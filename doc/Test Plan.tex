@@ -10,9 +10,9 @@
 
 \newcounter{testcounter}
 
-\newcommand{\test}[1] {
+\newcommand{\test}[2][pass] {
 	\stepcounter{testcounter}
-	Test \arabic{testcounter}: \emph{#1}}
+	Test \arabic{testcounter}: \emph{#2}. \textbf{\uppercase{#1}} \\}
 
 
 
@@ -78,16 +78,13 @@
     		\end{tabular}
 			
 		\subsubsection{Tests}
-			\test{The beat detector is able to detect beats in an audio source.}
-			\begin{enumerate}
-				\item Setup a mock audio stream (either using AudioFileInput or by injecting raw packets)
-				\item Send an audio configuration file (to setup the device)
-				\item Validate that the tempo of the outgoing beat objects matches (within a margin of error) the known beat of the audio file
-			\end{enumerate}
-			
+			\test{The beat detector is able to detect beats in an audio source}
+			\test{The beat detector should not crash on empty audio streams}
+			\test{The beat detector configuration should update automatically when parameters are changed}
+
 	\subsection{AudioFileInput}
 		\subsubsection{Description}
-			AudioFileInput reads from a wav file specified in it's configuration. 
+			AudioFileInput reads from a wav file specified in its configuration. 
 			It the emits SoundChunk messages periodically as if it was listening to the file through the input device.
 			
 			\begin{tabular}{p{5cm}|p{5cm}}
@@ -103,11 +100,9 @@
     		\end{tabular}
 			
 		\subsubsection{Tests}
-			\test{The module is able load a wave file and output its PCM data.}
-			\begin{enumerate}
-				\item Testing of the AudioConfiguration information can be tested by comparing the message to the details of a known wav file.
-				\item Testing of the sound output can be tested by comparing the binary audio data to the raw PCM data in a known wav file.
-			\end{enumerate}
+			\test{The module is able load a wave file and output its PCM data}
+			\test{The module correctly outputs configuration data from the wave file}
+			\test{The module correctly selects the file to load from its configuration}
 
 	\subsection{AudioInput}
 		\subsubsection{Description}
@@ -127,12 +122,9 @@
     		\end{tabular}
 
 		\subsubsection{Tests}
-			\test{The AudioInput module is able to read in sound data from the microphone.}
-			\begin{enumerate}
-				\item Run the AudioInput and validate that the detected AudioConfiguration parameters are valid for the used microphone.
-				\item Save the raw PCM data from the microphone to a file
-				\item Play this PCM data through speakers and validate that this is what the microphone would have detected.
-			\end{enumerate}
+			\test{The AudioInput module is able to read in sound data from the audio source}
+			\test{The AudioInput module correctly outputs the configuration of the audio source}
+			\test{The AudioInput module correctly selects the audio device based on system settings}
 			
 	\subsection{BeatDetector}
 		\subsubsection{Description}
@@ -152,12 +144,9 @@
     		\end{tabular}
 
 		\subsubsection{Tests}
-			\test{The BeatDetector is able to detect beats in an incoming audio stream.}
-			\begin{enumerate}
-				\item Setup a mock audio stream (either using AudioFileInput or by injecting raw packets)
-				\item Send an audio configuration file (to setup the device)
-				\item Validate that the tempo of the outgoing beat objects matches (within a margin of error) the known beat of the audio file
-			\end{enumerate}
+			\test{The beat detector is able to detect beats in an audio source}
+			\test{The beat detector should not crash on empty audio streams}
+			\test{The beat detector configuration should update automatically when parameters are changed}
 
 	\subsection{ConfigSystem}
 		\subsubsection{Description}
@@ -180,34 +169,11 @@
     		\end{tabular}
 
 		\subsubsection{Tests}
-			\test{The Config system is able to load from a JSON file.}
-			\begin{enumerate}
-				\item Use the configuration system with a known test configuration file.
-				\item Validate that the loaded configuration matches the file values.
-			\end{enumerate}
-			
-			\test{The Config system ensures that configurations only go to interested modules.}
-			\begin{enumerate}
-				\item Set up multiple (3 or more) mock reactors that ask for different configuration files.
-				\item Initialize the configuration system with a subset of these files.
-				\item Validate that the configuration data is available in the appropriate reactor.
-				\item Validate that other reactors don't have variables defined in files they didn't ask for.
-			\end{enumerate}
-			
-			\test{The Config system is able to load directories.}
-			\begin{enumerate}
-				\item Use the configuration system with a known directory containing test files
-				\item Validate that all files are loaded and accessible by interested reactors.
-			\end{enumerate}
-			
-			\test{The Config system is able to respond to modifications to loaded files.}
-			\begin{enumerate}
-				\item Use the configuration system with a known file.
-				\item Validate the contents of the file.
-				\item Modify the file programatically to change it's values.
-				\item Validate that the configuration is reloaded and the values have changed.
-			\end{enumerate}
-			
+			\test{The Config system is able to load from a JSON file}
+			\test{The Config system ensures that configurations only go to interested modules}
+			\test{The Config system is able to load directories containing configuration files}
+			\test{The Config system is able to respond to modifications on loaded files}
+
 	\subsection{DanceEngine}
 		\subsubsection{Description}
 			The dance engine is responsible for taking the incoming beat frequency of detected audio, and executing scripts on the robot that allow it to dance to the beat.
@@ -226,19 +192,9 @@
     		\end{tabular}
 
 		\subsubsection{Tests}
-			\test{The dance engine scales the scripts to an apropraite length.}
-			\begin{enumerate}
-				\item Input a pre-generated beat stream with a known tempo and predictable beat period.
-				\item Input a known script.
-				\item Validate that the script was scaled to the appropriate length and timing.
-			\end{enumerate}
-			
-			\test{The dance engine ensures that dance scripts execute such that they begin and end on beats.}
-			\begin{enumerate}
-				\item Input a pre-generated beat stream with a known tempo and predictable beat period.
-				\item Input a known script.
-				\item Validate that the outputted script starts near a beat point
-			\end{enumerate}
+			\test{The dance engine scales scripts lengths to match the period of the beat}
+			\test{The dance engine ensures that dance scripts execute such that they begin and end on beats}
+			\test{The dance engine continously picks random dances}
 		
 	\subsection{eSpeak}
 		\subsubsection{Description}
@@ -257,11 +213,7 @@
     		\end{tabular}
 
 		\subsubsection{Tests}
-			\test{eSpeak performs text to speach when a Say command is emitted.}
-			\begin{enumerate}
-				\item Send a string message to the module.
-				\item Ensure the test platform outputs the sound on it's default audio output device.
-			\end{enumerate}
+			\test{eSpeak performs text to speach when a Say command is emitted}
 		
 	\subsection{LinuxCameraStreamer}
 		\subsubsection{Description}
@@ -279,23 +231,15 @@
     		\end{tabular}
 
 		\subsubsection{Tests}
-			\test{The LinuxCameraStreamer is able to read an incoming video stream from the camera.}
-			\begin{enumerate}
-				\item Use the NUBugger module to manually verify incoming image data.
-			\end{enumerate}
-			
-			\test{The LinuxCameraStreamer will respond and update settings on the camera when needed.}
-			\begin{enumerate}
-				\item Change and save the camera configuration file.
-				\item Validate that the changes were applied.
-			\end{enumerate}
+			\test{The LinuxCameraStreamer is able to read an incoming video stream from the camera}
+			\test{The LinuxCameraStreamer will respond and update settings on the camera when needed}
+			\test{The LinuxCameraStreamer accurately retrieves hardware settings}
 		
 	\subsection{NUBugger}
 		\subsubsection{Description}
 			NUBugger is a debugging system which integrates with a web browser.
 			It is used to display useful debugging information from the robot while it is running.
-			\todo[inline]{Description}
-			
+
 			\begin{tabular}{p{5cm}|p{5cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
@@ -309,16 +253,11 @@
     		\end{tabular}
 
 		\subsubsection{Tests}
-			\test{NUBugger sends out diagnostic data to the web server.}
-			\begin{enumerate}
-				\item Run the robot and NUBugger binaries.
-				\item Manually ensure data is sent and visualized properly.
-			\end{enumerate}
+			\test{NUBugger sends out diagnostic data to the web server}
 		
 	\subsection{Platform Darwin HardwareIO}
 		\subsubsection{Description}
 			The Darwin Hardware IO module is responsible for directly interacting with the hardware on the robot.
-			\todo[inline]{Description}
 			
 			\begin{tabular}{p{5cm}|p{5cm}}
     			Input Data & Output Data \\ \hline
@@ -332,41 +271,34 @@
     		\end{tabular}
 
 		\subsubsection{Tests}
-			\test{The current data from the hardware is able to be read into SI units.}
-			\todo[inline]{Write test steps}
-			
-		\subsubsection{Tests}
-			\test{Commands are able to be sent to the hardware and they are executed properly.}
-			\todo[inline]{Write test steps}
+			\test{The current data from the hardware is able to be read into SI units}
+			\test{Commands are able to be sent to the hardware and they are executed properly}
+			\test{The conversions performed in the Darwin HardwareIO are accurate}
 
-		\subsubsection{Tests}
-			\test{The conversions performed in the Darwin HardwareIO are accurate.}
-			\todo[inline]{Write test steps}
-		
 	\subsection{Platform Darwin MotionManager}
 		\subsubsection{Description}
 			The MotionManager module is responsible for converting higher level motion commands into commands which can be executed on the robots hardware.
-			\todo[inline]{Description}
 			
 			\begin{tabular}{p{5cm}|p{5cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
-					\item \todo[inline]{INPUT}
+					\item A list of servo angle waypoints with the absolute time to be at these angles.
 				\end{itemize}
 				&
 				\begin{itemize}
-					\item \todo[inline]{OUTPUT}
+					\item A list of physical motor movements to enact the given waypoints.
 				\end{itemize}
     		\end{tabular}
 
 		\subsubsection{Tests}
-			\test{Waypoints sent to the motion manager are executed as hardware commands.}
-			\todo[inline]{Write test steps}
-		
+			\test{Waypoints sent to the motion manager are executed as hardware commands}
+			\test{If a new waypoint arrives MotionManager should drop all waypoints after the execution time of the new waypoint}
+			\test{MotionManager should correctly calculate the speed required to arrive at a particular waypoint in time}
+			\test{MotionManager should split waypoints if the angle traveled is larger then $2\pi$ radians}
+			
 	\subsection{ScriptEngine}
 		\subsubsection{Description}
 			The script engine of the system is responsible for taking Scripts (a series of waypoints) that are provided by the config system, and then executing them on demand via the MotionManager.
-			\todo[inline]{Description}
 			
 			\begin{tabular}{p{5cm}|p{5cm}}
     			Input Data & Output Data \\ \hline
@@ -381,54 +313,47 @@
     		\end{tabular}
 
 		\subsubsection{Tests}
-			\test{The script engine can execute the scripts loaded into it.}
-			\todo[inline]{Write test steps}
-			
-			\test{The script engine will respond to changes in the scripts if the file is modified.}
-			\todo[inline]{Write test steps}
+			\test{The script engine can execute the scripts loaded into it}
+			\test{The script engine will respond to changes in the scripts if the file is modified}
 		
 	\subsection{ScriptRunner}
 		\subsubsection{Description}
 			The ScriptRunner is a user interface reactor which is used to execute a series of scripts via the script engine.
-			\todo[inline]{Description}
 			
 			\begin{tabular}{p{5cm}|p{5cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
-					\item \todo[inline]{INPUT}
+					\item Command Line Arguments representing the scripts to run.
 				\end{itemize}
 				&
 				\begin{itemize}
-					\item \todo[inline]{OUTPUT}
+					\item A sequential set of messages indicating the next script to execute.
 				\end{itemize}
     		\end{tabular}
 
 		\subsubsection{Tests}
-			\test{The script runner is able to execute consecutive scripts.}
-			\todo[inline]{Write test steps}
+			\test{The script runner is able to execute consecutive scripts}
 		
 	\subsection{ScriptTuner}
 		\subsubsection{Description}
 			The ScriptTuner is a user interface which allows the user to generate and modify scripts to be executed on the robot.
-			\todo[inline]{Description}
+			
 			\begin{tabular}{p{5cm}|p{5cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
-					\item \todo[inline]{INPUT}
+					\item Nothing
 				\end{itemize}
 				&
 				\begin{itemize}
-					\item \todo[inline]{OUTPUT}
+					\item Motion Commands
 				\end{itemize}
     		\end{tabular}
 
 		\subsubsection{Tests}
-			\test{The script tuner is able to load existing script files.}
-			\todo[inline]{Write test steps}
-			
-			\test{The script tuner is able to create new script files.}
-			\todo[inline]{Write test steps}
-		
+			\test{The script tuner is able to load existing script files}		
+			\test{The script tuner is able to create new script files}
+			\test{The script tuner is able to save modified and new scripts}
+					
 \section{Test Results}
 	\todo[inline]{Write Introduction}
 		
