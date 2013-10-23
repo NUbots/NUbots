@@ -64,7 +64,7 @@ class nuclearport {
         Package['libespeak-dev'],
         Package['librtaudio-dev'],
         Package['libncurses5-dev'],
-        Package['libjpeg-dev'],
+        Package['libjpeg-turbo8-dev'],
         Package['libfftw3-dev'],
         Package['libaubio-dev'],
       ],

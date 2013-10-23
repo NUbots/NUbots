@@ -15,7 +15,10 @@ class nubots_nuclearport_dev_vm {
   package { 'libespeak-dev': ensure => latest }
   package { 'librtaudio-dev': ensure => latest }
   package { 'libncurses5-dev': ensure => latest }
-  package { 'libjpeg-dev': ensure => latest }
+  
+  package { 'libjpeg-dev': ensure => purged } ->
+  package { 'libjpeg-turbo8-dev': ensure => latest }
+
   package { 'libfftw3-dev': ensure => latest }
   package { 'libaubio-dev': ensure => latest }
   include vim
@@ -25,3 +28,4 @@ class nubots_nuclearport_dev_vm {
 node default {
   include nubots_nuclearport_dev_vm
 }
+
