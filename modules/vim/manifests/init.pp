@@ -35,17 +35,19 @@
 #
 # Copyright 2013 Your name here, unless otherwise noted.
 #
-class vim {
+class vim (
+    $username = 'nubot',
+  ) {
   package { 'vim':
     ensure => latest
   } ->
   package { 'vim-puppet':  # syntax highlighting
     ensure => latest,
   } ->
-  file { ['/home/mitchell/.vim', '/home/mitchell/.vim/plugin']:
+  file { ["/home/${username}/.vim", "/home/${username}/.vim/plugin"]:
     ensure => directory,
   } ->
-  file { '/home/mitchell/.vim/plugin/puppet.vim':
+  file { "/home/${username}/.vim/plugin/puppet.vim":
     ensure => link,
     target => '/usr/share/vim/addons/syntax/puppet.vim',
   }

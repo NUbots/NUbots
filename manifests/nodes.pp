@@ -1,10 +1,9 @@
 
-class nubots_nuclearport_dev_vm {
-  file { 'nubots_dir':
-    path => '/home/mitchell/NUbots',
-    ensure => directory,
-    owner => 'mitchell',
-    group => 'mitchell',
+class nubots_nuclearport_dev_vm (
+    $username = 'nubot',
+  ) {
+  class { 'vim':
+    username => $username,
   }
 
   package { 'cmake': ensure => latest }
@@ -21,11 +20,25 @@ class nubots_nuclearport_dev_vm {
 
   package { 'libfftw3-dev': ensure => latest }
   package { 'libaubio-dev': ensure => latest }
-  include vim
-  include nuclearPort
+
+  file { 'nubots_dir':
+    path => "/home/${username}/NUbots",
+    ensure => directory,
+    owner => $username,
+    group => $username,
+  }
+
+  class { 'nuclearPort':
+    username => $username,
+  }
 }
 
 node default {
-  include nubots_nuclearport_dev_vm
+  class { 'nubots_nuclearport_dev_vm': }
 }
 
+node mitchell-VirtualBox {
+  class { 'nubots_nuclearport_dev_vm':
+    username => 'mitchell',
+  }
+}

@@ -35,28 +35,31 @@
 #
 # Copyright 2013 Your name here, unless otherwise noted.
 #
-class nuclearport {
-  include 'nuclear'
+class nuclearport(
+    $username = 'nubot'
+  ) {
+  class { 'nuclear':
+    username => $username,
+  }
 
-  $nuclearport_build_dir = '/home/mitchell/NUbots/NUClearPort/build'
+  $nuclearport_build_dir = "/home/${username}/NUbots/NUClearPort/build"
 
   vcsrepo { 'nuclearport_repo':
     require => [File['nubots_dir'], Package['git']],
-    path => '/home/mitchell/NUbots/NUClearPort',
+    path => "/home/${username}/NUbots/NUClearPort",
     source => "https://github.com/nubots/NUClearPort.git",
     provider => 'git',
     ensure => present,
-    user => 'mitchell',
-    owner => 'mitchell',
-    # group => 'mitchell',
+    user => $username,
+    owner => $username,
   } ->
   file { 'nuclearport_build_dir':
     path => $nuclearport_build_dir,
     ensure => directory,
     purge => true,
     force => true,
-    owner => 'mitchell',
-    group => 'mitchell',
+    owner => $username,
+    group => $username,
   } ~>
   exec { 'nuclearport_cmake':
     require => [
@@ -73,7 +76,7 @@ class nuclearport {
     path => $path,
     refreshonly => true,
     logoutput => "on_failure",
-    user => 'mitchell',
+    user => $username,
   } ~>
   exec { 'nuclearport_make':
     command => 'make -j',
@@ -81,7 +84,7 @@ class nuclearport {
     path => $path,
     refreshonly => true,
     logoutput => "on_failure",
-    user => 'mitchell',
+    user => $username,
   }
 }
 

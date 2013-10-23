@@ -35,28 +35,30 @@
 #
 # Copyright 2013 Your name here, unless otherwise noted.
 #
-class nuclear {
+class nuclear(
+    $username = 'nubot',
+  ) {
   include gcc48
   include catch
 
-  $nuclear_build_dir = '/home/mitchell/NUbots/NUClear/build'
+  $nuclear_build_dir = "/home/${username}/NUbots/NUClear/build"
 
   vcsrepo { 'nuclear_repo':
     require => [File['nubots_dir'], Package['git']],
-    path => '/home/mitchell/NUbots/NUClear',
+    path => "/home/${username}/NUbots/NUClear",
     source => "https://github.com/Fastcode/NUClear.git",
     provider => 'git',
     ensure => present,
-    user => 'mitchell',
-    owner => 'mitchell',
+    user => $username,
+    owner => $username,
   } ->
   file { 'nuclear_build_dir':
     path => $nuclear_build_dir,
     ensure => directory,
     purge => true,
     force => true,
-    owner => 'mitchell',
-    group => 'mitchell',
+    owner => $username,
+    group => $username,
   } ~>
   exec { 'nuclear_cmake':
     require => [
@@ -71,7 +73,7 @@ class nuclear {
     path => $path,
     refreshonly => true,
     logoutput => "on_failure",
-    user => 'mitchell',
+    user => $username,
   } ~>
   exec { 'nuclear_make':
     command => 'make -j',
@@ -79,7 +81,7 @@ class nuclear {
     path => $path,
     refreshonly => true,
     logoutput => "on_failure",
-    user => 'mitchell',
+    user => $username,
   } ~>
   exec { 'nuclear_install':
     command => 'make install',
