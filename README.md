@@ -67,6 +67,7 @@ __(Note: commands in all following steps must be run on the new VM)__
 		$ sudo apt-get install git
 
 4. Clone the git repo into `/etc/puppet`:
+
 		$ sudo rm -rf /etc/puppet
 		$ sudo git clone https://github.com/mitchellmetcalfe/nubots-puppet.git /etc/puppet
 
