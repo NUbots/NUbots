@@ -33,13 +33,12 @@ Configuration management for the NUbots team.
 		6. Delete both partitions + add 4000 MB of ext4 with mount '/', and the rest as swap.
 		7. Install now
 		8. Set up location + language + keyboard + user + password however you want!
-
-	Note: NUbots' go-to settings are:
-	* Sydney
-	* US English
-	* US English
-	* nubot
-	* 123123 (+ don't require password to login)
+			Note: NUbots' go-to settings are:
+			* Sydney
+			* US English
+			* US English
+			* nubot
+			* 123123 (+ don't require password to login)
 	
 	Install VirtualBox Guest Additions:
 	* On the host:
@@ -53,6 +52,8 @@ Configuration management for the NUbots team.
 			
 			$ sudo  '/media/VBOXADDITOINS_4.2.18_88780/VBoxLinuxAdditions.run'
 	* Restart the VM.
+
+__(Note: commands in all following steps must be run on the new VM)__
 
 2. Enable the puppetlabs repository for Ubuntu 12.04 Precise Pangolin:
 
