@@ -53,7 +53,7 @@ Configuration management for the NUbots team.
 			$ sudo  '/media/VBOXADDITOINS_4.2.18_88780/VBoxLinuxAdditions.run'
 	* Restart the VM.
 
-__(Note: commands in all following steps must be run on the new VM)__
+_(Note: commands in all following steps must be run on the new VM)_
 
 2. Enable the puppetlabs repository for Ubuntu 12.04 Precise Pangolin:
 
@@ -67,6 +67,7 @@ __(Note: commands in all following steps must be run on the new VM)__
 		$ sudo apt-get install git
 
 4. Clone the git repo into `/etc/puppet`:
+
 		$ sudo rm -rf /etc/puppet
 		$ sudo git clone https://github.com/mitchellmetcalfe/nubots-puppet.git /etc/puppet
 
