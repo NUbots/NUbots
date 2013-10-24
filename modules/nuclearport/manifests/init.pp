@@ -38,6 +38,8 @@
 class nuclearport(
     $username = 'nubot'
   ) {
+  include gcc48
+
   class { 'nuclear':
     username => $username,
   }
@@ -63,6 +65,7 @@ class nuclearport(
   } ~>
   exec { 'nuclearport_cmake':
     require => [
+        Class['gcc48'],
         Class['nuclear'],
         Package['libespeak-dev'],
         Package['librtaudio-dev'],

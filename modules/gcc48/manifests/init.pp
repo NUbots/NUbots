@@ -47,9 +47,8 @@ class gcc48 {
   exec { 'gcc-4.8_alternatives':
     command => 'update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-4.6',
     path => $path,
-    refreshonly => true, 
   }
-
+  
   package { 'g++-4.8':
     ensure => latest,
     require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'], 
@@ -57,7 +56,6 @@ class gcc48 {
   exec { 'g++-4.8_alternatives':
     command => 'update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 80 --slave /usr/bin/g++ g++ /usr/bin/g++-4.8',
     path => $path,
-    refreshonly => true, 
   }
 }
 
