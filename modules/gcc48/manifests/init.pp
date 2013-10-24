@@ -38,7 +38,10 @@
 class gcc48 {
   include apt
 
-  apt::ppa { 'ppa:ubuntu-toolchain-r/test': }
+  # anchor pattern to contain class resources within this class.
+  anchor{'gcc48_first':} ->  
+  apt::ppa { 'ppa:ubuntu-toolchain-r/test': } ->
+  anchor{'gcc48_last':}
 
   package { 'gcc-4.8':
     ensure => latest,
@@ -47,7 +50,8 @@ class gcc48 {
   exec { 'gcc-4.8_alternatives':
     command => 'update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-4.6',
     path => $path,
-    refreshonly => true, 
+    refreshonly => true,
+    before => Anchor['gcc48_last'],
   }
 
   package { 'g++-4.8':
@@ -58,6 +62,7 @@ class gcc48 {
     command => 'update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 80 --slave /usr/bin/g++ g++ /usr/bin/g++-4.8',
     path => $path,
     refreshonly => true, 
+    before => Anchor['gcc48_last'],
   }
 }
 
