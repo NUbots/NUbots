@@ -14,14 +14,14 @@ Configuration management for the NUbots team.
 	* Base Memory: 4096 MB (use at least 1024 MB for reasonable performance)
 	* Hard Disk: Create New + Fixed-Size + 6.00 GB
 
-	Open Settings:
+	Open Settings (optional - but you will need some form of network connection):
 	* General -> Advanced -> Shared Clipboard: Bidirectional
 	* General -> Advanced -> Drag 'n' Drop: Bidirectional
 	* System -> Motherboard -> Enable IO APIC: Enable
 	* System -> Processor -> Processors: 4 (at least 1/4 to 1/2 of your CPUs)
 	* Network -> Adapter 1 -> Enable Network Adapter: Enable
 	* Network -> Adapter 1 -> Attached To: Bridged Adapter
-	* Shared Folders -> Add: Name 'nubots', Path '/Users/mitchell/nubots'. (for example, on OSX)
+	* (optional) Shared Folders -> Add: Name 'nubots', Path '/Users/mitchell/nubots'. (for example, on OSX)
 
 	Start the machine: (Select `ubuntu-12.04.3-desktop-i386.iso` as the installation media)
 	
