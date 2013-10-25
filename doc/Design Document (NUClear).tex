@@ -1,0 +1,129 @@
+% Initialisation
+\documentclass[english,12pt]{scrartcl}
+
+\usepackage[]{babel}
+% Input is utf8
+\usepackage[utf8]{inputenc}
+% Enables headers and footers
+\usepackage[]{scrpage2}
+% Lets us colour table cells
+\usepackage[table]{xcolor}
+% Allows todo list and todos
+\usepackage[]{todonotes}
+% Makes links in contents hyperlinked
+\usepackage{hyperref}
+% Make references appear in our table of contents
+\usepackage[nottoc,numbib]{tocbibind}
+% Allows us to put landscape sections of the document
+\usepackage{pdflscape} % \usepackage{lscape} %Use escape for printing (doesn't rotate the pdf page)
+% Provides a glossary
+\usepackage[toc]{glossaries}
+
+% Gives us pretty diagrams
+\usepackage{tikz}
+\usetikzlibrary{calc,fit,positioning,chains,decorations.pathreplacing,shapes,backgrounds}
+
+% Document Title and Author
+\title{NUClear Design Document}
+\author{2013 Final Year Project}
+
+% Header and Footer
+\pagestyle{scrheadings}
+\ihead{\today}
+\chead{}
+\ohead{NUClear Design Document}
+\ifoot{}
+\cfoot{}
+\ofoot{\pagemark}
+
+% Requirements custom commands
+\newcommand{\requirement}[1]{\textit{#1}}
+
+% Skip line rather then indent paragraphs
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.1in}
+
+% Start of document
+\begin{document}
+	\maketitle
+	\vfill
+	{\large
+		\begin{description}
+			\item [Status:] Draft 1
+			\item [Version:] 0.1
+		\end{description}}
+
+	\clearpage
+	\tableofcontents
+
+	\section{Document Notes}
+		\begin{tabular}{ p{0.1\textwidth} | p{0.6\textwidth} | p{0.3\textwidth} }
+			\textbf{Version} & \textbf{Changes} & \textbf{Author} \\
+			\hline
+
+			0.1 &
+			Initial Template &
+			Jake Woods \\
+			\hline
+		\end{tabular}
+		
+	\clearpage
+		
+	\section{Introduction}
+        NUClear is a C++ library that enables developers to write modular systems that communicate through messages. 
+        NUClear provides the framework for software modules to send and recieve messages while remaining completely unaware of their origin and destintaion.
+        It was originally designed to replace a robotics system that utilized a shared global memory store for communication and excels in replacing systems
+        that communicate through a globally shared "god-object".
+
+        NUClear leverages modern C++ features to provide both speed and simplicity. 
+        The public API contains only three functions and much of the computation is performed at compile-time to avoid incurring a runtime performance penalty.
+
+        NUClear is designed to run well on systems that do not have powerful processors. As such we have opted to use binary message passing instead of the more
+        traditional serialization based (XML, JSON, etc...) message passing due to the heavy performance penalty associated with text-based serialization/deserialization.
+
+    \section{Features}
+        \subsection{Transparent Multithreading}
+            \todo[inline] {Write about feature}
+        
+        \subsection{Compile-Time Message Routing}
+            \todo[inline] {Write about feature}
+
+        \subsection{Smart Timers}
+            \todo[inline] {Write about feature. No wasted CPU cycles using a wait-loop}
+
+        \subsection{Statistics and Logging}
+            \todo[inline] {Write about stats and logging and how we solve the problem of multithreaded logging}
+
+    \section{Component Overview - Power Plant}
+        \todo[inline] {Expand this a lot}
+        The PowerPlant has three main responsibilities which are split up into discreet classes.
+
+        \subsection{ReactorMaster}
+            \todo[inline] {Write about ReactorMaster}
+
+        \subsection{ThreadMaster}
+            \todo[inline] {Write about ThreadMaster}
+
+        \subsection{CacheMaster}
+            \todo[inline] {Write about CacheMaster}
+
+    \section{Component Overview - Reactor}
+        \todo[inline] {Write about Reactor and consider if On/Emit/Log are the appropriate subsections}
+
+        \subsection{On}
+
+        \subsection{Emit}
+
+        \subsection{Log}
+
+    \section{Component Overview - Reaction}
+        \todo[inline] {Explain how the concept of a Reaction fits in here}
+
+    \section{Component Overview - Networking}
+        \todo[inline] {Talk about Networking as an Extension here}
+
+	\bibliographystyle{plain}
+	\bibliography{references}
+	
+	\printglossaries
+\end{document}
