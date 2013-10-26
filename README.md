@@ -12,7 +12,7 @@ Configuration management for the NUbots team.
 	* Name: Nubots-NUClearPort (or whatever)
 	* Operating System: Ubuntu
 	* Base Memory: 4096 MB (use at least 1024 MB for reasonable performance)
-	* Hard Disk: Create New + Fixed-Size + 6.00 GB
+	* Hard Disk: Create New, Fixed-Size 6.00 - 8.00 GB
 
 	Open Settings (optional - but you will need some form of network connection):
 	* General -> Advanced -> Shared Clipboard: Bidirectional
