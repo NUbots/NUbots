@@ -26,31 +26,57 @@
 				\item Prove the significance of the improvements of the new architecture by using it to make the robots dance.
 			\end{enumerate}
 		\subsection {Objectives}
-			\begin{enumerate}
-				\item Decrease the time it takes to add a new component to the system from 1-2 weeks to less than 1 day.
-				\item Decouple performance of behaviour and localisation so they are no longer restricted by the performance of vision.
-				\item Decrease the time it takes to induct a new team member into the system from 1 month to 1 week.
-				\item Reduce the number of component needed to be changed to move the architecture between different robot platforms from 4 components to 2.
-				\item Make the robot dance according to a predetermined script and in response to music or detected human’s movements. These feature is to be implemented by changing only 1 component each, rather than 4 each which would be needed to implement this in the current system. 
+			\subsubsection{Time to add a new component}
+				Decrease the time it takes to add a new component to the system from 1-2 weeks to less than 1 day.
+			\subsubsection{Decoupling behaviour and localisation by vision}
+				Decouple performance of behaviour and localisation so they are no longer restricted by the performance of vision.
+			\subsubsection{Team Member Induction}
+				Decrease the time it takes to induct a new team member into the system from 1 month to 1 week.
+			\subsubsection{Components for Changing Hardware Platform}
+				Reduce the number of component needed to be changed to move the architecture between different robot platforms from 4 components to 2.
+			\subsubsection{Adding Dance}
+				Make the robot dance according to a predetermined script and in response to music or detected human’s movements. These feature is to be implemented by changing only 1 component each, rather than 4 each which would be needed to implement this in the current system. 
 
-				\item Improve visibility into the state of the system through diagnostics/monitoring tools. Improve on current basic timing and logging to include detailed debugging at the time of the system errors.
-				\item Improve utilization of existing and future robot hardware to allow for higher resolution on the camera, better use of low level controllers and increasing control over threading.
-				\item Improve the consistency of interfaces between components. Reducing the use of multiple different interface for each component to a single unified interface for all components. The unified interface must have a convention for describing so that it can minimise mis-understanding and redundancy.
+			\subsubsection{Improved Monitoring and Debugging Tools}
+				 Improve visibility into the state of the system through diagnostics/monitoring tools. Improve on current basic timing and logging to include detailed debugging at the time of the system errors.
+			\subsubsection{Improved Hardware Utilization}
+				 Improve utilization of existing and future robot hardware to allow for higher resolution on the camera, better use of low level controllers and increasing control over threading.
+			\subsubsection{Interface Consistency}
+				 Improve the consistency of interfaces between components. Reducing the use of multiple different interface for each component to a single unified interface for all components. The unified interface must have a convention for describing so that it can minimise mis-understanding and redundancy.
 				
+		\subsection {Acceptance Criteria}
+			\subsubsection{Time to add a new component}
+				The dancing to a script, audio and dancing to visual stimuli components will be added to test this objective. This objective will be accepted as complete if each of the 3 new components can be added in 12 man hours each for a experienced NUClear and NuBots user, or 24 hours for an inexperienced user.
+			\subsubsection{Decoupling behaviour and localisation by vision}
+				This objective will be verified by blocking vision and verifying that behaviour and localisation are not blocked, waiting on vision.
+			\subsubsection{Team Member Induction}
+				This objective will be verified by finding the average time taken to teach new NuBots team members how to use the system once fully converted to NUClear. The time should be less than 50 work hours.
+			\subsubsection{Components for Changing Hardware Platform}
+				This objective will be verified by creating a draft plan of how to move the system back to the Nao robot. It must only require 2 components to be changed.
+			\subsubsection{Adding Dance}
+				This objective will be verified by counting the number of components changed when these features are added. If should only require 1 component to be changed.
+			\subsubsection{Improved Monitoring and Debugging Tools}
+				This objective will be verified by purposely creating a wide variety of run-time errors to test the debugging features.
+			\subsubsection{Improved Hardware Utilization}
+				This objective will be verified by monitoring the thread use by the system on machines with more than 2 cores, to ensure they are all able to be used.
+			\subsubsection{Interface Consistency}
+				This objective will be verified by ensuring there is only 1 unified interface between all components. It also must be fully documented, including a description convention that the NuBot team accept as unambiguous.
 
-			\end{enumerate}
 		\subsection {Scope}
 			The project aims to measurably improve the effectiveness of the NUBots through the introduction of a new software architecture. This will involve modifications to the existing NUBots codebase. The project will not modify any hardware on the NUbots but must be able to accommodate changes in hardware. The project will not change any existing algorithms beyond restructuring them to fit the new architecture.
 			\\Additional we aim to give the robot the ability to dance in some form for marketing purposes. This dancing will be according to a predetermined script, or in response to some stimulus such as music or human movement detected in a camera.
-		\subsection {Review of changes to Goals, Objectives, Scope and Acceptance Criteria}
+				
+		\subsection {Review of changes to Goals, Objectives, Acceptance Criteria and Scope}
 			An review of how these categories have changed since the original Project Proposal.
 			\subsubsection{Goals}
 				The objectives of the project are unchanged.
 			\subsubsection{Objectives}
 				 Due to team members leaving objective 8. , the objective of making the robot dance to according to visual stimuli has been abandoned.
+			\subsubsection{Acceptance Criteria}
+				\paragraph{Time to add a new component}
+					This objective will no longer be tested by adding the dance according to visual stimuli component.
 			\subsubsection{Scope}
-				The project will no longer involve making the robot dance according to movement detected in a camera.
-			%TODO
+	The project will no longer involve making the robot dance according to movement detected in a camera.
 
 	\section{Resources}
 		\subsection{People and Responsibilities}
@@ -90,7 +116,14 @@
 						\item Daniel Gault
 					\end{itemize}
 		\subsection{Equipment, Tools and Materials}
+			\subsubsection{Physical Resources}
 			The team will have access to the NUBots robots under the supervision of members of the NUBots team.
+			\subsubsection{Management Tools}
+				\begin{itemize}
+					\item Git: For source code revision control.
+					\item Git Hub: For a shared Git repository.
+					\item Base Camp: For task management, team discussion and file sharing.
+				\end{itemize}
 		\subsection {Review of Resources}
 			An review of how our resources have changed since the original Project Proposal.
 			\subsubsection{Current Project Team}
@@ -103,16 +136,22 @@
 				Due to unforseen circumstances, Daniel Gault and Liam Jones left the project team.
 
 	\section{Risks}
-		\begin{tabularx}{\linewidth}{l  X  X X  X  X X}
-			\hline
-			Rank & Name & Chance & Severity & Mitigation Strategy & Contingency \\ \hline
-			1 & Project not completed by dealine & Low & High & Do our work & Remove features. Finish after deadline. NUBot team finished project. \\ \hline
+		\begin{table}[htbp]
+		%\begin{tabularx}{\linewidth}{l  X l  l  X X}
+		%\begin{tabularx}{textwidth}{bbbbbb}
+		%\begin{tabularx}{\linewidth}{X*{6}{X}}
+		%\begin{tabularx}{\linewidth}{| Xm{3cm} |  lm{0.5cm}  lm{0.5cm} l l l l l}
+		\begin{tabularx}{\linewidth}{ | m{0.6cm} |  X | m{1.05cm} |  m{1.05cm} |  X | X |}
+			\hline 
+			Rank & Name & Chance & Severity & Mitigation Strategy & Contingency \\  \hline
+			1 & Project not completed by deadline & Low & High & Do our work & Remove features. Finish after deadline. NUBot team finished project. \\ \hline
 			2 & Documentation not completed by deadline & Medium & Medium & Assign specific tasks for completion of documentation & Negotiate extension. \\ \hline
 			3 & Conflict in Team & Medium & Medium & Listen to all group members opinions. & Attempt to accomodate group memebers opinions. Make group decision on difficult choices \\ \hline
 			4 & Group members with unique vital skills can longer do the project, such as Jake with his ability to do template meta-programming in c++. & Low & High & Team members will work together to teach eachother these vital skills so one vital member leaving has less of an impact. & Redesigning the architecture so that it can be implemented without the skills that were lost. \\ \hline
 			5 & NUBot team cancelled & Very Low & Very High & None & Make project more general, as an architecture with no implentation in the NUBots \\ \hline
-			\hline
+			6 & Lack of progress due to unfamiliarity with project environment & High & High & Familiarise team members with c++ and robot programming environment & Reduce scope of project. \\ \hline
 		\end{tabularx}
+		\end{table}
 		\subsection{Review of Risks}
 			An overview of what risks occured and how well we responded to them.
 			\subsubsection{Unanticipated Risks}
