@@ -60,8 +60,8 @@ namespace modules {
 
             settings->chunkSize = m->file.samplerate() / CHUNKS_PER_SECOND;
 
-            //emit<Scope::DIRECT>(std::move(settings));
-            emit(std::move(settings));
+            emit<Scope::DIRECT>(std::move(settings));
+            //emit(std::move(settings));
         });
 
         on<Trigger<Every<(NUClear::clock::period::den / CHUNKS_PER_SECOND), NUClear::clock::duration>>>([this](const time_t&) {
