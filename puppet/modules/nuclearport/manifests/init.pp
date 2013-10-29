@@ -36,19 +36,16 @@
 # Copyright 2013 Your name here, unless otherwise noted.
 #
 class nuclearport(
-    $username = 'nubot'
+    $username = 'nubot',
+    $nubots_dir = "/home/${username}/NUbots", #"
   ) {
   include gcc48
 
-  class { 'nuclear':
-    username => $username,
-  }
-
-  $nuclearport_build_dir = "/home/${username}/NUbots/NUClearPort/build"
+  $nuclearport_build_dir = "${nubots_dir}/NUClearPort/build"
 
   vcsrepo { 'nuclearport_repo':
-    require => [File['nubots_dir'], Package['git']],
-    path => "/home/${username}/NUbots/NUClearPort",
+    require => [File["${nubots_dir}"], Package['git']],
+    path => "${nubots_dir}/NUClearPort",
     source => "https://github.com/nubots/NUClearPort.git",
     provider => 'git',
     ensure => present,
@@ -67,6 +64,7 @@ class nuclearport(
     require => [
         Class['gcc48'],
         Class['nuclear'],
+        Package['build-essential'],
         Package['libespeak-dev'],
         Package['librtaudio-dev'],
         Package['libncurses5-dev'],

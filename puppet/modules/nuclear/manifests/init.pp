@@ -37,15 +37,17 @@
 #
 class nuclear(
     $username = 'nubot',
+    $nubots_dir = "/home/${username}/NUbots", #"
+    $clone_directory = "/home/${username}/NUbots/NUClear", #"
   ) {
   include gcc48
   include catch
 
-  $nuclear_build_dir = "/home/${username}/NUbots/NUClear/build"
+  $nuclear_build_dir = "${nubots_dir}/NUClear/build"
 
   vcsrepo { 'nuclear_repo':
     require => [File['nubots_dir'], Package['git']],
-    path => "/home/${username}/NUbots/NUClear",
+    path => "${nubots_dir}/NUClear",
     source => "https://github.com/Fastcode/NUClear.git",
     provider => 'git',
     ensure => present,
@@ -64,6 +66,7 @@ class nuclear(
     require => [
         Class['gcc48'],
         Class['catch'],
+        Package['build-essential'],
         Package['cmake'],
         Package['libzmq-dev'],
         Package['protobuf-compiler'],
