@@ -45,21 +45,21 @@ The following is a guide to getting you set up and ready to contribute to the NU
 	Select which adapter the VM will use for its network connection by 
 	entering a number (if in doubt, the first option is likely to be the best choice).
 
-  (While your VM is generated, you might want to learn a little more about Vagrant by 
-  reading the [Getting Started Guide](http://docs.vagrantup.com/v2/getting-started/index.html) 
-  or the [Command-Line Interface](http://docs.vagrantup.com/v2/cli/index.html) documentation)
+	(While your VM is generated, you might want to learn a little more about Vagrant by 
+	reading the [Getting Started Guide](http://docs.vagrantup.com/v2/getting-started/index.html) 
+	or the [Command-Line Interface](http://docs.vagrantup.com/v2/cli/index.html) documentation)
 
-4. Just type `$ vagrant ssh` to ssh into your new VM!
+4.  Just type `$ vagrant ssh` to ssh into your new VM!
 
-  Vagrant will sync the `~/nubots/NUClearPort` directory on the VM with the root of your NUClearPort repository.
-  This allows for easy editing of code on your machine, and building on the VM.
+	Vagrant will sync the `~/nubots/NUClearPort` directory on the VM with the root of your NUClearPort repository.
+	This allows for easy editing of code on your machine, and building on the VM.
 
-  To build NUClearPort, just run the following commands on the VM:
+	To build NUClearPort, just run the following commands on the VM:
   
-    $ mkdir ~/nubots/NUClearPort/build
-    $ cd ~/nubots/NUClearPort/build
-    $ cmake ..
-    $ make -j
+		$ mkdir ~/nubots/NUClearPort/build
+		$ cd ~/nubots/NUClearPort/build
+		$ cmake ..
+		$ make -j
 
 6. Make robots do awesome stuff!
 
