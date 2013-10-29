@@ -153,7 +153,7 @@ namespace darwin {
         static_assert(sizeof(PingCommand) == 6, "The compiler is adding padding to this struct, Bad compiler!");
         #pragma pack(pop)
 
-    private:
+    protected:
         UART& coms;
         int id;
 

@@ -189,6 +189,14 @@ namespace Darwin {
         on<Trigger<messages::DarwinSensors::EyeLED>>([this](const messages::DarwinSensors::EyeLED& led) {
             darwin.cm730.write(darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(led.r, led.g, led.b));
         });
+
+        on<Trigger<messages::LMissile>>([this](const messages::LMissile&) {
+            darwin.lMissile.fire();
+        });
+
+        on<Trigger<messages::RMissile>>([this](const messages::RMissile&) {
+            darwin.rMissile.fire();
+        });
     }
 }
 }
