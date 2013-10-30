@@ -26,6 +26,10 @@
 
 namespace messages {
 
+    struct LMissile {};
+
+    struct RMissile {};
+
     /**
      * TODO document
      *
