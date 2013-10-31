@@ -6,6 +6,7 @@
 	\setbeamertemplate{navigation symbols}{}
 }
 
+\usepackage{etex} 	%Includes this to prevent an error from having 'too many things'. Latex apparently is terrible at memory 						%management by default.  See http://www.tex.ac.uk/cgi-bin/texfaq2html?label=noroom
 \usepackage{graphicx} 	% Allows including images
 \usepackage{booktabs} 	% Allows the use of \toprule, \midrule and \bottomrule in tables
 \usepackage{tikz} 		% Pretty diagrams.
@@ -1251,7 +1252,7 @@
 \end{frame}
 
 \begin{frame}[fragile]
-	\frametitle{Key Functions - Emit}
+	\frametitle {Key Functions - Emit}
 	\begin{itemize}
 		\item Q: "I have some data that I want to send to the world"
 		\item A: Use emit!
