@@ -1,35 +1,36 @@
 /*
- * This file is part of ScriptEngine.
+ * This file is part of DanceEngine.
  *
- * ScriptEngine is free software: you can redistribute it and/or modify
+ * DanceEngine is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ScriptEngine is distributed in the hope that it will be useful,
+ * DanceEngine is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ScriptEngine.  If not, see <http://www.gnu.org/licenses/>.
+ * along with DanceEngine.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_SCRIPTENGINE_H
-#define MODULES_SCRIPTENGINE_H
+#ifndef MODULES_DANCEENGINE_H
+#define MODULES_DANCEENGINE_H
 
 #include <NUClear.h>
 #include "messages/Script.h"
 
 namespace modules {
 
-    class ScriptEngine : public NUClear::Reactor {
+    class DanceEngine : public NUClear::Reactor {
     private:
         std::map<std::string, messages::Script> scripts;
+        bool startedDancing;
     public:
-        explicit ScriptEngine(NUClear::PowerPlant* plant);
+        explicit DanceEngine(NUClear::PowerPlant* plant);
     };
 }
 #endif

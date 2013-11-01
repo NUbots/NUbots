@@ -43,7 +43,29 @@ namespace messages {
         };
         std::vector<Frame> frames;
     };
-} // \namespace messages
+
+    /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     */
+    struct ExecuteScriptByName {
+        ExecuteScriptByName(const std::string script, NUClear::clock::time_point start = NUClear::clock::now()) : script(script), start(start) {};
+        std::string script;
+        NUClear::clock::time_point start;
+    };
+
+    /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     */
+    struct ExecuteScript {
+        ExecuteScript(const Script script, NUClear::clock::time_point start = NUClear::clock::now()) : script(script), start(start) {};
+        Script script;
+        NUClear::clock::time_point start;
+    };
+}  // namespace messages
 
 namespace utility {
 namespace configuration {
@@ -72,8 +94,8 @@ namespace configuration {
             return
             {
                 messages::DarwinSensors::Servo::idFromString(node["id"]),
-                        static_cast<float> (node["position"]),
-                        static_cast<float> (node["gain"])
+                        static_cast<float>(node["position"]),
+                        static_cast<float>(node["gain"])
             };
         }
     };
@@ -126,7 +148,7 @@ namespace configuration {
             return {std::move(frames)};
         }
     };
-} // namespace configuration
-} // namespace utility
+}  // namespace configuration
+}  // namespace utility
 
 #endif
