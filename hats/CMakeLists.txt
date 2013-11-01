@@ -47,6 +47,8 @@ ADD_HAT(
 ADD_HAT(
     NAME dancedarwin
     MODULES
+        ConfigSystem
+        Platform::Darwin::HardwareIO
         Platform::Darwin::MotionManager
         AudioFileInput
         AubioBeatDetector
