@@ -1,6 +1,5 @@
 % Initialisation
 \documentclass[english,12pt]{scrartcl}
-
 \usepackage[]{babel}
 % Input is utf8
 \usepackage[utf8]{inputenc}
@@ -81,28 +80,21 @@
 		
 		Originally NUClear was designed to replace a robot architecture that used a system known as the Blackboard.
 		Blackboards are a shared global memory store that all modules use to communicate by writing data to the blackboard and assuming it is read by the next module.
-		Our design makes it easy to transition from similar globally accessible data into a message based event-driven architecture.
+		Our design makes it easy to transition from similar globally accessible data to a message based event-driven architecture.
 		
 		Our goal was to make a system that allows programmers to easily send/receive information between modules using mechanisms that are \textbf{Fast}, \textbf{Reliable} and \textbf{Intuitive}.
 
 	\section{Goals}
 		\subsection{Simple API}
 			It was critical that NUClear have a simple and intuitive interface that didn't require weeks of study to achieve productivity with.
-			With that in mind we ensured that the two concepts, sending and receiving messages, only require the use of two corresponding functions: \textbf{On} and \textbf{Emit}
+			With that in mind we ensured that the two key concepts, sending and receiving messages, only require the use of two corresponding functions: \textbf{On} and \textbf{Emit}
 			
 			NUClear is designed around these two functions. \textbf{On} provides mechanisms to indicate that you are interested in a particular piece of information.
 			\textbf{Emit} correspondingly allows you to provide information to the system.
 			
 			There is a small amount of boilerplate requiring that you inherit from \textbf{NUClear::Reactor} and provide an appropriate constructor.
 			However these are simply implementation details and do not require understanding to utilize the full power of the system.
-			
-		\subsection{Low Performance Penalty}
-			NUClear needs to run in resource-constrained environment where large API overhead is unacceptable.
-			Because of this we have opted not to use technologies that incur large performance penalties such as XML serialization 
-			instead opting for a direct binary representation for messages passed within a single process. 
-			
-			Additionally we have utilized modern C++ patterns to perform computations at compile-time where possible using template meta-programming.
-			
+		
 		\subsection{Simple utilization of system resources}
 			Another requirement derived from resource-constrained environments is the need to easily utilize the full power of the platform you run on.
 			This is primarily achieve by introducing \textbf{Transparent Multi-threading} which automatically uses every physical core available on the system
@@ -124,6 +116,18 @@
 			If a single module shares data between two reactions and those reactions could run in parallel then the shared data will
 			need to be secured with a thread-safe mechanism such as a mutex.
 			NUClear also provides functionality to let the user specify that certain reactions should not be run in parallel which can be used to solve threading concerns.
+		
+		\subsection{Low Performance Penalty}
+			NUClear needs to run in resource-constrained environment where large API overhead is unacceptable.
+			Because of this we have opted not to use technologies that incur large performance penalties such as XML serialization 
+			instead opting for a direct binary representation for messages passed within a single process. 
+			
+			We use modern C++ features to perform \textbf{Compile-Time Allocation and Routing} which allows us to calculate and allocate space
+			for all reactions and messages at compile time.
+			Additionally we compute reaction lookup at compile-time to minimize the time it takes to emit or receive a message.
+			In our tests these optimizations have allowed us to send an arbitrary number of messages in O(1) time.
+			
+
 			
 		\subsection{Compile-Time Message Routing}
 			NUClear leverages modern C++ features enabling us to perform partial message routing at compile time.
