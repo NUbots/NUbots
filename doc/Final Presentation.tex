@@ -458,6 +458,7 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}
 \begin{itemize}
 	\item Problem description
 	\item Number of lines of code, estimate of effort
@@ -489,148 +490,43 @@
 	\item Demonstrate live coding of auto getup script
 	\item Demonstrate robot firing missiles
 \end{itemize}
-
+\end{frame}
 
 
 
 %----------------------------------------------------------------------------------------
 \section{Robot Dance}
 %----------------------------------------------------------------------------------------
-	\subsection{What and Why?} %-------------------
 	\begin{frame}
 		\sectionpage %Title page for the Robot Dance section
 	\end{frame}
+	\subsection{What and Why?} %-------------------
 	\begin{frame}
-		\frametitle{Why make the robots dance?}
+		\frametitle{Robot Dance: What and Why?}
 		\begin{itemize}
-			\item How does this relate to the rest of the project?
+			\item What does you mean by dancing robots?
+			\begin{itemize}
+				\item Scripted dancing
+				\item Dancing in time with music
+			\end{itemize}
+			\item Why Dancing Robots?
 			\begin{itemize}
 				\item Demonstrates the efficiency of the new architecture
-			\end{itemize}
-			\item Why demonstrate the architecture through dancing robots?
-			\begin{itemize}
-				\item Tests the architecture in adding functionality unrelated to soccer
 				\item Useful for marketing
 			\end{itemize}
 		\end{itemize}
 	\end{frame}
-	\begin{frame}
-		\frametitle{How do they dance?}
-		\begin{itemize}
-			\item Originally we were going to make them dance in 3 ways:
-			\begin{itemize}
-				\item Scripted Dance Moves
-				\item Dancing to music
-				\item Copying human dance moves through the camera
-			\end{itemize}
-			\item Due to team members leaving:
-			\begin{itemize}
-				\item Unable to do dancing by copying human
-			\end{itemize}
-		\end{itemize}
-	\end{frame}
-	\subsection{Scripted Dance} %-------------------
-	\begin{frame}
-		\frametitle{Scripted Dance Moves}
-		\begin{itemize}
-			\item Most simple method of robot dance
-			\item Dance script specifies:
-			\begin{itemize}
-				\item Angle for robot motors to move to
-				\item Times for when the motors should get there
-			\end{itemize}
-			\item Can be used as part of dancing to music
-			\item Can easily replace current soccer scripts
-		\end{itemize}
-	\end{frame}	
-	\begin{frame}
-		\frametitle{Creating the dance scripts}
-	\end{frame}	
-	\begin{frame}
-		\frametitle{Dancing and the New Architecture}
-		\framesubtitle{Dancing to a Script}
-		\begin{figure}
-			\centering
-			\includegraphics[scale=.5]{Presentation_Images/dance_script_new_arc.png}
-			\caption{Components for Dancing to Script with Nuclear}
-		\end{figure}
-	\end{frame}	
-	\begin{frame}
-		\frametitle{Dancing and the New Architecture}
-		\framesubtitle{Dancing to a Script}
-		\begin{figure}
-			\centering
-			\includegraphics[scale=.5]{Presentation_Images/dance_script_new_arc_change.png}
-			\caption{Components for Dancing to Script with Nuclear}
-		\end{figure}
-	\end{frame}
-	\begin{frame}
-		\frametitle{Dancing and the Old Architecture}
-		\framesubtitle{Dancing to a Script}
-		\begin{figure}
-			\centering
-			\includegraphics[scale=.45]{Presentation_Images/dance_script_old_arc.png}
-			\caption{Components for Dancing to Script with the Old System}
-		\end{figure}
-	\end{frame}	
 	\subsection{Dancing to Music} %-------------------
 	\begin{frame}
 		\frametitle{Dancing to Music}
-		Things to consider:
 		\begin{itemize}
-			\item How to analyse music
-			\begin{itemize}
-				\item Holistic approach?
-				\item Isolate musical characteristics?
-			\end{itemize}
-			\item Dance Moves
-			\begin{itemize}
-				\item Pre-Scripted or Dynamically Generated?
-				\item Scope of movement. Involving legs or just upper body?
-				\item How to relate dance moves to music
-			\end{itemize}
+			\item Music detected through Microphone
+			\item Music analysed to find beats
+			\item Dance move chosen and scaled to be in time with latest beats
+			\item Dance move is enacted
 		\end{itemize}
 	\end{frame}	
-	\begin{frame}
-		\frametitle{Dancing to Music}
-		\framesubtitle{Music Analysis}
-		\begin{itemize}
-			\item Beat is most important
-			\item What is beat?
-			\begin{itemize}
-				\item Basic timing element of a song
-				\item Tapping along to a song is finding the beat
-			\end{itemize}
-			\item Robot Dancing must be in time with beat
-			\item Many other musical characteristics depend on beat
-		\end{itemize}
-	\end{frame}	
-	\begin{frame}
-		\frametitle{Dancing to Music}
-		\framesubtitle{Finding the Beat}
-		\begin{itemize}
-			\item Finding the beat is known as Beat Tracking
-			\item Beat Tracking must be:
-			\begin{itemize}
-				\item Real Time
-				\item Predictive
-				\item Quick
-				\item Accurate
-				\item Robust
-			\end{itemize}
-		\end{itemize}
-	\end{frame}	
-	\begin{frame}
-		\frametitle{Dancing to Music}
-		\framesubtitle{Beat and Dance}
-		How we relate beat to dance:
-		\begin{itemize}
-			\item On Startup the dance Scripts are loaded
-			\item When a beat is found, the Dance Engine is notified
-			\item Each move in the dance script is reconfigured to be in time with the latest beat
-			\item When no dance is currently being run, a new dance script is chosen to be run
-		\end{itemize}
-	\end{frame}	
+	\subsection{Dancing and NUClear} %-------------------
 	\begin{frame}
 		\frametitle{Dancing and the New Architecture}
 		\framesubtitle{Dancing to a Music}
@@ -649,6 +545,7 @@
 			\caption{Components for Dancing to Music with the NUClear}
 		\end{figure}
 	\end{frame}	
+	\subsection{Dancing and the Old Architecture} %-------------------
 	\begin{frame}
 		\frametitle{Dancing and the Old Architecture}
 		\framesubtitle{Dancing to a Music}
