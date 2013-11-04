@@ -2,6 +2,7 @@
 \usepackage{epstopdf}
 \usepackage{adjustbox}
 \usepackage{tikz}
+\usepackage{arydshln} %Dotted lines for tables \hdashline \cdashline
 \usetikzlibrary{
 	positioning				% Allows 5px above/below of x style positioning
 	, arrows				% Allows <-, ->, <-> style arrows.
@@ -628,8 +629,94 @@
 		\end{itemize}
 	\end{frame}
 	\begin{frame}
-
+		Real Time:
+		\begin{itemize}
+			\item Does not require analysing the whole song to find the beats
+			\item Can take in audio through microphone and analyse incrementally
+			\item 
+		\end{itemize}		
 	\end{frame}
-
-
+	\begin{frame}
+		Quick:
+		\begin{itemize}
+			\item Doesn't slow down the rest of the system.
+			\item Beat located before next audio containing a beat is input into system
+		\end{itemize}		
+	\end{frame}
+	\begin{frame}
+		Accurate:
+		\begin{itemize}
+			\item Beats found feel right to a listener.
+			\item Accuracy doesn't need to be perfect
+			\item Half-pace beats may still feel right to a user
+		\end{itemize}		
+	\end{frame}
+	\begin{frame}
+		Robust:
+		\begin{itemize}
+			\item Works in real audio situations
+			\item Able to ignore background noise
+			\item Biggest problem for robots is motor noise
+		\end{itemize}		
+	\end{frame}
+	\begin{frame}
+		Two Candidates:
+		\begin{itemize}
+			\item Aubio
+				\begin{itemize}
+					\item Not the most accurate but it is quick
+				\end{itemize}
+			\item Beat'n
+				\begin{itemize}
+					\item Beat tracker Trent wrote when we were trying to get Aubio to work
+				\end{itemize}
+		\end{itemize}		
+	\end{frame}
+	\begin{frame}
+		Testing the 2 Beat Trackers for accuracy:
+		\begin{itemize}
+			\item Tested on 20 songs
+			\item Compared results of Beat Trackers with beats found by a human
+			\item Comparisons evaluated by 6 evaluation methods (some with several variations)
+			\item In addition to testing Aubio and Beat'n, we also test a dummy algorithm which simply has a beat occur every 0.5 seconds
+		\end{itemize}		
+	\end{frame}
+	\begin{frame}
+		Testing results:
+		\begin{table}
+		\begin{tabular}{c c c c c c c c c c c}
+			          & F-Measure & Cem(acc) & Goto(acc) & P-Score & CMLc & CMLt & AMLc & AMLt & D & Dg \\
+			Aubio & 29.6205 & 20.9227 & 0 & 35.5261 & 9.3504 & 14.2556 & 20.0702 & 31.6623 & 0.9857 & 0.0723 \\
+			Beat'n & 22.8261 & 15.7258 & 0 & 28.6636 & 3.054 & 5.8672 & 17.6479 & 25.7328 & 0.9178 & 0.0527 \\
+			Dummy & 8.227 & 5.7759 & 0 & 7.0067 & 0.7358 & 1.6722 & 1.5552 & 3.3445 & 0.0253 & 0.0083 \\
+		\end{tabular}
+		\end{table}	
+	\end{frame}
+	\begin{frame}
+		Testing results:
+		\begin{table}
+		\begin{tabular}{c | c | c | c}
+			  & Aubio  & Beat'n  & Dummy\\ \hline
+			F-Measure  & 29.6205  & 22.8261  & 8.227\\ \cline{1-1}  \cdashline{2-4}
+			Cem(acc)  & 20.9227  & 15.7258  & 5.7759\\ \cline{1-1}  \cdashline{2-4}
+			Goto(acc)  & 0  & 0  & 0\\ \cline{1-1}  \cdashline{2-4}
+			P-Score  & 35.5261  & 28.6636  & 7.0067\\ \cline{1-1}  \cdashline{2-4}
+			CMLc  & 9.3504  & 3.054  & 0.7358\\ \cline{1-1}  \cdashline{2-4}
+			CMLc  & 14.2556  & 5.8672  & 1.6722\\ \cline{1-1}  \cdashline{2-4}
+			AMLc  & 20.0702  & 17.6479  & 1.5552\\ \cline{1-1}  \cdashline{2-4}
+			AMLt  & 31.6623  & 25.7328  & 3.3445\\ \cline{1-1}  \cdashline{2-4}
+			D  & 0.9857  & 0.9178  & 0.0253\\ \cline{1-1}  \cdashline{2-4}
+			Dg  & 0.0723  & 0.0527  & 0.0083\\ \cline{1-1}  \cdashline{2-4}
+		\end{tabular}
+		\end{table}	
+	\end{frame}
+	\begin{frame}
+		Evaluating the other criteria:
+		\begin{itemize}
+			\item Both algorithms work in real time
+			\item Both algorithms are quick
+			\item Aubio has big problems with Motor Noise, though a filter could fix it.
+			\item Beat'n handle motor noise much better, though it still has some problem with it
+		\end{itemize}
+	\end{frame}
 \end{document} 
