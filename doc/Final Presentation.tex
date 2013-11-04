@@ -493,6 +493,71 @@
 \end{itemize}
 \end{frame}
 
+\subsection{NUClear Port}
+\begin{frame}
+	\frametitle{NUClear Port}
+
+	\begin{itemize}
+		\item The NUbots software has been ported to use NUClear
+		\item Functionality has been divided into many individual modules
+		\item All ommunication across modules is accomplished through NUClear messages
+		\item A new, flexible build system has been created with `roles' to allow fast and easy adding of functionality
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Modules}
+
+	\begin{itemize}
+		\item Every module has a single clear purpose, for example
+		\begin{itemize}
+			\item interacting with robot hardware
+			\item running scripted movements
+			\item loading configuration files
+		\end{itemize}
+		\item Modules do not care which other modules are present, only what information they consume and what they can produce
+		\begin{itemize}
+			\item Modules with the same inputs and outputs are interchangeable
+			\item Platform details are inherently decoupled from everything else
+			\item Only need to understand the modules you're working on, not the entire system
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Modules}
+
+	\todo[inline]{Tikz diagram of the new modules/powerplant model}
+\end{frame}
+
+\begin{frame}
+	\frametitle{New build system}
+
+	What are roles?
+	\begin{itemize}
+		\item A group of modules combined to make an executable
+		\item We can create new behaviours by combining different modules
+		\begin{itemize}
+			\item Robocup role with soccer-related modules
+			\item Dance role with beat detection and audio input modules
+			\item Script Tuner role with an interface for tweaking motion scripts
+		\end{itemize}
+		\item Only one file needs to be changed to make new roles
+		\item Adding new abilities requires very little effort
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Testing}
+
+	\begin{itemize}
+		\item Testing is built into the new system from the ground up
+		\item Modules have associated unit tests
+		\item The build system can run unit tests as a batch
+		\item Because of modular design it is easy to test single modules or subsets in isolation
+	\end{itemize}
+\end{frame}
+
 
 
 %----------------------------------------------------------------------------------------
