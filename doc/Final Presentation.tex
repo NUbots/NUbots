@@ -37,7 +37,7 @@
 {
 	University of Newcastle \\ % Your institution for the title page
 	\medskip
-	\textit{Trent.Houliston@uon.edu.au, Jake.f.woods@gmail.com} % Email address
+	\textit{\{Trent.Houliston, Jake.F.Woods, Joshua.Kearns, Michael Burton\}@uon.edu.au} % Email address
 }
 
 \date{\today}
@@ -48,7 +48,7 @@
 %----------------------------------------------------------------------------------------
 % Title Slide 
 %----------------------------------------------------------------------------------------
-\begin{frame}
+\begin{frame} % Introduce the team on this slide
 	\titlepage % Print the title page as the first slide
 \end{frame}
 
@@ -62,9 +62,6 @@
 %----------------------------------------------------------------------------------------
 \section{Introduction}
 %----------------------------------------------------------------------------------------
-\begin{frame}
-\end{frame}
-
 \begin{frame}
 	\frametitle{Problem Description}
 		Improve the software architecture of the NUbots robocup system to:
@@ -334,7 +331,7 @@
 \begin{frame}
 	\frametitle{Levels of Coupling}
 	\begin{itemize}
-		\item Coupling levels, from most coupled to least coupled are as follows
+		\item Coupling levels, from most coupled to least coupled are:
 		\begin{itemize}
 			\item Content Coupling (Pathological Coupling)
 			\item Common Coupling (Global Coupling)
@@ -352,9 +349,9 @@
 \begin{frame}
 	\frametitle{Message Passing}
 	\begin{itemize}
-		\item Message coupling is the lest coupled method of communication
-		\item As such a system built on message passing systems have excellent maintainability and modifiability
-		\item This is due to the systems requiring no knowledge of eachother
+		\item Message coupling is the least coupled method of communication
+		\item Message passing systems have excellent maintainability and modifiability
+		\item Components require no knowledge of each other
 	\end{itemize}
 \end{frame}
 
@@ -436,10 +433,19 @@
 	\frametitle{NUClear Design}
 	\begin{itemize}
 		\item NUClear is designed around a central PowerPlant
-		\item It will have several ``Reactors'' around it
+		\item The PowerPlant has several ``Reactors'' around it
 		\item These reactors request data they need, and emit data they have created to it
 		\item The PowerPlant will route this information to the appropriate entities
 		\item The PowerPlant is also responsible for the storage of information
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{NUClear Design}
+	\begin{itemize}
+		\item NUClear itself is built around the embedding of a Domain Specific Language (DSL) into C++
+		\item It uses advanced C++ techniques in order to allow an intuitive description of data flow
+		\item This allows it to be taught and used by novice C++ users while enforcing good practice
 	\end{itemize}
 \end{frame}
 
@@ -472,14 +478,6 @@
 		\item The lifetime of the data used is managed by the PowerPlant
 	\end{itemize}
 \end{frame}
-
-\begin{frame}
-
-\end{frame}
-
-% TODO talk about template metaprogramming
-% TODO talk about DSL
-% TODO 
 
 \begin{frame}
 	\frametitle{NUClear Features}
@@ -613,6 +611,25 @@
 		\item This gives a lot of power to implement features within the language itself
 		\item For example, the configuration system the the ported NUClear code is implemented as a part of the language
 	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Modular Design}
+	% this message passing api allows us to design the new system using modular design
+	% modular design results in each component of the system being isolated from others
+	% this allows us to 
+\end{frame}
+
+\begin{frame}
+	\frametitle{Modular Design}
+	%
+\end{frame}
+
+\begin{frame}
+	\frametitle{Orchestration}
+	% Using modular design and the NUClear api we are also able to take inspiration from Service Orientied Architectures
+	% the concept of orchistration is when we take several modules (services in SOA) and combine them to form an application
+	% in our case we take these modules and combine them to form a role for the robot
 \end{frame}
 
 % more powerful then typical event driven systems
