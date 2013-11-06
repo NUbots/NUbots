@@ -44,16 +44,25 @@ ADD_HAT(
         Platform::Darwin::HardwareIO
         MechWarrior)
 
+#ADD_HAT(
+#    NAME dancedarwin
+#    MODULES
+#        ConfigSystem
+#        Platform::Darwin::HardwareIO
+#        Platform::Darwin::MotionManager
+#        AudioFileInput
+#        AubioBeatDetector
+#        ScriptEngine
+#        DanceEngine)
+
 ADD_HAT(
-    NAME dancedarwin
+    NAME beatdetectortests
     MODULES
-        ConfigSystem
-        Platform::Darwin::HardwareIO
-        Platform::Darwin::MotionManager
-        AudioFileInput
-        AubioBeatDetector
-        ScriptEngine
-        DanceEngine)
+        AudioFileInputArgs
+        BeatDetector
+        BeatDetectorsTests)
+
+
 
 # The ADD_HAT function appends itself to the ${hats} variable.
 # We need to expose this to our parent scope so the DarwinSend.cmake
