@@ -117,159 +117,6 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Existing Architecture - Data Flow Diagram}
-	\begin{tikzpicture}[
-			x=10.5em,y=4.75em,
-			component/.style={
-				rectangle
-				, rounded corners
-				, draw=black, very thick
-				, text width=7em
-				, minimum height=2.4em
-				, text centered
-			}
-			, splitcomponent/.style={
-				component
-				, rectangle split
-				, rectangle split parts=2
-			}
-			, configsystemconfig/.style={ color=green!75!black }
-			, fileconfig/.style={ color=red!75!black }
-			, jobconfig/.style={ color=blue!75!black }
-			, hardcodedconfig/.style={ color=black }
-			, publicinterface/.style={ color=orange!75!black}
-			, write/.style={ ->, thick}
-			, read/.style={<-, thick}
-			, readwrite/.style={<->, thick}
-			, >=latex
-		]
-
-		%\node at (0.5,2.5) {$P_{1}$};
-
-		%%% Nodes
-		%% Left hand Side
-		\node at (0,3) [component] (vision) {Vision};
-		\node at (0,2) [component] (localization) {Localization};
-		\node at (0,1) [component] (behavior) {Behavior};
-
-		%% Center
-		\node at (1, 3) [splitcomponent] (blackboard) {Blackboard \nodepart{two} Game Network\\Team Network};
-		\node at (1, 2) [component] (kinematics) {Kinematics};
-		\node at (1, 1) [component] (jobs) {Jobs};
-		\node at (1, 0) [component] (actionators) {Actionators (Hardware)};
-
-		%% Right hand side
-		\node at(2,3) [component] (sensors) {Sensors (Hardware)};
-		\node at(2,2) [component] (camera) {Camera (Hardware)};
-		\node at(2,1) [splitcomponent] (motion) {Motion \nodepart{two} Scripts\\Head Motion\\Walk Engine};
-
-		%%% Connections
-		%% Left side connections
-		\path [readwrite, out=10, in=170] (vision) edge (blackboard);
-		\path [readwrite, out=20, in=185] (localization) edge (blackboard);
-		\path [read, out=10, in=200] (behavior) edge (blackboard);
-		\path [write, out=5, in=185] (behavior) edge (jobs);
-		\path [write, out=-5, in=160] (behavior) edge (actionators);
-		
-		%% Center connections
-		\path [readwrite] (kinematics) edge (blackboard);
-
-		%% Right side connections
-		\path [write, out=170, in=10] (sensors) edge (blackboard);
-		\path [write, out=185, in=-20] (camera) edge (blackboard);
-		\path [write, out=-10, in=190] (jobs) edge (motion);
-		\path [write, out=10, in=190] (jobs) edge (camera);
-		\path [write, out=200, in=20] (motion) edge (actionators);
-		\path [read, out=150, in=0] (motion) edge (kinematics);
-		
-		%%% Configuration Colours
-		%% Vision
-		\filldraw[fileconfig] ([yshift=-.5em,xshift=.5em]vision.north west) circle (3pt);
-		\filldraw[hardcodedconfig] ([yshift=-1.25em,xshift=.5em]vision.north west) circle(3pt);
-		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]vision.north east) rectangle ++(6pt, 6pt);	
-		
-		%% Localization
-		\filldraw[fileconfig] ([yshift=-.5em,xshift=.5em]localization.north west) circle(3pt);
-		\filldraw[hardcodedconfig] ([yshift=-1.25em,xshift=.5em]localization.north west) circle (3pt);
-		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]localization.north east) rectangle ++(6pt, 6pt);
-		
-		%% Behavior
-		\filldraw[fileconfig] ([yshift=-.5em,xshift=.5em]behavior.north west) circle(3pt);
-		\filldraw[hardcodedconfig] ([yshift=-1.25em,xshift=.5em]behavior.north west) circle(3pt);
-		
-		%% Blackboard
-		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]blackboard.north east) rectangle ++(6pt, 6pt);
-		
-		%% Kinematics
-		\filldraw[fileconfig] ([yshift=-.5em,xshift=.5em]kinematics.north west) circle(3pt);
-		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]kinematics.north east) rectangle ++(6pt, 6pt);
-		
-		%% Jobs
-		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]jobs.north east) rectangle ++(6pt, 6pt);
-		
-		%% Actionators
-		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]actionators.north east) rectangle ++(6pt, 6pt);
-		
-		%% Sensors
-		\filldraw[hardcodedconfig] ([yshift=-.5em,xshift=.5em]sensors.north west) circle(3pt);
-		
-		%% Camera
-		\filldraw[jobconfig] ([yshift=-.5em,xshift=.5em]camera.north west) circle(3pt);
-		\filldraw[fileconfig] ([yshift=-1.25em,xshift=.5em]camera.north west) circle(3pt);
-		\filldraw[hardcodedconfig] ([yshift=-2em,xshift=.5em]camera.north west) circle (3pt);
-		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]camera.north east) rectangle ++(6pt, 6pt);
-		
-		%% Motion
-		\filldraw[hardcodedconfig] ([yshift=-.5em,xshift=.5em]motion.north west) circle (3pt);
-		\filldraw[configsystemconfig] ([yshift=-2.25em,xshift=.5em]motion.north west) circle (3pt);
-		\filldraw[fileconfig] ([yshift=-3.5em,xshift=.5em]motion.north west) circle(3pt);
-		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]motion.north east) rectangle ++(6pt, 6pt);
-		
-		%%% Legend
-		\coordinate (legendpoint) at (.55, .35);
-		
-		%% Public Interface
-		\node [below=3pt of legendpoint,anchor=south east] (publicinterfacelabel) {\tiny Provides a Singleton Public Interface};
-		\filldraw[publicinterface] ([yshift=-3pt,xshift=-3pt]publicinterfacelabel.west) rectangle ++(6pt, 6pt);
-
-		%% Hard Coded Config
-		\node [below=0.9em of publicinterfacelabel.south west,anchor=south west] (hardcodedconfiglabel) {\tiny Configured by Hardcoding Values};
-		\filldraw[hardcodedconfig] ([yshift=.5pt]hardcodedconfiglabel.west) circle (3pt);
-		
-		%% File Config
-		\node [below=0.8em of hardcodedconfiglabel.south west,anchor=south west] (fileconfiglabel) {\tiny Configured by Custom Files};
-		\filldraw[fileconfig] ([yshift=.5pt]fileconfiglabel.west) circle (3pt);
-
-		%% Job Config
-		\node [below=0.8em of fileconfiglabel.south west,anchor=south west] (jobconfiglabel) {\tiny Configured by Job System};
-		\filldraw[jobconfig] ([yshift=.5pt]jobconfiglabel.west) circle (3pt);
-
-		%% Config System Config
-		\node [below=0.8em of jobconfiglabel.south west,anchor=south west] (configsystemconfiglabel) {\tiny Configured by Configuration System};
-		\filldraw[configsystemconfig] ([yshift=.5pt]configsystemconfiglabel.west) circle (3pt);
-		
-		%%% Decorations
-		%% SeeThink header
-		\node[fit=(vision)(localization)(behavior)](leftgroup){};
-		\draw[rounded corners] 
-		(leftgroup.north west)--(leftgroup.south west) -- ++(0.10,0);			
-		\draw[decorate,decoration={amplitude=7pt,brace}] % Header line
-		(leftgroup.north west) -- (leftgroup.north east);
-
-		\node[above=1.1em of leftgroup,anchor=center]{SeeThink Loop};
-
-		%% SenseMove header
-		\node[fit=(sensors)(camera)(motion)](rightgroup){};
-		\draw[rounded corners] 
-		(rightgroup.north east) -- (rightgroup.south east) -- ++(-0.10,0);
-		\draw[decorate,decoration={amplitude=7pt,brace}]
-		(rightgroup.north west) -- (rightgroup.north east);
-		\node[above=1.1em of rightgroup,anchor=center]{SenseMove Loop};
-	\end{tikzpicture}
-
-\end{frame}
-
-\begin{frame}
 	\frametitle{Existing Architecture - Dependency Graph}
 	\begin{adjustbox}{max totalsize={\textwidth}{.9\textheight},center}
 	\begin{tikzpicture}[
@@ -491,6 +338,71 @@
 	\item Demonstrate live coding of auto getup script
 	\item Demonstrate robot firing missiles
 \end{itemize}
+\end{frame}
+
+\subsection{NUClear Port}
+\begin{frame}
+	\frametitle{NUClear Port}
+
+	\begin{itemize}
+		\item The NUbots software has been ported to use NUClear
+		\item Functionality has been divided into many individual modules
+		\item All ommunication across modules is accomplished through NUClear messages
+		\item A new, flexible build system has been created with `roles' to allow fast and easy adding of functionality
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Modules}
+
+	\begin{itemize}
+		\item Every module has a single clear purpose, for example
+		\begin{itemize}
+			\item interacting with robot hardware
+			\item running scripted movements
+			\item loading configuration files
+		\end{itemize}
+		\item Modules do not care which other modules are present, only what information they consume and what they can produce
+		\begin{itemize}
+			\item Modules with the same inputs and outputs are interchangeable
+			\item Platform details are inherently decoupled from everything else
+			\item Only need to understand the modules you're working on, not the entire system
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Modules}
+
+	\todo[inline]{Tikz diagram of the new modules/powerplant model}
+\end{frame}
+
+\begin{frame}
+	\frametitle{New build system}
+
+	What are roles?
+	\begin{itemize}
+		\item A group of modules combined to make an executable
+		\item We can create new behaviours by combining different modules
+		\begin{itemize}
+			\item Robocup role with soccer-related modules
+			\item Dance role with beat detection and audio input modules
+			\item Script Tuner role with an interface for tweaking motion scripts
+		\end{itemize}
+		\item Only one file needs to be changed to make new roles
+		\item Adding new abilities requires very little effort
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Testing}
+
+	\begin{itemize}
+		\item Testing is built into the new system from the ground up
+		\item Modules have associated unit tests
+		\item The build system can run unit tests as a batch
+		\item Because of modular design it is easy to test single modules or subsets in isolation
+	\end{itemize}
 \end{frame}
 
 
