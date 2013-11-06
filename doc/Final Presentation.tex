@@ -506,6 +506,221 @@
 		\subsectionpage
 	\end{frame}
 	
+	\begin{frame}
+		\frametitle{Software Architecture}
+		\begin{itemize}
+			\item Components in a well designed software architecture are:
+			\item Loosely Coupled
+			\item Tightly Cohesive
+			\item These properties makes it easy to modify and maintain the system
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Message Passing}
+		\begin{itemize}
+			\item Message passing is the most loosely coupled architectural style
+			\item Components do not need to know of each other at all
+			\item This makes it easy to develop and modify components
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Use in Other Systems}
+		\begin{itemize}
+		\item Message passing has been used as an architecture with robotics before
+			\item Robot OS is designed on a message passing system
+			\item DDX is a previous generation robotics system also based on message passing
+			\item From before this time (and currently) CORBA is used extensively also
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Use in other Systems}
+		\begin{itemize}
+			\item These systems use message passing as it make it easy to collaborate and design modules
+			\item However these systems were never designed to run on low powered systems
+			\item Robot OS for example was designed to run on multiple computers as a distributed system in order to do this it has heavy routing and serialisation requirements
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Metaprogramming}
+		\begin{itemize}
+			\item Metaprogramming is a technique of writing programs that manipulate themselves
+			\item This includes programs that run at compilation time rather then runtime
+			\item It allows work to be offloaded from runtime processing
+			\item In C++ this is done through templates
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{C++ Template Metaprogramming}
+		\begin{itemize}
+			\item C++ metaprogramming is done through templates
+			\item Templates were designed to implement generic programming
+			\item However they also accidentally as a side effect are a turing complete language
+			\item This allows programs to be executed using templates at compile time using the type system
+		\end{itemize}
+	\end{frame}
+		
+	\begin{frame}
+		\frametitle{Partial Evaluation}
+		\begin{itemize}
+			\item One such metaprogramming technique is partial evaluation
+			\item It applies when partial information is available at compile time
+			\item Partial evaluation takes a function and performs part of the evaluation during compilation
+			\item In the case of a message passing system the routing of the message is known
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Compile Time Message Routing}
+		\begin{itemize}
+			\item We know the routes messages are going to take at compile time
+			\item Messages are published subscribed to using types
+			\item We can evaluate the dispatch of these messages at compile time using template metaprograms
+			\item We can bind the data of the messages at runtime
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Before Compilation}
+		\centering
+		\scalebox{0.55}{
+			\begin{tikzpicture}[
+				element/.style={
+				rectangle,
+				rounded corners,
+				draw=black, very thick,
+				minimum height=2em,
+				text centered
+			},
+			ball/.style={
+				element,
+				minimum height=0,
+				fill=black
+			},
+			arrow/.style={
+				->,
+				thick
+			},
+			>=latex]
+			
+			\node [element] (router) {Router};
+		
+			%%% Draw all of our components in a circle
+			\foreach [count=\i] \reactor in {Camera, Vision, Localisation, Behaviour, Servos} {				
+				% Draw the reactors around the central star
+				\node [element] (msg\reactor) at ({360/5 * (\i)}:6cm) {$\reactor$};
+			};
+			
+			\path [arrow] (router) edge[out=130, in=350]  node[right] {Image} (msgVision);
+			\path [arrow] (msgVision) edge[out=320, in=170] node[left] {Seen Objects} (router);
+			
+			\path [arrow] (msgCamera) edge[out=270, in=90] node[right] {Image} (router);
+			
+			\path [arrow] (router) edge[out=320, in=60] node[right, text width=1.5cm] {Servo Angles, Positions} (msgBehaviour);
+			\path [arrow] (msgBehaviour) edge[out=130, in=290] node[left, text width=1.75cm] {Servo Commands} (router);
+			
+			\path [arrow] (router) edge[out=190, in=80] node[left] {Seen Objects} (msgLocalisation);
+			\path [arrow] (msgLocalisation) edge[out=50, in=220] node[below] {Positions} (router);
+			
+			\path [arrow] (router) edge[out=30, in=150] node[above] {Servo Commands} (msgServos);
+			\path [arrow] (router) edge[out=0, in=190] node[below] {Servo Angles} (msgServos);
+			
+		\end{tikzpicture}}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{After Compilation}
+		\centering
+		\scalebox{0.8}{
+			\begin{tikzpicture}[
+				scale=0.7,
+				element/.style={
+					rectangle,
+					rounded corners,
+					draw=black, very thick,
+					minimum height=2em,
+					text centered
+				},
+				ball/.style={
+					element,
+					minimum height=0,
+					fill=black
+				},
+				arrow/.style={
+					->,
+					thick
+				},
+				>=latex]
+		
+			%%% Draw all of our components in a circle
+			\foreach [count=\i] \reactor in {Camera, Vision, Localisation, Behaviour, Servos} {				
+				% Draw the reactors around the central star
+				\node [element] (comp\reactor) at ({360/5 * (\i)}:6cm) {$\reactor$};
+			}; 
+			
+			\path [arrow] (compCamera) edge[out=180, in=30] node[left] {Image} (compVision);
+			\path [arrow] (compVision) edge[out=240, in=150] node[left] {Seen Objects} (compLocalisation);
+			\path [arrow] (compLocalisation) edge[out=330, in=180] node[left] {Positions} (compBehaviour);
+			\path [arrow] (compBehaviour) edge[out=70, in=190] node[left] {Servo Commands} (compServos);
+			\path [arrow] (compServos) edge[out=270, in=40] node[right] {Servo Angles} (compBehaviour);
+			
+		\end{tikzpicture}}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Compile Time  Message Routing}
+		\begin{itemize}
+			\item Before compilation, every item only knows about the router
+			\item This makes it very simple to modify programs
+			\item After compilation components directly access each other
+			\item This makes the resulting system almost as fast as direct function access
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Compile Time  Message Routing}
+		\begin{itemize}
+			\item The fast final result from the compile time program allows this architecture to be used
+			\item The performance drawbacks of having a message router no longer apply
+			\item This allows this style of architecture to be used in performance critical use cases
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Drawbacks}
+		\begin{itemize}
+			\item Using compile time message routing has drawbacks
+			\item As the routing is performed at compile time, compilation of programs is slower
+			\item Also, as template meta-programming in c++ is complex this makes it difficult to use
+			\item It also results in larger binaries as the routes for messages are hard coded
+			\item The system also requires an optimising compiler, else the system ends slower then a typical function call
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Results}
+		\begin{itemize}
+			\item When compared other methods of message passing compile time routing performed orders of magnitude faster
+			\item As routing is performed at compile time, it also does not suffer from a slowdown as the number of publishers, subscribers, or message types increases
+			\item The system was compared to CORBA for latency
+			\item Compile time dispatch was measured as taking from the range of 300 nanoseconds to 1 microsecond
+			\item CORBA is measured as taking between 1 millisecond to 7 milliseconds
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Use in FYP}
+		\begin{itemize}
+			\item Compile time message routing is used within the NUClear framework in order to route messages
+			\item This allows it to perform orders of magnitude faster then competing architectures
+			\item It also does not suffer slowdowns with the size of the project
+		\end{itemize}
+	\end{frame}
+	
 	%----------------------------------------------------------------------------------------
 	\subsection{Efficient Multithreading in Message Passing Systems}
 	%----------------------------------------------------------------------------------------
