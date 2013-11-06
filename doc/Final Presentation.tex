@@ -620,6 +620,14 @@
 		\end{itemize}
 	\end{frame}
 	\begin{frame}
+		How a software beat tracker could work
+		\begin{itemize}
+			\item Onset detection used to find location of musical notes in audio
+			\item Notes that occur at regular intervals are found
+			\item The most prominent regular notes are taken to be the beat
+		\end{itemize}
+	\end{frame}
+	\begin{frame}
 		Criteria for the Beat Tracker:
 		\begin{itemize}
 			\item Real Time % Whole piece of music doesn't need to be analysed. Works with microphone input.
@@ -632,8 +640,8 @@
 		Real Time:
 		\begin{itemize}
 			\item Does not require analysing the whole song to find the beats
+			\item Uses past events to find beats but not future events.
 			\item Can take in audio through microphone and analyse incrementally
-			\item 
 		\end{itemize}		
 	\end{frame}
 	\begin{frame}
@@ -646,9 +654,13 @@
 	\begin{frame}
 		Accurate:
 		\begin{itemize}
+			\item Measures highly on beat tracker evaluation tests
 			\item Beats found feel right to a listener.
 			\item Accuracy doesn't need to be perfect
-			\item Half-pace beats may still feel right to a user
+			\begin{itemize}
+				\item Can't be perfectly on the beat
+				\item Half-pace beats may still feel right to a user
+			\end{itemize}	
 		\end{itemize}		
 	\end{frame}
 	\begin{frame}
@@ -681,17 +693,17 @@
 			\item In addition to testing Aubio and Beat'n, we also test a dummy algorithm which simply has a beat occur every 0.5 seconds
 		\end{itemize}		
 	\end{frame}
-	\begin{frame}
-		Testing results:
-		\begin{table}
-		\begin{tabular}{c c c c c c c c c c c}
-			          & F-Measure & Cem(acc) & Goto(acc) & P-Score & CMLc & CMLt & AMLc & AMLt & D & Dg \\
-			Aubio & 29.6205 & 20.9227 & 0 & 35.5261 & 9.3504 & 14.2556 & 20.0702 & 31.6623 & 0.9857 & 0.0723 \\
-			Beat'n & 22.8261 & 15.7258 & 0 & 28.6636 & 3.054 & 5.8672 & 17.6479 & 25.7328 & 0.9178 & 0.0527 \\
-			Dummy & 8.227 & 5.7759 & 0 & 7.0067 & 0.7358 & 1.6722 & 1.5552 & 3.3445 & 0.0253 & 0.0083 \\
-		\end{tabular}
-		\end{table}	
-	\end{frame}
+%	\begin{frame}
+%		Testing results:
+%		\begin{table}
+%		\begin{tabular}{c c c c c c c c c c c}
+%			          & F-Measure & Cem(acc) & Goto(acc) & P-Score & CMLc & CMLt & AMLc & AMLt & D & Dg \\
+%			Aubio & 29.6205 & 20.9227 & 0 & 35.5261 & 9.3504 & 14.2556 & 20.0702 & 31.6623 & 0.9857 & 0.0723 \\
+%			Beat'n & 22.8261 & 15.7258 & 0 & 28.6636 & 3.054 & 5.8672 & 17.6479 & 25.7328 & 0.9178 & 0.0527 \\
+%			Dummy & 8.227 & 5.7759 & 0 & 7.0067 & 0.7358 & 1.6722 & 1.5552 & 3.3445 & 0.0253 & 0.0083 \\
+%		\end{tabular}
+%		\end{table}	
+%	\end{frame}
 	\begin{frame}
 		Testing results:
 		\begin{table}
@@ -717,6 +729,14 @@
 			\item Both algorithms are quick
 			\item Aubio has big problems with Motor Noise, though a filter could fix it.
 			\item Beat'n handle motor noise much better, though it still has some problem with it
+		\end{itemize}
+	\end{frame}
+	\begin{frame}
+		Conclusion:
+		\begin{itemize}
+			\item Beat Tracking CAN accurately detect beats in real time for Robot Dance
+			\item Aubio and Beat'n are a little lacking but sufficient for the job
+			\item Better beat trackers are available, particuarly when more processing power is available.
 		\end{itemize}
 	\end{frame}
 \end{document} 
