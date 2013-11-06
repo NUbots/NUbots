@@ -279,68 +279,151 @@
 	\sectionpage
 \end{frame}
 
+\subsection{NUClear API}
 \begin{frame}
-	\todo[inline]{Talk about coupling r.e. maintainablity}
-	\todo[inline]{Diagram of different forms of coupling}
+	\frametitle{Software Architecture}
+	\begin{itemize}
+		\item If we are to replace the architecture of the existing system, we need to define what makes a good architecture
+		\item A good software architecture is
+		\begin{itemize}
+			\item Maintainable
+			\item Modifiable
+			\item Testable
+			\item Understandable
+		\end{itemize}
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
-	\todo[inline]{Describe message passing systems}
-	\todo[inline]{How decoupled they are but they need a message passing management system}
+	\frametitle{Coupling and Cohesion}
+	\begin{itemize}
+		\item The most powerful indicators for good architecture design are those of coupling and cohesion
+		\item These two properties have huge influences on how easy a system is to understand and change
+		\item A well designed system should be loosely coupled, and tightly cohesive
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
-	\todo[inline]{Talk about existing systems such as Robot OS, DDX, CORBA}
+	\frametitle{Coupling}
+	\begin{itemize}
+		\item Coupling is a measure of how much a module relies on another module
+		\item For example, if a module calls functions on another module, it is dependant on it
+		\item A well designed system attempts to minimise these links between modules where possible
+		\item It is also important to avoid irrelevant information being communicated
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
-	\todo[inline]{These are all slow}
+	\frametitle{Cohesion}
+	\begin{itemize}
+		\item Cohesion is a measure of the extent to which two elements of a single module belong together
+		\item It describes the relevance of functionality within a module
+		\item For example, if a single module contained only functionality for controlling a robots motion it would be tightly cohsevive
+		\item However if a single module contained code for both performing vision processing as well as controlling the robots limbs this would be loosely cohesive as the two functions do not belong in a single logical module.
+	\end{itemize}
 \end{frame}
 
-\subsection{NUClear}
+\begin{frame}
+	\frametitle{Coupling}
+	\begin{itemize}
+		\item From an architectural standpoint, the decision of cohesion must be considered in each module
+		\item However coupling must be designed for the entire architecture in order to ensure that communication between modules is loosely coupled
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Levels of Coupling}
+	\begin{itemize}
+		\item Coupling levels, from most coupled to least coupled are as follows
+		\begin{itemize}
+			\item Content Coupling (Pathological Coupling)
+			\item Common Coupling (Global Coupling)
+			\item External Coupling
+			\item Control Coupling
+			\item Stamp Coupling
+			\item Data Coupling
+			\item Message Coupling
+			\item No Coupling
+		\end{itemize}
+		\item The existing architecture uses Common coupling through Blackboard (global storage)
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Message Passing}
+	\begin{itemize}
+		\item Message coupling is the lest coupled method of communication
+		\item As such a system built on message passing systems have excellent maintainability and modifiability
+		\item This is due to the systems requiring no knowledge of eachother
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Existing Systems}
+	\begin{itemize}
+		\item Message passing systems have been used in robotics before
+		\item They have been used in most robotic architectures designed for large scale use
+		\item These include
+		\begin{itemize}
+			\item Robot OS (ROS)
+			\item Dynamic Data eXchange (DDX)
+			\item CORBA based systems
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Robot OS}
+	\begin{itemize}
+		\item ROS is of particular note as it is the most commonly used system used in research
+		\item It currently runs in many robotic systems and has a substantial array of existing modules for it
+		\item It is a distributed message passing system which allows multiple programming languages and machines
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Performance}
+	\begin{itemize}
+		\item These architectures are not suitable for use on the NUBots team robots
+		\item They were designed to be used on high performance distributed systems
+		\item The latency and processing overhead of the message passing is significant on slower systems
+		\item This makes them unsuitable for lower performance devices such as the DARwIn-OP platform
+	\end{itemize}
+\end{frame}
+
 \begin{frame}
 	\frametitle{NUClear}
 	\begin{itemize}
-		\item These systems are all too slow to use on a robot
-		\item A new system must be designed if message passing is to be used
+		\item To resolve these issues a new framework was designed named NUClear
+		\item This framework and corresponding architecture is much faster then these previous systems
+		\item This allows its use for the NUBots system
 	\end{itemize}
 \end{frame}
 
-\begin{frame}
-\begin{itemize}
-	\item Problem description
-	\item Number of lines of code, estimate of effort
-	\item Good Software architecture
-	\begin{itemize}
-		\item Coupling
-		\item Cohesion
-	\end{itemize}
-	\item Existing system
-	\item ROS DDX etc message passing
-	\item Metaprogramming
-	\item NUClear API
-	\begin{itemize}
-		\item Message passing
-		\item Networking
-		\item Multithreading
-	\end{itemize}
-	\item Benefits
-	\begin{itemize}
-		\item 
-	\end{itemize}
-	\item Discuss the ease of adding in things
-	\item Robot Dance
-	\begin{itemize}
-		\item What do they do?
-		\item How does it work?
-	\end{itemize}
-	\item Demonstrate robot dancing
-	\item Demonstrate live coding of auto getup script
-	\item Demonstrate robot firing missiles
-\end{itemize}
-\end{frame}
+% multithreading
+% debugging and traceablity
+% incredibly fast
 
+% reactors reactions
+
+% template metaprogramming
+
+% design of the new system
+
+% replaces the blackboard style datastore implicitly
+% components are no longer linked to their datastore
+
+% more powerful then typical event driven systems
+
+% short code example
+
+% by building in this way we allow modular design
+
+% each indivdual ablity is built up as a single module
+
+%----------------------------------------------------------------------------------------
 \subsection{NUClear Port}
+%----------------------------------------------------------------------------------------
 \begin{frame}
 	\frametitle{NUClear Port}
 
@@ -404,8 +487,6 @@
 		\item Because of modular design it is easy to test single modules or subsets in isolation
 	\end{itemize}
 \end{frame}
-
-
 
 %----------------------------------------------------------------------------------------
 \section{Robot Dance}
@@ -481,9 +562,6 @@
 				\end{itemize}
 			\end{itemize}
 	\end{frame}	
-
-
-
 
 %----------------------------------------------------------------------------------------
 \section{Individual Research}
