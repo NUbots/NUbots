@@ -716,10 +716,10 @@
 				\node[above=0pt of publicinterfacelabel] (legendheader) {Legend};
 		
 				%%% Draw all of our components in a circle
-				\foreach [count=\i] \reactor/\style in {Camera, Vision, Localization, {Behavior/modified}, Network, Sensors, Kinematics, {Motion/modified}, Actionators, {AudioInput/new}, {BeatTracker/new}} {
+				\foreach [count=\i] \reactor/\style in {{Camera/}, {Vision/}, {Localization/}, {Behavior/modified}, {Network/}, {Sensors/}, {Kinematics/}, {Motion/modified}, {Actionators/}, {AudioInput/new}, {BeatTracker/new}} {
 				
 					% Draw the reactors around the central star
-					\node[reactor] (\reactor) at ({360/11 * (\i - 1)}:7cm) {$\reactor$};
+					\node[reactor, \style] (\reactor) at ({360/11 * (\i - 1)}:7cm) {$\reactor$};
 				};
 		
 				%% Legend Border
