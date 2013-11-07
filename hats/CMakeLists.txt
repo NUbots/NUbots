@@ -55,6 +55,21 @@ ADD_HAT(
         ScriptEngine
         DanceEngine)
 
+ADD_HAT(
+    NAME beatdetectortests
+    MODULES
+        AudioFileInputArgs
+        BeatDetector
+        BeatDetectorsTests)
+
+ADD_HAT(
+    NAME aubiobeatdetectortests
+    MODULES
+        AudioFileInputArgs
+        AubioBeatDetector
+        BeatDetectorsTests)
+
+
 # The ADD_HAT function appends itself to the ${hats} variable.
 # We need to expose this to our parent scope so the DarwinSend.cmake
 # file knows what binaries it depends on. We do this so that "make install"

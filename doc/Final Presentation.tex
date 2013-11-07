@@ -3,6 +3,7 @@
 \usepackage{adjustbox}
 \usepackage{tikz}
 \usepackage{arydshln} %Dotted lines for tables \hdashline \cdashline
+\usepackage{import}
 \usetikzlibrary{
 	positioning				% Allows 5px above/below of x style positioning
 	, arrows				% Allows <-, ->, <-> style arrows.
@@ -769,7 +770,12 @@
 		\end{figure}
 	\end{frame}	
 	\subsection{Dancing and the Old Architecture} %-------------------
-	\begin{frame}
+	\begin{frame} %TODO update this picture
+		\frametitle{Dancing and the Old Architecture}
+		\framesubtitle{Dancing to a Music}
+		\subimport{Presentation_Images/}{dance_audio_old_system.tex}
+	\end{frame}	
+	\begin{frame} %TODO get rid of this
 		\frametitle{Dancing and the Old Architecture}
 		\framesubtitle{Dancing to a Music}
 		\begin{figure}
@@ -1121,7 +1127,7 @@
 	\begin{frame}
 		Testing the 2 Beat Trackers for accuracy:
 		\begin{itemize}
-			\item Tested on 20 songs
+			\item Tested on 20, thirty second snippets of music
 			\item Compared results of Beat Trackers with beats found by a human
 			\item Comparisons evaluated by 6 evaluation methods (some with several variations)
 			\item In addition to testing Aubio and Beat'n, we also test a dummy algorithm which simply has a beat occur every 0.5 seconds
@@ -1141,20 +1147,53 @@
 	\begin{frame}
 		Testing results:
 		\begin{table}
-		\begin{tabular}{c | c | c | c}
+		\begin{tabular}{c | c | c | c }
 			  & Aubio  & Beat'n  & Dummy\\ \hline
-			F-Measure  & 29.6205  & 22.8261  & 8.227\\ \cline{1-1}  \cdashline{2-4}
-			Cem(acc)  & 20.9227  & 15.7258  & 5.7759\\ \cline{1-1}  \cdashline{2-4}
+			F-Measure  & 29.62  & 22.83  & 27.93\\ \cline{1-1}  \cdashline{2-4}
+			Cem(acc)  & 20.92  & 15.73  & 19.61\\ \cline{1-1}  \cdashline{2-4}
 			Goto(acc)  & 0  & 0  & 0\\ \cline{1-1}  \cdashline{2-4}
-			P-Score  & 35.5261  & 28.6636  & 7.0067\\ \cline{1-1}  \cdashline{2-4}
-			CMLc  & 9.3504  & 3.054  & 0.7358\\ \cline{1-1}  \cdashline{2-4}
-			CMLc  & 14.2556  & 5.8672  & 1.6722\\ \cline{1-1}  \cdashline{2-4}
-			AMLc  & 20.0702  & 17.6479  & 1.5552\\ \cline{1-1}  \cdashline{2-4}
-			AMLt  & 31.6623  & 25.7328  & 3.3445\\ \cline{1-1}  \cdashline{2-4}
-			D  & 0.9857  & 0.9178  & 0.0253\\ \cline{1-1}  \cdashline{2-4}
-			Dg  & 0.0723  & 0.0527  & 0.0083\\ \cline{1-1}  \cdashline{2-4}
+			P-Score  & 35.53  & 28.66  & 36.91\\ \cline{1-1}  \cdashline{2-4}
+			CMLc  & 9.35  & 3.05  & 4.16\\ \cline{1-1}  \cdashline{2-4}
+			CMLt  & 14.26  & 5.87  & 9.37\\ \cline{1-1}  \cdashline{2-4}
+			AMLc  & 20.07  & 17.65  & 8.87\\ \cline{1-1}  \cdashline{2-4}
+			AMLt  & 31.66  & 25.73  & 19.07\\ \cline{1-1}  \cdashline{2-4}
+			D  & 0.99  & 0.92  & 0.59\\ \cline{1-1}  \cdashline{2-4}
+			Dg  & 0.0723  & 0.0527  & 0.0315\\ \cline{1-1}  \cdashline{2-4}
 		\end{tabular}
 		\end{table}	
+	\end{frame}
+	\begin{frame}
+		Further testing for Aubio:
+		\begin{itemize}
+			\item Tested on 14 songs
+			\item Compared with more modern beat trackers
+		\end{itemize}		
+	\end{frame}
+	\begin{frame}
+		Testing results:
+		\begin{table}
+		\begin{tabular}{c | c | c | c | c | c | c}
+			& Davies & Kea & Dixon & Ellis & Dummy & Aubio \\ \hline
+			F-Measure & 82.16 & 87.56 & 91.93 & 79.78 & 27.65 & 25.36 \\ \cline{1-1}  \cdashline{2-7}
+			Cem(acc)  & 80.75 & 73.72 & 86.14 & 52.08 & 19.41 & 18.42 \\ \cline{1-1}  \cdashline{2-7}
+			Goto(acc)  & 100 & 78.57 & 85.71 & 35.71 & 0 & 7.14 \\ \cline{1-1}  \cdashline{2-7}
+			P-Score &  79.94 & 82.49 & 90.29 & 72.07 & 35.38 & 35.05 \\ \cline{1-1}  \cdashline{2-7}
+			CMLc  & 76.45 & 58.68 & 76.62 & 37.17 & 4.54 & 7.82 \\ \cline{1-1}  \cdashline{2-7}
+			CMLt  & 77.94 & 68.82 & 84.04 & 48.2 & 18.63 & 21.51 \\ \cline{1-1}  \cdashline{2-7}
+			AMLc  & 77.26 & 79.95 & 79.84 & 39.72 & 4.93 & 16.12 \\ \cline{1-1}  \cdashline{2-7}
+			AMLt  & 78.72 & 90.09 & 90.98 & 77.58 & 19.81 & 36.75 \\ \cline{1-1}  \cdashline{2-7}
+			D  & 3.28 & 2.4 & 2.74 & 2.64 & 0.095 & 0.45 \\ \cline{1-1}  \cdashline{2-7}
+			Dg  & 2.85 & 1.85 & 2.36 & 1.63 & 0.013 & 0.023 \\ \cline{1-1}  \cdashline{2-7}
+		\end{tabular}
+		\end{table}	
+	\end{frame}
+	\begin{frame}
+		Difficulties with testing:
+		\begin{itemize}
+			\item Acquiring music with annotated beat locations
+			\item Offbeats counted as completely wrong
+			\item Dummy algorithm can score high, but conveys no information
+		\end{itemize}
 	\end{frame}
 	\begin{frame}
 		Evaluating the other criteria:
@@ -1173,4 +1212,9 @@
 			\item Better beat trackers are available, particuarly when more processing power is available.
 		\end{itemize}
 	\end{frame}
+	\begin{frame}
+		Core Papers:
+		
+	\end{frame}
+	
 \end{document} 

@@ -38,6 +38,13 @@ namespace messages {
         /// The number of frames (a frame is a single sample for all channels) that each emitted chunk will have
         size_t chunkSize;
     };
+    
+    
+    struct SoundFileStart {
+
+        std::string fileName;
+        NUClear::clock::time_point time;
+    };
 
     /**
      * TODO document
