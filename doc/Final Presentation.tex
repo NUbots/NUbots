@@ -3,7 +3,10 @@
 \usepackage{adjustbox}
 \usepackage{tikz}
 \usepackage{arydshln} %Dotted lines for tables \hdashline \cdashline
-\usepackage{import}
+%\usepackage{import}
+\usepackage[backend=bibtex]{biblatex} % Bibliographies
+%\bibliography{beat_bibliography.bib}
+\addbibresource{Presentation_Resources/beat_bibliography.bib}
 \usetikzlibrary{
 	positioning				% Allows 5px above/below of x style positioning
 	, arrows				% Allows <-, ->, <-> style arrows.
@@ -650,7 +653,7 @@
 		\framesubtitle{Dancing to a Music}
 		\begin{figure}
 			\centering
-			\includegraphics[scale=.45]{Presentation_Images/dance_audio_new_arc.png}
+			\includegraphics[scale=.45]{Presentation_Resources/dance_audio_new_arc.png}
 			\caption{Components for Dancing to Music with the NUClear}
 		\end{figure}
 	\end{frame}	
@@ -659,19 +662,18 @@
 		\framesubtitle{Dancing to a Music}
 		\begin{figure}
 			\centering
-			\includegraphics[scale=.45]{Presentation_Images/dance_audio_new_arc_change.png}
+			\includegraphics[scale=.45]{Presentation_Resources/dance_audio_new_arc_change.png}
 			\caption{Components for Dancing to Music with the NUClear}
 		\end{figure}
 	\end{frame}	
 	\subsection{Dancing and the Old Architecture} %-------------------
-	\begin{frame} %TODO update this picture
+	\begin{frame} 
 		\frametitle{Dancing and the Old Architecture}
 		\framesubtitle{Dancing to a Music}
-		\subimport{Presentation_Images/}{dance_audio_old_system.tex}
-	\end{frame}	
-	\begin{frame} %TODO get rid of this
-		\frametitle{Dancing and the Old Architecture}
-		\framesubtitle{Dancing to a Music}
+		\definecolor{darkGreen}{RGB}{0,176,80}
+		\definecolor{lightGreen}{RGB}{146,208,80}
+		\definecolor{dullGreen}{RGB}{215,228,189}
+
 		\begin{figure}
 			\begin{adjustbox}{max totalsize={\textwidth}{.8\textheight},center}
 			\begin{tikzpicture}[
@@ -682,8 +684,9 @@
 				, jobs/.style={basearrow, dotted, color=blue!75!black}
 				, dependent/.style={->}
 				, codependent/.style={<->}
-				, new/.style={fill=green!45}
-				, modified/.style={fill=green!75}]
+				, new/.style={fill=darkGreen}
+				, modified/.style={fill=lightGreen}
+				, same/.style={fill=dullGreen}]
 		
 				%%% Legend
 				\coordinate (legendpoint) at (14, -2);
@@ -716,7 +719,7 @@
 				\node[above=0pt of publicinterfacelabel] (legendheader) {Legend};
 		
 				%%% Draw all of our components in a circle
-				\foreach [count=\i] \reactor/\style in {{Camera/}, {Vision/}, {Localization/}, {Behavior/modified}, {Network/}, {Sensors/}, {Kinematics/}, {Motion/modified}, {Actionators/}, {AudioInput/new}, {BeatTracker/new}} {
+				\foreach [count=\i] \reactor/\style in {{Camera/same}, {Vision/same}, {Localization/same}, {Behavior/modified}, {Network/same}, {Sensors/same}, {Kinematics/same}, {Motion/modified}, {Actionators/same}, {AudioInput/new}, {BeatTracker/new}} {
 				
 					% Draw the reactors around the central star
 					\node[reactor, \style] (\reactor) at ({360/11 * (\i - 1)}:7cm) {$\reactor$};
@@ -757,14 +760,14 @@
 			\end{tikzpicture}
 			\end{adjustbox}
 
-			\caption{Components for Dancing to Music with the Old System}
+			%\caption{Components for Dancing to Music with the Old System}
 		\end{figure}
 	\end{frame}	
-	\subsection{Conclusions} %-------------------
+	\subsection{Conclusion} %-------------------
 	\begin{frame}
-		\frametitle{Conclusions from Robot Dance}
+		\frametitle{Conclusion}
 			\begin{itemize}
-				\item Robot Dance shows NUClear to be:
+				\item We have seen that NUClear is:
 				\begin{itemize}
 					\item Easy to learn
 					\item Easy to use
@@ -1012,14 +1015,6 @@
 		\end{itemize}
 	\end{frame}
 	\begin{frame}
-		How a software beat tracker could work
-		\begin{itemize}
-			\item Onset detection used to find location of musical notes in audio
-			\item Notes that occur at regular intervals are found
-			\item The most prominent regular notes are taken to be the beat
-		\end{itemize}
-	\end{frame}
-	\begin{frame}
 		Criteria for the Beat Tracker:
 		\begin{itemize}
 			\item Real Time % Whole piece of music doesn't need to be analysed. Works with microphone input.
@@ -1032,7 +1027,6 @@
 		Real Time:
 		\begin{itemize}
 			\item Does not require analysing the whole song to find the beats
-			\item Uses past events to find beats but not future events.
 			\item Can take in audio through microphone and analyse incrementally
 		\end{itemize}		
 	\end{frame}
@@ -1040,19 +1034,14 @@
 		Quick:
 		\begin{itemize}
 			\item Doesn't slow down the rest of the system.
-			\item Beat located before next audio containing a beat is input into system
+			\item Beat found soon after it occured
 		\end{itemize}		
 	\end{frame}
 	\begin{frame}
 		Accurate:
 		\begin{itemize}
 			\item Measures highly on beat tracker evaluation tests
-			\item Beats found feel right to a listener.
-			\item Accuracy doesn't need to be perfect
-			\begin{itemize}
-				\item Can't be perfectly on the beat
-				\item Half-pace beats may still feel right to a user
-			\end{itemize}	
+			\item Beats found feel right to a listener.	
 		\end{itemize}		
 	\end{frame}
 	\begin{frame}
@@ -1064,61 +1053,56 @@
 		\end{itemize}		
 	\end{frame}
 	\begin{frame}
-		Two Candidates:
+		Our two beat trackers:
 		\begin{itemize}
 			\item Aubio
 				\begin{itemize}
-					\item Not the most accurate but it is quick
+					\item Very quick
+					\item Trade off for accuracy
 				\end{itemize}
 			\item Beat'n
 				\begin{itemize}
 					\item Beat tracker Trent wrote when we were trying to get Aubio to work
+					\item Not as accurate as Aubio
 				\end{itemize}
 		\end{itemize}		
 	\end{frame}
-	\begin{frame}
-		Testing the 2 Beat Trackers for accuracy:
-		\begin{itemize}
-			\item Tested on 20, thirty second snippets of music
-			\item Compared results of Beat Trackers with beats found by a human
-			\item Comparisons evaluated by 6 evaluation methods (some with several variations)
-			\item In addition to testing Aubio and Beat'n, we also test a dummy algorithm which simply has a beat occur every 0.5 seconds
-		\end{itemize}		
-	\end{frame}
+%	\begin{frame}
+%		Testing the 2 Beat Trackers for accuracy:
+%		\begin{itemize}
+%			\item Tested on 20, thirty second snippets of music
+%			\item Compared results of Beat Trackers with beats found by a human
+%			\item Comparisons evaluated by 6 evaluation methods (some with several variations)
+%			\item In addition to testing Aubio and Beat'n, we also test a dummy algorithm which simply has a beat occur %every 0.5 seconds
+%		\end{itemize}		
+%	\end{frame}
 %	\begin{frame}
 %		Testing results:
 %		\begin{table}
-%		\begin{tabular}{c c c c c c c c c c c}
-%			          & F-Measure & Cem(acc) & Goto(acc) & P-Score & CMLc & CMLt & AMLc & AMLt & D & Dg \\
-%			Aubio & 29.6205 & 20.9227 & 0 & 35.5261 & 9.3504 & 14.2556 & 20.0702 & 31.6623 & 0.9857 & 0.0723 \\
-%			Beat'n & 22.8261 & 15.7258 & 0 & 28.6636 & 3.054 & 5.8672 & 17.6479 & 25.7328 & 0.9178 & 0.0527 \\
-%			Dummy & 8.227 & 5.7759 & 0 & 7.0067 & 0.7358 & 1.6722 & 1.5552 & 3.3445 & 0.0253 & 0.0083 \\
+%		\begin{tabular}{c | c | c | c }
+%			  & Aubio  & Beat'n  & Dummy\\ \hline
+%			F-Measure  & 29.62  & 22.83  & 27.93\\ \cline{1-1}  \cdashline{2-4}
+%			Cem(acc)  & 20.92  & 15.73  & 19.61\\ \cline{1-1}  \cdashline{2-4}
+%			Goto(acc)  & 0  & 0  & 0\\ \cline{1-1}  \cdashline{2-4}
+%			P-Score  & 35.53  & 28.66  & 36.91\\ \cline{1-1}  \cdashline{2-4}
+%			CMLc  & 9.35  & 3.05  & 4.16\\ \cline{1-1}  \cdashline{2-4}
+%			CMLt  & 14.26  & 5.87  & 9.37\\ \cline{1-1}  \cdashline{2-4}
+%			AMLc  & 20.07  & 17.65  & 8.87\\ \cline{1-1}  \cdashline{2-4}
+%			AMLt  & 31.66  & 25.73  & 19.07\\ \cline{1-1}  \cdashline{2-4}
+%			D  & 0.99  & 0.92  & 0.59\\ \cline{1-1}  \cdashline{2-4}
+%			Dg  & 0.0723  & 0.0527  & 0.0315\\ \cline{1-1}  \cdashline{2-4}
 %		\end{tabular}
 %		\end{table}	
 %	\end{frame}
 	\begin{frame}
-		Testing results:
-		\begin{table}
-		\begin{tabular}{c | c | c | c }
-			  & Aubio  & Beat'n  & Dummy\\ \hline
-			F-Measure  & 29.62  & 22.83  & 27.93\\ \cline{1-1}  \cdashline{2-4}
-			Cem(acc)  & 20.92  & 15.73  & 19.61\\ \cline{1-1}  \cdashline{2-4}
-			Goto(acc)  & 0  & 0  & 0\\ \cline{1-1}  \cdashline{2-4}
-			P-Score  & 35.53  & 28.66  & 36.91\\ \cline{1-1}  \cdashline{2-4}
-			CMLc  & 9.35  & 3.05  & 4.16\\ \cline{1-1}  \cdashline{2-4}
-			CMLt  & 14.26  & 5.87  & 9.37\\ \cline{1-1}  \cdashline{2-4}
-			AMLc  & 20.07  & 17.65  & 8.87\\ \cline{1-1}  \cdashline{2-4}
-			AMLt  & 31.66  & 25.73  & 19.07\\ \cline{1-1}  \cdashline{2-4}
-			D  & 0.99  & 0.92  & 0.59\\ \cline{1-1}  \cdashline{2-4}
-			Dg  & 0.0723  & 0.0527  & 0.0315\\ \cline{1-1}  \cdashline{2-4}
-		\end{tabular}
-		\end{table}	
-	\end{frame}
-	\begin{frame}
-		Further testing for Aubio:
+		Testing for Aubio:
 		\begin{itemize}
 			\item Tested on 14 songs
-			\item Compared with more modern beat trackers
+			\item Aubio compared with more recent beat trackers
+			\item Also compared to dummy algorithm which simply has a beat occur every 0.5 seconds
+			\item Compared results of Beat Trackers with beats found by a skilled musician
+			\item Tested using a large suite of different evaluation methods
+			
 		\end{itemize}		
 	\end{frame}
 	\begin{frame}
@@ -1126,27 +1110,19 @@
 		\begin{table}
 		\begin{tabular}{c | c | c | c | c | c | c}
 			& Davies & Kea & Dixon & Ellis & Dummy & Aubio \\ \hline
-			F-Measure & 82.16 & 87.56 & 91.93 & 79.78 & 27.65 & 25.36 \\ \cline{1-1}  \cdashline{2-7}
-			Cem(acc)  & 80.75 & 73.72 & 86.14 & 52.08 & 19.41 & 18.42 \\ \cline{1-1}  \cdashline{2-7}
-			Goto(acc)  & 100 & 78.57 & 85.71 & 35.71 & 0 & 7.14 \\ \cline{1-1}  \cdashline{2-7}
-			P-Score &  79.94 & 82.49 & 90.29 & 72.07 & 35.38 & 35.05 \\ \cline{1-1}  \cdashline{2-7}
-			CMLc  & 76.45 & 58.68 & 76.62 & 37.17 & 4.54 & 7.82 \\ \cline{1-1}  \cdashline{2-7}
-			CMLt  & 77.94 & 68.82 & 84.04 & 48.2 & 18.63 & 21.51 \\ \cline{1-1}  \cdashline{2-7}
-			AMLc  & 77.26 & 79.95 & 79.84 & 39.72 & 4.93 & 16.12 \\ \cline{1-1}  \cdashline{2-7}
-			AMLt  & 78.72 & 90.09 & 90.98 & 77.58 & 19.81 & 36.75 \\ \cline{1-1}  \cdashline{2-7}
+			F-Measure & 82.2\% & 87.6\% & 91.9\% & 79.8\% & 27.7\% & 25.4\% \\ \cline{1-1}  \cdashline{2-7}
+			Cem(acc)  & 80.8\% & 73.7\% & 86.1\% & 52.1\% & 19.4\% & 18.4\% \\ \cline{1-1}  \cdashline{2-7}
+			Goto(acc)  & 100\% & 78.6\% & 85.7\% & 35.7\% & 0\% & 7.1\% \\ \cline{1-1}  \cdashline{2-7}
+			P-Score &  79.9\% & 82.5\% & 90.3\% & 72.1\% & 35.4\% & 35.1\% \\ \cline{1-1}  \cdashline{2-7}
+			CMLc  & 76.5\% & 58.7\% & 76.6\% & 37.2\% & 4.5\% & 7.8\% \\ \cline{1-1}  \cdashline{2-7}
+			CMLt  & 77.9\% & 68.8\% & 84.0\% & 48.2\% & 18.6\% & 21.5\% \\ \cline{1-1}  \cdashline{2-7}
+			AMLc  & 77.3\% & 80.0\% & 79.8\% & 39.7\% & 4.9\% & 16.1\% \\ \cline{1-1}  \cdashline{2-7}
+			AMLt  & 78.7\% & 90.1\% & 91.0\% & 77.6\% & 19.8\% & 36.8\% \\ \cline{1-1}  \cdashline{2-7}
 			D  & 3.28 & 2.4 & 2.74 & 2.64 & 0.095 & 0.45 \\ \cline{1-1}  \cdashline{2-7}
 			Dg  & 2.85 & 1.85 & 2.36 & 1.63 & 0.013 & 0.023 \\ \cline{1-1}  \cdashline{2-7}
 		\end{tabular}
 		\end{table}	
-	\end{frame}
-	\begin{frame}
-		Difficulties with automated testing:
-		\begin{itemize}
-			\item Acquiring music with annotated beat locations
-			\item Offbeats counted as completely wrong
-			\item Dummy algorithm can score high, but conveys no information
-			\item Doesn't perfectly convey whether a human would accept it
-		\end{itemize}
+		%\footnotetext[1]{\cite {davies2009evaluation}}
 	\end{frame}
 	\begin{frame}
 		Evaluating the other criteria:
@@ -1166,8 +1142,18 @@
 		\end{itemize}
 	\end{frame}
 	\begin{frame}
+		What to improve from here:
+		\begin{itemize}
+			\item Find a more accurate beat tracker
+			\item 'Davies' Beat Tracker part of Essentia music library
+			\item Look into audio filters
+		\end{itemize}
+	\end{frame}
+	\begin{frame}
 		Core Papers:
-		
+		\nocite{*}
+		%\cite {davies2009evaluation}
+		\printbibliography
 	\end{frame}
 	
 \end{document} 
