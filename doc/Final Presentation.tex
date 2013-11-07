@@ -291,7 +291,7 @@
 	\begin{itemize}
 		\item Cohesion is a measure of the extent to which two elements of a single module belong together
 		\item It describes the relevance of functionality within a module
-		\item For example, if a single module contained only functionality for controlling a robots motion it would be tightly cohsevive
+		\item For example, if a single module contained only functionality for controlling a robots motion it would be tightly cohesive
 		\item However if a single module contained code for both performing vision processing as well as controlling the robots limbs this would be loosely cohesive as the two functions do not belong in a single logical module.
 	\end{itemize}
 \end{frame}
@@ -325,6 +325,7 @@
 \begin{frame}
 	\frametitle{Message Passing}
 	\begin{itemize}
+		\item Message passing is a method for components to communicate without explicitly targeting eachother
 		\item Message coupling is the least coupled method of communication
 		\item Message passing systems have excellent maintainability and modifiability
 		\item Components require no knowledge of each other
@@ -357,7 +358,7 @@
 \begin{frame}
 	\frametitle{Performance}
 	\begin{itemize}
-		\item These architectures are not suitable for use on the NUbots team robots
+		\item These frameworks are not suitable for use on the NUbots team robots
 		\item They were designed to be used on high performance distributed systems
 		\item The latency and processing overhead of the message passing is significant on slower systems
 		\item This makes them unsuitable for lower performance devices such as the DARwIn-OP platform
@@ -368,7 +369,7 @@
 	\frametitle{NUClear}
 	\begin{itemize}
 		\item To resolve these issues a new framework was designed named NUClear
-		\item This framework and corresponding architecture is much faster then these previous systems
+		\item This framework and corresponding architecture is at least one thousand times faster then these systems
 		\item This allows its use for the NUbots system
 	\end{itemize}
 \end{frame}
@@ -419,39 +420,9 @@
 \begin{frame}
 	\frametitle{NUClear Design}
 	\begin{itemize}
-		\item NUClear itself is built around the embedding of a Domain Specific Language (DSL) into C++
+		\item NUClear itself is built around a simple but powerful API
 		\item It uses advanced C++ techniques in order to allow an intuitive description of data flow
 		\item This allows it to be taught and used by novice C++ users while enforcing good practice
-	\end{itemize}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Powerplant}
-	\begin{itemize}
-		\item The PowerPlant is the core component of the NUClear system
-		\item It is the central point whereby communication between modules happens
-		\item It holds the functionality to install modules and manages execution of the system
-		\item Most of the time, you will users never directly interact with it (it is hidden)
-	\end{itemize}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Reactor}
-	\begin{itemize}
-		\item A Reactor is the primary method that users will interact with the system
-		\item It is a class that extends from NUClear::Reactor
-		\item It has all of the methods on it that are used to listen for and emit messages
-		\item They are installed these reactors into the PowerPlant
-	\end{itemize}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Reaction}
-	\begin{itemize}
-		\item A reaction is a single function that is run in response to new data
-		\item They take as arguments constant references to the data that they use
-		\item The data that is passed into a reaction function can be considered thread safe
-		\item The lifetime of the data used is managed by the PowerPlant
 	\end{itemize}
 \end{frame}
 
@@ -583,9 +554,10 @@
 	\frametitle{Extensible API}
 	\begin{itemize}
 		\item The NUClear API itself was designed to be extensible
-		\item The DSL which is defined in NUClear can be modified by the user
+		\item The API which is defined in NUClear can be extended by the user
 		\item This gives a lot of power to implement features within the language itself
-		\item For example, the configuration system the the ported NUClear code is implemented as a part of the language
+		\item For example, the networking in NUClear is implemented using the extension system
+		\item This is useful as networking has system wide influence, integrating it into the API allows a more intuitive codebase
 	\end{itemize}
 \end{frame}
 
@@ -874,41 +846,11 @@
 	\end{frame}
 	
 	\begin{frame}
-		\frametitle{Software Architecture}
+		\frametitle{Why Messages?}
 		\begin{itemize}
-			\item Components in a well designed software architecture are:
-			\item Loosely Coupled
-			\item Tightly Cohesive
-			\item These properties makes it easy to modify and maintain the system
-		\end{itemize}
-	\end{frame}
-	
-	\begin{frame}
-		\frametitle{Message Passing}
-		\begin{itemize}
-			\item Message passing is the most loosely coupled architectural style
-			\item Components do not need to know of each other at all
-			\item This makes it easy to develop and modify components
-		\end{itemize}
-	\end{frame}
-	
-	\begin{frame}
-		\frametitle{Use in Other Systems}
-		\begin{itemize}
-		\item Message passing has been used as an architecture with robotics before
-			\item Robot OS (ROS) is based on a message passing architecture
-			\item DDX is a previous generation robotics system also based on message passing
-			\item CORBA is used extensively as a base for robotic systems
-		\end{itemize}
-	\end{frame}
-	
-	\begin{frame}
-		\frametitle{Use in other Systems}
-		\begin{itemize}
-			\item These systems use message passing as it make it easy to collaborate and design modules
-			\item However these systems were never designed to run on low powered hardware
-			\item Robot OS for example was designed to run on multiple computers as a distributed application
-			\item In order to do this it has heavy routing and serialisation requirements
+			\item As discussed in the main presentation, message passing is slow
+			\item If this is the case, why did we go to the trouble of implementing another system
+			\item The answer is that in our system, I developed a new technique
 		\end{itemize}
 	\end{frame}
 	
@@ -1087,6 +1029,8 @@
 			\item It also does not suffer slowdowns with the size of the project
 		\end{itemize}
 	\end{frame}
+	
+	\todo{conclusion}
 	
 	%----------------------------------------------------------------------------------------
 	\subsection{Efficient Multithreading in Message Passing Systems}
