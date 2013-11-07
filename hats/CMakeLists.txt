@@ -44,16 +44,16 @@ ADD_HAT(
         Platform::Darwin::HardwareIO
         MechWarrior)
 
-#ADD_HAT(
-#    NAME dancedarwin
-#    MODULES
-#        ConfigSystem
-#        Platform::Darwin::HardwareIO
-#        Platform::Darwin::MotionManager
-#        AudioFileInput
-#        AubioBeatDetector
-#        ScriptEngine
-#        DanceEngine)
+ADD_HAT(
+    NAME dancedarwin
+    MODULES
+        ConfigSystem
+        Platform::Darwin::HardwareIO
+        Platform::Darwin::MotionManager
+        AudioFileInput
+        AubioBeatDetector
+        ScriptEngine
+        DanceEngine)
 
 ADD_HAT(
     NAME beatdetectortests
@@ -62,6 +62,12 @@ ADD_HAT(
         BeatDetector
         BeatDetectorsTests)
 
+ADD_HAT(
+    NAME aubiobeatdetectortests
+    MODULES
+        AudioFileInputArgs
+        AubioBeatDetector
+        BeatDetectorsTests)
 
 
 # The ADD_HAT function appends itself to the ${hats} variable.
