@@ -53,12 +53,6 @@
 	\titlepage % Print the title page as the first slide
 \end{frame}
 
-%----------------------------------------------------------------------------------------
-% Overview (Table of Contents)
-%----------------------------------------------------------------------------------------
-\begin{frame}
-	\tableofcontents
-\end{frame}
 
 %----------------------------------------------------------------------------------------
 \section{Introduction}
@@ -93,25 +87,6 @@
 %----------------------------------------------------------------------------------------
 \begin{frame}
 	\sectionpage
-\end{frame}
-
-\begin{frame}
-	\frametitle{Existing System}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Existing System}
-	\begin{itemize}
-		\item The system runs in a synchronised dual pipeline architecture
-			\begin{itemize}
-				\item The See Think loop holds most of the logic and decision making code
-				\item The Sense Move loop is a much smaller loop that simply reads from the sensor and camera, and writes motor actions to the motors
-			\end{itemize}
-		\item The threads are synchronised to run at regular intervals
-		\item Most of these systems read in from the Blackboard and write back to it
-		\item Some of them will communicate using a message system called Jobs
-		\item The remainder of the communication is done using direct function calls on singletons
-	\end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -382,7 +357,7 @@
 \begin{frame}
 	\frametitle{Performance}
 	\begin{itemize}
-		\item These architectures are not suitable for use on the NUBots team robots
+		\item These architectures are not suitable for use on the NUbots team robots
 		\item They were designed to be used on high performance distributed systems
 		\item The latency and processing overhead of the message passing is significant on slower systems
 		\item This makes them unsuitable for lower performance devices such as the DARwIn-OP platform
@@ -394,7 +369,7 @@
 	\begin{itemize}
 		\item To resolve these issues a new framework was designed named NUClear
 		\item This framework and corresponding architecture is much faster then these previous systems
-		\item This allows its use for the NUBots system
+		\item This allows its use for the NUbots system
 	\end{itemize}
 \end{frame}
 
@@ -616,28 +591,21 @@
 
 \begin{frame}
 	\frametitle{Modular Design}
-	% this message passing api allows us to design the new system using modular design
-	% modular design results in each component of the system being isolated from others
-	% this allows us to 
-\end{frame}
-
-\begin{frame}
-	\frametitle{Modular Design}
-	%
+	\begin{itemize}
+		\item The use of NUClear enforces modular design
+		\item Every component must be placed in its own module
+		\item Each module has a distinct purpose
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Orchestration}
-	% Using modular design and the NUClear api we are also able to take inspiration from Service Orientied Architectures
-	% the concept of orchistration is when we take several modules (services in SOA) and combine them to form an application
-	% in our case we take these modules and combine them to form a role for the robot
+	\begin{itemize}
+		\item Thanks to modular design we can take inspiration from Service Oriented Architecture design
+		\item Orchestration is the process of taking several modules and combining them to form an application
+		\item In the case of the NUbots system, several robot skills and behaviours can be combined into a binary for a specific role
+	\end{itemize}
 \end{frame}
-
-% more powerful then typical event driven systems
-
-% by building in this way we allow modular design
-
-% each indivdual ablity is built up as a single module
 
 %----------------------------------------------------------------------------------------
 \subsection{NUClear Port}
@@ -779,8 +747,90 @@
 		\frametitle{Dancing and the Old Architecture}
 		\framesubtitle{Dancing to a Music}
 		\begin{figure}
-			\centering
-			\includegraphics[scale=.45]{Presentation_Images/dance_audio_old_arc.png}
+			\begin{adjustbox}{max totalsize={\textwidth}{.8\textheight},center}
+			\begin{tikzpicture}[
+				reactor/.style={draw, circle, ultra thick}
+				, basearrow/.style={>=triangle 45, ultra thick}
+				, blackboard/.style={basearrow, dashed}
+				, publicinterface/.style={basearrow, color=red!75!black}
+				, jobs/.style={basearrow, dotted, color=blue!75!black}
+				, dependent/.style={->}
+				, codependent/.style={<->}
+				, new/.style={fill=green!45}
+				, modified/.style={fill=green!75}]
+		
+				%%% Legend
+				\coordinate (legendpoint) at (14, -2);
+		
+				%% Public Interface Dependency
+				\node [below=of legendpoint,anchor=east] (publicinterfacelabel) {\small Public Interface Dependency};
+				\draw [publicinterface] (publicinterfacelabel.mid west) -- ++(-38pt, 0pt);
+		
+				%% Blackboard Dependency
+				\node [below=12pt of publicinterfacelabel.south west,anchor=south west] (blackboardlabel) {\small Dependency through Blackboard};
+				\draw[blackboard] (blackboardlabel.mid west) -- ++(-38pt, 0pt);
+		
+				%% Jobs Dependency
+				\node [below=12pt of blackboardlabel.south west,anchor=south west] (joblabel) {\small Dependency through Job System};
+				\draw[jobs] (joblabel.mid west) -- ++(-38pt, 0pt);
+		
+				%% Dependancy Type: Depends on
+				\node[below=20pt of joblabel.south west,anchor=south west] (dependencylabel) {\small X depends on Y};
+				\node[circle, draw, inner sep=0.5pt] (dependencynodeY) at ([yshift=1pt,xshift=-2pt]dependencylabel.mid west) {\tiny Y};
+				\node[circle, draw, inner sep=0.5pt, left=24pt of dependencynodeY] (dependencynodeX) {\tiny X};
+				\draw[basearrow, dependent] (dependencynodeX) edge (dependencynodeY);
+		
+				%% Dependancy Type: Codependent
+				\node[below=12pt of dependencylabel.south west,anchor=south west] (codependencylabel) {\small X, Y depend on each other};
+				\node[circle, draw, inner sep=0.5pt] (codependencynodeY) at ([yshift=1pt,xshift=-2pt]codependencylabel.mid west) {\tiny Y};
+				\node[circle, draw, inner sep=0.5pt, left=24pt of codependencynodeY] (codependencynodeX) {\tiny X};
+				\draw[basearrow, codependent] (codependencynodeX) edge (codependencynodeY);
+		
+				%% Legend Header
+				\node[above=0pt of publicinterfacelabel] (legendheader) {Legend};
+		
+				%%% Draw all of our components in a circle
+				\foreach [count=\i] \reactor/\style in {Camera, Vision, Localization, {Behavior/modified}, Network, Sensors, Kinematics, {Motion/modified}, Actionators, {AudioInput/new}, {BeatTracker/new}} {
+				
+					% Draw the reactors around the central star
+					\node[reactor] (\reactor) at ({360/11 * (\i - 1)}:7cm) {$\reactor$};
+				};
+		
+				%% Legend Border
+				\node[fit=(legendheader)(publicinterfacelabel)(blackboardlabel)
+						(joblabel)(dependencylabel)(codependencynodeX)(codependencynodeY),rectangle,draw](legendgroup){};
+		
+				%%% Dependencies
+				%% Vision
+				\path[blackboard, dependent] (Vision.305) edge (Camera.95);
+				\path[publicinterface, dependent] (Vision.275) edge (Camera.120);
+				\path[blackboard, dependent] (Vision) edge (Sensors);
+		
+				%% Localization
+				\path[blackboard, dependent] (Localization) edge (Sensors);
+				\path[blackboard, dependent] (Localization) edge (Vision);
+		
+				%% Behavior
+				\path[blackboard, codependent] (Behavior) edge (Localization);
+				\path[blackboard, dependent] (Behavior) edge (Kinematics);
+				\path[blackboard, dependent] (Behavior) edge (Vision);
+				\path[blackboard, dependent] (Behavior) edge (Sensors);
+				\path[publicinterface, dependent] (Behavior) edge (Actionators);
+				\path[publicinterface, codependent] (Behavior) edge (Network);
+				\path[jobs, dependent] (Behavior) edge (Camera);
+		
+				%% Motion
+				\path[blackboard, codependent] (Motion.80) edge (Behavior.300);
+				\path[jobs, dependent] (Motion.120) edge (Behavior.280);
+				\path[publicinterface, dependent] (Motion) edge  (Actionators);
+				\path[publicinterface, dependent] (Motion) edge (Kinematics);
+				
+				%% Dance
+				\path[blackboard, dependent] (AudioInput) edge (BeatTracker);
+				\path[blackboard, dependent] (Behavior) edge (BeatTracker);
+			\end{tikzpicture}
+			\end{adjustbox}
+
 			\caption{Components for Dancing to Music with the Old System}
 		\end{figure}
 	\end{frame}	
@@ -797,6 +847,10 @@
 				\end{itemize}
 			\end{itemize}
 	\end{frame}	
+	
+\begin{frame}
+% TODO conclusion and group reflection
+\end{frame}
 
 %----------------------------------------------------------------------------------------
 \section{Individual Research}
@@ -842,9 +896,9 @@
 		\frametitle{Use in Other Systems}
 		\begin{itemize}
 		\item Message passing has been used as an architecture with robotics before
-			\item Robot OS is designed on a message passing system
+			\item Robot OS (ROS) is based on a message passing architecture
 			\item DDX is a previous generation robotics system also based on message passing
-			\item From before this time (and currently) CORBA is used extensively also
+			\item CORBA is used extensively as a base for robotic systems
 		\end{itemize}
 	\end{frame}
 	
@@ -852,18 +906,18 @@
 		\frametitle{Use in other Systems}
 		\begin{itemize}
 			\item These systems use message passing as it make it easy to collaborate and design modules
-			\item However these systems were never designed to run on low powered systems
-			\item Robot OS for example was designed to run on multiple computers as a distributed system in order to do this it has heavy routing and serialisation requirements
+			\item However these systems were never designed to run on low powered hardware
+			\item Robot OS for example was designed to run on multiple computers as a distributed application
+			\item In order to do this it has heavy routing and serialisation requirements
 		\end{itemize}
 	\end{frame}
 	
 	\begin{frame}
 		\frametitle{Metaprogramming}
 		\begin{itemize}
-			\item Metaprogramming is a technique of writing programs that manipulate themselves
+			\item A Metaprogram is a programs that manipulate itself
 			\item This includes programs that run at compilation time rather then runtime
 			\item It allows work to be offloaded from runtime processing
-			\item In C++ this is done through templates
 		\end{itemize}
 	\end{frame}
 	
@@ -1209,7 +1263,7 @@
 		\begin{itemize}
 			\item Beat Tracking CAN accurately detect beats in real time for Robot Dance
 			\item Aubio and Beat'n are a little lacking but sufficient for the job
-			\item Better beat trackers are available, particuarly when more processing power is available.
+			\item Better beat trackers are available, particularly when more processing power is available.
 		\end{itemize}
 	\end{frame}
 	\begin{frame}
