@@ -38,7 +38,7 @@
 {
 	University of Newcastle \\ % Your institution for the title page
 	\medskip
-	\textit{Trent.Houliston@uon.edu.au, Jake.f.woods@gmail.com} % Email address
+	\textit{\{Trent.Houliston, Jake.F.Woods, Joshua.Kearns, Michael Burton\}@uon.edu.au} % Email address
 }
 
 \date{\today}
@@ -49,7 +49,7 @@
 %----------------------------------------------------------------------------------------
 % Title Slide 
 %----------------------------------------------------------------------------------------
-\begin{frame}
+\begin{frame} % Introduce the team on this slide
 	\titlepage % Print the title page as the first slide
 \end{frame}
 
@@ -63,9 +63,6 @@
 %----------------------------------------------------------------------------------------
 \section{Introduction}
 %----------------------------------------------------------------------------------------
-\begin{frame}
-\end{frame}
-
 \begin{frame}
 	\frametitle{Problem Description}
 		Improve the software architecture of the NUbots robocup system to:
@@ -280,75 +277,378 @@
 	\sectionpage
 \end{frame}
 
+\subsection{NUClear API}
 \begin{frame}
-	\todo[inline]{Talk about coupling r.e. maintainablity}
-	\todo[inline]{Diagram of different forms of coupling}
+	\frametitle{Software Architecture}
+	\begin{itemize}
+		\item If we are to replace the architecture of the existing system, we need to define what makes a good architecture
+		\item A good software architecture is
+		\begin{itemize}
+			\item Maintainable
+			\item Modifiable
+			\item Testable
+			\item Understandable
+		\end{itemize}
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
-	\todo[inline]{Describe message passing systems}
-	\todo[inline]{How decoupled they are but they need a message passing management system}
+	\frametitle{Coupling and Cohesion}
+	\begin{itemize}
+		\item The most powerful indicators for good architecture design are those of coupling and cohesion
+		\item These two properties have huge influences on how easy a system is to understand and change
+		\item A well designed system should be loosely coupled, and tightly cohesive
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
-	\todo[inline]{Talk about existing systems such as Robot OS, DDX, CORBA}
+	\frametitle{Coupling}
+	\begin{itemize}
+		\item Coupling is a measure of how much a module relies on another module
+		\item For example, if a module calls functions on another module, it is dependant on it
+		\item A well designed system attempts to minimise these links between modules where possible
+		\item It is also important to avoid irrelevant information being communicated
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
-	\todo[inline]{These are all slow}
+	\frametitle{Cohesion}
+	\begin{itemize}
+		\item Cohesion is a measure of the extent to which two elements of a single module belong together
+		\item It describes the relevance of functionality within a module
+		\item For example, if a single module contained only functionality for controlling a robots motion it would be tightly cohsevive
+		\item However if a single module contained code for both performing vision processing as well as controlling the robots limbs this would be loosely cohesive as the two functions do not belong in a single logical module.
+	\end{itemize}
 \end{frame}
 
-\subsection{NUClear}
+\begin{frame}
+	\frametitle{Coupling}
+	\begin{itemize}
+		\item From an architectural standpoint, the decision of cohesion must be considered in each module
+		\item However coupling must be designed for the entire architecture in order to ensure that communication between modules is loosely coupled
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Levels of Coupling}
+	\begin{itemize}
+		\item Coupling levels, from most coupled to least coupled are:
+		\begin{itemize}
+			\item Content Coupling (Pathological Coupling)
+			\item Common Coupling (Global Coupling)
+			\item External Coupling
+			\item Control Coupling
+			\item Stamp Coupling
+			\item Data Coupling
+			\item Message Coupling
+			\item No Coupling
+		\end{itemize}
+		\item The existing architecture uses Common coupling through Blackboard (global storage)
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Message Passing}
+	\begin{itemize}
+		\item Message coupling is the least coupled method of communication
+		\item Message passing systems have excellent maintainability and modifiability
+		\item Components require no knowledge of each other
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Existing Systems}
+	\begin{itemize}
+		\item Message passing systems have been used in robotics before
+		\item They have been used in most robotic architectures designed for large scale use
+		\item These include
+		\begin{itemize}
+			\item Robot OS (ROS)
+			\item Dynamic Data eXchange (DDX)
+			\item CORBA based systems
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Robot OS}
+	\begin{itemize}
+		\item ROS is of particular note as it is the most commonly used system used in research
+		\item It currently runs in many robotic systems and has a substantial array of existing modules for it
+		\item It is a distributed message passing system which allows multiple programming languages and machines
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Performance}
+	\begin{itemize}
+		\item These architectures are not suitable for use on the NUBots team robots
+		\item They were designed to be used on high performance distributed systems
+		\item The latency and processing overhead of the message passing is significant on slower systems
+		\item This makes them unsuitable for lower performance devices such as the DARwIn-OP platform
+	\end{itemize}
+\end{frame}
+
 \begin{frame}
 	\frametitle{NUClear}
 	\begin{itemize}
-		\item These systems are all too slow to use on a robot
-		\item A new system must be designed if message passing is to be used
+		\item To resolve these issues a new framework was designed named NUClear
+		\item This framework and corresponding architecture is much faster then these previous systems
+		\item This allows its use for the NUBots system
 	\end{itemize}
 \end{frame}
 
 \begin{frame}
-\begin{itemize}
-	\item Problem description
-	\item Number of lines of code, estimate of effort
-	\item Good Software architecture
-	\begin{itemize}
-		\item Coupling
-		\item Cohesion
-	\end{itemize}
-	\item Existing system
-	\item ROS DDX etc message passing
-	\item Metaprogramming
-	\item NUClear API
-	\begin{itemize}
-		\item Message passing
-		\item Networking
-		\item Multithreading
-	\end{itemize}
-	\item Benefits
-	\begin{itemize}
-		\item 
-	\end{itemize}
-	\item Discuss the ease of adding in things
-	\item Robot Dance
-	\begin{itemize}
-		\item What do they do?
-		\item How does it work?
-	\end{itemize}
-	\item Demonstrate robot dancing
-	\item Demonstrate live coding of auto getup script
-	\item Demonstrate robot firing missiles
-\end{itemize}
+	\frametitle{NUClear Design}
+	\centering
+	\scalebox{0.55}{
+		\begin{tikzpicture}[
+				element/.style={
+				circle,
+				rounded corners,
+				draw=black, very thick,
+				minimum height=2em,
+				text centered
+			},
+			arrow/.style={
+				<->,
+				thick
+			},
+			>=latex]
+			
+			\node [element] (plant) {PowerPlant};
+		
+			%%% Draw all of our components in a circle
+			\foreach [count=\i] \reactor in {Reactor, Reactor, Reactor, Reactor, Reactor} {				
+				% Draw the reactors around the central star
+				\node [element] (reactor) at ({360/5 * (\i)}:6cm) {$\reactor$};
+				
+				\path [arrow] (plant) edge (reactor);
+			};
+			
+		\end{tikzpicture}
+	}
 \end{frame}
 
+\begin{frame}
+	\frametitle{NUClear Design}
+	\begin{itemize}
+		\item NUClear is designed around a central PowerPlant
+		\item The PowerPlant has several ``Reactors'' around it
+		\item These reactors request data they need, and emit data they have created to it
+		\item The PowerPlant will route this information to the appropriate entities
+		\item The PowerPlant is also responsible for the storage of information
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{NUClear Design}
+	\begin{itemize}
+		\item NUClear itself is built around the embedding of a Domain Specific Language (DSL) into C++
+		\item It uses advanced C++ techniques in order to allow an intuitive description of data flow
+		\item This allows it to be taught and used by novice C++ users while enforcing good practice
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Powerplant}
+	\begin{itemize}
+		\item The PowerPlant is the core component of the NUClear system
+		\item It is the central point whereby communication between modules happens
+		\item It holds the functionality to install modules and manages execution of the system
+		\item Most of the time, you will users never directly interact with it (it is hidden)
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Reactor}
+	\begin{itemize}
+		\item A Reactor is the primary method that users will interact with the system
+		\item It is a class that extends from NUClear::Reactor
+		\item It has all of the methods on it that are used to listen for and emit messages
+		\item They are installed these reactors into the PowerPlant
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Reaction}
+	\begin{itemize}
+		\item A reaction is a single function that is run in response to new data
+		\item They take as arguments constant references to the data that they use
+		\item The data that is passed into a reaction function can be considered thread safe
+		\item The lifetime of the data used is managed by the PowerPlant
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{NUClear Features}
+	\begin{itemize}
+		\item There have been several features integrated into NUClear which distinguish it as exceptional
+		\item These include the following areas
+		\begin{itemize}
+			\item Transparent Multithreading
+			\item Debugging Tools
+			\item Integrated Networking
+			\item Extensible API
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Transparent Multithreading}
+	\begin{itemize}
+		\item NUClear is a multithreaded framework
+		\item It will transparently multithread any code that is given to it
+		\item This allows it to make use of all of the resources in the system
+		\item This is also a significant advancement as it makes the system scaleable to future hardware
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle {Multi Threading}
+	\begin{adjustbox}{max totalsize={\textwidth}{\textheight},center}
+		\centering
+		\begin{tikzpicture}
+			\begin{scope}[
+				task/.style={draw=black},
+				cameratriggered/.style={fill=blue!10},
+				sensortriggered/.style={fill=red!10}]
+
+				\draw (1, 1) grid (21, 4);
+				
+				%% Thread 1
+				\draw[cameratriggered, task] (1, 3) rectangle node {Camera} (6, 4);
+				\draw[sensortriggered, task] (8, 3) rectangle node {Field Mapper} (12, 4);
+				\draw[cameratriggered, task] (13, 3) rectangle node {Localisation} (17, 4);
+				\draw[cameratriggered, task] (19, 3) rectangle node {Motion} (21, 4);
+				
+				%% Thread 2
+				\draw[sensortriggered, task] (1, 2) rectangle node {Sensors} (5, 3);
+				\draw[cameratriggered, task] (6, 2) rectangle node {Vision} (13, 3);
+				\draw[cameratriggered, task] (17, 2) rectangle node {Behaviour} (19, 3);
+				
+				%% Thread 3
+				\draw[sensortriggered, task] (5, 1) rectangle node {Odometry} (8, 2);
+				\draw[sensortriggered, task] (12, 1) rectangle node {Map Combiner (Network)} (19, 2);
+				
+				% Row labels
+				\node[anchor=east, inner sep=0] at (.8, 3.5) {Thread 1};
+				\node[anchor=east, inner sep=0] at (.8, 2.5) {Thread 2};
+				\node[anchor=east, inner sep=0] at (.8, 1.5) {Thread 3};
+				
+				% Column Labels
+				\foreach \i in {1,...,20} {
+				\node[anchor=north, inner sep=0] at (\i + .5, .8) {\i};
+				}
+			\end{scope}
+		\end{tikzpicture}
+	\end{adjustbox}
+\end{frame}
+\begin{frame}
+	\frametitle{Debugging Tools}
+	\begin{itemize}
+		\item todo
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Integrated Networking}
+	\begin{itemize}
+		\item The networking system in NUClear is transparent to those using the system
+		\item Any data can be sent over the network with no modification
+		\item The syntax for emitting data over the network is identical to sending it to other modules
+		\item This makes it trivial to perform network communication with other systems
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Networking}
+	\begin{adjustbox}{max totalsize={\textwidth}{\textheight},center}
+	\begin{tikzpicture}[x=15em,y=5em,>=latex,
+		A/.style={red},
+		B/.style={blue},
+		reactor/.style={draw, circle, thick},
+		write/.style={->,thick},
+		read/.style={<-,thick}]
+	
+		%%% Left Power Plant
+		\node at (0, 0) [draw,star,star points=8,star point ratio=0.875,minimum width=3cm] (plantA) {Powerplant A};
+		\node [above=of plantA,reactor] (sensorsA) {Sensors};
+		\node [below=of plantA,reactor,align=center] (fieldmapperA) {2d Field\\Mapper};
+		\path [A, write] (sensorsA) edge node[A,left] {Image(A)} (plantA);
+		\path [A, read] (fieldmapperA.110) edge node[left] {Image(A)} (plantA.260);
+		\path [B, read] (fieldmapperA.70) edge node[right] {Image(B)} (plantA.280);
+	
+		%%% Right Power Plant
+		\node at (2, 0)
+			[draw,star,star points=8,star point ratio=0.875,minimum width=3cm]
+			(plantB){Powerplant B};
+		\node [above=of plantB,reactor] (sensorsB) {Sensors};
+		\node [below=of plantB,reactor,align=center] (fieldmapperB) {2d Field\\Mapper};
+		\path [B, write] (sensorsB) edge node[left] {Image(B)} (plantB);
+		\path [A, read] (fieldmapperB.110) edge node[left] {Image(A)} (plantB.260);
+		\path [B, read] (fieldmapperB.70) edge node[right] {Image(B)} (plantB.280);
+	
+		%%% Network & Network Connections
+		\node at (1, 0) [draw,cloud,cloud puffs=10,minimum width=3.5cm]
+		(network) {Network};
+	
+		%% Plant A connections
+		\path [A, write] (plantA.10) edge node[A, above] {Image(A)} (network.169);
+		\path [B, read] (plantA.-9) edge node[B, below] {Image(B)} (network.190);
+	
+		%% Plant B connections
+		\path [A, read] (plantB.171) edge node[A, above] {Image(A)}  (network.10);
+		\path [B, write] (plantB.190) edge node[B, below] {Image(B)} (network.-11);
+	\end{tikzpicture}
+	\end{adjustbox}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Extensible API}
+	\begin{itemize}
+		\item The NUClear API itself was designed to be extensible
+		\item The DSL which is defined in NUClear can be modified by the user
+		\item This gives a lot of power to implement features within the language itself
+		\item For example, the configuration system the the ported NUClear code is implemented as a part of the language
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Modular Design}
+	% this message passing api allows us to design the new system using modular design
+	% modular design results in each component of the system being isolated from others
+	% this allows us to 
+\end{frame}
+
+\begin{frame}
+	\frametitle{Modular Design}
+	%
+\end{frame}
+
+\begin{frame}
+	\frametitle{Orchestration}
+	% Using modular design and the NUClear api we are also able to take inspiration from Service Orientied Architectures
+	% the concept of orchistration is when we take several modules (services in SOA) and combine them to form an application
+	% in our case we take these modules and combine them to form a role for the robot
+\end{frame}
+
+% more powerful then typical event driven systems
+
+% by building in this way we allow modular design
+
+% each indivdual ablity is built up as a single module
+
+%----------------------------------------------------------------------------------------
 \subsection{NUClear Port}
+%----------------------------------------------------------------------------------------
 \begin{frame}
 	\frametitle{NUClear Port}
 
 	\begin{itemize}
 		\item The NUbots software has been ported to use NUClear
 		\item Functionality has been divided into many individual modules
-		\item All ommunication across modules is accomplished through NUClear messages
+		\item All communication across modules is accomplished through NUClear messages
 		\item A new, flexible build system has been created with `roles' to allow fast and easy adding of functionality
 	\end{itemize}
 \end{frame}
@@ -405,8 +705,6 @@
 		\item Because of modular design it is easy to test single modules or subsets in isolation
 	\end{itemize}
 \end{frame}
-
-
 
 %----------------------------------------------------------------------------------------
 \section{Robot Dance}
@@ -488,9 +786,6 @@
 			\end{itemize}
 	\end{frame}	
 
-
-
-
 %----------------------------------------------------------------------------------------
 \section{Individual Research}
 %----------------------------------------------------------------------------------------
@@ -510,6 +805,221 @@
 	%----------------------------------------------------------------------------------------
 	\begin{frame}
 		\subsectionpage
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Software Architecture}
+		\begin{itemize}
+			\item Components in a well designed software architecture are:
+			\item Loosely Coupled
+			\item Tightly Cohesive
+			\item These properties makes it easy to modify and maintain the system
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Message Passing}
+		\begin{itemize}
+			\item Message passing is the most loosely coupled architectural style
+			\item Components do not need to know of each other at all
+			\item This makes it easy to develop and modify components
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Use in Other Systems}
+		\begin{itemize}
+		\item Message passing has been used as an architecture with robotics before
+			\item Robot OS is designed on a message passing system
+			\item DDX is a previous generation robotics system also based on message passing
+			\item From before this time (and currently) CORBA is used extensively also
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Use in other Systems}
+		\begin{itemize}
+			\item These systems use message passing as it make it easy to collaborate and design modules
+			\item However these systems were never designed to run on low powered systems
+			\item Robot OS for example was designed to run on multiple computers as a distributed system in order to do this it has heavy routing and serialisation requirements
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Metaprogramming}
+		\begin{itemize}
+			\item Metaprogramming is a technique of writing programs that manipulate themselves
+			\item This includes programs that run at compilation time rather then runtime
+			\item It allows work to be offloaded from runtime processing
+			\item In C++ this is done through templates
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{C++ Template Metaprogramming}
+		\begin{itemize}
+			\item C++ metaprogramming is done through templates
+			\item Templates were designed to implement generic programming
+			\item However they also accidentally as a side effect are a turing complete language
+			\item This allows programs to be executed using templates at compile time using the type system
+		\end{itemize}
+	\end{frame}
+		
+	\begin{frame}
+		\frametitle{Partial Evaluation}
+		\begin{itemize}
+			\item One such metaprogramming technique is partial evaluation
+			\item It applies when partial information is available at compile time
+			\item Partial evaluation takes a function and performs part of the evaluation during compilation
+			\item In the case of a message passing system the routing of the message is known
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Compile Time Message Routing}
+		\begin{itemize}
+			\item We know the routes messages are going to take at compile time
+			\item Messages are published subscribed to using types
+			\item We can evaluate the dispatch of these messages at compile time using template metaprograms
+			\item We can bind the data of the messages at runtime
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Before Compilation}
+		\centering
+		\scalebox{0.55}{
+			\begin{tikzpicture}[
+				element/.style={
+				rectangle,
+				rounded corners,
+				draw=black, very thick,
+				minimum height=2em,
+				text centered
+			},
+			ball/.style={
+				element,
+				minimum height=0,
+				fill=black
+			},
+			arrow/.style={
+				->,
+				thick
+			},
+			>=latex]
+			
+			\node [element] (router) {Router};
+		
+			%%% Draw all of our components in a circle
+			\foreach [count=\i] \reactor in {Camera, Vision, Localisation, Behaviour, Servos} {				
+				% Draw the reactors around the central star
+				\node [element] (msg\reactor) at ({360/5 * (\i)}:6cm) {$\reactor$};
+			};
+			
+			\path [arrow] (router) edge[out=130, in=350]  node[right] {Image} (msgVision);
+			\path [arrow] (msgVision) edge[out=320, in=170] node[left] {Seen Objects} (router);
+			
+			\path [arrow] (msgCamera) edge[out=270, in=90] node[right] {Image} (router);
+			
+			\path [arrow] (router) edge[out=320, in=60] node[right, text width=1.5cm] {Servo Angles, Positions} (msgBehaviour);
+			\path [arrow] (msgBehaviour) edge[out=130, in=290] node[left, text width=1.75cm] {Servo Commands} (router);
+			
+			\path [arrow] (router) edge[out=190, in=80] node[left] {Seen Objects} (msgLocalisation);
+			\path [arrow] (msgLocalisation) edge[out=50, in=220] node[below] {Positions} (router);
+			
+			\path [arrow] (router) edge[out=30, in=150] node[above] {Servo Commands} (msgServos);
+			\path [arrow] (router) edge[out=0, in=190] node[below] {Servo Angles} (msgServos);
+			
+		\end{tikzpicture}}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{After Compilation}
+		\centering
+		\scalebox{0.8}{
+			\begin{tikzpicture}[
+				scale=0.7,
+				element/.style={
+					rectangle,
+					rounded corners,
+					draw=black, very thick,
+					minimum height=2em,
+					text centered
+				},
+				ball/.style={
+					element,
+					minimum height=0,
+					fill=black
+				},
+				arrow/.style={
+					->,
+					thick
+				},
+				>=latex]
+		
+			%%% Draw all of our components in a circle
+			\foreach [count=\i] \reactor in {Camera, Vision, Localisation, Behaviour, Servos} {				
+				% Draw the reactors around the central star
+				\node [element] (comp\reactor) at ({360/5 * (\i)}:6cm) {$\reactor$};
+			}; 
+			
+			\path [arrow] (compCamera) edge[out=180, in=30] node[left] {Image} (compVision);
+			\path [arrow] (compVision) edge[out=240, in=150] node[left] {Seen Objects} (compLocalisation);
+			\path [arrow] (compLocalisation) edge[out=330, in=180] node[left] {Positions} (compBehaviour);
+			\path [arrow] (compBehaviour) edge[out=70, in=190] node[left] {Servo Commands} (compServos);
+			\path [arrow] (compServos) edge[out=270, in=40] node[right] {Servo Angles} (compBehaviour);
+			
+		\end{tikzpicture}}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Compile Time  Message Routing}
+		\begin{itemize}
+			\item Before compilation, every item only knows about the router
+			\item This makes it very simple to modify programs
+			\item After compilation components directly access each other
+			\item This makes the resulting system almost as fast as direct function access
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Compile Time  Message Routing}
+		\begin{itemize}
+			\item The fast final result from the compile time program allows this architecture to be used
+			\item The performance drawbacks of having a message router no longer apply
+			\item This allows this style of architecture to be used in performance critical use cases
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Drawbacks}
+		\begin{itemize}
+			\item Using compile time message routing has drawbacks
+			\item As the routing is performed at compile time, compilation of programs is slower
+			\item Also, as template meta-programming in c++ is complex this makes it difficult to use
+			\item It also results in larger binaries as the routes for messages are hard coded
+			\item The system also requires an optimising compiler, else the system ends slower then a typical function call
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Results}
+		\begin{itemize}
+			\item When compared other methods of message passing compile time routing performed orders of magnitude faster
+			\item As routing is performed at compile time, it also does not suffer from a slowdown as the number of publishers, subscribers, or message types increases
+			\item The system was compared to CORBA for latency
+			\item Compile time dispatch was measured as taking from the range of 300 nanoseconds to 1 microsecond
+			\item CORBA is measured as taking between 1 millisecond to 7 milliseconds
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Use in FYP}
+		\begin{itemize}
+			\item Compile time message routing is used within the NUClear framework in order to route messages
+			\item This allows it to perform orders of magnitude faster then competing architectures
+			\item It also does not suffer slowdowns with the size of the project
+		\end{itemize}
 	\end{frame}
 	
 	%----------------------------------------------------------------------------------------
