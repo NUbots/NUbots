@@ -490,10 +490,15 @@
 		\end{tikzpicture}
 	\end{adjustbox}
 \end{frame}
+
 \begin{frame}
 	\frametitle{Debugging Tools}
 	\begin{itemize}
-		\item todo
+		\item Built into NUClear are several debugging and trace tools
+		\item Every message that is sent can be tracked and the messages it causes can be identified
+		\item We can build a tree of the execution along with how long process executed for
+		\item It also captures information such as errors that occur, and even the messages themselves
+		\item This allows us to inspect in fine detail the ordering and results of any part of the system
 	\end{itemize}
 \end{frame}
 
@@ -505,49 +510,6 @@
 		\item The syntax for emitting data over the network is identical to sending it to other modules
 		\item This makes it trivial to perform network communication with other systems
 	\end{itemize}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Networking}
-	\begin{adjustbox}{max totalsize={\textwidth}{\textheight},center}
-	\begin{tikzpicture}[x=15em,y=5em,>=latex,
-		A/.style={red},
-		B/.style={blue},
-		reactor/.style={draw, circle, thick},
-		write/.style={->,thick},
-		read/.style={<-,thick}]
-	
-		%%% Left Power Plant
-		\node at (0, 0) [draw,star,star points=8,star point ratio=0.875,minimum width=3cm] (plantA) {Powerplant A};
-		\node [above=of plantA,reactor] (sensorsA) {Sensors};
-		\node [below=of plantA,reactor,align=center] (fieldmapperA) {2d Field\\Mapper};
-		\path [A, write] (sensorsA) edge node[A,left] {Image(A)} (plantA);
-		\path [A, read] (fieldmapperA.110) edge node[left] {Image(A)} (plantA.260);
-		\path [B, read] (fieldmapperA.70) edge node[right] {Image(B)} (plantA.280);
-	
-		%%% Right Power Plant
-		\node at (2, 0)
-			[draw,star,star points=8,star point ratio=0.875,minimum width=3cm]
-			(plantB){Powerplant B};
-		\node [above=of plantB,reactor] (sensorsB) {Sensors};
-		\node [below=of plantB,reactor,align=center] (fieldmapperB) {2d Field\\Mapper};
-		\path [B, write] (sensorsB) edge node[left] {Image(B)} (plantB);
-		\path [A, read] (fieldmapperB.110) edge node[left] {Image(A)} (plantB.260);
-		\path [B, read] (fieldmapperB.70) edge node[right] {Image(B)} (plantB.280);
-	
-		%%% Network & Network Connections
-		\node at (1, 0) [draw,cloud,cloud puffs=10,minimum width=3.5cm]
-		(network) {Network};
-	
-		%% Plant A connections
-		\path [A, write] (plantA.10) edge node[A, above] {Image(A)} (network.169);
-		\path [B, read] (plantA.-9) edge node[B, below] {Image(B)} (network.190);
-	
-		%% Plant B connections
-		\path [A, read] (plantB.171) edge node[A, above] {Image(A)}  (network.10);
-		\path [B, write] (plantB.190) edge node[B, below] {Image(B)} (network.-11);
-	\end{tikzpicture}
-	\end{adjustbox}
 \end{frame}
 
 \begin{frame}
