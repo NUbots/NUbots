@@ -5,7 +5,7 @@
     - Robot: Darwin
     - Robocup: International Robot Soccer Competition
     - NUbots: We've been working closely with the NUBots team who build the software for the robots.
-    - 10 Years worth of development.
+    - They've been doing it for 10 Years.
 
 - Goal
     - Modernize software architecture so we can use it for things other then soccer. (Research, Other Platforms)

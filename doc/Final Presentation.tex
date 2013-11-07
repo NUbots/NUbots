@@ -734,10 +734,102 @@
 \end{frame}
 
 	%----------------------------------------------------------------------------------------
-	\subsection{Overcoming Limits of Event Driven Systems}
+	\subsection{Overcoming Limits of Event Driven Architectures}
 	%----------------------------------------------------------------------------------------
 	\begin{frame}
 		\subsectionpage
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{What is an event driven architecture?}
+		
+		Event Driven Architectures are characterized by a set of modules that communicate using events or messages.
+		\begin{itemize}
+			\item Events are defined blobs of data with a known format.
+			\item \textbf{Event} is often interchangeable with \textbf{Message}
+			\item Modules are sometimes be categorized as either \textbf{Producers} or \textbf{Consumers}
+		\end{itemize}
+	
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle {Exploring the limits}
+		
+		Most event driven architecture limitations can be overcome
+		\begin{itemize}
+			\item ... given you're willing to sacrifice performance
+		\end{itemize}
+		
+		The essence of architecture is making decisions
+		\begin{itemize}
+			\item Performance or Features
+			\item Competing choices will change depending on your goal
+			\item Different architectures value different things
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Common Tradeoffs}
+		
+		Message Format
+		\begin{itemize}
+			\item \textbf{Language-Specific} or \textbf{Language-Agnostic}
+			\item \textbf{Human Readable} or \textbf{Machine Only}
+		\end{itemize}
+		
+		Message Routing
+		\begin{itemize}
+			\item \textbf{Guaranteed Delivery} or \textbf{Assumed Delivery}
+			\item \textbf{Distributed} or \textbf{Central}
+			\item \textbf{Inter-Process} or \textbf{In-Process}
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Trade Offs: Robot OS and CORBA}
+		Goal: Sharing and Collaboration
+		
+		Message Format
+		\begin{itemize}
+			\item \textbf{Language-Agnostic}
+			\item \textbf{Human Readable}
+		\end{itemize}
+		
+		Message Routing
+		\begin{itemize}
+			\item \textbf{Guaranteed Delivery} and \textbf{Assumed Delivery}
+			\item \textbf{Central}
+			\item \textbf{Inter-Process}
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Trade Offs: NUClear}
+		
+		Goal: Speed and Ease-of-Use
+		
+		Message Format	
+		\begin{itemize}
+			\item \textbf{Language-Specific} and \textbf{Language-Agnostic}
+			\item \textbf{Machine Only}
+		\end{itemize}
+		
+		Message Routing
+		\begin{itemize}
+			\item \textbf{Guaranteed Delivery} and \textbf{Assumed Delivery}
+			\item \textbf{Distributed}
+			\item \textbf{In-Process} and \textbf{Inter-Process}
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Use in FYP}
+		
+		Using the lessons learned from analysing existing event driven architectures we:
+		\begin{itemize}
+			\item Decided to keep things primarily In-Process to allow us to provide features with no runtime cost.
+			\item Settled on using primarily a Machine-Only and Language-Specific transport only using Language-Agnostic when neccecary.
+		\end{itemize}
 	\end{frame}
 	
 	%----------------------------------------------------------------------------------------
