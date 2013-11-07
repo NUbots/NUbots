@@ -1,0 +1,40 @@
+=== Introduction ===
+- Introduce Members: Team NUClear (Jake, Trent, Michael, Josh)
+    - Our final year project was to modernize the NUBots software architecture.
+- Brief Introduction to Darwin, Robocup and Nubots
+    - Robot: Darwin
+    - Robocup: International Robot Soccer Competition
+    - NUbots: We've been working closely with the NUBots team who build the software for the robots.
+    - They've been doing it for 10 Years.
+
+- Goal
+    - Modernize software architecture so we can use it for things other then soccer. (Research, Other Platforms)
+    - Take existing modules (Vision, Behavior, Walk, etc...) and improve the way they communicate. So they can be used for other things. (Research!)
+    - Make it easier to learn the system.
+
+- Difficulty
+    - C++ is notorious for being tricky. Additionally we are on the cutting edge.
+    - Working with hardware can add a degree of complexity.
+
+- Successes
+    - Close collaboration with the NUBots team to produce a product that solves real problems and fits with what they need.
+    - Josiah is using the architecture to research better scripting (energy efficient, faster)
+
+=== Existing System ===
+- Talking about the existing system to give some context around the decision we made during the project.
+- Dependencies
+    - Each circle represents between 1000-20000 lines of code.
+    - Each arrow is a dependency. Implies that you need to understand both to make any changes.
+    - Different types of dependencies, three communication methods (Jobs, Direct, BlackBoard). Need to understand all to make changes.
+        - Blackboard: Global Data Store
+        - Jobs: Infrequently used message passing system
+        - Direct: Function calls
+
+- Major Problems: I'm going to cover the major problems we wanted to address with the new system
+    - Heavy module dependncies. Makes it very hard to re-use code or test the system.
+    - Tightly locked to two threads. If we upgrade hardware we can only take partial advantage of it.
+        - Additionally synchronization failures often cause the robot to fall over or behave weirdly due to undefined threading behavior.
+    - Networking is really hard. No one wants to take advantage of it.
+    - Fine Grained Debugging. It's really hard to get meaningful information out of the robot.
+    - Impossible to automatically test due to lack of abstraction layers.
+    - These were the sorts of things we had in mind when designing the new system
