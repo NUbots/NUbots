@@ -598,14 +598,6 @@
 	\end{itemize}
 \end{frame}
 
-\begin{frame}
-	\frametitle{Orchestration}
-	\begin{itemize}
-		\item Thanks to modular design we can take inspiration from Service Oriented Architecture design
-		\item Orchestration is the process of taking several modules and combining them to form an application
-		\item In the case of the NUbots system, several robot skills and behaviours can be combined into a binary for a specific role
-	\end{itemize}
-\end{frame}
 
 %----------------------------------------------------------------------------------------
 \subsection{NUClear Port}
@@ -640,41 +632,6 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{New build system}
-
-	What are roles?
-	\begin{itemize}
-		\item A group of modules combined to make an executable
-		\item New behaviours are made using different combinations of modules
-		\begin{itemize}
-			\item Robocup role with soccer-related modules
-			\item Dance role with beat detection and audio input modules
-			\item Script Tuner role with an interface for tweaking motion scripts
-		\end{itemize}
-		\item Many modules are used in several roles
-	\end{itemize}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Existing vs. New}
-	
-	\begin{itemize}
-		\item In the existing system
-		\begin{itemize}
-			\item Inducting a new member into the project takes one month
-			\item Changing behaviour requires lots of changes in many different places
-		\end{itemize}
-		\item In the NUClear port
-		\begin{itemize}
-			\item Modules are easy to learn and don't require understanding all their dependencies
-			\item A new member can start doing useful work almost immediately
-			\item Creating new roles requires changing only one file
-		\end{itemize}
-		\item `Mechwarrior' was created in under an hour on the new system, would have taken days or weeks on the old architecture
-	\end{itemize}
-\end{frame}
-
-\begin{frame}
 	\frametitle{Testing}
 
 	\begin{itemize}
@@ -685,6 +642,41 @@
 		\item Can create testing modules that emulate input from hardware
 	\end{itemize}
 \end{frame}
+
+\begin{frame}
+	\frametitle{Orchestration}
+	\begin{itemize}
+		\item Thanks to modular design we can take inspiration from Service Oriented Architecture design
+		\item Orchestration is the process of taking several modules and combining them to form an application
+		\item The new build system uses `roles' to build behaviours from orchestrated modules
+		\begin{itemize}
+			\item Robocup role with soccer modules
+			\item Marketing role for showing off the robots
+			\item Script Tuner role with an interface for tweaking motion scripts
+		\end{itemize}
+		\item Many modules are shared by multiple roles
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Existing vs. New}
+	
+	\begin{itemize}
+		\item In the existing system
+		\begin{itemize}
+			\item Inducting a new member into the project takes one month
+			\item Changing behaviour requires detailed understanding, lots of code changes
+		\end{itemize}
+		\item In the NUClear port
+		\begin{itemize}
+			\item Modules are easy to learn and don't require understanding all their dependencies
+			\item A new member can start doing useful work almost immediately
+			\item Creating new roles requires changing only one file
+		\end{itemize}
+		\item `Mechwarrior' was created in under an hour on the new system, ``would have been impossible'' on the existing system
+	\end{itemize}
+\end{frame}
+
 
 %----------------------------------------------------------------------------------------
 \section{Robot Dance}
