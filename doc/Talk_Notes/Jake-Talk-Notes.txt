@@ -3,9 +3,9 @@
     - Our final year project was to modernize the NUBots software architecture.
 - Brief Introduction to Darwin, Robocup and Nubots
     - Robot: Darwin
-    - Robocup: International Robot Soccer Competition
+    - Robocup: International Robot Soccer Competition goal is 2050
     - NUbots: We've been working closely with the NUBots team who build the software for the robots.
-    - They've been doing it for 10 Years.
+    - The uni has been been doing it since 2002
 
 - Goal
     - Modernize software architecture so we can use it for things other then soccer. (Research, Other Platforms)

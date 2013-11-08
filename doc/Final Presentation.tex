@@ -80,6 +80,7 @@
 		\item Estimated cost of \$200,000-\$500,000 (using COCOMO)
 		\item Working with C++
 		\item Working directly with hardware
+		\item Legacy codebase with 182,000 lines of code.
 	\end{itemize}
 \end{frame}
 
@@ -141,7 +142,7 @@
 		\node[above=0pt of publicinterfacelabel] (legendheader) {Legend};
 
 		%%% Draw all of our components in a circle
-		\foreach [count=\i] \reactor in {Camera, Vision, Localization, Behavior, Network, Sensors, Kinematics, Motion, Actionators} {
+		\foreach [count=\i] \reactor in {Camera, Vision, Localisation, Behavior, Network, Sensors, Kinematics, Motion, Actionators} {
 		
 			% Draw the reactors around the central star
 			\node[reactor] (\reactor) at ({360/9 * (\i - 1)}:7cm) {$\reactor$};
@@ -157,12 +158,12 @@
 		\path[publicinterface, dependent] (Vision.275) edge (Camera.120);
 		\path[blackboard, dependent] (Vision) edge (Sensors);
 
-		%% Localization
-		\path[blackboard, dependent] (Localization) edge (Sensors);
-		\path[blackboard, dependent] (Localization) edge (Vision);
+		%% Localisation
+		\path[blackboard, dependent] (Localisation) edge (Sensors);
+		\path[blackboard, dependent] (Localisation) edge (Vision);
 
 		%% Behavior
-		\path[blackboard, codependent] (Behavior) edge (Localization);
+		\path[blackboard, codependent] (Behavior) edge (Localisation);
 		\path[blackboard, dependent] (Behavior) edge (Kinematics);
 		\path[blackboard, dependent] (Behavior) edge (Vision);
 		\path[blackboard, dependent] (Behavior) edge (Sensors);
@@ -185,7 +186,7 @@
 		\item Heavy Module Dependencies
 		\item Tightly Locked to two threads
 		\begin{itemize}
-			\item Synchronization Issues cause weird behaviours.
+			\item Synchronisation Issues cause weird behaviours.
 		\end{itemize}
 		\item Networking is really hard
 		\item Low traceability into execution process
@@ -273,7 +274,7 @@
 \begin{frame}
 	\frametitle{Message Passing}
 	\begin{itemize}
-		\item Message passing is a method for components to communicate without explicitly targeting eachother
+		\item Message passing is a method for components to communicate without explicitly targeting each other
 		\item Message coupling is the least coupled method of communication
 		\item Message passing systems have excellent maintainability and modifiability
 		\item Components require no knowledge of each other
@@ -664,7 +665,7 @@
 				\node[above=0pt of publicinterfacelabel] (legendheader) {Legend};
 		
 				%%% Draw all of our components in a circle
-				\foreach [count=\i] \reactor/\style in {{Camera/same}, {Vision/same}, {Localization/same}, {Behavior/modified}, {Network/same}, {Sensors/same}, {Kinematics/same}, {Motion/modified}, {Actionators/same}, {AudioInput/new}, {BeatTracker/new}} {
+				\foreach [count=\i] \reactor/\style in {{Camera/same}, {Vision/same}, {Localisation/same}, {Behavior/modified}, {Network/same}, {Sensors/same}, {Kinematics/same}, {Motion/modified}, {Actionators/same}, {AudioInput/new}, {BeatTracker/new}} {
 				
 					% Draw the reactors around the central star
 					\node[reactor, \style] (\reactor) at ({360/11 * (\i - 1)}:7cm) {$\reactor$};
@@ -680,12 +681,12 @@
 				\path[publicinterface, dependent] (Vision.275) edge (Camera.120);
 				\path[blackboard, dependent] (Vision) edge (Sensors);
 		
-				%% Localization
-				\path[blackboard, dependent] (Localization) edge (Sensors);
-				\path[blackboard, dependent] (Localization) edge (Vision);
+				%% Localisation
+				\path[blackboard, dependent] (Localisation) edge (Sensors);
+				\path[blackboard, dependent] (Localisation) edge (Vision);
 		
 				%% Behavior
-				\path[blackboard, codependent] (Behavior) edge (Localization);
+				\path[blackboard, codependent] (Behavior) edge (Localisation);
 				\path[blackboard, dependent] (Behavior) edge (Kinematics);
 				\path[blackboard, dependent] (Behavior) edge (Vision);
 				\path[blackboard, dependent] (Behavior) edge (Sensors);
@@ -711,20 +712,19 @@
 	\subsection{Conclusion} %-------------------
 	\begin{frame}
 		\frametitle{Conclusion}
+			We achieved our major goals.
 			\begin{itemize}
-				\item We have seen that NUClear is:
-				\begin{itemize}
-					\item Easy to learn
-					\item Easy to use
-					\item Modular
-					\item Loosely Coupled
-				\end{itemize}
+				\item Accepted by the NUbots team as a significant improvement.
+				\item Modular Design proven by Dance and MechWarrior
+				\item Improvements on some existing low-level code
 			\end{itemize}
 	\end{frame}	
-	
-\begin{frame}
-% TODO conclusion and group reflection
-\end{frame}
+		\frametitle{Group Reflection}
+		
+	\begin{frame}
+		
+	% TODO conclusion and group reflection
+	\end{frame}
 
 %----------------------------------------------------------------------------------------
 \section{Individual Research}
@@ -743,11 +743,11 @@
 	\begin{frame}
 		\frametitle{What is an event driven architecture?}
 		
-		Event Driven Architectures are characterized by a set of modules that communicate using events or messages.
+		Event Driven Architectures are characterised by a set of modules that communicate using events or messages.
 		\begin{itemize}
 			\item Events are defined blobs of data with a known format.
 			\item \textbf{Event} is often interchangeable with \textbf{Message}
-			\item Modules are sometimes be categorized as either \textbf{Producers} or \textbf{Consumers}
+			\item Modules are sometimes be categorised as either \textbf{Producers} or \textbf{Consumers}
 		\end{itemize}
 	
 	\end{frame}
@@ -828,7 +828,7 @@
 		Using the lessons learned from analysing existing event driven architectures we:
 		\begin{itemize}
 			\item Decided to keep things primarily In-Process to allow us to provide features with no runtime cost.
-			\item Settled on using primarily a Machine-Only and Language-Specific transport only using Language-Agnostic when neccecary.
+			\item Settled on using primarily a Machine-Only and Language-Specific transport only using Language-Agnostic when necessary.
 		\end{itemize}
 	\end{frame}
 	
@@ -994,6 +994,15 @@
 	\end{frame}
 	
 	\begin{frame}
+		\frametitle{Type Safety}
+		\begin{itemize}
+			\item When using message passing with compile time routing there is type safety
+			\item This is significant as other message passing systems often have to reinterpret the type
+			\item When writing code this provides the advantage of knowing that you are using the correct type
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
 		\frametitle{Drawbacks}
 		\begin{itemize}
 			\item Using compile time message routing has drawbacks
@@ -1024,7 +1033,22 @@
 		\end{itemize}
 	\end{frame}
 	
-	\todo{conclusion}
+	\begin{frame}
+		\frametitle{Conclusions}
+		\begin{itemize}
+			\item Compile time dispatch allows message passing to be very fast
+			\item We gain the advantages of loose coupling
+			\item We also gain the speed that comes from tight coupling
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{References}
+		\begin{itemize}
+			\item Todd L Veldhuizen. C++ templates as partial evaluation. arXiv preprint cs/9810010, 1998.	\item Timothy H Harrison, David L Levine, and Douglas C Schmidt. The de- sign and performance of a real-time corba event service. ACM SIGPLAN Notices, 32(10):184–200, 1997.
+			\item Christopher D Gill, David L Levine, and Douglas C Schmidt. The design and performance of a real-time corba scheduling service. In Challenges in Design and Implementation of Middlewares for Real-Time Systems, pages 3–40. Springer, 2001.
+		\end{itemize}
+	\end{frame}
 	
 	%----------------------------------------------------------------------------------------
 	\subsection{Efficient Multithreading in Message Passing Systems}
@@ -1139,7 +1163,7 @@
 		Quick:
 		\begin{itemize}
 			\item Doesn't slow down the rest of the system.
-			\item Beat found soon after it occured
+			\item Beat found soon after it occurred
 		\end{itemize}		
 	\end{frame}
 	\begin{frame}
