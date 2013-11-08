@@ -42,6 +42,7 @@ namespace modules {
 
     BeatDetectorsTests::BeatDetectorsTests(NUClear::PowerPlant* plant) : Reactor(plant) {
         
+        
         on<Trigger<messages::SoundFileStart>, Options<Single>> ([this](const messages::SoundFileStart& soundFileStart) {
             m->myfile.close();
             
@@ -57,7 +58,8 @@ namespace modules {
             
             
         });
-        
+         
+        /*
         on<Trigger<messages::Beat>> ([this](const messages::Beat& beat) {
 
             //while (m->soundFileStarted == false)
@@ -84,7 +86,32 @@ namespace modules {
         
        on<Trigger<Shutdown>>([this](const Shutdown&) {
             m->myfile.close();
-       });
+       });*/
+        on<Trigger<messages::Beat>> ([this](const messages::Beat& beat) {
+            //std::cout << "beat received" << std::endl;
+            //while (m->soundFileStarted == false)
+            //{}
+            if (m->soundFileStarted == true)
+            {
+                NUClear::clock::duration relativeTime = beat.time - m->startTime;
+                //std::time_t time = std::chrono::system_clock::to_time_t(beat.time);
+                //std::time_t relativeTime = std::chrono::system_clock::to_time_t(relativeTimeDuration);
+
+                float secs, millis;
+                millis = (std::chrono::duration_cast<std::chrono::milliseconds>(relativeTime)).count();
+                secs = millis /1000;
+
+                //std::cout << "Beat found at: " << secs
+                //        << "Period: " << 60 / (double(beat.period.count()) / double(NUClear::clock::period::den)) << "bpm"
+                //        << std::endl << std::endl;
+
+
+                std::cout << secs << std::endl;
+                //m->myfile << secs << std::endl;
+                //m->myfile.flush();
+                
+            }
+        });
     }
     
 
