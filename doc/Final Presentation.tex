@@ -1033,6 +1033,74 @@
 		\subsectionpage
 	\end{frame}
 	
+	\begin{frame}
+		\frametitle{Challenges of Multithreading}
+		
+		\begin{itemize}
+			\item It is difficult to divide a complex process into independent blocks that can run in parallel
+			\item Some components depend on others' output
+			\item Access to shared resources must be synchronised
+			\item 
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Multithreading in NUClear}
+		
+		\begin{itemize}
+			\item In NUClear, every operation is a reaction to a message
+			\item Emitting one message can trigger multiple reactions
+			\item Reactions can take a long time to complete
+			\item NUClear spreads reactions across a pool of threads so several can be processed at once
+			\item Reactions get a read-only copy of the message so that the same data can be shared without synchronisation
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Making It Fast}
+		
+		\begin{itemize}
+			\item It is vital that emitting messages is as fast as possible
+			\item System-wide locking should be avoided to keep every core of the CPU as busy as possible
+			\item At higher system load, the strategy for allocating handlers to threads can affect performance
+			\begin{itemize}
+				\item Work sharing
+				\item Work stealing
+			\end{itemize}
+			\item Both will be implemented so their performance can be analysed
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Work Sharing}
+		
+		\begin{itemize}
+			\item All upcoming tasks are stored in a shared priority queue
+			\item Idle threads pop the next task off the queue
+			\item Access to the shared queue must be synchronised
+			\item Works best with a smaller number of threads
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Work Stealing}
+		
+		\begin{itemize}
+			\item Each thread has its own queue of tasks
+			\item Idle threads take tasks from the queues of busy threads
+		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\frametitle{Other Optimisations}
+		
+		\begin{itemize}
+			\item System-wide locking is avoided in many cases by using a separate queue for different message types
+			\item Thread-local variables are used to store thread-specific state
+			\item Spin locks are often faster than mutexes for short operations that need to be synchronised
+		\end{itemize}
+	\end{frame}
+	
 	%----------------------------------------------------------------------------------------
 	\subsection{Beat Tracking}
 	%----------------------------------------------------------------------------------------
