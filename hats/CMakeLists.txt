@@ -53,7 +53,8 @@ ADD_HAT(
         AudioFileInput
         AubioBeatDetector
         ScriptEngine
-        DanceEngine)
+        DanceEngine
+        StrobeDarwin)
 
 ADD_HAT(
     NAME beatdetectortests
