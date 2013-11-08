@@ -300,7 +300,7 @@
 	\begin{itemize}
 		\item ROS is of particular note as it is the most commonly used system used in research
 		\item It currently runs in many robotic systems and has a substantial array of existing modules for it
-		\item It is a distributed message passing system which allows multiple programming languages and machines
+		\item It is a message passing system which allows multiple programming languages and machines
 	\end{itemize}
 \end{frame}
 
@@ -472,16 +472,6 @@
 	\end{itemize}
 \end{frame}
 
-\begin{frame}
-	\frametitle{Modular Design}
-	\begin{itemize}
-		\item The use of NUClear enforces modular design
-		\item Every component must be placed in its own module
-		\item Each module has a distinct purpose
-	\end{itemize}
-\end{frame}
-
-
 %----------------------------------------------------------------------------------------
 \subsection{NUClear Port}
 %----------------------------------------------------------------------------------------
@@ -560,6 +550,9 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}
+	\huge MechWarrior Demonstration
+\end{frame}
 
 %----------------------------------------------------------------------------------------
 \section{Robot Dance}
@@ -632,7 +625,8 @@
 				, codependent/.style={<->}
 				, new/.style={fill=darkGreen}
 				, modified/.style={fill=lightGreen}
-				, same/.style={fill=dullGreen}]
+				, same/.style={fill=dullGreen}
+				, remove/.style={fill=red!50}]
 		
 				%%% Legend
 				\coordinate (legendpoint) at (14, -2);
@@ -665,7 +659,7 @@
 				\node[above=0pt of publicinterfacelabel] (legendheader) {Legend};
 		
 				%%% Draw all of our components in a circle
-				\foreach [count=\i] \reactor/\style in {{Camera/same}, {Vision/same}, {Localisation/same}, {Behavior/modified}, {Network/same}, {Sensors/same}, {Kinematics/same}, {Motion/modified}, {Actionators/same}, {AudioInput/new}, {BeatTracker/new}} {
+				\foreach [count=\i] \reactor/\style in {{Camera/remove}, {Vision/remove}, {Localisation/remove}, {Behavior/modified}, {Network/remove}, {Sensors/same}, {Kinematics/same}, {Motion/modified}, {Actionators/same}, {AudioInput/new}, {BeatTracker/new}} {
 				
 					% Draw the reactors around the central star
 					\node[reactor, \style] (\reactor) at ({360/11 * (\i - 1)}:7cm) {$\reactor$};
@@ -701,7 +695,7 @@
 				\path[publicinterface, dependent] (Motion) edge (Kinematics);
 				
 				%% Dance
-				\path[blackboard, dependent] (AudioInput) edge (BeatTracker);
+				\path[blackboard, dependent] (BeatTracker) edge (AudioInput);
 				\path[blackboard, dependent] (Behavior) edge (BeatTracker);
 			\end{tikzpicture}
 			\end{adjustbox}
@@ -709,6 +703,11 @@
 			%\caption{Components for Dancing to Music with the Old System}
 		\end{figure}
 	\end{frame}	
+	
+	\begin{frame}
+		\huge Dance Demonstration
+	\end{frame}
+	
 	\subsection{Conclusion} %-------------------
 	\begin{frame}
 		\frametitle{Conclusion}
@@ -719,11 +718,9 @@
 				\item Improvements on some existing low-level code
 			\end{itemize}
 	\end{frame}	
-		\frametitle{Group Reflection}
-		
+	
 	\begin{frame}
-		
-	% TODO conclusion and group reflection
+		\huge Questions?
 	\end{frame}
 
 %----------------------------------------------------------------------------------------
@@ -1040,6 +1037,10 @@
 			\item We gain the advantages of loose coupling
 			\item We also gain the speed that comes from tight coupling
 		\end{itemize}
+	\end{frame}
+	
+	\begin{frame}
+		\huge Questions?
 	\end{frame}
 	
 	\begin{frame}
