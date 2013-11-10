@@ -16,7 +16,8 @@ ADD_HAT(
         eSpeak
         PartyDarwin
         AudioInput
-        NUBugger)
+        NUBugger
+        Localisation)
 
 ADD_HAT(
     NAME scriptrunner
