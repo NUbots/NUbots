@@ -370,7 +370,7 @@
 			The best example of this is the Every type. This type when used will make the system trigger the On method at regular intervals.
 			This functionality will be used by the NUBots as the primal events that trigger all of the sensor reads each round.
 			
-			\emph{Emit} allows \glspl{reactor} to push data into the \gls{powerplant} that will then distributed to all components that are interested in this datatype. This is done by calling their appropriate \emph{On} methods while providing the Emitted data as a paramter.
+			\emph{Emit} allows \glspl{reactor} to push data into the \gls{powerplant} that will then distributed to all components that are interested in this datatype. This is done by calling their appropriate \emph{On} methods while providing the Emitted data as a parameter.
 			This will be used by the robot to push the results of any operations it has performed to allow other components to use them.
 			
 			An example: A Sensors reactor reads a camera frame every 30ms and uses \emph{Emit} to push a camera frame to the Power Plant. This is then received by the Vision system that processes the image and outputs the processed image it has created. This sequence of events is shown in Figure~\ref{fig:OnAndEmitExample} on page~\pageref{fig:OnAndEmitExample}.
@@ -784,7 +784,7 @@
 				
 				Once the system has provided a unit test, all that remains is to write a fix.
 				However in many cases this fix may be tested on the development machine instead of the robot.
-				If the unit test passes then the code can be deployed to the robot and tested to find if the problem is solved. THis greatly reduces development time as testing on the robot hardware is time consuming and intermittent.
+				If the unit test passes then the code can be deployed to the robot and tested to find if the problem is solved. This greatly reduces development time as testing on the robot hardware is time consuming and intermittent.
 				This approach also has the benefit of slowly building up a library of unit and regression tests against known bugs.
 
 		\subsection{The Robot is used to perform a new task}
@@ -818,7 +818,7 @@
 				
 			\subsubsection{Proposed System}
 				In the proposed architecture reuse of code is achieved by adding/removing modular \glspl{reactor} that communicate through the \gls{powerplant}.
-				Firsly a new sound \gls{reactor} that buffers sound input and emits it periodically would be created.
+				Firstly a new sound \gls{reactor} that buffers sound input and emits it periodically would be created.
 				Then create a sound analysis \gls{reactor} that determines the beat and emits the ``feel of the song''.
 				Then a modified behaviour \gls{reactor} would react to the beat of the song and perform the dance.
 				
@@ -1037,9 +1037,9 @@ kinematics module.
 
 				The robot, will several times a second, record a short snippet of sound. This sound is to record the
 sound to a similar quality to what a human would be hearing in the robots position. In the music
-analyser stage, the last several snippets of recordings will be combined, ready for analyis. The
+analyser stage, the last several snippets of recordings will be combined, ready for analysis. The
 recording must use the Darwin robot’s microphone.
-				This is feature, is neccessary for the requirement of dancing according to music.
+				This is feature, is necessary for the requirement of dancing according to music.
 
 				A testing module will be created that converts the recording to a sound file to be checked for
 quality by a human. For testing the length of the recording snippet will be increased to a length
@@ -1061,7 +1061,7 @@ moves will be chosen and the dance script will be scaled in time to fit the beat
 ignore the first musical item, and only calculate the beat on the audio of the second musical item.
 				The beat tracker is not expected to be able to detect the beat on complicated music, such as music without  drums.
 				The beat tracker must be able to detect the beats on audio which has background noise, including people talking and fan noise from robot motor. It is not expected to be able to find the correct beat if the background noise includes other music.
-				The beat tracker must emit the location of the beat within 50ms after the beat occured.
+				The beat tracker must emit the location of the beat within 50ms after the beat occurred.
 
 				Beat tracking will be tested by running the beat tracking algorithm on a large sample of music. The results of this will be recorded. The results will then be compared to the actual beat locations of the music using a suite of evaluation algorithms. These evaluation algorithms will be those used in the beat tracking research community based around the Music Information Retrieval Evaluation eXchange (MIREX).
 				The scaling of dance moves according to beat will be tested by flashing the robot's eyes according to the beat to show it's response to the beat.
