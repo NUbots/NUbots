@@ -1,0 +1,21 @@
+\begin{ganttchart}{1}{23}
+\gantttitle{Semester 1}{9} 
+\gantttitle{Semester 2}{14} \\
+\gantttitlelist{6,...,14}{1} 
+\gantttitlelist{1,2,...,14}{1} \\
+\ganttbar{Design Nuclear}{1}{4} \\ %elem0
+\ganttbar{Prototype Nuclear}{1}{4} \\ %elem1
+\ganttlinkedbar{Implement Nuclear}{5}{9} \ganttnewline %elem2
+\ganttmilestone{Milestone}{9} \ganttnewline %elem3
+\ganttlinkedbar{Convert NUBots to NUClear}{10}{23} \ganttnewline %elem4
+\ganttbar{Design Robot Dance}{5}{9} \\ %elem5
+\ganttlinkedbar{Implement Robot Dance}{10}{17} \ganttnewline %elem6
+\ganttlink{elem0}{elem1}
+\ganttlink{elem1}{elem0}
+\ganttlink{elem0}{elem2}
+\ganttlink{elem1}{elem2}
+\ganttlink{elem1}{elem5}
+\ganttlink{elem2}{elem3}
+\ganttlink{elem3}{elem4}
+\ganttlink{elem3}{elem6}
+\end{ganttchart}

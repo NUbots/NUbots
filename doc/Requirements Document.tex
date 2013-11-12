@@ -667,6 +667,29 @@
 				
 				There are fewer systems that are affected by this change in the new architecture, and the consistent method of communication between them means that there is no longer a need to understand both blackboard and the job system.
 				The method by which messages are passed also means that no global state needs to be set up to hold the new information provided by the compass.
+
+			\paragraph{Scenario} The marketing department for Engineering wishes to use the NUBots robots for advertising purposes. They request that the robots be made to dance in time to music they plan to play through some speakers. Therefore a new component will need to be added to take audio input and analyse it to determine how the robot should dance. Dance move scripts will need to be added to the system and in addition a way to execute the scripts according to timing of the beats will need to be added.
+
+			\subsubsection{Current System} %TODO
+				In order to implement this in the current system, the following changes would be required
+				\begin{itemize}
+					\item An audio input component would need to be added to take in audio through the microphone which is currently unused.
+					\item An audio processing component would need to be added to analyse the audio to determine how it should dance.
+					\item The script system would need to modified to include many dance scripts.
+					\item The Behaviour system would need to be modified to allow the dance scripts to be executed in time to the beat of the music that was detected.
+					\item Blackboard would need to be modified in order to provide a new location for the output of the audio processing.
+				\end{itemize} %TODO is this right, particuarly script and behaviour?
+			\subsubsection{Proposed System}
+				In order to implement this in the proposed system, the following changes would be required
+				\begin{itemize}
+					\item The script system would need to modified to include many dance scripts.
+					\item The Behaviour system would need to be modified to allow the dance scripts to be executed in time to the beat of the music that was detected.
+					\item An audio input component would need to be added to take in audio through the microphone which is currently unused.
+					\item An audio processing component would need to be added to analyse the audio to determine how it should dance.
+				\end{itemize}
+
+
+
 				
 		\subsection{Networking with other Robots}
 			Many modules within the robots code can benefit from information gathered by other robots on their team. Sharing information such as the position of objects on the field and each robots current action allows better co-operation.
@@ -803,194 +826,256 @@
 				You also need to remove the old soccer-based behaviour from the system but unlike the existing architecture this is a simple one-line change per component.
 
 	\section{Requirements}
+	The requirement section deals with the requirements for the NUClear architecture framework and in addition the task of robot dance which will use NUClear.
+		
+		\subsection{NUClear Requirements}
 		The requirements defined in this section are used to provide a set of measurables to determine if the final architecture achieves the goals set out for it.
 		It also provides a baseline to compare this architecture against both the architecture it is replacing as well as other competing architectures.
-		
-		\subsection{Multiprocessing}
-			\requirement{The architecture must take advantage of all CPU cores}
+			\subsubsection{Multiprocessing}
+				\requirement{The architecture must take advantage of all CPU cores}
+	
+				The existing system is currently only able to take advantage of two cores, and one of
+				those cores spends a lot of time doing very little work. Unfortunately writing
+				multithreaded code is difficult and distracts programmers from more important things
+				such as improving the speed at which a robot can backflip by 5\%. To account for this
+				the proposed API must provide a way for programmers to easily utilise the full CPU power
+				of any robot platform.
+	
+				This requirement is going to become increasingly important as time goes on. The current
+				trend in computing performance is to add more cores and in the cutthroat world of
+				robotic soccer it is of paramount importance that we utilise all of our resources.
+	
+				From an API point of view the ideal acceptance test for this requirement is to determine
+				how often a programmer needs to think about multithreading at all. We could analyse the
+				code to determine what sections need to include multithreaded primitives and from that
+				percentage determine how many times the API failed to provide the proper multithreaded
+				abstractions.
+	
+				From a performance and hardware point of view we can measure CPU utilisation on various
+				platforms and compare it to the old system.
+	
+				Technical Note: We're assuming that we aren't going to be using many single-core
+				machines. The API should still support single threaded machine but from a performance
+				point of view we're assuming that additional cores is the way to go.
 
-			The existing system is currently only able to take advantage of two cores, and one of
-			those cores spends a lot of time doing very little work. Unfortunately writing
-			multithreaded code is difficult and distracts programmers from more important things
-			such as improving the speed at which a robot can backflip by 5\%. To account for this
-			the proposed API must provide a way for programmers to easily utilise the full CPU power
-			of any robot platform.
+			\subsubsection{Robot Platforms}
+				\requirement{The architecture must be portable to new platforms}
+	
+				The existing system has a lot of complicated logic that is used to support a few
+				different platforms. It's currently not possible to easily swap out the \emph{Darwin} motor
+				components for an \emph{AIBO} or \emph{Nao} motor component due to the tight coupling of systems.
+	
+				The new architecture should provide a way to easily slot in platform dependent
+				components. For example it should be possible to remove the hardware-dependent Darwin
+				camera component and replace it with an AIBO component with minimal to no modification
+				of other components.
+	
+				Portability can be measured by determining the amount of code that depends on specific
+				hardware or platforms. For this exercise Unit Tests can be considered another platform
+				so we could determine the portability by replacing hardware-dependent components with
+				mock components.
+	
+				Technical Note: Obviously if the format of the data changes the systems that rely on
+				that data need to change as well. We're looking to reduce unnecessary changes due to API
+				bloat.
 
-			This requirement is going to become increasingly important as time goes on. The current
-			trend in computing performance is to add more cores and in the cutthroat world of
-			robotic soccer it is of paramount importance that we utilise all of our resources.
+			\subsubsection{Performance}
+				\requirement{The architecture must have acceptable performance}
+	
+				Robotic platforms have very strict requirements about how often motors need to be sent
+				commands. If these performance requirements aren't met the robots are approximately as
+				useful as a very ambitious block of wood. Because of these requirements the proposed
+				architecture cannot impose large processing or resource costs to the existing system.
+	
+				A good example of a system that imposes heavy performance costs is ROS (Robot Operating
+				System). ROS has made a number of trade-offs to facilitate distributed multi-language
+				multi-platform systems but those trade-offs have resulted in unacceptable performance
+				implications for smaller robots such as the Darwin.
+	
+				The proposed architecture should be optimised to run efficiently so it doesn't take
+				valuable resources away from critical computations. Ideally the architecture should be
+				structured in such a way that it can assist the \gls{nubots} team in writing efficient code.
+				The first key indicator of performance is to determine the ratio of time used by the
+				architecture vs. the time taken by actual components. Ideally the ratio should be so
+				small as to be practically insignificant. A good architecture should also provide the
+				tools to measure performance.
+	
+				We can also measure the speed of the old architecture vs. the new architecture to
+				determine what improvements have been made.
 
-			From an API point of view the ideal acceptance test for this requirement is to determine
-			how often a programmer needs to think about multithreading at all. We could analyse the
-			code to determine what sections need to include multithreaded primitives and from that
-			percentage determine how many times the API failed to provide the proper multithreaded
-			abstractions.
+			\subsubsection{Component Interfaces}
+				\requirement{The architecture must promote consistent interfaces between components}
+	
+				In the existing system there are a number of ways components can communicate all of
+				which have their own conventions, quirks and pitfalls. The biggest problem with this is
+				it greatly increases the complexity of the system and also causes increased coupling due
+				to all the different ways components can communicate.
+	
+				The proposed system needs to provide a unified mechanism for components to communicate.
+				However this unified mechanism shouldn't force us to remove any existing functionality
+				and as such must be able to accommodate or replace any of the existing communication
+				styles. By providing a unified mechanism we can greatly reduce the complexity of the
+				system.
+	
+				This requirement can be measured by analysing the mechanisms that components use to
+				communicate. For example we can look at all the places the Camera system communicates
+				with the Vision system and determine the number of unique ways in which they
+				communicate. Additionally we can measure the suitability of the unified mechanism by
+				ensuring that it doesn't force us to remove any existing functionality.
 
-			From a performance and hardware point of view we can measure CPU utilisation on various
-			platforms and compare it to the old system.
+			\subsubsection{Adding Components}
+				\requirement{The architecture must make it easy to add new components to the system}
+	
+				Adding a new component to the existing system is currently a highly perilous journey of
+				discovery involving knowledge of huge portions of the existing system to achieve and
+				copious amounts of prayer. Because the existing communication graph is basically a giant
+				yarn ball held together by faith every new component exponentially adds more complexity
+				to the existing system and makes the next new component even harder to add.
+	
+				This is one of the key components the new architecture needs to solve. Ideally if you
+				want to add a new component you should only need to know about the inputs and outputs of
+				your component. The proposed architecture must provide a mechanism to simplify adding
+				new components to the system.
+	
+				This requirement is best measured by comparing it against the old system. Take some
+				hypothetical component and look at how many systems you would need to touch to add it.
+				For example we could consider adding a new behaviour system to handle catering at
+				university functions. We could then analyse how many components would need to be
+				understood and changed to add this new components we could also develop a metric for
+				analysing the extent of the changes.
 
-			Technical Note: We're assuming that we aren't going to be using many single-core
-			machines. The API should still support single threaded machine but from a performance
-			point of view we're assuming that additional cores is the way to go.
+			\subsubsection{Networking}
+				\requirement{The architecture must provide methods to easily perform network
+				communication}
+	
+				Communication is a vital part of any team activity, without communication there is no
+				way to work on team behaviour, or share useful information. The current system does have
+				a networking solution. However it is difficult to use and this deters coders from using
+				it to better the team abilities of the robots. By providing a simple and intuitive
+				interface to send and receive networked data, a greater range of possibilities of team
+				behaviour and distributed computing become accessible to the \gls{nubots} team.
+	
+				The new architecture must be able to automatically find and communicate with any robots
+				that are currently on the network without configuration (auto discovery). It also must
+				be able to serialise packets of data into a binary format for the majority of cases, and
+				allow the user to provide a serializer for any edge cases. The cases that should be
+				covered by the system as a minimum are any data type that contains only Plain Old Data
+				(a container of basic data types only), or an instance of a
+				Protocol Buffer~\cite{protobuf}.
+	
+				This requirement is measured by the amount of code that is required to both send and
+				receive network packets from other robots, as well as how efficient the binary
+				representation over the network is. For example, take the case of the two robots
+				bragging about how they went after the game. Being robots, it would be inefficient to
+				communicate using a natural language such as English they would not be able to convey
+				their level of awesome quickly enough (running out of bandwidth), as such all
+				information exchanged should be in a binary format. Also, as the robot is made up of
+				many individual components, the communication between these components, must use the
+				same communication channel, but have different origin and destination points
 
-		\subsection{Robot Platforms}
-			\requirement{The architecture must be portable to new platforms}
+			\subsubsection{Debugging Tools}
+				\requirement{The architecture must provide tools for debugging components}
+	
+				Debugging in the current system is a very difficult and painful process. Since all of
+				the components are so tightly integrated with each other, this means that if an error
+				occurs in one system, it is difficult to locate where the source of the error was. For
+				example, in the current system an issue exists where if the camera is not connected, the
+				vision system (the next system in the pipeline) will progress to the point of
+				classifying the image before the robot crashes. This makes it appear that the bug is
+				located in the vision system, however it is actually located in the camera reading
+				system.
+	
+				The new architecture should provide tools within it that allow the debugging of both
+				errors with the systems, as well as the performance between the systems. Using the tree
+				style model of communication between components, it is possible to output this tree into
+				a format that is understandable. This would allow the person debugging the system to see
+				where each data packet that was used in the system of interest came from, and if enabled
+				the contents of those data packets should also be available in order to replay the
+				scenario that caused the error.
+	
+				These debugging tools can be measured by comparing the difficulty of tracing data through a system. It can also be measured by the ability to easily replay the data through the system to see the results.
 
-			The existing system has a lot of complicated logic that is used to support a few
-			different platforms. It's currently not possible to easily swap out the \emph{Darwin} motor
-			components for an \emph{AIBO} or \emph{Nao} motor component due to the tight coupling of systems.
+			\subsubsection{Testing}
+				\requirement{The architecture must provide tools for unit testing individual components}
+	
+				Unit testing is a very important concept as it allows a number of tests to be performed
+				on individual components in the system. This can help to identify and kill bugs before
+				they even leave the development environment. By enforcing greater isolation between the
+				components, the architecture is able to make it much easier to test an individual
+				component by sending it fake data and validating the results.
+	
+				The system must provide a testing harness that makes it easy to test in isolation a
+				component of the system. This testing harness should be able to wrap around any of the
+				individual components that make up the system and, without modification to the component
+				itself, send fake input to the component and capture and validate any output from that
+				system. This should allow the system to be unit tested thoroughly such that the number
+				of bugs that exist when the code is executed on the robot is much lower.
+	
+				This requirement is measured by comparing the difficulty of testing a component between
+				the current system and the new system. This includes both the difficulty of extracting
+				the component from the system to be tested without other components (isolating the
+				component) as well as the difficulty of testing its API and results once it has been
+				extracted from the system.
+		\subsection{Dance Requirements}
+		This section deals with the requirements of making the robot dance. 
+			\subsubsection{Dancing to a script}
+				\requirement{The robot must be able to dance by executing a script}
 
-			The new architecture should provide a way to easily slot in platform dependent
-			components. For example it should be possible to remove the hardware-dependent Darwin
-			camera component and replace it with an AIBO component with minimal to no modification
-			of other components.
+				A script will specify what actions the dance move consists of. This script will be run by the
+kinematics module.
+				Running scripted dance is a necessary requirement of the other types of dancing the robot will do as defined in further requirements. It will need to be able to run the dance scripts directly and also run them based on music that is being played or in response to movements detected by the camera.
+				The scripts do not need to involve leg movement, but only arm movement.
+				The scripts need to be written so that they cannot cause the robot to fall over or damage itself.
+				
+				Testing will be done by observing whether the robot can carry out the dance moves as they are
+				expected to be done. It will also involve testing on a more technical level to see what reasons the
+				moves may be aborted e.g. not enough room to perform move or whether the robot has fallen
+				over.
 
-			Portability can be measured by determining the amount of code that depends on specific
-			hardware or platforms. For this exercise Unit Tests can be considered another platform
-			so we could determine the portability by replacing hardware-dependent components with
-			mock components.
+			\subsubsection{Audio Input}
+				\requirement{The robot must be able to take audio input through it's microphone}
 
-			Technical Note: Obviously if the format of the data changes the systems that rely on
-			that data need to change as well. We're looking to reduce unnecessary changes due to API
-			bloat.
+				The robot, will several times a second, record a short snippet of sound. This sound is to record the
+sound to a similar quality to what a human would be hearing in the robots position. In the music
+analyser stage, the last several snippets of recordings will be combined, ready for analyis. The
+recording must use the Darwin robot’s microphone.
+				This is feature, is neccessary for the requirement of dancing according to music.
 
-		\subsection{Performance}
-			\requirement{The architecture must have acceptable performance}
+				A testing module will be created that converts the recording to a sound file to be checked for
+quality by a human. For testing the length of the recording snippet will be increased to a length
+significantly long enough for a human to be able to hear properly. Only the human ear will be
+able to tell that the sound was recorded properly in a way that is faithful to the sound the
+audience would be hearing.
+			\subsubsection{Dancing to Music}
+				\requirement{The robot must be able to dance according to the beat of the music detected through it's microphone}
 
-			Robotic platforms have very strict requirements about how often motors need to be sent
-			commands. If these performance requirements aren't met the robots are approximately as
-			useful as a very ambitious block of wood. Because of these requirements the proposed
-			architecture cannot impose large processing or resource costs to the existing system.
+				The location and frequency of the beat will be detected. Beat is the basic timing element of
+music. A person tapping their foot to music is detecting the beat and following it. Any piece of
+music with a beat, should be able to be analysed to find the beat. From simple clapping to a piece
+of classical music, the beat should be detected.
+				The beat of the analysed music must be compared with the possible dance moves, which will
+have specify what range of beats the dance move is capable of working for. One of the valid dance
+moves will be chosen and the dance script will be scaled in time to fit the beat.
+				The robot must not repeat the same dance moves again and again if possible, but will alternate between different dance moves.
+				The beat tracker must be able to tell when one musical item ends and another starts. It must
+ignore the first musical item, and only calculate the beat on the audio of the second musical item.
+				The beat tracker is not expected to be able to detect the beat on complicated music, such as music without  drums.
+				The beat tracker must be able to detect the beats on audio which has background noise, including people talking and fan noise from robot motor. It is not expected to be able to find the correct beat if the background noise includes other music.
+				The beat tracker must emit the location of the beat within 50ms after the beat occured.
 
-			A good example of a system that imposes heavy performance costs is ROS (Robot Operating
-			System). ROS has made a number of trade-offs to facilitate distributed multi-language
-			multi-platform systems but those trade-offs have resulted in unacceptable performance
-			implications for smaller robots such as the Darwin.
+				Beat tracking will be tested by running the beat tracking algorithm on a large sample of music. The results of this will be recorded. The results will then be compared to the actual beat locations of the music using a suite of evaluation algorithms. These evaluation algorithms will be those used in the beat tracking research community based around the Music Information Retrieval Evaluation eXchange (MIREX).
+				The scaling of dance moves according to beat will be tested by flashing the robot's eyes according to the beat to show it's response to the beat.
+			\subsubsection{Demonstrate the NUClear Architecture}
+				\requirement{The robot dance will demonstrate the qualities of the NUClear architecure}
 
-			The proposed architecture should be optimised to run efficiently so it doesn't take
-			valuable resources away from critical computations. Ideally the architecture should be
-			structured in such a way that it can assist the \gls{nubots} team in writing efficient code.
-			The first key indicator of performance is to determine the ratio of time used by the
-			architecture vs. the time taken by actual components. Ideally the ratio should be so
-			small as to be practically insignificant. A good architecture should also provide the
-			tools to measure performance.
-
-			We can also measure the speed of the old architecture vs. the new architecture to
-			determine what improvements have been made.
-
-		\subsection{Component Interfaces}
-			\requirement{The architecture must promote consistent interfaces between components}
-
-			In the existing system there are a number of ways components can communicate all of
-			which have their own conventions, quirks and pitfalls. The biggest problem with this is
-			it greatly increases the complexity of the system and also causes increased coupling due
-			to all the different ways components can communicate.
-
-			The proposed system needs to provide a unified mechanism for components to communicate.
-			However this unified mechanism shouldn't force us to remove any existing functionality
-			and as such must be able to accommodate or replace any of the existing communication
-			styles. By providing a unified mechanism we can greatly reduce the complexity of the
-			system.
-
-			This requirement can be measured by analysing the mechanisms that components use to
-			communicate. For example we can look at all the places the Camera system communicates
-			with the Vision system and determine the number of unique ways in which they
-			communicate. Additionally we can measure the suitability of the unified mechanism by
-			ensuring that it doesn't force us to remove any existing functionality.
-
-		\subsection{Adding Components}
-			\requirement{The architecture must make it easy to add new components to the system}
-
-			Adding a new component to the existing system is currently a highly perilous journey of
-			discovery involving knowledge of huge portions of the existing system to achieve and
-			copious amounts of prayer. Because the existing communication graph is basically a giant
-			yarn ball held together by faith every new component exponentially adds more complexity
-			to the existing system and makes the next new component even harder to add.
-
-			This is one of the key components the new architecture needs to solve. Ideally if you
-			want to add a new component you should only need to know about the inputs and outputs of
-			your component. The proposed architecture must provide a mechanism to simplify adding
-			new components to the system.
-
-			This requirement is best measured by comparing it against the old system. Take some
-			hypothetical component and look at how many systems you would need to touch to add it.
-			For example we could consider adding a new behaviour system to handle catering at
-			university functions. We could then analyse how many components would need to be
-			understood and changed to add this new components we could also develop a metric for
-			analysing the extent of the changes.
-
-		\subsection{Networking}
-			\requirement{The architecture must provide methods to easily perform network
-			communication}
-
-			Communication is a vital part of any team activity, without communication there is no
-			way to work on team behaviour, or share useful information. The current system does have
-			a networking solution. However it is difficult to use and this deters coders from using
-			it to better the team abilities of the robots. By providing a simple and intuitive
-			interface to send and receive networked data, a greater range of possibilities of team
-			behaviour and distributed computing become accessible to the \gls{nubots} team.
-
-			The new architecture must be able to automatically find and communicate with any robots
-			that are currently on the network without configuration (auto discovery). It also must
-			be able to serialise packets of data into a binary format for the majority of cases, and
-			allow the user to provide a serializer for any edge cases. The cases that should be
-			covered by the system as a minimum are any data type that contains only Plain Old Data
-			(a container of basic data types only), or an instance of a
-			Protocol Buffer~\cite{protobuf}.
-
-			This requirement is measured by the amount of code that is required to both send and
-			receive network packets from other robots, as well as how efficient the binary
-			representation over the network is. For example, take the case of the two robots
-			bragging about how they went after the game. Being robots, it would be inefficient to
-			communicate using a natural language such as English they would not be able to convey
-			their level of awesome quickly enough (running out of bandwidth), as such all
-			information exchanged should be in a binary format. Also, as the robot is made up of
-			many individual components, the communication between these components, must use the
-			same communication channel, but have different origin and destination points
-
-		\subsection{Debugging Tools}
-			\requirement{The architecture must provide tools for debugging components}
-
-			Debugging in the current system is a very difficult and painful process. Since all of
-			the components are so tightly integrated with each other, this means that if an error
-			occurs in one system, it is difficult to locate where the source of the error was. For
-			example, in the current system an issue exists where if the camera is not connected, the
-			vision system (the next system in the pipeline) will progress to the point of
-			classifying the image before the robot crashes. This makes it appear that the bug is
-			located in the vision system, however it is actually located in the camera reading
-			system.
-
-			The new architecture should provide tools within it that allow the debugging of both
-			errors with the systems, as well as the performance between the systems. Using the tree
-			style model of communication between components, it is possible to output this tree into
-			a format that is understandable. This would allow the person debugging the system to see
-			where each data packet that was used in the system of interest came from, and if enabled
-			the contents of those data packets should also be available in order to replay the
-			scenario that caused the error.
-
-			These debugging tools can be measured by comparing the difficulty of tracing data through a system. It can also be measured by the ability to easily replay the data through the system to see the results.
-
-		\subsection{Testing}
-			\requirement{The architecture must provide tools for unit testing individual components}
-
-			Unit testing is a very important concept as it allows a number of tests to be performed
-			on individual components in the system. This can help to identify and kill bugs before
-			they even leave the development environment. By enforcing greater isolation between the
-			components, the architecture is able to make it much easier to test an individual
-			component by sending it fake data and validating the results.
-
-			The system must provide a testing harness that makes it easy to test in isolation a
-			component of the system. This testing harness should be able to wrap around any of the
-			individual components that make up the system and, without modification to the component
-			itself, send fake input to the component and capture and validate any output from that
-			system. This should allow the system to be unit tested thoroughly such that the number
-			of bugs that exist when the code is executed on the robot is much lower.
-
-			This requirement is measured by comparing the difficulty of testing a component between
-			the current system and the new system. This includes both the difficulty of extracting
-			the component from the system to be tested without other components (isolating the
-			component) as well as the difficulty of testing its API and results once it has been
-			extracted from the system.
+				The dance part of the project is mainly to demonstrate the success of the NUClear architecture. It will show that the NUClear architecture:
+				\begin{itemize}
+					\item{Allows systems to be easily extended}
+					\item{Allow systems to be easily adapted for other purposes}
+					\item{Allow easy component re-use}
+				\end{itemize}
+				
+				This requirement will be measured by the number of components changed to add new functionality, compared to the estimated number of components needed to be changed under the old system.
 
 	\section{Extension Goals}
 		This section will outline extra goals that are not requirements but would be useful to have
