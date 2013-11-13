@@ -84,7 +84,7 @@
 		DarwinHardwareIO      & Manual Testing     \\ \hline
 		DarwinMotionManager   & Automated Testing  \\ \hline
 		eSpeak                & Manual Testing     \\ \hline
-		NUBugger              & Manual Testing     \\ \hline
+		NUbugger              & Manual Testing     \\ \hline
 		LinuxCameraStreamer   & Manual Testing     \\ \hline
 		PartyDarwin           & Unit Testable      \\ \hline
 		ScriptEngine          & Automated Testing  \\ \hline
@@ -302,182 +302,356 @@
 		\end{itemize}
 
 	\subsection{DanceEngine}
-		\textbf{\large Description} \\
-			The dance engine is responsible for taking the incoming beat frequency of detected audio, and executing scripts on the robot that allow it to dance to the beat.
-			
-			\begin{tabular}{p{7cm}|p{7cm}}
+		The dance engine is responsible for taking the incoming beat frequency of detected audio, and executing scripts on the robot that allow it to dance to the beat.
+		
+		\paragraph{Requirements:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\paragraph{Assumptions:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
-				\begin{itemize}
-					\item A Dance configuration describing the available dance scripts.
-					\item A stream of beat detections describing the time of detection and tempo.
-					\item A notification when all motors have completed their assigned tasks.
-				\end{itemize}
-				&
-				\begin{itemize}
-					\item A dance script scaled to the detected beat.
-				\end{itemize}
-    		\end{tabular}
+			\begin{itemize}
+				\item A Dance configuration describing the available dance scripts.
+				\item A stream of beat detections describing the time of detection and tempo.
+				\item A notification when all motors have completed their assigned tasks.
+			\end{itemize}
+			&
+			\begin{itemize}
+				\item A dance script scaled to the detected beat.
+			\end{itemize}
+		\end{tabular}
 
-		\textbf{\large Tests} \\
+		\paragraph{Tests:}
+		\begin{itemize}
 			\test{The dance engine scales scripts lengths to match the period of the beat}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+			
 			\test{The dance engine ensures that dance scripts execute such that they begin and end on beats}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+			
 			\test{The dance engine continously picks random dances}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+		\end{itemize}
 		
 	\subsection{eSpeak}
-		\textbf{\large Description} \\
-			The eSpeak module takes a string command and performs a text to speech conversion on it.
-			This sound data is then outputted through the speaker of the system.
-			
-			\begin{tabular}{p{7cm}|p{7cm}}
+		The eSpeak module takes a string command and performs a text to speech conversion on it.
+		This sound data is then outputted through the speaker of the system.
+		
+		\paragraph{Requirements:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\paragraph{Assumptions:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
-				\begin{itemize}
-					\item A message containing the string to speak.
-				\end{itemize}
-				&
-				\begin{itemize}
-					\item None
-				\end{itemize}
-    		\end{tabular}
+			\begin{itemize}
+				\item A message containing the string to speak.
+			\end{itemize}
+			&
+			\begin{itemize}
+				\item None
+			\end{itemize}
+		\end{tabular}
 
-		\textbf{\large Tests} \\
+		\paragraph{Tests:}
+		\begin{itemize}
 			\test{eSpeak performs text to speach when a Say command is emitted}
+			\begin{itemize}
+				\item \todo[inline]{Write}
+			\end{itemize}
+		\end{itemize}
 		
 	\subsection{LinuxCameraStreamer}
-		\textbf{\large Description} \\
-			The LinuxCameraStreamer uses the V4L2 Linux Kernel API in order to read live data from the webcam of a computer.
-			
-			\begin{tabular}{p{7cm}|p{7cm}}
-    			Input Data & Output Data \\ \hline
-				\begin{itemize}
-					\item A Camera configuration describing the camera settings.
-				\end{itemize}
-				&
-				\begin{itemize}
-					\item The raw video frames as they are recorded.
-				\end{itemize}
-    		\end{tabular}
-
-		\textbf{\large Tests} \\
-			\test{The LinuxCameraStreamer is able to read an incoming video stream from the camera}
-			\test{The LinuxCameraStreamer will respond and update settings on the camera when needed}
-			\test{The LinuxCameraStreamer accurately retrieves hardware settings}
+		The LinuxCameraStreamer uses the V4L2 Linux Kernel API in order to read live data from the webcam of a computer.
 		
-	\subsection{NUBugger}
-		\textbf{\large Description} \\
-			NUBugger is a debugging system which integrates with a web browser.
-			It is used to display useful debugging information from the robot while it is running.
+		\paragraph{Requirements:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\paragraph{Assumptions:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
 
-			\begin{tabular}{p{7cm}|p{7cm}}
+		\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
-				\begin{itemize}
-					\item Realtime sensor information.
-					\item Realtime image data.
-				\end{itemize}
-				&
-				\begin{itemize}
-					\item Networked packets containing sensor and image data.
-				\end{itemize}
-    		\end{tabular}
+			\begin{itemize}
+				\item A Camera configuration describing the camera settings.
+			\end{itemize}
+			&
+			\begin{itemize}
+				\item The raw video frames as they are recorded.
+			\end{itemize}
+		\end{tabular}
 
-		\textbf{\large Tests} \\
-			\test{NUBugger sends out diagnostic data to the web server}
+		\paragraph{Tests:}
+		\begin{itemize}
+			\test{The LinuxCameraStreamer is able to read an incoming video stream from the camera}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+			
+			\test{The LinuxCameraStreamer will respond and update settings on the camera when needed}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+			
+			\test{The LinuxCameraStreamer accurately retrieves hardware settings}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+		\end{itemize}
+		
+	\subsection{NUbugger}
+		NUbugger is a debugging system which integrates with a web browser.
+		It is used to display useful debugging information from the robot while it is running.
+
+		\paragraph{Requirements:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\paragraph{Assumptions:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+
+		\begin{tabular}{p{7cm}|p{7cm}}
+    			Input Data & Output Data \\ \hline
+			\begin{itemize}
+				\item Realtime sensor information.
+				\item Realtime image data.
+			\end{itemize}
+			&
+			\begin{itemize}
+				\item Networked packets containing sensor and image data.
+			\end{itemize}
+		\end{tabular}
+
+		\paragraph{Tests:}
+		\begin{itemize}
+			\test{NUbugger sends out diagnostic data to the web server}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+		\end{itemize}
 		
 	\subsection{Platform Darwin HardwareIO}
-		\textbf{\large Description} \\
-			The Darwin Hardware IO module is responsible for directly interacting with the hardware on the robot.
-			
-			\begin{tabular}{p{7cm}|p{7cm}}
-    			Input Data & Output Data \\ \hline
-				\begin{itemize}
-					\item Servo motor commands describing a target point the motor needs to move to.
-				\end{itemize}
-				&
-				\begin{itemize}
-					\item Sensor information
-				\end{itemize}
-    		\end{tabular}
+		The Darwin Hardware IO module is responsible for directly interacting with the hardware on the robot.
 
-		\textbf{\large Tests} \\
+		\paragraph{Requirements:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\paragraph{Assumptions:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\begin{tabular}{p{7cm}|p{7cm}}
+			Input Data & Output Data \\ \hline
+			\begin{itemize}
+				\item Servo motor commands describing a target point the motor needs to move to.
+			\end{itemize}
+			&
+			\begin{itemize}
+				\item Sensor information
+			\end{itemize}
+		\end{tabular}
+
+		\paragraph{Tests}
+		\begin{itemize}
 			\test{The current data from the hardware is able to be read into SI units}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+			
 			\test{Commands are able to be sent to the hardware and they are executed properly}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+			
 			\test{The conversions performed in the Darwin HardwareIO are accurate}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+		\end{itemize}
 
 	\subsection{Platform Darwin MotionManager}
-		\textbf{\large Description} \\
-			The MotionManager module is responsible for converting higher level motion commands into commands which can be executed on the robots hardware.
-			
-			\begin{tabular}{p{7cm}|p{7cm}}
-    			Input Data & Output Data \\ \hline
-				\begin{itemize}
-					\item A list of servo angle waypoints with the absolute time to be at these angles.
-				\end{itemize}
-				&
-				\begin{itemize}
-					\item A list of physical motor movements to enact the given waypoints.
-				\end{itemize}
-    		\end{tabular}
+		The MotionManager module is responsible for converting higher level motion commands into commands which can be executed on the robots hardware.
+		
+		\paragraph{Requirements:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\paragraph{Assumptions:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\begin{tabular}{p{7cm}|p{7cm}}
+			Input Data & Output Data \\ \hline
+			\begin{itemize}
+				\item A list of servo angle waypoints with the absolute time to be at these angles.
+			\end{itemize}
+			&
+			\begin{itemize}
+				\item A list of physical motor movements to enact the given waypoints.
+			\end{itemize}
+		\end{tabular}
 
-		\textbf{\large Tests} \\
+		\paragraph{Tests:}
+		\begin{itemize}
 			\test{Waypoints sent to the motion manager are executed as hardware commands}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+			
 			\test{If a new waypoint arrives MotionManager should drop all waypoints after the execution time of the new waypoint}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+			
 			\test{MotionManager should correctly calculate the speed required to arrive at a particular waypoint in time}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+			
 			\test{MotionManager should split waypoints if the angle traveled is larger then $2\pi$ radians}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+		\end{itemize}
 			
 	\subsection{ScriptEngine}
-		\textbf{\large Description} \\
-			The script engine of the system is responsible for taking Scripts (a series of waypoints) that are provided by the config system, and then executing them on demand via the MotionManager.
-			
-			\begin{tabular}{p{7cm}|p{7cm}}
-    			Input Data & Output Data \\ \hline
-				\begin{itemize}
-					\item A script configuration object describing the available scripts.
-					\item A execute script command detailing the script to execute.
-				\end{itemize}
-				&
-				\begin{itemize}
-					\item A series of servo waypoint commands representing the script.
-				\end{itemize}
-    		\end{tabular}
+		The script engine of the system is responsible for taking Scripts (a series of waypoints) that are provided by the config system, and then executing them on demand via the MotionManager.
+		
+		\paragraph{Requirements:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\paragraph{Assumptions:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\begin{tabular}{p{7cm}|p{7cm}}
+			Input Data & Output Data \\ \hline
+			\begin{itemize}
+				\item A script configuration object describing the available scripts.
+				\item A execute script command detailing the script to execute.
+			\end{itemize}
+			&
+			\begin{itemize}
+				\item A series of servo waypoint commands representing the script.
+			\end{itemize}
+		\end{tabular}
 
-		\textbf{\large Tests} \\
+		\paragraph{Tests:}
+		\begin{itemize}
 			\test{The script engine can execute the scripts loaded into it}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+			
 			\test{The script engine will respond to changes in the scripts if the file is modified}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+		\end{itemize}
 		
 	\subsection{ScriptRunner}
-		\textbf{\large Description} \\
-			The ScriptRunner is a user interface reactor which is used to execute a series of scripts via the script engine.
-			
-			\begin{tabular}{p{7cm}|p{7cm}}
-    			Input Data & Output Data \\ \hline
-				\begin{itemize}
-					\item Command Line Arguments representing the scripts to run.
-				\end{itemize}
-				&
-				\begin{itemize}
-					\item A sequential set of messages indicating the next script to execute.
-				\end{itemize}
-    		\end{tabular}
+		The ScriptRunner is a user interface reactor which is used to execute a series of scripts via the script engine.
+		
+		\paragraph{Requirements:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\paragraph{Assumptions:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\begin{tabular}{p{7cm}|p{7cm}}
+			Input Data & Output Data \\ \hline
+			\begin{itemize}
+				\item Command Line Arguments representing the scripts to run.
+			\end{itemize}
+			&
+			\begin{itemize}
+				\item A sequential set of messages indicating the next script to execute.
+			\end{itemize}
+		\end{tabular}
 
-		\textbf{\large Tests} \\
+		\paragraph{Tests:}
+		\begin{itemize}
 			\test{The script runner is able to execute consecutive scripts}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+		\end{itemize}
 		
 	\subsection{ScriptTuner}
-		\textbf{\large Description} \\
-			The ScriptTuner is a user interface which allows the user to generate and modify scripts to be executed on the robot.
-			
-			\begin{tabular}{p{7cm}|p{7cm}}
-    			Input Data & Output Data \\ \hline
-				\begin{itemize}
-					\item Nothing
-				\end{itemize}
-				&
-				\begin{itemize}
-					\item Motion Commands
-				\end{itemize}
-    		\end{tabular}
+		The ScriptTuner is a user interface which allows the user to generate and modify scripts to be executed on the robot.
+		
+		\paragraph{Requirements:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\paragraph{Assumptions:}
+		\begin{itemize}
+			\item \todo[inline]{write}
+		\end{itemize}
+		
+		\begin{tabular}{p{7cm}|p{7cm}}
+			Input Data & Output Data \\ \hline
+			\begin{itemize}
+				\item Nothing
+			\end{itemize}
+			&
+			\begin{itemize}
+				\item Motion Commands
+			\end{itemize}
+		\end{tabular}
 
-		\textbf{\large Tests} \\
-			\test{The script tuner is able to load existing script files}		
+		\paragraph{Tests:}
+		\begin{itemize}
+			\test{The script tuner is able to load existing script files}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+			
 			\test{The script tuner is able to create new script files}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+			
 			\test{The script tuner is able to save modified and new scripts}
+			\begin{itemize}
+				\item \todo[inline]{write}
+			\end{itemize}
+		\end{itemize}
 \end{document}
