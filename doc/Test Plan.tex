@@ -233,30 +233,73 @@
 		\end{itemize}
 
 	\subsection{ConfigSystem}
-		\textbf{\large Description} \\
-			The ConfigSystem loads JSON-formatted key-value configuration files and supplies them to other modules.
-			These modules can be loaded either by referencing an individual file, or by referencing an entire directory.
-			ConfigSystem loads JSON-formatted configuration files and supplies them to other modules.
-			
-			\begin{tabular}{p{7cm}|p{7cm}}
+		The ConfigSystem loads JSON-formatted key-value configuration files and supplies them to other modules.
+		These modules can be loaded either by referencing an individual file, or by referencing an entire directory.
+		ConfigSystem loads JSON-formatted configuration files and supplies them to other modules.
+		The config system can be automatically tested through unit testing.
+		
+		\paragraph{Requirements:}
+		\begin{itemize}
+			\item The config system must be able to load individual JSON formatted files
+			\item The config system must be able to load directories of JSON formatted files
+			\item The config system must be able to monitor changes in these files and notify systems which use them
+			\item The config system must be able to convert these JSON files into useable objects
+		\end{itemize}
+		
+		\paragraph{Assumptions:}
+		\begin{itemize}
+			\item Files are assumed in JSON format
+			\item The requested directory is readable
+			\item All configuration files are assumed to be within a single directory subtree
+		\end{itemize}
+		
+		\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
-				\begin{itemize}
-					\item A requested configuration file or directory to monitor.
-					\item A configuration and a file path to save the configuration into.
-				\end{itemize}
-				&
-				\begin{itemize}
-					\item The configuration contained within a configuration file limited to the scope of the requesting module.
-					\item The configuration of each file in a directory in the case of a request for a directory.
-					\item Any updates to the monitored configuration files as they files they came from are modified.
-				\end{itemize}
-    		\end{tabular}
+			\begin{itemize}
+				\item A requested configuration file or directory to monitor.
+				\item A configuration and a file path to save the configuration into.
+			\end{itemize}
+			&
+			\begin{itemize}
+				\item The configuration contained within a configuration file limited to the scope of the requesting module.
+				\item The configuration of each file in a directory in the case of a request for a directory.
+				\item Any updates to the monitored configuration files as they files they came from are modified.
+			\end{itemize}
+		\end{tabular}
 
-		\textbf{\large Tests} \\
+		\paragraph{Tests:}
+		\begin{itemize}
 			\test{The Config system is able to load from a JSON file}
+			\begin{itemize}
+				\item A pre generated JSON file for a configuration should be made
+				\item A mock module should request this JSON file path
+				\item The resulting data should be the same as the contents of the JSON file
+			\end{itemize}
+			
 			\test{The Config system ensures that configurations only go to interested modules}
+			\begin{itemize}
+				\item Two pre generated JSON files should be created
+				\item Two mock modules should be made
+				\item Each of these modules should request alternate configuration files
+				\item It should be ensured that the contents provided by the configuration system are for only the configuration requested
+			\end{itemize}
+			
 			\test{The Config system is able to load directories containing configuration files}
+			\begin{itemize}
+				\item A directory should be filled with several JSON configuration files
+				\item A mock module should be made to request this directory
+				\item It should be ensured that the module receives each of the configurations in turn
+			\end{itemize}
+			
 			\test{The Config system is able to respond to modifications on loaded files}
+			\begin{itemize}
+				\item A JSON configuration file, and directory containing several files should be created
+				\item Two mock modules one checking the directory and one checking the file should be created
+				\item Once the files have been loaded initially, the files should be modified
+				\item It should be ensured that the modules that requested those configurations are notified of their modification
+				\item It should also be tested that adding a new configuration to the directory results in an update to the module
+			\end{itemize}
+		\end{itemize}
 
 	\subsection{DanceEngine}
 		\textbf{\large Description} \\
