@@ -1,12 +1,53 @@
-\documentclass[a4paper]{article}
-\usepackage{hyperref}          % Makes links in hyperlinked
-\usepackage{url}               % Allows the use of URLs with links and formatting
-\usepackage[parfill]{parskip}  % Makes paragraphs be on a new line with no indent
-\usepackage{todonotes}         % Allows todo comments
+% Initialisation
+\documentclass[english,12pt]{scrartcl}
 
-\title{Test Plan}
-\author{Jake Woods, Trent Houliston}
-\date{\today}
+\usepackage[]{babel}
+% Input is utf8
+\usepackage[utf8]{inputenc}
+% Enables headers and footers
+\usepackage[]{scrpage2}
+% Lets us colour table cells
+\usepackage[table]{xcolor}
+% Allows todo list and todos
+\usepackage[]{todonotes}
+% Makes links in contents hyperlinked
+\usepackage{hyperref}
+% Make references appear in our table of contents
+\usepackage[nottoc,numbib]{tocbibind}
+% Allows us to put landscape sections of the document
+\usepackage{pdflscape} % \usepackage{lscape} %Use escape for printing (doesn't rotate the pdf page)
+% Provides a glossary
+\usepackage[toc]{glossaries}
+
+\usepackage{tabularx} % For tables
+\usepackage{pgfgantt} % For Gantt charts. See http://ctan.unsw.edu.au/graphics/pgf/contrib/pgfgantt/pgfgantt.pdf
+\usepackage{import} % To include files
+\usepackage[a4paper]{geometry} %specifies page width
+\newgeometry{bottom=2cm, top=2cm}
+
+\newganttlinktype{rdldr*}{
+	\draw [/pgfgantt/link]
+	(\xLeft, \yUpper) --
+	(\xLeft + \ganttvalueof{link bulge 1} * \ganttvalueof{x unit},
+	\yUpper) --
+	($(\xLeft + \ganttvalueof{link bulge 1} * \ganttvalueof{x unit},
+	\yUpper)!%
+	\ganttvalueof{link mid}!%
+	(\xLeft + \ganttvalueof{link bulge 1} * \ganttvalueof{x unit},
+	\yLower)$) --
+	($(\xRight - \ganttvalueof{link bulge 2} * \ganttvalueof{x unit},
+	\yUpper)!%
+	\ganttvalueof{link mid}!%
+	(\xRight - \ganttvalueof{link bulge 2} * \ganttvalueof{x unit},
+	\yLower)$) --
+	(\xRight - \ganttvalueof{link bulge 2} * \ganttvalueof{x unit},
+	\yLower) --
+	(\xRight, \yLower);%
+}
+\ganttset{
+	link bulge 1/.link=/pgfgantt/link bulge,
+	link bulge 2/.link=/pgfgantt/link bulge
+}
 
 \newcounter{testcounter}
 
@@ -14,14 +55,37 @@
 	\stepcounter{testcounter}
 	Test \arabic{testcounter}: \emph{#2}. \textbf{\uppercase{#1}} \\}
 
+\title{Project Proposal - Revision}
+\author{Trent Houliston \and Jake Woods}
 
+% Header and Footer
+\pagestyle{scrheadings}
+\ihead{\today}
+\chead{}
+\ohead{Project Proposal - Revision}
+\ifoot{}
+\cfoot{}
+\ofoot{\pagemark}
+
+% Skip line rather then indent paragraphs
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.1in}
 
 \begin{document}
+	\maketitle
+	\vfill
+	{\large
+		\begin{description}
+			\item [Status:] Release 1
+			\item [Version:] 1.0
+		\end{description}}
 
-\maketitle
+	\clearpage
+	\tableofcontents
+	\clearpage
 
 \section{Introduction}
-	This document outlines the scope of testing applied to the implementation of the new architecture for the robocup codebase. 
+	This document outlines the scope of testing applied to the implementation of the new architecture for the RoboCup codebase. 
 	The original architecture relied on purely manual processes for all testing.
 	 
 	We believe that the new architecture should utilise automated testing whenever feasible while using manual testing as a last-resort backup.
@@ -58,10 +122,9 @@
 		\item Platform/Darwin/HardwareIO
 	\end{itemize}
 	
-	
 \section{Modules}
 	\subsection{AubioBeatDetector}
-		\subsubsection{Description}
+		\textbf{\large Description} \\
 			AubioBeatDetector detects beats in a supplied audio stream using the Aubio library.
 			Beats are reported as the time the beat occurred and the tempo.
 						
@@ -77,13 +140,13 @@
 				\end{itemize}
     		\end{tabular}
 			
-		\subsubsection{Tests}
+		\textbf{\large Tests} \\
 			\test{The beat detector is able to detect beats in an audio source}
 			\test{The beat detector should not crash on empty audio streams}
 			\test{The beat detector configuration should update automatically when parameters are changed}
 
 	\subsection{AudioFileInput}
-		\subsubsection{Description}
+		\textbf{\large Description} \\
 			AudioFileInput reads from a wav file specified in its configuration. 
 			It the emits SoundChunk messages periodically as if it was listening to the file through the input device.
 			
@@ -99,13 +162,13 @@
 				\end{itemize}
     		\end{tabular}
 			
-		\subsubsection{Tests}
+		\textbf{\large Tests} \\
 			\test{The module is able load a wave file and output its PCM data}
 			\test{The module correctly outputs configuration data from the wave file}
 			\test{The module correctly selects the file to load from its configuration}
 
 	\subsection{AudioInput}
-		\subsubsection{Description}
+		\textbf{\large Description} \\
 			AudioInput reads from the default audio input device.
 			It emits SoundChunk messages periodically as more data is read in from the input device.
 						
@@ -121,13 +184,13 @@
 				\end{itemize}
     		\end{tabular}
 
-		\subsubsection{Tests}
+		\textbf{\large Tests} \\
 			\test{The AudioInput module is able to read in sound data from the audio source}
 			\test{The AudioInput module correctly outputs the configuration of the audio source}
 			\test{The AudioInput module correctly selects the audio device based on system settings}
 			
 	\subsection{BeatDetector}
-		\subsubsection{Description}
+		\textbf{\large Description} \\
 			BeatDetector detects beats in a supplied audio stream using the a custom algorithm Beat'n.
 			Beats are reported as the time the beat occurred and the tempo.
 						
@@ -143,13 +206,13 @@
 				\end{itemize}
     		\end{tabular}
 
-		\subsubsection{Tests}
+		\textbf{\large Tests} \\
 			\test{The beat detector is able to detect beats in an audio source}
 			\test{The beat detector should not crash on empty audio streams}
 			\test{The beat detector configuration should update automatically when parameters are changed}
 
 	\subsection{ConfigSystem}
-		\subsubsection{Description}
+		\textbf{\large Description} \\
 			The ConfigSystem loads JSON-formatted key-value configuration files and supplies them to other modules.
 			These modules can be loaded either by referencing an individual file, or by referencing an entire directory.
 			ConfigSystem loads JSON-formatted configuration files and supplies them to other modules.
@@ -168,14 +231,14 @@
 				\end{itemize}
     		\end{tabular}
 
-		\subsubsection{Tests}
+		\textbf{\large Tests} \\
 			\test{The Config system is able to load from a JSON file}
 			\test{The Config system ensures that configurations only go to interested modules}
 			\test{The Config system is able to load directories containing configuration files}
 			\test{The Config system is able to respond to modifications on loaded files}
 
 	\subsection{DanceEngine}
-		\subsubsection{Description}
+		\textbf{\large Description} \\
 			The dance engine is responsible for taking the incoming beat frequency of detected audio, and executing scripts on the robot that allow it to dance to the beat.
 			
 			\begin{tabular}{p{5cm}|p{5cm}}
@@ -191,13 +254,13 @@
 				\end{itemize}
     		\end{tabular}
 
-		\subsubsection{Tests}
+		\textbf{\large Tests} \\
 			\test{The dance engine scales scripts lengths to match the period of the beat}
 			\test{The dance engine ensures that dance scripts execute such that they begin and end on beats}
 			\test{The dance engine continously picks random dances}
 		
 	\subsection{eSpeak}
-		\subsubsection{Description}
+		\textbf{\large Description} \\
 			The eSpeak module takes a string command and performs a text to speech conversion on it.
 			This sound data is then outputted through the speaker of the system.
 			
@@ -212,11 +275,11 @@
 				\end{itemize}
     		\end{tabular}
 
-		\subsubsection{Tests}
+		\textbf{\large Tests} \\
 			\test{eSpeak performs text to speach when a Say command is emitted}
 		
 	\subsection{LinuxCameraStreamer}
-		\subsubsection{Description}
+		\textbf{\large Description} \\
 			The LinuxCameraStreamer uses the V4L2 Linux Kernel API in order to read live data from the webcam of a computer.
 			
 			\begin{tabular}{p{5cm}|p{5cm}}
@@ -230,13 +293,13 @@
 				\end{itemize}
     		\end{tabular}
 
-		\subsubsection{Tests}
+		\textbf{\large Tests} \\
 			\test{The LinuxCameraStreamer is able to read an incoming video stream from the camera}
 			\test{The LinuxCameraStreamer will respond and update settings on the camera when needed}
 			\test{The LinuxCameraStreamer accurately retrieves hardware settings}
 		
 	\subsection{NUBugger}
-		\subsubsection{Description}
+		\textbf{\large Description} \\
 			NUBugger is a debugging system which integrates with a web browser.
 			It is used to display useful debugging information from the robot while it is running.
 
@@ -252,11 +315,11 @@
 				\end{itemize}
     		\end{tabular}
 
-		\subsubsection{Tests}
+		\textbf{\large Tests} \\
 			\test{NUBugger sends out diagnostic data to the web server}
 		
 	\subsection{Platform Darwin HardwareIO}
-		\subsubsection{Description}
+		\textbf{\large Description} \\
 			The Darwin Hardware IO module is responsible for directly interacting with the hardware on the robot.
 			
 			\begin{tabular}{p{5cm}|p{5cm}}
@@ -270,13 +333,13 @@
 				\end{itemize}
     		\end{tabular}
 
-		\subsubsection{Tests}
+		\textbf{\large Tests} \\
 			\test{The current data from the hardware is able to be read into SI units}
 			\test{Commands are able to be sent to the hardware and they are executed properly}
 			\test{The conversions performed in the Darwin HardwareIO are accurate}
 
 	\subsection{Platform Darwin MotionManager}
-		\subsubsection{Description}
+		\textbf{\large Description} \\
 			The MotionManager module is responsible for converting higher level motion commands into commands which can be executed on the robots hardware.
 			
 			\begin{tabular}{p{5cm}|p{5cm}}
@@ -290,14 +353,14 @@
 				\end{itemize}
     		\end{tabular}
 
-		\subsubsection{Tests}
+		\textbf{\large Tests} \\
 			\test{Waypoints sent to the motion manager are executed as hardware commands}
 			\test{If a new waypoint arrives MotionManager should drop all waypoints after the execution time of the new waypoint}
 			\test{MotionManager should correctly calculate the speed required to arrive at a particular waypoint in time}
 			\test{MotionManager should split waypoints if the angle traveled is larger then $2\pi$ radians}
 			
 	\subsection{ScriptEngine}
-		\subsubsection{Description}
+		\textbf{\large Description} \\
 			The script engine of the system is responsible for taking Scripts (a series of waypoints) that are provided by the config system, and then executing them on demand via the MotionManager.
 			
 			\begin{tabular}{p{5cm}|p{5cm}}
@@ -312,12 +375,12 @@
 				\end{itemize}
     		\end{tabular}
 
-		\subsubsection{Tests}
+		\textbf{\large Tests} \\
 			\test{The script engine can execute the scripts loaded into it}
 			\test{The script engine will respond to changes in the scripts if the file is modified}
 		
 	\subsection{ScriptRunner}
-		\subsubsection{Description}
+		\textbf{\large Description} \\
 			The ScriptRunner is a user interface reactor which is used to execute a series of scripts via the script engine.
 			
 			\begin{tabular}{p{5cm}|p{5cm}}
@@ -331,11 +394,11 @@
 				\end{itemize}
     		\end{tabular}
 
-		\subsubsection{Tests}
+		\textbf{\large Tests} \\
 			\test{The script runner is able to execute consecutive scripts}
 		
 	\subsection{ScriptTuner}
-		\subsubsection{Description}
+		\textbf{\large Description} \\
 			The ScriptTuner is a user interface which allows the user to generate and modify scripts to be executed on the robot.
 			
 			\begin{tabular}{p{5cm}|p{5cm}}
@@ -349,7 +412,7 @@
 				\end{itemize}
     		\end{tabular}
 
-		\subsubsection{Tests}
+		\textbf{\large Tests} \\
 			\test{The script tuner is able to load existing script files}		
 			\test{The script tuner is able to create new script files}
 			\test{The script tuner is able to save modified and new scripts}
