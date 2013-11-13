@@ -20,40 +20,15 @@
 \usepackage[toc]{glossaries}
 
 \usepackage{tabularx} % For tables
-\usepackage{pgfgantt} % For Gantt charts. See http://ctan.unsw.edu.au/graphics/pgf/contrib/pgfgantt/pgfgantt.pdf
-\usepackage{import} % To include files
 \usepackage[a4paper]{geometry} %specifies page width
 \newgeometry{bottom=2cm, top=2cm}
-
-\newganttlinktype{rdldr*}{
-	\draw [/pgfgantt/link]
-	(\xLeft, \yUpper) --
-	(\xLeft + \ganttvalueof{link bulge 1} * \ganttvalueof{x unit},
-	\yUpper) --
-	($(\xLeft + \ganttvalueof{link bulge 1} * \ganttvalueof{x unit},
-	\yUpper)!%
-	\ganttvalueof{link mid}!%
-	(\xLeft + \ganttvalueof{link bulge 1} * \ganttvalueof{x unit},
-	\yLower)$) --
-	($(\xRight - \ganttvalueof{link bulge 2} * \ganttvalueof{x unit},
-	\yUpper)!%
-	\ganttvalueof{link mid}!%
-	(\xRight - \ganttvalueof{link bulge 2} * \ganttvalueof{x unit},
-	\yLower)$) --
-	(\xRight - \ganttvalueof{link bulge 2} * \ganttvalueof{x unit},
-	\yLower) --
-	(\xRight, \yLower);%
-}
-\ganttset{
-	link bulge 1/.link=/pgfgantt/link bulge,
-	link bulge 2/.link=/pgfgantt/link bulge
-}
+\renewcommand{\arraystretch}{1.5}
 
 \newcounter{testcounter}
 
-\newcommand{\test}[2][pass] {
+\newcommand{\test}[1] {
 	\stepcounter{testcounter}
-	Test \arabic{testcounter}: \emph{#2}. \textbf{\uppercase{#1}} \\}
+	\item[] Test \arabic{testcounter}: \emph{#1}.}
 
 \title{Project Proposal - Revision}
 \author{Trent Houliston \and Jake Woods}
@@ -96,61 +71,85 @@
 	End-to-end testing will still require manual validation as fully automated end-to-end testing would require an emulation layer for the robots hardware that was outside the scope of this project.
 
 \section{Scope}
-	The following modules can be automatically unit tested:
-	\begin{itemize}
-		\item AubioBeatDetector
-		\item BeatDetector
-		\item ConfigSystem
-		\item PartyDarwin
-		\item ScriptEngine
-		\item ScriptRunner
-		\item Platform/Darwin/MotionManager
-	\end{itemize}
-
-	The following module combinations can be combined into automatic integration tests:
-	\begin{itemize}
-		\item AudioFileInput, (AubioBeatDetector or BeatDetector)
-		\item ScriptRunner, Platform/Darwin/MotionManager
-	\end{itemize}
-
-	These modules require manual testing because they depend on robot hardware that we can't emulate:
-	\begin{itemize}
-		\item AudioInput
-		\item eSpeak
-		\item LinuxCameraStreamer
-		\item NUBugger
-		\item Platform/Darwin/HardwareIO
-	\end{itemize}
+	The newly ported system has been split into many mutually exclusive sub modules and many are able to be tested in isolation using unit tests.
+	Some of the modules however	must be manually tested due to their reliance on hardware in the system.
+	An outline of the modules which have been ported and built on the new system as well as the testing method required is outlined below.
+	\begin{tabular}{|p{7cm}|p{7cm}|}
+		\hline \textbf{\large Module} & \textbf{\large Testing Method} \\ \hline
+		AubioBeatDetector     & Unit Testable    \\ \hline
+		AudioFileInput        & Unit Testable    \\ \hline
+		AudioInput            & Manual Testing   \\ \hline
+		BeatDetector          & Unit Testable    \\ \hline
+		ConfigSystem          & Unit Testable    \\ \hline
+		DarwinHardwareIO      & Manual Testing   \\ \hline
+		DarwinMotionManager   & Unit Testable    \\ \hline
+		eSpeak                & Manual Testing   \\ \hline
+		NUBugger              & Manual Testing   \\ \hline
+		LinuxCameraStreamer   & Manual Testing   \\ \hline
+		PartyDarwin           & Unit Testable    \\ \hline
+		ScriptEngine          & Unit Testable    \\ \hline
+		ScriptRunner          & Unit Testable    \\ \hline
+	\end{tabular}
 	
 \section{Modules}
-	\subsection{AubioBeatDetector}
-		\textbf{\large Description} \\
-			AubioBeatDetector detects beats in a supplied audio stream using the Aubio library.
-			Beats are reported as the time the beat occurred and the tempo.
-						
-			\begin{tabular}{p{5cm}|p{5cm}}
-    			Input Data & Output Data \\ \hline
-				\begin{itemize}
-					\item An Audio configuration file describing the format of the incoming data.
-					\item A series of sound chunks carrying raw PCM data
-				\end{itemize}
-				&
-				\begin{itemize}
-					\item The time and tempo of each beat as it happens.
-				\end{itemize}
-    		\end{tabular}
+	\subsection{AubioBeatDetector \& BeatDetector}
+		AubioBeatDetector detects beats in a supplied audio stream using the Aubio library.
+		BeatDetector detects beats using the Beat'n algorithm.
+		As both of these modules have identical input and output, the testing method for these two modules is also identical.
+		Beats are reported as the time the beat occurred and the tempo.
+		
+		\paragraph{Requirements:}
+		\begin{itemize}
+			\item This module is required to be able to accept a stream of audio chunks in PCM format and locate beats within it.
+			\item The beats when found should be immediately emitted containing both the absolute time the beat occurred, and the estimated frequency of the beats.
+			\item The beat detector must maintain above 90\% accuracy when provided with a audio file with a significant beat.
+		\end{itemize}
+		
+		\paragraph{Assumptions:}
+		\begin{itemize}
+			\item It is assumed that prior to any sound data being received, that the system will have received configuration information describing the sample rate, chunk size, and data frequency that will be used.
+			\item It is also assumed that the sound information send has a distinguishable beat, failing this the output is undefined.
+		\end{itemize}
+		
+		\begin{tabular}{p{7cm}|p{7cm}}
+    			\textbf{Input Data} & \textbf{Output Data} \\ \hline
+			\begin{itemize}
+				\item An Audio configuration file describing the format of the incoming data.
+				\item A series of sound chunks carrying raw PCM data
+			\end{itemize}
+			&
+			\begin{itemize}
+				\item The time and tempo of each beat as it happens.
+			\end{itemize}
+		\end{tabular}
+		
+		\paragraph{Tests:}
+		\begin{itemize}
+			\test{Test that the beat detector is able to detect beats in an audio stream}
+			\begin{itemize}
+				\item Load PCM data that contains a distinguishable beat
+				\item Pre-identify and mark the location of beats in the data
+				\item Output the format that this PCM data is in (Sample rate, Chunk size)
+				\item Output the PCM data in chunks which match the previously outputted settings
+				\item Monitor the emissions of Beat objects, and check that they match the previously identified beats (to within a tolerance)
+			\end{itemize}
 			
-		\textbf{\large Tests} \\
-			\test{The beat detector is able to detect beats in an audio source}
-			\test{The beat detector should not crash on empty audio streams}
-			\test{The beat detector configuration should update automatically when parameters are changed}
+			\test{Test that the beat detector is able to handle different sample rates and chunk sizes}
+			\begin{itemize}
+				\item Load two separate PCM datasets with different sample rates
+				\item Output the format that the first of these datasets is in
+				\item Ensure that the beat detector works as expected
+				\item Output the format that the second of these datasets is in
+				\item Ensure that the beat detector continues to work as expected
+			\end{itemize}
+		\end{itemize}
 
 	\subsection{AudioFileInput}
 		\textbf{\large Description} \\
 			AudioFileInput reads from a wav file specified in its configuration. 
 			It the emits SoundChunk messages periodically as if it was listening to the file through the input device.
 			
-			\begin{tabular}{p{5cm}|p{5cm}}
+			\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
 					\item A Configuration object providing the location of a wav file to be read.
@@ -172,7 +171,7 @@
 			AudioInput reads from the default audio input device.
 			It emits SoundChunk messages periodically as more data is read in from the input device.
 						
-			\begin{tabular}{p{5cm}|p{5cm}}
+			\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
 					\item None
@@ -194,7 +193,7 @@
 			BeatDetector detects beats in a supplied audio stream using the a custom algorithm Beat'n.
 			Beats are reported as the time the beat occurred and the tempo.
 						
-			\begin{tabular}{p{5cm}|p{5cm}}
+			\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
 					\item An Audio configuration file describing the format of the incoming data.
@@ -217,7 +216,7 @@
 			These modules can be loaded either by referencing an individual file, or by referencing an entire directory.
 			ConfigSystem loads JSON-formatted configuration files and supplies them to other modules.
 			
-			\begin{tabular}{p{5cm}|p{5cm}}
+			\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
 					\item A requested configuration file or directory to monitor.
@@ -241,7 +240,7 @@
 		\textbf{\large Description} \\
 			The dance engine is responsible for taking the incoming beat frequency of detected audio, and executing scripts on the robot that allow it to dance to the beat.
 			
-			\begin{tabular}{p{5cm}|p{5cm}}
+			\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
 					\item A Dance configuration describing the available dance scripts.
@@ -264,7 +263,7 @@
 			The eSpeak module takes a string command and performs a text to speech conversion on it.
 			This sound data is then outputted through the speaker of the system.
 			
-			\begin{tabular}{p{5cm}|p{5cm}}
+			\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
 					\item A message containing the string to speak.
@@ -282,7 +281,7 @@
 		\textbf{\large Description} \\
 			The LinuxCameraStreamer uses the V4L2 Linux Kernel API in order to read live data from the webcam of a computer.
 			
-			\begin{tabular}{p{5cm}|p{5cm}}
+			\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
 					\item A Camera configuration describing the camera settings.
@@ -303,7 +302,7 @@
 			NUBugger is a debugging system which integrates with a web browser.
 			It is used to display useful debugging information from the robot while it is running.
 
-			\begin{tabular}{p{5cm}|p{5cm}}
+			\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
 					\item Realtime sensor information.
@@ -322,7 +321,7 @@
 		\textbf{\large Description} \\
 			The Darwin Hardware IO module is responsible for directly interacting with the hardware on the robot.
 			
-			\begin{tabular}{p{5cm}|p{5cm}}
+			\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
 					\item Servo motor commands describing a target point the motor needs to move to.
@@ -342,7 +341,7 @@
 		\textbf{\large Description} \\
 			The MotionManager module is responsible for converting higher level motion commands into commands which can be executed on the robots hardware.
 			
-			\begin{tabular}{p{5cm}|p{5cm}}
+			\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
 					\item A list of servo angle waypoints with the absolute time to be at these angles.
@@ -363,7 +362,7 @@
 		\textbf{\large Description} \\
 			The script engine of the system is responsible for taking Scripts (a series of waypoints) that are provided by the config system, and then executing them on demand via the MotionManager.
 			
-			\begin{tabular}{p{5cm}|p{5cm}}
+			\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
 					\item A script configuration object describing the available scripts.
@@ -383,7 +382,7 @@
 		\textbf{\large Description} \\
 			The ScriptRunner is a user interface reactor which is used to execute a series of scripts via the script engine.
 			
-			\begin{tabular}{p{5cm}|p{5cm}}
+			\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
 					\item Command Line Arguments representing the scripts to run.
@@ -401,7 +400,7 @@
 		\textbf{\large Description} \\
 			The ScriptTuner is a user interface which allows the user to generate and modify scripts to be executed on the robot.
 			
-			\begin{tabular}{p{5cm}|p{5cm}}
+			\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
 				\begin{itemize}
 					\item Nothing
@@ -416,48 +415,4 @@
 			\test{The script tuner is able to load existing script files}		
 			\test{The script tuner is able to create new script files}
 			\test{The script tuner is able to save modified and new scripts}
-					
-\section{Test Results}
-	\todo[inline]{Write Introduction}
-	%% Generated via python.
-	\begin{itemize}
-                \item Test 1: PASS
-                \item Test 2: PASS
-                \item Test 3: PASS
-                \item Test 4: PASS
-                \item Test 5: PASS
-                \item Test 6: PASS
-                \item Test 7: PASS
-                \item Test 8: PASS
-                \item Test 9: PASS
-                \item Test 10: PASS
-                \item Test 11: PASS
-                \item Test 12: PASS
-                \item Test 13: PASS
-                \item Test 14: PASS
-                \item Test 15: PASS
-                \item Test 16: PASS
-                \item Test 17: PASS
-                \item Test 18: PASS
-                \item Test 19: PASS
-                \item Test 20: PASS
-                \item Test 21: PASS
-                \item Test 22: PASS
-                \item Test 23: PASS
-                \item Test 24: PASS
-                \item Test 25: PASS
-                \item Test 26: PASS
-                \item Test 27: PASS
-                \item Test 28: PASS
-                \item Test 29: PASS
-                \item Test 30: PASS
-                \item Test 31: PASS
-                \item Test 32: PASS
-                \item Test 33: PASS
-                \item Test 34: PASS
-                \item Test 35: PASS
-                \item Test 36: PASS
-                \item Test 37: PASS
-	\end{itemize}
-		
 \end{document}
