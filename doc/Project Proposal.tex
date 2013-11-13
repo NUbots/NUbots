@@ -1,4 +1,23 @@
-\documentclass[a4paper]{article}
+% Initialisation
+\documentclass[english,12pt]{scrartcl}
+
+\usepackage[]{babel}
+% Input is utf8
+\usepackage[utf8]{inputenc}
+% Enables headers and footers
+\usepackage[]{scrpage2}
+% Lets us colour table cells
+\usepackage[table]{xcolor}
+% Allows todo list and todos
+\usepackage[]{todonotes}
+% Makes links in contents hyperlinked
+\usepackage{hyperref}
+% Make references appear in our table of contents
+\usepackage[nottoc,numbib]{tocbibind}
+% Allows us to put landscape sections of the document
+\usepackage{pdflscape} % \usepackage{lscape} %Use escape for printing (doesn't rotate the pdf page)
+% Provides a glossary
+\usepackage[toc]{glossaries}
 
 \usepackage{tabularx} % For tables
 \usepackage{pgfgantt} % For Gantt charts. See http://ctan.unsw.edu.au/graphics/pgf/contrib/pgfgantt/pgfgantt.pdf
@@ -6,14 +25,55 @@
 \usepackage[a4paper]{geometry} %specifies page width
 \newgeometry{bottom=2cm, top=2cm}
 
+\newganttlinktype{rdldr*}{
+	\draw [/pgfgantt/link]
+	(\xLeft, \yUpper) --
+	(\xLeft + \ganttvalueof{link bulge 1} * \ganttvalueof{x unit},
+	\yUpper) --
+	($(\xLeft + \ganttvalueof{link bulge 1} * \ganttvalueof{x unit},
+	\yUpper)!%
+	\ganttvalueof{link mid}!%
+	(\xLeft + \ganttvalueof{link bulge 1} * \ganttvalueof{x unit},
+	\yLower)$) --
+	($(\xRight - \ganttvalueof{link bulge 2} * \ganttvalueof{x unit},
+	\yUpper)!%
+	\ganttvalueof{link mid}!%
+	(\xRight - \ganttvalueof{link bulge 2} * \ganttvalueof{x unit},
+	\yLower)$) --
+	(\xRight - \ganttvalueof{link bulge 2} * \ganttvalueof{x unit},
+	\yLower) --
+	(\xRight, \yLower);%
+}
+\ganttset{
+	link bulge 1/.link=/pgfgantt/link bulge,
+	link bulge 2/.link=/pgfgantt/link bulge
+}
+
 \title{Project Proposal - Revision}
 \author{Joshua Kearns \and Trent Houliston \and Jake Woods}
-\date{\today}
+
+% Header and Footer
+\pagestyle{scrheadings}
+\ihead{\today}
+\chead{}
+\ohead{Project Proposal - Revision}
+\ifoot{}
+\cfoot{}
+\ofoot{\pagemark}
+
+% Skip line rather then indent paragraphs
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.1in}
 
 \begin{document}
-
 	\maketitle
-	
+	\vfill
+	{\large
+		\begin{description}
+			\item [Status:] Release 1
+			\item [Version:] 1.0
+		\end{description}}
+
 	\clearpage
 	\tableofcontents
 	\clearpage
@@ -164,12 +224,33 @@
 				\paragraph{Transferring to New Architecture behind schedule}  
 					Due to failing to anticipate how time consuming transferring the old system to the new architecture would be, it was realised that it could not be completed in time. Fortunately the team had considered this possibility and was ready to deal with it. It was decided, as according to our contingency plan, that we would simply do the best we could and leave the rest for the NUbots team to complete.
 
-\newpage
 	\section{Schedule}
 		\subsection{Gantt Chart}
 			Original Schedule
 			\begin{figure}[!ht]
-				\subimport{ProjectProposalResources/}{GanttChart}
+				\scalebox{0.8} {
+					\begin{ganttchart}[bar/.append style={orange}, link/.append style={thick}]{1}{23}
+						\gantttitle{Semester 1}{9} 
+						\gantttitle{Semester 2}{14} \\
+						\gantttitlelist{6,...,14}{1} 
+						\gantttitlelist{1,2,...,14}{1} \\
+						\ganttbar{Design Nuclear}{1}{4} \\ %elem0
+						\ganttbar{Prototype Nuclear}{1}{4} \\ %elem1
+						\ganttbar{Implement Nuclear}{5}{9} \ganttnewline %elem2
+						\ganttmilestone{Milestone}{9} \ganttnewline %elem3
+						\ganttlinkedbar{Convert NUBots to NUClear}{10}{23} \ganttnewline %elem4
+						\ganttbar{Design Robot Dance}{5}{9} \\ %elem5
+						\ganttlinkedbar{Implement Robot Dance}{10}{17} \ganttnewline %elem6
+						\ganttlink[link type=f-f]{elem0}{elem1}
+						\ganttlink[link type=f-f]{elem1}{elem0}
+						\ganttlink[link type=rdldr*, link bulge 2=0.75, link mid=-.15]{elem0}{elem2}
+						%\ganttlink{elem1}{elem2}
+						\ganttlink[link type=rdldr*, link bulge 2=1.25, link mid=-.1]{elem0}{elem5}
+						\ganttlink{elem2}{elem3}
+						\ganttlink{elem3}{elem4}
+						\ganttlink{elem3}{elem6}
+					\end{ganttchart}
+				}
 			\end{figure}
 			\subsubsection{Task Definition}
 				\paragraph{Design Nuclear}
@@ -184,12 +265,40 @@
 					The design of the robot dance, will need to be based around the design of NUClear and will allow for the robot dance to be implemented.
 				\paragraph{Implement Robot Dance}
 					The robot dance will be implemented.
-\newpage
+
 		\subsection{Gantt Chart - Actual}
 			Shows how the schedule of tasks has actually occurred. \\
 			\begin{figure}[!ht]
-				\subimport{ProjectProposalResources/}{GanttChart_actual}
+				\scalebox{0.8}{
+					\begin{ganttchart}[bar/.append style={orange}, link/.append style={thick}]{1}{23}
+						\gantttitle{Semester 1}{9} 
+						\gantttitle{Semester 2}{14} \\
+						\gantttitlelist{6,...,14}{1} 
+						\gantttitlelist{1,2,...,14}{1} \\
+						%\ganttgroup{Group 1}{1}{7} \\
+						\ganttbar{Design Nuclear}{1}{4} \\ %elem0
+						\ganttbar{Prototype Nuclear}{1}{4} \\ %elem1
+						\ganttbar{Implement Nuclear}{5}{9} \ganttnewline %elem2
+						\ganttmilestone{Milestone}{9} \ganttnewline %elem3
+						\ganttlinkedbar{Start Converting to NUClear}{10}{16} \ganttnewline %elem4
+						\ganttbar{NUClear User Documentation}{17}{23} \ganttnewline %elem5
+						\ganttbar{Test NUClear}{17}{23} \ganttnewline %elem6
+						\ganttbar{Design Robot Dance}{5}{9} \\ %elem7
+						\ganttlinkedbar{Implement Robot Dance}{10}{17} \ganttnewline %elem8
+						\ganttlinkedbar{Test Robot Dance}{18}{23} \ganttnewline %elem9
+						%\ganttbar{Final Task}{8}{12}
+						\ganttlink[link type=f-f]{elem0}{elem1}
+						\ganttlink[link type=f-f]{elem1}{elem0}
+						\ganttlink[link type=rdldr*, link bulge 2=0.75, link mid=-.15]{elem0}{elem2}
+						\ganttlink[link type=rdldr*, link bulge 2=1.0, link mid=-.10]{elem0}{elem7}
+						\ganttlink{elem2}{elem3}
+						\ganttlink[link type=rdldr*, link bulge 2=0.50, link mid=.0]{elem0}{elem5}
+						\ganttlink{elem2}{elem6}
+						\ganttlink{elem3}{elem8}
+					\end{ganttchart}
+				}
 			\end{figure}
+			
 			\subsubsection{Changes to tasks}
 				\paragraph{Convert NUbots to NUClear}
 					Due to running out of time, this task will not be completed but only the vital components will be converted which will make it easier for the NUbots team to finish the task themselves. This task will end in week 7 to allow time for other tasks to be completed.
