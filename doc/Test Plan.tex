@@ -145,27 +145,44 @@
 		\end{itemize}
 
 	\subsection{AudioFileInput}
-		\textbf{\large Description} \\
-			AudioFileInput reads from a wav file specified in its configuration. 
-			It the emits SoundChunk messages periodically as if it was listening to the file through the input device.
-			
-			\begin{tabular}{p{7cm}|p{7cm}}
+		AudioFileInput reads from a wav file specified in its configuration. 
+		It the emits SoundChunk messages periodically as if it was listening to the file through a physical input device.
+		
+		\paragraph{Requirements:}
+		\begin{itemize}
+			\item This module must be able to load files in the WAV format
+			\item This module must be able to load files of varying file formats
+		\end{itemize}
+		
+		\paragraph{Assumptions:}
+		\begin{itemize}
+			\item Files will only be provided in WAV format
+			\item Files that are specified exist and are readable
+		\end{itemize}
+		
+		\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
-				\begin{itemize}
-					\item A Configuration object providing the location of a wav file to be read.
-				\end{itemize}
-				&
-				\begin{itemize}
-					\item A single AudioConfiguration object, describing the format of the loaded sound.
-					\item The binary PCM data from the wav file, split into chunks.
-				\end{itemize}
+			\begin{itemize}
+				\item A Configuration object providing the location of a wav file to be read.
+			\end{itemize}
+			&
+			\begin{itemize}
+				\item A single AudioConfiguration object, describing the format of the loaded sound.
+				\item The binary PCM data from the wav file, split into chunks.
+			\end{itemize}
     		\end{tabular}
-			
-		\textbf{\large Tests} \\
-			\test{The module is able load a wave file and output its PCM data}
-			\test{The module correctly outputs configuration data from the wave file}
-			\test{The module correctly selects the file to load from its configuration}
-
+		
+		\paragraph{Tests:}
+		\begin{itemize}
+			\test{The module is able load a wave file and output its file format and PCM data}
+			\begin{itemize}
+				\item A file location to a WAV file is provided though a configuration message
+				\item The file is opened and emits a message containing the files sample rate, as well as the calculated chunk size
+				\item Ensure the system then output chunks in simulated real time (1 second per second)
+				\item Ensure that these chunks match the PCM data contained in the WAV file
+			\end{itemize}
+		\end{itemize}
+		
 	\subsection{AudioInput}
 		\textbf{\large Description} \\
 			AudioInput reads from the default audio input device.
