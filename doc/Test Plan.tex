@@ -76,19 +76,19 @@
 	An outline of the modules which have been ported and built on the new system as well as the testing method required is outlined below.
 	\begin{tabular}{|p{7cm}|p{7cm}|}
 		\hline \textbf{\large Module} & \textbf{\large Testing Method} \\ \hline
-		AubioBeatDetector     & Unit Testable    \\ \hline
-		AudioFileInput        & Unit Testable    \\ \hline
-		AudioInput            & Manual Testing   \\ \hline
-		BeatDetector          & Unit Testable    \\ \hline
-		ConfigSystem          & Unit Testable    \\ \hline
-		DarwinHardwareIO      & Manual Testing   \\ \hline
-		DarwinMotionManager   & Unit Testable    \\ \hline
-		eSpeak                & Manual Testing   \\ \hline
-		NUBugger              & Manual Testing   \\ \hline
-		LinuxCameraStreamer   & Manual Testing   \\ \hline
-		PartyDarwin           & Unit Testable    \\ \hline
-		ScriptEngine          & Unit Testable    \\ \hline
-		ScriptRunner          & Unit Testable    \\ \hline
+		AubioBeatDetector     & Automated Testing  \\ \hline
+		AudioFileInput        & Automated Testing  \\ \hline
+		AudioInput            & Manual Testing     \\ \hline
+		BeatDetector          & Automated Testing  \\ \hline
+		ConfigSystem          & Automated Testing  \\ \hline
+		DarwinHardwareIO      & Manual Testing     \\ \hline
+		DarwinMotionManager   & Automated Testing  \\ \hline
+		eSpeak                & Manual Testing     \\ \hline
+		NUBugger              & Manual Testing     \\ \hline
+		LinuxCameraStreamer   & Manual Testing     \\ \hline
+		PartyDarwin           & Unit Testable      \\ \hline
+		ScriptEngine          & Automated Testing  \\ \hline
+		ScriptRunner          & Automated Testing  \\ \hline
 	\end{tabular}
 	
 \section{Modules}
@@ -97,6 +97,7 @@
 		BeatDetector detects beats using the Beat'n algorithm.
 		As both of these modules have identical input and output, the testing method for these two modules is also identical.
 		Beats are reported as the time the beat occurred and the tempo.
+		These two modules are able to be tested through automated unit testing.
 		
 		\paragraph{Requirements:}
 		\begin{itemize}
@@ -170,7 +171,7 @@
 				\item A single AudioConfiguration object, describing the format of the loaded sound.
 				\item The binary PCM data from the wav file, split into chunks.
 			\end{itemize}
-    		\end{tabular}
+		\end{tabular}
 		
 		\paragraph{Tests:}
 		\begin{itemize}
@@ -184,48 +185,52 @@
 		\end{itemize}
 		
 	\subsection{AudioInput}
-		\textbf{\large Description} \\
-			AudioInput reads from the default audio input device.
-			It emits SoundChunk messages periodically as more data is read in from the input device.
-						
-			\begin{tabular}{p{7cm}|p{7cm}}
+		AudioInput reads from the default audio input device.
+		It emits SoundChunk messages periodically as more data is read in from the input device.
+		This module must be manually tested due to its dependence on hardware.
+		
+		\paragraph{Requirements:}
+		\begin{itemize}
+			\item This module must be able to read in live audio from a physical audio device
+			\item The data that is generated must be emitted in PCM format
+			\item This module must output configuration regarding its sample rate and chunk size before outputting PCM data
+		\end{itemize}
+		
+		\paragraph{Assumptions:}
+		\begin{itemize}
+			\item The system must have a physical audio input device to read from
+			\item The physical hardware must be enabled and be in working order
+		\end{itemize}
+		
+		\begin{tabular}{p{7cm}|p{7cm}}
     			Input Data & Output Data \\ \hline
-				\begin{itemize}
-					\item None
-				\end{itemize}
-				&
-				\begin{itemize}
-					\item A single AudioConfiguration object, describing the format of the streamed sound.
-					\item The binary PCM data as obtained from the microphone, split into chunks.
-				\end{itemize}
-    		\end{tabular}
+			\begin{itemize}
+				\item None
+			\end{itemize}
+			&
+			\begin{itemize}
+				\item A single AudioConfiguration object, describing the format of the streamed sound.
+				\item The binary PCM data as obtained from the microphone, split into chunks.
+			\end{itemize}
+		\end{tabular}
 
-		\textbf{\large Tests} \\
+		\paragraph{Tests:}
+		\begin{itemize}
 			\test{The AudioInput module is able to read in sound data from the audio source}
-			\test{The AudioInput module correctly outputs the configuration of the audio source}
+			\begin{itemize}
+				\item The module should access the default audio capture device automatically
+				\item The module should output the maximum sample rate and channels available on this device
+				\item The module should then output chunks of audio as they are received from the device
+				\item This PCM data should be captured and played back
+				\item The sound from playing back this audio should be checked for similarity to the ambient noise
+			\end{itemize}
 			\test{The AudioInput module correctly selects the audio device based on system settings}
-			
-	\subsection{BeatDetector}
-		\textbf{\large Description} \\
-			BeatDetector detects beats in a supplied audio stream using the a custom algorithm Beat'n.
-			Beats are reported as the time the beat occurred and the tempo.
-						
-			\begin{tabular}{p{7cm}|p{7cm}}
-    			Input Data & Output Data \\ \hline
-				\begin{itemize}
-					\item An Audio configuration file describing the format of the incoming data.
-					\item A series of sound chunks carrying raw PCM data
-				\end{itemize}
-				&
-				\begin{itemize}
-					\item The time and tempo of each beat as it happens.
-				\end{itemize}
-    		\end{tabular}
-
-		\textbf{\large Tests} \\
-			\test{The beat detector is able to detect beats in an audio source}
-			\test{The beat detector should not crash on empty audio streams}
-			\test{The beat detector configuration should update automatically when parameters are changed}
+			\begin{itemize}
+				\item The module should access the audio device chosen as the default system capture device
+				\item The default capture device should be changed to an alternative device
+				\item The module should be restarted, and then access this new device
+			\end{itemize}
+		\end{itemize}
 
 	\subsection{ConfigSystem}
 		\textbf{\large Description} \\
