@@ -108,8 +108,8 @@
 		
 		\paragraph{Assumptions:}
 		\begin{itemize}
-			\item It is assumed that prior to any sound data being received, that the system will have received configuration information describing the sample rate, chunk size, and data frequency that will be used.
-			\item It is also assumed that the sound information send has a distinguishable beat, failing this the output is undefined.
+			\item Prior to any sound data being received, the system will have received configuration information describing the sample rate, chunk size, and data frequency to be used.
+			\item The sound information sent has a distinguishable beat, failing this the output is undefined.
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
@@ -593,15 +593,17 @@
 			
 	\subsection{ScriptEngine}
 		The script engine of the system is responsible for taking Scripts (a series of waypoints) that are provided by the config system, and then executing them on demand via the MotionManager.
+		This module can be automatically tested through unit testing.
 		
 		\paragraph{Requirements:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The script engine is required to take scripts and convert them into waypoints
+			\item The script engine is required to take names of scripts and find them within its scope
 		\end{itemize}
 		
 		\paragraph{Assumptions:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The scripts only contain motions for servos which exist on the robot
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
@@ -620,26 +622,33 @@
 		\begin{itemize}
 			\test{The script engine can execute the scripts loaded into it}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item A script file must be located in the appropriate directory (where the module is configured to look)
+				\item The name of the script is passed to the script engine
+				\item It should be ensured that the waypoints that are outputted are those contained in the requested script
 			\end{itemize}
 			
-			\test{The script engine will respond to changes in the scripts if the file is modified}
+			\test{The script engine is able to execute other scripts passed to it}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item A script object should be created
+				\item This script object should be emitted
+				\item The script engine should output the waypoints corresponding to this script
 			\end{itemize}
 		\end{itemize}
 		
 	\subsection{ScriptRunner}
 		The ScriptRunner is a user interface reactor which is used to execute a series of scripts via the script engine.
+		This module is able to be automatically unit tested.
 		
 		\paragraph{Requirements:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The script runner must be able to run a series of scripts in order
+			\item The script runner must be able to identify scripts by name
+			\item The script runner must run each script as soon as the previous script has completed
 		\end{itemize}
 		
 		\paragraph{Assumptions:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The scripts which are to be executed must exist
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
@@ -657,21 +666,24 @@
 		\begin{itemize}
 			\test{The script runner is able to execute consecutive scripts}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item Start the script runner with a list of scripts
+				\item Ensure that the waypoints for the scripts are placed in order
 			\end{itemize}
 		\end{itemize}
 		
 	\subsection{ScriptTuner}
 		The ScriptTuner is a user interface which allows the user to generate and modify scripts to be executed on the robot.
+		As it is a user interface system it must be manually tested.
 		
 		\paragraph{Requirements:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The script tuner must be able to modify existing scripts
+			\item The script tuner must be able to create new scripts
 		\end{itemize}
 		
 		\paragraph{Assumptions:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The scripts 
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
@@ -705,5 +717,8 @@
 		
 \section{Integration Testing}
 	\todo{if you take away the hardware specific modules it is possible to test the entire system}
+	
+\section{Simulation Testing}
+	\todo{Write about Webots, and Simspark}
 	
 \end{document}
