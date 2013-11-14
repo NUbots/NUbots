@@ -83,6 +83,10 @@
 			0.5 &
 			Filled out all of the NUClear Design Features &
 			Jake Woods \\
+			
+			0.6 &
+			Editing &
+			Trent Houliston \\
 			\hline
 		\end{tabular}
 		
@@ -90,12 +94,13 @@
 		
 	\section{Summary}
 		\subsection{Project Background}
-			The NUbots are a team of Software Engineers and Computer Scientists who build software for robots in order to compete in robocup. 
-			Robocup is an international competition that pits two fearsome robots against each other in an intense soccer competition with the goal of challenging humans by the year 2050.
+			The NUbots are a team of Software Engineers and Computer Scientists who build software for robots in order to compete in RoboCup. 
+			RoboCup is an international competition that pits two fearsome robots against each other in an intense soccer competition with the goal of challenging humans by the year 2050.
 			
-			The robot software system has been developed at the University of Newcastle by the NUbots since 2002 and has changed robots three times between 2002-2013 initially starting with the four-legged \textbf{AIBO} robots followed by the two legged \textbf{Nao} and as of 2011 they are now using the \textbf{Darwin}. The NUbots have also been successful at taking home the coveted robocup trophy twice in their career.
+			The robot software system has been developed at the University of Newcastle by the NUbots since 2002 and has changed robots three times between 2002-2013 initially starting with the four-legged \textbf{Sony AIBO} robots followed by the two legged \textbf{Aldebaran Nao} and as of 2011 they are now using the \textbf{Robotis DARwIn-OP}.
+			The NUbots have also been successful at taking home the coveted RoboCup trophy twice in their career.
 			
-			The existing robot software was developed by separating different processing systems (Vision, Localization, Kinematics, etc...) into their own code modules that communicate using ad-hoc mechanisms on a per-module basis. 
+			The existing robot software was developed by separating different processing systems (Vision, Localisation, Kinematics, etc...) into their own code modules that communicate using ad-hoc mechanisms on a per-module basis. 
 			Unfortunately constant developer churn and a long-lived code base have resulted in a system that contains very impressive algorithms that are hindered by a myriad of complicated and confusing communication methods.
 			
 			Our team was asked to develop a solution to this communication problem by restructuring the architecture around the individual systems to allow them to communicate in a \textbf{Simple}, \textbf{Efficient} and \textbf{Unified} way. 
@@ -104,9 +109,11 @@
 			Our ultimate goal is to provide a system that allows the NUbots to focus on the amazing algorithms and research without spending a disproportionate amount of time writing code to move data from system to system.
 				
 		\subsection{Recommend Solution}
-			After careful analysis of the existing system we determined that it is prohibitively expensive to incrementally refactor the existing code base. However we have also determined that the algorithmic parts of the system can be separated from the architecture without a massive investment of labour. 
+			After careful analysis of the existing system we determined that it is prohibitively expensive to incrementally refactor the existing code base.
+			However we have also determined that the algorithmic parts of the system can be separated from the architecture without a massive investment of labour. 
 			
-			Based on these observations we decided to build a new architecture from the ground up while migrating the existing algorithms into the new system as it is built. It was important to ensure that we only made changes to algorithmic code when necessary to decouple it from the old architecture while still leaving the algorithm intact.
+			Based on these observations we decided to build a new architecture from the ground up while migrating the existing algorithms into the new system as it is built.
+			It was important to ensure that we only made changes to algorithmic code when necessary to decouple it from the old architecture while still leaving the algorithm intact.
 			
 			\subsubsection{Technologies}
 				A key requirement set out by the NUbots team was to make it possible to easily replace modules that provide information with completely different modules provided that they produce the same information. 
@@ -122,7 +129,7 @@
 				RobotOS uses a message passing system and was considered very heavily as a replacement for the existing architecture.
 				
 				Unfortunately RobotOS has a very high performance penalty to support message passing which was completely unacceptable for resource-starved platforms such as the Darwin. 
-				Other existing robot systems such as \textbf{Dynamic Data eXchange (DDX)} and  \textbf{Pack Service Robotic Architecture} also suffer from the same issues. It seemed that all contemporary robotic systems have decided to trade performance for message passing and cross-language compatibility.
+				Other existing robot systems such as \textbf{Dynamic Data eXchange (DDX)} and \textbf{Pack Service Robotic Architecture} also suffer from the same issues. It seemed that all contemporary robotic systems have decided to trade performance for message passing and cross-language compatibility.
 				
 				Our team decided to leverage our C++ skills to build an alternative system named \textbf{NUClear} that provides message passing capabilities (and more) that are orders of magnitudes faster then the competing systems. 
 				Once we had a proof-of-concept it was decided to use the NUClear architecture as the basis for the new NUbots architecture. NUClear is covered extensively in the Architecture Overview.
@@ -159,11 +166,11 @@
 				\textbf{Emit} correspondingly allows you to provide information to the system.
 				
 				The major benefit of having such a small API is understandability. 
-				Instead of having to memorize tens or hundreds of functions you just need to remember two key functions and you have the full power of NUClear at your fingertips.
+				Instead of having to memorise tens or hundreds of functions you just need to remember two key functions and you have the full power of NUClear at your fingertips.
 				This makes it easy for new programmers to learn and understand.
 			
 			\subsubsection{Simple utilization of system resources}
-				Another requirement derived from resource-constrained environments is the need to easily utilize the full power of the platform you run on.
+				Another requirement derived from resource-constrained environments is the need to easily utilise the full power of the platform you run on.
 				This is primarily achieve by introducing \textbf{Transparent Multi-threading} which automatically uses every physical core available on the system
 				without the developer needing to fiddle with threading primitives.
 				
@@ -187,10 +194,10 @@
 			\subsubsection{Low Performance Penalty}
 				In order to meet our clients requirements it is essential that message routing is performed as quickly as possible. 
 			
-				Because of this we have opted not to use technologies that incur large performance penalties such as text-based message serialization (XML, JSON).
+				Because of this we have opted not to use technologies that incur large performance penalties such as text-based message serialisation (XML, JSON).
 				Instead we have chosen a direct binary representation for messages passed within a single process. 
 				
-				We also need to minimize the amount of time it takes to send a message. 
+				We also need to minimise the amount of time it takes to send a message. 
 				To achieve this NUClear uses modern C++ features enabling us to perform partial message routing at compile time.
 				Normally when you send a message there is a message broker executes some code to find the systems that are interested in a particular message.
 				This system usually uses a number of intermediate steps to locate the appropriate messages.
@@ -198,7 +205,7 @@
 				Additionally we are able to perform compile time memory allocation using template meta-programming to determine at compile time how much space is needed for messages.
 				We can then use that information to preallocate the space before the program runs giving us the ability to send an arbitrary number of messages in O(1) time.
 			
-				Thanks to the mechanism used to allocate messages optimizing compilers are also able to reason about the memory allocation of the messages at compile time which gives the compiler the opportunity to apply a number of powerful optimizations to how messages are sent.
+				Thanks to the mechanism used to allocate messages optimising compilers are also able to reason about the memory allocation of the messages at compile time which gives the compiler the opportunity to apply a number of powerful optimisations to how messages are sent.
 				
 				Our tests show that NUClear is able to operate between 1000-7000 times faster then competing message passing systems such as CORBA or RobotOS.
 				
@@ -270,7 +277,7 @@
 	
 			\subsubsection{On}
 				\emph{On} subscribes a reaction to particular message. 
-				On also has a number of arguments that customize what data it receives and triggers on.
+				On also has a number of arguments that customise what data it receives and triggers on.
 				
 			\subsubsection{Emit}
 				\emph{Emit} sends data to the PowerPlant which routes it to the subscribed reactions.
