@@ -709,17 +709,24 @@
 		\begin{itemize}
 			\test{The script tuner is able to load existing script files}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item Run the script tuner given a path to an existing script file
+				\item Ensure that the script tuner has loaded the motor angles and frames within the file
 			\end{itemize}
 			
 			\test{The script tuner is able to create new script files}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item Run the script tuner given a path to a script file that does not exist
+				\item Ensure that the script tuner creates a new script file
 			\end{itemize}
 			
 			\test{The script tuner is able to save modified and new scripts}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item Run the script tuner given an existing script file
+				\item Perform a modification to the file and save it
+				\item Ensure that the JSON representation in the script file matches the modification
+				\item Run the script tuner given a new file path
+				\item Create new frames and save the data
+				\item Ensure that the JSON representation in the script file matches the created script
 			\end{itemize}
 		\end{itemize}
 		
@@ -792,6 +799,10 @@
 	\end{figure}
 	
 \section{Simulation Testing}
-	\todo{Write about Webots, and Simspark}
+	By implementing modules that simulate the hardware components of the robotic platform it is possible to perform a full simulation.
+	There currently exist two simulation engines that are able to perform high level simulations for the robot system.
+	Webots and Simspark are both based on the Open Dynamic Engine (ODE) which is an open source physics and rigid body simulator.
+	This allows high level simulations of the robots environment.
+	These systems allow testing on the entirety of the robotic system to be performed without requiring physical access to a robot.
 	
 \end{document}
