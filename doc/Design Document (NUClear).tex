@@ -74,6 +74,11 @@
 			Added a much better intro &
 			Jake Woods \\
 			\hline
+			
+			0.4 &
+			Improved some of NUClear and the Intro &
+			Jake Woods \\
+			\hline
 		\end{tabular}
 		
 	\clearpage
@@ -94,11 +99,9 @@
 			Our ultimate goal is to provide a system that allows the NUbots to focus on the amazing algorithms and research without spending a disproportionate amount of time writing code to move data from system to system.
 				
 		\subsection{Recommend Solution}
-			After careful analysis of the existing system we determined that it is prohibitively expensive to incrementally refactor the existing code base. 
-			Instead we have opted for a complete restructuring of the project whereby we replace the existing architectural scaffolding with a completely new system.
+			After careful analysis of the existing system we determined that it is prohibitively expensive to incrementally refactor the existing code base. However we have also determined that the algorithmic parts of the system can be separated from the architecture without a massive investment of labour. 
 			
-			However we also determined that the algorithmic parts of the system can be separated from the architecture without a massive investment of labour. 
-			With this in mind we have migrated the existing algorithms into the new architecture taking care to only make minimal changes to remove any architectural dependencies but leave the algorithm intact.
+			Based on these observations we decided to build a new architecture from the ground up while migrating the existing algorithms into the new system as it is built. It was important to ensure that we only made changes to algorithmic code when necessary to decouple it from the old architecture while still leaving the algorithm intact.
 			
 			\subsubsection{Technologies}
 				A key requirement set out by the NUbots team was to make it possible to easily replace modules that provide information with completely different modules provided that they produce the same information. 
@@ -143,16 +146,18 @@
 
 		\subsection{Goals}
 			\subsubsection{Simple API}
-					NUClear is designed to be usable by second year software students who have a basic understanding of C++. 
-					
-					It was critical that NUClear have a simple and intuitive interface that didn't require weeks of study to achieve productivity with.
-					With that in mind we ensured that the two key concepts, sending and receiving messages, only require the use of two corresponding functions: \textbf{On} and \textbf{Emit}
-					
-					NUClear is designed around these two functions. \textbf{On} provides mechanisms to indicate that you are interested in a particular piece of information.
-					\textbf{Emit} correspondingly allows you to provide information to the system.
-					
-					There is a small amount of boilerplate requiring that you inherit from \textbf{NUClear::Reactor} and provide an appropriate constructor.
-					However these are simply implementation details and do not require understanding to utilize the full power of the system.
+
+				
+				It is critical that NUClear have a simple and intuitive interface that didn't require weeks of study to achieve productivity with.
+				As such NUClear is designed to be usable by second year software students who have a basic understanding of C++. 
+				With that in mind we ensured that there was a single well-defined function for the two key features of the architecture: sending and receiving messages. Sending is accomplished using the \textbf{Emit} function while receiving is accomplished using the \textbf{On} function.
+				
+				NUClear is designed around these two functions. \textbf{On} provides mechanisms to indicate that you are interested in a particular piece of information.
+				\textbf{Emit} correspondingly allows you to provide information to the system.
+				
+				The major benefit of having such a small API is understandability. 
+				Instead of having to memorize tens or hundreds of functions you just need to remember two key functions and you have the full power of NUClear at your fingertips.
+				This makes it easy for new programmers to learn and understand.
 			
 			\subsubsection{Simple utilization of system resources}
 				Another requirement derived from resource-constrained environments is the need to easily utilize the full power of the platform you run on.
@@ -177,25 +182,25 @@
 				NUClear also provides functionality to let the user specify that certain reactions should not be run in parallel which can be used to solve threading concerns.
 			
 			\subsubsection{Low Performance Penalty}
-				NUClear needs to run in resource-constrained environment where large API overhead is unacceptable.
-				Because of this we have opted not to use technologies that incur large performance penalties such as XML serialization 
-				instead opting for a direct binary representation for messages passed within a single process. 
+				In order to meet our clients requirements it is essential that message routing is performed as quickly as possible. 
+			
+				Because of this we have opted not to use technologies that incur large performance penalties such as text-based message serialization (XML, JSON).
+				Instead we have chosen a direct binary representation for messages passed within a single process. 
 				
-				We use modern C++ features to perform \textbf{Compile-Time Allocation and Routing} which allows us to calculate and allocate space
-				for all reactions and messages at compile time.
-				Additionally we compute reaction lookup at compile-time to minimize the time it takes to emit or receive a message.
-				In our tests these optimizations have allowed us to send an arbitrary number of messages in O(1) time.
-				
-			\subsubsection{Compile-Time Message Routing}
-				NUClear leverages modern C++ features enabling us to perform partial message routing at compile time.
+				We also need to minimize the amount of time it takes to send a message. 
+				To achieve this NUClear uses modern C++ features enabling us to perform partial message routing at compile time.
 				Normally when you send a message there is a message broker executes some code to find the systems that are interested in a particular message.
 				This system usually uses a number of intermediate steps to locate the appropriate messages.
 				
-				NUClear uses template meta-programming to determine at compile time how much space is needed for reactions and messages and allocates
+				Additionally we are able to perform compile time memory allocation using template meta-programming to determine at compile time how much space is needed for messages.
+				We can then use that information to preallocate the space before the program runs giving us the ability to send an arbitrary number of messages in O(1) time.
+			
+				Thanks to the mechanism used to allocate messages optimizing compilers are also able to reason about the memory allocation of the messages at compile time which gives the compiler the opportunity to apply a number of powerful optimizations to how messages are sent.
 				
-				\todo[inline] {Write about feature}
+				Our tests show that NUClear is able to operate between 1000-7000 times faster then competing message passing systems such as CORBA or RobotOS.
 				
-			\subsubsection{Statistics and Logging}
+			\subsubsection{Statistics, Logging and Traceability}
+			
 				\todo[inline] {Write about stats and logging and how we solve the problem of multithreaded logging}
 				
 			\subsubsection{Extensible Architecture}
