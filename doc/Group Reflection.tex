@@ -62,9 +62,13 @@
 		NUClear was the core part of the project, without this architectural framework our project would have been of no use to the NUBots team.
 		NUClear was a huge success. NUClear has achieved its goals of being a fast, easy to use, flexible, loosely coupled framework.
 		It has used innovative techniques such as template metaprogramming and compile time message routing to achieve this.
-		It to allow the NUbots system to be much more expandable and flexible once NUClearPort is complete.
+		It to allow the NUbots system to be much more expandable, maintainable and flexible once NUClearPort is complete.
+		NUClear's message based design makes it easy to extend the the system easily plugging in new components or replacing old components.		
+		In particular it's ability to allow the NUbots to move to a new robot platform as the hardware IO is no longer tightly coupled to the rest of the system.
 		It has also allowed for the easy construction of completely new systems such as Robot Dance and Mech Warrior using components already available from NUClearPort.
-		It is also already being used for research purposes by the NUbots team.
+		NUClear was designed with debugability as a core goal, making the system much more maintainable.
+		NUClear has been embraced by the NUBots team who are continuing the work on NUClearPort.
+		Additionally the NUbots team are already using NUClear to assist in robot research.
 	
 	\subsection{NUClearPort}
 		While NUClearPort did not progress as far as originally intended it is well on it's way to converting the old NUbots soccer system to NUClear.
@@ -106,19 +110,62 @@
 		Skype was also employed regularly for group communication.
 	
 	\subsection{Software Engineering Methodologies}
+		Due to our close communication with the NUbots team aswell as our small team size, our group approach evolved into a smi-agile approach. This was expressed through the use of an evolutionary prototype which was used in the design and developement of NUClear. It allowed us to see what could be done with the tools we had available. We were however constrained in following agile development to some extent by the quantity of documentation required for the project.
 		
 	\subsection{Documentation}
 		Due to losing team members documentation became more of a burden than we originally estimated.
 		Focus had to be allocated to finishing the documentation rather than making further progress with the project, particularly with NUClearPort.
 		Many of our documents were delivered somewhat behind schedule, however they were still developed to a professional standard.
+		For our project we developed the following documents:
+		\begin{itemize}
+			\item Project Plan
+			\item Requirement Document
+			\item Design Document
+			\item Test Plan
+			\item Group Reflection (This Document)
+			\item NUbots training document
+		\end{itemize}
+		
+		Due to our agile approach and close communication with the NUbots team, at times the documentation seemed more of a burden than actually useful. 
+		The project plan however helped us to consider the risks that could take place in our project.
+		Also the requirements document helped us to fully clarify some of the requirements we had previously overlooked.
+		The test plan was useful for the NUbots team to use in the future to ensure future improvements are correct.
+		By far the most useful of the documents was the NUbots training document.
+		This document was developed to teach current and future NUbots members how to use NUClear and NUClearPort.
+		This document will helping NUBots members to use the new architecture we developed, to continue to port the system to NUClear and for all future NUbots development.
+
+		
 	
 	\subsection{Tools}
-		The tools we used for our project were Git, GitHub and BaseCamp.
+		The tools we used for our project were Git, GitHub, BaseCamp, Latex and C++.
 		Many of our group used different IDE's and we made no effort to synchronise on what to use for this.
+		\\
 		Git and GitHub proved extremely useful.
-		They allowed us to efficiently share code, to create different versions of the code to work on particular features and to easily go check previous code that we made.
-		BaseCamp was useful particularly for first semester as it was easy to learn and more useful for a large team. It helped us setup other tools such as git and agree on our approach when the project was new.
-		It however became less useful in semester 2 as the group became smaller and we had already determined our approaches.
+		They allowed us to efficiently share code, to create different versions of the code to work on particular features and to easily go check previous code that we made. They were also incredibly useful for documentation control.
+		\\
+		BaseCamp was useful particularly for first semester as it was easy to learn and more useful for a large team. 
+		It allowed us to have a common discussion board for the issues in our project. It was also useful for sharing files.
+		It helped us setup other tools such as git and agree on our approach when the project was new.
+		It however became less useful in semester 2 as the group became smaller when we had already determined our approaches and found it easier to communicate directly using other methods.
+		\\
+		We used Latex for writing our documentation. 
+		Latex turned out to be an excellent choice as a document writer. 
+		It allowed us to effectively share our documents using git.
+		It is also a flexible tool, allowing many things to be done with a document.
+		Although several of our team had no prior Latex experience, we quickly acquired a knack for using it.
+		\\
+		C++ was the programming language we used for our project. 
+		It was required that we use C++ as that is what the NUbots team uses. 
+		C and C++ are the standard languages used for robotics. 
+		C++ is able to work on a low level, making it excellent for communication with hardware such as the Darwin robots used by the NUbots.
+		C++ is also an object oriented language which makes it suitable for the large complicated system we were working on.
+		Our team was able to make full use of C++ using innovative techniques such as template meta-programming to make NUClear quick and very easy to use.
+		We managed to make use of nearly all the features released in the latest version of C++ (C++11).
+		The downside to this is that while NUClear is incredible easy to use for the user, it is very difficult to modify the core code of NUClear unless you are experienced with template meta-programming.
+		Some of our group members had little C++ experience at the start of the project.
+		Those group members had their skills greatly improved through the course of the project.
+		Nonetheless, this lack of experience at the start of the project caused some setbacks, particuarly for the robot dance.
+		
 \section{Overall Development}
 	%TODO More stuff in this section?
 	\subsection{Things to improve}
