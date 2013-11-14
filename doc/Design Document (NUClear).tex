@@ -49,7 +49,7 @@
 	{\large
 		\begin{description}
 			\item [Status:] Draft 1
-			\item [Version:] 0.3
+			\item [Version:] 0.5
 		\end{description}}
 
 	\clearpage
@@ -77,6 +77,11 @@
 			
 			0.4 &
 			Improved some of NUClear and the Intro &
+			Jake Woods \\
+			\hline
+			
+			0.5 &
+			Filled out all of the NUClear Design Features &
 			Jake Woods \\
 			\hline
 		\end{tabular}
@@ -131,7 +136,7 @@
 			He simply writes a new vision module using the NUClear API to request that image frames are sent 
 			
 			requesting the image information and NUClear ensures the image frames are sent to the appropriate modules.
-	
+		
 	\section{NUClear Design}
 		NUClear is the C++ library that we designed to enable developers to write modular systems that communicate using messages. 
 		Modules are kept ignorant of each other and only know about the messages they send/receive. 
@@ -144,10 +149,8 @@
 		
 		Our goal was to make a system that allows programmers to easily send/receive information between modules using mechanisms that are \textbf{Fast}, \textbf{Reliable} and \textbf{Intuitive}.
 
-		\subsection{Goals}
+		\subsection{Features}
 			\subsubsection{Simple API}
-
-				
 				It is critical that NUClear have a simple and intuitive interface that didn't require weeks of study to achieve productivity with.
 				As such NUClear is designed to be usable by second year software students who have a basic understanding of C++. 
 				With that in mind we ensured that there was a single well-defined function for the two key features of the architecture: sending and receiving messages. Sending is accomplished using the \textbf{Emit} function while receiving is accomplished using the \textbf{On} function.
@@ -199,15 +202,31 @@
 				
 				Our tests show that NUClear is able to operate between 1000-7000 times faster then competing message passing systems such as CORBA or RobotOS.
 				
-			\subsubsection{Statistics, Logging and Traceability}
-			
-				\todo[inline] {Write about stats and logging and how we solve the problem of multithreaded logging}
-				
-			\subsubsection{Extensible Architecture}
-				\todo[inline] {Write about how we can do awesome extensions}
-				
 			\subsubsection{Smart Timers}
-				\todo[inline] {Write about feature. No wasted CPU cycles using a wait-loop}		\subsection{Simple API}
+				In real-time systems it's common to have a number of systems that need to execute periodically. 
+				In our analysis of the existing NUbots architecture we found several examples of systems that need to do something periodically.
+				For example Camera frames need to be read every 50 milliseconds and Motors need to be updated every 30 milliseconds. 
+				
+				The way this is accomplished in the existing NUbots architecture is to manually set up a thread and have it block until the polling period is up. 
+				Unfortunately this approach ties up a CPU thread doing almost nothing and wastes valuable hardware resources.
+				
+				NUClear provides an alternative mechanism that allows you to execute code periodically without tying up a CPU core.
+				You can set up a reaction on a time event and NUClear will ensure that your reaction is called periodically. 
+				Instead of busy waiting the system will run other tasks while the period task is waiting which ensures that CPU cycles are not wasted doing nothing.	
+				
+			\subsubsection{Statistics, Logging and Traceability}
+				In complex system it can become very difficult to determine what the system is actually doing and why it's doing it. 
+				The NUbots team made it clear that the ability to get per-module statistics and logs would be invaluable in tackling the challenges of robotic software development.
+				
+				To facilitate this NUClear is built with powerful statistics and logging tools. NUClear stores runtime statistics about each modules and provides mechanisms to get the information logs on a per-module or per-reaction basis. 
+				By integrating these features into the NUbots architecture we are able to provide a large amount of useful information to assist them with debugging or understanding the robot system. 
+				
+				Additionally if an error occurs it's possible to capture the input that caused the error and replay it on the module. 
+				This functionality can be used to develop a powerful array of tests that accurately simulate real-time scenarios.
+				
+				For example: If the robot kicks the ball and you expected it to do something else you can capture the inputs that made it decide to kick and replace them at your convenience. 
+				It's also possible to encode the captured input into a unit test which can be automatically replayed. 
+				This lets the NUbots team verify that the bug has been fixed and ensure that future changes don't cause a regression.
 		
 		\subsection{Architecture}
 			NUClears architecture consists of three major building blocks: the \textbf{PowerPlant}, textbf{Reactor}s and \textbf{Reaction}s.
@@ -215,14 +234,14 @@
 		\subsection{Component Overview - Power Plant}
 			The PowerPlant has three main responsibilities which are split up into discreet classes.
 	
+			\subsection{CacheMaster}
+				\todo[inline] {Write about CacheMaster}	
+	
 			\subsection{ReactorMaster}
 				\todo[inline] {Write about ReactorMaster}
 	
 			\subsection{ThreadMaster}
 				\todo[inline] {Write about ThreadMaster}
-	
-			\subsection{CacheMaster}
-				\todo[inline] {Write about CacheMaster}
 		
 		\subsection{Component Overview - Reactor and Reaction}
 
