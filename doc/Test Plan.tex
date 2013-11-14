@@ -394,15 +394,19 @@
 		
 	\subsection{LinuxCameraStreamer}
 		The LinuxCameraStreamer uses the V4L2 Linux Kernel API in order to read live data from the webcam of a computer.
+		Due to the reliance on a webcam, this module must be manually tested.
 		
 		\paragraph{Requirements:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The module must be able to load images in real time from a webcam
+			\item The module must be able to change the configuration of the camera
+			\item The module must be able to handle multiple formats of camera streaming
 		\end{itemize}
 		
 		\paragraph{Assumptions:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The system has a webcam available to be accessed
+			\item The systems webcam is supported by the Video for Linux 2 framework
 		\end{itemize}
 
 		\begin{tabular}{p{7cm}|p{7cm}}
@@ -420,17 +424,17 @@
 		\begin{itemize}
 			\test{The LinuxCameraStreamer is able to read an incoming video stream from the camera}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item Setup the module with camera settings compatible with the camera
+				\item Ensure that the number of frames received per second is equal to the set FPS
+				\item Ensure the images that are received are the images that would be collected by the camera
 			\end{itemize}
 			
 			\test{The LinuxCameraStreamer will respond and update settings on the camera when needed}
 			\begin{itemize}
-				\item \todo[inline]{write}
-			\end{itemize}
-			
-			\test{The LinuxCameraStreamer accurately retrieves hardware settings}
-			\begin{itemize}
-				\item \todo[inline]{write}
+				\item Configure the camera with settings compatible with the camera
+				\item Ensure that it is emitting images as expected
+				\item Update the configuration with options compatible with the camera
+				\item Ensure that the camera has updated its settings and is emitting images with the new settings
 			\end{itemize}
 		\end{itemize}
 		
