@@ -599,11 +599,14 @@
 		\begin{itemize}
 			\item The script engine is required to take scripts and convert them into waypoints
 			\item The script engine is required to take names of scripts and find them within its scope
+			\item The script engine is able to execute a script that is sent to it.
+			\item The script engine correctly sends the series of waypoints to the MotionManager.
 		\end{itemize}
 		
 		\paragraph{Assumptions:}
 		\begin{itemize}
 			\item The scripts only contain motions for servos which exist on the robot
+			\item Scripts are assumed to be valid JSON files.
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
@@ -622,9 +625,14 @@
 		\begin{itemize}
 			\test{The script engine can execute the scripts loaded into it}
 			\begin{itemize}
+<<<<<<< HEAD
 				\item A script file must be located in the appropriate directory (where the module is configured to look)
 				\item The name of the script is passed to the script engine
 				\item It should be ensured that the waypoints that are outputted are those contained in the requested script
+=======
+				\item \todo[inline] {write}
+				\item \todo[inline]{write}
+>>>>>>> Minor additions to Script Engine
 			\end{itemize}
 			
 			\test{The script engine is able to execute other scripts passed to it}
