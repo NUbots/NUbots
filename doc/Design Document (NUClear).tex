@@ -229,39 +229,59 @@
 				This lets the NUbots team verify that the bug has been fixed and ensure that future changes don't cause a regression.
 		
 		\subsection{Architecture}
-			NUClears architecture consists of three major building blocks: the \textbf{PowerPlant}, textbf{Reactor}s and \textbf{Reaction}s.
+			NUClears architecture consists of three major building blocks: the \textbf{PowerPlant}, textbf{Reactor}s and \textbf{Reaction}s. 
 		
 		\subsection{Component Overview - Power Plant}
-			The PowerPlant has three main responsibilities which are split up into discreet classes.
+			The PowerPlant is the central message system through which all modules communicate. 
+			Message routing is actually performed at compile time but from an API point of view the system still communicates through the PowerPlant.
+			
+			The PowerPlant has three main responsibilities which are split up into named subsystems called \emph{Masters}.
+			
+			In general when a message is emitted it is first cached by the CacheMaster. 
+			The ThreadMaster then spawns a new thread and then tells the ReactorMaster to execute any reactions that are subscribed to that particular message. 
+			The ReactorMaster then uses the CacheMaster to retrieve the message data and then invokes the reactions with the message data.
 	
 			\subsection{CacheMaster}
-				\todo[inline] {Write about CacheMaster}	
+				The CacheMaster is responsible for the storage and caching of messages.
+				It is primarily made up of template metaprograms which are responsible for automatically allocating space for messages. 
+				
+				The CacheMaster is also technically responsible for message routing as our system doesn't actually move messages ever. Instead messages are simply cached and then passed by read-only reference to reactions that are interested in a particular message.
 	
 			\subsection{ReactorMaster}
-				\todo[inline] {Write about ReactorMaster}
+				The ReactorMaster exists to handle executing reactions for particular reactors. 
+				When a message is sent the ReactorMaster is responsible for interpreting that message, retrieving the appropriate data and executing the reactions that are subscribed to that message.
+				
+				The ReactorMaster uses the CacheMaster directly in order to retrieve message data to pass into invoking reactions.
 	
 			\subsection{ThreadMaster}
-				\todo[inline] {Write about ThreadMaster}
+				The ThreadMaster is responsible for multi-threading and task scheduling.
+				It contains an internal thread pool that contains a number of workers. 
+				Each worker executes a reaction using the ReactorMaster and then requests a new task from a blocking queue.
 		
 		\subsection{Component Overview - Reactor and Reaction}
-
-		\subsection{Component Overview - Reactor}
-			\todo[inline] {Write about Reactor and consider if On/Emit/Log are the appropriate subsections}
-	
-			\subsection{On}
-	
-			\subsection{Emit}
-	
-			\subsection{Log}
+			A Reactor encapsulates a single module that can send and receive messages.
+			Each Reactor contains a number of Reactions which are a single function that is run in response to new data. 
+			Reactions take immutable references to messages as arguments which provide a strong multithreading guarantee that allows multiple reactions accessing the same data to be run simultaneously.
 			
-		\subsection{Component Overview - Reaction}
-			\todo[inline] {Explain how the concept of a Reaction fits in here}
+			Reactors are the primary entry point to the NUClear API. 
+			It is expected that each module in a system will extend from NUClear::Reactor and use it's member functions to send and receive messages.
+			By subclassing from Reactor you gain access to the two main NUClear API functions \emph{On} and \emph{Emit}. 
+			Additionally you also gain access to \emph{Log} which provides per-reactor logging capabilities.
+	
+			\subsubsection{On}
+				\emph{On} subscribes a reaction to particular message. 
+				On also has a number of arguments that customize what data it receives and triggers on.
+				
+			\subsubsection{Emit}
+				\emph{Emit} sends data to the PowerPlant which routes it to the subscribed reactions.
+				Emit also has the concept of scopes which allows you to send data in different ways or to different places (such as over the network).
+	
+			\subsubsection{Log}
+				\emph{Log} provides a mechanism to log information against a particular reaction. 
+				This provides logging information that is per-reaction rather then system-wide giving greater traceability.
 	
 		\subsection{Component Overview - Networking}
 			\todo[inline] {Talk about Networking as an Extension here}
-		
-		\subsection{API Overview}
-			\todo[inline] {Talk about the API here}
 			
 	\section{NUbots NUClear Architecture}
 		\todo[inline] {Write this}
