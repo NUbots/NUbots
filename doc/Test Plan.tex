@@ -18,6 +18,9 @@
 \usepackage{pdflscape} % \usepackage{lscape} %Use escape for printing (doesn't rotate the pdf page)
 % Provides a glossary
 \usepackage[toc]{glossaries}
+% Gives us pretty diagrams
+\usepackage{tikz}
+\usetikzlibrary{calc,fit,positioning,chains,decorations.pathreplacing,shapes,backgrounds}
 
 \usepackage{tabularx} % For tables
 \usepackage[a4paper]{geometry} %specifies page width
@@ -82,6 +85,7 @@
 		BeatDetector          & Automated Testing  \\ \hline
 		ConfigSystem          & Automated Testing  \\ \hline
 		DarwinHardwareIO      & Manual Testing     \\ \hline
+		DanceEngine           & Automated Testing  \\ \hline
 		DarwinMotionManager   & Automated Testing  \\ \hline
 		eSpeak                & Manual Testing     \\ \hline
 		NUbugger              & Manual Testing     \\ \hline
@@ -89,6 +93,7 @@
 		PartyDarwin           & Automated Testing  \\ \hline
 		ScriptEngine          & Automated Testing  \\ \hline
 		ScriptRunner          & Automated Testing  \\ \hline
+		ScriptTuner           & Manual Testing     \\ \hline
 	\end{tabular}
 	
 \section{Modules}
@@ -719,7 +724,72 @@
 		\end{itemize}
 		
 \section{Integration Testing}
-	\todo{if you take away the hardware specific modules it is possible to test the entire system}
+	The design of the new architecture is to take advantage of the Service Oriented Architecture concept of Orchestration.
+	This concept involves taking many modules of functionality and combining them together to make an application.
+	Because of this there are many interactions between modules which can be used to perform integration testing using related modules.
+	The diagram in Figure~\ref{fig:links} shows how the modules which have been implemented in the port so far interact with each others outputs.
+	By taking any of the modules which are able to be automatically unit tested together, we are able to build an integration test which checks that the modules work together as expected.
+	
+	\begin{figure}[!h]
+		\scalebox{0.8}{
+		\begin{tikzpicture}[
+		reactor/.style={draw, rectangle, rounded corners, minimum height=3em, ultra thick},
+		arrow/.style={->, ultra thick}]
+		
+			%%% Draw all of our components in a circle
+			\foreach [count=\i] \reactor in {ScriptEngine,
+			                                 DarwinMotionManager,
+			                                 AudioInput,
+			                                 AudioFileInput,
+			                                 AubioBeatDetector,
+			                                 BeatDetector,
+			                                 DanceEngine,
+			                                 DarwinHardwareIO,
+			                                 LinuxCameraStreamer,
+			                                 NUbugger,
+			                                 ConfigSystem,
+			                                 ScriptRunner,
+			                                 ScriptTuner} {
+			
+				% Draw the reactors around the central star
+				\node[reactor] (\reactor) at ({360/13 * (\i - 1)}:8cm) {$\reactor$};
+			};
+			
+			% Beat detectors use audio inputs
+			\path (BeatDetector)        edge[arrow, out=110, in=90] (AudioFileInput) ;
+			\path (BeatDetector)        edge[arrow, out=110, in=90] (AudioInput);
+			\path (AubioBeatDetector)   edge[arrow, out=340, in=270] (AudioFileInput);
+			\path (AubioBeatDetector)   edge[arrow, out=340, in=180] (AudioInput);
+			
+			% Dance engine uses beat detectors
+			\path (DanceEngine)         edge[arrow, out=0, in=270] (BeatDetector);
+			\path (DanceEngine)         edge[arrow, out=0, in=270] (AubioBeatDetector);
+			
+			% Script things use the Script Engine
+			\path (ScriptTuner)         edge[arrow, out=90, in=180] (ScriptEngine);
+			\path (ScriptRunner)        edge[arrow, out=90, in=180] (ScriptEngine);
+			\path (DanceEngine)         edge[arrow, out=0, in=180] (ScriptEngine);
+			
+			% NUbugger uses the HardwareIO and Camera
+			\path (NUbugger)            edge[arrow, out=90, in=0] (LinuxCameraStreamer);
+			\path (NUbugger)            edge[arrow, out=90, in=0] (DarwinHardwareIO);
+			
+			% The Script engine uses motion manager to operate
+			\path (ScriptEngine)        edge[arrow, out=90, in=270] (DarwinMotionManager);
+			
+			% The Motion Manager use HardwareIO
+			\path (ScriptEngine)        edge[arrow, out=135, in=0] (DarwinHardwareIO);
+			
+			% The config system is used by several modules
+			\path (AudioFileInput)      edge[arrow, out=300, in=90] (ConfigSystem);
+			\path (LinuxCameraStreamer) edge[arrow, out=270, in=270] (ConfigSystem);
+			\path (DanceEngine)         edge[arrow, out=340, in=90] (ConfigSystem);
+			\path (ScriptEngine)        edge[arrow, out=135, in=90] (ConfigSystem);
+			
+		\end{tikzpicture}}
+		\caption{Integration tests between modules which share arrows can be created as needed}
+		\label{fig:links}
+	\end{figure}
 	
 \section{Simulation Testing}
 	\todo{Write about Webots, and Simspark}
