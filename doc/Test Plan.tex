@@ -162,7 +162,7 @@
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
-    			Input Data & Output Data \\ \hline
+    			\textbf{Input Data} & \textbf{Output Data} \\ \hline
 			\begin{itemize}
 				\item A Configuration object providing the location of a wav file to be read.
 			\end{itemize}
@@ -203,7 +203,7 @@
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
-    			Input Data & Output Data \\ \hline
+    			\textbf{Input Data} & \textbf{Output Data} \\ \hline
 			\begin{itemize}
 				\item None
 			\end{itemize}
@@ -254,7 +254,7 @@
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
-    			Input Data & Output Data \\ \hline
+    			\textbf{Input Data} & \textbf{Output Data} \\ \hline
 			\begin{itemize}
 				\item A requested configuration file or directory to monitor.
 				\item A configuration and a file path to save the configuration into.
@@ -319,7 +319,7 @@
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
-    			Input Data & Output Data \\ \hline
+    			\textbf{Input Data} & \textbf{Output Data} \\ \hline
 			\begin{itemize}
 				\item A Dance configuration describing the available dance scripts.
 				\item A stream of beat detections describing the time of detection and tempo.
@@ -373,7 +373,7 @@
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
-    			Input Data & Output Data \\ \hline
+    			\textbf{Input Data} & \textbf{Output Data} \\ \hline
 			\begin{itemize}
 				\item A message containing the string to speak.
 			\end{itemize}
@@ -410,7 +410,7 @@
 		\end{itemize}
 
 		\begin{tabular}{p{7cm}|p{7cm}}
-    			Input Data & Output Data \\ \hline
+    			\textbf{Input Data} & \textbf{Output Data} \\ \hline
 			\begin{itemize}
 				\item A Camera configuration describing the camera settings.
 			\end{itemize}
@@ -455,7 +455,7 @@
 		\end{itemize}
 
 		\begin{tabular}{p{7cm}|p{7cm}}
-    			Input Data & Output Data \\ \hline
+    			\textbf{Input Data} & \textbf{Output Data} \\ \hline
 			\begin{itemize}
 				\item Realtime sensor information.
 				\item Realtime image data.
@@ -485,7 +485,6 @@
 		\begin{itemize}
 			\item The system must be able to read and write to the Darwin's hardware
 			\item The system must be able to convert the sensors on the darwin into SI units
-			\item The system must take reasonable measures to prevent the robot from damaging itself
 			\item The system should be able to access partial information in the event of hardware failure
 		\end{itemize}
 		
@@ -496,7 +495,7 @@
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
-			Input Data & Output Data \\ \hline
+			\textbf{Input Data} & \textbf{Output Data} \\ \hline
 			\begin{itemize}
 				\item Servo motor commands describing a target point the motor needs to move to.
 			\end{itemize}
@@ -522,32 +521,39 @@
 				\item ensure that the angle of the motors as well as the speed of travel is consistent with the sent paramters
 			\end{itemize}
 			
-			\test{Ensure that the hardware is prevented from causing self harm}
+			\test{Information is able to be read from the robots hardware}
 			\begin{itemize}
-				\item Generate a command which would cause the robot to damage itself
-				\begin{itemize}
-					\item This would be a motion which results in a limb doing a full revolution
-				\end{itemize}
-				\item Send the command to the hard
-				\item Ensure that the command is executed such that the limb does not perform a full revolution
+				\item Capture the outputted sensor values from the module
+				\item Ensure that the data matches the expected sensor readings from the hardware
+				\item Ensure that the data from the hardware is outputted in SI units
+			\end{itemize}
+			
+			\test{Partial information is able to be read when hardware is damaged or offline}
+			\begin{itemize}
+				\item Disconnect a servo from the chain of motors
+				\item Capture the outputted sensor data from the module
+				\item Ensure that the data from the available sensors is available
 			\end{itemize}
 		\end{itemize}
 
 	\subsection{Platform Darwin MotionManager}
 		The MotionManager module is responsible for converting higher level motion commands into commands which can be executed on the robots hardware.
+		This module can be unit tested by mocking the data from the HardwareIO layer.
 		
 		\paragraph{Requirements:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The module is able to convert a series of timestamped waypoints into hardware actions
+			\item The module will remove any future motions if a motion before them is added
+			\item The module will prevent the motions from causing a full revolution which may cause damage
 		\end{itemize}
 		
 		\paragraph{Assumptions:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The waypoints that are provided are assumed to be in SI units
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
-			Input Data & Output Data \\ \hline
+			\textbf{Input Data} & \textbf{Output Data} \\ \hline
 			\begin{itemize}
 				\item A list of servo angle waypoints with the absolute time to be at these angles.
 			\end{itemize}
@@ -561,22 +567,27 @@
 		\begin{itemize}
 			\test{Waypoints sent to the motion manager are executed as hardware commands}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item Send a series of waypoints to the motion manager
+				\item Ensure that they are then outputted as a series of positions and speeds
 			\end{itemize}
 			
 			\test{If a new waypoint arrives MotionManager should drop all waypoints after the execution time of the new waypoint}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item Output a series of waypoints to the motion manager
+				\item Output a waypoint which exists before the waypoints in the first step
+				\item Ensure that the other waypoints are not executed
 			\end{itemize}
 			
 			\test{MotionManager should correctly calculate the speed required to arrive at a particular waypoint in time}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item A series of waypoints should be entered into the motion manager
+				\item It should be ensured that the speeds of the resulting hardware commands result in the servos arriving at the correct moment
 			\end{itemize}
 			
 			\test{MotionManager should split waypoints if the angle traveled is larger then $2\pi$ radians}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item Generate a command which would cause the robot to damage itself by traveling more then $2\pi$ radians
+				\item Ensure that the command is executed as two commands that are less then $2\pi$ radians to prevent damage
 			\end{itemize}
 		\end{itemize}
 			
@@ -594,7 +605,7 @@
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
-			Input Data & Output Data \\ \hline
+			\textbf{Input Data} & \textbf{Output Data} \\ \hline
 			\begin{itemize}
 				\item A script configuration object describing the available scripts.
 				\item A execute script command detailing the script to execute.
@@ -632,7 +643,7 @@
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
-			Input Data & Output Data \\ \hline
+			\textbf{Input Data} & \textbf{Output Data} \\ \hline
 			\begin{itemize}
 				\item Command Line Arguments representing the scripts to run.
 			\end{itemize}
@@ -664,7 +675,7 @@
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
-			Input Data & Output Data \\ \hline
+			\textbf{Input Data} & \textbf{Output Data} \\ \hline
 			\begin{itemize}
 				\item Nothing
 			\end{itemize}
