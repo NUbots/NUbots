@@ -1,0 +1,66 @@
+% Initialisation
+\documentclass[english,12pt]{scrartcl}
+\usepackage[]{babel}
+% Input is utf8
+\usepackage[utf8]{inputenc}
+% Enables headers and footers
+\usepackage[]{scrpage2}
+% Lets us colour table cells
+\usepackage[table]{xcolor}
+% Allows todo list and todos
+\usepackage[]{todonotes}
+% Makes links in contents hyperlinked
+\usepackage{hyperref}
+% Make references appear in our table of contents
+\usepackage[nottoc,numbib]{tocbibind}
+% Allows us to put landscape sections of the document
+\usepackage{pdflscape} % \usepackage{lscape} %Use escape for printing (doesn't rotate the pdf page)
+% Provides a glossary
+\usepackage[toc]{glossaries}
+
+% Gives us pretty diagrams
+\usepackage{tikz}
+\usetikzlibrary{calc,fit,positioning,chains,decorations.pathreplacing,shapes,backgrounds}
+
+% Document Title and Author
+\title{Group Reflection}
+\author{2013 Final Year Project}
+
+% Header and Footer
+\pagestyle{scrheadings}
+\ihead{\today}
+\chead{}
+\ohead{Group Reflection}
+\ifoot{}
+\cfoot{}
+\ofoot{\pagemark}
+
+% Requirements custom commands
+\newcommand{\requirement}[1]{\textit{#1}}
+
+% Skip line rather then indent paragraphs
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.1in}
+
+% Start of document
+\begin{document}
+	\maketitle
+	\vfill
+	{\large
+		\begin{description}
+			\item [Status:] Draft 1
+			\item [Version:] 0.1
+		\end{description}}
+
+	\clearpage
+	\tableofcontents
+		
+	\clearpage
+		
+	\section{Introduction}
+
+	\bibliographystyle{plain}
+	\bibliography{references}
+	
+	\printglossaries
+\end{document}
