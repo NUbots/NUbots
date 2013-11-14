@@ -86,7 +86,7 @@
 		eSpeak                & Manual Testing     \\ \hline
 		NUbugger              & Manual Testing     \\ \hline
 		LinuxCameraStreamer   & Manual Testing     \\ \hline
-		PartyDarwin           & Unit Testable      \\ \hline
+		PartyDarwin           & Automated Testing  \\ \hline
 		ScriptEngine          & Automated Testing  \\ \hline
 		ScriptRunner          & Automated Testing  \\ \hline
 	\end{tabular}
@@ -303,15 +303,19 @@
 
 	\subsection{DanceEngine}
 		The dance engine is responsible for taking the incoming beat frequency of detected audio, and executing scripts on the robot that allow it to dance to the beat.
+		This module can be automatically tested through unit testing
 		
 		\paragraph{Requirements:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The module must be able to scale dance scripts to fit beats
+			\item The module must not make dance moves rotate a servo faster then it is capable
 		\end{itemize}
 		
 		\paragraph{Assumptions:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item It is assumed that there exists at least one dance script to execute
+			\item It is assumed that no dance scripts rotate a servo faster then it is capable
+			\item It is assumed that the beat that is to be used is a regular pattern
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
@@ -331,32 +335,41 @@
 		\begin{itemize}
 			\test{The dance engine scales scripts lengths to match the period of the beat}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item A dance script should be created
+				\item A beat of a known period should be emitted
+				\item It should be ensured that the total length of the dance script is a multiple of the beat period
 			\end{itemize}
 			
 			\test{The dance engine ensures that dance scripts execute such that they begin and end on beats}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item A dance script should be created
+				\item A beat of a known period should be emitted
+				\item It should be ensured that the start time and end time of the dance script 
 			\end{itemize}
 			
 			\test{The dance engine continously picks random dances}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item A selection of dance scripts should be created
+				\item A beat of a known period should be emitted at the period of the beat
+				\item The dance scripts which are emitted should be randomly selected from all available scripts
 			\end{itemize}
 		\end{itemize}
 		
 	\subsection{eSpeak}
 		The eSpeak module takes a string command and performs a text to speech conversion on it.
 		This sound data is then outputted through the speaker of the system.
+		Due to the reliance on hardware, this module must be manually tested.
 		
 		\paragraph{Requirements:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item This module must be able to perform text to speech on strings of text
 		\end{itemize}
 		
 		\paragraph{Assumptions:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The text to be converted contains only alphanumeric text
+			\item The text to be converted should be in English
+			\item The system contains a sound device capable of outputting audio
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
@@ -374,21 +387,26 @@
 		\begin{itemize}
 			\test{eSpeak performs text to speach when a Say command is emitted}
 			\begin{itemize}
-				\item \todo[inline]{Write}
+				\item A message containing a string of english text should be emitted
+				\item The sound device should output the spoken text to speech version of the text
 			\end{itemize}
 		\end{itemize}
 		
 	\subsection{LinuxCameraStreamer}
 		The LinuxCameraStreamer uses the V4L2 Linux Kernel API in order to read live data from the webcam of a computer.
+		Due to the reliance on a webcam, this module must be manually tested.
 		
 		\paragraph{Requirements:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The module must be able to load images in real time from a webcam
+			\item The module must be able to change the configuration of the camera
+			\item The module must be able to handle multiple formats of camera streaming
 		\end{itemize}
 		
 		\paragraph{Assumptions:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The system has a webcam available to be accessed
+			\item The systems webcam is supported by the Video for Linux 2 framework
 		\end{itemize}
 
 		\begin{tabular}{p{7cm}|p{7cm}}
@@ -406,32 +424,34 @@
 		\begin{itemize}
 			\test{The LinuxCameraStreamer is able to read an incoming video stream from the camera}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item Setup the module with camera settings compatible with the camera
+				\item Ensure that the number of frames received per second is equal to the set FPS
+				\item Ensure the images that are received are the images that would be collected by the camera
 			\end{itemize}
 			
 			\test{The LinuxCameraStreamer will respond and update settings on the camera when needed}
 			\begin{itemize}
-				\item \todo[inline]{write}
-			\end{itemize}
-			
-			\test{The LinuxCameraStreamer accurately retrieves hardware settings}
-			\begin{itemize}
-				\item \todo[inline]{write}
+				\item Configure the camera with settings compatible with the camera
+				\item Ensure that it is emitting images as expected
+				\item Update the configuration with options compatible with the camera
+				\item Ensure that the camera has updated its settings and is emitting images with the new settings
 			\end{itemize}
 		\end{itemize}
 		
 	\subsection{NUbugger}
 		NUbugger is a debugging system which integrates with a web browser.
 		It is used to display useful debugging information from the robot while it is running.
+		As this module is dependant on the external NUbugger web framework, this module must be manually tested.
 
 		\paragraph{Requirements:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item NUbugger must be able to communicate with the external web framework
 		\end{itemize}
 		
 		\paragraph{Assumptions:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item There is a NUbugger web instance set up on the same network as the robot
+			\item The NUbugger web instance is configured to communicate with the robot being tested
 		\end{itemize}
 
 		\begin{tabular}{p{7cm}|p{7cm}}
@@ -450,21 +470,29 @@
 		\begin{itemize}
 			\test{NUbugger sends out diagnostic data to the web server}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item Setup and configure a NUbugger web instance
+				\item Emit mock sensor and image data to the NUbugger module
+				\item Ensure that this information is received by the NUbugger web module
 			\end{itemize}
 		\end{itemize}
 		
 	\subsection{Platform Darwin HardwareIO}
 		The Darwin Hardware IO module is responsible for directly interacting with the hardware on the robot.
+		Due to this tight reliance on hardware, this module must be manually tested.
+		However several components of this module are able to be tested through unit testing.
 
 		\paragraph{Requirements:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The system must be able to read and write to the Darwin's hardware
+			\item The system must be able to convert the sensors on the darwin into SI units
+			\item The system must take reasonable measures to prevent the robot from damaging itself
+			\item The system should be able to access partial information in the event of hardware failure
 		\end{itemize}
 		
 		\paragraph{Assumptions:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The system is able to access the hardware via the serial bus
+			\item Unless testing for damaged hardware, all hardware is in working order
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
@@ -482,17 +510,26 @@
 		\begin{itemize}
 			\test{The current data from the hardware is able to be read into SI units}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item Generate a list of SI unit values, and hand calculated hardware values
+				\item Perform the conversions on each of these values and ensure that they are correct
+				\item Perform inverse conversions on the converted values
+				\item Ensure that the inverse converted values are identical to the original values
 			\end{itemize}
 			
 			\test{Commands are able to be sent to the hardware and they are executed properly}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item Send a series of hardware movement commands to the hardware
+				\item ensure that the angle of the motors as well as the speed of travel is consistent with the sent paramters
 			\end{itemize}
 			
-			\test{The conversions performed in the Darwin HardwareIO are accurate}
+			\test{Ensure that the hardware is prevented from causing self harm}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item Generate a command which would cause the robot to damage itself
+				\begin{itemize}
+					\item This would be a motion which results in a limb doing a full revolution
+				\end{itemize}
+				\item Send the command to the hard
+				\item Ensure that the command is executed such that the limb does not perform a full revolution
 			\end{itemize}
 		\end{itemize}
 
@@ -654,4 +691,8 @@
 				\item \todo[inline]{write}
 			\end{itemize}
 		\end{itemize}
+		
+\section{Integration Testing}
+	\todo{if you take away the hardware specific modules it is possible to test the entire system}
+	
 \end{document}
