@@ -49,7 +49,7 @@
 	{\large
 		\begin{description}
 			\item [Status:] Draft 1
-			\item [Version:] 0.1
+			\item [Version:] 0.3
 		\end{description}}
 
 	\clearpage
@@ -66,114 +66,181 @@
 			\hline
 
 			0.2 &
-			Fleshed Out Intro and Features
+			Fleshed Out Intro and Features &
+			Jake Woods \\
+			\hline
+			
+			0.3 &
+			Added a much better intro &
 			Jake Woods \\
 			\hline
 		\end{tabular}
 		
 	\clearpage
 		
-	\section{Introduction}
-		NUClear is a C++ library that enables developers to write modular systems that communicate using messages. 
+	\section{Summary}
+		\subsection{Project Background}
+			The NUbots are a team of Software Engineers and Computer Scientists who build software for robots in order to compete in robocup. 
+			Robocup is an international competition that pits two fearsome robots against each other in an intense soccer competition with the goal of challenging humans by the year 2050.
+			
+			The robot software system has been developed at the University of Newcastle by the NUbots since 2002 and has changed robots three times between 2002-2013 initially starting with the four-legged \textbf{AIBO} robots followed by the two legged \textbf{Nao} and as of 2011 they are now using the \textbf{Darwin}. The NUbots have also been successful at taking home the coveted robocup trophy twice in their career.
+			
+			The existing robot software was developed by separating different processing systems (Vision, Localization, Kinematics, etc...) into their own code modules that communicate using ad-hoc mechanisms on a per-module basis. 
+			Unfortunately constant developer churn and a long-lived code base have resulted in a system that contains very impressive algorithms that are hindered by a myriad of complicated and confusing communication methods.
+			
+			Our team was asked to develop a solution to this communication problem by restructuring the architecture around the individual systems to allow them to communicate in a \textbf{Simple}, \textbf{Efficient} and \textbf{Unified} way. 
+			
+			We were also asked to assist with some of the fundamental problems with the existing architecture that have arisen from changing platforms and hardware over the years. 
+			Our ultimate goal is to provide a system that allows the NUbots to focus on the amazing algorithms and research without spending a disproportionate amount of time writing code to move data from system to system.
+				
+		\subsection{Recommend Solution}
+			After careful analysis of the existing system we determined that it is prohibitively expensive to incrementally refactor the existing code base. 
+			Instead we have opted for a complete restructuring of the project whereby we replace the existing architectural scaffolding with a completely new system.
+			
+			However we also determined that the algorithmic parts of the system can be separated from the architecture without a massive investment of labour. 
+			With this in mind we have migrated the existing algorithms into the new architecture taking care to only make minimal changes to remove any architectural dependencies but leave the algorithm intact.
+			
+			\subsubsection{Technologies}
+				A key requirement set out by the NUbots team was to make it possible to easily replace modules that provide information with completely different modules provided that they produce the same information. 
+				For example it should be possible to replace the system that reads camera frames from the hardware with one that reads frames from a file without changing the rest of the system.
+				
+				To facilitate this we looked at a number of different communication strategies to identify architectures that promoted \emph{loose coupling} which is a measure of how dependent components are on each other. 
+				Architectures that are \emph{loosely coupled} have been shown to support easy drop-in replacement of modules provided they require/provide the same information.
+				 
+				Currently the consensus in the robotics world is to utilise message passing systems whereby modules communicate by sending and receiving packets of data known as \emph{messages} without knowing where they are sending/receiving message to/from.
+				
+				During our research it was clear that the majority of mature robotic systems were built with a message-driven architecture in mind. 
+				Currently \textbf{Robot Operating System (RobotOS)} is the de-facto standard platform for robotics research.
+				RobotOS uses a message passing system and was considered very heavily as a replacement for the existing architecture.
+				
+				Unfortunately RobotOS has a very high performance penalty to support message passing which was completely unacceptable for resource-starved platforms such as the Darwin. 
+				Other existing robot systems such as \textbf{Dynamic Data eXchange (DDX)} and  \textbf{Pack Service Robotic Architecture} also suffer from the same issues. It seemed that all contemporary robotic systems have decided to trade performance for message passing and cross-language compatibility.
+				
+				Our team decided to leverage our C++ skills to build an alternative system named \textbf{NUClear} that provides message passing capabilities (and more) that are orders of magnitudes faster then the competing systems. 
+				Once we had a proof-of-concept it was decided to use the NUClear architecture as the basis for the new NUbots architecture. NUClear is covered extensively in the Architecture Overview.
+				
+				\todo[inline] {Link the words Architecture Overview to the actual section}
+				
+		\subsection{Use Cases}
+			Josiah is a fictional software engineer tasked with implementing a new vision algorithm on the robot to assist with recognising faces (to later target with toy missiles).
+			He knows that the robot is already capable of capturing images with its camera.
+			Luckily the robot system implements communication using NUClear. 
+			He simply writes a new vision module using the NUClear API to request that image frames are sent 
+			
+			requesting the image information and NUClear ensures the image frames are sent to the appropriate modules.
+	
+	\section{NUClear Design}
+		NUClear is the C++ library that we designed to enable developers to write modular systems that communicate using messages. 
 		Modules are kept ignorant of each other and only know about the messages they send/receive. 
 		This allows us to transparently drop in different producers/consumers without modifying the entire system.
 		
-		Originally NUClear was designed to replace a robot architecture that used a system known as the Blackboard.
+		NUClear was designed to replace the most common method of communication in the existing architecture known as the Blackboard.
 		Blackboards are a shared global memory store that all modules use to communicate by writing data to the blackboard and assuming it is read by the next module.
 		Our design makes it easy to transition from similar globally accessible data to a message based event-driven architecture.
+		NUClear is also capable of replacing other methods of communication currently in use in the existing system such as direct function calls.
 		
 		Our goal was to make a system that allows programmers to easily send/receive information between modules using mechanisms that are \textbf{Fast}, \textbf{Reliable} and \textbf{Intuitive}.
 
-	\section{Goals}
-		\subsection{Simple API}
-			It was critical that NUClear have a simple and intuitive interface that didn't require weeks of study to achieve productivity with.
-			With that in mind we ensured that the two key concepts, sending and receiving messages, only require the use of two corresponding functions: \textbf{On} and \textbf{Emit}
+		\subsection{Goals}
+			\subsubsection{Simple API}
+					NUClear is designed to be usable by second year software students who have a basic understanding of C++. 
+					
+					It was critical that NUClear have a simple and intuitive interface that didn't require weeks of study to achieve productivity with.
+					With that in mind we ensured that the two key concepts, sending and receiving messages, only require the use of two corresponding functions: \textbf{On} and \textbf{Emit}
+					
+					NUClear is designed around these two functions. \textbf{On} provides mechanisms to indicate that you are interested in a particular piece of information.
+					\textbf{Emit} correspondingly allows you to provide information to the system.
+					
+					There is a small amount of boilerplate requiring that you inherit from \textbf{NUClear::Reactor} and provide an appropriate constructor.
+					However these are simply implementation details and do not require understanding to utilize the full power of the system.
 			
-			NUClear is designed around these two functions. \textbf{On} provides mechanisms to indicate that you are interested in a particular piece of information.
-			\textbf{Emit} correspondingly allows you to provide information to the system.
+			\subsubsection{Simple utilization of system resources}
+				Another requirement derived from resource-constrained environments is the need to easily utilize the full power of the platform you run on.
+				This is primarily achieve by introducing \textbf{Transparent Multi-threading} which automatically uses every physical core available on the system
+				without the developer needing to fiddle with threading primitives.
+				
+				When a message is sent in the system the central coordination object known as the \textbf{PowerPlant} takes ownership of it. 
+				From this point forward no modules can modify the message and only have read-only access to it.
+				The PowerPlant then executes callbacks, known as reactions, that are subscribed to this message.
+				Each reaction gets a immutable reference to the original message and can perform any read operations on it.
+				
+				Immutability is the key that allows us to transparently multi-thread the system.
+				We know that multiple reactions will want to read the data and if we can guarantee that they don't modify it then we can
+				run the reactions in parallel without worrying about race conditions.
+				By forcing immutability we can move all threading logic directly into NUClear allowing developers to concentrate on their modules
+				instead of threading problems.
+				
+				In most cases multi-threading will be completely transparent. 
+				However it is still important that the developers understand that they are working in a multi-threaded environment.
+				If a single module shares data between two reactions and those reactions could run in parallel then the shared data will
+				need to be secured with a thread-safe mechanism such as a mutex.
+				NUClear also provides functionality to let the user specify that certain reactions should not be run in parallel which can be used to solve threading concerns.
 			
-			There is a small amount of boilerplate requiring that you inherit from \textbf{NUClear::Reactor} and provide an appropriate constructor.
-			However these are simply implementation details and do not require understanding to utilize the full power of the system.
+			\subsubsection{Low Performance Penalty}
+				NUClear needs to run in resource-constrained environment where large API overhead is unacceptable.
+				Because of this we have opted not to use technologies that incur large performance penalties such as XML serialization 
+				instead opting for a direct binary representation for messages passed within a single process. 
+				
+				We use modern C++ features to perform \textbf{Compile-Time Allocation and Routing} which allows us to calculate and allocate space
+				for all reactions and messages at compile time.
+				Additionally we compute reaction lookup at compile-time to minimize the time it takes to emit or receive a message.
+				In our tests these optimizations have allowed us to send an arbitrary number of messages in O(1) time.
+				
+			\subsubsection{Compile-Time Message Routing}
+				NUClear leverages modern C++ features enabling us to perform partial message routing at compile time.
+				Normally when you send a message there is a message broker executes some code to find the systems that are interested in a particular message.
+				This system usually uses a number of intermediate steps to locate the appropriate messages.
+				
+				NUClear uses template meta-programming to determine at compile time how much space is needed for reactions and messages and allocates
+				
+				\todo[inline] {Write about feature}
+				
+			\subsubsection{Statistics and Logging}
+				\todo[inline] {Write about stats and logging and how we solve the problem of multithreaded logging}
+				
+			\subsubsection{Extensible Architecture}
+				\todo[inline] {Write about how we can do awesome extensions}
+				
+			\subsubsection{Smart Timers}
+				\todo[inline] {Write about feature. No wasted CPU cycles using a wait-loop}		\subsection{Simple API}
 		
-		\subsection{Simple utilization of system resources}
-			Another requirement derived from resource-constrained environments is the need to easily utilize the full power of the platform you run on.
-			This is primarily achieve by introducing \textbf{Transparent Multi-threading} which automatically uses every physical core available on the system
-			without the developer needing to fiddle with threading primitives.
-			
-			When a message is sent in the system the central coordination object known as the \textbf{PowerPlant} takes ownership of it. 
-			From this point forward no modules can modify the message and only have read-only access to it.
-			The PowerPlant then executes callbacks, known as reactions, that are subscribed to this message.
-			Each reaction gets a immutable reference to the original message and can perform any read operations on it.
-			
-			Immutability is the key that allows us to transparently multi-thread the system.
-			We know that multiple reactions will want to read the data and if we can guarantee that they don't modify it then we can
-			run the reactions in parallel without worrying about race conditions.
-			By forcing immutability we can move all threading logic directly into NUClear allowing developers to concentrate on their modules
-			instead of threading problems.
-			
-			In most cases multi-threading will be completely transparent. 
-			However it is still important that the developers understand that they are working in a multi-threaded environment.
-			If a single module shares data between two reactions and those reactions could run in parallel then the shared data will
-			need to be secured with a thread-safe mechanism such as a mutex.
-			NUClear also provides functionality to let the user specify that certain reactions should not be run in parallel which can be used to solve threading concerns.
+		\subsection{Architecture}
+			NUClears architecture consists of three major building blocks: the \textbf{PowerPlant}, textbf{Reactor}s and \textbf{Reaction}s.
 		
-		\subsection{Low Performance Penalty}
-			NUClear needs to run in resource-constrained environment where large API overhead is unacceptable.
-			Because of this we have opted not to use technologies that incur large performance penalties such as XML serialization 
-			instead opting for a direct binary representation for messages passed within a single process. 
+		\subsection{Component Overview - Power Plant}
+			The PowerPlant has three main responsibilities which are split up into discreet classes.
+	
+			\subsection{ReactorMaster}
+				\todo[inline] {Write about ReactorMaster}
+	
+			\subsection{ThreadMaster}
+				\todo[inline] {Write about ThreadMaster}
+	
+			\subsection{CacheMaster}
+				\todo[inline] {Write about CacheMaster}
+		
+		\subsection{Component Overview - Reactor and Reaction}
+
+		\subsection{Component Overview - Reactor}
+			\todo[inline] {Write about Reactor and consider if On/Emit/Log are the appropriate subsections}
+	
+			\subsection{On}
+	
+			\subsection{Emit}
+	
+			\subsection{Log}
 			
-			We use modern C++ features to perform \textbf{Compile-Time Allocation and Routing} which allows us to calculate and allocate space
-			for all reactions and messages at compile time.
-			Additionally we compute reaction lookup at compile-time to minimize the time it takes to emit or receive a message.
-			In our tests these optimizations have allowed us to send an arbitrary number of messages in O(1) time.
+		\subsection{Component Overview - Reaction}
+			\todo[inline] {Explain how the concept of a Reaction fits in here}
+	
+		\subsection{Component Overview - Networking}
+			\todo[inline] {Talk about Networking as an Extension here}
+		
+		\subsection{API Overview}
+			\todo[inline] {Talk about the API here}
 			
-
-			
-		\subsection{Compile-Time Message Routing}
-			NUClear leverages modern C++ features enabling us to perform partial message routing at compile time.
-			Normally when you send a message there is a message broker executes some code to find the systems that are interested in a particular message.
-			This system usually uses a number of intermediate steps to locate the appropriate messages.
-			
-			NUClear uses template meta-programming to determine at compile time how much space is needed for reactions and messages and allocates
-			
-			\todo[inline] {Write about feature}
-			
-		\subsection{Statistics and Logging}
-			\todo[inline] {Write about stats and logging and how we solve the problem of multithreaded logging}
-			
-		\subsection{Extensible Architecture}
-			\todo[inline] {Write about how we can do awesome extensions}
-			
-		\subsection{Smart Timers}
-			\todo[inline] {Write about feature. No wasted CPU cycles using a wait-loop}
-
-	\section{Component Overview - Power Plant}
-		\todo[inline] {Expand this a lot}
-		The PowerPlant has three main responsibilities which are split up into discreet classes.
-
-		\subsection{ReactorMaster}
-			\todo[inline] {Write about ReactorMaster}
-
-		\subsection{ThreadMaster}
-			\todo[inline] {Write about ThreadMaster}
-
-		\subsection{CacheMaster}
-			\todo[inline] {Write about CacheMaster}
-
-	\section{Component Overview - Reactor}
-		\todo[inline] {Write about Reactor and consider if On/Emit/Log are the appropriate subsections}
-
-		\subsection{On}
-
-		\subsection{Emit}
-
-		\subsection{Log}
-
-	\section{Component Overview - Reaction}
-		\todo[inline] {Explain how the concept of a Reaction fits in here}
-
-	\section{Component Overview - Networking}
-		\todo[inline] {Talk about Networking as an Extension here}
+	\section{NUbots NUClear Architecture}
+		\todo[inline] {Write this}
 
 	\bibliographystyle{plain}
 	\bibliography{references}
