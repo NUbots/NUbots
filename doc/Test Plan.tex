@@ -358,15 +358,18 @@
 	\subsection{eSpeak}
 		The eSpeak module takes a string command and performs a text to speech conversion on it.
 		This sound data is then outputted through the speaker of the system.
+		Due to the reliance on hardware, this module must be manually tested.
 		
 		\paragraph{Requirements:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item This module must be able to perform text to speech on strings of text
 		\end{itemize}
 		
 		\paragraph{Assumptions:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The text to be converted contains only alphanumeric text
+			\item The text to be converted should be in English
+			\item The system contains a sound device capable of outputting audio
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
@@ -384,7 +387,8 @@
 		\begin{itemize}
 			\test{eSpeak performs text to speach when a Say command is emitted}
 			\begin{itemize}
-				\item \todo[inline]{Write}
+				\item A message containing a string of english text should be emitted
+				\item The sound device should output the spoken text to speech version of the text
 			\end{itemize}
 		\end{itemize}
 		
