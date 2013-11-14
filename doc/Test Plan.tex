@@ -303,15 +303,19 @@
 
 	\subsection{DanceEngine}
 		The dance engine is responsible for taking the incoming beat frequency of detected audio, and executing scripts on the robot that allow it to dance to the beat.
+		This module can be automatically tested through unit testing
 		
 		\paragraph{Requirements:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item The module must be able to scale dance scripts to fit beats
+			\item The module must not make dance moves rotate a servo faster then it is capable
 		\end{itemize}
 		
 		\paragraph{Assumptions:}
 		\begin{itemize}
-			\item \todo[inline]{write}
+			\item It is assumed that there exists at least one dance script to execute
+			\item It is assumed that no dance scripts rotate a servo faster then it is capable
+			\item It is assumed that the beat that is to be used is a regular pattern
 		\end{itemize}
 		
 		\begin{tabular}{p{7cm}|p{7cm}}
@@ -331,17 +335,23 @@
 		\begin{itemize}
 			\test{The dance engine scales scripts lengths to match the period of the beat}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item A dance script should be created
+				\item A beat of a known period should be emitted
+				\item It should be ensured that the total length of the dance script is a multiple of the beat period
 			\end{itemize}
 			
 			\test{The dance engine ensures that dance scripts execute such that they begin and end on beats}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item A dance script should be created
+				\item A beat of a known period should be emitted
+				\item It should be ensured that the start time and end time of the dance script 
 			\end{itemize}
 			
 			\test{The dance engine continously picks random dances}
 			\begin{itemize}
-				\item \todo[inline]{write}
+				\item A selection of dance scripts should be created
+				\item A beat of a known period should be emitted at the period of the beat
+				\item The dance scripts which are emitted should be randomly selected from all available scripts
 			\end{itemize}
 		\end{itemize}
 		
@@ -654,4 +664,8 @@
 				\item \todo[inline]{write}
 			\end{itemize}
 		\end{itemize}
+		
+\section{Integration Testing}
+	\todo{if you take away the hardware specific modules it is possible to test the entire system}
+	
 \end{document}
