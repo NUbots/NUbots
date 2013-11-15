@@ -21,6 +21,8 @@
 \usepackage{minted}
 % Stops \texttt{} text from overflowing
 \usepackage[htt]{hyphenat}
+% Allows us to force figure positioning
+\usepackage{float}
 
 % Minted configuration
 \usemintedstyle{vs}
@@ -377,6 +379,104 @@
 					// Send the data to the network!
 					emit<Scope::LOCAL, Scope::NETWORK>(std::move(myData));
 				\end{cppcode}
+				
+				\begin{figure}[p]
+					\centering
+					\begin{tikzpicture}[>=latex,
+						block/.style={
+							rectangle,
+							rounded corners,
+							draw=black, very thick,
+							minimum height=3em,
+							minimum width=10em,
+							align=center
+						},
+						header/.style={
+							rectangle,
+							draw = black, thick,
+							minimum height=1.2em,
+							minimum width=12.5em,
+							align=center
+						},
+						every join/.style={->, thick},
+						chained/.style={every node/.style={on chain}}]
+				
+						\begin{scope}[start chain=going below, chained]
+				
+							% Draw the Register node and setup the following blocks to have arrows
+							\node [block,join] (register) {Register Reaction from \\ Vision system};
+							\begin{scope}[start branch=on going right, every join/.style={<-}]
+								\node [block,join] (onimage) {on\textless \textbf{Image}\textgreater
+								\\(processimage)};
+							\end{scope}
+				
+							% Draw the on Every node
+							\begin{scope}[start branch=on going left, every join/.style={<-}]
+								\node [block,join] (onevery) {on\textless \textbf{Every 30ms}
+								\textgreater\\(getimage)};
+							\end{scope}
+				
+							% Start game node
+							\node[block,join] (start) {Start game};
+				
+							% In Game every node
+							\node [block, join] (runtimeStart) {Begin sending\\\textbf{Every
+								\textless ...\textgreater} events};
+				
+							% Sensor Reactors node
+							\node [block, join, on chain=going left] {Execute Reaction(s) \\for
+								\textbf{Every\textless 30ms\textgreater}};
+				
+							% Get Camera Image Node
+							\node [block, join] {Get image\\from camera};
+				
+							% Emit Node
+							\node [block, join] {Emit(\textbf{Image})};
+				
+							% Image Call Node
+							\node [block, join, on chain=going right] {Call all Reaction\\interested
+								in \textbf{Image}};
+				
+							% Execute Reactions Node
+							\node [block, join, on chain=going right] {Execute Reaction(s)\\for
+								\textbf{Image}};
+				
+							% Process Image Node
+							\node [block, join] {Process image};
+				
+							% Emit Processed Image node
+							\node [block, join] {Emit(ProcessedImage)};
+				
+							% Continuation Node
+							\node [block, join, on chain=going left] (final) {...\\(System continues)};
+						\end{scope}
+				
+						\coordinate (setuplineA) at ([xshift=-18em]$ (start) !.5! (runtimeStart) $);
+						\coordinate (setuplineB) at ([xshift=18em]$ (start) !.5! (runtimeStart) $);
+						\coordinate (setupTextPoint) at ([xshift=11em]$ (start) !.5! (runtimeStart) $);
+				
+						%% Setup dividing line and text
+						\node [above] at (setupTextPoint) {Pre-Game Setup};
+						\node [below] at (setupTextPoint) {Game Time};
+						\draw [dashed, ultra thick, shorten >= -0.4cm, shorten <= -0.4cm]
+							(setuplineA) -- (setuplineB);
+				
+						%% Add headers for the three threads
+						\node [header,above=of onevery] (sensorsHeader) {Sensors};
+						\node [header,above=of register] {Power Plant};
+						\node [header,above=of onimage] (visionHeader) {Vision};
+				
+						%% Add the column backgrounds for Sensors and Vision
+						\begin{scope}[on background layer]
+							\filldraw [gray!15] (sensorsHeader.south west) rectangle
+								(sensorsHeader.east |- final.south);
+							\filldraw [gray!15] (visionHeader.south west) rectangle
+								(visionHeader.east |- final.south);
+						\end{scope}
+					\end{tikzpicture}
+						\caption {A flowchart example of how \textbf{On}, \textbf{Emit} and \textbf{Every} work}
+						\label{fig:OnAndEmitExample}
+				\end{figure}
 	
 			\subsubsection{Log}
 				\emph{Log} provides a mechanism to log information against a particular reaction. 
@@ -507,7 +607,7 @@
 				The Network$<$Image$>$ object also contains information identifying the robot it was sent from allowing you to filter data by its source.
 				
 				% Networking diagram
-				\begin{figure}[h]
+				\begin{figure}[H]
 					\centering
 					\begin{tikzpicture}[x=15em,y=5em,>=latex,
 						A/.style={red},
