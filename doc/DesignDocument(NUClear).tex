@@ -589,11 +589,11 @@
 				Internally the Networking extension uses the ZeroMQ library to handle connection management.
 				ZeroMQ handles the creation of connections to other robots and handles transfer of binary data between machines.
 				
-				We also utilize google protocol buffers to serialize/deserialize messages. 
-				Google Protocol Buffers is a object serialization library that serializes objects into a binary format.
-				Compared to XML and JSON protocol buffers produce smaller messages more quickly and allow us to rapidly serialize messages for transfer over the network.
+				We also utilize google protocol buffers to serialise/deserialise messages. 
+				Google Protocol Buffers is a object serialisation library that serialises objects into a binary format.
+				Compared to XML and JSON, protocol buffers produce smaller messages more quickly and allow us to rapidly serialise messages for transfer over the network.
 				
-				In order to recieve networked messages NUClear provides a Network smart type that specifies you are looking for networked data:
+				In order to receive networked messages NUClear provides a Network smart type that specifies you are looking for networked data:
 				
 				\begin{cppcode}
 					void processNetworkImage(const Network<Image>& image) {
@@ -604,7 +604,7 @@
 					on<Trigger<Network<Image>>>(processNetworkImage);
 				\end{cppcode}
 				
-				The Network$<$Image$>$ object also contains information identifying the robot it was sent from allowing you to filter data by its source.
+				The \texttt{Network<Image>} object also contains information identifying the robot it was sent from allowing you to filter data by its source.
 				
 				% Networking diagram
 				\begin{figure}[H]
