@@ -792,7 +792,7 @@
 				JSON-formatted configuration files in a convenient manner. It acts as an
 				extension to the NUClear API to simplify its use.
 				
-				Modules can specify that they wish to load configuration by creation a reaction
+				Modules can specify that they wish to load configuration by creating a reaction
 				that triggers on \texttt{Configuration<Type>}, where \texttt{Type} is a class
 				containing a public static constant string called \texttt{CONFIGURATION\_PATH}
 				that holds the path	to the desired config file or a directory of config files. If
@@ -919,7 +919,7 @@
 				its use, the \texttt{image} class internally treats its image as if it were half
 				the width and half the height of the raw frame from the camera effectively
 				ignoring the subsampling. As such, If the camera is set to a resolution of
-				640x480 it will create 320x240 \texttt{mage}s.
+				640x480 it will create 320x240 \texttt{image}s.
 				
 				Whenever a new configuration is loaded, the camera settings are re-applied. If
 				the resolution has changed the camera device must be re-created, this can take
