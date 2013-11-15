@@ -260,7 +260,10 @@
 				It contains an internal thread pool that contains a number of workers. 
 				Each worker executes a reaction using the ReactorMaster and then requests a new task from a blocking queue.
 				
-				\todo[inline]{Extend section, more about the design/implementation details of this component}
+				When the system is started the ThreadMaster spins up a number of ThreadWorkers and places them in a thread pool.
+				These workers then request reaction tasks from a job queue that is populated by the ReactorMaster.
+				When a new job comes in it is taken by the first available ThreadWorker who then executes it.
+				Additionally ThreadWorkers record statistics about how long a particular task took and store them in a ReactionStats object.
 	
 			\subsection{ReactorMaster}
 				The ReactorMaster handles the logic relating to \emph{On} and \emph{Emit} directly. 
