@@ -679,7 +679,7 @@
 		
 
 		\subsection{Architecture}
-			Modules are the primary architectural units of the NUClear-baesd NUbot system. Each
+			Modules are the primary architectural units of the NUClear-based NUbots system. Each
 			one is intended to implement a single feature or task. They have no knowledge of or
 			interaction with other modules except through NUClear messages. A module consists of
 			a single NUClear Reactor subclass (with the same name as the module itself), any
@@ -706,7 +706,7 @@
 			One of the desired features of the new NUbot architecture was the flexibility to
 			change existing behaviour or create entirely new behaviour as easily as possible. To
 			this end the concept of a \textbf{role} has been created. The roles system is our
-			implementation of orchestration, a term most commonly associated with srvice-oriented
+			implementation of orchestration, a term most commonly associated with service-oriented
 			architectures, whereby complex systems are built by coordinating a range of disparate
 			components.
 			
@@ -717,7 +717,7 @@
 			that it uses.
 			
 			This design allows large parts of the code to be shared (for example, the hardware
-			interface layers and script exacution engine) while other parts are swapped in and
+			interface layers and script execution engine) while other parts are swapped in and
 			out. Switching between two compatible modules (with the same inputs and outputs)
 			requires editing only the roles list and rebuilding. This also allows for a subset of
 			modules to be integration tested without including other irrelevant code, or
@@ -792,7 +792,7 @@
 				JSON-formatted configuration files in a convenient manner. It acts as an
 				extension to the NUClear API to simplify its use.
 				
-				Modules can specify that they wish to load configuration by creationg a reaction
+				Modules can specify that they wish to load configuration by creation a reaction
 				that triggers on \texttt{Configuration<Type>}, where \texttt{Type} is a class
 				containing a public static constant string called \texttt{CONFIGURATION\_PATH}
 				that holds the path	to the desired config file or a directory of config files. If
@@ -916,10 +916,10 @@
 				Frames are retrieved in YUYV format with 4:2:2 chroma subsampling. This means
 				that for every two pixels horizontally of luma (brightness) there is one pixel
 				of chroma (colour) shared between them. For better performance and to simplify
-				its use, the \texttt{mage} class internally treats its image as if it were half
+				its use, the \texttt{image} class internally treats its image as if it were half
 				the width and half the height of the raw frame from the camera effectively
 				ignoring the subsampling. As such, If the camera is set to a resolution of
-				640x480 it will creatae 320x240 \texttt{mage}s.
+				640x480 it will create 320x240 \texttt{mage}s.
 				
 				Whenever a new configuration is loaded, the camera settings are re-applied. If
 				the resolution has changed the camera device must be re-created, this can take
