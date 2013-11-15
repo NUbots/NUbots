@@ -308,9 +308,43 @@
 			\subsubsection{On}
 				\emph{On} subscribes a reaction to particular message. 
 				On also has a number of arguments that customise what data it receives and triggers on.
+				On takes a number of template arguments to specify the type of data you are interested in. 
+				The two major ways of requesting data are using \emph{Trigger} and \emph{With}.
+				\emph{Trigger} tells NUClear that you want to execute a callback when new data for a particular type comes in.
+				This is called "Triggering" on a type. 
+				For example:
 				
 				\begin{cppcode}
-				\todo[inline]{Write up a code example}
+					// Arguments are immutable (const) and references (no copying)
+					void processImage(const Image& data) {
+					    // Do something with the image data here.
+					}
+				
+					on<Triger<Image>>(processImage);
+				\end{cppcode}
+				
+				\emph{With} tells NUClear that you are interested in something but you don't want to trigger on it. 
+				It's designed to solve the case where you want to do something when Image data comes in but you also want access to Motor Position data.
+				It can be used like this:
+				
+				\begin{cppcode}
+					void prcessImage(const Image& data, const MotorPositions& motors) {
+					    // Do something with image and motor data here
+					}
+					
+					on<Trigger<Image>, With<MotorPositions>>(processImage);
+				\end{cppcode}
+				
+				\emph{With} also allows you to request multiple chunks of data so you're not limited to just a single extra piece of data.
+				Consider the case where you need Image, Vision and Localization data (such as in behaviour) triggering on new Vision frames:
+				
+				\begin{cppcode}
+					void processBehaviour(const Vision& vision, const Image& image, 
+					    const Localization& loc) {
+					    // Do something with vision, image and localization here
+					}
+					
+					on<Trigger<Vision>, With<Image, Localization>>(processBehaviour);
 				\end{cppcode}
 				
 			\subsubsection{Emit}
@@ -328,6 +362,8 @@
 				\begin{cppcode}
 				\todo[inline]{Write up a code example}
 				\end{cppcode}
+			
+
 				
 		\subsection{Extension}
 			\todo[inline] {Write about how the system can be extended through partial speicalization of TriggerType, Exists, Get, and Emit}
@@ -353,6 +389,57 @@
 			\end{cppcode}
 			
 			\missingfigure{Diagram of network communication between robots}
+			
+		\section{Putting it all together}
+			We've seen examples of all the major features of NUClear but what does an actual module look like?
+			To answer this question we've got an example for you right here!
+			The following module is designed to make the robots eyes strobe when it hears a beat:
+			
+			\begin{cppcode}
+				// PartyStrobe.h
+				class PartyStrobe : NUClear::Reactor {
+				    public:
+				        PartyStrobe(NUClear::PowerPlant* plant);
+				};
+				
+				// PartyStrobe.cpp
+				#include "PartyStrobe.h"
+				
+				PartyStrobe::PartyStrobe(NUClear::PowerPlant* plant) 
+				: NUClear::Reactor(plant) {
+				    // Every time we hear a beat we want to max out the eye values.
+				    on<Trigger<Beat>>([this](const Beat& beat) {
+				        // We've detected a beat; set the eyes to max
+				        auto newEyes = std::make_unique<EyeLED>();
+				        
+				        // We're taking 10% out of the eyes every 100 milliseconds
+				        newEyes->r = 0xFFF;
+				        newEyes->g = 0xFFF;
+				        newEyes->b = 0xFFF;
+				        
+				        emit(std::move(newEyes));
+				    });
+				
+				    // Every 1/10th of a second we want to lower the eye intensity
+				    // so that it's noticeable when it strobes back up.
+				    on<Trigger<Every<100, std::chrono::milliseconds>>, 
+				       With<EyeLED>>([this](const time_t&, const EyeLED& eyeLED) {
+				        // Construct a new EyeLED message to change the eye colour.
+				        auto newEyes = std::make_unique<EyeLED>();
+				        
+				        // We're taking 10\% out of the eyes every 100 milliseconds
+				        newEyes->r = eyeLED->r - (0xFFF / 10);
+				        newEyes->g = eyeLED->g - (0xFFF / 10);
+				        newEyes->b = eyeLED->b - (0xFFF / 10);
+				         
+				         // Send the message out
+				         emit(std::move(newEyes));
+				    });
+				    
+
+				}
+				
+			\end{cppcode}
 			
 	\section{NUClear Powered NUbots}
 		\todo[inline]{Write introduction to the concept of nuclear in nubots}
