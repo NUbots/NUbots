@@ -1,0 +1,10 @@
+ADD_ROLE(
+    NAME scriptrunner
+    MODULES
+        ConfigSystem
+        Platform::Darwin::HardwareIO
+        Platform::Darwin::MotionManager
+        ScriptEngine
+        ScriptRunner
+        NUbugger
+        PartyDarwin)

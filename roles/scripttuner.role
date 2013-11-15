@@ -1,0 +1,8 @@
+ADD_ROLE(
+    NAME scripttuner
+    MODULES
+        Platform::Darwin::HardwareIO
+        Platform::Darwin::MotionManager
+        NUbugger
+        ScriptTuner
+        PartyDarwin)
