@@ -914,13 +914,106 @@
 				containing the servo ID, desired position, gain and the time by which the movement should finish. Any other waypoints already in that servo's queue that
 				would have started after the new waypoint are deleted. Multiple waypoints can be
 				set at once by emitting them in a \texttt{std::vector}.
+				
+				The Darwin Motion Manager relies on the Darwin Hardware I/O module to retrieve
+				the current position of servos and to send commands.
 
 			\subsubsection{eSpeak}
+				Allows the robot to `talk' using speech synthesis.
+				
+				When it receives a \texttt{Say} message, this module uses the eSpeak speech engine
+				to vocalise the contents. If the robot is already talking, it will wait until it
+				has finished before starting the new message.
+				
+				This module depends on libespeak.
+				
+				
 			\subsubsection{NUbugger}
+				NUbugger provides debugging information over the network in real time so that t
+				he status of the robot can be monitored in real time while it is active. The
+				NUbugger module listens for connections on TCP port 32000, any number of
+				clients can then connect to receive the serialised debug info. The format of
+				data is defined in the NUAPI protocol buffer.
+				
+				NUbugger presently sends two types of debug message: sensor data and Vision.
+				The sensor data message reproduces the contents of \texttt{DarwinSensors}
+				messages sent by the hardware I/O module. Vision messages contain a JPEG
+				compressed copy of the image most recently retrieved from the camera.
+				
+				This module depends on libzmq for network communication and libprotobuf for
+				message serialization. A camera input module must be installed to receive
+				images to relay and libjpeg is required to compress them. The hardware I/O
+				module must be installed to receive sensor data.
+				
+				
 			\subsubsection{LinuxCameraStreamer}
+				The Linux Camera Streamer streams video from a Video4Linux 2 compatible camera and
+				creates an Image from each frame.
+				
+				The camera is initialised on startup using settings from the configuration
+				file (device name, resolution, camera parameters such as contrast and
+				saturation, etc.). Once this has occurred, the module will emit a
+				\texttt{Image} for each frame of video it receives.
+				
+				Frames are retrieved in YUYV format with 4:2:2 chroma subsampling. This means
+				that for every two pixels horizontally of luma (brightness) there is one pixel
+				of chroma (colour) shared between them. For better performance and to simplify
+				its use, the \texttt{mage} class internally treats its image as if it were half
+				the width and half the height of the raw frame from the camera effectively
+				ignoring the subsampling. As such, If the camera is set to a resolution of
+				640x480 it will creatae 320x240 \texttt{mage}s.
+				
+				Whenever a new configuration is loaded, the camera settings are re-applied. If
+				the resolution has changed the camera device must be re-created, this can take
+				a second or two in which time no images will be captured.
+				
+				This module uses Linux-specific system calls to control and read from the camera.
+				In addition, the configuration system must be installed to load the camera settings file.
+				
+				
 			\subsubsection{PartyDarwin}
+				Party Darwin is a very simple module designed to test that communication with the
+				robot is working correctly and that the running program has not crashed or
+				stalled. It constantly flashes the eye and head LEDs of the Darwin to different
+				colours by periodically emitting \texttt{EyeLED} and \texttt{HeadLED} messages
+				with random colour values.
+				
+				This module depends on the Darwin Hardware I/O module to accomplish LED colour
+				changes.
+				
+				
 			\subsubsection{ScriptEngine}
+				The script engine loads files containing scripted robot movement instructions and
+				allows them to be executed.
+				
+				Scripts are JSON files containing a sequence of 'frames'. A frame lasts for a
+				set period of time and has instructions for the position and gain that servos
+				should be set to. Complex movements such as kicking or dancing are achieved
+				using many frames. Files are loaded using the configuration system.
+				
+				When the script engine receives an \texttt{ExecuteScript} message it transforms
+				the script into a format usable by the motion manager and dispatches it as a
+				series of servo waypoints. The \texttt{ExecuteScriptByName} message calls a script
+				based on its filename.
+				
+				The script engine depends on the configuration system to parse the script file
+				format and the motion manager to enact the scripted waypoints.
+			
+				
 			\subsubsection{ScriptRunner}
+				The Script Runner module allows for scripts to be executed in order by specifying
+				them as command-line parameters to the executable.
+				
+				At startup, ScriptRunner adds each command-line argument to a queue of scripts
+				and then begins executing the first. When it receives an
+				\texttt{AllServoWaypointsComplete} message it runs the next script in the queue.
+				Once all scripts have finished, it shuts down the power plant, effectively ending
+				the program.
+				
+				Script Runner depends on the script engine module being installed to execute
+				scripts, and the motion manager being installed to be notified of completed
+				scripts.
+			
 			\subsubsection{ScriptTuner}
 				\todo[inline]{Possible screenshot for this one since it is a GUI application}
 
