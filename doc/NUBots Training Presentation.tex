@@ -1224,7 +1224,7 @@
 \begin{frame}[fragile]
 	\frametitle {Key Functions - Options Sync}
 	\begin{itemize}
-		\item Q: "I have several state dependant reactions that can't be multithreaded! If they are then they won't run properly! But I know that if I use mutexes on them all I'll be really mean to everyone else by blocking up all the pool threads!"
+		\item Q: "I have several state dependent reactions that can't be multithreaded! If they are then they won't run properly! But I know that if I use mutexes on them all I'll be really mean to everyone else by blocking up all the pool threads!"
 		\item A: Use the Sync argument in Options
 		\item This will only allow a single event from a sync group to execute at a time (the rest queuing up and running after)
 	\end{itemize}
