@@ -112,7 +112,47 @@
 		Skype was also employed regularly for group communication.
 	
 	\subsection{Software Engineering Methodologies}
-		Due to our close communication with the NUbots team as well as our small team size, our group approach evolved into a semi-agile approach. This was expressed through the use of an evolutionary prototype which was used in the design and development of NUClear. It allowed us to see what could be done with the tools we had available. We were however constrained in following agile development to some extent by the quantity of documentation required for the project.
+		Due to our close communication with the NUbots team as well as our small team size, our group approach evolved into a semi-agile approach. 
+		This was expressed through the use of an evolutionary prototype which was used in the design and development of NUClear. 
+		It allowed us to see what could be done with the tools we had available. 
+		We were however constrained in following agile development to some extent by the quantity of documentation required for the project.
+		\\
+		We followed several development ideologies for the project.
+		\\
+		One of these ideologies was the MEITS (Make It Easy To Suceed) approach.
+		This is the idea that the architecture is designed so that it is difficult to use it wrong.
+		Many architecture designed work great in theory but in practice the system become a mess because the developers didn't follow the ideal set out in the architecture.
+		NUClear is designed so that the developers have to do it NUClear's way, making it much more difficult for the system to become a architectural mess in the future.
+		\\
+		Another ideology we used was literate programming.
+		NUClear was designed so that it is named in way that makes it intuitive to use.
+		This makes it much easier to read the code.
+		Even if you are inexperienced with NUClear, you should still have a general idea of what is happening.
+		This can be seen in the naming of 'on' and 'emit', which are keywords for a component triggering on a message and for emitting a message, respectively.
+		\\
+		A related ideology to the previous two is KISS (Keep It Simple Stupid).
+		NUClear was designed to be easy to use and easy to learn.
+		NUClear is a very powerful tool, that does innovate and complicated things such as compile time message routing and behind the scenes thread management.
+		Yet despite this it is still very easy to use.
+		This was acheived by using the full extend of C++ features including template meta programming.
+		Programming NUClear was a difficult task that was only possible due to having a very experienced C++ programmer on our team.
+		So while the core NUClear code would be very difficult for someone without a great knowledge of C++ this was only done so that the user of NUClear would have a much easier time programming.
+		\\
+		Another core software engineering ideology we used was Seperation of Concerns.
+		This was a core design principe of our architecure.
+		Every component of a system should be highly cohesive.
+		Every component should do a single task and no more.
+		Additionally different components should be loosely coupled.
+		Each component should not depend on the inner working of other components.
+		Rather the only dependancies should be through interfaces.
+		In the NUClear framework this is done through messages.
+		NUClear makes it easy to be loosely coupled since each component only cares about what type of message the other components send to it, or expect to receive from it.
+		NUClearPort also used this ideology.
+		Using the features of NUClear it uses the role system to make it easy to recombine components into different systems.
+		For example a unit test could created easily by creating dummy components that emit test data to the component being testing and trigger on the data the component emits to verify the output.
+		Components can also easily be replaced with different versions, such as different beat trackers for robot dance which can be swapped by replacing one line in a script.
+		All this was acheived because we made seperation of concerns a core ideology for our project.
+	
 		
 	\subsection{Documentation}
 		Due to losing team members documentation became more of a burden than we originally estimated.
