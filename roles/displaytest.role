@@ -1,0 +1,5 @@
+ADD_ROLE(
+    NAME displaytest
+    MODULES
+        ConfigSystem
+        DisplayTest)
