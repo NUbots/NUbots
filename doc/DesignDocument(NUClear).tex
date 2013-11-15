@@ -448,14 +448,28 @@
 				
 				\begin{cppcode}
 				// Example of Every
-				on<Trigger<Every<50, std::chrono::milliseconds>>(function);
+				on<Trigger<Every<50, std::chrono::milliseconds>>>(function);
 				\end{cppcode}	
 				
 			\subsubsection{Last}
-				\todo[inline] {Stuff from training presetnation}
-				\todo[inline] {code example and explanation}
-			
-			\todo[inline] {Transfer the sections from the training presettaion over here with points expanded}
+				In systems it is often very important to not only look at the most recent information but also prior information.
+				This is useful in scenarios where data must be operated on over a series of time.
+				However in NUClear alone there is only a method to access the most recent element, and not prior elements.
+				As the information which is provided is not owned by the reactor, the only available way would be to copy the information into local memory and manage it.
+				
+				In order to solve this problem, a smart type called Last is available in the NUClear system.
+				This smart type is able to access the references held by the CacheMaster and provide a list of these to the modules that request them.
+				This allows the system to access the previous elements without having to deal with storing the information locally or the overhead of copying this data.
+				
+				The Last smart type consists of the number of elements to return, as well as the type to be returned.
+				It will trigger whenever a type of the requested type is requested and will also get the previous number of elements.
+				It does this by accessing the raw shared pointer which is stored in the CacheMaster.
+				This allows it to ensure the lifetime of the data without having to copy the information itself.
+				
+				\begin{cppcode}
+				// Example of Last
+				on<Trigger<Last<10, Image>>>(function);
+				\end{cppcode}
 	
 			\subsubsection{Networked}
 				One of the pain points cited in the old system was networking. 
