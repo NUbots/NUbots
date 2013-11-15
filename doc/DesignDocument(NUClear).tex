@@ -394,16 +394,23 @@
 				\emph{Log} provides a mechanism to log information against a particular reaction. 
 				This provides logging information that is per-reaction rather then system-wide giving greater traceability.
 				
-				Logging is implemented internally using the standard iostream operator<< mechanism.
+				Logging is implemented internally using the standard iostream operator$<<$ mechanism.
 				This means that anything you can log with std::cout can also be logged with NUClear's log function.
 				
 				Log accepts an infinitely long set of arguments, concatenates them together and adds them as a single log entry to the reaction you are in. 
 				Consider the following example: 
 				
 				\begin{cppcode}
-				\todo[inline]{Write up a code example}
+					void processImage(const Image& image) {
+					    log("Got data: ", image.data);
+					}
+					
+					on<Trigger<Image>>(processImage);
 				\end{cppcode}
-			
+				
+				In the previous example the "Got data" message is attached to the processImage reaction allowing us to determine the exact context the message occurred in.
+				This makes it easy to filter through thousands of log messages to find the relevant information.
+				
 		\subsection{Extension}
 			The NUClear API has been designed so that it is extensible.
 			Despite the fact that there are only two functions that are available in the system, it is possible to add the ability for users to alter the effects of these functions is defined cases.
@@ -469,7 +476,7 @@
 				PartyStrobe::PartyStrobe(NUClear::PowerPlant* plant) 
 				: NUClear::Reactor(plant) {
 				    // Every time we hear a beat we want to max out the eye values.
-				    on<Trigger<Beat>>([this](const Beat& beat) {
+				    on<Trigger<Beat([this](const Beat& beat) {
 				        // We've detected a beat; set the eyes to max
 				        auto newEyes = std::make_unique<EyeLED>();
 				        
