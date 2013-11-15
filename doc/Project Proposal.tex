@@ -79,66 +79,96 @@
 	\clearpage
 
 	\section{Overview of Document}
-	This document seeks to update our original Project Proposal, explain how it has been implemented and how the plan has changed. It will explore the decisions our team has taken to respond to problem and how this has effected the implementation of the Project Plan.
+	This document seeks to update the original Project Proposal.
+	It aims to explain how the Project Proposal has been implemented and how the Project Plan has changed.
+	It will explore the decisions the project team has undertaken to respond to problems and how this has affected the implementation of the Project Plan.
 
 	\section{Terms of Reference}
 		\subsection {Goals}
 			\begin{enumerate}
 				\item Measurably improve robot architecture.
-				\item Prove the significance of the improvements of the new architecture by using it to make the robots dance.
+				\item Prove the significance of the improvements by making the robots dance. 
 			\end{enumerate}
 		\subsection {Objectives}
 			\subsubsection{Time to add a new component}
-				Decrease the time it takes to add a new component to the system from 1-2 weeks to less than 1 day.
+				Decrease the time it takes to add a new component to the system from 1 to 2 weeks to less than a day.
+			
 			\subsubsection{Decoupling behaviour and localisation by vision}
 				Decouple performance of behaviour and localisation so they are no longer restricted by the performance of vision.
+			
 			\subsubsection{Team Member Induction}
 				Decrease the time it takes to induct a new team member into the system from 1 month to 1 week.
+			
 			\subsubsection{Components for Changing Hardware Platform}
-				Reduce the number of component needed to be changed to move the architecture between different robot platforms from 4 components to 2.
+				Reduce the number of components from 4 that are needed to be changed to move the architecture between different robot platforms to 2. 
+			
 			\subsubsection{Adding Dance}
-				Make the robot dance according to a predetermined script and in response to music or detected human’s movements. These feature is to be implemented by changing only 1 component each, rather than 4 each which would be needed to implement this in the current system. 
+				Make the robot dance according to a predetermined script and in response to music or detected human movements.
+				This feature is to be implemented by changing only 1 component, rather than 4 that would is required for implementation in the current system. 
 
 			\subsubsection{Improved Monitoring and Debugging Tools}
-				 Improve visibility into the state of the system through diagnostics/monitoring tools. Improve on current basic timing and logging to include detailed debugging at the time of the system errors.
-			\subsubsection{Improved Hardware Utilization}
-				 Improve utilisation of existing and future robot hardware to allow for higher resolution on the camera, better use of low level controllers and increasing control over threading.
+				Improve visibility into the state of the system through diagnostics/monitoring tools.
+				Improve current basic timing and logging to include detailed debugging at the time of the system errors. 
+			
+			\subsubsection{Improved Hardware Utilisation}
+				Improve utilisation of existing and future robot hardware to allow for higher resolution on the camera, better use of low level controllers and increasing control over threading.
+			
 			\subsubsection{Interface Consistency}
-				 Improve the consistency of interfaces between components. Reducing the use of multiple different interface for each component to a single unified interface for all components. The unified interface must have a convention for describing so that it can minimise mis-understanding and redundancy.
+				Improve the consistency of interfaces between components.
+				Reduce the use of multiple interfaces for each component to a single unified interface for all components.
+				The unified interface must have a convention for describing so that it can minimise mis-understanding and redundancy.
 				
 		\subsection {Acceptance Criteria}
 			\subsubsection{Time to add a new component}
-				The dancing to a script, audio and dancing to visual stimuli components will be added to test this objective. This objective will be accepted as complete if each of the 3 new components can be added in 12 man hours each for a experienced NUClear and NuBots user, or 24 hours for an inexperienced user.
+				The dancing to a script, audio and dancing to visual stimuli components will be added to test this objective.
+				This objective will be accepted as complete if each of the 3 new components can be added in 12 work hours each for an experienced NUClear and NUbots user, or 24 hours for an inexperienced user. 
+			
 			\subsubsection{Decoupling behaviour and localisation by vision}
 				This objective will be verified by blocking vision and verifying that behaviour and localisation are not blocked, waiting on vision.
+			
 			\subsubsection{Team Member Induction}
-				This objective will be verified by finding the average time taken to teach new NuBots team members how to use the system once fully converted to NUClear. The time should be less than 50 work hours.
+				This objective will be verified by finding the average time taken to teach new NuBots team members how to use the system once fully converted to NUClear. 
+				The time should be less than 50 work hours.
+			
 			\subsubsection{Components for Changing Hardware Platform}
 				This objective will be verified by creating a draft plan of how to move the system back to the Nao robot. It must only require 2 components to be changed.
+			
 			\subsubsection{Adding Dance}
-				This objective will be verified by counting the number of components changed when these features are added. If should only require 1 component to be changed.
+				This objective will be verified by counting the number of components changed when these features are added.
+				It should only require 1 component to be changed. 
+			
 			\subsubsection{Improved Monitoring and Debugging Tools}
 				This objective will be verified by purposely creating a wide variety of run-time errors to test the debugging features.
-			\subsubsection{Improved Hardware Utilization}
-				This objective will be verified by monitoring the thread use by the system on machines with more than 2 cores, to ensure they are all able to be used.
+			
+			\subsubsection{Improved Hardware Utilisation}
+				This objective will be verified by monitoring the thread use by the system on machines with more than 2 cores to ensure they can all be used. 
+			
 			\subsubsection{Interface Consistency}
-				This objective will be verified by ensuring there is only 1 unified interface between all components. It also must be fully documented, including a description convention that the NuBot team accept as unambiguous.
+				This objective will be verified by ensuring there is only 1 unified interface between all components.
+				It also must be fully documented, including a description convention that the NUbot team accepts as unambiguous.
 
 		\subsection {Scope}
-			The project aims to measurably improve the effectiveness of the NUbots through the introduction of a new software architecture. This will involve modifications to the existing NUbots codebase. The project will not modify any hardware on the NUbots but must be able to accommodate changes in hardware. The project will not change any existing algorithms beyond restructuring them to fit the new architecture.
-			\\Additional we aim to give the robot the ability to dance in some form for marketing purposes. This dancing will be according to a predetermined script, or in response to some stimulus such as music or human movement detected in a camera.
+			The project aims to measurably improve the effectiveness of the NUbots through the introduction of new software architecture.
+			This will involve modifications to the existing NUbots codebase.
+			The project will not modify any hardware on the NUbots, but must accommodate changes in hardware.
+			The project will not change any existing algorithms beyond restructuring them to fit the new architecture.
+						Additionally, the project team aim to give the robot the ability to dance in some form for marketing purposes.
+			This dancing will be according to a predetermined script, or in response to stimulus such as music or human movement detected in a camera.
 				
 		\subsection {Review of changes to Goals, Objectives, Acceptance Criteria and Scope}
-			An review of how these categories have changed since the original Project Proposal.
+			A review of how the goals, objectives, acceptable, criteria and scope have changed since the original Project Proposal. 
+			
 			\subsubsection{Goals}
-				The objectives of the project are unchanged.
+				The objectives of the project remain unchanged.
+			
 			\subsubsection{Objectives}
-				 Due to team members leaving objective 8. , the objective of making the robot dance to according to visual stimuli has been abandoned.
+				Due to team members leaving the project, Objective 2.2.4 Adding Dance to visual stimuli has not been completed.
+			
 			\subsubsection{Acceptance Criteria}
-				\paragraph{Time to add a new component}
-					This objective will no longer be tested by adding the dance according to visual stimuli component.
+				In relation to 2.3.1 Time to add a new component, this objective will no longer be tested by adding the dance according to visual stimuli component.
+			
 			\subsubsection{Scope}
-	The project will no longer involve making the robot dance according to movement detected in a camera.
+				The project will no longer involve making the robot dance according to movement detected in a camera.
 
 	\section{Resources}
 		\subsection{People and Responsibilities}
@@ -165,18 +195,21 @@
 						\item Stephan Chalup
 					\end{itemize}
 			\subsubsection{Responsibilites}
+			
 				\paragraph{Re-Architecturing Focus Group}
 					\begin{itemize}
 						\item Jake Woods
 						\item Michael Burton
 						\item Trent Houliston
 					\end{itemize}
+					
 				\paragraph{Dance Focus Group}
 					\begin{itemize}
 						\item Joshua Kearns
 						\item Liam Jones
 						\item Daniel Gault
 					\end{itemize}
+					
 		\subsection{Equipment, Tools and Materials}
 			\subsubsection{Physical Resources}
 			The team will have access to the NUbots robots under the supervision of members of the NUbots team.
@@ -186,8 +219,9 @@
 					\item Git Hub: For a shared Git repository.
 					\item Base Camp: For task management, team discussion and file sharing.
 				\end{itemize}
+				
 		\subsection {Review of Resources}
-			An review of how our resources have changed since the original Project Proposal.
+			A review of how our resources have changed since the original Project Proposal.
 			\subsubsection{Current Project Team}
 				\begin{itemize}
 					\item Joshua Kearns
@@ -200,10 +234,6 @@
 \newpage
 	\section{Risks}
 		\begin{table}[htbp]
-		%\begin{tabularx}{\linewidth}{l  X l  l  X X}
-		%\begin{tabularx}{textwidth}{bbbbbb}
-		%\begin{tabularx}{\linewidth}{X*{6}{X}}
-		%\begin{tabularx}{\linewidth}{| Xm{3cm} |  lm{0.5cm}  lm{0.5cm} l l l l l}
 		\begin{tabularx}{\linewidth}{ | m{0.6cm} |  X | m{1.05cm} |  m{1.05cm} |  X | X |}
 			\hline 
 			Rank & Name & Chance & Severity & Mitigation Strategy & Contingency \\  \hline
@@ -216,13 +246,20 @@
 		\end{tabularx}
 		\end{table}
 		\subsection{Review of Risks}
-			An overview of what risks occurred and how well we responded to them.
+			An overview of what risks occurred and how well the team responded to them. 
+			
 			\subsubsection{Unanticipated Risks}
 				\paragraph{Project Members Leaving}  
-					Although we had discussed this possibility, we failed to thoroughly plan how to respond to it. Fortunately it was only members of the Dance Focus Group who left the team as the Dance part of the project was much easier to scale back than the Architecture part of the project. Despite this, members of the Architecture Focus Group were still required to help out with the Dance part of the project.
+					Although the project team had discussed this possibility, the team failed to thoroughly plan how to respond to it.
+					Fortunately, it was only members of the Dance Focus Group who left the team, as the Dance component was easier to revise than the Architecture component.
+					Despite this, members of the Architecture Focus Group were required to help out with the Dance component.
+					This required restructuring of the time allocation and priorities for the Architecture Focus Group, placing additional pressure on their resources, mainly time and skills. 
+			
 			\subsubsection{Anticipated Risks}
 				\paragraph{Transferring to New Architecture behind schedule}  
-					Due to failing to anticipate how time consuming transferring the old system to the new architecture would be, it was realised that it could not be completed in time. Fortunately the team had considered this possibility and was ready to deal with it. It was decided, as according to our contingency plan, that we would simply do the best we could and leave the rest for the NUbots team to complete.
+					Due to failing to anticipate how time consuming transferring the old system to the new architecture would be, it was realised that it could not be completed in time.
+					Fortunately, the project team had considered this possibility and had a contingency plan.
+					It was decided that the team would aim to do as much as possible and the NUbots team to complete the project.
 
 	\section{Schedule}
 		\subsection{Gantt Chart}
@@ -258,11 +295,13 @@
 				\paragraph{Prototype Nuclear}
 					This is an evolutionary prototype that will be used to assist in the design of NUClear.
 				\paragraph{Implement Nuclear}
-					NUClear will be implemented which provide the framework from which the NUbots system will be redesigned around.
+					NUClear will be implemented to provide the framework that the NUbots system will be redesigned around. 
 				\paragraph{Convert NUbots to NUClear}
-					The NUbots soccer playing system will be converted from the old architecture to the new one. This will be completed when all original functionality is operating on the new architecture.
+					The NUbots soccer playing system will be converted from the old architecture to the new architecture.
+					This will be completed when all original functionality is operating on the new architecture.
 				\paragraph{Design Robot Dance}
-					The design of the robot dance, will need to be based around the design of NUClear and will allow for the robot dance to be implemented.
+					The design of the robot dance will need to be based around the design of NUClear.
+					This will allow for the robot dance to be implemented. 
 				\paragraph{Implement Robot Dance}
 					The robot dance will be implemented.
 
@@ -301,7 +340,8 @@
 			
 			\subsubsection{Changes to tasks}
 				\paragraph{Convert NUbots to NUClear}
-					Due to running out of time, this task will not be completed but only the vital components will be converted which will make it easier for the NUbots team to finish the task themselves. This task will end in week 7 to allow time for other tasks to be completed.
+					Due to time constraints, this task will not be completed. Only the vital components will be converted, making it easier for the NUbots team to finish the task.
+					This task will end in Week 7 to allow time for other tasks to be completed. 
 				\paragraph{New Tasks}
 					\begin{enumerate}
 						\item Test NUClear
@@ -310,7 +350,7 @@
 					\end{enumerate}
 			\subsubsection{New Task Definition}
 				\paragraph{Test NUClear}
-					We failed to take into account testing in the original schedule. This testing will ensure that the NUClear architectural framework meets the objectives.
+					The Project Team failed to take into account testing in the original schedule. This testing will ensure that the NUClear architectural framework meets the objectives.
 				\paragraph{Test Robot Dance}
 					This testing will ensure that the Robot dance function correctly.
 				\paragraph{NUClear User Documentation}
