@@ -457,14 +457,85 @@
 			
 			\todo[inline] {Transfer the sections from the training presettaion over here with points expanded}
 	
-		\subsection{Component Overview - Networking}
-			\todo[inline] {Talk about Networking as an Extension here}
-			
-			\begin{cppcode}
-			\todo[inline]{Write up a code example}
-			\end{cppcode}
-			
-			\missingfigure{Diagram of network communication between robots}
+			\subsubsection{Networked}
+				One of the pain points cited in the old system was networking. 
+				To address this NUClear provides facilities to send messages over the network.
+				Networking is implemented through the Extension API and provides a good case study of the power available to users of the extension API.
+				
+				The Networking extension introduces a new emit scope which can be used to send message, as shown in the Reactor overview:
+				
+				\begin{cppcode}
+					// Send a message to the network
+					emit<Scope::NETWORK>(message);
+					
+					// Send a message locally and to the network
+					emit<Scope::LOCAL, Scope::NETWORK>(message);
+				\end{cppcode}
+				
+				Internally the Networking extension uses the ZeroMQ library to handle connection management.
+				ZeroMQ handles the creation of connections to other robots and handles transfer of binary data between machines.
+				
+				We also utilize google protocol buffers to serialize/deserialize messages. 
+				Google Protocol Buffers is a object serialization library that serializes objects into a binary format.
+				Compared to XML and JSON protocol buffers produce smaller messages more quickly and allow us to rapidly serialize messages for transfer over the network.
+				
+				In order to recieve networked messages NUClear provides a Network smart type that specifies you are looking for networked data:
+				
+				\begin{cppcode}
+					void processNetworkImage(const Network<Image>& image) {
+					    // Do something with the image from the network here.
+					}
+					
+					// Trigger on images from the network
+					on<Trigger<Network<Image>>>(processNetworkImage);
+				\end{cppcode}
+				
+				The Network$<$Image$>$ object also contains information identifying the robot it was sent from allowing you to filter data by its source.
+				
+				% Networking diagram
+				\begin{figure}[h]
+					\centering
+					\begin{tikzpicture}[x=15em,y=5em,>=latex,
+						A/.style={red},
+						B/.style={blue},
+						reactor/.style={draw, circle, thick},
+						write/.style={->,thick},
+						read/.style={<-,thick}]
+					
+						%%% Left Power Plant
+						\node at (0, 0) [draw,star,star points=8,star point ratio=0.875,minimum width=3cm] (plantA) {Powerplant A};
+						\node [above=of plantA,reactor] (sensorsA) {Sensors};
+						\node [below=of plantA,reactor,align=center] (fieldmapperA) {2d Field\\Mapper};
+						\path [A, write] (sensorsA) edge node[A,left] {Image(A)} (plantA);
+						\path [A, read] (fieldmapperA.110) edge node[left] {Image(A)} (plantA.260);
+						\path [B, read] (fieldmapperA.70) edge node[right] {Image(B)} (plantA.280);
+					
+						%%% Right Power Plant
+						\node at (2, 0)
+							[draw,star,star points=8,star point ratio=0.875,minimum width=3cm]
+							(plantB){Powerplant B};
+						\node [above=of plantB,reactor] (sensorsB) {Sensors};
+						\node [below=of plantB,reactor,align=center] (fieldmapperB) {2d Field\\Mapper};
+						\path [B, write] (sensorsB) edge node[left] {Image(B)} (plantB);
+						\path [A, read] (fieldmapperB.110) edge node[left] {Image(A)} (plantB.260);
+						\path [B, read] (fieldmapperB.70) edge node[right] {Image(B)} (plantB.280);
+					
+						%%% Network & Network Connections
+						\node at (1, 0) [draw,cloud,cloud puffs=10,minimum width=3.5cm]
+						(network) {Network};
+					
+						%% Plant A connections
+						\path [A, write] (plantA.10) edge node[A, above] {Image(A)} (network.169);
+						\path [B, read] (plantA.-9) edge node[B, below] {Image(B)} (network.190);
+					
+						%% Plant B connections
+						\path [A, read] (plantB.171) edge node[A, above] {Image(A)}  (network.10);
+						\path [B, write] (plantB.190) edge node[B, below] {Image(B)} (network.-11);
+					\end{tikzpicture}
+					\caption {An example of how robots can communicate camera data over a network to
+						build a 2d map of the field}
+						\label{fig:NetworkExampleDiagram}
+				\end{figure}
 			
 		\section{Putting it all together}
 			We've seen examples of all the major features of NUClear but what does an actual module look like?
@@ -480,7 +551,6 @@
 				
 				// PartyStrobe.cpp
 				#include "PartyStrobe.h"
-				
 				PartyStrobe::PartyStrobe(NUClear::PowerPlant* plant) 
 				: NUClear::Reactor(plant) {
 				    // Every time we hear a beat we want to max out the eye values.
@@ -511,10 +581,7 @@
 				         // Send the message out
 				         emit(std::move(newEyes));
 				    });
-				    
-
 				}
-				
 			\end{cppcode}
 			
 	\section{NUClear Powered NUbots}
