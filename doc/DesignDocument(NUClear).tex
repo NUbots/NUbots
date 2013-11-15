@@ -404,10 +404,30 @@
 				\todo[inline]{Write up a code example}
 				\end{cppcode}
 			
-
-				
 		\subsection{Extension}
-			\todo[inline] {Write about how the system can be extended through partial speicalization of TriggerType, Exists, Get, and Emit}
+			The NUClear API has been designed so that it is extensible.
+			Despite the fact that there are only two functions that are available in the system, it is possible to add the ability for users to alter the effects of these functions is defined cases.
+			This allows users of the NUClear framework to add new functionality to the core system without having to modify the complex metaprograms.
+			There are four anchor points at which an extension to the NUClear framework can be installed to modify the system.
+			
+			The first of these is the TriggerType extension.
+			This extension is able to change the type that a message is triggered on.
+			For example, if a message of a particular type is emitted, it can cause the running of a function with a different function signature.
+			This is useful for cases where one type is requested, but that type is based on another type.
+			For example if a type of \texttt{Increment<int>} were a theoretical type, then it may be triggered when an int is emitted rather then the requested \texttt{Increment<int>} type.
+			
+			The second possible anchor point is the Exists anchor point.
+			This anchor point is used when a function should be run because a type exists within a Trigger or With statement.
+			For example, in the configuration system if a Configuration type exists, then that type must be registered for events with the configuration system.
+			This allows it to generate events that are used in the configuration system simply by the type existing in the system.
+			
+			The third possible extension point is to override the Get function for a particular type.
+			This allows changing of how data is retrieved when a particular type is requested.
+			For example, if the type that is requested is accessed through a database and not NUClear, then by overriding how that information is obtained, the user can influence the system for that type.
+			
+			The final method of overriding is through Emit.
+			Emit can be overridden for any type or controller, this allows the user to control how the system uses data that is emitted.
+			This can be used to implement functionality such as networking, or communication with a database, or simply to intercept data elements and modify them before they are sent to the rest of the system.
 			
 		\subsection{Smart Types}
 			\todo[inline]{Write an introduction to the concepts of smart types (as part of extension)}
