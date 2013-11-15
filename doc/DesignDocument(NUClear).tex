@@ -811,6 +811,12 @@
 				analysis of JSON files. The directory monitoring thread uses system calls
 				specific to Linux.
 				
+			
+			\subsubsection{ConsoleLogHandler}
+				The Console log handler is a small utility module that outputs NUClear log
+				messages directly to standard output. It does not have any dependencies and
+				only reacts to NUClear \texttt{LogMessage}s.
+				
 				
 			\subsubsection{DarwinHardwareIO}
 				The Darwin Hardware I/O module is a complete rewrite of the libdarwin interface
@@ -971,8 +977,12 @@
 			
 			\subsubsection{ScriptTuner}
 				\includegraphics[width=1\textwidth]{./Images/tuner}
-				\todo[inline]{Possible screenshot for this one since it is a GUI application}
 
+				Script Tuner is a module that provides an ncurses-based user interface for
+				creating, editing and tweaking motion scripts. As it runs on the robot itself,
+				it allows for movements to be previewed while they are being designed.
+				
+				
 
 	\todo[inline]{Either have some references or remove this section}
 	\bibliographystyle{plain}
