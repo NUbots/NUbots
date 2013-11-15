@@ -256,27 +256,44 @@
 			The ReactorMaster then uses the CacheMaster to retrieve the message data and then invokes the reactions with the message data.
 	
 			\subsection{CacheMaster}
-				The CacheMaster is responsible for the storage and caching of messages.
-				It is primarily made up of template metaprograms which are responsible for automatically allocating space for messages. 
+				The CacheMaster is responsible for ensuring that there is enough storage for all uses of a particular message.
+				In most cases this means it needs to ensure there is space allocated for at least one instance of every message.
+				However some extensions may require that more then the most recent message be cached and the CacheMaster also needs to account for that.
 				
-				The CacheMaster is also technically responsible for message routing as our system doesn't actually move messages ever. Instead messages are simply cached and then passed by read-only reference to reactions that are interested in a particular message.
+				The CacheMaster is fed the minimum allowable size for a particular message buffer at compile time by the PowerPlant.
+				Internally the CacheMaster uses a data structure known as the TypeMap which is a compile-time mapping between types and instances of that type.
+				By using this structure we are able to perform all cache sizing calculations at compile time and ensure that all messages are accounted for.
 				
-				\todo[inline]{Extend section, more about the design/implementation details of this component}
-	
-			\subsection{ReactorMaster}
-				The ReactorMaster exists to handle executing reactions for particular reactors. 
-				When a message is sent the ReactorMaster is responsible for interpreting that message, retrieving the appropriate data and executing the reactions that are subscribed to that message.
+				Additionally the CacheMaster is the primary memory management facility for all messages in the system.
+				The CacheMaster keeps track of references to messages and automatically cleans up memory when it is not longer used.
+				It's possible for other systems to take ownership of data from the CacheMaster but it must be explicitly requested and is rare to see in regular modules.
 				
-				The ReactorMaster uses the CacheMaster directly in order to retrieve message data to pass into invoking reactions.
-	
-				\todo[inline]{Extend section, more about the design/implementation details of this component}
-				
-			\subsection{ThreadMaster}
+				Routing of messages is technically a responsibility of the CacheMaster.
+				However, we don't actually send messages for in-process communication in NUClear. 
+				Instead messages are stored in the CacheMaster which then provides references to the ReactorMaster that are sent to the reactions.
+				For the user this still looks like message routing but behind the scenes this approach gives us massive speed advantages of conventional copy-based routing.
+
+			\subsection{ThreadMaster}				
 				The ThreadMaster is responsible for multi-threading and task scheduling.
 				It contains an internal thread pool that contains a number of workers. 
 				Each worker executes a reaction using the ReactorMaster and then requests a new task from a blocking queue.
 				
 				\todo[inline]{Extend section, more about the design/implementation details of this component}
+	
+			\subsection{ReactorMaster}
+				The ReactorMaster handles the logic relating to \emph{On} and \emph{Emit} directly. 
+				It can be thought of as the glue that holds Reactors, the ThreadMaster and the CacheMaster together.
+				
+				When a Reactor calls Emit behind the scenes it is actually calling on the ReactorMaster to resolve the request.
+				The ReactorMaster uses the CacheMaster to cache the data that was emitted.
+				The ReactorMaster then loops through all reactions in the reaction list for that message type and adds a task to the ThreadMaster for each reaction.
+				
+				Additionally the ReactorMaster can also execute reactions directly in the main thread. 
+				This is useful for tasks that are faster then the overhead of moving data to a new thread and is sometimes used for very quick reactions.
+			
+				Interally all reactions are stored in a data structure similar to the TypeMap called a TypeList. 
+				A TypeList is a compile-time list of instances of a particular type. This list can be iterated over extremely quickly and allows us to perform subscriber lookup in O(1) time.
+				Combining this with the already fast CacheMaster is what gives us a lot of our speed advantage of RobotOS or DDX.
 		
 		\subsection{Component Overview - Reactor and Reaction}
 			A Reactor encapsulates a single module that can send and receive messages.
