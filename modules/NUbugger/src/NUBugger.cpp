@@ -1,23 +1,23 @@
 /*
- * This file is part of NUBugger.
+ * This file is part of NUbugger.
  *
- * NUBugger is free software: you can redistribute it and/or modify
+ * NUbugger is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * NUBugger is distributed in the hope that it will be useful,
+ * NUbugger is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with NUBugger.  If not, see <http://www.gnu.org/licenses/>.
+ * along with NUbugger.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "NUBugger.h"
+#include "NUbugger.h"
 #include "utility/idiom/pimpl_impl.h"
 
 #include <zmq.hpp>
@@ -34,7 +34,7 @@ using utility::image::YCbCr;
 
 namespace modules {
     // Implement our impl class as per the pimpl idiom.
-    class NUBugger::impl {
+    class NUbugger::impl {
         public:
             zmq::socket_t pub;
 
@@ -53,7 +53,7 @@ namespace modules {
             }
     };
 
-    NUBugger::NUBugger(NUClear::PowerPlant* plant) : Reactor(plant) {
+    NUbugger::NUbugger(NUClear::PowerPlant* plant) : Reactor(plant) {
         // Set our high water mark
         int64_t hwm = 3;
         m->pub.setsockopt(ZMQ_HWM, &hwm, sizeof(hwm));

@@ -1,10 +1,10 @@
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/AddHat.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/AddRole.cmake")
 
 # If you're using ConfigSystem then it needs to be the first installed module.
 # It needs to be installed first because other modules are going to try and
 # request configurations from it on install and if it hasn't been installed yet
 # they won't get any data and things will break.
-ADD_HAT(
+ADD_ROLE(
     NAME robocup
     MODULES
         SignalCatcher
@@ -16,9 +16,9 @@ ADD_HAT(
         eSpeak
         PartyDarwin
         AudioInput
-        NUBugger)
+        NUbugger)
 
-ADD_HAT(
+ADD_ROLE(
     NAME scriptrunner
     MODULES
         ConfigSystem
@@ -26,25 +26,25 @@ ADD_HAT(
         Platform::Darwin::MotionManager
         ScriptEngine
         ScriptRunner
-        NUBugger
+        NUbugger
         PartyDarwin)
 
-ADD_HAT(
+ADD_ROLE(
     NAME scripttuner
     MODULES
         Platform::Darwin::HardwareIO
         Platform::Darwin::MotionManager
-        NUBugger
+        NUbugger
         ScriptTuner
         PartyDarwin)
 
-ADD_HAT(
+ADD_ROLE(
     NAME mechwarrior
     MODULES
         Platform::Darwin::HardwareIO
         MechWarrior)
 
-ADD_HAT(
+ADD_ROLE(
     NAME dancedarwin
     MODULES
         ConfigSystem
@@ -56,9 +56,9 @@ ADD_HAT(
         DanceEngine
         StrobeDarwin)
 
-# The ADD_HAT function appends itself to the ${hats} variable.
+# The ADD_ROLE function appends itself to the ${roles} variable.
 # We need to expose this to our parent scope so the DarwinSend.cmake
 # file knows what binaries it depends on. We do this so that "make install"
 # and "make run" will properly update when binaries are regenerated.
-SET(hats ${hats} PARENT_SCOPE)
+SET(roles ${roles} PARENT_SCOPE)
 SET(modules ${modules} PARENT_SCOPE)
