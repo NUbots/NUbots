@@ -348,16 +348,55 @@
 				\end{cppcode}
 				
 			\subsubsection{Emit}
-				\emph{Emit} sends data to the PowerPlant which routes it to the subscribed reactions.
-				Emit also has the concept of scopes which allows you to send data in different ways or to different places (such as over the network).
+				\emph{Emit} is responsible for sending data to the rest of the system.
+				Internally it sends data to the PowerPlant which then uses the various masters to send the message on its way.
+				
+				The most basic use of emit looks like this:
 				
 				\begin{cppcode}
-				\todo[inline]{Write up a code example}
+					// We have a unique pointer to the data we want to send.
+					std::unique_ptr<MyData> myData = std::make_unique<MyData>();
+					
+					// send the data to the world!
+					emit(std::move(myData));
+				\end{cppcode}
+				
+				This basic example sends MyData to the entire system.
+				Anything that Triggers on MyData will then be executed on a worker thread.
+				
+				Emit also provides primitives for sending to different scopes.
+				The most common different scope is the Networked scope which sends messages to other robots on your network.
+				For example:
+				
+				\begin{cppcode}
+					// We have a unique pointer to the data we want to send (again).
+					std::unique_ptr<MyData> myData = std::make_unique<MyData>();
+					
+					// Send the data to the network!
+					emit<Scope::NETWORK>(std::move(myData));
+				\end{cppcode}
+				
+				As you can see sending data to the network is almost as simple as sending data normally.
+				By default this won't send data to internal modules. 
+				If you want to send data to both the network and locally you can use multiple scopes like so:
+				
+				\begin{cppcode}
+					// We have a unique pointer to the data we want to send (again).
+					std::unique_ptr<MyData> myData = std::make_unique<MyData>();
+					
+					// Send the data to the network!
+					emit<Scope::LOCAL, Scope::NETWORK>(std::move(myData));
 				\end{cppcode}
 	
 			\subsubsection{Log}
 				\emph{Log} provides a mechanism to log information against a particular reaction. 
 				This provides logging information that is per-reaction rather then system-wide giving greater traceability.
+				
+				Logging is implemented internally using the standard iostream operator<< mechanism.
+				This means that anything you can log with std::cout can also be logged with NUClear's log function.
+				
+				Log accepts an infinitely long set of arguments, concatenates them together and adds them as a single log entry to the reaction you are in. 
+				Consider the following example: 
 				
 				\begin{cppcode}
 				\todo[inline]{Write up a code example}

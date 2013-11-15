@@ -805,4 +805,11 @@
 	This allows high level simulations of the robots environment.
 	These systems allow testing on the entirety of the robotic system to be performed without requiring physical access to a robot.
 	
+	We can utilize Webots or Simspark to provide implementations for the simulated hardware components.
+	For the current system we would replace DarwinHardwareIO, DarwinMotionManager, LinuxCameraStreamer and AudioInput with simulated equivalents.
+	In the case of Webots we would use the API directly in the modules as Webots provides a C++ API.
+	In the case of Simspark the API is provided using a set of TCP/UDP sockets.
+	We instead can create modules that read from the sockets and pass the appropriate information to the system.
+	As you can see we could easily integrate the new system into Webots or Simspark giving us greater testing capabilities.
+	
 \end{document}
