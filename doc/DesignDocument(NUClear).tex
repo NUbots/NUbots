@@ -145,17 +145,6 @@
 				
 				Our team decided to leverage our C++ skills to build an alternative system named \textbf{NUClear} that provides message passing capabilities (and more) that are orders of magnitudes faster then the competing systems. 
 				Once we had a proof-of-concept it was decided to use the NUClear architecture as the basis for the new NUbots architecture. NUClear is covered extensively in the Architecture Overview.
-				
-				\todo[inline] {Link the words Architecture Overview to the actual section}
-				
-		\subsection{Use Cases}
-			Josiah is a fictional software engineer tasked with implementing a new vision algorithm on the robot to assist with recognising faces (to later target with toy missiles).
-			He knows that the robot is already capable of capturing images with its camera.
-			Luckily the robot system implements communication using NUClear. 
-			He simply writes a new vision module using the NUClear API to request image frames and outputs seen objects.
-			This will act as a drop in replacement for the existing vision algorithm with no modification to other systems.
-			
-			\todo[inline]{Write more use cases maybe? this section is a little lean}
 		
 	\section{NUClear Design}
 		NUClear is the C++ library that we designed to enable developers to write modular systems that communicate using messages. 
@@ -823,8 +812,7 @@
 				
 				
 			\subsubsection{BeatDetector}
-				This module finds the beat of music as it plays using an algorithm based on signal analysis using a Fourier transform.
-				\todo[inline]{what it was based on}.
+				This module finds the beat of music as it plays using an algorithm based on signal analysis using basic Fourier transformations.
 				
 				BeatDetector starts working when it receives a \texttt{SoundChunkSettings} message
 				indicating the format of upcoming sound chunks, which allows it to prepare its
