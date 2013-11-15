@@ -217,18 +217,6 @@
 				
 				Our tests show that NUClear is able to operate between 1000-7000 times faster then competing message passing systems such as CORBA or RobotOS.
 				
-			\subsubsection{Smart Timers}
-				In real-time systems it's common to have a number of systems that need to execute periodically. 
-				In our analysis of the existing NUbots architecture we found several examples of systems that need to do something periodically.
-				For example Camera frames need to be read every 50 milliseconds and Motors need to be updated every 30 milliseconds. 
-				
-				The way this is accomplished in the existing NUbots architecture is to manually set up a thread and have it block until the polling period is up. 
-				Unfortunately this approach ties up a CPU thread doing almost nothing and wastes valuable hardware resources.
-				
-				NUClear provides an alternative mechanism that allows you to execute code periodically without tying up a CPU core.
-				You can set up a reaction on a time event and NUClear will ensure that your reaction is called periodically. 
-				Instead of busy waiting the system will run other tasks while the period task is waiting which ensures that CPU cycles are not wasted doing nothing.	
-				
 			\subsubsection{Statistics, Logging and Traceability}
 				In complex system it can become very difficult to determine what the system is actually doing and why it's doing it. 
 				The NUbots team made it clear that the ability to get per-module statistics and logs would be invaluable in tackling the challenges of robotic software development.
@@ -437,11 +425,31 @@
 			This can be used to implement functionality such as networking, or communication with a database, or simply to intercept data elements and modify them before they are sent to the rest of the system.
 			
 		\subsection{Smart Types}
-			\todo[inline]{Write an introduction to the concepts of smart types (as part of extension)}
+			Through the use of the extensibility provided by NUClear, it is possible to implement special types which have been named Smart Types.
+			These types when used are able to perform manipulations and other non standard behaviour in the system.
+			These allow the system to be more useful as it provides an expansion of functionality as part of the API and not an additional module.
+			A number of these Smart Types have already been implemented as a core part of the NUClear framework, However it is also possible to implement them as a user of NUClear
 			
 			\subsubsection{Every}
-				\todo[inline] {Move the section about smart timers here + stuff from training presentation}
-				\todo[inline] {code example and explanation}
+				In real-time systems it's common to have a number of systems that need to execute periodically. 
+				In our analysis of the existing NUbots architecture we found several examples of systems that need to do something periodically.
+				For example Camera frames need to be read 30 times per second and Motors need to be read and written to 50 times per second. 
+				
+				The way this is accomplished in the existing NUbots architecture is to manually set up a thread and have it block until the polling period is up. 
+				Unfortunately this approach ties up a CPU thread doing almost nothing and wastes valuable hardware resources.
+				
+				NUClear provides an alternative mechanism that allows you to execute code periodically without tying up a CPU core.
+				You can set up a reaction on a time event and NUClear will ensure that your reaction is called periodically. 
+				Instead of busy waiting the system will run other tasks while the period task is waiting which ensures that CPU cycles are not wasted doing nothing.
+				
+				The manner in which the functionality was implemented was through a smart type.
+				This smart type is called Every and consists of an integer to wait for, and a time unit for the integer.
+				This allows the system to combine all polling that is necessary in one place and perform it as a part of the NUClear API.
+				
+				\begin{cppcode}
+				// Example of Every
+				on<Trigger<Every<50, std::chrono::milliseconds>>(function);
+				\end{cppcode}	
 				
 			\subsubsection{Last}
 				\todo[inline] {Stuff from training presetnation}
