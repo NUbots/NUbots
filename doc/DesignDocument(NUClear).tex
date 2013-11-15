@@ -19,6 +19,8 @@
 \usepackage[toc]{glossaries}
 % Used for source code syntax highlighting
 \usepackage{minted}
+% Stops \texttt{} text from overflowing
+\usepackage[htt]{hyphenat}
 
 % Minted configuration
 \usemintedstyle{vs}
@@ -604,7 +606,7 @@
 				
 				
 			\subsubsection{BeatDetector}
-				This module finds the beat of music as it plays using an algorithm based on
+				This module finds the beat of music as it plays using an algorithm based on signal analysis using a Fourier transform.
 				\todo[inline]{what it was based on}.
 				
 				BeatDetector starts working when it receives a \texttt{SoundChunkSettings} message
@@ -650,9 +652,9 @@
 				results are emitted as a \texttt{DarwinSensors} message.
 				
 				When HardwareIO receives a \texttt{HeadLED} or \texttt{EyeLED} message, it sets
-				the colour of the LEDs in the Darwin's head or eyes, respectively. When it
-				receives a \texttt{DarwinServoCommand} (or a sequence of them in a
-				\texttt{std::vector}>) it sends commands to the hardware to adjust the servo
+				the colour of the LEDs in the Darwin's head or eyes, respectively. 
+				When it receives a \texttt{DarwinServoCommand} (or a sequence of them in a
+				\texttt{std::vector}) it sends commands to the hardware to adjust the servo
 				positions and gain. Note that this is the lowest level of control over motion,
 				most use cases will be better served by using the motion manager or script engine.
 				
@@ -688,11 +690,9 @@
 				position at a given time using given gain. A queue of waypoints is maintained
 				for each of the Darwin's servos.
 				
-				Servos are updated at a rate of 50Hz, using the most recent sensor data. A
-				\texttt{ServoWaypointsCompleted<ServoID>} message is
-				emitted whenever all waypoints on a servo's queue have been completed (with
-				the template parameter being the relevant servo's ID). When all queues have
-				been completed an \texttt{AllServoWaypointsComplete} message is also emitted.
+				Servos are updated at a rate of 50Hz, using the most recent sensor data. 
+				A \texttt{ServoWaypointsCompleted<ServoID>} message is emitted whenever all waypoints on a servo's queue have been completed (with the template parameter being the relevant servo's ID). 
+				When all queues have been completed an \texttt{AllServoWaypointsComplete} message is also emitted.
 				
 				The motion manager creates a waypoint when it receives a \texttt{ServoWaypoint}
 				containing the servo ID, desired position, gain and the time by which the movement should finish. Any other waypoints already in that servo's queue that
