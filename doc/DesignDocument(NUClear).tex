@@ -481,25 +481,224 @@
 			\end{cppcode}
 			
 	\section{NUClear Powered NUbots}
-		\todo[inline]{Write introduction to the concept of nuclear in nubots}
+		The NUClear framework provides a central point around which the NUbots project has been
+		reconstructed. This has facilitated many improvements both on an architectural and
+		implementation level.
 		
+		The pre-existing NUbots codebase is divided into subsystems, however their boundaries are
+		often poorly defined. The use of both direct function calling between subsystems and 
+		shared data through the blackboard have led to difficulty in separating otherwise
+		unrelated functionality. To solve this problem we have redefined and solidified the
+		boundaries between subsystems by creating smaller, more cohesive modules. This is a
+		significant task for larger subsystems such as vision, as such parts of the port are
+		not yet complete.
+		
+		Efforts have been made, when possible, to improve the quality of code as it is being
+		transitioned. These include removing dead code that remained from previous hardware
+		platforms, adding documentation, adopting modern C++ practices such as the use of smart
+		pointers and replacing large numbers of preprocessor macros in favour of templates and
+		constants.
+		
+		The changes to the overall architecture and improvements in testing and documentation
+		should improve the NUbots' maintainability and extensibility and allow new team members
+		to begin working on the project with a much shorter induction period.
+		
+
 		\subsection{Architecture}
 			\todo[inline]{Description and diagram of architecture, possibly steal/enhance diagram in test document}
+			Modules are the primary architectural units of the NUClear-baesd NUbot system. Each
+			one is intended to implement a single feature or task. They have no knowledge of or
+			interaction with other modules except through NUClear messages. A module consists of
+			a single NUClear Reactor subclass (with the same name as the module itself), any
+			supporting source files, a set of unit tests, configuration files and documentation.
 			
-		\subsection{Orchistration/Roles}
-			\todo[inline]{Describe the process of orcistration and its implications}
+			Messages that modules use to communicate are defined in a separate, shared component.
+			This also includes a small collection of utility classes and functions.
+			
+			By separating functionality into modules we gain the ability to unit test in isolation,
+			which was largely impossible in the previous design. The project's build scripts
+			automatically compile unit tests alongside the modules and can run them as a batch.
+			
+			The \emph{pimpl} (private implementation) idiom is used to avoid specifying
+			implementation details such as library dependencies and private member data in header
+			files when not necessary.
+			
+			
+		\subsection{Orchestration/Roles}
+			NUClearPort uses a collection of CMake build scripts to automate the build process.
+			Each module is built separately into a library, both enforcing the requirement for
+			them to be independent and allowing them to be combined into executables at
+			link-time.
+			
+			One of the desired features of the new NUbot architecture was the flexibility to
+			change existing behaviour or create entirely new behaviour as easily as possible. To
+			this end the concept of a \textbf{role} has been created. The roles system is our
+			implementation of orchestration, a term most commonly associated with srvice-oriented
+			architectures, whereby complex systems are built by coordinating a range of disparate
+			components.
+			
+			A role represents an executable built from a specific subset of modules. When a role
+			is defined, the build system automatically generates a C++ source file containing code
+			to create a Power Plant and install each of the specified modules in the given order.
+			It then builds an application from it, linking against the libraries for the modules
+			that it uses.
+			
+			This design allows large parts of the code to be shared (for example, the hardware
+			interface layers and script exacution engine) while other parts are swapped in and
+			out. Switching between two compatible modules (with the same inputs and outputs)
+			requires editing only the roles list and rebuilding. This also allows for a subset of
+			modules to be integration tested without including other irrelevant code, or
+			producing a special build including extra logging and debugging modules.
+			
 		
 		\subsection{Modules}
 			\todo[inline]{Build up a template for a module and get information from readme.md files}
 			\todo[inline]{If time allows write up a small description and design of each module, much of this content should be available from the Readme.md files}
+			
 			\subsubsection{AubioBeatDetector}
+				This module finds the beat in music as it plays using the Aubio library's
+				tempo-finding algorithm.
+				
+				On receipt of a \texttt{SoundChunkSettings} message containing the sample format
+				of the sound, this module sets up an Aubio tempo tracking context and begins
+				receiving \texttt{SoundChunk} messages. As it detects beats, it sends out
+				\texttt{Beat} messages.
+				
+				It depends on the libaubio library, and requires that one of the audio input
+				modules be installed to provide it with data.
+			
+			
 			\subsubsection{AudioFileInput}
+				This is one of the audio input modules; as it emits the same messages as
+				AudioInput both can be used interchangeably. It reads sound from a file and emits
+				it in short, regular-sized chunks. These are generated in real time, as if the
+				sound was being recorded from the microphone.
+				
+				The audio file to be loaded is determined by a setting in the module's
+				configuration file. Once successfully opened, AudioFileInput emits a
+				\texttt{SoundChunkSettings} message to inform downstream modules of the sample
+				format (bit depth, sample rate, number of channels)	and number of samples that
+				will be present in subsequent sound chunks. After this, it periodically emits
+				\texttt{SoundChunk} messages containing the PCM samples of the sound until
+				the end of the file is reached.
+				
+				AudioFileInput depends on the libsndfile library to decode sound files, and
+				requires that the configuration system module be installed in order to read its
+				configuration file.
+			
+			
 			\subsubsection{AudioInput}
+				This is one of the audio input modules; as it emits the same messages as
+				AudioFileInput both can be used interchangeably. It records sound from the
+				machine's default audio input device (generally a microphone) and emits it in
+				regular-sized chunks.
+				
+				On startup, AudioInput attempts to open the system's default audio input device
+				using its highest available sample rate, native channel count and 16-bit depth.
+				Assuming this is successful it then emits a \texttt{SoundChunkSettings} message
+				to inform downstream modules of the sample format and size of upcoming chunks.
+				After this, it begins emitting \texttt{SoundChunk} messages containing PCM from
+				the input device.
+				
+				AudioInput depends on the librtaudio library to communicate with audio devices.
+				
+				
 			\subsubsection{BeatDetector}
+				This module finds the beat of music as it plays using an algorithm based on
+				\todo[inline]{what it was based on}.
+				
+				BeatDetector starts working when it receives a \texttt{SoundChunkSettings} message
+				indicating the format of upcoming sound chunks, which allows it to prepare its
+				buffers. Samples are then received from \texttt{SoundChunk} messages and placed
+				into a 10 second sliding window, which is analysed to find beats. Whenever one is
+				found, a \texttt{Beat} message is emitted.
+				
+				BeatDetector depends on the libfftw3 library to perform fast Fourier transforms
+				and requires that an audio input module be installed to receive sound.
+				
+				
 			\subsubsection{ConfigSystem}
+				The config system module provides a mechanism for other modules to load
+				JSON-formatted configuration files in a convenient manner. It acts as an
+				extension to the NUClear API to simplify its use.
+				
+				Modules can specify that they wish to load configuration by creationg a reaction
+				that triggers on \texttt{Configuration<Type>}, where \texttt{Type} is a class
+				containing a public static constant string called \texttt{CONFIGURATION\_PATH}
+				that holds the path	to the desired config file or a directory of config files. If
+				a directory is specified, all JSON files in that directory will be loaded, but
+				not files in subdirectories. Only files with a .json extension will be loaded.
+				
+				ConfigSystem emits a \texttt{Configuration<Type>} for each file that it loads. It
+				watches for changes in the config directories and will automatically load any new
+				or modified files.
+				
+				As the config system extends the NUClear API, it must be installed before any
+				other module that depends on it. It depends on the libjsmn library for lexical
+				analysis of JSON files. The directory monitoring thread uses system calls
+				specific to Linux.
+				
+				
 			\subsubsection{DarwinHardwareIO}
+				The Darwin Hardware I/O module is a complete rewrite of the libdarwin interface
+				drivers. It allows other modules to communicate with the robot's hardware, reading
+				sensors, controlling servo motors and adjusting LEDs.
+				
+				During initialisation, HardwareIO attempts to connect to the CM730 controller on
+				\texttt{/dev/usbTTY0}. Assuming it is successful, it begins polling the status of
+				every motor and sensor at a rate of 50Hz (once per every 20 milliseconds). The
+				results are emitted as a \texttt{DarwinSensors} message.
+				
+				When HardwareIO receives a \texttt{HeadLED} or \texttt{EyeLED} message, it sets
+				the colour of the LEDs in the Darwin's head or eyes, respectively. When it
+				receives a \texttt{DarwinServoCommand} (or a sequence of them in a
+				\texttt{std::vector}>) it sends commands to the hardware to adjust the servo
+				positions and gain. Note that this is the lowest level of control over motion,
+				most use cases will be better served by using the motion manager or script engine.
+				
+				The USB TTY communication uses Linux-specific system calls.
+				
 			\subsubsection{DanceEngine}
+				The dance engine loads motion scripts containing dance moves and scales their
+				speed to match the tempo of music, allowing the robot to appear to dance in time.
+				
+				Dance scripts are loaded at startup using the configuration system. These scripts
+				are in the same format as other motion scripts, each one represents a single dance
+				move lasting the duration of one beat.
+				
+				When the engine receives a \texttt{Beat} message, it runs a script to bring the
+				robot into a standing position. Once this has completed, it chooses a dance move
+				from its pool of available scripts and calculates the factor by which it must be
+				scaled to keep time with the beat of the music. The script's timing is scaled
+				accordingly and it is emitted as an \texttt{ExecuteScript} message.
+				
+				This module requires that the configuration system be installed to load dance
+				scripts, a beat detector module be installed in order to receive beat messages,
+				that the script engine module be installed to execute the stand script and the
+				adjusted dance scripts, and the motion manager module to receive notification
+				when a script has finished executing.
+				
+				
 			\subsubsection{DarwinMotionManager}
+				Manages movement of the Darwin by providing timed waypoints for each servo.
+				
+				To move the robot, it is usually necessary to perform many servo adjustments,
+				with specific timing and in a specific order. This module represents these
+				adjustments as waypoints: instructions that a servo should go to a specified
+				position at a given time using given gain. A queue of waypoints is maintained
+				for each of the Darwin's servos.
+				
+				Servos are updated at a rate of 50Hz, using the most recent sensor data. A
+				\texttt{ServoWaypointsCompleted<ServoID>} message is
+				emitted whenever all waypoints on a servo's queue have been completed (with
+				the template parameter being the relevant servo's ID). When all queues have
+				been completed an \texttt{AllServoWaypointsComplete} message is also emitted.
+				
+				The motion manager creates a waypoint when it receives a \texttt{ServoWaypoint}
+				containing the servo ID, desired position, gain and the time by which the movement should finish. Any other waypoints already in that servo's queue that
+				would have started after the new waypoint are deleted. Multiple waypoints can be
+				set at once by emitting them in a \texttt{std::vector}.
+
 			\subsubsection{eSpeak}
 			\subsubsection{NUbugger}
 			\subsubsection{LinuxCameraStreamer}
