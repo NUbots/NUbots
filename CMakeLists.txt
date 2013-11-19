@@ -41,10 +41,10 @@ ADD_SUBDIRECTORY(shared/utility)
 # Add these to our shared libraries (started in our shared libraries cmake)
 SET(NUBOTS_SHARED_LIBRARIES ${NUBOTS_SHARED_LIBRARIES} messages utility)
 
-# Find and build all our hats
-ADD_SUBDIRECTORY(hats)
+# Find and build all our roles
+ADD_SUBDIRECTORY(roles)
 
-# Remove any duplicate modules (used in more then one hat)
+# Remove any duplicate modules (used in more then one role)
 LIST(REMOVE_DUPLICATES modules)
 
 # Build each of our modules and their corresponding tests

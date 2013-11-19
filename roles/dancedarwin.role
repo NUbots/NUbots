@@ -1,0 +1,11 @@
+ADD_ROLE(
+    NAME dancedarwin
+    MODULES
+        ConfigSystem
+        Platform::Darwin::HardwareIO
+        Platform::Darwin::MotionManager
+        AudioFileInput
+        AubioBeatDetector
+        ScriptEngine
+        DanceEngine
+        StrobeDarwin)

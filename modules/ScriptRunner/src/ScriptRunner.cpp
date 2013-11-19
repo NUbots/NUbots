@@ -19,14 +19,14 @@
 
 #include "ScriptRunner.h"
 
-#include "messages/ExecuteScript.h"
+#include "messages/Script.h"
 #include "messages/ServoWaypoint.h"
 
 namespace modules {
     void ScriptRunner::executeNextScript() {
         if(!scripts.empty()) {
             auto script = scripts.front();
-            emit(std::make_unique<messages::ExecuteScript>(script));
+            emit(std::make_unique<messages::ExecuteScriptByName>(script));
             scripts.pop();
         }
         else {

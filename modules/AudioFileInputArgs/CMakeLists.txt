@@ -1,0 +1,7 @@
+# Find the SndFile Library
+FIND_PACKAGE(SndFile REQUIRED)
+
+# Build our NUClear module
+NUCLEAR_MODULE(INCLUDES ${SNDFILE_INCLUDE_DIR}
+               LIBRARIES ${SNDFILE_LIBRARY})
+

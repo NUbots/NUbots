@@ -14,13 +14,16 @@ should be set to. Complex movements such as kicking or dancing are achieved
 using many frames. Files are loaded using the configuration system, see the
 Configuration section below for details of the format.
 
-To execute a script, emit a `messages::ExecuteScript` containing the filename
-(without path) of the script to run and the time at which it should start.
+To execute a script, emit a `messages::ExecuteScriptByName` containing the
+filename (without path) of the script to run and the time at which it should
+start. Alternatively you can also emit a `messages::ExecuteScript` to run a
+`messages::Script` directly.
 
 ## Consumes
 
 * `messages::Configuration<Scripts>` containing the loaded scripts
-* `messages::ExecuteScript` to run a specified script
+* `messages::ExecuteScript` to run a script
+* `messages::ExecuteScriptByName` to run a script from a file
 
 ## Emits
 
