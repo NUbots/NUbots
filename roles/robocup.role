@@ -1,0 +1,13 @@
+ADD_ROLE(
+    NAME robocup
+    MODULES
+        SignalCatcher
+        ConfigSystem
+        Platform::Darwin::HardwareIO
+        Platform::Darwin::MotionManager
+        LinuxCameraStreamer
+        ScriptEngine
+        eSpeak
+        PartyDarwin
+        AudioInput
+        NUbugger)

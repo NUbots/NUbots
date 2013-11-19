@@ -21,15 +21,13 @@
 #define MODULES_SCRIPTENGINE_H
 
 #include <NUClear.h>
-#include "utility/idiom/pimpl.h"
-
+#include "messages/Script.h"
 
 namespace modules {
 
     class ScriptEngine : public NUClear::Reactor {
     private:
-        class impl;
-        utility::idiom::pimpl<impl> m;
+        std::map<std::string, messages::Script> scripts;
     public:
         explicit ScriptEngine(NUClear::PowerPlant* plant);
     };

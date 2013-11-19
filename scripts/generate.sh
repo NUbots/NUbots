@@ -8,7 +8,7 @@
 
 # Ensure we have specified a name
 if [ -n "$1" ] ; then
-    hat_name=$1;
+    role_name=$1;
 else
     echo "You must specify a name";
     exit 1;
@@ -16,30 +16,30 @@ fi
 
 # Ensure we've got at least one module
 if [ -n "$2" ] ; then
-    hat_modules=$2;
+    role_modules=$2;
 else
     echo "You must specify at least one module";
     exit 1;
 fi
 
-# Delete the old hat if it exists. We pipe to
+# Delete the old role if it exists. We pipe to
 # /dev/null to supress a message if it doesn't
 # exist.
-rm "$hat_name" 2> /dev/null;
+rm "$role_name" 2> /dev/null;
 
 # Build up our headers.
 # We always need NUClear.h
-echo "#include <NUClear.h>" >> "$hat_name";
+echo "#include <NUClear.h>" >> "$role_name";
 
 # Add our module headers
 for module in ${@:2}; do
     # Each module is given to us as Namespace::Namespace::Name.
     # we need to replace the ::'s with /'s so we can include them.
-    echo "#include \"`echo "${module}" | sed -e \"s/::/\//g\"`.h\"" >> "$hat_name";
+    echo "#include \"`echo "${module}" | sed -e \"s/::/\//g\"`.h\"" >> "$role_name";
 done
 
 # Add our main function.
-cat >> "$hat_name" << EOF
+cat >> "$role_name" << EOF
 
 int main(int argc, char** argv) {
     NUClear::PowerPlant::Configuration config;
@@ -50,10 +50,10 @@ EOF
 
 # Add our installs
 for module in ${@:2}; do
-    echo -e "\tplant.install<modules::${module}>();" >> "$hat_name";
+    echo -e "\tplant.install<modules::${module}>();" >> "$role_name";
 done
 
-cat >> "$hat_name" << EOF
+cat >> "$role_name" << EOF
 
     plant.start();
     return 0;

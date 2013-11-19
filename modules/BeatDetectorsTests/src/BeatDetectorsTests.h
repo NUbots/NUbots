@@ -19,13 +19,14 @@
 #define	MODULES_BEATDETECTORSTESTS_H
 
 #include <NUClear.h>
-
+#include "utility/idiom/pimpl.h"
 
 namespace modules {
 
     class BeatDetectorsTests : public NUClear::Reactor {
     private:
-        
+    class impl;
+    utility::idiom::pimpl<impl> m;    
     public:
         explicit BeatDetectorsTests(NUClear::PowerPlant* plant);
         ~BeatDetectorsTests();

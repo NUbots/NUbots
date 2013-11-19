@@ -1,13 +1,361 @@
-\documentclass[a4paper]{article}
+% Initialisation
+\documentclass[english,12pt]{scrartcl}
 
-\title{Title}
-\author{Author}
-\date{\today}
+\usepackage[]{babel}
+% Input is utf8
+\usepackage[utf8]{inputenc}
+% Enables headers and footers
+\usepackage[]{scrpage2}
+% Lets us colour table cells
+\usepackage[table]{xcolor}
+% Allows todo list and todos
+\usepackage[]{todonotes}
+% Makes links in contents hyperlinked
+\usepackage{hyperref}
+% Make references appear in our table of contents
+\usepackage[nottoc,numbib]{tocbibind}
+% Allows us to put landscape sections of the document
+\usepackage{pdflscape} % \usepackage{lscape} %Use escape for printing (doesn't rotate the pdf page)
+% Provides a glossary
+\usepackage[toc]{glossaries}
+
+\usepackage{tabularx} % For tables
+\usepackage{pgfgantt} % For Gantt charts. See http://ctan.unsw.edu.au/graphics/pgf/contrib/pgfgantt/pgfgantt.pdf
+\usepackage{import} % To include files
+\usepackage[a4paper]{geometry} %specifies page width
+\newgeometry{bottom=2cm, top=2cm}
+
+\newganttlinktype{rdldr*}{
+	\draw [/pgfgantt/link]
+	(\xLeft, \yUpper) --
+	(\xLeft + \ganttvalueof{link bulge 1} * \ganttvalueof{x unit},
+	\yUpper) --
+	($(\xLeft + \ganttvalueof{link bulge 1} * \ganttvalueof{x unit},
+	\yUpper)!%
+	\ganttvalueof{link mid}!%
+	(\xLeft + \ganttvalueof{link bulge 1} * \ganttvalueof{x unit},
+	\yLower)$) --
+	($(\xRight - \ganttvalueof{link bulge 2} * \ganttvalueof{x unit},
+	\yUpper)!%
+	\ganttvalueof{link mid}!%
+	(\xRight - \ganttvalueof{link bulge 2} * \ganttvalueof{x unit},
+	\yLower)$) --
+	(\xRight - \ganttvalueof{link bulge 2} * \ganttvalueof{x unit},
+	\yLower) --
+	(\xRight, \yLower);%
+}
+\ganttset{
+	link bulge 1/.link=/pgfgantt/link bulge,
+	link bulge 2/.link=/pgfgantt/link bulge
+}
+
+\title{\includegraphics[width=0.75\textwidth]{./Logo/NUClear-logo}~\\[1cm] Project Proposal - Revision}
+\author{Joshua Kearns \and Trent Houliston \and Jake Woods}
+
+% Header and Footer
+\pagestyle{scrheadings}
+\ihead{\today}
+\chead{}
+\ohead{Project Proposal - Revision}
+\ifoot{}
+\cfoot{}
+\ofoot{\pagemark}
+
+% Skip line rather then indent paragraphs
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.1in}
 
 \begin{document}
+	\maketitle
+	\vfill
+	{\large
+		\begin{description}
+			\item [Status:] Release 1
+			\item [Version:] 1.0
+		\end{description}}
 
-\maketitle
+	\clearpage
+	\tableofcontents
+	\clearpage
 
-Content
+	\section{Overview of Document}
+	This document seeks to update the original Project Proposal.
+	It aims to explain how the Project Proposal has been implemented and how the Project Plan has changed.
+	It will explore the decisions the project team has undertaken to respond to problems and how this has affected the implementation of the Project Plan.
+
+	\section{Terms of Reference}
+		\subsection {Goals}
+			\begin{enumerate}
+				\item Measurably improve robot architecture.
+				\item Prove the significance of the improvements by making the robots dance. 
+			\end{enumerate}
+		\subsection {Objectives}
+			\subsubsection{Time to add a new component}
+				Decrease the time it takes to add a new component to the system from 1 to 2 weeks to less than a day.
+			
+			\subsubsection{Decoupling behaviour and localisation by vision}
+				Decouple performance of behaviour and localisation so they are no longer restricted by the performance of vision.
+			
+			\subsubsection{Team Member Induction}
+				Decrease the time it takes to induct a new team member into the system from 1 month to 1 week.
+			
+			\subsubsection{Components for Changing Hardware Platform}
+				Reduce the number of components from 4 that are needed to be changed to move the architecture between different robot platforms to 2. 
+			
+			\subsubsection{Adding Dance}
+				Make the robot dance according to a predetermined script and in response to music or detected human movements.
+				This feature is to be implemented by changing only 1 component, rather than 4 that would is required for implementation in the current system. 
+
+			\subsubsection{Improved Monitoring and Debugging Tools}
+				Improve visibility into the state of the system through diagnostics/monitoring tools.
+				Improve current basic timing and logging to include detailed debugging at the time of the system errors. 
+			
+			\subsubsection{Improved Hardware Utilisation}
+				Improve utilisation of existing and future robot hardware to allow for higher resolution on the camera, better use of low level controllers and increasing control over threading.
+			
+			\subsubsection{Interface Consistency}
+				Improve the consistency of interfaces between components.
+				Reduce the use of multiple interfaces for each component to a single unified interface for all components.
+				The unified interface must have a convention for describing so that it can minimise mis-understanding and redundancy.
+				
+		\subsection {Acceptance Criteria}
+			\subsubsection{Time to add a new component}
+				The dancing to a script, audio and dancing to visual stimuli components will be added to test this objective.
+				This objective will be accepted as complete if each of the 3 new components can be added in 12 work hours each for an experienced NUClear and NUbots user, or 24 hours for an inexperienced user. 
+			
+			\subsubsection{Decoupling behaviour and localisation by vision}
+				This objective will be verified by blocking vision and verifying that behaviour and localisation are not blocked, waiting on vision.
+			
+			\subsubsection{Team Member Induction}
+				This objective will be verified by finding the average time taken to teach new NuBots team members how to use the system once fully converted to NUClear. 
+				The time should be less than 50 work hours.
+			
+			\subsubsection{Components for Changing Hardware Platform}
+				This objective will be verified by creating a draft plan of how to move the system back to the Nao robot. It must only require 2 components to be changed.
+			
+			\subsubsection{Adding Dance}
+				This objective will be verified by counting the number of components changed when these features are added.
+				It should only require 1 component to be changed. 
+			
+			\subsubsection{Improved Monitoring and Debugging Tools}
+				This objective will be verified by purposely creating a wide variety of run-time errors to test the debugging features.
+			
+			\subsubsection{Improved Hardware Utilisation}
+				This objective will be verified by monitoring the thread use by the system on machines with more than 2 cores to ensure they can all be used. 
+			
+			\subsubsection{Interface Consistency}
+				This objective will be verified by ensuring there is only 1 unified interface between all components.
+				It also must be fully documented, including a description convention that the NUbot team accepts as unambiguous.
+
+		\subsection {Scope}
+			The project aims to measurably improve the effectiveness of the NUbots through the introduction of new software architecture.
+			This will involve modifications to the existing NUbots codebase.
+			The project will not modify any hardware on the NUbots, but must accommodate changes in hardware.
+			The project will not change any existing algorithms beyond restructuring them to fit the new architecture.
+			
+			Additionally, the project team aim to give the robot the ability to dance in some form for marketing purposes.
+			This dancing will be according to a predetermined script, or in response to stimulus such as music or human movement detected in a camera.
+				
+		\subsection {Review of changes to Goals, Objectives, Acceptance Criteria and Scope}
+			A review of how the goals, objectives, acceptable, criteria and scope have changed since the original Project Proposal. 
+			
+			\subsubsection{Goals}
+				The objectives of the project remain unchanged.
+			
+			\subsubsection{Objectives}
+				Due to team members leaving the project, Objective 2.2.4 Adding Dance to visual stimuli has not been completed.
+			
+			\subsubsection{Acceptance Criteria}
+				In relation to 2.3.1 Time to add a new component, this objective will no longer be tested by adding the dance according to visual stimuli component.
+			
+			\subsubsection{Scope}
+				The project will no longer involve making the robot dance according to movement detected in a camera.
+
+	\section{Resources}
+		\subsection{People and Responsibilities}
+			\subsubsection{People}
+				\paragraph{Project Team}
+					\begin{itemize}
+						\item Joshua Kearns
+						\item Jake Woods
+						\item Michael Burton
+						\item Liam Jones
+						\item Daniel Gault
+						\item Trent Houliston
+					\end{itemize}
+				\paragraph{Nubots Liason}
+					\begin{itemize}
+						\item Josiah Walker
+					\end{itemize}
+				\paragraph{Supervisor}
+					\begin{itemize}
+						\item Yuqing Lin
+					\end{itemize}
+				\paragraph{Technical Advisor}
+					\begin{itemize}
+						\item Stephan Chalup
+					\end{itemize}
+			\subsubsection{Responsibilites}
+			
+				\paragraph{Re-Architecturing Focus Group}
+					\begin{itemize}
+						\item Jake Woods
+						\item Michael Burton
+						\item Trent Houliston
+					\end{itemize}
+					
+				\paragraph{Dance Focus Group}
+					\begin{itemize}
+						\item Joshua Kearns
+						\item Liam Jones
+						\item Daniel Gault
+					\end{itemize}
+					
+		\subsection{Equipment, Tools and Materials}
+			\subsubsection{Physical Resources}
+			The team will have access to the NUbots robots under the supervision of members of the NUbots team.
+			\subsubsection{Management Tools}
+				\begin{itemize}
+					\item Git: For source code revision control.
+					\item Git Hub: For a shared Git repository.
+					\item Base Camp: For task management, team discussion and file sharing.
+				\end{itemize}
+				
+		\subsection {Review of Resources}
+			A review of how our resources have changed since the original Project Proposal.
+			\subsubsection{Current Project Team}
+				\begin{itemize}
+					\item Joshua Kearns
+					\item Jake Woods
+					\item Michael Burton
+					\item Trent Houliston
+				\end{itemize}
+				Due to unforeseen circumstances, Daniel Gault and Liam Jones left the project team.
+
+\newpage
+	\section{Risks}
+		\begin{table}[htbp]
+		\begin{tabularx}{\linewidth}{ | m{0.6cm} |  X | m{1.05cm} |  m{1.05cm} |  X | X |}
+			\hline 
+			Rank & Name & Chance & Severity & Mitigation Strategy & Contingency \\  \hline
+			1 & Project not completed by deadline & Low & High & Do our work & Remove features. Finish after deadline. NUBot team finished project. \\ \hline
+			2 & Documentation not completed by deadline & Medium & Medium & Assign specific tasks for completion of documentation & Negotiate extension. \\ \hline
+			3 & Conflict in Team & Medium & Medium & Listen to all group members opinions. & Attempt to accommodate group members opinions. Make group decision on difficult choices \\ \hline
+			4 & Group members with unique vital skills can longer do the project, such as Jake with his ability to do template meta-programming in c++. & Low & High & Team members will work together to teach each other these vital skills so one vital member leaving has less of an impact. & Redesigning the architecture so that it can be implemented without the skills that were lost. \\ \hline
+			5 & NUBot team cancelled & Very Low & Very High & None & Make project more general, as an architecture with no implementation in the NUbots \\ \hline
+			6 & Lack of progress due to unfamiliarity with project environment & High & High & Familiarise team members with c++ and robot programming environment & Reduce scope of project. \\ \hline
+		\end{tabularx}
+		\end{table}
+		\subsection{Review of Risks}
+			An overview of what risks occurred and how well the team responded to them. 
+			
+			\subsubsection{Unanticipated Risks}
+				\paragraph{Project Members Leaving}  
+					Although the project team had discussed this possibility, the team failed to thoroughly plan how to respond to it.
+					Fortunately, it was only members of the Dance Focus Group who left the team, as the Dance component was easier to revise than the Architecture component.
+					Despite this, members of the Architecture Focus Group were required to help out with the Dance component.
+					This required restructuring of the time allocation and priorities for the Architecture Focus Group, placing additional pressure on their resources, mainly time and skills. 
+			
+			\subsubsection{Anticipated Risks}
+				\paragraph{Transferring to New Architecture behind schedule}  
+					Due to failing to anticipate how time consuming transferring the old system to the new architecture would be, it was realised that it could not be completed in time.
+					Fortunately, the project team had considered this possibility and had a contingency plan.
+					It was decided that the team would aim to do as much as possible and the NUbots team to complete the project.
+
+	\section{Schedule}
+		\subsection{Gantt Chart}
+			Original Schedule
+			\begin{figure}[!ht]
+				\scalebox{0.8} {
+					\begin{ganttchart}[bar/.append style={orange}, link/.append style={thick}]{1}{23}
+						\gantttitle{Semester 1}{9} 
+						\gantttitle{Semester 2}{14} \\
+						\gantttitlelist{6,...,14}{1} 
+						\gantttitlelist{1,2,...,14}{1} \\
+						\ganttbar{Design Nuclear}{1}{4} \\ %elem0
+						\ganttbar{Prototype Nuclear}{1}{4} \\ %elem1
+						\ganttbar{Implement Nuclear}{5}{9} \ganttnewline %elem2
+						\ganttmilestone{Milestone}{9} \ganttnewline %elem3
+						\ganttlinkedbar{Convert NUBots to NUClear}{10}{23} \ganttnewline %elem4
+						\ganttbar{Design Robot Dance}{5}{9} \\ %elem5
+						\ganttlinkedbar{Implement Robot Dance}{10}{17} \ganttnewline %elem6
+						\ganttlink[link type=f-f]{elem0}{elem1}
+						\ganttlink[link type=f-f]{elem1}{elem0}
+						\ganttlink[link type=rdldr*, link bulge 2=0.75, link mid=-.15]{elem0}{elem2}
+						%\ganttlink{elem1}{elem2}
+						\ganttlink[link type=rdldr*, link bulge 2=1.25, link mid=-.1]{elem0}{elem5}
+						\ganttlink{elem2}{elem3}
+						\ganttlink{elem3}{elem4}
+						\ganttlink{elem3}{elem6}
+					\end{ganttchart}
+				}
+			\end{figure}
+			\subsubsection{Task Definition}
+				\paragraph{Design Nuclear}
+					This is the research and design documents that will need to be created before the architecture framework, NUClear, can be implemented.
+				\paragraph{Prototype Nuclear}
+					This is an evolutionary prototype that will be used to assist in the design of NUClear.
+				\paragraph{Implement Nuclear}
+					NUClear will be implemented to provide the framework that the NUbots system will be redesigned around. 
+				\paragraph{Convert NUbots to NUClear}
+					The NUbots soccer playing system will be converted from the old architecture to the new architecture.
+					This will be completed when all original functionality is operating on the new architecture.
+				\paragraph{Design Robot Dance}
+					The design of the robot dance will need to be based around the design of NUClear.
+					This will allow for the robot dance to be implemented. 
+				\paragraph{Implement Robot Dance}
+					The robot dance will be implemented.
+
+		\subsection{Gantt Chart - Actual}
+			Shows how the schedule of tasks has actually occurred. \\
+			\begin{figure}[!ht]
+				\scalebox{0.8}{
+					\begin{ganttchart}[bar/.append style={orange}, link/.append style={thick}]{1}{23}
+						\gantttitle{Semester 1}{9} 
+						\gantttitle{Semester 2}{14} \\
+						\gantttitlelist{6,...,14}{1} 
+						\gantttitlelist{1,2,...,14}{1} \\
+						%\ganttgroup{Group 1}{1}{7} \\
+						\ganttbar{Design Nuclear}{1}{4} \\ %elem0
+						\ganttbar{Prototype Nuclear}{1}{4} \\ %elem1
+						\ganttbar{Implement Nuclear}{5}{9} \ganttnewline %elem2
+						\ganttmilestone{Milestone}{9} \ganttnewline %elem3
+						\ganttlinkedbar{Start Converting to NUClear}{10}{16} \ganttnewline %elem4
+						\ganttbar{NUClear User Documentation}{17}{23} \ganttnewline %elem5
+						\ganttbar{Test NUClear}{17}{23} \ganttnewline %elem6
+						\ganttbar{Design Robot Dance}{5}{9} \\ %elem7
+						\ganttlinkedbar{Implement Robot Dance}{10}{17} \ganttnewline %elem8
+						\ganttlinkedbar{Test Robot Dance}{18}{23} \ganttnewline %elem9
+						%\ganttbar{Final Task}{8}{12}
+						\ganttlink[link type=f-f]{elem0}{elem1}
+						\ganttlink[link type=f-f]{elem1}{elem0}
+						\ganttlink[link type=rdldr*, link bulge 2=0.75, link mid=-.15]{elem0}{elem2}
+						\ganttlink[link type=rdldr*, link bulge 2=1.0, link mid=-.10]{elem0}{elem7}
+						\ganttlink{elem2}{elem3}
+						\ganttlink[link type=rdldr*, link bulge 2=0.50, link mid=.0]{elem0}{elem5}
+						\ganttlink{elem2}{elem6}
+						\ganttlink{elem3}{elem8}
+					\end{ganttchart}
+				}
+			\end{figure}
+			
+			\subsubsection{Changes to tasks}
+				\paragraph{Convert NUbots to NUClear}
+					Due to time constraints, this task will not be completed. Only the vital components will be converted, making it easier for the NUbots team to finish the task.
+					This task will end in Week 7 to allow time for other tasks to be completed. 
+				\paragraph{New Tasks}
+					\begin{enumerate}
+						\item Test NUClear
+						\item Test Robot Dance
+						\item NUClear User Documentation
+					\end{enumerate}
+			\subsubsection{New Task Definition}
+				\paragraph{Test NUClear}
+					The Project Team failed to take into account testing in the original schedule. This testing will ensure that the NUClear architectural framework meets the objectives.
+				\paragraph{Test Robot Dance}
+					This testing will ensure that the Robot dance function correctly.
+				\paragraph{NUClear User Documentation}
+					This documentation will describe how to use the NUClear framework. It will be necessary for the NUbots team to finish the task of converting the NUbots system to work using NUClear.
+					
 
 \end{document}
