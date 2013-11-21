@@ -14,7 +14,7 @@ The following is a guide to getting you set up and ready to contribute to the NU
 1. Install the following prerequisites on your machine (packages/installers are available for Windows, OSX, and Linux):
 	* [Git][]
 	* [Virtualbox][]
-	* [Vagrant][vagrant_download]
+	* [Vagrant][vagrant_download] (Note: The version of Vagrant that is available in the Ubuntu 12.04 repositories is an older version that is incompatible with the NUbots' Vagrantfile. If you're using Ubuntu 12.04, please install the latest version of Vagrant via a .deb from the [Vagrant download page][vagrant_download])
 
 2. Clone this git repository onto your machine:
 	e.g.
