@@ -18,6 +18,7 @@ class nuclearport_dev_dependencies (
   package { 'libjpeg-turbo8-dev': ensure => latest }
   package { 'libfftw3-dev': ensure => latest }
   package { 'libaubio-dev': ensure => latest }
+  package { 'libsndfile-dev': ensure => latest }
 }
 
 node default {
