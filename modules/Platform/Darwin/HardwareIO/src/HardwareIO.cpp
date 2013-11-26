@@ -27,7 +27,7 @@ namespace modules {
 namespace Platform {
 namespace Darwin {
 
-    HardwareIO::HardwareIO(NUClear::PowerPlant* plant) : Reactor(plant), darwin("/dev/ttyUSB0") {
+    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/ttyUSB0") {
 
         // This trigger gets the sensor data from the CM730
         on<Trigger<Every<20, std::chrono::milliseconds>>>([this](const time_t& time) {

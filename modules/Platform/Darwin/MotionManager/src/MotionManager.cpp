@@ -26,7 +26,7 @@ namespace modules {
 namespace Platform {
 namespace Darwin {
 
-    MotionManager::MotionManager(NUClear::PowerPlant* plant) : Reactor(plant) {
+    MotionManager::MotionManager(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Trigger<Every<20, std::chrono::milliseconds>>, With<messages::DarwinSensors>>([this](const time_t& time, const messages::DarwinSensors& sensors) {
 

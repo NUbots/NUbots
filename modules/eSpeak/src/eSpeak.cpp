@@ -24,7 +24,7 @@
 
 namespace modules {
 
-    eSpeak::eSpeak(NUClear::PowerPlant* plant) : Reactor(plant) {
+    eSpeak::eSpeak(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         // Initialize espeak, and set it to play out the speakers, and not exit if it can't find it's directory
         espeak_Initialize(AUDIO_OUTPUT_PLAYBACK, 500, nullptr, 1 << 15);

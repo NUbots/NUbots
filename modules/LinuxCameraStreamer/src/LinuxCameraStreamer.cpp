@@ -34,7 +34,7 @@ namespace modules {
 
 
     // We assume that the device will always be video0, if not then change this
-    LinuxCameraStreamer::LinuxCameraStreamer(NUClear::PowerPlant* plant) : Reactor(plant) {
+    LinuxCameraStreamer::LinuxCameraStreamer(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         // This trigger gets us as close as we can to the frame rate as possible (as high resolution as we can)
         on<Trigger<Every<NUClear::clock::period::den / V4L2Camera::FRAMERATE, NUClear::clock::duration>>, Options<Single>>([this](const time_t& time) {

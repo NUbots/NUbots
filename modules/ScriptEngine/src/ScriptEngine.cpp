@@ -29,7 +29,7 @@ namespace modules {
         static constexpr const char* CONFIGURATION_PATH = "scripts/";
     };
 
-    ScriptEngine::ScriptEngine(NUClear::PowerPlant* plant) : Reactor(plant) {
+    ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Trigger<messages::Configuration<Scripts>>>([this](const messages::Configuration<Scripts>& script) {
             // Add this script to our list of scripts

@@ -40,7 +40,7 @@ namespace modules {
     
     
 
-    BeatDetectorsTests::BeatDetectorsTests(NUClear::PowerPlant* plant) : Reactor(plant) {
+    BeatDetectorsTests::BeatDetectorsTests(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
         
         
         on<Trigger<messages::SoundFileStart>, Options<Single>> ([this](const messages::SoundFileStart& soundFileStart) {

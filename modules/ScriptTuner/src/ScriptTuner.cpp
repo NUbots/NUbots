@@ -33,7 +33,7 @@ namespace modules {
 
     struct LockServo {};
 
-    ScriptTuner::ScriptTuner(NUClear::PowerPlant* plant) : Reactor(plant),
+    ScriptTuner::ScriptTuner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)),
             scriptPath("ERROR"),
             frame(0),
             selection(0),

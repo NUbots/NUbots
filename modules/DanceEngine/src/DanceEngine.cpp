@@ -29,7 +29,7 @@ namespace modules {
         static constexpr const char* CONFIGURATION_PATH = "scripts/dance/";
     };
 
-    DanceEngine::DanceEngine(NUClear::PowerPlant* plant) : Reactor(plant) {
+    DanceEngine::DanceEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Trigger<messages::Configuration<DanceScripts>>>([this](const messages::Configuration<DanceScripts>& script) {
             // Add this script to our list of scripts

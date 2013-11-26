@@ -88,7 +88,7 @@ namespace modules {
             std::unique_ptr<UserData> userData;
     };
 
-    AudioInput::AudioInput(NUClear::PowerPlant* plant) : Reactor(plant) {
+    AudioInput::AudioInput(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
         auto& audioContext = m->audioContext;
         auto& inputStreamParameters = m->inputStreamParameters;
 
