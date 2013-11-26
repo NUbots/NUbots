@@ -56,7 +56,7 @@ namespace modules {
         NUClear::clock::time_point time;
     };
 
-    AubioBeatDetector::AubioBeatDetector(NUClear::PowerPlant* plant) : Reactor(plant) {
+    AubioBeatDetector::AubioBeatDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Trigger<messages::SoundChunkSettings>>([this](const messages::SoundChunkSettings& settings) {
 

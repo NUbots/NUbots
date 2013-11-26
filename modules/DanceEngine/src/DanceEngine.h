@@ -30,7 +30,7 @@ namespace modules {
         std::map<std::string, messages::Script> scripts;
         bool startedDancing;
     public:
-        explicit DanceEngine(NUClear::PowerPlant* plant);
+        explicit DanceEngine(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 #endif

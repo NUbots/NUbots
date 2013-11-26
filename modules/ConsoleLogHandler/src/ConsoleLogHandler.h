@@ -31,7 +31,7 @@ namespace modules {
      */
     class ConsoleLogHandler : public NUClear::Reactor {
     public:
-        explicit ConsoleLogHandler(NUClear::PowerPlant* plant);
+        explicit ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 #endif

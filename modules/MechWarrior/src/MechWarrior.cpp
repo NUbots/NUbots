@@ -22,7 +22,7 @@
 
 namespace modules {
 
-    MechWarrior::MechWarrior(NUClear::PowerPlant* plant) : Reactor(plant), fired(0) {
+    MechWarrior::MechWarrior(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), fired(0) {
 
         on<Trigger<Every<250, std::chrono::milliseconds>>>([this](const time_t&) {
             if(++fired < 7) {

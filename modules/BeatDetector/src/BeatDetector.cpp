@@ -250,7 +250,7 @@ namespace modules {
         }
     }
 
-    BeatDetector::BeatDetector(NUClear::PowerPlant* plant) : Reactor(plant) {
+    BeatDetector::BeatDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Trigger<messages::SoundChunkSettings>>([this](const messages::SoundChunkSettings& settings) {
 

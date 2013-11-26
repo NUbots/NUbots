@@ -20,7 +20,7 @@
 #include "ConsoleLogHandler.h"
 namespace modules {
 
-    ConsoleLogHandler::ConsoleLogHandler(NUClear::PowerPlant* plant) : Reactor(plant) {
+    ConsoleLogHandler::ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
         on<Trigger<NUClear::Messages::LogMessage>>([this](const NUClear::Messages::LogMessage& message) {
             std::cout << message.message << std::endl;
         });

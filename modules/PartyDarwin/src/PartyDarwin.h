@@ -31,7 +31,7 @@ namespace modules {
      */
     class PartyDarwin : public NUClear::Reactor {
     public:
-        explicit PartyDarwin(NUClear::PowerPlant* plant);
+        explicit PartyDarwin(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 #endif

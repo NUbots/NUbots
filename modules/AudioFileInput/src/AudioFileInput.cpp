@@ -39,11 +39,11 @@ namespace modules {
         static constexpr const char* CONFIGURATION_PATH = "AudioFileInput.json";
     };
 
-    AudioFileInput::AudioFileInput(NUClear::PowerPlant* plant) : Reactor(plant) {
+    AudioFileInput::AudioFileInput(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
         // Load our file name configuration.
         on<Trigger<messages::Configuration<AudioFileConfiguration>>>([this](const messages::Configuration<AudioFileConfiguration>& configfile) {
                 std::string filePath = configfile.config["file"];
-                log("Loading sound file: ", filePath);
+                log<NUClear::DEBUG>("Loading sound file: ", filePath);
                 m->file = SndfileHandle(filePath.c_str());
 
                 auto settings = std::make_unique<messages::SoundChunkSettings>();

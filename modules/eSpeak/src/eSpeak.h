@@ -31,7 +31,7 @@ namespace modules {
      */
     class eSpeak : public NUClear::Reactor {
     public:
-        explicit eSpeak(NUClear::PowerPlant* plant);
+        explicit eSpeak(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 #endif

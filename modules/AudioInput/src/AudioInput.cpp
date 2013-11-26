@@ -88,13 +88,13 @@ namespace modules {
             std::unique_ptr<UserData> userData;
     };
 
-    AudioInput::AudioInput(NUClear::PowerPlant* plant) : Reactor(plant) {
+    AudioInput::AudioInput(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
         auto& audioContext = m->audioContext;
         auto& inputStreamParameters = m->inputStreamParameters;
 
         // We need to set up the audio context.
         if(audioContext.getDeviceCount() < 1) {
-            log("No audio devices found");
+            log<NUClear::DEBUG>("No audio devices found");
             return;
         }
 

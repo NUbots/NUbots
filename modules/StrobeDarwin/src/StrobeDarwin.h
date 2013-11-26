@@ -31,7 +31,7 @@ namespace modules {
      */
     class StrobeDarwin : public NUClear::Reactor {
     public:
-        explicit StrobeDarwin(NUClear::PowerPlant* plant);
+        explicit StrobeDarwin(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 #endif

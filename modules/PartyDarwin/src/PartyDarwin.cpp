@@ -22,7 +22,7 @@
 
 namespace modules {
 
-    PartyDarwin::PartyDarwin(NUClear::PowerPlant* plant) : Reactor(plant) {
+    PartyDarwin::PartyDarwin(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Trigger<Every<125, std::chrono::milliseconds>>>([this](const time_t&) {
 

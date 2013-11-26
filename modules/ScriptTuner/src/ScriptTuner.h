@@ -51,7 +51,7 @@ namespace modules {
         void run();
         void kill();
     public:
-        explicit ScriptTuner(NUClear::PowerPlant* plant);
+        explicit ScriptTuner(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 #endif

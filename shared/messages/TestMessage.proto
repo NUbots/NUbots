@@ -1,4 +1,0 @@
-package messages;
-message TestMessage {
-  required string message = 1;
-}

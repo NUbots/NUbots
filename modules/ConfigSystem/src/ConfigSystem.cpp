@@ -63,7 +63,7 @@ namespace modules {
         static constexpr const char* BASE_CONFIGURATION_PATH = "config/";
     };
 
-    ConfigSystem::ConfigSystem(NUClear::PowerPlant* plant) : Reactor(plant) {
+    ConfigSystem::ConfigSystem(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         m->running = true;
         m->watcherFd = inotify_init();

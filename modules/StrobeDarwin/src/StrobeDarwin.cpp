@@ -23,7 +23,7 @@
 
 namespace modules {
 
-    StrobeDarwin::StrobeDarwin(NUClear::PowerPlant* plant) : Reactor(plant) {
+    StrobeDarwin::StrobeDarwin(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
         // Strobe up
         on<Trigger<messages::Beat>>([this](const messages::Beat& beat) {
             auto eyes = std::make_unique<messages::DarwinSensors::EyeLED>();

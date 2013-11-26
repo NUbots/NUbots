@@ -28,7 +28,7 @@ namespace modules {
     class impl;
     utility::idiom::pimpl<impl> m;    
     public:
-        explicit BeatDetectorsTests(NUClear::PowerPlant* plant);
+        explicit BeatDetectorsTests(std::unique_ptr<NUClear::Environment> environment);
         ~BeatDetectorsTests();
     };
 }

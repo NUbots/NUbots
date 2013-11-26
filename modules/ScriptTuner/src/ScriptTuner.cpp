@@ -33,7 +33,7 @@ namespace modules {
 
     struct LockServo {};
 
-    ScriptTuner::ScriptTuner(NUClear::PowerPlant* plant) : Reactor(plant),
+    ScriptTuner::ScriptTuner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)),
             scriptPath("ERROR"),
             frame(0),
             selection(0),
@@ -49,12 +49,12 @@ namespace modules {
 
                 // Check if the script exists and load it if it does.
                 if(utility::file::exists(scriptPath)) {
-                    log("Loading script: ", scriptPath, '\n');
+                    log<NUClear::DEBUG>("Loading script: ", scriptPath, '\n');
                     loadScript(scriptPath);
                 }
             }
             else {
-                log("Error: Expected 2 arguments on argv found ", args.size(), '\n');
+                log<NUClear::DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
                 powerPlant->shutdown();
             }
         });

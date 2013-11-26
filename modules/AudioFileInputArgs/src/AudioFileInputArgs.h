@@ -28,7 +28,7 @@ namespace modules {
             class impl;
             utility::idiom::pimpl<impl> m;
         public:
-            explicit AudioFileInputArgs(NUClear::PowerPlant* plant);
+            explicit AudioFileInputArgs(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 #endif

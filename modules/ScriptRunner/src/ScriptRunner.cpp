@@ -34,7 +34,7 @@ namespace modules {
         }
     }
 
-    ScriptRunner::ScriptRunner(NUClear::PowerPlant* plant) : Reactor(plant) {
+    ScriptRunner::ScriptRunner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
         on<Trigger<CommandLineArguments>>([this](const std::vector<std::string>& args) {
             std::cout << "Args: " << args.size() << std::endl;
             for(size_t i = 1; i < args.size(); ++i) {

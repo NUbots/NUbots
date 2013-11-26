@@ -28,10 +28,10 @@ namespace modules {
     // Initialize our powerplant variable
     NUClear::PowerPlant* SignalCatcher::POWER_PLANT = nullptr;
 
-    SignalCatcher::SignalCatcher(NUClear::PowerPlant* plant) : Reactor(plant) {
+    SignalCatcher::SignalCatcher(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         // Store our powerplant in the static variable
-        POWER_PLANT = plant;
+        POWER_PLANT = powerPlant;
 
         // On sigint run the sigint handler
         std::signal(SIGINT, &SignalCatcher::sigintHandler);

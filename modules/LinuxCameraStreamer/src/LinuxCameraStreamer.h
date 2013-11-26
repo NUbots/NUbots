@@ -47,7 +47,7 @@ namespace modules {
         static constexpr const char* CONFIGURATION_PATH = "LinuxCameraStreamer.json";
 
         /// @brief Called by the powerplant to build and setup our CameraReader
-        LinuxCameraStreamer(NUClear::PowerPlant* plant);
+        LinuxCameraStreamer(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 #endif

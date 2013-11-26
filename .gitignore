@@ -20,6 +20,9 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 
+## Vagrant
+.vagrant/
+
 # LaTeX stuff
 doc/*.aux
 doc/*.pdf

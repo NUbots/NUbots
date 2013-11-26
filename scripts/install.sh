@@ -20,7 +20,7 @@ else
 fi
 
 # Copy our binaries over
-for file in `find hats -type f -executable -exec sh -c "file -i '{}' | grep -q 'x-executable; charset=binary'" \; -print`; do
+for file in `find roles -type f -executable -exec sh -c "file -i '{}' | grep -q 'x-executable; charset=binary'" \; -print`; do
     scp -C "$file" "darwin@$robotIP:/home/darwin/"
 done
 

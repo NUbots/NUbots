@@ -33,7 +33,7 @@ namespace modules {
     private:
         size_t fired;
     public:
-        explicit MechWarrior(NUClear::PowerPlant* plant);
+        explicit MechWarrior(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 #endif

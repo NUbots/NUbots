@@ -29,7 +29,7 @@ namespace modules {
     private:
         std::map<std::string, messages::Script> scripts;
     public:
-        explicit ScriptEngine(NUClear::PowerPlant* plant);
+        explicit ScriptEngine(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 #endif

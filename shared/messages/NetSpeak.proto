@@ -1,0 +1,4 @@
+package messages;
+message NetSpeak {
+  required string message = 1;
+}
