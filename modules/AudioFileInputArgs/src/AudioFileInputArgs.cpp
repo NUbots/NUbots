@@ -49,7 +49,7 @@ namespace modules {
         on<Trigger<CommandLineArguments>>([this](const std::vector<std::string>& args) {
             m->fileName = args[args.size() - 1];//configfile.config["file"]; //args[0] is the command to run the file... so args[1] is the arg we want
             std::cout << "reading file: " << m->fileName << std::endl;
-            log("Loading sound file: ", m->fileName);
+            log<NUClear::DEBUG>("Loading sound file: ", m->fileName);
             m->file = SndfileHandle(m->fileName.c_str());
 
 
