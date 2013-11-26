@@ -1,4 +1,4 @@
 package messages;
-message TestMessage {
+message NetSpeak {
   required string message = 1;
 }

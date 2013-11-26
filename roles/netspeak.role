@@ -1,0 +1,5 @@
+ADD_ROLE(
+    NAME netspeak
+    MODULES
+        eSpeak
+        NetworkSpeak)
