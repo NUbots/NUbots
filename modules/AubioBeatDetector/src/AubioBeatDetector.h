@@ -28,7 +28,7 @@ namespace modules {
         class impl;
         utility::idiom::pimpl<impl> m;
     public:
-        explicit AubioBeatDetector(NUClear::PowerPlant* plant);
+        explicit AubioBeatDetector(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 

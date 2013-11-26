@@ -49,7 +49,7 @@ namespace modules {
         //void send(zmq::message_t& packet);
 
     public:
-        explicit NUbugger(NUClear::PowerPlant* plant);
+        explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 #endif

@@ -41,7 +41,7 @@ namespace Darwin {
 
     public:
         /// @brief called by a Powerplant to construct this reactor
-        explicit HardwareIO(NUClear::PowerPlant* plant);
+        explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 }

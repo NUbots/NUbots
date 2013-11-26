@@ -32,7 +32,7 @@ namespace modules {
      */
     class AudioInput : public NUClear::Reactor {
         public:
-            explicit AudioInput(NUClear::PowerPlant* plant);
+            explicit AudioInput(std::unique_ptr<NUClear::Environment> environment);
         private:
             class impl;
             utility::idiom::pimpl<impl> m;

@@ -38,7 +38,7 @@ namespace modules {
      */
     class SignalCatcher : public NUClear::Reactor {
     public:
-        explicit SignalCatcher(NUClear::PowerPlant* plant);
+        explicit SignalCatcher(std::unique_ptr<NUClear::Environment> environment);
     private:
 
         /// Our static PowerPlant variable that we use to shutdown the system

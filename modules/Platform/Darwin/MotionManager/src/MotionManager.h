@@ -50,7 +50,7 @@ namespace Darwin {
         void queueEnd(size_t queue);
         void allQueueEnd();
     public:
-        explicit MotionManager(NUClear::PowerPlant* plant);
+        explicit MotionManager(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 }

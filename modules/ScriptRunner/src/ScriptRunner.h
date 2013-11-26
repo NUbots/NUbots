@@ -35,7 +35,7 @@ namespace modules {
 
         void executeNextScript();
     public:
-        explicit ScriptRunner(NUClear::PowerPlant* plant);
+        explicit ScriptRunner(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 #endif

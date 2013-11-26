@@ -39,7 +39,7 @@ namespace modules {
         utility::idiom::pimpl<impl> m;
 
    public:
-        explicit ConfigSystem(NUClear::PowerPlant* plant);
+        explicit ConfigSystem(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 #endif
