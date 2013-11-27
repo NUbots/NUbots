@@ -19,7 +19,7 @@
 #ifndef MESSAGES_BEAT_H
 #define	MESSAGES_BEAT_H
 
-#include <NUClear.h>
+#include <nuclear>
 
 namespace messages {
     struct Beat {

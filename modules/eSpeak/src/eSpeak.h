@@ -20,7 +20,7 @@
 #ifndef MODULES_ESPEAK_H
 #define MODULES_ESPEAK_H
 
-#include <NUClear.h>
+#include <nuclear>
 
 namespace modules {
 

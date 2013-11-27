@@ -20,7 +20,7 @@
 #ifndef MESSAGES_CONFIGURATION_H_
 #define MESSAGES_CONFIGURATION_H_
 
-#include <NUClear.h>
+#include <nuclear>
 #include "utility/configuration/ConfigurationNode.h"
 
 namespace messages {

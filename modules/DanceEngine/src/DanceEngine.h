@@ -20,7 +20,7 @@
 #ifndef MODULES_DANCEENGINE_H
 #define MODULES_DANCEENGINE_H
 
-#include <NUClear.h>
+#include <nuclear>
 #include "messages/Script.h"
 
 namespace modules {

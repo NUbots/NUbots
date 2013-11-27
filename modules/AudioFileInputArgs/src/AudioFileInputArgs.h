@@ -18,7 +18,7 @@
 #ifndef MODULES_AUDIOFILEINPUTARGS_H
 #define MODULES_AUDIOFILEINPUTARGS_H
 
-#include <NUClear.h>
+#include <nuclear>
 #include "utility/idiom/pimpl.h"
 
 namespace modules {

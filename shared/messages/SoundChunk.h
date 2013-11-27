@@ -20,7 +20,7 @@
 #ifndef MESSAGES_SOUNDCHUNK_H
 #define MESSAGES_SOUNDCHUNK_H
 
-#include <NUClear.h>
+#include <nuclear>
 #include <vector>
 #include <cstdint>
 

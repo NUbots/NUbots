@@ -20,7 +20,7 @@
 #ifndef MODULES_DARWINCAMERAREADER_H
 #define MODULES_DARWINCAMERAREADER_H
 
-#include <NUClear.h>
+#include <nuclear>
 #include "utility/idiom/pimpl.h"
 
 namespace modules {

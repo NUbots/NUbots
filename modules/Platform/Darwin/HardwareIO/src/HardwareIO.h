@@ -20,7 +20,7 @@
 #ifndef MODULES_PLATFORM_DARWIN_HARDWAREIO_H
 #define MODULES_PLATFORM_DARWIN_HARDWAREIO_H
 
-#include <NUClear.h>
+#include <nuclear>
 
 #include "darwin/Darwin.h"
 

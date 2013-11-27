@@ -20,7 +20,7 @@
 #ifndef MESSAGES_SERVOWAYPOINTS_H
 #define MESSAGES_SERVOWAYPOINTS_H
 
-#include <NUClear.h>
+#include <nuclear>
 #include "DarwinServoCommand.h"
 
 namespace messages {

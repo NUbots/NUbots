@@ -20,7 +20,7 @@
 #ifndef MODULES_SCRIPTENGINE_H
 #define MODULES_SCRIPTENGINE_H
 
-#include <NUClear.h>
+#include <nuclear>
 #include "messages/Script.h"
 
 namespace modules {

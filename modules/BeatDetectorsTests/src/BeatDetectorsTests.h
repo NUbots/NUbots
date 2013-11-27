@@ -18,7 +18,7 @@
 #ifndef MODULES_BEATDETECTORSTESTS_H
 #define	MODULES_BEATDETECTORSTESTS_H
 
-#include <NUClear.h>
+#include <nuclear>
 #include "utility/idiom/pimpl.h"
 
 namespace modules {

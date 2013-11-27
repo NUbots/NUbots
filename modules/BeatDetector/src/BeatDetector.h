@@ -20,7 +20,7 @@
 #ifndef MODULES_BEATDETECTOR_H
 #define	MODULES_BEATDETECTOR_H
 
-#include <NUClear.h>
+#include <nuclear>
 #include "utility/idiom/pimpl.h"
 
 namespace modules {

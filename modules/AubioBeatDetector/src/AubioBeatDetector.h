@@ -18,7 +18,7 @@
 #ifndef MODULES_AUBIOBEATDETECTOR_H
 #define	MODULES_AUBIOBEATDETECTOR_H
 
-#include <NUClear.h>
+#include <nuclear>
 #include "utility/idiom/pimpl.h"
 
 namespace modules {

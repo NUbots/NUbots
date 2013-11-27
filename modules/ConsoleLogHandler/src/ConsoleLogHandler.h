@@ -20,7 +20,7 @@
 #ifndef MODULES_CONSOLELOGHANDLER_H
 #define MODULES_CONSOLELOGHANDLER_H
 
-#include <NUClear.h>
+#include <nuclear>
 
 namespace modules {
 

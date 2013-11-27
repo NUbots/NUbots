@@ -20,7 +20,7 @@
 #ifndef MODULES_STROBEDARWIN_H
 #define MODULES_STROBEDARWIN_H
 
-#include <NUClear.h>
+#include <nuclear>
 
 namespace modules {
 
