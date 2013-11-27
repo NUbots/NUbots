@@ -20,7 +20,7 @@
 #ifndef MODULES_NetworkSpeak_H
 #define MODULES_NetworkSpeak_H
 
-#include <NUClear.h>
+#include <nuclear>
 
 namespace modules {
 

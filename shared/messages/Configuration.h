@@ -26,7 +26,7 @@
 namespace messages {
 
     using namespace utility::configuration;
-    using namespace NUClear::Internal::Magic::MetaProgramming;
+    using namespace NUClear::metaprogramming;
 
     // Anonymous namespace to hide details
     namespace {

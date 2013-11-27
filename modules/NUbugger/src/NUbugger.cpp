@@ -40,7 +40,7 @@ namespace modules {
 
             std::mutex mutex;
 
-            impl() : pub(NUClear::Extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {}
+            impl() : pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {}
 
             /**
              * This method needs to be used over pub.send as all calls to
