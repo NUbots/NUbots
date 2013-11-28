@@ -1,24 +1,24 @@
 /*
- * This file is part of NetworkSpeak.
+ * This file is part of Networking Configuration.
  *
- * NetworkSpeak is free software: you can redistribute it and/or modify
+ * Networking Configuration is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * NetworkSpeak is distributed in the hope that it will be useful,
+ * Networking Configuration is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with NetworkSpeak.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Networking Configuration.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_NETWORKSPEAK_H
-#define MODULES_NETWORKSPEAK_H
+#ifndef MODULES_NETWORKINGCONFIGURATION_H
+#define MODULES_NETWORKINGCONFIGURATION_H
 
 #include <nuclear>
 
@@ -29,9 +29,10 @@ namespace modules {
      *
      * @author Trent Houliston
      */
-    class NetworkSpeak : public NUClear::Reactor {
+    class NetworkingConfiguration : public NUClear::Reactor {
     public:
-        explicit NetworkSpeak(std::unique_ptr<NUClear::Environment> environment);
+        static constexpr const char* CONFIGURATION_PATH = "NetworkingConfiguration.json";
+        explicit NetworkingConfiguration(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 #endif

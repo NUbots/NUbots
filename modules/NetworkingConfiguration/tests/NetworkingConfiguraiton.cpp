@@ -17,22 +17,5 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_NETWORKSPEAK_H
-#define MODULES_NETWORKSPEAK_H
-
-#include <nuclear>
-
-namespace modules {
-
-    /**
-     * TODO document
-     *
-     * @author Trent Houliston
-     */
-    class NetworkSpeak : public NUClear::Reactor {
-    public:
-        explicit NetworkSpeak(std::unique_ptr<NUClear::Environment> environment);
-    };
-}
-#endif
-
+#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#include <catch.hpp>
