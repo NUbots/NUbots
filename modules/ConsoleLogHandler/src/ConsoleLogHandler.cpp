@@ -21,7 +21,7 @@
 namespace modules {
 
     ConsoleLogHandler::ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-        on<Trigger<NUClear::Messages::LogMessage>>([this](const NUClear::Messages::LogMessage& message) {
+        on<Trigger<NUClear::LogMessage>>([this](const NUClear::LogMessage& message) {
             std::cout << message.message << std::endl;
         });
     }
