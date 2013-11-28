@@ -29,12 +29,15 @@ namespace modules {
         // Initialize espeak, and set it to play out the speakers, and not exit if it can't find it's directory
         espeak_Initialize(AUDIO_OUTPUT_PLAYBACK, 500, nullptr, 1 << 15);
         espeak_SetVoiceByName("default");
-        espeak_SetParameter(espeakVOLUME, 200, 0);
+        espeak_SetParameter(espeakVOLUME, 100, 0);
         espeak_SetParameter(espeakCAPITALS, 6, 0);
 
-        on<Trigger<messages::Say>, Options<Single>>([](const messages::Say& message) {
+        on<Trigger<messages::Say>, Options<Sync<eSpeak>>>([](const messages::Say& message) {
             // Wait to finish the current message (if any)
+            // By waiting here this reaction can finish and return to the pool
+            // if it does not have to wait for another say message
             espeak_Synchronize();
+            
             // Say the new message
             espeak_Synth(message.c_str(),       // Text
                          message.size() + 1,    // Size (including null at end)
