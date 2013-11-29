@@ -18,6 +18,7 @@
  */
 
 #include "ScriptOptimizer.h"
+#include "messages/Script.h"
 #include "messages/OptimizeScript.pb.h"
 #include "messages/DarwinSensors.h"
 
@@ -30,14 +31,28 @@ namespace modules {
 
                 // Check if this script is for us
                 if (config.deviceName == task.data->target()) {
+                    
+                    log<NUClear::DEBUG>("Script ", task.data->iteration(), " was delivered to be executed");
 
+                    auto script = std::make_unique<messages::Script>();
+                    
                     // Make a script from the frames
                     for (const auto& frame : task.data->frames()) {
+                        messages::Script::Frame f;
                         for (const auto& target : frame.targets()) {
-
+                            messages::Script::Frame::Target t;
+                            //t.id;
+                            t.position = target.position();
+                            t.gain = target.gain();
+                            
+                            f.targets.push_back(std::move(t));
                         }
+                        
+                        script->frames.push_back(std::move(f));
                     }
                 }
+                
+                // Emit the frame
             });
         }
     }
