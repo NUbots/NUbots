@@ -1,0 +1,11 @@
+ADD_ROLE(
+    NAME scriptoptimizer
+    MODULES
+        ConsoleLogHandler
+        ConfigSystem
+        NetworkingConfiguration
+        Platform::Darwin::HardwareIO
+        Platform::Darwin::MotionManager
+        ScriptEngine
+        Research::ScriptOptimizer
+)
