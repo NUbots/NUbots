@@ -40,7 +40,7 @@ namespace modules {
 
             std::mutex mutex;
 
-            impl() : pub(NUClear::Extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {}
+            impl() : pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {}
 
             /**
              * This method needs to be used over pub.send as all calls to
@@ -56,7 +56,7 @@ namespace modules {
     NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
         // Set our high water mark
         int64_t hwm = 3;
-        m->pub.setsockopt(ZMQ_HWM, &hwm, sizeof(hwm));
+        m->pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
 
         // Bind to port 12000
         m->pub.bind("tcp://*:12000");

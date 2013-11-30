@@ -20,7 +20,7 @@
 #ifndef MODULES_PLATFORM_DARWIN_CONVERT_H
 #define MODULES_PLATFORM_DARWIN_CONVERT_H
 
-#include <NUClear.h>
+#include <nuclear>
 
 namespace modules {
 namespace Platform {

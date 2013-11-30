@@ -22,7 +22,7 @@
 
 #include <list>
 #include <thread>
-#include <NUClear.h>
+#include <nuclear>
 #include "messages/ServoWaypoint.h"
 
 namespace modules {

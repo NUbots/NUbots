@@ -20,7 +20,7 @@
 #ifndef MODULES_PARTYDARWIN_H
 #define MODULES_PARTYDARWIN_H
 
-#include <NUClear.h>
+#include <nuclear>
 
 namespace modules {
 

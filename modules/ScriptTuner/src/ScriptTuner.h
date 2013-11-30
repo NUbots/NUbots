@@ -20,7 +20,7 @@
 #ifndef MODULES_SCRIPTTUNER_H
 #define MODULES_SCRIPTTUNER_H
 
-#include <NUClear.h>
+#include <nuclear>
 #include "messages/Script.h"
 
 namespace modules {

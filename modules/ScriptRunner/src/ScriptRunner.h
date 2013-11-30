@@ -22,7 +22,7 @@
 
 #include <queue>
 
-#include <NUClear.h>
+#include <nuclear>
 
 #include "messages/DarwinServoCommand.h"
 #include "messages/Script.h"

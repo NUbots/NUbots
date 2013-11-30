@@ -30,8 +30,7 @@ namespace messages {
      * @author Trent Houliston
      */
     struct Say : public std::string {
-        Say(std::string message) : message(message) {};
-        const std::string message;
+        Say(std::string message) : std::string(message) {};
     };
 };
 

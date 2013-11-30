@@ -20,7 +20,7 @@
 #ifndef MODULES_MECHWARRIOR_H
 #define MODULES_MECHWARRIOR_H
 
-#include <NUClear.h>
+#include <nuclear>
 
 namespace modules {
 

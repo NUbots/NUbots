@@ -80,8 +80,8 @@ namespace modules {
             emit(std::move(waypoint));
         });
 
-        powerPlant->addServiceTask(NUClear::Internal::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&ScriptTuner::run), this),
-                                                                                std::bind(std::mem_fn(&ScriptTuner::kill), this)));
+        powerPlant->addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&ScriptTuner::run), this),
+                                                                                 std::bind(std::mem_fn(&ScriptTuner::kill), this)));
     }
 
     void ScriptTuner::run() {

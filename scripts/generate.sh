@@ -29,7 +29,7 @@ rm "$role_name" 2> /dev/null;
 
 # Build up our headers.
 # We always need NUClear.h
-echo "#include <NUClear.h>" >> "$role_name";
+echo "#include <nuclear>" >> "$role_name";
 
 # Add our module headers
 for module in ${@:2}; do

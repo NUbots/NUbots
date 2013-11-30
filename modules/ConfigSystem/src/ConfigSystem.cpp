@@ -109,7 +109,7 @@ namespace modules {
         std::function<void ()> run = std::bind(std::mem_fn(&impl::run), &*m);
         std::function<void ()> kill = std::bind(std::mem_fn(&impl::kill), &*m);
 
-        powerPlant->addServiceTask(NUClear::Internal::ThreadWorker::ServiceTask(run, kill));
+        powerPlant->addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(run, kill));
     }
 
     messages::ConfigurationNode ConfigSystem::impl::buildConfigurationNode(const std::string& filePath) {

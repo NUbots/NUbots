@@ -20,7 +20,7 @@
 #ifndef MODULES_SIGNALCATCHER_H
 #define MODULES_SIGNALCATCHER_H
 
-#include <NUClear.h>
+#include <nuclear>
 #include <exception>
 
 #include "messages/SegmentationFault.h"

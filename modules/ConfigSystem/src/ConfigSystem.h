@@ -20,7 +20,7 @@
 #ifndef MODULES_CONFIGSYSTEM_H_
 #define MODULES_CONFIGSYSTEM_H_
 
-#include <NUClear.h>
+#include <nuclear>
 
 #include "utility/idiom/pimpl.h"
 
