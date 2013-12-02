@@ -23,8 +23,8 @@
 #include <nuclear>
 
 namespace modules {
-namespace Platform {
-namespace Darwin {
+namespace platform {
+namespace darwin {
 
     /**
      * TODO document

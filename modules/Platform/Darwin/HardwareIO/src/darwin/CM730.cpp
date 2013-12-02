@@ -19,10 +19,11 @@
 
 #include "CM730.h"
 
-// Pass our arguments to our parent's constructor
-darwin::CM730::CM730(UART& coms, int id) : DarwinDevice(coms, id) {}
+namespace Darwin {
+    CM730::CM730(UART& coms, int id) : DarwinDevice(coms, id) {}
 
-void darwin::CM730::turnOnDynamixel() {
-    // Write true to the DXL_POWER byte
-    write(Address::DXL_POWER, true);
-}
+    void CM730::turnOnDynamixel() {
+        // Write true to the DXL_POWER byte
+        write(Address::DXL_POWER, true);
+        }
+}  // Darwin

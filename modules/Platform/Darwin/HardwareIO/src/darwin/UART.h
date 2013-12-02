@@ -31,7 +31,7 @@
 #include <vector>
 
 
-namespace darwin {
+namespace Darwin {
     namespace Packet {
         enum {
             MAGIC       = 0,

@@ -7,9 +7,9 @@ FUNCTION(ADD_ROLE)
     # Custom command that specifies how to generate ${ROLE_NAME}.cpp
     ADD_CUSTOM_COMMAND(
         OUTPUT "${CMAKE_BINARY_DIR}/roles/${ROLE_NAME}.cpp"
-        COMMAND "${NUBOTS_SCRIPTS_DIR}/generate.sh" "${CMAKE_BINARY_DIR}/roles/${ROLE_NAME}.cpp" ${ROLE_MODULES}
+        COMMAND "${CMAKE_SOURCE_DIR}/cmake/Scripts/generate.sh" "${CMAKE_BINARY_DIR}/roles/${ROLE_NAME}.cpp" ${ROLE_MODULES}
         COMMENT "Generating the ${ROLE_NAME} role"
-        DEPENDS "${NUBOTS_SCRIPTS_DIR}/generate.sh")
+        DEPENDS "${CMAKE_SOURCE_DIR}/cmake/Scripts/generate.sh")
 
     INCLUDE_DIRECTORIES("${CMAKE_BINARY_DIR}/modules/")
 

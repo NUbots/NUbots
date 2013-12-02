@@ -22,7 +22,7 @@
 
 #include "DarwinDevice.h"
 
-namespace darwin {
+namespace Darwin {
 
     class MLNCH : public DarwinDevice {
     public:

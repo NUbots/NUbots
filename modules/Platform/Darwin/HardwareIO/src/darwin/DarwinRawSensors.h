@@ -22,7 +22,7 @@
 
 #include <stdint.h>
 
-namespace darwin {
+namespace Darwin {
 
     /**
      * This namespace contains all of the raw Datatypes that we will use for reading and writing from the hardware
