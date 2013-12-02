@@ -19,8 +19,11 @@ IF(protobufs)
     # This directory contains our generated protocol buffers
     INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/shared/)
 
+    # Setup our compiler settings
+    INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/ProtoCompiler.cmake")
+
     # Generate the protocol buffers
-    PROTOBUF_GENERATE_CPP(proto_src proto_h ${protobufs})
+    PROTOBUF_COMPILE(proto_src proto_h ${protobufs})
 
     # Add the protocol buffers in with our source
     SET(src ${src} ${proto_src} ${proto_h})
