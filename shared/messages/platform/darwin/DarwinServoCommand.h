@@ -22,6 +22,7 @@
 
 #include <vector>
 #include "DarwinSensors.h"
+#include "messages/input/ServoID.h"
 
 namespace messages {
     namespace platform {
@@ -33,7 +34,7 @@ namespace messages {
              * @author Trent Houliston
              */
             struct DarwinServoCommand {
-                DarwinSensors::Servo::ID id;
+                input::ServoID id;
                 float pGain;
                 float iGain;
                 float dGain;

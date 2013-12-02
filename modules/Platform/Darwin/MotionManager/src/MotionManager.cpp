@@ -18,6 +18,7 @@
  */
 
 #include "messages/motion/ServoWaypoint.h"
+#include "messages/platform/darwin/DarwinServoCommand.h"
 
 #include "MotionManager.h"
 #include "utility/math/angle.h"
@@ -82,7 +83,7 @@ namespace darwin {
                     float targetPosition = waypoints[i].front().position;
                     auto end = waypoints[i].front().end;
                     auto time = NUClear::clock::now();
-                    messages::platform::darwin::DarwinSensors::Servo::ID id = static_cast<messages::platform::darwin::DarwinSensors::Servo::ID>(i);
+                    messages::input::ServoID id = static_cast<messages::input::ServoID>(i);
 
                     // If the distance we would travel is greater then 75% of pi, we have to split this waypoint.
                     // Otherwise the robot will take the "shortest" path to the goal. This will result in it potentially
@@ -182,26 +183,26 @@ namespace darwin {
 
     void MotionManager::queueEnd(size_t queue) {
         switch(queue) {
-            case 0: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_SHOULDER_PITCH>>()); break;
-            case 1: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_SHOULDER_PITCH>>()); break;
-            case 2: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_SHOULDER_ROLL>>()); break;
-            case 3: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_SHOULDER_ROLL>>()); break;
-            case 4: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_ELBOW>>()); break;
-            case 5: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_ELBOW>>()); break;
-            case 6: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_HIP_YAW>>()); break;
-            case 7: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_HIP_YAW>>()); break;
-            case 8: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_HIP_ROLL>>()); break;
-            case 9: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_HIP_ROLL>>()); break;
-            case 10: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_HIP_PITCH>>()); break;
-            case 11: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_HIP_PITCH>>()); break;
-            case 12: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_KNEE>>()); break;
-            case 13: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_KNEE>>()); break;
-            case 14: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_ANKLE_PITCH>>()); break;
-            case 15: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_ANKLE_PITCH>>()); break;
-            case 16: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_ANKLE_ROLL>>()); break;
-            case 17: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_ANKLE_ROLL>>()); break;
-            case 18: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::HEAD_PAN>>()); break;
-            case 19: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::HEAD_TILT>>()); break;
+            case 0: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::R_SHOULDER_PITCH>>()); break;
+            case 1: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::L_SHOULDER_PITCH>>()); break;
+            case 2: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::R_SHOULDER_ROLL>>()); break;
+            case 3: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::L_SHOULDER_ROLL>>()); break;
+            case 4: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::R_ELBOW>>()); break;
+            case 5: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::L_ELBOW>>()); break;
+            case 6: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::R_HIP_YAW>>()); break;
+            case 7: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::L_HIP_YAW>>()); break;
+            case 8: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::R_HIP_ROLL>>()); break;
+            case 9: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::L_HIP_ROLL>>()); break;
+            case 10: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::R_HIP_PITCH>>()); break;
+            case 11: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::L_HIP_PITCH>>()); break;
+            case 12: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::R_KNEE>>()); break;
+            case 13: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::L_KNEE>>()); break;
+            case 14: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::R_ANKLE_PITCH>>()); break;
+            case 15: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::L_ANKLE_PITCH>>()); break;
+            case 16: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::R_ANKLE_ROLL>>()); break;
+            case 17: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::L_ANKLE_ROLL>>()); break;
+            case 18: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::HEAD_PAN>>()); break;
+            case 19: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::HEAD_TILT>>()); break;
         }
     }
 

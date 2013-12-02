@@ -21,7 +21,7 @@
 #define MESSAGES_MOTION_SERVOWAYPOINTS_H
 
 #include <nuclear>
-#include "messages/platform/darwin/DarwinServoCommand.h"
+#include "messages/input/ServoID.h"
 
 namespace messages {
     namespace motion {
@@ -31,7 +31,7 @@ namespace messages {
          *
          * @author Trent Houliston
          */
-        template<enum platform::darwin::DarwinSensors::Servo::ID>
+        template<enum input::ServoID>
         struct ServoWaypointsComplete {};
 
         /**
@@ -48,7 +48,7 @@ namespace messages {
          */
         struct ServoWaypoint {
             NUClear::clock::time_point time;
-            platform::darwin::DarwinSensors::Servo::ID id;
+            input::ServoID id;
             float position;
             float gain;
         };
