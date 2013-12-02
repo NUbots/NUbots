@@ -83,7 +83,7 @@ namespace darwin {
                     float targetPosition = waypoints[i].front().position;
                     auto end = waypoints[i].front().end;
                     auto time = NUClear::clock::now();
-                    messages::platform::darwin::DarwinSensors::Servo::ID id = static_cast<messages::platform::darwin::DarwinSensors::Servo::ID>(i);
+                    messages::input::ServoID id = static_cast<messages::input::ServoID>(i);
 
                     // If the distance we would travel is greater then 75% of pi, we have to split this waypoint.
                     // Otherwise the robot will take the "shortest" path to the goal. This will result in it potentially
