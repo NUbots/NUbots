@@ -3,6 +3,6 @@ ADD_ROLE(
     MODULES
         Platform::Darwin::HardwareIO
         Platform::Darwin::MotionManager
-        NUbugger
-        ScriptTuner
-        PartyDarwin)
+        Behaviours::Utility::ScriptTuner
+        Utility::NUbugger
+)

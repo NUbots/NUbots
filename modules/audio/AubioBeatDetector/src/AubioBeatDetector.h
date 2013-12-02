@@ -15,22 +15,25 @@
  * Copyright 2013 Joshua Kearns <joshau-k@hotmail.com>
  */
 
-#ifndef MODULES_AUBIOBEATDETECTOR_H
-#define	MODULES_AUBIOBEATDETECTOR_H
+#ifndef MODULES_AUDIO_AUBIOBEATDETECTOR_H
+#define	MODULES_AUDIO_AUBIOBEATDETECTOR_H
 
 #include <nuclear>
 #include "utility/idiom/pimpl.h"
 
 namespace modules {
+    namespace audio {
 
-    class AubioBeatDetector : public NUClear::Reactor {
-    private:
-        class impl;
-        utility::idiom::pimpl<impl> m;
-    public:
-        explicit AubioBeatDetector(std::unique_ptr<NUClear::Environment> environment);
-    };
-}
+        class AubioBeatDetector : public NUClear::Reactor {
+        private:
+            class impl;
+            utility::idiom::pimpl<impl> m;
+        public:
+            explicit AubioBeatDetector(std::unique_ptr<NUClear::Environment> environment);
+        };
+        
+    }  // audio
+}  // modules
 
-#endif	/* AUBIOBEATDETECTOR_H */
+#endif  // MODULES_AUDIO_AUBIOBEATDETECTOR_H
 
