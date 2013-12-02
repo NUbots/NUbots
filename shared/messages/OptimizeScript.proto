@@ -15,5 +15,6 @@ message OptimizeScript {
 
     required string target = 1;
     required uint32 iteration = 2;
-    repeated Frame frames = 3;
+    required string metadata = 3;
+    repeated Frame frames = 4;
 }

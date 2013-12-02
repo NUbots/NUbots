@@ -25,7 +25,10 @@ namespace modules {
 
     NetworkSpeak::NetworkSpeak(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Trigger<Network<messages::NetSpeak>>, Options<Single>>([this](const Network<messages::NetSpeak>& message) {
+        on<Trigger<Network<messages::NetSpeak>>>([this](const Network<messages::NetSpeak>& message) {
+            
+            log<NUClear::DEBUG>("Saying: \"", message.data->message(), "\"");
+            
             //send the message from the network to the espeak module
             emit(std::make_unique<messages::Say>(message.data->message()));
         });

@@ -1,0 +1,52 @@
+package messages;
+
+message OptimizeScriptResult {
+
+    message Servo {
+        bool torqueEnabled;
+        bool led;
+
+        float pGain;
+        float iGain;
+        float dGain;
+
+        float goalPosition;
+        float movingSpeed;
+        float torqueLimit;
+
+        float presentPosition;
+        float presentSpeed;
+
+        float load;
+        float voltage;
+        uint8_t temperature;
+    }
+
+    message FSR {
+        float fsr1;
+        float fsr2;
+        float fsr3;
+        float fsr4;
+
+        float centreX;
+        float centreY;
+    }
+
+    message Vector {
+        required float x = 1;
+        required float y = 2;
+        required float z = 3;
+    }
+    
+    message Sensors {
+        required Vector accelerometer = 1;
+        required Vector gyro = 2;
+        required FSR lfsr = 3;
+        required FSR rfsr = 4;
+        repeated Servo servos = 5;
+    }
+    
+    required uint32 iteration = 1;
+    required string metadata = 2;
+    repeated Sensors sensors = 3;
+}

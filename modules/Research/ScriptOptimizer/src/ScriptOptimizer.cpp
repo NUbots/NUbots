@@ -34,26 +34,63 @@ namespace modules {
                     
                     log<NUClear::DEBUG>("Script ", task.data->iteration(), " was delivered to be executed");
 
-                    auto script = std::make_unique<messages::Script>();
+                    auto script = std::make_unique<messages::ExecuteScript>();
                     
                     // Make a script from the frames
                     for (const auto& frame : task.data->frames()) {
                         messages::Script::Frame f;
                         for (const auto& target : frame.targets()) {
                             messages::Script::Frame::Target t;
-                            //t.id;
+                            
+                            t.id = messages::DarwinSensors::Servo::idFromString(target.id());
                             t.position = target.position();
                             t.gain = target.gain();
                             
                             f.targets.push_back(std::move(t));
                         }
                         
-                        script->frames.push_back(std::move(f));
+                        script->script.frames.push_back(std::move(f));
                     }
+                    
+                    // Emit our script
+                    emit(std::move(script));
+                    
+                    // Start recording
+                    this->recording = true;
                 }
-                
-                // Emit the frame
             });
+            
+            on<Trigger<Raw<messages::DarwinSensors>>>([this](const std::shared_ptr<const messages::DarwinSensors>& frame) {
+                
+                // While we are recording, store all the frames in a vector
+                if(this->recording) {
+                    sensors->push_back(frame);
+                }
+            });
+            
+            on<Trigger<messages::AllServoWaypointsComplete>>([this](const messages::AllServoWaypointsComplete&) {
+                
+                // If we were recording
+                if(this->recording) {
+                    
+                    // Stop recording
+                    this->recording = false;
+                    
+                    // Make a response message to the optimizer
+                    auto result = std::make_unique<messages::OptimizeScriptResult>();
+                    
+                    // Store all the sensor values for the script
+                    for(const auto& sensor : sensors) {
+                        // Add it to the list
+                    }
+                    
+                    // Store our metadata about what we executed
+                    
+                    // Return our result to the optimizer
+                    emit<Scope::NETWORK>(std::move(result));
+                }
+            });
+            
         }
     }
 }
