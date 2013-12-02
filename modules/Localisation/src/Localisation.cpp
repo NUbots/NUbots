@@ -19,11 +19,26 @@
 
 #include "Localisation.h"
 #include "messages/DarwinSensors.h"
+#include "messages/Configuration.h"
 
 namespace modules {
     Localisation::Localisation(NUClear::PowerPlant* plant) : Reactor(plant) {
+        on<Trigger<messages::Configuration<Localisation>>>([this](const messages::Configuration<Localisation>& settings) {
+            std::cout << __PRETTY_FUNCTION__ << ": Config" << std::endl;
+            
+            std::string testConfig = settings.config["testConfig"];
+            std::cout << testConfig << std::endl;
+        });
 
-    	
+    	on<Trigger<Every<1000, std::chrono::milliseconds>>>([this](const time_t&) {
+            std::cout << __PRETTY_FUNCTION__ << ": before missile" << std::endl;
+            emit(std::make_unique<messages::LMissile>());
+            std::cout << __PRETTY_FUNCTION__ << ": after missile" << std::endl;
+        });
 
+        on<Trigger<messages::LMissile>>([this](const messages::LMissile&) {
+            std::cout << __PRETTY_FUNCTION__ << ": Missile!" << std::endl;
+        });
     }
 }
+

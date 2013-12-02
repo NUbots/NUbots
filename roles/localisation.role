@@ -1,0 +1,6 @@
+ADD_ROLE(
+    NAME localisation
+    MODULES
+        ConfigSystem
+        NUbugger
+        Localisation)

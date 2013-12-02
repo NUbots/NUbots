@@ -17,23 +17,14 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_LOCALISATION_H
-#define MODULES_LOCALISATION_H
+#ifndef MODULES_LOCALISATIONENGINE_H
+#define MODULES_LOCALISATIONENGINE_H
 
 #include <NUClear.h>
-#include "LocalisationEngine.h"
 
 namespace modules {
-    class Localisation : public NUClear::Reactor {
-    private:
-    	LocalisationEngine engine;
-
-    public:
-    	/// @brief Our configuration file for this class
-        static constexpr const char* CONFIGURATION_PATH = "Localisation.json";
-
-        /// @brief Called by the powerplant to build and setup our CameraReader
-        explicit Localisation(NUClear::PowerPlant* plant);
+    class LocalisationEngine {
+    	
     };
 }
 #endif
