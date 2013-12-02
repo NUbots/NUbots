@@ -22,7 +22,7 @@
 
 #include <chrono>
 #include "utility/configuration/ConfigurationNode.h"
-#include "messages/platform/darwin/DarwinSensors.h"
+#include "messages/input/ServoID.h"
 
 namespace messages {
     namespace motion {
@@ -35,7 +35,7 @@ namespace messages {
         struct Script {
             struct Frame {
                 struct Target {
-                    messages::platform::darwin::DarwinSensors::Servo::ID id;
+                    input::ServoID id;
                     float position;
                     float gain;
                 };
@@ -85,7 +85,7 @@ namespace configuration {
 
             utility::configuration::ConfigurationNode node;
 
-            node["id"] = messages::platform::darwin::DarwinSensors::Servo::stringFromId(input.id);
+            node["id"] = messages::input::stringFromId(input.id);
             node["position"] = input.position;
             node["gain"] = input.gain;
 
@@ -96,7 +96,7 @@ namespace configuration {
 
             return
             {
-                messages::platform::darwin::DarwinSensors::Servo::idFromString(node["id"]),
+                messages::input::idFromString(node["id"]),
                         static_cast<float>(node["position"]),
                         static_cast<float>(node["gain"])
             };

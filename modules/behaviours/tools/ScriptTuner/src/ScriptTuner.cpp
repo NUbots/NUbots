@@ -67,7 +67,7 @@ namespace modules {
 
                     messages::motion::Script::Frame::Target target;
 
-                    target.id = static_cast<messages::platform::darwin::DarwinSensors::Servo::ID>(id);
+                    target.id = static_cast<messages::input::ServoID>(id);
                     target.position = sensors.servo[id].presentPosition;
                     target.gain = 100;
 
@@ -274,7 +274,7 @@ namespace modules {
                     // Emit a waypoint so that the motor will turn off gain (go limp)
                     auto waypoint = std::make_unique<messages::motion::ServoWaypoint>();
                     waypoint->time = NUClear::clock::now();
-                    waypoint->id = static_cast<messages::platform::darwin::DarwinSensors::Servo::ID>(selection < 2 ? 18 + selection : selection - 2);
+                    waypoint->id = static_cast<messages::input::ServoID>(selection < 2 ? 18 + selection : selection - 2);
                     waypoint->gain = 0;
                     waypoint->position = 0;
                     emit(std::move(waypoint));
@@ -385,7 +385,7 @@ namespace modules {
                         if(it == std::end(script.frames[frame].targets)) {
                             it = script.frames[frame].targets.emplace(std::end(script.frames[frame].targets));
                             auto id = selection < 2 ? 18 + selection : selection - 2;
-                            it->id = static_cast<messages::platform::darwin::DarwinSensors::Servo::ID>(id);
+                            it->id = static_cast<messages::input::ServoID>(id);
                             it->position = 0;
                             it->gain = 0;
                         }
