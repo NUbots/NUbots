@@ -19,6 +19,6 @@
 
 #include "FSR.h"
 
-namespace darwin {
+namespace Darwin {
     FSR::FSR(UART& coms, int id) : DarwinDevice(coms, id) {}
 }

@@ -20,13 +20,13 @@
 #ifndef MODULES_PLATFORM_DARWIN_HARDWAREIO_H
 #define MODULES_PLATFORM_DARWIN_HARDWAREIO_H
 
-#include <NUClear.h>
+#include <nuclear>
 
 #include "darwin/Darwin.h"
 
 namespace modules {
-namespace Platform {
-namespace Darwin {
+namespace platform {
+namespace darwin {
 
     /**
      * This NUClear Reactor is responsible for reading in the data for the Darwin Platform and emitting it to the rest
@@ -37,11 +37,11 @@ namespace Darwin {
     class HardwareIO : public NUClear::Reactor {
     private:
         /// @brief Our internal darwin class that is used for interacting with the hardware
-        darwin::Darwin darwin;
+        Darwin::Darwin darwin;
 
     public:
         /// @brief called by a Powerplant to construct this reactor
-        explicit HardwareIO(NUClear::PowerPlant* plant);
+        explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 }

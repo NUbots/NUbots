@@ -17,18 +17,18 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "messages/ServoWaypoint.h"
+#include "messages/motion/ServoWaypoint.h"
 
 #include "MotionManager.h"
 #include "utility/math/angle.h"
 
 namespace modules {
-namespace Platform {
-namespace Darwin {
+namespace platform {
+namespace darwin {
 
-    MotionManager::MotionManager(NUClear::PowerPlant* plant) : Reactor(plant) {
+    MotionManager::MotionManager(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Trigger<Every<20, std::chrono::milliseconds>>, With<messages::DarwinSensors>>([this](const time_t& time, const messages::DarwinSensors& sensors) {
+        on<Trigger<Every<20, std::chrono::milliseconds>>, With<messages::platform::darwin::DarwinSensors>>([this](const time_t& time, const messages::platform::darwin::DarwinSensors& sensors) {
 
                 std::lock_guard<std::mutex> waypointLock(waypointMutex);
 
@@ -65,7 +65,7 @@ namespace Darwin {
                 }
             }
 
-            auto commands = std::make_unique<std::vector<messages::DarwinServoCommand>>();
+            auto commands = std::make_unique<std::vector<messages::platform::darwin::DarwinServoCommand>>();
 
             // Check if there are any unexecuted motions that are in our current window and execute them if they are in range
             for(size_t i = 0; i < 20; ++i) {
@@ -82,7 +82,7 @@ namespace Darwin {
                     float targetPosition = waypoints[i].front().position;
                     auto end = waypoints[i].front().end;
                     auto time = NUClear::clock::now();
-                    messages::DarwinSensors::Servo::ID id = static_cast<messages::DarwinSensors::Servo::ID>(i);
+                    messages::platform::darwin::DarwinSensors::Servo::ID id = static_cast<messages::platform::darwin::DarwinSensors::Servo::ID>(i);
 
                     // If the distance we would travel is greater then 75% of pi, we have to split this waypoint.
                     // Otherwise the robot will take the "shortest" path to the goal. This will result in it potentially
@@ -119,7 +119,7 @@ namespace Darwin {
                     }
 
                     // Add this command to our vector of commands
-                    messages::DarwinServoCommand command;
+                    messages::platform::darwin::DarwinServoCommand command;
                     command.id = id;
                     command.goalPosition = targetPosition;
                     command.movingSpeed = movingSpeed;
@@ -142,15 +142,15 @@ namespace Darwin {
         });
 
         // For single waypoints
-        on<Trigger<messages::ServoWaypoint>>([this](const messages::ServoWaypoint& point) {
+        on<Trigger<messages::motion::ServoWaypoint>>([this](const messages::motion::ServoWaypoint& point) {
 
             // Make a vector of the command
-            auto points = std::make_unique<std::vector<messages::ServoWaypoint>>();
+            auto points = std::make_unique<std::vector<messages::motion::ServoWaypoint>>();
             points->push_back(point);
             emit<Scope::DIRECT>(std::move(points));
         });
 
-        on<Trigger<std::vector<messages::ServoWaypoint>>>([this](const std::vector<messages::ServoWaypoint>& points) {
+        on<Trigger<std::vector<messages::motion::ServoWaypoint>>>([this](const std::vector<messages::motion::ServoWaypoint>& points) {
             std::lock_guard<std::mutex> waypointLock(waypointMutex);
 
             for(const auto& point : points) {
@@ -182,31 +182,31 @@ namespace Darwin {
 
     void MotionManager::queueEnd(size_t queue) {
         switch(queue) {
-            case 0: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_SHOULDER_PITCH>>()); break;
-            case 1: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_SHOULDER_PITCH>>()); break;
-            case 2: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_SHOULDER_ROLL>>()); break;
-            case 3: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_SHOULDER_ROLL>>()); break;
-            case 4: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_ELBOW>>()); break;
-            case 5: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_ELBOW>>()); break;
-            case 6: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_HIP_YAW>>()); break;
-            case 7: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_HIP_YAW>>()); break;
-            case 8: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_HIP_ROLL>>()); break;
-            case 9: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_HIP_ROLL>>()); break;
-            case 10: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_HIP_PITCH>>()); break;
-            case 11: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_HIP_PITCH>>()); break;
-            case 12: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_KNEE>>()); break;
-            case 13: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_KNEE>>()); break;
-            case 14: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_ANKLE_PITCH>>()); break;
-            case 15: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_ANKLE_PITCH>>()); break;
-            case 16: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::R_ANKLE_ROLL>>()); break;
-            case 17: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::L_ANKLE_ROLL>>()); break;
-            case 18: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::HEAD_PAN>>()); break;
-            case 19: emit(std::make_unique<messages::ServoWaypointsComplete<messages::DarwinSensors::Servo::ID::HEAD_TILT>>()); break;
+            case 0: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_SHOULDER_PITCH>>()); break;
+            case 1: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_SHOULDER_PITCH>>()); break;
+            case 2: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_SHOULDER_ROLL>>()); break;
+            case 3: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_SHOULDER_ROLL>>()); break;
+            case 4: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_ELBOW>>()); break;
+            case 5: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_ELBOW>>()); break;
+            case 6: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_HIP_YAW>>()); break;
+            case 7: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_HIP_YAW>>()); break;
+            case 8: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_HIP_ROLL>>()); break;
+            case 9: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_HIP_ROLL>>()); break;
+            case 10: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_HIP_PITCH>>()); break;
+            case 11: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_HIP_PITCH>>()); break;
+            case 12: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_KNEE>>()); break;
+            case 13: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_KNEE>>()); break;
+            case 14: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_ANKLE_PITCH>>()); break;
+            case 15: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_ANKLE_PITCH>>()); break;
+            case 16: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::R_ANKLE_ROLL>>()); break;
+            case 17: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::L_ANKLE_ROLL>>()); break;
+            case 18: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::HEAD_PAN>>()); break;
+            case 19: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::platform::darwin::DarwinSensors::Servo::ID::HEAD_TILT>>()); break;
         }
     }
 
     void MotionManager::allQueueEnd() {
-        emit(std::make_unique<messages::AllServoWaypointsComplete>());
+        emit(std::make_unique<messages::motion::AllServoWaypointsComplete>());
     }
 }
 }

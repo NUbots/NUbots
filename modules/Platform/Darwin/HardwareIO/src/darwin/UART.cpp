@@ -22,7 +22,7 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
-namespace darwin {
+namespace Darwin {
     uint8_t calculateChecksum(void* command) {
 
         uint8_t* data = static_cast<uint8_t*>(command);

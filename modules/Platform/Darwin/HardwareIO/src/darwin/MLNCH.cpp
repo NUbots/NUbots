@@ -19,11 +19,13 @@
 
 #include "MLNCH.h"
 
-// Pass our arguments to our parent's constructor
-darwin::MLNCH::MLNCH(UART& coms, int id) : DarwinDevice(coms, id) {}
+namespace Darwin {
 
-void darwin::MLNCH::fire() {
-    std::vector<uint8_t> command({0xFF, 0xFF, 51, 2, 3, 0x00});
-    //coms.calculateChecksum(command.data());
-    coms.executeBroadcast(command);
-}
+    MLNCH::MLNCH(UART& coms, int id) : DarwinDevice(coms, id) {}
+
+    void MLNCH::fire() {
+        std::vector<uint8_t> command({0xFF, 0xFF, 51, 2, 3, 0x00});
+        //coms.calculateChecksum(command.data());
+        coms.executeBroadcast(command);
+    }
+} // Darwin

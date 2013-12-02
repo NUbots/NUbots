@@ -24,7 +24,7 @@
 
 #include "UART.h"
 
-namespace darwin {
+namespace Darwin {
     /**
      * @brief The darwin device is a device on the serial port that will respond to the command types.
      *

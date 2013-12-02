@@ -18,10 +18,10 @@
  */
 #include "DarwinDevice.h"
 
-namespace darwin {
+namespace Darwin {
     DarwinDevice::DarwinDevice(UART& coms, int id) : coms(coms), id(id) {}
 
-    bool darwin::DarwinDevice::ping() {
+    bool DarwinDevice::ping() {
 
         // Ping and get the result
         CommandResult result = coms.execute(PingCommand(id));

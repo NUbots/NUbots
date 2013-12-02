@@ -22,12 +22,12 @@
 
 #include <list>
 #include <thread>
-#include <NUClear.h>
-#include "messages/ServoWaypoint.h"
+#include <nuclear>
+#include "messages/motion/ServoWaypoint.h"
 
 namespace modules {
-namespace Platform {
-namespace Darwin {
+namespace platform {
+namespace darwin {
 
     /**
      * TODO document
@@ -50,7 +50,7 @@ namespace Darwin {
         void queueEnd(size_t queue);
         void allQueueEnd();
     public:
-        explicit MotionManager(NUClear::PowerPlant* plant);
+        explicit MotionManager(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 }

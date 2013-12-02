@@ -19,30 +19,30 @@
 
 #include "HardwareIO.h"
 
-#include "messages/DarwinServoCommand.h"
-#include "messages/DarwinSensors.h"
+#include "messages/platform/darwin/DarwinServoCommand.h"
+#include "messages/platform/darwin/DarwinSensors.h"
 #include "Convert.h"
 
 namespace modules {
-namespace Platform {
-namespace Darwin {
+namespace platform {
+namespace darwin {
 
-    HardwareIO::HardwareIO(NUClear::PowerPlant* plant) : Reactor(plant), darwin("/dev/ttyUSB0") {
+    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/ttyUSB0") {
 
         // This trigger gets the sensor data from the CM730
         on<Trigger<Every<20, std::chrono::milliseconds>>>([this](const time_t& time) {
 
             // Read our data
-            darwin::BulkReadResults data = darwin.bulkRead();
+            Darwin::BulkReadResults data = darwin.bulkRead();
 
-            auto sensors = std::make_unique<messages::DarwinSensors>();
+            auto sensors = std::make_unique<messages::platform::darwin::DarwinSensors>();
 
             /*
              CM730 Data
              */
 
             // Read our Error code
-            sensors->cm730ErrorFlags = data.cm730ErrorCode == -1 ? messages::DarwinSensors::Error::TIMEOUT : data.cm730ErrorCode;
+            sensors->cm730ErrorFlags = data.cm730ErrorCode == -1 ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.cm730ErrorCode;
 
             // LED Panel
             sensors->ledPanel.led2 = Convert::getBit<1>(data.cm730.ledPanel);
@@ -78,7 +78,7 @@ namespace Darwin {
 
             // Right Sensor
             // Error
-            sensors->fsr.right.errorFlags = data.fsrErrorCodes[0] == -1 ? messages::DarwinSensors::Error::TIMEOUT : data.fsrErrorCodes[0];
+            sensors->fsr.right.errorFlags = data.fsrErrorCodes[0] == -1 ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.fsrErrorCodes[0];
 
             // Sensors
             sensors->fsr.right.fsr1 = Convert::fsrForce(data.fsr[0].fsr1);
@@ -92,7 +92,7 @@ namespace Darwin {
 
             // Left Sensor
             // Error
-            sensors->fsr.left.errorFlags = data.fsrErrorCodes[1] == -1 ? messages::DarwinSensors::Error::TIMEOUT : data.fsrErrorCodes[1];
+            sensors->fsr.left.errorFlags = data.fsrErrorCodes[1] == -1 ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.fsrErrorCodes[1];
 
             // Sensors
             sensors->fsr.left.fsr1 = Convert::fsrForce(data.fsr[1].fsr1);
@@ -110,10 +110,10 @@ namespace Darwin {
 
             for(int i = 0; i < 20; ++i) {
                 // Get a reference to the servo we are populating
-                messages::DarwinSensors::Servo& servo = sensors->servo[i];
+                messages::platform::darwin::DarwinSensors::Servo& servo = sensors->servo[i];
 
                 // Error code
-                servo.errorFlags = data.servoErrorCodes[i] == -1 ? messages::DarwinSensors::Error::TIMEOUT : data.servoErrorCodes[i];
+                servo.errorFlags = data.servoErrorCodes[i] == -1 ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.servoErrorCodes[i];
 
                 // Booleans
                 servo.torqueEnabled = data.servos[i].torqueEnabled;
@@ -144,15 +144,15 @@ namespace Darwin {
         });
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<std::vector<messages::DarwinServoCommand>>>([this](const std::vector<messages::DarwinServoCommand>& commands) {
+        on<Trigger<std::vector<messages::platform::darwin::DarwinServoCommand>>>([this](const std::vector<messages::platform::darwin::DarwinServoCommand>& commands) {
 
-            std::vector<darwin::Types::ServoValues> values;
+            std::vector<Darwin::Types::ServoValues> values;
 
             // Loop through each of our commands
             for (const auto& command : commands) {
                 // If all our gains are 0 then do a normal write to disable torque (syncwrite won't write to torqueEnable)
                 if(command.pGain == 0 && command.iGain == 0 && command.dGain == 0) {
-                    darwin[static_cast<int>(command.id) + 1].write(darwin::MX28::Address::TORQUE_ENABLE, false);
+                    darwin[static_cast<int>(command.id) + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
                 }
                 // Otherwise write the command using sync write
                 else {
@@ -172,8 +172,8 @@ namespace Darwin {
             darwin.writeServos(values);
         });
 
-        on<Trigger<messages::DarwinServoCommand>>([this](const messages::DarwinServoCommand command) {
-            auto commandList = std::make_unique<std::vector<messages::DarwinServoCommand>>();
+        on<Trigger<messages::platform::darwin::DarwinServoCommand>>([this](const messages::platform::darwin::DarwinServoCommand command) {
+            auto commandList = std::make_unique<std::vector<messages::platform::darwin::DarwinServoCommand>>();
             commandList->push_back(command);
 
             // Emit it so it's captured by the reaction above
@@ -181,20 +181,20 @@ namespace Darwin {
         });
 
         // If we get a HeadLED command then write it
-        on<Trigger<messages::DarwinSensors::HeadLED>>([this](const messages::DarwinSensors::HeadLED& led) {
-            darwin.cm730.write(darwin::CM730::Address::LED_HEAD_L, Convert::colourLEDInverse(led.r, led.g, led.b));
+        on<Trigger<messages::platform::darwin::DarwinSensors::HeadLED>>([this](const messages::platform::darwin::DarwinSensors::HeadLED& led) {
+            darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, Convert::colourLEDInverse(led.r, led.g, led.b));
         });
 
         // If we get a HeadLED command then write it
-        on<Trigger<messages::DarwinSensors::EyeLED>>([this](const messages::DarwinSensors::EyeLED& led) {
-            darwin.cm730.write(darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(led.r, led.g, led.b));
+        on<Trigger<messages::platform::darwin::DarwinSensors::EyeLED>>([this](const messages::platform::darwin::DarwinSensors::EyeLED& led) {
+            darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(led.r, led.g, led.b));
         });
 
-        on<Trigger<messages::LMissile>>([this](const messages::LMissile&) {
+        on<Trigger<messages::platform::darwin::LMissile>>([this](const messages::platform::darwin::LMissile&) {
             darwin.lMissile.fire();
         });
 
-        on<Trigger<messages::RMissile>>([this](const messages::RMissile&) {
+        on<Trigger<messages::platform::darwin::RMissile>>([this](const messages::platform::darwin::RMissile&) {
             darwin.rMissile.fire();
         });
     }
