@@ -109,31 +109,6 @@ namespace messages {
                 } fsr;
 
                 struct Servo {
-                    enum class ID {
-                        R_SHOULDER_PITCH    = 0,
-                        L_SHOULDER_PITCH    = 1,
-                        R_SHOULDER_ROLL     = 2,
-                        L_SHOULDER_ROLL     = 3,
-                        R_ELBOW             = 4,
-                        L_ELBOW             = 5,
-                        R_HIP_YAW           = 6,
-                        L_HIP_YAW           = 7,
-                        R_HIP_ROLL          = 8,
-                        L_HIP_ROLL          = 9,
-                        R_HIP_PITCH         = 10,
-                        L_HIP_PITCH         = 11,
-                        R_KNEE              = 12,
-                        L_KNEE              = 13,
-                        R_ANKLE_PITCH       = 14,
-                        L_ANKLE_PITCH       = 15,
-                        R_ANKLE_ROLL        = 16,
-                        L_ANKLE_ROLL        = 17,
-                        HEAD_PAN            = 18,
-                        HEAD_TILT           = 19
-                    };
-
-                    static const ID idFromString(const std::string str);
-                    static const std::string stringFromId(const ID);
 
                     uint8_t errorFlags;
 
