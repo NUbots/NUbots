@@ -31,7 +31,7 @@
 
 #include "DarwinRawSensors.h"
 
-namespace darwin {
+namespace Darwin {
 
     /**
      * Contains all of the dynamixel IDs in the system

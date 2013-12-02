@@ -1,8 +1,0 @@
-ADD_ROLE(
-    NAME netspeak
-    MODULES
-        ConsoleLogHandler
-        ConfigSystem
-        NetworkingConfiguration
-        eSpeak
-        NetworkSpeak)

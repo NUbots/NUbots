@@ -22,7 +22,7 @@
 
 #include "DarwinDevice.h"
 
-namespace darwin {
+namespace Darwin {
     /**
      * @brief This represents, and gives access to the darwin's MX28 motors
      *
