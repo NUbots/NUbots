@@ -21,7 +21,7 @@
 #include "Convert.h"
 #include "utility/math/angle.h"
 
-using namespace modules::Platform::Darwin;
+using namespace modules::platform::darwin;
 
 TEST_CASE("Testing the hardware accelerometer conversions to SI units", "[hardware][conversion][accelerometer]") {
 

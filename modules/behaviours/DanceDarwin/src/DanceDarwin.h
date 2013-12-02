@@ -17,14 +17,20 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_DANCEDARWIN_H
-#define MODULES_DANCEDARWIN_H
+#ifndef MODULES_BEHAVIOURS_DANCEDARWIN_H
+#define MODULES_BEHAVIOURS_DANCEDARWIN_H
 
 #include <nuclear>
 #include "messages/Script.h"
 
 namespace modules {
-    namespace Behaviours {
+    namespace behaviours {
+        
+        /**
+         * Uses incoming beats in order to scale dance scripts and play them.
+         * 
+         * @author Trent Houliston
+         */
         class DanceDarwin : public NUClear::Reactor {
         private:
             std::map<std::string, messages::Script> scripts;
@@ -32,7 +38,8 @@ namespace modules {
         public:
             explicit DanceDarwin(std::unique_ptr<NUClear::Environment> environment);
         };
-    }
-}
-#endif
+        
+    }  // behaviours
+}  // modules
+#endif  // MODULES_BEHAVIOURS_DANCEDARWIN_H
 

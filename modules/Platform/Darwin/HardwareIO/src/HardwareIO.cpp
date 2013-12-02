@@ -24,8 +24,8 @@
 #include "Convert.h"
 
 namespace modules {
-namespace Platform {
-namespace Darwin {
+namespace platform {
+namespace darwin {
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/ttyUSB0") {
 
@@ -33,7 +33,7 @@ namespace Darwin {
         on<Trigger<Every<20, std::chrono::milliseconds>>>([this](const time_t& time) {
 
             // Read our data
-            darwin::BulkReadResults data = darwin.bulkRead();
+            Darwin::BulkReadResults data = darwin.bulkRead();
 
             auto sensors = std::make_unique<messages::DarwinSensors>();
 
@@ -146,13 +146,13 @@ namespace Darwin {
         // This trigger writes the servo positions to the hardware
         on<Trigger<std::vector<messages::DarwinServoCommand>>>([this](const std::vector<messages::DarwinServoCommand>& commands) {
 
-            std::vector<darwin::Types::ServoValues> values;
+            std::vector<Darwin::Types::ServoValues> values;
 
             // Loop through each of our commands
             for (const auto& command : commands) {
                 // If all our gains are 0 then do a normal write to disable torque (syncwrite won't write to torqueEnable)
                 if(command.pGain == 0 && command.iGain == 0 && command.dGain == 0) {
-                    darwin[static_cast<int>(command.id) + 1].write(darwin::MX28::Address::TORQUE_ENABLE, false);
+                    darwin[static_cast<int>(command.id) + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
                 }
                 // Otherwise write the command using sync write
                 else {
@@ -182,12 +182,12 @@ namespace Darwin {
 
         // If we get a HeadLED command then write it
         on<Trigger<messages::DarwinSensors::HeadLED>>([this](const messages::DarwinSensors::HeadLED& led) {
-            darwin.cm730.write(darwin::CM730::Address::LED_HEAD_L, Convert::colourLEDInverse(led.r, led.g, led.b));
+            darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, Convert::colourLEDInverse(led.r, led.g, led.b));
         });
 
         // If we get a HeadLED command then write it
         on<Trigger<messages::DarwinSensors::EyeLED>>([this](const messages::DarwinSensors::EyeLED& led) {
-            darwin.cm730.write(darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(led.r, led.g, led.b));
+            darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(led.r, led.g, led.b));
         });
 
         on<Trigger<messages::LMissile>>([this](const messages::LMissile&) {

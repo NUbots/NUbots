@@ -23,8 +23,8 @@
 #include "utility/math/angle.h"
 
 namespace modules {
-namespace Platform {
-namespace Darwin {
+namespace platform {
+namespace darwin {
 
     MotionManager::MotionManager(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 

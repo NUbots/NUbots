@@ -24,7 +24,8 @@
 #include "messages/Beat.h"
 
 namespace modules {
-    namespace Behaviours {
+    namespace behaviours {
+        
         struct DanceScripts {
             // For scripts we want updates on the whole scripts directory
             static constexpr const char* CONFIGURATION_PATH = "scripts/dance/";
@@ -90,5 +91,6 @@ namespace modules {
                 }
             });
         }
-    }
-}
+        
+    }  // behaviours
+}  // modules

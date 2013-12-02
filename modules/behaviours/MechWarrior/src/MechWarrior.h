@@ -17,24 +17,27 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MECHWARRIOR_H
-#define MODULES_MECHWARRIOR_H
+#ifndef MODULES_BEHAVIOURS_MECHWARRIOR_H
+#define MODULES_BEHAVIOURS_MECHWARRIOR_H
 
 #include <nuclear>
 
 namespace modules {
+    namespace behaviours {
 
-    /**
-     * TODO document
-     *
-     * @author Trent Houliston
-     */
-    class MechWarrior : public NUClear::Reactor {
-    private:
-        size_t fired;
-    public:
-        explicit MechWarrior(std::unique_ptr<NUClear::Environment> environment);
-    };
-}
-#endif
+        /**
+         * When the missle launcher is attached, this behaviour controls the firing of the missles.
+         *
+         * @author Trent Houliston
+         */
+        class MechWarrior : public NUClear::Reactor {
+        private:
+            size_t fired;
+        public:
+            explicit MechWarrior(std::unique_ptr<NUClear::Environment> environment);
+        };
+        
+    }  // behaviours
+}  // modules
+#endif  // MODULES_BEHAVIOURS_MECHWARRIOR_H
 

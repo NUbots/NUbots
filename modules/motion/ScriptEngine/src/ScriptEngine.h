@@ -17,20 +17,30 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_SCRIPTENGINE_H
-#define MODULES_SCRIPTENGINE_H
+#ifndef MODULES_MOTION_SCRIPTENGINE_H
+#define MODULES_MOTION_SCRIPTENGINE_H
 
 #include <nuclear>
 #include "messages/Script.h"
 
 namespace modules {
+    namespace motion {
 
-    class ScriptEngine : public NUClear::Reactor {
-    private:
-        std::map<std::string, messages::Script> scripts;
-    public:
-        explicit ScriptEngine(std::unique_ptr<NUClear::Environment> environment);
-    };
-}
-#endif
+        /**
+         * Executes scripts as a series of waypoints.
+         * Can either find a script by name, or take a script as a set of waypoints
+         * 
+         * @author Trent Houliston
+         */
+        class ScriptEngine : public NUClear::Reactor {
+        private:
+            std::map<std::string, messages::Script> scripts;
+        public:
+            explicit ScriptEngine(std::unique_ptr<NUClear::Environment> environment);
+        };
+    
+    }  // motion
+}  // modules
+
+#endif  // MODULES_MOTION_SCRIPTENGINE_H
 

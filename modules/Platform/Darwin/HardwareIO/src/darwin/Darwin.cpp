@@ -22,7 +22,7 @@
 #include <thread>
 #include <algorithm>
 
-namespace darwin {
+namespace Darwin {
     // Initialize all of the sensor handler objects using the passed uart
     Darwin::Darwin(const char* name) : uart(name)
     , cm730(uart, ID::CM730)

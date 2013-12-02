@@ -24,51 +24,55 @@
 #include "messages/DarwinServoCommand.h"
 
 namespace modules {
-    struct Scripts {
-        // For scripts we want updates on the whole scripts directory
-        static constexpr const char* CONFIGURATION_PATH = "scripts/";
-    };
+    namespace motion {
+        
+        struct Scripts {
+            // For scripts we want updates on the whole scripts directory
+            static constexpr const char* CONFIGURATION_PATH = "scripts/";
+        };
 
-    ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Trigger<messages::Configuration<Scripts>>>([this](const messages::Configuration<Scripts>& script) {
-            // Add this script to our list of scripts
-            scripts.insert(std::make_pair(script.name, script.config));
-        });
+            on<Trigger<messages::Configuration<Scripts>>>([this](const messages::Configuration<Scripts>& script) {
+                // Add this script to our list of scripts
+                scripts.insert(std::make_pair(script.name, script.config));
+            });
 
-        on<Trigger<messages::ExecuteScriptByName>>([this](const messages::ExecuteScriptByName& command) {
-            auto script = scripts.find(command.script);
+            on<Trigger<messages::ExecuteScriptByName>>([this](const messages::ExecuteScriptByName& command) {
+                auto script = scripts.find(command.script);
 
-            if(script == std::end(scripts)) {
-                throw std::runtime_error("The script " + command.script + " is not loaded in the system");
-            }
-            else {
-                emit(std::make_unique<messages::ExecuteScript>(script->second, command.start));
-            }
-        });
-
-        on<Trigger<messages::ExecuteScript>>([this](const messages::ExecuteScript& command) {
-
-            auto waypoints = std::make_unique<std::vector<messages::ServoWaypoint>>();
-
-            auto time = command.start;
-            for(const auto& frame : command.script.frames) {
-                // Move along our duration in time
-                time += frame.duration;
-
-                // Loop through all the motors and make a servo waypoint for it
-                for(const auto& target : frame.targets) {
-                    waypoints->push_back({
-                        time,
-                        target.id,
-                        target.position,
-                        target.gain
-                    });
+                if(script == std::end(scripts)) {
+                    throw std::runtime_error("The script " + command.script + " is not loaded in the system");
                 }
-            }
+                else {
+                    emit(std::make_unique<messages::ExecuteScript>(script->second, command.start));
+                }
+            });
 
-            // Emit our waypoints
-            emit(std::move(waypoints));
-        });
-    }
-}
+            on<Trigger<messages::ExecuteScript>>([this](const messages::ExecuteScript& command) {
+
+                auto waypoints = std::make_unique<std::vector<messages::ServoWaypoint>>();
+
+                auto time = command.start;
+                for(const auto& frame : command.script.frames) {
+                    // Move along our duration in time
+                    time += frame.duration;
+
+                    // Loop through all the motors and make a servo waypoint for it
+                    for(const auto& target : frame.targets) {
+                        waypoints->push_back({
+                            time,
+                            target.id,
+                            target.position,
+                            target.gain
+                        });
+                    }
+                }
+
+                // Emit our waypoints
+                emit(std::move(waypoints));
+            });
+        }
+        
+    }  // motion
+}  // modules

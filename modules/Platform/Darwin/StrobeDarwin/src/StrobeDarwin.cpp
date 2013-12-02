@@ -22,43 +22,48 @@
 #include "messages/Beat.h"
 
 namespace modules {
+    namespace platform {
+        namespace darwin {
 
-    StrobeDarwin::StrobeDarwin(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-        // Strobe up
-        on<Trigger<messages::Beat>>([this](const messages::Beat& beat) {
-            auto eyes = std::make_unique<messages::DarwinSensors::EyeLED>();
-            eyes->r = 0xff;
-            eyes->g = 0xff;
-            eyes->b = 0xff;
+            StrobeDarwin::StrobeDarwin(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+                // Strobe up
+                on<Trigger<messages::Beat>>([this](const messages::Beat& beat) {
+                    auto eyes = std::make_unique<messages::DarwinSensors::EyeLED>();
+                    eyes->r = 0xff;
+                    eyes->g = 0xff;
+                    eyes->b = 0xff;
 
-            auto head = std::make_unique<messages::DarwinSensors::HeadLED>();
-            head->r = 0xff;
-            head->g = 0xff;
-            head->b = 0xff;
+                    auto head = std::make_unique<messages::DarwinSensors::HeadLED>();
+                    head->r = 0xff;
+                    head->g = 0xff;
+                    head->b = 0xff;
 
-            emit(std::move(eyes));
-            emit(std::move(head));
-        });
+                    emit(std::move(eyes));
+                    emit(std::move(head));
+                });
 
-        // Strobe down
-        on<Trigger<Every<50, std::chrono::milliseconds>>,
-           With<messages::DarwinSensors>>([this](
-            const time_t&, const messages::DarwinSensors& data) {
+                // Strobe down
+                on<Trigger<Every<50, std::chrono::milliseconds>>,
+                   With<messages::DarwinSensors>>([this](
+                    const time_t&, const messages::DarwinSensors& data) {
 
-            const int down = 25;
+                    const int down = 25;
+
+                    auto eyes = std::make_unique<messages::DarwinSensors::EyeLED>();
+                    eyes->r = data.headLED.r > down ? data.headLED.r - down : 0;
+                    eyes->g = data.headLED.g > down ? data.headLED.g - down : 0;
+                    eyes->b = data.headLED.b > down ? data.headLED.b - down : 0;
+
+                    auto head = std::make_unique<messages::DarwinSensors::HeadLED>();
+                    head->r = data.headLED.r > down ? data.headLED.r - down : 0;
+                    head->g = data.headLED.g > down ? data.headLED.g - down : 0;
+                    head->b = data.headLED.b > down ? data.headLED.b - down : 0;
+
+                    emit(std::move(eyes));
+                    emit(std::move(head));
+                });
+            }
             
-            auto eyes = std::make_unique<messages::DarwinSensors::EyeLED>();
-            eyes->r = data.headLED.r > down ? data.headLED.r - down : 0;
-            eyes->g = data.headLED.g > down ? data.headLED.g - down : 0;
-            eyes->b = data.headLED.b > down ? data.headLED.b - down : 0;
-
-            auto head = std::make_unique<messages::DarwinSensors::HeadLED>();
-            head->r = data.headLED.r > down ? data.headLED.r - down : 0;
-            head->g = data.headLED.g > down ? data.headLED.g - down : 0;
-            head->b = data.headLED.b > down ? data.headLED.b - down : 0;
-
-            emit(std::move(eyes));
-            emit(std::move(head));
-        });
-    }
-}
+        }  // darwin
+    }  // platform
+}  // modules

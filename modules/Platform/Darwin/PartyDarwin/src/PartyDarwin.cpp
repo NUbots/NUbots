@@ -21,23 +21,27 @@
 #include "messages/DarwinSensors.h"
 
 namespace modules {
+    namespace platform {
+        namespace darwin {
 
-    PartyDarwin::PartyDarwin(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+            PartyDarwin::PartyDarwin(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Trigger<Every<125, std::chrono::milliseconds>>>([this](const time_t&) {
+                on<Trigger<Every<125, std::chrono::milliseconds>>>([this](const time_t&) {
 
-            auto eyes = std::make_unique<messages::DarwinSensors::EyeLED>();
-            eyes->r = rand();
-            eyes->g = rand();
-            eyes->b = rand();
+                    auto eyes = std::make_unique<messages::DarwinSensors::EyeLED>();
+                    eyes->r = rand();
+                    eyes->g = rand();
+                    eyes->b = rand();
 
-            auto head = std::make_unique<messages::DarwinSensors::HeadLED>();
-            head->r = rand();
-            head->g = rand();
-            head->b = rand();
+                    auto head = std::make_unique<messages::DarwinSensors::HeadLED>();
+                    head->r = rand();
+                    head->g = rand();
+                    head->b = rand();
 
-            emit(std::move(eyes));
-            emit(std::move(head));
-        });
+                    emit(std::move(eyes));
+                    emit(std::move(head));
+                });
+            }
+        }
     }
 }

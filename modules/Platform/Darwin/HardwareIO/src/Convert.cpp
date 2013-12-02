@@ -21,8 +21,8 @@
 #include "utility/math/angle.h"
 
 namespace modules {
-namespace Platform {
-namespace Darwin {
+namespace platform {
+namespace darwin {
 
     /// Picks which direction a motor should be measured in (forward or reverse)
     const int8_t Convert::SERVO_DIRECTION[] = {

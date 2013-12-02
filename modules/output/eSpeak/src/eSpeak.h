@@ -17,22 +17,26 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_ESPEAK_H
-#define MODULES_ESPEAK_H
+#ifndef MODULES_OUTPUT_ESPEAK_H
+#define MODULES_OUTPUT_ESPEAK_H
 
 #include <nuclear>
 
 namespace modules {
+    namespace output {
 
-    /**
-     * TODO document
-     *
-     * @author Trent Houliston
-     */
-    class eSpeak : public NUClear::Reactor {
-    public:
-        explicit eSpeak(std::unique_ptr<NUClear::Environment> environment);
-    };
-}
-#endif
+        /**
+         * Takes strings given to it and plays them using text to speech
+         *
+         * @author Trent Houliston
+         */
+        class eSpeak : public NUClear::Reactor {
+        public:
+            explicit eSpeak(std::unique_ptr<NUClear::Environment> environment);
+        };
+        
+    }  // output
+}  // modules
+
+#endif  // MODULES_OUTPUT_ESPEAK_H
 

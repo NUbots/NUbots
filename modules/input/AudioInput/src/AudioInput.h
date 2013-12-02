@@ -17,26 +17,29 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_AUDIOINPUT_H
-#define MODULES_AUDIOINPUT_H
+#ifndef MODULES_INPUT_AUDIOINPUT_H
+#define MODULES_INPUT_AUDIOINPUT_H
 
 #include <nuclear>
 #include "utility/idiom/pimpl.h"
 
 namespace modules {
+    namespace input {
 
-    /**
-     * TODO document
-     *
-     * @author Jake Woods
-     */
-    class AudioInput : public NUClear::Reactor {
-        public:
-            explicit AudioInput(std::unique_ptr<NUClear::Environment> environment);
-        private:
-            class impl;
-            utility::idiom::pimpl<impl> m;
-    };
-}
-#endif
+        /**
+         * Uses the microphone in the system to provide a constant stream of audio
+         *
+         * @author Jake Woods
+         */
+        class AudioInput : public NUClear::Reactor {
+            public:
+                explicit AudioInput(std::unique_ptr<NUClear::Environment> environment);
+            private:
+                class impl;
+                utility::idiom::pimpl<impl> m;
+        };
+        
+    }  // input
+}  // modules
 
+#endif  // MODULES_INPUT_AUDIOINPUT_H

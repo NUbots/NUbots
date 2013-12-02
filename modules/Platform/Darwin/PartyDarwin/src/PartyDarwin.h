@@ -17,22 +17,28 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_PARTYDARWIN_H
-#define MODULES_PARTYDARWIN_H
+#ifndef MODULES_PLATFORM_DARWIN_PARTYDARWIN_H
+#define MODULES_PLATFORM_DARWIN_PARTYDARWIN_H
 
 #include <nuclear>
 
 namespace modules {
+    namespace platform {
+        namespace darwin {
 
-    /**
-     * TODO document
-     *
-     * @author Trent Houliston
-     */
-    class PartyDarwin : public NUClear::Reactor {
-    public:
-        explicit PartyDarwin(std::unique_ptr<NUClear::Environment> environment);
-    };
-}
-#endif
+            /**
+             * Makes the Darwin's eyes flash random colours, useful for debugging.
+             *
+             * @author Trent Houliston
+             */
+            class PartyDarwin : public NUClear::Reactor {
+            public:
+                explicit PartyDarwin(std::unique_ptr<NUClear::Environment> environment);
+            };
+
+        }  // darwin
+    }  // platform
+}  // modules
+
+#endif  // MODULES_PLATFORM_DARWIN_PARTYDARWIN_H
 

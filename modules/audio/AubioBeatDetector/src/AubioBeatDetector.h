@@ -1,18 +1,20 @@
 /*
- * This file is part of AubioBeatDetector.
+ * This file is part of Aubio BeatDetector.
  *
- * AudioInput is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
- * version.
+ * Aubio BeatDetector is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * AubioBeatDetector is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
- * details.
+ * Aubio BeatDetector is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with AubioBeatDetector.  If not, see
- * <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with Aubio BeatDetector.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 Joshua Kearns <joshau-k@hotmail.com>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #ifndef MODULES_AUDIO_AUBIOBEATDETECTOR_H
@@ -24,6 +26,11 @@
 namespace modules {
     namespace audio {
 
+        /**
+         * Uses the Aubio library in order to find beats within a stream of audio.
+         * 
+         * @author Joshua Kearns
+         */
         class AubioBeatDetector : public NUClear::Reactor {
         private:
             class impl;
