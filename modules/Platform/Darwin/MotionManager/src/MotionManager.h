@@ -23,7 +23,7 @@
 #include <list>
 #include <thread>
 #include <nuclear>
-#include "messages/ServoWaypoint.h"
+#include "messages/motion/ServoWaypoint.h"
 
 namespace modules {
 namespace platform {

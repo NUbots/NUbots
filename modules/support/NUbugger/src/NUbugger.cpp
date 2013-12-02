@@ -24,8 +24,8 @@
 #include <jpeglib.h>
 
 #include "messages/NUAPI.pb.h"
-#include "messages/DarwinSensors.h"
-#include "messages/Image.h"
+#include "messages/platform/darwin/DarwinSensors.h"
+#include "messages/input/Image.h"
 
 #include "utility/image/ColorModelConversions.h"
 
@@ -64,7 +64,7 @@ namespace modules {
             m->pub.bind("tcp://*:12000");
 
             // This trigger gets the output from the sensors (unfiltered)
-            on<Trigger<messages::DarwinSensors>>([this](const messages::DarwinSensors& sensors) {
+            on<Trigger<messages::platform::darwin::DarwinSensors>>([this](const messages::platform::darwin::DarwinSensors& sensors) {
                 API::Message message;
 
                 message.set_type(API::Message::SENSOR_DATA);
@@ -106,7 +106,7 @@ namespace modules {
                 m->send(packet);
             });
 
-            on<Trigger<messages::Image>, Options<Single, Priority<NUClear::LOW>>>([this](const messages::Image& image) {
+            on<Trigger<messages::input::Image>, Options<Single, Priority<NUClear::LOW>>>([this](const messages::input::Image& image) {
 
                 API::Message message;
                 message.set_type(API::Message::VISION);

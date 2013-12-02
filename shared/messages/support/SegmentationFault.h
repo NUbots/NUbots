@@ -17,18 +17,22 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_SEGMENTATIONFAULT_H
-#define MESSAGES_SEGMENTATIONFAULT_H
+#ifndef MESSAGES_SUPPORT_SEGMENTATIONFAULT_H
+#define MESSAGES_SUPPORT_SEGMENTATIONFAULT_H
 
 #include <exception>
 
 namespace messages {
+    namespace support {
 
-    /**
-     * TODO document
-     *
-     * @author Trent Houliston
-     */
-    class SegmentationFault : public std::exception {};
-}
-#endif
+        /**
+         * Is thrown when a segmentation fault happens and SignalCatcher is installed
+         *
+         * @author Trent Houliston
+         */
+        class SegmentationFault : public std::exception {};
+        
+    }  // support
+}  // messages
+
+#endif  // MESSAGES_SUPPORT_SEGMENTATIONFAULT_H

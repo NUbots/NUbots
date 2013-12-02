@@ -17,21 +17,24 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_SAY_H
-#define MESSAGES_SAY_H
+#ifndef MESSAGES_OUTPUT_SAY_H
+#define MESSAGES_OUTPUT_SAY_H
 
 #include <string>
 
 namespace messages {
+    namespace output {
 
-    /**
-     * TODO document
-     *
-     * @author Trent Houliston
-     */
-    struct Say : public std::string {
-        Say(std::string message) : std::string(message) {};
-    };
-};
+        /**
+         * TODO document
+         *
+         * @author Trent Houliston
+         */
+        struct Say : public std::string {
+            Say(std::string message) : std::string(message) {};
+        };
+        
+    }  // output
+}  // messages
 
-#endif
+#endif  // MESSAGES_OUTPUT_SAY_H

@@ -18,7 +18,7 @@
  */
 
 #include "MechWarrior.h"
-#include "messages/DarwinSensors.h"
+#include "messages/platform/darwin/DarwinSensors.h"
 
 namespace modules {
     namespace behaviours {
@@ -27,7 +27,7 @@ namespace modules {
 
             on<Trigger<Every<250, std::chrono::milliseconds>>>([this](const time_t&) {
                 if(++fired < 7) {
-                    emit(std::make_unique<messages::LMissile>());
+                    emit(std::make_unique<messages::platform::darwin::LMissile>());
                 }
                 else {
                     powerPlant->shutdown();

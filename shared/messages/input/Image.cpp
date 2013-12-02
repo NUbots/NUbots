@@ -21,30 +21,33 @@
 #include <cstring>
 
 namespace messages {
+    namespace input {
 
-    Image::Image(size_t width, size_t height, std::unique_ptr<Pixel[]>&& data) :
-    imgWidth(width),
-    imgHeight(height),
-    data(std::move(data)) {
-    }
+        Image::Image(size_t width, size_t height, std::unique_ptr<Pixel[]>&& data) :
+        imgWidth(width),
+        imgHeight(height),
+        data(std::move(data)) {
+        }
 
-    Image::Pixel& Image::operator ()(size_t x, size_t y) {
-        return data.get()[y * imgWidth + x];
-    }
+        Image::Pixel& Image::operator ()(size_t x, size_t y) {
+            return data.get()[y * imgWidth + x];
+        }
 
-    const Image::Pixel& Image::operator ()(size_t x, size_t y) const {
-        return data.get()[y * imgWidth + x];
-    }
+        const Image::Pixel& Image::operator ()(size_t x, size_t y) const {
+            return data.get()[y * imgWidth + x];
+        }
 
-    const size_t Image::width() const {
-        return imgWidth / 2;
-    }
+        const size_t Image::width() const {
+            return imgWidth / 2;
+        }
 
-    const size_t Image::height() const {
-        return imgHeight / 2;
-    }
+        const size_t Image::height() const {
+            return imgHeight / 2;
+        }
 
-    const size_t Image::size() const {
-        return imgWidth * imgHeight / 4;
-    }
-}
+        const size_t Image::size() const {
+            return imgWidth * imgHeight / 4;
+        }
+    
+    }  // input
+}  // messages

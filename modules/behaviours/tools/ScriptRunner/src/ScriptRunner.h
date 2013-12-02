@@ -23,8 +23,8 @@
 #include <nuclear>
 #include <queue>
 
-#include "messages/DarwinServoCommand.h"
-#include "messages/Script.h"
+#include "messages/platform/darwin/DarwinServoCommand.h"
+#include "messages/motion/Script.h"
 
 namespace modules {
     namespace behaviours {

@@ -17,27 +17,32 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_DARWINSERVOS_H
-#define MESSAGES_DARWINSERVOS_H
+#ifndef MESSAGES_PLATFORM_DARWIN_DARWINSERVOS_H
+#define MESSAGES_PLATFORM_DARWIN_DARWINSERVOS_H
 
 #include <vector>
 #include "DarwinSensors.h"
 
 namespace messages {
+    namespace platform {
+        namespace darwin {
 
-    /**
-     * TODO document
-     *
-     * @author Trent Houliston
-     */
-    struct DarwinServoCommand {
-        DarwinSensors::Servo::ID id;
-        float pGain;
-        float iGain;
-        float dGain;
-        float goalPosition;
-        float movingSpeed;
-    };
-};
+            /**
+             * TODO document
+             *
+             * @author Trent Houliston
+             */
+            struct DarwinServoCommand {
+                DarwinSensors::Servo::ID id;
+                float pGain;
+                float iGain;
+                float dGain;
+                float goalPosition;
+                float movingSpeed;
+            };
+    
+        }  // darwin
+    }  // platform
+}  // messages
 
 #endif

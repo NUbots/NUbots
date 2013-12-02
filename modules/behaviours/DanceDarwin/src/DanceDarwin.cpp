@@ -19,9 +19,9 @@
 
 #include "DanceDarwin.h"
 
-#include "messages/ServoWaypoint.h"
-#include "messages/Configuration.h"
-#include "messages/Beat.h"
+#include "messages/motion/ServoWaypoint.h"
+#include "messages/support/Configuration.h"
+#include "messages/audio/Beat.h"
 
 namespace modules {
     namespace behaviours {
@@ -33,13 +33,13 @@ namespace modules {
 
         DanceDarwin::DanceDarwin(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Trigger<messages::Configuration<DanceScripts>>>([this](const messages::Configuration<DanceScripts>& script) {
+            on<Trigger<messages::support::Configuration<DanceScripts>>>([this](const messages::support::Configuration<DanceScripts>& script) {
                 // Add this script to our list of scripts
                 scripts.insert(std::make_pair(script.name, script.config));
             });
 
 
-            on<Trigger<messages::AllServoWaypointsComplete>, With<messages::Beat>>([this](const messages::AllServoWaypointsComplete&, const messages::Beat& beat) {
+            on<Trigger<messages::motion::AllServoWaypointsComplete>, With<messages::audio::Beat>>([this](const messages::motion::AllServoWaypointsComplete&, const messages::audio::Beat& beat) {
                 std::cout << "ServoWaypointsComplete" << std::endl;
                 // Here we pick a random element. Note that the random selection is bias here however until the number
                 // of scripts in the system is statistically significant compared to RAND_MAX, this should give decent results
@@ -73,20 +73,20 @@ namespace modules {
                 std::cout << "Scaling script by: " << scale << std::endl;
 
                 // Scale our script
-                messages::Script script;
+                messages::motion::Script script;
                 for(const auto& frame : item->second.frames) {
                     script.frames.push_back(frame);
                     script.frames.back().duration *= scale;
                 }
 
                 // Emit our scaled script to start at our start time (normally in the past)
-                emit(std::make_unique<messages::ExecuteScript>(script, start));
+                emit(std::make_unique<messages::motion::ExecuteScript>(script, start));
             });
 
             // Awful hack do not use.
-            on<Trigger<messages::Beat>>([this](const messages::Beat& beat) {
+            on<Trigger<messages::audio::Beat>>([this](const messages::audio::Beat& beat) {
                 if(!startedDancing) {
-                    emit(std::make_unique<messages::ExecuteScriptByName>("Stand.json"));
+                    emit(std::make_unique<messages::motion::ExecuteScriptByName>("Stand.json"));
                     startedDancing = true;
                 }
             });

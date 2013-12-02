@@ -34,7 +34,7 @@ extern "C" {
 #include "utility/file/fileutil.h"
 #include "utility/idiom/pimpl_impl.h"
 
-#include "messages/Configuration.h"
+#include "messages/support/Configuration.h"
 
 namespace modules {
     namespace support {
@@ -42,7 +42,7 @@ namespace modules {
 
             class ConfigSystem::impl {
             public:
-                using HandlerFunction = std::function<void (NUClear::Reactor*, const std::string&, const messages::ConfigurationNode&)>;
+                using HandlerFunction = std::function<void (NUClear::Reactor*, const std::string&, const messages::support::ConfigurationNode&)>;
 
                 std::set<std::type_index> loaded;
                 std::map<std::string, std::vector<HandlerFunction>> handler;
@@ -58,7 +58,7 @@ namespace modules {
                 void kill();
                 void loadDir(const std::string& path, HandlerFunction emit);
                 void watchDir(const std::string& path);
-                messages::ConfigurationNode buildConfigurationNode(const std::string& filePath);
+                messages::support::ConfigurationNode buildConfigurationNode(const std::string& filePath);
 
                 // Lots of space for events (definitely more then needed)
                 static constexpr size_t MAX_EVENT_LEN = sizeof (inotify_event) * 1024 + 16;
@@ -73,7 +73,7 @@ namespace modules {
                 m->reactor = this;
                 m->watchDir(impl::BASE_CONFIGURATION_PATH);
 
-                on<Trigger<messages::ConfigurationConfiguration>>([this](const messages::ConfigurationConfiguration& command) {
+                on<Trigger<messages::support::ConfigurationConfiguration>>([this](const messages::support::ConfigurationConfiguration& command) {
 
                     // Check if we have already loaded this type's handler
                     if (m->loaded.find(command.requester) == std::end(m->loaded)) {
@@ -101,7 +101,7 @@ namespace modules {
                         else {
                             auto lastSlashIndex = command.configPath.rfind('/');
                             auto fileName = command.configPath.substr(lastSlashIndex == std::string::npos ? 0 : lastSlashIndex);
-                            command.initialEmitter(this, fileName, messages::ConfigurationNode(m->buildConfigurationNode(fullPath)));
+                            command.initialEmitter(this, fileName, messages::support::ConfigurationNode(m->buildConfigurationNode(fullPath)));
                         }
 
                         handlers.push_back(command.emitter);
@@ -114,7 +114,7 @@ namespace modules {
                 powerPlant->addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(run, kill));
             }
 
-            messages::ConfigurationNode ConfigSystem::impl::buildConfigurationNode(const std::string& filePath) {
+            messages::support::ConfigurationNode ConfigSystem::impl::buildConfigurationNode(const std::string& filePath) {
                 timestamp[filePath] = NUClear::clock::now();
                 return utility::configuration::json::parse(utility::file::loadFromFile(filePath));
             }
@@ -125,7 +125,7 @@ namespace modules {
 
                 for (const auto& element : elements) {
                     if (utility::strutil::endsWith(element, ".json")) {
-                        emit(reactor, element, messages::ConfigurationNode(buildConfigurationNode(path + element)));
+                        emit(reactor, element, messages::support::ConfigurationNode(buildConfigurationNode(path + element)));
                     }
                 }
             }
@@ -190,7 +190,7 @@ namespace modules {
                                             std::cout << "Loading " << fullPath << " with handler for " << handlers->first << std::endl;
                                             try {
                                                 for (auto& emitter : handlers->second) {
-                                                    emitter(reactor, name, messages::ConfigurationNode(buildConfigurationNode(fullPath)));
+                                                    emitter(reactor, name, messages::support::ConfigurationNode(buildConfigurationNode(fullPath)));
                                                 }
                                             }
                                             catch(const std::exception& e) {

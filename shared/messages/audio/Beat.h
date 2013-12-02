@@ -16,17 +16,21 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
-#ifndef MESSAGES_BEAT_H
-#define	MESSAGES_BEAT_H
+#ifndef MESSAGES_AUDIO_BEAT_H
+#define	MESSAGES_AUDIO_BEAT_H
 
 #include <nuclear>
 
 namespace messages {
-    struct Beat {
-        NUClear::clock::time_point time;
-        NUClear::clock::duration period;
-    };
-}
+    namespace audio {
+
+        struct Beat {
+            NUClear::clock::time_point time;
+            NUClear::clock::duration period;
+        };
+        
+    }  // audio
+}  // messages
 
 #endif  // MESSAGES_BEAT_H
 

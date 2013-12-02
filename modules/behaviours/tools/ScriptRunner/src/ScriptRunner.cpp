@@ -19,8 +19,8 @@
 
 #include "ScriptRunner.h"
 
-#include "messages/Script.h"
-#include "messages/ServoWaypoint.h"
+#include "messages/motion/Script.h"
+#include "messages/motion/ServoWaypoint.h"
 
 namespace modules {
     namespace behaviours {
@@ -33,7 +33,7 @@ namespace modules {
                     
                     // Get it and emit it
                     auto script = scripts.front();
-                    emit(std::make_unique<messages::ExecuteScriptByName>(script));
+                    emit(std::make_unique<messages::motion::ExecuteScriptByName>(script));
                     scripts.pop();
                 }
                 // Otherwise we are done, shutdown
@@ -57,7 +57,7 @@ namespace modules {
                 });
 
                 // When we finish with a script, execute the next one
-                on<Trigger<messages::AllServoWaypointsComplete>>([this](const messages::AllServoWaypointsComplete& complete) {
+                on<Trigger<messages::motion::AllServoWaypointsComplete>>([this](const messages::motion::AllServoWaypointsComplete& complete) {
                     executeNextScript();
                 });
             }

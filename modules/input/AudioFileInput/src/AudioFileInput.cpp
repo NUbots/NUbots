@@ -20,8 +20,8 @@
 #include "AudioFileInput.h"
 #include "utility/idiom/pimpl_impl.h"
 
-#include "messages/SoundChunk.h"
-#include "messages/Configuration.h"
+#include "messages/input/SoundChunk.h"
+#include "messages/support/Configuration.h"
 #include <chrono>
 #include <string>
 #include <sndfile.hh>
@@ -42,12 +42,12 @@ namespace modules {
 
         AudioFileInput::AudioFileInput(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
             // Load our file name configuration.
-            on<Trigger<messages::Configuration<AudioFileConfiguration>>>([this](const messages::Configuration<AudioFileConfiguration>& configfile) {
+            on<Trigger<messages::support::Configuration<AudioFileConfiguration>>>([this](const messages::support::Configuration<AudioFileConfiguration>& configfile) {
                     std::string filePath = configfile.config["file"];
                     log<NUClear::DEBUG>("Loading sound file: ", filePath);
                     m->file = SndfileHandle(filePath.c_str());
 
-                    auto settings = std::make_unique<messages::SoundChunkSettings>();
+                    auto settings = std::make_unique<messages::input::SoundChunkSettings>();
 
                     settings->sampleRate = m->file.samplerate();
                     settings->channels = m->file.channels();
@@ -60,7 +60,7 @@ namespace modules {
             on<Trigger<Every<(NUClear::clock::period::den / CHUNKS_PER_SECOND), NUClear::clock::duration>>>([this](const time_t&) {
                 auto& file = m->file;
 
-                auto chunk = std::make_unique<messages::SoundChunk>();
+                auto chunk = std::make_unique<messages::input::SoundChunk>();
 
                 // Find out how much of our file to read to get our sample
                 size_t chunkSize = (file.samplerate() / CHUNKS_PER_SECOND) * file.channels();

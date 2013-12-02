@@ -21,7 +21,7 @@
 #define MODULES_BEHAVIOURS_DANCEDARWIN_H
 
 #include <nuclear>
-#include "messages/Script.h"
+#include "messages/motion/Script.h"
 
 namespace modules {
     namespace behaviours {
@@ -33,7 +33,7 @@ namespace modules {
          */
         class DanceDarwin : public NUClear::Reactor {
         private:
-            std::map<std::string, messages::Script> scripts;
+            std::map<std::string, messages::motion::Script> scripts;
             bool startedDancing;
         public:
             explicit DanceDarwin(std::unique_ptr<NUClear::Environment> environment);

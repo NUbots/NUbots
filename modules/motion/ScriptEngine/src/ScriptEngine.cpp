@@ -19,9 +19,9 @@
 
 #include "ScriptEngine.h"
 
-#include "messages/Configuration.h"
-#include "messages/ServoWaypoint.h"
-#include "messages/DarwinServoCommand.h"
+#include "messages/support/Configuration.h"
+#include "messages/motion/ServoWaypoint.h"
+#include "messages/platform/darwin/DarwinServoCommand.h"
 
 namespace modules {
     namespace motion {
@@ -33,25 +33,25 @@ namespace modules {
 
         ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Trigger<messages::Configuration<Scripts>>>([this](const messages::Configuration<Scripts>& script) {
+            on<Trigger<messages::support::Configuration<Scripts>>>([this](const messages::support::Configuration<Scripts>& script) {
                 // Add this script to our list of scripts
                 scripts.insert(std::make_pair(script.name, script.config));
             });
 
-            on<Trigger<messages::ExecuteScriptByName>>([this](const messages::ExecuteScriptByName& command) {
+            on<Trigger<messages::motion::ExecuteScriptByName>>([this](const messages::motion::ExecuteScriptByName& command) {
                 auto script = scripts.find(command.script);
 
                 if(script == std::end(scripts)) {
                     throw std::runtime_error("The script " + command.script + " is not loaded in the system");
                 }
                 else {
-                    emit(std::make_unique<messages::ExecuteScript>(script->second, command.start));
+                    emit(std::make_unique<messages::motion::ExecuteScript>(script->second, command.start));
                 }
             });
 
-            on<Trigger<messages::ExecuteScript>>([this](const messages::ExecuteScript& command) {
+            on<Trigger<messages::motion::ExecuteScript>>([this](const messages::motion::ExecuteScript& command) {
 
-                auto waypoints = std::make_unique<std::vector<messages::ServoWaypoint>>();
+                auto waypoints = std::make_unique<std::vector<messages::motion::ServoWaypoint>>();
 
                 auto time = command.start;
                 for(const auto& frame : command.script.frames) {

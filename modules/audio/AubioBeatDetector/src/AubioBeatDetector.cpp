@@ -26,8 +26,8 @@ extern "C" {
 #include <ctime>
 #include <vector>
 
-#include "messages/SoundChunk.h"
-#include "messages/Beat.h"
+#include "messages/input/SoundChunk.h"
+#include "messages/audio/Beat.h"
 
 namespace modules {
     namespace audio {
@@ -59,7 +59,7 @@ namespace modules {
 
         AubioBeatDetector::AubioBeatDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Trigger<messages::SoundChunkSettings>>([this](const messages::SoundChunkSettings& settings) {
+            on<Trigger<messages::input::SoundChunkSettings>>([this](const messages::input::SoundChunkSettings& settings) {
 
                 // Store the settings of the sound chunks
                 m->sampleRate = settings.sampleRate;
@@ -74,7 +74,7 @@ namespace modules {
 
             });
 
-            on<Trigger<messages::SoundChunk>>([this](const messages::SoundChunk& chunk) {
+            on<Trigger<messages::input::SoundChunk>>([this](const messages::input::SoundChunk& chunk) {
 
                 for (size_t i = 0; i < m->chunkSize; ++i) {
 
@@ -107,7 +107,7 @@ namespace modules {
            on<Trigger<Last<2, BeatTime>>>([this](const std::vector<std::shared_ptr<const BeatTime>>& lastTwoBeats) {
 
                if(lastTwoBeats.size() == 2) {
-                    auto beat = std::make_unique<messages::Beat>();
+                    auto beat = std::make_unique<messages::audio::Beat>();
                     beat->time = lastTwoBeats[0]->time; //apparently the latest one is 0
                     beat->period = lastTwoBeats[0]->time - lastTwoBeats[1]->time;
 
