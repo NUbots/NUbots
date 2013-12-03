@@ -19,11 +19,35 @@ IF(protobufs)
     # This directory contains our generated protocol buffers
     INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/shared/)
 
-    # Setup our compiler settings
-    INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/ProtoCompiler.cmake")
+    # Loop through our protocol buffers
+    FOREACH(proto ${protobufs})
 
-    # Generate the protocol buffers
-    PROTOBUF_COMPILE(proto_src proto_h ${protobufs})
+        # Get the absolute file, and the file without the extension
+        GET_FILENAME_COMPONENT(abs_file ${proto} ABSOLUTE)
+        GET_FILENAME_COMPONENT(file_we ${proto} NAME_WE)
+
+        # Calculate the Output Directory
+        FILE(RELATIVE_PATH outputpath ${CMAKE_CURRENT_SOURCE_DIR} ${proto})
+        GET_FILENAME_COMPONENT(outputpath ${outputpath} PATH)
+        SET(outputpath "${CMAKE_CURRENT_BINARY_DIR}/${outputpath}")
+
+        # Add the two files we will generate to our output
+        LIST(APPEND proto_src "${outputpath}/${file_we}.pb.cc")
+        LIST(APPEND proto_h   "${outputpath}/${file_we}.pb.h")
+
+        # Make the protocol buffers
+        ADD_CUSTOM_COMMAND(
+            OUTPUT "${outputpath}/${file_we}.pb.cc"
+                   "${outputpath}/${file_we}.pb.h"
+            COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
+            ARGS --cpp_out ${CMAKE_BINARY_DIR}/shared -I ${CMAKE_SOURCE_DIR}/shared ${abs_file}
+            DEPENDS ${abs_file}
+            COMMENT "Running C++ protocol buffer compiler on ${proto}"
+            VERBATIM)
+    ENDFOREACH()
+
+    # The protobuf files are generated
+    SET_SOURCE_FILES_PROPERTIES(${proto_src} ${proto_h} PROPERTIES GENERATED TRUE)
 
     # Add the protocol buffers in with our source
     SET(src ${src} ${proto_src} ${proto_h})

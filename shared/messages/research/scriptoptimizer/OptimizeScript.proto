@@ -1,0 +1,20 @@
+package messages.research.scriptoptimizer;
+
+message OptimizeScript {
+
+    message Target {
+        required string id = 1;
+        required float position = 2;
+        required float gain = 3;
+    }
+
+    message Frame {
+        required uint32 duration = 1;
+        repeated Target targets = 2;
+    }
+
+    required string target = 1;
+    required uint32 iteration = 2;
+    required string metadata = 3;
+    repeated Frame frames = 4;
+}
