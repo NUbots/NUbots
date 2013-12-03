@@ -7,5 +7,5 @@ ADD_ROLE(
         platform::darwin::HardwareIO
         platform::darwin::MotionManager
         motion::ScriptEngine
-        Research::ScriptOptimizer
+        research::ScriptOptimizer
 )
