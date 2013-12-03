@@ -32,11 +32,13 @@
 
 namespace modules {
     namespace input {
+        
+        using messages::input::Image;
 
         V4L2Camera::V4L2Camera() : fd(-1), width(0), height(0), deviceID(""), streaming(false) {
         }
 
-        std::unique_ptr<messages::Image> V4L2Camera::getImage() {
+        std::unique_ptr<Image> V4L2Camera::getImage() {
             if (!streaming) {
                 return nullptr;
             }
@@ -56,13 +58,13 @@ namespace modules {
             }
 
             // Memcpy our data directly from the buffer
-            std::unique_ptr<messages::Image::Pixel[]> data =
-                    std::unique_ptr<messages::Image::Pixel[]>(new messages::Image::Pixel[current.bytesused]);
+            std::unique_ptr<Image::Pixel[]> data =
+                    std::unique_ptr<Image::Pixel[]>(new Image::Pixel[current.bytesused]);
             memcpy(data.get(), buff[current.index].payload, current.bytesused);
 
             // Move this data into the image
-            std::unique_ptr<messages::Image> image = 
-                    std::unique_ptr<messages::Image>(new messages::Image(width, height, std::move(data)));
+            std::unique_ptr<Image> image = 
+                    std::unique_ptr<Image>(new Image(width, height, std::move(data)));
 
             // Enqueue our next buffer so it can be written to
             if (ioctl(fd, VIDIOC_QBUF, &current) == -1) {

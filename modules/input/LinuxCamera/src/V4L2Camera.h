@@ -23,7 +23,7 @@
 #include <map>
 #include <string>
 
-#include "messages/Image.h"
+#include "messages/input/Image.h"
 #include "V4L2CameraSetting.h"
 
 namespace modules {
@@ -96,7 +96,7 @@ namespace modules {
              *
              * @return a pointer to the latest image from the camera
              */
-            std::unique_ptr<messages::Image> getImage();
+            std::unique_ptr<messages::input::Image> getImage();
 
             /**
              * @brief Sets up the camera at a given resolution
