@@ -1,6 +1,6 @@
 package messages.research.scriptoptimizer;
 
-import "input/Sensors.proto";
+import "messages/input/Sensors.proto";
 
 message OptimizeScriptResult {
 
