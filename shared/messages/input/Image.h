@@ -33,11 +33,14 @@ namespace messages {
          */
         class Image {
         public:
-            struct Pixel {
-                public:
+            union Pixel {
+                uint32_t value;
+                struct {
+                    uint8_t padding;
                     uint8_t y;
                     uint8_t cb;
                     uint8_t cr;
+                };
             };
 
             Image(size_t width, size_t height, std::unique_ptr<Pixel[]>&& data);
