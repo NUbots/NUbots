@@ -1,4 +1,4 @@
-package messages;
+package messages.research.scriptoptimizer;
 
 message OptimizeScript {
 

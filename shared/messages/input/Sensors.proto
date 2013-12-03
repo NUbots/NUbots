@@ -1,4 +1,5 @@
-        
+package messages.input;
+
 message Sensors {
 
     enum ServoID {

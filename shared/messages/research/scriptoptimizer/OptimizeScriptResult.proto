@@ -1,0 +1,10 @@
+package messages.research.scriptoptimizer;
+
+import "input/Sensors.proto";
+
+message OptimizeScriptResult {
+
+    required uint32 iteration = 1;
+    required string metadata = 2;
+    repeated input.Sensors sensors = 3;
+}
