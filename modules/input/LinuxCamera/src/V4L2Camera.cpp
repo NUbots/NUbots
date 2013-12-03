@@ -29,6 +29,7 @@
 #include <string>
 #include <sstream>
 #include <linux/videodev2.h>
+#include <jpeglib.h>
 
 namespace modules {
     namespace input {
@@ -52,15 +53,61 @@ namespace modules {
             if (ioctl(fd, VIDIOC_DQBUF, &current) == -1) {
                 throw std::system_error(errno, std::system_category(), "There was an error while de-queuing a buffer");
             }
+            
+            std::unique_ptr<Image::Pixel[]> data = std::unique_ptr<Image::Pixel[]>(new Image::Pixel[width * height]);
 
-            if (current.bytesused != width * height * 2) {
-                throw std::system_error(errno, std::system_category(), "A bad camera frame was returned (incorrect size)");
+            // If it is a MJPG
+            if(format == "MJPG") {
+                struct jpeg_error_mgr err;
+                struct jpeg_decompress_struct cinfo = {0};
+
+                // Create a decompressor
+                jpeg_create_decompress(&cinfo);
+                cinfo.err = jpeg_std_error(&err);
+                cinfo.do_fancy_upsampling = false;
+
+                // Set our source buffer
+                jpeg_mem_src(&cinfo, static_cast<uint8_t*>(buff[current.index].payload), current.bytesused);
+
+                // Read our header
+                jpeg_read_header(&cinfo, 1);
+
+                // Start decompression
+                jpeg_start_decompress(&cinfo);
+                
+                // Have a location to store our pixel data for each row
+                std::unique_ptr<uint8_t[]> row = std::unique_ptr<uint8_t[]>(new uint8_t[cinfo.image_width * cinfo.num_components]);
+
+                // Loop through each of our scanlines
+                for(size_t x = 0; cinfo.output_scanline < cinfo.output_height; ++x) {
+                    jpeg_read_scanlines(&cinfo, (JSAMPARRAY) row.get(), 1);
+                    
+                    // Fix up the colour information to be YUV444 rather then YUV422
+                    for(size_t y = 0; y < width; ++y) {
+                        
+                        data[width * x + y].y  = row[y * 2];
+                        data[width * x + y].cb = row[((y * 2) - 1) + (((y + 1) % 2) * 2)];
+                        data[width * x + y].cr = row[((y * 2) + 1) + (((y + 1) % 2) * 2)];
+                    }
+                }   
+
+                // Clean up
+                jpeg_finish_decompress(&cinfo);
+                jpeg_destroy_decompress(&cinfo);
             }
-
-            // Memcpy our data directly from the buffer
-            std::unique_ptr<Image::Pixel[]> data =
-                    std::unique_ptr<Image::Pixel[]>(new Image::Pixel[current.bytesused]);
-            memcpy(data.get(), buff[current.index].payload, current.bytesused);
+            
+            else {
+                
+                uint8_t* input = static_cast<uint8_t*>(buff[current.index].payload);
+                
+                for(size_t x = 0; x < height; ++x) {
+                    for(size_t y = 0; y < width; ++y) {
+                        data[width * x + y].y  = input[((width * x + y) * 2)];
+                        data[width * x + y].cb = input[(((width * x + y) * 2) - 1) + (((y + 1) % 2) * 2)];
+                        data[width * x + y].cr = input[(((width * x + y) * 2) + 1) + (((y + 1) % 2) * 2)];
+                    }
+                }
+            }
 
             // Move this data into the image
             std::unique_ptr<Image> image = 
@@ -75,12 +122,13 @@ namespace modules {
             return std::move(image);
         }
 
-        void V4L2Camera::resetCamera(const std::string& device, size_t w, size_t h) {
+        void V4L2Camera::resetCamera(const std::string& device, const std::string& fmt, size_t w, size_t h) {
             // if the camera device is already open, close it
             closeCamera();
 
             // Store our new state
             deviceID = device;
+            format = fmt;
             width = w;
             height = h;
 
@@ -97,21 +145,21 @@ namespace modules {
             format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             format.fmt.pix.width = width;
             format.fmt.pix.height = height;
-            format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+            
+            // We have to choose YUYV or MJPG here
+            if(fmt == "YUYV") {
+                format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+            }
+            else if(fmt == "MJPG") {
+                format.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
+            }
+            else {
+                throw std::runtime_error("The format must be either YUYV or MJPG");
+            }
+            
             format.fmt.pix.field = V4L2_FIELD_NONE;
             if (ioctl(fd, VIDIOC_S_FMT, &format) == -1) {
                 throw std::system_error(errno, std::system_category(), "There was an error while setting the cameras format");
-            }
-
-            if (format.fmt.pix.sizeimage != width * height * 2) {
-                std::stringstream errorStream;
-                errorStream
-                    << "The camera returned an image size that made no sense ("
-                    << "Expected: " << (width * height * 2)
-                    << ", "
-                    << "Found: " << format.fmt.pix.sizeimage
-                    << ")";
-                throw std::runtime_error(errorStream.str());
             }
 
             // Set the frame rate
@@ -217,6 +265,10 @@ namespace modules {
 
         const std::string& V4L2Camera::getDeviceID() const {
             return deviceID;
+        }
+        
+        const std::string& V4L2Camera::getFormat() const {
+            return format;
         }
 
         void V4L2Camera::closeCamera() {

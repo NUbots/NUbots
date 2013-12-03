@@ -20,6 +20,10 @@
 #include "LinuxCamera.h"
 #include "utility/idiom/pimpl_impl.h"
 
+extern "C" {
+    #include <jpeglib.h>
+}
+
 #include "V4L2Camera.h"
 #include "messages/input/Image.h"
 #include "messages/support/Configuration.h"
@@ -62,10 +66,13 @@ namespace modules {
                     int width = settings.config["imageWidth"];
                     int height = settings.config["imageHeight"];
                     std::string deviceID = settings.config["deviceID"];
+                    std::string format = settings.config["imageFormat"];
+                    
                     if (camera.getWidth() != static_cast<size_t>(width)
                         || camera.getHeight() != static_cast<size_t>(height)
+                        || camera.getFormat() != format
                         || camera.getDeviceID() != deviceID) {
-                        camera.resetCamera(deviceID, width, height);
+                        camera.resetCamera(deviceID, format, width, height);
                     }
 
                     // Set all other camera settings
