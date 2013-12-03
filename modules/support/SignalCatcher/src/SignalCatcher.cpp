@@ -60,7 +60,7 @@ namespace modules {
         }
 
         void SignalCatcher::segfaultConverter(int signal) {
-            throw messages::SegmentationFault();
+            throw messages::support::SegmentationFault();
         }
 
     }  // support

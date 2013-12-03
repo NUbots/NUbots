@@ -34,11 +34,9 @@ namespace messages {
         class Image {
         public:
             struct Pixel {
-                private:
-                    uint8_t padding;
                 public:
-                    uint8_t cb;
                     uint8_t y;
+                    uint8_t cb;
                     uint8_t cr;
             };
 

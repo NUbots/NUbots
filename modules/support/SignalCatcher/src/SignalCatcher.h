@@ -23,7 +23,7 @@
 #include <nuclear>
 #include <exception>
 
-#include "messages/SegmentationFault.h"
+#include "messages/support/SegmentationFault.h"
 
 namespace modules {
     namespace support {

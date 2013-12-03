@@ -179,7 +179,7 @@ namespace Darwin {
         timeout.tv_usec = 2000;
         if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
 
-            int bytesRead = read(fd, &result.checksum, 1);
+            size_t bytesRead = read(fd, &result.checksum, 1);
             assert(bytesRead == 1);
             (void)bytesRead; // Make the compiler happy when NDEBUG is set
         }
@@ -214,7 +214,7 @@ namespace Darwin {
         tcflush(fd, TCIFLUSH);
 
         // Write the command as usual
-        int written = write(fd, command.data(), command.size());
+        size_t written = write(fd, command.data(), command.size());
         assert(written == command.size());
         (void)written; // Keep the compiler happy when NDEBUG is set
 
@@ -235,7 +235,7 @@ namespace Darwin {
         tcflush(fd,TCIFLUSH);
 
         // Write the command as usual
-        int written = write(fd, command.data(), command.size());
+        size_t written = write(fd, command.data(), command.size());
         assert(written == command.size());
         (void) written; // Make the compiler happy when NDEBUG is set
 

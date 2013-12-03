@@ -79,15 +79,19 @@ namespace modules {
                 std::unique_ptr<uint8_t[]> row = std::unique_ptr<uint8_t[]>(new uint8_t[cinfo.image_width * cinfo.num_components]);
 
                 // Loop through each of our scanlines
-                for(size_t x = 0; cinfo.output_scanline < cinfo.output_height; ++x) {
+                for(size_t i = 0; cinfo.output_scanline < cinfo.output_height;) {
                     jpeg_read_scanlines(&cinfo, (JSAMPARRAY) row.get(), 1);
                     
                     // Fix up the colour information to be YUV444 rather then YUV422
-                    for(size_t y = 0; y < width; ++y) {
+                    for(size_t x = 0; x < width; ++++x, ++++i) {
                         
-                        data[width * x + y].y  = row[y * 2];
-                        data[width * x + y].cb = row[((y * 2) - 1) + (((y + 1) % 2) * 2)];
-                        data[width * x + y].cr = row[((y * 2) + 1) + (((y + 1) % 2) * 2)];
+                        data[i].y  = row[x * 2];
+                        data[i].cb = row[x * 2 + 1];
+                        data[i].cr = row[x * 2 + 3];
+
+                        data[i + 1].y  = row[x * 2 + 2];
+                        data[i + 1].cb = row[x * 2 + 1];
+                        data[i + 1].cr = row[x * 2 + 3];
                     }
                 }   
 
@@ -100,12 +104,18 @@ namespace modules {
                 
                 uint8_t* input = static_cast<uint8_t*>(buff[current.index].payload);
                 
-                for(size_t x = 0; x < height; ++x) {
-                    for(size_t y = 0; y < width; ++y) {
-                        data[width * x + y].y  = input[((width * x + y) * 2)];
-                        data[width * x + y].cb = input[(((width * x + y) * 2) - 1) + (((y + 1) % 2) * 2)];
-                        data[width * x + y].cr = input[(((width * x + y) * 2) + 1) + (((y + 1) % 2) * 2)];
-                    }
+                const size_t total = width * height;
+                
+                // Fix the colour information to be YUV444 rather then YUV422
+                for(size_t i = 0; i < total; ++++i) {
+                    
+                    data[i].y  = input[i * 2];
+                    data[i].cb = input[i * 2 + 1];
+                    data[i].cr = input[i * 2 + 3];
+                    
+                    data[i + 1].y  = input[i * 2 + 2];
+                    data[i + 1].cb = input[i * 2 + 1];
+                    data[i + 1].cr = input[i * 2 + 3];
                 }
             }
 
