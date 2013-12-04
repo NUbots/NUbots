@@ -89,15 +89,10 @@ namespace modules {
             // float DISTANCE_BETWEEN_POSTS;
             // float BALL_WIDTH;
             // float CENTRE_CIRCLE_RADIUS;
-            // unsigned int HORIZONTAL_SCANLINE_SPACING;
-            // unsigned int VERTICAL_SCANLINE_SPACING;
-            unsigned int GREEN_HORIZON_SCAN_SPACING;
-            unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS;
             // unsigned int SAM_MAX_LINES;
             // unsigned int SAM_MIN_POINTS_OVER;
             // unsigned int SAM_MIN_POINTS_TO_LINE;
             // unsigned int SAM_MIN_POINTS_TO_LINE_FINAL;
-            float GREEN_HORIZON_UPPER_THRESHOLD_MULT;
             // float SAM_SPLIT_DISTANCE;
             // float SAM_MAX_ANGLE_DIFF_TO_MERGE;
             // float SAM_MAX_DISTANCE_TO_MERGE;
@@ -108,24 +103,6 @@ namespace modules {
             // float RANSAC_MAX_ANGLE_DIFF_TO_MERGE;
             // float RANSAC_MAX_DISTANCE_TO_MERGE;
 
-            /*! @brief Computes the visual green horizon.
-                Note that the use of kinematics horizon has been replaced by dummmy code 
-                @param image The raw image
-            */ 
-            std::vector<arma::vec> calculateGreenHorizon(const messages::input::Image& image);
-            
-            /*! @brief Generates the scan lines
-            */ 
-            std::vector<int> generateScanLines(const messages::input::Image& image, const std::vector<arma::vec>& green_horizon_points);
-            
-            //ClassifiedImage ClassifyScanLines(std::vector<int> scan_lines);
-
-
-            /*! @brief Returns a std::list of points on the convex hull in counter-clockwise order.
-             Note: the last point in the returned std::list is the same as the first one.
-             */
-            std::vector<arma::vec> upperConvexHull(const std::vector<arma::vec>& points);
-
             /*! @brief  2D cross product of OA and OB std::vectors, i.e. z-component of their 3D cross product.
             Returns a positive value, if OAB makes a counter-clockwise turn,
             negative for clockwise turn, and zero if the points are collinear.
@@ -135,11 +112,10 @@ namespace modules {
                 return (A[0] - O[0]) * (B[1] - O[1]) - (A[1] - O[1]) * (B[0] - O[0]);
             }
 
-            bool isPixelGreen(const messages::input::Image::Pixel& p);
         public:
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
 
-            static constexpr const char* CONFIGURATION_PATH = "VisionConstants.json";
+            static constexpr const char* CONFIGURATION_PATH = "LUT.json";
         };
     
     }  // vision
