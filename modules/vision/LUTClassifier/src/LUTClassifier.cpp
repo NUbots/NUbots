@@ -115,14 +115,14 @@ namespace modules {
 
             on<Trigger<Image>>([this](const Image& image){
 
-            	std::vector<arma::vec> green_horizon_points = CalculateGreenHorizon(image);
+            	std::vector<arma::vec> green_horizon_points = calculateGreenHorizon(image);
 
-            	std::vector<int> scan_lines = GenerateScanLines(image,green_horizon_points);
+            	std::vector<int> scan_lines = generateScanLines(image,green_horizon_points);
 
             });
         }
 
-        std::vector<arma::vec> LUTClassifier::CalculateGreenHorizon(const Image& img){
+        std::vector<arma::vec> LUTClassifier::calculateGreenHorizon(const Image& img){
 
         	//NEEDS KINEMATICS ! const Horizon& kin_hor = Last<1,KinematicsHorizon>;
 
@@ -140,7 +140,7 @@ namespace modules {
 		    int kin_hor_y;		
 
 		    //For sampled pixel columns (vertical scans) sampled with period SPACING
-		    for (int x = 0; x < width; x+=SPACING)
+		    for (unsigned int x = 0; x < width; x+=SPACING)
 		    {
 		        unsigned int green_top = 0;
 		        unsigned int green_count = 0;
@@ -157,16 +157,16 @@ namespace modules {
 		        
 
 		        //Search for green below the kinematics horizon
-		        for (int y = kin_hor_y; y < height; y++) {
+		        for (unsigned int y = kin_hor_y; y < height; y++) {
 
-		            if (IsPixelGreen(img(x, y))) {
+		            if (isPixelGreen(img(x, y))) {
 		                if (green_count == 0) {
 		                    green_top = y;
 		                }
 		                green_count++;
 		                // if VER_THRESHOLD green pixels found, add point
-		                if (green_count == GREEN_HORIZON_MIN_GREEN_PIXELS) {//TODO
-		                    vec v(2);
+		                if (green_count == GREEN_HORIZON_MIN_GREEN_PIXELS) {
+		                    arma::vec v(2);
 		                    v[0] = x;
 		                    v[1] = green_top;
 		                    horizon_points.push_back(v);
@@ -187,10 +187,10 @@ namespace modules {
 		        }
 		        else {
 		            num_no_green = 0;
-		            log<NUClear::ERROR>("150 FRAMES OF NO GREEN HORIZON FOUND - VERY POOR LUT");
+		            log<NUClear::WARN>("150 FRAMES OF NO GREEN HORIZON FOUND - VERY POOR LUT");
 		        }
 		        horizon_points.clear();
-		        vec v(2);
+		        arma::vec v(2);
 		        v[0] = 0;
 		        v[1] = height-1;
 		        horizon_points.push_back(v);
@@ -200,25 +200,25 @@ namespace modules {
 		        return horizon_points;
 		    }
 
-		    // provide blackboard the original set of scan points
-		    vbb->setGreenHorizonScanPoints(horizon_points);
+		    //should we emit green horizon unfiltered scan points? (used to provide blackboard the original set of scan points)
+		    // vbb->setGreenHorizonScanPoints(horizon_points);
 
 		    // statistical filter for green horizon points
 		    double mean_y, std_dev_y;
-		    set<double, stats<tag::mean, tag::variance> > acc;  //TODO
+		    arma::running_stat<double> acc;  
 
 		    for(auto& p : horizon_points) {
-		        if (p.[1] < height-1)     // if not at bottom of image
-		            acc(p.[1]);
+		        if (p[1] < height-1)     // if not at bottom of image
+		            acc(p[1]);
 		    }
 
-		    mean_y = mean(acc);
-		    std_dev_y = sqrt(variance(acc));
+		    mean_y = acc.mean();
+		    std_dev_y = acc.stddev();
 		
 
 		    std::vector<arma::vec>::iterator p = horizon_points.begin();
 		    while(p < horizon_points.end()) {
-		        if (p->y < mean_y - GREEN_HORIZON_UPPER_THRESHOLD_MULT*std_dev_y) {//TODO
+		        if ((*p)[1] < mean_y - GREEN_HORIZON_UPPER_THRESHOLD_MULT*std_dev_y) {
 		            thrown_points.push_back(*p);
 		            p = horizon_points.erase(p);
 		        }
@@ -235,8 +235,8 @@ namespace modules {
 		    return horizon_points;
         }
 
-        std::vector<int> LUTClassifier::GenerateScanLines(const messages::input::Image& image, const std::vector<arma::vec>& green_horizon_points){
-
+        std::vector<int> LUTClassifier::generateScanLines(const messages::input::Image& image, const std::vector<arma::vec>& green_horizon_points){
+        	return std::vector<int>();
         }          
 
 
@@ -254,7 +254,7 @@ namespace modules {
 */
 		}
 
-		std::vector<std::vector<ColourSegment>> ScanLines::classifyVerticalScanLines(const Image& originalImage, const std::vector<arma::vec>& greenHorizon, const LookUpTable& LUT)
+		std::vector<std::vector<ColourSegment>> LUTClassifier::classifyVerticalScanLines(const Image& originalImage, const std::vector<arma::vec>& greenHorizon, const LookUpTable& LUT)
 		{
 /*
 			const std::vector<Vector2<double>>& verticalStartPoints = greenHorizon.getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING);
@@ -276,7 +276,7 @@ namespace modules {
 
 	        // Build upper hull
 	        for (int i = 0; i < n; i++) {
-	            while (k >= 2 && DifferenceCrossProduct2D(H[k-2], H[k-1], points[i]) <= 0)
+	            while (k >= 2 && differenceCrossProduct2D(H[k-2], H[k-1], points[i]) <= 0)
 	                k--;
 	            H[k] = points[i];
 	            k++;
@@ -287,7 +287,7 @@ namespace modules {
 	    }
 
 
-        bool LUTClassifier::IsPixelGreen(const messages::input::Image::Pixel& p){
+        bool LUTClassifier::isPixelGreen(const messages::input::Image::Pixel& p){
         	//TODO LUT
         	return true;
         }

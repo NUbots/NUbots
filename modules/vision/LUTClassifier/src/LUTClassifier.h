@@ -24,6 +24,7 @@
 #include <string>
 #include <armadillo>
 #include "messages/input/Image.h"
+#include "messages/support/Configuration.h"
 
 namespace modules {
     namespace vision {
@@ -110,11 +111,11 @@ namespace modules {
                 Note that the use of kinematics horizon has been replaced by dummmy code 
                 @param image The raw image
             */ 
-            std::vector<arma::vec> CalculateGreenHorizon(const messages::input::Image& image);
+            std::vector<arma::vec> calculateGreenHorizon(const messages::input::Image& image);
             
             /*! @brief Generates the scan lines
             */ 
-            std::vector<int> GenerateScanLines(const messages::input::Image& image, const std::vector<arma::vec>& green_horizon_points);
+            std::vector<int> generateScanLines(const messages::input::Image& image, const std::vector<arma::vec>& green_horizon_points);
             
             //ClassifiedImage ClassifyScanLines(std::vector<int> scan_lines);
 
@@ -128,12 +129,12 @@ namespace modules {
             Returns a positive value, if OAB makes a counter-clockwise turn,
             negative for clockwise turn, and zero if the points are collinear.
             */
-            static double DifferenceCrossProduct2D(const arma::vec& O, const arma::vec& A, const arma::vec& B)
+            static double differenceCrossProduct2D(const arma::vec& O, const arma::vec& A, const arma::vec& B)
             {
-                return (A.[0] - O.[0]) * (B.[1] - O.[1]) - (A.[1] - O.[1]) * (B.[0] - O.[0]);
+                return (A[0] - O[0]) * (B[1] - O[1]) - (A[1] - O[1]) * (B[0] - O[0]);
             }
 
-            bool IsPixelGreen(const messages::input::Image::Pixel& p);
+            bool isPixelGreen(const messages::input::Image::Pixel& p);
         public:
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
 
