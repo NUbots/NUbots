@@ -24,6 +24,7 @@
 #include <string>
 #include <armadillo>
 #include "messages/input/Image.h"
+#include "messages/support/Configuration.h"
 
 namespace modules {
     namespace vision {
@@ -33,17 +34,16 @@ namespace modules {
          *
          * @author Alex Biddulph
          */
-        class GreenHorizon {
+        class GreenHorizon : public NUClear::Reactor {
         private:
             unsigned int GREEN_HORIZON_SCAN_SPACING;
             unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS;
             float GREEN_HORIZON_UPPER_THRESHOLD_MULT;
 
-            static constexpr const char* CONFIGURATION_PATH = "GreenHorizon.json";
         public:
             /*! @brief Loads configuration file.
             */ 
-            GreenHorizon();
+            GreenHorizon(std::unique_ptr<NUClear::Environment> environment);
 
             /*! @brief Computes the visual green horizon.
                 Note that the use of kinematics horizon has been replaced by dummmy code 
@@ -70,6 +70,7 @@ namespace modules {
                 return (A[0] - O[0]) * (B[1] - O[1]) - (A[1] - O[1]) * (B[0] - O[0]);
             }
 
+            static constexpr const char* CONFIGURATION_PATH = "GreenHorizon.json";
         };
     
     }  // vision

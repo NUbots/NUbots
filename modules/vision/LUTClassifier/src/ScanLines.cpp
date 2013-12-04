@@ -23,8 +23,9 @@ namespace modules {
     namespace vision {
 
         using messages::input::Image;
+        using messages::support::Configuration;
 
-        ScanLines::ScanLines() {
+        ScanLines::ScanLines(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
             on<Trigger<Configuration<ScanLines>>>([this](const Configuration<ScanLines>& constants) {
 				HORIZONTAL_SCANLINE_SPACING = constants.config["HORIZONTAL_SCANLINE_SPACING"];
 				VERTICAL_SCANLINE_SPACING = constants.config["VERTICAL_SCANLINE_SPACING"];
@@ -46,7 +47,7 @@ namespace modules {
 				log<NUClear::WARN>("Left horizon limit exceeds image height: ", right.y)
 
 			/* Old code, commented out pre-NUClear
-			unsigned int bottom_horizontal_scan = (left.y + right.y) / 2;
+			unsigned int bottom_horizontal_scan = (left.y + right.y) / 2; 
 			
 			if(bottom_horizontal_scan >= img.height())
 				errorlog << "avg: " << bottom_horizontal_scan << std::endl;
