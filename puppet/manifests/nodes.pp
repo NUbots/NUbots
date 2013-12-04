@@ -10,7 +10,6 @@ class nuclearport_dev_dependencies (
   package { 'cmake': ensure => latest }
   package { 'git': ensure => latest }
   package { 'openssh-server': ensure => latest }
-  package { 'libzmq-dev': ensure => latest }
   package { ['libprotobuf-dev', 'protobuf-compiler']: ensure => latest }
   package { 'libespeak-dev': ensure => latest }
   package { 'librtaudio-dev': ensure => latest }

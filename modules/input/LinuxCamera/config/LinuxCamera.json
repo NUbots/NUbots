@@ -1,0 +1,17 @@
+{
+    "deviceID": "/dev/video0",
+    "autoWhiteBalance": 0,
+    "whiteBalanceTemperature": 2000,
+    "brightness": 143,
+    "contrast": 39,
+    "saturation": 46,
+    "gain": 255,
+    "autoExposure": 1,
+    "autoExposurePriority": 0,
+    "absoluteExposure": 1814,
+    "powerLineFrequency": 2,
+    "sharpness": 191,
+    "imageFormat" : "MJPG",
+    "imageWidth": 800,
+    "imageHeight": 600
+}
