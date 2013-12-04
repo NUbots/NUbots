@@ -39,6 +39,7 @@ namespace modules {
             unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS;
             float GREEN_HORIZON_UPPER_THRESHOLD_MULT;
 
+            static constexpr const char* CONFIGURATION_PATH = "GreenHorizon.json";
         public:
             /*! @brief Loads configuration file.
             */ 
@@ -57,9 +58,18 @@ namespace modules {
 
             /*! @brief Returns a true if the specified pixel is coloured green.
              */
-            bool IsPixelGreen(const messages::input::Image::Pixel& p);
+            bool isPixelGreen(const messages::input::Image::Pixel& p);
 
-            static constexpr const char* CONFIGURATION_PATH = "GreenHorizon.json";
+
+            /*! @brief  2D cross product of OA and OB std::vectors, i.e. z-component of their 3D cross product.
+            Returns a positive value, if OAB makes a counter-clockwise turn,
+            negative for clockwise turn, and zero if the points are collinear.
+            */
+            static double differenceCrossProduct2D(const arma::vec& O, const arma::vec& A, const arma::vec& B)
+            {
+                return (A[0] - O[0]) * (B[1] - O[1]) - (A[1] - O[1]) * (B[0] - O[0]);
+            }
+
         };
     
     }  // vision

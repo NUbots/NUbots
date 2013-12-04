@@ -68,7 +68,7 @@ namespace modules {
 		        //Search for green below the kinematics horizon
 		        for (int y = kin_hor_y; y < height; y++) {
 
-		            if (IsPixelGreen(img(x, y))) {
+		            if (isPixelGreen(img(x, y))) {
 		                if (green_count == 0) {
 		                    green_top = y;
 		                }
@@ -76,7 +76,7 @@ namespace modules {
 		                green_count++;
 		                // if VER_THRESHOLD green pixels found, add point
 		                if (green_count == GREEN_HORIZON_MIN_GREEN_PIXELS) {//TODO
-		                    vec v(2);
+		                    arma::vec v(2);
 		                    v[0] = x;
 		                    v[1] = green_top;
 		                    horizon_points.push_back(v);
@@ -103,7 +103,7 @@ namespace modules {
 		        }
 
 		        horizon_points.clear();
-		        vec v(2);
+		        arma::vec v(2);
 		        v[0] = 0;
 		        v[1] = height-1;
 		        horizon_points.push_back(v);
@@ -113,31 +113,26 @@ namespace modules {
 		        return horizon_points;
 		    }
 
-		    // provide blackboard the original set of scan points
-		    vbb->setGreenHorizonScanPoints(horizon_points);
-
 		    // statistical filter for green horizon points
 		    double mean_y, std_dev_y;
-		    set<double, stats<tag::mean, tag::variance> > acc;  //TODO
+		    running_stat<double> acc;  //TODO
 
 		    for(auto& p : horizon_points) {
-		        if (p.[1] < height-1)     // if not at bottom of image
-		            acc(p.[1]);
+		        if (p[1] < height-1)     // if not at bottom of image
+		            acc(p[1]);
 		    }
 
-		    mean_y = mean(acc);
-		    std_dev_y = sqrt(variance(acc));
+		    mean_y = acc.mean();
+		    std_dev_y = acc.stddev();
 		
 
 		    std::vector<arma::vec>::iterator p = horizon_points.begin();
 
 		    while(p < horizon_points.end()) {
-		        if (p->y < mean_y - GREEN_HORIZON_UPPER_THRESHOLD_MULT * std_dev_y) {//TODO
+		        if ((*p)[1] < mean_y - GREEN_HORIZON_UPPER_THRESHOLD_MULT * std_dev_y) {//TODO
 		            thrown_points.push_back(*p);
 		            p = horizon_points.erase(p);
-		        }
-
-		        else {
+		        } else {
 		            p++;
 		        }
 		    }
@@ -154,10 +149,11 @@ namespace modules {
         	int n = points.size(),
             	k = 0;
 	        std::vector<arma::vec> H(n);
+	        std::vector<arma::vec> H(n);
 
 	        // Build upper hull
 	        for (int i = 0; i < n; i++) {
-	            while (k >= 2 && DifferenceCrossProduct2D(H[k-2], H[k-1], points[i]) <= 0)
+	            while (k >= 2 && differenceCrossProduct2D(H[k-2], H[k-1], points[i]) <= 0)
 	                k--;
 
 	            H[k] = points[i];
@@ -169,7 +165,7 @@ namespace modules {
 	    }
 
 
-        bool GreenHorizon::IsPixelGreen(const messages::input::Image::Pixel& p) {
+        bool GreenHorizon::isPixelGreen(const messages::input::Image::Pixel& p) {
         	//TODO LUT
         	return true;
         }

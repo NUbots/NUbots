@@ -103,15 +103,7 @@ namespace modules {
             // float RANSAC_MAX_ANGLE_DIFF_TO_MERGE;
             // float RANSAC_MAX_DISTANCE_TO_MERGE;
 
-            /*! @brief  2D cross product of OA and OB std::vectors, i.e. z-component of their 3D cross product.
-            Returns a positive value, if OAB makes a counter-clockwise turn,
-            negative for clockwise turn, and zero if the points are collinear.
-            */
-            static double differenceCrossProduct2D(const arma::vec& O, const arma::vec& A, const arma::vec& B)
-            {
-                return (A[0] - O[0]) * (B[1] - O[1]) - (A[1] - O[1]) * (B[0] - O[0]);
-            }
-
+            
         public:
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
 
