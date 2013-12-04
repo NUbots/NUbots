@@ -28,15 +28,15 @@ namespace modules {
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
             on<Trigger<Image>>([this](const Image& image){
 
-            	//std::vector<arma::vec> green_horizon_points = CalculateGreenHorizon(image);
+            	std::vector<arma::vec> green_horizon_points = CalculateGreenHorizon(image);
 
-            	//std::vector<int> scan_lines = GenerateScanLines(image,green_horizon_points);
+            	std::vector<int> scan_lines = GenerateScanLines(image,green_horizon_points);
 
             });
         }
 
         std::vector<arma::vec> LUTClassifier::CalculateGreenHorizon(const Image& img){
-/*
+
         	//NEEDS KINEMATICS ! const Horizon& kin_hor = Last<1,KinematicsHorizon>;
 
 		    size_t width = img.width();
@@ -78,7 +78,7 @@ namespace modules {
 		                }
 		                green_count++;
 		                // if VER_THRESHOLD green pixels found, add point
-		                if (green_count == VisionConstants::GREEN_HORIZON_MIN_GREEN_PIXELS) {
+		                if (green_count == VisionConstants::GREEN_HORIZON_MIN_GREEN_PIXELS) {//TODO
 		                    vec v(2);
 		                    v[0] = x;
 		                    v[1] = green_top;
@@ -118,7 +118,7 @@ namespace modules {
 
 		    // statistical filter for green horizon points
 		    double mean_y, std_dev_y;
-		    accumulator_set<double, stats<tag::mean, tag::variance> > acc;
+		    accumulator_set<double, stats<tag::mean, tag::variance> > acc;  //TODO
 
 		    for(auto& p : horizon_points) {
 		        if (p.[1] < height-1)     // if not at bottom of image
@@ -131,7 +131,7 @@ namespace modules {
 
 		    std::vector<arma::vec>::iterator p = horizon_points.begin();
 		    while(p < horizon_points.end()) {
-		        if (p->y < mean_y - VisionConstants::GREEN_HORIZON_UPPER_THRESHOLD_MULT*std_dev_y) {
+		        if (p->y < mean_y - VisionConstants::GREEN_HORIZON_UPPER_THRESHOLD_MULT*std_dev_y) {//TODO
 		            thrown_points.push_back(*p);
 		            p = horizon_points.erase(p);
 		        }
@@ -140,12 +140,12 @@ namespace modules {
 		        }
 		    }
 
-		    DataWrapper::getInstance()->debugPublish(DBID_GREENHORIZON_THROWN, thrown_points);
+		    //NOTE: OLD Code may have printed more info about the thrown points.
+		    log<NUClear::DEBUG>("Green Horizon Thrown Points : ", thrown_points.size());
+
 		    horizon_points = upperConvexHull(horizon_points);
-		    // set hull points
-		    vbb->setGreenHullPoints(horizon_points);
-		   */
-		    return std::vector<arma::vec>();
+		   
+		    return horizon_points;
         }
 
 		std::vector<std::vector<ColourSegment>> LUTClassifier::classifyHorizontalScanLines(const Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT)
@@ -177,5 +177,22 @@ namespace modules {
 */
 		}
       
+        std::vector<arma::vec> LUTClassifier::upperConvexHull(const std::vector<arma::vec>& points){
+        	int n = points.size(),
+            	k = 0;
+	        std::vector<arma::vec> H(n);
+
+	        // Build upper hull
+	        for (int i = 0; i < n; i++) {
+	            while (k >= 2 && DifferenceCrossProduct2D(H[k-2], H[k-1], points[i]) <= 0)
+	                k--;
+	            H[k] = points[i];
+	            k++;
+	        }
+
+	        H.resize(k);
+	        return H;
+	    }
+
     }  // vision
 }  // modules
