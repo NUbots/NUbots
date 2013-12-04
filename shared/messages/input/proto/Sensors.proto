@@ -1,4 +1,4 @@
-package messages.input;
+package messages.input.proto;
 
 message Sensors {
 

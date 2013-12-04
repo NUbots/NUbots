@@ -18,29 +18,35 @@
  */
 
 #include "ScriptOptimizer.h"
-#include "messages/Script.h"
-#include "messages/OptimizeScript.pb.h"
-#include "messages/DarwinSensors.h"
+#include "messages/motion/Script.h"
+#include "messages/research/scriptoptimizer/OptimizeScript.pb.h"
+#include "messages/platform/darwin/DarwinSensors.h"
 
 namespace modules {
-    namespace Research {
+    namespace research {
+        
+        using messages::platform::darwin::DarwinSensors;
+        using messages::research::scriptoptimizer::OptimizeScript;
+        using messages::motion::ExecuteScript;
+        using messages::motion::Script;
+        
         ScriptOptimizer::ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Trigger<Network<messages::OptimizeScript>>, With<NUClear::extensions::NetworkingConfiguration>>([this]
-                    (const Network<messages::OptimizeScript>& task, const NUClear::extensions::NetworkingConfiguration config) {
+            on<Trigger<Network<OptimizeScript>>, With<NUClear::extensions::NetworkingConfiguration>>([this]
+                    (const Network<OptimizeScript>& task, const NUClear::extensions::NetworkingConfiguration config) {
 
                 // Check if this script is for us
                 if (config.deviceName == task.data->target()) {
                     
                     log<NUClear::DEBUG>("Script ", task.data->iteration(), " was delivered to be executed");
 
-                    auto script = std::make_unique<messages::ExecuteScript>();
+                    auto script = std::make_unique<ExecuteScript>();
                     
                     // Make a script from the frames
                     for (const auto& frame : task.data->frames()) {
-                        messages::Script::Frame f;
+                        Script::Frame f;
                         for (const auto& target : frame.targets()) {
-                            messages::Script::Frame::Target t;
+                            Script::Frame::Target t;
                             
                             t.id = messages::DarwinSensors::Servo::idFromString(target.id());
                             t.position = target.position();

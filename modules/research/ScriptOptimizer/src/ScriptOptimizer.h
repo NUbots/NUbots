@@ -23,7 +23,7 @@
 #include <nuclear>
 
 namespace modules {
-    namespace Research {
+    namespace research {
 
         /**
          * TODO document

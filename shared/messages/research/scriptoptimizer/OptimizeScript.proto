@@ -1,5 +1,7 @@
 package messages.research.scriptoptimizer;
 
+import "messages/input/proto/Sensors.proto";
+
 message OptimizeScript {
 
     message Target {
@@ -13,7 +15,7 @@ message OptimizeScript {
         repeated Target targets = 2;
     }
 
-    required string target = 1;
+    required input.proto.Sensors.ServoID target = 1;
     required uint32 iteration = 2;
     required string metadata = 3;
     repeated Frame frames = 4;
