@@ -21,6 +21,7 @@
 #define MODULES_RESEARCH_SCRIPTOPTIMIZER_H
 
 #include <nuclear>
+#include "messages/platform/darwin/DarwinSensors.h"
 
 namespace modules {
     namespace research {
@@ -31,6 +32,9 @@ namespace modules {
          * @author Trent Houliston
          */
         class ScriptOptimizer : public NUClear::Reactor {
+        private:
+            volatile bool recording;
+            std::vector<std::shared_ptr<const messages::platform::darwin::DarwinSensors>> sensors;
         public:
             explicit ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment);
         };

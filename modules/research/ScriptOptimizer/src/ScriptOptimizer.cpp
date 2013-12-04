@@ -19,7 +19,9 @@
 
 #include "ScriptOptimizer.h"
 #include "messages/motion/Script.h"
+#include "messages/motion/ServoWaypoint.h"
 #include "messages/research/scriptoptimizer/OptimizeScript.pb.h"
+#include "messages/research/scriptoptimizer/OptimizeScriptResult.pb.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 
 namespace modules {
@@ -27,10 +29,12 @@ namespace modules {
         
         using messages::platform::darwin::DarwinSensors;
         using messages::research::scriptoptimizer::OptimizeScript;
+        using messages::research::scriptoptimizer::OptimizeScriptResult;
         using messages::motion::ExecuteScript;
+        using messages::motion::AllServoWaypointsComplete;
         using messages::motion::Script;
         
-        ScriptOptimizer::ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        ScriptOptimizer::ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), recording(false) {
 
             on<Trigger<Network<OptimizeScript>>, With<NUClear::extensions::NetworkingConfiguration>>([this]
                     (const Network<OptimizeScript>& task, const NUClear::extensions::NetworkingConfiguration config) {
@@ -40,7 +44,7 @@ namespace modules {
                     
                     log<NUClear::DEBUG>("Script ", task.data->iteration(), " was delivered to be executed");
 
-                    auto script = std::make_unique<ExecuteScript>();
+                    Script script;
                     
                     // Make a script from the frames
                     for (const auto& frame : task.data->frames()) {
@@ -48,33 +52,39 @@ namespace modules {
                         for (const auto& target : frame.targets()) {
                             Script::Frame::Target t;
                             
-                            t.id = messages::DarwinSensors::Servo::idFromString(target.id());
+                            t.id = static_cast<messages::input::ServoID>(target.id());
                             t.position = target.position();
                             t.gain = target.gain();
                             
                             f.targets.push_back(std::move(t));
                         }
                         
-                        script->script.frames.push_back(std::move(f));
+                        script.frames.push_back(std::move(f));
                     }
                     
+                    // Stop recording
+                    this->recording = false;
+                    
+                    // Clear the sensors
+                    sensors.clear();
+                    
                     // Emit our script
-                    emit(std::move(script));
+                    emit(std::make_unique<ExecuteScript>(script));
                     
                     // Start recording
                     this->recording = true;
                 }
             });
             
-            on<Trigger<Raw<messages::DarwinSensors>>>([this](const std::shared_ptr<const messages::DarwinSensors>& frame) {
+            on<Trigger<Raw<DarwinSensors>>>([this](const std::shared_ptr<const DarwinSensors>& frame) {
                 
                 // While we are recording, store all the frames in a vector
                 if(this->recording) {
-                    sensors->push_back(frame);
+                    sensors.push_back(frame);
                 }
             });
             
-            on<Trigger<messages::AllServoWaypointsComplete>>([this](const messages::AllServoWaypointsComplete&) {
+            on<Trigger<AllServoWaypointsComplete>>([this](const AllServoWaypointsComplete&) {
                 
                 // If we were recording
                 if(this->recording) {
@@ -83,7 +93,7 @@ namespace modules {
                     this->recording = false;
                     
                     // Make a response message to the optimizer
-                    auto result = std::make_unique<messages::OptimizeScriptResult>();
+                    auto result = std::make_unique<OptimizeScriptResult>();
                     
                     // Store all the sensor values for the script
                     for(const auto& sensor : sensors) {
