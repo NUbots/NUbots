@@ -44,7 +44,23 @@ namespace modules {
                 
             */ 
             std::vector<int> GenerateScanLines(const messages::input::Image& image, const std::vector<arma::vec>& green_horizon_points);
+            
             //ClassifiedImage ClassifyScanLines(std::vector<int> scan_lines);
+
+
+            /*! @brief Returns a std::list of points on the convex hull in counter-clockwise order.
+             Note: the last point in the returned std::list is the same as the first one.
+             */
+            std::vector<arma::vec> upperConvexHull(const std::vector<arma::vec>& points);
+
+            /*! @brief  2D cross product of OA and OB std::vectors, i.e. z-component of their 3D cross product.
+            Returns a positive value, if OAB makes a counter-clockwise turn,
+            negative for clockwise turn, and zero if the points are collinear.
+            */
+            static double DifferenceCrossProduct2D(const arma::vec& O, const arma::vec& A, const arma::vec& B)
+            {
+                return (A.[0] - O.[0]) * (B.[1] - O.[1]) - (A.[1] - O.[1]) * (B.[0] - O.[0]);
+            }
         public:
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
         };
