@@ -35,20 +35,28 @@ namespace modules {
         using messages::motion::Script;
         
         ScriptOptimizer::ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), recording(false) {
-
+            
+            on<Trigger<Initialize>>([this](const Initialize&) {
+                emit(std::make_unique<OptimizeScriptResult>());
+                log<NUClear::DEBUG>("Requesting initial script");
+            });
+                    
             on<Trigger<Network<OptimizeScript>>, With<NUClear::extensions::NetworkingConfiguration>>([this]
                     (const Network<OptimizeScript>& task, const NUClear::extensions::NetworkingConfiguration config) {
 
                 // Check if this script is for us
                 if (config.deviceName == task.data->target()) {
                     
-                    log<NUClear::DEBUG>("Script ", task.data->iteration(), " was delivered to be executed");
+                    log<NUClear::DEBUG>("Script ", task.data->iteration(), " was delivered to be executed from ", task.sender);
 
                     Script script;
                     
                     // Make a script from the frames
                     for (const auto& frame : task.data->frames()) {
                         Script::Frame f;
+                        
+                        f.duration = std::chrono::milliseconds(frame.duration());
+                        
                         for (const auto& target : frame.targets()) {
                             Script::Frame::Target t;
                             
