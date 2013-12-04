@@ -34,6 +34,8 @@ namespace modules {
         class ScriptOptimizer : public NUClear::Reactor {
         private:
             volatile bool recording;
+            volatile int iteration;
+            std::string metadata;
             std::vector<std::shared_ptr<const messages::platform::darwin::DarwinSensors>> sensors;
         public:
             explicit ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment);
