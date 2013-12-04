@@ -118,6 +118,15 @@ namespace modules {
             
             //ClassifiedImage ClassifyScanLines(std::vector<int> scan_lines);
 
+            /*! @brief Returns a std::vector of ColourSegments relating classified 
+            horizontal scan lines.
+             */
+            std::vector<std::vector<ColourSegment>> classifyHorizontalScanLines(const Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT)
+
+            /*! @brief Returns a std::vector of ColourSegments relating to classified 
+            vertical scan lines.
+             */
+            std::vector<std::vector<ColourSegment>> classifyVerticalScanLines(const Image& originalImage, const std::vector<arma::vec>& greenHorizon, const LookUpTable& LUT)
 
             /*! @brief Returns a std::list of points on the convex hull in counter-clockwise order.
              Note: the last point in the returned std::list is the same as the first one.
