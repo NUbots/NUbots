@@ -28,15 +28,15 @@ namespace modules {
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
             on<Trigger<Image>>([this](const Image& image){
 
-            	//std::vector<arma::vec> green_horizon_points = CalculateGreenHorizon(image);
+            	std::vector<arma::vec> green_horizon_points = CalculateGreenHorizon(image);
 
-            	//std::vector<int> scan_lines = GenerateScanLines(image,green_horizon_points);
+            	std::vector<int> scan_lines = GenerateScanLines(image,green_horizon_points);
 
             });
         }
 
         std::vector<arma::vec> LUTClassifier::CalculateGreenHorizon(const Image& img){
-/*
+
         	//NEEDS KINEMATICS ! const Horizon& kin_hor = Last<1,KinematicsHorizon>;
 
 		    size_t width = img.width();
@@ -144,7 +144,7 @@ namespace modules {
 		    horizon_points = upperConvexHull(horizon_points);
 		    // set hull points
 		    vbb->setGreenHullPoints(horizon_points);
-		   */
+		   
 		    return std::vector<arma::vec>();
         }
         
