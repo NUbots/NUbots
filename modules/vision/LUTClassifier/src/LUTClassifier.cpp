@@ -93,11 +93,6 @@ namespace modules {
 				// CENTRE_CIRCLE_RADIUS = constants.config["CENTRE_CIRCLE_RADIUS"];
 				// //float VisionConstants::BEACON_WIDTH;
 				// //! ScanLine options
-				HORIZONTAL_SCANLINE_SPACING = constants.config["HORIZONTAL_SCANLINE_SPACING"];
-				VERTICAL_SCANLINE_SPACING = constants.config["VERTICAL_SCANLINE_SPACING"];
-				GREEN_HORIZON_SCAN_SPACING = constants.config["GREEN_HORIZON_SCAN_SPACING"];
-				GREEN_HORIZON_MIN_GREEN_PIXELS = constants.config["GREEN_HORIZON_MIN_GREEN_PIXELS"];
-				GREEN_HORIZON_UPPER_THRESHOLD_MULT = constants.config["GREEN_HORIZON_UPPER_THRESHOLD_MULT"];
 				// //! Split and Merge constants
 				// SAM_MAX_LINES = constants.config["SAM_MAX_LINES"];
 				// SAM_SPLIT_DISTANCE = constants.config["SAM_SPLIT_DISTANCE"];

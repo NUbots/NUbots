@@ -88,15 +88,10 @@ namespace modules {
             // float DISTANCE_BETWEEN_POSTS;
             // float BALL_WIDTH;
             // float CENTRE_CIRCLE_RADIUS;
-            unsigned int HORIZONTAL_SCANLINE_SPACING;
-            unsigned int VERTICAL_SCANLINE_SPACING;
-            unsigned int GREEN_HORIZON_SCAN_SPACING;
-            unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS;
             // unsigned int SAM_MAX_LINES;
             // unsigned int SAM_MIN_POINTS_OVER;
             // unsigned int SAM_MIN_POINTS_TO_LINE;
             // unsigned int SAM_MIN_POINTS_TO_LINE_FINAL;
-            float GREEN_HORIZON_UPPER_THRESHOLD_MULT;
             // float SAM_SPLIT_DISTANCE;
             // float SAM_MAX_ANGLE_DIFF_TO_MERGE;
             // float SAM_MAX_DISTANCE_TO_MERGE;
@@ -119,7 +114,7 @@ namespace modules {
         public:
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
 
-            static constexpr const char* CONFIGURATION_PATH = "VisionConstants.json";
+            static constexpr const char* CONFIGURATION_PATH = "LUT.json";
         };
     
     }  // vision
