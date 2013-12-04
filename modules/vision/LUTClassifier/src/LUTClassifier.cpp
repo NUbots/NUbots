@@ -117,13 +117,12 @@ namespace modules {
 
             on<Trigger<Image>>([this](const Image& image){
 
-            	std::vector<arma::vec> green_horizon_points = CalculateGreenHorizon(image);
+            	std::vector<arma::vec> green_horizon_points = calculateGreenHorizon(image);
 
-            	std::vector<int> scan_lines = GenerateScanLines(image,green_horizon_points);
+            	std::vector<int> scan_lines = generateScanLines(image,green_horizon_points);
 
             });
         }
-
 
     }  // vision
 }  // modules
