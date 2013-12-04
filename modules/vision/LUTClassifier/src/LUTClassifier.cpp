@@ -237,9 +237,38 @@ namespace modules {
 
         std::vector<int> LUTClassifier::GenerateScanLines(const messages::input::Image& image, const std::vector<arma::vec>& green_horizon_points){
 
-        }
-          
+        }          
 
+
+		std::vector<std::vector<ColourSegment>> LUTClassifier::classifyHorizontalScanLines(const Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT)
+		{
+/*
+			std::vector<std::vector<ColourSegment>> classifications;
+
+		    for (auto scanLine : horizontalScanLines)
+			{
+				classifications.push_back(classifyHorizontalScan(LUT, originalImage, scanLine));
+			}
+
+			return classifications;
+*/
+		}
+
+		std::vector<std::vector<ColourSegment>> ScanLines::classifyVerticalScanLines(const Image& originalImage, const std::vector<arma::vec>& greenHorizon, const LookUpTable& LUT)
+		{
+/*
+			const std::vector<Vector2<double>>& verticalStartPoints = greenHorizon.getInterpolatedSubset(VisionConstants::VERTICAL_SCANLINE_SPACING);
+			std::vector<std::vector<ColourSegment>> classifications;
+
+			for (auto startPoint : verticalStartPoints)
+			{
+				classifications.push_back(classifyVerticalScan(LUT, originalImage, startPoint));
+			}
+    		
+			return classifications;
+*/
+		}
+      
         std::vector<arma::vec> LUTClassifier::upperConvexHull(const std::vector<arma::vec>& points){
         	int n = points.size(),
             	k = 0;
