@@ -25,6 +25,7 @@
 #include <armadillo>
 #include "messages/input/Image.h"
 #include "messages/support/Configuration.h"
+#include "LookUpTable.h"
 
 namespace modules {
     namespace vision {

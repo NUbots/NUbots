@@ -55,6 +55,7 @@ namespace messages {
             size_t imgWidth;
             size_t imgHeight;
             std::unique_ptr<Pixel[]> data;
+            
         };
         
     }  // input
