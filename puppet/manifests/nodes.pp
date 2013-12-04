@@ -18,6 +18,8 @@ class nuclearport_dev_dependencies (
   package { 'libfftw3-dev': ensure => latest }
   package { 'libaubio-dev': ensure => latest }
   package { 'libsndfile-dev': ensure => latest }
+  package { 'libarmadillo-dev': ensure => latest }
+  package { 'libboost-math-dev': ensure => latest }
 }
 
 node default {

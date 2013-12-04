@@ -23,8 +23,9 @@ namespace modules {
     namespace vision {
 
         using messages::input::Image;
+        using messages::support::Configuration;
 
-        GreenHorizon::GreenHorizon() {
+        GreenHorizon::GreenHorizon(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
             on<Trigger<Configuration<GreenHorizon>>>([this](const Configuration<GreenHorizon>& constants) {
 				GREEN_HORIZON_SCAN_SPACING = constants.config["GREEN_HORIZON_SCAN_SPACING"];
 				GREEN_HORIZON_MIN_GREEN_PIXELS = constants.config["GREEN_HORIZON_MIN_GREEN_PIXELS"];

@@ -24,6 +24,7 @@
 #include <string>
 #include <armadillo>
 #include "messages/input/Image.h"
+#include "messages/support/Configuration.h"
 
 namespace modules {
     namespace vision {
@@ -33,7 +34,7 @@ namespace modules {
          *
          * @author Alex Biddulph
          */
-        class ScanLines {
+        class ScanLines : public NUClear::Reactor {
         private:
             unsigned int VISION_SCANLINE_VERBOSITY;
             unsigned int HORIZONTAL_SCANLINE_SPACING;
@@ -52,7 +53,7 @@ namespace modules {
         public:
             /*! @brief Loads configuration file.
             */ 
-            ScanLines();
+            ScanLines(std::unique_ptr<NUClear::Environment> environment);
 
             /*! @brief Generates the scan lines
             */ 
