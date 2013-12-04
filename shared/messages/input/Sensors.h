@@ -73,6 +73,11 @@ namespace messages {
             };
         };
         
+        Acceleronometer acceleronometer;
+        Gyroscope gyroscope;
+        FSR leftFSR;
+        FSR rightFSR;
+        Servo servos[20];
     }
 }
 
