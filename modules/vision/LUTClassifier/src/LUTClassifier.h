@@ -87,8 +87,8 @@ namespace modules {
             // float DISTANCE_BETWEEN_POSTS;
             // float BALL_WIDTH;
             // float CENTRE_CIRCLE_RADIUS;
-            // unsigned int HORIZONTAL_SCANLINE_SPACING;
-            // unsigned int VERTICAL_SCANLINE_SPACING;
+            unsigned int HORIZONTAL_SCANLINE_SPACING;
+            unsigned int VERTICAL_SCANLINE_SPACING;
             unsigned int GREEN_HORIZON_SCAN_SPACING;
             unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS;
             // unsigned int SAM_MAX_LINES;
@@ -106,32 +106,21 @@ namespace modules {
             // float RANSAC_MAX_ANGLE_DIFF_TO_MERGE;
             // float RANSAC_MAX_DISTANCE_TO_MERGE;
 
-            /*! @brief Computes the visual green horizon.
-                Note that the use of kinematics horizon has been replaced by dummmy code 
-                @param image The raw image
-            */ 
-            std::vector<arma::vec> CalculateGreenHorizon(const messages::input::Image& image);
-            
             /*! @brief Generates the scan lines
             */ 
-            std::vector<int> GenerateScanLines(const messages::input::Image& image, const std::vector<arma::vec>& green_horizon_points);
+            std::vector<int> generateScanLines(const messages::input::Image& image, const std::vector<arma::vec>& greenHorizonPoints);
             
             //ClassifiedImage ClassifyScanLines(std::vector<int> scan_lines);
 
             /*! @brief Returns a std::vector of ColourSegments relating classified 
             horizontal scan lines.
              */
-            std::vector<std::vector<ColourSegment>> classifyHorizontalScanLines(const Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT)
+            std::vector<std::vector<ColourSegment>> classifyHorizontalScanLines(const messages::input::IImage& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT)
 
             /*! @brief Returns a std::vector of ColourSegments relating to classified 
             vertical scan lines.
              */
-            std::vector<std::vector<ColourSegment>> classifyVerticalScanLines(const Image& originalImage, const std::vector<arma::vec>& greenHorizon, const LookUpTable& LUT)
-
-            /*! @brief Returns a std::list of points on the convex hull in counter-clockwise order.
-             Note: the last point in the returned std::list is the same as the first one.
-             */
-            std::vector<arma::vec> upperConvexHull(const std::vector<arma::vec>& points);
+            std::vector<std::vector<ColourSegment>> classifyVerticalScanLines(const messages::input::IImage& originalImage, const std::vector<arma::vec>& greenHorizon, const LookUpTable& LUT)
 
             /*! @brief  2D cross product of OA and OB std::vectors, i.e. z-component of their 3D cross product.
             Returns a positive value, if OAB makes a counter-clockwise turn,
