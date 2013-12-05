@@ -68,6 +68,7 @@ namespace modules{
         {
             return getColourFromIndex(LUT[getLUTIndex(p)]); // 7bit LUT
         }
+    private:
         /*!
         *  @brief Gets the index of the pixel in the LUT
         *  @param p The pixel to be classified.
@@ -82,7 +83,7 @@ namespace modules{
 
         
 
-    private:
+   
         const unsigned char* LUT;           //! @variable Colour Look Up Table - protected.
         unsigned char* LUTbuffer;           //! @variable temp LUT for loading.
     };
