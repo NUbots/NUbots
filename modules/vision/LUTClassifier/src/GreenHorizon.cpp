@@ -131,12 +131,65 @@ namespace modules {
 		    }
 
 		    //NOTE: OLD Code may have printed more info about the thrown points.
-		    log<NUClear::DEBUG>("Green Horizon Thrown Points : ", thrown_points.size());
+		    log<NUClear::DEBUG>("Green Horizon Number of Thrown Points : ", thrown_points.size());
 
 		    horizon_points = upperConvexHull(horizon_points);
-		   
+		   	set(horizon_points,width,height);
 		    return horizon_points;
         }
+
+        void GreenHorizon::set(const std::vector<arma::vec> &initial_points, int image_width, int image_height)
+		{
+		    original_points = initial_points;
+		    interpolated_points.clear();
+
+		    //unsigned int position, y_new;
+		    int y_new;
+		    std::vector<arma::vec>::const_iterator it_start, it_end;
+
+		    //generate start/end edge points (if not there)
+		    if(original_points.front().x > 0) {
+		        double y = interpolate(original_points.at(0), original_points.at(1), 0);
+		        //clamp to image vertical bounds
+		        y = std::max(y, 0.0);
+		        y = std::min(y, image_height - 1);
+		        arma::vec v(2)
+		        v[0] = 0;
+		        v[1] = y;
+		        original_points.insert(original_points.begin(), v);
+		    }
+		    if(original_points.back().x < image_width - 1) {
+		        double y = interpolate(original_points.at(original_points.size() - 2),
+		                               original_points.at(original_points.size() - 1),
+		                               image_width - 1);
+		        //clamp to image vertical bounds
+		        y = std::max(y, 0.0);
+		        y = std::min(y, image_height - 1);
+		        arma::vec v(2)
+		        v[0] = image_width - 1;
+		        v[1] = y;
+		        original_points.push_back(v);
+		    }
+
+		    it_start = original_points.begin();
+		    it_end = it_start + 1;
+		    for (int x = 0; x < image_width; x++) {
+		        // consider hull points either side of current x value
+		        while (x > it_end->x) {
+		            it_start++;
+		            it_end++;
+		        }
+		        // calculate y value for interpolated point
+		        y_new = interpolate(*it_start, *it_end, x);
+
+		        if(y_new >= image_height)
+		            std::cout << "GreenHorizon::set: " << y_new << " it_start: " << *it_start << " it_end: " << *it_end << std::endl;
+		        arma::vec v(2)
+		        v[0] = x;
+		        v[1] = y_new;
+		        interpolated_points.push_back(v);
+		    }
+		}
 
         std::vector<arma::vec> GreenHorizon::upperConvexHull(const std::vector<arma::vec>& points) {
         	int n = points.size(), k = 0;
@@ -160,5 +213,9 @@ namespace modules {
         	return LUT.classifyPixel(p) == green; //green is a Colour enum, defined in LookUpTable.h
         }
 
+
+		double GreenHorizon::interpolate(arma::vec p1, arma::vec p2, double x){
+			return p1[1] + (p2[1] - p1[1]) * (x - p1[0]]) / (p2[0] - p1[0]);
+		}
 	}
 }

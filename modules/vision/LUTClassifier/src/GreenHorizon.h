@@ -40,7 +40,8 @@ namespace modules {
             unsigned int GREEN_HORIZON_SCAN_SPACING;
             unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS;
             float GREEN_HORIZON_UPPER_THRESHOLD_MULT;
-
+            std::vector<arma::vec> original_points;      //! @variable The original hull points.
+            std::vector<arma::vec> interpolated_points;  //! @variable The interpolated points.
         public:
             /*! @brief Loads configuration file.
             */ 
@@ -58,8 +59,11 @@ namespace modules {
                 Note that the use of kinematics horizon has been replaced by dummmy code 
                 @param image The raw image
             */ 
-            std::vector<arma::vec> CalculateGreenHorizon(const messages::input::Image& image, const LookUpTable& LUT);
-            
+            std::vector<arma::vec> calculateGreenHorizon(const messages::input::Image& image, const LookUpTable& LUT);
+            /*! @brief Computes the green horizon characteristics
+                @param initial_points the horizon points calculated by the calculateGreenHorizon method
+            */ 
+            void set(const std::vector<arma::vec> &initial_points, int image_width, int image_height);
             /*! @brief Returns a std::list of points on the convex hull in counter-clockwise order.
              Note: the last point in the returned std::list is the same as the first one.
              */
