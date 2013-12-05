@@ -114,9 +114,9 @@ namespace modules {
             friend std::ostream& operator<<(std::ostream& output, const std::vector<ColourSegment>& c);
 
             //! only used for ransac - segments cannot overlap and thus cannot have equal centres
-            friend bool operator==(const ColourSegment& lhs, const ColourSegment& rhs)
-            {
-                return lhs.m_centre == rhs.m_centre;
+            friend bool operator==(const ColourSegment& lhs, const ColourSegment& rhs) {
+                // Compare both elements in both centre points for equality.
+                return ((lhs.m_centre[0] == rhs.m_centre[0]) && (lhs.m_centre[1] == rhs.m_centre[1]);
             } 
     };
     

@@ -31,18 +31,18 @@ namespace modules {
 
 
 
-		std::vector<int> ScanLines::generateScanLines(const Image& img, const std::vector<arma::vec>& greenHorizon) {
+		std::vector<int> ScanLines::generateScanLines(const Image& img, const GreenHorizon& greenHorizon) {
 			std::vector<int> horizontalScanLines;
-			const std::vector<arma::vec::fixed<2>>& horizonPoints = greenHorizon().getInterpolatedPoints();   // Need this to get the left and right
+			const std::vector<arma::vec::fixed<2>>& horizonPoints = greenHorizon.getInterpolatedPoints();   // Need this to get the left and right
 
 			arma::vec::fixed<2> left = horizonPoints.front();
 			arma::vec::fixed<2> right = horizonPoints.back();
 
-			if(left.y >= img.height())
-				log<NUClear::WARN>("Left horizon limit exceeds image height: ", left.y)
+			if(left(1) >= img.height()) // Element 1 is the y-component.
+				log<NUClear::WARN>("Left horizon limit exceeds image height: ", left(1))
 
-			if(right.y >= img.height())
-				log<NUClear::WARN>("Left horizon limit exceeds image height: ", right.y)
+			if(right(1) >= img.height()) // Element 1 is the y-component.
+				log<NUClear::WARN>("Left horizon limit exceeds image height: ", right(1))
 
 			/* Old code, commented out pre-NUClear
 			unsigned int bottom_horizontal_scan = (left.y + right.y) / 2; 
@@ -69,7 +69,7 @@ namespace modules {
 			std::vector<std::vector<ColourSegment>> classifications;
 
 		    for (auto scanLine : horizontalScanLines) {
-				classifications.push_back(classifyHorizontalScan(LUT, originalImage, scanLine));
+				classifications.push_back(classifyHorizontalScan(originalImage, scanLine, LUT));
 			}
 
 			return classifications;
@@ -80,7 +80,7 @@ namespace modules {
 			std::vector<std::vector<ColourSegment>> classifications;
 
 			for (auto startPoint : verticalStartPoints) {
-				classifications.push_back(classifyVerticalScan(LUT, originalImage, startPoint));
+				classifications.push_back(classifyVerticalScan(originalImage, startPoint, LUT));
 			}
     		
 			return classifications;
@@ -107,7 +107,7 @@ namespace modules {
 				if(currentColour != startColour) {
 					//start of new segment
 					//make new segment and push onto std::vector
-					segment.set(Point(startPosition, y), Point(x, y), startColour);
+					segment.set(arma::vec::fixed<2>(startPosition, y), arma::vec::fixed<2>(x, y), startColour);
 					result.push_back(segment);
 
 					//start new segment
@@ -116,7 +116,7 @@ namespace modules {
 				}
 			}
 
-			segment.set(Point(startPosition, y), Point(x - 1, y), startColour);
+			segment.set(arma::vec::fixed<2>(startPosition, y), arma::vec::fixed<2>(x - 1, y), startColour);
 			result.push_back(segment);
 
 			return result;
@@ -142,7 +142,7 @@ namespace modules {
 				if(currentColour != startColour) {
 					//start of new segment
 					//make new segment and push onto std::vector
-					segment.set(Point(x, startPosiiton), Point(x, y), startColour);
+					segment.set(arma::vec::fixed<2>(x, startPosition), arma::vec::fixed<2>(x, y), startColour);
 					result.push_back(segment);
 
 					//start new segment
@@ -151,7 +151,7 @@ namespace modules {
 				}
 			}
 
-			segment.set(Point(x, startPosition), Point(x, y), startColour);
+			segment.set(arma::vec::fixed<2>(x, startPosition), arma::vec::fixed<2>(x, y), startColour);
 			result.push_back(segment);
 
 			return result;
