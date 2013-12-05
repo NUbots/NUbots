@@ -23,8 +23,13 @@
 #include <nuclear> 
 #include <string>
 #include <armadillo>
+
 #include "messages/input/Image.h"
 #include "messages/support/Configuration.h"
+<<<<<<< HEAD
+#include "ColourSegment.h"
+=======
+>>>>>>> c55d84a304dc07d8af68bc9ca4a939f84df1f47d
 #include "LookUpTable.h"
 
 namespace modules {
@@ -48,12 +53,12 @@ namespace modules {
             /*! @brief Returns a std::vector of ColourSegments detailing the
             horizontal colour segments in the image.
             */
-            std::vector<ColourSegment> classifyHorizontalScan(const messages::input::Image& image, unsigned int y, const LookUpTable& LUT));
+            std::vector<ColourSegment> classifyHorizontalScan(const messages::input::Image& image, unsigned int y, const LookUpTable& LUT);
 
             /*! @brief Returns a std::vector of ColourSegments detailing the
             vertical colour segments in the image.
             */
-            std::vector<ColourSegment> classifyVerticalScan(const messages::input::Image& image, const Vector2<double> &start, const LookUpTable& LUT));
+            std::vector<ColourSegment> classifyVerticalScan(const messages::input::Image& image, const arma::vec& start, const LookUpTable& LUT);
 
         public:
             /*! @brief Loads configuration file.

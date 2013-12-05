@@ -22,7 +22,7 @@
 #include "GreenHorizon.h"
 
 namespace modules {
-    namespace vision {
+    namespace vision {o
 
         using messages::input::Image;
         using messages::support::Configuration;

@@ -19,7 +19,7 @@
 
 namespace modules{
   namespace vision{
-
+/*
     enum Colour{
         unclassified, //!< Colour has not be given a category.
         white, //!< Colour is in the White region.
@@ -35,7 +35,7 @@ namespace modules{
         num_colours, //!< Total number of colour categories.
         invalid
     };  
-    
+  */  
     class LookUpTable
     {
     public:
