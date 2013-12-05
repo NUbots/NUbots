@@ -115,9 +115,9 @@ namespace modules {
                         auto* s = result->add_sensors();
                         
                         auto* acc = s->mutable_accelerometer();
-                        acc->set_x(sensor->acceleronometer.x);
-                        acc->set_y(sensor->acceleronometer.y);
-                        acc->set_z(sensor->acceleronometer.z);
+                        acc->set_x(sensor->accelerometer.x);
+                        acc->set_y(sensor->accelerometer.y);
+                        acc->set_z(sensor->accelerometer.z);
                         
                         auto* gyro = s->mutable_gyroscope();
                         gyro->set_x(sensor->gyroscope.x);

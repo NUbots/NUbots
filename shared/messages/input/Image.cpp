@@ -44,9 +44,9 @@ namespace messages {
         const size_t Image::height() const {
             return imgHeight;
         }
-
-        const size_t Image::size() const {
-            return imgWidth * imgHeight;
+        
+        const std::unique_ptr<Image::Pixel[]>& Image::raw() const {
+            return data;
         }
     
     }  // input

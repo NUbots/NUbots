@@ -152,7 +152,7 @@ namespace modules {
 				std::string* imageBytes = imageData->mutable_data();
 
 				// Reserve enough space in the image data to store the output
-				imageBytes->resize(image.size());
+				imageBytes->resize(image.width() * image.height());
 				imageData->set_width(image.width());
 				imageData->set_height(image.height());
 
@@ -183,27 +183,13 @@ namespace modules {
 
 				// Start compression
 				jpeg_start_compress(&jpegC, true);
-
-				// Allocate some space for our row data
-				auto row = std::unique_ptr<JSAMPLE[]>(new JSAMPLE[image.width() * 3]);
-
-				// Read in each scanline
-				while (jpegC.next_scanline < jpegC.image_height) {
-					// Allocate a pointer to our row (since it likes to have them sparse)
-					JSAMPLE* rowPtr = row.get();
-					JSAMPARRAY ptr = &rowPtr;
-
-					// Now load the data into the row from image
-					for(size_t i = 0; i < image.width(); ++i) {
-						row[i * 3 + 0] = image(i, jpegC.next_scanline).y;
-						row[i * 3 + 1] = image(i, jpegC.next_scanline).cb;
-						row[i * 3 + 2] = image(i, jpegC.next_scanline).cr;
-					}
-
-					// Write this scanline in
-					jpeg_write_scanlines(&jpegC, ptr, 1);
-				}
-
+                                
+                                // Compress each row
+                                for(size_t i = 0; i < image.height(); ++i) {
+                                    uint8_t* start = reinterpret_cast<uint8_t*>(image.raw().get() + i * image.width());
+                                    jpeg_write_scanlines(&jpegC, &start, 1);
+                                }
+                                
 				// Finish our compression
 				jpeg_finish_compress(&jpegC);
 
