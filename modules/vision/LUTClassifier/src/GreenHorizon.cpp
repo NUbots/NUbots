@@ -44,10 +44,8 @@ namespace modules {
 		    // variable declarations    
 		    std::vector<arma::vec> horizon_points;
 		    std::vector<arma::vec> thrown_points;
-
 	
 		    int kin_hor_y;		
-
 		    //For sampled pixel columns (vertical scans) sampled with period SPACING
 		    for (int x = 0; x < width; x+=SPACING) {
 		        unsigned int green_top = 0;
@@ -81,9 +79,7 @@ namespace modules {
 		                    horizon_points.push_back(v);
 		                    break;
 		                }
-		            }
-
-		            else {
+		            } else {
 		                // not green - reset
 		                green_count = 0;
 		            }
@@ -94,9 +90,7 @@ namespace modules {
 		    if(horizon_points.size() < 2) {
 		        if(num_no_green < 150) {
 		            num_no_green++;
-		        }
-
-		        else {
+		        } else {
 		            num_no_green = 0;
 		            log<NUClear::ERROR>("150 FRAMES OF NO GREEN HORIZON FOUND - VERY POOR LUT");
 		        }
