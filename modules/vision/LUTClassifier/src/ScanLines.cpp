@@ -25,40 +25,25 @@ namespace modules {
         using messages::input::Image;
         using messages::support::Configuration;
 
-        ScanLines::ScanLines() :
-        				HORIZONTAL_SCANLINE_SPACING(),
-  						VERTICAL_SCANLINE_SPACING(){}
-
-
+        ScanLines::ScanLines(unsigned int HORIZONTAL_SCANLINE_SPACING_, unsigned int VERTICAL_SCANLINE_SPACING_) {
+        	setParameters(HORIZONTAL_SCANLINE_SPACING_, VERTICAL_SCANLINE_SPACING_);
+        }
 
 		std::vector<int> ScanLines::generateScanLines(const Image& img, const GreenHorizon& greenHorizon) {
 			std::vector<int> horizontalScanLines;
-			const std::vector<arma::vec::fixed<2>>& horizonPoints = greenHorizon.getInterpolatedPoints();   // Need this to get the left and right
+			int bottomHorizontalScan = img.height() - 1;														//we need h-scans under the GH for field lines
+			const std::vector<arma::vec::fixed<2>>& horizonPoints = greenHorizon.getInterpolatedPoints();		// Need this to get the left and right
 
 			arma::vec::fixed<2> left = horizonPoints.front();
 			arma::vec::fixed<2> right = horizonPoints.back();
 
-			if(left(1) >= img.height()) // Element 1 is the y-component.
+			if(left[1] >= img.height()) // Element 1 is the y-component.
 				log<NUClear::WARN>("Left horizon limit exceeds image height: ", left(1))
 
-			if(right(1) >= img.height()) // Element 1 is the y-component.
+			if(right[1] >= img.height()) // Element 1 is the y-component.
 				log<NUClear::WARN>("Left horizon limit exceeds image height: ", right(1))
 
-			/* Old code, commented out pre-NUClear
-			unsigned int bottom_horizontal_scan = (left.y + right.y) / 2; 
-			
-			if(bottom_horizontal_scan >= img.height())
-				errorlog << "avg: " << bottom_horizontal_scan << std::endl;
-			*/
-
-			int bottomHorizontalScan = img.height() - 1;    //we need h-scans under the GH for field lines
-
 			for (int y = bottomHorizontalScan; y >= 0; y -= HORIZONTAL_SCANLINE_SPACING) {
-				/* Old code, commented out pre-NUClear
-				if(y >= img.height())
-					errorlog << " y: " << y << std::endl;
-				*/
-
 				horizontalScanLines.push_back(y);
 			}
 
@@ -88,26 +73,31 @@ namespace modules {
 
         std::vector<ColourSegment> ScanLines::classifyHorizontalScan(const Image& image, unsigned int y, const LookUpTable& LUT) {
 			std::vector<ColourSegment> result;
+			arma::vec::fixed<2> startPoint, endPoint;
 
-			if(y >= img.height()) {
-				log<NUClear::ERROR>("ScanLines::classifyHorizontalScan invalid y: ", y)
+			if(y >= image.height()) {
+				log<NUClear::ERROR>("ScanLines::classifyHorizontalScan invalid y: ", y);
 				return result;
 			}
 
 			//simple and nasty first
 			//Colour previous, current, next
-			int startPosition = 0, x;
-			Colour startColour = getColourFromIndex(lut.classifyPixel(img(0,y)));
+			unsigned int startPosition = 0, x;
+			Colour startColour = getColourFromIndex(LUT.classifyPixel(image(0, y)));
 			Colour currentColour;
 			ColourSegment segment;
 
-			for(x = 0; x < img.width(); x++) {
-				currentColour = getColourFromIndex(lut.classifyPixel(img(x,y)));
+			for(x = 0; x < image.width(); x++) {
+				currentColour = getColourFromIndex(LUT.classifyPixel(image(x, y)));
 
 				if(currentColour != startColour) {
 					//start of new segment
 					//make new segment and push onto std::vector
-					segment.set(arma::vec::fixed<2>(startPosition, y), arma::vec::fixed<2>(x, y), startColour);
+					startPoint[0] = startPosition;
+					startPoint[1] = y;
+					endPoint[0] = x;
+					endPoint[1] = y;
+					segment.set(startPoint, endPoint, startColour);
 					result.push_back(segment);
 
 					//start new segment
@@ -116,7 +106,11 @@ namespace modules {
 				}
 			}
 
-			segment.set(arma::vec::fixed<2>(startPosition, y), arma::vec::fixed<2>(x - 1, y), startColour);
+			startPoint[0] = startPosition;
+			startPoint[1] = y;
+			endPoint[0] = x - 1;
+			endPoint[1] = y;
+			segment.set(startPoint, endPoint, startColour);
 			result.push_back(segment);
 
 			return result;
@@ -124,25 +118,30 @@ namespace modules {
 
 		std::vector<ColourSegment> ScanLines::classifyVerticalScan(const Image& image, const arma::vec& start, const LookUpTable& LUT) {
 			std::vector<ColourSegment> result;
+			arma::vec::fixed<2> startPoint, endPoint;
 
-			if((start.y >= img.height()) || (start.y < 0) || (start.x >= img.width()) || (start.x < 0)) {
-				log<NUClear::ERROR>("ScanLines::classifyVerticalScan invalid start position: ", start)
+			if((start[1] >= image.height()) || (start[1] < 0) || (start[0] >= image.width()) || (start[0] < 0)) {
+				log<NUClear::ERROR>("ScanLines::classifyVerticalScan invalid start position: ", start);
 				return result;
 			}
 
 			//simple and nasty first
 			//Colour previous, current, next
-			Colour startColour = getColourFromIndex(lut.classifyPixel(img(start.x,start.y))), currentColour;
+			Colour startColour = getColourFromIndex(LUT.classifyPixel(image(start[0], start[1]))), currentColour;
 			ColourSegment segment;
-			int startPosition = start.y, x = start.x, y;
+			unsigned int startPosition = start[1], x = start[0], y;
 
-			for(y = start.y; y < img.height(); y++) {
-				currentColour = getColourFromIndex(lut.classifyPixel(img(x,y)));
+			for(y = start[1]; y < image.height(); y++) {
+				currentColour = getColourFromIndex(LUT.classifyPixel(image(x, y)));
 
 				if(currentColour != startColour) {
 					//start of new segment
 					//make new segment and push onto std::vector
-					segment.set(arma::vec::fixed<2>(x, startPosition), arma::vec::fixed<2>(x, y), startColour);
+					startPoint[0] = x;
+					startPoint[1] = startPosition;
+					endPoint[0] = x;
+					endPoint[1] = y;
+					segment.set(startPoint, endPoint, startColour);
 					result.push_back(segment);
 
 					//start new segment
@@ -151,7 +150,11 @@ namespace modules {
 				}
 			}
 
-			segment.set(arma::vec::fixed<2>(x, startPosition), arma::vec::fixed<2>(x, y), startColour);
+			startPoint[0] = x;
+			startPoint[1] = startPosition;
+			endPoint[0] = x;
+			endPoint[1] = y;
+			segment.set(startPoint, endPoint, startColour);
 			result.push_back(segment);
 
 			return result;

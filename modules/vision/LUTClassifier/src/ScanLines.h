@@ -62,7 +62,7 @@ namespace modules {
         public:
             /*! @brief Loads configuration file.
             */ 
-            ScanLines();
+            ScanLines(unsigned int HORIZONTAL_SCANLINE_SPACING_, unsigned int VERTICAL_SCANLINE_SPACING_);
 
             /*! @brief Generates the scan lines
             */ 

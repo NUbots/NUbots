@@ -21,23 +21,7 @@
 
 namespace modules{
   namespace vision{
-/*
-    enum Colour{
-        unclassified, //!< Colour has not be given a category.
-        white, //!< Colour is in the White region.
-        green, //!< Colour is in the Green region.
-        shadow_object, //!< Colour is part of a shadowed area.
-        pink, //!< Colour is in the Red region.
-        pink_orange, //!< Colour is in the region of overlap between Red and Orange.
-        orange, //!< Colour is in the Orange region.
-        yellow_orange, //!< Colour is in the region of overlap between Yellow and Orange.
-        yellow, //!< Colour is in the Yellow region.
-        blue, //!< Colour is in the Sky Blue region.
-        shadow_blue, //!< Colour is in the Dark Blue region.
-        num_colours, //!< Total number of colour categories.
-        invalid
-    };  
-  */  
+
     class LookUpTable
     {
     public:
@@ -66,7 +50,7 @@ namespace modules{
         */
         void zero();
 
-        Colour classifyPixel(const messages::input::Image::Pixel& p) {
+        Colour classifyPixel(const messages::input::Image::Pixel& p) const {
             return getColourFromIndex(LUT[getLUTIndex(p)]); // 7bit LUT
         }
 
@@ -76,7 +60,7 @@ namespace modules{
         *  @param p The pixel to be classified.
         *  @return Returns the colour index for the given pixel.
         */
-        unsigned int getLUTIndex(const messages::input::Image::Pixel& colour);
+        unsigned int getLUTIndex(const messages::input::Image::Pixel& colour) const;
   
         const unsigned char* LUT;           //! @variable Colour Look Up Table - protected.
         unsigned char* LUTbuffer;           //! @variable temp LUT for loading.

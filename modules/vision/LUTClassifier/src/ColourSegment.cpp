@@ -25,9 +25,10 @@ void ColourSegment::set(const arma::vec::fixed<2>& start, const arma::vec::fixed
     m_start = start;
     m_end = end;
 
-    m_length_pixels = (start - end).abs();
+    m_length_pixels = arma::norm((start - end), 2);     // Length of the vector between the two points.
+//    m_length_pixels = (m_start - m_end).abs();        // original code.
 
-    m_centre = (m_start + m_end)*0.5;
+    m_centre = (m_start + m_end) * 0.5;
 }
 
 void ColourSegment::setColour(const Colour& colour) {
@@ -52,8 +53,10 @@ bool ColourSegment::join(const ColourSegment &other) {
         return false;
     }
 
-    m_length_pixels = (m_start - m_end).abs();
-    m_centre = (m_start + m_end)*0.5;
+    m_length_pixels = arma::norm((start - end), 2);     // Length of the vector between the two points.
+//    m_length_pixels = (m_start - m_end).abs();        // original code.
+
+    m_centre = (m_start + m_end) * 0.5;
 
     return true;
 }
@@ -72,7 +75,7 @@ std::ostream& operator<< (std::ostream& output, const ColourSegment& c) {
  *  @relates ColourSegment
  */
 std::ostream& operator<< (std::ostream& output, const std::vector<ColourSegment>& c) {
-    for (size_t i=0; i<c.size(); i++)
+    for (size_t i = 0; i < c.size(); i++)
         output << c[i];
 
     return output;
