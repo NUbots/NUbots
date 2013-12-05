@@ -101,21 +101,6 @@ namespace modules {
             }
             
             else {
-                const size_t total = width * height;
-                uint32_t* input = static_cast<uint32_t*>(buff[current.index].payload);
-                
-                for(size_t i = 0; i < total; ++i) {
-                    
-                    // Set first pixel to be the YUYV
-                    data[i].value = input[i / 2];
-                    
-                    // Set the second pixel to be the first
-                    data[i + 1] = data[i];
-                    
-                    // Move over the Y value
-                    data[i].y = data[i].padding;
-                }
-                /*
                 uint8_t* input = static_cast<uint8_t*>(buff[current.index].payload);
                 
                 const size_t total = width * height;
@@ -130,7 +115,7 @@ namespace modules {
                     data[i + 1].y  = input[i * 2 + 2];
                     data[i + 1].cb = input[i * 2 + 1];
                     data[i + 1].cr = input[i * 2 + 3];
-                }*/
+                }
             }
 
             // Move this data into the image
