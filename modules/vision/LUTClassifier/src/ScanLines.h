@@ -23,10 +23,12 @@
 #include <nuclear> 
 #include <string>
 #include <armadillo>
+
 #include "messages/input/Image.h"
 #include "messages/support/Configuration.h"
 #include "ColourSegment.h"
- 
+#include "LookUpTable.h"
+
 namespace modules {
     namespace vision {
 
