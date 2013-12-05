@@ -19,7 +19,7 @@
 
 #include "ColourSegment.h"
 
-void ColourSegment::set(const arma::vec::fixed<2>& start, const arma::vec::fixed<2>& end, const Colour& colour) {
+void ColourSegment::set(const arma::vec2& start, const arma::vec2& end, const Colour& colour) {
     m_colour = colour;
 
     m_start = start;
@@ -65,7 +65,7 @@ bool ColourSegment::join(const ColourSegment &other) {
  *      The segment is terminated by a newline.
  */
 std::ostream& operator<< (std::ostream& output, const ColourSegment& c) {
-    output << c.m_start << " - " << c.m_end << " length(pixels): " << c.m_length_pixels << " colour: " << getColourName(c.m_colour) << std::endl;
+    output << c.m_start << " - " << c.m_end << " length(pixels): " << c.m_length_pixels << " colour: " << LookUpTable::getColourName(c.m_colour) << std::endl;
 
     return output;
 }

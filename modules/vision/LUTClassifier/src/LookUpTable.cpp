@@ -98,5 +98,57 @@ namespace modules{
                 default: return invalid;
             };
         }
+
+        std::string LookUpTable::getColourName(const Colour& colour) {
+            switch(colour) {
+                case unclassified: {
+                    return "unclassified";
+                }
+
+                case white: {
+                    return "white";
+                }
+
+                case green: {
+                    return "green";
+                }
+
+                case shadow_object: {
+                    return "shadow object";
+                }
+
+                case pink: {
+                    return "pink";
+                }
+
+                case pink_orange: {
+                    return "pink - orange";
+                }
+
+                case orange: {
+                    return "orange";
+                }
+
+                case yellow_orange: {
+                    return "yellow - orange";
+                }
+
+                case yellow: {
+                    return "yellow";
+                }
+
+                case blue: {
+                    return "blue";
+                }
+
+                case shadow_blue: {
+                    return "shadow blue";
+                }
+
+                default: {
+                    return "unknown colour!";
+                }
+            }
+        }
     }   //vision
 }   //modules

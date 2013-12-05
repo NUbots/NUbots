@@ -25,8 +25,7 @@
 #include <armadillo>
 
 #include "messages/input/Image.h"
-#include "ClassificationColours.h"
-
+ 
 namespace modules {
     namespace vision {
 
@@ -44,7 +43,7 @@ namespace modules {
             unsigned int m_length_pixels;
 
             //! @variable The start pixel location.
-            arma::vec::fixed<2> m_start, 
+            arma::vec2 m_start, 
 
             //! @variable The end  pixellocation.
             m_end, 
@@ -57,7 +56,7 @@ namespace modules {
                 set(arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2), invalid);
             }
 
-            ColourSegment(const arma::vec::fixed<2>& start, const arma::vec::fixed<2>& end, const Colour& colour) {
+            ColourSegment(const arma::vec2& start, const arma::vec2& end, const Colour& colour) {
                 set(start, end, colour);
             }
 
@@ -72,17 +71,17 @@ namespace modules {
             }
 
             //! Returns the start location of the segment in pixel coordinates.
-            const arma::vec::fixed<2>& getStart() const {
+            const arma::vec2& getStart() const {
                 return m_start;
             }
 
             //! Returns the end location of the segment in pixel coordinates.
-            const arma::vec::fixed<2>& getEnd() const {
+            const arma::vec2& getEnd() const {
                 return m_end;
             }
 
             //! Returns the end location of the segment in pixel coordinates.
-            const arma::vec::fixed<2>& getCentre() const {
+            const arma::vec2& getCentre() const {
                 return m_centre;
             }
 
@@ -92,7 +91,7 @@ namespace modules {
              * @param end The end location of the segment.
              * @param colour The colour of the segment.
              */
-            void set(const arma::vec::fixed<2>& start, const arma::vec::fixed<2>& end, const Colour& colour);
+            void set(const arma::vec2& start, const arma::vec2& end, const Colour& colour);
 
             //! Set the colour of the segment.
             void setColour(const Colour& colour);

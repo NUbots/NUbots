@@ -80,8 +80,12 @@ namespace modules{
         *  @return Returns the classified colour for the given pixel colour number.
         */
         Colour getColourFromIndex(int index);        
-
-        
+        /*!
+        Gets the name of the given colour.
+        @param colour The colour name desired.
+        @return The name of the colour.
+        */
+        static std::string getColourName(const Colour& colour);
 
    
         const unsigned char* LUT;           //! @variable Colour Look Up Table - protected.

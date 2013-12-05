@@ -82,12 +82,12 @@ namespace modules {
 			//simple and nasty first
 			//Colour previous, current, next
 			unsigned int startPosition = 0, x;
-			Colour startColour = getColourFromIndex(LUT.classifyPixel(image(0, y)));
+			Colour startColour = LUT.classifyPixel(image(0, y));
 			Colour currentColour;
 			ColourSegment segment;
 
 			for(x = 0; x < image.width(); x++) {
-				currentColour = getColourFromIndex(LUT.classifyPixel(image(x, y)));
+				currentColour = LUT.classifyPixel(image(x, y));
 
 				if(currentColour != startColour) {
 					//start of new segment
@@ -126,12 +126,12 @@ namespace modules {
 
 			//simple and nasty first
 			//Colour previous, current, next
-			Colour startColour = getColourFromIndex(LUT.classifyPixel(image(start[0], start[1]))), currentColour;
+			Colour startColour = LUT.classifyPixel(image(start[0], start[1])), currentColour;
 			ColourSegment segment;
 			unsigned int startPosition = start[1], x = start[0], y;
 
 			for(y = start[1]; y < image.height(); y++) {
-				currentColour = getColourFromIndex(LUT.classifyPixel(image(x, y)));
+				currentColour = LUT.classifyPixel(image(x, y));
 
 				if(currentColour != startColour) {
 					//start of new segment
