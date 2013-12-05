@@ -114,36 +114,36 @@ namespace modules {
 
 			//Load LUTs
 			on<Trigger<Configuration<LUTLocations>>>([this](const Configuration<LUTLocations>& locations) {
-				for(std::string& location : locations.config) {
+				std::vector<std::string> locat = locations.config;
+				for(auto& location : locat) {
 					LookUpTable LUT;
 					bool loaded = LUT.loadLUTFromFile(location);
 
 					if(loaded) {
 						LUTs.push_back(LUT);
-					}
-
-					else {
+					} else {
 						log<NUClear::ERROR>("LUT ", location, " has not loaded successfully." );
 					}
 				}
-			}
+			});
+
 
 			//Load in greenhorizon parameters
 			on<Trigger<Configuration<GreenHorizonConfig>>>([this](const Configuration<GreenHorizonConfig>& constants) {
 				greenHorizon.setParameters(constants.config["GREEN_HORIZON_SCAN_SPACING"],
 											constants.config["GREEN_HORIZON_MIN_GREEN_PIXELS"],
 											constants.config["GREEN_HORIZON_UPPER_THRESHOLD_MULT"]);
-			}
+			});
 
 			//Load in scanline parameters
-			on<Trigger<Configuration<ScanLinesConfig>>>([this](const Configuration<GreenHorizonConfig>& constants) {
+			on<Trigger<Configuration<ScanLinesConfig>>>([this](const Configuration<ScanLinesConfig>& constants) {
 				scanLines.setParameters(constants.config["HORIZONTAL_SCANLINE_SPACING"],
 										 constants.config["VERTICAL_SCANLINE_SPACING"]);
-			}
+			});
 
             on<Trigger<Image>>([this](const Image& image) {
             	std::vector<arma::vec2> green_horizon_points = greenHorizon.calculateGreenHorizon(image, LUTs[current_LUT_index]);
-            	std::vector<int> scan_lines = scanLines.generateScanLines(image, green_horizon_points, LUTs[current_LUT_index]);
+            	std::vector<int> scan_lines = scanLines.generateScanLines(image, greenHorizon);
             });
         }
 

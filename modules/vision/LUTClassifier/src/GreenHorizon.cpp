@@ -69,9 +69,9 @@ namespace modules {
 		                green_count++;
 		                // if VER_THRESHOLD green pixels found, add point
 		                if (green_count == GREEN_HORIZON_MIN_GREEN_PIXELS) {//TODO
-		                    arma::vec2 v(x,green_top);
-		                    //v[0] = x;
-		                    //v[1] = green_top;
+		                    arma::vec2 v;
+		                    v[0] = x;
+		                    v[1] = green_top;
 		                    horizon_points.push_back(v);
 		                    break;
 		                }
@@ -88,7 +88,7 @@ namespace modules {
 		            num_no_green++;
 		        } else {
 		            num_no_green = 0;
-		            log<NUClear::ERROR>("150 FRAMES OF NO GREEN HORIZON FOUND - VERY POOR LUT");
+		            std::cout<<"150 FRAMES OF NO GREEN HORIZON FOUND - VERY POOR LUT"<<std::endl;
 		        }
 
 		        horizon_points.clear();
@@ -127,7 +127,7 @@ namespace modules {
 		    }
 
 		    //NOTE: OLD Code may have printed more info about the thrown points.
-		    log<NUClear::DEBUG>("Green Horizon Number of Thrown Points : ", thrown_points.size());
+		    std::cout<<"Green Horizon Number of Thrown Points : "<<thrown_points.size()<<std::endl;
 
 		    horizon_points = upperConvexHull(horizon_points);
 		   	set(horizon_points,width,height);
@@ -144,24 +144,24 @@ namespace modules {
 		    std::vector<arma::vec2>::const_iterator it_start, it_end;
 
 		    //generate start/end edge points (if not there)
-		    if(original_points.front().x > 0) {
+		    if(original_points.front()[0] > 0) {
 		        double y = interpolate(original_points.at(0), original_points.at(1), 0);
 		        //clamp to image vertical bounds
 		        y = std::max(y, 0.0);
-		        y = std::min(y, image_height - 1);
+		        y = std::min(y, image_height - 1.0);
 		        arma::vec2 v;
 		        v[0] = 0;
 		        v[1] = y;
 		        original_points.insert(original_points.begin(), v);
 		    }
-		    if(original_points.back().x < image_width - 1) {
+		    if(original_points.back()[0] < image_width - 1) {
 		        double y = interpolate(original_points.at(original_points.size() - 2),
 		                               original_points.at(original_points.size() - 1),
 		                               image_width - 1);
 		        //clamp to image vertical bounds
 		        y = std::max(y, 0.0);
-		        y = std::min(y, image_height - 1);
-		        arma::vec2 v
+		        y = std::min(y, image_height - 1.0);
+		        arma::vec2 v;
 		        v[0] = image_width - 1;
 		        v[1] = y;
 		        original_points.push_back(v);
@@ -171,7 +171,7 @@ namespace modules {
 		    it_end = it_start + 1;
 		    for (int x = 0; x < image_width; x++) {
 		        // consider hull points either side of current x value
-		        while (x > it_end->x) {
+		        while (x > (*it_end)[0]) {
 		            it_start++;
 		            it_end++;
 		        }
@@ -211,7 +211,7 @@ namespace modules {
 
 
 		double GreenHorizon::interpolate(arma::vec2 p1, arma::vec2 p2, double x){
-			return p1[1] + (p2[1] - p1[1]) * (x - p1[0]]) / (p2[0] - p1[0]);
+			return p1[1] + (p2[1] - p1[1]) * (x - p1[0]) / (p2[0] - p1[0]);
 		}
 
 		const std::vector<arma::vec2>& GreenHorizon::getInterpolatedPoints() const
@@ -219,7 +219,7 @@ namespace modules {
 		    return interpolated_points;
 		}
 
-		const std::vector<arma::vec2>& GreenHorizon::getInterpolatedSubset(unsigned int spacing) const
+		std::vector<arma::vec2> GreenHorizon::getInterpolatedSubset(unsigned int spacing) const
 		{
 		    std::vector<arma::vec2> subset;
 		    for(unsigned int i=0; i<interpolated_points.size(); i+=spacing) {

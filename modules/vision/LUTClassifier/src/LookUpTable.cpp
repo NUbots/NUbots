@@ -73,7 +73,7 @@ namespace modules{
             LUT = LUTbuffer;
         }
 
-        unsigned int LookUpTable::getLUTIndex(const messages::input::Image::Pixel& colour){
+        const unsigned int LookUpTable::getLUTIndex(const messages::input::Image::Pixel& colour) const{
             unsigned int index = 0;
             index += ((colour.y >> 1) <<14);
             index += ((colour.cb >> 1) <<7);
@@ -81,7 +81,7 @@ namespace modules{
             return index;
         }
 
-        Colour LookUpTable::getColourFromIndex(int index){
+        const Colour LookUpTable::getColourFromIndex(int index) const{
             switch(index)
             {
                 case 0:  return unclassified;

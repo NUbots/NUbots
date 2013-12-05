@@ -25,7 +25,8 @@
 #include <armadillo>
 
 #include "messages/input/Image.h"
- 
+#include "LookUpTable.h"
+
 namespace modules {
     namespace vision {
 
@@ -117,8 +118,7 @@ namespace modules {
                 // Compare both elements in both centre points for equality.
                 return ((lhs.m_centre[0] == rhs.m_centre[0]) && (lhs.m_centre[1] == rhs.m_centre[1]));
             } 
-    };
-    
+        };    
     }  // vision
 }  // modules
 

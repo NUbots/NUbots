@@ -88,8 +88,11 @@ namespace modules {
             {
                 return (A[0] - O[0]) * (B[1] - O[1]) - (A[1] - O[1]) * (B[0] - O[0]);
             }
-
+            
+            double interpolate(arma::vec2 p1, arma::vec2 p2, double x);
+            //! Returns the interpolated points for the entire screen width.
             const std::vector<arma::vec2>& getInterpolatedPoints() const;
+            //! Returns a list of interpolated points with a given spacing.
             std::vector<arma::vec2> getInterpolatedSubset(unsigned int spacing) const;
 
             static constexpr const char* CONFIGURATION_PATH = "GreenHorizon.json";

@@ -64,7 +64,7 @@ namespace modules{
         */
         void zero();
 
-        Colour classifyPixel(const messages::input::Image::Pixel& p)
+        const Colour classifyPixel(const messages::input::Image::Pixel& p) const
         {
             return getColourFromIndex(LUT[getLUTIndex(p)]); // 7bit LUT
         }
@@ -74,12 +74,12 @@ namespace modules{
         *  @param p The pixel to be classified.
         *  @return Returns the colour index for the given pixel.
         */
-        unsigned int getLUTIndex(const messages::input::Image::Pixel& colour);
+        const unsigned int getLUTIndex(const messages::input::Image::Pixel& colour) const;
         /*!
         *  @param p The Colour enum value of the pixel to be classified.
         *  @return Returns the classified colour for the given pixel colour number.
         */
-        Colour getColourFromIndex(int index);        
+        const Colour getColourFromIndex(int index) const;        
         /*!
         Gets the name of the given colour.
         @param colour The colour name desired.

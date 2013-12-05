@@ -18,65 +18,68 @@
  */
 
 #include "ColourSegment.h"
+namespace modules{
+    namespace vision{
+        void ColourSegment::set(const arma::vec2& start, const arma::vec2& end, const Colour& colour) {
+            m_colour = colour;
 
-void ColourSegment::set(const arma::vec2& start, const arma::vec2& end, const Colour& colour) {
-    m_colour = colour;
+            m_start = start;
+            m_end = end;
 
-    m_start = start;
-    m_end = end;
+            m_length_pixels = arma::norm((start - end), 2);     // Length of the vector between the two points.
+        //    m_length_pixels = (m_start - m_end).abs();        // original code.
 
-    m_length_pixels = arma::norm((start - end), 2);     // Length of the vector between the two points.
-//    m_length_pixels = (m_start - m_end).abs();        // original code.
+            m_centre = (m_start + m_end) * 0.5;
+        }
 
-    m_centre = (m_start + m_end) * 0.5;
-}
+        void ColourSegment::setColour(const Colour& colour) {
+            m_colour = colour;
+        }
 
-void ColourSegment::setColour(const Colour& colour) {
-    m_colour = colour;
-}
+        bool ColourSegment::join(const ColourSegment &other) {
+            //colours don't match - segments cannot be joined
+            if(m_colour != other.m_colour)
+                return false;
 
-bool ColourSegment::join(const ColourSegment &other) {
-    //colours don't match - segments cannot be joined
-    if(m_colour != other.m_colour)
-        return false;
+            if(m_start == other.m_end) {
+                m_start = other.m_start;
+            }
 
-    if(m_start == other.m_end) {
-        m_start = other.m_start;
+            else if(m_end == other.m_start) {
+                m_end = other.m_end;
+            }
+
+            //there are no matching endpoints
+            else {
+                return false;
+            }
+
+            m_length_pixels = arma::norm((start - end), 2);     // Length of the vector between the two points.
+        //    m_length_pixels = (m_start - m_end).abs();        // original code.
+
+            m_centre = (m_start + m_end) * 0.5;
+
+            return true;
+        }
+
+        /*! @brief Stream insertion operator for a single ColourSegment.
+         *      The segment is terminated by a newline.
+         */
+        std::ostream& operator<< (std::ostream& output, const ColourSegment& c) {
+            output << c.m_start << " - " << c.m_end << " length(pixels): " << c.m_length_pixels << " colour: " << LookUpTable::getColourName(c.m_colour) << std::endl;
+
+            return output;
+        }
+
+        /*! @brief Stream insertion operator for a vector of ColourSegments.
+         *      Each segment is terminated by a newline.
+         *  @relates ColourSegment
+         */
+        std::ostream& operator<< (std::ostream& output, const std::vector<ColourSegment>& c) {
+            for (size_t i = 0; i < c.size(); i++)
+                output << c[i];
+
+            return output;
+        }
     }
-
-    else if(m_end == other.m_start) {
-        m_end = other.m_end;
-    }
-
-    //there are no matching endpoints
-    else {
-        return false;
-    }
-
-    m_length_pixels = arma::norm((start - end), 2);     // Length of the vector between the two points.
-//    m_length_pixels = (m_start - m_end).abs();        // original code.
-
-    m_centre = (m_start + m_end) * 0.5;
-
-    return true;
-}
-
-/*! @brief Stream insertion operator for a single ColourSegment.
- *      The segment is terminated by a newline.
- */
-std::ostream& operator<< (std::ostream& output, const ColourSegment& c) {
-    output << c.m_start << " - " << c.m_end << " length(pixels): " << c.m_length_pixels << " colour: " << LookUpTable::getColourName(c.m_colour) << std::endl;
-
-    return output;
-}
-
-/*! @brief Stream insertion operator for a vector of ColourSegments.
- *      Each segment is terminated by a newline.
- *  @relates ColourSegment
- */
-std::ostream& operator<< (std::ostream& output, const std::vector<ColourSegment>& c) {
-    for (size_t i = 0; i < c.size(); i++)
-        output << c[i];
-
-    return output;
 }
