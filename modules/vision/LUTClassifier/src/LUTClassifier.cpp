@@ -27,10 +27,10 @@ namespace modules {
         using messages::input::Image;
         using messages::support::Configuration;
         
-        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) , current_LUT(0){
            
-            on<Trigger<Configuration<LUTClassifier>>>([this](const Configuration<LUTClassifier>& constants) {
-            	//HACK FOR RC2013
+            on<Trigger<Configuration<VisionConstants>>>([this](const Configuration<VisionConstants>& constants) {
+           		//HACK FOR RC2013
 				// WHITE_SIDE_IS_BLUE = constants.config["WHITE_SIDE_IS_BLUE"];
 				// NON_WHITE_SIDE_CHECK = constants.config["NON_WHITE_SIDE_CHECK"];
 				// UPPER_WHITE_THRESHOLD = constants.config["UPPER_WHITE_THRESHOLD"];
@@ -109,6 +109,18 @@ namespace modules {
 				// RANSAC_MAX_ANGLE_DIFF_TO_MERGE = constants.config["RANSAC_MAX_ANGLE_DIFF_TO_MERGE"]; 
 				// RANSAC_MAX_DISTANCE_TO_MERGE = constants.config["RANSAC_MAX_DISTANCE_TO_MERGE"]; 
             });
+
+			on<Trigger<Configuration<LUTLocations>>>([this](const Configuration<LUTLocations>& locations){
+				for(string& location : locations.config){
+					LookUpTable LUT;
+					bool loaded = LUT.loadLUTFromFile(location);
+					if(loaded){
+						LUTs.push_back(LUT);	
+					} else {
+						log<NUClear::ERROR>("LUT ", location, " has not loaded successfully." );
+					}
+				}
+			}
 
             on<Trigger<Image>>([this](const Image& image){
 
