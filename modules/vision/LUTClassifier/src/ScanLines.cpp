@@ -59,7 +59,7 @@ namespace modules {
 			return classifications;
 		}
 
-		std::vector<std::vector<ColourSegment>> ScanLines::classifyVerticalScanLines(const Image& originalImage, const std::vector<arma::vec2>& greenHorizon, const LookUpTable& LUT) {
+		std::vector<std::vector<ColourSegment>> ScanLines::classifyVerticalScanLines(const Image& originalImage, const GreenHorizon& greenHorizon, const LookUpTable& LUT) {
 			const std::vector<arma::vec2>& verticalStartPoints = greenHorizon.getInterpolatedSubset(VERTICAL_SCANLINE_SPACING);
 			std::vector<std::vector<ColourSegment>> classifications;
 

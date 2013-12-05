@@ -218,5 +218,14 @@ namespace modules {
 		{
 		    return interpolated_points;
 		}
+
+		const std::vector<arma::vec2>& GreenHorizon::getInterpolatedSubset(unsigned int spacing) const
+		{
+		    std::vector<arma::vec2> subset;
+		    for(unsigned int i=0; i<interpolated_points.size(); i+=spacing) {
+		        subset.push_back(interpolated_points.at(i));
+		    }
+		    return subset;
+		}
 	}
 }

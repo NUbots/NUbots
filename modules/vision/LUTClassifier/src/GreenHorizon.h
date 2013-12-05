@@ -44,7 +44,7 @@ namespace modules {
             float GREEN_HORIZON_UPPER_THRESHOLD_MULT;
             std::vector<arma::vec2> original_points;      //! @variable The original hull points.
             std::vector<arma::vec2> interpolated_points;  //! @variable The interpolated points.
-        public: 
+        public:
             GreenHorizon(){}
             
             /*! @brief Sets configured parameters for the green horizon.
@@ -90,6 +90,7 @@ namespace modules {
             }
 
             const std::vector<arma::vec2>& getInterpolatedPoints() const;
+            std::vector<arma::vec2> getInterpolatedSubset(unsigned int spacing) const;
 
             static constexpr const char* CONFIGURATION_PATH = "GreenHorizon.json";
         };
