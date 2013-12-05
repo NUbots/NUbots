@@ -24,16 +24,14 @@ namespace modules {
 
         using messages::input::Image;
         using messages::support::Configuration;
+        
+        GreenHorizon::GreenHorizon() :
+            GREEN_HORIZON_SCAN_SPACING(),
+            GREEN_HORIZON_MIN_GREEN_PIXELS(),
+            GREEN_HORIZON_UPPER_THRESHOLD_MULT(){}
 
-        GreenHorizon::GreenHorizon(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-            on<Trigger<Configuration<GreenHorizon>>>([this](const Configuration<GreenHorizon>& constants) {
-				GREEN_HORIZON_SCAN_SPACING = constants.config["GREEN_HORIZON_SCAN_SPACING"];
-				GREEN_HORIZON_MIN_GREEN_PIXELS = constants.config["GREEN_HORIZON_MIN_GREEN_PIXELS"];
-				GREEN_HORIZON_UPPER_THRESHOLD_MULT = constants.config["GREEN_HORIZON_UPPER_THRESHOLD_MULT"];
-            });
-        }
 
-        std::vector<arma::vec> GreenHorizon::calculateGreenHorizon(const Image& img) {
+        std::vector<arma::vec> GreenHorizon::calculateGreenHorizon(const Image& img, const LookUpTable& LUT) {
 
         	//NEEDS KINEMATICS ! const Horizon& kin_hor = Last<1,KinematicsHorizon>;
 
@@ -69,7 +67,7 @@ namespace modules {
 		        //Search for green below the kinematics horizon
 		        for (unsigned int y = kin_hor_y; y < height; y++) {
 
-		            if (isPixelGreen(img(x, y))) {
+		            if (isPixelGreen(img(x, y),LUT)) {
 		                if (green_count == 0) {
 		                    green_top = y;
 		                }
@@ -164,9 +162,8 @@ namespace modules {
 	    }
 
 
-        bool GreenHorizon::isPixelGreen(const messages::input::Image::Pixel& p) {
-        	//TODO LUT
-        	return true;
+        bool GreenHorizon::isPixelGreen(const messages::input::Image::Pixel& p, const LookUpTable& LUT) {
+        	return LUT.classifyPixel(p) == green; //green is a Colour enum, defined in LookUpTable.h
         }
 
 	}

@@ -26,7 +26,10 @@
 
 #include "messages/input/Image.h"
 #include "messages/support/Configuration.h"
+<<<<<<< HEAD
 #include "ColourSegment.h"
+=======
+>>>>>>> c55d84a304dc07d8af68bc9ca4a939f84df1f47d
 #include "LookUpTable.h"
 
 namespace modules {
@@ -39,10 +42,14 @@ namespace modules {
          */
         class ScanLines : public NUClear::Reactor {
         private:
-            unsigned int VISION_SCANLINE_VERBOSITY;
             unsigned int HORIZONTAL_SCANLINE_SPACING;
             unsigned int VERTICAL_SCANLINE_SPACING;
 
+            setParameters( unsigned int HORIZONTAL_SCANLINE_SPACING_,
+                           unsigned int VERTICAL_SCANLINE_SPACING_){
+                HORIZONTAL_SCANLINE_SPACING = HORIZONTAL_SCANLINE_SPACING_;
+                VERTICAL_SCANLINE_SPACING = VERTICAL_SCANLINE_SPACING_;
+            }
             /*! @brief Returns a std::vector of ColourSegments detailing the
             horizontal colour segments in the image.
             */

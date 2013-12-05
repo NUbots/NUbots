@@ -25,14 +25,12 @@ namespace modules {
         using messages::input::Image;
         using messages::support::Configuration;
 
-        ScanLines::ScanLines(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-            on<Trigger<Configuration<ScanLines>>>([this](const Configuration<ScanLines>& constants) {
-				HORIZONTAL_SCANLINE_SPACING = constants.config["HORIZONTAL_SCANLINE_SPACING"];
-				VERTICAL_SCANLINE_SPACING = constants.config["VERTICAL_SCANLINE_SPACING"];
-				VISION_SCANLINE_VERBOSITY =  constants.config["VISION_SCANLINE_VERBOSITY"];
-            });
+        ScanLines::ScanLines() :
+        				HORIZONTAL_SCANLINE_SPACING(),
+  						VERTICAL_SCANLINE_SPACING(){}
 
-        }
+
+
 		std::vector<int> ScanLines::generateScanLines(const Image& img, const std::vector<arma::vec>& greenHorizon) {
 			std::vector<int> horizontalScanLines;
 			const std::vector<arma::vec::fixed<2>>& horizonPoints = greenHorizon().getInterpolatedPoints();   // Need this to get the left and right

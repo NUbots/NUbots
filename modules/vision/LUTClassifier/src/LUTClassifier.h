@@ -32,9 +32,14 @@ namespace modules {
         struct VisionConstants{
             static constexpr const char* CONFIGURATION_PATH = "VisionConstants.json";
         };
-
         struct LUTLocations{
             static constexpr const char* CONFIGURATION_PATH = "LUTLocations.json";
+        };
+        struct GreenHorizonConfig{
+            static constexpr const char* CONFIGURATION_PATH = "GreenHorizon.json";
+        };
+        struct ScanLinesConfig{
+            static constexpr const char* CONFIGURATION_PATH = "ScanLines.json";
         };
         /**
          * Classifies a raw image, producing the colour segments for object detection
@@ -109,7 +114,7 @@ namespace modules {
             // float RANSAC_MAX_ANGLE_DIFF_TO_MERGE;
             // float RANSAC_MAX_DISTANCE_TO_MERGE;
             std::vector<LookUpTable> LUTs;
-            unsigned int current_LUT;
+            unsigned int current_LUT_index;
         public:
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
              
