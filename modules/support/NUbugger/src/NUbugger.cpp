@@ -26,169 +26,201 @@
 #include "messages/NUAPI.pb.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/Image.h"
+#include "utility/NUbugger/NUgraph.h"
 
 #include "utility/image/ColorModelConversions.h"
 
-using utility::image::RGB;
-using utility::image::YCbCr;
+using messages::platform::darwin::DarwinSensors;
+using messages::input::Image;
+using NUClear::DEBUG;
+using utility::NUbugger::graph;
 
 namespace modules {
-    namespace support {
+	namespace support {
 
-        // Implement our impl class as per the pimpl idiom.
-        class NUbugger::impl {
-            public:
-                zmq::socket_t pub;
+		// Implement our impl class as per the pimpl idiom.
+		class NUbugger::impl {
+			public:
+				zmq::socket_t pub;
 
-                std::mutex mutex;
+				std::mutex mutex;
 
-                impl() : pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {}
+				impl() : pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {}
 
-                /**
-                 * This method needs to be used over pub.send as all calls to
-                 * pub.send need to be synchronized with a concurrency primative
-                 * (such as a mutex)
-                 */
-                void send(zmq::message_t& packet) {
-                    std::lock_guard<std::mutex> lock(mutex);
-                    pub.send(packet);
-                }
-        };
+				/**
+				 * This method needs to be used over pub.send as all calls to
+				 * pub.send need to be synchronized with a concurrency primative
+				 * (such as a mutex)
+				 */
+				void send(zmq::message_t& packet) {
+					std::lock_guard<std::mutex> lock(mutex);
+					pub.send(packet);
+				}
 
-        NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-            
-            // Set our high water mark
-            int hwm = 3;
-            m->pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
-            
-            // Bind to port 12000
-            m->pub.bind("tcp://*:12000");
+				void send(API::Message message) {
+					auto serialized = message.SerializeAsString();
+					zmq::message_t packet(serialized.size());
+					memcpy(packet.data(), serialized.data(), serialized.size());
+					send(packet);
+				}
+		};
 
-            // This trigger gets the output from the sensors (unfiltered)
-            on<Trigger<messages::platform::darwin::DarwinSensors>>([this](const messages::platform::darwin::DarwinSensors& sensors) {
-                API::Message message;
+		NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+			// Set our high water mark
+			int hwm = 3;
+			m->pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
 
-                message.set_type(API::Message::SENSOR_DATA);
-                message.set_utc_timestamp(std::time(0));
+			// Bind to port 12000
+			m->pub.bind("tcp://*:12000");
 
-                auto* sensorData = message.mutable_sensor_data();
+			on<Trigger<DataPoint>>([this](const DataPoint& data_point) {
+				API::Message message;
+				message.set_type(API::Message::DATA_POINT);
+				message.set_utc_timestamp(std::time(0));
 
-                for (int i = 0; i < 20; ++i) {
+				auto* dataPoint = message.mutable_datapoint();
+				dataPoint->set_label(data_point.label);
+				for (auto value : data_point.values) {
+					dataPoint->add_value(value);
+				}
 
-                    auto* servo = sensorData->add_motor();
+				m->send(message);
+			});
 
-                    servo->set_position(sensors.servo[i].presentPosition);
-                    servo->set_velocity(sensors.servo[i].presentSpeed);
-                    servo->set_target(sensors.servo[i].goalPosition);
-                    servo->set_stiffness(sensors.servo[i].pGain);
-                    servo->set_current(sensors.servo[i].load);
-                    servo->set_torque(sensors.servo[i].torqueLimit);
-                    servo->set_temperature(sensors.servo[i].temperature);
-                }
+			// This trigger gets the output from the sensors (unfiltered)
+			on<Trigger<DarwinSensors>>([this](const DarwinSensors& sensors) {
+				API::Message message;
 
-                auto* gyro = sensorData->mutable_gyro();
-                gyro->add_float_value(sensors.gyroscope.x);
-                gyro->add_float_value(sensors.gyroscope.y);
-                gyro->add_float_value(sensors.gyroscope.z);
+				message.set_type(API::Message::SENSOR_DATA);
+				message.set_utc_timestamp(std::time(0));
 
-                auto* accel = sensorData->mutable_accelerometer();
-                accel->add_float_value(sensors.acceleronometer.x);
-                accel->add_float_value(sensors.acceleronometer.y);
-                accel->add_float_value(sensors.acceleronometer.z);
+				auto* sensorData = message.mutable_sensor_data();
 
-                auto* orient = sensorData->mutable_orientation();
-                orient->add_float_value(0);
-                orient->add_float_value(0);
-                orient->add_float_value(0);
+				for (int i = 0; i < 20; ++i) {
 
-                auto serialized = message.SerializeAsString();
-                zmq::message_t packet(serialized.size());
-                memcpy(packet.data(), serialized.data(), serialized.size());
-                m->send(packet);
-            });
+					auto* servo = sensorData->add_motor();
 
-            on<Trigger<messages::input::Image>, Options<Single, Priority<NUClear::LOW>>>([this](const messages::input::Image& image) {
+					servo->set_position(sensors.servo[i].presentPosition);
+					servo->set_velocity(sensors.servo[i].presentSpeed);
+					servo->set_target(sensors.servo[i].goalPosition);
+					servo->set_stiffness(sensors.servo[i].pGain);
+					servo->set_current(sensors.servo[i].load);
+					servo->set_torque(sensors.servo[i].torqueLimit);
+					servo->set_temperature(sensors.servo[i].temperature);
+				}
 
-                API::Message message;
-                message.set_type(API::Message::VISION);
-                message.set_utc_timestamp(std::time(0));
-                auto* visionData = message.mutable_vision();
-                auto* imageData = visionData->mutable_image();
-                std::string* imageBytes = imageData->mutable_data();
+				auto* gyro = sensorData->mutable_gyro();
+				gyro->add_float_value(sensors.gyroscope.x);
+				gyro->add_float_value(sensors.gyroscope.y);
+				gyro->add_float_value(sensors.gyroscope.z);
 
-                // Reserve enough space in the image data to store the output
-                imageBytes->resize(image.size());
-                imageData->set_width(image.width());
-                imageData->set_height(image.height());
+				auto* accel = sensorData->mutable_accelerometer();
+				accel->add_float_value(sensors.accelerometer.x);
+				accel->add_float_value(sensors.accelerometer.y);
+				accel->add_float_value(sensors.accelerometer.z);
 
-                // Open the memory of the string as a file (using some dastardly hackery)
-                auto memFile = fmemopen(const_cast<char*>(imageBytes->data()), imageBytes->size(), "wb");
+				emit(graph(
+					"Accelerometer", 
+					sensors.accelerometer.x,
+					sensors.accelerometer.y,
+					sensors.accelerometer.z
+					
+				));
 
-                // Our jpeg compression structures
-                jpeg_compress_struct jpegC;
-                jpeg_error_mgr jpegErr;
+				emit(graph(
+					"Gyro",
+					sensors.gyroscope.x,
+					sensors.gyroscope.y,
+					sensors.gyroscope.z
+				));
 
-                // Set our error handler on our Config object
-                jpegC.err = jpeg_std_error(&jpegErr);
+				auto* orient = sensorData->mutable_orientation();
+				orient->add_float_value(0);
+				orient->add_float_value(0);
+				orient->add_float_value(0);
 
-                // Create our compression object
-                jpeg_create_compress(&jpegC);
+				m->send(message);
+			});
 
-                // Set our output to the file
-                jpeg_stdio_dest(&jpegC, memFile);
+			on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
 
-                // Set information about our image
-                jpegC.image_width = image.width();
-                jpegC.image_height = image.height();
-                jpegC.input_components = 3;
-                jpegC.in_color_space = JCS_YCbCr;
+				API::Message message;
+				message.set_type(API::Message::VISION);
+				message.set_utc_timestamp(std::time(0));
+				auto* visionData = message.mutable_vision();
+				auto* imageData = visionData->mutable_image();
+				std::string* imageBytes = imageData->mutable_data();
 
-                // Set the default compression parameters
-                jpeg_set_defaults(&jpegC);
+				// Reserve enough space in the image data to store the output
+				imageBytes->resize(image.size());
+				imageData->set_width(image.width());
+				imageData->set_height(image.height());
 
-                // Start compression
-                jpeg_start_compress(&jpegC, true);
+				// Open the memory of the string as a file (using some dastardly hackery)
+				auto memFile = fmemopen(const_cast<char*>(imageBytes->data()), imageBytes->size(), "wb");
 
-                // Allocate some space for our row data
-                std::unique_ptr<JSAMPLE[]> row = std::unique_ptr<JSAMPLE[]>(new JSAMPLE[image.width() * 3]);
+				// Our jpeg compression structures
+				jpeg_compress_struct jpegC;
+				jpeg_error_mgr jpegErr;
 
-                // Read in each scanline
-                while (jpegC.next_scanline < jpegC.image_height) {
-                    // Allocate a pointer to our row (since it likes to have them sparse)
-                    JSAMPLE* rowPtr = row.get();
-                    JSAMPARRAY ptr = &rowPtr;
+				// Set our error handler on our Config object
+				jpegC.err = jpeg_std_error(&jpegErr);
 
-                    // Now load the data into the row from image
-                    for(size_t i = 0; i < image.width(); ++i) {
-                        row[i * 3 + 0] = image(i, jpegC.next_scanline).y;
-                        row[i * 3 + 1] = image(i, jpegC.next_scanline).cb;
-                        row[i * 3 + 2] = image(i, jpegC.next_scanline).cr;
-                    }
+				// Create our compression object
+				jpeg_create_compress(&jpegC);
 
-                    // Write this scanline in
-                    jpeg_write_scanlines(&jpegC, ptr, 1);
-                }
+				// Set our output to the file
+				jpeg_stdio_dest(&jpegC, memFile);
 
-                // Finish our compression
-                jpeg_finish_compress(&jpegC);
+				// Set information about our image
+				jpegC.image_width = image.width();
+				jpegC.image_height = image.height();
+				jpegC.input_components = 3;
+				jpegC.in_color_space = JCS_YCbCr;
 
-                // Close the memory file)
-                fclose(memFile);
+				// Set the default compression parameters
+				jpeg_set_defaults(&jpegC);
 
-                // Destroy the compression object (free memory)
-                jpeg_destroy_compress(&jpegC);
+				// Start compression
+				jpeg_start_compress(&jpegC, true);
 
-                auto serialized = message.SerializeAsString();
-                zmq::message_t packet(serialized.size());
-                memcpy(packet.data(), serialized.data(), serialized.size());
-                m->send(packet);
-            });
+				// Allocate some space for our row data
+				auto row = std::unique_ptr<JSAMPLE[]>(new JSAMPLE[image.width() * 3]);
 
-            // When we shutdown, close our publisher
-            on<Trigger<Shutdown>>([this](const Shutdown&) {
-                m->pub.close();
-            });
-        }
-        
-    }  // support
-}  // modules
+				// Read in each scanline
+				while (jpegC.next_scanline < jpegC.image_height) {
+					// Allocate a pointer to our row (since it likes to have them sparse)
+					JSAMPLE* rowPtr = row.get();
+					JSAMPARRAY ptr = &rowPtr;
+
+					// Now load the data into the row from image
+					for(size_t i = 0; i < image.width(); ++i) {
+						row[i * 3 + 0] = image(i, jpegC.next_scanline).y;
+						row[i * 3 + 1] = image(i, jpegC.next_scanline).cb;
+						row[i * 3 + 2] = image(i, jpegC.next_scanline).cr;
+					}
+
+					// Write this scanline in
+					jpeg_write_scanlines(&jpegC, ptr, 1);
+				}
+
+				// Finish our compression
+				jpeg_finish_compress(&jpegC);
+
+				// Close the memory file)
+				fclose(memFile);
+
+				// Destroy the compression object (free memory)
+				jpeg_destroy_compress(&jpegC);
+
+				m->send(message);
+			});
+
+			// When we shutdown, close our publisher
+			on<Trigger<Shutdown>>([this](const Shutdown&) {
+				m->pub.close();
+			});
+		}
+
+	} // support
+} // modules

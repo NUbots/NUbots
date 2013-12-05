@@ -39,18 +39,19 @@ namespace messages {
              */
             struct DarwinSensors {
 
-                enum Error {
-                    OK              = 0x0000,
-                    INPUT_VOLTAGE   = 0x0001,
-                    ANGLE_LIMIT     = 0x0002,
-                    OVERHEATING     = 0x0004,
-                    RANGE           = 0x0008,
-                    CHECKSUM        = 0x0010,
-                    OVERLOAD        = 0x0020,
-                    INSTRUCTION     = 0x0040,
-                    CORRUPT_DATA    = 0x0080,
-                    TIMEOUT         = 0x0100
-                };
+			// bitmask values
+	        enum Error {
+	            OK              = 0, // not really a flag but the lack of any other flag
+	            INPUT_VOLTAGE   = 1 << 0,
+	            ANGLE_LIMIT     = 1 << 1,
+	            OVERHEATING     = 1 << 2,
+	            RANGE           = 1 << 3,
+	            CHECKSUM        = 1 << 4,
+	            OVERLOAD        = 1 << 5,
+	            INSTRUCTION     = 1 << 6,
+	            CORRUPT_DATA    = 1 << 7,
+	            TIMEOUT         = 1 << 8
+	        };
 
                 uint8_t cm730ErrorFlags;
 
@@ -79,11 +80,11 @@ namespace messages {
 
                 float voltage;
 
-                struct Acceleronometer {
-                    float x;
-                    float y;
-                    float z;
-                } acceleronometer;
+		        struct Accelerometer {
+		            float x;
+		            float y;
+		            float z;
+		        } accelerometer;
 
                 struct Gyroscope {
                     float x;
