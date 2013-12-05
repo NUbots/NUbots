@@ -25,6 +25,7 @@
 #include <armadillo>
 #include "messages/input/Image.h"
 #include "messages/support/Configuration.h"
+#include "LookUpTable.h"
 
 namespace modules {
     namespace vision {
@@ -36,19 +37,23 @@ namespace modules {
          */
         class ScanLines : public NUClear::Reactor {
         private:
-            unsigned int VISION_SCANLINE_VERBOSITY;
             unsigned int HORIZONTAL_SCANLINE_SPACING;
             unsigned int VERTICAL_SCANLINE_SPACING;
 
+            setParameters( unsigned int HORIZONTAL_SCANLINE_SPACING_,
+                           unsigned int VERTICAL_SCANLINE_SPACING_){
+                HORIZONTAL_SCANLINE_SPACING = HORIZONTAL_SCANLINE_SPACING_;
+                VERTICAL_SCANLINE_SPACING = VERTICAL_SCANLINE_SPACING_;
+            }
             /*! @brief Returns a std::vector of ColourSegments detailing the
             horizontal colour segments in the image.
             */
-            std::vector<ColourSegment> ScanLines::classifyHorizontalScan(const messages::input::Image& image, unsigned int y, const LookUpTable& LUT));
+            std::vector<ColourSegment> classifyHorizontalScan(const messages::input::Image& image, unsigned int y, const LookUpTable& LUT));
 
             /*! @brief Returns a std::vector of ColourSegments detailing the
             vertical colour segments in the image.
             */
-            std::vector<ColourSegment> ScanLines::classifyVerticalScan(const messages::input::Image& image, const Vector2<double> &start, const LookUpTable& LUT));
+            std::vector<ColourSegment> classifyVerticalScan(const messages::input::Image& image, const Vector2<double> &start, const LookUpTable& LUT));
 
         public:
             /*! @brief Loads configuration file.

@@ -25,6 +25,7 @@
 #include <armadillo>
 #include "messages/input/Image.h"
 #include "messages/support/Configuration.h"
+#include "LookUpTable.h"
 
 namespace modules {
     namespace vision {
@@ -34,7 +35,7 @@ namespace modules {
          *
          * @author Alex Biddulph
          */
-        class GreenHorizon : public NUClear::Reactor {
+        class GreenHorizon {
         private:
             unsigned int GREEN_HORIZON_SCAN_SPACING;
             unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS;
@@ -45,11 +46,18 @@ namespace modules {
             */ 
             GreenHorizon(std::unique_ptr<NUClear::Environment> environment);
 
+            setParameters(unsigned int GREEN_HORIZON_SCAN_SPACING_,
+                          unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS_,
+                          float GREEN_HORIZON_UPPER_THRESHOLD_MULT_){
+                GREEN_HORIZON_SCAN_SPACING = GREEN_HORIZON_SCAN_SPACING_;
+                GREEN_HORIZON_MIN_GREEN_PIXELS = GREEN_HORIZON_MIN_GREEN_PIXELS_;
+                GREEN_HORIZON_UPPER_THRESHOLD_MULT = GREEN_HORIZON_UPPER_THRESHOLD_MULT_;
+            }
             /*! @brief Computes the visual green horizon.
                 Note that the use of kinematics horizon has been replaced by dummmy code 
                 @param image The raw image
             */ 
-            std::vector<arma::vec> CalculateGreenHorizon(const messages::input::Image& image);
+            std::vector<arma::vec> CalculateGreenHorizon(const messages::input::Image& image, const LookUpTable& LUT);
             
             /*! @brief Returns a std::list of points on the convex hull in counter-clockwise order.
              Note: the last point in the returned std::list is the same as the first one.
@@ -58,7 +66,7 @@ namespace modules {
 
             /*! @brief Returns a true if the specified pixel is coloured green.
              */
-            bool isPixelGreen(const messages::input::Image::Pixel& p);
+            bool isPixelGreen(const messages::input::Image::Pixel& p, const LookUpTable& LUT);
 
 
             /*! @brief  2D cross product of OA and OB std::vectors, i.e. z-component of their 3D cross product.

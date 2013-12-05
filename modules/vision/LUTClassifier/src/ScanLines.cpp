@@ -25,14 +25,12 @@ namespace modules {
         using messages::input::Image;
         using messages::support::Configuration;
 
-        ScanLines::ScanLines(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-            on<Trigger<Configuration<ScanLines>>>([this](const Configuration<ScanLines>& constants) {
-				HORIZONTAL_SCANLINE_SPACING = constants.config["HORIZONTAL_SCANLINE_SPACING"];
-				VERTICAL_SCANLINE_SPACING = constants.config["VERTICAL_SCANLINE_SPACING"];
-				VISION_SCANLINE_VERBOSITY =  constants.config["VISION_SCANLINE_VERBOSITY"];
-            });
+        ScanLines::ScanLines() :
+        				HORIZONTAL_SCANLINE_SPACING(),
+  						VERTICAL_SCANLINE_SPACING(){}
 
-        }
+
+
 		std::vector<int> ScanLines::generateScanLines(const Image& img, const std::vector<arma::vec>& greenHorizon) {
 			std::vector<int> horizontalScanLines;
 			const std::vector<Vector2<double> >& horizonPoints = greenHorizon().getInterpolatedPoints();   // Need this to get the left and right
@@ -120,15 +118,6 @@ namespace modules {
 
 			segment.set(Point(startPosition, y), Point(x - 1, y), startColour);
 			result.push_back(segment);
-
-			#if VISION_SCANLINE_VERBOSITY > 1
-				Point end;
-
-				for(int i = 0; i < result.size(); i++) {
-					log<NUClear::DEBUG>(result.at(i).getStart(), " ", result.at(i).getEnd(), " ", (end==result.at(i).getStart()));
-					end = result.at(i).getEnd();
-				}
-			#endif
 
 			return result;
 		}

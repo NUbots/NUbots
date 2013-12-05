@@ -27,7 +27,11 @@ namespace modules {
         using messages::input::Image;
         using messages::support::Configuration;
         
-        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) , current_LUT(0){
+        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : 
+        										Reactor(std::move(environment)) , current_LUT(0),
+        										green_horizon(),
+        										scan_lines()
+        {
            
             on<Trigger<Configuration<VisionConstants>>>([this](const Configuration<VisionConstants>& constants) {
            		//HACK FOR RC2013
@@ -109,24 +113,37 @@ namespace modules {
 				// RANSAC_MAX_ANGLE_DIFF_TO_MERGE = constants.config["RANSAC_MAX_ANGLE_DIFF_TO_MERGE"]; 
 				// RANSAC_MAX_DISTANCE_TO_MERGE = constants.config["RANSAC_MAX_DISTANCE_TO_MERGE"]; 
             });
-
+			//Load LUTs
 			on<Trigger<Configuration<LUTLocations>>>([this](const Configuration<LUTLocations>& locations){
 				for(string& location : locations.config){
 					LookUpTable LUT;
 					bool loaded = LUT.loadLUTFromFile(location);
 					if(loaded){
-						LUTs.push_back(LUT);	
+						LUTs.push_back(LUT);
 					} else {
 						log<NUClear::ERROR>("LUT ", location, " has not loaded successfully." );
 					}
 				}
 			}
 
+			//Load in greenhorizon parameters
+			on<Trigger<Configuration<GreenHorizonConfig>>>([this](const Configuration<GreenHorizonConfig>& constants){
+				green_horizon.setParameters(constants.config["GREEN_HORIZON_SCAN_SPACING"],
+											constants.config["GREEN_HORIZON_MIN_GREEN_PIXELS"],
+											constants.config["GREEN_HORIZON_UPPER_THRESHOLD_MULT"]);
+			}
+
+			//Load in scanline parameters
+			on<Trigger<Configuration<ScanLinesConfig>>>([this](const Configuration<GreenHorizonConfig>& constants){
+				scan_lines.setParameters(constants.config["HORIZONTAL_SCANLINE_SPACING"],
+										 constants.config["VERTICAL_SCANLINE_SPACING"]);
+			}
+
             on<Trigger<Image>>([this](const Image& image){
 
-            	std::vector<arma::vec> green_horizon_points = calculateGreenHorizon(image);
+            	std::vector<arma::vec> green_horizon_points = calculateGreenHorizon(image,LUTs[current_LUT_index]);
 
-            	std::vector<int> scan_lines = generateScanLines(image,green_horizon_points);
+            	std::vector<int> scan_lines = generateScanLines(image,green_horizon_points,LUTs[current_LUT_index]);
 
             });
         }
