@@ -37,15 +37,15 @@ namespace modules {
 			arma::vec2 left = horizonPoints.front();
 			arma::vec2 right = horizonPoints.back();
 
-			if(left[1] >= img.height()) { // Element 1 is the y-component.
+			/*
+			if(left[1] >= img.height()) // Element 1 is the y-component.
 //				log<NUClear::WARN>("Left horizon limit exceeds image height: ", left[1]);
 				std::cout << "Left horizon limit exceeds image height: " << left[1] << std::endl;
-			}
-			
-			if(right[1] >= img.height()) { // Element 1 is the y-component.
+
+			if(right[1] >= img.height()) // Element 1 is the y-component.
 //				log<NUClear::WARN>("Left horizon limit exceeds image height: ", right[1]);
 				std::cout << "Left horizon limit exceeds image height: " << right[1] << std::endl;
-			}
+			*/
 			
 			for (int y = bottomHorizontalScan; y >= 0; y -= HORIZONTAL_SCANLINE_SPACING) {
 				horizontalScanLines.push_back(y);

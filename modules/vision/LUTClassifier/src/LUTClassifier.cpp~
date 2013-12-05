@@ -27,7 +27,7 @@ namespace modules {
         using messages::input::Image;
         using messages::support::Configuration;
         
-        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), greenHorizon(), scanLines() { 
+        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)),greenHorizon(),scanLines() { 
 			current_LUT_index = 0;
 			
 

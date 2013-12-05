@@ -44,15 +44,21 @@ namespace modules {
             float GREEN_HORIZON_UPPER_THRESHOLD_MULT;
             std::vector<arma::vec2> original_points;      //! @variable The original hull points.
             std::vector<arma::vec2> interpolated_points;  //! @variable The interpolated points.
-            
         public:
-            GreenHorizon();
+            GreenHorizon(){}
             
             /*! @brief Sets configured parameters for the green horizon.
             */
-            void setParameters(unsigned int GREEN_HORIZON_SCAN_SPACING_, unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS_, float GREEN_HORIZON_UPPER_THRESHOLD_MULT_);
+            void setParameters(unsigned int GREEN_HORIZON_SCAN_SPACING_,
+                              unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS_,
+                              float GREEN_HORIZON_UPPER_THRESHOLD_MULT_) {
+                GREEN_HORIZON_SCAN_SPACING = GREEN_HORIZON_SCAN_SPACING_;
+                GREEN_HORIZON_MIN_GREEN_PIXELS = GREEN_HORIZON_MIN_GREEN_PIXELS_;
+                GREEN_HORIZON_UPPER_THRESHOLD_MULT = GREEN_HORIZON_UPPER_THRESHOLD_MULT_;
+            }
 
         public:
+           
             /*! @brief Computes the visual green horizon.
                 Note that the use of kinematics horizon has been replaced by dummmy code 
                 @param image The raw image
@@ -78,17 +84,18 @@ namespace modules {
             Returns a positive value, if OAB makes a counter-clockwise turn,
             negative for clockwise turn, and zero if the points are collinear.
             */
-            static double differenceCrossProduct2D(const arma::vec2& O, const arma::vec2& A, const arma::vec2& B) {
+            static double differenceCrossProduct2D(const arma::vec2& O, const arma::vec2& A, const arma::vec2& B)
+            {
                 return (A[0] - O[0]) * (B[1] - O[1]) - (A[1] - O[1]) * (B[0] - O[0]);
             }
             
             double interpolate(arma::vec2 p1, arma::vec2 p2, double x);
-            
             //! Returns the interpolated points for the entire screen width.
             const std::vector<arma::vec2>& getInterpolatedPoints() const;
-            
             //! Returns a list of interpolated points with a given spacing.
             std::vector<arma::vec2> getInterpolatedSubset(unsigned int spacing) const;
+
+            static constexpr const char* CONFIGURATION_PATH = "GreenHorizon.json";
         };
     
     }  // vision
