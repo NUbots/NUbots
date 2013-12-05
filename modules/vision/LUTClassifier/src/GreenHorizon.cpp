@@ -51,7 +51,7 @@ namespace modules {
 		    int kin_hor_y;		
 
 		    //For sampled pixel columns (vertical scans) sampled with period SPACING
-		    for (int x = 0; x < width; x+=SPACING) {
+		    for (size_t x = 0; x < width; x+=SPACING) {
 		        unsigned int green_top = 0;
 		        unsigned int green_count = 0;
 
@@ -67,7 +67,7 @@ namespace modules {
 		        
 
 		        //Search for green below the kinematics horizon
-		        for (int y = kin_hor_y; y < height; y++) {
+		        for (unsigned int y = kin_hor_y; y < height; y++) {
 
 		            if (isPixelGreen(img(x, y))) {
 		                if (green_count == 0) {
@@ -116,7 +116,7 @@ namespace modules {
 
 		    // statistical filter for green horizon points
 		    double mean_y, std_dev_y;
-		    running_stat<double> acc;  //TODO
+		    arma::running_stat<double> acc;  //TODO
 
 		    for(auto& p : horizon_points) {
 		        if (p[1] < height-1)     // if not at bottom of image
@@ -147,14 +147,12 @@ namespace modules {
         }
 
         std::vector<arma::vec> GreenHorizon::upperConvexHull(const std::vector<arma::vec>& points) {
-        	int n = points.size(),
-            	k = 0;
-	        std::vector<arma::vec> H(n);
+        	int n = points.size(), k = 0;
 	        std::vector<arma::vec> H(n);
 
 	        // Build upper hull
 	        for (int i = 0; i < n; i++) {
-	            while (k >= 2 && differenceCrossProduct2D(H[k-2], H[k-1], points[i]) <= 0)
+	            while ((k >= 2) && (differenceCrossProduct2D(H[k-2], H[k-1], points[i]) <= 0))
 	                k--;
 
 	            H[k] = points[i];

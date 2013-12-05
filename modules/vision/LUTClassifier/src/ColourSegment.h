@@ -22,8 +22,8 @@
 
 #include <nuclear> 
 #include <string>
-#include <vector>
- 
+#include <armadillo>
+
 #include "messages/input/Image.h"
 #include "ClassificationColours.h"
 
@@ -44,7 +44,7 @@ namespace modules {
             unsigned int m_length_pixels;
 
             //! @variable The start pixel location.
-            Point m_start, 
+            arma::vec::fixed<2> m_start, 
 
             //! @variable The end  pixellocation.
             m_end, 
@@ -54,10 +54,10 @@ namespace modules {
            
         public:
             ColourSegment() {
-                set(Point(0, 0), Point(0, 0), invalid);
+                set(arma::vec::fixed<2>(0, 0), arma::vec::fixed<2>(0, 0), invalid);
             }
 
-            ColourSegment(const Point& start, const Point& end, const Colour& colour) {
+            ColourSegment(const arma::vec::fixed<2>& start, const arma::vec::fixed<2>& end, const Colour& colour) {
                 set(start, end, colour);
             }
 
@@ -72,17 +72,17 @@ namespace modules {
             }
 
             //! Returns the start location of the segment in pixel coordinates.
-            const Point& getStart() const {
+            const arma::vec::fixed<2>& getStart() const {
                 return m_start;
             }
 
             //! Returns the end location of the segment in pixel coordinates.
-            const Point& getEnd() const {
+            const arma::vec::fixed<2>& getEnd() const {
                 return m_end;
             }
 
             //! Returns the end location of the segment in pixel coordinates.
-            const Point& getCentre() const {
+            const arma::vec::fixed<2>& getCentre() const {
                 return m_centre;
             }
 
@@ -92,10 +92,10 @@ namespace modules {
              * @param end The end location of the segment.
              * @param colour The colour of the segment.
              */
-            void set(const Point& start, const Point& end, Colour colour);
+            void set(const arma::vec::fixed<2>& start, const arma::vec::fixed<2>& end, const Colour& colour);
 
             //! Set the colour of the segment.
-            void setColour(Colour colour);
+            void setColour(const Colour& colour);
 
             /**
              * Joins the given segment to this one. This segment will now be as long as the total

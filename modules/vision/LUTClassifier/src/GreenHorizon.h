@@ -49,7 +49,7 @@ namespace modules {
                 Note that the use of kinematics horizon has been replaced by dummmy code 
                 @param image The raw image
             */ 
-            std::vector<arma::vec> CalculateGreenHorizon(const messages::input::Image& image);
+            std::vector<arma::vec> calculateGreenHorizon(const messages::input::Image& image);
             
             /*! @brief Returns a std::list of points on the convex hull in counter-clockwise order.
              Note: the last point in the returned std::list is the same as the first one.

@@ -19,7 +19,7 @@
 
 #include "ColourSegment.h"
 
-void ColourSegment::set(const Point &start, const Point &end, Colour colour) {
+void ColourSegment::set(const arma::vec::fixed<2>& start, const arma::vec::fixed<2>& end, const Colour& colour) {
     m_colour = colour;
 
     m_start = start;
