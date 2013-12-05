@@ -25,11 +25,7 @@ namespace modules {
         using messages::input::Image;
         using messages::support::Configuration;
         
-        GreenHorizon::GreenHorizon() :
-            GREEN_HORIZON_SCAN_SPACING(),
-            GREEN_HORIZON_MIN_GREEN_PIXELS(),
-            GREEN_HORIZON_UPPER_THRESHOLD_MULT(){}
-
+        
 
         std::vector<arma::vec> GreenHorizon::calculateGreenHorizon(const Image& img, const LookUpTable& LUT) {
 

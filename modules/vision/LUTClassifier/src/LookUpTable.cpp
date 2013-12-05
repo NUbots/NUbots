@@ -73,7 +73,7 @@ namespace modules{
             LUT = LUTbuffer;
         }
 
-        unsigned int LookUpTable::getLUTIndex(const messages::input::Image::Pixel& colour) {
+        unsigned int LookUpTable::getLUTIndex(const messages::input::Image::Pixel& colour) const {
             unsigned int index = 0;
 
             index += ((colour.y >> 1) << 14);

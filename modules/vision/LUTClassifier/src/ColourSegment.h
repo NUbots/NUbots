@@ -54,7 +54,7 @@ namespace modules {
            
         public:
             ColourSegment() {
-                set(arma::vec::fixed<2>(0, 0), arma::vec::fixed<2>(0, 0), invalid);
+                set(arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2), invalid);
             }
 
             ColourSegment(const arma::vec::fixed<2>& start, const arma::vec::fixed<2>& end, const Colour& colour) {
@@ -116,7 +116,7 @@ namespace modules {
             //! only used for ransac - segments cannot overlap and thus cannot have equal centres
             friend bool operator==(const ColourSegment& lhs, const ColourSegment& rhs) {
                 // Compare both elements in both centre points for equality.
-                return ((lhs.m_centre[0] == rhs.m_centre[0]) && (lhs.m_centre[1] == rhs.m_centre[1]);
+                return ((lhs.m_centre[0] == rhs.m_centre[0]) && (lhs.m_centre[1] == rhs.m_centre[1]));
             } 
     };
     

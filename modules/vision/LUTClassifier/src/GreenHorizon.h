@@ -1,18 +1,18 @@
 /*
- * This file is part of ScanLines.
+ * This file is part of GreenHorizon.
  *
- * ScanLines is free software: you can redistribute it and/or modify
+ * GreenHorizon is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ScanLines is distributed in the hope that it will be useful,
+ * GreenHorizon is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ScanLines.  If not, see <http://www.gnu.org/licenses/>.
+ * along with GreenHorizon.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -23,6 +23,7 @@
 #include <nuclear> 
 #include <string>
 #include <armadillo>
+
 #include "messages/input/Image.h"
 #include "messages/support/Configuration.h"
 #include "LookUpTable.h"
@@ -31,9 +32,10 @@ namespace modules {
     namespace vision {
 
         /**
-         * Generates horizontal and vertical scan lines.
+         * @brief Calculate green horzion.    
          *
-         * @author Alex Biddulph
+         * @author Jake Fountain
+         * @note Edited by Alex Biddulph
          */
         class GreenHorizon {
         private:
@@ -42,28 +44,33 @@ namespace modules {
             float GREEN_HORIZON_UPPER_THRESHOLD_MULT;
             std::vector<arma::vec> original_points;      //! @variable The original hull points.
             std::vector<arma::vec> interpolated_points;  //! @variable The interpolated points.
-        public:
-            /*! @brief Loads configuration file.
-            */ 
-            GreenHorizon();
-
+        public: 
+            GreenHorizon():original_points(), interpolated_points(), GREEN_HORIZON_SCAN_SPACING(),
+                GREEN_HORIZON_MIN_GREEN_PIXELS(), GREEN_HORIZON_UPPER_THRESHOLD_MULT() {}
+            
+            /*! @brief Sets configured parameters for the green horizon.
+            */
             void setParameters(unsigned int GREEN_HORIZON_SCAN_SPACING_,
-                          unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS_,
-                          float GREEN_HORIZON_UPPER_THRESHOLD_MULT_) {
+                              unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS_,
+                              float GREEN_HORIZON_UPPER_THRESHOLD_MULT_) {
                 GREEN_HORIZON_SCAN_SPACING = GREEN_HORIZON_SCAN_SPACING_;
                 GREEN_HORIZON_MIN_GREEN_PIXELS = GREEN_HORIZON_MIN_GREEN_PIXELS_;
                 GREEN_HORIZON_UPPER_THRESHOLD_MULT = GREEN_HORIZON_UPPER_THRESHOLD_MULT_;
             }
 
+        public:
+           
             /*! @brief Computes the visual green horizon.
                 Note that the use of kinematics horizon has been replaced by dummmy code 
                 @param image The raw image
             */ 
             std::vector<arma::vec> calculateGreenHorizon(const messages::input::Image& image, const LookUpTable& LUT);
+         
             /*! @brief Computes the green horizon characteristics
                 @param initial_points the horizon points calculated by the calculateGreenHorizon method
             */ 
             void set(const std::vector<arma::vec> &initial_points, int image_width, int image_height);
+
             /*! @brief Returns a std::list of points on the convex hull in counter-clockwise order.
              Note: the last point in the returned std::list is the same as the first one.
              */

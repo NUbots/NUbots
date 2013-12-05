@@ -22,17 +22,15 @@
 #include "GreenHorizon.h"
 
 namespace modules {
-    namespace vision {o
+    namespace vision {
 
         using messages::input::Image;
         using messages::support::Configuration;
         
-        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : 
-        										Reactor(std::move(environment)) , current_LUT(0),
-        										green_horizon(),
-        										scan_lines()
-        {
-           
+        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)),greenHorizon(),scanLines() { 
+			current_LUT_index = 0;
+			
+
             on<Trigger<Configuration<VisionConstants>>>([this](const Configuration<VisionConstants>& constants) {
            		//HACK FOR RC2013
 				// WHITE_SIDE_IS_BLUE = constants.config["WHITE_SIDE_IS_BLUE"];
@@ -113,38 +111,39 @@ namespace modules {
 				// RANSAC_MAX_ANGLE_DIFF_TO_MERGE = constants.config["RANSAC_MAX_ANGLE_DIFF_TO_MERGE"]; 
 				// RANSAC_MAX_DISTANCE_TO_MERGE = constants.config["RANSAC_MAX_DISTANCE_TO_MERGE"]; 
             });
+
 			//Load LUTs
-			on<Trigger<Configuration<LUTLocations>>>([this](const Configuration<LUTLocations>& locations){
-				for(string& location : locations.config){
+			on<Trigger<Configuration<LUTLocations>>>([this](const Configuration<LUTLocations>& locations) {
+				for(std::string& location : locations.config) {
 					LookUpTable LUT;
 					bool loaded = LUT.loadLUTFromFile(location);
-					if(loaded){
+
+					if(loaded) {
 						LUTs.push_back(LUT);
-					} else {
+					}
+
+					else {
 						log<NUClear::ERROR>("LUT ", location, " has not loaded successfully." );
 					}
 				}
 			}
 
 			//Load in greenhorizon parameters
-			on<Trigger<Configuration<GreenHorizonConfig>>>([this](const Configuration<GreenHorizonConfig>& constants){
-				green_horizon.setParameters(constants.config["GREEN_HORIZON_SCAN_SPACING"],
+			on<Trigger<Configuration<GreenHorizonConfig>>>([this](const Configuration<GreenHorizonConfig>& constants) {
+				greenHorizon.setParameters(constants.config["GREEN_HORIZON_SCAN_SPACING"],
 											constants.config["GREEN_HORIZON_MIN_GREEN_PIXELS"],
 											constants.config["GREEN_HORIZON_UPPER_THRESHOLD_MULT"]);
 			}
 
 			//Load in scanline parameters
-			on<Trigger<Configuration<ScanLinesConfig>>>([this](const Configuration<GreenHorizonConfig>& constants){
-				scan_lines.setParameters(constants.config["HORIZONTAL_SCANLINE_SPACING"],
+			on<Trigger<Configuration<ScanLinesConfig>>>([this](const Configuration<GreenHorizonConfig>& constants) {
+				scanLines.setParameters(constants.config["HORIZONTAL_SCANLINE_SPACING"],
 										 constants.config["VERTICAL_SCANLINE_SPACING"]);
 			}
 
-            on<Trigger<Image>>([this](const Image& image){
-
-            	std::vector<arma::vec> green_horizon_points = calculateGreenHorizon(image,LUTs[current_LUT_index]);
-
-            	std::vector<int> scan_lines = generateScanLines(image,green_horizon_points,LUTs[current_LUT_index]);
-
+            on<Trigger<Image>>([this](const Image& image) {
+            	std::vector<arma::vec> green_horizon_points = greenHorizon.calculateGreenHorizon(image, LUTs[current_LUT_index]);
+            	std::vector<int> scan_lines = scanLines.generateScanLines(image, green_horizon_points, LUTs[current_LUT_index]);
             });
         }
 

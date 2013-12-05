@@ -23,9 +23,12 @@
 #include <nuclear> 
 #include <string>
 #include <armadillo>
+
 #include "messages/input/Image.h"
 #include "messages/support/Configuration.h"
 #include "LookUpTable.h"
+#include "GreenHorizon.h"
+#include "ScanLines.h"
 
 namespace modules {
     namespace vision {
@@ -115,9 +118,12 @@ namespace modules {
             // float RANSAC_MAX_DISTANCE_TO_MERGE;
             std::vector<LookUpTable> LUTs;
             unsigned int current_LUT_index;
+
+            GreenHorizon greenHorizon;
+            ScanLines scanLines;
+
         public:
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
-             
         };
     
     }  // vision

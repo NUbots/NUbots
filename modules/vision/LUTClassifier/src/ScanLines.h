@@ -41,13 +41,7 @@ namespace modules {
         class ScanLines : public NUClear::Reactor {
         private:
             unsigned int HORIZONTAL_SCANLINE_SPACING;
-            unsigned int VERTICAL_SCANLINE_SPACING;
-
-            void setParameters( unsigned int HORIZONTAL_SCANLINE_SPACING_,
-                           unsigned int VERTICAL_SCANLINE_SPACING_) {
-                HORIZONTAL_SCANLINE_SPACING = HORIZONTAL_SCANLINE_SPACING_;
-                VERTICAL_SCANLINE_SPACING = VERTICAL_SCANLINE_SPACING_;
-            }
+            unsigned int VERTICAL_SCANLINE_SPACING;            
 
             /*! @brief Returns a std::vector of ColourSegments detailing the
             horizontal colour segments in the image.
@@ -63,7 +57,12 @@ namespace modules {
             /*! @brief Loads configuration file.
             */ 
             ScanLines();
-
+            
+            void setParameters( unsigned int HORIZONTAL_SCANLINE_SPACING_,
+                           unsigned int VERTICAL_SCANLINE_SPACING_) {
+                HORIZONTAL_SCANLINE_SPACING = HORIZONTAL_SCANLINE_SPACING_;
+                VERTICAL_SCANLINE_SPACING = VERTICAL_SCANLINE_SPACING_;
+            }
             /*! @brief Generates the scan lines
             */ 
             std::vector<int> generateScanLines(const messages::input::Image& image, const GreenHorizon& greenHorizonPoints);
