@@ -1,0 +1,16 @@
+language: cpp
+
+install:
+  - wget http://apt.puppetlabs.com/puppetlabs-release-precise.deb
+  - sudo dpkg -i puppetlabs-release-precise.deb
+  - sudo apt-get update
+  - sudo apt-get install puppet
+  - sudo apt-get install git
+
+script:
+  - sudo puppet apply --modulepath=puppet/modules puppet/manifests/travis.pp
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make -j
+  - make test

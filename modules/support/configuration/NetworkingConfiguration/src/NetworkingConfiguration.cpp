@@ -18,16 +18,18 @@
  */
 
 #include "NetworkingConfiguration.h"
-#include "messages/Configuration.h"
+#include "messages/support/Configuration.h"
 
 namespace modules {
     namespace support {
         namespace configuration {
+            
+            using messages::support::Configuration;
 
             NetworkingConfiguration::NetworkingConfiguration(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-                on<Trigger<messages::Configuration<NetworkingConfiguration>>>([this]
-                        (const messages::Configuration<NetworkingConfiguration>& config) {
+                on<Trigger<Configuration<NetworkingConfiguration>>>([this]
+                        (const Configuration<NetworkingConfiguration>& config) {
                     auto c = std::make_unique<NUClear::extensions::NetworkingConfiguration>();
 
                     // Put our configuration options into a NUClear config object
