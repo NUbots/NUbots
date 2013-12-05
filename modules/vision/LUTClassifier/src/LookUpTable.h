@@ -10,11 +10,13 @@
 #ifndef LOOKUPTABLE_H
 #define LOOKUPTABLE_H
 
-#include "messages/input/Image.h"
 #include <nuclear>
 #include <string>
 #include <iostream>
 #include <fstream>
+
+#include "messages/input/Image.h"
+#include "ClassificationColours.h"
 
 
 namespace modules{
@@ -39,7 +41,7 @@ namespace modules{
     class LookUpTable
     {
     public:
-        static const int LUT_SIZE = 128*128*128; //!< The size of a lookup table in bytes.
+        static const int LUT_SIZE = (128 * 128 * 128); //!< The size of a lookup table in bytes.
 
         LookUpTable();
         LookUpTable(unsigned char* vals);
@@ -64,10 +66,10 @@ namespace modules{
         */
         void zero();
 
-        Colour classifyPixel(const messages::input::Image::Pixel& p)
-        {
+        Colour classifyPixel(const messages::input::Image::Pixel& p) {
             return getColourFromIndex(LUT[getLUTIndex(p)]); // 7bit LUT
         }
+
     private:
         /*!
         *  @brief Gets the index of the pixel in the LUT
@@ -75,15 +77,7 @@ namespace modules{
         *  @return Returns the colour index for the given pixel.
         */
         unsigned int getLUTIndex(const messages::input::Image::Pixel& colour);
-        /*!
-        *  @param p The Colour enum value of the pixel to be classified.
-        *  @return Returns the classified colour for the given pixel colour number.
-        */
-        Colour getColourFromIndex(int index);        
-
-        
-
-   
+  
         const unsigned char* LUT;           //! @variable Colour Look Up Table - protected.
         unsigned char* LUTbuffer;           //! @variable temp LUT for loading.
     };

@@ -44,15 +44,16 @@ namespace modules {
         public:
             /*! @brief Loads configuration file.
             */ 
-            GreenHorizon(std::unique_ptr<NUClear::Environment> environment);
+            GreenHorizon();
 
-            setParameters(unsigned int GREEN_HORIZON_SCAN_SPACING_,
+            void setParameters(unsigned int GREEN_HORIZON_SCAN_SPACING_,
                           unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS_,
-                          float GREEN_HORIZON_UPPER_THRESHOLD_MULT_){
+                          float GREEN_HORIZON_UPPER_THRESHOLD_MULT_) {
                 GREEN_HORIZON_SCAN_SPACING = GREEN_HORIZON_SCAN_SPACING_;
                 GREEN_HORIZON_MIN_GREEN_PIXELS = GREEN_HORIZON_MIN_GREEN_PIXELS_;
                 GREEN_HORIZON_UPPER_THRESHOLD_MULT = GREEN_HORIZON_UPPER_THRESHOLD_MULT_;
             }
+
             /*! @brief Computes the visual green horizon.
                 Note that the use of kinematics horizon has been replaced by dummmy code 
                 @param image The raw image
