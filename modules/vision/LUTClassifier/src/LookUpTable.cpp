@@ -42,14 +42,12 @@ namespace modules{
             lutFile.open(file_name, std::ios::binary | std::ios::ate);
 
             // check if file opened correctly and is correct size
-            if((lutFile.is_open()) && (lutFile.tellg() == LUT_SIZE) {
+            if((lutFile.is_open()) && (lutFile.tellg() == LUT_SIZE)) {
                 lutFile.seekg (0, std::ios::beg);  // move to start of file.
                 lutFile.read (lutBuffer, LUT_SIZE); // read in buffer
                 lutFile.close();
                 load_success = true;
-            }
-
-            else {
+            } else {
                 lutFile.clear();
                 load_success = false;
             }
@@ -57,10 +55,6 @@ namespace modules{
 
             if(load_success) {
                 LUT = LUTbuffer;
-            }
-
-            else {
-                //log<NUClear::DEBUG>("Vision::loadLUTFromFile(", file_name, "). Failed to load lut.");
             }
 
             return load_success;

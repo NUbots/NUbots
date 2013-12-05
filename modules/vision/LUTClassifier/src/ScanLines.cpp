@@ -30,17 +30,18 @@ namespace modules {
 		std::vector<int> ScanLines::generateScanLines(const Image& img, const GreenHorizon& greenHorizon) {
 			std::vector<int> horizontalScanLines;
 			int bottomHorizontalScan = img.height() - 1;														//we need h-scans under the GH for field lines
-			const std::vector<arma::vec::fixed<2>>& horizonPoints = greenHorizon.getInterpolatedPoints();		// Need this to get the left and right
+			const std::vector<arma::vec2>& horizonPoints = greenHorizon.getInterpolatedPoints();		// Need this to get the left and right
 
-			arma::vec::fixed<2> left = horizonPoints.front();
-			arma::vec::fixed<2> right = horizonPoints.back();
+			arma::vec2 left = horizonPoints.front();
+			arma::vec2 right = horizonPoints.back();
 
+			/*
 			if(left[1] >= img.height()) // Element 1 is the y-component.
-				log<NUClear::WARN>("Left horizon limit exceeds image height: ", left(1))
+				log<NUClear::WARN>("Left horizon limit exceeds image height: ", left(1));
 
 			if(right[1] >= img.height()) // Element 1 is the y-component.
-				log<NUClear::WARN>("Left horizon limit exceeds image height: ", right(1))
-
+				log<NUClear::WARN>("Left horizon limit exceeds image height: ", right(1));
+			*/
 			for (int y = bottomHorizontalScan; y >= 0; y -= HORIZONTAL_SCANLINE_SPACING) {
 				horizontalScanLines.push_back(y);
 			}
@@ -58,8 +59,8 @@ namespace modules {
 			return classifications;
 		}
 
-		std::vector<std::vector<ColourSegment>> ScanLines::classifyVerticalScanLines(const Image& originalImage, const std::vector<arma::vec>& greenHorizon, const LookUpTable& LUT) {
-			const std::vector<arma::vec>& verticalStartPoints = greenHorizon.getInterpolatedSubset(VERTICAL_SCANLINE_SPACING);
+		std::vector<std::vector<ColourSegment>> ScanLines::classifyVerticalScanLines(const Image& originalImage, const std::vector<arma::vec2>& greenHorizon, const LookUpTable& LUT) {
+			const std::vector<arma::vec2>& verticalStartPoints = greenHorizon.getInterpolatedSubset(VERTICAL_SCANLINE_SPACING);
 			std::vector<std::vector<ColourSegment>> classifications;
 
 			for (auto startPoint : verticalStartPoints) {
@@ -71,7 +72,7 @@ namespace modules {
 
         std::vector<ColourSegment> ScanLines::classifyHorizontalScan(const Image& image, unsigned int y, const LookUpTable& LUT) {
 			std::vector<ColourSegment> result;
-			arma::vec::fixed<2> startPoint, endPoint;
+			arma::vec2 startPoint, endPoint;
 
 			if(y >= image.height()) {
 				log<NUClear::ERROR>("ScanLines::classifyHorizontalScan invalid y: ", y);
@@ -114,9 +115,9 @@ namespace modules {
 			return result;
 		}
 
-		std::vector<ColourSegment> ScanLines::classifyVerticalScan(const Image& image, const arma::vec& start, const LookUpTable& LUT) {
+		std::vector<ColourSegment> ScanLines::classifyVerticalScan(const Image& image, const arma::vec2& start, const LookUpTable& LUT) {
 			std::vector<ColourSegment> result;
-			arma::vec::fixed<2> startPoint, endPoint;
+			arma::vec2 startPoint, endPoint;
 
 			if((start[1] >= image.height()) || (start[1] < 0) || (start[0] >= image.width()) || (start[0] < 0)) {
 				log<NUClear::ERROR>("ScanLines::classifyVerticalScan invalid start position: ", start);

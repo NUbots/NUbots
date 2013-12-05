@@ -42,11 +42,10 @@ namespace modules {
             unsigned int GREEN_HORIZON_SCAN_SPACING;
             unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS;
             float GREEN_HORIZON_UPPER_THRESHOLD_MULT;
-            std::vector<arma::vec> original_points;      //! @variable The original hull points.
-            std::vector<arma::vec> interpolated_points;  //! @variable The interpolated points.
+            std::vector<arma::vec2> original_points;      //! @variable The original hull points.
+            std::vector<arma::vec2> interpolated_points;  //! @variable The interpolated points.
         public: 
-            GreenHorizon():original_points(), interpolated_points(), GREEN_HORIZON_SCAN_SPACING(),
-                GREEN_HORIZON_MIN_GREEN_PIXELS(), GREEN_HORIZON_UPPER_THRESHOLD_MULT() {}
+            GreenHorizon(){}
             
             /*! @brief Sets configured parameters for the green horizon.
             */
@@ -64,17 +63,17 @@ namespace modules {
                 Note that the use of kinematics horizon has been replaced by dummmy code 
                 @param image The raw image
             */ 
-            std::vector<arma::vec> calculateGreenHorizon(const messages::input::Image& image, const LookUpTable& LUT);
+            std::vector<arma::vec2> calculateGreenHorizon(const messages::input::Image& image, const LookUpTable& LUT);
          
             /*! @brief Computes the green horizon characteristics
                 @param initial_points the horizon points calculated by the calculateGreenHorizon method
             */ 
-            void set(const std::vector<arma::vec> &initial_points, int image_width, int image_height);
+            void set(const std::vector<arma::vec2> &initial_points, int image_width, int image_height);
 
             /*! @brief Returns a std::list of points on the convex hull in counter-clockwise order.
              Note: the last point in the returned std::list is the same as the first one.
              */
-            std::vector<arma::vec> upperConvexHull(const std::vector<arma::vec>& points);
+            std::vector<arma::vec2> upperConvexHull(const std::vector<arma::vec2>& points);
 
             /*! @brief Returns a true if the specified pixel is coloured green.
              */
@@ -85,10 +84,12 @@ namespace modules {
             Returns a positive value, if OAB makes a counter-clockwise turn,
             negative for clockwise turn, and zero if the points are collinear.
             */
-            static double differenceCrossProduct2D(const arma::vec& O, const arma::vec& A, const arma::vec& B)
+            static double differenceCrossProduct2D(const arma::vec2& O, const arma::vec2& A, const arma::vec2& B)
             {
                 return (A[0] - O[0]) * (B[1] - O[1]) - (A[1] - O[1]) * (B[0] - O[0]);
             }
+
+            const std::vector<arma::vec2>& getInterpolatedPoints() const;
 
             static constexpr const char* CONFIGURATION_PATH = "GreenHorizon.json";
         };

@@ -27,7 +27,7 @@ namespace modules {
         
         
 
-        std::vector<arma::vec> GreenHorizon::calculateGreenHorizon(const Image& img, const LookUpTable& LUT) {
+        std::vector<arma::vec2> GreenHorizon::calculateGreenHorizon(const Image& img, const LookUpTable& LUT) {
 
         	//NEEDS KINEMATICS ! const Horizon& kin_hor = Last<1,KinematicsHorizon>;
 
@@ -38,8 +38,8 @@ namespace modules {
 		    const int SPACING = std::max(GREEN_HORIZON_SCAN_SPACING, 1U);
 		    
 		    // variable declarations    
-		    std::vector<arma::vec> horizon_points;
-		    std::vector<arma::vec> thrown_points;
+		    std::vector<arma::vec2> horizon_points;
+		    std::vector<arma::vec2> thrown_points;
 	
 		    int kin_hor_y;		
 		    //For sampled pixel columns (vertical scans) sampled with period SPACING
@@ -69,9 +69,9 @@ namespace modules {
 		                green_count++;
 		                // if VER_THRESHOLD green pixels found, add point
 		                if (green_count == GREEN_HORIZON_MIN_GREEN_PIXELS) {//TODO
-		                    arma::vec v(2);
-		                    v[0] = x;
-		                    v[1] = green_top;
+		                    arma::vec2 v(x,green_top);
+		                    //v[0] = x;
+		                    //v[1] = green_top;
 		                    horizon_points.push_back(v);
 		                    break;
 		                }
@@ -92,7 +92,7 @@ namespace modules {
 		        }
 
 		        horizon_points.clear();
-		        arma::vec v(2);
+		        arma::vec2 v;
 		        v[0] = 0;
 		        v[1] = height-1;
 		        horizon_points.push_back(v);
@@ -115,7 +115,7 @@ namespace modules {
 		    std_dev_y = acc.stddev();
 		
 
-		    std::vector<arma::vec>::iterator p = horizon_points.begin();
+		    std::vector<arma::vec2>::iterator p = horizon_points.begin();
 
 		    while(p < horizon_points.end()) {
 		        if ((*p)[1] < mean_y - GREEN_HORIZON_UPPER_THRESHOLD_MULT * std_dev_y) {//TODO
@@ -134,14 +134,14 @@ namespace modules {
 		    return horizon_points;
         }
 
-        void GreenHorizon::set(const std::vector<arma::vec> &initial_points, int image_width, int image_height)
+        void GreenHorizon::set(const std::vector<arma::vec2> &initial_points, int image_width, int image_height)
 		{
 		    original_points = initial_points;
 		    interpolated_points.clear();
 
 		    //unsigned int position, y_new;
 		    int y_new;
-		    std::vector<arma::vec>::const_iterator it_start, it_end;
+		    std::vector<arma::vec2>::const_iterator it_start, it_end;
 
 		    //generate start/end edge points (if not there)
 		    if(original_points.front().x > 0) {
@@ -149,7 +149,7 @@ namespace modules {
 		        //clamp to image vertical bounds
 		        y = std::max(y, 0.0);
 		        y = std::min(y, image_height - 1);
-		        arma::vec v(2)
+		        arma::vec2 v;
 		        v[0] = 0;
 		        v[1] = y;
 		        original_points.insert(original_points.begin(), v);
@@ -161,7 +161,7 @@ namespace modules {
 		        //clamp to image vertical bounds
 		        y = std::max(y, 0.0);
 		        y = std::min(y, image_height - 1);
-		        arma::vec v(2)
+		        arma::vec2 v
 		        v[0] = image_width - 1;
 		        v[1] = y;
 		        original_points.push_back(v);
@@ -180,16 +180,16 @@ namespace modules {
 
 		        if(y_new >= image_height)
 		            std::cout << "GreenHorizon::set: " << y_new << " it_start: " << *it_start << " it_end: " << *it_end << std::endl;
-		        arma::vec v(2)
+		        arma::vec2 v;
 		        v[0] = x;
 		        v[1] = y_new;
 		        interpolated_points.push_back(v);
 		    }
 		}
 
-        std::vector<arma::vec> GreenHorizon::upperConvexHull(const std::vector<arma::vec>& points) {
+        std::vector<arma::vec2> GreenHorizon::upperConvexHull(const std::vector<arma::vec2>& points) {
         	int n = points.size(), k = 0;
-	        std::vector<arma::vec> H(n);
+	        std::vector<arma::vec2> H(n);
 
 	        // Build upper hull
 	        for (int i = 0; i < n; i++) {
@@ -210,8 +210,13 @@ namespace modules {
         }
 
 
-		double GreenHorizon::interpolate(arma::vec p1, arma::vec p2, double x){
+		double GreenHorizon::interpolate(arma::vec2 p1, arma::vec2 p2, double x){
 			return p1[1] + (p2[1] - p1[1]) * (x - p1[0]]) / (p2[0] - p1[0]);
+		}
+
+		const std::vector<arma::vec2>& GreenHorizon::getInterpolatedPoints() const
+		{
+		    return interpolated_points;
 		}
 	}
 }

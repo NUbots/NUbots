@@ -51,7 +51,7 @@ namespace modules {
             /*! @brief Returns a std::vector of ColourSegments detailing the
             vertical colour segments in the image.
             */
-            std::vector<ColourSegment> classifyVerticalScan(const messages::input::Image& image, const arma::vec& start, const LookUpTable& LUT);
+            std::vector<ColourSegment> classifyVerticalScan(const messages::input::Image& image, const arma::vec2& start, const LookUpTable& LUT);
 
         public:
             /*! @brief Loads configuration file.
@@ -75,7 +75,7 @@ namespace modules {
             /*! @brief Returns a std::vector of ColourSegments relating to classified 
             vertical scan lines.
             */
-            std::vector<std::vector<ColourSegment>> classifyVerticalScanLines(const messages::input::Image& originalImage, const std::vector<arma::vec>& greenHorizon, const LookUpTable& LUT);
+            std::vector<std::vector<ColourSegment>> classifyVerticalScanLines(const messages::input::Image& originalImage, const std::vector<arma::vec2>& greenHorizon, const LookUpTable& LUT);
 
             static constexpr const char* CONFIGURATION_PATH = "ScanLines.json";
         };
