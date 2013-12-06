@@ -1,8 +1,10 @@
-# nuclearport::build_dep class
-#   Installs all build-dependencies for NUClearPort
+# == Class: nuclearport::build_dep
+#
+# Installs all build-dependencies for NUClearPort
+#
 class nuclearport::build_dep (
     $username = 'nubot',
-    $nubots_dir => "/home/${username}/nubots",
+    $nubots_dir = "/home/${username}/nubots", #"
   ) {
   package { 'build-essential': ensure => latest }
   package { 'cmake': ensure => latest }
