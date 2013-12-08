@@ -24,7 +24,7 @@ namespace modules {
         namespace logging {
 
             ConsoleLogHandler::ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-                on<Trigger<NUClear::LogMessage>, Options<Sync<ConsoleLogHandler>>([this](const NUClear::LogMessage& message) {
+                on<Trigger<NUClear::LogMessage>, Options<Sync<ConsoleLogHandler>>>([this](const NUClear::LogMessage& message) {
                     
                     // Output the message
                     std::cout << message.message << std::endl;

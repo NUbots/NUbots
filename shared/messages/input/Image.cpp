@@ -38,15 +38,15 @@ namespace messages {
         }
 
         const size_t Image::width() const {
-            return imgWidth / 2;
+            return imgWidth;
         }
 
         const size_t Image::height() const {
-            return imgHeight / 2;
+            return imgHeight;
         }
-
-        const size_t Image::size() const {
-            return imgWidth * imgHeight / 4;
+        
+        const std::unique_ptr<Image::Pixel[]>& Image::raw() const {
+            return data;
         }
     
     }  // input

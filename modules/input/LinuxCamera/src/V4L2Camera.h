@@ -23,7 +23,7 @@
 #include <map>
 #include <string>
 
-#include "messages/Image.h"
+#include "messages/input/Image.h"
 #include "V4L2CameraSetting.h"
 
 namespace modules {
@@ -68,6 +68,9 @@ namespace modules {
 
             /// @brief The name of the device to read camera data from
             std::string deviceID;
+            
+            /// @brief the format that we are reading in from the camera
+            std::string format;
 
             /// @brief Whether the camera is currently in streaming mode
             bool streaming;
@@ -96,7 +99,7 @@ namespace modules {
              *
              * @return a pointer to the latest image from the camera
              */
-            std::unique_ptr<messages::Image> getImage();
+            std::unique_ptr<messages::input::Image> getImage();
 
             /**
              * @brief Sets up the camera at a given resolution
@@ -105,7 +108,7 @@ namespace modules {
              * @param w the image's width
              * @param h the image's height
              */
-            void resetCamera(const std::string& name, size_t w, size_t h);
+            void resetCamera(const std::string& name, const std::string& format, size_t w, size_t h);
 
             /**
              * @brief Returns a map of all configurable settings
@@ -126,6 +129,11 @@ namespace modules {
              * @brief Returns the device id that is currently used as the camera
              */
             const std::string& getDeviceID() const;
+            
+            /**
+             * @brief returns the format that the camera is currently reading (YUYV or MJPG)
+             */
+            const std::string& getFormat() const;
 
             /**
              * @brief This method is to be called when shutting down the system. It does cleanup on the cameras resources

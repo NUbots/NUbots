@@ -71,6 +71,7 @@ class nuclearport(
         Package['libjpeg-turbo8-dev'],
         Package['libfftw3-dev'],
         Package['libaubio-dev'],
+        Package['libarmadillo-dev'],
       ],
     command => 'cmake ..',
     cwd => $nuclearport_build_dir,

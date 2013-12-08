@@ -29,14 +29,68 @@
 #include <string>
 #include <sstream>
 #include <linux/videodev2.h>
+#include <jpeglib.h>
 
 namespace modules {
     namespace input {
-
+        
+        using messages::input::Image;
+        
+        // For some reason MJPEGs dont have a huffman table
+        constexpr uint8_t huffmantable[] = {
+            0xC4, 0x01, 0xA2, 0x00, 0x00, 0x01, 0x05, 0x01, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+            0x07, 0x08, 0x09, 0x0A, 0x0B, 0x01, 0x00, 0x03, 0x01,
+            0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04,
+            0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x10, 0x00,
+            0x02, 0x01, 0x03, 0x03, 0x02, 0x04, 0x03, 0x05, 0x05,
+            0x04, 0x04, 0x00, 0x00, 0x01, 0x7D, 0x01, 0x02, 0x03,
+            0x00, 0x04, 0x11, 0x05, 0x12, 0x21, 0x31, 0x41, 0x06,
+            0x13, 0x51, 0x61, 0x07, 0x22, 0x71, 0x14, 0x32, 0x81,
+            0x91, 0xA1, 0x08, 0x23, 0x42, 0xB1, 0xC1, 0x15, 0x52,
+            0xD1, 0xF0, 0x24, 0x33, 0x62, 0x72, 0x82, 0x09, 0x0A,
+            0x16, 0x17, 0x18, 0x19, 0x1A, 0x25, 0x26, 0x27, 0x28,
+            0x29, 0x2A, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A,
+            0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x53,
+            0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5A, 0x63, 0x64,
+            0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x73, 0x74, 0x75,
+            0x76, 0x77, 0x78, 0x79, 0x7A, 0x83, 0x84, 0x85, 0x86,
+            0x87, 0x88, 0x89, 0x8A, 0x92, 0x93, 0x94, 0x95, 0x96,
+            0x97, 0x98, 0x99, 0x9A, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6,
+            0xA7, 0xA8, 0xA9, 0xAA, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6,
+            0xB7, 0xB8, 0xB9, 0xBA, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6,
+            0xC7, 0xC8, 0xC9, 0xCA, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6,
+            0xD7, 0xD8, 0xD9, 0xDA, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5,
+            0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xF1, 0xF2, 0xF3, 0xF4,
+            0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0x11, 0x00, 0x02,
+            0x01, 0x02, 0x04, 0x04, 0x03, 0x04, 0x07, 0x05, 0x04,
+            0x04, 0x00, 0x01, 0x02, 0x77, 0x00, 0x01, 0x02, 0x03,
+            0x11, 0x04, 0x05, 0x21, 0x31, 0x06, 0x12, 0x41, 0x51,
+            0x07, 0x61, 0x71, 0x13, 0x22, 0x32, 0x81, 0x08, 0x14,
+            0x42, 0x91, 0xA1, 0xB1, 0xC1, 0x09, 0x23, 0x33, 0x52,
+            0xF0, 0x15, 0x62, 0x72, 0xD1, 0x0A, 0x16, 0x24, 0x34,
+            0xE1, 0x25, 0xF1, 0x17, 0x18, 0x19, 0x1A, 0x26, 0x27,
+            0x28, 0x29, 0x2A, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A,
+            0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x53,
+            0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5A, 0x63, 0x64,
+            0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x73, 0x74, 0x75,
+            0x76, 0x77, 0x78, 0x79, 0x7A, 0x82, 0x83, 0x84, 0x85,
+            0x86, 0x87, 0x88, 0x89, 0x8A, 0x92, 0x93, 0x94, 0x95,
+            0x96, 0x97, 0x98, 0x99, 0x9A, 0xA2, 0xA3, 0xA4, 0xA5,
+            0xA6, 0xA7, 0xA8, 0xA9, 0xAA, 0xB2, 0xB3, 0xB4, 0xB5,
+            0xB6, 0xB7, 0xB8, 0xB9, 0xBA, 0xC2, 0xC3, 0xC4, 0xC5,
+            0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xD2, 0xD3, 0xD4, 0xD5,
+            0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xE2, 0xE3, 0xE4, 0xE5,
+            0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xF2, 0xF3, 0xF4, 0xF5,
+            0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFF, 0xDA
+        };
+        
         V4L2Camera::V4L2Camera() : fd(-1), width(0), height(0), deviceID(""), streaming(false) {
         }
 
-        std::unique_ptr<messages::Image> V4L2Camera::getImage() {
+        std::unique_ptr<Image> V4L2Camera::getImage() {
             if (!streaming) {
                 return nullptr;
             }
@@ -50,19 +104,80 @@ namespace modules {
             if (ioctl(fd, VIDIOC_DQBUF, &current) == -1) {
                 throw std::system_error(errno, std::system_category(), "There was an error while de-queuing a buffer");
             }
+            
+            std::unique_ptr<Image::Pixel[]> data = std::unique_ptr<Image::Pixel[]>(new Image::Pixel[width * height]);
 
-            if (current.bytesused != width * height * 2) {
-                throw std::system_error(errno, std::system_category(), "A bad camera frame was returned (incorrect size)");
+            // If it is a MJPG
+            if(format == "MJPG") {
+                struct jpeg_error_mgr err;
+                struct jpeg_decompress_struct cinfo = {0};
+                
+                uint8_t* payload = static_cast<uint8_t*>(buff[current.index].payload);
+
+                // Create a decompressor
+                jpeg_create_decompress(&cinfo);
+                cinfo.err = jpeg_std_error(&err);
+                
+                // We need enough space for the table, and every byte except for byte 196
+                std::unique_ptr<uint8_t[]> jpegData = std::unique_ptr<uint8_t[]>(new uint8_t[current.bytesused + sizeof(huffmantable) - 1]);
+                
+                // Copy our header (the first 195 bytes)
+                auto it = std::copy(payload, payload + 195, jpegData.get());
+                
+                // Copy our huffman table
+                it = std::copy(std::begin(huffmantable), std::end(huffmantable), it);
+                
+                // Copy the remainder of our data
+                std::copy(payload + 196, payload + current.bytesused, it);
+                
+                // Set our source buffer
+                jpeg_mem_src(&cinfo, jpegData.get(), current.bytesused + sizeof(huffmantable) - 1);
+                
+                // Read our header
+                jpeg_read_header(&cinfo, true);
+                
+                // Set our options
+                cinfo.do_fancy_upsampling = false;
+                cinfo.out_color_components = 3;
+                cinfo.out_color_space = JCS_YCbCr;
+                
+                // Start decompression
+                jpeg_start_decompress(&cinfo);
+
+                for (Image::Pixel* row = data.get();
+                        cinfo.output_scanline < cinfo.output_height;
+                        row += width) {
+                    
+                    // Read the scanline into place
+                    jpeg_read_scanlines(&cinfo, reinterpret_cast<uint8_t**>(&row), 1);
+                }   
+
+                // Clean up
+                jpeg_finish_decompress(&cinfo);
+                jpeg_destroy_decompress(&cinfo);
+            }
+            
+            else {
+                uint8_t* input = static_cast<uint8_t*>(buff[current.index].payload);
+                
+                const size_t total = width * height;
+                
+                // Fix the colour information to be YUV444 rather then YUV422
+                for(size_t i = 0; i < total; ++++i) {
+                    
+                    data[total - i - 1].y  = input[i * 2];
+                    data[total - i - 1].cb = input[i * 2 + 1];
+                    data[total - i - 1].cr = input[i * 2 + 3];
+                    
+                    data[total - i].y  = input[i * 2 + 2];
+                    data[total - i].cb = input[i * 2 + 1];
+                    data[total - i].cr = input[i * 2 + 3];
+                }
             }
 
-            // Memcpy our data directly from the buffer
-            std::unique_ptr<messages::Image::Pixel[]> data =
-                    std::unique_ptr<messages::Image::Pixel[]>(new messages::Image::Pixel[current.bytesused]);
-            memcpy(data.get(), buff[current.index].payload, current.bytesused);
-
             // Move this data into the image
-            std::unique_ptr<messages::Image> image = 
-                    std::unique_ptr<messages::Image>(new messages::Image(width, height, std::move(data)));
+            std::unique_ptr<Image> image = 
+                    std::unique_ptr<Image>(new Image(width, height, std::move(data)));
 
             // Enqueue our next buffer so it can be written to
             if (ioctl(fd, VIDIOC_QBUF, &current) == -1) {
@@ -73,12 +188,13 @@ namespace modules {
             return std::move(image);
         }
 
-        void V4L2Camera::resetCamera(const std::string& device, size_t w, size_t h) {
+        void V4L2Camera::resetCamera(const std::string& device, const std::string& fmt, size_t w, size_t h) {
             // if the camera device is already open, close it
             closeCamera();
 
             // Store our new state
             deviceID = device;
+            format = fmt;
             width = w;
             height = h;
 
@@ -95,21 +211,21 @@ namespace modules {
             format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             format.fmt.pix.width = width;
             format.fmt.pix.height = height;
-            format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+            
+            // We have to choose YUYV or MJPG here
+            if(fmt == "YUYV") {
+                format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+            }
+            else if(fmt == "MJPG") {
+                format.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
+            }
+            else {
+                throw std::runtime_error("The format must be either YUYV or MJPG");
+            }
+            
             format.fmt.pix.field = V4L2_FIELD_NONE;
             if (ioctl(fd, VIDIOC_S_FMT, &format) == -1) {
                 throw std::system_error(errno, std::system_category(), "There was an error while setting the cameras format");
-            }
-
-            if (format.fmt.pix.sizeimage != width * height * 2) {
-                std::stringstream errorStream;
-                errorStream
-                    << "The camera returned an image size that made no sense ("
-                    << "Expected: " << (width * height * 2)
-                    << ", "
-                    << "Found: " << format.fmt.pix.sizeimage
-                    << ")";
-                throw std::runtime_error(errorStream.str());
             }
 
             // Set the frame rate
@@ -215,6 +331,10 @@ namespace modules {
 
         const std::string& V4L2Camera::getDeviceID() const {
             return deviceID;
+        }
+        
+        const std::string& V4L2Camera::getFormat() const {
+            return format;
         }
 
         void V4L2Camera::closeCamera() {

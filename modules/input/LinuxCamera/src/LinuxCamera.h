@@ -38,7 +38,7 @@ namespace modules {
          * @author Jake Woods
          * @author Trent Houliston
          */
-        class LinuxCameraStreamer : public NUClear::Reactor {
+        class LinuxCamera : public NUClear::Reactor {
 
         private:
             class impl;
@@ -48,7 +48,7 @@ namespace modules {
             static constexpr const char* CONFIGURATION_PATH = "LinuxCamera.json";
 
             /// @brief Called by the PowerPlant to build and setup our Reactor
-            LinuxCameraStreamer(std::unique_ptr<NUClear::Environment> environment);
+            LinuxCamera(std::unique_ptr<NUClear::Environment> environment);
         };
         
     }  // input

@@ -1,0 +1,8 @@
+ADD_ROLE(
+    NAME classifiertester
+    MODULES
+    	support::configuration::ConfigSystem
+    	input::LinuxCamera
+        vision::LUTClassifier
+        support::NUbugger
+)

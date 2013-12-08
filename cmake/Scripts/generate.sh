@@ -23,7 +23,7 @@ else
 fi
 
 # Delete the old role if it exists. We pipe to
-# /dev/null to supress a message if it doesn't
+# /dev/null to suppress a message if it doesn't
 # exist.
 rm "$role_name" 2> /dev/null;
 

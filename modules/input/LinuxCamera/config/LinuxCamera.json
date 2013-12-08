@@ -11,6 +11,7 @@
     "absoluteExposure": 1814,
     "powerLineFrequency": 2,
     "sharpness": 191,
-    "imageWidth": 640,
-    "imageHeight": 480
+    "imageFormat" : "MJPG",
+    "imageWidth": 800,
+    "imageHeight": 600
 }

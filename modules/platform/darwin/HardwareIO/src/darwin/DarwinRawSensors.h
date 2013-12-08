@@ -40,7 +40,7 @@ namespace Darwin {
         };
 
         /**
-         * @brief This represents the raw acceleronometer values from the CM730
+         * @brief This represents the raw accelerometer values from the CM730
          */
         struct Accelerometer {
             uint16_t x;
@@ -90,7 +90,7 @@ namespace Darwin {
             uint8_t buttons;
             uint8_t reserved[7];
             Gyro gyroscope;
-            Accelerometer acceleronometer;
+            Accelerometer accelerometer;
             uint8_t voltage;
         };
 

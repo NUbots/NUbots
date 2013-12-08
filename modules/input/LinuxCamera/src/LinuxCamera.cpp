@@ -17,18 +17,24 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "LinuxCameraStreamer.h"
+#include "LinuxCamera.h"
 #include "utility/idiom/pimpl_impl.h"
 
+extern "C" {
+    #include <jpeglib.h>
+}
+
 #include "V4L2Camera.h"
-#include "messages/Image.h"
-#include "messages/Configuration.h"
+#include "messages/input/Image.h"
+#include "messages/support/Configuration.h"
 
 namespace modules {
     namespace input {
         
+        using messages::support::Configuration;
+        
         // Create our impl class as per the pimpl idiom.
-        class LinuxCameraStreamer::impl {
+        class LinuxCamera::impl {
             public:
                 /// @brief Our internal camera class that interacts with the physical device
                 V4L2Camera camera;
@@ -36,7 +42,7 @@ namespace modules {
 
 
         // We assume that the device will always be video0, if not then change this
-        LinuxCameraStreamer::LinuxCameraStreamer(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        LinuxCamera::LinuxCamera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
             // This trigger gets us as close as we can to the frame rate as possible (as high resolution as we can)
             on<Trigger<Every<NUClear::clock::period::den / V4L2Camera::FRAMERATE, NUClear::clock::duration>>, Options<Single>>([this](const time_t& time) {
@@ -52,7 +58,7 @@ namespace modules {
                 m->camera.closeCamera();
             });
 
-            on<Trigger<messages::Configuration<LinuxCameraStreamer>>>([this](const messages::Configuration<LinuxCameraStreamer>& settings) {
+            on<Trigger<Configuration<LinuxCamera>>>([this](const Configuration<LinuxCamera>& settings) {
                 auto& camera = m->camera;
 
                 try {
@@ -60,10 +66,13 @@ namespace modules {
                     int width = settings.config["imageWidth"];
                     int height = settings.config["imageHeight"];
                     std::string deviceID = settings.config["deviceID"];
+                    std::string format = settings.config["imageFormat"];
+                    
                     if (camera.getWidth() != static_cast<size_t>(width)
                         || camera.getHeight() != static_cast<size_t>(height)
+                        || camera.getFormat() != format
                         || camera.getDeviceID() != deviceID) {
-                        camera.resetCamera(deviceID, width, height);
+                        camera.resetCamera(deviceID, format, width, height);
                     }
 
                     // Set all other camera settings
