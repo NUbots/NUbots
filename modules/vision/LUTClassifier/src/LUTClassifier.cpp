@@ -20,12 +20,14 @@
 #include "LUTClassifier.h"
 #include "ScanLines.h"
 #include "GreenHorizon.h"
-
+#include "LookUpTable.h"
+#include "ColourSegment.h"
 namespace modules {
     namespace vision {
 
         using messages::input::Image;
         using messages::support::Configuration;
+
         
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), greenHorizon(), scanLines() { 
 			current_LUT_index = 0;
@@ -142,8 +144,13 @@ namespace modules {
 			});
 
             on<Trigger<Image>>([this](const Image& image) {
-            	std::vector<arma::vec2> green_horizon_points = greenHorizon.calculateGreenHorizon(image, LUTs[current_LUT_index]);
+            	/*std::vector<arma::vec2> green_horizon_points = */
+            	greenHorizon.calculateGreenHorizon(image, LUTs[current_LUT_index]);
             	std::vector<int> scan_lines = scanLines.generateScanLines(image, greenHorizon);
+            	std::vector<std::vector<ColourSegment> > classified_segments_hor = scanLines.classifyHorizontalScanLines(image, scan_lines, LUTs[current_LUT_index]);
+            	std::vector<std::vector<ColourSegment> > classified_segments_ver = scanLines.classifyVerticalScanLines(image, greenHorizon, LUTs[current_LUT_index]);
+            	//TODO: Segment filter here and then something like:
+            	//emit(std::make_unique<ClassifiedImage>(new ClassifiedImage(classigied_segments_hor,classified_segments_ver)));
             });
         }
 
