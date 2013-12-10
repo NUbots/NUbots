@@ -251,12 +251,12 @@ namespace modules {
 				}
 			}
 		}
-
 		
 		void SegmentFilter::addTransitionRule(ColourTransitionRule& rule){
 			m_horizontalRules.push_back(rule);
 			m_verticalRules.push_back(rule);
 		}
+
 		void SegmentFilter::addReplacementRule(ColourReplacementRule& rule){
 			m_horizontalReplacementRules.push_back(rule);
 			m_verticalReplacementRules.push_back(rule);

@@ -144,7 +144,15 @@ namespace modules {
 			});
 
 			on<Trigger<Configuration<RulesConfig>>>([this](const Configuration<RulesConfig>& rules) {
-				
+				rules.config["REPLACEMENT_RULES"]
+				std::vector<something> rules = rules.config["REPLACEMENT_RULES"]
+				std::map<std::string, ConfiguationNode> thing = rules.config["REPLACEMENT_RULES"];
+
+				for(const auto& rule : rules) {
+					//rule.first = the name;
+					//rule.second = the rule;
+					//START HERE
+				}
 			});
 
             on<Trigger<Image>>([this](const Image& image) {

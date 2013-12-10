@@ -3,30 +3,30 @@
 	{
 		"fieldnoise_v_small":
 		{
-			"before": {"vec" : [3, -1], "colour" : "green"},                 //3 pix min
-			"middle": {"vec" : [0 , 1], "colour" : "unclassified"},    //1 pix max
-			"after": {"vec" : [3, -1] , "colour" : "green"},                  //3 pix min
-			"replacement": "before"                         //before, after, split
+			"before": {"vec" : [3, -1], "colour" : "green"},                 
+			"middle": {"vec" : [0 , 1], "colour" : "unclassified"},    
+			"after": {"vec" : [3, -1] , "colour" : "green"},                  
+			"replacement": "before"                         
 		},
 		"fieldnoise_v_med":
 		{
-			"before": {"vec" : [6, -1], "colour" : "green"},                  //6 pix min
-			"middle": {"vec" : [0 , 2], "colour" : "unclassified"},    //2 pix max
-			"after": {"vec" : [6, -1] , "colour" : "green"},                   //6 pix min
-			"replacement": "before"                         //before, after, split
+			"before": {"vec" : [6, -1], "colour" : "green"},                  
+			"middle": {"vec" : [0 , 2], "colour" : "unclassified"},   
+			"after": {"vec" : [6, -1] , "colour" : "green"},                  
+			"replacement": "before"                         
 		},
 		"fieldnoise_v_large":
 		{
-			"before": {"vec" : [12, -1], "colour" : "green"},                   //12 pix min
-			"middle": {"vec" : [0 , 4], "colour" : "unclassified"},    //4 pix max
-			"after": {"vec" : [12, -1] , "colour" : "green"},                    //12 pix min
-			"replacement": "before"                         //before, after, split
+			"before": {"vec" : [12, -1], "colour" : "green"},                   
+			"middle": {"vec" : [0 , 4], "colour" : "unclassified"},    
+			"after": {"vec" : [12, -1] , "colour" : "green"},                   
+			"replacement": "before"                         
 		},
 		"fieldnoise_v_oneway":
 		{
-			"before": {"vec" : [1, -1], "colour" : "green"},                      //1 pix min
-			"middle": {"vec" : [0 , 4], "colour" : "unclassified"},    //4 pix max
-			"after": {"vec" : [12, -1] , "colour" : "green"},                    //12 pix min
+			"before": {"vec" : [1, -1], "colour" : "green"},                      
+			"middle": {"vec" : [0 , 4], "colour" : "unclassified"},    
+			"after": {"vec" : [12, -1] , "colour" : "green"},                    
 			"replacement": "before"                         //before, after, split
 		},
 		"fieldnoise_v_oneway":
