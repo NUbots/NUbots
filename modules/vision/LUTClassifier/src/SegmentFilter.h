@@ -39,7 +39,8 @@ namespace modules {
 		public:
 			static const bool PREFILTER_ON = true;
 			
-			loadRules();
+			void addTransitionRule(ColourTransitionRule& rule);
+			void addReplacementRule(ColourReplacementRule& rule);
 
 			SegmentFilter();
 			
@@ -90,19 +91,6 @@ namespace modules {
 			  */
 			void joinMatchingSegments(std::vector<ColourSegment>& line) const;
 
-			/**
-			  @brief Loads the transition rules from a pair of files.
-			  @param filename the filename to load from, note that "_h.txt" and "_v.txt" will be appended to
-				     this to find the actual files.
-			  */
-			void loadTransitionRules(const std::string& filename);
-			
-			/**
-			  @brief Loads the replacement rules from a pair of files.
-			  @param filename the filename to load from, note that "_h.txt" and "_v.txt" will be appended to
-				     this to find the actual files.
-			  */
-			void loadReplacementRules(const std::string& filename);
 		
 		private:
 			std::vector<ColourReplacementRule> m_horizontalReplacementRules;	//! @variable The std::list of horizontal replacement rules
