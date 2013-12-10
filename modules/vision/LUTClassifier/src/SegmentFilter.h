@@ -39,7 +39,7 @@ namespace modules {
 		public:
 			static const bool PREFILTER_ON = true;
 			
-			
+			loadRules();
 
 			SegmentFilter();
 			

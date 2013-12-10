@@ -44,6 +44,9 @@ namespace modules {
         struct ScanLinesConfig{
             static constexpr const char* CONFIGURATION_PATH = "ScanLines.json";
         };
+        struct RulesConfig{
+            static constexpr const char* CONFIGURATION_PATH = "Rules.json";
+        };
         /**
          * Classifies a raw image, producing the colour segments for object detection
          *

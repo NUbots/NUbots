@@ -143,6 +143,10 @@ namespace modules {
 										 constants.config["VERTICAL_SCANLINE_SPACING"]);
 			});
 
+			on<Trigger<Configuration<RulesConfig>>>([this](const Configuration<RulesConfig>& rules) {
+				
+			});
+
             on<Trigger<Image>>([this](const Image& image) {
             	/*std::vector<arma::vec2> green_horizon_points = */
             	greenHorizon.calculateGreenHorizon(image, LUTs[current_LUT_index]);

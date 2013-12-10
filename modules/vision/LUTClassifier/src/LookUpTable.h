@@ -50,15 +50,8 @@ namespace modules{
         void zero();
 
         const messages::vision::ClassifiedImage::Colour classifyPixel(const messages::input::Image::Pixel& p) const {
-            return getColourFromIndex(LUT[getLUTIndex(p)]); // 7bit LUT
-        }
-        
-        /*!
-        Gets the name of the given colour.
-        @param colour The colour name desired.
-        @return The name of the colour.
-        */
-        static std::string getColourName(const messages::vision::ClassifiedImage::Colour& colour);
+            return (Colour)(LUT[getLUTIndex(p)]); // 7bit LUT
+        }        
         
     private:
         /*!
@@ -67,13 +60,6 @@ namespace modules{
         *  @return Returns the colour index for the given pixel.
         */
         const unsigned int getLUTIndex(const messages::input::Image::Pixel& colour) const;
-        
-        /*!
-        *  @param p The Colour enum value of the pixel to be classified.
-        *  @return Returns the classified colour for the given pixel colour number.
-        */
-        const messages::vision::ClassifiedImage::Colour getColourFromIndex(int index) const;        
-
    
         const unsigned char* LUT;           //! @variable Colour Look Up Table - protected.
         unsigned char* LUTbuffer;           //! @variable temp LUT for loading.

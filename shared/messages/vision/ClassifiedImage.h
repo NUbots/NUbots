@@ -58,6 +58,13 @@ namespace messages {
                 TEAM_MAGENTA_COLOUR,
                 UNKNOWN_COLOUR
             };
+            /*!
+            Gets the name of the given colour.
+            @param colour The colour name desired.
+            @return The name of the colour.
+            */
+            static std::string getColourName(const messages::vision::ClassifiedImage::Colour& colour);
+            
             ClassifiedImage();
         private:
             

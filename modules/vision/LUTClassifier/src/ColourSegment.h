@@ -25,6 +25,7 @@
 #include <armadillo>
 
 #include "messages/input/Image.h"
+#include "messages/vision/ClassifiedImage.h"
 #include "LookUpTable.h"
 
 namespace modules {
