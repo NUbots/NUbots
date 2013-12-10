@@ -132,15 +132,6 @@ namespace modules {
 			ColourTransitionRule() {}
 			bool match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const {return false;}
 			SegmentFilter::COLOUR_CLASS getColourClass() const {return SegmentFilter::UNKNOWN_COLOUR;}
-
-			//! output stream operator.
-			friend std::ostream& operator<< (std::ostream& output, const ColourTransitionRule& c);
-			//! output stream operator for a vector of rules.
-			friend std::ostream& operator<< (std::ostream& output, const std::vector<ColourTransitionRule>& v);
-			//! input stream operator.
-			friend std::istream& operator>> (std::istream& input, ColourTransitionRule& c);
-			//! input stream operator for a vector of rules.
-			friend std::istream& operator>> (std::istream& input, std::vector<ColourTransitionRule>& v);
     	};
     	
     	class ColourReplacementRule {

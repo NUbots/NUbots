@@ -287,7 +287,7 @@ namespace modules {
 			}
 		}
 
-		void SegmentFilter::loadTransitionRules(const std::string& filename) {
+		void SegmentFilter::loadTransitionRules(std::string filename) {
 			//load the horizontal rules
 			std::string tempFilename = filename + ".txt";
 			std::ifstream input(tempFilename.c_str());
@@ -315,7 +315,7 @@ namespace modules {
 			}			
 		}
 
-		void SegmentFilter::loadReplacementRules(const std::string& filename) {
+		void SegmentFilter::loadReplacementRules(std::string filename) {
 			//load the horizontal rules
 			std::string tempFilename = filename + ".txt";
 			std::ifstream input(tempFilename.c_str());
