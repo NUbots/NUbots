@@ -62,6 +62,7 @@ namespace modules {
                 volatile bool running;
                 void run();
                 void kill();
+                void playScript();
             public:
                 explicit ScriptTuner(std::unique_ptr<NUClear::Environment> environment);
             };

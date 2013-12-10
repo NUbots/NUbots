@@ -32,6 +32,7 @@
 namespace modules {
     namespace behaviours {
         namespace tools {
+            using messages::motion::ExecuteScript;
 
             struct LockServo {};
 
@@ -141,6 +142,9 @@ namespace modules {
                             break;
                         case 'D':           // Delete frame
                             deleteFrame();
+                            break;
+                        case 'P':
+                            playScript();
                             break;
                     }
 
@@ -424,6 +428,10 @@ namespace modules {
             void ScriptTuner::kill() {
                 running = false;
                 endwin();
+            }
+
+            void ScriptTuner::playScript() {
+                emit(std::make_unique<ExecuteScript>(script));
             }
             
         }  // tools
