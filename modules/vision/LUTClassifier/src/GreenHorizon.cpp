@@ -38,7 +38,6 @@ namespace modules {
         }
 
         std::vector<arma::vec2> GreenHorizon::calculateGreenHorizon(const Image& img, const LookUpTable& LUT) {
-
         	//NEEDS KINEMATICS ! const Horizon& kin_hor = Last<1,KinematicsHorizon>;
 
 		    size_t width = img.width();

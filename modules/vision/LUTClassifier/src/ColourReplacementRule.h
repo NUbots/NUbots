@@ -26,8 +26,8 @@
 #include <vector>
 #include <istream>
 #include <ostream>
-#include <algorithm>
 
+#include "utility/strutil/strutil.h"
 #include "messages/vision/ClassifiedImage.h"
 #include "LookUpTable.h"
 #include "ColourSegment.h"

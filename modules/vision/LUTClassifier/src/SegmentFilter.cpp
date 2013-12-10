@@ -251,13 +251,15 @@ namespace modules {
 				}
 			}
 		}
-
-		void SegmentFilter::loadTransitionRules(const std::string& filename) {
 		
+		void SegmentFilter::addTransitionRule(ColourTransitionRule& rule){
+			m_horizontalRules.push_back(rule);
+			m_verticalRules.push_back(rule);
 		}
 
-		void SegmentFilter::loadReplacementRules(const std::string& filename) {
-			
+		void SegmentFilter::addReplacementRule(ColourReplacementRule& rule){
+			m_horizontalReplacementRules.push_back(rule);
+			m_verticalReplacementRules.push_back(rule);
 		}
 	}
 }

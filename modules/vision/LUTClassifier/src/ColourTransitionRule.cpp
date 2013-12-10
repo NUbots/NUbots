@@ -118,7 +118,7 @@ namespace modules {
 			output << "before: (" << c.m_before_min << ", " << c.m_before_max << ") [";
 			
 			for (auto it : c.m_before) {
-				output << LookUpTable::getColourName(it) << ", ";
+				output << ClassifiedImage::getColourName(it) << ", ";
 			}
 			
 			output << "]\t// (min, max) [colourlist]\n";
@@ -127,7 +127,7 @@ namespace modules {
 			output << "middle: (" << c.m_min << ", " << c.m_max << ") [";
 			
 			for (auto it : c.m_middle) {
-				output << LookUpTable::getColourName(it) << ", ";
+				output << ClassifiedImage::getColourName(it) << ", ";
 			}
 			
 			output << "]\t// (min, max) [colourlist]\n";
@@ -136,7 +136,7 @@ namespace modules {
 			output << "after: (" << c.m_after_min << ", " << c.m_after_max << ") [";
 			
 			for (auto it : c.m_after) {
-				output << LookUpTable::getColourName(it) << ", ";
+				output << ClassifiedImage::getColourName(it) << ", ";
 			}
 			
 			output << "]\t// (min, max) [colourlist]" << std::endl;
@@ -165,8 +165,7 @@ namespace modules {
 
 			// read in the rule name
 			std::getline(input, id_str, ':');
-			id_str = id_str.erase(0, id_str.find_first_not_of(' '));		// remove spaces from the start of the string.
-			id_str = id_str.erase(id_str.find_last_not_of(' '));			// remove spaces from the end of the string.
+			utility::strutil::trim(id_str, std::string(" "));										// remove spaces from the beginning and end of the string.
 			c.m_colour_class = ClassifiedImage::getColourClassFromName(id_str);
 
 			//BEFORE
@@ -184,14 +183,14 @@ namespace modules {
 
 			//get colour list
 			std::getline(input, colour_str, ']');
-			colour_str.erase(std::remove(colour_str.begin(), colour_str.end(), ' '), colour_str.end());  //remove whitespace
+			utility::strutil::removeAll(colour_str, std::string(" "));								// remove spaces.
 			
 			if (!colour_str.empty()) {
 				colour_stream.str(colour_str);
 				
 				while(colour_stream.good()) {
 					std::getline(colour_stream, next, ',');
-					c.m_before.push_back(LookUpTable::getColourFromName(next));
+					c.m_before.push_back(ClassifiedImage::getColourFromName(next));
 				}
 			}
 
@@ -210,14 +209,14 @@ namespace modules {
 
 			//get colour list
 			std::getline(input, colour_str, ']');
-			colour_str.erase(std::remove(colour_str.begin(), colour_str.end(), ' '), colour_str.end());  //remove whitespace
+			utility::strutil::removeAll(colour_str, std::string(" "));								// remove spaces.
 			
 			if (!colour_str.empty()) {
 				colour_stream.str(colour_str);
 				
 				while(colour_stream.good()) {
 					std::getline(colour_stream, next, ',');
-					c.m_middle.push_back(LookUpTable::getColourFromName(next));
+					c.m_middle.push_back(ClassifiedImage::getColourFromName(next));
 				}
 			}
 
@@ -235,8 +234,8 @@ namespace modules {
 			input.ignore(10, '[');
 
 			//get colour list
-			std::getline(input, colour_str, ']');
-			colour_str.erase(std::remove(colour_str.begin(), colour_str.end(), ' '), colour_str.end());  //remove whitespace
+			std::getline(input, colour_str, ']');	
+			utility::strutil::removeAll(colour_str, std::string(" "));								// remove spaces.
 			
 			if(!colour_str.empty()) {
 				colour_stream.clear();
@@ -244,7 +243,7 @@ namespace modules {
 				
 				while(colour_stream.good()) {
 					std::getline(colour_stream, next, ',');
-					c.m_after.push_back(LookUpTable::getColourFromName(next));
+					c.m_after.push_back(ClassifiedImage::getColourFromName(next));
 				}
 			}
 

@@ -39,7 +39,6 @@ namespace modules {
 		class SegmentFilter {
 		public:
 			static const bool PREFILTER_ON = true;
-
 			SegmentFilter();
 			
 			/**
@@ -50,6 +49,9 @@ namespace modules {
 			  */
 			void run(const SegmentedRegion& horizontalSegments, const SegmentedRegion& verticalSegments) const;
 				
+			void addTransitionRule(ColourTransitionRule& rule);
+			void addReplacementRule(ColourReplacementRule& rule);
+
 		private:
 			/**
 			  @brief runs the segment prefilter rules over a segment std::list.
@@ -89,19 +91,6 @@ namespace modules {
 			  */
 			void joinMatchingSegments(std::vector<ColourSegment>& line) const;
 
-			/**
-			  @brief Loads the transition rules from a pair of files.
-			  @param filename the filename to load from, note that "_h.txt" and "_v.txt" will be appended to
-				     this to find the actual files.
-			  */
-			void loadTransitionRules(const std::string& filename);
-			
-			/**
-			  @brief Loads the replacement rules from a pair of files.
-			  @param filename the filename to load from, note that "_h.txt" and "_v.txt" will be appended to
-				     this to find the actual files.
-			  */
-			void loadReplacementRules(const std::string& filename);
 		
 		private:
 			std::vector<ColourReplacementRule> m_horizontalReplacementRules;	//! @variable The std::list of horizontal replacement rules

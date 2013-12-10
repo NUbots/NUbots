@@ -22,6 +22,7 @@
 
 #include <nuclear>
 
+#include "utility/strutil/strutil.h"
 #include "messages/vision/ClassifiedImage.h"
 #include "LookUpTable.h"
 #include "ColourSegment.h"

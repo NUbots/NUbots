@@ -83,5 +83,107 @@ namespace messages {
 			}
 		}
 
-    }  // messages
+		std::string ClassifiedImage::getColourName(const ClassifiedImage::Colour& colour) {
+			switch (colour) {
+				case ClassifiedImage::unclassified: {
+					return "unclassified";
+				}
+
+				case ClassifiedImage::white: {
+					return "white";
+				}
+
+				case ClassifiedImage::green: {
+					return "green";
+				}
+
+				case ClassifiedImage::shadow_object: {
+					return "shadow object";
+				}
+
+				case ClassifiedImage::pink: {
+					return "pink";
+				}
+
+				case ClassifiedImage::pink_orange: {
+					return "pink - orange";
+				}
+
+				case ClassifiedImage::orange: {
+					return "orange";
+				}
+
+				case ClassifiedImage::yellow_orange: {
+					return "yellow - orange";
+				}
+
+				case ClassifiedImage::yellow: {
+					return "yellow";
+				}
+
+				case ClassifiedImage::blue: {
+					return "blue";
+				}
+
+				case ClassifiedImage::shadow_blue: {
+					return "shadow blue";
+				}
+
+				default: {
+					return "unknown colour!";
+				}
+			}
+		}
+
+		ClassifiedImage::Colour getColourFromName(const std::string& name) {
+			if (name.compare("unclassified") == 0) {
+				return ClassifiedImage::unclassified;
+			}
+			
+			else if (name.compare("white") == 0) {
+				return ClassifiedImage::white;
+			}
+			
+			else if (name.compare("green") == 0) {
+				return ClassifiedImage::green;
+			}
+			
+			else if (name.compare("shadow object") == 0) {
+				return ClassifiedImage::shadow_object;
+			}
+			
+			else if (name.compare("pink") == 0) {
+				return ClassifiedImage::pink;
+			}
+			
+			else if (name.compare("pink - orange") == 0) {
+				return ClassifiedImage::pink_orange;
+			}
+			
+			else if (name.compare("orange") == 0) {
+				return ClassifiedImage::orange;
+			}
+			
+			else if (name.compare("yellow - orange") == 0) {
+				return ClassifiedImage::yellow_orange;
+			}
+			
+			else if (name.compare("yellow") == 0) {
+				return ClassifiedImage::yellow;
+			}
+			
+			else if (name.compare("blue") == 0) {
+				return ClassifiedImage::blue;
+			}
+			
+			else if (name.compare("shadow blue") == 0) {
+				return ClassifiedImage::shadow_blue;
+			}
+			
+			else {
+				return ClassifiedImage::invalid;
+			}
+		}
+	
+    }  // vision
 }  // messages

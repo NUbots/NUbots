@@ -69,7 +69,7 @@ namespace modules{
          *      The segment is terminated by a newline.
          */
         std::ostream& operator<< (std::ostream& output, const ColourSegment& c) {
-            output << c.m_start << " - " << c.m_end << " length(pixels): " << c.m_length_pixels << " colour: " << LookUpTable::getColourName(c.m_colour) << std::endl;
+            output << c.m_start << " - " << c.m_end << " length(pixels): " << c.m_length_pixels << " colour: " << messages::vision::ClassifiedImage::getColourName(c.m_colour) << std::endl;
 
             return output;
         }
