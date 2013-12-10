@@ -150,54 +150,64 @@ namespace modules {
 				auto* visionData = message.mutable_vision();
 				auto* imageData = visionData->mutable_image();
 				std::string* imageBytes = imageData->mutable_data();
-
-				// Reserve enough space in the image data to store the output
-				imageBytes->resize(image.width() * image.height());
-				imageData->set_width(image.width());
-				imageData->set_height(image.height());
-
-				// Open the memory of the string as a file (using some dastardly hackery)
-				auto memFile = fmemopen(const_cast<char*>(imageBytes->data()), imageBytes->size(), "wb");
-
-				// Our jpeg compression structures
-				jpeg_compress_struct jpegC;
-				jpeg_error_mgr jpegErr;
-
-				// Set our error handler on our Config object
-				jpegC.err = jpeg_std_error(&jpegErr);
-
-				// Create our compression object
-				jpeg_create_compress(&jpegC);
-
-				// Set our output to the file
-				jpeg_stdio_dest(&jpegC, memFile);
-
-				// Set information about our image
-				jpegC.image_width = image.width();
-				jpegC.image_height = image.height();
-				jpegC.input_components = 3;
-				jpegC.in_color_space = JCS_YCbCr;
-
-				// Set the default compression parameters
-				jpeg_set_defaults(&jpegC);
-
-				// Start compression
-				jpeg_start_compress(&jpegC, true);
                                 
-                                // Compress each row
-                                for(size_t i = 0; i < image.height(); ++i) {
-                                    uint8_t* start = reinterpret_cast<uint8_t*>(image.raw().get() + i * image.width());
-                                    jpeg_write_scanlines(&jpegC, &start, 1);
+                                if(image.source().empty()) {
+                                    // Reserve enough space in the image data to store the output
+                                    imageBytes->resize(image.width() * image.height());
+                                    imageData->set_width(image.width());
+                                    imageData->set_height(image.height());
+
+                                    // Open the memory of the string as a file (using some dastardly hackery)
+                                    auto memFile = fmemopen(const_cast<char*>(imageBytes->data()), imageBytes->size(), "wb");
+
+                                    // Our jpeg compression structures
+                                    jpeg_compress_struct jpegC;
+                                    jpeg_error_mgr jpegErr;
+
+                                    // Set our error handler on our Config object
+                                    jpegC.err = jpeg_std_error(&jpegErr);
+
+                                    // Create our compression object
+                                    jpeg_create_compress(&jpegC);
+
+                                    // Set our output to the file
+                                    jpeg_stdio_dest(&jpegC, memFile);
+
+                                    // Set information about our image
+                                    jpegC.image_width = image.width();
+                                    jpegC.image_height = image.height();
+                                    jpegC.input_components = 3;
+                                    jpegC.in_color_space = JCS_YCbCr;
+
+                                    // Set the default compression parameters
+                                    jpeg_set_defaults(&jpegC);
+
+                                    // Start compression
+                                    jpeg_start_compress(&jpegC, true);
+
+                                    // Compress each row
+                                    for(size_t i = 0; i < image.height(); ++i) {
+                                        uint8_t* start = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(&image.raw()[i * image.width()]));
+                                        jpeg_write_scanlines(&jpegC, &start, 1);
+                                    }
+
+                                    // Finish our compression
+                                    jpeg_finish_compress(&jpegC);
+
+                                    // Close the memory file)
+                                    fclose(memFile);
+
+                                    // Destroy the compression object (free memory)
+                                    jpeg_destroy_compress(&jpegC);
                                 }
-                                
-				// Finish our compression
-				jpeg_finish_compress(&jpegC);
-
-				// Close the memory file)
-				fclose(memFile);
-
-				// Destroy the compression object (free memory)
-				jpeg_destroy_compress(&jpegC);
+                                else {
+                                    // Reserve enough space in the image data to store the output
+                                    imageBytes->resize(image.source().size());
+                                    imageData->set_width(image.width());
+                                    imageData->set_height(image.height());
+                                    
+                                    imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
+                                }
 
 				m->send(message);
 			});
