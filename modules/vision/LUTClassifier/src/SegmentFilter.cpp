@@ -21,8 +21,7 @@
 
 namespace modules {
     namespace vision {
-    	using messages::vision::ClassifiedImage::COLOUR_CLASS;
-    	using messages::vision::ClassifiedImage::Colour;
+    	using messages::vision::ClassifiedImage;
 
 		SegmentFilter::SegmentFilter() {			
 		}
@@ -32,7 +31,7 @@ namespace modules {
 //			const SegmentedRegion& verticalSegments = vbb->getVerticalSegmentedRegion();
 			
 			SegmentedRegion horizontalFiltered, verticalFiltered;
-			std::map<COLOUR_CLASS, std::vector<ColourSegment>> horizontalResult, verticalResult;
+			std::map<ClassifiedImage::COLOUR_CLASS, std::vector<ColourSegment>> horizontalResult, verticalResult;
 		
 			if (PREFILTER_ON) {
 				preFilter(horizontalSegments, horizontalFiltered);
@@ -71,7 +70,7 @@ namespace modules {
 				if(line_it->size() >= 3) {
 				    //move down segments in triplets replacing the middle if necessary
 				    before_it = line_it->begin();
-				    middle_it = before_it+1;
+				    middle_it = before_it + 1;
 				    line.clear();
 				    line.push_back(*before_it);         //add the first segment
 				    
@@ -97,13 +96,14 @@ namespace modules {
 			result.set(finalSegments, dir);
 		}
 
-		void SegmentFilter::filter(const SegmentedRegion &scans, std::map<COLOUR_CLASS, std::vector<ColourSegment>>& result) const {
-			switch(scans.getDirection()) {
+		void SegmentFilter::filter(const SegmentedRegion &scans, std::map<ClassifiedImage::COLOUR_CLASS, std::vector<ColourSegment>>& result) const {
+			switch (scans.getDirection()) {
 				case SegmentedRegion::VERTICAL: {
 					for (auto rule : m_verticalRules) {
 						std::vector<ColourSegment>& segments = result[rule.getColourClass()];
 						checkRuleAgainstRegion(scans, rule, segments);
-					}			
+					}
+					
 					break;
 				}
 			
@@ -151,7 +151,7 @@ namespace modules {
 				    }
 				    
 				    // Lastly check final pair alone
-				    if(rule.match(*(it - 1), *it, ColourTransitionRule::nomatch)) {
+				    if (rule.match(*(it - 1), *it, ColourTransitionRule::nomatch)) {
 				        matches.push_back(*it);
 				    }
 				}
@@ -188,7 +188,7 @@ namespace modules {
 			for(rules_it = begin; rules_it < end; rules_it++) {
 				if (rules_it->match(before, middle, after)) {
 				    // Replace middle using replacement method.
-				    switch(rules_it->getMethod()) {
+				    switch (rules_it->getMethod()) {
 						case ColourReplacementRule::BEFORE: {
 							tempSegment.setColour(before.getColour());
 							replacements.push_back(tempSegment);

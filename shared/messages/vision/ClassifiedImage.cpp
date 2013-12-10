@@ -19,10 +19,69 @@
 
 #include "ClassifiedImage.h"
 
-
 namespace messages {
-    namespace input {
-        ClassifiedImage::ClassifiedImage(){}      
+    namespace vision {
+	
+        ClassifiedImage::ClassifiedImage() {
+		}      
+
+		std::string getColourClassName(const ClassifiedImage::COLOUR_CLASS& id) {
+			switch (id) {
+				case ClassifiedImage::BALL_COLOUR: {
+					return "BALL_COLOUR";
+				}
+					
+				case ClassifiedImage::GOAL_COLOUR: {
+					return "GOAL_COLOUR";
+				}
+
+/*				
+				case ClassifiedImage::GOAL_Y_COLOUR: {
+					return "GOAL_Y_COLOUR";
+				}
+					
+				case ClassifiedImage::GOAL_B_COLOUR: {
+					return "GOAL_B_COLOUR";
+				}
+*/
+
+				case ClassifiedImage::LINE_COLOUR: {
+					return "LINE_COLOUR";
+				}
+					
+				default: {
+					return "UNKNOWN_COLOUR";
+				}
+			}
+		}
     
-    }  // input
+		ClassifiedImage::COLOUR_CLASS getColourClassFromName(const std::string& name) {
+			if (name.compare("BALL_COLOUR") == 0) {
+				return ClassifiedImage::BALL_COLOUR;
+			}
+			
+			else if (name.compare("GOAL_COLOUR") == 0) {
+				return ClassifiedImage::GOAL_COLOUR;
+			}
+			
+/*			
+			else if (name.compare("GOAL_Y_COLOUR") == 0) {
+				return ClassifiedImage::GOAL_Y_COLOUR;
+			}
+			
+			else if (name.compare("GOAL_B_COLOUR") == 0) {
+				return ClassifiedImage::GOAL_B_COLOUR;
+			}
+*/
+		
+			else if (name.compare("LINE_COLOUR") == 0) {
+				return ClassifiedImage::LINE_COLOUR;
+			}
+				
+			else {
+				return ClassifiedImage::UNKNOWN_COLOUR;
+			}
+		}
+
+    }  // messages
 }  // messages

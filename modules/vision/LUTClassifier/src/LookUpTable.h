@@ -59,6 +59,13 @@ namespace modules{
         @return The name of the colour.
         */
         static std::string getColourName(const messages::vision::ClassifiedImage::Colour& colour);
+
+		/*!
+		  Gets the colour matching given name.
+		  @param name String name of the colour desired.
+		  @return The method mathing the given name.
+		  */
+		static messages::vision::ClassifiedImage::Colour getColourFromName(const std::string& name);
         
     private:
         /*!

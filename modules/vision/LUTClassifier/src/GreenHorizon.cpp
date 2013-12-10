@@ -24,7 +24,7 @@ namespace modules {
 
         using messages::input::Image;
         using messages::support::Configuration;
-        using messages::vision::ClassifiedImage::Colour;
+        using messages::vision::ClassifiedImage;
         
         
         GreenHorizon::GreenHorizon() {
@@ -93,10 +93,12 @@ namespace modules {
 		    }
 
 		    static int num_no_green = 0;
-		    if(horizon_points.size() < 2) {
-		        if(num_no_green < 150) {
+		    if (horizon_points.size() < 2) {
+		        if (num_no_green < 150) {
 		            num_no_green++;
-		        } else {
+		        }
+				
+				else {
 		            num_no_green = 0;
 		            std::cout<<"150 FRAMES OF NO GREEN HORIZON FOUND - VERY POOR LUT"<<std::endl;
 		        }
@@ -123,7 +125,6 @@ namespace modules {
 
 		    mean_y = acc.mean();
 		    std_dev_y = acc.stddev();
-		
 
 		    std::vector<arma::vec2>::iterator p = horizon_points.begin();
 
@@ -131,21 +132,23 @@ namespace modules {
 		        if ((*p)[1] < mean_y - GREEN_HORIZON_UPPER_THRESHOLD_MULT * std_dev_y) {//TODO
 		            thrown_points.push_back(*p);
 		            p = horizon_points.erase(p);
-		        } else {
+		        }
+				
+				else {
 		            p++;
 		        }
 		    }
 
 		    //NOTE: OLD Code may have printed more info about the thrown points.
-		    std::cout<<"Green Horizon Number of Thrown Points : "<<thrown_points.size()<<std::endl;
+		    std::cout << "Green Horizon Number of Thrown Points : " << thrown_points.size() << std::endl;
 
 		    horizon_points = upperConvexHull(horizon_points);
 		   	set(horizon_points,width,height);
+			
 		    return horizon_points;
         }
 
-        void GreenHorizon::set(const std::vector<arma::vec2> &initial_points, int image_width, int image_height)
-		{
+        void GreenHorizon::set(const std::vector<arma::vec2> &initial_points, int image_width, int image_height) {
 		    original_points = initial_points;
 		    interpolated_points.clear();
 
@@ -154,8 +157,9 @@ namespace modules {
 		    std::vector<arma::vec2>::const_iterator it_start, it_end;
 
 		    //generate start/end edge points (if not there)
-		    if(original_points.front()[0] > 0) {
+		    if (original_points.front()[0] > 0) {
 		        double y = interpolate(original_points.at(0), original_points.at(1), 0);
+				
 		        //clamp to image vertical bounds
 		        y = std::max(y, 0.0);
 		        y = std::min(y, image_height - 1.0);
@@ -164,10 +168,12 @@ namespace modules {
 		        v[1] = y;
 		        original_points.insert(original_points.begin(), v);
 		    }
-		    if(original_points.back()[0] < image_width - 1) {
+			
+		    if (original_points.back()[0] < image_width - 1) {
 		        double y = interpolate(original_points.at(original_points.size() - 2),
 		                               original_points.at(original_points.size() - 1),
 		                               image_width - 1);
+									   
 		        //clamp to image vertical bounds
 		        y = std::max(y, 0.0);
 		        y = std::min(y, image_height - 1.0);
@@ -179,17 +185,21 @@ namespace modules {
 
 		    it_start = original_points.begin();
 		    it_end = it_start + 1;
+			
 		    for (int x = 0; x < image_width; x++) {
 		        // consider hull points either side of current x value
 		        while (x > (*it_end)[0]) {
 		            it_start++;
 		            it_end++;
 		        }
+				
 		        // calculate y value for interpolated point
 		        y_new = interpolate(*it_start, *it_end, x);
 
-		        if(y_new >= image_height)
+		        if(y_new >= image_height) {
 		            std::cout << "GreenHorizon::set: " << y_new << " it_start: " << *it_start << " it_end: " << *it_end << std::endl;
+				}
+				
 		        arma::vec2 v;
 		        v[0] = x;
 		        v[1] = y_new;
@@ -203,9 +213,10 @@ namespace modules {
 
 	        // Build upper hull
 	        for (int i = 0; i < n; i++) {
-	            while ((k >= 2) && (differenceCrossProduct2D(H[k-2], H[k-1], points[i]) <= 0))
+	            while ((k >= 2) && (differenceCrossProduct2D(H[k - 2], H[k - 1], points[i]) <= 0)) {
 	                k--;
-
+				}
+				
 	            H[k] = points[i];
 	            k++;
 	        }
@@ -214,27 +225,25 @@ namespace modules {
 	        return H;
 	    }
 
-
         bool GreenHorizon::isPixelGreen(const messages::input::Image::Pixel& p, const LookUpTable& LUT) {
-        	return LUT.classifyPixel(p) == green; //green is a Colour enum, defined in LookUpTable.h
+        	return LUT.classifyPixel(p) == ClassifiedImage::green;
         }
-
 
 		double GreenHorizon::interpolate(arma::vec2 p1, arma::vec2 p2, double x){
 			return p1[1] + (p2[1] - p1[1]) * (x - p1[0]) / (p2[0] - p1[0]);
 		}
 
-		const std::vector<arma::vec2>& GreenHorizon::getInterpolatedPoints() const
-		{
+		const std::vector<arma::vec2>& GreenHorizon::getInterpolatedPoints() const {
 		    return interpolated_points;
 		}
 
-		std::vector<arma::vec2> GreenHorizon::getInterpolatedSubset(unsigned int spacing) const
-		{
+		std::vector<arma::vec2> GreenHorizon::getInterpolatedSubset(unsigned int spacing) const {
 		    std::vector<arma::vec2> subset;
-		    for(unsigned int i=0; i<interpolated_points.size(); i+=spacing) {
+			
+		    for (unsigned int i = 0; i < interpolated_points.size(); i += spacing) {
 		        subset.push_back(interpolated_points.at(i));
 		    }
+			
 		    return subset;
 		}
 	}

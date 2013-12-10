@@ -24,7 +24,7 @@ namespace modules {
 
         using messages::input::Image;
         using messages::support::Configuration;
-        using messages::vision::ClassifiedImage::Colour;
+        using messages::vision::ClassifiedImage;
         
  		ScanLines::ScanLines() {
  			// Empty Constructor.
@@ -38,12 +38,12 @@ namespace modules {
 			arma::vec2 left = horizonPoints.front();
 			arma::vec2 right = horizonPoints.back();
 
-			if(left[1] >= img.height()) { // Element 1 is the y-component.
+			if (left[1] >= img.height()) { // Element 1 is the y-component.
 //				log<NUClear::WARN>("Left horizon limit exceeds image height: ", left[1]);
 				std::cout << "Left horizon limit exceeds image height: " << left[1] << std::endl;
 			}
 			
-			if(right[1] >= img.height()) { // Element 1 is the y-component.
+			if (right[1] >= img.height()) { // Element 1 is the y-component.
 //				log<NUClear::WARN>("Left horizon limit exceeds image height: ", right[1]);
 				std::cout << "Left horizon limit exceeds image height: " << right[1] << std::endl;
 			}
@@ -80,7 +80,7 @@ namespace modules {
 			std::vector<ColourSegment> result;
 			arma::vec2 startPoint, endPoint;
 
-			if(y >= image.height()) {
+			if (y >= image.height()) {
 //				log<NUClear::ERROR>("ScanLines::classifyHorizontalScan invalid y: ", y);
 				std::cout << "ScanLines::classifyHorizontalScan invalid y: " <<  y << std::endl;
 				return result;
@@ -89,14 +89,14 @@ namespace modules {
 			//simple and nasty first
 			//Colour previous, current, next
 			unsigned int startPosition = 0, x;
-			Colour startColour = LUT.classifyPixel(image(0, y));
-			Colour currentColour;
+			ClassifiedImage::Colour startColour = LUT.classifyPixel(image(0, y));
+			ClassifiedImage::Colour currentColour;
 			ColourSegment segment;
 
-			for(x = 0; x < image.width(); x++) {
+			for (x = 0; x < image.width(); x++) {
 				currentColour = LUT.classifyPixel(image(x, y));
 
-				if(currentColour != startColour) {
+				if (currentColour != startColour) {
 					//start of new segment
 					//make new segment and push onto std::vector
 					startPoint[0] = startPosition;
@@ -126,7 +126,7 @@ namespace modules {
 			std::vector<ColourSegment> result;
 			arma::vec2 startPoint, endPoint;
 
-			if((start[1] >= image.height()) || (start[1] < 0) || (start[0] >= image.width()) || (start[0] < 0)) {
+			if ((start[1] >= image.height()) || (start[1] < 0) || (start[0] >= image.width()) || (start[0] < 0)) {
 //				log<NUClear::ERROR>("ScanLines::classifyVerticalScan invalid start position: ", start);
 				std::cout << "ScanLines::classifyVerticalScan invalid start position: " << start << std::endl;
 				return result;
@@ -134,14 +134,14 @@ namespace modules {
 
 			//simple and nasty first
 			//Colour previous, current, next
-			Colour startColour = LUT.classifyPixel(image(start[0], start[1])), currentColour;
+			ClassifiedImage::Colour startColour = LUT.classifyPixel(image(start[0], start[1])), currentColour;
 			ColourSegment segment;
 			unsigned int startPosition = start[1], x = start[0], y;
 
-			for(y = start[1]; y < image.height(); y++) {
+			for (y = start[1]; y < image.height(); y++) {
 				currentColour = LUT.classifyPixel(image(x, y));
 
-				if(currentColour != startColour) {
+				if (currentColour != startColour) {
 					//start of new segment
 					//make new segment and push onto std::vector
 					startPoint[0] = x;

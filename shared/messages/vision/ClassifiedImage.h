@@ -1,4 +1,3 @@
-
 /*
  * This file is part of LUTClassifier.
  *
@@ -18,10 +17,10 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_VISION_CLASSIFIED_IMAGE_H
-#define MESSAGES_VISION_CLASSIFIED_IMAGE_H
+#ifndef MESSAGES_VISION_CLASSIFIEDIMAGE_H
+#define MESSAGES_VISION_CLASSIFIEDIMAGE_H
 
-
+#include <string>
 
 namespace messages {
     namespace vision {
@@ -47,7 +46,8 @@ namespace messages {
                 shadow_blue, //!< Colour is in the Dark Blue region.
                 num_colours, //!< Total number of colour categories.
                 invalid
-            };      
+            };
+			
             enum COLOUR_CLASS {
                 BALL_COLOUR,
                 GOAL_COLOUR,
@@ -58,7 +58,15 @@ namespace messages {
                 TEAM_MAGENTA_COLOUR,
                 UNKNOWN_COLOUR
             };
+			
             ClassifiedImage();
+			
+			//! @brief converts a string into a colour class.
+			static COLOUR_CLASS getColourClassFromName(const std::string& name);
+
+			//! @brief converts a colour class into a string.
+			static std::string getColourClassName(const COLOUR_CLASS& id);
+			
         private:
             
         };
@@ -66,4 +74,4 @@ namespace messages {
     }  // vision
 }  // messages
 
-#endif  // MESSAGES_VISION_CLASSIFIED_IMAGE_H
+#endif  // MESSAGES_VISION_CLASSIFIEDIMAGE_H

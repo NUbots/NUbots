@@ -54,7 +54,7 @@ namespace modules {
            
         public:
             ColourSegment() {
-                set(arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2), invalid);
+                set(arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2), messages::vision::ClassifiedImage::invalid);
             }
 
             ColourSegment(const arma::vec2& start, const arma::vec2& end, const messages::vision::ClassifiedImage::Colour& colour) {

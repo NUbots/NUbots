@@ -30,16 +30,15 @@
 #include "SegmentedRegion.h"
 #include "ColourSegment.h"
 #include "messages/vision/ClassifiedImage.h"
-//#include "Vision/VisionTypes/colourreplacementrule.h"
-//#include "Vision/VisionTypes/colourtransitionrule.h"
+#include "ColourReplacementRule.h"
+#include "ColourTransitionRule.h"
 
 namespace modules {
     namespace vision {
+	
 		class SegmentFilter {
 		public:
 			static const bool PREFILTER_ON = true;
-			
-			
 
 			SegmentFilter();
 			
@@ -110,6 +109,7 @@ namespace modules {
 			std::vector<ColourTransitionRule> m_horizontalRules;				//! @variable The std::list of horizontal transition rules
 			std::vector<ColourTransitionRule> m_verticalRules;					//! @variable The std::list of vertical transition rules
     	};    	
+		
     }  // vision
 }  // modules
 

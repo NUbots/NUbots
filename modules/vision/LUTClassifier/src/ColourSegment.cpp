@@ -21,9 +21,9 @@
  
 namespace modules{
     namespace vision{
-        using messages::vision::ClassifiedImage::Colour;
+        using messages::vision::ClassifiedImage;
 
-        void ColourSegment::set(const arma::vec2& start, const arma::vec2& end, const Colour& colour) {
+        void ColourSegment::set(const arma::vec2& start, const arma::vec2& end, const ClassifiedImage::Colour& colour) {
             m_colour = colour;
 
             m_start = start;
@@ -35,11 +35,11 @@ namespace modules{
             m_centre = (m_start + m_end) * 0.5;
         }
 
-        void ColourSegment::setColour(const Colour& colour) {
+        void ColourSegment::setColour(const ClassifiedImage::Colour& colour) {
             m_colour = colour;
         }
 
-        bool ColourSegment::join(const ColourSegment &other) {
+        bool ColourSegment::join(const ColourSegment& other) {
             //colours don't match - segments cannot be joined
             if (m_colour != other.m_colour)
                 return false;
