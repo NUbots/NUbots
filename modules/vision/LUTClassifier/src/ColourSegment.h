@@ -38,7 +38,7 @@ namespace modules {
         class ColourSegment  {
         private:
             //! @variable The colour of the segment.
-            Colour m_colour;
+            messages::vision::ClassifiedImage::Colour m_colour;
 
             //! @variable The length of the segment in pixels.
             unsigned int m_length_pixels;
@@ -57,7 +57,7 @@ namespace modules {
                 set(arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2), invalid);
             }
 
-            ColourSegment(const arma::vec2& start, const arma::vec2& end, const Colour& colour) {
+            ColourSegment(const arma::vec2& start, const arma::vec2& end, const messages::vision::ClassifiedImage::Colour& colour) {
                 set(start, end, colour);
             }
 
@@ -67,7 +67,7 @@ namespace modules {
             }
 
             //! Returns the colour of the segment.
-            Colour getColour() const {
+            messages::vision::ClassifiedImage::Colour getColour() const {
                 return m_colour;
             }
 
@@ -92,10 +92,10 @@ namespace modules {
              * @param end The end location of the segment.
              * @param colour The colour of the segment.
              */
-            void set(const arma::vec2& start, const arma::vec2& end, const Colour& colour);
+            void set(const arma::vec2& start, const arma::vec2& end, const messages::vision::ClassifiedImage::Colour& colour);
 
             //! Set the colour of the segment.
-            void setColour(const Colour& colour);
+            void setColour(const messages::vision::ClassifiedImage::Colour& colour);
 
             /**
              * Joins the given segment to this one. This segment will now be as long as the total

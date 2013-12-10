@@ -11,7 +11,8 @@
 
 namespace modules{
   namespace vision{
-
+        using messages::vision::ClassifiedImage::Colour;
+        
         LookUpTable::LookUpTable()
         {
             LUTbuffer = new unsigned char[LUT_SIZE];

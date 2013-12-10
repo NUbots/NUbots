@@ -18,8 +18,11 @@
  */
 
 #include "ColourSegment.h"
+ 
 namespace modules{
     namespace vision{
+        using messages::vision::ClassifiedImage::Colour;
+
         void ColourSegment::set(const arma::vec2& start, const arma::vec2& end, const Colour& colour) {
             m_colour = colour;
 

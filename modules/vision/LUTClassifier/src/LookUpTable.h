@@ -11,6 +11,7 @@
 #define LOOKUPTABLE_H
 
 #include "messages/input/Image.h"
+#include "messages/vision/ClassifiedImage.h"
 #include <nuclear>
 #include <string>
 #include <iostream>
@@ -19,22 +20,6 @@
 
 namespace modules{
   namespace vision{
-
-    enum Colour{
-        unclassified, //!< Colour has not be given a category.
-        white, //!< Colour is in the White region.
-        green, //!< Colour is in the Green region.
-        shadow_object, //!< Colour is part of a shadowed area.
-        pink, //!< Colour is in the Red region.
-        pink_orange, //!< Colour is in the region of overlap between Red and Orange.
-        orange, //!< Colour is in the Orange region.
-        yellow_orange, //!< Colour is in the region of overlap between Yellow and Orange.
-        yellow, //!< Colour is in the Yellow region.
-        blue, //!< Colour is in the Sky Blue region.
-        shadow_blue, //!< Colour is in the Dark Blue region.
-        num_colours, //!< Total number of colour categories.
-        invalid
-    };  
     
     class LookUpTable
     {
@@ -64,7 +49,7 @@ namespace modules{
         */
         void zero();
 
-        const Colour classifyPixel(const messages::input::Image::Pixel& p) const {
+        const messages::vision::ClassifiedImage::Colour classifyPixel(const messages::input::Image::Pixel& p) const {
             return getColourFromIndex(LUT[getLUTIndex(p)]); // 7bit LUT
         }
         
@@ -73,7 +58,7 @@ namespace modules{
         @param colour The colour name desired.
         @return The name of the colour.
         */
-        static std::string getColourName(const Colour& colour);
+        static std::string getColourName(const messages::vision::ClassifiedImage::Colour& colour);
         
     private:
         /*!
@@ -87,7 +72,7 @@ namespace modules{
         *  @param p The Colour enum value of the pixel to be classified.
         *  @return Returns the classified colour for the given pixel colour number.
         */
-        const Colour getColourFromIndex(int index) const;        
+        const messages::vision::ClassifiedImage::Colour getColourFromIndex(int index) const;        
 
    
         const unsigned char* LUT;           //! @variable Colour Look Up Table - protected.

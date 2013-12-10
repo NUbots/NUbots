@@ -21,39 +21,12 @@
 
 namespace modules {
     namespace vision {
+    	using messages::vision::ClassifiedImage::COLOUR_CLASS;
+    	using messages::vision::ClassifiedImage::Colour;
 
-// FROM Autoconfig/nubotdataconfig.h
-//#define DATA_DIR (std::string(getenv("HOME")) + std::string("/nubot/"))
-//#define CONFIG_DIR (DATA_DIR + std::string("Config/Darwin/"))
-//#define RULE_DIR (CONFIG_DIR + std::string("Rules/"))
-#define RULE_DIR std::string("/home/nubot/")
-
-
-		SegmentFilter::SegmentFilter() {
-			loadReplacementRules(RULE_DIR + std::string("ReplacementRules"));
-			loadTransitionRules(RULE_DIR + std::string("TransitionRules"));
+		SegmentFilter::SegmentFilter() {			
 		}
-/*
-		double averageLength(const SegmentedRegion& scans, Colour colour) {
-			const std::vector<std::vector<ColourSegment>>& segments = scans.getSegments();
-			std::vector<std::vector<ColourSegment> >::const_iterator line_it;
-			std::vector<ColourSegment>::const_iterator seg_it;
-			double sum = 0, num = 0;
-			
-			//loop through each scan
-			for(line_it = segments.begin(); line_it < segments.end(); line_it++) {
-				//move down segments in triplets replacing the middle if necessary
-				for(seg_it = line_it->begin(); seg_it < line_it->end(); seg_it++) {
-				    if(seg_it->getColour() == colour) {
-				        sum += seg_it->getLength();
-				        num++;
-				    }
-				}
-			}
-			
-			return sum/num;
-		}
-*/
+
 		void SegmentFilter::run(const SegmentedRegion& horizontalSegments, const SegmentedRegion& verticalSegments) const {
 //			const SegmentedRegion& horizontalSegments = vbb->getHorizontalSegmentedRegion();
 //			const SegmentedRegion& verticalSegments = vbb->getVerticalSegmentedRegion();
@@ -68,16 +41,10 @@ namespace modules {
 //				TODO: Need to emit these?
 //				vbb->setHorizontalFilteredSegments(horizontalFiltered.m_segmentedScans);
 //				vbb->setVerticalFilteredSegments(verticalFiltered.m_segmentedScans);
-
-				filter(horizontalFiltered, horizontalResult);
-				filter(verticalFiltered, verticalResult);
 			}
+			filter(horizontalFiltered, horizontalResult);
+			filter(verticalFiltered, verticalResult);
 			
-			else {
-				//Vision problem should occur in here:
-				filter(horizontalSegments, horizontalResult);
-				filter(verticalSegments, verticalResult);
-			}
 		
 // 			TODO: Need to emit these?
 			// Push results to BB
@@ -136,8 +103,7 @@ namespace modules {
 					for (auto rule : m_verticalRules) {
 						std::vector<ColourSegment>& segments = result[rule.getColourClass()];
 						checkRuleAgainstRegion(scans, rule, segments);
-					}
-				
+					}			
 					break;
 				}
 			
@@ -254,8 +220,7 @@ namespace modules {
 						
 						case ColourReplacementRule::INVALID: {
 							std::cout << "SegmentFilter::applyReplacements - invalid replacement rule" << std::endl;
-							replacements.push_back(middle);
-							
+							replacements.push_back(middle);							
 							break;
 						}
 					}
@@ -288,48 +253,11 @@ namespace modules {
 		}
 
 		void SegmentFilter::loadTransitionRules(const std::string& filename) {
-			//load the horizontal rules
-			std::string tempFilename = filename + ".txt";
-			std::ifstream input(tempFilename.c_str());
 		
-			if(input.good()) {
-				input >> m_horizontalRules;
-				m_verticalRules = m_horizontalRules;
-			}
-			
-			else {
-				std::cout << "SegmentFilter::loadTransitionRules - failed to read from " << tempFilename << std::endl;
-			}
-			
-			input.close();
-
-			if ((m_horizontalRules.size()  == 0) || (m_verticalRules.size() == 0)) {
-				std::cout << std::endl
-				     << "=================WARNING=================" << std::endl
-				     << __PRETTY_FUNCTION__ << ":"                  << std::endl
-				     << "  " << filename << ".txt is empty!"        << std::endl
-				     << ""                                          << std::endl
-				     << "  The robot may exhibit blindness."        << std::endl
-				     << "=================WARNING=================" << std::endl
-				     << std::endl;
-			}			
 		}
 
 		void SegmentFilter::loadReplacementRules(const std::string& filename) {
-			//load the horizontal rules
-			std::string tempFilename = filename + ".txt";
-			std::ifstream input(tempFilename.c_str());
-
-			if (input.good()) {
-				input >> m_horizontalReplacementRules;
-				m_verticalReplacementRules = m_horizontalReplacementRules;
-			}
 			
-			else {
-				std::cout << "SegmentFilter::loadReplacementRules - failed to read from " << tempFilename << std::endl;
-			}
-			
-			input.close();
 		}
 	}
 }

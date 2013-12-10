@@ -29,30 +29,17 @@
 
 #include "SegmentedRegion.h"
 #include "ColourSegment.h"
+#include "messages/vision/ClassifiedImage.h"
 //#include "Vision/VisionTypes/colourreplacementrule.h"
 //#include "Vision/VisionTypes/colourtransitionrule.h"
 
 namespace modules {
     namespace vision {
-
-		// Forward declarations to allow for compilation.
-    	class ColourTransitionRule;
-    	class ColourReplacementRule;
-
 		class SegmentFilter {
 		public:
 			static const bool PREFILTER_ON = true;
 			
-			enum COLOUR_CLASS {
-				BALL_COLOUR,
-				GOAL_COLOUR,
-				// GOAL_Y_COLOUR,
-				// GOAL_B_COLOUR,
-				LINE_COLOUR,
-				TEAM_CYAN_COLOUR,
-				TEAM_MAGENTA_COLOUR,
-				UNKNOWN_COLOUR
-			};
+			
 
 			SegmentFilter();
 			
@@ -77,7 +64,7 @@ namespace modules {
 			  @param scans the std::lists of segments - smoothed or unsmoothed.
 			  @param result std::vectors of transition rule matches and the field object ids they map to.
 			  */
-			void filter(const SegmentedRegion& scans, std::map<COLOUR_CLASS, std::vector<ColourSegment>>& result) const;
+			void filter(const SegmentedRegion& scans, std::map<messages::vision::ClassifiedImage::COLOUR_CLASS, std::vector<ColourSegment>>& result) const;
 		
 			/**
 			  @brief Applies a single rule to a segmented region.
@@ -122,53 +109,7 @@ namespace modules {
 			std::vector<ColourReplacementRule> m_verticalReplacementRules;		//! @variable The std::list of vertical replacement rules
 			std::vector<ColourTransitionRule> m_horizontalRules;				//! @variable The std::list of horizontal transition rules
 			std::vector<ColourTransitionRule> m_verticalRules;					//! @variable The std::list of vertical transition rules
-    	};
-    	
-// 		TODO: Replace these with the proper classes.
-    	class ColourTransitionRule {
-    	public:
-			static ColourSegment nomatch;   //! @variable A static segment used to represent one that cannot be matched to any rule.
-
-			ColourTransitionRule() {}
-			bool match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const {return false;}
-			SegmentFilter::COLOUR_CLASS getColourClass() const {return SegmentFilter::UNKNOWN_COLOUR;}
-
-			//! output stream operator.
-			friend std::ostream& operator<< (std::ostream& output, const ColourTransitionRule& c);
-			//! output stream operator for a vector of rules.
-			friend std::ostream& operator<< (std::ostream& output, const std::vector<ColourTransitionRule>& v);
-			//! input stream operator.
-			friend std::istream& operator>> (std::istream& input, ColourTransitionRule& c);
-			//! input stream operator for a vector of rules.
-			friend std::istream& operator>> (std::istream& input, std::vector<ColourTransitionRule>& v);
-    	};
-    	
-    	class ColourReplacementRule {
-    	public:
-		    static ColourSegment nomatch;   //! @variable a static segment used to represent one that cannot be matched to any rule.
-		    
-			enum ReplacementMethod {
-				BEFORE,
-				AFTER,
-				SPLIT,
-				INVALID
-			};
-    
-    	    ColourReplacementRule() {}
-		    bool match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const {return false;}
-		    bool oneWayMatch(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const {return false;}
-			ReplacementMethod getMethod() const {return INVALID;}
-    
-			//! output stream operator.
-			friend std::ostream& operator<< (std::ostream& output, const ColourReplacementRule& c);
-			//! output stream operator for a vector of rules.
-			friend std::ostream& operator<< (std::ostream& output, const std::vector<ColourReplacementRule>& v);
-			//! input stream operator.
-			friend std::istream& operator>> (std::istream& input, ColourReplacementRule& c);
-			//! input stream operator for a vector of rules.
-			friend std::istream& operator>> (std::istream& input, std::vector<ColourReplacementRule>& v);
-    	};
-    	
+    	};    	
     }  // vision
 }  // modules
 
