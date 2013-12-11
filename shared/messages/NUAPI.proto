@@ -6,6 +6,7 @@ message Message {
         VISION = 2;
         LOCALISATION = 3;
 		DATA_POINT = 4;
+		REACTION_STATISTICS = 5;
     }
 
     required Type type = 1;
@@ -15,7 +16,20 @@ message Message {
     optional Vision vision = 4;
     optional Localisation localisation = 5;
     optional DataPoint dataPoint = 6;
+    optional ReactionStatistics reactionStatistics = 7;
 }
+
+message ReactionStatistics {
+	optional string name = 1;
+	optional uint64 reactionId = 2;
+	optional uint64 taskId = 3;
+	optional uint64 causeReactionId = 4;
+	optional uint64 causeTaskId = 5;
+	optional uint64 emitted = 6;
+	optional uint64 started = 7;
+	optional uint64 finished = 8;
+}
+
 
 message DataPoint {
 	optional string label = 1;
