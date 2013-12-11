@@ -222,6 +222,34 @@ namespace modules {
 				log<NUClear::DEBUG>("ClassifiedImage!");
 			});
 
+			on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
+				API::Message message;
+				message.set_type(API::Message::REACTION_STATISTICS);
+				message.set_utc_timestamp(std::time(0));
+
+				auto* reactionStatistics = message.mutable_reactionstatistics();
+
+				reactionStatistics->set_name(stats.name);
+				reactionStatistics->set_reactionid(stats.reactionId);
+				reactionStatistics->set_taskid(stats.taskId);
+				reactionStatistics->set_causereactionid(stats.causeReactionId);
+				reactionStatistics->set_causetaskid(stats.causeTaskId);
+				reactionStatistics->set_emitted(duration_cast<milliseconds>(stats.emitted.time_since_epoch()).count());
+				reactionStatistics->set_started(duration_cast<milliseconds>(stats.started.time_since_epoch()).count());
+				reactionStatistics->set_finished(duration_cast<milliseconds>(stats.finished.time_since_epoch()).count());
+
+				/*std::string name = stats.name;
+                int status = -4;
+                char* res = abi::__cxa_demangle(name.c_str(), NULL, NULL, &status);
+                const char* const demangled_name = (status == 0) ? res : name.c_str();
+                std::string ret_val(demangled_name);
+                free(res);
+
+				log<NUClear::DEBUG>("testing! ", demangled_name);*/
+
+				m->send(message);
+			});
+
 			// When we shutdown, close our publisher
 			on<Trigger<Shutdown>>([this](const Shutdown&) {
 				pub.close();
