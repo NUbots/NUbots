@@ -20,12 +20,12 @@
 #ifndef MODULES_LOCALISATIONENGINE_H
 #define MODULES_LOCALISATIONENGINE_H
 
-#include <NUClear.h>
+#include <nuclear>
 
 namespace modules {
     class LocalisationEngine {
-    	
+    	public:
+    	LocalisationEngine();
     };
 }
 #endif
-

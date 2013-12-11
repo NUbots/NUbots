@@ -1,6 +1,7 @@
 ADD_ROLE(
     NAME localisation
     MODULES
-        ConfigSystem
-        NUbugger
+        support::configuration::ConfigSystem
+        support::NUbugger
         Localisation)
+        

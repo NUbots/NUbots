@@ -26,6 +26,7 @@
 #include "messages/NUAPI.pb.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/Image.h"
+#include "messages/localisation/FieldObject.h"
 #include "utility/NUbugger/NUgraph.h"
 
 #include "utility/image/ColorModelConversions.h"
@@ -198,6 +199,28 @@ namespace modules {
 
 				// Destroy the compression object (free memory)
 				jpeg_destroy_compress(&jpegC);
+
+				m->send(message);
+			});
+
+			on<Trigger<messages::localisation::FieldObject>>([this](const messages::localisation::FieldObject& field_object) {
+				API::Message message;
+
+				message.set_type(API::Message::LOCALISATION);
+				message.set_utc_timestamp(std::time(0));
+
+				auto* localisation = message.mutable_localisation();
+				auto* api_ball = localisation->add_field_object();
+
+				api_ball->set_name(field_object.name);
+				api_ball->set_wm_x(field_object.wm_x);
+				api_ball->set_wm_y(field_object.wm_y);
+				api_ball->set_sd_x(field_object.sd_x);
+				api_ball->set_sd_y(field_object.sd_y);
+				api_ball->set_sr_xx(field_object.sr_xx);
+				api_ball->set_sr_xy(field_object.sr_xy);
+				api_ball->set_sr_yy(field_object.sr_yy);
+				api_ball->set_lost(field_object.lost);
 
 				m->send(message);
 			});

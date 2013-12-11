@@ -20,7 +20,7 @@
 #ifndef MODULES_LOCALISATION_H
 #define MODULES_LOCALISATION_H
 
-#include <NUClear.h>
+#include <nuclear>
 #include "LocalisationEngine.h"
 
 namespace modules {
@@ -33,7 +33,7 @@ namespace modules {
         static constexpr const char* CONFIGURATION_PATH = "Localisation.json";
 
         /// @brief Called by the powerplant to build and setup our CameraReader
-        explicit Localisation(NUClear::PowerPlant* plant);
+        explicit Localisation(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 #endif
