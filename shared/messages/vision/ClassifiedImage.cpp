@@ -185,15 +185,15 @@ namespace messages {
 			}
 		}
 
-		static COLOUR_CLASS ClassifiedImage::getClassOfColour(const Colour& c){
+		ClassifiedImage::COLOUR_CLASS ClassifiedImage::getClassOfColour(const Colour& c){
 			switch (c) {
-				case yellow : {return GOAL_COLOUR}
-				case orange : {return BALL_COLOUR}
-				case white : {return LINE_COLOUR}
-				case blue : {return TEAM_CYAN_COLOUR}
-				case pink : {return TEAM_MAGENTA_COLOUR}
-				case default : {return UNKNOWN_COLOUR}
+				case yellow : {return GOAL_COLOUR;}
+				case orange : {return BALL_COLOUR;}
+				case white : {return LINE_COLOUR;}
+				case blue : {return TEAM_CYAN_COLOUR;}
+				case pink : {return TEAM_MAGENTA_COLOUR;}				
 			}
+			return UNKNOWN_COLOUR;
 		}
 	
     }  // vision

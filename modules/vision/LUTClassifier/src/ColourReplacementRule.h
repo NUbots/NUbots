@@ -48,8 +48,18 @@ namespace modules {
 		    };
 
 		    ColourReplacementRule();
-		    ColourReplacementRule(arma::vec2 vec, std::string colour);
-
+		    
+			void loadRuleFromConfigInfo(
+	    		std::string colours_before,
+		    	std::string colour_middle,
+		    	std::string colours_after,
+				unsigned int before_min,
+				unsigned int before_max,
+				unsigned int min,
+				unsigned int max,
+				unsigned int after_min,
+				unsigned int after_max,
+				std::string replacement_method);
 			/*!
 				Checks if the given segment triplet matches this rule.
 				@param before the first segment.

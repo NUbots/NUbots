@@ -28,9 +28,9 @@ namespace modules {
 		ColourReplacementRule::ColourReplacementRule() {}
 
 
-		void ColourTransitionRule::loadRuleFromConfigInfo(
+		void ColourReplacementRule::loadRuleFromConfigInfo(
 	    		std::string colours_before,
-		    	std::string colour_middle,
+		    	std::string colours_middle,
 		    	std::string colours_after,
 				unsigned int before_min,
 				unsigned int before_max,
@@ -43,7 +43,6 @@ namespace modules {
 	    	m_before.clear();
 	    	m_middle.clear();
 	    	m_after.clear();
-	    	m_colour_class = ClassifiedImage::UNKOWN_COLOUR;
 	    	//Assign limits
 	    	m_before_min = before_min;
 			m_before_max = before_max;

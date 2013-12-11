@@ -27,6 +27,7 @@ namespace modules {
 
         using messages::input::Image;
         using messages::support::Configuration;
+        using utility::configuration::ConfigurationNode;
 
         
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), greenHorizon(), scanLines() { 
@@ -146,8 +147,8 @@ namespace modules {
 
 			on<Trigger<Configuration<RulesConfig>>>([this](const Configuration<RulesConfig>& rules) {
 				// std::vector< WHAT?!?!?! > rules = rules.config["REPLACEMENT_RULES"];
-				std::map<std::string, ConfiguationNode> replacement_rules = rules.config["REPLACEMENT_RULES"];
-				std::map<std::string, ConfiguationNode> transition_rules = rules.config["TRANSITION_RULES"];
+				std::map<std::string, ConfigurationNode> replacement_rules = rules.config["REPLACEMENT_RULES"];
+				std::map<std::string, ConfigurationNode> transition_rules = rules.config["TRANSITION_RULES"];
 				for(auto& rule : replacement_rules) {
 					//rule.first = the name;
 					//rule.second = the rule;

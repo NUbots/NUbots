@@ -28,6 +28,7 @@
 #include "messages/vision/ClassifiedImage.h"
 #include "LookUpTable.h"
 #include "ColourSegment.h"
+#include "utility/configuration/ConfigurationNode.h"
 
 namespace modules {
 	namespace vision { 

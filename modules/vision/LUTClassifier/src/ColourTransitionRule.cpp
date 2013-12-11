@@ -38,7 +38,7 @@ namespace modules {
 	    	m_before.clear();
 	    	m_middle.clear();
 	    	m_after.clear();
-	    	m_colour_class = ClassifiedImage::UNKOWN_COLOUR;
+	    	m_colour_class = ClassifiedImage::UNKNOWN_COLOUR;
 	    	//Assign limits
 	    	m_before_min = before_min;
 			m_before_max = before_max;
@@ -71,7 +71,7 @@ namespace modules {
 			} else {
 				//TODO: Log through NUClear
 				std::cout<< "===================ERROR==================="<<std::endl;
-				std::cout<< "Middle transition colour " << colour_middle << " not recognised."
+				std::cout<< "Middle transition colour " << colour_middle << " not recognised."<<std::endl;
 				std::cout<< "Note that only one middle colour can be specified for a transition rule."<<std::endl;
 				std::cout<< "===================ERROR==================="<<std::endl;
 			}
