@@ -1,4 +1,5 @@
 /*
+ * Needs to be split into struct data and logic.
  * This file is part of ColourSegment.
  *
  * ColourSegment is free software: you can redistribute it and/or modify
