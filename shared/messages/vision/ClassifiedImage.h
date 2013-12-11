@@ -80,7 +80,8 @@ namespace messages {
 
 			//! @brief converts a colour class into a string.
 			static std::string getColourClassName(const COLOUR_CLASS& id);
-			
+            //! gets the colour class corresponding to the colour
+            static COLOUR_CLASS getClassOfColour(const Colour& c);
         private:
             
         };

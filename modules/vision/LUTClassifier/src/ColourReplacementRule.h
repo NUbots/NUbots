@@ -26,6 +26,7 @@
 #include <vector>
 #include <istream>
 #include <ostream>
+#include <iostream>
 
 #include "utility/strutil/strutil.h"
 #include "messages/vision/ClassifiedImage.h"
@@ -81,18 +82,6 @@ namespace modules {
 			  @return An enum for the method.
 			  */
     		ReplacementMethod getMethod() const;
-    
-			//! output stream operator.
-			friend std::ostream& operator<< (std::ostream& output, const ColourReplacementRule& c);
-			
-			//! output stream operator for a vector of rules.
-			friend std::ostream& operator<< (std::ostream& output, const std::vector<ColourReplacementRule>& v);
-
-			//! input stream operator.
-			friend std::istream& operator>> (std::istream& input, ColourReplacementRule& c);
-			
-			//! input stream operator for a vector of rules.
-			friend std::istream& operator>> (std::istream& input, std::vector<ColourReplacementRule>& v);
 
     	private:
    			std::string m_name;  //! @variable the name of the rule.

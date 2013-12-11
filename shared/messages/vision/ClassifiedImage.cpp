@@ -98,7 +98,7 @@ namespace messages {
 				}
 
 				case ClassifiedImage::shadow_object: {
-					return "shadow object";
+					return "shadow-object";
 				}
 
 				case ClassifiedImage::pink: {
@@ -106,7 +106,7 @@ namespace messages {
 				}
 
 				case ClassifiedImage::pink_orange: {
-					return "pink - orange";
+					return "pink-orange";
 				}
 
 				case ClassifiedImage::orange: {
@@ -114,7 +114,7 @@ namespace messages {
 				}
 
 				case ClassifiedImage::yellow_orange: {
-					return "yellow - orange";
+					return "yellow-orange";
 				}
 
 				case ClassifiedImage::yellow: {
@@ -126,7 +126,7 @@ namespace messages {
 				}
 
 				case ClassifiedImage::shadow_blue: {
-					return "shadow blue";
+					return "shadow-blue";
 				}
 
 				default: {
@@ -148,7 +148,7 @@ namespace messages {
 				return ClassifiedImage::green;
 			}
 			
-			else if (name.compare("shadow object") == 0) {
+			else if (name.compare("shadow-object") == 0) {
 				return ClassifiedImage::shadow_object;
 			}
 			
@@ -156,7 +156,7 @@ namespace messages {
 				return ClassifiedImage::pink;
 			}
 			
-			else if (name.compare("pink - orange") == 0) {
+			else if (name.compare("pink-orange") == 0) {
 				return ClassifiedImage::pink_orange;
 			}
 			
@@ -164,7 +164,7 @@ namespace messages {
 				return ClassifiedImage::orange;
 			}
 			
-			else if (name.compare("yellow - orange") == 0) {
+			else if (name.compare("yellow-orange") == 0) {
 				return ClassifiedImage::yellow_orange;
 			}
 			
@@ -176,12 +176,23 @@ namespace messages {
 				return ClassifiedImage::blue;
 			}
 			
-			else if (name.compare("shadow blue") == 0) {
+			else if (name.compare("shadow-blue") == 0) {
 				return ClassifiedImage::shadow_blue;
 			}
 			
 			else {
 				return ClassifiedImage::invalid;
+			}
+		}
+
+		static COLOUR_CLASS ClassifiedImage::getClassOfColour(const Colour& c){
+			switch (c) {
+				case yellow : {return GOAL_COLOUR}
+				case orange : {return BALL_COLOUR}
+				case white : {return LINE_COLOUR}
+				case blue : {return TEAM_CYAN_COLOUR}
+				case pink : {return TEAM_MAGENTA_COLOUR}
+				case default : {return UNKNOWN_COLOUR}
 			}
 		}
 	

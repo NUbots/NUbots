@@ -21,6 +21,8 @@
 #define MODULES_VISION_COLOURTRANSITIONRULE_H
 
 #include <nuclear>
+#include <iostream>
+#include <string>
 
 #include "utility/strutil/strutil.h"
 #include "messages/vision/ClassifiedImage.h"
@@ -32,8 +34,26 @@ namespace modules {
 		class ColourTransitionRule {
 		public:
 		    static ColourSegment nomatch;   //! @variable A static segment used to represent one that cannot be matched to any rule.
-
+			
 		    ColourTransitionRule();
+/*!
+			  Configuration based constructor.
+			  @param before the preceeding segment.
+			  @param middle the middle segment.
+			  @param after the following segment.
+			  @return Whether it is a match.
+			  */
+		    void loadRuleFromConfigInfo(
+		    	std::string colours_before,
+		    	std::string colours_middle,
+		    	std::string colours_after,
+				unsigned int before_min,
+				unsigned int before_max,
+				unsigned int min,
+				unsigned int max,
+				unsigned int after_min,
+				unsigned int after_max
+		    	);
 		    /*!
 		      Checks if the given segment pair matches this rule (forward and reverse).
 		      @param before the preceding segment.
@@ -45,19 +65,6 @@ namespace modules {
 			
 		    //! Returns the ID of the field object that this rule is for.
 		    messages::vision::ClassifiedImage::COLOUR_CLASS getColourClass() const;		   
-
-			//! output stream operator.
-			friend std::ostream& operator<< (std::ostream& output, const ColourTransitionRule& c);
-			
-			//! output stream operator for a vector of rules.
-			friend std::ostream& operator<< (std::ostream& output, const std::vector<ColourTransitionRule>& v);
-
-			//! input stream operator.
-			friend std::istream& operator>> (std::istream& input, ColourTransitionRule& c);
-			
-			//! input stream operator for a vector of rules.
-			friend std::istream& operator>> (std::istream& input, std::vector<ColourTransitionRule>& v);
-
 		private:
 		    messages::vision::ClassifiedImage::COLOUR_CLASS m_colour_class;     //! @variable The ID of the field object that this rule is for.
 

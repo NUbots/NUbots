@@ -22,7 +22,71 @@ namespace modules {
 	namespace vision {
 		using messages::vision::ClassifiedImage;
 
-	    ColourTransitionRule::ColourTransitionRule() {
+	    ColourTransitionRule::ColourTransitionRule(){}	    		
+
+	    void ColourTransitionRule::loadRuleFromConfigInfo(
+	    		std::string colours_before,
+		    	std::string colour_middle,
+		    	std::string colours_after,
+				unsigned int before_min,
+				unsigned int before_max,
+				unsigned int min,
+				unsigned int max,
+				unsigned int after_min,
+				unsigned int after_max)	{
+	    	//Clear current settings
+	    	m_before.clear();
+	    	m_middle.clear();
+	    	m_after.clear();
+	    	m_colour_class = ClassifiedImage::UNKOWN_COLOUR;
+	    	//Assign limits
+	    	m_before_min = before_min;
+			m_before_max = before_max;
+			m_min = min;
+			m_max = max;
+			m_after_min = after_min;
+			m_after_max = after_max;
+
+			//Load rule colours
+			//Initialise stream variables
+			std::stringstream sstream;
+			std::string current_colour_name;
+			//Load before colours
+			sstream << colours_before;			
+			sstream >> current_colour_name;
+			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
+			while(!current_colour_name.empty()){
+				ClassifiedImage::Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
+				if(colour!=ClassifiedImage::invalid){
+					m_before.push_back(colour);
+				}
+				sstream >> current_colour_name;
+			}
+
+			//We only support one middle colour which gives our colour class (ie one object)	
+			ClassifiedImage::Colour colour = ClassifiedImage::getColourFromName(colour_middle);
+			m_colour_class = ClassifiedImage::getClassOfColour(colour);
+			if(colour!=ClassifiedImage::invalid){
+				m_middle.push_back(colour);
+			} else {
+				//TODO: Log through NUClear
+				std::cout<< "===================ERROR==================="<<std::endl;
+				std::cout<< "Middle transition colour " << colour_middle << " not recognised."
+				std::cout<< "Note that only one middle colour can be specified for a transition rule."<<std::endl;
+				std::cout<< "===================ERROR==================="<<std::endl;
+			}
+			
+			//Load after colours
+			sstream << colours_after;			
+			sstream >> current_colour_name;
+			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
+			while(!current_colour_name.empty()){
+				ClassifiedImage::Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
+				if(colour!=ClassifiedImage::invalid){
+					m_after.push_back(colour);
+				}
+				sstream >> current_colour_name;
+			}			
 		}
 		
 	    /*!
@@ -108,172 +172,5 @@ namespace modules {
 
 		    return true;    //passed all checks
 		}	   
-
-		/*! @brief Stream insertion operator for a single ColourTransitionRule
-		 */
-		std::ostream& operator<< (std::ostream& output, const ColourTransitionRule& c) {
-			output << ClassifiedImage::getColourClassName(c.m_colour_class) << ":\n";
-
-			//before
-			output << "before: (" << c.m_before_min << ", " << c.m_before_max << ") [";
-			
-			for (auto it : c.m_before) {
-				output << ClassifiedImage::getColourName(it) << ", ";
-			}
-			
-			output << "]\t// (min, max) [colourlist]\n";
-
-			//this
-			output << "middle: (" << c.m_min << ", " << c.m_max << ") [";
-			
-			for (auto it : c.m_middle) {
-				output << ClassifiedImage::getColourName(it) << ", ";
-			}
-			
-			output << "]\t// (min, max) [colourlist]\n";
-
-			//after
-			output << "after: (" << c.m_after_min << ", " << c.m_after_max << ") [";
-			
-			for (auto it : c.m_after) {
-				output << ClassifiedImage::getColourName(it) << ", ";
-			}
-			
-			output << "]\t// (min, max) [colourlist]" << std::endl;
-
-			return output;
-		}
-
-		/*! @brief Stream insertion operator for a vector of ColourTransitionRule.
-		 *  @relates ColourRule
-		 */
-		std::ostream& operator<< (std::ostream& output, const std::vector<ColourTransitionRule>& v) {
-			for (auto it : v) {		
-				output << it;
-			}
-			
-			return output;
-		}
-
-		/*! @brief Stream extraction operator for a ColourTransitionRule.
-		 *  @relates ColourRule
-		 */
-		std::istream& operator>> (std::istream& input, ColourTransitionRule& c) {
-			std::stringstream colour_stream;
-			std::string next, colour_str;
-			std::string id_str;
-
-			// read in the rule name
-			std::getline(input, id_str, ':');
-			utility::strutil::trim(id_str, std::string(" "));										// remove spaces from the beginning and end of the string.
-			c.m_colour_class = ClassifiedImage::getColourClassFromName(id_str);
-
-			//BEFORE
-			//reset colour list
-			c.m_before.clear();
-			
-			// read in the before: (min, max)
-			input.ignore(30, '(');
-			input >> c.m_before_min;
-			input.ignore(10, ',');
-			input >> c.m_before_max;
-			input.ignore(10, ')');
-
-			input.ignore(10, '[');
-
-			//get colour list
-			std::getline(input, colour_str, ']');
-			utility::strutil::removeAll(colour_str, std::string(" "));								// remove spaces.
-			
-			if (!colour_str.empty()) {
-				colour_stream.str(colour_str);
-				
-				while(colour_stream.good()) {
-					std::getline(colour_stream, next, ',');
-					c.m_before.push_back(ClassifiedImage::getColourFromName(next));
-				}
-			}
-
-			//MIDDLE
-			//reset colour list
-			c.m_middle.clear();
-			
-			// read in the before: (min, max)
-			input.ignore(30, '(');
-			input >> c.m_min;
-			input.ignore(10, ',');
-			input >> c.m_max;
-			input.ignore(10, ')');
-
-			input.ignore(10, '[');
-
-			//get colour list
-			std::getline(input, colour_str, ']');
-			utility::strutil::removeAll(colour_str, std::string(" "));								// remove spaces.
-			
-			if (!colour_str.empty()) {
-				colour_stream.str(colour_str);
-				
-				while(colour_stream.good()) {
-					std::getline(colour_stream, next, ',');
-					c.m_middle.push_back(ClassifiedImage::getColourFromName(next));
-				}
-			}
-
-			//AFTER
-			//reset colour list
-			c.m_after.clear();
-			
-			// read in the before: (min, max)
-			input.ignore(30, '(');
-			input >> c.m_after_min;
-			input.ignore(10, ',');
-			input >> c.m_after_max;
-			input.ignore(10, ')');
-
-			input.ignore(10, '[');
-
-			//get colour list
-			std::getline(input, colour_str, ']');	
-			utility::strutil::removeAll(colour_str, std::string(" "));								// remove spaces.
-			
-			if(!colour_str.empty()) {
-				colour_stream.clear();
-				colour_stream.str(colour_str);
-				
-				while(colour_stream.good()) {
-					std::getline(colour_stream, next, ',');
-					c.m_after.push_back(ClassifiedImage::getColourFromName(next));
-				}
-			}
-
-			// ignore the rest of the line
-			input.ignore(128, '\n');
-			input.peek();               //trigger eofbit being set in the case of this being the last rule
-
-			return input;
-		}
-
-		/*! @brief Stream extraction operator for a vector of ColourTransitionRule.
-		 *  @relates ColourTransitionRule
-		 */
-		std::istream& operator>> (std::istream& input, std::vector<ColourTransitionRule>& v) {
-			ColourTransitionRule temp;
-			v.clear();
-			
-			while(input.good()) {
-				input >> temp;
-				
-				if(temp.getColourClass() != ClassifiedImage::UNKNOWN_COLOUR) {
-					v.push_back(temp);
-				}
-				
-				else {
-					std::cout << "ColourTransitionRule istream operator: UNKOWN_COLOUR match ignored." << std::endl;
-				}
-			}
-
-			return input;
-		}
 	}
 }

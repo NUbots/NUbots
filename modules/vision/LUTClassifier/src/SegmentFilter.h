@@ -49,8 +49,8 @@ namespace modules {
 			  */
 			void run(const SegmentedRegion& horizontalSegments, const SegmentedRegion& verticalSegments) const;
 				
-			void addTransitionRule(ColourTransitionRule& rule);
-			void addReplacementRule(ColourReplacementRule& rule);
+			void addTransitionRule(const ColourTransitionRule& rule);
+			void addReplacementRule(const ColourReplacementRule& rule);
 
 		private:
 			/**

@@ -143,19 +143,18 @@ namespace modules {
 										 constants.config["VERTICAL_SCANLINE_SPACING"]);
 			});
 			
-/* TODO: FIX ME!!!!!!
-			on<Trigger<Configuration<RulesConfig>>>([this](const Configuration<RulesConfig>& rules) {
-				rules.config["REPLACEMENT_RULES"],
-				std::vector<something> rules = rules.config["REPLACEMENT_RULES"],
-				std::map<std::string, ConfiguationNode> thing = rules.config["REPLACEMENT_RULES"];
 
-				for(auto rule : rules) {
+			on<Trigger<Configuration<RulesConfig>>>([this](const Configuration<RulesConfig>& rules) {
+				// std::vector< WHAT?!?!?! > rules = rules.config["REPLACEMENT_RULES"];
+				std::map<std::string, ConfiguationNode> replacement_rules = rules.config["REPLACEMENT_RULES"];
+				std::map<std::string, ConfiguationNode> transition_rules = rules.config["TRANSITION_RULES"];
+				for(auto& rule : replacement_rules) {
 					//rule.first = the name;
 					//rule.second = the rule;
-					//START HERE
+					
 				}
 			});
-*/
+
 
             on<Trigger<Image>>([this](const Image& image) {
             	/*std::vector<arma::vec2> green_horizon_points = */

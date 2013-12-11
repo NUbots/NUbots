@@ -25,7 +25,74 @@ namespace modules {
 		
 		ColourSegment nomatch(arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2), ClassifiedImage::invalid);
 
-		ColourReplacementRule::ColourReplacementRule() {
+		ColourReplacementRule::ColourReplacementRule() {}
+
+
+		void ColourTransitionRule::loadRuleFromConfigInfo(
+	    		std::string colours_before,
+		    	std::string colour_middle,
+		    	std::string colours_after,
+				unsigned int before_min,
+				unsigned int before_max,
+				unsigned int min,
+				unsigned int max,
+				unsigned int after_min,
+				unsigned int after_max,
+				std::string replacement_method)	{
+	    	//Clear current settings
+	    	m_before.clear();
+	    	m_middle.clear();
+	    	m_after.clear();
+	    	m_colour_class = ClassifiedImage::UNKOWN_COLOUR;
+	    	//Assign limits
+	    	m_before_min = before_min;
+			m_before_max = before_max;
+			m_middle_min = min;
+			m_middle_max = max;
+			m_after_min = after_min;
+			m_after_max = after_max;
+			//replacement method
+			m_method = getMethodFromName(replacement_method);
+
+			//Load rule colours
+			//Initialise stream variables
+			std::stringstream sstream;
+			std::string current_colour_name;
+			//Load before colours
+			sstream << colours_before;			
+			sstream >> current_colour_name;
+			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
+			while(!current_colour_name.empty()){
+				ClassifiedImage::Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
+				if(colour!=ClassifiedImage::invalid){
+					m_before.push_back(colour);
+				}
+				sstream >> current_colour_name;
+			}
+
+			//Load middle colours
+			sstream << colours_middle;			
+			sstream >> current_colour_name;
+			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
+			while(!current_colour_name.empty()){
+				ClassifiedImage::Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
+				if(colour!=ClassifiedImage::invalid){
+					m_middle.push_back(colour);
+				}
+				sstream >> current_colour_name;
+			}
+			
+			//Load after colours
+			sstream << colours_after;			
+			sstream >> current_colour_name;
+			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
+			while(!current_colour_name.empty()){
+				ClassifiedImage::Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
+				if(colour!=ClassifiedImage::invalid){
+					m_after.push_back(colour);
+				}
+				sstream >> current_colour_name;
+			}			
 		}
 
 		std::string ColourReplacementRule::getMethodName(const ColourReplacementRule::ReplacementMethod& method) const {
@@ -141,188 +208,5 @@ namespace modules {
 		ColourReplacementRule::ReplacementMethod ColourReplacementRule::getMethod() const {
 			return m_method;
 		}
-
-		/*! @brief Stream insertion operator for a single ColourReplacementRule
-		 */
-		std::ostream& operator<< (std::ostream& output, const ColourReplacementRule& c) {
-			output << c.m_name << ":" << std::endl;
-
-			//before
-			output << "\tbefore: (" << c.m_before_min << ", " << c.m_before_max << ") [";
-			
-			for (auto it : c.m_before) {
-				output << ClassifiedImage::getColourName(it) << ", ";
-			}
-			
-			output << "]\t\t// (min, max) [colourlist]" << std::endl;
-
-			//middle
-			output << "\tmiddle: (" << c.m_middle_min << ", " << c.m_middle_max << ") [";
-			
-			for (auto it : c.m_middle) {
-				output << ClassifiedImage::getColourName(it) << ", ";
-			}
-			
-			output << "]\t\t// (min, max) [colourlist]" << std::endl;
-
-			//after
-			output << "\tafter(" << c.m_after_min << ", " << c.m_after_max << ") [";
-			
-			for (auto it : c.m_after) {
-				output << ClassifiedImage::getColourName(it) << ", ";
-			}
-			
-			output << "]\t\t// (min, max) [colourlist]" << std::endl;
-
-			//replacement method
-			output << "\treplacement: " << c.getMethodName(c.m_method) << "\t\t// [colourlist]" << std::endl;
-
-			return output;
-		}
-
-		/*! @brief Stream insertion operator for a vector of ColourReplacementRule.
-		 *  @relates ColourReplacementRule
-		 */
-		std::ostream& operator<< (std::ostream& output, const std::vector<ColourReplacementRule>& v) {
-			for (auto it : v) {
-				output << it;
-			}
-			
-			return output;
-		}
-
-		/*! @brief Stream extraction operator for a ColourReplacementRule.
-		 *  @relates ColourReplacementRule
-		 */
-		std::istream& operator>> (std::istream& input, ColourReplacementRule& c) {
-			std::stringstream colour_stream;
-			std::string next, colour_str;
-
-			// read in the rule name
-			std::getline(input, c.m_name, ':');
-
-			//BEFORE
-			//reset colour list
-			c.m_before.clear();
-			
-			// read in the before: (min, max)
-			input.ignore(30, '(');
-			input >> c.m_before_min;
-			input.ignore(10, ',');
-			input >> c.m_before_max;
-			input.ignore(10, ')');
-
-			input.ignore(10, '[');
-
-			//get colour list
-			std::getline(input, colour_str, ']');
-			utility::strutil::removeAll(colour_str, std::string(" "));								// remove spaces.
-			
-			if (!colour_str.empty()) {
-				colour_stream.str(colour_str);
-				
-				while (colour_stream.good()) {
-					std::getline(colour_stream, next, ',');
-					c.m_before.push_back(ClassifiedImage::getColourFromName(next));
-				}
-			}
-
-			// ignore the rest of the line
-			input.ignore(128, '\n');
-
-			//middle
-			//reset colour list
-			c.m_middle.clear();
-			
-			// read in the middle: (min, max)
-			input.ignore(30, '(');
-			input >> c.m_middle_min;
-			input.ignore(10, ',');
-			input >> c.m_middle_max;
-			input.ignore(10, ')');
-
-			input.ignore(10, '[');
-
-			//get colour list
-			std::getline(input, colour_str, ']');
-			utility::strutil::removeAll(colour_str, std::string(" "));								// remove spaces.
-			
-			if (!colour_str.empty()) {
-				colour_stream.clear();
-				colour_stream.str(colour_str);
-				
-				while (colour_stream.good()) {
-					std::getline(colour_stream, next, ',');
-					c.m_middle.push_back(ClassifiedImage::getColourFromName(next));
-				}
-			}
-			
-			// ignore the rest of the line
-			input.ignore(128, '\n');
-
-			//AFTER
-			//reset colour list
-			c.m_after.clear();
-			
-			// read in the after: (min, max)
-			input.ignore(30, '(');
-			input >> c.m_after_min;
-			input.ignore(10, ',');
-			input >> c.m_after_max;
-			input.ignore(10, ')');
-
-			input.ignore(10, '[');
-
-			//get colour list
-			std::getline(input, colour_str, ']');
-			utility::strutil::removeAll(colour_str, std::string(" "));								// remove spaces.
-			
-			if (!colour_str.empty()) {
-				colour_stream.clear();
-				colour_stream.str(colour_str);
-				
-				while (colour_stream.good()) {
-					std::getline(colour_stream, next, ',');
-					c.m_after.push_back(ClassifiedImage::getColourFromName(next));
-				}
-			}
-
-			// ignore the rest of the line
-			input.ignore(128, '\n');
-			
-			//REPLACEMENT
-			//get method
-			input.ignore(20, ':');
-			std::getline(input, colour_str, '/');
-			utility::strutil::removeAll(colour_str, std::string(" "));								// remove spaces.
-			
-			if (!colour_str.empty()) {
-				c.m_method = c.getMethodFromName(colour_str);
-			}
-			
-			// ignore the rest of the line - potentially holds comment
-			input.ignore(128, '\n');
-			
-			//force eofbit in the case of last rule
-			input.peek();
-
-			return input;
-		}
-
-		/*! @brief Stream extraction operator for a vector of ColourReplacementRule.
-		 *  @relates ColourReplacementRule
-		 */
-		std::istream& operator>> (std::istream& input, std::vector<ColourReplacementRule>& v) {
-			ColourReplacementRule temp;
-			v.clear();
-			
-			while(input.good()) {
-				input >> temp;
-				v.push_back(temp);
-			}
-
-			return input;
-		}
-
 	}
 }
