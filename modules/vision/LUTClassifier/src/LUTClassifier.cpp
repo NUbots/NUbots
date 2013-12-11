@@ -154,16 +154,16 @@ namespace modules {
 					std::cout << "Loading Replacement rule : " << rule.first << std::endl;
 					//rule.second = the rule;
 					ColourReplacementRule r;
-					/*r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
+					r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
 											rule.second["middle"]["colour"],
 											rule.second["after"]["colour"],
-											((std::vector<int>)rule.second["before"]["vec"])[0],//min
-											((std::vector<int>)rule.second["before"]["vec"])[1],//max, etc.
-											((std::vector<int>)rule.second["middle"]["vec"])[0],
-											((std::vector<int>)rule.second["middle"]["vec"])[1],
-											((std::vector<int>)rule.second["after"]["vec"])[0],
-											((std::vector<int>)rule.second["after"]["vec"])[1],
-											rule.second["replacement"]);*/
+											unint_32(rule.second["before"]["vec"][0]),//min
+											unint_32(rule.second["before"]["vec"][1]),//max, etc.
+											unint_32(rule.second["middle"]["vec"][0]),
+											unint_32(rule.second["middle"]["vec"][1]),
+											unint_32(rule.second["after"]["vec"][0]),
+											unint_32(rule.second["after"]["vec"][1]),
+											rule.second["replacement"]);
 					segmentFilter.addReplacementRule(r);
 				}
 				for(auto& rule : transition_rules) {
@@ -190,7 +190,9 @@ namespace modules {
             	std::vector<int> scan_lines = scanLines.generateScanLines(image, greenHorizon);
             	std::vector<std::vector<ColourSegment> > classified_segments_hor = scanLines.classifyHorizontalScanLines(image, scan_lines, LUTs[current_LUT_index]);
             	std::vector<std::vector<ColourSegment> > classified_segments_ver = scanLines.classifyVerticalScanLines(image, greenHorizon, LUTs[current_LUT_index]);
-            	//TODO: Segment filter here and then something like:
+            	unique_ptr<ClassifiedImage> image = segmentFilter.getClassifiedImage(classified_segments_hor,classified_segments_ver);
+            	image->green_horizon = greenHorizon;
+            	emit(image);
             	//emit(std::make_unique<ClassifiedImage>(new ClassifiedImage(classigied_segments_hor,classified_segments_ver)));
             });
         }

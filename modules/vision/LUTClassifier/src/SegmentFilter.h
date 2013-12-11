@@ -48,7 +48,7 @@ namespace modules {
 			  as transitions back on the blackboard. This method also calls some smoothing prefilters on the std::lists
 			  which are also set by preloaded rules.
 			  */
-			void run(const SegmentedRegion& horizontalSegments, const SegmentedRegion& verticalSegments) const;
+			make_unique<ClassifiedImage> classifyImage(const SegmentedRegion& horizontalSegments, const SegmentedRegion& verticalSegments) const;
 				
 			void clearRules();
 			void addTransitionRule(const ColourTransitionRule& rule);

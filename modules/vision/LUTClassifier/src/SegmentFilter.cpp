@@ -26,7 +26,7 @@ namespace modules {
 		SegmentFilter::SegmentFilter() {			
 		}
 
-		void SegmentFilter::run(const SegmentedRegion& horizontalSegments, const SegmentedRegion& verticalSegments) const {
+		unique_ptr<ClassifiedImage> SegmentFilter::classifyImage(const SegmentedRegion& horizontalSegments, const SegmentedRegion& verticalSegments) const {
 //			const SegmentedRegion& horizontalSegments = vbb->getHorizontalSegmentedRegion();
 //			const SegmentedRegion& verticalSegments = vbb->getVerticalSegmentedRegion();
 			
@@ -49,6 +49,15 @@ namespace modules {
 			// Push results to BB
 //			vbb->setHorizontalTransitionsMap(horizontalResult);
 //			vbb->setVerticalTransitionsMap(verticalResult);
+			unique_ptr<ClassifiedImage> image(new ClassifiedImage());
+
+			image->horizontal_filtered_segments = horizontalFiltered;
+			image->vertical_filtered_segments = verticalFiltered;
+
+			image->matched_horizontal_segments = horizontalResult;
+			image->matched_vertical_segments = verticalResult;
+
+			return image;
 		}
 
 		void SegmentFilter::preFilter(const SegmentedRegion& scans, SegmentedRegion &result) const {

@@ -21,7 +21,8 @@
 
 namespace messages {
     namespace vision {
-	
+		using modules::vision::ColourSegment;
+
         ClassifiedImage::ClassifiedImage() {
 		}      
 
@@ -135,7 +136,7 @@ namespace messages {
 			}
 		}
 
-		ClassifiedImage::Colour getColourFromName(const std::string& name) {
+		ClassifiedImage::Colour ClassifiedImage::getColourFromName(const std::string& name) {
 			if (name.compare("unclassified") == 0) {
 				return ClassifiedImage::unclassified;
 			}
@@ -196,5 +197,28 @@ namespace messages {
 			return UNKNOWN_COLOUR;
 		}
 	
+	/*	void ClassifiedImage::setFilteredSegments(const  SegmentedRegion& hor, const  SegmentedRegion& vert){
+			horizontal_filtered_segments = hor;
+			vertical_filtered_segments = vert;
+		}
+        void ClassifiedImage::setTransitionsMaps(const std::map<COLOUR_CLASS, std::vector<modules::vision::ColourSegment> >& hor, 
+                                const std::map<COLOUR_CLASS, std::vector<modules::vision::ColourSegment> >& vert){
+        	matched_horizontal_segments = hor;
+			matched_vertical_segments = vert;
+        }
+
+        const SegmentedRegion& ClassifiedImage::getHorizontalFilteredSegments(){
+        	return horizontal_filtered_segments;
+        }
+        const SegmentedRegion& ClassifiedImage::getVerticalFilteredSegments(){
+	    	return vertical_filtered_segments;
+        }
+        const std::map<COLOUR_CLASS, std::vector<ColourSegment> >& ClassifiedImage::getHorizontalTransitionsMap(){
+        	return matched_horizontal_segments;
+        }
+        const std::map<COLOUR_CLASS, std::vector<ColourSegment> >& ClassifiedImage::getVerticalTransitionsMap(){
+        	return matched_vertical_segments;
+        }*/
+
     }  // vision
 }  // messages
