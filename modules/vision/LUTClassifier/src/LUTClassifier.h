@@ -29,6 +29,9 @@
 #include "LookUpTable.h"
 #include "GreenHorizon.h"
 #include "ScanLines.h"
+#include "SegmentFilter.h"
+#include "ColourReplacementRule.h"
+#include "ColourTransitionRule.h"
 
 namespace modules {
     namespace vision {
@@ -124,6 +127,7 @@ namespace modules {
 
             GreenHorizon greenHorizon;
             ScanLines scanLines;
+            SegmentFilter segmentFilter;
 
         public:
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);

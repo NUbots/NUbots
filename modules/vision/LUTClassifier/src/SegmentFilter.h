@@ -1,4 +1,5 @@
 /*
+ * Note that the segment filter no longer supports vertical and horizontal rules
  * This file is part of SegmentFilter.
  *
  * SegmentFilter is free software: you can redistribute it and/or modify
@@ -49,6 +50,7 @@ namespace modules {
 			  */
 			void run(const SegmentedRegion& horizontalSegments, const SegmentedRegion& verticalSegments) const;
 				
+			void clearRules();
 			void addTransitionRule(const ColourTransitionRule& rule);
 			void addReplacementRule(const ColourReplacementRule& rule);
 

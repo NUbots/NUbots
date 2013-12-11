@@ -146,13 +146,40 @@ namespace modules {
 			
 
 			on<Trigger<Configuration<RulesConfig>>>([this](const Configuration<RulesConfig>& rules) {
+				segmentFilter.clearRules();
 				// std::vector< WHAT?!?!?! > rules = rules.config["REPLACEMENT_RULES"];
 				std::map<std::string, ConfigurationNode> replacement_rules = rules.config["REPLACEMENT_RULES"];
 				std::map<std::string, ConfigurationNode> transition_rules = rules.config["TRANSITION_RULES"];
 				for(auto& rule : replacement_rules) {
-					//rule.first = the name;
+					std::cout << "Loading Replacement rule : " << rule.first << std::endl;
 					//rule.second = the rule;
-					
+					ColourReplacementRule r;
+					/*r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
+											rule.second["middle"]["colour"],
+											rule.second["after"]["colour"],
+											((std::vector<int>)rule.second["before"]["vec"])[0],//min
+											((std::vector<int>)rule.second["before"]["vec"])[1],//max, etc.
+											((std::vector<int>)rule.second["middle"]["vec"])[0],
+											((std::vector<int>)rule.second["middle"]["vec"])[1],
+											((std::vector<int>)rule.second["after"]["vec"])[0],
+											((std::vector<int>)rule.second["after"]["vec"])[1],
+											rule.second["replacement"]);*/
+					segmentFilter.addReplacementRule(r);
+				}
+				for(auto& rule : transition_rules) {
+					std::cout << "Loading Transition rule : " << rule.first << std::endl;
+					//rule.second = the rule;
+					ColourTransitionRule r;
+					/*r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
+											rule.second["middle"]["colour"],
+											rule.second["after"]["colour"],
+											rule.second["before"]["vec"][0],//min
+											rule.second["before"]["vec"][1],//max, etc.
+											rule.second["middle"]["vec"][0],
+											rule.second["middle"]["vec"][1],
+											rule.second["after"]["vec"][0],
+											rule.second["after"]["vec"][1]);*/
+					segmentFilter.addTransitionRule(r);
 				}
 			});
 
