@@ -170,15 +170,15 @@ namespace modules {
 					std::cout << "Loading Transition rule : " << rule.first << std::endl;
 					//rule.second = the rule;
 					ColourTransitionRule r;
-					/*r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
+					r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
 											rule.second["middle"]["colour"],
 											rule.second["after"]["colour"],
-											rule.second["before"]["vec"][0],//min
-											rule.second["before"]["vec"][1],//max, etc.
-											rule.second["middle"]["vec"][0],
-											rule.second["middle"]["vec"][1],
-											rule.second["after"]["vec"][0],
-											rule.second["after"]["vec"][1]);*/
+											unint_32(rule.second["before"]["vec"][0]),//min
+											unint_32(rule.second["before"]["vec"][1]),//max, etc.
+											unint_32(rule.second["middle"]["vec"][0]),
+											unint_32(rule.second["middle"]["vec"][1]),
+											unint_32(rule.second["after"]["vec"][0]),
+											unint_32(rule.second["after"]["vec"][1]));
 					segmentFilter.addTransitionRule(r);
 				}
 			});
