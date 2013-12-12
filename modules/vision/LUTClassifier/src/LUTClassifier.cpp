@@ -75,9 +75,26 @@ namespace modules {
 				for(auto& rule : replacement_rules) {
 					std::cout << "Loading Replacement rule : " << rule.first << std::endl;
 
-					//rule.second = the rule;
+					
 					ColourReplacementRule r;
+
+					vector<unint_32> before = rule.second["before"]["vec"];
+					vector<unint_32> middle = rule.second["middle"]["vec"];
+					vector<unint_32> after = rule.second["after"]["vec"];
+
 					r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
+											rule.second["middle"]["colour"],
+											rule.second["after"]["colour"],
+											before[0],//min
+											before[1],//max, etc.
+											middle[0],
+											middle[1],
+											after[0],
+											after[1],
+											rule.second["replacement"]);
+
+					//Neat method which is broken due to config system
+					/*r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
 											rule.second["middle"]["colour"],
 											rule.second["after"]["colour"],
 											unint_32(rule.second["before"]["vec"][0]),//min
@@ -86,16 +103,31 @@ namespace modules {
 											unint_32(rule.second["middle"]["vec"][1]),
 											unint_32(rule.second["after"]["vec"][0]),
 											unint_32(rule.second["after"]["vec"][1]),
-											rule.second["replacement"]);
+											rule.second["replacement"]);*/
 					segmentFilter.addReplacementRule(r);
 				}
 
 				for(auto& rule : transition_rules) {
 					std::cout << "Loading Transition rule : " << rule.first << std::endl;
 
-					//rule.second = the rule;
+					
 					ColourTransitionRule r;
+
+					vector<unint_32> before = rule.second["before"]["vec"];
+					vector<unint_32> middle = rule.second["middle"]["vec"];
+					vector<unint_32> after = rule.second["after"]["vec"];
+
 					r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
+											rule.second["middle"]["colour"],
+											rule.second["after"]["colour"],
+											before[0],//min
+											before[1],//max, etc.
+											middle[0],
+											middle[1],
+											after[0],
+											after[1]);
+					//Neat method which is broken due to config system
+					/*r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
 											rule.second["middle"]["colour"],
 											rule.second["after"]["colour"],
 											unint_32(rule.second["before"]["vec"][0]),//min
@@ -103,7 +135,7 @@ namespace modules {
 											unint_32(rule.second["middle"]["vec"][0]),
 											unint_32(rule.second["middle"]["vec"][1]),
 											unint_32(rule.second["after"]["vec"][0]),
-											unint_32(rule.second["after"]["vec"][1]));
+											unint_32(rule.second["after"]["vec"][1]));*/
 					segmentFilter.addTransitionRule(r);
 				}
 			});
