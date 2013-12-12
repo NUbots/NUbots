@@ -40,6 +40,19 @@ namespace messages {
                 arma::vec2 m_centre;            //! @variable The centre pixellocation.
             };
 
+            struct SegmentedRegion {
+                std::vector<std::vector<ColourSegment>> m_segmentedScans;       //! @variable The segments in this region.
+                ScanDirection m_direction;                                      //! @variable The alignment of the scans in this region.
+            };
+
+            /**
+             * The possible alignment for segments in a region.
+             */     
+            enum ScanDirection {
+                VERTICAL,
+                HORIZONTAL
+            };
+        
             enum Colour {
                 unclassified, //!< Colour has not be given a category.
                 white, //!< Colour is in the White region.
