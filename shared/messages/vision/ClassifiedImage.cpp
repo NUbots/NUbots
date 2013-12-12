@@ -21,6 +21,7 @@
 
 namespace messages {
     namespace vision {
+
 		using modules::vision::ColourSegment;
 
         ClassifiedImage::ClassifiedImage() {
@@ -186,15 +187,32 @@ namespace messages {
 			}
 		}
 
-		ClassifiedImage::COLOUR_CLASS ClassifiedImage::getClassOfColour(const Colour& c){
+		ClassifiedImage::COLOUR_CLASS ClassifiedImage::getClassOfColour(const Colour& c) {
 			switch (c) {
-				case yellow : {return GOAL_COLOUR;}
-				case orange : {return BALL_COLOUR;}
-				case white : {return LINE_COLOUR;}
-				case blue : {return TEAM_CYAN_COLOUR;}
-				case pink : {return TEAM_MAGENTA_COLOUR;}				
+				case yellow: {
+					return ClassifiedImage::GOAL_COLOUR;
+				}
+
+				case orange: {
+					return ClassifiedImage::BALL_COLOUR;
+				}
+
+				case white: {
+					return ClassifiedImage::LINE_COLOUR;
+				}
+
+				case blue: {
+					return ClassifiedImage::TEAM_CYAN_COLOUR;
+				}
+
+				case pink: {
+					return ClassifiedImage::TEAM_MAGENTA_COLOUR;
+				}
+
+				default: {
+					return ClassifiedImage::UNKNOWN_COLOUR;
+				}
 			}
-			return UNKNOWN_COLOUR;
 		}
 	
 	/*	void ClassifiedImage::setFilteredSegments(const  SegmentedRegion& hor, const  SegmentedRegion& vert){

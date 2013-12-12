@@ -21,8 +21,6 @@
 #define MESSAGES_VISION_CLASSIFIEDIMAGE_H
 
 #include <string>
-#include "ColourSegment.h"
-#include "GreenHorizon.h"
 
 namespace messages {
     namespace vision {
@@ -34,7 +32,15 @@ namespace messages {
          */
         class ClassifiedImage {
         public:
-            enum Colour{
+            struct ColourSegment {
+                Colour m_colour;
+                unsigned int m_lengthPixels;
+                arma::vec2 m_start;             //! @variable The start pixel location.
+                arma::vec2 m_end;               //! @variable The end  pixellocation.
+                arma::vec2 m_centre;            //! @variable The centre pixellocation.
+            };
+
+            enum Colour {
                 unclassified, //!< Colour has not be given a category.
                 white, //!< Colour is in the White region.
                 green, //!< Colour is in the Green region.
@@ -82,6 +88,7 @@ namespace messages {
 
 			//! @brief converts a colour class into a string.
 			static std::string getColourClassName(const COLOUR_CLASS& id);
+
             //! gets the colour class corresponding to the colour
             static COLOUR_CLASS getClassOfColour(const Colour& c);
 
@@ -93,11 +100,13 @@ namespace messages {
             const SegmentedRegion& getHorizontalFilteredSegments();
             const SegmentedRegion& getVerticalFilteredSegments();
             const std::map<COLOUR_CLASS, std::vector<modules::vision::ColourSegment> >& getHorizontalTransitionsMap();
-            const std::map<COLOUR_CLASS, std::vector<modules::vision::ColourSegment> >& getVerticalTransitionsMap();*/
+            const std::map<COLOUR_CLASS, std::vector<modules::vision::ColourSegment> >& getVerticalTransitionsMap();
+*/
         
             //Image variables:
             SegmentedRegion horizontal_filtered_segments;       //! @variable The filtered segmented horizontal scanlines.
             SegmentedRegion vertical_filtered_segments;         //! @variable The filtered segmented vertical scanlines.
+
             //! Transitions
             std::map<COLOUR_CLASS, std::vector<modules::vision::ColourSegment> > matched_horizontal_segments;
             std::map<COLOUR_CLASS, std::vector<modules::vision::ColourSegment> > matched_vertical_segments;
