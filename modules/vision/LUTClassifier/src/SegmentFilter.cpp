@@ -21,43 +21,49 @@
 
 namespace modules {
     namespace vision {
-
     	using messages::vision::ClassifiedImage;
 
 		SegmentFilter::SegmentFilter() {			
 		}
 
-		unique_ptr<ClassifiedImage> SegmentFilter::classifyImage(const SegmentedRegion& horizontalSegments, const SegmentedRegion& verticalSegments) const {
+		void SegmentFilter::run(const SegmentedRegion& horizontalSegments, const SegmentedRegion& verticalSegments) const {
+//			const SegmentedRegion& horizontalSegments = vbb->getHorizontalSegmentedRegion();
+//			const SegmentedRegion& verticalSegments = vbb->getVerticalSegmentedRegion();
+			
 			SegmentedRegion horizontalFiltered, verticalFiltered;
-			std::map<COLOUR_CLASS, std::vector<ColourSegment>> horizontalResult, verticalResult;
+			std::map<ClassifiedImage::COLOUR_CLASS, std::vector<ColourSegment>> horizontalResult, verticalResult;
 		
 			if (PREFILTER_ON) {
 				preFilter(horizontalSegments, horizontalFiltered);
 				preFilter(verticalSegments, verticalFiltered);
+				
+//				TODO: Need to emit these?
+//				vbb->setHorizontalFilteredSegments(horizontalFiltered.m_segmentedScans);
+//				vbb->setVerticalFilteredSegments(verticalFiltered.m_segmentedScans);
 			}
-
 			filter(horizontalFiltered, horizontalResult);
 			filter(verticalFiltered, verticalResult);
-					
-			std::unique_ptr<ClassifiedImage> image(new ClassifiedImage());
-
-			image->horizontal_filtered_segments = horizontalFiltered;
-			image->vertical_filtered_segments = verticalFiltered;
-
-			image->matched_horizontal_segments = horizontalResult;
-			image->matched_vertical_segments = verticalResult;
-
-			return image;
+			
+		
+// 			TODO: Need to emit these?
+			// Push results to BB
+//			vbb->setHorizontalTransitionsMap(horizontalResult);
+//			vbb->setVerticalTransitionsMap(verticalResult);
 		}
 
 		void SegmentFilter::preFilter(const SegmentedRegion& scans, SegmentedRegion &result) const {
 			const std::vector<std::vector<ColourSegment>>& segments = scans.getSegments();
+//			std::vector<std::vector<ColourSegment>>& finalSegments = result.m_segmentedScans;
 			std::vector<std::vector<ColourSegment>> finalSegments;
 			std::vector<ColourSegment> line;
 		
 			std::vector<std::vector<ColourSegment>>::const_iterator line_it;
 			std::vector<ColourSegment>::const_iterator before_it, middle_it, after_it;
 			SegmentedRegion::ScanDirection dir = scans.getDirection();
+		
+//			result.m_direction = dir;
+
+//			finalSegments.clear();
 		
 			//loop through each scan
 			for(line_it = segments.begin(); line_it < segments.end(); line_it++) {
@@ -86,8 +92,9 @@ namespace modules {
 				}
 			}
 	
-			// Store the result of the pre-filtering.		
-			result.set(finalSegments, dir);
+			// Store the result of the pre-filtering.
+			result.m_segmentedScans = finalSegments;								//vector assignment operator copies elements
+			result.m_direction = dir;
 		}
 
 		void SegmentFilter::filter(const SegmentedRegion &scans, std::map<ClassifiedImage::COLOUR_CLASS, std::vector<ColourSegment>>& result) const {
@@ -152,10 +159,7 @@ namespace modules {
 			}
 		}
 
-		void SegmentFilter::applyReplacements(const ColourSegment& before, 
-												const ColourSegment& middle, 
-												const ColourSegment& after, std::vector<ColourSegment>& replacements, 
-												SegmentedRegion::ScanDirection dir) const {
+		void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after, std::vector<ColourSegment>& replacements, SegmentedRegion::ScanDirection dir) const {
 			std::vector<ColourReplacementRule>::const_iterator rules_it, begin, end;
 			ColourSegment tempSegment;
 		
@@ -206,10 +210,10 @@ namespace modules {
 							arma::vec2 end_pt	= tempSegment.getEnd();
 							arma::vec2 mid_pt	= arma::vec2((start_pt + end_pt) * 0.5);
 							
-							tempSegment.set(start_pt, mid_pt, before.getColour());
+							SegmentLogic::setColourSegment(tempSegment,start_pt, mid_pt, before.getColour());
 							replacements.push_back(tempSegment);
 							
-							tempSegment.set(mid_pt, end_pt, after.getColour());
+							SegmentLogic::setColourSegment(tempSegment,mid_pt, end_pt, after.getColour());
 							replacements.push_back(tempSegment);
 							
 							break;
@@ -237,7 +241,7 @@ namespace modules {
 			
 			while(after_it<line.end()) {
 				if(before_it->getColour() == after_it->getColour()) {
-				    before_it->join(*after_it);
+				    SegmentLogic::joinColourSegment(*before_it,*after_it);
 				    after_it = line.erase(after_it);
 				    before_it = after_it - 1;
 				}

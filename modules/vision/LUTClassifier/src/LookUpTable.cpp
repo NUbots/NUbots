@@ -12,13 +12,13 @@
 namespace modules{
   namespace vision{
 
-        using messages::vision;
+        using messages::vision::Colour;
         
         LookUpTable::LookUpTable() {
             LUTbuffer = new unsigned char[LUT_SIZE];
 			
             for(int i = 0; i < LUT_SIZE; i++) {
-                LUTbuffer[i] = unclassified;
+                LUTbuffer[i] = Colour::unclassified;
 			}
 			
             LUT = LUTbuffer;
@@ -71,7 +71,7 @@ namespace modules{
 
         void LookUpTable::zero() {
             for(int i = 0; i < LUT_SIZE; i++) {
-                LUTbuffer[i] = unclassified;
+                LUTbuffer[i] = Colour::unclassified;
 			}
 			
             LUT = LUTbuffer;

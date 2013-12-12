@@ -30,7 +30,6 @@
 
 #include "messages/vision/ClassifiedImage.h"
 
-#include "ColourSegment.h"
 #include "ColourReplacementRule.h"
 #include "ColourTransitionRule.h"
 
@@ -48,8 +47,8 @@ namespace modules {
 			  as transitions back on the blackboard. This method also calls some smoothing prefilters on the std::lists
 			  which are also set by preloaded rules.
 			  */
-			std::make_unique<messages::vision::ClassifiedImage> classifyImage(const SegmentedRegion& horizontalSegments, 
-																				const SegmentedRegion& verticalSegments) const;
+			std::make_unique<messages::vision::ClassifiedImage> classifyImage(const messages::vision::SegmentedRegion& horizontalSegments, 
+																				const messages::vision::SegmentedRegion& verticalSegments) const;
 				
 			void clearRules();
 			void addTransitionRule(const ColourTransitionRule& rule);
@@ -61,14 +60,14 @@ namespace modules {
 			  @param scans the std::lists of segments.
 			  @param result a smoothed result.
 			  */
-			void preFilter(const SegmentedRegion& scans, SegmentedRegion& result) const;
+			void preFilter(const messages::vision::SegmentedRegion& scans, messages::vision::SegmentedRegion& result) const;
 			
 			/**
 			  @brief runs the transition rules over a segment std::list.
 			  @param scans the std::lists of segments - smoothed or unsmoothed.
 			  @param result std::vectors of transition rule matches and the field object ids they map to.
 			  */
-			void filter(const SegmentedRegion& scans, std::map<COLOUR_CLASS, std::vector<ColourSegment>>& result) const;
+			void filter(const messages::vision::SegmentedRegion& scans, std::map<COLOUR_CLASS, std::vector<messages::vision::ColourSegment>>& result) const;
 		
 			/**
 			  @brief Applies a single rule to a segmented region.
@@ -76,7 +75,7 @@ namespace modules {
 			  @param rule The transition rule to apply.
 			  @param matches the resulting std::list of transitions.
 			  */
-			void checkRuleAgainstRegion(const SegmentedRegion& scans, const ColourTransitionRule& rule, std::vector<ColourSegment>& matches) const;
+			void checkRuleAgainstRegion(const messages::vision::SegmentedRegion& scans, const ColourTransitionRule& rule, std::vector<messages::vision::ColourSegment>& matches) const;
 			
 			/**
 			  @brief Applies a replacement rule to a triplet of segments.
@@ -86,16 +85,16 @@ namespace modules {
 			  @param replacement a reference to a std::vector of segments that should replace the middle segment.
 			  @param dir the scan direction (vertical or horizontal).
 			  */
-			void applyReplacements(const ColourSegment& before, 
-									const ColourSegment& middle, 
-									const ColourSegment& after, std::vector<ColourSegment>& replacement, 
+			void applyReplacements(const messages::vision::ColourSegment& before, 
+									const messages::vision::ColourSegment& middle, 
+									const messages::vision::ColourSegment& after, std::vector<messages::vision::ColourSegment>& replacement, 
 									ScanDirection dir) const;
 				
 			/**
 			  @brief Joins any adjacent segments that are the same colour.
 			  @param line the std::list of segments.
 			  */
-			void joinMatchingSegments(std::vector<ColourSegment>& line) const;
+			void joinMatchingSegments(std::vector<messages::vision::ColourSegment>& line) const;
 
 		
 		private:

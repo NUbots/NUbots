@@ -24,7 +24,7 @@ namespace modules {
 
         using messages::input::Image;
         using messages::support::Configuration;
-        using namespace messages::vision;
+        using messages::vision::ClassifiedImage;
         
  		ScanLines::ScanLines() {
  			// Empty Constructor.
@@ -89,7 +89,8 @@ namespace modules {
 			//simple and nasty first
 			//Colour previous, current, next
 			unsigned int startPosition = 0, x;
-			Colour startColour = LUT.classifyPixel(image(0, y)), currentColour;
+			ClassifiedImage::Colour startColour = LUT.classifyPixel(image(0, y));
+			ClassifiedImage::Colour currentColour;
 			ColourSegment segment;
 
 			for (x = 0; x < image.width(); x++) {
@@ -102,7 +103,7 @@ namespace modules {
 					startPoint[1] = y;
 					endPoint[0] = x;
 					endPoint[1] = y;
-					segment.set(startPoint, endPoint, startColour);
+					SegmentLogic::setColourSegment(segment,startPoint, endPoint, startColour);
 					result.push_back(segment);
 
 					//start new segment
@@ -115,7 +116,7 @@ namespace modules {
 			startPoint[1] = y;
 			endPoint[0] = x - 1;
 			endPoint[1] = y;
-			segment.set(startPoint, endPoint, startColour);
+			SegmentLogic::setColourSegment(segment,startPoint, endPoint, startColour);
 			result.push_back(segment);
 
 			return result;
@@ -133,7 +134,7 @@ namespace modules {
 
 			//simple and nasty first
 			//Colour previous, current, next
-			Colour startColour = LUT.classifyPixel(image(start[0], start[1])), currentColour;
+			ClassifiedImage::Colour startColour = LUT.classifyPixel(image(start[0], start[1])), currentColour;
 			ColourSegment segment;
 			unsigned int startPosition = start[1], x = start[0], y;
 
@@ -147,7 +148,7 @@ namespace modules {
 					startPoint[1] = startPosition;
 					endPoint[0] = x;
 					endPoint[1] = y;
-					segment.set(startPoint, endPoint, startColour);
+					SegmentLogic::setColourSegment(segment,startPoint, endPoint, startColour);
 					result.push_back(segment);
 
 					//start new segment
@@ -160,7 +161,7 @@ namespace modules {
 			startPoint[1] = startPosition;
 			endPoint[0] = x;
 			endPoint[1] = y;
-			segment.set(startPoint, endPoint, startColour);
+			SegmentLogic::setColourSegment(segment,startPoint, endPoint, startColour);
 			result.push_back(segment);
 
 			return result;
