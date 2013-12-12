@@ -38,7 +38,7 @@ namespace modules {
 			on<Trigger<Configuration<LUTLocations>>>([this](const Configuration<LUTLocations>& locations) {
 				std::vector<std::string> locat = locations.config;
 
-				for(auto& location : locat) {
+				for(auto location : locat) {
 					LookUpTable LUT;
 					bool loaded = LUT.loadLUTFromFile(location);
 
@@ -72,7 +72,7 @@ namespace modules {
 				std::map<std::string, ConfigurationNode> replacement_rules = rules.config["REPLACEMENT_RULES"];
 				std::map<std::string, ConfigurationNode> transition_rules = rules.config["TRANSITION_RULES"];
 
-				for(auto& rule : replacement_rules) {
+				for(auto rule : replacement_rules) {
 					std::cout << "Loading Replacement rule : " << rule.first << std::endl;
 
 					//rule.second = the rule;
@@ -80,17 +80,25 @@ namespace modules {
 					r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
 											rule.second["middle"]["colour"],
 											rule.second["after"]["colour"],
-											unint_32(rule.second["before"]["vec"][0]),//min
+											static_cast<unsigned int>(rule.second["before"]["vec"][0]),
+											static_cast<uint_32>(rule.second["before"]["vec"][1]),
+											static_cast<uint_32>(rule.second["middle"]["vec"][0]),
+											static_cast<uint_32>(rule.second["middle"]["vec"][1]),
+											static_cast<uint_32>(rule.second["after"]["vec"][0]),
+											static_cast<uint_32>(rule.second["after"]["vec"][1]),
+
+/*											unint_32(rule.second["before"]["vec"][0]),//min
 											unint_32(rule.second["before"]["vec"][1]),//max, etc.
 											unint_32(rule.second["middle"]["vec"][0]),
 											unint_32(rule.second["middle"]["vec"][1]),
 											unint_32(rule.second["after"]["vec"][0]),
 											unint_32(rule.second["after"]["vec"][1]),
+*/
 											rule.second["replacement"]);
 					segmentFilter.addReplacementRule(r);
 				}
 
-				for(auto& rule : transition_rules) {
+				for(auto rule : transition_rules) {
 					std::cout << "Loading Transition rule : " << rule.first << std::endl;
 
 					//rule.second = the rule;
@@ -98,12 +106,20 @@ namespace modules {
 					r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
 											rule.second["middle"]["colour"],
 											rule.second["after"]["colour"],
+											static_cast<uint_32>(rule.second["before"]["vec"][0]),
+											static_cast<uint_32>(rule.second["before"]["vec"][1]),
+											static_cast<uint_32>(rule.second["middle"]["vec"][0]),
+											static_cast<uint_32>(rule.second["middle"]["vec"][1]),
+											static_cast<uint_32>(rule.second["after"]["vec"][0]),
+											static_cast<uint_32>(rule.second["after"]["vec"][1]));
+/*											
 											unint_32(rule.second["before"]["vec"][0]),//min
 											unint_32(rule.second["before"]["vec"][1]),//max, etc.
 											unint_32(rule.second["middle"]["vec"][0]),
 											unint_32(rule.second["middle"]["vec"][1]),
 											unint_32(rule.second["after"]["vec"][0]),
 											unint_32(rule.second["after"]["vec"][1]));
+*/
 					segmentFilter.addTransitionRule(r);
 				}
 			});

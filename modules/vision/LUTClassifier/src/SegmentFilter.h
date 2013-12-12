@@ -47,7 +47,7 @@ namespace modules {
 			  as transitions back on the blackboard. This method also calls some smoothing prefilters on the std::lists
 			  which are also set by preloaded rules.
 			  */
-			std::make_unique<messages::vision::ClassifiedImage> classifyImage(const messages::vision::SegmentedRegion& horizontalSegments, 
+			std::unique_ptr<messages::vision::ClassifiedImage> classifyImage(const messages::vision::SegmentedRegion& horizontalSegments, 
 																				const messages::vision::SegmentedRegion& verticalSegments) const;
 				
 			void clearRules();
@@ -67,7 +67,7 @@ namespace modules {
 			  @param scans the std::lists of segments - smoothed or unsmoothed.
 			  @param result std::vectors of transition rule matches and the field object ids they map to.
 			  */
-			void filter(const messages::vision::SegmentedRegion& scans, std::map<COLOUR_CLASS, std::vector<messages::vision::ColourSegment>>& result) const;
+			void filter(const messages::vision::SegmentedRegion& scans, std::map<messages::vision::COLOUR_CLASS, std::vector<messages::vision::ColourSegment>>& result) const;
 		
 			/**
 			  @brief Applies a single rule to a segmented region.
@@ -88,7 +88,7 @@ namespace modules {
 			void applyReplacements(const messages::vision::ColourSegment& before, 
 									const messages::vision::ColourSegment& middle, 
 									const messages::vision::ColourSegment& after, std::vector<messages::vision::ColourSegment>& replacement, 
-									ScanDirection dir) const;
+									messages::vision::ScanDirection dir) const;
 				
 			/**
 			  @brief Joins any adjacent segments that are the same colour.
