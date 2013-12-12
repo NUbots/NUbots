@@ -18,8 +18,8 @@
 #include <fstream>
 
 
-namespace modules{
-  namespace vision{
+namespace modules {
+  namespace vision {
     
     class LookUpTable
     {
@@ -50,7 +50,6 @@ namespace modules{
         void zero();
 
         const messages::vision::ClassifiedImage::Colour classifyPixel(const messages::input::Image::Pixel& p) const {
-//            return getColourFromIndex(LUT[getLUTIndex(p)]); // 7bit LUT
             return (messages::vision::ClassifiedImage::Colour)(LUT[getLUTIndex(p)]); // 7bit LUT
         }        
         
