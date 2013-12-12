@@ -12,7 +12,7 @@
 namespace modules{
   namespace vision{
 
-        using utility::vision;
+        using messages::vision;
         
         LookUpTable::LookUpTable() {
             LUTbuffer = new unsigned char[LUT_SIZE];

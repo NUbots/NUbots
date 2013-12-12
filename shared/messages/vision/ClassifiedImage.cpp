@@ -22,8 +22,6 @@
 namespace messages {
     namespace vision {
 
-		using namespace utility::vision;
-
         ClassifiedImage::ClassifiedImage() {
 		}      
 	

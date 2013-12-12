@@ -25,7 +25,6 @@ namespace modules {
 		using messages::input::Image;
 		using messages::support::Configuration;
 		using utility::configuration::ConfigurationNode;
-		using namespace utility::vision;
         
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), greenHorizon(), scanLines() { 
 			current_LUT_index = 0;
@@ -203,7 +202,7 @@ namespace modules {
             	std::vector<int> scan_lines = scanLines.generateScanLines(image, greenHorizon);
             	std::vector<std::vector<ColourSegment>> classified_segments_hor = scanLines.classifyHorizontalScanLines(image, scan_lines, LUTs[current_LUT_index]);
             	std::vector<std::vector<ColourSegment>> classified_segments_ver = scanLines.classifyVerticalScanLines(image, greenHorizon, LUTs[current_LUT_index]);
-            	unique_ptr<ClassifiedImage> image = segmentFilter.getClassifiedImage(classified_segments_hor,classified_segments_ver);
+            	std::unique_ptr<ClassifiedImage> image = segmentFilter.classifyImage(classified_segments_hor, classified_segments_ver);
             	image->green_horizon = greenHorizon;
             	emit(image);
             	//emit(std::make_unique<ClassifiedImage>(new ClassifiedImage(classigied_segments_hor,classified_segments_ver)));

@@ -24,7 +24,7 @@ namespace modules {
 
         using messages::input::Image;
         using messages::support::Configuration;
-        using utility::vision;
+        using namespace messages::vision;
         
  		ScanLines::ScanLines() {
  			// Empty Constructor.

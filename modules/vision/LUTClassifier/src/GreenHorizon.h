@@ -26,7 +26,7 @@
 
 #include "messages/input/Image.h"
 #include "messages/support/Configuration.h"
-#include "utility/vision/ColourClassification.h"
+#include "messages/vision/ClassifiedImage.h"
 
 #include "LookUpTable.h"
 

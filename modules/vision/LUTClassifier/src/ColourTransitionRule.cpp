@@ -21,8 +21,8 @@
 namespace modules {
 	namespace vision {
 
-		using utility::vision;
-
+		using namespace messages::vision;
+		
 	    ColourTransitionRule::ColourTransitionRule() {
 	    	// Empty constructor.
 	    }	    		

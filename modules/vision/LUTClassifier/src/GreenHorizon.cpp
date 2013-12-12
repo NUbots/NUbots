@@ -24,7 +24,6 @@ namespace modules {
 
         using messages::input::Image;
         using messages::support::Configuration;
-        using utility::vision;
         
         GreenHorizon::GreenHorizon() {
         	// Empty constructor.
@@ -143,7 +142,7 @@ namespace modules {
 		    std::cout << "Green Horizon Number of Thrown Points : " << thrown_points.size() << std::endl;
 
 		    horizon_points = upperConvexHull(horizon_points);
-		   	set(horizon_points,width,height);
+		   	set(horizon_points, width, height);
 			
 		    return horizon_points;
         }

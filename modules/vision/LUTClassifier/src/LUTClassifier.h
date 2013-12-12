@@ -27,7 +27,6 @@
 #include "messages/input/Image.h"
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/support/Configuration.h"
-#include "utility/vision/ColourSegment.h"
 
 #include "LookUpTable.h"
 #include "GreenHorizon.h"

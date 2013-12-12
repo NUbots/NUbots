@@ -16,7 +16,7 @@
 #include <fstream>
 
 #include "messages/input/Image.h"
-#include "utility/vision/ColourClassification.h"
+#include "messages/vision/ClassifiedImage.h"
 
 namespace modules {
   namespace vision {
@@ -49,8 +49,8 @@ namespace modules {
         */
         void zero();
 
-        const utility::vision::Colour classifyPixel(const messages::input::Image::Pixel& p) const {
-            return (utility::vision::Colour)(LUT[getLUTIndex(p)]); // 7bit LUT
+        const messages::vision::Colour classifyPixel(const messages::input::Image::Pixel& p) const {
+            return (messages::vision::Colour)(LUT[getLUTIndex(p)]); // 7bit LUT
         }        
         
     private:

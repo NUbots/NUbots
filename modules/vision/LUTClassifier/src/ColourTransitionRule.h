@@ -24,18 +24,18 @@
 #include <iostream>
 #include <string>
 
+#include "messages/vision/ClassifiedImage.h"
 #include "utility/strutil/strutil.h"
-#include "utility/vision/ColourSegment.h"
-#include "utility/vision/ColourClassification.h"
 #include "utility/configuration/ConfigurationNode.h"
 
 #include "LookUpTable.h"
+#include "ColourClassification.h"
 
 namespace modules {
 	namespace vision { 
 		class ColourTransitionRule {
 		public:
-		    static utility::vision::ColourSegment nomatch;   //! @variable A static segment used to represent one that cannot be matched to any rule.
+		    static messages::vision::ColourSegment nomatch;   //! @variable A static segment used to represent one that cannot be matched to any rule.
 			
 		    ColourTransitionRule();
 		    
@@ -64,24 +64,24 @@ namespace modules {
 		      @param after the following segment.
 		      @return Whether it is a match in either direction.
 		      */
-		    bool match(const utility::vision::ColourSegment& before, const utility::vision::ColourSegment& middle, const utility::vision::ColourSegment& after) const;
+		    bool match(const messages::vision::ColourSegment& before, const messages::vision::ColourSegment& middle, const messages::vision::ColourSegment& after) const;
 			
 		    //! Returns the ID of the field object that this rule is for.
-		    utility::vision::COLOUR_CLASS getColourClass() const;
+		    messages::vision::COLOUR_CLASS getColourClass() const;
 
 		private:
-		    utility::vision::COLOUR_CLASS m_colour_class;     //! @variable The ID of the field object that this rule is for.
+		    messages::vision::COLOUR_CLASS m_colour_class;     //! @variable The ID of the field object that this rule is for.
 
-		    std::vector<utility::vision::Colour>  m_before,   //! @variable The colour that the previous segment must be.
-		                    	 m_middle,   //! @variable The colour that this segment must be
-		                    	 m_after;    //! @variable The colour that the following segment must be.
+		    std::vector<messages::vision::Colour> m_before;   //! @variable The colour that the previous segment must be.
+			std::vector<messages::vision::Colour> m_middle;   //! @variable The colour that this segment must be
+		    std::vector<messages::vision::Colour> m_after;    //! @variable The colour that the following segment must be.
 
-		    unsigned int m_before_min,   //! @variable the minimum length of the previous segment for a match.
-				         m_before_max,   //! @variable the maximum length of the previous segment for a match.
-				         m_min,          //! @variable the minimum length of the segment for a match.
-				         m_max,          //! @variable the maximum length of the segment for a match.
-				         m_after_min,    //! @variable the minimum length of the following segment for a match.
-				         m_after_max;    //! @variable the maximum length of the following segment for a match.
+		    unsigned int m_before_min;   //! @variable the minimum length of the previous segment for a match.
+			unsigned int m_before_max;   //! @variable the maximum length of the previous segment for a match.
+			unsigned int m_min;          //! @variable the minimum length of the segment for a match.
+			unsigned int m_max;          //! @variable the maximum length of the segment for a match.
+			unsigned int m_after_min;    //! @variable the minimum length of the following segment for a match.
+			unsigned int m_after_max;    //! @variable the maximum length of the following segment for a match.
 
 			/*!
 			  Checks if the given segment triplet matches this rule in one direction.
@@ -90,7 +90,7 @@ namespace modules {
 			  @param after the following segment.
 			  @return Whether it is a match.
 			  */
-			bool oneWayMatch(const utility::vision::ColourSegment& before, const utility::vision::ColourSegment& middle, const utility::vision::ColourSegment& after) const;
+			bool oneWayMatch(const messages::vision::ColourSegment& before, const messages::vision::ColourSegment& middle, const messages::vision::ColourSegment& after) const;
 		};
 	}
 }

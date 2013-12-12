@@ -23,12 +23,58 @@
 #include <string>
 #include <vector>
 #include <map>
-
-#include "utility/vision/ColourClassification.h"
-#include "utility/vision/ColourSegment.h"
+#include <armadillo>
 
 namespace messages {
     namespace vision {
+
+        enum Colour {
+            unclassified, //!< Colour has not be given a category.
+            white, //!< Colour is in the White region.
+            green, //!< Colour is in the Green region.
+            shadow_object, //!< Colour is part of a shadowed area.
+            pink, //!< Colour is in the Red region.
+            pink_orange, //!< Colour is in the region of overlap between Red and Orange.
+            orange, //!< Colour is in the Orange region.
+            yellow_orange, //!< Colour is in the region of overlap between Yellow and Orange.
+            yellow, //!< Colour is in the Yellow region.
+            blue, //!< Colour is in the Sky Blue region.
+            shadow_blue, //!< Colour is in the Dark Blue region.
+            num_colours, //!< Total number of colour categories.
+            invalid
+        };
+        
+        enum COLOUR_CLASS {
+            BALL_COLOUR,
+            GOAL_COLOUR,
+            // GOAL_Y_COLOUR,
+            // GOAL_B_COLOUR,
+            LINE_COLOUR,
+            TEAM_CYAN_COLOUR,
+            TEAM_MAGENTA_COLOUR,
+            UNKNOWN_COLOUR
+        };
+            
+        /**
+        * The possible alignment for segments in a segmented region.
+        */     
+        enum ScanDirection {
+            VERTICAL,
+            HORIZONTAL
+        };
+
+        typedef struct {
+            Colour m_colour;
+            unsigned int m_lengthPixels;
+            arma::vec2 m_start;             //! @variable The start pixel location.
+            arma::vec2 m_end;               //! @variable The end  pixellocation.
+            arma::vec2 m_centre;            //! @variable The centre pixellocation.
+        } ColourSegment;
+
+        typedef struct {
+            std::vector<std::vector<ColourSegment>> m_segmentedScans;       //! @variable The segments in this region.
+            ScanDirection m_direction;                                      //! @variable The alignment of the scans in this region.
+        } SegmentedRegion;
 
         /**
          * This class contains all information about a classified image.
@@ -37,6 +83,7 @@ namespace messages {
          */
         class ClassifiedImage {
         public:
+
             ClassifiedImage();
 
 /*
@@ -51,12 +98,12 @@ namespace messages {
 */
         
             //Image variables:
-            utility::vision::SegmentedRegion horizontal_filtered_segments;       //! @variable The filtered segmented horizontal scanlines.
-            utility::vision::SegmentedRegion vertical_filtered_segments;         //! @variable The filtered segmented vertical scanlines.
+            SegmentedRegion horizontal_filtered_segments;       //! @variable The filtered segmented horizontal scanlines.
+            SegmentedRegion vertical_filtered_segments;         //! @variable The filtered segmented vertical scanlines.
 
             //! Transitions
-            std::map<utility::vision::COLOUR_CLASS, std::vector<utility::vision::ColourSegment>> matched_horizontal_segments;
-            std::map<utility::vision::COLOUR_CLASS, std::vector<utility::vision::ColourSegment>> matched_vertical_segments;
+            std::map<COLOUR_CLASS, std::vector<ColourSegment>> matched_horizontal_segments;
+            std::map<COLOUR_CLASS, std::vector<ColourSegment>> matched_vertical_segments;
 
 //            GreenHorizon green_horizon;
         };

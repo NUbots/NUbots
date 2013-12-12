@@ -23,7 +23,6 @@ namespace modules {
     namespace vision {
 
     	using messages::vision::ClassifiedImage;
-    	using utility::vision;
 
 		SegmentFilter::SegmentFilter() {			
 		}

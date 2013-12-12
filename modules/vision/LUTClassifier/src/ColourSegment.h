@@ -17,46 +17,29 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_VISION_COLOURSEGMENT_H
-#define UTILITY_VISION_COLOURSEGMENT_H
+#ifndef MODULES_VISION_COLOURSEGMENT_H
+#define MODULES_VISION_COLOURSEGMENT_H
 
 #include <string>
 #include <vector>
 #include <armadillo>
 #include <ostream>
 
+#include "messages/vision/ClassifiedImage.h"
+
 #include "ColourClassification.h"
 
-namespace utility {
-
-    /**
-     * Provides some simple routines for the generation of classified images.
-     *
-     * @author Alex Biddulph
-     */
+namespace modules {
     namespace vision {
 
+        using namespace messages::vision;
+        
         /**
-         * The possible alignment for segments in a region.
-        */     
-        enum ScanDirection {
-            VERTICAL,
-            HORIZONTAL
-        };
-
-        typedef struct {
-            Colour m_colour;
-            unsigned int m_lengthPixels;
-            arma::vec2 m_start;             //! @variable The start pixel location.
-            arma::vec2 m_end;               //! @variable The end  pixellocation.
-            arma::vec2 m_centre;            //! @variable The centre pixellocation.
-        } ColourSegment;
-
-        typedef struct {
-            std::vector<std::vector<ColourSegment>> m_segmentedScans;       //! @variable The segments in this region.
-            ScanDirection m_direction;                                      //! @variable The alignment of the scans in this region.
-        } SegmentedRegion;
-
+         * Provides some simple routines for the generation of classified images.
+         *
+         * @author Alex Biddulph
+         */
+         
         void setColourSegment(ColourSegment& colourSegment, const arma::vec2& start, const arma::vec2& end, const Colour& colour) {
             colourSegment.m_colour = colour;
 
@@ -120,4 +103,4 @@ namespace utility {
     }
 }
 
-#endif // UTILITY_VISION_COLOURSEGMENT_H
+#endif // MODULES_VISION_COLOURSEGMENT_H
