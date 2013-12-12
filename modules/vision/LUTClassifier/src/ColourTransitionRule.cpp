@@ -123,9 +123,9 @@ namespace modules {
 
 		bool ColourTransitionRule::oneWayMatch(const ColourSegment &before, const ColourSegment &middle, const ColourSegment &after) const {
 		    //check lengths first to save iterating over colour vectors pointlessly as this method is majority false
-		    if (!((m_min <= middle.getLength()) && (m_max >= middle.getLength()) &&
-		         (m_before_min <= before.getLength()) && (m_before_max >= before.getLength()) &&
-		         (m_after_min <= after.getLength()) && (m_after_max >= after.getLength()))) {
+		    if (!((m_min <= middle.m_lengthPixels) && (m_max >= middle.m_lengthPixels) &&
+		         (m_before_min <= before.m_lengthPixels) && (m_before_max >= before.m_lengthPixels) &&
+		         (m_after_min <= after.m_lengthPixels) && (m_after_max >= after.m_lengthPixels))) {
 		        //did not match size requirements
 		        return false;
 		    }
