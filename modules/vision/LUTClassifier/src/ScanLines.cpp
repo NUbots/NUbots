@@ -26,8 +26,8 @@ namespace modules {
         using messages::support::Configuration;
         using messages::vision::ClassifiedImage;
 		using messages::vision::ColourSegment;
-
-
+		using messages::vision::COLOUR_CLASS;
+		using messages::vision::Colour;
         
  		ScanLines::ScanLines() {
  			// Empty Constructor.

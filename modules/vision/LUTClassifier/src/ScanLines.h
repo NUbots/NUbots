@@ -30,6 +30,7 @@
 
 #include "LookUpTable.h"
 #include "GreenHorizon.h"
+#include "SegmentLogic.h"
 
 namespace modules {
     namespace vision {

@@ -18,8 +18,8 @@
  */
 #include "SegmentLogic.h"
  
-modules{
-	vision{
+namespace modules{
+	namespace vision{
 
 		using message::vision::ClassifiedImage;
 		using message::vision::ColourSegment;

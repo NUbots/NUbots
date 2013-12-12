@@ -17,23 +17,29 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+#ifndef MODULES_VISION_SEGMENTLOGIC_H
+#define MODULES_VISION_SEGMENTLOGIC_H
+
 #include <nuclear>
 #include <vector>
 #include <armadillo>
 
 #include "messages/vision/ClassifiedImage.h"
 
-modules{
-	vision{
+namespace modules{
+	namespace vision{
+		std::ostream& operator<< (std::ostream& output, const messages::vision::ColourSegment& c);
+        std::ostream& operator<< (std::ostream& output, const std::vector<messages::vision::ColourSegment>& c);
+		bool operator== (const messages::vision::ColourSegment& lhs, const messages::vision::ColourSegment& rhs);
 		class SegmentLogic{
+		public:
 			SegmentLogic();
 
         	static void setColourSegment(messages::vision::ColourSegment& colourSegment, const arma::vec2& start, const arma::vec2& end, const messages::vision::Colour& colour);
-	        static bool SegmentLogic::joinColourSegment(messages::vision::ColourSegment& colourSegment, const messages::vision::ColourSegment& other);
+	        static bool joinColourSegment(messages::vision::ColourSegment& colourSegment, const messages::vision::ColourSegment& other);
 
-	        static std::ostream& operator<< (std::ostream& output, const messages::vision::ColourSegment& c);
-	        static std::ostream& operator<< (std::ostream& output, const std::vector<messages::vision::ColourSegment>& c);
-			static bool operator== (const messages::vision::ColourSegment& lhs, const messages::vision::ColourSegment& rhs);
+
 		};
 	}
 }
+#endif

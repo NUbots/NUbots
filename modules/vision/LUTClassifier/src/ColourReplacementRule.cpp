@@ -24,6 +24,7 @@ namespace modules {
 
 		using messages::vision::Colour;
 		using messages::vision::ClassifiedImage;
+		using messages::vision::ColourSegment;
 		
 		ColourSegment ColourReplacementRule::nomatch(arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2), invalid);
 

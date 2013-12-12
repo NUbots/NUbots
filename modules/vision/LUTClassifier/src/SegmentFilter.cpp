@@ -29,8 +29,6 @@ namespace modules {
 		}
 
 		std::make_unique<messages::vision::ClassifiedImage> SegmentFilter::run(const SegmentedRegion& horizontalSegments, const SegmentedRegion& verticalSegments) const {
-//			const SegmentedRegion& horizontalSegments = vbb->getHorizontalSegmentedRegion();
-//			const SegmentedRegion& verticalSegments = vbb->getVerticalSegmentedRegion();
 			
 			SegmentedRegion horizontalFiltered, verticalFiltered;
 			std::map<COLOUR_CLASS, std::vector<ColourSegment>> horizontalResult, verticalResult;
