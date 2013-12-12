@@ -24,17 +24,19 @@ namespace modules {
     	using messages::vision::ClassifiedImage;
     	using messages::vision::ColourSegment;
     	using messages::vision::SegmentedRegion;
+    	using messages::vision::COLOUR_CLASS;
+    	using messages::vision::ScanDirection;
 
 		SegmentFilter::SegmentFilter() {			
 		}
 
-		std::unique_ptr<messages::vision::ClassifiedImage> SegmentFilter::run(const SegmentedRegion& horizontalSegments, const SegmentedRegion& verticalSegments) const {
+		std::unique_ptr<messages::vision::ClassifiedImage> SegmentFilter::classifyImage(const SegmentedRegion& horizontalSegments, const SegmentedRegion& verticalSegments) const {
 			
 			SegmentedRegion horizontalFiltered, verticalFiltered;
 			std::map<COLOUR_CLASS, std::vector<ColourSegment>> horizontalResult, verticalResult;
 			
 			//Construct image for emission
-			std::unique_ptr<ClassifiedImage> image(new ClassifiedImage());
+			std::unique_ptr<ClassifiedImage> image = std::unique_ptr<ClassifiedImage>(new ClassifiedImage());
 
 			if (PREFILTER_ON) {
 				preFilter(horizontalSegments, horizontalFiltered);
@@ -52,17 +54,17 @@ namespace modules {
 			
 			image->matched_horizontal_segments = horizontalResult;
 			image->matched_vertical_segments = verticalResult;
-			return image;
+			return std::move(image);
 		}
 
 		void SegmentFilter::preFilter(const SegmentedRegion& scans, SegmentedRegion &result) const {
-			const std::vector<std::vector<ColourSegment>>& segments = scans.getSegments();
+			const std::vector<std::vector<ColourSegment>>& segments = scans.m_segmentedScans;
 			std::vector<std::vector<ColourSegment>> finalSegments;
 			std::vector<ColourSegment> line;
 		
 			std::vector<std::vector<ColourSegment>>::const_iterator line_it;
 			std::vector<ColourSegment>::const_iterator before_it, middle_it, after_it;
-			SegmentedRegion::ScanDirection dir = scans.getDirection();
+			ScanDirection dir = scans.m_direction;
 		
 			//loop through each scan
 			for(line_it = segments.begin(); line_it < segments.end(); line_it++) {
@@ -97,8 +99,8 @@ namespace modules {
 		}
 
 		void SegmentFilter::filter(const SegmentedRegion &scans, std::map<COLOUR_CLASS, std::vector<ColourSegment>>& result) const {
-			switch (scans.getDirection()) {
-				case SegmentedRegion::VERTICAL: {
+			switch (scans.m_direction) {
+				case ScanDirection::VERTICAL: {
 					for (auto rule : m_verticalRules) {
 						std::vector<ColourSegment>& segments = result[rule.getColourClass()];
 						checkRuleAgainstRegion(scans, rule, segments);
@@ -107,7 +109,7 @@ namespace modules {
 					break;
 				}
 			
-				case SegmentedRegion::HORIZONTAL: {
+				case ScanDirection::HORIZONTAL: {
 					for (auto rule : m_horizontalRules) {
 						std::vector<ColourSegment>& segments = result[rule.getColourClass()];
 						checkRuleAgainstRegion(scans, rule, segments);
@@ -124,7 +126,7 @@ namespace modules {
 		}
 
 		void SegmentFilter::checkRuleAgainstRegion(const SegmentedRegion& scans, const ColourTransitionRule& rule, std::vector<ColourSegment>& matches) const {
-			const std::vector<std::vector<ColourSegment>>& segments = scans.getSegments();
+			const std::vector<std::vector<ColourSegment>>& segments = scans.m_segmentedScans;
 			std::vector<ColourSegment>::const_iterator it;
 
 			//loop through each scan
@@ -158,19 +160,19 @@ namespace modules {
 			}
 		}
 
-		void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after, std::vector<ColourSegment>& replacements, SegmentedRegion::ScanDirection dir) const {
+		void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after, std::vector<ColourSegment>& replacements, ScanDirection dir) const {
 			std::vector<ColourReplacementRule>::const_iterator rules_it, begin, end;
 			ColourSegment tempSegment;
 		
 			switch(dir) {
-				case SegmentedRegion::VERTICAL: {
+				case ScanDirection::VERTICAL: {
 					begin = m_verticalReplacementRules.end();
 					end = m_verticalReplacementRules.end();
 					
 					break;
 				}
 				
-				case SegmentedRegion::HORIZONTAL: {
+				case ScanDirection::HORIZONTAL: {
 					begin = m_horizontalReplacementRules.begin();
 					end = m_horizontalReplacementRules.end();
 					
@@ -190,14 +192,14 @@ namespace modules {
 				    // Replace middle using replacement method.
 				    switch (rules_it->getMethod()) {
 						case ColourReplacementRule::BEFORE: {
-							tempSegment.setColour(before.getColour());
+							tempSegment.m_colour = before.m_colour;
 							replacements.push_back(tempSegment);
 
 							break;
 						}
 						
 						case ColourReplacementRule::AFTER: {
-							tempSegment.setColour(after.getColour());
+							tempSegment.m_colour = after.m_colour;
 							replacements.push_back(tempSegment);
 							
 							break;
@@ -205,14 +207,14 @@ namespace modules {
 						
 						case ColourReplacementRule::SPLIT: {
 							// Generate two new segments matching each end and push them both back.
-							arma::vec2 start_pt	= tempSegment.getStart();
-							arma::vec2 end_pt	= tempSegment.getEnd();
+							arma::vec2 start_pt	= tempSegment.m_start;
+							arma::vec2 end_pt	= tempSegment.m_end;
 							arma::vec2 mid_pt	= arma::vec2((start_pt + end_pt) * 0.5);
 							
-							SegmentLogic::setColourSegment(tempSegment,start_pt, mid_pt, before.getColour());
+							SegmentLogic::setColourSegment(tempSegment,start_pt, mid_pt, before.m_colour);
 							replacements.push_back(tempSegment);
 							
-							SegmentLogic::setColourSegment(tempSegment,mid_pt, end_pt, after.getColour());
+							SegmentLogic::setColourSegment(tempSegment,mid_pt, end_pt, after.m_colour);
 							replacements.push_back(tempSegment);
 							
 							break;
@@ -239,7 +241,7 @@ namespace modules {
 			after_it = before_it + 1;
 			
 			while(after_it<line.end()) {
-				if(before_it->getColour() == after_it->getColour()) {
+				if(before_it->m_colour == after_it->m_colour) {
 				    SegmentLogic::joinColourSegment(*before_it,*after_it);
 				    after_it = line.erase(after_it);
 				    before_it = after_it - 1;

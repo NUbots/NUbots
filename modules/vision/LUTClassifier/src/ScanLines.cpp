@@ -28,6 +28,8 @@ namespace modules {
 		using messages::vision::ColourSegment;
 		using messages::vision::COLOUR_CLASS;
 		using messages::vision::Colour;
+		using messages::vision::SegmentedRegion;
+		using messages::vision::ScanDirection;
         
  		ScanLines::ScanLines() {
  			// Empty Constructor.
@@ -58,24 +60,26 @@ namespace modules {
 			return horizontalScanLines;
 		}
 
-		std::vector<std::vector<ColourSegment>> ScanLines::classifyHorizontalScanLines(const Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT) {
-			std::vector<std::vector<ColourSegment>> classifications;
+		SegmentedRegion ScanLines::classifyHorizontalScanLines(const Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT) {
+			SegmentedRegion classifications;
 
 		    for (auto scanLine : horizontalScanLines) {
-				classifications.push_back(classifyHorizontalScan(originalImage, scanLine, LUT));
+				classifications.m_segmentedScans.push_back(classifyHorizontalScan(originalImage, scanLine, LUT));
 			}
+
+			classifications.m_direction = ScanDirection::HORIZONTAL;
 
 			return classifications;
 		}
 
-		std::vector<std::vector<ColourSegment>> ScanLines::classifyVerticalScanLines(const Image& originalImage, const GreenHorizon& greenHorizon, const LookUpTable& LUT) {
+		SegmentedRegion ScanLines::classifyVerticalScanLines(const Image& originalImage, const GreenHorizon& greenHorizon, const LookUpTable& LUT) {
 			const std::vector<arma::vec2>& verticalStartPoints = greenHorizon.getInterpolatedSubset(VERTICAL_SCANLINE_SPACING);
-			std::vector<std::vector<ColourSegment>> classifications;
+			SegmentedRegion classifications;
 
-			for (auto startPoint : verticalStartPoints) {
-				classifications.push_back(classifyVerticalScan(originalImage, startPoint, LUT));
+		    for (auto scanLine : verticalStartPoints) {
+				classifications.m_segmentedScans.push_back(classifyVerticalScan(originalImage, scanLine, LUT));
 			}
-    		
+    		classifications.m_direction = ScanDirection::VERTICAL;
 			return classifications;
 		}
 

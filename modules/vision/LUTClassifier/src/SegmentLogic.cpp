@@ -21,10 +21,13 @@
 namespace modules{
 	namespace vision{
 
-		using message::vision::ClassifiedImage;
-		using message::vision::ColourSegment;
+		using messages::vision::ClassifiedImage;
+		using messages::vision::ColourSegment;
+		using messages::vision::Colour;
+		
 
 		SegmentLogic::SegmentLogic() {
+			// Empty constructor.
 			// Empty constructor.
 		}
 

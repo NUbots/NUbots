@@ -25,7 +25,7 @@
 #include <string>
 
 #include "messages/vision/ClassifiedImage.h"
-#include "utility/strutil/strutil.h"
+//#include "utility/strutil/strutil.h"
 #include "utility/configuration/ConfigurationNode.h"
 
 #include "LookUpTable.h"

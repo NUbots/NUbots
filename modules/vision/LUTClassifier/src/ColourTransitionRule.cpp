@@ -30,6 +30,8 @@ namespace modules {
 	    	// Empty constructor.
 	    }	    		
 
+	    ColourSegment ColourTransitionRule::nomatch = {Colour::invalid, 0,arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2)};
+
 	    void ColourTransitionRule::loadRuleFromConfigInfo(std::string colours_before,
 															std::string colour_middle,
 															std::string colours_after,
@@ -43,7 +45,7 @@ namespace modules {
 	    	m_before.clear();
 	    	m_middle.clear();
 	    	m_after.clear();
-	    	m_colour_class = UNKNOWN_COLOUR;
+	    	m_colour_class = COLOUR_CLASS::UNKNOWN_COLOUR;
 
 	    	//Assign limits
 	    	m_before_min = before_min;
@@ -133,14 +135,14 @@ namespace modules {
 		    bool valid;
 
 		    if (!m_middle.empty()) {
-		        if (middle.getColour() == Colour::invalid) {
+		        if (middle.m_colour == Colour::invalid) {
 		            return false;   //there is a before set, but no before colour
 				}
 				
 		        valid = false;
 				
 				for (auto it : m_middle) {
-		            if(it == middle.getColour()) {
+		            if(it == middle.m_colour ){
 		                valid = true;   //a match has been found
 					}
 		        }
@@ -151,14 +153,14 @@ namespace modules {
 		    }
 
 		    if (!m_before.empty()) {
-		        if (before.getColour() == Colour::invalid) {
+		        if (before.m_colour == Colour::invalid) {
 		            return false;   //there is a before set, but no before colour
 				}
 				
 		        valid = false;
 				
 				for (auto it : m_before) {
-		            if(it == before.getColour()) {
+		            if(it == before.m_colour ){
 		                valid = true;   //a match has been found
 					}
 		        }
@@ -169,14 +171,14 @@ namespace modules {
 		    }
 
 		    if (!m_after.empty()) {
-		        if (after.getColour() == Colour::invalid) {
+		        if (after.m_colour == Colour::invalid) {
 		            return false;   //there is an after set, but no after colour
 				}
 				
 		        valid = false;
 				
 				for (auto it : m_after) {
-		            if (it == after.getColour()) {
+		            if (it == after.m_colour ){
 		                valid = true;   //a match has been found
 					}
 		        }

@@ -37,8 +37,6 @@ namespace modules{
 
         	static void setColourSegment(messages::vision::ColourSegment& colourSegment, const arma::vec2& start, const arma::vec2& end, const messages::vision::Colour& colour);
 	        static bool joinColourSegment(messages::vision::ColourSegment& colourSegment, const messages::vision::ColourSegment& other);
-
-
 		};
 	}
 }

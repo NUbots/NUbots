@@ -32,6 +32,7 @@
 
 #include "ColourReplacementRule.h"
 #include "ColourTransitionRule.h"
+#include "SegmentLogic.h"
 
 namespace modules {
     namespace vision {

@@ -25,8 +25,9 @@ namespace modules {
 		using messages::vision::Colour;
 		using messages::vision::ClassifiedImage;
 		using messages::vision::ColourSegment;
+
 		
-		ColourSegment ColourReplacementRule::nomatch(arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2), invalid);
+		ColourSegment ColourReplacementRule::nomatch = {Colour::invalid, 0,arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2)};
 
 		ColourReplacementRule::ColourReplacementRule() {
 			// Empty constructor.
@@ -168,7 +169,7 @@ namespace modules {
 				valid = false;
 				
 				for (auto it : m_middle) {
-					if(it == middle.getColour())
+					if(it == middle.m_colour)
 						valid = true;   //a match has been found
 				}
 				
@@ -182,14 +183,14 @@ namespace modules {
 			}
 
 			if (!m_before.empty()) {
-				if (before.getColour() == Colour::invalid) {
+				if (before.m_colour == Colour::invalid) {
 					return false;   //there is a before set, but no before colour
 				}
 				
 				valid = false;
 				
 				for (auto it : m_before) {
-					if (it == before.getColour()) {
+					if (it == before.m_colour) {
 						valid = true;   //a match has been found
 					}
 				}
@@ -200,14 +201,14 @@ namespace modules {
 			}
 
 			if (!m_after.empty()) {
-				if (after.getColour() == Colour::invalid) {
+				if (after.m_colour == Colour::invalid) {
 					return false;   //there is an after set, but no after colour
 				}
 				
 				valid = false;
 				
 				for (auto it : m_after) {
-					if(it == after.getColour()) {
+					if(it == after.m_colour ){
 						valid = true;   //a match has been found
 					}
 				}

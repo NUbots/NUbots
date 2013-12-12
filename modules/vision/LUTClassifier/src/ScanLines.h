@@ -73,12 +73,12 @@ namespace modules {
             /*! @brief Returns a std::vector of ColourSegments relating classified 
             horizontal scan lines.
             */
-            std::vector<std::vector<messages::vision::ColourSegment>> classifyHorizontalScanLines(const messages::input::Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT);
+            messages::vision::SegmentedRegion classifyHorizontalScanLines(const messages::input::Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT);
 
             /*! @brief Returns a std::vector of ColourSegments relating to classified 
             vertical scan lines.
             */
-            std::vector<std::vector<messages::vision::ColourSegment>> classifyVerticalScanLines(const messages::input::Image& originalImage, const GreenHorizon& greenHorizon, const LookUpTable& LUT);
+            messages::vision::SegmentedRegion classifyVerticalScanLines(const messages::input::Image& originalImage, const GreenHorizon& greenHorizon, const LookUpTable& LUT);
         };
     
     }  // vision
