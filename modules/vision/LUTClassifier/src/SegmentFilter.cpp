@@ -59,7 +59,6 @@ namespace modules {
 
 		void SegmentFilter::preFilter(const SegmentedRegion& scans, SegmentedRegion &result) const {
 			const std::vector<std::vector<ColourSegment>>& segments = scans.getSegments();
-//			std::vector<std::vector<ColourSegment>>& finalSegments = result.m_segmentedScans;
 			std::vector<std::vector<ColourSegment>> finalSegments;
 			std::vector<ColourSegment> line;
 		

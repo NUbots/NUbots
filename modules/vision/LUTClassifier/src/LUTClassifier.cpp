@@ -23,6 +23,7 @@ namespace modules {
     namespace vision {
 
 		using messages::input::Image;
+		using messages::vision::ColourSegment;
 		using messages::support::Configuration;
 		using utility::configuration::ConfigurationNode;
         

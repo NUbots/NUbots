@@ -24,6 +24,7 @@ namespace modules {
 
         using messages::input::Image;
         using messages::support::Configuration;
+        using messages::vision::Colour;
         
         GreenHorizon::GreenHorizon() {
         	// Empty constructor.
@@ -105,9 +106,9 @@ namespace modules {
 		        horizon_points.clear();
 		        arma::vec2 v;
 		        v[0] = 0;
-		        v[1] = height-1;
+		        v[1] = height - 1;
 		        horizon_points.push_back(v);
-		        v[0] = width-1;
+		        v[0] = width - 1;
 		        horizon_points.push_back(v);
 		        
 		        return horizon_points;
@@ -225,7 +226,7 @@ namespace modules {
 	    }
 
         bool GreenHorizon::isPixelGreen(const messages::input::Image::Pixel& p, const LookUpTable& LUT) {
-        	return LUT.classifyPixel(p) == green;
+        	return LUT.classifyPixel(p) == Colour::green;
         }
 
 		double GreenHorizon::interpolate(arma::vec2 p1, arma::vec2 p2, double x){

@@ -32,7 +32,6 @@
 #include "utility/strutil/strutil.h"
 
 #include "LookUpTable.h"
-#include "ColourClassification.h"
 
 namespace modules {
 	namespace vision {
