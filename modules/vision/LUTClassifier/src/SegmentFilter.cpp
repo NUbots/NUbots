@@ -53,17 +53,12 @@ namespace modules {
 
 		void SegmentFilter::preFilter(const SegmentedRegion& scans, SegmentedRegion &result) const {
 			const std::vector<std::vector<ColourSegment>>& segments = scans.getSegments();
-//			std::vector<std::vector<ColourSegment>>& finalSegments = result.m_segmentedScans;
 			std::vector<std::vector<ColourSegment>> finalSegments;
 			std::vector<ColourSegment> line;
 		
 			std::vector<std::vector<ColourSegment>>::const_iterator line_it;
 			std::vector<ColourSegment>::const_iterator before_it, middle_it, after_it;
 			SegmentedRegion::ScanDirection dir = scans.getDirection();
-		
-//			result.m_direction = dir;
-
-//			finalSegments.clear();
 		
 			//loop through each scan
 			for(line_it = segments.begin(); line_it < segments.end(); line_it++) {

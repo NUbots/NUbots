@@ -21,7 +21,10 @@
 namespace modules {
 	namespace vision {
 
-		using namespace messages::vision;
+		using messages::vision::Colour;
+		using messages::vision::ColourSegment;
+		using messages::vision::COLOUR_CLASS;
+		using messages::vision::ClassifiedImage;
 		
 	    ColourTransitionRule::ColourTransitionRule() {
 	    	// Empty constructor.
@@ -61,9 +64,9 @@ namespace modules {
 
 			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
 			while (!current_colour_name.empty()) {
-				Colour colour = getColourFromName(current_colour_name);
+				Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
 
-				if(colour != invalid) {
+				if(colour != Colour::invalid) {
 					m_before.push_back(colour);
 				}
 
@@ -71,10 +74,10 @@ namespace modules {
 			}
 
 			//We only support one middle colour which gives our colour class (ie one object)	
-			Colour colour = getColourFromName(colour_middle);
-			m_colour_class = getClassOfColour(colour);
+			Colour colour = ClassifiedImage::getColourFromName(colour_middle);
+			m_colour_class = ClassifiedImage::getClassOfColour(colour);
 
-			if(colour != invalid) {
+			if(colour != Colour::invalid) {
 				m_middle.push_back(colour);
 			}
 
@@ -92,9 +95,9 @@ namespace modules {
 
 			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
 			while (!current_colour_name.empty()) {
-				Colour colour = getColourFromName(current_colour_name);
+				Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
 
-				if (colour != invalid) {
+				if (colour != Colour::invalid) {
 					m_after.push_back(colour);
 				}
 
@@ -130,7 +133,7 @@ namespace modules {
 		    bool valid;
 
 		    if (!m_middle.empty()) {
-		        if (middle.getColour() == invalid) {
+		        if (middle.getColour() == Colour::invalid) {
 		            return false;   //there is a before set, but no before colour
 				}
 				
@@ -148,7 +151,7 @@ namespace modules {
 		    }
 
 		    if (!m_before.empty()) {
-		        if (before.getColour() == invalid) {
+		        if (before.getColour() == Colour::invalid) {
 		            return false;   //there is a before set, but no before colour
 				}
 				
@@ -166,7 +169,7 @@ namespace modules {
 		    }
 
 		    if (!m_after.empty()) {
-		        if (after.getColour() == invalid) {
+		        if (after.getColour() == Colour::invalid) {
 		            return false;   //there is an after set, but no after colour
 				}
 				

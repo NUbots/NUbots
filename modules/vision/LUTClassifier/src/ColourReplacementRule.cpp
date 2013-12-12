@@ -22,7 +22,8 @@
 namespace modules {
     namespace vision {
 
-		using namespace messages::vision;
+		using messages::vision::Colour;
+		using messages::vision::ClassifiedImage;
 		
 		ColourSegment ColourReplacementRule::nomatch(arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2), invalid);
 
@@ -68,9 +69,9 @@ namespace modules {
 
 			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
 			while (!current_colour_name.empty()) {
-				Colour colour = getColourFromName(current_colour_name);
+				Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
 
-				if (colour != invalid){
+				if (colour != Colour::invalid){
 					m_before.push_back(colour);
 				}
 
@@ -83,9 +84,9 @@ namespace modules {
 
 			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
 			while (!current_colour_name.empty()) {
-				Colour colour = getColourFromName(current_colour_name);
+				Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
 
-				if (colour != invalid){
+				if (colour != Colour::invalid){
 					m_middle.push_back(colour);
 				}
 
@@ -98,9 +99,9 @@ namespace modules {
 
 			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
 			while (!current_colour_name.empty()) {
-				Colour colour = getColourFromName(current_colour_name);
+				Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
 
-				if(colour != invalid){
+				if(colour != Colour::invalid){
 					m_after.push_back(colour);
 				}
 
@@ -180,7 +181,7 @@ namespace modules {
 			}
 
 			if (!m_before.empty()) {
-				if (before.getColour() == invalid) {
+				if (before.getColour() == Colour::invalid) {
 					return false;   //there is a before set, but no before colour
 				}
 				
@@ -198,7 +199,7 @@ namespace modules {
 			}
 
 			if (!m_after.empty()) {
-				if (after.getColour() == invalid) {
+				if (after.getColour() == Colour::invalid) {
 					return false;   //there is an after set, but no after colour
 				}
 				

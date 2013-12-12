@@ -29,7 +29,6 @@
 #include "utility/configuration/ConfigurationNode.h"
 
 #include "LookUpTable.h"
-#include "ColourClassification.h"
 
 namespace modules {
 	namespace vision { 
