@@ -21,6 +21,7 @@
 #define MESSAGES_VISION_CLASSIFIEDIMAGE_H
 
 #include <string>
+#include <vector>
 
 namespace messages {
     namespace vision {

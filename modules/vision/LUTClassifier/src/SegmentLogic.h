@@ -17,11 +17,23 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+#include <nuclear>
+#include <vector>
+#include <armadillo>
+
+#include "messages/vision/ClassifiedImage.h"
+
 modules{
 	vision{
 		class SegmentLogic{
 			SegmentLogic();
 
-		}
+        	static void setColourSegment(ClassifiedImage::ColourSegment& colourSegment, const arma::vec2& start, const arma::vec2& end, const ClassifiedImage::Colour& colour);
+	        static bool SegmentLogic::joinColourSegment(ClassifiedImage::ColourSegment& colourSegment, const ClassifiedImage::ColourSegment& other);
+
+	        static std::ostream& operator<< (std::ostream& output, const ClassifiedImage::ColourSegment& c);
+	        static std::ostream& operator<< (std::ostream& output, const std::vector<ClassifiedImage::ColourSegment>& c);
+			static bool operator== (const ClassifiedImage::ColourSegment& lhs, const ClassifiedImage::ColourSegment& rhs);
+		};
 	}
 }
