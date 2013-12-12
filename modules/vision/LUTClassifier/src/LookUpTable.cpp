@@ -11,13 +11,14 @@
 
 namespace modules{
   namespace vision{
-        using messages::vision::ClassifiedImage;
+
+        using utility::vision;
         
         LookUpTable::LookUpTable() {
             LUTbuffer = new unsigned char[LUT_SIZE];
 			
             for(int i = 0; i < LUT_SIZE; i++) {
-                LUTbuffer[i] = ClassifiedImage::unclassified;
+                LUTbuffer[i] = unclassified;
 			}
 			
             LUT = LUTbuffer;
@@ -70,7 +71,7 @@ namespace modules{
 
         void LookUpTable::zero() {
             for(int i = 0; i < LUT_SIZE; i++) {
-                LUTbuffer[i] = ClassifiedImage::unclassified;
+                LUTbuffer[i] = unclassified;
 			}
 			
             LUT = LUTbuffer;

@@ -26,7 +26,9 @@
 
 #include "messages/input/Image.h"
 #include "messages/support/Configuration.h"
-#include "ColourSegment.h"
+#include "utility/vision/ColourSegment.h"
+#include "utility/vision/ColourClassification.h"
+
 #include "LookUpTable.h"
 #include "GreenHorizon.h"
 
@@ -46,12 +48,12 @@ namespace modules {
             /*! @brief Returns a std::vector of ColourSegments detailing the
             horizontal colour segments in the image.
             */
-            std::vector<ColourSegment> classifyHorizontalScan(const messages::input::Image& image, unsigned int y, const LookUpTable& LUT);
+            std::vector<utility::vision::ColourSegment> classifyHorizontalScan(const messages::input::Image& image, unsigned int y, const LookUpTable& LUT);
 
             /*! @brief Returns a std::vector of ColourSegments detailing the
             vertical colour segments in the image.
             */
-            std::vector<ColourSegment> classifyVerticalScan(const messages::input::Image& image, const arma::vec2& start, const LookUpTable& LUT);
+            std::vector<utility::vision::ColourSegment> classifyVerticalScan(const messages::input::Image& image, const arma::vec2& start, const LookUpTable& LUT);
 
         public:
             /*! @brief Loads configuration file.
@@ -71,12 +73,12 @@ namespace modules {
             /*! @brief Returns a std::vector of ColourSegments relating classified 
             horizontal scan lines.
             */
-            std::vector<std::vector<ColourSegment>> classifyHorizontalScanLines(const messages::input::Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT);
+            std::vector<std::vector<utility::vision::ColourSegment>> classifyHorizontalScanLines(const messages::input::Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT);
 
             /*! @brief Returns a std::vector of ColourSegments relating to classified 
             vertical scan lines.
             */
-            std::vector<std::vector<ColourSegment>> classifyVerticalScanLines(const messages::input::Image& originalImage, const GreenHorizon& greenHorizon, const LookUpTable& LUT);
+            std::vector<std::vector<utility::vision::ColourSegment>> classifyVerticalScanLines(const messages::input::Image& originalImage, const GreenHorizon& greenHorizon, const LookUpTable& LUT);
         };
     
     }  // vision

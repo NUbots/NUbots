@@ -18,22 +18,18 @@
  */
 
 #include "LUTClassifier.h"
-#include "ScanLines.h"
-#include "GreenHorizon.h"
-#include "LookUpTable.h"
-#include "ColourSegment.h"
+
 namespace modules {
     namespace vision {
 
-        using messages::input::Image;
-        using messages::support::Configuration;
-        using utility::configuration::ConfigurationNode;
-
+		using messages::input::Image;
+		using messages::support::Configuration;
+		using utility::configuration::ConfigurationNode;
+		using namespace utility::vision;
         
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), greenHorizon(), scanLines() { 
 			current_LUT_index = 0;
 			
-
             on<Trigger<Configuration<VisionConstants>>>([this](const Configuration<VisionConstants>& constants) {
            		//HACK FOR RC2013
 				// WHITE_SIDE_IS_BLUE = constants.config["WHITE_SIDE_IS_BLUE"];
@@ -118,18 +114,20 @@ namespace modules {
 			//Load LUTs
 			on<Trigger<Configuration<LUTLocations>>>([this](const Configuration<LUTLocations>& locations) {
 				std::vector<std::string> locat = locations.config;
+
 				for(auto& location : locat) {
 					LookUpTable LUT;
 					bool loaded = LUT.loadLUTFromFile(location);
 
 					if(loaded) {
 						LUTs.push_back(LUT);
-					} else {
+					}
+
+					else {
 						log<NUClear::ERROR>("LUT ", location, " has not loaded successfully." );
 					}
 				}
 			});
-
 
 			//Load in greenhorizon parameters
 			on<Trigger<Configuration<GreenHorizonConfig>>>([this](const Configuration<GreenHorizonConfig>& constants) {
@@ -150,46 +148,61 @@ namespace modules {
 				// std::vector< WHAT?!?!?! > rules = rules.config["REPLACEMENT_RULES"];
 				std::map<std::string, ConfigurationNode> replacement_rules = rules.config["REPLACEMENT_RULES"];
 				std::map<std::string, ConfigurationNode> transition_rules = rules.config["TRANSITION_RULES"];
+
 				for(auto& rule : replacement_rules) {
 					std::cout << "Loading Replacement rule : " << rule.first << std::endl;
+
 					//rule.second = the rule;
 					ColourReplacementRule r;
 					r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
 											rule.second["middle"]["colour"],
 											rule.second["after"]["colour"],
-											unint_32(rule.second["before"]["vec"][0]),//min
+											static_cast<unsigned int>(rule.second["before"]["vec"][0]),
+											static_cast<unsigned int>(rule.second["before"]["vec"][1]),
+											static_cast<unsigned int>(rule.second["middle"]["vec"][0]),
+											static_cast<unsigned int>(rule.second["middle"]["vec"][1]),
+											static_cast<unsigned int>(rule.second["after"]["vec"][0]),
+											static_cast<unsigned int>(rule.second["after"]["vec"][1]),
+/*											unint_32(rule.second["before"]["vec"][0]),//min
 											unint_32(rule.second["before"]["vec"][1]),//max, etc.
 											unint_32(rule.second["middle"]["vec"][0]),
 											unint_32(rule.second["middle"]["vec"][1]),
 											unint_32(rule.second["after"]["vec"][0]),
-											unint_32(rule.second["after"]["vec"][1]),
+											unint_32(rule.second["after"]["vec"][1]),*/
 											rule.second["replacement"]);
 					segmentFilter.addReplacementRule(r);
 				}
+
 				for(auto& rule : transition_rules) {
 					std::cout << "Loading Transition rule : " << rule.first << std::endl;
+
 					//rule.second = the rule;
 					ColourTransitionRule r;
 					r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
 											rule.second["middle"]["colour"],
 											rule.second["after"]["colour"],
-											unint_32(rule.second["before"]["vec"][0]),//min
+											static_cast<unsigned int>(rule.second["before"]["vec"][0]),
+											static_cast<unsigned int>(rule.second["before"]["vec"][1]),
+											static_cast<unsigned int>(rule.second["middle"]["vec"][0]),
+											static_cast<unsigned int>(rule.second["middle"]["vec"][1]),
+											static_cast<unsigned int>(rule.second["after"]["vec"][0]),
+											static_cast<unsigned int>(rule.second["after"]["vec"][1])
+/*											unint_32(rule.second["before"]["vec"][0]),//min
 											unint_32(rule.second["before"]["vec"][1]),//max, etc.
 											unint_32(rule.second["middle"]["vec"][0]),
 											unint_32(rule.second["middle"]["vec"][1]),
 											unint_32(rule.second["after"]["vec"][0]),
-											unint_32(rule.second["after"]["vec"][1]));
+											unint_32(rule.second["after"]["vec"][1])*/);
 					segmentFilter.addTransitionRule(r);
 				}
 			});
-
 
             on<Trigger<Image>>([this](const Image& image) {
             	/*std::vector<arma::vec2> green_horizon_points = */
             	greenHorizon.calculateGreenHorizon(image, LUTs[current_LUT_index]);
             	std::vector<int> scan_lines = scanLines.generateScanLines(image, greenHorizon);
-            	std::vector<std::vector<ColourSegment> > classified_segments_hor = scanLines.classifyHorizontalScanLines(image, scan_lines, LUTs[current_LUT_index]);
-            	std::vector<std::vector<ColourSegment> > classified_segments_ver = scanLines.classifyVerticalScanLines(image, greenHorizon, LUTs[current_LUT_index]);
+            	std::vector<std::vector<ColourSegment>> classified_segments_hor = scanLines.classifyHorizontalScanLines(image, scan_lines, LUTs[current_LUT_index]);
+            	std::vector<std::vector<ColourSegment>> classified_segments_ver = scanLines.classifyVerticalScanLines(image, greenHorizon, LUTs[current_LUT_index]);
             	unique_ptr<ClassifiedImage> image = segmentFilter.getClassifiedImage(classified_segments_hor,classified_segments_ver);
             	image->green_horizon = greenHorizon;
             	emit(image);

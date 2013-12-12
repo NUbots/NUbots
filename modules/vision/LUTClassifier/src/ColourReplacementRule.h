@@ -29,16 +29,17 @@
 #include <iostream>
 
 #include "utility/strutil/strutil.h"
-#include "messages/vision/ClassifiedImage.h"
+#include "utility/vision/ColourSegment.h"
+#include "utility/vision/ColourClassification.h"
+
 #include "LookUpTable.h"
-#include "ColourSegment.h"
 
 namespace modules {
 	namespace vision {
 	
 		class ColourReplacementRule {
 		public:
-			static ColourSegment nomatch;   //! @variable a static segment used to represent one that cannot be matched to any rule.
+			static utility::vision::ColourSegment nomatch;   //! @variable a static segment used to represent one that cannot be matched to any rule.
     
 			enum ReplacementMethod {
 		        BEFORE,
@@ -68,7 +69,7 @@ namespace modules {
 				@param dir The scan direction (vertical or horizontal).
 				@return Whether it is a match.
 				*/
-    		bool match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const;
+    		bool match(const utility::vision::ColourSegment& before, const utility::vision::ColourSegment& middle, const utility::vision::ColourSegment& after) const;
     
 			/*!
 			  Gets the method matching the given string.
@@ -98,18 +99,18 @@ namespace modules {
     
 			ReplacementMethod m_method;  //! @variable The replacement method for this rule.
 
-       		std::vector<messages::vision::ClassifiedImage::Colour>  m_before,   //! @variable The colour that the first segment must be.
-			                     m_middle,   //! @variable The colour that the middle segment must be.
-			                     m_after;    //! @variable The colour that the last segment must be.
+       		std::vector<utility::vision::Colour> m_before;				//! @variable The colour that the first segment must be.
+			std::vector<utility::vision::Colour> m_middle;				//! @variable The colour that the middle segment must be.
+			std::vector<utility::vision::Colour> m_after;				//! @variable The colour that the last segment must be.
 
-			unsigned int m_middle_min,   //! @variable the minimum length of the middle segment for a match.
-		                 m_middle_max,   //! @variable the maximum length of the middle segment for a match.
-		                 m_before_min,   //! @variable the minimum length of the first segment for a match.
-		                 m_before_max,   //! @variable the maximum length of the first segment for a match.
-		                 m_after_min,    //! @variable the minimum length of the last segment for a match.
-		                 m_after_max;    //! @variable the maximum length of the last segment for a match. 
+			unsigned int m_middle_min;									//! @variable the minimum length of the middle segment for a match.
+		    unsigned int m_middle_max;									//! @variable the maximum length of the middle segment for a match.
+		    unsigned int m_before_min;									//! @variable the minimum length of the first segment for a match.
+		    unsigned int m_before_max;									//! @variable the maximum length of the first segment for a match.
+		    unsigned int m_after_min;									//! @variable the minimum length of the last segment for a match.
+		    unsigned int m_after_max;									//! @variable the maximum length of the last segment for a match. 
 						 
-			bool oneWayMatch(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const;		                 
+			bool oneWayMatch(const utility::vision::ColourSegment& before, const utility::vision::ColourSegment& middle, const utility::vision::ColourSegment& after) const;
 		};
 		
 	} // vision

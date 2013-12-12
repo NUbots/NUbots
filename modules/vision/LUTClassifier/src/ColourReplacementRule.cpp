@@ -21,30 +21,32 @@
  
 namespace modules {
     namespace vision {
-        using messages::vision::ClassifiedImage;
+
+		using messages::vision::ClassifiedImage;
+		using utility::vision;
 		
-		ColourSegment ColourReplacementRule::nomatch(arma::zeros<arma::vec>(2), 
-													 arma::zeros<arma::vec>(2), 
-													 ClassifiedImage::invalid);
+		ColourSegment ColourReplacementRule::nomatch(arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2), invalid);
 
-		ColourReplacementRule::ColourReplacementRule() {}
+		ColourReplacementRule::ColourReplacementRule() {
+			// Empty constructor.
+		}
 
 
-		void ColourReplacementRule::loadRuleFromConfigInfo(
-	    		std::string colours_before,
-		    	std::string colours_middle,
-		    	std::string colours_after,
-				unsigned int before_min,
-				unsigned int before_max,
-				unsigned int min,
-				unsigned int max,
-				unsigned int after_min,
-				unsigned int after_max,
-				std::string replacement_method)	{
+		void ColourReplacementRule::loadRuleFromConfigInfo(std::string colours_before,
+															std::string colours_middle,
+															std::string colours_after,
+															unsigned int before_min,
+															unsigned int before_max,
+															unsigned int min,
+															unsigned int max,
+															unsigned int after_min,
+															unsigned int after_max,
+															std::string replacement_method)	{
 	    	//Clear current settings
 	    	m_before.clear();
 	    	m_middle.clear();
 	    	m_after.clear();
+
 	    	//Assign limits
 	    	m_before_min = before_min;
 			m_before_max = before_max;
@@ -52,6 +54,7 @@ namespace modules {
 			m_middle_max = max;
 			m_after_min = after_min;
 			m_after_max = after_max;
+
 			//replacement method
 			m_method = getMethodFromName(replacement_method);
 
@@ -59,39 +62,49 @@ namespace modules {
 			//Initialise stream variables
 			std::stringstream sstream;
 			std::string current_colour_name;
+
 			//Load before colours
 			sstream << colours_before;			
 			sstream >> current_colour_name;
+
 			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
-			while(!current_colour_name.empty()){
-				ClassifiedImage::Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
-				if(colour!=ClassifiedImage::invalid){
+			while (!current_colour_name.empty()) {
+				Colour colour = getColourFromName(current_colour_name);
+
+				if (colour != invalid){
 					m_before.push_back(colour);
 				}
+
 				sstream >> current_colour_name;
 			}
 
 			//Load middle colours
 			sstream << colours_middle;			
 			sstream >> current_colour_name;
+
 			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
-			while(!current_colour_name.empty()){
-				ClassifiedImage::Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
-				if(colour!=ClassifiedImage::invalid){
+			while (!current_colour_name.empty()) {
+				Colour colour = getColourFromName(current_colour_name);
+
+				if (colour != invalid){
 					m_middle.push_back(colour);
 				}
+
 				sstream >> current_colour_name;
 			}
 			
 			//Load after colours
 			sstream << colours_after;			
 			sstream >> current_colour_name;
+
 			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
-			while(!current_colour_name.empty()){
-				ClassifiedImage::Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
-				if(colour!=ClassifiedImage::invalid){
+			while (!current_colour_name.empty()) {
+				Colour colour = getColourFromName(current_colour_name);
+
+				if(colour != invalid){
 					m_after.push_back(colour);
 				}
+
 				sstream >> current_colour_name;
 			}			
 		}
@@ -168,7 +181,7 @@ namespace modules {
 			}
 
 			if (!m_before.empty()) {
-				if (before.getColour() == ClassifiedImage::invalid) {
+				if (before.getColour() == invalid) {
 					return false;   //there is a before set, but no before colour
 				}
 				
@@ -186,7 +199,7 @@ namespace modules {
 			}
 
 			if (!m_after.empty()) {
-				if (after.getColour() == ClassifiedImage::invalid) {
+				if (after.getColour() == invalid) {
 					return false;   //there is an after set, but no after colour
 				}
 				

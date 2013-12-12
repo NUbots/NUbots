@@ -21,35 +21,26 @@
 
 namespace modules {
     namespace vision {
+
     	using messages::vision::ClassifiedImage;
+    	using utility::vision;
 
 		SegmentFilter::SegmentFilter() {			
 		}
 
 		unique_ptr<ClassifiedImage> SegmentFilter::classifyImage(const SegmentedRegion& horizontalSegments, const SegmentedRegion& verticalSegments) const {
-//			const SegmentedRegion& horizontalSegments = vbb->getHorizontalSegmentedRegion();
-//			const SegmentedRegion& verticalSegments = vbb->getVerticalSegmentedRegion();
-			
 			SegmentedRegion horizontalFiltered, verticalFiltered;
-			std::map<ClassifiedImage::COLOUR_CLASS, std::vector<ColourSegment>> horizontalResult, verticalResult;
+			std::map<COLOUR_CLASS, std::vector<ColourSegment>> horizontalResult, verticalResult;
 		
 			if (PREFILTER_ON) {
 				preFilter(horizontalSegments, horizontalFiltered);
 				preFilter(verticalSegments, verticalFiltered);
-				
-//				TODO: Need to emit these?
-//				vbb->setHorizontalFilteredSegments(horizontalFiltered.m_segmentedScans);
-//				vbb->setVerticalFilteredSegments(verticalFiltered.m_segmentedScans);
 			}
+
 			filter(horizontalFiltered, horizontalResult);
 			filter(verticalFiltered, verticalResult);
-			
-		
-// 			TODO: Need to emit these?
-			// Push results to BB
-//			vbb->setHorizontalTransitionsMap(horizontalResult);
-//			vbb->setVerticalTransitionsMap(verticalResult);
-			unique_ptr<ClassifiedImage> image(new ClassifiedImage());
+					
+			std::unique_ptr<ClassifiedImage> image(new ClassifiedImage());
 
 			image->horizontal_filtered_segments = horizontalFiltered;
 			image->vertical_filtered_segments = verticalFiltered;
@@ -62,17 +53,12 @@ namespace modules {
 
 		void SegmentFilter::preFilter(const SegmentedRegion& scans, SegmentedRegion &result) const {
 			const std::vector<std::vector<ColourSegment>>& segments = scans.getSegments();
-//			std::vector<std::vector<ColourSegment>>& finalSegments = result.m_segmentedScans;
 			std::vector<std::vector<ColourSegment>> finalSegments;
 			std::vector<ColourSegment> line;
 		
 			std::vector<std::vector<ColourSegment>>::const_iterator line_it;
 			std::vector<ColourSegment>::const_iterator before_it, middle_it, after_it;
 			SegmentedRegion::ScanDirection dir = scans.getDirection();
-		
-//			result.m_direction = dir;
-
-//			finalSegments.clear();
 		
 			//loop through each scan
 			for(line_it = segments.begin(); line_it < segments.end(); line_it++) {
@@ -167,7 +153,10 @@ namespace modules {
 			}
 		}
 
-		void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after, std::vector<ColourSegment>& replacements, SegmentedRegion::ScanDirection dir) const {
+		void SegmentFilter::applyReplacements(const ColourSegment& before, 
+												const ColourSegment& middle, 
+												const ColourSegment& after, std::vector<ColourSegment>& replacements, 
+												SegmentedRegion::ScanDirection dir) const {
 			std::vector<ColourReplacementRule>::const_iterator rules_it, begin, end;
 			ColourSegment tempSegment;
 		

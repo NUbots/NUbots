@@ -24,7 +24,7 @@ namespace modules {
 
         using messages::input::Image;
         using messages::support::Configuration;
-        using messages::vision::ClassifiedImage;
+        using utility::vision;
         
  		ScanLines::ScanLines() {
  			// Empty Constructor.
@@ -89,8 +89,7 @@ namespace modules {
 			//simple and nasty first
 			//Colour previous, current, next
 			unsigned int startPosition = 0, x;
-			ClassifiedImage::Colour startColour = LUT.classifyPixel(image(0, y));
-			ClassifiedImage::Colour currentColour;
+			Colour startColour = LUT.classifyPixel(image(0, y)), currentColour;
 			ColourSegment segment;
 
 			for (x = 0; x < image.width(); x++) {
@@ -134,7 +133,7 @@ namespace modules {
 
 			//simple and nasty first
 			//Colour previous, current, next
-			ClassifiedImage::Colour startColour = LUT.classifyPixel(image(start[0], start[1])), currentColour;
+			Colour startColour = LUT.classifyPixel(image(start[0], start[1])), currentColour;
 			ColourSegment segment;
 			unsigned int startPosition = start[1], x = start[0], y;
 

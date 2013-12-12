@@ -26,6 +26,8 @@
 
 #include "messages/input/Image.h"
 #include "messages/support/Configuration.h"
+#include "utility/vision/ColourClassification.h"
+
 #include "LookUpTable.h"
 
 namespace modules {

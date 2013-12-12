@@ -24,8 +24,7 @@ namespace modules {
 
         using messages::input::Image;
         using messages::support::Configuration;
-        using messages::vision::ClassifiedImage;
-        
+        using utility::vision;
         
         GreenHorizon::GreenHorizon() {
         	// Empty constructor.
@@ -50,7 +49,8 @@ namespace modules {
 		    std::vector<arma::vec2> horizon_points;
 		    std::vector<arma::vec2> thrown_points;
 	
-		    int kin_hor_y;		
+		    int kin_hor_y;
+
 		    //For sampled pixel columns (vertical scans) sampled with period SPACING
 		    for (size_t x = 0; x < width; x+=SPACING) {
 		        unsigned int green_top = 0;
@@ -66,16 +66,15 @@ namespace modules {
 		        //DUMMY CODE UNTIL KINEMATICS IMPLEMENTED. 
 		        kin_hor_y = 0;		        //IE Search whole vertical strip
 		        
-
 		        //Search for green below the kinematics horizon
 		        for (unsigned int y = kin_hor_y; y < height; y++) {
-
 		            if (isPixelGreen(img(x, y),LUT)) {
 		                if (green_count == 0) {
 		                    green_top = y;
 		                }
 
 		                green_count++;
+
 		                // if VER_THRESHOLD green pixels found, add point
 		                if (green_count == GREEN_HORIZON_MIN_GREEN_PIXELS) {//TODO
 		                    arma::vec2 v;
@@ -84,7 +83,9 @@ namespace modules {
 		                    horizon_points.push_back(v);
 		                    break;
 		                }
-		            } else {
+		            }
+
+		            else {
 		                // not green - reset
 		                green_count = 0;
 		            }
@@ -118,7 +119,7 @@ namespace modules {
 		    arma::running_stat<double> acc;  //TODO
 
 		    for(auto& p : horizon_points) {
-		        if (p[1] < height-1)     // if not at bottom of image
+		        if (p[1] < height - 1)     // if not at bottom of image
 		            acc(p[1]);
 		    }
 
@@ -225,7 +226,7 @@ namespace modules {
 	    }
 
         bool GreenHorizon::isPixelGreen(const messages::input::Image::Pixel& p, const LookUpTable& LUT) {
-        	return LUT.classifyPixel(p) == ClassifiedImage::green;
+        	return LUT.classifyPixel(p) == green;
         }
 
 		double GreenHorizon::interpolate(arma::vec2 p1, arma::vec2 p2, double x){

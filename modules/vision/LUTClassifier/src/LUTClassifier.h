@@ -25,7 +25,10 @@
 #include <armadillo>
 
 #include "messages/input/Image.h"
+#include "messages/vision/ClassifiedImage.h"
 #include "messages/support/Configuration.h"
+#include "utility/vision/ColourSegment.h"
+
 #include "LookUpTable.h"
 #include "GreenHorizon.h"
 #include "ScanLines.h"
@@ -38,18 +41,23 @@ namespace modules {
         struct VisionConstants{
             static constexpr const char* CONFIGURATION_PATH = "VisionConstants.json";
         };
+
         struct LUTLocations{
             static constexpr const char* CONFIGURATION_PATH = "LUTLocations.json";
         };
+
         struct GreenHorizonConfig{
             static constexpr const char* CONFIGURATION_PATH = "GreenHorizon.json";
         };
+
         struct ScanLinesConfig{
             static constexpr const char* CONFIGURATION_PATH = "ScanLines.json";
         };
+
         struct RulesConfig{
             static constexpr const char* CONFIGURATION_PATH = "Rules.json";
         };
+
         /**
          * Classifies a raw image, producing the colour segments for object detection
          *

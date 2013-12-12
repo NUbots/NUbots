@@ -25,19 +25,21 @@
 #include <string>
 
 #include "utility/strutil/strutil.h"
-#include "messages/vision/ClassifiedImage.h"
-#include "LookUpTable.h"
-#include "ColourSegment.h"
+#include "utility/vision/ColourSegment.h"
+#include "utility/vision/ColourClassification.h"
 #include "utility/configuration/ConfigurationNode.h"
+
+#include "LookUpTable.h"
 
 namespace modules {
 	namespace vision { 
 		class ColourTransitionRule {
 		public:
-		    static ColourSegment nomatch;   //! @variable A static segment used to represent one that cannot be matched to any rule.
+		    static utility::vision::ColourSegment nomatch;   //! @variable A static segment used to represent one that cannot be matched to any rule.
 			
 		    ColourTransitionRule();
-/*!
+		    
+			/*!
 			  Configuration based constructor.
 			  @param before the preceeding segment.
 			  @param middle the middle segment.
@@ -62,14 +64,15 @@ namespace modules {
 		      @param after the following segment.
 		      @return Whether it is a match in either direction.
 		      */
-		    bool match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const;
+		    bool match(const utility::vision::ColourSegment& before, const utility::vision::ColourSegment& middle, const utility::vision::ColourSegment& after) const;
 			
 		    //! Returns the ID of the field object that this rule is for.
-		    messages::vision::ClassifiedImage::COLOUR_CLASS getColourClass() const;		   
-		private:
-		    messages::vision::ClassifiedImage::COLOUR_CLASS m_colour_class;     //! @variable The ID of the field object that this rule is for.
+		    utility::vision::COLOUR_CLASS getColourClass() const;
 
-		    std::vector<messages::vision::ClassifiedImage::Colour>  m_before,   //! @variable The colour that the previous segment must be.
+		private:
+		    utility::vision::COLOUR_CLASS m_colour_class;     //! @variable The ID of the field object that this rule is for.
+
+		    std::vector<utility::vision::Colour>  m_before,   //! @variable The colour that the previous segment must be.
 		                    	 m_middle,   //! @variable The colour that this segment must be
 		                    	 m_after;    //! @variable The colour that the following segment must be.
 
@@ -87,7 +90,7 @@ namespace modules {
 			  @param after the following segment.
 			  @return Whether it is a match.
 			  */
-			bool oneWayMatch(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const;
+			bool oneWayMatch(const utility::vision::ColourSegment& before, const utility::vision::ColourSegment& middle, const utility::vision::ColourSegment& after) const;
 		};
 	}
 }

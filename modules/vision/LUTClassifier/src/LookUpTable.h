@@ -10,13 +10,13 @@
 #ifndef LOOKUPTABLE_H
 #define LOOKUPTABLE_H
 
-#include "messages/input/Image.h"
-#include "messages/vision/ClassifiedImage.h"
 #include <nuclear>
 #include <string>
 #include <iostream>
 #include <fstream>
 
+#include "messages/input/Image.h"
+#include "utility/vision/ColourClassification.h"
 
 namespace modules {
   namespace vision {
@@ -49,8 +49,8 @@ namespace modules {
         */
         void zero();
 
-        const messages::vision::ClassifiedImage::Colour classifyPixel(const messages::input::Image::Pixel& p) const {
-            return (messages::vision::ClassifiedImage::Colour)(LUT[getLUTIndex(p)]); // 7bit LUT
+        const utility::vision::Colour classifyPixel(const messages::input::Image::Pixel& p) const {
+            return (utility::vision::Colour)(LUT[getLUTIndex(p)]); // 7bit LUT
         }        
         
     private:
@@ -64,6 +64,7 @@ namespace modules {
         const unsigned char* LUT;           //! @variable Colour Look Up Table - protected.
         unsigned char* LUTbuffer;           //! @variable temp LUT for loading.
     };
+
   } //vision
 } // modules
 
