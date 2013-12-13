@@ -33,12 +33,15 @@ namespace modules {
 			current_LUT_index = 0;
 			
             on<Trigger<Configuration<VisionConstants>>>([this](const Configuration<VisionConstants>& constants) {
-           		
+           		std::cout<< "Loading VisionConstants."<<std::endl;
+           		std::cout<< "Finished Config Loading successfully."<<std::endl;
             });
 
 			//Load LUTs
 			on<Trigger<Configuration<LUTLocations>>>([this](const Configuration<LUTLocations>& locations) {
-				std::vector<std::string> locat = locations.config;
+				std::cout<< "Loading LUT."<<std::endl;
+
+				std::vector<std::string> locat = locations.config["DEFAULT_LOCATION"];
 
 				for(auto location : locat) {
 					LookUpTable LUT;
@@ -46,37 +49,44 @@ namespace modules {
 
 					if(loaded) {
 						LUTs.push_back(LUT);
+						std::cout<< "Finished Config Loading successfully."<<std::endl;
 					}
 
 					else {
+						std::cout<< "Error Loading LUT: "<<location<<std::endl;
 						log<NUClear::ERROR>("LUT ", location, " has not loaded successfully." );
 					}
 				}
+				
 			});
 
 			//Load in greenhorizon parameters
 			on<Trigger<Configuration<GreenHorizonConfig>>>([this](const Configuration<GreenHorizonConfig>& constants) {
-				greenHorizon.setParameters(constants.config["GREEN_HORIZON_SCAN_SPACING"],
+				std::cout<< "Loading gh cONFIG."<<std::endl;
+				greenHorizon.setParameters( constants.config["GREEN_HORIZON_SCAN_SPACING"],
 											constants.config["GREEN_HORIZON_MIN_GREEN_PIXELS"],
 											constants.config["GREEN_HORIZON_UPPER_THRESHOLD_MULT"]);
+				std::cout<< "Finished Config Loading successfully."<<std::endl;
 			});
 
 			//Load in scanline parameters
 			on<Trigger<Configuration<ScanLinesConfig>>>([this](const Configuration<ScanLinesConfig>& constants) {
+				std::cout<< "Loading ScanLines config."<<std::endl;
 				scanLines.setParameters(constants.config["HORIZONTAL_SCANLINE_SPACING"],
 										 constants.config["VERTICAL_SCANLINE_SPACING"]);
+				std::cout<< "Finished Config Loading successfully."<<std::endl;
 			});
 			
 
 			on<Trigger<Configuration<RulesConfig>>>([this](const Configuration<RulesConfig>& rules) {
+				std::cout<< "Loading Rules config."<<std::endl;
 				segmentFilter.clearRules();
 				// std::vector< WHAT?!?!?! > rules = rules.config["REPLACEMENT_RULES"];
 				std::map<std::string, ConfigurationNode> replacement_rules = rules.config["REPLACEMENT_RULES"];
 				std::map<std::string, ConfigurationNode> transition_rules = rules.config["TRANSITION_RULES"];
 
-				for(auto rule : replacement_rules) {
+				for(const auto& rule : replacement_rules) {
 					std::cout << "Loading Replacement rule : " << rule.first << std::endl;
-
 					
 					ColourReplacementRule r;
 
@@ -107,12 +117,12 @@ namespace modules {
 											unint_32(rule.second["after"]["vec"][1]),
 											rule.second["replacement"]);*/
 					segmentFilter.addReplacementRule(r);
+					std::cout<< "Finished Config Loading successfully."<<std::endl;
 				}
 
-				for(auto rule : transition_rules) {
+				for(const auto& rule : transition_rules) {
 					std::cout << "Loading Transition rule : " << rule.first << std::endl;
 
-					
 					ColourTransitionRule r;
 
 					std::vector<unsigned int> before = rule.second["before"]["vec"];
@@ -140,17 +150,25 @@ namespace modules {
 											static_cast<uint_32>(rule.second["after"]["vec"][1]));											
 											unint_32(rule.second["after"]["vec"][1]));*/
 					segmentFilter.addTransitionRule(r);
+					std::cout<< "Finished Config Loading successfully."<<std::endl;
 				}
 			});
 
             on<Trigger<Image>>([this](const Image& image) {
             	/*std::vector<arma::vec2> green_horizon_points = */
+            	std::cout << "Image size = "<< image.width() << "x" << image.height() <<std::endl;
+            	std::cout << "LUTClassifier::on<Trigger<Image>> calculateGreenHorizon" << std::endl;
             	greenHorizon.calculateGreenHorizon(image, LUTs[current_LUT_index]);
+            	std::cout << "LUTClassifier::on<Trigger<Image>> generateScanLines" << std::endl;
             	std::vector<int> scan_lines = scanLines.generateScanLines(image, greenHorizon);
+            	std::cout << "LUTClassifier::on<Trigger<Image>> classifyHorizontalScanLines" << std::endl;
             	SegmentedRegion classified_segments_hor = scanLines.classifyHorizontalScanLines(image, scan_lines, LUTs[current_LUT_index]);
+            	std::cout << "LUTClassifier::on<Trigger<Image>> classifyVerticalScanLines" << std::endl;
             	SegmentedRegion classified_segments_ver = scanLines.classifyVerticalScanLines(image, greenHorizon, LUTs[current_LUT_index]);
+            	std::cout << "LUTClassifier::on<Trigger<Image>> classifyImage" << std::endl;
             	std::unique_ptr<ClassifiedImage> classified_image = segmentFilter.classifyImage(classified_segments_hor, classified_segments_ver);
             	//TODO: image->green_horizon = greenHorizon;
+            	std::cout << "LUTClassifier::on<Trigger<Image>> emit(std::move(classified_image));" << std::endl;
             	emit(std::move(classified_image));
             	//emit(std::make_unique<ClassifiedImage>(new ClassifiedImage(classigied_segments_hor,classified_segments_ver)));
             });

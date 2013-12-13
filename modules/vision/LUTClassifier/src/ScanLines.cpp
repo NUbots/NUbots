@@ -39,7 +39,7 @@ namespace modules {
 			std::vector<int> horizontalScanLines;
 			int bottomHorizontalScan = img.height() - 1;														//we need h-scans under the GH for field lines
 			const std::vector<arma::vec2>& horizonPoints = greenHorizon.getInterpolatedPoints();		// Need this to get the left and right
-
+			std::cout << "Num Horizon points = " << horizonPoints.size()<< std::endl;
 			arma::vec2 left = horizonPoints.front();
 			arma::vec2 right = horizonPoints.back();
 
@@ -53,7 +53,9 @@ namespace modules {
 				std::cout << "Left horizon limit exceeds image height: " << right[1] << std::endl;
 			}
 			
-			for (int y = bottomHorizontalScan; y >= 0; y -= HORIZONTAL_SCANLINE_SPACING) {
+			const int SPACING = std::max(HORIZONTAL_SCANLINE_SPACING, 1U);
+
+			for (int y = bottomHorizontalScan; y >= 0; y -= SPACING) {
 				horizontalScanLines.push_back(y);
 			}
 
@@ -63,7 +65,7 @@ namespace modules {
 		SegmentedRegion ScanLines::classifyHorizontalScanLines(const Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT) {
 			SegmentedRegion classifications;
 
-		    for (auto scanLine : horizontalScanLines) {
+		    for (const auto& scanLine : horizontalScanLines) {
 				classifications.m_segmentedScans.push_back(classifyHorizontalScan(originalImage, scanLine, LUT));
 			}
 
@@ -73,10 +75,11 @@ namespace modules {
 		}
 
 		SegmentedRegion ScanLines::classifyVerticalScanLines(const Image& originalImage, const GreenHorizon& greenHorizon, const LookUpTable& LUT) {
+			
 			const std::vector<arma::vec2>& verticalStartPoints = greenHorizon.getInterpolatedSubset(VERTICAL_SCANLINE_SPACING);
 			SegmentedRegion classifications;
 
-		    for (auto scanLine : verticalStartPoints) {
+		    for (const auto& scanLine : verticalStartPoints) {
 				classifications.m_segmentedScans.push_back(classifyVerticalScan(originalImage, scanLine, LUT));
 			}
     		classifications.m_direction = ScanDirection::VERTICAL;

@@ -27,42 +27,42 @@
 			"before": {"vec" : [1, -1], "colour" : "green"},                      
 			"middle": {"vec" : [0 , 4], "colour" : "unclassified"},    
 			"after": {"vec" : [12, -1] , "colour" : "green"},                    
-			"replacement": "before"                         //before, after, split
+			"replacement": "before"                        
 		},
 		"fieldnoise_v_oneway":
 		{
-			"before": {"vec" : [3, -1], "colour" : "green"},                      //1 pix min
-			"middle": {"vec" : [0 , 7], "colour" : "unclassified"},    //4 pix max
-			"after": {"vec" : [20, -1] , "colour" : "green"},                    //12 pix min
-			"replacement": "before"                         //before, after, split
+			"before": {"vec" : [3, -1], "colour" : "green"},                     
+			"middle": {"vec" : [0 , 7], "colour" : "unclassified"},    
+			"after": {"vec" : [20, -1] , "colour" : "green"},                  
+			"replacement": "before"                         
 		},
 		"yellowgoal1":
 		{
-			"before": {"vec" : [1, -1], "colour" : "yellow"},                   // pix min
-			"middle": {"vec" : [0 , 1], "colour" : "orange"},     //1, pix max
-			"after": {"vec" : [5, -1] , "colour" : "yellow"},       //5 pix min
-			"replacement": "after"                 //before, after, split
+			"before": {"vec" : [1, -1], "colour" : "yellow"},                   
+			"middle": {"vec" : [0 , 1], "colour" : "orange"},   
+			"after": {"vec" : [5, -1] , "colour" : "yellow"},      
+			"replacement": "after"                 
 		},
 		"yellowgoal2":
 		{
-			"before": {"vec" : [5, -1], "colour" : "yellow"},                   // pix min
-			"middle": {"vec" : [0 , 3], "colour" : "unclassified"},     //1 pix max
-			"after": {"vec" : [1, -1] , "colour" : "yellow"},       //5 pix min
-			"replacement": "after"                 //before, after, split
+			"before": {"vec" : [5, -1], "colour" : "yellow"},                   
+			"middle": {"vec" : [0 , 3], "colour" : "unclassified"},     
+			"after": {"vec" : [1, -1] , "colour" : "yellow"},       
+			"replacement": "after"                
 		},
 		"ball1":
 		{
-			"before": {"vec" : [5, -1], "colour" : "orange"},       //3 pix min
-			"middle": {"vec" : [0 , 3], "colour" : "unclassified"},     //1 pix max
+			"before": {"vec" : [5, -1], "colour" : "orange"},       
+			"middle": {"vec" : [0 , 3], "colour" : "unclassified"},     
 			"after": {"vec" : [1,-1] ,"colour" : "orange"},
-			"replacement": "before"                 //before, after, split
+			"replacement": "before"                 
 		},
 		"line1":
 		{
-			"before": {"vec" : [1, -1], "colour" : "white"},       //3 pix min
-			"middle": {"vec" : [0 , 3], "colour" : "unclassified"},     //1 pix max
+			"before": {"vec" : [1, -1], "colour" : "white"},       
+			"middle": {"vec" : [0 , 3], "colour" : "unclassified"},     
 			"after": {"vec" : [5,-1] ,"colour" : "white"},
-			"replacement": "before"                 //before, after, split
+			"replacement": "before"                 
 		},
 	},		
 	"TRANSITION_RULES":

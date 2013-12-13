@@ -59,7 +59,7 @@ namespace modules {
                 Note that the use of kinematics horizon has been replaced by dummmy code 
                 @param image The raw image
             */ 
-            std::vector<arma::vec2> calculateGreenHorizon(const messages::input::Image& image, const LookUpTable& LUT);
+            void calculateGreenHorizon(const messages::input::Image& image, const LookUpTable& LUT);
          
             /*! @brief Computes the green horizon characteristics
                 @param initial_points the horizon points calculated by the calculateGreenHorizon method

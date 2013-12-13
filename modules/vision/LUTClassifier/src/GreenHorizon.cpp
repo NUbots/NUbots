@@ -36,7 +36,7 @@ namespace modules {
             GREEN_HORIZON_UPPER_THRESHOLD_MULT = GREEN_HORIZON_UPPER_THRESHOLD_MULT_;
         }
 
-        std::vector<arma::vec2> GreenHorizon::calculateGreenHorizon(const Image& img, const LookUpTable& LUT) {
+        void GreenHorizon::calculateGreenHorizon(const Image& img, const LookUpTable& LUT) {
         	//NEEDS KINEMATICS ! const Horizon& kin_hor = Last<1,KinematicsHorizon>;
 
 		    size_t width = img.width();
@@ -110,8 +110,7 @@ namespace modules {
 		        horizon_points.push_back(v);
 		        v[0] = width - 1;
 		        horizon_points.push_back(v);
-		        
-		        return horizon_points;
+		        set(horizon_points, width, height);		        
 		    }
 
 		    // statistical filter for green horizon points
@@ -143,9 +142,7 @@ namespace modules {
 		    std::cout << "Green Horizon Number of Thrown Points : " << thrown_points.size() << std::endl;
 
 		    horizon_points = upperConvexHull(horizon_points);
-		   	set(horizon_points, width, height);
-			
-		    return horizon_points;
+		   	set(horizon_points, width, height);		    
         }
 
         void GreenHorizon::set(const std::vector<arma::vec2> &initial_points, int image_width, int image_height) {
@@ -240,6 +237,7 @@ namespace modules {
 		std::vector<arma::vec2> GreenHorizon::getInterpolatedSubset(unsigned int spacing) const {
 		    std::vector<arma::vec2> subset;
 			
+			spacing = std::max(spacing, 1U);
 		    for (unsigned int i = 0; i < interpolated_points.size(); i += spacing) {
 		        subset.push_back(interpolated_points.at(i));
 		    }

@@ -70,7 +70,7 @@ namespace modules {
 			sstream >> current_colour_name;
 
 			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
-			while (!current_colour_name.empty()) {
+			while (sstream.good()) {
 				Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
 
 				if (colour != Colour::invalid){
@@ -85,7 +85,7 @@ namespace modules {
 			sstream >> current_colour_name;
 
 			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
-			while (!current_colour_name.empty()) {
+			while (sstream.good()) {
 				Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
 
 				if (colour != Colour::invalid){
@@ -100,7 +100,7 @@ namespace modules {
 			sstream >> current_colour_name;
 
 			//While stream is not empty, check if the next word names a colour and load if it does. Get next word.
-			while (!current_colour_name.empty()) {
+			while (sstream.good()) {
 				Colour colour = ClassifiedImage::getColourFromName(current_colour_name);
 
 				if(colour != Colour::invalid){
