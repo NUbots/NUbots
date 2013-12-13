@@ -1,4 +1,4 @@
-package messages.input;
+package messages.input.proto;
 
 message Sensors {
 
@@ -69,4 +69,10 @@ message Sensors {
         optional float centreX = 5;
         optional float centreY = 6;
     }
+
+    optional Accelerometer accelerometer = 1;
+    optional Gyroscope gyroscope = 2;
+    optional FSR leftFSR = 3;
+    optional FSR rightFSR = 4;
+    repeated Servo servos = 5;
 }

@@ -42,7 +42,7 @@ class nuclear(
   ) {
   include gcc48
   include catch
-  include zmq
+  include zmq3
 
   $nuclear_build_dir = "${nubots_dir}/NUClear/build"
 
@@ -67,9 +67,9 @@ class nuclear(
     require => [
         Class['gcc48'],
         Class['catch'],
+		Class['zmq3'],
         Package['build-essential'],
         Package['cmake'],
-        Class['zmq'],
         Package['protobuf-compiler'],
       ],
     command => 'cmake ..',

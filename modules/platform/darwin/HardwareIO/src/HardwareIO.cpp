@@ -62,10 +62,10 @@ namespace darwin {
             // Voltage (in volts)
             sensors->voltage = Convert::voltage(data.cm730.voltage);
 
-            // Acceleronometer (in m/s^2)
-            sensors->acceleronometer.x = Convert::accelerometer(data.cm730.acceleronometer.x);
-            sensors->acceleronometer.y = Convert::accelerometer(data.cm730.acceleronometer.y);
-            sensors->acceleronometer.z = Convert::accelerometer(data.cm730.acceleronometer.z);
+            // Accelerometer (in m/s^2)
+            sensors->accelerometer.x = Convert::accelerometer(data.cm730.accelerometer.x);
+            sensors->accelerometer.y = Convert::accelerometer(data.cm730.accelerometer.y);
+            sensors->accelerometer.z = Convert::accelerometer(data.cm730.accelerometer.z);
 
             // Gyroscope (in radians/second)
             sensors->gyroscope.x = Convert::gyroscope(data.cm730.gyroscope.x);

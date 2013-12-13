@@ -5,6 +5,7 @@ message Message {
         SENSOR_DATA = 1;
         VISION = 2;
         LOCALISATION = 3;
+		DATA_POINT = 4;
     }
 
     required Type type = 1;
@@ -13,6 +14,12 @@ message Message {
     optional SensorData sensor_data = 3;
     optional Vision vision = 4;
     optional Localisation localisation = 5;
+    optional DataPoint dataPoint = 6;
+}
+
+message DataPoint {
+	optional string label = 1;
+	repeated float value = 2;
 }
 
 message Image {
