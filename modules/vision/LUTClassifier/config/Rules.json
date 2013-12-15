@@ -63,7 +63,7 @@
 			"middle": {"vec" : [0 , 3], "colour" : "unclassified"},     
 			"after": {"vec" : [5,-1] ,"colour" : "white"},
 			"replacement": "before"                 
-		},
+		}
 	},		
 	"TRANSITION_RULES":
 	{
