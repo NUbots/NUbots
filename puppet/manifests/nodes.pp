@@ -7,6 +7,10 @@ node npvagrant {
   # define variables for this node
   $username = 'vagrant'
 
+  class { 'nubugger':
+    username => $username,
+  }
+
   class { 'nuclearport::build_dep':
     username => $username,
   }
