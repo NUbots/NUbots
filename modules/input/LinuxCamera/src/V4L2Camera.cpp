@@ -189,7 +189,7 @@ namespace modules {
             }
 
             // Return our image
-            return std::move(image);
+            return image;
         }
 
         void V4L2Camera::resetCamera(const std::string& device, const std::string& fmt, size_t w, size_t h) {
