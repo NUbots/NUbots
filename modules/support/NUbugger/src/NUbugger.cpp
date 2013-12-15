@@ -18,7 +18,6 @@
  */
 
 #include "NUbugger.h"
-#include "utility/idiom/pimpl_impl.h"
 
 #include <zmq.hpp>
 #include <jpeglib.h>
@@ -27,12 +26,14 @@
 #include "messages/NUAPI.pb.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/Image.h"
+#include "messages/vision/ClassifiedImage.h"
 #include "utility/NUbugger/NUgraph.h"
 
 #include "utility/image/ColorModelConversions.h"
 
 using messages::platform::darwin::DarwinSensors;
 using messages::input::Image;
+using messages::vision::ClassifiedImage;
 using NUClear::DEBUG;
 using utility::NUbugger::graph;
 using std::chrono::duration_cast;
@@ -41,40 +42,15 @@ using std::chrono::milliseconds;
 namespace modules {
 	namespace support {
 
-		// Implement our impl class as per the pimpl idiom.
-		class NUbugger::impl {
-			public:
-				zmq::socket_t pub;
-
-				std::mutex mutex;
-
-				impl() : pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {}
-
-				/**
-				 * This method needs to be used over pub.send as all calls to
-				 * pub.send need to be synchronized with a concurrency primative
-				 * (such as a mutex)
-				 */
-				void send(zmq::message_t& packet) {
-					std::lock_guard<std::mutex> lock(mutex);
-					pub.send(packet);
-				}
-
-				void send(API::Message message) {
-					auto serialized = message.SerializeAsString();
-					zmq::message_t packet(serialized.size());
-					memcpy(packet.data(), serialized.data(), serialized.size());
-					send(packet);
-				}
-		};
-
-		NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+		NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
+			: Reactor(std::move(environment))
+			, pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {
 			// Set our high water mark
 			int hwm = 3;
-			m->pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
+			pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
 
 			// Bind to port 12000
-			m->pub.bind("tcp://*:12000");
+			pub.bind("tcp://*:12000");
 
 			on<Trigger<DataPoint>>([this](const DataPoint& data_point) {
 				API::Message message;
@@ -87,7 +63,7 @@ namespace modules {
 					dataPoint->add_value(value);
 				}
 
-				m->send(message);
+				send(message);
 			});
 
 			// This trigger gets the output from the sensors (unfiltered)
@@ -142,7 +118,7 @@ namespace modules {
 				orient->add_float_value(0);
 				orient->add_float_value(0);
 
-				m->send(message);
+				send(message);
 			});
 
 			on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
@@ -154,65 +130,64 @@ namespace modules {
 				auto* imageData = visionData->mutable_image();
 				std::string* imageBytes = imageData->mutable_data();
                                 
-                                if(image.source().empty()) {
-                                    // Reserve enough space in the image data to store the output
-                                    imageBytes->resize(image.width() * image.height());
-                                    imageData->set_width(image.width());
-                                    imageData->set_height(image.height());
+				if(image.source().empty()) {
+					// Reserve enough space in the image data to store the output
+					imageBytes->resize(image.width() * image.height());
+					imageData->set_width(image.width());
+					imageData->set_height(image.height());
 
-                                    // Open the memory of the string as a file (using some dastardly hackery)
-                                    auto memFile = fmemopen(const_cast<char*>(imageBytes->data()), imageBytes->size(), "wb");
+					// Open the memory of the string as a file (using some dastardly hackery)
+					auto memFile = fmemopen(const_cast<char*>(imageBytes->data()), imageBytes->size(), "wb");
 
-                                    // Our jpeg compression structures
-                                    jpeg_compress_struct jpegC;
-                                    jpeg_error_mgr jpegErr;
+					// Our jpeg compression structures
+					jpeg_compress_struct jpegC;
+					jpeg_error_mgr jpegErr;
 
-                                    // Set our error handler on our Config object
-                                    jpegC.err = jpeg_std_error(&jpegErr);
+					// Set our error handler on our Config object
+					jpegC.err = jpeg_std_error(&jpegErr);
 
-                                    // Create our compression object
-                                    jpeg_create_compress(&jpegC);
+					// Create our compression object
+					jpeg_create_compress(&jpegC);
 
-                                    // Set our output to the file
-                                    jpeg_stdio_dest(&jpegC, memFile);
+					// Set our output to the file
+					jpeg_stdio_dest(&jpegC, memFile);
 
-                                    // Set information about our image
-                                    jpegC.image_width = image.width();
-                                    jpegC.image_height = image.height();
-                                    jpegC.input_components = 3;
-                                    jpegC.in_color_space = JCS_YCbCr;
+					// Set information about our image
+					jpegC.image_width = image.width();
+					jpegC.image_height = image.height();
+					jpegC.input_components = 3;
+					jpegC.in_color_space = JCS_YCbCr;
 
-                                    // Set the default compression parameters
-                                    jpeg_set_defaults(&jpegC);
+					// Set the default compression parameters
+					jpeg_set_defaults(&jpegC);
 
-                                    // Start compression
-                                    jpeg_start_compress(&jpegC, true);
+					// Start compression
+					jpeg_start_compress(&jpegC, true);
 
-                                    // Compress each row
-                                    for(size_t i = 0; i < image.height(); ++i) {
-                                        uint8_t* start = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(&image.raw()[i * image.width()]));
-                                        jpeg_write_scanlines(&jpegC, &start, 1);
-                                    }
+					// Compress each row
+					for(size_t i = 0; i < image.height(); ++i) {
+						uint8_t* start = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(&image.raw()[i * image.width()]));
+						jpeg_write_scanlines(&jpegC, &start, 1);
+					}
 
-                                    // Finish our compression
-                                    jpeg_finish_compress(&jpegC);
+					// Finish our compression
+					jpeg_finish_compress(&jpegC);
 
-                                    // Close the memory file)
-                                    fclose(memFile);
+					// Close the memory file)
+					fclose(memFile);
 
-                                    // Destroy the compression object (free memory)
-                                    jpeg_destroy_compress(&jpegC);
-                                }
-                                else {
-                                    // Reserve enough space in the image data to store the output
-                                    imageBytes->resize(image.source().size());
-                                    imageData->set_width(image.width());
-                                    imageData->set_height(image.height());
-                                    
-                                    imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
-                                }
+					// Destroy the compression object (free memory)
+					jpeg_destroy_compress(&jpegC);
+				} else {
+					// Reserve enough space in the image data to store the output
+					imageBytes->resize(image.source().size());
+					imageData->set_width(image.width());
+					imageData->set_height(image.height());
+					
+					imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
+				}
 
-				m->send(message);
+				send(message);
 			});
 
 			on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
@@ -240,13 +215,34 @@ namespace modules {
 
 				log<NUClear::DEBUG>("testing! ", demangled_name);*/
 
-				m->send(message);
+				send(message);
+			});
+
+			on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& image) {
+				log<NUClear::DEBUG>("ClassifiedImage!");
 			});
 
 			// When we shutdown, close our publisher
 			on<Trigger<Shutdown>>([this](const Shutdown&) {
-				m->pub.close();
+				pub.close();
 			});
+		}
+
+		/**
+		 * This method needs to be used over pub.send as all calls to
+		 * pub.send need to be synchronized with a concurrency primative
+		 * (such as a mutex)
+		 */
+		void NUbugger::send(zmq::message_t& packet) {
+			std::lock_guard<std::mutex> lock(mutex);
+			pub.send(packet);
+		}
+
+		void NUbugger::send(API::Message message) {
+			auto serialized = message.SerializeAsString();
+			zmq::message_t packet(serialized.size());
+			memcpy(packet.data(), serialized.data(), serialized.size());
+			send(packet);
 		}
 
 	} // support
