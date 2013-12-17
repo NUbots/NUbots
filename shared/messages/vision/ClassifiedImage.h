@@ -84,7 +84,7 @@ namespace messages {
         class ClassifiedImage {
         public:
 
-            ClassifiedImage();
+            ClassifiedImage(){}
             /**
              * Provides some simple routines for handling colours.
              *
@@ -98,7 +98,7 @@ namespace messages {
             std::map<COLOUR_CLASS, std::vector<ColourSegment>> matched_horizontal_segments;
             std::map<COLOUR_CLASS, std::vector<ColourSegment>> matched_vertical_segments;
 
-//            GreenHorizon green_horizon;
+            std::vector<arma::vec2> green_horizon_interpolated_points;
              
             /*!
             Gets the name of the given colour.
