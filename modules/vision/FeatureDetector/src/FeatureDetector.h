@@ -41,7 +41,7 @@ namespace modules {
          */
         class FeatureDetector : public NUClear::Reactor {
         private:
-
+            NUClear::ReactionHandle reaction;
         public:
             explicit FeatureDetector(std::unique_ptr<NUClear::Environment> environment);
         };

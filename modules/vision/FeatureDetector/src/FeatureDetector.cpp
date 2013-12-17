@@ -29,10 +29,11 @@ namespace modules {
             on<Trigger<Configuration<FeatureDetectorConfig>>>([this](const Configuration<FeatureDetectorConfig>& constants) {
             });
 
-            on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
+            reaction = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
                 /********************************************************
                  *          THIS CODE HAS NOT BEEN PORTED YET           *
                  ********************************************************/
+                reaction.disable();
                 // FIND GOALS                
                 // ransac method
                 std::vector<Goal> ransac_goals_edges = m_goal_detector_ransac_edges->run();
@@ -57,7 +58,24 @@ namespace modules {
                 // ADD IN LABELLING OF GOALS BASED ON KEEPER COLOUR
 
                 // EMIT RESULTS
+
             });
+
+//BEGIN Trents multi trigger:
+            
+
+            auto functionthattakesallthethingsback = [this](const blah& ball, const goal& goal, ..., int index_of_triggered){
+                if(all triggered){
+                    emit(collection);
+                }
+                reaction.enable();
+            }
+
+            on<Trigger<blah>, With<goal>, With<line>,..>(std::bind(functionthattakesallthethingsback,_1,_2,_3,0));
+
+            on<With<blah>, Trigger<goal>, With<line>,..>(std::bind(functionthattakesallthethingsback,_1,_2,_3,1));
+
+            on<With<blah>, With<goal>, Trigger<line>,..>(std::bind(functionthattakesallthethingsback,_1,_2,_3,2));
         }
 
     }  // vision
