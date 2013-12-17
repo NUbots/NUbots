@@ -41,11 +41,6 @@ namespace modules {
             //! @brief applies a series of checks to decide if the goal is valid.
             bool check() const;
                 
-            //! @brief Stream output for labelling purposes
-            void printLabel(std::ostream& out) const {
-              out << VFOName(m_id) << " " << m_location << " " << m_size_on_screen;
-            }
-
             virtual double findScreenError(VisionFieldObject* other) const;
             virtual double findGroundError(VisionFieldObject* other) const;
 

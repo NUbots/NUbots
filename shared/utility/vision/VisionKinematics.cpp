@@ -28,7 +28,7 @@ namespace utility {
 
             m_headPitch = m_headYaw = m_bodyRoll = 0;
 
-            neck_position = {0, 0, 0};
+            m_neckPosition = {0, 0, 0};
 
             m_imageSize = {0, 0};
             m_imageCentre = {0, 0};
@@ -54,7 +54,7 @@ namespace utility {
           * @param pt The pixel location to correct.
           */
         arma::vec2 VisionKinematics::correctDistortion(float RADIAL_CORRECTION_COEFFICIENT, const arma::vec2& point) {
-            //get position relative to centre
+            // Gget position relative to centre.
             arma::vec2 halfSize = m_imageSize * 0.5;
             arma::vec2 centreRelative = point - halfSize;
 
@@ -111,9 +111,9 @@ namespace utility {
             m_camVector = (headV2RobotRotation * m_sensorCalibration.m_cameraPositionOffset) + m_neckPosition;
             m_camV2RobotRotation = headV2RobotRotation * cameraPitch_rot * cameraRoll_rot * cameraYaw_rot;
 
-            #undef ROLL   0
-            #undef PITCH  1
-            #undef YAW    2
+            #undef ROLL
+            #undef PITCH
+            #undef YAW
         }
 
         void VisionKinematics::calculateRepresentationsFromPixelLocation(NUPoint& point, bool known_distance, double val) const {

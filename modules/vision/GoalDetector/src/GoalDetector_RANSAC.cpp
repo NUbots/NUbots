@@ -55,30 +55,30 @@ namespace modules {
 		std::unique_ptr<std::vector<Goal>> GoalDetector_RANSAC::run(const std::vector<ColourSegment>& horizontalSegments, const std::vector<ColourSegment>& verticalSegments) {
 			std::list<Quad> quads, postCandidates;
 			std::pair<bool, Quad> crossbar(false, Quad());
-			std::unique_ptr<std::vector<Goal>> posts = std::unique_ptr<std::vector<Goal>>(new std::vector<Goal>);
+			std::unique_ptr<std::vector<Goal>> posts = std::unique_ptr<std::vector<Goal>>(new std::vector<Goal>());
 
 			std::vector<arma::vec2> startPoints, endPoints;
 			std::vector<pair<RANSACLine<arma::vec2>, std::vector<arma::vec2>>> ransacResults;
 			std::vector<LSFittedLine> startLines, endLines;
 
 			// Get edge points.
-			for (ColourSegment& s : horizontalSegments) {
-				startPoints.push_back(s.getStart());
-				endPoints.push_back(s.getEnd());
+			for (ColourSegment& segment : horizontalSegments) {
+				startPoints.push_back(segment.getStart());
+				endPoints.push_back(segment.getEnd());
 			}
 
 			// Use generic RANSAC implementation to find start lines (left edges).
 			ransacResults = RANSAC::findMultipleModels<RANSACLine<arma::vec2>, arma::vec2>(startPoints, m_consensusThreshold, m_minimumPoints, m_maxIterationsPerFitting, m_maxFittingAttempts, m_RANSACMethod);
 		
-			for (auto l : ransacResults) {
-				startLines.push_back(LSFittedLine(l.second));
+			for (const auto& line : ransacResults) {
+				startLines.push_back(LSFittedLine(line.second));
 			}
 
 			// Use generic RANSAC implementation to find end lines (right edges).
 			ransacResults = RANSAC::findMultipleModels<RANSACLine<arma::vec2>, arma::vec2>(endPoints, m_consensusThreshold, m_minimumPoints, m_maxIterationsPerFitting, m_maxFittingAttempts, m_RANSACMethod);
 		
-			for (auto l : ransacResults) {
-				endLines.push_back(LSFittedLine(l.second));
+			for (const auto& line : ransacResults) {
+				endLines.push_back(LSFittedLine(line.second));
 			}
 
 			/*********************
@@ -100,22 +100,22 @@ namespace modules {
 			double lowerAngleThreshold = (ANGLE_MARGIN * halfPI);
 			double upperAngleThreshold = halfPI - lowerAngleThreshold;
 			
-			for (Quad q : quads) {
-				double angle = m_kinematicsHorizon.getAngleBetween(Line(q.getTopCentre(), q.getBottomCentre()));
+			for (const Quad& quad : quads) {
+				double angle = m_kinematicsHorizon.getAngleBetween(Line(quad.getTopCentre(), quad.getBottomCentre()));
 
 				if (angle >= upperAngleThreshold) {
-				    postCandidates.push_back(q);
+				    postCandidates.push_back(quad);
 				}
 				
 				else if (angle <= lowerAngleThreshold) {
 				    // Only keep largest crossbar candidate.
 				    if (!crossbar.first) {
 				        crossbar.first = true;
-				        crossbar.second = q;
+				        crossbar.second = quad;
 				    }
 				    
-				    else if (crossbar.second.area() < q.area()) {
-				        crossbar.second = q;
+				    else if (crossbar.second.area() < quad.area()) {
+				        crossbar.second = quad;
 				    }
 				}
 			}
@@ -131,16 +131,16 @@ namespace modules {
 		
 			else {
 				// No crossbar, just use general method.
-				posts = GoalDetector::assignGoals(postCandidates);
+				posts = assignGoals(postCandidates);
 			}
 
 			// Improves bottom centre estimate using vertical transitions.
-			for (ColourSegment v : verticalSegments) {
-				const arma::vec2& p = v.getEnd();
+			for (const ColourSegment& segment : verticalSegments) {
+				const arma::vec2& point = segment.getEnd();
 				
-				for (Goal& g : posts) {
-				    if ((p[0] <= g.getQuad().getRight()) && (p[0] >= g.getQuad().getLeft()) && (p[1] > g.getLocationPixels()[1])) {
-				        g.setBase(p);
+				for (Goal& post : posts) {
+				    if ((point[0] <= post.getQuad().getRight()) && (point[0] >= post.getQuad().getLeft()) && (point[1] > post.getLocationPixels()[1])) {
+				        post.setBase(point);
 				    }
 				}
 			}
@@ -252,22 +252,6 @@ namespace modules {
 			return best;
 		}
 
-		std::vector<Goal> GoalDetector_RANSAC::assignGoals(const std::list<Quad>& candidates, const Quad& crossbar) const {
-			if (candidates.size() == 1) {
-				if (crossbar.getCentre()[0] < candidates.front().getCentre()[0]) {
-				    return std::vector<Goal>(1, Goal(GOAL_R, candidates.front()));
-				}
-				
-				else {
-				    return std::vector<Goal>(1, Goal(GOAL_L, candidates.front()));
-				}
-			}
-			
-			else {
-				return GoalDetector::assignGoals(candidates);
-			}
-		}
-
 		std::vector<arma::vec2> GoalDetector_RANSAC::getEdgePointsFromSegments(const std::vector<ColourSegment> &segments) {
 			std::vector<arma::vec2> points;
 			
@@ -278,7 +262,107 @@ namespace modules {
 
 			return points;
 		}
+
+		std::unique_ptr<std::vector<Goal>> GoalDetector_RANSAC::assignGoals(const std::list<Quad>& candidates, const Quad& crossbar) const {
+			if (candidates.size() == 1) {
+				if (crossbar.getCentre()[0] < candidates.front().getCentre()[0]) {
+				    return std::unique_ptr<std::vector<Goal>>(new std::vector<Goal>(1, Goal(GOAL_R, candidates.front()));
+				}
+				
+				else {
+				    return std::unique_ptr<std::vector<Goal>>(new std::vector<Goal>(1, Goal(GOAL_L, candidates.front()));
+				}
+			}
+			
+			else {
+				return std::move(assignGoals(candidates));
+			}
+		}
+
+		std::unique_ptr<std::vector<Goal>> GoalDetector_RANSAC::assignGoals(const std::list<Quad>& candidates) const {
+			std::unique_ptr<std::vector<Goal>> goals = std::unique_ptr<std::vector<Goal>>(new std::vector<Goal>());
+			
+			if (candidates.size() == 2) {
+				// There are exactly two candidates, identify each as left or right.
+				const Quad& post1 = candidates.front();
+				const Quad& post2 = candidates.back();
+
+				// Calculate separation between candidates.
+				double pos1 = std::min(post1.getRight(), post2.getRight());			// inside right
+				double pos2 = std::max(post1.getLeft(), post2.getLeft());			// inside left
+
+				// Only publish if the candidates are far enough apart.
+				if (std::abs(pos2 - pos1) >= VisionConstants::MIN_GOAL_SEPARATION) {
+				    // Flip if necessary.
+				    if (post1.getCentre()[0] > post2.getCentre()[0]) {
+				        goals->push_back(Goal(GOAL_L, post2));
+				        goals->push_back(Goal(GOAL_R, post1));
+				    }
+				    
+				    else {
+				        goals->push_back(Goal(GOAL_L, post1));
+				        goals->push_back(Goal(GOAL_R, post2));
+				    }
+				}
+				
+				else {
+				    //should merge
+				}
+			}
+			
+			else {
+				// Unable to identify which post is which.
+				// Setting all to unknown.
+				for (const Quad& candidate : candidates) {
+				    goals->push_back(Goal(GOAL_U, candidate));
+				}
+			}
+			
+			return std::move(goals);
+		}
+
+		void GoalDetector_RANSAC::removeInvalid(std::list<Quad>& posts) {
+			std::list<Quad>::iterator it = posts.begin();
+			
+			for (std::list<Quad>::iterator it = posts.begin(); it != posts.end(); /* Increment done by if statement */) {
+				// Remove all posts whos' aspect ratios are too low.
+				if ( it->aspectRatio() < VisionConstants::GOAL_HEIGHT_TO_WIDTH_RATIO_MIN) {
+				    it = posts.erase(it);
+				}
+				
+				else {
+				    it++;
+				}
+			}
+		}
 		
+		void GoalDetector::mergeClose(std::list<Quad>& posts, double widthMultipleToMerge) {
+			std::list<Quad>::iterator a = posts.begin();
+			std::list<Quad>::iterator b;
+			
+			for (std::list<Quad>::iterator post = posts.begin(); post != posts.end(); post++) {
+				for (std::list<Quad>::iterator postCompare = post; postCompare != posts.end();  /* Increment done by if statement */) {
+				    // If the posts overlap.
+				    // Or if their centres are horizontally closer than the largest widths multiplied by widthMultipleToMerge.
+					if (post->overlapsHorizontally(*postCompare) || (std::abs(post->getCentre()[0] - postCompare->getCentre()[0]) <= (std::max(post->getAverageWidth(), postCompare->getAverageWidth()) * widthMultipleToMerge))) {
+				        // Get outer lines.
+				        arma::vec2 tl = {std::min(post->getTopLeft()[0],		postCompare->getTopLeft()[0]),		std::min(post->getTopLeft()[1],		postCompare->getTopLeft()[1])};
+				        arma::vec2 tr = {std::max(post->getTopRight()[0],		postCompare->getTopRight()[0]),		std::min(post->getTopRight()[1],	postCompare->getTopRight()[1])};
+				        arma::vec2 bl = {std::min(post->getBottomLeft()[0],		postCompare->getBottomLeft()[0]),	std::max(post->getBottomLeft()[1],	postCompare->getBottomLeft()[1])};
+				        arma::vec2 br = {std::max(post->getBottomRight()[0],	postCompare->getBottomRight()[0]),	std::max(post->getBottomRight()[1], postCompare->getBottomRight()[1])};
+
+				        //replace original two quads with the new one
+				        post->set(bl, tl, tr, br);
+				        postCompare = posts.erase(postCompare);
+					}
+					
+					else {
+						postCompare++;
+					}
+				}
+			}
+		}
+
 	}
 }
 
