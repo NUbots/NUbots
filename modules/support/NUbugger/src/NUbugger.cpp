@@ -37,7 +37,7 @@ using messages::vision::ClassifiedImage;
 using NUClear::DEBUG;
 using utility::NUbugger::graph;
 using std::chrono::duration_cast;
-using std::chrono::milliseconds;
+using std::chrono::microseconds;
 
 namespace modules {
 	namespace support {
@@ -46,8 +46,8 @@ namespace modules {
 			: Reactor(std::move(environment))
 			, pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {
 			// Set our high water mark
-			int hwm = 3;
-			pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
+			//int hwm = 50;
+			//pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
 
 			// Bind to port 12000
 			pub.bind("tcp://*:12000");
@@ -86,6 +86,10 @@ namespace modules {
 					servo->set_current(sensors.servo[i].load);
 					servo->set_torque(sensors.servo[i].torqueLimit);
 					servo->set_temperature(sensors.servo[i].temperature);
+
+					/*if (sensors.servo[i].errorFlags > 0) {
+						std::cout << sensors.servo[i].errorFlags << std::endl;
+					}*/
 				}
 
 				auto* gyro = sensorData->mutable_gyro();
@@ -97,6 +101,18 @@ namespace modules {
 				accel->add_float_value(sensors.accelerometer.x);
 				accel->add_float_value(sensors.accelerometer.y);
 				accel->add_float_value(sensors.accelerometer.z);
+
+				/*if (sensors.cm730ErrorFlags > 0) {
+					std::cout << sensors.cm730ErrorFlags << std::endl;
+				}
+
+				if (sensors.fsr.left.errorFlags > 0) {
+					std::cout << sensors.fsr.left.errorFlags << std::endl;
+				}
+
+				if (sensors.fsr.right.errorFlags > 0) {
+					std::cout << sensors.fsr.right.errorFlags << std::endl;
+				}*/
 
 				emit(graph(
 					"Accelerometer", 
@@ -123,9 +139,12 @@ namespace modules {
 
 			on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
 
+				//std::cout << "Image!" << std::endl;
+
 				API::Message message;
 				message.set_type(API::Message::VISION);
 				message.set_utc_timestamp(std::time(0));
+
 				auto* visionData = message.mutable_vision();
 				auto* imageData = visionData->mutable_image();
 				std::string* imageBytes = imageData->mutable_data();
@@ -197,29 +216,80 @@ namespace modules {
 
 				auto* reactionStatistics = message.mutable_reactionstatistics();
 
-				reactionStatistics->set_name(stats.name);
+				//reactionStatistics->set_name(stats.name);
 				reactionStatistics->set_reactionid(stats.reactionId);
 				reactionStatistics->set_taskid(stats.taskId);
 				reactionStatistics->set_causereactionid(stats.causeReactionId);
 				reactionStatistics->set_causetaskid(stats.causeTaskId);
-				reactionStatistics->set_emitted(duration_cast<milliseconds>(stats.emitted.time_since_epoch()).count());
-				reactionStatistics->set_started(duration_cast<milliseconds>(stats.started.time_since_epoch()).count());
-				reactionStatistics->set_finished(duration_cast<milliseconds>(stats.finished.time_since_epoch()).count());
+				reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
+				reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
+				reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
 
 				/*std::string name = stats.name;
                 int status = -4;
                 char* res = abi::__cxa_demangle(name.c_str(), NULL, NULL, &status);
                 const char* const demangled_name = (status == 0) ? res : name.c_str();
                 std::string ret_val(demangled_name);
-                free(res);
+                free(res);*/
 
-				log<NUClear::DEBUG>("testing! ", demangled_name);*/
+				/*log<NUClear::DEBUG>("testing! ", demangled_name);*/
+				
+				int status = -4; // some arbitrary value to eliminate the compiler warning
+				std::unique_ptr<char, void(*)(void*)> res {
+					abi::__cxa_demangle(stats.name.c_str(), nullptr, nullptr, &status),
+					std::free
+				};
+
+                std::string demangled_name(status == 0 ? res.get() : stats.name );
+
+				reactionStatistics->set_name(demangled_name);
 
 				send(message);
 			});
 
 			on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& image) {
-				log<NUClear::DEBUG>("ClassifiedImage!");
+
+				API::Message message;
+				message.set_type(API::Message::VISION);
+				message.set_utc_timestamp(std::time(0));
+				API::Vision* api_vision = message.mutable_vision();
+
+				API::VisionClassifiedImage* api_classified_image = api_vision->mutable_classified_image();
+
+				for (auto& rowColourSegments : image.horizontal_filtered_segments.m_segmentedScans) {
+					for (auto& colorSegment : rowColourSegments) {
+						auto& start = colorSegment.m_start;
+						auto& end = colorSegment.m_end;
+						auto& colour = colorSegment.m_colour;
+
+						API::VisionClassifiedSegment* api_segment = api_classified_image->add_segment();
+						api_segment->set_start_x(start[0]);
+						api_segment->set_start_y(start[1]);
+						api_segment->set_end_x(end[0]);
+						api_segment->set_end_y(end[1]);
+						api_segment->set_colour(colour);
+					}
+				}
+
+				for (auto& columnColourSegments : image.vertical_filtered_segments.m_segmentedScans)
+				{
+					for (auto& colorSegment : columnColourSegments)
+					{
+						auto& start = colorSegment.m_start;
+						auto& end = colorSegment.m_end;
+						auto& colour = colorSegment.m_colour;
+
+						API::VisionClassifiedSegment* api_segment = api_classified_image->add_segment();
+						api_segment->set_start_x(start[0]);
+						api_segment->set_start_y(start[1]);
+						api_segment->set_end_x(end[0]);
+						api_segment->set_end_y(end[1]);
+						api_segment->set_colour(colour);
+					}
+				}
+
+				send(message);
+				
 			});
 
 			// When we shutdown, close our publisher
