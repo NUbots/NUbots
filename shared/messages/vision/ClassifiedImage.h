@@ -72,7 +72,7 @@ namespace messages {
         } ColourSegment;
 
         typedef struct {
-            std::vector<std::vector<ColourSegment>> m_segmentedScans;       //! @variable The segments in this region.
+            std::vector<std::vector<ColourSegment> > m_segmentedScans;       //! @variable The segments in this region.
             ScanDirection m_direction;                                      //! @variable The alignment of the scans in this region.
         } SegmentedRegion;
 
@@ -95,8 +95,8 @@ namespace messages {
             SegmentedRegion vertical_filtered_segments;         //! @variable The filtered segmented vertical scanlines.
 
             //! Transitions
-            std::map<COLOUR_CLASS, std::vector<ColourSegment>> matched_horizontal_segments;
-            std::map<COLOUR_CLASS, std::vector<ColourSegment>> matched_vertical_segments;
+            std::map<COLOUR_CLASS, std::vector<ColourSegment> > matched_horizontal_segments;
+            std::map<COLOUR_CLASS, std::vector<ColourSegment> > matched_vertical_segments;
 
             std::vector<arma::vec2> green_horizon_interpolated_points;
              
