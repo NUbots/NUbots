@@ -63,7 +63,7 @@ namespace modules {
             });
 
             detect_goals = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
-
+                emit(std::move(goalDetector.getGoals());
             });
 
             detect_balls = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {

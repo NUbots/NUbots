@@ -52,6 +52,8 @@ namespace modules {
             NUClear::ReactionHandle detect_balls;
             NUClear::ReactionHandle etect_line_objects;
             NUClear::ReactionHandle detect_obstacles;
+
+            GoalDetector_RANSAC goalDetector;
         public:
             explicit FeatureDetector(std::unique_ptr<NUClear::Environment> environment);
         };
