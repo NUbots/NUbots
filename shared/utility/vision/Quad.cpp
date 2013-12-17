@@ -1,28 +1,29 @@
 /*
- * This file is part of FeatureDetector.
+ * This file is part of NUBots Utility.
  *
- * FeatureDetector is free software: you can redistribute it and/or modify
+ * NUBots Utility is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * FeatureDetector is distributed in the hope that it will be useful,
+ * NUBots Utility is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FeatureDetector.  If not, see <http://www.gnu.org/licenses/>.
+ * along with NUBots Utility.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #include "Quad.h"
 
-namespace modules {
+namespace utility {
 	namespace vision {	
 
 		Quad::Quad() : bl(arma::zeros<arma::vec>(2)), br(arma::zeros<arma::vec>(2)), tr(arma::zeros<arma::vec>(2)), tl(arma::zeros<arma::vec>(2)) {
+			// Empty constructor.
 		}
 
 		Quad::Quad(const Quad& other) {
@@ -130,18 +131,22 @@ namespace modules {
 
 		/// @brief Stream insertion operator for a single Quad.
 		/// @relates Quad
-		std::ostream& operator<< (std::ostream& output, const Quad& q) {
-			output << "(" << q.bl[0] << ", " << q.bl[1] << ") (" << q.tl[0] << ", " << q.tl[1] << ") (" << q.tr[0] << ", " << q.tr[1] << ") (" << q.br[0] << ", " << q.br[1] << ")";
+		std::ostream& operator<< (std::ostream& output, const Quad& quad) {
+			output << "(" << quad.getBottomLeft()[0] << ", " << quad.getBottomLeft()[1] << ") (" 
+					<< quad.getTopLeft()[0] << ", " << quad.getTopLeft()[1] << ") (" 
+					<< quad.getTopRight()[0] << ", " << quad.getTopRight()[1] << ") (" 
+					<< quad.getBottomRight()[0] << ", " << quad.getBottomRight()[1] << ")";
+
 			return output;
 		}
 
 		/// @brief Stream insertion operator for a std::vector of Quads.
-		///  @relates Quad
-		std::ostream& operator<< (std::ostream& output, const std::vector<Quad>& q) {
+		/// @relates Quad
+		std::ostream& operator<< (std::ostream& output, const std::vector<Quad>& quads) {
 			output << "[";
 			
-			for (const auto& it : q)
-				output << it << ", ";
+			for (const auto& quad : quads)
+				output << quad << ", ";
 				
 			output << "]";
 			

@@ -1,31 +1,31 @@
 /*
- * This file is part of FeatureDetector.
+ * This file is part of NUBots Utility.
  *
- * FeatureDetector is free software: you can redistribute it and/or modify
+ * NUBots Utility is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * FeatureDetector is distributed in the hope that it will be useful,
+ * NUBots Utility is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FeatureDetector.  If not, see <http://www.gnu.org/licenses/>.
+ * along with NUBots Utility.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_VISION_QUAD_H
-#define MODULES_VISION_QUAD_H
+#ifndef UTILITY_VISION_QUAD_H
+#define UTILITY_VISION_QUAD_H
 
 #include <nuclear>
 #include <armadillo>
-#include <iostream>
+#include <ostream>
 #include <vector>
 
-namespace modules {
+namespace utility {
 	namespace vision {
 	
 		class Quad {
@@ -82,12 +82,6 @@ namespace modules {
 
 			bool overlapsHorizontally(const Quad& other) const;
 
-			//! @brief output stream operator.
-			friend std::ostream& operator<< (std::ostream& output, const Quad& g);
-			
-			//! @brief output stream operator for a vector of goals.
-			friend std::ostream& operator<< (std::ostream& output, const std::vector<Quad>& g);
-
 		private:
 			arma::vec2 bl;													//! @variable The bottom-left of the Quad.
 			arma::vec2 br;													//! @variable The bottom-right of the Quad.
@@ -95,8 +89,14 @@ namespace modules {
 			arma::vec2 tl;													//! @variable The top-left of the Quad.
 		};
 		
+		//! @brief output stream operator.
+		std::ostream& operator<< (std::ostream& output, const Quad& quad);
+		
+		//! @brief output stream operator for a vector of goals.
+		std::ostream& operator<< (std::ostream& output, const std::vector<Quad>& quads);
+
 	}
 }
 
-#endif // MODULES_VISION_QUAD_H
+#endif // UTILITY_VISION_QUAD_H
 
