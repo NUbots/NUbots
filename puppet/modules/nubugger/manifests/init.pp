@@ -3,10 +3,10 @@
 # Installs the NUbugger debugging system.
 #
 class nubugger(
-	$username = 'nubot',
-    $nubots_dir = "/home/${username}/NUbots", #"
+    $username = 'nubot',
+    $nubots_dir = "/home/${username}/nubots", #"
 	) {
-  include nodejs
+  # include nodejs
   include zmq
 
   $nubugger_dir = "${nubots_dir}/NUbugger"
@@ -27,6 +27,7 @@ class nubugger(
     ensure => present,
     user => $username,
     owner => $username,
+    revision => 'feature/puppet',
   } ~> 
   exec { 'npm_install':
     require => [
@@ -35,12 +36,13 @@ class nubugger(
         Package['build-essential'],
         Package['pkg-config'],
         Package['uuid-dev'],
+        Vcsrepo['nubugger_repo'],
       ],
     command => 'npm install',
     cwd => $nubugger_dir,
     path => $path,
     refreshonly => true,
     logoutput => "on_failure",
-    user => $username,
+    # user => $username,
   }
 }
