@@ -62,7 +62,7 @@ namespace modules {
 			std::vector<LSFittedLine> startLines, endLines;
 
 			// Get edge points.
-			for (ColourSegment s : horizontalSegments) {
+			for (ColourSegment& s : horizontalSegments) {
 				startPoints.push_back(s.getStart());
 				endPoints.push_back(s.getEnd());
 			}

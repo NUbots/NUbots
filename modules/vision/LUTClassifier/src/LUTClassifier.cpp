@@ -167,7 +167,7 @@ namespace modules {
             	SegmentedRegion classified_segments_ver = scanLines.classifyVerticalScanLines(image, greenHorizon, LUTs[current_LUT_index]);
             	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyImage" << std::endl;
             	std::unique_ptr<ClassifiedImage> classified_image = segmentFilter.classifyImage(classified_segments_hor, classified_segments_ver);
-            	image->green_horizon_interpolated_points = greenHorizon.getInterpolatedPoints();
+            	classified_image->green_horizon_interpolated_points = greenHorizon.getInterpolatedPoints();
             	//std::cout << "LUTClassifier::on<Trigger<Image>> emit(std::move(classified_image));" << std::endl;
             	emit(std::move(classified_image));
             	//emit(std::make_unique<ClassifiedImage>(new ClassifiedImage(classigied_segments_hor,classified_segments_ver)));
