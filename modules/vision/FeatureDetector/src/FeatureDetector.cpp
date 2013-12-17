@@ -27,56 +27,52 @@ namespace modules {
         FeatureDetector::FeatureDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) { 
             // Load feature detector constants.
             on<Trigger<Configuration<FeatureDetectorConfig>>>([this](const Configuration<FeatureDetectorConfig>& constants) {
-            });
-
-            reaction = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
-                /********************************************************
-                 *          THIS CODE HAS NOT BEEN PORTED YET           *
-                 ********************************************************/
-                reaction.disable();
-                // FIND GOALS                
-                // ransac method
-                std::vector<Goal> ransac_goals_edges = m_goal_detector_ransac_edges->run();
-                //m_goal_detector_ransac_edges->relabel(ransac_goals_edges);
-
-                m_blackboard->addGoals(ransac_goals_edges);
-
-                // FIND FIELD POINTS
-                // REMOVED FOR RC2013
-                // Edit here to change whether centre circles, lines or corners are found
-                //      (note lines cannot be published yet)
-                m_field_point_detector->run(true, true, true);
-
-                // FIND BALLS
-                //m_blackboard->addBalls(m_ball_detector_dave->run());
-                m_blackboard->addBalls(m_ball_detector_shannon->run());
-
-                // FIND OBSTACLES
-                std::vector<Obstacle> obstacles = ObstacleDetectionCH::run();
-                m_blackboard->addObstacles(obstacles);
-
-                // ADD IN LABELLING OF GOALS BASED ON KEEPER COLOUR
-
-                // EMIT RESULTS
-
-            });
-
-//BEGIN Trents multi trigger:
-            
-
-            auto functionthattakesallthethingsback = [this](const blah& ball, const goal& goal, ..., int index_of_triggered){
-                if(all triggered){
-                    emit(collection);
+                DETECT_LINES = constants.config["DETECT_LINES"];
+                DETECT_GOALS = constants.config["DETECT_GOALS"];
+                DETECT_BALLS = constants.config["DETECT_BALLS"];
+                DETECT_OBSTACTLES = constants.config["DETECT_OBSTACTLES"];
+                
+                if(DETECT_LINES) {
+                    detect_line_objects.enable();
+                } else {
+                    detect_line_objects.disable();
                 }
-                reaction.enable();
-            }
 
-            on<Trigger<blah>, With<goal>, With<line>,..>(std::bind(functionthattakesallthethingsback,_1,_2,_3,0));
+                if(DETECT_GOALS) {
+                    detect_goals.enable();
+                } else {
+                    detect_goals.disable();
+                }
 
-            on<With<blah>, Trigger<goal>, With<line>,..>(std::bind(functionthattakesallthethingsback,_1,_2,_3,1));
+                if(DETECT_BALLS) {
+                    detect_balls.enable();
+                } else {
+                    detect_balls.disable();
+                }
 
-            on<With<blah>, With<goal>, Trigger<line>,..>(std::bind(functionthattakesallthethingsback,_1,_2,_3,2));
+                if(DETECT_OBSTACTLES) {
+                    detect_obstacles.enable();
+                } else {
+                    detect_obstacles.disable();
+                }
+
+            });
+
+            detect_line_objects = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
+
+            });
+
+            detect_goals = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
+
+            });
+
+            detect_balls = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
+
+            });
+
+            detect_obstacles = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
+
+            });
         }
-
     }  // vision
 }  // modules

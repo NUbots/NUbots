@@ -42,6 +42,16 @@ namespace modules {
         class FeatureDetector : public NUClear::Reactor {
         private:
             NUClear::ReactionHandle reaction;
+
+            bool DETECT_LINES;
+            bool DETECT_GOALS;
+            bool DETECT_BALLS;
+            bool DETECT_OBSTACTLES; 
+
+            NUClear::ReactionHandle detect_goals;
+            NUClear::ReactionHandle detect_balls;
+            NUClear::ReactionHandle etect_line_objects;
+            NUClear::ReactionHandle detect_obstacles;
         public:
             explicit FeatureDetector(std::unique_ptr<NUClear::Environment> environment);
         };
