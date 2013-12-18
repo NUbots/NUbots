@@ -21,6 +21,7 @@
 #define MODULES_INPUT_V4L2CAMERA_H
 
 #include <map>
+#include <memory>
 #include <string>
 
 #include "messages/input/Image.h"

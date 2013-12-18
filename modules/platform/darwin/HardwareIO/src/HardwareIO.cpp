@@ -30,7 +30,7 @@ namespace darwin {
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/ttyUSB0") {
 
         // This trigger gets the sensor data from the CM730
-        on<Trigger<Every<20, std::chrono::milliseconds>>>([this](const time_t& time) {
+        on<Trigger<Every<60, std::chrono::milliseconds>>, Options<Single>>([this](const time_t& time) {
 
             // Read our data
             Darwin::BulkReadResults data = darwin.bulkRead();
@@ -62,10 +62,10 @@ namespace darwin {
             // Voltage (in volts)
             sensors->voltage = Convert::voltage(data.cm730.voltage);
 
-            // Acceleronometer (in m/s^2)
-            sensors->acceleronometer.x = Convert::accelerometer(data.cm730.acceleronometer.x);
-            sensors->acceleronometer.y = Convert::accelerometer(data.cm730.acceleronometer.y);
-            sensors->acceleronometer.z = Convert::accelerometer(data.cm730.acceleronometer.z);
+            // Accelerometer (in m/s^2)
+            sensors->accelerometer.x = Convert::accelerometer(data.cm730.accelerometer.x);
+            sensors->accelerometer.y = Convert::accelerometer(data.cm730.accelerometer.y);
+            sensors->accelerometer.z = Convert::accelerometer(data.cm730.accelerometer.z);
 
             // Gyroscope (in radians/second)
             sensors->gyroscope.x = Convert::gyroscope(data.cm730.gyroscope.x);

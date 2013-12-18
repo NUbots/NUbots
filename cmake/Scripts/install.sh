@@ -20,9 +20,9 @@ else
 fi
 
 # Copy our binaries over
-for file in `find roles -type f -executable -exec sh -c "file -i '{}' | grep -q 'x-executable; charset=binary'" \; -print`; do
-    scp -C "$file" "darwin@$robotIP:/home/darwin/"
-done
+cd roles
+file -i * | grep 'x-executable; charset=binary' | cut -f1 -d: | rsync --files-from=- -avz . "darwin@$robotIP:/home/darwin/"
+cd ..
 
 # Overwrite configuration files
 if [ "$config" == "update" ] || [ "$config" == "u" ] ;
