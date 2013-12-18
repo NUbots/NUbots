@@ -283,6 +283,44 @@ namespace modules {
 					}
 				}
 
+				for (auto& matchedSegment : image.matched_vertical_segments)
+				{
+					for (auto& ballColumnColourSegment : matchedSegment.second)
+					{
+						auto& start = ballColumnColourSegment.m_start;
+						auto& end = ballColumnColourSegment.m_end;
+						auto& colour = ballColumnColourSegment.m_colour;
+						auto& colourClass = matchedSegment.first;
+
+						API::VisionTransitionSegment* api_segment = api_classified_image->add_transition_segment();
+						api_segment->set_start_x(start[0]);
+						api_segment->set_start_y(start[1]);
+						api_segment->set_end_x(end[0]);
+						api_segment->set_end_y(end[1]);
+						api_segment->set_colour(colour);
+						api_segment->set_colour_class(colourClass);
+					}
+				}
+	
+				for (auto& matchedSegment : image.matched_horizontal_segments)
+				{
+					for (auto& ballRowColourSegment : matchedSegment.second)
+					{
+						auto& start = ballRowColourSegment.m_start;
+						auto& end = ballRowColourSegment.m_end;
+						auto& colour = ballRowColourSegment.m_colour;
+						auto& colourClass = matchedSegment.first;
+
+						API::VisionTransitionSegment* api_segment = api_classified_image->add_transition_segment();
+						api_segment->set_start_x(start[0]);
+						api_segment->set_start_y(start[1]);
+						api_segment->set_end_x(end[0]);
+						api_segment->set_end_y(end[1]);
+						api_segment->set_colour(colour);
+						api_segment->set_colour_class(colourClass);
+					}
+				}
+	
 				send(message);
 				//log<NUClear::DEBUG>("ClassifiedImage!");
 

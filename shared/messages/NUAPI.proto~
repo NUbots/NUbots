@@ -88,12 +88,12 @@ message VisionTransitionSegment {
 
     optional uint32 colour = 5;
 
-    optional uint32 colour_class = 6;
+    optional uint32 class = 6;
 }
 
 message VisionClassifiedImage {
     optional uint32 num_segments = 1;
-    repeated VisionClassifiedSegment segment = 2;
+    repeated VisionClassifiedSegment classified_segment = 2;
     repeated VisionTransitionSegment transition_segment = 3;
 }
 
