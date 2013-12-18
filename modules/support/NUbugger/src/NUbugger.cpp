@@ -256,6 +256,10 @@ namespace modules {
 				reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
 				reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
 
+				for (auto& log : stats.log) {
+					reactionStatistics->add_log(log);
+				}
+
 				/*std::string name = stats.name;
                 int status = -4;
                 char* res = abi::__cxa_demangle(name.c_str(), NULL, NULL, &status);
