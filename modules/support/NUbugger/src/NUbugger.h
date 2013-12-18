@@ -22,7 +22,7 @@
 
 #include <nuclear>
 #include <zmq.hpp>
-#include "messages/NUAPI.pb.h"
+#include "messages/support/NUbugger/proto/Message.pb.h"
 
 namespace modules {
     namespace support {
@@ -40,7 +40,7 @@ namespace modules {
 			std::mutex mutex;
 
 			void send(zmq::message_t& packet);
-			void send(API::Message message);
+			void send(messages::support::NUbugger::proto::Message message);
         public:
             explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);
         };

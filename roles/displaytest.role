@@ -8,5 +8,5 @@ ADD_ROLE(
         platform::darwin::HardwareIO
         input::LinuxCamera
         support::NUbugger
-        vision::LUTClassifier
+        #vision::LUTClassifier
 )
