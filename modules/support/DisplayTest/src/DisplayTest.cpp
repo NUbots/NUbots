@@ -11,7 +11,7 @@ namespace modules {
 			on<Trigger<Every<100, std::chrono::milliseconds>>>([this](const time_t&) {
 
 				/*std::string value = "testing";
-				log<NUClear::DEBUG>(value);
+				NUClear::log<NUClear::DEBUG>(value);
 
 				auto message = std::make_unique<messages::PlainMessage>();
 				message->value = value;

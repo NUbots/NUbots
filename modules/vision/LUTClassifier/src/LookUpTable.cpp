@@ -55,7 +55,7 @@ namespace modules{
             }
 			
             else {
-                //log<NUClear::DEBUG>("Vision::loadLUTFromFile(", file_location, "). Failed to load lut.");
+                //NUClear::log<NUClear::DEBUG>("Vision::loadLUTFromFile(", file_location, "). Failed to load lut.");
                 std::cout << "Vision::loadLUTFromFile(" << file_location << "). Failed to load lut." << std::endl;
                 std::cout << "Lutfile is open "<< lutfile.is_open()<<"  ||  LUTfile size = "<<lutfile.tellg()<< std::endl;
                 std::cout << "good: "<< lutfile.good() <<"; bad: "<< lutfile.bad() <<"; fail: "<< lutfile.fail() <<"; eof: "<< lutfile.eof() << std::endl;

@@ -44,12 +44,12 @@ namespace modules {
 			arma::vec2 right = horizonPoints.back();
 
 			if (left[1] >= img.height()) { // Element 1 is the y-component.
-//				log<NUClear::WARN>("Left horizon limit exceeds image height: ", left[1]);
+//				NUClear::log<NUClear::WARN>("Left horizon limit exceeds image height: ", left[1]);
 				std::cout << "Left horizon limit exceeds image height: " << left[1] << std::endl;
 			}
 			
 			if (right[1] >= img.height()) { // Element 1 is the y-component.
-//				log<NUClear::WARN>("Left horizon limit exceeds image height: ", right[1]);
+//				NUClear::log<NUClear::WARN>("Left horizon limit exceeds image height: ", right[1]);
 				std::cout << "Left horizon limit exceeds image height: " << right[1] << std::endl;
 			}
 			
@@ -91,7 +91,7 @@ namespace modules {
 			arma::vec2 startPoint, endPoint;
 
 			if (y >= image.height()) {
-//				log<NUClear::ERROR>("ScanLines::classifyHorizontalScan invalid y: ", y);
+//				NUClear::log<NUClear::ERROR>("ScanLines::classifyHorizontalScan invalid y: ", y);
 				std::cout << "ScanLines::classifyHorizontalScan invalid y: " <<  y << std::endl;
 				return result;
 			}
@@ -137,7 +137,7 @@ namespace modules {
 			arma::vec2 startPoint, endPoint;
 
 			if ((start[1] >= image.height()) || (start[1] < 0) || (start[0] >= image.width()) || (start[0] < 0)) {
-//				log<NUClear::ERROR>("ScanLines::classifyVerticalScan invalid start position: ", start);
+//				NUClear::log<NUClear::ERROR>("ScanLines::classifyVerticalScan invalid start position: ", start);
 				std::cout << "ScanLines::classifyVerticalScan invalid start position: " << start << std::endl;
 				return result;
 			}

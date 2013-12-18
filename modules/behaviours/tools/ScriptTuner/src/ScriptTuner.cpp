@@ -52,12 +52,12 @@ namespace modules {
 
                         // Check if the script exists and load it if it does.
                         if(utility::file::exists(scriptPath)) {
-                            log<NUClear::DEBUG>("Loading script: ", scriptPath, '\n');
+                            NUClear::log<NUClear::DEBUG>("Loading script: ", scriptPath, '\n');
                             loadScript(scriptPath);
                         }
                     }
                     else {
-                        log<NUClear::DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
+                        NUClear::log<NUClear::DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
                         powerPlant->shutdown();
                     }
                 });

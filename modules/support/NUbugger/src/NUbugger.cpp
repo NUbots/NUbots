@@ -263,7 +263,7 @@ namespace modules {
                 std::string ret_val(demangled_name);
                 free(res);*/
 
-				/*log<NUClear::DEBUG>("testing! ", demangled_name);*/
+				/*NUClear::log<NUClear::DEBUG>("testing! ", demangled_name);*/
 				
 				int status = -4; // some arbitrary value to eliminate the compiler warning
 				std::unique_ptr<char, void(*)(void*)> res {
