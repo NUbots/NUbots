@@ -139,7 +139,7 @@ namespace modules {
 		    }
 
 		    //NOTE: OLD Code may have printed more info about the thrown points.
-		    std::cout << "Green Horizon Number of Thrown Points : " << thrown_points.size() << std::endl;
+		    //std::cout << "Green Horizon Number of Thrown Points : " << thrown_points.size() << std::endl;
 
 		    horizon_points = upperConvexHull(horizon_points);
 		   	set(horizon_points, width, height);		    

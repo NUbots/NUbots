@@ -39,7 +39,7 @@ namespace modules {
 			std::vector<int> horizontalScanLines;
 			int bottomHorizontalScan = img.height() - 1;														//we need h-scans under the GH for field lines
 			const std::vector<arma::vec2>& horizonPoints = greenHorizon.getInterpolatedPoints();		// Need this to get the left and right
-			std::cout << "Num Horizon points = " << horizonPoints.size()<< std::endl;
+			//std::cout << "Num Horizon points = " << horizonPoints.size()<< std::endl;
 			arma::vec2 left = horizonPoints.front();
 			arma::vec2 right = horizonPoints.back();
 
