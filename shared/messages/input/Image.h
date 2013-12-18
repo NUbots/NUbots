@@ -54,8 +54,10 @@ namespace messages {
         private:
             size_t imgWidth;
             size_t imgHeight;
+
             std::vector<Pixel> data;
             std::vector<uint8_t> src;
+
         };
         
     }  // input
