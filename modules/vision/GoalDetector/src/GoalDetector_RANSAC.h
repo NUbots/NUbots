@@ -52,11 +52,7 @@ namesapce modules {
 
 			unsigned int getClosestUntriedLine(const LSFittedLine& start, const std::vector<LSFittedLine>& end_lines, std::vector<bool>& tried);
 
-			std::unique_ptr<std::vector<Goal>> assignGoals(const std::list<Quad>& candidates, const Quad& crossbar) const;
-			std::unique_ptr<std::vector<Goal>> assignGoals(const std::list<Quad>& candidates) const;
-
-			void removeInvalid(std::list<Quad>& posts);
-			void mergeClose(std::list<Quad>& posts, double widthMultipleToMerge);
+			std::vector<Goal> assignGoals(const std::list<Quad>& candidates, const Quad& crossbar) const;
 
 			std::vector<Point> getEdgePointsFromSegments(const std::vector<ColourSegment> &segments);
 

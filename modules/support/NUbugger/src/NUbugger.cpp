@@ -37,7 +37,8 @@ using messages::vision::ClassifiedImage;
 using NUClear::DEBUG;
 using utility::NUbugger::graph;
 using std::chrono::duration_cast;
-using std::chrono::microseconds;
+using std::chrono::milliseconds;
+
 
 namespace modules {
 	namespace support {
@@ -46,8 +47,9 @@ namespace modules {
 			: Reactor(std::move(environment))
 			, pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {
 			// Set our high water mark
-			//int hwm = 50;
-			//pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
+			int hwm = 3;
+			pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
+
 
 			// Bind to port 12000
 			pub.bind("tcp://*:12000");
@@ -216,33 +218,26 @@ namespace modules {
 
 				auto* reactionStatistics = message.mutable_reactionstatistics();
 
-				//reactionStatistics->set_name(stats.name);
+
+				reactionStatistics->set_name(stats.name);
 				reactionStatistics->set_reactionid(stats.reactionId);
 				reactionStatistics->set_taskid(stats.taskId);
 				reactionStatistics->set_causereactionid(stats.causeReactionId);
 				reactionStatistics->set_causetaskid(stats.causeTaskId);
-				reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
-				reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
-				reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
+
+				reactionStatistics->set_emitted(duration_cast<milliseconds>(stats.emitted.time_since_epoch()).count());
+				reactionStatistics->set_started(duration_cast<milliseconds>(stats.started.time_since_epoch()).count());
+				reactionStatistics->set_finished(duration_cast<milliseconds>(stats.finished.time_since_epoch()).count());
+
 
 				/*std::string name = stats.name;
                 int status = -4;
                 char* res = abi::__cxa_demangle(name.c_str(), NULL, NULL, &status);
                 const char* const demangled_name = (status == 0) ? res : name.c_str();
                 std::string ret_val(demangled_name);
-                free(res);*/
+                free(res);
 
-				/*log<NUClear::DEBUG>("testing! ", demangled_name);*/
-				
-				int status = -4; // some arbitrary value to eliminate the compiler warning
-				std::unique_ptr<char, void(*)(void*)> res {
-					abi::__cxa_demangle(stats.name.c_str(), nullptr, nullptr, &status),
-					std::free
-				};
-
-                std::string demangled_name(status == 0 ? res.get() : stats.name );
-
-				reactionStatistics->set_name(demangled_name);
+				log<NUClear::DEBUG>("testing! ", demangled_name);*/
 
 				send(message);
 			});
@@ -289,7 +284,8 @@ namespace modules {
 				}
 
 				send(message);
-				
+				//log<NUClear::DEBUG>("ClassifiedImage!");
+
 			});
 
 			// When we shutdown, close our publisher
