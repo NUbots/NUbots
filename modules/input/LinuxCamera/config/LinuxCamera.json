@@ -11,7 +11,7 @@
     "absoluteExposure": 1814,
     "powerLineFrequency": 2,
     "sharpness": 191,
-    "imageFormat" : "YUYV",
+    "imageFormat" : "MJPG",
     "imageWidth": 320,
     "imageHeight": 240
 }
