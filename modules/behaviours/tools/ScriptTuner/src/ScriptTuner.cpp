@@ -146,6 +146,9 @@ namespace modules {
                         case 'P':
                             playScript();
                             break;
+                        case 'J':
+                            jumpToFrame();
+                            break;
                     }
 
                     // Update whatever visual changes we made
@@ -187,6 +190,9 @@ namespace modules {
                 mvprintw(3, 2, "Frames:"); // The frames section is filled out after this
                 mvprintw(4, 2, "Duration: %d", // Output the selected frames duration
                          std::chrono::duration_cast<std::chrono::milliseconds>(script.frames[frame].duration).count());
+                mvprintw(5,2, "Jump To Frame:");
+                mvprintw(6,2, "Load File:");
+                mvprintw(7,2, "Play Files:");
 
                 // Output all of our frame numbers and highlight the selected frame
                 move(3, 10);
@@ -206,7 +212,7 @@ namespace modules {
 
                 // Heading Commands
                 attron(A_BOLD);
-                mvprintw(29, 2, "Commands ");
+                mvprintw(31, 2, "Commands ");
                 attroff(A_BOLD);
 
                  //Each Command
@@ -222,12 +228,14 @@ namespace modules {
                                      " ",
                                      "S",
                                      "T",
+                                     "A",
                                      "N",
                                      "D",
                                      "P",
-                                     "J"};
+                                     "J",
+                                     "R"};
 
-                //Each Meaning
+                //Each Meaningc++ else if
                 const char* MEANINGS[] = {"Change selection up",
                                      "Change selection down",
                                      "Swap between angle and gain",
@@ -240,16 +248,18 @@ namespace modules {
                                      "Toggle lock mode",
                                      "Save the current script",
                                      "Edit this frame's duration",
+                                     "Play All",
                                      "Create new frame",
                                      "Delete Frame",
                                      "Play current script from first frame",
-                                     "Jump to a Frame"};    
+                                     "Jump to a Frame",
+                                     "Manual Screen Refresh"};    
 
                 //Prints commands and their meanings to the screen
-                for (size_t i = 0; i < 16; i++) {
-                    mvprintw( 30 + i, 2, COMMANDS[i]);
-                    mvprintw( 30 + i, 12, "=");
-                    mvprintw( 30 + i, 14, MEANINGS[i]);
+                for (size_t i = 0; i < 18; i++) {
+                    mvprintw( 32 + i, 2, COMMANDS[i]);
+                    mvprintw( 32 + i, 12, "=");
+                    mvprintw( 32 + i, 14, MEANINGS[i]);
                 }
 
                 // Each motor
@@ -277,27 +287,27 @@ namespace modules {
                 // Loop through all our motors
                 for (size_t i = 0; i < 20; ++i) {
                     // Everything defaults to unlocked, we add locks as we find them
-                    mvprintw(i + 6, 2, "U");
+                    mvprintw(i + 9, 2, "U");
 
                     // Output the motor name
                     attron(A_BOLD);
-                    mvprintw(i + 6, 4, MOTOR_NAMES[i]);
+                    mvprintw(i + 9, 4, MOTOR_NAMES[i]);
                     attroff(A_BOLD);
 
                     // Everything defaults to 0 angle and gain (unless we find one)
-                    mvprintw(i + 6, 26, "Angle: -.--- Gain: ---.-");
+                    mvprintw(i + 9, 26, "Angle: -.--- Gain: ---.-");
                 }
 
                 for(auto& target : script.frames[frame].targets) {
                     // Output that this frame is locked (we shuffle the head to the top of the list)
-                    mvprintw(((static_cast<int>(target.id) + 2) % 20) + 6, 2, "L");
+                    mvprintw(((static_cast<int>(target.id) + 2) % 20) + 9, 2, "L");
 
                     // Output this frames gain and angle
-                    mvprintw(((static_cast<int>(target.id) + 2) % 20) + 6, 26, "Angle: %+.3f Gain: %5.1f", target.position, target.gain);
+                    mvprintw(((static_cast<int>(target.id) + 2) % 20) + 9, 26, "Angle: %+.3f Gain: %5.1f", target.position, target.gain);
                 }
 
                 // Highlight our selected point
-                mvchgat(selection + 6, angleOrGain ? 26 : 41, angleOrGain ? 13 : 11, A_STANDOUT, 0, nullptr);
+                mvchgat(selection + 9, angleOrGain ? 26 : 40, angleOrGain ? 13 : 11, A_STANDOUT, 0, nullptr);
 
                 // We finished building
                 refresh();
@@ -411,10 +421,10 @@ namespace modules {
             void ScriptTuner::editSelection() {
 
                 // Erase our old text
-                mvprintw(selection + 6, angleOrGain ? 33 : 46, " ");
+                mvprintw(selection + 9, angleOrGain ? 33 : 46, " ");
 
                 // Move to our point
-                move(selection + 6, angleOrGain ? 33 : 46);
+                move(selection + 9, angleOrGain ? 33 : 46);
 
                 // Get the users input
                 std::string result = userInput();
@@ -479,8 +489,50 @@ namespace modules {
                 endwin();
             }
 
+            //emits a message so motion can pick up the script
             void ScriptTuner::playScript() {
                 emit(std::make_unique<ExecuteScript>(script));
+            }
+
+            //allows user to jump to a specific frame without engaging the motors
+            void ScriptTuner::jumpToFrame() {
+                //places cursor
+                move(5, 17);
+                //makes cursor visible
+                curs_set(true);
+                std::string tempframe = userInput();
+
+
+                //checks user input is a number and converts it to a number    
+                if(!tempframe.empty() && tempframe.size() <= 4) {
+                    try {
+                        int tempframe2 = stoi(tempframe);
+                        //makes tempframe2 always positive
+                        if(tempframe2 <= 0) {
+                            tempframe2=-1*tempframe2;
+
+                        }
+                        else {
+                            tempframe2=tempframe2;
+                        }
+                        //checks user input is within correct range
+                        if(tempframe2 <= script.frames.size()) {
+
+                            frame = tempframe2 - 1;
+                        }
+                        else {
+                            beep();                        
+                        }
+                    }
+                    catch(std::invalid_argument) {
+                        beep();
+                    }
+                }
+                curs_set(false);               
+            }
+
+            void ScriptTuner::manualRefresh() {
+                refreshView();
             }
             
         } // tools

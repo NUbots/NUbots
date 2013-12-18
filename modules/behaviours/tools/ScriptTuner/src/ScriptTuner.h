@@ -64,6 +64,8 @@ namespace modules {
                 void run();
                 void kill();
                 void playScript();
+                void jumpToFrame();
+                void manualRefresh();
 
 
                
