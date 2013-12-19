@@ -112,7 +112,7 @@ namespace utility {
         }
 
         void Line::normaliseRhoPhi() {
-            m_phi = m_phi - 2 * datum::pi * floor(m_phi / (2 * arma::pi));
+            m_phi = m_phi - 2 * arma::math::pi() * floor(m_phi / (2 * arma::math::pi()));
         }
 
         // setLineFromPoints(arma::vec2 p1, arma::vec2 p2): Generate the line that passes through the two given points.
@@ -249,8 +249,8 @@ namespace utility {
         double Line::getAngleBetween(const Line& other) const {
             double angle = std::abs(getAngle() - other.getAngle());
 
-            if (angle > (datum::pi * 0.5))
-                angle = datum::pi - angle;
+            if (angle > (arma::math::pi() * 0.5))
+                angle = arma::math::pi() - angle;
 
             return angle;
         }

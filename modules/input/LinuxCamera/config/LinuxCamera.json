@@ -4,14 +4,14 @@
     "whiteBalanceTemperature": 2000,
     "brightness": 143,
     "contrast": 39,
-    "saturation": 46,
+    "saturation": 70,
     "gain": 255,
     "autoExposure": 1,
     "autoExposurePriority": 0,
-    "absoluteExposure": 1814,
-    "powerLineFrequency": 2,
+    "absoluteExposure": 514,
+    "powerLineFrequency": 1,
     "sharpness": 191,
-    "imageFormat" : "YUYV",
+    "imageFormat" : "MJPEG",
     "imageWidth": 320,
     "imageHeight": 240
 }
