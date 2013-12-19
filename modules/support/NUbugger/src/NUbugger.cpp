@@ -358,9 +358,9 @@ namespace modules {
 				}
 
 				for (auto& greenHorizonPoint : image.green_horizon_interpolated_points) {
-					Message::VisionGreenHorizon* api_segment = api_classified_image->add_green_horizon();
-					api_segment->set_x(greenHorizonPoint[0]);
-					api_segment->set_y(greenHorizonPoint[1]);
+					Message::VisionGreenHorizonPoint* api_ghpoint = api_classified_image->add_green_horizon_point();
+					api_ghpoint->set_x(greenHorizonPoint[0]);
+					api_ghpoint->set_y(greenHorizonPoint[1]);
 				}
 
 				send(message);
