@@ -101,7 +101,7 @@ message Message {
 		optional uint32 num_segments = 1;
 		repeated VisionClassifiedSegment segment = 2;
 		repeated VisionTransitionSegment transition_segment = 3;
-                repeated VisionGreenHorizonPoint green_horizon = 4;
+        repeated VisionGreenHorizonPoint green_horizon_point = 4;
 	}
 
 	message Vision {
