@@ -33,21 +33,36 @@ namespace utility {
          */
         namespace matrix {
             inline arma::mat33 xRotationMatrix(double angle) {
-                return arma::mat33({0           , 0             , 0             , 
-                                    0           , cos(angle)    , -sin(angle)   , 
-                                    0           , sin(angle)    , cos(angle)    });
+                arma::mat33 xRotMatrix;
+                double cosA = cos(angle);
+                double sinA = sin(angle);
+
+                xRotMatrix << 0     << 0     << 0     << arma::endr
+                           << 0     << cosA  << -sinA << arma::endr
+                           << 0     << sinA  << cosA  << arma::endr;
+                return xRotMatrix;
             }
 
             inline arma::mat33 yRotationMatrix(double angle) {
-                return arma::mat33({cos(angle)  , 0             , sin(angle)    , 
-                                    0           , 0             , 0             , 
-                                    -sin(angle) , 0             , cos(angle)    });
+                arma::mat33 yRotMatrix;
+                double cosA = cos(angle);
+                double sinA = sin(angle);
+
+                yRotMatrix << cosA  << 0     << sinA  << arma::endr
+                           << 0     << 0     << 0     << arma::endr
+                           << -sinA << 0     << cosA  << arma::endr;
+                return yRotMatrix;
             }
 
             inline arma::mat33 zRotationMatrix(double angle) {
-                return arma::mat33({cos(angle)  , -sin(angle)   , 0             , 
-                                    sin(angle)  , cos(angle)    , 0             , 
-                                    0           , 0             , 0             });
+                arma::mat33 zRotMatrix;
+                double cosA = cos(angle);
+                double sinA = sin(angle);
+
+                zRotMatrix << cosA  << -sinA << 0     << arma::endr
+                           << sinA  << cosA  << 0     << arma::endr
+                           << 0     << 0     << 0     << arma::endr;
+                return zRotMatrix;
             }
         }
     }

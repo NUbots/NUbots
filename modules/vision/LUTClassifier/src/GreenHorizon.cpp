@@ -100,7 +100,7 @@ namespace modules {
 				
 				else {
 		            num_no_green = 0;
-		            std::cout<<"150 FRAMES OF NO GREEN HORIZON FOUND - VERY POOR LUT"<<std::endl;
+                    NUClear::log<NUClear::WARN>("150 FRAMES OF NO GREEN HORIZON FOUND - VERY POOR LUT");
 		        }
 
 		        horizon_points.clear();
