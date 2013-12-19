@@ -38,7 +38,7 @@ namespace modules {
             
             on<Trigger<Initialize>>([this](const Initialize&) {
                 emit(std::make_unique<OptimizeScriptResult>());
-                log<NUClear::DEBUG>("Requesting initial script");
+                NUClear::log<NUClear::DEBUG>("Requesting initial script");
             });
                     
             on<Trigger<Network<OptimizeScript>>, With<NUClear::extensions::NetworkingConfiguration>>([this]
@@ -47,7 +47,7 @@ namespace modules {
                 // Check if this script is for us
                 if (config.deviceName == task.data->target()) {
                     
-                    log<NUClear::DEBUG>("Script ", task.data->iteration(), " was delivered to be executed from ", task.sender);
+                    NUClear::log<NUClear::DEBUG>("Script ", task.data->iteration(), " was delivered to be executed from ", task.sender);
 
                     Script script;
                     
