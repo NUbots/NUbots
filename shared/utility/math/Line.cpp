@@ -22,22 +22,8 @@
 namespace utility {
     namespace math {
 
-        bool operator < (const arma::vec2& point1, const arma::vec2& point2) {
-            if(point1[0] < point2[0]) {
-                return true;
-            }
-
-            else if(point1[0] == point2[0]) {
-                if(point1[1] < point2[1]) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         // Constructor
-        Line::Line() : v({0, 0}), a({0, 0}) {
+        Line::Line() : v(arma::zeros<arma::vec>(2)), a(arma::zeros<arma::vec>(2)) {
             // General Line Equation: A*x + B*y = C
             m_A = 0.0;
             m_B = 0.0;
@@ -48,7 +34,7 @@ namespace utility {
         }
 
         // Constructor
-        Line::Line(arma::vec2 p1, arma::vec2 p2){
+        Line::Line(const arma::vec2& p1, const arma::vec2& p2) {
             // General Line Equation: A*x + B*y = C
             setLineFromPoints(p1, p2);
         }
@@ -77,7 +63,7 @@ namespace utility {
                 m_inv_normaliser = 1.0 / sqrt((m_A * m_A) + (m_B * m_B));
                 m_phi = acos(m_A * m_inv_normaliser);
                 m_rho = m_C * m_inv_normaliser;
-                a = arma::vec2({0, m_C});
+                a << 0 << m_C;
             }
 
             else {
@@ -88,10 +74,10 @@ namespace utility {
                 m_phi = 0.0;
                 m_rho = m_C;
                 m_inv_normaliser = 1.0 / m_A;
-                a = arma::vec2(m_C, 0);
+                a << m_C << 0;
             }
 
-            v = arma::vec2({m_B, -m_A});
+            v << m_B << -m_A;
             v = v / arma::norm(v, 2);
 
             normaliseRhoPhi();
@@ -106,17 +92,17 @@ namespace utility {
             m_A = cos(phi);
             m_B = sin(phi);
             m_C = rho;
-            m_inv_normaliser = 1.0 / sqrt((m_A * m_A) + (m_B * m_B);
+            m_inv_normaliser = 1.0 / sqrt((m_A * m_A) + (m_B * m_B));
 
             if (m_B == 0) {
-                a = arma::vec2({m_C, 0});
+                a << m_C << 0;
             }
 
             else {
-                a = arma::vec2({0, m_C});
+                a << 0 << m_C;
             }
 
-            v = arma::vec2({m_B, -m_A});
+            v  << m_B << -m_A;
             v = v / arma::norm(v, 2);
 
             normaliseRhoPhi();
@@ -126,7 +112,7 @@ namespace utility {
         }
 
         void Line::normaliseRhoPhi() {
-            m_phi = m_phi - 2 * datum::pi * floor(m_phi / (2 * datum::pi));
+            m_phi = m_phi - 2 * datum::pi * floor(m_phi / (2 * arma::pi));
         }
 
         // setLineFromPoints(arma::vec2 p1, arma::vec2 p2): Generate the line that passes through the two given points.
@@ -195,7 +181,7 @@ namespace utility {
 
         // findYFromX(float x): Calculate the x coord given the y for the current line.
         double Line::findXFromY(double y) const {
-            double x = 1e50;
+            double x = std::numeric_limits<double>::max();
 
             // If horizontal cannot find x from y.
             if ((isValid() == true) && (isHorizontal() == false)) {
@@ -208,7 +194,7 @@ namespace utility {
 
         // findYFromX(float x): Calculate the y coord given the x for the current line.
         double Line::findYFromX(double x) const {
-            double y = 1e50;
+            double y = std::numeric_limits<double>::max();
 
             // If vertical cannot find y from x.
             if ((isValid() == true) && (isVertical() == false)) {
@@ -229,7 +215,7 @@ namespace utility {
 
             // Big number to represent infinity.
             else if (isVertical()) {
-                gradient = 1e9;
+                gradient = std::numeric_limits<double>::max();
             }
 
             // Rearrange equation --> y = C/B - A/B*x
@@ -253,11 +239,6 @@ namespace utility {
         }
 
         double Line::getLinePointDistance(const arma::vec2& point) const {
-            double d = ((m_A * point[0]) + (m_B * point[1]) - m_C) * m_inv_normaliser;
-            long b = *((long*) &d) & 0x7FFFFFFFFFFFFFFF;
-
-            d = *((double*) &b);
-
             return std::abs((m_A * point[0]) + (m_B * point[1]) - m_C) * m_inv_normaliser;
         }
 
@@ -345,6 +326,20 @@ namespace utility {
             else {
                 return (line1.getGradient() > line2.getGradient());
             }
+        }
+
+        bool operator < (const arma::vec2& point1, const arma::vec2& point2) {
+            if(point1[0] < point2[0]) {
+                return true;
+            }
+
+            else if(point1[0] == point2[0]) {
+                if(point1[1] < point2[1]) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         std::ostream& operator<< (std::ostream& output, const Line& line) {

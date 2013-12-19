@@ -31,6 +31,7 @@
 #include <armadillo>
 #include <iostream>
 #include <vector>
+#include <limits>
 
 /*!
   @brief Class representing a 2 dimensional line in the form Ax + By = C.
@@ -45,7 +46,7 @@ namespace utility {
             Line();
 
             //! Constructor with intialising points. A line is created through these 2 points.
-            Line(arma::vec2 p1, arma::vec2 p2);
+            Line(const arma::vec2& p1, const arma::vec2& p2);
 
             //! Constructor with intialising values.
             Line(double rho, double phi);
@@ -77,7 +78,7 @@ namespace utility {
               @param p2 The second point.
               @return True if a valid line was assigned using the points. False otherwise.
               */
-            bool setLineFromPoints(arma::vec2 p1, arma::vec2 p2);
+            bool setLineFromPoints(const arma::vec2& p1, const arma::vec2& p2);
 
             /*!
               @brief Normalises the rho/phi values.
@@ -183,7 +184,7 @@ namespace utility {
               @param point The point to find the distance to.
               @return The distance from the line to the point.
               */
-            double getLinePointDistance(arma::vec2 point) const;
+            double getLinePointDistance(const arma::vec2& point) const;
 
             /*Added by Shannon*/
             /*!
@@ -191,14 +192,14 @@ namespace utility {
               @param point The point to find the distance to.
               @return The signed distance from the line to the point.
               */
-            double getSignedLinePointDistance(arma::vec2 point) const;
+            double getSignedLinePointDistance(const arma::vec2& point) const;
 
             /*!
               @brief Find the smallest angle between this and the given line.
               @param other The other line.
               @return The acute angle between the lines.
               */
-            double getAngleBetween(Line other) const;
+            double getAngleBetween(const Line& other) const;
 
             /*!
               @brief Retrieve the Rho value of the line equation (normal form)
@@ -217,21 +218,21 @@ namespace utility {
               @param pt The point to project.
               @return The scalar projection (length of the vector projection).
               */
-            double scalarProjection(arma::vec2 pt) const;
+            double scalarProjection(const arma::vec2& point) const;
 
             /*!
               @brief Projects the point onto the line.
               @param pt The point to project.
               @return The projected point.
               */
-            arma::vec2 projectOnto(arma::vec2 pt) const;
+            arma::vec2 projectOnto(const arma::vec2& point) const;
 
             /*!
               @brief Projects multiple points onto the line.
               @param pts A vector of points to project.
               @return The vector of projected points.
               */
-            std::vector<arma::vec2> projectOnto(const std::vector<arma::vec2>& pts) const;
+            std::vector<arma::vec2> projectOnto(const std::vector<arma::vec2>& points) const;
 
             /*!
               @brief Finds the intersection of the two lines.
@@ -240,33 +241,6 @@ namespace utility {
               @return Whether the lines intersect.
               */
             bool getIntersection(const Line& other, arma::vec2& pt) const;
-
-            /*Added by Shannon*/
-
-            // Overloaded functions
-            /*!
-              @brief Equality operator
-              @return True of the two lines are equal. False if they are not.
-              */
-            friend bool operator ==(const Line& line1, const Line& line2);
-
-            /*!
-              @brief Unequality operator
-              @return False of the two lines are equal. True if they are not.
-              */
-            friend bool operator !=(const Line& line1, const Line& line2);
-
-            /*!
-              @brief Greater than operator
-              @return True if line1 grad > line2 grad, if == then true if
-                    line1 y-int > line2 y-int. False otherwise.
-              */
-            friend bool operator > (const Line& line1, const Line& line2);
-
-            /*!
-              @brief Output stream operator
-              */
-            friend std::ostream& operator<< (std::ostream& output, const Line& l);
             
           protected:
               double m_A; //! The lines A value.
@@ -286,6 +260,32 @@ namespace utility {
                 */
               bool isValid(double A, double B, double C) const;
         };
+
+            /*Added by Shannon*/
+	    // Overloaded functions
+	    /*!
+	      @brief Equality operator
+	      @return True of the two lines are equal. False if they are not.
+	      */
+	    bool operator == (const Line& line1, const Line& line2);
+
+	    /*!
+	      @brief Unequality operator
+	      @return False of the two lines are equal. True if they are not.
+	      */
+	    bool operator != (const Line& line1, const Line& line2);
+
+	    /*!
+	      @brief Greater than operator
+	      @return True if line1 grad > line2 grad, if == then true if
+		    line1 y-int > line2 y-int. False otherwise.
+	      */
+	    bool operator > (const Line& line1, const Line& line2);
+
+	    /*!
+	      @brief Output stream operator
+	      */
+	    std::ostream& operator<< (std::ostream& output, const Line& l);
 
     }
 }

@@ -92,10 +92,16 @@ message Message {
 		optional uint32 colour_class = 6;
 	}
 
+	message VisionGreenHorizon {
+		optional uint32 x = 1;
+		optional uint32 y = 2;
+	}
+
 	message VisionClassifiedImage {
 		optional uint32 num_segments = 1;
 		repeated VisionClassifiedSegment segment = 2;
 		repeated VisionTransitionSegment transition_segment = 3;
+                repeated VisionGreenHorizon green_horizon = 4;
 	}
 
 	message Vision {
