@@ -364,9 +364,9 @@ namespace modules {
 			});
 
 			on<Trigger<messages::localisation::FieldObject>>([this](const messages::localisation::FieldObject& field_object) {
-				API::Message message;
+				Message message;
 
-				message.set_type(API::Message::LOCALISATION);
+				message.set_type(Message::LOCALISATION);
 				message.set_utc_timestamp(std::time(0));
 
 				auto* localisation = message.mutable_localisation();
