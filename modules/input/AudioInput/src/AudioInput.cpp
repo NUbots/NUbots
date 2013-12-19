@@ -95,7 +95,7 @@ namespace modules {
 
             // We need to set up the audio context.
             if(audioContext.getDeviceCount() < 1) {
-                log<NUClear::DEBUG>("No audio devices found");
+                NUClear::log<NUClear::DEBUG>("No audio devices found");
                 return;
             }
 

@@ -1,0 +1,133 @@
+package messages.support.NUbugger.proto;
+
+import "messages/input/proto/Sensors.proto";
+
+message Message {
+    enum Type {
+        SENSOR_DATA = 1;
+        VISION = 2;
+        LOCALISATION = 3;
+		DATA_POINT = 4;
+		REACTION_STATISTICS = 5;
+    }
+
+    required Type type = 1;
+    required uint64 utc_timestamp = 2;
+
+    optional messages.input.proto.Sensors sensor_data = 3;
+    optional Vision vision = 4;
+    optional Localisation localisation = 5;
+    optional DataPoint dataPoint = 6;
+    optional ReactionStatistics reactionStatistics = 7;
+
+	message ReactionStatistics {
+		optional string name = 1;
+		optional uint64 reactionId = 2;
+		optional uint64 taskId = 3;
+		optional uint64 causeReactionId = 4;
+		optional uint64 causeTaskId = 5;
+		optional uint64 emitted = 6;
+		optional uint64 started = 7;
+		optional uint64 finished = 8;
+	}
+
+
+	message DataPoint {
+		optional string label = 1;
+		repeated float value = 2;
+	}
+
+	message Image {
+		optional uint32 width = 1;
+		optional uint32 height = 2;
+		optional bytes data = 3;
+	}
+
+	message VisionFieldObject {
+		enum Type {
+			CIRCLE = 1;
+			RECTANGLE = 2;
+			POLYGON = 3;
+			UNKNOWN = 4;
+		}
+
+		optional Type type = 1;
+
+		optional uint32 id = 2;
+		optional string name = 3;
+		optional bool visible = 4;
+
+		optional float screen_x = 5;
+		optional float screen_y = 6;
+
+		optional float rotation = 7;
+
+		optional uint32 radius = 8;
+		optional uint32 width = 9;
+		optional uint32 height = 10;
+		repeated uint32 points = 11;
+
+		repeated float measured_relative_position = 12;
+	}
+
+	message VisionClassifiedSegment {
+		optional uint32 start_x = 1;
+		optional uint32 start_y = 2;
+
+		optional uint32 end_x = 3;
+		optional uint32 end_y = 4;
+
+		optional uint32 colour = 5;
+	}
+
+	message VisionTransitionSegment {
+		optional uint32 start_x = 1;
+		optional uint32 start_y = 2;
+
+		optional uint32 end_x = 3;
+		optional uint32 end_y = 4;
+
+		optional uint32 colour = 5;
+
+		optional uint32 colour_class = 6;
+	}
+
+	message VisionClassifiedImage {
+		optional uint32 num_segments = 1;
+		repeated VisionClassifiedSegment segment = 2;
+		repeated VisionTransitionSegment transition_segment = 3;
+	}
+
+	message Vision {
+		optional Image image = 1;
+		repeated VisionFieldObject field_object = 2;
+		optional VisionClassifiedImage classified_image = 3;
+	}
+
+	message LocalisationFieldObject {
+		optional string name = 1;
+
+		optional float wm_x = 2;
+		optional float wm_y = 3;
+
+		optional float sd_x = 4;
+		optional float sd_y = 5;
+
+		optional float sr_xx = 6;
+		optional float sr_xy = 7;
+		optional float sr_yy = 8;
+
+		optional float heading = 9;
+		optional float sd_heading = 10;
+
+		optional bool lost = 11;
+	}
+
+	message Localisation {
+		repeated LocalisationFieldObject field_object = 1;
+	}
+
+	message Vector {
+		repeated float float_value = 1;
+	}
+}

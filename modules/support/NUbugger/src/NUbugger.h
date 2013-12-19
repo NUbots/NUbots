@@ -21,7 +21,8 @@
 #define MODULES_SUPPORT_NUBUGGER_H
 
 #include <nuclear>
-#include "utility/idiom/pimpl.h"
+#include <zmq.hpp>
+#include "messages/support/NUbugger/proto/Message.pb.h"
 
 namespace modules {
     namespace support {
@@ -34,8 +35,12 @@ namespace modules {
          */
         class NUbugger : public NUClear::Reactor {
         private:
-            class impl;
-            utility::idiom::pimpl<impl> m;
+			zmq::socket_t pub;
+
+			std::mutex mutex;
+
+			void send(zmq::message_t& packet);
+			void send(messages::support::NUbugger::proto::Message message);
         public:
             explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);
         };

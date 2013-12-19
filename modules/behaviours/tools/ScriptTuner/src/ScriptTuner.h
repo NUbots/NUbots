@@ -23,6 +23,7 @@
 #include <nuclear>
 #include "messages/motion/Script.h"
 
+
 namespace modules {
     namespace behaviours {
         namespace tools {
@@ -63,6 +64,11 @@ namespace modules {
                 void run();
                 void kill();
                 void playScript();
+                void jumpToFrame();
+                void manualRefresh();
+
+
+               
             public:
                 explicit ScriptTuner(std::unique_ptr<NUClear::Environment> environment);
             };

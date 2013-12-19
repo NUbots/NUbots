@@ -105,7 +105,8 @@ namespace modules {
                 throw std::system_error(errno, std::system_category(), "There was an error while de-queuing a buffer");
             }
             
-            std::unique_ptr<Image::Pixel[]> data = std::unique_ptr<Image::Pixel[]>(new Image::Pixel[width * height]);
+            std::vector<Image::Pixel> data(width * height);
+            std::unique_ptr<Image> image;
 
             // If it is a MJPG
             if(format == "MJPG") {
@@ -119,10 +120,10 @@ namespace modules {
                 cinfo.err = jpeg_std_error(&err);
                 
                 // We need enough space for the table, and every byte except for byte 196
-                std::unique_ptr<uint8_t[]> jpegData = std::unique_ptr<uint8_t[]>(new uint8_t[current.bytesused + sizeof(huffmantable) - 1]);
+                std::vector<uint8_t> jpegData(current.bytesused + sizeof(huffmantable) - 1);
                 
                 // Copy our header (the first 195 bytes)
-                auto it = std::copy(payload, payload + 195, jpegData.get());
+                auto it = std::copy(payload, payload + 195, std::begin(jpegData));
                 
                 // Copy our huffman table
                 it = std::copy(std::begin(huffmantable), std::end(huffmantable), it);
@@ -131,7 +132,7 @@ namespace modules {
                 std::copy(payload + 196, payload + current.bytesused, it);
                 
                 // Set our source buffer
-                jpeg_mem_src(&cinfo, jpegData.get(), current.bytesused + sizeof(huffmantable) - 1);
+                jpeg_mem_src(&cinfo, jpegData.data(), current.bytesused + sizeof(huffmantable) - 1);
                 
                 // Read our header
                 jpeg_read_header(&cinfo, true);
@@ -144,17 +145,20 @@ namespace modules {
                 // Start decompression
                 jpeg_start_decompress(&cinfo);
 
-                for (Image::Pixel* row = data.get();
+                for (Image::Pixel* row = data.data();
                         cinfo.output_scanline < cinfo.output_height;
                         row += width) {
                     
                     // Read the scanline into place
                     jpeg_read_scanlines(&cinfo, reinterpret_cast<uint8_t**>(&row), 1);
-                }   
-
+                }
+                
                 // Clean up
                 jpeg_finish_decompress(&cinfo);
                 jpeg_destroy_decompress(&cinfo);
+                
+                // Move this data into the image along with the jpeg source
+                image = std::unique_ptr<Image>(new Image(width, height, std::move(data), std::move(jpegData)));
             }
             
             else {
@@ -172,12 +176,12 @@ namespace modules {
                     data[total - i].y  = input[i * 2 + 2];
                     data[total - i].cb = input[i * 2 + 1];
                     data[total - i].cr = input[i * 2 + 3];
-                }
-            }
+                }                
 
-            // Move this data into the image
-            std::unique_ptr<Image> image = 
-                    std::unique_ptr<Image>(new Image(width, height, std::move(data)));
+                // Move this data into the image
+                std::unique_ptr<Image> image = 
+                        std::unique_ptr<Image>(new Image(width, height, std::move(data)));
+            }
 
             // Enqueue our next buffer so it can be written to
             if (ioctl(fd, VIDIOC_QBUF, &current) == -1) {
@@ -185,7 +189,7 @@ namespace modules {
             }
 
             // Return our image
-            return std::move(image);
+            return image;
         }
 
         void V4L2Camera::resetCamera(const std::string& device, const std::string& fmt, size_t w, size_t h) {

@@ -12,6 +12,6 @@
     "powerLineFrequency": 2,
     "sharpness": 191,
     "imageFormat" : "MJPG",
-    "imageWidth": 800,
-    "imageHeight": 600
+    "imageWidth": 320,
+    "imageHeight": 240
 }

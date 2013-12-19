@@ -21,7 +21,8 @@
 #define MESSAGES_INPUT_IMAGE_H
 
 #include <cstdint>
-#include <memory>
+#include <cstddef>
+#include <vector>
 
 namespace messages {
     namespace input {
@@ -39,18 +40,24 @@ namespace messages {
                 uint8_t cr;
             };
 
-            Image(size_t width, size_t height, std::unique_ptr<Pixel[]>&& data);
+            Image(size_t width, size_t height, std::vector<Pixel>&& data);
+            Image(size_t width, size_t height, std::vector<Pixel>&& data, std::vector<uint8_t>&& src);
+            
             Pixel& operator()(size_t x, size_t y);
 
             const Pixel& operator()(size_t x, size_t y) const;
             const size_t width() const;
             const size_t height() const;
-            const std::unique_ptr<Pixel[]>& raw() const;
+            const std::vector<Pixel>& raw() const;
+            const std::vector<uint8_t>& source() const;
 
         private:
             size_t imgWidth;
             size_t imgHeight;
-            std::unique_ptr<Pixel[]> data;
+
+            std::vector<Pixel> data;
+            std::vector<uint8_t> src;
+
         };
         
     }  // input

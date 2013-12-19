@@ -44,7 +44,7 @@ namespace modules {
             // Load our file name configuration.
             on<Trigger<messages::support::Configuration<AudioFileConfiguration>>>([this](const messages::support::Configuration<AudioFileConfiguration>& configfile) {
                     std::string filePath = configfile.config["file"];
-                    log<NUClear::DEBUG>("Loading sound file: ", filePath);
+                    NUClear::log<NUClear::DEBUG>("Loading sound file: ", filePath);
                     m->file = SndfileHandle(filePath.c_str());
 
                     auto settings = std::make_unique<messages::input::SoundChunkSettings>();

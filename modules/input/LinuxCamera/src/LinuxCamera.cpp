@@ -79,14 +79,14 @@ namespace modules {
                     for(auto& setting : camera.getSettings()) {
                         int value = settings.config[setting.first];
                         if(setting.second.set(value) == false) {
-                            log<NUClear::DEBUG>("Failed to set " + setting.first + " on camera");
+                            NUClear::log<NUClear::DEBUG>("Failed to set " + setting.first + " on camera");
                         }
                     }
 
                     // Start the camera streaming video
                     m->camera.startStreaming();
                 } catch(const std::exception& e) {
-                    log<NUClear::DEBUG>(std::string("Exception while setting camera configuration: ") + e.what());
+                    NUClear::log<NUClear::DEBUG>(std::string("Exception while setting camera configuration: ") + e.what());
                 }
             });
         }

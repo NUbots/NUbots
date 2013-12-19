@@ -6,6 +6,7 @@ message Message {
         VISION = 2;
         LOCALISATION = 3;
 		DATA_POINT = 4;
+		REACTION_STATISTICS = 5;
     }
 
     required Type type = 1;
@@ -15,7 +16,20 @@ message Message {
     optional Vision vision = 4;
     optional Localisation localisation = 5;
     optional DataPoint dataPoint = 6;
+    optional ReactionStatistics reactionStatistics = 7;
 }
+
+message ReactionStatistics {
+	optional string name = 1;
+	optional uint64 reactionId = 2;
+	optional uint64 taskId = 3;
+	optional uint64 causeReactionId = 4;
+	optional uint64 causeTaskId = 5;
+	optional uint64 emitted = 6;
+	optional uint64 started = 7;
+	optional uint64 finished = 8;
+}
+
 
 message DataPoint {
 	optional string label = 1;
@@ -65,9 +79,22 @@ message VisionClassifiedSegment {
     optional uint32 colour = 5;
 }
 
+message VisionTransitionSegment {
+    optional uint32 start_x = 1;
+    optional uint32 start_y = 2;
+
+    optional uint32 end_x = 3;
+    optional uint32 end_y = 4;
+
+    optional uint32 colour = 5;
+
+    optional uint32 class = 6;
+}
+
 message VisionClassifiedImage {
     optional uint32 num_segments = 1;
-    repeated VisionClassifiedSegment segment = 2;
+    repeated VisionClassifiedSegment classified_segment = 2;
+    repeated VisionTransitionSegment transition_segment = 3;
 }
 
 message Vision {
