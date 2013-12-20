@@ -40,7 +40,7 @@ with open(role_name, 'w') as file:
         # replace :: with /
         header = re.sub(r'::', r'/', module)
         # replace last name with src/name.h
-        header = re.sub(r'\/([^\/]+)$', r'/\1/src/\1.h', header)
+        header = re.sub(r'([^\/]+)$', r'\1/src/\1.h', header)
         file.write('#include "modules/{0}"\n'.format(header))
 
     # Add our main function.
