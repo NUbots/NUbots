@@ -5,10 +5,11 @@
 #include <armadillo> 
 #include <nuclear>
 
-namespace messages{
+namespace messages {
 	namespace vision {
 
 		class VisionObject {
+        public:
 			arma::vec3 sphericalFromNeck;	//neckRelativeRadial
 			arma::vec3 sphericalError;
 			arma::vec2 screenAngular;	//Polar around view vector on image
@@ -17,11 +18,13 @@ namespace messages{
 			NUClear::clock::time_point timestamp;
 		};
 
-		class Ball : VisionObject {
-			Ball() : VisionObject() {}			
+		class BallObject : VisionObject {
+        public:
+			BallObject() : VisionObject() {}			
 		};
 
 		class Goal : VisionObject {
+        public:
 			Goal() : VisionObject() {}
 			enum Type{
 				LEFT,
@@ -31,6 +34,7 @@ namespace messages{
 		};
 
 		class Obstacle : VisionObject {
+        public:
 			Obstacle() : VisionObject() {}
 			float arcWidth;
 		};	
@@ -41,10 +45,12 @@ namespace messages{
 		//Line objects:
 
 		class FieldLine : VisionObject {
+        public:
 			FieldLine() : VisionObject() {}
 		};
 
 		class CornerPoint : VisionObject {
+        public:
 			CornerPoint() : VisionObject() {}
 			enum Type{
 				L_CORNER,
@@ -54,10 +60,12 @@ namespace messages{
 		};
 
 		class CentreCircle : VisionObject {
+        public:
 			CentreCircle() : VisionObject() {}		
 		};
 
 		class LineObjects{
+        public:
 			LineObjects(){}
 			std::vector<CentreCircle> centre_circles;
 			std::vector<CornerPoint> corner_points;
