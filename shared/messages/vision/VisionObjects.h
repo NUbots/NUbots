@@ -10,6 +10,8 @@ namespace messages {
 
 		class VisionObject {
         public:
+            VisionObject() {}
+
 			arma::vec3 sphericalFromNeck;	//neckRelativeRadial
 			arma::vec3 sphericalError;
 			arma::vec2 screenAngular;	//Polar around view vector on image
