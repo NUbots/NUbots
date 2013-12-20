@@ -45,10 +45,15 @@ elif sys.argv[1] == 'make' or sys.argv[1] == 'makej':
 
 elif sys.argv[1] == 'run':
     if len(sys.argv) < 3:
-	print 'Usage: b run <role>\nPlease provide the name of the role to run.'
+	print '''
+Usage: b run <role>
+
+Please provide the name of the role to run.
+'''
+    elif os.path.isfile("build/roles/{}".format(sys.argv[2])):
+        call("./{}".format(sys.argv[2]), cwd='build/roles')
     else:
-        if not os.path.isfile('build/roles/${sys.argv[2]}'):
-            call("./${sys.argv[2]}", cwd='build/roles')
+        print "The role '{}' does not exist or did not build correctly.".format(sys.argv[2])
 
 # print 'Number of arguments:', len(sys.argv), 'arguments.'
 # print 'Argument List:', str(sys.argv)
