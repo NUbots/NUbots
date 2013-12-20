@@ -65,7 +65,8 @@ namespace modules {
                 void kill();
                 void playScript();
                 void jumpToFrame();
-                void manualRefresh();
+                //void help();
+                //void userLoadScript();
 
 
                

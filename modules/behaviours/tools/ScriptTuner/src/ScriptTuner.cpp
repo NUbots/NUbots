@@ -1,7 +1,7 @@
 /*
 * This file is part of ScriptTuner.
 *
-* ScriptTuner is free software: you can redistribute it and/or modify
+* ScriptTuner is :free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
 * (at your option) any later version.
@@ -55,6 +55,9 @@ namespace modules {
                             NUClear::log<NUClear::DEBUG>("Loading script: ", scriptPath, '\n');
                             loadScript(scriptPath);
                         }
+//should it be NUClear::log<NUclear::Debug>
+
+
                     }
                     else {
                         NUClear::log<NUClear::DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
@@ -89,6 +92,7 @@ namespace modules {
 
             void ScriptTuner::run() {
 
+                
                 // Start curses mode
                 initscr();
                 // Capture our characters immediately (but pass through signals)
@@ -147,8 +151,18 @@ namespace modules {
                             playScript();
                             break;
                         case 'J':
-                            jumpToFrame();
+                            jumpToFrame( git commit -am "Start to improve help command");
                             break;
+                        case 'R':
+                            refreshView();
+                            break;
+ //Kill simply freezes the window
+                        //case 'X':
+                            //kill();
+                            //break;
+//                        case ':':
+//                            help();
+//                           break;
                     }
 
                     // Update whatever visual changes we made
@@ -191,8 +205,8 @@ namespace modules {
                 mvprintw(4, 2, "Duration: %d", // Output the selected frames duration
                          std::chrono::duration_cast<std::chrono::milliseconds>(script.frames[frame].duration).count());
                 mvprintw(5,2, "Jump To Frame:");
-                mvprintw(6,2, "Load File:");
-                mvprintw(7,2, "Play Files:");
+                mvprintw(6,2, "Load Script:");
+                mvprintw(7,2, "Play Scripts:");
 
                 // Output all of our frame numbers and highlight the selected frame
                 move(3, 10);
@@ -212,54 +226,54 @@ namespace modules {
 
                 // Heading Commands
                 attron(A_BOLD);
-                mvprintw(31, 2, "Commands ");
+                mvprintw(LINES-6, 2, "Commands");
                 attroff(A_BOLD);
+                mvprintw(LINES-2, 2, "Type :help for list of commands or :longhelp <command> for details");
+                
 
                  //Each Command
-                const char* COMMANDS[] = {"KEY_UP",
-                                     "KEY_DOWN",
-                                     "KEY_LEFT",
-                                     "KEY_RIGHT",
-                                     "KEY_ENTER",
-                                     "9",
+                const char* COMMANDS[] = {
                                      ",",
                                      ".",
-                                     "\\n",
-                                     " ",
-                                     "S",
-                                     "T",
-                                     "A",
                                      "N",
                                      "D",
-                                     "P",
+                                     " ",
+                                     "T",
                                      "J",
-                                     "R"};
+                                     "P",
+                                     "S",
+                                     "X"};
 
-                //Each Meaningc++ else if
-                const char* MEANINGS[] = {"Change selection up",
-                                     "Change selection down",
-                                     "Swap between angle and gain",
-                                     "Swap between angle and gain",
-                                     "Edit selected field",
-                                     "Ask Trent",
-                                     "Move left a frame",
-                                     "Move right a frame",
-                                     "Edit selected field",
-                                     "Toggle lock mode",
-                                     "Save the current script",
-                                     "Edit this frame's duration",
-                                     "Play All",
-                                     "Create new frame",
+                //Each Meaning
+                const char* MEANINGS[] = {
+                                     "Left a frame",
+                                     "Right a frame",
+                                     "New Frame",
                                      "Delete Frame",
-                                     "Play current script from first frame",
-                                     "Jump to a Frame",
-                                     "Manual Screen Refresh"};    
+                                     "Lock/Unlock",
+                                     "Edit Duration",
+                                     "Jump to Frame",
+                                     "Play",
+                                     "Save",
+                                     "Exit (doesn't work yet use CTR C)"};    
 
                 //Prints commands and their meanings to the screen
-                for (size_t i = 0; i < 18; i++) {
-                    mvprintw( 32 + i, 2, COMMANDS[i]);
-                    mvprintw( 32 + i, 12, "=");
-                    mvprintw( 32 + i, 14, MEANINGS[i]);
+                for (size_t i = 0; i < 10; i = i + 2) {
+                    attron(A_BOLD);
+                    attron(A_STANDOUT);
+                    mvprintw(LINES-5, 2 + ((2+14)*(i/2)), COMMANDS[i]);
+                    attroff(A_BOLD);
+                    attroff(A_STANDOUT); 
+                    mvprintw(LINES-5, 4 + ((2+14)*(i/2)), MEANINGS[i]);
+                }
+
+                for (size_t i = 1; i < 10; i = i + 2) {
+                    attron(A_BOLD);
+                    attron(A_STANDOUT);
+                    mvprintw(LINES-4, 2 + ((2+14)*((i-1)/2)), COMMANDS[i]);
+                    attroff(A_BOLD);
+                    attroff(A_STANDOUT); 
+                    mvprintw(LINES-4, 4 + ((2+14)*((i-1)/2)), MEANINGS[i]);
                 }
 
                 // Each motor
@@ -307,7 +321,7 @@ namespace modules {
                 }
 
                 // Highlight our selected point
-                mvchgat(selection + 9, angleOrGain ? 26 : 40, angleOrGain ? 13 : 11, A_STANDOUT, 0, nullptr);
+                mvchgat(selection + 9, angleOrGain ? 26 : 41, angleOrGain ? 13 : 11, A_STANDOUT, 0, nullptr);
 
                 // We finished building
                 refresh();
@@ -489,6 +503,37 @@ namespace modules {
                 endwin();
             }
 
+/*            void ScriptTuner::help() {
+                move(29,2);
+                //make backspace work
+                curs_set(true);
+                std::string tempcommand = userInput();
+
+                if (tempcommand == "help") {
+                    WINDOW *newwin(20,15,0,0);
+                    initscr ();
+                    cbreak ();
+                    keypad();
+
+
+
+                }
+                else if (tempcommand == "longhelp") {
+
+
+
+                }
+                else {
+                    refreshView(); //need this??
+                }
+
+                curs_set(false);
+
+            }
+
+
+*/
+
             //emits a message so motion can pick up the script
             void ScriptTuner::playScript() {
                 emit(std::make_unique<ExecuteScript>(script));
@@ -531,9 +576,16 @@ namespace modules {
                 curs_set(false);               
             }
 
-            void ScriptTuner::manualRefresh() {
-                refreshView();
-            }
+
+//            void userLoadScript() {
+//                //make scripttuner independent of path
+//                move(6,13);
+//                curs_set(true);
+//                std::string tempscript = userInput();
+//
+//                if
+//            }
+
             
         } // tools
     } // behaviours
