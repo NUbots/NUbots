@@ -23,14 +23,16 @@
 #include "messages/localisation/FieldObject.h"
 
 using utility::NUbugger::graph;
+using messages::support::Configuration;
 
 namespace modules {
     Localisation::Localisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-        on<Trigger<messages::support::Configuration<Localisation>>>([this](const messages::support::Configuration<Localisation>& settings) {
+        on<Trigger<Configuration<LocalisationConfig>>>(
+            [this](const Configuration<LocalisationConfig>& settings) {
             std::cout << __func__ << ": Config" << std::endl;
             
-            std::string testConfig = settings.config["testConfig"];
-            std::cout << testConfig << std::endl;
+        //     // std::string testConfig = settings.config["testConfig"];
+        //     // std::cout << testConfig << std::endl;
         });
 
     	on<Trigger<Every<500, std::chrono::milliseconds>>>([this](const time_t&) {

@@ -30,7 +30,10 @@ namespace modules {
 
     public:
     	/// @brief Our configuration file for this class
-        static constexpr const char* CONFIGURATION_PATH = "Localisation.json";
+        struct LocalisationConfig {
+        	static constexpr const char* CONFIGURATION_PATH = "Localisation.json";
+        };
+
 
         /// @brief Called by the powerplant to build and setup our CameraReader
         explicit Localisation(std::unique_ptr<NUClear::Environment> environment);
