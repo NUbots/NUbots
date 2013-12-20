@@ -1,0 +1,89 @@
+{
+	"REPLACEMENT_RULES":
+	{
+		"fieldnoise_v_small":
+		{
+			"before": {"vec" : [3, -1], "colour" : "green"},                 
+			"middle": {"vec" : [0 , 1], "colour" : "unclassified"},    
+			"after": {"vec" : [3, -1] , "colour" : "green"},                  
+			"replacement": "before"                         
+		},
+		"fieldnoise_v_med":
+		{
+			"before": {"vec" : [6, -1], "colour" : "green"},                  
+			"middle": {"vec" : [0 , 2], "colour" : "unclassified"},   
+			"after": {"vec" : [6, -1] , "colour" : "green"},                  
+			"replacement": "before"                         
+		},
+		"fieldnoise_v_large":
+		{
+			"before": {"vec" : [12, -1], "colour" : "green"},                   
+			"middle": {"vec" : [0 , 4], "colour" : "unclassified"},    
+			"after": {"vec" : [12, -1] , "colour" : "green"},                   
+			"replacement": "before"                         
+		},
+		"fieldnoise_v_oneway":
+		{
+			"before": {"vec" : [1, -1], "colour" : "green"},                      
+			"middle": {"vec" : [0 , 4], "colour" : "unclassified"},    
+			"after": {"vec" : [12, -1] , "colour" : "green"},                    
+			"replacement": "before"                        
+		},
+		"fieldnoise_v_oneway":
+		{
+			"before": {"vec" : [3, -1], "colour" : "green"},                     
+			"middle": {"vec" : [0 , 7], "colour" : "unclassified"},    
+			"after": {"vec" : [20, -1] , "colour" : "green"},                  
+			"replacement": "before"                         
+		},
+		"yellowgoal1":
+		{
+			"before": {"vec" : [1, -1], "colour" : "yellow"},                   
+			"middle": {"vec" : [0 , 1], "colour" : "orange"},   
+			"after": {"vec" : [5, -1] , "colour" : "yellow"},      
+			"replacement": "after"                 
+		},
+		"yellowgoal2":
+		{
+			"before": {"vec" : [5, -1], "colour" : "yellow"},                   
+			"middle": {"vec" : [0 , 3], "colour" : "unclassified"},     
+			"after": {"vec" : [1, -1] , "colour" : "yellow"},       
+			"replacement": "after"                
+		},
+		"ball1":
+		{
+			"before": {"vec" : [5, -1], "colour" : "orange"},       
+			"middle": {"vec" : [0 , 3], "colour" : "unclassified"},     
+			"after": {"vec" : [1,-1] ,"colour" : "orange"},
+			"replacement": "before"                 
+		},
+		"line1":
+		{
+			"before": {"vec" : [1, -1], "colour" : "white"},       
+			"middle": {"vec" : [0 , 3], "colour" : "unclassified"},     
+			"after": {"vec" : [5,-1] ,"colour" : "white"},
+			"replacement": "before"                 
+		}
+	},		
+	"TRANSITION_RULES":
+	{
+		"GOAL_COLOUR":
+		{
+		"before" : {"vec" : [0, -1], "colour" : ""},
+		"middle" : {"vec" : [3, -1], "colour" : "yellow"},
+		"after" : {"vec" : [0, -1], "colour" : ""}
+		},
+		"BALL_COLOUR":
+		{
+		"before" : {"vec" : [0, -1], "colour" : ""},
+		"middle" : {"vec" : [1, -1], "colour" : "orange"},
+		"after" : {"vec" : [0, -1], "colour" : ""}
+		},
+		"LINE_COLOUR":
+		{
+		"before" : {"vec" : [0, -1], "colour" : ""},
+		"middle" : {"vec" : [2, -1], "colour" : "white"},
+		"after" : {"vec" : [0, -1], "colour" : ""}
+		}
+	}		
+}

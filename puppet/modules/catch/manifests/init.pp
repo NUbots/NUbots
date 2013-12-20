@@ -35,9 +35,10 @@
 #
 # Copyright 2013 Your name here, unless otherwise noted.
 #
+# EDIT: Changed fetch command to download from an earlier commit (Build 14).
 class catch {
   wget::fetch { 'catch.hpp':
     destination => '/usr/local/include/catch.hpp',
-    source => 'https://raw.github.com/philsquared/Catch/master/single_include/catch.hpp',
+    source => 'https://raw.github.com/philsquared/Catch/5ecb72b9bb65cd8fed2aec4da23a3bc21bbccd74/single_include/catch.hpp',
   }
 }

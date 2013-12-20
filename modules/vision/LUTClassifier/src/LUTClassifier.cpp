@@ -22,131 +22,157 @@
 namespace modules {
     namespace vision {
 
-        using messages::input::Image;
-
+		using messages::input::Image;
+		using messages::vision::ColourSegment;
+		using messages::support::Configuration;
+		using utility::configuration::ConfigurationNode;
+		using messages::vision::ClassifiedImage;
+		using messages::vision::SegmentedRegion;
         
-        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-            on<Trigger<Image>>([this](const Image& image){
+        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), greenHorizon(), scanLines() { 
+			current_LUT_index = 0;
+			
+            on<Trigger<Configuration<VisionConstants>>>([this](const Configuration<VisionConstants>& constants) {
+           		//std::cout<< "Loading VisionConstants."<<std::endl;
+           		//std::cout<< "Finished Config Loading successfully."<<std::endl;
+            });
 
-            	//std::vector<arma::vec> green_horizon_points = CalculateGreenHorizon(image);
+			//Load LUTs
+			on<Trigger<Configuration<LUTLocations>>>([this](const Configuration<LUTLocations>& locations) {
+				//std::cout<< "Loading LUT."<<std::endl;
 
-            	//std::vector<int> scan_lines = GenerateScanLines(image,green_horizon_points);
+				std::vector<std::string> locat = locations.config["DEFAULT_LOCATION"];
 
+				for(auto location : locat) {
+					LookUpTable LUT;
+					bool loaded = LUT.loadLUTFromFile(location);
+
+					if(loaded) {
+						LUTs.push_back(LUT);
+						//std::cout<< "Finished Config Loading successfully."<<std::endl;
+					}
+
+					else {
+						std::cout<< "Error Loading LUT: "<<location<<std::endl;
+						NUClear::log<NUClear::ERROR>("LUT ", location, " has not loaded successfully." );
+					}
+				}
+				
+			});
+
+			//Load in greenhorizon parameters
+			on<Trigger<Configuration<GreenHorizonConfig>>>([this](const Configuration<GreenHorizonConfig>& constants) {
+				//std::cout<< "Loading gh cONFIG."<<std::endl;
+				greenHorizon.setParameters( constants.config["GREEN_HORIZON_SCAN_SPACING"],
+											constants.config["GREEN_HORIZON_MIN_GREEN_PIXELS"],
+											constants.config["GREEN_HORIZON_UPPER_THRESHOLD_MULT"]);
+				//std::cout<< "Finished Config Loading successfully."<<std::endl;
+			});
+
+			//Load in scanline parameters
+			on<Trigger<Configuration<ScanLinesConfig>>>([this](const Configuration<ScanLinesConfig>& constants) {
+				//std::cout<< "Loading ScanLines config."<<std::endl;
+				scanLines.setParameters(constants.config["HORIZONTAL_SCANLINE_SPACING"],
+										 constants.config["VERTICAL_SCANLINE_SPACING"]);
+				//std::cout<< "Finished Config Loading successfully."<<std::endl;
+			});
+			
+
+			on<Trigger<Configuration<RulesConfig>>>([this](const Configuration<RulesConfig>& rules) {
+				//std::cout<< "Loading Rules config."<<std::endl;
+				segmentFilter.clearRules();
+				// std::vector< WHAT?!?!?! > rules = rules.config["REPLACEMENT_RULES"];
+				std::map<std::string, ConfigurationNode> replacement_rules = rules.config["REPLACEMENT_RULES"];
+				std::map<std::string, ConfigurationNode> transition_rules = rules.config["TRANSITION_RULES"];
+
+				for(const auto& rule : replacement_rules) {
+					std::cout << "Loading Replacement rule : " << rule.first << std::endl;
+					
+					ColourReplacementRule r;
+
+					std::vector<unsigned int> before = rule.second["before"]["vec"];
+					std::vector<unsigned int> middle = rule.second["middle"]["vec"];
+					std::vector<unsigned int> after = rule.second["after"]["vec"];
+
+					r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
+											rule.second["middle"]["colour"],
+											rule.second["after"]["colour"],
+											before[0],//min
+											before[1],//max, etc.
+											middle[0],
+											middle[1],
+											after[0],
+											after[1],
+											rule.second["replacement"]);
+
+					//Neat method which is broken due to config system
+					/*r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
+											rule.second["middle"]["colour"],
+											rule.second["after"]["colour"],
+											unint_32(rule.second["before"]["vec"][0]),//min
+											unint_32(rule.second["before"]["vec"][1]),//max, etc.
+											unint_32(rule.second["middle"]["vec"][0]),
+											unint_32(rule.second["middle"]["vec"][1]),
+											unint_32(rule.second["after"]["vec"][0]),
+											unint_32(rule.second["after"]["vec"][1]),
+											rule.second["replacement"]);*/
+					segmentFilter.addReplacementRule(r);
+					//std::cout<< "Finished Config Loading successfully."<<std::endl;
+				}
+
+				for(const auto& rule : transition_rules) {
+					//std::cout << "Loading Transition rule : " << rule.first << std::endl;
+
+					ColourTransitionRule r;
+
+					std::vector<unsigned int> before = rule.second["before"]["vec"];
+					std::vector<unsigned int> middle = rule.second["middle"]["vec"];
+					std::vector<unsigned int> after = rule.second["after"]["vec"];
+
+					r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
+											rule.second["middle"]["colour"],
+											rule.second["after"]["colour"],
+											before[0],//min
+											before[1],//max, etc.
+											middle[0],
+											middle[1],
+											after[0],
+											after[1]);
+					//Neat method which is broken due to config system
+					/*r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
+											rule.second["middle"]["colour"],
+											rule.second["after"]["colour"],
+											static_cast<uint_32>(rule.second["before"]["vec"][0]),
+											static_cast<uint_32>(rule.second["before"]["vec"][1]),
+											static_cast<uint_32>(rule.second["middle"]["vec"][0]),
+											static_cast<uint_32>(rule.second["middle"]["vec"][1]),
+											static_cast<uint_32>(rule.second["after"]["vec"][0]),
+											static_cast<uint_32>(rule.second["after"]["vec"][1]));											
+											unint_32(rule.second["after"]["vec"][1]));*/
+					segmentFilter.addTransitionRule(r);
+					//std::cout<< "Finished Config Loading successfully."<<std::endl;
+				}
+			});
+
+            on<Trigger<Image>>([this](const Image& image) {
+            	/*std::vector<arma::vec2> green_horizon_points = */
+            	//std::cout << "Image size = "<< image.width() << "x" << image.height() <<std::endl;
+            	//std::cout << "LUTClassifier::on<Trigger<Image>> calculateGreenHorizon" << std::endl;
+            	greenHorizon.calculateGreenHorizon(image, LUTs[current_LUT_index]);
+            	//std::cout << "LUTClassifier::on<Trigger<Image>> generateScanLines" << std::endl;
+            	std::vector<int> scan_lines = scanLines.generateScanLines(image, greenHorizon);
+            	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyHorizontalScanLines" << std::endl;
+            	SegmentedRegion classified_segments_hor = scanLines.classifyHorizontalScanLines(image, scan_lines, LUTs[current_LUT_index]);
+            	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyVerticalScanLines" << std::endl;
+            	SegmentedRegion classified_segments_ver = scanLines.classifyVerticalScanLines(image, greenHorizon, LUTs[current_LUT_index]);
+            	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyImage" << std::endl;
+            	std::unique_ptr<ClassifiedImage> classified_image = segmentFilter.classifyImage(classified_segments_hor, classified_segments_ver);
+            	classified_image->green_horizon_interpolated_points = greenHorizon.getInterpolatedPoints();
+            	//std::cout << "LUTClassifier::on<Trigger<Image>> emit(std::move(classified_image));" << std::endl;
+            	emit(std::move(classified_image));
+            	//emit(std::make_unique<ClassifiedImage>(new ClassifiedImage(classigied_segments_hor,classified_segments_ver)));
             });
         }
 
-        std::vector<arma::vec> LUTClassifier::CalculateGreenHorizon(const Image& img){
-/*
-        	//NEEDS KINEMATICS ! const Horizon& kin_hor = Last<1,KinematicsHorizon>;
-
-		    size_t width = img.width();
-		    size_t height = img.height();
-
-		    //makes this fail-safe in the event of improper parameters
-		    const int SPACING = std::max(VisionConstants::GREEN_HORIZON_SCAN_SPACING, 1U);
-		    
-		    // variable declarations    
-		    std::vector<arma::vec> horizon_points;
-		    std::vector<arma::vec> thrown_points;
-
-	
-		    int kin_hor_y;		
-
-		    //For sampled pixel columns (vertical scans) sampled with period SPACING
-		    for (int x = 0; x < width; x+=SPACING)
-		    {
-		        unsigned int green_top = 0;
-		        unsigned int green_count = 0;
-
-		        //Find kinematics horizon level for this vertical scan
-		        
-		        // kin_hor_y = kin_hor.findYFromX(x);
-		        // //clamp green horizon values
-		        // kin_hor_y = std::max(0, kin_hor_y);
-		        // kin_hor_y = std::min(height-1, kin_hor_y);
-
-		        //DUMMY CODE UNTIL KINEMATICS IMPLEMENTED. 
-		        kin_hor_y = 0;		        //IE Search whole vertical strip
-		        
-
-		        //Search for green below the kinematics horizon
-		        for (int y = kin_hor_y; y < height; y++) {
-
-		            if (isPixelGreen(img, x, y)) {
-		                if (green_count == 0) {
-		                    green_top = y;
-		                }
-		                green_count++;
-		                // if VER_THRESHOLD green pixels found, add point
-		                if (green_count == VisionConstants::GREEN_HORIZON_MIN_GREEN_PIXELS) {
-		                    vec v(2);
-		                    v[0] = x;
-		                    v[1] = green_top;
-		                    horizon_points.push_back(v);
-		                    break;
-		                }
-		            }
-		            else {
-		                // not green - reset
-		                green_count = 0;
-		            }
-		        }
-		    }
-
-		    static int num_no_green = 0;
-		    if(horizon_points.size() < 2) {
-		        if(num_no_green < 150) {
-		            num_no_green++;
-		        }
-		        else {
-		            num_no_green = 0;
-		            log<NUClear::ERROR>("150 FRAMES OF NO GREEN HORIZON FOUND - VERY POOR LUT");
-		        }
-		        horizon_points.clear();
-		        vec v(2);
-		        v[0] = 0;
-		        v[1] = height-1;
-		        horizon_points.push_back(v);
-		        v[0] = width-1;
-		        horizon_points.push_back(v);
-		        
-		        return horizon_points;
-		    }
-
-		    // provide blackboard the original set of scan points
-		    vbb->setGreenHorizonScanPoints(horizon_points);
-
-		    // statistical filter for green horizon points
-		    double mean_y, std_dev_y;
-		    accumulator_set<double, stats<tag::mean, tag::variance> > acc;
-
-		    for(auto& p : horizon_points) {
-		        if (p.[1] < height-1)     // if not at bottom of image
-		            acc(p.[1]);
-		    }
-
-		    mean_y = mean(acc);
-		    std_dev_y = sqrt(variance(acc)); 
-		
-
-		    std::vector<arma::vec>::iterator p = horizon_points.begin();
-		    while(p < horizon_points.end()) {
-		        if (p->y < mean_y - VisionConstants::GREEN_HORIZON_UPPER_THRESHOLD_MULT*std_dev_y) {
-		            thrown_points.push_back(*p);
-		            p = horizon_points.erase(p);
-		        }
-		        else {
-		            p++;
-		        }
-		    }
-
-		    DataWrapper::getInstance()->debugPublish(DBID_GREENHORIZON_THROWN, thrown_points);
-		    horizon_points = upperConvexHull(horizon_points);
-		    // set hull points
-		    vbb->setGreenHullPoints(horizon_points);
-		   */
-		    return std::vector<arma::vec>();
-        }
-        
     }  // vision
 }  // modules

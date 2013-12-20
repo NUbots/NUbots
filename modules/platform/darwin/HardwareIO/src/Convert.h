@@ -35,7 +35,7 @@ namespace darwin {
 
         /// The value from the Darwin is between 0 and 1023, representing a value between -4g and 4g.
         /// This means 512 = 0
-        static constexpr double ACCELERONOMETER_CONVERSION_FACTOR = (4 * 9.80665) / 512.0;
+        static constexpr double ACCELEROMETER_CONVERSION_FACTOR = (4 * 9.80665) / 512.0;
 
         /// The Gyrosocope value from the Darwin is between 0 and 1023, representing a value between -1600 and 1600
         /// degrees per second. This means 512 = 0

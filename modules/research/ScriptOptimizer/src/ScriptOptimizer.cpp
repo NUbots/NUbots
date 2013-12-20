@@ -38,7 +38,7 @@ namespace modules {
             
             on<Trigger<Initialize>>([this](const Initialize&) {
                 emit(std::make_unique<OptimizeScriptResult>());
-                log<NUClear::DEBUG>("Requesting initial script");
+                NUClear::log<NUClear::DEBUG>("Requesting initial script");
             });
                     
             on<Trigger<Network<OptimizeScript>>, With<NUClear::extensions::NetworkingConfiguration>>([this]
@@ -47,7 +47,7 @@ namespace modules {
                 // Check if this script is for us
                 if (config.deviceName == task.data->target()) {
                     
-                    log<NUClear::DEBUG>("Script ", task.data->iteration(), " was delivered to be executed from ", task.sender);
+                    NUClear::log<NUClear::DEBUG>("Script ", task.data->iteration(), " was delivered to be executed from ", task.sender);
 
                     Script script;
                     
@@ -115,45 +115,45 @@ namespace modules {
                         auto* s = result->add_sensors();
                         
                         auto* acc = s->mutable_accelerometer();
-                        acc->set_x(sensor->acceleronometer.x);
-                        acc->set_y(sensor->acceleronometer.y);
-                        acc->set_z(sensor->acceleronometer.z);
+                        acc->set_x(sensor->accelerometer.x);
+                        acc->set_y(sensor->accelerometer.y);
+                        acc->set_z(sensor->accelerometer.z);
                         
                         auto* gyro = s->mutable_gyroscope();
                         gyro->set_x(sensor->gyroscope.x);
                         gyro->set_y(sensor->gyroscope.y);
                         gyro->set_z(sensor->gyroscope.z);
                         
-                        auto* lfsr = s->mutable_leftfsr();
+                        auto* lfsr = s->mutable_left_fsr();
                         lfsr->set_fsr1(sensor->fsr.left.fsr1);
                         lfsr->set_fsr2(sensor->fsr.left.fsr2);
                         lfsr->set_fsr3(sensor->fsr.left.fsr3);
                         lfsr->set_fsr4(sensor->fsr.left.fsr4);
-                        lfsr->set_centrex(sensor->fsr.left.centreX);
-                        lfsr->set_centrey(sensor->fsr.left.centreY);
+                        lfsr->set_centre_x(sensor->fsr.left.centreX);
+                        lfsr->set_centre_y(sensor->fsr.left.centreY);
                         
-                        auto* rfsr = s->mutable_rightfsr();
+                        auto* rfsr = s->mutable_right_fsr();
                         rfsr->set_fsr1(sensor->fsr.right.fsr1);
                         rfsr->set_fsr2(sensor->fsr.right.fsr2);
                         rfsr->set_fsr3(sensor->fsr.right.fsr3);
                         rfsr->set_fsr4(sensor->fsr.right.fsr4);
-                        rfsr->set_centrex(sensor->fsr.right.centreX);
-                        rfsr->set_centrey(sensor->fsr.right.centreY);
+                        rfsr->set_centre_x(sensor->fsr.right.centreX);
+                        rfsr->set_centre_y(sensor->fsr.right.centreY);
                         
                         for(int i = 0; i < 20; ++i) {
-                            auto* servo = s->add_servos();
+                            auto* servo = s->add_servo();
                             
-                            servo->set_errorflags(sensor->servo[i].errorFlags);
+                            servo->set_error_flags(sensor->servo[i].errorFlags);
                             servo->set_id(static_cast<messages::input::proto::Sensors_ServoID>(i));
                             servo->set_enabled(sensor->servo[i].torqueEnabled);
-                            servo->set_pgain(sensor->servo[i].pGain);
-                            servo->set_igain(sensor->servo[i].iGain);
-                            servo->set_dgain(sensor->servo[i].dGain);
-                            servo->set_goalposition(sensor->servo[i].goalPosition);
-                            servo->set_movingspeed(sensor->servo[i].movingSpeed);
-                            servo->set_torquelimit(sensor->servo[i].torqueLimit);
-                            servo->set_presentposition(sensor->servo[i].presentPosition);
-                            servo->set_presentspeed(sensor->servo[i].presentSpeed);
+                            servo->set_p_gain(sensor->servo[i].pGain);
+                            servo->set_i_gain(sensor->servo[i].iGain);
+                            servo->set_d_gain(sensor->servo[i].dGain);
+                            servo->set_goal_position(sensor->servo[i].goalPosition);
+                            servo->set_goal_speed(sensor->servo[i].movingSpeed);
+                            servo->set_torque_limit(sensor->servo[i].torqueLimit);
+                            servo->set_present_position(sensor->servo[i].presentPosition);
+                            servo->set_present_speed(sensor->servo[i].presentSpeed);
                             servo->set_load(sensor->servo[i].load);
                             servo->set_voltage(sensor->servo[i].voltage);
                             servo->set_temperature(sensor->servo[i].temperature);

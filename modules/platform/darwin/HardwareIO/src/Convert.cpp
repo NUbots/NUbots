@@ -97,7 +97,7 @@ namespace darwin {
 
 
     float Convert::accelerometer(uint16_t value) {
-        return (value - 512) * ACCELERONOMETER_CONVERSION_FACTOR;
+        return (value - 512) * ACCELEROMETER_CONVERSION_FACTOR;
     }
 
     float Convert::gyroscope(uint16_t value) {

@@ -21,6 +21,7 @@
 #define UTILITY_STRUTIL_H
 
 #include <string>
+#include <algorithm>
 
 namespace utility {
 
@@ -28,6 +29,7 @@ namespace utility {
      * TODO document
      *
      * @author Trent Houliston
+	 * @note Alex Biddulph added trimLeft, trimRight, trim, and removeAll functions 10-12-2012
      */
     namespace strutil {
 
@@ -51,6 +53,27 @@ namespace utility {
                 return false;
             }
         }
+		
+		void trimLeft(std::string& str, const std::string& tokens) {
+			str.erase(0, str.find_first_not_of(tokens));		// remove tokens from the beginning of the string.
+		}
+		
+		void trimRight(std::string& str, const std::string& tokens) {
+			str.erase(str.find_last_not_of(tokens), str.length() - 1);		// remove tokens from the beginning of the string.
+		}
+		
+		void trim(std::string& str, const std::string& tokens) {
+			trimLeft(str, tokens);
+			trimRight(str, tokens);
+		}
+		
+		void removeAll(std::string& str, const std::string& tokens) {
+			str.erase(std::remove_if(str.begin(), str.end(), 
+				[&tokens](const char& c) {
+					return tokens.find(c) != std::string::npos;
+				}
+				), str.end());		// remove all tokens from the string.
+		}
     }
 }
 #endif

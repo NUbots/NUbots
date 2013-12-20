@@ -26,22 +26,22 @@ message Sensors {
     }
 
     message Servo {
-        required uint32 errorFlags = 1;
+        required uint32 error_flags = 1;
 
         required ServoID id = 2;
 
         optional bool enabled = 3;
 
-        optional float pGain = 4;
-        optional float iGain = 5;
-        optional float dGain = 6;
+        optional float p_gain = 4;
+        optional float i_gain = 5;
+        optional float d_gain = 6;
 
-        optional float goalPosition = 7;
-        optional float movingSpeed = 8;
-        optional float torqueLimit = 9;
+        optional float goal_position = 7;
+        optional float goal_speed = 8;
+        optional float torque_limit = 9;
 
-        optional float presentPosition = 10;
-        optional float presentSpeed = 11;
+        optional float present_position = 10;
+        optional float present_speed = 11;
 
         optional float load = 12;
         optional float voltage = 13;
@@ -66,13 +66,13 @@ message Sensors {
         optional float fsr3 = 3;
         optional float fsr4 = 4;
 
-        optional float centreX = 5;
-        optional float centreY = 6;
+        optional float centre_x = 5;
+        optional float centre_y = 6;
     }
 
     optional Accelerometer accelerometer = 1;
     optional Gyroscope gyroscope = 2;
-    optional FSR leftFSR = 3;
-    optional FSR rightFSR = 4;
-    repeated Servo servos = 5;
+    optional FSR left_FSR = 3;
+    optional FSR right_FSR = 4;
+    repeated Servo servo = 5;
 }

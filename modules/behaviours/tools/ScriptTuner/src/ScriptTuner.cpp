@@ -52,7 +52,7 @@ namespace modules {
 
                         // Check if the script exists and load it if it does.
                         if(utility::file::exists(scriptPath)) {
-                            log<NUClear::DEBUG>("Loading script: ", scriptPath, '\n');
+                            NUClear::log<NUClear::DEBUG>("Loading script: ", scriptPath, '\n');
                             loadScript(scriptPath);
                         }
 //should it be NUClear::log<NUclear::Debug>
@@ -60,7 +60,7 @@ namespace modules {
 
                     }
                     else {
-                        log<NUClear::DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
+                        NUClear::log<NUClear::DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
                         powerPlant->shutdown();
                     }
                 });
@@ -151,7 +151,7 @@ namespace modules {
                             playScript();
                             break;
                         case 'J':
-                            jumpToFrame();
+                            jumpToFrame( git commit -am "Start to improve help command");
                             break;
                         case 'R':
                             refreshView();
@@ -589,4 +589,4 @@ namespace modules {
             
         } // tools
     } // behaviours
-} // modules:
+} // modules

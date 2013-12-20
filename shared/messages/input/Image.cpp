@@ -23,18 +23,25 @@
 namespace messages {
     namespace input {
 
-        Image::Image(size_t width, size_t height, std::unique_ptr<Pixel[]>&& data) :
+        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data) :
         imgWidth(width),
         imgHeight(height),
         data(std::move(data)) {
         }
+        
+        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data, std::vector<uint8_t>&& source) :
+        imgWidth(width),
+        imgHeight(height),
+        data(std::move(data)),
+        src(std::move(source)) {
+        }
 
         Image::Pixel& Image::operator ()(size_t x, size_t y) {
-            return data.get()[y * imgWidth + x];
+            return data[y * imgWidth + x];
         }
 
         const Image::Pixel& Image::operator ()(size_t x, size_t y) const {
-            return data.get()[y * imgWidth + x];
+            return data[y * imgWidth + x];
         }
 
         const size_t Image::width() const {
@@ -44,9 +51,13 @@ namespace messages {
         const size_t Image::height() const {
             return imgHeight;
         }
-
-        const size_t Image::size() const {
-            return imgWidth * imgHeight;
+        
+        const std::vector<Image::Pixel>& Image::raw() const {
+            return data;
+        }
+        
+        const std::vector<uint8_t>& Image::source() const {
+            return src;
         }
     
     }  // input

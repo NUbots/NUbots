@@ -21,11 +21,41 @@
 #define MODULES_VISION_LUTCLASSIFIER_H
 
 #include <nuclear> 
+#include <string>
 #include <armadillo>
+
 #include "messages/input/Image.h"
+#include "messages/vision/ClassifiedImage.h"
+#include "messages/support/Configuration.h"
+
+#include "LookUpTable.h"
+#include "GreenHorizon.h"
+#include "ScanLines.h"
+#include "SegmentFilter.h"
+#include "ColourReplacementRule.h"
+#include "ColourTransitionRule.h"
 
 namespace modules {
     namespace vision {
+        struct VisionConstants{
+            static constexpr const char* CONFIGURATION_PATH = "VisionConstants.json";
+        };
+
+        struct LUTLocations{
+            static constexpr const char* CONFIGURATION_PATH = "LUTLocations.json";
+        };
+
+        struct GreenHorizonConfig{
+            static constexpr const char* CONFIGURATION_PATH = "GreenHorizon.json";
+        };
+
+        struct ScanLinesConfig{
+            static constexpr const char* CONFIGURATION_PATH = "ScanLines.json";
+        };
+
+        struct RulesConfig{
+            static constexpr const char* CONFIGURATION_PATH = "Rules.json";
+        };
 
         /**
          * Classifies a raw image, producing the colour segments for object detection
@@ -34,17 +64,13 @@ namespace modules {
          */
         class LUTClassifier : public NUClear::Reactor {
         private:
-            /*! @brief Computes the visual green horizon.
-                Note that the use of kinematics horizon has been replaced by dummmy code 
-                @param image The raw image
-            */ 
-            std::vector<arma::vec> CalculateGreenHorizon(const messages::input::Image& image);
-            
-            /*! @brief Generates the scan lines
-                
-            */ 
-            std::vector<int> GenerateScanLines(const messages::input::Image& image, const std::vector<arma::vec>& green_horizon_points);
-            //ClassifiedImage ClassifyScanLines(std::vector<int> scan_lines);
+            std::vector<LookUpTable> LUTs;
+            unsigned int current_LUT_index;
+
+            GreenHorizon greenHorizon;
+            ScanLines scanLines;
+            SegmentFilter segmentFilter;
+
         public:
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
         };
