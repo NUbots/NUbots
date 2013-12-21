@@ -27,7 +27,7 @@ class nubugger(
     ensure => present,
     user => $username,
     owner => $username,
-    revision => 'feature/puppet',
+    revision => 'develop',
   } ~> 
   exec { 'npm_install':
     require => [
