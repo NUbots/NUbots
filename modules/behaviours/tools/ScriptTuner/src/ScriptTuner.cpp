@@ -151,7 +151,7 @@ namespace modules {
                             playScript();
                             break;
                         case 'J':
-                            jumpToFrame( git commit -am "Start to improve help command");
+                            jumpToFrame();
                             break;
                         case 'R':
                             refreshView();
