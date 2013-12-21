@@ -27,13 +27,13 @@ using messages::support::Configuration;
 
 namespace modules {
     Localisation::Localisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-        on<Trigger<Configuration<LocalisationConfig>>>(
-            [this](const Configuration<LocalisationConfig>& settings) {
-            std::cout << __func__ << ": Config" << std::endl;
+        // on<Trigger<Configuration<LocalisationConfig>>>(
+        //     [this](const Configuration<LocalisationConfig>& settings) {
+        //     std::cout << __func__ << ": Config" << std::endl;
             
-        //     // std::string testConfig = settings.config["testConfig"];
-        //     // std::cout << testConfig << std::endl;
-        });
+        // //     // std::string testConfig = settings.config["testConfig"];
+        // //     // std::cout << testConfig << std::endl;
+        // });
 
     	on<Trigger<Every<500, std::chrono::milliseconds>>>([this](const time_t&) {
             // emit(std::make_unique<messages::LMissile>());
