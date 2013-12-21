@@ -38,6 +38,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
   config.vm.synced_folder ".", "/home/vagrant/nubots/NUClearPort"
+  # Share NUbugger repository with the VM if it has been placed in the same
+  # directory as NUClearPort
+  if File.directory?("../NUbugger")
+    config.vm.synced_folder "../NUbugger", "/home/vagrant/nubots/NUbugger"
+  end
 
   # Enable provisioning with Puppet stand alone.  Puppet manifests
   # are contained in a directory path relative to this Vagrantfile.
