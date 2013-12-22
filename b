@@ -51,7 +51,7 @@ Usage: b run <role>
 Please provide the name of the role to run.
 '''
     elif os.path.isfile("build/roles/{}".format(sys.argv[2])):
-        call("./{}".format(sys.argv[2]), cwd='build/roles')
+        call("./roles/{}".format(sys.argv[2]), cwd='build/')
     else:
         print "The role '{}' does not exist or did not build correctly.".format(sys.argv[2])
 
