@@ -18,10 +18,11 @@ This script is an optional helper script for performing common tasks
 related to building and running NUClearPort and related projects.
 
 Command summary:
-  - clean	Deletes the build directory.
-  - cmake	Runs cmake in the build directory (creating it if it doesn't exist).
-  - make	Runs make in the build directory (creates it and runs cmake if it doesn't exist).
-  - run	<role>	Runs the binary for the role of the given name.
+  - clean       Deletes the build directory.
+  - cmake       Runs cmake in the build directory (creating it if it doesn't exist).
+  - make        Runs make in the build directory (creates it and runs cmake if it doesn't exist).
+  - makej       Same as make, but runs 'make -j'.
+  - run	<role>  Runs the binary for the role of the given name.
 """
 
 elif sys.argv[1] == 'clean':
