@@ -35,14 +35,16 @@ namespace modules {
         class VisionKinematics {
         public:
             VisionKinematics();
-            VisionKinematics(const SensorCalibration& calibration);
 
-            void setCalibration(const SensorCalibration& calibration);
-
-            SensorCalibration getCalibration();
+			void setParameters(float RADIAL_CORRECTION_COEFFICIENT_,
+								const arma::vec2& BODY_ANGLE_OFFSET_,
+								const arma::vec3& CAMERA_ANGLE_OFFSET_,
+								const arma::vec3& NECK_POSITION_OFFSET_,
+								const arma::vec3& BODY_POITION_OFFSET_,
+								const arma::vec3& CAMERA_POSITION_OFFSET_);
 
             // 2D distortion transform.
-            arma::vec2 correctDistortion(float RADIAL_CORRECTION_COEFFICIENT, const arma::vec2& point);
+            arma::vec2 correctDistortion(const arma::vec2& point);
 
             void calculateRepresentationsFromPixelLocation(NUPoint& pt, bool knownDistance = false, double val = 0.0) const;
             void calculateRepresentationsFromPixelLocation(std::vector<NUPoint>& pts, bool knownDistance = false, double val = 0.0) const;
@@ -60,7 +62,7 @@ namespace modules {
             //! Calculate the field of view and effective camera distance in pixels.
             void setCamParams(arma::vec2 imagesize, arma::vec2 fov);
 
-            void setSensors(double new_head_pitch, double new_head_yaw, double new_body_roll, double new_body_pitch, arma::vec3 new_neck_position);
+            void setSensors(double headPitch, double headYaw, double bodyRoll, double bodyPitch, arma::vec3 neckPosition);
 
             void preCalculateTransforms();
 
@@ -96,7 +98,6 @@ namespace modules {
             arma::vec2 m_screenToRadialFactor;
 
             // New for transforms.
-            SensorCalibration m_sensorCalibration;
             arma::mat m_camVector;
             arma::mat m_camV2RobotRotation;
             double m_headPitch;
@@ -104,6 +105,14 @@ namespace modules {
             double m_bodyRoll;
             double m_bodyPitch;
             arma::vec3 m_neckPosition;
+
+			float RADIAL_CORRECTION_COEFFICIENT;
+
+			arma::vec2 BODY_ANGLE_OFFSET;
+			arma::vec3 CAMERA_ANGLE_OFFSET;
+			arma::vec3 NECK_POSITION_OFFSET;
+			arma::vec3 BODY_POITION_OFFSET;
+			arma::vec3 CAMERA_POSITION_OFFSET;
         };
 
     }

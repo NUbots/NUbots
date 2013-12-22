@@ -36,24 +36,30 @@ namespace modules {
             m_screenToRadialFactor << 0 << 0;
         }
 
-        VisionKinematics::VisionKinematics(const SensorCalibration& calibration) {
-            setCalibration(calibration);
-        }
+		void VisionKinematics::setParameters(float RADIAL_CORRECTION_COEFFICIENT_,
+												const arma::vec2& BODY_ANGLE_OFFSET_,
+												const arma::vec3& CAMERA_ANGLE_OFFSET_,
+												const arma::vec3& NECK_POSITION_OFFSET_,
+												const arma::vec3& BODY_POITION_OFFSET_,
+												const arma::vec3& CAMERA_POSITION_OFFSET_) {
+			RADIAL_CORRECTION_COEFFICIENT = RADIAL_CORRECTION_COEFFICIENT_;
+			
+			BODY_ANGLE_OFFSET = BODY_ANGLE_OFFSET_;
+			CAMERA_ANGLE_OFFSET = CAMERA_ANGLE_OFFSET_;
+			
+			NECK_POSITION_OFFSET = NECK_POSITION_OFFSET_;
 
-        void VisionKinematics::setCalibration(const SensorCalibration& calibration) {
-            m_sensorCalibration = calibration;
-            preCalculateTransforms();
-        }
+			BODY_POSITION_OFFSET = BODY_POSITION_OFFSET_;
+			CAMERA_POSITION_OFFSET = CAMERA_POSITION_OFFSET_;
 
-        SensorCalibration VisionKinematics::getCalibration() {
-          return m_sensorCalibration;
-        }
+			preCalculateTransforms();
+		}
 
         /**
           * Applies radial distortion correction to the given pixel location.
           * @param pt The pixel location to correct.
           */
-        arma::vec2 VisionKinematics::correctDistortion(float RADIAL_CORRECTION_COEFFICIENT, const arma::vec2& point) {
+        arma::vec2 VisionKinematics::correctDistortion(const arma::vec2& point) {
             // Gget position relative to centre.
             arma::vec2 halfSize = m_imageSize * 0.5;
             arma::vec2 centreRelative = point - halfSize;
@@ -79,16 +85,16 @@ namespace modules {
             #define YAW    2        // Z-axis
 
             // Uses the following member variables:
-            // m_headPitch, m_headYaw, m_bodyRoll, m_bodyPitch, m_sensorCalibration
+            // m_headPitch, m_headYaw, m_bodyRoll, m_bodyPitch
 
             // Results written to:
             // m_camVector, m_camV2RobotRotation
 
             // Varibles for orientations.
-            arma::vec3 cameraOrientation = m_sensorCalibration.m_cameraAngleOffset;
+            arma::vec3 cameraOrientation = CAMERA_ANGLE_OFFSET;
             arma::vec3 headOrientation;
             headOrientation << 0 << 0 << 0;
-            arma::vec2 bodyOrientation = m_sensorCalibration.m_bodyAngleOffset;
+            arma::vec2 bodyOrientation = BODY_ANGLE_OFFSET;
 
             // Add the joint values.
             headOrientation[PITCH] += m_headPitch;
@@ -109,7 +115,7 @@ namespace modules {
             arma::mat cameraYaw_rot = utility::math::matrix::zRotationMatrix(cameraOrientation[YAW]);
             arma::mat headV2RobotRotation = bodyRoll_rot * bodyPitch_rot * headYaw_rot * headPitch_rot;
 
-            m_camVector = (headV2RobotRotation * m_sensorCalibration.m_cameraPositionOffset) + m_neckPosition;
+            m_camVector = (headV2RobotRotation * CAMERA_POSITION_OFFSET) + m_neckPosition;
             m_camV2RobotRotation = headV2RobotRotation * cameraPitch_rot * cameraRoll_rot * cameraYaw_rot;
 
             #undef ROLL

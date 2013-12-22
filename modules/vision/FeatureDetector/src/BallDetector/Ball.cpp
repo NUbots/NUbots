@@ -22,7 +22,7 @@
 namespace modules {
     namespace vision {
 
-        using messages::vision::BallObject;
+		using messages::vision::BallObject;
 
         Ball::Ball() {
             m_id = BALL;
@@ -53,12 +53,35 @@ namespace modules {
             valid = (calculatePositions() && check());
         }
 
+		void Ball::setParameters(bool THROWOUT_ON_ABOVE_KIN_HOR_BALL_,
+									float MAX_DISTANCE_METHOD_DISCREPENCY_BALL_,
+									bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_,
+									bool THROWOUT_SMALL_BALLS_,
+									float MIN_BALL_DIAMETER_PIXELS_,
+									bool THROWOUT_DISTANT_BALLS_,
+									float MAX_BALL_DISTANCE_,
+									float BALL_WIDTH_,
+									const DistanceMethod& BALL_DISTANCE_METHOD_,
+									const VisionKinematics& transformer) {
+			THROWOUT_ON_ABOVE_KIN_HOR_BALL = THROWOUT_ON_ABOVE_KIN_HOR_BALL_;
+			MAX_DISTANCE_METHOD_DISCREPENCY_BALL = MAX_DISTANCE_METHOD_DISCREPENCY_BALL_;
+			THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL = THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_;
+			THROWOUT_SMALL_BALLS = THROWOUT_SMALL_BALLS_;
+			MIN_BALL_DIAMETER_PIXELS = MIN_BALL_DIAMETER_PIXELS_;
+			THROWOUT_DISTANT_BALLS = THROWOUT_DISTANT_BALLS_;
+			MAX_BALL_DISTANCE = MAX_BALL_DISTANCE_;
+			BALL_WIDTH = BALL_WIDTH_;
+			BALL_DISTANCE_METHOD = BALL_DISTANCE_METHOD_;
+
+			m_transformer = transformer;
+		}
+
         float Ball::getRadius() const {
             return (m_diameter * 0.5);
         }
 
         bool Ball::addToExternalFieldObjects(std::unique_ptr<messages::vision::BallObject> ball) const {
-            std::unique_ptr<messages::vision::BallObject> temp = std::unique_ptr<new messages::vision::BallObject()>;
+			std::unique_ptr<BallObject> temp = std::unique_ptr<BallObject>(new BallObject());
 
             if (valid) {
                 // Add ball to mobileFieldObjects.
@@ -67,7 +90,7 @@ namespace modules {
                 temp->screenAngular = m_location.screenAngular;
                 temp->screenCartesian = m_location.screenCartesian;
                 temp->sizeOnScreen = m_sizeOnScreen;
-                temp->timestamp = timestamp;
+                temp->timestamp = NUClear::clock::now();
 
                 ball = std::move(temp);
 
@@ -83,29 +106,25 @@ namespace modules {
             // Various throwouts here.
 
             // Throwout for below horizon.
-            if(VisionConstants::THROWOUT_ON_ABOVE_KIN_HOR_BALL && !(VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location.screenCartesian[0], m_location.screenCartesian[1]))) {
+			// TODO: Add kinematics horizon.
+            if (THROWOUT_ON_ABOVE_KIN_HOR_BALL && true /* !(VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location.screenCartesian[0], m_location.screenCartesian[1]))*/ ) {
                 std::cout << "Ball::check() - Ball above horizon: should not occur" << std::endl;
 
                 return false;
             }
             
             //Distance discrepency throwout - if width method says ball is a lot closer than d2p (by specified value) then discard
-        //    if(VisionConstants::THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL and
-        //            std::abs(width_dist - d2p) > VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL) {
-        //        #if VISION_BALL_VERBOSITY > 1
-        //        debug << "Ball::check - Ball thrown out: width distance too much smaller than d2p" << std::endl;
-        //            debug << "\td2p: " << d2p << " width_dist: " << width_dist << " MAX_DISTANCE_METHOD_DISCREPENCY_BALL: " << VisionConstants::MAX_DISTANCE_METHOD_DISCREPENCY_BALL << std::endl;
-        //        #endif
+        //    if ((THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL) && (std::abs(width_dist - d2p) > MAX_DISTANCE_METHOD_DISCREPENCY_BALL)) {
         //        return false;
         //    }
 
             // Throw out if ball is too small.
-            if (VisionConstants::THROWOUT_SMALL_BALLS && (m_diameter < VisionConstants::MIN_BALL_DIAMETER_PIXELS)) {
+            if (THROWOUT_SMALL_BALLS && (m_diameter < MIN_BALL_DIAMETER_PIXELS)) {
                 return false;
             }
             
             // Throw out if ball is too far away.
-            if (VisionConstants::THROWOUT_DISTANT_BALLS && (m_location.neckRelativeRadial[0] > VisionConstants::MAX_BALL_DISTANCE)) {
+            if (THROWOUT_DISTANT_BALLS && (m_location.neckRelativeRadial[0] > MAX_BALL_DISTANCE)) {
                 return false;
             }
             
@@ -113,33 +132,31 @@ namespace modules {
             return true;
         }
 
-        double Ball::findScreenError(VisionFieldObject *other) const {
+        double Ball::findScreenError(VisionFieldObject* other) const {
             Ball* b = dynamic_cast<Ball*>(other);
 
-            return ((arma::norm(m_location.screenCartesian - b->m_location.screenCartesian, 2) + amra::norm(m_sizeOnScreen - b->m_sizeOnScreen, 2));
+            return (arma::norm(m_location.screenCartesian - b->m_location.screenCartesian, 2) + arma::norm(m_sizeOnScreen - b->m_sizeOnScreen, 2));
         }
 
-        double Ball::findGroundError(VisionFieldObject *other) const {
+        double Ball::findGroundError(VisionFieldObject* other) const {
             Ball* b = dynamic_cast<Ball*>(other);
 
             return arma::norm(m_location.groundCartesian - b->m_location.groundCartesian, 2);
         }
 
         bool Ball::calculatePositions() {
-            const Transformer& transformer = VisionBlackboard::getInstance()->getTransformer();
-
             // To the bottom of the Goal Post.
             NUPoint d2pLocation, widthLocation;
 
             d2pLocation.screenCartesian = m_location.screenCartesian;
             widthLocation.screenCartesian = m_location.screenCartesian;
 
-            double widthDistance = ((VisionConstants::BALL_WIDTH * transformer.getCameraDistanceInPixels()) / (m_sizeOnScreen[0]));
+            double widthDistance = ((BALL_WIDTH * m_transformer.getCameraDistanceInPixels()) / (m_sizeOnScreen[0]));
 
-            transformer.calculateRepresentationsFromPixelLocation(d2pLocation);
-            transformer.calculateRepresentationsFromPixelLocation(widthLocation, true, widthDistance);
+            m_transformer.calculateRepresentationsFromPixelLocation(d2pLocation);
+            m_transformer.calculateRepresentationsFromPixelLocation(widthLocation, true, widthDistance);
 
-            switch(VisionConstants::BALL_DISTANCE_METHOD) {
+            switch (BALL_DISTANCE_METHOD) {
                 case D2P: {
                     m_location = d2pLocation;
 
@@ -179,7 +196,6 @@ namespace modules {
         *   @param elevation The angle about the y axis.
         */
         //double Ball::distanceToBall(double bearing, double elevation) {
-        //    const Transformer& tran = VisionBlackboard::getInstance()->getTransformer();
         //    //reset distance values
         //    bool d2pvalid = false;
         //    d2p = 0;
@@ -187,25 +203,14 @@ namespace modules {
         //    double result = 0;
         //    //get distance to point from base
 
-        //    d2pvalid = tran.isDistanceToPointValid();
+        //    d2pvalid = m_transfomer.isDistanceToPointValid();
         //    if(d2pvalid)
-        //        d2p = tran.distanceToPoint(bearing, elevation);
+        //        d2p = m_transformer.distanceToPoint(bearing, elevation);
 
-        //    #if VISION_BALL_VERBOSITY > 1
-        //        if(!d2pvalid)
-        //            debug << "Ball::distanceToGoal: d2p invalid - combination methods will only return width_dist" << std::endl;
-        //    #endif
         //    //get distance from width
-        //    width_dist = VisionConstants::BALL_WIDTH*tran.getCameraDistanceInPixels()/m_sizeOnScreen[0];
+        //    width_dist = BALL_WIDTH*m_transformer.getCameraDistanceInPixels()/m_sizeOnScreen[0];
 
-        //    #if VISION_BALL_VERBOSITY > 1
-        //        debug << "Ball::distanceToGoal: bearing: " << bearing << " elevation: " << elevation << std::endl;
-        //        debug << "Ball::distanceToGoal: d2p: " << d2p << std::endl;
-        //        debug << "Ball::distanceToGoal: m_sizeOnScreen[0]: " << m_sizeOnScreen[0] << std::endl;
-        //        debug << "Ball::distanceToGoal: width_dist: " << width_dist << std::endl;
-        //        debug << "Ball::distanceToGoal: Method: " << getDistanceMethodName(VisionConstants::BALL_DISTANCE_METHOD) << std::endl;
-        //    #endif
-        //    switch(VisionConstants::BALL_DISTANCE_METHOD) {
+        //    switch (BALL_DISTANCE_METHOD) {
         //    case D2P:
         //        distance_valid = d2pvalid && d2p > 0;
         //        result = d2p;
@@ -234,7 +239,7 @@ namespace modules {
             output << " angularloc: [" << ball.m_location.screenAngular[0] << ", " << ball.m_location.screenAngular[1] << "]" << std::endl;
             output << "\trelative field coords: [" << ball.m_location.neckRelativeRadial[0] << ", " << ball.m_location.neckRelativeRadial[1] << 
                         ", " << ball.m_location.neckRelativeRadial[2] << "]" << std::endl;
-            output << "\tspherical error: [" << ball.m_spherical_error[0] << ", " << ball.m_spherical_error[1] << "]" << std::endl;
+            output << "\tspherical error: [" << ball.m_sphericalError[0] << ", " << ball.m_sphericalError[1] << "]" << std::endl;
             output << "\tsize on screen: [" << ball.m_sizeOnScreen[0] << ", " << ball.m_sizeOnScreen[1] << "]";
 
             return output;

@@ -1,5 +1,23 @@
+/*
+ * This file is part of FeatureDetector.
+ *
+ * FeatureDetector is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * FeatureDetector is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FeatureDetector.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
 
-#ifdef MESSAGES_VISION_VISION_OBJECTS_H
+#ifndef MESSAGES_VISION_VISION_OBJECTS_H
 #define MESSAGES_VISION_VISION_OBJECTS_H
 
 #include <armadillo> 
@@ -20,12 +38,12 @@ namespace messages {
 			NUClear::clock::time_point timestamp;
 		};
 
-		class BallObject : VisionObject {
+		class BallObject : public VisionObject {
         public:
 			BallObject() : VisionObject() {}			
 		};
 
-		class Goal : VisionObject {
+		class Goal : public VisionObject {
         public:
 			Goal() : VisionObject() {}
 			enum Type{
@@ -35,7 +53,7 @@ namespace messages {
 			} type;
 		};
 
-		class Obstacle : VisionObject {
+		class Obstacle : public VisionObject {
         public:
 			Obstacle() : VisionObject() {}
 			float arcWidth;
@@ -46,12 +64,12 @@ namespace messages {
 
 		//Line objects:
 
-		class FieldLine : VisionObject {
+		class FieldLine : public VisionObject {
         public:
 			FieldLine() : VisionObject() {}
 		};
 
-		class CornerPoint : VisionObject {
+		class CornerPoint : public VisionObject {
         public:
 			CornerPoint() : VisionObject() {}
 			enum Type{
@@ -61,7 +79,7 @@ namespace messages {
 			} type;
 		};
 
-		class CentreCircle : VisionObject {
+		class CentreCircle : public VisionObject {
         public:
 			CentreCircle() : VisionObject() {}		
 		};

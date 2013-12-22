@@ -27,15 +27,27 @@
 #include "messages/vision/VisionObjects.h"
 
 #include "../VisionFieldObject.h"
+#include "../VisionKinematics.h"
 
 namespace modules {
     namespace vision {
-        
+
         class Ball : public VisionFieldObject {
         public:
             Ball();
             Ball(const arma::vec2& centre, double diameter);
             
+			void setParameters(bool THROWOUT_ON_ABOVE_KIN_HOR_BALL_,
+									float MAX_DISTANCE_METHOD_DISCREPENCY_BALL_,
+									bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_,
+									bool THROWOUT_SMALL_BALLS_,
+									float MIN_BALL_DIAMETER_PIXELS_,
+									bool THROWOUT_DISTANT_BALLS_,
+									float MAX_BALL_DISTANCE_,
+									float BALL_WIDTH_,
+									const DistanceMethod& BALL_DISTANCE_METHOD_,
+									const VisionKinematics& transformer);
+
             /*!
               @brief returns the radius.
               @return the radius of the ball in pixels.
@@ -53,8 +65,8 @@ namespace modules {
             //! @brief applies a series of checks to decide if the ball is valid.
             bool check() const;
             
-            virtual double findScreenError(VisionFieldObject* other) const;
-            virtual double findGroundError(VisionFieldObject* other) const;
+            double findScreenError(VisionFieldObject* other) const;
+            double findGroundError(VisionFieldObject* other) const;
             
             //! @brief output stream operator
             friend std::ostream& operator<< (std::ostream& output, const Ball& b);
@@ -80,6 +92,17 @@ namespace modules {
         public:
             int m_diameter;     //! @variable the radius of the ball in pixels
             
+			bool THROWOUT_ON_ABOVE_KIN_HOR_BALL;
+			float MAX_DISTANCE_METHOD_DISCREPENCY_BALL;
+			bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL;
+			bool THROWOUT_SMALL_BALLS;
+			float MIN_BALL_DIAMETER_PIXELS;
+			bool THROWOUT_DISTANT_BALLS;
+			float MAX_BALL_DISTANCE;
+			float BALL_WIDTH;
+			DistanceMethod BALL_DISTANCE_METHOD;
+			VisionKinematics m_transformer;
+
             //private:
             //    float d2p;          //! @variable the distance of the ball in cm as found by the distance to point method
             //    float width_dist;   //! @variable the distance of the ball in cm as found by the width method.
