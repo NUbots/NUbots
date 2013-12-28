@@ -29,7 +29,7 @@
 #include "Goal.h"
 #include "../Quad.h"
 #include "../LSFittedLine.h"
-#include "RANSAC.h"
+#include "../RANSAC/RANSAC.h"
 
 namespace modules {
 	namespace vision {

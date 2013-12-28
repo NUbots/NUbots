@@ -17,67 +17,47 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_VISION_FIELDPOINTDETECTOR_H
-#define MODULES_VISION_FIELDPOINTDETECTOR_H
+#ifndef MODULES_VISION_CIRCLEDETECTOR_H
+#define MODULES_VISION_CIRCLEDETECTOR_H
 
 #include <vector>
-#include <armadillo>
 
-#include "messages/vision/ClassifiedImage.h"
-
-#include "../VisionKinematics.h"
 #include "../NUPoint.h"
-#include "CircleDetector.h"
-#include "LineDetector.h"
-#include "CornerDetector.h"
+#include "../VisionKinematics.h"
+#include "../RANSAC/RANSAC.h"
+#include "../RANSAC/RANSACCircle.h"
+
+#include "CentreCircle.h"
 
 namespace modules {
     namespace vision {
 
-        class FieldPointDetector {
+        class CircleDetector {
         public:
-            FieldPointDetector();
+            CircleDetector();
 
-            void setParameters(bool TRANSFORM_FIRST_,
-                               const VisionKinematics& transformer,
-                    
-                               // CircleDetector.
-                               double CIRCLE_DETECTOR_TOLERANCE_,
+            void setParameters(double TOLERANCE_,
                                unsigned int MINIMUM_POINTS_,
                                unsigned int ITERATIONS_PER_FITTING_,
                                double CONSENSUS_MARGIN_,
                                unsigned int MAX_FITTINGS_,
                                float CENTRE_CIRCLE_RADIUS_, 
-                    
-                               // CornerDetector.
-                               double CORNER_DETECTOR_TOLERANCE_);
-
-            void run(bool findCircles,
-                    bool findLines, 
-                    bool findCorners, 
-                    const std::vector<arma::vec2>& greenHorizon) const;
+                               const VisionKinematics& transformer);
+            
+            virtual bool run(std::vector<NUPoint>& points, CentreCircle& result);
 
         private:
-            LineDetector m_lineDetector;
-            CircleDetector m_circleDetector;
-            CornerDetector m_cornerDetector;
-            
-            bool TRANSFORM_FIRST;
-
-            VisionKinematics m_transformer;
-
-            // CircleDetector.
-            double CIRCLE_DETECTOR_TOLERANCE;
+            double TOLERANCE;
             unsigned int MINIMUM_POINTS;
             unsigned int ITERATIONS_PER_FITTING;
             double CONSENSUS_MARGIN;
             unsigned int MAX_FITTINGS;
             float CENTRE_CIRCLE_RADIUS;
 
-            // CornerDetector.
-            double CORNER_DETECTOR_TOLERANCE;
+            const VisionKinematics m_transformer;
         };
+
     }
 }
 
-#endif // MODULES_VISION_FIELDPOINTDETECTOR_H
+#endif // MODULES_VISION_CIRCLEDETECTOR_H

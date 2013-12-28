@@ -28,10 +28,11 @@ namespace modules {
         using messages::vision::COLOUR_CLASS;
 		using messages::vision::ColourSegment;
         
-        FeatureDetector::FeatureDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)),
-                                m_transformer(), m_ballDetector(), m_goalDetector(), m_fieldPointDetector(), m_obstacleDetector() { 
+        FeatureDetector::FeatureDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), 
+                                m_transformer() { //, m_ballDetector(), m_goalDetector(), m_fieldPointDetector(), m_obstacleDetector() { 
 
             // Load feature detector constants.
+                    /*
             on<Trigger<Configuration<FeatureDetectorConfig>>>([this](const Configuration<FeatureDetectorConfig>& constants) {
                 DETECT_LINES = constants.config["DETECT_LINES"];
                 DETECT_GOALS = constants.config["DETECT_GOALS"];
@@ -70,6 +71,7 @@ namespace modules {
                     m_detectObstacles.disable();
                 }
             });
+                */
 
             on<Trigger<Configuration<VisionKinematicsConfig>>>([this](const Configuration<VisionKinematicsConfig>& constants) {
                 arma::vec2 BODY_ANGLE_OFFSET;
@@ -119,6 +121,7 @@ namespace modules {
                         distanceMethod = DISTANCE_METHOD::WIDTH;
                     }
 
+/*
                     m_ballDetector.setParameters(constants.config["BALL_EDGE_THRESHOLD"],
                                                  constants.config["BALL_ORANGE_TOLERANCE"],
                                                  constants.config["BALL_MIN_PERCENT_ORANGE"],
@@ -132,6 +135,7 @@ namespace modules {
                                                  constants.config["BALL_WIDTH"],
                                                  distanceMethod, 
                                                  m_transformer);
+                                                 */
             });
             
             on<Trigger<Configuration<GoalDetectorConfig>>>([this](const Configuration<GoalDetectorConfig>& constants) {
@@ -172,6 +176,7 @@ namespace modules {
                         selectionMethod = RANSAC_SELECTION_METHOD::LargestConsensus;
                     }
 
+                    /*
                     m_goalDetector.setParameters(constants.config["MINIMUM_POINTS"],
                                                  constants.config["MAX_ITERATIONS_PER_FITTING"],
                                                  constants.config["CONSENSUS_THRESHOLD"],
@@ -192,9 +197,11 @@ namespace modules {
                                                  constants.config["GOAL_WIDTH"],
                                                  distanceMethod,
                                                  constants.config["EDGE_OF_SCREEN_MARGIN"]);
+                                                 */
             });
 
             on<Trigger<Configuration<ObstacleDetectorConfig>>>([this](const Configuration<ObstacleDetectorConfig>& constants) {
+                    /*
                     m_obstacleDetector.setParameters(constants.config["MIN_DISTANCE_FROM_HORIZON"],
                                                  constants.config["MIN_CONSECUTIVE_POINTS"],
                                                  constants.config["VERTICAL_SCANLINE_SPACING"],
@@ -202,7 +209,10 @@ namespace modules {
                                                  constants.config["MAX_OTHER_COLOUR_THRESHOLD"],
                                                  constants.config["VER_THRESHOLD"],
                                                  constants.config["OBJECT_THRESHOLD_MULT"]);
+                                                 */
             });
+
+            /*
             m_detectLineObjects = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
 
             });
@@ -222,6 +232,7 @@ namespace modules {
             m_detectObstacles = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
 
             });
+            */
         }
     }  // vision
 }  // modules

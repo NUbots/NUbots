@@ -72,10 +72,12 @@ namespace modules {
             bool DETECT_BALLS;
             bool DETECT_OBSTACTLES; 
 
-            NUClear::threading::ReactionHandle m_detectGoals;
-            NUClear::threading::ReactionHandle m_detectBalls;
-            NUClear::threading::ReactionHandle m_detectLineObjects;
-            NUClear::threading::ReactionHandle m_detectObstacles;
+            /*
+            NUClear::Reactor::ReactionHandle m_detectGoals;
+            NUClear::Reactor::ReactionHandle m_detectBalls;
+            NUClear::Reactor::ReactionHandle m_detectLineObjects;
+            NUClear::Reactor::ReactionHandle m_detectObstacles;
+*/
 
             VisionKinematics m_transformer;
             
