@@ -43,14 +43,40 @@ namespace modules {
                                     const std::vector<messages::vision::ColourSegment>& verticalMatchedSegments, 
                                     const std::vector<arma::vec2>& greenHorizonInterpolatedPoints);
 
-            void setParameters(int BALL_EDGE_THRESHOLD_, int BALL_ORANGE_TOLERANCE_, float BALL_MIN_PERCENT_ORANGE_);
+            void setParameters(int BALL_EDGE_THRESHOLD_, 
+                                int BALL_ORANGE_TOLERANCE_, 
+                                float BALL_MIN_PERCENT_ORANGE_,
+                                bool THROWOUT_ON_ABOVE_KIN_HOR_BALL_,
+                                float MAX_DISTANCE_METHOD_DISCREPENCY_BALL_,
+                                bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_,
+                                bool THROWOUT_SMALL_BALLS_,
+                                float MIN_BALL_DIAMETER_PIXELS_,
+                                bool THROWOUT_DISTANT_BALLS_,
+                                float MAX_BALL_DISTANCE_,
+                                float BALL_WIDTH_,
+                                const DISTANCE_METHOD& BALL_DISTANCE_METHOD_,
+                                const VisionKinematics& transformer);
 
         private:
-            void appendEdgesFromSegments(const std::vector<messages::vision::ColourSegment>& segments, std::list<arma::vec2>& pointList, const std::vector<arma::vec2>& gh);
+            void appendEdgesFromSegments(const std::vector<messages::vision::ColourSegment>& segments, 
+                                        std::list<arma::vec2>& pointList, 
+                                        const std::vector<arma::vec2>& greenHorizon);
             
             int BALL_EDGE_THRESHOLD;
             int BALL_ORANGE_TOLERANCE;
             float BALL_MIN_PERCENT_ORANGE;
+
+            // Constants for construction of a Ball object.
+			bool THROWOUT_ON_ABOVE_KIN_HOR_BALL;
+			float MAX_DISTANCE_METHOD_DISCREPENCY_BALL;
+			bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL;
+			bool THROWOUT_SMALL_BALLS;
+			float MIN_BALL_DIAMETER_PIXELS;
+			bool THROWOUT_DISTANT_BALLS;
+			float MAX_BALL_DISTANCE;
+			float BALL_WIDTH;
+			DISTANCE_METHOD BALL_DISTANCE_METHOD;
+			VisionKinematics m_transformer;
         };
 
     }

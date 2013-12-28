@@ -41,19 +41,16 @@ namespace modules {
 			if (PREFILTER_ON) {
 				preFilter(horizontalSegments, horizontalFiltered);
 				preFilter(verticalSegments, verticalFiltered);
-
-		        image->horizontal_filtered_segments = horizontalFiltered;
-		        image->vertical_filtered_segments = verticalFiltered;
-			} else {
-				image->horizontal_filtered_segments = horizontalSegments;
-		        image->vertical_filtered_segments = verticalSegments;
 			}
+
 			filter(horizontalFiltered, horizontalResult);
 			filter(verticalFiltered, verticalResult);
 
-			
-			image->matched_horizontal_segments = horizontalResult;
-			image->matched_vertical_segments = verticalResult;
+            image->horizontalFilteredSegments = horizontalSegments;
+            image->verticalFilteredSegments = verticalSegments;
+			image->matchedHorizontalSegments = horizontalResult;
+			image->matchedVerticalSegments = verticalResult;
+
 			return std::move(image);
 		}
 

@@ -28,7 +28,7 @@
 namespace modules {
 	namespace vision {
 	
-		class LSFittedLine : public Line {
+		class LSFittedLine : public utility::math::Line {
 		public:
 			LSFittedLine();
 			LSFittedLine(const std::vector<arma::vec2>& pointlist);

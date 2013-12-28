@@ -65,7 +65,7 @@ namespace modules {
         class LUTClassifier : public NUClear::Reactor {
         private:
             std::vector<LookUpTable> LUTs;
-            unsigned int current_LUT_index;
+            unsigned int currentLUTIndex;
 
             GreenHorizon greenHorizon;
             ScanLines scanLines;

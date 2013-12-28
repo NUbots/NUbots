@@ -32,10 +32,35 @@ namespace modules {
             // Empty destructor. 
         }
 
-        void BallDetector::setParameters(int BALL_EDGE_THRESHOLD_, int BALL_ORANGE_TOLERANCE_, float BALL_MIN_PERCENT_ORANGE_) {
+        void BallDetector::setParameters(int BALL_EDGE_THRESHOLD_, 
+                                        int BALL_ORANGE_TOLERANCE_, 
+                                        float BALL_MIN_PERCENT_ORANGE_,
+		                                bool THROWOUT_ON_ABOVE_KIN_HOR_BALL_,
+									    float MAX_DISTANCE_METHOD_DISCREPENCY_BALL_,
+									    bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_,
+									    bool THROWOUT_SMALL_BALLS_,
+									    float MIN_BALL_DIAMETER_PIXELS_,
+									    bool THROWOUT_DISTANT_BALLS_,
+									    float MAX_BALL_DISTANCE_,
+									    float BALL_WIDTH_,
+									    const DISTANCE_METHOD& BALL_DISTANCE_METHOD_,
+									    const VisionKinematics& transformer) {
             BALL_MIN_PERCENT_ORANGE = BALL_EDGE_THRESHOLD_;
             BALL_ORANGE_TOLERANCE = BALL_ORANGE_TOLERANCE_;
             BALL_EDGE_THRESHOLD = BALL_MIN_PERCENT_ORANGE_;
+
+            // Parameters for constructing a Ball object.
+			THROWOUT_ON_ABOVE_KIN_HOR_BALL = THROWOUT_ON_ABOVE_KIN_HOR_BALL_;
+			MAX_DISTANCE_METHOD_DISCREPENCY_BALL = MAX_DISTANCE_METHOD_DISCREPENCY_BALL_;
+			THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL = THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_;
+			THROWOUT_SMALL_BALLS = THROWOUT_SMALL_BALLS_;
+			MIN_BALL_DIAMETER_PIXELS = MIN_BALL_DIAMETER_PIXELS_;
+			THROWOUT_DISTANT_BALLS = THROWOUT_DISTANT_BALLS_;
+			MAX_BALL_DISTANCE = MAX_BALL_DISTANCE_;
+			BALL_WIDTH = BALL_WIDTH_;
+			BALL_DISTANCE_METHOD = BALL_DISTANCE_METHOD_;
+
+			m_transformer = transformer;
         }
 
         // BROKEN
@@ -101,6 +126,7 @@ namespace modules {
                 int right = pos[0];
                 int not_orange_count = 0;
 
+		/*
                 // FIND BALL CENTRE (single iteration approach; doesn't deal great with occlusion)
                 for (top = pos[1]; ((top > 0) && (not_orange_count <= BALL_ORANGE_TOLERANCE)); top--) {
                     if (getColourFromIndex(lut.classifyPixel(img((int)pos[0], top))) != orange) {
@@ -192,6 +218,7 @@ namespace modules {
                 }
 
                 top_edge = true;
+		*/
 
                 // DETERMINE CENTRE
                 arma::vec2 center;
@@ -234,15 +261,28 @@ namespace modules {
                         int box_top = std::max(center[1] - min_dimension / 2, 0.0);
                         int box_bottom = std::min(center[1] + min_dimension / 2, height - 1.0);
 
+			/*
                         for (int i = box_left; i < box_right; i++) {
                             for (int j = box_top; j < box_bottom; j++) {
                                 if (getColourFromIndex(lut.classifyPixel(img(i, j))) == orange)
                                     count++;
                             }
                         }
+			*/
 
                         if ((count / (min_dimension * min_dimension)) >= BALL_MIN_PERCENT_ORANGE) {
-                            balls.push_back(Ball(center, std::max((right - left), (bottom - top))));
+                            Ball ball = Ball(center, std::max((right - left), (bottom - top)));
+                            ball.setParameters(THROWOUT_ON_ABOVE_KIN_HOR_BALL,
+                                                MAX_DISTANCE_METHOD_DISCREPENCY_BALL,
+                                                THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL,
+                                                THROWOUT_SMALL_BALLS,
+                                                MIN_BALL_DIAMETER_PIXELS,
+                                                THROWOUT_DISTANT_BALL_,
+                                                MAX_BALL_DISTANCE,
+                                                BALL_WIDTH,
+                                                BALL_DISTANCE_METHOD,
+                                                m_transformer);
+                            balls.push_back(ball);
                         }
 
                         else {
@@ -251,7 +291,18 @@ namespace modules {
                     }
 
                     else {
-                        balls.push_back(Ball(center, std::max((right - left), (bottom - top))));
+                        Ball ball = Ball(center, std::max((right - left), (bottom - top)));
+                        ball.setParameters(THROWOUT_ON_ABOVE_KIN_HOR_BALL,
+                                            MAX_DISTANCE_METHOD_DISCREPENCY_BALL,
+                                            THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL,
+                                            THROWOUT_SMALL_BALLS,
+                                            MIN_BALL_DIAMETER_PIXELS,
+                                            THROWOUT_DISTANT_BALL_,
+                                            MAX_BALL_DISTANCE,
+                                            BALL_WIDTH,
+                                            BALL_DISTANCE_METHOD,
+                                            m_transformer);
+                        balls.push_back(ball);
                     }
                 }
                 else {
@@ -262,16 +313,18 @@ namespace modules {
             return balls;
         }
 
-        void BallDetector::appendEdgesFromSegments(const std::vector<ColourSegment>& segments, std::list<arma::vec2>& pointList, const std::vector<arma::vec2>& greenHorizonInterpolatedPoints) {
+        void BallDetector::appendEdgesFromSegments(const std::vector<ColourSegment>& segments, 
+                                                    std::list<arma::vec2>& pointList, 
+                                                    const std::vector<arma::vec2>& greenHorizon) {
             for (const ColourSegment& segment : segments) {
                 const arma::vec2& start = segment.m_start;
                 const arma::vec2& end = segment.m_end;
 
-                if (start[1] > greenHorizonInterpolatedPoints.at(start[0])[1]) {
+                if (start[1] > greenHorizon.at(start[0])[1]) {
                     pointList.push_back(start);
                 }
 
-                if (end[1] > greenHorizonInterpolatedPoints.at(end[0])[1]) {
+                if (end[1] > greenHorizon.at(end[0])[1]) {
                     pointList.push_back(end);
                 }
             }

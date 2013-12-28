@@ -27,11 +27,37 @@
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/support/Configuration.h"
 
+#include "VisionKinematics.h"
+#include "BallDetector/BallDetector.h"
+#include "GoalDetector/GoalDetector_RANSAC.h"
+#include "FieldPointDetector/FieldPointDetector.h"
+#include "ObstacleDetector/ObstacleDetector.h"
+
 namespace modules {
     namespace vision {
 
         struct FeatureDetectorConfig{
             static constexpr const char* CONFIGURATION_PATH = "FeatureDetector.json";
+        };
+
+        struct VisionKinematicsConfig{
+            static constexpr const char* CONFIGURATION_PATH = "VisionKinematics.json";
+        };
+
+        struct BallDetectorConfig{
+            static constexpr const char* CONFIGURATION_PATH = "BallDetector.json";
+        };
+
+        struct GoalDetectorConfig{
+            static constexpr const char* CONFIGURATION_PATH = "GoalDetector.json";
+        };
+
+        struct FieldPointDetectorConfig{
+            static constexpr const char* CONFIGURATION_PATH = "FieldPointDetector.json";
+        };
+
+        struct ObstacleDetectorConfig{
+            static constexpr const char* CONFIGURATION_PATH = "ObstacleDetector.json";
         };
 
         /**
@@ -41,19 +67,23 @@ namespace modules {
          */
         class FeatureDetector : public NUClear::Reactor {
         private:
-            NUClear::ReactionHandle reaction;
-
             bool DETECT_LINES;
             bool DETECT_GOALS;
             bool DETECT_BALLS;
             bool DETECT_OBSTACTLES; 
 
-            NUClear::ReactionHandle detect_goals;
-            NUClear::ReactionHandle detect_balls;
-            NUClear::ReactionHandle etect_line_objects;
-            NUClear::ReactionHandle detect_obstacles;
+            NUClear::threading::ReactionHandle m_detectGoals;
+            NUClear::threading::ReactionHandle m_detectBalls;
+            NUClear::threading::ReactionHandle m_detectLineObjects;
+            NUClear::threading::ReactionHandle m_detectObstacles;
 
-            GoalDetector_RANSAC goalDetector;
+            VisionKinematics m_transformer;
+            
+            BallDetector m_ballDetector;
+            GoalDetector_RANSAC m_goalDetector;
+            FieldPointDetector m_fieldPointDetector;
+            ObstacleDetector m_obstacleDetector;
+
         public:
             explicit FeatureDetector(std::unique_ptr<NUClear::Environment> environment);
         };

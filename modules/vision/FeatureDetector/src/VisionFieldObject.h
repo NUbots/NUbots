@@ -32,11 +32,11 @@
 namespace modules {
     namespace vision {
 
-        enum DistanceMethod {
-            Width,
+        enum DISTANCE_METHOD {
+            WIDTH,
             D2P,
-            Average,
-            Least
+            AVERAGE,
+            LEAST
         };
 
         //! VFO_ID enum and associated std::string conversion methods
@@ -100,8 +100,8 @@ namespace modules {
             //! @brief converts a string into a VisionFieldObject Id.
             static VFO_ID VFOFromName(const std::string& name);
 
-            static DistanceMethod getDistanceMethodFromName(const std::string& name);
-            static std::string getDistanceMethodName(const DistanceMethod& method);
+            static DISTANCE_METHOD getDistanceMethodFromName(const std::string& name);
+            static std::string getDistanceMethodName(const DISTANCE_METHOD& method);
 
         protected:
             NUPoint m_location;                         //! @variable The location of the object (includes screen, radial and ground position).

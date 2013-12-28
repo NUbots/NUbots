@@ -38,9 +38,9 @@ namespace messages {
 			NUClear::clock::time_point timestamp;
 		};
 
-		class BallObject : public VisionObject {
+		class Ball : public VisionObject {
         public:
-			BallObject() : VisionObject() {}			
+			Ball() : VisionObject() {}			
 		};
 
 		class Goal : public VisionObject {

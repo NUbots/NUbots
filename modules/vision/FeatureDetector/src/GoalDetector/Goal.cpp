@@ -23,9 +23,8 @@ namesapce modules {
                                     int MIN_GOAL_HEIGHT_, 
                                     int MIN_GOAL_WIDTH_, 
                                     float GOAL_WIDTH_, 
-                                    float GOAL_DISTANCE_METHOD_,
-                                    int EDGE_OF_SCREEN_) {
-
+                                    const DISTANCE_METHOD& GOAL_DISTANCE_METHOD_,
+                                    int EDGE_OF_SCREEN_MARGIN_) {
             THROWOUT_SHORT_GOALS = THROWOUT_SHORT_GOALS_;
             THROWOUT_NARROW_GOALS = THROWOUT_NARROW_GOALS_;
             THROWOUT_ON_ABOVE_KIN_HOR_GOALS = THROWOUT_ON_ABOVE_KIN_HOR_GOALS_;
@@ -34,7 +33,8 @@ namesapce modules {
             MIN_GOAL_HEIGHT = MIN_GOAL_HEIGHT_;
             MIN_GOAL_WIDTH = MIN_GOAL_WIDTH_;
             GOAL_WIDTH = GOAL_WIDTH_;
-            GOAL_DISTANCE_METHOD = GOAL_DISTANCE_METHOD_;            
+            GOAL_DISTANCE_METHOD = GOAL_DISTANCE_METHOD_; 
+            EDGE_OF_SCREEN_MARGIN = EDGE_OF_SCREEN_MARGIN_;
         }
 
         void Goal::setBase(arma::vec2 base) {
@@ -62,9 +62,22 @@ namesapce modules {
         *   includes no checks before placing them, and nor should it. For example, if this is 
         *   called on multiple YellowLeftGoals then localisation will only see the last one.
         */
-        bool Goal::addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const {
+    	bool addToExternalFieldObjects(std::unique_ptr<std::vector<messages::vision::Goal>> goals) const;
+		std::unique_ptr<std::vector<messages::vision::Goal>> temp = std::unique_ptr<td::vector<messages::vision::Goal>>(new std::vector<messages::vision::Goal>());
+
+		/*
+                temp->sphericalFromNeck = m_location.neckRelativeRadial;
+                temp->sphericalError = m_sphericalError;
+                temp->screenAngular = m_location.screenAngular;
+                temp->screenCartesian = m_location.screenCartesian;
+                temp->sizeOnScreen = m_sizeOnScreen;
+                temp->timestamp = NUClear::clock::now();
+
+                ball = std::move(temp);
+		*/
+
             if (valid) {
-                AmbiguousObject newAmbObj;
+		    messages::vision::Goal newGoal;
 
                 switch(m_id) {
                     case GOAL_L: {

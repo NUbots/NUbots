@@ -287,7 +287,7 @@ namespace modules {
 
 				Message::VisionClassifiedImage* api_classified_image = api_vision->mutable_classified_image();
 
-				for (auto& rowColourSegments : image.horizontal_filtered_segments.m_segmentedScans) {
+				for (auto& rowColourSegments : image.horizontalFilteredSegments.m_segmentedScans) {
 					for (auto& colorSegment : rowColourSegments) {
 						auto& start = colorSegment.m_start;
 						auto& end = colorSegment.m_end;
@@ -302,7 +302,7 @@ namespace modules {
 					}
 				}
 
-				for (auto& columnColourSegments : image.vertical_filtered_segments.m_segmentedScans)
+				for (auto& columnColourSegments : image.verticalFilteredSegments.m_segmentedScans)
 				{
 					for (auto& colorSegment : columnColourSegments)
 					{
@@ -319,13 +319,13 @@ namespace modules {
 					}
 				}
 
-				for (auto& matchedSegment : image.matched_vertical_segments)
+				for (auto& matchedSegment : image.matchedVerticalSegments)
 				{
-					for (auto& ballColumnColourSegment : matchedSegment.second)
+					for (auto& columnColourSegment : matchedSegment.second)
 					{
-						auto& start = ballColumnColourSegment.m_start;
-						auto& end = ballColumnColourSegment.m_end;
-						auto& colour = ballColumnColourSegment.m_colour;
+						auto& start = columnColourSegment.m_start;
+						auto& end = columnColourSegment.m_end;
+						auto& colour = columnColourSegment.m_colour;
 						auto& colourClass = matchedSegment.first;
 
 						Message::VisionTransitionSegment* api_segment = api_classified_image->add_transition_segment();
@@ -338,13 +338,13 @@ namespace modules {
 					}
 				}
 	
-				for (auto& matchedSegment : image.matched_horizontal_segments)
+				for (auto& matchedSegment : image.matchedHorizontalSegments)
 				{
-					for (auto& ballRowColourSegment : matchedSegment.second)
+					for (auto& rowColourSegment : matchedSegment.second)
 					{
-						auto& start = ballRowColourSegment.m_start;
-						auto& end = ballRowColourSegment.m_end;
-						auto& colour = ballRowColourSegment.m_colour;
+						auto& start = rowColourSegment.m_start;
+						auto& end = rowColourSegment.m_end;
+						auto& colour = rowColourSegment.m_colour;
 						auto& colourClass = matchedSegment.first;
 
 						Message::VisionTransitionSegment* api_segment = api_classified_image->add_transition_segment();
@@ -357,7 +357,7 @@ namespace modules {
 					}
 				}
 
-				for (auto& greenHorizonPoint : image.green_horizon_interpolated_points) {
+				for (auto& greenHorizonPoint : image.greenHorizonInterpolatedPoints) {
 					Message::VisionGreenHorizonPoint* api_ghpoint = api_classified_image->add_green_horizon_point();
 					api_ghpoint->set_x(greenHorizonPoint[0]);
 					api_ghpoint->set_y(greenHorizonPoint[1]);

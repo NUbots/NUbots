@@ -1,11 +1,33 @@
+/*
+ * This file is part of FeatureDetector.
+ *
+ * FeatureDetector is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * FeatureDetector is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FeatureDetector.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+
+
 #ifndef MODULES_VISION_GOAL_H
 #define MODULES_VISION_GOAL_H
 
 #include <nuclear>
 #include <armadillo>
 
-#include "VisionFieldObject.h"
-#include "Quad.h"
+#include "messages/vision/VisionObjects.h"
+
+#include "../VisionFieldObject.h"
+#include "../Quad.h"
 
 namespace modules {
     namespace vision {
@@ -22,8 +44,8 @@ namespace modules {
                                int MIN_GOAL_HEIGHT_, 
                                int MIN_GOAL_WIDTH_, 
                                float GOAL_WIDTH_, 
-                               float GOAL_DISTANCE_METHOD_,
-                               int EDGE_OF_SCREEN_);
+                               const DISTANCE_METHOD& GOAL_DISTANCE_METHOD_,
+                               int EDGE_OF_SCREEN_MARGIN_);
 
             void setBase(arma::vec2 base);
 
@@ -36,16 +58,11 @@ namespace modules {
               @param timestamp the image timestamp.
               @return the success of the operation.
               */
-            bool addToExternalFieldObjects(FieldObjects *fieldobjects, float timestamp) const;
+            bool addToExternalFieldObjects(std::unique_ptr<messages::vision::Goal> goal) const;
 
             //! @brief applies a series of checks to decide if the goal is valid.
             bool check() const;
                 
-            //! @brief Stream output for labelling purposes
-            void printLabel(std::ostream& out) const {
-              out << VFOName(m_id) << " " << m_location << " " << m_size_on_screen;
-            }
-
             virtual double findScreenError(VisionFieldObject* other) const;
             virtual double findGroundError(VisionFieldObject* other) const;
 
@@ -77,8 +94,6 @@ namespace modules {
             double m_widthDistance, m_heightDistance;
             bool m_offTop, m_offBottom, m_offSide;
 
-            int EDGE_OF_SCREEN_MARGIN;
-
             bool THROWOUT_ON_ABOVE_KIN_HOR_GOALS;                 //! Whether to throw out goals whose base is above the kinematics horizon.
             bool THROWOUT_DISTANT_GOALS;                          //! Whether to throw out goals too far away.
             bool THROWOUT_NARROW_GOALS;                           //! Whether to throw out goals that are too narrow.
@@ -90,6 +105,10 @@ namespace modules {
 
             int MIN_GOAL_WIDTH;                                   //! The minimum width of a goal.
             int MIN_GOAL_HEIGHT;                                  //! The minimum height of a goal.
+
+            DISTANCE_METHOD GOAL_DISTANCE_METHOD;
+
+            int EDGE_OF_SCREEN_MARGIN;
 
         //public:
         //    double width_dist,

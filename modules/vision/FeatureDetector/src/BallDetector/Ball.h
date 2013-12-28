@@ -38,15 +38,15 @@ namespace modules {
             Ball(const arma::vec2& centre, double diameter);
             
 			void setParameters(bool THROWOUT_ON_ABOVE_KIN_HOR_BALL_,
-									float MAX_DISTANCE_METHOD_DISCREPENCY_BALL_,
-									bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_,
-									bool THROWOUT_SMALL_BALLS_,
-									float MIN_BALL_DIAMETER_PIXELS_,
-									bool THROWOUT_DISTANT_BALLS_,
-									float MAX_BALL_DISTANCE_,
-									float BALL_WIDTH_,
-									const DistanceMethod& BALL_DISTANCE_METHOD_,
-									const VisionKinematics& transformer);
+                                float MAX_DISTANCE_METHOD_DISCREPENCY_BALL_,
+                                bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_,
+                                bool THROWOUT_SMALL_BALLS_,
+                                float MIN_BALL_DIAMETER_PIXELS_,
+                                bool THROWOUT_DISTANT_BALLS_,
+                                float MAX_BALL_DISTANCE_,
+                                float BALL_WIDTH_,
+                                const DISTANCE_METHOD& BALL_DISTANCE_METHOD_,
+                                const VisionKinematics& transformer);
 
             /*!
               @brief returns the radius.
@@ -60,7 +60,7 @@ namespace modules {
               @param timestamp the image timestamp.
               @return the success of the operation.
               */
-            bool addToExternalFieldObjects(std::unique_ptr<messages::vision::BallObject> ball) const;
+            bool addToExternalFieldObjects(std::unique_ptr<messages::vision::Ball> ball) const;
 
             //! @brief applies a series of checks to decide if the ball is valid.
             bool check() const;
@@ -89,7 +89,7 @@ namespace modules {
               */
             //double distanceToBall(double bearing, double elevation);
             
-        public:
+        private:
             int m_diameter;     //! @variable the radius of the ball in pixels
             
 			bool THROWOUT_ON_ABOVE_KIN_HOR_BALL;
@@ -100,7 +100,7 @@ namespace modules {
 			bool THROWOUT_DISTANT_BALLS;
 			float MAX_BALL_DISTANCE;
 			float BALL_WIDTH;
-			DistanceMethod BALL_DISTANCE_METHOD;
+			DISTANCE_METHOD BALL_DISTANCE_METHOD;
 			VisionKinematics m_transformer;
 
             //private:

@@ -21,8 +21,12 @@ namespace modules {
 	namespace vision {
 	
 		template<class Model, typename DataPoint>
-		std::vector<std::pair<Model, std::vector<DataPoint>>> findMultipleModels(const std::vector<DataPoint>& points, double e, unsigned int n, unsigned int k, unsigned int max_iterations, RANSAC_SELECTION_METHOD method)
-		{
+		std::vector<std::pair<Model, std::vector<DataPoint>>> findMultipleModels(const std::vector<DataPoint>& points, 
+												double e, 
+												unsigned int n, 
+												unsigned int k, 
+												unsigned int max_iterations, 
+												RANSAC_SELECTION_METHOD method) {
 		    double variance;
 		    bool found;
 		    Model model;

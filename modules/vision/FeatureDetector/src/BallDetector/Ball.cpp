@@ -27,7 +27,6 @@ namespace modules {
         Ball::Ball() {
             m_id = BALL;
             m_diameter = 0;
-            valid = (calculatePositions() && check());
         }
 
         Ball::Ball(const arma::vec2& centre, double diameter) {
@@ -50,19 +49,18 @@ namespace modules {
             m_diameter = std::max(bottomPoint[1] - topPoint[1], rightPoint[0] - leftPoint[0]);
             m_location.screenCartesian = centre;
             m_sizeOnScreen << m_diameter << m_diameter;
-            valid = (calculatePositions() && check());
         }
 
 		void Ball::setParameters(bool THROWOUT_ON_ABOVE_KIN_HOR_BALL_,
-									float MAX_DISTANCE_METHOD_DISCREPENCY_BALL_,
-									bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_,
-									bool THROWOUT_SMALL_BALLS_,
-									float MIN_BALL_DIAMETER_PIXELS_,
-									bool THROWOUT_DISTANT_BALLS_,
-									float MAX_BALL_DISTANCE_,
-									float BALL_WIDTH_,
-									const DistanceMethod& BALL_DISTANCE_METHOD_,
-									const VisionKinematics& transformer) {
+                                float MAX_DISTANCE_METHOD_DISCREPENCY_BALL_,
+                                bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_,
+                                bool THROWOUT_SMALL_BALLS_,
+                                float MIN_BALL_DIAMETER_PIXELS_,
+                                bool THROWOUT_DISTANT_BALLS_,
+                                float MAX_BALL_DISTANCE_,
+                                float BALL_WIDTH_,
+                                const DISTANCE_METHOD& BALL_DISTANCE_METHOD_,
+                                const VisionKinematics& transformer) {
 			THROWOUT_ON_ABOVE_KIN_HOR_BALL = THROWOUT_ON_ABOVE_KIN_HOR_BALL_;
 			MAX_DISTANCE_METHOD_DISCREPENCY_BALL = MAX_DISTANCE_METHOD_DISCREPENCY_BALL_;
 			THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL = THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_;
@@ -74,17 +72,21 @@ namespace modules {
 			BALL_DISTANCE_METHOD = BALL_DISTANCE_METHOD_;
 
 			m_transformer = transformer;
+
+            // Internal variables contain valid values at this point.
+            // All necessary constants have been set.
+            // It is now safe to determine the validity of this Ball object.
+            valid = (calculatePositions() && check());
 		}
 
         float Ball::getRadius() const {
             return (m_diameter * 0.5);
         }
 
-        bool Ball::addToExternalFieldObjects(std::unique_ptr<messages::vision::BallObject> ball) const {
-			std::unique_ptr<BallObject> temp = std::unique_ptr<BallObject>(new BallObject());
+        bool Ball::addToExternalFieldObjects(std::unique_ptr<messages::vision::Ball> ball) const {
+			std::unique_ptr<messages::vision::Ball> temp = std::unique_ptr<messages::vision::Ball>(new messages::vision::Ball());
 
             if (valid) {
-                // Add ball to mobileFieldObjects.
                 temp->sphericalFromNeck = m_location.neckRelativeRadial;
                 temp->sphericalError = m_sphericalError;
                 temp->screenAngular = m_location.screenAngular;
@@ -163,13 +165,13 @@ namespace modules {
                     break;
                 }
 
-                case Width: {
+                case WIDTH: {
                     m_location = widthLocation;
 
                     break;
                 }
 
-                case Average: {
+                case AVERAGE: {
                     //average distances
                     m_location.screenCartesian      = (d2pLocation.screenCartesian + widthLocation.screenCartesian) * 0.5;
                     m_location.neckRelativeRadial   = (d2pLocation.neckRelativeRadial + widthLocation.neckRelativeRadial) * 0.5;
@@ -179,7 +181,7 @@ namespace modules {
                     break;
                 }
 
-                case Least: {
+                case LEAST: {
                     m_location = ((d2pLocation.neckRelativeRadial[0] < widthLocation.neckRelativeRadial[0]) ? d2pLocation : widthLocation);
 
                     break;
@@ -215,16 +217,16 @@ namespace modules {
         //        distance_valid = d2pvalid && d2p > 0;
         //        result = d2p;
         //        break;
-        //    case Width:
+        //    case WIDTH:
         //        distance_valid = true;
         //        result = width_dist;
         //        break;
-        //    case Average:
+        //    case AVERAGE:
         //        //average distances
         //        distance_valid = d2pvalid && d2p > 0;
         //        result = (d2p + width_dist) * 0.5;
         //        break;
-        //    case Least:
+        //    case LEAST:
         //        distance_valid = d2pvalid && d2p > 0;
         //        result = (distance_valid ? std::min(d2p, width_dist) : width_dist);
         //        break;
