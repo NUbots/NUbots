@@ -25,10 +25,7 @@ namespace modules {
         using messages::vision::ColourSegment;
         using messages::vision::COLOUR_CLASS;
 
-        FieldPointDetector::FieldPointDetector() { // : m_lineDetector(), m_circleDetector(), m_cornerDetector() {
-            m_lineDetector = LineDetector();
-            m_circleDetector = CircleDetector();
-            m_cornerDetector = CornerDetector();
+        FieldPointDetector::FieldPointDetector()  : m_lineDetector(), m_circleDetector(), m_cornerDetector() {
             // Empty constructor.
         }
 
@@ -64,7 +61,7 @@ namespace modules {
         void FieldPointDetector::run(bool findCircles, 
                                     bool findLines, 
                                     bool findCorners,
-                                    const std::vector<arma::vec2>& greenHorizon) const {
+                                    const std::vector<arma::vec2>& greenHorizon) {
             /// @note At present no detection exists for corners or ellipses in the image plane so
             ///       disabling this flag disables all field point detection methods.
             if (TRANSFORM_FIRST) {
@@ -77,7 +74,7 @@ namespace modules {
 
                 // Collect all vertical and horizontal line transition centres that exist under the green horizon.
                 // TODO: What is vbb->getAllTransistions?
-                const std::vector<ColourSegment>& segments; // = vbb->getAllTransitions(LINE_COLOUR);
+                /*const*/ std::vector<ColourSegment>/*&*/ segments; // = vbb->getAllTransitions(LINE_COLOUR);
 
                 for (const ColourSegment& segment : segments) {
                     temp.screenCartesian = segment.m_centre;
@@ -92,12 +89,12 @@ namespace modules {
                 if (findCircles) {
                     // First attempt to find a centre circle.
                     m_circleDetector.setParameters(CIRCLE_DETECTOR_TOLERANCE,
-                                                    MINIMUM_POINTS,
-                                                    ITERATIONS_PER_FITTING,
-                                                    CONSENSUS_MARGIN,
-                                                    MAX_FITTINGS,
-                                                    CENTRE_CIRCLE_RADIUS,
-                                                    m_transformer);
+                                                   MINIMUM_POINTS,
+                                                   ITERATIONS_PER_FITTING,
+                                                   CONSENSUS_MARGIN,
+                                                   MAX_FITTINGS,
+                                                   CENTRE_CIRCLE_RADIUS,
+                                                   m_transformer);
                     
                     if (m_circleDetector.run(points, circle)) {
                         // Circle found - points are already removed.

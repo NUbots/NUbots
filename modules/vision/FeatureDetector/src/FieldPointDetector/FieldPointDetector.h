@@ -55,7 +55,7 @@ namespace modules {
             void run(bool findCircles,
                     bool findLines, 
                     bool findCorners, 
-                    const std::vector<arma::vec2>& greenHorizon) const;
+                    const std::vector<arma::vec2>& greenHorizon);
 
         private:
             LineDetector m_lineDetector;

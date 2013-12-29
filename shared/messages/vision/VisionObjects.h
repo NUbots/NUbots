@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_VISION_VISION_OBJECTS_H
-#define MESSAGES_VISION_VISION_OBJECTS_H
+#ifndef MESSAGES_VISION_VISIONOBJECTS_H
+#define MESSAGES_VISION_VISIONOBJECTS_H
 
 #include <armadillo> 
 #include <nuclear>
@@ -72,10 +72,12 @@ namespace messages {
 		class CornerPoint : public VisionObject {
         public:
 			CornerPoint() : VisionObject() {}
-			enum Type{
+
+			enum Type {
 				L_CORNER,
 				T_CORNER,
-				X_CORNER
+				X_CORNER,
+                INVALID
 			} type;
 		};
 
@@ -86,7 +88,7 @@ namespace messages {
 
 		class LineObjects{
         public:
-			LineObjects(){}
+			LineObjects() {}
 			std::vector<CentreCircle> centre_circles;
 			std::vector<CornerPoint> corner_points;
 			std::vector<FieldLine> field_lines;
@@ -95,4 +97,4 @@ namespace messages {
 	}
 }
 
-#endif
+#endif // MESSAGES_VISION_VISIONOBJECTS_H

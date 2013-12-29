@@ -25,7 +25,7 @@ namespace modules {
         using messages::vision::CornerPoint::Type;
 
         CornerPoint::CornerPoint(const Type& type, const NUPoint& location) {
-            m_sizeOnScreen  << 3 << 3;
+            m_sizeOnScreen << 3 << 3;
             m_type = type;
             m_location = location;
 
@@ -118,19 +118,19 @@ namespace modules {
             output << "CornerPoint - ";
 
             switch (c.m_type) {
-                case CornerPoint::L: {
+                case Type::L_CORNER: {
                     output << "L";
 
                     break;
                 }
 
-                case CornerPoint::T: {
+                case Type::T_CORNER: {
                     output << "T";
 
                     break;
                 }
 
-                case CornerPoint::X: {
+                case Type::X_CORNER: {
                     output << "X";
 
                     break;
@@ -153,7 +153,7 @@ namespace modules {
         }
 
         std::ostream& operator<< (std::ostream& output, const std::vector<CornerPoint>& corners) {
-            for (const auto& corner : corners) {
+            for (const CornerPoint& corner : corners) {
                 output << corner << std::endl;
             }
 

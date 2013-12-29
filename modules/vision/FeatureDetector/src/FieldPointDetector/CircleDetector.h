@@ -54,7 +54,7 @@ namespace modules {
             unsigned int MAX_FITTINGS;
             float CENTRE_CIRCLE_RADIUS;
 
-            const VisionKinematics m_transformer;
+            VisionKinematics m_transformer;
         };
 
     }

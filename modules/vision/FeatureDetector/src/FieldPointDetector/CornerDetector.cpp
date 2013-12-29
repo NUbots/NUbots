@@ -102,15 +102,15 @@ namespace modules {
                 // Perhaps do this later with only 1 line.
 
                 if ((d1m == min1) && (d2m == min2)) {
-                    return Type::X;
+                    return Type::X_CORNER;
                 }
                 
                 else if ((d1m == min1) || (d2m == min2)) {
-                    return Type::T;
+                    return Type::T_CORNER;
                 }
 
                 else {
-                    return Type::L;
+                    return Type::L_CORNER;
                 }
             //}
             //

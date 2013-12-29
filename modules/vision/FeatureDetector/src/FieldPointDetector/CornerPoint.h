@@ -34,7 +34,7 @@ namespace modules {
 
         class CornerPoint : public VisionFieldObject {
         public:
-            CornerPoint(const messages::vision::CornerPoint::Type type, const NUPoint& location);
+            CornerPoint(const messages::vision::CornerPoint::Type& type, const NUPoint& location);
 
             virtual bool addToExternalFieldObjects(std::unique_ptr<messages::vision::CornerPoint> cornerPoint) const;
 
