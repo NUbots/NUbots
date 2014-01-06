@@ -86,7 +86,7 @@ namespace modules {
 				std::map<std::string, ConfigurationNode> transitionRules = rules.config["TRANSITION_RULES"];
 
 				for (const auto& rule : replacementRules) {
-					std::cout << "Loading Replacement rule : " << rule.first << std::endl;
+					//std::cout << "Loading Replacement rule : " << rule.first << std::endl;
 					
 					ColourReplacementRule r;
 
