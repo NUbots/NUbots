@@ -1,6 +1,5 @@
 #include "Kalman.h"
 #include "Utils.h"
-#include <sstream>
 //#include "IMUModel.h" //IKFModel.h
 //#include "Tools/Math/General.h"
 //*
@@ -48,9 +47,9 @@ bool Kalman<Model>::timeUpdate(double delta_t, const arma::mat& measurement, con
 
         std::cout << "cov = [";
         arma::mat cov = m_estimate.covariance();
-        for(unsigned int i = 0; i < cov.getm(); ++i) {
+        for(unsigned int i = 0; i < cov.n_rows; ++i) {
             if(i!=0) std::cout << "; ";
-            for(unsigned int j = 0; j < cov.getm(); ++j) {
+            for(unsigned int j = 0; j < cov.n_cols; ++j) { //pretty sure theres a mistake in the original, should be .n_cols, not .n_rows
                 if(j!=0) std::cout << ",";
                 std::cout << std::setprecision(9) << cov[i][j];
             }

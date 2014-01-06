@@ -8,6 +8,9 @@
 
 #include "UnscentedTransform.h"
 
+#include <sstream> //for the .cpp file
+#include <iomanip> //std::setprecision
+
 //#include "IKFModel.h" //the model now gets inherited from the template parameter
 //PRECONDITION: IKalmanFilter<type> :: type MUST IMPLEMENT THE FOLLOWING METHODS:
     //Clone() 
