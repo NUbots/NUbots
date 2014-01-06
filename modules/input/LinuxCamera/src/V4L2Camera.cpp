@@ -87,7 +87,7 @@ namespace modules {
             0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFF, 0xDA
         };
         
-        V4L2Camera::V4L2Camera() : fd(-1), width(0), height(0), deviceID(""), streaming(false) {
+        V4L2Camera::V4L2Camera() : fd(-1), width(0), height(0), deviceID(""), streaming(false) , flipped(false){
         }
 
         std::unique_ptr<Image> V4L2Camera::getImage() {
@@ -158,7 +158,7 @@ namespace modules {
                 jpeg_destroy_decompress(&cinfo);
                 
                 // Move this data into the image along with the jpeg source
-                image = std::unique_ptr<Image>(new Image(width, height, std::move(data), std::move(jpegData)));
+                image = std::unique_ptr<Image>(new Image(width, height, std::move(data), std::move(jpegData), flipped));
             }
             
             else {
@@ -180,7 +180,7 @@ namespace modules {
 
                 // Move this data into the image
                 std::unique_ptr<Image> image = 
-                        std::unique_ptr<Image>(new Image(width, height, std::move(data)));
+                        std::unique_ptr<Image>(new Image(width, height, std::move(data), flipped));
             }
 
             // Enqueue our next buffer so it can be written to
@@ -192,7 +192,7 @@ namespace modules {
             return image;
         }
 
-        void V4L2Camera::resetCamera(const std::string& device, const std::string& fmt, size_t w, size_t h) {
+        void V4L2Camera::resetCamera(const std::string& device, const std::string& fmt, size_t w, size_t h, bool f) {
             // if the camera device is already open, close it
             closeCamera();
 
@@ -201,6 +201,7 @@ namespace modules {
             format = fmt;
             width = w;
             height = h;
+            flipped = f;
 
             // Open the camera device
             fd = open(deviceID.c_str(), O_RDWR);

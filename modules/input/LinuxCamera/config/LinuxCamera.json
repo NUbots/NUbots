@@ -4,7 +4,7 @@
     "whiteBalanceTemperature": 2000,
     "brightness": 143,
     "contrast": 39,
-    "saturation": 70,
+    "saturation": 100,
     "gain": 255,
     "autoExposure": 1,
     "autoExposurePriority": 0,
@@ -13,5 +13,6 @@
     "sharpness": 191,
     "imageFormat" : "MJPEG",
     "imageWidth": 320,
-    "imageHeight": 240
+    "imageHeight": 240,
+    "flipped" : true
 }

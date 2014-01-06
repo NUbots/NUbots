@@ -23,25 +23,39 @@
 namespace messages {
     namespace input {
 
-        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data) :
+        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data, bool flipped_) :
         imgWidth(width),
         imgHeight(height),
-        data(std::move(data)) {
+        flipped(flipped_),
+        data(std::move(data)){
         }
         
-        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data, std::vector<uint8_t>&& source) :
+        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data, std::vector<uint8_t>&& source, bool flipped_) :
         imgWidth(width),
         imgHeight(height),
+        flipped(flipped_),
         data(std::move(data)),
         src(std::move(source)) {
         }
 
         Image::Pixel& Image::operator ()(size_t x, size_t y) {
-            return data[y * imgWidth + x];
+            int new_y = y;
+            int new_x = x;
+            if(flipped){
+                new_y = imgHeight-y-1;
+                new_x = imgWidth-x-1;
+            }
+            return data[new_y*imgWidth+new_x];            
         }
 
         const Image::Pixel& Image::operator ()(size_t x, size_t y) const {
-            return data[y * imgWidth + x];
+            int new_y = y;
+            int new_x = x;
+            if(flipped){
+                new_y = imgHeight-y-1;
+                new_x = imgWidth-x-1;
+            }
+            return data[new_y*imgWidth+new_x];     
         }
 
         const size_t Image::width() const {
