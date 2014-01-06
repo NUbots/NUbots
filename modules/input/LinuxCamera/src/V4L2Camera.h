@@ -77,7 +77,7 @@ namespace modules {
             bool streaming;
 
             /// @brief Whether the camera is mounted upside down
-            bool flipped;
+            bool rotated;
         public:
 
             /// @brief this enum holds important constants (we are c++ we don't use defines for this kind of thing)

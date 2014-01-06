@@ -40,8 +40,8 @@ namespace messages {
                 uint8_t cr;
             };
 
-            Image(size_t width, size_t height, std::vector<Pixel>&& data, bool flipped_);
-            Image(size_t width, size_t height, std::vector<Pixel>&& data, std::vector<uint8_t>&& src, bool flipped_);
+            Image(size_t width, size_t height, std::vector<Pixel>&& data, bool rotated_);
+            Image(size_t width, size_t height, std::vector<Pixel>&& data, std::vector<uint8_t>&& src, bool rotated_);
             
             Pixel& operator()(size_t x, size_t y);
 
@@ -54,7 +54,7 @@ namespace messages {
         private:
             size_t imgWidth;
             size_t imgHeight;
-            bool flipped;
+            bool rotated;
 
             std::vector<Pixel> data;
             std::vector<uint8_t> src;

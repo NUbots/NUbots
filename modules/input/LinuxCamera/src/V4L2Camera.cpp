@@ -87,7 +87,7 @@ namespace modules {
             0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFF, 0xDA
         };
         
-        V4L2Camera::V4L2Camera() : fd(-1), width(0), height(0), deviceID(""), streaming(false) , flipped(false){
+        V4L2Camera::V4L2Camera() : fd(-1), width(0), height(0), deviceID(""), streaming(false) , rotated(false){
         }
 
         std::unique_ptr<Image> V4L2Camera::getImage() {
@@ -158,7 +158,7 @@ namespace modules {
                 jpeg_destroy_decompress(&cinfo);
                 
                 // Move this data into the image along with the jpeg source
-                image = std::unique_ptr<Image>(new Image(width, height, std::move(data), std::move(jpegData), flipped));
+                image = std::unique_ptr<Image>(new Image(width, height, std::move(data), std::move(jpegData), rotated));
             }
             
             else {
@@ -180,7 +180,7 @@ namespace modules {
 
                 // Move this data into the image
                 std::unique_ptr<Image> image = 
-                        std::unique_ptr<Image>(new Image(width, height, std::move(data), flipped));
+                        std::unique_ptr<Image>(new Image(width, height, std::move(data), rotated));
             }
 
             // Enqueue our next buffer so it can be written to
@@ -201,7 +201,7 @@ namespace modules {
             format = fmt;
             width = w;
             height = h;
-            flipped = f;
+            rotated = f;
 
             // Open the camera device
             fd = open(deviceID.c_str(), O_RDWR);

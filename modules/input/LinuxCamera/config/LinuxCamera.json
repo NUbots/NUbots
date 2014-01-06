@@ -14,5 +14,5 @@
     "imageFormat" : "MJPEG",
     "imageWidth": 320,
     "imageHeight": 240,
-    "flipped" : true
+    "rotated" : true
 }

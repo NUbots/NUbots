@@ -23,17 +23,17 @@
 namespace messages {
     namespace input {
 
-        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data, bool flipped_) :
+        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data, bool rotated_) :
         imgWidth(width),
         imgHeight(height),
-        flipped(flipped_),
+        rotated(rotated_),
         data(std::move(data)){
         }
         
-        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data, std::vector<uint8_t>&& source, bool flipped_) :
+        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data, std::vector<uint8_t>&& source, bool rotated_) :
         imgWidth(width),
         imgHeight(height),
-        flipped(flipped_),
+        rotated(rotated_),
         data(std::move(data)),
         src(std::move(source)) {
         }
@@ -41,7 +41,7 @@ namespace messages {
         Image::Pixel& Image::operator ()(size_t x, size_t y) {
             int new_y = y;
             int new_x = x;
-            if(flipped){
+            if(rotated){
                 new_y = imgHeight-y-1;
                 new_x = imgWidth-x-1;
             }
@@ -51,7 +51,7 @@ namespace messages {
         const Image::Pixel& Image::operator ()(size_t x, size_t y) const {
             int new_y = y;
             int new_x = x;
-            if(flipped){
+            if(rotated){
                 new_y = imgHeight-y-1;
                 new_x = imgWidth-x-1;
             }
