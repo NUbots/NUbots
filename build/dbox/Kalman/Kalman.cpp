@@ -16,7 +16,7 @@
 /*
 template <typename Model>
 bool Kalman<Model>::timeUpdate(double delta_t, const arma::mat& measurement, const arma::mat& process_noise, const arma::mat& measurement_noise) { //@brief Performs the time update of the filter. @param deltaT The time that has passed since the previous update. @param measurement The measurement/s (if any) that can be used to measure a change in the system. @param linearProcessNoise The linear process noise that will be added. @return True if the time update was performed successfully. False if it was not.
-  
+
     const unsigned int total_points = m_unscented_transform.totalSigmaPoints();
 
     // Calculate the current sigma points, and write to member variable.

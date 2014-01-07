@@ -21,7 +21,7 @@ int main() {
 
     //m.test();
     
-    /*  //testing the armadillo libraries are working
+      //testing the armadillo libraries are working
     	arma::mat A(3,4); A = "1 2 3 4;5 6 7 8; 9 10 11 0;";
 	arma::mat B(3,4); B = "1 2 3 4;5 6 7 8; 5 10 11 0;";
 	//arma::mat C(3,4); C.zeros();
@@ -29,7 +29,7 @@ int main() {
 	std::cout << arma::vectorise(A==B) << std::endl;
 	std::cout << "Are the matrices equal?      " << arma::all(arma::all(A==B)) << std::endl;
 	std::cout << "Are the matricies different? " << arma::any(arma::vectorise(A!=B)) << std::endl;
-    */
+    
     
   
     //---------------------------------------------------------------------------------------------------------------
