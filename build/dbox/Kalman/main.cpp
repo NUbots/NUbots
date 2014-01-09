@@ -67,7 +67,38 @@ int main() {
         arma::mat a(1,1); ////setting up the tests...................
         a << noisysin[i];
         
-        //k.measurementUpdate;
+        //a ~ measurement
+        //b ~ noise
+        //c ~ args
+        //d ~ type (type of measurement)
+        
+        arma::mat b(1, 1);
+        b << 0.9;
+        
+        arma::mat c(1, 1);
+        c << 0;
+        unsigned int d=0;
+        
+        //const arma::mat& u = a; //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+++
+        //const arma::mat& v = b; //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+++
+        //const arma::mat& w = c; //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+++
+        
+            /*
+           * //the last argument (type) is one of 3 types (defined in IMUModel.h)
+          * bbbb build me
+          enum MeasurementType {
+            kmeasurement_accelerometer,
+            kmeasurement_kinematic,
+            kmeasurement_total_types
+          };
+             */
+        
+        arma::mat q(1,1);
+        
+        //const arma::mat& measurement, const arma::mat& noise, const arma::mat& args, unsigned int type
+        //k.measurementUpdate(a,b,c,d); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        
+        std::cout << "measurmentUpdate? " << d << std::endl;
         
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         

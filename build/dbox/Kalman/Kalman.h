@@ -5,7 +5,6 @@
 
 #include "CircBuffer.h" //for circular buffer class <boost/circular_buffer.hpp>
 #include "VisionObjects.h" //Infrastructure/FieldObjects/FieldObjects.h
-
 #include "UnscentedTransform.h"
 
 #include <sstream> //for the .cpp file
@@ -29,7 +28,7 @@ public:
 //virtual std::istream& readStreamBinary (std::istream& input) = 0;
 //virtual std::string summary(bool detailed) const = 0;
 
-    Kalman() {} //ox
+    Kalman() {} // {} //ox
     virtual ~Kalman() { //IKalmanFilter //DESTRUCTOR OVERWRITTEN IN .cpp file 
         if(m_model != NULL)
             delete m_model;
@@ -194,5 +193,7 @@ protected:
 //extra helper function 
 public:
     double convDble(arma::mat X);
-//----------------------------------------------------------- 
+//-----------------------------------------------------------
 }; //end class
+
+//#include "Kalman.cpp" //flip the includes (its a template function).

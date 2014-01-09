@@ -1,8 +1,9 @@
-#include "Kalman.h"
 #include "Utils.h"
+#include "Kalman.h" //should not be here - its a template class
 //#include "IMUModel.h" //IKFModel.h
 //#include "Tools/Math/General.h"
 //*
+
 template <typename Model> //: m_estimate(source.estimate()), m_unscented_transform(source.m_unscented_transform)
 Kalman<Model>::Kalman(const Kalman<Model>& source): m_estimate(source.estimate()), m_unscented_transform(source.m_unscented_transform) { // IKalmanFilter
         m_model = source.m_model->Clone();
@@ -81,6 +82,7 @@ bool Kalman<Model>::timeUpdate(double delta_t, const arma::mat& measurement, con
 // @brief Performs the measurement update of the filter. @param measurement The measurement to be used for the update. @param measurementNoise The linear measurement noise that will be added. @param measurementArgs Any additional information about the measurement, if required. @return True if the measurement update was performed successfully. False if it was not.
 template <typename Model>
 bool Kalman<Model>::measurementUpdate(const arma::mat& measurement, const arma::mat& noise, const arma::mat& args, unsigned int type) {
+
     const unsigned int total_points = m_unscented_transform.totalSigmaPoints();
     const unsigned int totalMeasurements = measurement.n_rows; //.getm()
     arma::mat current_point; // temporary storage.
@@ -136,7 +138,7 @@ bool Kalman<Model>::measurementUpdate(const arma::mat& measurement, const arma::
     m_estimate.setMean(updated_mean);
     m_estimate.setCovariance(updated_covariance);
     return true;
-}
+} //*/
 
 template <typename Model>
 void Kalman<Model>::initialiseEstimate(const MultivariateGaussian& estimate) {
