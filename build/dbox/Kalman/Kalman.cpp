@@ -3,17 +3,30 @@
 //#include "IMUModel.h" //IKFModel.h
 //#include "Tools/Math/General.h"
 //*
-//Kalman::Kalman(const Kalman& source): IWeightedKalmanFilter(source), m_unscented_transform(source.m_unscented_transform) {
-//    m_weighting_enabled = source.m_weighting_enabled;
-//    m_filter_weight = source.m_filter_weight;
-//    m_sigma_points = source.m_sigma_points;
-//    m_sigma_mean = source.m_sigma_mean;
-//    m_C = source.m_C;
-//    m_d = source.m_d;
-//    m_X = source.m_X;
-//}
+template <typename Model> //: m_estimate(source.estimate()), m_unscented_transform(source.m_unscented_transform)
+Kalman<Model>::Kalman(const Kalman<Model>& source): m_estimate(source.estimate()), m_unscented_transform(source.m_unscented_transform) { // IKalmanFilter
+        m_model = source.m_model->Clone();
+        m_outlier_filtering_enabled = source.m_outlier_filtering_enabled;
+        m_outlier_threshold = source.m_outlier_threshold;
 
-/*
+        m_previous_decisions = source.m_previous_decisions;  //IWeightedKalmanFilter
+        m_parent_id = source.id(); //IWeightedKalmanFilter
+        m_active = source.m_active; //IWeightedKalmanFilter
+        m_id = m_id; //IWeightedKalmanFilter
+        m_creation_time = source.m_creation_time; //IWeightedKalmanFilter
+        //m_parent_history_buffer = source.m_parent_history_buffer; //IWeightedKalmanFilter
+        
+        m_weighting_enabled = source.m_weighting_enabled;
+        m_filter_weight = source.m_filter_weight;
+        m_sigma_points = source.m_sigma_points;
+        m_sigma_mean = source.m_sigma_mean;
+        m_C = source.m_C;
+        m_d = source.m_d;
+        m_X = source.m_X;
+}
+
+
+
 template <typename Model>
 bool Kalman<Model>::timeUpdate(double delta_t, const arma::mat& measurement, const arma::mat& process_noise, const arma::mat& measurement_noise) { //@brief Performs the time update of the filter. @param deltaT The time that has passed since the previous update. @param measurement The measurement/s (if any) that can be used to measure a change in the system. @param linearProcessNoise The linear process noise that will be added. @return True if the time update was performed successfully. False if it was not.
 
@@ -25,8 +38,8 @@ bool Kalman<Model>::timeUpdate(double delta_t, const arma::mat& measurement, con
 
     // update each sigma point.
     for (unsigned int i = 0; i < total_points; ++i) {
-        currentPoint = m_sigma_points.getCol(i);    // Get the sigma point.
-        m_sigma_points.setCol(i, m_model->processEquation(currentPoint, delta_t, measurement));   // Write the propagated version of it.
+        currentPoint = m_sigma_points.col(i);    // Get the sigma point.
+        m_sigma_points.col(i) = m_model->processEquation(currentPoint, delta_t, measurement); // Write the propagated version of it.
     }
 
     // Calculate the new mean and covariance values.
@@ -42,7 +55,7 @@ bool Kalman<Model>::timeUpdate(double delta_t, const arma::mat& measurement, con
         std::cout << "Weight: " << this->getFilterWeight() << " ";
         std::cout << "Mean:\n" << m_estimate.mean() << std::endl;
         std::cout << "Covariance:\n" << m_estimate.covariance() << std::endl;
-        std::cout << "Sqrt Covariance:\n" << cholesky(m_estimate.covariance()) << std::endl;
+        std::cout << "Sqrt Covariance:\n" << arma::chol(m_estimate.covariance()) << std::endl;
         std::cout << "m_sigma_points:\n" << m_sigma_points << std::endl;
 
         std::cout << "cov = [";
@@ -51,7 +64,7 @@ bool Kalman<Model>::timeUpdate(double delta_t, const arma::mat& measurement, con
             if(i!=0) std::cout << "; ";
             for(unsigned int j = 0; j < cov.n_cols; ++j) { //pretty sure theres a mistake in the original, should be .n_cols, not .n_rows
                 if(j!=0) std::cout << ",";
-                std::cout << std::setprecision(9) << cov[i][j];
+                std::cout << std::setprecision(9) << cov(i, j);
             }
         }
         std::cout << "]" << std::endl;
@@ -75,8 +88,8 @@ bool Kalman<Model>::measurementUpdate(const arma::mat& measurement, const arma::
 
     // First step is to calculate the expected measurement for each sigma point.
     for (unsigned int i = 0; i < total_points; ++i) {
-        current_point = m_sigma_points.getCol(i);    // Get the sigma point.
-        Yprop.setCol(i, m_model->measurementEquation(current_point, args, type));
+        current_point = m_sigma_points.col(i);    // Get the sigma point.
+        Yprop.col(i)  = m_model->measurementEquation(current_point, args, type);
     }
 
     // Now calculate the mean of these measurement sigmas.
@@ -87,8 +100,8 @@ bool Kalman<Model>::measurementUpdate(const arma::mat& measurement, const arma::
     const arma::mat cov_weights = m_unscented_transform.covarianceWeights();
     // Calculate the Y vector.
     for(unsigned int i = 0; i < total_points; ++i) {
-        arma::mat point = Yprop.getCol(i) - Ymean;
-        Y.setCol(i, point);
+        arma::mat point = Yprop.col(i) - Ymean;
+        Y.col(i) = point;
         Pyy = Pyy + cov_weights(0, i) * point * point.t();
     }
 
@@ -98,13 +111,13 @@ bool Kalman<Model>::measurementUpdate(const arma::mat& measurement, const arma::
     if(evaluateMeasurement(innovation, Pyy - noise, noise) == false)    // Check for outlier, if outlier return without updating estimate.
         return false;
 
-    m_C = m_C - m_C.transp() * Ytransp * (noise + Y*m_C*Ytransp).i() * Y * m_C; //ox previously InverseMatrix(noise + ...)
+    m_C = m_C - m_C.t() * Ytransp * (noise + Y*m_C*Ytransp).i() * Y * m_C; //ox previously InverseMatrix(noise + ...)
     m_d = m_d + Ytransp * noise.i() * innovation;
 
     arma::mat updated_mean = m_sigma_mean + m_X * m_C * m_d;    // Update mean and covariance.
-    arma::mat updated_covariance = m_X * m_C * m_X.transp();
+    arma::mat updated_covariance = m_X * m_C * m_X.t();
 
-    if(not updated_covariance.isValid()) {
+    if(not duti::isMatrixValid(updated_covariance) ) { //not updated_covariance.isValid()
         std::cout << "ID: " << id() << std::endl;
         std::cout << "Sigma mean:\n" << m_X << std::endl;
         std::cout << "measurement:\n" << measurement << std::endl;
@@ -139,24 +152,29 @@ void Kalman<Model>::initialiseEstimate(const MultivariateGaussian& estimate) {
     m_sigma_mean = estimate.mean();    // Redraw sigma points to cover this new estimate.
     m_sigma_points = m_unscented_transform.GenerateSigmaPoints(m_estimate.mean(), m_estimate.covariance());
 
-    m_C = diag(m_unscented_transform.covarianceWeights());    // Initialise the variables for sequential measurement updates. m_C = Matrix(total_points, total_points, true);
+    m_C = arma::diagmat(m_unscented_transform.covarianceWeights());    // Initialise the variables for sequential measurement updates. m_C = Matrix(total_points, total_points, true);
     m_d = arma::mat(total_points, 1);
 
     m_X = arma::mat(num_states, total_points);    // Calculate X vector.
     for(unsigned int i = 0; i < total_points; ++i) {
-        m_X.setCol(i, (m_sigma_points.getCol(i) - m_sigma_mean));
+        m_X.col(i) = (m_sigma_points.col(i) - m_sigma_mean);
     }
 
     return;
 }
 
 template <typename Model>
+double Kalman<Model>::convDble(arma::mat X) {
+    return X(0, 0); //cannot use A(n, m) notation directly when assigning a matrix calculation to a float
+}
+
+template <typename Model>
 bool Kalman<Model>::evaluateMeasurement(const arma::mat& innovation, const arma::mat& estimate_variance, const arma::mat& measurement_variance) {
     if(!m_outlier_filtering_enabled and !m_weighting_enabled) return true;
 
-    arma::mat innov_transp = innovation.transp();
+    arma::mat innov_transp = innovation.t();
     arma::mat innov_variance = estimate_variance + measurement_variance;
-
+    
     if(m_outlier_filtering_enabled) {
         float innovation_2 = convDble(innov_transp * innov_variance.i() * innovation);
         if(m_outlier_threshold > 0 and innovation_2 > m_outlier_threshold) {
@@ -168,10 +186,10 @@ bool Kalman<Model>::evaluateMeasurement(const arma::mat& innovation, const arma:
     if(m_weighting_enabled) {
         int measurement_dimensions = measurement_variance.n_rows; //.getm()
         const float outlier_probability = 0.05;
-        double exp_term = -0.5 * convDble(innovation.transp() * innov_variance.i() *  innovation);
-        double fract = 1 / sqrt( pow(2 * mathGeneral::PI, measurement_dimensions) * determinant(innov_variance));
+        double exp_term = -0.5 * convDble(innovation.t() * innov_variance.i() *  innovation);
+        double fract = 1 / sqrt( pow(2 * duti::PI, measurement_dimensions) * arma::det(innov_variance));
         m_filter_weight *= (1.f - outlier_probability) * fract * exp(exp_term) + outlier_probability;
-     }
+    }
 
     return true;
 }
@@ -184,6 +202,7 @@ std::string Kalman<Model>::summary(bool detailed) const {
     return str_strm.str();
 }
 
+/* //new system does not read/write binary stream.
 //template <typename Model>
 //std::ostream& Kalman<Model>::writeStreamBinary (std::ostream& output) const {
 //    m_model->writeStreamBinary(output);

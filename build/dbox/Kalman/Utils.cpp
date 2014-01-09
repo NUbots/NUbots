@@ -19,7 +19,9 @@ bool equals(const arma::mat a, const arma::mat b) {
 }
 */
     
+//duti::isMatrixValid
 bool isMatrixValid(arma::mat m) {    //used in MultivariateGaussian.cpp and Kalman.cpp
+    //this may be useless
 
     if(m.n_rows == 0 || m.n_cols == 0)
         return false;

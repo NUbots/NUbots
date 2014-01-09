@@ -93,26 +93,7 @@ protected:
      
      */
 
-    Kalman(const Kalman& source): m_estimate(source.estimate()), m_unscented_transform(source.m_unscented_transform)  { // IKalmanFilter
-        m_model = source.m_model->Clone();
-        m_outlier_filtering_enabled = source.m_outlier_filtering_enabled;
-        m_outlier_threshold = source.m_outlier_threshold;
-
-        m_previous_decisions = source.m_previous_decisions;  //IWeightedKalmanFilter
-        m_parent_id = source.id(); //IWeightedKalmanFilter
-        m_active = source.m_active; //IWeightedKalmanFilter
-        m_id = m_id; //IWeightedKalmanFilter
-        m_creation_time = source.m_creation_time; //IWeightedKalmanFilter
-        //m_parent_history_buffer = source.m_parent_history_buffer; //IWeightedKalmanFilter
-        
-        m_weighting_enabled = source.m_weighting_enabled;
-        m_filter_weight = source.m_filter_weight;
-        m_sigma_points = source.m_sigma_points;
-        m_sigma_mean = source.m_sigma_mean;
-        m_C = source.m_C;
-        m_d = source.m_d;
-        m_X = source.m_X;
-    }
+    Kalman(const Kalman& source);
     
 //-----------------------------------------------------------IWeightedKalmanFilter
 
@@ -170,13 +151,27 @@ public:
         return new Kalman(*this); //WSeqUKF(*this)
     }
 
-    bool timeUpdate(double delta_t, const arma::mat& measurement, const arma::mat& process_noise, const arma::mat& measurement_noise); //@brief Time update function The time update function predicts the new state of the system. @param delta_t The elapsed time since the previous time update. @param measurement Any mesurements that can be used to predict the change in state. @param process_noise The linear process noise to be added to the estimate. @param measurement_noise The noise present in the measurment provided. @return True if the update was performed sucessfully. False if the update was unable to be performed.
-    bool measurementUpdate(const arma::mat& measurement, const arma::mat& noise, const arma::mat& args, unsigned int type); //@brief Measurement update function The measurement update function corrects the estimated state of the system using observed measurement/s. @param measurement The measured data to be used for the update. @param noise The noise associated with the measurement data provided. @param args Any additional arguments required for the measurment update. @param type The type of measurement. @return True if the update was performed sucessfully. False if the update was unable to be performed.
+   //@brief Time update function The time update function predicts the new state of the system. 
+   //@param delta_t The elapsed time since the previous time update. 
+    //@param measurement Any measurements that can be used to predict the change in state. 
+    //@param process_noise The linear process noise to be added to the estimate. 
+    //@param measurement_noise The noise present in the measurement provided. 
+    //@return True if the update was performed successfully. False if the update was unable to be performed.
+    bool timeUpdate(double delta_t, const arma::mat& measurement, const arma::mat& process_noise, const arma::mat& measurement_noise);
+    
+//@brief Measurement update function The measurement update function corrects the estimated state of the system using observed measurement/s. 
+    //@param measurement The measured data to be used for the update. 
+    //@param noise The noise associated with the measurement data provided. 
+    //@param args Any additional arguments required for the measurement update. 
+    //@param type The type of measurement. @return True if the update was performed sucessfully. False if the update was unable to be performed.
+    bool measurementUpdate(const arma::mat& measurement, const arma::mat& noise, const arma::mat& args, unsigned int type);            
+
     void initialiseEstimate(const MultivariateGaussian& estimate); //@brief Initialisation function. Used to initialise the filters estimate. @param estimate The initial estimate of the filter.
     std::string summary(bool detailed) const;
 
-    std::ostream& writeStreamBinary (std::ostream& output) const; //@brief Outputs a binary representation of the UKF object to a stream. @param output The output stream. @return The output stream.
-    std::istream& readStreamBinary (std::istream& input); //@brief Reads in a UKF object from the input stream. @param input The input stream. @return The input stream.
+    //depracated
+    //std::ostream& writeStreamBinary (std::ostream& output) const; //@brief Outputs a binary representation of the UKF object to a stream. @param output The output stream. @return The output stream.
+    //std::istream& readStreamBinary (std::istream& input); //@brief Reads in a UKF object from the input stream. @param input The input stream. @return The input stream.
 
     void enableWeighting(bool enabled = true) {m_weighting_enabled = enabled;}    // Weighting functions.
     float getFilterWeight() const {return m_filter_weight;}
@@ -196,5 +191,8 @@ protected:
     void init();
     bool evaluateMeasurement(const arma::mat& innovation, const arma::mat& estimate_variance, const arma::mat& measurement_variance);
 
+//extra helper function 
+public:
+    double convDble(arma::mat X);
 //----------------------------------------------------------- 
 }; //end class
