@@ -49,7 +49,7 @@ namespace messages {
 			enum Type{
 				LEFT,
 				RIGHT,
-				UNKOWN
+				UNKNOWN
 			} type;
 		};
 

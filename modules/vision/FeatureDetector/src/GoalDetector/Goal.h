@@ -28,6 +28,7 @@
 
 #include "VisionFieldObject.h"
 #include "Quad.h"
+#include "VisionKinematics.h"
 #include "utility/math/Line.h"
 
 namespace modules {
@@ -35,7 +36,7 @@ namespace modules {
 
         class Goal : public VisionFieldObject {
         public:
-            Goal(const VisionKinematics& visionKinematics, VFO_ID id = INVALID, const Quad& corners = Quad(), bool known = false);
+            Goal(const VisionKinematics& visionKinematics, messages::vision::Goal::Type id = messages::vision::Goal::Type::UNKNOWN, const Quad& corners = Quad(), bool known = false);
 
             void setParameters(bool THROWOUT_SHORT_GOALS_, 
                                bool THROWOUT_NARROW_GOALS_, 
@@ -110,6 +111,8 @@ namespace modules {
             DISTANCE_METHOD GOAL_DISTANCE_METHOD;
 
             int EDGE_OF_SCREEN_MARGIN;
+
+            messages::vision::Goal::Type m_goalType;
 
         //public:
         //    double width_dist,

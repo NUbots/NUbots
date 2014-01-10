@@ -5,8 +5,8 @@ namespace modules {
 
         using utility::math::Line;
 
-        Goal::Goal(const VisionKinematics& visionKinematics, VFO_ID id, const Quad &corners, bool known) {
-            m_id = id;
+        Goal::Goal(const VisionKinematics& visionKinematics, messages::vision::Goal::Type id, const Quad &corners, bool known) {
+            m_goalType = id;
             m_corners = corners;
             m_known = known;
 
@@ -56,6 +56,10 @@ namespace modules {
         const Quad& Goal::getQuad() const {
             return m_corners;
         }
+
+
+
+        /*IS THIS METHOD USED ANYWHERE???!?!*/
 
         /*!
         *   @brief Updates the external field objects with this goal.
@@ -198,7 +202,7 @@ namespace modules {
         double Goal::findScreenError(VisionFieldObject* other) const {
             Goal* g = dynamic_cast<Goal*>(other);
 
-            return (arma::norm(m_location.screenCartesian - g->m_location.screenCartesian, 2) + arma::norm(m_size_on_screen - g->m_size_on_screen, 2));
+            return (arma::norm(m_location.screenCartesian - g->m_location.screenCartesian, 2) + arma::norm(m_sizeOnScreen - g->m_sizeOnScreen, 2));
         }
 
         double Goal::findGroundError(VisionFieldObject* other) const {
@@ -214,8 +218,8 @@ namespace modules {
         *   this will leave m_transformed_spherical_position at all zeros.
         */
         bool Goal::calculatePositions(const VisionKinematics& visionKinematics){
-            int imageWidth = visionKinematics.getImageWidth();
-            int imageHeight = visionKinematics.getImageHeight();
+            int imageWidth = visionKinematics.getImageSize()[0];
+            int imageHeight = visionKinematics.getImageSize()[1];
 
             m_d2pLocation.screenCartesian = m_location.screenCartesian;
             m_widthLocation.screenCartesian = m_location.screenCartesian;
@@ -230,7 +234,7 @@ namespace modules {
             visionKinematics.calculateRepresentationsFromPixelLocation(m_d2pLocation);
 
             // WIDTH
-            visionKinematics.calculateRepresentationsFromPixelLocation(m_widthLocaiton, true, m_widthDistance);
+            visionKinematics.calculateRepresentationsFromPixelLocation(m_widthLocation, true, m_widthDistance);
 
             // HEIGHT
             // visionKinematics.calculateRepresentationsFromPixelLocation(heightLocation, true, heightDistance);
@@ -239,7 +243,7 @@ namespace modules {
             m_offTop = (m_location.screenCartesian[1] - m_sizeOnScreen[1]) < EDGE_OF_SCREEN_MARGIN;
             m_offBottom = m_location.screenCartesian[1] >= (imageHeight - EDGE_OF_SCREEN_MARGIN);
             m_offSide = ((m_location.screenCartesian[0] - (0.5 * m_sizeOnScreen[0]) <= EDGE_OF_SCREEN_MARGIN) ||
-                            (m_location.screenCartesian[0] + (0.5 * m_sizeOnScreen[0]) >= (imageWidth - EDGE_OF_SCREEN_MARGIN));
+                            (m_location.screenCartesian[0] + (0.5 * m_sizeOnScreen[0]) >= (imageWidth - EDGE_OF_SCREEN_MARGIN)));
 
             if (m_offBottom && m_offSide) {
                 // We can't tell distance to these goals.
@@ -250,7 +254,7 @@ namespace modules {
 
             else if (m_offBottom || m_offTop) {
                 // We can only use width.
-                m_location = widthLocation;
+                m_location = m_widthLocation;
             }
 
             else if (m_offSide) {
@@ -272,13 +276,13 @@ namespace modules {
                         break;
                     }
 
-                    case Width: {
+                    case WIDTH: {
                         m_location = m_widthLocation;
 
                         break;
                     }
 
-                    case Average: {
+                    case AVERAGE: {
                         // Average distances.
                         m_location.screenCartesian = (m_d2pLocation.screenCartesian + m_widthLocation.screenCartesian) * 0.5;
                         m_location.neckRelativeRadial = (m_d2pLocation.neckRelativeRadial + m_widthLocation.neckRelativeRadial) * 0.5;
@@ -288,7 +292,7 @@ namespace modules {
                         break;
                     }
 
-                    case Least: {
+                    case LEAST: {
                         m_location = ((m_d2pLocation.neckRelativeRadial[0] < m_widthLocation.neckRelativeRadial[0]) ? m_d2pLocation : m_widthLocation);
 
                         break;
@@ -296,14 +300,14 @@ namespace modules {
                 }
             }
 
-            return (m_m_location.neckRelativeRadial[0] > 0.0);
+            return (m_location.neckRelativeRadial[0] > 0.0);
         }
 
         /*! @brief Stream insertion operator for a single ColourSegment.
          *      The segment is terminated by a newline.
          */
         std::ostream& operator<< (std::ostream& output, const Goal& g) {
-            output << "Goal - " << VFOName(g.m_id) << std::endl;
+            output << "Goal - " << std::endl;
             output << "\tpixelloc: " << g.m_location.screenCartesian << std::endl;
             output << "\tangularloc: " << g.m_location.screenAngular << std::endl;
             output << "\trelative field coords: " << g.m_location.neckRelativeRadial << std::endl;

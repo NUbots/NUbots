@@ -58,6 +58,10 @@ namespace modules {
 
             arma::vec2 getFOV() const;
 
+            arma::vec2 getImageSize() const{
+                return m_imageSize;
+            }
+
         private:
             //! Calculate the field of view and effective camera distance in pixels.
             void setCamParams(arma::vec2 imagesize, arma::vec2 fov);

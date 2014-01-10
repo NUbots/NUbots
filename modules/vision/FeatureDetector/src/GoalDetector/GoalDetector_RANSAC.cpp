@@ -22,7 +22,7 @@
 namespace modules {
 	namespace vision {
 
-		using messages::vision::ClassifiedImage::ColourSegment;
+		using messages::vision::ColourSegment;
 		
 		GoalDetector_RANSAC::GoalDetector_RANSAC() {
 			// Empty constructor.
@@ -49,7 +49,7 @@ namespace modules {
                                                 float GOAL_WIDTH_, 
                                                 const DISTANCE_METHOD& GOAL_DISTANCE_METHOD_,
                                                 int EDGE_OF_SCREEN_MARGIN_) {
-			MINNIMUM_POINTS = MINIMUM_POINTS_;  									// Minimum points needed to make a line (Min pts to line essentially)
+			MINIMUM_POINTS = MINIMUM_POINTS_;  									// Minimum points needed to make a line (Min pts to line essentially)
 																					// Original value: 25 / VisionConstants::HORIZONTAL_SCANLINE_SPACING;
 			MAX_ITERATIONS_PER_FITTING = MAX_ITERATIONS_PER_FITTING_;               // Number of iterations per fitting attempt
 			CONSENSUS_THRESHOLD = CONSENSUS_THRESHOLD_;     						// Threshold dtermining what constitutes a good fit (Consensus margin)
@@ -135,9 +135,9 @@ namespace modules {
 
 			// Sort out potential crossbars and vertical posts (posts on too large of a lean will be removed).
 			// Edit ANGLE_MARGIN to affect this.
-			double halfPI = arma::math::pi() * 0.5;
+			/*double halfPI = arma::math::pi() * 0.5;
 			double lowerAngleThreshold = (ANGLE_MARGIN * halfPI);
-			double upperAngleThreshold = halfPI - lowerAngleThreshold;
+			double upperAngleThreshold = halfPI - lowerAngleThreshold;*/
 			
 			for (const Quad& quad : quads) {
 
@@ -167,12 +167,12 @@ namespace modules {
 			// Generate actual goal from candidate posts.
 			if (crossbar.first) {
 				// If a cross bar has been found use it to help assign left and right.
-				posts = assignGoals(postCandidates, crossbar.second);
+				posts = assignGoals(visionKinematics, postCandidates, crossbar.second);
 			}
 		
 			else {
 				// No crossbar, just use general method.
-				posts = assignGoals(postCandidates);
+				posts = assignGoals(visionKinematics, postCandidates);
 			}
 
 
@@ -184,7 +184,7 @@ namespace modules {
 				    if ((point[0] <= post.getQuad().getRight()) && 
                             (point[0] >= post.getQuad().getLeft()) && 
                             (point[1] > post.getLocationPixels()[1])) {
-				        post.setBase(point);
+				        post.setBase(visionKinematics, point);
 				    }
 				}
 			}
@@ -221,7 +221,7 @@ namespace modules {
 				    const LSFittedLine& endLine = endLines.at(i);
 
 				    // Check angles.
-				    if (startLine.getAngleBetween(e) <= (tolerance * datum::pi * 0.5)) {					// Dodgy way (linear with angle between).
+				    if (startLine.getAngleBetween(endLine) <= (tolerance * arma::math::pi() * 0.5)) {					// Dodgy way (linear with angle between).
 				    //if(std::min(a1/a2, a2/a1) <= (1 - tolerance)) {
 				        // Get the end points of each line.
 				        arma::vec2 sp1, sp2, ep1, ep2;
@@ -298,16 +298,16 @@ namespace modules {
 			return best;
 		}
 
-		std::unique_ptr<std::vector<Goal> > GoalDetector_RANSAC::assignGoals(const std::list<Quad>& candidates, const Quad& crossbar) const {
+		std::unique_ptr<std::vector<Goal> > GoalDetector_RANSAC::assignGoals(const VisionKinematics& visionKinematics, const std::list<Quad>& candidates, const Quad& crossbar) const {
 			if (candidates.size() == 1) {
-                Goal goal;
+                Goal goal(visionKinematics);
                 
 				if (crossbar.getCentre()[0] < candidates.front().getCentre()[0]) {
-                    goal = Goal(messages::vision::Goal::Type::RIGHT, candidates.front().getVertices());
+                    goal = Goal(visionKinematics, messages::vision::Goal::Type::RIGHT, candidates);
 				}
 				
 				else {
-                    goal = Goal(messages::vision::Goal::Type::LEFT, candidates.front().getVertices());
+                    goal = Goal(visionKinematics, messages::vision::Goal::Type::LEFT, candidates);
 				}
 
                 /*goal.setParameters(THROWOUT_SHORT_GOALS, 
@@ -320,14 +320,14 @@ namespace modules {
                                    GOAL_WIDTH, 
                                    GOAL_DISTANCE_METHOD,
                                    EDGE_OF_SCREEN_MARGIN);*/
-                return std::move( std::unique_ptr<std::vector<Goal>>(std::vector<Goal>(1, goal)) );
+                return std::move( std::unique_ptr<std::vector<Goal>>(  std::vector<Goal>(1, goal)  ) );
 			}
 			
             return assignGoals(candidates);
 		}
 
-        std::unique_ptr<std::vector<Goal> > GoalDetector_RANSAC::assignGoals(const std::list<Quad>& candidates) const {
-        	//START HERE : NEED TO RETURN unique_ptr 
+        std::unique_ptr<std::vector<Goal> > GoalDetector_RANSAC::assignGoals(const VisionKinematics& visionKinematics, const std::list<Quad>& candidates) const {
+
             std::unique_ptr<std::vector<Goal> > goals = std::unique_ptr<std::vector<Goal>>(new std::vector<Goal>());
 
             if (candidates.size() == 2) {
@@ -345,13 +345,13 @@ namespace modules {
                 if (std::abs(pos2 - pos1) >= MIN_GOAL_SEPARATION) {
                     //flip if necessary
                     if (post1.getCentre()[0] > post2.getCentre()[0]) {
-                        leftPost = Goal(messages::vision::Goal::Type::LEFT, post2.getVertices());
-                        rightPost = Goal(messages::vision::Goal::Type::RIGHT, post1.getVertices());
+                        leftPost = Goal(visionKinematics, messages::vision::Goal::Type::LEFT, post2);
+                        rightPost = Goal(visionKinematics, messages::vision::Goal::Type::RIGHT, post1);
                     }
 
                     else {
-                        leftPost = Goal(messages::vision::Goal::Type::LEFT, post1.getVertices());
-                        rightPost = Goal(messages::vision::Goal::Type::RIGHT, post2.getVertices());
+                        leftPost = Goal(visionKinematics, messages::vision::Goal::Type::LEFT, post1);
+                        rightPost = Goal(visionKinematics, messages::vision::Goal::Type::RIGHT, post2);
                     }
 
                    /* Parameters should be elsewhere 
@@ -389,7 +389,7 @@ namespace modules {
                 //unable to identify which post is which
                 //setting all to unknown
                 for(const Quad& candidate : candidates) {
-                    Goal goal = Goal(messages::vision::Goal::Type::UNKNOWN, candidate.getVertices());
+                    Goal goal = Goal(visionKinematics, messages::vision::Goal::Type::UNKNOWN, candidate);
                     /*goal.setParameters(THROWOUT_SHORT_GOALS, 
                                         THROWOUT_NARROW_GOALS, 
                                         THROWOUT_ON_ABOVE_KIN_HOR_GOALS, 

@@ -26,11 +26,12 @@
 
 namespace modules {
 	namespace vision {
-	
-			enum RANSAC_SELECTION_METHOD {
-				LargestConsensus,
-				BestFittingConsensus
-			};
+        enum RANSAC_SELECTION_METHOD {
+            LargestConsensus,
+            BestFittingConsensus
+        };
+            
+	    namespace RANSAC{			
 
             /************************************
              *      FUNCTION PROTOTYPES         *
@@ -241,32 +242,33 @@ namespace modules {
                     model.regenerate(rand_pts);
                 }
                 
-                return model;
-        //        Model model;
-        //        if(points.size() >= model.minPointsForFit()) {
-        //            std::vector<DataPoint> rand_pts;
-        //            DataPoint next;
-        //            rand_pts.push_back(points.at(rand() % points.size()));
+                    return model;
+            //        Model model;
+            //        if(points.size() >= model.minPointsForFit()) {
+            //            std::vector<DataPoint> rand_pts;
+            //            DataPoint next;
+            //            rand_pts.push_back(points.at(rand() % points.size()));
 
-        //            while(rand_pts.size() < model.minPointsForFit()) {
-        //                bool unique;
-        //                do {
-        //                    unique = true;
-        //                    next = points.at(rand() % points.size());
-        //                    BOOST_FOREACH(DataPoint& pt, rand_pts) {
-        //                        if(pt == next)
-        //                            unique = false;
-        //                    }
-        //                }
-        //                while(!unique);
-        //                rand_pts.push_back(next);
-        //            }
-        //            model.regenerate(rand_pts);
-        //        }
-        //        return model;
+            //            while(rand_pts.size() < model.minPointsForFit()) {
+            //                bool unique;
+            //                do {
+            //                    unique = true;
+            //                    next = points.at(rand() % points.size());
+            //                    BOOST_FOREACH(DataPoint& pt, rand_pts) {
+            //                        if(pt == next)
+            //                            unique = false;
+            //                    }
+            //                }
+            //                while(!unique);
+            //                rand_pts.push_back(next);
+            //            }
+            //            model.regenerate(rand_pts);
+            //        }
+            //        return model;
 
-		}
+    		}
 
+        }
 	}
 }
 

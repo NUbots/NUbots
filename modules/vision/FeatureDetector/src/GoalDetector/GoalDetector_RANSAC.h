@@ -29,6 +29,7 @@
 
 #include "Goal.h"
 #include "Quad.h"
+#include "VisionKinematics.h"
 #include "LSFittedLine.h"
 #include "RANSAC/RANSAC.h"
 #include "RANSAC/RANSACLine.h"
@@ -71,8 +72,8 @@ namespace modules {
 
 			unsigned int getClosestUntriedLine(const LSFittedLine& start, const std::vector<LSFittedLine>& end_lines, std::vector<bool>& tried);
 
-			std::vector<Goal> assignGoals(const std::list<Quad>& candidates, const Quad& crossbar) const;
-            std::vector<Goal> assignGoals(const std::list<Quad>& candidates) const;
+			std::unique_ptr<std::vector<Goal>> assignGoals(const VisionKinematics& visionKinematics, const std::list<Quad>& candidates, const Quad& crossbar) const;
+            std::unique_ptr<std::vector<Goal>> assignGoals(const VisionKinematics& visionKinematics, const std::list<Quad>& candidates) const;
 
             void removeInvalid(std::list<Quad>& posts);
             void mergeClose(std::list<Quad>& posts, double widthMultipleToMerge);
@@ -87,7 +88,7 @@ namespace modules {
 			double ANGLE_MARGIN;									// Used for filtering out goal posts which are on too much of a lean.
 			double CONSENSUS_THRESHOLD; 							// Threshold dtermining what constitutes a good fit (Consensus margin)
 			
-			RANSAC_SELECTION_METHOD m_RANSACMethod;
+			RANSAC_SELECTION_METHOD SELECTION_METHOD;
 //			Horizon& m_kinematicsHorizon;
 			
 			double RANSAC_MATCHING_TOLERANCE;
