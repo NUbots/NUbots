@@ -25,11 +25,13 @@
 #include <armadillo>
 
 #include "messages/vision/ClassifiedImage.h"
+#include "messages/vision/VisionObjects.h"
 
 #include "Goal.h"
-#include "../Quad.h"
-#include "../LSFittedLine.h"
-#include "../RANSAC/RANSAC.h"
+#include "Quad.h"
+#include "LSFittedLine.h"
+#include "RANSAC/RANSAC.h"
+#include "RANSAC/RANSACLine.h"
 
 namespace modules {
 	namespace vision {
@@ -37,7 +39,7 @@ namespace modules {
 		class GoalDetector_RANSAC {
 		public:
 			GoalDetector_RANSAC();
-            std::unique_ptr<std::vector<Goal>> run(const std::vector<messages::vision::ColourSegment>& horizontalSegments, 
+            std::unique_ptr<std::vector<Goal>> run(const VisionKinematics& visionKinematics, const std::vector<messages::vision::ColourSegment>& horizontalSegments, 
                                                     const std::vector<messages::vision::ColourSegment>& verticalSegments);
 
             // TODO: Add in Kinematics horizon.

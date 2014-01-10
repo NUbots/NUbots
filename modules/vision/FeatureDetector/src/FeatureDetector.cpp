@@ -27,9 +27,10 @@ namespace modules {
         using messages::vision::ClassifiedImage;
         using messages::vision::COLOUR_CLASS;
 		using messages::vision::ColourSegment;
+        using messages::platform::darwin::DarwinSensors;
         
         FeatureDetector::FeatureDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), 
-                                m_transformer() { //, m_ballDetector(), m_goalDetector(), m_fieldPointDetector(), m_obstacleDetector() { 
+                                m_visionKinematics() { //, m_ballDetector(), m_goalDetector(), m_fieldPointDetector(), m_obstacleDetector() { 
 
             // Load feature detector constants.
                     /*
@@ -86,7 +87,7 @@ namespace modules {
                 BODY_POSITION_OFFSET << constants.config["BODY_POSITION_OFFSET"];
                 CAMERA_POSITION_OFFSET << constants.config["CAMERA_POSITION_OFFSET"];
 
-                m_transformer.setParameters(constants.config["RADIAL_CORRECTION_COEFFICIENT"], 
+                m_visionKinematics.setParameters(constants.config["RADIAL_CORRECTION_COEFFICIENT"], 
                                             BODY_ANGLE_OFFSET, 
                                             CAMERA_ANGLE_OFFSET, 
                                             NECK_POSITION_OFFSET, 
@@ -134,7 +135,7 @@ namespace modules {
                                                  constants.config["MAX_BALL_DISTANCE"],
                                                  constants.config["BALL_WIDTH"],
                                                  distanceMethod, 
-                                                 m_transformer);
+                                                 m_visionKinematics);
                                                  */
             });
             
@@ -212,19 +213,46 @@ namespace modules {
                                                  */
             });
 
+            on<Trigger<Configuration<CameraConfig>>>([this](const Configuration<CameraConfig>& config) {
+                    arma::vec2 FOV, imageSize;
+                    
+                    FOV[0] = config.config["FOV_X"];
+                    FOV[1] = config.config["FOV_Y"];
+                    
+                    imageSize[0] = config.config["imageWidth"];
+                    imageSize[1] = config.config["imageHeight"];
+
+                    m_visionKinematics.setCamParams(imageSize,FOV);
+            });
+
+          /* TODO: Kinematics required here!!!
+            on<Trigger<DarwinSensors>, With<FilteredKinematics!!!!!!>>([this](const DarwinSensors& sensors){
+                m_visionKinematics.setSensors(sensors.Servos.headTilt.presentPosition,
+                                              sensors.Servos.headPan.presentPosition,
+                                              sensors.Servos.head.presentPosition,
+                                              sensors.Servos.headPan.presentPosition,
+                                              sensors.Servos.headPan.presentPosition,);
+
+            });
+            */
             /*
             m_detectLineObjects = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
 
             });
 
-            m_detectGoals = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
+            m_detectGoals =
+
+            */ 
+            on<Trigger<ClassifiedImage>, With<DarwinSensors>>([this](const ClassifiedImage& classifiedImage) {
+
                 if (classifiedImage.matchedHorizontalSegments.count(messages::vision::GOAL_COLOUR) &&
                     classifiedImage.matchedVerticalSegments.count(messages::vision::GOAL_COLOUR)) {
-                    emit(std::move(m_goalDetector.run(classifiedImage.matchedHorizontalSegments.at(messages::vision::GOAL_COLOUR), 
+                    emit(std::move(m_goalDetector.run(m_visionKinematics,
+                                                      classifiedImage.matchedHorizontalSegments.at(messages::vision::GOAL_COLOUR), 
                                                       classifiedImage.matchedVerticalSegments.at(messages::vision::GOAL_COLOUR))));
                 }
             });
-
+/*
             m_detectBalls = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
 
             });

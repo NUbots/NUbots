@@ -60,6 +60,9 @@ namespace modules {
             static constexpr const char* CONFIGURATION_PATH = "ObstacleDetector.json";
         };
 
+        struct CameraConfig {
+            static constexpr const char* CONFIGURATION_PATH = "LinuxCamera.json";
+        };
         /**
          * Searches for interesting features in a classified image.
          *
@@ -79,12 +82,16 @@ namespace modules {
             NUClear::Reactor::ReactionHandle m_detectObstacles;
 */
 
-            VisionKinematics m_transformer;
-            
+
             BallDetector m_ballDetector;
+
             GoalDetector_RANSAC m_goalDetector;
+
             FieldPointDetector m_fieldPointDetector;
+
             ObstacleDetector m_obstacleDetector;
+
+            VisionKinematics m_visionKinematics;
 
         public:
             explicit FeatureDetector(std::unique_ptr<NUClear::Environment> environment);

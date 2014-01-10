@@ -26,15 +26,16 @@
 
 #include "messages/vision/VisionObjects.h"
 
-#include "../VisionFieldObject.h"
-#include "../Quad.h"
+#include "VisionFieldObject.h"
+#include "Quad.h"
+#include "utility/math/Line.h"
 
 namespace modules {
     namespace vision {
 
         class Goal : public VisionFieldObject {
         public:
-            Goal(VFO_ID id = INVALID, const Quad& corners = Quad(), bool known = false);
+            Goal(const VisionKinematics& visionKinematics, VFO_ID id = INVALID, const Quad& corners = Quad(), bool known = false);
 
             void setParameters(bool THROWOUT_SHORT_GOALS_, 
                                bool THROWOUT_NARROW_GOALS_, 
@@ -47,7 +48,7 @@ namespace modules {
                                const DISTANCE_METHOD& GOAL_DISTANCE_METHOD_,
                                int EDGE_OF_SCREEN_MARGIN_);
 
-            void setBase(arma::vec2 base);
+            void setBase(const VisionKinematics& visionKinematics, arma::vec2 base);
 
             //! @brief reutns the pixel locations of the corners.
             const Quad& getQuad() const;
@@ -77,7 +78,7 @@ namespace modules {
               @brief calculates various positions values of the goal.
               @return whether the goal is valid.
               */
-            bool calculatePositions();
+            bool calculatePositions(const VisionKinematics& visionKinematics);
 
             /*!
               @brief calculates distance to the goal based on the global goal distance metric.

@@ -84,7 +84,7 @@ namespace modules {
             arma::vec3 distanceToPoint(arma::vec2 pixel, double objectHeight = 0.0) const;
 
         private:
-            arma::vec2 m_FOV;
+            arma::vec2 m_FOV;               //!FOV in radians horizontally and vertically
             double m_effectiveCameraDistancePixels;
 
             arma::mat m_ctgTransform;
@@ -111,7 +111,7 @@ namespace modules {
 			arma::vec2 BODY_ANGLE_OFFSET;
 			arma::vec3 CAMERA_ANGLE_OFFSET;
 			arma::vec3 NECK_POSITION_OFFSET;
-			arma::vec3 BODY_POITION_OFFSET;
+			arma::vec3 BODY_POSITION_OFFSET;
 			arma::vec3 CAMERA_POSITION_OFFSET;
         };
 

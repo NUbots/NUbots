@@ -1,5 +1,5 @@
 /*
- * This file is part of FeatureDetector.
+ * This file is part of FeatureDetector. It describes the line fitted to data with the least squares method.
  *
  * FeatureDetector is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

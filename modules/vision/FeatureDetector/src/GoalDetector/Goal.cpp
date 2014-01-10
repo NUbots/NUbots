@@ -1,18 +1,21 @@
 #include "Goal.h"
 
-namesapce modules {
+namespace modules {
     namespace vision {
 
-        Goal::Goal(VFO_ID id, const Quad &corners, bool known) {
+        using utility::math::Line;
+
+        Goal::Goal(const VisionKinematics& visionKinematics, VFO_ID id, const Quad &corners, bool known) {
             m_id = id;
             m_corners = corners;
             m_known = known;
 
             m_location.screenCartesian = corners.getBottomCentre();
-            m_sizeOnScreen = arma::vec2({corners.getAverageWidth(), corners.getAverageHeight()});
+            m_sizeOnScreen[0] = corners.getAverageWidth();
+            m_sizeOnScreen[1] = corners.getAverageHeight();
 
             //CALCULATE DISTANCE AND BEARING VALS
-            valid = (calculatePositions() && check());
+            valid = (calculatePositions(visionKinematics) && check());
         }
 
         void Goal::setParameters(bool THROWOUT_SHORT_GOALS_, 
@@ -37,16 +40,17 @@ namesapce modules {
             EDGE_OF_SCREEN_MARGIN = EDGE_OF_SCREEN_MARGIN_;
         }
 
-        void Goal::setBase(arma::vec2 base) {
+        void Goal::setBase(const VisionKinematics& visionKinematics,  arma::vec2 base) {
             Line l_line(m_corners.getBottomLeft(), m_corners.getTopLeft());
             Line r_line(m_corners.getBottomRight(), m_corners.getTopRight());
 
             arma::vec2 l_point = l_line.projectOnto(base);
             arma::vec2 r_point = r_line.projectOnto(base);
 
-            m_location.screenCartesian = arma::vec2({(l_point[0] + r_point[0]) * 0.5, base[1]});
+            m_location.screenCartesian[0] = (l_point[0] + r_point[0]) * 0.5;
+            m_location.screenCartesian[1] = base[1];
 
-            valid = (calculatePositions() && check());
+            valid = (calculatePositions(visionKinematics) && check());
         }
 
         const Quad& Goal::getQuad() const {
@@ -62,10 +66,10 @@ namesapce modules {
         *   includes no checks before placing them, and nor should it. For example, if this is 
         *   called on multiple YellowLeftGoals then localisation will only see the last one.
         */
-    	bool addToExternalFieldObjects(std::unique_ptr<std::vector<messages::vision::Goal>> goals) const;
-		std::unique_ptr<std::vector<messages::vision::Goal>> temp = std::unique_ptr<td::vector<messages::vision::Goal>>(new std::vector<messages::vision::Goal>());
+    	/*bool Goal::addToExternalFieldObjects(std::unique_ptr<std::vector<messages::vision::Goal>> goals) const{
+		    std::unique_ptr<std::vector<messages::vision::Goal>> temp = std::unique_ptr<std::vector<messages::vision::Goal>>(new std::vector<messages::vision::Goal>());
 
-		/*
+		
                 temp->sphericalFromNeck = m_location.neckRelativeRadial;
                 temp->sphericalError = m_sphericalError;
                 temp->screenAngular = m_location.screenAngular;
@@ -74,7 +78,7 @@ namesapce modules {
                 temp->timestamp = NUClear::clock::now();
 
                 ball = std::move(temp);
-		*/
+		
 
             if (valid) {
 		    messages::vision::Goal newGoal;
@@ -154,13 +158,13 @@ namesapce modules {
                 fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
 
                 return true;
-            }
+            
 
             else {
                 return false;
             }
         }
-
+*/
         
 
         bool Goal::check() const {
@@ -176,11 +180,11 @@ namesapce modules {
                     return false;
                 }
             }
-
+            //TODO KINHOR
             // Throwout for base below horizon.
-            if (THROWOUT_ON_ABOVE_KIN_HOR_GOALS && !(VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location.screenCartesian.x, m_location.screenCartesian.y))) {
+         /*   if (THROWOUT_ON_ABOVE_KIN_HOR_GOALS && !(VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location.screenCartesian.x, m_location.screenCartesian.y))) {
                 return false;
-            }
+            }*/
 
             // Throw out if goal is too far away.
             if (THROWOUT_DISTANT_GOALS && (m_location.neckRelativeRadial[0] > MAX_GOAL_DISTANCE)) {
@@ -209,28 +213,27 @@ namesapce modules {
         *   This method uses the camera transform and as such if it was not valid when retrieved from the wrapper
         *   this will leave m_transformed_spherical_position at all zeros.
         */
-        bool Goal::calculatePositions() {
-            const Transformer& transformer = VisionBlackboard::getInstance()->getTransformer();
-            int imageWidth = VisionBlackboard::getInstance()->getImageWidth();
-            int imageHeight = VisionBlackboard::getInstance()->getImageHeight();
+        bool Goal::calculatePositions(const VisionKinematics& visionKinematics){
+            int imageWidth = visionKinematics.getImageWidth();
+            int imageHeight = visionKinematics.getImageHeight();
 
             m_d2pLocation.screenCartesian = m_location.screenCartesian;
             m_widthLocation.screenCartesian = m_location.screenCartesian;
             m_heightLocation.screenCartesian = m_location.screenCartesian;
 
             // Get distance from width.
-            m_widthDistance = ((GOAL_WIDTH * transformer.getCameraDistanceInPixels()) / (m_sizeOnScreen[0]));
+            m_widthDistance = ((GOAL_WIDTH * visionKinematics.getCameraDistanceInPixels()) / (m_sizeOnScreen[0]));
 
-            // heightHeight = ((VisionConstants::GOAL_HEIGHT * transformer.getCameraDistanceInPixels()) / (m_sizeOnScreen[1]));
+            // heightHeight = ((VisionConstants::GOAL_HEIGHT * visionKinematics.getCameraDistanceInPixels()) / (m_sizeOnScreen[1]));
 
             // D2P
-            transformer.calculateRepresentationsFromPixelLocation(m_d2pLocation);
+            visionKinematics.calculateRepresentationsFromPixelLocation(m_d2pLocation);
 
             // WIDTH
-            transformer.calculateRepresentationsFromPixelLocation(m_widthLocaiton, true, m_widthDistance);
+            visionKinematics.calculateRepresentationsFromPixelLocation(m_widthLocaiton, true, m_widthDistance);
 
             // HEIGHT
-            // transformer.calculateRepresentationsFromPixelLocation(heightLocation, true, heightDistance);
+            // visionKinematics.calculateRepresentationsFromPixelLocation(heightLocation, true, heightDistance);
 
             // Check if we are off the edge of the screen by a certain margin.
             m_offTop = (m_location.screenCartesian[1] - m_sizeOnScreen[1]) < EDGE_OF_SCREEN_MARGIN;

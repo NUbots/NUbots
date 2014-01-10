@@ -80,14 +80,14 @@ namespace modules {
 	
 		// std::vector<ColourSegment> verticalSegments = ClassifiedImage::matched_vertical_segments[GOAL_COLOUR];
 		// std::vector<ColourSegment> horizontalSegments = ClassifiedImage::matched_horizontal_segments[GOAL_COLOUR];
-		std::unique_ptr<std::vector<Goal>> GoalDetector_RANSAC::run(const std::vector<ColourSegment>& horizontalSegments, 
+		std::unique_ptr<std::vector<Goal>> GoalDetector_RANSAC::run(const VisionKinematics& visionKinematics, const std::vector<ColourSegment>& horizontalSegments, 
                                                                     const std::vector<ColourSegment>& verticalSegments) {
 			std::list<Quad> quads, postCandidates;
 			std::pair<bool, Quad> crossbar(false, Quad());
 			std::unique_ptr<std::vector<Goal>> posts = std::unique_ptr<std::vector<Goal>>(new std::vector<Goal>);
 
 			std::vector<arma::vec2> startPoints, endPoints;
-			std::vector<pair<RANSACLine<arma::vec2>, std::vector<arma::vec2>>> ransacResults;
+			std::vector<std::pair<RANSACLine<arma::vec2>, std::vector<arma::vec2>>> ransacResults;
 			std::vector<LSFittedLine> startLines, endLines;
 
 			// Get edge points.
@@ -104,7 +104,7 @@ namespace modules {
                                                                                             MAX_FITTING_ATTEMPTS, 
                                                                                             SELECTION_METHOD);
 		
-			for (auto l : ransacResults) {
+			for (auto& l : ransacResults) {
 				startLines.push_back(LSFittedLine(l.second));
 			}
 
@@ -116,7 +116,7 @@ namespace modules {
                                                                                             MAX_FITTING_ATTEMPTS, 
                                                                                             SELECTION_METHOD);
 		
-			for (auto l : ransacResults) {
+			for (auto& l : ransacResults) {
 				endLines.push_back(LSFittedLine(l.second));
 			}
 
@@ -135,16 +135,18 @@ namespace modules {
 
 			// Sort out potential crossbars and vertical posts (posts on too large of a lean will be removed).
 			// Edit ANGLE_MARGIN to affect this.
-			double halfPI = datum::pi * 0.5;
+			double halfPI = arma::math::pi() * 0.5;
 			double lowerAngleThreshold = (ANGLE_MARGIN * halfPI);
 			double upperAngleThreshold = halfPI - lowerAngleThreshold;
 			
 			for (const Quad& quad : quads) {
-//				double angle = m_kinematicsHorizon.getAngleBetween(Line(q.getTopCentre(), q.getBottomCentre()));
 
-				if (angle >= upperAngleThreshold) {
+				//TODO!!!!!!!!!!!!!!!!!!!!!!!!!!! - add in filtering with kinematics horizon
+/*				double angle = m_kinematicsHorizon.getAngleBetween(Line(quad.getTopCentre(), quad.getBottomCentre()));
+
+				if (angle >= upperAngleThreshold) {*/
 				    postCandidates.push_back(quad);
-				}
+			/*	}
 				
 				else if (angle <= lowerAngleThreshold) {
 				    // Only keep largest crossbar candidate.
@@ -156,7 +158,7 @@ namespace modules {
 				    else if (crossbar.second.area() < quad.area()) {
 				        crossbar.second = quad;
 				    }
-				}
+				}*/
 			}
 
 			// Only check upright posts for building candidates.
@@ -170,14 +172,15 @@ namespace modules {
 		
 			else {
 				// No crossbar, just use general method.
-				posts = GoalDetector::assignGoals(postCandidates);
+				posts = assignGoals(postCandidates);
 			}
+
 
 			// Improves bottom centre estimate using vertical transitions.
 			for (const ColourSegment& segment : verticalSegments) {
 				const arma::vec2& point = segment.m_end;
 				
-				for (Goal& post : posts) {
+				for (Goal& post : *posts) {
 				    if ((point[0] <= post.getQuad().getRight()) && 
                             (point[0] >= post.getQuad().getLeft()) && 
                             (point[1] > post.getLocationPixels()[1])) {
@@ -295,19 +298,19 @@ namespace modules {
 			return best;
 		}
 
-		std::vector<Goal> GoalDetector_RANSAC::assignGoals(const std::list<Quad>& candidates, const Quad& crossbar) const {
+		std::unique_ptr<std::vector<Goal> > GoalDetector_RANSAC::assignGoals(const std::list<Quad>& candidates, const Quad& crossbar) const {
 			if (candidates.size() == 1) {
                 Goal goal;
                 
 				if (crossbar.getCentre()[0] < candidates.front().getCentre()[0]) {
-                    goal = Goal(GOAL_R, candidates.front());
+                    goal = Goal(messages::vision::Goal::Type::RIGHT, candidates.front().getVertices());
 				}
 				
 				else {
-                    goal = Goal(GOAL_L, candidates.front());
+                    goal = Goal(messages::vision::Goal::Type::LEFT, candidates.front().getVertices());
 				}
 
-                goal.setParameters(THROWOUT_SHORT_GOALS, 
+                /*goal.setParameters(THROWOUT_SHORT_GOALS, 
                                    THROWOUT_NARROW_GOALS, 
                                    THROWOUT_ON_ABOVE_KIN_HOR_GOALS, 
                                    THROWOUT_DISTANT_GOALS, 
@@ -316,15 +319,16 @@ namespace modules {
                                    MIN_GOAL_WIDTH, 
                                    GOAL_WIDTH, 
                                    GOAL_DISTANCE_METHOD,
-                                   EDGE_OF_SCREEN_MARGIN);
-                return std::vector<Goal>(1, goal);
+                                   EDGE_OF_SCREEN_MARGIN);*/
+                return std::move( std::unique_ptr<std::vector<Goal>>(std::vector<Goal>(1, goal)) );
 			}
 			
             return assignGoals(candidates);
 		}
 
-        std::vector<Goal> GoalDetector_RANSAC::assignGoals(const std::list<Quad>& candidates) const {
-            std::vector<Goal> goals;
+        std::unique_ptr<std::vector<Goal> > GoalDetector_RANSAC::assignGoals(const std::list<Quad>& candidates) const {
+        	//START HERE : NEED TO RETURN unique_ptr 
+            std::unique_ptr<std::vector<Goal> > goals = std::unique_ptr<std::vector<Goal>>(new std::vector<Goal>());
 
             if (candidates.size() == 2) {
                 Goal leftPost, rightPost;
@@ -341,16 +345,18 @@ namespace modules {
                 if (std::abs(pos2 - pos1) >= MIN_GOAL_SEPARATION) {
                     //flip if necessary
                     if (post1.getCentre()[0] > post2.getCentre()[0]) {
-                        leftPost = Goal(GOAL_L, post2);
-                        rightPost = Goal(GOAL_R, post1);
+                        leftPost = Goal(messages::vision::Goal::Type::LEFT, post2.getVertices());
+                        rightPost = Goal(messages::vision::Goal::Type::RIGHT, post1.getVertices());
                     }
 
                     else {
-                        leftPost = Goal(GOAL_L, post1);
-                        rightPost = Goal(GOAL_R, post2);
+                        leftPost = Goal(messages::vision::Goal::Type::LEFT, post1.getVertices());
+                        rightPost = Goal(messages::vision::Goal::Type::RIGHT, post2.getVertices());
                     }
 
-                    leftPost.setParameters(THROWOUT_SHORT_GOALS, 
+                   /* Parameters should be elsewhere 
+
+                   leftPost.setParameters(THROWOUT_SHORT_GOALS, 
                                            THROWOUT_NARROW_GOALS, 
                                            THROWOUT_ON_ABOVE_KIN_HOR_GOALS, 
                                            THROWOUT_DISTANT_GOALS, 
@@ -369,9 +375,9 @@ namespace modules {
                                             MIN_GOAL_WIDTH, 
                                             GOAL_WIDTH, 
                                             GOAL_DISTANCE_METHOD,
-                                            EDGE_OF_SCREEN_MARGIN);
-                    goals.push_back(leftPost);
-                    goals.push_back(rightPost);
+                                            EDGE_OF_SCREEN_MARGIN);*/
+                    goals->push_back(leftPost);
+                    goals->push_back(rightPost);
                 }
 
                 else {
@@ -383,8 +389,8 @@ namespace modules {
                 //unable to identify which post is which
                 //setting all to unknown
                 for(const Quad& candidate : candidates) {
-                    Goal goal = Goal(GOAL_U, candidate);
-                    goal.setParameters(THROWOUT_SHORT_GOALS, 
+                    Goal goal = Goal(messages::vision::Goal::Type::UNKNOWN, candidate.getVertices());
+                    /*goal.setParameters(THROWOUT_SHORT_GOALS, 
                                         THROWOUT_NARROW_GOALS, 
                                         THROWOUT_ON_ABOVE_KIN_HOR_GOALS, 
                                         THROWOUT_DISTANT_GOALS, 
@@ -393,12 +399,12 @@ namespace modules {
                                         MIN_GOAL_WIDTH, 
                                         GOAL_WIDTH, 
                                         GOAL_DISTANCE_METHOD,
-                                        EDGE_OF_SCREEN_MARGIN);
-                    goals.push_back(goal);
+                                        EDGE_OF_SCREEN_MARGIN);*/
+                    goals->push_back(goal);
                 }
             }
 
-            return goals;
+            return std::move(goals);
         }
 
 		std::vector<arma::vec2> GoalDetector_RANSAC::getEdgePointsFromSegments(const std::vector<ColourSegment> &segments) {

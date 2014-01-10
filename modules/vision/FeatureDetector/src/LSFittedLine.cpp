@@ -53,11 +53,11 @@ namespace modules {
 		}
 
 		void LSFittedLine::addPoint(const arma::vec2& point) {
-			sumX += point.x;
-			sumY += point.y;
-			sumX2 += point.x * point.x;
-			sumY2 += point.y * point.y;
-			sumXY += point.x * point.y;
+			sumX += point[0];
+			sumY += point[1];
+			sumX2 += point[0] * point[0];
+			sumY2 += point[1] * point[1];
+			sumXY += point[0] * point[1];
 			points.push_back(point);
 			valid = (points.size() >= 2);
 				
@@ -104,7 +104,7 @@ namespace modules {
 			}
 		}
 
-		arma::vec2LSFittedLine::combinedR2TLSandMSD(const LSFittedLine &sourceLine) const {
+		arma::vec2 LSFittedLine::combinedR2TLSandMSD(const LSFittedLine &sourceLine) const {
 			double sxx, syy, sxy, Sigma;
 			double TsumX, TsumY, TsumX2, TsumY2, TsumXY, TnumPoints;
 		
@@ -180,27 +180,23 @@ namespace modules {
 
 			float min = std::numeric_limits<float>::max();
 			float max = -std::numeric_limits<float>::max();
-		
-			const arma::vec2& minPoint, maxPoint;
-		
-			for (const arma::vec2& point : points) {
-				float trans_x = -(m_B * point[0]) - (m_A * point[1]);
-				
-				if (trans_x < min) {
-				    minPoint = point;
-				    min = trans_x;
-				}
-				
-				else if (trans_x > max) {
-				    maxPoint = point;
-				    max = trans_x;
-				}
-			}
-		
-			p1 = projectOnto(minPoint);
-			p2 = projectOnto(maxPoint);
-		
-			return true;
+	
+			std::vector< arma::vec2 >::const_iterator p, p_min, p_max;
+
+		    for(p = points.begin(), p_min = p_max = p; p!=points.end(); p++) {
+		        float trans_x = -m_B*(*p)[0] - m_A*(*p)[1];
+		        if(trans_x < min) {
+		            p_min = p;
+		            min = trans_x;
+		        }
+		        else if(trans_x > max) {
+		            p_max = p;
+		            max = trans_x;
+		        }
+		    }
+		    p1 = projectOnto(*p_min);
+		    p2 = projectOnto(*p_max);
+		    return true;
 		}
 
 		bool LSFittedLine::getOriginalEndPoints(arma::vec2& p1, arma::vec2& p2) const {
@@ -209,27 +205,23 @@ namespace modules {
 
 			float min = std::numeric_limits<float>::max();
 			float max = -std::numeric_limits<float>::max();
-		
-			const arma::vec2& minPoint, maxPoint;
-		
-			for (const arma::vec2& point : points) {
-				float trans_x = -(m_B * point[0]) - (m_A * point[1]);
-				
-				if (trans_x < min) {
-				    minPoint = point;
-				    min = trans_x;
-				}
-				
-				else if (trans_x > max) {
-				    maxPoint = point;
-				    max = trans_x;
-				}
-			}
-		
-			p1 = minPoint;
-			p2 = maxPoint;
-		
-			return true;
+
+		    std::vector< arma::vec2 >::const_iterator p, p_min, p_max;
+
+		    for(p = points.begin(), p_min = p_max = p; p!=points.end(); p++) {
+		        float trans_x = -m_B*(*p)[0] - m_A*(*p)[1];
+		        if(trans_x < min) {
+		            p_min = p;
+		            min = trans_x;
+		        }
+		        else if(trans_x > max) {
+		            p_max = p;
+		            max = trans_x;
+		        }
+		    }
+		    p1 = *p_min;
+		    p2 = *p_max;
+		    return true;
 		}
 
 		double LSFittedLine::averageDistanceBetween(const LSFittedLine& other) const {

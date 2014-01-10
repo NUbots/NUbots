@@ -40,7 +40,7 @@ namespace modules {
 												const arma::vec2& BODY_ANGLE_OFFSET_,
 												const arma::vec3& CAMERA_ANGLE_OFFSET_,
 												const arma::vec3& NECK_POSITION_OFFSET_,
-												const arma::vec3& BODY_POITION_OFFSET_,
+												const arma::vec3& BODY_POSITION_OFFSET_,
 												const arma::vec3& CAMERA_POSITION_OFFSET_) {
 			RADIAL_CORRECTION_COEFFICIENT = RADIAL_CORRECTION_COEFFICIENT_;
 			

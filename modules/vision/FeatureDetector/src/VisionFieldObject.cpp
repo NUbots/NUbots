@@ -194,9 +194,9 @@ namespace modules {
 
         }
 
-        DistanceMethod VisionFieldObject::getDistanceMethodFromName(const std::string& name) {
+        DISTANCE_METHOD VisionFieldObject::getDistanceMethodFromName(const std::string& name) {
             if (name.compare("WIDTH") == 0) {
-                return Width;
+                return WIDTH;
             }
 
             else if (name.compare("D2P") == 0) {
@@ -204,11 +204,11 @@ namespace modules {
             }
 
             else if (name.compare("LEAST") == 0) {
-                return Least;
+                return LEAST;
             }
 
             else if (name.compare("AVERAGE") == 0) {
-                return Average;
+                return AVERAGE;
             }
 
             else {
@@ -216,9 +216,9 @@ namespace modules {
             }
         }
 
-        std::string VisionFieldObject::getDistanceMethodName(const DistanceMethod& method) {
+        std::string VisionFieldObject::getDistanceMethodName(const DISTANCE_METHOD& method) {
             switch (method) {
-                case Width: {
+                case WIDTH: {
                     return "WIDTH";
                 }
 
@@ -226,11 +226,11 @@ namespace modules {
                     return "D2P";
                 }
 
-                case Average: {
+                case AVERAGE: {
                     return "AVERAGE";
                 }
 
-                case Least: {
+                case LEAST: {
                     return "LEAST";
                 }
 

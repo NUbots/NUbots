@@ -14,5 +14,7 @@
     "imageFormat" : "MJPG",
     "imageWidth": 320,
     "imageHeight": 240,
+    "FOV_X" : 0.785398,
+    "FOV_Y" : 0.785398,
     "rotated" : true
 }
