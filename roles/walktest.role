@@ -1,13 +1,12 @@
 ADD_ROLE(
-    NAME displaytest
+    NAME walktest
     MODULES
         support::SignalCatcher
         support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem
+		support::configuration::ConfigSystem    
         support::configuration::NetworkingConfiguration
-        support::DisplayTest
         platform::darwin::HardwareIO
-        input::LinuxCamera
+        #platform::darwin::MotionManager
         support::NUbugger
-        vision::LUTClassifier
+        motion::WalkEngine
 )
