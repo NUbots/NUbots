@@ -1,0 +1,7 @@
+ADD_ROLE(
+    NAME localisation
+    MODULES
+        support::configuration::ConfigSystem
+        support::NUbugger
+        Localisation)
+        

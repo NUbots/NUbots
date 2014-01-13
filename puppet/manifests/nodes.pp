@@ -1,51 +1,39 @@
-
-class nuclearport_dev_dependencies (
-    $username = 'nubot',
-  ) {
-  class { 'vim': 
-    username => $username,
-  }
-
-  package { 'build-essential': ensure => latest }
-  package { 'cmake': ensure => latest }
-  package { 'git': ensure => latest }
-  package { 'openssh-server': ensure => latest }
-  package { ['libprotobuf-dev', 'protobuf-compiler']: ensure => latest }
-  package { 'libespeak-dev': ensure => latest }
-  package { 'librtaudio-dev': ensure => latest }
-  package { 'libncurses5-dev': ensure => latest }
-  package { 'libjpeg-turbo8-dev': ensure => latest }
-  package { 'libfftw3-dev': ensure => latest }
-  package { 'libaubio-dev': ensure => latest }
-  package { 'libsndfile-dev': ensure => latest }
-  package { 'libarmadillo-dev': ensure => latest }
-  package { 'libboost-math-dev': ensure => latest }
-}
-
-node default {
-  # class { 'nuclearport_dev_dependencies': }
-}
-
-node npvagrant {
+class initial_apt_update {
   # Perform a single `apt-get update` before installing ANY packages.
   exec { "initial_apt_update":
     command => "/usr/bin/apt-get update"
   } -> Package <| |>
+}
 
+node nuclearportvm {
+  include initial_apt_update
+
+  # define variables for this node
   $username = 'vagrant'
-  $nubots_dir = "/home/${username}/nubots"
 
-  class { 'nuclearport_dev_dependencies':
-    username => $username,
-  }
+  class { 'nuclearport::build_dep': username => $username, }
+
+  class { 'vim':  username => $username, }
+}
+
+node nubuggervm {
+  include initial_apt_update
+
+  # define variables for this node
+  $username = 'vagrant'
+
+  # these (and most packages) should be virtual resources
+  package { 'build-essential': ensure => latest }
+  package { 'git': ensure => latest }
+
   file { 'nubots_dir':
     path => "/home/${username}/nubots",
     ensure => directory,
     owner => $username,
     group => $username,
   }
-  class { 'nuclear':
-    username => $username,
-    nubots_dir => $nubots_dir,
-  }
+
+  class { 'nubugger': username => $username, }
+
+  class { 'vim': username => $username, }
 }

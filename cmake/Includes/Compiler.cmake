@@ -1,5 +1,5 @@
 # Common C++ Flags
-SET(CMAKE_CXX_FLAGS "-std=c++11 -O3 -DNDEBUG")
+SET(CMAKE_CXX_FLAGS "-std=c++11 -O3 -DNDEBUG -march=atom -mtune=atom")
 SET(CMAKE_C_FLAGS "-O3 -DNDEBUG")
 
 # XCode support

@@ -60,4 +60,8 @@ doc/TSWLatexianTemp*
 tags
 *.swp
 /nbproject/
+<<<<<<< HEAD
 *~
+=======
+.DS_Store
+>>>>>>> develop

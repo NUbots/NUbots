@@ -53,8 +53,10 @@ namespace modules {
 					}
 
 					else {
+						
 						std::cout << "Error Loading LUT: " << LUTLocation << std::endl;
 						NUClear::log<NUClear::ERROR>("LUT ", LUTLocation, " has not loaded successfully." );
+
 					}
 				}
 				

@@ -1,21 +1,21 @@
 /*
- * This file is part of ScriptTuner.
- *
- * ScriptTuner is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * ScriptTuner is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with ScriptTuner.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Copyright 2013 NUBots <nubots@nubots.net>
- */
+* This file is part of ScriptTuner.
+*
+* ScriptTuner is :free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* ScriptTuner is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with ScriptTuner. If not, see <http://www.gnu.org/licenses/>.
+*
+* Copyright 2013 NUBots <nubots@nubots.net>
+*/
 
 #include "ScriptTuner.h"
 #include "messages/support/Configuration.h"
@@ -32,6 +32,7 @@
 namespace modules {
     namespace behaviours {
         namespace tools {
+            using messages::motion::ExecuteScript;
 
             struct LockServo {};
 
@@ -54,6 +55,9 @@ namespace modules {
                             NUClear::log<NUClear::DEBUG>("Loading script: ", scriptPath, '\n');
                             loadScript(scriptPath);
                         }
+//should it be NUClear::log<NUclear::Debug>
+
+
                     }
                     else {
                         NUClear::log<NUClear::DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
@@ -88,6 +92,7 @@ namespace modules {
 
             void ScriptTuner::run() {
 
+                
                 // Start curses mode
                 initscr();
                 // Capture our characters immediately (but pass through signals)
@@ -106,42 +111,58 @@ namespace modules {
                 while (running) {
                     // Get the character the user has typed
                     switch(getch()) {
-                        case KEY_UP:        // Change selection up
+                        case KEY_UP: // Change selection up
                             selection = selection == 0 ? 19 : selection - 1;
                             break;
-                        case KEY_DOWN:      // Change selection down
+                        case KEY_DOWN: // Change selection down
                             selection = (selection + 1) % 20;
                             break;
-                        case 9:             // Swap between angle and gain
-                        case KEY_LEFT:      // Swap between angle and gain
-                        case KEY_RIGHT:     // Swap between angle and gain
+                        case 9: // Swap between angle and gain
+                        case KEY_LEFT: // Swap between angle and gain
+                        case KEY_RIGHT: // Swap between angle and gain
                             angleOrGain = !angleOrGain;
                             break;
-                        case ',':           // Move left a frame
+                        case ',': // Move left a frame
                             activateFrame(frame == 0 ? frame : frame - 1);
                             break;
-                        case '.':           // Move right a frame
+                        case '.': // Move right a frame
                             activateFrame(frame == script.frames.size() - 1 ? frame : frame + 1);
                             break;
-                        case '\n':          // Edit selected field
-                        case KEY_ENTER:     // Edit selected field
+                        case '\n': // Edit selected field
+                        case KEY_ENTER: // Edit selected field
                             editSelection();
                             break;
-                        case ' ':           // Toggle lock mode
+                        case ' ': // Toggle lock mode
                             toggleLockMotor();
                             break;
-                        case 'S':           // Save the current script
+                        case 'S': // Save the current script
                             saveScript();
                             break;
-                        case 'T':           // Edit this frames duration
+                        case 'T': // Edit this frames duration
                             editDuration();
                             break;
-                        case 'N':           // New frame
+                        case 'N': // New frame
                             newFrame();
                             break;
-                        case 'D':           // Delete frame
+                        case 'D': // Delete frame
                             deleteFrame();
                             break;
+                        case 'P':
+                            playScript();
+                            break;
+                        case 'J':
+                            jumpToFrame();
+                            break;
+                        case 'R':
+                            refreshView();
+                            break;
+ //Kill simply freezes the window
+                        //case 'X':
+                            //kill();
+                            //break;
+//                        case ':':
+//                            help();
+//                           break;
                     }
 
                     // Update whatever visual changes we made
@@ -179,10 +200,13 @@ namespace modules {
                 attroff(A_BOLD);
 
                 // Top sections
-                mvprintw(2, 2, "Script: %s", scriptPath.c_str());   // Output our scripts name
-                mvprintw(3, 2, "Frames:");  // The frames section is filled out after this
+                mvprintw(2, 2, "Script: %s", scriptPath.c_str()); // Output our scripts name
+                mvprintw(3, 2, "Frames:"); // The frames section is filled out after this
                 mvprintw(4, 2, "Duration: %d", // Output the selected frames duration
                          std::chrono::duration_cast<std::chrono::milliseconds>(script.frames[frame].duration).count());
+                mvprintw(5,2, "Jump To Frame:");
+                mvprintw(6,2, "Load Script:");
+                mvprintw(7,2, "Play Scripts:");
 
                 // Output all of our frame numbers and highlight the selected frame
                 move(3, 10);
@@ -197,6 +221,59 @@ namespace modules {
                         attroff(A_STANDOUT);
                     }
                     printw(" ");
+                }
+
+
+                // Heading Commands
+                attron(A_BOLD);
+                mvprintw(LINES-6, 2, "Commands");
+                attroff(A_BOLD);
+                mvprintw(LINES-2, 2, "Type :help for list of commands or :longhelp <command> for details");
+                
+
+                 //Each Command
+                const char* COMMANDS[] = {
+                                     ",",
+                                     ".",
+                                     "N",
+                                     "D",
+                                     " ",
+                                     "T",
+                                     "J",
+                                     "P",
+                                     "S",
+                                     "X"};
+
+                //Each Meaning
+                const char* MEANINGS[] = {
+                                     "Left a frame",
+                                     "Right a frame",
+                                     "New Frame",
+                                     "Delete Frame",
+                                     "Lock/Unlock",
+                                     "Edit Duration",
+                                     "Jump to Frame",
+                                     "Play",
+                                     "Save",
+                                     "Exit (doesn't work yet use CTR C)"};    
+
+                //Prints commands and their meanings to the screen
+                for (size_t i = 0; i < 10; i = i + 2) {
+                    attron(A_BOLD);
+                    attron(A_STANDOUT);
+                    mvprintw(LINES-5, 2 + ((2+14)*(i/2)), COMMANDS[i]);
+                    attroff(A_BOLD);
+                    attroff(A_STANDOUT); 
+                    mvprintw(LINES-5, 4 + ((2+14)*(i/2)), MEANINGS[i]);
+                }
+
+                for (size_t i = 1; i < 10; i = i + 2) {
+                    attron(A_BOLD);
+                    attron(A_STANDOUT);
+                    mvprintw(LINES-4, 2 + ((2+14)*((i-1)/2)), COMMANDS[i]);
+                    attroff(A_BOLD);
+                    attroff(A_STANDOUT); 
+                    mvprintw(LINES-4, 4 + ((2+14)*((i-1)/2)), MEANINGS[i]);
                 }
 
                 // Each motor
@@ -224,27 +301,27 @@ namespace modules {
                 // Loop through all our motors
                 for (size_t i = 0; i < 20; ++i) {
                     // Everything defaults to unlocked, we add locks as we find them
-                    mvprintw(i + 6, 2, "U");
+                    mvprintw(i + 9, 2, "U");
 
                     // Output the motor name
                     attron(A_BOLD);
-                    mvprintw(i + 6, 4, MOTOR_NAMES[i]);
+                    mvprintw(i + 9, 4, MOTOR_NAMES[i]);
                     attroff(A_BOLD);
 
                     // Everything defaults to 0 angle and gain (unless we find one)
-                    mvprintw(i + 6, 26, "Angle:  -.---  Gain: ---.-");
+                    mvprintw(i + 9, 26, "Angle: -.--- Gain: ---.-");
                 }
 
                 for(auto& target : script.frames[frame].targets) {
                     // Output that this frame is locked (we shuffle the head to the top of the list)
-                    mvprintw(((static_cast<int>(target.id) + 2) % 20) + 6, 2, "L");
+                    mvprintw(((static_cast<int>(target.id) + 2) % 20) + 9, 2, "L");
 
                     // Output this frames gain and angle
-                    mvprintw(((static_cast<int>(target.id) + 2) % 20) + 6, 26, "Angle: %+.3f  Gain: %5.1f", target.position, target.gain);
+                    mvprintw(((static_cast<int>(target.id) + 2) % 20) + 9, 26, "Angle: %+.3f Gain: %5.1f", target.position, target.gain);
                 }
 
                 // Highlight our selected point
-                mvchgat(selection + 6, angleOrGain ? 26 : 41, angleOrGain ? 13 : 11, A_STANDOUT, 0, nullptr);
+                mvchgat(selection + 9, angleOrGain ? 26 : 41, angleOrGain ? 13 : 11, A_STANDOUT, 0, nullptr);
 
                 // We finished building
                 refresh();
@@ -358,10 +435,10 @@ namespace modules {
             void ScriptTuner::editSelection() {
 
                 // Erase our old text
-                mvprintw(selection + 6, angleOrGain ? 33 : 46, "      ");
+                mvprintw(selection + 9, angleOrGain ? 33 : 46, " ");
 
                 // Move to our point
-                move(selection + 6, angleOrGain ? 33 : 46);
+                move(selection + 9, angleOrGain ? 33 : 46);
 
                 // Get the users input
                 std::string result = userInput();
@@ -397,7 +474,7 @@ namespace modules {
                             num = utility::math::angle::normalizeAngle(num);
                             /*num = fmod(num + M_PI, M_PI * 2);
                             if (num < 0)
-                                num += M_PI * 2;
+                            num += M_PI * 2;
                             num -= M_PI;*/
 
                             it->position = num;
@@ -425,7 +502,92 @@ namespace modules {
                 running = false;
                 endwin();
             }
+
+/*            void ScriptTuner::help() {
+                move(29,2);
+                //make backspace work
+                curs_set(true);
+                std::string tempcommand = userInput();
+
+                if (tempcommand == "help") {
+                    WINDOW *newwin(20,15,0,0);
+                    initscr ();
+                    cbreak ();
+                    keypad();
+
+
+
+                }
+                else if (tempcommand == "longhelp") {
+
+
+
+                }
+                else {
+                    refreshView(); //need this??
+                }
+
+                curs_set(false);
+
+            }
+
+
+*/
+
+            //emits a message so motion can pick up the script
+            void ScriptTuner::playScript() {
+                emit(std::make_unique<ExecuteScript>(script));
+            }
+
+            //allows user to jump to a specific frame without engaging the motors
+            void ScriptTuner::jumpToFrame() {
+                //places cursor
+                move(5, 17);
+                //makes cursor visible
+                curs_set(true);
+                std::string tempframe = userInput();
+
+
+                //checks user input is a number and converts it to a number    
+                if(!tempframe.empty() && tempframe.size() <= 4) {
+                    try {
+                        int tempframe2 = stoi(tempframe);
+                        //makes tempframe2 always positive
+                        if(tempframe2 <= 0) {
+                            tempframe2=-1*tempframe2;
+
+                        }
+                        else {
+                            tempframe2=tempframe2;
+                        }
+                        //checks user input is within correct range
+                        if(tempframe2 <= script.frames.size()) {
+
+                            frame = tempframe2 - 1;
+                        }
+                        else {
+                            beep();                        
+                        }
+                    }
+                    catch(std::invalid_argument) {
+                        beep();
+                    }
+                }
+                curs_set(false);               
+            }
+
+
+//            void userLoadScript() {
+//                //make scripttuner independent of path
+//                move(6,13);
+//                curs_set(true);
+//                std::string tempscript = userInput();
+//
+//                if
+//            }
+
             
+
         }  // tools
     }  // behaviours
 }  // modules

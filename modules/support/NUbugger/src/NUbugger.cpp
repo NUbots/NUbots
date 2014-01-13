@@ -1,3 +1,4 @@
+
 /*
  * This file is part of NUbugger.
  *
@@ -26,6 +27,7 @@
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/Image.h"
 #include "messages/vision/ClassifiedImage.h"
+#include "messages/localisation/FieldObject.h"
 #include "utility/NUbugger/NUgraph.h"
 
 #include "utility/image/ColorModelConversions.h"
@@ -263,7 +265,7 @@ namespace modules {
                 std::string ret_val(demangled_name);
                 free(res);*/
 
-				/*log<NUClear::DEBUG>("testing! ", demangled_name);*/
+				/*NUClear::log<NUClear::DEBUG>("testing! ", demangled_name);*/
 				
 				int status = -4; // some arbitrary value to eliminate the compiler warning
 				std::unique_ptr<char, void(*)(void*)> res {
@@ -365,6 +367,28 @@ namespace modules {
 
 				send(message);
 				
+			});
+
+			on<Trigger<messages::localisation::FieldObject>>([this](const messages::localisation::FieldObject& field_object) {
+				Message message;
+
+				message.set_type(Message::LOCALISATION);
+				message.set_utc_timestamp(std::time(0));
+
+				auto* localisation = message.mutable_localisation();
+				auto* api_ball = localisation->add_field_object();
+
+				api_ball->set_name(field_object.name);
+				api_ball->set_wm_x(field_object.wm_x);
+				api_ball->set_wm_y(field_object.wm_y);
+				api_ball->set_sd_x(field_object.sd_x);
+				api_ball->set_sd_y(field_object.sd_y);
+				api_ball->set_sr_xx(field_object.sr_xx);
+				api_ball->set_sr_xy(field_object.sr_xy);
+				api_ball->set_sr_yy(field_object.sr_yy);
+				api_ball->set_lost(field_object.lost);
+
+				send(message);
 			});
 
 			// When we shutdown, close our publisher

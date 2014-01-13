@@ -1,5 +1,5 @@
-name    'nubots/zmq3'
-version '0.1.0'
+name    'nubots/nubugger'
+version '0.0.1'
 source 'UNKNOWN'
 author 'nubots'
 license 'Apache License, Version 2.0'
