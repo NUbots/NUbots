@@ -7,7 +7,7 @@ namespace modules {
 
         Goal::Goal(const VisionKinematics& visionKinematics, messages::vision::Goal::Type id, const Quad &corners, bool known) {
             m_goalType = id;
-            m_corners = corners;
+            ;
             m_known = known;
 
             m_location.screenCartesian = corners.getBottomCentre();

@@ -87,13 +87,15 @@ namespace modules {
 			arma::vec2 br;													//! @variable The bottom-right of the Quad.
 			arma::vec2 tr;													//! @variable The top-right of the Quad.
 			arma::vec2 tl;													//! @variable The top-left of the Quad.
-		};
-		
-		//! @brief output stream operator.
-		std::ostream& operator<< (std::ostream& output, const Quad& quad);
+
+			//! @brief output stream operator.
+		friend std::ostream& operator<< (std::ostream& output, const Quad& quad);
 		
 		//! @brief output stream operator for a vector of goals.
-		std::ostream& operator<< (std::ostream& output, const std::vector<Quad>& quads);
+		friend std::ostream& operator<< (std::ostream& output, const std::vector<Quad>& quads);
+		};
+		
+		
 
 	}
 }

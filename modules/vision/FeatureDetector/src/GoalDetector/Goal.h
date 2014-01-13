@@ -26,9 +26,9 @@
 
 #include "messages/vision/VisionObjects.h"
 
-#include "VisionFieldObject.h"
-#include "Quad.h"
-#include "VisionKinematics.h"
+#include "../VisionFieldObject.h"
+#include "../Quad.h"
+#include "../VisionKinematics.h"
 #include "utility/math/Line.h"
 
 namespace modules {

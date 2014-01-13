@@ -34,12 +34,12 @@ namespace modules {
             arma::vec3 neckRelativeRadial;
         } NUPoint;
 
-        std::ostream& operator<< (std::ostream& stream, const NUPoint& point) {
+       /* std::ostream& operator<< (std::ostream& stream, const NUPoint& point) {
             stream << point.screenCartesian << "  " << point.screenAngular << "  " << point.groundCartesian << "  " << point.neckRelativeRadial;
 
             return stream;
         }
-
+*/
     }
 }
 

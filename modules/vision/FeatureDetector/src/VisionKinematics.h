@@ -62,9 +62,11 @@ namespace modules {
                 return m_imageSize;
             }
 
-        private:
+            
             //! Calculate the field of view and effective camera distance in pixels.
             void setCamParams(arma::vec2 imagesize, arma::vec2 fov);
+
+        private:
 
             void setSensors(double headPitch, double headYaw, double bodyRoll, double bodyPitch, arma::vec3 neckPosition);
 

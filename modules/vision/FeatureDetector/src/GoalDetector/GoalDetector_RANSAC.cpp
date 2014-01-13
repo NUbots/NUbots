@@ -303,11 +303,11 @@ namespace modules {
                 Goal goal(visionKinematics);
                 
 				if (crossbar.getCentre()[0] < candidates.front().getCentre()[0]) {
-                    goal = Goal(visionKinematics, messages::vision::Goal::Type::RIGHT, candidates);
+                    goal = Goal(visionKinematics, messages::vision::Goal::Type::RIGHT, candidates.front());
 				}
 				
 				else {
-                    goal = Goal(visionKinematics, messages::vision::Goal::Type::LEFT, candidates);
+                    goal = Goal(visionKinematics, messages::vision::Goal::Type::LEFT, candidates.front());
 				}
 
                 /*goal.setParameters(THROWOUT_SHORT_GOALS, 
@@ -320,10 +320,11 @@ namespace modules {
                                    GOAL_WIDTH, 
                                    GOAL_DISTANCE_METHOD,
                                    EDGE_OF_SCREEN_MARGIN);*/
-                return std::move( std::unique_ptr<std::vector<Goal>>(  std::vector<Goal>(1, goal)  ) );
+                
+                return std::move(  std::unique_ptr<std::vector<Goal>>(  new std::vector<Goal>(1, goal)  )  );
 			}
 			
-            return assignGoals(candidates);
+            return assignGoals(visionKinematics, candidates);
 		}
 
         std::unique_ptr<std::vector<Goal> > GoalDetector_RANSAC::assignGoals(const VisionKinematics& visionKinematics, const std::list<Quad>& candidates) const {
@@ -331,7 +332,7 @@ namespace modules {
             std::unique_ptr<std::vector<Goal> > goals = std::unique_ptr<std::vector<Goal>>(new std::vector<Goal>());
 
             if (candidates.size() == 2) {
-                Goal leftPost, rightPost;
+                Goal leftPost(visionKinematics), rightPost(visionKinematics);
 
                 //there are exactly two candidates, identify each as left or right
                 Quad post1 = candidates.front();
@@ -419,11 +420,11 @@ namespace modules {
 		}
 		
         void GoalDetector_RANSAC::mergeClose(std::list<Quad>& posts, double widthMultipleToMerge) {
-            std::list<Quad>::iterator a = posts.begin(),
+            std::list<Quad>::iterator a = posts.begin();
             std::list<Quad>::iterator b;
             
             for (std::list<Quad>::iterator a = posts.begin(); a != posts.end(); a++) {
-                for (std::list<Quad>::iterator b = (++a); b != posts.end(); /* Iteration done by for loop */ ) {
+                for (std::list<Quad>::iterator b = (++a)/*Init b as a+1.*/; b != posts.end(); /* Iteration done by for loop */ ) {
                     // If the posts overlap.
                     // Or if their centres are horizontally closer than the largest widths multiplied by widthMultipleToMerge.
                     if (a->overlapsHorizontally(*b) ||
@@ -436,7 +437,7 @@ namespace modules {
 
                         tl << std::min(a->getTopLeft()[0],     b->getTopLeft()[0])     << std::min(a->getTopLeft()[1],     b->getTopLeft()[1]);
                         tr << std::min(a->getTopRight()[0],    b->getTopRight()[0])    << std::min(a->getTopRight()[1],    b->getTopRight()[1]);
-                        bl << std::max(a->getBottomLeft()[0],  b->getBottomleft()[0])  << std::max(a->getBottomLeft()[1],  b->getBottomLeft()[1]);
+                        bl << std::max(a->getBottomLeft()[0],  b->getBottomLeft()[0])  << std::max(a->getBottomLeft()[1],  b->getBottomLeft()[1]);
                         br << std::max(a->getBottomRight()[0], b->getBottomRight()[0]) << std::max(a->getBottomRight()[1], b->getBottomRight()[1]);
 
                         // Replace original two quads with the new one.
@@ -454,9 +455,9 @@ namespace modules {
         void GoalDetector_RANSAC::removeInvalid(std::list<Quad>& posts) {
             std::list<Quad>::iterator it = posts.begin();
 
-            for (std::list<Quad>::iterator psot = posts.begin(); post != posts.end(); /* Iteration done in for loop */ ) {
+            for (std::list<Quad>::iterator post = posts.begin(); post != posts.end(); /* Iteration done in for loop */ ) {
                 // Remove all posts whos' aspect ratios are too low.
-                if (post->aspectRatio() < GOAL_HEIGHT_TO_WIDTH_RATION_MIN) {
+                if (post->aspectRatio() < GOAL_HEIGHT_TO_WIDTH_RATIO_MIN) {
                     post = posts.erase(post);
                 }
 

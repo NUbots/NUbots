@@ -28,11 +28,11 @@
 #include "messages/vision/VisionObjects.h"
 
 #include "Goal.h"
-#include "Quad.h"
-#include "VisionKinematics.h"
-#include "LSFittedLine.h"
-#include "RANSAC/RANSAC.h"
-#include "RANSAC/RANSACLine.h"
+#include "../Quad.h"
+#include "../VisionKinematics.h"
+#include "../LSFittedLine.h"
+#include "../RANSAC/RANSAC.h"
+#include "../RANSAC/RANSACLine.h"
 
 namespace modules {
 	namespace vision {

@@ -23,7 +23,7 @@
 #include <vector>
 #include <armadillo>
 
-#include "NUPoint.h"
+#include "../NUPoint.h"
 
 namespace modules {
     namespace vision {

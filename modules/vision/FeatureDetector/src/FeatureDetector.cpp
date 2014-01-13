@@ -98,46 +98,46 @@ namespace modules {
             // TODO: on<Trigger<Configuration<FieldPointDetectorConfig>>>().
             // TODO: on<Trigger<Configuration<ObstalceDetectorConfig>>>().
             // TODO: Ensure all config files are up to date and include constants for the appropriate subclasses.
-            on<Trigger<Configuration<BallDetectorConfig>>>([this](const Configuration<BallDetectorConfig>& constants) {
-                    DISTANCE_METHOD distanceMethod;
-                    std::string BALL_DISTANCE_METHOD = constants.config["BALL_DISTANCE_METHOD"];
+            // on<Trigger<Configuration<BallDetectorConfig>>>([this](const Configuration<BallDetectorConfig>& constants) {
+            //         DISTANCE_METHOD distanceMethod;
+            //         std::string BALL_DISTANCE_METHOD = constants.config["BALL_DISTANCE_METHOD"];
 
-                    if (BALL_DISTANCE_METHOD.compare("WIDTH") == 0) {
-                        distanceMethod = DISTANCE_METHOD::WIDTH;
-                    }
+            //         if (BALL_DISTANCE_METHOD.compare("WIDTH") == 0) {
+            //             distanceMethod = DISTANCE_METHOD::WIDTH;
+            //         }
                     
-                    else if (BALL_DISTANCE_METHOD.compare("D2P") == 0) {
-                        distanceMethod = DISTANCE_METHOD::D2P;
-                    }
+            //         else if (BALL_DISTANCE_METHOD.compare("D2P") == 0) {
+            //             distanceMethod = DISTANCE_METHOD::D2P;
+            //         }
 
-                    else if (BALL_DISTANCE_METHOD.compare("AVERAGE") == 0) {
-                        distanceMethod = DISTANCE_METHOD::AVERAGE;
-                    }
+            //         else if (BALL_DISTANCE_METHOD.compare("AVERAGE") == 0) {
+            //             distanceMethod = DISTANCE_METHOD::AVERAGE;
+            //         }
 
-                    else if (BALL_DISTANCE_METHOD.compare("LEAST") == 0) {
-                        distanceMethod = DISTANCE_METHOD::LEAST;
-                    }
+            //         else if (BALL_DISTANCE_METHOD.compare("LEAST") == 0) {
+            //             distanceMethod = DISTANCE_METHOD::LEAST;
+            //         }
 
-                    else {
-                        distanceMethod = DISTANCE_METHOD::WIDTH;
-                    }
+            //         else {
+            //             distanceMethod = DISTANCE_METHOD::WIDTH;
+            //         }
 
-/*
-                    m_ballDetector.setParameters(constants.config["BALL_EDGE_THRESHOLD"],
-                                                 constants.config["BALL_ORANGE_TOLERANCE"],
-                                                 constants.config["BALL_MIN_PERCENT_ORANGE"],
-                                                 constants.config["THROWOUT_ON_ABOVE_KIN_HOR_BALL"],
-                                                 constants.config["MAX_DISTANCE_METHOD_DISCREPENCY_BALL"],
-                                                 constants.config["THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL"],
-                                                 constants.config["THROWOUT_SMALL_BALLS"],
-                                                 constants.config["MIN_BALL_DIAMETER_PIXELS"],
-                                                 constants.config["THROWOUT_DISTANT_BALLS"],
-                                                 constants.config["MAX_BALL_DISTANCE"],
-                                                 constants.config["BALL_WIDTH"],
-                                                 distanceMethod, 
-                                                 m_visionKinematics);
-                                                 */
-            });
+
+            //         m_ballDetector.setParameters(constants.config["BALL_EDGE_THRESHOLD"],
+            //                                      constants.config["BALL_ORANGE_TOLERANCE"],
+            //                                      constants.config["BALL_MIN_PERCENT_ORANGE"],
+            //                                      constants.config["THROWOUT_ON_ABOVE_KIN_HOR_BALL"],
+            //                                      constants.config["MAX_DISTANCE_METHOD_DISCREPENCY_BALL"],
+            //                                      constants.config["THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL"],
+            //                                      constants.config["THROWOUT_SMALL_BALLS"],
+            //                                      constants.config["MIN_BALL_DIAMETER_PIXELS"],
+            //                                      constants.config["THROWOUT_DISTANT_BALLS"],
+            //                                      constants.config["MAX_BALL_DISTANCE"],
+            //                                      constants.config["BALL_WIDTH"],
+            //                                      distanceMethod, 
+            //                                      m_visionKinematics);
+                                                 
+            // });
             
             on<Trigger<Configuration<GoalDetectorConfig>>>([this](const Configuration<GoalDetectorConfig>& constants) {
                     RANSAC_SELECTION_METHOD selectionMethod;
@@ -177,7 +177,7 @@ namespace modules {
                         selectionMethod = RANSAC_SELECTION_METHOD::LargestConsensus;
                     }
 
-                    /*
+                    
                     m_goalDetector.setParameters(constants.config["MINIMUM_POINTS"],
                                                  constants.config["MAX_ITERATIONS_PER_FITTING"],
                                                  constants.config["CONSENSUS_THRESHOLD"],
@@ -198,7 +198,7 @@ namespace modules {
                                                  constants.config["GOAL_WIDTH"],
                                                  distanceMethod,
                                                  constants.config["EDGE_OF_SCREEN_MARGIN"]);
-                                                 */
+                                                 
             });
 
             on<Trigger<Configuration<ObstacleDetectorConfig>>>([this](const Configuration<ObstacleDetectorConfig>& constants) {
@@ -243,13 +243,15 @@ namespace modules {
             m_detectGoals =
 
             */ 
-            on<Trigger<ClassifiedImage>, With<DarwinSensors>>([this](const ClassifiedImage& classifiedImage) {
+            on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
 
                 if (classifiedImage.matchedHorizontalSegments.count(messages::vision::GOAL_COLOUR) &&
                     classifiedImage.matchedVerticalSegments.count(messages::vision::GOAL_COLOUR)) {
-                    emit(std::move(m_goalDetector.run(m_visionKinematics,
-                                                      classifiedImage.matchedHorizontalSegments.at(messages::vision::GOAL_COLOUR), 
-                                                      classifiedImage.matchedVerticalSegments.at(messages::vision::GOAL_COLOUR))));
+                    emit(
+                        m_goalDetector.run(m_visionKinematics,
+                                           classifiedImage.matchedHorizontalSegments.at(messages::vision::GOAL_COLOUR), 
+                                           classifiedImage.matchedVerticalSegments.at(messages::vision::GOAL_COLOUR))
+                        );
                 }
             });
 /*
