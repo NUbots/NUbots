@@ -27,6 +27,7 @@
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/Image.h"
 #include "messages/vision/ClassifiedImage.h"
+#include "messages/vision/VisionObjects.h"
 #include "messages/localisation/FieldObject.h"
 #include "utility/NUbugger/NUgraph.h"
 
@@ -40,6 +41,7 @@ using utility::NUbugger::graph;
 using std::chrono::duration_cast;
 using std::chrono::microseconds;
 using messages::support::NUbugger::proto::Message;
+using messages::vision::Goal;
 
 namespace modules {
 	namespace support {
@@ -367,6 +369,34 @@ namespace modules {
 
 				send(message);
 				
+			});
+
+			on<Trigger<std::vector<Goal>>>([this](const std::vector<Goal> goals){
+				Message message;
+
+				message.set_type(Message::VISION);
+				message.set_utc_timestamp(std::time(0));
+
+				Message::Vision* api_vision = message.mutable_vision();
+
+				for (auto& goal : goals){
+					Message::VisionFieldObject* api_goal = api_vision->add_vision_object();
+
+					api_goal->set_shape_type(Message::VisionFieldObject::QUAD);
+					api_goal->set_goal_type(Message::VisionFieldObject::GoalType(int(goal.type)));
+					api_goal->set_name("Goal");
+					api_goal->set_width(goal.sizeOnScreen[0]);
+					api_goal->set_height(goal.sizeOnScreen[1]);
+
+					for(auto& point : goal.screen_quad){
+						api_goal->add_points(point[0]);
+						api_goal->add_points(point[1]);
+					}
+					for(auto& coord : goal.sphericalFromNeck){
+						api_goal->add_measured_relative_position(coord);
+					}
+				}
+				send(message);
 			});
 
 			on<Trigger<messages::localisation::FieldObject>>([this](const messages::localisation::FieldObject& field_object) {

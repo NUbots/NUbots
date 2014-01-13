@@ -42,17 +42,17 @@ namespace modules {
 				//std::cout<< "Loading LUT."<<std::endl;
 
 				std::vector<std::string> LUTLocations = locations.config["DEFAULT_LOCATION"];
+				LUTs.clear();
+				LUTs.reserve(LUTLocations.size());
 
 				for (auto LUTLocation : LUTLocations) {
 					LookUpTable LUT;
-					bool loaded = LUT.loadLUTFromFile(LUTLocation);
+					LUTs.push_back(LUT);
+					bool loaded = LUTs.back().loadLUTFromFile(LUTLocation);
 
-					if(loaded) {
-						LUTs.push_back(LUT);
-						//std::cout<< "Finished Config Loading successfully."<<std::endl;
-					}
+					
 
-					else {
+					if(!loaded) {
 						
 						std::cout << "Error Loading LUT: " << LUTLocation << std::endl;
 						NUClear::log<NUClear::ERROR>("LUT ", LUTLocation, " has not loaded successfully." );
@@ -75,7 +75,9 @@ namespace modules {
 			on<Trigger<Configuration<ScanLinesConfig>>>([this](const Configuration<ScanLinesConfig>& constants) {
 				//std::cout<< "Loading ScanLines config."<<std::endl;
 				scanLines.setParameters(constants.config["HORIZONTAL_SCANLINE_SPACING"],
-										 constants.config["VERTICAL_SCANLINE_SPACING"]);
+										 constants.config["VERTICAL_SCANLINE_SPACING"],
+										 constants.config["APPROXIMATE_SEGS_PER_HOR_SCAN"],
+										 constants.config["APPROXIMATE_SEGS_PER_VERT_SCAN"]);
 				//std::cout<< "Finished Config Loading successfully."<<std::endl;
 			});
 			
@@ -83,45 +85,46 @@ namespace modules {
 			on<Trigger<Configuration<RulesConfig>>>([this](const Configuration<RulesConfig>& rules) {
 				//std::cout<< "Loading Rules config."<<std::endl;
 				segmentFilter.clearRules();
+				if(rules.config["USE_REPLACEMENT_RULES"]){
+					std::map<std::string, ConfigurationNode> replacementRules = rules.config["REPLACEMENT_RULES"];				
 
-				std::map<std::string, ConfigurationNode> replacementRules = rules.config["REPLACEMENT_RULES"];
-				std::map<std::string, ConfigurationNode> transitionRules = rules.config["TRANSITION_RULES"];
+					for (const auto& rule : replacementRules) {
+						//std::cout << "Loading Replacement rule : " << rule.first << std::endl;
+						
+						ColourReplacementRule r;
 
-				for (const auto& rule : replacementRules) {
-					//std::cout << "Loading Replacement rule : " << rule.first << std::endl;
-					
-					ColourReplacementRule r;
+						std::vector<unsigned int> before = rule.second["before"]["vec"];
+						std::vector<unsigned int> middle = rule.second["middle"]["vec"];
+						std::vector<unsigned int> after = rule.second["after"]["vec"];
 
-					std::vector<unsigned int> before = rule.second["before"]["vec"];
-					std::vector<unsigned int> middle = rule.second["middle"]["vec"];
-					std::vector<unsigned int> after = rule.second["after"]["vec"];
+						r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
+												rule.second["middle"]["colour"],
+												rule.second["after"]["colour"],
+												before[0],//min
+												before[1],//max, etc.
+												middle[0],
+												middle[1],
+												after[0],
+												after[1],
+												rule.second["replacement"]);
 
-					r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
-											rule.second["middle"]["colour"],
-											rule.second["after"]["colour"],
-											before[0],//min
-											before[1],//max, etc.
-											middle[0],
-											middle[1],
-											after[0],
-											after[1],
-											rule.second["replacement"]);
-
-					//Neat method which is broken due to config system
-					/*r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
-											rule.second["middle"]["colour"],
-											rule.second["after"]["colour"],
-											unint_32(rule.second["before"]["vec"][0]),//min
-											unint_32(rule.second["before"]["vec"][1]),//max, etc.
-											unint_32(rule.second["middle"]["vec"][0]),
-											unint_32(rule.second["middle"]["vec"][1]),
-											unint_32(rule.second["after"]["vec"][0]),
-											unint_32(rule.second["after"]["vec"][1]),
-											rule.second["replacement"]);*/
-					segmentFilter.addReplacementRule(r);
-					//std::cout<< "Finished Config Loading successfully."<<std::endl;
+						//Neat method which is broken due to config system
+						/*r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
+												rule.second["middle"]["colour"],
+												rule.second["after"]["colour"],
+												unint_32(rule.second["before"]["vec"][0]),//min
+												unint_32(rule.second["before"]["vec"][1]),//max, etc.
+												unint_32(rule.second["middle"]["vec"][0]),
+												unint_32(rule.second["middle"]["vec"][1]),
+												unint_32(rule.second["after"]["vec"][0]),
+												unint_32(rule.second["after"]["vec"][1]),
+												rule.second["replacement"]);*/
+						segmentFilter.addReplacementRule(r);
+						//std::cout<< "Finished Config Loading successfully."<<std::endl;
+					}
 				}
 
+				std::map<std::string, ConfigurationNode> transitionRules = rules.config["TRANSITION_RULES"];
 				for(const auto& rule : transitionRules) {
 					//std::cout << "Loading Transition rule : " << rule.first << std::endl;
 
@@ -163,13 +166,16 @@ namespace modules {
             	greenHorizon.calculateGreenHorizon(image, LUTs[currentLUTIndex]);
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> generateScanLines" << std::endl;
-            	std::vector<int> generatedScanLines = scanLines.generateScanLines(image, greenHorizon);
+            	std::vector<int> generatedScanLines;
+            	SegmentedRegion horizontalClassifiedSegments, verticalClassifiedSegments;
+
+            	scanLines.generateScanLines(image, greenHorizon, &generatedScanLines);
                 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyHorizontalScanLines" << std::endl;
-            	SegmentedRegion horizontalClassifiedSegments = scanLines.classifyHorizontalScanLines(image, generatedScanLines, LUTs[currentLUTIndex]);
+            	scanLines.classifyHorizontalScanLines(image, generatedScanLines, LUTs[currentLUTIndex], &horizontalClassifiedSegments);
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyVerticalScanLines" << std::endl;
-            	SegmentedRegion verticalClassifiedSegments = scanLines.classifyVerticalScanLines(image, greenHorizon, LUTs[currentLUTIndex]);
+            	scanLines.classifyVerticalScanLines(image, greenHorizon, LUTs[currentLUTIndex], &verticalClassifiedSegments);
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyImage" << std::endl;
             	std::unique_ptr<ClassifiedImage> classifiedImage = segmentFilter.classifyImage(horizontalClassifiedSegments, verticalClassifiedSegments);

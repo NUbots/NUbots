@@ -51,6 +51,9 @@ namespace messages {
 				RIGHT,
 				UNKNOWN
 			} type;
+
+			//Order convention: tr, br, bl, tl,
+			std::vector<arma::vec2> screen_quad;
 		};
 
 		class Obstacle : public VisionObject {

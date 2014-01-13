@@ -47,8 +47,10 @@ namespace modules {
 		    
 		    // variable declarations    
 		    std::vector<arma::vec2> horizon_points;
+		    horizon_points.reserve(1+width/SPACING);	//Reserve for optimisation
 		    std::vector<arma::vec2> thrown_points;
-	
+			thrown_points.reserve(1+width/SPACING);	//Reserve for optimisation
+
 		    int kin_hor_y;
 
 		    //For sampled pixel columns (vertical scans) sampled with period SPACING

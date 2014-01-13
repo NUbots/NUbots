@@ -44,30 +44,35 @@ message Message {
 	}
 
 	message VisionFieldObject {
-		enum Type {
+		enum ShapeType {
 			CIRCLE = 1;
-			RECTANGLE = 2;
+			QUAD = 2;
 			POLYGON = 3;
-			UNKNOWN = 4;
+			UNKNOWN_SHAPE = 4;
 		}
 
-		optional Type type = 1;
+		enum GoalType {
+			LEFT = 1;
+			RIGHT = 2;
+			UNKNOWN_GOAL = 3;
+		}
 
-		optional uint32 id = 2;
+		
+		required ShapeType shape_type = 1;
+		optional GoalType goal_type = 2;
 		optional string name = 3;
-		optional bool visible = 4;
 
-		optional float screen_x = 5;
-		optional float screen_y = 6;
+		optional float screen_x = 4;
+		optional float screen_y = 5;
 
-		optional float rotation = 7;
+		optional float rotation = 6;
 
-		optional uint32 radius = 8;
-		optional uint32 width = 9;
-		optional uint32 height = 10;
-		repeated uint32 points = 11;
+		optional uint32 radius = 7;
+		optional uint32 width = 8;
+		optional uint32 height = 9;
+		repeated uint32 points = 10;
 
-		repeated float measured_relative_position = 12;
+		repeated float measured_relative_position = 11; //Spherical
 	}
 
 	message VisionClassifiedSegment {
@@ -106,7 +111,7 @@ message Message {
 
 	message Vision {
 		optional Image image = 1;
-		repeated VisionFieldObject field_object = 2;
+		repeated VisionFieldObject vision_object = 2;
 		optional VisionClassifiedImage classified_image = 3;
 	}
 
