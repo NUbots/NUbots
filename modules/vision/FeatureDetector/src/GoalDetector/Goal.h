@@ -36,6 +36,7 @@ namespace modules {
 
         class Goal : public VisionFieldObject {
         public:
+            friend class GoalDetector_RANSAC;
             Goal(const VisionKinematics& visionKinematics, messages::vision::Goal::Type id = messages::vision::Goal::Type::UNKNOWN, const Quad& corners = Quad(), bool known = false);
 
             void setParameters(bool THROWOUT_SHORT_GOALS_, 
@@ -88,6 +89,7 @@ namespace modules {
               @return the distance to the goal in cm.
               */
         //    double distanceToGoal(double bearing, double elevation);
+        
 
             bool m_known;
 

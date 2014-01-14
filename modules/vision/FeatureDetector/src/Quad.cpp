@@ -152,6 +152,17 @@ namespace modules {
 			
 			return output;
 		}
+
+		std::vector<arma::vec2> Quad::getVertices(){
+			std::vector<arma::vec2> vert(4);
+
+    		vert[0] = tr;
+    		vert[1] = br;
+    		vert[2] = bl;
+    		vert[3] = tl;
+
+    		return vert;
+		}
 	}
 }
 

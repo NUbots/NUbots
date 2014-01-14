@@ -28,6 +28,8 @@ namespace modules {
 		using utility::configuration::ConfigurationNode;
 		using messages::vision::ClassifiedImage;
 		using messages::vision::SegmentedRegion;
+
+		using std::chrono::system_clock;
         
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), greenHorizon(), scanLines() { 
 			currentLUTIndex = 0;
@@ -184,6 +186,17 @@ namespace modules {
             	//std::cout << "LUTClassifier::on<Trigger<Image>> emit(std::move(classified_image));" << std::endl;
             	emit(std::move(classifiedImage));
             });
+
+			// on<Trigger<Image>>([this](const Image& image) {
+
+			// 	//NUClear::log("Waiting 100 milliseconds...");
+
+			// 	system_clock::time_point start = system_clock::now();
+
+			// 	while (std::chrono::duration_cast<std::chrono::milliseconds>(system_clock::now().time_since_epoch()) - 
+			// 			std::chrono::duration_cast<std::chrono::milliseconds>(start.time_since_epoch())  < std::chrono::milliseconds(3)){}
+
+			// });
         }
 
     }  // vision

@@ -80,7 +80,7 @@ namespace modules {
 	
 		// std::vector<ColourSegment> verticalSegments = ClassifiedImage::matched_vertical_segments[GOAL_COLOUR];
 		// std::vector<ColourSegment> horizontalSegments = ClassifiedImage::matched_horizontal_segments[GOAL_COLOUR];
-		std::unique_ptr<std::vector<Goal>> GoalDetector_RANSAC::run(const VisionKinematics& visionKinematics, const std::vector<ColourSegment>& horizontalSegments, 
+		std::unique_ptr<std::vector<messages::vision::Goal>> GoalDetector_RANSAC::run(const VisionKinematics& visionKinematics, const std::vector<ColourSegment>& horizontalSegments, 
                                                                     const std::vector<ColourSegment>& verticalSegments) {
 			std::list<Quad> quads, postCandidates;
 			std::pair<bool, Quad> crossbar(false, Quad());
@@ -189,7 +189,7 @@ namespace modules {
 				}
 			}
 
-			return std::move(posts);
+			return std::move(createGoalMessage(posts));
 		}
 
 		std::list<Quad> GoalDetector_RANSAC::buildQuadsFromLines(const std::vector<LSFittedLine>& startLines, 
@@ -465,6 +465,47 @@ namespace modules {
                     post++;
                 }
             }
+        }
+
+        std::unique_ptr<std::vector<messages::vision::Goal>> GoalDetector_RANSAC::createGoalMessage(const std::unique_ptr<std::vector<Goal>>& goal_posts){
+        	std::unique_ptr<std::vector<messages::vision::Goal>> goal_message = std::unique_ptr<std::vector<messages::vision::Goal>>(new std::vector<messages::vision::Goal>());
+
+        	for (auto& post : *goal_posts){
+        		goal_message->push_back(messages::vision::Goal());
+        		NUPoint goal_location;
+        		switch(post.GOAL_DISTANCE_METHOD){
+            		case (WIDTH) :
+            			goal_location = post.m_widthLocation;
+            			break;
+            		case (D2P) :
+            			goal_location = post.m_d2pLocation;
+            			break;
+            		case (AVERAGE) :
+            			//TODO: is this useful??
+            			goal_location = post.m_widthLocation;
+            			goal_location.neckRelativeRadial[0] = (goal_location.neckRelativeRadial[0]+post.m_d2pLocation.neckRelativeRadial[0])/2;
+            			break;
+            		case (LEAST) :
+            			goal_location = post.m_widthLocation;
+            			goal_location.neckRelativeRadial[0] = std::min(goal_location.neckRelativeRadial[0],post.m_d2pLocation.neckRelativeRadial[0]);
+            			break;
+        		}
+        		goal_message->back().sphericalFromNeck = goal_location.neckRelativeRadial;
+        		//goal_message->back().sphericalError = goal_location.
+        		goal_message->back().screenAngular = goal_location.screenAngular;
+        		goal_message->back().screenCartesian = goal_location.screenCartesian;
+        		goal_message->back().sizeOnScreen[0] = post.m_corners.getAverageWidth();
+        		goal_message->back().sizeOnScreen[1] = post.m_corners.getAverageHeight();
+
+        		//goal_message->back().timestamp = goal_location.
+        		
+        		goal_message->back().type = post.m_goalType;
+
+        		goal_message->back().screen_quad = post.m_corners.getVertices();
+
+        	}
+
+        	return goal_message;
         }
 
 	}

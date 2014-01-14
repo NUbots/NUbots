@@ -40,7 +40,7 @@ namespace modules {
 		class GoalDetector_RANSAC {
 		public:
 			GoalDetector_RANSAC();
-            std::unique_ptr<std::vector<Goal>> run(const VisionKinematics& visionKinematics, const std::vector<messages::vision::ColourSegment>& horizontalSegments, 
+            std::unique_ptr<std::vector<messages::vision::Goal>> run(const VisionKinematics& visionKinematics, const std::vector<messages::vision::ColourSegment>& horizontalSegments, 
                                                     const std::vector<messages::vision::ColourSegment>& verticalSegments);
 
             // TODO: Add in Kinematics horizon.
@@ -107,6 +107,8 @@ namespace modules {
             float GOAL_WIDTH;
             DISTANCE_METHOD GOAL_DISTANCE_METHOD;
             int EDGE_OF_SCREEN_MARGIN;
+
+            std::unique_ptr<std::vector<messages::vision::Goal>> createGoalMessage(const std::unique_ptr<std::vector<Goal>>& goal_posts);
 		};
 		
 	}

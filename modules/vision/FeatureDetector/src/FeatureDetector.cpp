@@ -81,11 +81,17 @@ namespace modules {
                 arma::vec3 BODY_POSITION_OFFSET;
                 arma::vec3 CAMERA_POSITION_OFFSET;
 
-                BODY_ANGLE_OFFSET << constants.config["BODY_ANGLE_OFFSET"];
-                CAMERA_ANGLE_OFFSET << constants.config["CAMERA_ANGLE_OFFSET"];
-                NECK_POSITION_OFFSET << constants.config["NECK_POSITION_OFFSET"];
-                BODY_POSITION_OFFSET << constants.config["BODY_POSITION_OFFSET"];
-                CAMERA_POSITION_OFFSET << constants.config["CAMERA_POSITION_OFFSET"];
+                std::vector<double> BODY_ANGLE_OFFSET_ = constants.config["BODY_ANGLE_OFFSET"];
+                std::vector<double> CAMERA_ANGLE_OFFSET_ = constants.config["CAMERA_ANGLE_OFFSET"];
+                std::vector<double> NECK_POSITION_OFFSET_ = constants.config["NECK_POSITION_OFFSET"];
+                std::vector<double> BODY_POSITION_OFFSET_ = constants.config["BODY_POSITION_OFFSET"];
+                std::vector<double> CAMERA_POSITION_OFFSET_ = constants.config["CAMERA_POSITION_OFFSET"];
+
+                BODY_ANGLE_OFFSET << BODY_ANGLE_OFFSET_[0] << BODY_ANGLE_OFFSET_[1];
+                CAMERA_ANGLE_OFFSET << CAMERA_ANGLE_OFFSET_[0] << CAMERA_ANGLE_OFFSET_[1] << CAMERA_ANGLE_OFFSET_[2];
+                NECK_POSITION_OFFSET << NECK_POSITION_OFFSET_[0] << NECK_POSITION_OFFSET_[1] << NECK_POSITION_OFFSET_[2];
+                BODY_POSITION_OFFSET << BODY_POSITION_OFFSET_[0] << BODY_POSITION_OFFSET_[1] << BODY_POSITION_OFFSET_[2];
+                CAMERA_POSITION_OFFSET << CAMERA_POSITION_OFFSET_[0] << CAMERA_POSITION_OFFSET_[1] << CAMERA_POSITION_OFFSET_[2];
 
                 m_visionKinematics.setParameters(constants.config["RADIAL_CORRECTION_COEFFICIENT"], 
                                             BODY_ANGLE_OFFSET, 
