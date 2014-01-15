@@ -27,17 +27,17 @@
 #include "messages/vision/ClassifiedImage.h"
 
 namespace modules{
-	namespace vision{
-		std::ostream& operator<< (std::ostream& output, const messages::vision::ColourSegment& c);
+    namespace vision{
+        std::ostream& operator<< (std::ostream& output, const messages::vision::ColourSegment& c);
         std::ostream& operator<< (std::ostream& output, const std::vector<messages::vision::ColourSegment>& c);
-		bool operator== (const messages::vision::ColourSegment& lhs, const messages::vision::ColourSegment& rhs);
-		class SegmentLogic{
-		public:
-			SegmentLogic();
+        bool operator== (const messages::vision::ColourSegment& lhs, const messages::vision::ColourSegment& rhs);
+        class SegmentLogic{
+        public:
+            SegmentLogic();
 
-        	static void setColourSegment(messages::vision::ColourSegment& colourSegment, const arma::vec2& start, const arma::vec2& end, const messages::vision::Colour& colour);
-	        static bool joinColourSegment(messages::vision::ColourSegment& colourSegment, const messages::vision::ColourSegment& other);
-		};
-	}
+            static void setColourSegment(messages::vision::ColourSegment& colourSegment, const arma::vec2& start, const arma::vec2& end, const messages::vision::Colour& colour);
+            static bool joinColourSegment(messages::vision::ColourSegment& colourSegment, const messages::vision::ColourSegment& other);
+        };
+    }
 }
 #endif

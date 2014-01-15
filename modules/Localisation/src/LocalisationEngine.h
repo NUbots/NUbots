@@ -24,8 +24,8 @@
 
 namespace modules {
     class LocalisationEngine {
-    	public:
-    	LocalisationEngine();
+        public:
+        LocalisationEngine();
     };
 }
 #endif

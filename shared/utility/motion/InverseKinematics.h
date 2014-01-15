@@ -29,15 +29,15 @@ namespace utility {
 namespace motion {
 namespace kinematics {
 
-		inline bool isInside(float t, float min, float max) {
-			return min <= max ? t >= min && t <= max : t >= min || t <= max;
-		}
+        inline bool isInside(float t, float min, float max) {
+            return min <= max ? t >= min && t <= max : t >= min || t <= max;
+        }
 
-		inline float limit(float t, float min, float max) {
-			return t < min ? min : t > max ? max : t;
-		}
+        inline float limit(float t, float min, float max) {
+            return t < min ? min : t > max ? max : t;
+        }
 
-		std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints(arma::mat44 target, bool isLeft);
+        std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints(arma::mat44 target, bool isLeft);
 
 } // kinematics
 }  // motion

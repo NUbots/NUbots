@@ -26,7 +26,7 @@ namespace modules {
     namespace motion {
 
         /**
-		 * TODO
+         * TODO
          * 
          * @author Trent Houliston
          */
@@ -34,7 +34,7 @@ namespace modules {
         private:
             
         public:
-			static constexpr const char* CONFIGURATION_PATH = "WalkEngine.json";
+            static constexpr const char* CONFIGURATION_PATH = "WalkEngine.json";
             explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
         };
     
