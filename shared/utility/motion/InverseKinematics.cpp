@@ -64,10 +64,14 @@ namespace kinematics {
         const float max = 1.0f;
 
         //!< TODO: Check if this cosLowerLeg shoud condition should be inverted.
+        
+        NUClear::log<NUClear::INFO>("Cos Knee: ", cosKnee, " Cos Lower Leg: ", cosLowerLeg, " min: ", min, " max: ", max);
+        
+        
         if (!isInside(cosKnee, min, max) || isInside(cosLowerLeg, min, max)) {
             cosKnee = limit(cosKnee, min, max);
             cosLowerLeg = limit(cosLowerLeg, min, max);
-            throw "Target angle unreachable";
+            throw std::runtime_error("Target angle unreachable");
         }
 
         float joint3 = PI - acos(cosKnee);
