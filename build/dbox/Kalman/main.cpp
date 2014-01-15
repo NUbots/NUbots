@@ -16,7 +16,7 @@ const double ANGULAR_FREQ = 0.05;
 int main() {  
     
     std::cout << "Kalman testing :)" << std::endl;
-    //IMUModel m; //yes, pointers arnt supposed to be used in
+    IMUModel m; //yes, pointers arnt supposed to be used in
     Kalman<IMUModel> k; //only use () when a constructor accepts a parameter!!!!
 
     //m.test();
@@ -33,7 +33,7 @@ int main() {
     
   
     //---------------------------------------------------------------------------------------------------------------
-    //return 0; //when your ready for the actual tests, uncomment this line
+    return 0; //when your ready for the actual tests, uncomment this line
     srand(time(0));
     std::cout << "Testing the kalman filter by sending in a sine wave, adding noise, then filtering it." << std::endl;
 
