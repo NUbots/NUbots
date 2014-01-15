@@ -1,4 +1,4 @@
-NUbots NUClearPort Project
+NUbots NUClearPort Project [![Build Status][travis-develop-image]][nuclearport-travis]
 ==========================
 
 The [NUClearPort][] project is an effort to port the [NUbots][]' [robocup][] 
@@ -63,6 +63,9 @@ The following is a guide to getting you set up and ready to contribute to the NU
 
 6. Make robots do awesome stuff!
 
+	Also, read the steps in the [NUClearPort Startup Guide][nuclearport-startup-guide] about
+	additional Vagrant config.
+
 	**Important:** Make sure to set your git identity correctly before committing to the project.
 	
 		$ git config --global user.name "Your Name"
@@ -70,9 +73,11 @@ The following is a guide to getting you set up and ready to contribute to the NU
 
 		$ git config --global color.ui auto
 
-
+[nuclearport-travis]:     https://travis-ci.org/nubots/NUClearPort                "NUClearPort's Travis Page"
+[travis-develop-image]:   https://travis-ci.org/nubots/NUClearPort.png?branch=develop "Travis-CI build status for the develop branch"
 [git]:                    http://git-scm.com/                                     "Git"
 [NUClearPort]:            https://github.com/nubots/NUClearPort                   "NUClearPort Repository"
+[nuclearport-startup-guide]: http://confluence.nubots.net/display/NUB/NUClearPort+Startup+Guide
 [NUbots]:                 http://nubots.net/                                      "NUbots"
 [robocup]:                https://github.com/nubots/robocup                       "Robocup"
 [NUClear]:                https://github.com/Fastcode/NUClear                     "NUClear"

@@ -1,0 +1,78 @@
+package messages.input.proto;
+
+message Sensors {
+
+    enum ServoID {
+        R_SHOULDER_PITCH    = 0;
+        L_SHOULDER_PITCH    = 1;
+        R_SHOULDER_ROLL     = 2;
+        L_SHOULDER_ROLL     = 3;
+        R_ELBOW             = 4;
+        L_ELBOW             = 5;
+        R_HIP_YAW           = 6;
+        L_HIP_YAW           = 7;
+        R_HIP_ROLL          = 8;
+        L_HIP_ROLL          = 9;
+        R_HIP_PITCH         = 10;
+        L_HIP_PITCH         = 11;
+        R_KNEE              = 12;
+        L_KNEE              = 13;
+        R_ANKLE_PITCH       = 14;
+        L_ANKLE_PITCH       = 15;
+        R_ANKLE_ROLL        = 16;
+        L_ANKLE_ROLL        = 17;
+        HEAD_PAN            = 18;
+        HEAD_TILT           = 19;
+    }
+
+    message Servo {
+        required uint32 error_flags = 1;
+
+        required ServoID id = 2;
+
+        optional bool enabled = 3;
+
+        optional float p_gain = 4;
+        optional float i_gain = 5;
+        optional float d_gain = 6;
+
+        optional float goal_position = 7;
+        optional float goal_speed = 8;
+        optional float torque_limit = 9;
+
+        optional float present_position = 10;
+        optional float present_speed = 11;
+
+        optional float load = 12;
+        optional float voltage = 13;
+        optional float temperature = 14;
+    }
+
+    message Accelerometer {
+        optional float x = 1;
+        optional float y = 2;
+        optional float z = 3;
+    }
+
+    message Gyroscope {
+        optional float x = 1;
+        optional float y = 2;
+        optional float z = 3;
+    }
+
+    message FSR {
+        optional float fsr1 = 1;
+        optional float fsr2 = 2;
+        optional float fsr3 = 3;
+        optional float fsr4 = 4;
+
+        optional float centre_x = 5;
+        optional float centre_y = 6;
+    }
+
+    optional Accelerometer accelerometer = 1;
+    optional Gyroscope gyroscope = 2;
+    optional FSR left_FSR = 3;
+    optional FSR right_FSR = 4;
+    repeated Servo servo = 5;
+}

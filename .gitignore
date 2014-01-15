@@ -60,4 +60,4 @@ doc/TSWLatexianTemp*
 tags
 *.swp
 /nbproject/
-
+.DS_Store

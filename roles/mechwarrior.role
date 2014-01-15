@@ -1,5 +1,6 @@
 ADD_ROLE(
     NAME mechwarrior
     MODULES
-        Platform::Darwin::HardwareIO
-        MechWarrior)
+        platform::darwin::HardwareIO
+        behaviours::MechWarrior
+)
