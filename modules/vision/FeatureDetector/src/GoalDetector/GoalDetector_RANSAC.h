@@ -27,6 +27,8 @@
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/vision/VisionObjects.h"
 
+#include "utility/math/Line.h"
+
 #include "Goal.h"
 #include "../Quad.h"
 #include "../VisionKinematics.h"

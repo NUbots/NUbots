@@ -66,10 +66,9 @@ namespace modules {
             //! Calculate the field of view and effective camera distance in pixels.
             void setCamParams(arma::vec2 imagesize, arma::vec2 fov);
 
-        private:
-
             void setSensors(double headPitch, double headYaw, double bodyRoll, double bodyPitch, arma::vec3 neckPosition);
 
+        private:
             void preCalculateTransforms();
 
             void screenToRadial3D(NUPoint &point, double distance) const;

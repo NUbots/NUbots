@@ -229,15 +229,17 @@ namespace modules {
                     imageSize[1] = config.config["imageHeight"];
 
                     m_visionKinematics.setCamParams(imageSize,FOV);
+
+                    m_visionKinematics.setSensors(0, 0, 0, 0, arma::vec3("0 0 0"));
             });
 
           /* TODO: Kinematics required here!!!
             on<Trigger<DarwinSensors>, With<FilteredKinematics!!!!!!>>([this](const DarwinSensors& sensors){
                 m_visionKinematics.setSensors(sensors.Servos.headTilt.presentPosition,
                                               sensors.Servos.headPan.presentPosition,
-                                              sensors.Servos.head.presentPosition,
-                                              sensors.Servos.headPan.presentPosition,
-                                              sensors.Servos.headPan.presentPosition,);
+                                              kin.bodyRoll,
+                                              kin.bodyPitch,
+                                              neckPosition);
 
             });
             */
@@ -249,7 +251,7 @@ namespace modules {
             m_detectGoals =
 
             */ 
-            on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
+            on<Trigger<ClassifiedImage>, Options<Single>>([this](const ClassifiedImage& classifiedImage) {
 
                 if (classifiedImage.matchedHorizontalSegments.count(messages::vision::GOAL_COLOUR) &&
                     classifiedImage.matchedVerticalSegments.count(messages::vision::GOAL_COLOUR)) {

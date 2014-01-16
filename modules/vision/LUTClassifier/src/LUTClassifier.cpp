@@ -161,7 +161,7 @@ namespace modules {
 				}
 			});
 
-            on<Trigger<Image>>([this](const Image& image) {
+            on<Trigger<Image>, Options<Single>>([this](const Image& image) {
             	/*std::vector<arma::vec2> green_horizon_points = */
             	//std::cout << "Image size = "<< image.width() << "x" << image.height() <<std::endl;
             	//std::cout << "LUTClassifier::on<Trigger<Image>> calculateGreenHorizon" << std::endl;

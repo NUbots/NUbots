@@ -378,12 +378,12 @@ namespace modules {
 				message.set_utc_timestamp(std::time(0));
 
 				Message::Vision* api_vision = message.mutable_vision();
-
+				std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : sending " << goals.size() << " goals to NUbugger." << std::endl;
 				for (auto& goal : goals){
 					Message::VisionFieldObject* api_goal = api_vision->add_vision_object();
 
 					api_goal->set_shape_type(Message::VisionFieldObject::QUAD);
-					api_goal->set_goal_type(Message::VisionFieldObject::GoalType(int(goal.type)));
+					api_goal->set_goal_type(Message::VisionFieldObject::GoalType(1+int(goal.type))); //+1 to account for zero vs one referencing in message buffer.
 					api_goal->set_name("Goal");
 					api_goal->set_width(goal.sizeOnScreen[0]);
 					api_goal->set_height(goal.sizeOnScreen[1]);
@@ -391,6 +391,7 @@ namespace modules {
 					for(auto& point : goal.screen_quad){
 						api_goal->add_points(point[0]);
 						api_goal->add_points(point[1]);
+						std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : adding quad point ( " << point[0] << " , " << point[1] << " )."<< std::endl;
 					}
 					for(auto& coord : goal.sphericalFromNeck){
 						api_goal->add_measured_relative_position(coord);
