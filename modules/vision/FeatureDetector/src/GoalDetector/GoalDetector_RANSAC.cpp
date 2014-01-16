@@ -83,7 +83,7 @@ namespace modules {
 		// std::vector<ColourSegment> horizontalSegments = ClassifiedImage::matched_horizontal_segments[GOAL_COLOUR];
 		std::unique_ptr<std::vector<messages::vision::Goal>> GoalDetector_RANSAC::run(const VisionKinematics& visionKinematics, const std::vector<ColourSegment>& horizontalSegments, 
                                                                     const std::vector<ColourSegment>& verticalSegments) {
-			std::cout<< "GoalDetector_RANSAC::run : Starting Goal Detection !!!!!!!!!!!!!!!!!!!!"<<std::endl;
+			//std::cout<< "GoalDetector_RANSAC::run : Starting Goal Detection !!!!!!!!!!!!!!!!!!!!"<<std::endl;
 			
 			
 			std::list<Quad> quads, postCandidates;
@@ -108,7 +108,7 @@ namespace modules {
                                                                                             MAX_FITTING_ATTEMPTS, 
                                                                                             SELECTION_METHOD);
 			
-			std::cout<< "GoalDetector_RANSAC::run : ransacResults for start points has size " << ransacResults.size() <<std::endl;
+			//std::cout<< "GoalDetector_RANSAC::run : ransacResults for start points has size " << ransacResults.size() <<std::endl;
 			for (auto& l : ransacResults) {
 				startLines.push_back(LSFittedLine(l.second));
 			}
@@ -120,7 +120,7 @@ namespace modules {
                                                                                             MAX_ITERATIONS_PER_FITTING,
                                                                                             MAX_FITTING_ATTEMPTS, 
                                                                                             SELECTION_METHOD);
-			std::cout<< "GoalDetector_RANSAC::run : ransacResults for end points has size " << ransacResults.size() <<std::endl; 
+			//std::cout<< "GoalDetector_RANSAC::run : ransacResults for end points has size " << ransacResults.size() <<std::endl; 
 			
 			for (auto& l : ransacResults) {
 				endLines.push_back(LSFittedLine(l.second));
@@ -137,11 +137,11 @@ namespace modules {
 			// Build candidates out of lines - this finds candidates irrespective of rotation - filtering must be done later.
 			quads = buildQuadsFromLines(startLines, endLines, RANSAC_MATCHING_TOLERANCE);
 
-			std::cout<< "GoalDetector_RANSAC::run : found " << quads.size()<< " quads culled to ";
+			//std::cout<< "GoalDetector_RANSAC::run : found " << quads.size()<< " quads culled to ";
 			
 			// Remove posts with invalid aspect ratio : check potential cross bars AND posts.
 			removeInvalid(quads);
-			std::cout << quads.size()<< " quad(s)." <<std::endl;
+			//std::cout << quads.size()<< " quad(s)." <<std::endl;
 
 
 			// Sort out potential crossbars and vertical posts (posts on too large of a lean will be removed).
@@ -167,7 +167,7 @@ namespace modules {
 				    if (!crossbar.first) {
 				        crossbar.first = true;
 				        crossbar.second = quad;
-				        std::cout<< "GoalDetector_RANSAC::run : crossbar found!"<<std::endl;
+				        //std::cout<< "GoalDetector_RANSAC::run : crossbar found!"<<std::endl;
 				    }
 				    
 				    else if (crossbar.second.area() < quad.area()) {
@@ -179,7 +179,7 @@ namespace modules {
 			// Only check upright posts for building candidates.
 			//TODO FIX SEGFAULT here:
 			//mergeClose(postCandidates, 1.5);
-			//std::cout<< "GoalDetector_RANSAC::run : merged to " << postCandidates.size()<< " candidates.";
+			////std::cout<< "GoalDetector_RANSAC::run : merged to " << postCandidates.size()<< " candidates.";
 
 			
 			// Generate actual goal from candidate posts.
@@ -192,7 +192,7 @@ namespace modules {
 				posts = assignGoals(visionKinematics, postCandidates);
 			}
 			
-			std::cout<< "GoalDetector_RANSAC::run : "<< posts->size() <<" posts assigned."<<std::endl;
+			//std::cout<< "GoalDetector_RANSAC::run : "<< posts->size() <<" posts assigned."<<std::endl;
 
 			// Improves bottom centre estimate using vertical transitions.
 			int numberOfBasesSet = 0;
@@ -208,11 +208,11 @@ namespace modules {
 				    }
 				}
 			}
-			std::cout<< "GoalDetector_RANSAC::run : "<<numberOfBasesSet <<" bases improved using segments."<<std::endl;
+			//std::cout<< "GoalDetector_RANSAC::run : "<<numberOfBasesSet <<" bases improved using segments."<<std::endl;
 			
 			std::unique_ptr<std::vector<messages::vision::Goal>> finalGoals = std::move(createGoalMessage(posts));
-			std::cout<< "GoalDetector_RANSAC::run : final number of goals : "<< finalGoals->size() << std::endl << std::endl;
-			std::cout<< "GoalDetector_RANSAC::run : Finishing Goal Detection !!!!!!!!!!!!!!!!!!!!"<<std::endl;
+			//std::cout<< "GoalDetector_RANSAC::run : final number of goals : "<< finalGoals->size() << std::endl << std::endl;
+			//std::cout<< "GoalDetector_RANSAC::run : Finishing Goal Detection !!!!!!!!!!!!!!!!!!!!"<<std::endl;
 			return std::move(finalGoals);
 		}
 
@@ -226,7 +226,7 @@ namespace modules {
 			// std::list can be shrunk.
 
 			if ((tolerance < 0) || (tolerance > 1)) {
-				std::cout << "GoalDetector_RANSAC::buildQuadsFromLines - tolerance must be in [0, 1]" << std::endl;
+				//std::cout << "GoalDetector_RANSAC::buildQuadsFromLines - tolerance must be in [0, 1]" << std::endl;
 				tolerance = 1;					// TODO: Pick a better action here? We used to throw.
 			}
 
@@ -295,7 +295,7 @@ namespace modules {
                                                                 const std::vector<LSFittedLine>& endLines, 
                                                                 std::vector<bool>& tried) {
 			if (endLines.size() != tried.size()) {
-				std::cout << "GoalDetector_RANSAC::getClosestUntriedLine - 'endLines' must match 'tried' in size" << std::endl;
+				//std::cout << "GoalDetector_RANSAC::getClosestUntriedLine - 'endLines' must match 'tried' in size" << std::endl;
 				return 0;					// TODO: Pick a better action here? We used to throw.
 			}
 
@@ -492,23 +492,34 @@ namespace modules {
         }
 
         std::unique_ptr<std::vector<messages::vision::Goal>> GoalDetector_RANSAC::createGoalMessage(const std::unique_ptr<std::vector<Goal>>& goal_posts){
+        	
         	std::unique_ptr<std::vector<messages::vision::Goal>> goal_message = std::unique_ptr<std::vector<messages::vision::Goal>>(new std::vector<messages::vision::Goal>());
 
         	for (auto& post : *goal_posts){
-        		goal_message->push_back(messages::vision::Goal());        		
-        		goal_message->back().sphericalFromNeck = post.m_location.neckRelativeRadial;
-        		//goal_message->back().sphericalError = goal_location.
-        		goal_message->back().screenAngular = post.m_location.screenAngular;
-        		goal_message->back().screenCartesian = post.m_location.screenCartesian;
-        		goal_message->back().sizeOnScreen[0] = post.m_corners.getAverageWidth();
-        		goal_message->back().sizeOnScreen[1] = post.m_corners.getAverageHeight();
+        		if(post.valid){
+	        		goal_message->push_back(messages::vision::Goal());        		
+	        		goal_message->back().sphericalFromNeck = post.m_location.neckRelativeRadial;
+	        		//goal_message->back().sphericalError = goal_location.
+	        		goal_message->back().screenAngular = post.m_location.screenAngular;
+	        		goal_message->back().screenCartesian = post.m_location.screenCartesian;
+	        		
+	        		goal_message->back().sizeOnScreen[0] = post.m_corners.getAverageWidth();
+	        		goal_message->back().sizeOnScreen[1] = post.m_corners.getAverageHeight();
 
-        		//goal_message->back().timestamp = goal_location.
-        		
-        		goal_message->back().type = post.m_goalType;
+	        		goal_message->back().sphericalError[0] = post.m_sphericalError[0];
+	        		goal_message->back().sphericalError[1] = post.m_sphericalError[1];
+	        		goal_message->back().sphericalError[2] = post.m_sphericalError[2];
 
-        		goal_message->back().screen_quad = post.m_corners.getVertices();
+	        		//goal_message->back().timestamp = goal_location.
+	        		
+	        		goal_message->back().type = post.m_goalType;
 
+	        		goal_message->back().screen_quad = post.m_corners.getVertices();
+
+	        		std::cout << "Emitting " << post << std::endl;
+	        	} else {
+	        		std::cout << "INVALID GOAL " << post << std::endl;
+	        	}
         	}
 
         	return goal_message;

@@ -105,7 +105,7 @@ namespace modules {
 					servo->set_temperature(sensors.servo[i].temperature);
 
 					/*if (sensors.servo[i].errorFlags > 0) {
-						std::cout << sensors.servo[i].errorFlags << std::endl;
+						//std::cout << sensors.servo[i].errorFlags << std::endl;
 					}*/
 				}
 
@@ -136,15 +136,15 @@ namespace modules {
 				rfsr->set_centre_y(sensors.fsr.right.centreY);
 
 				/*if (sensors.cm730ErrorFlags > 0) {
-					std::cout << sensors.cm730ErrorFlags << std::endl;
+					//std::cout << sensors.cm730ErrorFlags << std::endl;
 				}
 
 				if (sensors.fsr.left.errorFlags > 0) {
-					std::cout << sensors.fsr.left.errorFlags << std::endl;
+					//std::cout << sensors.fsr.left.errorFlags << std::endl;
 				}
 
 				if (sensors.fsr.right.errorFlags > 0) {
-					std::cout << sensors.fsr.right.errorFlags << std::endl;
+					//std::cout << sensors.fsr.right.errorFlags << std::endl;
 				}*/
 
 				emit(graph(
@@ -174,7 +174,7 @@ namespace modules {
 
 			on<Trigger<Image>, With<DarwinSensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image, const DarwinSensors&) {
 
-				//std::cout << "Image!" << std::endl;
+				////std::cout << "Image!" << std::endl;
 
 				Message message;
 				message.set_type(Message::VISION);
@@ -373,12 +373,12 @@ namespace modules {
 
 			on<Trigger<std::vector<Goal>>>([this](const std::vector<Goal> goals){
 				Message message;
-
+ 
 				message.set_type(Message::VISION);
 				message.set_utc_timestamp(std::time(0));
 
 				Message::Vision* api_vision = message.mutable_vision();
-				std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : sending " << goals.size() << " goals to NUbugger." << std::endl;
+				//std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : sending " << goals.size() << " goals to NUbugger." << std::endl;
 				for (auto& goal : goals){
 					Message::VisionFieldObject* api_goal = api_vision->add_vision_object();
 
@@ -387,11 +387,13 @@ namespace modules {
 					api_goal->set_name("Goal");
 					api_goal->set_width(goal.sizeOnScreen[0]);
 					api_goal->set_height(goal.sizeOnScreen[1]);
+					api_goal->set_screen_x(goal.screenCartesian[0]);
+					api_goal->set_screen_y(goal.screenCartesian[1]);
 
 					for(auto& point : goal.screen_quad){
 						api_goal->add_points(point[0]);
 						api_goal->add_points(point[1]);
-						std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : adding quad point ( " << point[0] << " , " << point[1] << " )."<< std::endl;
+						//std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : adding quad point ( " << point[0] << " , " << point[1] << " )."<< std::endl;
 					}
 					for(auto& coord : goal.sphericalFromNeck){
 						api_goal->add_measured_relative_position(coord);

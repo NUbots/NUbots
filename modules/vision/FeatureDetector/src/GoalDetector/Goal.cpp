@@ -259,11 +259,7 @@ namespace modules {
 
             else if (m_offSide) {
                 // We can only use d2p.
-                m_location.neckRelativeRadial = arma::vec3();
-
-                // TODO: Why am I commented out?
-                // m_location = d2pLocation;
-
+                m_location = m_d2pLocation;
                 return false;
             }
 
