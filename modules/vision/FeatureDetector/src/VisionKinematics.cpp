@@ -119,9 +119,6 @@ namespace modules {
             m_camVector = (headV2RobotRotation * CAMERA_POSITION_OFFSET) + m_neckPosition;
             m_camV2RobotRotation = headV2RobotRotation * cameraPitch_rot * cameraRoll_rot * cameraYaw_rot;
 
-            #undef ROLL
-            #undef PITCH
-            #undef YAW
         }
 
         void VisionKinematics::calculateRepresentationsFromPixelLocation(NUPoint& point, bool known_distance, double val) const {
