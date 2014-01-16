@@ -80,10 +80,11 @@ namespace modules {
         }
 
         void VisionKinematics::preCalculateTransforms() {
-            #define ROLL   0        // X-axis
-            #define PITCH  1        // Y-axis
-            #define YAW    2        // Z-axis
-
+            enum{ 
+                ROLL = 0,          // X-axis
+                PITCH = 1,         // Y-axis
+                YAW = 2       // Z-axis
+            };
             // Uses the following member variables:
             // m_headPitch, m_headYaw, m_bodyRoll, m_bodyPitch
 
@@ -140,9 +141,9 @@ namespace modules {
                 // Calculate the radial position relative to
                 point.neckRelativeRadial = distanceToPoint(point.screenCartesian, val);
             }
-
-            point.groundCartesian[0] = cos(point.neckRelativeRadial[2]) * cos(point.neckRelativeRadial[1]) * point.neckRelativeRadial[0];
-            point.groundCartesian[1] = cos(point.neckRelativeRadial[2]) * sin(point.neckRelativeRadial[1]) * point.neckRelativeRadial[0];
+            arma::vec3 cartesian = utility::math::coordinates::Spherical2Cartesian(point.neckRelativeRadial);
+            point.groundCartesian[0] = cartesian[0];
+            point.groundCartesian[1] = cartesian[1];
         }
 
         void VisionKinematics::calculateRepresentationsFromPixelLocation(std::vector<NUPoint>& points, bool knownDistance, double val) const {
