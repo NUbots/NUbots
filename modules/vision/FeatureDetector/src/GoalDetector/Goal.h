@@ -89,7 +89,9 @@ namespace modules {
               @return the distance to the goal in cm.
               */
         //    double distanceToGoal(double bearing, double elevation);
-        
+            
+            bool calculateSphericalError
+            (const VisionKinematics& visionKinematics);
 
             bool m_known;
 

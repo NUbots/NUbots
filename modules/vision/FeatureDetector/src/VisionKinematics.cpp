@@ -304,6 +304,14 @@ namespace modules {
             m_effectiveCameraDistancePixels = m_imageCentre[0] / m_tanHalfFOV[0];   //Checked to be correct Jake Fountain 2014
         }
 
+
+        double VisionKinematics::getD2PError(const NUPoint& location) const{
+            double declination_error = m_FOV[1]/m_imageSize[1];
+            double robot_height = std::abs(m_neckPosition(3,2));
+            double sin_elevation = std::sin(location.neckRelativeRadial[2]-arma::math::pi()); 
+            return declination_error*robot_height/(sin_elevation*sin_elevation);
+        }
+
     }
 }
         

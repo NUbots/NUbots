@@ -189,14 +189,29 @@ namespace modules {
                 }
             }
 
-            return (m_location.neckRelativeRadial[0] > 0.0);
+
+
+            return (calculateSphericalError(visionKinematics) && m_location.neckRelativeRadial[0] > 0.0);
         }
 
         /*! @brief Stream insertion operator for a single ColourSegment.
          *      The segment is terminated by a newline.
          */
         std::ostream& operator<< (std::ostream& output, const Goal& g) {
-            output << "Goal - " << std::endl;
+            switch(g.m_goalType){
+                case messages::vision::Goal::LEFT: {
+                        output << "Left Goal - " << std::endl;
+                        break;
+                }
+                case messages::vision::Goal::RIGHT: {
+                    output << "Right Goal - " << std::endl;
+                    break;                }
+                case messages::vision::Goal::UNKNOWN: {
+                    output << "Unknown Goal - " << std::endl;
+                    break;
+                }                   
+            }        
+            output << "Distance type = " << g.GOAL_DISTANCE_METHOD << std::endl;
             output << "\tpixelloc: " << g.m_location.screenCartesian << std::endl;
             output << "\tangularloc: " << g.m_location.screenAngular << std::endl;
             output << "\trelative field coords: " << g.m_location.neckRelativeRadial << std::endl;
@@ -218,6 +233,49 @@ namespace modules {
             }
 
             return output;
+        }
+
+        bool Goal::calculateSphericalError(const VisionKinematics& visionKinematics){
+            switch (GOAL_DISTANCE_METHOD) {
+                case D2P: {
+                    m_sphericalError[0] = visionKinematics.getD2PError(m_location);
+
+                    break;
+                }
+
+                case WIDTH: {
+                    m_sphericalError[0] = m_location.neckRelativeRadial[0]/m_sizeOnScreen[0]; //=d*dp/p (assuming error of dp=1 pixel in width)
+
+                    break;
+                }
+
+                case AVERAGE: {
+                    double width_error = m_location.neckRelativeRadial[0]/m_sizeOnScreen[0];
+                    double d2p_error = visionKinematics.getD2PError(m_location);
+
+                    m_sphericalError[0] = std::max(width_error,d2p_error);
+                    break;
+                }
+
+                case LEAST: {                   
+                    if(m_widthLocation.neckRelativeRadial[0]>m_d2pLocation.neckRelativeRadial[0]){
+                        m_sphericalError[0] = visionKinematics.getD2PError(m_location);
+                    } else {
+                        m_sphericalError[0] = m_location.neckRelativeRadial[0]/m_sizeOnScreen[0];
+                    }
+                    break;
+                }
+
+                default: {
+                    m_sphericalError[0] = m_location.neckRelativeRadial[0]/m_sizeOnScreen[0]; //=d*dp/p (assuming error of 1 pixel in width)
+
+                    break;
+                }
+            }
+
+            m_sphericalError[1] = visionKinematics.getFOV()[0]/visionKinematics.getImageSize()[0];  //Erordp =1 
+            m_sphericalError[2] = visionKinematics.getFOV()[1]/visionKinematics.getImageSize()[1];  //Erordp =1
+            return true;
         }
 
     }

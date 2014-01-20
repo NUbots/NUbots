@@ -178,7 +178,7 @@ namespace modules {
 			
 			// Only check upright posts for building candidates.
 			//TODO FIX SEGFAULT here:
-			//mergeClose(postCandidates, 1.5);
+			mergeClose(postCandidates, 1.5);
 			////std::cout<< "GoalDetector_RANSAC::run : merged to " << postCandidates.size()<< " candidates.";
 
 			
@@ -446,6 +446,7 @@ namespace modules {
         void GoalDetector_RANSAC::mergeClose(std::list<Quad>& posts, double widthMultipleToMerge) {
             std::list<Quad>::iterator a = posts.begin();
             std::list<Quad>::iterator b;
+
             
             for (std::list<Quad>::iterator a = posts.begin(); a != posts.end(); a++) {
                 for (std::list<Quad>::iterator b = (++a)/*Init b as a+1.*/; b != posts.end(); /* Iteration done inside the 'for' loop */ ) {
@@ -496,6 +497,7 @@ namespace modules {
         	std::unique_ptr<std::vector<messages::vision::Goal>> goal_message = std::unique_ptr<std::vector<messages::vision::Goal>>(new std::vector<messages::vision::Goal>());
 
         	for (auto& post : *goal_posts){
+        		if(post.valid){
         			goal_message->push_back(messages::vision::Goal());        		
 	        		goal_message->back().sphericalFromNeck = post.m_location.neckRelativeRadial;
 	        		//goal_message->back().sphericalError = goal_location.
@@ -514,10 +516,8 @@ namespace modules {
 	        		goal_message->back().type = post.m_goalType;
 
 	        		goal_message->back().screen_quad = post.m_corners.getVertices();
-        		if(post.valid){
+        		
 	        		std::cout << "Emitting " << post << std::endl;
-	        	} else {
-	        		std::cout << "INVALID GOAL " << post << std::endl;
 	        	}
         	}
 

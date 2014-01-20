@@ -63,6 +63,7 @@ namespace modules {
                 return m_imageSize;
             }
 
+            double getD2PError(const NUPoint& location) const;
             
             //! Calculate the field of view and effective camera distance in pixels.
             void setCamParams(arma::vec2 imagesize, arma::vec2 fov);
