@@ -24,6 +24,7 @@ namespace modules {
 
     }
 
+    /// Integrate time-dependent measurements on all objects
     void LocalisationEngine::TimeUpdate(time_t current_time) {
         ball_model_.TimeUpdate();
 
@@ -31,6 +32,7 @@ namespace modules {
             model.TimeUpdate();
     }
 
+    /// Estimate object positions based on measurements
     void LocalisationEngine::ObjectUpdate() {
 
     }
