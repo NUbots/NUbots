@@ -26,6 +26,14 @@ namespace modules {
     class LocalisationEngine {
     	public:
     	LocalisationEngine();
+
+        void RecordMeasurement(Measurement m, time_t timestamp);
+
+        void SwapMeasurementBuffers();
+
+        void TimeUpdate();
+
+        void ObjectUpdate();
     };
 }
 #endif
