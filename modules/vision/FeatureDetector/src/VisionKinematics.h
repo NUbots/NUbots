@@ -23,6 +23,7 @@
 #include <nuclear>
 #include <armadillo>
 #include <vector>
+#include <iostream>
 
 #include "utility/math/matrix.h"
 #include "utility/math/coordinates.h"
@@ -92,8 +93,9 @@ namespace modules {
             arma::vec2 m_FOV;               //!FOV in radians horizontally and vertically
             double m_effectiveCameraDistancePixels;
 
-            arma::mat m_ctgTransform;
-            bool m_ctgValid;              //! @variable Whether the ctgvector is valid.
+//WHERE IS THIS USED? WHAT IS IT FOR?
+            //arma::mat m_ctgTransform;
+            //bool m_ctgValid;              //! @variable Whether the ctgvector is valid.
         //    std::vector<float> m_ctVector;     //! @variable The camera transform vector.
         //    bool m_ctValid;               //! @variable Whether the ctvector is valid.
 

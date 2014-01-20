@@ -38,6 +38,7 @@ namespace modules {
             GOAL_WIDTH = GOAL_WIDTH_;
             GOAL_DISTANCE_METHOD = GOAL_DISTANCE_METHOD_; 
             EDGE_OF_SCREEN_MARGIN = EDGE_OF_SCREEN_MARGIN_;
+                     
         }
 
         void Goal::setBase(const VisionKinematics& visionKinematics,  arma::vec2 base) {
@@ -56,120 +57,6 @@ namespace modules {
         const Quad& Goal::getQuad() const {
             return m_corners;
         }
-
-
-
-        /*IS THIS METHOD USED ANYWHERE???!?!*/
-
-        /*!
-        *   @brief Updates the external field objects with this goal.
-        *   @param fieldobjects A pointer to the external field objects.
-        *   @param timestamp The current timestamp to apply to the field objects.
-        *
-        *   This method uses the id of the goal to determine where to place it, it also
-        *   includes no checks before placing them, and nor should it. For example, if this is 
-        *   called on multiple YellowLeftGoals then localisation will only see the last one.
-        */
-    	/*bool Goal::addToExternalFieldObjects(std::unique_ptr<std::vector<messages::vision::Goal>> goals) const{
-		    std::unique_ptr<std::vector<messages::vision::Goal>> temp = std::unique_ptr<std::vector<messages::vision::Goal>>(new std::vector<messages::vision::Goal>());
-
-		
-                temp->sphericalFromNeck = m_location.neckRelativeRadial;
-                temp->sphericalError = m_sphericalError;
-                temp->screenAngular = m_location.screenAngular;
-                temp->screenCartesian = m_location.screenCartesian;
-                temp->sizeOnScreen = m_sizeOnScreen;
-                temp->timestamp = NUClear::clock::now();
-
-                ball = std::move(temp);
-		
-
-            if (valid) {
-		    messages::vision::Goal newGoal;
-
-                switch(m_id) {
-                    case GOAL_L: {
-                        newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Left Yellow Post");
-                        newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
-                        newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
-
-                        break;
-                    }
-
-                    case GOAL_R: {
-                        newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Right Yellow Post");
-                        newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
-                        newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
-
-                        break;
-                    }
-
-                    case GOAL_U: {
-                        newAmbObj = AmbiguousObject(FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN, "Unknown Yellow Post");
-                        newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_LEFT_GOALPOST);
-                        newAmbObj.addPossibleObjectID(FieldObjects::FO_YELLOW_RIGHT_GOALPOST);
-                        newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_LEFT_GOALPOST);
-                        newAmbObj.addPossibleObjectID(FieldObjects::FO_BLUE_RIGHT_GOALPOST);
-
-                        break;
-                    }
-                    
-                    case GOAL_B_L: {
-                        fieldobjects->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].UpdateVisualObject(m_location.neckRelativeRadial, m_spericalError, 
-                                                                                                                     m_location.screenAngular, m_location.screenCartesian, m_sizeOnScreen,
-                                                                                                                     timestamp);
-
-                        return true;
-                    }
-                    
-                    case GOAL_B_R: {
-                        fieldobjects->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].UpdateVisualObject(m_location.neckRelativeRadial, m_spericalError, 
-                                                                                                                     m_location.screenAngular, m_location.screenCartesian, m_sizeOnScreen,
-                                                                                                                     timestamp);
-
-                        return true;
-                    }
-                    
-                    case GOAL_Y_L: {
-                        fieldobjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].UpdateVisualObject(m_location.neckRelativeRadial, m_spericalError, 
-                                                                                                                     m_location.screenAngular, m_location.screenCartesian, m_sizeOnScreen,
-                                                                                                                     timestamp);
-                        
-                        return true;
-                    }
-                    
-                    case GOAL_Y_R: {
-                        fieldobjects->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].UpdateVisualObject(m_location.neckRelativeRadial, m_spericalError, 
-                                                                                                                     m_location.screenAngular, m_location.screenCartesian, m_sizeOnScreen,
-                                                                                                                     timestamp);
-                        
-                        return true;
-                    }
-                    
-                    default: {
-                        // Invalid object - do not push to fieldobjects.
-                        std::cout << "Goal::addToExternalFieldObjects - attempt to add invalid Goal object id: " << VFOName(m_id) << std::endl;
-
-                        return false;
-                    }            
-                }
-
-                //update ambiguous goal post and add it to ambiguousFieldObjects
-                newAmbObj.UpdateVisualObject(m_location.neckRelativeRadial, m_spericalError, 
-                                             m_location.screenAngular, m_location.screenCartesian, m_sizeOnScreen,
-                                             timestamp);
-                        
-                fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
-
-                return true;
-            
-
-            else {
-                return false;
-            }
-        }
-*/
-        
 
         bool Goal::check() const {
             // Various throwouts here.
@@ -293,6 +180,12 @@ namespace modules {
 
                         break;
                     }
+
+                    default: {
+                        m_location = m_widthLocation;
+
+                        break;
+                    }
                 }
             }
 
@@ -309,6 +202,9 @@ namespace modules {
             output << "\trelative field coords: " << g.m_location.neckRelativeRadial << std::endl;
             output << "\tspherical error: " << g.m_sphericalError << std::endl;
             output << "\tsize on screen: " << g.m_sizeOnScreen;
+            output << "\tm_offTop: " << g.m_offTop << std::endl;
+            output << "\tm_offBottom: " << g.m_offBottom << std::endl;
+            output << "\tm_offSide: " << g.m_offSide << std::endl;
             return output;
         }
 

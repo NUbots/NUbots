@@ -118,18 +118,19 @@ namespace modules {
 
             m_camVector = (headV2RobotRotation * CAMERA_POSITION_OFFSET) + m_neckPosition;
             m_camV2RobotRotation = headV2RobotRotation * cameraPitch_rot * cameraRoll_rot * cameraYaw_rot;
+            
 
         }
 
         void VisionKinematics::calculateRepresentationsFromPixelLocation(NUPoint& point, bool known_distance, double val) const {
             // Calculate the radial position (relative to the camera vector) from the pixel position.
-            point.screenAngular[0] = atan((m_imageCentre[0] - point.screenCartesian[0]) * m_screenToRadialFactor[0]);
-            point.screenAngular[1] = atan((m_imageCentre[1] - point.screenCartesian[1]) * m_screenToRadialFactor[1]);
+            point.screenAngular[0] = atan( (m_imageCentre[0] - point.screenCartesian[0]) * m_screenToRadialFactor[0]);
+            point.screenAngular[1] = atan( (m_imageCentre[1] - point.screenCartesian[1]) * m_screenToRadialFactor[1]);
 
             if (known_distance) {
                 // In this case val represents known distance (for e.g. found by perspective comparison).
                 arma::vec3 imagePositionSpherical;
-                imagePositionSpherical << val << point.screenAngular[0] << point.screenAngular[1];
+                imagePositionSpherical << val << point.screenAngular[0] << arma::math::pi()/2-point.screenAngular[1];       //Changed to agree with standard convention for spherical coordinates(using declination)
                 point.neckRelativeRadial = utility::math::coordinates::Cartesian2Spherical(m_camV2RobotRotation * utility::math::coordinates::Spherical2Cartesian(imagePositionSpherical));
             }
 
@@ -140,7 +141,7 @@ namespace modules {
             }
             arma::vec3 cartesian = utility::math::coordinates::Spherical2Cartesian(point.neckRelativeRadial);
             point.groundCartesian[0] = cartesian[0];
-            point.groundCartesian[1] = cartesian[1];
+            point.groundCartesian[1] = cartesian[1];          
         }
 
         void VisionKinematics::calculateRepresentationsFromPixelLocation(std::vector<NUPoint>& points, bool knownDistance, double val) const {
@@ -300,7 +301,7 @@ namespace modules {
             m_screenToRadialFactor << (m_tanHalfFOV[0] / m_imageCentre[0]) << (m_tanHalfFOV[1] / m_imageCentre[1]);
             //m_screenToRadialFactor << (m_FOV[0] / m_imageCentre[0]) << (m_FOV[1] / m_imageCentre[1]);
 
-            m_effectiveCameraDistancePixels = m_imageCentre[0] / m_tanHalfFOV[0];
+            m_effectiveCameraDistancePixels = m_imageCentre[0] / m_tanHalfFOV[0];   //Checked to be correct Jake Fountain 2014
         }
 
     }

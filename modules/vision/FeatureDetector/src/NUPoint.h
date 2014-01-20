@@ -33,13 +33,6 @@ namespace modules {
             arma::vec2 groundCartesian;
             arma::vec3 neckRelativeRadial;
         } NUPoint;
-
-       /* std::ostream& operator<< (std::ostream& stream, const NUPoint& point) {
-            stream << point.screenCartesian << "  " << point.screenAngular << "  " << point.groundCartesian << "  " << point.neckRelativeRadial;
-
-            return stream;
-        }
-*/
     }
 }
 

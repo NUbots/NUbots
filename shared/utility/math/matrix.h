@@ -37,7 +37,7 @@ namespace utility {
                 double cosA = cos(angle);
                 double sinA = sin(angle);
 
-                xRotMatrix << 0     << 0     << 0     << arma::endr
+                xRotMatrix << 1     << 0     << 0     << arma::endr
                            << 0     << cosA  << -sinA << arma::endr
                            << 0     << sinA  << cosA  << arma::endr;
                 return xRotMatrix;
@@ -49,7 +49,7 @@ namespace utility {
                 double sinA = sin(angle);
 
                 yRotMatrix << cosA  << 0     << sinA  << arma::endr
-                           << 0     << 0     << 0     << arma::endr
+                           << 0     << 1     << 0     << arma::endr
                            << -sinA << 0     << cosA  << arma::endr;
                 return yRotMatrix;
             }
@@ -61,7 +61,7 @@ namespace utility {
 
                 zRotMatrix << cosA  << -sinA << 0     << arma::endr
                            << sinA  << cosA  << 0     << arma::endr
-                           << 0     << 0     << 0     << arma::endr;
+                           << 0     << 0     << 1     << arma::endr;
                 return zRotMatrix;
             }
         }

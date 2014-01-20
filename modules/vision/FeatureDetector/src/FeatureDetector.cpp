@@ -230,7 +230,7 @@ namespace modules {
 
                     m_visionKinematics.setCamParams(imageSize,FOV);
 
-                    m_visionKinematics.setSensors(0, 0, 0, 0, arma::vec3("0 0 0"));
+                    m_visionKinematics.setSensors(0, 0, 0, 0, arma::vec3("0 0 5"));
             });
 
           /* TODO: Kinematics required here!!!
@@ -252,7 +252,7 @@ namespace modules {
 
             */ 
             on<Trigger<ClassifiedImage>, Options<Single>>([this](const ClassifiedImage& classifiedImage) {
-
+                m_visionKinematics.setSensors(0, 0, 0, 0, arma::vec3("0 0 5"));
                 if (classifiedImage.matchedHorizontalSegments.count(messages::vision::GOAL_COLOUR) &&
                     classifiedImage.matchedVerticalSegments.count(messages::vision::GOAL_COLOUR)) {
                     emit(
