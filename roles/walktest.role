@@ -3,10 +3,11 @@ ADD_ROLE(
     MODULES
         support::SignalCatcher
         support::logging::ConsoleLogHandler
-		support::configuration::ConfigSystem    
-        support::configuration::NetworkingConfiguration
-        platform::darwin::HardwareIO
-        #platform::darwin::MotionManager
+        support::configuration::ConfigSystem    
+        #support::configuration::NetworkingConfiguration
+        #platform::darwin::HardwareIO
+        platform::fakedarwin::HardwareIO
+        platform::darwin::MotionManager
         support::NUbugger
         motion::WalkEngine
 )

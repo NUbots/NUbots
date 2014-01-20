@@ -30,7 +30,7 @@ namespace darwin {
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/ttyUSB0") {
 
         // This trigger gets the sensor data from the CM730
-        on<Trigger<Every<60, std::chrono::milliseconds>>, Options<Single>>([this](const time_t& time) {
+		on<Trigger<Every<NUClear::clock::period::den / 60, NUClear::clock::duration>>, Options<Single>>([this](const time_t& time) {
 
             // Read our data
             Darwin::BulkReadResults data = darwin.bulkRead();

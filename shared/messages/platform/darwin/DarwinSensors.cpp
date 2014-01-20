@@ -24,9 +24,9 @@ namespace messages {
     namespace platform {
         namespace darwin {
             
-            const DarwinSensors::Servo& DarwinSensors::Servos::operator[](int index) const {
+            const DarwinSensors::Servo& DarwinSensors::Servos::operator[](input::ServoID servoId) const {
 
-                switch (static_cast<input::ServoID>(index)) {
+                switch (servoId) {
                     case input::ServoID::R_SHOULDER_PITCH:   return rShoulderPitch;
                     case input::ServoID::L_SHOULDER_PITCH:   return lShoulderPitch;
                     case input::ServoID::R_SHOULDER_ROLL:    return rShoulderRoll;
@@ -52,9 +52,9 @@ namespace messages {
                 throw std::runtime_error("Out of bounds");
             }
 
-            DarwinSensors::Servo& DarwinSensors::Servos::operator[](int index) {
+            DarwinSensors::Servo& DarwinSensors::Servos::operator[](input::ServoID servoId) {
 
-                switch (static_cast<input::ServoID>(index)) {
+                switch (servoId) {
                     case input::ServoID::R_SHOULDER_PITCH:   return rShoulderPitch;
                     case input::ServoID::L_SHOULDER_PITCH:   return lShoulderPitch;
                     case input::ServoID::R_SHOULDER_ROLL:    return rShoulderRoll;
@@ -79,6 +79,14 @@ namespace messages {
                 
                 throw std::runtime_error("Out of bounds");
             }
+
+            const DarwinSensors::Servo& DarwinSensors::Servos::operator[](int index) const {
+				return (*this)[static_cast<input::ServoID>(index)];
+			}
+
+            DarwinSensors::Servo& DarwinSensors::Servos::operator[](int index) {
+				return (*this)[static_cast<input::ServoID>(index)];
+			}
 
         }  // darwin
     }  // platform
