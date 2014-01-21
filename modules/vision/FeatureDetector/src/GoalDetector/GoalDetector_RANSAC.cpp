@@ -83,9 +83,6 @@ namespace modules {
 		// std::vector<ColourSegment> horizontalSegments = ClassifiedImage::matched_horizontal_segments[GOAL_COLOUR];
 		std::unique_ptr<std::vector<messages::vision::Goal>> GoalDetector_RANSAC::run(const VisionKinematics& visionKinematics, const std::vector<ColourSegment>& horizontalSegments, 
                                                                     const std::vector<ColourSegment>& verticalSegments) {
-			//std::cout<< "GoalDetector_RANSAC::run : Starting Goal Detection !!!!!!!!!!!!!!!!!!!!"<<std::endl;
-			
-			
 			std::list<Quad> quads, postCandidates;
 			std::pair<bool, Quad> crossbar(false, Quad());
 			std::unique_ptr<std::vector<Goal>> posts = std::unique_ptr<std::vector<Goal>>(new std::vector<Goal>);
@@ -108,7 +105,6 @@ namespace modules {
                                                                                             MAX_FITTING_ATTEMPTS, 
                                                                                             SELECTION_METHOD);
 			
-			//std::cout<< "GoalDetector_RANSAC::run : ransacResults for start points has size " << ransacResults.size() <<std::endl;
 			for (auto& l : ransacResults) {
 				startLines.push_back(LSFittedLine(l.second));
 			}
@@ -120,7 +116,6 @@ namespace modules {
                                                                                             MAX_ITERATIONS_PER_FITTING,
                                                                                             MAX_FITTING_ATTEMPTS, 
                                                                                             SELECTION_METHOD);
-			//std::cout<< "GoalDetector_RANSAC::run : ransacResults for end points has size " << ransacResults.size() <<std::endl; 
 			
 			for (auto& l : ransacResults) {
 				endLines.push_back(LSFittedLine(l.second));
@@ -141,7 +136,6 @@ namespace modules {
 			
 			// Remove posts with invalid aspect ratio : check potential cross bars AND posts.
 			removeInvalid(quads);
-			//std::cout << quads.size()<< " quad(s)." <<std::endl;
 
 
 			// Sort out potential crossbars and vertical posts (posts on too large of a lean will be removed).
@@ -167,7 +161,6 @@ namespace modules {
 				    if (!crossbar.first) {
 				        crossbar.first = true;
 				        crossbar.second = quad;
-				        //std::cout<< "GoalDetector_RANSAC::run : crossbar found!"<<std::endl;
 				    }
 				    
 				    else if (crossbar.second.area() < quad.area()) {
@@ -179,7 +172,6 @@ namespace modules {
 			// Only check upright posts for building candidates.
 			//TODO FIX SEGFAULT here:
 			mergeClose(postCandidates, 1.5);
-			////std::cout<< "GoalDetector_RANSAC::run : merged to " << postCandidates.size()<< " candidates.";
 
 			
 			// Generate actual goal from candidate posts.
@@ -192,7 +184,6 @@ namespace modules {
 				posts = assignGoals(visionKinematics, postCandidates);
 			}
 			
-			//std::cout<< "GoalDetector_RANSAC::run : "<< posts->size() <<" posts assigned."<<std::endl;
 
 			// Improves bottom centre estimate using vertical transitions.
 			int numberOfBasesSet = 0;
@@ -208,11 +199,8 @@ namespace modules {
 				    }
 				}
 			}
-			//std::cout<< "GoalDetector_RANSAC::run : "<<numberOfBasesSet <<" bases improved using segments."<<std::endl;
 			
 			std::unique_ptr<std::vector<messages::vision::Goal>> finalGoals = std::move(createGoalMessage(posts));
-			//std::cout<< "GoalDetector_RANSAC::run : final number of goals : "<< finalGoals->size() << std::endl << std::endl;
-			//std::cout<< "GoalDetector_RANSAC::run : Finishing Goal Detection !!!!!!!!!!!!!!!!!!!!"<<std::endl;
 			return std::move(finalGoals);
 		}
 
@@ -226,7 +214,6 @@ namespace modules {
 			// std::list can be shrunk.
 
 			if ((tolerance < 0) || (tolerance > 1)) {
-				//std::cout << "GoalDetector_RANSAC::buildQuadsFromLines - tolerance must be in [0, 1]" << std::endl;
 				tolerance = 1;					// TODO: Pick a better action here? We used to throw.
 			}
 
@@ -295,7 +282,6 @@ namespace modules {
                                                                 const std::vector<LSFittedLine>& endLines, 
                                                                 std::vector<bool>& tried) {
 			if (endLines.size() != tried.size()) {
-				//std::cout << "GoalDetector_RANSAC::getClosestUntriedLine - 'endLines' must match 'tried' in size" << std::endl;
 				return 0;					// TODO: Pick a better action here? We used to throw.
 			}
 
@@ -444,16 +430,16 @@ namespace modules {
 		}
 		
         void GoalDetector_RANSAC::mergeClose(std::list<Quad>& posts, double widthMultipleToMerge) {
-            std::list<Quad>::iterator a = posts.begin();
-            std::list<Quad>::iterator b;
-
-            
+            if(posts.size()<2){
+            	return;
+            }
             for (std::list<Quad>::iterator a = posts.begin(); a != posts.end(); a++) {
-                for (std::list<Quad>::iterator b = (++a)/*Init b as a+1.*/; b != posts.end(); /* Iteration done inside the 'for' loop */ ) {
+                for (std::list<Quad>::iterator b = (std::next(a))/*Init b as a+1.*/; b != posts.end(); /* Iteration done inside the 'for' loop */ ) {
                     // If the posts overlap.
                     // Or if their centres are horizontally closer than the largest widths multiplied by widthMultipleToMerge.
+            		
                     if (a->overlapsHorizontally(*b) ||
-                       std::abs(a->getCentre()[0] - b->getCentre()[0]) <= std::max(a->getAverageWidth(), b->getAverageWidth()) * widthMultipleToMerge) {
+                       std::abs(a->getCentre()[0] - b->getCentre()[0]) <= std::max(a->getAverageWidth(), b->getAverageWidth()) * widthMultipleToMerge) {         	
                         // Get outer lines.
                         arma::vec2 tl;
                         arma::vec2 tr;
@@ -466,11 +452,11 @@ namespace modules {
                         br << std::max(a->getBottomRight()[0], b->getBottomRight()[0]) << std::max(a->getBottomRight()[1], b->getBottomRight()[1]);
 
                         // Replace original two quads with the new one.
-                        a->set(bl, tl, tr, br);
+                        a->set(bl, tl, tr, br);            		
                         b = posts.erase(b);
                     }
 
-                    else {
+                    else {                 
                         b++;
                     }
                 }
@@ -479,16 +465,14 @@ namespace modules {
 
         void GoalDetector_RANSAC::removeInvalid(std::list<Quad>& posts) {
             std::list<Quad>::iterator it = posts.begin();
-
+           
             for (std::list<Quad>::iterator post = posts.begin(); post != posts.end(); /* Iteration done in for loop */ ) {
                 // Remove all posts whos' aspect ratios are too low.
-                if (post->aspectRatio() < GOAL_HEIGHT_TO_WIDTH_RATIO_MIN) {
+                if (post->aspectRatio() < GOAL_HEIGHT_TO_WIDTH_RATIO_MIN || !post->checkCornersValid()) {
                     post = posts.erase(post);
-                }
-
-                else {
-                    post++;
-                }
+	            } else {
+	                post++;
+	            }
             }
         }
 
@@ -517,7 +501,7 @@ namespace modules {
 
 	        		goal_message->back().screen_quad = post.m_corners.getVertices();
         		
-	        		std::cout << "Emitting " << post << std::endl;
+	        		// std::cout << "Emitting " << post << std::endl;
 	        	}
         	}
 

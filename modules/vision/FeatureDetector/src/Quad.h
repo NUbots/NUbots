@@ -80,9 +80,11 @@ namespace modules {
 			double area() const;
 			double aspectRatio() const;
 
-			std::vector<arma::vec2> getVertices();
+			std::vector<arma::vec2> getVertices() const;
 
 			bool overlapsHorizontally(const Quad& other) const;
+
+			bool checkCornersValid() const;
 
 		private:
 			arma::vec2 bl;													//! @variable The bottom-left of the Quad.

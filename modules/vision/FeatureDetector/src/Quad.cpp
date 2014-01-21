@@ -153,7 +153,7 @@ namespace modules {
 			return output;
 		}
 
-		std::vector<arma::vec2> Quad::getVertices(){
+		std::vector<arma::vec2> Quad::getVertices() const{
 			std::vector<arma::vec2> vert(4);
 
     		vert[0] = tr;
@@ -162,6 +162,10 @@ namespace modules {
     		vert[3] = tl;
 
     		return vert;
+		}
+
+		bool Quad::checkCornersValid() const{
+			return br.size()==2  && bl.size()==2 && tr.size()==2 && tl.size()==2;
 		}
 	}
 }

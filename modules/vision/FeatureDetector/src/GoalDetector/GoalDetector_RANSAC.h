@@ -23,6 +23,7 @@
 #include <vector>
 #include <list>
 #include <armadillo>
+#include <iterator> 
 
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/vision/VisionObjects.h"
