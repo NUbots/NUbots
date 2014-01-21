@@ -45,6 +45,7 @@ namespace modules {
 
                 // Add a blank frame to start with
                 script.frames.emplace_back();
+                script.frames.back().duration = std::chrono::milliseconds(1000);
 
                 on<Trigger<CommandLineArguments>>([this](const std::vector<std::string>& args) {
                     if(args.size() == 2) {
@@ -73,7 +74,7 @@ namespace modules {
 
                     target.id = static_cast<messages::input::ServoID>(id);
                     target.position = sensors.servo[id].presentPosition;
-                    target.gain = 100;
+                    target.gain = 80;
 
                     script.frames[frame].targets.push_back(target);
 
@@ -255,7 +256,7 @@ namespace modules {
                                      "Jump to Frame",
                                      "Play",
                                      "Save",
-                                     "Exit (doesn't work yet use CTR C)"};    
+                                     "Exit (Use Ctr C)"};    
 
                 //Prints commands and their meanings to the screen
                 for (size_t i = 0; i < 10; i = i + 2) {
@@ -263,7 +264,7 @@ namespace modules {
                     attron(A_STANDOUT);
                     mvprintw(LINES-5, 2 + ((2+14)*(i/2)), COMMANDS[i]);
                     attroff(A_BOLD);
-                    attroff(A_STANDOUT); 
+                    attroff(A_STANDOUT);
                     mvprintw(LINES-5, 4 + ((2+14)*(i/2)), MEANINGS[i]);
                 }
 
@@ -272,7 +273,7 @@ namespace modules {
                     attron(A_STANDOUT);
                     mvprintw(LINES-4, 2 + ((2+14)*((i-1)/2)), COMMANDS[i]);
                     attroff(A_BOLD);
-                    attroff(A_STANDOUT); 
+                    attroff(A_STANDOUT);
                     mvprintw(LINES-4, 4 + ((2+14)*((i-1)/2)), MEANINGS[i]);
                 }
 
@@ -362,6 +363,7 @@ namespace modules {
                 // Make a new frame before our current with our current set of motor angles and unlocked/locked status
                 auto newFrame = script.frames[frame];
                 script.frames.insert(script.frames.begin() + frame, newFrame);
+                script.frames[frame].duration = std::chrono::milliseconds(1000);
             }
 
             void ScriptTuner::deleteFrame() {
@@ -561,7 +563,7 @@ namespace modules {
                             tempframe2=tempframe2;
                         }
                         //checks user input is within correct range
-                        if(tempframe2 <= script.frames.size()) {
+                        if((size_t)tempframe2 <= script.frames.size()) {
 
                             frame = tempframe2 - 1;
                         }
@@ -587,7 +589,6 @@ namespace modules {
 //            }
 
             
-
-        }  // tools
-    }  // behaviours
-}  // modules
+        } // tools
+    } // behaviours
+} // modules
