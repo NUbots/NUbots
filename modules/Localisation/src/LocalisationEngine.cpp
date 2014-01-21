@@ -37,6 +37,116 @@ namespace modules {
 
     }
 
+    /*! @brief Process objects
+        Processes the field objects and perfroms the correction updates required from the observations.
+
+        @param fobs The object information output by the vision module. This contains objects identified and their relative positions.
+        @param time_increment The time that has elapsed since the previous localisation frame.
+
+     */
+    void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
+    {
+        int numUpdates = 0;
+        int updateResult;
+        int usefulObjectCount = 0;
+
+        // all objects at once.
+        std::vector<StationaryObject*> update_objects;
+        unsigned int objectsAdded = 0;
+        for(auto& sfob : fobs->stationaryFieldObjects)
+        {
+            if(!sfob.isObjectVisible())
+                continue;
+
+            update_objects.push_back(sfob);
+            objectsAdded++;
+        }
+
+        numUpdates += objectsAdded;
+        usefulObjectCount += objectsAdded;
+        updateResult = multipleLandmarkUpdate(update_objects);
+
+        NormaliseAlphas();
+
+    #if MULTIPLE_MODELS_ON
+            bool blueGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || 
+                                fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible();
+            bool yellowGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() || 
+                                  fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible();
+            removeAmbiguousGoalPairs(fobs->ambiguousFieldObjects, yellowGoalSeen, blueGoalSeen);
+            
+            for (auto& ambobj : fobs->ambiguousFieldObjects) {
+                if(!ambobj.isObjectVisible()) 
+                    continue;
+
+                std::vector<int> possible_ids = ambobj.getPossibleObjectIDs();
+                std::vector<StationaryObject*> poss_obj(possible_ids.size());
+                for (auto& id : possible_ids)
+                    poss_obj.push_back(&(fobs->stationaryFieldObjects[id]));
+
+                updateResult = ambiguousLandmarkUpdate(ambobj, poss_obj);
+
+                numUpdates++;
+                if(ambobj.getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN || 
+                   ambobj.getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+                    usefulObjectCount++;
+
+                NormaliseAlphas();
+                PruneModels();
+            }
+    #endif // MULTIPLE_MODELS_ON
+
+        // // Two Object update
+        // //#if TWO_OBJECT_UPDATE_ON
+        // StationaryObject& leftBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
+        // StationaryObject& rightBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
+        // StationaryObject& leftYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
+        // StationaryObject& rightYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
+
+        // if( leftBlue.isObjectVisible() and rightBlue.isObjectVisible())
+        // {
+        //     doTwoObjectUpdate(leftBlue, rightBlue);
+        // }
+        // if( leftYellow.isObjectVisible() and rightYellow.isObjectVisible())
+        // {
+        //     doTwoObjectUpdate(leftYellow, rightYellow);
+        // }
+        // //#endif
+
+        NormaliseAlphas();
+        PruneModels();
+
+        MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
+        ballUpdate(ball);
+    
+        if (usefulObjectCount > 0)
+            m_timeSinceFieldObjectSeen = 0;
+        else
+            m_timeSinceFieldObjectSeen += time_increment;
+    }
+
+    /*! @brief Normalises the alphas of all exisiting models.
+        The alphas of all active models are normalised so that the total probablility of the set sums to 1.0.
+    */
+    void SelfLocalisation::NormaliseAlphas()
+    {
+        double sumAlpha = 0.0;
+        
+        for (auto& model : robot_models_)
+            if (model.active())
+                sumAlpha += (*model_it)->alpha();
+
+        if(sumAlpha == 1) 
+            return;
+
+        if (sumAlpha == 0) 
+            sumAlpha = 1e-12;
+
+        for (auto& model : robot_models_)
+            if (model.active())
+                model.setAlpha(model.alpha() / sumAlpha);
+    }
+
     void LocalisationEngine::landmarkUpdate(StationaryObject &landmark)
     {
         if(!landmark.validMeasurement())
@@ -68,8 +178,6 @@ namespace modules {
         if (num_objects == 0) 
             return 0;
 
-        std::vector<StationaryObject*>::iterator currStat(landmarks.begin());
-        std::vector<StationaryObject*>::const_iterator endStat(landmarks.end());
         Matrix locations(2 * num_objects, 1, false);
         Matrix measurements(2 * num_objects, 1, false);
         Matrix R_measurement(2 * num_objects, 2 * num_objects, false);
