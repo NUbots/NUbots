@@ -45,7 +45,7 @@ namespace modules {
 
                 // Add a blank frame to start with
                 script.frames.emplace_back();
-                script.frames.back().duration = std::chrono::milliseconds(1000);
+                script.frames.back().duration = std::chrono::milliseconds(defaultDuration);
 
                 on<Trigger<CommandLineArguments>>([this](const std::vector<std::string>& args) {
                     if(args.size() == 2) {
@@ -56,10 +56,8 @@ namespace modules {
                             NUClear::log<NUClear::DEBUG>("Loading script: ", scriptPath, '\n');
                             loadScript(scriptPath);
                         }
-//should it be NUClear::log<NUclear::Debug>
-
-
                     }
+
                     else {
                         NUClear::log<NUClear::DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
                         powerPlant->shutdown();
@@ -74,7 +72,7 @@ namespace modules {
 
                     target.id = static_cast<messages::input::ServoID>(id);
                     target.position = sensors.servo[id].presentPosition;
-                    target.gain = 80;
+                    target.gain = defaultGain;
 
                     script.frames[frame].targets.push_back(target);
 
@@ -157,6 +155,9 @@ namespace modules {
                         case 'R':
                             refreshView();
                             break;
+                        case':':
+                            help();
+                            break;
  //Kill simply freezes the window
                         //case 'X':
                             //kill();
@@ -229,7 +230,7 @@ namespace modules {
                 attron(A_BOLD);
                 mvprintw(LINES-6, 2, "Commands");
                 attroff(A_BOLD);
-                mvprintw(LINES-2, 2, "Type :help for list of commands or :longhelp <command> for details");
+                mvprintw(LINES-2, 2, "Type :help for a full list of commands");
                 
 
                  //Each Command
@@ -363,7 +364,7 @@ namespace modules {
                 // Make a new frame before our current with our current set of motor angles and unlocked/locked status
                 auto newFrame = script.frames[frame];
                 script.frames.insert(script.frames.begin() + frame, newFrame);
-                script.frames[frame].duration = std::chrono::milliseconds(1000);
+                script.frames[frame].duration = std::chrono::milliseconds(defaultDuration);
             }
 
             void ScriptTuner::deleteFrame() {
@@ -505,36 +506,77 @@ namespace modules {
                 endwin();
             }
 
-/*            void ScriptTuner::help() {
-                move(29,2);
-                //make backspace work
+            void ScriptTuner::help() {
+                
+                move(LINES-6 ,12);
                 curs_set(true);
                 std::string tempcommand = userInput();
 
-                if (tempcommand == "help") {
-                    WINDOW *newwin(20,15,0,0);
-                    initscr ();
-                    cbreak ();
-                    keypad();
+                if (tempcommand.compare("help") == 0) {
+                    curs_set(false);
 
+                    const char* ALL_COMMANDS[] = {
+                                             ",",
+                                             ".",
+                                             "N",
+                                             "D",
+                                             " ",
+                                             "T",
+                                             "J",
+                                             "P",
+                                             "S",
+                                             "X"};
 
+                    const char* ALL_MEANINGS[] = {
+                                             "Left a frame",
+                                             "Right a frame",
+                                             "New Frame",
+                                             "Delete Frame",
+                                             "Lock/Unlock",
+                                             "Edit Duration",
+                                             "Jump to Frame",
+                                             "Play",
+                                             "Save",
+                                             "Exit (this works to exit help)"};
+                    
+                    size_t longestCommand = 0;
+                    for(const auto& command : ALL_COMMANDS) {
+                    longestCommand = std::max(longestCommand, std::strlen(command));
+                    }
 
-                }
-                else if (tempcommand == "longhelp") {
+                    erase();
+                    box(stdscr,0,0);
+                    attron(A_BOLD);
+                    mvprintw(0,(COLS - 14)/2, " Script Tuner ");
+                    mvprintw(3,2, "Help Commands:");
+                    attroff(A_BOLD);
+                    for(size_t i = 0; i < 10; i++) {
+                        mvprintw(5 + i, 2, ALL_COMMANDS[i]);
+                        mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
+                    }
 
+                    while(getch() != 'X') {
+                        erase();
+                        box(stdscr,0,0);
+                        attron(A_BOLD);
+                        mvprintw(0,(COLS - 14)/2, " Script Tuner ");
+                        mvprintw(3,2, "Help Commands:");
+                        attroff(A_BOLD);
 
-
-                }
+                        for(size_t i = 0; i < 10; i++) {
+                            mvprintw(5 + i, 2, ALL_COMMANDS[i]);
+                            mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
+                        }
+                       
+                    }
+                    refreshView();
+                }  
                 else {
-                    refreshView(); //need this??
+                    refreshView();
                 }
-
                 curs_set(false);
-
             }
 
-
-*/
 
             //emits a message so motion can pick up the script
             void ScriptTuner::playScript() {
@@ -543,14 +585,11 @@ namespace modules {
 
             //allows user to jump to a specific frame without engaging the motors
             void ScriptTuner::jumpToFrame() {
-                //places cursor
-                move(5, 17);
-                //makes cursor visible
+                move(5,17);
                 curs_set(true);
-                std::string tempframe = userInput();
 
-
-                //checks user input is a number and converts it to a number    
+                //checks user input is a number and converts it to a number 
+                std::string tempframe = userInput();   
                 if(!tempframe.empty() && tempframe.size() <= 4) {
                     try {
                         int tempframe2 = stoi(tempframe);
@@ -575,7 +614,9 @@ namespace modules {
                         beep();
                     }
                 }
-                curs_set(false);               
+                curs_set(false);
+               
+                               
             }
 
 

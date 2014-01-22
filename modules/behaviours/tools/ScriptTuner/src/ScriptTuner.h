@@ -45,6 +45,8 @@ namespace modules {
                 size_t selection;
                 /// If we are selecting the angle or gain for this item
                 bool angleOrGain;
+                const size_t defaultGain = 80;
+                const size_t defaultDuration = 1000;
 
                 void refreshView();
 
@@ -65,7 +67,7 @@ namespace modules {
                 void kill();
                 void playScript();
                 void jumpToFrame();
-                //void help();
+                void help();
                 //void userLoadScript();
 
 
