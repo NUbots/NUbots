@@ -34,6 +34,14 @@ namespace modules {
         void TimeUpdate();
 
         void ObjectUpdate();
+
+    private:
+		// TODO: Consider extracting the robot models into an actual class,
+		// that handles the robot model without regard to whether or not
+		// it is represented by a multi-modal distribution. (e.g. methods like
+		// removeInactiveModels(), would be instance methods  of this new
+		// class)
+    	ModelContainer robot_models_;
     };
 }
 #endif

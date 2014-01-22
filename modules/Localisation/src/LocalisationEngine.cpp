@@ -24,7 +24,7 @@ namespace modules {
 
     }
 
-    /// Integrate time-dependent measurements on all objects
+    /// Integrate time-dependent observations on all objects
     void LocalisationEngine::TimeUpdate(time_t current_time) {
         ball_model_.TimeUpdate();
 
@@ -32,9 +32,141 @@ namespace modules {
             model.TimeUpdate();
     }
 
-    /// Estimate object positions based on measurements
+    /// Estimate object positions based on observations
     void LocalisationEngine::ObjectUpdate() {
 
+    }
+
+    /*! @brief Removes all inactive models from the given container
+     *  @param container The container to remove inactive models from.
+     *  @retun The number of models removed.
+     */
+    unsigned int SelfLocalisation::RemoveInactiveModels(std::list<IWeightedKalmanFilter*>& container) {
+        const unsigned int num_before = container.size();   // Save original size
+
+        for (auto* model : robot_models_) {
+            if (!model->active()) {
+                delete model;
+                model = NULL;
+            }
+        }
+
+        container.erase(
+            remove_if(container.begin(),
+                      container.end(),
+                      [](const IWeightedKalmanFilter* p) { return p == NULL; }), 
+            container.end());
+        
+        // Return number removed: original size - new size
+        return num_before - container.size();
+    }
+
+    /*! @brief Remove all inactive models from the default container.
+     *  @retun The number of models removed.
+     */
+    unsigned int SelfLocalisation::RemoveInactiveModels() {
+        return RemoveInactiveModels(robot_models_);
+    }
+
+    /*! @brief Prunes the models using the Viterbi method. This removes lower probability models to a maximum total models.
+     *  @param order The number of models to be kept at the end for the process.
+     *  @return The number of models that were removed during this process.
+     */
+    int SelfLocalisation::PruneViterbi(unsigned int order)
+    {
+        RemoveInactiveModels();
+
+        // No pruning required if not above maximum.
+        if(m_robot_filters.size() <= order) 
+            return 0;
+
+        // Sort, results in order smallest to largest.
+        m_robot_filters.sort(model_ptr_cmp());
+
+        // Number of models that need to be removed.
+        unsigned int num_to_remove = m_robot_filters.size() - order;
+
+        // Beginning of removal range
+        auto begin_remove = m_robot_filters.begin();
+        
+        // End of removal range (not removed)
+        auto end_remove = m_robot_filters.begin();
+        std::advance(end_remove, num_to_remove);
+
+        std::for_each (
+            begin_remove, 
+            end_remove, 
+            std::bind2nd(std::mem_fun(&IWeightedKalmanFilter::setActive), false));
+
+        // Clear out all deactivated models.
+        int num_removed = RemoveInactiveModels();
+
+        // Result should have been achieved or something is broken.
+        assert(m_robot_filters.size() == order);
+
+        return num_removed;
+    }
+
+    void SelfLocalisation::PruneModels() {
+        RemoveInactiveModels();
+
+        // if (m_settings.pruneMethod() == LocalisationSettings::prune_viterbi)
+        // {
+            RemoveSimilarModels();
+            PruneViterbi(c_MAX_MODELS_AFTER_MERGE);
+        // }
+
+        NormaliseAlphas();
+    }
+
+    int ProcessAmbiguousObjects(FieldObjects* fobs) {
+        int useful_object_count = 0;
+
+        auto& stat_fobs = fobs->stationaryFieldObjects;
+
+        // // Note: These lines were commented in the robocup codebase.
+        // // (I forget why I ported them.  If they're unnecessary, please delete them!)
+        // bool blueGoalSeen = stat_fobs[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || 
+        //                     stat_fobs[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible();
+        // bool yellowGoalSeen = stat_fobs[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() || 
+        //                       stat_fobs[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible();
+        // RemoveAmbiguousGoalPairs(fobs->ambiguousFieldObjects, yellowGoalSeen, blueGoalSeen);
+        
+        for (auto& ambobj : fobs->ambiguousFieldObjects) {
+            if (!ambobj.isObjectVisible()) 
+                continue;
+
+            auto possible_ids = ambobj.getPossibleObjectIDs();
+            std::vector<StationaryObject*> poss_obj(possible_ids.size());
+            
+            for (auto& id : possible_ids)
+                poss_obj.push_back(&(stat_fobs[id]));
+
+            AmbiguousLandmarkUpdate(ambobj, poss_obj);
+
+            if (ambobj.getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN || 
+                ambobj.getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
+                useful_object_count++;
+
+            NormaliseModelAlphas();
+            PruneModels();
+        }
+
+        return useful_object_count;
+    }
+
+    /// Performs a two object update if it is currently possible to do so
+    int AttemptTwoObjectUpdate(FieldObjects* fobs) {
+        StationaryObject& left_blue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
+        StationaryObject& right_blue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
+        StationaryObject& left_yellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
+        StationaryObject& right_yellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
+
+        if (left_blue.isObjectVisible() && right_blue.isObjectVisible())
+            doTwoObjectUpdate(left_blue, right_blue);
+
+        if (left_yellow.isObjectVisible() && right_yellow.isObjectVisible())
+            doTwoObjectUpdate(left_yellow, right_yellow);
     }
 
     /*! @brief Process objects
@@ -42,101 +174,114 @@ namespace modules {
 
         @param fobs The object information output by the vision module. This contains objects identified and their relative positions.
         @param time_increment The time that has elapsed since the previous localisation frame.
-
      */
-    void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment)
-    {
-        int numUpdates = 0;
-        int updateResult;
-        int usefulObjectCount = 0;
+    void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment) {
+        int useful_object_count = 0;
 
         // all objects at once.
         std::vector<StationaryObject*> update_objects;
-        unsigned int objectsAdded = 0;
-        for(auto& sfob : fobs->stationaryFieldObjects)
-        {
-            if(!sfob.isObjectVisible())
+        unsigned int useful_object_count = 0;
+        for (auto& sfob : fobs->stationaryFieldObjects) {
+            if (!sfob.isObjectVisible())
                 continue;
 
             update_objects.push_back(sfob);
-            objectsAdded++;
+            useful_object_count++;
         }
 
-        numUpdates += objectsAdded;
-        usefulObjectCount += objectsAdded;
-        updateResult = multipleLandmarkUpdate(update_objects);
+        multipleLandmarkUpdate(update_objects);
 
-        NormaliseAlphas();
+        NormaliseModelAlphas();
 
-    #if MULTIPLE_MODELS_ON
-            bool blueGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || 
-                                fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible();
-            bool yellowGoalSeen = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() || 
-                                  fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible();
-            removeAmbiguousGoalPairs(fobs->ambiguousFieldObjects, yellowGoalSeen, blueGoalSeen);
-            
-            for (auto& ambobj : fobs->ambiguousFieldObjects) {
-                if(!ambobj.isObjectVisible()) 
-                    continue;
+        // Update robot models
+        if (kMultipleModelsEnabled) {
+            useful_object_count += ProcessAmbiguousObjects(fobs);
+        }
 
-                std::vector<int> possible_ids = ambobj.getPossibleObjectIDs();
-                std::vector<StationaryObject*> poss_obj(possible_ids.size());
-                for (auto& id : possible_ids)
-                    poss_obj.push_back(&(fobs->stationaryFieldObjects[id]));
+        // Two object update
+        if (kTwoObjectUpdateEnabled) {
+            AttemptTwoObjectUpdate(fobs);
+        }
 
-                updateResult = ambiguousLandmarkUpdate(ambobj, poss_obj);
-
-                numUpdates++;
-                if(ambobj.getID() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN || 
-                   ambobj.getID() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
-                    usefulObjectCount++;
-
-                NormaliseAlphas();
-                PruneModels();
-            }
-    #endif // MULTIPLE_MODELS_ON
-
-        // // Two Object update
-        // //#if TWO_OBJECT_UPDATE_ON
-        // StationaryObject& leftBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
-        // StationaryObject& rightBlue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
-        // StationaryObject& leftYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
-        // StationaryObject& rightYellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
-
-        // if( leftBlue.isObjectVisible() and rightBlue.isObjectVisible())
-        // {
-        //     doTwoObjectUpdate(leftBlue, rightBlue);
-        // }
-        // if( leftYellow.isObjectVisible() and rightYellow.isObjectVisible())
-        // {
-        //     doTwoObjectUpdate(leftYellow, rightYellow);
-        // }
-        // //#endif
-
-        NormaliseAlphas();
+        NormaliseModelAlphas();
         PruneModels();
 
         MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
-        ballUpdate(ball);
+        
+        BallUpdate(ball);
     
-        if (usefulObjectCount > 0)
-            m_timeSinceFieldObjectSeen = 0;
+        if (useful_object_count > 0)
+            time_since_field_object_last_seen_ = 0;
         else
-            m_timeSinceFieldObjectSeen += time_increment;
+            time_since_field_object_last_seen_ += time_increment;
     }
+
+    float TranslationDistance(const MultivariateGaussian& a, const MultivariateGaussian& b) {
+        float diff_x = a.mean(RobotModel::kstates_x) - b.mean(RobotModel::kstates_x);
+        float diff_y = a.mean(RobotModel::kstates_y) - b.mean(RobotModel::kstates_y);
+        return sqrt(diff_x * diff_x + diff_y * diff_y);
+    }
+
+    float HeadingDistance(const MultivariateGaussian& a, const MultivariateGaussian& b) {
+        float diff_head = a.mean(RobotModel::kstates_heading) - b.mean(RobotModel::kstates_heading);
+        return diff_head;
+    }
+
+    float ModelsAreSimilar(const IWeightedKalmanFilter* a, const IWeightedKalmanFilter* b) {
+        const float min_trans_dist = 5; // TODO: Add to config system
+        const float min_head_dist = 0.01; // TODO: Add to config system
+
+        float trans_dist = TranslationDistance(model_a->estimate(), model_b->estimate());
+        float head_dist = HeadingDistance(model_a->estimate(), model_b->estimate());
+        
+        return (trans_dist < min_trans_dist) && (head_dist < min_head_dist);
+    }
+
+    /// Reduces the number of active models by merging similar models together
+    void SelfLocalisation::RemoveSimilarModels() {
+        // Loop through each pair of active models
+        for (auto* model_a : robot_models_) {
+            if (!model_a->active())
+                continue;
+
+            for (auto* model_b : robot_models_) {
+                if (!model_b->active())
+                    continue;
+
+                if (model_a == model_b)
+                    continue;
+
+                if (ModelsAreSimilar(model_a, model_b)) {
+                    float total_alpha = model_a->getFilterWeight() + model_b->getFilterWeight();
+                    
+                    if (model_a->getFilterWeight() < model_b->getFilterWeight()) {
+                        model_a->setActive(false);
+                        model_b->setFilterWeight(total_alpha);
+                    } else {
+                        model_a->setFilterWeight(total_alpha);
+                        model_b->setActive(false);
+                    }
+                }
+            }
+        }
+
+        RemoveInactiveModels();
+
+        NormaliseModelAlphas();
+    }
+
 
     /*! @brief Normalises the alphas of all exisiting models.
         The alphas of all active models are normalised so that the total probablility of the set sums to 1.0.
     */
-    void SelfLocalisation::NormaliseAlphas()
-    {
+    void SelfLocalisation::NormaliseModelAlphas() {
         double sumAlpha = 0.0;
         
         for (auto& model : robot_models_)
             if (model.active())
                 sumAlpha += (*model_it)->alpha();
 
-        if(sumAlpha == 1) 
+        if (sumAlpha == 1) 
             return;
 
         if (sumAlpha == 0) 
@@ -147,9 +292,8 @@ namespace modules {
                 model.setAlpha(model.alpha() / sumAlpha);
     }
 
-    void LocalisationEngine::landmarkUpdate(StationaryObject &landmark)
-    {
-        if(!landmark.validMeasurement())
+    void LocalisationEngine::landmarkUpdate(StationaryObject &landmark) {
+        if (!landmark.validMeasurement())
             return SelfModel::RESULT_OUTLIER;
 
         double dist = landmark.measuredDistance();
@@ -163,8 +307,7 @@ namespace modules {
             c_obj_range_relative_variance * distance_squared);
         temp_error.setHeading(c_obj_theta_variance);
 
-        for (auto& model : robot_models_)
-        {
+        for (auto& model : robot_models_) {
             if(!model.active())
                 continue;
 
@@ -172,8 +315,7 @@ namespace modules {
         }
     }
 
-    int SelfLocalisation::multipleLandmarkUpdate(std::vector<StationaryObject*>& landmarks)
-    {
+    int SelfLocalisation::multipleLandmarkUpdate(std::vector<StationaryObject*>& landmarks) {
         const unsigned int num_objects = landmarks.size();
         if (num_objects == 0) 
             return 0;
@@ -185,11 +327,10 @@ namespace modules {
 
 
         unsigned int num_measurements = 0;
-        for(auto& landmark : landmarks)
-        {
+        for (auto& landmark : landmarks) {
             const int index = 2 * num_measurements;
 
-            if(!landmark.validMeasurement())
+            if (!landmark.validMeasurement())
                 continue;
 
             double dist = landmark.measuredDistance();
@@ -222,54 +363,58 @@ namespace modules {
             num_measurements++;
         }
 
-        for (auto& model : robot_models_)
-        {
-            if(!model.active()) 
+        for (auto& model : robot_models_) {
+            if (!model.active()) 
                 continue;
 
             model.MultipleObjectUpdate(locations, measurements, r_measurements);
         }
     }
 
+    #error Check this method!
+    // TODO: Check this method!!
     /*! @brief Performs an ambiguous measurement update using the exhaustive 
      *  process. 
      *  This creates a new model for each possible location for the measurement.
      */
-    int SelfLocalisation::ambiguousLandmarkUpdateExhaustive(
+    int SelfLocalisation::AmbiguousLandmarkUpdateExhaustive(
         AmbiguousObject &ambiguousObject, 
-        const vector<StationaryObject*>& possible_objects)
-    {
+        const vector<StationaryObject*>& possible_objects) {
+
+        if (possible_objects.size() < 1)
+        {
+    // #if LOC_SUMMARY_LEVEL > 0
+    //         m_frame_log << "Ignoring Ambiguous Object - " << ambiguousObject.getName() << std::endl;
+    // #endif
+            return 0;
+        }
+
         const float outlier_factor = 0.0001;
         ModelContainer new_models;
 
         MeasurementError error = calculateError(ambiguousObject);
 
-        for (auto& model : robot_models_)
-        {
+        for (auto& model : robot_models_) {
             if((model.inactive())
                 continue;
 
             unsigned int models_added = 0;
-            for(auto& obj : possible_objects)
-            {
+
+            for (auto& obj : possible_objects) {
                 auto* temp_mod = new Model(model, ambiguousObject, obj, error, GetTimestamp());
                 new_models.push_back(temp_mod);
             }
 
-            removeInactiveModels(new_models);
+            RemoveInactiveModels(new_models);
 
-            if(models_added)
-            {
+            if (models_added) {
                 model.setActive(false);
-            }
-            else
-            {
+            } else {
                 model.setAlpha(outlier_factor * model.alpha());
             }
         }
 
-        if(new_models.size() > 0)
-        {
+        if (new_models.size() > 0) {
             m_models.insert(m_models.end(), new_models.begin(), new_models.end());
             new_models.clear();
         }
