@@ -33,6 +33,8 @@ namespace modules {
         using messages::motion::ServoWaypoint;
         using messages::input::ServoID;
         using utility::motion::kinematics::calculateLegJoints;
+        using utility::motion::kinematics::calculateLegJoints2;
+        using utility::motion::kinematics::calculateLegJoints3;
         using utility::math::matrix::xRotationMatrix;
         using utility::math::matrix::yRotationMatrix;
         using utility::math::matrix::zRotationMatrix;
@@ -89,9 +91,8 @@ namespace modules {
 			});
 			
 			on<
-				Trigger<Every<2, std::chrono::seconds> >,
-				With<WalkCommand, Configuration<WalkEngine> >
-			>([this](const time_t&, const WalkCommand& walkCommand, const Configuration<WalkEngine>& walkEngineConfig) {
+				Trigger<Configuration<WalkEngine> >
+			>([this](const Configuration<WalkEngine>& walkEngineConfig) {
 				// walk!
 
 				/*arma::mat target = {0, 0, 0, 0,
@@ -100,14 +101,16 @@ namespace modules {
 				                    0, 0, 0, 0};
 				target.reshape(4,4);*/
 
-				arma::mat44 target = zRotationMatrix(walkEngineConfig.config["angle"], 4);
+				arma::mat44 target = yRotationMatrix(walkEngineConfig.config["zAngle"], 4);
+				target *= xRotationMatrix(walkEngineConfig.config["yAngle"], 4);
+				target *= zRotationMatrix(walkEngineConfig.config["xAngle"], 4);
 				
 				// translation
 				target(0,3) = walkEngineConfig.config["x"]; // down/up
 				target(1,3) = walkEngineConfig.config["y"]; // left/right
 				target(2,3) = walkEngineConfig.config["z"]; // front/back
 
-				std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints(target, true);
+				std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints3(target, true);
                 auto waypoints = std::make_unique<std::vector<ServoWaypoint> >();
                 for (auto& legJoint : legJoints) {
                     ServoWaypoint waypoint;

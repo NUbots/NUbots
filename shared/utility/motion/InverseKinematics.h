@@ -38,6 +38,8 @@ namespace kinematics {
         }
 
         std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints(arma::mat44 target, bool isLeft);
+        std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints2(arma::mat44 target, bool isLeft);
+        std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints3(arma::mat44 target, bool isLeft);
 
 } // kinematics
 }  // motion

@@ -22,6 +22,7 @@
 #include "messages/platform/darwin/DarwinServoCommand.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/ServoID.h"
+#include "utility/math/angle.h"
 
 using messages::platform::darwin::DarwinSensors;
 using messages::platform::darwin::DarwinServoCommand;
@@ -147,6 +148,8 @@ namespace fakedarwin {
 				auto& servo = sensors.servo[i];
 
 				float distance = servo.goalPosition - servo.presentPosition;
+                float distance2 = utility::math::angle::difference(servo.goalPosition, servo.presentPosition);
+                NUClear::log<NUClear::DEBUG>(distance, " ", distance2);
 				float movingSpeed = servo.movingSpeed / 60.0;
 				int sign = (distance >= 0 ? 1 : -1);
 
