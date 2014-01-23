@@ -28,7 +28,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/vision/ClassifiedImage.h"
 
-#include "LookUpTable.h"
+#include "utility/vision/LookUpTable.h"
 #include "GreenHorizon.h"
 #include "SegmentLogic.h"
 
@@ -52,12 +52,12 @@ namespace modules {
             /*! @brief Returns a std::vector of ColourSegments detailing the
             horizontal colour segments in the image.
             */
-            void classifyHorizontalScan(const messages::input::Image& image, unsigned int y, const LookUpTable& LUT, messages::vision::SegmentedRegion* region);
+            void classifyHorizontalScan(const messages::input::Image& image, unsigned int y, const utility::vision::LookUpTable& LUT, messages::vision::SegmentedRegion* region);
 
             /*! @brief Returns a std::vector of ColourSegments detailing the
             vertical colour segments in the image.
             */
-            void classifyVerticalScan(const messages::input::Image& image, const arma::vec2& start, const LookUpTable& LUT, messages::vision::SegmentedRegion* region);
+            void classifyVerticalScan(const messages::input::Image& image, const arma::vec2& start, const utility::vision::LookUpTable& LUT, messages::vision::SegmentedRegion* region);
 
         public:
             /*! @brief Loads configuration file.
@@ -82,12 +82,12 @@ namespace modules {
             /*! @brief Returns a std::vector of ColourSegments relating classified 
             horizontal scan lines.
             */
-            void classifyHorizontalScanLines(const messages::input::Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT, messages::vision::SegmentedRegion* resulting_region);
+            void classifyHorizontalScanLines(const messages::input::Image& originalImage, const std::vector<int>& horizontalScanLines, const utility::vision::LookUpTable& LUT, messages::vision::SegmentedRegion* resulting_region);
 
             /*! @brief Returns a std::vector of ColourSegments relating to classified 
             vertical scan lines.
             */
-            void classifyVerticalScanLines(const messages::input::Image& originalImage, const GreenHorizon& greenHorizon, const LookUpTable& LUT, messages::vision::SegmentedRegion* resulting_region);
+            void classifyVerticalScanLines(const messages::input::Image& originalImage, const GreenHorizon& greenHorizon, const utility::vision::LookUpTable& LUT, messages::vision::SegmentedRegion* resulting_region);
         };
     
     }  // vision

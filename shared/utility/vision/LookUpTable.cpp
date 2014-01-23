@@ -9,7 +9,7 @@
 
 #include "LookUpTable.h"
 
-namespace modules{
+namespace utility{
   namespace vision{
 
         using messages::vision::Colour;

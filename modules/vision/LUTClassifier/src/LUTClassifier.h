@@ -29,7 +29,7 @@
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/support/Configuration.h"
 
-#include "LookUpTable.h"
+#include "utility/vision/LookUpTable.h"
 #include "GreenHorizon.h"
 #include "ScanLines.h"
 #include "SegmentFilter.h"
@@ -57,7 +57,7 @@ namespace modules {
         struct RulesConfig{
             static constexpr const char* CONFIGURATION_PATH = "Rules.json";
         };
-
+        
         /**
          * Classifies a raw image, producing the colour segments for object detection
          *
@@ -65,7 +65,7 @@ namespace modules {
          */
         class LUTClassifier : public NUClear::Reactor {
         private:
-            std::vector<LookUpTable> LUTs;
+            std::vector<utility::vision::LookUpTable> LUTs;
             unsigned int currentLUTIndex;
 
             GreenHorizon greenHorizon;

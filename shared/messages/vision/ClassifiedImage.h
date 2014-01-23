@@ -24,37 +24,12 @@
 #include <vector>
 #include <map>
 #include <armadillo>
+#include "utility/vision/LookUpTable.h"
+#include "messages/input/Image.h"
 
 namespace messages {
     namespace vision {
-
-        enum Colour {
-            unclassified, //!< Colour has not be given a category.
-            white, //!< Colour is in the White region.
-            green, //!< Colour is in the Green region.
-            shadow_object, //!< Colour is part of a shadowed area.
-            pink, //!< Colour is in the Red region.
-            pink_orange, //!< Colour is in the region of overlap between Red and Orange.
-            orange, //!< Colour is in the Orange region.
-            yellow_orange, //!< Colour is in the region of overlap between Yellow and Orange.
-            yellow, //!< Colour is in the Yellow region.
-            blue, //!< Colour is in the Sky Blue region.
-            shadow_blue, //!< Colour is in the Dark Blue region.
-            num_colours, //!< Total number of colour categories.
-            invalid
-        };
-        
-        enum COLOUR_CLASS {
-            BALL_COLOUR,
-            GOAL_COLOUR,
-            // GOAL_Y_COLOUR,
-            // GOAL_B_COLOUR,
-            LINE_COLOUR,
-            TEAM_CYAN_COLOUR,
-            TEAM_MAGENTA_COLOUR,
-            UNKNOWN_COLOUR
-        };
-            
+           
         /**
         * The possible alignment for segments in a segmented region.
         */     
@@ -99,7 +74,12 @@ namespace messages {
             std::map<COLOUR_CLASS, std::vector<ColourSegment>> matchedVerticalSegments;
 
             std::vector<arma::vec2> greenHorizonInterpolatedPoints;
+
+            std::shared_ptr<const messages::input::Image> image;         //@! The image from which the segments are derived.
+
+            std::shared_ptr<utility::vision::LookUpTable> LUT;
              
+
             /*!
             Gets the name of the given colour.
             @param colour The colour name desired.
@@ -293,6 +273,10 @@ namespace messages {
 
                     case pink: {
                         return TEAM_MAGENTA_COLOUR;
+                    }
+
+                    case green: {
+                        return FIELD_COLOUR;
                     }
 
                     default: {

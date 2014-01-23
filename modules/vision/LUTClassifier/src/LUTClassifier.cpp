@@ -28,6 +28,7 @@ namespace modules {
 		using utility::configuration::ConfigurationNode;
 		using messages::vision::ClassifiedImage;
 		using messages::vision::SegmentedRegion;
+		using utility::vision::LookUpTable;
 
 		using std::chrono::system_clock;
         
@@ -161,7 +162,7 @@ namespace modules {
 				}
 			});
 
-            on<Trigger<Image>, Options<Single>>([this](const Image& image) {
+            on<Trigger<Image>, With<Raw<Image>>, Options<Single>>([this](const Image& image, std::shared_ptr<const Image> image_ptr) {
             	/*std::vector<arma::vec2> green_horizon_points = */
             	//std::cout << "Image size = "<< image.width() << "x" << image.height() <<std::endl;
             	//std::cout << "LUTClassifier::on<Trigger<Image>> calculateGreenHorizon" << std::endl;
@@ -184,6 +185,11 @@ namespace modules {
             	classifiedImage->greenHorizonInterpolatedPoints = greenHorizon.getInterpolatedPoints();
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> emit(std::move(classified_image));" << std::endl;
+            	classifiedImage->image = image_ptr;
+
+            	std::shared_ptr<LookUpTable> lut_pointer = std::shared_ptr<LookUpTable>(&LUTs[currentLUTIndex]);
+            	classifiedImage->LUT = lut_pointer;
+
             	emit(std::move(classifiedImage));
             });
 

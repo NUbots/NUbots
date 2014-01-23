@@ -25,6 +25,7 @@ namespace modules {
         using messages::input::Image;
         using messages::support::Configuration;
         using messages::vision::Colour;
+        using utility::vision::LookUpTable;
         
         GreenHorizon::GreenHorizon() {
         	// Empty constructor.

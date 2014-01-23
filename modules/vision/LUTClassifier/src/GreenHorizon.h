@@ -28,7 +28,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/vision/ClassifiedImage.h"
 
-#include "LookUpTable.h"
+#include "utility/vision/LookUpTable.h"
 
 namespace modules {
     namespace vision {
@@ -59,7 +59,7 @@ namespace modules {
                 Note that the use of kinematics horizon has been replaced by dummmy code 
                 @param image The raw image
             */ 
-            void calculateGreenHorizon(const messages::input::Image& image, const LookUpTable& LUT);
+            void calculateGreenHorizon(const messages::input::Image& image, const utility::vision::LookUpTable& LUT);
          
             /*! @brief Computes the green horizon characteristics
                 @param initial_points the horizon points calculated by the calculateGreenHorizon method
@@ -73,7 +73,7 @@ namespace modules {
 
             /*! @brief Returns a true if the specified pixel is coloured green.
              */
-            bool isPixelGreen(const messages::input::Image::Pixel& p, const LookUpTable& LUT);
+            bool isPixelGreen(const messages::input::Image::Pixel& p, const utility::vision::LookUpTable& LUT);
 
 
             /*! @brief  2D cross product of OA and OB std::vectors, i.e. z-component of their 3D cross product.
