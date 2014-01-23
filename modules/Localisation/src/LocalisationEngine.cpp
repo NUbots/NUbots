@@ -68,29 +68,30 @@ namespace modules {
         return RemoveInactiveModels(robot_models_);
     }
 
-    /*! @brief Prunes the models using the Viterbi method. This removes lower probability models to a maximum total models.
-     *  @param order The number of models to be kept at the end for the process.
-     *  @return The number of models that were removed during this process.
+    /* @brief Prunes the models using the Viterbi method. This removes lower
+     *        probability models to a maximum total models.
+     * @param order The number of models to be kept at the end for the process.
+     * @return The number of models that were removed during this process.
      */
     int SelfLocalisation::PruneViterbi(unsigned int order)
     {
         RemoveInactiveModels();
 
         // No pruning required if not above maximum.
-        if(m_robot_filters.size() <= order) 
+        if(robot_models_.size() <= order) 
             return 0;
 
         // Sort, results in order smallest to largest.
-        m_robot_filters.sort(model_ptr_cmp());
+        robot_models_.sort(model_ptr_cmp());
 
         // Number of models that need to be removed.
-        unsigned int num_to_remove = m_robot_filters.size() - order;
+        unsigned int num_to_remove = robot_models_.size() - order;
 
         // Beginning of removal range
-        auto begin_remove = m_robot_filters.begin();
+        auto begin_remove = robot_models_.begin();
         
         // End of removal range (not removed)
-        auto end_remove = m_robot_filters.begin();
+        auto end_remove = robot_models_.begin();
         std::advance(end_remove, num_to_remove);
 
         std::for_each (
@@ -102,7 +103,7 @@ namespace modules {
         int num_removed = RemoveInactiveModels();
 
         // Result should have been achieved or something is broken.
-        assert(m_robot_filters.size() == order);
+        assert(robot_models_.size() == order);
 
         return num_removed;
     }
@@ -175,40 +176,29 @@ namespace modules {
         @param fobs The object information output by the vision module. This contains objects identified and their relative positions.
         @param time_increment The time that has elapsed since the previous localisation frame.
      */
-    void SelfLocalisation::ProcessObjects(FieldObjects* fobs, float time_increment) {
+    void SelfLocalisation::ProcessObjects(FieldObjects* fobs, 
+                                          float time_increment) {
         int useful_object_count = 0;
 
-        // all objects at once.
-        std::vector<StationaryObject*> update_objects;
-        unsigned int useful_object_count = 0;
-        for (auto& sfob : fobs->stationaryFieldObjects) {
-            if (!sfob.isObjectVisible())
-                continue;
-
-            update_objects.push_back(sfob);
-            useful_object_count++;
-        }
-
-        multipleLandmarkUpdate(update_objects);
-
-        NormaliseModelAlphas();
-
-        // Update robot models
-        if (kMultipleModelsEnabled) {
-            useful_object_count += ProcessAmbiguousObjects(fobs);
-        }
+        // Known object update
+        IndividualStationaryObjectUpdate(fobs, time_increment);
 
         // Two object update
         if (kTwoObjectUpdateEnabled) {
             AttemptTwoObjectUpdate(fobs);
         }
 
+        // Update robot models
+        if (kMultipleModelsEnabled) {
+            useful_object_count += ProcessAmbiguousObjects(fobs);
+        }
+
+        // Pruning
         NormaliseModelAlphas();
         PruneModels();
 
-        MobileObject& ball = fobs->mobileFieldObjects[FieldObjects::FO_BALL];
-        
-        BallUpdate(ball);
+        // Ball update
+        BallUpdate(fobs->mobileFieldObjects[FieldObjects::FO_BALL]);
     
         if (useful_object_count > 0)
             time_since_field_object_last_seen_ = 0;
@@ -371,54 +361,119 @@ namespace modules {
         }
     }
 
-    #error Check this method!
-    // TODO: Check this method!!
+    int SelfLocalisation::AmbiguousLandmarkUpdateExhaustive(
+        AmbiguousObject &ambiguous_object,
+        const std::vector<StationaryObject*>& possible_objects)
+    {
+        return AmbiguousLandmarkUpdateExhaustive(ambiguous_object,
+                                                 possible_objects);
+    }
+
+    /*!
+     * @brief Calculate the variance in the given measurement based on the objects distance.
+     * @param theObject The object the error variance is to be calculated for.
+     * @return The error of the measurement given as the variance.
+     */
+    MeasurementError SelfLocalisation::CalculateError(const Object& theObject)
+    {
+        MeasurementError error;
+
+        float flat_dist = theObject.measuredDistance() * 
+                          cos(theObject.measuredElevation());
+        float flat_dist_sqr = flat_dist * flat_dist;
+
+        error.setDistance(c_obj_range_offset_variance + 
+                          c_obj_range_relative_variance * flat_dist_sqr);
+        error.setHeading(c_obj_theta_variance);
+
+        return error;
+    }
+
+    IWeightedKalmanFilter* SelfLocalisation::newRobotModel(
+        IWeightedKalmanFilter* filter, 
+        const StationaryObject& measured_object, 
+        const MeasurementError &error,
+        int ambiguous_id, double timestamp)
+    {
+        Matrix meas_noise = error.errorCovariance();
+
+        IWeightedKalmanFilter* new_filter = filter->Clone();
+        new_filter->AssignNewId();  // update with a new ID.
+
+        Matrix meas(2, 1, false);
+        meas[0][0] = measured_object.measuredDistance() * cos(measured_object.measuredElevation());
+        meas[1][0] = measured_object.measuredBearing();
+
+        Matrix args(2,1,false);
+        args[0][0] = measured_object.X();
+        args[1][0] = measured_object.Y();
+
+        bool success = new_filter->measurementUpdate(meas, meas_noise, args,
+                                                     RobotModel::klandmark_measurement);
+        new_filter->setActive(success);
+
+        if(new_filter->active())
+        {
+            new_filter->m_creation_time = timestamp;
+            new_filter->m_parent_history_buffer = filter->m_parent_history_buffer;
+            new_filter->m_parent_history_buffer.push_back(filter->id());
+            new_filter->m_parent_id = filter->id();
+            new_filter->m_split_option = measured_object.getID();
+            new_filter->m_previous_decisions = filter->m_previous_decisions;
+            new_filter->m_previous_decisions[ambiguous_id] = measured_object.getID();
+        }
+
+        return new_filter;
+    }
+
     /*! @brief Performs an ambiguous measurement update using the exhaustive 
      *  process. 
      *  This creates a new model for each possible location for the measurement.
      */
     int SelfLocalisation::AmbiguousLandmarkUpdateExhaustive(
-        AmbiguousObject &ambiguousObject, 
-        const vector<StationaryObject*>& possible_objects) {
+        AmbiguousObject &ambiguous_object,
+        const std::vector<StationaryObject*>& possible_objects)
+    {
+        const float outlier_factor = 0.001; // TODO: Add to config system
+        std::list<IWeightedKalmanFilter*> new_models;
 
-        if (possible_objects.size() < 1)
-        {
-    // #if LOC_SUMMARY_LEVEL > 0
-    //         m_frame_log << "Ignoring Ambiguous Object - " << ambiguousObject.getName() << std::endl;
-    // #endif
-            return 0;
-        }
+        MeasurementError error = CalculateError(ambiguous_object);
 
-        const float outlier_factor = 0.0001;
-        ModelContainer new_models;
-
-        MeasurementError error = calculateError(ambiguousObject);
-
-        for (auto& model : robot_models_) {
-            if((model.inactive())
+        for (auto* model : robot_models_) {
+            if (!model->active())
                 continue;
 
             unsigned int models_added = 0;
 
-            for (auto& obj : possible_objects) {
-                auto* temp_mod = new Model(model, ambiguousObject, obj, error, GetTimestamp());
+            for (StationaryObject* possible_object : possible_objects) {
+                auto temp_object = *possible_object;
+                temp_object.CopyMeasurement(ambiguous_object);
+                
+                auto* temp_mod = newRobotModel(model, temp_object, error, 
+                                               ambiguous_object.getID(), 
+                                               GetTimestamp());
+                
                 new_models.push_back(temp_mod);
+
+                if(temp_mod->active())
+                    models_added++;
             }
 
             RemoveInactiveModels(new_models);
 
-            if (models_added) {
-                model.setActive(false);
-            } else {
-                model.setAlpha(outlier_factor * model.alpha());
-            }
+            if (models_added)
+                model->setActive(false);
+            else
+                model->setmodelWeight(outlier_factor * model->getFilterWeight());
         }
 
         if (new_models.size() > 0) {
-            m_models.insert(m_models.end(), new_models.begin(), new_models.end());
+            robot_models_.insert(robot_models_.end(), new_models.begin(), new_models.end());
             new_models.clear();
         }
 
-        return SelfModel::RESULT_OUTLIER;
+        RemoveInactiveModels();
+
+        return 0;
     }
 }
