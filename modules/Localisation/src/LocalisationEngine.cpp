@@ -170,6 +170,43 @@ namespace modules {
             doTwoObjectUpdate(left_yellow, right_yellow);
     }
 
+    void SelfLocalisation::IndividualStationaryObjectUpdate(FieldObjects* fobs, float time_increment)
+    {
+        unsigned int objects_added = 0;
+        unsigned int total_successful_updates = 0;
+
+        for (auto& obj : fobs->stationaryFieldObjects) {
+            // Skip objects that were not seen.
+            if (!obj.isObjectVisible())
+                continue;
+
+            total_successful_updates += LandmarkUpdate(obj);
+            objects_added++;
+        }
+
+        // if (objects_added > 0 and total_successful_updates < 1) {
+        //     total_bad_known_objects += objects_added;
+        // } else {
+        //     total_bad_known_objects = 0;
+        // }
+
+        // if (total_bad_known_objects > 3) {
+        //     DoReset();
+
+        //     // reapply the updates.
+        //     for (auto& obj : fobs->stationaryFieldObjects) {
+        //         // Skip objects that were not seen.
+        //         if (!obj.isObjectVisible())
+        //             continue;
+
+        //         total_successful_updates += LandmarkUpdate(obj);
+        //         objects_added++;
+        //     }
+        // }
+
+        NormaliseAlphas();
+    }
+
     /*! @brief Process objects
         Processes the field objects and perfroms the correction updates required from the observations.
 
@@ -218,13 +255,13 @@ namespace modules {
     }
 
     float ModelsAreSimilar(const IWeightedKalmanFilter* a, const IWeightedKalmanFilter* b) {
-        const float min_trans_dist = 5; // TODO: Add to config system
-        const float min_head_dist = 0.01; // TODO: Add to config system
+        const float kMinTransDist = 5; // TODO: Add to config system
+        const float kMinHeadDist = 0.01; // TODO: Add to config system
 
         float trans_dist = TranslationDistance(model_a->estimate(), model_b->estimate());
         float head_dist = HeadingDistance(model_a->estimate(), model_b->estimate());
         
-        return (trans_dist < min_trans_dist) && (head_dist < min_head_dist);
+        return (trans_dist < kMinTransDist) && (head_dist < kMinHeadDist);
     }
 
     /// Reduces the number of active models by merging similar models together
@@ -282,23 +319,23 @@ namespace modules {
                 model.setAlpha(model.alpha() / sumAlpha);
     }
 
-    void LocalisationEngine::landmarkUpdate(StationaryObject &landmark) {
+    void LocalisationEngine::LandmarkUpdate(StationaryObject &landmark) {
         if (!landmark.validMeasurement())
             return SelfModel::RESULT_OUTLIER;
 
         double dist = landmark.measuredDistance();
         double elevation = landmark.measuredElevation();
-        double flat_distance =  dist * cos(elevation);
-        double distance_squared = flat_distance * flat_distance;
+        double flat_dist =  dist * cos(elevation);
+        double flat_dist_squared = flat_dist * flat_dist;
         
         MeasurementError temp_error;
         temp_error.setDistance(
-            c_obj_range_offset_variance + 
-            c_obj_range_relative_variance * distance_squared);
+            kObjectRangeOffsetVariance + 
+            kObjectRangeRelativeVariance * flat_dist_squared);
         temp_error.setHeading(c_obj_theta_variance);
 
         for (auto& model : robot_models_) {
-            if(!model.active())
+            if (!model.active())
                 continue;
 
             model.MeasurementUpdate(landmark, temp_error);
@@ -325,13 +362,13 @@ namespace modules {
 
             double dist = landmark.measuredDistance();
             double elevation = landmark.measuredElevation();
-            double flat_distance =  dist * cos(elevation);
-            double distance_squared = flat_distance * flat_distance;
+            double flat_dist =  dist * cos(elevation);
+            double flat_dist_squared = flat_dist * flat_dist;
             
             MeasurementError temp_error;
             temp_error.setDistance(
-                c_obj_range_offset_variance + 
-                c_obj_range_relative_variance * distance_squared);
+                kObjectRangeOffsetVariance + 
+                kObjectRangeRelativeVariance * flat_dist_squared);
             temp_error.setHeading(c_obj_theta_variance);
 
 
@@ -339,13 +376,13 @@ namespace modules {
             locations[index][0] = landmark.X();
             locations[index+1][0] = landmark.Y();
 
-            measurements[index][0] = flat_distance;
+            measurements[index][0] = flat_dist;
             measurements[index+1][0] = landmark.measuredBearing();
 
             // R
             r_measurements[index][index] = 
-                c_obj_range_offset_variance + 
-                c_obj_range_relative_variance * distance_squared;
+                kObjectRangeOffsetVariance + 
+                kObjectRangeRelativeVariance * flat_dist_squared;
             r_measurements[index+1][index+1] = c_obj_theta_variance;
 
             objIds.push_back(landmark.getID());
@@ -382,8 +419,8 @@ namespace modules {
                           cos(theObject.measuredElevation());
         float flat_dist_sqr = flat_dist * flat_dist;
 
-        error.setDistance(c_obj_range_offset_variance + 
-                          c_obj_range_relative_variance * flat_dist_sqr);
+        error.setDistance(kObjectRangeOffsetVariance + 
+                          kObjectRangeRelativeVariance * flat_dist_sqr);
         error.setHeading(c_obj_theta_variance);
 
         return error;
@@ -434,7 +471,7 @@ namespace modules {
         AmbiguousObject &ambiguous_object,
         const std::vector<StationaryObject*>& possible_objects)
     {
-        const float outlier_factor = 0.001; // TODO: Add to config system
+        const float kOutlierFactor = 0.001; // TODO: Add to config system
         std::list<IWeightedKalmanFilter*> new_models;
 
         MeasurementError error = CalculateError(ambiguous_object);
@@ -455,7 +492,7 @@ namespace modules {
                 
                 new_models.push_back(temp_mod);
 
-                if(temp_mod->active())
+                if (temp_mod->active())
                     models_added++;
             }
 
@@ -464,7 +501,7 @@ namespace modules {
             if (models_added)
                 model->setActive(false);
             else
-                model->setmodelWeight(outlier_factor * model->getFilterWeight());
+                model->setmodelWeight(kOutlierFactor * model->getFilterWeight());
         }
 
         if (new_models.size() > 0) {
