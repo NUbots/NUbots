@@ -196,7 +196,7 @@ namespace modules {
 		            it_start++;
 		            it_end++;
 		        }
-				
+				//
 		        // calculate y value for interpolated point
 		        y_new = interpolate(*it_start, *it_end, x);
 
