@@ -189,18 +189,22 @@ namespace kinematics {
 
         arma::vec3 targetLeg = anklePos - hipOffset;
 
-        NUClear::log<NUClear::DEBUG>(ankleX, "\n", ankleY, "\n", ankleZ, "\n", anklePos);
-        NUClear::log<NUClear::DEBUG>(hipOffset, "\n", targetLeg);
+        //NUClear::log<NUClear::DEBUG>(ankleX, "\n", ankleY, "\n", ankleZ, "\n", anklePos);
+        //NUClear::log<NUClear::DEBUG>(hipOffset, "\n", targetLeg);
 
 
         float length = arma::norm(targetLeg, 2);
-        NUClear::log<NUClear::DEBUG>("Length: ", length);
+        if(length > UPPER_LEG_LENGTH+LOWER_LEG_LENGTH){
+            NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints3 : Requested position beyond leg reach.");
+            return positions;
+        }
+        //NUClear::log<NUClear::DEBUG>("Length: ", length);
         float sqrLength = length * length;
         float sqrUpperLeg = UPPER_LEG_LENGTH * UPPER_LEG_LENGTH;
         float sqrLowerLeg = LOWER_LEG_LENGTH * LOWER_LEG_LENGTH;
 
         float cosKnee = (sqrUpperLeg + sqrLowerLeg - sqrLength) / (2 * UPPER_LEG_LENGTH * LOWER_LEG_LENGTH);
-        NUClear::log<NUClear::DEBUG>("Cos Knee: ", cosKnee);
+       // NUClear::log<NUClear::DEBUG>("Cos Knee: ", cosKnee);
         // TODO: check if cosKnee is between 1 and -1
         knee = acos(cosKnee);
 
@@ -215,8 +219,14 @@ namespace kinematics {
         arma::vec3 unitTargetLeg = targetLeg / length;
 
         arma::vec3 hipX = arma::cross(ankleY, unitTargetLeg);
-        //TODO: Check if hipX is zero and shortcut if it is by assuming leg plane is perpendicular to globalX
-        arma::vec3 legPlaneTangent = arma::cross(ankleY, hipX);
+        float hipXLength = arma::norm(hipX,2);
+        if(hipXLength>0){
+            hipX /= hipXLength;
+        } else {
+            NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints3 : hipX and ankleY parrallel. This is unhandled at the moment.");
+            return positions;
+        }
+        arma::vec3 legPlaneTangent = arma::cross(ankleY, hipX); //Will be unit as ankleY and hipX are normal and unit
 
         ankleRoll = M_PI_2 - acos(arma::dot(ankleX, legPlaneTangent));
 
@@ -227,28 +237,31 @@ namespace kinematics {
         float cosZandHipX = arma::dot(globalZ, hipX);
         bool hipRollPositive = cosZandHipX <= 0;
         arma::vec3 legPlaneGlobalZ = (globalZ - ( cosZandHipX * hipX));
-        legPlaneGlobalZ /= arma::norm(legPlaneGlobalZ, 2);
-
-        float cosHipRoll = arma::dot(legPlaneGlobalZ, globalZ);
-        // TODO: check if cosHipRoll is between 1 and -1
-        hipRoll = acos(cosHipRoll);
-        if(!hipRollPositive) {
-            hipRoll *= -1;
+        float legPlaneGlobalZLength = arma::norm(legPlaneGlobalZ, 2);
+        if(legPlaneGlobalZLength>0){
+           legPlaneGlobalZ /= legPlaneGlobalZLength;
         }
+
+        float cosHipRoll = arma::dot((arma::dot(hipX, globalX) >= 0 ? 1 : -1) * legPlaneGlobalZ, globalZ);
+        // TODO: check if cosHipRoll is between 1 and -1
+        hipRoll = (hipRollPositive ? 1 : -1) * acos(cosHipRoll);
+
 
         float phi4 = M_PI - knee - lowerLeg;
         
         //Superposition values:
         float sinPIminusPhi2 = std::sin(M_PI - phi2);
         arma::vec3 unitUpperLeg = unitTargetLeg * (std::sin(phi2 - phi4) / sinPIminusPhi2) + ankleY * (std::sin(phi4) / sinPIminusPhi2);
+        bool isHipPitchPositive = dot(hipX,cross(unitUpperLeg,legPlaneGlobalZ))>=0;
 
-        hipPitch = acos(arma::dot(legPlaneGlobalZ, unitUpperLeg));
+        hipPitch = (isHipPitchPositive ? 1 : -1) * acos(arma::dot(legPlaneGlobalZ, unitUpperLeg));
 
         arma::vec3 hipXProjected = hipX;
         hipXProjected[2] = 0;
         hipXProjected /= arma::norm(hipXProjected, 2);
+        bool isHipYawPositive = arma::dot(hipXProjected,globalY)>=0;
 
-        hipYaw = acos(hipXProjected[0]);
+        hipYaw = (isHipYawPositive ? 1 : -1) * acos(arma::dot(hipXProjected,globalX));
 
         if (isLeft) {
             positions.push_back(std::make_pair(ServoID::L_HIP_YAW, -hipYaw));
