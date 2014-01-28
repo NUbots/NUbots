@@ -56,7 +56,7 @@ bool MultivariateGaussian::operator ==(const MultivariateGaussian& b) const {
     if( m_numStates != b.m_numStates) {
         return false;
     }//FIXME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    if(arma::any(arma::vectorise(m_mean!=b.m_mean))) { // because armadillo doesnt have a simple A!=B matrix comparison function //m_mean != b.m_mean
+    if(arma::any(arma::vectorise(m_mean!=b.m_mean))) { // because armadillo doesnt have a straightforward A!=B matrix comparison function //m_mean != b.m_mean
         return false;
     }
     if(arma::any(arma::vectorise(this->m_covariance!=b.m_covariance))) {
@@ -143,8 +143,8 @@ void MultivariateGaussian::writeData(std::ostream& output) const {
         temp = mean(i);
         output.write(c_cast(temp), sizeof(temp));
     }
-    for (int r = 0; r < m_covariance.n_rows; r++) {
-        for (int c = 0; c < m_covariance.n_cols; c++) {
+    for (unsigned int r = 0; r < m_covariance.n_rows; r++) {
+        for (unsigned int c = 0; c < m_covariance.n_cols; c++) {
             temp = m_covariance(r, c);
             output.write(c_cast(temp), sizeof(temp));
         }

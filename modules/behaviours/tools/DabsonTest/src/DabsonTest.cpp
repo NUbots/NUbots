@@ -1,7 +1,8 @@
 #include "DabsonTest.h"
 
-#include "Kalman.h" //the 2 files neccessary for kalman filter testing
-#include "IMUModel.h"
+//../../../../../../shared/
+#include "utility/math/kalman/Kalman.h" //the 2 files neccessary for filtering
+#include "utility/math/kalman/IMUModel.h"
 
 #include "utility/NUbugger/NUgraph.h"
 using utility::NUbugger::graph;
@@ -21,8 +22,7 @@ namespace modules {
 
                     // Do kalman filtery stuff in here
 
-                    IMUModel  im;
-                    //SINEModel sm;
+                    IMUModel  im;                    //OR IDEALLY WHEN ITS WORKINGSINEModel sm;
                     Kalman<IMUModel> k; 
 
                     float o = s; //o ~ the kalman filter output.
@@ -121,15 +121,15 @@ int main() {
         //const arma::mat& v = b; //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+++
         //const arma::mat& w = c; //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+++
         
-            /*
-           * //the last argument (type) is one of 3 types (defined in IMUModel.h)
-          * bbbb build me
-          enum MeasurementType {
-            kmeasurement_accelerometer,
-            kmeasurement_kinematic,
-            kmeasurement_total_types
-          };
-             *
+            //
+           // the last argument (type) is one of 3 types (defined in IMUModel.h)
+         //  bbbb build me
+          //enum MeasurementType {
+         //   kmeasurement_accelerometer,
+          //  kmeasurement_kinematic,
+         //   kmeasurement_total_types
+          //};
+        //     *
         
         arma::mat q(1,1);
         
