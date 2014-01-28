@@ -1,0 +1,7 @@
+ADD_ROLE(
+    NAME dabsontest 
+    MODULES
+        support::logging::ConsoleLogHandler
+	behaviours::tools::DabsonTest
+        support::NUbugger
+)
