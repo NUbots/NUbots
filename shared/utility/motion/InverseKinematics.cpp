@@ -223,45 +223,47 @@ namespace kinematics {
         if(hipXLength>0){
             hipX /= hipXLength;
         } else {
-            NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints3 : hipX and ankleY parrallel. This is unhandled at the moment.");
+            NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints3 : targetLeg and ankleY parrallel. This is unhandled at the moment.");
             return positions;
         }
         arma::vec3 legPlaneTangent = arma::cross(ankleY, hipX); //Will be unit as ankleY and hipX are normal and unit
 
-        ankleRoll = M_PI_2 - acos(arma::dot(ankleX, legPlaneTangent));
+        ankleRoll = atan2(arma::dot(ankleX, legPlaneTangent),arma::dot(ankleX, hipX));
 
         arma::vec3 globalX = {1,0,0};
         arma::vec3 globalY = {0,1,0};
         arma::vec3 globalZ = {0,0,1};
+
+        bool isAnkleAboveWaist = arma::dot(unitTargetLeg,globalZ)<0;
         
         float cosZandHipX = arma::dot(globalZ, hipX);
         bool hipRollPositive = cosZandHipX <= 0;
-        arma::vec3 legPlaneGlobalZ = (globalZ - ( cosZandHipX * hipX));
+        arma::vec3 legPlaneGlobalZ = (isAnkleAboveWaist ? -1 : 1 ) * (globalZ - ( cosZandHipX * hipX));
         float legPlaneGlobalZLength = arma::norm(legPlaneGlobalZ, 2);
         if(legPlaneGlobalZLength>0){
            legPlaneGlobalZ /= legPlaneGlobalZLength;
         }
 
-        float cosHipRoll = arma::dot((arma::dot(hipX, globalX) >= 0 ? 1 : -1) * legPlaneGlobalZ, globalZ);
+        float cosHipRoll = arma::dot(legPlaneGlobalZ, globalZ);
         // TODO: check if cosHipRoll is between 1 and -1
         hipRoll = (hipRollPositive ? 1 : -1) * acos(cosHipRoll);
 
 
         float phi4 = M_PI - knee - lowerLeg;
-        
         //Superposition values:
         float sinPIminusPhi2 = std::sin(M_PI - phi2);
         arma::vec3 unitUpperLeg = unitTargetLeg * (std::sin(phi2 - phi4) / sinPIminusPhi2) + ankleY * (std::sin(phi4) / sinPIminusPhi2);
-        bool isHipPitchPositive = dot(hipX,cross(unitUpperLeg,legPlaneGlobalZ))>=0;
+        bool isHipPitchPositive = dot(hipX,cross(unitUpperLeg, legPlaneGlobalZ))>=0;    
 
         hipPitch = (isHipPitchPositive ? 1 : -1) * acos(arma::dot(legPlaneGlobalZ, unitUpperLeg));
-
-        arma::vec3 hipXProjected = hipX;
+        
+        arma::vec3 hipXProjected = (isAnkleAboveWaist ? -1 : 1) * hipX;  //If leg is above waist then hipX is pointing in the wrong direction in the xy plane 
         hipXProjected[2] = 0;
         hipXProjected /= arma::norm(hipXProjected, 2);
         bool isHipYawPositive = arma::dot(hipXProjected,globalY)>=0;
 
-        hipYaw = (isHipYawPositive ? 1 : -1) * acos(arma::dot(hipXProjected,globalX));
+       
+        hipYaw = (isHipYawPositive ? 1 : -1) * acos(arma::dot( hipXProjected,globalX));
 
         if (isLeft) {
             positions.push_back(std::make_pair(ServoID::L_HIP_YAW, -hipYaw));
