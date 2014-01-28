@@ -113,8 +113,8 @@ namespace modules {
 
             if (!edges.empty()) {
                 // Geometric mean
-                arma::Col<long double> pos;
-                pos << 1.0 << 1.0;
+                // Should replace with average
+                std::vector<long double> pos(2, 1.0);
                 long double root_order = 1.0 / edges.size();
 
                 for(const arma::vec2& p : edges) {
@@ -338,6 +338,14 @@ namespace modules {
 
         std::unique_ptr< std::vector<messages::vision::Ball> > BallDetector::createBallMessage(const std::vector<Ball>& balls){
             std::unique_ptr< std::vector<messages::vision::Ball> > ball_message = std::unique_ptr< std::vector<messages::vision::Ball> >(new std::vector<messages::vision::Ball> );
+            for(auto& ball : balls){
+                NUClear::log<NUClear::DEBUG>(ball);
+                if(ball.valid){ 
+                   
+                    // ball_message->push_back(messages::vision::Ball());
+                    // ball_message->back().
+                }
+            }
             return std::move(ball_message);
         }
 

@@ -42,6 +42,10 @@ namespace modules {
 
 		    size_t width = img.width();
 		    size_t height = img.height();
+		    if(width==0 || height==0){
+		    	NUClear::log<NUClear::ERROR>("Image height or width zero. Check camera!!");
+		    	return;
+		    }
 
 		    //makes this fail-safe in the event of improper parameters
 		    const int SPACING = std::max(GREEN_HORIZON_SCAN_SPACING, 1U);

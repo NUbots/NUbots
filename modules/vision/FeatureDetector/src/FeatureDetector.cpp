@@ -141,8 +141,8 @@ namespace modules {
                                                  constants.config["THROWOUT_DISTANT_BALLS"],
                                                  constants.config["MAX_BALL_DISTANCE"],
                                                  constants.config["BALL_WIDTH"],
-                                                 distanceMethod, 
-                                                 m_visionKinematics);
+                                                 distanceMethod
+                                                 );
                                                  
             });
             
@@ -230,7 +230,6 @@ namespace modules {
                     imageSize[1] = config.config["imageHeight"];
 
                     m_visionKinematics.setCamParams(imageSize,FOV);
-
                     m_visionKinematics.setSensors(0, 0, 0, 0, arma::vec3("0 0 5"));
             });
 

@@ -34,6 +34,8 @@ namespace modules {
 
         class Ball : public VisionFieldObject {
         public:
+
+            friend class BallDetector;
             Ball();
             Ball(const arma::vec2& centre, double diameter);
             

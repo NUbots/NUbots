@@ -46,18 +46,13 @@ namespace modules {
 
 				std::vector<std::string> LUTLocations = locations.config["DEFAULT_LOCATION"];
 				LUTs.clear();
-				LUTs.reserve(LUTLocations.size());
 
-				for (auto LUTLocation : LUTLocations) {
-					LookUpTable LUT;
-					LUTs.push_back(LUT);
-					bool loaded = LUTs.back().loadLUTFromFile(LUTLocation);
+				for (auto& LUTLocation : LUTLocations) {
+					std::shared_ptr<LookUpTable> ptr = std::make_shared<LookUpTable>();
+					LUTs.push_back(ptr);
+					bool loaded = LUTs.back()->loadLUTFromFile(LUTLocation);			
 
-					
-
-					if(!loaded) {
-						
-						std::cout << "Error Loading LUT: " << LUTLocation << std::endl;
+					if(!loaded) {						
 						NUClear::log<NUClear::ERROR>("LUT ", LUTLocation, " has not loaded successfully." );
 
 					}
@@ -166,7 +161,7 @@ namespace modules {
             	/*std::vector<arma::vec2> green_horizon_points = */
             	//std::cout << "Image size = "<< image.width() << "x" << image.height() <<std::endl;
             	//std::cout << "LUTClassifier::on<Trigger<Image>> calculateGreenHorizon" << std::endl;
-            	greenHorizon.calculateGreenHorizon(image, LUTs[currentLUTIndex]);
+            	greenHorizon.calculateGreenHorizon(image, *LUTs[currentLUTIndex]);
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> generateScanLines" << std::endl;
             	std::vector<int> generatedScanLines;
@@ -175,10 +170,10 @@ namespace modules {
             	scanLines.generateScanLines(image, greenHorizon, &generatedScanLines);
                 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyHorizontalScanLines" << std::endl;
-            	scanLines.classifyHorizontalScanLines(image, generatedScanLines, LUTs[currentLUTIndex], &horizontalClassifiedSegments);
+            	scanLines.classifyHorizontalScanLines(image, generatedScanLines, *LUTs[currentLUTIndex], &horizontalClassifiedSegments);
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyVerticalScanLines" << std::endl;
-            	scanLines.classifyVerticalScanLines(image, greenHorizon, LUTs[currentLUTIndex], &verticalClassifiedSegments);
+            	scanLines.classifyVerticalScanLines(image, greenHorizon, *LUTs[currentLUTIndex], &verticalClassifiedSegments);
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyImage" << std::endl;
             	std::unique_ptr<ClassifiedImage> classifiedImage = segmentFilter.classifyImage(horizontalClassifiedSegments, verticalClassifiedSegments);
@@ -186,9 +181,7 @@ namespace modules {
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> emit(std::move(classified_image));" << std::endl;
             	classifiedImage->image = image_ptr;
-
-            	std::shared_ptr<LookUpTable> lut_pointer = std::shared_ptr<LookUpTable>(&LUTs[currentLUTIndex]);
-            	classifiedImage->LUT = lut_pointer;
+            	classifiedImage->LUT = LUTs[currentLUTIndex];
 
             	emit(std::move(classifiedImage));
             });

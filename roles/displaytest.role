@@ -1,7 +1,7 @@
 ADD_ROLE(
     NAME displaytest
     MODULES
-        support::SignalCatcher
+        #support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
         support::DisplayTest

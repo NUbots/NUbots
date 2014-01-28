@@ -65,7 +65,7 @@ namespace modules {
          */
         class LUTClassifier : public NUClear::Reactor {
         private:
-            std::vector<utility::vision::LookUpTable> LUTs;
+            std::vector< std::shared_ptr<utility::vision::LookUpTable> > LUTs;
             unsigned int currentLUTIndex;
 
             GreenHorizon greenHorizon;
