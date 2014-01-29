@@ -65,7 +65,7 @@ namespace modules {
                 @param initial_points the horizon points calculated by the calculateGreenHorizon method
             */ 
             void set(std::vector<arma::vec2> original_points, int image_width, int image_height);
-
+            
             /*! @brief Returns a std::list of points on the convex hull in counter-clockwise order.
              Note: the last point in the returned std::list is the same as the first one.
              */
@@ -84,7 +84,7 @@ namespace modules {
                 return (A[0] - O[0]) * (B[1] - O[1]) - (A[1] - O[1]) * (B[0] - O[0]);
             }
             
-            double interpolate(arma::vec2 p1, arma::vec2 p2, double x);
+            double interpolate(const arma::vec2& p1, const arma::vec2& p2, double x);
             
             //! Returns the interpolated points for the entire screen width.
             const std::vector<arma::vec2>& getInterpolatedPoints() const;
