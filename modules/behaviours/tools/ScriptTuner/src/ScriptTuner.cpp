@@ -158,13 +158,10 @@ namespace modules {
                         case':':
                             help();
                             break;
- //Kill simply freezes the window
+                        //Kill simply freezes the window
                         //case 'X':
-                            //kill();
-                            //break;
-//                        case ':':
-//                            help();
-//                           break;
+                        //kill();
+                        //break;
                     }
 
                     // Update whatever visual changes we made
@@ -506,6 +503,7 @@ namespace modules {
                 endwin();
             }
 
+            //shows full list of commands
             void ScriptTuner::help() {
                 
                 move(LINES-6 ,12);
@@ -619,15 +617,6 @@ namespace modules {
                                
             }
 
-
-//            void userLoadScript() {
-//                //make scripttuner independent of path
-//                move(6,13);
-//                curs_set(true);
-//                std::string tempscript = userInput();
-//
-//                if
-//            }
 
             
         } // tools

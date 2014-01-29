@@ -48,30 +48,25 @@ namespace modules {
                 const size_t defaultGain = 80;
                 const size_t defaultDuration = 1000;
 
-                void refreshView();
-
                 std::string userInput();
+                
+                void refreshView();
                 void loadScript(const std::string& path);
                 void saveScript();
                 void editDuration();
                 void editSelection();
-
                 void activateFrame(int frame);
-
                 void toggleLockMotor();
                 void newFrame();
                 void deleteFrame();
-
-                volatile bool running;
                 void run();
                 void kill();
                 void playScript();
                 void jumpToFrame();
                 void help();
-                //void userLoadScript();
 
+                volatile bool running;
 
-               
             public:
                 explicit ScriptTuner(std::unique_ptr<NUClear::Environment> environment);
             };
