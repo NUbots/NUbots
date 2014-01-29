@@ -53,9 +53,11 @@ namespace modules {
 					bool loaded = LUTs.back()->loadLUTFromFile(LUTLocation);			
 
 					if(!loaded) {						
-						NUClear::log<NUClear::ERROR>("LUT ", LUTLocation, " has not loaded successfully." );
+						NUClear::log<NUClear::ERROR>("!!!LUT ", LUTLocation, " has NOT loaded successfully!!!!" );
 
-					}
+					} else {
+                        NUClear::log<NUClear::ERROR>("LUT ", LUTLocation, " has loaded successfully. Size: ", LUTs.back()->LUT_SIZE);
+                    }
 				}
 				
 			});
@@ -157,7 +159,7 @@ namespace modules {
 				}
 			});
 
-            on<Trigger<Image>, With<Raw<Image>>, Options<Single>>([this](const Image& image, std::shared_ptr<const Image> image_ptr) {
+            on<Trigger<Image>, With<Raw<Image>>, Options<Single>>([this](const Image& image, const std::shared_ptr<const Image>& image_ptr) {
             	/*std::vector<arma::vec2> green_horizon_points = */
             	//std::cout << "Image size = "<< image.width() << "x" << image.height() <<std::endl;
             	//std::cout << "LUTClassifier::on<Trigger<Image>> calculateGreenHorizon" << std::endl;
@@ -186,16 +188,6 @@ namespace modules {
             	emit(std::move(classifiedImage));
             });
 
-			// on<Trigger<Image>>([this](const Image& image) {
-
-			// 	//NUClear::log("Waiting 100 milliseconds...");
-
-			// 	system_clock::time_point start = system_clock::now();
-
-			// 	while (std::chrono::duration_cast<std::chrono::milliseconds>(system_clock::now().time_since_epoch()) - 
-			// 			std::chrono::duration_cast<std::chrono::milliseconds>(start.time_since_epoch())  < std::chrono::milliseconds(3)){}
-
-			// });
         }
 
     }  // vision

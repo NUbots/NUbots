@@ -50,7 +50,7 @@ namespace modules {
                                const DISTANCE_METHOD& GOAL_DISTANCE_METHOD_,
                                int EDGE_OF_SCREEN_MARGIN_);
 
-            void setBase(const VisionKinematics& visionKinematics, arma::vec2 base);
+            void setBase(const VisionKinematics& visionKinematics,const arma::vec2& base);
 
             //! @brief reutns the pixel locations of the corners.
             const Quad& getQuad() const;

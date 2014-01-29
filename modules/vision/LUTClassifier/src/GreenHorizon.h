@@ -64,7 +64,7 @@ namespace modules {
             /*! @brief Computes the green horizon characteristics
                 @param initial_points the horizon points calculated by the calculateGreenHorizon method
             */ 
-            void set(const std::vector<arma::vec2> &initial_points, int image_width, int image_height);
+            void set(std::vector<arma::vec2> original_points, int image_width, int image_height);
 
             /*! @brief Returns a std::list of points on the convex hull in counter-clockwise order.
              Note: the last point in the returned std::list is the same as the first one.

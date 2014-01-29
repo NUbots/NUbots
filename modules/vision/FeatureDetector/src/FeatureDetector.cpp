@@ -22,11 +22,11 @@
 namespace modules {
     namespace vision {
 
-		using messages::support::Configuration;
-		using utility::configuration::ConfigurationNode;
+    		using messages::support::Configuration;
+    		using utility::configuration::ConfigurationNode;
         using messages::vision::ClassifiedImage;
         using messages::vision::COLOUR_CLASS;
-		using messages::vision::ColourSegment;
+		    using messages::vision::ColourSegment;
         using messages::platform::darwin::DarwinSensors;
         using utility::vision::LookUpTable;
         

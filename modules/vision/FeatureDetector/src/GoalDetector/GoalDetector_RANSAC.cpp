@@ -83,6 +83,9 @@ namespace modules {
 		// std::vector<ColourSegment> horizontalSegments = ClassifiedImage::matched_horizontal_segments[GOAL_COLOUR];
 		std::unique_ptr<std::vector<messages::vision::Goal>> GoalDetector_RANSAC::run(const VisionKinematics& visionKinematics, const std::vector<ColourSegment>& horizontalSegments, 
                                                                     const std::vector<ColourSegment>& verticalSegments) {
+            int i = 1;
+            NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - ", i++);
+
 			std::list<Quad> quads, postCandidates;
 			std::pair<bool, Quad> crossbar(false, Quad());
 			std::unique_ptr<std::vector<Goal>> posts = std::unique_ptr<std::vector<Goal>>(new std::vector<Goal>);
@@ -90,12 +93,14 @@ namespace modules {
 			std::vector<arma::vec2> startPoints, endPoints;
 			std::vector<std::pair<RANSACLine<arma::vec2>, std::vector<arma::vec2>>> ransacResults;
 			std::vector<LSFittedLine> startLines, endLines;
+            NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - ", i++);
 			
 			// Get edge points.
 			for (const ColourSegment& segment : horizontalSegments) {
 				startPoints.push_back(segment.m_start);
 				endPoints.push_back(segment.m_end);
 			}
+            NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - ", i++);
 			
 			// Use generic RANSAC implementation to find start lines (left edges).
 			ransacResults = RANSAC::findMultipleModels<RANSACLine<arma::vec2>, arma::vec2>(startPoints, 
@@ -104,10 +109,12 @@ namespace modules {
                                                                                             MAX_ITERATIONS_PER_FITTING,
                                                                                             MAX_FITTING_ATTEMPTS, 
                                                                                             SELECTION_METHOD);
+            NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - ", i++);
 			
 			for (auto& l : ransacResults) {
 				startLines.push_back(LSFittedLine(l.second));
 			}
+            NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - ", i++);
 			
 			// Use generic RANSAC implementation to find end lines (right enddges).
 			ransacResults = RANSAC::findMultipleModels<RANSACLine<arma::vec2>, arma::vec2>(endPoints, 
@@ -116,10 +123,12 @@ namespace modules {
                                                                                             MAX_ITERATIONS_PER_FITTING,
                                                                                             MAX_FITTING_ATTEMPTS, 
                                                                                             SELECTION_METHOD);
+            NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - ", i++);
 			
 			for (auto& l : ransacResults) {
 				endLines.push_back(LSFittedLine(l.second));
 			}
+            NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - ", i++);
 			
 
 			/************************
@@ -131,18 +140,21 @@ namespace modules {
 
 			// Build candidates out of lines - this finds candidates irrespective of rotation - filtering must be done later.
 			quads = buildQuadsFromLines(startLines, endLines, RANSAC_MATCHING_TOLERANCE);
+            NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - ", i++);
 
 			//std::cout<< "GoalDetector_RANSAC::run : found " << quads.size()<< " quads culled to ";
 			
 			// Remove posts with invalid aspect ratio : check potential cross bars AND posts.
 			removeInvalid(quads);
 
+            NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - ", i++);
 
 			// Sort out potential crossbars and vertical posts (posts on too large of a lean will be removed).
 			// Edit ANGLE_MARGIN to affect this.
 			double halfPI = arma::math::pi() * 0.5;
 			double lowerAngleThreshold = (ANGLE_MARGIN * halfPI);
 			double upperAngleThreshold = halfPI - lowerAngleThreshold;
+            NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - ", i++);
 			
 			for (const Quad& quad : quads) {
 
@@ -168,11 +180,13 @@ namespace modules {
 				    }
 				}
 			}
+            NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - ", i++);
 			
 			// Only check upright posts for building candidates.
 			//TODO FIX SEGFAULT here:
 			mergeClose(postCandidates, 1.5);
 
+            NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - ", i++);
 			
 			// Generate actual goal from candidate posts.
 			if (crossbar.first) {
@@ -184,23 +198,31 @@ namespace modules {
 				posts = assignGoals(visionKinematics, postCandidates);
 			}
 			
+            NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - ", i++);
 
 			// Improves bottom centre estimate using vertical transitions.
 			int numberOfBasesSet = 0;
 			for (const ColourSegment& segment : verticalSegments) {
+            	//NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - setting base with vert segment.");
 				const arma::vec2& point = segment.m_end;
-				
+				int num_posts = 1;
 				for (Goal& post : *posts) {
+            		//NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - post ", num_posts++);
 				    if ((point[0] <= post.getQuad().getRight()) && 
                             (point[0] >= post.getQuad().getLeft()) && 
                             (point[1] > post.getLocationPixels()[1])) {
+				    	//NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - base setting...");
 				        post.setBase(visionKinematics, point);
 				    	numberOfBasesSet++;
+				    	//NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - base set");
 				    }
 				}
 			}
+            NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - ", i++);
 			
 			std::unique_ptr<std::vector<messages::vision::Goal>> finalGoals = std::move(createGoalMessage(posts));
+            NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run end - ", i++);
+
 			return std::move(finalGoals);
 		}
 

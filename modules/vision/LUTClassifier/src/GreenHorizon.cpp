@@ -149,11 +149,17 @@ namespace modules {
 		    //std::cout << "Green Horizon Number of Thrown Points : " << thrown_points.size() << std::endl;
 
 		    horizon_points = upperConvexHull(horizon_points);
+            std::cout << horizon_points.size() << std::endl;
+            for(auto& p : horizon_points){
+                std::cout << "GreenHorizon - set point ( "<< p[0] << " , " << p[1]<<")."<< std::endl;
+            }
+           
+            
 		   	set(horizon_points, width, height);		    
         }
 
-        void GreenHorizon::set(const std::vector<arma::vec2> &initial_points, int image_width, int image_height) {
-		    original_points = initial_points;
+        void GreenHorizon::set(std::vector<arma::vec2> original_points, int image_width, int image_height) {
+
 		    interpolated_points.clear();
 
 		    //unsigned int position, y_new;

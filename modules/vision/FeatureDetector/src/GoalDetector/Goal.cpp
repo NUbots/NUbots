@@ -41,7 +41,7 @@ namespace modules {
                      
         }
 
-        void Goal::setBase(const VisionKinematics& visionKinematics,  arma::vec2 base) {
+        void Goal::setBase(const VisionKinematics& visionKinematics, const arma::vec2& base) {
             Line l_line(m_corners.getBottomLeft(), m_corners.getTopLeft());
             Line r_line(m_corners.getBottomRight(), m_corners.getTopRight());
 
