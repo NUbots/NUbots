@@ -8,6 +8,7 @@
  
  Copyright (c) 2012 Steven Nicklin
  
+ 
  This file is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
@@ -46,7 +47,7 @@ public:
     
     UnscentedTransform(unsigned int L, double alpha=1e-2, double kappa=0.f, double beta=2.f): m_L(L), m_alpha(alpha), m_kappa(kappa), m_beta(beta) {
         m_lambda = lambda();
-        CalculateWeights();
+        calculateWeights();
     }
 
     UnscentedTransform(const UnscentedTransform& source)
@@ -174,7 +175,7 @@ public:
     }
 
     // Functions for performing steps of the UKF algorithm.
-    void CalculateWeights()
+    void calculateWeights()
     {
         const unsigned int totalWeights = totalSigmaPoints();
 
@@ -190,7 +191,7 @@ public:
         return;
     }
 
-    arma::mat GenerateSigmaPoints(const arma::mat& mean, const arma::mat& covariance) const {
+    arma::mat generateSigmaPoints(const arma::mat& mean, const arma::mat& covariance) const {
         const unsigned int numPoints = totalSigmaPoints();
         const arma::mat current_mean = mean;
         const unsigned int num_states = mean.n_rows; //ox--mean.getm()
@@ -210,12 +211,12 @@ public:
         return points;
     }
 
-    arma::mat CalculateMeanFromSigmas(const arma::mat& sigmaPoints) const
+    arma::mat calculateMeanFromSigmas(const arma::mat& sigmaPoints) const
     {
         return sigmaPoints * m_mean_weights;
     }
 
-    arma::mat CalculateCovarianceFromSigmas(const arma::mat& sigmaPoints, const arma::mat& mean) const
+    arma::mat calculateCovarianceFromSigmas(const arma::mat& sigmaPoints, const arma::mat& mean) const
     {
         const unsigned int numPoints = totalSigmaPoints();
         const unsigned int numStates = mean.n_rows; //ox getm();
@@ -266,7 +267,7 @@ public:
         input.read(reinterpret_cast<char*>(&m_alpha), sizeof(m_alpha));
         input.read(reinterpret_cast<char*>(&m_kappa), sizeof(m_kappa));
         input.read(reinterpret_cast<char*>(&m_beta), sizeof(m_beta));
-        CalculateWeights();
+        calculateWeights();
         return input;
     }
 

@@ -1,6 +1,5 @@
 #include "DabsonTest.h"
 
-//../../../../../../shared/
 #include "utility/math/kalman/Kalman.h" //the 2 files neccessary for filtering
 #include "utility/math/kalman/IMUModel.h"
 
@@ -28,8 +27,12 @@ namespace modules {
 
                     // Do kalman filtery stuff in here
 
-                    IMUModel  im;                    //OR IDEALLY WHEN ITS WORKINGSINEModel sm;
-                    Kalman<IMUModel> k; 
+                    Kalman<SinModel> k;
+
+                    arma::mat something;
+
+                    k.timeUpdate(100, something, something, something);
+                    k.measurementUpdate(something, something, something);
 
                     float o = s; //o ~ the kalman filter output.
 

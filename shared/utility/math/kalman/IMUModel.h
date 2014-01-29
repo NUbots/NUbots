@@ -20,10 +20,10 @@ public:
     virtual std::istream& readStreamBinary (std::istream& input) = 0;
 };
 */
-#include <armadillo>
 #ifndef IMUModel_H
 #define IMUModel_H
 
+#include <armadillo>
 class IMUModel {
 public:
     //void test() { //--------------------------TEMPORARY TEST ~ DELETE ME
@@ -48,10 +48,10 @@ public:
 
     IMUModel(); // empty constructor
     IMUModel* Clone() { return new IMUModel(*this); } //this should Ideally be removed and replaced with a smart-pointer equivilant
-
+body_roll_rot
     arma::mat processEquation(const arma::mat& state, double deltaT, const arma::mat& measurement);      // The process equation, this describes the transition of the estimate due to time and inputs applied. @param state The state determined frim the previous estimate. @param deltaT The elapsed time since the previous update was performed. @param measurement Measurment data obtained from the inputs to the system. @return The new updated measurement.
-    arma::mat measurementEquation(const arma::mat& state, const arma::mat& measurementArgs, unsigned int type);    // The measurement equation, this is used to calculate the expected measurement given a state of the system. @param state The estimated state of the system. @param measurementArgs Additional information about the measurement. @return The expected measurment for the given conditions.
-    arma::mat measurementDistance(const arma::mat& measurement1, const arma::mat& measurement2, unsigned int type);
+    arma::mat measurementEquation(const arma::mat& state, const arma::mat& measurementArgs);    // The measurement equation, this is used to calculate the expected measurement given a state of the system. @param state The estimated state of the system. @param measurementArgs Additional information about the measurement. @return The expected measurment for the given conditions.
+    arma::mat measurementDistance(const arma::mat& measurement1, const arma::mat& measurement2);
 
     void limitState(arma::mat &state);
     unsigned int totalStates() const {
