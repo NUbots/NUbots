@@ -18,15 +18,14 @@ template <class T> inline int sign(T x){
 }
 //---------------------
 
-IMUModel::IMUModel() {
-}
+IMUModel::IMUModel() {}
 
 IMUModel::IMUModel(const IMUModel& source) {
     *this = source;
 }
 
 void IMUModel::limitState(arma::mat &state) {
-    const float pi_2 = 0.5 * M_PI; 
+    const float pi_2 = 0.5 * M_PI;
     if(fabs(state(kstates_body_angle_x, 0)) > pi_2 and fabs(state(kstates_body_angle_y, 0)) > pi_2) { // This part checks for the event where a large roll and large pitch puts the robot back upright
         state(kstates_body_angle_x, 0) = state(kstates_body_angle_x, 0) - sign(state(kstates_body_angle_x, 0)) * M_PI;
         state(kstates_body_angle_y, 0) = state(kstates_body_angle_y, 0) - sign(state(kstates_body_angle_y, 0)) * M_PI;

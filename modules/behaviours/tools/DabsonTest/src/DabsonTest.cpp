@@ -7,6 +7,8 @@
 #include "utility/NUbugger/NUgraph.h"
 using utility::NUbugger::graph;
 
+unsigned int i = 0; //TESTING_HERE
+
 namespace modules {
     namespace behaviours {
         namespace tools {
@@ -16,9 +18,13 @@ namespace modules {
                 // Get the scripts to run from the command line
                 on<Trigger<Every<10, std::chrono::milliseconds>>>([this](const time_t& time) {
                     
-                    float s = sin(time.time_since_epoch().count());
+                    double freq = 0.25;
 
-                    s += (rand()/double(RAND_MAX) - 0.5) * 0.1;
+                    double t = time.time_since_epoch().count() / double(NUClear::clock::period::den);
+
+                    float s = sin(2 * M_PI * freq * t);
+
+                    s += (rand()/double(RAND_MAX) - 0.5) * 0.2;
 
                     // Do kalman filtery stuff in here
 

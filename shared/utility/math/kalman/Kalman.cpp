@@ -26,8 +26,6 @@ Kalman<Model>::Kalman(const Kalman<Model>& source): m_estimate(source.estimate()
         m_X = source.m_X;
 }
 
-
-
 template <typename Model>
 bool Kalman<Model>::timeUpdate(double delta_t, const arma::mat& measurement, const arma::mat& process_noise, const arma::mat& measurement_noise) { //@brief Performs the time update of the filter. @param deltaT The time that has passed since the previous update. @param measurement The measurement/s (if any) that can be used to measure a change in the system. @param linearProcessNoise The linear process noise that will be added. @return True if the time update was performed successfully. False if it was not.
 
@@ -120,6 +118,7 @@ bool Kalman<Model>::measurementUpdate(const arma::mat& measurement, const arma::
     arma::mat updated_covariance = m_X * m_C * m_X.t();
 
     if(not duti::isMatrixValid(updated_covariance) ) { //not updated_covariance.isValid()
+        std::cout << "Kalman.evaluateMeasurement() : updated_covariance matrix is not valid!" << std::endl;
         std::cout << "ID: " << id() << std::endl;
         std::cout << "Sigma mean:\n" << m_X << std::endl;
         std::cout << "measurement:\n" << measurement << std::endl;
@@ -147,11 +146,8 @@ void Kalman<Model>::initialiseEstimate(const MultivariateGaussian& estimate) {
     const unsigned int total_points = m_unscented_transform.totalSigmaPoints();
     const unsigned int num_states = m_estimate.totalStates();
 
-
-    m_estimate = estimate;    // Assign the estimate.
-
-
-    m_sigma_mean = estimate.mean();    // Redraw sigma points to cover this new estimate.
+    m_estimate     = estimate;    // Assign the estimate.
+    m_sigma_mean   = estimate.mean();    // Redraw sigma points to cover this new estimate.
     m_sigma_points = m_unscented_transform.GenerateSigmaPoints(m_estimate.mean(), m_estimate.covariance());
 
     m_C = arma::diagmat(m_unscented_transform.covarianceWeights());    // Initialise the variables for sequential measurement updates. m_C = Matrix(total_points, total_points, true);
