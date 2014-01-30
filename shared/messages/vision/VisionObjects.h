@@ -40,7 +40,8 @@ namespace messages {
 
 		class Ball : public VisionObject {
         public:
-			Ball() : VisionObject() {}			
+			Ball() : VisionObject() {}	
+			float diameter;		
 		};
 
 		class Goal : public VisionObject {

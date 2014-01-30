@@ -42,6 +42,7 @@ using std::chrono::duration_cast;
 using std::chrono::microseconds;
 using messages::support::NUbugger::proto::Message;
 using messages::vision::Goal;
+using messages::vision::Ball;
 
 namespace modules {
 	namespace support {
@@ -371,14 +372,13 @@ namespace modules {
 				
 			});
 
-			on<Trigger<std::vector<Goal>>>([this](const std::vector<Goal> goals){
+			on<Trigger<std::vector<Goal>>>([this](const std::vector<Goal>& goals){
 				Message message;
  
 				message.set_type(Message::VISION);
 				message.set_utc_timestamp(std::time(0));
 
 				Message::Vision* api_vision = message.mutable_vision();
-				//std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : sending " << goals.size() << " goals to NUbugger." << std::endl;
 				for (auto& goal : goals){
 					Message::VisionFieldObject* api_goal = api_vision->add_vision_object();
 
@@ -393,10 +393,35 @@ namespace modules {
 					for(auto& point : goal.screen_quad){
 						api_goal->add_points(point[0]);
 						api_goal->add_points(point[1]);
-						//std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : adding quad point ( " << point[0] << " , " << point[1] << " )."<< std::endl;
+						
 					}
 					for(auto& coord : goal.sphericalFromNeck){
 						api_goal->add_measured_relative_position(coord);
+					}
+				}
+				send(message);
+			});
+
+			on<Trigger<std::vector<Ball>>>([this](const std::vector<Ball>& balls){
+				Message message;
+ 
+				message.set_type(Message::VISION);
+				message.set_utc_timestamp(std::time(0));
+
+				Message::Vision* api_vision = message.mutable_vision();
+				for (auto& ball : balls){
+					Message::VisionFieldObject* api_ball = api_vision->add_vision_object();
+
+					api_ball->set_shape_type(Message::VisionFieldObject::CIRCLE);
+					api_ball->set_name("Ball");
+					api_ball->set_width(ball.sizeOnScreen[0]);
+					api_ball->set_height(ball.sizeOnScreen[1]);
+					api_ball->set_screen_x(ball.screenCartesian[0]);
+					api_ball->set_screen_y(ball.screenCartesian[1]);
+					api_ball->set_radius(ball.diameter/2.0);
+					
+					for(auto& coord : ball.sphericalFromNeck){
+						api_ball->add_measured_relative_position(coord);
 					}
 				}
 				send(message);

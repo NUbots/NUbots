@@ -329,26 +329,18 @@ namespace modules {
         }
 
         std::unique_ptr< std::vector<messages::vision::Ball> > BallDetector::createBallMessage(const std::vector<Ball>& balls){
-            std::unique_ptr< std::vector<messages::vision::Ball> > ball_message = std::unique_ptr< std::vector<messages::vision::Ball> >(new std::vector<messages::vision::Ball> );
-            std::cout << "Number of balls detected: " <<balls.size() << std::endl;
+            std::unique_ptr< std::vector<messages::vision::Ball> > ball_message = std::make_unique< std::vector<messages::vision::Ball> >();
             for(auto& ball : balls){
-                std::cout << "Emmiting ball" << ball << std::endl;
+                std::cout << "Emmiting " << ball << std::endl;
+                ball_message->push_back(messages::vision::Ball());
                 if(ball.valid){ 
-                   
-                    std::unique_ptr<messages::vision::Ball> temp = std::unique_ptr<messages::vision::Ball>(new messages::vision::Ball());
-
-                    // old code:
-                    // temp->sphericalFromNeck = m_location.neckRelativeRadial;
-                    // temp->sphericalError = m_sphericalError;
-                    // temp->screenAngular = m_location.screenAngular;
-                    // temp->screenCartesian = m_location.screenCartesian;
-                    // temp->sizeOnScreen = m_sizeOnScreen;
-                    // temp->timestamp = NUClear::clock::now();
-
-                    // ball = std::move(temp);
-
-                    // return true;
-          
+                    ball_message->back().sphericalFromNeck = ball.m_location.neckRelativeRadial;
+                    ball_message->back().sphericalError = ball.m_sphericalError;
+                    ball_message->back().screenAngular = ball.m_location.screenAngular;
+                    ball_message->back().screenCartesian = ball.m_location.screenCartesian;
+                    ball_message->back().sizeOnScreen = ball.m_sizeOnScreen;
+                    ball_message->back().timestamp = NUClear::clock::now();
+                    ball_message->back().diameter = ball.m_diameter;
                 }
             }
             return std::move(ball_message);
