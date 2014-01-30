@@ -99,7 +99,8 @@ namespace modules {
                                             CAMERA_ANGLE_OFFSET, 
                                             NECK_POSITION_OFFSET, 
                                             BODY_POSITION_OFFSET, 
-                                            CAMERA_POSITION_OFFSET);
+                                            CAMERA_POSITION_OFFSET,
+                                            constants.config["SCREEN_LOCATION_UNCERTAINTY_PIXELS"]);
             });
 
             // TODO: on<Trigger<Configuration<FieldPointDetectorConfig>>>().

@@ -183,18 +183,14 @@ namespace modules {
 			// Improves bottom centre estimate using vertical transitions.
 			int numberOfBasesSet = 0;
 			for (const ColourSegment& segment : verticalSegments) {
-            	//NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - setting base with vert segment.");
+            	
 				const arma::vec2& point = segment.m_end;
-				int num_posts = 1;
 				for (Goal& post : *posts) {
-            		//NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - post ", num_posts++);
 				    if ((point[0] <= post.getQuad().getRight()) && 
                             (point[0] >= post.getQuad().getLeft()) && 
                             (point[1] > post.getLocationPixels()[1])) {
-				    	//NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - base setting...");
 				        post.setBase(visionKinematics, point);
 				    	numberOfBasesSet++;
-				    	//NUClear::log<NUClear::ERROR>("GoalDetector_RANSAC::run - base set");
 				    }
 				}
 			}
@@ -501,7 +497,7 @@ namespace modules {
 
 	        		goal_message->back().screen_quad = post.m_corners.getVertices();
         		
-	        		std::cout << "Emitting " << post << std::endl;
+	        		//std::cout << "Emitting " << post << std::endl;
 	        	}
         	}
 

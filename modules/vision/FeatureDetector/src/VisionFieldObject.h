@@ -88,8 +88,8 @@ namespace modules {
             //! @brief returns the field position relative to the robot.
             virtual arma::vec3 getRelativeFieldCoords() const;
 
-            virtual double findScreenError(VisionFieldObject* other) const = 0;
-            virtual double findGroundError(VisionFieldObject* other) const = 0;
+            // virtual double findScreenError(VisionFieldObject* other) const = 0;
+            // virtual double findGroundError(VisionFieldObject* other) const = 0;
 
             //! @brief returns whether the given id maps to a goal
             static bool isGoal(VFO_ID id);

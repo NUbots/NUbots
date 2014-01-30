@@ -41,7 +41,8 @@ namespace modules {
 												const arma::vec3& CAMERA_ANGLE_OFFSET_,
 												const arma::vec3& NECK_POSITION_OFFSET_,
 												const arma::vec3& BODY_POSITION_OFFSET_,
-												const arma::vec3& CAMERA_POSITION_OFFSET_) {
+												const arma::vec3& CAMERA_POSITION_OFFSET_,
+                                                float SCREEN_LOCATION_UNCERTAINTY_PIXELS_) {
 			RADIAL_CORRECTION_COEFFICIENT = RADIAL_CORRECTION_COEFFICIENT_;
 			
 			BODY_ANGLE_OFFSET = BODY_ANGLE_OFFSET_;
@@ -51,6 +52,8 @@ namespace modules {
 
 			BODY_POSITION_OFFSET = BODY_POSITION_OFFSET_;
 			CAMERA_POSITION_OFFSET = CAMERA_POSITION_OFFSET_;
+
+            SCREEN_LOCATION_UNCERTAINTY_PIXELS = SCREEN_LOCATION_UNCERTAINTY_PIXELS_;
 
 			preCalculateTransforms();
 		}
@@ -306,10 +309,53 @@ namespace modules {
 
 
         double VisionKinematics::getD2PError(const NUPoint& location) const{
-            double declination_error = m_FOV[1]/m_imageSize[1];
+            double declination_error = SCREEN_LOCATION_UNCERTAINTY_PIXELS*m_FOV[1]/m_imageSize[1];
             double robot_height = std::abs(m_neckPosition(3,2));
             double sin_elevation = std::sin(location.neckRelativeRadial[2]-arma::math::pi()); 
             return declination_error*robot_height/(sin_elevation*sin_elevation);
+        }
+
+        arma::vec3 VisionKinematics::calculateSphericalError(NUPoint location, DISTANCE_METHOD distanceMethod, float width) const{
+            arma::vec3 sphericalError;
+            switch (distanceMethod) {
+                case D2P: {
+                    sphericalError[0] = getD2PError(location);
+
+                    break;
+                }
+
+                case WIDTH: {
+                    sphericalError[0] = SCREEN_LOCATION_UNCERTAINTY_PIXELS*location.neckRelativeRadial[0]/width; //=d*dp/p (assuming error of dp=1 pixel in width)
+
+                    break;
+                }
+
+                case AVERAGE: {
+                    double width_error = SCREEN_LOCATION_UNCERTAINTY_PIXELS*location.neckRelativeRadial[0]/width;
+                    double d2p_error = getD2PError(location);
+
+                    sphericalError[0] = std::max(width_error,d2p_error);
+                    break;
+                }
+
+                case LEAST: {                   
+                    double width_error = SCREEN_LOCATION_UNCERTAINTY_PIXELS*location.neckRelativeRadial[0]/width;
+                    double d2p_error = getD2PError(location);
+
+                    sphericalError[0] = std::max(width_error,d2p_error);
+                    break;
+                }
+
+                default: {
+                    sphericalError[0] = SCREEN_LOCATION_UNCERTAINTY_PIXELS*location.neckRelativeRadial[0]/width; //=d*dp/p (assuming error of 1 pixel in width)
+
+                    break;
+                }
+            }
+
+            sphericalError[1] = SCREEN_LOCATION_UNCERTAINTY_PIXELS*getFOV()[0]/getImageSize()[0];  //Erordp =1 
+            sphericalError[2] = SCREEN_LOCATION_UNCERTAINTY_PIXELS*getFOV()[1]/getImageSize()[1];  //Erordp =1
+            return sphericalError;
         }
 
     }

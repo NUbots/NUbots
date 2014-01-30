@@ -28,13 +28,13 @@ namespace modules {
             m_diameter = 0;
         }
 
-        Ball::Ball(const arma::vec2& centre, double diameter) {
+        Ball::Ball(const arma::vec2& centre, double max_box_size) {
             m_id = BALL;
 
-            double top = centre[1] - (diameter * 0.5);
-            double bottom = centre[1] + (diameter * 0.5);
-            double left = centre[0] - (diameter * 0.5);
-            double right = centre[0] + (diameter * 0.5);
+            double top = centre[1] - (max_box_size * 0.5);
+            double bottom = centre[1] + (max_box_size * 0.5);
+            double left = centre[0] - (max_box_size * 0.5);
+            double right = centre[0] + (max_box_size * 0.5);
 
             arma::vec2 topPoint;
             arma::vec2 bottomPoint;
@@ -59,7 +59,7 @@ namespace modules {
                                 float MAX_BALL_DISTANCE_,
                                 float BALL_WIDTH_,
                                 const DISTANCE_METHOD& BALL_DISTANCE_METHOD_,
-                                const VisionKinematics& transformer) {
+                                const VisionKinematics& visionKinematics) {
 			THROWOUT_ON_ABOVE_KIN_HOR_BALL = THROWOUT_ON_ABOVE_KIN_HOR_BALL_;
 			MAX_DISTANCE_METHOD_DISCREPENCY_BALL = MAX_DISTANCE_METHOD_DISCREPENCY_BALL_;
 			THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL = THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_;
@@ -70,37 +70,14 @@ namespace modules {
 			BALL_WIDTH = BALL_WIDTH_;
 			BALL_DISTANCE_METHOD = BALL_DISTANCE_METHOD_;
 
-			m_transformer = transformer;
-
             // Internal variables contain valid values at this point.
             // All necessary constants have been set.
             // It is now safe to determine the validity of this Ball object.
-            valid = (calculatePositions() && check());
+            valid = (calculatePositions(visionKinematics) && check());
 		}
 
         float Ball::getRadius() const {
             return (m_diameter * 0.5);
-        }
-
-        bool Ball::addToExternalFieldObjects(std::unique_ptr<messages::vision::Ball> ball) const {
-			std::unique_ptr<messages::vision::Ball> temp = std::unique_ptr<messages::vision::Ball>(new messages::vision::Ball());
-
-            if (valid) {
-                temp->sphericalFromNeck = m_location.neckRelativeRadial;
-                temp->sphericalError = m_sphericalError;
-                temp->screenAngular = m_location.screenAngular;
-                temp->screenCartesian = m_location.screenCartesian;
-                temp->sizeOnScreen = m_sizeOnScreen;
-                temp->timestamp = NUClear::clock::now();
-
-                ball = std::move(temp);
-
-                return true;
-            }
-
-            else {
-                return false;
-            }
         }
 
         bool Ball::check() const {
@@ -114,10 +91,10 @@ namespace modules {
                 return false;
             }
             
-            //Distance discrepency throwout - if width method says ball is a lot closer than d2p (by specified value) then discard
-        //    if ((THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL) && (std::abs(width_dist - d2p) > MAX_DISTANCE_METHOD_DISCREPENCY_BALL)) {
-        //        return false;
-        //    }
+            // //Distance discrepency throwout - if width method says ball is a lot closer than d2p (by specified value) then discard
+            // if ((THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL) && (std::abs(width_dist - d2p) > MAX_DISTANCE_METHOD_DISCREPENCY_BALL)) {
+            //     return false;
+            // }
 
             // Throw out if ball is too small.
             if (THROWOUT_SMALL_BALLS && (m_diameter < MIN_BALL_DIAMETER_PIXELS)) {
@@ -133,34 +110,21 @@ namespace modules {
             return true;
         }
 
-        double Ball::findScreenError(VisionFieldObject* other) const {
-            Ball* b = dynamic_cast<Ball*>(other);
-
-            return (arma::norm(m_location.screenCartesian - b->m_location.screenCartesian, 2) + arma::norm(m_sizeOnScreen - b->m_sizeOnScreen, 2));
-        }
-
-        double Ball::findGroundError(VisionFieldObject* other) const {
-            Ball* b = dynamic_cast<Ball*>(other);
-
-            return arma::norm(m_location.groundCartesian - b->m_location.groundCartesian, 2);
-        }
-
-        bool Ball::calculatePositions() {
+        bool Ball::calculatePositions(const VisionKinematics& visionKinematics) {
             // To the bottom of the Goal Post.
             NUPoint d2pLocation, widthLocation;
 
             d2pLocation.screenCartesian = m_location.screenCartesian;
             widthLocation.screenCartesian = m_location.screenCartesian;
 
-            double widthDistance = ((BALL_WIDTH * m_transformer.getCameraDistanceInPixels()) / (m_sizeOnScreen[0]));
+            double widthDistance = ((BALL_WIDTH * visionKinematics.getCameraDistanceInPixels()) / (m_diameter));
 
-            m_transformer.calculateRepresentationsFromPixelLocation(d2pLocation);
-            m_transformer.calculateRepresentationsFromPixelLocation(widthLocation, true, widthDistance);
+            visionKinematics.calculateRepresentationsFromPixelLocation(d2pLocation);
+            visionKinematics.calculateRepresentationsFromPixelLocation(widthLocation, true, widthDistance);
 
             switch (BALL_DISTANCE_METHOD) {
                 case D2P: {
                     m_location = d2pLocation;
-
                     break;
                 }
 
@@ -186,7 +150,7 @@ namespace modules {
                     break;
                 }
             }
-
+            m_sphericalError = visionKinematics.calculateSphericalError(m_location, BALL_DISTANCE_METHOD, m_diameter);
             return (m_location.neckRelativeRadial[0] > 0);
         }
 
@@ -240,7 +204,7 @@ namespace modules {
             output << " angularloc: [" << ball.m_location.screenAngular[0] << ", " << ball.m_location.screenAngular[1] << "]" << std::endl;
             output << "\trelative field coords: [" << ball.m_location.neckRelativeRadial[0] << ", " << ball.m_location.neckRelativeRadial[1] << 
                         ", " << ball.m_location.neckRelativeRadial[2] << "]" << std::endl;
-            output << "\tspherical error: [" << ball.m_sphericalError[0] << ", " << ball.m_sphericalError[1] << "]" << std::endl;
+            output << "\tspherical error: [" << ball.m_sphericalError[0] << ", " << ball.m_sphericalError[1] <<", "<< ball.m_sphericalError[2] << "]" << std::endl;
             output << "\tsize on screen: [" << ball.m_sizeOnScreen[0] << ", " << ball.m_sizeOnScreen[1] << "]";
 
             return output;

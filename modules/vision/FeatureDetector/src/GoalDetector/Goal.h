@@ -65,9 +65,6 @@ namespace modules {
 
             //! @brief applies a series of checks to decide if the goal is valid.
             bool check() const;
-                
-            virtual double findScreenError(VisionFieldObject* other) const;
-            virtual double findGroundError(VisionFieldObject* other) const;
 
             //! @brief output stream operator.
             friend std::ostream& operator<< (std::ostream& output, const Goal& g);

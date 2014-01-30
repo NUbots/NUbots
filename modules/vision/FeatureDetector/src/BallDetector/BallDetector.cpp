@@ -51,9 +51,9 @@ namespace modules {
 									    float BALL_WIDTH_,
 									    const DISTANCE_METHOD& BALL_DISTANCE_METHOD_
 									    ) {
-            BALL_MIN_PERCENT_ORANGE = BALL_EDGE_THRESHOLD_;
+            BALL_MIN_PERCENT_ORANGE = BALL_MIN_PERCENT_ORANGE_;
             BALL_ORANGE_TOLERANCE = BALL_ORANGE_TOLERANCE_;
-            BALL_EDGE_THRESHOLD = BALL_MIN_PERCENT_ORANGE_;
+            BALL_EDGE_THRESHOLD = BALL_EDGE_THRESHOLD_;
 
             // Parameters for constructing a Ball object.
 			THROWOUT_ON_ABOVE_KIN_HOR_BALL = THROWOUT_ON_ABOVE_KIN_HOR_BALL_;
@@ -82,8 +82,8 @@ namespace modules {
             appendEdgesFromSegments(horizontalMatchedSegments, edges, greenHorizonInterpolatedPoints);
             appendEdgesFromSegments(verticalMatchedSegments, edges, greenHorizonInterpolatedPoints);
 
-            int height = 10; //img.getHeight();
-            int width = 10; //img.getWidth();                  
+            int height = img.height();
+            int width = img.width();                  
 
             if (!edges.empty()) {
                 // Arithmetic mean
@@ -282,14 +282,13 @@ namespace modules {
                                                 BALL_WIDTH,
                                                 BALL_DISTANCE_METHOD,
                                                 visionKinematics);
-                            balls.push_back(ball);
+                            balls.push_back(ball);     
                         }
 
                         else {
-                            NUClear::log<NUClear::DEBUG>("BallDetector::detectBall - ball thrown out on percentage contained BALL_COLOUR");
+                           // NUClear::log<NUClear::DEBUG>("BallDetector::detectBall - ball thrown out on percentage contained BALL_COLOUR");
                         }
                     }
-
                     else {
                         Ball ball = Ball(center, std::max((right - left), (bottom - top)));
                         ball.setParameters(THROWOUT_ON_ABOVE_KIN_HOR_BALL,
@@ -302,13 +301,11 @@ namespace modules {
                                             BALL_WIDTH,
                                             BALL_DISTANCE_METHOD,
                                             visionKinematics);
-                        balls.push_back(ball);                        
+                        balls.push_back(ball); 
                     }
-                    NUClear::log<NUClear::DEBUG>("BallDetector::run - balls SUCCESS");
-
                 }
                 else {
-                    NUClear::log<NUClear::DEBUG>("BallDetector::detectBall - (1, 1) ball thrown out");
+                    //NUClear::log<NUClear::DEBUG>("BallDetector::detectBall - ERRROR: Ball screen pos = (1, 1); ball thrown out");
                 }
             }
             return std::move(createBallMessage(balls));
@@ -333,12 +330,25 @@ namespace modules {
 
         std::unique_ptr< std::vector<messages::vision::Ball> > BallDetector::createBallMessage(const std::vector<Ball>& balls){
             std::unique_ptr< std::vector<messages::vision::Ball> > ball_message = std::unique_ptr< std::vector<messages::vision::Ball> >(new std::vector<messages::vision::Ball> );
+            std::cout << "Number of balls detected: " <<balls.size() << std::endl;
             for(auto& ball : balls){
-                NUClear::log<NUClear::DEBUG>(ball);
+                std::cout << "Emmiting ball" << ball << std::endl;
                 if(ball.valid){ 
                    
-                    // ball_message->push_back(messages::vision::Ball());
-                    // ball_message->back().
+                    std::unique_ptr<messages::vision::Ball> temp = std::unique_ptr<messages::vision::Ball>(new messages::vision::Ball());
+
+                    // old code:
+                    // temp->sphericalFromNeck = m_location.neckRelativeRadial;
+                    // temp->sphericalError = m_sphericalError;
+                    // temp->screenAngular = m_location.screenAngular;
+                    // temp->screenCartesian = m_location.screenCartesian;
+                    // temp->sizeOnScreen = m_sizeOnScreen;
+                    // temp->timestamp = NUClear::clock::now();
+
+                    // ball = std::move(temp);
+
+                    // return true;
+          
                 }
             }
             return std::move(ball_message);
