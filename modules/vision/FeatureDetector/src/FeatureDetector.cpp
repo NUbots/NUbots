@@ -209,8 +209,7 @@ namespace modules {
                                                  
             });
 
-            on<Trigger<Configuration<ObstacleDetectorConfig>>>([this](const Configuration<ObstacleDetectorConfig>& constants) {
-                    /*
+            on<Trigger<Configuration<ObstacleDetectorConfig>>>([this](const Configuration<ObstacleDetectorConfig>& constants) {                    
                     m_obstacleDetector.setParameters(constants.config["MIN_DISTANCE_FROM_HORIZON"],
                                                  constants.config["MIN_CONSECUTIVE_POINTS"],
                                                  constants.config["VERTICAL_SCANLINE_SPACING"],
@@ -218,7 +217,7 @@ namespace modules {
                                                  constants.config["MAX_OTHER_COLOUR_THRESHOLD"],
                                                  constants.config["VER_THRESHOLD"],
                                                  constants.config["OBJECT_THRESHOLD_MULT"]);
-                                                 */
+                                                 
             });
 
             on<Trigger<Configuration<CameraConfig>>>([this](const Configuration<CameraConfig>& config) {
@@ -264,7 +263,7 @@ namespace modules {
                 }
             });
 
-            //m_detectBalls
+            //m_detectBalls = 
             on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
                 emit(
                     m_ballDetector.run( 
@@ -277,11 +276,14 @@ namespace modules {
                                        )
                 );
             });
-/*
-            m_detectObstacles = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
 
+            //m_detectObstacles = 
+            on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
+                emit(
+                    m_obstacleDetector.run(classifiedImage.greenHorizonInterpolatedPoints, *(classifiedImage.LUT), *(classifiedImage.image))
+                );
             });
-            */
+            
         }
     }  // vision
 }  // modules

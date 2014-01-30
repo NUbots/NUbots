@@ -90,7 +90,7 @@ namespace modules {
 
             //FieldPointDetector m_fieldPointDetector;
 
-            //ObstacleDetector m_obstacleDetector;
+            ObstacleDetector m_obstacleDetector;
 
             VisionKinematics m_visionKinematics;
 
