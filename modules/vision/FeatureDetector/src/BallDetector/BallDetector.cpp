@@ -75,11 +75,7 @@ namespace modules {
                                             const std::vector<arma::vec2>& greenHorizonInterpolatedPoints,
                                             const Image& img,
                                             const LookUpTable& lut,
-                                            const VisionKinematics& visionKinematics) {
-       
-
-            // BEGIN BALL DETECTION -----------------------------------------------------------------
-
+                                            const VisionKinematics& visionKinematics) {       
             std::list<arma::vec2> edges;
             std::vector<Ball> balls;//will only ever hold one
 
@@ -87,31 +83,29 @@ namespace modules {
             appendEdgesFromSegments(verticalMatchedSegments, edges, greenHorizonInterpolatedPoints);
 
             int height = 10; //img.getHeight();
-            int width = 10; //img.getWidth();
-
-            // Arithmetic mean
-            arma::vec2 avg, stddev;
-            arma::running_stat_vec<double> acc;
-
-            for(const arma::vec2& point : edges) {
-                acc(point);
-            }
-
-            avg = acc.mean();
-            stddev = acc.stddev();
-
-            // Statistical throw-out
-            for (std::list<arma::vec2>::iterator it = edges.begin(); it != edges.end(); /* Iteration done by for loop */) {
-                if ((std::abs((*it)[0] - avg[0]) > stddev[0]) || (std::abs((*it)[1] - avg[1]) > stddev[1])) {
-                    it = edges.erase(it);
-                }
-
-                else {
-                    it++;
-                }
-            }
+            int width = 10; //img.getWidth();                  
 
             if (!edges.empty()) {
+                // Arithmetic mean
+                arma::vec2 avg, stddev;
+                arma::running_stat_vec<arma::vec2> acc;
+                for(const arma::vec2& point : edges) {
+                    acc(point);
+                }
+
+                avg = acc.mean();
+                stddev = acc.stddev();
+                // Statistical throw-out
+                for (std::list<arma::vec2>::iterator it = edges.begin(); it != edges.end(); /* Iteration done by for loop */) {
+                    if ((std::abs((*it)[0] - avg[0]) > stddev[0]) || (std::abs((*it)[1] - avg[1]) > stddev[1])) {
+                        it = edges.erase(it);
+                    }
+
+                    else {
+                        it++;
+                    }
+                }
+
                 // Geometric mean
                 // Should replace with average
                 std::vector<long double> pos(2, 1.0);
@@ -208,7 +202,7 @@ namespace modules {
                         break;
                     }
                 }
-                
+
                 for (int i = bottom; ((i < (bottom + BALL_EDGE_THRESHOLD)) && (i < height)); i++) {
                     if (ClassifiedImage::getClassOfColour(lut.classifyPixel(img((int)pos[0], i))) == FIELD_COLOUR) {
                         bottom_edge = true;
@@ -308,14 +302,15 @@ namespace modules {
                                             BALL_WIDTH,
                                             BALL_DISTANCE_METHOD,
                                             visionKinematics);
-                        balls.push_back(ball);
+                        balls.push_back(ball);                        
                     }
+                    NUClear::log<NUClear::DEBUG>("BallDetector::run - balls SUCCESS");
+
                 }
                 else {
                     NUClear::log<NUClear::DEBUG>("BallDetector::detectBall - (1, 1) ball thrown out");
                 }
             }
-
             return std::move(createBallMessage(balls));
         }
 
