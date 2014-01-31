@@ -286,14 +286,15 @@ namespace messages {
             }
             
             std::vector<ColourSegment> getAllMatchedSegments(COLOUR_CLASS c) const{
-                NUClear::log<NUClear::DEBUG>("getAllMatchedSegments");            
 
-                std::vector<ColourSegment> result = matchedHorizontalSegments.at(c);            
-                NUClear::log<NUClear::DEBUG>("getAllMatchedSegments");            
-                
-                result.insert(result.end(), matchedVerticalSegments.at(c).begin(), matchedVerticalSegments.at(c).end());
-                NUClear::log<NUClear::DEBUG>("getAllMatchedSegments");            
-
+                std::vector<ColourSegment> result;
+                try{
+                    result.reserve(matchedVerticalSegments.at(c).size()+matchedHorizontalSegments.at(c).size());
+                    result.insert(result.end(), matchedHorizontalSegments.at(c).begin(), matchedHorizontalSegments.at(c).end());
+                    result.insert(result.end(), matchedVerticalSegments.at(c).begin(), matchedVerticalSegments.at(c).end());
+                }catch(const std::out_of_range& e){
+                    //NUClear::log<NUClear::DEBUG>("getAllMatchedSegments : no horizontal or vertical segments existing for Colour Class ",c, "exception:", e.what());
+                }
                 return result;
             }
            
