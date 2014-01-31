@@ -1,5 +1,4 @@
 #include "MultivariateGaussian.h"
-#include "Utils.h"
 #include <sstream>
 #include <iostream>
 #include <assert.h>
@@ -100,21 +99,21 @@ float MultivariateGaussian::variance(unsigned int stateNumber) const { // @brief
 
 void MultivariateGaussian::setMean(const arma::mat& newMean) { // @brief Sets the mean of the moment to the given value/s. The dimensions of the new mean matrix must match the number of states for moment. @param newMean the new value for the mean.
     bool isCorrectSize = ((unsigned int)newMean.n_rows == m_numStates) && (newMean.n_cols == 1);
-    assert(isCorrectSize);
-    assert(duti::isMatrixValid(newMean));
-    if(isCorrectSize and duti::isMatrixValid(newMean)) {
+//    assert(isCorrectSize);
+//    assert(duti::isMatrixValid(newMean));
+//    if(isCorrectSize and duti::isMatrixValid(newMean)) {
         m_mean = newMean;
-    }
+//    }
     return;
 }
 
 void MultivariateGaussian::setCovariance(const arma::mat& newCovariance) { // @brief Sets the covariance of the moment to the given value/s. The dimensions of the new covariance matrix must match the number of states for moment. @param newCovariance the new value for the covariance.
     bool isCorrectSize = (newCovariance.n_rows == m_numStates) && (newCovariance.n_cols == m_numStates);
-    assert(isCorrectSize);
-    assert(duti::isMatrixValid(newCovariance));
-    if(isCorrectSize and duti::isMatrixValid(newCovariance)) {
+//    assert(isCorrectSize);
+//    assert(duti::isMatrixValid(newCovariance));
+//    if(isCorrectSize and duti::isMatrixValid(newCovariance)) {
         m_covariance = newCovariance;
-    }
+//    }
     return;
 }
 

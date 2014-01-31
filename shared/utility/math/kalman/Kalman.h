@@ -8,12 +8,19 @@ class Kalman {
 private:
     // The model
     Model model;
+    
+    
+    // TODO add Model::states to hold the number of states, lets us use fixed width vectors
 
     // TODO remove this, only contains a matrix
     MultivariateGaussian estimate;
-
+    
+    // Definitely a matrix
     arma::mat sigmaPoints;
+    // Definitely a vector of size Model::size
     arma::mat sigmaMean;
+    
+    // Don't know what these are
     arma::mat x;
     arma::mat d;
     arma::mat c;

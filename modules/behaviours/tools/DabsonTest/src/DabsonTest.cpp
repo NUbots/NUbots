@@ -1,7 +1,7 @@
 #include "DabsonTest.h"
 
 #include "utility/math/kalman/Kalman.h" //the 2 files neccessary for filtering
-#include "utility/math/kalman/IMUModel.h"
+#include "utility/math/kalman/SinModel.h"
 
 #include "utility/NUbugger/NUgraph.h"
 using utility::NUbugger::graph;
