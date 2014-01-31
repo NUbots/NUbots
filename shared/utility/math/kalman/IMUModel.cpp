@@ -37,7 +37,12 @@ void IMUModel::limitState(arma::mat &state) {
     return;
 }
 
-arma::mat IMUModel::processEquation(const arma::mat& state, double deltaT, const arma::mat& measurement) { // @brief The process equation is used to update the systems state using the process euquations of the system. @param sigma_point The sigma point representing a system state. @param deltaT The amount of time that has passed since the previous update, in seconds. @param measurement The reading from the rate gyroscope in rad/s used to update the orientation. @return The new estimated system state.
+// @brief The process equation is used to update the systems state using the process euquations of the system. 
+// @param sigma_point The sigma point representing a system state. 
+// @param deltaT The amount of time that has passed since the previous update, in seconds. 
+// @param measurement The reading from the rate gyroscope in rad/s used to update the orientation. 
+// @return The new estimated system state.
+arma::mat IMUModel::processEquation(const arma::mat& state, double deltaT, const arma::mat& measurement) { 
     arma::mat result(state); // Start at original state.
     result(kstates_body_angle_x, 0) += (measurement(0, 0) - state(kstates_gyro_offset_x, 0)) * deltaT; // Add measurement + offset.
     result(kstates_body_angle_y, 0) += (measurement(1, 0) - state(kstates_gyro_offset_y, 0)) * deltaT;
@@ -45,6 +50,10 @@ arma::mat IMUModel::processEquation(const arma::mat& state, double deltaT, const
     return result;
 }
 
+// @brief The measurement equation is used to calculate the expected measurement given a system state.
+// @param sigma_point The sigma point representing a system state.
+// @param measurementArgs Additional arguments used to calculate the measurement. In this implementation it remains empty.
+// @return The expected measurement for the given states. Either accelerometer measurement, or kinematic measurement.
 arma::mat IMUModel::kinematicMeasurementEquation(const arma::mat& state, const arma::mat& measurementArgs) {
     // measurementArgs contain no data.
     // Measurement is returned in angle [theta_x, theta_y]^T.
@@ -120,11 +129,16 @@ arma::mat IMUModel::measurementDistance(const arma::mat& measurement1, const arm
     return result;
 }
 
-std::ostream& IMUModel::writeStreamBinary (std::ostream& output) const { // @brief Outputs a binary representation of the UKF object to a stream. @param output The output stream. @return The output stream.
+// @brief Outputs a binary representation of the UKF object to a stream. 
+// @param output The output stream. 
+// @return The output stream.
+std::ostream& IMUModel::writeStreamBinary (std::ostream& output) const {
     return output;
 }
 
-// @brief Reads in a UKF object from the input stream. @param input The input stream. @return The input stream.
+// @brief Reads in a UKF object from the input stream. 
+// @param input The input stream. 
+// @return The input stream.
 std::istream& IMUModel::readStreamBinary (std::istream& input) {
     return input;
 }
