@@ -211,8 +211,8 @@ namespace modules {
 
             on<Trigger<Configuration<ObstacleDetectorConfig>>>([this](const Configuration<ObstacleDetectorConfig>& constants) {                    
                     m_obstacleDetector.setParameters(constants.config["MIN_DISTANCE_FROM_HORIZON"],
-                                                 constants.config["MIN_CONSECUTIVE_POINTS"],
                                                  constants.config["VERTICAL_SCANLINE_SPACING"],
+                                                 constants.config["MIN_CONSECUTIVE_POINTS"],
                                                  constants.config["MIN_COLOUR_THRESHOLD"],
                                                  constants.config["MAX_OTHER_COLOUR_THRESHOLD"],
                                                  constants.config["VER_THRESHOLD"],
@@ -251,8 +251,8 @@ namespace modules {
             m_detectGoals =
 
             */ 
-            on<Trigger<ClassifiedImage>, Options<Single>>([this](const ClassifiedImage& classifiedImage) {
-                m_visionKinematics.setSensors(0, 0, 0, 0, arma::vec3("0 0 0.05"));
+            m_visionKinematics.setSensors(0, 0, 0, 0, arma::vec3("0 0 0.05"));
+            on<Trigger<ClassifiedImage>, Options<Single>>([this](const ClassifiedImage& classifiedImage) {             
                 if (classifiedImage.matchedHorizontalSegments.count(messages::vision::GOAL_COLOUR) &&
                     classifiedImage.matchedVerticalSegments.count(messages::vision::GOAL_COLOUR)) {
                     emit(
@@ -279,9 +279,19 @@ namespace modules {
 
             //m_detectObstacles = 
             on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
+              
+                /*NUClear::log<NUClear::DEBUG>("ObstacleDetector::run and emit");            
+
                 emit(
-                    m_obstacleDetector.run(classifiedImage.greenHorizonInterpolatedPoints, *(classifiedImage.LUT), *(classifiedImage.image))
+                    m_obstacleDetector.run(classifiedImage.greenHorizonInterpolatedPoints, 
+                                           *(classifiedImage.LUT), 
+                                           *(classifiedImage.image),
+                                           classifiedImage.getAllMatchedSegments(messages::vision::TEAM_CYAN_COLOUR),
+                                           classifiedImage.getAllMatchedSegments(messages::vision::TEAM_MAGENTA_COLOUR),
+                                           m_visionKinematics
+                                          )
                 );
+                  NUClear::log<NUClear::DEBUG>("ObstacleDetector::run and emit");  */       
             });
             
         }

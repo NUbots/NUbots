@@ -171,7 +171,6 @@ namespace modules {
 		        v[0] = 0;      
 		        v[1] = y;   
 		        original_points.insert(original_points.begin(), v);
-                std::cout << "GreenHorizon::set - initial point added successfully." << std::endl;
 		    }           
 			
 		    if (original_points.back()[0] < image_width - 1) {

@@ -32,7 +32,7 @@
 #include "BallDetector/BallDetector.h"
 #include "GoalDetector/GoalDetector_RANSAC.h"
 //#include "FieldPointDetector/FieldPointDetector.h"
-//#include "ObstacleDetector/ObstacleDetector.h"
+#include "ObstacleDetector/ObstacleDetector.h"
 
 namespace modules {
     namespace vision {
