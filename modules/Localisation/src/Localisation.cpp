@@ -21,6 +21,7 @@
 #include "messages/support/Configuration.h"
 #include "utility/NUbugger/NUgraph.h"
 #include "messages/localisation/FieldObject.h"
+#include "messages/vision/VisionObjects.h"
 
 using utility::NUbugger::graph;
 using messages::support::Configuration;
@@ -53,7 +54,7 @@ namespace modules {
         //     emit(std::move(field_object));
         // });
 
-        on<Trigger<Measurement>>([this](const Measurement& m) {
+        on<Trigger<vision::Goal>>([this](const vision::Goal& m) {
             engine.RecordMeasurement(m, timestamp);
         });
 

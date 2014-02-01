@@ -27,7 +27,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "nuclearportvm", primary: true do |nuclearport|
     nuclearport.vm.hostname = "nuclearportvm"
     
-    config.vm.network :private_network, ip: "192.168.33.77"
+    nuclearport.vm.network :private_network, ip: "192.168.33.77"
 
     # Syntax: "path/on/host", "/path/on/guest"
     nuclearport.vm.synced_folder ".", "/home/vagrant/nubots/NUClearPort"
@@ -41,7 +41,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     nubugger.vm.network :forwarded_port, guest: 9090, host: 9090
     nubugger.vm.network :forwarded_port, guest: 12000, host: 12000
 
-    config.vm.network :private_network, ip: "192.168.33.88"
+    nubugger.vm.network :private_network, ip: "192.168.33.88"
 
     # Share NUbugger repository with the VM if it has been placed in the same
     # directory as the NUClearPort repository

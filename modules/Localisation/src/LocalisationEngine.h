@@ -22,6 +22,8 @@
 
 #include <nuclear>
 
+#include "MultiModalRobotModel.h"
+
 namespace modules {
     class LocalisationEngine {
     	public:
@@ -41,7 +43,7 @@ namespace modules {
 		// it is represented by a multi-modal distribution. (e.g. methods like
 		// removeInactiveModels(), would be instance methods  of this new
 		// class)
-    	ModelContainer robot_models_;
+    	MultiModalRobotModel robot_models_;
     };
 }
 #endif
