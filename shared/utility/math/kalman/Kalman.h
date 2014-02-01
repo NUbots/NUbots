@@ -1,5 +1,4 @@
 #include <armadillo>
-#include "MultivariateGaussian.h"
 
 #include "UnscentedTransform.h"
 
@@ -9,20 +8,20 @@ private:
     // The model
     Model model;
     
+    // Our estimate and covariance
+    arma::vec::fixed<Model::size> mean;
+    arma::mat::fixed<Model::size, Model::size> covariance;
     
-    // TODO add Model::states to hold the number of states, lets us use fixed width vectors
-
-    // TODO remove this, only contains a matrix
-    MultivariateGaussian estimate;
-    
-    // Definitely a matrix
+    // Our sigma variables for UKF
+    arma::vec::fixed<Model::size> sigmaMean;
     arma::mat sigmaPoints;
-    // Definitely a vector of size Model::size
-    arma::mat sigmaMean;
     
     // Don't know what these are
     arma::mat x;
     arma::mat d;
+    
+    
+    // The covariance weights
     arma::mat c;
 
     // Does unscented transform logic (sigma points)
@@ -33,35 +32,31 @@ private:
     bool outlierThreshold;
 
 public:
-    Kalman() : model(), estimate(model.totalStates()) {}
+    Kalman() : model() {}
 
-    void timeUpdate(double delta_t, const arma::mat& measurement, const arma::mat& processNoise, const arma::mat& measurementNoise) {
-
-        auto numSigmaPoints = unscentedTransform.totalSigmaPoints();
+    void timeUpdate(double delta_t, const arma::vec::fixed<Model::size>& measurement, const arma::mat& processNoise, const arma::mat& measurementNoise) {
 
         // Calculate the current sigma points, and write to member variable.
         sigmaPoints = unscentedTransform.generateSigmaPoints(estimate.mean(), estimate.covariance());
         
-        // Update each sigma point.
-        for(uint i = 0; i < numSigmaPoints; ++i) {
-            // Write the propagated version of the sigma point
+        // Write the propagated version of the sigma point
+        for(uint i = 0; i < sigmaPoints.n_rows; ++i) {
             sigmaPoints.col(i) = model.processEquation(sigmaPoints.col(i), delta_t, measurement);
         }
 
         // Calculate the new mean and covariance values.
-        arma::mat predictedMean = unscentedTransform.calculateMeanFromSigmas(sigmaPoints);
-        arma::mat predictedCovariance = unscentedTransform.calculateCovarianceFromSigmas(sigmaPoints, predictedMean) + processNoise;
-
-        model.limitState(predictedMean);
-        estimate.setMean(predictedMean);
-        estimate.setCovariance(predictedCovariance);
-
-        sigmaMean = estimate.mean();
+        mean = model.limitState(unscentedTransform.calculateMeanFromSigmas(sigmaPoints));
+        covariance = unscentedTransform.calculateCovarianceFromSigmas(sigmaPoints, predictedMean) + processNoise;
+        
+        // Re calculate our sigma points
+        sigmaMean = mean;
         sigmaPoints = unscentedTransform.generateSigmaPoints(estimate.mean(), estimate.covariance());
 
+        // Calculate our TODO what are these again?
         c = arma::diagmat(unscentedTransform.covarianceWeights());
         d = arma::mat(numSigmaPoints, 1);
         x = arma::mat(estimate.totalStates(), numSigmaPoints);
+        
         for(uint i = 0; i < numSigmaPoints; ++i) {
             x.col(i) = (sigmaPoints.col(i) - sigmaMean);
         }
@@ -110,11 +105,8 @@ public:
         c = c - c.t() * Ytransp * (noise + Y * c * Ytransp).i() * Y * c; //ox previously InverseMatrix(noise + ...)
         d = d + Ytransp * noise.i() * innovation;
 
-        arma::mat updatedMean = sigmaMean + x * c * d;    // Update mean and covariance.
-        arma::mat updatedCovariance = x * c * x.t();
-
-        model.limitState(updatedMean);
-        estimate.setMean(updatedMean);
-        estimate.setCovariance(updatedCovariance);
+        // Update our mean and covariance
+        mean = model.limitState(sigmaMean + x * c * d);
+        covariance = x * c * x.t();
     }
 };
