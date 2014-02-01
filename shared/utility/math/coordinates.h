@@ -28,21 +28,22 @@ namespace utility {
 
         /**
          * Functions to convert between coordinate representations.
-         *
+         *  
+         * (r,phi,theta) represent radial distance, bearing (counter-clockwise from x-axis in xy-plane) and declination (measured from the z axis) (in radians)
          * @author Alex Biddulph
          */
         namespace coordinates {
             inline arma::vec3 Spherical2Cartesian(const arma::vec3& sphericalCoordinates) {
                 double distance = sphericalCoordinates[0];
-                double bearingcos = cos(sphericalCoordinates[1]);
-                double bearingsin = sin(sphericalCoordinates[1]);
-                double elevationcos = cos(sphericalCoordinates[2]);
-                double elevationsin = sin(sphericalCoordinates[2]);
+                double cos_phi = cos(sphericalCoordinates[1]);
+                double sin_phi = sin(sphericalCoordinates[1]);
+                double cos_theta = cos(sphericalCoordinates[2]);
+                double sin_theta = sin(sphericalCoordinates[2]);
                 arma::vec3 result;
 
-                result[0] = distance * bearingcos * elevationcos;
-                result[1] = distance * bearingsin * elevationcos;
-                result[2] = distance * elevationsin;
+                result[0] = distance * sin_theta * cos_phi;
+                result[1] = distance * sin_theta * sin_phi;
+                result[2] = distance * cos_theta;
 
                 return result;
             }
@@ -53,9 +54,9 @@ namespace utility {
                 double z = cartesianCoordinates[2];
                 arma::vec3 result;
 
-                result[0] = sqrt(x*x + y*y + z*z);
-                result[1] = atan2(y, x);
-                result[2] = asin(z / (result[0]));
+                result[0] = sqrt(x*x + y*y + z*z);  //r
+                result[1] = atan2(y, x);            //phi
+                result[2] = acos(z / (result[0]));  //theta
 
                 return result;
             }

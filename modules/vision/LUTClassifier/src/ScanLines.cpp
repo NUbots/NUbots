@@ -35,8 +35,8 @@ namespace modules {
  			// Empty Constructor.
  		}
 
-		std::vector<int> ScanLines::generateScanLines(const Image& img, const GreenHorizon& greenHorizon) {
-			std::vector<int> horizontalScanLines;
+		void ScanLines::generateScanLines(const Image& img, const GreenHorizon& greenHorizon, std::vector<int>* resulting_scan_lines) {
+			
 			int bottomHorizontalScan = img.height() - 1;														//we need h-scans under the GH for field lines
 			const std::vector<arma::vec2>& horizonPoints = greenHorizon.getInterpolatedPoints();		// Need this to get the left and right
 			//std::cout << "Num Horizon points = " << horizonPoints.size()<< std::endl;
@@ -56,44 +56,45 @@ namespace modules {
 			const int SPACING = std::max(HORIZONTAL_SCANLINE_SPACING, 1U);
 
 			for (int y = bottomHorizontalScan; y >= 0; y -= SPACING) {
-				horizontalScanLines.push_back(y);
+				resulting_scan_lines->push_back(y);
 			}
-
-			return horizontalScanLines;
 		}
 
-		SegmentedRegion ScanLines::classifyHorizontalScanLines(const Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT) {
-			SegmentedRegion classifications;
+		void ScanLines::classifyHorizontalScanLines(const Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT, messages::vision::SegmentedRegion* resulting_region) {
+			
 
 		    for (const auto& scanLine : horizontalScanLines) {
-				classifications.m_segmentedScans.push_back(classifyHorizontalScan(originalImage, scanLine, LUT));
+				classifyHorizontalScan(originalImage, scanLine, LUT, resulting_region/*Will be modified*/);
 			}
 
-			classifications.m_direction = ScanDirection::HORIZONTAL;
-
-			return classifications;
+			resulting_region->m_direction = ScanDirection::HORIZONTAL;
 		}
 
-		SegmentedRegion ScanLines::classifyVerticalScanLines(const Image& originalImage, const GreenHorizon& greenHorizon, const LookUpTable& LUT) {
+		void ScanLines::classifyVerticalScanLines(const Image& originalImage, const GreenHorizon& greenHorizon, const LookUpTable& LUT, messages::vision::SegmentedRegion* resulting_region) {
 			
 			const std::vector<arma::vec2>& verticalStartPoints = greenHorizon.getInterpolatedSubset(VERTICAL_SCANLINE_SPACING);
-			SegmentedRegion classifications;
+			
 
 		    for (const auto& scanLine : verticalStartPoints) {
-				classifications.m_segmentedScans.push_back(classifyVerticalScan(originalImage, scanLine, LUT));
+				classifyVerticalScan(originalImage, scanLine, LUT, resulting_region/*Will be modified*/);
 			}
-    		classifications.m_direction = ScanDirection::VERTICAL;
-			return classifications;
+
+    		resulting_region->m_direction = ScanDirection::VERTICAL;
 		}
 
-        std::vector<ColourSegment> ScanLines::classifyHorizontalScan(const Image& image, unsigned int y, const LookUpTable& LUT) {
-			std::vector<ColourSegment> result;
+        void ScanLines::classifyHorizontalScan(const Image& image, unsigned int y, const LookUpTable& LUT, SegmentedRegion* region) {
+			//Number of scanlines is given by integer ratio plus one for scanline at origin
+			std::vector<ColourSegment> result;			
+			region->m_segmentedScans.push_back(result);
+
+			//Reserve memory to reduce time taken by reallocation with push_back
+			region->m_segmentedScans.back().reserve((2+(image.height()/VERTICAL_SCANLINE_SPACING))*APPROXIMATE_SEGS_PER_HOR_SCAN);
 			arma::vec2 startPoint, endPoint;
 
 			if (y >= image.height()) {
 //				NUClear::log<NUClear::ERROR>("ScanLines::classifyHorizontalScan invalid y: ", y);
 				std::cout << "ScanLines::classifyHorizontalScan invalid y: " <<  y << std::endl;
-				return result;
+				return;
 			}
 
 			//simple and nasty first
@@ -114,7 +115,7 @@ namespace modules {
 					endPoint[0] = x;
 					endPoint[1] = y;
 					SegmentLogic::setColourSegment(segment,startPoint, endPoint, startColour);
-					result.push_back(segment);
+					region->m_segmentedScans.back().push_back(segment);
 
 					//start new segment
 					startColour = currentColour;
@@ -127,19 +128,23 @@ namespace modules {
 			endPoint[0] = x - 1;
 			endPoint[1] = y;
 			SegmentLogic::setColourSegment(segment,startPoint, endPoint, startColour);
-			result.push_back(segment);
-
-			return result;
+			region->m_segmentedScans.back().push_back(segment);
 		}
 
-		std::vector<ColourSegment> ScanLines::classifyVerticalScan(const Image& image, const arma::vec2& start, const LookUpTable& LUT) {
-			std::vector<ColourSegment> result;
+		void ScanLines::classifyVerticalScan(const Image& image, const arma::vec2& start, const LookUpTable& LUT, SegmentedRegion* region) {
+			//Number of scanlines is given by integer ratio plus one for scanline at origin
+			std::vector<ColourSegment> result;			
+			region->m_segmentedScans.push_back(result);
+
+			//Reserve memory to reduce time taken by reallocation with push_back
+			region->m_segmentedScans.back().reserve((2+(image.width()/HORIZONTAL_SCANLINE_SPACING))*APPROXIMATE_SEGS_PER_VERT_SCAN); 
+
 			arma::vec2 startPoint, endPoint;
 
 			if ((start[1] >= image.height()) || (start[1] < 0) || (start[0] >= image.width()) || (start[0] < 0)) {
 //				NUClear::log<NUClear::ERROR>("ScanLines::classifyVerticalScan invalid start position: ", start);
 				std::cout << "ScanLines::classifyVerticalScan invalid start position: " << start << std::endl;
-				return result;
+				return;
 			}
 
 			//simple and nasty first
@@ -159,7 +164,7 @@ namespace modules {
 					endPoint[0] = x;
 					endPoint[1] = y;
 					SegmentLogic::setColourSegment(segment,startPoint, endPoint, startColour);
-					result.push_back(segment);
+					region->m_segmentedScans.back().push_back(segment);
 
 					//start new segment
 					startColour = currentColour;
@@ -172,9 +177,8 @@ namespace modules {
 			endPoint[0] = x;
 			endPoint[1] = y;
 			SegmentLogic::setColourSegment(segment,startPoint, endPoint, startColour);
-			result.push_back(segment);
+			region->m_segmentedScans.back().push_back(segment);
 
-			return result;
 		}
 	}
 }

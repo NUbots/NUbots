@@ -27,6 +27,7 @@
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/Image.h"
 #include "messages/vision/ClassifiedImage.h"
+#include "messages/vision/VisionObjects.h"
 #include "messages/localisation/FieldObject.h"
 #include "utility/NUbugger/NUgraph.h"
 
@@ -40,6 +41,7 @@ using utility::NUbugger::graph;
 using std::chrono::duration_cast;
 using std::chrono::microseconds;
 using messages::support::NUbugger::proto::Message;
+using messages::vision::Goal;
 
 namespace modules {
 	namespace support {
@@ -103,7 +105,7 @@ namespace modules {
 					servo->set_temperature(sensors.servo[i].temperature);
 
 					/*if (sensors.servo[i].errorFlags > 0) {
-						std::cout << sensors.servo[i].errorFlags << std::endl;
+						//std::cout << sensors.servo[i].errorFlags << std::endl;
 					}*/
 				}
 
@@ -134,15 +136,15 @@ namespace modules {
 				rfsr->set_centre_y(sensors.fsr.right.centreY);
 
 				/*if (sensors.cm730ErrorFlags > 0) {
-					std::cout << sensors.cm730ErrorFlags << std::endl;
+					//std::cout << sensors.cm730ErrorFlags << std::endl;
 				}
 
 				if (sensors.fsr.left.errorFlags > 0) {
-					std::cout << sensors.fsr.left.errorFlags << std::endl;
+					//std::cout << sensors.fsr.left.errorFlags << std::endl;
 				}
 
 				if (sensors.fsr.right.errorFlags > 0) {
-					std::cout << sensors.fsr.right.errorFlags << std::endl;
+					//std::cout << sensors.fsr.right.errorFlags << std::endl;
 				}*/
 
 				emit(graph(
@@ -172,7 +174,7 @@ namespace modules {
 
 			on<Trigger<Image>, With<DarwinSensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image, const DarwinSensors&) {
 
-				//std::cout << "Image!" << std::endl;
+				////std::cout << "Image!" << std::endl;
 
 				Message message;
 				message.set_type(Message::VISION);
@@ -289,7 +291,7 @@ namespace modules {
 
 				Message::VisionClassifiedImage* api_classified_image = api_vision->mutable_classified_image();
 
-				for (auto& rowColourSegments : image.horizontal_filtered_segments.m_segmentedScans) {
+				for (auto& rowColourSegments : image.horizontalFilteredSegments.m_segmentedScans) {
 					for (auto& colorSegment : rowColourSegments) {
 						auto& start = colorSegment.m_start;
 						auto& end = colorSegment.m_end;
@@ -304,7 +306,7 @@ namespace modules {
 					}
 				}
 
-				for (auto& columnColourSegments : image.vertical_filtered_segments.m_segmentedScans)
+				for (auto& columnColourSegments : image.verticalFilteredSegments.m_segmentedScans)
 				{
 					for (auto& colorSegment : columnColourSegments)
 					{
@@ -321,13 +323,13 @@ namespace modules {
 					}
 				}
 
-				for (auto& matchedSegment : image.matched_vertical_segments)
+				for (auto& matchedSegment : image.matchedVerticalSegments)
 				{
-					for (auto& ballColumnColourSegment : matchedSegment.second)
+					for (auto& columnColourSegment : matchedSegment.second)
 					{
-						auto& start = ballColumnColourSegment.m_start;
-						auto& end = ballColumnColourSegment.m_end;
-						auto& colour = ballColumnColourSegment.m_colour;
+						auto& start = columnColourSegment.m_start;
+						auto& end = columnColourSegment.m_end;
+						auto& colour = columnColourSegment.m_colour;
 						auto& colourClass = matchedSegment.first;
 
 						Message::VisionTransitionSegment* api_segment = api_classified_image->add_transition_segment();
@@ -340,13 +342,13 @@ namespace modules {
 					}
 				}
 	
-				for (auto& matchedSegment : image.matched_horizontal_segments)
+				for (auto& matchedSegment : image.matchedHorizontalSegments)
 				{
-					for (auto& ballRowColourSegment : matchedSegment.second)
+					for (auto& rowColourSegment : matchedSegment.second)
 					{
-						auto& start = ballRowColourSegment.m_start;
-						auto& end = ballRowColourSegment.m_end;
-						auto& colour = ballRowColourSegment.m_colour;
+						auto& start = rowColourSegment.m_start;
+						auto& end = rowColourSegment.m_end;
+						auto& colour = rowColourSegment.m_colour;
 						auto& colourClass = matchedSegment.first;
 
 						Message::VisionTransitionSegment* api_segment = api_classified_image->add_transition_segment();
@@ -359,8 +361,45 @@ namespace modules {
 					}
 				}
 
+				for (auto& greenHorizonPoint : image.greenHorizonInterpolatedPoints) {
+					Message::VisionGreenHorizonPoint* api_ghpoint = api_classified_image->add_green_horizon_point();
+					api_ghpoint->set_x(greenHorizonPoint[0]);
+					api_ghpoint->set_y(greenHorizonPoint[1]);
+				}
+
 				send(message);
 				
+			});
+
+			on<Trigger<std::vector<Goal>>>([this](const std::vector<Goal> goals){
+				Message message;
+ 
+				message.set_type(Message::VISION);
+				message.set_utc_timestamp(std::time(0));
+
+				Message::Vision* api_vision = message.mutable_vision();
+				//std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : sending " << goals.size() << " goals to NUbugger." << std::endl;
+				for (auto& goal : goals){
+					Message::VisionFieldObject* api_goal = api_vision->add_vision_object();
+
+					api_goal->set_shape_type(Message::VisionFieldObject::QUAD);
+					api_goal->set_goal_type(Message::VisionFieldObject::GoalType(1+int(goal.type))); //+1 to account for zero vs one referencing in message buffer.
+					api_goal->set_name("Goal");
+					api_goal->set_width(goal.sizeOnScreen[0]);
+					api_goal->set_height(goal.sizeOnScreen[1]);
+					api_goal->set_screen_x(goal.screenCartesian[0]);
+					api_goal->set_screen_y(goal.screenCartesian[1]);
+
+					for(auto& point : goal.screen_quad){
+						api_goal->add_points(point[0]);
+						api_goal->add_points(point[1]);
+						//std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : adding quad point ( " << point[0] << " , " << point[1] << " )."<< std::endl;
+					}
+					for(auto& coord : goal.sphericalFromNeck){
+						api_goal->add_measured_relative_position(coord);
+					}
+				}
+				send(message);
 			});
 
 			on<Trigger<messages::localisation::FieldObject>>([this](const messages::localisation::FieldObject& field_object) {

@@ -1,14 +1,35 @@
+/*
+ * This file is part of FeatureDetector.
+ *
+ * FeatureDetector is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * FeatureDetector is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FeatureDetector.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
 
-#ifdef MESSAGES_VISION_VISION_OBJECTS_H
-#define MESSAGES_VISION_VISION_OBJECTS_H
+#ifndef MESSAGES_VISION_VISIONOBJECTS_H
+#define MESSAGES_VISION_VISIONOBJECTS_H
 
 #include <armadillo> 
 #include <nuclear>
 
-namespace messages{
+namespace messages {
 	namespace vision {
 
 		class VisionObject {
+        public:
+            VisionObject() {}
+
 			arma::vec3 sphericalFromNeck;	//neckRelativeRadial
 			arma::vec3 sphericalError;
 			arma::vec2 screenAngular;	//Polar around view vector on image
@@ -17,20 +38,26 @@ namespace messages{
 			NUClear::clock::time_point timestamp;
 		};
 
-		class Ball : VisionObject {
+		class Ball : public VisionObject {
+        public:
 			Ball() : VisionObject() {}			
 		};
 
-		class Goal : VisionObject {
+		class Goal : public VisionObject {
+        public:
 			Goal() : VisionObject() {}
 			enum Type{
 				LEFT,
 				RIGHT,
-				UNKOWN
+				UNKNOWN
 			} type;
+
+			//Order convention: tr, br, bl, tl,
+			std::vector<arma::vec2> screen_quad;
 		};
 
-		class Obstacle : VisionObject {
+		class Obstacle : public VisionObject {
+        public:
 			Obstacle() : VisionObject() {}
 			float arcWidth;
 		};	
@@ -40,25 +67,31 @@ namespace messages{
 
 		//Line objects:
 
-		class FieldLine : VisionObject {
+		class FieldLine : public VisionObject {
+        public:
 			FieldLine() : VisionObject() {}
 		};
 
-		class CornerPoint : VisionObject {
+		class CornerPoint : public VisionObject {
+        public:
 			CornerPoint() : VisionObject() {}
-			enum Type{
+
+			enum Type {
 				L_CORNER,
 				T_CORNER,
-				X_CORNER
+				X_CORNER,
+                INVALID
 			} type;
 		};
 
-		class CentreCircle : VisionObject {
+		class CentreCircle : public VisionObject {
+        public:
 			CentreCircle() : VisionObject() {}		
 		};
 
 		class LineObjects{
-			LineObjects(){}
+        public:
+			LineObjects() {}
 			std::vector<CentreCircle> centre_circles;
 			std::vector<CornerPoint> corner_points;
 			std::vector<FieldLine> field_lines;
@@ -67,4 +100,4 @@ namespace messages{
 	}
 }
 
-#endif
+#endif // MESSAGES_VISION_VISIONOBJECTS_H

@@ -67,12 +67,13 @@ namespace modules {
                     int height = settings.config["imageHeight"];
                     std::string deviceID = settings.config["deviceID"];
                     std::string format = settings.config["imageFormat"];
+                    bool rotated = settings.config["rotated"];
                     
                     if (camera.getWidth() != static_cast<size_t>(width)
                         || camera.getHeight() != static_cast<size_t>(height)
                         || camera.getFormat() != format
                         || camera.getDeviceID() != deviceID) {
-                        camera.resetCamera(deviceID, format, width, height);
+                        camera.resetCamera(deviceID, format, width, height, rotated);
                     }
 
                     // Set all other camera settings

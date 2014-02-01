@@ -39,28 +39,28 @@ namespace modules {
 			std::unique_ptr<ClassifiedImage> image = std::unique_ptr<ClassifiedImage>(new ClassifiedImage());
 
 			if (PREFILTER_ON) {
-				preFilter(horizontalSegments, horizontalFiltered);
-				preFilter(verticalSegments, verticalFiltered);
-
-		        image->horizontal_filtered_segments = horizontalFiltered;
-		        image->vertical_filtered_segments = verticalFiltered;
-			} else {
-				image->horizontal_filtered_segments = horizontalSegments;
-		        image->vertical_filtered_segments = verticalSegments;
+				preFilter(horizontalSegments, &horizontalFiltered);
+				preFilter(verticalSegments, &verticalFiltered);
 			}
-			filter(horizontalFiltered, horizontalResult);
-			filter(verticalFiltered, verticalResult);
 
+			filter(horizontalFiltered, &(image->matchedHorizontalSegments));
+			filter(verticalFiltered, &(image->matchedVerticalSegments));
+
+            image->horizontalFilteredSegments = horizontalSegments;
+            image->verticalFilteredSegments = verticalSegments;
 			
-			image->matched_horizontal_segments = horizontalResult;
-			image->matched_vertical_segments = verticalResult;
+
 			return std::move(image);
 		}
 
-		void SegmentFilter::preFilter(const SegmentedRegion& scans, SegmentedRegion &result) const {
+		void SegmentFilter::preFilter(const SegmentedRegion& scans, SegmentedRegion* result) const {
 			const std::vector<std::vector<ColourSegment>>& segments = scans.m_segmentedScans;
+			
 			std::vector<std::vector<ColourSegment>> finalSegments;
+			finalSegments.reserve(segments.size());
+			
 			std::vector<ColourSegment> line;
+			line.reserve(3); //Line will only contain at most 3 elements.
 		
 			std::vector<std::vector<ColourSegment>>::const_iterator line_it;
 			std::vector<ColourSegment>::const_iterator before_it, middle_it, after_it;
@@ -76,13 +76,13 @@ namespace modules {
 				    line.push_back(*before_it);         //add the first segment
 				    
 				    for(after_it = before_it + 2; after_it < line_it->end(); after_it++) {
-				        applyReplacements(*before_it, *middle_it, *after_it, line, dir);
+				        applyReplacements(*before_it, *middle_it, *after_it, &line, dir);
 				        before_it = middle_it;
 				        middle_it = after_it;
 				    }
 				    
 				    line.push_back(line_it->back());    //add the last segment
-				    joinMatchingSegments(line);         //merge any now matching segments
+				    joinMatchingSegments(&line);         //merge any now matching segments
 				    finalSegments.push_back(line);
 				}
 				
@@ -94,16 +94,16 @@ namespace modules {
 			}
 	
 			// Store the result of the pre-filtering.
-			result.m_segmentedScans = finalSegments;								//vector assignment operator copies elements
-			result.m_direction = dir;
+			result->m_segmentedScans = finalSegments;								//vector assignment operator copies elements
+			result->m_direction = dir;
 		}
 
-		void SegmentFilter::filter(const SegmentedRegion &scans, std::map<COLOUR_CLASS, std::vector<ColourSegment>>& result) const {
+		void SegmentFilter::filter(const SegmentedRegion &scans, std::map<COLOUR_CLASS, std::vector<ColourSegment>>* result) const {
 			switch (scans.m_direction) {
 				case ScanDirection::VERTICAL: {
 					for (auto rule : m_verticalRules) {
-						std::vector<ColourSegment>& segments = result[rule.getColourClass()];
-						checkRuleAgainstRegion(scans, rule, segments);
+						std::vector<ColourSegment>& segments = (*result)[rule.getColourClass()];
+						checkRuleAgainstRegion(scans, rule, &segments);
 					}
 					
 					break;
@@ -111,8 +111,8 @@ namespace modules {
 			
 				case ScanDirection::HORIZONTAL: {
 					for (auto rule : m_horizontalRules) {
-						std::vector<ColourSegment>& segments = result[rule.getColourClass()];
-						checkRuleAgainstRegion(scans, rule, segments);
+						std::vector<ColourSegment>& segments = (*result)[rule.getColourClass()];
+						checkRuleAgainstRegion(scans, rule, &segments);
 					}
 				
 					break;
@@ -125,7 +125,7 @@ namespace modules {
 			}   
 		}
 
-		void SegmentFilter::checkRuleAgainstRegion(const SegmentedRegion& scans, const ColourTransitionRule& rule, std::vector<ColourSegment>& matches) const {
+		void SegmentFilter::checkRuleAgainstRegion(const SegmentedRegion& scans, const ColourTransitionRule& rule, std::vector<ColourSegment>* matches) const {
 			const std::vector<std::vector<ColourSegment>>& segments = scans.m_segmentedScans;
 			std::vector<ColourSegment>::const_iterator it;
 
@@ -138,7 +138,7 @@ namespace modules {
 				    
 				    // First check start pair alone
 				    if (rule.match(ColourTransitionRule::nomatch, *it, *(it + 1))) {
-				        matches.push_back(*it);
+				        matches->push_back(*it);
 				    }
 				    
 				    it++;
@@ -146,7 +146,7 @@ namespace modules {
 				    // Then check the rest in triplets
 				    while (it < vs.end() - 1) {
 				        if (rule.match(*(it - 1), *it, *(it + 1))) {
-				            matches.push_back(*it);
+				            matches->push_back(*it);
 				        }
 				        
 				        it++;
@@ -154,13 +154,13 @@ namespace modules {
 				    
 				    // Lastly check final pair alone
 				    if (rule.match(*(it - 1), *it, ColourTransitionRule::nomatch)) {
-				        matches.push_back(*it);
+				        matches->push_back(*it);
 				    }
 				}
 			}
 		}
 
-		void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after, std::vector<ColourSegment>& replacements, ScanDirection dir) const {
+		void SegmentFilter::applyReplacements(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after, std::vector<ColourSegment>* replacements, ScanDirection dir) const {
 			std::vector<ColourReplacementRule>::const_iterator rules_it, begin, end;
 			ColourSegment tempSegment;
 		
@@ -193,14 +193,14 @@ namespace modules {
 				    switch (rules_it->getMethod()) {
 						case ColourReplacementRule::BEFORE: {
 							tempSegment.m_colour = before.m_colour;
-							replacements.push_back(tempSegment);
+							replacements->push_back(tempSegment);
 
 							break;
 						}
 						
 						case ColourReplacementRule::AFTER: {
 							tempSegment.m_colour = after.m_colour;
-							replacements.push_back(tempSegment);
+							replacements->push_back(tempSegment);
 							
 							break;
 						}
@@ -212,17 +212,17 @@ namespace modules {
 							arma::vec2 mid_pt	= arma::vec2((start_pt + end_pt) * 0.5);
 							
 							SegmentLogic::setColourSegment(tempSegment,start_pt, mid_pt, before.m_colour);
-							replacements.push_back(tempSegment);
+							replacements->push_back(tempSegment);
 							
 							SegmentLogic::setColourSegment(tempSegment,mid_pt, end_pt, after.m_colour);
-							replacements.push_back(tempSegment);
+							replacements->push_back(tempSegment);
 							
 							break;
 						}
 						
 						case ColourReplacementRule::INVALID: {
 							std::cout << "SegmentFilter::applyReplacements - invalid replacement rule" << std::endl;
-							replacements.push_back(middle);							
+							replacements->push_back(middle);							
 							break;
 						}
 					}
@@ -232,18 +232,18 @@ namespace modules {
 				}
 			}
 		
-			replacements.push_back(middle); //no replacement so keep middle
+			replacements->push_back(middle); //no replacement so keep middle
 		}
 		
-		void SegmentFilter::joinMatchingSegments(std::vector<ColourSegment>& line) const {
+		void SegmentFilter::joinMatchingSegments(std::vector<ColourSegment>* line) const {
 			std::vector<ColourSegment>::iterator before_it, after_it;
-			before_it = line.begin();
+			before_it = line->begin();
 			after_it = before_it + 1;
 			
-			while(after_it<line.end()) {
+			while(after_it<line->end()) {
 				if(before_it->m_colour == after_it->m_colour) {
 				    SegmentLogic::joinColourSegment(*before_it,*after_it);
-				    after_it = line.erase(after_it);
+				    after_it = line->erase(after_it);
 				    before_it = after_it - 1;
 				}
 				
