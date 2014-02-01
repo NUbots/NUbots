@@ -48,18 +48,29 @@ public:
 
     IMUModel(); // empty constructor
     IMUModel* Clone() { return new IMUModel(*this); } //this should Ideally be removed and replaced with a smart-pointer equivilant
-body_roll_rot
+
     arma::mat processEquation(const arma::mat& state, double deltaT, const arma::mat& measurement);      // The process equation, this describes the transition of the estimate due to time and inputs applied. @param state The state determined frim the previous estimate. @param deltaT The elapsed time since the previous update was performed. @param measurement Measurment data obtained from the inputs to the system. @return The new updated measurement.
-    arma::mat measurementEquation(const arma::mat& state, const arma::mat& measurementArgs);    // The measurement equation, this is used to calculate the expected measurement given a state of the system. @param state The estimated state of the system. @param measurementArgs Additional information about the measurement. @return The expected measurment for the given conditions.
-    arma::mat measurementDistance(const arma::mat& measurement1, const arma::mat& measurement2);
+  
+    // The measurement equation, this is used to calculate the expected
+    // measurement given a state of the system. @param state The estimated
+    // state of the system. @param measurementArgs Additional information about
+    // the measurement. @return The expected measurment for the given
+    // conditions.
+    arma::mat measurementEquation(const arma::mat& state, const arma::mat& measurementArgs, unsigned int type);
+    arma::mat measurementDistance(const arma::mat& measurement1, const arma::mat& measurement2,  unsigned int type);
 
     void limitState(arma::mat &state);
     unsigned int totalStates() const {
         return kstates_total;
     }
 
-    std::ostream& writeStreamBinary (std::ostream& output) const; // @brief Outputs a binary representation of the UKF object to a stream. @param output The output stream. @return The output stream.
-    std::istream& readStreamBinary (std::istream& input); // @brief Reads in a UKF object from the input stream. @param input The input stream. @return The input stream.
+    // @brief Outputs a binary representation of the UKF object to a stream. @param
+    // @output The output stream. @return The output stream.
+    std::ostream& writeStreamBinary (std::ostream& output) const; 
+    
+    // @brief Reads in a UKF object from the input stream.
+    // @param input The input stream. @return The input stream.
+    std::istream& readStreamBinary (std::istream& input);
 
 protected:
     IMUModel(const IMUModel& source);
