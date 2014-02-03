@@ -310,7 +310,7 @@ namespace modules {
 
         double VisionKinematics::getD2PError(const NUPoint& location) const{
             double declination_error = SCREEN_LOCATION_UNCERTAINTY_PIXELS*m_FOV[1]/m_imageSize[1];
-            double robot_height = std::abs(m_neckPosition(3,2));
+            double robot_height = std::abs(m_neckPosition[2]);
             double sin_elevation = std::sin(location.neckRelativeRadial[2]-arma::math::pi()); 
             return declination_error*robot_height/(sin_elevation*sin_elevation);
         }

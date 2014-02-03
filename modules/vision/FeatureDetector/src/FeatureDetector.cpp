@@ -278,20 +278,16 @@ namespace modules {
             });
 
             //m_detectObstacles = 
-            on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
-              
-                // NUClear::log<NUClear::DEBUG>("ObstacleDetector::run and emit");            
-
-                // emit(
-                //     m_obstacleDetector.run(classifiedImage.greenHorizonInterpolatedPoints, 
-                //                            *(classifiedImage.LUT), 
-                //                            *(classifiedImage.image),
-                //                            classifiedImage.getAllMatchedSegments(messages::vision::TEAM_CYAN_COLOUR),
-                //                            classifiedImage.getAllMatchedSegments(messages::vision::TEAM_MAGENTA_COLOUR),
-                //                            m_visionKinematics
-                //                           )
-                // );
-                //   NUClear::log<NUClear::DEBUG>("ObstacleDetector::run and emit");         
+            on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {          
+                emit(
+                    m_obstacleDetector.run(classifiedImage.greenHorizonInterpolatedPoints, 
+                                           *(classifiedImage.LUT), 
+                                           *(classifiedImage.image),
+                                           classifiedImage.getAllMatchedSegments(messages::vision::TEAM_CYAN_COLOUR),
+                                           classifiedImage.getAllMatchedSegments(messages::vision::TEAM_MAGENTA_COLOUR),
+                                           m_visionKinematics
+                                          )
+                );     
             });
             
         }
