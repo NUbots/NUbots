@@ -1,24 +1,34 @@
 #include "SinModel.h"
 
-
+// The process equation, this describes the change in state over time. 
+//  @param state The internal state of the system. 
+//  @param deltaT The elapsed time since the previous update was performed. 
+//  @param measurement Time measurment data obtained from the inputs to the system - ie velocity (null if these don't exist for the model). 
+//  @return The new updated internal state.
 arma::mat SinModel::processEquation(const arma::mat& state, double deltaT, const arma::mat& measurement) {
     
     arma::mat result(state); // Start at original state.
-    result(0, 0) = state(1,0)*asin(measurement(0,0)) - deltaT; // Add measurement + offset.
-    result(1, 0) += (deltaT+result(0,0))/asin(measurement(0,0)); //result is the period
+    result(0, 0) = state(0,0)+deltaT/state(1,0); // Add measurement + offset.
     limitState(result);
     return result;
     
 }
 
-// The process equation, this describes the transition of the estimate due to time and inputs applied. @param state The state determined frim the previous estimate. @param deltaT The elapsed time since the previous update was performed. @param measurement Measurment data obtained from the inputs to the system. @return The new updated measurement.
+// The measurement equation, this is used to calculate the expected observation for the current state. This lets us compare it to real observations.
+// NOTE: there are allowed to be multiple measurement equations for different observations - ie obs(goalpost) != obs(centrecircle)
+//  @param state The estimated internal state of the system. 
+//  @param measurementArgs Additional information about the measurement (currently unused). 
+//  @return The expected observation for the given state.
 arma::mat SinModel::measurementEquation(const arma::mat& state, const arma::mat& measurementArgs) {
     
-    arma::mat result = { sin(state(0,0) / state(1,0)) };
+    arma::mat result = { sin(state(0,0)) };
     
     return result;
     
-}// The measurement equation, this is used to calculate the expected measurement given a state of the system. @param state The estimated state of the system. @param measurementArgs Additional information about the measurement. @return The expected measurment for the given conditions.
+}
+
+//A generic L1 distance calculation - fast for single state systems
+//XXX: pretty sure measurementDistance should return a scalar - check original code
 arma::mat SinModel::measurementDistance(const arma::mat& measurement1, const arma::mat& measurement2) {
     
     arma::mat result = { arma::accu(arma::abs(measurement1 - measurement2)) };
@@ -26,15 +36,16 @@ arma::mat SinModel::measurementDistance(const arma::mat& measurement1, const arm
     return result;
 };
 
+//this limits the part of the state which is an angle to [-pi,pi]
 void SinModel::limitState(arma::mat &state) {
-    if (state(0,0) > 1) {
-        state(0,0) = 1;
+    if (state(0,0) > 3.1415926) { //XXX: replace with arma const for pi
+        state(0,0) -= 2*3.1415926;
     }
-    else if (state(0,0) < -1) {
-        state(0,0) = -1;
+    else if (state(0,0) < -3.1415926) {
+        state(0,0) += 2*3.1415926;
     }
 }
 
 unsigned int SinModel::totalStates() {
-    return 1;
+    return 2;
 }
