@@ -30,6 +30,7 @@
 #include "messages/vision/VisionObjects.h"
 #include "messages/localisation/FieldObject.h"
 #include "utility/NUbugger/NUgraph.h"
+#include "utility/vision/LookUpTable.h"
 
 #include "utility/image/ColorModelConversions.h"
 
@@ -43,6 +44,7 @@ using std::chrono::microseconds;
 using messages::support::NUbugger::proto::Message;
 using messages::vision::Goal;
 using messages::vision::Ball;
+using messages::vision::Obstacle;
 
 namespace modules {
 	namespace support {
@@ -422,6 +424,42 @@ namespace modules {
 					
 					for(auto& coord : ball.sphericalFromNeck){
 						api_ball->add_measured_relative_position(coord);
+					}
+				}
+				send(message);
+			});
+
+			on<Trigger<std::vector<Obstacle>>>([this](const std::vector<Obstacle>& obstacles){
+				Message message;
+ 
+				message.set_type(Message::VISION);
+				message.set_utc_timestamp(std::time(0));
+
+				Message::Vision* api_vision = message.mutable_vision();
+				for (auto& obstacle : obstacles){
+					Message::VisionFieldObject* api_obstacle = api_vision->add_vision_object();
+
+					api_obstacle->set_shape_type(Message::VisionFieldObject::QUAD);
+					api_obstacle->set_name("Obstacle");
+					api_obstacle->set_width(obstacle.sizeOnScreen[0]);
+					if( obstacle.sizeOnScreen[1] >=0 ){
+						api_obstacle->set_height(obstacle.sizeOnScreen[1]);
+					}					
+					api_obstacle->set_screen_x(obstacle.screenCartesian[0]);
+					api_obstacle->set_screen_y(obstacle.screenCartesian[1]);
+					switch(obstacle.colour){
+						case messages::vision::UNKNOWN_COLOUR:
+							api_obstacle->set_obstacle_colour(Message::VisionFieldObject::UNKNOWN);
+							break;
+						case messages::vision::TEAM_CYAN_COLOUR:
+							api_obstacle->set_obstacle_colour(Message::VisionFieldObject::CYAN);
+							break;
+						case messages::vision::TEAM_MAGENTA_COLOUR:
+							api_obstacle->set_obstacle_colour(Message::VisionFieldObject::MAGENTA);
+							break;
+					}										
+					for(const auto& coord : obstacle.sphericalFromNeck){
+						api_obstacle->add_measured_relative_position(coord);
 					}
 				}
 				send(message);
