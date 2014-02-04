@@ -4,22 +4,20 @@
 #include <armadillo>
 
 class SinModel {
-    //float period;
-    //float angle;
+
 public:
-    
     // Number of dimensions
-    static constexpr size_t size = 1;
+    static constexpr size_t size = 2;
     
     SinModel() {} // empty constructor
     
-    arma::mat processEquation(const arma::vec::fixed<size>& state, double deltaT, const arma::vec::fixed<size>& measurement);
+    arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec& measurement);
     
-    arma::mat measurementEquation(const arma::vec::fixed<size>& state, const arma::mat& measurementArgs);
+    arma::vec predictedObservation(const arma::vec::fixed<size>& state, const arma::mat& measurementArgs);
     
-    arma::mat measurementDistance(const arma::mat& measurement1, const arma::mat& measurement2);
+    arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
     
-    void limitState(arma::mat &state);
+    void limitState(arma::vec::fixed<size>& state);
     
     unsigned int totalStates();
 };

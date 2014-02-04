@@ -15,7 +15,7 @@ namespace modules {
             DabsonTest::DabsonTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
                 
                 // Get the scripts to run from the command line
-                on<Trigger<Every<10, std::chrono::milliseconds>>>([this](const time_t& time) {
+                on<Trigger<Every<10, std::chrono::milliseconds>>, Options<Single>>([this](const time_t& time) {
                     
                     double freq = 0.25;
 
@@ -28,15 +28,23 @@ namespace modules {
                     // Do kalman filtery stuff in here
 
                     UKF<SinModel> k;
+                    
+                    arma::mat processNoise;
+                    
+                    k.timeUpdate(100);
+                    
+                    arma::vec m = { s };
+                    
+                    k.measurementUpdate(m, arma::eye(1, 1), arma::mat());
+                    
+                    
+                    
 
-                    arma::mat something;
-
-                    k.timeUpdate(100, something, something, something);
-                    k.measurementUpdate(something, something, something);
-
-                    float o = s; //o ~ the kalman filter output.
-
-                    emit(graph("Filter", s, o)); //plot the sinewave & the kalmanfilter output
+                    float o = k.get()[0]; //o ~ the kalman filter output.
+                    
+                    emit(graph("Sin", s));
+                    emit(graph("Kalman", o));
+                         //plot the sinewave & the kalmanfilter output
                 });
             }
             
