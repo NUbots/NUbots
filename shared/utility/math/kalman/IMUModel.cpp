@@ -29,11 +29,13 @@ void IMUModel::limitState(arma::mat &state) {
     if(fabs(state(kstates_body_angle_x, 0)) > pi_2 and fabs(state(kstates_body_angle_y, 0)) > pi_2) { // This part checks for the event where a large roll and large pitch puts the robot back upright
         state(kstates_body_angle_x, 0) = state(kstates_body_angle_x, 0) - sign(state(kstates_body_angle_x, 0)) * M_PI;
         state(kstates_body_angle_y, 0) = state(kstates_body_angle_y, 0) - sign(state(kstates_body_angle_y, 0)) * M_PI;
+        state(kstates_body_angle_z, 0) = state(kstates_body_angle_z, 0) - sign(state(kstates_body_angle_z, 0)) * M_PI;
     }
 
     // Regular unwrapping.
     state(kstates_body_angle_x, 0) = normaliseAngle(state(kstates_body_angle_x, 0));
     state(kstates_body_angle_y, 0) = normaliseAngle(state(kstates_body_angle_y, 0));
+    state(kstates_body_angle_z, 0) = normaliseAngle(state(kstates_body_angle_z, 0));
     return;
 }
 
@@ -46,6 +48,7 @@ arma::mat IMUModel::processEquation(const arma::mat& state, double deltaT, const
     arma::mat result(state); // Start at original state.
     result(kstates_body_angle_x, 0) += (measurement(0, 0) - state(kstates_gyro_offset_x, 0)) * deltaT; // Add measurement + offset.
     result(kstates_body_angle_y, 0) += (measurement(1, 0) - state(kstates_gyro_offset_y, 0)) * deltaT;
+    result(kstates_body_angle_z, 0) += (measurement(2, 0) - state(kstates_gyro_offset_z, 0)) * deltaT;
     limitState(result); 
     return result;
 }
@@ -58,9 +61,10 @@ arma::mat IMUModel::kinematicMeasurementEquation(const arma::mat& state, const a
     // measurementArgs contain no data.
     // Measurement is returned in angle [theta_x, theta_y]^T.
 
-    arma::mat result(2,1);
+    arma::mat result(3,1);
     result(0, 0) = state(kstates_body_angle_x, 0);
     result(1, 0) = state(kstates_body_angle_y, 0);
+    result(2, 0) = state(kstates_body_angle_z, 0);
     return result;
 }
 
@@ -69,15 +73,25 @@ arma::mat IMUModel::accelerometerMeasurementEquation(const arma::mat& state, con
     // Measurement is returned as accelerations [x, y, z]^T.
     // Gravity vector - Starts as pointing down, z =s 980.7 cm/s^2 as
     
-    arma::mat g_vec(3, 1);
-    g_vec(0, 0) = 0.f;
-    g_vec(1, 0) = 0.f;
-    g_vec(2, 0) = -980.7f;
+    arma::vec g_vec(3, 1);
+    gVec(0, 0) = 0.f;
+    gVec(1, 0) = 0.f;
+    gVec(2, 0) = -9.807f; //changed to m/s^2 from cm/s^2
 
     const double body_roll  = state(kstates_body_angle_x, 0); //state ~ input parameter
     const double body_pitch = state(kstates_body_angle_y, 0);
-    float sinA, cosA;
-
+    const double body_yaw = state(kstates_body_angle_z, 0);
+    
+    //new universal rotation code for gyro
+    //See: http://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Simultaneous_orthogonal_rotation_angle
+    const double phi = arma::sqrt(body_roll*body_roll,body_pitch*body_pitch,body_yaw*body_yaw);
+    const arma::vec omega({body_roll/phi,body_pitch/phi,body_yaw/phi});
+    const double cosPhi = cos(phi);
+    const auto omegaCrossG = arma::cross(omega,gVec);
+    
+    arma::vec result = gVec*cosPhi + omegaCrossG*sin(Phi) + omega*omegaCrossG*(1.0-cosPhi);
+    
+    /* //this is BAD CODE - do not use.
     arma::mat body_roll_rot = arma::mat(3,3);
     body_roll_rot.eye(); //body_roll_rot should be initialised as an identity matrix
     sinA = sin(body_roll);
@@ -95,8 +109,8 @@ arma::mat IMUModel::accelerometerMeasurementEquation(const arma::mat& state, con
     body_pitch_rot(0, 2) = -sinA;
     body_pitch_rot(2, 0) = sinA;
     body_pitch_rot(2, 2) = cosA;
-
     arma::mat result = body_roll_rot * body_pitch_rot * g_vec; //this line armadillo hates ..........................................!
+    */
     return result;
 }
 
@@ -124,6 +138,7 @@ arma::mat IMUModel::measurementDistance(const arma::mat& measurement1, const arm
             result = measurement1 - measurement2;
             result(0, 0) = normaliseAngle(result(0, 0));
             result(1, 0) = normaliseAngle(result(1, 0));
+            result(1, 0) = normaliseAngle(result(2, 0));
             break;
     };
     return result;
