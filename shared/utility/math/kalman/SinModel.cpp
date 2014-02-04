@@ -5,9 +5,9 @@
 //  @param deltaT The elapsed time since the previous update was performed. 
 //  @param measurement Time measurment data obtained from the inputs to the system - ie velocity (null if these don't exist for the model). 
 //  @return The new updated internal state.
-arma::mat SinModel::processEquation(const arma::mat& state, double deltaT, const arma::mat& measurement) {
+arma::vec::fixed<size> SinModel::processEquation(const arma::vec::fixed<size>& state, double deltaT, const arma::vec::fixed<size>& measurement) {
     
-    arma::mat result(state); // Start at original state.
+    arma::vec::fixed<size> result(state); // Start at original state.
     result(0, 0) = state(0,0)+deltaT/state(1,0); // Add measurement + offset.
     limitState(result);
     return result;
@@ -19,7 +19,7 @@ arma::mat SinModel::processEquation(const arma::mat& state, double deltaT, const
 //  @param state The estimated internal state of the system. 
 //  @param measurementArgs Additional information about the measurement (currently unused). 
 //  @return The expected observation for the given state.
-arma::mat SinModel::measurementEquation(const arma::mat& state, const arma::mat& measurementArgs) {
+arma::mat SinModel::measurementEquation(const arma::vec::fixed<size>& state, const arma::mat& measurementArgs) {
     
     arma::mat result = { sin(state(0,0)) };
     
@@ -34,7 +34,7 @@ arma::mat SinModel::measurementDistance(const arma::mat& measurement1, const arm
     arma::mat result = { arma::accu(arma::abs(measurement1 - measurement2)) };
     
     return result;
-};
+}
 
 //this limits the part of the state which is an angle to [-pi,pi]
 void SinModel::limitState(arma::mat &state) {
@@ -44,8 +44,4 @@ void SinModel::limitState(arma::mat &state) {
     else if (state(0,0) < -3.1415926) {
         state(0,0) += 2*3.1415926;
     }
-}
-
-unsigned int SinModel::totalStates() {
-    return 2;
 }

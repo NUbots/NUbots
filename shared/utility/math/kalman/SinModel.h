@@ -13,7 +13,7 @@ public:
     
     SinModel() {} // empty constructor
     
-    arma::mat processEquation(const arma::vec::fixed<size> state, double deltaT, const arma::vec::fixed<size>& measurement);
+    arma::mat processEquation(const arma::vec::fixed<size>& state, double deltaT, const arma::vec::fixed<size>& measurement);
     
     arma::mat measurementEquation(const arma::vec::fixed<size>& state, const arma::mat& measurementArgs);
     

@@ -1,6 +1,6 @@
 #include "DabsonTest.h"
 
-#include "utility/math/kalman/Kalman.h" //the 2 files neccessary for filtering
+#include "utility/math/kalman/UKF.h"
 #include "utility/math/kalman/SinModel.h"
 
 #include "utility/NUbugger/NUgraph.h"
@@ -27,7 +27,7 @@ namespace modules {
 
                     // Do kalman filtery stuff in here
 
-                    Kalman<SinModel> k;
+                    UKF<SinModel> k;
 
                     arma::mat something;
 
