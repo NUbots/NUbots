@@ -40,7 +40,7 @@ namespace modules{
         bool LookUpTable::loadLUTFromFile(const std::string& file_name) {
             // char* lutBuffer = (char*)LUTbuffer;
             std::ifstream lutfile;
-            std::string file_location = "/home/darwin/config/"+file_name;
+            std::string file_location = file_name;
 
             // Need std::ios_base::ate for determining file size.
             lutfile.open(file_location, std::ios_base::in | std::ios_base::binary | std::ios_base::ate);

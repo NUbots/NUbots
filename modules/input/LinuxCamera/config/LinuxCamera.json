@@ -11,10 +11,10 @@
     "absoluteExposure": 514,
     "powerLineFrequency": 1,
     "sharpness": 191,
-    "imageFormat" : "MJPG",
+    "imageFormat": "MJPG",
     "imageWidth": 320,
     "imageHeight": 240,
-    "FOV_X" : 1.0472,
-    "FOV_Y" : 0.785398,
-    "rotated" : true
+    "FOV_X": 1.0472,
+    "FOV_Y": 0.785398,
+    "rotated": true
 }
