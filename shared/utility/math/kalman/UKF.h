@@ -10,8 +10,9 @@ private:
     static constexpr uint NUM_SIGMA_POINTS = (Model::size * 2) + 1;
     
     // Dimension types for vectors and square matricies
-    using ModelVec = arma::vec::fixed<Model::size>;
-    using ModelMat = arma::mat::fixed<Model::size, Model::size>;
+    // TODO StateVec, StateMat
+    using StateVec = arma::vec::fixed<Model::size>;
+    using StateMat = arma::mat::fixed<Model::size, Model::size>;
     
     using SigmaVec = arma::vec::fixed<NUM_SIGMA_POINTS>;
     using SigmaRowVec = arma::rowvec::fixed<NUM_SIGMA_POINTS>;
@@ -19,19 +20,19 @@ private:
     using SigmaSquareMat = arma::mat::fixed<NUM_SIGMA_POINTS, NUM_SIGMA_POINTS>;
     
     // Our estimate and covariance
-    ModelVec mean;
-    ModelMat covariance;
+    StateVec mean;
+    StateMat covariance;
     
     // Our sigma points for UKF
-    ModelVec sigmaMean;
+    StateVec sigmaMean;
     SigmaMat sigmaPoints;
     
-    // Don't know what these are
+    
     SigmaMat centredSigmaPoints; // X in Steves kalman theory
     SigmaVec d;
     SigmaSquareMat covarianceUpdate; // C in Steves kalman theory
     
-    SigmaSquareMat defaultC;
+    SigmaSquareMat defaultCovarianceUpdate;
     
     // The mean and covariance weights
     SigmaVec meanWeights;
@@ -40,7 +41,7 @@ private:
     // UKF variables
     double covarianceSigmaWeights;
     
-    SigmaMat generateSigmaPoints(const ModelVec& mean, const ModelMat& covariance) {
+    SigmaMat generateSigmaPoints(const StateVec& mean, const StateMat& covariance) {
         
         // Allocate memory for our points
         SigmaMat points;
@@ -53,36 +54,41 @@ private:
         
         // Put our values in either end of the matrix
         for (uint i = 1; i < Model::size + 1; ++i) {
-            uint negIndex = i + Model::size;
-            
+           
             auto deviation = chol.col(i - 1);
             
-            points.col(i) = mean + deviation;
-            points.col(negIndex) = mean - deviation;
+            points.col(i)               = mean + deviation;
+            points.col(i + Model::size) = mean - deviation;
         }
         
         return points;
     }
     
-    ModelVec meanFromSigmas(const SigmaMat& sigmaPoints) const {
+    StateVec meanFromSigmas(const SigmaMat& sigmaPoints) const {
         return sigmaPoints * meanWeights;
     }
    
-    ModelMat covarianceFromSigmas(const SigmaMat& sigmaPoints, const ModelVec& mean) const {
+    StateMat covarianceFromSigmas(const SigmaMat& sigmaPoints, const StateVec& mean) const {
+        
         auto meanCentered = sigmaPoints - arma::repmat(mean, 1, NUM_SIGMA_POINTS);
         return (arma::repmat(covarianceWeights, Model::size, 1) % meanCentered) * meanCentered.t();
     }
 
-    
-    void initialise(double alpha, double kappa, double beta) {
+public:
+    UKF(double alpha = 1e-1, double kappa = 0.f, double beta = 2.f) {
         
-        double lambda(pow(alpha, 2) * (Model::size + kappa) - Model::size);
+        reset(alpha, kappa, beta);
+    }
+    
+    void reset(double alpha, double kappa, double beta) {
+        
+        double lambda = pow(alpha, 2) * (Model::size + kappa) - Model::size;
         
         covarianceSigmaWeights = Model::size + lambda;
         
         // TODO dirty hack
-        mean.ones();
-        covariance.eye();
+        mean.zeros();
+        covariance.eye() * 0.1;
         
         meanWeights.fill(1.0 / (2.0 * (Model::size + lambda)));
         meanWeights[0] = lambda / (Model::size + lambda);
@@ -90,19 +96,10 @@ private:
         covarianceWeights.fill(1.0 / (2.0 * (Model::size + lambda)));
         covarianceWeights[0] = lambda / (Model::size + lambda) + (1.0 - pow(alpha,2) + beta);
         
-        defaultC = arma::diagmat(covarianceWeights);
-    }
-    
-
-public:
-    UKF(double alpha = 1e-2, double kappa = 0.f, double beta = 2.f) {
-        
-        initialise(alpha, kappa, beta);
+        defaultCovarianceUpdate = arma::diagmat(covarianceWeights);
     }
 
-    void timeUpdate(double delta_t, const ModelMat& processNoise = arma::eye(Model::size, Model::size), const arma::vec& measurement = arma::vec(), const arma::mat& measurementNoise = arma::mat()) {
-
-        // TODO currently measurement noise is not used at all
+    void timeUpdate(double delta_t, const StateMat& processNoise = arma::zeros(Model::size, Model::size), const arma::vec& measurement = arma::vec()) {
         
         // Generate our sigma points
         sigmaPoints = generateSigmaPoints(mean, covariance);
@@ -122,17 +119,17 @@ public:
         sigmaPoints = generateSigmaPoints(mean, covariance);
         
         // Reset our state for more measurements
-        covarianceUpdate = defaultC;
+        covarianceUpdate = defaultCovarianceUpdate;
         d.zeros();
         centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
     }
 
     void measurementUpdate(const arma::vec& measurement, const arma::mat& noise, const arma::mat& args) {
 
-        auto totalMeasurements = measurement.n_rows; //.getm()
+        auto measurementSize = measurement.n_elem;
 
         // Want to know what this is...
-        arma::mat predictedObservations(totalMeasurements, NUM_SIGMA_POINTS);
+        arma::mat predictedObservations(measurementSize, NUM_SIGMA_POINTS);
 
         // First step is to calculate the expected measurement for each sigma point.
         for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
@@ -149,25 +146,24 @@ public:
         const arma::mat innovation = model.observationDifference(measurement, predictedMean);
 
         // Check for outlier, if outlier return without updating estimate.
-        if(!evaluateMeasurement(innovation, predictedCovariance, noise)) {
-            return;
+        if(evaluateMeasurement(innovation, predictedCovariance, noise)) {
+
+            // Update our state
+            covarianceUpdate -= covarianceUpdate.t() * predictedObservations.t() * (noise + predictedObservations * covarianceUpdate * predictedObservations.t()).i() * predictedObservations * covarianceUpdate;
+            d += predictedObservations.t() * noise.i() * innovation;
+
+            // Update our mean and covariance
+            mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
+            model.limitState(mean);
+            covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
         }
-
-        // Update our state
-        covarianceUpdate = covarianceUpdate - covarianceUpdate.t() * predictedObservations.t() * (noise + predictedObservations * covarianceUpdate * predictedObservations.t()).i() * predictedObservations * covarianceUpdate;
-        d += predictedObservations.t() * noise.i() * innovation;
-
-        // Update our mean and covariance
-        mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
-        model.limitState(mean);
-        covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
     }
     
-    ModelVec get() {
+    StateVec get() {
         return mean;
     }
     
-    ModelMat getCovariance() {
+    StateMat getCovariance() {
         return covariance;
     }
     
@@ -191,6 +187,8 @@ public:
             }
         }
         
+        // If our measurements are terrible, then we reduce the weighting of this (for localization)
+         
         if(weighting) {
             int measurement_dimensions = measurement_variance.n_rows; //.getm()
             const float outlier_probability = 0.05;

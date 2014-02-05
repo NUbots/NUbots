@@ -22,6 +22,8 @@
 
 #include <nuclear>
 
+#include "utility/math/kalman/UKF.h"
+#include "utility/math/kalman/TestModel.h"
 
 namespace modules {
     namespace behaviours {
@@ -33,6 +35,8 @@ namespace modules {
              * @author Trent Houliston
              */
             class DabsonTest : public NUClear::Reactor {
+                
+                UKF<TestModel> k;
 
             public:
                 explicit DabsonTest(std::unique_ptr<NUClear::Environment> environment);

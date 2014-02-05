@@ -1,15 +1,15 @@
-#ifndef SINMODEL_H
-#define SINMODEL_H
+#ifndef TESTMODEL_H
+#define TESTMODEL_H
 
 #include <armadillo>
 
-class SinModel {
+class TestModel {
 
 public:
     // Number of dimensions
-    static constexpr size_t size = 2;
+    static constexpr size_t size = 1;
     
-    SinModel() {} // empty constructor
+    TestModel() {} // empty constructor
     
     arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec& measurement);
     
