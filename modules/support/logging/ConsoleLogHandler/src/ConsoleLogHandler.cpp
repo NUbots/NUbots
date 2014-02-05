@@ -24,6 +24,21 @@ namespace modules {
         namespace logging {
 
             ConsoleLogHandler::ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+                on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics & stats) {
+                    if (stats.exception) {
+                        try {
+                            std::rethrow_exception(stats.exception);
+                        }
+                        catch (std::exception ex) {
+                            NUClear::log<NUClear::ERROR>("Unhandled Exception: ", ex.what());
+                        }
+                        // We don't actually want to crash
+                        catch (...) {
+                        }
+                    }
+                });
+                
+                
                 on<Trigger<NUClear::LogMessage>, Options<Sync<ConsoleLogHandler>>>([this](const NUClear::LogMessage& message) {
                     
                     // Output the message

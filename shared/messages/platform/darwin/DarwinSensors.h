@@ -24,6 +24,8 @@
 #include <string>
 #include <stdexcept>
 
+#include "messages/input/ServoID.h"
+
 namespace messages {
     namespace platform {
         namespace darwin {
@@ -39,19 +41,19 @@ namespace messages {
              */
             struct DarwinSensors {
 
-			// bitmask values
-	        enum Error {
-	            OK              = 0, // not really a flag but the lack of any other flag
-	            INPUT_VOLTAGE   = 1 << 0,
-	            ANGLE_LIMIT     = 1 << 1,
-	            OVERHEATING     = 1 << 2,
-	            RANGE           = 1 << 3,
-	            CHECKSUM        = 1 << 4,
-	            OVERLOAD        = 1 << 5,
-	            INSTRUCTION     = 1 << 6,
-	            CORRUPT_DATA    = 1 << 7,
-	            TIMEOUT         = 1 << 8
-	        };
+				// bitmask values
+				enum Error {
+					OK              = 0, // not really a flag but the lack of any other flag
+					INPUT_VOLTAGE   = 1 << 0,
+					ANGLE_LIMIT     = 1 << 1,
+					OVERHEATING     = 1 << 2,
+					RANGE           = 1 << 3,
+					CHECKSUM        = 1 << 4,
+					OVERLOAD        = 1 << 5,
+					INSTRUCTION     = 1 << 6,
+					CORRUPT_DATA    = 1 << 7,
+					TIMEOUT         = 1 << 8
+				};
 
                 uint8_t cm730ErrorFlags;
 
@@ -154,8 +156,12 @@ namespace messages {
                     Servo headPan;
                     Servo headTilt;
 
+                    const Servo& operator[](messages::input::ServoID index) const;
+                    Servo& operator[](messages::input::ServoID index);
+
                     const Servo& operator[](int index) const;
                     Servo& operator[](int index);
+
                 } servo;
             };
             

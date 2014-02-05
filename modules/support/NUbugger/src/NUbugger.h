@@ -35,12 +35,12 @@ namespace modules {
          */
         class NUbugger : public NUClear::Reactor {
         private:
-			zmq::socket_t pub;
+            zmq::socket_t pub;
 
-			std::mutex mutex;
+            std::mutex mutex;
 
-			void send(zmq::message_t& packet);
-			void send(messages::support::NUbugger::proto::Message message);
+            void send(zmq::message_t& packet);
+            void send(messages::support::NUbugger::proto::Message message);
         public:
             explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);
         };

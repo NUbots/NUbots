@@ -16,11 +16,11 @@ namespace modules{
         
         LookUpTable::LookUpTable() {
             LUTbuffer = new unsigned char[LUT_SIZE];
-			
+            
             for(int i = 0; i < LUT_SIZE; i++) {
                 LUTbuffer[i] = Colour::unclassified;
-			}
-			
+            }
+            
             LUT = LUTbuffer;
         }
 
@@ -33,7 +33,7 @@ namespace modules{
             for(int i = 0; i < LUT_SIZE; i++) {
                 LUTbuffer[i] = vals[i];
             }
-			
+            
             LUT = LUTbuffer;
         }
 
@@ -53,7 +53,7 @@ namespace modules{
                 LUT = LUTbuffer;
                 return true;
             }
-			
+            
             else {
                 //NUClear::log<NUClear::DEBUG>("Vision::loadLUTFromFile(", file_location, "). Failed to load lut.");
                 std::cout << "Vision::loadLUTFromFile(" << file_location << "). Failed to load lut." << std::endl;
@@ -67,20 +67,20 @@ namespace modules{
         void LookUpTable::zero() {
             for(int i = 0; i < LUT_SIZE; i++) {
                 LUTbuffer[i] = Colour::unclassified;
-			}
-			
+            }
+            
             LUT = LUTbuffer;
         }
 
         const unsigned int LookUpTable::getLUTIndex(const messages::input::Image::Pixel& colour) const {
             unsigned int index = 0;
-			
+            
             index += ((colour.y >> 1) << 14);
             index += ((colour.cb >> 1) << 7);
             index += (colour.cr >> 1);
-			
+            
             return index;
         }
-		
+        
     }   //vision
 }   //modules
