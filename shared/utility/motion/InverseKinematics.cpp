@@ -272,6 +272,13 @@ namespace kinematics {
             positions.push_back(std::make_pair(ServoID::L_KNEE, M_PI - knee));
             positions.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, -anklePitch));
             positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, ankleRoll));
+        } else {
+            positions.push_back(std::make_pair(ServoID::R_HIP_YAW, -hipYaw));
+            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL, -hipRoll));
+            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH, -hipPitch));
+            positions.push_back(std::make_pair(ServoID::R_KNEE, M_PI - knee));
+            positions.push_back(std::make_pair(ServoID::R_ANKLE_PITCH, -anklePitch));
+            positions.push_back(std::make_pair(ServoID::R_ANKLE_ROLL, -ankleRoll));
         }
 
         return positions;

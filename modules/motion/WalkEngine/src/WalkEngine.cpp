@@ -110,7 +110,9 @@ namespace modules {
 				target(1,3) = walkEngineConfig.config["y"]; // left/right
 				target(2,3) = walkEngineConfig.config["z"]; // front/back
 
-				std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints3(target, true);
+                bool isLeft = walkEngineConfig.config["isLeft"];
+
+				std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints3(target, isLeft);
                 auto waypoints = std::make_unique<std::vector<ServoWaypoint> >();
                 for (auto& legJoint : legJoints) {
                     ServoWaypoint waypoint;
