@@ -35,8 +35,6 @@
 using messages::platform::darwin::DarwinSensors;
 using messages::input::Image;
 using messages::vision::ClassifiedImage;
-using NUClear::DEBUG;
-using utility::NUbugger::graph;
 using std::chrono::duration_cast;
 using std::chrono::microseconds;
 using messages::support::NUbugger::proto::Message;
@@ -144,21 +142,6 @@ namespace modules {
                 if (sensors.fsr.right.errorFlags > 0) {
                     std::cout << sensors.fsr.right.errorFlags << std::endl;
                 }*/
-
-                emit(graph(
-                    "Accelerometer", 
-                    sensors.accelerometer.x,
-                    sensors.accelerometer.y,
-                    sensors.accelerometer.z
-                    
-                ));
-
-                emit(graph(
-                    "Gyro",
-                    sensors.gyroscope.x,
-                    sensors.gyroscope.y,
-                    sensors.gyroscope.z
-                ));
 
                 // TODO!
 

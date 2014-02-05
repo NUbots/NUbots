@@ -9,5 +9,6 @@ ADD_ROLE(
         platform::fakedarwin::HardwareIO
         platform::darwin::MotionManager
         support::NUbugger
+        debug::NUbugger
         motion::WalkEngine
 )
