@@ -17,7 +17,9 @@ public:
     
     arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
     
-    void limitState(arma::vec::fixed<size>& state);
+    arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
+    
+    arma::mat::fixed<size, size> processNoise();
     
     unsigned int totalStates();
 };

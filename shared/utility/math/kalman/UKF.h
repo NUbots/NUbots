@@ -10,7 +10,6 @@ private:
     static constexpr uint NUM_SIGMA_POINTS = (Model::size * 2) + 1;
     
     // Dimension types for vectors and square matricies
-    // TODO StateVec, StateMat
     using StateVec = arma::vec::fixed<Model::size>;
     using StateMat = arma::mat::fixed<Model::size, Model::size>;
     
@@ -99,7 +98,8 @@ public:
         defaultCovarianceUpdate = arma::diagmat(covarianceWeights);
     }
 
-    void timeUpdate(double delta_t, const StateMat& processNoise = arma::zeros(Model::size, Model::size), const arma::vec& measurement = arma::vec()) {
+    template <typename TMeasurement>
+    void timeUpdate(double delta_t, const TMeasurement& measurement = TMeasurement()) {
         
         // Generate our sigma points
         sigmaPoints = generateSigmaPoints(mean, covariance);
@@ -111,8 +111,8 @@ public:
 
         // Calculate the new mean and covariance values.
         mean = meanFromSigmas(sigmaPoints);
-        model.limitState(mean);
-        covariance = covarianceFromSigmas(sigmaPoints, mean) + processNoise;
+        mean = model.limitState(mean);
+        covariance = covarianceFromSigmas(sigmaPoints, mean) + model.processNoise();
         
         // Re calculate our sigma points
         sigmaMean = mean;
@@ -124,7 +124,8 @@ public:
         centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
     }
 
-    void measurementUpdate(const arma::vec& measurement, const arma::mat& noise, const arma::mat& args) {
+    template <typename TMeasurement>
+    void measurementUpdate(const TMeasurement& measurement, const arma::mat& noise) {
 
         auto measurementSize = measurement.n_elem;
 
@@ -133,7 +134,7 @@ public:
 
         // First step is to calculate the expected measurement for each sigma point.
         for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
-            predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), args);
+            predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), measurement);
         }
 
         // Now calculate the mean of these measurement sigmas.
@@ -154,7 +155,7 @@ public:
 
             // Update our mean and covariance
             mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
-            model.limitState(mean);
+            mean = model.limitState(mean);
             covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
         }
     }

@@ -33,6 +33,14 @@ arma::vec TestModel::observationDifference(const arma::vec& a, const arma::vec& 
     return a - b;
 }
 
+
+//A generic L1 distance calculation - fast for single state systems
+//XXX: pretty sure measurementDistance should return a scalar - check original code
+arma::mat::fixed<TestModel::size, TestModel::size> TestModel::processNoise() {
+    return arma::zeros(size, size);
+}
+
 //this limits the part of the state which is an angle to [-pi,pi]
-void TestModel::limitState(arma::vec::fixed<size>& state) {
+arma::vec::fixed<TestModel::size> TestModel::limitState(const arma::vec::fixed<size>& state) {
+    return state;
 }
