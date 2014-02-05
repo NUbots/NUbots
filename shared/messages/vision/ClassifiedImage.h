@@ -91,14 +91,14 @@ namespace messages {
              * @author Alex Biddulph
              */
               //Image variables:
-            SegmentedRegion horizontal_filtered_segments;       //! @variable The filtered segmented horizontal scanlines.
-            SegmentedRegion vertical_filtered_segments;         //! @variable The filtered segmented vertical scanlines.
+            SegmentedRegion horizontalFilteredSegments;       //! @variable The filtered segmented horizontal scanlines.
+            SegmentedRegion verticalFilteredSegments;         //! @variable The filtered segmented vertical scanlines.
 
             //! Transitions
-            std::map<COLOUR_CLASS, std::vector<ColourSegment> > matched_horizontal_segments;
-            std::map<COLOUR_CLASS, std::vector<ColourSegment> > matched_vertical_segments;
+            std::map<COLOUR_CLASS, std::vector<ColourSegment>> matchedHorizontalSegments;
+            std::map<COLOUR_CLASS, std::vector<ColourSegment>> matchedVerticalSegments;
 
-            std::vector<arma::vec2> green_horizon_interpolated_points;
+            std::vector<arma::vec2> greenHorizonInterpolatedPoints;
              
             /*!
             Gets the name of the given colour.

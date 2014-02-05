@@ -11,4 +11,5 @@ ADD_ROLE(
         support::NUbugger
         debug::NUbugger
         vision::LUTClassifier
+        vision::FeatureDetector
 )
