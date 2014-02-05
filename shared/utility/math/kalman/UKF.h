@@ -26,7 +26,6 @@ private:
     StateVec sigmaMean;
     SigmaMat sigmaPoints;
     
-    
     SigmaMat centredSigmaPoints; // X in Steves kalman theory
     SigmaVec d;
     SigmaSquareMat covarianceUpdate; // C in Steves kalman theory
@@ -66,8 +65,18 @@ private:
     StateVec meanFromSigmas(const SigmaMat& sigmaPoints) const {
         return sigmaPoints * meanWeights;
     }
-   
+    
     StateMat covarianceFromSigmas(const SigmaMat& sigmaPoints, const StateVec& mean) const {
+        
+        auto meanCentered = sigmaPoints - arma::repmat(mean, 1, NUM_SIGMA_POINTS);
+        return (arma::repmat(covarianceWeights, Model::size, 1) % meanCentered) * meanCentered.t();
+    }
+    
+    arma::vec meanFromSigmas(const arma::mat& sigmaPoints) const {
+        return sigmaPoints * meanWeights;
+    }
+    
+    arma::mat covarianceFromSigmas(const arma::mat& sigmaPoints, const arma::vec& mean) const {
         
         auto meanCentered = sigmaPoints - arma::repmat(mean, 1, NUM_SIGMA_POINTS);
         return (arma::repmat(covarianceWeights, Model::size, 1) % meanCentered) * meanCentered.t();
@@ -105,7 +114,7 @@ public:
         sigmaPoints = generateSigmaPoints(mean, covariance);
         
         // Write the propagated version of the sigma point
-        for(uint i = 0; i < sigmaPoints.n_rows; ++i) {
+        for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
             sigmaPoints.col(i) = model.timeUpdate(sigmaPoints.col(i), delta_t, measurement);
         }
 
@@ -125,12 +134,10 @@ public:
     }
 
     template <typename TMeasurement>
-    void measurementUpdate(const TMeasurement& measurement, const arma::mat& noise) {
+    double measurementUpdate(const TMeasurement& measurement, const arma::mat& noise) {
 
-        auto measurementSize = measurement.n_elem;
-
-        // Want to know what this is...
-        arma::mat predictedObservations(measurementSize, NUM_SIGMA_POINTS);
+        // Allocate room for our predictions
+        arma::mat predictedObservations(measurement.n_elem, NUM_SIGMA_POINTS);
 
         // First step is to calculate the expected measurement for each sigma point.
         for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
@@ -138,11 +145,11 @@ public:
         }
 
         // Now calculate the mean of these measurement sigmas.
-        arma::vec predictedMean = predictedObservations * meanWeights; //meanFromSigmas(predictedObservations);
+        arma::vec predictedMean = meanFromSigmas(predictedObservations);
         predictedObservations.each_col() -= predictedMean;
         
         // Calculate our predicted covariance
-        arma::mat predictedCovariance = covarianceWeights * predictedObservations.t() * predictedObservations;
+        arma::mat predictedCovariance = covarianceFromSigmas(predictedObservations, predictedMean);
         
         const arma::mat innovation = model.observationDifference(measurement, predictedMean);
 
@@ -158,6 +165,15 @@ public:
             mean = model.limitState(mean);
             covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
         }
+        
+        arma::mat innovationVariance = predictedCovariance + noise;
+        arma::mat thing = (innovation.t() * innovationVariance.i() * innovation);
+        
+        double expTerm = -0.5 * thing(0, 0);
+        double fract = 1 / sqrt(pow(2 * M_PI, noise.n_rows) * arma::det(innovationVariance));
+        const float outlierProbability = 0.05;
+        
+        return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
     }
     
     StateVec get() {

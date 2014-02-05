@@ -20,8 +20,6 @@ public:
     arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
     
     arma::mat::fixed<size, size> processNoise();
-    
-    unsigned int totalStates();
 };
 
 #endif
