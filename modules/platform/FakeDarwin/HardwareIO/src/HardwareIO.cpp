@@ -141,14 +141,14 @@ namespace fakedarwin {
 		}
 
         // This trigger gets the sensor data from the CM730
-		on<Trigger<Every<NUClear::clock::period::den / 60, NUClear::clock::duration>>, Options<Single>>([this](const time_t& time) {
+		on<Trigger<Every<60, Per<std::chrono::seconds> > >, Options<Single> >([this](const time_t& time) {
 
 			for (int i = 0; i < 20; ++i) {
 
 				auto& servo = sensors.servo[i];
 
 				float distance = servo.goalPosition - servo.presentPosition;
-                float distance2 = utility::math::angle::difference(servo.goalPosition, servo.presentPosition);
+                //float distance2 = utility::math::angle::difference(servo.goalPosition, servo.presentPosition);
                 //NUClear::log<NUClear::DEBUG>(distance, " ", distance2);
 				float movingSpeed = servo.movingSpeed / 60.0;
 				int sign = (distance >= 0 ? 1 : -1);

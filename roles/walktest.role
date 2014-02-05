@@ -10,5 +10,6 @@ ADD_ROLE(
         platform::darwin::MotionManager
         support::NUbugger
         debug::NUbugger
+        debug::InverseKinematics
         motion::WalkEngine
 )
