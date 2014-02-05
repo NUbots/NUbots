@@ -21,6 +21,9 @@
 #define MODULES_MOTION_WALKENGINE_H
 
 #include <nuclear>
+#include <armadillo>
+
+#include "utility/configuration/ConfigurationNode.h"
 
 namespace modules {
     namespace motion {
@@ -31,11 +34,34 @@ namespace modules {
          * @author Trent Houliston
          */
         class WalkEngine : public NUClear::Reactor {
-        private:
-            
         public:
             static constexpr const char* CONFIGURATION_PATH = "WalkEngine.json";
             explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
+        private:
+            utility::configuration::ConfigurationNode config;
+            bool active;
+            bool started;
+            bool moving;
+            time_t tLastStep;
+            float ph0 = 0;
+            float ph = 0;
+            int iStep0 = -1;
+            int iStep = 0;
+            int stopRequest = 2;
+            enum {
+                LEFT,
+                RIGHT
+            } supportLeg = LEFT;
+            // TODO: uLeft1
+            // TODO: uRight1
+            // TODO: uTorso1
+            arma::vec2 supportMod;
+            float shiftFactor;
+
+            void update();
+            void advanceMotion();
+            void updateVelocity();
+            float getFootX();
         };
     
     }  // motion
