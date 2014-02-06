@@ -1,0 +1,6 @@
+{
+	"DETECT_LINES" : true,
+	"DETECT_GOALS" : true,
+	"DETECT_BALLS" : true,
+	"DETECT_OBSTACTLES" : true
+}

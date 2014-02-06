@@ -61,14 +61,14 @@ namespace modules {
 			  @param scans the std::lists of segments.
 			  @param result a smoothed result.
 			  */
-			void preFilter(const messages::vision::SegmentedRegion& scans, messages::vision::SegmentedRegion& result) const;
+			void preFilter(const messages::vision::SegmentedRegion& scans, messages::vision::SegmentedRegion* result) const;
 			
 			/**
 			  @brief runs the transition rules over a segment std::list.
 			  @param scans the std::lists of segments - smoothed or unsmoothed.
 			  @param result std::vectors of transition rule matches and the field object ids they map to.
 			  */
-			void filter(const messages::vision::SegmentedRegion& scans, std::map<messages::vision::COLOUR_CLASS, std::vector<messages::vision::ColourSegment>>& result) const;
+			void filter(const messages::vision::SegmentedRegion& scans, std::map<messages::vision::COLOUR_CLASS, std::vector<messages::vision::ColourSegment>>* result) const;
 		
 			/**
 			  @brief Applies a single rule to a segmented region.
@@ -76,7 +76,7 @@ namespace modules {
 			  @param rule The transition rule to apply.
 			  @param matches the resulting std::list of transitions.
 			  */
-			void checkRuleAgainstRegion(const messages::vision::SegmentedRegion& scans, const ColourTransitionRule& rule, std::vector<messages::vision::ColourSegment>& matches) const;
+			void checkRuleAgainstRegion(const messages::vision::SegmentedRegion& scans, const ColourTransitionRule& rule, std::vector<messages::vision::ColourSegment>* matches) const;
 			
 			/**
 			  @brief Applies a replacement rule to a triplet of segments.
@@ -88,14 +88,14 @@ namespace modules {
 			  */
 			void applyReplacements(const messages::vision::ColourSegment& before, 
 									const messages::vision::ColourSegment& middle, 
-									const messages::vision::ColourSegment& after, std::vector<messages::vision::ColourSegment>& replacement, 
+									const messages::vision::ColourSegment& after, std::vector<messages::vision::ColourSegment>* replacement, 
 									messages::vision::ScanDirection dir) const;
 				
 			/**
 			  @brief Joins any adjacent segments that are the same colour.
 			  @param line the std::list of segments.
 			  */
-			void joinMatchingSegments(std::vector<messages::vision::ColourSegment>& line) const;
+			void joinMatchingSegments(std::vector<messages::vision::ColourSegment>* line) const;
 
 		
 		private:

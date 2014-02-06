@@ -1,4 +1,5 @@
-{
+{	
+	"USE_REPLACEMENT_RULES" : true,
 	"REPLACEMENT_RULES":
 	{
 		"fieldnoise_v_small":

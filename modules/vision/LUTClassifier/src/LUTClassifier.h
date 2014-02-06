@@ -23,6 +23,7 @@
 #include <nuclear> 
 #include <string>
 #include <armadillo>
+#include <chrono>
 
 #include "messages/input/Image.h"
 #include "messages/vision/ClassifiedImage.h"
@@ -65,7 +66,7 @@ namespace modules {
         class LUTClassifier : public NUClear::Reactor {
         private:
             std::vector<LookUpTable> LUTs;
-            unsigned int current_LUT_index;
+            unsigned int currentLUTIndex;
 
             GreenHorizon greenHorizon;
             ScanLines scanLines;

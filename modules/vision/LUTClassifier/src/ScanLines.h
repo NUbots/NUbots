@@ -43,17 +43,21 @@ namespace modules {
         class ScanLines {
         private:
             unsigned int HORIZONTAL_SCANLINE_SPACING;
-            unsigned int VERTICAL_SCANLINE_SPACING;            
+            unsigned int VERTICAL_SCANLINE_SPACING;     
+
+            unsigned int APPROXIMATE_SEGS_PER_HOR_SCAN;
+            unsigned int APPROXIMATE_SEGS_PER_VERT_SCAN;
+
 
             /*! @brief Returns a std::vector of ColourSegments detailing the
             horizontal colour segments in the image.
             */
-            std::vector<messages::vision::ColourSegment> classifyHorizontalScan(const messages::input::Image& image, unsigned int y, const LookUpTable& LUT);
+            void classifyHorizontalScan(const messages::input::Image& image, unsigned int y, const LookUpTable& LUT, messages::vision::SegmentedRegion* region);
 
             /*! @brief Returns a std::vector of ColourSegments detailing the
             vertical colour segments in the image.
             */
-            std::vector<messages::vision::ColourSegment> classifyVerticalScan(const messages::input::Image& image, const arma::vec2& start, const LookUpTable& LUT);
+            void classifyVerticalScan(const messages::input::Image& image, const arma::vec2& start, const LookUpTable& LUT, messages::vision::SegmentedRegion* region);
 
         public:
             /*! @brief Loads configuration file.
@@ -61,24 +65,29 @@ namespace modules {
             ScanLines();
             
             void setParameters( unsigned int HORIZONTAL_SCANLINE_SPACING_,
-                           unsigned int VERTICAL_SCANLINE_SPACING_) {
+                                unsigned int VERTICAL_SCANLINE_SPACING_,
+                                unsigned int APPROXIMATE_SEGS_PER_HOR_SCAN_,
+                                unsigned int APPROXIMATE_SEGS_PER_VERT_SCAN_
+                                ) {
                 HORIZONTAL_SCANLINE_SPACING = HORIZONTAL_SCANLINE_SPACING_;
                 VERTICAL_SCANLINE_SPACING = VERTICAL_SCANLINE_SPACING_;
+                APPROXIMATE_SEGS_PER_HOR_SCAN = APPROXIMATE_SEGS_PER_HOR_SCAN_;
+                APPROXIMATE_SEGS_PER_VERT_SCAN = APPROXIMATE_SEGS_PER_VERT_SCAN_;
             }
             
             /*! @brief Generates the scan lines
             */ 
-            std::vector<int> generateScanLines(const messages::input::Image& image, const GreenHorizon& greenHorizonPoints);
+            void generateScanLines(const messages::input::Image& image, const GreenHorizon& greenHorizonPoints, std::vector<int>* resulting_scan_lines);
 
             /*! @brief Returns a std::vector of ColourSegments relating classified 
             horizontal scan lines.
             */
-            messages::vision::SegmentedRegion classifyHorizontalScanLines(const messages::input::Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT);
+            void classifyHorizontalScanLines(const messages::input::Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT, messages::vision::SegmentedRegion* resulting_region);
 
             /*! @brief Returns a std::vector of ColourSegments relating to classified 
             vertical scan lines.
             */
-            messages::vision::SegmentedRegion classifyVerticalScanLines(const messages::input::Image& originalImage, const GreenHorizon& greenHorizon, const LookUpTable& LUT);
+            void classifyVerticalScanLines(const messages::input::Image& originalImage, const GreenHorizon& greenHorizon, const LookUpTable& LUT, messages::vision::SegmentedRegion* resulting_region);
         };
     
     }  // vision
