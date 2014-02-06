@@ -1,0 +1,8 @@
+ADD_ROLE(
+    NAME orientationtest
+    MODULES
+    	support::configuration::ConfigSystem
+    	platform::darwin::HardwareIO
+    	platform::darwin::SensorFilter
+        support::NUbugger
+)
