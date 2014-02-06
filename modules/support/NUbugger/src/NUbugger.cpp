@@ -22,10 +22,10 @@
 
 #include <zmq.hpp>
 #include <jpeglib.h>
-#include <stdio.h>
+#include <cstdio>
 #include <cxxabi.h>
 
-#include "messages/platform/darwin/DarwinSensors.h"
+#include "messages/input/Sensors.h"
 #include "messages/input/Image.h"
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/vision/VisionObjects.h"
@@ -34,7 +34,7 @@
 
 #include "utility/image/ColorModelConversions.h"
 
-using messages::platform::darwin::DarwinSensors;
+using messages::input::Sensors;
 using messages::input::Image;
 using messages::vision::ClassifiedImage;
 using NUClear::DEBUG;
@@ -71,8 +71,8 @@ namespace modules {
 				send(message);
 			});
 
-			// This trigger gets the output from the sensors (unfiltered)
-			on<Trigger<DarwinSensors>>([this](const DarwinSensors& sensors) {
+			// This trigger gets the output from the sensors
+			on<Trigger<Sensors>>([this](const Sensors& sensors) {
 				Message message;
 
 				message.set_type(Message::SENSOR_DATA);
@@ -80,61 +80,58 @@ namespace modules {
 
 				auto* sensorData = message.mutable_sensor_data();
 
-				for (int i = 0; i < 20; ++i) {
+				sensorData->set_timestamp(sensors.timestamp.time_since_epoch().count());
+
+				for(const auto& s : sensors.servos) {
 
 					auto* servo = sensorData->add_servo();
 
-					servo->set_error_flags(sensors.servo[i].errorFlags);
+					servo->set_error_flags(s.errorFlags);
 
-					servo->set_id(static_cast<messages::input::proto::Sensors_ServoID>(i));
+					servo->set_id(static_cast<messages::input::proto::Sensors_ServoID>(s.id));
 
-					servo->set_enabled(sensors.servo[i].torqueEnabled);
+					servo->set_enabled(s.enabled);
 
-					servo->set_p_gain(sensors.servo[i].pGain);
-					servo->set_i_gain(sensors.servo[i].iGain);
-					servo->set_d_gain(sensors.servo[i].dGain);
+					servo->set_p_gain(s.pGain);
+					servo->set_i_gain(s.iGain);
+					servo->set_d_gain(s.dGain);
 
-					servo->set_goal_position(sensors.servo[i].goalPosition);
-					servo->set_goal_speed(sensors.servo[i].movingSpeed);
-					servo->set_torque_limit(sensors.servo[i].torqueLimit);
+					servo->set_goal_position(s.goalPosition);
+					servo->set_goal_speed(s.goalSpeed);
+					servo->set_torque_limit(s.torqueLimit);
 
-					servo->set_present_position(sensors.servo[i].presentPosition);
-					servo->set_present_speed(sensors.servo[i].presentSpeed);
+					servo->set_present_position(s.presentPosition);
+					servo->set_present_speed(s.presentSpeed);
 
-					servo->set_load(sensors.servo[i].load);
-					servo->set_voltage(sensors.servo[i].voltage);
-					servo->set_temperature(sensors.servo[i].temperature);
-
-					/*if (sensors.servo[i].errorFlags > 0) {
-						//std::cout << sensors.servo[i].errorFlags << std::endl;
-					}*/
+					servo->set_load(s.load);
+					servo->set_voltage(s.voltage);
+					servo->set_temperature(s.temperature);
 				}
 
 				auto* gyro = sensorData->mutable_gyroscope();
-				gyro->set_x(sensors.gyroscope.x);
-				gyro->set_y(sensors.gyroscope.y);
-				gyro->set_z(sensors.gyroscope.z);
+				gyro->set_x(sensors.gyroscope[0]);
+				gyro->set_y(sensors.gyroscope[1]);
+				gyro->set_z(sensors.gyroscope[2]);
 
 				auto* accel = sensorData->mutable_accelerometer();
-				accel->set_x(sensors.accelerometer.x);
-				accel->set_y(sensors.accelerometer.y);
-				accel->set_z(sensors.accelerometer.z);
+				accel->set_x(sensors.accelerometer[0]);
+				accel->set_y(sensors.accelerometer[1]);
+				accel->set_z(sensors.accelerometer[2]);
+
+				auto* orient = sensorData->mutable_orientation();
+				orient->set_x(sensors.orientation[0]);
+				orient->set_y(sensors.orientation[1]);
+				orient->set_z(sensors.orientation[2]);
 
 				auto* lfsr = sensorData->mutable_left_fsr();
-				lfsr->set_fsr1(sensors.fsr.left.fsr1);
-				lfsr->set_fsr2(sensors.fsr.left.fsr2);
-				lfsr->set_fsr3(sensors.fsr.left.fsr3);
-				lfsr->set_fsr4(sensors.fsr.left.fsr4);
-				lfsr->set_centre_x(sensors.fsr.left.centreX);
-				lfsr->set_centre_y(sensors.fsr.left.centreY);
-				
+				lfsr->set_x(sensors.leftFSR[0]);
+				lfsr->set_y(sensors.leftFSR[1]);
+				lfsr->set_z(sensors.leftFSR[2]);
+
 				auto* rfsr = sensorData->mutable_right_fsr();
-				rfsr->set_fsr1(sensors.fsr.right.fsr1);
-				rfsr->set_fsr2(sensors.fsr.right.fsr2);
-				rfsr->set_fsr3(sensors.fsr.right.fsr3);
-				rfsr->set_fsr4(sensors.fsr.right.fsr4);
-				rfsr->set_centre_x(sensors.fsr.right.centreX);
-				rfsr->set_centre_y(sensors.fsr.right.centreY);
+				rfsr->set_x(sensors.rightFSR[0]);
+				rfsr->set_y(sensors.rightFSR[1]);
+				rfsr->set_z(sensors.rightFSR[2]);
 
 				/*if (sensors.cm730ErrorFlags > 0) {
 					//std::cout << sensors.cm730ErrorFlags << std::endl;
@@ -147,20 +144,20 @@ namespace modules {
 				if (sensors.fsr.right.errorFlags > 0) {
 					//std::cout << sensors.fsr.right.errorFlags << std::endl;
 				}*/
-
+				
+				//TODO: REMOVE HACK BY SENDING GENERIC SENSORS WITH FILTERING
 				emit(graph(
 					"Accelerometer", 
-					sensors.accelerometer.x,
-					sensors.accelerometer.y,
-					sensors.accelerometer.z
-					
+					sensors.accelerometer[0],
+					sensors.accelerometer[1],
+					sensors.accelerometer[2]
 				));
 
 				emit(graph(
 					"Gyro",
-					sensors.gyroscope.x,
-					sensors.gyroscope.y,
-					sensors.gyroscope.z
+					sensors.gyroscope[0],
+					sensors.gyroscope[1],
+					sensors.gyroscope[2]
 				));
 
 				// TODO!
@@ -173,7 +170,7 @@ namespace modules {
 				send(message);
 			});
 
-			on<Trigger<Image>, With<DarwinSensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image, const DarwinSensors&) {
+			on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
                 
 				if(!image.source().empty()) {
                     

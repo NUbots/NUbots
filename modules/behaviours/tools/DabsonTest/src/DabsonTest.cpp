@@ -8,7 +8,7 @@ namespace modules {
     namespace behaviours {
         namespace tools {
 
-            DabsonTest::DabsonTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), k(0.001) {
+            DabsonTest::DabsonTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
                 
                 // Get the scripts to run from the command line
                 on<Trigger<Every<10, std::chrono::milliseconds>>, Options<Sync<DabsonTest>>>([this](const time_t& time) {

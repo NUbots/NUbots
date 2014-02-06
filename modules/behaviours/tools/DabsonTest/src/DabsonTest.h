@@ -36,7 +36,7 @@ namespace modules {
              */
             class DabsonTest : public NUClear::Reactor {
                 
-                UKF<TestModel> k;
+                utility::math::kalman::UKF<TestModel> k;
 
             public:
                 explicit DabsonTest(std::unique_ptr<NUClear::Environment> environment);

@@ -23,6 +23,8 @@
 #include <nuclear>
 
 #include "messages/motion/ServoWaypoint.h"
+#include "utility/math/kalman/UKF.h"
+#include "utility/math/kalman/IMUModel.h"
 
 namespace modules {
     namespace platform {
@@ -36,6 +38,9 @@ namespace modules {
             class SensorFilter : public NUClear::Reactor {
             public:
                 explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
+
+                time_t lastUpdate;
+                utility::math::kalman::UKF<utility::math::kalman::IMUModel> orientationFilter;
             };
         }
     }
