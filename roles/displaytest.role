@@ -6,6 +6,7 @@ ADD_ROLE(
         support::configuration::ConfigSystem
         support::DisplayTest
         platform::darwin::HardwareIO
+        platform::darwin::SensorFilter
         input::LinuxCamera
         support::NUbugger
         vision::LUTClassifier

@@ -29,6 +29,10 @@ namespace modules {
 		    using messages::vision::ColourSegment;
         using messages::platform::darwin::DarwinSensors;
         using utility::vision::LookUpTable;
+
+        using messages::input::Sensors;
+        using messages::input::ServoID;
+
         
         FeatureDetector::FeatureDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), 
                                 m_visionKinematics() { //, m_ballDetector(), m_goalDetector(), m_fieldPointDetector(), m_obstacleDetector() { 
@@ -230,19 +234,18 @@ namespace modules {
                     imageSize[1] = config.config["imageHeight"];
 
                     m_visionKinematics.setCamParams(imageSize,FOV);
-                    m_visionKinematics.setSensors(0, 0, 0, 0, arma::vec3("0 0 5"));
+                    m_visionKinematics.setSensors(0, 0, arma::vec3("0 0 -9.8"), arma::vec3("0 0 0.30"));
             });
 
-          /* TODO: Kinematics required here!!!
-            on<Trigger<DarwinSensors>, With<FilteredKinematics!!!!!!>>([this](const DarwinSensors& sensors){
-                m_visionKinematics.setSensors(sensors.Servos.headTilt.presentPosition,
-                                              sensors.Servos.headPan.presentPosition,
-                                              kin.bodyRoll,
-                                              kin.bodyPitch,
-                                              neckPosition);
+          
+            on<Trigger<Sensors>>([this](const Sensors& sensors){
+                m_visionKinematics.setSensors(sensors.servos[static_cast<int>(ServoID::HEAD_TILT)].presentPosition,
+                                              sensors.servos[static_cast<int>(ServoID::HEAD_PAN)].presentPosition,
+                                              sensors.orientation,
+                                              arma::vec3("0 0 0.35"));
 
             });
-            */
+            
             /*
             m_detectLineObjects = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
 
@@ -251,7 +254,7 @@ namespace modules {
             m_detectGoals =
 
             */ 
-            m_visionKinematics.setSensors(0, 0, 0, 0, arma::vec3("0 0 0.05"));
+            
             on<Trigger<ClassifiedImage>, Options<Single>>([this](const ClassifiedImage& classifiedImage) {             
                 if (classifiedImage.matchedHorizontalSegments.count(messages::vision::GOAL_COLOUR) &&
                     classifiedImage.matchedVerticalSegments.count(messages::vision::GOAL_COLOUR)) {
