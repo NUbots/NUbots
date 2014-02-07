@@ -59,3 +59,6 @@ SOURCE_GROUP("Protocol Buffer Generated Files" FILES ${proto_src} ${proto_h})
 
 # Build a library from these files
 ADD_LIBRARY(messages ${protobufs} ${src})
+
+# Put it in an IDE group for shared
+SET_PROPERTY(TARGET messages PROPERTY FOLDER "shared/")

@@ -60,19 +60,23 @@ message Sensors {
         optional float z = 3;
     }
 
-    message FSR {
-        optional float fsr1 = 1;
-        optional float fsr2 = 2;
-        optional float fsr3 = 3;
-        optional float fsr4 = 4;
-
-        optional float centre_x = 5;
-        optional float centre_y = 6;
+    message Orientation {
+        optional float x = 1;
+        optional float y = 2;
+        optional float z = 3;
     }
 
-    optional Accelerometer accelerometer = 1;
-    optional Gyroscope gyroscope = 2;
-    optional FSR left_FSR = 3;
-    optional FSR right_FSR = 4;
-    repeated Servo servo = 5;
+    message FSR {
+        optional float x = 1;
+        optional float y = 2;
+        optional float z = 3;
+    }
+
+    required int64 timestamp = 1;
+    optional Accelerometer accelerometer = 2;
+    optional Gyroscope gyroscope = 3;
+    optional Gyroscope orientation = 4;
+    optional FSR left_FSR = 5;
+    optional FSR right_FSR = 6;
+    repeated Servo servo = 7;
 }

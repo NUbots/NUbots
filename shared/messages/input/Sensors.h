@@ -20,13 +20,15 @@
 #ifndef MESSAGES_INPUT_SENSORS_H
 #define MESSAGES_INPUT_SENSORS_H
 
+#include <armadillo>
+
 #include "ServoID.h"
 
 namespace messages {
     namespace input {
-        
+
+
         struct Sensors {
-        
             struct Servo {
                 uint8_t errorFlags;
 
@@ -50,34 +52,16 @@ namespace messages {
                 float temperature;
             };
 
-            struct Accelerometer {
-                float x;
-                float y;
-                float z;
-            };
-            
-            struct Gyroscope {
-                float x;
-                float y;
-                float z;
-            };
+            NUClear::clock::time_point timestamp;
 
-            struct FSR {
-                float fsr1;
-                float fsr2;
-                float fsr3;
-                float fsr4;
+            arma::vec3 accelerometer;
+            arma::vec3 gyroscope;
+            arma::vec3 orientation;
+            arma::vec3 leftFSR;
+            arma::vec3 rightFSR;
 
-                float centreX;
-                float centreY;
-            };
+            std::vector<Servo> servos;
         };
-        
-        Acceleronometer acceleronometer;
-        Gyroscope gyroscope;
-        FSR leftFSR;
-        FSR rightFSR;
-        Servo servos[20];
     }
 }
 
