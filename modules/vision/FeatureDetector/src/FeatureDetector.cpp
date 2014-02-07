@@ -238,7 +238,7 @@ namespace modules {
             });
 
           
-            on<Trigger<Sensors>>([this](const Sensors& sensors){
+            on<Trigger<Sensors>/*TODO SYNC!!!*/>([this](const Sensors& sensors){
                 m_visionKinematics.setSensors(sensors.servos[static_cast<int>(ServoID::HEAD_TILT)].presentPosition,
                                               sensors.servos[static_cast<int>(ServoID::HEAD_PAN)].presentPosition,
                                               sensors.orientation,
