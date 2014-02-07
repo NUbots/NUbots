@@ -34,8 +34,8 @@ namespace modules {
 
 
 
-            SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), orientationFilter(arma::vec3("1,0,0")) {
-                on<Trigger<DarwinSensors>>([this](const DarwinSensors& input) {
+            SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), orientationFilter(arma::vec3("7,0,-7")) , frameLimiter(0){
+                on<Trigger<DarwinSensors>, Options<Single>>([this](const DarwinSensors& input) {
                     
                     auto sensors = std::make_unique<Sensors>();
 
@@ -46,7 +46,7 @@ namespace modules {
 
                         sensors->servos.push_back({
                             original.errorFlags,
-                            static_cast<ServoID>(i),
+                            static_cast<ServoID>(i),    
                             original.torqueEnabled,
                             original.pGain,
                             original.iGain,
@@ -75,14 +75,17 @@ namespace modules {
 
                     sensors->orientation = orientationFilter.get();
 
-                    emit(graph("Filtered Orientation",
-                            float(orientation[0]),
-                            float(orientation[1]),
-                            float(orientation[2])
-                        ));
+                    if(++frameLimiter % 3 == 0){
+                        emit(graph("Filtered Orientation",
+                                float(orientation[0]),
+                                float(orientation[1]),
+                                float(orientation[2])
+                            ));
 
-                    emit(graph("Orientation Quality", quality
-                        ));
+                        emit(graph("Orientation Quality", quality
+                            ));
+                        frameLimiter = 1;
+                    }
                     // Kalman filter all of the incoming data!
 
                     

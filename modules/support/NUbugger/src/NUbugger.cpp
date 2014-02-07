@@ -72,7 +72,7 @@ namespace modules {
 			});
 
 			// This trigger gets the output from the sensors
-			on<Trigger<Sensors>>([this](const Sensors& sensors) {
+			on<Trigger<Every<20, Per<std::chrono::seconds>>>, Options<Single>, With<Sensors>>([this](const time_t& time, const Sensors& sensors) {
 				Message message;
 
 				message.set_type(Message::SENSOR_DATA);

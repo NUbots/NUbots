@@ -41,6 +41,7 @@ namespace modules {
 
                 time_t lastUpdate;
                 utility::math::kalman::UKF<utility::math::kalman::IMUModel> orientationFilter;
+                int frameLimiter;
             };
         }
     }

@@ -29,7 +29,7 @@ namespace utility {
             // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation. 
             // @return The new estimated system state.
             arma::vec::fixed<IMUModel::size> IMUModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& measurement) { 
-                //new universal rotation code for gyro
+                //new universal rotation code for gyro (SORA)
                 //See: http://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Simultaneous_orthogonal_rotation_angle
                 arma::vec3 omega = measurement * deltaT;
                 double phi = arma::norm(omega, 2);
@@ -43,7 +43,7 @@ namespace utility {
 
 
             arma::vec IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const arma::vec& measurement) {
-                return state * 9.8;
+                return state ;
             }
 
 
@@ -52,7 +52,8 @@ namespace utility {
             }
 
             arma::mat::fixed<IMUModel::size, IMUModel::size> IMUModel::processNoise() {
-                return arma::eye(size, size) *1e-8; //std::numeric_limits<double>::epsilon();
+
+                return arma::eye(size, size) *1e-6; //std::numeric_limits<double>::epsilon();
             }
 
         }
