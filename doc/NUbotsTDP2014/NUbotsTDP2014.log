@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2013.7.11)  8 FEB 2014 15:26
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2013.7.11)  8 FEB 2014 16:02
 entering extended mode
  %&-line parsing enabled.
 **NUbotsTDP2014.tex
@@ -149,7 +149,7 @@ File: pdftex.def 2010/03/12 v0.04p Graphics/color for pdfTeX
 \Gin@req@height=\dimen124
 \Gin@req@width=\dimen125
 )
-No file NUbotsTDP2014.aux.
+(./NUbotsTDP2014.aux)
 \openout1 = `NUbotsTDP2014.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 12.
@@ -164,7 +164,7 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 12.
 LaTeX Font Info:    ... okay on input line 12.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 12.
 LaTeX Font Info:    ... okay on input line 12.
-(/usr/share/texmf-texlive/tex/context/base/supp-pdf.mkii
+ (/usr/share/texmf-texlive/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count116
 \scratchdimen=\dimen126
@@ -193,197 +193,186 @@ LaTeX Warning: Citation `ChalupOstwald2009' on page 1 undefined on input line 5
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2]
 
 LaTeX Warning: Citation `ChalupEtAlSMC2007' on page 3 undefined on input line 1
-35.
+40.
 
 
-LaTeX Warning: Citation `nubotsGit' on page 3 undefined on input line 135.
+LaTeX Warning: Citation `nubotsGit' on page 3 undefined on input line 140.
 
 
-LaTeX Warning: Citation `Kulk2011c' on page 3 undefined on input line 135.
-
-
-LaTeX Warning: Reference `fig:platform' on page 3 undefined on input line 137.
+LaTeX Warning: Citation `Kulk2011c' on page 3 undefined on input line 140.
 
 <Platform.png, id=15, 303.534pt x 108.8868pt>
 File: Platform.png Graphic file (type png)
  <use Platform.png>
 
-LaTeX Warning: Citation `Kulk2011c' on page 3 undefined on input line 142.
+LaTeX Warning: Citation `Kulk2011c' on page 3 undefined on input line 147.
 
 
-LaTeX Warning: Citation `Kulk2011c' on page 3 undefined on input line 142.
-
-[3]
-
-LaTeX Warning: Citation `BHumanWalk2010' on page 4 undefined on input line 149.
+LaTeX Warning: Citation `Kulk2011c' on page 3 undefined on input line 147.
 
 
-[4 <./Platform.png>] <TAJ3850.png, id=25, 2087.32765pt x 950.84647pt>
+LaTeX Warning: Citation `BHumanWalk2010' on page 3 undefined on input line 154.
+
+
+[3] <TAJ3850.png, id=21, 2087.32765pt x 950.84647pt>
 File: TAJ3850.png Graphic file (type png)
+ <use TAJ3850.png>
 
-<use TAJ3850.png>
-
-LaTeX Warning: Float too large for page by 117.06487pt on input line 167.
-
-
-LaTeX Warning: Citation `budden2012colour' on page 5 undefined on input line 17
-4.
+LaTeX Warning: Float too large for page by 117.06487pt on input line 172.
 
 
-LaTeX Warning: Citation `budden2012ball' on page 5 undefined on input line 174.
+LaTeX Warning: Citation `budden2012colour' on page 4 undefined on input line 17
+9.
 
 
-
-LaTeX Warning: Citation `henderson_2007' on page 5 undefined on input line 174.
+LaTeX Warning: Citation `budden2012ball' on page 4 undefined on input line 179.
 
 
 
-LaTeX Warning: Citation `nickin_2007' on page 5 undefined on input line 174.
+LaTeX Warning: Citation `henderson_2007' on page 4 undefined on input line 179.
 
 
-LaTeX Warning: Citation `NUBOT2006' on page 5 undefined on input line 174.
+
+LaTeX Warning: Citation `nickin_2007' on page 4 undefined on input line 179.
 
 
-LaTeX Warning: Citation `Henderson2008' on page 5 undefined on input line 174.
+LaTeX Warning: Citation `NUBOT2006' on page 4 undefined on input line 179.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 174--176
+LaTeX Warning: Citation `Henderson2008' on page 4 undefined on input line 179.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 179--181
+
+ []
+
+[4 <./Platform.png>] [5 <./TAJ3850.png (PNG copy)>]
+Underfull \hbox (badness 10000) in paragraph at lines 182--193
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 177--188
+LaTeX Warning: Citation `ChalupEtAl2006' on page 6 undefined on input line 196.
+
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 194--198
 
  []
 
 
-LaTeX Warning: Citation `ChalupEtAl2006' on page 5 undefined on input line 191.
+LaTeX Warning: Citation `QuinlanEtAlACRA2003' on page 6 undefined on input line
+ 199.
+
+
+LaTeX Warning: Citation `ChalupEtAlSMC2007' on page 6 undefined on input line 1
+99.
+
+
+LaTeX Warning: Citation `Kulk2008' on page 6 undefined on input line 199.
+
+
+LaTeX Warning: Citation `Kulk2010' on page 6 undefined on input line 199.
+
+
+LaTeX Warning: Citation `Kulk2010a' on page 6 undefined on input line 199.
+
+
+LaTeX Warning: Citation `Kulk2011a' on page 6 undefined on input line 199.
+
+
+LaTeX Warning: Citation `Kulk2011b' on page 6 undefined on input line 199.
+
+
+LaTeX Warning: Citation `WiklendtChalup2008' on page 6 undefined on input line 
+200.
+
+
+LaTeX Warning: Citation `BHumanWalk2010' on page 6 undefined on input line 200.
 
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 189--193
-
- []
-
-
-LaTeX Warning: Citation `QuinlanEtAlACRA2003' on page 5 undefined on input line
- 194.
-
-
-LaTeX Warning: Citation `ChalupEtAlSMC2007' on page 5 undefined on input line 1
-94.
-
-
-LaTeX Warning: Citation `Kulk2008' on page 5 undefined on input line 194.
-
-
-LaTeX Warning: Citation `Kulk2010' on page 5 undefined on input line 194.
-
-
-LaTeX Warning: Citation `Kulk2010a' on page 5 undefined on input line 194.
-
-
-LaTeX Warning: Citation `Kulk2011a' on page 5 undefined on input line 194.
-
-
-LaTeX Warning: Citation `Kulk2011b' on page 5 undefined on input line 194.
-
-
-LaTeX Warning: Citation `WiklendtChalup2008' on page 5 undefined on input line 
-195.
-
-
-LaTeX Warning: Citation `BHumanWalk2010' on page 5 undefined on input line 195.
-
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 194--197
+Underfull \hbox (badness 10000) in paragraph at lines 199--202
 
  []
 
-[5] [6 <./TAJ3850.png (PNG copy)>]
 
-LaTeX Warning: Citation `ANFA2012' on page 7 undefined on input line 198.
-
-
-LaTeX Warning: Citation `Pareidolia2010' on page 7 undefined on input line 198.
+LaTeX Warning: Citation `ANFA2012' on page 6 undefined on input line 203.
 
 
-
-LaTeX Warning: Citation `HongEtAl2013a' on page 7 undefined on input line 198.
-
-
-LaTeX Warning: Citation `HongEtAl2013b' on page 7 undefined on input line 198.
+LaTeX Warning: Citation `Pareidolia2010' on page 6 undefined on input line 203.
 
 
-LaTeX Warning: Citation `WongEtAl2013' on page 7 undefined on input line 198.
+
+LaTeX Warning: Citation `HongEtAl2013a' on page 6 undefined on input line 203.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 198--200
+LaTeX Warning: Citation `HongEtAl2013b' on page 6 undefined on input line 203.
+
+
+LaTeX Warning: Citation `WongEtAl2013' on page 6 undefined on input line 203.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 203--205
 
  []
 
+[6]
 
 LaTeX Warning: Citation `JalalianEtAl_CAADRIA2011' on page 7 undefined on input
- line 201.
+ line 206.
 
 
-LaTeX Warning: Citation `WongEtAl2012' on page 7 undefined on input line 201.
+LaTeX Warning: Citation `WongEtAl2012' on page 7 undefined on input line 206.
 
 
-LaTeX Warning: Citation `BhatiaEtAl2012' on page 7 undefined on input line 201.
+LaTeX Warning: Citation `BhatiaEtAl2012' on page 7 undefined on input line 206.
 
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 201--203
+Underfull \hbox (badness 10000) in paragraph at lines 206--208
 
  []
 
 
-LaTeX Warning: Citation `ChalupEtAl2007b' on page 7 undefined on input line 208
+LaTeX Warning: Citation `ChalupEtAl2007b' on page 7 undefined on input line 213
 .
 
 
 LaTeX Warning: Citation `WongChalup_WCCI_2008' on page 7 undefined on input lin
-e 208.
+e 213.
 
 
-LaTeX Warning: Citation `WongChalup2008' on page 7 undefined on input line 208.
+LaTeX Warning: Citation `WongChalup2008' on page 7 undefined on input line 213.
 
 
 
-LaTeX Warning: Citation `WongEtAl2012' on page 7 undefined on input line 208.
+LaTeX Warning: Citation `WongEtAl2012' on page 7 undefined on input line 213.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 204--210
+Underfull \hbox (badness 10000) in paragraph at lines 209--215
 
  []
 
 No file NUbotsTDP2014.bbl.
-[7] (./NUbotsTDP2014.aux)
-
-LaTeX Warning: There were undefined references.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
- ) 
+[7] (./NUbotsTDP2014.aux) ) 
 Here is how much of TeX's memory you used:
- 1310 strings out of 495061
- 15853 string characters out of 1182621
- 75033 words of memory out of 3000000
+ 1312 strings out of 495061
+ 15889 string characters out of 1182621
+ 75049 words of memory out of 3000000
  4530 multiletter control sequences out of 15000+50000
  6446 words of font info for 24 fonts, out of 3000000 for 9000
  28 hyphenation exceptions out of 8191
  29i,8n,21p,946b,266s stack positions out of 5000i,500n,10000p,200000b,50000s
-</usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/sha
-re/texmf-texlive/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texmf-te
-xlive/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/share/texmf-texlive/fonts/
-type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-texlive/fonts/type1/public
-/amsfonts/cm/cmr9.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/
-cmti10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-</usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
-Output written on NUbotsTDP2014.pdf (7 pages, 287370 bytes).
+</usr/share/texmf-texlive/fonts/type1/public/amsfont
+s/cm/cmbx10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmbx12
+.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/s
+hare/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-t
+exlive/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texmf-texlive/fonts/
+type1/public/amsfonts/cm/cmti10.pfb></usr/share/texmf-texlive/fonts/type1/publi
+c/amsfonts/cm/cmtt10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/
+cm/cmtt9.pfb>
+Output written on NUbotsTDP2014.pdf (7 pages, 287175 bytes).
 PDF statistics:
  62 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
