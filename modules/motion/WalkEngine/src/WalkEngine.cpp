@@ -20,6 +20,7 @@
 #include "WalkEngine.h"
 
 #include <armadillo>
+#include <chrono>
 #include <cmath>
 
 #include "messages/motion/ServoWaypoint.h"
@@ -41,6 +42,98 @@ namespace modules {
 
             on<Trigger<Configuration<WalkEngine> > >([this](const Configuration<WalkEngine>& walkEngineConfig) {
                 config = walkEngineConfig.config;
+            });
+
+            on<Trigger<Initialize> >([this]() {
+                // walk state
+                uTorso = {config["supportX"], 0, 0};
+                uLeft = {0, config["footY"], 0};
+                uRight = {0, -double(config["footY"]), 0};
+
+                pLLeg = {0, config["footY"], 0, 0, 0, 0};
+                pRLeg = {0, -double(config["footY"]), 0, 0, 0, 0};
+                pTorso = {config["supportX"], 0, config["bodyHeight"], 0, config["bodyTilt"], 0};
+
+                velCurrent = {0, 0, 0};
+                velCommand = {0, 0, 0};
+                velDiff = {0, 0, 0};
+
+                // zmp expoential coefficients
+                aXP = 0;
+                aXN = 0;
+                aYP = 0;
+                aYN = 0;
+
+                // gyro stabilization variables
+                ankleShift = {0, 0};
+                kneeShift = 0;
+                hipShift = {0, 0};;
+                armShift = {0, 0};;
+
+                active = true;
+                started = false;
+                moving = false;
+                iStep0 = -1;
+                iStep = 0;
+                tStep = config["tStep"];
+                tStep0 = tStep;
+                time_t now = NUClear::clock::now();
+                t0 = now;
+                tLastStep = now;
+                ph0 = 0;
+                ph = 0;
+
+                stopRequest = 2;
+                canWalkKick = 1; // can we do walkkick with this walk code?
+                walkKickRequest = 0;
+                // TODO: walkKick = 
+                currentStepType = 0;
+
+                initialStep = 2;
+
+                upperBodyOverriden = 0;
+                motionPlaying = 0;
+
+//                qLArmOR0 = config["qLArm0"];
+                qLArmOR0 = config["qLArm0"].as<arma::vec3>();
+//                qLArmOR0 = config<arma::vec3>["qLArm0"];
+//                qLArmOR0 = static_cast<arma::vec3>(config["qLArm0"]);
+
+                // TODO:
+//                arma::vec3 test = config["qLArm0"];
+                //qLArmOR0 = static_cast<std::vector<double>>(config["qLArm0"]);
+//                qRArmOR0 = config["qRArm0"];
+
+                qLArmOR1 = {0, 0, 0};
+                qRArmOR1 = {0, 0, 0};
+
+                bodyRot1 = {0, 0, 0};
+
+                phSingle = 0;
+
+                // current arm pose
+                qLArm = M_PI / 180 * arma::vec3{90, 40, -160};
+                qRArm = M_PI / 180 * arma::vec3{90, -40, -160};
+
+                // commented out in original darwin code
+                //qLArm0 = {qLArm[0], qLArm[1]};
+                //qRArm0 = {qRArm[0], qRArm[1]};
+
+                // standard offset
+                uLRFootOffset = {0, double(config["footY"]) + double(config["supportY"]), 0};
+
+                // walking/stepping transition variables
+                uLeftI = {0, 0, 0};
+                uRightI = {0, 0, 0};
+                uTorsoI = {0, 0, 0};
+                supportI = {0, 0, 0};
+                startFromStep = false;
+
+                comdot = {0, 0};
+                stepKickReady = false;
+                hasBall = 0;
+
+                stepKickRequest = 0;
             });
 
             on<Trigger<Every<1, Per<std::chrono::seconds> > > >([this](const time_t& time) {
@@ -73,7 +166,7 @@ namespace modules {
             moving = true;
 
             // SJ: Variable tStep support for walkkick
-            ph = (time - tLastStep) / config["tStep"];
+            ph = std::chrono::duration_cast<std::chrono::microseconds>(time - tLastStep).count() / double(tStep);
 
             if (ph > 1) {
                 iStep++;
@@ -96,7 +189,7 @@ namespace modules {
                 uRight1 = uRight2;
                 uTorso1 = uTorso2;
 
-                supportMod = {0,0}; // support point modulation for wallkick
+                supportMod = {0, 0}; // support point modulation for wallkick
                 shiftFactor = 0.5; // how much should we shift final torso pose?
 
                 checkWalkKick();
@@ -428,7 +521,7 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
             motionArms();
         }
 
-        void WalkEngine::motionLegs(qLegs, gyroOff) {
+        void WalkEngine::motionLegs(std::vector<double> qLegs, bool gyroOff) {
             phComp = std::min(1, phSingle / 0.1, (1 - phSingle) / 0.1);
 
             // ankle stabilization using gyro feedback
@@ -550,19 +643,19 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
             // TODO: empty?
         }
 
-        void WalkEngine::stepLeftDestination(vel, uLeft, uRight) {
+        void WalkEngine::stepLeftDestination(arma::vec3 vel, arma::vec3 uLeft, arma::vec3 uRight) {
             // TODO
         }
 
-        void WalkEngine::stepRightDestination(vel, uLeft, uRight) {
+        void WalkEngine::stepRightDestination(arma::vec3 vel, arma::vec3 uLeft, arma::vec3 uRight) {
             // TODO
         }
 
-        void WalkEngine::stepTorso(uLeft, uRight, shiftFactor) {
+        void WalkEngine::stepTorso(arma::vec3 arma::vec3 uLeft, uRight, arma::vec3 shiftFactor) {
             // TODO
         }
 
-        void WalkEngine::setVelocity(vx, vy, va) {
+        void WalkEngine::setVelocity(float vx, float vy, float va) {
             // filter the commanded speed
             vx = std::min(std::max(vx, velLimitX[0]), velLimitX[1]);
             vy = std::min(std::max(vy, velLimitY[0]), velLimitY[1]);
@@ -709,7 +802,7 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
             }
         }
 
-        void WalkEngine::setInitialStance(uL, uR, uT, support) {
+        void WalkEngine::setInitialStance(arma::vec3 uL, arma::vec3 uR, arma::vec3 uT, arma::vec3 support) {
             uLeftI = uL;
             uRightI = uR;
             uTorso = uT;
@@ -758,7 +851,7 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
             startFromStep = false;
         }
 
-        void WalkEngine::getOdometry(u0) {
+        void WalkEngine::getOdometry(arma::vec3 u0) {
             if (!u0) {
                 u0 = {0,0,0};
             }
@@ -771,7 +864,7 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
             // TODO: return
         }
 
-        std::pair<float, float> WalkEngine::zmpSolve(zs, z1, z2, x1, x2) {
+        std::pair<float, float> WalkEngine::zmpSolve(float zs, float z1, float z2, float x1, float x2) {
             /*
             Solves ZMP equation:
             x(t) = z(t) + aP*exp(t/tZmp) + aN*exp(-t/tZmp) - tZmp*mi*sinh((t-Ti)/tZmp)
@@ -791,7 +884,7 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
             return std::make_pair(aP, aN);
         }
         
-        void WalkEngine::zmpCom(ph) {
+        void WalkEngine::zmpCom(float ph) {
             arma::vec3 com = {0, 0, 0};
             float expT = std::exp(tStep * ph / tZmp);
             com[0] = uSupport[0] + aXP * expT + aXN / expT;
@@ -813,7 +906,7 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
             return com;
         }
 
-        std::pair<float, float> WalkEngine::footPhase(ph) {
+        std::pair<float, float> WalkEngine::footPhase(float ph) {
             // Computes relative x,z motion of foot during single support phase
             // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
             phSingle = std::min(std::max(ph - ph1Single, 0) / (ph2Single - ph1Single), 1);
@@ -822,7 +915,7 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
             float zf = 0.5 * (1 - std::cos(2 * M_PI * phSingleSkew));
 
 
-            if (use_alternative_trajectory > 0) {
+            if (useAlternativeTrajectory > 0) {
                 ph1FootPhase = 0.1;
                 ph2FootPhase = 0.5;
                 ph3FootPhase = 0.8;
@@ -860,7 +953,6 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
         float WalkEngine::getFootX() {
             return config["footX"] + config["footXComp"];
         }
-        
         
     }  // motion
 }  // modules
