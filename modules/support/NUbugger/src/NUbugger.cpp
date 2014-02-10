@@ -80,7 +80,6 @@ namespace modules {
 
 				auto* sensorData = message.mutable_sensor_data();
 
-				sensorData->set_timestamp(sensors.timestamp.time_since_epoch().count());
 
 				for(const auto& s : sensors.servos) {
 
@@ -118,20 +117,20 @@ namespace modules {
 				accel->set_y(sensors.accelerometer[1]);
 				accel->set_z(sensors.accelerometer[2]);
 
-				auto* orient = sensorData->mutable_orientation();
-				orient->set_x(sensors.orientation[0]);
-				orient->set_y(sensors.orientation[1]);
-				orient->set_z(sensors.orientation[2]);
+				// auto* orient = sensorData->mutable_orientation();
+				// orient->set_x(sensors.orientation[0]);
+				// orient->set_y(sensors.orientation[1]);
+				// orient->set_z(sensors.orientation[2]);
 
-				auto* lfsr = sensorData->mutable_left_fsr();
-				lfsr->set_x(sensors.leftFSR[0]);
-				lfsr->set_y(sensors.leftFSR[1]);
-				lfsr->set_z(sensors.leftFSR[2]);
+				// auto* lfsr = sensorData->mutable_left_fsr();
+				// lfsr->set_x(sensors.leftFSR[0]);
+				// lfsr->set_y(sensors.leftFSR[1]);
+				// lfsr->set_z(sensors.leftFSR[2]);
 
-				auto* rfsr = sensorData->mutable_right_fsr();
-				rfsr->set_x(sensors.rightFSR[0]);
-				rfsr->set_y(sensors.rightFSR[1]);
-				rfsr->set_z(sensors.rightFSR[2]);
+				// auto* rfsr = sensorData->mutable_right_fsr();
+				// rfsr->set_x(sensors.rightFSR[0]);
+				// rfsr->set_y(sensors.rightFSR[1]);
+				// rfsr->set_z(sensors.rightFSR[2]);
 
 				/*if (sensors.cm730ErrorFlags > 0) {
 					//std::cout << sensors.cm730ErrorFlags << std::endl;

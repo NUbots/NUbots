@@ -86,13 +86,13 @@ namespace utility {
                 arma::mat covarianceFromSigmas(const arma::mat& sigmaPoints, const arma::vec& mean) const {
                     
                     auto meanCentered = sigmaPoints - arma::repmat(mean, 1, NUM_SIGMA_POINTS);
-                    return (arma::repmat(covarianceWeights, Model::size, 1) % meanCentered) * meanCentered.t();
+                    return (arma::repmat(covarianceWeights, mean.size() , 1) % meanCentered) * meanCentered.t();
                 }
 
             public:
                 UKF(StateVec initialMean = arma::zeros(Model::size),
                     StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1,
-                    double alpha = 1e-1,
+                    double alpha = 1,//1e-1,
                     double kappa = 0.f,
                     double beta = 2.f) {
                     
@@ -145,7 +145,6 @@ namespace utility {
 
                 template <typename TMeasurement>
                 double measurementUpdate(const TMeasurement& measurement, const arma::mat& noise) {
-
                     // Allocate room for our predictions
                     arma::mat predictedObservations(measurement.n_elem, NUM_SIGMA_POINTS);
 
@@ -176,6 +175,7 @@ namespace utility {
                         covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
                     }
                     
+                    //Magical quality calculation
                     arma::mat innovationVariance = predictedCovariance + noise;
                     arma::mat thing = (innovation.t() * innovationVariance.i() * innovation);
                     

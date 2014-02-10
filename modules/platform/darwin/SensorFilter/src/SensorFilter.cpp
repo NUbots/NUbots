@@ -21,12 +21,15 @@
 
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/Sensors.h"
+#include "messages/support/Configuration.h"
 #include "utility/NUbugger/NUgraph.h"
 
 namespace modules {
     namespace platform {
         namespace darwin {
             
+
+            using messages::support::Configuration;
             using messages::platform::darwin::DarwinSensors;
             using messages::input::Sensors;
             using utility::NUbugger::graph;
@@ -34,7 +37,15 @@ namespace modules {
 
 
 
-            SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), orientationFilter(arma::vec3("7,0,-7")) , frameLimiter(0){
+            SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), orientationFilter(arma::vec("0,0,-1,1,0,0,0,0,0")) , frameLimiter(0){
+                    
+                on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){
+                    DEFAULT_NOISE_GAIN = file.config["DEFAULT_NOISE_GAIN"];
+                    HIGH_NOISE_THRESHOLD = file.config["HIGH_NOISE_THRESHOLD"];
+                    HIGH_NOISE_GAIN = file.config["HIGH_NOISE_GAIN"];
+                    LOW_NOISE_THRESHOLD = file.config["LOW_NOISE_THRESHOLD"];
+                });
+
                 on<Trigger<DarwinSensors>, Options<Single>>([this](const DarwinSensors& input) {
                     
                     auto sensors = std::make_unique<Sensors>();
@@ -68,21 +79,40 @@ namespace modules {
                     // Kalman filter for orientation
                     double deltaT = (lastUpdate - input.timestamp).count() / double(NUClear::clock::period::den);
                     lastUpdate = input.timestamp;
-
                     orientationFilter.timeUpdate(deltaT, sensors->gyroscope);
-                    float quality = orientationFilter.measurementUpdate(sensors->accelerometer, 0.001 * arma::eye(3, 3));
-                    arma::vec3 orientation = orientationFilter.get();
 
-                    sensors->orientation = orientationFilter.get();
+                    arma::mat observationNoise = arma::eye(3,3) * DEFAULT_NOISE_GAIN;
+                    double normAcc = std::abs(arma::norm(sensors->accelerometer,2) - 9.807);
+                    //std::cout << "normAcc = " << normAcc << std::endl;
+                    if(normAcc > HIGH_NOISE_THRESHOLD){
+                        observationNoise *= HIGH_NOISE_GAIN;
+                    } else if(normAcc > LOW_NOISE_THRESHOLD){
+                        observationNoise *= normAcc;
+                    }
+
+                    float quality = orientationFilter.measurementUpdate(sensors->accelerometer, observationNoise);
+                    arma::vec orientation = orientationFilter.get();
+                    sensors->orientation = orientationFilter.get().rows(0,2);
 
                     if(++frameLimiter % 3 == 0){
-                        emit(graph("Filtered Orientation",
+                        emit(graph("Filtered Down Vector",
                                 float(orientation[0]),
                                 float(orientation[1]),
                                 float(orientation[2])
                             ));
-
+                         emit(graph("Filtered Forward Vector",
+                                float(orientation[3]),
+                                float(orientation[4]),
+                                float(orientation[5])
+                            ));
+                          emit(graph("Filtered Gyro Offset",
+                                float(orientation[6]),
+                                float(orientation[7]),
+                                float(orientation[8])
+                            ));
                         emit(graph("Orientation Quality", quality
+                            ));
+                        emit(graph("Difference from gravity", normAcc
                             ));
                         frameLimiter = 1;
                     }
