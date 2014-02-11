@@ -92,7 +92,7 @@ namespace utility {
             public:
                 UKF(StateVec initialMean = arma::zeros(Model::size),
                     StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1,
-                    double alpha = 1,//1e-1,
+                    double alpha = 1e-1,
                     double kappa = 0.f,
                     double beta = 2.f) {
                     

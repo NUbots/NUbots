@@ -11,14 +11,14 @@ namespace utility {
                 // Number of dimensions
                 // State is 3 vectors:
                 //    1.Store unit vector pointing globally down (gravity)
-                //      Coordinate system (same as CM730 coords):
+                //      Coordinate system (robot) (same as CM730 coords):
                 //                  x = forward, out of chest
                 //                  y = leftwards
                 //                  z = robot upward, towards head
-                //     2.Forward, in same coordinate system
+                //     2.Global x approximated by orthogonalisation, in same robot coordinate system
                 //     3.Bias of gyroscope in x,y,z angle offsets
-            public:
-                static constexpr size_t size = 9;
+            public:            
+                static constexpr size_t size = 6;
                 
                 AdaptiveIMUModel() {} // empty constructor
                 
@@ -32,7 +32,7 @@ namespace utility {
                 
                 arma::mat::fixed<size, size> processNoise();
 
-                const double processNoiseFactor = 1e-8;//1e-6 has worked before
+                const double processNoiseFactor = 1e-6;
             };
 
 

@@ -9,7 +9,7 @@ namespace utility {
         namespace kalman {
             arma::vec::fixed<AdaptiveIMUModel::size> AdaptiveIMUModel::limitState(const arma::vec::fixed<size>& state) {
                 
-                arma::mat stateMatrix = arma::reshape(state,3,3);
+                arma::mat stateMatrix = arma::reshape(state,3,2);
                 double normDown = arma::norm(stateMatrix.col(0),2);
                 if(normDown == 0){
                     //TODO: RESTART FILTER
@@ -28,7 +28,7 @@ namespace utility {
                 }  
                 stateMatrix.col(1) = stateMatrix.col(1) / normForward;
                 
-                
+                 
                 return static_cast<arma::vec::fixed<size>>(arma::vectorise(stateMatrix));            
             }
 
@@ -40,14 +40,13 @@ namespace utility {
             arma::vec::fixed<AdaptiveIMUModel::size> AdaptiveIMUModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& measurement) { 
                 //new universal rotation code for gyro (SORA)
                 //See: http://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Simultaneous_orthogonal_rotation_angle
-                arma::mat stateMatrix = arma::reshape(state,3,3);
-                arma::vec3 omega = ( measurement - stateMatrix.col(2) )* deltaT;    //Offset applied
+                arma::mat stateMatrix = arma::reshape(state,3,2);
+                arma::vec3 omega = measurement * deltaT;    //Offset applied
                 double phi = arma::norm(omega, 2);
                 if (phi == 0) {
                     return state;
                 }
-                arma::vec3 unitOmega = omega / phi;
-                
+                arma::vec3 unitOmega = omega / phi;                
                 
                 const auto omegaCrossStateDown = arma::cross(unitOmega,stateMatrix.col(0));
                 stateMatrix.col(0) = stateMatrix.col(0) * cos(phi) + omegaCrossStateDown * sin(phi) + unitOmega * arma::dot(unitOmega, stateMatrix.col(0)) * (1.0 - cos(phi));

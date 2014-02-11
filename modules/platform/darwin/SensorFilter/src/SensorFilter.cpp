@@ -37,8 +37,8 @@ namespace modules {
 
 
 
-            SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), orientationFilter(arma::vec("0,0,-1,1,0,0,0,0,0")) , frameLimiter(0){
-                    
+            SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), orientationFilter(arma::vec("0,0,-1,1,0,0")) , frameLimiter(0){
+                
                 on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){
                     DEFAULT_NOISE_GAIN = file.config["DEFAULT_NOISE_GAIN"];
                     HIGH_NOISE_THRESHOLD = file.config["HIGH_NOISE_THRESHOLD"];
@@ -73,42 +73,37 @@ namespace modules {
                         });
                     }
 
-                    sensors->accelerometer = {-input.accelerometer.y, input.accelerometer.y, -input.accelerometer.z};
+                    sensors->accelerometer = {-input.accelerometer.y, input.accelerometer.x, -input.accelerometer.z};
                     sensors->gyroscope = {-input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
-
+                     
                     // Kalman filter for orientation
                     double deltaT = (lastUpdate - input.timestamp).count() / double(NUClear::clock::period::den);
-                    lastUpdate = input.timestamp;
-                    orientationFilter.timeUpdate(deltaT, sensors->gyroscope);
+                    lastUpdate = input.timestamp;                     
+                    orientationFilter.timeUpdate(deltaT, sensors->gyroscope);                     
 
-                    arma::mat observationNoise = arma::eye(3,3) * DEFAULT_NOISE_GAIN;
+                    arma::mat observationNoise = arma::eye(3,3) * DEFAULT_NOISE_GAIN;                     
                     double normAcc = std::abs(arma::norm(sensors->accelerometer,2) - 9.807);
-                    //std::cout << "normAcc = " << normAcc << std::endl;
+
                     if(normAcc > HIGH_NOISE_THRESHOLD){
                         observationNoise *= HIGH_NOISE_GAIN;
                     } else if(normAcc > LOW_NOISE_THRESHOLD){
-                        observationNoise *= normAcc;
+                        observationNoise = arma::eye(3,3) * (HIGH_NOISE_GAIN - DEFAULT_NOISE_GAIN) * (normAcc - LOW_NOISE_THRESHOLD) / (HIGH_NOISE_THRESHOLD - LOW_NOISE_THRESHOLD);
                     }
-
-                    float quality = orientationFilter.measurementUpdate(sensors->accelerometer, observationNoise);
-                    arma::vec orientation = orientationFilter.get();
-                    sensors->orientation = orientationFilter.get().rows(0,2);
+                     
+                    float quality = orientationFilter.measurementUpdate(sensors->accelerometer, observationNoise);                     
+                    arma::vec orientation = orientationFilter.get();                     
+                    sensors->orientation = orientation.rows(0,2);                     
 
                     if(++frameLimiter % 3 == 0){
-                        emit(graph("Filtered Down Vector",
-                                float(orientation[0]),
-                                float(orientation[1]),
-                                float(orientation[2])
+                        emit(graph("Filtered Gravity Vector",
+                                float(orientation[0]*9.807),
+                                float(orientation[1]*9.807),
+                                float(orientation[2]*9.807)
                             ));
                          emit(graph("Filtered Forward Vector",
                                 float(orientation[3]),
                                 float(orientation[4]),
                                 float(orientation[5])
-                            ));
-                          emit(graph("Filtered Gyro Offset",
-                                float(orientation[6]),
-                                float(orientation[7]),
-                                float(orientation[8])
                             ));
                         emit(graph("Orientation Quality", quality
                             ));
@@ -116,9 +111,7 @@ namespace modules {
                             ));
                         frameLimiter = 1;
                     }
-                    // Kalman filter all of the incoming data!
-
-                    
+                    // Kalman filter all of the incoming data!                    
                     // Output the filtered data
                     
                     emit(std::move(sensors));
