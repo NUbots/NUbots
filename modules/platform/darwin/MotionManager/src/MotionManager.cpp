@@ -201,8 +201,8 @@ namespace darwin {
             case 15: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::L_ANKLE_PITCH>>()); break;
             case 16: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::R_ANKLE_ROLL>>()); break;
             case 17: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::L_ANKLE_ROLL>>()); break;
-            case 18: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::HEAD_PAN>>()); break;
-            case 19: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::HEAD_TILT>>()); break;
+            case 18: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::HEAD_YAW>>()); break;
+            case 19: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::HEAD_PITCH>>()); break;
         }
     }
 

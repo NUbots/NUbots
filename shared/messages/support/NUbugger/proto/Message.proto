@@ -29,6 +29,7 @@ message Message {
 		optional uint64 emitted = 6;
 		optional uint64 started = 7;
 		optional uint64 finished = 8;
+		repeated string log = 9;
 	}
 
 

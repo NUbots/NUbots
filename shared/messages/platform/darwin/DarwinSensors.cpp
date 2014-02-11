@@ -45,8 +45,8 @@ namespace messages {
                     case input::ServoID::L_ANKLE_PITCH:      return lAnklePitch;
                     case input::ServoID::R_ANKLE_ROLL:       return rAnkleRoll;
                     case input::ServoID::L_ANKLE_ROLL:       return lAnkleRoll;
-                    case input::ServoID::HEAD_PAN:           return headPan;
-                    case input::ServoID::HEAD_TILT:          return headTilt;
+                    case input::ServoID::HEAD_YAW:           return headPan;
+                    case input::ServoID::HEAD_PITCH:          return headTilt;
                 }
 
                 throw std::runtime_error("Out of bounds");
@@ -73,8 +73,8 @@ namespace messages {
                     case input::ServoID::L_ANKLE_PITCH:      return lAnklePitch;
                     case input::ServoID::R_ANKLE_ROLL:       return rAnkleRoll;
                     case input::ServoID::L_ANKLE_ROLL:       return lAnkleRoll;
-                    case input::ServoID::HEAD_PAN:           return headPan;
-                    case input::ServoID::HEAD_TILT:          return headTilt;
+                    case input::ServoID::HEAD_YAW:           return headPan;
+                    case input::ServoID::HEAD_PITCH:          return headTilt;
                 }
                 
                 throw std::runtime_error("Out of bounds");

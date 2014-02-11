@@ -241,15 +241,10 @@ namespace modules {
                 reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
                 reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
                 reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
-
-                /*std::string name = stats.name;
-                int status = -4;
-                char* res = abi::__cxa_demangle(name.c_str(), NULL, NULL, &status);
-                const char* const demangled_name = (status == 0) ? res : name.c_str();
-                std::string ret_val(demangled_name);
-                free(res);*/
-
-                /*NUClear::log<NUClear::DEBUG>("testing! ", demangled_name);*/
+                
+                for (auto& log : stats.log) {
+					reactionStatistics->add_log(log);
+				}
                 
                 int status = -4; // some arbitrary value to eliminate the compiler warning
                 std::unique_ptr<char, void(*)(void*)> res {
