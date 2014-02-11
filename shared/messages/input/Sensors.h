@@ -56,7 +56,7 @@ namespace messages {
 
             arma::vec3 accelerometer;
             arma::vec3 gyroscope;
-            arma::vec3 orientation;
+            arma::mat33 orientation;
             arma::vec3 leftFSR;
             arma::vec3 rightFSR;
 

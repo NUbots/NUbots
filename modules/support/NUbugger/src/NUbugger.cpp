@@ -80,6 +80,8 @@ namespace modules {
 
 				auto* sensorData = message.mutable_sensor_data();
 
+				sensorData->set_timestamp(sensors.timestamp.time_since_epoch().count());
+
 
 				for(const auto& s : sensors.servos) {
 
@@ -117,20 +119,26 @@ namespace modules {
 				accel->set_y(sensors.accelerometer[1]);
 				accel->set_z(sensors.accelerometer[2]);
 
-				// auto* orient = sensorData->mutable_orientation();
-				// orient->set_x(sensors.orientation[0]);
-				// orient->set_y(sensors.orientation[1]);
-				// orient->set_z(sensors.orientation[2]);
+				auto* orient = sensorData->mutable_orientation();
+				orient->set_xx(sensors.orientation(0,0));
+				orient->set_xy(sensors.orientation(1,0));
+				orient->set_xz(sensors.orientation(2,0));
+				orient->set_yx(sensors.orientation(0,0));
+				orient->set_yy(sensors.orientation(1,1));
+				orient->set_yz(sensors.orientation(2,1));
+				orient->set_zx(sensors.orientation(0,2));
+				orient->set_zy(sensors.orientation(1,2));
+				orient->set_zz(sensors.orientation(2,2));
 
-				// auto* lfsr = sensorData->mutable_left_fsr();
-				// lfsr->set_x(sensors.leftFSR[0]);
-				// lfsr->set_y(sensors.leftFSR[1]);
-				// lfsr->set_z(sensors.leftFSR[2]);
+				auto* lfsr = sensorData->mutable_left_fsr();
+				lfsr->set_x(sensors.leftFSR[0]);
+				lfsr->set_y(sensors.leftFSR[1]);
+				lfsr->set_z(sensors.leftFSR[2]);
 
-				// auto* rfsr = sensorData->mutable_right_fsr();
-				// rfsr->set_x(sensors.rightFSR[0]);
-				// rfsr->set_y(sensors.rightFSR[1]);
-				// rfsr->set_z(sensors.rightFSR[2]);
+				auto* rfsr = sensorData->mutable_right_fsr();
+				rfsr->set_x(sensors.rightFSR[0]);
+				rfsr->set_y(sensors.rightFSR[1]);
+				rfsr->set_z(sensors.rightFSR[2]);
 
 				/*if (sensors.cm730ErrorFlags > 0) {
 					//std::cout << sensors.cm730ErrorFlags << std::endl;
@@ -158,13 +166,6 @@ namespace modules {
 					sensors.gyroscope[1],
 					sensors.gyroscope[2]
 				));
-
-				// TODO!
-
-				/*auto* orient = sensorData->mutable_orientation();
-				orient->add_float_value(0);
-				orient->add_float_value(0);
-				orient->add_float_value(0);*/
 
 				send(message);
 			});

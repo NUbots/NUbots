@@ -91,8 +91,10 @@ namespace modules {
                     }
                      
                     float quality = orientationFilter.measurementUpdate(sensors->accelerometer, observationNoise);                     
-                    arma::vec orientation = orientationFilter.get();                     
-                    sensors->orientation = orientation.rows(0,2);                     
+                    arma::vec orientation = orientationFilter.get();
+                    sensors->orientation.col(2) = -orientation.rows(0,2);
+                    sensors->orientation.col(0) = orientation.rows(3,5);
+                    sensors->orientation.col(1) = arma::cross(sensors->orientation.col(2), sensors->orientation.col(0));
 
                     if(++frameLimiter % 3 == 0){
                         emit(graph("Filtered Gravity Vector",
