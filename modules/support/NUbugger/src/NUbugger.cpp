@@ -47,8 +47,6 @@ namespace modules {
 		using messages::support::NUbugger::proto::Message;
 		using messages::vision::Goal;
 
-		using NUbuggerOptions = Options<Single, NUClear::Priority<NUClear::LOW>>>;
-
 		NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
 			: Reactor(std::move(environment))
 			, pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {
@@ -74,7 +72,7 @@ namespace modules {
 			});
 
 			// This trigger gets the output from the sensors
-			on<Trigger<Sensors>, NUbuggerOptions>([this](const Sensors& sensors) {
+			on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
 				Message message;
 
 				message.set_type(Message::SENSOR_DATA);
@@ -172,7 +170,7 @@ namespace modules {
 				send(message);
 			});
 
-			on<Trigger<Image>, NUbuggerOptions>([this](const Image& image) {
+			on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
                 
 				if(!image.source().empty()) {
                     
@@ -234,7 +232,7 @@ namespace modules {
 				send(message);
 			});
 
-			on<Trigger<ClassifiedImage>, NUbuggerOptions>([this](const ClassifiedImage& image) {
+			on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
 
 				Message message;
 				message.set_type(Message::VISION);
@@ -323,7 +321,7 @@ namespace modules {
 				
 			});
 
-			on<Trigger<std::vector<Goal>>, NUbuggerOptions>([this](const std::vector<Goal> goals){
+			on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Goal> goals){
 				Message message;
  
 				message.set_type(Message::VISION);
@@ -354,7 +352,7 @@ namespace modules {
 				send(message);
 			});
 
-			on<Trigger<messages::localisation::FieldObject>, NUbuggerOptions>([this](const messages::localisation::FieldObject& field_object) {
+			on<Trigger<messages::localisation::FieldObject>, Options<Single, Priority<NUClear::LOW>>>([this](const messages::localisation::FieldObject& field_object) {
 				Message message;
 
 				message.set_type(Message::LOCALISATION);
