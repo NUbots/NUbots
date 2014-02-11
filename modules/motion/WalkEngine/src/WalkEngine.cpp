@@ -67,8 +67,8 @@ namespace modules {
                 // gyro stabilization variables
                 ankleShift = {0, 0};
                 kneeShift = 0;
-                hipShift = {0, 0};;
-                armShift = {0, 0};;
+                hipShift = {0, 0};
+                armShift = {0, 0};
 
                 active = true;
                 started = false;
@@ -91,7 +91,7 @@ namespace modules {
 
                 initialStep = 2;
 
-                upperBodyOverriden = 0;
+                upperBodyOverridden = 0;
                 motionPlaying = 0;
 
 //                qLArmOR0 = config["qLArm0"];
@@ -134,6 +134,11 @@ namespace modules {
                 hasBall = 0;
 
                 stepKickRequest = 0;
+
+                ankleMod = config["ankleMod"].as<arma::vec2>();
+                ph1Zmp = config["ph1Single"];
+                ph2Zmp = config["ph2Single"];
+                tZmp = config["tZmp"];
             });
 
             on<Trigger<Every<1, Per<std::chrono::seconds> > > >([this](const time_t& time) {
@@ -171,7 +176,7 @@ namespace modules {
             if (ph > 1) {
                 iStep++;
                 ph = ph - std::floor(ph);
-                tLastStep += tStep;
+                tLastStep += std::chrono::seconds(tStep);
             }
 
             if (iStep > iStep0 && stopRequest == 2) {
@@ -223,21 +228,21 @@ namespace modules {
                         toeTipCompensation = 0;
                         if (velDiff[0] > 0) {
                             // accelerating to front
-                            supportMod[0] = supportFront2;
-                        } else if (velCurrent[0] > velFastForward) {
-                            supportMod[0] = supportFront;
+                            supportMod[0] = config["supportFront2"];
+                        } else if (velCurrent[0] > double(config["velFastForward"])) {
+                            supportMod[0] = config["supportFront"];
                             toeTipCompensation = ankleMod[0];
                         } else if (velCurrent[0] < 0) {
-                            supportMod[0] = supportBack;
-                        } else if (std::abs(velCurrent[2]) > velFastTurn) {
-                            supportMod[0] = supportTurn;
+                            supportMod[0] = config["supportBack"];
+                        } else if (std::abs(velCurrent[2]) > double(config["velFastTurn"])) {
+                            supportMod[0] = config["supportTurn"];
                         } else {
                             if (velCurrent[1] > 0.015) {
-                                supportMod[0] = supportSideX;
-                                supportMod[1] = supportSideY;
+                                supportMod[0] = config["supportSideX"];
+                                supportMod[1] = config["supportSideY"];
                             } else if (velCurrent[1] < -0.015) {
-                                supportMod[0] = supportSideX;
-                                supportMod[1] = -supportSideY;
+                                supportMod[0] = config["supportSideX"];
+                                supportMod[1] = -double(config["supportSideY"]);
                             }
                         }
                     }
@@ -247,7 +252,7 @@ namespace modules {
 
                 // adjustable initial step body swing
                 if (initialStep > 0) {
-                    supportMod[1] = supportModYInitial;
+                    supportMod[1] = config["supportModYInitial"];
                     if (supportLeg == RIGHT) {
                         supportMod[1] *= -1;
                     }
@@ -260,40 +265,41 @@ namespace modules {
                     arma::vec3 uTorso = {supportMod[0], supportMod[1], 0};
                     // TODO: uLeftModded = 
                     // TODO: uSupport = 
-                    leftLegHardness = hardnessSupport;
-                    rightLegHardness = hardnessSwing;
+                    leftLegHardness = config["hardnessSupport"];
+                    rightLegHardness = config["hardnessSwing"];
                 } else {
                     // TODO: uRightTorso = 
                     // TODO: uTorsoModded =
                     arma::vec3 uTorso = {supportMod[0], supportMod[1], 0};
                     // TODO: uRightModded = 
                     // TODO: uSupport = 
-                    leftLegHardness = hardnessSwing;
-                    rightLegHardness = hardnessSupport;
+                    leftLegHardness = config["hardnessSwing"];
+                    rightLegHardness = config["hardnessSupport"];
                 }
 
                 // compute ZMP coefficients
                 m1X = (uSupport[0] - uTorso[0]) / (tStep * ph1Zmp);
-                m2X = (uTorso2[0] - uSpport[0]) / (tStep * (1 - ph2Zmp));
+                m2X = (uTorso2[0] - uSupport[0]) / (tStep * (1 - ph2Zmp));
                 m1Y = (uSupport[1] - uTorso[1]) / (tStep * ph1Zmp);
                 m2Y = (uTorso2[1] - uSupport[1]) / (tStep * (1 - ph2Zmp));
-                std::map<aXP, aXN> = zmp_solve(uSupport[0], uTorso1[0], uTorso[0], uTorso[0], uTorso[0]);
-                std::map<aYP, aYN> = zmp_solve(uSupport[1], uTorso1[1], uTorso[1], uTorso[1], uTorso[1]);
+                std::tie(aXP, aXN) = zmpSolve(uSupport[0], uTorso1[0], uTorso[0], uTorso[0], uTorso[0]);
+                std::tie(aYP, aYN) = zmpSolve(uSupport[1], uTorso1[1], uTorso[1], uTorso[1], uTorso[1]);
 
                 // compute COM speed at the boundary
 
-                dx0 = (aXP - aXN) / tZmp + m1X * (1 - std::cosh(ph1Zmp * tStep / tZmp));
-                dy0 = (aYP - aYN) / tZmp + m1Y * (1 - std::cosh(ph1Zmp * tStep / tZmp));
+//                dx0 = (aXP - aXN) / tZmp + m1X * (1 - std::cosh(ph1Zmp * tStep / tZmp));
+//                dy0 = (aYP - aYN) / tZmp + m1Y * (1 - std::cosh(ph1Zmp * tStep / tZmp));
 
-                dx1 = (aXP * std::exp(tStep / tZmp) - aXN * std::exp(-tStep / tZmp)) / tZmp
+                float dx1 = (aXP * std::exp(tStep / tZmp) - aXN * std::exp(-tStep / tZmp)) / tZmp
                         + m2X * (1 - std::cosh((1 - ph2Zmp) * tStep / tZmp));
-                dy1 = (aYP * std::exp(tStep / tZmp) - aYN * std::exp(-tStep / tZmp)) / tZmp
+                float dy1 = (aYP * std::exp(tStep / tZmp) - aYN * std::exp(-tStep / tZmp)) / tZmp
                         + m2Y * (1 - std::cosh((1 - ph2Zmp) * tStep / tZmp));
 
                 comdot = {dx1, dy1};
             }
 
-            std::map<xFoot, zFoot> = footPhase(ph);
+            float xFoot, zFoot;
+            std::tie(xFoot, zFoot) = footPhase(ph);
             if (initialStep > 0) {
                 zFoot = 0; // don't lift foot at initial step
             }
@@ -309,7 +315,7 @@ namespace modules {
                 } else {
                     // TODO: uRight = 
                 }
-                pRLeg[2] = stepHeigh * zFoot;
+                pRLeg[2] = stepHeight * zFoot;
             } else {
                 if (currentStepType > 1) { // walkkick
                     if (xFoot < walkKickPh) {
@@ -320,10 +326,10 @@ namespace modules {
                 } else {
                     // TODO: uLeft = 
                 }
-                pLLeg[2] = stepHeigh * zFoot;
+                pLLeg[2] = stepHeight * zFoot;
             }
 
-            uTorsoOld = uTorso;
+            // unused: uTorsoOld = uTorso;
 
             uTorso = zmpCom(ph);
 
@@ -341,15 +347,17 @@ namespace modules {
             if (velDiff[0] > 0.02) {
                 frontCompX = frontCompX + AccelComp;
             }
+            
+            float armPosCompX, armPosCompY;
 
             // arm movement compensation
             if (upperBodyOverridden > 0 || motionPlaying > 0) {
                 // mass shift to X
-w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qLArmOR[1])
-                        - std::sin(qRArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qRArmOR[1]);
+                float elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qLArmOR[1])
+                               -std::sin(qRArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qRArmOR[1]);
 
                 // mass shift to Y
-                elbowY = std::sin(qLArmOR[1]) + std::sin(qRArmOR[1]);
+                float elbowY = std::sin(qLArmOR[1]) + std::sin(qRArmOR[1]);
                 armPosCompX = elbowX * -0.009;
                 armPosCompY = elbowY * -0.009;
 
@@ -370,7 +378,7 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
                 turnCompX = turnCompX - 0.01;
             }
 
-            // TODO: uTorsoActual = 
+            arma::vec3 uTorsoActual; // TODO: get real value
             pTorso[0] = uTorsoActual[0];
             pTorso[1] = uTorsoActual[1];
             pTorso[5] += uTorsoActual[2];
@@ -384,24 +392,26 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
             pRLeg[2] = uRight[2];
 
             // TODO: qLegs = IK()
+            std::vector<double> qLegs;
             motionLegs(qLegs);
             motionArms();
         }
 
         void WalkEngine::checkStepKick() {
+            arma::vec3 uFootErr;
             if (stepKickRequest == 0) {
                 stepCheckCount = 0;
                 return;
             } else if (stepKickRequest == 1) {
-                // tODO: uFootErr = 
+                // TODO: uFootErr = 
                 stepCheckCount++;
             }
 
             if (supportLeg == stepKickSupport) {
-                if (stepCheckCount > 2) || 
+                if (stepCheckCount > 2 || 
                         (std::abs(uFootErr[0]) < 0.02 &&
                         std::abs(uFootErr[1]) < 0.01 &&
-                        std::abs(uFootErr[2]) < 10 * M_PI / 180.0) {
+                        std::abs(uFootErr[2]) < 10 * M_PI / 180.0)) {
                     stepKickReady = true;
                     return;
                 }
@@ -424,18 +434,19 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
                 tStep = tStep0;
                 stepHeight = stepHeight0;
                 currentStepType = 0;
-                velCurrent = {0,0,0};
-                velCommad = {0,0,0};
+                velCurrent = {0, 0, 0};
+                velCommand = {0, 0, 0};
                 return;
             }
 
-            if (walkRequestType == 1) {
+            if (walkKickRequest == 1) {
                 // check current supportLeg and feet positions
                 // and advance steps until ready
 
+                arma::vec3 uFootErr;
                 // TODO: uFootErr = 
 
-                if (supportLeg ~= walkKick[0][2] ||
+                if (supportLeg != walkKick[0][2] ||
                         std::abs(uFootErr[0] > 0.02) || 
                         std::abs(uFootErr[1] > 0.01) ||
                         std::abs(uFootErr[2] > 10 * M_PI / 180.0)) {
@@ -456,7 +467,7 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
             shiftFactor = walkKick[walkKickRequest][5];
 
             if (walkKick[walkKickRequest] <= 7) { // TODO: investigate port
-                footPos1 = walkKick[walkKickRequest][6];
+                arma::vec3 footPos1 = walkKick[walkKickRequest][6];
                 if (supportLeg == LEFT) {
                     // TODO: look at uLRFootOffset for use here
                     // TODO: uRight2 = 
@@ -464,8 +475,8 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
                     // TODO: uLeft2 = 
                 }
             } else {
-                footPos1 = walkKick[walkKickRequest][6];
-                footPos2 = walkKick[walkKickRequest][7];
+                arma::vec3 footPos1 = walkKick[walkKickRequest][6];
+                arma::vec3 footPos2 = walkKick[walkKickRequest][7];
                 if (supportLeg == LEFT) {
                     // TODO: uRight15 = 
                     // TODO: uRight2 = 
@@ -481,13 +492,15 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
         void WalkEngine::updateStill() {
             uTorso = stepTorso(uLeft, uRight, 0.5);
 
-            if (upperBodyOverriden > 0 || motionPlaying > 0) {
+            float armPosCompX, armPosCompY;
+
+            if (upperBodyOverridden > 0 || motionPlaying > 0) {
                 // mass shift to X
-                elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qLArmOR[1])
-                        - std::sin(qRArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qRArmOR[1]);
+                float elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qLArmOR[1])
+                               -std::sin(qRArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qRArmOR[1]);
 
                 // mass shift to Y
-                elbowY = std::sin(qLArmOR[1]) + std::sin(qRArmOR[1]);
+                float elbowY = std::sin(qLArmOR[1]) + std::sin(qRArmOR[1]);
                 armPosCompX = elbowX * -0.007;
                 armPosCompY = elbowY * -0.007;
 
@@ -527,14 +540,15 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
             // ankle stabilization using gyro feedback
             // TODO: imuGyr = 
 
-            gyroRoll0 = imuGyr[0];
-            gyroPitch0 = imuGyr[1];
+            float gyroRoll0 = imuGyr[0];
+            float gyroPitch0 = imuGyr[1];
             if (gyroOff) {
                 gyroRoll0 = 0;
                 gyroPitch0 = 0;
             }
 
             // get effective gyro angle considering body angle offset
+            float yawAngle;
             if (!active) {
                 // double support
                 yawAngle = (uLeft[2] + uRight[2]) / 2 - uTorsoActual[2];
@@ -544,9 +558,9 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
                 yawAngle = uRight[2] - uTorsoActual[2];
             }
 
-            gyroRoll = gyroRoll0 * std::cos(yawAngle)
+            float gyroRoll = gyroRoll0 * std::cos(yawAngle)
                     + gyroPitch0 * std::sin(yawAngle);
-            gyroPitch = gyroPitch0 * std::cos(yawAngle)
+            float gyroPitch = gyroPitch0 * std::cos(yawAngle)
                     + gyroRoll0 * std::sin(yawAngle);
 
             // TODO: armShiftX = 
@@ -651,8 +665,9 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
             // TODO
         }
 
-        void WalkEngine::stepTorso(arma::vec3 arma::vec3 uLeft, uRight, arma::vec3 shiftFactor) {
+        arma::vec3 WalkEngine::stepTorso(arma::vec3 arma::vec3 uLeft, uRight, arma::vec3 shiftFactor) {
             // TODO
+            return {0,0,0};
         }
 
         void WalkEngine::setVelocity(float vx, float vy, float va) {
@@ -884,7 +899,7 @@ w               elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(
             return std::make_pair(aP, aN);
         }
         
-        void WalkEngine::zmpCom(float ph) {
+        arma::vec3 WalkEngine::zmpCom(float ph) {
             arma::vec3 com = {0, 0, 0};
             float expT = std::exp(tStep * ph / tZmp);
             com[0] = uSupport[0] + aXP * expT + aXN / expT;

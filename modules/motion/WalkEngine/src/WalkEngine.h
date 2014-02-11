@@ -39,29 +39,101 @@ namespace modules {
             explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
         private:
             utility::configuration::ConfigurationNode config;
-            /*bool active;
-            bool started;
-            bool moving;
-            time_t tLastStep;
-            float ph0 = 0;
-            float ph = 0;
-            int iStep0 = -1;
-            int iStep = 0;
-            int stopRequest = 2;
-            enum {
-                LEFT,
-                RIGHT
-            } supportLeg = LEFT;
-            // TODO: uLeft1
-            // TODO: uRight1
-            // TODO: uTorso1
-            arma::vec2 supportMod;
-            float shiftFactor;
 
-            void update();
-            void advanceMotion();
-            void updateVelocity();
-            float getFootX();*/
+            // start_config_params
+
+            // Walk Parameters
+            // Stance and velocity limit values
+            arma::vec2 stanceLimitX;
+            arma::vec2 stanceLimitY;
+            arma::vec2 stanceLimitA;
+            arma::vec2 velLimitX;
+            arma::vec2 velLimitY;
+            arma::vec2 velLimitA;
+            arma::vec3 velDelta;
+            float vaFactor;
+
+            float velXHigh;
+            float velDeltaXHigh;
+
+            // Toe/heel overlap checking values
+            arma::vec2 footSizeX;
+            float stanceLimitMarginY;
+            float stanceLimitY2;
+
+            // OP default stance width: 0.0375*2 = 0.075
+            // Heel overlap At radian 0.15 at each foot = 0.05*sin(0.15)*2=0.015
+            // Heel overlap At radian 0.30 at each foot = 0.05*sin(0.15)*2=0.030
+
+            // Stance parameters
+            float bodyHeight;
+            float bodyTilt;
+            float footX;
+            float footY;
+            float supportX;
+            float supportY;
+            arma::vec3 qLArm0;
+            arma::vec3 qRArm0;
+            arma::vec3 qLArmKick0;
+            arma::vec3 qRArmKick0;
+
+            // Hardness parameters
+            float hardnessSupport;
+            float hardnessSwing;
+
+            float hardnessArm0;
+            float hardnessArm;
+
+            // Gait parameters
+            float tStep0;
+            float tStep;
+            float tZmp;
+            float stepHeight0;
+            float stepHeight;
+            float ph1Single;
+            float ph2Single;
+            float ph1Zmp;
+            float ph2Zmp;
+
+            // Compensation parameters
+            float hipRollCompensation;
+            arma::vec2 ankleMod;
+            float spreadComp;
+            float turnCompThreshold;
+            float turnComp;
+
+            // Gyro stabilization parameters
+            arma::vec4 ankleImuParamX;
+            arma::vec4 ankleImuParamY;
+            arma::vec4 kneeImuParamX;
+            arma::vec4 hipImuParamY;
+            arma::vec4 armImuParamX;
+            arma::vec4 armImuParamY;
+
+            // Support bias parameters to reduce backlash-based instability
+            float velFastForward;
+            float velFastTurn;
+            float supportFront;
+            float supportFront2;
+            float supportBack;
+            float supportSideX;
+            float supportSideY;
+            float supportTurn;
+
+            float frontComp;
+            float AccelComp;
+
+            // Initial body swing 
+            float supportModYInitial;
+
+            // TODO: WalkKick parameters
+//            walkKickDef = Config.walk.walkKickDef;
+            float walkKickPh;
+            float toeTipCompensation;
+
+            bool useAlternativeTrajectory;
+
+            // end_config_params
 
             // walk state
             arma::vec3 uTorso;
@@ -99,8 +171,6 @@ namespace modules {
             bool moving;
             int iStep0;
             int iStep;
-            int tStep0;
-            int tStep;
             time_t t0;
             time_t tLastStep;
             float ph0;
@@ -114,16 +184,20 @@ namespace modules {
 
             int initialStep;
 
-            int upperBodyOverriden;
+            int upperBodyOverridden;
             int motionPlaying;
 
             // TODO:
+            arma::vec3 qLArmOR;
+            arma::vec3 qRArmOR;
+
             arma::vec3 qLArmOR0;
             arma::vec3 qRArmOR0;
 
             arma::vec3 qLArmOR1;
             arma::vec3 qRArmOR1;
 
+            arma::vec3 bodyRot;
             arma::vec3 bodyRot1;
 
             float phSingle;
@@ -146,13 +220,31 @@ namespace modules {
             bool stepKickReady;
             int hasBall;
 
-            enum {
+            enum Leg {
                 LEFT,
                 RIGHT
-            } supportLeg = LEFT;
+            };
+
+            Leg supportLeg = LEFT;
+            Leg stepKickSupport = LEFT;
             arma::vec2 supportMod;
             float shiftFactor;
             int stepKickRequest;
+
+            // TODO: link to actuator
+            float leftLegHardness;
+            float rightLegHardness;
+
+            // TODO: do these need to be global?
+            float m1X;
+            float m2X;
+            float m1Y;
+            float m2Y;
+
+            arma::vec3 uSupport;
+
+            // TODO: default 0
+            int stepCheckCount;
 
             void update();
             void checkStepKick();
@@ -163,7 +255,7 @@ namespace modules {
             void exit();
             void stepLeftDestination(arma::vec3 vel, arma::vec3 uLeft, arma::vec3 uRight);
             void stepRightDestination(arma::vec3 vel, arma::vec3 uLeft, arma::vec3 uRight);
-            void stepTorso(arma::vec3 uLeft, arma::vec3 uRight, arma::vec3 shiftFactor);
+            arma::vec3 stepTorso(arma::vec3 uLeft, arma::vec3 uRight, arma::vec3 shiftFactor);
             void setVelocity(float vx, float vy, float va);
             void updateVelocity();
             void getVelocity();
@@ -175,8 +267,8 @@ namespace modules {
             void stanceReset();
             void getOdometry(arma::vec3 u0);
             void getBodyOffset();
-            std::pair<float, float> zpmSolve(float zs, float z1, float z2, float x1, float x2);
-            void zmpCop(float ph);
+            std::pair<float, float> zmpSolve(float zs, float z1, float z2, float x1, float x2);
+            arma::vec3 zmpCom(float ph);
             std::pair<float, float> footPhase(float ph);
             float getFootX();
         };
