@@ -21,8 +21,8 @@ message Sensors {
         L_ANKLE_PITCH       = 15;
         R_ANKLE_ROLL        = 16;
         L_ANKLE_ROLL        = 17;
-        HEAD_PAN            = 18;
-        HEAD_TILT           = 19;
+        HEAD_YAW            = 18;
+        HEAD_PITCH          = 19;
     }
 
     message Servo {
