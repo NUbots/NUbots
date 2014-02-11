@@ -34,18 +34,20 @@
 
 #include "utility/image/ColorModelConversions.h"
 
-using messages::input::Sensors;
-using messages::input::Image;
-using messages::vision::ClassifiedImage;
-using NUClear::DEBUG;
-using utility::NUbugger::graph;
-using std::chrono::duration_cast;
-using std::chrono::microseconds;
-using messages::support::NUbugger::proto::Message;
-using messages::vision::Goal;
-
 namespace modules {
 	namespace support {
+
+		using messages::input::Sensors;
+		using messages::input::Image;
+		using messages::vision::ClassifiedImage;
+		using NUClear::DEBUG;
+		using utility::NUbugger::graph;
+		using std::chrono::duration_cast;
+		using std::chrono::microseconds;
+		using messages::support::NUbugger::proto::Message;
+		using messages::vision::Goal;
+
+		using NUbuggerOptions = Options<Single, NUClear::Priority<NUClear::LOW>>>;
 
 		NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
 			: Reactor(std::move(environment))
@@ -72,7 +74,7 @@ namespace modules {
 			});
 
 			// This trigger gets the output from the sensors
-			on<Trigger<Every<20, Per<std::chrono::seconds>>>, Options<Single>, With<Sensors>>([this](const time_t& time, const Sensors& sensors) {
+			on<Trigger<Sensors>, NUbuggerOptions>([this](const Sensors& sensors) {
 				Message message;
 
 				message.set_type(Message::SENSOR_DATA);
@@ -121,13 +123,13 @@ namespace modules {
 
 				auto* orient = sensorData->mutable_orientation();
 				orient->set_xx(sensors.orientation(0,0));
-				orient->set_xy(sensors.orientation(1,0));
-				orient->set_xz(sensors.orientation(2,0));
-				orient->set_yx(sensors.orientation(0,0));
+				orient->set_yx(sensors.orientation(1,0));
+				orient->set_zx(sensors.orientation(2,0));
+				orient->set_xy(sensors.orientation(0,1));
 				orient->set_yy(sensors.orientation(1,1));
-				orient->set_yz(sensors.orientation(2,1));
-				orient->set_zx(sensors.orientation(0,2));
-				orient->set_zy(sensors.orientation(1,2));
+				orient->set_zy(sensors.orientation(2,1));
+				orient->set_xz(sensors.orientation(0,2));
+				orient->set_yz(sensors.orientation(1,2));
 				orient->set_zz(sensors.orientation(2,2));
 
 				auto* lfsr = sensorData->mutable_left_fsr();
@@ -170,7 +172,7 @@ namespace modules {
 				send(message);
 			});
 
-			on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
+			on<Trigger<Image>, NUbuggerOptions>([this](const Image& image) {
                 
 				if(!image.source().empty()) {
                     
@@ -232,7 +234,7 @@ namespace modules {
 				send(message);
 			});
 
-			on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& image) {
+			on<Trigger<ClassifiedImage>, NUbuggerOptions>([this](const ClassifiedImage& image) {
 
 				Message message;
 				message.set_type(Message::VISION);
@@ -321,7 +323,7 @@ namespace modules {
 				
 			});
 
-			on<Trigger<std::vector<Goal>>>([this](const std::vector<Goal> goals){
+			on<Trigger<std::vector<Goal>>, NUbuggerOptions>([this](const std::vector<Goal> goals){
 				Message message;
  
 				message.set_type(Message::VISION);
@@ -352,7 +354,7 @@ namespace modules {
 				send(message);
 			});
 
-			on<Trigger<messages::localisation::FieldObject>>([this](const messages::localisation::FieldObject& field_object) {
+			on<Trigger<messages::localisation::FieldObject>, NUbuggerOptions>([this](const messages::localisation::FieldObject& field_object) {
 				Message message;
 
 				message.set_type(Message::LOCALISATION);
