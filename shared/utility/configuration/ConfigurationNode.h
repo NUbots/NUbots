@@ -158,10 +158,15 @@ namespace configuration {
                 throw std::runtime_error("The datatype in this node was not an array");
             }
         }
+        
+        template <typename TType>
+        TType as() {
+            return ConvertNode<TType>::makeValue(*this);
+        }
 
         template <typename TType>
         operator TType() const {
-            return static_cast<TType>(ConvertNode<TType>::makeValue(*this));
+            return ConvertNode<TType>::makeValue(*this);
         }
     };
 }}
