@@ -48,6 +48,14 @@ namespace kinematics {
         float anklePitch = 0;
         float ankleRoll = 0;
 
+
+        if(!isLeft) {
+            target.submat(0,0,2,2) = arma::mat("-1,0,0;0,1,0;0,0,1") * target.submat(0,0,2,2);
+            target.submat(0,0,2,0) *= -1;
+            target(0,3) *= -1;
+
+        }
+
         arma::vec3 ankleX = target.submat(0,0,2,0);
         arma::vec3 ankleY = target.submat(0,1,2,1);
         arma::vec3 ankleZ = target.submat(0,2,2,2);
@@ -135,106 +143,24 @@ namespace kinematics {
         hipYaw = (isHipYawPositive ? 1 : -1) * acos(arma::dot( hipXProjected,globalX));
 
         if (isLeft) {
-            positions.push_back(std::make_pair(ServoID::L_HIP_YAW, -hipYaw));
-            positions.push_back(std::make_pair(ServoID::L_HIP_ROLL, hipRoll));
-            positions.push_back(std::make_pair(ServoID::L_HIP_PITCH, -hipPitch));
-            positions.push_back(std::make_pair(ServoID::L_KNEE, M_PI - knee));
-            positions.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, -anklePitch));
-            positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, ankleRoll));
+            positions.push_back(std::make_pair(ServoID::L_HIP_YAW,      -hipYaw));
+            positions.push_back(std::make_pair(ServoID::L_HIP_ROLL,      hipRoll));
+            positions.push_back(std::make_pair(ServoID::L_HIP_PITCH,    -hipPitch));
+            positions.push_back(std::make_pair(ServoID::L_KNEE,          M_PI - knee));
+            positions.push_back(std::make_pair(ServoID::L_ANKLE_PITCH,  -anklePitch));
+            positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL,    ankleRoll));
         } else {
-            positions.push_back(std::make_pair(ServoID::R_HIP_YAW, -hipYaw));
-            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL, -hipRoll));
-            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH, -hipPitch));
-            positions.push_back(std::make_pair(ServoID::R_KNEE, M_PI - knee));
-            positions.push_back(std::make_pair(ServoID::R_ANKLE_PITCH, -anklePitch));
-            positions.push_back(std::make_pair(ServoID::R_ANKLE_ROLL, -ankleRoll));
+            positions.push_back(std::make_pair(ServoID::R_HIP_YAW,       hipYaw));
+            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL,     -hipRoll));
+            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH,    -hipPitch));
+            positions.push_back(std::make_pair(ServoID::R_KNEE,          M_PI - knee));
+            positions.push_back(std::make_pair(ServoID::R_ANKLE_PITCH,  -anklePitch));
+            positions.push_back(std::make_pair(ServoID::R_ANKLE_ROLL,   -ankleRoll));
         }
 
         return positions;
     }
 
-	std::vector<std::pair<ServoID, float> > calculateLegJointsBWalk(arma::mat44 target, bool isLeft) {
-
-		static const float LENGTH_BETWEEN_LEGS = 74.0f;
-		static const float UPPER_LEG_LENGTH = 93.0f;
-		static const float LOWER_LEG_LENGTH = 93.0f;
-		static const double PI = arma::math::pi();
-
-		const int sign(isLeft ? -1 : 1);
-		std::vector<std::pair<ServoID, float> > positions;
-
-		// add a translation in the y axis - shifts to absolute offset?
-        target(1,3) += sign * LENGTH_BETWEEN_LEGS / 2;
-        //target = TransformMatrices::RotX(sign * pi_4) * target;
-        target = arma::inv(target);
-
-        // Matrix access format is matrix[row][collumn]
-
-		// total distance of translation
-        float length = sqrt(target(0,3) * target(0,3) + target(1,3) * target(1,3) + target(2,3) * target(2,3));
-        float sqrLength = length * length;
-        float sqrUpperLeg = UPPER_LEG_LENGTH * UPPER_LEG_LENGTH;
-        float sqrLowerLeg = LOWER_LEG_LENGTH * LOWER_LEG_LENGTH;
-
-		// cosine rule (a^2 = b^2 + c^2 - 2*b*c*cosA) rearranged for cosA
-		// angle between ankle and angle-hip vector
-        float cosLowerLeg = (sqrLowerLeg + sqrLength - sqrUpperLeg) / (2 * LOWER_LEG_LENGTH * length);
-		// angle between upper and lower leg
-        float cosKnee = (sqrUpperLeg + sqrLowerLeg - sqrLength) / (2 * UPPER_LEG_LENGTH * LOWER_LEG_LENGTH);
-
-//        const float min = -1.0f;
-//        const float max = 1.0f;
-
-        //!< TODO: Check if this cosLowerLeg shoud condition should be inverted.
-        /*if (!isInside(cosKnee, min, max) || isInside(cosLowerLeg, min, max)) {
-			cosKnee = limit(cosKnee, min, max);
-			cosLowerLeg = limit(cosLowerLeg, min, max);
-			throw std::runtime_error("Target angle unreachable");
-        }*/
-
-        float joint3 = PI - acos(cosKnee);
-        float joint4 = -acos(cosLowerLeg);
-        double yzabs = sqrt(target(1,3)*target(1,3) + target(2,3)*target(2,3));
-        joint4 -= atan2(target(0,3), yzabs);
-        float joint5 = atan2(target(1,3), target(2,3)) * sign;
-
-        // calculate rotation matrix before hip joints
-		arma::mat33 hipFromFoot(arma::fill::eye);
-
-        hipFromFoot = hipFromFoot * xRotationMatrix(-sign * joint5, 3) * yRotationMatrix(-joint4 - joint3, 3);
-
-        // compute rotation matrix for hip from rotation before hip and desired rotation
-        arma::mat33 hip = arma::inv(hipFromFoot) * target.submat(0,0,2,2);
-
-        // compute joints from rotation matrix using theorem of euler angles
-        // see http://www.geometrictools.com/Documentation/EulerAngles.pdf
-        // this is possible because of the known order of joints (z, x, y seen from body resp. y, x, z seen from foot)
-        float joint1 = asin(-hip(1,2)) * -sign;
-        float joint2 = -atan2(hip(0,2), hip(2,2));
-        float joint0 = -atan2(hip(1,0), hip(1,1));
-
-        // Since the joint ordering is different simplest way is to directly index.
-		if (isLeft) {
-            positions.push_back(std::make_pair(ServoID::L_HIP_YAW, joint0));
-            positions.push_back(std::make_pair(ServoID::L_HIP_ROLL, -joint1));
-            positions.push_back(std::make_pair(ServoID::L_HIP_PITCH, joint2));
-            positions.push_back(std::make_pair(ServoID::L_KNEE, joint3));
-            positions.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, joint4));
-            positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, -joint5));
-		} else {
-            positions.push_back(std::make_pair(ServoID::R_HIP_YAW, joint0));
-            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL, joint1));
-            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH, joint2));
-            positions.push_back(std::make_pair(ServoID::R_KNEE, joint3));
-            positions.push_back(std::make_pair(ServoID::R_ANKLE_PITCH, joint4));
-            positions.push_back(std::make_pair(ServoID::R_ANKLE_ROLL, joint5));
-		}
-
-		return positions;
-
-		//return std::vector<std::pair<ServoID, float>>();
-		
-	}
 } // kinematics
 } // motion
 } // utility
