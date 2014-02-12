@@ -51,6 +51,9 @@ namespace modules {
 			// Set our high water mark
 			int hwm = 50;
 			pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
+			
+            // Bind to port 12000
+            pub.bind("tcp://*:12000");
                 
             on<Trigger<DataPoint>>([this](const DataPoint& data_point) {
                 Message message;
@@ -68,6 +71,7 @@ namespace modules {
 
             // This trigger gets the output from the sensors (unfiltered)
             on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
+
                 Message message;
 
                 message.set_type(Message::SENSOR_DATA);
