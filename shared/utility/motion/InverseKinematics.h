@@ -22,24 +22,157 @@
 
 #include <vector>
 #include <armadillo>
+#include <nuclear_bits/LogLevel.h>
+#include <cmath>
+#include <nuclear>
+
+#include "InverseKinematics.h"
+
+#include "utility/math/matrix.h"
 
 #include "messages/input/ServoID.h"
 
 namespace utility {
 namespace motion {
 namespace kinematics {
+	
+	/*! @brief Calculates the leg joints for a given input ankle position.
+			The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint of the hips.
+			Robot coordinate system:
+						x is out of the front of the robot
+						y is left, from right shoulder to left
+						z is upward, from feet to head
+			Input ankle coordinate system:
+						x is forward, from heel to toe
+						y is left,
+						z is normal to the plane of the foot
+		@param target The target 4x4 basis matrix for the ankle
+		@param isLeft Request for left leg motors or right leg motors?
+		@param RobotKinematicModel The class containing the leg model of the robot.
+	*/
+    template <typename RobotKinematicModel> 
+	std::vector< std::pair<messages::input::ServoID, float> > calculateLegJoints(arma::mat44 target, bool isLeft) {
+        const float LENGTH_BETWEEN_LEGS = RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS;
+        const float DISTANCE_FROM_BODY_TO_HIP_JOINT = RobotKinematicModel::Leg::DISTANCE_FROM_BODY_TO_HIP_JOINT;
+        const float UPPER_LEG_LENGTH = RobotKinematicModel::Leg::UPPER_LEG_LENGTH;
+        const float LOWER_LEG_LENGTH = RobotKinematicModel::Leg::LOWER_LEG_LENGTH;
 
-        inline bool isInside(float t, float min, float max) {
-            return min <= max ? t >= min && t <= max : t >= min || t <= max;
+		std::vector<std::pair<messages::input::ServoID, float> > positions;
+
+        float hipYaw = 0;
+        float hipRoll = 0;
+        float hipPitch = 0;
+        float knee = 0;
+        float anklePitch = 0;
+        float ankleRoll = 0;
+
+        //TODO remove this. It was due to wrong convention use
+        arma::mat44 inputCoordinatesToCalcCoordinates("0,1,0,0,
+        											   1,0,0,0,
+        											   0,0,-1,0,
+        											   0,0,0,1"); 
+        
+        target = inputCoordinatesToCalcCoordinates * target;
+
+        arma::vec3 ankleX = target.submat(0,0,2,0);
+        arma::vec3 ankleY = target.submat(0,1,2,1);
+        arma::vec3 ankleZ = target.submat(0,2,2,2);
+
+        arma::vec3 anklePos = target.submat(0,3,2,3);
+
+        arma::vec3 hipOffset = {LENGTH_BETWEEN_LEGS / 2.0, 0, DISTANCE_FROM_BODY_TO_HIP_JOINT};
+
+        arma::vec3 targetLeg = anklePos - hipOffset;
+
+        float length = arma::norm(targetLeg, 2);
+        if(length > UPPER_LEG_LENGTH+LOWER_LEG_LENGTH){
+            NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints3 : Requested position beyond leg reach.");
+            return positions;
+        }
+        //NUClear::log<NUClear::DEBUG>("Length: ", length);
+        float sqrLength = length * length;
+        float sqrUpperLeg = UPPER_LEG_LENGTH * UPPER_LEG_LENGTH;
+        float sqrLowerLeg = LOWER_LEG_LENGTH * LOWER_LEG_LENGTH;
+
+        float cosKnee = (sqrUpperLeg + sqrLowerLeg - sqrLength) / (2 * UPPER_LEG_LENGTH * LOWER_LEG_LENGTH);
+       // NUClear::log<NUClear::DEBUG>("Cos Knee: ", cosKnee);
+        // TODO: check if cosKnee is between 1 and -1
+        knee = acos(cosKnee);
+
+        float cosLowerLeg = (sqrLowerLeg + sqrLength - sqrUpperLeg) / (2 * LOWER_LEG_LENGTH * length);
+        // TODO: check if cosLowerLeg is between 1 and -1
+        float lowerLeg = acos(cosLowerLeg);
+
+        float phi2 = acos(arma::dot(targetLeg, ankleY)/length);
+
+        anklePitch = lowerLeg + phi2 - M_PI_2;
+
+        arma::vec3 unitTargetLeg = targetLeg / length;
+
+        arma::vec3 hipX = arma::cross(ankleY, unitTargetLeg);
+        float hipXLength = arma::norm(hipX,2);
+        if(hipXLength>0){
+            hipX /= hipXLength;
+        } else {
+            NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints3 : targetLeg and ankleY parrallel. This is unhandled at the moment.");
+            return positions;
+        }
+        arma::vec3 legPlaneTangent = arma::cross(ankleY, hipX); //Will be unit as ankleY and hipX are normal and unit
+
+        ankleRoll = atan2(arma::dot(ankleX, legPlaneTangent),arma::dot(ankleX, hipX));
+
+        arma::vec3 globalX = {1,0,0};
+        arma::vec3 globalY = {0,1,0};
+        arma::vec3 globalZ = {0,0,1};
+
+        bool isAnkleAboveWaist = arma::dot(unitTargetLeg,globalZ)<0;
+        
+        float cosZandHipX = arma::dot(globalZ, hipX);
+        bool hipRollPositive = cosZandHipX <= 0;
+        arma::vec3 legPlaneGlobalZ = (isAnkleAboveWaist ? -1 : 1 ) * (globalZ - ( cosZandHipX * hipX));
+        float legPlaneGlobalZLength = arma::norm(legPlaneGlobalZ, 2);
+        if(legPlaneGlobalZLength>0){
+           legPlaneGlobalZ /= legPlaneGlobalZLength;
         }
 
-        inline float limit(float t, float min, float max) {
-            return t < min ? min : t > max ? max : t;
+        float cosHipRoll = arma::dot(legPlaneGlobalZ, globalZ);
+        // TODO: check if cosHipRoll is between 1 and -1
+        hipRoll = (hipRollPositive ? 1 : -1) * acos(cosHipRoll);
+
+
+        float phi4 = M_PI - knee - lowerLeg;
+        //Superposition values:
+        float sinPIminusPhi2 = std::sin(M_PI - phi2);
+        arma::vec3 unitUpperLeg = unitTargetLeg * (std::sin(phi2 - phi4) / sinPIminusPhi2) + ankleY * (std::sin(phi4) / sinPIminusPhi2);
+        bool isHipPitchPositive = dot(hipX,cross(unitUpperLeg, legPlaneGlobalZ))>=0;    
+
+        hipPitch = (isHipPitchPositive ? 1 : -1) * acos(arma::dot(legPlaneGlobalZ, unitUpperLeg));
+        
+        arma::vec3 hipXProjected = (isAnkleAboveWaist ? -1 : 1) * hipX;  //If leg is above waist then hipX is pointing in the wrong direction in the xy plane 
+        hipXProjected[2] = 0;
+        hipXProjected /= arma::norm(hipXProjected, 2);
+        bool isHipYawPositive = arma::dot(hipXProjected,globalY)>=0;
+       
+        hipYaw = (isHipYawPositive ? 1 : -1) * acos(arma::dot( hipXProjected,globalX));
+
+        if (isLeft) {
+            positions.push_back(std::make_pair(messages::input::ServoID::L_HIP_YAW, -hipYaw));
+            positions.push_back(std::make_pair(messages::input::ServoID::L_HIP_ROLL, hipRoll));
+            positions.push_back(std::make_pair(messages::input::ServoID::L_HIP_PITCH, -hipPitch));
+            positions.push_back(std::make_pair(messages::input::ServoID::L_KNEE, M_PI - knee));
+            positions.push_back(std::make_pair(messages::input::ServoID::L_ANKLE_PITCH, -anklePitch));
+            positions.push_back(std::make_pair(messages::input::ServoID::L_ANKLE_ROLL, ankleRoll));
+        } else {
+            positions.push_back(std::make_pair(messages::input::ServoID::R_HIP_YAW, (RobotKinematicModel::Leg::LEFT_TO_RIGHT_HIP_YAW) * -hipYaw));
+            positions.push_back(std::make_pair(messages::input::ServoID::R_HIP_ROLL, (RobotKinematicModel::Leg::LEFT_TO_RIGHT_HIP_ROLL) * hipRoll));
+            positions.push_back(std::make_pair(messages::input::ServoID::R_HIP_PITCH, (RobotKinematicModel::Leg::LEFT_TO_RIGHT_HIP_PITCH) * -hipPitch));
+            positions.push_back(std::make_pair(messages::input::ServoID::R_KNEE, (RobotKinematicModel::Leg::LEFT_TO_RIGHT_KNEE) * (M_PI - knee) ));
+            positions.push_back(std::make_pair(messages::input::ServoID::R_ANKLE_PITCH, (RobotKinematicModel::Leg::LEFT_TO_RIGHT_ANKLE_PITCH) * -anklePitch));
+            positions.push_back(std::make_pair(messages::input::ServoID::R_ANKLE_ROLL, (RobotKinematicModel::Leg::LEFT_TO_RIGHT_ANKLE_ROLL) * ankleRoll));
         }
 
-        std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints(arma::mat44 target, bool isLeft);
-        std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints2(arma::mat44 target, bool isLeft);
-        std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints3(arma::mat44 target, bool isLeft);
+        return positions;
+    }
 
 } // kinematics
 }  // motion
