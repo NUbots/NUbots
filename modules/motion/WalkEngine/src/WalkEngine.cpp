@@ -18,7 +18,6 @@
  */
 
 #include "WalkEngine.h"
-#include "WalkFunctions.h"
 
 #include <algorithm>
 #include <armadillo>
@@ -46,7 +45,7 @@ namespace modules {
                 config = walkEngineConfig.config;
             });
 
-            on<Trigger<Initialize> >([this]() {
+            /*on<Trigger<Initialize> >([this]() {
                 // walk state
                 uTorso = {config["supportX"], 0, 0};
                 uLeft = {0, config["footY"], 0};
@@ -96,8 +95,8 @@ namespace modules {
                 upperBodyOverridden = 0;
                 motionPlaying = 0;
 
-                qLArmOR0 = config["qLArm0"].as<arma::vec3>();
-                qRArmOR0 = config["qRArm0"].as<arma::vec3>();
+//                qLArmOR0 = config["qLArm0"].as<arma::vec3>();
+//                qRArmOR0 = config["qRArm0"].as<arma::vec3>();
 
                 qLArmOR1 = {0, 0, 0};
                 qRArmOR1 = {0, 0, 0};
@@ -130,11 +129,11 @@ namespace modules {
 
                 stepKickRequest = 0;
 
-                ankleMod = config["ankleMod"].as<arma::vec2>();
+//                ankleMod = config["ankleMod"].as<arma::vec2>();
                 ph1Zmp = config["ph1Single"];
                 ph2Zmp = config["ph2Single"];
                 tZmp = config["tZmp"];
-            });
+            });*/
 
             on<Trigger<Every<1, Per<std::chrono::seconds> > > >([this](const time_t& time) {
                 update();
@@ -1012,11 +1011,57 @@ namespace modules {
             return float(config["footX"]) + float(config["footXComp"]);
         }
 
-        double getTime() {
+        double WalkEngine::getTime() {
               struct timeval t;
               gettimeofday(&t, NULL);
               return t.tv_sec + 1E-6 * t.tv_usec;
         }
+
+		double WalkEngine::procFunc(double a, double deadband, double maxvalue) { //a function for IMU feedback (originally from teamdarwin2013release/player/util/util.lua)
+			double   ret  = std::min( std::max(0., std::abs(a)-deadband), maxvalue);
+			if(a<=0) ret *= -1.;
+			return   ret;
+		}
+
+		double WalkEngine::modAngle(double a) { // reduce an angle to [-pi, pi)
+			if(a==0) return 0.;
+			a = std::fmod(a, (2. * M_PI)); //fmod(a,b) the same as a%b, but for doubles (fmod() defined in math.h)
+			if(a >= M_PI)
+				a -= 2. * M_PI;
+			return a;
+		}
+
+		arma::vec3 WalkEngine::poseGlobal(arma::vec3 pRelative, arma::vec3 pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!
+			double ca = std::cos(pose[2]);
+			double sa = std::sin(pose[2]);
+            return {
+                pose[0] + ca * pRelative[0] - sa * pRelative[1],
+                pose[1] + sa * pRelative[0] + ca * pRelative[1],
+                pose[2] + pRelative[2]
+            };
+		}
+
+		arma::vec3 WalkEngine::poseRelative(arma::vec3 pGlobal, arma::vec3 pose) {
+			double ca = std::cos(pose[2]);
+			double sa = std::sin(pose[2]);
+			double px = pGlobal[0] - pose[0];
+			double py = pGlobal[1] - pose[1];
+			double pa = pGlobal[2] - pose[2];
+            return {
+                ca * px + sa * py,
+                -sa * px + ca * py,
+                modAngle(pa)
+            };
+		}
+
+		//should t be an integer???
+		arma::vec3 WalkEngine::se2Interpolate(double t, arma::vec3 u1, arma::vec3 u2) { //helps smooth out the motions using a weighted average
+            return {
+                u1[0] + t * (u2[0] - u1[0]),
+                u1[1] + t * (u2[1] - u1[1]),
+                u1[2] + t * modAngle(u2[2] - u1[2])
+            };
+		}
         
     }  // motion
 }  // modules

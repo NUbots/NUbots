@@ -7,7 +7,7 @@ ADD_ROLE(
         #support::configuration::NetworkingConfiguration
         #platform::darwin::HardwareIO
         platform::fakedarwin::HardwareIO
-	platform::darwin::SensorFilter
+        platform::darwin::SensorFilter
         platform::darwin::MotionManager
         support::NUbugger
         debug::NUbugger

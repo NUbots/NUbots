@@ -66,7 +66,7 @@ namespace modules {
 		}
 
 		//should t be an integer???
-		arma::vec se2Interpolate(double t, arma::vec u1, arma::vec u2) { //helps smooth out the motions using a weighted average
+		arma::vec3 se2Interpolate(double t, arma::vec3 u1, arma::vec3 u2) { //helps smooth out the motions using a weighted average
             return {
                 u1[0] + t * (u2[0] - u1[0]),
                 u1[1] + t * (u2[1] - u1[1]),
