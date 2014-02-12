@@ -26,8 +26,6 @@
 #include <cmath>
 #include <nuclear>
 
-#include "InverseKinematics.h"
-
 #include "utility/math/matrix.h"
 
 #include "messages/input/ServoID.h"
@@ -51,7 +49,7 @@ namespace kinematics {
 		@param RobotKinematicModel The class containing the leg model of the robot.
 	*/
     template <typename RobotKinematicModel> 
-	std::vector< std::pair<messages::input::ServoID, float> > calculateLegJoints(arma::mat44 target, bool isLeft) {
+	std::vector< std::pair<messages::input::ServoID, float> > calculateLegJoints(arma::mat44 target, Side isLeft) {
         const float LENGTH_BETWEEN_LEGS = RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS;
         const float DISTANCE_FROM_BODY_TO_HIP_JOINT = RobotKinematicModel::Leg::DISTANCE_FROM_BODY_TO_HIP_JOINT;
         const float UPPER_LEG_LENGTH = RobotKinematicModel::Leg::UPPER_LEG_LENGTH;
@@ -67,11 +65,8 @@ namespace kinematics {
         float ankleRoll = 0;
 
         //TODO remove this. It was due to wrong convention use
-        arma::mat44 inputCoordinatesToCalcCoordinates("0,1,0,0,
-        											   1,0,0,0,
-        											   0,0,-1,0,
-        											   0,0,0,1"); 
-        
+        arma::mat44 inputCoordinatesToCalcCoordinates("0,1,0,0,  1,0,0,0,  0,0,-1,0,  0,0,0,1"); 
+
         target = inputCoordinatesToCalcCoordinates * target;
 
         arma::vec3 ankleX = target.submat(0,0,2,0);
@@ -173,6 +168,8 @@ namespace kinematics {
 
         return positions;
     }
+
+
 
 } // kinematics
 }  // motion
