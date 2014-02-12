@@ -1,0 +1,14 @@
+ADD_ROLE(
+    NAME kinematicsdebug
+    MODULES
+        support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem    
+        #platform::darwin::HardwareIO
+        platform::fakedarwin::HardwareIO
+        platform::darwin::MotionManager
+        platform::darwin::SensorFilter
+        support::NUbugger
+        debug::NUbugger
+        debug::KinematicsDebug
+)
