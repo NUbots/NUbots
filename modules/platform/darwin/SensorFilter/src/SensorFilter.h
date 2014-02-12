@@ -23,6 +23,8 @@
 #include <nuclear>
 
 #include "messages/motion/ServoWaypoint.h"
+#include "utility/math/kalman/UKF.h"
+#include "utility/math/kalman/AdaptiveIMUModel.h"
 
 namespace modules {
     namespace platform {
@@ -36,6 +38,17 @@ namespace modules {
             class SensorFilter : public NUClear::Reactor {
             public:
                 explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
+
+                time_t lastUpdate;
+                utility::math::kalman::UKF<utility::math::kalman::AdaptiveIMUModel> orientationFilter;
+                int frameLimiter;
+
+                double DEFAULT_NOISE_GAIN;
+                double HIGH_NOISE_THRESHOLD;
+                double HIGH_NOISE_GAIN;
+                double LOW_NOISE_THRESHOLD;
+                static constexpr const char* CONFIGURATION_PATH = "DarwinSensorFilter.json";
+
             };
         }
     }

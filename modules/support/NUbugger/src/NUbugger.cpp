@@ -23,7 +23,7 @@
 #include <jpeglib.h>
 #include <cxxabi.h>
 
-#include "messages/platform/darwin/DarwinSensors.h"
+#include "messages/input/Sensors.h"
 #include "messages/input/Image.h"
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/vision/VisionObjects.h"
@@ -32,43 +32,42 @@
 
 #include "utility/image/ColorModelConversions.h"
 
-using messages::platform::darwin::DarwinSensors;
-using messages::input::Image;
-using messages::vision::ClassifiedImage;
-using std::chrono::duration_cast;
-using std::chrono::microseconds;
-using messages::support::NUbugger::proto::Message;
-using messages::vision::Goal;
-
 namespace modules {
-    namespace support {
+	namespace support {
 
-        NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment))
-            , pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {
-            // Set our high water mark
-            int hwm = 50;
-            pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
+		using messages::input::Sensors;
+		using messages::input::Image;
+		using messages::vision::ClassifiedImage;
+		using NUClear::DEBUG;
+		using utility::NUbugger::graph;
+		using std::chrono::duration_cast;
+		using std::chrono::microseconds;
+		using messages::support::NUbugger::proto::Message;
+		using messages::vision::Goal;
 
-            // Bind to port 12000
-            pub.bind("tcp://*:12000");
-
+		NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
+			: Reactor(std::move(environment))
+			, pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {
+			// Set our high water mark
+			int hwm = 50;
+			pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
+                
             on<Trigger<DataPoint>>([this](const DataPoint& data_point) {
                 Message message;
                 message.set_type(Message::DATA_POINT);
                 message.set_utc_timestamp(std::time(0));
-
+                
                 auto* dataPoint = message.mutable_datapoint();
                 dataPoint->set_label(data_point.label);
                 for (auto value : data_point.values) {
                     dataPoint->add_value(value);
                 }
-
+                
                 send(message);
             });
 
             // This trigger gets the output from the sensors (unfiltered)
-            on<Trigger<DarwinSensors>>([this](const DarwinSensors& sensors) {
+            on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
                 Message message;
 
                 message.set_type(Message::SENSOR_DATA);
@@ -76,155 +75,97 @@ namespace modules {
 
                 auto* sensorData = message.mutable_sensor_data();
 
-                for (int i = 0; i < 20; ++i) {
+				sensorData->set_timestamp(sensors.timestamp.time_since_epoch().count());
 
-                    auto* servo = sensorData->add_servo();
+                // Add each of the servos into the protocol buffer
+				for(const auto& s : sensors.servos) {
 
-                    servo->set_error_flags(sensors.servo[i].errorFlags);
+					auto* servo = sensorData->add_servo();
 
-                    servo->set_id(static_cast<messages::input::proto::Sensors_ServoID>(i));
+					servo->set_error_flags(s.errorFlags);
 
-                    servo->set_enabled(sensors.servo[i].torqueEnabled);
+					servo->set_id(static_cast<messages::input::proto::Sensors_ServoID>(s.id));
 
-                    servo->set_p_gain(sensors.servo[i].pGain);
-                    servo->set_i_gain(sensors.servo[i].iGain);
-                    servo->set_d_gain(sensors.servo[i].dGain);
+					servo->set_enabled(s.enabled);
 
-                    servo->set_goal_position(sensors.servo[i].goalPosition);
-                    servo->set_goal_speed(sensors.servo[i].movingSpeed);
-                    servo->set_torque_limit(sensors.servo[i].torqueLimit);
+					servo->set_p_gain(s.pGain);
+					servo->set_i_gain(s.iGain);
+					servo->set_d_gain(s.dGain);
 
-                    servo->set_present_position(sensors.servo[i].presentPosition);
-                    servo->set_present_speed(sensors.servo[i].presentSpeed);
+					servo->set_goal_position(s.goalPosition);
+					servo->set_goal_speed(s.goalSpeed);
+					servo->set_torque_limit(s.torqueLimit);
 
-                    servo->set_load(sensors.servo[i].load);
-                    servo->set_voltage(sensors.servo[i].voltage);
-                    servo->set_temperature(sensors.servo[i].temperature);
+					servo->set_present_position(s.presentPosition);
+					servo->set_present_speed(s.presentSpeed);
 
-                    /*if (sensors.servo[i].errorFlags > 0) {
-                        std::cout << sensors.servo[i].errorFlags << std::endl;
-                    }*/
-                }
+					servo->set_load(s.load);
+					servo->set_voltage(s.voltage);
+					servo->set_temperature(s.temperature);
+				}
 
-                auto* gyro = sensorData->mutable_gyroscope();
-                gyro->set_x(sensors.gyroscope.x);
-                gyro->set_y(sensors.gyroscope.y);
-                gyro->set_z(sensors.gyroscope.z);
+                // The gyroscope values (x,y,z)
+				auto* gyro = sensorData->mutable_gyroscope();
+				gyro->set_x(sensors.gyroscope[0]);
+				gyro->set_y(sensors.gyroscope[1]);
+				gyro->set_z(sensors.gyroscope[2]);
 
-                auto* accel = sensorData->mutable_accelerometer();
-                accel->set_x(sensors.accelerometer.x);
-                accel->set_y(sensors.accelerometer.y);
-                accel->set_z(sensors.accelerometer.z);
+                // The accelerometer values (x,y,z)
+				auto* accel = sensorData->mutable_accelerometer();
+				accel->set_x(sensors.accelerometer[0]);
+				accel->set_y(sensors.accelerometer[1]);
+				accel->set_z(sensors.accelerometer[2]);
 
-                auto* lfsr = sensorData->mutable_left_fsr();
-                lfsr->set_fsr1(sensors.fsr.left.fsr1);
-                lfsr->set_fsr2(sensors.fsr.left.fsr2);
-                lfsr->set_fsr3(sensors.fsr.left.fsr3);
-                lfsr->set_fsr4(sensors.fsr.left.fsr4);
-                lfsr->set_centre_x(sensors.fsr.left.centreX);
-                lfsr->set_centre_y(sensors.fsr.left.centreY);
+                // The orientation matrix
+				auto* orient = sensorData->mutable_orientation();
+				orient->set_xx(sensors.orientation(0,0));
+				orient->set_yx(sensors.orientation(1,0));
+				orient->set_zx(sensors.orientation(2,0));
+				orient->set_xy(sensors.orientation(0,1));
+				orient->set_yy(sensors.orientation(1,1));
+				orient->set_zy(sensors.orientation(2,1));
+				orient->set_xz(sensors.orientation(0,2));
+				orient->set_yz(sensors.orientation(1,2));
+				orient->set_zz(sensors.orientation(2,2));
+
+                // The left FSR values
+				auto* lfsr = sensorData->mutable_left_fsr();
+				lfsr->set_x(sensors.leftFSR[0]);
+				lfsr->set_y(sensors.leftFSR[1]);
+				lfsr->set_z(sensors.leftFSR[2]);
+
+                // The right FSR values
+				auto* rfsr = sensorData->mutable_right_fsr();
+				rfsr->set_x(sensors.rightFSR[0]);
+				rfsr->set_y(sensors.rightFSR[1]);
+				rfsr->set_z(sensors.rightFSR[2]);
+
+                send(message);
+            });
+
+			on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
                 
-                auto* rfsr = sensorData->mutable_right_fsr();
-                rfsr->set_fsr1(sensors.fsr.right.fsr1);
-                rfsr->set_fsr2(sensors.fsr.right.fsr2);
-                rfsr->set_fsr3(sensors.fsr.right.fsr3);
-                rfsr->set_fsr4(sensors.fsr.right.fsr4);
-                rfsr->set_centre_x(sensors.fsr.right.centreX);
-                rfsr->set_centre_y(sensors.fsr.right.centreY);
-
-                /*if (sensors.cm730ErrorFlags > 0) {
-                    std::cout << sensors.cm730ErrorFlags << std::endl;
-                }
-
-                if (sensors.fsr.left.errorFlags > 0) {
-                    std::cout << sensors.fsr.left.errorFlags << std::endl;
-                }
-
-                if (sensors.fsr.right.errorFlags > 0) {
-                    std::cout << sensors.fsr.right.errorFlags << std::endl;
-                }*/
-
-                // TODO!
-
-                /*auto* orient = sensorData->mutable_orientation();
-                orient->add_float_value(0);
-                orient->add_float_value(0);
-                orient->add_float_value(0);*/
-
-                send(message);
-            });
-
-            on<Trigger<Image>, With<DarwinSensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image, const DarwinSensors&) {
-
-                //std::cout << "Image!" << std::endl;
-
-                Message message;
-                message.set_type(Message::VISION);
-                message.set_utc_timestamp(std::time(0));
-
-                auto* visionData = message.mutable_vision();
-                auto* imageData = visionData->mutable_image();
-                std::string* imageBytes = imageData->mutable_data();
-                                
-                if(image.source().empty()) {
-                    // Reserve enough space in the image data to store the output
-                    imageBytes->resize(image.width() * image.height());
-                    imageData->set_width(image.width());
-                    imageData->set_height(image.height());
-
-                    // Open the memory of the string as a file (using some dastardly hackery)
-                    auto memFile = fmemopen(const_cast<char*>(imageBytes->data()), imageBytes->size(), "wb");
-
-                    // Our jpeg compression structures
-                    jpeg_compress_struct jpegC;
-                    jpeg_error_mgr jpegErr;
-
-                    // Set our error handler on our Config object
-                    jpegC.err = jpeg_std_error(&jpegErr);
-
-                    // Create our compression object
-                    jpeg_create_compress(&jpegC);
-
-                    // Set our output to the file
-                    jpeg_stdio_dest(&jpegC, memFile);
-
-                    // Set information about our image
-                    jpegC.image_width = image.width();
-                    jpegC.image_height = image.height();
-                    jpegC.input_components = 3;
-                    jpegC.in_color_space = JCS_YCbCr;
-
-                    // Set the default compression parameters
-                    jpeg_set_defaults(&jpegC);
-
-                    // Start compression
-                    jpeg_start_compress(&jpegC, true);
-
-                    // Compress each row
-                    for(size_t i = 0; i < image.height(); ++i) {
-                        uint8_t* start = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(&image.raw()[i * image.width()]));
-                        jpeg_write_scanlines(&jpegC, &start, 1);
-                    }
-
-                    // Finish our compression
-                    jpeg_finish_compress(&jpegC);
-
-                    // Close the memory file)
-                    fclose(memFile);
-
-                    // Destroy the compression object (free memory)
-                    jpeg_destroy_compress(&jpegC);
-                } else {
-                    // Reserve enough space in the image data to store the output
-                    imageBytes->resize(image.source().size());
-                    imageData->set_width(image.width());
-                    imageData->set_height(image.height());
+				if(!image.source().empty()) {
                     
-                    imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
+                    Message message;
+                    message.set_type(Message::VISION);
+                    message.set_utc_timestamp(std::time(0));
+                    
+                    auto* visionData = message.mutable_vision();
+                    auto* imageData = visionData->mutable_image();
+                    std::string* imageBytes = imageData->mutable_data();
+                    
+					// Reserve enough space in the image data to store the output
+					imageBytes->resize(image.source().size());
+					imageData->set_width(image.width());
+					imageData->set_height(image.height());
+					
+					imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
+                    
+                    
+                    send(message);
                 }
-
-                send(message);
-            });
+			});
 
             on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
                 Message message;
@@ -243,23 +184,19 @@ namespace modules {
                 reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
                 
                 for (auto& log : stats.log) {
-					reactionStatistics->add_log(log);
-				}
+                    reactionStatistics->add_log(log);
+                }
                 
                 int status = -4; // some arbitrary value to eliminate the compiler warning
                 std::unique_ptr<char, void(*)(void*)> res {
                     abi::__cxa_demangle(stats.name.c_str(), nullptr, nullptr, &status),
                     std::free
                 };
-
-                std::string demangled_name(status == 0 ? res.get() : stats.name );
-
-                reactionStatistics->set_name(demangled_name);
-
+                
                 send(message);
             });
 
-            on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& image) {
+			on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
 
                 Message message;
                 message.set_type(Message::VISION);
@@ -348,7 +285,7 @@ namespace modules {
                 
             });
 
-			on<Trigger<std::vector<Goal>>>([this](const std::vector<Goal> goals){
+			on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Goal> goals){
 				Message message;
  
 				message.set_type(Message::VISION);
@@ -378,51 +315,51 @@ namespace modules {
 				}
 				send(message);
 			});
+            
+			on<Trigger<messages::localisation::FieldObject>, Options<Single, Priority<NUClear::LOW>>>([this](const messages::localisation::FieldObject& field_object) {
+				Message message;
 
-            on<Trigger<messages::localisation::FieldObject>>([this](const messages::localisation::FieldObject& field_object) {
-                Message message;
+				message.set_type(Message::LOCALISATION);
+				message.set_utc_timestamp(std::time(0));
 
-                message.set_type(Message::LOCALISATION);
-                message.set_utc_timestamp(std::time(0));
+				auto* localisation = message.mutable_localisation();
+				auto* api_ball = localisation->add_field_object();
 
-                auto* localisation = message.mutable_localisation();
-                auto* api_ball = localisation->add_field_object();
+				api_ball->set_name(field_object.name);
+				api_ball->set_wm_x(field_object.wm_x);
+				api_ball->set_wm_y(field_object.wm_y);
+				api_ball->set_sd_x(field_object.sd_x);
+				api_ball->set_sd_y(field_object.sd_y);
+				api_ball->set_sr_xx(field_object.sr_xx);
+				api_ball->set_sr_xy(field_object.sr_xy);
+				api_ball->set_sr_yy(field_object.sr_yy);
+				api_ball->set_lost(field_object.lost);
 
-                api_ball->set_name(field_object.name);
-                api_ball->set_wm_x(field_object.wm_x);
-                api_ball->set_wm_y(field_object.wm_y);
-                api_ball->set_sd_x(field_object.sd_x);
-                api_ball->set_sd_y(field_object.sd_y);
-                api_ball->set_sr_xx(field_object.sr_xx);
-                api_ball->set_sr_xy(field_object.sr_xy);
-                api_ball->set_sr_yy(field_object.sr_yy);
-                api_ball->set_lost(field_object.lost);
+				send(message);
+			});
 
-                send(message);
-            });
+			// When we shutdown, close our publisher
+			on<Trigger<Shutdown>>([this](const Shutdown&) {
+				pub.close();
+			});
+		}
 
-            // When we shutdown, close our publisher
-            on<Trigger<Shutdown>>([this](const Shutdown&) {
-                pub.close();
-            });
-        }
+		/**
+		 * This method needs to be used over pub.send as all calls to
+		 * pub.send need to be synchronized with a concurrency primitive
+		 * (such as a mutex)
+		 */
+		void NUbugger::send(zmq::message_t& packet) {
+			std::lock_guard<std::mutex> lock(mutex);
+			pub.send(packet);
+		}
 
-        /**
-         * This method needs to be used over pub.send as all calls to
-         * pub.send need to be synchronized with a concurrency primitive
-         * (such as a mutex)
-         */
-        void NUbugger::send(zmq::message_t& packet) {
-            std::lock_guard<std::mutex> lock(mutex);
-            pub.send(packet);
-        }
+		void NUbugger::send(Message message) {
+			auto serialized = message.SerializeAsString();
+			zmq::message_t packet(serialized.size());
+			memcpy(packet.data(), serialized.data(), serialized.size());
+			send(packet);
+		}
 
-        void NUbugger::send(Message message) {
-            auto serialized = message.SerializeAsString();
-            zmq::message_t packet(serialized.size());
-            memcpy(packet.data(), serialized.data(), serialized.size());
-            send(packet);
-        }
-
-    } // support
+	} // support
 } // modules
