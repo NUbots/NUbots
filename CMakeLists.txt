@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-PROJECT(Robocup)
+PROJECT(NUBots)
 
 SET(VERSION_MAJOR 0)
 SET(VERSION_MINOR 2)
@@ -56,3 +56,7 @@ ENDFOREACH()
 
 # Include our scp darwin sender
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/DarwinSend.cmake")
+
+# Put it in an IDE group for shared
+SET_PROPERTY(TARGET install PROPERTY FOLDER "ALL_BUILD/")
+SET_PROPERTY(TARGET run PROPERTY FOLDER "ALL_BUILD/")
