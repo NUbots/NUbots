@@ -196,6 +196,10 @@ namespace modules {
                     abi::__cxa_demangle(stats.name.c_str(), nullptr, nullptr, &status),
                     std::free
                 };
+
+                std::string demangled_name(status == 0 ? res.get() : stats.name );
+
+                reactionStatistics->set_name(demangled_name);
                 
                 send(message);
             });
