@@ -22,7 +22,7 @@ namespace modules {
 	namespace motion {
 		double procFunc(double a, double deadband, double maxvalue); //TODO: move documentation from .cpp to .h file
 		double modAngle(double a);
-		arma::vec poseGlobal(arma::vec pRelative, arma::vec pose);
+		arma::vec3 poseGlobal(arma::vec3 pRelative, arma::vec3 pose);
 		arma::vec poseRelative(arma::vec pGlobal, arma::vec pose);
 		arma::vec se2Interpolate(double t, arma::vec u1, arma::vec u2);
 	}

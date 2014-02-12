@@ -42,39 +42,36 @@ namespace modules {
 			return a;
 		}
 
-		arma::vec poseGlobal(arma::vec pRelative, arma::vec pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!
-			double ca = std::cos(pose(2));
-			double sa = std::sin(pose(2));
-
-			arma::vec ret(3);
-			ret(0) = pose(0) + ca * pRelative(0) - sa * pRelative(1);
-			ret(1) = pose(1) + sa * pRelative(0) + ca * pRelative(1);
-			ret(2) = pose(2) + pRelative(2);
-			return ret;
+		arma::vec3 poseGlobal(arma::vec3 pRelative, arma::vec3 pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!
+			double ca = std::cos(pose[2]);
+			double sa = std::sin(pose[2]);
+            return {
+                pose[0] + ca * pRelative[0] - sa * pRelative[1],
+                pose[1] + sa * pRelative[0] + ca * pRelative[1],
+                pose[2] + pRelative[2]
+            };
 		}
 
-		arma::vec poseRelative(arma::vec pGlobal, arma::vec pose) {
-			double ca = std::cos(pose(2));
-			double sa = std::sin(pose(2));
-			double px = pGlobal(0) - pose(0);
-			double py = pGlobal(1) - pose(1);
-			double pa = pGlobal(2) - pose(2);
-
-			arma::vec ret(3); 
-			ret(0) =  ca * px + sa * py;
-			ret(1) = -sa * px + ca * py;
-			ret(2) = modAngle(pa);
-			return ret;
+		arma::vec3 poseRelative(arma::vec3 pGlobal, arma::vec3 pose) {
+			double ca = std::cos(pose[2]);
+			double sa = std::sin(pose[2]);
+			double px = pGlobal[0] - pose[0];
+			double py = pGlobal[1] - pose[1];
+			double pa = pGlobal[2] - pose[2];
+            return {
+                ca * px + sa * py,
+                -sa * px + ca * py,
+                modAngle(pa)
+            };
 		}
 
 		//should t be an integer???
 		arma::vec se2Interpolate(double t, arma::vec u1, arma::vec u2) { //helps smooth out the motions using a weighted average
-
-			arma::vec ret(3);
-			ret(0) = u1(0) + t*(u2(0) - u1(0));
-			ret(1) = u1(1) + t*(u2(1) - u1(1));
-			ret(2) = u1(2) + t*modAngle(u2(2) - u1(2));
-			return ret;
+            return {
+                u1[0] + t * (u2[0] - u1[0]),
+                u1[1] + t * (u2[1] - u1[1]),
+                u1[2] + t * modAngle(u2[2] - u1[2])
+            };
 		}
 
 		/*TODO: MAKE A .H FILE, NAMESPACE, GUARD etc and finish the following dependancy functions for WalkEngine...

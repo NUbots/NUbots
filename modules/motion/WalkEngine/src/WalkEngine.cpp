@@ -18,7 +18,9 @@
  */
 
 #include "WalkEngine.h"
+#include "WalkFunctions.h"
 
+#include <algorithm>
 #include <armadillo>
 #include <chrono>
 #include <cmath>
@@ -77,7 +79,7 @@ namespace modules {
                 iStep = 0;
                 tStep = config["tStep"];
                 tStep0 = tStep;
-                time_t now = NUClear::clock::now();
+                double now = getTime();
                 t0 = now;
                 tLastStep = now;
                 ph0 = 0;
@@ -94,15 +96,8 @@ namespace modules {
                 upperBodyOverridden = 0;
                 motionPlaying = 0;
 
-//                qLArmOR0 = config["qLArm0"];
                 qLArmOR0 = config["qLArm0"].as<arma::vec3>();
-//                qLArmOR0 = config<arma::vec3>["qLArm0"];
-//                qLArmOR0 = static_cast<arma::vec3>(config["qLArm0"]);
-
-                // TODO:
-//                arma::vec3 test = config["qLArm0"];
-                //qLArmOR0 = static_cast<std::vector<double>>(config["qLArm0"]);
-//                qRArmOR0 = config["qRArm0"];
+                qRArmOR0 = config["qRArm0"].as<arma::vec3>();
 
                 qLArmOR1 = {0, 0, 0};
                 qRArmOR1 = {0, 0, 0};
@@ -126,7 +121,7 @@ namespace modules {
                 uLeftI = {0, 0, 0};
                 uRightI = {0, 0, 0};
                 uTorsoI = {0, 0, 0};
-                supportI = {0, 0, 0};
+                supportI = LEFT;
                 startFromStep = false;
 
                 comdot = {0, 0};
@@ -148,10 +143,10 @@ namespace modules {
         }
         
         void WalkEngine::update() {
-            advanceMotion();
+            //advanceMotion();
 
             float footX = getFootX();
-            time_t time = NUClear::clock::now();
+            double time = getTime();
 
             // TODO: float bodyHeightCurrent = TODO
 
@@ -171,12 +166,12 @@ namespace modules {
             moving = true;
 
             // SJ: Variable tStep support for walkkick
-            ph = std::chrono::duration_cast<std::chrono::microseconds>(time - tLastStep).count() / double(tStep);
+            ph = (time - tLastStep) / tStep;
 
             if (ph > 1) {
                 iStep++;
                 ph = ph - std::floor(ph);
-                tLastStep += std::chrono::seconds(tStep);
+                tLastStep += tStep;
             }
 
             if (iStep > iStep0 && stopRequest == 2) {
@@ -197,7 +192,7 @@ namespace modules {
                 supportMod = {0, 0}; // support point modulation for wallkick
                 shiftFactor = 0.5; // how much should we shift final torso pose?
 
-                checkWalkKick();
+                //checkWalkKick();
                 checkStepKick();
 
                 if (stepKickReady) {
@@ -378,7 +373,7 @@ namespace modules {
                 turnCompX = turnCompX - 0.01;
             }
 
-            arma::vec3 uTorsoActual; // TODO: get real value
+            arma::vec3 uTorsoActual = poseGlobal({-footX + frontCompX + turnCompX + armPosCompX, armPosCompY, 0}, uTorso);
             pTorso[0] = uTorsoActual[0];
             pTorso[1] = uTorsoActual[1];
             pTorso[5] += uTorsoActual[2];
@@ -424,12 +419,12 @@ namespace modules {
             }
         }
 
-        void WalkEngine::checkWalkKick() {
+        /*void WalkEngine::checkWalkKick() {
             if (walkKickRequest == 0) {
                 return;
             }
 
-            if (walkKickRequest > 0 && walkKickRequest > walkKick) {
+            if (walkKickRequest > 0 && walkKickRequest > walkKick.size()) {
                 walkKickRequest = 0;
                 tStep = tStep0;
                 stepHeight = stepHeight0;
@@ -466,7 +461,7 @@ namespace modules {
             supportMod = walkKick[walkKickRequest][4];
             shiftFactor = walkKick[walkKickRequest][5];
 
-            if (walkKick[walkKickRequest] <= 7) { // TODO: investigate port
+            if (walkKick[walkKickRequest].size() <= 7) {
                 arma::vec3 footPos1 = walkKick[walkKickRequest][6];
                 if (supportLeg == LEFT) {
                     // TODO: look at uLRFootOffset for use here
@@ -487,7 +482,7 @@ namespace modules {
             }
 
             walkKickRequest++;
-        }
+        }*/
 
         void WalkEngine::updateStill() {
             uTorso = stepTorso(uLeft, uRight, 0.5);
@@ -516,7 +511,7 @@ namespace modules {
                 pTorso[5] = 0;
             }
 
-            // TODO: uTorsoActual = 
+            uTorsoActual = poseGlobal({-footX + armPosCompX, armPosCompY, 0}, uTorso);
             pTorso[0] = uTorsoActual[0];
             pTorso[1] = uTorsoActual[1];
             pTorso[5] += uTorsoActual[2];
@@ -530,15 +525,21 @@ namespace modules {
             pRLeg[2] = uRight[2];
 
             // TODO: qLegs = IK()
+            std::vector<double> qLegs;
             motionLegs(qLegs, true);
             motionArms();
         }
 
+        void WalkEngine::motionLegs(std::vector<double> qLegs) {
+            motionLegs(qLegs, false);
+        }
+
         void WalkEngine::motionLegs(std::vector<double> qLegs, bool gyroOff) {
-            phComp = std::min(1, phSingle / 0.1, (1 - phSingle) / 0.1);
+            float phComp = std::min({1.0, phSingle / 0.1, (1 - phSingle) / 0.1});
 
             // ankle stabilization using gyro feedback
             // TODO: imuGyr = 
+            arma::vec3 imuGyr;
 
             float gyroRoll0 = imuGyr[0];
             float gyroPitch0 = imuGyr[1];
@@ -563,20 +564,20 @@ namespace modules {
             float gyroPitch = gyroPitch0 * std::cos(yawAngle)
                     + gyroRoll0 * std::sin(yawAngle);
 
-            // TODO: armShiftX = 
-            // TODO: armShiftY = 
+            float armShiftX = procFunc(gyroPitch * armImuParamY[1], armImuParamY[2], armImuParamY[3]);
+            float armShiftY = procFunc(gyroRoll * armImuParamY[1], armImuParamY[2], armImuParamY[3]);
 
-            // TODO: ankleShiftX = 
-            // TODO: ankleShiftY = 
-            // TODO: kneeShiftX = 
-            // TODO: hipShiftY = 
+            float ankleShiftX = procFunc(gyroPitch * ankleImuParamX[1], ankleImuParamX[2], ankleImuParamX[3]);
+            float ankleShiftY = procFunc(gyroRoll * ankleImuParamY[1], ankleImuParamY[2], ankleImuParamY[3]);
+            float kneeShiftX = procFunc(gyroPitch * kneeImuParamX[1], kneeImuParamX[2], kneeImuParamX[3]);
+            float hipShiftY = procFunc(gyroRoll * hipImuParamY[1], hipImuParamY[2], hipImuParamY[3]);
 
-            ankleShift[0] = ankleShift[0] + ankleImuParamX[0] * (ankleShiftX - ankleShift[0]);
-            ankleShift[1] = ankleShift[1] + ankleImuParamY[0] * (ankleShiftY - ankleShift[1]);
-            kneeShift = kneeShift + kneeImuParamX[0] * (kneeShiftX - kneeShift);
-            hipShift[1] = hipShift[1] + hipImuParamY[0] * (hipShiftY - hipShift[1]);
-            armShift[0] = armShift[0] + armImuParamX[0] * (armShiftX - armShift[0]);
-            armShift[1] = armShift[1] + armImuParamY[0] * (armShiftY - armShift[1]);
+            ankleShift[0] += ankleImuParamX[0] * (ankleShiftX - ankleShift[0]);
+            ankleShift[1] += ankleImuParamY[0] * (ankleShiftY - ankleShift[1]);
+            kneeShift += kneeImuParamX[0] * (kneeShiftX - kneeShift);
+            hipShift[1] += hipImuParamY[0] * (hipShiftY - hipShift[1]);
+            armShift[0] += armImuParamX[0] * (armShiftX - armShift[0]);
+            armShift[1] += armImuParamY[0] * (armShiftY - armShift[1]);
             
             // TODO: toe/heel lifting
 
@@ -610,7 +611,8 @@ namespace modules {
                 qLegs[7] -= hipRollCompensation * phComp; // Hip roll compensation
             }
 
-            leftLegCommand = qLegs;
+            // TODO:
+            //leftLegCommand = qLegs;
         }
 
         void WalkEngine::motionArms() {
@@ -623,64 +625,105 @@ namespace modules {
             arma::vec3 qRArmActual = {qRArm0[0] + armShift[0], qRArm0[1] + armShift[1], 0};
 
             if (upperBodyOverridden > 0 || motionPlaying > 0) {
-                qLArmActual = {qLArm0[0], qLArmOR[1], qLArmOR[2};
+                qLArmActual = {qLArm0[0], qLArmOR[1], qLArmOR[2]};
                 qRArmActual = {qRArm0[0], qRArmOR[1], qRArmOR[2]};
             }
 
             // check leg hitting
-            // TODO: rotLeftA = 
-            // TODO: rotRightA = 
+            float rotLeftA = modAngle(uLeft[2] - uTorso[2]);
+            float rotRightA = modAngle(uTorso[2] - uRight[2]);
 
-            // TODO: leftLegTorso = 
-            // TODO: rightLegTorso = 
+            arma::vec3 leftLegTorso = poseRelative(uLeft, uTorso);
+            arma::vec3 rightLegTorso = poseRelative(uRight, uTorso);
 
             qLArmActual[1] = std::max(
-                    5 * M_PI / 180 + std::max(0, rotLeftA) / 2
-                    + std::max(0, leftLegTorso[1] - 0.04) / 0.02 * (6 * M_PI / 180)
+                    5 * M_PI / 180 + std::max(0.0f, rotLeftA) / 2
+                    + std::max(0.0, leftLegTorso[1] - 0.04) / 0.02 * (6 * M_PI / 180)
                     , qLArmActual[1]);
 
             qRArmActual[1] = std::max(
-                    -5 * M_PI / 180 + std::max(0, rotRightA) / 2
-                    - std::max(0, rightLegTorso[1] - 0.04) / 0.02 * (6 * M_PI / 180)
+                    -5 * M_PI / 180 + std::max(0.0f, rotRightA) / 2
+                    - std::max(0.0, rightLegTorso[1] - 0.04) / 0.02 * (6 * M_PI / 180)
                     , qLArmActual[1]);
             
-            if (uppoerBodyOverridden <= 0 && motionPlaying <= 0) {
+            if (upperBodyOverridden <= 0 && motionPlaying <= 0) {
                 qLArmActual[2] = qLArm[2];
                 qRArmActual[2] = qRArm[2];
             }
 
-            leftArmCommand = qLArmActual;
-            rightArmCommand = qRArmActual;
+            // TODO:
+//            leftArmCommand = qLArmActual;
+//            rightArmCommand = qRArmActual;
         }
 
         void WalkEngine::exit() {
             // TODO: empty?
         }
 
-        void WalkEngine::stepLeftDestination(arma::vec3 vel, arma::vec3 uLeft, arma::vec3 uRight) {
-            // TODO
+        arma::vec3 WalkEngine::stepLeftDestination(arma::vec3 vel, arma::vec3 uLeft, arma::vec3 uRight) {
+            arma::vec3 u0 = se2Interpolate(0.5, uLeft, uRight);
+            // Determine nominal midpoint position 1.5 steps in future
+            arma::vec3 u1 = poseGlobal(vel, u0);
+            arma::vec3 u2 = poseGlobal(0.5 * vel, u1);
+            arma::vec3 uLeftPredict = poseGlobal(uLRFootOffset, u2);
+            arma::vec3 uLeftRight = poseRelative(uLeftPredict, uRight);
+            // Do not pidgeon toe, cross feet:
+
+            // Check toe and heel overlap
+            double toeOverlap = -footSizeX[1] * uLeftRight[3];
+            double heelOverlap = -footSizeX[2] * uLeftRight[3];
+            double limitY = std::max(stanceLimitY[1], stanceLimitY2 + std::max(toeOverlap, heelOverlap));
+
+            // print("Toeoverlap Heeloverlap",toeOverlap,heelOverlap,limitY)
+
+            uLeftRight[1] = std::min(std::max(uLeftRight[1], stanceLimitX[1]), stanceLimitX[2]);
+            uLeftRight[2] = std::min(std::max(uLeftRight[2], limitY), stanceLimitY[2]);
+            uLeftRight[3] = std::min(std::max(uLeftRight[3], stanceLimitA[1]), stanceLimitA[2]);
+
+            return poseGlobal(uLeftRight, uRight);
         }
 
-        void WalkEngine::stepRightDestination(arma::vec3 vel, arma::vec3 uLeft, arma::vec3 uRight) {
-            // TODO
+        arma::vec3 WalkEngine::stepRightDestination(arma::vec3 vel, arma::vec3 uLeft, arma::vec3 uRight) {
+            arma::vec3 u0 = se2Interpolate(.5, uLeft, uRight);
+            // Determine nominal midpoint position 1.5 steps in future
+            arma::vec3 u1 = poseGlobal(vel, u0);
+            arma::vec3 u2 = poseGlobal(0.5 * vel, u1);
+            arma::vec3 uRightPredict = poseGlobal(-1 * uLRFootOffset, u2);
+            arma::vec3 uRightLeft = poseRelative(uRightPredict, uLeft);
+            // Do not pidgeon toe, cross feet:
+
+            // Check toe and heel overlap
+            double toeOverlap = footSizeX[1] * uRightLeft[3];
+            double heelOverlap = footSizeX[2] * uRightLeft[3];
+            double limitY = std::max(stanceLimitY[1], stanceLimitY2 + std::max(toeOverlap, heelOverlap));
+
+            // print("Toeoverlap Heeloverlap",toeOverlap,heelOverlap,limitY)
+
+            uRightLeft[1] = std::min(std::max(uRightLeft[1], stanceLimitX[1]), stanceLimitX[2]);
+            uRightLeft[2] = std::min(std::max(uRightLeft[2], -stanceLimitY[2]), -limitY);
+            uRightLeft[3] = std::min(std::max(uRightLeft[3], -stanceLimitA[2]), -stanceLimitA[1]);
+
+            return poseGlobal(uRightLeft, uLeft);
         }
 
-        arma::vec3 WalkEngine::stepTorso(arma::vec3 arma::vec3 uLeft, uRight, arma::vec3 shiftFactor) {
-            // TODO
-            return {0,0,0};
+        arma::vec3 WalkEngine::stepTorso(arma::vec3 uLeft, arma::vec3 uRight, float shiftFactor) {
+            arma::vec3 u0 = se2Interpolate(0.5, uLeft, uRight);
+            arma::vec3 uLeftSupport = poseGlobal({supportX, supportY, 0}, uLeft);
+            arma::vec3 uRightSupport = poseGlobal({supportX, -supportY, 0}, uRight);
+            return se2Interpolate(shiftFactor, uLeftSupport, uRightSupport);
         }
 
-        void WalkEngine::setVelocity(float vx, float vy, float va) {
+        void WalkEngine::setVelocity(double vx, double vy, double va) {
             // filter the commanded speed
             vx = std::min(std::max(vx, velLimitX[0]), velLimitX[1]);
             vy = std::min(std::max(vy, velLimitY[0]), velLimitY[1]);
             va = std::min(std::max(va, velLimitA[0]), velLimitA[1]);
             
             // slow down when turning
-            vFactor = 1 - std::abs(va) / vaFactor;
+            double vFactor = 1 - std::abs(va) / vaFactor;
 
-            stepMag = std::sqrt(vx * vx + vy * vy);
-            magFactor = std::min(velLimit[1] * vFactor, stepMag) / (stepMag + 0.000001);
+            double stepMag = std::sqrt(vx * vx + vy * vy);
+            double magFactor = std::min(velLimitX[1] * vFactor, stepMag) / (stepMag + 0.000001);
 
             velCommand[0] = vx * magFactor;
             velCommand[1] = vy * magFactor;
@@ -710,26 +753,26 @@ namespace modules {
             velCurrent[1] += velDiff[1];
             velCurrent[2] += velDiff[2];
 
-            if (initial_step > 0) {
-                velCurrent = arma::vec3;
-                initial_step++;
+            if (initialStep > 0) {
+                velCurrent = arma::vec3{0, 0, 0};
+                initialStep++;
             }
         }
 
-        void WalkEngine::getVelocity() {
+        arma::vec3 WalkEngine::getVelocity() {
             return velCurrent;
         }
 
         void WalkEngine::start() {
             stopRequest = 0;
             if (!active) {
-                time_t now = NUClear::clock::now();
+                double now = getTime();
 
                 active = true;
                 started = false;
                 iStep0 = -1;
                 t0 = now;
-                tLastStep = onw;
+                tLastStep = now;
                 initialStep = 2;
             }
         }
@@ -739,12 +782,12 @@ namespace modules {
             stopRequest = std::max(1, stopRequest);
         }
 
-        void WalkEngine::startMotion(std::string name) {
+        /*void WalkEngine::startMotion(std::string name) {
             if (motionPlaying == 0) {
                 motionPlaying = 1;
                 // TODO: currentMotion = 
                 motionIndex = 1;
-                motionStartTime = NUClear::clock::now();
+                motionStartTime = getTime();
 
                 qLArmOR1 = currentMotion[0][1];
                 qRArmOR1 = currentMotion[0][2];
@@ -767,7 +810,7 @@ namespace modules {
                 return;
             }
 
-            time_t time = NUClear::clock::now();
+            double time = getTime();
             curMotionFrame = currentMotion[motionIndex];
             ph = (time - motionStartTime) / curMotionFrame[0];
             if (ph > 1) {
@@ -815,17 +858,17 @@ namespace modules {
                     bodyRot0[1] = (1 - ph) * bodyRot0[1] + ph * bodyRot1[1];
                     bodyRot0[2] = (1 - ph) * bodyRot0[2] + ph * bodyRot1[2];
             }
-        }
+        }*/
 
-        void WalkEngine::setInitialStance(arma::vec3 uL, arma::vec3 uR, arma::vec3 uT, arma::vec3 support) {
+        void WalkEngine::setInitialStance(arma::vec3 uL, arma::vec3 uR, arma::vec3 uT, Leg support) {
             uLeftI = uL;
             uRightI = uR;
             uTorso = uT;
-            supportI = uT;
+            supportI = support;
             startFromStep = true;
         }
 
-        void stanceReset() {
+        void WalkEngine::stanceReset() {
             // standup/sitdown/falldown handling
             if (startFromStep) {
                 uLeft = uLeftI;
@@ -857,7 +900,7 @@ namespace modules {
             uRight2 = uRight;
 
             uSupport = uTorso;
-            tLastStep = NUClear::clock::now();
+            tLastStep = getTime();
             walkKickRequest = 0;
             currentStepType = 0;
             motionPlaying = 0;
@@ -867,9 +910,6 @@ namespace modules {
         }
 
         void WalkEngine::getOdometry(arma::vec3 u0) {
-            if (!u0) {
-                u0 = {0,0,0};
-            }
             // TODO: uFoot = 
             // TODO: return
         }
@@ -924,22 +964,25 @@ namespace modules {
         std::pair<float, float> WalkEngine::footPhase(float ph) {
             // Computes relative x,z motion of foot during single support phase
             // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
-            phSingle = std::min(std::max(ph - ph1Single, 0) / (ph2Single - ph1Single), 1);
+            phSingle = std::min(std::max(ph - ph1Single, 0.0f) / (ph2Single - ph1Single), 1.0f);
             float phSingleSkew = std::pow(phSingle, 0.8) - 0.17 * phSingle * (1 - phSingle);
             float xf = 0.5 * (1 - std::cos(M_PI * phSingleSkew));
             float zf = 0.5 * (1 - std::cos(2 * M_PI * phSingleSkew));
 
 
-            if (useAlternativeTrajectory > 0) {
-                ph1FootPhase = 0.1;
-                ph2FootPhase = 0.5;
-                ph3FootPhase = 0.8;
+            /*if (useAlternativeTrajectory > 0) {
+                float ph1FootPhase = 0.1;
+                float ph2FootPhase = 0.5;
+                float ph3FootPhase = 0.8;
 
-                exp1FootPhase = 2;
-                exp2FootPhase = 2;
-                exp3FootPhase = 2;
+//                float exp1FootPhase = 2;
+//                float exp2FootPhase = 2;
+//                float exp3FootPhase = 2;
 
-                zFootLand = 0.3;    
+//                float zFootLand = 0.3;    
+
+                float phZTemp;
+                float phXTemp;
 
                 if (phSingle < ph1FootPhase) {
                     phZTemp = phSingle / ph2FootPhase;
@@ -960,13 +1003,19 @@ namespace modules {
                     // xf = 1;
                     // zf = phZTemp^exp3FootPhase*zFootLand;
                 }
-            }
+            }*/
 
             return std::make_pair(xf, zf);
         }
 
         float WalkEngine::getFootX() {
-            return config["footX"] + config["footXComp"];
+            return float(config["footX"]) + float(config["footXComp"]);
+        }
+
+        double getTime() {
+              struct timeval t;
+              gettimeofday(&t, NULL);
+              return t.tv_sec + 1E-6 * t.tv_usec;
         }
         
     }  // motion
