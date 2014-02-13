@@ -148,10 +148,11 @@ namespace fakedarwin {
 			for (int i = 0; i < 20; ++i) {
 
 				auto& servo = sensors.servo[i];
-				float movingSpeed = servo.movingSpeed / 60;
+				float movingSpeed = servo.movingSpeed == 0 ? 0.1 : servo.movingSpeed / 60;
+				movingSpeed = movingSpeed > 0.1 ? 0.1 : movingSpeed;
 
 
-				if(movingSpeed == 0 || utility::math::angle::difference(servo.presentPosition, servo.goalPosition) < movingSpeed) {
+				if(utility::math::angle::difference(servo.presentPosition, servo.goalPosition) < movingSpeed) {
 					servo.presentPosition = servo.goalPosition;
 				}
 				else {
