@@ -4,6 +4,7 @@ ADD_ROLE(
         support::configuration::ConfigSystem
         platform::darwin::HardwareIO
         platform::darwin::MotionManager
+        platform::darwin::SensorFilter
         motion::ScriptEngine
         behaviours::tools::ScriptRunner
         support::NUbugger

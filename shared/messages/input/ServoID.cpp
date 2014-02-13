@@ -43,7 +43,7 @@ namespace messages {
                     : str == "R_ANKLE_ROLL"     ? ServoID::R_ANKLE_ROLL
                     : str == "L_ANKLE_ROLL"     ? ServoID::L_ANKLE_ROLL
                     : str == "HEAD_YAW"         ? ServoID::HEAD_YAW
-                    : str == "HEAD_PITCH"        ? ServoID::HEAD_PITCH
+                    : str == "HEAD_PITCH"       ? ServoID::HEAD_PITCH
                     : static_cast<ServoID>(-1);
         }
 
@@ -69,7 +69,7 @@ namespace messages {
                 case ServoID::R_ANKLE_ROLL:      return "R_ANKLE_ROLL";
                 case ServoID::L_ANKLE_ROLL:      return "L_ANKLE_ROLL";
                 case ServoID::HEAD_YAW:          return "HEAD_YAW";
-                case ServoID::HEAD_PITCH:         return "HEAD_PITCH";
+                case ServoID::HEAD_PITCH:        return "HEAD_PITCH";
                 default:                         return "UNKNOWN";
             }
         }
