@@ -93,8 +93,8 @@ namespace modules {
                 tZmp = config["tZmp"];
                 stepHeight = config["stepHeight"];
                 stepHeight0 = stepHeight;
-                ph1Single = config["phSingle"][1];
-                ph2Single = config["phSingle"][2];
+                ph1Single = config["phSingle"][size_t(0)];
+                ph2Single = config["phSingle"][size_t(1)];
                 ph1Zmp = ph1Single;
                 ph2Zmp = ph2Single;
 
@@ -108,12 +108,12 @@ namespace modules {
                 float gyroFactor = 0.273 * M_PI / 180 * 300 / 1024;
 
                 // gGyro stabilization parameters
-                ankleImuParamX = arma::vec3{0.5, 0.3 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
-                ankleImuParamY = arma::vec3{0.5, 1.2 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
-                kneeImuParamX = arma::vec3{0.5, 0.7 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
-                hipImuParamY = arma::vec3{0.5, 0.3 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
-                armImuParamX = arma::vec3{0.5, 10.0 * gyroFactor, 20 * M_PI / 180, 45 * M_PI / 180};
-                armImuParamY = arma::vec3{0.5, 0.0 * gyroFactor, 20 * M_PI / 180, 45 * M_PI / 180};
+                ankleImuParamX = {0.5, 0.3 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
+                ankleImuParamY = {0.5, 1.2 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
+                kneeImuParamX = {0.5, 0.7 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
+                hipImuParamY = {0.5, 0.3 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
+                armImuParamX = {0.5, 10.0 * gyroFactor, 20 * M_PI / 180, 45 * M_PI / 180};
+                armImuParamY = {0.5, 0.0 * gyroFactor, 20 * M_PI / 180, 45 * M_PI / 180};
 
                 // gSupport bias parameters to reduce backlash-based instability
                 velFastForward = config["velFastForward"];
