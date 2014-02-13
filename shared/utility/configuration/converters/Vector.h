@@ -74,10 +74,10 @@ namespace configuration {
         }
     };
 
-    template <typename TType, size_t size>
-    struct ConfigurationNode::ConvertNode<typename arma::Col<TType>::fixed<size> > {
+    template <typename TType>
+    struct ConfigurationNode::ConvertNode<typename arma::Col<TType> > {
         //typedef typename arma::Col<TType>::fixed<size> vec;
-        using vec = typename arma::Col<TType>::template fixed<size>;
+        using vec = typename arma::Col<TType>;
 
         static ConfigurationNode makeNode(const vec& input) {
 
@@ -91,7 +91,7 @@ namespace configuration {
         }
 
         static vec makeValue(const ConfigurationNode& node) {
-            return {static_cast<std::vector<TType> >(node)};
+            return node.as<std::vector<TType> >();
         }
     };
 

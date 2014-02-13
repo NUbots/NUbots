@@ -203,6 +203,7 @@ namespace modules {
             arma::vec3 qRArmOR1;
 
             arma::vec3 bodyRot;
+            arma::vec3 bodyRot0;
             arma::vec3 bodyRot1;
 
             float phSingle;
@@ -275,8 +276,8 @@ namespace modules {
 //            void advanceMotion();
             void setInitialStance(arma::vec3 uL, arma::vec3 uR, arma::vec3 uT, Leg support);
             void stanceReset();
-            void getOdometry(arma::vec3 u0);
-            void getBodyOffset();
+            std::pair<arma::vec3, arma::vec3> getOdometry(arma::vec3 u0);
+            arma::vec3 getBodyOffset();
             std::pair<float, float> zmpSolve(float zs, float z1, float z2, float x1, float x2);
             arma::vec3 zmpCom(float ph);
             std::pair<float, float> footPhase(float ph);
