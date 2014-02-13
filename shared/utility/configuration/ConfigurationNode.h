@@ -160,7 +160,7 @@ namespace configuration {
         }
         
         template <typename TType>
-        TType as() {
+        TType as() const {
             return ConvertNode<TType>::makeValue(*this);
         }
 
