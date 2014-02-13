@@ -11,6 +11,5 @@ ADD_ROLE(
         platform::darwin::SensorFilter
         support::NUbugger
         debug::NUbugger
-        debug::KinematicsDebug
         #motion::WalkEngine
 )

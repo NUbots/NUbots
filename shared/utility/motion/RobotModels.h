@@ -1,12 +1,14 @@
 
+#ifndef UTILITY_MOTION_KINEMATICS_ROBOTMODELS_H
+#define UTILITY_MOTION_KINEMATICS_ROBOTMODELS_H
 
 namespace utility{
 	namespace motion{
 		namespace kinematics{
 
 			enum class Side : bool {
-			    LEFT = true;
-			    RIGHT = false;
+			    LEFT = true,
+			    RIGHT = false
 		    };
 
 			class DarwinModel{
@@ -19,7 +21,7 @@ namespace utility{
 					static constexpr float LOWER_LEG_LENGTH = 0.093;
 
 
-					static constexpr int LEFT_TO_RIGHT_HIP_YAW = 	    1;
+					static constexpr int LEFT_TO_RIGHT_HIP_YAW = 	   -1;
 					static constexpr int LEFT_TO_RIGHT_HIP_ROLL = 	   -1;
 					static constexpr int LEFT_TO_RIGHT_HIP_PITCH =      1;
 					static constexpr int LEFT_TO_RIGHT_KNEE =           1;
@@ -35,3 +37,5 @@ namespace utility{
 		}
 	}
 }
+
+#endif

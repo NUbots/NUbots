@@ -27,7 +27,7 @@
 #include <nuclear>
 
 #include "utility/math/matrix.h"
-
+#include "utility/motion/RobotModels.h"
 #include "messages/input/ServoID.h"
 
 namespace utility {
@@ -65,9 +65,16 @@ namespace kinematics {
         float ankleRoll = 0;
 
         //TODO remove this. It was due to wrong convention use
-        arma::mat44 inputCoordinatesToCalcCoordinates("0,1,0,0,  1,0,0,0,  0,0,-1,0,  0,0,0,1"); 
+        arma::mat44 inputCoordinatesToCalcCoordinates("0,1,0,0;  1,0,0,0;  0,0,-1,0;  0,0,0,1");
 
-        target = inputCoordinatesToCalcCoordinates * target;
+        //Rotate input position from standard robot coords
+        target.col(3) = inputCoordinatesToCalcCoordinates * target.col(3);
+
+        if(!static_cast<bool>(isLeft)) {
+            target.submat(0,0,2,2) = arma::mat("-1,0,0;0,1,0;0,0,1") * target.submat(0,0,2,2);
+            target.submat(0,0,2,0) *= -1;
+            target(0,3) *= -1;
+        }
 
         arma::vec3 ankleX = target.submat(0,0,2,0);
         arma::vec3 ankleY = target.submat(0,1,2,1);
@@ -81,7 +88,7 @@ namespace kinematics {
 
         float length = arma::norm(targetLeg, 2);
         if(length > UPPER_LEG_LENGTH+LOWER_LEG_LENGTH){
-            NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints3 : Requested position beyond leg reach.");
+            NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints : Requested position beyond leg reach.");
             return positions;
         }
         //NUClear::log<NUClear::DEBUG>("Length: ", length);
@@ -109,7 +116,7 @@ namespace kinematics {
         if(hipXLength>0){
             hipX /= hipXLength;
         } else {
-            NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints3 : targetLeg and ankleY parrallel. This is unhandled at the moment.");
+            NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints : targetLeg and ankleY parrallel. This is unhandled at the moment.");
             return positions;
         }
         arma::vec3 legPlaneTangent = arma::cross(ankleY, hipX); //Will be unit as ankleY and hipX are normal and unit
@@ -150,7 +157,7 @@ namespace kinematics {
        
         hipYaw = (isHipYawPositive ? 1 : -1) * acos(arma::dot( hipXProjected,globalX));
 
-        if (isLeft) {
+        if (static_cast<bool>(isLeft)) {
             positions.push_back(std::make_pair(messages::input::ServoID::L_HIP_YAW, -hipYaw));
             positions.push_back(std::make_pair(messages::input::ServoID::L_HIP_ROLL, hipRoll));
             positions.push_back(std::make_pair(messages::input::ServoID::L_HIP_PITCH, -hipPitch));

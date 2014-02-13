@@ -23,21 +23,24 @@
 #include <nuclear>
 
 namespace modules {
-namespace debug {
+	namespace debug {
 
-	struct InverseKinematicsRequest{
-        static constexpr const char* CONFIGURATION_PATH = "InverseKinematicsRequest.json";
-	};
-	struct ForwardKinematicsRequest{
-        static constexpr const char* CONFIGURATION_PATH = "ForwardKinematicsRequest.json";
-	};
+			struct InverseKinematicsRequest{
+		        static constexpr const char* CONFIGURATION_PATH = "InverseKinematicsRequest.json";
+			};
+			struct ForwardKinematicsRequest{
+		        static constexpr const char* CONFIGURATION_PATH = "ForwardKinematicsRequest.json";
+			};
+			struct KinematicsNULLTest{
+		        static constexpr const char* CONFIGURATION_PATH = "KinematicsNULLTest.json";
+			};
 
-    class KinematicsDebug : public NUClear::Reactor {
-    public:
-        explicit KinematicsDebug(std::unique_ptr<NUClear::Environment> environment);
-    };
-    
-}  // debug
+		    class KinematicsDebug : public NUClear::Reactor {
+		    public:
+		        explicit KinematicsDebug(std::unique_ptr<NUClear::Environment> environment);
+		    };
+
+	}  // debug
 }  // modules
 
 #endif  // MODULES_DEBUG_KINEMATICSDEBUG_H
