@@ -178,6 +178,7 @@ namespace modules {
                 ph=0;
 
                 stopRequest = 2;
+
                 canWalkKick = 1; // gCan we do walkkick with this walk code?
                 walkKickRequest = 0; 
                 //walkKick = walkKickDef["FrontLeft"];
@@ -224,7 +225,11 @@ namespace modules {
                 hasBall = 0;
             });
 
-            on<Trigger<Every<10, Per<std::chrono::seconds> > > >([this](const time_t& time) {
+            on<Trigger<Initialize>>([this](const Initialize&) {
+                start();
+            });
+
+            on<Trigger<Every<60, Per<std::chrono::seconds> > > >([this](const time_t& time) {
                 update();
             });
 			
@@ -475,8 +480,7 @@ namespace modules {
             pRLeg[1] = uRight[1];
             pRLeg[2] = uRight[2];
 
-            // TODO: qLegs = IK()
-            std::vector<double> qLegs;
+            std::vector<double> qLegs = darwinop_kinematics_inverse_legs(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
             motionLegs(qLegs);
             motionArms();
         }
@@ -714,26 +718,19 @@ namespace modules {
             10 = rightAnklePitch
             11 = rightAnkleRoll*/
 
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_HIP_YAW,     float(qLegs[0]),  float(leftLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_HIP_ROLL,    float(qLegs[1]),  float(leftLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_HIP_PITCH,   float(qLegs[2]),  float(leftLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_KNEE,        float(qLegs[3]),  float(leftLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_ANKLE_PITCH, float(qLegs[4]),  float(leftLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_ANKLE_ROLL,  float(qLegs[5]),  float(leftLegHardness * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::L_HIP_YAW,     float(qLegs[0]),  float(leftLegHardness * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::L_HIP_ROLL,    float(qLegs[1]),  float(leftLegHardness * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::L_HIP_PITCH,   float(qLegs[2]),  float(leftLegHardness * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::L_KNEE,        float(qLegs[3]),  float(leftLegHardness * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::L_ANKLE_PITCH, float(qLegs[4]),  float(leftLegHardness * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::L_ANKLE_ROLL,  float(qLegs[5]),  float(leftLegHardness * 100)});
 
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_HIP_YAW,     float(qLegs[6]),  float(rightLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_HIP_ROLL,    float(qLegs[7]),  float(rightLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_HIP_PITCH,   float(qLegs[8]),  float(rightLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_KNEE,        float(qLegs[9]),  float(rightLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_ANKLE_PITCH, float(qLegs[10]), float(rightLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_ANKLE_ROLL,  float(qLegs[11]), float(rightLegHardness * 100)});
-
-            std::cout << "Totally should be doing something" << std::endl;
-
-            for(const auto& waypoint : *waypoints) {
-                std::cout << waypoint.position << " ";
-            }
-            std::cout << std::endl;
+            waypoints->push_back({NUClear::clock::now(), ServoID::R_HIP_YAW,     float(qLegs[6]),  float(rightLegHardness * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::R_HIP_ROLL,    float(qLegs[7]),  float(rightLegHardness * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::R_HIP_PITCH,   float(qLegs[8]),  float(rightLegHardness * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::R_KNEE,        float(qLegs[9]),  float(rightLegHardness * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::R_ANKLE_PITCH, float(qLegs[10]), float(rightLegHardness * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::R_ANKLE_ROLL,  float(qLegs[11]), float(rightLegHardness * 100)});
 
             emit(std::move(waypoints));
         }
@@ -777,12 +774,12 @@ namespace modules {
             auto waypoints = std::make_unique<std::vector<ServoWaypoint>>();
             waypoints->reserve(6);
 
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]),  float(hardnessArm * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]),  float(hardnessArm * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_ELBOW,          float(qRArmActual[2]),  float(hardnessArm * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]),  float(hardnessArm * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]),  float(hardnessArm * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_ELBOW,          float(qLArmActual[2]),  float(hardnessArm * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]),  float(hardnessArm * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]),  float(hardnessArm * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::R_ELBOW,          float(qRArmActual[2]),  float(hardnessArm * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]),  float(hardnessArm * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]),  float(hardnessArm * 100)});
+            waypoints->push_back({NUClear::clock::now(), ServoID::L_ELBOW,          float(qLArmActual[2]),  float(hardnessArm * 100)});
 
             emit(std::move(waypoints));
         }

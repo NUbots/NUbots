@@ -19,6 +19,8 @@
 
 #include "HardwareIO.h"
 
+#include <armadillo>
+
 #include "messages/platform/darwin/DarwinServoCommand.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/ServoID.h"
@@ -146,21 +148,24 @@ namespace fakedarwin {
 			for (int i = 0; i < 20; ++i) {
 
 				auto& servo = sensors.servo[i];
+				float movingSpeed = servo.movingSpeed / 60;
 
-				float distance = servo.goalPosition - servo.presentPosition;
-                //float distance2 = utility::math::angle::difference(servo.goalPosition, servo.presentPosition);
-                //NUClear::log<NUClear::DEBUG>(distance, " ", distance2);
-				float movingSpeed = servo.movingSpeed / 60.0;
-				int sign = (distance >= 0 ? 1 : -1);
 
-				if (std::abs(distance) > 0) {
-					if (std::abs(distance) <= movingSpeed) {
-						servo.presentPosition = servo.goalPosition;
-					} else {
-						float delta = movingSpeed * sign;
-						servo.presentPosition += delta;
+				if(movingSpeed == 0 || utility::math::angle::difference(servo.presentPosition, servo.goalPosition) < movingSpeed) {
+					servo.presentPosition = servo.goalPosition;
+				}
+				else {
+					arma::vec3 present = { cos(servo.presentPosition), sin(servo.presentPosition), 0 };
+					arma::vec3 goal = { cos(servo.goalPosition), sin(servo.goalPosition), 0 };
+
+					arma::vec3 cross = arma::cross(present, goal);
+					if(cross[2] > 0) {
+						servo.presentPosition += movingSpeed;
 					}
-				}				
+					else {
+						servo.presentPosition -= movingSpeed;
+					}
+				}		
 			}
 
 			// Send our nicely computed sensor data out to the world
