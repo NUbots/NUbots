@@ -31,7 +31,7 @@ namespace darwin {
 
         on<Trigger<Every<20, std::chrono::milliseconds>>, With<messages::platform::darwin::DarwinSensors>>([this](const time_t& time, const messages::platform::darwin::DarwinSensors& sensors) {
 
-                std::lock_guard<std::mutex> waypointLock(waypointMutex);
+            std::lock_guard<std::mutex> waypointLock(waypointMutex);
 
             bool emptiedQueue = false;
 

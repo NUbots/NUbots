@@ -38,7 +38,6 @@ namespace modules {
             static constexpr const char* CONFIGURATION_PATH = "WalkEngine.json";
             explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
         private:
-            utility::configuration::ConfigurationNode config;
 
             enum Leg {
                 LEFT,
@@ -281,7 +280,6 @@ namespace modules {
             std::pair<float, float> zmpSolve(float zs, float z1, float z2, float x1, float x2);
             arma::vec3 zmpCom(float ph);
             std::pair<float, float> footPhase(float ph);
-            float getFootX();
 
             double getTime(); // TODO: remove
             double procFunc(double a, double deadband, double maxvalue); //TODO: move documentation from .cpp to .h file
