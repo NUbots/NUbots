@@ -152,7 +152,7 @@ namespace fakedarwin {
 				movingSpeed = movingSpeed > 0.1 ? 0.1 : movingSpeed;
 
 
-				if(utility::math::angle::difference(servo.presentPosition, servo.goalPosition) < movingSpeed) {
+				if (std::abs(servo.presentPosition - servo.goalPosition) < movingSpeed) {
 					servo.presentPosition = servo.goalPosition;
 				}
 				else {
@@ -161,12 +161,12 @@ namespace fakedarwin {
 
 					arma::vec3 cross = arma::cross(present, goal);
 					if(cross[2] > 0) {
-						servo.presentPosition += movingSpeed;
+						servo.presentPosition += utility::math::angle::normalizeAngle(movingSpeed);
 					}
 					else {
-						servo.presentPosition -= movingSpeed;
+						servo.presentPosition -= utility::math::angle::normalizeAngle(movingSpeed);
 					}
-				}		
+				}
 			}
 
 			// Send our nicely computed sensor data out to the world

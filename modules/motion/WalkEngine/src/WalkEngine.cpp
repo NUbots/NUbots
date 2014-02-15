@@ -29,6 +29,7 @@
 #include "utility/motion/InverseKinematics.h"
 #include "utility/math/matrix.h"
 #include "OPKinematics.h"
+#include "utility/NUbugger/NUgraph.h"
 
 namespace modules {
     namespace motion {
@@ -36,6 +37,7 @@ namespace modules {
         using messages::input::ServoID;
         using messages::motion::ServoWaypoint;
         using messages::support::Configuration;
+        using utility::NUbugger::graph;
         
         WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -72,8 +74,7 @@ namespace modules {
                 // gStance parameters
                 bodyHeight = config["bodyHeight"];
                 bodyTilt = config["bodyTilt"];
-                // TODO
-                //footX = mcm.get_footX();
+                footX = config["footX"];
                 footY = config["footY"];
                 supportX = config["supportX"];
                 supportY = config["supportY"];
@@ -149,7 +150,7 @@ namespace modules {
                 uRight = {0, -footY, 0};
 
                 pLLeg = {0, footY, 0, 0, 0, 0};
-                pRLeg = {0, -footY, 0, 0,0,0};
+                pRLeg = {0, -footY, 0, 0, 0, 0};
                 pTorso = {supportX, 0, bodyHeight, 0, bodyTilt, 0};
 
                 velCurrent = {0, 0, 0};
@@ -226,6 +227,7 @@ namespace modules {
             });
 
             on<Trigger<Initialize>>([this](const Initialize&) {
+                stanceReset();
                 start();
             });
 
@@ -235,15 +237,36 @@ namespace modules {
 			
         }
         // TODO: add others
+
+        void WalkEngine::start() {
+            stopRequest = 0;
+            if (!active) {
+                double now = getTime();
+
+                active = true;
+                started = false;
+                iStep0 = -1;
+                t0 = now;
+                tLastStep = now;
+                initialStep = 2;
+            }
+        }
+
+        void WalkEngine::stop() {
+            // always stops with feet together (which helps transition)
+            stopRequest = std::max(1, stopRequest);
+        }
         
         void WalkEngine::update() {
             //advanceMotion();
             double time = getTime();
 
+
+            NUClear::log<NUClear::DEBUG>("iStep: ", iStep, " iStep0: ", iStep0);
+
             // TODO: bodyHeightCurrent = vcm.get_camera_bodyHeight();
 
             if (!active) {
-                // TODO
                 moving = false;
                 updateStill();
                 return;
@@ -274,6 +297,7 @@ namespace modules {
 
             // new step
             if (iStep > iStep0) {
+                NUClear::log<NUClear::DEBUG>("new step");
                 updateVelocity();
                 iStep0 = iStep;
                 supportLeg = (iStep % 2 == 0 ? LEFT : RIGHT); // 0 for left support, 1 for right support
@@ -285,12 +309,12 @@ namespace modules {
                 shiftFactor = 0.5; // how much should we shift final torso pose?
 
                 //checkWalkKick();
-                checkStepKick();
+                //checkStepKick();
 
-                if (stepKickReady) {
+                /*if (stepKickReady) {
                     // large step init
                     return; // TODO: return "step"
-                }
+                }*/
 
                 if (walkKickRequest == 0 && stepKickRequest == 0) {
                     if (stopRequest == 1) {
@@ -351,17 +375,15 @@ namespace modules {
                     arma::vec3 uTorsoModded = poseGlobal({supportMod[0], supportMod[1], 0}, uTorso);
                     arma::vec3 uLeftModded = poseGlobal(uLeftTorso, uTorsoModded);
                     uSupport = poseGlobal({supportX, supportY, 0}, uLeftModded);
-                    // TODO
-                    //leftLegHardness = hardnessSupport;
-                    //rightLegHardness = hardnessSwing;
+                    leftLegHardness = hardnessSupport;
+                    rightLegHardness = hardnessSwing;
                 } else {
                     arma::vec3 uRightTorso = poseRelative(uRight1, uTorso);
                     arma::vec3 uTorsoModded = poseGlobal({supportMod[1], supportMod[2], 0}, uTorso);
                     arma::vec3 uRightModded = poseGlobal(uRightTorso, uTorsoModded);
                     uSupport = poseGlobal({supportX, -supportY, 0}, uRightModded);
-                    // TODO:
-                    //leftLegHardness = hardnessSwing;
-                    //rightLegHardness = hardnessSupport;
+                    leftLegHardness = hardnessSwing;
+                    rightLegHardness = hardnessSupport;
                 }
 
                 // compute ZMP coefficients
@@ -616,7 +638,6 @@ namespace modules {
             pRLeg[1] = uRight[1];
             pRLeg[2] = uRight[2];
 
-            // TODO: qLegs = IK()
             std::vector<double> qLegs = darwinop_kinematics_inverse_legs(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
             motionLegs(qLegs, true);
             motionArms();
@@ -732,6 +753,34 @@ namespace modules {
             waypoints->push_back({NUClear::clock::now(), ServoID::R_ANKLE_PITCH, float(qLegs[10]), float(rightLegHardness * 100)});
             waypoints->push_back({NUClear::clock::now(), ServoID::R_ANKLE_ROLL,  float(qLegs[11]), float(rightLegHardness * 100)});
 
+            /*NUClear::log<NUClear::DEBUG>("L Hip Yaw: ", qLegs[0]);
+            NUClear::log<NUClear::DEBUG>("L Hip Roll: ", qLegs[1]);
+            NUClear::log<NUClear::DEBUG>("L Hip Pitch: ", qLegs[2]);
+            NUClear::log<NUClear::DEBUG>("L Knee: ", qLegs[3]);
+            NUClear::log<NUClear::DEBUG>("L Ankle Pitch: ", qLegs[4]);
+            NUClear::log<NUClear::DEBUG>("L Ankle Roll: ", qLegs[5]);
+
+            NUClear::log<NUClear::DEBUG>("R Hip Yaw: ", qLegs[6]);
+            NUClear::log<NUClear::DEBUG>("R Hip Roll: ", qLegs[7]);
+            NUClear::log<NUClear::DEBUG>("R Hip Pitch: ", qLegs[8]);
+            NUClear::log<NUClear::DEBUG>("R Knee: ", qLegs[9]);
+            NUClear::log<NUClear::DEBUG>("R Ankle Pitch: ", qLegs[10]);
+            NUClear::log<NUClear::DEBUG>("R Ankle Roll: ", qLegs[11]);*/
+
+            emit(graph("L Hip Yaw", qLegs[0]));
+            emit(graph("L Hip Roll", qLegs[1]));
+            emit(graph("L Hip Pitch", qLegs[2]));
+            emit(graph("L Knee", qLegs[3]));
+            emit(graph("L Ankle Pitch", qLegs[4]));
+            emit(graph("L Ankle Roll", qLegs[5]));
+
+            emit(graph("R Hip Yaw", qLegs[6]));
+            emit(graph("R Hip Roll", qLegs[7]));
+            emit(graph("R Hip Pitch", qLegs[8]));
+            emit(graph("R Knee", qLegs[9]));
+            emit(graph("R Ankle Pitch", qLegs[10]));
+            emit(graph("R Ankle Roll", qLegs[11]));
+
             emit(std::move(waypoints));
         }
 
@@ -780,6 +829,14 @@ namespace modules {
             waypoints->push_back({NUClear::clock::now(), ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]),  float(hardnessArm * 100)});
             waypoints->push_back({NUClear::clock::now(), ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]),  float(hardnessArm * 100)});
             waypoints->push_back({NUClear::clock::now(), ServoID::L_ELBOW,          float(qLArmActual[2]),  float(hardnessArm * 100)});
+
+            emit(graph("L Shoulder Pitch", qLArmActual[0]));
+            emit(graph("L Shoulder Roll", qLArmActual[1]));
+            emit(graph("L Elbow", qLArmActual[2]));
+
+            emit(graph("R Shoulder Pitch", qRArmActual[0]));
+            emit(graph("R Shoulder Roll", qRArmActual[1]));
+            emit(graph("R Elbow", qRArmActual[2]));
 
             emit(std::move(waypoints));
         }
@@ -891,24 +948,6 @@ namespace modules {
             return velCurrent;
         }
 
-        void WalkEngine::start() {
-            stopRequest = 0;
-            if (!active) {
-                double now = getTime();
-
-                active = true;
-                started = false;
-                iStep0 = -1;
-                t0 = now;
-                tLastStep = now;
-                initialStep = 2;
-            }
-        }
-
-        void WalkEngine::stop() {
-            // always stops with feet together (which helps transition)
-            stopRequest = std::max(1, stopRequest);
-        }
 
         /*void WalkEngine::startMotion(std::string name) {
             if (motionPlaying == 0) {

@@ -47,9 +47,9 @@ namespace debug {
 				target *= zRotationMatrix(inverseKinematicsConfig.config["xAngle"], 4);
 				
 				// translation
-				target(0,3) = inverseKinematicsConfig.config["x"]; // down/up
-				target(1,3) = inverseKinematicsConfig.config["y"]; // left/right
-				target(2,3) = inverseKinematicsConfig.config["z"]; // front/back
+				target(0,3) = inverseKinematicsConfig.config["x"];
+				target(1,3) = inverseKinematicsConfig.config["y"];
+				target(2,3) = inverseKinematicsConfig.config["z"];
 
                 bool left = inverseKinematicsConfig.config["left"];
                 bool right = inverseKinematicsConfig.config["right"];
@@ -76,6 +76,8 @@ namespace debug {
                 }
 
                 if (right) {
+                    // negative x to keep feet apart
+                    target(0, 3) *= -1;
                     std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints(target, false);
                     for (auto& legJoint : legJoints) {
                         ServoWaypoint waypoint;

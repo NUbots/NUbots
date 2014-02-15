@@ -150,9 +150,9 @@ namespace modules {
             arma::vec3 uRight1;
             arma::vec3 uRight2;
 
-            arma::vec pLLeg;
-            arma::vec pRLeg;
-            arma::vec pTorso;
+            arma::vec6 pLLeg;
+            arma::vec6 pRLeg;
+            arma::vec6 pTorso;
 
             arma::vec3 velCurrent;
             arma::vec3 velCommand;
