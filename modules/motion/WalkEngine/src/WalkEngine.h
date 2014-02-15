@@ -175,8 +175,8 @@ namespace modules {
             bool moving;
             int iStep0;
             int iStep;
-            float t0;
-            float tLastStep;
+            double t0;
+            double tLastStep;
             float ph0;
             float ph;
 
@@ -283,7 +283,7 @@ namespace modules {
 
             double getTime(); // TODO: remove
             double procFunc(double a, double deadband, double maxvalue); //TODO: move documentation from .cpp to .h file
-            double modAngle(double a);
+            double modAngle(double value);
             arma::vec3 poseGlobal(arma::vec3 pRelative, arma::vec3 pose);
             arma::vec3 poseRelative(arma::vec3 pGlobal, arma::vec3 pose);
             arma::vec3 se2Interpolate(double t, arma::vec3 u1, arma::vec3 u2);

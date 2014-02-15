@@ -38,6 +38,8 @@ namespace modules {
         using messages::motion::ServoWaypoint;
         using messages::support::Configuration;
         using utility::NUbugger::graph;
+        using NUClear::log;
+        using NUClear::DEBUG;
         
         WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -261,9 +263,6 @@ namespace modules {
             //advanceMotion();
             double time = getTime();
 
-
-            NUClear::log<NUClear::DEBUG>("iStep: ", iStep, " iStep0: ", iStep0);
-
             // TODO: bodyHeightCurrent = vcm.get_camera_bodyHeight();
 
             if (!active) {
@@ -297,13 +296,14 @@ namespace modules {
 
             // new step
             if (iStep > iStep0) {
-                NUClear::log<NUClear::DEBUG>("new step");
                 updateVelocity();
                 iStep0 = iStep;
                 supportLeg = (iStep % 2 == 0 ? LEFT : RIGHT); // 0 for left support, 1 for right support
                 uLeft1 = uLeft2;
                 uRight1 = uRight2;
                 uTorso1 = uTorso2;
+
+                log<DEBUG>("new step, supportLeg: ", supportLeg);
 
                 supportMod = {0, 0}; // support point modulation for wallkick
                 shiftFactor = 0.5; // how much should we shift final torso pose?
@@ -318,6 +318,7 @@ namespace modules {
 
                 if (walkKickRequest == 0 && stepKickRequest == 0) {
                     if (stopRequest == 1) {
+                        log<DEBUG>("stop request 1");
                         stopRequest = 2;
                         velCurrent = {0, 0, 0};
                         velCommand = {0, 0, 0};
@@ -331,8 +332,10 @@ namespace modules {
                         tStep = tStep0;
                         if (supportLeg == LEFT) {
                             uRight2 = stepRightDestination(velCurrent, uLeft1, uRight1);
+                            log<DEBUG>("normal walk left ");
                         } else {
                             uLeft2 = stepLeftDestination(velCurrent, uLeft1, uRight1);
+                            log<DEBUG>("normal walk right ");
                         }
 
                         // velocity-based support point modulation
@@ -379,7 +382,7 @@ namespace modules {
                     rightLegHardness = hardnessSwing;
                 } else {
                     arma::vec3 uRightTorso = poseRelative(uRight1, uTorso);
-                    arma::vec3 uTorsoModded = poseGlobal({supportMod[1], supportMod[2], 0}, uTorso);
+                    arma::vec3 uTorsoModded = poseGlobal({supportMod[0], supportMod[1], 0}, uTorso);
                     arma::vec3 uRightModded = poseGlobal(uRightTorso, uTorsoModded);
                     uSupport = poseGlobal({supportX, -supportY, 0}, uRightModded);
                     leftLegHardness = hardnessSwing;
@@ -391,8 +394,8 @@ namespace modules {
                 m2X = (uTorso2[0] - uSupport[0]) / (tStep * (1 - ph2Zmp));
                 m1Y = (uSupport[1] - uTorso[1]) / (tStep * ph1Zmp);
                 m2Y = (uTorso2[1] - uSupport[1]) / (tStep * (1 - ph2Zmp));
-                std::tie(aXP, aXN) = zmpSolve(uSupport[0], uTorso1[0], uTorso[0], uTorso[0], uTorso[0]);
-                std::tie(aYP, aYN) = zmpSolve(uSupport[1], uTorso1[1], uTorso[1], uTorso[1], uTorso[1]);
+                std::tie(aXP, aXN) = zmpSolve(uSupport[0], uTorso1[0], uTorso2[0], uTorso1[0], uTorso2[0]);
+                std::tie(aYP, aYN) = zmpSolve(uSupport[1], uTorso1[1], uTorso2[1], uTorso1[1], uTorso2[1]);
 
                 // compute COM speed at the boundary
 
@@ -496,11 +499,11 @@ namespace modules {
 
             pLLeg[0] = uLeft[0];
             pLLeg[1] = uLeft[1];
-            pLLeg[2] = uLeft[2];
+            pLLeg[5] = uLeft[2];
 
             pRLeg[0] = uRight[0];
             pRLeg[1] = uRight[1];
-            pRLeg[2] = uRight[2];
+            pRLeg[5] = uRight[2];
 
             std::vector<double> qLegs = darwinop_kinematics_inverse_legs(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
             motionLegs(qLegs);
@@ -855,15 +858,15 @@ namespace modules {
             // Do not pidgeon toe, cross feet:
 
             // Check toe and heel overlap
-            double toeOverlap = -footSizeX[1] * uLeftRight[3];
-            double heelOverlap = -footSizeX[2] * uLeftRight[3];
-            double limitY = std::max(stanceLimitY[1], stanceLimitY2 + std::max(toeOverlap, heelOverlap));
+            double toeOverlap = -footSizeX[0] * uLeftRight[2];
+            double heelOverlap = -footSizeX[1] * uLeftRight[2];
+            double limitY = std::max(stanceLimitY[0], stanceLimitY2 + std::max(toeOverlap, heelOverlap));
 
             // print("Toeoverlap Heeloverlap",toeOverlap,heelOverlap,limitY)
 
-            uLeftRight[1] = std::min(std::max(uLeftRight[1], stanceLimitX[1]), stanceLimitX[2]);
-            uLeftRight[2] = std::min(std::max(uLeftRight[2], limitY), stanceLimitY[2]);
-            uLeftRight[3] = std::min(std::max(uLeftRight[3], stanceLimitA[1]), stanceLimitA[2]);
+            uLeftRight[0] = std::min(std::max(uLeftRight[0], stanceLimitX[0]), stanceLimitX[1]);
+            uLeftRight[1] = std::min(std::max(uLeftRight[1], limitY), stanceLimitY[1]);
+            uLeftRight[2] = std::min(std::max(uLeftRight[2], stanceLimitA[0]), stanceLimitA[1]);
 
             return poseGlobal(uLeftRight, uRight);
         }
@@ -878,15 +881,15 @@ namespace modules {
             // Do not pidgeon toe, cross feet:
 
             // Check toe and heel overlap
-            double toeOverlap = footSizeX[1] * uRightLeft[3];
-            double heelOverlap = footSizeX[2] * uRightLeft[3];
-            double limitY = std::max(stanceLimitY[1], stanceLimitY2 + std::max(toeOverlap, heelOverlap));
+            double toeOverlap = footSizeX[0] * uRightLeft[2];
+            double heelOverlap = footSizeX[1] * uRightLeft[2];
+            double limitY = std::max(stanceLimitY[0], stanceLimitY2 + std::max(toeOverlap, heelOverlap));
 
             // print("Toeoverlap Heeloverlap",toeOverlap,heelOverlap,limitY)
 
-            uRightLeft[1] = std::min(std::max(uRightLeft[1], stanceLimitX[1]), stanceLimitX[2]);
-            uRightLeft[2] = std::min(std::max(uRightLeft[2], -stanceLimitY[2]), -limitY);
-            uRightLeft[3] = std::min(std::max(uRightLeft[3], -stanceLimitA[2]), -stanceLimitA[1]);
+            uRightLeft[0] = std::min(std::max(uRightLeft[0], stanceLimitX[0]), stanceLimitX[1]);
+            uRightLeft[1] = std::min(std::max(uRightLeft[1], -stanceLimitY[1]), -limitY);
+            uRightLeft[2] = std::min(std::max(uRightLeft[2], -stanceLimitA[2]), -stanceLimitA[0]);
 
             return poseGlobal(uRightLeft, uLeft);
         }
@@ -1187,12 +1190,12 @@ namespace modules {
 			return   ret;
 		}
 
-		double WalkEngine::modAngle(double a) { // reduce an angle to [-pi, pi)
-			if(a==0) return 0.;
-			a = std::fmod(a, (2. * M_PI)); //fmod(a,b) the same as a%b, but for doubles (fmod() defined in math.h)
-			if(a >= M_PI)
-				a -= 2. * M_PI;
-			return a;
+		double WalkEngine::modAngle(double value) { // reduce an angle to [-pi, pi)
+            double angle = std::fmod(value, 2 * M_PI);
+            if (angle <= -M_PI) angle += 2 * M_PI;
+            else if (angle > M_PI) angle -= 2 * M_PI;
+
+            return angle;
 		}
 
 		arma::vec3 WalkEngine::poseGlobal(arma::vec3 pRelative, arma::vec3 pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!
