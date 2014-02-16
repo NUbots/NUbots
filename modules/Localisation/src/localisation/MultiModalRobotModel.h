@@ -23,15 +23,26 @@
 #include <nuclear>
 
 namespace modules {
+namespace localisation {
+
+    class RobotModel {
+    private:
+        bool active_;
+
+    public:
+        bool active() { return active_; }
+        void set_active(bool active) { active_ = active; }
+    };
+
     class MultiModalRobotModel {
     public:
         MultiModalRobotModel();
 
-        void NormaliseAlphas();
         unsigned int RemoveInactiveModels();
-        void RemoveSimilarModels();
-        
+        unsigned int RemoveInactiveModels(std::vector<RobotModel>& container);
         void PruneModels();
+        void RemoveSimilarModels();
+        void NormaliseAlphas();
 
         void LandmarkUpdate();
         void MultipleLandmarkUpdate();
@@ -39,14 +50,14 @@ namespace modules {
         //     AmbiguousObject &ambiguous_object,
         //     const std::vector<StationaryObject*>& possible_objects);
 
-
     private:
         int PruneViterbi(unsigned int order);
-        // int SelfLocalisation::AmbiguousLandmarkUpdateExhaustive(
+        // int AmbiguousLandmarkUpdateExhaustive(
         //     AmbiguousObject &ambiguous_object,
         //     const std::vector<StationaryObject*>& possible_objects);
 
-        std::vector<IWeightedKalmanFilter> robot_models_;
+        std::vector<RobotModel> robot_models_;
     };
+}
 }
 #endif

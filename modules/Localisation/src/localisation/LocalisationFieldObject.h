@@ -17,29 +17,43 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_LOCALISATION_H
-#define MODULES_LOCALISATION_H
+#ifndef MODULES_LOCALISATIONFIELDOBJECT_H
+#define MODULES_LOCALISATIONFIELDOBJECT_H
 
-#include <nuclear>
-#include "localisation/LocalisationEngine.h"
-
-using localisation::LocalisationEngine;
+#include <armadillo>
 
 namespace modules {
-    class Localisation : public NUClear::Reactor {
-    private:
-    	LocalisationEngine engine;
+namespace localisation {
 
-    public:
-    	/// @brief Our configuration file for this class
-        struct LocalisationConfig {
-        	static constexpr const char* CONFIGURATION_PATH = "Localisation.json";
-        };
+class LocalisationFieldObject {
+public:
+    LocalisationFieldObject();
 
-
-        /// @brief Called by the powerplant to build and setup our CameraReader
-        explicit Localisation(std::unique_ptr<NUClear::Environment> environment);
+    enum class LFOId {
+        kInvalid,
+        kBall,
+        kFieldLine,
+        kCorner,  
+        kCentre_circle,
+        kObstacle,
+        kGoalL,
+        kGoalR,
+        kGoalU,  
+        kGoalYL,
+        kGoalYR,
+        kGoalYU,
+        kGoalBL,
+        kGoalBR,
+        kGoalBU,
     };
-}
-#endif
 
+private:
+    arma::vec2 location_;
+    LFOId id_;
+    std::string name_;
+};
+
+}
+}
+
+#endif

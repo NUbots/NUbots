@@ -17,33 +17,12 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_LOCALISATIONENGINE_H
-#define MODULES_LOCALISATIONENGINE_H
-
-#include <nuclear>
-
-#include "MultiModalRobotModel.h"
+#include "localisation/FieldDescription.h"
 
 namespace modules {
-    class LocalisationEngine {
-    	public:
-    	LocalisationEngine();
-
-        void RecordMeasurement(Measurement m, time_t timestamp);
-
-        void SwapMeasurementBuffers();
-
-        void TimeUpdate();
-
-        void ObjectUpdate();
-
-    private:
-		// TODO: Consider extracting the robot models into an actual class,
-		// that handles the robot model without regard to whether or not
-		// it is represented by a multi-modal distribution. (e.g. methods like
-		// removeInactiveModels(), would be instance methods  of this new
-		// class)
-    	MultiModalRobotModel robot_models_;
-    };
+namespace localisation {
+    FieldDescription::FieldDescription() {
+    	
+    }
 }
-#endif
+}

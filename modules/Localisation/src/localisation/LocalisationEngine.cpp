@@ -17,9 +17,15 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "LocalisationEngine.h"
+#include "localisation/LocalisationEngine.h"
+
+#include "messages/vision/VisionObjects.h"
+
+using messages::vision::VisionObject;
 
 namespace modules {
+namespace localisation {
+
     LocalisationEngine::LocalisationEngine() {
 
     }
@@ -37,7 +43,7 @@ namespace modules {
         ProcessObjects();
     }
 
-    int ProcessAmbiguousObjects(FieldObjects* fobs) {
+    int ProcessAmbiguousObjects(std::vector<std::shared_ptr<VisionObject>>& fobs) {
         int useful_object_count = 0;
 
         auto& stat_fobs = fobs->stationaryFieldObjects;
@@ -74,7 +80,7 @@ namespace modules {
     }
 
     /// Performs a two object update if it is currently possible to do so
-    int AttemptTwoObjectUpdate(FieldObjects* fobs) {
+    int AttemptTwoObjectUpdate(std::vector<std::shared_ptr<VisionObject>>& fobs) {
         StationaryObject& left_blue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
         StationaryObject& right_blue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
         StationaryObject& left_yellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
@@ -87,7 +93,7 @@ namespace modules {
             TwoObjectUpdate(left_yellow, right_yellow);
     }
 
-    void SelfLocalisation::IndividualStationaryObjectUpdate(FieldObjects* fobs, float time_increment)
+    void LocalisationEngine::IndividualStationaryObjectUpdate(std::vector<std::shared_ptr<VisionObject>>& fobs, float time_increment)
     {
         unsigned int objects_added = 0;
         unsigned int total_successful_updates = 0;
@@ -130,7 +136,7 @@ namespace modules {
         @param fobs The object information output by the vision module. This contains objects identified and their relative positions.
         @param time_increment The time that has elapsed since the previous localisation frame.
      */
-    void SelfLocalisation::ProcessObjects(FieldObjects* fobs, 
+    void LocalisationEngine::ProcessObjects(std::vector<std::shared_ptr<VisionObject>>& fobs, 
                                           float time_increment) {
         int useful_object_count = 0;
 
@@ -183,7 +189,7 @@ namespace modules {
         }
     }
 
-    int SelfLocalisation::multipleLandmarkUpdate(std::vector<StationaryObject*>& landmarks) {
+    int LocalisationEngine::multipleLandmarkUpdate(std::vector<StationaryObject*>& landmarks) {
         const unsigned int num_objects = landmarks.size();
         if (num_objects == 0) 
             return 0;
@@ -239,7 +245,7 @@ namespace modules {
         }
     }
 
-    int SelfLocalisation::AmbiguousLandmarkUpdateExhaustive(
+    int LocalisationEngine::AmbiguousLandmarkUpdateExhaustive(
         AmbiguousObject &ambiguous_object,
         const std::vector<StationaryObject*>& possible_objects)
     {
@@ -252,7 +258,7 @@ namespace modules {
      * @param theObject The object the error variance is to be calculated for.
      * @return The error of the measurement given as the variance.
      */
-    MeasurementError SelfLocalisation::CalculateError(const Object& theObject)
+    MeasurementError LocalisationEngine::CalculateError(const Object& theObject)
     {
         MeasurementError error;
 
@@ -267,91 +273,92 @@ namespace modules {
         return error;
     }
 
-    IWeightedKalmanFilter* SelfLocalisation::newRobotModel(
-        IWeightedKalmanFilter* filter, 
-        const StationaryObject& measured_object, 
-        const MeasurementError &error,
-        int ambiguous_id, double timestamp)
-    {
-        Matrix meas_noise = error.errorCovariance();
+    // IWeightedKalmanFilter* LocalisationEngine::newRobotModel(
+    //     IWeightedKalmanFilter* filter, 
+    //     const StationaryObject& measured_object, 
+    //     const MeasurementError &error,
+    //     int ambiguous_id, double timestamp)
+    // {
+    //     Matrix meas_noise = error.errorCovariance();
 
-        IWeightedKalmanFilter* new_filter = filter->Clone();
-        new_filter->AssignNewId();  // update with a new ID.
+    //     IWeightedKalmanFilter* new_filter = filter->Clone();
+    //     new_filter->AssignNewId();  // update with a new ID.
 
-        Matrix meas(2, 1, false);
-        meas[0][0] = measured_object.measuredDistance() * cos(measured_object.measuredElevation());
-        meas[1][0] = measured_object.measuredBearing();
+    //     Matrix meas(2, 1, false);
+    //     meas[0][0] = measured_object.measuredDistance() * cos(measured_object.measuredElevation());
+    //     meas[1][0] = measured_object.measuredBearing();
 
-        Matrix args(2,1,false);
-        args[0][0] = measured_object.X();
-        args[1][0] = measured_object.Y();
+    //     Matrix args(2,1,false);
+    //     args[0][0] = measured_object.X();
+    //     args[1][0] = measured_object.Y();
 
-        bool success = new_filter->measurementUpdate(meas, meas_noise, args,
-                                                     RobotModel::klandmark_measurement);
-        new_filter->setActive(success);
+    //     bool success = new_filter->measurementUpdate(meas, meas_noise, args,
+    //                                                  RobotModel::klandmark_measurement);
+    //     new_filter->setActive(success);
 
-        if(new_filter->active())
-        {
-            new_filter->m_creation_time = timestamp;
-            new_filter->m_parent_history_buffer = filter->m_parent_history_buffer;
-            new_filter->m_parent_history_buffer.push_back(filter->id());
-            new_filter->m_parent_id = filter->id();
-            new_filter->m_split_option = measured_object.get_id();
-            new_filter->m_previous_decisions = filter->m_previous_decisions;
-            new_filter->m_previous_decisions[ambiguous_id] = measured_object.get_id();
-        }
+    //     if(new_filter->active())
+    //     {
+    //         new_filter->m_creation_time = timestamp;
+    //         new_filter->m_parent_history_buffer = filter->m_parent_history_buffer;
+    //         new_filter->m_parent_history_buffer.push_back(filter->id());
+    //         new_filter->m_parent_id = filter->id();
+    //         new_filter->m_split_option = measured_object.get_id();
+    //         new_filter->m_previous_decisions = filter->m_previous_decisions;
+    //         new_filter->m_previous_decisions[ambiguous_id] = measured_object.get_id();
+    //     }
 
-        return new_filter;
-    }
+    //     return new_filter;
+    // }
 
-    /*! @brief Performs an ambiguous measurement update using the exhaustive 
-     *  process. 
-     *  This creates a new model for each possible location for the measurement.
-     */
-    int SelfLocalisation::AmbiguousLandmarkUpdateExhaustive(
-        AmbiguousObject &ambiguous_object,
-        const std::vector<StationaryObject*>& possible_objects)
-    {
-        const float kOutlierFactor = 0.001; // TODO: Add to config system
-        std::list<IWeightedKalmanFilter*> new_models;
+    // /*! @brief Performs an ambiguous measurement update using the exhaustive 
+    //  *  process. 
+    //  *  This creates a new model for each possible location for the measurement.
+    //  */
+    // int LocalisationEngine::AmbiguousLandmarkUpdateExhaustive(
+    //     AmbiguousObject &ambiguous_object,
+    //     const std::vector<StationaryObject*>& possible_objects)
+    // {
+    //     const float kOutlierFactor = 0.001; // TODO: Add to config system
+    //     std::list<IWeightedKalmanFilter*> new_models;
 
-        MeasurementError error = CalculateError(ambiguous_object);
+    //     MeasurementError error = CalculateError(ambiguous_object);
 
-        for (auto* model : robot_models_) {
-            if (!model->active())
-                continue;
+    //     for (auto& model : robot_models_) {
+    //         if (!model->active())
+    //             continue;
 
-            unsigned int models_added = 0;
+    //         unsigned int models_added = 0;
 
-            for (StationaryObject* possible_object : possible_objects) {
-                auto temp_object = *possible_object;
-                temp_object.CopyMeasurement(ambiguous_object);
+    //         for (StationaryObject* possible_object : possible_objects) {
+    //             auto temp_object = *possible_object;
+    //             temp_object.CopyMeasurement(ambiguous_object);
                 
-                auto* temp_mod = newRobotModel(model, temp_object, error, 
-                                               ambiguous_object.get_id(), 
-                                               GetTimestamp());
+    //             auto temp_mod = newRobotModel(model, temp_object, error, 
+    //                                            ambiguous_object.get_id(), 
+    //                                            GetTimestamp());
                 
-                new_models.push_back(temp_mod);
+    //             new_models.push_back(temp_mod);
 
-                if (temp_mod->active())
-                    models_added++;
-            }
+    //             if (temp_mod->active())
+    //                 models_added++;
+    //         }
 
-            RemoveInactiveModels(new_models);
+    //         RemoveInactiveModels(new_models);
 
-            if (models_added)
-                model->setActive(false);
-            else
-                model->setmodelWeight(kOutlierFactor * model->getFilterWeight());
-        }
+    //         if (models_added)
+    //             model->setActive(false);
+    //         else
+    //             model->setmodelWeight(kOutlierFactor * model->getFilterWeight());
+    //     }
 
-        if (new_models.size() > 0) {
-            robot_models_.insert(robot_models_.end(), new_models.begin(), new_models.end());
-            new_models.clear();
-        }
+    //     if (new_models.size() > 0) {
+    //         robot_models_.insert(robot_models_.end(), new_models.begin(), new_models.end());
+    //         new_models.clear();
+    //     }
 
-        RemoveInactiveModels();
+    //     RemoveInactiveModels();
 
-        return 0;
-    }
+    //     return 0;
+    // }
+}
 }

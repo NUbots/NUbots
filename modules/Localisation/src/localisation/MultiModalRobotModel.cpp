@@ -18,9 +18,12 @@
  */
 
 
-#include "MultiModalRobotModel.h"
+#include "localisation/MultiModalRobotModel.h"
+
+#include "utility/math/kalman/MultivariateGaussian.h"
 
 namespace modules {
+namespace localisation {
 
 /*! @brief Remove all inactive models from the default container.
  *  @retun The number of models removed.
@@ -33,7 +36,7 @@ unsigned int MultiModalRobotModel::RemoveInactiveModels() {
  *  @param container The container to remove inactive models from.
  *  @retun The number of models removed.
  */
-unsigned int MultiModalRobotModel::RemoveInactiveModels(std::list<IWeightedKalmanFilter*>& container) {
+unsigned int MultiModalRobotModel::RemoveInactiveModels(std::vector<RobotModel>& container) {
     const unsigned int num_before = container.size();   // Save original size
 
     for (auto* model : robot_models_) {
@@ -46,7 +49,7 @@ unsigned int MultiModalRobotModel::RemoveInactiveModels(std::list<IWeightedKalma
     container.erase(
         remove_if(container.begin(),
                   container.end(),
-                  [](const IWeightedKalmanFilter* p) { return p == NULL; }), 
+                  [](const RobotModel* p) { return p == NULL; }), 
         container.end());
     
     // Return number removed: original size - new size
@@ -78,7 +81,7 @@ float HeadingDistance(const MultivariateGaussian& a, const MultivariateGaussian&
     return diff_head;
 }
 
-float ModelsAreSimilar(const IWeightedKalmanFilter* a, const IWeightedKalmanFilter* b) {
+float ModelsAreSimilar(const RobotModel* a, const RobotModel* b) {
     const float kMinTransDist = 6; // TODO: Add to config system
     const float kMinHeadDist = 0.01; // TODO: Add to config system
 
@@ -149,7 +152,7 @@ int MultiModalRobotModel::PruneViterbi(unsigned int order) {
     std::for_each (
         begin_remove, 
         end_remove, 
-        std::bind2nd(std::mem_fun(&IWeightedKalmanFilter::setActive), false));
+        std::bind2nd(std::mem_fun(&RobotModel::setActive), false));
 
     // Clear out all deactivated models.
     int num_removed = RemoveInactiveModels();
@@ -181,4 +184,5 @@ void MultiModalRobotModel::NormaliseAlphas() {
             model.setAlpha(model.alpha() / sumAlpha);
 }
 
+}
 }

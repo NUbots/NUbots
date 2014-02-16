@@ -32,6 +32,8 @@ namespace modules {
         //     [this](const Configuration<LocalisationConfig>& settings) {
         //     std::cout << __func__ << ": Config" << std::endl;
             
+        //     engine.UpdateConfiguration(settings);
+
         //     // std::string testConfig = settings.config["testConfig"];
         //     // std::cout << testConfig << std::endl;
         // });
@@ -54,7 +56,7 @@ namespace modules {
         //     emit(std::move(field_object));
         // });
 
-        on<Trigger<vision::Goal>>([this](const vision::Goal& m) {
+        on<Trigger<vision::Goal>>([this](const messages::vision::Goal& m) {
             engine.RecordMeasurement(m, timestamp);
         });
 
