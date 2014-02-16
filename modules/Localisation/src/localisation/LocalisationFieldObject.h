@@ -25,27 +25,21 @@
 namespace modules {
 namespace localisation {
 
+enum class LFOId {
+    kInvalid,
+    kBall,
+    kGoalYL,
+    kGoalYR,
+    kGoalBL,
+    kGoalBR,
+};
+
 class LocalisationFieldObject {
 public:
     LocalisationFieldObject();
 
-    enum class LFOId {
-        kInvalid,
-        kBall,
-        kFieldLine,
-        kCorner,  
-        kCentre_circle,
-        kObstacle,
-        kGoalL,
-        kGoalR,
-        kGoalU,  
-        kGoalYL,
-        kGoalYR,
-        kGoalYU,
-        kGoalBL,
-        kGoalBR,
-        kGoalBU,
-    };
+    LocalisationFieldObject(arma::vec2 location, LFOId id, std::string name)
+        : location_(location), id_(id), name_(name);
 
 private:
     arma::vec2 location_;

@@ -20,6 +20,8 @@
 #ifndef MODULES_FIELDDESCRIPTION_H
 #define MODULES_FIELDDESCRIPTION_H
 
+#include <armadillo>
+
 #include "localisation/LocalisationFieldObject.h"
 
 namespace modules {
@@ -33,7 +35,8 @@ class FieldDescription {
 public:
     FieldDescription();
 
-    std::vector<LocalisationFieldObject> field_objects;
+    // Should be a std::unordered_set?
+    std::vector<LocalisationFieldObject> field_objects_;
 };
 
 }

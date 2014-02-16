@@ -179,7 +179,7 @@ namespace localisation {
         temp_error.setDistance(
             kObjectRangeOffsetVariance + 
             kObjectRangeRelativeVariance * flat_dist_squared);
-        temp_error.setHeading(c_obj_theta_variance);
+        temp_error.setHeading(kObjectThetaVariance);
 
         for (auto& model : robot_models_) {
             if (!model.active())
@@ -196,7 +196,7 @@ namespace localisation {
 
         Matrix locations(2 * num_objects, 1, false);
         Matrix measurements(2 * num_objects, 1, false);
-        Matrix R_measurement(2 * num_objects, 2 * num_objects, false);
+        Matrix r_measurements(2 * num_objects, 2 * num_objects, false);
         std::vector<unsigned int> objIds;
 
 
