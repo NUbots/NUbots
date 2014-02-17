@@ -84,6 +84,12 @@ namespace utility {
 				rot.submat(0,0,2,2) = zRotationMatrix(angle);		 			
 				return rot;
 			}	
+
+			inline arma::mat44 translationMatrix(arma::vec3 v){
+				arma::mat44 result = arma::eye(4,4);
+				result.col(3).rows(0,2) = v;
+ 				return result;
+			}
 			
         }
     }

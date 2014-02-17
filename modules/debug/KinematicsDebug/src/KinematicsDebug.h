@@ -17,22 +17,31 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_DEBUG_INVERSEKINEMATICS_H
-#define MODULES_DEBUG_INVERSEKINEMATICS_H
+#ifndef MODULES_DEBUG_KINEMATICSDEBUG_H
+#define MODULES_DEBUG_KINEMATICSDEBUG_H
 
 #include <nuclear>
 
 namespace modules {
-namespace debug {
+	namespace debug {
 
-    class InverseKinematics : public NUClear::Reactor {
-    public:
-        static constexpr const char* CONFIGURATION_PATH = "InverseKinematics.json";
-        explicit InverseKinematics(std::unique_ptr<NUClear::Environment> environment);
-    };
-    
-}  // debug
+			struct InverseKinematicsRequest{
+		        static constexpr const char* CONFIGURATION_PATH = "InverseKinematicsRequest.json";
+			};
+			struct ForwardKinematicsRequest{
+		        static constexpr const char* CONFIGURATION_PATH = "ForwardKinematicsRequest.json";
+			};
+			struct KinematicsNULLTest{
+		        static constexpr const char* CONFIGURATION_PATH = "KinematicsNULLTest.json";
+			};
+
+		    class KinematicsDebug : public NUClear::Reactor {
+		    public:
+		        explicit KinematicsDebug(std::unique_ptr<NUClear::Environment> environment);
+		    };
+
+	}  // debug
 }  // modules
 
-#endif  // MODULES_SUPPORT_NUBUGGER_H
+#endif  // MODULES_DEBUG_KINEMATICSDEBUG_H
 

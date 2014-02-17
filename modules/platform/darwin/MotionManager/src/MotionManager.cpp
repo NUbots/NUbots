@@ -116,6 +116,7 @@ namespace darwin {
 
                     // If this moving speed is unattainable
                     if(movingSpeed > 60) {
+                        NUClear::log<NUClear::WARN>("Servo ", i + 1, " has a requested moving speed of ", movingSpeed, ", which is greater then the maximum speed of the motor");
                         // TODO some sort of log warning could be thrown here that we can't go this fast (motors can't)
                     }
 

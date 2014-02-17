@@ -22,13 +22,13 @@
     "supportX": 0,
     "supportY": 0.01,
 
-    "hardnessSupport": 1,
-    "hardnessSwing": 1,
+    "hardnessSupport": 0.7,
+    "hardnessSwing": 0.5,
 
     "hardnessArm0": 0.2,
     "hardnessArm": 0.3,
 
-    "tStep": 0.25,
+    "tStep": 1.0,
     "tZmp": 0.165,
     "stepHeight": 0.035,
     "phSingle": [0.1, 0.9],

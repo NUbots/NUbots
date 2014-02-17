@@ -1,0 +1,11 @@
+{
+	"RANDOMIZE" : true,
+	"xAngle": 0.0,
+    "yAngle": 0.0,
+    "zAngle": 0.0,
+    "x": 0.1,
+    "y": 0.1,
+    "z": -0.1,
+    "left": true,
+    "right": true
+}

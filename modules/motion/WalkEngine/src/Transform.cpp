@@ -5,6 +5,16 @@ Transform::Transform() {
   clear();
 }
 
+Transform::Transform(arma::mat44 mat) {
+  clear();
+
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+        t[i][j] = mat(i,j);
+    }
+  }
+}
+
 void Transform::clear() {
   // Initialize to identity matrix:
   for (int i = 0; i < 4; i++)
@@ -118,6 +128,14 @@ double& Transform::operator() (int i, int j) {
   return t[i][j];
 }
 
+std::ostream& operator<< (std::ostream& output, const Transform& t) {
+    output << t(0,0) << ", " << t(0,1) << ", " << t(0,2) << ", " << t(0,3) << std::endl;
+    output << t(1,0) << ", " << t(1,1) << ", " << t(1,2) << ", " << t(1,3) << std::endl;
+    output << t(2,0) << ", " << t(2,1) << ", " << t(2,2) << ", " << t(2,3) << std::endl;
+    return output;
+}
+
+
 Transform operator* (const Transform &t1, const Transform &t2) {
   Transform t;
   for (int i = 0; i < 3; i++) {
@@ -176,4 +194,14 @@ std::vector<double> position6D(const Transform &t1) {
   p[4] = -asin(t1(2,0));
   p[5] = atan2(t1(1,0), t1(0,0));
   return p;
+}
+
+arma::mat44 Transform::getArmaMat() {
+    arma::mat44 result;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            result(i,j) = t[i][j];
+        }
+    }
+    return result;
 }

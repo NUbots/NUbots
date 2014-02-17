@@ -29,6 +29,7 @@
 #include "utility/motion/InverseKinematics.h"
 #include "utility/math/matrix.h"
 #include "OPKinematics.h"
+#include "utility/NUbugger/NUgraph.h"
 
 namespace modules {
     namespace motion {
@@ -36,6 +37,9 @@ namespace modules {
         using messages::input::ServoID;
         using messages::motion::ServoWaypoint;
         using messages::support::Configuration;
+        using utility::NUbugger::graph;
+        using NUClear::log;
+        using NUClear::DEBUG;
         
         WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -72,8 +76,7 @@ namespace modules {
                 // gStance parameters
                 bodyHeight = config["bodyHeight"];
                 bodyTilt = config["bodyTilt"];
-                // TODO
-                //footX = mcm.get_footX();
+                footX = config["footX"];
                 footY = config["footY"];
                 supportX = config["supportX"];
                 supportY = config["supportY"];
@@ -140,6 +143,9 @@ namespace modules {
 
                 useAlternativeTrajectory = config["useAlternativeTrajectory"];
                 
+            });
+
+            on<Trigger<Initialize>>([this](const Initialize&) {
                 // g--------------------------------------------------------
                 // g Walk state variables
                 // g--------------------------------------------------------
@@ -149,7 +155,7 @@ namespace modules {
                 uRight = {0, -footY, 0};
 
                 pLLeg = {0, footY, 0, 0, 0, 0};
-                pRLeg = {0, -footY, 0, 0,0,0};
+                pRLeg = {0, -footY, 0, 0, 0, 0};
                 pTorso = {supportX, 0, bodyHeight, 0, bodyTilt, 0};
 
                 velCurrent = {0, 0, 0};
@@ -178,6 +184,7 @@ namespace modules {
                 ph=0;
 
                 stopRequest = 2;
+
                 canWalkKick = 1; // gCan we do walkkick with this walk code?
                 walkKickRequest = 0; 
                 //walkKick = walkKickDef["FrontLeft"];
@@ -222,14 +229,37 @@ namespace modules {
                 comdot = {0, 0};
                 stepKickReady = false;
                 hasBall = 0;
+
+                setVelocity(1, 0, 0);
+                stanceReset();
+                start();
             });
 
-            on<Trigger<Every<10, Per<std::chrono::seconds> > > >([this](const time_t& time) {
+            on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, Options<Single> >([this](const time_t& time) {
                 update();
             });
 			
         }
         // TODO: add others
+
+        void WalkEngine::start() {
+            stopRequest = 0;
+            if (!active) {
+                double now = getTime();
+
+                active = true;
+                started = false;
+                iStep0 = -1;
+                t0 = now;
+                tLastStep = now;
+                initialStep = 2;
+            }
+        }
+
+        void WalkEngine::stop() {
+            // always stops with feet together (which helps transition)
+            stopRequest = std::max(1, stopRequest);
+        }
         
         void WalkEngine::update() {
             //advanceMotion();
@@ -237,8 +267,10 @@ namespace modules {
 
             // TODO: bodyHeightCurrent = vcm.get_camera_bodyHeight();
 
+//            log<DEBUG>("velCurrent: ", velCurrent);
+//            log<DEBUG>("velCommand: ", velCommand);
+
             if (!active) {
-                // TODO
                 moving = false;
                 updateStill();
                 return;
@@ -276,19 +308,22 @@ namespace modules {
                 uRight1 = uRight2;
                 uTorso1 = uTorso2;
 
+                //log<DEBUG>("new step, supportLeg: ", supportLeg);
+
                 supportMod = {0, 0}; // support point modulation for wallkick
                 shiftFactor = 0.5; // how much should we shift final torso pose?
 
                 //checkWalkKick();
-                checkStepKick();
+                //checkStepKick();
 
-                if (stepKickReady) {
+                /*if (stepKickReady) {
                     // large step init
                     return; // TODO: return "step"
-                }
+                }*/
 
                 if (walkKickRequest == 0 && stepKickRequest == 0) {
                     if (stopRequest == 1) {
+                        log<DEBUG>("stop request 1");
                         stopRequest = 2;
                         velCurrent = {0, 0, 0};
                         velCommand = {0, 0, 0};
@@ -346,17 +381,15 @@ namespace modules {
                     arma::vec3 uTorsoModded = poseGlobal({supportMod[0], supportMod[1], 0}, uTorso);
                     arma::vec3 uLeftModded = poseGlobal(uLeftTorso, uTorsoModded);
                     uSupport = poseGlobal({supportX, supportY, 0}, uLeftModded);
-                    // TODO
-                    //leftLegHardness = hardnessSupport;
-                    //rightLegHardness = hardnessSwing;
+                    leftLegHardness = hardnessSupport;
+                    rightLegHardness = hardnessSwing;
                 } else {
                     arma::vec3 uRightTorso = poseRelative(uRight1, uTorso);
-                    arma::vec3 uTorsoModded = poseGlobal({supportMod[1], supportMod[2], 0}, uTorso);
+                    arma::vec3 uTorsoModded = poseGlobal({supportMod[0], supportMod[1], 0}, uTorso);
                     arma::vec3 uRightModded = poseGlobal(uRightTorso, uTorsoModded);
                     uSupport = poseGlobal({supportX, -supportY, 0}, uRightModded);
-                    // TODO:
-                    //leftLegHardness = hardnessSwing;
-                    //rightLegHardness = hardnessSupport;
+                    leftLegHardness = hardnessSwing;
+                    rightLegHardness = hardnessSupport;
                 }
 
                 // compute ZMP coefficients
@@ -364,8 +397,8 @@ namespace modules {
                 m2X = (uTorso2[0] - uSupport[0]) / (tStep * (1 - ph2Zmp));
                 m1Y = (uSupport[1] - uTorso[1]) / (tStep * ph1Zmp);
                 m2Y = (uTorso2[1] - uSupport[1]) / (tStep * (1 - ph2Zmp));
-                std::tie(aXP, aXN) = zmpSolve(uSupport[0], uTorso1[0], uTorso[0], uTorso[0], uTorso[0]);
-                std::tie(aYP, aYN) = zmpSolve(uSupport[1], uTorso1[1], uTorso[1], uTorso[1], uTorso[1]);
+                std::tie(aXP, aXN) = zmpSolve(uSupport[0], uTorso1[0], uTorso2[0], uTorso1[0], uTorso2[0]);
+                std::tie(aYP, aYN) = zmpSolve(uSupport[1], uTorso1[1], uTorso2[1], uTorso1[1], uTorso2[1]);
 
                 // compute COM speed at the boundary
 
@@ -469,16 +502,23 @@ namespace modules {
 
             pLLeg[0] = uLeft[0];
             pLLeg[1] = uLeft[1];
-            pLLeg[2] = uLeft[2];
+            pLLeg[5] = uLeft[2];
 
             pRLeg[0] = uRight[0];
             pRLeg[1] = uRight[1];
-            pRLeg[2] = uRight[2];
+            pRLeg[5] = uRight[2];
 
-            // TODO: qLegs = IK()
-            std::vector<double> qLegs;
+            /*emit(graph("pLLeg", pLLeg[0], pLLeg[1], pLLeg[2], pLLeg[3], pLLeg[4], pLLeg[5]));
+            emit(graph("pRLeg", pLLeg[0], pLLeg[1], pLLeg[2], pRLeg[3], pRLeg[4], pRLeg[5]));
+            emit(graph("pTorso", pTorso[0], pTorso[1], pTorso[2], pTorso[3], pTorso[4], pTorso[5]));*/
+
+            emit(graph("pLLeg", pLLeg[3], pLLeg[4], pLLeg[5]));
+            emit(graph("pRLeg", pRLeg[3], pRLeg[4], pRLeg[5]));
+            emit(graph("pTorso", pTorso[3], pTorso[4], pTorso[5]));
+
+            std::vector<double> qLegs = darwinop_kinematics_inverse_legs_nubots(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
             motionLegs(qLegs);
-            motionArms();
+            //motionArms();
         }
 
         void WalkEngine::checkStepKick() {
@@ -612,10 +652,9 @@ namespace modules {
             pRLeg[1] = uRight[1];
             pRLeg[2] = uRight[2];
 
-            // TODO: qLegs = IK()
-            std::vector<double> qLegs = darwinop_kinematics_inverse_legs(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
+            std::vector<double> qLegs = darwinop_kinematics_inverse_legs_nubots(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
             motionLegs(qLegs, true);
-            motionArms();
+           //motionArms();
         }
 
         void WalkEngine::motionLegs(std::vector<double> qLegs) {
@@ -647,8 +686,8 @@ namespace modules {
                 yawAngle = uRight[2] - uTorsoActual[2];
             }
 
-            float gyroRoll = gyroRoll0 * std::cos(yawAngle) + gyroPitch0 * std::sin(yawAngle);
-            float gyroPitch = gyroPitch0 * std::cos(yawAngle) + gyroRoll0 * std::sin(yawAngle);
+            float gyroRoll = gyroRoll0 * std::cos(yawAngle) - gyroPitch0 * std::sin(yawAngle);
+            float gyroPitch = gyroPitch0 * std::cos(yawAngle) - gyroRoll0 * std::sin(yawAngle);
 
             float armShiftX = procFunc(gyroPitch * armImuParamY[1], armImuParamY[2], armImuParamY[3]);
             float armShiftY = procFunc(gyroRoll * armImuParamY[1], armImuParamY[2], armImuParamY[3]);
@@ -714,26 +753,51 @@ namespace modules {
             10 = rightAnklePitch
             11 = rightAnkleRoll*/
 
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_HIP_YAW,     float(qLegs[0]),  float(leftLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_HIP_ROLL,    float(qLegs[1]),  float(leftLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_HIP_PITCH,   float(qLegs[2]),  float(leftLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_KNEE,        float(qLegs[3]),  float(leftLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_ANKLE_PITCH, float(qLegs[4]),  float(leftLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_ANKLE_ROLL,  float(qLegs[5]),  float(leftLegHardness * 100)});
+            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(1000000/UPDATE_FREQUENCY);
 
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_HIP_YAW,     float(qLegs[6]),  float(rightLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_HIP_ROLL,    float(qLegs[7]),  float(rightLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_HIP_PITCH,   float(qLegs[8]),  float(rightLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_KNEE,        float(qLegs[9]),  float(rightLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_ANKLE_PITCH, float(qLegs[10]), float(rightLegHardness * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_ANKLE_ROLL,  float(qLegs[11]), float(rightLegHardness * 100)});
+            waypoints->push_back({time, ServoID::L_HIP_YAW,     float(qLegs[0]),  float(leftLegHardness * 100)});
+            waypoints->push_back({time, ServoID::L_HIP_ROLL,    float(qLegs[1]),  float(leftLegHardness * 100)});
+            waypoints->push_back({time, ServoID::L_HIP_PITCH,   float(qLegs[2]),  float(leftLegHardness * 100)});
+            waypoints->push_back({time, ServoID::L_KNEE,        float(qLegs[3]),  float(leftLegHardness * 100)});
+            waypoints->push_back({time, ServoID::L_ANKLE_PITCH, float(qLegs[4]),  float(leftLegHardness * 100)});
+            waypoints->push_back({time, ServoID::L_ANKLE_ROLL,  float(qLegs[5]),  float(leftLegHardness * 100)});
 
-            std::cout << "Totally should be doing something" << std::endl;
+            waypoints->push_back({time, ServoID::R_HIP_YAW,     float(qLegs[6]),  float(rightLegHardness * 100)});
+            waypoints->push_back({time, ServoID::R_HIP_ROLL,    float(qLegs[7]),  float(rightLegHardness * 100)});
+            waypoints->push_back({time, ServoID::R_HIP_PITCH,   float(qLegs[8]),  float(rightLegHardness * 100)});
+            waypoints->push_back({time, ServoID::R_KNEE,        float(qLegs[9]),  float(rightLegHardness * 100)});
+            waypoints->push_back({time, ServoID::R_ANKLE_PITCH, float(qLegs[10]), float(rightLegHardness * 100)});
+            waypoints->push_back({time, ServoID::R_ANKLE_ROLL,  float(qLegs[11]), float(rightLegHardness * 100)});
 
-            for(const auto& waypoint : *waypoints) {
-                std::cout << waypoint.position << " ";
-            }
-            std::cout << std::endl;
+            /*NUClear::log<NUClear::DEBUG>("L Hip Yaw: ", qLegs[0]);
+            NUClear::log<NUClear::DEBUG>("L Hip Roll: ", qLegs[1]);
+            NUClear::log<NUClear::DEBUG>("L Hip Pitch: ", qLegs[2]);
+            NUClear::log<NUClear::DEBUG>("L Knee: ", qLegs[3]);
+            NUClear::log<NUClear::DEBUG>("L Ankle Pitch: ", qLegs[4]);
+            NUClear::log<NUClear::DEBUG>("L Ankle Roll: ", qLegs[5]);
+
+            NUClear::log<NUClear::DEBUG>("R Hip Yaw: ", qLegs[6]);
+            NUClear::log<NUClear::DEBUG>("R Hip Roll: ", qLegs[7]);
+            NUClear::log<NUClear::DEBUG>("R Hip Pitch: ", qLegs[8]);
+            NUClear::log<NUClear::DEBUG>("R Knee: ", qLegs[9]);
+            NUClear::log<NUClear::DEBUG>("R Ankle Pitch: ", qLegs[10]);
+            NUClear::log<NUClear::DEBUG>("R Ankle Roll: ", qLegs[11]);*/
+
+            /*emit(graph("L Hip Yaw", qLegs[0]));
+            emit(graph("L Hip Roll", qLegs[1]));
+            emit(graph("L Hip Pitch", qLegs[2]));
+            emit(graph("L Knee", qLegs[3]));
+            emit(graph("L Ankle Pitch", qLegs[4]));
+            emit(graph("L Ankle Roll", qLegs[5]));
+
+            emit(graph("R Hip Yaw", qLegs[6]));
+            emit(graph("R Hip Roll", qLegs[7]));
+            emit(graph("R Hip Pitch", qLegs[8]));
+            emit(graph("R Knee", qLegs[9]));
+            emit(graph("R Ankle Pitch", qLegs[10]));
+            emit(graph("R Ankle Roll", qLegs[11]));*/
+
+            emit(graph("L Ankle Pitch", qLegs[4]));
 
             emit(std::move(waypoints));
         }
@@ -776,13 +840,22 @@ namespace modules {
 
             auto waypoints = std::make_unique<std::vector<ServoWaypoint>>();
             waypoints->reserve(6);
+            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(1000000/UPDATE_FREQUENCY);
 
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]),  float(hardnessArm * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]),  float(hardnessArm * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::R_ELBOW,          float(qRArmActual[2]),  float(hardnessArm * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]),  float(hardnessArm * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]),  float(hardnessArm * 100)});
-            waypoints->push_back({NUClear::clock::now() + std::chrono::milliseconds(100), ServoID::L_ELBOW,          float(qLArmActual[2]),  float(hardnessArm * 100)});
+            waypoints->push_back({time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]),  float(hardnessArm * 100)});
+            waypoints->push_back({time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]),  float(hardnessArm * 100)});
+            waypoints->push_back({time, ServoID::R_ELBOW,          float(qRArmActual[2]),  float(hardnessArm * 100)});
+            waypoints->push_back({time, ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]),  float(hardnessArm * 100)});
+            waypoints->push_back({time, ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]),  float(hardnessArm * 100)});
+            waypoints->push_back({time, ServoID::L_ELBOW,          float(qLArmActual[2]),  float(hardnessArm * 100)});
+
+            /*emit(graph("L Shoulder Pitch", qLArmActual[0]));
+            emit(graph("L Shoulder Roll", qLArmActual[1]));
+            emit(graph("L Elbow", qLArmActual[2]));
+
+            emit(graph("R Shoulder Pitch", qRArmActual[0]));
+            emit(graph("R Shoulder Roll", qRArmActual[1]));
+            emit(graph("R Elbow", qRArmActual[2]));*/
 
             emit(std::move(waypoints));
         }
@@ -801,15 +874,15 @@ namespace modules {
             // Do not pidgeon toe, cross feet:
 
             // Check toe and heel overlap
-            double toeOverlap = -footSizeX[1] * uLeftRight[3];
-            double heelOverlap = -footSizeX[2] * uLeftRight[3];
-            double limitY = std::max(stanceLimitY[1], stanceLimitY2 + std::max(toeOverlap, heelOverlap));
+            double toeOverlap = -footSizeX[0] * uLeftRight[2];
+            double heelOverlap = -footSizeX[1] * uLeftRight[2];
+            double limitY = std::max(stanceLimitY[0], stanceLimitY2 + std::max(toeOverlap, heelOverlap));
 
             // print("Toeoverlap Heeloverlap",toeOverlap,heelOverlap,limitY)
 
-            uLeftRight[1] = std::min(std::max(uLeftRight[1], stanceLimitX[1]), stanceLimitX[2]);
-            uLeftRight[2] = std::min(std::max(uLeftRight[2], limitY), stanceLimitY[2]);
-            uLeftRight[3] = std::min(std::max(uLeftRight[3], stanceLimitA[1]), stanceLimitA[2]);
+            uLeftRight[0] = std::min(std::max(uLeftRight[0], stanceLimitX[0]), stanceLimitX[1]);
+            uLeftRight[1] = std::min(std::max(uLeftRight[1], limitY), stanceLimitY[1]);
+            uLeftRight[2] = std::min(std::max(uLeftRight[2], stanceLimitA[0]), stanceLimitA[1]);
 
             return poseGlobal(uLeftRight, uRight);
         }
@@ -824,15 +897,15 @@ namespace modules {
             // Do not pidgeon toe, cross feet:
 
             // Check toe and heel overlap
-            double toeOverlap = footSizeX[1] * uRightLeft[3];
-            double heelOverlap = footSizeX[2] * uRightLeft[3];
-            double limitY = std::max(stanceLimitY[1], stanceLimitY2 + std::max(toeOverlap, heelOverlap));
+            double toeOverlap = footSizeX[0] * uRightLeft[2];
+            double heelOverlap = footSizeX[1] * uRightLeft[2];
+            double limitY = std::max(stanceLimitY[0], stanceLimitY2 + std::max(toeOverlap, heelOverlap));
 
             // print("Toeoverlap Heeloverlap",toeOverlap,heelOverlap,limitY)
 
-            uRightLeft[1] = std::min(std::max(uRightLeft[1], stanceLimitX[1]), stanceLimitX[2]);
-            uRightLeft[2] = std::min(std::max(uRightLeft[2], -stanceLimitY[2]), -limitY);
-            uRightLeft[3] = std::min(std::max(uRightLeft[3], -stanceLimitA[2]), -stanceLimitA[1]);
+            uRightLeft[0] = std::min(std::max(uRightLeft[0], stanceLimitX[0]), stanceLimitX[1]);
+            uRightLeft[1] = std::min(std::max(uRightLeft[1], -stanceLimitY[1]), -limitY);
+            uRightLeft[2] = std::min(std::max(uRightLeft[2], -stanceLimitA[2]), -stanceLimitA[0]);
 
             return poseGlobal(uRightLeft, uLeft);
         }
@@ -886,7 +959,7 @@ namespace modules {
 
             if (initialStep > 0) {
                 velCurrent = arma::vec3{0, 0, 0};
-                initialStep++;
+                initialStep--;
             }
         }
 
@@ -894,24 +967,6 @@ namespace modules {
             return velCurrent;
         }
 
-        void WalkEngine::start() {
-            stopRequest = 0;
-            if (!active) {
-                double now = getTime();
-
-                active = true;
-                started = false;
-                iStep0 = -1;
-                t0 = now;
-                tLastStep = now;
-                initialStep = 2;
-            }
-        }
-
-        void WalkEngine::stop() {
-            // always stops with feet together (which helps transition)
-            stopRequest = std::max(1, stopRequest);
-        }
 
         /*void WalkEngine::startMotion(std::string name) {
             if (motionPlaying == 0) {
@@ -1151,12 +1206,12 @@ namespace modules {
 			return   ret;
 		}
 
-		double WalkEngine::modAngle(double a) { // reduce an angle to [-pi, pi)
-			if(a==0) return 0.;
-			a = std::fmod(a, (2. * M_PI)); //fmod(a,b) the same as a%b, but for doubles (fmod() defined in math.h)
-			if(a >= M_PI)
-				a -= 2. * M_PI;
-			return a;
+		double WalkEngine::modAngle(double value) { // reduce an angle to [-pi, pi)
+            double angle = std::fmod(value, 2 * M_PI);
+            if (angle <= -M_PI) angle += 2 * M_PI;
+            else if (angle > M_PI) angle -= 2 * M_PI;
+
+            return angle;
 		}
 
 		arma::vec3 WalkEngine::poseGlobal(arma::vec3 pRelative, arma::vec3 pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!

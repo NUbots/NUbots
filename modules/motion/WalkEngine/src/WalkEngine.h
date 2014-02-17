@@ -35,6 +35,7 @@ namespace modules {
          */
         class WalkEngine : public NUClear::Reactor {
         public:
+             static constexpr size_t UPDATE_FREQUENCY = 20;
             static constexpr const char* CONFIGURATION_PATH = "WalkEngine.json";
             explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
         private:
@@ -150,9 +151,9 @@ namespace modules {
             arma::vec3 uRight1;
             arma::vec3 uRight2;
 
-            arma::vec pLLeg;
-            arma::vec pRLeg;
-            arma::vec pTorso;
+            arma::vec6 pLLeg;
+            arma::vec6 pRLeg;
+            arma::vec6 pTorso;
 
             arma::vec3 velCurrent;
             arma::vec3 velCommand;
@@ -175,8 +176,8 @@ namespace modules {
             bool moving;
             int iStep0;
             int iStep;
-            float t0;
-            float tLastStep;
+            double t0;
+            double tLastStep;
             float ph0;
             float ph;
 
@@ -283,7 +284,7 @@ namespace modules {
 
             double getTime(); // TODO: remove
             double procFunc(double a, double deadband, double maxvalue); //TODO: move documentation from .cpp to .h file
-            double modAngle(double a);
+            double modAngle(double value);
             arma::vec3 poseGlobal(arma::vec3 pRelative, arma::vec3 pose);
             arma::vec3 poseRelative(arma::vec3 pGlobal, arma::vec3 pose);
             arma::vec3 se2Interpolate(double t, arma::vec3 u1, arma::vec3 u2);
