@@ -9,6 +9,7 @@ ADD_ROLE(
         platform::fakedarwin::HardwareIO
         platform::darwin::SensorFilter
         platform::darwin::MotionManager
+        platform::darwin::SensorFilter
         support::NUbugger
         debug::NUbugger
         motion::WalkEngine
