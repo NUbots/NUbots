@@ -37,3 +37,28 @@ node nubuggervm {
 
   class { 'vim': username => $username, }
 }
+
+node packer-virtualbox-iso, packer-vmware-iso {
+  include initial_apt_update
+
+  $username = 'vagrant'
+
+  class { 'nuclearport::build_dep': username => $username, }
+
+  # nubugger::build_dep
+  package { 'pkg-config': ensure => latest, }
+  package { 'uuid-dev': ensure => latest, }
+
+  class { 'ruby':
+    gems_version  => 'latest'
+  }
+  class { 'nodejs':
+    version => 'stable',
+    make_install => false,
+  }
+
+  # Non-essential developer tools:
+  class { 'vim':  username => $username, }
+  package { 'screen': ensure => latest, }
+  package { 'htop': ensure => latest, }
+}

@@ -7,6 +7,9 @@ from subprocess import call
 
 numArgs = len(sys.argv)
 
+# print 'Number of arguments:', numArgs, 'arguments.'
+# print 'Argument List:', str(sys.argv)
+
 if numArgs == 1:
     # Print command summary?
     print """
@@ -22,7 +25,9 @@ Command summary:
   - cmake       Runs cmake in the build directory (creating it if it doesn't exist).
   - make        Runs make in the build directory (creates it and runs cmake if it doesn't exist).
   - makej       Same as make, but runs 'make -j'.
-  - run	<role>  Runs the binary for the role of the given name.
+  - run <role>  Runs the binary for the role of the given name.
+  - create_box	Builds the nubots Vagrant box using Packer.
+                (the box is first deleted if it already exists)
 """
 
 elif sys.argv[1] == 'clean':
@@ -45,7 +50,7 @@ elif sys.argv[1] == 'make' or sys.argv[1] == 'makej':
         call(['make', '-j'], cwd='build')
 
 elif sys.argv[1] == 'run':
-    if len(sys.argv) < 3:
+    if numArgs < 3:
 	print '''
 Usage: b run <role>
 
@@ -55,14 +60,9 @@ Please provide the name of the role to run.
         call("./roles/{}".format(sys.argv[2]), cwd='build/')
     else:
         print "The role '{}' does not exist or did not build correctly.".format(sys.argv[2])
-
-# print 'Number of arguments:', len(sys.argv), 'arguments.'
-# print 'Argument List:', str(sys.argv)
-
-# call(['echo', 'hello'])
-
-# call(['ls'])
-# call(['pwd'])
-# call('ls', cwd = './puppet')
-
-# print 'hello'
+elif sys.argv[1] == 'create_box':
+  if os.path.isfile("packer/nubots-ubuntu-12-04-x86-virtualbox.box"):
+    call(['rm', 'nubots-ubuntu-12-04-x86-virtualbox.box'], cwd='packer')
+  call(['packer', 'build', '-only=virtualbox-iso', 'template.json'], cwd='packer')
+  call(['vagrant', 'box', 'remove', 'nubots-14.02'])
+  call(['vagrant', 'box', 'add', 'nubots-14.02', 'nubots-ubuntu-12-04-x86-virtualbox.box'], cwd='packer')
