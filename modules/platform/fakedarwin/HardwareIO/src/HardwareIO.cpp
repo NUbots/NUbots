@@ -161,10 +161,10 @@ namespace fakedarwin {
 
 					arma::vec3 cross = arma::cross(present, goal);
 					if(cross[2] > 0) {
-						servo.presentPosition += utility::math::angle::normalizeAngle(movingSpeed);
+						servo.presentPosition = utility::math::angle::normalizeAngle(servo.presentPosition + movingSpeed);
 					}
 					else {
-						servo.presentPosition -= utility::math::angle::normalizeAngle(movingSpeed);
+						servo.presentPosition = utility::math::angle::normalizeAngle(servo.presentPosition - movingSpeed);
 					}
 				}
 			}
