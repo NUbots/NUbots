@@ -143,6 +143,9 @@ namespace modules {
 
                 useAlternativeTrajectory = config["useAlternativeTrajectory"];
                 
+            });
+
+            on<Trigger<Initialize>>([this](const Initialize&) {
                 // g--------------------------------------------------------
                 // g Walk state variables
                 // g--------------------------------------------------------
@@ -226,9 +229,7 @@ namespace modules {
                 comdot = {0, 0};
                 stepKickReady = false;
                 hasBall = 0;
-            });
 
-            on<Trigger<Initialize>>([this](const Initialize&) {
                 setVelocity(1, 0, 0);
                 stanceReset();
                 start();
@@ -307,7 +308,7 @@ namespace modules {
                 uRight1 = uRight2;
                 uTorso1 = uTorso2;
 
-                log<DEBUG>("new step, supportLeg: ", supportLeg);
+                //log<DEBUG>("new step, supportLeg: ", supportLeg);
 
                 supportMod = {0, 0}; // support point modulation for wallkick
                 shiftFactor = 0.5; // how much should we shift final torso pose?
@@ -336,10 +337,8 @@ namespace modules {
                         tStep = tStep0;
                         if (supportLeg == LEFT) {
                             uRight2 = stepRightDestination(velCurrent, uLeft1, uRight1);
-                            log<DEBUG>("normal walk left ");
                         } else {
                             uLeft2 = stepLeftDestination(velCurrent, uLeft1, uRight1);
-                            log<DEBUG>("normal walk right ");
                         }
 
                         // velocity-based support point modulation
