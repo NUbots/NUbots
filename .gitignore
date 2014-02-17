@@ -20,8 +20,10 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 
-## Vagrant
+# Vagrant & Packer
 .vagrant/
+*.box
+*.iso
 
 # LaTeX stuff
 doc/*.aux
@@ -56,12 +58,9 @@ doc/*.tdo
 doc/TSWLatexianTemp*
 
 # Misc
-.exe
+*.exe
 tags
 *.swp
 /nbproject/
-<<<<<<< HEAD
 *~
-=======
 .DS_Store
->>>>>>> develop
