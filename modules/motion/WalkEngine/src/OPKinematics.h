@@ -58,6 +58,13 @@ darwinop_kinematics_inverse_legs(
 			    const double *pTorso,
 			    int legSupport=0);
 
+std::vector<double>
+darwinop_kinematics_inverse_legs_nubots(
+			    const double *pLLeg,
+			    const double *pRLeg,
+			    const double *pTorso,
+			    int legSupport=0);
+
 
 std::vector<double> darwinop_kinematics_inverse_larm(
 			    const double *dArm

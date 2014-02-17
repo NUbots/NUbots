@@ -195,3 +195,13 @@ std::vector<double> position6D(const Transform &t1) {
   p[5] = atan2(t1(1,0), t1(0,0));
   return p;
 }
+
+arma::mat44 Transform::getArmaMat() {
+    arma::mat44 result;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            result(i,j) = t[i][j];
+        }
+    }
+    return result;
+}

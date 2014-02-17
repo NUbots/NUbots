@@ -2,6 +2,8 @@
 #include "Transform.h"
 #include <math.h>
 #include <stdio.h>
+#include <utility/motion/InverseKinematics.h>
+#include <utility/motion/RobotModels.h>
 
 void printTransform(Transform tr) {
   for (int i = 0; i < 4; i++) {
@@ -180,6 +182,28 @@ darwinop_kinematics_inverse_legs(
 
   qLLeg = darwinop_kinematics_inverse_lleg(trTorso_LLeg, 0);
   qRLeg = darwinop_kinematics_inverse_rleg(trTorso_RLeg, 0);
+
+  qLLeg.insert(qLLeg.end(), qRLeg.begin(), qRLeg.end());
+  return qLLeg;
+}
+
+std::vector<double>
+darwinop_kinematics_inverse_legs_nubots (
+			    const double *pLLeg,
+			    const double *pRLeg,
+			    const double *pTorso,
+			    int legSupport)
+{
+  std::vector<double> qLLeg(12), qRLeg;
+  Transform trLLeg = transform6D(pLLeg);
+  Transform trRLeg = transform6D(pRLeg);
+  Transform trTorso = transform6D(pTorso);
+
+  Transform trTorso_LLeg = inv(trTorso)*trLLeg;
+  Transform trTorso_RLeg = inv(trTorso)*trRLeg;
+
+  qLLeg = utility::motion::kinematics::calculateLegJointsTeamDarwin<utility::motion::kinematics::DarwinModel>(trTorso_LLeg.getArmaMat(), true);
+  qRLeg = utility::motion::kinematics::calculateLegJointsTeamDarwin<utility::motion::kinematics::DarwinModel>(trTorso_RLeg.getArmaMat(), false);
 
   qLLeg.insert(qLLeg.end(), qRLeg.begin(), qRLeg.end());
   return qLLeg;

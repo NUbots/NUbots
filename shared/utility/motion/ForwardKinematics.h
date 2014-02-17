@@ -92,7 +92,7 @@ namespace kinematics {
         }
         
         arma::mat44 hipPos = arma::eye(4,4);
-        hipPos.col(3)= arma::vec({ 0, negativeIfRight * RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS/2, -RobotKinematicModel::Leg::DISTANCE_FROM_BODY_TO_HIP_JOINT,1});
+        hipPos.col(3)= arma::vec({ RobotKinematicModel::Leg::HIP_OFFSET_X, negativeIfRight * RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS/2, -RobotKinematicModel::Leg::HIP_OFFSET_Z,1});
         runningTransform *= hipPos;
         //Rotate to face down the leg (see above for definitions of terms, including 'facing')
         runningTransform *= utility::math::matrix::yRotationMatrix(M_PI/2, 4).t();

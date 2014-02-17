@@ -51,7 +51,8 @@ namespace kinematics {
     template <typename RobotKinematicModel> 
 	std::vector< std::pair<messages::input::ServoID, float> > calculateLegJoints(arma::mat44 target, Side isLeft) {
         const float LENGTH_BETWEEN_LEGS = RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS;
-        const float DISTANCE_FROM_BODY_TO_HIP_JOINT = RobotKinematicModel::Leg::DISTANCE_FROM_BODY_TO_HIP_JOINT;
+        const float DISTANCE_FROM_BODY_TO_HIP_JOINT = RobotKinematicModel::Leg::HIP_OFFSET_Z;
+        const float HIP_OFFSET_X = RobotKinematicModel::Leg::HIP_OFFSET_X;
         const float UPPER_LEG_LENGTH = RobotKinematicModel::Leg::UPPER_LEG_LENGTH;
         const float LOWER_LEG_LENGTH = RobotKinematicModel::Leg::LOWER_LEG_LENGTH;
 
@@ -66,9 +67,12 @@ namespace kinematics {
 
         //TODO remove this. It was due to wrong convention use
         arma::mat44 inputCoordinatesToCalcCoordinates("0,1,0,0;  1,0,0,0;  0,0,-1,0;  0,0,0,1");
-
-        //Rotate input position from standard robot coords
-        target.col(3) = inputCoordinatesToCalcCoordinates * target.col(3);
+        //Rotate input position from standard robot coords to foot coords
+        //NUClear::log<NUClear::DEBUG>("Target Original\n", target);
+        arma::vec4 fourthColumn = inputCoordinatesToCalcCoordinates * target.col(3);
+        target = inputCoordinatesToCalcCoordinates * target * inputCoordinatesToCalcCoordinates.t();
+        target.col(3) = fourthColumn;
+        //NUClear::log<NUClear::DEBUG>("Target Final\n", target);
 
         if(!static_cast<bool>(isLeft)) {
             target.submat(0,0,2,2) = arma::mat("-1,0,0;0,1,0;0,0,1") * target.submat(0,0,2,2);
@@ -82,22 +86,22 @@ namespace kinematics {
 
         arma::vec3 anklePos = target.submat(0,3,2,3);
 
-        arma::vec3 hipOffset = {LENGTH_BETWEEN_LEGS / 2.0, 0, DISTANCE_FROM_BODY_TO_HIP_JOINT};
+        arma::vec3 hipOffset = {LENGTH_BETWEEN_LEGS / 2.0, HIP_OFFSET_X, DISTANCE_FROM_BODY_TO_HIP_JOINT};
 
         arma::vec3 targetLeg = anklePos - hipOffset;
 
         float length = arma::norm(targetLeg, 2);
         if(length > UPPER_LEG_LENGTH+LOWER_LEG_LENGTH){
-            NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints : Requested position beyond leg reach.");
+            //NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints : Requested position beyond leg reach.");
             return positions;
         }
-        //NUClear::log<NUClear::DEBUG>("Length: ", length);
+        ////NUClear::log<NUClear::DEBUG>("Length: ", length);
         float sqrLength = length * length;
         float sqrUpperLeg = UPPER_LEG_LENGTH * UPPER_LEG_LENGTH;
         float sqrLowerLeg = LOWER_LEG_LENGTH * LOWER_LEG_LENGTH;
 
         float cosKnee = (sqrUpperLeg + sqrLowerLeg - sqrLength) / (2 * UPPER_LEG_LENGTH * LOWER_LEG_LENGTH);
-       // NUClear::log<NUClear::DEBUG>("Cos Knee: ", cosKnee);
+       // //NUClear::log<NUClear::DEBUG>("Cos Knee: ", cosKnee);
         // TODO: check if cosKnee is between 1 and -1
         knee = acos(cosKnee);
 
@@ -116,7 +120,7 @@ namespace kinematics {
         if(hipXLength>0){
             hipX /= hipXLength;
         } else {
-            NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints : targetLeg and ankleY parrallel. This is unhandled at the moment.");
+            //NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints : targetLeg and ankleY parrallel. This is unhandled at the moment.");
             return positions;
         }
         arma::vec3 legPlaneTangent = arma::cross(ankleY, hipX); //Will be unit as ankleY and hipX are normal and unit
@@ -176,6 +180,24 @@ namespace kinematics {
         return positions;
     }
 
+    template <typename RobotKinematicModel> 
+	std::vector<double> calculateLegJointsTeamDarwin(arma::mat44 target, bool isLeft) {
+        std::vector<double> joints(6);
+        //NUClear::log<NUClear::DEBUG>(isLeft ? "Left Leg" : "Right Leg");
+        //NUClear::log<NUClear::DEBUG>("calculateLegJointsTeamDarwin\n", target);
+        target(2,3) += RobotKinematicModel::TEAMDARWINCHEST_TO_ORIGIN;
+        target *= utility::math::matrix::translationMatrix(arma::vec3({0,0,RobotKinematicModel::Leg::FOOT_HEIGHT}));
+        auto legJoints = calculateLegJoints<RobotKinematicModel>(target, Side(isLeft));
+
+        joints[0] = legJoints[0].second;
+        joints[1] = legJoints[1].second;
+        joints[2] = legJoints[2].second;
+        joints[3] = legJoints[3].second;
+        joints[4] = legJoints[4].second;
+        joints[5] = legJoints[5].second;
+
+        return joints;
+    }
 
 
 } // kinematics

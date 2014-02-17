@@ -20,6 +20,7 @@ public:
   Transform &rotateY(double a = 0);
   Transform &rotateZ(double a = 0);
   Transform &mDH(double alpha, double a, double theta, double d);
+  arma::mat44 getArmaMat();
   void apply(double x[3]);
   double& operator() (int i, int j);
   const double operator() (int i, int j) const;

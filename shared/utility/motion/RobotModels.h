@@ -13,12 +13,17 @@ namespace utility{
 
 			class DarwinModel{
 			public:
+                
+
 				class Leg {
 				public:
 					static constexpr float LENGTH_BETWEEN_LEGS = 0.074;
-			        static constexpr float DISTANCE_FROM_BODY_TO_HIP_JOINT = 0.034;
+			        static constexpr float HIP_OFFSET_Z = 0.034;
+			        static constexpr float HIP_OFFSET_X = 0.008;
 					static constexpr float UPPER_LEG_LENGTH = 0.093;
 					static constexpr float LOWER_LEG_LENGTH = 0.093;
+					static constexpr float FOOT_HEIGHT = 0.0335;
+		
 
 
 					static constexpr int LEFT_TO_RIGHT_HIP_YAW = 	   -1;
@@ -33,6 +38,8 @@ namespace utility{
 				public:
 
 				};
+
+				static constexpr float TEAMDARWINCHEST_TO_ORIGIN = 0.096 - Leg::HIP_OFFSET_Z; //Taken from team darwin OPkinematics.cpp : hipOffsetZ = .096; 
 			};
 		}
 	}
