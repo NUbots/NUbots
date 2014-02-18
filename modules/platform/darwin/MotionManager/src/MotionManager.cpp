@@ -173,7 +173,7 @@ namespace darwin {
                 // If we have an event in the queue, then we start when this event starts otherwise we start now
                 m.start = queue.empty() ? NUClear::clock::now() : queue.back().end;
                 m.end = point.time;
-                m.position = utility::math::angle::normalizeAngle(point.position);;
+                m.position = utility::math::angle::normalizeAngle(point.position);
                 m.gain = point.gain;
                 m.executed = false;
 
