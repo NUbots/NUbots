@@ -38,7 +38,7 @@ namespace modules {
                 }
                 // Otherwise we are done, shutdown
                 else {
-                    powerPlant->shutdown();
+                    powerplant.shutdown();
                 }
             }
 
