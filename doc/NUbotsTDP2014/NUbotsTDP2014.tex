@@ -44,7 +44,7 @@ Homepage: \texttt{http://robots.newcastle.edu.au}}
 \maketitle              % typeset the title of the contribution
 
 \begin{abstract}
-The NUbots team, from The University of Newcastle, Australia, has had a strong record of success in the RoboCup Standard Platform League since first entering in 2002. The team was also competitive within the RoboCup Humanoid Kid-Size League since 2012. The 2014 team comprises several new students. This paper summarizes the history of the NUbots team, describes the roles and research of the team members, gives an overview of the NUbots' robots and software system, and addresses relevant research projects within the the Newcastle Robotics Laboratory.
+The NUbots team, from The University of Newcastle, Australia, has had a strong record of success in the RoboCup Standard Platform League since first entering in 2002. The team has also competed within the RoboCup Humanoid Kid-Size League since 2012. The 2014 team brings a renewed focus on software architecture, modularity, and the ability to easily share code. This paper summarizes the history of the NUbots team, describes the roles and research of the team members, gives an overview of the NUbots' robots and software system, and addresses relevant research projects within the the Newcastle Robotics Laboratory.
 \end{abstract}
 
 %
@@ -70,14 +70,11 @@ During the previous two years the NUbots SPL code base has been ported to the DA
 
 \section{Background of the NUbots Team Members}
 \begin{itemize}
-\item \emph{Josiah Walker} is studying for a Doctorate of Philosophy in Computer Science in Reinforcement Learning and Robotics. He works on robot behaviour and machine learning for various NUbot systems. He is the NUbots team leader for 2013.
+\item \emph{Josiah Walker} is studying for a Doctorate of Philosophy in Computer Science in Reinforcement Learning and Robotics. He works on robot behaviour and machine learning for various NUbot systems. He is the NUbots team leader for 2013-2014.
 
+\item \emph{Brendan Annable} is a 3rd year undergraduate student studying Software Engineering currently working on network infrastructure as well as a browser-based debugging environment.
 
-
-
-\item \emph{Brendan Annable} is a 2nd year undergraduate student studying Software Engineering currently working on network infrastructure as well as a browser-based debugging environment.
-
-\item \emph{Alex Biddulph} is a fourth year undergraduate student studying Computer Engineering and Computer Science. He is working on improving the vision system and replacing the CM730.
+\item \emph{Alex Biddulph} is a 4th year undergraduate student studying Computer Engineering and Computer Science. His final year project is to improve the vision system and develop an alternative controller platform for the Darwin. %e is working on improving the vision system and replacing the CM730.
 
 \item \emph{A/Prof. Stephan Chalup} is the head of the Newcastle Robotics
 Laboratory. He is an Associate Professor in Computer Science and Software Engineering.
@@ -85,15 +82,15 @@ He is one of the initiators of the University of Newcastle's
 RoboCup activities since 2001. His research area is machine learning
 and anthropocentric robotics.
 
-\item \emph{Jake Fountain} is a fourth year undergraduate student studying a combined degree in mathematics and science, with his main interests lying in machine learning and artificial intelligence.
+\item \emph{Jake Fountain} is an honors year undergraduate student studying computer science, with undergraduate degrees in mathematics and science. His main interests lie in machine learning and artificial intelligence.
 
 \item \emph{Dr. Robert King} is a Lecturer in Statistics at the University of Newcastle. His research focus is on flexibly-shaped distributions,
 statistical computing and Bayesian knowledge updating. He joined the
-NUbots in 2004 and has developed a special interest in RoboCup rules and refereeing.
+NUbots in 2004 and has developed a special interest in the RoboCup rules and refereeing.
 
-\item \emph{Mitchell Metcalfe} is a fourth year undergraduate student studying combined degree in Mathematics and Computer Science. He is working on the NUBots' configuration system to consolidate system parameters.
+\item \emph{Mitchell Metcalfe} is a fourth year undergraduate student studying combined degree in Mathematics and Computer Science. He is working on the NUBots' localisation system, and maintains the support tools for the NUBots' compiler environment.
 
-\item \emph{Peter Turner} is technical staff in the School of Electrical Engineering and Computer Science. He is an expert on robot hardware and electronics and familiar with the Darwin-OP.
+\item \emph{Peter Turner} is technical staff in the School of Electrical Engineering and Computer Science. Peter provides hardware support and assists the team with physical robot design upgrades. %an expert on robot hardware and electronics and familiar with the Darwin-OP.
 
 \item \emph{Taylor Johnson} 
 
@@ -113,13 +110,11 @@ Newcastle, Australia. Details are linked to the relevant webpages at
 \texttt{www.robots.newcastle.edu.au}. Other robotics lab members who have contributed over the past six months include:
 \begin{itemize}
 
-\item \emph{Shannon Fenn} is a recent Computer Engineering and Computer Science graduate, who completed his Honours thesis on shape-based computer vision and optimisation, his works on machine vision with a focus on geometric methods.
+\item \emph{Shannon Fenn} %is a recent Computer Engineering and Computer Science graduate, who completed his Honours thesis on shape-based computer vision and optimisation, his works on machine vision with a focus on geometric methods.
 
-\item \emph{Madison Flannery} is a recent Computer Science graduate who worked on improving the detection of field objects in the NUbots vision system.
+\item \emph{Madison Flannery} %is a recent Computer Science graduate who worked on improving the detection of field objects in the NUbots vision system.
 
-\item \emph{Dr. Alexandre Mendes} is deputy head of the Newcastle Robotics
-Lab. He is a Senior Lecturer in Computer Science and Software Engineering.
-He joined the group in September 2011 and his research areas are algorithms and optimisation.
+\item \emph{Dr. Alexandre Mendes} %is deputy head of the Newcastle Robotics Lab. He is a Senior Lecturer in Computer Science and Software Engineering. He joined the group in September 2011 and his research areas are algorithms and optimisation.
 
 \end{itemize}
 
@@ -127,52 +122,55 @@ He joined the group in September 2011 and his research areas are algorithms and 
 
 %\pagebreak
 \section{Hardware and Software Overview}
-The NUbots use the DARWIN-OP robot with footsensors. The team has four of these robots that are of the standard design with the exception of a reduced footsize which currently is introduced. %Aditional minor structural modifications as well as a replacement of the main processor are planned after RoboCup 2013.
+The NUbots use the DARWIN-OP robot with footsensors. The team has five of these robots that are of the standard design with the exception of a slightly reduced footsize. The team also hopes to field modified DARWIN-OP consisting of a full HD camera, an ODROID computer (ref) and an updated motor communications board as a part of a student project. %Aditional minor structural modifications as well as a replacement of the main processor are planned after RoboCup 2013.
 
-%\begin{figure}
-%\begin{center}
-%\scalebox{0.3}{\includegraphics{darwin.png}}
-%\caption{The DARWIN-OP Robot.}
-%\label{fig:darwin}
-%\end{center}
-%\end{figure}
-
-The NUbots team's major research focus is on using machine learning methods within the software systems of the robot to achieve increased performance and autonomy~\cite{ChalupEtAlSMC2007}. The current NUbots software source is available from \cite{nubotsGit} and is covered under the GPL. This includes associated toolkits for optimisation and learning on the robots. Our software platform is designed to work on multiple robotic platforms, and all of the individual modules have been designed with this in mind. The sensors and actuators are accessed using a standard format, regardless of the robot running the software~\cite{Kulk2011c}. 
-
-The software is broken into a number of modules. The primary modules are: vision, localisation, behaviour, and motion. An overview of our software structure can be seen in Figure~\ref{fig:platform}. The research areas applied to each of these modules are described in the research section.
-
-\begin{figure}[bht!]
+\begin{figure}
 \begin{center}
-\includegraphics[width=1.0\textwidth]{Platform.png}
-\caption{An overview of the software framework, and the transfer of information between the hardware and software modules via the blackboard~\cite{Kulk2011c}.}
-\label{fig:platform}
+\scalebox{0.3}{\includegraphics{darwin.png}}
+\caption{The DARWIN-OP Robot.}
+\label{fig:darwin}
 \end{center}
 \end{figure}
 
+The NUbots team's major research focus is on using machine learning methods within the software systems of the robot to achieve increased performance and autonomy~\cite{ChalupEtAlSMC2007}. The current NUbots software source is available from \cite{nubotsGit} and is covered under the GPL. This includes associated toolkits for building and deploying the software. Our software is designed to work on multiple robotic platforms, and all of the individual modules have been designed to be easily used in other systems. The sensors and actuators are accessed using a standard format, regardless of the robot running the software~\cite{Kulk2011c}. 
+
+This year marks a major change in the software architecture of the NUBots, with improved software modularity coming from a cutting edge event based message passing system. The NUBots' architecture now has strong parallels with ROS (although without the associated overheads) and interoperability of modules is planned. The NUBots software is designed to allow new teams and team members to easily understand and innovate on existing code. We plan to provide a full code release post Robocup 2014.
+
+%The software is broken into a number of modules. The primary modules are: vision, localisation, behaviour, and motion. An overview of our software structure can be seen in Figure~\ref{fig:platform}. The research areas applied to each of these modules are described in the research section.
+
+%\begin{figure}[bht!]
+%\begin{center}
+%\includegraphics[width=1.0\textwidth]{Platform.png} 
+%\caption{An overview of the software framework, and the transfer of information between the hardware and software modules via the blackboard~\cite{Kulk2011c}.}
+%\label{fig:platform}
+%\end{center}
+%\end{figure}
+
 
 \section{Acknowledgement of Use of Code}
-The NUbots Darwin-OP robots use a walk engine ported from the B-Human NAO robot walk engine \cite{BHumanWalk2010}. We acknowledge the source of this code and have made changes only in the areas that allow it to inter-operate with our multi-platform framework.
+The NUbots Darwin-OP robots use a walk engine ported from the 2013 Team Darwin code release. We acknowledge the source of this code. The NUBots have ported this code to C++ and restructured the logic, and also made changes including improving the inverse kinematic calculations. %The source for this module can be found in \cite{nubotsGit2}.
 
 \section{Enhancements since RoboCup 2013}
-Since Robocup 2013, improvements have been made in the area of software architecture and hardware. 
+Since Robocup 2013, improvements have been made in the area of software architecture and hardware. As the league moves to more realistic game conditions, we are trialling a hardware control platform composed of the following:
 
 In response to the increase in field size, the Logitech C905 is being replaced with a Logitech C920. The new camera will provide a HD 1080p image, allowing the robots to detect and classify objects at a greater distance.
 
 The Main Controller (CompuLab fit-PC2i) is being replaced by an ODROID-XU to help provide the extra processing power that is required for processing the HD images from the Logitech C920 while also allowing the software architecture to be further paralleled.
 
 A prototype hardware replacement for the ROBOTIS CM730 Sub Controller, named the TAJ3850, is 
-being developed as part of a Computer Engineering Third Year Project. The TAJ3850 provides power to all system components, a battery monitoring system featuring a low-voltage alarm and an extremely low-voltage automatic cut-off, a six-axis motion processing unit, a temperature sensor, and five dedicated motor buses. The TAJ3850 also exposes peripheral connections from the ODROID-XU to the back panel of the robot (HDMI, USB3, LAN, Audio output), monitors the three back-panel control buttons, and controls the status LEDs on the back panel and in the head.
+being developed as part of a Computer Engineering Third Year Project. The TAJ3850 provides power to all system components, a battery monitoring system featuring a low-voltage alarm and an extremely low-voltage automatic cut-off, an improved six-axis motion processing unit, a temperature sensor, and five dedicated motor buses. The TAJ3850 also exposes peripheral connections from the ODROID-XU to the back panel of the robot (HDMI, USB3, LAN, Audio output), monitors the three back-panel control buttons, and controls the status LEDs on the back panel and in the head.
 
-\begin{figure}
-\begin{center}
-\scalebox{0.3}{\includegraphics[angle=270]{TAJ3850.png}}
-\caption{Connection mappings between the TAJ3850, ODROID-XU, and external peripherals.}
-\label{fig:taj3850}
-\end{center}
-\end{figure}
+%\begin{figure}
+%\begin{center}
+%\scalebox{0.3}{\includegraphics[angle=270]{TAJ3850.png}}
+%\caption{Connection mappings between the TAJ3850, ODROID-XU, and external peripherals.}
+%\label{fig:taj3850}
+%\end{center}
+%\end{figure}
 
 
-The above enhancements will not be implemented on all of the Darwin-OP robots. The robots that do no get selected for these enhancement will have the standard Logitech C905, fit-PC21 and CM730 configuration.
+%The above enhancements will not be implemented on all of the Darwin-OP robots. 
+The remaining robots will have the standard Logitech C905, fit-PC21 and CM730 configuration.
 
 \section{Research Areas}
 
@@ -196,8 +194,8 @@ effort with the company Tribotix and colleagues in design a
 bear-like robot (called Hykim) was developed~\cite{ChalupEtAl2006}. The idea was to have a modular open platform using high quality Dynamixel servos. 
 \\
 
-\noindent\textbf{Biped Robot Locomotion:} The improvement of walking speed and stability has been investigated by the NUbots since several years and on different platforms: On the AIBO robot we achieved one of the fastest walks at that time by walk parameter evolution \cite{QuinlanEtAlACRA2003,ChalupEtAlSMC2007}. On the Nao robot we improved existing walk engines by modifying the joint stiffnesses, or controller gains, \cite{Kulk2008,Kulk2010,Kulk2010a}. The stiffnesses were selected through an iterative process to maximise the cost of transport. We investigated the application of Support Vector Machines and Neural Networks to proprioception data for sensing perturbations during pseudo quiet stance. Walk improvements have been primarily done via optimisation techniques \cite{Kulk2011a,Kulk2011b} with recent improvements to our framework for online optimisation of bipedal humanoid locomotion. 
-The use of spiking neural networks has been trialled in simulation~\cite{WiklendtChalup2008}. Prior to RoboCup 2012 the walk engine developed by the leading SPL team BHuman~\cite{BHumanWalk2010} was ported to the DARwIn-OP platform, and a variety of optimisation techniques were developed and successfully applied to improve walking speed and stability of the Darwin-OP. 
+\noindent\textbf{Biped Robot Locomotion:} The improvement of walking speed and stability has been investigated by the NUbots for several years and on different platforms: On the AIBO robot we achieved one of the fastest walks at that time by walk parameter evolution \cite{QuinlanEtAlACRA2003,ChalupEtAlSMC2007}. On the Nao robot we improved existing walk engines by modifying the joint stiffnesses, or controller gains, \cite{Kulk2008,Kulk2010,Kulk2010a}. The stiffnesses were selected through an iterative process to maximise the cost of transport. We investigated the application of Support Vector Machines and Neural Networks to proprioception data for sensing perturbations during pseudo quiet stance. Walk improvements have been primarily done via optimisation techniques \cite{Kulk2011a,Kulk2011b} with recent improvements to our framework for online optimisation of bipedal humanoid locomotion. 
+The use of spiking neural networks has been trialled in simulation~\cite{WiklendtChalup2008}. Prior to RoboCup 2012 the walk engine developed by the leading SPL team BHuman~\cite{BHumanWalk2010} was ported to the DARwIn-OP platform, and a variety of optimisation techniques were developed and successfully applied to improve walking speed and stability of the Darwin-OP. Similar optimisations are in process for the Team Darwin 2013 walk.
 \\
 
 \noindent\textbf{Reinforcement Learning, Affective Computing and Robot Emotions:} We investigate the feasibility of reinforcement learning or neurodynamic programming for applications such as motor control and music composition. Concepts for affective computing are developed in multidisciplinary projects in collaboration with the areas of architecture and cognitive science. The concept of emotion is important for selective memory formation and action weighting and continues to gain importance in the robotics community, including within robotic soccer. A number of projects in the Newcastle Robots lab already address this topic~\cite{ANFA2012,Pareidolia2010,HongEtAl2013a,HongEtAl2013b,WongEtAl2013}. 
@@ -213,7 +211,7 @@ and efficient processing of high-dimensional visual and acoustic data.
 \cite{ChalupEtAl2007b,WongChalup_WCCI_2008,WongChalup2008,WongEtAl2012}.
 \\
 
-\noindent\textbf{Other new projects:} Much work has been focused on the underlying software architecture and external utilities to enable flexibility and extensibility for future research. Projects undertaken include improving the configurability of the software system via parameter consolidation, development of a web-based online visualisation and debugging utility and the application of software architectural principles in the area of machine vision. Some of this work is currently still in progress as part of the 2012/2013 robotics lab summer projects by new undergraduate students who have joined the team.
+\noindent\textbf{Other new projects:} Much work has been focused on the underlying software architecture and external utilities to enable flexibility and extensibility for future research. Projects undertaken include improving the configurability of the software system via real-time configuration updates, development of a web-based online visualisation and debugging utility and the application of software architectural principles to create a multithreaded event-based system with almost no run-time overhead. Some of this work is currently still in progress as part of the 2013/2014 robotics lab summer projects by new undergraduate students who have joined the team.
 
 \section{Related Research Concentrations}
 
