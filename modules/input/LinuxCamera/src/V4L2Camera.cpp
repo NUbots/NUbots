@@ -111,7 +111,8 @@ namespace modules {
             // If it is a MJPG
             if(format == "MJPG") {
                 struct jpeg_error_mgr err;
-                struct jpeg_decompress_struct cinfo = {0};
+                struct jpeg_decompress_struct cinfo;
+                std::memset(&cinfo, 0, sizeof(jpeg_decompress_struct));
                 
                 uint8_t* payload = static_cast<uint8_t*>(buff[current.index].payload);
 

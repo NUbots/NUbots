@@ -72,7 +72,7 @@ namespace modules{
             LUT = LUTbuffer;
         }
 
-        const unsigned int LookUpTable::getLUTIndex(const messages::input::Image::Pixel& colour) const {
+        unsigned int LookUpTable::getLUTIndex(const messages::input::Image::Pixel& colour) const {
             unsigned int index = 0;
             
             index += ((colour.y >> 1) << 14);
@@ -81,6 +81,10 @@ namespace modules{
             
             return index;
         }
+
+        messages::vision::Colour LookUpTable::classifyPixel(const messages::input::Image::Pixel& p) const {
+            return (messages::vision::Colour)(LUT[getLUTIndex(p)]); // 7bit LUT
+        }  
         
     }   //vision
 }   //modules

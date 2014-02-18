@@ -49,7 +49,7 @@ namespace messages {
         };
         
         const std::string stringFromId(const ServoID id);
-        const ServoID idFromString(const std::string str);
+        ServoID idFromString(const std::string str);
     }
 }
 

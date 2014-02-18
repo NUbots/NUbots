@@ -45,7 +45,7 @@ namespace modules {
         LinuxCamera::LinuxCamera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
             // This trigger gets us as close as we can to the frame rate as possible (as high resolution as we can)
-            on<Trigger<Every<NUClear::clock::period::den / V4L2Camera::FRAMERATE, NUClear::clock::duration>>, Options<Single>>([this](const time_t& time) {
+            on<Trigger<Every<NUClear::clock::period::den / V4L2Camera::FRAMERATE, NUClear::clock::duration>>, Options<Single>>([this](const time_t&) {
 
                 // If the camera is ready, get an image and emit it
                 if (m->camera.isStreaming()) {
@@ -54,7 +54,7 @@ namespace modules {
             });
 
             // When we shutdown, we must tell our camera class to close (stop streaming)
-            on<Trigger<Shutdown>>([this](const Shutdown& shutdown) {
+            on<Trigger<Shutdown>>([this](const Shutdown&) {
                 m->camera.closeCamera();
             });
 

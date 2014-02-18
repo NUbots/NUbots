@@ -61,7 +61,7 @@ namespace modules {
                     }
                     else {
                         NUClear::log<NUClear::DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
-                        powerPlant->shutdown();
+                        powerplant.shutdown();
                     }
                 });
 
@@ -86,7 +86,7 @@ namespace modules {
                     emit(std::move(waypoint));
                 });
 
-                powerPlant->addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&ScriptTuner::run), this),
+                powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&ScriptTuner::run), this),
                                                                                          std::bind(std::mem_fn(&ScriptTuner::kill), this)));
             }
 
