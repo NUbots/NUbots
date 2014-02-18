@@ -84,7 +84,7 @@ namespace modules {
             });
 
             // Awful hack do not use.
-            on<Trigger<messages::audio::Beat>>([this](const messages::audio::Beat& beat) {
+            on<Trigger<messages::audio::Beat>>([this](const messages::audio::Beat&) {
                 if(!startedDancing) {
                     emit(std::make_unique<messages::motion::ExecuteScriptByName>("Stand.json"));
                     startedDancing = true;

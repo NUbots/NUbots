@@ -49,9 +49,12 @@ namespace modules {
         */
         void zero();
 
-        const messages::vision::Colour classifyPixel(const messages::input::Image::Pixel& p) const {
-            return (messages::vision::Colour)(LUT[getLUTIndex(p)]); // 7bit LUT
-        }        
+        /*!
+            @brief Classifies a pixel
+            @param p the pixel
+            @return Returns the colour classification of this pixel
+         */
+        messages::vision::Colour classifyPixel(const messages::input::Image::Pixel& p) const;
         
     private:
         /*!
@@ -59,7 +62,7 @@ namespace modules {
         *  @param p The pixel to be classified.
         *  @return Returns the colour index for the given pixel.
         */
-        const unsigned int getLUTIndex(const messages::input::Image::Pixel& colour) const;
+        unsigned int getLUTIndex(const messages::input::Image::Pixel& colour) const;
    
         const unsigned char* LUT;           //! @variable Colour Look Up Table - protected.
         unsigned char* LUTbuffer;           //! @variable temp LUT for loading.

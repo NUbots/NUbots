@@ -30,7 +30,7 @@ namespace darwin {
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/ttyUSB0") {
 
         // This trigger gets the sensor data from the CM730
-        on<Trigger<Every<60, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t& time) {
+        on<Trigger<Every<60, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
 
             // Read our data
             Darwin::BulkReadResults data = darwin.bulkRead();
@@ -45,7 +45,7 @@ namespace darwin {
              */
 
             // Read our Error code
-            sensors->cm730ErrorFlags = data.cm730ErrorCode == -1 ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.cm730ErrorCode;
+            sensors->cm730ErrorFlags = data.cm730ErrorCode == 0xFF ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.cm730ErrorCode;
 
             // LED Panel
             sensors->ledPanel.led2 = Convert::getBit<1>(data.cm730.ledPanel);
@@ -81,7 +81,7 @@ namespace darwin {
 
             // Right Sensor
             // Error
-            sensors->fsr.right.errorFlags = data.fsrErrorCodes[0] == -1 ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.fsrErrorCodes[0];
+            sensors->fsr.right.errorFlags = data.fsrErrorCodes[0] == 0xFF ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.fsrErrorCodes[0];
 
             // Sensors
             sensors->fsr.right.fsr1 = Convert::fsrForce(data.fsr[0].fsr1);
@@ -95,7 +95,7 @@ namespace darwin {
 
             // Left Sensor
             // Error
-            sensors->fsr.left.errorFlags = data.fsrErrorCodes[1] == -1 ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.fsrErrorCodes[1];
+            sensors->fsr.left.errorFlags = data.fsrErrorCodes[1] == 0xFF ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.fsrErrorCodes[1];
 
             // Sensors
             sensors->fsr.left.fsr1 = Convert::fsrForce(data.fsr[1].fsr1);
@@ -116,7 +116,7 @@ namespace darwin {
                 messages::platform::darwin::DarwinSensors::Servo& servo = sensors->servo[i];
 
                 // Error code
-                servo.errorFlags = data.servoErrorCodes[i] == -1 ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.servoErrorCodes[i];
+                servo.errorFlags = data.servoErrorCodes[i] == 0xFF ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.servoErrorCodes[i];
 
                 // Booleans
                 servo.torqueEnabled = data.servos[i].torqueEnabled;
