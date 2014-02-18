@@ -24,6 +24,7 @@ install_manifest.txt
 .vagrant/
 *.box
 *.iso
+*.deb
 
 # LaTeX stuff
 doc/*.aux
