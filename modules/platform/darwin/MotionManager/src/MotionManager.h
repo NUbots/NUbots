@@ -44,12 +44,17 @@ namespace darwin {
             bool executed = false;
         };
 
+        float P_FACTOR;
+        float I_FACTOR;
+        float D_FACTOR;
         std::mutex waypointMutex;
         std::list<Motion> waypoints[20];
 
         void queueEnd(size_t queue);
         void allQueueEnd();
     public:
+        static constexpr const char* CONFIGURATION_PATH = "MotionManager.json";
+        
         explicit MotionManager(std::unique_ptr<NUClear::Environment> environment);
     };
 }

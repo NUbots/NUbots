@@ -19,6 +19,7 @@
 
 #include "messages/motion/ServoWaypoint.h"
 #include "messages/platform/darwin/DarwinServoCommand.h"
+#include "messages/support/Configuration.h"
 
 #include "MotionManager.h"
 #include "utility/math/angle.h"
@@ -26,6 +27,8 @@
 namespace modules {
 namespace platform {
 namespace darwin {
+    using messages::support::Configuration;
+
 
     MotionManager::MotionManager(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -128,9 +131,9 @@ namespace darwin {
 
                     // TODO if someone were to want to tune the PID values, this is where it would go.
                     // multiply the values by gain to get the "softness" of the motion
-                    command.pGain = gain;
-                    command.iGain = 0;
-                    command.dGain = 0;
+                    command.pGain = P_FACTOR * gain;
+                    command.iGain = I_FACTOR;
+                    command.dGain = D_FACTOR;
 
                     // Push this onto our list of commands
                     commands->push_back(std::move(command));
@@ -180,6 +183,15 @@ namespace darwin {
                 queue.push_back(std::move(m));
             }
         });
+
+        on< Trigger<Configuration<MotionManager>> >([this](const Configuration<MotionManager>& motion) {
+            
+            P_FACTOR = motion.config["P_FACTOR"];
+            I_FACTOR = motion.config["I_FACTOR"];
+            D_FACTOR = motion.config["D_FACTOR"];
+
+        });
+
     }
 
     void MotionManager::queueEnd(size_t queue) {
