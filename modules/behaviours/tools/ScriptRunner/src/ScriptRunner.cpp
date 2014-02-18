@@ -57,7 +57,7 @@ namespace modules {
                 });
 
                 // When we finish with a script, execute the next one
-                on<Trigger<messages::motion::AllServoWaypointsComplete>>([this](const messages::motion::AllServoWaypointsComplete& complete) {
+                on<Trigger<messages::motion::AllServoWaypointsComplete>>([this](const messages::motion::AllServoWaypointsComplete&) {
                     executeNextScript();
                 });
             }

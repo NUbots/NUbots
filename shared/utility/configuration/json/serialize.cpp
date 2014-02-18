@@ -69,7 +69,7 @@ namespace {
                 return nodeAsString;
             }
 
-            std::string serializeNullpointer(const ConfigurationNode& node) {
+            std::string serializeNullpointer(const ConfigurationNode&) {
                 return "null";
             }
 

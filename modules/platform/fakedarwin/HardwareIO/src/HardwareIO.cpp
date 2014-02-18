@@ -141,7 +141,7 @@ namespace fakedarwin {
 		}
 
         // This trigger gets the sensor data from the CM730
-		on<Trigger<Every<60, Per<std::chrono::seconds> > >, Options<Single> >([this](const time_t& time) {
+		on<Trigger<Every<60, Per<std::chrono::seconds> > >, Options<Single> >([this](const time_t&) {
 
 			for (int i = 0; i < 20; ++i) {
 
