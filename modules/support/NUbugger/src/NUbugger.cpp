@@ -186,20 +186,9 @@ namespace modules {
                 reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
                 reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
                 reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
-                
-                for (auto& log : stats.log) {
-                    reactionStatistics->add_log(log);
-                }
-                
-                int status = -4; // some arbitrary value to eliminate the compiler warning
-                std::unique_ptr<char, void(*)(void*)> res {
-                    abi::__cxa_demangle(stats.name.c_str(), nullptr, nullptr, &status),
-                    std::free
-                };
 
-                std::string demangled_name(status == 0 ? res.get() : stats.name );
-
-                reactionStatistics->set_name(demangled_name);
+                // TODO this has 3 things in it now
+                reactionStatistics->set_name(stats.identifier[1]);
                 
                 send(message);
             });

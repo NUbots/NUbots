@@ -30,7 +30,7 @@ namespace modules {
                     emit(std::make_unique<messages::platform::darwin::LMissile>());
                 }
                 else {
-                    powerPlant->shutdown();
+                    powerplant.shutdown();
                 }
             });
         }

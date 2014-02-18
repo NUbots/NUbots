@@ -32,7 +32,7 @@ namespace modules {
         SignalCatcher::SignalCatcher(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
             // Store our powerplant in the static variable
-            POWER_PLANT = powerPlant;
+            POWER_PLANT = &powerplant;
 
             // On sigint run the sigint handler
             std::signal(SIGINT, &SignalCatcher::sigintHandler);
