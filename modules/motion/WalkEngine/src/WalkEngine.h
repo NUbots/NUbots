@@ -35,7 +35,7 @@ namespace modules {
          */
         class WalkEngine : public NUClear::Reactor {
         public:
-             static constexpr size_t UPDATE_FREQUENCY = 20;
+             static constexpr size_t UPDATE_FREQUENCY = 60;
             static constexpr const char* CONFIGURATION_PATH = "WalkEngine.json";
             explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
         private:
