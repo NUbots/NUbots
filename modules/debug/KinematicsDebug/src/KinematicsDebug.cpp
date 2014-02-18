@@ -108,72 +108,97 @@ namespace modules {
                     });
 
                     on< Trigger<Configuration<KinematicsNULLTest>> >([this](const Configuration<KinematicsNULLTest>& request) {
-                        
-                        arma::mat44 ikRequest = yRotationMatrix(request.config["yAngle"], 4);
-                        ikRequest *= xRotationMatrix(request.config["xAngle"], 4);
-                        ikRequest *= zRotationMatrix(request.config["zAngle"], 4);
-                        
-                        // translation
-                        ikRequest(0,3) = request.config["x"];
-                        ikRequest(1,3) = request.config["y"]; 
-                        ikRequest(2,3) = request.config["z"]; 
+                        int iterations = 1;
+                        int numberOfFails = 0;
+                        float ERROR_THRESHOLD = request.config["ERROR_THRESHOLD"];
 
                         if(request.config["RANDOMIZE"]){
-                            ikRequest = yRotationMatrix(2*M_PI*rand()/static_cast<double>(RAND_MAX), 4);
-                            ikRequest *= xRotationMatrix(2*M_PI*rand()/static_cast<double>(RAND_MAX), 4);
-                            ikRequest *= zRotationMatrix(2*M_PI*rand()/static_cast<double>(RAND_MAX), 4);
-                            ikRequest(0,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);
-                            ikRequest(1,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);
-                            ikRequest(2,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);
+                            iterations = request.config["RANDOM_ITERATIONS"];
                         }
 
-                        bool left = request.config["left"];
-                        bool right = request.config["right"];
+                        for(int i = 0; i<iterations; i++){
+                            arma::mat44 ikRequest = yRotationMatrix(request.config["yAngle"], 4);
+                            ikRequest *= xRotationMatrix(request.config["xAngle"], 4);
+                            ikRequest *= zRotationMatrix(request.config["zAngle"], 4);
+                            
+                            // translation
+                            ikRequest(0,3) = request.config["x"];
+                            ikRequest(1,3) = request.config["y"]; 
+                            ikRequest(2,3) = request.config["z"]; 
+
+                            if(request.config["RANDOMIZE"]){
+                                ikRequest = yRotationMatrix(2*M_PI*rand()/static_cast<double>(RAND_MAX), 4);
+                                ikRequest *= xRotationMatrix(2*M_PI*rand()/static_cast<double>(RAND_MAX), 4);
+                                ikRequest *= zRotationMatrix(2*M_PI*rand()/static_cast<double>(RAND_MAX), 4);
+                                ikRequest(0,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);
+                                ikRequest(1,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);
+                                ikRequest(2,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);
+                            }
+
+                            bool left = request.config["left"];
+                            bool right = request.config["right"];
+                            
+                            std::unique_ptr<Sensors> sensors = std::make_unique<Sensors>();
+                            sensors->servos = std::vector<Sensors::Servo>(20);
+
+                            if (left) {
+                                std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(ikRequest, Side::LEFT);
+                                for (auto& legJoint : legJoints) {
+                                    ServoID servoID;
+                                    float position;
+
+                                    std::tie(servoID, position) = legJoint;
+                                    
+                                    sensors->servos[static_cast<int>(servoID)].presentPosition = position;
+                                }
+                            }
+
+                            if (right) {
+                                std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(ikRequest, Side::RIGHT);
+                                for (auto& legJoint : legJoints) {
+                                    ServoID servoID;
+                                    float position;
+
+                                    std::tie(servoID, position) = legJoint;
+                                    
+                                    sensors->servos[static_cast<int>(servoID)].presentPosition = position;
+                                }
+                            }
+                            std::cout<< "KinematicsNULLTest -calculating forward kinematics." <<std::endl;                
+                            arma::mat44 lFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::L_ANKLE_ROLL) * utility::math::matrix::yRotationMatrix(-M_PI_2, 4).t();
+                            arma::mat44 rFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::R_ANKLE_ROLL) * utility::math::matrix::yRotationMatrix(-M_PI_2, 4).t();                            
+                            NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts left foot: \n",lFootPosition);
+                            NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts right foot: \n",rFootPosition);
+                            std::cout << "Compared to request: \n" << ikRequest << std::endl;
+
+                            float lmax_error = 0;
+                            float rmax_error = 0;
+                            for(int i = 0; i <16 ; i++){
+                                float lerror = std::abs(lFootPosition(i%4, i/4) - ikRequest(i%4, i/4));
+                                float rerror = std::abs(rFootPosition(i%4, i/4) - ikRequest(i%4, i/4));
+                                if (lerror>lmax_error) {
+                                    lmax_error = lerror;
+                                }
+                                if (rerror>rmax_error) {
+                                    rmax_error = rerror;
+                                }
+                            }
+                            std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<std::endl;                        
+                            std::cout<< (lmax_error < ERROR_THRESHOLD ? "LEFT IK TEST PASSED" : "\n\n\n!!!!!!!!!! LEFT IK TEST FAILED !!!!!!!!!!\n\n\n" ) << "     (max_error = " << lmax_error << ")"<<std::endl; 
+                            std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<std::endl;       
+
+                            std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<std::endl;                        
+                            std::cout<< (rmax_error < ERROR_THRESHOLD ? "RIGHT IK TEST PASSED" : "\n\n\n!!!!!!!!!! RIGHT IK TEST FAILED !!!!!!!!!!\n\n\n" ) << "     (max_error = " << rmax_error << ")"<<std::endl; 
+                            std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<std::endl;       
+
+                            if(lmax_error >= ERROR_THRESHOLD or rmax_error >= ERROR_THRESHOLD){
+                                numberOfFails++;
+                            }
+                            sensors->orientation = arma::eye(3,3); 
+                            emit(std::move(sensors));    
+                        }           
+                        std::cout<< "IK NULL Test : "<< numberOfFails << " Total Failures " <<std::endl;       
                         
-                        std::unique_ptr<Sensors> sensors = std::make_unique<Sensors>();
-                        sensors->servos = std::vector<Sensors::Servo>(20);
-
-                        if (left) {
-                            std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(ikRequest, Side::LEFT);
-                            for (auto& legJoint : legJoints) {
-                                ServoID servoID;
-                                float position;
-
-                                std::tie(servoID, position) = legJoint;
-                                
-                                sensors->servos[static_cast<int>(servoID)].presentPosition = position;
-                            }
-                        }
-
-                        if (right) {
-                            std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(ikRequest, Side::RIGHT);
-                            for (auto& legJoint : legJoints) {
-                                ServoID servoID;
-                                float position;
-
-                                std::tie(servoID, position) = legJoint;
-                                
-                                sensors->servos[static_cast<int>(servoID)].presentPosition = position;
-                            }
-                        }
-                        std::cout<< "KinematicsNULLTest -calculating forward kinematics." <<std::endl;                
-                        arma::mat44 footPosition = calculatePosition<DarwinModel>(*sensors, ServoID::L_ANKLE_ROLL) * utility::math::matrix::yRotationMatrix(-M_PI_2, 4).t();
-                        NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts: \n",footPosition);
-                        std::cout << "Compared to request: \n" << ikRequest << std::endl;
-
-                        float max_error = 0;
-                        for(int i = 0; i <16 ; i++){
-                            float error = std::abs(footPosition(i%4, i/4) - ikRequest(i%4, i/4));
-                            if (error>max_error) {
-                                max_error = error;
-                            }
-                        }
-                        std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<std::endl;                        
-                        std::cout<< (max_error < 1e-6 ? "IK TEST PASSED" : "\n\n\n!!!!!!!!!! IK TEST FAILED !!!!!!!!!!\n\n\n" ) << "     (max_error = " << max_error << ")"<<std::endl; 
-                        std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<std::endl;       
-
-                        sensors->orientation = arma::eye(3,3);                 
-                        emit(std::move(sensors));
                     });
 
             }
