@@ -71,6 +71,11 @@ Please provide the name of the role to run.
 elif command == 'create_box':
   if os.path.isfile("packer/nubots-ubuntu-12-04-x86-virtualbox.box"):
     call(['rm', 'nubots-ubuntu-12-04-x86-virtualbox.box'], cwd='packer')
-  call(['packer', 'build', '-only=virtualbox-iso', 'template.json'], cwd='packer')
+  if os.path.isfile("packer/nubots-ubuntu-12-04-x86-vmware.box"):
+    call(['rm', 'nubots-ubuntu-12-04-x86-vmware.box'], cwd='packer')
+  call(['packer', 'build', '-only=vmware-iso', 'template.json'], cwd='packer')
   call(['vagrant', 'box', 'remove', 'nubots-14.02'])
-  call(['vagrant', 'box', 'add', 'nubots-14.02', 'nubots-ubuntu-12-04-x86-virtualbox.box'], cwd='packer')
+  if os.path.isfile("packer/nubots-ubuntu-12-04-x86-virtualbox.box"):
+    call(['vagrant', 'box', 'add', 'nubots-14.02', 'nubots-ubuntu-12-04-x86-virtualbox.box'], cwd='packer')
+  else:
+    call(['vagrant', 'box', 'add', 'nubots-14.02', 'nubots-ubuntu-12-04-x86-vmware.box'], cwd='packer')

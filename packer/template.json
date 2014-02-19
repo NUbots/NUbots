@@ -18,6 +18,7 @@
           "scripts": [
             "scripts/base.sh",
             "scripts/vagrant.sh",
+            "scripts/vmware.sh",
             "scripts/puppet.sh",
             "scripts/cleanup.sh",
             "scripts/zerodisk.sh"
@@ -93,9 +94,10 @@
       "disk_size": 40960,
       "guest_os_type": "linux",
       "http_directory": "http",
-      "iso_url": "http://releases.ubuntu.com/precise/ubuntu-12.04.4-server-i386.iso",
+      "iso_url": "../../ubuntu-12.04.4-server-i386.iso",
       "iso_checksum": "fbe7f159337551cc5ce9f0ff72acefef567f3dcd30750425287588c554978501",
       "iso_checksum_type": "sha256",
+      "tools_upload_flavor": "linux",
       "ssh_username": "vagrant",
       "ssh_password": "vagrant",
       "ssh_port": 22,
