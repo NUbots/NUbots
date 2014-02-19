@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 #ifndef MESSAGES_AUDIO_BEAT_H
-#define	MESSAGES_AUDIO_BEAT_H
+#define    MESSAGES_AUDIO_BEAT_H
 
 #include <nuclear>
 

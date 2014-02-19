@@ -22,13 +22,15 @@ message Message {
 
 	message ReactionStatistics {
 		optional string name = 1;
-		optional uint64 reactionId = 2;
-		optional uint64 taskId = 3;
-		optional uint64 causeReactionId = 4;
-		optional uint64 causeTaskId = 5;
-		optional uint64 emitted = 6;
-		optional uint64 started = 7;
-		optional uint64 finished = 8;
+		optional string triggerName = 2;
+		optional string functionName = 3;
+		optional uint64 reactionId = 4;
+		optional uint64 taskId = 5;
+		optional uint64 causeReactionId = 6;
+		optional uint64 causeTaskId = 7;
+		optional uint64 emitted = 8;
+		optional uint64 started = 9;
+		optional uint64 finished = 10;
 	}
 
 
@@ -57,8 +59,8 @@ message Message {
 			UNKNOWN_GOAL = 3;
 		}
 
-		
-		required ShapeType shape_type = 1;
+
+		optional ShapeType shape_type = 1;
 		optional GoalType goal_type = 2;
 		optional string name = 3;
 

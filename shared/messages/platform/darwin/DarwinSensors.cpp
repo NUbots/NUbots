@@ -24,9 +24,9 @@ namespace messages {
     namespace platform {
         namespace darwin {
             
-            const DarwinSensors::Servo& DarwinSensors::Servos::operator[](int index) const {
+            const DarwinSensors::Servo& DarwinSensors::Servos::operator[](input::ServoID servoId) const {
 
-                switch (static_cast<input::ServoID>(index)) {
+                switch (servoId) {
                     case input::ServoID::R_SHOULDER_PITCH:   return rShoulderPitch;
                     case input::ServoID::L_SHOULDER_PITCH:   return lShoulderPitch;
                     case input::ServoID::R_SHOULDER_ROLL:    return rShoulderRoll;
@@ -45,16 +45,16 @@ namespace messages {
                     case input::ServoID::L_ANKLE_PITCH:      return lAnklePitch;
                     case input::ServoID::R_ANKLE_ROLL:       return rAnkleRoll;
                     case input::ServoID::L_ANKLE_ROLL:       return lAnkleRoll;
-                    case input::ServoID::HEAD_PAN:           return headPan;
-                    case input::ServoID::HEAD_TILT:          return headTilt;
+                    case input::ServoID::HEAD_YAW:           return headPan;
+                    case input::ServoID::HEAD_PITCH:          return headTilt;
                 }
 
                 throw std::runtime_error("Out of bounds");
             }
 
-            DarwinSensors::Servo& DarwinSensors::Servos::operator[](int index) {
+            DarwinSensors::Servo& DarwinSensors::Servos::operator[](input::ServoID servoId) {
 
-                switch (static_cast<input::ServoID>(index)) {
+                switch (servoId) {
                     case input::ServoID::R_SHOULDER_PITCH:   return rShoulderPitch;
                     case input::ServoID::L_SHOULDER_PITCH:   return lShoulderPitch;
                     case input::ServoID::R_SHOULDER_ROLL:    return rShoulderRoll;
@@ -73,12 +73,20 @@ namespace messages {
                     case input::ServoID::L_ANKLE_PITCH:      return lAnklePitch;
                     case input::ServoID::R_ANKLE_ROLL:       return rAnkleRoll;
                     case input::ServoID::L_ANKLE_ROLL:       return lAnkleRoll;
-                    case input::ServoID::HEAD_PAN:           return headPan;
-                    case input::ServoID::HEAD_TILT:          return headTilt;
+                    case input::ServoID::HEAD_YAW:           return headPan;
+                    case input::ServoID::HEAD_PITCH:          return headTilt;
                 }
                 
                 throw std::runtime_error("Out of bounds");
             }
+
+            const DarwinSensors::Servo& DarwinSensors::Servos::operator[](int index) const {
+				return (*this)[static_cast<input::ServoID>(index)];
+			}
+
+            DarwinSensors::Servo& DarwinSensors::Servos::operator[](int index) {
+				return (*this)[static_cast<input::ServoID>(index)];
+			}
 
         }  // darwin
     }  // platform

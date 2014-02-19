@@ -25,45 +25,66 @@
 
 namespace utility {
     namespace math {
-
+  
         /**
          * Some general matrix utilities (generating rotation matrices).
          *
          * @author Alex Biddulph
+		 * @author Jake Fountain
+		 * @author Brendan Annable
          */
         namespace matrix {
+
             inline arma::mat33 xRotationMatrix(double angle) {
-                arma::mat33 xRotMatrix;
-                double cosA = cos(angle);
-                double sinA = sin(angle);
-
-                xRotMatrix << 1     << 0     << 0     << arma::endr
-                           << 0     << cosA  << -sinA << arma::endr
-                           << 0     << sinA  << cosA  << arma::endr;
-                return xRotMatrix;
-            }
-
+				double cosAngle = cos(angle);
+				double sinAngle = sin(angle);
+                return {1           , 0           , 0           , 
+                        0           , cosAngle    , -sinAngle   , 
+                        0           , sinAngle    , cosAngle    };
+			}
             inline arma::mat33 yRotationMatrix(double angle) {
-                arma::mat33 yRotMatrix;
-                double cosA = cos(angle);
-                double sinA = sin(angle);
-
-                yRotMatrix << cosA  << 0     << sinA  << arma::endr
-                           << 0     << 1     << 0     << arma::endr
-                           << -sinA << 0     << cosA  << arma::endr;
-                return yRotMatrix;
+				double cosAngle = cos(angle);
+				double sinAngle = sin(angle);
+                return {cosAngle    , 0           , sinAngle    , 
+                        0           , 1           , 0           , 
+                        -sinAngle   , 0           , cosAngle    };
             }
 
             inline arma::mat33 zRotationMatrix(double angle) {
-                arma::mat33 zRotMatrix;
-                double cosA = cos(angle);
-                double sinA = sin(angle);
-
-                zRotMatrix << cosA  << -sinA << 0     << arma::endr
-                           << sinA  << cosA  << 0     << arma::endr
-                           << 0     << 0     << 1     << arma::endr;
-                return zRotMatrix;
+				double cosAngle = cos(angle);
+				double sinAngle = sin(angle);
+                return {cosAngle    , -sinAngle   , 0           , 
+                        sinAngle    , cosAngle    , 0           , 
+                        0           , 0           , 1           };
             }
+
+			inline arma::mat xRotationMatrix(double angle, int size) {
+				if (size <= 2) {
+					throw std::runtime_error("Rotations in two dimensions cannot be done about the x-axis. Use the z-axis.");
+				}
+				arma::mat rot(size, size, arma::fill::eye);
+				rot.submat(0,0,2,2) = xRotationMatrix(angle);		 			
+				return rot;
+			}
+
+			inline arma::mat yRotationMatrix(double angle, int size) {
+				if (size <= 2) {
+					throw std::runtime_error("Rotations in two dimensions cannot be done about the y-axis. Use the z-axis.");
+				}
+				arma::mat rot(size, size, arma::fill::eye);
+				rot.submat(0,0,2,2) = yRotationMatrix(angle);		 			
+				return rot;
+			}	
+
+			inline arma::mat zRotationMatrix(double angle, int size) {
+				if (size <= 2) {
+					return zRotationMatrix(angle).submat(0,1,0,1); 				
+				}
+				arma::mat rot(size, size, arma::fill::eye);
+				rot.submat(0,0,2,2) = zRotationMatrix(angle);		 			
+				return rot;
+			}	
+			
         }
     }
 }

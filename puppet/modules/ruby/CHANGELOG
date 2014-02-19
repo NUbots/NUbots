@@ -1,0 +1,26 @@
+2013-10-09 - Version 0.1.1
+
+Summary:
+
+Tiny fix to the metadata.json.
+
+Fixes:
+- metadata.json.
+
+2013-10-08 - Version 0.1.0
+
+Summary:
+
+Release an updated version of this. Highlights include OpenSUSE and general
+spring cleaning done by our wonderful community members!
+
+Features:
+- OpenSUSE support
+- Allow `rubygems_package` override.
+- Add gemhome fact.
+- Add ri package.
+
+Fixes:
+- Lint fixes.
+- Remove virtual irb package.
+- Update dev packages for Ubuntu/Debian

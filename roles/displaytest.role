@@ -4,10 +4,12 @@ ADD_ROLE(
         support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
+        support::configuration::NetworkingConfiguration
         support::DisplayTest
         platform::darwin::HardwareIO
         input::LinuxCamera
         support::NUbugger
+        debug::NUbugger
         vision::LUTClassifier
         vision::FeatureDetector
 )

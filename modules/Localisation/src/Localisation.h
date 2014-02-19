@@ -28,12 +28,12 @@ using localisation::LocalisationEngine;
 namespace modules {
     class Localisation : public NUClear::Reactor {
     private:
-    	LocalisationEngine engine;
+        LocalisationEngine engine;
 
     public:
-    	/// @brief Our configuration file for this class
+        /// @brief Our configuration file for this class
         struct LocalisationConfig {
-        	static constexpr const char* CONFIGURATION_PATH = "Localisation.json";
+            static constexpr const char* CONFIGURATION_PATH = "Localisation.json";
         };
 
 

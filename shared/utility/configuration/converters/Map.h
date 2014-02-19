@@ -67,7 +67,7 @@ namespace configuration {
                     return result;
                 }
                 default:
-                    throw std::runtime_error("The datatype in this node was not an array or an object");
+                    throw std::runtime_error("The datatype in this node was not an object");
             }
         }
     };

@@ -7,7 +7,7 @@
 
 namespace messages {
     struct PlainMessage {
-		std::string value;
+        std::string value;
     };
 }
 

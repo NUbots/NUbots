@@ -1,0 +1,15 @@
+ADD_ROLE(
+    NAME walktest
+    MODULES
+        support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem    
+        #support::configuration::NetworkingConfiguration
+        #platform::darwin::HardwareIO
+        platform::fakedarwin::HardwareIO
+        platform::darwin::MotionManager
+        support::NUbugger
+        debug::NUbugger
+        debug::InverseKinematics
+        motion::WalkEngine
+)

@@ -44,8 +44,8 @@ namespace Darwin {
     , lAnklePitch(uart, ID::L_ANKLE_PITCH)
     , rAnkleRoll(uart, ID::R_ANKLE_ROLL)
     , lAnkleRoll(uart, ID::L_ANKLE_ROLL)
-    , headPan(uart, ID::HEAD_PAN)
-    , headTilt(uart, ID::HEAD_TILT)
+    , headPan(uart, ID::HEAD_YAW)
+    , headTilt(uart, ID::HEAD_PITCH)
     , rFSR(uart, ID::R_FSR)
     , lFSR(uart, ID::L_FSR)
     , rMissile(uart, ID::R_MISSILE)
@@ -166,7 +166,7 @@ namespace Darwin {
             if (!r.data.empty()) {
 
                 // Copy for servo data
-                if(r.header.id >= ID::R_SHOULDER_PITCH && r.header.id <= ID::HEAD_TILT) {
+                if(r.header.id >= ID::R_SHOULDER_PITCH && r.header.id <= ID::HEAD_PITCH) {
                     memcpy(&data.servos[r.header.id - 1], r.data.data(), sizeof(Types::MX28Data));
                     data.servoErrorCodes[r.header.id - 1] = r.header.errorcode;
                 }
@@ -203,7 +203,7 @@ namespace Darwin {
                 }
 
                 // Set for servo data
-                if (r.header.id >= ID::R_SHOULDER_PITCH && r.header.id <= ID::HEAD_TILT) {
+                if (r.header.id >= ID::R_SHOULDER_PITCH && r.header.id <= ID::HEAD_PITCH) {
                     memset(&data.servos[r.header.id - 1], 0xFF, sizeof(Types::MX28Data));
                     data.servoErrorCodes[r.header.id - 1] = r.header.errorcode;
                 }
@@ -265,9 +265,9 @@ namespace Darwin {
                 return rAnkleRoll;
             case ID::L_ANKLE_ROLL:
                 return lAnkleRoll;
-            case ID::HEAD_PAN:
+            case ID::HEAD_YAW:
                 return headPan;
-            case ID::HEAD_TILT:
+            case ID::HEAD_PITCH:
                 return headTilt;
             case ID::R_FSR:
                 return rFSR;

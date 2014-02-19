@@ -61,7 +61,7 @@ namespace modules {
                     }
                     else {
                         NUClear::log<NUClear::DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
-                        powerPlant->shutdown();
+                        powerplant.shutdown();
                     }
                 });
 
@@ -86,7 +86,7 @@ namespace modules {
                     emit(std::move(waypoint));
                 });
 
-                powerPlant->addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&ScriptTuner::run), this),
+                powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&ScriptTuner::run), this),
                                                                                          std::bind(std::mem_fn(&ScriptTuner::kill), this)));
             }
 
@@ -549,11 +549,11 @@ namespace modules {
 
 
                 //checks user input is a number and converts it to a number    
-                if(!tempframe.empty() && tempframe.size() <= 4) {
+                if (!tempframe.empty() && tempframe.size() <= 4) {
                     try {
                         int tempframe2 = stoi(tempframe);
                         //makes tempframe2 always positive
-                        if(tempframe2 <= 0) {
+                        if (tempframe2 <= 0) {
                             tempframe2=-1*tempframe2;
 
                         }
@@ -561,7 +561,7 @@ namespace modules {
                             tempframe2=tempframe2;
                         }
                         //checks user input is within correct range
-                        if(tempframe2 <= script.frames.size()) {
+                        if (size_t(tempframe2) <= script.frames.size()) {
 
                             frame = tempframe2 - 1;
                         }
@@ -569,7 +569,7 @@ namespace modules {
                             beep();                        
                         }
                     }
-                    catch(std::invalid_argument) {
+                    catch (std::invalid_argument) {
                         beep();
                     }
                 }
