@@ -109,7 +109,7 @@ namespace NUClear {
      */
     template <typename TConfiguration>
     struct NUClear::Reactor::Exists<messages::support::Configuration<TConfiguration>> {
-        static void exists(NUClear::Reactor* context) {
+        static void exists(NUClear::Reactor& context) {
 
             // Build our lambda we will use to trigger this reaction
             std::function<void (Reactor*, const std::string&, const messages::support::ConfigurationNode&)> emitter =
@@ -127,7 +127,7 @@ namespace NUClear {
             };
 
             // Emit it from our reactor to the config system
-            context->emit<Scope::INITIALIZE>(std::unique_ptr<messages::support::ConfigurationConfiguration>(
+            context.emit<Scope::INITIALIZE>(std::unique_ptr<messages::support::ConfigurationConfiguration>(
                 new messages::support::ConfigurationConfiguration {
                     typeid(TConfiguration),
                     TConfiguration::CONFIGURATION_PATH,

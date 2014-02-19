@@ -22,7 +22,7 @@
 namespace messages {
     namespace input {
 
-        const ServoID idFromString(const std::string str) {
+        ServoID idFromString(const std::string str) {
 
             return    str == "R_SHOULDER_PITCH" ? ServoID::R_SHOULDER_PITCH
                     : str == "L_SHOULDER_PITCH" ? ServoID::L_SHOULDER_PITCH
