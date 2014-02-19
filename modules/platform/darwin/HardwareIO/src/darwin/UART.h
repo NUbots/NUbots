@@ -45,7 +45,7 @@ namespace Darwin {
 
     namespace ErrorCode {
         enum {
-            NO_RESPONSE     = -1,
+            NO_RESPONSE     = 0x00FF,
             NONE            = 0x0000,
             INPUT_VOLTAGE   = 0x0001,
             ANGLE_LIMIT     = 0x0002,

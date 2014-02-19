@@ -131,9 +131,10 @@ namespace darwin {
 
                     // TODO if someone were to want to tune the PID values, this is where it would go.
                     // multiply the values by gain to get the "softness" of the motion
+
                     command.pGain = P_FACTOR * gain;
-                    command.iGain = I_FACTOR;
-                    command.dGain = D_FACTOR;
+                    command.iGain = I_FACTOR * (gain != 0);
+                    command.dGain = D_FACTOR * (gain != 0);
 
                     // Push this onto our list of commands
                     commands->push_back(std::move(command));

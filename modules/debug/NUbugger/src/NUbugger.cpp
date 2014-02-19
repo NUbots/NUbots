@@ -72,7 +72,7 @@ namespace debug {
         on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
 
             for(const auto& s : sensors.servos) {
-                if(s.id == ServoID::R_KNEE){
+                if(s.id == ServoID::L_HIP_ROLL){
                     emit(graph("Servo " + messages::input::stringFromId(s.id), s.presentPosition));
                 }
             }

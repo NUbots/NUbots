@@ -31,6 +31,7 @@
 #include "OPKinematics.h"
 #include "utility/NUbugger/NUgraph.h"
 
+
 namespace modules {
     namespace motion {
 
@@ -40,6 +41,7 @@ namespace modules {
         using utility::NUbugger::graph;
         using NUClear::log;
         using NUClear::DEBUG;
+        using messages::input::Sensors;
         
         WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -93,6 +95,7 @@ namespace modules {
                 hardnessArm = config["hardnessArm"];
 
                 // gGait parameters
+
                 tStep = config["tStep"];
                 tStep0 = tStep;
                 tZmp = config["tZmp"];
@@ -110,7 +113,7 @@ namespace modules {
                 turnCompThreshold = config["turnCompThreshold"];
                 turnComp = config["turnComp"];
 
-                float gyroFactor = 0.273 * M_PI / 180 * 300 / 1024;
+                float gyroFactor = float(config["gyroFactor"]) * 0.273 * M_PI / 180 * 300 / 1024; //dps to rad/s conversion
 
                 // gGyro stabilization parameters
                 ankleImuParamX = {0.5, 0.3 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
@@ -139,9 +142,11 @@ namespace modules {
                 // gWalkKick parameters
                 //walkKickDef = config["walkKickDef"];
                 walkKickPh = config["walkKickPh"];
-                toeTipCompensation = 0;
+                toeTipCompensation = config["toeTipCompensation"];
 
                 useAlternativeTrajectory = config["useAlternativeTrajectory"];
+
+                setVelocity(config["velCommandX"], config["velCommandY"], config["velCommandAngular"]);
                 
             });
 
@@ -230,13 +235,13 @@ namespace modules {
                 stepKickReady = false;
                 hasBall = 0;
 
-                setVelocity(1, 0, 0);
+                
                 stanceReset();
                 start();
             });
 
-            on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, Options<Single> >([this](const time_t&) {
-                update();
+            on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, With<Sensors>, Options<Single> >([this](const time_t&, const Sensors& sensors) {
+                update(sensors);
             });
 			
         }
@@ -261,7 +266,7 @@ namespace modules {
             stopRequest = std::max(1, stopRequest);
         }
         
-        void WalkEngine::update() {
+        void WalkEngine::update(const Sensors& sensors) {
             //advanceMotion();
             double time = getTime();
 
@@ -512,12 +517,12 @@ namespace modules {
             emit(graph("pRLeg", pLLeg[0], pLLeg[1], pLLeg[2], pRLeg[3], pRLeg[4], pRLeg[5]));
             emit(graph("pTorso", pTorso[0], pTorso[1], pTorso[2], pTorso[3], pTorso[4], pTorso[5]));*/
 
-            // emit(graph("pLLeg", pLLeg[0], pLLeg[1], pLLeg[2], pLLeg[3], pLLeg[4], pLLeg[5]));
-            // emit(graph("pRLeg", pRLeg[0], pRLeg[1], pRLeg[2], pRLeg[3], pRLeg[4], pRLeg[5]));
-            // emit(graph("pTorso", pTorso[0], pTorso[1], pTorso[2], pTorso[3], pTorso[4], pTorso[5]));
+            emit(graph("pLLeg", pLLeg[3], pLLeg[4], pLLeg[5]));
+            emit(graph("pRLeg",  pRLeg[3], pRLeg[4], pRLeg[5]));
+            emit(graph("pTorso", pTorso[3], pTorso[4], pTorso[5]));
 
             std::vector<double> qLegs = darwinop_kinematics_inverse_legs_nubots(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
-            motionLegs(qLegs);
+            motionLegs(qLegs, false, sensors);
             //motionArms();
         }
 
@@ -653,35 +658,16 @@ namespace modules {
             pRLeg[2] = uRight[2];
 
             std::vector<double> qLegs = darwinop_kinematics_inverse_legs_nubots(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
-            motionLegs(qLegs, true);
+            motionLegs(qLegs, true, Sensors());
            //motionArms();
         }
 
-        void WalkEngine::motionLegs(std::vector<double> qLegs) {
-            motionLegs(qLegs, false);
-        }
-
-        void WalkEngine::motionLegs(std::vector<double> qLegs, bool gyroOff) {
+        void WalkEngine::motionLegs(std::vector<double> qLegs, bool gyroOff, const Sensors& sensors) {
             float phComp = std::min({1.0, phSingle / 0.1, (1 - phSingle) / 0.1});
-            // emit(graph("L Hip Yaw", qLegs[0]));
-            // emit(graph("L Hip Roll", qLegs[1]));
-            // emit(graph("L Hip Pitch", qLegs[2]));
-            // emit(graph("L Knee", qLegs[3]));
-            // emit(graph("L Ankle Pitch", qLegs[4]));
-            // emit(graph("L Ankle Roll", qLegs[5]));
+            
 
-            // emit(graph("R Hip Yaw", qLegs[6]));
-            // emit(graph("R Hip Roll", qLegs[7]));
-            // emit(graph("R Hip Pitch", qLegs[8]));
-            emit(graph("R Knee", qLegs[9]));
-            // emit(graph("R Ankle Pitch", qLegs[10]));
-            // emit(graph("R Ankle Roll", qLegs[11]));
-            // ankle stabilization using gyro feedback
-            // TODO: imuGyr = 
-            arma::vec3 imuGyr;
-
-            float gyroRoll0 = imuGyr[0];
-            float gyroPitch0 = imuGyr[1];
+            float gyroRoll0 = -sensors.gyroscope[0]*180.0/M_PI;
+            float gyroPitch0 = -sensors.gyroscope[1]*180.0/M_PI;
             if (gyroOff) {
                 gyroRoll0 = 0;
                 gyroPitch0 = 0;
@@ -729,6 +715,9 @@ namespace modules {
                 qLegs[9] += kneeShift; // Knee pitch stabilization
                 qLegs[10] += ankleShift[0]; // Ankle pitch stabilization
                 // qLegs[11] += ankleShift[1]; // Ankle roll stabilization
+                
+                
+
 
             } else if (supportLeg == LEFT) {
                 qLegs[1] += hipShift[1]; // Hip roll stabilization
@@ -738,6 +727,10 @@ namespace modules {
 
                 qLegs[10] += toeTipCompensation * phComp; // Lifting toetip
                 qLegs[1] += hipRollCompensation * phComp; // Hip roll compensation
+            	emit(graph("L Ankle comp dp,dr", ankleShift[0], ankleShift[1]));
+            	emit(graph("L Hip comp roll", hipShift[1]));
+            	emit(graph("L Knee comp", kneeShift));
+
             } else {
                 qLegs[7] += hipShift[1]; // Hip roll stabilization
                 qLegs[9] += kneeShift; // Knee pitch stabilization
@@ -746,6 +739,10 @@ namespace modules {
 
                 qLegs[4] += toeTipCompensation * phComp; // Lifting toetip
                 qLegs[7] -= hipRollCompensation * phComp; // Hip roll compensation
+            	emit(graph("R Ankle comp dp,dr", ankleShift[0], ankleShift[1]));
+            	emit(graph("R Hip comp roll", hipShift[1]));
+            	emit(graph("R Knee comp", kneeShift));
+
             }
 
             auto waypoints = std::make_unique<std::vector<ServoWaypoint>>();
@@ -765,7 +762,7 @@ namespace modules {
             10 = rightAnklePitch
             11 = rightAnkleRoll*/
 
-            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(1000000/UPDATE_FREQUENCY);
+            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(1000000000/UPDATE_FREQUENCY);
 
             waypoints->push_back({time, ServoID::L_HIP_YAW,     float(qLegs[0]),  float(leftLegHardness * 100)});
             waypoints->push_back({time, ServoID::L_HIP_ROLL,    float(qLegs[1]),  float(leftLegHardness * 100)});
@@ -794,6 +791,21 @@ namespace modules {
             NUClear::log<NUClear::DEBUG>("R Knee: ", qLegs[9]);
             NUClear::log<NUClear::DEBUG>("R Ankle Pitch: ", qLegs[10]);
             NUClear::log<NUClear::DEBUG>("R Ankle Roll: ", qLegs[11]);*/
+
+            // emit(graph("L Hip Yaw", qLegs[0]));
+            emit(graph("L Hip Roll", qLegs[1]));
+            // emit(graph("L Hip Pitch", qLegs[2]));
+            // emit(graph("L Knee", qLegs[3]));
+            // emit(graph("L Ankle Pitch", qLegs[4]));
+            // emit(graph("L Ankle Roll", qLegs[5]));
+
+            // emit(graph("R Hip Yaw", qLegs[6]));
+            // emit(graph("R Hip Roll", qLegs[7]));
+            // emit(graph("R Hip Pitch", qLegs[8]));
+            // emit(graph("R Knee", qLegs[9]));
+            // emit(graph("R Ankle Pitch", qLegs[10]));
+            // emit(graph("R Ankle Roll", qLegs[11]));
+            // ankle stabilization using gyro feedback
 
            
 
@@ -840,7 +852,7 @@ namespace modules {
 
             auto waypoints = std::make_unique<std::vector<ServoWaypoint>>();
             waypoints->reserve(6);
-            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(1000000/UPDATE_FREQUENCY);
+            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(1000000000/UPDATE_FREQUENCY);
 
             waypoints->push_back({time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]),  float(hardnessArm * 100)});
             waypoints->push_back({time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]),  float(hardnessArm * 100)});

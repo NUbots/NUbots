@@ -24,6 +24,7 @@
 #include <armadillo>
 
 #include "utility/configuration/ConfigurationNode.h"
+#include "messages/input/Sensors.h"
 
 namespace modules {
     namespace motion {
@@ -35,7 +36,8 @@ namespace modules {
          */
         class WalkEngine : public NUClear::Reactor {
         public:
-             static constexpr size_t UPDATE_FREQUENCY = 60;
+            static constexpr size_t UPDATE_FREQUENCY = 60;
+            
             static constexpr const char* CONFIGURATION_PATH = "WalkEngine.json";
             explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
         private:
@@ -256,12 +258,11 @@ namespace modules {
 //            arma::vec3 leftLegCommand;
 //            arma::vec3 rightLegCommand;
 
-            void update();
+            void update(const messages::input::Sensors& sensors);
             void checkStepKick();
             void checkWalkKick();
             void updateStill();
-            void motionLegs(std::vector<double> qLegs);
-            void motionLegs(std::vector<double> qLegs, bool gyroOff);
+            void motionLegs(std::vector<double> qLegs, bool gyroOff, const messages::input::Sensors& sensors);
             void motionArms();
             void exit();
             arma::vec3 stepLeftDestination(arma::vec3 vel, arma::vec3 uLeft, arma::vec3 uRight);

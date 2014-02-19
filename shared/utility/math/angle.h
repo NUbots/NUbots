@@ -54,7 +54,8 @@ namespace math {
          * @param
          */
         inline double difference(const double a, const double b) {
-            return std::fmod(((a - b) + M_PI), 2 * M_PI) - M_PI;
+
+            return M_PI - std::fabs(std::fmod(std::fabs(a - b), 2 * M_PI) - M_PI);
         }
     }
 }

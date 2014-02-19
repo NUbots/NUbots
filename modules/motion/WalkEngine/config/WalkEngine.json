@@ -8,6 +8,8 @@
     "velDelta": [0.02, 0.02, 0.15],
     "vaFactor": 0.6,
 
+    "gyroFactor" : 0.18,
+
     "velXHigh": 0.06,
     "velDeltaXHigh": 0.01,
 
@@ -15,20 +17,20 @@
     "stanceLimitMarginY": 0.015,
     "stanceLimitY2": 0.02,
 
-    "bodyHeight": 0.295,
+    "bodyHeight": 0.285,
     "bodyTilt": 0.3491,
-    "footX": -0.02,
+    "footX": 0.0,
     "footY": 0.035,
-    "supportX": 0,
+    "supportX": 0.02,
     "supportY": 0.01,
 
-    "hardnessSupport": 0.7,
-    "hardnessSwing": 0.5,
+    "hardnessSupport": 0.3,
+    "hardnessSwing": 0.3,
 
     "hardnessArm0": 0.2,
     "hardnessArm": 0.3,
 
-    "tStep": 1.0,
+    "tStep": 0.25,
     "tZmp": 0.165,
     "stepHeight": 0.035,
     "phSingle": [0.1, 0.9],
@@ -46,14 +48,18 @@
     "supportSideY": -0.005,
     "supportTurn": 0.02,
 
-    "frontComp": 0.003,
-    "AccelComp": 0.003,
+    "frontComp": 0.00,
+    "AccelComp": 0.00,
 
     "supportModYInitial": 0,
 
     "walkKickPh": 0.5,
     "toeTipCompensation": 0,
 
-    "useAlternativeTrajectory": false
-}
+    "useAlternativeTrajectory": false,
 
+    "velCommandX" : 0.035,
+    "velCommandY" : 0.0,
+    "velCommandAngular" : 0.0
+
+}
