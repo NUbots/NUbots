@@ -145,7 +145,7 @@ namespace modules {
                 
             });
 
-            on<Trigger<Initialize>>([this](const Initialize&) {
+            on<Trigger<Startup>>([this](const Startup&) {
                 // g--------------------------------------------------------
                 // g Walk state variables
                 // g--------------------------------------------------------
@@ -235,7 +235,7 @@ namespace modules {
                 start();
             });
 
-            on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, Options<Single> >([this](const time_t& time) {
+            on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, Options<Single> >([this](const time_t&) {
                 update();
             });
 			

@@ -187,8 +187,9 @@ namespace modules {
                 reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
                 reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
 
-                // TODO this has 3 things in it now
-                reactionStatistics->set_name(stats.identifier[1]);
+                reactionStatistics->set_name(stats.identifier[0]);
+                reactionStatistics->set_triggername(stats.identifier[1]);
+                reactionStatistics->set_functionname(stats.identifier[2]);
                 
                 send(message);
             });

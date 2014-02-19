@@ -46,8 +46,8 @@ namespace messages {
             Pixel& operator()(size_t x, size_t y);
 
             const Pixel& operator()(size_t x, size_t y) const;
-            const size_t width() const;
-            const size_t height() const;
+            size_t width() const;
+            size_t height() const;
             const std::vector<Pixel>& raw() const;
             const std::vector<uint8_t>& source() const;
 

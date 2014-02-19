@@ -41,7 +41,7 @@ namespace modules {
             std::signal(SIGSEGV, &SignalCatcher::segfaultConverter);
         }
 
-        void SignalCatcher::sigintHandler(int signal) {
+        void SignalCatcher::sigintHandler(int) {
 
             // Output that a shutdown command was sent (so the user knows the ctrl-c worked)
             std::cout << std::endl << "Shutdown Command Sent" << std::endl;
@@ -59,7 +59,7 @@ namespace modules {
             }
         }
 
-        void SignalCatcher::segfaultConverter(int signal) {
+        void SignalCatcher::segfaultConverter(int) {
             throw messages::support::SegmentationFault();
         }
 

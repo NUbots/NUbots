@@ -69,7 +69,7 @@ namespace modules {
                             original.presentSpeed,
                             original.load,
                             original.voltage,
-                            original.temperature
+                            float(original.temperature)
                         });
                     }
 
