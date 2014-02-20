@@ -37,7 +37,7 @@ namespace modules {
             
             arma::mat::fixed<size, size> processNoise();
 
-            const double processNoiseFactor = 1e-6;
+            static constexpr double processNoiseFactor = 1e-6;
         };
     }
 }

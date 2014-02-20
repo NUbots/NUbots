@@ -143,8 +143,8 @@ namespace utility {
                     centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
                 }
 
-                template <typename TMeasurement, typename TArgs = void>
-                double measurementUpdate(const TMeasurement& measurement, const arma::mat& noise, const TArgs& args) {
+                template <typename TMeasurement, typename TArgs = nullptr_t>
+                double measurementUpdate(const TMeasurement& measurement, const arma::mat& noise, const TArgs& args = nullptr) {
                     // Allocate room for our predictions
                     arma::mat predictedObservations(measurement.n_elem, NUM_SIGMA_POINTS);
 

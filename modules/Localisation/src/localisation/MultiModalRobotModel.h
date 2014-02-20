@@ -40,11 +40,15 @@ namespace localisation {
         void set_active(bool active) { active_ = active; }
         float getFilterWeight() { return 0; }
         void setFilterWeight(float weight) { }
+
+        bool operator ==(const RobotHypothesis& other) {
+            return true;
+        };
     };
 
     class MultiModalRobotModel {
     public:
-        MultiModalRobotModel();
+        MultiModalRobotModel() { }
 
         unsigned int RemoveInactiveModels();
         unsigned int RemoveInactiveModels(std::vector<RobotHypothesis>& container);

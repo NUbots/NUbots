@@ -55,11 +55,11 @@ arma::vec RobotModel::observationDifference(const arma::vec& a,
     // {
     //     case MeasurementType::kLandmarkMeasurement:
     //         result = measurement1 - measurement2;
-    //         result[1] = utility::math::angle::normaliseAngle(result[1]);
+    //         result[1] = utility::math::angle::normalizeAngle(result[1]);
     //         break;
     //     case MeasurementType::kAngleBetweenLandmarksMeasurement:
     //         result = measurement1 - measurement2;
-    //         result[0] = utility::math::angle::normaliseAngle(result[0]);
+    //         result[0] = utility::math::angle::normalizeAngle(result[0]);
     //         break;
     // };
     // return result;
@@ -67,10 +67,12 @@ arma::vec RobotModel::observationDifference(const arma::vec& a,
 
 arma::vec::fixed<RobotModel::size> RobotModel::limitState(
     const arma::vec::fixed<RobotModel::size>& state) {
+ 
+    auto result = state;
 
-    state[kHeading] = utility::math::angle::normaliseAngle(state[kHeading]);
+    result[kHeading] = utility::math::angle::normalizeAngle(result[kHeading]);
     
-    return state;
+    return result;
 }
 
 arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() {

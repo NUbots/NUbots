@@ -56,18 +56,18 @@ namespace modules {
         //     emit(std::move(field_object));
         // });
 
-        on<Trigger<vision::Goal>>([this](const messages::vision::Goal& m) {
-            engine.RecordMeasurement(m, timestamp);
+        on<Trigger<messages::vision::Goal>>([this](const messages::vision::Goal& m) {
+            // engine.RecordMeasurement(m, timestamp); 
         });
 
-        on<Trigger<TimeUpdate>>([this](const TimeUpdate& m) {
-            engine.SwapMeasurementBuffers();
+        // on<Trigger<TimeUpdate>>([this](const TimeUpdate& m) {
+        //     engine.SwapMeasurementBuffers();
 
-            engine.TimeUpdate();
-        });
+        //     engine.TimeUpdate();
+        // });
 
-        on<Trigger<ObjectUpdate>>([this](const ObjectUpdate& m) {
-            engine.ObjectUpdate();
-        });
+        // on<Trigger<ObjectUpdate>>([this](const ObjectUpdate& m) {
+        //     engine.ObjectUpdate();
+        // });
     }
 }

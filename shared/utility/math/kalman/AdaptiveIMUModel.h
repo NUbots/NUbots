@@ -24,7 +24,7 @@ namespace utility {
                 
                 arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& measurement);
                 
-                arma::vec predictedObservation(const arma::vec::fixed<size>& state);
+                arma::vec predictedObservation(const arma::vec::fixed<size>& state, std::nullptr_t observationType);
                 
                 arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
                 
@@ -32,7 +32,7 @@ namespace utility {
                 
                 arma::mat::fixed<size, size> processNoise();
 
-                const double processNoiseFactor = 1e-6;
+                static constexpr double processNoiseFactor = 1e-6;
             };
 
 

@@ -23,12 +23,10 @@
 #include <nuclear>
 #include "localisation/LocalisationEngine.h"
 
-using localisation::LocalisationEngine;
-
 namespace modules {
     class Localisation : public NUClear::Reactor {
     private:
-        LocalisationEngine engine;
+        localisation::LocalisationEngine engine;
 
     public:
         /// @brief Our configuration file for this class

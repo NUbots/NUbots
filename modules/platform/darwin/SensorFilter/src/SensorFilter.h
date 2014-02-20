@@ -30,10 +30,6 @@ namespace modules {
     namespace platform {
         namespace darwin {
 
-            enum class MeasurementType {
-                kAccelerometerMeasurement,
-            };
-
             /**
              * TODO document
              * 

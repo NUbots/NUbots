@@ -78,7 +78,7 @@ void MultiModalRobotModel::PruneModels() {
 //     return diff_head;
 // }
 
-float ModelsAreSimilar(const RobotHypothesis* a, const RobotHypothesis* b) {
+float ModelsAreSimilar(const RobotHypothesis& a, const RobotHypothesis& b) {
     // const float kMinTransDist = 6; // TODO: Add to config system
     // const float kMinHeadDist = 0.01; // TODO: Add to config system
 
@@ -94,7 +94,7 @@ float ModelsAreSimilar(const RobotHypothesis* a, const RobotHypothesis* b) {
 void MultiModalRobotModel::RemoveSimilarModels() {
     // Loop through each pair of active models
     for (auto& model_a : robot_models_) {
-        if (!model_a->active())
+        if (!model_a.active())
             continue;
 
         for (auto& model_b : robot_models_) {
@@ -120,7 +120,7 @@ void MultiModalRobotModel::RemoveSimilarModels() {
 
     RemoveInactiveModels();
 
-    NormaliseModelAlphas();
+    NormaliseAlphas();
 }
 
 /* @brief Prunes the models using the Viterbi method. This removes lower
@@ -129,58 +129,61 @@ void MultiModalRobotModel::RemoveSimilarModels() {
  * @return The number of models that were removed during this process.
  */
 int MultiModalRobotModel::PruneViterbi(unsigned int order) {
-    RemoveInactiveModels();
-
-    // No pruning required if not above maximum.
-    if(robot_models_.size() <= order) 
-        return 0;
-
-    // Sort, results in order smallest to largest.
-    robot_models_.sort(model_ptr_cmp());
-
-    // Number of models that need to be removed.
-    unsigned int num_to_remove = robot_models_.size() - order;
-
-    // Beginning of removal range
-    auto begin_remove = robot_models_.begin();
     
-    // End of removal range (not removed)
-    auto end_remove = robot_models_.begin();
-    std::advance(end_remove, num_to_remove);
+    return 0;
 
-    std::for_each (
-        begin_remove, 
-        end_remove, 
-        std::bind2nd(std::mem_fun(&RobotHypothesis::setActive), false));
+    // RemoveInactiveModels();
 
-    // Clear out all deactivated models.
-    int num_removed = RemoveInactiveModels();
+    // // No pruning required if not above maximum.
+    // if(robot_models_.size() <= order) 
+    //     return 0;
 
-    // Result should have been achieved or something is broken.
-    assert(robot_models_.size() == order);
+    // // Sort, results in order smallest to largest.
+    // robot_models_.sort(model_ptr_cmp());
 
-    return num_removed;
+    // // Number of models that need to be removed.
+    // unsigned int num_to_remove = robot_models_.size() - order;
+
+    // // Beginning of removal range
+    // auto begin_remove = robot_models_.begin();
+    
+    // // End of removal range (not removed)
+    // auto end_remove = robot_models_.begin();
+    // std::advance(end_remove, num_to_remove);
+
+    // std::for_each (
+    //     begin_remove, 
+    //     end_remove, 
+    //     std::bind2nd(std::mem_fun(&RobotHypothesis::setActive), false));
+
+    // // Clear out all deactivated models.
+    // int num_removed = RemoveInactiveModels();
+
+    // // Result should have been achieved or something is broken.
+    // assert(robot_models_.size() == order);
+
+    // return num_removed;
 }
 
 /*! @brief Normalises the alphas of all exisiting models.
     The alphas of all active models are normalised so that the total probablility of the set sums to 1.0.
 */
 void MultiModalRobotModel::NormaliseAlphas() {
-    double sumAlpha = 0.0;
+    // double sumAlpha = 0.0;
     
-    for (auto& model : robot_models_)
-        if (model.active())
-            sumAlpha += (*model_it)->alpha();
+    // for (auto& model : robot_models_)
+    //     if (model.active())
+    //         sumAlpha += (*model_it)->alpha();
 
-    if (sumAlpha == 1) 
-        return;
+    // if (sumAlpha == 1) 
+    //     return;
 
-    if (sumAlpha == 0) 
-        sumAlpha = 1e-12;
+    // if (sumAlpha == 0) 
+    //     sumAlpha = 1e-12;
 
-    for (auto& model : robot_models_)
-        if (model.active())
-            model.setAlpha(model.alpha() / sumAlpha);
+    // for (auto& model : robot_models_)
+    //     if (model.active())
+    //         model.setAlpha(model.alpha() / sumAlpha);
 }
 
 }
