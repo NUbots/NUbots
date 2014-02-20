@@ -25,13 +25,40 @@
 %                                     also used for the TOC unless
 %                                     \toctitle is used
 
-\author{Brendan Annable \and Alex Biddulph \and Stephan K. Chalup \and Jake Fountain \and Robert A.R. King \and Alexandre Mendes \and Mitchell Metcalfe \and Peter Turner \and Josiah Walker \and Taylor Johnson \and Jordan Johnson \and Anita Sugo \and Andrew Dabson \and Trent Houliston}
+\author{Josiah Walker
+		\and Trent Houliston
+		\and Brendan Annable
+		\and Alex Biddulph
+		\and Andrew Dabson
+		\and Jake Fountain
+		\and Taylor Johnson
+		\and Jordan Johnson
+		\and Mitchell Metcalfe
+		\and Anita Sugo
+		\and Stephan K. Chalup
+		\and Robert A.R. King
+		\and Alexandre Mendes
+		\and Peter Turner}
 %
-\authorrunning{Annable et al.}   % abbreviated author list (for running head)
+\authorrunning{Walker et al.}   % abbreviated author list (for running head)
 %
 %%%% modified list of authors for the TOC (add the affiliations)
 %\tocauthor{S.K. Chalup, A. Mendes, R.A.R. King, D. Budden, S. Fenn}
-\tocauthor{B. Annable, A. Biddulph, S.K. Chalup, J. Fountain, R.A.R. King, A. Mendes, M. Metcalfe, P. Turner, J. Walker, T. Johnson, J. Johnson, A. Sugo, A. Dabson, T. Houliston}
+\tocauthor{J. Walker,
+T. Houliston,
+B. Annable,
+A. Biddulph,
+A. Dabson,
+J. Fountain,
+T. Johnson,
+J. Johnson,
+M. Metcalfe,
+A. Sugo,
+S. Chalup,
+R.A.R. King,
+A. Mendes,
+P. Turner}
+
 %
 \institute{Newcastle Robotics Laboratory\\ School of Electrical Engineering \& Computer Science\\
 Faculty of Engineering and Built Environment\\
@@ -51,7 +78,7 @@ The NUbots team, from The University of Newcastle, Australia, has had a strong r
 %
 The NUbots team, from the University of Newcastle, Australia, competed in the Four Legged League from 2002-2007, within the Standard Platform League from 2008-2011 and subsequently within the Kid-Size Humanoid league since 2012. The NUbots have had a strong record of successes, twice achieving a first place; in 2006 in Bremen, Germany, and, again in 2008 as part of the NUManoid team in Suzhou, China.
 
-The central goal of the NUbots is to be a high performance competitive robot soccer team at RoboCup. The vision of the research projects associated with the NUbots team is to develop and program robots that can support humans not only for routine, challenging, or dangerous tasks, but also to improve quality of life through personal assistance, companionship, and coaching.  Our mission is to contribute to a responsible development and application of robotics. Some of our projects therefore emphasize anthropocentric and biocybernetic
+The central goal of the NUbots is to be a high performance competitive robot soccer team at RoboCup. The vision of the research projects associated with the NUbots team is to develop and program robots that can support humans not only for routine, challenging, or dangerous tasks, but also to improve quality of life through personal assistance, companionship, and coaching.  Our mission is to contribute to a responsible development and application of robotics. Some of our projects therefore emphasise anthropocentric and biocybernetic
 aspects in robotics research~\cite{ChalupOstwald2009}. This includes new aspects of human robot interaction and perception. The Newcastle Robotics Laboratory hosts several postgraduate and undergraduate research projects that are associated with the NUbots.
 
 %The following sections describe the history of the team, the roles and research of the team members and addresses associated research projects and relevant aspects of the study and research environment of the University of Newcastle, Australia.
@@ -65,7 +92,7 @@ The Nubots commit to participation at RoboCup 2014 upon successful qualification
 
 The NUbots team was founded in 2002 and participated for the first time at RoboCup in Fukuoka in the Sony Four-Legged League (3rd place). Since then the team has  a strong history of competition and success in the RoboCup SPL/Four-Legged League, obtaining many top three placements and winning the title in 2006 and 2008. In 2013 the NUbots missed out on a place in the quarter finals by only one goal. We hope to improve on this in 2014.
 
-The NUbots joined the Kid-size league in 2012 with the Darwin-OP robots, and ported the SPL NUbots codebase to the new platform. The NUbots retain a robust and fast vision and localisation system from their time in the SPL, and demonstrated the ability to draw on improvements in other leagues by porting the B-human NAO walk to the Darwin-OP for 2012-2013. In 2013 the NUbots presented a curiosity based reinforcement learning approach to gaze planning at Robocup, which was used for all games during the competition. 
+The NUbots joined the Kid-size league in 2012 with the DARwIn-OP robots, and ported the SPL NUbots codebase to the new platform. The NUbots retain a robust and fast vision and localisation system from their time in the SPL, and demonstrated the ability to draw on improvements in other leagues by porting the B-human NAO walk to the DARwIn-OP for 2012-2013. In 2013 the NUbots presented a curiosity based reinforcement learning approach to gaze planning at Robocup, which was used for all games during the competition. 
 
 %During the previous two years the NUbots SPL code base has been ported to the DARwIn-OP platform and the majority of modules previously used on the NAO robot in the SPL were fielded for RoboCup 2012. Since then the majority of modules have undergone major revision in order to allow more effective use of the newer platform and in response to recent changes in the league rules. 
 
@@ -101,7 +128,7 @@ NUbots in 2004 and has developed a special interest in the RoboCup rules and ref
 
 \item \emph{Mitchell Metcalfe} is a fourth year undergraduate student studying combined degree in Mathematics and Computer Science. He is working on the NUBots' localisation system, and maintains the support tools for the NUBots' compiler environment.
 
-\item \emph{Peter Turner} is technical staff in the School of Electrical Engineering and Computer Science. Peter provides hardware support and assists the team with physical robot design upgrades. %an expert on robot hardware and electronics and familiar with the Darwin-OP.
+\item \emph{Peter Turner} is technical staff in the School of Electrical Engineering and Computer Science. Peter provides hardware support and assists the team with physical robot design upgrades. %an expert on robot hardware and electronics and familiar with the DARwIn-OP.
 
 \item \emph{Anita Sugo} is a second year undergraduate student studying a combined degree in Mathematics and Science. She is interested in the mathematics used in robotics.
 
@@ -115,7 +142,7 @@ Newcastle, Australia. Details are linked to the relevant webpages at
 
 %\pagebreak
 \section{Hardware and Software Overview}
-The NUbots use the DARWIN-OP robot with footsensors. The team has five of these robots that are of the standard design with the exception of a slightly reduced footsize. The team also hopes to field modified DARWIN-OP consisting of a full HD camera, an ODROID-XU computer and an updated motor communications board as a part of a student project. %Aditional minor structural modifications as well as a replacement of the main processor are planned after RoboCup 2013.
+The NUbots use the DARwIn-OP robot with foot sensors. The team has five of these robots that are of the standard design with the exception of a slightly reduced foot size. The team also hopes to field modified DARwIn-OP consisting of a full HD camera, an ODroid-XU computer and an updated motor communications board as a part of a student project. %Aditional minor structural modifications as well as a replacement of the main processor are planned after RoboCup 2013.
 
 %\begin{figure}
 %\begin{center}
@@ -141,33 +168,32 @@ This year marks a major change in the software architecture of the NUBots, with 
 
 
 \section{Acknowledgement of Use of Code}
-The NUbots Darwin-OP robots use a walk engine ported from the 2013 Team Darwin code release. We acknowledge the source of this code. The NUBots have ported this code to C++ and restructured the logic, and also made changes including improving the inverse kinematic calculations. %The source for this module can be found in \cite{nubotsGit2}.
+The NUbots DARwIn-OP robots use a walk engine ported from the 2013 Team Darwin code release. We acknowledge the source of this code. The NUBots have ported this code to C++ and restructured the logic, and also made changes including improving the inverse kinematic calculations. %The source for this module can be found in \cite{nubotsGit2}.
 
 \section{Enhancements since RoboCup 2013}
 Since Robocup 2013, improvements have been made in the area of software architecture and hardware. As the league moves to more realistic game conditions, we are trialling a hardware control platform composed of the following:
 
 In response to the increase in field size, the Logitech C905 is being replaced with a Logitech C920. The new camera will provide a 1080p image, allowing the robots to detect and classify objects at greater distances.
 
-The Main Controller (CompuLab fit-PC2i) is being replaced by an ODROID-XU to provide the extra processing power that is required for processing the images from the Logitech C920.
+The Main Controller (CompuLab fit-PC2i) is being replaced by an ODroid-XU to provide the extra processing power that is required for processing the images from the Logitech C920.
 
 A prototype hardware replacement for the ROBOTIS CM730 Sub Controller, named the TAJ3850, is 
-being developed as part of a Computer Engineering Third Year Project. The TAJ3850 provides power to all system components, a battery monitoring system featuring a low-voltage alarm and an extremely low-voltage automatic cut-off, an improved six-axis motion processing unit, a temperature sensor, and five dedicated motor buses. The TAJ3850 also exposes peripheral connections from the ODROID-XU to the back panel of the robot (HDMI, USB3, LAN, Audio output), monitors the three back-panel control buttons, and controls the status LEDs on the back panel and in the head.
+being developed as part of a Computer Engineering Third Year Project. The TAJ3850 provides power to all system components, a battery monitoring system featuring a low-voltage alarm and an extremely low-voltage automatic cut-off, an improved six-axis motion processing unit, a temperature sensor, and five dedicated motor buses. The TAJ3850 also exposes peripheral connections from the ODroid-XU to the back panel of the robot (HDMI, USB3, LAN, Audio output), monitors the three back-panel control buttons, and controls the status LEDs on the back panel and in the head.
 
 %\begin{figure}
 %\begin{center}
 %\scalebox{0.3}{\includegraphics[angle=270]{TAJ3850.png}}
-%\caption{Connection mappings between the TAJ3850, ODROID-XU, and external peripherals.}
+%\caption{Connection mappings between the TAJ3850, ODroid-XU, and external peripherals.}
 %\label{fig:taj3850}
 %\end{center}
 %\end{figure}
 
-
-%The above enhancements will not be implemented on all of the Darwin-OP robots. 
-The remaining robots will have the standard Darwin-OP configuration of a Logitech C905, fit-PC2i and CM730.
+%The above enhancements will not be implemented on all of the DARwIn-OP robots. 
+The remaining robots will have the standard DARwIn-OP configuration of a Logitech C905, fit-PC2i and CM730.
 
 \section{Research Areas}
 
-\noindent\textbf{Robot Vision:} Vision is one of the major research areas associated with the Newcastle Robotics Laboratory. Several subtopics have been investigated including object recognition, horizon determination, edge detection, model fitting and colour classification using ellipse fitting, convex optimization and kernel machines. Recent work has resulted in a fully-autonomous method of colour look-up table generation using k-means clustering and support vector machines, as well as evaluation of colour spaces for unsupervised learning and occluded feature detection. Publications are available e.g. from~\cite{budden2012colour,budden2012ball,henderson_2007,nickin_2007,NUBOT2006,Henderson2008}.
+\noindent\textbf{Robot Vision:} Vision is one of the major research areas associated with the Newcastle Robotics Laboratory. Several subtopics have been investigated including object recognition, horizon determination, edge detection, model fitting and colour classification using ellipse fitting, convex optimisation and kernel machines. Recent work has resulted in a fully-autonomous method of colour look-up table generation using k-means clustering and support vector machines, as well as evaluation of colour spaces for unsupervised learning and occluded feature detection. Publications are available e.g. from~\cite{budden2012colour,budden2012ball,henderson_2007,nickin_2007,NUBOT2006,Henderson2008}.
 \\
 
 \noindent\textbf{Localisation and Kalman Filters:} Research on the
@@ -188,7 +214,7 @@ bear-like robot (called Hykim) was developed~\cite{ChalupEtAl2006}. The idea was
 \\
 
 \noindent\textbf{Biped Robot Locomotion:} The improvement of walking speed and stability has been investigated by the NUbots for several years and on different platforms: On the AIBO robot we achieved one of the fastest walks at that time by walk parameter evolution \cite{QuinlanEtAlACRA2003,ChalupEtAlSMC2007}. On the Nao robot we improved existing walk engines by modifying the joint stiffnesses, or controller gains, \cite{Kulk2008,Kulk2010,Kulk2010a}. The stiffnesses were selected through an iterative process to maximise the cost of transport. We investigated the application of Support Vector Machines and Neural Networks to proprioception data for sensing perturbations during pseudo quiet stance. Walk improvements have been primarily done via optimisation techniques \cite{Kulk2011a,Kulk2011b} with recent improvements to our framework for online optimisation of bipedal humanoid locomotion. 
-The use of spiking neural networks has been trialled in simulation~\cite{WiklendtChalup2008}. Prior to RoboCup 2012 the walk engine developed by the leading SPL team BHuman~\cite{BHumanWalk2010} was ported to the DARwIn-OP platform, and a variety of optimisation techniques were developed and successfully applied to improve walking speed and stability of the Darwin-OP. Similar optimisations are in process for the Team Darwin 2013 walk.
+The use of spiking neural networks has been trialled in simulation~\cite{WiklendtChalup2008}. Prior to RoboCup 2012 the walk engine developed by the leading SPL team BHuman~\cite{BHumanWalk2010} was ported to the DARwIn-OP platform, and a variety of optimisation techniques were developed and successfully applied to improve walking speed and stability of the DARwIn-OP. Similar optimisations are in process for the Team Darwin 2013 walk.
 
 \noindent\textbf{Reinforcement Learning, Affective Computing and Robot Emotions:} We investigate the feasibility of reinforcement learning or neurodynamic programming for applications such as motor control and music composition. Concepts for affective computing are developed in multidisciplinary projects in collaboration with the areas of architecture and cognitive science. The concept of emotion is important for selective memory formation and action weighting and continues to gain importance in the robotics community, including within robotic soccer. A number of projects in the Newcastle Robots Laboratory already address this topic~\cite{ANFA2012,Pareidolia2010,HongEtAl2013a,HongEtAl2013b,WongEtAl2013}. 
 \\
