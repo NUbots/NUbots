@@ -24,6 +24,10 @@ Vagrant.configure("2") do |config|
     puppet.manifest_file  = "site.pp"
   end
 
+  # config.vm.provider "virtualbox" do |v|
+  #   v.gui = true
+  # end
+
   # Define the NUClearPort development VM, snd make it the primary VM
   # (meaning that a plain `vagrant up` will only create this machine)
   config.vm.define "nuclearportvm", primary: true do |nuclearport|
