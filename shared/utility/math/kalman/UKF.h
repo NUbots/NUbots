@@ -143,14 +143,14 @@ namespace utility {
                     centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
                 }
 
-                template <typename TMeasurement>
-                double measurementUpdate(const TMeasurement& measurement, const arma::mat& noise) {
+                template <typename TMeasurement, typename TArgs = void>
+                double measurementUpdate(const TMeasurement& measurement, const arma::mat& noise, const TArgs& args) {
                     // Allocate room for our predictions
                     arma::mat predictedObservations(measurement.n_elem, NUM_SIGMA_POINTS);
 
                     // First step is to calculate the expected measurement for each sigma point.
                     for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
-                        predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), measurement);
+                        predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), args);
                     }
 
                     // Now calculate the mean of these measurement sigmas.

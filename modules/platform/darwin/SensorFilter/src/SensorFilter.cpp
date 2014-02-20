@@ -90,7 +90,7 @@ namespace modules {
                         observationNoise = arma::eye(3,3) * (HIGH_NOISE_GAIN - DEFAULT_NOISE_GAIN) * (normAcc - LOW_NOISE_THRESHOLD) / (HIGH_NOISE_THRESHOLD - LOW_NOISE_THRESHOLD);
                     }
                      
-                    float quality = orientationFilter.measurementUpdate(sensors->accelerometer, observationNoise);                     
+                    float quality = orientationFilter.measurementUpdate(sensors->accelerometer, observationNoise, MeasurementType::kAccelerometerMeasurement);                     
                     arma::vec orientation = orientationFilter.get();
                     sensors->orientation.col(2) = -orientation.rows(0,2);
                     sensors->orientation.col(0) = orientation.rows(3,5);

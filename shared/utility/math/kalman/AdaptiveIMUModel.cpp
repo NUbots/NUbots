@@ -58,7 +58,7 @@ namespace utility {
             }
 
 
-            arma::vec AdaptiveIMUModel::predictedObservation(const arma::vec::fixed<size>& state, const arma::vec& measurement) {
+            arma::vec AdaptiveIMUModel::predictedObservation(const arma::vec::fixed<size>& state) {
                 return state.rows(0,2) * 9.807;
             }
 
