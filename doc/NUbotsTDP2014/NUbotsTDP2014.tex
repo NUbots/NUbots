@@ -117,13 +117,13 @@ Newcastle, Australia. Details are linked to the relevant webpages at
 \section{Hardware and Software Overview}
 The NUbots use the DARWIN-OP robot with footsensors. The team has five of these robots that are of the standard design with the exception of a slightly reduced footsize. The team also hopes to field modified DARWIN-OP consisting of a full HD camera, an ODROID-XU computer and an updated motor communications board as a part of a student project. %Aditional minor structural modifications as well as a replacement of the main processor are planned after RoboCup 2013.
 
-\begin{figure}
-\begin{center}
-\scalebox{0.26}{\includegraphics{darwin.png}}
-\caption{The DARWIN-OP Robot.}
-\label{fig:darwin}
-\end{center}
-\end{figure}
+%\begin{figure}
+%\begin{center}
+%\scalebox{0.26}{\includegraphics{darwin.png}}
+%\caption{The DARWIN-OP Robot.}
+%\label{fig:darwin}
+%\end{center}
+%\end{figure}
 
 The NUbots team's major research focus is on using machine learning methods within the software systems of the robot to achieve increased performance and autonomy~\cite{ChalupEtAlSMC2007}. The current NUbots software source is available from \cite{nubotsGit} and is covered under the GPL. This includes associated toolkits for building and deploying the software. Our software is designed to work on multiple robotic platforms, and all of the individual modules have been designed to be easily used in other systems. The sensors and actuators are accessed using a standard format, regardless of the robot running the software~\cite{Kulk2011c}. 
 
@@ -146,9 +146,9 @@ The NUbots Darwin-OP robots use a walk engine ported from the 2013 Team Darwin c
 \section{Enhancements since RoboCup 2013}
 Since Robocup 2013, improvements have been made in the area of software architecture and hardware. As the league moves to more realistic game conditions, we are trialling a hardware control platform composed of the following:
 
-In response to the increase in field size, the Logitech C905 is being replaced with a Logitech C920. The new camera will provide a HD 1080p image, allowing the robots to detect and classify objects at a greater distance.
+In response to the increase in field size, the Logitech C905 is being replaced with a Logitech C920. The new camera will provide a 1080p image, allowing the robots to detect and classify objects at greater distances.
 
-The Main Controller (CompuLab fit-PC2i) is being replaced by an ODROID-XU to help provide the extra processing power that is required for processing the HD images from the Logitech C920 while also allowing the software architecture to be further paralleled.
+The Main Controller (CompuLab fit-PC2i) is being replaced by an ODROID-XU to provide the extra processing power that is required for processing the images from the Logitech C920.
 
 A prototype hardware replacement for the ROBOTIS CM730 Sub Controller, named the TAJ3850, is 
 being developed as part of a Computer Engineering Third Year Project. The TAJ3850 provides power to all system components, a battery monitoring system featuring a low-voltage alarm and an extremely low-voltage automatic cut-off, an improved six-axis motion processing unit, a temperature sensor, and five dedicated motor buses. The TAJ3850 also exposes peripheral connections from the ODROID-XU to the back panel of the robot (HDMI, USB3, LAN, Audio output), monitors the three back-panel control buttons, and controls the status LEDs on the back panel and in the head.
@@ -163,7 +163,7 @@ being developed as part of a Computer Engineering Third Year Project. The TAJ385
 
 
 %The above enhancements will not be implemented on all of the Darwin-OP robots. 
-The remaining robots will have the standard Logitech C905, fit-PC2i and CM730 configuration.
+The remaining robots will have the standard Darwin-OP configuration of a Logitech C905, fit-PC2i and CM730.
 
 \section{Research Areas}
 
@@ -193,7 +193,7 @@ The use of spiking neural networks has been trialled in simulation~\cite{Wiklend
 \noindent\textbf{Reinforcement Learning, Affective Computing and Robot Emotions:} We investigate the feasibility of reinforcement learning or neurodynamic programming for applications such as motor control and music composition. Concepts for affective computing are developed in multidisciplinary projects in collaboration with the areas of architecture and cognitive science. The concept of emotion is important for selective memory formation and action weighting and continues to gain importance in the robotics community, including within robotic soccer. A number of projects in the Newcastle Robots Laboratory already address this topic~\cite{ANFA2012,Pareidolia2010,HongEtAl2013a,HongEtAl2013b,WongEtAl2013}. 
 \\
 
-\noindent\textbf{Gaze analysis and head movement behavioural learning:} We investigated methods for human and robot pedestrian gaze analysis in~\cite{JalalianEtAl_CAADRIA2011,WongEtAl2012}. In another project we focus on detection analysis of salient regions/objects and wayfinding~\cite{BhatiaEtAl2012}. Recently we  applied reinforcement learning techniques to optimising head movement behaviour, providing a robust algorithm by which a robot learns to choose landmarks to localise efficiently during a soccer game. 
+\noindent\textbf{Gaze analysis and head movement behavioural learning:} We investigated methods for human and robot pedestrian gaze analysis in~\cite{JalalianEtAl_CAADRIA2011,WongEtAl2012}. In another project we focus on detection analysis of salient regions/objects and wayfinding~\cite{BhatiaEtAl2012}. Recently we  applied motivated reinforcement learning techniques to optimising head movement behaviour, providing a robust algorithm by which a robot learns to choose landmarks to localise efficiently during a soccer game~\cite{jakeetal}. This algorithm was used in competition at Robocup 2013.
 \\
 
 \noindent\textbf{Manifold Learning:} In several projects we
