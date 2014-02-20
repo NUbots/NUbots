@@ -23,7 +23,9 @@
 #include <nuclear>
 
 #include "MultiModalRobotModel.h"
+ #include "LocalisationBall.h"
 #include "messages/vision/VisionObjects.h"
+#include "LocalisationFieldObject.h"
 
 using messages::vision::VisionObject;
 
@@ -52,21 +54,21 @@ namespace localisation {
         void ProcessObjects(std::vector<std::shared_ptr<VisionObject>>& fobs,
             float time_increment);
         
-        void LandmarkUpdate(StationaryObject &landmark);
+        void LandmarkUpdate(StationaryFieldObject &landmark);
         
-        int multipleLandmarkUpdate(std::vector<StationaryObject*>& landmarks);
+        int multipleLandmarkUpdate(std::vector<StationaryFieldObject*>& landmarks);
         
-        MeasurementError CalculateError(const Object& theObject);
+        // MeasurementError CalculateError(const Object& theObject);
         
         // IWeightedKalmanFilter* newRobotModel(
         //     IWeightedKalmanFilter* filter, 
-        //     const StationaryObject& measured_object, 
+        //     const StationaryFieldObject& measured_object, 
         //     const MeasurementError &error,
         //     int ambiguous_id, double timestamp);
         
         // int AmbiguousLandmarkUpdateExhaustive(
         //     AmbiguousObject &ambiguous_object,
-        //     const std::vector<StationaryObject*>& possible_objects);
+        //     const std::vector<StationaryFieldObject*>& possible_objects);
 
     private:
         // TODO: Consider extracting the robot models into an actual class,
@@ -75,6 +77,8 @@ namespace localisation {
         // removeInactiveModels(), would be instance methods  of this new
         // class)
         MultiModalRobotModel robot_models_;
+
+        LocalisationBall ball_model_;
     };
 }
 }

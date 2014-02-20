@@ -17,10 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-
 #include "localisation/MultiModalRobotModel.h"
-
-#include "utility/math/kalman/MultivariateGaussian.h"
 
 namespace modules {
 namespace localisation {
@@ -36,20 +33,20 @@ unsigned int MultiModalRobotModel::RemoveInactiveModels() {
  *  @param container The container to remove inactive models from.
  *  @retun The number of models removed.
  */
-unsigned int MultiModalRobotModel::RemoveInactiveModels(std::vector<RobotModel>& container) {
+unsigned int MultiModalRobotModel::RemoveInactiveModels(std::vector<RobotHypothesis>& container) {
     const unsigned int num_before = container.size();   // Save original size
 
-    for (auto* model : robot_models_) {
-        if (!model->active()) {
-            delete model;
-            model = NULL;
-        }
-    }
-
+    // for (auto& model : robot_models_) {
+    //     if (!model->active()) {
+    //         delete model;
+    //         model = NULL;
+    //     }
+    // }
+ 
     container.erase(
         remove_if(container.begin(),
                   container.end(),
-                  [](const RobotModel* p) { return p == NULL; }), 
+                  [](const RobotHypothesis& p) { return !p.active(); }), 
         container.end());
     
     // Return number removed: original size - new size
@@ -70,50 +67,52 @@ void MultiModalRobotModel::PruneModels() {
     NormaliseAlphas();
 }
 
-float TranslationDistance(const MultivariateGaussian& a, const MultivariateGaussian& b) {
-    float diff_x = a.mean(RobotModel::kstates_x) - b.mean(RobotModel::kstates_x);
-    float diff_y = a.mean(RobotModel::kstates_y) - b.mean(RobotModel::kstates_y);
-    return sqrt(diff_x * diff_x + diff_y * diff_y);
-}
+// float TranslationDistance(const MultivariateGaussian& a, const MultivariateGaussian& b) {
+//     float diff_x = a.mean(RobotHypothesis::kstates_x) - b.mean(RobotHypothesis::kstates_x);
+//     float diff_y = a.mean(RobotHypothesis::kstates_y) - b.mean(RobotHypothesis::kstates_y);
+//     return sqrt(diff_x * diff_x + diff_y * diff_y);
+// }
 
-float HeadingDistance(const MultivariateGaussian& a, const MultivariateGaussian& b) {
-    float diff_head = a.mean(RobotModel::kstates_heading) - b.mean(RobotModel::kstates_heading);
-    return diff_head;
-}
+// float HeadingDistance(const MultivariateGaussian& a, const MultivariateGaussian& b) {
+//     float diff_head = a.mean(RobotHypothesis::kstates_heading) - b.mean(RobotHypothesis::kstates_heading);
+//     return diff_head;
+// }
 
-float ModelsAreSimilar(const RobotModel* a, const RobotModel* b) {
-    const float kMinTransDist = 6; // TODO: Add to config system
-    const float kMinHeadDist = 0.01; // TODO: Add to config system
+float ModelsAreSimilar(const RobotHypothesis* a, const RobotHypothesis* b) {
+    // const float kMinTransDist = 6; // TODO: Add to config system
+    // const float kMinHeadDist = 0.01; // TODO: Add to config system
 
-    float trans_dist = TranslationDistance(model_a->estimate(), model_b->estimate());
-    float head_dist = HeadingDistance(model_a->estimate(), model_b->estimate());
+    // float trans_dist = TranslationDistance(model_a->estimate(), model_b->estimate());
+    // float head_dist = HeadingDistance(model_a->estimate(), model_b->estimate());
     
-    return (trans_dist < kMinTransDist) && (head_dist < kMinHeadDist);
+    // return (trans_dist < kMinTransDist) && (head_dist < kMinHeadDist);
+
+    return 0;
 }
 
 /// Reduces the number of active models by merging similar models together
 void MultiModalRobotModel::RemoveSimilarModels() {
     // Loop through each pair of active models
-    for (auto* model_a : robot_models_) {
+    for (auto& model_a : robot_models_) {
         if (!model_a->active())
             continue;
 
-        for (auto* model_b : robot_models_) {
-            if (!model_b->active())
+        for (auto& model_b : robot_models_) {
+            if (!model_b.active())
                 continue;
 
             if (model_a == model_b)
                 continue;
 
             if (ModelsAreSimilar(model_a, model_b)) {
-                float total_alpha = model_a->getFilterWeight() + model_b->getFilterWeight();
+                float total_alpha = model_a.getFilterWeight() + model_b.getFilterWeight();
                 
-                if (model_a->getFilterWeight() < model_b->getFilterWeight()) {
-                    model_a->setActive(false);
-                    model_b->setFilterWeight(total_alpha);
+                if (model_a.getFilterWeight() < model_b.getFilterWeight()) {
+                    model_a.set_active(false);
+                    model_b.setFilterWeight(total_alpha);
                 } else {
-                    model_a->setFilterWeight(total_alpha);
-                    model_b->setActive(false);
+                    model_a.setFilterWeight(total_alpha);
+                    model_b.set_active(false);
                 }
             }
         }
@@ -152,7 +151,7 @@ int MultiModalRobotModel::PruneViterbi(unsigned int order) {
     std::for_each (
         begin_remove, 
         end_remove, 
-        std::bind2nd(std::mem_fun(&RobotModel::setActive), false));
+        std::bind2nd(std::mem_fun(&RobotHypothesis::setActive), false));
 
     // Clear out all deactivated models.
     int num_removed = RemoveInactiveModels();

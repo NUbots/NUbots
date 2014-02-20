@@ -23,6 +23,9 @@
 #include <armadillo>
 
 #include "localisation/LocalisationFieldObject.h"
+#include "messages/support/Configuration.h"
+
+using messages::support::Configuration;
 
 namespace modules {
 namespace localisation {
@@ -33,7 +36,7 @@ struct FieldDescriptionConfig {
 
 class FieldDescription {
 public:
-    FieldDescription();
+    FieldDescription(Configuration<FieldDescriptionConfig> config);
 
     // Should be a std::unordered_set?
     std::vector<LocalisationFieldObject> field_objects_;

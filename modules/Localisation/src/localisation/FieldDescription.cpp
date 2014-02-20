@@ -16,31 +16,34 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
-#include <armadillo>
- 
-#include "messages/support/Configuration.h"
 #include "localisation/FieldDescription.h"
+
+#include <armadillo>
+
+#include "messages/support/Configuration.h"
+#include "localisation/LocalisationFieldObject.h"
 
 using messages::support::Configuration;
 
 namespace modules {
 namespace localisation {
 
-	void LocalisationFieldObject BuildLFO(
-		Configuration<FieldDescriptionConfig> config,
-		LFOId id, std::string name)
-	{
-    	arma::vec2 lfo_pos = config[name];
-    	
-    	auto lfo = LocalisationFieldObject(pos, id, name);
-	}
+	// LocalisationFieldObject BuildLFO(
+	// 	Configuration<FieldDescriptionConfig> config,
+	// 	LFOId id, const std::string& name)
+	// {
+ //        // arma::vec2 lfo_pos = config[name];
+ //    	arma::vec2 lfo_pos;
+
+ //    	return LocalisationFieldObject(lfo_pos, id, name);
+	// }
 
     FieldDescription::FieldDescription(Configuration<FieldDescriptionConfig> config) {
-    	field_objects.add(BuildLFO(config, kBall, "Ball"));
-    	field_objects.add(BuildLFO(config, kGoalBR, "GoalBR"));
-    	field_objects.add(BuildLFO(config, kGoalBL, "GoalBL"));
-    	field_objects.add(BuildLFO(config, kGoalYR, "GoalYR"));
-    	field_objects.add(BuildLFO(config, kGoalYL, "GoalYL"));
+    	// field_objects_.push_back(BuildLFO(config, kBall, "Ball"));
+    	// field_objects_.push_back(BuildLFO(config, kGoalBR, "GoalBR"));
+    	// field_objects_.push_back(BuildLFO(config, kGoalBL, "GoalBL"));
+    	// field_objects_.push_back(BuildLFO(config, kGoalYR, "GoalYR"));
+    	// field_objects_.push_back(BuildLFO(config, kGoalYL, "GoalYL"));
     }
 }
 }

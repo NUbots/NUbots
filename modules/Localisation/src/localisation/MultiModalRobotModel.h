@@ -22,16 +22,24 @@
 
 #include <nuclear>
 
+#include "utility/math/kalman/UKF.h"
+
+#include "RobotModel.h"
+
 namespace modules {
 namespace localisation {
 
-    class RobotModel {
+    class RobotHypothesis {
     private:
         bool active_;
 
+        utility::math::kalman::UKF<RobotModel> filter_;
+
     public:
-        bool active() { return active_; }
+        bool active() const { return active_; }
         void set_active(bool active) { active_ = active; }
+        float getFilterWeight() { return 0; }
+        void setFilterWeight(float weight) { }
     };
 
     class MultiModalRobotModel {
@@ -39,11 +47,12 @@ namespace localisation {
         MultiModalRobotModel();
 
         unsigned int RemoveInactiveModels();
-        unsigned int RemoveInactiveModels(std::vector<RobotModel>& container);
+        unsigned int RemoveInactiveModels(std::vector<RobotHypothesis>& container);
         void PruneModels();
         void RemoveSimilarModels();
         void NormaliseAlphas();
 
+        void TimeUpdate() { };
         void LandmarkUpdate();
         void MultipleLandmarkUpdate();
         // int AmbiguousLandmarkUpdate(
@@ -56,7 +65,7 @@ namespace localisation {
         //     AmbiguousObject &ambiguous_object,
         //     const std::vector<StationaryObject*>& possible_objects);
 
-        std::vector<RobotModel> robot_models_;
+        std::vector<RobotHypothesis> robot_models_;
     };
 }
 }

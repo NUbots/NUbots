@@ -17,40 +17,18 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_LOCALISATIONFIELDOBJECT_H
-#define MODULES_LOCALISATIONFIELDOBJECT_H
-
-#include <armadillo>
+#ifndef MODULES_LOCALISATION_LOCALISATIONBALL
+#define MODULES_LOCALISATION_LOCALISATIONBALL
 
 namespace modules {
 namespace localisation {
 
-enum class LFOId {
-    kInvalid,
-    kBall,
-    kGoalYL,
-    kGoalYR,
-    kGoalBL,
-    kGoalBR,
-};
+    class LocalisationBall {
+    public:
+        void TimeUpdate() { };
 
-class LocalisationFieldObject {
-public:
-    // LocalisationFieldObject();
-
-    LocalisationFieldObject(arma::vec2 location, LFOId id, const std::string& name)
-        : location_(location), id_(id), name_(name) { }
-
-private:
-    arma::vec2 location_;
-    LFOId id_;
-    std::string name_;
-};
-
-class StationaryFieldObject : public LocalisationFieldObject { };
-class MobileFieldObject : public LocalisationFieldObject { };
+    };
 
 }
 }
-
 #endif
