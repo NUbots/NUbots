@@ -107,7 +107,7 @@ namespace modules {
 
                     });
 
-                    on< Trigger<Configuration<KinematicsNULLTest>> >([this](const Configuration<KinematicsNULLTest>& request) {
+                    on< Trigger<Configuration<LegKinematicsNULLTest>> >([this](const Configuration<LegKinematicsNULLTest>& request) {
                         int iterations = 1;
                         int numberOfFails = 0;
                         float ERROR_THRESHOLD = request.config["ERROR_THRESHOLD"];
@@ -197,10 +197,65 @@ namespace modules {
                             sensors->orientation = arma::eye(3,3); 
                             emit(std::move(sensors));    
                         }           
-                        std::cout<< "IK NULL Test : "<< numberOfFails << " Total Failures " <<std::endl;       
+                        std::cout<< "IK Leg NULL Test : "<< numberOfFails << " Total Failures " <<std::endl;       
                         
                     });
+                
+                    on< Trigger<Configuration<HeadKinematicsNULLTest>> >([this](const Configuration<HeadKinematicsNULLTest>& request) {
+                        int iterations = 1;
+                        int numberOfFails = 0;
+                        float ERROR_THRESHOLD = request.config["ERROR_THRESHOLD"];
 
+                        arma::vec3 cameraVec = {cos(request.config["yaw"])*cos(request.config["pitch"]), sin(request.config["yaw"])*cos(request.config["pitch"]), -sin(request.config["pitch"])}
+                        if(request.config["RANDOMIZE"]){
+                            iterations = request.config["RANDOM_ITERATIONS"];
+                        }
+
+                        for(int i = 0; i<iterations; i++){
+                            if(request.config["RANDOMIZE"]){
+                                cameraVec[0] = 0.1 * rand()/static_cast<double>(RAND_MAX);
+                                cameraVec[1] = 0.1 * rand()/static_cast<double>(RAND_MAX);
+                                cameraVec[2] = 0.1 * rand()/static_cast<double>(RAND_MAX);
+                                cameraVec *= 1/arma::norm(cameraVec,2);
+                            }
+                            
+                            std::vector< std::pair<messages::input::ServoID, float> > angles = calculateHeadJoints(cameraVec);
+                            Sensors sensors;                       
+                            
+                            for (auto& angle : angles) {
+                                    ServoID servoID;
+                                    float position;
+
+                                    std::tie(servoID, position) = angle;
+                                    
+                                    sensors->servos[static_cast<int>(servoID)].presentPosition = position;
+                            }
+
+                            arma::mat44 fKin = calculatePosition(sensors, ServoID::HEAD_PITCH);
+
+                            float max_error = 0;
+                            for(int i = 0; i < 4 ; i++){                                
+                                float error = std::abs(fKin(i%4, i/4) - fKin(i%4, i/4));
+                                if (error>max_error) {
+                                    max_error = error;
+                                }
+                            }
+                            if(max_error >= ERROR_THRESHOLD){
+                                    numberOfFails++;
+                            }
+
+                            NUClear::log<NUClear::DEBUG>("++++++++++++++++++++++++++++++++++++++++++++++++++");
+                            NUClear::log<NUClear::DEBUG>("Request = \n", cameraVec);
+                            NUClear::log<NUClear::DEBUG>("Angles = \n", angles);
+                            NUClear::log<NUClear::DEBUG>("Final FKin = \n", fkin);
+                            NUClear::log<NUClear::DEBUG>(max_error >= ERROR_THRESHOLD "PASS" : "FAIL");
+                            NUClear::log<NUClear::DEBUG>("++++++++++++++++++++++++++++++++++++++++++++++++++");
+
+                        }
+                        std::cout<< "IK Head NULL Test : "<< numberOfFails << " Total Failures " <<std::endl;  
+
+                       
+                    });
             }
     } // debug
 } // modules

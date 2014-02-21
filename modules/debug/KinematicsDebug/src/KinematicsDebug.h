@@ -31,9 +31,13 @@ namespace modules {
 			struct ForwardKinematicsRequest{
 		        static constexpr const char* CONFIGURATION_PATH = "ForwardKinematicsRequest.json";
 			};
-			struct KinematicsNULLTest{
-		        static constexpr const char* CONFIGURATION_PATH = "KinematicsNULLTest.json";
+			struct LegKinematicsNULLTest{
+		        static constexpr const char* CONFIGURATION_PATH = "LegKinematicsNULLTest.json";
 			};
+			struct HeadKinematicsNULLTest{
+		        static constexpr const char* CONFIGURATION_PATH = "HeadKinematicsNULLTest.json";
+			};
+
 
 		    class KinematicsDebug : public NUClear::Reactor {
 		    public:

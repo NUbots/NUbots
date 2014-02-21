@@ -204,7 +204,7 @@ namespace kinematics {
     }
 
     template <typename RobotKinematicModel> 
-    std::vector< std::pair<messages::input::ServoID, float> > calculateHeadJoints(arma::vec3 cameraUnitVector, Side isLeft){
+    std::vector< std::pair<messages::input::ServoID, float> > calculateHeadJoints(arma::vec3 cameraUnitVector){
         std::vector< std::pair<messages::input::ServoID, float> > positions;
         positions.push_back(std::make_pair(messages::input::ServoID::HEAD_YAW, atan2(cameraUnitVector[1],cameraUnitVector[0]) ));
         positions.push_back(std::make_pair(messages::input::ServoID::HEAD_PITCH, atan2(-cameraUnitVector[2],cameraUnitVector[0]) ));
