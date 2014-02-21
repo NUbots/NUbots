@@ -517,9 +517,9 @@ namespace modules {
             emit(graph("pRLeg", pLLeg[0], pLLeg[1], pLLeg[2], pRLeg[3], pRLeg[4], pRLeg[5]));
             emit(graph("pTorso", pTorso[0], pTorso[1], pTorso[2], pTorso[3], pTorso[4], pTorso[5]));*/
 
-            emit(graph("pLLeg", pLLeg[3], pLLeg[4], pLLeg[5]));
-            emit(graph("pRLeg",  pRLeg[3], pRLeg[4], pRLeg[5]));
-            emit(graph("pTorso", pTorso[3], pTorso[4], pTorso[5]));
+            // emit(graph("pLLeg", pLLeg[3], pLLeg[4], pLLeg[5]));
+            // emit(graph("pRLeg",  pRLeg[3], pRLeg[4], pRLeg[5]));
+            // emit(graph("pTorso", pTorso[3], pTorso[4], pTorso[5]));
 
             std::vector<double> qLegs = darwinop_kinematics_inverse_legs_nubots(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
             motionLegs(qLegs, false, sensors);
@@ -727,9 +727,9 @@ namespace modules {
 
                 qLegs[10] += toeTipCompensation * phComp; // Lifting toetip
                 qLegs[1] += hipRollCompensation * phComp; // Hip roll compensation
-            	emit(graph("L Ankle comp dp,dr", ankleShift[0], ankleShift[1]));
-            	emit(graph("L Hip comp roll", hipShift[1]));
-            	emit(graph("L Knee comp", kneeShift));
+            	// emit(graph("L Ankle comp dp,dr", ankleShift[0], ankleShift[1]));
+            	// emit(graph("L Hip comp roll", hipShift[1]));
+            	// emit(graph("L Knee comp", kneeShift));
 
             } else {
                 qLegs[7] += hipShift[1]; // Hip roll stabilization
@@ -739,9 +739,9 @@ namespace modules {
 
                 qLegs[4] += toeTipCompensation * phComp; // Lifting toetip
                 qLegs[7] -= hipRollCompensation * phComp; // Hip roll compensation
-            	emit(graph("R Ankle comp dp,dr", ankleShift[0], ankleShift[1]));
-            	emit(graph("R Hip comp roll", hipShift[1]));
-            	emit(graph("R Knee comp", kneeShift));
+            	// emit(graph("R Ankle comp dp,dr", ankleShift[0], ankleShift[1]));
+            	// emit(graph("R Hip comp roll", hipShift[1]));
+            	// emit(graph("R Knee comp", kneeShift));
 
             }
 
@@ -793,7 +793,7 @@ namespace modules {
             NUClear::log<NUClear::DEBUG>("R Ankle Roll: ", qLegs[11]);*/
 
             // emit(graph("L Hip Yaw", qLegs[0]));
-            emit(graph("L Hip Roll", qLegs[1]));
+            // emit(graph("L Hip Roll", qLegs[1]));
             // emit(graph("L Hip Pitch", qLegs[2]));
             // emit(graph("L Knee", qLegs[3]));
             // emit(graph("L Ankle Pitch", qLegs[4]));
