@@ -71,6 +71,12 @@ namespace kinematics {
         //Return basis pointing along camera vector (ie x is camera vector, z out of top of head). Pos at camera position
         return runningTransform;
     }
+
+    template <typename RobotKinematicModel>
+    arma::mat44 calculateCameraBasis(const messages::input::Sensors& sensors){
+        return calculateHeadJointPosition(sensors, messages::input::ServoID::HEAD_PITCH);
+    }
+
     
     template <typename RobotKinematicModel>
     arma::mat44 calculateArmJointPosition(const messages::input::Sensors& sensors,  messages::input::ServoID servoID, Side isLeft){
