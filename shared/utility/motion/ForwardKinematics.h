@@ -42,10 +42,15 @@ namespace kinematics {
     template <typename RobotKinematicModel>
     arma::mat44 calculateHeadJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID){
         arma::mat44 runningTransform = arma::eye(4,4);
-        float HEAD_PITCH = messages::input::ServoID::HEAD_PITCH;
-        float HEAD_YAW = messages::input::ServoID::HEAD_YAW;
-        arma::vec3 NECK_POS = RobotKinematicModel::Head::NECK_BASE_POS_FROM_ORIGIN;
+        float HEAD_PITCH = sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_PITCH)].presentPosition;
+        float HEAD_YAW =  sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_YAW)].presentPosition;
+        arma::vec3 NECK_POS = {RobotKinematicModel::Head::NECK_BASE_POS_FROM_ORIGIN[0],
+                               RobotKinematicModel::Head::NECK_BASE_POS_FROM_ORIGIN[1],
+                               RobotKinematicModel::Head::NECK_BASE_POS_FROM_ORIGIN[2]};
         float NECK_LENGTH = RobotKinematicModel::Head::NECK_LENGTH;
+        arma::vec3 NECK_TO_CAMERA = {RobotKinematicModel::Head::NECK_TO_CAMERA[0],
+                               RobotKinematicModel::Head::NECK_TO_CAMERA[1],
+                               RobotKinematicModel::Head::NECK_TO_CAMERA[2]};
 
         //Translate to base of neck from origin
         runningTransform *= utility::math::matrix::translationMatrix(NECK_POS);
@@ -65,7 +70,7 @@ namespace kinematics {
         //Rotate pitch
         runningTransform *= utility::math::matrix::yRotationMatrix(HEAD_PITCH).t();
         //Translate to camera
-        runningTransform *= utility::math::matrix::translationMatrix(RobotKinematicModel::Head::NECK_TO_CAMERA);
+        runningTransform *= utility::math::matrix::translationMatrix(NECK_TO_CAMERA);
         //Rotate to set x to camera vector
         runningTransform *= utility::math::matrix::yRotationMatrix(RobotKinematicModel::Head::CAMERA_DECLINATION_ANGLE_OFFSET).t();
         //Return basis pointing along camera vector (ie x is camera vector, z out of top of head). Pos at camera position
@@ -74,7 +79,7 @@ namespace kinematics {
 
     template <typename RobotKinematicModel>
     arma::mat44 calculateCameraBasis(const messages::input::Sensors& sensors){
-        return calculateHeadJointPosition(sensors, messages::input::ServoID::HEAD_PITCH);
+        return calculateHeadJointPosition<RobotKinematicModel>(sensors, messages::input::ServoID::HEAD_PITCH);
     }
 
     

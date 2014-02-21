@@ -44,6 +44,7 @@ namespace modules {
             using utility::math::matrix::yRotationMatrix;
             using utility::math::matrix::zRotationMatrix;
             using utility::motion::kinematics::DarwinModel;
+            using utility::motion::kinematics::calculateHeadJoints;
 
             KinematicsDebug::KinematicsDebug(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
         			on< Trigger<Configuration<InverseKinematicsRequest>> >([this](const Configuration<InverseKinematicsRequest>& request) {
@@ -206,7 +207,7 @@ namespace modules {
                         int numberOfFails = 0;
                         float ERROR_THRESHOLD = request.config["ERROR_THRESHOLD"];
 
-                        arma::vec3 cameraVec = {cos(request.config["yaw"])*cos(request.config["pitch"]), sin(request.config["yaw"])*cos(request.config["pitch"]), -sin(request.config["pitch"])}
+                        arma::vec3 cameraVec = {cos(request.config["yaw"])*cos(request.config["pitch"]), sin(request.config["yaw"])*cos(request.config["pitch"]), -sin(request.config["pitch"])};
                         if(request.config["RANDOMIZE"]){
                             iterations = request.config["RANDOM_ITERATIONS"];
                         }
@@ -219,7 +220,7 @@ namespace modules {
                                 cameraVec *= 1/arma::norm(cameraVec,2);
                             }
                             
-                            std::vector< std::pair<messages::input::ServoID, float> > angles = calculateHeadJoints(cameraVec);
+                            std::vector< std::pair<messages::input::ServoID, float> > angles = calculateHeadJoints<DarwinModel>(cameraVec);
                             Sensors sensors;                       
                             
                             for (auto& angle : angles) {
@@ -228,10 +229,10 @@ namespace modules {
 
                                     std::tie(servoID, position) = angle;
                                     
-                                    sensors->servos[static_cast<int>(servoID)].presentPosition = position;
+                                    sensors.servos[static_cast<int>(servoID)].presentPosition = position;
                             }
 
-                            arma::mat44 fKin = calculatePosition(sensors, ServoID::HEAD_PITCH);
+                            arma::mat44 fKin = calculatePosition<DarwinModel>(sensors, ServoID::HEAD_PITCH);
 
                             float max_error = 0;
                             for(int i = 0; i < 4 ; i++){                                
@@ -246,9 +247,9 @@ namespace modules {
 
                             NUClear::log<NUClear::DEBUG>("++++++++++++++++++++++++++++++++++++++++++++++++++");
                             NUClear::log<NUClear::DEBUG>("Request = \n", cameraVec);
-                            NUClear::log<NUClear::DEBUG>("Angles = \n", angles);
-                            NUClear::log<NUClear::DEBUG>("Final FKin = \n", fkin);
-                            NUClear::log<NUClear::DEBUG>(max_error >= ERROR_THRESHOLD "PASS" : "FAIL");
+                            NUClear::log<NUClear::DEBUG>("Angles = \n", angles[0].second, angles[1].second);
+                            NUClear::log<NUClear::DEBUG>("Final FKin = \n", fKin);
+                            NUClear::log<NUClear::DEBUG>(max_error >= ERROR_THRESHOLD ? "PASS" : "FAIL");
                             NUClear::log<NUClear::DEBUG>("++++++++++++++++++++++++++++++++++++++++++++++++++");
 
                         }

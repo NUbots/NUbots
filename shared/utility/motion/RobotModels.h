@@ -36,9 +36,9 @@ namespace utility{
 
 				class Head {
 				public:
-					static constexpr arma::vec3 NECK_BASE_POS_FROM_ORIGIN = {0.013, 0, 0.11};
+					static constexpr float NECK_BASE_POS_FROM_ORIGIN[3] = {0.013, 0, 0.11};
 					static constexpr float NECK_LENGTH = 0.0305;
-					static constexpr arma::vec3 NECK_TO_CAMERA = {0.033,0,0.033};
+					static constexpr float NECK_TO_CAMERA[3] = {0.033,0,0.033};
 					static constexpr float CAMERA_DECLINATION_ANGLE_OFFSET = 0;
 
 
