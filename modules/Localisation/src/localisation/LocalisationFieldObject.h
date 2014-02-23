@@ -34,6 +34,7 @@ enum class LFOId {
     kGoalBR,
 };
 
+// Should be abstract
 class LocalisationFieldObject {
 public:
     // LocalisationFieldObject();

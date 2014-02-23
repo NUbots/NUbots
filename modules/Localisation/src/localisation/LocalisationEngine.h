@@ -23,36 +23,44 @@
 #include <nuclear>
 
 #include "MultiModalRobotModel.h"
- #include "LocalisationBall.h"
+#include "LocalisationBall.h"
 #include "messages/vision/VisionObjects.h"
 #include "LocalisationFieldObject.h"
-
-using messages::vision::VisionObject;
+#include "FieldDescription.h"
 
 namespace modules {
 namespace localisation {
+
+    // struct ObservationRecord {
+    //     enum class ObservationType {
+    //         kInvalid,
+    //         kGoal,
+    //     } type;
+
+    //     std::unique_ptr<messages::vision::Goal> goal;
+    // };
+
 
     class LocalisationEngine {
         public:
 
         LocalisationEngine();
 
+        // void RecordMeasurement(const messages::vision::Goal& m);
+
         void TimeUpdate(time_t current_time);
         void ObjectUpdate();
-
-        void RecordMeasurement(messages::vision::Goal m, time_t timestamp);
 
         void SwapMeasurementBuffers();
 
         int ProcessAmbiguousObjects(
-            std::vector<std::shared_ptr<VisionObject>>& fobs);
+            std::vector<std::shared_ptr<messages::vision::VisionObject>>& fobs);
         
         void IndividualStationaryObjectUpdate(
-            std::vector<std::shared_ptr<VisionObject>>& fobs,
+            std::vector<std::shared_ptr<messages::vision::VisionObject>>& fobs,
             float time_increment);
 
-        void ProcessObjects(std::vector<std::shared_ptr<VisionObject>>& fobs,
-            float time_increment);
+        void ProcessObjects(const std::vector<messages::vision::Goal>& goals);
         
         void LandmarkUpdate(StationaryFieldObject &landmark);
         
@@ -70,7 +78,18 @@ namespace localisation {
         //     AmbiguousObject &ambiguous_object,
         //     const std::vector<StationaryFieldObject*>& possible_objects);
 
+        std::shared_ptr<localisation::FieldDescription> field_description() {
+            return field_description_;
+        };
+
+        void set_field_description(std::shared_ptr<localisation::FieldDescription> desc) {
+            field_description_ = desc;
+        };
+
     private:
+        /// Contains the dimensions of the field
+        std::shared_ptr<localisation::FieldDescription> field_description_;
+
         // TODO: Consider extracting the robot models into an actual class,
         // that handles the robot model without regard to whether or not
         // it is represented by a multi-modal distribution. (e.g. methods like
@@ -79,7 +98,11 @@ namespace localisation {
         MultiModalRobotModel robot_models_;
 
         LocalisationBall ball_model_;
+
+        // // Should be a queue?
+        // std::vector<ObservationRecord> observation_buffer_;
     };
 }
 }
 #endif
+

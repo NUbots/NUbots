@@ -37,6 +37,13 @@ Vagrant.configure("2") do |config|
 
     # Syntax: "path/on/host", "/path/on/guest"
     nuclearport.vm.synced_folder ".", "/home/vagrant/nubots/NUClearPort"
+
+
+    # Share NUbugger repository with the VM if it has been placed in the same
+    # directory as the NUClearPort repository
+    if File.directory?("../NUbugger")
+      nuclearport.vm.synced_folder "../NUbugger", "/home/vagrant/nubots/NUbugger"
+    end
   end
 
   # # Define a VM for running NUbugger.

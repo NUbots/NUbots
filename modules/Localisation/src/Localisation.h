@@ -22,20 +22,29 @@
 
 #include <nuclear>
 #include "localisation/LocalisationEngine.h"
+#include "localisation/FieldDescription.h"
 
 namespace modules {
+    namespace localisation {
+        struct TimeUpdate { };
+        struct ObjectUpdate { };
+    }
+
     class Localisation : public NUClear::Reactor {
     private:
-        localisation::LocalisationEngine engine;
+        /// The engine that does all of the work
+        localisation::LocalisationEngine engine_;
+
+        /// Contains the dimensions of the field
+        std::shared_ptr<localisation::FieldDescription> field_description_;
 
     public:
-        /// @brief Our configuration file for this class
+        /// @brief General localisation configuration.
         struct LocalisationConfig {
             static constexpr const char* CONFIGURATION_PATH = "Localisation.json";
         };
 
-
-        /// @brief Called by the powerplant to build and setup our CameraReader
+        /// @brief Called by the powerplant to build and setup the Localisation reactor.
         explicit Localisation(std::unique_ptr<NUClear::Environment> environment);
     };
 }

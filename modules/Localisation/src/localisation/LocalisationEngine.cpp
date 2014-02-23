@@ -28,8 +28,19 @@ namespace modules {
 namespace localisation {
 
     LocalisationEngine::LocalisationEngine() {
-
     }
+
+    // void LocalisationEngine::RecordMeasurement(const messages::vision::Goal& m) {
+    //     // ObservationRecord r;
+
+    //     // r.type = ObservationRecord::ObservationType::kGoal;
+    //     // r.goal = std::move(std::make_unique<messages::vision::Goal>(m));
+
+    //     // observation_buffer_.push_back(std::move(r));
+
+    //     observation_buffer_.push_back(m);
+    // }
+
 
     /// Integrate time-dependent observations on all objects
     void LocalisationEngine::TimeUpdate(time_t current_time) {
@@ -38,10 +49,10 @@ namespace localisation {
         robot_models_.TimeUpdate();
     }
 
-    /// Estimate object positions based on observations
-    void LocalisationEngine::ObjectUpdate() {
-        // ProcessObjects();
-    }
+    // /// Estimate object positions based on observations
+    // void LocalisationEngine::ObjectUpdate() {
+    //     ProcessObjects(observation_buffer_);
+    // }
 
     int ProcessAmbiguousObjects(std::vector<std::shared_ptr<VisionObject>>& fobs) {
         int useful_object_count = 0;
@@ -131,15 +142,14 @@ namespace localisation {
 
         // NormaliseAlphas();
     }
-
+ 
     /*! @brief Process objects
         Processes the field objects and perfroms the correction updates required from the observations.
 
         @param fobs The object information output by the vision module. This contains objects identified and their relative positions.
         @param time_increment The time that has elapsed since the previous localisation frame.
      */
-    void LocalisationEngine::ProcessObjects(std::vector<std::shared_ptr<VisionObject>>& fobs, 
-                                          float time_increment) {
+    void LocalisationEngine::ProcessObjects(const std::vector<messages::vision::Goal>& goals) {
         // int useful_object_count = 0;
 
         // // Known object update

@@ -66,7 +66,10 @@ Usage: b run <role>
 Please provide the name of the role to run.
 '''
     elif os.path.isfile("build/roles/{}".format(arg1)):
-        call("./roles/{}".format(arg1), cwd='build/')
+        try:
+          call("./roles/{}".format(arg1), cwd='build/')
+        except KeyboardInterrupt, e:
+          print "\nThe process was interrupted by the Keyboard."
     else:
         print "The role '{}' does not exist or did not build correctly.".format(arg1)
 

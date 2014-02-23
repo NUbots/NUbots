@@ -22,10 +22,11 @@
 
 #include <armadillo>
 
-#include "localisation/LocalisationFieldObject.h"
 #include "messages/support/Configuration.h"
+#include "LocalisationFieldObject.h"
 
 using messages::support::Configuration;
+
 
 namespace modules {
 namespace localisation {

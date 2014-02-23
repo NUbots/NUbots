@@ -13,6 +13,8 @@ node nuclearportvm {
 
   class { 'nuclearport::build_dep': username => $username, }
 
+  class { 'nubugger': username => $username, }
+
   # Non-essential developer tools:
   class { 'vim':  username => $username, }
   package { 'screen': ensure => latest, }

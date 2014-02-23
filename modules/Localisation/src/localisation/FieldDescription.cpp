@@ -21,29 +21,29 @@
 #include <armadillo>
 
 #include "messages/support/Configuration.h"
-#include "localisation/LocalisationFieldObject.h"
+#include "LocalisationFieldObject.h"
 
 using messages::support::Configuration;
 
 namespace modules {
 namespace localisation {
+    LocalisationFieldObject BuildLFO(
+        Configuration<FieldDescriptionConfig> config,
+        LFOId id, const std::string& name) {
+        std::vector<double> v = config.config[name];
+        arma::vec2 lfo_pos;
+        lfo_pos << v[0] << v[1];
 
-	// LocalisationFieldObject BuildLFO(
-	// 	Configuration<FieldDescriptionConfig> config,
-	// 	LFOId id, const std::string& name)
-	// {
- //        // arma::vec2 lfo_pos = config[name];
- //    	arma::vec2 lfo_pos;
-
- //    	return LocalisationFieldObject(lfo_pos, id, name);
-	// }
+        return LocalisationFieldObject(lfo_pos, id, name);
+    }
 
     FieldDescription::FieldDescription(Configuration<FieldDescriptionConfig> config) {
-    	// field_objects_.push_back(BuildLFO(config, kBall, "Ball"));
-    	// field_objects_.push_back(BuildLFO(config, kGoalBR, "GoalBR"));
-    	// field_objects_.push_back(BuildLFO(config, kGoalBL, "GoalBL"));
-    	// field_objects_.push_back(BuildLFO(config, kGoalYR, "GoalYR"));
-    	// field_objects_.push_back(BuildLFO(config, kGoalYL, "GoalYL"));
+        field_objects_.push_back(BuildLFO(config, LFOId::kBall, "Ball"));
+        field_objects_.push_back(BuildLFO(config, LFOId::kGoalBR, "GoalBR"));
+        field_objects_.push_back(BuildLFO(config, LFOId::kGoalBL, "GoalBL"));
+        field_objects_.push_back(BuildLFO(config, LFOId::kGoalYR, "GoalYR"));
+        field_objects_.push_back(BuildLFO(config, LFOId::kGoalYL, "GoalYL"));
     }
 }
 }
+
