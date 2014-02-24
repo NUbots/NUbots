@@ -23,7 +23,7 @@ public:
   arma::mat44 getArmaMat();
   void apply(double x[3]);
   double& operator() (int i, int j);
-  const double operator() (int i, int j) const;
+  double operator() (int i, int j) const;
   friend std::ostream& operator<< (std::ostream& output, const Transform& t);
 
  private:

@@ -663,8 +663,7 @@ namespace modules {
         }
 
         void WalkEngine::motionLegs(std::vector<double> qLegs, bool gyroOff, const Sensors& sensors) {
-            float phComp = std::min({1.0, phSingle / 0.1, (1 - phSingle) / 0.1});
-            
+            float phComp = std::min({1.0, phSingle / 0.1, (1 - phSingle) / 0.1});       
 
             float gyroRoll0 = -sensors.gyroscope[0]*180.0/M_PI;
             float gyroPitch0 = -sensors.gyroscope[1]*180.0/M_PI;

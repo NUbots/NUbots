@@ -23,6 +23,7 @@
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
 #include "utility/NUbugger/NUgraph.h"
+#include "utility/math/matrix.h"
 
 namespace modules {
     namespace platform {
@@ -76,6 +77,14 @@ namespace modules {
                     sensors->accelerometer = {-input.accelerometer.y, input.accelerometer.x, -input.accelerometer.z};
                     sensors->gyroscope = {-input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
                      
+                    // Store last orientation matrix for gyro filtering
+                    arma::vec orientation = orientationFilter.get();
+                    arma::mat33 lastOrientationMatrix;
+                    lastOrientationMatrix.col(2) = -orientation.rows(0,2);
+                    lastOrientationMatrix.col(0) = orientation.rows(3,5);
+                    lastOrientationMatrix.col(1) = arma::cross(sensors->orientation.col(2), sensors->orientation.col(0));
+
+
                     // Kalman filter for orientation
                     double deltaT = (lastUpdate - input.timestamp).count() / double(NUClear::clock::period::den);
                     lastUpdate = input.timestamp;                     
@@ -91,7 +100,7 @@ namespace modules {
                     }
                      
                     float quality = orientationFilter.measurementUpdate(sensors->accelerometer, observationNoise);                     
-                    arma::vec orientation = orientationFilter.get();
+                    orientation = orientationFilter.get();
                     sensors->orientation.col(2) = -orientation.rows(0,2);
                     sensors->orientation.col(0) = orientation.rows(3,5);
                     sensors->orientation.col(1) = arma::cross(sensors->orientation.col(2), sensors->orientation.col(0));
@@ -113,9 +122,18 @@ namespace modules {
                             ));
                         frameLimiter = 1;
                     }
-                    // Kalman filter all of the incoming data!                    
-                    // Output the filtered data
-                    
+                    // Kalman filter for orientation END
+
+
+
+                    //BEGIN CALCULATE FILTERED GYRO
+
+                    arma::mat33 SORAMatrix = sensors->orientation * lastOrientationMatrix.t();            
+                    std::pair<arma::vec3, double> axisAngle = utility::math::matrix::axisAngleFromRotationMatrix(SORAMatrix);
+                    sensors->gyroscope = axisAngle.first * axisAngle.second;
+
+                    //END CALCULATE FILTERED GYRO
+
                     emit(std::move(sensors));
                 });
             }
