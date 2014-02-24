@@ -55,9 +55,9 @@ namespace kinematics {
         //Translate to base of neck from origin
         runningTransform *= utility::math::matrix::translationMatrix(NECK_POS);
         //Rotate to face out of base of neck
-        runningTransform *= utility::math::matrix::yRotationMatrix(-M_PI/2).t();
+        runningTransform *= utility::math::matrix::yRotationMatrix(-M_PI/2, 4).t();
         //Rotate head in yaw axis
-        runningTransform *= utility::math::matrix::xRotationMatrix(HEAD_YAW).t();
+        runningTransform *= utility::math::matrix::xRotationMatrix(HEAD_YAW, 4).t();
         //Translate to top of neck (i.e. next motor axle)
         runningTransform *= utility::math::matrix::translationMatrix(arma::vec3({NECK_LENGTH, 0, 0}));
         //Return the basis pointing out of the top of the torso with z pointing out the back of the neck. Pos is top of neck (at hip pitch motor)
@@ -66,13 +66,13 @@ namespace kinematics {
         }
 
         //Rotate to face forward direction of neck
-        runningTransform *= utility::math::matrix::yRotationMatrix(M_PI).t();
+        runningTransform *= utility::math::matrix::yRotationMatrix(M_PI/2, 4).t();
         //Rotate pitch
-        runningTransform *= utility::math::matrix::yRotationMatrix(HEAD_PITCH).t();
+        runningTransform *= utility::math::matrix::yRotationMatrix(HEAD_PITCH, 4).t();
         //Translate to camera
         runningTransform *= utility::math::matrix::translationMatrix(NECK_TO_CAMERA);
         //Rotate to set x to camera vector
-        runningTransform *= utility::math::matrix::yRotationMatrix(RobotKinematicModel::Head::CAMERA_DECLINATION_ANGLE_OFFSET).t();
+        runningTransform *= utility::math::matrix::yRotationMatrix(RobotKinematicModel::Head::CAMERA_DECLINATION_ANGLE_OFFSET, 4).t();
         //Return basis pointing along camera vector (ie x is camera vector, z out of top of head). Pos at camera position
         return runningTransform;
     }
