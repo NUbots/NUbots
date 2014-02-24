@@ -27,6 +27,7 @@
 #include "messages/localisation/FieldObject.h"
 #include "messages/vision/VisionObjects.h"
 #include "localisation/FieldDescription.h"
+#include "localisation/LocalisationFieldObject.h"
 
 using utility::NUbugger::graph;
 using messages::support::Configuration;
@@ -44,29 +45,29 @@ namespace modules {
 
             auto fd = std::make_shared<localisation::FieldDescription>(config);
 
-            field_description_ = fd;
             engine_.set_field_description(fd);
         });
-            
 
-        // // Emit to NUbugger
-        // on<Trigger<Every<500, std::chrono::milliseconds>>>([this](const time_t&) {
-        //     // emit(std::make_unique<messages::LMissile>());
-        //     // std::cout << __PRETTY_FUNCTION__ << ": rand():" << rand() << std::endl;
+        // Emit to NUbugger
+        on<Trigger<Every<500, std::chrono::milliseconds>>>([this](const time_t&) {
+            // emit(std::make_unique<messages::LMissile>());
+            // std::cout << __PRETTY_FUNCTION__ << ": rand():" << rand() << std::endl;
 
-        //     auto field_object = std::make_unique<messages::localisation::FieldObject>();
-        //     field_object->name = "ball";
-        //     field_object->wm_x = static_cast<float>(rand() % 400 - 200);
-        //     field_object->wm_y = static_cast<float>(rand() % 600 - 300);
-        //     field_object->sd_x = 100;
-        //     field_object->sd_y = 25;
-        //     field_object->sr_xx = 100;
-        //     field_object->sr_xy = -1;
-        //     field_object->sr_yy = 10;
-        //     field_object->lost = false;
+            auto field_object = std::make_unique<messages::localisation::FieldObject>();
+            field_object->name = "self";
+            field_object->wm_x = static_cast<float>(rand() % 600 - 300) * 0.01;
+            field_object->wm_y = static_cast<float>(rand() % 400 - 200) * 0.01;
+            field_object->heading = static_cast<float>(rand() % 628) * 0.01;
+            field_object->sd_x = 1;
+            field_object->sd_y = 0.25;
+            field_object->sr_xx = 0.01;
+            field_object->sr_xy = -0.01;
+            field_object->sr_yy = 0.10;
+            field_object->lost = false;
 
-        //     emit(std::move(field_object));
-        // });
+            emit(std::move(field_object));
+        });
+
 
         // Simulate Vision
         on<Trigger<Every<500, std::chrono::milliseconds>>>([this](const time_t&) {
@@ -78,12 +79,16 @@ namespace modules {
 
             auto camera_pos = arma::vec3 { 150.0, 100.0, 40.0 };
 
-            auto goal1_pos = arma::vec3 { 300.0, 100.0, 0.0 };
-            auto goal2_pos = arma::vec3 { 300.0, -100.0, 0.0 };
+            auto fd = engine_.field_description();
+            auto goal_br_pos = fd->GetLFO(localisation::LFOId::kGoalBR).location();
+            auto goal_bl_pos = fd->GetLFO(localisation::LFOId::kGoalBL).location();
+
+            auto goal1_pos = arma::vec3 { goal_br_pos[0], goal_br_pos[1], 0.0 };
+            auto goal2_pos = arma::vec3 { goal_bl_pos[0], goal_bl_pos[1], 0.0 };
 
             // (dist, bearing, declination)
-            goal1.sphericalFromNeck = arma::vec3();
-            goal2.sphericalFromNeck = arma::vec3();
+            goal1.sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(goal1_pos - camera_pos);
+            goal2.sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(goal2_pos - camera_pos);
 
             auto goals = std::make_unique<std::vector<messages::vision::Goal>>();
 
@@ -125,4 +130,6 @@ namespace modules {
         //     NUClear::log<NUClear::DEBUG>("Object Update", '\n');
 
         //     emit(std::make_unique<localisation::TimeUpdate>());
-        // 
+        // });
+    }
+}

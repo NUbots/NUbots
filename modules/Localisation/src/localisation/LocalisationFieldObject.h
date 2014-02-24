@@ -34,13 +34,17 @@ enum class LFOId {
     kGoalBR,
 };
 
+
 // Should be abstract
 class LocalisationFieldObject {
 public:
-    // LocalisationFieldObject();
+    LocalisationFieldObject() { } // Necessary?
 
     LocalisationFieldObject(arma::vec2 location, LFOId id, const std::string& name)
         : location_(location), id_(id), name_(name) { }
+
+    LFOId id() { return id_; }
+    arma::vec2 location() { return location_; };
 
 private:
     arma::vec2 location_;

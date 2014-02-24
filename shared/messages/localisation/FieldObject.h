@@ -7,6 +7,7 @@ namespace messages {
             std::string name;
             float wm_x;
             float wm_y;
+            float heading;
             float sd_x;
             float sd_y;
             float sr_xx;

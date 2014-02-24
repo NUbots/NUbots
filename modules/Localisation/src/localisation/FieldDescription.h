@@ -20,13 +20,13 @@
 #ifndef MODULES_FIELDDESCRIPTION_H
 #define MODULES_FIELDDESCRIPTION_H
 
+#include <unordered_map>
 #include <armadillo>
 
 #include "messages/support/Configuration.h"
 #include "LocalisationFieldObject.h"
 
 using messages::support::Configuration;
-
 
 namespace modules {
 namespace localisation {
@@ -39,8 +39,28 @@ class FieldDescription {
 public:
     FieldDescription(Configuration<FieldDescriptionConfig> config);
 
-    // Should be a std::unordered_set?
-    std::vector<LocalisationFieldObject> field_objects_;
+    void AddLFO(LocalisationFieldObject lfo);
+    LocalisationFieldObject GetLFO(LFOId id);
+
+    // Can't use unordered map without a hash function
+    std::map<LFOId, LocalisationFieldObject> field_objects_;
+
+    struct FieldDimensions {
+        double line_width;
+        double mark_width;
+        double field_length;
+        double field_width;
+        double goal_depth;
+        double goal_width;
+        double goal_area_length;
+        double goal_area_width;
+        double goal_crossbar_height;
+        double goalpost_diameter;
+        double goal_net_height;
+        double penalty_mark_distance;
+        double center_circle_diameter;
+        double border_strip_min_width;
+    } dimensions;
 };
 
 }

@@ -326,6 +326,7 @@ namespace modules {
 				api_ball->set_name(field_object.name);
 				api_ball->set_wm_x(field_object.wm_x);
 				api_ball->set_wm_y(field_object.wm_y);
+				api_ball->set_heading(field_object.heading);
 				api_ball->set_sd_x(field_object.sd_x);
 				api_ball->set_sd_y(field_object.sd_y);
 				api_ball->set_sr_xx(field_object.sr_xx);

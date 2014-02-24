@@ -1,7 +1,28 @@
 {
+    "Units": "cm",
     "Ball": [0, 0],
-    "GoalBR": [0, 0],
-    "GoalBL": [0, 0],
-    "GoalYR": [0, 0],
-    "GoalYL": [0, 0],
+    "GoalBR": [0, -112.5],
+    "GoalBL": [0, 112.5],
+    "GoalYR": [900, 112.5],
+    "GoalYL": [900, -112.5],
+    "LineWidth": 5,
+    "MarkWidth": 10,
+    "FieldLength": 900,
+    "FieldWidth": 600,
+    "GoalDepth": 50,
+    "GoalWidth": 225,
+    "GoalAreaLength": 60,
+    "GoalAreaWidth": 345,
+    "GoalCrossbarHeight": 110,
+    "GoalpostDiameter": 10,
+    "GoalNetHeight": 100,
+    "PenaltyMarkDistance": 180,
+    "CenterCircleDiameter": 150,
+    "BorderStripMinWidth": 70,
+    "Notes": [
+    	"GoalWidth is distance between inner edges of goal posts.",
+    	"PenaltyMarkDistance is measured from the goal line",
+    	"GoalCrossbarHeight is the height to the bottom of the crossbar",
+    	"The crossbar diameter and the goalpost diameter are equal"
+    ]
 }

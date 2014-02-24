@@ -35,9 +35,6 @@ namespace modules {
         /// The engine that does all of the work
         localisation::LocalisationEngine engine_;
 
-        /// Contains the dimensions of the field
-        std::shared_ptr<localisation::FieldDescription> field_description_;
-
     public:
         /// @brief General localisation configuration.
         struct LocalisationConfig {
