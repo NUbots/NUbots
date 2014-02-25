@@ -130,7 +130,7 @@ namespace modules {
 
                     arma::mat33 SORAMatrix = sensors->orientation * lastOrientationMatrix.t();            
                     std::pair<arma::vec3, double> axisAngle = utility::math::matrix::axisAngleFromRotationMatrix(SORAMatrix);
-                    sensors->gyroscope = axisAngle.first * axisAngle.second;
+                    sensors->gyroscope = axisAngle.first * (axisAngle.second / deltaT);
 
                     //END CALCULATE FILTERED GYRO
 

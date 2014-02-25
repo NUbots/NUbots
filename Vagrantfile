@@ -29,7 +29,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "nuclearportvm", primary: true do |nuclearport|
     nuclearport.vm.hostname = "nuclearportvm"
     
-    nuclearport.vm.network :forwarded_port, guest: 12000, host: 12000
+    nuclearport.vm.network :forwarded_port, guest: 9090, host: 9090
 
     # Syntax: "path/on/host", "/path/on/guest"
     nuclearport.vm.synced_folder ".", "/home/vagrant/nubots/NUClearPort"
