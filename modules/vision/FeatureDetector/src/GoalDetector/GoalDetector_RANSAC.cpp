@@ -89,13 +89,13 @@ namespace modules {
 
 			std::vector<arma::vec2> startPoints, endPoints;
 			std::vector<std::pair<RANSACLine<arma::vec2>, std::vector<arma::vec2>>> ransacResults;
-			std::vector<LSFittedLine> startLines, endLines;
+			std::vector<LSFittedLine> startLines, endLines;            
 			
 			// Get edge points.
 			for (const ColourSegment& segment : horizontalSegments) {
 				startPoints.push_back(segment.m_start);
 				endPoints.push_back(segment.m_end);
-			}
+			}           
 			
 			// Use generic RANSAC implementation to find start lines (left edges).
 			ransacResults = RANSAC::findMultipleModels<RANSACLine<arma::vec2>, arma::vec2>(startPoints, 
@@ -104,10 +104,11 @@ namespace modules {
                                                                                             MAX_ITERATIONS_PER_FITTING,
                                                                                             MAX_FITTING_ATTEMPTS, 
                                                                                             SELECTION_METHOD);
+            
 			
 			for (auto& l : ransacResults) {
 				startLines.push_back(LSFittedLine(l.second));
-			}
+			}            
 			
 			// Use generic RANSAC implementation to find end lines (right enddges).
 			ransacResults = RANSAC::findMultipleModels<RANSACLine<arma::vec2>, arma::vec2>(endPoints, 
@@ -116,11 +117,10 @@ namespace modules {
                                                                                             MAX_ITERATIONS_PER_FITTING,
                                                                                             MAX_FITTING_ATTEMPTS, 
                                                                                             SELECTION_METHOD);
-			
+            
 			for (auto& l : ransacResults) {
 				endLines.push_back(LSFittedLine(l.second));
-			}
-			
+			}        		
 
 			/************************
 			 *      DEBUG POINT	    *
@@ -131,18 +131,16 @@ namespace modules {
 
 			// Build candidates out of lines - this finds candidates irrespective of rotation - filtering must be done later.
 			quads = buildQuadsFromLines(startLines, endLines, RANSAC_MATCHING_TOLERANCE);
-
-			//std::cout<< "GoalDetector_RANSAC::run : found " << quads.size()<< " quads culled to ";
-			
+           			
 			// Remove posts with invalid aspect ratio : check potential cross bars AND posts.
-			removeInvalid(quads);
-
+			removeInvalid(quads);            
 
 			// Sort out potential crossbars and vertical posts (posts on too large of a lean will be removed).
 			// Edit ANGLE_MARGIN to affect this.
 			double halfPI = arma::math::pi() * 0.5;
 			double lowerAngleThreshold = (ANGLE_MARGIN * halfPI);
 			double upperAngleThreshold = halfPI - lowerAngleThreshold;
+            
 			
 			for (const Quad& quad : quads) {
 
@@ -167,12 +165,10 @@ namespace modules {
 				        crossbar.second = quad;
 				    }
 				}
-			}
+			}            
 			
 			// Only check upright posts for building candidates.
-			//TODO FIX SEGFAULT here:
-			mergeClose(postCandidates, 1.5);
-
+			mergeClose(postCandidates, 1.5);            
 			
 			// Generate actual goal from candidate posts.
 			if (crossbar.first) {
@@ -182,14 +178,13 @@ namespace modules {
 			else {
 				// No crossbar, just use general method.
 				posts = assignGoals(visionKinematics, postCandidates);
-			}
-			
-
+			}			
+            
 			// Improves bottom centre estimate using vertical transitions.
 			int numberOfBasesSet = 0;
 			for (const ColourSegment& segment : verticalSegments) {
+            	
 				const arma::vec2& point = segment.m_end;
-				
 				for (Goal& post : *posts) {
 				    if ((point[0] <= post.getQuad().getRight()) && 
                             (point[0] >= post.getQuad().getLeft()) && 
@@ -201,6 +196,7 @@ namespace modules {
 			}
 			
 			std::unique_ptr<std::vector<messages::vision::Goal>> finalGoals = std::move(createGoalMessage(posts));
+
 			return std::move(finalGoals);
 		}
 
@@ -501,7 +497,7 @@ namespace modules {
 
 	        		goal_message->back().screen_quad = post.m_corners.getVertices();
         		
-	        		std::cout << "Emitting " << post << std::endl;
+	        		//std::cout << "Emitting " << post << std::endl;
 	        	}
         	}
 

@@ -27,12 +27,14 @@
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/support/Configuration.h"
 #include "messages/platform/darwin/DarwinSensors.h"
+#include "messages/input/Sensors.h"
 
 #include "VisionKinematics.h"
-//#include "BallDetector/BallDetector.h"
+#include "BallDetector/BallDetector.h"
 #include "GoalDetector/GoalDetector_RANSAC.h"
 //#include "FieldPointDetector/FieldPointDetector.h"
-//#include "ObstacleDetector/ObstacleDetector.h"
+#include "ObstacleDetector/ObstacleDetector.h"
+
 
 namespace modules {
     namespace vision {
@@ -84,13 +86,13 @@ namespace modules {
 */
 
 
-            //BallDetector m_ballDetector;
+            BallDetector m_ballDetector;
 
             GoalDetector_RANSAC m_goalDetector;
 
             //FieldPointDetector m_fieldPointDetector;
 
-            //ObstacleDetector m_obstacleDetector;
+            ObstacleDetector m_obstacleDetector;
 
             VisionKinematics m_visionKinematics;
 
