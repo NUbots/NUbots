@@ -30,7 +30,9 @@ class armadillo {
     destination => '/tmp/armadillo.deb',
     source      => 'https://dl.dropboxusercontent.com/u/27568639/armadillo_4.000.4_i386.deb',
   }
-  -> package { '/tmp/armadillo.deb':
-  	provider    => 'dpkg',
+  -> package { 'armadillo':
+    provider => 'dpkg',
+    ensure => 'installed',
+    source => "/tmp/armadillo.deb"
   }
 }

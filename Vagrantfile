@@ -24,12 +24,16 @@ Vagrant.configure("2") do |config|
     puppet.manifest_file  = "site.pp"
   end
 
+  # config.vm.provider "virtualbox" do |v|
+  #   v.gui = true
+  # end
+
   # Define the NUClearPort development VM, snd make it the primary VM
   # (meaning that a plain `vagrant up` will only create this machine)
   config.vm.define "nuclearportvm", primary: true do |nuclearport|
     nuclearport.vm.hostname = "nuclearportvm"
     
-    nuclearport.vm.network :forwarded_port, guest: 9090, host: 9090
+    nuclearport.vm.network :forwarded_port, guest: 12000, host: 12000
 
     # Syntax: "path/on/host", "/path/on/guest"
     nuclearport.vm.synced_folder ".", "/home/vagrant/nubots/NUClearPort"

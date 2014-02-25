@@ -1,5 +1,5 @@
 #include "DabsonTest.h"
-
+#include <nuclear>
 
 #include "utility/NUbugger/NUgraph.h"
 using utility::NUbugger::graph;
@@ -33,6 +33,7 @@ namespace modules {
                     emit(graph("KVar", k.get()[0] + k.getCovariance()[0], k.get()[0] - k.getCovariance()[0]));
                 });
                 
+                
                 on<Trigger<Every<100, Per<std::chrono::seconds>>>, Options<Sync<DabsonTest>>>([this](const time_t& time){
                     
                     double t = (time.time_since_epoch().count() * double(NUClear::clock::period::num)) / double(NUClear::clock::period::den);
@@ -54,7 +55,7 @@ namespace modules {
                     double quality = k.measurementUpdate(pm, {1.0/12.0});
                     emit(graph("Quality", quality));
                     
-                });
+                }); 
             }
             
         }  // tools
