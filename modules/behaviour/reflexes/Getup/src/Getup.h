@@ -35,7 +35,7 @@ namespace modules {
              * 
              * @author Josiah Walker
              */
-            class SensorFilter : public NUClear::Reactor {
+            class Getup : public NUClear::Reactor {
             private:
                 /// config settings
                 double FALLEN_ANGLE,GETUP_PRIORITY,EXECUTION_PRIORITY;

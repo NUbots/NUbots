@@ -22,21 +22,25 @@
 #include <cmath>
 #include "messages/motion/Script.h"
 #include "messages/motion/ServoWaypoint.h"
+#include "messages/support/Configuration.h"
+#include "messages/input/Sensors.h"
 
 namespace modules {
     namespace behaviour {
         namespace reflexes {
             
+            using messages::support::Configuration;
+            using messages::input::Sensors;
+            
             Getup::Getup(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-                //do a little configurating
-                on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){
-                        FALLEN_ANGLE = cos(file.config["FALLEN_ANGLE"]*M_PI/180.0);
+                    //do a little configurating
+                    on<Trigger<Configuration<Getup>>>([this](const Configuration<Getup>& file){
+                        double fallenAngleConfig = file.config["FALLEN_ANGLE"];
+                
+                        FALLEN_ANGLE = cos(fallenAngleConfig*M_PI/180.0);
                         GETUP_PRIORITY = file.config["GETUP_PRIORITY"];
                         EXECUTION_PRIORITY = file.config["EXECUTION_PRIORITY"];
                     });
-                });
-
-            Getup::Getup(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
                 
                 on<Trigger<Sensors>, Options<Single>>([this](const Sensors& sensors) {
                     
