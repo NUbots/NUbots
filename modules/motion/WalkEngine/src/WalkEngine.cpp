@@ -27,6 +27,8 @@
 #include "messages/motion/ServoWaypoint.h"
 #include "messages/support/Configuration.h"
 #include "utility/motion/InverseKinematics.h"
+#include "utility/motion/ForwardKinematics.h"
+#include "utility/motion/RobotModels.h"
 #include "utility/math/matrix.h"
 #include "OPKinematics.h"
 #include "utility/NUbugger/NUgraph.h"
@@ -38,6 +40,7 @@ namespace modules {
         using messages::input::ServoID;
         using messages::motion::ServoWaypoint;
         using messages::support::Configuration;
+        using utility::motion::kinematics::DarwinModel;
         using utility::NUbugger::graph;
         using NUClear::log;
         using NUClear::DEBUG;
@@ -663,16 +666,22 @@ namespace modules {
         }
 
         void WalkEngine::motionLegs(std::vector<double> qLegs, bool gyroOff, const Sensors& sensors) {
-            float phComp = std::min({1.0, phSingle / 0.1, (1 - phSingle) / 0.1});       
+            float phComp = std::min({1.0, phSingle / 0.1, (1 - phSingle) / 0.1});                  
 
-            float gyroRoll0 = -sensors.gyroscope[0]*180.0/M_PI;
-            float gyroPitch0 = -sensors.gyroscope[1]*180.0/M_PI;
+            arma::mat33 ankleRotation = utility::motion::kinematics::calculatePosition<DarwinModel>(sensors, supportLeg == LEFT ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH ).submat(0,0,2,2) * utility::math::matrix::yRotationMatrix(-M_PI/2, 3);
+            // get effective gyro angle considering body angle offset
+            arma::mat33 kinematicGyroSORAMatrix = sensors.orientation * ankleRotation;   //DOUBLE TRANSPOSE       
+            std::pair<arma::vec3, double> axisAngle = utility::math::matrix::axisAngleFromRotationMatrix(kinematicGyroSORAMatrix);
+            float weight = 1;
+            arma::vec3 kinematicsGyro = axisAngle.first * (axisAngle.second / weight);
+
+            float gyroRoll0 = -kinematicsGyro[0]*180.0/M_PI;
+            float gyroPitch0 = -kinematicsGyro[1]*180.0/M_PI;
             if (gyroOff) {
                 gyroRoll0 = 0;
                 gyroPitch0 = 0;
             }
 
-            // get effective gyro angle considering body angle offset
             float yawAngle = 0;
             if (!active) {
                 // double support

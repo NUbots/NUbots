@@ -130,7 +130,6 @@ namespace utility {
 			 	arma::cx_vec eigValues;
                 arma::cx_mat eigVectors;
                 eig_gen(eigValues,eigVectors, matrix);
-                NUClear::log<NUClear::DEBUG>("Matrix\n",matrix,"\nhas E-vecs\n",eigVectors,"\nE-values\n", eigValues);
 
                 for(size_t i = 0; i < eigValues.size(); i++){
                     if(std::real(eigValues[i])==1){
@@ -143,8 +142,7 @@ namespace utility {
                 } else {
                 	NUClear::log<NUClear::ERROR>("utility::math::matrix::axisAngleRotationMatrix -  ERROR :  No rotation found");
                 	return result;
-                }
-                NUClear::log<NUClear::DEBUG>("Rotational Axis =\n", result.first);
+                }                
 
                 //Construct an ONB
                 arma::vec3 s = {0,-result.first[2],result.first[1]};	//orth to result.first
@@ -159,7 +157,6 @@ namespace utility {
                 arma::vec3 Rs = matrix*s;								//Rotate s to calculate angle of rotation
 
                 result.second = atan2(arma::dot(Rs,t),arma::dot(Rs,s));	//Set angle of rotation for return
-                NUClear::log<NUClear::DEBUG>("s = \n",s,"t = \n",t,"Rs = \n",Rs,"Rotational Angle =\n", result.second);
 
  				return result;	//returns axis as vec3 and angle as double
 			}

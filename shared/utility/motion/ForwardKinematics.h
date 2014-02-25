@@ -77,16 +77,16 @@ namespace kinematics {
         return runningTransform;
     }
 
-    template <typename RobotKinematicModel>
-    arma::mat44 calculateCameraBasis(const messages::input::Sensors& sensors){
-        return calculateHeadJointPosition<RobotKinematicModel>(sensors, messages::input::ServoID::HEAD_PITCH);
-    }
+    // template <typename RobotKinematicModel>
+    // arma::mat44 calculateCameraBasis(const messages::input::Sensors& sensors){
+    //     return calculateHeadJointPosition<RobotKinematicModel>(sensors, messages::input::ServoID::HEAD_PITCH);
+    // }
 
     
-    template <typename RobotKinematicModel>
-    arma::mat44 calculateArmJointPosition(const messages::input::Sensors& sensors,  messages::input::ServoID servoID, Side isLeft){
-        return arma::eye(4,4);
-    }
+    // template <typename RobotKinematicModel>
+    // arma::mat44 calculateArmJointPosition(const messages::input::Sensors& sensors,  messages::input::ServoID servoID, Side isLeft){
+    //     return arma::eye(4,4);
+    // }
 
     /*! @brief
         @NOTE read " runningTransform *= utility::math::matrix::_RotationMatrix(angle, 4); " as "Rotate the running transform about its local _ coordinate by angle."
