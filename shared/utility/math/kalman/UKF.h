@@ -115,6 +115,16 @@ namespace utility {
                     covarianceWeights[0] = lambda / (Model::size + lambda) + (1.0 - pow(alpha,2) + beta);
                     
                     defaultCovarianceUpdate = arma::diagmat(covarianceWeights);
+
+
+                    // Calculate our sigma points
+                    sigmaMean = mean;
+                    sigmaPoints = generateSigmaPoints(mean, covariance);
+
+                    // Reset our state for more measurements
+                    covarianceUpdate = defaultCovarianceUpdate;
+                    d.zeros();
+                    centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
                 }
 
                 template <typename TMeasurement>
@@ -150,7 +160,7 @@ namespace utility {
 
                     // First step is to calculate the expected measurement for each sigma point.
                     for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
-                        predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), args);
+                        predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), std::forward<const TArgs&>(args));
                     }
 
                     // Now calculate the mean of these measurement sigmas.

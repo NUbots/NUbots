@@ -23,6 +23,16 @@
 namespace modules {
 namespace localisation {
 
+void MultiModalRobotModel::TimeUpdate() {
+    for (auto& model : robot_models_)
+        model.TimeUpdate();
+}
+
+void RobotHypothesis::TimeUpdate() {
+    filter_.timeUpdate<arma::vec3>(0.1);
+}
+
+
 /*! @brief Remove all inactive models from the default container.
  *  @retun The number of models removed.
  */

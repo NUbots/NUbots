@@ -35,6 +35,7 @@ Command summary:
   - make        Runs make in the build directory (creates it and runs cmake if it doesn't exist).
   - makej       Same as make, but runs 'make -j'.
   - run <role>  Runs the binary for the role of the given name.
+  - debug <role> Runs the binary for the role of the given name under gdb.
   - create_box	Builds the nubots Vagrant box using Packer.
                 (the box is first deleted if it already exists)
 """
@@ -58,7 +59,7 @@ elif command == 'make' or command == 'makej':
     else:
         call(['make', '-j2'], cwd='build')
 
-elif command == 'run':
+elif command == 'run' or command == 'debug':
     if numArgs < 3:
 	print '''
 Usage: b run <role>
@@ -67,7 +68,11 @@ Please provide the name of the role to run.
 '''
     elif os.path.isfile("build/roles/{}".format(arg1)):
         try:
-          call("./roles/{}".format(arg1), cwd='build/')
+          if command == 'run':
+            call("./roles/{}".format(arg1), cwd='build/')
+          else:
+            call(["gdb", "./roles/{}".format(arg1), "-ex", "r"], cwd='build/')
+
         except KeyboardInterrupt, e:
           print "\nThe process was interrupted by the Keyboard."
     else:

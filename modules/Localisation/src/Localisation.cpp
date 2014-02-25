@@ -53,20 +53,29 @@ namespace modules {
             // emit(std::make_unique<messages::LMissile>());
             // std::cout << __PRETTY_FUNCTION__ << ": rand():" << rand() << std::endl;
 
-            auto field_object = std::make_unique<messages::localisation::FieldObject>();
-            field_object->name = "self";
-            field_object->wm_x = static_cast<float>(rand() % 600 - 300) * 0.01;
-            field_object->wm_y = static_cast<float>(rand() % 400 - 200) * 0.01;
-            field_object->heading = static_cast<float>(rand() % 628) * 0.01;
-            field_object->sd_x = 1;
-            field_object->sd_y = 0.25;
-            field_object->sr_xx = 0.01;
-            field_object->sr_xy = -0.01;
-            field_object->sr_yy = 0.10;
-            field_object->lost = false;
+            auto state = engine_.robot_models_.GetEstimate();
 
-            emit(std::move(field_object));
+            std::cout << state << std::endl;
+
+            auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
+            robot_msg->name = "self";
+            // robot_msg->wm_x = static_cast<float>(rand() % 600 - 300) * 0.01;
+            // robot_msg->wm_y = static_cast<float>(rand() % 400 - 200) * 0.01;
+            // robot_msg->heading = static_cast<float>(rand() % 628) * 0.01;
+            robot_msg->wm_x = state[0];
+            robot_msg->wm_y = state[1];
+            robot_msg->heading = state[2];
+            robot_msg->sd_x = 1;
+            robot_msg->sd_y = 0.25;
+            robot_msg->sr_xx = 0.01;
+            robot_msg->sr_xy = -0.01;
+            robot_msg->sr_yy = 0.10;
+            robot_msg->lost = false;
+            emit(std::move(robot_msg));
         });
+
+
+
 
 
         // Simulate Vision
@@ -77,7 +86,9 @@ namespace modules {
             goal1.type = messages::vision::Goal::LEFT;
             goal2.type = messages::vision::Goal::RIGHT;
 
-            auto camera_pos = arma::vec3 { 150.0, 100.0, 40.0 };
+            // auto camera_pos = arma::vec3 { 150.0, 100.0, 40.0 };
+            // auto camera_pos = arma::vec3 { 1.50, 1.0, 0.0 };
+            auto camera_pos = arma::vec3 { -4.5, 0, 0.0 };
 
             auto fd = engine_.field_description();
             auto goal_br_pos = fd->GetLFO(localisation::LFOId::kGoalBR).location();
@@ -86,17 +97,24 @@ namespace modules {
             auto goal1_pos = arma::vec3 { goal_br_pos[0], goal_br_pos[1], 0.0 };
             auto goal2_pos = arma::vec3 { goal_bl_pos[0], goal_bl_pos[1], 0.0 };
 
+            NUClear::log("Goal positions", goal1_pos, goal2_pos);
+
             // (dist, bearing, declination)
             goal1.sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(goal1_pos - camera_pos);
             goal2.sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(goal2_pos - camera_pos);
+            goal1.sphericalError = { 0.1, 0.1, 0.1 };
+            goal2.sphericalError = { 0.1, 0.1, 0.1 };
 
             auto goals = std::make_unique<std::vector<messages::vision::Goal>>();
 
-            goals->push_back(goal1);
             goals->push_back(goal2);
+            goals->push_back(goal1);
 
             emit(std::move(goals));
         });
+
+
+
 
 
         // on<Trigger<std::vector<messages::vision::Goal>>>([this](const std::vector<messages::vision::Goal>& m) {
@@ -111,6 +129,7 @@ namespace modules {
             // engine_.TimeUpdate();
 
             engine_.ProcessObjects(goals);
+            engine_.TimeUpdate(0.1);
         });
 
         // emit<Scope::INITIALIZE>(std::make_unique<localisation::TimeUpdate>());

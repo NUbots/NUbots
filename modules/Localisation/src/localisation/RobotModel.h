@@ -34,9 +34,9 @@ namespace modules {
 
             arma::vec predictedObservation(
                 const arma::vec::fixed<RobotModel::size>& state, 
-                arma::vec2 actual_position);
+                const arma::vec2& actual_position);
             
-            
+
             arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
             
             arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
@@ -48,3 +48,4 @@ namespace modules {
     }
 }
 #endif
+

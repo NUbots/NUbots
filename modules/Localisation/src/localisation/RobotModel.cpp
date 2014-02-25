@@ -16,23 +16,24 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
 
     auto result = state;
 
-    double interp_heading = state[kHeading] + 0.5 * measurement[kHeading];
+    // double interp_heading = state[kHeading] + 0.5 * measurement[kHeading];
 
-    double cos_theta = cos(interp_heading);
-    double sin_theta = sin(interp_heading);
+    // double cos_theta = cos(interp_heading);
+    // double sin_theta = sin(interp_heading);
 
-    result[kX] += measurement[kX] * cos_theta - measurement[kY] * sin_theta;
-    result[kY] += measurement[kX] * sin_theta + measurement[kY] * cos_theta;
-    result[kHeading] += measurement[kHeading];
+    // result[kX]       += deltaT * (measurement[kX] * cos_theta - measurement[kY] * sin_theta);
+    // result[kY]       += deltaT * (measurement[kX] * sin_theta + measurement[kY] * cos_theta);
+    // result[kHeading] += deltaT * (measurement[kHeading]);
     
     return result;
 }
 
+
 /// Return the predicted observation of an object at the given position
 arma::vec RobotModel::predictedObservation(
-    const arma::vec::fixed<RobotModel::size>& state, arma::vec2 actual_position) {
+    const arma::vec::fixed<RobotModel::size>& state, const arma::vec2& actual_position) {
     
-    auto diff = actual_position - state.rows(0, 2);
+    arma::vec2 diff = actual_position - state.rows(0, 1);
 
     auto distance = arma::norm(diff, 2);
 
@@ -52,6 +53,7 @@ arma::vec RobotModel::predictedObservation(
     //         return arma::vec::fixed<RobotModel::size>();
     // };
 }
+
 
 arma::vec RobotModel::observationDifference(const arma::vec& a, 
                                             const arma::vec& b){
@@ -83,7 +85,7 @@ arma::vec::fixed<RobotModel::size> RobotModel::limitState(
 }
 
 arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() {
-
+    return arma::eye(RobotModel::size, RobotModel::size) * processNoiseFactor;
 }
 
 }

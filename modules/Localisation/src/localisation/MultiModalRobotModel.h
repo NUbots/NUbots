@@ -40,22 +40,31 @@ namespace localisation {
     public:
         bool active() const { return active_; }
         void set_active(bool active) { active_ = active; }
+
         float GetFilterWeight() { return 0; }
         void SetFilterWeight(float weight) { }
+
+        arma::vec::fixed<RobotModel::size> GetEstimate() {
+            return filter_.get();
+        }
 
         void MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,
             const LocalisationFieldObject& actual_object);
 
+        void TimeUpdate();
+
         bool operator ==(const RobotHypothesis& other) {
             return true;
         };
     };
-    
+
 
     class MultiModalRobotModel {
     public:
-        MultiModalRobotModel() { }
+        MultiModalRobotModel() { 
+            robot_models_.emplace_back();
+        }
 
         unsigned int RemoveInactiveModels();
         unsigned int RemoveInactiveModels(std::vector<RobotHypothesis>& container);
@@ -63,7 +72,7 @@ namespace localisation {
         void RemoveSimilarModels();
         void NormaliseAlphas();
 
-        void TimeUpdate() { };
+        void TimeUpdate();
 
         void MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,
@@ -73,6 +82,10 @@ namespace localisation {
         // int AmbiguousLandmarkUpdate(
         //     AmbiguousObject &ambiguous_object,
         //     const std::vector<StationaryObject*>& possible_objects);
+
+        arma::vec::fixed<RobotModel::size> GetEstimate() {
+            return robot_models_[0].GetEstimate();
+        }
 
     private:
         int PruneViterbi(unsigned int order);

@@ -86,7 +86,7 @@ namespace localisation {
             field_description_ = desc;
         };
 
-    private:
+    // private:
         /// Contains the dimensions of the field
         std::shared_ptr<localisation::FieldDescription> field_description_;
 
