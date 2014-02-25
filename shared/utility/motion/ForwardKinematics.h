@@ -55,9 +55,9 @@ namespace kinematics {
         //Translate to base of neck from origin
         runningTransform *= utility::math::matrix::translationMatrix(NECK_POS);
         //Rotate to face out of base of neck
-        runningTransform *= utility::math::matrix::yRotationMatrix(-M_PI/2, 4).t();
+        runningTransform *= utility::math::matrix::yRotationMatrix(-M_PI/2, 4);
         //Rotate head in yaw axis
-        runningTransform *= utility::math::matrix::xRotationMatrix(HEAD_YAW, 4).t();
+        runningTransform *= utility::math::matrix::xRotationMatrix(HEAD_YAW, 4);
         //Translate to top of neck (i.e. next motor axle)
         runningTransform *= utility::math::matrix::translationMatrix(arma::vec3({NECK_LENGTH, 0, 0}));
         //Return the basis pointing out of the top of the torso with z pointing out the back of the neck. Pos is top of neck (at hip pitch motor)
@@ -66,13 +66,13 @@ namespace kinematics {
         }
 
         //Rotate to face forward direction of neck
-        runningTransform *= utility::math::matrix::yRotationMatrix(M_PI/2, 4).t();
+        runningTransform *= utility::math::matrix::yRotationMatrix(M_PI/2, 4);
         //Rotate pitch
-        runningTransform *= utility::math::matrix::yRotationMatrix(HEAD_PITCH, 4).t();
+        runningTransform *= utility::math::matrix::yRotationMatrix(HEAD_PITCH, 4);
         //Translate to camera
         runningTransform *= utility::math::matrix::translationMatrix(NECK_TO_CAMERA);
         //Rotate to set x to camera vector
-        runningTransform *= utility::math::matrix::yRotationMatrix(RobotKinematicModel::Head::CAMERA_DECLINATION_ANGLE_OFFSET, 4).t();
+        runningTransform *= utility::math::matrix::yRotationMatrix(RobotKinematicModel::Head::CAMERA_DECLINATION_ANGLE_OFFSET, 4);
         //Return basis pointing along camera vector (ie x is camera vector, z out of top of head). Pos at camera position
         return runningTransform;
     }
@@ -89,7 +89,7 @@ namespace kinematics {
     }
 
     /*! @brief
-        @NOTE read " runningTransform *= utility::math::matrix::_RotationMatrix(angle, 4).t(); " as "Rotate the running transform about its local _ coordinate by angle."
+        @NOTE read " runningTransform *= utility::math::matrix::_RotationMatrix(angle, 4); " as "Rotate the running transform about its local _ coordinate by angle."
         @return Returns basis matrix for position of end of limb controlled by the specified motor. 
 
         The basis 'faces' down its x axis.
@@ -122,22 +122,22 @@ namespace kinematics {
         hipPos.col(3)= arma::vec({ RobotKinematicModel::Leg::HIP_OFFSET_X, negativeIfRight * RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS/2, -RobotKinematicModel::Leg::HIP_OFFSET_Z,1});
         runningTransform *= hipPos;
         //Rotate to face down the leg (see above for definitions of terms, including 'facing')
-        runningTransform *= utility::math::matrix::yRotationMatrix(M_PI/2, 4).t();
+        runningTransform *= utility::math::matrix::yRotationMatrix(M_PI/2, 4);
         //Using right hand rule along global z gives positive direction of yaw:
-        runningTransform *= utility::math::matrix::xRotationMatrix(-sensors.servos[static_cast<int>(HIP_YAW)].presentPosition , 4).t();
+        runningTransform *= utility::math::matrix::xRotationMatrix(-sensors.servos[static_cast<int>(HIP_YAW)].presentPosition , 4);
         //Return basis facing from body to hip centre (down) with z aligned with the axis of the hip roll motor axis. Position at hip joint
         if(servoID == messages::input::ServoID::L_HIP_YAW || servoID == messages::input::ServoID::R_HIP_YAW) { 
             return runningTransform; 
         }
 
-        runningTransform *= utility::math::matrix::zRotationMatrix(sensors.servos[static_cast<int>(HIP_ROLL)].presentPosition , 4).t();
+        runningTransform *= utility::math::matrix::zRotationMatrix(sensors.servos[static_cast<int>(HIP_ROLL)].presentPosition , 4);
         //Return basis facing down leg plane, with z oriented through axis of roll motor. Position still hip joint
         if(servoID == messages::input::ServoID::L_HIP_ROLL || servoID == messages::input::ServoID::R_HIP_ROLL) { 
             return runningTransform;
         }
 
         //Rotate to face down upper leg
-        runningTransform *= utility::math::matrix::yRotationMatrix(sensors.servos[static_cast<int>(HIP_PITCH)].presentPosition , 4).t();
+        runningTransform *= utility::math::matrix::yRotationMatrix(sensors.servos[static_cast<int>(HIP_PITCH)].presentPosition , 4);
         //Translate down upper leg
         runningTransform *= utility::math::matrix::translationMatrix(arma::vec3({RobotKinematicModel::Leg::UPPER_LEG_LENGTH, 0, 0}));
         //Return basis faces down upper leg, with z out of front of thigh. Pos = knee axis centre
@@ -147,7 +147,7 @@ namespace kinematics {
 
 
         //Rotate to face down lower leg
-        runningTransform *= utility::math::matrix::yRotationMatrix(sensors.servos[static_cast<int>(KNEE)].presentPosition , 4).t();
+        runningTransform *= utility::math::matrix::yRotationMatrix(sensors.servos[static_cast<int>(KNEE)].presentPosition , 4);
         //Translate down lower leg
         runningTransform *= utility::math::matrix::translationMatrix(arma::vec3({RobotKinematicModel::Leg::UPPER_LEG_LENGTH, 0, 0}));
         //Return basis facing down lower leg, with z out of front of shin. Pos = ankle axis centre
@@ -157,14 +157,14 @@ namespace kinematics {
 
 
         //Rotate to face down foot (pitch)
-        runningTransform *= utility::math::matrix::yRotationMatrix(sensors.servos[static_cast<int>(ANKLE_PITCH)].presentPosition , 4).t();
+        runningTransform *= utility::math::matrix::yRotationMatrix(sensors.servos[static_cast<int>(ANKLE_PITCH)].presentPosition , 4);
         //Return basis facing pitch down to foot with z out the front of the foot. Pos = ankle axis centre
         if(servoID == messages::input::ServoID::L_ANKLE_PITCH || servoID == messages::input::ServoID::R_ANKLE_PITCH) { 
             return runningTransform; 
         }
 
         //Rotate to face down foot (roll)
-        runningTransform *= utility::math::matrix::zRotationMatrix(sensors.servos[static_cast<int>(ANKLE_ROLL)].presentPosition , 4).t();
+        runningTransform *= utility::math::matrix::zRotationMatrix(sensors.servos[static_cast<int>(ANKLE_ROLL)].presentPosition , 4);
         //Return basis with x as the normal the plane of the foot and z out the front. Pos = ankle axis centre
         return runningTransform;       
     }
