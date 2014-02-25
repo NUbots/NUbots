@@ -28,10 +28,17 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     return result;
 }
 
+/// Return the predicted observation of an object at the given position
 arma::vec RobotModel::predictedObservation(
-    const arma::vec::fixed<RobotModel::size>& state, MeasurementType type) {
+    const arma::vec::fixed<RobotModel::size>& state, arma::vec2 actual_position) {
     
-    return state;
+    auto diff = actual_position - state.rows(0, 2);
+
+    auto distance = arma::norm(diff, 2);
+
+    auto angle = utility::math::angle::normalizeAngle(atan2(diff[1], diff[0]) - state[kHeading]);
+
+    return { distance, angle };
 
     // switch(type)
     // {

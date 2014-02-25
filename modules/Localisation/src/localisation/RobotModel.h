@@ -17,6 +17,8 @@ namespace modules {
         };
 
         enum class MeasurementType {
+            kBRGoalMeasurement,
+            kBLGoalMeasurement,
             kLandmarkMeasurement,
             kAngleBetweenLandmarksMeasurement,
         };
@@ -29,7 +31,11 @@ namespace modules {
             
             arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& measurement);
             
-            arma::vec predictedObservation(const arma::vec::fixed<size>& state, MeasurementType type);
+
+            arma::vec predictedObservation(
+                const arma::vec::fixed<RobotModel::size>& state, 
+                arma::vec2 actual_position);
+            
             
             arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
             

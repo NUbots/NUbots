@@ -25,6 +25,8 @@
 #include "utility/math/kalman/UKF.h"
 
 #include "RobotModel.h"
+#include "messages/vision/VisionObjects.h"
+#include "LocalisationFieldObject.h"
 
 namespace modules {
 namespace localisation {
@@ -38,13 +40,18 @@ namespace localisation {
     public:
         bool active() const { return active_; }
         void set_active(bool active) { active_ = active; }
-        float getFilterWeight() { return 0; }
-        void setFilterWeight(float weight) { }
+        float GetFilterWeight() { return 0; }
+        void SetFilterWeight(float weight) { }
+
+        void MeasurementUpdate(
+            const messages::vision::VisionObject& observed_object,
+            const LocalisationFieldObject& actual_object);
 
         bool operator ==(const RobotHypothesis& other) {
             return true;
         };
     };
+    
 
     class MultiModalRobotModel {
     public:
@@ -57,7 +64,11 @@ namespace localisation {
         void NormaliseAlphas();
 
         void TimeUpdate() { };
-        void LandmarkUpdate();
+
+        void MeasurementUpdate(
+            const messages::vision::VisionObject& observed_object,
+            const LocalisationFieldObject& actual_object);
+
         void MultipleLandmarkUpdate();
         // int AmbiguousLandmarkUpdate(
         //     AmbiguousObject &ambiguous_object,

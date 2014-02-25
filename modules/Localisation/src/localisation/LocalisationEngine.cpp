@@ -20,6 +20,7 @@
 #include "localisation/LocalisationEngine.h"
 
 #include "messages/vision/VisionObjects.h"
+#include "FieldDescription.h"
 #include "LocalisationFieldObject.h"
 
 using messages::vision::VisionObject;
@@ -106,19 +107,25 @@ namespace localisation {
         return 0;
     }
 
-    void LocalisationEngine::IndividualStationaryObjectUpdate(std::vector<std::shared_ptr<VisionObject>>& fobs, float time_increment)
+    void LocalisationEngine::IndividualStationaryObjectUpdate(
+        const std::vector<messages::vision::Goal>& goals,
+        float time_increment)
     {
         // unsigned int objects_added = 0;
         // unsigned int total_successful_updates = 0;
 
-        // for (auto& obj : fobs->stationaryFieldObjects) {
-        //     // Skip objects that were not seen.
-        //     if (!obj.isObjectVisible())
-        //         continue;
+        for (auto& observed_object : goals) {
 
-        //     total_successful_updates += LandmarkUpdate(obj);
-        //     objects_added++;
-        // }
+            LocalisationFieldObject actual_object;
+
+            if (observed_object.type == messages::vision::Goal::Type::LEFT)
+                actual_object = field_description_->GetLFO(LFOId::kGoalBL);
+
+            if (observed_object.type == messages::vision::Goal::Type::RIGHT)
+                actual_object = field_description_->GetLFO(LFOId::kGoalBR);
+
+            robot_models_.MeasurementUpdate(observed_object, actual_object);
+        }
 
         // // if (objects_added > 0 and total_successful_updates < 1) {
         // //     total_bad_known_objects += objects_added;
@@ -135,13 +142,14 @@ namespace localisation {
         // //         if (!obj.isObjectVisible())
         // //             continue;
 
-        // //         total_successful_updates += LandmarkUpdate(obj);
+        // //         total_successful_updates += robot_models_.MeasurementUpdate(obj);
         // //         objects_added++;
         // //     }
         // // }
 
         // NormaliseAlphas();
     }
+
  
     /*! @brief Process objects
         Processes the field objects and perfroms the correction updates required from the observations.
@@ -152,8 +160,8 @@ namespace localisation {
     void LocalisationEngine::ProcessObjects(const std::vector<messages::vision::Goal>& goals) {
         // int useful_object_count = 0;
 
-        // // Known object update
-        // IndividualStationaryObjectUpdate(fobs, time_increment);
+        // Known object update
+        IndividualStationaryObjectUpdate(goals, 0);
 
         // // Two object update
         // if (kTwoObjectUpdateEnabled) {
@@ -163,11 +171,10 @@ namespace localisation {
         // // Update robot models
         // if (kMultipleModelsEnabled) {
         //     useful_object_count += ProcessAmbiguousObjects(fobs);
-        // }
-
         // // Pruning
         // NormaliseModelAlphas();
         // PruneModels();
+        // }
 
         // // Ball update
         // BallUpdate(fobs->mobileFieldObjects[FieldObjects::FO_BALL]);
@@ -177,29 +184,6 @@ namespace localisation {
         // else
         //     time_since_field_object_last_seen_ += time_increment;
     }
-
-    // void LocalisationEngine::LandmarkUpdate(StationaryFieldObject &landmark) {
-    //     if (!landmark.validMeasurement())
-    //         return SelfModel::RESULT_OUTLIER;
-
-    //     double dist = landmark.measuredDistance();
-    //     double elevation = landmark.measuredElevation();
-    //     double flat_dist =  dist * cos(elevation);
-    //     double flat_dist_squared = flat_dist * flat_dist;
-        
-    //     MeasurementError temp_error;
-    //     temp_error.setDistance(
-    //         kObjectRangeOffsetVariance + 
-    //         kObjectRangeRelativeVariance * flat_dist_squared);
-    //     temp_error.setHeading(kObjectThetaVariance);
-
-    //     for (auto& model : robot_models_) {
-    //         if (!model.active())
-    //             continue;
-
-    //         model.MeasurementUpdate(landmark, temp_error);
-    //     }
-    // }
 
     // int LocalisationEngine::multipleLandmarkUpdate(std::vector<StationaryFieldObject*>& landmarks) {
     //     const unsigned int num_objects = landmarks.size();

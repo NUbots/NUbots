@@ -43,8 +43,8 @@ public:
     LocalisationFieldObject(arma::vec2 location, LFOId id, const std::string& name)
         : location_(location), id_(id), name_(name) { }
 
-    LFOId id() { return id_; }
-    arma::vec2 location() { return location_; };
+    LFOId id() const { return id_; }
+    arma::vec2 location() const { return location_; }
 
 private:
     arma::vec2 location_;
@@ -59,3 +59,4 @@ class MobileFieldObject : public LocalisationFieldObject { };
 }
 
 #endif
+

@@ -57,12 +57,12 @@ namespace localisation {
             std::vector<std::shared_ptr<messages::vision::VisionObject>>& fobs);
         
         void IndividualStationaryObjectUpdate(
-            std::vector<std::shared_ptr<messages::vision::VisionObject>>& fobs,
+            const std::vector<messages::vision::Goal>& goals,
             float time_increment);
 
         void ProcessObjects(const std::vector<messages::vision::Goal>& goals);
         
-        void LandmarkUpdate(StationaryFieldObject &landmark);
+        void LandmarkUpdate(messages::vision::Goal &landmark);
         
         int multipleLandmarkUpdate(std::vector<StationaryFieldObject*>& landmarks);
         
@@ -105,4 +105,3 @@ namespace localisation {
 }
 }
 #endif
-

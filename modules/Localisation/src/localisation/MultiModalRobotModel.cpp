@@ -18,6 +18,7 @@
  */
 
 #include "localisation/MultiModalRobotModel.h"
+#include "LocalisationFieldObject.h"
 
 namespace modules {
 namespace localisation {
@@ -105,13 +106,13 @@ void MultiModalRobotModel::RemoveSimilarModels() {
                 continue;
 
             if (ModelsAreSimilar(model_a, model_b)) {
-                float total_alpha = model_a.getFilterWeight() + model_b.getFilterWeight();
+                float total_alpha = model_a.GetFilterWeight() + model_b.GetFilterWeight();
                 
-                if (model_a.getFilterWeight() < model_b.getFilterWeight()) {
+                if (model_a.GetFilterWeight() < model_b.GetFilterWeight()) {
                     model_a.set_active(false);
-                    model_b.setFilterWeight(total_alpha);
+                    model_b.SetFilterWeight(total_alpha);
                 } else {
-                    model_a.setFilterWeight(total_alpha);
+                    model_a.SetFilterWeight(total_alpha);
                     model_b.set_active(false);
                 }
             }
@@ -184,6 +185,44 @@ void MultiModalRobotModel::NormaliseAlphas() {
     // for (auto& model : robot_models_)
     //     if (model.active())
     //         model.setAlpha(model.alpha() / sumAlpha);
+}
+
+
+void MultiModalRobotModel::MeasurementUpdate(
+    const messages::vision::VisionObject& observed_object,
+    const LocalisationFieldObject& actual_object) {
+
+
+    for (auto& model : robot_models_)
+        model.MeasurementUpdate(observed_object, actual_object);
+}
+
+void RobotHypothesis::MeasurementUpdate(
+    const messages::vision::VisionObject& observed_object,
+    const LocalisationFieldObject& actual_object) {
+
+    arma::vec2 measurement = { observed_object.sphericalFromNeck[0],
+                               observed_object.sphericalFromNeck[2] };
+    arma::vec2 actual_pos = actual_object.location();
+
+    arma::mat22 cov = { observed_object.sphericalError[0], 0,
+                        0, observed_object.sphericalError[2] };
+
+
+
+    // // Calculate noise from spherical error
+    // double dist = observed_object.sphericalFromNeck[0];
+    // double elevation = observed_object.sphericalFromNeck[1];
+    // double flat_dist =  dist * cos(elevation);
+    // double flat_dist_squared = flat_dist * flat_dist;
+
+    // arma::vec3 temp_error;
+    // temp_error[0] = kObjectRangeOffsetVariance + 
+    //                 kObjectRangeRelativeVariance * flat_dist_squared;
+    // temp_error[1] = observed_object.sphericalError[1];
+    // temp_error[2] = 0;
+
+    double quality = filter_.measurementUpdate(measurement, cov, actual_pos);
 }
 
 }
