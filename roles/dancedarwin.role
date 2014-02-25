@@ -7,6 +7,6 @@ ADD_ROLE(
         input::AudioFileInput
         audio::AubioBeatDetector
         motion::ScriptEngine
-        behaviours::DanceDarwin
+        behaviour::tools::DanceDarwin
         platform::darwin::StrobeDarwin
 )

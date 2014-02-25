@@ -24,21 +24,22 @@
 #include "messages/motion/Script.h"
 
 namespace modules {
-    namespace behaviours {
+    namespace behaviour {
+        namespace tools {
         
-        /**
-         * Uses incoming beats in order to scale dance scripts and play them.
-         * 
-         * @author Trent Houliston
-         */
-        class DanceDarwin : public NUClear::Reactor {
-        private:
-            std::map<std::string, messages::motion::Script> scripts;
-            bool startedDancing;
-        public:
-            explicit DanceDarwin(std::unique_ptr<NUClear::Environment> environment);
-        };
-        
+            /**
+             * Uses incoming beats in order to scale dance scripts and play them.
+             * 
+             * @author Trent Houliston
+             */
+            class DanceDarwin : public NUClear::Reactor {
+            private:
+                std::map<std::string, messages::motion::Script> scripts;
+                bool startedDancing;
+            public:
+                explicit DanceDarwin(std::unique_ptr<NUClear::Environment> environment);
+            };
+        } // tools
     }  // behaviours
 }  // modules
 #endif  // MODULES_BEHAVIOURS_DANCEDARWIN_H

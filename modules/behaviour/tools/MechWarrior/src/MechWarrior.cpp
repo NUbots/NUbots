@@ -21,18 +21,20 @@
 #include "messages/platform/darwin/DarwinSensors.h"
 
 namespace modules {
-    namespace behaviours {
+    namespace behaviour {
+        namespace tools {
 
-        MechWarrior::MechWarrior(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), fired(0) {
+            MechWarrior::MechWarrior(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), fired(0) {
 
-            on<Trigger<Every<250, std::chrono::milliseconds>>>([this](const time_t&) {
-                if(++fired < 7) {
-                    emit(std::make_unique<messages::platform::darwin::LMissile>());
-                }
-                else {
-                    powerplant.shutdown();
-                }
-            });
+                on<Trigger<Every<250, std::chrono::milliseconds>>>([this](const time_t&) {
+                    if(++fired < 7) {
+                        emit(std::make_unique<messages::platform::darwin::LMissile>());
+                    }
+                    else {
+                        powerplant.shutdown();
+                    }
+                });
+        }
         }
     }
 }

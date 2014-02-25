@@ -23,20 +23,21 @@
 #include <nuclear>
 
 namespace modules {
-    namespace behaviours {
+    namespace behaviour {
+        namespace tools {
 
-        /**
-         * When the missle launcher is attached, this behaviour controls the firing of the missles.
-         *
-         * @author Trent Houliston
-         */
-        class MechWarrior : public NUClear::Reactor {
-        private:
-            size_t fired;
-        public:
-            explicit MechWarrior(std::unique_ptr<NUClear::Environment> environment);
-        };
-        
+            /**
+             * When the missle launcher is attached, this behaviour controls the firing of the missles.
+             *
+             * @author Trent Houliston
+             */
+            class MechWarrior : public NUClear::Reactor {
+            private:
+                size_t fired;
+            public:
+                explicit MechWarrior(std::unique_ptr<NUClear::Environment> environment);
+            };
+        } // tools
     }  // behaviours
 }  // modules
 #endif  // MODULES_BEHAVIOURS_MECHWARRIOR_H

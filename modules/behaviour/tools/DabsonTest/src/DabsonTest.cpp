@@ -5,7 +5,7 @@
 using utility::NUbugger::graph;
 
 namespace modules {
-    namespace behaviours {
+    namespace behaviour {
         namespace tools {
 
             DabsonTest::DabsonTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {

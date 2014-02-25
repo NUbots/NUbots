@@ -6,6 +6,6 @@ ADD_ROLE(
         platform::darwin::MotionManager
         platform::darwin::SensorFilter
         motion::ScriptEngine
-        behaviours::tools::ScriptRunner
+        behaviour::tools::ScriptRunner
         support::NUbugger
 )

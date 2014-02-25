@@ -30,7 +30,7 @@
 #include <sstream>
 
 namespace modules {
-    namespace behaviours {
+    namespace behaviour {
         namespace tools {
             using messages::motion::ExecuteScript;
 

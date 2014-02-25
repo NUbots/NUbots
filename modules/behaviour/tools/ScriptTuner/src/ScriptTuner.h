@@ -17,15 +17,15 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOURS_TOOLS_SCRIPTTUNER_H
-#define MODULES_BEHAVIOURS_TOOLS_SCRIPTTUNER_H
+#ifndef MODULES_BEHAVIOUR_TOOLS_SCRIPTTUNER_H
+#define MODULES_BEHAVIOUR_TOOLS_SCRIPTTUNER_H
 
 #include <nuclear>
 #include "messages/motion/Script.h"
 
 
 namespace modules {
-    namespace behaviours {
+    namespace behaviour {
         namespace tools {
             
             /**

@@ -23,7 +23,7 @@
 #include "messages/motion/ServoWaypoint.h"
 
 namespace modules {
-    namespace behaviours {
+    namespace behaviour {
         namespace tools {
             
             void ScriptRunner::executeNextScript() {

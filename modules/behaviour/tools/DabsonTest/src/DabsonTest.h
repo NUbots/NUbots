@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOURS_TOOLS_DABSONTEST_H
-#define MODULES_BEHAVIOURS_TOOLS_DABSONTEST_H
+#ifndef MODULES_BEHAVIOUR_TOOLS_DABSONTEST_H
+#define MODULES_BEHAVIOUR_TOOLS_DABSONTEST_H
 
 #include <nuclear>
 
@@ -26,7 +26,7 @@
 #include "utility/math/kalman/TestModel.h"
 
 namespace modules {
-    namespace behaviours {
+    namespace behaviour {
         namespace tools {
 
             /**

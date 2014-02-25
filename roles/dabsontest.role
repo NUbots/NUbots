@@ -7,7 +7,7 @@ ADD_ROLE(
         #platform::darwin::HardwareIO
         input::LinuxCamera
         support::NUbugger
-		behaviours::tools::DabsonTest
+		behaviour::tools::DabsonTest
 )
 
 

@@ -27,7 +27,7 @@
 #include "messages/motion/Script.h"
 
 namespace modules {
-    namespace behaviours {
+    namespace behaviour {
         namespace tools {
 
             /**
