@@ -33,50 +33,50 @@ void RobotHypothesis::TimeUpdate() {
 }
 
 
-/*! @brief Remove all inactive models from the default container.
- *  @retun The number of models removed.
- */
-unsigned int MultiModalRobotModel::RemoveInactiveModels() {
-    return RemoveInactiveModels(robot_models_);
-}
+// /*! @brief Remove all inactive models from the default container.
+//  *  @retun The number of models removed.
+//  */
+// unsigned int MultiModalRobotModel::RemoveInactiveModels() {
+//     return RemoveInactiveModels(robot_models_);
+// }
 
-/*! @brief Removes all inactive models from the given container
- *  @param container The container to remove inactive models from.
- *  @retun The number of models removed.
- */
-unsigned int MultiModalRobotModel::RemoveInactiveModels(std::vector<RobotHypothesis>& container) {
-    const unsigned int num_before = container.size();   // Save original size
+// /*! @brief Removes all inactive models from the given container
+//  *  @param container The container to remove inactive models from.
+//  *  @retun The number of models removed.
+//  */
+// unsigned int MultiModalRobotModel::RemoveInactiveModels(std::vector<RobotHypothesis>& container) {
+//     const unsigned int num_before = container.size();   // Save original size
 
-    // for (auto& model : robot_models_) {
-    //     if (!model->active()) {
-    //         delete model;
-    //         model = NULL;
-    //     }
-    // }
+//     // for (auto& model : robot_models_) {
+//     //     if (!model->active()) {
+//     //         delete model;
+//     //         model = NULL;
+//     //     }
+//     // }
  
-    container.erase(
-        remove_if(container.begin(),
-                  container.end(),
-                  [](const RobotHypothesis& p) { return !p.active(); }), 
-        container.end());
+//     container.erase(
+//         remove_if(container.begin(),
+//                   container.end(),
+//                   [](const RobotHypothesis& p) { return !p.active(); }), 
+//         container.end());
     
-    // Return number removed: original size - new size
-    return num_before - container.size();
-}
+//     // Return number removed: original size - new size
+//     return num_before - container.size();
+// }
 
-void MultiModalRobotModel::PruneModels() {
-    const float kMaxModelsAfterMerge = 5; // TODO: Add to config system
+// void MultiModalRobotModel::PruneModels() {
+//     const float kMaxModelsAfterMerge = 5; // TODO: Add to config system
 
-    RemoveInactiveModels();
+//     RemoveInactiveModels();
 
-    // if (m_settings.pruneMethod() == LocalisationSettings::prune_viterbi)
-    // {
-        RemoveSimilarModels();
-        PruneViterbi(kMaxModelsAfterMerge);
-    // }
+//     // if (m_settings.pruneMethod() == LocalisationSettings::prune_viterbi)
+//     // {
+//         RemoveSimilarModels();
+//         PruneViterbi(kMaxModelsAfterMerge);
+//     // }
 
-    NormaliseAlphas();
-}
+//     NormaliseAlphas();
+// }
 
 // float TranslationDistance(const MultivariateGaussian& a, const MultivariateGaussian& b) {
 //     float diff_x = a.mean(RobotHypothesis::kstates_x) - b.mean(RobotHypothesis::kstates_x);
@@ -89,113 +89,113 @@ void MultiModalRobotModel::PruneModels() {
 //     return diff_head;
 // }
 
-float ModelsAreSimilar(const RobotHypothesis& a, const RobotHypothesis& b) {
-    // const float kMinTransDist = 6; // TODO: Add to config system
-    // const float kMinHeadDist = 0.01; // TODO: Add to config system
+// float ModelsAreSimilar(const RobotHypothesis& a, const RobotHypothesis& b) {
+//     // const float kMinTransDist = 6; // TODO: Add to config system
+//     // const float kMinHeadDist = 0.01; // TODO: Add to config system
 
-    // float trans_dist = TranslationDistance(model_a->estimate(), model_b->estimate());
-    // float head_dist = HeadingDistance(model_a->estimate(), model_b->estimate());
+//     // float trans_dist = TranslationDistance(model_a->estimate(), model_b->estimate());
+//     // float head_dist = HeadingDistance(model_a->estimate(), model_b->estimate());
     
-    // return (trans_dist < kMinTransDist) && (head_dist < kMinHeadDist);
+//     // return (trans_dist < kMinTransDist) && (head_dist < kMinHeadDist);
 
-    return 0;
-}
+//     return 0;
+// }
 
-/// Reduces the number of active models by merging similar models together
-void MultiModalRobotModel::RemoveSimilarModels() {
-    // Loop through each pair of active models
-    for (auto& model_a : robot_models_) {
-        if (!model_a.active())
-            continue;
+// /// Reduces the number of active models by merging similar models together
+// void MultiModalRobotModel::RemoveSimilarModels() {
+//     // Loop through each pair of active models
+//     for (auto& model_a : robot_models_) {
+//         if (!model_a.active())
+//             continue;
 
-        for (auto& model_b : robot_models_) {
-            if (!model_b.active())
-                continue;
+//         for (auto& model_b : robot_models_) {
+//             if (!model_b.active())
+//                 continue;
 
-            if (model_a == model_b)
-                continue;
+//             if (model_a == model_b)
+//                 continue;
 
-            if (ModelsAreSimilar(model_a, model_b)) {
-                float total_alpha = model_a.GetFilterWeight() + model_b.GetFilterWeight();
+//             if (ModelsAreSimilar(model_a, model_b)) {
+//                 float total_alpha = model_a.GetFilterWeight() + model_b.GetFilterWeight();
                 
-                if (model_a.GetFilterWeight() < model_b.GetFilterWeight()) {
-                    model_a.set_active(false);
-                    model_b.SetFilterWeight(total_alpha);
-                } else {
-                    model_a.SetFilterWeight(total_alpha);
-                    model_b.set_active(false);
-                }
-            }
-        }
-    }
+//                 if (model_a.GetFilterWeight() < model_b.GetFilterWeight()) {
+//                     model_a.set_active(false);
+//                     model_b.SetFilterWeight(total_alpha);
+//                 } else {
+//                     model_a.SetFilterWeight(total_alpha);
+//                     model_b.set_active(false);
+//                 }
+//             }
+//         }
+//     }
 
-    RemoveInactiveModels();
+//     RemoveInactiveModels();
 
-    NormaliseAlphas();
-}
+//     NormaliseAlphas();
+// }
 
-/* @brief Prunes the models using the Viterbi method. This removes lower
- *        probability models to a maximum total models.
- * @param order The number of models to be kept at the end for the process.
- * @return The number of models that were removed during this process.
- */
-int MultiModalRobotModel::PruneViterbi(unsigned int order) {
+// /* @brief Prunes the models using the Viterbi method. This removes lower
+//  *        probability models to a maximum total models.
+//  * @param order The number of models to be kept at the end for the process.
+//  * @return The number of models that were removed during this process.
+//  */
+// int MultiModalRobotModel::PruneViterbi(unsigned int order) {
     
-    return 0;
+//     return 0;
 
-    // RemoveInactiveModels();
+//     // RemoveInactiveModels();
 
-    // // No pruning required if not above maximum.
-    // if(robot_models_.size() <= order) 
-    //     return 0;
+//     // // No pruning required if not above maximum.
+//     // if(robot_models_.size() <= order) 
+//     //     return 0;
 
-    // // Sort, results in order smallest to largest.
-    // robot_models_.sort(model_ptr_cmp());
+//     // // Sort, results in order smallest to largest.
+//     // robot_models_.sort(model_ptr_cmp());
 
-    // // Number of models that need to be removed.
-    // unsigned int num_to_remove = robot_models_.size() - order;
+//     // // Number of models that need to be removed.
+//     // unsigned int num_to_remove = robot_models_.size() - order;
 
-    // // Beginning of removal range
-    // auto begin_remove = robot_models_.begin();
+//     // // Beginning of removal range
+//     // auto begin_remove = robot_models_.begin();
     
-    // // End of removal range (not removed)
-    // auto end_remove = robot_models_.begin();
-    // std::advance(end_remove, num_to_remove);
+//     // // End of removal range (not removed)
+//     // auto end_remove = robot_models_.begin();
+//     // std::advance(end_remove, num_to_remove);
 
-    // std::for_each (
-    //     begin_remove, 
-    //     end_remove, 
-    //     std::bind2nd(std::mem_fun(&RobotHypothesis::setActive), false));
+//     // std::for_each (
+//     //     begin_remove, 
+//     //     end_remove, 
+//     //     std::bind2nd(std::mem_fun(&RobotHypothesis::setActive), false));
 
-    // // Clear out all deactivated models.
-    // int num_removed = RemoveInactiveModels();
+//     // // Clear out all deactivated models.
+//     // int num_removed = RemoveInactiveModels();
 
-    // // Result should have been achieved or something is broken.
-    // assert(robot_models_.size() == order);
+//     // // Result should have been achieved or something is broken.
+//     // assert(robot_models_.size() == order);
 
-    // return num_removed;
-}
+//     // return num_removed;
+// }
 
-/*! @brief Normalises the alphas of all exisiting models.
-    The alphas of all active models are normalised so that the total probablility of the set sums to 1.0.
-*/
-void MultiModalRobotModel::NormaliseAlphas() {
-    // double sumAlpha = 0.0;
+// /*! @brief Normalises the alphas of all exisiting models.
+//     The alphas of all active models are normalised so that the total probablility of the set sums to 1.0.
+// */
+// void MultiModalRobotModel::NormaliseAlphas() {
+//     // double sumAlpha = 0.0;
     
-    // for (auto& model : robot_models_)
-    //     if (model.active())
-    //         sumAlpha += (*model_it)->alpha();
+//     // for (auto& model : robot_models_)
+//     //     if (model.active())
+//     //         sumAlpha += (*model_it)->alpha();
 
-    // if (sumAlpha == 1) 
-    //     return;
+//     // if (sumAlpha == 1) 
+//     //     return;
 
-    // if (sumAlpha == 0) 
-    //     sumAlpha = 1e-12;
+//     // if (sumAlpha == 0) 
+//     //     sumAlpha = 1e-12;
 
-    // for (auto& model : robot_models_)
-    //     if (model.active())
-    //         model.setAlpha(model.alpha() / sumAlpha);
-}
+//     // for (auto& model : robot_models_)
+//     //     if (model.active())
+//     //         model.setAlpha(model.alpha() / sumAlpha);
+// }
 
 
 void MultiModalRobotModel::MeasurementUpdate(

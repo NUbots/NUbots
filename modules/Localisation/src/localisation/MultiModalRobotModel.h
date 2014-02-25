@@ -34,15 +34,18 @@ namespace localisation {
     class RobotHypothesis {
     private:
         bool active_;
+        double weight_;
 
         utility::math::kalman::UKF<RobotModel> filter_;
 
     public:
+        RobotHypothesis() : active_(true), weight_(0) { }
+
         bool active() const { return active_; }
         void set_active(bool active) { active_ = active; }
 
-        float GetFilterWeight() { return 0; }
-        void SetFilterWeight(float weight) { }
+        float GetFilterWeight() { return weight_; }
+        void SetFilterWeight(float weight) { weight_ = weight; }
 
         arma::vec::fixed<RobotModel::size> GetEstimate() {
             return filter_.get();
@@ -54,9 +57,9 @@ namespace localisation {
 
         void TimeUpdate();
 
-        bool operator ==(const RobotHypothesis& other) {
-            return true;
-        };
+        // bool operator ==(const RobotHypothesis& other) {
+        //     return true;
+        // };
     };
 
 
