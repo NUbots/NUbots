@@ -6,6 +6,7 @@
 #include <armadillo>
 
 #include "utility/math/angle.h"
+#include "utility/math/coordinates.h"
 
 namespace modules {
 namespace localisation {
@@ -28,18 +29,23 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     return result;
 }
 
-
 /// Return the predicted observation of an object at the given position
 arma::vec RobotModel::predictedObservation(
     const arma::vec::fixed<RobotModel::size>& state, const arma::vec2& actual_position) {
     
     arma::vec2 diff = actual_position - state.rows(0, 1);
 
-    auto distance = arma::norm(diff, 2);
+    // auto distance = arma::norm(diff, 2);
 
-    auto angle = utility::math::angle::normalizeAngle(atan2(diff[1], diff[0]) - state[kHeading]);
+    // auto angle = utility::math::angle::normalizeAngle(atan2(diff[1], diff[0]) - state[kHeading]);
 
-    return { distance, angle };
+    // return { distance, angle };
+
+    arma::vec2 radial = utility::math::coordinates::Cartesian2Radial(diff);
+
+    radial(1) = utility::math::angle::normalizeAngle(radial[1] - state[kHeading]);
+
+    return radial;
 
     // switch(type)
     // {
@@ -54,10 +60,15 @@ arma::vec RobotModel::predictedObservation(
     // };
 }
 
-
 arma::vec RobotModel::observationDifference(const arma::vec& a, 
                                             const arma::vec& b){
-    return a - b;
+    
+    arma::vec2 result = a - b;
+
+    result(1) = utility::math::angle::normalizeAngle(result[1]);
+
+    return result;
+
 
     // Matrix result;
     // switch(type)
@@ -74,11 +85,17 @@ arma::vec RobotModel::observationDifference(const arma::vec& a,
     // return result;
 }
 
+
+
+
 arma::vec::fixed<RobotModel::size> RobotModel::limitState(
     const arma::vec::fixed<RobotModel::size>& state) {
  
     auto result = state;
 
+    // How to get clipping values from config system?
+    result[kX] = std::max(std::min(result[kX], 4.5 + 0.7) , -4.5 -0.7);
+    result[kY] = std::max(std::min(result[kY], 3 + 0.7) , -3 -0.7);
     result[kHeading] = utility::math::angle::normalizeAngle(result[kHeading]);
     
     return result;
@@ -91,3 +108,4 @@ arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() 
 }
 }
 #endif
+

@@ -197,7 +197,6 @@ void RobotHypothesis::TimeUpdate() {
 //     //         model.setAlpha(model.alpha() / sumAlpha);
 // }
 
-
 void MultiModalRobotModel::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object,
     const LocalisationFieldObject& actual_object) {
@@ -207,17 +206,18 @@ void MultiModalRobotModel::MeasurementUpdate(
         model.MeasurementUpdate(observed_object, actual_object);
 }
 
+
+
 void RobotHypothesis::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object,
     const LocalisationFieldObject& actual_object) {
 
     arma::vec2 measurement = { observed_object.sphericalFromNeck[0],
-                               observed_object.sphericalFromNeck[2] };
+                               observed_object.sphericalFromNeck[1] };
     arma::vec2 actual_pos = actual_object.location();
 
     arma::mat22 cov = { observed_object.sphericalError[0], 0,
-                        0, observed_object.sphericalError[2] };
-
+                        0, observed_object.sphericalError[1] };
 
 
     // // Calculate noise from spherical error
@@ -234,6 +234,7 @@ void RobotHypothesis::MeasurementUpdate(
 
     double quality = filter_.measurementUpdate(measurement, cov, actual_pos);
 }
+
 
 }
 }

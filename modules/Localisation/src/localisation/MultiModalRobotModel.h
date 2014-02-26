@@ -38,6 +38,7 @@ namespace localisation {
 
         utility::math::kalman::UKF<RobotModel> filter_;
 
+
     public:
         RobotHypothesis() : active_(true), weight_(0) { }
 
@@ -49,6 +50,10 @@ namespace localisation {
 
         arma::vec::fixed<RobotModel::size> GetEstimate() {
             return filter_.get();
+        }
+
+        arma::mat::fixed<RobotModel::size, RobotModel::size> GetCovariance() {
+            return filter_.getCovariance();
         }
 
         void MeasurementUpdate(
@@ -89,6 +94,11 @@ namespace localisation {
         arma::vec::fixed<RobotModel::size> GetEstimate() {
             return robot_models_[0].GetEstimate();
         }
+
+        arma::mat::fixed<RobotModel::size, RobotModel::size> GetCovariance() {
+            return robot_models_[0].GetCovariance();
+        }
+
 
     private:
         int PruneViterbi(unsigned int order);

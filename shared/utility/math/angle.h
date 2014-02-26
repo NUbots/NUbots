@@ -41,9 +41,9 @@ namespace math {
          */
         inline double normalizeAngle(const double value) {
 
-            double angle = fmod(value, 2 * M_PI);
-            if (angle < -M_PI) angle += 2 * M_PI;
-            else if (angle >= M_PI) angle -= 2 * M_PI;
+            double angle = std::fmod(value, 2 * M_PI);
+            if (angle <= -M_PI) angle += 2 * M_PI;
+            else if (angle > M_PI) angle -= 2 * M_PI;
 
             return angle;
         }

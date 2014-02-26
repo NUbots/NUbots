@@ -21,6 +21,7 @@
 
 #include <nuclear>
 
+#include "utility/NUbugger/NUgraph.h"
 #include "messages/support/Configuration.h"
 #include "utility/NUbugger/NUgraph.h"
 #include "utility/math/coordinates.h"
@@ -31,6 +32,7 @@
 
 using utility::NUbugger::graph;
 using messages::support::Configuration;
+using utility::NUbugger::graph;
 
 namespace modules {
     Localisation::Localisation(std::unique_ptr<NUClear::Environment> environment)
@@ -49,32 +51,60 @@ namespace modules {
         });
 
         // Emit to NUbugger
-        on<Trigger<Every<500, std::chrono::milliseconds>>>([this](const time_t&) {
+        on<Trigger<Every<250, std::chrono::milliseconds>>>([this](const time_t&) {
             // emit(std::make_unique<messages::LMissile>());
             // std::cout << __PRETTY_FUNCTION__ << ": rand():" << rand() << std::endl;
 
-            auto state = engine_.robot_models_.GetEstimate();
+            arma::vec3 state = engine_.robot_models_.GetEstimate();
+            auto cov = engine_.robot_models_.GetCovariance();
 
-            std::cout << state << std::endl;
+            NUClear::log("=====================", "Covariance Matrix\n", cov);
+
 
             auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
             robot_msg->name = "self";
-            // robot_msg->wm_x = static_cast<float>(rand() % 600 - 300) * 0.01;
-            // robot_msg->wm_y = static_cast<float>(rand() % 400 - 200) * 0.01;
-            // robot_msg->heading = static_cast<float>(rand() % 628) * 0.01;
             robot_msg->wm_x = state[0];
             robot_msg->wm_y = state[1];
             robot_msg->heading = state[2];
             robot_msg->sd_x = 1;
             robot_msg->sd_y = 0.25;
-            robot_msg->sr_xx = 0.01;
-            robot_msg->sr_xy = -0.01;
-            robot_msg->sr_yy = 0.10;
+            robot_msg->sr_xx = cov(0, 0);
+            robot_msg->sr_xy = cov(0, 1);
+            robot_msg->sr_yy = cov(1, 1);
+            // robot_msg->sr_xx = 0.01;
+            // robot_msg->sr_xy = -0.01;
+            // robot_msg->sr_yy = 0.10;
             robot_msg->lost = false;
             emit(std::move(robot_msg));
+
+
+            auto now = NUClear::clock::now();
+            auto ms_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+            double t = static_cast<double>(ms_since_epoch - 1393322147502L);
+            // NUClear::log("t", t, ", ms_since_epoch", ms_since_epoch);
+            double secs = 20;
+            marker_ = { 2 * cos(t / (1000.0 * secs)), 2 * sin(t / (1000.0 * secs)) };
+            // NUClear::log("Actual robot position", marker_);
+
+            arma::vec2 diff = { marker_[0] - state[0], marker_[1] - state[1] };
+            float distance = arma::norm(diff, 2);
+            emit(graph("Localisation estimate distance error", distance));
+            emit(graph("Estimated robot position", state[0], state[1]));
+            emit(graph("Actual robot position", marker_[0], marker_[1]));
+
+            auto ball_msg = std::make_unique<messages::localisation::FieldObject>();
+            ball_msg->name = "ball";
+            ball_msg->wm_x = marker_[0];
+            ball_msg->wm_y = marker_[1];
+            ball_msg->heading = 0;
+            ball_msg->sd_x = 0.1;
+            ball_msg->sd_y = 0.1;
+            ball_msg->sr_xx = 0.01;
+            ball_msg->sr_xy = 0;
+            ball_msg->sr_yy = 0.01;
+            ball_msg->lost = false;
+            emit(std::move(ball_msg));
         });
-
-
 
 
 
@@ -83,12 +113,14 @@ namespace modules {
             auto goal1 = messages::vision::Goal();
             auto goal2 = messages::vision::Goal();
 
-            goal1.type = messages::vision::Goal::LEFT;
-            goal2.type = messages::vision::Goal::RIGHT;
+
+            goal1.type = messages::vision::Goal::RIGHT;
+            goal2.type = messages::vision::Goal::LEFT;
 
             // auto camera_pos = arma::vec3 { 150.0, 100.0, 40.0 };
-            // auto camera_pos = arma::vec3 { 1.50, 1.0, 0.0 };
-            auto camera_pos = arma::vec3 { -4.5, 0, 0.0 };
+            // auto camera_pos = arma::vec3 { -1.50, -1.0, 0.0 };
+            // auto camera_pos = arma::vec3 { -4.5, 0, 0.0 };
+            auto camera_pos = arma::vec3 { marker_[0], marker_[1], 0.0 };
 
             auto fd = engine_.field_description();
             auto goal_br_pos = fd->GetLFO(localisation::LFOId::kGoalBR).location();
@@ -97,24 +129,27 @@ namespace modules {
             auto goal1_pos = arma::vec3 { goal_br_pos[0], goal_br_pos[1], 0.0 };
             auto goal2_pos = arma::vec3 { goal_bl_pos[0], goal_bl_pos[1], 0.0 };
 
-            NUClear::log("Goal positions", goal1_pos, goal2_pos);
+            // NUClear::log("Goal positions\n", goal1_pos, goal2_pos);
 
             // (dist, bearing, declination)
             goal1.sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(goal1_pos - camera_pos);
             goal2.sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(goal2_pos - camera_pos);
-            goal1.sphericalError = { 0.1, 0.1, 0.1 };
-            goal2.sphericalError = { 0.1, 0.1, 0.1 };
+
+
+            // NUClear::log("---------------------", "goal1.sphericalFromNeck\n", goal1.sphericalFromNeck);
+            // NUClear::log("---------------------", "goal2.sphericalFromNeck\n", goal2.sphericalFromNeck);
+
+
+            goal1.sphericalError = { 0.0001, 0.0001, 0.000001 };
+            goal2.sphericalError = { 0.0001, 0.0001, 0.000001 };
 
             auto goals = std::make_unique<std::vector<messages::vision::Goal>>();
 
-            goals->push_back(goal2);
             goals->push_back(goal1);
+            goals->push_back(goal2);
 
             emit(std::move(goals));
         });
-
-
-
 
 
         // on<Trigger<std::vector<messages::vision::Goal>>>([this](const std::vector<messages::vision::Goal>& m) {
@@ -126,11 +161,18 @@ namespace modules {
           >(
             [this](const time_t&,
                    const std::vector<messages::vision::Goal>& goals) {
-            // engine_.TimeUpdate();
 
+            // engine_.TimeUpdate(0.5);
+            engine_.TimeUpdate(0.05);
             engine_.ProcessObjects(goals);
-            engine_.TimeUpdate(0.1);
         });
+
+
+        // on<Trigger<Every<100, std::chrono::milliseconds>>>([this](const time_t&) {
+        //     engine_.TimeUpdate(0.05);
+        // });
+
+
 
         // emit<Scope::INITIALIZE>(std::make_unique<localisation::TimeUpdate>());
         // on<Trigger<localisation::TimeUpdate>>([this](const localisation::TimeUpdate& m) {
@@ -152,3 +194,4 @@ namespace modules {
         // });
     }
 }
+

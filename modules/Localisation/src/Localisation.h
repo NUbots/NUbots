@@ -21,6 +21,7 @@
 #define MODULES_LOCALISATION_H
 
 #include <nuclear>
+#include <armadillo>
 #include "localisation/LocalisationEngine.h"
 #include "localisation/FieldDescription.h"
 
@@ -34,6 +35,9 @@ namespace modules {
     private:
         /// The engine that does all of the work
         localisation::LocalisationEngine engine_;
+
+        /// For testing
+        arma::vec2 marker_ = { 0, 0 };
 
     public:
         /// @brief General localisation configuration.
