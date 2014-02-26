@@ -28,37 +28,47 @@
 namespace modules {
     namespace behaviour {
         namespace reflexes {
-            
+
             using messages::support::Configuration;
             using messages::input::Sensors;
-            
-            Getup::Getup(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+            using messages::motion::AllServoWaypointsComplete;
+
+            Getup::Getup(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), fallenDetector(nullptr), getupDetector(nullptr) {
                     //do a little configurating
                     on<Trigger<Configuration<Getup>>>([this](const Configuration<Getup>& file){
                         double fallenAngleConfig = file.config["FALLEN_ANGLE"];
-                
+
                         FALLEN_ANGLE = cos(fallenAngleConfig*M_PI/180.0);
                         GETUP_PRIORITY = file.config["GETUP_PRIORITY"];
                         EXECUTION_PRIORITY = file.config["EXECUTION_PRIORITY"];
                     });
-                
-                on<Trigger<Sensors>, Options<Single>>([this](const Sensors& sensors) {
-                    
+
+                fallenDetector = on<Trigger<Sensors>, Options<Single>>([this](const Sensors& sensors) {
                     // if we think we have fallen, get up
-                    if (abs(sensors.orientation(2,2)) < FALLEN_ANGLE) {
-                        
+                    //NUClear::log(fabs(sensors.orientation(2,2)),FALLEN_ANGLE);
+
+                    if (fabs(sensors.orientation(2,2)) < FALLEN_ANGLE) {
+                        fallenDetector.disable();
+                        getupDetector.enable();
                         //check if we're on our front or back
-                        if (sensors.orientation(0,2) > 0.0) {
+                        if (sensors.orientation(0,2) < 0.0) {
                             //XXX: replace with priorities
                             emit(std::make_unique<messages::motion::ExecuteScriptByName>("StandUpFront.json"));
                         } else {
                             emit(std::make_unique<messages::motion::ExecuteScriptByName>("StandUpBack.json"));
                         }
                     }
-                    
+
                 });
+
+                getupDetector = on<Trigger<AllServoWaypointsComplete>>([this](const AllServoWaypointsComplete&) {
+                    getupDetector.disable();
+                    fallenDetector.enable();
+                });
+
+                getupDetector.disable();
             }
-            
+
         }  // tools
     }  // behaviours
 }  // modules

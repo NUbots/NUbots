@@ -39,6 +39,9 @@ namespace modules {
             private:
                 /// config settings
                 double FALLEN_ANGLE,GETUP_PRIORITY,EXECUTION_PRIORITY;
+                ReactionHandle fallenDetector;
+                ReactionHandle getupDetector;
+                
             public:
                 explicit Getup(std::unique_ptr<NUClear::Environment> environment);
                 static constexpr const char* CONFIGURATION_PATH = "Getup.json";
