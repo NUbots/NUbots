@@ -313,8 +313,10 @@ namespace modules {
 				}
 				send(message);
 			});
+
             
-			on<Trigger<messages::localisation::FieldObject>, Options<Single, Priority<NUClear::LOW>>>([this](const messages::localisation::FieldObject& field_object) {
+			on<Trigger<messages::localisation::FieldObject>, 
+			   Options<Priority<NUClear::LOW>>>([this](const messages::localisation::FieldObject& field_object) {
 				Message message;
 
 				message.set_type(Message::LOCALISATION);
@@ -342,6 +344,7 @@ namespace modules {
 				pub.close();
 			});
 		}
+
 
 		/**
 		 * This method needs to be used over pub.send as all calls to
