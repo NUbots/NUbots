@@ -32,16 +32,21 @@ namespace modules {
 
             /**
              * Executes a getup script if the robot falls over.
-             * 
+             *
              * @author Josiah Walker
              */
             class Getup : public NUClear::Reactor {
             private:
                 /// config settings
                 double FALLEN_ANGLE,GETUP_PRIORITY,EXECUTION_PRIORITY;
+
+                ///reactionhandles let us disable reactions temporarily
                 ReactionHandle fallenDetector;
                 ReactionHandle getupDetector;
-                
+
+                double currentPriority;
+                void updateAction(const double& priority);
+
             public:
                 explicit Getup(std::unique_ptr<NUClear::Environment> environment);
                 static constexpr const char* CONFIGURATION_PATH = "Getup.json";
