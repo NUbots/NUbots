@@ -59,6 +59,11 @@ message Message {
 			UNKNOWN_GOAL = 3;
 		}
 
+		enum ObstacleColour {
+			UNKNOWN = 1;
+			CYAN = 2;
+			MAGENTA = 3;
+		}
 
 		optional ShapeType shape_type = 1;
 		optional GoalType goal_type = 2;
@@ -75,6 +80,8 @@ message Message {
 		repeated uint32 points = 10;
 
 		repeated float measured_relative_position = 11; //Spherical
+
+		optional ObstacleColour obstacle_colour = 12;
 	}
 
 	message VisionClassifiedSegment {

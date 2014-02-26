@@ -23,6 +23,9 @@
 #include <armadillo> 
 #include <nuclear>
 
+#include "utility/vision/LookUpTable.h"
+
+
 namespace messages {
 	namespace vision {
 
@@ -40,7 +43,8 @@ namespace messages {
 
 		class Ball : public VisionObject {
         public:
-			Ball() : VisionObject() {}			
+			Ball() : VisionObject() {}	
+			float diameter;		
 		};
 
 		class Goal : public VisionObject {
@@ -60,10 +64,13 @@ namespace messages {
         public:
 			Obstacle() : VisionObject() {}
 			float arcWidth;
+			// enum ColourType{
+			// 	TEAM_CYAN,
+			// 	TEAM_MAGENTA,
+			// 	UNKNOWN
+			// }
+			COLOUR_CLASS colour;
 		};	
-
-
-
 
 		//Line objects:
 

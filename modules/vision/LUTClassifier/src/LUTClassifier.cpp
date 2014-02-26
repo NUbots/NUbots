@@ -28,6 +28,7 @@ namespace modules {
 		using utility::configuration::ConfigurationNode;
 		using messages::vision::ClassifiedImage;
 		using messages::vision::SegmentedRegion;
+		using utility::vision::LookUpTable;
 
 		using std::chrono::system_clock;
         
@@ -45,21 +46,18 @@ namespace modules {
 
 				std::vector<std::string> LUTLocations = locations.config["DEFAULT_LOCATION"];
 				LUTs.clear();
-				LUTs.reserve(LUTLocations.size());
 
-				for (auto LUTLocation : LUTLocations) {
-					LookUpTable LUT;
-					LUTs.push_back(LUT);
-					bool loaded = LUTs.back().loadLUTFromFile(LUTLocation);
+				for (auto& LUTLocation : LUTLocations) {
+					std::shared_ptr<LookUpTable> ptr = std::make_shared<LookUpTable>();
+					LUTs.push_back(ptr);
+					bool loaded = LUTs.back()->loadLUTFromFile(LUTLocation);			
 
-					
+					if(!loaded) {						
+						NUClear::log<NUClear::ERROR>("!!!LUT ", LUTLocation, " has NOT loaded successfully!!!!" );
 
-					if(!loaded) {
-						
-						std::cout << "Error Loading LUT: " << LUTLocation << std::endl;
-						NUClear::log<NUClear::ERROR>("LUT ", LUTLocation, " has not loaded successfully." );
-
-					}
+					} else {
+                        NUClear::log<NUClear::ERROR>("LUT ", LUTLocation, " has loaded successfully. Size: ", LUTs.back()->LUT_SIZE);
+                    }
 				}
 				
 			});
@@ -161,11 +159,11 @@ namespace modules {
 				}
 			});
 
-            on<Trigger<Image>, Options<Single>>([this](const Image& image) {
+            on<Trigger<Image>, With<Raw<Image>>, Options<Single>>([this](const Image& image, const std::shared_ptr<const Image>& image_ptr) {
             	/*std::vector<arma::vec2> green_horizon_points = */
             	//std::cout << "Image size = "<< image.width() << "x" << image.height() <<std::endl;
             	//std::cout << "LUTClassifier::on<Trigger<Image>> calculateGreenHorizon" << std::endl;
-            	greenHorizon.calculateGreenHorizon(image, LUTs[currentLUTIndex]);
+            	greenHorizon.calculateGreenHorizon(image, *LUTs[currentLUTIndex]);
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> generateScanLines" << std::endl;
             	std::vector<int> generatedScanLines;
@@ -174,29 +172,22 @@ namespace modules {
             	scanLines.generateScanLines(image, greenHorizon, &generatedScanLines);
                 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyHorizontalScanLines" << std::endl;
-            	scanLines.classifyHorizontalScanLines(image, generatedScanLines, LUTs[currentLUTIndex], &horizontalClassifiedSegments);
+            	scanLines.classifyHorizontalScanLines(image, generatedScanLines, *LUTs[currentLUTIndex], &horizontalClassifiedSegments);
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyVerticalScanLines" << std::endl;
-            	scanLines.classifyVerticalScanLines(image, greenHorizon, LUTs[currentLUTIndex], &verticalClassifiedSegments);
+            	scanLines.classifyVerticalScanLines(image, greenHorizon, *LUTs[currentLUTIndex], &verticalClassifiedSegments);
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyImage" << std::endl;
             	std::unique_ptr<ClassifiedImage> classifiedImage = segmentFilter.classifyImage(horizontalClassifiedSegments, verticalClassifiedSegments);
             	classifiedImage->greenHorizonInterpolatedPoints = greenHorizon.getInterpolatedPoints();
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> emit(std::move(classified_image));" << std::endl;
+            	classifiedImage->image = image_ptr;
+            	classifiedImage->LUT = LUTs[currentLUTIndex];
+
             	emit(std::move(classifiedImage));
             });
 
-			// on<Trigger<Image>>([this](const Image& image) {
-
-			// 	//NUClear::log("Waiting 100 milliseconds...");
-
-			// 	system_clock::time_point start = system_clock::now();
-
-			// 	while (std::chrono::duration_cast<std::chrono::milliseconds>(system_clock::now().time_since_epoch()) - 
-			// 			std::chrono::duration_cast<std::chrono::milliseconds>(start.time_since_epoch())  < std::chrono::milliseconds(3)){}
-
-			// });
         }
 
     }  // vision

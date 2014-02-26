@@ -41,7 +41,8 @@ namespace modules {
 												const arma::vec3& CAMERA_ANGLE_OFFSET_,
 												const arma::vec3& NECK_POSITION_OFFSET_,
 												const arma::vec3& BODY_POSITION_OFFSET_,
-												const arma::vec3& CAMERA_POSITION_OFFSET_) {
+												const arma::vec3& CAMERA_POSITION_OFFSET_,
+                                                float SCREEN_LOCATION_UNCERTAINTY_PIXELS_) {
 			RADIAL_CORRECTION_COEFFICIENT = RADIAL_CORRECTION_COEFFICIENT_;
 			
 			BODY_ANGLE_OFFSET = BODY_ANGLE_OFFSET_;
@@ -51,6 +52,8 @@ namespace modules {
 
 			BODY_POSITION_OFFSET = BODY_POSITION_OFFSET_;
 			CAMERA_POSITION_OFFSET = CAMERA_POSITION_OFFSET_;
+
+            SCREEN_LOCATION_UNCERTAINTY_PIXELS = SCREEN_LOCATION_UNCERTAINTY_PIXELS_;
 
 			preCalculateTransforms();
 		}
@@ -231,23 +234,51 @@ namespace modules {
         arma::vec3 VisionKinematics::distanceToPoint(arma::vec2 pixel, double objectHeight) const {
             arma::vec3 result;
 
-            arma::mat vcam(3, 1);
-            vcam.fill(0.0);
-            vcam(0, 0) = m_effectiveCameraDistancePixels;
-            vcam(1, 0) = (m_imageSize[0] * 0.5) - pixel[0];
-            vcam(2, 0) = (m_imageSize[1] * 0.5) - pixel[1];
+            arma::vec3 cameraToObjectDirection_cam({    //use subscript to denote coord system
+                m_effectiveCameraDistancePixels,
+                (m_imageSize[0] * 0.5) - pixel[0],
+                (m_imageSize[1] * 0.5) - pixel[1]});   //Are the pixels mapped like this? Seems likely.
+            // or like this?
+            // -(m_imageSize[0] * 0.5) + pixel[0],
+            // -(m_imageSize[1] * 0.5) + pixel[1]});
+            // std::cout "VisionKinematics::distanceToPoint - cameraToObjectDirection_cam = "<< cameraToObjectDirection_cam << std::endl;
 
-            arma::mat roboVdir = m_camV2RobotRotation * vcam;
-            double alpha = (objectHeight - m_camVector(2, 0)) / roboVdir(2, 0);
-            arma::mat v2FieldPoint = (alpha * roboVdir) + m_camVector;
+            arma::vec3 cameraToObjectDirection_world = m_camV2RobotRotation * cameraToObjectDirection_cam;
+            // std::cout "VisionKinematics::distanceToPoint - cameraToObjectDirection_world = "<< cameraToObjectDirection_world << std::endl;
+
+            double alpha = std::abs( m_camVector[2] - objectHeight) / std::abs(cameraToObjectDirection_world[2]);      //Similar triangle ratio
+            // std::cout "VisionKinematics::distanceToPoint - alpha = "<< alpha << std::endl;
+
+            //alpha == cameraToObject_world / norm(cameraToObjectDirection_world)
+            //therefore
+            arma::vec3 cameraToObject_world = alpha * cameraToObjectDirection_world; //as they are parallel
+            // std::cout "VisionKinematics::distanceToPoint - cameraToObject_world = "<< cameraToObject_world << std::endl;
+
+            arma::vec3 neckToObject_world = cameraToObject_world - m_neckPosition;
+            // std::cout "VisionKinematics::distanceToPoint - neckToObject_world = "<< neckToObject_world << std::endl;
+
+            return utility::math::coordinates::Cartesian2Spherical(neckToObject_world);
+
+
+            /*
+             arma::vec3 result;
+
+            arma::vec3 vcam
+            << m_effectiveCameraDistancePixels
+            << m_imageSize[0] * 0.5) - pixel[0]
+            << (m_imageSize[1] * 0.5) - pixel[1];   //Are the pixels mapped like this?
+
+            arma::vec3 roboVdir = m_camV2RobotRotation * vcam;
+            double alpha = (objectHeight - m_camVector[2]) / roboVdir[2];
+            arma::vec3 v2FieldPoint = (alpha * roboVdir) + m_camVector;
 
             arma::vec3 temp;
-            temp << v2FieldPoint(0, 0) << v2FieldPoint(1, 0) << (objectHeight - m_camVector(2, 0));
+            temp << v2FieldPoint[0] << v2FieldPoint[1]<< (objectHeight - m_camVector[2]);
             result[0] = arma::norm(temp, 2);
-            result[1] = std::atan2(v2FieldPoint(1, 0), v2FieldPoint(0, 0));
-            result[2] = std::asin((objectHeight - m_camVector(2, 0)) / result[0]);
+            result[1] = std::atan2(v2FieldPoint[1], v2FieldPoint[0]);
+            result[2] = std::asin((objectHeight - m_camVector[2] / result[0]);
 
-            return result;
+           return result;*/
         }
 
         //void VisionKinematics::screenToGroundCartesian(NUPoint& point) const {
@@ -283,11 +314,12 @@ namespace modules {
         //    return groundPoints;
         //}
 
-        void VisionKinematics::setSensors(double headPitch, double headYaw, double bodyRoll, double bodyPitch, arma::vec3 neckPosition) {
+        void VisionKinematics::setSensors(double headPitch, double headYaw, const arma::vec3& gravity, const arma::vec3& neckPosition) {
             m_headPitch = headPitch;
             m_headYaw = headYaw;
-            m_bodyPitch = bodyPitch;
-            m_bodyRoll = bodyRoll;
+            m_gravity = gravity;
+            m_bodyPitch = atan2(-gravity[0], -gravity[2]);
+            m_bodyRoll = atan2(-gravity[1], -gravity[2]);
             m_neckPosition = neckPosition;
 
             preCalculateTransforms();
@@ -306,10 +338,53 @@ namespace modules {
 
 
         double VisionKinematics::getD2PError(const NUPoint& location) const{
-            double declination_error = m_FOV[1]/m_imageSize[1];
-            double robot_height = std::abs(m_neckPosition(3,2));
+            double declination_error = SCREEN_LOCATION_UNCERTAINTY_PIXELS*m_FOV[1]/m_imageSize[1];
+            double robot_height = std::abs(m_neckPosition[2]);
             double sin_elevation = std::sin(location.neckRelativeRadial[2]-arma::math::pi()); 
             return declination_error*robot_height/(sin_elevation*sin_elevation);
+        }
+
+        arma::vec3 VisionKinematics::calculateSphericalError(NUPoint location, DISTANCE_METHOD distanceMethod, float width) const{
+            arma::vec3 sphericalError;
+            switch (distanceMethod) {
+                case D2P: {
+                    sphericalError[0] = getD2PError(location);
+
+                    break;
+                }
+
+                case WIDTH: {
+                    sphericalError[0] = SCREEN_LOCATION_UNCERTAINTY_PIXELS*location.neckRelativeRadial[0]/width; //=d*dp/p (assuming error of dp=1 pixel in width)
+
+                    break;
+                }
+
+                case AVERAGE: {
+                    double width_error = SCREEN_LOCATION_UNCERTAINTY_PIXELS*location.neckRelativeRadial[0]/width;
+                    double d2p_error = getD2PError(location);
+
+                    sphericalError[0] = std::max(width_error,d2p_error);
+                    break;
+                }
+
+                case LEAST: {                   
+                    double width_error = SCREEN_LOCATION_UNCERTAINTY_PIXELS*location.neckRelativeRadial[0]/width;
+                    double d2p_error = getD2PError(location);
+
+                    sphericalError[0] = std::max(width_error,d2p_error);
+                    break;
+                }
+
+                default: {
+                    sphericalError[0] = SCREEN_LOCATION_UNCERTAINTY_PIXELS*location.neckRelativeRadial[0]/width; //=d*dp/p (assuming error of 1 pixel in width)
+
+                    break;
+                }
+            }
+
+            sphericalError[1] = SCREEN_LOCATION_UNCERTAINTY_PIXELS*getFOV()[0]/getImageSize()[0];  //Erordp =1 
+            sphericalError[2] = SCREEN_LOCATION_UNCERTAINTY_PIXELS*getFOV()[1]/getImageSize()[1];  //Erordp =1
+            return sphericalError;
         }
 
     }
