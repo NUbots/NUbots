@@ -86,4 +86,7 @@ node packer-virtualbox-iso, packer-vmware-iso {
   package { 'screen': ensure => latest, }
   package { 'htop': ensure => latest, }
   package { 'gdb': ensure => latest, }
+
+  # NFS for better Vagrant shared folders
+  package { 'nfs-common': ensure => latest, }
 }
