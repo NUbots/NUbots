@@ -17,92 +17,196 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+#include <iomanip>
+
 #include "localisation/MultiModalRobotModel.h"
 #include "LocalisationFieldObject.h"
+#include "utility/math/angle.h"
 
 namespace modules {
 namespace localisation {
 
+std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
+    arma::vec::fixed<RobotModel::size> est = h.filter_.get();
+
+    return os 
+        << "[ "
+        << "weight: "
+            << std::setw(7) << h.weight_ << ", "
+        << "estimate: [" 
+            << std::setw(7) << est[0] << ", " 
+            << std::setw(7) << est[1] << ", " 
+            << std::setw(7) << est[2] << "]"  
+        << " ]";
+}
+
 void MultiModalRobotModel::TimeUpdate() {
     for (auto& model : robot_models_)
-        model.TimeUpdate();
+        model->TimeUpdate();
 }
+
 
 void RobotHypothesis::TimeUpdate() {
-    filter_.timeUpdate<arma::vec3>(0.1);
+    arma::vec3 tmp = { 0, 0, 0 };
+    // filter_.timeUpdate(0.1, tmp);
 }
 
 
-// /*! @brief Remove all inactive models from the default container.
-//  *  @retun The number of models removed.
-//  */
-// unsigned int MultiModalRobotModel::RemoveInactiveModels() {
-//     return RemoveInactiveModels(robot_models_);
-// }
+void MultiModalRobotModel::MeasurementUpdate(
+    const messages::vision::VisionObject& observed_object,
+    const LocalisationFieldObject& actual_object) {
 
-// /*! @brief Removes all inactive models from the given container
-//  *  @param container The container to remove inactive models from.
-//  *  @retun The number of models removed.
-//  */
-// unsigned int MultiModalRobotModel::RemoveInactiveModels(std::vector<RobotHypothesis>& container) {
-//     const unsigned int num_before = container.size();   // Save original size
+    for (auto& model : robot_models_)
+        model->MeasurementUpdate(observed_object, actual_object);
+}
 
-//     // for (auto& model : robot_models_) {
-//     //     if (!model->active()) {
-//     //         delete model;
-//     //         model = NULL;
-//     //     }
-//     // }
- 
-//     container.erase(
-//         remove_if(container.begin(),
-//                   container.end(),
-//                   [](const RobotHypothesis& p) { return !p.active(); }), 
-//         container.end());
+
+double RobotHypothesis::MeasurementUpdate(
+    const messages::vision::VisionObject& observed_object,
+    const LocalisationFieldObject& actual_object) {
+
+    arma::vec2 measurement = { observed_object.sphericalFromNeck[0],
+                               observed_object.sphericalFromNeck[1] };
+    arma::vec2 actual_pos = actual_object.location();
+
+    arma::mat22 cov = { observed_object.sphericalError[0], 0,
+                        0, observed_object.sphericalError[1] };
+
+    double quality = filter_.measurementUpdate(measurement, cov, actual_pos);
+
+    return quality;
+}
+
+
+/*! @brief Performs an ambiguous measurement update using the exhaustive 
+ *  process. 
+ *  This creates a new model for each possible location for the measurement.
+ */
+void MultiModalRobotModel::AmbiguousMeasurementUpdate(
+    const messages::vision::VisionObject& ambiguous_object,
+    const std::vector<LocalisationFieldObject>& possible_objects) {
+
+    std::vector<std::unique_ptr<RobotHypothesis>> new_models;
+    new_models.reserve(possible_objects.size() * robot_models_.size());
+
+    // For each model:
+    while (!robot_models_.empty()) {
+        auto model = std::move(robot_models_.back());
+        robot_models_.pop_back();
+
+        // Split the model for each possible object, and observe that object:
+        // TODO: Micro-optimisation: use model as the last split_model
+        for (auto& possible_object : possible_objects) {
+            auto split_model = std::make_unique<RobotHypothesis>(*model);
+
+            auto quality = split_model->MeasurementUpdate(ambiguous_object,
+                                                          possible_object);
+
+            // Weight the new model based on the 'quality' of the observation
+            // just made.
+            auto weight = split_model->GetFilterWeight();
+            split_model->SetFilterWeight(weight * quality);
+
+            new_models.push_back(std::move(split_model));
+        }
+    }
+
+    robot_models_ = std::move(new_models);
+}
+
+void MultiModalRobotModel::PruneModels() {
+    const float kMaxModelsAfterMerge = 10; // TODO: Add to config system
+
+    NUClear::log(__PRETTY_FUNCTION__, "Number of models before merging: ",
+                         robot_models_.size());
+
+    MergeSimilarModels();
+
+    NUClear::log(__PRETTY_FUNCTION__, "Number of models before pruning: ",
+                         robot_models_.size());
+
+    PruneViterbi(kMaxModelsAfterMerge);
+
+    NormaliseAlphas();
+}
+
+bool ModelsAreSimilar(const RobotHypothesis& model_a,
+                      const RobotHypothesis& model_b) {
+    const float kMinTransDist = 0.06; // TODO: Add to config system
+    const float kMinHeadDist = 0.01; // TODO: Add to config system
+
+    arma::vec::fixed<RobotModel::size> diff = model_a.GetEstimate() - model_b.GetEstimate();
+
+    auto trans_dist = arma::norm(diff.rows(0, 1), 2);
+
+    auto head_dist = std::abs(utility::math::angle::normalizeAngle(diff[kHeading]));
+
+    return (trans_dist < kMinTransDist) && (head_dist < kMinHeadDist);
+}
+
+/// Reduces the number of active models by merging similar models together
+// TODO: Find a neater, yet performant way of writing this method
+void MultiModalRobotModel::MergeSimilarModels() {
     
-//     // Return number removed: original size - new size
-//     return num_before - container.size();
-// }
+    // Sort models by weight from smallest to largest.
+    std::sort(robot_models_.begin(), robot_models_.end(), 
+        [](const std::unique_ptr<RobotHypothesis> & a, 
+           const std::unique_ptr<RobotHypothesis> & b) { 
+            return a->GetFilterWeight() < b->GetFilterWeight();
+        });
 
-// void MultiModalRobotModel::PruneModels() {
-//     const float kMaxModelsAfterMerge = 5; // TODO: Add to config system
+    std::vector<std::unique_ptr<RobotHypothesis>> new_models;
+    new_models.reserve(robot_models_.size());
 
-//     RemoveInactiveModels();
+    // Create a bool array to indicate which models have been merged
+    // into another model and should thus be ignored
+    std::vector<bool> merged;
+    merged.resize(robot_models_.size(), false);
 
-//     // if (m_settings.pruneMethod() == LocalisationSettings::prune_viterbi)
-//     // {
-//         RemoveSimilarModels();
-//         PruneViterbi(kMaxModelsAfterMerge);
-//     // }
-
-//     NormaliseAlphas();
-// }
-
-// float TranslationDistance(const MultivariateGaussian& a, const MultivariateGaussian& b) {
-//     float diff_x = a.mean(RobotHypothesis::kstates_x) - b.mean(RobotHypothesis::kstates_x);
-//     float diff_y = a.mean(RobotHypothesis::kstates_y) - b.mean(RobotHypothesis::kstates_y);
-//     return sqrt(diff_x * diff_x + diff_y * diff_y);
-// }
-
-// float HeadingDistance(const MultivariateGaussian& a, const MultivariateGaussian& b) {
-//     float diff_head = a.mean(RobotHypothesis::kstates_heading) - b.mean(RobotHypothesis::kstates_heading);
-//     return diff_head;
-// }
-
-// float ModelsAreSimilar(const RobotHypothesis& a, const RobotHypothesis& b) {
-//     // const float kMinTransDist = 6; // TODO: Add to config system
-//     // const float kMinHeadDist = 0.01; // TODO: Add to config system
-
-//     // float trans_dist = TranslationDistance(model_a->estimate(), model_b->estimate());
-//     // float head_dist = HeadingDistance(model_a->estimate(), model_b->estimate());
+    // Loop through each pair of merged models
+    for (int ma = robot_models_.size() - 1; ma >= 0; ma--) {
+        if (merged[ma])
+            continue;
     
-//     // return (trans_dist < kMinTransDist) && (head_dist < kMinHeadDist);
+        // Compare the last model in the list to all the models before it
+        for (int mb = ma - 1; mb >= 0; mb--) {
+            if (merged[mb])
+                continue;
 
-//     return 0;
-// }
+            auto& model_a = robot_models_[ma];
+            auto& model_b = robot_models_[mb];
+
+            if (!ModelsAreSimilar(*model_a, *model_b))
+                continue;
+
+            float wa = model_a->GetFilterWeight();
+            float wb = model_b->GetFilterWeight();
+            
+            if (wa < wb) {
+                merged[ma] = true;
+                model_b->SetFilterWeight(wa + wb);
+            } else {
+                model_a->SetFilterWeight(wa + wb);
+                merged[mb] = true;
+            }
+        }
+
+        // If the model remains unmerged, move it to the new list
+        if (!merged[ma]) {
+            new_models.push_back(std::move(robot_models_[ma]));
+
+            // Pop the now invalid last model from robot_models
+            // Note: not strictly necessary
+            robot_models_.pop_back();
+        }
+    }
+
+    // Replace the old models with the new list of merged models
+    robot_models_ = std::move(new_models);
+}
 
 // /// Reduces the number of active models by merging similar models together
-// void MultiModalRobotModel::RemoveSimilarModels() {
+// void MultiModalRobotModel::MergeSimilarModels() {
 //     // Loop through each pair of active models
 //     for (auto& model_a : robot_models_) {
 //         if (!model_a.active())
@@ -112,7 +216,7 @@ void RobotHypothesis::TimeUpdate() {
 //             if (!model_b.active())
 //                 continue;
 
-//             if (model_a == model_b)
+//             if (&model_a == &model_b)
 //                 continue;
 
 //             if (ModelsAreSimilar(model_a, model_b)) {
@@ -134,107 +238,44 @@ void RobotHypothesis::TimeUpdate() {
 //     NormaliseAlphas();
 // }
 
-// /* @brief Prunes the models using the Viterbi method. This removes lower
-//  *        probability models to a maximum total models.
-//  * @param order The number of models to be kept at the end for the process.
-//  * @return The number of models that were removed during this process.
-//  */
-// int MultiModalRobotModel::PruneViterbi(unsigned int order) {
+/* @brief Prunes the models using the Viterbi method. This removes lower
+ *        probability models to a maximum total models.
+ * @param order The maximum number of models to remain after pruning.
+ */
+void MultiModalRobotModel::PruneViterbi(unsigned int order) {
+    // No pruning required if not above maximum.
+    if(robot_models_.size() <= order) 
+        return;
+
+    // Sort models by weight from largest to smallest.
+    std::sort(robot_models_.begin(), robot_models_.end(), 
+        [](const std::unique_ptr<RobotHypothesis> & a, 
+           const std::unique_ptr<RobotHypothesis> & b) { 
+            return a->GetFilterWeight() > b->GetFilterWeight();
+        });
+
+    // Keep only the desired number of elements.
+    robot_models_.resize(order);
+}
+
+/*! @brief Normalises the alphas of all exisiting models.
+    The alphas of all active models are normalised so that the total probablility of the set sums to 1.0.
+*/
+void MultiModalRobotModel::NormaliseAlphas() {
+    double sumAlpha = 0.0;
     
-//     return 0;
+    for (auto& model : robot_models_)
+        sumAlpha += model->GetFilterWeight();
 
-//     // RemoveInactiveModels();
+    // if (sumAlpha == 1) 
+    //     return;
 
-//     // // No pruning required if not above maximum.
-//     // if(robot_models_.size() <= order) 
-//     //     return 0;
-
-//     // // Sort, results in order smallest to largest.
-//     // robot_models_.sort(model_ptr_cmp());
-
-//     // // Number of models that need to be removed.
-//     // unsigned int num_to_remove = robot_models_.size() - order;
-
-//     // // Beginning of removal range
-//     // auto begin_remove = robot_models_.begin();
-    
-//     // // End of removal range (not removed)
-//     // auto end_remove = robot_models_.begin();
-//     // std::advance(end_remove, num_to_remove);
-
-//     // std::for_each (
-//     //     begin_remove, 
-//     //     end_remove, 
-//     //     std::bind2nd(std::mem_fun(&RobotHypothesis::setActive), false));
-
-//     // // Clear out all deactivated models.
-//     // int num_removed = RemoveInactiveModels();
-
-//     // // Result should have been achieved or something is broken.
-//     // assert(robot_models_.size() == order);
-
-//     // return num_removed;
-// }
-
-// /*! @brief Normalises the alphas of all exisiting models.
-//     The alphas of all active models are normalised so that the total probablility of the set sums to 1.0.
-// */
-// void MultiModalRobotModel::NormaliseAlphas() {
-//     // double sumAlpha = 0.0;
-    
-//     // for (auto& model : robot_models_)
-//     //     if (model.active())
-//     //         sumAlpha += (*model_it)->alpha();
-
-//     // if (sumAlpha == 1) 
-//     //     return;
-
-//     // if (sumAlpha == 0) 
-//     //     sumAlpha = 1e-12;
-
-//     // for (auto& model : robot_models_)
-//     //     if (model.active())
-//     //         model.setAlpha(model.alpha() / sumAlpha);
-// }
-
-void MultiModalRobotModel::MeasurementUpdate(
-    const messages::vision::VisionObject& observed_object,
-    const LocalisationFieldObject& actual_object) {
-
+    if (sumAlpha == 0) 
+        sumAlpha = 1e-12;
 
     for (auto& model : robot_models_)
-        model.MeasurementUpdate(observed_object, actual_object);
+            model->SetFilterWeight(model->GetFilterWeight() / sumAlpha);
 }
-
-
-
-void RobotHypothesis::MeasurementUpdate(
-    const messages::vision::VisionObject& observed_object,
-    const LocalisationFieldObject& actual_object) {
-
-    arma::vec2 measurement = { observed_object.sphericalFromNeck[0],
-                               observed_object.sphericalFromNeck[1] };
-    arma::vec2 actual_pos = actual_object.location();
-
-    arma::mat22 cov = { observed_object.sphericalError[0], 0,
-                        0, observed_object.sphericalError[1] };
-
-
-    // // Calculate noise from spherical error
-    // double dist = observed_object.sphericalFromNeck[0];
-    // double elevation = observed_object.sphericalFromNeck[1];
-    // double flat_dist =  dist * cos(elevation);
-    // double flat_dist_squared = flat_dist * flat_dist;
-
-    // arma::vec3 temp_error;
-    // temp_error[0] = kObjectRangeOffsetVariance + 
-    //                 kObjectRangeRelativeVariance * flat_dist_squared;
-    // temp_error[1] = observed_object.sphericalError[1];
-    // temp_error[2] = 0;
-
-    double quality = filter_.measurementUpdate(measurement, cov, actual_pos);
-}
-
 
 }
 }

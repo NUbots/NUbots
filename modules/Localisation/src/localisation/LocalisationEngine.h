@@ -53,9 +53,12 @@ namespace localisation {
 
         void SwapMeasurementBuffers();
 
-        int ProcessAmbiguousObjects(
-            std::vector<std::shared_ptr<messages::vision::VisionObject>>& fobs);
+        void ProcessAmbiguousObjects(
+            const std::vector<messages::vision::Goal>& ambiguous_objects);
         
+        std::vector<LocalisationFieldObject> GetPossibleObjects(
+            const messages::vision::Goal& ambiguous_object);
+
         void IndividualStationaryObjectUpdate(
             const std::vector<messages::vision::Goal>& goals,
             float time_increment);

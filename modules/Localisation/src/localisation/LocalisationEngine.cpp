@@ -55,56 +55,55 @@ namespace localisation {
     //     ProcessObjects(observation_buffer_);
     // }
 
-    int ProcessAmbiguousObjects(std::vector<std::shared_ptr<VisionObject>>& fobs) {
-        int useful_object_count = 0;
+    std::vector<LocalisationFieldObject> LocalisationEngine::GetPossibleObjects(
+            const messages::vision::Goal& ambiguous_object) {
+        std::vector<LocalisationFieldObject> possible;
 
-        // auto& stat_fobs = fobs->stationaryFieldObjects;
+        if (ambiguous_object.type == messages::vision::Goal::Type::LEFT) {
+            possible.push_back(field_description_->GetLFO(LFOId::kGoalBL));
+            possible.push_back(field_description_->GetLFO(LFOId::kGoalYL));
+        }
 
-        // // // Note: These lines were commented in the robocup codebase.
-        // // // (I forget why I ported them.  If they're unnecessary, please delete them!)
-        // // bool blueGoalSeen = stat_fobs[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || 
-        // //                     stat_fobs[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible();
-        // // bool yellowGoalSeen = stat_fobs[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() || 
-        // //                       stat_fobs[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible();
-        // // RemoveAmbiguousGoalPairs(fobs->ambiguousFieldObjects, yellowGoalSeen, blueGoalSeen);
-        
-        // for (auto& ambobj : fobs->ambiguousFieldObjects) {
-        //     if (!ambobj.isObjectVisible()) 
-        //         continue;
+        if (ambiguous_object.type == messages::vision::Goal::Type::RIGHT) {
+            possible.push_back(field_description_->GetLFO(LFOId::kGoalBR));
+            possible.push_back(field_description_->GetLFO(LFOId::kGoalYR));
+        }
 
-        //     auto possible_ids = ambobj.GetPossibleObjectIDs();
-        //     std::vector<StationaryFieldObject*> poss_obj(possible_ids.size());
-            
-        //     for (auto& id : possible_ids)
-        //         poss_obj.push_back(&(stat_fobs[id]));
+        if (ambiguous_object.type == messages::vision::Goal::Type::UNKNOWN) {
+            possible.push_back(field_description_->GetLFO(LFOId::kGoalBL));
+            possible.push_back(field_description_->GetLFO(LFOId::kGoalYL));
+            possible.push_back(field_description_->GetLFO(LFOId::kGoalBR));
+            possible.push_back(field_description_->GetLFO(LFOId::kGoalYR));
+        }
 
-        //     AmbiguousLandmarkUpdate(ambobj, poss_obj);
-
-        //     if (ambobj.get_id() == FieldObjects::FO_BLUE_GOALPOST_UNKNOWN || 
-        //         ambobj.get_id() == FieldObjects::FO_YELLOW_GOALPOST_UNKNOWN)
-        //         useful_object_count++;
-
-        //     NormaliseModelAlphas();
-        //     PruneModels();
-        // }
-
-        return useful_object_count;
+        return std::move(possible);
     }
 
-    /// Performs a two object update if it is currently possible to do so
-    int AttemptTwoObjectUpdate(std::vector<std::shared_ptr<VisionObject>>& fobs) {
-        // StationaryFieldObject& left_blue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
-        // StationaryFieldObject& right_blue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
-        // StationaryFieldObject& left_yellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
-        // StationaryFieldObject& right_yellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
+    void LocalisationEngine::ProcessAmbiguousObjects(const std::vector<messages::vision::Goal>& ambiguous_objects) {
+        // auto& stat_fobs = fobs->stationaryFieldObjects;
 
-        // if (left_blue.isObjectVisible() && right_blue.isObjectVisible())
-        //     TwoObjectUpdate(left_blue, right_blue);
+        // // Note: These lines were commented in the robocup codebase.
+        // // (I forget why I ported them.  If they're unnecessary, please delete them!)
+        // bool blueGoalSeen = stat_fobs[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || 
+        //                     stat_fobs[FieldObjects::FO_BLUE_RIGHT_GOALPOST].isObjectVisible();
+        // bool yellowGoalSeen = stat_fobs[FieldObjects::FO_YELLOW_LEFT_GOALPOST].isObjectVisible() || 
+        //                       stat_fobs[FieldObjects::FO_YELLOW_RIGHT_GOALPOST].isObjectVisible();
+        // RemoveAmbiguousGoalPairs(fobs->ambiguousFieldObjects, yellowGoalSeen, blueGoalSeen);
+        
+        for (auto& ambiguous_object : ambiguous_objects) {
 
-        // if (left_yellow.isObjectVisible() && right_yellow.isObjectVisible())
-        //     TwoObjectUpdate(left_yellow, right_yellow);
+            // auto possible_ids = ambobj.GetPossibleObjectIDs();
+            // std::vector<StationaryFieldObject*> poss_obj(possible_ids.size());
+            // for (auto& id : possible_ids)
+            //     poss_obj.push_back(&(stat_fobs[id]));
 
-        return 0;
+            // Get a vector of all field objects that the observed object could
+            // possibly be
+            auto possible_objects = GetPossibleObjects(ambiguous_object);
+            robot_models_.AmbiguousMeasurementUpdate(ambiguous_object, possible_objects);
+        }
+
+        robot_models_.PruneModels();
     }
 
     void LocalisationEngine::IndividualStationaryObjectUpdate(
@@ -161,19 +160,18 @@ namespace localisation {
         // int useful_object_count = 0;
 
         // Known object update
-        IndividualStationaryObjectUpdate(goals, 0);
+        // IndividualStationaryObjectUpdate(goals, 0);
 
         // // Two object update
         // if (kTwoObjectUpdateEnabled) {
         //     AttemptTwoObjectUpdate(fobs);
         // }
 
-        // // Update robot models
-        // if (kMultipleModelsEnabled) {
-        //     useful_object_count += ProcessAmbiguousObjects(fobs);
-        // // Pruning
-        // NormaliseModelAlphas();
-        // PruneModels();
+        // Update robot models
+        // if (kMultipleModelsEnabled) { 
+            // useful_object_count += ProcessAmbiguousObjects(fobs);
+            ProcessAmbiguousObjects(goals);
+            // PruneModels();
         // }
 
         // // Ball update
@@ -249,112 +247,21 @@ namespace localisation {
     //                                              possible_objects);
     // }
 
-    // /*!
-    //  * @brief Calculate the variance in the given measurement based on the objects distance.
-    //  * @param theObject The object the error variance is to be calculated for.
-    //  * @return The error of the measurement given as the variance.
-    //  */
-    // MeasurementError LocalisationEngine::CalculateError(const Object& theObject)
-    // {
-    //     MeasurementError error;
+    // /// Performs a two object update if it is currently possible to do so
+    // int AttemptTwoObjectUpdate(std::vector<std::shared_ptr<VisionObject>>& fobs) {
+    //     // StationaryFieldObject& left_blue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_LEFT_GOALPOST];
+    //     // StationaryFieldObject& right_blue = fobs->stationaryFieldObjects[FieldObjects::FO_BLUE_RIGHT_GOALPOST];
+    //     // StationaryFieldObject& left_yellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_LEFT_GOALPOST];
+    //     // StationaryFieldObject& right_yellow = fobs->stationaryFieldObjects[FieldObjects::FO_YELLOW_RIGHT_GOALPOST];
 
-    //     float flat_dist = theObject.measuredDistance() * 
-    //                       cos(theObject.measuredElevation());
-    //     float flat_dist_sqr = flat_dist * flat_dist;
+    //     // if (left_blue.isObjectVisible() && right_blue.isObjectVisible())
+    //     //     TwoObjectUpdate(left_blue, right_blue);
 
-    //     error.setDistance(kObjectRangeOffsetVariance + 
-    //                       kObjectRangeRelativeVariance * flat_dist_sqr);
-    //     error.setHeading(c_obj_theta_variance);
-
-    //     return error;
-    // }
-
-    // IWeightedKalmanFilter* LocalisationEngine::newRobotModel(
-    //     IWeightedKalmanFilter* filter, 
-    //     const StationaryFieldObject& measured_object, 
-    //     const MeasurementError &error,
-    //     int ambiguous_id, double timestamp)
-    // {
-    //     Matrix meas_noise = error.errorCovariance();
-
-    //     IWeightedKalmanFilter* new_filter = filter->Clone();
-    //     new_filter->AssignNewId();  // update with a new ID.
-
-    //     Matrix meas(2, 1, false);
-    //     meas[0][0] = measured_object.measuredDistance() * cos(measured_object.measuredElevation());
-    //     meas[1][0] = measured_object.measuredBearing();
-
-    //     Matrix args(2,1,false);
-    //     args[0][0] = measured_object.X();
-    //     args[1][0] = measured_object.Y();
-
-    //     bool success = new_filter->measurementUpdate(meas, meas_noise, args,
-    //                                                  RobotModel::klandmark_measurement);
-    //     new_filter->setActive(success);
-
-    //     if(new_filter->active())
-    //     {
-    //         new_filter->m_creation_time = timestamp;
-    //         new_filter->m_parent_history_buffer = filter->m_parent_history_buffer;
-    //         new_filter->m_parent_history_buffer.push_back(filter->id());
-    //         new_filter->m_parent_id = filter->id();
-    //         new_filter->m_split_option = measured_object.get_id();
-    //         new_filter->m_previous_decisions = filter->m_previous_decisions;
-    //         new_filter->m_previous_decisions[ambiguous_id] = measured_object.get_id();
-    //     }
-
-    //     return new_filter;
-    // }
-
-    // /*! @brief Performs an ambiguous measurement update using the exhaustive 
-    //  *  process. 
-    //  *  This creates a new model for each possible location for the measurement.
-    //  */
-    // int LocalisationEngine::AmbiguousLandmarkUpdateExhaustive(
-    //     AmbiguousObject &ambiguous_object,
-    //     const std::vector<StationaryFieldObject*>& possible_objects)
-    // {
-    //     const float kOutlierFactor = 0.001; // TODO: Add to config system
-    //     std::list<IWeightedKalmanFilter*> new_models;
-
-    //     MeasurementError error = CalculateError(ambiguous_object);
-
-    //     for (auto& model : robot_models_) {
-    //         if (!model->active())
-    //             continue;
-
-    //         unsigned int models_added = 0;
-
-    //         for (StationaryFieldObject* possible_object : possible_objects) {
-    //             auto temp_object = *possible_object;
-    //             temp_object.CopyMeasurement(ambiguous_object);
-                
-    //             auto temp_mod = newRobotModel(model, temp_object, error, 
-    //                                            ambiguous_object.get_id(), 
-    //                                            GetTimestamp());
-                
-    //             new_models.push_back(temp_mod);
-
-    //             if (temp_mod->active())
-    //                 models_added++;
-    //         }
-
-    //         RemoveInactiveModels(new_models);
-
-    //         if (models_added)
-    //             model->setActive(false);
-    //         else
-    //             model->setmodelWeight(kOutlierFactor * model->getFilterWeight());
-    //     }
-
-    //     if (new_models.size() > 0) {
-    //         robot_models_.insert(robot_models_.end(), new_models.begin(), new_models.end());
-    //         new_models.clear();
-    //     }
-
-    //     RemoveInactiveModels();
+    //     // if (left_yellow.isObjectVisible() && right_yellow.isObjectVisible())
+    //     //     TwoObjectUpdate(left_yellow, right_yellow);
 
     //     return 0;
     // }
+
 }
 }

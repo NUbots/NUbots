@@ -51,32 +51,46 @@ namespace modules {
         });
 
         // Emit to NUbugger
-        on<Trigger<Every<250, std::chrono::milliseconds>>>([this](const time_t&) {
+        on<Trigger<Every<250, std::chrono::milliseconds>>,
+           Options<Sync<Localisation>>>([this](const time_t&) {
             // emit(std::make_unique<messages::LMissile>());
             // std::cout << __PRETTY_FUNCTION__ << ": rand():" << rand() << std::endl;
 
             arma::vec3 state = engine_.robot_models_.GetEstimate();
             auto cov = engine_.robot_models_.GetCovariance();
 
-            NUClear::log("=====================", "Covariance Matrix\n", cov);
-
+            // NUClear::log("=====================", "Covariance Matrix\n", cov);
+            NUClear::log("=====================", "Number of models: ",
+                         engine_.robot_models_.hypotheses().size());
+            for (auto& model : engine_.robot_models_.hypotheses()) {
+                // std::cout << "    " << *model << std::endl;
+                NUClear::log("    ", *model);
+            }
 
             auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
-            robot_msg->name = "self";
-            robot_msg->wm_x = state[0];
-            robot_msg->wm_y = state[1];
-            robot_msg->heading = state[2];
-            robot_msg->sd_x = 1;
-            robot_msg->sd_y = 0.25;
-            robot_msg->sr_xx = cov(0, 0);
-            robot_msg->sr_xy = cov(0, 1);
-            robot_msg->sr_yy = cov(1, 1);
-            // robot_msg->sr_xx = 0.01;
-            // robot_msg->sr_xy = -0.01;
-            // robot_msg->sr_yy = 0.10;
-            robot_msg->lost = false;
-            emit(std::move(robot_msg));
+            std::vector<messages::localisation::FieldObject::Model> robot_msg_models;
+            
+            for (auto& model : engine_.robot_models_.hypotheses()) {
+                arma::vec3 model_state = model->GetEstimate();
 
+                messages::localisation::FieldObject::Model robot_model;
+                robot_msg->name = "self";
+                robot_model.wm_x = model_state[0];
+                robot_model.wm_y = model_state[1];
+                robot_model.heading = model_state[2];
+                robot_model.sd_x = 1;
+                robot_model.sd_y = 0.25;
+                robot_model.sr_xx = cov(0, 0);
+                robot_model.sr_xy = cov(0, 1);
+                robot_model.sr_yy = cov(1, 1);
+                // robot_model.sr_xx = 0.01;
+                // robot_model.sr_xy = -0.01;
+                // robot_model.sr_yy = 0.10;
+                robot_model.lost = false;
+                robot_msg_models.push_back(robot_model);
+            }
+            robot_msg->models = robot_msg_models;
+            emit(std::move(robot_msg));
 
             auto now = NUClear::clock::now();
             auto ms_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
@@ -93,23 +107,27 @@ namespace modules {
             emit(graph("Actual robot position", marker_[0], marker_[1]));
 
             auto ball_msg = std::make_unique<messages::localisation::FieldObject>();
+            std::vector<messages::localisation::FieldObject::Model> ball_msg_models;
+            messages::localisation::FieldObject::Model ball_model;
             ball_msg->name = "ball";
-            ball_msg->wm_x = marker_[0];
-            ball_msg->wm_y = marker_[1];
-            ball_msg->heading = 0;
-            ball_msg->sd_x = 0.1;
-            ball_msg->sd_y = 0.1;
-            ball_msg->sr_xx = 0.01;
-            ball_msg->sr_xy = 0;
-            ball_msg->sr_yy = 0.01;
-            ball_msg->lost = false;
+            ball_model.wm_x = marker_[0];
+            ball_model.wm_y = marker_[1];
+            ball_model.heading = 0;
+            ball_model.sd_x = 0.1;
+            ball_model.sd_y = 0.1;
+            ball_model.sr_xx = 0.01;
+            ball_model.sr_xy = 0;
+            ball_model.sr_yy = 0.01;
+            ball_model.lost = false;
+            ball_msg_models.push_back(ball_model);
+            ball_msg->models = ball_msg_models;
             emit(std::move(ball_msg));
         });
 
 
-
         // Simulate Vision
-        on<Trigger<Every<500, std::chrono::milliseconds>>>([this](const time_t&) {
+        on<Trigger<Every<500, std::chrono::milliseconds>>,
+           Options<Sync<Localisation>>>([this](const time_t&) {
             auto goal1 = messages::vision::Goal();
             auto goal2 = messages::vision::Goal();
 
@@ -157,7 +175,8 @@ namespace modules {
         // });
 
         on<Trigger<Every<500, std::chrono::milliseconds>>, 
-           With<std::vector<messages::vision::Goal>>
+           With<std::vector<messages::vision::Goal>>,
+           Options<Sync<Localisation>>
           >(
             [this](const time_t&,
                    const std::vector<messages::vision::Goal>& goals) {

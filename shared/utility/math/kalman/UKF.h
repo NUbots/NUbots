@@ -1,6 +1,8 @@
 #ifndef UTILITY_MATH_KALMAN_UKF_H
 #define UTILITY_MATH_KALMAN_UKF_H
 
+#include <nuclear>
+
 #include <armadillo>
 
 namespace utility {
@@ -187,23 +189,25 @@ namespace utility {
                     
                     //Magical quality calculation
                     arma::mat innovationVariance = predictedCovariance + noise;
-                    arma::mat thing = (innovation.t() * innovationVariance.i() * innovation);
+                    arma::mat innovationCovariance = ((innovation.t() * innovationVariance.i()) * innovation);
                     
-                    double expTerm = -0.5 * thing(0, 0);
+                    NUClear::log("---------------------", "innovationVariance\n", innovationVariance);
+                    NUClear::log("---------------------", "innovationCovariance\n", innovationCovariance);
+
+                    double expTerm = -0.5 * innovationCovariance(0, 0);
                     double fract = 1 / sqrt(pow(2 * M_PI, noise.n_rows) * arma::det(innovationVariance));
                     const float outlierProbability = 0.05;
                     
                     return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
                 }
                 
-                StateVec get() {
+                StateVec get() const {
                     return mean;
                 }
                 
-                StateMat getCovariance() {
+                StateMat getCovariance() const {
                     return covariance;
                 }
-                
                 
                 bool evaluateMeasurement(const arma::mat& innovation, const arma::mat& estimateVariance, const arma::mat& measurementVariance) {
                     

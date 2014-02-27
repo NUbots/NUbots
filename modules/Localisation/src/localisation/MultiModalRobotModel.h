@@ -33,51 +33,50 @@ namespace localisation {
 
     class RobotHypothesis {
     private:
-        bool active_;
+        // bool active_;
         double weight_;
 
         utility::math::kalman::UKF<RobotModel> filter_;
 
-
     public:
-        RobotHypothesis() : active_(true), weight_(0) { }
+        RobotHypothesis() : 
+            // active_(true), 
+            weight_(1) { }
 
-        bool active() const { return active_; }
-        void set_active(bool active) { active_ = active; }
+        // bool active() const { return active_; }
+        // void set_active(bool active) { active_ = active; }
 
-        float GetFilterWeight() { return weight_; }
+        float GetFilterWeight() const { return weight_; }
         void SetFilterWeight(float weight) { weight_ = weight; }
 
-        arma::vec::fixed<RobotModel::size> GetEstimate() {
+        arma::vec::fixed<RobotModel::size> GetEstimate() const {
             return filter_.get();
         }
 
-        arma::mat::fixed<RobotModel::size, RobotModel::size> GetCovariance() {
+        arma::mat::fixed<RobotModel::size, RobotModel::size> GetCovariance() const {
             return filter_.getCovariance();
         }
 
-        void MeasurementUpdate(
+        double MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,
             const LocalisationFieldObject& actual_object);
 
         void TimeUpdate();
 
-        // bool operator ==(const RobotHypothesis& other) {
-        //     return true;
-        // };
-    };
 
+        friend std::ostream& operator<<(std::ostream &os, const RobotHypothesis& h);
+    };
 
     class MultiModalRobotModel {
     public:
         MultiModalRobotModel() { 
-            robot_models_.emplace_back();
+            robot_models_.push_back(std::make_unique<RobotHypothesis>());
         }
 
         unsigned int RemoveInactiveModels();
         unsigned int RemoveInactiveModels(std::vector<RobotHypothesis>& container);
         void PruneModels();
-        void RemoveSimilarModels();
+        void MergeSimilarModels();
         void NormaliseAlphas();
 
         void TimeUpdate();
@@ -85,29 +84,35 @@ namespace localisation {
         void MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,
             const LocalisationFieldObject& actual_object);
+        // void MultipleLandmarkUpdate();
 
-        void MultipleLandmarkUpdate();
-        // int AmbiguousLandmarkUpdate(
-        //     AmbiguousObject &ambiguous_object,
-        //     const std::vector<StationaryObject*>& possible_objects);
+        void AmbiguousMeasurementUpdate(
+            const messages::vision::VisionObject& ambiguous_object,
+            const std::vector<LocalisationFieldObject>& possible_objects);
 
         arma::vec::fixed<RobotModel::size> GetEstimate() {
-            return robot_models_[0].GetEstimate();
+            return robot_models_[0]->GetEstimate();
         }
 
         arma::mat::fixed<RobotModel::size, RobotModel::size> GetCovariance() {
-            return robot_models_[0].GetCovariance();
+            return robot_models_[0]->GetCovariance();
+        }
+
+        const std::vector<std::unique_ptr<RobotHypothesis>>& hypotheses() {
+            return robot_models_;
         }
 
 
     private:
-        int PruneViterbi(unsigned int order);
+        void PruneViterbi(unsigned int order);
         // int AmbiguousLandmarkUpdateExhaustive(
         //     AmbiguousObject &ambiguous_object,
         //     const std::vector<StationaryObject*>& possible_objects);
 
-        std::vector<RobotHypothesis> robot_models_;
+        std::vector<std::unique_ptr<RobotHypothesis>> robot_models_;
     };
 }
 }
 #endif
+
+
