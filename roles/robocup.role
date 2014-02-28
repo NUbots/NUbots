@@ -1,0 +1,16 @@
+ADD_ROLE(
+    NAME robocup
+    MODULES
+        # Support and Configuration
+        #support::configuration::ConfigSystem
+
+        # Hardware Interface
+        #platform::darwin::HardwareIO
+        #platform::darwin::MotionManager
+
+        # Behaviour Modules
+        behaviour::Controller;
+
+        # Motion
+        #motion::ScriptEngine
+)
