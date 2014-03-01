@@ -27,6 +27,9 @@ namespace modules {
         using messages::behaviour::ServoCommand;
         using messages::behaviour::LimbID;
         
+        // So we don't need a huge long type declaration everywhere...
+        using iterators = std::pair<std::set<RequestItem>::iterator, std::set<RequestItem>::iterator>;
+        
         Controller::Controller(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
             
             on<Trigger<RegisterAction>>("Action Registration", [this] (const RegisterAction& action) {
@@ -34,6 +37,8 @@ namespace modules {
                 // Register the action in the sorted lists
                 
                 // Each set gets it's own place in the list
+                
+                // The highest priority element in the action is flagged as the main action
                 
             });
             
@@ -45,6 +50,12 @@ namespace modules {
             });
             
             on<Trigger<ActionPriorites>>("Action Priority Update", [this] (const ActionPriorites& update) {
+                
+                auto& request = requests[update.id];
+                
+                for(uint i = 0; i < request->items.size(); ++i) {
+                    request->items[i]->priority = update.priorities[i];
+                }
                 
                 // Short circuit logic, if the update is for our current action, and the priority went up then don't bother selecting a new action
                 
@@ -67,19 +78,41 @@ namespace modules {
             });
         }
         
+        bool hasLimbs(const std::set<LimbID>& limbRequest, const std::map<LimbID, iterators>& limbAvailable) {
+            
+            // Get the available limbs and the requested limbs
+            auto available = std::begin(limbAvailable);
+            auto request   = std::begin(limbRequest);
+            
+            // Check that every limb in request is available
+            for (; available != std::end(limbAvailable); ++available)
+            {
+                // If we reach the end of the request, or we don't have the limb return false
+                if (request == std::end(limbRequest) || available->first < *request) {
+                    return false;
+                }
+                
+                // If our element is after our requested element check the next limb
+                if (*request >= available->first) {
+                    ++available;
+                }
+            }
+            
+            return true;
+        }
+        
         void Controller::selectAction() {
             
-            using iterators = std::pair<std::set<RequestItem>::iterator, std::set<RequestItem>::iterator>;
             
-            // Set all the running flags on the current actions to false
-            
-            
-            
+            // Set the active flags on the current actions to false
+            for (auto& action : currentActions) {
+                action->group.active = false;
+            }
             
             // Get iterators to each of the actions on the limbs
             std::map<LimbID, iterators> limbs =
             {
-                std::make_pair(LimbID::LEFT_LEG  , std::make_pair(std::begin(actions[uint(LimbID::LEFT_LEG)])  , std::end(actions[uint(LimbID::LEFT_LEG)])))
+                std::make_pair(LimbID::LEFT_LEG    , std::make_pair(std::begin(actions[uint(LimbID::LEFT_LEG)])  , std::end(actions[uint(LimbID::LEFT_LEG)])))
                 , std::make_pair(LimbID::RIGHT_LEG , std::make_pair(std::begin(actions[uint(LimbID::RIGHT_LEG)]) , std::end(actions[uint(LimbID::RIGHT_LEG)])))
                 , std::make_pair(LimbID::LEFT_ARM  , std::make_pair(std::begin(actions[uint(LimbID::LEFT_ARM)])  , std::end(actions[uint(LimbID::LEFT_ARM)])))
                 , std::make_pair(LimbID::RIGHT_ARM , std::make_pair(std::begin(actions[uint(LimbID::RIGHT_ARM)]) , std::end(actions[uint(LimbID::RIGHT_ARM)])))
@@ -87,12 +120,12 @@ namespace modules {
             };
             
             // Our new actions
-            std::vector<RequestItem> newActions;
+            std::vector<std::set<RequestItem>::iterator> newActions;
             
             // We keep adding actions while we have limbs to add
             while (!limbs.empty()) {
                 
-                // Find the largest iterator priority value
+                // Find the largest iterator task from all the limbs
                 auto maxIt = std::max_element(std::begin(limbs), std::end(limbs),
                                               [](const std::pair<LimbID, iterators>& a,
                                                  const std::pair<LimbID, iterators>& b) {
@@ -116,61 +149,110 @@ namespace modules {
                 
                 // Otherwise this is a candidate for selection
                 else {
-                    
-                    // These two must pass to be granted the limb control
-                    bool mainCheck, hasLimbs = true;
-                    
-                    // Get the available limbs and the requested limbs
-                    auto available = std::begin(limbs);
-                    auto request   = std::begin(maxIt->second.first->limbSet);
-                    
-                    // Check that every limb in request is available
-                    while(available != std::end(limbs) && request != std::end(maxIt->second.first->limbSet)) {
-                        
-                        // If our element is before our requested element check the next limb
-                        if(available->first < *request) {
-                            ++available;
-                        }
-                        // If we have the limb requested then move along
-                        else if(available->first == *request) {
-                            ++available;
-                            ++request;
-                        }
-                        // Otherwise we don't have the needed limb
-                        else {
-                            hasLimbs = false;
-                            break;
-                        }
-                    }
+                    // This is the iterator to our action
+                    auto& action = maxIt->second.first;
                     
                     // Are we already active (from previous main activation)
-                    // Are we the highest priority action
-                    mainCheck = maxIt->second.first->parent.active || maxIt->second.first->mainElement;
-                    
-                    if(hasLimbs && mainCheck) {
+                    // Are we the main action?
+                    if(((action->index == action->group.mainElement) || action->group.active)
+                       // Do we have the needed limbs
+                       && hasLimbs(action->limbSet, limbs)) {
                         
-                        // Add this command to our list of commands
+                        // Activate this group
+                        action->group.active = true;
                         
-                        // Remove the requested limbs from our list of limbs
+                        // Push this action onto our list of actions
+                        newActions.push_back(action);
                         
-                        // find each limb from the limbset and remove it
+                        // Remove the limbs that we have just allocated
+                        for(auto& limb : action->limbSet) {
+                            limbs.erase(limbs.find(limb));
+                        }
                         
                     }
                     // This request isn't suitable, move to the next one
                     else {
-                        ++(maxIt->second.first);
+                        ++action;
                     }
                 }
             }
             
-            // Compare our current actions to our new actions
+            // Reset the limb access
+            for (auto& l : limbAccess) {
+                l = 0;
+            }
             
-            // Find the differences (added and removed)
+            // Set the permissions for a limb according to our allocations
+            for (auto& command : newActions) {
+                for(auto& l : command->limbSet) {
+                    limbAccess[uint(l)] = command->group.id;
+                }
+            }
             
-            // Change the control gates on our motors
+            // This comparator will sort our list so we can compare it with the current actions
+            std::function<bool (const std::set<RequestItem>::iterator&, std::set<RequestItem>::iterator&)> comp =
+            [] (const std::set<RequestItem>::iterator& a, std::set<RequestItem>::iterator& b) {
+                if(a->group.id < b->group.id) {
+                    return true;
+                }
+                else if(a->group.id == b->group.id) {
+                    return a->index < b->index;
+                }
+                else {
+                    return false;
+                }
+            };
             
-            // Run the kill and start commands for these
+            // Sort our list
+            std::sort(std::begin(newActions), std::end(newActions), comp);
             
+            // These are used to work out the difference
+            std::vector<std::set<RequestItem>::iterator> start;
+            std::map<size_t, std::set<LimbID>> startMap;
+            
+            std::vector<std::set<RequestItem>::iterator> kill;
+            std::map<size_t, std::set<LimbID>> killMap;
+            
+            // We will never have more then 5
+            start.reserve(5);
+            kill.reserve(5);
+
+            // Find newly added actions
+            std::set_difference(std::begin(newActions), std::end(newActions),
+                                std::begin(currentActions), std::end(currentActions),
+                                std::back_inserter(start), comp);
+            
+            // Find now deleted actions
+            std::set_difference(std::begin(currentActions), std::end(currentActions),
+                                std::begin(newActions), std::end(newActions),
+                                std::back_inserter(kill), comp);
+            
+            // Fill up our map with a list of limbs to kill (and the controllers for it)
+            for (const auto& k : kill) {
+                for (const auto& l : k->limbSet) {
+                    killMap[k->group.id].insert(l);
+                }
+            }
+            
+            // Fill up our map with a list of limbs to start (and the controllers for it)
+            for (const auto& s : start) {
+                for (const auto& l : s->limbSet) {
+                    killMap[s->group.id].insert(l);
+                }
+            }
+            
+            // Execute all our kill commands
+            for (const auto& k : killMap) {
+                requests[k.first]->kill(k.second);
+            }
+            
+            // Execute our start commands
+            for (const auto& s : startMap) {
+                requests[s.first]->start(s.second);
+            }
+            
+            // Our actions are now these new actions
+            currentActions = std::move(newActions);
         }
         
     }  // behaviours

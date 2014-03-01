@@ -22,6 +22,11 @@
 
 #include <nuclear>
 
+#include <array>
+#include <vector>
+#include <map>
+#include <set>
+
 #include "messages/behaviour/Action.h"
 
 namespace modules {
@@ -30,16 +35,31 @@ namespace modules {
         struct RequestItem;
 
         struct Request {
+            /// The ID of this request that will be sent with any motion commands
+            size_t id;
+            
+            /// If the main element of this request is active
             bool active;
+            
+            /// The maximum priority for any of the items
+            float maxPriority;
+            
+            /// The index of the main item
+            size_t mainElement;
+            
+            /// The items in this list
             std::vector<std::unique_ptr<RequestItem>> items;
+            
+            /// The callback to execute when a new limb is started
+            std::function<void (std::set<messages::behaviour::LimbID>)> start;
+            std::function<void (std::set<messages::behaviour::LimbID>)> kill;
         };
 
         struct RequestItem {
-            Request& parent;
-
-            bool active;
-            bool mainElement;
-
+            Request& group;
+            
+            size_t index;
+            
             float priority;
             std::set<messages::behaviour::LimbID> limbSet;
         };
@@ -51,8 +71,10 @@ namespace modules {
          */
         class Controller : public NUClear::Reactor {
         private:
-            std::set<RequestItem> actions[5];
+            std::array<std::set<RequestItem>, 5> actions;
+            std::array<size_t, 5> limbAccess;
             std::map<size_t, std::unique_ptr<Request>> requests;
+            std::vector<std::set<RequestItem>::iterator> currentActions;
             
             void selectAction();
         public:
