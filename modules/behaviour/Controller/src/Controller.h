@@ -35,6 +35,15 @@ namespace modules {
         struct RequestItem;
 
         struct Request {
+            using callback = std::function<void (std::set<messages::behaviour::LimbID>)>;
+            
+            Request(size_t id, callback start, callback kill)
+            : id(id)
+            , active(false)
+            , maxPriority(std::numeric_limits<float>::min())
+            , start(start)
+            , kill(kill) {}
+            
             /// The ID of this request that will be sent with any motion commands
             size_t id;
             
@@ -48,20 +57,33 @@ namespace modules {
             size_t mainElement;
             
             /// The items in this list
-            std::vector<std::unique_ptr<RequestItem>> items;
+            std::vector<RequestItem> items;
             
             /// The callback to execute when a new limb is started
-            std::function<void (std::set<messages::behaviour::LimbID>)> start;
-            std::function<void (std::set<messages::behaviour::LimbID>)> kill;
+            callback start;
+            callback kill;
         };
 
         struct RequestItem {
+            
+            RequestItem(Request& group, size_t index, float priority, std::set<messages::behaviour::LimbID> limbSet)
+            : group(group)
+            , index(index)
+            , priority(priority)
+            , limbSet(limbSet) {}
+            
             Request& group;
             
             size_t index;
             
+            bool active;
+            
             float priority;
             std::set<messages::behaviour::LimbID> limbSet;
+            
+            inline bool operator < (const RequestItem& a) const {
+                return priority < a.priority;
+            };
         };
 
         /**
@@ -71,10 +93,10 @@ namespace modules {
          */
         class Controller : public NUClear::Reactor {
         private:
-            std::array<std::set<RequestItem>, 5> actions;
+            std::array<std::vector<std::reference_wrapper<RequestItem>>, 5> actions;
             std::array<size_t, 5> limbAccess;
             std::map<size_t, std::unique_ptr<Request>> requests;
-            std::vector<std::set<RequestItem>::iterator> currentActions;
+            std::vector<std::reference_wrapper<RequestItem>> currentActions;
             
             void selectAction();
         public:

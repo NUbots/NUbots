@@ -28,18 +28,34 @@ namespace modules {
         using messages::behaviour::LimbID;
         
         // So we don't need a huge long type declaration everywhere...
-        using iterators = std::pair<std::set<RequestItem>::iterator, std::set<RequestItem>::iterator>;
+        using iterators = std::pair<std::vector<std::reference_wrapper<RequestItem>>::iterator, std::vector<std::reference_wrapper<RequestItem>>::iterator>;
         
         Controller::Controller(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
             
             on<Trigger<RegisterAction>>("Action Registration", [this] (const RegisterAction& action) {
                 
-                // Register the action in the sorted lists
+                // Make our request object
+                auto request = std::make_unique<Request>(action.id, action.start, action.kill);
                 
-                // Each set gets it's own place in the list
+                // Make our request items
+                for(auto& set : action.limbSet) {
+                    RequestItem item(*request, request->items.size(), set.first, set.second);
+                    request->items.push_back(std::move(item));
+                    
+                    // Put our request in the correct queue
+                    for(auto& l : set.second) {
+                        actions[uint(l)].push_back(std::ref(request->items.back()));
+                    }
+                }
                 
-                // The highest priority element in the action is flagged as the main action
+                auto maxRequest = std::max_element(std::begin(request->items), std::end(request->items));
                 
+                // Set the main element to this one
+                request->mainElement = maxRequest->index;
+                request->maxPriority = maxRequest->priority;
+                
+                // Insert this into our requests list
+                requests.insert(std::make_pair(request->id, std::move(request)));
             });
             
             on<Trigger<Startup>>("Initial Action Selection", [this] (const Startup&) {
@@ -53,17 +69,42 @@ namespace modules {
                 
                 auto& request = requests[update.id];
                 
+                // Unless we need to, try not to run the expensive subsumption algorithm
+                bool reselect = false;
+                
+                // Perform our update
                 for(uint i = 0; i < request->items.size(); ++i) {
-                    request->items[i]->priority = update.priorities[i];
+                    
+                    bool main = request->mainElement == i;
+                    bool higherThenMain = request->maxPriority < update.priorities[i];
+                    
+                    bool priorityUp = request->items[i].priority < update.priorities[i];
+                    bool priorityDown = request->items[i].priority > update.priorities[i];
+                    bool active = request->items[i].active;
+                    
+                    
+                    // If this is the main item, we need to do a complete search to see if another priority is higher
+                    // Otherwise we just need to check if we are higher then the main priority
+                    
+                    
+                    // TODO reselect if item is active and priority is going down
+                    // TODO reselect if item is inactive and priority is going up
+                    // TODO no reselect if item is main and is less then highest current priority
+                    // TODO no reselect
+                    
+                    // Update our priority
+                    //request->items[i]->priority = update.priorities[i];
                 }
                 
                 // Short circuit logic, if the update is for our current action, and the priority went up then don't bother selecting a new action
                 
                 // Update the priorities of the actions
                 
-                // Sort the list
-                
-                // run selectAction()
+                if(reselect) {
+                    
+                    // Select our new action
+                    selectAction();
+                }
                 
             });
             
@@ -103,10 +144,17 @@ namespace modules {
         
         void Controller::selectAction() {
             
+            // Sort each of the lists to choose a new item
+            for(auto& l : actions) {
+                std::sort(std::begin(l), std::end(l), [] (const RequestItem& a, const RequestItem& b) {
+                    return a < b;
+                });
+            }
             
             // Set the active flags on the current actions to false
             for (auto& action : currentActions) {
-                action->group.active = false;
+                action.get().active = false;
+                action.get().group.active = false;
             }
             
             // Get iterators to each of the actions on the limbs
@@ -120,7 +168,7 @@ namespace modules {
             };
             
             // Our new actions
-            std::vector<std::set<RequestItem>::iterator> newActions;
+            std::vector<std::reference_wrapper<RequestItem>> newActions;
             
             // We keep adding actions while we have limbs to add
             while (!limbs.empty()) {
@@ -139,7 +187,7 @@ namespace modules {
                                                   }
                                                   
                                                   // The smaller priority loses
-                                                  return a.second.first->priority < b.second.first->priority;
+                                                  return a.second.first->get().priority < b.second.first->get().priority;
                                               });
                 
                 // If we ran out of possible actions for this limb remove it
@@ -150,29 +198,30 @@ namespace modules {
                 // Otherwise this is a candidate for selection
                 else {
                     // This is the iterator to our action
-                    auto& action = maxIt->second.first;
+                    auto& action = maxIt->second.first->get();
                     
                     // Are we already active (from previous main activation)
                     // Are we the main action?
-                    if(((action->index == action->group.mainElement) || action->group.active)
+                    if(((action.index == action.group.mainElement) || action.group.active)
                        // Do we have the needed limbs
-                       && hasLimbs(action->limbSet, limbs)) {
+                       && hasLimbs(action.limbSet, limbs)) {
                         
-                        // Activate this group
-                        action->group.active = true;
+                        // Activate this group and item
+                        action.active = true;
+                        action.group.active = true;
                         
                         // Push this action onto our list of actions
-                        newActions.push_back(action);
+                        newActions.push_back(std::ref(action));
                         
                         // Remove the limbs that we have just allocated
-                        for(auto& limb : action->limbSet) {
+                        for(auto& limb : action.limbSet) {
                             limbs.erase(limbs.find(limb));
                         }
                         
                     }
                     // This request isn't suitable, move to the next one
                     else {
-                        ++action;
+                        ++(maxIt->second.first);
                     }
                 }
             }
@@ -184,19 +233,19 @@ namespace modules {
             
             // Set the permissions for a limb according to our allocations
             for (auto& command : newActions) {
-                for(auto& l : command->limbSet) {
-                    limbAccess[uint(l)] = command->group.id;
+                for(auto& l : command.get().limbSet) {
+                    limbAccess[uint(l)] = command.get().group.id;
                 }
             }
             
             // This comparator will sort our list so we can compare it with the current actions
-            std::function<bool (const std::set<RequestItem>::iterator&, std::set<RequestItem>::iterator&)> comp =
-            [] (const std::set<RequestItem>::iterator& a, std::set<RequestItem>::iterator& b) {
-                if(a->group.id < b->group.id) {
+            std::function<bool (const RequestItem&, const RequestItem&)> comp =
+            [] (const RequestItem& a, const RequestItem& b) {
+                if(a.group.id < b.group.id) {
                     return true;
                 }
-                else if(a->group.id == b->group.id) {
-                    return a->index < b->index;
+                else if(a.group.id == b.group.id) {
+                    return a.index < b.index;
                 }
                 else {
                     return false;
@@ -207,10 +256,10 @@ namespace modules {
             std::sort(std::begin(newActions), std::end(newActions), comp);
             
             // These are used to work out the difference
-            std::vector<std::set<RequestItem>::iterator> start;
+            std::vector<std::reference_wrapper<RequestItem>> start;
             std::map<size_t, std::set<LimbID>> startMap;
             
-            std::vector<std::set<RequestItem>::iterator> kill;
+            std::vector<std::reference_wrapper<RequestItem>> kill;
             std::map<size_t, std::set<LimbID>> killMap;
             
             // We will never have more then 5
@@ -229,15 +278,15 @@ namespace modules {
             
             // Fill up our map with a list of limbs to kill (and the controllers for it)
             for (const auto& k : kill) {
-                for (const auto& l : k->limbSet) {
-                    killMap[k->group.id].insert(l);
+                for (const auto& l : k.get().limbSet) {
+                    killMap[k.get().group.id].insert(l);
                 }
             }
             
             // Fill up our map with a list of limbs to start (and the controllers for it)
             for (const auto& s : start) {
-                for (const auto& l : s->limbSet) {
-                    killMap[s->group.id].insert(l);
+                for (const auto& l : s.get().limbSet) {
+                    killMap[s.get().group.id].insert(l);
                 }
             }
             
