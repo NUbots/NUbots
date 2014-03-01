@@ -62,46 +62,44 @@ namespace modules {
                 
                 // Pick our first action to take
                 selectAction();
-                
             });
             
             on<Trigger<ActionPriorites>>("Action Priority Update", [this] (const ActionPriorites& update) {
                 
                 auto& request = requests[update.id];
                 
+                // Find the largest priority
+                auto maxEl = std::max_element(std::begin(update.priorities), std::end(update.priorities));
+                
+                // Find its index
+                uint mainElement = std::distance(std::begin(update.priorities), maxEl);
+                
                 // Unless we need to, try not to run the expensive subsumption algorithm
-                bool reselect = false;
+                bool reselect;
+                
+                // If our main changed we have to reselect
+                reselect = mainElement != request->mainElement;
+                
+                request->mainElement = mainElement;
+                request->maxPriority = *maxEl;
+                
                 
                 // Perform our update
                 for(uint i = 0; i < request->items.size(); ++i) {
                     
-                    bool main = request->mainElement == i;
-                    bool higherThenMain = request->maxPriority < update.priorities[i];
-                    
-                    bool priorityUp = request->items[i].priority < update.priorities[i];
-                    bool priorityDown = request->items[i].priority > update.priorities[i];
+                    bool up = request->items[i].priority < update.priorities[i];
+                    bool down = request->items[i].priority > update.priorities[i];
                     bool active = request->items[i].active;
                     
-                    
-                    // If this is the main item, we need to do a complete search to see if another priority is higher
-                    // Otherwise we just need to check if we are higher then the main priority
-                    
-                    
-                    // TODO reselect if item is active and priority is going down
-                    // TODO reselect if item is inactive and priority is going up
-                    // TODO no reselect if item is main and is less then highest current priority
-                    // TODO no reselect
+                    // Short circuit if we can
+                    // TODO see if we can add more here
+                    reselect |= (up ^ down) && ((active && up) || (!active && down));
                     
                     // Update our priority
-                    //request->items[i]->priority = update.priorities[i];
+                    request->items[i].priority = update.priorities[i];
                 }
                 
-                // Short circuit logic, if the update is for our current action, and the priority went up then don't bother selecting a new action
-                
-                // Update the priorities of the actions
-                
                 if(reselect) {
-                    
                     // Select our new action
                     selectAction();
                 }
