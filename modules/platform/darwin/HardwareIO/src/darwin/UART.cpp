@@ -20,6 +20,7 @@
 #include "UART.h"
 
 #include <sys/ioctl.h>
+#include <nuclear>
 #include <fcntl.h>
 
 namespace Darwin {
@@ -221,6 +222,9 @@ namespace Darwin {
         // Read our responses for each of the packets
         for (int i = 0; i < responses; ++i) {
             results[i] = readPacket();
+            if(results[i].header.errorcode != 0) {
+                NUClear::log<NUClear::DEBUG>("There was an error reading from the dynamixel", i, "error:", uint(results[i].header.errorcode));
+            }
         }
 
         return results;

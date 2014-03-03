@@ -187,7 +187,7 @@ namespace modules {
                                         // file in the root of the config dir, just ignore it
 
                                         if (handlers != std::end(handler)) {
-                                            std::cout << "Loading " << fullPath << " with handler for " << handlers->first << std::endl;
+                                            NUClear::log<NUClear::INFO>("Loading", fullPath, "with handler for", handlers->first);
                                             try {
                                                 for (auto& emitter : handlers->second) {
                                                     emitter(reactor, name, messages::support::ConfigurationNode(buildConfigurationNode(fullPath)));
@@ -196,7 +196,7 @@ namespace modules {
                                             catch(const std::exception& e) {
                                                 // so that an error reading/applying config
                                                 // doesn't crash the whole config thread
-                                                std::cout << "Exception thrown while configuring " << fullPath << ": " << e.what() << std::endl;
+                                                NUClear::log<NUClear::WARN>("Exception thrown while configuring", fullPath, "-", e.what());
                                             }
                                         }
                                     }
@@ -221,7 +221,7 @@ namespace modules {
                                         }
                                     }
                                     catch(const std::exception& e) {
-                                        std::cout << "Exception thrown while configuring " << fullPath << ": " << e.what() << std::endl;
+                                        NUClear::log<NUClear::WARN>("Exception thrown while configuring", fullPath, "-", e.what());
                                     }
                                 }
                             }

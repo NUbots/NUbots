@@ -5,11 +5,12 @@ ADD_ROLE(
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem    
         #support::configuration::NetworkingConfiguration
-        #platform::darwin::HardwareIO
-        platform::fakedarwin::HardwareIO
+        platform::darwin::HardwareIO
+        #platform::fakedarwin::HardwareIO
+        platform::darwin::SensorFilter
         platform::darwin::MotionManager
         support::NUbugger
         debug::NUbugger
-        debug::InverseKinematics
         motion::WalkEngine
 )
+
