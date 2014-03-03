@@ -1,10 +1,12 @@
 ADD_ROLE(
     NAME scripttuner
     MODULES
-		support::configuration::ConfigSystem    
+	support::configuration::ConfigSystem    
         platform::darwin::HardwareIO
         platform::darwin::MotionManager
-        behaviour::tools::ScriptTuner
+	platform::darwin::SensorFilter
+        behaviours::tools::ScriptTuner
+	debug::NUbugger
         support::NUbugger
         motion::ScriptEngine
 )

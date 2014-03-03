@@ -72,6 +72,30 @@ namespace messages {
             Configuration(const std::string& name, ConfigurationNode config) : name(name), config(config) {};
             std::string name;
             ConfigurationNode config;
+
+            ConfigurationNode& operator [] (const std::string& key) {
+                return config[key];
+            }
+
+            const ConfigurationNode& operator [] (const std::string& key) const {
+                return config[key];
+            }
+
+            ConfigurationNode& operator [] (const char* key) {
+                return config[key];
+            }
+
+            const ConfigurationNode& operator [] (const char* key) const {
+                return config[key];
+            }
+
+            ConfigurationNode& operator [] (size_t index) {
+                return config[index];
+            }
+
+            const ConfigurationNode& operator [] (size_t index) const {
+                return config[index];
+            }
         };
 
         /**

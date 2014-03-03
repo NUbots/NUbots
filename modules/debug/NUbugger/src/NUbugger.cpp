@@ -21,6 +21,7 @@
 #include "NUbugger.h"
 
 #include "messages/platform/darwin/DarwinSensors.h"
+#include "messages/input/Sensors.h"
 #include "utility/NUbugger/NUgraph.h"
 
 namespace modules {
@@ -30,6 +31,8 @@ namespace debug {
     using utility::NUbugger::graph;
     using messages::platform::darwin::DarwinSensors;
     using std::chrono::milliseconds;
+    using messages::input::Sensors;
+    using messages::input::ServoID;
 
     NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -48,21 +51,31 @@ namespace debug {
         });
 
         on<Trigger<DarwinSensors>>([this](const DarwinSensors& sensors) {
-
+            //Includes change to our standard coordinate system
             emit(graph(
                 "Accelerometer", 
+                -sensors.accelerometer.y,
                 sensors.accelerometer.x,
-                sensors.accelerometer.y,
-                sensors.accelerometer.z
+                -sensors.accelerometer.z
                 
             ));
 
             emit(graph(
                 "Gyro",
-                sensors.gyroscope.x,
-                sensors.gyroscope.y,
+                -sensors.gyroscope.x,
+                -sensors.gyroscope.y,
                 sensors.gyroscope.z
             ));
+
+        });
+
+        on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
+
+            for(const auto& s : sensors.servos) {
+                if(s.id == ServoID::L_HIP_ROLL){
+                    emit(graph("Servo " + messages::input::stringFromId(s.id), s.presentPosition));
+                }
+            }
 
         });
 

@@ -41,7 +41,7 @@ namespace modules {
                      
         }
 
-        void Goal::setBase(const VisionKinematics& visionKinematics,  arma::vec2 base) {
+        void Goal::setBase(const VisionKinematics& visionKinematics, const arma::vec2& base) {
             Line l_line(m_corners.getBottomLeft(), m_corners.getTopLeft());
             Line r_line(m_corners.getBottomRight(), m_corners.getTopRight());
 
@@ -84,18 +84,6 @@ namespace modules {
             
             //all checks passed, keep goalpost
             return true;
-        }
-
-        double Goal::findScreenError(VisionFieldObject* other) const {
-            Goal* g = dynamic_cast<Goal*>(other);
-
-            return (arma::norm(m_location.screenCartesian - g->m_location.screenCartesian, 2) + arma::norm(m_sizeOnScreen - g->m_sizeOnScreen, 2));
-        }
-
-        double Goal::findGroundError(VisionFieldObject* other) const {
-            Goal* g = dynamic_cast<Goal*>(other);
-
-            return arma::norm(m_location.groundCartesian - g->m_location.groundCartesian, 2);
         }
 
         /*!
@@ -189,9 +177,8 @@ namespace modules {
                 }
             }
 
-
-
-            return (calculateSphericalError(visionKinematics) && m_location.neckRelativeRadial[0] > 0.0);
+            m_sphericalError = visionKinematics.calculateSphericalError(m_location, GOAL_DISTANCE_METHOD, m_sizeOnScreen[0]);
+            return ( m_location.neckRelativeRadial[0] > 0.0);
         }
 
         /*! @brief Stream insertion operator for a single ColourSegment.
@@ -235,48 +222,7 @@ namespace modules {
             return output;
         }
 
-        bool Goal::calculateSphericalError(const VisionKinematics& visionKinematics){
-            switch (GOAL_DISTANCE_METHOD) {
-                case D2P: {
-                    m_sphericalError[0] = visionKinematics.getD2PError(m_location);
-
-                    break;
-                }
-
-                case WIDTH: {
-                    m_sphericalError[0] = m_location.neckRelativeRadial[0]/m_sizeOnScreen[0]; //=d*dp/p (assuming error of dp=1 pixel in width)
-
-                    break;
-                }
-
-                case AVERAGE: {
-                    double width_error = m_location.neckRelativeRadial[0]/m_sizeOnScreen[0];
-                    double d2p_error = visionKinematics.getD2PError(m_location);
-
-                    m_sphericalError[0] = std::max(width_error,d2p_error);
-                    break;
-                }
-
-                case LEAST: {                   
-                    if(m_widthLocation.neckRelativeRadial[0]>m_d2pLocation.neckRelativeRadial[0]){
-                        m_sphericalError[0] = visionKinematics.getD2PError(m_location);
-                    } else {
-                        m_sphericalError[0] = m_location.neckRelativeRadial[0]/m_sizeOnScreen[0];
-                    }
-                    break;
-                }
-
-                default: {
-                    m_sphericalError[0] = m_location.neckRelativeRadial[0]/m_sizeOnScreen[0]; //=d*dp/p (assuming error of 1 pixel in width)
-
-                    break;
-                }
-            }
-
-            m_sphericalError[1] = visionKinematics.getFOV()[0]/visionKinematics.getImageSize()[0];  //Erordp =1 
-            m_sphericalError[2] = visionKinematics.getFOV()[1]/visionKinematics.getImageSize()[1];  //Erordp =1
-            return true;
-        }
+       
 
     }
 }        

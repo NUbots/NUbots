@@ -9,7 +9,7 @@
 
 #include "LookUpTable.h"
 
-namespace modules{
+namespace utility{
   namespace vision{
 
         using messages::vision::Colour;
@@ -40,7 +40,7 @@ namespace modules{
         bool LookUpTable::loadLUTFromFile(const std::string& file_name) {
             // char* lutBuffer = (char*)LUTbuffer;
             std::ifstream lutfile;
-            std::string file_location = "/home/darwin/config/"+file_name;
+            std::string file_location = file_name;
 
             // Need std::ios_base::ate for determining file size.
             lutfile.open(file_location, std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
@@ -55,10 +55,10 @@ namespace modules{
             }
             
             else {
-                //NUClear::log<NUClear::DEBUG>("Vision::loadLUTFromFile(", file_location, "). Failed to load lut.");
-                std::cout << "Vision::loadLUTFromFile(" << file_location << "). Failed to load lut." << std::endl;
-                std::cout << "Lutfile is open "<< lutfile.is_open()<<"  ||  LUTfile size = "<<lutfile.tellg()<< std::endl;
-                std::cout << "good: "<< lutfile.good() <<"; bad: "<< lutfile.bad() <<"; fail: "<< lutfile.fail() <<"; eof: "<< lutfile.eof() << std::endl;
+                NUClear::log<NUClear::DEBUG>("Vision::loadLUTFromFile(", file_location, "). Failed to load lut. File size = ", lutfile.tellg());
+                //std::cout << "Vision::loadLUTFromFile(" << file_location << "). Failed to load lut." << std::endl;
+               // std::coutImage << "Lutfile is open "<< lutfile.is_open()<<"  ||  LUTfile size = "<<lutfile.tellg()<< std::endl;
+               // std::cout << "good: "<< lutfile.good() <<"; bad: "<< lutfile.bad() <<"; fail: "<< lutfile.fail() <<"; eof: "<< lutfile.eof() << std::endl;
                 lutfile.clear();
                 return false;
             }

@@ -27,6 +27,7 @@
 
 #include "utility/math/matrix.h"
 #include "utility/math/coordinates.h"
+#include "VisionFieldObject.h"
 
 #include "NUPoint.h"
 
@@ -42,7 +43,9 @@ namespace modules {
 								const arma::vec3& CAMERA_ANGLE_OFFSET_,
 								const arma::vec3& NECK_POSITION_OFFSET_,
 								const arma::vec3& BODY_POITION_OFFSET_,
-								const arma::vec3& CAMERA_POSITION_OFFSET_);
+								const arma::vec3& CAMERA_POSITION_OFFSET_,
+                                float SCREEN_LOCATION_UNCERTAINTY_PIXELS_
+                                );
 
             // 2D distortion transform.
             arma::vec2 correctDistortion(const arma::vec2& point);
@@ -68,7 +71,9 @@ namespace modules {
             //! Calculate the field of view and effective camera distance in pixels.
             void setCamParams(arma::vec2 imagesize, arma::vec2 fov);
 
-            void setSensors(double headPitch, double headYaw, double bodyRoll, double bodyPitch, arma::vec3 neckPosition);
+            void setSensors(double headPitch, double headYaw, const arma::vec3& gravity, const arma::vec3& neckPosition);
+
+            arma::vec3 calculateSphericalError(NUPoint location, DISTANCE_METHOD distanceMethod, float width) const;
 
         private:
             void preCalculateTransforms();
@@ -106,10 +111,11 @@ namespace modules {
             arma::vec2 m_screenToRadialFactor;
 
             // New for transforms.
-            arma::mat m_camVector;
-            arma::mat m_camV2RobotRotation;
+            arma::vec3 m_camVector;
+            arma::mat33 m_camV2RobotRotation;
             double m_headPitch;
             double m_headYaw;
+            arma::vec3 m_gravity;
             double m_bodyRoll;
             double m_bodyPitch;
             arma::vec3 m_neckPosition;
@@ -121,6 +127,8 @@ namespace modules {
 			arma::vec3 NECK_POSITION_OFFSET;
 			arma::vec3 BODY_POSITION_OFFSET;
 			arma::vec3 CAMERA_POSITION_OFFSET;
+
+            float SCREEN_LOCATION_UNCERTAINTY_PIXELS;
         };
 
     }

@@ -12,7 +12,7 @@ namespace NUbugger{
     template<typename... Values>
     inline std::unique_ptr<DataPoint> graph(std::string label, Values... values) {
         return std::make_unique<DataPoint>(DataPoint{
-            label, {values...}
+            label, {float(values)...}
         });
     }
 

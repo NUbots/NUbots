@@ -1,10 +1,9 @@
-NUbugger
+Kinematics Debug
 ========
 
 ## Description
 
-This module allows for more effective debugging of the robocup program by
-sending the robot's status over the network.
+For testing forward and inverse kinematics
 
 ## Usage
 

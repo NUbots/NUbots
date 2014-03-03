@@ -40,6 +40,7 @@ namespace modules {
                 explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
                 time_t lastUpdate;
+                arma::mat33 lastOrientationMatrix;
                 utility::math::kalman::UKF<utility::math::kalman::AdaptiveIMUModel> orientationFilter;
                 int frameLimiter;
 

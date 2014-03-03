@@ -23,6 +23,7 @@
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
 #include "utility/NUbugger/NUgraph.h"
+#include "utility/math/matrix.h"
 
 namespace modules {
     namespace platform {
@@ -37,7 +38,7 @@ namespace modules {
 
 
 
-            SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), orientationFilter(arma::vec("0,0,-1,1,0,0")) , frameLimiter(0){
+            SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), orientationFilter(arma::vec("0,0,-1,1,0,0")) , frameLimiter(0), lastOrientationMatrix(arma::eye(3,3)) {
                 
                 on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){
                     DEFAULT_NOISE_GAIN = file.config["DEFAULT_NOISE_GAIN"];
@@ -96,6 +97,17 @@ namespace modules {
                     sensors->orientation.col(0) = orientation.rows(3,5);
                     sensors->orientation.col(1) = arma::cross(sensors->orientation.col(2), sensors->orientation.col(0));
 
+                    // Kalman filter for orientation END
+
+
+
+                    //BEGIN CALCULATE FILTERED GYRO
+                    arma::mat33 SORAMatrix = sensors->orientation * lastOrientationMatrix.t();            
+                    std::pair<arma::vec3, double> axisAngle = utility::math::matrix::axisAngleFromRotationMatrix(SORAMatrix);
+                    sensors->gyroscope = axisAngle.first * (axisAngle.second / deltaT);
+                    //END CALCULATE FILTERED GYRO
+
+
                     if(++frameLimiter % 3 == 0){
                         emit(graph("Filtered Gravity Vector",
                                 float(orientation[0]*9.807),
@@ -111,11 +123,18 @@ namespace modules {
                             ));
                         emit(graph("Difference from gravity", normAcc
                             ));
+                        emit(graph("Gyro Filtered", sensors->gyroscope[0],sensors->gyroscope[1], sensors->gyroscope[2]
+                            ));
+                        emit(graph("L FSR", input.fsr.left.fsr1, input.fsr.left.fsr2, input.fsr.left.fsr3, input.fsr.left.fsr4
+                            ));
+                        emit(graph("R FSR", input.fsr.right.fsr1, input.fsr.right.fsr2, input.fsr.right.fsr3, input.fsr.right.fsr4
+                            ));
+
                         frameLimiter = 1;
-                    }
-                    // Kalman filter all of the incoming data!                    
-                    // Output the filtered data
-                    
+                    }   
+
+                    lastOrientationMatrix = sensors->orientation;
+
                     emit(std::move(sensors));
                 });
             }
