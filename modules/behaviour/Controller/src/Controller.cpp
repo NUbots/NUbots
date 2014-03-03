@@ -32,39 +32,41 @@ namespace modules {
         
         Controller::Controller(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
             
-            on<Trigger<RegisterAction>>("Action Registration", [this] (const RegisterAction& action) {
+            on<Trigger<RegisterAction>, Options<Sync<Controller>>>("Action Registration", [this] (const RegisterAction& action) {
                 
                 // Make our request object
-                auto request = std::make_unique<Request>(action.id, action.start, action.kill);
+                requests[action.id] = std::make_unique<Request>(action.id, action.start, action.kill);
+                auto& request = requests[action.id];
+                
+                // In order for our references to hold valid, we need to never reallocate this
+                request->items.reserve(action.limbSet.size());
                 
                 // Make our request items
-                for(auto& set : action.limbSet) {
-                    RequestItem item(*request, request->items.size(), set.first, set.second);
-                    request->items.push_back(std::move(item));
+                for(const auto& set : action.limbSet) {
+                    request->items.emplace_back(*request, request->items.size(), set.first, set.second);
+                    
                     
                     // Put our request in the correct queue
-                    for(auto& l : set.second) {
+                    for(auto& l : request->items.back().limbSet) {
                         actions[uint(l)].push_back(std::ref(request->items.back()));
                     }
                 }
                 
+                // Find the main element
                 auto maxRequest = std::max_element(std::begin(request->items), std::end(request->items));
                 
                 // Set the main element to this one
                 request->mainElement = maxRequest->index;
                 request->maxPriority = maxRequest->priority;
-                
-                // Insert this into our requests list
-                requests.insert(std::make_pair(request->id, std::move(request)));
             });
             
-            on<Trigger<Startup>>("Initial Action Selection", [this] (const Startup&) {
+            on<Trigger<Startup>, Options<Sync<Controller>>>("Initial Action Selection", [this] (const Startup&) {
                 
                 // Pick our first action to take
                 selectAction();
             });
             
-            on<Trigger<ActionPriorites>>("Action Priority Update", [this] (const ActionPriorites& update) {
+            on<Trigger<ActionPriorites>, Options<Sync<Controller>>>("Action Priority Update", [this] (const ActionPriorites& update) {
                 
                 auto& request = requests[update.id];
                 
@@ -106,15 +108,41 @@ namespace modules {
                 
             });
             
-            on<Trigger<ServoCommand>>("Command Filter", [this] (const ServoCommand& command) {
+            on<Trigger<ServoCommand>, Options<Sync<Controller>>>("Command Filter", [this] (const ServoCommand& command) {
                 
                 // Find out what servos this supplier is authorized to use
                 
-                // Emit those to the motion manager
-                
-                // If if we change permissions we need to purge future commands from other things
+                // Add them to the queue as normal
                 
             });
+            
+            
+            auto test1 = std::make_unique<RegisterAction>();
+            test1->id = 100;
+            
+            test1->start = [] (std::set<LimbID> s) {
+                std::cout << "Starting: " << s.size() << std::endl;
+            };
+            
+            test1->kill = [] (std::set<LimbID> s) {
+                std::cout << "Killing: " << s.size() << std::endl;
+            };
+            
+            std::set<LimbID> a = { LimbID::LEFT_LEG, LimbID::RIGHT_LEG };
+            std::set<LimbID> b = { LimbID::LEFT_ARM, LimbID::RIGHT_ARM };
+            std::set<LimbID> c = { LimbID::HEAD };
+            
+            test1->limbSet = { std::make_pair(18.5, a)
+                , std::make_pair(6.8, b)
+                , std::make_pair(4.2, c)
+            };
+            
+            emit<Scope::INITIALIZE>(std::move(test1));
+            
+            
+            
+            //auto test2 = std::make_unique<RegisterAction>();
+            //auto test3 = std::make_unique<RegisterAction>();
         }
         
         bool hasLimbs(const std::set<LimbID>& limbRequest, const std::map<LimbID, iterators>& limbAvailable) {
@@ -183,7 +211,6 @@ namespace modules {
                                                   else if(b.second.first == b.second.second) {
                                                       return false;
                                                   }
-                                                  
                                                   // The smaller priority loses
                                                   return a.second.first->get().priority < b.second.first->get().priority;
                                               });
@@ -195,7 +222,8 @@ namespace modules {
                 
                 // Otherwise this is a candidate for selection
                 else {
-                    // This is the iterator to our action
+                    
+                    // This our action item we are looking at
                     auto& action = maxIt->second.first->get();
                     
                     // Are we already active (from previous main activation)
@@ -284,7 +312,7 @@ namespace modules {
             // Fill up our map with a list of limbs to start (and the controllers for it)
             for (const auto& s : start) {
                 for (const auto& l : s.get().limbSet) {
-                    killMap[s.get().group.id].insert(l);
+                    startMap[s.get().group.id].insert(l);
                 }
             }
             

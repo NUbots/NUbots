@@ -66,7 +66,7 @@ namespace modules {
 
         struct RequestItem {
             
-            RequestItem(Request& group, size_t index, float priority, std::set<messages::behaviour::LimbID> limbSet)
+            RequestItem(Request& group, size_t index, float priority, const std::set<messages::behaviour::LimbID>& limbSet)
             : group(group)
             , index(index)
             , priority(priority)
