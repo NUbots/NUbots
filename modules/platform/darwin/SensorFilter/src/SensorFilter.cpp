@@ -125,6 +125,11 @@ namespace modules {
                             ));
                         emit(graph("Gyro Filtered", sensors->gyroscope[0],sensors->gyroscope[1], sensors->gyroscope[2]
                             ));
+                        emit(graph("L FSR", input.fsr.left.fsr1, input.fsr.left.fsr2, input.fsr.left.fsr3, input.fsr.left.fsr4
+                            ));
+                        emit(graph("R FSR", input.fsr.right.fsr1, input.fsr.right.fsr2, input.fsr.right.fsr3, input.fsr.right.fsr4
+                            ));
+
                         frameLimiter = 1;
                     }   
 

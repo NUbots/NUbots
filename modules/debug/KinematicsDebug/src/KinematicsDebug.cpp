@@ -166,8 +166,8 @@ namespace modules {
                                 }
                             }
                             std::cout<< "KinematicsNULLTest -calculating forward kinematics." <<std::endl;                
-                            arma::mat44 lFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::L_ANKLE_ROLL) * utility::math::matrix::yRotationMatrix(-M_PI_2, 4);
-                            arma::mat44 rFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::R_ANKLE_ROLL) * utility::math::matrix::yRotationMatrix(-M_PI_2, 4);                            
+                            arma::mat44 lFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL] * utility::math::matrix::yRotationMatrix(-M_PI_2, 4);
+                            arma::mat44 rFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL] * utility::math::matrix::yRotationMatrix(-M_PI_2, 4);                            
                             NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts left foot: \n",lFootPosition);
                             NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts right foot: \n",rFootPosition);
                             std::cout << "Compared to request: \n" << ikRequest << std::endl;
@@ -236,7 +236,7 @@ namespace modules {
                                     sensors.servos[static_cast<int>(servoID)].presentPosition = position;
                             }
 
-                            arma::mat44 fKin = calculatePosition<DarwinModel>(sensors, ServoID::HEAD_PITCH);
+                            arma::mat44 fKin = calculatePosition<DarwinModel>(sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
 
                             float max_error = 0;
                             for(int i = 0; i < 3 ; i++){                                
