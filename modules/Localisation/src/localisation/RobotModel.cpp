@@ -66,6 +66,7 @@ arma::vec RobotModel::observationDifference(const arma::vec& a,
     arma::vec2 result = a - b;
 
     result(1) = utility::math::angle::normalizeAngle(result[1]);
+    // result(1) = utility::math::angle::difference(a[1], b[1]);
 
     return result;
 
@@ -87,15 +88,14 @@ arma::vec RobotModel::observationDifference(const arma::vec& a,
 
 
 
-
 arma::vec::fixed<RobotModel::size> RobotModel::limitState(
     const arma::vec::fixed<RobotModel::size>& state) {
  
     auto result = state;
 
-    // How to get clipping values from config system?
-    result[kX] = std::max(std::min(result[kX], 4.5 + 0.7) , -4.5 -0.7);
-    result[kY] = std::max(std::min(result[kY], 3 + 0.7) , -3 -0.7);
+    // // How to get clipping values from config system?
+    // result[kX] = std::max(std::min(result[kX], 4.5 + 0.7) , -4.5 -0.7);
+    // result[kY] = std::max(std::min(result[kY], 3 + 0.7) , -3 -0.7);
     result[kHeading] = utility::math::angle::normalizeAngle(result[kHeading]);
     
     return result;

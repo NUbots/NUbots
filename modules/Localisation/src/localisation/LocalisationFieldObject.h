@@ -45,6 +45,7 @@ public:
 
     LFOId id() const { return id_; }
     arma::vec2 location() const { return location_; }
+    std::string name() const { return name_; }
 
 private:
     arma::vec2 location_;

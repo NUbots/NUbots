@@ -21,6 +21,7 @@
 #define MODULES_MULTIMODALROBOTMODEL_H
 
 #include <nuclear>
+#include <armadillo>
 
 #include "utility/math/kalman/UKF.h"
 
@@ -38,8 +39,18 @@ namespace localisation {
 
         utility::math::kalman::UKF<RobotModel> filter_;
 
+        std::string obs_trail_;
+
     public:
+
+        int obs_count_;
+
         RobotHypothesis() : 
+            filter_(
+                {0, 0, 3.141},
+                arma::eye(RobotModel::size, RobotModel::size) * 1),
+            obs_trail_(""),
+            obs_count_(0),
             // active_(true), 
             weight_(1) { }
 
@@ -72,6 +83,8 @@ namespace localisation {
         MultiModalRobotModel() { 
             robot_models_.push_back(std::make_unique<RobotHypothesis>());
         }
+
+        void RemoveOldModels();
 
         unsigned int RemoveInactiveModels();
         unsigned int RemoveInactiveModels(std::vector<RobotHypothesis>& container);

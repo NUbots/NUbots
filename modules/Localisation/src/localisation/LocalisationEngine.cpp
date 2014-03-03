@@ -81,7 +81,6 @@ namespace localisation {
 
     void LocalisationEngine::ProcessAmbiguousObjects(const std::vector<messages::vision::Goal>& ambiguous_objects) {
         // auto& stat_fobs = fobs->stationaryFieldObjects;
-
         // // Note: These lines were commented in the robocup codebase.
         // // (I forget why I ported them.  If they're unnecessary, please delete them!)
         // bool blueGoalSeen = stat_fobs[FieldObjects::FO_BLUE_LEFT_GOALPOST].isObjectVisible() || 
@@ -91,12 +90,6 @@ namespace localisation {
         // RemoveAmbiguousGoalPairs(fobs->ambiguousFieldObjects, yellowGoalSeen, blueGoalSeen);
         
         for (auto& ambiguous_object : ambiguous_objects) {
-
-            // auto possible_ids = ambobj.GetPossibleObjectIDs();
-            // std::vector<StationaryFieldObject*> poss_obj(possible_ids.size());
-            // for (auto& id : possible_ids)
-            //     poss_obj.push_back(&(stat_fobs[id]));
-
             // Get a vector of all field objects that the observed object could
             // possibly be
             auto possible_objects = GetPossibleObjects(ambiguous_object);

@@ -24,6 +24,7 @@
 #include "utility/NUbugger/NUgraph.h"
 #include "messages/support/Configuration.h"
 #include "utility/NUbugger/NUgraph.h"
+#include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/vision/VisionObjects.h"
@@ -39,6 +40,7 @@ namespace modules {
         : Reactor(std::move(environment)) {
 
         on<Trigger<Configuration<localisation::FieldDescriptionConfig>>>(
+            "Configuration Update",
             [this](const Configuration<localisation::FieldDescriptionConfig>& config) {
             // std::cout << __func__ << ": Config" << std::endl;
             
@@ -52,7 +54,7 @@ namespace modules {
 
         // Emit to NUbugger
         on<Trigger<Every<250, std::chrono::milliseconds>>,
-           Options<Sync<Localisation>>>([this](const time_t&) {
+           Options<Sync<Localisation>>>("NUbugger Output", [this](const time_t&) {
             // emit(std::make_unique<messages::LMissile>());
             // std::cout << __PRETTY_FUNCTION__ << ": rand():" << rand() << std::endl;
 
@@ -96,7 +98,7 @@ namespace modules {
             auto ms_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
             double t = static_cast<double>(ms_since_epoch - 1393322147502L);
             // NUClear::log("t", t, ", ms_since_epoch", ms_since_epoch);
-            double secs = 20;
+            double secs = 5;
             marker_ = { 2 * cos(t / (1000.0 * secs)), 2 * sin(t / (1000.0 * secs)) };
             // NUClear::log("Actual robot position", marker_);
 
@@ -127,7 +129,7 @@ namespace modules {
 
         // Simulate Vision
         on<Trigger<Every<500, std::chrono::milliseconds>>,
-           Options<Sync<Localisation>>>([this](const time_t&) {
+           Options<Sync<Localisation>>>("Vision Simulation", [this](const time_t&) {
             auto goal1 = messages::vision::Goal();
             auto goal2 = messages::vision::Goal();
 
@@ -139,6 +141,7 @@ namespace modules {
             // auto camera_pos = arma::vec3 { -1.50, -1.0, 0.0 };
             // auto camera_pos = arma::vec3 { -4.5, 0, 0.0 };
             auto camera_pos = arma::vec3 { marker_[0], marker_[1], 0.0 };
+            double camera_heading = 3.1415926535;
 
             auto fd = engine_.field_description();
             auto goal_br_pos = fd->GetLFO(localisation::LFOId::kGoalBR).location();
@@ -153,6 +156,8 @@ namespace modules {
             goal1.sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(goal1_pos - camera_pos);
             goal2.sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(goal2_pos - camera_pos);
 
+            goal1.sphericalFromNeck[1] = utility::math::angle::normalizeAngle(goal1.sphericalFromNeck[1] - camera_heading);
+            goal2.sphericalFromNeck[1] = utility::math::angle::normalizeAngle(goal2.sphericalFromNeck[1] - camera_heading);
 
             // NUClear::log("---------------------", "goal1.sphericalFromNeck\n", goal1.sphericalFromNeck);
             // NUClear::log("---------------------", "goal2.sphericalFromNeck\n", goal2.sphericalFromNeck);
@@ -174,10 +179,10 @@ namespace modules {
         //     engine_.RecordMeasurement(m);
         // });
 
-        on<Trigger<Every<500, std::chrono::milliseconds>>, 
+        on<Trigger<Every<500, std::chrono::milliseconds>>,
            With<std::vector<messages::vision::Goal>>,
            Options<Sync<Localisation>>
-          >(
+          >("Localisation Step",
             [this](const time_t&,
                    const std::vector<messages::vision::Goal>& goals) {
 

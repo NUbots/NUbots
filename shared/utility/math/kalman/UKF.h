@@ -156,7 +156,9 @@ namespace utility {
                 }
 
                 template <typename TMeasurement, typename TArgs = nullptr_t>
-                double measurementUpdate(const TMeasurement& measurement, const arma::mat& noise, const TArgs& args = nullptr) {
+                double measurementUpdate(const TMeasurement& measurement, 
+                                         const arma::mat& measurement_variance, 
+                                         const TArgs& args = nullptr) {
                     // Allocate room for our predictions
                     arma::mat predictedObservations(measurement.n_elem, NUM_SIGMA_POINTS);
 
@@ -175,11 +177,14 @@ namespace utility {
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
 
                     // Check for outlier, if outlier return without updating estimate.
-                    if(evaluateMeasurement(innovation, predictedCovariance, noise)) {
+                    if(evaluateMeasurement(innovation, predictedCovariance, measurement_variance)) {
 
                         // Update our state
-                        covarianceUpdate -= covarianceUpdate.t() * predictedObservations.t() * (noise + predictedObservations * covarianceUpdate * predictedObservations.t()).i() * predictedObservations * covarianceUpdate;
-                        d += predictedObservations.t() * noise.i() * innovation;
+                        covarianceUpdate -= covarianceUpdate.t() * predictedObservations.t() * 
+                                            (measurement_variance + predictedObservations * covarianceUpdate * predictedObservations.t()).i() * 
+                                            predictedObservations * covarianceUpdate;
+                                            
+                        d += predictedObservations.t() * measurement_variance.i() * innovation;
 
                         // Update our mean and covariance
                         mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
@@ -187,15 +192,15 @@ namespace utility {
                         covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
                     }
                     
-                    //Magical quality calculation
-                    arma::mat innovationVariance = predictedCovariance + noise;
+                    // Magical quality calculation
+                    arma::mat innovationVariance = predictedCovariance + measurement_variance;
                     arma::mat innovationCovariance = ((innovation.t() * innovationVariance.i()) * innovation);
                     
                     NUClear::log("---------------------", "innovationVariance\n", innovationVariance);
                     NUClear::log("---------------------", "innovationCovariance\n", innovationCovariance);
 
                     double expTerm = -0.5 * innovationCovariance(0, 0);
-                    double fract = 1 / sqrt(pow(2 * M_PI, noise.n_rows) * arma::det(innovationVariance));
+                    double fract = 1 / sqrt(pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance));
                     const float outlierProbability = 0.05;
                     
                     return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
