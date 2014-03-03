@@ -180,11 +180,11 @@ namespace kinematics {
             case messages::input::ServoID::R_SHOULDER_PITCH:
             case messages::input::ServoID::R_SHOULDER_ROLL:
             case messages::input::ServoID::R_ELBOW:
-                return calculateArmJointPosition<RobotKinematicModel>(sensors, servoID, Side::RIGHT);
+                return arma::eye(4,4);//calculateArmJointPosition<RobotKinematicModel>(sensors, servoID, Side::RIGHT);
             case messages::input::ServoID::L_SHOULDER_PITCH:
             case messages::input::ServoID::L_SHOULDER_ROLL:
             case messages::input::ServoID::L_ELBOW:
-                return calculateArmJointPosition<RobotKinematicModel>(sensors, servoID, Side::LEFT);
+                return arma::eye(4,4);//calculateArmJointPosition<RobotKinematicModel>(sensors, servoID, Side::LEFT);
             case messages::input::ServoID::R_HIP_YAW:
             case messages::input::ServoID::R_HIP_ROLL:
             case messages::input::ServoID::R_HIP_PITCH:

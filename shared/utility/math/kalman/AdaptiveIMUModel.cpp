@@ -3,6 +3,7 @@
 #include "AdaptiveIMUModel.h" //includes armadillo
 
 #include <iostream>
+#include <nuclear>
 
 namespace utility {
     namespace math {
@@ -13,17 +14,24 @@ namespace utility {
                 double normDown = arma::norm(stateMatrix.col(0),2);
                 if(normDown == 0){
                     //TODO: RESTART FILTER
+                    NUClear::log<NUClear::WARN>("AdaptiveIMUModel::limitState - Down vector has zero length!!!");
                     return state;
                 }                
                 
                 stateMatrix.col(0) = stateMatrix.col(0) / normDown;     //Normalise down    
 
                 double dotProd = arma::dot(stateMatrix.col(0), stateMatrix.col(1));
+                //Angle for checking:
+                double angle = acos(dotProd) * 180 / M_PI;
+                if(angle < 45 || angle > 135){
+                    NUClear::log<NUClear::WARN>("AdaptiveIMUModel::limitState - New forward and down vectors are close: angle =", angle, "(degrees) ", angle < 45 ? "( < 45 degrees)" : "( > 135 degrees)");
+                }
                 stateMatrix.col(1) = stateMatrix.col(1) - stateMatrix.col(0)*dotProd;       //Orthogonalise forward and down     
                 
                 double normForward = arma::norm(stateMatrix.col(1),2);     //Normalise forward
                 if(normForward == 0){
                     //TODO: RESTART FILTER
+                    NUClear::log<NUClear::WARN>("AdaptiveIMUModel::limitState - Projected forward vector has zero length!!!");
                     return state;
                 }  
                 stateMatrix.col(1) = stateMatrix.col(1) / normForward;
