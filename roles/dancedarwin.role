@@ -3,7 +3,7 @@ ADD_ROLE(
     MODULES
         support::configuration::ConfigSystem
         platform::darwin::HardwareIO
-        platform::darwin::MotionManager
+        #platform::darwin::MotionManager
         input::AudioFileInput
         audio::AubioBeatDetector
         motion::ScriptEngine

@@ -19,9 +19,13 @@
 
 #include "Controller.h"
 
+#include "messages/motion/ServoWaypoint.h"
+
 namespace modules {
     namespace behaviour {
         
+        using messages::input::ServoID;
+        using messages::motion::ServoWaypoint;
         using messages::behaviour::RegisterAction;
         using messages::behaviour::ActionPriorites;
         using messages::behaviour::ServoCommand;
@@ -126,74 +130,75 @@ namespace modules {
                 
                 for (auto& command : commands) {
                     
-                    // Limb for servoid
-                    auto limb = 0;
-                    
                     // Check if we have access
-                    if (this->limbAccess[limb] == command.source) {
+                    if (this->limbAccess[uint(messages::behaviour::limbForServo(command.id))] == command.source) {
                         
+                        // Get our queue
+                        auto& queue = commandQueues[uint(command.id)];
+                        
+                        // Clear commands until we get back one that we are after
+                        while(!queue.empty() && queue.back().time > command.time) {
+                            queue.pop_back();
+                        }
+                        
+                        // Push our command onto the queue
+                        queue.push_back(command);
+                    }
+                }
+            });
+            
+            on<Trigger<Every<60, Per<std::chrono::seconds>>>, Options<Sync<Controller>>>([this] (const time_t& now) {
+                
+                std::list<ServoID> emptiedQueues;
+                std::unique_ptr<std::vector<ServoWaypoint>> waypoints;
+                
+                for(auto& queue : commandQueues) {
+                    if (!queue.empty() && queue.front().time < now) {
+                        
+                        // Store our ID (if we need it)
+                        auto id = queue.front().id;
+                        
+                        queue.pop_front();
+                        
+                        if(queue.empty()) {
+                            // Keep track of what we have emptied
+                            emptiedQueues.push_back(id);
+                        }
+                        else {
+                            const auto& command = queue.front();
+                            
+                            // Lazy initialize
+                            if(!waypoints) {
+                                waypoints = std::make_unique<std::vector<ServoWaypoint>>();
+                            }
+                            
+                            // Add to our waypoints
+                            waypoints->push_back({ command.time, command.id, command.position, command.gain });
+                        }
                     }
                 }
                 
-                // Find out what servos this supplier is authorized to use
+                // Emit our waypoints
+                if(waypoints) {
+                    emit(std::move(waypoints));
+                }
                 
-                // Add them to the queue as normal
-                
+                if(!emptiedQueues.empty()) {
+                    
+                    std::map<size_t, std::set<ServoID>> completeMap;
+                    
+                    for (auto& servo : emptiedQueues) {
+                        
+                        // Get the id of the limb this was leased to
+                        auto id = limbAccess[uint(messages::behaviour::limbForServo(servo))];
+                        completeMap[id].insert(servo);
+                    }
+                    
+                    for(const auto& e : completeMap) {
+                        requests[e.first]->completed(e.second);
+                    }
+                }
             });
-            
-            on<Trigger<Every<2, std::chrono::seconds>>>([this](const time_t& time) {
-                auto x = std::make_unique<ActionPriorites>();
-                
-                x->id = 92;
-                x->priorities = { (time.time_since_epoch().count() % 100) * 0.1 };
-                
-                std::cout << std::endl;
-                std::cout << x->priorities[0] << std::endl;
-                
-                emit(std::move(x));
-            });
-            
-            
-            auto test1 = std::make_unique<RegisterAction>();
-            test1->id = 100;
-            
-            test1->start = [] (std::set<LimbID> s) {
-                std::cout << "Starting Test 1: " << s.size() << std::endl;
-            };
-            
-            test1->kill = [] (std::set<LimbID> s) {
-                std::cout << "Killing Test 1: " << s.size() << std::endl;
-            };
-            
-            std::set<LimbID> a = { LimbID::LEFT_LEG, LimbID::RIGHT_LEG };
-            std::set<LimbID> b = { LimbID::LEFT_ARM, LimbID::RIGHT_ARM };
-            std::set<LimbID> c = { LimbID::HEAD };
-            
-            test1->limbSet = { std::make_pair(18.5, a)
-                , std::make_pair(6.8, b)
-                , std::make_pair(4.2, c)
-            };
-            
-            emit<Scope::INITIALIZE>(std::move(test1));
-            
-            auto test2 = std::make_unique<RegisterAction>();
-            test2->id = 92;
-            
-            test2->start = [] (std::set<LimbID> s) {
-                std::cout << "Starting Test 2: " << s.size() << std::endl;
-            };
-            
-            test2->kill = [] (std::set<LimbID> s) {
-                std::cout << "Killing Test 2: " << s.size() << std::endl;
-            };
-            
-            std::set<LimbID> d = { LimbID::LEFT_ARM, LimbID::RIGHT_ARM };
-            
-            test2->limbSet = { std::make_pair(20.0, d)
-            };
-            
-            emit<Scope::INITIALIZE>(std::move(test2));
-            //auto test3 = std::make_unique<RegisterAction>();
         }
         
         bool hasLimbs(const std::set<LimbID>& limbRequest, const std::map<LimbID, iterators>& limbAvailable) {
@@ -370,6 +375,13 @@ namespace modules {
             // Execute all our kill commands
             for (const auto& k : killMap) {
                 requests[k.first]->kill(k.second);
+                
+                // Clear our queues for this limb
+                for(const auto& limb : k.second) {
+                    for (const auto& servo : messages::behaviour::servosForLimb(limb)) {
+                        commandQueues[uint(servo)].clear();
+                    }
+                }
             }
             
             // Execute our start commands

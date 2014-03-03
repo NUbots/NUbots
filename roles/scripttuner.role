@@ -3,10 +3,10 @@ ADD_ROLE(
     MODULES
 	support::configuration::ConfigSystem    
         platform::darwin::HardwareIO
-        platform::darwin::MotionManager
-	platform::darwin::SensorFilter
-        behaviours::tools::ScriptTuner
-	debug::NUbugger
+        #platform::darwin::MotionManager
+        platform::darwin::SensorFilter
+        behaviour::tools::ScriptTuner
+        debug::NUbugger
         support::NUbugger
         motion::ScriptEngine
 )

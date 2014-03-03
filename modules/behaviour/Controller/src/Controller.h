@@ -26,6 +26,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <list>
 
 #include "messages/behaviour/Action.h"
 
@@ -62,6 +63,7 @@ namespace modules {
             /// The callback to execute when a new limb is started
             callback start;
             callback kill;
+            std::function<void (std::set<messages::input::ServoID>)> completed;
         };
 
         struct RequestItem {
@@ -93,6 +95,9 @@ namespace modules {
             std::array<size_t, 5> limbAccess;
             std::map<size_t, std::unique_ptr<Request>> requests;
             std::vector<std::reference_wrapper<RequestItem>> currentActions;
+            
+            
+            std::array<std::list<messages::behaviour::ServoCommand>, 20> commandQueues;
             
             void selectAction();
         public:

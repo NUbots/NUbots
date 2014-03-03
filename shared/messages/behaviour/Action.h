@@ -39,6 +39,9 @@ namespace messages {
             float position;
             float gain;
         };
+        
+        std::set<messages::input::ServoID> servosForLimb(const LimbID& limb);
+        LimbID limbForServo(const messages::input::ServoID& servo);
     }
 }
 
