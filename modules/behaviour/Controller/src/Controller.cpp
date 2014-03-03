@@ -34,6 +34,8 @@ namespace modules {
             
             on<Trigger<RegisterAction>, Options<Sync<Controller>>>("Action Registration", [this] (const RegisterAction& action) {
                 
+                // TODO error if this id already exists (will cause errors)
+                
                 // Make our request object
                 requests[action.id] = std::make_unique<Request>(action.id, action.start, action.kill);
                 auto& request = requests[action.id];
@@ -53,7 +55,10 @@ namespace modules {
                 }
                 
                 // Find the main element
-                auto maxRequest = std::max_element(std::begin(request->items), std::end(request->items));
+                auto maxRequest = std::max_element(std::begin(request->items), std::end(request->items),
+                                                   [] (const RequestItem& a, const RequestItem& b) {
+                                                       return a.priority < b.priority;
+                                                   });
                 
                 // Set the main element to this one
                 request->mainElement = maxRequest->index;
@@ -95,7 +100,7 @@ namespace modules {
                     
                     // Short circuit if we can
                     // TODO see if we can add more here
-                    reselect |= (up ^ down) && ((active && up) || (!active && down));
+                    reselect |= (up != down) && ((active && down) || (!active && up));
                     
                     // Update our priority
                     request->items[i].priority = update.priorities[i];
@@ -116,16 +121,28 @@ namespace modules {
                 
             });
             
+            on<Trigger<Every<2, std::chrono::seconds>>>([this](const time_t& time) {
+                auto x = std::make_unique<ActionPriorites>();
+                
+                x->id = 92;
+                x->priorities = { (time.time_since_epoch().count() % 100) * 0.1 };
+                
+                std::cout << std::endl;
+                std::cout << x->priorities[0] << std::endl;
+                
+                emit(std::move(x));
+            });
+            
             
             auto test1 = std::make_unique<RegisterAction>();
             test1->id = 100;
             
             test1->start = [] (std::set<LimbID> s) {
-                std::cout << "Starting: " << s.size() << std::endl;
+                std::cout << "Starting Test 1: " << s.size() << std::endl;
             };
             
             test1->kill = [] (std::set<LimbID> s) {
-                std::cout << "Killing: " << s.size() << std::endl;
+                std::cout << "Killing Test 1: " << s.size() << std::endl;
             };
             
             std::set<LimbID> a = { LimbID::LEFT_LEG, LimbID::RIGHT_LEG };
@@ -139,41 +156,55 @@ namespace modules {
             
             emit<Scope::INITIALIZE>(std::move(test1));
             
+            auto test2 = std::make_unique<RegisterAction>();
+            test2->id = 92;
             
+            test2->start = [] (std::set<LimbID> s) {
+                std::cout << "Starting Test 2: " << s.size() << std::endl;
+            };
             
-            //auto test2 = std::make_unique<RegisterAction>();
+            test2->kill = [] (std::set<LimbID> s) {
+                std::cout << "Killing Test 2: " << s.size() << std::endl;
+            };
+            
+            std::set<LimbID> d = { LimbID::LEFT_ARM, LimbID::RIGHT_ARM };
+            
+            test2->limbSet = { std::make_pair(20.0, d)
+            };
+            
+            emit<Scope::INITIALIZE>(std::move(test2));
             //auto test3 = std::make_unique<RegisterAction>();
         }
         
         bool hasLimbs(const std::set<LimbID>& limbRequest, const std::map<LimbID, iterators>& limbAvailable) {
             
             // Get the available limbs and the requested limbs
-            auto available = std::begin(limbAvailable);
-            auto request   = std::begin(limbRequest);
+            auto available = std::begin(limbAvailable); // first
+            auto request   = std::begin(limbRequest); // second
             
             // Check that every limb in request is available
-            for (; available != std::end(limbAvailable); ++available)
+            for (; request != std::end(limbRequest); ++available)
             {
                 // If we reach the end of the request, or we don't have the limb return false
-                if (request == std::end(limbRequest) || available->first < *request) {
+                if (available == std::end(limbAvailable) || *request < available->first) {
                     return false;
                 }
-                
                 // If our element is after our requested element check the next limb
-                if (*request >= available->first) {
-                    ++available;
+                if (available->first >= *request) {
+                    ++request;
                 }
             }
-            
             return true;
         }
         
         void Controller::selectAction() {
             
+            std::cout << "Selecting Action" << std::endl;
+            
             // Sort each of the lists to choose a new item
             for(auto& l : actions) {
-                std::sort(std::begin(l), std::end(l), [] (const RequestItem& a, const RequestItem& b) {
-                    return a < b;
+                std::stable_sort(std::begin(l), std::end(l), [] (const RequestItem& a, const RequestItem& b) {
+                    return a.priority > b.priority;
                 });
             }
             

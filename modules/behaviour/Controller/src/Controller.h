@@ -80,10 +80,6 @@ namespace modules {
             
             float priority;
             std::set<messages::behaviour::LimbID> limbSet;
-            
-            inline bool operator < (const RequestItem& a) const {
-                return priority < a.priority;
-            };
         };
 
         /**
