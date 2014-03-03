@@ -113,7 +113,27 @@ namespace modules {
                 
             });
             
-            on<Trigger<ServoCommand>, Options<Sync<Controller>>>("Command Filter", [this] (const ServoCommand& command) {
+            // For single waypoints
+            on<Trigger<ServoCommand>>([this](const ServoCommand& point) {
+                
+                // Make a vector of the command
+                auto points = std::make_unique<std::vector<ServoCommand>>();
+                points->push_back(point);
+                emit<Scope::DIRECT>(std::move(points));
+            });
+            
+            on<Trigger<std::vector<ServoCommand>>, Options<Sync<Controller>>>("Command Filter", [this] (const std::vector<ServoCommand>& commands) {
+                
+                for (auto& command : commands) {
+                    
+                    // Limb for servoid
+                    auto limb = 0;
+                    
+                    // Check if we have access
+                    if (this->limbAccess[limb] == command.source) {
+                        
+                    }
+                }
                 
                 // Find out what servos this supplier is authorized to use
                 

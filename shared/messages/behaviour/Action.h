@@ -1,6 +1,9 @@
 #ifndef MESSAGES_BEHAVIOUR_ACTIONS_H
 #define MESSAGES_BEHAVIOUR_ACTIONS_H
 
+#include <nuclear>
+#include "messages/input/ServoID.h"
+
 namespace messages {
     namespace behaviour {
         
@@ -29,7 +32,12 @@ namespace messages {
         };
 
         struct ServoCommand {
-
+            size_t source;
+            
+            NUClear::clock::time_point time;
+            input::ServoID id;
+            float position;
+            float gain;
         };
     }
 }

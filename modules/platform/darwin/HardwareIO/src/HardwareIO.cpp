@@ -147,9 +147,11 @@ namespace darwin {
         });
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<std::vector<messages::platform::darwin::DarwinServoCommand>>>([this](const std::vector<messages::platform::darwin::DarwinServoCommand>& commands) {
+        on<Trigger<std::vector<ServoWaypoint>>>([this](const std::vector<ServoWaypoint>& commands) {
 
             std::vector<Darwin::Types::ServoValues> values;
+            
+            // TODO work out our velocity using our current position
 
             // Loop through each of our commands
             for (const auto& command : commands) {
@@ -175,7 +177,7 @@ namespace darwin {
             darwin.writeServos(values);
         });
 
-        on<Trigger<messages::platform::darwin::DarwinServoCommand>>([this](const messages::platform::darwin::DarwinServoCommand command) {
+        on<Trigger<ServoWaypoint>>([this](const ServoWaypoint command) {
             auto commandList = std::make_unique<std::vector<messages::platform::darwin::DarwinServoCommand>>();
             commandList->push_back(command);
 
@@ -191,14 +193,6 @@ namespace darwin {
         // If we get a HeadLED command then write it
         on<Trigger<messages::platform::darwin::DarwinSensors::EyeLED>>([this](const messages::platform::darwin::DarwinSensors::EyeLED& led) {
             darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(led.r, led.g, led.b));
-        });
-
-        on<Trigger<messages::platform::darwin::LMissile>>([this](const messages::platform::darwin::LMissile&) {
-            darwin.lMissile.fire();
-        });
-
-        on<Trigger<messages::platform::darwin::RMissile>>([this](const messages::platform::darwin::RMissile&) {
-            darwin.rMissile.fire();
         });
     }
 }

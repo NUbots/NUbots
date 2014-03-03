@@ -31,21 +31,6 @@ namespace messages {
          *
          * @author Trent Houliston
          */
-        template<enum input::ServoID>
-        struct ServoWaypointsComplete {};
-
-        /**
-         * TODO document
-         *
-         * @author Trent Houliston
-         */
-        struct AllServoWaypointsComplete {};
-
-        /**
-         * TODO document
-         *
-         * @author Trent Houliston
-         */
         struct ServoWaypoint {
             NUClear::clock::time_point time;
             input::ServoID id;
