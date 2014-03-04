@@ -90,7 +90,6 @@ namespace modules {
             }
 
             void ScriptTuner::run() {
-
                 
                 // Start curses mode
                 initscr();
@@ -203,7 +202,7 @@ namespace modules {
                 mvprintw(3, 2, "Frames:"); // The frames section is filled out after this
                 mvprintw(4, 2, "Duration: %d", // Output the selected frames duration
                          std::chrono::duration_cast<std::chrono::milliseconds>(script.frames[frame].duration).count());
-                mvprintw(5,2, "Jump To Frame:");
+                mvprintw(5,2, "_");
                 mvprintw(6,2, "Load Script:");
                 mvprintw(7,2, "Play Scripts:");
 
@@ -254,7 +253,7 @@ namespace modules {
                                      "Jump to Frame",
                                      "Play",
                                      "Save",
-                                     "Exit (Use Ctr C)"};    
+                                     "Exit (Use Ctr C)"};
 
                 //Prints commands and their meanings to the screen
                 for (size_t i = 0; i < 10; i = i + 2) {
@@ -308,7 +307,7 @@ namespace modules {
                     attroff(A_BOLD);
 
                     // Everything defaults to 0 angle and gain (unless we find one)
-                    mvprintw(i + 9, 26, "Angle: -.--- Gain: ---.-");
+                    mvprintw(i + 9, 26, "Angle:  -.--- Gain: ---.-");
                 }
 
                 for(auto& target : script.frames[frame].targets) {
@@ -320,7 +319,7 @@ namespace modules {
                 }
 
                 // Highlight our selected point
-                mvchgat(selection + 9, angleOrGain ? 26 : 41, angleOrGain ? 13 : 11, A_STANDOUT, 0, nullptr);
+                mvchgat(selection + 9, angleOrGain ? 26 : 40, angleOrGain ? 13 : 11, A_STANDOUT, 0, nullptr);
 
                 // We finished building
                 refresh();
@@ -503,7 +502,6 @@ namespace modules {
                 endwin();
             }
 
-            //shows full list of commands
             void ScriptTuner::help() {
                 
                 move(LINES-6 ,12);
@@ -568,13 +566,12 @@ namespace modules {
                        
                     }
                     refreshView();
-                }  
+                }
                 else {
                     refreshView();
                 }
                 curs_set(false);
             }
-
 
             //emits a message so motion can pick up the script
             void ScriptTuner::playScript() {
@@ -583,14 +580,195 @@ namespace modules {
 
             //allows user to jump to a specific frame without engaging the motors
             void ScriptTuner::jumpToFrame() {
+                mvprintw(5,2,"Jump To Frame:");
                 move(5,17);
                 curs_set(true);
+                userInputToFrame();
+                curs_set(false);                 
+            }
 
-                //checks user input is a number and converts it to a number 
-                std::string tempframe = userInput();   
+
+
+            //allows user to edit the gain for the entire script or specified frame
+            void ScriptTuner::editGain() {
+                erase();
+                box(stdscr,0,0);
+                attron(A_BOLD);
+                mvprintw(0,(COLS-14)/2," Script Tuner ");
+                mvprintw(3,2,"Edit Gain");
+                attroff(A_BOLD);
+                mvprintw(5,2,"For Entire Script:");
+                mvprintw(6,2,"All: ---.- Upper: ---.- Lower: ---.-");
+                mvprintw(7,2, "For Frame: %d", frame);
+                mvprintw(8,2,"All: ---.- Upper: ---.- Lower: ---.-");
+                move(6,7);
+                curs_set(true);
+                size_t YPOSITION[3][3] = {{6,6,6}, {7, 0, 0}, {8,8,8}};
+                size_t XPOSITION[3][3] = {{7,20,32}, {12,0,0}, {7,20,32}};
+                size_t i = 0;
+                size_t j = 0;
+                float upperGain;
+                float lowerGain;
+                
+                while (getch() != 'X') {
+
+                    switch(getch()) {
+                        case KEY_UP:
+                            i = (i-1) % 3;
+                            break;
+                        case KEY_DOWN:
+                            i = (i+1) % 3;
+                            break;
+                        case KEY_LEFT:
+                            j = (j-1) % 3;
+                            break;
+                        case KEY_RIGHT:
+                            j = (j+1) % 3;
+                            break;
+                        case KEY_ENTER:
+                            float newGain = 0;
+
+                            //prints user input to screen
+                            if (YPOSITION[i][j] == 7 && XPOSITION[i][j] == 12) {
+                                mvprintw(YPOSITION[i][j], XPOSITION[i][j], " ")
+                                userInputToFrame();
+                                printw("%d", frame);
+                            }
+                            else {
+                                mvprintw(YPOSITION[i][j], XPOSITION[i][j], "     ")
+                                newGain = userInputToGain();
+                                if(isnan(newGain)) {
+                                    printw("---.-");
+                                }
+                                else {
+                                    printw("%5.1f", newGain);
+                                    
+                                    //allows separate gains for upper and lower motors
+                                    if (YPOSITION[i][j] == 6 && XPOSITION[i][j] == 20 || YPOSITION[i][j] == 8 && XPOSITION == 20) {
+                                        upperGain = newGain;
+                                        
+                                        // Zero out the "ALL" option
+                                        if(YPOSITION[i][j] == 6 && XPOSITION[i][j] == 20) {
+                                            mvprintw(6,7, "---.-");
+                                        }
+                                        else {
+                                            mvprintw(8,7,"---.-");
+                                        }
+                                    }
+                                    else if (YPOSITION[i][j] == 6 && XPOSITION[i][j] == 32 || YPOSITION[i][j] == 8 && XPOSITION == 32) {
+                                        lowerGain = newGain;
+                                        
+                                        // Zero out the both option
+                                        if (YPOSITION[i][j] == 6 && XPOSITION[i][j] == 32) {
+                                            mvprintw(6,7, "---.-");
+                                        }
+                                        else {
+                                            mvprintw(8,7, "---.-");
+                                        }
+                                    }
+                                    else {
+                                        upperGain = newGain;
+                                        lowerGain = newGain;
+
+                                        // Set upper and lower
+                                        if (YPOSITION[i][j] == 6 && XPOSITION[i][j] == 7) {
+                                            mvprint(6,20, "---.-");
+                                            mvprintw(6,32, "---.-");
+                                        }
+                                        else {
+                                            mvprintw(8,20, "---.-");
+                                            mvprintw(8,32, "---.-");
+                                        }   
+                                    }
+
+                                    //if user has entered the same gain in upper and lower then automatically prints value in both and dashes upper and lower
+                                    if (upperGain == lowerGain) {   
+                                        if (YPOSITION[i][j] == 6) {
+                                        mvprint(6,20, "---.-");
+                                        mvprintw(6,32, "---.-");
+                                        }
+                                        else {
+                                        mvprintw(8,20, "---.-");
+                                        mvprintw(8,32, "---.-");
+                                        }
+                                    }
+                                }
+                            }//end KEY_ENTER else
+                            //moves cursor back to last position before ENTER was pressed
+                            //turn off A_STANDOUT????
+                            move(YPOSITION[i][j], XPOSITION[i][j]);
+                            break;
+                    }//switch
+
+                    //highlights current position, either a frame if position (7,12) or a gain
+                    if (YPOSITION[i][j] == 0 && XPOSITION[i][j]  == 0) {
+                        curs_set(false);
+                    }
+                    else {
+                        if (YPOSITION[i][j] == 7 && XPOSITION[i][j] == 12) {
+                            mvchgat(YPOSITION[i][j], XPOSITION[i][j], frame, A_STANDOUT, 0, nullptr);
+                        }
+                        else {
+                            mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
+                        }
+                    }
+                }//while
+
+                for (auto& f : script.frames) {
+                    for (auto& waypoint : frame.waypoints) {
+                        waypoint.gain = something; 
+                    }
+                }
+
+                auto& f = script.frames[frame];
+                //does this loop through all frames of script,need two cases for whole script or single frame
+                //the last case changed will overide???
+                for(auto& waypoint : f.waypoints) {
+                    switch(waypoint.servoid) {
+                        case HEAD_PAN:
+                        case HEAD_TILT:
+                        case R_SHOULDER_PITCH:
+                        case L_SHOULDER_PITCH:
+                        case R_SHOULDER_ROLL:
+                        case L_SHOULDER_ROLL:
+                        case R_ELBOW:
+                        case L_ELBOW:                            
+                        waypoint.gain = upperGain;
+                        break;
+                        case R_HIP_YAW:
+                        case L_HIP_YAW:
+                        case R_HIP_ROLL:
+                        case L_HIP_ROLL:
+                        case R_HIP_PITCH:
+                        case L_HIP_PITCH:
+                        case R_KNEE:
+                        case L_KNEE:
+                        case R_ANKLE_PITCH:
+                        case L_ANKLE_PITCH:
+                        case R_ANKLE_ROLL:
+                        case L_ANKLE_ROLL:
+                        waypoint.gain = lowerGain;
+                        break;
+                    }
+                }    
+
+                
+                //output gains to scripttuner window automatic??
+                curs_set(false);
+                refreshView();
+            }// editGain()
+
+
+
+
+
+             //checks user input is a number and converts it a number that becomes the new frame number
+            void ScriptTuner::userInputToFrame() {
+                std::string tempframe = userInput();
                 if(!tempframe.empty() && tempframe.size() <= 4) {
                     try {
-                        int tempframe2 = stoi(tempframe);
+                        int tempframe2 = stoi(tempframe); //int tempframe = stoi(tempframe):???
+                        
                         //makes tempframe2 always positive
                         if(tempframe2 <= 0) {
                             tempframe2=-1*tempframe2;
@@ -599,24 +777,52 @@ namespace modules {
                         else {
                             tempframe2=tempframe2;
                         }
+                        
                         //checks user input is within correct range
                         if((size_t)tempframe2 <= script.frames.size()) {
 
                             frame = tempframe2 - 1;
                         }
                         else {
-                            beep();                        
+                            beep();
                         }
                     }
                     catch(std::invalid_argument) {
                         beep();
                     }
                 }
-                curs_set(false);
-               
-                               
             }
 
+            float ScriptTuner::userInputToGain() {
+                std::string tempGain = userInput();
+                try {
+                    if (!tempGain.empty() {
+                        float tempGain2 = stof(tempGain); //double tempGain = stod(tempGain)???;
+                        if (tempGain2 => 0 && tempGain2 <= 100){
+                            return tempGain2;
+                        }
+                        else {
+                            beep();
+                        }
+
+                    }
+                }
+                catch(std::invalid_argument) {
+                    beep();
+                }
+
+                return std::numeric_limits<float>::quiet_NaN();
+            }
+
+
+// void userLoadScript() {
+// //make scripttuner independent of path
+// move(6,13);
+// curs_set(true);
+// std::string tempscript = userInput();
+//
+// if
+// }
 
             
         } // tools

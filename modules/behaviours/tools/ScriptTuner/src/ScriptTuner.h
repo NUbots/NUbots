@@ -64,6 +64,7 @@ namespace modules {
                 void playScript();
                 void jumpToFrame();
                 void help();
+                void editGainInput();
 
                 volatile bool running;
 
