@@ -60,6 +60,13 @@ namespace messages {
             arma::vec3 leftFSR;
             arma::vec3 rightFSR;
 
+            bool leftFootDown;
+            bool rightFootDown;
+
+            std::map<messages::input::ServoID, arma::mat44> forwardKinematics;
+
+            arma::vec3 torsoVelocity;
+
             std::vector<Servo> servos;
         };
     }

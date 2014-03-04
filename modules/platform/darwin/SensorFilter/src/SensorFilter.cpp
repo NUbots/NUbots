@@ -24,6 +24,8 @@
 #include "messages/support/Configuration.h"
 #include "utility/NUbugger/NUgraph.h"
 #include "utility/math/matrix.h"
+#include "utility/motion/ForwardKinematics.h"
+#include "utility/motion/RobotModels.h"
 
 namespace modules {
     namespace platform {
@@ -35,16 +37,20 @@ namespace modules {
             using messages::input::Sensors;
             using utility::NUbugger::graph;
             using messages::input::ServoID;
+            using utility::motion::kinematics::calculatePosition;
+            using utility::motion::kinematics::DarwinModel;
 
 
-
-            SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), orientationFilter(arma::vec("0,0,-1,1,0,0")) , frameLimiter(0), lastOrientationMatrix(arma::eye(3,3)) {
+            SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), orientationFilter(arma::vec("0,0,-1,1,0,0")) , velocityFilter(arma::vec3("0,0,0")), frameLimiter(0), lastOrientationMatrix(arma::eye(3,3)), previousMeasuredTorsoFromLeftFoot(), previousMeasuredTorsoFromRightFoot() {
                 
                 on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){
                     DEFAULT_NOISE_GAIN = file.config["DEFAULT_NOISE_GAIN"];
                     HIGH_NOISE_THRESHOLD = file.config["HIGH_NOISE_THRESHOLD"];
                     HIGH_NOISE_GAIN = file.config["HIGH_NOISE_GAIN"];
                     LOW_NOISE_THRESHOLD = file.config["LOW_NOISE_THRESHOLD"];
+
+                    SUPPORT_FOOT_FSR_THRESHOLD = file.config["SUPPORT_FOOT_FSR_THRESHOLD"];
+                    REQUIRED_NUMBER_OF_FSRS = file.config["REQUIRED_NUMBER_OF_FSRS"];
                 });
 
                 on<Trigger<DarwinSensors>, Options<Single>>([this](const DarwinSensors& input) {
@@ -108,6 +114,53 @@ namespace modules {
                     //END CALCULATE FILTERED GYRO
 
 
+                    //KINEMATICS
+                    // std::map<messages::input::ServoID, arma::mat44> leftArm = calculatePosition<DarwinModel>(*sensors, ServoID::L_ELBOW);
+                    // std::map<messages::input::ServoID, arma::mat44> rightArm = calculatePosition<DarwinModel>(*sensors, ServoID::R_ELBOW);
+                    std::map<messages::input::ServoID, arma::mat44> leftLegPositions = calculatePosition<DarwinModel>(*sensors, ServoID::L_ANKLE_ROLL);
+                    std::map<messages::input::ServoID, arma::mat44> rightLegPositions = calculatePosition<DarwinModel>(*sensors, ServoID::R_ANKLE_ROLL);
+                    std::map<messages::input::ServoID, arma::mat44> headPositions = calculatePosition<DarwinModel>(*sensors, ServoID::HEAD_PITCH);
+                    sensors->forwardKinematics.insert(leftLegPositions.begin(), leftLegPositions.end());
+                    sensors->forwardKinematics.insert(rightLegPositions.begin(), rightLegPositions.end());
+                    sensors->forwardKinematics.insert(headPositions.begin(), headPositions.end());
+                    //END KINEMATICS
+
+
+                    //ODOMETRY
+                    //Check support foot:
+                    sensors->leftFootDown = false;
+                    sensors->rightFootDown = false;
+                    sensors->torsoVelocity = {0,0,0};
+
+                    int zeroSensorsLeft = (input.fsr.left.fsr1 == 0) + (input.fsr.left.fsr2 == 0) + (input.fsr.left.fsr3 == 0) + (input.fsr.left.fsr4 == 0);
+                    int zeroSensorsRight = (input.fsr.right.fsr1 == 0) + (input.fsr.right.fsr2 == 0) + (input.fsr.right.fsr3 == 0) + (input.fsr.right.fsr4 == 0);
+
+                    if(input.fsr.left.fsr1 + input.fsr.left.fsr2 + input.fsr.left.fsr3 + input.fsr.left.fsr4 > SUPPORT_FOOT_FSR_THRESHOLD && zeroSensorsLeft <= 4 - REQUIRED_NUMBER_OF_FSRS){
+                        sensors->leftFootDown = true;
+                    }
+                    if(input.fsr.right.fsr1 + input.fsr.right.fsr2 + input.fsr.right.fsr3 + input.fsr.right.fsr4 > SUPPORT_FOOT_FSR_THRESHOLD && zeroSensorsRight <= 4 - REQUIRED_NUMBER_OF_FSRS){
+                        sensors->rightFootDown = true;
+                    }
+
+
+                    if(sensors->leftFootDown || sensors->rightFootDown){
+                        //velocityFilter.timeUpdate(deltaT, sensors->accelerometer - sensors->orientation.col(2) * 9.807);
+                        arma::vec3 measuredTorsoFromLeftFoot = -sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,0,2,2).t() * sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].col(3).rows(0,2);
+                        arma::vec3 measuredTorsoFromRightFoot = -sensors->forwardKinematics[ServoID::R_ANKLE_ROLL].submat(0,0,2,2).t() * sensors->forwardKinematics[ServoID::R_ANKLE_ROLL].col(3).rows(0,2);
+
+                        arma::vec3 torsoVelFromLeftFoot =  -(measuredTorsoFromLeftFoot - previousMeasuredTorsoFromLeftFoot)/deltaT;//negate hack
+                        arma::vec3 torsoVelFromRightFoot =  -(measuredTorsoFromRightFoot - previousMeasuredTorsoFromRightFoot)/deltaT;
+
+                        arma::vec3 averageVelocity = (torsoVelFromLeftFoot * static_cast<int>(sensors->leftFootDown) + torsoVelFromRightFoot * static_cast<int>(sensors->rightFootDown))/(static_cast<int>(sensors->rightFootDown) + static_cast<int>(sensors->leftFootDown));
+                        previousMeasuredTorsoFromLeftFoot = measuredTorsoFromLeftFoot;
+                        previousMeasuredTorsoFromRightFoot = measuredTorsoFromRightFoot;
+                        //FILTER WITH ACCELEROMETER
+                        //velocityFilter.measurementUpdate(averageVelocity, arma::eye(3,3) * 1e-6);
+                        sensors->torsoVelocity = averageVelocity;
+                        //sensors->torsoVelocity = velocityFilter.get();
+                    }
+                    //END ODOMETRY
+
                     if(++frameLimiter % 3 == 0){
                         emit(graph("Filtered Gravity Vector",
                                 float(orientation[0]*9.807),
@@ -128,6 +181,8 @@ namespace modules {
                         emit(graph("L FSR", input.fsr.left.fsr1, input.fsr.left.fsr2, input.fsr.left.fsr3, input.fsr.left.fsr4
                             ));
                         emit(graph("R FSR", input.fsr.right.fsr1, input.fsr.right.fsr2, input.fsr.right.fsr3, input.fsr.right.fsr4
+                            ));
+                        emit(graph("Torso Velocity", sensors->torsoVelocity[0], sensors->torsoVelocity[1], sensors->torsoVelocity[2]
                             ));
 
                         frameLimiter = 1;
