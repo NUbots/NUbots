@@ -38,7 +38,12 @@ namespace modules {
             
             on<Trigger<RegisterAction>, Options<Sync<Controller>>>("Action Registration", [this] (const RegisterAction& action) {
                 
-                // TODO error if this id already exists (will cause errors)
+                if(action.id == 0) {
+                    throw std::runtime_error("Action ID 0 is reserved for internal use");
+                }
+                else if(requests.find(action.id) != std::end(requests)) {
+                    throw std::runtime_error("The passed action ID has already been registered");
+                };
                 
                 // Make our request object
                 requests[action.id] = std::make_unique<Request>(action.id, action.start, action.kill);
@@ -153,6 +158,7 @@ namespace modules {
                 std::unique_ptr<std::vector<ServoWaypoint>> waypoints;
                 
                 for(auto& queue : commandQueues) {
+                    
                     if (!queue.empty() && queue.front().time < now) {
                         
                         // Store our ID (if we need it)
@@ -164,17 +170,24 @@ namespace modules {
                             // Keep track of what we have emptied
                             emptiedQueues.push_back(id);
                         }
-                        else {
-                            const auto& command = queue.front();
-                            
-                            // Lazy initialize
-                            if(!waypoints) {
-                                waypoints = std::make_unique<std::vector<ServoWaypoint>>();
-                            }
-                            
-                            // Add to our waypoints
-                            waypoints->push_back({ command.time, command.id, command.position, command.gain });
+                    }
+                    
+                    // Dirty hack, we set source to 0 when it's processed
+                    if(!queue.empty() && queue.front().source != 0) {
+                        
+                        auto& command = queue.front();
+                        
+                        // Lazy initialize
+                        if(!waypoints) {
+                            waypoints = std::make_unique<std::vector<ServoWaypoint>>();
                         }
+                        
+                        // Add to our waypoints
+                        waypoints->push_back({ command.time, command.id, command.position, command.gain });
+                        
+                        // Dirty hack the waypoint
+                        command.source = 0;
+                        
                     }
                 }
                 
