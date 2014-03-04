@@ -20,8 +20,9 @@
 #include "Getup.h"
 
 #include <cmath>
+#include "messages/input/ServoID.h"
 #include "messages/motion/Script.h"
-#include "messages/motion/ServoWaypoint.h"
+#include "messages/behaviour/Action.h"
 #include "messages/support/Configuration.h"
 #include "messages/input/Sensors.h"
 
@@ -30,92 +31,76 @@ namespace modules {
         namespace reflexes {
 
             //internal only callback messages to start and stop our action
-            struct ExecuteGetup{ std::vector<LimbID> limbs; };
-            struct KillGetup{ std::vector<LimbID> limbs; };
+            struct ExecuteGetup{};
+            struct KillGetup{};
 
             using messages::support::Configuration;
             using messages::input::Sensors;
-            using messages::motion::AllServoWaypointsComplete;
+            using messages::input::ServoID;
+            using messages::motion::ExecuteScriptByName;
+            using messages::behaviour::RegisterAction;
+            using messages::behaviour::ActionPriorites;
+            using messages::behaviour::LimbID;
 
-            Getup::Getup(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), fallenDetector(nullptr), getupDetector(nullptr), currentPriority(0) {
-                    //do a little configurating
-                    on<Trigger<Configuration<Getup>>>([this](const Configuration<Getup>& file){
+            Getup::Getup(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)), gettingUp(false) {
 
-                        //encode fallen angle as a cosine so we can compare it directly to the z axis value
-                        double fallenAngleConfig = file.config["FALLEN_ANGLE"];
-                        FALLEN_ANGLE = cos(fallenAngleConfig*M_PI/180.0);
+                //do a little configurating
+                on<Trigger<Configuration<Getup>>>([this] (const Configuration<Getup>& file){
 
-                        //load priorities for the getup
-                        GETUP_PRIORITY = file.config["GETUP_PRIORITY"];
-                        EXECUTION_PRIORITY = file.config["EXECUTION_PRIORITY"];
-                    });
+                    //encode fallen angle as a cosine so we can compare it directly to the z axis value
+                    double fallenAngleConfig = file.config["FALLEN_ANGLE"];
+                    FALLEN_ANGLE = cos(fallenAngleConfig);
 
-                fallenDetector = on<Trigger<Sensors>, Options<Single>>([this](const Sensors& sensors) {
+                    //load priorities for the getup
+                    GETUP_PRIORITY = file.config["GETUP_PRIORITY"];
+                    EXECUTION_PRIORITY = file.config["EXECUTION_PRIORITY"];
+                });
+
+                on<Trigger<Sensors>, Options<Single>>([this] (const Sensors& sensors) {
 
                     //check if the orientation is smaller than the cosine of our fallen angle
-                    if (currentPriority != GETUP_PRIORITY and fabs(sensors.orientation(2,2)) < FALLEN_ANGLE) {
-                        updateAction(GETUP_PRIORITY);
-                    } else  if (currentPriority > 0.0) {
-                        updateAction(0.0);
+                    if (!gettingUp && fabs(sensors.orientation(2,2)) < FALLEN_ANGLE) {
+                        updatePriority(GETUP_PRIORITY);
                     }
-
                 });
 
-                getupDetector = on<Trigger<AllServoWaypointsComplete>, Options<Single>>([this](const AllServoWaypointsComplete&) {
-                    //when everything is complete, then switch back to event listener mode and change pririties
-                    updateAction(0.0);
-                    fallenDetector.enable();
-                    getupDetector.disable();
-                });
+                on<Trigger<ExecuteGetup>, With<Sensors>>([this] (const ExecuteGetup&, const Sensors& sensors) {
 
-                //Execute the kick action
-                on<Trigger<ExecuteGetup>, With<Sensors>, Options<Sync<Getup>>>([this](const ExecuteGetup& a, const Sensors& sensors) {
-                    fallenDetector.disable();
-                    getupDetector.enable();
-                    //check with side we're getting up from
+                    std::cout << "Totally got triggered" << std::endl;
+
+                    gettingUp = true;
+
+                    // Check with side we're getting up from
                     if (sensors.orientation(0,2) < 0.0) {
-                        emit(std::make_unique<messages::motion::ExecuteScriptByName>("StandUpFront.json"));
-                    } else {
-                        emit(std::make_unique<messages::motion::ExecuteScriptByName>("StandUpBack.json"));
+                        emit(std::make_unique<ExecuteScriptByName>(id, "StandUpFront.json"));
                     }
-                    updateAction(EXECUTION_PRIORITY);
+                    else {
+                        emit(std::make_unique<ExecuteScriptByName>(id, "StandUpBack.json"));
+                    }
+                    updatePriority(EXECUTION_PRIORITY);
                 });
 
-                on<Trigger<KillGetup>, Options<Sync<Getup>>>([this](const KillGetup& a) {
-                    fallenDetector.enable();
-                    getupDetector.disable();
-                    updateAction(0);
+                on<Trigger<KillGetup>, Options<Sync<Getup>>>([this] (const KillGetup&) {
+                    updatePriority(0);
                 });
 
-
-                //start with the kill switch turned off
-                getupDetector.disable();
-
-                //register our callbacks with the controller
-                emit(std::make_unique<messages::behaviour::RegisterAction>(
-
-                    size_t(this)*size_t(this)-size_t(this), //unique identifier based on this
-
-                    //Initial limb priorities
-                    {{0,{LimbID::HEAD,
-                         LimbID::LEFT_ARM,LimbID::RIGHT_ARM,
-                         LimbID::LEFT_LEG,LimbID::RIGHT_LEG}}},
-
-                    [this](const std::vector<LimbID> limbs) { //make a function to start the action
-                        emit(std::make_unique<ExecuteGetup>(limbs));
-                    }),
-
-                    [this](const std::vector<LimbID> limbs) { //make a function to end the action
-                        emit(std::make_unique<KillGetup>(limbs));
-                    }));
-
-
-
+                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+                    id,
+                    { std::pair<float, std::set<LimbID>>(0, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD }) },
+                    [this] (const std::set<LimbID>&) {
+                        emit(std::make_unique<ExecuteGetup>());
+                    },
+                    [this] (const std::set<LimbID>&) {
+                        emit(std::make_unique<KillGetup>());
+                    },
+                    [this] (const std::set<ServoID>&) {
+                        emit(std::make_unique<KillGetup>());
+                    }
+                }));
             }
 
-            Getup::updateAction(const double& priority) {
-                currentPriority = priority;
-                emit(std::make_unique<messages::behaviour::UpdateAction>(priority));
+            void Getup::updatePriority(const float& priority) {
+                emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { priority }}));
             }
 
 

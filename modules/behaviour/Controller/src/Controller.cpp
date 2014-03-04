@@ -25,7 +25,7 @@ namespace modules {
     namespace behaviour {
         
         using messages::input::ServoID;
-        using messages::motion::ServoWaypoint;
+        using ServoWaypoint = messages::motion::ServoWaypointX;
         using messages::behaviour::RegisterAction;
         using messages::behaviour::ActionPriorites;
         using messages::behaviour::ServoCommand;
@@ -237,7 +237,7 @@ namespace modules {
         
         void Controller::selectAction() {
             
-            std::cout << "Selecting Action" << std::endl;
+            std::cout << "Selecting Action from " << requests.size() << std::endl;
             
             // Sort each of the lists to choose a new item
             for(auto& l : actions) {

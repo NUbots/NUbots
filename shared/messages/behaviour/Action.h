@@ -23,6 +23,7 @@ namespace messages {
             
             std::function<void (std::set<LimbID>)> start;
             std::function<void (std::set<LimbID>)> kill;
+            std::function<void (std::set<messages::input::ServoID>)> completed;
         };
         
         struct ActionPriorites {

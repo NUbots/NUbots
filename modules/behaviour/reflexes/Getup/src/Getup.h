@@ -23,7 +23,6 @@
 #include <nuclear>
 #include <queue>
 
-#include "messages/platform/darwin/DarwinServoCommand.h"
 #include "messages/motion/Script.h"
 
 namespace modules {
@@ -37,15 +36,16 @@ namespace modules {
              */
             class Getup : public NUClear::Reactor {
             private:
+                const size_t id;
+
+                bool gettingUp;
+
                 /// config settings
-                double FALLEN_ANGLE,GETUP_PRIORITY,EXECUTION_PRIORITY;
+                float FALLEN_ANGLE;
+                float GETUP_PRIORITY;
+                float EXECUTION_PRIORITY;
 
-                ///reactionhandles let us disable reactions temporarily
-                ReactionHandle fallenDetector;
-                ReactionHandle getupDetector;
-
-                double currentPriority;
-                void updateAction(const double& priority);
+                void updatePriority(const float& priority);
 
             public:
                 explicit Getup(std::unique_ptr<NUClear::Environment> environment);

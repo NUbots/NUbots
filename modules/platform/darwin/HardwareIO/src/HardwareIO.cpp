@@ -18,14 +18,19 @@
  */
 
 #include "HardwareIO.h"
-
-#include "messages/platform/darwin/DarwinServoCommand.h"
-#include "messages/platform/darwin/DarwinSensors.h"
 #include "Convert.h"
+
+#include "utility/math/angle.h"
+#include "messages/platform/darwin/DarwinSensors.h"
+#include "messages/motion/ServoWaypoint.h"
+
 
 namespace modules {
 namespace platform {
 namespace darwin {
+
+    using messages::platform::darwin::DarwinSensors;
+    using messages::motion::ServoWaypoint;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/ttyUSB0") {
 
@@ -35,7 +40,7 @@ namespace darwin {
             // Read our data
             Darwin::BulkReadResults data = darwin.bulkRead();
 
-            auto sensors = std::make_unique<messages::platform::darwin::DarwinSensors>();
+            auto sensors = std::make_unique<DarwinSensors>();
 
             // Timestamp when our data was taken
             sensors->timestamp = NUClear::clock::now();
@@ -45,7 +50,7 @@ namespace darwin {
              */
 
             // Read our Error code
-            sensors->cm730ErrorFlags = data.cm730ErrorCode == 0xFF ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.cm730ErrorCode;
+            sensors->cm730ErrorFlags = data.cm730ErrorCode == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.cm730ErrorCode);
 
             // LED Panel
             sensors->ledPanel.led2 = Convert::getBit<1>(data.cm730.ledPanel);
@@ -81,7 +86,7 @@ namespace darwin {
 
             // Right Sensor
             // Error
-            sensors->fsr.right.errorFlags = data.fsrErrorCodes[0] == 0xFF ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.fsrErrorCodes[0];
+            sensors->fsr.right.errorFlags = data.fsrErrorCodes[0] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.fsrErrorCodes[0]);
 
             // Sensors
             sensors->fsr.right.fsr1 = Convert::fsrForce(data.fsr[0].fsr1);
@@ -95,7 +100,7 @@ namespace darwin {
 
             // Left Sensor
             // Error
-            sensors->fsr.left.errorFlags = data.fsrErrorCodes[1] == 0xFF ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.fsrErrorCodes[1];
+            sensors->fsr.left.errorFlags = data.fsrErrorCodes[1] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.fsrErrorCodes[1]);
 
             // Sensors
             sensors->fsr.left.fsr1 = Convert::fsrForce(data.fsr[1].fsr1);
@@ -113,10 +118,10 @@ namespace darwin {
 
             for(int i = 0; i < 20; ++i) {
                 // Get a reference to the servo we are populating
-                messages::platform::darwin::DarwinSensors::Servo& servo = sensors->servo[i];
+                DarwinSensors::Servo& servo = sensors->servo[i];
 
                 // Error code
-                servo.errorFlags = data.servoErrorCodes[i] == 0xFF ? messages::platform::darwin::DarwinSensors::Error::TIMEOUT : data.servoErrorCodes[i];
+                servo.errorFlags = data.servoErrorCodes[i] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.servoErrorCodes[i]);
 
                 // Booleans
                 servo.torqueEnabled = data.servos[i].torqueEnabled;
@@ -147,28 +152,33 @@ namespace darwin {
         });
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<std::vector<ServoWaypoint>>>([this](const std::vector<ServoWaypoint>& commands) {
+        on<Trigger<std::vector<ServoWaypoint>>, With<DarwinSensors>>([this](const std::vector<ServoWaypoint>& commands, const DarwinSensors& sensors) {
 
             std::vector<Darwin::Types::ServoValues> values;
-            
-            // TODO work out our velocity using our current position
 
             // Loop through each of our commands
             for (const auto& command : commands) {
-                // If all our gains are 0 then do a normal write to disable torque (syncwrite won't write to torqueEnable)
-                if(command.pGain == 0 && command.iGain == 0 && command.dGain == 0) {
+                
+                // If gain is 0, do a normal write to disable torque (syncwrite won't write to torqueEnable)
+                if(command.gain == 0) {
                     darwin[static_cast<int>(command.id) + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
                 }
+                
                 // Otherwise write the command using sync write
                 else {
+                    float diff = utility::math::angle::difference(command.position, sensors.servo[command.id].presentPosition);
+                    NUClear::clock::duration duration = command.time - NUClear::clock::now();
+
+                    float speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                    
                     values.push_back({
                         static_cast<uint8_t>(static_cast<int>(command.id) + 1),  // The id's on the robot start with ID 1
-                        Convert::gainInverse(command.dGain),
-                        Convert::gainInverse(command.iGain),
-                        Convert::gainInverse(command.pGain),
+                        Convert::gainInverse(command.gain),
+                        Convert::gainInverse(command.gain * 0),
+                        Convert::gainInverse(command.gain * 0),
                         0,
-                        Convert::servoPositionInverse(static_cast<int>(command.id), command.goalPosition),
-                        Convert::servoSpeedInverse(static_cast<int>(command.id), command.movingSpeed)
+                        Convert::servoPositionInverse(static_cast<int>(command.id), command.position),
+                        Convert::servoSpeedInverse(static_cast<int>(command.id), speed)
                     });
                 }
             }
@@ -178,20 +188,20 @@ namespace darwin {
         });
 
         on<Trigger<ServoWaypoint>>([this](const ServoWaypoint command) {
-            auto commandList = std::make_unique<std::vector<messages::platform::darwin::DarwinServoCommand>>();
+            auto commandList = std::make_unique<std::vector<ServoWaypoint>>();
             commandList->push_back(command);
 
             // Emit it so it's captured by the reaction above
-            emit(std::move(commandList));
+            emit<Scope::DIRECT>(std::move(commandList));
         });
 
         // If we get a HeadLED command then write it
-        on<Trigger<messages::platform::darwin::DarwinSensors::HeadLED>>([this](const messages::platform::darwin::DarwinSensors::HeadLED& led) {
+        on<Trigger<DarwinSensors::HeadLED>>([this](const DarwinSensors::HeadLED& led) {
             darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, Convert::colourLEDInverse(led.r, led.g, led.b));
         });
 
         // If we get a HeadLED command then write it
-        on<Trigger<messages::platform::darwin::DarwinSensors::EyeLED>>([this](const messages::platform::darwin::DarwinSensors::EyeLED& led) {
+        on<Trigger<DarwinSensors::EyeLED>>([this](const DarwinSensors::EyeLED& led) {
             darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(led.r, led.g, led.b));
         });
     }

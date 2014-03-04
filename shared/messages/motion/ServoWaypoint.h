@@ -31,7 +31,7 @@ namespace messages {
          *
          * @author Trent Houliston
          */
-        struct ServoWaypoint {
+        struct ServoWaypointX {
             NUClear::clock::time_point time;
             input::ServoID id;
             float position;

@@ -6,11 +6,11 @@ ADD_ROLE(
         support::configuration::ConfigSystem    
         #support::configuration::NetworkingConfiguration
         #platform::darwin::HardwareIO
-        platform::fakedarwin::HardwareIO
+        #platform::fakedarwin::HardwareIO
         platform::darwin::SensorFilter
         #platform::darwin::MotionManager
         support::NUbugger
         debug::NUbugger
-        motion::WalkEngine
+        #motion::WalkEngine
 )
 
