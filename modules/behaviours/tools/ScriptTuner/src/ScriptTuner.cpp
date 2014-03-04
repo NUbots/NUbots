@@ -681,7 +681,7 @@ namespace modules {
                                         }   
                                     }
 
-                                    //if user has entered the same gain in upper and lower then automatically prints value in both and dashes upper and lower
+                                    // if user has entered the same gain in upper and lower then automatically prints value in both and dashes upper and lower
                                     if (upperGain == lowerGain) {   
                                         if (YPOSITION[i][j] == 6) {
                                         mvprint(6,20, "---.-");
