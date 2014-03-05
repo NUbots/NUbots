@@ -154,6 +154,9 @@ namespace modules {
                         case 'R':
                             refreshView();
                             break;
+                        case 'G';
+                            editGain();
+                            break;
                         case':':
                             help();
                             break;
@@ -609,6 +612,12 @@ namespace modules {
                 size_t j = 0;
                 float upperGain;
                 float lowerGain;
+                bool editScript;
+                bool editFrame;
+                editScript = false;
+                editGain = false;
+                bool changedUpper = false;
+                bool changedLower = false;
                 
                 while (getch() != 'X') {
 
@@ -627,6 +636,15 @@ namespace modules {
                             break;
                         case KEY_ENTER:
                             float newGain = 0;
+                            
+                            //tracks editing
+
+                            if (YPOSITION[i][j] == 6) {
+                                editScript = true;
+                            }
+                            else if (YPOSITION[i][j] == 8) {
+                                editFrame = true;
+                            }
 
                             //prints user input to screen
                             if (YPOSITION[i][j] == 7 && XPOSITION[i][j] == 12) {
@@ -646,6 +664,8 @@ namespace modules {
                                     //allows separate gains for upper and lower motors
                                     if (YPOSITION[i][j] == 6 && XPOSITION[i][j] == 20 || YPOSITION[i][j] == 8 && XPOSITION == 20) {
                                         upperGain = newGain;
+
+                                        changedUpper = true;
                                         
                                         // Zero out the "ALL" option
                                         if(YPOSITION[i][j] == 6 && XPOSITION[i][j] == 20) {
@@ -657,6 +677,8 @@ namespace modules {
                                     }
                                     else if (YPOSITION[i][j] == 6 && XPOSITION[i][j] == 32 || YPOSITION[i][j] == 8 && XPOSITION == 32) {
                                         lowerGain = newGain;
+
+                                        changedLower = true;
                                         
                                         // Zero out the both option
                                         if (YPOSITION[i][j] == 6 && XPOSITION[i][j] == 32) {
@@ -669,6 +691,9 @@ namespace modules {
                                     else {
                                         upperGain = newGain;
                                         lowerGain = newGain;
+
+                                        changedUpper = true;
+                                        changedLower = true;
 
                                         // Set upper and lower
                                         if (YPOSITION[i][j] == 6 && XPOSITION[i][j] == 7) {
@@ -714,43 +739,85 @@ namespace modules {
                     }
                 }//while
 
-                for (auto& f : script.frames) {
-                    for (auto& waypoint : frame.waypoints) {
-                        waypoint.gain = something; 
+                //loop through all frames in script and edit gains
+                if (editScript) {
+                    for(auto& f : script.frames) {
+                        for(auto& waypoint : f.waypoints) {
+                            switch(waypoint.servoid) {
+                                case HEAD_PAN:
+                                case HEAD_TILT:
+                                case R_SHOULDER_PITCH:
+                                case L_SHOULDER_PITCH:
+                                case R_SHOULDER_ROLL:
+                                case L_SHOULDER_ROLL:
+                                case R_ELBOW:
+                                case L_ELBOW:
+                                    if(changedUpper) {
+                                        waypoint.gain = upperGain;
+                                    }
+                                break;
+                                case R_HIP_YAW:
+                                case L_HIP_YAW:
+                                case R_HIP_ROLL:
+                                case L_HIP_ROLL:
+                                case R_HIP_PITCH:
+                                case L_HIP_PITCH:
+                                case R_KNEE:
+                                case L_KNEE:
+                                case R_ANKLE_PITCH:
+                                case L_ANKLE_PITCH:
+                                case R_ANKLE_ROLL:
+                                case L_ANKLE_ROLL:
+                                    if(changedLower) {
+                                        waypoint.gain = lowerGain;
+                                    }
+                                break;
+                            }
+                        }    
                     }
                 }
 
+                //edit gains for only specifc frame
+                if (editFrame) {
+                    for(auto& waypoint : f.waypoints) {
+                        switch(waypoint.servoid) {
+                            case HEAD_PAN:
+                            case HEAD_TILT:
+                            case R_SHOULDER_PITCH:
+                            case L_SHOULDER_PITCH:
+                            case R_SHOULDER_ROLL:
+                            case L_SHOULDER_ROLL:
+                            case R_ELBOW:
+                            case L_ELBOW:
+                                if(changedUpper) {
+                                    waypoint.gain = upperGain;
+                                }
+                            break;
+                            case R_HIP_YAW:
+                            case L_HIP_YAW:
+                            case R_HIP_ROLL:
+                            case L_HIP_ROLL:
+                            case R_HIP_PITCH:
+                            case L_HIP_PITCH:
+                            case R_KNEE:
+                            case L_KNEE:
+                            case R_ANKLE_PITCH:
+                            case L_ANKLE_PITCH:
+                            case R_ANKLE_ROLL:
+                            case L_ANKLE_ROLL:
+                                if(changedLower) {
+                                    waypoint.gain = lowerGain;
+                                }
+                            break;
+                        }
+                    }    
+                }
+
+                
                 auto& f = script.frames[frame];
                 //does this loop through all frames of script,need two cases for whole script or single frame
                 //the last case changed will overide???
-                for(auto& waypoint : f.waypoints) {
-                    switch(waypoint.servoid) {
-                        case HEAD_PAN:
-                        case HEAD_TILT:
-                        case R_SHOULDER_PITCH:
-                        case L_SHOULDER_PITCH:
-                        case R_SHOULDER_ROLL:
-                        case L_SHOULDER_ROLL:
-                        case R_ELBOW:
-                        case L_ELBOW:                            
-                        waypoint.gain = upperGain;
-                        break;
-                        case R_HIP_YAW:
-                        case L_HIP_YAW:
-                        case R_HIP_ROLL:
-                        case L_HIP_ROLL:
-                        case R_HIP_PITCH:
-                        case L_HIP_PITCH:
-                        case R_KNEE:
-                        case L_KNEE:
-                        case R_ANKLE_PITCH:
-                        case L_ANKLE_PITCH:
-                        case R_ANKLE_ROLL:
-                        case L_ANKLE_ROLL:
-                        waypoint.gain = lowerGain;
-                        break;
-                    }
-                }    
+                
 
                 
                 //output gains to scripttuner window automatic??
