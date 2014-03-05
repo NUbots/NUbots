@@ -9,7 +9,7 @@ class nuclearport::build_dep (
   package { 'build-essential': ensure => latest }
   package { 'cmake': ensure => latest }
   package { 'git': ensure => latest }
-  package { 'openssh-server': ensure => latest }
+  # package { 'openssh-server': ensure => latest }
   package { ['libprotobuf-dev', 'protobuf-compiler']: ensure => latest }
   package { 'libespeak-dev': ensure => latest }
   package { 'librtaudio-dev': ensure => latest }
@@ -19,7 +19,7 @@ class nuclearport::build_dep (
   package { 'libaubio-dev': ensure => latest }
   package { 'libsndfile-dev': ensure => latest }
   package { 'libboost-math-dev': ensure => latest }
-  package { 'libarmadillo-dev': ensure => latest }
+  include armadillo
 
   class { 'nuclear':
     username => $username,

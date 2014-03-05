@@ -18,7 +18,7 @@
  */
 
 #ifndef MODULES_AUDIO_BEATNBEATDETECTOR_H
-#define	MODULES_AUDIO_BEATNBEATDETECTOR_H
+#define MODULES_AUDIO_BEATNBEATDETECTOR_H
 
 #include <nuclear>
 #include "utility/idiom/pimpl.h"

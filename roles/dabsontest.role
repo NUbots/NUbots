@@ -1,0 +1,13 @@
+ADD_ROLE(
+    NAME dabsontest 
+    MODULES
+        support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem
+        #platform::darwin::HardwareIO
+        input::LinuxCamera
+        support::NUbugger
+		behaviours::tools::DabsonTest
+)
+
+

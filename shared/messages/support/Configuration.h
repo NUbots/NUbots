@@ -72,6 +72,30 @@ namespace messages {
             Configuration(const std::string& name, ConfigurationNode config) : name(name), config(config) {};
             std::string name;
             ConfigurationNode config;
+
+            ConfigurationNode& operator [] (const std::string& key) {
+                return config[key];
+            }
+
+            const ConfigurationNode& operator [] (const std::string& key) const {
+                return config[key];
+            }
+
+            ConfigurationNode& operator [] (const char* key) {
+                return config[key];
+            }
+
+            const ConfigurationNode& operator [] (const char* key) const {
+                return config[key];
+            }
+
+            ConfigurationNode& operator [] (size_t index) {
+                return config[index];
+            }
+
+            const ConfigurationNode& operator [] (size_t index) const {
+                return config[index];
+            }
         };
 
         /**
@@ -109,7 +133,7 @@ namespace NUClear {
      */
     template <typename TConfiguration>
     struct NUClear::Reactor::Exists<messages::support::Configuration<TConfiguration>> {
-        static void exists(NUClear::Reactor* context) {
+        static void exists(NUClear::Reactor& context) {
 
             // Build our lambda we will use to trigger this reaction
             std::function<void (Reactor*, const std::string&, const messages::support::ConfigurationNode&)> emitter =
@@ -127,7 +151,7 @@ namespace NUClear {
             };
 
             // Emit it from our reactor to the config system
-            context->emit<Scope::INITIALIZE>(std::unique_ptr<messages::support::ConfigurationConfiguration>(
+            context.emit<Scope::INITIALIZE>(std::unique_ptr<messages::support::ConfigurationConfiguration>(
                 new messages::support::ConfigurationConfiguration {
                     typeid(TConfiguration),
                     TConfiguration::CONFIGURATION_PATH,

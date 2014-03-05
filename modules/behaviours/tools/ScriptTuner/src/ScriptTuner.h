@@ -66,6 +66,10 @@ namespace modules {
                 void help();
                 void editGainInput();
 
+                void editGain();
+                void userInputToFrame();
+                float userInputToGain();
+
                 volatile bool running;
 
             public:

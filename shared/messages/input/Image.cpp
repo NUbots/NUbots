@@ -58,11 +58,11 @@ namespace messages {
             return data[new_y*imgWidth+new_x];     
         }
 
-        const size_t Image::width() const {
+        size_t Image::width() const {
             return imgWidth;
         }
 
-        const size_t Image::height() const {
+        size_t Image::height() const {
             return imgHeight;
         }
         

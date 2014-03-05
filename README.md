@@ -13,16 +13,23 @@ The following is a guide to getting you set up and ready to contribute to the NU
 
 1. Install the following prerequisites on your machine (packages/installers are available for Windows, OSX, and Linux):
 	* [Git][]
-	* [Virtualbox][]
+	* [Virtualbox][] (or VMware Fusion)
 	* [Vagrant][vagrant_download] (Note: The version of Vagrant that is available in the Ubuntu 12.04 repositories is an older version that is incompatible with the NUbots' Vagrantfile. If you're using Ubuntu 12.04, please install the latest version of Vagrant via a .deb from the [Vagrant download page][vagrant_download])
+	* [Packer][]
 
 2. Clone this git repository onto your machine:
 	e.g.
 
 		$ git clone git@github.com:nubots/NUClearPort.git ~/NUClearPort
 
+3. Create a Vagrant base box using Packer:
+	
+	The build-helper script has a command for this:
 
-3. Run `vagrant up` from within the directory just created by the clone operation:
+		$ cd ~/NUClearPort
+		$ ./b create_box
+
+4. Run `vagrant up` from the NUClearPort directory:
 	e.g.
 
 		$ cd ~/NUClearPort
@@ -49,7 +56,7 @@ The following is a guide to getting you set up and ready to contribute to the NU
 	(While your VM is being created, you might want to learn a little more about Vagrant by 
 	reading the [Getting Started Guide][] or the [Command-Line Interface][] documentation)
 
-4.  Just type `$ vagrant ssh` to ssh into your new VM!
+5.  Just type `$ vagrant ssh` to ssh into your new VM!
 
 	Vagrant will sync the `~/nubots/NUClearPort` directory on the VM with the root of your NUClearPort repository.
 	This allows for easy editing of code on your machine, and building on the VM.
@@ -84,6 +91,7 @@ The following is a guide to getting you set up and ready to contribute to the NU
 [Vagrant]:                http://www.vagrantup.com/                               "Vagrant"
 [Virtualbox]:             https://www.virtualbox.org/wiki/Downloads               "Virtualbox"
 [vagrant_download]:       http://downloads.vagrantup.com/                         "Vagrant Download Page"
+[Packer]:                 http://www.packer.io/                                   "Packer Website"
 [precise_32_box]:         http://files.vagrantup.com/precise32.box                "Ubuntu 12.04 Box for Vagrant"
 [Getting Started Guide]:  http://docs.vagrantup.com/v2/getting-started/index.html "Vagrant's Getting Started Guide"
 [Command-Line Interface]: http://docs.vagrantup.com/v2/cli/index.html             "Vagrant Command-Line Interface Documentation"

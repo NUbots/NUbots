@@ -19,6 +19,7 @@
 
 #include "messages/motion/ServoWaypoint.h"
 #include "messages/platform/darwin/DarwinServoCommand.h"
+#include "messages/support/Configuration.h"
 
 #include "MotionManager.h"
 #include "utility/math/angle.h"
@@ -26,12 +27,14 @@
 namespace modules {
 namespace platform {
 namespace darwin {
+    using messages::support::Configuration;
+
 
     MotionManager::MotionManager(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Trigger<Every<20, std::chrono::milliseconds>>, With<messages::platform::darwin::DarwinSensors>>([this](const time_t& time, const messages::platform::darwin::DarwinSensors& sensors) {
 
-                std::lock_guard<std::mutex> waypointLock(waypointMutex);
+            std::lock_guard<std::mutex> waypointLock(waypointMutex);
 
             bool emptiedQueue = false;
 
@@ -116,6 +119,7 @@ namespace darwin {
 
                     // If this moving speed is unattainable
                     if(movingSpeed > 60) {
+                        NUClear::log<NUClear::WARN>("Servo ", i + 1, " has a requested moving speed of ", movingSpeed, ", which is greater then the maximum speed of the motor");
                         // TODO some sort of log warning could be thrown here that we can't go this fast (motors can't)
                     }
 
@@ -127,9 +131,10 @@ namespace darwin {
 
                     // TODO if someone were to want to tune the PID values, this is where it would go.
                     // multiply the values by gain to get the "softness" of the motion
-                    command.pGain = gain;
-                    command.iGain = 0;
-                    command.dGain = 0;
+
+                    command.pGain = P_FACTOR * gain;
+                    command.iGain = I_FACTOR * (gain != 0);
+                    command.dGain = D_FACTOR * (gain != 0);
 
                     // Push this onto our list of commands
                     commands->push_back(std::move(command));
@@ -172,13 +177,22 @@ namespace darwin {
                 // If we have an event in the queue, then we start when this event starts otherwise we start now
                 m.start = queue.empty() ? NUClear::clock::now() : queue.back().end;
                 m.end = point.time;
-                m.position = utility::math::angle::normalizeAngle(point.position);;
+                m.position = utility::math::angle::normalizeAngle(point.position);
                 m.gain = point.gain;
                 m.executed = false;
 
                 queue.push_back(std::move(m));
             }
         });
+
+        on< Trigger<Configuration<MotionManager>> >([this](const Configuration<MotionManager>& motion) {
+            
+            P_FACTOR = motion.config["P_FACTOR"];
+            I_FACTOR = motion.config["I_FACTOR"];
+            D_FACTOR = motion.config["D_FACTOR"];
+
+        });
+
     }
 
     void MotionManager::queueEnd(size_t queue) {
@@ -201,8 +215,8 @@ namespace darwin {
             case 15: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::L_ANKLE_PITCH>>()); break;
             case 16: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::R_ANKLE_ROLL>>()); break;
             case 17: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::L_ANKLE_ROLL>>()); break;
-            case 18: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::HEAD_PAN>>()); break;
-            case 19: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::HEAD_TILT>>()); break;
+            case 18: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::HEAD_YAW>>()); break;
+            case 19: emit(std::make_unique<messages::motion::ServoWaypointsComplete<messages::input::ServoID::HEAD_PITCH>>()); break;
         }
     }
 

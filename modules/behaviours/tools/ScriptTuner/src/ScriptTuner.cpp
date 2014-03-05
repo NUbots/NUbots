@@ -33,6 +33,7 @@ namespace modules {
     namespace behaviours {
         namespace tools {
             using messages::motion::ExecuteScript;
+            using messages::input::ServoID;
 
             struct LockServo {};
 
@@ -60,7 +61,7 @@ namespace modules {
 
                     else {
                         NUClear::log<NUClear::DEBUG>("Error: Expected 2 arguments on argv found ", args.size(), '\n');
-                        powerPlant->shutdown();
+                        powerplant.shutdown();
                     }
                 });
 
@@ -85,7 +86,7 @@ namespace modules {
                     emit(std::move(waypoint));
                 });
 
-                powerPlant->addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&ScriptTuner::run), this),
+                powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&ScriptTuner::run), this),
                                                                                          std::bind(std::mem_fn(&ScriptTuner::kill), this)));
             }
 
@@ -154,7 +155,7 @@ namespace modules {
                         case 'R':
                             refreshView();
                             break;
-                        case 'G';
+                        case 'G':
                             editGain();
                             break;
                         case':':
@@ -612,10 +613,8 @@ namespace modules {
                 size_t j = 0;
                 float upperGain;
                 float lowerGain;
-                bool editScript;
-                bool editFrame;
-                editScript = false;
-                editGain = false;
+                bool editScript = false;
+                bool editFrame = false;
                 bool changedUpper = false;
                 bool changedLower = false;
                 
@@ -623,15 +622,19 @@ namespace modules {
 
                     switch(getch()) {
                         case KEY_UP:
+                            mvchgat(YPOSITION[i][j], XPOSITION[i][j], frame, 0, 0, nullptr);
                             i = (i-1) % 3;
                             break;
                         case KEY_DOWN:
+                            mvchgat(YPOSITION[i][j], XPOSITION[i][j], frame, 0, 0, nullptr);
                             i = (i+1) % 3;
                             break;
                         case KEY_LEFT:
+                            mvchgat(YPOSITION[i][j], XPOSITION[i][j], frame, 0, 0, nullptr);
                             j = (j-1) % 3;
                             break;
                         case KEY_RIGHT:
+                            mvchgat(YPOSITION[i][j], XPOSITION[i][j], frame, 0, 0, nullptr);
                             j = (j+1) % 3;
                             break;
                         case KEY_ENTER:
@@ -648,12 +651,12 @@ namespace modules {
 
                             //prints user input to screen
                             if (YPOSITION[i][j] == 7 && XPOSITION[i][j] == 12) {
-                                mvprintw(YPOSITION[i][j], XPOSITION[i][j], " ")
+                                mvprintw(YPOSITION[i][j], XPOSITION[i][j], " ");
                                 userInputToFrame();
                                 printw("%d", frame);
                             }
                             else {
-                                mvprintw(YPOSITION[i][j], XPOSITION[i][j], "     ")
+                                mvprintw(YPOSITION[i][j], XPOSITION[i][j], "     ");
                                 newGain = userInputToGain();
                                 if(isnan(newGain)) {
                                     printw("---.-");
@@ -662,7 +665,7 @@ namespace modules {
                                     printw("%5.1f", newGain);
                                     
                                     //allows separate gains for upper and lower motors
-                                    if (YPOSITION[i][j] == 6 && XPOSITION[i][j] == 20 || YPOSITION[i][j] == 8 && XPOSITION == 20) {
+                                    if ((YPOSITION[i][j] == 6 && XPOSITION[i][j] == 20) || (YPOSITION[i][j] == 8 && XPOSITION[i][j] == 20)) {
                                         upperGain = newGain;
 
                                         changedUpper = true;
@@ -675,7 +678,7 @@ namespace modules {
                                             mvprintw(8,7,"---.-");
                                         }
                                     }
-                                    else if (YPOSITION[i][j] == 6 && XPOSITION[i][j] == 32 || YPOSITION[i][j] == 8 && XPOSITION == 32) {
+                                    else if ((YPOSITION[i][j] == 6 && XPOSITION[i][j] == 32) || (YPOSITION[i][j] == 8 && XPOSITION[i][j] == 32)) {
                                         lowerGain = newGain;
 
                                         changedLower = true;
@@ -697,7 +700,7 @@ namespace modules {
 
                                         // Set upper and lower
                                         if (YPOSITION[i][j] == 6 && XPOSITION[i][j] == 7) {
-                                            mvprint(6,20, "---.-");
+                                            mvprintw(6,20, "---.-");
                                             mvprintw(6,32, "---.-");
                                         }
                                         else {
@@ -709,7 +712,7 @@ namespace modules {
                                     // if user has entered the same gain in upper and lower then automatically prints value in both and dashes upper and lower
                                     if (upperGain == lowerGain) {   
                                         if (YPOSITION[i][j] == 6) {
-                                        mvprint(6,20, "---.-");
+                                        mvprintw(6,20, "---.-");
                                         mvprintw(6,32, "---.-");
                                         }
                                         else {
@@ -742,34 +745,34 @@ namespace modules {
                 //loop through all frames in script and edit gains
                 if (editScript) {
                     for(auto& f : script.frames) {
-                        for(auto& waypoint : f.waypoints) {
-                            switch(waypoint.servoid) {
-                                case HEAD_PAN:
-                                case HEAD_TILT:
-                                case R_SHOULDER_PITCH:
-                                case L_SHOULDER_PITCH:
-                                case R_SHOULDER_ROLL:
-                                case L_SHOULDER_ROLL:
-                                case R_ELBOW:
-                                case L_ELBOW:
+                        for(auto& target : f.targets) {
+                            switch(target.id) {
+                                case ServoID::HEAD_YAW:
+                                case ServoID::HEAD_PITCH:
+                                case ServoID::R_SHOULDER_PITCH:
+                                case ServoID::L_SHOULDER_PITCH:
+                                case ServoID::R_SHOULDER_ROLL:
+                                case ServoID::L_SHOULDER_ROLL:
+                                case ServoID::R_ELBOW:
+                                case ServoID::L_ELBOW:
                                     if(changedUpper) {
-                                        waypoint.gain = upperGain;
+                                        target.gain = upperGain;
                                     }
                                 break;
-                                case R_HIP_YAW:
-                                case L_HIP_YAW:
-                                case R_HIP_ROLL:
-                                case L_HIP_ROLL:
-                                case R_HIP_PITCH:
-                                case L_HIP_PITCH:
-                                case R_KNEE:
-                                case L_KNEE:
-                                case R_ANKLE_PITCH:
-                                case L_ANKLE_PITCH:
-                                case R_ANKLE_ROLL:
-                                case L_ANKLE_ROLL:
+                                case ServoID::R_HIP_YAW:
+                                case ServoID::L_HIP_YAW:
+                                case ServoID::R_HIP_ROLL:
+                                case ServoID::L_HIP_ROLL:
+                                case ServoID::R_HIP_PITCH:
+                                case ServoID::L_HIP_PITCH:
+                                case ServoID::R_KNEE:
+                                case ServoID::L_KNEE:
+                                case ServoID::R_ANKLE_PITCH:
+                                case ServoID::L_ANKLE_PITCH:
+                                case ServoID::R_ANKLE_ROLL:
+                                case ServoID::L_ANKLE_ROLL:
                                     if(changedLower) {
-                                        waypoint.gain = lowerGain;
+                                        target.gain = lowerGain;
                                     }
                                 break;
                             }
@@ -779,46 +782,39 @@ namespace modules {
 
                 //edit gains for only specifc frame
                 if (editFrame) {
-                    for(auto& waypoint : f.waypoints) {
-                        switch(waypoint.servoid) {
-                            case HEAD_PAN:
-                            case HEAD_TILT:
-                            case R_SHOULDER_PITCH:
-                            case L_SHOULDER_PITCH:
-                            case R_SHOULDER_ROLL:
-                            case L_SHOULDER_ROLL:
-                            case R_ELBOW:
-                            case L_ELBOW:
+                    for(auto& target : script.frames[frame].targets) {
+                        switch(target.id) {
+                            case ServoID::HEAD_YAW:
+                            case ServoID::HEAD_PITCH:
+                            case ServoID::R_SHOULDER_PITCH:
+                            case ServoID::L_SHOULDER_PITCH:
+                            case ServoID::R_SHOULDER_ROLL:
+                            case ServoID::L_SHOULDER_ROLL:
+                            case ServoID::R_ELBOW:
+                            case ServoID::L_ELBOW:
                                 if(changedUpper) {
-                                    waypoint.gain = upperGain;
+                                    target.gain = upperGain;
                                 }
                             break;
-                            case R_HIP_YAW:
-                            case L_HIP_YAW:
-                            case R_HIP_ROLL:
-                            case L_HIP_ROLL:
-                            case R_HIP_PITCH:
-                            case L_HIP_PITCH:
-                            case R_KNEE:
-                            case L_KNEE:
-                            case R_ANKLE_PITCH:
-                            case L_ANKLE_PITCH:
-                            case R_ANKLE_ROLL:
-                            case L_ANKLE_ROLL:
+                            case ServoID::R_HIP_YAW:
+                            case ServoID::L_HIP_YAW:
+                            case ServoID::R_HIP_ROLL:
+                            case ServoID::L_HIP_ROLL:
+                            case ServoID::R_HIP_PITCH:
+                            case ServoID::L_HIP_PITCH:
+                            case ServoID::R_KNEE:
+                            case ServoID::L_KNEE:
+                            case ServoID::R_ANKLE_PITCH:
+                            case ServoID::L_ANKLE_PITCH:
+                            case ServoID::R_ANKLE_ROLL:
+                            case ServoID::L_ANKLE_ROLL:
                                 if(changedLower) {
-                                    waypoint.gain = lowerGain;
+                                    target.gain = lowerGain;
                                 }
                             break;
                         }
                     }    
                 }
-
-                
-                auto& f = script.frames[frame];
-                //does this loop through all frames of script,need two cases for whole script or single frame
-                //the last case changed will overide???
-                
-
                 
                 //output gains to scripttuner window automatic??
                 curs_set(false);
@@ -863,9 +859,9 @@ namespace modules {
             float ScriptTuner::userInputToGain() {
                 std::string tempGain = userInput();
                 try {
-                    if (!tempGain.empty() {
+                    if (!tempGain.empty()) {
                         float tempGain2 = stof(tempGain); //double tempGain = stod(tempGain)???;
-                        if (tempGain2 => 0 && tempGain2 <= 100){
+                        if (tempGain2 >= 0 && tempGain2 <= 100){
                             return tempGain2;
                         }
                         else {

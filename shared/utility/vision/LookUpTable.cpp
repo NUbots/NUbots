@@ -9,18 +9,18 @@
 
 #include "LookUpTable.h"
 
-namespace modules{
+namespace utility{
   namespace vision{
 
         using messages::vision::Colour;
         
         LookUpTable::LookUpTable() {
             LUTbuffer = new unsigned char[LUT_SIZE];
-			
+            
             for(int i = 0; i < LUT_SIZE; i++) {
                 LUTbuffer[i] = Colour::unclassified;
-			}
-			
+            }
+            
             LUT = LUTbuffer;
         }
 
@@ -33,14 +33,14 @@ namespace modules{
             for(int i = 0; i < LUT_SIZE; i++) {
                 LUTbuffer[i] = vals[i];
             }
-			
+            
             LUT = LUTbuffer;
         }
 
         bool LookUpTable::loadLUTFromFile(const std::string& file_name) {
             // char* lutBuffer = (char*)LUTbuffer;
             std::ifstream lutfile;
-            std::string file_location = "/home/darwin/config/"+file_name;
+            std::string file_location = file_name;
 
             // Need std::ios_base::ate for determining file size.
             lutfile.open(file_location, std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
@@ -53,12 +53,12 @@ namespace modules{
                 LUT = LUTbuffer;
                 return true;
             }
-			
+            
             else {
-                //NUClear::log<NUClear::DEBUG>("Vision::loadLUTFromFile(", file_location, "). Failed to load lut.");
-                std::cout << "Vision::loadLUTFromFile(" << file_location << "). Failed to load lut." << std::endl;
-                std::cout << "Lutfile is open "<< lutfile.is_open()<<"  ||  LUTfile size = "<<lutfile.tellg()<< std::endl;
-                std::cout << "good: "<< lutfile.good() <<"; bad: "<< lutfile.bad() <<"; fail: "<< lutfile.fail() <<"; eof: "<< lutfile.eof() << std::endl;
+                NUClear::log<NUClear::DEBUG>("Vision::loadLUTFromFile(", file_location, "). Failed to load lut. File size = ", lutfile.tellg());
+                //std::cout << "Vision::loadLUTFromFile(" << file_location << "). Failed to load lut." << std::endl;
+               // std::coutImage << "Lutfile is open "<< lutfile.is_open()<<"  ||  LUTfile size = "<<lutfile.tellg()<< std::endl;
+               // std::cout << "good: "<< lutfile.good() <<"; bad: "<< lutfile.bad() <<"; fail: "<< lutfile.fail() <<"; eof: "<< lutfile.eof() << std::endl;
                 lutfile.clear();
                 return false;
             }
@@ -67,20 +67,24 @@ namespace modules{
         void LookUpTable::zero() {
             for(int i = 0; i < LUT_SIZE; i++) {
                 LUTbuffer[i] = Colour::unclassified;
-			}
-			
+            }
+            
             LUT = LUTbuffer;
         }
 
-        const unsigned int LookUpTable::getLUTIndex(const messages::input::Image::Pixel& colour) const {
+        unsigned int LookUpTable::getLUTIndex(const messages::input::Image::Pixel& colour) const {
             unsigned int index = 0;
-			
+            
             index += ((colour.y >> 1) << 14);
             index += ((colour.cb >> 1) << 7);
             index += (colour.cr >> 1);
-			
+            
             return index;
         }
-		
+
+        messages::vision::Colour LookUpTable::classifyPixel(const messages::input::Image::Pixel& p) const {
+            return (messages::vision::Colour)(LUT[getLUTIndex(p)]); // 7bit LUT
+        }  
+        
     }   //vision
 }   //modules

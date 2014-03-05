@@ -30,17 +30,32 @@ namespace math {
      * @author Trent Houliston
      */
     namespace angle {
+        
+        
+        /**
+         * Takes an angle in radians and normalizes it to be between -pi and pi
+         *
+         * @param value the angle in radians
+         *
+         * @return the angle between -pi and pi
+         */
         inline double normalizeAngle(const double value) {
 
-            double angle = fmod(value, 2 * M_PI);
-            if (angle < -M_PI) angle += 2 * M_PI;
-            else if (angle >= M_PI) angle -= 2 * M_PI;
+            double angle = std::fmod(value, 2 * M_PI);
+            if (angle <= -M_PI) angle += 2 * M_PI;
+            else if (angle > M_PI) angle -= 2 * M_PI;
 
             return angle;
         }
 
+        /**
+         * Calculates the difference between two angles between -pi and pi
+         *
+         * @param
+         */
         inline double difference(const double a, const double b) {
-            return fmod(((a - b) + M_PI), 2 * M_PI) - M_PI;
+
+            return M_PI - std::fabs(std::fmod(std::fabs(a - b), 2 * M_PI) - M_PI);
         }
     }
 }

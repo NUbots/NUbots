@@ -35,7 +35,7 @@ namespace modules {
         // //     // std::cout << testConfig << std::endl;
         // });
 
-    	on<Trigger<Every<500, std::chrono::milliseconds>>>([this](const time_t&) {
+        on<Trigger<Every<500, std::chrono::milliseconds>>>([this](const time_t&) {
             // emit(std::make_unique<messages::LMissile>());
             std::cout << __PRETTY_FUNCTION__ << ": rand():" << rand() << std::endl;
 

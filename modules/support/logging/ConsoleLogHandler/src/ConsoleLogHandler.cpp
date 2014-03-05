@@ -24,8 +24,45 @@ namespace modules {
         namespace logging {
 
             ConsoleLogHandler::ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+                on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics & stats) {
+                    if (stats.exception) {
+                        try {
+                            std::rethrow_exception(stats.exception);
+                        }
+                        catch (std::exception ex) {
+                            NUClear::log<NUClear::ERROR>("Unhandled Exception: ", ex.what());
+                        }
+                        // We don't actually want to crash
+                        catch (...) {
+                        }
+                    }
+                });
+                
+                
                 on<Trigger<NUClear::LogMessage>, Options<Sync<ConsoleLogHandler>>>([this](const NUClear::LogMessage& message) {
                     
+                    // Output the level
+                    switch(message.level) {
+                        case NUClear::TRACE:
+                            std::cout << "TRACE: ";
+                            break;
+                        case NUClear::DEBUG:
+                            std::cout << "DEBUG: ";
+                            break;
+                        case NUClear::INFO:
+                            std::cout << "INFO: ";
+                            break;
+                        case NUClear::WARN:
+                            std::cout << "WARN: ";
+                            break;
+                        case NUClear::ERROR:
+                            std::cout << "ERROR: ";
+                            break;
+                        case NUClear::FATAL:
+                            std::cout << "FATAL: ";
+                            break;
+                    }
+
                     // Output the message
                     std::cout << message.message << std::endl;
                 });

@@ -46,6 +46,8 @@ namespace configuration {
                     return true;
                 case DataType::NULLPOINTER:
                     return false;
+                default:
+                    return false;
             }
         }
     };

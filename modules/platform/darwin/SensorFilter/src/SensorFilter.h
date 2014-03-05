@@ -23,6 +23,9 @@
 #include <nuclear>
 
 #include "messages/motion/ServoWaypoint.h"
+#include "utility/math/kalman/UKF.h"
+#include "utility/math/kalman/AdaptiveIMUModel.h"
+#include "utility/math/kalman/LinearVec3Model.h"
 
 namespace modules {
     namespace platform {
@@ -36,6 +39,24 @@ namespace modules {
             class SensorFilter : public NUClear::Reactor {
             public:
                 explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
+
+                time_t lastUpdate;
+                arma::mat33 lastOrientationMatrix;
+                arma::vec3 previousMeasuredTorsoFromLeftFoot;
+                arma::vec3 previousMeasuredTorsoFromRightFoot;
+                utility::math::kalman::UKF<utility::math::kalman::AdaptiveIMUModel> orientationFilter;
+                utility::math::kalman::UKF<utility::math::kalman::LinearVec3Model> velocityFilter;
+                int frameLimiter;
+
+                double DEFAULT_NOISE_GAIN;
+                double HIGH_NOISE_THRESHOLD;
+                double HIGH_NOISE_GAIN;
+                double LOW_NOISE_THRESHOLD;
+
+                double SUPPORT_FOOT_FSR_THRESHOLD;
+                int REQUIRED_NUMBER_OF_FSRS;
+                static constexpr const char* CONFIGURATION_PATH = "DarwinSensorFilter.json";
+
             };
         }
     }

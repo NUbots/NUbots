@@ -22,7 +22,7 @@
 namespace messages {
     namespace input {
 
-        const ServoID idFromString(const std::string str) {
+        ServoID idFromString(const std::string str) {
 
             return    str == "R_SHOULDER_PITCH" ? ServoID::R_SHOULDER_PITCH
                     : str == "L_SHOULDER_PITCH" ? ServoID::L_SHOULDER_PITCH
@@ -42,8 +42,8 @@ namespace messages {
                     : str == "L_ANKLE_PITCH"    ? ServoID::L_ANKLE_PITCH
                     : str == "R_ANKLE_ROLL"     ? ServoID::R_ANKLE_ROLL
                     : str == "L_ANKLE_ROLL"     ? ServoID::L_ANKLE_ROLL
-                    : str == "HEAD_PAN"         ? ServoID::HEAD_PAN
-                    : str == "HEAD_TILT"        ? ServoID::HEAD_TILT
+                    : str == "HEAD_YAW"         ? ServoID::HEAD_YAW
+                    : str == "HEAD_PITCH"       ? ServoID::HEAD_PITCH
                     : static_cast<ServoID>(-1);
         }
 
@@ -68,8 +68,8 @@ namespace messages {
                 case ServoID::L_ANKLE_PITCH:     return "L_ANKLE_PITCH";
                 case ServoID::R_ANKLE_ROLL:      return "R_ANKLE_ROLL";
                 case ServoID::L_ANKLE_ROLL:      return "L_ANKLE_ROLL";
-                case ServoID::HEAD_PAN:          return "HEAD_PAN";
-                case ServoID::HEAD_TILT:         return "HEAD_TILT";
+                case ServoID::HEAD_YAW:          return "HEAD_YAW";
+                case ServoID::HEAD_PITCH:        return "HEAD_PITCH";
                 default:                         return "UNKNOWN";
             }
         }
