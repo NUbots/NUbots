@@ -163,7 +163,11 @@ namespace localisation {
         // Update robot models
         // if (kMultipleModelsEnabled) { 
             // useful_object_count += ProcessAmbiguousObjects(fobs);
+
+
             ProcessAmbiguousObjects(goals);
+
+
             // PruneModels();
         // }
 

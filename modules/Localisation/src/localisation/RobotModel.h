@@ -13,7 +13,9 @@ namespace modules {
         enum RobotModelStateComponents {
             kX = 0,
             kY = 1,
-            kHeading = 2,
+            // kHeading = 2,
+            kHeadingX = 2,
+            kHeadingY = 3,
         };
 
         enum class MeasurementType {
@@ -25,7 +27,7 @@ namespace modules {
 
         class RobotModel {
         public:            
-            static constexpr size_t size = 3;
+            static constexpr size_t size = 4;
             
             RobotModel() {} // empty constructor
             

@@ -30,6 +30,7 @@
 #include "messages/vision/VisionObjects.h"
 #include "localisation/FieldDescription.h"
 #include "localisation/LocalisationFieldObject.h"
+#include "localisation/RobotModel.h"
 
 using utility::NUbugger::graph;
 using messages::support::Configuration;
@@ -58,7 +59,7 @@ namespace modules {
             // emit(std::make_unique<messages::LMissile>());
             // std::cout << __PRETTY_FUNCTION__ << ": rand():" << rand() << std::endl;
 
-            arma::vec3 state = engine_.robot_models_.GetEstimate();
+            arma::vec::fixed<localisation::RobotModel::size> state = engine_.robot_models_.GetEstimate();
             auto cov = engine_.robot_models_.GetCovariance();
 
             // NUClear::log("=====================", "Covariance Matrix\n", cov);
@@ -73,13 +74,13 @@ namespace modules {
             std::vector<messages::localisation::FieldObject::Model> robot_msg_models;
             
             for (auto& model : engine_.robot_models_.hypotheses()) {
-                arma::vec3 model_state = model->GetEstimate();
+                arma::vec::fixed<localisation::RobotModel::size> model_state = model->GetEstimate();
 
                 messages::localisation::FieldObject::Model robot_model;
                 robot_msg->name = "self";
                 robot_model.wm_x = model_state[0];
                 robot_model.wm_y = model_state[1];
-                robot_model.heading = model_state[2];
+                robot_model.heading = std::atan2(model_state[3], model_state[2]);
                 robot_model.sd_x = 1;
                 robot_model.sd_y = 0.25;
                 robot_model.sr_xx = cov(0, 0);
