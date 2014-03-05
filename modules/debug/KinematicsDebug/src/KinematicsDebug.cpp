@@ -34,7 +34,7 @@
 namespace modules {
     namespace debug {
             using messages::support::Configuration;
-            using messages::motion::ServoWaypoint;
+            using ServoWaypoint = messages::motion::ServoWaypointX;
             using messages::input::ServoID;
             using messages::input::Sensors;
             using utility::motion::kinematics::calculateLegJoints;

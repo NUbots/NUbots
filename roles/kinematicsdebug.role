@@ -6,5 +6,5 @@ ADD_ROLE(
         support::configuration::ConfigSystem 
         support::NUbugger
         debug::NUbugger
-        #debug::KinematicsDebug
+        debug::KinematicsDebug
 )

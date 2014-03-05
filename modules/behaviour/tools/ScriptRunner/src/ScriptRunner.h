@@ -39,6 +39,9 @@ namespace modules {
                 /// The scripts to be executed
                 std::queue<std::string> scripts;
 
+                /// Our ID for subsumption
+                const size_t id;
+
                 /// Execute the next script in the list
                 void executeNextScript();
             public:

@@ -20,11 +20,18 @@
 #include "ScriptRunner.h"
 
 #include "messages/motion/Script.h"
-#include "messages/motion/ServoWaypoint.h"
+#include "messages/behaviour/Action.h"
 
 namespace modules {
     namespace behaviour {
         namespace tools {
+
+            using messages::motion::ExecuteScriptByName;
+            using messages::behaviour::RegisterAction;
+            using messages::behaviour::LimbID;
+            using messages::input::ServoID;
+
+            struct ExecuteNextScript {};
             
             void ScriptRunner::executeNextScript() {
                 
@@ -33,7 +40,7 @@ namespace modules {
                     
                     // Get it and emit it
                     auto script = scripts.front();
-                    emit(std::make_unique<messages::motion::ExecuteScriptByName>(script));
+                    emit(std::make_unique<ExecuteScriptByName>(id, script));
                     scripts.pop();
                 }
                 // Otherwise we are done, shutdown
@@ -42,7 +49,7 @@ namespace modules {
                 }
             }
 
-            ScriptRunner::ScriptRunner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+            ScriptRunner::ScriptRunner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
                 
                 // Get the scripts to run from the command line
                 on<Trigger<CommandLineArguments>>([this](const std::vector<std::string>& args) {
@@ -52,14 +59,25 @@ namespace modules {
                         NUClear::log<NUClear::INFO>("Queueing script ", args[i]);
                         scripts.push(args[i]);
                     }
+                });
 
+                on<Trigger<ExecuteNextScript>>([this](const ExecuteNextScript&) {
                     executeNextScript();
                 });
 
-                // When we finish with a script, execute the next one
-                on<Trigger<messages::motion::AllServoWaypointsComplete>>([this](const messages::motion::AllServoWaypointsComplete&) {
-                    executeNextScript();
-                });
+                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+                    id,
+                    { std::pair<float, std::set<LimbID>>(1, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD }) },
+                    [this] (const std::set<LimbID>&) {
+                        emit(std::make_unique<ExecuteNextScript>());
+                    },
+                    [this] (const std::set<LimbID>&) {
+                        // We should always be the only running thing
+                    },
+                    [this] (const std::set<ServoID>&) {
+                        emit(std::make_unique<ExecuteNextScript>());
+                    }
+                }));
             }
             
         }  // tools
