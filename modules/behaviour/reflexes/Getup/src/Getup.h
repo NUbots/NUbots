@@ -21,9 +21,6 @@
 #define MODULES_BEHAVIOUR_REFLEX_GETUP_H
 
 #include <nuclear>
-#include <queue>
-
-#include "messages/motion/Script.h"
 
 namespace modules {
     namespace behaviour {

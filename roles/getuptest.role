@@ -10,6 +10,7 @@ ADD_ROLE(
         support::NUbugger
         debug::NUbugger
         behaviour::Controller
+        behaviour::reflexes::Stand
         behaviour::reflexes::Getup
         motion::ScriptEngine
 )

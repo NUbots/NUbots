@@ -66,8 +66,6 @@ namespace modules {
 
                 on<Trigger<ExecuteGetup>, With<Sensors>>([this] (const ExecuteGetup&, const Sensors& sensors) {
 
-                    std::cout << "Totally got triggered" << std::endl;
-
                     gettingUp = true;
 
                     // Check with side we're getting up from
@@ -81,6 +79,7 @@ namespace modules {
                 });
 
                 on<Trigger<KillGetup>, Options<Sync<Getup>>>([this] (const KillGetup&) {
+                    gettingUp = false;
                     updatePriority(0);
                 });
 

@@ -29,6 +29,7 @@
 #include <list>
 
 #include "messages/behaviour/Action.h"
+#include "messages/input/ServoID.h"
 
 namespace modules {
     namespace behaviour {
@@ -38,12 +39,13 @@ namespace modules {
         struct Request {
             using callback = std::function<void (std::set<messages::behaviour::LimbID>)>;
             
-            Request(size_t id, callback start, callback kill)
+            Request(size_t id, callback start, callback kill, std::function<void (std::set<messages::input::ServoID>)> completed)
             : id(id)
             , active(false)
             , maxPriority(std::numeric_limits<float>::min())
             , start(start)
-            , kill(kill) {}
+            , kill(kill)
+            , completed(completed) {}
             
             /// The ID of this request that will be sent with any motion commands
             size_t id;

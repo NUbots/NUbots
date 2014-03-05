@@ -19,57 +19,39 @@
 
 #include "Stand.h"
 
-#include <cmath>
+#include "messages/input/ServoID.h"
 #include "messages/motion/Script.h"
-#include "messages/motion/ServoWaypoint.h"
-#include "messages/support/Configuration.h"
+#include "messages/behaviour/Action.h"
 
 namespace modules {
     namespace behaviour {
         namespace reflexes {
 
+            using messages::input::ServoID;
+            using messages::motion::ExecuteScriptByName;
+            using messages::behaviour::RegisterAction;
+            using messages::behaviour::LimbID;
+
             //internal only callback messages to start and stop our action
-            struct ExecuteStand{ std::vector<LimbID> limbs; };
-            struct KillStand{ std::vector<LimbID> limbs; };
+            struct ExecuteStand {};
 
-            using messages::support::Configuration;
-            using messages::motion::AllServoWaypointsComplete;
+            Stand::Stand(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
+                
+                on<Trigger<ExecuteStand>>([this] (const ExecuteStand&) {
 
-            Stand::Stand(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-                    //do a little configurating
-                    on<Trigger<Configuration<Stand>>>([this](const Configuration<Getup>& file){
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Stand.json"));
 
-                        //we don't have any config data yet
-                        
-                    });
-
-                //Execute the kick action
-                on<Trigger<ExecuteStand>, Options<Sync<Stand>>>([this](const ExecuteGetup& a) {
-                    
                 });
 
-                on<Trigger<KillStand>, Options<Sync<Stand>>>([this](const KillGetup& a) {
-                    
-                });
-
-
-                //register our callbacks with the controller
-                emit(std::make_unique<messages::behaviour::RegisterAction>(
-
-                    size_t(this)*size_t(this)-size_t(this), //unique identifier based on this
-
-                    //Initial limb priorities
-                    {{1,{LimbID::LEFT_LEG,LimbID::RIGHT_LEG}},
-                     {0.5,{LimbID::LEFT_ARM,LimbID::RIGHT_ARM}}
-                         },
-
-                    [this](const std::vector<LimbID> limbs) { //make a function to start the action
-                        emit(std::make_unique<ExecuteStand>(limbs));
-                    }),
-
-                    [this](const std::vector<LimbID> limbs) { //make a function to end the action
-                        emit(std::make_unique<KillStand>(limbs));
-                    }));
+                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+                    id,
+                    { std::pair<float, std::set<LimbID>>(std::numeric_limits<float>::epsilon(), { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD }) },
+                    [this] (const std::set<LimbID>&) {
+                        emit(std::make_unique<ExecuteStand>());
+                    },
+                    [this] (const std::set<LimbID>&) { },
+                    [this] (const std::set<ServoID>&) { }
+                }));
             }
         }  // tools
     }  // behaviours

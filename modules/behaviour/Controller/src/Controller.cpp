@@ -46,7 +46,7 @@ namespace modules {
                 };
                 
                 // Make our request object
-                requests[action.id] = std::make_unique<Request>(action.id, action.start, action.kill);
+                requests[action.id] = std::make_unique<Request>(action.id, action.start, action.kill, action.completed);
                 auto& request = requests[action.id];
                 
                 // In order for our references to hold valid, we need to never reallocate this
@@ -236,8 +236,6 @@ namespace modules {
         }
         
         void Controller::selectAction() {
-            
-            std::cout << "Selecting Action from " << requests.size() << std::endl;
             
             // Sort each of the lists to choose a new item
             for(auto& l : actions) {

@@ -30,7 +30,7 @@ namespace platform {
 namespace darwin {
 
     using messages::platform::darwin::DarwinSensors;
-    using messages::motion::ServoWaypoint;
+    using ServoWaypoint = messages::motion::ServoWaypointX;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/ttyUSB0") {
 
@@ -170,12 +170,13 @@ namespace darwin {
                     NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                     float speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
-                    
+
                     values.push_back({
                         static_cast<uint8_t>(static_cast<int>(command.id) + 1),  // The id's on the robot start with ID 1
-                        Convert::gainInverse(command.gain),
-                        Convert::gainInverse(command.gain * 0),
-                        Convert::gainInverse(command.gain * 0),
+
+                        Convert::gainInverse(command.gain * 0), // Derivitive gain
+                        Convert::gainInverse(command.gain * 0), // Integral gain
+                        Convert::gainInverse(command.gain), // Proportional gain
                         0,
                         Convert::servoPositionInverse(static_cast<int>(command.id), command.position),
                         Convert::servoSpeedInverse(static_cast<int>(command.id), speed)

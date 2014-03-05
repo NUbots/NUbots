@@ -21,10 +21,6 @@
 #define MODULES_BEHAVIOUR_REFLEX_STAND_H
 
 #include <nuclear>
-#include <queue>
-
-#include "messages/platform/darwin/DarwinServoCommand.h"
-#include "messages/motion/Script.h"
 
 namespace modules {
     namespace behaviour {
@@ -37,12 +33,13 @@ namespace modules {
              */
             class Stand : public NUClear::Reactor {
             private:
-                void updateAction(const double& priority);
+                const size_t id;
 
             public:
                 explicit Stand(std::unique_ptr<NUClear::Environment> environment);
                 static constexpr const char* CONFIGURATION_PATH = "Stand.json";
             };
+
         }  // reflexes
     }  // behaviours
 }  // modules
