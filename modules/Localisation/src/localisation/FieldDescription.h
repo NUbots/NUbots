@@ -61,6 +61,8 @@ public:
         double center_circle_diameter;
         double border_strip_min_width;
     } dimensions;
+
+    void AddGoals(FieldDimensions d);
 };
 
 }
