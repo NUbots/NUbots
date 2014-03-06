@@ -7,7 +7,7 @@
 using messages::NUbugger::DataPoint;
 
 namespace utility {
-namespace NUbugger{
+namespace nubugger{
 
     template<typename... Values>
     inline std::unique_ptr<DataPoint> graph(std::string label, Values... values) {

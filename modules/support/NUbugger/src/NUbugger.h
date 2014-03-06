@@ -22,7 +22,7 @@
 
 #include <nuclear>
 #include <zmq.hpp>
-#include "messages/support/NUbugger/proto/Message.pb.h"
+#include "messages/support/nubugger/proto/Message.pb.h"
 
 namespace modules {
     namespace support {
@@ -36,11 +36,19 @@ namespace modules {
         class NUbugger : public NUClear::Reactor {
         private:
             zmq::socket_t pub;
+            zmq::socket_t sub;
+
+            bool listening = true;
 
             std::mutex mutex;
 
             void send(zmq::message_t& packet);
-            void send(messages::support::NUbugger::proto::Message message);
+            void send(messages::support::nubugger::proto::Message message);
+
+            void recvMessage(const messages::support::nubugger::proto::Message& message);
+
+            void run();
+            void kill();
         public:
             explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);
         };

@@ -27,8 +27,9 @@
 #include "messages/input/Image.h"
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/vision/LookUpTable.h"
 #include "messages/localisation/FieldObject.h"
-#include "utility/NUbugger/NUgraph.h"
+#include "utility/nubugger/NUgraph.h"
 
 #include "utility/image/ColorModelConversions.h"
 
@@ -38,22 +39,28 @@ namespace modules {
 		using messages::input::Sensors;
 		using messages::input::Image;
 		using messages::vision::ClassifiedImage;
+		using messages::vision::LookUpTable;
 		using NUClear::DEBUG;
-		using utility::NUbugger::graph;
+		using utility::nubugger::graph;
 		using std::chrono::duration_cast;
 		using std::chrono::microseconds;
-		using messages::support::NUbugger::proto::Message;
+		using messages::support::nubugger::proto::Message;
 		using messages::vision::Goal;
 
 		NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
 			: Reactor(std::move(environment))
-			, pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB) {
+			, pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB)
+			, sub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_SUB) {
 			// Set our high water mark
 			int hwm = 50;
 			pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
+            sub.setsockopt(ZMQ_SUBSCRIBE, 0, 0);
 			
             // Bind to port 12000
             pub.bind("tcp://*:12000");
+            sub.bind("tcp://*:12001");
+
+            powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&NUbugger::run), this), std::bind(std::mem_fn(&NUbugger::kill), this)));
                 
             on<Trigger<DataPoint>>([this](const DataPoint& data_point) {
                 Message message;
@@ -341,6 +348,37 @@ namespace modules {
 				pub.close();
 			});
 		}
+
+		void NUbugger::run() {
+            // TODO: fix this - still blocks on last recv even if listening = false
+            while (listening) {
+                zmq::message_t message;
+                sub.recv(&message);
+                
+                // If our message size is 0, then it is probably our termination message
+                if (message.size() > 0) {
+                    
+                    // Parse our message
+                    Message proto;
+                    proto.ParseFromArray(message.data(), message.size());
+                    recvMessage(proto);
+                }
+            }
+        }
+        
+        void NUbugger::recvMessage(const Message& message) {
+            // TODO: support other types
+
+            std::string lutData = message.lookuptable().table();
+            NUClear::log("Load LUT");
+            auto lut = std::make_unique<LookUpTable>();
+            lut->loadLUTFromArray(lutData.data());
+            emit(std::move(lut));
+        }
+
+		void NUbugger::kill() {
+            listening = false;
+        }
 
 		/**
 		 * This method needs to be used over pub.send as all calls to

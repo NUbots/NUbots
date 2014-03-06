@@ -28,7 +28,7 @@
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/Image.h"
 
-#include "utility/vision/LookUpTable.h"
+#include "messages/vision/LookUpTable.h"
 
 #include "Ball.h"
 
@@ -47,7 +47,7 @@ namespace modules {
                                     const std::vector<messages::vision::ColourSegment>& verticalMatchedSegments, 
                                     const std::vector<arma::vec2>& greenHorizonInterpolatedPoints,
                                     const messages::input::Image& img,
-                                    const utility::vision::LookUpTable& lut,
+                                    const messages::vision::LookUpTable& lut,
                                     const VisionKinematics& visionKinematics);
 
             void setParameters(int BALL_EDGE_THRESHOLD_, 

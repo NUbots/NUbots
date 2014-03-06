@@ -27,8 +27,7 @@
 #include "messages/input/Image.h"
 #include "messages/support/Configuration.h"
 #include "messages/vision/ClassifiedImage.h"
-
-#include "utility/vision/LookUpTable.h"
+#include "messages/vision/LookUpTable.h"
 
 namespace modules {
     namespace vision {
@@ -56,16 +55,16 @@ namespace modules {
 
         public:
             /*! @brief Computes the visual green horizon.
-                Note that the use of kinematics horizon has been replaced by dummmy code 
+                Note that the use of kinematics horizon has been replaced by dummy code 
                 @param image The raw image
             */ 
-            void calculateGreenHorizon(const messages::input::Image& image, const utility::vision::LookUpTable& LUT);
+            void calculateGreenHorizon(const messages::input::Image& image, const messages::vision::LookUpTable& LUT);
          
             /*! @brief Computes the green horizon characteristics
                 @param initial_points the horizon points calculated by the calculateGreenHorizon method
             */ 
             void set(std::vector<arma::vec2> original_points, int image_width, int image_height);
-            
+
             /*! @brief Returns a std::list of points on the convex hull in counter-clockwise order.
              Note: the last point in the returned std::list is the same as the first one.
              */
@@ -73,7 +72,7 @@ namespace modules {
 
             /*! @brief Returns a true if the specified pixel is coloured green.
              */
-            bool isPixelGreen(const messages::input::Image::Pixel& p, const utility::vision::LookUpTable& LUT);
+            bool isPixelGreen(const messages::input::Image::Pixel& p, const messages::vision::LookUpTable& LUT);
 
 
             /*! @brief  2D cross product of OA and OB std::vectors, i.e. z-component of their 3D cross product.
