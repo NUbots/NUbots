@@ -145,7 +145,7 @@ namespace modules {
 				}
 			});
 
-            on<Trigger<Image>, With<LookUpTable>, Options<Single>>([this](const Image& image, const LookUpTable& lut) { // TODO: fix!
+            on<Trigger<Image>, With<LookUpTable, Raw<Image>, Raw<LookUpTable>>, Options<Single>>([this](const Image& image, const LookUpTable& lut, const std::shared_ptr<const Image>& imagePtr, const std::shared_ptr<const LookUpTable> lutPtr) { // TODO: fix!
             	/*std::vector<arma::vec2> green_horizon_points = */
             	//std::cout << "Image size = "<< image.width() << "x" << image.height() <<std::endl;
             	//std::cout << "LUTClassifier::on<Trigger<Image>> calculateGreenHorizon" << std::endl;
@@ -165,6 +165,8 @@ namespace modules {
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyImage" << std::endl;
             	std::unique_ptr<ClassifiedImage> classifiedImage = segmentFilter.classifyImage(horizontalClassifiedSegments, verticalClassifiedSegments);
+                classifiedImage->image = imagePtr;
+                classifiedImage->LUT = lutPtr;
             	classifiedImage->greenHorizonInterpolatedPoints = greenHorizon.getInterpolatedPoints();
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> emit(std::move(classified_image));" << std::endl;

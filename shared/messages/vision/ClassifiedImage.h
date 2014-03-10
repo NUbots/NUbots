@@ -78,7 +78,7 @@ namespace messages {
 
             std::shared_ptr<const messages::input::Image> image;         //@! The image from which the segments are derived.
 
-            std::shared_ptr<messages::vision::LookUpTable> LUT;
+            std::shared_ptr<const messages::vision::LookUpTable> LUT;
              
 
             /*!
