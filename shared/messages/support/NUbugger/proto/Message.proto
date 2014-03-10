@@ -1,4 +1,4 @@
-package messages.support.NUbugger.proto;
+package messages.support.nubugger.proto;
 
 import "messages/input/proto/Sensors.proto";
 
@@ -9,6 +9,7 @@ message Message {
         LOCALISATION = 3;
 		DATA_POINT = 4;
 		REACTION_STATISTICS = 5;
+		LOOKUP_TABLE = 6;
     }
 
     required Type type = 1;
@@ -19,6 +20,11 @@ message Message {
     optional Localisation localisation = 5;
     optional DataPoint dataPoint = 6;
     optional ReactionStatistics reactionStatistics = 7;
+	optional LookupTable lookupTable = 8;
+
+	message LookupTable {
+		optional bytes table = 1;
+	}
 
 	message ReactionStatistics {
 		optional string name = 1;

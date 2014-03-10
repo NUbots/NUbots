@@ -30,7 +30,7 @@ namespace modules {
 		using messages::vision::Colour;
 		using messages::vision::SegmentedRegion;
 		using messages::vision::ScanDirection;
-		using utility::vision::LookUpTable;
+		using messages::vision::LookUpTable;
         
  		ScanLines::ScanLines() {
  			// Empty Constructor.

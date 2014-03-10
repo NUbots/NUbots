@@ -22,7 +22,7 @@
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
-#include "utility/NUbugger/NUgraph.h"
+#include "utility/nubugger/NUgraph.h"
 #include "utility/math/matrix.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/RobotModels.h"
@@ -35,7 +35,7 @@ namespace modules {
             using messages::support::Configuration;
             using messages::platform::darwin::DarwinSensors;
             using messages::input::Sensors;
-            using utility::NUbugger::graph;
+            using utility::nubugger::graph;
             using messages::input::ServoID;
             using utility::motion::kinematics::calculatePosition;
             using utility::motion::kinematics::DarwinModel;
@@ -53,7 +53,7 @@ namespace modules {
                     REQUIRED_NUMBER_OF_FSRS = file.config["REQUIRED_NUMBER_OF_FSRS"];
                 });
 
-                on<Trigger<DarwinSensors>, Options<Single>>([this](const DarwinSensors& input) {
+                on<Trigger<DarwinSensors>, With<Sensors>, Options<Single>>([this](const DarwinSensors& input, const Sensors& lastSensors) {
                     
                     auto sensors = std::make_unique<Sensors>();
 
@@ -80,8 +80,14 @@ namespace modules {
                         });
                     }
 
-                    sensors->accelerometer = {-input.accelerometer.y, input.accelerometer.x, -input.accelerometer.z};
-                    sensors->gyroscope = {-input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
+                    if (input.cm730ErrorFlags == DarwinSensors::Error::OK) {
+                        sensors->accelerometer = {-input.accelerometer.y, input.accelerometer.x, -input.accelerometer.z};
+                        sensors->gyroscope = {-input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
+                    } else {
+                        NUClear::log("Warning - CM730 Sensor Error");
+                        sensors->accelerometer = lastSensors.accelerometer;
+                        sensors->gyroscope = lastSensors.gyroscope;
+                    }
                      
                     // Kalman filter for orientation
                     double deltaT = (lastUpdate - input.timestamp).count() / double(NUClear::clock::period::den);
@@ -192,6 +198,9 @@ namespace modules {
 
                     emit(std::move(sensors));
                 });
+
+                // hack?
+                emit(std::make_unique<Sensors>());
             }
             
         }  // darwin

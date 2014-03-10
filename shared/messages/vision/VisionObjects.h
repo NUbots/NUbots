@@ -23,8 +23,7 @@
 #include <armadillo> 
 #include <nuclear>
 
-#include "utility/vision/LookUpTable.h"
-
+#include "messages/vision/ClassifiedImage.h"
 
 namespace messages {
 	namespace vision {

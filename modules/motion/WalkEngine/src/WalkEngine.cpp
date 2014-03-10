@@ -31,7 +31,7 @@
 #include "utility/motion/RobotModels.h"
 #include "utility/math/matrix.h"
 #include "OPKinematics.h"
-#include "utility/NUbugger/NUgraph.h"
+#include "utility/nubugger/NUgraph.h"
 
 
 namespace modules {
@@ -41,7 +41,7 @@ namespace modules {
         using messages::motion::ServoWaypoint;
         using messages::support::Configuration;
         using utility::motion::kinematics::DarwinModel;
-        using utility::NUbugger::graph;
+        using utility::nubugger::graph;
         using NUClear::log;
         using NUClear::DEBUG;
         using messages::input::Sensors;

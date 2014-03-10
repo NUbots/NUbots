@@ -29,7 +29,7 @@
 #include <iostream>
 
 #include "messages/vision/ClassifiedImage.h"
- 
+
 namespace modules {
     namespace vision {
     

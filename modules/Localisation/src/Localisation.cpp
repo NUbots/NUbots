@@ -19,10 +19,10 @@
 
 #include "Localisation.h"
 #include "messages/support/Configuration.h"
-#include "utility/NUbugger/NUgraph.h"
+#include "utility/nubugger/NUgraph.h"
 #include "messages/localisation/FieldObject.h"
 
-using utility::NUbugger::graph;
+using utility::nubugger::graph;
 using messages::support::Configuration;
 
 namespace modules {

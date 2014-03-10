@@ -13,7 +13,7 @@
 
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/vision/VisionObjects.h"
-#include "utility/vision/LookUpTable.h"
+#include "messages/vision/LookUpTable.h"
 #include "messages/input/Image.h"
 #include "../VisionKinematics.h"
 
@@ -27,7 +27,7 @@ namespace modules {
             ObstacleDetector();
 
             std::unique_ptr< std::vector<messages::vision::Obstacle> > run(const std::vector<arma::vec2>& greenHorizon,
-                                                    const utility::vision::LookUpTable& LUT,
+                                                    const messages::vision::LookUpTable& LUT,
                                                     const messages::input::Image& img,
                                                     const std::vector<messages::vision::ColourSegment>& cyanSegments,
                                                     const std::vector<messages::vision::ColourSegment>& magentaSegments,

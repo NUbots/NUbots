@@ -1,8 +1,8 @@
 #include "DabsonTest.h"
 #include <nuclear>
 
-#include "utility/NUbugger/NUgraph.h"
-using utility::NUbugger::graph;
+#include "utility/nubugger/NUgraph.h"
+using utility::nubugger::graph;
 
 namespace modules {
     namespace behaviours {

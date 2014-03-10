@@ -13,7 +13,7 @@ namespace modules {
 
         using messages::vision::ColourSegment;
         using messages::vision::COLOUR_CLASS;
-        using utility::vision::LookUpTable;
+        using messages::vision::LookUpTable;
         using messages::input::Image;
         using messages::vision::ClassifiedImage;
 

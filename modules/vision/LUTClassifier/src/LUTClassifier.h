@@ -29,7 +29,6 @@
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/support/Configuration.h"
 
-#include "utility/vision/LookUpTable.h"
 #include "GreenHorizon.h"
 #include "ScanLines.h"
 #include "SegmentFilter.h"
@@ -65,9 +64,6 @@ namespace modules {
          */
         class LUTClassifier : public NUClear::Reactor {
         private:
-            std::vector< std::shared_ptr<utility::vision::LookUpTable> > LUTs;
-            unsigned int currentLUTIndex;
-
             GreenHorizon greenHorizon;
             ScanLines scanLines;
             SegmentFilter segmentFilter;
