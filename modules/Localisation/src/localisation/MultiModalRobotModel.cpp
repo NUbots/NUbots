@@ -39,8 +39,8 @@ std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
             << std::setw(7) << est[kY] << ", "
             << std::setw(7) << est[kHeadingX] << ", "
             << std::setw(7) << est[kHeadingY] << "]"
-        << ", observation trail: [" << h.obs_trail_ << "]"
-        << ", covariance:\n" << h.GetCovariance()
+        // << ", observation trail: [" << h.obs_trail_ << "]"
+        // << ", covariance:\n" << h.GetCovariance()
         << ", observation count: " << h.obs_count_
         << " }";
 }

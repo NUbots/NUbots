@@ -118,7 +118,7 @@ namespace utility {
                     
                     defaultCovarianceUpdate = arma::diagmat(covarianceWeights);
 
-                    NUClear::log("initial covarianceWeights:\n", covarianceWeights);
+                    // NUClear::log("initial covarianceWeights:\n", covarianceWeights);
 
                     // Calculate our sigma points
                     sigmaMean = mean;
@@ -172,19 +172,19 @@ namespace utility {
                     arma::vec predictedMean = meanFromSigmas(predictedObservations);
                     predictedObservations.each_col() -= predictedMean;
                     
-                    NUClear::log("---------------------", "measurement:\n", measurement);
-                    NUClear::log("predictedMean:\n", predictedMean);
-                    NUClear::log("covarianceWeights:\n", covarianceWeights);
+                    // NUClear::log("---------------------", "measurement:\n", measurement);
+                    // NUClear::log("predictedMean:\n", predictedMean);
+                    // NUClear::log("covarianceWeights:\n", covarianceWeights);
 
                     // Calculate our predicted covariance
                     arma::mat predictedCovariance = covarianceFromSigmas(predictedObservations, predictedMean);
                     
-                    NUClear::log("predictedCovariance:\n", predictedCovariance);
+                    // NUClear::log("predictedCovariance:\n", predictedCovariance);
 
 
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
 
-                    NUClear::log("innovation:\n", innovation);
+                    // NUClear::log("innovation:\n", innovation);
 
                     // Check for outlier, if outlier return without updating estimate.
                     if(evaluateMeasurement(innovation, predictedCovariance, measurement_variance)) {
@@ -206,15 +206,15 @@ namespace utility {
                     arma::mat innovationVariance = predictedCovariance + measurement_variance;
                     arma::mat innovationCovariance = ((innovation.t() * innovationVariance.i()) * innovation);
                     
-                    NUClear::log("innovationVariance\n", innovationVariance);
-                    NUClear::log("arma::det(innovationVariance): ", arma::det(innovationVariance));
-                    NUClear::log("innovationCovariance: ", innovationCovariance);
+                    // NUClear::log("innovationVariance\n", innovationVariance);
+                    // NUClear::log("arma::det(innovationVariance): ", arma::det(innovationVariance));
+                    // NUClear::log("innovationCovariance: ", innovationCovariance);
 
                     double expTerm = -0.5 * innovationCovariance(0, 0);
                     double fract = 1 / sqrt(pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance));
                     const float outlierProbability = 0.05;
 
-                    NUClear::log("fract: ", fract);
+                    // NUClear::log("fract: ", fract);
 
                     return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
                 }

@@ -43,13 +43,7 @@ namespace modules {
         on<Trigger<Configuration<localisation::FieldDescriptionConfig>>>(
             "Configuration Update",
             [this](const Configuration<localisation::FieldDescriptionConfig>& config) {
-            // std::cout << __func__ << ": Config" << std::endl;
-            
-            // std::string testConfig = settings.config["testConfig"];
-            // std::cout << testConfig << std::endl;
-
             auto fd = std::make_shared<localisation::FieldDescription>(config);
-
             engine_.set_field_description(fd);
         });
 
@@ -66,7 +60,6 @@ namespace modules {
             NUClear::log("=====================", "Number of models: ",
                          engine_.robot_models_.hypotheses().size());
             for (auto& model : engine_.robot_models_.hypotheses()) {
-                // std::cout << "    " << *model << std::endl;
                 NUClear::log("    ", *model);
             }
 
@@ -86,9 +79,6 @@ namespace modules {
                 robot_model.sr_xx = cov(0, 0);
                 robot_model.sr_xy = cov(0, 1);
                 robot_model.sr_yy = cov(1, 1);
-                // robot_model.sr_xx = 0.01;
-                // robot_model.sr_xy = -0.01;
-                // robot_model.sr_yy = 0.10;
                 robot_model.lost = false;
                 robot_msg_models.push_back(robot_model);
             }
@@ -176,16 +166,19 @@ namespace modules {
         });
 
 
-        // on<Trigger<std::vector<messages::vision::Goal>>>([this](const std::vector<messages::vision::Goal>& m) {
-        //     engine_.RecordMeasurement(m);
-        // });
-
         on<Trigger<Every<500, std::chrono::milliseconds>>,
            With<std::vector<messages::vision::Goal>>,
            Options<Sync<Localisation>>
           >("Localisation Step",
             [this](const time_t&,
                    const std::vector<messages::vision::Goal>& goals) {
+
+            // NUClear::log("=====================");
+
+            // for (auto& goal : goals) {
+            //     NUClear::log(goal);
+            //     NUClear::log("----------");
+            // }
 
             // engine_.TimeUpdate(0.5);
             engine_.TimeUpdate(0.05);
@@ -195,27 +188,6 @@ namespace modules {
 
         // on<Trigger<Every<100, std::chrono::milliseconds>>>([this](const time_t&) {
         //     engine_.TimeUpdate(0.05);
-        // });
-
-
-
-        // emit<Scope::INITIALIZE>(std::make_unique<localisation::TimeUpdate>());
-        // on<Trigger<localisation::TimeUpdate>>([this](const localisation::TimeUpdate& m) {
-        //     // engine_.SwapMeasurementBuffers();
-
-        //     // engine_.TimeUpdate();
-
-        //     NUClear::log<NUClear::DEBUG>("Time Update", '\n');
-
-        //     emit(std::make_unique<localisation::ObjectUpdate>());
-        // });
-
-        // on<Trigger<localisation::ObjectUpdate>>([this](const localisation::ObjectUpdate& m) {
-        //     // engine_.ObjectUpdate();
-
-        //     NUClear::log<NUClear::DEBUG>("Object Update", '\n');
-
-        //     emit(std::make_unique<localisation::TimeUpdate>());
         // });
     }
 }
