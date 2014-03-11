@@ -17,24 +17,21 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_LOCALISATION_H
-#define MODULES_LOCALISATION_H
+#ifndef MODULES_LOCALISATION_MMKFROBOTLOCALISATION_H
+#define MODULES_LOCALISATION_MMKFROBOTLOCALISATION_H
 
 #include <nuclear>
 #include <armadillo>
-#include "localisation/LocalisationEngine.h"
-#include "localisation/FieldDescription.h"
+#include "MMKFRobotLocalisationEngine.h"
+#include "FieldDescription.h"
 
 namespace modules {
-    namespace localisation {
-        struct TimeUpdate { };
-        struct ObjectUpdate { };
-    }
+namespace localisation {
 
-    class Localisation : public NUClear::Reactor {
+    class MMKFRobotLocalisation : public NUClear::Reactor {
     private:
         /// The engine that does all of the work
-        localisation::LocalisationEngine engine_;
+        localisation::MMKFRobotLocalisationEngine engine_;
 
         /// For testing
         arma::vec2 marker_ = { 0, 0 };
@@ -46,8 +43,10 @@ namespace modules {
         };
 
         /// @brief Called by the powerplant to build and setup the Localisation reactor.
-        explicit Localisation(std::unique_ptr<NUClear::Environment> environment);
+        explicit MMKFRobotLocalisation(std::unique_ptr<NUClear::Environment> environment);
     };
+
+}
 }
 #endif
 

@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "localisation/LocalisationEngine.h"
+#include "MMKFRobotLocalisationEngine.h"
 
 #include "messages/vision/VisionObjects.h"
 #include "FieldDescription.h"
@@ -28,11 +28,13 @@ using messages::vision::VisionObject;
 namespace modules {
 namespace localisation {
     /// Integrate time-dependent observations on all objects
-    void LocalisationEngine::TimeUpdate(time_t current_time) {
+    void MMKFRobotLocalisationEngine
+::TimeUpdate(time_t current_time) {
         robot_models_.TimeUpdate();
     }
 
-    std::vector<LocalisationFieldObject> LocalisationEngine::GetPossibleObjects(
+    std::vector<LocalisationFieldObject> MMKFRobotLocalisationEngine
+::GetPossibleObjects(
             const messages::vision::Goal& ambiguous_object) {
         std::vector<LocalisationFieldObject> possible;
 
@@ -56,7 +58,8 @@ namespace localisation {
         return std::move(possible);
     }
 
-    void LocalisationEngine::ProcessAmbiguousObjects(const std::vector<messages::vision::Goal>& ambiguous_objects) {
+    void MMKFRobotLocalisationEngine
+::ProcessAmbiguousObjects(const std::vector<messages::vision::Goal>& ambiguous_objects) {
         for (auto& ambiguous_object : ambiguous_objects) {
             // Get a vector of all field objects that the observed object could
             // possibly be
@@ -67,7 +70,8 @@ namespace localisation {
         robot_models_.PruneModels();
     }
 
-    void LocalisationEngine::IndividualStationaryObjectUpdate(
+    void MMKFRobotLocalisationEngine
+::IndividualStationaryObjectUpdate(
         const std::vector<messages::vision::Goal>& goals,
         float time_increment) {
 
@@ -93,7 +97,8 @@ namespace localisation {
         @param fobs The object information output by the vision module. This contains objects identified and their relative positions.
         @param time_increment The time that has elapsed since the previous localisation frame.
      */
-    void LocalisationEngine::ProcessObjects(const std::vector<messages::vision::Goal>& goals) {
+    void MMKFRobotLocalisationEngine
+::ProcessObjects(const std::vector<messages::vision::Goal>& goals) {
         ProcessAmbiguousObjects(goals);
     }
 }

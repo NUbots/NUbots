@@ -19,9 +19,9 @@
 
 #include <iomanip>
 
-#include "localisation/MultiModalRobotModel.h"
-#include "localisation/RobotModel.h"
-#include "localisation/LocalisationFieldObject.h"
+#include "MultiModalRobotModel.h"
+#include "RobotModel.h"
+#include "LocalisationFieldObject.h"
 #include "utility/math/angle.h"
 
 namespace modules {

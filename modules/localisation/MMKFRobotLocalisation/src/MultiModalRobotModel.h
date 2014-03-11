@@ -34,15 +34,13 @@ namespace localisation {
 
     class RobotHypothesis {
     private:
-        // bool active_;
-        double weight_;
-
         utility::math::kalman::UKF<RobotModel> filter_;
 
-        std::string obs_trail_;
+        double weight_;
 
     public:
 
+        std::string obs_trail_;
         int obs_count_;
 
         RobotHypothesis() : 
@@ -51,10 +49,9 @@ namespace localisation {
                 // {0, 0, 3.141},
                 arma::eye(RobotModel::size, RobotModel::size) * 1, // cov
                 1), // alpha
+            weight_(1),
             obs_trail_(""),
-            obs_count_(0),
-            // active_(true), 
-            weight_(1) { }
+            obs_count_(0) { }
 
         // bool active() const { return active_; }
         // void set_active(bool active) { active_ = active; }

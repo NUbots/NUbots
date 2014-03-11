@@ -16,12 +16,12 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
-#include "localisation/FieldDescription.h"
+#include "FieldDescription.h"
 
 #include <nuclear>
 #include <armadillo>
 #include "messages/support/Configuration.h"
-#include "localisation/LocalisationFieldObject.h"
+#include "LocalisationFieldObject.h"
 
 using messages::support::Configuration;
 

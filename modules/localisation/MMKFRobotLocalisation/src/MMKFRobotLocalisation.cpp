@@ -1,43 +1,43 @@
 /*
- * This file is part of Localisation.
+ * This file is part of MMKFRobotLocalisation.
  *
- * Localisation is free software: you can redistribute it and/or modify
+ * MMKFRobotLocalisation is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Localisation is distributed in the hope that it will be useful,
+ * MMKFRobotLocalisation is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Localisation.  If not, see <http://www.gnu.org/licenses/>.
+ * along with MMKFRobotLocalisation.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "Localisation.h"
+#include "MMKFRobotLocalisation.h"
 
 #include <nuclear>
 
-#include "utility/NUbugger/NUgraph.h"
-#include "messages/support/Configuration.h"
-#include "utility/NUbugger/NUgraph.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
-#include "messages/localisation/FieldObject.h"
+#include "utility/NUbugger/NUgraph.h"
 #include "messages/vision/VisionObjects.h"
-#include "localisation/FieldDescription.h"
-#include "localisation/LocalisationFieldObject.h"
-#include "localisation/RobotModel.h"
+#include "messages/support/Configuration.h"
+#include "messages/localisation/FieldObject.h"
+#include "RobotModel.h"
+#include "FieldDescription.h"
+#include "LocalisationFieldObject.h"
 
 using utility::NUbugger::graph;
 using messages::support::Configuration;
 using utility::NUbugger::graph;
 
 namespace modules {
-    Localisation::Localisation(std::unique_ptr<NUClear::Environment> environment)
+namespace localisation {
+    MMKFRobotLocalisation::MMKFRobotLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
         on<Trigger<Configuration<localisation::FieldDescriptionConfig>>>(
@@ -49,7 +49,7 @@ namespace modules {
 
         // Emit to NUbugger
         on<Trigger<Every<250, std::chrono::milliseconds>>,
-           Options<Sync<Localisation>>>("NUbugger Output", [this](const time_t&) {
+           Options<Sync<MMKFRobotLocalisation>>>("NUbugger Output", [this](const time_t&) {
             // emit(std::make_unique<messages::LMissile>());
             // std::cout << __PRETTY_FUNCTION__ << ": rand():" << rand() << std::endl;
 
@@ -120,7 +120,7 @@ namespace modules {
 
         // Simulate Vision
         on<Trigger<Every<500, std::chrono::milliseconds>>,
-           Options<Sync<Localisation>>>("Vision Simulation", [this](const time_t&) {
+           Options<Sync<MMKFRobotLocalisation>>>("Vision Simulation", [this](const time_t&) {
             auto goal1 = messages::vision::Goal();
             auto goal2 = messages::vision::Goal();
 
@@ -168,8 +168,8 @@ namespace modules {
 
         on<Trigger<Every<500, std::chrono::milliseconds>>,
            With<std::vector<messages::vision::Goal>>,
-           Options<Sync<Localisation>>
-          >("Localisation Step",
+           Options<Sync<MMKFRobotLocalisation>>
+          >("MMKFRobotLocalisation Step",
             [this](const time_t&,
                    const std::vector<messages::vision::Goal>& goals) {
 
@@ -191,4 +191,4 @@ namespace modules {
         // });
     }
 }
-
+}

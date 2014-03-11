@@ -17,24 +17,23 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_LOCALISATIONENGINE_H
-#define MODULES_LOCALISATIONENGINE_H
+#ifndef MODULES_MMKFROBOTLOCALISATIONENGINE_H
+#define MODULES_MMKFROBOTLOCALISATIONENGINE_H
 
 #include <nuclear>
 
-#include "MultiModalRobotModel.h"
-#include "LocalisationBall.h"
 #include "messages/vision/VisionObjects.h"
-#include "LocalisationFieldObject.h"
 #include "FieldDescription.h"
+#include "MultiModalRobotModel.h"
+#include "LocalisationFieldObject.h"
 
 namespace modules {
 namespace localisation {
 
-    class LocalisationEngine {
+    class MMKFRobotLocalisationEngine {
         public:
 
-        LocalisationEngine() { }
+        MMKFRobotLocalisationEngine() { }
 
         void TimeUpdate(time_t current_time);
 
@@ -62,8 +61,6 @@ namespace localisation {
         std::shared_ptr<localisation::FieldDescription> field_description_;
 
         MultiModalRobotModel robot_models_;
-
-        // LocalisationBall ball_model_;
     };
 }
 }
