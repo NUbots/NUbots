@@ -320,25 +320,32 @@ namespace modules {
 				}
 				send(message);
 			});
+
             
-			on<Trigger<messages::localisation::FieldObject>, Options<Single, Priority<NUClear::LOW>>>([this](const messages::localisation::FieldObject& field_object) {
+			on<Trigger<messages::localisation::FieldObject>, 
+			   Options<Priority<NUClear::LOW>>>([this](const messages::localisation::FieldObject& field_object) {
 				Message message;
 
 				message.set_type(Message::LOCALISATION);
 				message.set_utc_timestamp(std::time(0));
 
 				auto* localisation = message.mutable_localisation();
-				auto* api_ball = localisation->add_field_object();
+				auto* api_field_object = localisation->add_field_object();
+				api_field_object->set_name(field_object.name);
 
-				api_ball->set_name(field_object.name);
-				api_ball->set_wm_x(field_object.wm_x);
-				api_ball->set_wm_y(field_object.wm_y);
-				api_ball->set_sd_x(field_object.sd_x);
-				api_ball->set_sd_y(field_object.sd_y);
-				api_ball->set_sr_xx(field_object.sr_xx);
-				api_ball->set_sr_xy(field_object.sr_xy);
-				api_ball->set_sr_yy(field_object.sr_yy);
-				api_ball->set_lost(field_object.lost);
+				for (messages::localisation::FieldObject::Model model : field_object.models) {
+					auto* api_model = api_field_object->add_models();
+
+					api_model->set_wm_x(model.wm_x);
+					api_model->set_wm_y(model.wm_y);
+					api_model->set_heading(model.heading);
+					api_model->set_sd_x(model.sd_x);
+					api_model->set_sd_y(model.sd_y);
+					api_model->set_sr_xx(model.sr_xx);
+					api_model->set_sr_xy(model.sr_xy);
+					api_model->set_sr_yy(model.sr_yy);
+					api_model->set_lost(model.lost);
+				}
 
 				send(message);
 			});

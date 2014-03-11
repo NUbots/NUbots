@@ -1,7 +1,11 @@
 ADD_ROLE(
     NAME localisation
     MODULES
+        support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
         support::NUbugger
-        Localisation)
-        
+        vision::FeatureDetector
+        vision::LUTClassifier
+        input::LinuxCamera
+        localisation::MMKFRobotLocalisation)
+

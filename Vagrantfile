@@ -37,7 +37,17 @@ Vagrant.configure("2") do |config|
     nuclearport.vm.network :forwarded_port, guest: 12001, host: 12001
 
     # Syntax: "path/on/host", "/path/on/guest"
-    nuclearport.vm.synced_folder ".", "/home/vagrant/nubots/NUClearPort"
+    # nuclearport.vm.synced_folder ".", "/home/vagrant/nubots/NUClearPort"
+
+    # Note: Use NFS for more predictable shared folder support.
+    #   The guest must have 'apt-get install nfs-common'
+    nuclearport.vm.synced_folder ".", "/home/vagrant/nubots/NUClearPort", type: "nfs"
+
+    # Share NUbugger repository with the VM if it has been placed in the same
+    # directory as the NUClearPort repository
+    if File.directory?("../NUbugger")
+      nuclearport.vm.synced_folder "../NUbugger", "/home/vagrant/nubots/NUbugger", type: "nfs"
+    end
   end
 
   # # Define a VM for running NUbugger.
