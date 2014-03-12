@@ -1,6 +1,3 @@
-#ifndef UTILITY_MATH_KALMAN_ADAPTIVEIMUMODEL_H
-#define UTILITY_MATH_KALMAN_ADAPTIVEIMUMODEL_H
-
 #include "RobotModel.h"
 
 #include <armadillo>
@@ -111,5 +108,3 @@ arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() 
 
 }
 }
-#endif
-

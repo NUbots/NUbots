@@ -1,5 +1,5 @@
 ADD_ROLE(
-    NAME localisation
+    NAME robotlocalisation
     MODULES
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem

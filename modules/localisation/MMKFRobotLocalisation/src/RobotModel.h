@@ -26,18 +26,18 @@ namespace modules {
         };
 
         class RobotModel {
-        public:            
+        public:
             static constexpr size_t size = 4;
             
             RobotModel() {} // empty constructor
             
-            arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& measurement);
+            arma::vec::fixed<size> timeUpdate(
+                const arma::vec::fixed<size>& state, double deltaT,
+                const arma::vec3& measurement);
             
-
             arma::vec predictedObservation(
                 const arma::vec::fixed<RobotModel::size>& state, 
                 const arma::vec2& actual_position);
-            
 
             arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
             
