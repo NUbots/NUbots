@@ -120,12 +120,6 @@ namespace localisation {
         // // Simulate Vision
         // on<Trigger<Every<500, std::chrono::milliseconds>>,
         //    Options<Sync<MMKFRobotLocalisation>>>("Vision Simulation", [this](const time_t&) {
-        //     auto goal1 = messages::vision::Goal();
-        //     auto goal2 = messages::vision::Goal();
-
-
-        //     goal1.type = messages::vision::Goal::RIGHT;
-        //     goal2.type = messages::vision::Goal::LEFT;
 
         //     // auto camera_pos = arma::vec3 { 150.0, 100.0, 40.0 };
         //     // auto camera_pos = arma::vec3 { -1.50, -1.0, 0.0 };
@@ -142,6 +136,11 @@ namespace localisation {
 
         //     // NUClear::log("Goal positions\n", goal1_pos, goal2_pos);
 
+        //     auto goal1 = messages::vision::Goal();
+        //     auto goal2 = messages::vision::Goal();
+        //     goal1.type = messages::vision::Goal::RIGHT;
+        //     goal2.type = messages::vision::Goal::LEFT;
+            
         //     // (dist, bearing, declination)
         //     goal1.sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(goal1_pos - camera_pos);
         //     goal2.sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(goal2_pos - camera_pos);
@@ -151,7 +150,6 @@ namespace localisation {
 
         //     // NUClear::log("---------------------", "goal1.sphericalFromNeck\n", goal1.sphericalFromNeck);
         //     // NUClear::log("---------------------", "goal2.sphericalFromNeck\n", goal2.sphericalFromNeck);
-
 
         //     goal1.sphericalError = { 0.0001, 0.0001, 0.000001 };
         //     goal2.sphericalError = { 0.0001, 0.0001, 0.000001 };

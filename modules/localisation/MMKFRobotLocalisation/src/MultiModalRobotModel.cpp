@@ -174,13 +174,13 @@ void MultiModalRobotModel::RemoveOldModels() {
 void MultiModalRobotModel::PruneModels() {
     const float kMaxModelsAfterMerge = 10; // TODO: Add to config system
 
-    NUClear::log(__PRETTY_FUNCTION__, "Number of models before merging: ",
-                         robot_models_.size());
+    // NUClear::log(__PRETTY_FUNCTION__, "Number of models before merging: ",
+    //                      robot_models_.size());
 
     MergeSimilarModels();
 
-    NUClear::log(__PRETTY_FUNCTION__, "Number of models before pruning: ",
-                         robot_models_.size());
+    // NUClear::log(__PRETTY_FUNCTION__, "Number of models before pruning: ",
+    //                      robot_models_.size());
 
     // RemoveOldModels();
 

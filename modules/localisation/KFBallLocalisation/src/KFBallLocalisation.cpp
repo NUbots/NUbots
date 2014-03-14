@@ -34,11 +34,24 @@ using messages::support::Configuration;
 
 namespace modules {
 namespace localisation {
+
+    double triangle_wave(double t, double period) {
+        auto a = period; // / 2.0;
+        auto k = t / a;
+        return 2.0 * std::abs(2.0 * (k - std::floor(k + 0.5))) - 1.0;
+    }
+    double sawtooth_wave(double t, double period) {
+        return 2.0 * std::fmod(t / period, 1.0) - 1.0;
+    }
+    double square_wave(double t, double period) {
+        return std::copysign(1.0, sawtooth_wave(t, period));
+    }
+
     KFBallLocalisation::KFBallLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
         // Emit to NUbugger
-        on<Trigger<Every<250, std::chrono::milliseconds>>,
+        on<Trigger<Every<100, std::chrono::milliseconds>>,
            Options<Sync<KFBallLocalisation>>>("NUbugger Output", [this](const time_t&) {
             // emit(std::make_unique<messages::LMissile>());
             // std::cout << __PRETTY_FUNCTION__ << ": rand():" << rand() << std::endl;
@@ -55,17 +68,27 @@ namespace localisation {
 
             auto now = NUClear::clock::now();
             auto ms_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
-            double t = static_cast<double>(ms_since_epoch - 1393322147502L);
-            // NUClear::log("t", t, ", ms_since_epoch", ms_since_epoch);
-            double secs = 5;
-            marker_ = { 2 * cos(t / (1000.0 * secs)), 2 * sin(t / (1000.0 * secs)) };
-            // NUClear::log("Actual robot position", marker_);
+            double ms = static_cast<double>(ms_since_epoch - 1393322147502L);
+            double t = ms / 1000.0;
+            double secs = 40;
+            // marker_ = { 2 * cos(t / (1000.0 * secs)), 2 * sin(t / (1000.0 * secs)) };
+            // marker_ = { 6 * cos(t / (1000.0 * secs)), 0 };
+
+
+            auto triangle1 = triangle_wave(t, secs);
+            auto triangle2 = triangle_wave(t + (secs / 4.0), secs);
+            marker_ = { triangle1 * 3, triangle2 * 2 };
+
+            auto velocity_x = -square_wave(t, secs) * ((3 * 4) / secs);
+            auto velocity_y = -square_wave(t + (secs / 4.0), secs) * ((2 * 4) / secs);
 
             arma::vec2 diff = { marker_[0] - state[0], marker_[1] - state[1] };
             float distance = arma::norm(diff, 2);
             emit(graph("Localisation estimate distance error", distance));
             emit(graph("Estimated ball position", state[0], state[1]));
             emit(graph("Actual ball position", marker_[0], marker_[1]));
+            emit(graph("Estimated ball velocity", state[2], state[3]));
+            emit(graph("Actual ball velocity", velocity_x, velocity_y));
 
             auto ball_msg = std::make_unique<messages::localisation::FieldObject>();
             std::vector<messages::localisation::FieldObject::Model> ball_msg_models;
@@ -120,21 +143,32 @@ namespace localisation {
         });
 
 
-        on<Trigger<Every<500, std::chrono::milliseconds>>,
-           With<messages::vision::Ball>,
+        // on<Trigger<Every<250, std::chrono::milliseconds>>,
+        //    With<messages::vision::Ball>,
+        //    Options<Sync<KFBallLocalisation>>
+        //   >("KFBallLocalisation Step",
+        //     [this](const time_t&,
+        //            const messages::vision::Ball& ball) {
+
+        //     // engine_.TimeUpdate(0.5);
+        //     engine_.MeasurementUpdate(ball);
+        // });
+
+       on<Trigger<messages::vision::Ball>,
            Options<Sync<KFBallLocalisation>>
           >("KFBallLocalisation Step",
-            [this](const time_t&,
-                   const messages::vision::Ball& ball) {
+            [this](const messages::vision::Ball& ball) {
 
-            engine_.TimeUpdate(0.05);
+            // engine_.TimeUpdate(0.5);
             engine_.MeasurementUpdate(ball);
         });
 
 
-        // on<Trigger<Every<100, std::chrono::milliseconds>>>([this](const time_t&) {
-        //     engine_.TimeUpdate(0.05);
-        // });
+        on<Trigger<Every<100, std::chrono::milliseconds>>,
+           Options<Sync<KFBallLocalisation>>
+           >([this](const time_t&) {
+            engine_.TimeUpdate(0.1);
+        });
     }
 }
 }

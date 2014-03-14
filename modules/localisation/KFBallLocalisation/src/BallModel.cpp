@@ -14,11 +14,20 @@ arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
 
     auto result = state;
 
-    // double interp_heading = state[kHeading] + 0.5 * measurement[kHeading];
+    // Apply ball velocity
+    result[kX] += state[kVx] * deltaT;
+    result[kY] += state[kVy] * deltaT;
+    const double kDragCoefficient = 1.0; // TODO: Config system
+    result[kVx] *= kDragCoefficient;
+    result[kVy] *= kDragCoefficient;
 
+    // result[kY] = utility::math::angle::normalizeAngle(state[kY]);
+
+    // Apply robot odometry / robot position change
+
+    // double interp_heading = state[kHeading] + 0.5 * measurement[kHeading];
     // double cos_theta = cos(interp_heading);
     // double sin_theta = sin(interp_heading);
-
     // result[kX]       += (measurement[kX] * cos_theta - measurement[kY] * sin_theta);
     // result[kY]       += (measurement[kX] * sin_theta + measurement[kY] * cos_theta);
     // result[kHeading] += (measurement[kHeading]);
@@ -30,13 +39,14 @@ arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
 arma::vec BallModel::predictedObservation(
     const arma::vec::fixed<BallModel::size>& state, std::nullptr_t unused) {
 
-    arma::vec2 radial = utility::math::coordinates::Cartesian2Radial(state.rows(0, 1));
+    // // Robot-relative cartesian
+    // return { state[kX], state[kY] };
 
+    // Distance and unit vector heading
+    arma::vec2 radial = utility::math::coordinates::Cartesian2Radial(state.rows(0, 1));
     auto heading_angle = radial[1];
     auto heading_x = std::cos(heading_angle);
     auto heading_y = std::sin(heading_angle);
-
-    // arma::vec2 heading = arma::normalise(diff);
     return {radial[0], heading_x, heading_y};
 }
 
@@ -50,10 +60,23 @@ arma::vec::fixed<BallModel::size> BallModel::limitState(
     const arma::vec::fixed<BallModel::size>& state) {
  
     return { state[kX], state[kY], state[kVx], state[kVy] };
+    
+
+    // // Radial coordinates
+    // return { state[kX], 
+    //     utility::math::angle::normalizeAngle(state[kY]),
+    //     state[kVx], state[kVy] };
 }
 
 arma::mat::fixed<BallModel::size, BallModel::size> BallModel::processNoise() {
-    return arma::eye(BallModel::size, BallModel::size) * processNoiseFactor;
+    arma::mat noise = arma::eye(BallModel::size, BallModel::size) * processNoiseFactor;
+
+    // noise(kX, kX) = processNoiseFactor * 100;
+    // noise(kY, kY) = processNoiseFactor * 100;
+    noise(kVx, kVx) = processNoiseFactor * 10;
+    noise(kVy, kVy) = processNoiseFactor * 10;
+
+    return noise;
 }
 
 }

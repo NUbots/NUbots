@@ -44,7 +44,7 @@ namespace localisation {
     LocalisationFieldObject FieldDescription::GetLFO(LFOId id) {
         return field_objects_.at(id);
     }
-
+    
     void FieldDescription::AddGoals(FieldDescription::FieldDimensions d) {
         auto half_length = d.field_length * 0.5;
         // auto goal_line_width = d.line_width * 0.5;
@@ -58,8 +58,8 @@ namespace localisation {
 
         arma::vec2 blue_left_goal_post = { -goal_post_x, -goal_y };
         arma::vec2 blue_right_goal_post = { -goal_post_x, goal_y };
-        arma::vec2 yellow_left_goal_post = { goal_post_x, -goal_y };
-        arma::vec2 yellow_right_goal_post = { goal_post_x, goal_y };
+        arma::vec2 yellow_left_goal_post = { goal_post_x, goal_y };
+        arma::vec2 yellow_right_goal_post = { goal_post_x, -goal_y };
 
         // AddLFO(LocalisationFieldObject(config, LFOId::kBall, "Ball"));
         AddLFO(LocalisationFieldObject(blue_left_goal_post, LFOId::kGoalBL, "GoalBL"));

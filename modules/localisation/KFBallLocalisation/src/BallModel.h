@@ -36,6 +36,7 @@ namespace modules {
             
             arma::mat::fixed<size, size> processNoise();
 
+            // TODO: Add to config system?
             // static constexpr double processNoiseFactor = 1e-6;
             static constexpr double processNoiseFactor = 1e-3;
         };
