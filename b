@@ -4,22 +4,10 @@ import sys
 import os
 import shutil
 from subprocess import call
+from subprocess import Popen
+from subprocess import PIPE
 
-numArgs = len(sys.argv)
-command = ''
-arg1 = ''
-arg2 = ''
-
-# print 'Number of arguments:', numArgs, 'arguments.'
-# print 'Argument List:', str(sys.argv)
-
-if numArgs >= 2:
-  command = sys.argv[1]
-  if numArgs >= 3:
-    arg1 = sys.argv[2]
-
-if numArgs == 1 or (numArgs > 1 and (command == 'help' or command == '--help')):
-    # Print command summary
+def print_command_summary():
     print """
 Usage: b <command> [arguments]
 
@@ -29,72 +17,156 @@ This script is an optional helper script for performing common tasks
 related to building and running NUClearPort and related projects.
 
 Command summary:
-  - help        Show this help.
-  - clean       Deletes the build directory.
-  - cmake       Runs cmake in the build directory (creating it if it doesn't exist).
-  - make        Runs make in the build directory (creates it and runs cmake if it doesn't exist).
-  - makej       Same as make, but runs 'make -j'.
-  - run <role>  Runs the binary for the role of the given name.
-  - debug <role> Runs the binary for the role of the given name under gdb.
-  - create_box	Builds the nubots Vagrant box using Packer.
-                (the box is first deleted if it already exists)
+  - help              Show this help.
+  - clean             Deletes the build directory.
+  - cmake             Runs cmake in the build directory (creating it if it 
+                      doesn't exist).
+  - make [arg]...     Runs cmake, then make in the build directory (creating it
+                      if it doesn't exist), passing any arguments to the make
+                      command.
+  - makej             Same as make, but runs 'make -j'.
+  - run <role>        Runs the binary for the role of the given name.
+  - debug <role>      Runs the binary for the role of the given name under gdb.
+  - create_box <provider> Builds the nubots Vagrant box, for the given
+                          virtualisation provider (vmware, or vitrualbox),
+                          using Packer.
+                          (the box is first deleted if it already exists)
 """
 
-elif command == 'clean':
+def clean():
     if os.path.exists('build'):
         shutil.rmtree('build')
 
-elif command == 'cmake':
+def cmake():
     if not os.path.exists('build'):
         os.mkdir('build') 
     call(['cmake', '..'], cwd='build')
 
-elif command == 'make' or command == 'makej':
-    if not os.path.exists('build'):
-        os.mkdir('build') 
-        call(['cmake', '..'], cwd='build')
 
-    if command == 'make':
-        call('make', cwd='build')
-    else:
-        call(['make', '-j2'], cwd='build')
+def make(args):
+    call(['make'] + args, cwd='build')
 
-elif command == 'run' or command == 'debug':
-    if numArgs < 3:
-	print '''
+def role_exists(role):
+    return os.path.isfile("build/roles/{}".format(role))
+
+def run(role):
+    if role == '':
+        print '''
 Usage: b run <role>
 
 Please provide the name of the role to run.
 '''
-    elif os.path.isfile("build/roles/{}".format(arg1)):
-        try:
-          if command == 'run':
-            call("./roles/{}".format(arg1), cwd='build/')
-          else:
-            call(["gdb", "./roles/{}".format(arg1), "-ex", "r"], cwd='build/')
-
-        except KeyboardInterrupt, e:
-          print "\nThe process was interrupted by the Keyboard."
+    elif role_exists(role):
+        call("./roles/{}".format(role), cwd='build/')
     else:
-        print "The role '{}' does not exist or did not build correctly.".format(arg1)
+        print "The role '{}' does not exist or did not build correctly.".format(role)
 
-elif command == 'create_box':
-  if os.path.isfile("packer/nubots-ubuntu-12-04-x86-virtualbox.box"):
-    call(['rm', 'nubots-ubuntu-12-04-x86-virtualbox.box'], cwd='packer')
-  if os.path.isfile("packer/nubots-ubuntu-12-04-x86-vmware.box"):
-    call(['rm', 'nubots-ubuntu-12-04-x86-vmware.box'], cwd='packer')
-  call(['packer', 'build', '-only=vmware-iso', 'template.json'], cwd='packer')
-  call(['vagrant', 'box', 'remove', 'nubots-14.02'])
-  if os.path.isfile("packer/nubots-ubuntu-12-04-x86-virtualbox.box"):
-    call(['vagrant', 'box', 'add', 'nubots-14.02', 'nubots-ubuntu-12-04-x86-virtualbox.box'], cwd='packer')
-  else:
-    call(['vagrant', 'box', 'add', 'nubots-14.02', 'nubots-ubuntu-12-04-x86-vmware.box'], cwd='packer')
+def debug(role):
+    if role == '':
+        print '''
+Usage: b debug <role>
 
-else:
-  # Unknown command: print usage and help
-  print """
+Please provide the name of the role to debug.
+'''
+    elif role_exists(role):
+        call(["gdb", "./roles/{}".format(role), "-ex", "r"], cwd='build/')
+    else:
+        print "The role '{}' does not exist or did not build correctly.".format(role)
+
+def box_exists(box_name, provider):
+    p1 = Popen(['vagrant', 'box', 'list'], stdout=PIPE)
+    p2 = Popen(['grep', "'{0}.*({1}'".format(box_name, provider)], stdin=p1.stdout, stdout=PIPE)
+    return p2.communicate()[0] != ''
+
+def box_generated(provider):
+    return os.path.isfile("packer/nubots-ubuntu-12-04-x86-{}.box".format(provider))
+
+def packer_is_installed():
+    return not call(['which', 'packer'])
+
+def packer(provider):
+    box_name = 'nubots-14.02'
+
+    if box_generated(provider):
+        call(['rm', 'nubots-ubuntu-12-04-x86-{}.box'.format(provider)], cwd='packer')
+    
+    call(['packer', 'build', '-only={}-iso'.format(provider), 'template.json'], cwd='packer')
+    
+    if box_generated(provider):
+        if box_exists(box_name, provider):
+            call(['vagrant', 'box', 'remove', box_name]) # TODO: only remove box for given provider
+        
+        call(['vagrant', 'box', 'add', box_name,
+              'nubots-ubuntu-12-04-x86-{}.box'.format(provider)],
+             cwd='packer')
+
+def create_box(provider):
+    if not packer_is_installed():
+        print '''
+The program packer must be installed to generate a box.
+
+Please visit http://www.packer.io/ for information on installing packer.
+'''
+    elif provider == '' or (provider != 'vmware' and provider != 'virtualbox'):
+        print '''
+Usage: b create_box <provider>
+
+Please provide the name of the provider for which to create the Vagrant box.
+Allowable providers are:
+    - vmware
+    - virtualbox
+
+The selected provider must be installed on the system to create a box.
+'''
+    else:
+        packer(provider)
+
+def unknown_command(command):
+    print """
 Unknown command: {}
 Usage: b <command> [arguments]
 
 Run './b help' for a command summary.
 """.format(command)
+
+def execute_command(command, args):
+    arg0 = ''
+    if len(args) >= 1:
+        arg0 = args[0]
+
+    if (command == '' or
+       command == 'help' or
+       command == '--help'):
+        print_command_summary()
+    elif command == 'clean':
+        clean()
+    elif command == 'cmake':
+        cmake()
+    elif command == 'makej':
+        make(['-j2'])
+    elif command == 'make':
+        cmake()
+        make(arguments)
+    elif command == 'run':
+        run(arg0)
+    elif command == 'debug':
+        debug(arg0)
+    elif command == 'create_box':
+        create_box(arg0)
+    else:
+        unknown_command(command)
+
+
+# Prepare the command line arguments and perform the user's command:
+command = ''
+arguments = []
+
+if len(sys.argv) >= 2:
+    command = sys.argv[1]
+if len(sys.argv) >= 3:
+    arguments = sys.argv[2:]
+
+try:
+    execute_command(command, arguments)
+except KeyboardInterrupt, e:
+  print "\nThe process was interrupted by the Keyboard."
