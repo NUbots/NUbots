@@ -37,7 +37,7 @@ namespace modules {
             using messages::input::Sensors;
             using utility::nubugger::graph;
             using messages::input::ServoID;
-            using utility::motion::kinematics::calculatePosition;
+            using utility::motion::kinematics::calculateAllPositions;
             using utility::motion::kinematics::DarwinModel;
 
 
@@ -121,14 +121,7 @@ namespace modules {
 
 
                     //KINEMATICS
-                    // std::map<messages::input::ServoID, arma::mat44> leftArm = calculatePosition<DarwinModel>(*sensors, ServoID::L_ELBOW);
-                    // std::map<messages::input::ServoID, arma::mat44> rightArm = calculatePosition<DarwinModel>(*sensors, ServoID::R_ELBOW);
-                    std::map<messages::input::ServoID, arma::mat44> leftLegPositions = calculatePosition<DarwinModel>(*sensors, ServoID::L_ANKLE_ROLL);
-                    std::map<messages::input::ServoID, arma::mat44> rightLegPositions = calculatePosition<DarwinModel>(*sensors, ServoID::R_ANKLE_ROLL);
-                    std::map<messages::input::ServoID, arma::mat44> headPositions = calculatePosition<DarwinModel>(*sensors, ServoID::HEAD_PITCH);
-                    sensors->forwardKinematics.insert(leftLegPositions.begin(), leftLegPositions.end());
-                    sensors->forwardKinematics.insert(rightLegPositions.begin(), rightLegPositions.end());
-                    sensors->forwardKinematics.insert(headPositions.begin(), headPositions.end());
+                    sensors->forwardKinematics = calculateAllPositions<DarwinModel>(sensors);
                     //END KINEMATICS
 
 

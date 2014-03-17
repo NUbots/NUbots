@@ -217,7 +217,46 @@ namespace kinematics {
         }
         return std::map<messages::input::ServoID, arma::mat44>();
     }
-   
+    
+
+    template <typename RobotKinematicModel>
+    std::map<messages::input::ServoID, arma::mat44> calculateAllPositions(const messages::input::Sensors& sensors) {
+        std::map<messages::input::ServoID, arma::mat44> result = calculatePosition<DarwinModel>(sensors, messages::input::ServoID::L_ANKLE_ROLL);
+        std::map<messages::input::ServoID, arma::mat44> rightLegPositions = calculatePosition<DarwinModel>(sensors, messages::input::ServoID::R_ANKLE_ROLL);
+        std::map<messages::input::ServoID, arma::mat44> headPositions = calculatePosition<DarwinModel>(sensors, messages::input::ServoID::HEAD_PITCH);
+        // std::map<messages::input::ServoID, arma::mat44> leftArm = calculatePosition<DarwinModel>(sensors, messages::input::ServoID::L_ELBOW);
+        // std::map<messages::input::ServoID, arma::mat44> rightArm = calculatePosition<DarwinModel>(sensors, messages::input::ServoID::R_ELBOW);
+        result.insert(leftArm.begin(), leftArm.end());
+        result.insert(rightArm.begin(), rightArm.end());
+        result.insert(rightLegPositions.begin(), rightLegPositions.end());
+        result.insert(headPositions.begin(), headPositions.end());                    
+        return result;
+    }
+    /*! @brief Adds up the mass vectors stored in the robot model and normalises the resulting position
+        @return [x_com, y_com, z_com, total_mass] relative to the torso basis
+    */
+    template <typename RobotKinematicModel>
+    arma::vec4 calculateCentreOfMass(const std::map<messages::input::ServoID, arma::mat44>& jointPositions){
+        arma::vec4 massVector;
+        
+        for(auto& joint : jointPositions){
+            double jointMass = RobotKinematicModel::MassModel::masses[joint.first][3];
+            
+            arma::mat44 massScaler = arma::eye(4,4);
+            massScaler.submat(0,0,2,2) *= jointMass;
+            
+            massVector +=  joint.second * massScaler * RobotKinematicModel::MassModel::masses[joint.first]; // = m * local centre of mass in global robot coords
+        }
+
+        arma::mat44 normaliser = arma::eye(4,4);
+        if(massVector[3] > 0 ){
+            massScaler.submat(0,0,2,2) *= 1 / massVector[3];
+            return normaliser * massVector;
+        } else {
+            NUClear::log<NUClear::ERROR>("ForwardKinematics::calculateCentreOfMass - Empty centre of mass request or no mass in mass model.");
+            return arma::vec4;
+        }
+    }
 
 } // kinematics
 }  // motion

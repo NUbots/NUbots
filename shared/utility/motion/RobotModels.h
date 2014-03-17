@@ -14,7 +14,6 @@ namespace utility{
 			class DarwinModel{
 			public:
                 
-
 				class Leg {
 				public:
 					static constexpr float LENGTH_BETWEEN_LEGS = 0.074;
@@ -40,8 +39,32 @@ namespace utility{
 					static constexpr float NECK_LENGTH = 0.0305;
 					static constexpr float NECK_TO_CAMERA[3] = {0.033,0,0.033};
 					static constexpr float CAMERA_DECLINATION_ANGLE_OFFSET = 0;
+				};
 
-
+				class MassModel {
+					static constexpr arma::vec4[] masses = {
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0}),
+						arma::vec4({0,0,0,0})
+					}
 				};
 
 				static constexpr float TEAMDARWINCHEST_TO_ORIGIN = 0.096 - Leg::HIP_OFFSET_Z; //Taken from team darwin OPkinematics.cpp : hipOffsetZ = .096; 
