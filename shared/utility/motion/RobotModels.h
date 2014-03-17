@@ -2,6 +2,8 @@
 #ifndef UTILITY_MOTION_KINEMATICS_ROBOTMODELS_H
 #define UTILITY_MOTION_KINEMATICS_ROBOTMODELS_H
 
+#include <armadillo>
+
 namespace utility{
 	namespace motion{
 		namespace kinematics{
@@ -42,29 +44,28 @@ namespace utility{
 				};
 
 				class MassModel {
-					static constexpr arma::vec4[] masses = {
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0}),
-						arma::vec4({0,0,0,0})
-					}
+					static constexpr double masses[20][4] = {
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0},
+						{0,0,0,0}
+					};
 				};
 
 				static constexpr float TEAMDARWINCHEST_TO_ORIGIN = 0.096 - Leg::HIP_OFFSET_Z; //Taken from team darwin OPkinematics.cpp : hipOffsetZ = .096; 

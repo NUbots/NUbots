@@ -121,7 +121,7 @@ namespace modules {
 
 
                     //KINEMATICS
-                    sensors->forwardKinematics = calculateAllPositions<DarwinModel>(sensors);
+                    sensors->forwardKinematics = calculateAllPositions<DarwinModel>(*sensors);
                     //END KINEMATICS
 
 

@@ -226,8 +226,8 @@ namespace kinematics {
         std::map<messages::input::ServoID, arma::mat44> headPositions = calculatePosition<DarwinModel>(sensors, messages::input::ServoID::HEAD_PITCH);
         // std::map<messages::input::ServoID, arma::mat44> leftArm = calculatePosition<DarwinModel>(sensors, messages::input::ServoID::L_ELBOW);
         // std::map<messages::input::ServoID, arma::mat44> rightArm = calculatePosition<DarwinModel>(sensors, messages::input::ServoID::R_ELBOW);
-        result.insert(leftArm.begin(), leftArm.end());
-        result.insert(rightArm.begin(), rightArm.end());
+        // result.insert(leftArm.begin(), leftArm.end());
+        // result.insert(rightArm.begin(), rightArm.end());
         result.insert(rightLegPositions.begin(), rightLegPositions.end());
         result.insert(headPositions.begin(), headPositions.end());                    
         return result;
@@ -237,24 +237,25 @@ namespace kinematics {
     */
     template <typename RobotKinematicModel>
     arma::vec4 calculateCentreOfMass(const std::map<messages::input::ServoID, arma::mat44>& jointPositions){
-        arma::vec4 massVector;
+        arma::vec4 totalMassVector;
         
         for(auto& joint : jointPositions){
-            double jointMass = RobotKinematicModel::MassModel::masses[joint.first][3];
+            arma::vec4 massVector(RobotKinematicModel::MassModel::masses[joint.first]);
+            double jointMass = massVector[3];
             
             arma::mat44 massScaler = arma::eye(4,4);
             massScaler.submat(0,0,2,2) *= jointMass;
             
-            massVector +=  joint.second * massScaler * RobotKinematicModel::MassModel::masses[joint.first]; // = m * local centre of mass in global robot coords
+            totalMassVector +=  joint.second * massScaler * massVector; // = m * local centre of mass in global robot coords
         }
 
         arma::mat44 normaliser = arma::eye(4,4);
-        if(massVector[3] > 0 ){
-            massScaler.submat(0,0,2,2) *= 1 / massVector[3];
-            return normaliser * massVector;
+        if(totalMassVector[3] > 0 ){
+            normaliser.submat(0,0,2,2) *= 1 / totalMassVector[3];
+            return normaliser * totalMassVector;
         } else {
             NUClear::log<NUClear::ERROR>("ForwardKinematics::calculateCentreOfMass - Empty centre of mass request or no mass in mass model.");
-            return arma::vec4;
+            return arma::vec4();
         }
     }
 
