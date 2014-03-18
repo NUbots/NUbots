@@ -22,7 +22,7 @@
 
 #include "utility/math/angle.h"
 #include "messages/platform/darwin/DarwinSensors.h"
-#include "messages/motion/ServoWaypoint.h"
+#include "messages/motion/ServoTarget.h"
 
 
 namespace modules {
@@ -30,7 +30,7 @@ namespace platform {
 namespace darwin {
 
     using messages::platform::darwin::DarwinSensors;
-    using ServoWaypoint = messages::motion::ServoWaypointX;
+    using  messages::motion::ServoTarget;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/ttyUSB0") {
 
@@ -152,7 +152,7 @@ namespace darwin {
         });
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<std::vector<ServoWaypoint>>, With<DarwinSensors>>([this](const std::vector<ServoWaypoint>& commands, const DarwinSensors& sensors) {
+        on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>([this](const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
 
             std::vector<Darwin::Types::ServoValues> values;
 
@@ -188,8 +188,8 @@ namespace darwin {
             darwin.writeServos(values);
         });
 
-        on<Trigger<ServoWaypoint>>([this](const ServoWaypoint command) {
-            auto commandList = std::make_unique<std::vector<ServoWaypoint>>();
+        on<Trigger<ServoTarget>>([this](const ServoTarget command) {
+            auto commandList = std::make_unique<std::vector<ServoTarget>>();
             commandList->push_back(command);
 
             // Emit it so it's captured by the reaction above

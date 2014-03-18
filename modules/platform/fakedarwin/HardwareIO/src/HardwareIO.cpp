@@ -21,13 +21,13 @@
 
 #include <armadillo>
 
-#include "messages/motion/ServoWaypoint.h"
+#include "messages/motion/ServoTarget.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/ServoID.h"
 #include "utility/math/angle.h"
 
 using messages::platform::darwin::DarwinSensors;
-using ServoWaypoint = messages::motion::ServoWaypointX;
+using messages::motion::ServoTarget;
 using messages::input::ServoID;
 
 namespace modules {
@@ -188,7 +188,7 @@ namespace fakedarwin {
 		});*/
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<std::vector<ServoWaypoint> > >([this](const std::vector<ServoWaypoint>& commands) {
+        on<Trigger<std::vector<ServoTarget> > >([this](const std::vector<ServoTarget>& commands) {
             for (auto& command : commands) {
 
             	// Calculate our moving speed
@@ -206,8 +206,8 @@ namespace fakedarwin {
 			emit(std::make_unique<DarwinSensors>(sensors));
         });
 
-        on<Trigger<ServoWaypoint> >([this](const ServoWaypoint command) {
-            auto commandList = std::make_unique<std::vector<ServoWaypoint>>();
+        on<Trigger<ServoTarget> >([this](const ServoTarget command) {
+            auto commandList = std::make_unique<std::vector<ServoTarget>>();
             commandList->push_back(command);
 
             // Emit it so it's captured by the reaction above

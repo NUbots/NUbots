@@ -19,13 +19,13 @@
 
 #include "Controller.h"
 
-#include "messages/motion/ServoWaypoint.h"
+#include "messages/motion/ServoTarget.h"
 
 namespace modules {
     namespace behaviour {
         
         using messages::input::ServoID;
-        using ServoWaypoint = messages::motion::ServoWaypointX;
+        using messages::motion::ServoTarget;
         using messages::behaviour::RegisterAction;
         using messages::behaviour::ActionPriorites;
         using messages::behaviour::ServoCommand;
@@ -155,7 +155,7 @@ namespace modules {
             on<Trigger<Every<60, Per<std::chrono::seconds>>>, Options<Sync<Controller>>>([this] (const time_t& now) {
                 
                 std::list<ServoID> emptiedQueues;
-                std::unique_ptr<std::vector<ServoWaypoint>> waypoints;
+                std::unique_ptr<std::vector<ServoTarget>> waypoints;
                 
                 for(auto& queue : commandQueues) {
                     
@@ -179,7 +179,7 @@ namespace modules {
                         
                         // Lazy initialize
                         if(!waypoints) {
-                            waypoints = std::make_unique<std::vector<ServoWaypoint>>();
+                            waypoints = std::make_unique<std::vector<ServoTarget>>();
                         }
                         
                         // Add to our waypoints

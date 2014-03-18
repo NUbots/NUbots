@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_MOTION_SERVOWAYPOINTS_H
-#define MESSAGES_MOTION_SERVOWAYPOINTS_H
+#ifndef MESSAGES_MOTION_SERVOTARGET_H
+#define MESSAGES_MOTION_SERVOTARGET_H
 
 #include <nuclear>
 #include "messages/input/ServoID.h"
@@ -31,7 +31,7 @@ namespace messages {
          *
          * @author Trent Houliston
          */
-        struct ServoWaypointX {
+        struct ServoTarget {
             NUClear::clock::time_point time;
             input::ServoID id;
             float position;
@@ -41,4 +41,4 @@ namespace messages {
     }  // motion
 }  // messages
 
-#endif  // MESSAGES_MOTION_SERVOWAYPOINTS_H
+#endif  // MESSAGES_MOTION_SERVOTARGET_H

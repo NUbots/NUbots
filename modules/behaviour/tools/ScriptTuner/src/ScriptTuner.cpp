@@ -20,7 +20,7 @@
 #include "ScriptTuner.h"
 #include "messages/support/Configuration.h"
 #include "messages/platform/darwin/DarwinSensors.h"
-#include "messages/motion/ServoWaypoint.h"
+#include "messages/motion/ServoTarget.h"
 #include "utility/math/angle.h"
 #include "utility/file/fileutil.h"
 #include "utility/configuration/json/parse.h"
@@ -33,7 +33,7 @@ namespace modules {
     namespace behaviour {
         namespace tools {
             using messages::motion::ExecuteScript;
-            using ServoWaypoint = messages::motion::ServoWaypointX;
+            using messages::motion::ServoTarget;
 
             struct LockServo {};
 
@@ -79,7 +79,7 @@ namespace modules {
                     script.frames[frame].targets.push_back(target);
 
                     // Emit a waypoint so that the motor will go rigid at this angle
-                    auto waypoint = std::make_unique<ServoWaypoint>();
+                    auto waypoint = std::make_unique<ServoTarget>();
                     waypoint->time = NUClear::clock::now();
                     waypoint->id = target.id;
                     waypoint->gain = target.gain;
@@ -174,9 +174,9 @@ namespace modules {
             void ScriptTuner::activateFrame(int frame) {
                 this->frame = frame;
 
-                auto waypoints = std::make_unique<std::vector<ServoWaypoint>>();
+                auto waypoints = std::make_unique<std::vector<ServoTarget>>();
                 for(auto& target : script.frames[frame].targets) {
-                    waypoints->push_back(ServoWaypoint {
+                    waypoints->push_back(ServoTarget {
                         NUClear::clock::now() + std::chrono::milliseconds(500)
                         , target.id
                         , target.position
@@ -350,7 +350,7 @@ namespace modules {
                     script.frames[frame].targets.erase(it);
 
                     // Emit a waypoint so that the motor will turn off gain (go limp)
-                    auto waypoint = std::make_unique<ServoWaypoint>();
+                    auto waypoint = std::make_unique<ServoTarget>();
                     waypoint->time = NUClear::clock::now();
                     waypoint->id = static_cast<messages::input::ServoID>(selection < 2 ? 18 + selection : selection - 2);
                     waypoint->gain = 0;
