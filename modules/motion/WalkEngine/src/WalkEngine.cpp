@@ -24,7 +24,7 @@
 #include <chrono>
 #include <cmath>
 
-#include "messages/motion/ServoWaypoint.h"
+#include "messages/behaviour/Action.h"
 #include "messages/support/Configuration.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
@@ -38,7 +38,7 @@ namespace modules {
     namespace motion {
 
         using messages::input::ServoID;
-        using messages::motion::ServoWaypoint;
+        using messages::behaviour::ServoCommand;
         using messages::support::Configuration;
         using utility::motion::kinematics::DarwinModel;
         using utility::nubugger::graph;
@@ -753,7 +753,7 @@ namespace modules {
 
             }
 
-            auto waypoints = std::make_unique<std::vector<ServoWaypoint>>();
+            auto waypoints = std::make_unique<std::vector<ServoCommand>>();
             waypoints->reserve(16);
 
 /*
@@ -772,19 +772,19 @@ namespace modules {
 
             time_t time = NUClear::clock::now() + std::chrono::nanoseconds(1000000000/UPDATE_FREQUENCY);
 
-            waypoints->push_back({time, ServoID::L_HIP_YAW,     float(qLegs[0]),  float(leftLegHardness * 100)});
-            waypoints->push_back({time, ServoID::L_HIP_ROLL,    float(qLegs[1]),  float(leftLegHardness * 100)});
-            waypoints->push_back({time, ServoID::L_HIP_PITCH,   float(qLegs[2]),  float(leftLegHardness * 100)});
-            waypoints->push_back({time, ServoID::L_KNEE,        float(qLegs[3]),  float(leftLegHardness * 100)});
-            waypoints->push_back({time, ServoID::L_ANKLE_PITCH, float(qLegs[4]),  float(leftLegHardness * 100)});
-            waypoints->push_back({time, ServoID::L_ANKLE_ROLL,  float(qLegs[5]),  float(leftLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::L_HIP_YAW,     float(qLegs[0]),  float(leftLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::L_HIP_ROLL,    float(qLegs[1]),  float(leftLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::L_HIP_PITCH,   float(qLegs[2]),  float(leftLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::L_KNEE,        float(qLegs[3]),  float(leftLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::L_ANKLE_PITCH, float(qLegs[4]),  float(leftLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::L_ANKLE_ROLL,  float(qLegs[5]),  float(leftLegHardness * 100)});
 
-            waypoints->push_back({time, ServoID::R_HIP_YAW,     float(qLegs[6]),  float(rightLegHardness * 100)});
-            waypoints->push_back({time, ServoID::R_HIP_ROLL,    float(qLegs[7]),  float(rightLegHardness * 100)});
-            waypoints->push_back({time, ServoID::R_HIP_PITCH,   float(qLegs[8]),  float(rightLegHardness * 100)});
-            waypoints->push_back({time, ServoID::R_KNEE,        float(qLegs[9]),  float(rightLegHardness * 100)});
-            waypoints->push_back({time, ServoID::R_ANKLE_PITCH, float(qLegs[10]), float(rightLegHardness * 100)});
-            waypoints->push_back({time, ServoID::R_ANKLE_ROLL,  float(qLegs[11]), float(rightLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::R_HIP_YAW,     float(qLegs[6]),  float(rightLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::R_HIP_ROLL,    float(qLegs[7]),  float(rightLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::R_HIP_PITCH,   float(qLegs[8]),  float(rightLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::R_KNEE,        float(qLegs[9]),  float(rightLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::R_ANKLE_PITCH, float(qLegs[10]), float(rightLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::R_ANKLE_ROLL,  float(qLegs[11]), float(rightLegHardness * 100)});
 
             /*NUClear::log<NUClear::DEBUG>("L Hip Yaw: ", qLegs[0]);
             NUClear::log<NUClear::DEBUG>("L Hip Roll: ", qLegs[1]);
@@ -858,16 +858,16 @@ namespace modules {
                 qRArmActual[2] = qRArm[2];
             }
 
-            auto waypoints = std::make_unique<std::vector<ServoWaypoint>>();
+            auto waypoints = std::make_unique<std::vector<ServoCommand>>();
             waypoints->reserve(6);
             time_t time = NUClear::clock::now() + std::chrono::nanoseconds(1000000000/UPDATE_FREQUENCY);
 
-            waypoints->push_back({time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]),  float(hardnessArm * 100)});
-            waypoints->push_back({time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]),  float(hardnessArm * 100)});
-            waypoints->push_back({time, ServoID::R_ELBOW,          float(qRArmActual[2]),  float(hardnessArm * 100)});
-            waypoints->push_back({time, ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]),  float(hardnessArm * 100)});
-            waypoints->push_back({time, ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]),  float(hardnessArm * 100)});
-            waypoints->push_back({time, ServoID::L_ELBOW,          float(qLArmActual[2]),  float(hardnessArm * 100)});
+            waypoints->push_back({id, time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]),  float(hardnessArm * 100)});
+            waypoints->push_back({id, time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]),  float(hardnessArm * 100)});
+            waypoints->push_back({id, time, ServoID::R_ELBOW,          float(qRArmActual[2]),  float(hardnessArm * 100)});
+            waypoints->push_back({id, time, ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]),  float(hardnessArm * 100)});
+            waypoints->push_back({id, time, ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]),  float(hardnessArm * 100)});
+            waypoints->push_back({id, time, ServoID::L_ELBOW,          float(qLArmActual[2]),  float(hardnessArm * 100)});
 
             /*emit(graph("L Shoulder Pitch", qLArmActual[0]));
             emit(graph("L Shoulder Roll", qLArmActual[1]));

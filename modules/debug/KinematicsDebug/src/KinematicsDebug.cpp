@@ -23,7 +23,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/input/ServoID.h"
 #include "messages/input/Sensors.h"
-#include "messages/motion/ServoWaypoint.h"
+#include "messages/motion/ServoTarget.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/math/matrix.h"
@@ -34,7 +34,7 @@
 namespace modules {
     namespace debug {
             using messages::support::Configuration;
-            using messages::motion::ServoWaypoint;
+            using messages::motion::ServoTarget;
             using messages::input::ServoID;
             using messages::input::Sensors;
             using utility::motion::kinematics::calculateLegJoints;
@@ -61,12 +61,12 @@ namespace modules {
                         bool left = request.config["left"];
                         bool right = request.config["right"];
 
-                        auto waypoints = std::make_unique<std::vector<ServoWaypoint> >();
+                        auto waypoints = std::make_unique<std::vector<ServoTarget> >();
 
                         if (left) {
                             std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(target, Side::LEFT);
                             for (auto& legJoint : legJoints) {
-                                ServoWaypoint waypoint;
+                                ServoTarget waypoint;
 
                                 ServoID servoID;
                                 float position;
@@ -85,7 +85,7 @@ namespace modules {
                         if (right) {
                             std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(target, Side::RIGHT);
                             for (auto& legJoint : legJoints) {
-                                ServoWaypoint waypoint;
+                                ServoTarget waypoint;
 
                                 ServoID servoID;
                                 float position;

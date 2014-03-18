@@ -21,13 +21,13 @@
 
 #include <armadillo>
 
-#include "messages/platform/darwin/DarwinServoCommand.h"
+#include "messages/motion/ServoTarget.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/ServoID.h"
 #include "utility/math/angle.h"
 
 using messages::platform::darwin::DarwinSensors;
-using messages::platform::darwin::DarwinServoCommand;
+using messages::motion::ServoTarget;
 using messages::input::ServoID;
 
 namespace modules {
@@ -188,23 +188,30 @@ namespace fakedarwin {
 		});*/
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<std::vector<DarwinServoCommand> > >([this](const std::vector<DarwinServoCommand>& commands) {
+        on<Trigger<std::vector<ServoTarget> > >([this](const std::vector<ServoTarget>& commands) {
             for (auto& command : commands) {
+
+            	// Calculate our moving speed
+                float diff = utility::math::angle::difference(command.position, sensors.servo[command.id].presentPosition);
+                NUClear::clock::duration duration = command.time - NUClear::clock::now();
+                float speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+
+                // Set our variables
 				auto& servo = sensors.servo[command.id];
-                servo.movingSpeed = command.movingSpeed;
-                servo.goalPosition = command.goalPosition;
+                servo.movingSpeed = speed;
+                servo.goalPosition = command.position;
 			}
 
 			// Send our nicely computed sensor data out to the world
 			emit(std::make_unique<DarwinSensors>(sensors));
         });
 
-        on<Trigger<DarwinServoCommand> >([this](const DarwinServoCommand command) {
-            auto commandList = std::make_unique<std::vector<DarwinServoCommand>>();
+        on<Trigger<ServoTarget> >([this](const ServoTarget command) {
+            auto commandList = std::make_unique<std::vector<ServoTarget>>();
             commandList->push_back(command);
 
             // Emit it so it's captured by the reaction above
-            emit(std::move(commandList));
+            emit<Scope::DIRECT>(std::move(commandList));
         });
     }
 }

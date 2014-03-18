@@ -41,7 +41,13 @@ namespace modules {
             using utility::motion::kinematics::DarwinModel;
 
 
-            SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), orientationFilter(arma::vec("0,0,-1,1,0,0")) , velocityFilter(arma::vec3("0,0,0")), frameLimiter(0), lastOrientationMatrix(arma::eye(3,3)), previousMeasuredTorsoFromLeftFoot(), previousMeasuredTorsoFromRightFoot() {
+            SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) 
+            : Reactor(std::move(environment))
+            , orientationFilter(arma::vec({0,0,-1,1,0,0}))
+            , velocityFilter(arma::vec3({0,0,0}))
+            , lastOrientationMatrix(arma::eye(3,3))
+            , previousMeasuredTorsoFromLeftFoot()
+            , previousMeasuredTorsoFromRightFoot() {
                 
                 on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){
                     DEFAULT_NOISE_GAIN = file.config["DEFAULT_NOISE_GAIN"];
@@ -160,32 +166,28 @@ namespace modules {
                     }
                     //END ODOMETRY
 
-                    if(++frameLimiter % 3 == 0){
-                        emit(graph("Filtered Gravity Vector",
-                                float(orientation[0]*9.807),
-                                float(orientation[1]*9.807),
-                                float(orientation[2]*9.807)
-                            ));
-                         emit(graph("Filtered Forward Vector",
-                                float(orientation[3]),
-                                float(orientation[4]),
-                                float(orientation[5])
-                            ));
-                        emit(graph("Orientation Quality", quality
-                            ));
-                        emit(graph("Difference from gravity", normAcc
-                            ));
-                        emit(graph("Gyro Filtered", sensors->gyroscope[0],sensors->gyroscope[1], sensors->gyroscope[2]
-                            ));
-                        emit(graph("L FSR", input.fsr.left.fsr1, input.fsr.left.fsr2, input.fsr.left.fsr3, input.fsr.left.fsr4
-                            ));
-                        emit(graph("R FSR", input.fsr.right.fsr1, input.fsr.right.fsr2, input.fsr.right.fsr3, input.fsr.right.fsr4
-                            ));
-                        emit(graph("Torso Velocity", sensors->torsoVelocity[0], sensors->torsoVelocity[1], sensors->torsoVelocity[2]
-                            ));
-
-                        frameLimiter = 1;
-                    }   
+                    emit(graph("Filtered Gravity Vector",
+                            float(orientation[0]*9.807),
+                            float(orientation[1]*9.807),
+                            float(orientation[2]*9.807)
+                        ));
+                     emit(graph("Filtered Forward Vector",
+                            float(orientation[3]),
+                            float(orientation[4]),
+                            float(orientation[5])
+                        ));
+                    emit(graph("Orientation Quality", quality
+                        ));
+                    emit(graph("Difference from gravity", normAcc
+                        ));
+                    emit(graph("Gyro Filtered", sensors->gyroscope[0],sensors->gyroscope[1], sensors->gyroscope[2]
+                        ));
+                    emit(graph("L FSR", input.fsr.left.fsr1, input.fsr.left.fsr2, input.fsr.left.fsr3, input.fsr.left.fsr4
+                        ));
+                    emit(graph("R FSR", input.fsr.right.fsr1, input.fsr.right.fsr2, input.fsr.right.fsr3, input.fsr.right.fsr4
+                        ));
+                    emit(graph("Torso Velocity", sensors->torsoVelocity[0], sensors->torsoVelocity[1], sensors->torsoVelocity[2]
+                        ));
 
                     lastOrientationMatrix = sensors->orientation;
 

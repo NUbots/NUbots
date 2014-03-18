@@ -31,10 +31,6 @@ namespace messages {
     namespace platform {
         namespace darwin {
 
-            struct LMissile {};
-
-            struct RMissile {};
-
             /**
              * TODO document
              *
