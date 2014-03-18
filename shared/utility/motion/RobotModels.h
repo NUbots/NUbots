@@ -20,11 +20,10 @@ namespace utility{
 				public:
 					static constexpr float LENGTH_BETWEEN_LEGS = 0.074;
 			        static constexpr float HIP_OFFSET_Z = 0.034;
-			        static constexpr float HIP_OFFSET_X = 0.008;
+			        static constexpr float HIP_OFFSET_X = 0.00; //DARWIN SAYS THIS IS 0.008
 					static constexpr float UPPER_LEG_LENGTH = 0.093;
 					static constexpr float LOWER_LEG_LENGTH = 0.093;
-					static constexpr float FOOT_HEIGHT = 0.0335;
-		
+					static constexpr float FOOT_HEIGHT = 0.0335;	
 
 
 					static constexpr int LEFT_TO_RIGHT_HIP_YAW = 	   -1;
@@ -35,7 +34,7 @@ namespace utility{
 					static constexpr int LEFT_TO_RIGHT_ANKLE_ROLL =    -1;
 				};
 
-				class Head {//ROUGH MEASUREMENTS
+				class Head {
 				public:
 					static constexpr float NECK_BASE_POS_FROM_ORIGIN[3] = {0.013, 0, 0.11};
 					static constexpr float NECK_LENGTH = 0.0305;
@@ -44,6 +43,7 @@ namespace utility{
 				};
 
 				class Arm {//ROUGH MEASUREMENTS
+				public:
 					static constexpr float DISTANCE_BETWEEN_SHOULDERS = 0.114;				
 					static constexpr float SHOULDER_Z_OFFSET = 0.088;					
 					static constexpr float SHOULDER_X_OFFSET = 0.01;

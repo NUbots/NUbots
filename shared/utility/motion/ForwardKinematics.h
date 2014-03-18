@@ -199,13 +199,13 @@ namespace kinematics {
         int negativeIfRight = 1;
 
         if(static_cast<bool>(isLeft)){            
-            SHOULDER_PITCH = messages::inputs::ServoID::L_SHOULDER_PITCH;
-            SHOULDER_ROLL = messages::inputs::ServoID::L_SHOULDER_ROLL;
-            ELBOW = messages::inputs::ServoID::L_ELBOW;
+            SHOULDER_PITCH = messages::input::ServoID::L_SHOULDER_PITCH;
+            SHOULDER_ROLL = messages::input::ServoID::L_SHOULDER_ROLL;
+            ELBOW = messages::input::ServoID::L_ELBOW;
         } else {
-            SHOULDER_PITCH = messages::inputs::ServoID::R_SHOULDER_PITCH;
-            SHOULDER_ROLL = messages::inputs::ServoID::R_SHOULDER_ROLL;
-            ELBOW = messages::inputs::ServoID::R_ELBOW;
+            SHOULDER_PITCH = messages::input::ServoID::R_SHOULDER_PITCH;
+            SHOULDER_ROLL = messages::input::ServoID::R_SHOULDER_ROLL;
+            ELBOW = messages::input::ServoID::R_ELBOW;
             negativeIfRight = -1;
         }
 
