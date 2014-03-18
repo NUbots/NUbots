@@ -184,6 +184,68 @@ namespace kinematics {
         return positions;       
     }
 
+    /*! @brief
+        @NOTE read " runningTransform *= utility::math::matrix::_RotationMatrix(angle, 4); " as "Rotate the running transform about its local _ coordinate by angle."
+        @return Returns basis matrix for position of end of limb controlled by the specified motor. 
+
+        The basis 'faces' down its x axis.
+    */
+    template <typename RobotKinematicModel>
+    std::map<messages::input::ServoID, arma::mat44> calculateArmJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID, Side isLeft){
+        std::map<messages::input::ServoID, arma::mat44> positions;
+        arma::mat44 runningTransform = arma::eye(4,4);
+        //Variables to mask left and right leg differences:
+        messages::input::ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
+        int negativeIfRight = 1;
+
+        if(static_cast<bool>(isLeft)){            
+            SHOULDER_PITCH = messages::inputs::ServoID::L_SHOULDER_PITCH;
+            SHOULDER_ROLL = messages::inputs::ServoID::L_SHOULDER_ROLL;
+            ELBOW = messages::inputs::ServoID::L_ELBOW;
+        } else {
+            SHOULDER_PITCH = messages::inputs::ServoID::R_SHOULDER_PITCH;
+            SHOULDER_ROLL = messages::inputs::ServoID::R_SHOULDER_ROLL;
+            ELBOW = messages::inputs::ServoID::R_ELBOW;
+            negativeIfRight = -1;
+        }
+
+        //Translate to shoulder
+        runningTransform *= utility::math::matrix::translationMatrix(arma::vec3({RobotKinematicModel::Arm::SHOULDER_X_OFFSET,
+                                                                                 negativeIfRight * RobotKinematicModel::Arm::DISTANCE_BETWEEN_SHOULDERS / 2.0,
+                                                                                 RobotKinematicModel::Arm::SHOULDER_Z_OFFSET}));
+        //Rotate about shoulder pitch
+        runningTransform *= utility::math::matrix::yRotationMatrix(sensors.servos[static_cast<int>(SHOULDER_PITCH)].presentPosition, 4);
+        //Translate to end of shoulder part
+        runningTransform *= utility::math::matrix::translationMatrix(arma::vec3({RobotKinematicModel::Arm::SHOULDER_LENGTH,
+                                                                                 negativeIfRight * RobotKinematicModel::Arm::SHOULDER_WIDTH,
+                                                                                 RobotKinematicModel::Arm::SHOULDER_HEIGHT}));
+        //Return matrix pointing down shoulder, y same as global y. Pos = at centre of shoulder roll joint
+        positions[SHOULDER_PITCH] = runningTransform;
+        if(servoID == SHOULDER_PITCH){
+            return positions;
+        }
+
+        //Rotate by the shoulder roll
+        runningTransform *= utility::math::matrix::zRotationMatrix(sensors.servos[static_cast<int>(SHOULDER_ROLL)].presentPosition, 4);
+        //Translate to centre of next joint
+        runningTransform *= utility::math::matrix::translationMatrix(arma::vec3({RobotKinematicModel::Arm::UPPER_ARM_LENGTH,
+                                                                                 negativeIfRight * RobotKinematicModel::Arm::UPPER_ARM_Y_OFFSET,
+                                                                                 RobotKinematicModel::Arm::UPPER_ARM_Z_OFFSET}));
+        positions[SHOULDER_ROLL] = runningTransform;
+        if(servoID == SHOULDER_ROLL){
+            return positions;
+        }
+
+        //Rotate by the elbow angle
+        runningTransform *= utility::math::matrix::yRotationMatrix(sensors.servos[static_cast<int>(ELBOW)].presentPosition, 4);
+        //Translate to centre of end of arm, in line with joint
+        runningTransform *= utility::math::matrix::translationMatrix(arma::vec3({RobotKinematicModel::Arm::LOWER_ARM_LENGTH,
+                                                                                 negativeIfRight * RobotKinematicModel::Arm::LOWER_ARM_Y_OFFSET,
+                                                                                 RobotKinematicModel::Arm::LOWER_ARM_Z_OFFSET}));
+        positions[ELBOW] = runningTransform;
+        return positions;
+    }
+
     /*! @brief 
     */
     template <typename RobotKinematicModel>
@@ -195,11 +257,11 @@ namespace kinematics {
             case messages::input::ServoID::R_SHOULDER_PITCH:
             case messages::input::ServoID::R_SHOULDER_ROLL:
             case messages::input::ServoID::R_ELBOW:
-                return std::map<messages::input::ServoID, arma::mat44>();//calculateArmJointPosition<RobotKinematicModel>(sensors, servoID, Side::RIGHT);
+                return calculateArmJointPosition<RobotKinematicModel>(sensors, servoID, Side::RIGHT);
             case messages::input::ServoID::L_SHOULDER_PITCH:
             case messages::input::ServoID::L_SHOULDER_ROLL:
             case messages::input::ServoID::L_ELBOW:
-                return std::map<messages::input::ServoID, arma::mat44>();//calculateArmJointPosition<RobotKinematicModel>(sensors, servoID, Side::LEFT);
+                return calculateArmJointPosition<RobotKinematicModel>(sensors, servoID, Side::LEFT);
             case messages::input::ServoID::R_HIP_YAW:
             case messages::input::ServoID::R_HIP_ROLL:
             case messages::input::ServoID::R_HIP_PITCH:
