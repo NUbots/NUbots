@@ -24,12 +24,13 @@
 #include <vector>
 #include <map>
 #include <armadillo>
-#include "utility/vision/LookUpTable.h"
+#include <memory>
 #include "messages/input/Image.h"
+#include "messages/vision/LookUpTable.h"
 
 namespace messages {
     namespace vision {
-           
+
         /**
         * The possible alignment for segments in a segmented region.
         */     
@@ -77,7 +78,7 @@ namespace messages {
 
             std::shared_ptr<const messages::input::Image> image;         //@! The image from which the segments are derived.
 
-            std::shared_ptr<utility::vision::LookUpTable> LUT;
+            std::shared_ptr<const messages::vision::LookUpTable> LUT;
              
 
             /*!

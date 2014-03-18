@@ -60,8 +60,17 @@ namespace utility {
 
                 return result;
             }
+
+            inline arma::vec2 Cartesian2Radial(const arma::vec2& cartesianCoordinates)  {
+                double x = cartesianCoordinates[0];
+                double y = cartesianCoordinates[1];
+
+                return { sqrt(x*x + y*y), atan2(y, x) };
+            }
         }
     }
 }
 
+
 #endif // UTILITY_MATH_COORDINATES_H
+

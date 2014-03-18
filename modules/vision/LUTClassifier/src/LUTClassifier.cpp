@@ -18,6 +18,7 @@
  */
 
 #include "LUTClassifier.h"
+#include "messages/vision/LookUpTable.h"
 
 namespace modules {
     namespace vision {
@@ -28,38 +29,23 @@ namespace modules {
 		using utility::configuration::ConfigurationNode;
 		using messages::vision::ClassifiedImage;
 		using messages::vision::SegmentedRegion;
-		using utility::vision::LookUpTable;
+        using messages::vision::LookUpTable;
 
 		using std::chrono::system_clock;
         
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), greenHorizon(), scanLines() { 
-			currentLUTIndex = 0;
 			
-            on<Trigger<Configuration<VisionConstants>>>([this](const Configuration<VisionConstants>& constants) {
+            on<Trigger<Configuration<VisionConstants>>>([this](const Configuration<VisionConstants>&) {
            		//std::cout<< "Loading VisionConstants."<<std::endl;
            		//std::cout<< "Finished Config Loading successfully."<<std::endl;
             });
 
 			//Load LUTs
-			on<Trigger<Configuration<LUTLocations>>>([this](const Configuration<LUTLocations>& locations) {
-				//std::cout<< "Loading LUT."<<std::endl;
-
-				std::vector<std::string> LUTLocations = locations.config["DEFAULT_LOCATION"];
-				LUTs.clear();
-
-				for (auto& LUTLocation : LUTLocations) {
-					std::shared_ptr<LookUpTable> ptr = std::make_shared<LookUpTable>();
-					LUTs.push_back(ptr);
-					bool loaded = LUTs.back()->loadLUTFromFile(LUTLocation);			
-
-					if(!loaded) {						
-						NUClear::log<NUClear::ERROR>("!!!LUT ", LUTLocation, " has NOT loaded successfully!!!!" );
-
-					} else {
-                        NUClear::log<NUClear::ERROR>("LUT ", LUTLocation, " has loaded successfully. Size: ", LUTs.back()->LUT_SIZE);
-                    }
-				}
-				
+			on<Trigger<Configuration<LUTLocations>>>([this](const Configuration<LUTLocations>& config) {
+				std::string LUTLocation = config["LUT_LOCATION"];
+                auto lut = std::make_unique<LookUpTable>();
+                lut->loadLUTFromFile(LUTLocation);
+                emit(std::move(lut));
 			});
 
 			//Load in greenhorizon parameters
@@ -159,11 +145,11 @@ namespace modules {
 				}
 			});
 
-            on<Trigger<Image>, With<Raw<Image>>, Options<Single>>([this](const Image& image, const std::shared_ptr<const Image>& image_ptr) {
+            on<Trigger<Image>, With<LookUpTable, Raw<Image>, Raw<LookUpTable>>, Options<Single>>([this](const Image& image, const LookUpTable& lut, const std::shared_ptr<const Image>& imagePtr, const std::shared_ptr<const LookUpTable> lutPtr) { // TODO: fix!
             	/*std::vector<arma::vec2> green_horizon_points = */
             	//std::cout << "Image size = "<< image.width() << "x" << image.height() <<std::endl;
             	//std::cout << "LUTClassifier::on<Trigger<Image>> calculateGreenHorizon" << std::endl;
-            	greenHorizon.calculateGreenHorizon(image, *LUTs[currentLUTIndex]);
+            	greenHorizon.calculateGreenHorizon(image, lut);
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> generateScanLines" << std::endl;
             	std::vector<int> generatedScanLines;
@@ -172,22 +158,31 @@ namespace modules {
             	scanLines.generateScanLines(image, greenHorizon, &generatedScanLines);
                 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyHorizontalScanLines" << std::endl;
-            	scanLines.classifyHorizontalScanLines(image, generatedScanLines, *LUTs[currentLUTIndex], &horizontalClassifiedSegments);
+            	scanLines.classifyHorizontalScanLines(image, generatedScanLines, lut, &horizontalClassifiedSegments);
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyVerticalScanLines" << std::endl;
-            	scanLines.classifyVerticalScanLines(image, greenHorizon, *LUTs[currentLUTIndex], &verticalClassifiedSegments);
+            	scanLines.classifyVerticalScanLines(image, greenHorizon, lut, &verticalClassifiedSegments);
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyImage" << std::endl;
             	std::unique_ptr<ClassifiedImage> classifiedImage = segmentFilter.classifyImage(horizontalClassifiedSegments, verticalClassifiedSegments);
+                classifiedImage->image = imagePtr;
+                classifiedImage->LUT = lutPtr;
             	classifiedImage->greenHorizonInterpolatedPoints = greenHorizon.getInterpolatedPoints();
 
             	//std::cout << "LUTClassifier::on<Trigger<Image>> emit(std::move(classified_image));" << std::endl;
-            	classifiedImage->image = image_ptr;
-            	classifiedImage->LUT = LUTs[currentLUTIndex];
-
             	emit(std::move(classifiedImage));
             });
 
+			// on<Trigger<Image>>([this](const Image& image) {
+
+			// 	//NUClear::log("Waiting 100 milliseconds...");
+
+			// 	system_clock::time_point start = system_clock::now();
+
+			// 	while (std::chrono::duration_cast<std::chrono::milliseconds>(system_clock::now().time_since_epoch()) - 
+			// 			std::chrono::duration_cast<std::chrono::milliseconds>(start.time_since_epoch())  < std::chrono::milliseconds(3)){}
+
+			// });
         }
 
     }  // vision

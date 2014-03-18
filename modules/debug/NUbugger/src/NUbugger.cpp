@@ -22,13 +22,13 @@
 
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/Sensors.h"
-#include "utility/NUbugger/NUgraph.h"
+#include "utility/nubugger/NUgraph.h"
 
 namespace modules {
 namespace debug {
 
     using NUClear::DEBUG;
-    using utility::NUbugger::graph;
+    using utility::nubugger::graph;
     using messages::platform::darwin::DarwinSensors;
     using std::chrono::milliseconds;
     using messages::input::Sensors;

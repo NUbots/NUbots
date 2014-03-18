@@ -1,6 +1,7 @@
-package messages.support.NUbugger.proto;
+package messages.support.nubugger.proto;
 
 import "messages/input/proto/Sensors.proto";
+import "messages/localisation/proto/Localisation.proto";
 
 message Message {
     enum Type {
@@ -9,6 +10,7 @@ message Message {
         LOCALISATION = 3;
 		DATA_POINT = 4;
 		REACTION_STATISTICS = 5;
+		LOOKUP_TABLE = 6;
     }
 
     required Type type = 1;
@@ -16,9 +18,14 @@ message Message {
 
     optional messages.input.proto.Sensors sensor_data = 3;
     optional Vision vision = 4;
-    optional Localisation localisation = 5;
+    optional messages.localisation.proto.Localisation localisation = 5;
     optional DataPoint dataPoint = 6;
     optional ReactionStatistics reactionStatistics = 7;
+	optional LookupTable lookupTable = 8;
+
+	message LookupTable {
+		optional bytes table = 1;
+	}
 
 	message ReactionStatistics {
 		optional string name = 1;
@@ -122,29 +129,6 @@ message Message {
 		optional Image image = 1;
 		repeated VisionFieldObject vision_object = 2;
 		optional VisionClassifiedImage classified_image = 3;
-	}
-
-	message LocalisationFieldObject {
-		optional string name = 1;
-
-		optional float wm_x = 2;
-		optional float wm_y = 3;
-
-		optional float sd_x = 4;
-		optional float sd_y = 5;
-
-		optional float sr_xx = 6;
-		optional float sr_xy = 7;
-		optional float sr_yy = 8;
-
-		optional float heading = 9;
-		optional float sd_heading = 10;
-
-		optional bool lost = 11;
-	}
-
-	message Localisation {
-		repeated LocalisationFieldObject field_object = 1;
 	}
 
 	message Vector {

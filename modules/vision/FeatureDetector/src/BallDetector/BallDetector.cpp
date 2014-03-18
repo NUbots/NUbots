@@ -24,7 +24,7 @@ namespace modules {
         
         using messages::vision::ColourSegment;
         using messages::input::Image;
-        using utility::vision::LookUpTable;
+        using messages::vision::LookUpTable;
         using messages::vision::ClassifiedImage;
 
         using messages::vision::BALL_COLOUR;

@@ -31,7 +31,7 @@
 #include "utility/motion/RobotModels.h"
 #include "utility/math/matrix.h"
 #include "OPKinematics.h"
-#include "utility/NUbugger/NUgraph.h"
+#include "utility/nubugger/NUgraph.h"
 
 
 namespace modules {
@@ -41,7 +41,7 @@ namespace modules {
         using messages::behaviour::ServoCommand;
         using messages::support::Configuration;
         using utility::motion::kinematics::DarwinModel;
-        using utility::NUbugger::graph;
+        using utility::nubugger::graph;
         using NUClear::log;
         using NUClear::DEBUG;
         using messages::input::Sensors;
@@ -668,7 +668,7 @@ namespace modules {
         void WalkEngine::motionLegs(std::vector<double> qLegs, bool gyroOff, const Sensors& sensors) {
             float phComp = std::min({1.0, phSingle / 0.1, (1 - phSingle) / 0.1});                  
             ServoID supportLegID = (supportLeg == LEFT) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
-            arma::mat33 ankleRotation = utility::motion::kinematics::calculatePosition<DarwinModel>(sensors, supportLegID)[supportLegID].submat(0,0,2,2) * utility::math::matrix::yRotationMatrix(-M_PI/2, 3);
+            arma::mat33 ankleRotation = sensors.forwardKinematics.find(supportLegID)->second.submat(0,0,2,2);
             // get effective gyro angle considering body angle offset
             arma::mat33 kinematicGyroSORAMatrix = sensors.orientation * ankleRotation;   //DOUBLE TRANSPOSE       
             std::pair<arma::vec3, double> axisAngle = utility::math::matrix::axisAngleFromRotationMatrix(kinematicGyroSORAMatrix);

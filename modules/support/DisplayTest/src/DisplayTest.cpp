@@ -1,7 +1,7 @@
 #include "DisplayTest.h"
-#include "utility/NUbugger/NUgraph.h"
+#include "utility/nubugger/NUgraph.h"
 
-using utility::NUbugger::graph;
+using utility::nubugger::graph;
 
 namespace modules {
     namespace support {

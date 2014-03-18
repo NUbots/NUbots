@@ -177,7 +177,9 @@ namespace kinematics {
 
         //Rotate to face down foot (roll)
         runningTransform *= utility::math::matrix::zRotationMatrix(sensors.servos[static_cast<int>(ANKLE_ROLL)].presentPosition , 4);
-        //Return basis with x as the normal the plane of the foot and z out the front. Pos = ankle axis centre
+        //Rotate so x faces towar toes
+        runningTransform *= utility::math::matrix::yRotationMatrix(-M_PI/2, 4);
+        //Return basis with x out of the front of the toe and z out the top of foot. Pos = ankle axis centre
         positions[ANKLE_ROLL] = runningTransform;
         return positions;       
     }

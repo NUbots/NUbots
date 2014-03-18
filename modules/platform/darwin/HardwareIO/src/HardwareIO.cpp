@@ -160,7 +160,7 @@ namespace darwin {
             for (const auto& command : commands) {
                 
                 // If gain is 0, do a normal write to disable torque (syncwrite won't write to torqueEnable)
-                if(command.gain == 0) {
+                if(isnan(command.gain)) {
                     darwin[static_cast<int>(command.id) + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
                 }
                 

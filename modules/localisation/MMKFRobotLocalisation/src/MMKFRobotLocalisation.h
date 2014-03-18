@@ -17,27 +17,36 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_LOCALISATION_H
-#define MODULES_LOCALISATION_H
+#ifndef MODULES_LOCALISATION_MMKFROBOTLOCALISATION_H
+#define MODULES_LOCALISATION_MMKFROBOTLOCALISATION_H
 
 #include <nuclear>
-#include "LocalisationEngine.h"
+#include <armadillo>
+#include "MMKFRobotLocalisationEngine.h"
+#include "FieldDescription.h"
 
 namespace modules {
-    class Localisation : public NUClear::Reactor {
+namespace localisation {
+
+    class MMKFRobotLocalisation : public NUClear::Reactor {
     private:
-        LocalisationEngine engine;
+        /// The engine that does all of the work
+        localisation::MMKFRobotLocalisationEngine engine_;
+
+        /// For testing
+        arma::vec2 marker_ = { 0, 0 };
 
     public:
-        /// @brief Our configuration file for this class
+        /// @brief General localisation configuration.
         struct LocalisationConfig {
             static constexpr const char* CONFIGURATION_PATH = "Localisation.json";
         };
 
-
-        /// @brief Called by the powerplant to build and setup our CameraReader
-        explicit Localisation(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the Localisation reactor.
+        explicit MMKFRobotLocalisation(std::unique_ptr<NUClear::Environment> environment);
     };
+
+}
 }
 #endif
 
