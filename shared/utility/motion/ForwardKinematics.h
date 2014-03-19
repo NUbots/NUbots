@@ -298,11 +298,12 @@ namespace kinematics {
         @return [x_com, y_com, z_com, total_mass] relative to the torso basis
     */
     template <typename RobotKinematicModel>
-    arma::vec4 calculateCentreOfMass(const std::map<messages::input::ServoID, arma::mat44>& jointPositions){
+    arma::vec4 calculateCentreOfMass(const std::map<messages::input::ServoID, arma::mat44>& jointPositions, bool includeTorso){
         arma::vec4 totalMassVector;
         
         for(auto& joint : jointPositions){
-            arma::vec4 massVector(RobotKinematicModel::MassModel::masses[joint.first]);
+            arma::vec4 massVector(RobotKinematicModel::MassModel::masses[static_cast<int>(joint.first)]);
+            NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass ", messages::input::stringFromId(joint.first), massVector);
             double jointMass = massVector[3];
             
             arma::mat44 massScaler = arma::eye(4,4);
@@ -311,8 +312,18 @@ namespace kinematics {
             totalMassVector +=  joint.second * massScaler * massVector; // = m * local centre of mass in global robot coords
         }
 
+        if(includeTorso){
+            arma::vec4 massVector(RobotKinematicModel::MassModel::masses[20]);
+            double jointMass = massVector[3];
+            
+            arma::mat44 massScaler = arma::eye(4,4);
+            massScaler.submat(0,0,2,2) *= jointMass;
+            
+            totalMassVector +=  massScaler * massVector; // = m * local centre of mass in global robot coords
+        }
+
         arma::mat44 normaliser = arma::eye(4,4);
-        if(totalMassVector[3] > 0 ){
+        if(totalMassVector[3] > 0){
             normaliser.submat(0,0,2,2) *= 1 / totalMassVector[3];
             return normaliser * totalMassVector;
         } else {
