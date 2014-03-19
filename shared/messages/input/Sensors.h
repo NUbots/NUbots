@@ -67,6 +67,8 @@ namespace messages {
 
             arma::vec3 torsoVelocity;
 
+            arma::vec4 centreOfMass;
+
             std::vector<Servo> servos;
         };
     }

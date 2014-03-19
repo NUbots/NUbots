@@ -303,6 +303,7 @@ namespace kinematics {
 
         if(includeTorso){
             arma::vec4 massVector(RobotKinematicModel::MassModel::masses[20]);
+            NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass Torso", massVector);
             double jointMass = massVector[3];
             
             arma::mat44 massScaler = arma::eye(4,4);

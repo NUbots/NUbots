@@ -39,6 +39,7 @@ namespace modules {
             using messages::input::ServoID;
             using utility::motion::kinematics::calculateAllPositions;
             using utility::motion::kinematics::DarwinModel;
+            using utility::motion::kinematics::calculateCentreOfMass;
 
 
             SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), orientationFilter(arma::vec("0,0,-1,1,0,0")) , velocityFilter(arma::vec3("0,0,0")), frameLimiter(0), lastOrientationMatrix(arma::eye(3,3)), previousMeasuredTorsoFromLeftFoot(), previousMeasuredTorsoFromRightFoot() {
@@ -160,29 +161,36 @@ namespace modules {
                     }
                     //END ODOMETRY
 
+
+                    //MASS MODEL
+                    sensors->centreOfMass = calculateCentreOfMass<DarwinModel>(sensors->forwardKinematics, true);
+                    //END MASS MODEL
                     if(++frameLimiter % 3 == 0){
-                        emit(graph("Filtered Gravity Vector",
-                                float(orientation[0]*9.807),
-                                float(orientation[1]*9.807),
-                                float(orientation[2]*9.807)
+                        // emit(graph("Filtered Gravity Vector",
+                        //         float(orientation[0]*9.807),
+                        //         float(orientation[1]*9.807),
+                        //         float(orientation[2]*9.807)
+                        //     ));
+                        //  emit(graph("Filtered Forward Vector",
+                        //         float(orientation[3]),
+                        //         float(orientation[4]),
+                        //         float(orientation[5])
+                        //     ));
+                        // emit(graph("Orientation Quality", quality
+                        //     ));
+                        // emit(graph("Difference from gravity", normAcc
+                        //     ));
+                        // emit(graph("Gyro Filtered", sensors->gyroscope[0],sensors->gyroscope[1], sensors->gyroscope[2]
+                        //     ));
+                        // emit(graph("L FSR", input.fsr.left.fsr1, input.fsr.left.fsr2, input.fsr.left.fsr3, input.fsr.left.fsr4
+                        //     ));
+                        // emit(graph("R FSR", input.fsr.right.fsr1, input.fsr.right.fsr2, input.fsr.right.fsr3, input.fsr.right.fsr4
+                        //     ));
+                        // emit(graph("Torso Velocity", sensors->torsoVelocity[0], sensors->torsoVelocity[1], sensors->torsoVelocity[2]
+                        //     ));
+                        emit(graph("COM", sensors->centreOfMass[0], sensors->centreOfMass[1], sensors->centreOfMass[2], sensors->centreOfMass[3]
                             ));
-                         emit(graph("Filtered Forward Vector",
-                                float(orientation[3]),
-                                float(orientation[4]),
-                                float(orientation[5])
-                            ));
-                        emit(graph("Orientation Quality", quality
-                            ));
-                        emit(graph("Difference from gravity", normAcc
-                            ));
-                        emit(graph("Gyro Filtered", sensors->gyroscope[0],sensors->gyroscope[1], sensors->gyroscope[2]
-                            ));
-                        emit(graph("L FSR", input.fsr.left.fsr1, input.fsr.left.fsr2, input.fsr.left.fsr3, input.fsr.left.fsr4
-                            ));
-                        emit(graph("R FSR", input.fsr.right.fsr1, input.fsr.right.fsr2, input.fsr.right.fsr3, input.fsr.right.fsr4
-                            ));
-                        emit(graph("Torso Velocity", sensors->torsoVelocity[0], sensors->torsoVelocity[1], sensors->torsoVelocity[2]
-                            ));
+
 
                         frameLimiter = 1;
                     }   
