@@ -83,17 +83,6 @@ namespace kinematics {
         return positions;
     }
 
-    // template <typename RobotKinematicModel>
-    // arma::mat44 calculateCameraBasis(const messages::input::Sensors& sensors){
-    //     return calculateHeadJointPosition<RobotKinematicModel>(sensors, messages::input::ServoID::HEAD_PITCH);
-    // }
-
-    
-    // template <typename RobotKinematicModel>
-    // arma::mat44 calculateArmJointPosition(const messages::input::Sensors& sensors,  messages::input::ServoID servoID, Side isLeft){
-    //     return arma::eye(4,4);
-    // }
-
     /*! @brief
         @NOTE read " runningTransform *= utility::math::matrix::_RotationMatrix(angle, 4); " as "Rotate the running transform about its local _ coordinate by angle."
         @return Returns basis matrix for position of end of limb controlled by the specified motor. 
@@ -283,13 +272,13 @@ namespace kinematics {
 
     template <typename RobotKinematicModel>
     std::map<messages::input::ServoID, arma::mat44> calculateAllPositions(const messages::input::Sensors& sensors) {
-        std::map<messages::input::ServoID, arma::mat44> result = calculatePosition<DarwinModel>(sensors, messages::input::ServoID::L_ANKLE_ROLL);
-        std::map<messages::input::ServoID, arma::mat44> rightLegPositions = calculatePosition<DarwinModel>(sensors, messages::input::ServoID::R_ANKLE_ROLL);
-        std::map<messages::input::ServoID, arma::mat44> headPositions = calculatePosition<DarwinModel>(sensors, messages::input::ServoID::HEAD_PITCH);
-        // std::map<messages::input::ServoID, arma::mat44> leftArm = calculatePosition<DarwinModel>(sensors, messages::input::ServoID::L_ELBOW);
-        // std::map<messages::input::ServoID, arma::mat44> rightArm = calculatePosition<DarwinModel>(sensors, messages::input::ServoID::R_ELBOW);
-        // result.insert(leftArm.begin(), leftArm.end());
-        // result.insert(rightArm.begin(), rightArm.end());
+        std::map<messages::input::ServoID, arma::mat44> result = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::L_ANKLE_ROLL);
+        std::map<messages::input::ServoID, arma::mat44> rightLegPositions = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::R_ANKLE_ROLL);
+        std::map<messages::input::ServoID, arma::mat44> headPositions = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::HEAD_PITCH);
+        std::map<messages::input::ServoID, arma::mat44> leftArm = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::L_ELBOW);
+        std::map<messages::input::ServoID, arma::mat44> rightArm = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::R_ELBOW);
+        result.insert(leftArm.begin(), leftArm.end());
+        result.insert(rightArm.begin(), rightArm.end());
         result.insert(rightLegPositions.begin(), rightLegPositions.end());
         result.insert(headPositions.begin(), headPositions.end());                    
         return result;

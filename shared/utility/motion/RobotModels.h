@@ -64,7 +64,7 @@ namespace utility{
 				};
 
 				class MassModel {
-					static constexpr double masses[20][4] = {
+					static constexpr double masses[21][4] = {
 
 						{-0.011264,			0.0109774,		-0.00139357,	0.025913},	//	R_SHOULDER_PITCH
 						{-0.011264,			-0.0109774,		-0.00139357,	0.025913},	//	L_SHOULDER_PITCH
@@ -88,10 +88,14 @@ namespace utility{
 						{-0.02533338,		6.39198E-005,	-0.0144355,		0.158042},	//	HEAD_PITCH
 						{-0.0066631,		-0.00311589,	0.0705563,		0.975599}	//	TORSO
 
-				};
+					};
 
+				};
 				static constexpr float TEAMDARWINCHEST_TO_ORIGIN = 0.096 - Leg::HIP_OFFSET_Z; //Taken from team darwin OPkinematics.cpp : hipOffsetZ = .096; 
 			};
+
+
+
 		}
 	}
 }
