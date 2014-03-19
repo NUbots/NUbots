@@ -20,8 +20,7 @@
 #include "ScriptEngine.h"
 
 #include "messages/support/Configuration.h"
-#include "messages/motion/ServoWaypoint.h"
-#include "messages/platform/darwin/DarwinServoCommand.h"
+#include "messages/behaviour/Action.h"
 
 namespace modules {
     namespace motion {
@@ -45,13 +44,13 @@ namespace modules {
                     throw std::runtime_error("The script " + command.script + " is not loaded in the system");
                 }
                 else {
-                    emit(std::make_unique<messages::motion::ExecuteScript>(script->second, command.start));
+                    emit(std::make_unique<messages::motion::ExecuteScript>(command.sourceId, script->second, command.start));
                 }
             });
 
             on<Trigger<messages::motion::ExecuteScript>>([this](const messages::motion::ExecuteScript& command) {
 
-                auto waypoints = std::make_unique<std::vector<messages::motion::ServoWaypoint>>();
+                auto waypoints = std::make_unique<std::vector<messages::behaviour::ServoCommand>>();
 
                 auto time = command.start;
                 for(const auto& frame : command.script.frames) {
@@ -61,6 +60,7 @@ namespace modules {
                     // Loop through all the motors and make a servo waypoint for it
                     for(const auto& target : frame.targets) {
                         waypoints->push_back({
+                            command.sourceId,
                             time,
                             target.id,
                             target.position,

@@ -1,0 +1,17 @@
+ADD_ROLE(
+    NAME getuptest
+    MODULES
+        support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem    
+        #support::configuration::NetworkingConfiguration
+        platform::darwin::HardwareIO
+        platform::darwin::SensorFilter
+        support::NUbugger
+        debug::NUbugger
+        behaviour::Controller
+        behaviour::reflexes::Stand
+        behaviour::reflexes::FallingRelax
+        behaviour::reflexes::Getup
+        motion::ScriptEngine
+)
