@@ -21,24 +21,26 @@
 
 #include "MultiModalRobotModel.h"
 #include "RobotModel.h"
-#include "LocalisationFieldObject.h"
+#include "utility/localisation/LocalisationFieldObject.h"
 #include "utility/math/angle.h"
+
+using utility::localisation::LocalisationFieldObject;
 
 namespace modules {
 namespace localisation {
 
 std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
-    arma::vec::fixed<RobotModel::size> est = h.filter_.get();
+    arma::vec::fixed<robot::RobotModel::size> est = h.filter_.get();
 
     return os 
         << "{ "
         << "weight: "
             << std::setw(7) << h.weight_ << ", "
         << "estimate: ["
-            << std::setw(7) << est[kX] << ", "
-            << std::setw(7) << est[kY] << ", "
-            << std::setw(7) << est[kHeadingX] << ", "
-            << std::setw(7) << est[kHeadingY] << "]"
+            << std::setw(7) << est[robot::kX] << ", "
+            << std::setw(7) << est[robot::kY] << ", "
+            << std::setw(7) << est[robot::kHeadingX] << ", "
+            << std::setw(7) << est[robot::kHeadingY] << "]"
         // << ", observation trail: [" << h.obs_trail_ << "]"
         // << ", covariance:\n" << h.GetCovariance()
         << ", observation count: " << h.obs_count_
@@ -194,7 +196,7 @@ bool ModelsAreSimilar(const RobotHypothesis& model_a,
     const float kMinTransDist = 0.06; // TODO: Add to config system
     const float kMinHeadDist = 0.01; // TODO: Add to config system
 
-    arma::vec::fixed<RobotModel::size> diff = model_a.GetEstimate() - model_b.GetEstimate();
+    arma::vec::fixed<robot::RobotModel::size> diff = model_a.GetEstimate() - model_b.GetEstimate();
 
     auto trans_dist = arma::norm(diff.rows(0, 1), 2);
 
@@ -202,7 +204,7 @@ bool ModelsAreSimilar(const RobotHypothesis& model_a,
     // auto head_dist = std::abs(utility::math::angle::normalizeAngle(diff[kHeading]));
 
     // Unit vector orientation
-    auto head_dist = diff[kHeadingX] + diff[kHeadingY];
+    auto head_dist = diff[robot::kHeadingX] + diff[robot::kHeadingY];
 
     return (trans_dist < kMinTransDist) && (head_dist < kMinHeadDist);
 }

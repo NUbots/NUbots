@@ -32,9 +32,6 @@ namespace localisation {
         /// The engine that does all of the work
         localisation::KFBallLocalisationEngine engine_;
 
-        /// For testing
-        arma::vec2 marker_ = { 0, 0 };
-
     public:
         /// @brief Called by the powerplant to build and setup the KFBallLocalisation reactor.
         explicit KFBallLocalisation(std::unique_ptr<NUClear::Environment> environment);

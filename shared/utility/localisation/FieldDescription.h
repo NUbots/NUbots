@@ -17,18 +17,19 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_FIELDDESCRIPTION_H
-#define MODULES_FIELDDESCRIPTION_H
+#ifndef SHARED_UTILITY_LOCALISATION_FIELDDESCRIPTION_H
+#define SHARED_UTILITY_LOCALISATION_FIELDDESCRIPTION_H
 
 #include <unordered_map>
 #include <armadillo>
 
 #include "messages/support/Configuration.h"
-#include "LocalisationFieldObject.h"
+#include "utility/localisation/LocalisationFieldObject.h"
 
 using messages::support::Configuration;
+using utility::localisation::LocalisationFieldObject;
 
-namespace modules {
+namespace utility {
 namespace localisation {
 
 struct FieldDescriptionConfig {

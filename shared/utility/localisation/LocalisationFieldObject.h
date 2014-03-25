@@ -17,13 +17,13 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_LOCALISATIONFIELDOBJECT_H
-#define MODULES_LOCALISATIONFIELDOBJECT_H
+#ifndef UTILITY_LOCALISATION_LOCALISATIONFIELDOBJECT_H
+#define UTILITY_LOCALISATION_LOCALISATIONFIELDOBJECT_H
 
 #include <iomanip>
 #include <armadillo>
 
-namespace modules {
+namespace utility {
 namespace localisation {
 
 enum class LFOId {
@@ -64,8 +64,8 @@ public:
     }
 };
 
-class StationaryFieldObject : public LocalisationFieldObject { };
-class MobileFieldObject : public LocalisationFieldObject { };
+// class StationaryFieldObject : public LocalisationFieldObject { };
+// class MobileFieldObject : public LocalisationFieldObject { };
 
 }
 }

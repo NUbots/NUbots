@@ -27,14 +27,14 @@
 
 #include "RobotModel.h"
 #include "messages/vision/VisionObjects.h"
-#include "LocalisationFieldObject.h"
+#include "utility/localisation/LocalisationFieldObject.h"
 
 namespace modules {
 namespace localisation {
 
     class RobotHypothesis {
     private:
-        utility::math::kalman::UKF<RobotModel> filter_;
+        utility::math::kalman::UKF<robot::RobotModel> filter_;
 
         double weight_;
 
@@ -47,7 +47,7 @@ namespace localisation {
             filter_(
                 {0, 0, -1, 0}, // mean
                 // {0, 0, 3.141},
-                arma::eye(RobotModel::size, RobotModel::size) * 1, // cov
+                arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 1, // cov
                 1), // alpha
             weight_(1),
             obs_trail_(""),
@@ -59,17 +59,17 @@ namespace localisation {
         float GetFilterWeight() const { return weight_; }
         void SetFilterWeight(float weight) { weight_ = weight; }
 
-        arma::vec::fixed<RobotModel::size> GetEstimate() const {
+        arma::vec::fixed<robot::RobotModel::size> GetEstimate() const {
             return filter_.get();
         }
 
-        arma::mat::fixed<RobotModel::size, RobotModel::size> GetCovariance() const {
+        arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> GetCovariance() const {
             return filter_.getCovariance();
         }
 
         double MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,
-            const LocalisationFieldObject& actual_object);
+            const utility::localisation::LocalisationFieldObject& actual_object);
 
         void TimeUpdate();
 
@@ -95,18 +95,18 @@ namespace localisation {
 
         void MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,
-            const LocalisationFieldObject& actual_object);
+            const utility::localisation::LocalisationFieldObject& actual_object);
         // void MultipleLandmarkUpdate();
 
         void AmbiguousMeasurementUpdate(
             const messages::vision::VisionObject& ambiguous_object,
-            const std::vector<LocalisationFieldObject>& possible_objects);
+            const std::vector<utility::localisation::LocalisationFieldObject>& possible_objects);
 
-        arma::vec::fixed<RobotModel::size> GetEstimate() {
+        arma::vec::fixed<robot::RobotModel::size> GetEstimate() {
             return robot_models_[0]->GetEstimate();
         }
 
-        arma::mat::fixed<RobotModel::size, RobotModel::size> GetCovariance() {
+        arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> GetCovariance() {
             return robot_models_[0]->GetCovariance();
         }
 

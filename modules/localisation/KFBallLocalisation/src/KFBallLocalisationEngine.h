@@ -38,7 +38,7 @@ namespace localisation {
             ball_filter_(
                 {0, 0, 0, 0}, // mean
                 // {0, 0, 3.141},
-                arma::eye(BallModel::size, BallModel::size) * 1, // cov
+                arma::eye(ball::BallModel::size, ball::BallModel::size) * 1, // cov
                 1) // alpha
             { }
 
@@ -46,7 +46,7 @@ namespace localisation {
 
         double MeasurementUpdate(const messages::vision::VisionObject& observed_object);
 
-        utility::math::kalman::UKF<BallModel> ball_filter_;
+        utility::math::kalman::UKF<ball::BallModel> ball_filter_;
     };
 }
 }

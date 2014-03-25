@@ -7,6 +7,7 @@
 
 namespace modules {
 namespace localisation {
+namespace ball {
 
 arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
     const arma::vec::fixed<BallModel::size>& state, double deltaT, 
@@ -79,5 +80,6 @@ arma::mat::fixed<BallModel::size, BallModel::size> BallModel::processNoise() {
     return noise;
 }
 
+}
 }
 }

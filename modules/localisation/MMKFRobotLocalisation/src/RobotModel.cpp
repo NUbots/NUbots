@@ -7,6 +7,7 @@
 
 namespace modules {
 namespace localisation {
+namespace robot {
 
 arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     const arma::vec::fixed<RobotModel::size>& state, double deltaT, 
@@ -106,5 +107,6 @@ arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() 
     return arma::eye(RobotModel::size, RobotModel::size) * processNoiseFactor;
 }
 
+}
 }
 }

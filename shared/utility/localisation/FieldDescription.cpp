@@ -25,7 +25,7 @@
 
 using messages::support::Configuration;
 
-namespace modules {
+namespace utility {
 namespace localisation {
     // LocalisationFieldObject BuildLFO(
     //     Configuration<FieldDescriptionConfig> config,
@@ -103,3 +103,4 @@ namespace localisation {
     }
 }
 }
+        

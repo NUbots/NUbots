@@ -23,9 +23,10 @@
 #include <nuclear>
 
 #include "messages/vision/VisionObjects.h"
-#include "FieldDescription.h"
+#include "utility/localisation/FieldDescription.h"
 #include "MultiModalRobotModel.h"
-#include "LocalisationFieldObject.h"
+#include "utility/localisation/FieldDescription.h"
+#include "utility/localisation/LocalisationFieldObject.h"
 
 namespace modules {
 namespace localisation {
@@ -37,7 +38,7 @@ namespace localisation {
 
         void TimeUpdate(time_t current_time);
 
-        std::vector<LocalisationFieldObject> GetPossibleObjects(
+        std::vector<utility::localisation::LocalisationFieldObject> GetPossibleObjects(
             const messages::vision::Goal& ambiguous_object);
         
         void ProcessAmbiguousObjects(
@@ -49,16 +50,16 @@ namespace localisation {
 
         void ProcessObjects(const std::vector<messages::vision::Goal>& goals);
         
-        std::shared_ptr<localisation::FieldDescription> field_description() {
+        std::shared_ptr<utility::localisation::FieldDescription> field_description() {
             return field_description_;
         };
-        void set_field_description(std::shared_ptr<localisation::FieldDescription> desc) {
+        void set_field_description(std::shared_ptr<utility::localisation::FieldDescription> desc) {
             field_description_ = desc;
         };
 
     // private:
         /// Contains the dimensions of the field
-        std::shared_ptr<localisation::FieldDescription> field_description_;
+        std::shared_ptr<utility::localisation::FieldDescription> field_description_;
 
         MultiModalRobotModel robot_models_;
     };

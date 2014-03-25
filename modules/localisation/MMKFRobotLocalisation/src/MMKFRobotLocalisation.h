@@ -23,7 +23,6 @@
 #include <nuclear>
 #include <armadillo>
 #include "MMKFRobotLocalisationEngine.h"
-#include "FieldDescription.h"
 
 namespace modules {
 namespace localisation {

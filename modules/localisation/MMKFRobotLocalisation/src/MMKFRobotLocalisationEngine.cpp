@@ -20,10 +20,11 @@
 #include "MMKFRobotLocalisationEngine.h"
 
 #include "messages/vision/VisionObjects.h"
-#include "FieldDescription.h"
-#include "LocalisationFieldObject.h"
+#include "utility/localisation/LocalisationFieldObject.h"
 
 using messages::vision::VisionObject;
+using utility::localisation::LocalisationFieldObject;
+using utility::localisation::LFOId;
 
 namespace modules {
 namespace localisation {
