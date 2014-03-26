@@ -291,7 +291,10 @@ namespace kinematics {
         arma::vec4 totalMassVector;
         
         for(auto& joint : jointPositions){
-            arma::vec4 massVector(RobotKinematicModel::MassModel::masses[static_cast<int>(joint.first)]);
+            arma::vec4 massVector;
+            for(size_t i = 0; i < 4; i++){
+                massVector[i] = RobotKinematicModel::MassModel::masses[static_cast<int>(joint.first)][i];
+            }
             NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass ", messages::input::stringFromId(joint.first), massVector);
             double jointMass = massVector[3];
             
@@ -302,7 +305,10 @@ namespace kinematics {
         }
 
         if(includeTorso){
-            arma::vec4 massVector(RobotKinematicModel::MassModel::masses[20]);
+            arma::vec4 massVector;
+             for(size_t i = 0; i < 4; i++){
+                massVector[i] = RobotKinematicModel::MassModel::masses[20][i];
+            }
             NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass Torso", massVector);
             double jointMass = massVector[3];
             
