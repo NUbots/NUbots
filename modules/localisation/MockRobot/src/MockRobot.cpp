@@ -79,7 +79,7 @@ namespace localisation {
             arma::vec2 diff = robot_position_ - old_pos;
  
             robot_heading_ = arma::normalise(diff);
-            robot_velocity_ = robot_heading_ / (10.0 / 1000.0);
+            robot_velocity_ = robot_heading_ / (100.0);
         });
 
         // Update ball position
@@ -96,6 +96,33 @@ namespace localisation {
             auto velocity_x = -square_wave(t, period) * ((x_amp * 4) / period);
             auto velocity_y = -square_wave(t + (period / 4.0), period) * ((y_amp * 4) / period);
             ball_velocity_ = { velocity_x, velocity_y };
+        });
+
+
+        // Simulate Odometry
+        on<Trigger<Every<100, std::chrono::milliseconds>>>("Odometry Simulation",
+            [this](const time_t&) {
+            
+            auto odom = std::make_unique<messages::localisation::FakeOdometry>();
+
+            odom->torso_displacement = robot_position_ - odom_old_robot_position_;
+
+            double old_heading = std::atan2(odom_old_robot_heading_[1],
+                                            odom_old_robot_heading_[0]);
+            double new_heading = std::atan2(robot_heading_[1],
+                                            robot_heading_[0]); 
+            double heading_diff = new_heading - old_heading;
+            odom->torso_rotation = utility::math::angle::normalizeAngle(heading_diff);
+
+            odom_old_robot_position_ = robot_position_;
+            odom_old_robot_heading_ = robot_heading_;
+
+            emit(graph("Odometry torso_displacement", 
+                odom->torso_displacement[0],
+                odom->torso_displacement[1]));
+            emit(graph("Odometry torso_rotation", odom->torso_rotation));
+
+            emit(std::move(odom));
         });
 
         // Simulate Vision

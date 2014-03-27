@@ -34,6 +34,8 @@ namespace localisation {
         arma::vec2 robot_position_ = { 0, 0 };
         arma::vec2 robot_velocity_ = { 0, 0 };
         arma::vec2 robot_heading_ = { 1, 0 };
+        arma::vec2 odom_old_robot_position_ = { 0, 0 };
+        arma::vec2 odom_old_robot_heading_ = { 1, 0 };
 
         std::shared_ptr<utility::localisation::FieldDescription> field_description_;
 
