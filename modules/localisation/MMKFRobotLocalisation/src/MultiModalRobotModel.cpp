@@ -76,7 +76,7 @@ double RobotHypothesis::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object,
     const LocalisationFieldObject& actual_object) {
 
-    obs_trail_ += actual_object.name() + " ";
+    // obs_trail_ += actual_object.name() + " ";
 
     // // Radial coordinates
     // arma::vec2 actual_pos = actual_object.location();
@@ -133,15 +133,6 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
 
             new_models.push_back(std::move(split_model));
         }
-
-        // auto model1 = std::make_unique<RobotHypothesis>();
-        // auto model2 = std::make_unique<RobotHypothesis>(*model1);
-        // auto quality1 = model1->MeasurementUpdate(ambiguous_object, possible_objects[0]);
-        // auto quality2 = model2->MeasurementUpdate(ambiguous_object, possible_objects[1]);
-        // model1->SetFilterWeight(model1->GetFilterWeight() * quality1);
-        // model2->SetFilterWeight(model2->GetFilterWeight() * quality2);
-        // new_models.push_back(std::move(model1));
-        // new_models.push_back(std::move(model2));
     }
 
     robot_models_ = std::move(new_models);
@@ -154,6 +145,48 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
         });
 }
 
+void MultiModalRobotModel::AmbiguousMeasurementUpdate(
+    const std::vector<messages::vision::VisionObject>& ambiguous_objects,
+    const std::vector<std::vector<LocalisationFieldObject>>& possible_object_sets) {
+
+    std::vector<std::unique_ptr<RobotHypothesis>> new_models;
+    new_models.reserve(possible_object_sets.size() * robot_models_.size());
+
+    // For each model:
+    while (!robot_models_.empty()) {
+        auto model = std::move(robot_models_.back());
+        robot_models_.pop_back();
+
+        // Split the model for each possible object, and observe that object:
+        // (TODO: Micro-optimisation: use model as the last split_model)
+        for (auto& object_set : possible_object_sets) {
+            auto split_model = std::make_unique<RobotHypothesis>(*model);
+
+            for (int i = 0; i < object_set.size(); i++) {
+                split_model->obs_count_++;
+
+                auto quality = split_model->MeasurementUpdate(ambiguous_objects[i],
+                                                              object_set[i]);
+
+                // Weight the new model based on the 'quality' of the observation
+                // just made.
+                auto weight = split_model->GetFilterWeight();
+                split_model->SetFilterWeight(weight * quality);
+            }
+
+            new_models.push_back(std::move(split_model));
+        }
+    }
+
+    robot_models_ = std::move(new_models);
+
+    // Sort models by weight from largest to smallest.
+    std::sort(robot_models_.begin(), robot_models_.end(), 
+        [](const std::unique_ptr<RobotHypothesis> & a, 
+           const std::unique_ptr<RobotHypothesis> & b) { 
+            return a->GetFilterWeight() > b->GetFilterWeight();
+        });
+}
 
 void MultiModalRobotModel::RemoveOldModels() {
     std::vector<std::unique_ptr<RobotHypothesis>> new_models;
@@ -174,7 +207,7 @@ void MultiModalRobotModel::RemoveOldModels() {
 }
 
 void MultiModalRobotModel::PruneModels() {
-    const float kMaxModelsAfterMerge = 10; // TODO: Add to config system
+    const float kMaxModelsAfterMerge = 4; // TODO: Add to config system
 
     // NUClear::log(__PRETTY_FUNCTION__, "Number of models before merging: ",
     //                      robot_models_.size());

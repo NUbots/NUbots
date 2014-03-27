@@ -40,7 +40,7 @@ namespace localisation {
 
     public:
 
-        std::string obs_trail_;
+        // std::string obs_trail_;
         int obs_count_;
 
         RobotHypothesis() : 
@@ -50,7 +50,7 @@ namespace localisation {
                 arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 1, // cov
                 1), // alpha
             weight_(1),
-            obs_trail_(""),
+            // obs_trail_(""),
             obs_count_(0) { }
 
         // bool active() const { return active_; }
@@ -101,6 +101,10 @@ namespace localisation {
         void AmbiguousMeasurementUpdate(
             const messages::vision::VisionObject& ambiguous_object,
             const std::vector<utility::localisation::LocalisationFieldObject>& possible_objects);
+
+        void AmbiguousMeasurementUpdate(
+            const std::vector<messages::vision::VisionObject>& ambiguous_objects,
+            const std::vector<std::vector<utility::localisation::LocalisationFieldObject>>& possible_object_sets);
 
         arma::vec::fixed<robot::RobotModel::size> GetEstimate() {
             return robot_models_[0]->GetEstimate();

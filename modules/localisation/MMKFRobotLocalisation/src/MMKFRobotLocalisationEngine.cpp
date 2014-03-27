@@ -19,6 +19,8 @@
 
 #include "MMKFRobotLocalisationEngine.h"
 
+#include <algorithm>
+
 #include "messages/vision/VisionObjects.h"
 #include "utility/localisation/LocalisationFieldObject.h"
 
@@ -57,12 +59,45 @@ namespace localisation {
         return std::move(possible);
     }
 
-    void MMKFRobotLocalisationEngine::ProcessAmbiguousObjects(const std::vector<messages::vision::Goal>& ambiguous_objects) {
-        for (auto& ambiguous_object : ambiguous_objects) {
-            // Get a vector of all field objects that the observed object could
-            // possibly be
-            auto possible_objects = GetPossibleObjects(ambiguous_object);
-            robot_models_.AmbiguousMeasurementUpdate(ambiguous_object, possible_objects);
+    void MMKFRobotLocalisationEngine::ProcessAmbiguousObjects(
+        const std::vector<messages::vision::Goal>& ambiguous_objects) {
+        
+        bool goal_pair_observed = false;
+        if (ambiguous_objects.size() == 2) {
+            auto& oa = ambiguous_objects[0];
+            auto& ob = ambiguous_objects[1];
+
+            goal_pair_observed = 
+                (oa.type == messages::vision::Goal::Type::RIGHT &&
+                 ob.type == messages::vision::Goal::Type::LEFT) ||
+                (oa.type == messages::vision::Goal::Type::LEFT &&
+                 ob.type == messages::vision::Goal::Type::RIGHT);
+        }
+
+        if (goal_pair_observed) {
+            std::vector<messages::vision::VisionObject> vis_objs;
+            // Ensure left goal is always first.
+            if (ambiguous_objects[0].type == messages::vision::Goal::Type::LEFT){
+                vis_objs = { ambiguous_objects[0], ambiguous_objects[1] };
+            } else {
+                vis_objs = { ambiguous_objects[1], ambiguous_objects[0] };
+            }
+
+            std::vector<std::vector<LocalisationFieldObject>> objs = {
+                {field_description_->GetLFO(LFOId::kGoalBL), 
+                 field_description_->GetLFO(LFOId::kGoalBR)},
+                {field_description_->GetLFO(LFOId::kGoalYL), 
+                 field_description_->GetLFO(LFOId::kGoalYR)}
+            };
+
+            robot_models_.AmbiguousMeasurementUpdate(vis_objs, objs);
+        } else {
+            for (auto& ambiguous_object : ambiguous_objects) {
+                // Get a vector of all field objects that the observed object could
+                // possibly be
+                auto possible_objects = GetPossibleObjects(ambiguous_object);
+                robot_models_.AmbiguousMeasurementUpdate(ambiguous_object, possible_objects);
+            }
         }
 
         robot_models_.PruneModels();
