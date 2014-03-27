@@ -45,6 +45,9 @@ namespace localisation {
     double square_wave(double t, double period) {
         return std::copysign(1.0, sawtooth_wave(t, period));
     }
+    double sine_wave(double t, double period) {
+        return std::sin((2.0 * M_PI * t) / period);
+    }
     double absolute_time() {
         auto now = NUClear::clock::now();
         auto ms_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
@@ -72,9 +75,11 @@ namespace localisation {
 
             arma::vec2 old_pos = robot_position_;
 
-            auto triangle1 = triangle_wave(t, period);
-            auto triangle2 = triangle_wave(t + (period / 4.0), period);
-            robot_position_ = { triangle1 * x_amp, triangle2 * y_amp };
+            // auto wave1 = triangle_wave(t, period);
+            // auto wave2 = triangle_wave(t + (period / 4.0), period);
+            auto wave1 = sine_wave(t, period);
+            auto wave2 = sine_wave(t + (period / 4.0), period);
+            robot_position_ = { wave1 * x_amp, wave2 * y_amp };
 
             arma::vec2 diff = robot_position_ - old_pos;
  
@@ -105,14 +110,21 @@ namespace localisation {
             
             auto odom = std::make_unique<messages::localisation::FakeOdometry>();
 
-            odom->torso_displacement = robot_position_ - odom_old_robot_position_;
-
             double old_heading = std::atan2(odom_old_robot_heading_[1],
                                             odom_old_robot_heading_[0]);
             double new_heading = std::atan2(robot_heading_[1],
                                             robot_heading_[0]); 
             double heading_diff = new_heading - old_heading;
             odom->torso_rotation = utility::math::angle::normalizeAngle(heading_diff);
+
+            // Calculate torso displacement in robot-space:
+            arma::vec2 position_diff = robot_position_ - odom_old_robot_position_;
+            double theta = -new_heading;
+            arma::mat22 rot = {  std::cos(theta), std::sin(theta),
+                                -std::sin(theta), std::cos(theta) };
+            // Rotate position_diff by -new_heading.
+            odom->torso_displacement = rot * position_diff;
+
 
             odom_old_robot_position_ = robot_position_;
             odom_old_robot_heading_ = robot_heading_;
@@ -229,20 +241,14 @@ namespace localisation {
                    const messages::localisation::Ball& ball,
                    const messages::vision::Ball& vision_ball,
                    const std::vector<messages::localisation::Self>& robots) {
-            
-            // emit(graph("Estimated ball position", state[0], state[1]));
-            // emit(graph("Estimated ball velocity", state[2], state[3]));
-            emit(graph("Actual ball position", ball_position_[0], ball_position_[1]));
-            emit(graph("Actual ball velocity", ball_velocity_[0], ball_velocity_[1]));
-
-            // arma::vec2 u = arma::normalise(robot_heading_);
-            // arma::mat22 rot = {  u[0], -u[1],
-            //                      u[1],  u[0] };
-            // arma::vec2 ball_pos = rot * ball.position + robots[0].position;
-            // arma::vec2 ball_pos = rot * ball.position + robot_position_;
 
             arma::vec2 ball_pos = utility::localisation::transform::RobotBall2FieldBall(
                 robot_position_, robot_heading_, ball.position);
+
+            emit(graph("Estimated ball position", ball_pos[0], ball_pos[1]));
+            // emit(graph("Estimated ball velocity", state[2], state[3]));
+            emit(graph("Actual ball position", ball_position_[0], ball_position_[1]));
+            emit(graph("Actual ball velocity", ball_velocity_[0], ball_velocity_[1]));
 
             // Ball message
             auto ball_msg = std::make_unique<messages::localisation::FieldObject>();

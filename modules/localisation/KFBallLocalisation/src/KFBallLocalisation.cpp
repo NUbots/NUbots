@@ -35,6 +35,14 @@ using messages::support::Configuration;
 namespace modules {
 namespace localisation {
 
+    double time_diff() {
+        auto now = NUClear::clock::now();
+        auto ms_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+        double ms = static_cast<double>(ms_since_epoch - 1393322147502L);
+        double t = ms / 1000.0;
+        return t;
+    }
+
     KFBallLocalisation::KFBallLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
@@ -56,27 +64,6 @@ namespace localisation {
             emit(std::move(ball_msg));
         });
 
-
-        // // Simulate Vision
-        // on<Trigger<Every<500, std::chrono::milliseconds>>,
-        //    Options<Sync<KFBallLocalisation>>>("Vision Simulation - Ball", [this](const time_t&) {
-
-        //     auto camera_pos = arma::vec3 { 0.0, 0.0, 0.0 };
-        //     double camera_heading = 0.0; // 3.1415926535;
-
-        //     auto ball_pos = arma::vec3 { marker_[0], marker_[1], 0.0 };
-
-        //     auto ball = std::make_unique<messages::vision::Ball>();
-
-        //     // (dist, bearing, declination)
-        //     ball->sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(ball_pos - camera_pos);
-        //     ball->sphericalFromNeck[1] = utility::math::angle::normalizeAngle(ball->sphericalFromNeck[1] - camera_heading);
-        //     ball->sphericalError = { 0.0001, 0.0001, 0.000001 };
-
-        //     emit(std::move(ball));
-        // });
-
-
         // on<Trigger<Every<250, std::chrono::milliseconds>>,
         //    With<messages::vision::Ball>,
         //    Options<Sync<KFBallLocalisation>>
@@ -88,21 +75,32 @@ namespace localisation {
         //     engine_.MeasurementUpdate(ball);
         // });
 
+
+       on<Trigger<messages::localisation::FakeOdometry>,
+           Options<Sync<KFBallLocalisation>>
+          >("KFBallLocalisation Odometry",
+            [this](const messages::localisation::FakeOdometry& odom) {
+
+            auto curr_time = NUClear::clock::now();
+            engine_.TimeUpdate(curr_time, odom);
+        });
+
        on<Trigger<messages::vision::Ball>,
            Options<Sync<KFBallLocalisation>>
           >("KFBallLocalisation Step",
             [this](const messages::vision::Ball& ball) {
-
-            // engine_.TimeUpdate(0.5);
+            
+            auto curr_time = NUClear::clock::now();
+            engine_.TimeUpdate(curr_time);
             engine_.MeasurementUpdate(ball);
         });
 
 
-        on<Trigger<Every<100, std::chrono::milliseconds>>,
-           Options<Sync<KFBallLocalisation>>
-           >([this](const time_t&) {
-            engine_.TimeUpdate(0.1);
-        });
+        // on<Trigger<Every<100, std::chrono::milliseconds>>,
+        //    Options<Sync<KFBallLocalisation>>
+        //    >([this](const time_t&) {
+        //     engine_.TimeUpdate(0.1);
+        // });
     }
 }
 }

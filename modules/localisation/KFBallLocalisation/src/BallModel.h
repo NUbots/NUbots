@@ -2,6 +2,8 @@
 #define MODULES_LOCALISATION_BALLMODEL_H
 
 #include <armadillo>
+#include "messages/localisation/FieldObject.h"
+
 namespace modules {
 namespace localisation {
 namespace ball {
@@ -26,7 +28,10 @@ namespace ball {
         
         arma::vec::fixed<size> timeUpdate(
             const arma::vec::fixed<size>& state, double deltaT,
-            const arma::vec3& measurement);
+            const messages::localisation::FakeOdometry& odom);
+
+        arma::vec::fixed<size> timeUpdate(
+            const arma::vec::fixed<size>& state, double deltaT, std::nullptr_t foo);
 
         arma::vec predictedObservation(const arma::vec::fixed<size>& state, std::nullptr_t unused);
 

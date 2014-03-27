@@ -4,15 +4,16 @@
 
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
+#include "messages/localisation/FieldObject.h"
+
+using messages::localisation::FakeOdometry;
 
 namespace modules {
 namespace localisation {
 namespace ball {
 
-arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
-    const arma::vec::fixed<BallModel::size>& state, double deltaT, 
-    const arma::vec3& measurement) {
-
+arma::vec::fixed<BallModel::size> ApplyVelocity(
+    const arma::vec::fixed<BallModel::size>& state, double deltaT) {
     auto result = state;
 
     // Apply ball velocity
@@ -22,17 +23,32 @@ arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
     result[kVx] *= kDragCoefficient;
     result[kVy] *= kDragCoefficient;
 
-    // result[kY] = utility::math::angle::normalizeAngle(state[kY]);
+    return result;
+}
+
+arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
+    const arma::vec::fixed<BallModel::size>& state, double deltaT, std::nullptr_t foo) {
+
+    return ApplyVelocity(state, deltaT);
+}
+
+arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
+    const arma::vec::fixed<BallModel::size>& state, double deltaT, 
+    const FakeOdometry& odom) {
+
+    auto result = ApplyVelocity(state, deltaT);
 
     // Apply robot odometry / robot position change
+    result[kX] -= odom.torso_displacement[0];
+    result[kY] -= odom.torso_displacement[1];
 
-    // double interp_heading = state[kHeading] + 0.5 * measurement[kHeading];
-    // double cos_theta = cos(interp_heading);
-    // double sin_theta = sin(interp_heading);
-    // result[kX]       += (measurement[kX] * cos_theta - measurement[kY] * sin_theta);
-    // result[kY]       += (measurement[kX] * sin_theta + measurement[kY] * cos_theta);
-    // result[kHeading] += (measurement[kHeading]);
-    
+    double h = -odom.torso_rotation;
+    arma::mat22 rot = {  std::cos(h), std::sin(h),
+                        -std::sin(h), std::cos(h) };
+    // Rotate ball_pos by -torso_rotation.
+    result.rows(kX, kY) = rot * result.rows(kX, kY);
+
+
     return result;
 }
 
