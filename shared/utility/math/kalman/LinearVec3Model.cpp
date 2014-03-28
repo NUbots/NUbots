@@ -18,7 +18,7 @@ namespace utility {
             }
 
 
-            arma::vec LinearVec3Model::predictedObservation(const arma::vec::fixed<size>& state, const arma::vec& measurement) {
+            arma::vec LinearVec3Model::predictedObservation(const arma::vec::fixed<size>& state, std::nullptr_t) {
                 return state;
             }
 

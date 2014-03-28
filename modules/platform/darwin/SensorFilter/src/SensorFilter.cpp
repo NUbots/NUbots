@@ -170,7 +170,7 @@ namespace modules {
 
                     orientationFilter.timeUpdate(deltaT, sensors->gyroscope);
                     arma::mat observationNoise = arma::eye(3,3) * DEFAULT_NOISE_GAIN;
-                    double normAcc = std::abs(arma::norm(sensors->accelerometer,2) - 9.807);
+                    double normAcc = std::abs(arma::norm(sensors->accelerometer,2) - 9.80665);
 
                     if(normAcc > HIGH_NOISE_THRESHOLD){
                         observationNoise *= HIGH_NOISE_GAIN;
@@ -178,7 +178,7 @@ namespace modules {
                         observationNoise = arma::eye(3,3) * (HIGH_NOISE_GAIN - DEFAULT_NOISE_GAIN) * (normAcc - LOW_NOISE_THRESHOLD) / (HIGH_NOISE_THRESHOLD - LOW_NOISE_THRESHOLD);
                     }
  
-                    float quality = orientationFilter.measurementUpdate(sensors->accelerometer, observationNoise);
+                    orientationFilter.measurementUpdate(sensors->accelerometer, observationNoise);
                     arma::vec orientation = orientationFilter.get();
                     sensors->orientation.col(2) = -orientation.rows(0,2);
                     sensors->orientation.col(0) = orientation.rows(3,5);

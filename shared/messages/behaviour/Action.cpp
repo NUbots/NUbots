@@ -84,6 +84,9 @@ namespace messages {
                 case ServoID::R_SHOULDER_ROLL:
                 case ServoID::R_ELBOW:
                     return LimbID::RIGHT_ARM;
+                default:
+                    // Can't really happen but in case it does make sure someone pays!
+                    return static_cast<LimbID>(-1);;
             }
         }
     }
