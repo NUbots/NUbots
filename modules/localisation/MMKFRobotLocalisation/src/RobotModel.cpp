@@ -9,21 +9,22 @@ namespace modules {
 namespace localisation {
 namespace robot {
 
+
 arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     const arma::vec::fixed<RobotModel::size>& state, double deltaT, 
     const arma::vec3& measurement) {
 
     auto result = state;
+  
+    // // Apply robot odometry / robot position change
+    // result.rows(kX, kY) += odom.torso_displacement;
 
-    // double interp_heading = state[kHeading] + 0.5 * measurement[kHeading];
+    // double h = odom.torso_rotation;
+    // arma::mat22 rot = {  std::cos(h), std::sin(h),
+    //                     -std::sin(h), std::cos(h) };
+    // // Rotate heading by -torso_rotation.
+    // result.rows(kHeadingX, kHeadingY) = rot * result.rows(kHeadingX, kHeadingY);
 
-    // double cos_theta = cos(interp_heading);
-    // double sin_theta = sin(interp_heading);
-
-    // result[kX]       += deltaT * (measurement[kX] * cos_theta - measurement[kY] * sin_theta);
-    // result[kY]       += deltaT * (measurement[kX] * sin_theta + measurement[kY] * cos_theta);
-    // result[kHeading] += deltaT * (measurement[kHeading]);
-    
     return result;
 }
 

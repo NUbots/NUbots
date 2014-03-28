@@ -19,34 +19,27 @@
 
 #include "KFBallLocalisationEngine.h"
 #include <chrono>
-
+#include "utility/time/time.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/localisation/FieldObject.h"
 
-using std::chrono::duration_cast;
 using messages::vision::VisionObject;
 using messages::localisation::FakeOdometry;
+using utility::time::TimeDifferenceSeconds;
 
 namespace modules {
 namespace localisation {
 
-double KFBallLocalisationEngine::SecondsSinceLastTimeUpdate(
-    std::chrono::system_clock::time_point current_time) {
-    auto time_diff = current_time - last_time_update_time_;
-    double nano = duration_cast<std::chrono::nanoseconds>(time_diff).count();
-    return nano * 1.0e-9;
-}
-
 /// Integrate time-dependent observations on all objects
 void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time) {
-    double seconds = SecondsSinceLastTimeUpdate(current_time);
+    double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
     last_time_update_time_ = current_time;
     ball_filter_.timeUpdate(seconds, nullptr);
 }
 
 void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
                                           const FakeOdometry& odom) {
-    double seconds = SecondsSinceLastTimeUpdate(current_time);
+    double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
     last_time_update_time_ = current_time;
     ball_filter_.timeUpdate(seconds, odom);
 }
