@@ -206,9 +206,12 @@ namespace modules {
                     if(input.fsr.right.fsr1 + input.fsr.right.fsr2 + input.fsr.right.fsr3 + input.fsr.right.fsr4 > SUPPORT_FOOT_FSR_THRESHOLD && zeroSensorsRight <= 4 - REQUIRED_NUMBER_OF_FSRS){
                         sensors->rightFootDown = true;
                     }
-
-                    arma::mat44 odometryLeftFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::LEFT);
-                    arma::mat44 odometryRightFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::RIGHT);
+                    arma::mat44 odometryLeftFoot = arma::eye(4,4);
+                    arma::mat44 odometryRightFoot = arma::eye(4,4);
+                    if(previousSensors){
+                        odometryLeftFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::LEFT);
+                        odometryRightFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::RIGHT);
+                    }
 
                     sensors->odometry = arma::eye(4,4);
                     

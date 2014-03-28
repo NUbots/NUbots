@@ -21,7 +21,7 @@
 #include <nuclear>
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
-#include "utility/NUbugger/NUgraph.h"
+#include "utility/nubugger/NUgraph.h"
 #include "utility/localisation/transform.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/support/Configuration.h"
