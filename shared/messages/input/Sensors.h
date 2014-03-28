@@ -65,7 +65,7 @@ namespace messages {
 
             std::map<messages::input::ServoID, arma::mat44> forwardKinematics;
 
-            arma::vec3 torsoVelocity;
+            arma::mat44 odometry;
 
             arma::vec4 centreOfMass;
 

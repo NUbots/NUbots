@@ -39,14 +39,12 @@ namespace modules {
             using utility::motion::kinematics::calculateAllPositions;
             using utility::motion::kinematics::DarwinModel;
             using utility::motion::kinematics::calculateCentreOfMass;
+            using utility::motion::kinematics::Side;
+            using utility::math::matrix::orthonormal44Inverse;
 
             SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
-            , orientationFilter(arma::vec({0,0,-1,1,0,0}))
-            , velocityFilter(arma::vec3({0,0,0}))
-            , lastOrientationMatrix(arma::eye(3,3))
-            , previousMeasuredTorsoFromLeftFoot()
-            , previousMeasuredTorsoFromRightFoot() {
+            , orientationFilter(arma::vec({0,0,-1,1,0,0})){
 
                 on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){
                     DEFAULT_NOISE_GAIN = file.config["DEFAULT_NOISE_GAIN"];
@@ -58,7 +56,7 @@ namespace modules {
                     REQUIRED_NUMBER_OF_FSRS = file.config["REQUIRED_NUMBER_OF_FSRS"];
                 });
 
-                on<Trigger<DarwinSensors>, Options<Single>>([this](const DarwinSensors& input) {
+                on<Trigger<DarwinSensors>, Options<Single>, With<Sensors>>([this](const DarwinSensors& input, const Sensors& previousSensors) {
 
                     auto sensors = std::make_unique<Sensors>();
 
@@ -183,7 +181,6 @@ namespace modules {
                     //Check support foot:
                     sensors->leftFootDown = false;
                     sensors->rightFootDown = false;
-                    sensors->torsoVelocity = {0,0,0};
 
                     int zeroSensorsLeft = (input.fsr.left.fsr1 == 0) + (input.fsr.left.fsr2 == 0) + (input.fsr.left.fsr3 == 0) + (input.fsr.left.fsr4 == 0);
                     int zeroSensorsRight = (input.fsr.right.fsr1 == 0) + (input.fsr.right.fsr2 == 0) + (input.fsr.right.fsr3 == 0) + (input.fsr.right.fsr4 == 0);
@@ -195,22 +192,19 @@ namespace modules {
                         sensors->rightFootDown = true;
                     }
 
+                    arma::mat44 odometryLeftFoot = calculateOdometryMatrix(*sensors, previousSensors, Side::LEFT);
+                    arma::mat44 odometryRightFoot = calculateOdometryMatrix(*sensors, previousSensors, Side::RIGHT);
 
-                    if(sensors->leftFootDown || sensors->rightFootDown){
-                        //velocityFilter.timeUpdate(deltaT, sensors->accelerometer - sensors->orientation.col(2) * 9.807);
-                        arma::vec3 measuredTorsoFromLeftFoot = -sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,0,2,2).t() * sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].col(3).rows(0,2);
-                        arma::vec3 measuredTorsoFromRightFoot = -sensors->forwardKinematics[ServoID::R_ANKLE_ROLL].submat(0,0,2,2).t() * sensors->forwardKinematics[ServoID::R_ANKLE_ROLL].col(3).rows(0,2);
-
-                        arma::vec3 torsoVelFromLeftFoot =  -(measuredTorsoFromLeftFoot - previousMeasuredTorsoFromLeftFoot)/deltaT;//negate hack
-                        arma::vec3 torsoVelFromRightFoot =  -(measuredTorsoFromRightFoot - previousMeasuredTorsoFromRightFoot)/deltaT;
-
-                        arma::vec3 averageVelocity = (torsoVelFromLeftFoot * static_cast<int>(sensors->leftFootDown) + torsoVelFromRightFoot * static_cast<int>(sensors->rightFootDown))/(static_cast<int>(sensors->rightFootDown) + static_cast<int>(sensors->leftFootDown));
-                        previousMeasuredTorsoFromLeftFoot = measuredTorsoFromLeftFoot;
-                        previousMeasuredTorsoFromRightFoot = measuredTorsoFromRightFoot;
-                        //FILTER WITH ACCELEROMETER
-                        //velocityFilter.measurementUpdate(averageVelocity, arma::eye(3,3) * 1e-6);
-                        sensors->torsoVelocity = averageVelocity;
-                        //sensors->torsoVelocity = velocityFilter.get();
+                    sensors->odometry = arma::eye(4,4);
+                    
+                    if(sensors->leftFootDown || sensors->rightFootDown){                       
+                        sensors->odometry.submat(0,3,2,3) = (odometryLeftFoot.submat(0,3,2,3) * sensors->leftFootDown + odometryLeftFoot.submat(0,3,2,3) * sensors->rightFootDown) 
+                                                            / (sensors->leftFootDown + sensors->rightFootDown);
+                        if(sensors->leftFootDown && sensors->rightFootDown){
+                            sensors->odometry.submat(0,0,2,2) = odometryLeftFoot.submat(0,0,2,2);
+                        } else {
+                            sensors->odometry.submat(0,0,2,2) = odometryLeftFoot.submat(0,0,2,2) * sensors->leftFootDown + odometryRightFoot.submat(0,0,2,2) * sensors->rightFootDown;
+                        }
                     }
                     //END ODOMETRY
 
@@ -239,17 +233,30 @@ namespace modules {
                         ));
                     emit(graph("R FSR", input.fsr.right.fsr1, input.fsr.right.fsr2, input.fsr.right.fsr3, input.fsr.right.fsr4
                         ));
-                    emit(graph("Torso Velocity", sensors->torsoVelocity[0], sensors->torsoVelocity[1], sensors->torsoVelocity[2]
+                    emit(graph("Torso Velocity", sensors->odometry(0,3), sensors->odometry(1,3), sensors->odometry(2,3)
                         ));
                     emit(graph("COM", sensors->centreOfMass[0], sensors->centreOfMass[1], sensors->centreOfMass[2], sensors->centreOfMass[3]
                         ));
 
-
-                    lastOrientationMatrix = sensors->orientation;
-
                     emit(std::move(sensors));
                 });
             }
+        
+            arma::mat44 SensorFilter::calculateOdometryMatrix(
+                const messages::input::Sensors& sensors,
+                const messages::input::Sensors& previousSensors,
+                utility::motion::kinematics::Side side) {
+                    arma::mat44 bodyFromAnkleInitialInverse, bodyFromAnkleFinal;
+                    if(side == Side::LEFT){
+                        bodyFromAnkleInitialInverse = previousSensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL);   //Double Inverse   
+                        bodyFromAnkleFinal = orthonormal44Inverse(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL));
+                    } else {
+                        bodyFromAnkleInitialInverse = previousSensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL);   //Double Inverse                     
+                        bodyFromAnkleFinal = orthonormal44Inverse(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL));                        
+                    }
+                    return bodyFromAnkleFinal * bodyFromAnkleInitialInverse;            
+            }
+
 
         }  // darwin
     }  // platform

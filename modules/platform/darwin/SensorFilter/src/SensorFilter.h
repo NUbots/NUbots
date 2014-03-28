@@ -25,6 +25,8 @@
 #include "utility/math/kalman/UKF.h"
 #include "utility/math/kalman/AdaptiveIMUModel.h"
 #include "utility/math/kalman/LinearVec3Model.h"
+#include "utility/motion/RobotModels.h"
+#include "messages/input/Sensors.h"
 
 namespace modules {
     namespace platform {
@@ -41,10 +43,7 @@ namespace modules {
 
                 time_t lastUpdate;
                 arma::mat33 lastOrientationMatrix;
-                arma::vec3 previousMeasuredTorsoFromLeftFoot;
-                arma::vec3 previousMeasuredTorsoFromRightFoot;
                 utility::math::kalman::UKF<utility::math::kalman::AdaptiveIMUModel> orientationFilter;
-                utility::math::kalman::UKF<utility::math::kalman::LinearVec3Model> velocityFilter;
                 
                 double DEFAULT_NOISE_GAIN;
                 double HIGH_NOISE_THRESHOLD;
@@ -54,7 +53,11 @@ namespace modules {
                 double SUPPORT_FOOT_FSR_THRESHOLD;
                 int REQUIRED_NUMBER_OF_FSRS;
                 static constexpr const char* CONFIGURATION_PATH = "DarwinSensorFilter.json";
-
+            private:
+                arma::mat44 calculateOdometryMatrix(
+                    const messages::input::Sensors& sensors,
+                    const messages::input::Sensors& previousSensors,
+                    utility::motion::kinematics::Side side);
             };
         }
     }
