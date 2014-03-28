@@ -603,7 +603,7 @@ namespace modules {
                 attroff(A_BOLD);
                 mvprintw(5,2,"For Entire Script:");
                 mvprintw(6,2,"All: ---.- Upper: ---.- Lower: ---.-");
-                mvprintw(7,2, "For Frame: %d", frame);
+                mvprintw(7,2, "For Frame: %d", frame+1);
                 mvprintw(8,2,"All: ---.- Upper: ---.- Lower: ---.-");
                 move(6,7);
                 curs_set(false);
@@ -611,8 +611,10 @@ namespace modules {
                 size_t XPOSITION[3][3] = {{7,20,33}, {12,0,0}, {7,20,33}};
                 size_t i = 0;
                 size_t j = 0;
-                float upperGain=-1;
-                float lowerGain=-1;
+                float upperGainS=-1;
+                float lowerGainS=-1;
+                float upperGainF=-1;
+                float lowerGainF=-1;
                 bool editScript = false;
                 bool editFrame = false;
                 bool changedUpper = false;
@@ -702,9 +704,9 @@ namespace modules {
                                 mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
                             }
                             break;
+                        case '\n':
                         case KEY_ENTER:
                             float newGain = 0;
-                            
                             //tracks editing
 
                             if (YPOSITION[i][j] == 6) {
@@ -716,104 +718,110 @@ namespace modules {
 
                             //prints user input to screen
                             if (YPOSITION[i][j] == 7 && XPOSITION[i][j] == 12) {
-                                mvprintw(YPOSITION[i][j], XPOSITION[i][j], " ");
+                                mvprintw(YPOSITION[i][j], XPOSITION[i][j], "     ");
+                                move(YPOSITION[i][j],XPOSITION[i][j]);
                                 userInputToFrame();
-                                printw("%d", frame);
-                                upperGain=-1;
-                                lowerGain=-1;
+                                mvprintw(YPOSITION[i][j],XPOSITION[i][j],"%d", frame+1);
                             }
                             else {
                                 mvprintw(YPOSITION[i][j], XPOSITION[i][j], "     ");
+                                move(YPOSITION[i][j],XPOSITION[i][j]);
                                 newGain = userInputToGain();
                                 if(isnan(newGain)) {
-                                    printw("---.-");
-                                    upperGain=-1;
-                                    lowerGain=-1;
+                                    mvprintw(YPOSITION[i][j],XPOSITION[i][j],"---.-");
+                                    upperGainS=-1;
+                                    lowerGainS=-1;
+                                    upperGainF=-1;
+                                    lowerGainF=-1;
                                 }
                                 else {
-                                    printw("%5.1f", newGain);
+                                    
+                                    mvprintw(YPOSITION[i][j],XPOSITION[i][j],"%5.1f", newGain);
                                     
                                     //allows separate gains for upper and lower motors
-                                    if ((YPOSITION[i][j] == 6 && XPOSITION[i][j] == 20) || (YPOSITION[i][j] == 8 && XPOSITION[i][j] == 20)) {
-                                        upperGain = newGain;
-                                        lowerGain=-1;
-                                        changedUpper = true;
+                                    if (XPOSITION[i][j] == 20) {
+                                        if (YPOSITION[i][j] == 6) {
+                                            upperGainS = newGain;
+                                        }
+                                        else {
+                                            upperGainF = newGain;
+                                        }
                                         
                                         // Zero out the "ALL" option
-                                        if(YPOSITION[i][j] == 6 && XPOSITION[i][j] == 20) {
+                                        if(YPOSITION[i][j] == 6) {
                                             mvprintw(6,7, "---.-");
                                         }
                                         else {
                                             mvprintw(8,7,"---.-");
                                         }
+                                        changedUpper = true;
                                     }
-                                    else if ((YPOSITION[i][j] == 6 && XPOSITION[i][j] == 33) || (YPOSITION[i][j] == 8 && XPOSITION[i][j] == 33)) {
-                                        lowerGain = newGain;
-                                        upperGain=-1;
-                                        changedLower = true;
-                                        
+                                    else if (XPOSITION[i][j] == 33) {
+                                        if (YPOSITION[i][j] == 6) {
+                                            lowerGainS = newGain;
+                                        }
+                                        else {
+                                            lowerGainF = newGain;
+                                        }
+
                                         // Zero out the both option
-                                        if (YPOSITION[i][j] == 6 && XPOSITION[i][j] == 33) {
+                                        if (YPOSITION[i][j] == 6) {
                                             mvprintw(6,7, "---.-");
                                         }
                                         else {
                                             mvprintw(8,7, "---.-");
                                         }
+                                        changedLower = true;
                                     }
                                     else {
-                                        upperGain = newGain;
-                                        lowerGain = newGain;
-
-                                        changedUpper = true;
-                                        changedLower = true;
 
                                         // Set upper and lower
-                                        if (YPOSITION[i][j] == 6 && XPOSITION[i][j] == 7) {
+                                        if (XPOSITION[i][j] == 7) {
+                                            if (YPOSITION[i][j] == 6) {
+                                            upperGainS = newGain;
+                                            lowerGainS = newGain;
+                                            mvprintw(6,7, "%5.1f", upperGainS);
                                             mvprintw(6,20, "---.-");
                                             mvprintw(6,33, "---.-");
+                                            }
+                                            else {
+                                                upperGainF = newGain;
+                                                lowerGainF = newGain;
+                                                mvprintw(8,7, "%5.1f", upperGainF);
+                                                mvprintw(8,20, "---.-");
+                                                mvprintw(8,33, "---.-");
+                                            }
                                         }
-                                        else {
-                                            mvprintw(8,20, "---.-");
-                                            mvprintw(8,33, "---.-");
-                                        }   
+                                        changedUpper = true;
+                                        changedLower = true;   
                                     }
 
+                                    mvprintw(20,2,"upperGainS = %5.1f",upperGainS);
+                                    mvprintw(21,2,"lowerGainS = %5.1f",lowerGainS);
+                                    mvprintw(22,2,"upperGainF = %5.1f",upperGainF);
+                                    mvprintw(23,2,"lowerGainF = %5.1f",lowerGainF);
+                                    
                                     // if user has entered the same gain in upper and lower then automatically prints value in both and dashes upper and lower
-                                    if (upperGain == lowerGain) {   
-                                        if (YPOSITION[i][j] == 6) {
+                                    if ((upperGainS == lowerGainS) && (upperGainS >= 0)) {   
+                                        mvprintw(6,7, "%5.1f", upperGainS);
                                         mvprintw(6,20, "---.-");
                                         mvprintw(6,33, "---.-");
-                                        }
-                                        else {
+                                    }
+                                    if ((upperGainF == lowerGainF) && (upperGainF >= 0)) {
+                                        mvprintw(8,7, "%5.1f", upperGainF);
                                         mvprintw(8,20, "---.-");
                                         mvprintw(8,33, "---.-");
-                                        }
                                     }
+                                    
                                 }
                             }//end KEY_ENTER else
-                            //moves cursor back to last position before ENTER was pressed
-                            //turn off A_STANDOUT????
-                            upperGain=-1;
-                            lowerGain=-1;
-                            move(YPOSITION[i][j], XPOSITION[i][j]);
-                            break;
+                            mvchgat(YPOSITION[i][j],XPOSITION[i][j],5,A_STANDOUT,0,nullptr);
+                            break;//end case KEY_ENTER
                     }//switch
-
-                    //highlights current position, either a frame if position (7,12) or a gain
-                    if (YPOSITION[i][j] == 0 && XPOSITION[i][j]  == 0) {
-                        i=
-                        curs_set(false);
-                    }
-                    else {
-                        if (YPOSITION[i][j] == 7 && XPOSITION[i][j] == 12) {
-                            mvchgat(YPOSITION[i][j], XPOSITION[i][j], frame, A_STANDOUT, 0, nullptr);
-                        }
-                        else {
-                            mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
-                        }
-                    }
+                    
                 }//while
 
+/*
                 if(upperGain!=-1 && lowerGain!=-1){
                     //loop through all frames in script and edit gains
                     if (editScript) {
@@ -829,7 +837,7 @@ namespace modules {
                                     case ServoID::R_ELBOW:
                                     case ServoID::L_ELBOW:
                                         if(changedUpper) {
-                                            target.gain = upperGain;
+                                            target.gain = upperGainS;
                                         }
                                     break;
                                     case ServoID::R_HIP_YAW:
@@ -845,7 +853,7 @@ namespace modules {
                                     case ServoID::R_ANKLE_ROLL:
                                     case ServoID::L_ANKLE_ROLL:
                                         if(changedLower) {
-                                            target.gain = lowerGain;
+                                            target.gain = lowerGainS;
                                         }
                                     break;
                                 }
@@ -866,7 +874,7 @@ namespace modules {
                                 case ServoID::R_ELBOW:
                                 case ServoID::L_ELBOW:
                                     if(changedUpper) {
-                                        target.gain = upperGain;
+                                        target.gain = upperGainF;
                                     }
                                 break;
                                 case ServoID::R_HIP_YAW:
@@ -882,15 +890,16 @@ namespace modules {
                                 case ServoID::R_ANKLE_ROLL:
                                 case ServoID::L_ANKLE_ROLL:
                                     if(changedLower) {
-                                        target.gain = lowerGain;
+                                        target.gain = lowerGainF;
                                     }
                                 break;
                             }
                         }    
                     }
                 }//end upperGain,lowerGain=-1 if
+*/
                 //output gains to scripttuner window automatic??
-                curs_set(false);
+                
                 refreshView();
             }// editGain()
 
