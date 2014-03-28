@@ -44,7 +44,8 @@ namespace modules {
 
             SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
-            , orientationFilter(arma::vec({0,0,-1,1,0,0})){
+            , orientationFilter(arma::vec({0,0,-1,1,0,0}))
+            , velocityFilter(arma::vec3({0,0,0})) {
 
                 on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){
                     DEFAULT_NOISE_GAIN = file.config["DEFAULT_NOISE_GAIN"];
@@ -56,13 +57,17 @@ namespace modules {
                     REQUIRED_NUMBER_OF_FSRS = file.config["REQUIRED_NUMBER_OF_FSRS"];
                 });
 
-                on<Trigger<DarwinSensors>, Options<Single>, With<Sensors>>([this](const DarwinSensors& input, const Sensors& previousSensors) {
+                on<Trigger<DarwinSensors>,
+                   With<Optional<Sensors>>,
+                   Options<Single>>([this](const DarwinSensors& input, const std::shared_ptr<const Sensors>& previousSensors) {
 
                     auto sensors = std::make_unique<Sensors>();
 
+                    // Set our timestamp to when the data was read
                     sensors->timestamp = input.timestamp;
 
-                    if (input.cm730ErrorFlags == DarwinSensors::Error::OK) {
+                    // This checks for an error on the CM730 and reports it
+                    if (input.cm730ErrorFlags != DarwinSensors::Error::OK) {
                         std::stringstream s;
                         s << "Error on CM730:";
 
@@ -91,11 +96,12 @@ namespace modules {
                         NUClear::log<NUClear::WARN>(s.str());
                     }
 
-
+                    // Read through all of our sensors
                     for(uint i = 0; i < 20; ++i) {
                         auto& original = input.servo[i];
                         auto& error = input.servo[i].errorFlags;
 
+                        // Check for an error on the servo and report it
                         if(error != DarwinSensors::Error::OK) {
                             std::stringstream s;
                             s << "Error on Servo " << (i + 1) << ":";
@@ -125,6 +131,7 @@ namespace modules {
                             NUClear::log<NUClear::WARN>(s.str());
                         }
 
+                        // Add the sensor values to the system properly
                         sensors->servos.push_back({
                             original.errorFlags,
                             static_cast<ServoID>(i),
@@ -143,16 +150,25 @@ namespace modules {
                         });
                     }
 
-                    sensors->accelerometer = {-input.accelerometer.y, input.accelerometer.x, -input.accelerometer.z};
-                    sensors->gyroscope = {-input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
+                    // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
+                    if(previousSensors && input.cm730ErrorFlags != DarwinSensors::Error::OK) {
+                        sensors->accelerometer = previousSensors->accelerometer;
+                        sensors->gyroscope = previousSensors->gyroscope;
+                    }
+                    // Otherwise convert our new data
+                    else {
+                        sensors->accelerometer = {-input.accelerometer.y, input.accelerometer.x, -input.accelerometer.z};
+                        sensors->gyroscope = {-input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
+                    }
 
                     /************************************************
                      *                 Orientation                  *
                      ************************************************/
-                    double deltaT = (lastUpdate - input.timestamp).count() / double(NUClear::clock::period::den);
-                    lastUpdate = input.timestamp;
-                    orientationFilter.timeUpdate(deltaT, sensors->gyroscope);
 
+                    // Calculate our time offset from the last read
+                    double deltaT = ((previousSensors ? previousSensors->timestamp : input.timestamp) - input.timestamp).count() / double(NUClear::clock::period::den);
+
+                    orientationFilter.timeUpdate(deltaT, sensors->gyroscope);
                     arma::mat observationNoise = arma::eye(3,3) * DEFAULT_NOISE_GAIN;
                     double normAcc = std::abs(arma::norm(sensors->accelerometer,2) - 9.807);
 
@@ -177,7 +193,6 @@ namespace modules {
                      *                   Odometry                   *
                      ************************************************/
 
-                    //ODOMETRY
                     //Check support foot:
                     sensors->leftFootDown = false;
                     sensors->rightFootDown = false;
@@ -206,10 +221,10 @@ namespace modules {
                             sensors->odometry.submat(0,0,2,2) = odometryLeftFoot.submat(0,0,2,2) * sensors->leftFootDown + odometryRightFoot.submat(0,0,2,2) * sensors->rightFootDown;
                         }
                     }
-                    //END ODOMETRY
 
-
-                    //MASS MODEL
+                    /************************************************
+                     *                  Mass Model                  *
+                     ************************************************/
                     sensors->centreOfMass = calculateCentreOfMass<DarwinModel>(sensors->forwardKinematics, true);
                     //END MASS MODEL
 

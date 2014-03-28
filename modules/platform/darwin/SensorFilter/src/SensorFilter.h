@@ -34,17 +34,17 @@ namespace modules {
 
             /**
              * TODO document
-             * 
-             * @author YOUR NAME HERE!
+             *
+             * @author Jake Fountain
+             * @author Trent Houliston
              */
             class SensorFilter : public NUClear::Reactor {
             public:
                 explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
-                time_t lastUpdate;
-                arma::mat33 lastOrientationMatrix;
                 utility::math::kalman::UKF<utility::math::kalman::AdaptiveIMUModel> orientationFilter;
-                
+                utility::math::kalman::UKF<utility::math::kalman::LinearVec3Model> velocityFilter;
+
                 double DEFAULT_NOISE_GAIN;
                 double HIGH_NOISE_THRESHOLD;
                 double HIGH_NOISE_GAIN;

@@ -30,7 +30,7 @@ namespace messages {
 
         struct Sensors {
             struct Servo {
-                uint8_t errorFlags;
+                uint16_t errorFlags;
 
                 ServoID id;
 
