@@ -22,7 +22,6 @@
 
 #include <nuclear>
 
-#include "messages/motion/ServoWaypoint.h"
 #include "utility/math/kalman/UKF.h"
 #include "utility/math/kalman/AdaptiveIMUModel.h"
 #include "utility/math/kalman/LinearVec3Model.h"
@@ -46,8 +45,7 @@ namespace modules {
                 arma::vec3 previousMeasuredTorsoFromRightFoot;
                 utility::math::kalman::UKF<utility::math::kalman::AdaptiveIMUModel> orientationFilter;
                 utility::math::kalman::UKF<utility::math::kalman::LinearVec3Model> velocityFilter;
-                int frameLimiter;
-
+                
                 double DEFAULT_NOISE_GAIN;
                 double HIGH_NOISE_THRESHOLD;
                 double HIGH_NOISE_GAIN;

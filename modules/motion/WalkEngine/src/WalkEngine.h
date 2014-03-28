@@ -47,6 +47,9 @@ namespace modules {
                 RIGHT
             };
 
+            /// Subsumption ID key to access motors
+            size_t id;
+
             // start_config_params
 
             // Walk Parameters

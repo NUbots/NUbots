@@ -21,7 +21,7 @@ fi
 
 # Copy our binaries over
 cd roles
-file -i * | grep 'x-executable; charset=binary' | cut -f1 -d: | rsync --files-from=- -avz . "darwin@$robotIP:/home/darwin/"
+file -i * | grep 'x-executable; charset=binary' | cut -f1 -d: | rsync --files-from=- -avzP . "darwin@$robotIP:/home/darwin/"
 cd ..
 
 # Overwrite configuration files
@@ -34,7 +34,7 @@ then
 elif [ "$config" == "new" ] || [ "$config" == "n" ] || [ "$config" == "" ] ;
 then
     echo "Adding new configuration files only"
-    rsync -avz --ignore-existing -e ssh config "darwin@$robotIP:/home/darwin/"
+    rsync -avzP --ignore-existing -e ssh config "darwin@$robotIP:/home/darwin/"
 
 # Ignore configuration files
 elif [ "$config" == "ignore" ] || [ "$config" == "i" ] ;
