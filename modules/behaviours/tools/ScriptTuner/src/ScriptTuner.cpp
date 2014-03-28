@@ -618,6 +618,7 @@ namespace modules {
                 bool changedUpper = false;
                 bool changedLower = false;
                 bool editGainRun = true;
+                mvchgat(YPOSITION[i][j],XPOSITION[i][j],5, A_STANDOUT,0,nullptr);
 
                 while (editGainRun) {
 
@@ -626,48 +627,80 @@ namespace modules {
                             editGainRun = false;
                             break;
                         case KEY_UP:
-                            if(YPOSITION[i][j]==0 && XPOSITION[i][j]==0){
+                            if(YPOSITION[i][j]==0 && XPOSITION[i][j]==0) {
                                 mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, 0, 0, nullptr);
-                                i=(i-2)%3;
+                                i=((i-2)+3)%3;
                                 mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
                             }
-                            else if(YPOSITION[i][j]==7 && XPOSITION[i][j]==12){
+                            else if(YPOSITION[i][j]==7 && XPOSITION[i][j]==12) {
                                 mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, 0, 0, nullptr);
-                                i=(i-1)%3;
+                                i=((i-1)+3)%3;
                                 mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
                             }
-                            else{
+                            else if(YPOSITION[i][j]==8 && (XPOSITION[i][j]==20 || XPOSITION[i][j]==33)) {
+                                mvchgat(YPOSITION[i][j],XPOSITION[i][j],5,0,0,nullptr);
+                                i=((i-2)+3)%3;
+                                mvchgat(YPOSITION[i][j],XPOSITION[i][j],5,A_STANDOUT,0,nullptr);
+                            }
+                            else {
                                 mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, 0, 0, nullptr);
-                                i = (i-1) % 3;
+                                i =((i-1)+3) % 3;
                                 mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
                             }
                             break;
                         case KEY_DOWN:
-                            if(YPOSITION[i][j]==0 && XPOSITION[i][j]==0){
+                            if(YPOSITION[i][j]==0 && XPOSITION[i][j]==0) {
                                 mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, 0, 0, nullptr);
                                 i=(i+2)%3;
                                 mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
                             }
-                            else if(YPOSITION[i][j]==7 && XPOSITION[i][j]==12){
+                            else if(YPOSITION[i][j]==7 && XPOSITION[i][j]==12) {
                                 mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, 0, 0, nullptr);
                                 i=(i+1)%3;
                                 mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
                             }
-                            else{
+                            else if(YPOSITION[i][j]==6 && (XPOSITION[i][j]==20 || XPOSITION[i][j]==33)) {
+                                mvchgat(YPOSITION[i][j],XPOSITION[i][j],5,0,0,nullptr);
+                                i=(i+2)%3;
+                                mvchgat(YPOSITION[i][j],XPOSITION[i][j],5,A_STANDOUT,0,nullptr);
+                            }
+                            else {
                                 mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, 0, 0, nullptr);
                                 i = (i+1) % 3;
                                 mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
                             }
                             break;
                         case KEY_LEFT:
-                            mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, 0, 0, nullptr);
-                            j = (j-1) % 3;
-                            mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
+                            if(YPOSITION[i][j]==0 && XPOSITION[i][j]==0) {
+                                mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, 0, 0, nullptr);
+                                j=0;
+                                mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr); 
+                            }
+                            else if(YPOSITION[i][j]==7 && XPOSITION[i][j]==12) {
+                                mvchgat(YPOSITION[i][j],XPOSITION[i][j],5,0,0,nullptr);
+                                mvchgat(YPOSITION[i][j],XPOSITION[i][j],5,A_STANDOUT,0,nullptr);
+                            }
+                            else {
+                                mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, 0, 0, nullptr);
+                                j = (j-1) % 3;
+                                mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
+                            }
                             break;
                         case KEY_RIGHT:
-                            mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, 0, 0, nullptr);
-                            j = (j+1) % 3;
-                            mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
+                            if(YPOSITION[i][j]==0 && XPOSITION[i][j]==0) {
+                                mvchgat(YPOSITION[i][j],XPOSITION[i][j],5,0,0,nullptr);
+                                j=0;
+                                mvchgat(YPOSITION[i][j],XPOSITION[i][j],5,A_STANDOUT,0,nullptr);
+                            }
+                            else if(YPOSITION[i][j]==7 && XPOSITION[i][j]==12) {
+                                mvchgat(YPOSITION[i][j],XPOSITION[i][j],5,0,0,nullptr);
+                                mvchgat(YPOSITION[i][j],XPOSITION[i][j],5,A_STANDOUT,0,nullptr);
+                            }
+                            else {
+                                mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, 0, 0, nullptr);
+                                j = (j+1) % 3;
+                                mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
+                            }
                             break;
                         case KEY_ENTER:
                             float newGain = 0;
