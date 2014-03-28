@@ -161,10 +161,9 @@ namespace modules {
                         case':':
                             help();
                             break;
-                        //Kill simply freezes the window
-                        //case 'X':
-                        //kill();
-                        //break;
+                        case 'X':
+                            powerplant.shutdown();
+                            break;
                     }
 
                     // Update whatever visual changes we made
@@ -467,7 +466,7 @@ namespace modules {
                             auto id = selection < 2 ? 18 + selection : selection - 2;
                             it->id = static_cast<messages::input::ServoID>(id);
                             it->position = 0;
-                            it->gain = 0;
+                            it->gain = defaultGain;
                         }
 
                         // If we are entering an angle
@@ -525,7 +524,9 @@ namespace modules {
                                              "J",
                                              "P",
                                              "S",
-                                             "X"};
+                                             "X",
+                                             "R",
+                                             "G"};
 
                     const char* ALL_MEANINGS[] = {
                                              "Left a frame",
@@ -537,7 +538,9 @@ namespace modules {
                                              "Jump to Frame",
                                              "Play",
                                              "Save",
-                                             "Exit (this works to exit help)"};
+                                             "Exit (this works to exit help and editGain)",
+                                             "Manual Refresh View",
+                                             "Edit the gains of an entire Script or Frame"};
                     
                     size_t longestCommand = 0;
                     for(const auto& command : ALL_COMMANDS) {
@@ -550,7 +553,7 @@ namespace modules {
                     mvprintw(0,(COLS - 14)/2, " Script Tuner ");
                     mvprintw(3,2, "Help Commands:");
                     attroff(A_BOLD);
-                    for(size_t i = 0; i < 10; i++) {
+                    for(size_t i = 0; i < 12; i++) {
                         mvprintw(5 + i, 2, ALL_COMMANDS[i]);
                         mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
                     }
@@ -563,7 +566,7 @@ namespace modules {
                         mvprintw(3,2, "Help Commands:");
                         attroff(A_BOLD);
 
-                        for(size_t i = 0; i < 10; i++) {
+                        for(size_t i = 0; i < 12; i++) {
                             mvprintw(5 + i, 2, ALL_COMMANDS[i]);
                             mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
                         }
@@ -821,49 +824,13 @@ namespace modules {
                     
                 }//while
 
-/*
-                if(upperGain!=-1 && lowerGain!=-1){
-                    //loop through all frames in script and edit gains
-                    if (editScript) {
-                        for(auto& f : script.frames) {
-                            for(auto& target : f.targets) {
-                                switch(target.id) {
-                                    case ServoID::HEAD_YAW:
-                                    case ServoID::HEAD_PITCH:
-                                    case ServoID::R_SHOULDER_PITCH:
-                                    case ServoID::L_SHOULDER_PITCH:
-                                    case ServoID::R_SHOULDER_ROLL:
-                                    case ServoID::L_SHOULDER_ROLL:
-                                    case ServoID::R_ELBOW:
-                                    case ServoID::L_ELBOW:
-                                        if(changedUpper) {
-                                            target.gain = upperGainS;
-                                        }
-                                    break;
-                                    case ServoID::R_HIP_YAW:
-                                    case ServoID::L_HIP_YAW:
-                                    case ServoID::R_HIP_ROLL:
-                                    case ServoID::L_HIP_ROLL:
-                                    case ServoID::R_HIP_PITCH:
-                                    case ServoID::L_HIP_PITCH:
-                                    case ServoID::R_KNEE:
-                                    case ServoID::L_KNEE:
-                                    case ServoID::R_ANKLE_PITCH:
-                                    case ServoID::L_ANKLE_PITCH:
-                                    case ServoID::R_ANKLE_ROLL:
-                                    case ServoID::L_ANKLE_ROLL:
-                                        if(changedLower) {
-                                            target.gain = lowerGainS;
-                                        }
-                                    break;
-                                }
-                            }    
-                        }
-                    }
 
-                    //edit gains for only specifc frame
-                    if (editFrame) {
-                        for(auto& target : script.frames[frame].targets) {
+                
+                //loop through all frames in script and edit gains
+                if (editScript) {
+                std::cout << "Hello!" << std::endl;
+                    for(auto& f : script.frames) {
+                        for(auto& target : f.targets) {
                             switch(target.id) {
                                 case ServoID::HEAD_YAW:
                                 case ServoID::HEAD_PITCH:
@@ -873,8 +840,8 @@ namespace modules {
                                 case ServoID::L_SHOULDER_ROLL:
                                 case ServoID::R_ELBOW:
                                 case ServoID::L_ELBOW:
-                                    if(changedUpper) {
-                                        target.gain = upperGainF;
+                                    if(changedUpper && (upperGainS >= 0)) {
+                                        target.gain = upperGainS;
                                     }
                                 break;
                                 case ServoID::R_HIP_YAW:
@@ -889,17 +856,52 @@ namespace modules {
                                 case ServoID::L_ANKLE_PITCH:
                                 case ServoID::R_ANKLE_ROLL:
                                 case ServoID::L_ANKLE_ROLL:
-                                    if(changedLower) {
-                                        target.gain = lowerGainF;
+                                    if(changedLower && (lowerGainS >= 0)) {
+                                        target.gain = lowerGainS;
                                     }
                                 break;
                             }
                         }    
                     }
-                }//end upperGain,lowerGain=-1 if
-*/
-                //output gains to scripttuner window automatic??
+                }
+
+                //edit gains for only specifc frame
+                if (editFrame) {
+                    for(auto& target : script.frames[frame].targets) {
+                        switch(target.id) {
+                            case ServoID::HEAD_YAW:
+                            case ServoID::HEAD_PITCH:
+                            case ServoID::R_SHOULDER_PITCH:
+                            case ServoID::L_SHOULDER_PITCH:
+                            case ServoID::R_SHOULDER_ROLL:
+                            case ServoID::L_SHOULDER_ROLL:
+                            case ServoID::R_ELBOW:
+                            case ServoID::L_ELBOW:
+                                if(changedUpper && (upperGainF >= 0)) {
+                                    target.gain = upperGainF;
+                                }
+                            break;
+                            case ServoID::R_HIP_YAW:
+                            case ServoID::L_HIP_YAW:
+                            case ServoID::R_HIP_ROLL:
+                            case ServoID::L_HIP_ROLL:
+                            case ServoID::R_HIP_PITCH:
+                            case ServoID::L_HIP_PITCH:
+                            case ServoID::R_KNEE:
+                            case ServoID::L_KNEE:
+                            case ServoID::R_ANKLE_PITCH:
+                            case ServoID::L_ANKLE_PITCH:
+                            case ServoID::R_ANKLE_ROLL:
+                            case ServoID::L_ANKLE_ROLL:
+                                if(changedLower && (lowerGainF >= 0)) {
+                                    target.gain = lowerGainF;
+                                }
+                            break;
+                        }
+                    }    
+                }
                 
+                //output gains to scripttuner window automatic??
                 refreshView();
             }// editGain()
 
