@@ -207,8 +207,8 @@ namespace modules {
                         sensors->rightFootDown = true;
                     }
 
-                    arma::mat44 odometryLeftFoot = calculateOdometryMatrix(*sensors, previousSensors, Side::LEFT);
-                    arma::mat44 odometryRightFoot = calculateOdometryMatrix(*sensors, previousSensors, Side::RIGHT);
+                    arma::mat44 odometryLeftFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::LEFT);
+                    arma::mat44 odometryRightFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::RIGHT);
 
                     sensors->odometry = arma::eye(4,4);
                     

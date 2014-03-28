@@ -120,17 +120,16 @@ namespace modules {
                 jpeg_create_decompress(&cinfo);
                 cinfo.err = jpeg_std_error(&err);
                 
-                // We need enough space for the table, and every byte except for byte 196
-                std::vector<uint8_t> jpegData(current.bytesused);
+                std::vector<uint8_t> jpegData(current.bytesused + sizeof(huffmantable) - 1);
                 
                 // Copy our header (the first 195 bytes)
-                auto it = std::copy(payload, payload + current.bytesused, std::begin(jpegData));
+                auto it = std::copy(payload, payload + 195, std::begin(jpegData));
                 
                 // Copy our huffman table
-                // it = std::copy(std::begin(huffmantable), std::end(huffmantable), it);
+                it = std::copy(std::begin(huffmantable), std::end(huffmantable), it);
                 
                 // Copy the remainder of our data
-                // std::copy(payload + 196, payload + current.bytesused, it);
+                std::copy(payload + 196, payload + current.bytesused, it);
                 
                 // Set our source buffer
                 jpeg_mem_src(&cinfo, jpegData.data(), current.bytesused + sizeof(huffmantable) - 1);
