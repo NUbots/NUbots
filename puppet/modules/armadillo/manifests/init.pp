@@ -28,7 +28,7 @@ class armadillo {
 
   # The following script attempts to automate the process of .deb creation
 /*
-arma_version=4.100.1
+arma_version=4.100.2
 sudo apt-get install libblas-dev
 sudo apt-get install liblapack-dev
 sudo apt-get install libffi-dev
@@ -45,16 +45,19 @@ fpm -s dir -t deb -n armadillo -v ${arma_version} \
                          -d libblas-dev \
                          -d liblapack-dev \
                          usr/include usr/lib usr/share
-*/
 
-  wget::fetch { 'armadillo.deb':
+*/
+  $arma_pkg = 'armadillo_4.100.2_i386.deb'
+
+  wget::fetch { "${arma_pkg}":
   	require    => [Package['libblas-dev'], Package['liblapack-dev']],
-    destination => '/tmp/armadillo.deb',
-    source      => 'https://dl.dropboxusercontent.com/u/27568639/armadillo_4.100.1_i386.deb',
+    destination => "/tmp/${arma_pkg}",
+    source      => "https://dl.dropboxusercontent.com/u/27568639/${arma_pkg}",
   }
-  -> package { 'armadillo':
+  ~> package { 'armadillo':
     provider => 'dpkg',
-    ensure => 'installed',
-    source => "/tmp/armadillo.deb"
+    ensure => 'latest',
+    source => "/tmp/${arma_pkg}"
   }
 }
+
