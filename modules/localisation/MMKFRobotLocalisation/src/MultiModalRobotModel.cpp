@@ -25,6 +25,7 @@
 #include "utility/math/angle.h"
 
 using utility::localisation::LocalisationFieldObject;
+using messages::localisation::FakeOdometry;
 
 namespace modules {
 namespace localisation {
@@ -47,19 +48,22 @@ std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
         << " }";
 }
 
-void MultiModalRobotModel::TimeUpdate() {
-
+void MultiModalRobotModel::TimeUpdate(double seconds) {
     // robot_models_ = std::vector<std::unique_ptr<RobotHypothesis>>();
     // robot_models_.push_back(std::make_unique<RobotHypothesis>());
-
     for (auto& model : robot_models_)
-        model->TimeUpdate();
+        model->TimeUpdate(seconds);
+}
+void MultiModalRobotModel::TimeUpdate(double seconds, const FakeOdometry& odom) {
+    for (auto& model : robot_models_)
+        model->TimeUpdate(seconds, odom);
 }
 
-
-void RobotHypothesis::TimeUpdate() {
-    arma::vec3 tmp = { 0, 0, 0 };
-    filter_.timeUpdate(0.1, tmp);
+void RobotHypothesis::TimeUpdate(double seconds) {
+    filter_.timeUpdate(seconds, nullptr);
+}
+void RobotHypothesis::TimeUpdate(double seconds, const FakeOdometry& odom) {
+    filter_.timeUpdate(seconds, odom);
 }
 
 

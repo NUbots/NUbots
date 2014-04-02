@@ -34,6 +34,7 @@
 using utility::nubugger::graph;
 using messages::support::Configuration;
 using utility::localisation::LocalisationFieldObject;
+using messages::localisation::FakeOdometry;
 
 namespace modules {
 namespace localisation {
@@ -48,9 +49,9 @@ namespace localisation {
         });
 
         // Emit to NUbugger
-        on<Trigger<Every<250, std::chrono::milliseconds>>,
-           Options<Sync<MMKFRobotLocalisation>>>("NUbugger Output", [this](const time_t&) {
-
+        on<Trigger<Every<100, std::chrono::milliseconds>>,
+           Options<Sync<MMKFRobotLocalisation>>
+           >("NUbugger Output", [this](const time_t&) {
             auto robot_msg = std::make_unique<std::vector<messages::localisation::Self>>();
             
             for (auto& model : engine_.robot_models_.hypotheses()) {
@@ -69,23 +70,19 @@ namespace localisation {
             emit(std::move(robot_msg));
         });
 
+       on<Trigger<FakeOdometry>,
+           Options<Sync<MMKFRobotLocalisation>>
+          >("MMKFRobotLocalisation Odometry", [this](const FakeOdometry& odom) {
+            auto curr_time = NUClear::clock::now();
+            engine_.TimeUpdate(curr_time, odom);
+        });
 
-        on<Trigger<Every<500, std::chrono::milliseconds>>,
-           With<std::vector<messages::vision::Goal>>,
+        on<Trigger<std::vector<messages::vision::Goal>>,
            Options<Sync<MMKFRobotLocalisation>>
           >("MMKFRobotLocalisation Step",
-            [this](const time_t&,
-                   const std::vector<messages::vision::Goal>& goals) {
-
-            // NUClear::log("=====================");
-
-            // for (auto& goal : goals) {
-            //     NUClear::log(goal);
-            //     NUClear::log("----------");
-            // }
-
-            // engine_.TimeUpdate(0.5);
-            engine_.TimeUpdate(0.05);
+            [this](const std::vector<messages::vision::Goal>& goals) {
+            auto curr_time = NUClear::clock::now();
+            engine_.TimeUpdate(curr_time);
             engine_.ProcessObjects(goals);
         });
     }

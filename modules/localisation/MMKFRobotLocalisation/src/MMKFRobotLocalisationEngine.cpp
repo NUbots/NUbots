@@ -18,21 +18,33 @@
  */
 
 #include "MMKFRobotLocalisationEngine.h"
-
+#include <chrono>
 #include <algorithm>
-
-#include "messages/vision/VisionObjects.h"
+#include "utility/time/time.h"
 #include "utility/localisation/LocalisationFieldObject.h"
+#include "messages/vision/VisionObjects.h"
+#include "messages/localisation/FieldObject.h"
 
-using messages::vision::VisionObject;
-using utility::localisation::LocalisationFieldObject;
 using utility::localisation::LFOId;
+using utility::localisation::LocalisationFieldObject;
+using utility::time::TimeDifferenceSeconds;
+using messages::vision::VisionObject;
+using messages::localisation::FakeOdometry;
 
 namespace modules {
 namespace localisation {
-    /// Integrate time-dependent observations on all objects
-    void MMKFRobotLocalisationEngine::TimeUpdate(time_t current_time) {
-        robot_models_.TimeUpdate();
+
+    void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time) {
+        double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
+        last_time_update_time_ = current_time;
+        robot_models_.TimeUpdate(seconds);
+    }
+
+    void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
+                                              const FakeOdometry& odom) {
+        double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
+        last_time_update_time_ = current_time;
+        robot_models_.TimeUpdate(seconds, odom);
     }
 
     std::vector<LocalisationFieldObject> MMKFRobotLocalisationEngine::GetPossibleObjects(

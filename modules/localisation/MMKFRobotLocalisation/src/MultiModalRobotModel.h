@@ -71,7 +71,8 @@ namespace localisation {
             const messages::vision::VisionObject& observed_object,
             const utility::localisation::LocalisationFieldObject& actual_object);
 
-        void TimeUpdate();
+        void TimeUpdate(double seconds);
+        void TimeUpdate(double seconds, const messages::localisation::FakeOdometry& odom);
 
 
         friend std::ostream& operator<<(std::ostream &os, const RobotHypothesis& h);
@@ -91,7 +92,8 @@ namespace localisation {
         void MergeSimilarModels();
         void NormaliseAlphas();
 
-        void TimeUpdate();
+        void TimeUpdate(double seconds);
+        void TimeUpdate(double seconds, const messages::localisation::FakeOdometry& odom);
 
         void MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,

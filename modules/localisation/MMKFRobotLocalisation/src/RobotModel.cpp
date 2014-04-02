@@ -3,27 +3,36 @@
 #include <armadillo>
 
 #include "utility/math/angle.h"
+#include "utility/math/matrix.h"
 #include "utility/math/coordinates.h"
+#include "messages/localisation/FieldObject.h"
+
+using messages::localisation::FakeOdometry;
+using utility::math::matrix::rotationMatrix;
 
 namespace modules {
 namespace localisation {
 namespace robot {
 
+arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
+    const arma::vec::fixed<RobotModel::size>& state, double deltaT, std::nullptr_t foo) {
+
+    auto result = state;
+    return result;
+}
 
 arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     const arma::vec::fixed<RobotModel::size>& state, double deltaT, 
-    const arma::vec3& measurement) {
-
+    const FakeOdometry& odom) {
     auto result = state;
-  
-    // // Apply robot odometry / robot position change
-    // result.rows(kX, kY) += odom.torso_displacement;
 
-    // double h = odom.torso_rotation;
-    // arma::mat22 rot = {  std::cos(h), std::sin(h),
-    //                     -std::sin(h), std::cos(h) };
-    // // Rotate heading by -torso_rotation.
-    // result.rows(kHeadingX, kHeadingY) = rot * result.rows(kHeadingX, kHeadingY);
+    // Apply robot odometry / robot position change
+    arma::mat22 rot_heading = rotationMatrix(std::atan2(state[kHeadingY], state[kHeadingX]));
+    result.rows(kX, kY) += rot_heading * odom.torso_displacement;
+
+    // Rotate heading by torso_rotation.
+    arma::mat22 rot = rotationMatrix(odom.torso_rotation);
+    result.rows(kHeadingX, kHeadingY) = rot * result.rows(kHeadingX, kHeadingY);
 
     return result;
 }

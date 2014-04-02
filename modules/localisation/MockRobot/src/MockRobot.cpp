@@ -138,7 +138,7 @@ namespace localisation {
         });
 
         // Simulate Vision
-        on<Trigger<Every<250, std::chrono::milliseconds>>,
+        on<Trigger<Every<1000, std::chrono::milliseconds>>,
            Options<Sync<MockRobot>>>("Vision Simulation", [this](const time_t&) {
 
             // Camera setup
@@ -193,7 +193,13 @@ namespace localisation {
                    const std::vector<messages::localisation::Self>& robots) {
             
             emit(graph("Actual robot position", robot_position_[0], robot_position_[1]));
+            emit(graph("Actual robot heading", robot_heading_[0], robot_heading_[1]));
             emit(graph("Actual robot velocity", robot_velocity_[0], robot_velocity_[1]));
+
+            if (robots.size() >= 1) {
+                emit(graph("Estimated robot position", robots[0].position[0], robots[0].position[1]));
+                emit(graph("Estimated robot heading", robots[0].heading[0], robots[0].heading[1]));
+            }
 
             // Robot message
             auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
@@ -207,9 +213,9 @@ namespace localisation {
                 robot_model.heading = std::atan2(model.heading[1], model.heading[0]);
                 robot_model.sd_x = 1;
                 robot_model.sd_y = 0.25;
-                robot_model.sr_xx = model.sr_xx * 100;
-                robot_model.sr_xy = model.sr_xy * 100;
-                robot_model.sr_yy = model.sr_yy * 100;
+                robot_model.sr_xx = model.sr_xx; // * 100;
+                robot_model.sr_xy = model.sr_xy; // * 100;
+                robot_model.sr_yy = model.sr_yy; // * 100;
                 robot_model.lost = false;
                 robot_msg_models.push_back(robot_model);
             }
@@ -234,12 +240,12 @@ namespace localisation {
         // Emit ball to Nubugger
         on<Trigger<Every<100, std::chrono::milliseconds>>,
            With<messages::localisation::Ball>,
-           With<messages::vision::Ball>,
+           // With<messages::vision::Ball>,
            With<std::vector<messages::localisation::Self>>,
            Options<Sync<MockRobot>>>("NUbugger Output",
             [this](const time_t&,
                    const messages::localisation::Ball& ball,
-                   const messages::vision::Ball& vision_ball,
+                   // const messages::vision::Ball& vision_ball,
                    const std::vector<messages::localisation::Self>& robots) {
 
             arma::vec2 ball_pos = utility::localisation::transform::RobotBall2FieldBall(

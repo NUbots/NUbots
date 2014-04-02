@@ -21,12 +21,13 @@
 #define MODULES_MMKFROBOTLOCALISATIONENGINE_H
 
 #include <nuclear>
+#include <chrono>
 
-#include "messages/vision/VisionObjects.h"
-#include "utility/localisation/FieldDescription.h"
-#include "MultiModalRobotModel.h"
-#include "utility/localisation/FieldDescription.h"
 #include "utility/localisation/LocalisationFieldObject.h"
+#include "utility/localisation/FieldDescription.h"
+#include "utility/localisation/FieldDescription.h"
+#include "messages/vision/VisionObjects.h"
+#include "MultiModalRobotModel.h"
 
 namespace modules {
 namespace localisation {
@@ -34,9 +35,14 @@ namespace localisation {
     class MMKFRobotLocalisationEngine {
         public:
 
-        MMKFRobotLocalisationEngine() { }
+        MMKFRobotLocalisationEngine() {
+            last_time_update_time_ = NUClear::clock::now();
+        }
 
-        void TimeUpdate(time_t current_time);
+        void TimeUpdate(std::chrono::system_clock::time_point current_time);
+
+        void TimeUpdate(std::chrono::system_clock::time_point current_time,
+                        const messages::localisation::FakeOdometry& odom);
 
         std::vector<utility::localisation::LocalisationFieldObject> GetPossibleObjects(
             const messages::vision::Goal& ambiguous_object);
@@ -62,6 +68,8 @@ namespace localisation {
         std::shared_ptr<utility::localisation::FieldDescription> field_description_;
 
         MultiModalRobotModel robot_models_;
+
+        std::chrono::system_clock::time_point last_time_update_time_;
     };
 }
 }

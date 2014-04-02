@@ -2,6 +2,8 @@
 #define MODULES_LOCALISATION_ROBOTMODEL_H
 
 #include <armadillo>
+#include "messages/localisation/FieldObject.h"
+
 namespace modules {
 namespace localisation {
 namespace robot {
@@ -31,9 +33,13 @@ namespace robot {
         
         RobotModel() {} // empty constructor
         
-        arma::vec::fixed<size> timeUpdate(
-            const arma::vec::fixed<size>& state, double deltaT,
-            const arma::vec3& measurement);
+        arma::vec::fixed<RobotModel::size> timeUpdate(
+            const arma::vec::fixed<RobotModel::size>& state, double deltaT,
+            std::nullptr_t foo);
+
+        arma::vec::fixed<RobotModel::size> timeUpdate(
+            const arma::vec::fixed<RobotModel::size>& state, double deltaT, 
+            const messages::localisation::FakeOdometry& odom);
         
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state, 

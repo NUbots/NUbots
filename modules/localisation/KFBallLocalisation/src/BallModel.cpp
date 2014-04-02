@@ -3,10 +3,12 @@
 #include <armadillo>
 
 #include "utility/math/angle.h"
+#include "utility/math/matrix.h"
 #include "utility/math/coordinates.h"
 #include "messages/localisation/FieldObject.h"
 
 using messages::localisation::FakeOdometry;
+using utility::math::matrix::rotationMatrix;
 
 namespace modules {
 namespace localisation {
@@ -41,10 +43,8 @@ arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
     // Apply robot odometry / robot position change
     result.rows(kX, kY) -= odom.torso_displacement;
 
-    double h = -odom.torso_rotation;
-    arma::mat22 rot = {  std::cos(h), std::sin(h),
-                        -std::sin(h), std::cos(h) };
     // Rotate ball_pos by -torso_rotation.
+    arma::mat22 rot = rotationMatrix(-odom.torso_rotation);
     result.rows(kX, kY) = rot * result.rows(kX, kY);
     result.rows(kVx, kVy) = rot * result.rows(kVx, kVy);
 
