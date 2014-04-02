@@ -747,7 +747,7 @@ namespace modules {
 
             uRightLeft[0] = std::min(std::max(uRightLeft[0], stanceLimitX[0]), stanceLimitX[1]);
             uRightLeft[1] = std::min(std::max(uRightLeft[1], -stanceLimitY[1]), -limitY);
-            uRightLeft[2] = std::min(std::max(uRightLeft[2], -stanceLimitA[2]), -stanceLimitA[0]);
+            uRightLeft[2] = std::min(std::max(uRightLeft[2], -stanceLimitA[1]), -stanceLimitA[0]);
 
             return poseGlobal(uRightLeft, uLeft);
         }
