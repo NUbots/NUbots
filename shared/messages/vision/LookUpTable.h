@@ -12,6 +12,7 @@
 
 #include <string>
 #include <cmath>
+#include <cstring>
 #include "messages/input/Image.h"
 
 namespace messages {
@@ -57,6 +58,12 @@ namespace messages {
              */
             void loadLUTFromFile(const std::string& fileName);
             void loadLUTFromArray(const char* array);
+            void save(const std::string& fileName) const;
+            char* getData() const {
+                char* result = new char[LUT_SIZE];
+                std::memcpy(result, LUT, LUT_SIZE);
+                return result;
+            }
             /*!
                 @brief Classifies a pixel
                 @param p the pixel
