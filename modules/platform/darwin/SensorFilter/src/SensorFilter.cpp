@@ -227,8 +227,10 @@ namespace modules {
 
                     /************************************************
                      *                  Mass Model                  *
-                     ************************************************/
-                    sensors->centreOfMass = calculateCentreOfMass<DarwinModel>(sensors->forwardKinematics, true);
+                     ************************************************/                
+                    //LOOKOUT!!!! ARRAYOPS_MEAT
+                    arma::vec4 COM = calculateCentreOfMass<DarwinModel>(sensors->forwardKinematics, true);
+                    sensors->centreOfMass = {COM[0],COM[1], COM[2], COM[3]};
                     //END MASS MODEL
 
                     /*emit(graph("Filtered Gravity Vector",
