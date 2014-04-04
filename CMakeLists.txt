@@ -22,7 +22,7 @@ INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/NUClearModuleBuilder.cmake")
 
 # Include our shared messages etc headers
 INCLUDE_DIRECTORIES("shared")
-INCLUDE_DIRECTORIES("build/shared")
+INCLUDE_DIRECTORIES("${CMAKE_BINARY_DIR}/shared")
 
 # Build tests in test mode
 IF(BUILD_TESTS)

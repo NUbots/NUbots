@@ -30,6 +30,9 @@ namespace modules {
                             std::rethrow_exception(stats.exception);
                         }
                         catch (std::exception ex) {
+                            for (auto stat : stats.identifier) {
+                                NUClear::log<NUClear::ERROR>("Identifier: ", stat);
+                            }
                             NUClear::log<NUClear::ERROR>("Unhandled Exception: ", ex.what());
                         }
                         // We don't actually want to crash

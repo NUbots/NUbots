@@ -1,0 +1,23 @@
+{
+    "Units": "cm",
+    "LineWidth": 0.05,
+    "MarkWidth": 0.1,
+    "FieldLength": 6,
+    "FieldWidth": 4,
+    "GoalDepth": 0.5,
+    "GoalWidth": 1.5,
+    "GoalAreaLength": 0.6,
+    "GoalAreaWidth": 2.2,
+    "GoalCrossbarHeight": 1.0,
+    "GoalpostDiameter": 0.1,
+    "GoalNetHeight": 0.8,
+    "PenaltyMarkDistance": 1.80,
+    "CenterCircleDiameter": 1.20,
+    "BorderStripMinWidth": 0.7,
+    "Notes": [
+    	"GoalWidth is distance between inner edges of goal posts.",
+    	"PenaltyMarkDistance is measured from the goal line",
+    	"GoalCrossbarHeight is the height to the bottom of the crossbar",
+    	"The crossbar diameter and the goalpost diameter are equal"
+    ]
+}

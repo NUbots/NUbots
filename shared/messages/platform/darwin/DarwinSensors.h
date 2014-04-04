@@ -31,10 +31,6 @@ namespace messages {
     namespace platform {
         namespace darwin {
 
-            struct LMissile {};
-
-            struct RMissile {};
-
             /**
              * TODO document
              *
@@ -53,12 +49,12 @@ namespace messages {
     	            OVERLOAD        = 1 << 5,
     	            INSTRUCTION     = 1 << 6,
     	            CORRUPT_DATA    = 1 << 7,
-    	            TIMEOUT         = 1 << 8
+                    TIMEOUT         = 1 << 8
     	        };
 
                 NUClear::clock::time_point timestamp;
 
-                uint8_t cm730ErrorFlags;
+                uint16_t cm730ErrorFlags;
 
                 struct LEDPanel {
                     bool led2;
@@ -106,7 +102,7 @@ namespace messages {
                     float centreX;
                     float centreY;
 
-                    uint8_t errorFlags;
+                    uint16_t errorFlags;
                 };
 
                 struct FSRs {
@@ -116,7 +112,7 @@ namespace messages {
 
                 struct Servo {
 
-                    uint8_t errorFlags;
+                    uint16_t errorFlags;
 
                     bool torqueEnabled;
                     bool led;
@@ -167,7 +163,7 @@ namespace messages {
 
                 } servo;
             };
-            
+
         }  // darwin
     }  // platform
 }  // messages

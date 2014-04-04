@@ -28,7 +28,7 @@ namespace modules {
         using messages::vision::COLOUR_CLASS;
 		    using messages::vision::ColourSegment;
         using messages::platform::darwin::DarwinSensors;
-        using utility::vision::LookUpTable;
+        using messages::vision::LookUpTable;
 
         using messages::input::Sensors;
         using messages::input::ServoID;

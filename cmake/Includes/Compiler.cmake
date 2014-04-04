@@ -1,5 +1,5 @@
 # Common C++ Flags
-SET(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wpedantic -Wextra -DNDEBUG -march=atom -mtune=atom")
+SET(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wpedantic -Wextra -g -march=atom -mtune=atom")
 SET(CMAKE_C_FLAGS "-O3 -DNDEBUG")
 
 # XCode support
@@ -25,3 +25,4 @@ ELSEIF("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 ELSE()
     MESSAGE(FATAL_ERROR "Unsupported compiler!")
 ENDIF()
+

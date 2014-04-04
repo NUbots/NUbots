@@ -1,0 +1,134 @@
+/*
+ * This file is part of Localisation.
+ *
+ * Localisation is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Localisation is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Localisation.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+
+#ifndef MODULES_MULTIMODALROBOTMODEL_H
+#define MODULES_MULTIMODALROBOTMODEL_H
+
+#include <nuclear>
+#include <armadillo>
+
+#include "utility/math/kalman/UKF.h"
+
+#include "RobotModel.h"
+#include "messages/vision/VisionObjects.h"
+#include "utility/localisation/LocalisationFieldObject.h"
+
+namespace modules {
+namespace localisation {
+
+    class RobotHypothesis {
+    private:
+        utility::math::kalman::UKF<robot::RobotModel> filter_;
+
+        double weight_;
+
+    public:
+
+        // std::string obs_trail_;
+        int obs_count_;
+
+        RobotHypothesis() : 
+            filter_(
+                {0, 0, -1, 0}, // mean
+                // {0, 0, 3.141},
+                arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 1, // cov
+                1), // alpha
+            weight_(1),
+            // obs_trail_(""),
+            obs_count_(0) { }
+
+        // bool active() const { return active_; }
+        // void set_active(bool active) { active_ = active; }
+
+        float GetFilterWeight() const { return weight_; }
+        void SetFilterWeight(float weight) { weight_ = weight; }
+
+        arma::vec::fixed<robot::RobotModel::size> GetEstimate() const {
+            return filter_.get();
+        }
+
+        arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> GetCovariance() const {
+            return filter_.getCovariance();
+        }
+
+        double MeasurementUpdate(
+            const messages::vision::VisionObject& observed_object,
+            const utility::localisation::LocalisationFieldObject& actual_object);
+
+        void TimeUpdate();
+
+
+        friend std::ostream& operator<<(std::ostream &os, const RobotHypothesis& h);
+    };
+
+    class MultiModalRobotModel {
+    public:
+        MultiModalRobotModel() { 
+            robot_models_.push_back(std::make_unique<RobotHypothesis>());
+        }
+
+        void RemoveOldModels();
+
+        unsigned int RemoveInactiveModels();
+        unsigned int RemoveInactiveModels(std::vector<RobotHypothesis>& container);
+        void PruneModels();
+        void MergeSimilarModels();
+        void NormaliseAlphas();
+
+        void TimeUpdate();
+
+        void MeasurementUpdate(
+            const messages::vision::VisionObject& observed_object,
+            const utility::localisation::LocalisationFieldObject& actual_object);
+        // void MultipleLandmarkUpdate();
+
+        void AmbiguousMeasurementUpdate(
+            const messages::vision::VisionObject& ambiguous_object,
+            const std::vector<utility::localisation::LocalisationFieldObject>& possible_objects);
+
+        void AmbiguousMeasurementUpdate(
+            const std::vector<messages::vision::VisionObject>& ambiguous_objects,
+            const std::vector<std::vector<utility::localisation::LocalisationFieldObject>>& possible_object_sets);
+
+        arma::vec::fixed<robot::RobotModel::size> GetEstimate() {
+            return robot_models_[0]->GetEstimate();
+        }
+
+        arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> GetCovariance() {
+            return robot_models_[0]->GetCovariance();
+        }
+
+        const std::vector<std::unique_ptr<RobotHypothesis>>& hypotheses() {
+            return robot_models_;
+        }
+
+
+    private:
+        void PruneViterbi(unsigned int order);
+        // int AmbiguousLandmarkUpdateExhaustive(
+        //     AmbiguousObject &ambiguous_object,
+        //     const std::vector<StationaryObject*>& possible_objects);
+
+        std::vector<std::unique_ptr<RobotHypothesis>> robot_models_;
+    };
+}
+}
+#endif
+
+

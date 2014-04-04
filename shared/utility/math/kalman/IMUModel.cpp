@@ -41,8 +41,7 @@ namespace utility {
                 return state * cos(phi) + omegaCrossState * sin(phi) + unitOmega * arma::dot(unitOmega, state) * (1.0 - cos(phi));
             }
 
-
-            arma::vec IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const arma::vec& measurement) {
+            arma::vec IMUModel::predictedObservation(const arma::vec::fixed<size>& state, std::nullptr_t) {
                 return state ;
             }
 

@@ -1,0 +1,11 @@
+ADD_ROLE(
+    NAME robotlocalisation
+    MODULES
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem
+        support::NUbugger
+        vision::FeatureDetector
+        vision::LUTClassifier
+        input::LinuxCamera
+        localisation::MMKFRobotLocalisation)
+

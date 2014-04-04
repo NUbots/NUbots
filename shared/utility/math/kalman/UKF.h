@@ -1,6 +1,8 @@
 #ifndef UTILITY_MATH_KALMAN_UKF_H
 #define UTILITY_MATH_KALMAN_UKF_H
 
+#include <nuclear>
+
 #include <armadillo>
 
 namespace utility {
@@ -115,6 +117,17 @@ namespace utility {
                     covarianceWeights[0] = lambda / (Model::size + lambda) + (1.0 - pow(alpha,2) + beta);
                     
                     defaultCovarianceUpdate = arma::diagmat(covarianceWeights);
+
+                    // NUClear::log("initial covarianceWeights:\n", covarianceWeights);
+
+                    // Calculate our sigma points
+                    sigmaMean = mean;
+                    sigmaPoints = generateSigmaPoints(mean, covariance);
+
+                    // Reset our state for more measurements
+                    covarianceUpdate = defaultCovarianceUpdate;
+                    d.zeros();
+                    centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
                 }
 
                 template <typename TMeasurement>
@@ -143,31 +156,45 @@ namespace utility {
                     centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
                 }
 
-                template <typename TMeasurement>
-                double measurementUpdate(const TMeasurement& measurement, const arma::mat& noise) {
+                template <typename TMeasurement, typename TArgs = nullptr_t>
+                double measurementUpdate(const TMeasurement& measurement, 
+                                         const arma::mat& measurement_variance, 
+                                         const TArgs& args = nullptr) {
                     // Allocate room for our predictions
                     arma::mat predictedObservations(measurement.n_elem, NUM_SIGMA_POINTS);
 
                     // First step is to calculate the expected measurement for each sigma point.
                     for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
-                        predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), measurement);
+                        predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), std::forward<const TArgs&>(args));
                     }
 
                     // Now calculate the mean of these measurement sigmas.
                     arma::vec predictedMean = meanFromSigmas(predictedObservations);
                     predictedObservations.each_col() -= predictedMean;
                     
+                    // NUClear::log("---------------------", "measurement:\n", measurement);
+                    // NUClear::log("predictedMean:\n", predictedMean);
+                    // NUClear::log("covarianceWeights:\n", covarianceWeights);
+
                     // Calculate our predicted covariance
                     arma::mat predictedCovariance = covarianceFromSigmas(predictedObservations, predictedMean);
                     
+                    // NUClear::log("predictedCovariance:\n", predictedCovariance);
+
+
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
 
+                    // NUClear::log("innovation:\n", innovation);
+
                     // Check for outlier, if outlier return without updating estimate.
-                    if(evaluateMeasurement(innovation, predictedCovariance, noise)) {
+                    if(evaluateMeasurement(innovation, predictedCovariance, measurement_variance)) {
 
                         // Update our state
-                        covarianceUpdate -= covarianceUpdate.t() * predictedObservations.t() * (noise + predictedObservations * covarianceUpdate * predictedObservations.t()).i() * predictedObservations * covarianceUpdate;
-                        d += predictedObservations.t() * noise.i() * innovation;
+                        covarianceUpdate -= covarianceUpdate.t() * predictedObservations.t() * 
+                                            (measurement_variance + predictedObservations * covarianceUpdate * predictedObservations.t()).i() * 
+                                            predictedObservations * covarianceUpdate;
+                                            
+                        d += predictedObservations.t() * measurement_variance.i() * innovation;
 
                         // Update our mean and covariance
                         mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
@@ -175,25 +202,30 @@ namespace utility {
                         covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
                     }
                     
-                    //Magical quality calculation
-                    arma::mat innovationVariance = predictedCovariance + noise;
-                    arma::mat thing = (innovation.t() * innovationVariance.i() * innovation);
+                    // Magical quality calculation
+                    arma::mat innovationVariance = predictedCovariance + measurement_variance;
+                    arma::mat innovationCovariance = ((innovation.t() * innovationVariance.i()) * innovation);
                     
-                    double expTerm = -0.5 * thing(0, 0);
-                    double fract = 1 / sqrt(pow(2 * M_PI, noise.n_rows) * arma::det(innovationVariance));
+                    // NUClear::log("innovationVariance\n", innovationVariance);
+                    // NUClear::log("arma::det(innovationVariance): ", arma::det(innovationVariance));
+                    // NUClear::log("innovationCovariance: ", innovationCovariance);
+
+                    double expTerm = -0.5 * innovationCovariance(0, 0);
+                    double fract = 1 / sqrt(pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance));
                     const float outlierProbability = 0.05;
-                    
+
+                    // NUClear::log("fract: ", fract);
+
                     return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
                 }
                 
-                StateVec get() {
+                StateVec get() const {
                     return mean;
                 }
                 
-                StateMat getCovariance() {
+                StateMat getCovariance() const {
                     return covariance;
                 }
-                
                 
                 bool evaluateMeasurement(const arma::mat& innovation, const arma::mat& estimateVariance, const arma::mat& measurementVariance) {
                     

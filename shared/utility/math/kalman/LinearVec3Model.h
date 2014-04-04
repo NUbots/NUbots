@@ -18,7 +18,7 @@ namespace utility {
                 
                 arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& measurement);
                 
-                arma::vec predictedObservation(const arma::vec::fixed<size>& state, const arma::vec& measurement);
+                arma::vec predictedObservation(const arma::vec::fixed<size>& state, std::nullptr_t);
                 
                 arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
                 

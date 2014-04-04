@@ -497,7 +497,7 @@ namespace modules {
 
 	        		goal_message->back().screen_quad = post.m_corners.getVertices();
         		
-	        		//std::cout << "Emitting " << post << std::endl;
+        			NUClear::log("Emitting ", post);
 	        	}
         	}
 

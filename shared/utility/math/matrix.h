@@ -160,6 +160,13 @@ namespace utility {
 
  				return result;	//returns axis as vec3 and angle as double
 			}
+
+			inline arma::mat44 orthonormal44Inverse(const arma::mat44& m){
+				arma::mat44 minverse = arma::eye(4,4);
+				minverse.submat(0,0,2,2) = m.submat(0,0,2,2).t();
+				minverse.submat(0,3,2,3) = -minverse.submat(0,0,2,2) * m.submat(0,3,2,3);
+				return minverse;
+			}
 			
         }
     }

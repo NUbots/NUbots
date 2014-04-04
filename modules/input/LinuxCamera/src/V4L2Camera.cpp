@@ -120,7 +120,6 @@ namespace modules {
                 jpeg_create_decompress(&cinfo);
                 cinfo.err = jpeg_std_error(&err);
                 
-                // We need enough space for the table, and every byte except for byte 196
                 std::vector<uint8_t> jpegData(current.bytesused + sizeof(huffmantable) - 1);
                 
                 // Copy our header (the first 195 bytes)

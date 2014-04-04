@@ -1,0 +1,9 @@
+ADD_ROLE(
+    NAME balllocalisation
+    MODULES
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem
+        support::NUbugger
+        localisation::KFBallLocalisation
+        localisation::MockRobot)
+
