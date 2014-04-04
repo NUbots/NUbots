@@ -2,7 +2,7 @@ ADD_ROLE(
     NAME scripttuner
     MODULES
 	support::configuration::ConfigSystem    
-        #platform::darwin::HardwareIO
+        platform::darwin::HardwareIO
         platform::fakedarwin::HardwareIO
         platform::darwin::MotionManager
 	platform::darwin::SensorFilter

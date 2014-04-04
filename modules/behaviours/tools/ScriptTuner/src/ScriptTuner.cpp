@@ -474,10 +474,6 @@ namespace modules {
 
                             // Normalize our angle to be between -pi and pi
                             num = utility::math::angle::normalizeAngle(num);
-                            /*num = fmod(num + M_PI, M_PI * 2);
-                            if (num < 0)
-                            num += M_PI * 2;
-                            num -= M_PI;*/
 
                             it->position = num;
                             // Convert our angle to be between -pi and pi
