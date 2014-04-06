@@ -26,21 +26,15 @@
 
 namespace modules {
 namespace localisation {
-
     class MMKFRobotLocalisation : public NUClear::Reactor {
     private:
         /// The engine that does all of the work
-        localisation::MMKFRobotLocalisationEngine engine_;
+        std::unique_ptr<localisation::MMKFRobotLocalisationEngine> engine_;
 
         /// For testing
         arma::vec2 marker_ = { 0, 0 };
 
     public:
-        /// @brief General localisation configuration.
-        struct LocalisationConfig {
-            static constexpr const char* CONFIGURATION_PATH = "Localisation.json";
-        };
-
         /// @brief Called by the powerplant to build and setup the MMKFRobotLocalisation reactor.
         explicit MMKFRobotLocalisation(std::unique_ptr<NUClear::Environment> environment);
     };

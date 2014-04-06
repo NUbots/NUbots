@@ -17,15 +17,15 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MMKFROBOTLOCALISATIONENGINE_H
-#define MODULES_MMKFROBOTLOCALISATIONENGINE_H
+#ifndef MODULES_LOCALISATION_MMKFROBOTLOCALISATIONENGINE_H
+#define MODULES_LOCALISATION_MMKFROBOTLOCALISATIONENGINE_H
 
 #include <nuclear>
 #include <chrono>
-
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "utility/localisation/FieldDescription.h"
 #include "utility/localisation/FieldDescription.h"
+#include "messages/support/Configuration.h"
 #include "messages/vision/VisionObjects.h"
 #include "MultiModalRobotModel.h"
 
@@ -62,7 +62,11 @@ namespace localisation {
         void set_field_description(std::shared_ptr<utility::localisation::FieldDescription> desc) {
             field_description_ = desc;
         };
-
+        
+        void UpdateConfiguration(
+            const messages::support::Configuration<modules::localisation::MultiModalRobotModelConfig>& config) {
+            robot_models_.UpdateConfiguration(config);
+        };
     // private:
         /// Contains the dimensions of the field
         std::shared_ptr<utility::localisation::FieldDescription> field_description_;

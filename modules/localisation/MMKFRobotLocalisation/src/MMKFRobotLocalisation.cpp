@@ -24,28 +24,38 @@
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/NUbugger/NUgraph.h"
+#include "utility/localisation/FieldDescription.h"
+#include "utility/localisation/LocalisationFieldObject.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
+#include "MMKFRobotLocalisationEngine.h"
 #include "RobotModel.h"
-#include "utility/localisation/FieldDescription.h"
-#include "utility/localisation/LocalisationFieldObject.h"
 
 using utility::nubugger::graph;
 using messages::support::Configuration;
 using utility::localisation::LocalisationFieldObject;
 using messages::localisation::FakeOdometry;
+using modules::localisation::MultiModalRobotModelConfig;
+using utility::localisation::FieldDescriptionConfig;
 
 namespace modules {
 namespace localisation {
     MMKFRobotLocalisation::MMKFRobotLocalisation(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : engine_(std::make_unique<MMKFRobotLocalisationEngine>()),
+          Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<utility::localisation::FieldDescriptionConfig>>>(
+        on<Trigger<Configuration<MultiModalRobotModelConfig>>>(
             "Configuration Update",
-            [this](const Configuration<utility::localisation::FieldDescriptionConfig>& config) {
+            [this](const Configuration<MultiModalRobotModelConfig>& config) {
+            engine_->UpdateConfiguration(config);
+        });
+
+        on<Trigger<Configuration<FieldDescriptionConfig>>>(
+            "Configuration Update",
+            [this](const Configuration<FieldDescriptionConfig>& config) {
             auto fd = std::make_shared<utility::localisation::FieldDescription>(config);
-            engine_.set_field_description(fd);
+            engine_->set_field_description(fd);
         });
 
         // Emit to NUbugger
@@ -54,7 +64,7 @@ namespace localisation {
            >("NUbugger Output", [this](const time_t&) {
             auto robot_msg = std::make_unique<std::vector<messages::localisation::Self>>();
             
-            for (auto& model : engine_.robot_models_.hypotheses()) {
+            for (auto& model : engine_->robot_models_.hypotheses()) {
                 arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
                 auto model_cov = model->GetCovariance();
 
@@ -74,7 +84,7 @@ namespace localisation {
            Options<Sync<MMKFRobotLocalisation>>
           >("MMKFRobotLocalisation Odometry", [this](const FakeOdometry& odom) {
             auto curr_time = NUClear::clock::now();
-            engine_.TimeUpdate(curr_time, odom);
+            engine_->TimeUpdate(curr_time, odom);
         });
 
         on<Trigger<std::vector<messages::vision::Goal>>,
@@ -82,8 +92,8 @@ namespace localisation {
           >("MMKFRobotLocalisation Step",
             [this](const std::vector<messages::vision::Goal>& goals) {
             auto curr_time = NUClear::clock::now();
-            engine_.TimeUpdate(curr_time);
-            engine_.ProcessObjects(goals);
+            engine_->TimeUpdate(curr_time);
+            engine_->ProcessObjects(goals);
         });
     }
 }

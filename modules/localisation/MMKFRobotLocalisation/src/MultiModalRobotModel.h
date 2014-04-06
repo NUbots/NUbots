@@ -20,17 +20,20 @@
 #ifndef MODULES_MULTIMODALROBOTMODEL_H
 #define MODULES_MULTIMODALROBOTMODEL_H
 
-#include <nuclear>
 #include <armadillo>
-
-#include "utility/math/kalman/UKF.h"
-
-#include "RobotModel.h"
-#include "messages/vision/VisionObjects.h"
+#include <nuclear>
 #include "utility/localisation/LocalisationFieldObject.h"
+#include "utility/math/kalman/UKF.h"
+#include "messages/support/Configuration.h"
+#include "messages/vision/VisionObjects.h"
+#include "RobotModel.h"
 
 namespace modules {
 namespace localisation {
+    /// @brief General localisation configuration.
+    struct MultiModalRobotModelConfig {
+        static constexpr const char* CONFIGURATION_PATH = "MultiModalRobotModel.json";
+    };
 
     class RobotHypothesis {
     private:
@@ -80,9 +83,17 @@ namespace localisation {
 
     class MultiModalRobotModel {
     public:
-        MultiModalRobotModel() { 
+        MultiModalRobotModel() :
+            cfg_({ 4, 0.025, 0.01 }) { 
             robot_models_.push_back(std::make_unique<RobotHypothesis>());
         }
+
+        void UpdateConfiguration(
+            const messages::support::Configuration<modules::localisation::MultiModalRobotModelConfig>& config) {
+            cfg_.max_models_after_merge = config["MaxModelsAfterMerge"];
+            cfg_.merge_min_translation_dist = config["MergeMinTranslationDist"];
+            cfg_.merge_min_heading_dist = config["MergeMinHeadingDist"];
+        };
 
         void RemoveOldModels();
 
@@ -91,6 +102,9 @@ namespace localisation {
         void PruneModels();
         void MergeSimilarModels();
         void NormaliseAlphas();
+
+        bool ModelsAreSimilar(const std::unique_ptr<RobotHypothesis>& model_a,
+                              const std::unique_ptr<RobotHypothesis>& model_b);
 
         void TimeUpdate(double seconds);
         void TimeUpdate(double seconds, const messages::localisation::FakeOdometry& odom);
@@ -128,6 +142,12 @@ namespace localisation {
         //     const std::vector<StationaryObject*>& possible_objects);
 
         std::vector<std::unique_ptr<RobotHypothesis>> robot_models_;
+
+        struct {
+            int max_models_after_merge;
+            float merge_min_translation_dist;
+            float merge_min_heading_dist;
+        } cfg_;
     };
 }
 }

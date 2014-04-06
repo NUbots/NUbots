@@ -103,6 +103,23 @@ namespace localisation {
             ball_velocity_ = { velocity_x, velocity_y };
         });
 
+//         // Simulate orientation matrix
+//         on<Trigger<Every<10, std::chrono::milliseconds>>>(
+//             "Orientation Matrix Simulation", [this](const time_t&){
+// // orient =   M: W -> R
+// //          M^T: R -> W
+
+// //          a, x_w,  M*R_a*x_w = x_r
+
+// // M is an orthonormal basis for world coords expressed in robot coords
+// // i.e. M contains unit vectors pointing along each of the world axes
+// // Note: M can only attempt to track the robot's orientation - not its position.
+// //       i.e. The origin of the world coords resulting from M is still the
+// //            robot's torso, but the axes are parallel to the field axes.
+//             arma::mat33 M = 
+
+
+//         });
 
         // Simulate Odometry
         on<Trigger<Every<100, std::chrono::milliseconds>>>("Odometry Simulation",
