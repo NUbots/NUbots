@@ -45,31 +45,33 @@ namespace modules {
                 size_t selection;
                 /// If we are selecting the angle or gain for this item
                 bool angleOrGain;
-
-                void refreshView();
+                const size_t defaultGain = 80;
+                const size_t defaultDuration = 1000;
 
                 std::string userInput();
+                
+                void refreshView();
                 void loadScript(const std::string& path);
                 void saveScript();
                 void editDuration();
                 void editSelection();
-
                 void activateFrame(int frame);
-
                 void toggleLockMotor();
                 void newFrame();
                 void deleteFrame();
-
-                volatile bool running;
                 void run();
                 void kill();
                 void playScript();
                 void jumpToFrame();
-                //void help();
-                //void userLoadScript();
+                void help();
+                void editGainInput();
 
+                void editGain();
+                void userInputToFrame();
+                float userInputToGain();
 
-               
+                volatile bool running;
+
             public:
                 explicit ScriptTuner(std::unique_ptr<NUClear::Environment> environment);
             };
