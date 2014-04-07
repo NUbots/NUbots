@@ -24,10 +24,14 @@ The following is a guide to getting you set up and ready to contribute to the NU
 
 3. Create a Vagrant base box using Packer:
 	
-	The build-helper script has a command for this:
+	The build-helper script has a command for this Linux:
 
 		$ cd ~/NUClearPort
-		$ ./b create_box
+		$ ./b create_box virtualbox
+
+    Or Windows:
+    
+		$ python b create_box virtualbox
 
 4. Run `vagrant up` from the NUClearPort directory:
 	e.g.
