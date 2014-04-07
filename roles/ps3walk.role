@@ -1,0 +1,11 @@
+ADD_ROLE(
+    NAME ps3walk
+    MODULES
+        support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem
+        #platform::darwin::HardwareIO
+        #platform::darwin::SensorFilter
+        support::NUbugger
+        behaviour::planning::PS3Walk
+)

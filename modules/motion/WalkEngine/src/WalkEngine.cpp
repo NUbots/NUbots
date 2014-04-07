@@ -32,6 +32,7 @@
 #include "utility/math/matrix.h"
 #include "OPKinematics.h"
 #include "utility/nubugger/NUgraph.h"
+#include "messages/motion/WalkCommand.h"
 
 
 namespace modules {
@@ -45,13 +46,9 @@ namespace modules {
         using NUClear::log;
         using NUClear::DEBUG;
         using messages::input::Sensors;
+        using messages::motion::WalkCommand;
         
         WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
-
-			struct WalkCommand {
-                arma::vec2 velocity; // in m/s
-                float rotationalSpeed; // in rads/s
-			};
 
             on<Trigger<Configuration<WalkEngine> > >([this](const Configuration<WalkEngine>& config) {
 
