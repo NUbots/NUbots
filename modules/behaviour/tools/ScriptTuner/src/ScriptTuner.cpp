@@ -242,7 +242,7 @@ namespace modules {
                                      " ",
                                      "T",
                                      "J",
-                                     "P",
+                                     "G",
                                      "S",
                                      "X"};
 
@@ -255,7 +255,7 @@ namespace modules {
                                      "Lock/Unlock",
                                      "Edit Duration",
                                      "Jump to Frame",
-                                     "Play",
+                                     "Change Gains",
                                      "Save",
                                      "Exit (Use Ctr C)"};
 
