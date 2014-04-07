@@ -4,8 +4,9 @@ ADD_ROLE(
         support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
-        #platform::darwin::HardwareIO
-        #platform::darwin::SensorFilter
+        platform::darwin::HardwareIO
+        platform::darwin::SensorFilter
+        motion::WalkEngine
         support::NUbugger
         behaviour::planning::PS3Walk
 )

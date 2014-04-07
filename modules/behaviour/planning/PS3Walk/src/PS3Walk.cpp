@@ -54,8 +54,8 @@ namespace planning {
             auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
             NUClear::log("Command\n", strafeNorm, rotationalSpeedNorm);
             emit(std::make_unique<WalkCommand>(WalkCommand{
-                strafeNorm,
-                rotationalSpeedNorm
+                strafeNorm * 0.03,
+                rotationalSpeedNorm * 0.1
             }));
         });
     }
