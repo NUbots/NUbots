@@ -930,6 +930,10 @@ namespace modules {
             return angle;
 		}
 
+        /**
+         * @brief Transforms pRelative from pose co-ordinates to global co-ordinates in 2 dimensions 
+         *  using the third element as bearing angle
+         */
 		arma::vec3 WalkEngine::poseGlobal(arma::vec3 pRelative, arma::vec3 pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!
 			double ca = std::cos(pose[2]);
 			double sa = std::sin(pose[2]);
