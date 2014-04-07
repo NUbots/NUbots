@@ -49,13 +49,13 @@ namespace planning {
             }
         });
 
-        on<Trigger<Every<500, std::chrono::milliseconds>>>([this](const time_t&) {
+        on<Trigger<Every<50, std::chrono::milliseconds>>>([this](const time_t&) {
             auto strafeNorm = strafe / std::numeric_limits<short>::max();
             auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
             NUClear::log("Command\n", strafeNorm, rotationalSpeedNorm);
             emit(std::make_unique<WalkCommand>(WalkCommand{
                 strafeNorm * 0.03,
-                rotationalSpeedNorm * 0.1
+                rotationalSpeedNorm
             }));
         });
     }
