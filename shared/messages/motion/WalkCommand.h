@@ -33,8 +33,14 @@ namespace messages {
          * @author Brendan Annable
          */
         struct WalkCommand {
-                arma::vec2 velocity; // in m/s
-                float rotationalSpeed; // in rads/s
+            arma::vec2 velocity; // in m/s
+            float rotationalSpeed; // in rads/s
+        };
+        
+        struct WalkStartCommand {
+        };
+
+        struct WalkStopCommand {
         };
         
     }  // motion

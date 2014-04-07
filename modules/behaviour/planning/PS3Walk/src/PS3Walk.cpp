@@ -26,11 +26,13 @@ namespace behaviour {
 namespace planning {
 
     using messages::motion::WalkCommand;
+    using messages::motion::WalkStartCommand;
+    using messages::motion::WalkStopCommand;
 
     PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<Every<1, std::chrono::milliseconds>>>([this](const time_t&) {
+        on<Trigger<Every<1, std::chrono::milliseconds>>, Options<Single>>([this](const time_t&) {
             JoystickEvent event;
             if (joystick.sample(&event)) {
                 if (event.isAxis()) {
@@ -45,6 +47,22 @@ namespace planning {
                             rotationalSpeed = -event.value;
                             break;
                     }
+                } else if (event.isButton()) {
+//                    NUClear::log("button", int(event.number), int(event.value));
+                    switch (event.number) {
+                        case BUTTON_TRIANGLE:
+                            if (event.value > 0) {
+                                if (moving) {
+                                    NUClear::log("Stop walking");
+                                    emit(std::make_unique<WalkStopCommand>());
+                                } else {
+                                    NUClear::log("Start walking");
+                                    emit(std::make_unique<WalkStartCommand>());
+                                }
+                                moving = !moving;
+                            }
+                            break;
+                    }
                 }
             }
         });
@@ -52,17 +70,12 @@ namespace planning {
         on<Trigger<Every<50, std::chrono::milliseconds>>>([this](const time_t&) {
             auto strafeNorm = strafe / std::numeric_limits<short>::max();
             auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
-            NUClear::log("Command\n", strafeNorm, rotationalSpeedNorm);
             emit(std::make_unique<WalkCommand>(WalkCommand{
-                strafeNorm * 0.03,
+                strafeNorm * 0.03, // TODO: non-magic numbers
                 rotationalSpeedNorm
             }));
         });
     }
-
-//    double normalize(short value) {
-//
-//    }
 
 }
 }

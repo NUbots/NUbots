@@ -35,6 +35,10 @@ namespace planning {
         static constexpr uint LEFT_JOYSTICK_VERTICAL = 1;
         static constexpr uint RIGHT_JOYSTICK_HORIZONTAL = 2;
         static constexpr uint RIGHT_JOYSTICK_VERTICAL = 3;
+        static constexpr uint BUTTON_TRIANGLE = 12;
+        static constexpr uint BUTTON_CIRCLE = 13;
+        static constexpr uint BUTTON_CROSS = 14;
+        static constexpr uint BUTTON_SQUARE = 15;
 
         /// @brief Called by the powerplant to build and setup the PS3Walk reactor.
         explicit PS3Walk(std::unique_ptr<NUClear::Environment> environment);
@@ -42,6 +46,7 @@ namespace planning {
         Joystick joystick{"/dev/input/js0"};
         arma::vec2 strafe{0, 0};
         float rotationalSpeed = 0;
+        bool moving = false;
     };
 
 }

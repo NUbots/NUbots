@@ -34,6 +34,7 @@
 #include "utility/nubugger/NUgraph.h"
 #include "messages/motion/WalkCommand.h"
 #include "messages/motion/ServoTarget.h"
+#include "messages/behaviour/Action.h"
 
 
 namespace modules {
@@ -48,9 +49,60 @@ namespace modules {
         using NUClear::DEBUG;
         using messages::input::Sensors;
         using messages::motion::WalkCommand;
+        using messages::motion::WalkStartCommand;
+        using messages::motion::WalkStopCommand;
         using messages::motion::ServoTarget;
+        using messages::behaviour::RegisterAction;
+        using messages::behaviour::ActionPriorites;
+        using messages::behaviour::LimbID;
         
-        WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
+        WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment))
+            , id(size_t(this) * size_t(this) - size_t(this)) {
+
+            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+                id,
+                {
+                    std::pair<float, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG}),
+                    std::pair<float, std::set<LimbID>>(0, {LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
+                },
+                [this] (const std::set<LimbID>& givenLimbs) {
+                    if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
+                        // legs are available, start walking
+                        stanceReset();
+                        updateHandle.enable();
+                    }
+                },
+                [this] (const std::set<LimbID>& takenLimbs) {
+                    if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
+                        // legs are no longer available, reset walking (too late to stop walking)
+                        updateHandle.disable();
+                    }
+                },
+                [this] (const std::set<ServoID>&) {
+                    // nothing
+                }
+            }));
+
+            updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, With<Sensors>, Options<Single> >([this](const time_t&, const Sensors& sensors) {
+                update(sensors);
+            });
+
+            updateHandle.disable();
+
+            on<Trigger<WalkCommand>>([this](const WalkCommand& walkCommand) {
+                setVelocity(walkCommand.velocity[1], walkCommand.velocity[0], walkCommand.rotationalSpeed);
+            });
+
+            on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
+                start();
+                emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 25, 10 }}));
+            });
+
+            on<Trigger<WalkStopCommand>>([this](const WalkStopCommand&) {
+                stop();
+                // TODO: set priorities to 0 when stopped - somehow
+            });
 
             on<Trigger<Configuration<WalkEngine> > >([this](const Configuration<WalkEngine>& config) {
 
@@ -147,10 +199,6 @@ namespace modules {
                 
             });
 
-            on<Trigger<WalkCommand>>([this](const WalkCommand& walkCommand) {
-                setVelocity(walkCommand.velocity[1], walkCommand.velocity[0], walkCommand.rotationalSpeed);
-            });
-
             on<Trigger<Startup>>([this](const Startup&) {
                 // g--------------------------------------------------------
                 // g Walk state variables
@@ -234,11 +282,7 @@ namespace modules {
 
                 
                 stanceReset();
-                start();
-            });
-
-            on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, With<Sensors>, Options<Single> >([this](const time_t&, const Sensors& sensors) {
-                update(sensors);
+                //start();
             });
 			
         }
@@ -274,7 +318,7 @@ namespace modules {
 
             if (!active) {
                 moving = false;
-                updateStill();
+                updateStill(sensors);
                 return;
             }
 
@@ -484,7 +528,7 @@ namespace modules {
             //motionArms();
         }
 
-        void WalkEngine::updateStill() {
+        void WalkEngine::updateStill(const Sensors& sensors) {
             uTorso = stepTorso(uLeft, uRight, 0.5);
 
             float armPosCompX, armPosCompY;
@@ -525,7 +569,7 @@ namespace modules {
             pRLeg[2] = uRight[2];
 
             std::vector<double> qLegs = darwinop_kinematics_inverse_legs_nubots(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
-            motionLegs(qLegs, true, Sensors());
+            motionLegs(qLegs, true, sensors);
            //motionArms();
         }
 
@@ -611,7 +655,7 @@ namespace modules {
 
             }
 
-            auto waypoints = std::make_unique<std::vector<ServoTarget>>();
+            auto waypoints = std::make_unique<std::vector<ServoCommand>>();
             waypoints->reserve(16);
 
 /*
@@ -628,21 +672,21 @@ namespace modules {
             10 = rightAnklePitch
             11 = rightAnkleRoll*/
 
-            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(1000000000/UPDATE_FREQUENCY);
+            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
 
-            waypoints->push_back({time, ServoID::L_HIP_YAW,     float(qLegs[0]),  float(leftLegHardness * 100)});
-            waypoints->push_back({time, ServoID::L_HIP_ROLL,    float(qLegs[1]),  float(leftLegHardness * 100)});
-            waypoints->push_back({time, ServoID::L_HIP_PITCH,   float(qLegs[2]),  float(leftLegHardness * 100)});
-            waypoints->push_back({time, ServoID::L_KNEE,        float(qLegs[3]),  float(leftLegHardness * 100)});
-            waypoints->push_back({time, ServoID::L_ANKLE_PITCH, float(qLegs[4]),  float(leftLegHardness * 100)});
-            waypoints->push_back({time, ServoID::L_ANKLE_ROLL,  float(qLegs[5]),  float(leftLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::L_HIP_YAW,     float(qLegs[0]),  float(leftLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::L_HIP_ROLL,    float(qLegs[1]),  float(leftLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::L_HIP_PITCH,   float(qLegs[2]),  float(leftLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::L_KNEE,        float(qLegs[3]),  float(leftLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::L_ANKLE_PITCH, float(qLegs[4]),  float(leftLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::L_ANKLE_ROLL,  float(qLegs[5]),  float(leftLegHardness * 100)});
 
-            waypoints->push_back({time, ServoID::R_HIP_YAW,     float(qLegs[6]),  float(rightLegHardness * 100)});
-            waypoints->push_back({time, ServoID::R_HIP_ROLL,    float(qLegs[7]),  float(rightLegHardness * 100)});
-            waypoints->push_back({time, ServoID::R_HIP_PITCH,   float(qLegs[8]),  float(rightLegHardness * 100)});
-            waypoints->push_back({time, ServoID::R_KNEE,        float(qLegs[9]),  float(rightLegHardness * 100)});
-            waypoints->push_back({time, ServoID::R_ANKLE_PITCH, float(qLegs[10]), float(rightLegHardness * 100)});
-            waypoints->push_back({time, ServoID::R_ANKLE_ROLL,  float(qLegs[11]), float(rightLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::R_HIP_YAW,     float(qLegs[6]),  float(rightLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::R_HIP_ROLL,    float(qLegs[7]),  float(rightLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::R_HIP_PITCH,   float(qLegs[8]),  float(rightLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::R_KNEE,        float(qLegs[9]),  float(rightLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::R_ANKLE_PITCH, float(qLegs[10]), float(rightLegHardness * 100)});
+            waypoints->push_back({id, time, ServoID::R_ANKLE_ROLL,  float(qLegs[11]), float(rightLegHardness * 100)});
 
             emit(std::move(waypoints));
         }
@@ -683,16 +727,16 @@ namespace modules {
                 qRArmActual[2] = qRArm[2];
             }
 
-            auto waypoints = std::make_unique<std::vector<ServoTarget>>();
+            auto waypoints = std::make_unique<std::vector<ServoCommand>>();
             waypoints->reserve(6);
             time_t time = NUClear::clock::now() + std::chrono::nanoseconds(1000000000/UPDATE_FREQUENCY);
 
-            waypoints->push_back({time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]),  float(hardnessArm * 100)});
-            waypoints->push_back({time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]),  float(hardnessArm * 100)});
-            waypoints->push_back({time, ServoID::R_ELBOW,          float(qRArmActual[2]),  float(hardnessArm * 100)});
-            waypoints->push_back({time, ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]),  float(hardnessArm * 100)});
-            waypoints->push_back({time, ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]),  float(hardnessArm * 100)});
-            waypoints->push_back({time, ServoID::L_ELBOW,          float(qLArmActual[2]),  float(hardnessArm * 100)});
+            waypoints->push_back({id, time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]),  float(hardnessArm * 100)});
+            waypoints->push_back({id, time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]),  float(hardnessArm * 100)});
+            waypoints->push_back({id, time, ServoID::R_ELBOW,          float(qRArmActual[2]),  float(hardnessArm * 100)});
+            waypoints->push_back({id, time, ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]),  float(hardnessArm * 100)});
+            waypoints->push_back({id, time, ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]),  float(hardnessArm * 100)});
+            waypoints->push_back({id, time, ServoID::L_ELBOW,          float(qLArmActual[2]),  float(hardnessArm * 100)});
 
             /*emit(graph("L Shoulder Pitch", qLArmActual[0]));
             emit(graph("L Shoulder Roll", qLArmActual[1]));
