@@ -306,6 +306,7 @@ def execute_command(command, args):
     elif command == 'cmake':
         cmake()
     elif command == 'makej':
+        cmake()
         make(['-j2'])
     elif command == 'make':
         cmake()

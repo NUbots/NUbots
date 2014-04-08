@@ -224,12 +224,13 @@ void MultiModalRobotModel::PruneModels() {
     NormaliseAlphas();
 }
 
-bool ModelsAreSimilar(const RobotHypothesis& model_a,
-                      const RobotHypothesis& model_b) {
+bool ModelsAreSimilar(const std::unique_ptr<RobotHypothesis>& model_a,
+                      const std::unique_ptr<RobotHypothesis>& model_b) {
     const float kMinTransDist = 0.06; // TODO: Add to config system
     const float kMinHeadDist = 0.01; // TODO: Add to config system
 
-    arma::vec::fixed<robot::RobotModel::size> diff = model_a.GetEstimate() - model_b.GetEstimate();
+    // arma::vec::fixed<robot::RobotModel::size> diff = model_a.GetEstimate() - model_b.GetEstimate();
+    arma::vec diff = model_a->GetEstimate() - model_b->GetEstimate();
 
     auto trans_dist = arma::norm(diff.rows(0, 1), 2);
 
@@ -274,7 +275,7 @@ void MultiModalRobotModel::MergeSimilarModels() {
             auto& model_a = robot_models_[ma];
             auto& model_b = robot_models_[mb];
 
-            if (!ModelsAreSimilar(*model_a, *model_b))
+            if (!ModelsAreSimilar(model_a, model_b))
                 continue;
 
             float wa = model_a->GetFilterWeight();
