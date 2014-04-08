@@ -18,21 +18,33 @@
  */
 
 #include "MMKFRobotLocalisationEngine.h"
-
+#include <chrono>
 #include <algorithm>
-
-#include "messages/vision/VisionObjects.h"
+#include "utility/time/time.h"
 #include "utility/localisation/LocalisationFieldObject.h"
+#include "messages/vision/VisionObjects.h"
+#include "messages/localisation/FieldObject.h"
 
-using messages::vision::VisionObject;
-using utility::localisation::LocalisationFieldObject;
 using utility::localisation::LFOId;
+using utility::localisation::LocalisationFieldObject;
+using utility::time::TimeDifferenceSeconds;
+using messages::vision::VisionObject;
+using messages::localisation::FakeOdometry;
 
 namespace modules {
 namespace localisation {
-    /// Integrate time-dependent observations on all objects
-    void MMKFRobotLocalisationEngine::TimeUpdate(time_t current_time) {
-        robot_models_.TimeUpdate();
+
+    void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time) {
+        double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
+        last_time_update_time_ = current_time;
+        robot_models_.TimeUpdate(seconds);
+    }
+
+    void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
+                                              const FakeOdometry& odom) {
+        double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
+        last_time_update_time_ = current_time;
+        robot_models_.TimeUpdate(seconds, odom);
     }
 
     std::vector<LocalisationFieldObject> MMKFRobotLocalisationEngine::GetPossibleObjects(
@@ -59,22 +71,25 @@ namespace localisation {
         return std::move(possible);
     }
 
+    bool GoalPairObserved(
+        const std::vector<messages::vision::Goal>& ambiguous_objects) {
+        if (ambiguous_objects.size() != 2)
+            return false;
+
+        auto& oa = ambiguous_objects[0];
+        auto& ob = ambiguous_objects[1];
+
+        return
+            (oa.type == messages::vision::Goal::Type::RIGHT &&
+             ob.type == messages::vision::Goal::Type::LEFT) ||
+            (oa.type == messages::vision::Goal::Type::LEFT &&
+             ob.type == messages::vision::Goal::Type::RIGHT);
+    }
+
     void MMKFRobotLocalisationEngine::ProcessAmbiguousObjects(
         const std::vector<messages::vision::Goal>& ambiguous_objects) {
         
-        bool goal_pair_observed = false;
-        if (ambiguous_objects.size() == 2) {
-            auto& oa = ambiguous_objects[0];
-            auto& ob = ambiguous_objects[1];
-
-            goal_pair_observed = 
-                (oa.type == messages::vision::Goal::Type::RIGHT &&
-                 ob.type == messages::vision::Goal::Type::LEFT) ||
-                (oa.type == messages::vision::Goal::Type::LEFT &&
-                 ob.type == messages::vision::Goal::Type::RIGHT);
-        }
-
-        if (goal_pair_observed) {
+        if (GoalPairObserved(ambiguous_objects)) {
             std::vector<messages::vision::VisionObject> vis_objs;
             // Ensure left goal is always first.
             if (ambiguous_objects[0].type == messages::vision::Goal::Type::LEFT){

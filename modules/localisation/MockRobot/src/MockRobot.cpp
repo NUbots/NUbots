@@ -73,7 +73,7 @@ namespace localisation {
             double x_amp = 1;
             double y_amp = 1;
 
-            arma::vec2 old_pos = robot_position_;
+            arma::vec old_pos = robot_position_;
 
             auto wave1 = triangle_wave(t, period);
             auto wave2 = triangle_wave(t + (period / 4.0), period);
@@ -81,10 +81,10 @@ namespace localisation {
             // auto wave2 = sine_wave(t + (period / 4.0), period);
             robot_position_ = { wave1 * x_amp, wave2 * y_amp };
 
-            arma::vec2 diff = robot_position_ - old_pos;
+            arma::vec diff = robot_position_ - old_pos;
  
             robot_heading_ = arma::normalise(diff);
-            robot_velocity_ = robot_heading_ / (100.0);
+            robot_velocity_ = robot_heading_ / 100.0;
         });
 
         // Update ball position
@@ -103,6 +103,23 @@ namespace localisation {
             ball_velocity_ = { velocity_x, velocity_y };
         });
 
+//         // Simulate orientation matrix
+//         on<Trigger<Every<10, std::chrono::milliseconds>>>(
+//             "Orientation Matrix Simulation", [this](const time_t&){
+// // orient =   M: W -> R
+// //          M^T: R -> W
+
+// //          a, x_w,  M*R_a*x_w = x_r
+
+// // M is an orthonormal basis for world coords expressed in robot coords
+// // i.e. M contains unit vectors pointing along each of the world axes
+// // Note: M can only attempt to track the robot's orientation - not its position.
+// //       i.e. The origin of the world coords resulting from M is still the
+// //            robot's torso, but the axes are parallel to the field axes.
+//             arma::mat33 M = 
+
+
+//         });
 
         // Simulate Odometry
         on<Trigger<Every<100, std::chrono::milliseconds>>>("Odometry Simulation",
@@ -138,7 +155,7 @@ namespace localisation {
         });
 
         // Simulate Vision
-        on<Trigger<Every<250, std::chrono::milliseconds>>,
+        on<Trigger<Every<1000, std::chrono::milliseconds>>,
            Options<Sync<MockRobot>>>("Vision Simulation", [this](const time_t&) {
 
             // Camera setup
@@ -193,7 +210,13 @@ namespace localisation {
                    const std::vector<messages::localisation::Self>& robots) {
             
             emit(graph("Actual robot position", robot_position_[0], robot_position_[1]));
+            emit(graph("Actual robot heading", robot_heading_[0], robot_heading_[1]));
             emit(graph("Actual robot velocity", robot_velocity_[0], robot_velocity_[1]));
+
+            if (robots.size() >= 1) {
+                emit(graph("Estimated robot position", robots[0].position[0], robots[0].position[1]));
+                emit(graph("Estimated robot heading", robots[0].heading[0], robots[0].heading[1]));
+            }
 
             // Robot message
             auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
@@ -207,9 +230,9 @@ namespace localisation {
                 robot_model.heading = std::atan2(model.heading[1], model.heading[0]);
                 robot_model.sd_x = 1;
                 robot_model.sd_y = 0.25;
-                robot_model.sr_xx = model.sr_xx * 100;
-                robot_model.sr_xy = model.sr_xy * 100;
-                robot_model.sr_yy = model.sr_yy * 100;
+                robot_model.sr_xx = model.sr_xx; // * 100;
+                robot_model.sr_xy = model.sr_xy; // * 100;
+                robot_model.sr_yy = model.sr_yy; // * 100;
                 robot_model.lost = false;
                 robot_msg_models.push_back(robot_model);
             }
@@ -234,12 +257,12 @@ namespace localisation {
         // Emit ball to Nubugger
         on<Trigger<Every<100, std::chrono::milliseconds>>,
            With<messages::localisation::Ball>,
-           With<messages::vision::Ball>,
+           // With<messages::vision::Ball>,
            With<std::vector<messages::localisation::Self>>,
            Options<Sync<MockRobot>>>("NUbugger Output",
             [this](const time_t&,
                    const messages::localisation::Ball& ball,
-                   const messages::vision::Ball& vision_ball,
+                   // const messages::vision::Ball& vision_ball,
                    const std::vector<messages::localisation::Self>& robots) {
 
             arma::vec2 ball_pos = utility::localisation::transform::RobotBall2FieldBall(

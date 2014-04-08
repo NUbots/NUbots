@@ -20,6 +20,7 @@
 #ifndef UTILITY_MATH_MATRIX_H
 #define UTILITY_MATH_MATRIX_H
 
+#include <nuclear>
 #include <armadillo>
 #include <cmath>
 
@@ -34,6 +35,15 @@ namespace utility {
 		 * @author Brendan Annable
          */
         namespace matrix {
+        	
+        	inline arma::mat22 rotationMatrix(double angle) {
+				double cosAngle = std::cos(angle);
+				double sinAngle = std::sin(angle);
+				arma::mat22 result;
+                result << cosAngle    << -sinAngle   <<  arma::endr 
+	                   << sinAngle    << cosAngle;
+                return result;
+            }
 
             inline arma::mat33 xRotationMatrix(double angle) {
 				double cosAngle = cos(angle);

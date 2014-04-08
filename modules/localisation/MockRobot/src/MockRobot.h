@@ -29,13 +29,13 @@ namespace localisation {
 
     class MockRobot : public NUClear::Reactor {
     private:
-        arma::vec2 ball_position_ = { 0, 0 };
-        arma::vec2 ball_velocity_ = { 0, 0 };
-        arma::vec2 robot_position_ = { 0, 0 };
-        arma::vec2 robot_velocity_ = { 0, 0 };
-        arma::vec2 robot_heading_ = { 1, 0 };
-        arma::vec2 odom_old_robot_position_ = { 0, 0 };
-        arma::vec2 odom_old_robot_heading_ = { 1, 0 };
+        arma::vec ball_position_ = { 0, 0 };
+        arma::vec ball_velocity_ = { 0, 0 };
+        arma::vec robot_position_ = { 0, 0 };
+        arma::vec robot_velocity_ = { 0, 0 };
+        arma::vec robot_heading_ = { 1, 0 };
+        arma::vec odom_old_robot_position_ = { 0, 0 };
+        arma::vec odom_old_robot_heading_ = { 1, 0 };
 
         std::shared_ptr<utility::localisation::FieldDescription> field_description_;
 

@@ -25,6 +25,7 @@
 #include "utility/math/angle.h"
 
 using utility::localisation::LocalisationFieldObject;
+using messages::localisation::FakeOdometry;
 
 namespace modules {
 namespace localisation {
@@ -47,19 +48,22 @@ std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
         << " }";
 }
 
-void MultiModalRobotModel::TimeUpdate() {
-
+void MultiModalRobotModel::TimeUpdate(double seconds) {
     // robot_models_ = std::vector<std::unique_ptr<RobotHypothesis>>();
     // robot_models_.push_back(std::make_unique<RobotHypothesis>());
-
     for (auto& model : robot_models_)
-        model->TimeUpdate();
+        model->TimeUpdate(seconds);
+}
+void MultiModalRobotModel::TimeUpdate(double seconds, const FakeOdometry& odom) {
+    for (auto& model : robot_models_)
+        model->TimeUpdate(seconds, odom);
 }
 
-
-void RobotHypothesis::TimeUpdate() {
-    arma::vec3 tmp = { 0, 0, 0 };
-    filter_.timeUpdate(0.1, tmp);
+void RobotHypothesis::TimeUpdate(double seconds) {
+    filter_.timeUpdate(seconds, nullptr);
+}
+void RobotHypothesis::TimeUpdate(double seconds, const FakeOdometry& odom) {
+    filter_.timeUpdate(seconds, odom);
 }
 
 
@@ -75,8 +79,6 @@ void MultiModalRobotModel::MeasurementUpdate(
 double RobotHypothesis::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object,
     const LocalisationFieldObject& actual_object) {
-
-    // obs_trail_ += actual_object.name() + " ";
 
     // // Radial coordinates
     // arma::vec2 actual_pos = actual_object.location();
@@ -162,7 +164,7 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
         for (auto& object_set : possible_object_sets) {
             auto split_model = std::make_unique<RobotHypothesis>(*model);
 
-            for (int i = 0; i < object_set.size(); i++) {
+            for (int i = 0; i < int(object_set.size()); i++) {
                 split_model->obs_count_++;
 
                 auto quality = split_model->MeasurementUpdate(ambiguous_objects[i],
@@ -207,8 +209,6 @@ void MultiModalRobotModel::RemoveOldModels() {
 }
 
 void MultiModalRobotModel::PruneModels() {
-    const float kMaxModelsAfterMerge = 4; // TODO: Add to config system
-
     // NUClear::log(__PRETTY_FUNCTION__, "Number of models before merging: ",
     //                      robot_models_.size());
 
@@ -219,28 +219,26 @@ void MultiModalRobotModel::PruneModels() {
 
     // RemoveOldModels();
 
-    PruneViterbi(kMaxModelsAfterMerge);
+    PruneViterbi(cfg_.max_models_after_merge);
 
     NormaliseAlphas();
 }
 
-bool ModelsAreSimilar(const std::unique_ptr<RobotHypothesis>& model_a,
-                      const std::unique_ptr<RobotHypothesis>& model_b) {
-    const float kMinTransDist = 0.06; // TODO: Add to config system
-    const float kMinHeadDist = 0.01; // TODO: Add to config system
+bool MultiModalRobotModel::ModelsAreSimilar(
+    const std::unique_ptr<RobotHypothesis> &model_a,
+    const std::unique_ptr<RobotHypothesis> &model_b) {
+    arma::vec::fixed<robot::RobotModel::size> diff = model_a->GetEstimate() - model_b->GetEstimate();
 
-    // arma::vec::fixed<robot::RobotModel::size> diff = model_a.GetEstimate() - model_b.GetEstimate();
-    arma::vec diff = model_a->GetEstimate() - model_b->GetEstimate();
-
-    auto trans_dist = arma::norm(diff.rows(0, 1), 2);
+    auto translation_dist = arma::norm(diff.rows(0, 1), 2);
 
     // // Radial coords
-    // auto head_dist = std::abs(utility::math::angle::normalizeAngle(diff[kHeading]));
+    // auto heading_dist = std::abs(utility::math::angle::normalizeAngle(diff[kHeading]));
 
     // Unit vector orientation
-    auto head_dist = diff[robot::kHeadingX] + diff[robot::kHeadingY];
+    auto heading_dist = diff[robot::kHeadingX] + diff[robot::kHeadingY];
 
-    return (trans_dist < kMinTransDist) && (head_dist < kMinHeadDist);
+    return (translation_dist < cfg_.merge_min_translation_dist) && 
+           (heading_dist < cfg_.merge_min_heading_dist);
 }
 
 /// Reduces the number of active models by merging similar models together
@@ -303,39 +301,6 @@ void MultiModalRobotModel::MergeSimilarModels() {
     // Replace the old models with the new list of merged models
     robot_models_ = std::move(new_models);
 }
-
-// /// Reduces the number of active models by merging similar models together
-// void MultiModalRobotModel::MergeSimilarModels() {
-//     // Loop through each pair of active models
-//     for (auto& model_a : robot_models_) {
-//         if (!model_a.active())
-//             continue;
-
-//         for (auto& model_b : robot_models_) {
-//             if (!model_b.active())
-//                 continue;
-
-//             if (&model_a == &model_b)
-//                 continue;
-
-//             if (ModelsAreSimilar(model_a, model_b)) {
-//                 float total_alpha = model_a.GetFilterWeight() + model_b.GetFilterWeight();
-                
-//                 if (model_a.GetFilterWeight() < model_b.GetFilterWeight()) {
-//                     model_a.set_active(false);
-//                     model_b.SetFilterWeight(total_alpha);
-//                 } else {
-//                     model_a.SetFilterWeight(total_alpha);
-//                     model_b.set_active(false);
-//                 }
-//             }
-//         }
-//     }
-
-//     RemoveInactiveModels();
-
-//     NormaliseAlphas();
-// }
 
 /* @brief Prunes the models using the Viterbi method. This removes lower
  *        probability models to a maximum total models.

@@ -31,6 +31,7 @@
 
 using utility::nubugger::graph;
 using messages::support::Configuration;
+using messages::localisation::FakeOdometry;
 
 namespace modules {
 namespace localisation {
@@ -64,23 +65,9 @@ namespace localisation {
             emit(std::move(ball_msg));
         });
 
-        // on<Trigger<Every<250, std::chrono::milliseconds>>,
-        //    With<messages::vision::Ball>,
-        //    Options<Sync<KFBallLocalisation>>
-        //   >("KFBallLocalisation Step",
-        //     [this](const time_t&,
-        //            const messages::vision::Ball& ball) {
-
-        //     // engine_.TimeUpdate(0.5);
-        //     engine_.MeasurementUpdate(ball);
-        // });
-
-
-       on<Trigger<messages::localisation::FakeOdometry>,
+       on<Trigger<FakeOdometry>,
            Options<Sync<KFBallLocalisation>>
-          >("KFBallLocalisation Odometry",
-            [this](const messages::localisation::FakeOdometry& odom) {
-
+          >("KFBallLocalisation Odometry", [this](const FakeOdometry& odom) {
             auto curr_time = NUClear::clock::now();
             engine_.TimeUpdate(curr_time, odom);
         });
@@ -94,13 +81,6 @@ namespace localisation {
             engine_.TimeUpdate(curr_time);
             engine_.MeasurementUpdate(ball);
         });
-
-
-        // on<Trigger<Every<100, std::chrono::milliseconds>>,
-        //    Options<Sync<KFBallLocalisation>>
-        //    >([this](const time_t&) {
-        //     engine_.TimeUpdate(0.1);
-        // });
     }
 }
 }
