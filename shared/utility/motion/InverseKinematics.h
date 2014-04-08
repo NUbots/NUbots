@@ -34,29 +34,29 @@ namespace utility {
 namespace motion {
 namespace kinematics {
 
-	/*! @brief Calculates the leg joints for a given input ankle position.
-			The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint of the hips.
-			Robot coordinate system:
-						x is out of the front of the robot
-						y is left, from right shoulder to left
-						z is upward, from feet to head
-			Input ankle coordinate system:
-						x is forward, from heel to toe
-						y is left,
-						z is normal to the plane of the foot
-		@param target The target 4x4 basis matrix for the ankle
-		@param isLeft Request for left leg motors or right leg motors?
-		@param RobotKinematicModel The class containing the leg model of the robot.
-	*/
+    /*! @brief Calculates the leg joints for a given input ankle position.
+            The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint of the hips.
+            Robot coordinate system:
+                        x is out of the front of the robot
+                        y is left, from right shoulder to left
+                        z is upward, from feet to head
+            Input ankle coordinate system:
+                        x is forward, from heel to toe
+                        y is left,
+                        z is normal to the plane of the foot
+        @param target The target 4x4 basis matrix for the ankle
+        @param isLeft Request for left leg motors or right leg motors?
+        @param RobotKinematicModel The class containing the leg model of the robot.
+    */
     template <typename RobotKinematicModel>
-	std::vector< std::pair<messages::input::ServoID, float> > calculateLegJoints(arma::mat44 target, Side isLeft) {
+    std::vector< std::pair<messages::input::ServoID, float> > calculateLegJoints(arma::mat44 target, Side isLeft) {
         const float LENGTH_BETWEEN_LEGS = RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS;
         const float DISTANCE_FROM_BODY_TO_HIP_JOINT = RobotKinematicModel::Leg::HIP_OFFSET_Z;
         const float HIP_OFFSET_X = RobotKinematicModel::Leg::HIP_OFFSET_X;
         const float UPPER_LEG_LENGTH = RobotKinematicModel::Leg::UPPER_LEG_LENGTH;
         const float LOWER_LEG_LENGTH = RobotKinematicModel::Leg::LOWER_LEG_LENGTH;
 
-		std::vector<std::pair<messages::input::ServoID, float> > positions;
+        std::vector<std::pair<messages::input::ServoID, float> > positions;
 
         float hipYaw = 0;
         float hipRoll = 0;
@@ -185,7 +185,7 @@ namespace kinematics {
     }
 
     template <typename RobotKinematicModel>
-	std::vector<double> calculateLegJointsTeamDarwin(arma::mat44 target, bool isLeft) {
+    std::vector<double> calculateLegJointsTeamDarwin(arma::mat44 target, bool isLeft) {
         std::vector<double> joints(6);
         //NUClear::log<NUClear::DEBUG>(isLeft ? "Left Leg" : "Right Leg");
         //NUClear::log<NUClear::DEBUG>("calculateLegJointsTeamDarwin\n", target);

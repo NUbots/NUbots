@@ -141,7 +141,7 @@ Transform operator* (const Transform &t1, const Transform &t2) {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 4; j++) {
       t(i,j) = t1(i,0)*t2(0,j) + t1(i,1)*t2(1,j) +
-	t1(i,2)*t2(2,j) + t1(i,3)*t2(3,j);
+    t1(i,2)*t2(2,j) + t1(i,3)*t2(3,j);
     }
   }
   return t;

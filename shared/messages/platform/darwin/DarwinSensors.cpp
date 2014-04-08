@@ -81,12 +81,12 @@ namespace messages {
             }
 
             const DarwinSensors::Servo& DarwinSensors::Servos::operator[](int index) const {
-				return (*this)[static_cast<input::ServoID>(index)];
-			}
+                return (*this)[static_cast<input::ServoID>(index)];
+            }
 
             DarwinSensors::Servo& DarwinSensors::Servos::operator[](int index) {
-				return (*this)[static_cast<input::ServoID>(index)];
-			}
+                return (*this)[static_cast<input::ServoID>(index)];
+            }
 
         }  // darwin
     }  // platform

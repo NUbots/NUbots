@@ -36,27 +36,27 @@ namespace modules {
             m_screenToRadialFactor << 0 << 0;
         }
 
-		void VisionKinematics::setParameters(float RADIAL_CORRECTION_COEFFICIENT_,
-												const arma::vec2& BODY_ANGLE_OFFSET_,
-												const arma::vec3& CAMERA_ANGLE_OFFSET_,
-												const arma::vec3& NECK_POSITION_OFFSET_,
-												const arma::vec3& BODY_POSITION_OFFSET_,
-												const arma::vec3& CAMERA_POSITION_OFFSET_,
+        void VisionKinematics::setParameters(float RADIAL_CORRECTION_COEFFICIENT_,
+                                                const arma::vec2& BODY_ANGLE_OFFSET_,
+                                                const arma::vec3& CAMERA_ANGLE_OFFSET_,
+                                                const arma::vec3& NECK_POSITION_OFFSET_,
+                                                const arma::vec3& BODY_POSITION_OFFSET_,
+                                                const arma::vec3& CAMERA_POSITION_OFFSET_,
                                                 float SCREEN_LOCATION_UNCERTAINTY_PIXELS_) {
-			RADIAL_CORRECTION_COEFFICIENT = RADIAL_CORRECTION_COEFFICIENT_;
+            RADIAL_CORRECTION_COEFFICIENT = RADIAL_CORRECTION_COEFFICIENT_;
 
-			BODY_ANGLE_OFFSET = BODY_ANGLE_OFFSET_;
-			CAMERA_ANGLE_OFFSET = CAMERA_ANGLE_OFFSET_;
+            BODY_ANGLE_OFFSET = BODY_ANGLE_OFFSET_;
+            CAMERA_ANGLE_OFFSET = CAMERA_ANGLE_OFFSET_;
 
-			NECK_POSITION_OFFSET = NECK_POSITION_OFFSET_;
+            NECK_POSITION_OFFSET = NECK_POSITION_OFFSET_;
 
-			BODY_POSITION_OFFSET = BODY_POSITION_OFFSET_;
-			CAMERA_POSITION_OFFSET = CAMERA_POSITION_OFFSET_;
+            BODY_POSITION_OFFSET = BODY_POSITION_OFFSET_;
+            CAMERA_POSITION_OFFSET = CAMERA_POSITION_OFFSET_;
 
             SCREEN_LOCATION_UNCERTAINTY_PIXELS = SCREEN_LOCATION_UNCERTAINTY_PIXELS_;
 
-			preCalculateTransforms();
-		}
+            preCalculateTransforms();
+        }
 
         /**
           * Applies radial distortion correction to the given pixel location.

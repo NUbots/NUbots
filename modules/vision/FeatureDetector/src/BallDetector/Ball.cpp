@@ -50,7 +50,7 @@ namespace modules {
             m_sizeOnScreen << m_diameter << m_diameter;
         }
 
-		void Ball::setParameters(bool THROWOUT_ON_ABOVE_KIN_HOR_BALL_,
+        void Ball::setParameters(bool THROWOUT_ON_ABOVE_KIN_HOR_BALL_,
                                 float MAX_DISTANCE_METHOD_DISCREPENCY_BALL_,
                                 bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_,
                                 bool THROWOUT_SMALL_BALLS_,
@@ -60,21 +60,21 @@ namespace modules {
                                 float BALL_WIDTH_,
                                 const DISTANCE_METHOD& BALL_DISTANCE_METHOD_,
                                 const VisionKinematics& visionKinematics) {
-			THROWOUT_ON_ABOVE_KIN_HOR_BALL = THROWOUT_ON_ABOVE_KIN_HOR_BALL_;
-			MAX_DISTANCE_METHOD_DISCREPENCY_BALL = MAX_DISTANCE_METHOD_DISCREPENCY_BALL_;
-			THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL = THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_;
-			THROWOUT_SMALL_BALLS = THROWOUT_SMALL_BALLS_;
-			MIN_BALL_DIAMETER_PIXELS = MIN_BALL_DIAMETER_PIXELS_;
-			THROWOUT_DISTANT_BALLS = THROWOUT_DISTANT_BALLS_;
-			MAX_BALL_DISTANCE = MAX_BALL_DISTANCE_;
-			BALL_WIDTH = BALL_WIDTH_;
-			BALL_DISTANCE_METHOD = BALL_DISTANCE_METHOD_;
+            THROWOUT_ON_ABOVE_KIN_HOR_BALL = THROWOUT_ON_ABOVE_KIN_HOR_BALL_;
+            MAX_DISTANCE_METHOD_DISCREPENCY_BALL = MAX_DISTANCE_METHOD_DISCREPENCY_BALL_;
+            THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL = THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_;
+            THROWOUT_SMALL_BALLS = THROWOUT_SMALL_BALLS_;
+            MIN_BALL_DIAMETER_PIXELS = MIN_BALL_DIAMETER_PIXELS_;
+            THROWOUT_DISTANT_BALLS = THROWOUT_DISTANT_BALLS_;
+            MAX_BALL_DISTANCE = MAX_BALL_DISTANCE_;
+            BALL_WIDTH = BALL_WIDTH_;
+            BALL_DISTANCE_METHOD = BALL_DISTANCE_METHOD_;
 
             // Internal variables contain valid values at this point.
             // All necessary constants have been set.
             // It is now safe to determine the validity of this Ball object.
             valid = (calculatePositions(visionKinematics) && check());
-		}
+        }
 
         float Ball::getRadius() const {
             return (m_diameter * 0.5);
@@ -84,7 +84,7 @@ namespace modules {
             // Various throwouts here.
 
             // Throwout for below horizon.
-			// TODO: Add kinematics horizon.
+            // TODO: Add kinematics horizon.
             if (THROWOUT_ON_ABOVE_KIN_HOR_BALL && true /* !(VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location.screenCartesian[0], m_location.screenCartesian[1]))*/ ) {
                 std::cout << "Ball::check() - Ball above horizon: should not occur" << std::endl;
 

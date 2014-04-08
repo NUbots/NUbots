@@ -38,12 +38,12 @@ namespace modules {
         public:
             VisionKinematics();
 
-			void setParameters(float RADIAL_CORRECTION_COEFFICIENT_,
-								const arma::vec2& BODY_ANGLE_OFFSET_,
-								const arma::vec3& CAMERA_ANGLE_OFFSET_,
-								const arma::vec3& NECK_POSITION_OFFSET_,
-								const arma::vec3& BODY_POITION_OFFSET_,
-								const arma::vec3& CAMERA_POSITION_OFFSET_,
+            void setParameters(float RADIAL_CORRECTION_COEFFICIENT_,
+                                const arma::vec2& BODY_ANGLE_OFFSET_,
+                                const arma::vec3& CAMERA_ANGLE_OFFSET_,
+                                const arma::vec3& NECK_POSITION_OFFSET_,
+                                const arma::vec3& BODY_POITION_OFFSET_,
+                                const arma::vec3& CAMERA_POSITION_OFFSET_,
                                 float SCREEN_LOCATION_UNCERTAINTY_PIXELS_
                                 );
 
@@ -120,13 +120,13 @@ namespace modules {
             double m_bodyPitch;
             arma::vec3 m_neckPosition;
 
-			float RADIAL_CORRECTION_COEFFICIENT;
+            float RADIAL_CORRECTION_COEFFICIENT;
 
-			arma::vec2 BODY_ANGLE_OFFSET;
-			arma::vec3 CAMERA_ANGLE_OFFSET;
-			arma::vec3 NECK_POSITION_OFFSET;
-			arma::vec3 BODY_POSITION_OFFSET;
-			arma::vec3 CAMERA_POSITION_OFFSET;
+            arma::vec2 BODY_ANGLE_OFFSET;
+            arma::vec3 CAMERA_ANGLE_OFFSET;
+            arma::vec3 NECK_POSITION_OFFSET;
+            arma::vec3 BODY_POSITION_OFFSET;
+            arma::vec3 CAMERA_POSITION_OFFSET;
 
             float SCREEN_LOCATION_UNCERTAINTY_PIXELS;
         };

@@ -46,16 +46,16 @@ namespace modules {
             using utility::motion::kinematics::calculateHeadJoints;
 
             KinematicsDebug::KinematicsDebug(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-        			on< Trigger<Configuration<InverseKinematicsRequest>> >([this](const Configuration<InverseKinematicsRequest>& request) {
-        		        return;
-        				arma::mat44 target = yRotationMatrix(request.config["yAngle"], 4);
-        				target *= xRotationMatrix(request.config["xAngle"], 4);
-        				target *= zRotationMatrix(request.config["zAngle"], 4);
+                    on< Trigger<Configuration<InverseKinematicsRequest>> >([this](const Configuration<InverseKinematicsRequest>& request) {
+                        return;
+                        arma::mat44 target = yRotationMatrix(request.config["yAngle"], 4);
+                        target *= xRotationMatrix(request.config["xAngle"], 4);
+                        target *= zRotationMatrix(request.config["zAngle"], 4);
 
-        				// translation
-        				target(0,3) = request.config["x"]; // down/up
-        				target(1,3) = request.config["y"]; // left/right
-        				target(2,3) = request.config["z"]; // front/back
+                        // translation
+                        target(0,3) = request.config["x"]; // down/up
+                        target(1,3) = request.config["y"]; // left/right
+                        target(2,3) = request.config["z"]; // front/back
 
                         bool left = request.config["left"];
                         bool right = request.config["right"];
@@ -101,7 +101,7 @@ namespace modules {
                         }
 
                         emit(std::move(waypoints));
-        			});
+                    });
 
                     on< Trigger<Configuration<ForwardKinematicsRequest>> >([this](const Configuration<ForwardKinematicsRequest>& request) {
 

@@ -41,30 +41,30 @@ namespace modules {
         void BallDetector::setParameters(int BALL_EDGE_THRESHOLD_,
                                         int BALL_ORANGE_TOLERANCE_,
                                         float BALL_MIN_PERCENT_ORANGE_,
-		                                bool THROWOUT_ON_ABOVE_KIN_HOR_BALL_,
-									    float MAX_DISTANCE_METHOD_DISCREPENCY_BALL_,
-									    bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_,
-									    bool THROWOUT_SMALL_BALLS_,
-									    float MIN_BALL_DIAMETER_PIXELS_,
-									    bool THROWOUT_DISTANT_BALLS_,
-									    float MAX_BALL_DISTANCE_,
-									    float BALL_WIDTH_,
-									    const DISTANCE_METHOD& BALL_DISTANCE_METHOD_
-									    ) {
+                                        bool THROWOUT_ON_ABOVE_KIN_HOR_BALL_,
+                                        float MAX_DISTANCE_METHOD_DISCREPENCY_BALL_,
+                                        bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_,
+                                        bool THROWOUT_SMALL_BALLS_,
+                                        float MIN_BALL_DIAMETER_PIXELS_,
+                                        bool THROWOUT_DISTANT_BALLS_,
+                                        float MAX_BALL_DISTANCE_,
+                                        float BALL_WIDTH_,
+                                        const DISTANCE_METHOD& BALL_DISTANCE_METHOD_
+                                        ) {
             BALL_MIN_PERCENT_ORANGE = BALL_MIN_PERCENT_ORANGE_;
             BALL_ORANGE_TOLERANCE = BALL_ORANGE_TOLERANCE_;
             BALL_EDGE_THRESHOLD = BALL_EDGE_THRESHOLD_;
 
             // Parameters for constructing a Ball object.
-			THROWOUT_ON_ABOVE_KIN_HOR_BALL = THROWOUT_ON_ABOVE_KIN_HOR_BALL_;
-			MAX_DISTANCE_METHOD_DISCREPENCY_BALL = MAX_DISTANCE_METHOD_DISCREPENCY_BALL_;
-			THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL = THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_;
-			THROWOUT_SMALL_BALLS = THROWOUT_SMALL_BALLS_;
-			MIN_BALL_DIAMETER_PIXELS = MIN_BALL_DIAMETER_PIXELS_;
-			THROWOUT_DISTANT_BALLS = THROWOUT_DISTANT_BALLS_;
-			MAX_BALL_DISTANCE = MAX_BALL_DISTANCE_;
-			BALL_WIDTH = BALL_WIDTH_;
-			BALL_DISTANCE_METHOD = BALL_DISTANCE_METHOD_;
+            THROWOUT_ON_ABOVE_KIN_HOR_BALL = THROWOUT_ON_ABOVE_KIN_HOR_BALL_;
+            MAX_DISTANCE_METHOD_DISCREPENCY_BALL = MAX_DISTANCE_METHOD_DISCREPENCY_BALL_;
+            THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL = THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_;
+            THROWOUT_SMALL_BALLS = THROWOUT_SMALL_BALLS_;
+            MIN_BALL_DIAMETER_PIXELS = MIN_BALL_DIAMETER_PIXELS_;
+            THROWOUT_DISTANT_BALLS = THROWOUT_DISTANT_BALLS_;
+            MAX_BALL_DISTANCE = MAX_BALL_DISTANCE_;
+            BALL_WIDTH = BALL_WIDTH_;
+            BALL_DISTANCE_METHOD = BALL_DISTANCE_METHOD_;
 
         }
 

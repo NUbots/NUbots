@@ -41,9 +41,9 @@ Transform darwinop_kinematics_forward_rleg(const double *q);
 
 std::vector<double>
 darwinop_kinematics_inverse_leg(
-			   const Transform trLeg,
-			   const int leg,
-			   double unused=0);
+               const Transform trLeg,
+               const int leg,
+               double unused=0);
 
 std::vector<double>
 darwinop_kinematics_inverse_lleg(const Transform trLeg, double unused=0);
@@ -53,25 +53,25 @@ darwinop_kinematics_inverse_rleg(const Transform trLeg, double unused=0);
 
 std::vector<double>
 darwinop_kinematics_inverse_legs(
-			    const double *pLLeg,
-			    const double *pRLeg,
-			    const double *pTorso,
-			    int legSupport=0);
+                const double *pLLeg,
+                const double *pRLeg,
+                const double *pTorso,
+                int legSupport=0);
 
 std::vector<double>
 darwinop_kinematics_inverse_legs_nubots(
-			    const double *pLLeg,
-			    const double *pRLeg,
-			    const double *pTorso,
-			    int legSupport=0);
+                const double *pLLeg,
+                const double *pRLeg,
+                const double *pTorso,
+                int legSupport=0);
 
 
 std::vector<double> darwinop_kinematics_inverse_larm(
-			    const double *dArm
-			    );
+                const double *dArm
+                );
 
 std::vector<double> darwinop_kinematics_inverse_rarm(
-			    const double *dArm
-			    );
+                const double *dArm
+                );
 
 #endif

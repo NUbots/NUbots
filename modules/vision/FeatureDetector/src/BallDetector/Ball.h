@@ -39,7 +39,7 @@ namespace modules {
             Ball();
             Ball(const arma::vec2& centre, double max_box_size);
 
-			      void setParameters(bool THROWOUT_ON_ABOVE_KIN_HOR_BALL_,
+                  void setParameters(bool THROWOUT_ON_ABOVE_KIN_HOR_BALL_,
                                 float MAX_DISTANCE_METHOD_DISCREPENCY_BALL_,
                                 bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_,
                                 bool THROWOUT_SMALL_BALLS_,
@@ -83,15 +83,15 @@ namespace modules {
         private:
             int m_diameter;     //! @variable the radius of the ball in pixels
 
-      			bool THROWOUT_ON_ABOVE_KIN_HOR_BALL;
-      			float MAX_DISTANCE_METHOD_DISCREPENCY_BALL;
-      			bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL;
-      			bool THROWOUT_SMALL_BALLS;
-      			float MIN_BALL_DIAMETER_PIXELS;
-      			bool THROWOUT_DISTANT_BALLS;
-      			float MAX_BALL_DISTANCE;
-      			float BALL_WIDTH;
-      			DISTANCE_METHOD BALL_DISTANCE_METHOD;
+                bool THROWOUT_ON_ABOVE_KIN_HOR_BALL;
+                float MAX_DISTANCE_METHOD_DISCREPENCY_BALL;
+                bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL;
+                bool THROWOUT_SMALL_BALLS;
+                float MIN_BALL_DIAMETER_PIXELS;
+                bool THROWOUT_DISTANT_BALLS;
+                float MAX_BALL_DISTANCE;
+                float BALL_WIDTH;
+                DISTANCE_METHOD BALL_DISTANCE_METHOD;
 
             //private:
             //    float d2p;          //! @variable the distance of the ball in cm as found by the distance to point method

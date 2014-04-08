@@ -23,14 +23,14 @@
 #include "messages/vision/LookUpTable.h"
 
 namespace messages {
-	namespace vision {
+    namespace vision {
 
         struct SaveLookUpTable {
             LookUpTable lut;
         };
 
 
-	}
+    }
 }
 
 #endif // MESSAGES_VISION_SAVELOOKUPTABLE_H

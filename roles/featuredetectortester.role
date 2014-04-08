@@ -2,8 +2,8 @@ ADD_ROLE(
     NAME featuredetectortester
     MODULES
         support::SignalCatcher
-    	support::configuration::ConfigSystem
-    	input::LinuxCamera
+        support::configuration::ConfigSystem
+        input::LinuxCamera
         vision::LUTClassifier
         vision::FeatureDetector
         support::NUbugger

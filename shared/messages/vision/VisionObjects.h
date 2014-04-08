@@ -26,84 +26,84 @@
 #include "messages/vision/ClassifiedImage.h"
 
 namespace messages {
-	namespace vision {
+    namespace vision {
 
-		class VisionObject {
+        class VisionObject {
         public:
             VisionObject() {}
 
-			arma::vec3 sphericalFromNeck;	//neckRelativeRadial
-			arma::vec3 sphericalError;
-			arma::vec2 screenAngular;	//Polar around view vector on image
-			arma::vec2 screenCartesian;
-			arma::vec2 sizeOnScreen;
-			NUClear::clock::time_point timestamp;
-		};
+            arma::vec3 sphericalFromNeck;   //neckRelativeRadial
+            arma::vec3 sphericalError;
+            arma::vec2 screenAngular;   //Polar around view vector on image
+            arma::vec2 screenCartesian;
+            arma::vec2 sizeOnScreen;
+            NUClear::clock::time_point timestamp;
+        };
 
-		class Ball : public VisionObject {
+        class Ball : public VisionObject {
         public:
-			Ball() : VisionObject() {}
-			float diameter;
-		};
+            Ball() : VisionObject() {}
+            float diameter;
+        };
 
-		class Goal : public VisionObject {
+        class Goal : public VisionObject {
         public:
-			Goal() : VisionObject() {}
-			enum Type{
-				LEFT,
-				RIGHT,
-				UNKNOWN
-			} type;
+            Goal() : VisionObject() {}
+            enum Type{
+                LEFT,
+                RIGHT,
+                UNKNOWN
+            } type;
 
-			//Order convention: tr, br, bl, tl,
-			std::vector<arma::vec2> screen_quad;
-		};
+            //Order convention: tr, br, bl, tl,
+            std::vector<arma::vec2> screen_quad;
+        };
 
-		class Obstacle : public VisionObject {
+        class Obstacle : public VisionObject {
         public:
-			Obstacle() : VisionObject() {}
-			float arcWidth;
-			// enum ColourType{
-			// 	TEAM_CYAN,
-			// 	TEAM_MAGENTA,
-			// 	UNKNOWN
-			// }
-			COLOUR_CLASS colour;
-		};
+            Obstacle() : VisionObject() {}
+            float arcWidth;
+            // enum ColourType{
+            //  TEAM_CYAN,
+            //  TEAM_MAGENTA,
+            //  UNKNOWN
+            // }
+            COLOUR_CLASS colour;
+        };
 
-		//Line objects:
+        //Line objects:
 
-		class FieldLine : public VisionObject {
+        class FieldLine : public VisionObject {
         public:
-			FieldLine() : VisionObject() {}
-		};
+            FieldLine() : VisionObject() {}
+        };
 
-		class CornerPoint : public VisionObject {
+        class CornerPoint : public VisionObject {
         public:
-			CornerPoint() : VisionObject() {}
+            CornerPoint() : VisionObject() {}
 
-			enum Type {
-				L_CORNER,
-				T_CORNER,
-				X_CORNER,
+            enum Type {
+                L_CORNER,
+                T_CORNER,
+                X_CORNER,
                 INVALID
-			} type;
-		};
+            } type;
+        };
 
-		class CentreCircle : public VisionObject {
+        class CentreCircle : public VisionObject {
         public:
-			CentreCircle() : VisionObject() {}
-		};
+            CentreCircle() : VisionObject() {}
+        };
 
-		class LineObjects{
+        class LineObjects{
         public:
-			LineObjects() {}
-			std::vector<CentreCircle> centre_circles;
-			std::vector<CornerPoint> corner_points;
-			std::vector<FieldLine> field_lines;
-		};
+            LineObjects() {}
+            std::vector<CentreCircle> centre_circles;
+            std::vector<CornerPoint> corner_points;
+            std::vector<FieldLine> field_lines;
+        };
 
-	}
+    }
 }
 
 #endif // MESSAGES_VISION_VISIONOBJECTS_H

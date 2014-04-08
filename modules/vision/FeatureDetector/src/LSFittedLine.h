@@ -26,44 +26,44 @@
 #include "utility/math/Line.h"
 
 namespace modules {
-	namespace vision {
+    namespace vision {
 
-		class LSFittedLine : public utility::math::Line {
-		public:
-			LSFittedLine();
-			LSFittedLine(const std::vector<arma::vec2>& pointlist);
-			virtual ~LSFittedLine();
+        class LSFittedLine : public utility::math::Line {
+        public:
+            LSFittedLine();
+            LSFittedLine(const std::vector<arma::vec2>& pointlist);
+            virtual ~LSFittedLine();
 
-			void addPoint(const arma::vec2& point);
-			void addPoints(const std::vector<arma::vec2>& pointlist);
-			void clearPoints();
-			size_t getNumPoints() const;
-			const std::vector<arma::vec2>& getPoints() const;
-			bool getEndPoints(arma::vec2& p1, arma::vec2& p2) const;
-			bool getOriginalEndPoints(arma::vec2& p1, arma::vec2& p2) const;
+            void addPoint(const arma::vec2& point);
+            void addPoints(const std::vector<arma::vec2>& pointlist);
+            void clearPoints();
+            size_t getNumPoints() const;
+            const std::vector<arma::vec2>& getPoints() const;
+            bool getEndPoints(arma::vec2& p1, arma::vec2& p2) const;
+            bool getOriginalEndPoints(arma::vec2& p1, arma::vec2& p2) const;
 
-			void joinLine(const LSFittedLine& sourceLine);
+            void joinLine(const LSFittedLine& sourceLine);
 
-			arma::vec2 combinedR2TLSandMSD(const LSFittedLine& sourceLine) const;
+            arma::vec2 combinedR2TLSandMSD(const LSFittedLine& sourceLine) const;
 
-			double getMSD() const;
-			double getr2tls() const;
+            double getMSD() const;
+            double getr2tls() const;
 
-			double averageDistanceBetween(const LSFittedLine& other) const;
+            double averageDistanceBetween(const LSFittedLine& other) const;
 
-			bool isValid() const;
+            bool isValid() const;
 
-		private:
-			void calcLine();
+        private:
+            void calcLine();
 
-			double sumX, sumY, sumX2, sumY2, sumXY;
-			double MSD, r2tls;
-			std::vector<arma::vec2> points;
+            double sumX, sumY, sumX2, sumY2, sumXY;
+            double MSD, r2tls;
+            std::vector<arma::vec2> points;
 
-			bool valid;
-		};
+            bool valid;
+        };
 
-	}
+    }
 }
 
 #endif // MODULES_VISION_LSFITTEDLINE_H

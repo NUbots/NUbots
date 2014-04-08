@@ -23,28 +23,28 @@
 #include <nuclear>
 
 namespace modules {
-	namespace debug {
+    namespace debug {
 
-			struct InverseKinematicsRequest{
-		        static constexpr const char* CONFIGURATION_PATH = "InverseKinematicsRequest.json";
-			};
-			struct ForwardKinematicsRequest{
-		        static constexpr const char* CONFIGURATION_PATH = "ForwardKinematicsRequest.json";
-			};
-			struct LegKinematicsNULLTest{
-		        static constexpr const char* CONFIGURATION_PATH = "LegKinematicsNULLTest.json";
-			};
-			struct HeadKinematicsNULLTest{
-		        static constexpr const char* CONFIGURATION_PATH = "HeadKinematicsNULLTest.json";
-			};
+            struct InverseKinematicsRequest{
+                static constexpr const char* CONFIGURATION_PATH = "InverseKinematicsRequest.json";
+            };
+            struct ForwardKinematicsRequest{
+                static constexpr const char* CONFIGURATION_PATH = "ForwardKinematicsRequest.json";
+            };
+            struct LegKinematicsNULLTest{
+                static constexpr const char* CONFIGURATION_PATH = "LegKinematicsNULLTest.json";
+            };
+            struct HeadKinematicsNULLTest{
+                static constexpr const char* CONFIGURATION_PATH = "HeadKinematicsNULLTest.json";
+            };
 
 
-		    class KinematicsDebug : public NUClear::Reactor {
-		    public:
-		        explicit KinematicsDebug(std::unique_ptr<NUClear::Environment> environment);
-		    };
+            class KinematicsDebug : public NUClear::Reactor {
+            public:
+                explicit KinematicsDebug(std::unique_ptr<NUClear::Environment> environment);
+            };
 
-	}  // debug
+    }  // debug
 }  // modules
 
 #endif  // MODULES_DEBUG_KINEMATICSDEBUG_H

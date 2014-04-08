@@ -74,18 +74,18 @@ namespace modules {
             float BALL_MIN_PERCENT_ORANGE;
 
             // Constants for construction of a Ball object.
-			bool THROWOUT_ON_ABOVE_KIN_HOR_BALL;
-			float MAX_DISTANCE_METHOD_DISCREPENCY_BALL;
-			bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL;
-			bool THROWOUT_SMALL_BALLS;
-			float MIN_BALL_DIAMETER_PIXELS;
-			bool THROWOUT_DISTANT_BALLS;
-			float MAX_BALL_DISTANCE;
-			float BALL_WIDTH;
-			DISTANCE_METHOD BALL_DISTANCE_METHOD;
+            bool THROWOUT_ON_ABOVE_KIN_HOR_BALL;
+            float MAX_DISTANCE_METHOD_DISCREPENCY_BALL;
+            bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL;
+            bool THROWOUT_SMALL_BALLS;
+            float MIN_BALL_DIAMETER_PIXELS;
+            bool THROWOUT_DISTANT_BALLS;
+            float MAX_BALL_DISTANCE;
+            float BALL_WIDTH;
+            DISTANCE_METHOD BALL_DISTANCE_METHOD;
 
 
-			std::unique_ptr< std::vector<messages::vision::Ball> > createBallMessage(const std::vector<Ball>& balls);
+            std::unique_ptr< std::vector<messages::vision::Ball> > createBallMessage(const std::vector<Ball>& balls);
         };
 
     }

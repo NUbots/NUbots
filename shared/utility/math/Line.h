@@ -262,30 +262,30 @@ namespace utility {
         };
 
             /*Added by Shannon*/
-	    // Overloaded functions
-	    /*!
-	      @brief Equality operator
-	      @return True of the two lines are equal. False if they are not.
-	      */
-	    bool operator == (const Line& line1, const Line& line2);
+        // Overloaded functions
+        /*!
+          @brief Equality operator
+          @return True of the two lines are equal. False if they are not.
+          */
+        bool operator == (const Line& line1, const Line& line2);
 
-	    /*!
-	      @brief Unequality operator
-	      @return False of the two lines are equal. True if they are not.
-	      */
-	    bool operator != (const Line& line1, const Line& line2);
+        /*!
+          @brief Unequality operator
+          @return False of the two lines are equal. True if they are not.
+          */
+        bool operator != (const Line& line1, const Line& line2);
 
-	    /*!
-	      @brief Greater than operator
-	      @return True if line1 grad > line2 grad, if == then true if
-		    line1 y-int > line2 y-int. False otherwise.
-	      */
-	    bool operator > (const Line& line1, const Line& line2);
+        /*!
+          @brief Greater than operator
+          @return True if line1 grad > line2 grad, if == then true if
+            line1 y-int > line2 y-int. False otherwise.
+          */
+        bool operator > (const Line& line1, const Line& line2);
 
-	    /*!
-	      @brief Output stream operator
-	      */
-	    std::ostream& operator<< (std::ostream& output, const Line& l);
+        /*!
+          @brief Output stream operator
+          */
+        std::ostream& operator<< (std::ostream& output, const Line& l);
 
     }
 }

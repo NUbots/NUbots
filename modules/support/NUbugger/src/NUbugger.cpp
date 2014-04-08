@@ -35,28 +35,28 @@
 #include "utility/image/ColorModelConversions.h"
 
 namespace modules {
-	namespace support {
+    namespace support {
 
-		using messages::input::Sensors;
-		using messages::input::Image;
-		using messages::vision::ClassifiedImage;
-		using messages::vision::LookUpTable;
-		using NUClear::DEBUG;
-		using utility::nubugger::graph;
-		using std::chrono::duration_cast;
-		using std::chrono::microseconds;
-		using messages::support::nubugger::proto::Message;
-		using messages::support::nubugger::proto::Message_Type;
-		using messages::vision::Goal;
-		using messages::vision::SaveLookUpTable;
+        using messages::input::Sensors;
+        using messages::input::Image;
+        using messages::vision::ClassifiedImage;
+        using messages::vision::LookUpTable;
+        using NUClear::DEBUG;
+        using utility::nubugger::graph;
+        using std::chrono::duration_cast;
+        using std::chrono::microseconds;
+        using messages::support::nubugger::proto::Message;
+        using messages::support::nubugger::proto::Message_Type;
+        using messages::vision::Goal;
+        using messages::vision::SaveLookUpTable;
 
-		NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
-			: Reactor(std::move(environment))
-			, pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB)
-			, sub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_SUB) {
-			// Set our high water mark
-			int hwm = 50;
-			pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
+        NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment))
+            , pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB)
+            , sub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_SUB) {
+            // Set our high water mark
+            int hwm = 50;
+            pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
             sub.setsockopt(ZMQ_SUBSCRIBE, 0, 0);
 
             // Bind to port 12000
@@ -89,77 +89,77 @@ namespace modules {
 
                 auto* sensorData = message.mutable_sensor_data();
 
-				sensorData->set_timestamp(sensors.timestamp.time_since_epoch().count());
+                sensorData->set_timestamp(sensors.timestamp.time_since_epoch().count());
 
                 // Add each of the servos into the protocol buffer
-				for(const auto& s : sensors.servos) {
+                for(const auto& s : sensors.servos) {
 
-					auto* servo = sensorData->add_servo();
+                    auto* servo = sensorData->add_servo();
 
-					servo->set_error_flags(s.errorFlags);
+                    servo->set_error_flags(s.errorFlags);
 
-					servo->set_id(static_cast<messages::input::proto::Sensors_ServoID>(s.id));
+                    servo->set_id(static_cast<messages::input::proto::Sensors_ServoID>(s.id));
 
-					servo->set_enabled(s.enabled);
+                    servo->set_enabled(s.enabled);
 
-					servo->set_p_gain(s.pGain);
-					servo->set_i_gain(s.iGain);
-					servo->set_d_gain(s.dGain);
+                    servo->set_p_gain(s.pGain);
+                    servo->set_i_gain(s.iGain);
+                    servo->set_d_gain(s.dGain);
 
-					servo->set_goal_position(s.goalPosition);
-					servo->set_goal_speed(s.goalSpeed);
-					servo->set_torque_limit(s.torqueLimit);
+                    servo->set_goal_position(s.goalPosition);
+                    servo->set_goal_speed(s.goalSpeed);
+                    servo->set_torque_limit(s.torqueLimit);
 
-					servo->set_present_position(s.presentPosition);
-					servo->set_present_speed(s.presentSpeed);
+                    servo->set_present_position(s.presentPosition);
+                    servo->set_present_speed(s.presentSpeed);
 
-					servo->set_load(s.load);
-					servo->set_voltage(s.voltage);
-					servo->set_temperature(s.temperature);
-				}
+                    servo->set_load(s.load);
+                    servo->set_voltage(s.voltage);
+                    servo->set_temperature(s.temperature);
+                }
 
                 // The gyroscope values (x,y,z)
-				auto* gyro = sensorData->mutable_gyroscope();
-				gyro->set_x(sensors.gyroscope[0]);
-				gyro->set_y(sensors.gyroscope[1]);
-				gyro->set_z(sensors.gyroscope[2]);
+                auto* gyro = sensorData->mutable_gyroscope();
+                gyro->set_x(sensors.gyroscope[0]);
+                gyro->set_y(sensors.gyroscope[1]);
+                gyro->set_z(sensors.gyroscope[2]);
 
                 // The accelerometer values (x,y,z)
-				auto* accel = sensorData->mutable_accelerometer();
-				accel->set_x(sensors.accelerometer[0]);
-				accel->set_y(sensors.accelerometer[1]);
-				accel->set_z(sensors.accelerometer[2]);
+                auto* accel = sensorData->mutable_accelerometer();
+                accel->set_x(sensors.accelerometer[0]);
+                accel->set_y(sensors.accelerometer[1]);
+                accel->set_z(sensors.accelerometer[2]);
 
                 // The orientation matrix
-				auto* orient = sensorData->mutable_orientation();
-				orient->set_xx(sensors.orientation(0,0));
-				orient->set_yx(sensors.orientation(1,0));
-				orient->set_zx(sensors.orientation(2,0));
-				orient->set_xy(sensors.orientation(0,1));
-				orient->set_yy(sensors.orientation(1,1));
-				orient->set_zy(sensors.orientation(2,1));
-				orient->set_xz(sensors.orientation(0,2));
-				orient->set_yz(sensors.orientation(1,2));
-				orient->set_zz(sensors.orientation(2,2));
+                auto* orient = sensorData->mutable_orientation();
+                orient->set_xx(sensors.orientation(0,0));
+                orient->set_yx(sensors.orientation(1,0));
+                orient->set_zx(sensors.orientation(2,0));
+                orient->set_xy(sensors.orientation(0,1));
+                orient->set_yy(sensors.orientation(1,1));
+                orient->set_zy(sensors.orientation(2,1));
+                orient->set_xz(sensors.orientation(0,2));
+                orient->set_yz(sensors.orientation(1,2));
+                orient->set_zz(sensors.orientation(2,2));
 
                 // The left FSR values
-				auto* lfsr = sensorData->mutable_left_fsr();
-				lfsr->set_x(sensors.leftFSR[0]);
-				lfsr->set_y(sensors.leftFSR[1]);
-				lfsr->set_z(sensors.leftFSR[2]);
+                auto* lfsr = sensorData->mutable_left_fsr();
+                lfsr->set_x(sensors.leftFSR[0]);
+                lfsr->set_y(sensors.leftFSR[1]);
+                lfsr->set_z(sensors.leftFSR[2]);
 
                 // The right FSR values
-				auto* rfsr = sensorData->mutable_right_fsr();
-				rfsr->set_x(sensors.rightFSR[0]);
-				rfsr->set_y(sensors.rightFSR[1]);
-				rfsr->set_z(sensors.rightFSR[2]);
+                auto* rfsr = sensorData->mutable_right_fsr();
+                rfsr->set_x(sensors.rightFSR[0]);
+                rfsr->set_y(sensors.rightFSR[1]);
+                rfsr->set_z(sensors.rightFSR[2]);
 
                 send(message);
             });
 
-			on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
+            on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
 
-				if(!image.source().empty()) {
+                if(!image.source().empty()) {
 
                     Message message;
                     message.set_type(Message::VISION);
@@ -169,17 +169,17 @@ namespace modules {
                     auto* imageData = visionData->mutable_image();
                     std::string* imageBytes = imageData->mutable_data();
 
-					// Reserve enough space in the image data to store the output
-					imageBytes->resize(image.source().size());
-					imageData->set_width(image.width());
-					imageData->set_height(image.height());
+                    // Reserve enough space in the image data to store the output
+                    imageBytes->resize(image.source().size());
+                    imageData->set_width(image.width());
+                    imageData->set_height(image.height());
 
-					imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
+                    imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
 
 
                     send(message);
                 }
-			});
+            });
 
             /*on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
                 Message message;
@@ -204,7 +204,7 @@ namespace modules {
                 send(message);
             });*/
 
-			on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
+            on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
 
                 Message message;
                 message.set_type(Message::VISION);
@@ -213,7 +213,7 @@ namespace modules {
 
                 Message::VisionClassifiedImage* api_classified_image = api_vision->mutable_classified_image();
 
-				for (auto& rowColourSegments : image.horizontalFilteredSegments.m_segmentedScans) {
+                for (auto& rowColourSegments : image.horizontalFilteredSegments.m_segmentedScans) {
                     for (auto& colorSegment : rowColourSegments) {
                         auto& start = colorSegment.m_start;
                         auto& end = colorSegment.m_end;
@@ -228,7 +228,7 @@ namespace modules {
                     }
                 }
 
-				for (auto& columnColourSegments : image.verticalFilteredSegments.m_segmentedScans)
+                for (auto& columnColourSegments : image.verticalFilteredSegments.m_segmentedScans)
                 {
                     for (auto& colorSegment : columnColourSegments)
                     {
@@ -245,13 +245,13 @@ namespace modules {
                     }
                 }
 
-				for (auto& matchedSegment : image.matchedVerticalSegments)
+                for (auto& matchedSegment : image.matchedVerticalSegments)
                 {
-					for (auto& columnColourSegment : matchedSegment.second)
+                    for (auto& columnColourSegment : matchedSegment.second)
                     {
-						auto& start = columnColourSegment.m_start;
-						auto& end = columnColourSegment.m_end;
-						auto& colour = columnColourSegment.m_colour;
+                        auto& start = columnColourSegment.m_start;
+                        auto& end = columnColourSegment.m_end;
+                        auto& colour = columnColourSegment.m_colour;
                         auto& colourClass = matchedSegment.first;
 
                         Message::VisionTransitionSegment* api_segment = api_classified_image->add_transition_segment();
@@ -264,13 +264,13 @@ namespace modules {
                     }
                 }
 
-				for (auto& matchedSegment : image.matchedHorizontalSegments)
+                for (auto& matchedSegment : image.matchedHorizontalSegments)
                 {
-					for (auto& rowColourSegment : matchedSegment.second)
+                    for (auto& rowColourSegment : matchedSegment.second)
                     {
-						auto& start = rowColourSegment.m_start;
-						auto& end = rowColourSegment.m_end;
-						auto& colour = rowColourSegment.m_colour;
+                        auto& start = rowColourSegment.m_start;
+                        auto& end = rowColourSegment.m_end;
+                        auto& colour = rowColourSegment.m_colour;
                         auto& colourClass = matchedSegment.first;
 
                         Message::VisionTransitionSegment* api_segment = api_classified_image->add_transition_segment();
@@ -283,83 +283,83 @@ namespace modules {
                     }
                 }
 
-				for (auto& greenHorizonPoint : image.greenHorizonInterpolatedPoints) {
-					Message::VisionGreenHorizonPoint* api_ghpoint = api_classified_image->add_green_horizon_point();
-					api_ghpoint->set_x(greenHorizonPoint[0]);
-					api_ghpoint->set_y(greenHorizonPoint[1]);
-				}
+                for (auto& greenHorizonPoint : image.greenHorizonInterpolatedPoints) {
+                    Message::VisionGreenHorizonPoint* api_ghpoint = api_classified_image->add_green_horizon_point();
+                    api_ghpoint->set_x(greenHorizonPoint[0]);
+                    api_ghpoint->set_y(greenHorizonPoint[1]);
+                }
 
                 send(message);
 
             });
 
-			on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Goal> goals){
-				Message message;
+            on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Goal> goals){
+                Message message;
 
-				message.set_type(Message::VISION);
-				message.set_utc_timestamp(std::time(0));
+                message.set_type(Message::VISION);
+                message.set_utc_timestamp(std::time(0));
 
-				Message::Vision* api_vision = message.mutable_vision();
-				//std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : sending " << goals.size() << " goals to NUbugger." << std::endl;
-				for (auto& goal : goals){
-					Message::VisionFieldObject* api_goal = api_vision->add_vision_object();
+                Message::Vision* api_vision = message.mutable_vision();
+                //std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : sending " << goals.size() << " goals to NUbugger." << std::endl;
+                for (auto& goal : goals){
+                    Message::VisionFieldObject* api_goal = api_vision->add_vision_object();
 
-					api_goal->set_shape_type(Message::VisionFieldObject::QUAD);
-					api_goal->set_goal_type(Message::VisionFieldObject::GoalType(1+int(goal.type))); //+1 to account for zero vs one referencing in message buffer.
-					api_goal->set_name("Goal");
-					api_goal->set_width(goal.sizeOnScreen[0]);
-					api_goal->set_height(goal.sizeOnScreen[1]);
-					api_goal->set_screen_x(goal.screenCartesian[0]);
-					api_goal->set_screen_y(goal.screenCartesian[1]);
+                    api_goal->set_shape_type(Message::VisionFieldObject::QUAD);
+                    api_goal->set_goal_type(Message::VisionFieldObject::GoalType(1+int(goal.type))); //+1 to account for zero vs one referencing in message buffer.
+                    api_goal->set_name("Goal");
+                    api_goal->set_width(goal.sizeOnScreen[0]);
+                    api_goal->set_height(goal.sizeOnScreen[1]);
+                    api_goal->set_screen_x(goal.screenCartesian[0]);
+                    api_goal->set_screen_y(goal.screenCartesian[1]);
 
-					for(auto& point : goal.screen_quad){
-						api_goal->add_points(point[0]);
-						api_goal->add_points(point[1]);
-						//std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : adding quad point ( " << point[0] << " , " << point[1] << " )."<< std::endl;
-					}
-					for(auto& coord : goal.sphericalFromNeck){
-						api_goal->add_measured_relative_position(coord);
-					}
-				}
-				send(message);
-			});
+                    for(auto& point : goal.screen_quad){
+                        api_goal->add_points(point[0]);
+                        api_goal->add_points(point[1]);
+                        //std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : adding quad point ( " << point[0] << " , " << point[1] << " )."<< std::endl;
+                    }
+                    for(auto& coord : goal.sphericalFromNeck){
+                        api_goal->add_measured_relative_position(coord);
+                    }
+                }
+                send(message);
+            });
 
 
-			on<Trigger<messages::localisation::FieldObject>,
-			   Options<Priority<NUClear::LOW>>>([this](const messages::localisation::FieldObject& field_object) {
-				Message message;
+            on<Trigger<messages::localisation::FieldObject>,
+               Options<Priority<NUClear::LOW>>>([this](const messages::localisation::FieldObject& field_object) {
+                Message message;
 
-				message.set_type(Message::LOCALISATION);
-				message.set_utc_timestamp(std::time(0));
+                message.set_type(Message::LOCALISATION);
+                message.set_utc_timestamp(std::time(0));
 
-				auto* localisation = message.mutable_localisation();
-				auto* api_field_object = localisation->add_field_object();
-				api_field_object->set_name(field_object.name);
+                auto* localisation = message.mutable_localisation();
+                auto* api_field_object = localisation->add_field_object();
+                api_field_object->set_name(field_object.name);
 
-				for (messages::localisation::FieldObject::Model model : field_object.models) {
-					auto* api_model = api_field_object->add_models();
+                for (messages::localisation::FieldObject::Model model : field_object.models) {
+                    auto* api_model = api_field_object->add_models();
 
-					api_model->set_wm_x(model.wm_x);
-					api_model->set_wm_y(model.wm_y);
-					api_model->set_heading(model.heading);
-					api_model->set_sd_x(model.sd_x);
-					api_model->set_sd_y(model.sd_y);
-					api_model->set_sr_xx(model.sr_xx);
-					api_model->set_sr_xy(model.sr_xy);
-					api_model->set_sr_yy(model.sr_yy);
-					api_model->set_lost(model.lost);
-				}
+                    api_model->set_wm_x(model.wm_x);
+                    api_model->set_wm_y(model.wm_y);
+                    api_model->set_heading(model.heading);
+                    api_model->set_sd_x(model.sd_x);
+                    api_model->set_sd_y(model.sd_y);
+                    api_model->set_sr_xx(model.sr_xx);
+                    api_model->set_sr_xy(model.sr_xy);
+                    api_model->set_sr_yy(model.sr_yy);
+                    api_model->set_lost(model.lost);
+                }
 
-				send(message);
-			});
+                send(message);
+            });
 
-			// When we shutdown, close our publisher
-			on<Trigger<Shutdown>>([this](const Shutdown&) {
-				pub.close();
-			});
-		}
+            // When we shutdown, close our publisher
+            on<Trigger<Shutdown>>([this](const Shutdown&) {
+                pub.close();
+            });
+        }
 
-		void NUbugger::run() {
+        void NUbugger::run() {
             // TODO: fix this - still blocks on last recv even if listening = false
             while (listening) {
                 zmq::message_t message;
@@ -389,17 +389,17 @@ namespace modules {
             }
         }
 
-		void NUbugger::recvCommand(const Message& message) {
+        void NUbugger::recvCommand(const Message& message) {
             std::string command = message.command().command();
             if (command == "download_lut") {
                 auto lut = powerplant.get<LookUpTable>();
 
-				Message message;
+                Message message;
 
-				message.set_type(Message::LOOKUP_TABLE);
-				message.set_utc_timestamp(std::time(0));
+                message.set_type(Message::LOOKUP_TABLE);
+                message.set_utc_timestamp(std::time(0));
 
-				Message::LookupTable* api_lookup_table = message.mutable_lookuptable();
+                Message::LookupTable* api_lookup_table = message.mutable_lookuptable();
                 api_lookup_table->set_table(lut->getData());
 
                 send(message);
@@ -407,7 +407,7 @@ namespace modules {
         }
 
 
-		void NUbugger::recvLookupTable(const Message& message) {
+        void NUbugger::recvLookupTable(const Message& message) {
             auto lookuptable = message.lookuptable();
             const std::string& lutData = lookuptable.table();
 
@@ -425,26 +425,26 @@ namespace modules {
             }
         }
 
-		void NUbugger::kill() {
+        void NUbugger::kill() {
             listening = false;
         }
 
-		/**
-		 * This method needs to be used over pub.send as all calls to
-		 * pub.send need to be synchronized with a concurrency primitive
-		 * (such as a mutex)
-		 */
-		void NUbugger::send(zmq::message_t& packet) {
-			std::lock_guard<std::mutex> lock(mutex);
-			pub.send(packet);
-		}
+        /**
+         * This method needs to be used over pub.send as all calls to
+         * pub.send need to be synchronized with a concurrency primitive
+         * (such as a mutex)
+         */
+        void NUbugger::send(zmq::message_t& packet) {
+            std::lock_guard<std::mutex> lock(mutex);
+            pub.send(packet);
+        }
 
-		void NUbugger::send(Message message) {
-			auto serialized = message.SerializeAsString();
-			zmq::message_t packet(serialized.size());
-			memcpy(packet.data(), serialized.data(), serialized.size());
-			send(packet);
-		}
+        void NUbugger::send(Message message) {
+            auto serialized = message.SerializeAsString();
+            zmq::message_t packet(serialized.size());
+            memcpy(packet.data(), serialized.data(), serialized.size());
+            send(packet);
+        }
 
-	} // support
+    } // support
 } // modules

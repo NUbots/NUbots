@@ -48,10 +48,10 @@ namespace modules {
 
         WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
 
-			struct WalkCommand {
+            struct WalkCommand {
                 arma::vec2 velocity; // in m/s
                 float rotationalSpeed; // in rads/s
-			};
+            };
 
             on<Trigger<Configuration<WalkEngine> > >([this](const Configuration<WalkEngine>& config) {
 
@@ -916,55 +916,55 @@ namespace modules {
               return t.tv_sec + 1E-6 * t.tv_usec;
         }
 
-		double WalkEngine::procFunc(double a, double deadband, double maxvalue) { //a function for IMU feedback (originally from teamdarwin2013release/player/util/util.lua)
-			double   ret  = std::min( std::max(0., std::abs(a)-deadband), maxvalue);
-			if(a<=0) ret *= -1.;
-			return   ret;
-		}
+        double WalkEngine::procFunc(double a, double deadband, double maxvalue) { //a function for IMU feedback (originally from teamdarwin2013release/player/util/util.lua)
+            double   ret  = std::min( std::max(0., std::abs(a)-deadband), maxvalue);
+            if(a<=0) ret *= -1.;
+            return   ret;
+        }
 
-		double WalkEngine::modAngle(double value) { // reduce an angle to [-pi, pi)
+        double WalkEngine::modAngle(double value) { // reduce an angle to [-pi, pi)
             double angle = std::fmod(value, 2 * M_PI);
             if (angle <= -M_PI) angle += 2 * M_PI;
             else if (angle > M_PI) angle -= 2 * M_PI;
 
             return angle;
-		}
+        }
 
         /**
          * @brief Transforms pRelative from pose co-ordinates to global co-ordinates in 2 dimensions
          *  using the third element as bearing angle
          */
-		arma::vec3 WalkEngine::poseGlobal(arma::vec3 pRelative, arma::vec3 pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!
-			double ca = std::cos(pose[2]);
-			double sa = std::sin(pose[2]);
+        arma::vec3 WalkEngine::poseGlobal(arma::vec3 pRelative, arma::vec3 pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!
+            double ca = std::cos(pose[2]);
+            double sa = std::sin(pose[2]);
             return {
                 pose[0] + ca * pRelative[0] - sa * pRelative[1],
                 pose[1] + sa * pRelative[0] + ca * pRelative[1],
                 pose[2] + pRelative[2]
             };
-		}
+        }
 
-		arma::vec3 WalkEngine::poseRelative(arma::vec3 pGlobal, arma::vec3 pose) {
-			double ca = std::cos(pose[2]);
-			double sa = std::sin(pose[2]);
-			double px = pGlobal[0] - pose[0];
-			double py = pGlobal[1] - pose[1];
-			double pa = pGlobal[2] - pose[2];
+        arma::vec3 WalkEngine::poseRelative(arma::vec3 pGlobal, arma::vec3 pose) {
+            double ca = std::cos(pose[2]);
+            double sa = std::sin(pose[2]);
+            double px = pGlobal[0] - pose[0];
+            double py = pGlobal[1] - pose[1];
+            double pa = pGlobal[2] - pose[2];
             return {
                 ca * px + sa * py,
                 -sa * px + ca * py,
                 modAngle(pa)
             };
-		}
+        }
 
-		//should t be an integer???
-		arma::vec3 WalkEngine::se2Interpolate(double t, arma::vec3 u1, arma::vec3 u2) { //helps smooth out the motions using a weighted average
+        //should t be an integer???
+        arma::vec3 WalkEngine::se2Interpolate(double t, arma::vec3 u1, arma::vec3 u2) { //helps smooth out the motions using a weighted average
             return {
                 u1[0] + t * (u2[0] - u1[0]),
                 u1[1] + t * (u2[1] - u1[1]),
                 u1[2] + t * modAngle(u2[2] - u1[2])
             };
-		}
+        }
 
     }  // motion
 }  // modules
