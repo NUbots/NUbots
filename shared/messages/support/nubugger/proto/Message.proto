@@ -11,6 +11,7 @@ message Message {
 		DATA_POINT = 4;
 		REACTION_STATISTICS = 5;
 		LOOKUP_TABLE = 6;
+		COMMAND = 7;
     }
 
     required Type type = 1;
@@ -22,9 +23,15 @@ message Message {
     optional DataPoint dataPoint = 6;
     optional ReactionStatistics reactionStatistics = 7;
 	optional LookupTable lookupTable = 8;
+	optional Command command = 9;
+
+    message Command {
+        optional string command = 1;
+    }
 
 	message LookupTable {
 		optional bytes table = 1;
+        optional bool save = 2;
 	}
 
 	message ReactionStatistics {

@@ -28,6 +28,7 @@
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/vision/LookUpTable.h"
+#include "messages/vision/SaveLookUpTable.h"
 #include "messages/localisation/FieldObject.h"
 #include "utility/nubugger/NUgraph.h"
 
@@ -45,7 +46,9 @@ namespace modules {
 		using std::chrono::duration_cast;
 		using std::chrono::microseconds;
 		using messages::support::nubugger::proto::Message;
+		using messages::support::nubugger::proto::Message_Type;
 		using messages::vision::Goal;
+		using messages::vision::SaveLookUpTable;
 
 		NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
 			: Reactor(std::move(environment))
@@ -178,7 +181,7 @@ namespace modules {
                 }
 			});
 
-            on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
+            /*on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
                 Message message;
                 message.set_type(Message::REACTION_STATISTICS);
                 message.set_utc_timestamp(std::time(0));
@@ -199,7 +202,7 @@ namespace modules {
                 reactionStatistics->set_functionname(stats.identifier[2]);
                 
                 send(message);
-            });
+            });*/
 
 			on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
 
@@ -374,13 +377,52 @@ namespace modules {
         }
         
         void NUbugger::recvMessage(const Message& message) {
-            // TODO: support other types
+            switch (message.type()) {
+                case Message::Type::Message_Type_COMMAND:
+                    recvCommand(message);
+                    break;
+                case Message::Type::Message_Type_LOOKUP_TABLE:
+                    recvLookupTable(message);
+                    break;
+                default:
+                    return;
+            }
+        }
 
-            std::string lutData = message.lookuptable().table();
-            NUClear::log("Load LUT");
-            auto lut = std::make_unique<LookUpTable>();
-            lut->loadLUTFromArray(lutData.data());
-            emit(std::move(lut));
+		void NUbugger::recvCommand(const Message& message) {
+            std::string command = message.command().command();
+            if (command == "download_lut") {
+                auto lut = powerplant.get<LookUpTable>();
+
+				Message message;
+ 
+				message.set_type(Message::LOOKUP_TABLE);
+				message.set_utc_timestamp(std::time(0));
+
+				Message::LookupTable* api_lookup_table = message.mutable_lookuptable();
+                api_lookup_table->set_table(lut->getData());
+
+                send(message);
+            }
+        }
+        
+
+		void NUbugger::recvLookupTable(const Message& message) {
+            auto lookuptable = message.lookuptable();
+            const std::string& lutData = lookuptable.table();
+            
+            if (lookuptable.save()) {
+                NUClear::log("Loading LUT and saving");
+                auto savelut = std::make_unique<SaveLookUpTable>();
+                savelut->lut.loadLUTFromArray(lutData.data());
+                emit(std::move(savelut));
+            }
+            else {
+                NUClear::log("Loading LUT");
+                auto lut = std::make_unique<LookUpTable>();
+                lut->loadLUTFromArray(lutData.data());
+                emit(std::move(lut));
+            }
         }
 
 		void NUbugger::kill() {

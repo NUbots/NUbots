@@ -13,7 +13,7 @@ namespace messages {
         void LookUpTable::loadLUTFromArray(const char* array) {
             std::memcpy(&LUT, array, LUT_SIZE);
         }
-
+        
         messages::vision::Colour LookUpTable::classifyPixel(const messages::input::Image::Pixel& p) const {
             return messages::vision::Colour(LUT[getLUTIndex(p)]); // 7bit LUT
         }
@@ -26,6 +26,11 @@ namespace messages {
             index += (colour.cr >> (8 - BITS_PER_COLOUR));
 
             return index;
+        }
+
+        void LookUpTable::save(const std::string& fileName) const {
+            std::ofstream lutfile(fileName, std::ios::binary);
+            std::copy(std::begin(LUT), std::end(LUT), std::ostreambuf_iterator<char>(lutfile));
         }
 
     } //vision

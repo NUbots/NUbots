@@ -19,6 +19,7 @@
 
 #include "LUTClassifier.h"
 #include "messages/vision/LookUpTable.h"
+#include "messages/vision/SaveLookUpTable.h"
 
 namespace modules {
     namespace vision {
@@ -30,6 +31,7 @@ namespace modules {
 		using messages::vision::ClassifiedImage;
 		using messages::vision::SegmentedRegion;
         using messages::vision::LookUpTable;
+        using messages::vision::SaveLookUpTable;
 
 		using std::chrono::system_clock;
         
@@ -47,6 +49,11 @@ namespace modules {
                 lut->loadLUTFromFile(LUTLocation);
                 emit(std::move(lut));
 			});
+
+            on<Trigger<SaveLookUpTable>, With<Configuration<LUTLocations>>>([this](const SaveLookUpTable& saveLut, const Configuration<LUTLocations>& config) {
+				std::string LUTLocation = config["LUT_LOCATION"];
+                saveLut.lut.save(LUTLocation);
+            });
 
 			//Load in greenhorizon parameters
 			on<Trigger<Configuration<GreenHorizonConfig>>>([this](const Configuration<GreenHorizonConfig>& constants) {

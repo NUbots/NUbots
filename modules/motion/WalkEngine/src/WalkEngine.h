@@ -48,7 +48,7 @@ namespace modules {
             };
 
             /// Subsumption ID key to access motors
-            size_t id;
+            const size_t id;
 
             // start_config_params
 
@@ -84,8 +84,6 @@ namespace modules {
             float supportY;
             arma::vec3 qLArm0;
             arma::vec3 qRArm0;
-            arma::vec3 qLArmKick0;
-            arma::vec3 qRArmKick0;
 
             // Hardness parameters
             float hardnessSupport;
@@ -136,9 +134,6 @@ namespace modules {
             // Initial body swing 
             float supportModYInitial;
 
-            // TODO: WalkKick parameters
-//            walkKickDef = Config.walk.walkKickDef;
-            float walkKickPh;
             float toeTipCompensation;
 
             bool useAlternativeTrajectory;
@@ -187,9 +182,6 @@ namespace modules {
             float ph;
 
             int stopRequest;
-            int canWalkKick; // can we do walkkick with this walk code?
-            size_t walkKickRequest;
-            //std::vector<std::vector<double> > walkKick;
             int currentStepType;
 
             int initialStep;
@@ -228,14 +220,11 @@ namespace modules {
             bool startFromStep;
 
             arma::vec2 comdot;
-            bool stepKickReady;
             int hasBall;
 
             Leg supportLeg = LEFT;
-            Leg stepKickSupport = LEFT;
             arma::vec2 supportMod;
             float shiftFactor;
-            int stepKickRequest;
 
             // TODO: link to actuator
             float leftLegHardness;
@@ -262,8 +251,6 @@ namespace modules {
 //            arma::vec3 rightLegCommand;
 
             void update(const messages::input::Sensors& sensors);
-            void checkStepKick();
-            void checkWalkKick();
             void updateStill();
             void motionLegs(std::vector<double> qLegs, bool gyroOff, const messages::input::Sensors& sensors);
             void motionArms();
@@ -276,12 +263,8 @@ namespace modules {
             arma::vec3 getVelocity();
             void start();
             void stop();
-//            void startMotion(std::string name);
-//            void advanceMotion();
             void setInitialStance(arma::vec3 uL, arma::vec3 uR, arma::vec3 uT, Leg support);
             void stanceReset();
-            std::pair<arma::vec3, arma::vec3> getOdometry(arma::vec3 u0);
-            arma::vec3 getBodyOffset();
             std::pair<float, float> zmpSolve(float zs, float z1, float z2, float x1, float x2);
             arma::vec3 zmpCom(float ph);
             std::pair<float, float> footPhase(float ph);

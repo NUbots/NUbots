@@ -20,6 +20,8 @@ node nuclearportvm {
   package { 'screen': ensure => latest, }
   package { 'htop': ensure => latest, }
   package { 'gdb': ensure => latest, }
+  package { 'cmake-curses-gui': ensure => latest, }
+  package { 'linux-headers-generic': ensure => latest, }
 }
 
 # node nubuggervm {
@@ -86,7 +88,15 @@ node packer-virtualbox-iso, packer-vmware-iso {
   package { 'screen': ensure => latest, }
   package { 'htop': ensure => latest, }
   package { 'gdb': ensure => latest, }
+  package { 'cmake-curses-gui': ensure => latest, }
+  package { 'linux-headers-generic': ensure => latest, }
 
   # NFS for better Vagrant shared folders
   package { 'nfs-common': ensure => latest, }
+    
+  # sharing fix, see http://superuser.com/questions/736024/cannot-share-host-directory-with-virtualbox-guest-mint-16-64-bit
+  file { '/sbin/mount.vboxsf':
+  	ensure => 'link',
+  	target => '/usr/lib/i386-linux-gnu/VBoxGuestAdditions/mount.vboxsf'
+  }
 }

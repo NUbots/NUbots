@@ -46,7 +46,7 @@ namespace modules {
         using NUClear::DEBUG;
         using messages::input::Sensors;
         
-        WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
 
 			struct WalkCommand {
                 arma::vec2 velocity; // in m/s
@@ -87,8 +87,6 @@ namespace modules {
                 supportY = config["supportY"];
                 qLArm0 = M_PI / 180.0 * arma::vec3{90, 2, -20};
                 qRArm0 = M_PI / 180.0 * arma::vec3{90, -2, -20};
-                qLArmKick0 = M_PI / 180 * arma::vec3{90, 30, -60};
-                qRArmKick0 = M_PI / 180 * arma::vec3{90, -30, -60};
 
                 // gHardness parameters
                 hardnessSupport = config["hardnessSupport"];
@@ -142,9 +140,6 @@ namespace modules {
                 // gInitial body swing 
                 supportModYInitial = config["supportModYInitial"];
 
-                // gWalkKick parameters
-                //walkKickDef = config["walkKickDef"];
-                walkKickPh = config["walkKickPh"];
                 toeTipCompensation = config["toeTipCompensation"];
 
                 useAlternativeTrajectory = config["useAlternativeTrajectory"];
@@ -193,9 +188,6 @@ namespace modules {
 
                 stopRequest = 2;
 
-                canWalkKick = 1; // gCan we do walkkick with this walk code?
-                walkKickRequest = 0; 
-                //walkKick = walkKickDef["FrontLeft"];
                 currentStepType = 0;
 
                 initialStep = 2;
@@ -235,7 +227,6 @@ namespace modules {
                 startFromStep = false;
 
                 comdot = {0, 0};
-                stepKickReady = false;
                 hasBall = 0;
 
                 
@@ -292,7 +283,6 @@ namespace modules {
             ph0 = ph;
             moving = true;
 
-            // SJ: Variable tStep support for walkkick
             ph = (time - tLastStep) / tStep;
 
             if (ph > 1) {
@@ -316,63 +306,51 @@ namespace modules {
                 uRight1 = uRight2;
                 uTorso1 = uTorso2;
 
-                //log<DEBUG>("new step, supportLeg: ", supportLeg);
-
                 supportMod = {0, 0}; // support point modulation for wallkick
                 shiftFactor = 0.5; // how much should we shift final torso pose?
 
-                //checkWalkKick();
-                //checkStepKick();
-
-                /*if (stepKickReady) {
-                    // large step init
-                    return; // TODO: return "step"
-                }*/
-
-                if (walkKickRequest == 0 && stepKickRequest == 0) {
-                    if (stopRequest == 1) {
-                        log<DEBUG>("stop request 1");
-                        stopRequest = 2;
-                        velCurrent = {0, 0, 0};
-                        velCommand = {0, 0, 0};
-                        if (supportLeg == LEFT) {
-                            uRight2 = poseGlobal(-2 * uLRFootOffset, uLeft1);
-                        } else {
-                            uLeft2 = poseGlobal(2 * uLRFootOffset, uRight1);
-                        }
+                if (stopRequest == 1) {
+                    log<DEBUG>("stop request 1");
+                    stopRequest = 2;
+                    velCurrent = {0, 0, 0};
+                    velCommand = {0, 0, 0};
+                    if (supportLeg == LEFT) {
+                        uRight2 = poseGlobal(-2 * uLRFootOffset, uLeft1);
                     } else {
-                        // normal walk, advance steps
-                        tStep = tStep0;
-                        if (supportLeg == LEFT) {
-                            uRight2 = stepRightDestination(velCurrent, uLeft1, uRight1);
-                        } else {
-                            uLeft2 = stepLeftDestination(velCurrent, uLeft1, uRight1);
-                        }
+                        uLeft2 = poseGlobal(2 * uLRFootOffset, uRight1);
+                    }
+                } else {
+                    // normal walk, advance steps
+                    tStep = tStep0;
+                    if (supportLeg == LEFT) {
+                        uRight2 = stepRightDestination(velCurrent, uLeft1, uRight1);
+                    } else {
+                        uLeft2 = stepLeftDestination(velCurrent, uLeft1, uRight1);
+                    }
 
-                        // velocity-based support point modulation
-                        toeTipCompensation = 0;
-                        if (velDiff[0] > 0) {
-                            // accelerating to front
-                            supportMod[0] = supportFront2;
-                        } else if (velCurrent[0] > velFastForward) {
-                            supportMod[0] = supportFront;
-                            toeTipCompensation = ankleMod[0];
-                        } else if (velCurrent[0] < 0) {
-                            supportMod[0] = supportBack;
-                        } else if (std::abs(velCurrent[2]) > velFastTurn) {
-                            supportMod[0] = supportTurn;
-                        } else {
-                            if (velCurrent[1] > 0.015) {
-                                supportMod[0] = supportSideX;
-                                supportMod[1] = supportSideY;
-                            } else if (velCurrent[1] < -0.015) {
-                                supportMod[0] = supportSideX;
-                                supportMod[1] = -supportSideY;
-                            }
+                    // velocity-based support point modulation
+                    toeTipCompensation = 0;
+                    if (velDiff[0] > 0) {
+                        // accelerating to front
+                        supportMod[0] = supportFront2;
+                    } else if (velCurrent[0] > velFastForward) {
+                        supportMod[0] = supportFront;
+                        toeTipCompensation = ankleMod[0];
+                    } else if (velCurrent[0] < 0) {
+                        supportMod[0] = supportBack;
+                    } else if (std::abs(velCurrent[2]) > velFastTurn) {
+                        supportMod[0] = supportTurn;
+                    } else {
+                        if (velCurrent[1] > 0.015) {
+                            supportMod[0] = supportSideX;
+                            supportMod[1] = supportSideY;
+                        } else if (velCurrent[1] < -0.015) {
+                            supportMod[0] = supportSideX;
+                            supportMod[1] = -supportSideY;
                         }
                     }
                 }
-
+                
                 uTorso2 = stepTorso(uLeft2, uRight2, shiftFactor);
 
                 // adjustable initial step body swing
@@ -429,27 +407,9 @@ namespace modules {
             pLLeg[2] = 0;
             pRLeg[2] = 0;
             if (supportLeg == LEFT) {
-                /*if (currentStepType > 1) { // walkkick
-                    if (xFoot < walkKickPh) {
-                        uRight = se2Interpolate(xFoot * 2, uRight1, uRight15);
-                    } else {
-                        uRight = se2Interpolate(xFoot * 2 - 1, uRight15, uRight2);
-                    }
-                } else {
-                    uRight = se2Interpolate(xFoot, uRight1, uRight2);
-                }*/
                 uRight = se2Interpolate(xFoot, uRight1, uRight2);
                 pRLeg[2] = stepHeight * zFoot;
             } else {
-                /*if (currentStepType > 1) { // walkkick
-                    if (xFoot < walkKickPh) {
-                        uLeft = se2Interpolate(xFoot * 2, uLeft1, uLeft15);
-                    } else {
-                        uLeft = se2Interpolate(xFoot * 2 - 1, uLeft15, uLeft2);
-                    }
-                } else {
-                    uLeft = se2Interpolate(xFoot, uLeft1, uLeft2);
-                }*/
                 uLeft = se2Interpolate(xFoot, uLeft1, uLeft2);
                 pLLeg[2] = stepHeight * zFoot;
             }
@@ -516,109 +476,10 @@ namespace modules {
             pRLeg[1] = uRight[1];
             pRLeg[5] = uRight[2];
 
-            /*emit(graph("pLLeg", pLLeg[0], pLLeg[1], pLLeg[2], pLLeg[3], pLLeg[4], pLLeg[5]));
-            emit(graph("pRLeg", pLLeg[0], pLLeg[1], pLLeg[2], pRLeg[3], pRLeg[4], pRLeg[5]));
-            emit(graph("pTorso", pTorso[0], pTorso[1], pTorso[2], pTorso[3], pTorso[4], pTorso[5]));*/
-
-            // emit(graph("pLLeg", pLLeg[3], pLLeg[4], pLLeg[5]));
-            // emit(graph("pRLeg",  pRLeg[3], pRLeg[4], pRLeg[5]));
-            // emit(graph("pTorso", pTorso[3], pTorso[4], pTorso[5]));
-
             std::vector<double> qLegs = darwinop_kinematics_inverse_legs_nubots(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
             motionLegs(qLegs, false, sensors);
             //motionArms();
         }
-
-        void WalkEngine::checkStepKick() {
-            arma::vec3 uFootErr;
-            if (stepKickRequest == 0) {
-                stepCheckCount = 0;
-                return;
-            } else if (stepKickRequest == 1) {
-                uFootErr = poseRelative(uLeft1, poseGlobal(2 * uLRFootOffset, uRight1));
-                stepCheckCount++;
-            }
-
-            if (supportLeg == stepKickSupport) {
-                if (stepCheckCount > 2 || 
-                        (std::abs(uFootErr[0]) < 0.02 &&
-                        std::abs(uFootErr[1]) < 0.01 &&
-                        std::abs(uFootErr[2]) < 10 * M_PI / 180.0)) {
-                    stepKickReady = true;
-                    return;
-                }
-            }
-
-            if (supportLeg == LEFT) {
-                uRight2 = poseGlobal(-2 * uLRFootOffset, uLeft1);
-            } else {
-                uLeft2 = poseGlobal(2 * uLRFootOffset, uRight1);
-            }
-        }
-
-        /*void WalkEngine::checkWalkKick() {
-            if (walkKickRequest == 0) {
-                return;
-            }
-
-            if (walkKickRequest > 0 && walkKickRequest > walkKick.size()) {
-                walkKickRequest = 0;
-                tStep = tStep0;
-                stepHeight = stepHeight0;
-                currentStepType = 0;
-                velCurrent = {0, 0, 0};
-                velCommand = {0, 0, 0};
-                return;
-            }
-
-            if (walkKickRequest == 1) {
-                // check current supportLeg and feet positions
-                // and advance steps until ready
-
-                arma::vec3 uFootErr = poseRelative(uLeft1, poseGlobal(2 * uLRFootOffset, uRight1));
-
-                if (supportLeg != walkKick[0][2] ||
-                        std::abs(uFootErr[0] > 0.02) || 
-                        std::abs(uFootErr[1] > 0.01) ||
-                        std::abs(uFootErr[2] > 10 * M_PI / 180.0)) {
-                    if (supportLeg == LEFT) {
-                        // TODO: uRight2 = 
-                    } else {
-                        // TODO: uLeft2 = 
-                    }
-                    return;
-                }
-            }
-
-            tStep = walkKick[walkKickRequest][0];
-            currentStepType = walkKick[walkKickRequest][1];
-            supportLeg = walkKick[walkKickRequest][2];
-            stepHeight = walkKick[walkKickRequest][3];
-            supportMod = walkKick[walkKickRequest][4];
-            shiftFactor = walkKick[walkKickRequest][5];
-
-            if (walkKick[walkKickRequest].size() <= 7) {
-                arma::vec3 footPos1 = walkKick[walkKickRequest][6];
-                if (supportLeg == LEFT) {
-                    // TODO: look at uLRFootOffset for use here
-                    // TODO: uRight2 = 
-                } else {
-                    // TODO: uLeft2 = 
-                }
-            } else {
-                arma::vec3 footPos1 = walkKick[walkKickRequest][6];
-                arma::vec3 footPos2 = walkKick[walkKickRequest][7];
-                if (supportLeg == LEFT) {
-                    // TODO: uRight15 = 
-                    // TODO: uRight2 = 
-                } else {
-                    // TODO: uLeft15 =
-                    // TODO: uLeft2 = 
-                }
-            }
-
-            walkKickRequest++;
-        }*/
 
         void WalkEngine::updateStill() {
             uTorso = stepTorso(uLeft, uRight, 0.5);
@@ -735,9 +596,6 @@ namespace modules {
 
                 qLegs[10] += toeTipCompensation * phComp; // Lifting toetip
                 qLegs[1] += hipRollCompensation * phComp; // Hip roll compensation
-            	// emit(graph("L Ankle comp dp,dr", ankleShift[0], ankleShift[1]));
-            	// emit(graph("L Hip comp roll", hipShift[1]));
-            	// emit(graph("L Knee comp", kneeShift));
 
             } else {
                 qLegs[7] += hipShift[1]; // Hip roll stabilization
@@ -747,9 +605,6 @@ namespace modules {
 
                 qLegs[4] += toeTipCompensation * phComp; // Lifting toetip
                 qLegs[7] -= hipRollCompensation * phComp; // Hip roll compensation
-            	// emit(graph("R Ankle comp dp,dr", ankleShift[0], ankleShift[1]));
-            	// emit(graph("R Hip comp roll", hipShift[1]));
-            	// emit(graph("R Knee comp", kneeShift));
 
             }
 
@@ -785,39 +640,6 @@ namespace modules {
             waypoints->push_back({id, time, ServoID::R_KNEE,        float(qLegs[9]),  float(rightLegHardness * 100)});
             waypoints->push_back({id, time, ServoID::R_ANKLE_PITCH, float(qLegs[10]), float(rightLegHardness * 100)});
             waypoints->push_back({id, time, ServoID::R_ANKLE_ROLL,  float(qLegs[11]), float(rightLegHardness * 100)});
-
-            /*NUClear::log<NUClear::DEBUG>("L Hip Yaw: ", qLegs[0]);
-            NUClear::log<NUClear::DEBUG>("L Hip Roll: ", qLegs[1]);
-            NUClear::log<NUClear::DEBUG>("L Hip Pitch: ", qLegs[2]);
-            NUClear::log<NUClear::DEBUG>("L Knee: ", qLegs[3]);
-            NUClear::log<NUClear::DEBUG>("L Ankle Pitch: ", qLegs[4]);
-            NUClear::log<NUClear::DEBUG>("L Ankle Roll: ", qLegs[5]);
-
-            NUClear::log<NUClear::DEBUG>("R Hip Yaw: ", qLegs[6]);
-            NUClear::log<NUClear::DEBUG>("R Hip Roll: ", qLegs[7]);
-            NUClear::log<NUClear::DEBUG>("R Hip Pitch: ", qLegs[8]);
-            NUClear::log<NUClear::DEBUG>("R Knee: ", qLegs[9]);
-            NUClear::log<NUClear::DEBUG>("R Ankle Pitch: ", qLegs[10]);
-            NUClear::log<NUClear::DEBUG>("R Ankle Roll: ", qLegs[11]);*/
-
-            // emit(graph("L Hip Yaw", qLegs[0]));
-            // emit(graph("L Hip Roll", qLegs[1]));
-            // emit(graph("L Hip Pitch", qLegs[2]));
-            // emit(graph("L Knee", qLegs[3]));
-            // emit(graph("L Ankle Pitch", qLegs[4]));
-            // emit(graph("L Ankle Roll", qLegs[5]));
-
-            // emit(graph("R Hip Yaw", qLegs[6]));
-            // emit(graph("R Hip Roll", qLegs[7]));
-            // emit(graph("R Hip Pitch", qLegs[8]));
-            // emit(graph("R Knee", qLegs[9]));
-            // emit(graph("R Ankle Pitch", qLegs[10]));
-            // emit(graph("R Ankle Roll", qLegs[11]));
-            // ankle stabilization using gyro feedback
-
-           
-
-//            emit(graph("L Ankle Pitch", qLegs[4]));
 
             emit(std::move(waypoints));
         }
@@ -925,7 +747,7 @@ namespace modules {
 
             uRightLeft[0] = std::min(std::max(uRightLeft[0], stanceLimitX[0]), stanceLimitX[1]);
             uRightLeft[1] = std::min(std::max(uRightLeft[1], -stanceLimitY[1]), -limitY);
-            uRightLeft[2] = std::min(std::max(uRightLeft[2], -stanceLimitA[2]), -stanceLimitA[0]);
+            uRightLeft[2] = std::min(std::max(uRightLeft[2], -stanceLimitA[1]), -stanceLimitA[0]);
 
             return poseGlobal(uRightLeft, uLeft);
         }
@@ -987,85 +809,6 @@ namespace modules {
             return velCurrent;
         }
 
-
-        /*void WalkEngine::startMotion(std::string name) {
-            if (motionPlaying == 0) {
-                motionPlaying = 1;
-                // TODO: currentMotion = 
-                motionIndex = 1;
-                motionStartTime = getTime();
-
-                qLArmOR1 = currentMotion[0][1];
-                qRArmOR1 = currentMotion[0][2];
-                bodyRot0 = {0, bodyTilt, 0};
-
-                // TODO: investigate port
-                if (currentMotion[0] > 3) {
-                    bodyRot1 = currentMotion[0][3];
-                } else {
-                    bodyRot1 = bodyRot0;
-                }
-
-                leftArmHardness = {0.7, 0.7, 0.7};
-                rightArmHardness = {0.7, 0.7, 0.7};
-            }
-        }
-
-        void WalkEngine::advanceMotion() {
-            if (motionPlaying == 0) {
-                return;
-            }
-
-            double time = getTime();
-            curMotionFrame = currentMotion[motionIndex];
-            ph = (time - motionStartTime) / curMotionFrame[0];
-            if (ph > 1) {
-                // advance frame
-                // TODO: investigate port
-                if (currentMotion == motionIndex) {
-                    motionPlaying = 0;
-                    leftArmHardness = hardnessArm;
-                    rightArmHardness = hardnessArm;
-                } else {
-                    motionIndex++;
-                    motionStartTime = time;
-                    qLArmOR0[0] = qLArmOR1[0];
-                    qLArmOR0[1] = qLArmOR1[1];
-                    qLArmOR0[2] = qLArmOR1[2];
-
-                    qRArmOR0[0] = qRArmOR1[0];
-                    qRArmOR0[1] = qRArmOR1[1];
-                    qRArmOR0[2] = qRArmOR1[2];
-
-                    bodyRot0[0] = bodyRot1[0];
-                    bodyRot0[1] = bodyRot1[1];
-                    bodyRot0[2] = bodyRot1[2];
-
-                    qLArmOR1 = currentMotion[motionIndex][1];
-                    qRArmOR1 = currentMotion[motionIndex][2];
-
-                    // TODO: investigate port
-                    if (currentMotion[0] > 3) {
-                        bodyRot1 = currentMotion[MotionIndex][3];
-                    } else {
-                        bodyRot1 = bodyRot0;
-                    }
-                }
-            } else {
-                    qLArmOR0[0] = (1 - ph) * qLArmOR0[0] + ph * qLArmOR1[0];
-                    qLArmOR0[1] = (1 - ph) * qLArmOR0[1] + ph * qLArmOR1[1];
-                    qLArmOR0[1] = (1 - ph) * qLArmOR0[2] + ph * qLArmOR1[2];
-
-                    qRArmOR0[0] = (1 - ph) * qRArmOR0[0] + ph * qRArmOR1[0];
-                    qRArmOR0[1] = (1 - ph) * qRArmOR0[1] + ph * qRArmOR1[1];
-                    qRArmOR0[1] = (1 - ph) * qRArmOR0[2] + ph * qRArmOR1[2];
-
-                    bodyRot0[0] = (1 - ph) * bodyRot0[0] + ph * bodyRot1[0];
-                    bodyRot0[1] = (1 - ph) * bodyRot0[1] + ph * bodyRot1[1];
-                    bodyRot0[2] = (1 - ph) * bodyRot0[2] + ph * bodyRot1[2];
-            }
-        }*/
-
         void WalkEngine::setInitialStance(arma::vec3 uL, arma::vec3 uR, arma::vec3 uT, Leg support) {
             uLeftI = uL;
             uRightI = uR;
@@ -1107,22 +850,11 @@ namespace modules {
 
             uSupport = uTorso;
             tLastStep = getTime();
-            walkKickRequest = 0;
             currentStepType = 0;
             motionPlaying = 0;
             upperBodyOverridden = 0;
             uLRFootOffset = {0, footY, 0};
             startFromStep = false;
-        }
-
-        std::pair<arma::vec3, arma::vec3> WalkEngine::getOdometry(arma::vec3 u0) {
-            arma::vec3 uFoot = se2Interpolate(0.5, uLeft, uRight);
-            return {poseRelative(uFoot, u0), uFoot};
-        }
-
-        arma::vec3 WalkEngine::getBodyOffset() {
-            arma::vec3 uFoot = se2Interpolate(0.5, uLeft, uRight);
-            return poseRelative(uTorso, uFoot);
         }
 
         std::pair<float, float> WalkEngine::zmpSolve(float zs, float z1, float z2, float x1, float x2) {
@@ -1175,42 +907,6 @@ namespace modules {
             float xf = 0.5 * (1 - std::cos(M_PI * phSingleSkew));
             float zf = 0.5 * (1 - std::cos(2 * M_PI * phSingleSkew));
 
-
-            /*if (useAlternativeTrajectory > 0) {
-                float ph1FootPhase = 0.1;
-                float ph2FootPhase = 0.5;
-                float ph3FootPhase = 0.8;
-
-//                float exp1FootPhase = 2;
-//                float exp2FootPhase = 2;
-//                float exp3FootPhase = 2;
-
-//                float zFootLand = 0.3;    
-
-                float phZTemp;
-                float phXTemp;
-
-                if (phSingle < ph1FootPhase) {
-                    phZTemp = phSingle / ph2FootPhase;
-                    // xf = 0;
-                    // zf = 1 - (1-phZTemp)^exp1FootPhase;
-                } else if (phSingle < ph2FootPhase) {
-                    phXTemp = (phSingle - ph1FootPhase) / (ph3FootPhase - ph1FootPhase);
-                    phZTemp = phSingle / ph2FootPhase;
-                    // xf =  .5*(1-math.cos(math.pi*phXTemp));
-                    // zf = 1 - (1-phZTemp)^exp1FootPhase;
-                } else if (phSingle < ph3FootPhase) {
-                    phXTemp = (phSingle - ph1FootPhase) / (ph3FootPhase - ph1FootPhase);
-                    phZTemp = (phSingle - ph2FootPhase) / (ph3FootPhase - ph2FootPhase);
-                    // xf =  .5*(1-math.cos(math.pi*phXTemp));
-                    // zf = 1 - phZTemp^exp2FootPhase*(1-zFootLand);
-                } else {
-                    phZTemp = (1 - phSingle) / (1 - ph3FootPhase);
-                    // xf = 1;
-                    // zf = phZTemp^exp3FootPhase*zFootLand;
-                }
-            }*/
-
             return std::make_pair(xf, zf);
         }
 
@@ -1234,6 +930,10 @@ namespace modules {
             return angle;
 		}
 
+        /**
+         * @brief Transforms pRelative from pose co-ordinates to global co-ordinates in 2 dimensions 
+         *  using the third element as bearing angle
+         */
 		arma::vec3 WalkEngine::poseGlobal(arma::vec3 pRelative, arma::vec3 pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!
 			double ca = std::cos(pose[2]);
 			double sa = std::sin(pose[2]);

@@ -46,6 +46,8 @@ namespace modules {
             void send(messages::support::nubugger::proto::Message message);
 
             void recvMessage(const messages::support::nubugger::proto::Message& message);
+            void recvCommand(const messages::support::nubugger::proto::Message& message);
+            void recvLookupTable(const messages::support::nubugger::proto::Message& message);
 
             void run();
             void kill();

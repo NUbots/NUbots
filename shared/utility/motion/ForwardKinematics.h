@@ -295,7 +295,7 @@ namespace kinematics {
             for(size_t i = 0; i < 4; i++){
                 massVector[i] = RobotKinematicModel::MassModel::masses[static_cast<int>(joint.first)][i];
             }
-            NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass ", messages::input::stringFromId(joint.first), massVector);
+            //NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass ", messages::input::stringFromId(joint.first), massVector);
             double jointMass = massVector[3];
             
             arma::mat44 massScaler = arma::eye(4,4);
@@ -309,19 +309,18 @@ namespace kinematics {
              for(size_t i = 0; i < 4; i++){
                 massVector[i] = RobotKinematicModel::MassModel::masses[20][i];
             }
-            NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass Torso", massVector);
+            //NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass Torso", massVector);
             double jointMass = massVector[3];
-            
-            arma::mat44 massScaler = arma::eye(4,4);
-            massScaler.submat(0,0,2,2) *= jointMass;
-            
+            arma::mat44 massScaler = arma::eye(4,4);            
+            massScaler.submat(0,0,2,2) *= jointMass;            
             totalMassVector +=  massScaler * massVector; // = m * local centre of mass in global robot coords
         }
-
+        
         arma::mat44 normaliser = arma::eye(4,4);
-        if(totalMassVector[3] > 0){
-            normaliser.submat(0,0,2,2) *= 1 / totalMassVector[3];
-            return normaliser * totalMassVector;
+        if(totalMassVector[3] > 0){            
+            normaliser.submat(0,0,2,2) *= 1 / totalMassVector[3];            
+            arma::vec4 result = normaliser * totalMassVector;
+            return result;
         } else {
             NUClear::log<NUClear::ERROR>("ForwardKinematics::calculateCentreOfMass - Empty centre of mass request or no mass in mass model.");
             return arma::vec4();
