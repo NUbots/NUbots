@@ -1,18 +1,18 @@
 /*
- * This file is part of LinuxCamera.
+ * This file is part of the NUbots Codebase.
  *
- * LinuxCamera is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * LinuxCamera is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with LinuxCamera.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -30,9 +30,9 @@ extern "C" {
 
 namespace modules {
     namespace input {
-        
+
         using messages::support::Configuration;
-        
+
         // Create our impl class as per the pimpl idiom.
         class LinuxCamera::impl {
             public:
@@ -68,7 +68,7 @@ namespace modules {
                     std::string deviceID = settings.config["deviceID"];
                     std::string format = settings.config["imageFormat"];
                     bool rotated = settings.config["rotated"];
-                    
+
                     if (camera.getWidth() != static_cast<size_t>(width)
                         || camera.getHeight() != static_cast<size_t>(height)
                         || camera.getFormat() != format
@@ -91,6 +91,6 @@ namespace modules {
                 }
             });
         }
-        
+
     }  // input
 }  // modules

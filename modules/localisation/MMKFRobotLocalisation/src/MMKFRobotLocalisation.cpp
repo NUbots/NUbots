@@ -1,18 +1,18 @@
 /*
- * This file is part of MMKFRobotLocalisation.
+ * This file is part of the NUbots Codebase.
  *
- * MMKFRobotLocalisation is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MMKFRobotLocalisation is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MMKFRobotLocalisation.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -63,7 +63,7 @@ namespace localisation {
            Options<Sync<MMKFRobotLocalisation>>
            >("NUbugger Output", [this](const time_t&) {
             auto robot_msg = std::make_unique<std::vector<messages::localisation::Self>>();
-            
+
             for (auto& model : engine_->robot_models_.hypotheses()) {
                 arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
                 auto model_cov = model->GetCovariance();

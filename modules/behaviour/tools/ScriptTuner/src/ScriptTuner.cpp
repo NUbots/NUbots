@@ -1,21 +1,21 @@
 /*
-* This file is part of ScriptTuner.
-*
-* ScriptTuner is :free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* ScriptTuner is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with ScriptTuner. If not, see <http://www.gnu.org/licenses/>.
-*
-* Copyright 2013 NUBots <nubots@nubots.net>
-*/
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
 
 #include "ScriptTuner.h"
 #include "messages/support/Configuration.h"
@@ -92,7 +92,7 @@ namespace modules {
             }
 
             void ScriptTuner::run() {
-                
+
                 // Start curses mode
                 initscr();
                 // Capture our characters immediately (but pass through signals)
@@ -231,7 +231,7 @@ namespace modules {
                 mvprintw(LINES-6, 2, "Commands");
                 attroff(A_BOLD);
                 mvprintw(LINES-2, 2, "Type :help for a full list of commands");
-                
+
 
                  //Each Command
                 const char* COMMANDS[] = {
@@ -503,7 +503,7 @@ namespace modules {
             }
 
             void ScriptTuner::help() {
-                
+
                 move(LINES-6 ,12);
                 curs_set(true);
                 std::string tempcommand = userInput();
@@ -538,7 +538,7 @@ namespace modules {
                                              "Exit (this works to exit help and editGain)",
                                              "Manual Refresh View",
                                              "Edit the gains of an entire Script or Frame"};
-                    
+
                     size_t longestCommand = 0;
                     for(const auto& command : ALL_COMMANDS) {
                     longestCommand = std::max(longestCommand, std::strlen(command));
@@ -567,7 +567,7 @@ namespace modules {
                             mvprintw(5 + i, 2, ALL_COMMANDS[i]);
                             mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
                         }
-                       
+
                     }
                     refreshView();
                 }
@@ -579,7 +579,7 @@ namespace modules {
 
             //emits a message so motion can pick up the script
             void ScriptTuner::playScript() {
-                
+
                 // TODO Broken, need to fix sometime
                 //emit(std::make_unique<ExecuteScript>(script));
             }
@@ -590,7 +590,7 @@ namespace modules {
                 move(5,17);
                 curs_set(true);
                 userInputToFrame();
-                curs_set(false);                 
+                curs_set(false);
             }
 
 
@@ -678,7 +678,7 @@ namespace modules {
                             if(YPOSITION[i][j]==0 && XPOSITION[i][j]==0) {
                                 mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, 0, 0, nullptr);
                                 j=0;
-                                mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr); 
+                                mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
                             }
                             else if(YPOSITION[i][j]==7 && XPOSITION[i][j]==12) {
                                 mvchgat(YPOSITION[i][j],XPOSITION[i][j],5,0,0,nullptr);
@@ -737,9 +737,9 @@ namespace modules {
                                     lowerGainF=-1;
                                 }
                                 else {
-                                    
+
                                     mvprintw(YPOSITION[i][j],XPOSITION[i][j],"%5.1f", newGain);
-                                    
+
                                     //allows separate gains for upper and lower motors
                                     if (XPOSITION[i][j] == 20) {
                                         if (YPOSITION[i][j] == 6) {
@@ -748,7 +748,7 @@ namespace modules {
                                         else {
                                             upperGainF = newGain;
                                         }
-                                        
+
                                         // Zero out the "ALL" option
                                         if(YPOSITION[i][j] == 6) {
                                             mvprintw(6,7, "---.-");
@@ -795,16 +795,16 @@ namespace modules {
                                             }
                                         }
                                         changedUpper = true;
-                                        changedLower = true;   
+                                        changedLower = true;
                                     }
 
                                     mvprintw(20,2,"upperGainS = %5.1f",upperGainS);
                                     mvprintw(21,2,"lowerGainS = %5.1f",lowerGainS);
                                     mvprintw(22,2,"upperGainF = %5.1f",upperGainF);
                                     mvprintw(23,2,"lowerGainF = %5.1f",lowerGainF);
-                                    
+
                                     // if user has entered the same gain in upper and lower then automatically prints value in both and dashes upper and lower
-                                    if ((upperGainS == lowerGainS) && (upperGainS >= 0)) {   
+                                    if ((upperGainS == lowerGainS) && (upperGainS >= 0)) {
                                         mvprintw(6,7, "%5.1f", upperGainS);
                                         mvprintw(6,20, "---.-");
                                         mvprintw(6,33, "---.-");
@@ -814,17 +814,17 @@ namespace modules {
                                         mvprintw(8,20, "---.-");
                                         mvprintw(8,33, "---.-");
                                     }
-                                    
+
                                 }
                             }//end KEY_ENTER else
                             mvchgat(YPOSITION[i][j],XPOSITION[i][j],5,A_STANDOUT,0,nullptr);
                             break;//end case KEY_ENTER
                     }//switch
-                    
+
                 }//while
 
 
-                
+
                 //loop through all frames in script and edit gains
                 if (editScript) {
                 std::cout << "Hello!" << std::endl;
@@ -860,7 +860,7 @@ namespace modules {
                                     }
                                 break;
                             }
-                        }    
+                        }
                     }
                 }
 
@@ -897,9 +897,9 @@ namespace modules {
                                 }
                             break;
                         }
-                    }    
+                    }
                 }
-                
+
                 //output gains to scripttuner window automatic??
                 refreshView();
             }// editGain()
@@ -914,7 +914,7 @@ namespace modules {
                 if(!tempframe.empty() && tempframe.size() <= 4) {
                     try {
                         int tempframe2 = stoi(tempframe); //int tempframe = stoi(tempframe):???
-                        
+
                         //makes tempframe2 always positive
                         if(tempframe2 <= 0) {
                             tempframe2=-1*tempframe2;
@@ -923,7 +923,7 @@ namespace modules {
                         else {
                             tempframe2=tempframe2;
                         }
-                        
+
                         //checks user input is within correct range
                         if((size_t)tempframe2 <= script.frames.size()) {
 
@@ -970,7 +970,7 @@ namespace modules {
 // if
 // }
 
-            
+
         } // tools
     } // behaviours
 } // modules

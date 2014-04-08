@@ -1,18 +1,18 @@
 /*
- * This file is part of FeatureDetector.
+ * This file is part of the NUbots Codebase.
  *
- * FeatureDetector is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * FeatureDetector is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FeatureDetector.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -20,7 +20,7 @@
 #ifndef MESSAGES_VISION_VISIONOBJECTS_H
 #define MESSAGES_VISION_VISIONOBJECTS_H
 
-#include <armadillo> 
+#include <armadillo>
 #include <nuclear>
 
 #include "messages/vision/ClassifiedImage.h"
@@ -42,8 +42,8 @@ namespace messages {
 
 		class Ball : public VisionObject {
         public:
-			Ball() : VisionObject() {}	
-			float diameter;		
+			Ball() : VisionObject() {}
+			float diameter;
 		};
 
 		class Goal : public VisionObject {
@@ -69,7 +69,7 @@ namespace messages {
 			// 	UNKNOWN
 			// }
 			COLOUR_CLASS colour;
-		};	
+		};
 
 		//Line objects:
 
@@ -92,7 +92,7 @@ namespace messages {
 
 		class CentreCircle : public VisionObject {
         public:
-			CentreCircle() : VisionObject() {}		
+			CentreCircle() : VisionObject() {}
 		};
 
 		class LineObjects{

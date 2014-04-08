@@ -1,18 +1,18 @@
 /*
- * This file is part of NUbugger.
+ * This file is part of the NUbots Codebase.
  *
- * NUbugger is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * NUbugger is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with NUbugger.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -58,24 +58,24 @@ namespace modules {
 			int hwm = 50;
 			pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
             sub.setsockopt(ZMQ_SUBSCRIBE, 0, 0);
-			
+
             // Bind to port 12000
             pub.bind("tcp://*:12000");
             sub.bind("tcp://*:12001");
 
             powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&NUbugger::run), this), std::bind(std::mem_fn(&NUbugger::kill), this)));
-                
+
             on<Trigger<DataPoint>>([this](const DataPoint& data_point) {
                 Message message;
                 message.set_type(Message::DATA_POINT);
                 message.set_utc_timestamp(std::time(0));
-                
+
                 auto* dataPoint = message.mutable_datapoint();
                 dataPoint->set_label(data_point.label);
                 for (auto value : data_point.values) {
                     dataPoint->add_value(value);
                 }
-                
+
                 send(message);
             });
 
@@ -158,25 +158,25 @@ namespace modules {
             });
 
 			on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
-                
+
 				if(!image.source().empty()) {
-                    
+
                     Message message;
                     message.set_type(Message::VISION);
                     message.set_utc_timestamp(std::time(0));
-                    
+
                     auto* visionData = message.mutable_vision();
                     auto* imageData = visionData->mutable_image();
                     std::string* imageBytes = imageData->mutable_data();
-                    
+
 					// Reserve enough space in the image data to store the output
 					imageBytes->resize(image.source().size());
 					imageData->set_width(image.width());
 					imageData->set_height(image.height());
-					
+
 					imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
-                    
-                    
+
+
                     send(message);
                 }
 			});
@@ -200,7 +200,7 @@ namespace modules {
                 reactionStatistics->set_name(stats.identifier[0]);
                 reactionStatistics->set_triggername(stats.identifier[1]);
                 reactionStatistics->set_functionname(stats.identifier[2]);
-                
+
                 send(message);
             });*/
 
@@ -263,7 +263,7 @@ namespace modules {
                         api_segment->set_colour_class(colourClass);
                     }
                 }
-    
+
 				for (auto& matchedSegment : image.matchedHorizontalSegments)
                 {
 					for (auto& rowColourSegment : matchedSegment.second)
@@ -290,12 +290,12 @@ namespace modules {
 				}
 
                 send(message);
-                
+
             });
 
 			on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Goal> goals){
 				Message message;
- 
+
 				message.set_type(Message::VISION);
 				message.set_utc_timestamp(std::time(0));
 
@@ -324,8 +324,8 @@ namespace modules {
 				send(message);
 			});
 
-            
-			on<Trigger<messages::localisation::FieldObject>, 
+
+			on<Trigger<messages::localisation::FieldObject>,
 			   Options<Priority<NUClear::LOW>>>([this](const messages::localisation::FieldObject& field_object) {
 				Message message;
 
@@ -364,10 +364,10 @@ namespace modules {
             while (listening) {
                 zmq::message_t message;
                 sub.recv(&message);
-                
+
                 // If our message size is 0, then it is probably our termination message
                 if (message.size() > 0) {
-                    
+
                     // Parse our message
                     Message proto;
                     proto.ParseFromArray(message.data(), message.size());
@@ -375,7 +375,7 @@ namespace modules {
                 }
             }
         }
-        
+
         void NUbugger::recvMessage(const Message& message) {
             switch (message.type()) {
                 case Message::Type::Message_Type_COMMAND:
@@ -395,7 +395,7 @@ namespace modules {
                 auto lut = powerplant.get<LookUpTable>();
 
 				Message message;
- 
+
 				message.set_type(Message::LOOKUP_TABLE);
 				message.set_utc_timestamp(std::time(0));
 
@@ -405,12 +405,12 @@ namespace modules {
                 send(message);
             }
         }
-        
+
 
 		void NUbugger::recvLookupTable(const Message& message) {
             auto lookuptable = message.lookuptable();
             const std::string& lutData = lookuptable.table();
-            
+
             if (lookuptable.save()) {
                 NUClear::log("Loading LUT and saving");
                 auto savelut = std::make_unique<SaveLookUpTable>();

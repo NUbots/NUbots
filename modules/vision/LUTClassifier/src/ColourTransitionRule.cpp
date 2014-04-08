@@ -1,21 +1,22 @@
 /*
- * This file is part of ColourTransitionRule.
+ * This file is part of the NUbots Codebase.
  *
- * ColourTransitionRule is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ColourTransitionRule is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ColourTransitionRule.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
+
 #include "ColourTransitionRule.h"
 
 namespace modules {
@@ -25,10 +26,10 @@ namespace modules {
         using messages::vision::ColourSegment;
         using messages::vision::COLOUR_CLASS;
         using messages::vision::ClassifiedImage;
-        
+
         ColourTransitionRule::ColourTransitionRule() {
             // Empty constructor.
-        }                
+        }
 
         ColourSegment ColourTransitionRule::nomatch = {Colour::invalid, 0,arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2)};
 
@@ -61,7 +62,7 @@ namespace modules {
             std::string current_colour_name;
 
             //Load before colours
-            sstream << colours_before;            
+            sstream << colours_before;
             sstream >> current_colour_name;
 
             //While stream is not empty, check if the next word names a colour and load if it does. Get next word.
@@ -75,7 +76,7 @@ namespace modules {
                 sstream >> current_colour_name;
             }
 
-            //We only support one middle colour which gives our colour class (ie one object)    
+            //We only support one middle colour which gives our colour class (ie one object)
             Colour colour = ClassifiedImage::getColourFromName(colour_middle);
             m_colour_class = ClassifiedImage::getClassOfColour(colour);
 
@@ -90,9 +91,9 @@ namespace modules {
                 std::cout<< "Note that only one middle colour can be specified for a transition rule."<<std::endl;
                 std::cout<< "===================ERROR==================="<<std::endl;
             }
-            
+
             //Load after colours
-            sstream << colours_after;            
+            sstream << colours_after;
             sstream >> current_colour_name;
 
             //While stream is not empty, check if the next word names a colour and load if it does. Get next word.
@@ -104,9 +105,9 @@ namespace modules {
                 }
 
                 sstream >> current_colour_name;
-            }            
+            }
         }
-        
+
         /*!
           Checks if the given segment pair matches this rule (forward and reverse).
           @param before the preceding segment.
@@ -117,11 +118,11 @@ namespace modules {
         bool ColourTransitionRule::match(const ColourSegment &before, const ColourSegment& middle, const ColourSegment &after) const {
             return (oneWayMatch(before, middle, after) || oneWayMatch(after, middle, before)); //test both directions
         }
-        
+
         //! Returns the ID of the field object that this rule is for.
         COLOUR_CLASS ColourTransitionRule::getColourClass() const {
             return m_colour_class;
-        } 
+        }
 
         bool ColourTransitionRule::oneWayMatch(const ColourSegment &before, const ColourSegment &middle, const ColourSegment &after) const {
             //check lengths first to save iterating over colour vectors pointlessly as this method is majority false
@@ -138,15 +139,15 @@ namespace modules {
                 if (middle.m_colour == Colour::invalid) {
                     return false;   //there is a before set, but no before colour
                 }
-                
+
                 valid = false;
-                
+
                 for (auto it : m_middle) {
                     if(it == middle.m_colour ){
                         valid = true;   //a match has been found
                     }
                 }
-                
+
                 if (!valid) {
                     return false;   //did not match before set
                 }
@@ -156,15 +157,15 @@ namespace modules {
                 if (before.m_colour == Colour::invalid) {
                     return false;   //there is a before set, but no before colour
                 }
-                
+
                 valid = false;
-                
+
                 for (auto it : m_before) {
                     if(it == before.m_colour ){
                         valid = true;   //a match has been found
                     }
                 }
-                
+
                 if (!valid) {
                     return false;   //did not match before set
                 }
@@ -174,21 +175,21 @@ namespace modules {
                 if (after.m_colour == Colour::invalid) {
                     return false;   //there is an after set, but no after colour
                 }
-                
+
                 valid = false;
-                
+
                 for (auto it : m_after) {
                     if (it == after.m_colour ){
                         valid = true;   //a match has been found
                     }
                 }
-                
+
                 if (!valid) {
                     return false;   //did not match after set
                 }
             }
 
             return true;    //passed all checks
-        }       
+        }
     }
 }

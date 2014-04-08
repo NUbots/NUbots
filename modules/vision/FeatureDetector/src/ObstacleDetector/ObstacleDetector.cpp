@@ -1,10 +1,21 @@
-/**
-*   @name   ObjectDetectionCH
-*   @file   objectdetectionch.cpp
-*   @brief  basic object detection by checking breaks in green horizon.
-*   @author David Budden
-*   @date   22/02/2012
-*/
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
 
 #include "ObstacleDetector.h"
 
@@ -45,7 +56,7 @@ namespace modules {
                                                     const std::vector<ColourSegment>& cyanSegments,
                                                     const std::vector<ColourSegment>& magentaSegments,
                                                     const VisionKinematics& visionKinematics) {
-            //std::cout << "ObstacleDetector::run - " <<  debugCounter++ << std::endl;          
+            //std::cout << "ObstacleDetector::run - " <<  debugCounter++ << std::endl;
 
             std::vector<arma::vec2> obstaclePoints;
             obstaclePoints.reserve(greenHorizon.size());
@@ -53,7 +64,7 @@ namespace modules {
 
             int imgHeight = img.height();
             double meanY, stdDevY;
-            //std::cout << "ObstacleDetector::run - " <<  debugCounter++ << std::endl;          
+            //std::cout << "ObstacleDetector::run - " <<  debugCounter++ << std::endl;
 
             //Get subset of green horizon points
             std::vector<arma::vec2> horizonPoints;
@@ -68,15 +79,15 @@ namespace modules {
                 accY(point[1]);
             }
             //std::cout << "ObstacleDetector::run - " <<  debugCounter++ << std::endl;
-            //Segfault after here          
+            //Segfault after here
 
             meanY = accY.mean();
             stdDevY = accY.stddev();
 
             // For each point in interpolated list.
             for (const arma::vec2& point : horizonPoints) {
-                //std::cout << "ObstacleDetector::run - scanning from hor point "<< point << std::endl;  
-                //std::cout << "..." << std::endl;  
+                //std::cout << "ObstacleDetector::run - scanning from hor point "<< point << std::endl;
+                //std::cout << "..." << std::endl;
 
                 int greenTop = 0;
                 int greenCount = 0;
@@ -84,37 +95,37 @@ namespace modules {
                 // If bottom of image, assume object.
                 if (point[1] == (imgHeight - 1)) {
                     if (point[1] - greenHorizon.at(point[0])[1] >= MIN_DISTANCE_FROM_HORIZON) {
-                        //std::cout << "ObstacleDetector::run - point at bottom of image "<< std::endl;  
+                        //std::cout << "ObstacleDetector::run - point at bottom of image "<< std::endl;
                         obstaclePoints.insert(obstaclePoints.end(),point);
                     }
                 }
                 else {
                     // Scan from point to bottom of image.
                     for (int y = point[1]; y < imgHeight; y++) {
-                        //std::cout << "ObstacleDetector::run - scanning: y = "<< y << " /" << imgHeight << std::endl;  
+                        //std::cout << "ObstacleDetector::run - scanning: y = "<< y << " /" << imgHeight << std::endl;
 
                         if (ClassifiedImage::getClassOfColour(LUT.classifyPixel(img(point[0],y))) == COLOUR_CLASS::FIELD_COLOUR) {
-                            //std::cout << "ObstacleDetector::run - pixel field colour "<< std::endl;  
+                            //std::cout << "ObstacleDetector::run - pixel field colour "<< std::endl;
 
                             if (greenCount == 1) {
                                 greenTop = y;
                             }
 
                             greenCount++;
-                            
+
                             // If VER_THRESHOLD green pixels found outside of acceptable range, add point.
                             if (greenCount >= VER_THRESHOLD) {
-                                //std::cout << "ObstacleDetector::run - greenCount >= VER_THRESHOLD ("<< greenCount << " >= "<< VER_THRESHOLD<< ")" << std::endl;  
+                                //std::cout << "ObstacleDetector::run - greenCount >= VER_THRESHOLD ("<< greenCount << " >= "<< VER_THRESHOLD<< ")" << std::endl;
 
                                 if (greenTop > (meanY + OBJECT_THRESHOLD_MULT * stdDevY + 1)) {
-                                    //std::cout << "ObstacleDetector::run - greenTop > (meanY + OBJECT_THRESHOLD_MULT * stdDevY + 1) ("<< greenTop << " > "<< (meanY + OBJECT_THRESHOLD_MULT * stdDevY + 1)<< ")" << std::endl;  
-                                    //std::cout << "ObstacleDetector::run - greenHorizon.at(static_cast<int>(point[0]))[1]) = "<< greenHorizon.at(static_cast<int>(point[0]))[1] << std::endl;  
+                                    //std::cout << "ObstacleDetector::run - greenTop > (meanY + OBJECT_THRESHOLD_MULT * stdDevY + 1) ("<< greenTop << " > "<< (meanY + OBJECT_THRESHOLD_MULT * stdDevY + 1)<< ")" << std::endl;
+                                    //std::cout << "ObstacleDetector::run - greenHorizon.at(static_cast<int>(point[0]))[1]) = "<< greenHorizon.at(static_cast<int>(point[0]))[1] << std::endl;
 
                                     // Only add point if it is outside of minimum distance.
                                     if ((y - greenHorizon.at(static_cast<int>(point[0]))[1]) >= MIN_DISTANCE_FROM_HORIZON) {
-                                        //std::cout << "ObstacleDetector::run - greenHorizon.at(static_cast<int>(point[0]))[1]) >= MIN_DISTANCE_FROM_HORIZON  ("<< greenHorizon.at(static_cast<int>(point[0]))[1] << " > "<<MIN_DISTANCE_FROM_HORIZON<< ")" << std::endl;  
+                                        //std::cout << "ObstacleDetector::run - greenHorizon.at(static_cast<int>(point[0]))[1]) >= MIN_DISTANCE_FROM_HORIZON  ("<< greenHorizon.at(static_cast<int>(point[0]))[1] << " > "<<MIN_DISTANCE_FROM_HORIZON<< ")" << std::endl;
                                         double y_ = y;
-                                        arma::vec2 pushPoint = { point[0] , y_};                                       
+                                        arma::vec2 pushPoint = { point[0] , y_};
                                         //std::cout << "ObstacleDetector::run - push_back " << pushPoint << std::endl;
                                         obstaclePoints.insert(obstaclePoints.end(),pushPoint);
                                         //std::cout << "ObstacleDetector::run - push_back done "<< std::endl;
@@ -130,12 +141,12 @@ namespace modules {
                         else {
                             greenCount = 0; // not green - reset
                         }
-                        
+
 
                         // If bottom reached without green, add bottom point.
                         if (y == (imgHeight - 1)) {
                             if ((y - greenHorizon.at(static_cast<int>(point[0]))[1]) >= MIN_DISTANCE_FROM_HORIZON) {
-                                //std::cout << "ObstacleDetector::run - bottom of image reached without green "<< std::endl;  
+                                //std::cout << "ObstacleDetector::run - bottom of image reached without green "<< std::endl;
                                 double y_ = y;
                                 arma::vec2 pushPoint = { point[0] , y_};
                                 obstaclePoints.insert(obstaclePoints.end(),pushPoint);
@@ -144,12 +155,12 @@ namespace modules {
                     }
                 }
             }
-            ////std::cout  << "Found obstacle points:"<< obstaclePoints.size() <<std::endl;            
+            ////std::cout  << "Found obstacle points:"<< obstaclePoints.size() <<std::endl;
             // Find obstacles from these points.
             int start = 0;
             int count = 0, bottom = 0;
             bool scanning = false;
-            //std::cout << "ObstacleDetector::run - " <<  debugCounter++ << std::endl;          
+            //std::cout << "ObstacleDetector::run - " <<  debugCounter++ << std::endl;
 
             for (unsigned int i = 0; i < obstaclePoints.size(); i++) {
                 if (!scanning) {
@@ -190,9 +201,9 @@ namespace modules {
                     }
                 }
             }
-            //std::cout << "ObstacleDetector::run - " <<  debugCounter++ << std::endl;          
+            //std::cout << "ObstacleDetector::run - " <<  debugCounter++ << std::endl;
 
-            // NOW ATTEMPT TO FIND ROBOTS        
+            // NOW ATTEMPT TO FIND ROBOTS
             for (Obstacle& obstacle : obstacles) {
                 int cyanCount = 0;
                 int magentaCount = 0;
@@ -230,7 +241,7 @@ namespace modules {
                     obstacle.m_colour = COLOUR_CLASS::UNKNOWN_COLOUR;
                 }
             }
-            
+
 
             return std::move(createObstacleMessage(obstacles));
         }
@@ -254,7 +265,7 @@ namespace modules {
                     obstacle_message->back().screenCartesian = obstacle.m_location.screenCartesian;
                     obstacle_message->back().sizeOnScreen = obstacle.m_sizeOnScreen;
                     obstacle_message->back().timestamp = NUClear::clock::now();
-                    
+
                     obstacle_message->back().arcWidth = obstacle.m_arcWidth;
                     obstacle_message->back().colour = obstacle.m_colour;
                 }

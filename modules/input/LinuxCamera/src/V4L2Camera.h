@@ -1,18 +1,18 @@
 /*
- * This file is part of LinuxCamera.
+ * This file is part of the NUbots Codebase.
  *
- * LinuxCamera is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * LinuxCamera is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with LinuxCamera.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -69,7 +69,7 @@ namespace modules {
 
             /// @brief The name of the device to read camera data from
             std::string deviceID;
-            
+
             /// @brief the format that we are reading in from the camera
             std::string format;
 
@@ -99,7 +99,7 @@ namespace modules {
              * @details
              *   This function blocks until the camera device provides a new frame of video
              *   data, at which point it copies the frame into a new Image and returns. The
-             *   camera device must already be set up (using resetCamera) and 
+             *   camera device must already be set up (using resetCamera) and
              *
              * @return a pointer to the latest image from the camera
              */
@@ -134,7 +134,7 @@ namespace modules {
              * @brief Returns the device id that is currently used as the camera
              */
             const std::string& getDeviceID() const;
-            
+
             /**
              * @brief returns the format that the camera is currently reading (YUYV or MJPG)
              */
@@ -160,7 +160,7 @@ namespace modules {
              */
             void stopStreaming();
         };
-        
+
     }  // input
 }  // modules
 

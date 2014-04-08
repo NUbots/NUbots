@@ -1,18 +1,18 @@
 /*
- * This file is part of FeatureDetector.
+ * This file is part of the NUbots Codebase.
  *
- * FeatureDetector is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * FeatureDetector is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FeatureDetector.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -30,8 +30,8 @@ namespace modules {
             LargestConsensus,
             BestFittingConsensus
         };
-            
-	    namespace RANSAC{			
+
+	    namespace RANSAC{
 
             /************************************
              *      FUNCTION PROTOTYPES         *
@@ -63,11 +63,11 @@ namespace modules {
              *      FUNCTION IMPLEMENTATIONS    *
              ************************************/
             template<class Model, typename DataPoint>
-            std::vector<std::pair<Model, std::vector<DataPoint>>> findMultipleModels(const std::vector<DataPoint>& points, 
-                                                    double e, 
-                                                    unsigned int n, 
-                                                    unsigned int k, 
-                                                    unsigned int max_iterations, 
+            std::vector<std::pair<Model, std::vector<DataPoint>>> findMultipleModels(const std::vector<DataPoint>& points,
+                                                    double e,
+                                                    unsigned int n,
+                                                    unsigned int k,
+                                                    unsigned int max_iterations,
                                                     RANSAC_SELECTION_METHOD method) {
                 double variance;
                 bool found;
@@ -78,13 +78,13 @@ namespace modules {
 
                 // Run first iterations.
                 found = findModel(points, model, consensus, remainder, variance, e, n, k, method);
-                
+
                 if (found) {
                     results.push_back(std::pair<Model, std::vector<DataPoint>>(model, consensus));
-                    
+
                     while (found && results.size() < max_iterations) {
                         found = findModel(remainder, model, consensus, remainder, variance, e, n, k, method);
-                        
+
                         if(found)
                             results.push_back(std::pair<Model, std::vector<DataPoint>>(model, consensus));
                     }
@@ -94,14 +94,14 @@ namespace modules {
             }
 
             template<class Model, typename DataPoint>
-            bool findModel(std::vector<DataPoint> points, 
-                            Model &result, 
-                            std::vector<DataPoint>& consensus, 
-                            std::vector<DataPoint>& remainder, 
-                            double& variance, 
-                            double e, 
-                            unsigned int n, 
-                            unsigned int k, 
+            bool findModel(std::vector<DataPoint> points,
+                            Model &result,
+                            std::vector<DataPoint>& consensus,
+                            std::vector<DataPoint>& remainder,
+                            double& variance,
+                            double e,
+                            unsigned int n,
+                            unsigned int k,
                             RANSAC_SELECTION_METHOD method) {
                 if ((points.size() < n) || (n < result.minPointsForFit())) {
                     return false;
@@ -109,10 +109,10 @@ namespace modules {
 
                 // Used for BestFittingConsensus method.
                 double minerr = std::numeric_limits<double>::max();
-                
+
                 // Used for LargestConsensus method.
                 size_t largestconsensus = 0;
-                
+
                 // Arrays for storing concensus sets.
                 bool c1[points.size()];
                 bool c2[points.size()];
@@ -130,18 +130,18 @@ namespace modules {
                     unsigned int concensus_size = 0;
 
                     // Use the concensus that is not currently the best.
-                    cur_concensus = ((c1 == best_concensus) ? c2 : c1);   
+                    cur_concensus = ((c1 == best_concensus) ? c2 : c1);
 
                     // Determine consensus set.
                     for (size_t i = 0; i < points.size(); i++) {
                         double dist = m.calculateError(points.at(i));
-                        
+
                         // Cheap and nasty - assuming that true.
                         bool in = (dist < e);
                         cur_variance += (dist * in);
                         concensus_size += in;
                         cur_concensus[i] = in;
-                        
+
         //                if (dist < e) {
         //                    cur_variance += dist;
         //                    concensus_size++;
@@ -166,10 +166,10 @@ namespace modules {
                                     minerr = cur_variance;							// Keep variance for other purposes.
                                     best_concensus = cur_concensus;
                                 }
-                                
+
                                 break;
                             }
-                            
+
                             case BestFittingConsensus: {
                                 if(cur_variance < minerr) {
                                     found = true;
@@ -177,13 +177,13 @@ namespace modules {
                                     minerr = cur_variance;
                                     best_concensus = cur_concensus;
                                 }
-                                
+
                                 break;
                             }
                         }
                     }
                 }
-                
+
                 variance = minerr;
 
                 if(found) {
@@ -194,13 +194,13 @@ namespace modules {
                         if(best_concensus[i]) {
                             consensus.push_back(points.at(i));
                         }
-                        
+
                         else {
                             remainder.push_back(points.at(i));
                         }
                     }
                 }
-                
+
                 return found;
             }
 
@@ -210,38 +210,38 @@ namespace modules {
             Model generateRandomModel(const std::vector<DataPoint>& points) {
                 Model model;
                 size_t n = points.size();
-                
+
                 if (n >= model.minPointsForFit()) {
                     std::vector<size_t> indices;
                     size_t next;
-                    
+
                     indices.push_back(rand() % n);
 
                     while(indices.size() < model.minPointsForFit()) {
                         bool unique;
-                        
+
                         do {
                             unique = true;
                             next = rand() % n;
-                            
+
                             for (size_t i : indices) {
                                 if(i == next)
                                     unique = false;
-                            }		                
+                            }
                         } while(!unique);
-                        
+
                         indices.push_back(next);
                     }
 
                     std::vector<DataPoint> rand_pts;
-                    
+
                     for (size_t i : indices) {
                         rand_pts.push_back(points.at(i));
                     }
 
                     model.regenerate(rand_pts);
                 }
-                
+
                     return model;
             //        Model model;
             //        if(points.size() >= model.minPointsForFit()) {

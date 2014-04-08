@@ -1,10 +1,29 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+
 #include "Action.h"
 
 namespace messages {
     namespace behaviour {
-        
+
         using messages::input::ServoID;
-        
+
         std::set<ServoID> servosForLimb(const LimbID& limb) {
             switch(limb) {
                 case LimbID::HEAD:
@@ -12,7 +31,7 @@ namespace messages {
                         ServoID::HEAD_PITCH,
                         ServoID::HEAD_YAW
                     };
-                    
+
                 case LimbID::LEFT_LEG:
                     return {
                         ServoID::L_ANKLE_PITCH,
@@ -22,7 +41,7 @@ namespace messages {
                         ServoID::L_HIP_YAW,
                         ServoID::L_KNEE
                     };
-                    
+
                 case LimbID::RIGHT_LEG:
                     return {
                         ServoID::R_ANKLE_PITCH,
@@ -32,33 +51,33 @@ namespace messages {
                         ServoID::R_HIP_YAW,
                         ServoID::R_KNEE
                     };
-                    
+
                 case LimbID::LEFT_ARM:
                     return {
                         ServoID::L_SHOULDER_PITCH,
                         ServoID::L_SHOULDER_ROLL,
                         ServoID::L_ELBOW
                     };
-                    
+
                 case LimbID::RIGHT_ARM:
                     return {
                         ServoID::R_SHOULDER_PITCH,
                         ServoID::R_SHOULDER_ROLL,
                         ServoID::R_ELBOW
                     };
-                    
+
                 default: {
                     return std::set<ServoID>{};
                 }
             }
         }
-        
+
         LimbID limbForServo(const ServoID& servo) {
             switch(servo) {
                 case ServoID::HEAD_PITCH:
                 case ServoID::HEAD_YAW:
                     return LimbID::HEAD;
-                    
+
                 case ServoID::L_ANKLE_PITCH:
                 case ServoID::L_ANKLE_ROLL:
                 case ServoID::L_HIP_PITCH:
@@ -66,7 +85,7 @@ namespace messages {
                 case ServoID::L_HIP_YAW:
                 case ServoID::L_KNEE:
                     return LimbID::LEFT_LEG;
-                    
+
                 case ServoID::R_ANKLE_PITCH:
                 case ServoID::R_ANKLE_ROLL:
                 case ServoID::R_HIP_PITCH:
@@ -74,12 +93,12 @@ namespace messages {
                 case ServoID::R_HIP_YAW:
                 case ServoID::R_KNEE:
                     return LimbID::RIGHT_LEG;
-                    
+
                 case ServoID::L_SHOULDER_PITCH:
                 case ServoID::L_SHOULDER_ROLL:
                 case ServoID::L_ELBOW:
                     return LimbID::LEFT_ARM;
-                    
+
                 case ServoID::R_SHOULDER_PITCH:
                 case ServoID::R_SHOULDER_ROLL:
                 case ServoID::R_ELBOW:

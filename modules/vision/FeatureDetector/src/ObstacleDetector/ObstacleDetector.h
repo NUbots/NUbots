@@ -1,10 +1,21 @@
-/**
-*   @name   ObjectDetectionCH
-*   @file   objectdetectionch.h
-*   @brief  basic object detection by checking breaks in green horizon.
-*   @author David Budden
-*   @date   22/02/2012
-*/
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
 
 #ifndef MODULE_VISION_OBSTACLEDETECTOR_H
 #define MODULE_VISION_OBSTACLEDETECTOR_H
@@ -42,7 +53,7 @@ namespace modules {
                                  double OBJECT_THRESHOLD_MULT_);
         private:
             void appendEdgesFromSegments(const std::vector<messages::vision::ColourSegment>& segments, std::vector<arma::vec2>& pointList);
-            
+
             int MIN_DISTANCE_FROM_HORIZON;
             unsigned int VERTICAL_SCANLINE_SPACING;
             int MIN_CONSECUTIVE_POINTS;

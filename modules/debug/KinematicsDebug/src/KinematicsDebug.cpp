@@ -1,19 +1,18 @@
-
 /*
- * This file is part of NUbugger.
+ * This file is part of the NUbots Codebase.
  *
- * NUbugger is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * NUbugger is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with NUbugger.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -52,7 +51,7 @@ namespace modules {
         				arma::mat44 target = yRotationMatrix(request.config["yAngle"], 4);
         				target *= xRotationMatrix(request.config["xAngle"], 4);
         				target *= zRotationMatrix(request.config["zAngle"], 4);
-        				
+
         				// translation
         				target(0,3) = request.config["x"]; // down/up
         				target(1,3) = request.config["y"]; // left/right
@@ -121,11 +120,11 @@ namespace modules {
                             arma::mat44 ikRequest = yRotationMatrix(request.config["yAngle"], 4);
                             ikRequest *= xRotationMatrix(request.config["xAngle"], 4);
                             ikRequest *= zRotationMatrix(request.config["zAngle"], 4);
-                            
+
                             // translation
                             ikRequest(0,3) = request.config["x"];
-                            ikRequest(1,3) = request.config["y"]; 
-                            ikRequest(2,3) = request.config["z"]; 
+                            ikRequest(1,3) = request.config["y"];
+                            ikRequest(2,3) = request.config["z"];
 
                             if(request.config["RANDOMIZE"]){
                                 ikRequest = yRotationMatrix(2*M_PI*rand()/static_cast<double>(RAND_MAX), 4);
@@ -138,7 +137,7 @@ namespace modules {
 
                             bool left = request.config["left"];
                             bool right = request.config["right"];
-                            
+
                             std::unique_ptr<Sensors> sensors = std::make_unique<Sensors>();
                             sensors->servos = std::vector<Sensors::Servo>(20);
 
@@ -149,7 +148,7 @@ namespace modules {
                                     float position;
 
                                     std::tie(servoID, position) = legJoint;
-                                    
+
                                     sensors->servos[static_cast<int>(servoID)].presentPosition = position;
                                 }
                             }
@@ -161,13 +160,13 @@ namespace modules {
                                     float position;
 
                                     std::tie(servoID, position) = legJoint;
-                                    
+
                                     sensors->servos[static_cast<int>(servoID)].presentPosition = position;
                                 }
                             }
-                            std::cout<< "KinematicsNULLTest -calculating forward kinematics." <<std::endl;                
+                            std::cout<< "KinematicsNULLTest -calculating forward kinematics." <<std::endl;
                             arma::mat44 lFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
-                            arma::mat44 rFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];                            
+                            arma::mat44 rFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
                             NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts left foot: \n",lFootPosition);
                             NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts right foot: \n",rFootPosition);
                             std::cout << "Compared to request: \n" << ikRequest << std::endl;
@@ -184,24 +183,24 @@ namespace modules {
                                     rmax_error = rerror;
                                 }
                             }
-                            std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<std::endl;                        
-                            std::cout<< (lmax_error < ERROR_THRESHOLD ? "LEFT IK TEST PASSED" : "\n\n\n!!!!!!!!!! LEFT IK TEST FAILED !!!!!!!!!!\n\n\n" ) << "     (max_error = " << lmax_error << ")"<<std::endl; 
-                            std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<std::endl;       
+                            std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<std::endl;
+                            std::cout<< (lmax_error < ERROR_THRESHOLD ? "LEFT IK TEST PASSED" : "\n\n\n!!!!!!!!!! LEFT IK TEST FAILED !!!!!!!!!!\n\n\n" ) << "     (max_error = " << lmax_error << ")"<<std::endl;
+                            std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<std::endl;
 
-                            std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<std::endl;                        
-                            std::cout<< (rmax_error < ERROR_THRESHOLD ? "RIGHT IK TEST PASSED" : "\n\n\n!!!!!!!!!! RIGHT IK TEST FAILED !!!!!!!!!!\n\n\n" ) << "     (max_error = " << rmax_error << ")"<<std::endl; 
-                            std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<std::endl;       
+                            std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<std::endl;
+                            std::cout<< (rmax_error < ERROR_THRESHOLD ? "RIGHT IK TEST PASSED" : "\n\n\n!!!!!!!!!! RIGHT IK TEST FAILED !!!!!!!!!!\n\n\n" ) << "     (max_error = " << rmax_error << ")"<<std::endl;
+                            std::cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<std::endl;
 
                             if(lmax_error >= ERROR_THRESHOLD or rmax_error >= ERROR_THRESHOLD){
                                 numberOfFails++;
                             }
-                            sensors->orientation = arma::eye(3,3); 
-                            emit(std::move(sensors));    
-                        }           
-                        std::cout<< "IK Leg NULL Test : "<< numberOfFails << " Total Failures " <<std::endl;       
-                        
+                            sensors->orientation = arma::eye(3,3);
+                            emit(std::move(sensors));
+                        }
+                        std::cout<< "IK Leg NULL Test : "<< numberOfFails << " Total Failures " <<std::endl;
+
                     });
-                
+
                     on< Trigger<Configuration<HeadKinematicsNULLTest>> >([this](const Configuration<HeadKinematicsNULLTest>& request) {
                         int iterations = 1;
                         int numberOfFails = 0;
@@ -209,7 +208,7 @@ namespace modules {
                         float yaw = request.config["yaw"];
                         float pitch = request.config["pitch"];
                         bool RANDOMIZE = request.config["RANDOMIZE"];
-                        
+
                         arma::vec3 cameraVec = {cos(yaw)*cos(pitch), sin(yaw)*cos(pitch), -sin(pitch)};
                         if(RANDOMIZE){
                             iterations = request.config["RANDOM_ITERATIONS"];
@@ -222,24 +221,24 @@ namespace modules {
                                 cameraVec[2] = rand()/static_cast<double>(RAND_MAX);
                                 cameraVec *= 1/arma::norm(cameraVec,2);
                             }
-                            
+
                             std::vector< std::pair<messages::input::ServoID, float> > angles = calculateHeadJoints<DarwinModel>(cameraVec);
-                            Sensors sensors;                       
+                            Sensors sensors;
                             sensors.servos = std::vector<Sensors::Servo>(20);
-                            
+
                             for (auto& angle : angles) {
                                     ServoID servoID;
                                     float position;
 
                                     std::tie(servoID, position) = angle;
-                                    
+
                                     sensors.servos[static_cast<int>(servoID)].presentPosition = position;
                             }
 
                             arma::mat44 fKin = calculatePosition<DarwinModel>(sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
 
                             float max_error = 0;
-                            for(int i = 0; i < 3 ; i++){                                
+                            for(int i = 0; i < 3 ; i++){
                                 float error = std::abs(fKin(i, 0) - cameraVec[i]);
                                 if (error>max_error) {
                                     max_error = error;
@@ -257,9 +256,9 @@ namespace modules {
                             NUClear::log<NUClear::DEBUG>("++++++++++++++++++++++++++++++++++++++++++++++++++");
 
                         }
-                        std::cout<< "IK Head NULL Test : "<< numberOfFails << " Total Failures out of " << iterations <<std::endl;  
+                        std::cout<< "IK Head NULL Test : "<< numberOfFails << " Total Failures out of " << iterations <<std::endl;
 
-                       
+
                     });
             }
     } // debug

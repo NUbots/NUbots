@@ -92,9 +92,9 @@ The Nubots commit to participation at RoboCup 2014 upon successful qualification
 
 The NUbots team was founded in 2002 and participated for the first time at RoboCup in Fukuoka in the Sony Four-Legged League (3rd place). Since then the team has  a strong history of competition and success in the RoboCup SPL/Four-Legged League, obtaining many top three placements and winning the title in 2006 and 2008. In 2013 the NUbots missed out on a place in the quarter finals by only one goal. We hope to improve on this in 2014.
 
-The NUbots joined the Kid-size league in 2012 with the DARwIn-OP robots, and ported the SPL NUbots codebase to the new platform. The NUbots retain a robust and fast vision and localisation system from their time in the SPL, and demonstrated the ability to draw on improvements in other leagues by porting the B-human NAO walk to the DARwIn-OP for 2012-2013. In 2013 the NUbots presented a curiosity based reinforcement learning approach to gaze planning at Robocup, which was used for all games during the competition. 
+The NUbots joined the Kid-size league in 2012 with the DARwIn-OP robots, and ported the SPL NUbots codebase to the new platform. The NUbots retain a robust and fast vision and localisation system from their time in the SPL, and demonstrated the ability to draw on improvements in other leagues by porting the B-human NAO walk to the DARwIn-OP for 2012-2013. In 2013 the NUbots presented a curiosity based reinforcement learning approach to gaze planning at Robocup, which was used for all games during the competition.
 
-%During the previous two years the NUbots SPL code base has been ported to the DARwIn-OP platform and the majority of modules previously used on the NAO robot in the SPL were fielded for RoboCup 2012. Since then the majority of modules have undergone major revision in order to allow more effective use of the newer platform and in response to recent changes in the league rules. 
+%During the previous two years the NUbots SPL code base has been ported to the DARwIn-OP platform and the majority of modules previously used on the NAO robot in the SPL were fielded for RoboCup 2012. Since then the majority of modules have undergone major revision in order to allow more effective use of the newer platform and in response to recent changes in the league rules.
 
 \section{Background of the NUbots Team Members}
 \begin{itemize}
@@ -152,7 +152,7 @@ The NUbots use the DARwIn-OP robot with foot sensors. The team has five of these
 %\end{center}
 %\end{figure}
 
-The NUbots team's major research focus is on using machine learning methods within the software systems of the robot to achieve increased performance and autonomy~\cite{ChalupEtAlSMC2007}. The current NUbots software source is available from \cite{nubotsGit} and is covered under the GPL. This includes associated toolkits for building and deploying the software. Our software is designed to work on multiple robotic platforms, and all of the individual modules have been designed to be easily used in other systems. The sensors and actuators are accessed using a standard format, regardless of the robot running the software~\cite{Kulk2011c}. 
+The NUbots team's major research focus is on using machine learning methods within the software systems of the robot to achieve increased performance and autonomy~\cite{ChalupEtAlSMC2007}. The current NUbots software source is available from \cite{nubotsGit} and is covered under the GPL. This includes associated toolkits for building and deploying the software. Our software is designed to work on multiple robotic platforms, and all of the individual modules have been designed to be easily used in other systems. The sensors and actuators are accessed using a standard format, regardless of the robot running the software~\cite{Kulk2011c}.
 
 This year marks a major change in the software architecture of the NUBots, with improved software modularity coming from a cutting edge event based message passing system. The NUBots' architecture now has strong parallels with ROS (although without the associated overheads) and interoperability with ROS modules is planned. The NUBots software is designed to allow new teams and team members to easily understand and innovate on existing code. We plan to provide a full code release post Robocup 2014.
 
@@ -160,7 +160,7 @@ This year marks a major change in the software architecture of the NUBots, with 
 
 %\begin{figure}[bht!]
 %\begin{center}
-%\includegraphics[width=1.0\textwidth]{Platform.png} 
+%\includegraphics[width=1.0\textwidth]{Platform.png}
 %\caption{An overview of the software framework, and the transfer of information between the hardware and software modules via the blackboard~\cite{Kulk2011c}.}
 %\label{fig:platform}
 %\end{center}
@@ -177,7 +177,7 @@ In response to the increase in field size, the Logitech C905 is being replaced w
 
 The Main Controller (CompuLab fit-PC2i) is being replaced by an ODroid-XU to provide the extra processing power that is required for processing the images from the Logitech C920.
 
-A prototype hardware replacement for the ROBOTIS CM730 Sub Controller, named the TAJ3850, is 
+A prototype hardware replacement for the ROBOTIS CM730 Sub Controller, named the TAJ3850, is
 being developed as part of a Computer Engineering Third Year Project. The TAJ3850 provides power to all system components, a battery monitoring system featuring a low-voltage alarm and an extremely low-voltage automatic cut-off, an improved six-axis motion processing unit, a temperature sensor, and five dedicated motor buses. The TAJ3850 also exposes peripheral connections from the ODroid-XU to the back panel of the robot (HDMI, USB3, LAN, Audio output), monitors the three back-panel control buttons, and controls the status LEDs on the back panel and in the head.
 
 %\begin{figure}
@@ -188,7 +188,7 @@ being developed as part of a Computer Engineering Third Year Project. The TAJ385
 %\end{center}
 %\end{figure}
 
-%The above enhancements will not be implemented on all of the DARwIn-OP robots. 
+%The above enhancements will not be implemented on all of the DARwIn-OP robots.
 The remaining robots will have the standard DARwIn-OP configuration of a Logitech C905, fit-PC2i and CM730.
 
 \section{Research Areas}
@@ -199,9 +199,9 @@ The remaining robots will have the standard DARwIn-OP configuration of a Logitec
 \noindent\textbf{Localisation and Kalman Filters:} Research on the
 topic of localisation focused on Bayesian approaches to robot
 localisation including Kalman Filter and particle filter
-based methods. We are interested in 
+based methods. We are interested in
 modifications of the Kalman Filter to handle non-ideal information
-from vision, incorporate increased information from multiple agents, 
+from vision, incorporate increased information from multiple agents,
 and effectively utilise non-unique objects.
 %Furthermore we are also interested in the use of machine learning to
 %improve the models used by localisation. For information about our current approach see
@@ -210,14 +210,14 @@ and effectively utilise non-unique objects.
 
 \noindent\textbf{Development of the Robot Bear:} In a collaborative
 effort with the company Tribotix and colleagues in design a
-bear-like robot (called Hykim) was developed~\cite{ChalupEtAl2006}. The idea was to have a modular open platform using high quality Dynamixel servos. 
+bear-like robot (called Hykim) was developed~\cite{ChalupEtAl2006}. The idea was to have a modular open platform using high quality Dynamixel servos.
 \\
 
 \noindent\textbf{Biped Robot Locomotion:} The improvement of walking speed and stability has been investigated by the NUbots for several years and on different platforms: On the AIBO robot we achieved one of the fastest walks at that time by walk parameter evolution \cite{QuinlanEtAlACRA2003,ChalupEtAlSMC2007}. On the Nao robot we improved existing walk engines by modifying the joint stiffnesses, or controller gains, \cite{Kulk2008,Kulk2010,Kulk2010a}. The stiffnesses were selected through an iterative process to maximise the cost of transport. We investigated the application of Support Vector Machines and Neural Networks to proprioception data for sensing perturbations during pseudo quiet stance. Walk improvements have been primarily done via optimisation techniques \cite{Kulk2011a},  %,Kulk2011b
-with recent improvements to our framework for online optimisation of bipedal humanoid locomotion. 
+with recent improvements to our framework for online optimisation of bipedal humanoid locomotion.
 The use of spiking neural networks has been trialled in simulation~\cite{WiklendtChalup2008}. Prior to RoboCup 2012 the walk engine developed by the leading SPL team BHuman~\cite{BHumanWalk2010} was ported to the DARwIn-OP platform, and a variety of optimisation techniques were developed and successfully applied to improve walking speed and stability of the DARwIn-OP`\cite{budden2013probabilistic}. Similar optimisations are in process for the Team Darwin 2013 walk.\\
 
-\noindent\textbf{Reinforcement Learning, Affective Computing and Robot Emotions:} We investigate the feasibility of reinforcement learning or neurodynamic programming for applications such as motor control and music composition. Concepts for affective computing are developed in multidisciplinary projects in collaboration with the areas of architecture and cognitive science. The concept of emotion is important for selective memory formation and action weighting and continues to gain importance in the robotics community, including within robotic soccer. A number of projects in the Newcastle Robots Laboratory already address this topic~\cite{Pareidolia2010,HongEtAl2013a,HongEtAl2013b,WongEtAl2013}. 
+\noindent\textbf{Reinforcement Learning, Affective Computing and Robot Emotions:} We investigate the feasibility of reinforcement learning or neurodynamic programming for applications such as motor control and music composition. Concepts for affective computing are developed in multidisciplinary projects in collaboration with the areas of architecture and cognitive science. The concept of emotion is important for selective memory formation and action weighting and continues to gain importance in the robotics community, including within robotic soccer. A number of projects in the Newcastle Robots Laboratory already address this topic~\cite{Pareidolia2010,HongEtAl2013a,HongEtAl2013b,WongEtAl2013}.
 \\
 
 \noindent\textbf{Gaze analysis and head movement behavioural learning:} We investigated methods for human and robot pedestrian gaze analysis in~\cite{JalalianEtAl_CAADRIA2011,WongEtAl2012} as well as space perception, way finding and the detection and analysis of salient regions~\cite{BhatiaChalup2013,BhatiaEtAl2013,BhatiaChalupOstwald2013}. Recently we  applied motivated reinforcement learning techniques to optimising head movement behaviour, providing a robust algorithm by which a robot learns to choose landmarks to localise efficiently during a soccer game~\cite{FountainEtAl2014}. This algorithm was used in competition at Robocup 2013.
@@ -225,7 +225,7 @@ The use of spiking neural networks has been trialled in simulation~\cite{Wiklend
 
 \noindent\textbf{Manifold Learning:} In several projects we
 investigate the application of non-linear dimensionality reduction
-methods in order to achieve more understanding of, and more precise 
+methods in order to achieve more understanding of, and more precise
 and efficient processing of, high-dimensional visual and acoustic data.
 \cite{ChalupEtAl2007b,WongChalup_WCCI_2008,WongEtAl2012}.%WongChalup2008,
 \\

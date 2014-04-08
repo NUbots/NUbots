@@ -1,18 +1,18 @@
 /*
- * This file is part of LUTClassifier.
+ * This file is part of the NUbots Codebase.
  *
- * LUTClassifier is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * LUTClassifier is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with LUTClassifier.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -33,7 +33,7 @@ namespace messages {
 
         /**
         * The possible alignment for segments in a segmented region.
-        */     
+        */
         enum ScanDirection {
             VERTICAL,
             HORIZONTAL
@@ -79,7 +79,7 @@ namespace messages {
             std::shared_ptr<const messages::input::Image> image;         //@! The image from which the segments are derived.
 
             std::shared_ptr<const messages::vision::LookUpTable> LUT;
-             
+
 
             /*!
             Gets the name of the given colour.
@@ -147,76 +147,76 @@ namespace messages {
                 if (name.compare("unclassified") == 0) {
                     return unclassified;
                 }
-                
+
                 else if (name.compare("white") == 0) {
                     return white;
                 }
-                
+
                 else if (name.compare("green") == 0) {
                     return green;
                 }
-                
+
                 else if (name.compare("shadow-object") == 0) {
                     return shadow_object;
                 }
-                
+
                 else if (name.compare("pink") == 0) {
                     return pink;
                 }
-                
+
                 else if (name.compare("pink-orange") == 0) {
                     return pink_orange;
                 }
-                
+
                 else if (name.compare("orange") == 0) {
                     return orange;
                 }
-                
+
                 else if (name.compare("yellow-orange") == 0) {
                     return yellow_orange;
                 }
-                
+
                 else if (name.compare("yellow") == 0) {
                     return yellow;
                 }
-                
+
                 else if (name.compare("blue") == 0) {
                     return blue;
                 }
-                
+
                 else if (name.compare("shadow-blue") == 0) {
                     return shadow_blue;
                 }
-                
+
                 else {
                     return invalid;
                 }
             }
-            
+
             //! @brief converts a string into a colour class.
             static COLOUR_CLASS getColourClassFromName(const std::string& name) {
                 if (name.compare("BALL_COLOUR") == 0) {
                     return BALL_COLOUR;
                 }
-                
+
                 else if (name.compare("GOAL_COLOUR") == 0) {
                     return GOAL_COLOUR;
                 }
-                
-    /*          
+
+    /*
                 else if (name.compare("GOAL_Y_COLOUR") == 0) {
                     return GOAL_Y_COLOUR;
                 }
-                
+
                 else if (name.compare("GOAL_B_COLOUR") == 0) {
                     return GOAL_B_COLOUR;
                 }
     */
-            
+
                 else if (name.compare("LINE_COLOUR") == 0) {
                     return LINE_COLOUR;
                 }
-                    
+
                 else {
                     return UNKNOWN_COLOUR;
                 }
@@ -228,16 +228,16 @@ namespace messages {
                     case BALL_COLOUR: {
                         return "BALL_COLOUR";
                     }
-                        
+
                     case GOAL_COLOUR: {
                         return "GOAL_COLOUR";
                     }
 
-    /*              
+    /*
                     case GOAL_Y_COLOUR: {
                         return "GOAL_Y_COLOUR";
                     }
-                        
+
                     case GOAL_B_COLOUR: {
                         return "GOAL_B_COLOUR";
                     }
@@ -246,12 +246,12 @@ namespace messages {
                     case LINE_COLOUR: {
                         return "LINE_COLOUR";
                     }
-                        
+
                     default: {
                         return "UNKNOWN_COLOUR";
                     }
                 }
-            }    
+            }
 
             //! gets the colour class corresponding to the colour
             static COLOUR_CLASS getClassOfColour(const Colour& c) {
@@ -285,7 +285,7 @@ namespace messages {
                     }
                 }
             }
-            
+
             std::vector<ColourSegment> getAllMatchedSegments(COLOUR_CLASS c) const{
 
                 std::vector<ColourSegment> result;
@@ -298,9 +298,9 @@ namespace messages {
                 }
                 return result;
             }
-           
+
         };
-        
+
     }  // vision
 }  // messages
 

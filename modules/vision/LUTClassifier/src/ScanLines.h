@@ -1,18 +1,18 @@
 /*
- * This file is part of ScanLines.
+ * This file is part of the NUbots Codebase.
  *
- * ScanLines is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ScanLines is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ScanLines.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -20,7 +20,7 @@
 #ifndef MODULES_VISION_SCANLINES_H
 #define MODULES_VISION_SCANLINES_H
 
-#include <nuclear> 
+#include <nuclear>
 #include <string>
 #include <armadillo>
 
@@ -43,7 +43,7 @@ namespace modules {
         class ScanLines {
         private:
             unsigned int HORIZONTAL_SCANLINE_SPACING;
-            unsigned int VERTICAL_SCANLINE_SPACING;     
+            unsigned int VERTICAL_SCANLINE_SPACING;
 
             unsigned int APPROXIMATE_SEGS_PER_HOR_SCAN;
             unsigned int APPROXIMATE_SEGS_PER_VERT_SCAN;
@@ -61,9 +61,9 @@ namespace modules {
 
         public:
             /*! @brief Loads configuration file.
-            */ 
+            */
             ScanLines();
-            
+
             void setParameters( unsigned int HORIZONTAL_SCANLINE_SPACING_,
                                 unsigned int VERTICAL_SCANLINE_SPACING_,
                                 unsigned int APPROXIMATE_SEGS_PER_HOR_SCAN_,
@@ -74,22 +74,22 @@ namespace modules {
                 APPROXIMATE_SEGS_PER_HOR_SCAN = APPROXIMATE_SEGS_PER_HOR_SCAN_;
                 APPROXIMATE_SEGS_PER_VERT_SCAN = APPROXIMATE_SEGS_PER_VERT_SCAN_;
             }
-            
+
             /*! @brief Generates the scan lines
-            */ 
+            */
             void generateScanLines(const messages::input::Image& image, const GreenHorizon& greenHorizonPoints, std::vector<int>* resulting_scan_lines);
 
-            /*! @brief Returns a std::vector of ColourSegments relating classified 
+            /*! @brief Returns a std::vector of ColourSegments relating classified
             horizontal scan lines.
             */
             void classifyHorizontalScanLines(const messages::input::Image& originalImage, const std::vector<int>& horizontalScanLines, const messages::vision::LookUpTable& LUT, messages::vision::SegmentedRegion* resulting_region);
 
-            /*! @brief Returns a std::vector of ColourSegments relating to classified 
+            /*! @brief Returns a std::vector of ColourSegments relating to classified
             vertical scan lines.
             */
             void classifyVerticalScanLines(const messages::input::Image& originalImage, const GreenHorizon& greenHorizon, const messages::vision::LookUpTable& LUT, messages::vision::SegmentedRegion* resulting_region);
         };
-    
+
     }  // vision
 }  // modules
 

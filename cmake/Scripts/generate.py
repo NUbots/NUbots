@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #
 # File:   generate.py
-# Authors: 
+# Authors:
 #   Brendan Annable <brendan.annable@uon.edu.au>
 #   Jake Woods <jake.f.woods@gmail.com>
 #   Trent Houliston <trent@houliston.me>

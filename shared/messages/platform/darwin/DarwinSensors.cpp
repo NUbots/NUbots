@@ -1,18 +1,18 @@
 /*
- * This file is part of Darwin Hardware IO.
+ * This file is part of the NUbots Codebase.
  *
- * Darwin Hardware IO is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Darwin Hardware IO is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Darwin Hardware IO.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -23,7 +23,7 @@
 namespace messages {
     namespace platform {
         namespace darwin {
-            
+
             const DarwinSensors::Servo& DarwinSensors::Servos::operator[](input::ServoID servoId) const {
 
                 switch (servoId) {
@@ -76,7 +76,7 @@ namespace messages {
                     case input::ServoID::HEAD_YAW:           return headPan;
                     case input::ServoID::HEAD_PITCH:          return headTilt;
                 }
-                
+
                 throw std::runtime_error("Out of bounds");
             }
 

@@ -1,18 +1,18 @@
 /*
- * This file is part of LUTClassifier.
+ * This file is part of the NUbots Codebase.
  *
- * LUTClassifier is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * LUTClassifier is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with LUTClassifier.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -34,9 +34,9 @@ namespace modules {
         using messages::vision::SaveLookUpTable;
 
 		using std::chrono::system_clock;
-        
-        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), greenHorizon(), scanLines() { 
-			
+
+        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), greenHorizon(), scanLines() {
+
             on<Trigger<Configuration<VisionConstants>>>([this](const Configuration<VisionConstants>&) {
            		//std::cout<< "Loading VisionConstants."<<std::endl;
            		//std::cout<< "Finished Config Loading successfully."<<std::endl;
@@ -73,17 +73,17 @@ namespace modules {
 										 constants.config["APPROXIMATE_SEGS_PER_VERT_SCAN"]);
 				//std::cout<< "Finished Config Loading successfully."<<std::endl;
 			});
-			
+
 
 			on<Trigger<Configuration<RulesConfig>>>([this](const Configuration<RulesConfig>& rules) {
 				//std::cout<< "Loading Rules config."<<std::endl;
 				segmentFilter.clearRules();
 				if(rules.config["USE_REPLACEMENT_RULES"]){
-					std::map<std::string, ConfigurationNode> replacementRules = rules.config["REPLACEMENT_RULES"];				
+					std::map<std::string, ConfigurationNode> replacementRules = rules.config["REPLACEMENT_RULES"];
 
 					for (const auto& rule : replacementRules) {
 						//std::cout << "Loading Replacement rule : " << rule.first << std::endl;
-						
+
 						ColourReplacementRule r;
 
 						std::vector<unsigned int> before = rule.second["before"]["vec"];
@@ -145,7 +145,7 @@ namespace modules {
 											static_cast<uint_32>(rule.second["middle"]["vec"][0]),
 											static_cast<uint_32>(rule.second["middle"]["vec"][1]),
 											static_cast<uint_32>(rule.second["after"]["vec"][0]),
-											static_cast<uint_32>(rule.second["after"]["vec"][1]));											
+											static_cast<uint_32>(rule.second["after"]["vec"][1]));
 											unint_32(rule.second["after"]["vec"][1]));*/
 					segmentFilter.addTransitionRule(r);
 					//std::cout<< "Finished Config Loading successfully."<<std::endl;
@@ -163,7 +163,7 @@ namespace modules {
             	SegmentedRegion horizontalClassifiedSegments, verticalClassifiedSegments;
 
             	scanLines.generateScanLines(image, greenHorizon, &generatedScanLines);
-                
+
             	//std::cout << "LUTClassifier::on<Trigger<Image>> classifyHorizontalScanLines" << std::endl;
             	scanLines.classifyHorizontalScanLines(image, generatedScanLines, lut, &horizontalClassifiedSegments);
 
@@ -186,7 +186,7 @@ namespace modules {
 
 			// 	system_clock::time_point start = system_clock::now();
 
-			// 	while (std::chrono::duration_cast<std::chrono::milliseconds>(system_clock::now().time_since_epoch()) - 
+			// 	while (std::chrono::duration_cast<std::chrono::milliseconds>(system_clock::now().time_since_epoch()) -
 			// 			std::chrono::duration_cast<std::chrono::milliseconds>(start.time_since_epoch())  < std::chrono::milliseconds(3)){}
 
 			// });

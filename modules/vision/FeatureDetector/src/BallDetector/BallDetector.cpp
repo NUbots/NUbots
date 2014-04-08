@@ -1,18 +1,18 @@
 /*
- * This file is part of FeatureDetector.
+ * This file is part of the NUbots Codebase.
  *
- * FeatureDetector is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * FeatureDetector is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FeatureDetector.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -21,7 +21,7 @@
 
 namespace modules {
     namespace vision {
-        
+
         using messages::vision::ColourSegment;
         using messages::input::Image;
         using messages::vision::LookUpTable;
@@ -31,15 +31,15 @@ namespace modules {
         using messages::vision::FIELD_COLOUR;
 
         BallDetector::BallDetector() {
-            // Empty constructor. 
+            // Empty constructor.
         }
 
         BallDetector::~BallDetector() {
-            // Empty destructor. 
+            // Empty destructor.
         }
 
-        void BallDetector::setParameters(int BALL_EDGE_THRESHOLD_, 
-                                        int BALL_ORANGE_TOLERANCE_, 
+        void BallDetector::setParameters(int BALL_EDGE_THRESHOLD_,
+                                        int BALL_ORANGE_TOLERANCE_,
                                         float BALL_MIN_PERCENT_ORANGE_,
 		                                bool THROWOUT_ON_ABOVE_KIN_HOR_BALL_,
 									    float MAX_DISTANCE_METHOD_DISCREPENCY_BALL_,
@@ -70,12 +70,12 @@ namespace modules {
 
         // BROKEN
         // COLOUR_CLASS = BALL_COLOUR
-        std::unique_ptr< std::vector<messages::vision::Ball> > BallDetector::run(const std::vector<ColourSegment>& horizontalMatchedSegments, 
-                                            const std::vector<ColourSegment>& verticalMatchedSegments, 
+        std::unique_ptr< std::vector<messages::vision::Ball> > BallDetector::run(const std::vector<ColourSegment>& horizontalMatchedSegments,
+                                            const std::vector<ColourSegment>& verticalMatchedSegments,
                                             const std::vector<arma::vec2>& greenHorizonInterpolatedPoints,
                                             const Image& img,
                                             const LookUpTable& lut,
-                                            const VisionKinematics& visionKinematics) {       
+                                            const VisionKinematics& visionKinematics) {
             std::list<arma::vec2> edges;
             std::vector<Ball> balls;//will only ever hold one
 
@@ -83,7 +83,7 @@ namespace modules {
             appendEdgesFromSegments(verticalMatchedSegments, edges, greenHorizonInterpolatedPoints);
 
             int height = img.height();
-            int width = img.width();                  
+            int width = img.width();
 
             if (!edges.empty()) {
                 // Arithmetic mean
@@ -126,7 +126,7 @@ namespace modules {
                 int right = pos[0];
                 int not_BALL_COLOUR_count = 0;
 
-		
+
                 // FIND BALL CENTRE (single iteration approach; doesn't deal great with occlusion)
                 for (top = pos[1]; ((top > 0) && (not_BALL_COLOUR_count <= BALL_ORANGE_TOLERANCE)); top--) {
                     if (ClassifiedImage::getClassOfColour(lut.classifyPixel(img((int)pos[0], top))) != BALL_COLOUR) {
@@ -218,7 +218,7 @@ namespace modules {
                 }
 
                 top_edge = true;
-		
+
 
                 // DETERMINE CENTRE
                 arma::vec2 center;
@@ -261,14 +261,14 @@ namespace modules {
                         int box_top = std::max(center[1] - min_dimension / 2, 0.0);
                         int box_bottom = std::min(center[1] + min_dimension / 2, height - 1.0);
 
-			
+
                         for (int i = box_left; i < box_right; i++) {
                             for (int j = box_top; j < box_bottom; j++) {
                                 if (ClassifiedImage::getClassOfColour(lut.classifyPixel(img(i, j))) == BALL_COLOUR)
                                     count++;
                             }
                         }
-			
+
 
                         if ((count / (min_dimension * min_dimension)) >= BALL_MIN_PERCENT_ORANGE) {
                             Ball ball = Ball(center, std::max((right - left), (bottom - top)));
@@ -282,7 +282,7 @@ namespace modules {
                                                 BALL_WIDTH,
                                                 BALL_DISTANCE_METHOD,
                                                 visionKinematics);
-                            balls.push_back(ball);     
+                            balls.push_back(ball);
                         }
 
                         else {
@@ -301,7 +301,7 @@ namespace modules {
                                             BALL_WIDTH,
                                             BALL_DISTANCE_METHOD,
                                             visionKinematics);
-                        balls.push_back(ball); 
+                        balls.push_back(ball);
                     }
                 }
                 else {
@@ -311,8 +311,8 @@ namespace modules {
             return std::move(createBallMessage(balls));
         }
 
-        void BallDetector::appendEdgesFromSegments(const std::vector<ColourSegment>& segments, 
-                                                    std::list<arma::vec2>& pointList, 
+        void BallDetector::appendEdgesFromSegments(const std::vector<ColourSegment>& segments,
+                                                    std::list<arma::vec2>& pointList,
                                                     const std::vector<arma::vec2>& greenHorizon) {
             for (const ColourSegment& segment : segments) {
                 const arma::vec2& start = segment.m_start;
@@ -333,7 +333,7 @@ namespace modules {
             for(auto& ball : balls){
                 //std::cout << "Emmiting " << ball << std::endl;
                 ball_message->push_back(messages::vision::Ball());
-                if(ball.valid){ 
+                if(ball.valid){
                     ball_message->back().sphericalFromNeck = ball.m_location.neckRelativeRadial;
                     ball_message->back().sphericalError = ball.m_sphericalError;
                     ball_message->back().screenAngular = ball.m_location.screenAngular;

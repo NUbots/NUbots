@@ -1,18 +1,18 @@
 /*
- * This file is part of NUBots FeatureDetector.
+ * This file is part of the NUbots Codebase.
  *
- * NUBots FeatureDetector is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * NUBots FeatureDetector is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with NUBots FeatureDetector.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -27,9 +27,9 @@
 
 namespace modules {
 	namespace vision {
-	
+
 		class Quad {
-		public:		
+		public:
 			Quad();
 			Quad(const Quad& other);
 			Quad(const arma::vec2& bottomLeft, const arma::vec2& topLeft, const arma::vec2& topRight, const arma::vec2& bottomRight);
@@ -52,7 +52,7 @@ namespace modules {
 			  * @param bottomRight The bottom right corner.
 			  */
 			void set(const arma::vec2& bottomLeft, const arma::vec2& topLeft, const arma::vec2& topRight, const arma::vec2& bottomRight);
-		
+
 			arma::vec2 getTopCentre() const;								//! Returns the bottom centre pixel location of the Quad.
 			arma::vec2 getBottomCentre() const;								//! Returns the bottom centre pixel location of the Quad.
 
@@ -94,12 +94,12 @@ namespace modules {
 
 			//! @brief output stream operator.
 		friend std::ostream& operator<< (std::ostream& output, const Quad& quad);
-		
+
 		//! @brief output stream operator for a vector of goals.
 		friend std::ostream& operator<< (std::ostream& output, const std::vector<Quad>& quads);
 		};
-		
-		
+
+
 
 	}
 }

@@ -50,7 +50,7 @@
 \begin{document}
 
 %----------------------------------------------------------------------------------------
-% Title Slide 
+% Title Slide
 %----------------------------------------------------------------------------------------
 \begin{frame} % Introduce the team on this slide
 	\titlepage % Print the title page as the first slide
@@ -143,7 +143,7 @@
 
 		%%% Draw all of our components in a circle
 		\foreach [count=\i] \reactor in {Camera, Vision, Localisation, Behavior, Network, Sensors, Kinematics, Motion, Actionators} {
-		
+
 			% Draw the reactors around the central star
 			\node[reactor] (\reactor) at ({360/9 * (\i - 1)}:7cm) {$\reactor$};
 		};
@@ -340,17 +340,17 @@
 				thick
 			},
 			>=latex]
-			
+
 			\node [element] (plant) {PowerPlant};
-		
+
 			%%% Draw all of our components in a circle
-			\foreach [count=\i] \reactor in {Reactor, Reactor, Reactor, Reactor, Reactor} {				
+			\foreach [count=\i] \reactor in {Reactor, Reactor, Reactor, Reactor, Reactor} {
 				% Draw the reactors around the central star
 				\node [element] (reactor) at ({360/5 * (\i)}:6cm) {$\reactor$};
-				
+
 				\path [arrow] (plant) edge (reactor);
 			};
-			
+
 		\end{tikzpicture}
 	}
 \end{frame}
@@ -410,27 +410,27 @@
 				sensortriggered/.style={fill=red!10}]
 
 				\draw (1, 1) grid (21, 4);
-				
+
 				%% Thread 1
 				\draw[cameratriggered, task] (1, 3) rectangle node {Camera} (6, 4);
 				\draw[sensortriggered, task] (8, 3) rectangle node {Field Mapper} (12, 4);
 				\draw[cameratriggered, task] (13, 3) rectangle node {Localisation} (17, 4);
 				\draw[cameratriggered, task] (19, 3) rectangle node {Motion} (21, 4);
-				
+
 				%% Thread 2
 				\draw[sensortriggered, task] (1, 2) rectangle node {Sensors} (5, 3);
 				\draw[cameratriggered, task] (6, 2) rectangle node {Vision} (13, 3);
 				\draw[cameratriggered, task] (17, 2) rectangle node {Behaviour} (19, 3);
-				
+
 				%% Thread 3
 				\draw[sensortriggered, task] (5, 1) rectangle node {Odometry} (8, 2);
 				\draw[sensortriggered, task] (12, 1) rectangle node {Map Combiner (Network)} (19, 2);
-				
+
 				% Row labels
 				\node[anchor=east, inner sep=0] at (.8, 3.5) {Thread 1};
 				\node[anchor=east, inner sep=0] at (.8, 2.5) {Thread 2};
 				\node[anchor=east, inner sep=0] at (.8, 1.5) {Thread 3};
-				
+
 				% Column Labels
 				\foreach \i in {1,...,20} {
 				\node[anchor=north, inner sep=0] at (\i + .5, .8) {\i};
@@ -533,7 +533,7 @@
 
 \begin{frame}
 	\frametitle{Existing vs. New}
-	
+
 	\begin{itemize}
 		\item In the existing system
 		\begin{itemize}
@@ -585,7 +585,7 @@
 			\item Dance move chosen and scaled to be in time with latest beats
 			\item Dance move is enacted
 		\end{itemize}
-	\end{frame}	
+	\end{frame}
 	\subsection{Dancing and NUClear} %-------------------
 	\begin{frame}
 		\frametitle{Dancing and the New Architecture}
@@ -595,7 +595,7 @@
 			\includegraphics[scale=.45]{Presentation_Resources/dance_audio_new_arc.png}
 			\caption{Components for Dancing to Music with the NUClear}
 		\end{figure}
-	\end{frame}	
+	\end{frame}
 	\begin{frame}
 		\frametitle{Dancing and the New Architecture}
 		\framesubtitle{Dancing to a Music}
@@ -604,9 +604,9 @@
 			\includegraphics[scale=.45]{Presentation_Resources/dance_audio_new_arc_change.png}
 			\caption{Components for Dancing to Music with the NUClear}
 		\end{figure}
-	\end{frame}	
+	\end{frame}
 	\subsection{Dancing and the Old Architecture} %-------------------
-	\begin{frame} 
+	\begin{frame}
 		\frametitle{Dancing and the Old Architecture}
 		\framesubtitle{Dancing to a Music}
 		\definecolor{darkGreen}{RGB}{0,176,80}
@@ -627,58 +627,58 @@
 				, modified/.style={fill=lightGreen}
 				, same/.style={fill=dullGreen}
 				, remove/.style={fill=red!50}]
-		
+
 				%%% Legend
 				\coordinate (legendpoint) at (14, -2);
-		
+
 				%% Public Interface Dependency
 				\node [below=of legendpoint,anchor=east] (publicinterfacelabel) {\small Public Interface Dependency};
 				\draw [publicinterface] (publicinterfacelabel.mid west) -- ++(-38pt, 0pt);
-		
+
 				%% Blackboard Dependency
 				\node [below=12pt of publicinterfacelabel.south west,anchor=south west] (blackboardlabel) {\small Dependency through Blackboard};
 				\draw[blackboard] (blackboardlabel.mid west) -- ++(-38pt, 0pt);
-		
+
 				%% Jobs Dependency
 				\node [below=12pt of blackboardlabel.south west,anchor=south west] (joblabel) {\small Dependency through Job System};
 				\draw[jobs] (joblabel.mid west) -- ++(-38pt, 0pt);
-		
+
 				%% Dependancy Type: Depends on
 				\node[below=20pt of joblabel.south west,anchor=south west] (dependencylabel) {\small X depends on Y};
 				\node[circle, draw, inner sep=0.5pt] (dependencynodeY) at ([yshift=1pt,xshift=-2pt]dependencylabel.mid west) {\tiny Y};
 				\node[circle, draw, inner sep=0.5pt, left=24pt of dependencynodeY] (dependencynodeX) {\tiny X};
 				\draw[basearrow, dependent] (dependencynodeX) edge (dependencynodeY);
-		
+
 				%% Dependancy Type: Codependent
 				\node[below=12pt of dependencylabel.south west,anchor=south west] (codependencylabel) {\small X, Y depend on each other};
 				\node[circle, draw, inner sep=0.5pt] (codependencynodeY) at ([yshift=1pt,xshift=-2pt]codependencylabel.mid west) {\tiny Y};
 				\node[circle, draw, inner sep=0.5pt, left=24pt of codependencynodeY] (codependencynodeX) {\tiny X};
 				\draw[basearrow, codependent] (codependencynodeX) edge (codependencynodeY);
-		
+
 				%% Legend Header
 				\node[above=0pt of publicinterfacelabel] (legendheader) {Legend};
-		
+
 				%%% Draw all of our components in a circle
 				\foreach [count=\i] \reactor/\style in {{Camera/remove}, {Vision/remove}, {Localisation/remove}, {Behavior/modified}, {Network/remove}, {Sensors/same}, {Kinematics/same}, {Motion/modified}, {Actionators/same}, {AudioInput/new}, {BeatTracker/new}} {
-				
+
 					% Draw the reactors around the central star
 					\node[reactor, \style] (\reactor) at ({360/11 * (\i - 1)}:7cm) {$\reactor$};
 				};
-		
+
 				%% Legend Border
 				\node[fit=(legendheader)(publicinterfacelabel)(blackboardlabel)
 						(joblabel)(dependencylabel)(codependencynodeX)(codependencynodeY),rectangle,draw](legendgroup){};
-		
+
 				%%% Dependencies
 				%% Vision
 				\path[blackboard, dependent] (Vision.305) edge (Camera.95);
 				\path[publicinterface, dependent] (Vision.275) edge (Camera.120);
 				\path[blackboard, dependent] (Vision) edge (Sensors);
-		
+
 				%% Localisation
 				\path[blackboard, dependent] (Localisation) edge (Sensors);
 				\path[blackboard, dependent] (Localisation) edge (Vision);
-		
+
 				%% Behavior
 				\path[blackboard, codependent] (Behavior) edge (Localisation);
 				\path[blackboard, dependent] (Behavior) edge (Kinematics);
@@ -687,13 +687,13 @@
 				\path[publicinterface, dependent] (Behavior) edge (Actionators);
 				\path[publicinterface, codependent] (Behavior) edge (Network);
 				\path[jobs, dependent] (Behavior) edge (Camera);
-		
+
 				%% Motion
 				\path[blackboard, codependent] (Motion.80) edge (Behavior.300);
 				\path[jobs, dependent] (Motion.120) edge (Behavior.280);
 				\path[publicinterface, dependent] (Motion) edge  (Actionators);
 				\path[publicinterface, dependent] (Motion) edge (Kinematics);
-				
+
 				%% Dance
 				\path[blackboard, dependent] (BeatTracker) edge (AudioInput);
 				\path[blackboard, dependent] (Behavior) edge (BeatTracker);
@@ -702,12 +702,12 @@
 
 			%\caption{Components for Dancing to Music with the Old System}
 		\end{figure}
-	\end{frame}	
-	
+	\end{frame}
+
 	\begin{frame}
 		\huge Dance Demonstration
 	\end{frame}
-	
+
 	\subsection{Conclusion} %-------------------
 	\begin{frame}
 		\frametitle{Conclusion}
@@ -717,8 +717,8 @@
 				\item Modular Design proven by Dance and MechWarrior
 				\item Improvements on some existing low-level code
 			\end{itemize}
-	\end{frame}	
-	
+	\end{frame}
+
 	\begin{frame}
 		\huge Questions?
 	\end{frame}
@@ -736,27 +736,27 @@
 	\begin{frame}
 		\subsectionpage
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{What is an event driven architecture?}
-		
+
 		Event Driven Architectures are characterised by a set of modules that communicate using events or messages.
 		\begin{itemize}
 			\item Events are defined blobs of data with a known format.
 			\item \textbf{Event} is often interchangeable with \textbf{Message}
 			\item Modules are sometimes be categorised as either \textbf{Producers} or \textbf{Consumers}
 		\end{itemize}
-	
+
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle {Exploring the limits}
-		
+
 		Most event driven architecture limitations can be overcome
 		\begin{itemize}
 			\item ... given you're willing to sacrifice performance
 		\end{itemize}
-		
+
 		The essence of architecture is making decisions
 		\begin{itemize}
 			\item Performance or Features
@@ -764,16 +764,16 @@
 			\item Different architectures value different things
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Common Tradeoffs}
-		
+
 		Message Format
 		\begin{itemize}
 			\item \textbf{Language-Specific} or \textbf{Language-Agnostic}
 			\item \textbf{Human Readable} or \textbf{Machine Only}
 		\end{itemize}
-		
+
 		Message Routing
 		\begin{itemize}
 			\item \textbf{Guaranteed Delivery} or \textbf{Assumed Delivery}
@@ -781,17 +781,17 @@
 			\item \textbf{Inter-Process} or \textbf{In-Process}
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Trade Offs: Robot OS and CORBA}
 		Goal: Sharing and Collaboration
-		
+
 		Message Format
 		\begin{itemize}
 			\item \textbf{Language-Agnostic}
 			\item \textbf{Human Readable}
 		\end{itemize}
-		
+
 		Message Routing
 		\begin{itemize}
 			\item \textbf{Guaranteed Delivery} and \textbf{Assumed Delivery}
@@ -799,18 +799,18 @@
 			\item \textbf{Inter-Process}
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Trade Offs: NUClear}
-		
+
 		Goal: Speed and Ease-of-Use
-		
-		Message Format	
+
+		Message Format
 		\begin{itemize}
 			\item \textbf{Language-Specific} and \textbf{Language-Agnostic}
 			\item \textbf{Machine Only}
 		\end{itemize}
-		
+
 		Message Routing
 		\begin{itemize}
 			\item \textbf{Guaranteed Delivery} and \textbf{Assumed Delivery}
@@ -818,24 +818,24 @@
 			\item \textbf{In-Process} and \textbf{Inter-Process}
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Use in FYP}
-		
+
 		Using the lessons learned from analysing existing event driven architectures we:
 		\begin{itemize}
 			\item Decided to keep things primarily In-Process to allow us to provide features with no runtime cost.
 			\item Settled on using primarily a Machine-Only and Language-Specific transport only using Language-Agnostic when necessary.
 		\end{itemize}
 	\end{frame}
-	
+
 	%----------------------------------------------------------------------------------------
 	\subsection{Compile Time Message Routing}
 	%----------------------------------------------------------------------------------------
 	\begin{frame}
 		\subsectionpage
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Why Messages?}
 		\begin{itemize}
@@ -844,7 +844,7 @@
 			\item The answer is that in our system, I developed a new technique
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Metaprogramming}
 		\begin{itemize}
@@ -853,7 +853,7 @@
 			\item It allows work to be offloaded from runtime processing
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{C++ Template Metaprogramming}
 		\begin{itemize}
@@ -863,7 +863,7 @@
 			\item This allows programs to be executed using templates at compile time using the type system
 		\end{itemize}
 	\end{frame}
-		
+
 	\begin{frame}
 		\frametitle{Partial Evaluation}
 		\begin{itemize}
@@ -873,7 +873,7 @@
 			\item In the case of a message passing system the routing of the message is known
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Compile Time Message Routing}
 		\begin{itemize}
@@ -883,7 +883,7 @@
 			\item We can bind the data of the messages at runtime
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Before Compilation}
 		\centering
@@ -906,32 +906,32 @@
 				thick
 			},
 			>=latex]
-			
+
 			\node [element] (router) {Router};
-		
+
 			%%% Draw all of our components in a circle
-			\foreach [count=\i] \reactor in {Camera, Vision, Localisation, Behaviour, Servos} {				
+			\foreach [count=\i] \reactor in {Camera, Vision, Localisation, Behaviour, Servos} {
 				% Draw the reactors around the central star
 				\node [element] (msg\reactor) at ({360/5 * (\i)}:6cm) {$\reactor$};
 			};
-			
+
 			\path [arrow] (router) edge[out=130, in=350]  node[right] {Image} (msgVision);
 			\path [arrow] (msgVision) edge[out=320, in=170] node[left] {Seen Objects} (router);
-			
+
 			\path [arrow] (msgCamera) edge[out=270, in=90] node[right] {Image} (router);
-			
+
 			\path [arrow] (router) edge[out=320, in=60] node[right, text width=1.5cm] {Servo Angles, Positions} (msgBehaviour);
 			\path [arrow] (msgBehaviour) edge[out=130, in=290] node[left, text width=1.75cm] {Servo Commands} (router);
-			
+
 			\path [arrow] (router) edge[out=190, in=80] node[left] {Seen Objects} (msgLocalisation);
 			\path [arrow] (msgLocalisation) edge[out=50, in=220] node[below] {Positions} (router);
-			
+
 			\path [arrow] (router) edge[out=30, in=150] node[above] {Servo Commands} (msgServos);
 			\path [arrow] (router) edge[out=0, in=190] node[below] {Servo Angles} (msgServos);
-			
+
 		\end{tikzpicture}}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{After Compilation}
 		\centering
@@ -955,22 +955,22 @@
 					thick
 				},
 				>=latex]
-		
+
 			%%% Draw all of our components in a circle
-			\foreach [count=\i] \reactor in {Camera, Vision, Localisation, Behaviour, Servos} {				
+			\foreach [count=\i] \reactor in {Camera, Vision, Localisation, Behaviour, Servos} {
 				% Draw the reactors around the central star
 				\node [element] (comp\reactor) at ({360/5 * (\i)}:6cm) {$\reactor$};
-			}; 
-			
+			};
+
 			\path [arrow] (compCamera) edge[out=180, in=30] node[left] {Image} (compVision);
 			\path [arrow] (compVision) edge[out=240, in=150] node[left] {Seen Objects} (compLocalisation);
 			\path [arrow] (compLocalisation) edge[out=330, in=180] node[left] {Positions} (compBehaviour);
 			\path [arrow] (compBehaviour) edge[out=70, in=190] node[left] {Servo Commands} (compServos);
 			\path [arrow] (compServos) edge[out=270, in=40] node[right] {Servo Angles} (compBehaviour);
-			
+
 		\end{tikzpicture}}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Compile Time  Message Routing}
 		\begin{itemize}
@@ -980,7 +980,7 @@
 			\item This makes the resulting system almost as fast as direct function access
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Compile Time  Message Routing}
 		\begin{itemize}
@@ -989,7 +989,7 @@
 			\item This allows this style of architecture to be used in performance critical use cases
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Type Safety}
 		\begin{itemize}
@@ -998,7 +998,7 @@
 			\item When writing code this provides the advantage of knowing that you are using the correct type
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Drawbacks}
 		\begin{itemize}
@@ -1009,7 +1009,7 @@
 			\item The system also requires an optimising compiler, else the system ends slower then a typical function call
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Results}
 		\begin{itemize}
@@ -1020,7 +1020,7 @@
 			\item CORBA is measured as taking between 1 millisecond to 7 milliseconds
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Use in FYP}
 		\begin{itemize}
@@ -1029,7 +1029,7 @@
 			\item It also does not suffer slowdowns with the size of the project
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Conclusions}
 		\begin{itemize}
@@ -1038,11 +1038,11 @@
 			\item We also gain the speed that comes from tight coupling
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\huge Questions?
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{References}
 		\begin{itemize}
@@ -1050,27 +1050,27 @@
 			\item Christopher D Gill, David L Levine, and Douglas C Schmidt. The design and performance of a real-time corba scheduling service. In Challenges in Design and Implementation of Middlewares for Real-Time Systems, pages 3–40. Springer, 2001.
 		\end{itemize}
 	\end{frame}
-	
+
 	%----------------------------------------------------------------------------------------
 	\subsection{Efficient Multithreading in Message Passing Systems}
 	%----------------------------------------------------------------------------------------
 	\begin{frame}
 		\subsectionpage
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Challenges of Multithreading}
-		
+
 		\begin{itemize}
 			\item It is difficult to divide a complex process into independent blocks that can run in parallel
 			\item Some components depend on others' output
 			\item Access to shared resources must be synchronised
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Multithreading in NUClear}
-		
+
 		\begin{itemize}
 			\item In NUClear, every operation is a reaction to a message
 			\item Emitting one message can trigger multiple reactions
@@ -1079,10 +1079,10 @@
 			\item Reactions get a read-only copy of the message so that the same data can be shared without synchronisation
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Making It Fast}
-		
+
 		\begin{itemize}
 			\item It is vital that emitting messages is as fast as possible
 			\item System-wide locking should be avoided to keep every core of the CPU as busy as possible
@@ -1094,10 +1094,10 @@
 			\item Both will be implemented so their performance can be analysed
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Work Sharing}
-		
+
 		\begin{itemize}
 			\item All upcoming tasks are stored in a shared priority queue
 			\item Idle threads pop the next task off the queue
@@ -1105,26 +1105,26 @@
 			\item Works best with a smaller number of threads
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Work Stealing}
-		
+
 		\begin{itemize}
 			\item Each thread has its own queue of tasks
 			\item Idle threads take tasks from the queues of busy threads
 		\end{itemize}
 	\end{frame}
-	
+
 	\begin{frame}
 		\frametitle{Other Optimisations}
-		
+
 		\begin{itemize}
 			\item System-wide locking is avoided in many cases by using a separate queue for different message types
 			\item Thread-local variables are used to store thread-specific state
 			\item Spin locks are often faster than mutexes for short operations that need to be synchronised
 		\end{itemize}
 	\end{frame}
-	
+
 	%----------------------------------------------------------------------------------------
 	\subsection{Beat Tracking}
 	%----------------------------------------------------------------------------------------
@@ -1149,7 +1149,7 @@
 			\item Real Time % Whole piece of music doesn't need to be analysed. Works with microphone input.
 			\item Quick % Doesn't slow down other systems. Beat found before the next beat occurs.
 			\item Accurate % Beats found are close enough to where a listener feels they should be
-			\item Robust	% Works in real audio situations with background noise an Robot motor noise.		
+			\item Robust	% Works in real audio situations with background noise an Robot motor noise.
 		\end{itemize}
 	\end{frame}
 	\begin{frame}
@@ -1157,21 +1157,21 @@
 		\begin{itemize}
 			\item Does not require analysing the whole song to find the beats
 			\item Can take in audio through microphone and analyse incrementally
-		\end{itemize}		
+		\end{itemize}
 	\end{frame}
 	\begin{frame}
 		Quick:
 		\begin{itemize}
 			\item Doesn't slow down the rest of the system.
 			\item Beat found soon after it occurred
-		\end{itemize}		
+		\end{itemize}
 	\end{frame}
 	\begin{frame}
 		Accurate:
 		\begin{itemize}
 			\item Measures highly on beat tracker evaluation tests
-			\item Beats found feel right to a listener.	
-		\end{itemize}		
+			\item Beats found feel right to a listener.
+		\end{itemize}
 	\end{frame}
 	\begin{frame}
 		Robust:
@@ -1179,7 +1179,7 @@
 			\item Works in real audio situations
 			\item Able to ignore background noise
 			\item Biggest problem for robots is motor noise
-		\end{itemize}		
+		\end{itemize}
 	\end{frame}
 	\begin{frame}
 		Our two beat trackers:
@@ -1194,7 +1194,7 @@
 					\item Beat tracker Trent wrote when we were trying to get Aubio to work
 					\item Not as accurate as Aubio
 				\end{itemize}
-		\end{itemize}		
+		\end{itemize}
 	\end{frame}
 %	\begin{frame}
 %		Testing the 2 Beat Trackers for accuracy:
@@ -1203,7 +1203,7 @@
 %			\item Compared results of Beat Trackers with beats found by a human
 %			\item Comparisons evaluated by 6 evaluation methods (some with several variations)
 %			\item In addition to testing Aubio and Beat'n, we also test a dummy algorithm which simply has a beat occur %every 0.5 seconds
-%		\end{itemize}		
+%		\end{itemize}
 %	\end{frame}
 %	\begin{frame}
 %		Testing results:
@@ -1221,7 +1221,7 @@
 %			D  & 0.99  & 0.92  & 0.59\\ \cline{1-1}  \cdashline{2-4}
 %			Dg  & 0.0723  & 0.0527  & 0.0315\\ \cline{1-1}  \cdashline{2-4}
 %		\end{tabular}
-%		\end{table}	
+%		\end{table}
 %	\end{frame}
 	\begin{frame}
 		Testing for Aubio:
@@ -1231,8 +1231,8 @@
 			\item Also compared to dummy algorithm which simply has a beat occur every 0.5 seconds
 			\item Compared results of Beat Trackers with beats found by a skilled musician
 			\item Tested using a large suite of different evaluation methods
-			
-		\end{itemize}		
+
+		\end{itemize}
 	\end{frame}
 	\begin{frame}
 		Testing results:
@@ -1250,7 +1250,7 @@
 			D  & 3.28 & 2.4 & 2.74 & 2.64 & 0.095 & 0.45 \\ \cline{1-1}  \cdashline{2-7}
 			Dg  & 2.85 & 1.85 & 2.36 & 1.63 & 0.013 & 0.023 \\ \cline{1-1}  \cdashline{2-7}
 		\end{tabular}
-		\end{table}	
+		\end{table}
 		\footnotetext[1]{\cite {"Evaluation methods for musical audio beat tracking algorithms."}}
 	\end{frame}
 	\begin{frame}
@@ -1290,5 +1290,5 @@
 		%\cite {davies2009evaluation}
 		%\printbibliography
 	\end{frame}
-	
-\end{document} 
+
+\end{document}

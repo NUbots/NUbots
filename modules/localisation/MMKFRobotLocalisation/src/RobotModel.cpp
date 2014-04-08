@@ -1,3 +1,22 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+
 #include "RobotModel.h"
 
 #include <armadillo>
@@ -22,7 +41,7 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
 }
 
 arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
-    const arma::vec::fixed<RobotModel::size>& state, double deltaT, 
+    const arma::vec::fixed<RobotModel::size>& state, double deltaT,
     const FakeOdometry& odom) {
     auto result = state;
 
@@ -62,7 +81,7 @@ arma::vec RobotModel::predictedObservation(
 
 
 
-arma::vec RobotModel::observationDifference(const arma::vec& a, 
+arma::vec RobotModel::observationDifference(const arma::vec& a,
                                             const arma::vec& b){
     // // Radial coordinates
     // arma::vec2 result = a - b;
@@ -96,7 +115,7 @@ arma::vec RobotModel::observationDifference(const arma::vec& a,
 
 arma::vec::fixed<RobotModel::size> RobotModel::limitState(
     const arma::vec::fixed<RobotModel::size>& state) {
- 
+
     // auto result = state;
     // // // // How to get clipping values from config system?
     // // // result[kX] = std::max(std::min(result[kX], 4.5 + 0.7) , -4.5 -0.7);
@@ -105,7 +124,7 @@ arma::vec::fixed<RobotModel::size> RobotModel::limitState(
     // // // Radial coordinates
     // // result[kHeading] = utility::math::angle::normalizeAngle(result[kHeading]);
     // return result;
-    
+
 
     // Unit vector orientation
     arma::vec2 heading = { state[kHeadingX], state[kHeadingY] };

@@ -1,24 +1,24 @@
 /*
- * This file is part of ColourReplacementRule.
+ * This file is part of the NUbots Codebase.
  *
- * ColourReplacementRule is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ColourReplacementRule is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ColourReplacementRule.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #include "ColourReplacementRule.h"
- 
+
 namespace modules {
     namespace vision {
 
@@ -26,7 +26,7 @@ namespace modules {
         using messages::vision::ClassifiedImage;
         using messages::vision::ColourSegment;
 
-        
+
         ColourSegment ColourReplacementRule::nomatch = {Colour::invalid, 0,arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2), arma::zeros<arma::vec>(2)};
 
         ColourReplacementRule::ColourReplacementRule() {
@@ -66,7 +66,7 @@ namespace modules {
             std::string current_colour_name;
 
             //Load before colours
-            sstream << colours_before;            
+            sstream << colours_before;
             sstream >> current_colour_name;
 
             //While stream is not empty, check if the next word names a colour and load if it does. Get next word.
@@ -81,7 +81,7 @@ namespace modules {
             }
 
             //Load middle colours
-            sstream << colours_middle;            
+            sstream << colours_middle;
             sstream >> current_colour_name;
 
             //While stream is not empty, check if the next word names a colour and load if it does. Get next word.
@@ -94,9 +94,9 @@ namespace modules {
 
                 sstream >> current_colour_name;
             }
-            
+
             //Load after colours
-            sstream << colours_after;            
+            sstream << colours_after;
             sstream >> current_colour_name;
 
             //While stream is not empty, check if the next word names a colour and load if it does. Get next word.
@@ -108,7 +108,7 @@ namespace modules {
                 }
 
                 sstream >> current_colour_name;
-            }            
+            }
         }
 
         std::string ColourReplacementRule::getMethodName(const ColourReplacementRule::ReplacementMethod& method) const {
@@ -116,15 +116,15 @@ namespace modules {
                 case BEFORE: {
                     return "before";
                 }
-                
+
                 case AFTER: {
                     return "after";
                 }
-                
+
                 case SPLIT: {
                     return "green";
                 }
-                
+
                 default: {
                     return "unknown method";
                 }
@@ -140,15 +140,15 @@ namespace modules {
             if (name.compare("before") == 0) {
                 return BEFORE;
             }
-            
+
             else if (name.compare("after") == 0) {
                 return AFTER;
             }
-            
+
             else if (name.compare("split") == 0) {
                 return SPLIT;
             }
-            
+
             else {
                 return INVALID;
             }
@@ -164,20 +164,20 @@ namespace modules {
             }
 
             bool valid;
-            
+
             if (!m_middle.empty()) {
                 valid = false;
-                
+
                 for (auto it : m_middle) {
                     if(it == middle.m_colour)
                         valid = true;   //a match has been found
                 }
-                
+
                 if (!valid) {
                     return false; //did not match middle set
                 }
             }
-            
+
             else {
                 return false;    //if middle is empty the rule matches nothing
             }
@@ -186,15 +186,15 @@ namespace modules {
                 if (before.m_colour == Colour::invalid) {
                     return false;   //there is a before set, but no before colour
                 }
-                
+
                 valid = false;
-                
+
                 for (auto it : m_before) {
                     if (it == before.m_colour) {
                         valid = true;   //a match has been found
                     }
                 }
-                
+
                 if (!valid) {
                     return false;   //did not match before set
                 }
@@ -204,15 +204,15 @@ namespace modules {
                 if (after.m_colour == Colour::invalid) {
                     return false;   //there is an after set, but no after colour
                 }
-                
+
                 valid = false;
-                
+
                 for (auto it : m_after) {
                     if(it == after.m_colour ){
                         valid = true;   //a match has been found
                     }
                 }
-                
+
                 if (!valid) {
                     return false;   //did not match after set
                 }

@@ -1,18 +1,18 @@
 /*
- * This file is part of FeatureDetector.
+ * This file is part of the NUbots Codebase.
  *
- * FeatureDetector is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * FeatureDetector is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FeatureDetector.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -34,7 +34,7 @@
 
 namespace modules {
     namespace vision {
-        
+
         class BallDetector {
         public:
             BallDetector();
@@ -43,15 +43,15 @@ namespace modules {
             /*! @brief Detects a single ball from orange transitions using a geometric mean for general location
               and close classification at the pixel level combined with occlusion detection for refinement.
             */
-            std::unique_ptr< std::vector<messages::vision::Ball> > run(const std::vector<messages::vision::ColourSegment>& horizontalMatchedSegments, 
-                                    const std::vector<messages::vision::ColourSegment>& verticalMatchedSegments, 
+            std::unique_ptr< std::vector<messages::vision::Ball> > run(const std::vector<messages::vision::ColourSegment>& horizontalMatchedSegments,
+                                    const std::vector<messages::vision::ColourSegment>& verticalMatchedSegments,
                                     const std::vector<arma::vec2>& greenHorizonInterpolatedPoints,
                                     const messages::input::Image& img,
                                     const messages::vision::LookUpTable& lut,
                                     const VisionKinematics& visionKinematics);
 
-            void setParameters(int BALL_EDGE_THRESHOLD_, 
-                                int BALL_ORANGE_TOLERANCE_, 
+            void setParameters(int BALL_EDGE_THRESHOLD_,
+                                int BALL_ORANGE_TOLERANCE_,
                                 float BALL_MIN_PERCENT_ORANGE_,
                                 bool THROWOUT_ON_ABOVE_KIN_HOR_BALL_,
                                 float MAX_DISTANCE_METHOD_DISCREPENCY_BALL_,
@@ -65,10 +65,10 @@ namespace modules {
                                );
 
         private:
-            void appendEdgesFromSegments(const std::vector<messages::vision::ColourSegment>& segments, 
-                                        std::list<arma::vec2>& pointList, 
+            void appendEdgesFromSegments(const std::vector<messages::vision::ColourSegment>& segments,
+                                        std::list<arma::vec2>& pointList,
                                         const std::vector<arma::vec2>& greenHorizon);
-            
+
             int BALL_EDGE_THRESHOLD;
             int BALL_ORANGE_TOLERANCE;
             float BALL_MIN_PERCENT_ORANGE;

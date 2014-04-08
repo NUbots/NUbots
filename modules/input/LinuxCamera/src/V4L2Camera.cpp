@@ -1,18 +1,18 @@
 /*
- * This file is part of LinuxCamera.
+ * This file is part of the NUbots Codebase.
  *
- * LinuxCamera is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * LinuxCamera is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with LinuxCamera.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -33,9 +33,9 @@
 
 namespace modules {
     namespace input {
-        
+
         using messages::input::Image;
-        
+
         // For some reason MJPEGs dont have a huffman table
         constexpr uint8_t huffmantable[] = {
             0xC4, 0x01, 0xA2, 0x00, 0x00, 0x01, 0x05, 0x01, 0x01,
@@ -86,7 +86,7 @@ namespace modules {
             0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xF2, 0xF3, 0xF4, 0xF5,
             0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFF, 0xDA
         };
-        
+
         V4L2Camera::V4L2Camera() : fd(-1), width(0), height(0), deviceID(""), streaming(false) , rotated(false){
         }
 
@@ -104,7 +104,7 @@ namespace modules {
             if (ioctl(fd, VIDIOC_DQBUF, &current) == -1) {
                 throw std::system_error(errno, std::system_category(), "There was an error while de-queuing a buffer");
             }
-            
+
             std::vector<Image::Pixel> data(width * height);
             std::unique_ptr<Image> image;
 
@@ -113,73 +113,73 @@ namespace modules {
                 struct jpeg_error_mgr err;
                 struct jpeg_decompress_struct cinfo;
                 std::memset(&cinfo, 0, sizeof(jpeg_decompress_struct));
-                
+
                 uint8_t* payload = static_cast<uint8_t*>(buff[current.index].payload);
 
                 // Create a decompressor
                 jpeg_create_decompress(&cinfo);
                 cinfo.err = jpeg_std_error(&err);
-                
+
                 std::vector<uint8_t> jpegData(current.bytesused + sizeof(huffmantable) - 1);
-                
+
                 // Copy our header (the first 195 bytes)
                 auto it = std::copy(payload, payload + 195, std::begin(jpegData));
-                
+
                 // Copy our huffman table
                 it = std::copy(std::begin(huffmantable), std::end(huffmantable), it);
-                
+
                 // Copy the remainder of our data
                 std::copy(payload + 196, payload + current.bytesused, it);
-                
+
                 // Set our source buffer
                 jpeg_mem_src(&cinfo, jpegData.data(), current.bytesused + sizeof(huffmantable) - 1);
-                
+
                 // Read our header
                 jpeg_read_header(&cinfo, true);
-                
+
                 // Set our options
                 cinfo.do_fancy_upsampling = false;
                 cinfo.out_color_components = 3;
                 cinfo.out_color_space = JCS_YCbCr;
-                
+
                 // Start decompression
                 jpeg_start_decompress(&cinfo);
 
                 for (Image::Pixel* row = data.data();
                         cinfo.output_scanline < cinfo.output_height;
                         row += width) {
-                    
+
                     // Read the scanline into place
                     jpeg_read_scanlines(&cinfo, reinterpret_cast<uint8_t**>(&row), 1);
                 }
-                
+
                 // Clean up
                 jpeg_finish_decompress(&cinfo);
                 jpeg_destroy_decompress(&cinfo);
-                
+
                 // Move this data into the image along with the jpeg source
                 image = std::unique_ptr<Image>(new Image(width, height, std::move(data), std::move(jpegData), rotated));
             }
-            
+
             else {
                 uint8_t* input = static_cast<uint8_t*>(buff[current.index].payload);
-                
+
                 const size_t total = width * height;
-                
+
                 // Fix the colour information to be YUV444 rather then YUV422
                 for(size_t i = 0; i < total; ++++i) {
-                    
+
                     data[total - i - 1].y  = input[i * 2];
                     data[total - i - 1].cb = input[i * 2 + 1];
                     data[total - i - 1].cr = input[i * 2 + 3];
-                    
+
                     data[total - i].y  = input[i * 2 + 2];
                     data[total - i].cb = input[i * 2 + 1];
                     data[total - i].cr = input[i * 2 + 3];
-                }                
+                }
 
                 // Move this data into the image
-                std::unique_ptr<Image> image = 
+                std::unique_ptr<Image> image =
                         std::unique_ptr<Image>(new Image(width, height, std::move(data), rotated));
             }
 
@@ -216,7 +216,7 @@ namespace modules {
             format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             format.fmt.pix.width = width;
             format.fmt.pix.height = height;
-            
+
             // We have to choose YUYV or MJPG here
             if(fmt == "YUYV") {
                 format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
@@ -227,7 +227,7 @@ namespace modules {
             else {
                 throw std::runtime_error("The format must be either YUYV or MJPG");
             }
-            
+
             format.fmt.pix.field = V4L2_FIELD_NONE;
             if (ioctl(fd, VIDIOC_S_FMT, &format) == -1) {
                 throw std::system_error(errno, std::system_category(), "There was an error while setting the cameras format");
@@ -337,7 +337,7 @@ namespace modules {
         const std::string& V4L2Camera::getDeviceID() const {
             return deviceID;
         }
-        
+
         const std::string& V4L2Camera::getFormat() const {
             return format;
         }
@@ -355,6 +355,6 @@ namespace modules {
                 fd = -1;
             }
         }
-        
+
     }  // input
 }  // modules

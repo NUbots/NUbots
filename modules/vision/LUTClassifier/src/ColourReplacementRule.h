@@ -1,26 +1,26 @@
 /*
- * This file is part of ColourReplacementRule.
+ * This file is part of the NUbots Codebase.
  *
- * ColourReplacementRule is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ColourReplacementRule is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ColourReplacementRule.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
- 
+
 #ifndef MODULES_VISION_COLOURREPLACEMENTRULE_H
 #define MODULES_VISION_COLOURREPLACEMENTRULE_H
 
-#include <nuclear> 
+#include <nuclear>
 #include <armadillo>
 #include <string>
 #include <vector>
@@ -32,11 +32,11 @@
 
 namespace modules {
     namespace vision {
-    
+
         class ColourReplacementRule {
         public:
             static messages::vision::ColourSegment nomatch;   //! @variable a static segment used to represent one that cannot be matched to any rule.
-    
+
             enum ReplacementMethod {
                 BEFORE,
                 AFTER,
@@ -45,7 +45,7 @@ namespace modules {
             };
 
             ColourReplacementRule();
-            
+
             void loadRuleFromConfigInfo(
                 std::string colours_before,
                 std::string colour_middle,
@@ -66,21 +66,21 @@ namespace modules {
                 @return Whether it is a match.
                 */
             bool match(const messages::vision::ColourSegment& before, const messages::vision::ColourSegment& middle, const messages::vision::ColourSegment& after) const;
-    
+
             /*!
               Gets the method matching the given string.
               @param name String name of the method.
               @return The method desired.
               */
             ReplacementMethod getMethodFromName(const std::string& name) const;
-            
+
             /*!
               Gets the name of the given method.
               @param method The method name desired.
               @return String name of the method.
               */
             std::string getMethodName(const ReplacementMethod& method) const;
-            
+
             /*!
               Returns the replacement method (before, after or split) for this rule.
                - before - the middle segment is given the colour of the first.
@@ -92,7 +92,7 @@ namespace modules {
 
         private:
                std::string m_name;  //! @variable the name of the rule.
-    
+
             ReplacementMethod m_method;  //! @variable The replacement method for this rule.
 
                std::vector<messages::vision::Colour> m_before;                //! @variable The colour that the first segment must be.
@@ -104,11 +104,11 @@ namespace modules {
             unsigned int m_before_min;                                    //! @variable the minimum length of the first segment for a match.
             unsigned int m_before_max;                                    //! @variable the maximum length of the first segment for a match.
             unsigned int m_after_min;                                    //! @variable the minimum length of the last segment for a match.
-            unsigned int m_after_max;                                    //! @variable the maximum length of the last segment for a match. 
-                         
+            unsigned int m_after_max;                                    //! @variable the maximum length of the last segment for a match.
+
             bool oneWayMatch(const messages::vision::ColourSegment& before, const messages::vision::ColourSegment& middle, const messages::vision::ColourSegment& after) const;
         };
-        
+
     } // vision
 } // modules
 

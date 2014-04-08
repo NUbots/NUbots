@@ -1,18 +1,18 @@
 /*
- * This file is part of FeatureDetector.
+ * This file is part of the NUbots Codebase.
  *
- * FeatureDetector is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * FeatureDetector is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FeatureDetector.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -38,7 +38,7 @@ namespace modules {
             friend class BallDetector;
             Ball();
             Ball(const arma::vec2& centre, double max_box_size);
-            
+
 			      void setParameters(bool THROWOUT_ON_ABOVE_KIN_HOR_BALL_,
                                 float MAX_DISTANCE_METHOD_DISCREPENCY_BALL_,
                                 bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL_,
@@ -58,20 +58,20 @@ namespace modules {
 
             //! @brief applies a series of checks to decide if the ball is valid.
             bool check() const;
-            
+
             //! @brief output stream operator
             friend std::ostream& operator<< (std::ostream& output, const Ball& b);
 
             //! @brief output stream operator for a std::vector of balls
             friend std::ostream& operator<< (std::ostream& output, const std::vector<Ball>& b);
-            
+
         private:
             /*!
               @brief calculates various positions values of the ball.
               @return whether the ball is valid.
               */
             bool calculatePositions(const VisionKinematics& visionKinematics);
-            
+
             /*!
               @brief calculates distance to the ball based on the global ball distance metric.
               @param bearing the angle between the ball and the image centre in the xy plane.
@@ -79,10 +79,10 @@ namespace modules {
               @return the distance to the ball in cm.
               */
             //double distanceToBall(double bearing, double elevation);
-            
+
         private:
             int m_diameter;     //! @variable the radius of the ball in pixels
-            
+
       			bool THROWOUT_ON_ABOVE_KIN_HOR_BALL;
       			float MAX_DISTANCE_METHOD_DISCREPENCY_BALL;
       			bool THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL;

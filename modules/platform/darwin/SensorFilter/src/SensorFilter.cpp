@@ -1,18 +1,18 @@
 /*
- * This file is part of Darwin Sensor Filter.
+ * This file is part of the NUbots Codebase.
  *
- * Darwin Sensor Filter is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Darwin Sensor Filter is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Darwin Sensor Filter.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -177,7 +177,7 @@ namespace modules {
                     } else if(normAcc > LOW_NOISE_THRESHOLD){
                         observationNoise = arma::eye(3,3) * (HIGH_NOISE_GAIN - DEFAULT_NOISE_GAIN) * (normAcc - LOW_NOISE_THRESHOLD) / (HIGH_NOISE_THRESHOLD - LOW_NOISE_THRESHOLD);
                     }
- 
+
                     orientationFilter.measurementUpdate(sensors->accelerometer, observationNoise);
                     arma::vec orientation = orientationFilter.get();
                     sensors->orientation.col(2) = -orientation.rows(0,2);
@@ -214,9 +214,9 @@ namespace modules {
                     }
 
                     sensors->odometry = arma::eye(4,4);
-                    
-                    if(sensors->leftFootDown || sensors->rightFootDown){                       
-                        sensors->odometry.submat(0,3,2,3) = (odometryLeftFoot.submat(0,3,2,3) * sensors->leftFootDown + odometryLeftFoot.submat(0,3,2,3) * sensors->rightFootDown) 
+
+                    if(sensors->leftFootDown || sensors->rightFootDown){
+                        sensors->odometry.submat(0,3,2,3) = (odometryLeftFoot.submat(0,3,2,3) * sensors->leftFootDown + odometryLeftFoot.submat(0,3,2,3) * sensors->rightFootDown)
                                                             / (sensors->leftFootDown + sensors->rightFootDown);
                         if(sensors->leftFootDown && sensors->rightFootDown){
                             sensors->odometry.submat(0,0,2,2) = odometryLeftFoot.submat(0,0,2,2);
@@ -227,7 +227,7 @@ namespace modules {
 
                     /************************************************
                      *                  Mass Model                  *
-                     ************************************************/                
+                     ************************************************/
                     //LOOKOUT!!!! ARRAYOPS_MEAT
                     arma::vec4 COM = calculateCentreOfMass<DarwinModel>(sensors->forwardKinematics, true);
                     sensors->centreOfMass = {COM[0],COM[1], COM[2], COM[3]};
@@ -261,20 +261,20 @@ namespace modules {
                     emit(std::move(sensors));
                 });
             }
-        
+
             arma::mat44 SensorFilter::calculateOdometryMatrix(
                 const messages::input::Sensors& sensors,
                 const messages::input::Sensors& previousSensors,
                 utility::motion::kinematics::Side side) {
                     arma::mat44 bodyFromAnkleInitialInverse, bodyFromAnkleFinal;
                     if(side == Side::LEFT){
-                        bodyFromAnkleInitialInverse = previousSensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL);   //Double Inverse   
+                        bodyFromAnkleInitialInverse = previousSensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL);   //Double Inverse
                         bodyFromAnkleFinal = orthonormal44Inverse(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL));
                     } else {
-                        bodyFromAnkleInitialInverse = previousSensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL);   //Double Inverse                     
-                        bodyFromAnkleFinal = orthonormal44Inverse(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL));                        
+                        bodyFromAnkleInitialInverse = previousSensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL);   //Double Inverse
+                        bodyFromAnkleFinal = orthonormal44Inverse(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL));
                     }
-                    return bodyFromAnkleFinal * bodyFromAnkleInitialInverse;            
+                    return bodyFromAnkleFinal * bodyFromAnkleInitialInverse;
             }
 
 

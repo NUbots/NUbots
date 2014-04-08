@@ -1,18 +1,18 @@
 /*
- * This file is part of WalkEngine.
+ * This file is part of the NUbots Codebase.
  *
- * WalkEngine is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * WalkEngine is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with WalkEngine.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -31,13 +31,13 @@ namespace modules {
 
         /**
          * TODO
-         * 
+         *
          * @author Trent Houliston
          */
         class WalkEngine : public NUClear::Reactor {
         public:
             static constexpr size_t UPDATE_FREQUENCY = 60;
-            
+
             static constexpr const char* CONFIGURATION_PATH = "WalkEngine.json";
             explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
         private:
@@ -131,7 +131,7 @@ namespace modules {
             float frontComp;
             float AccelComp;
 
-            // Initial body swing 
+            // Initial body swing
             float supportModYInitial;
 
             float toeTipCompensation;
@@ -276,7 +276,7 @@ namespace modules {
             arma::vec3 poseRelative(arma::vec3 pGlobal, arma::vec3 pose);
             arma::vec3 se2Interpolate(double t, arma::vec3 u1, arma::vec3 u2);
         };
-    
+
     }  // motion
 }  // modules
 

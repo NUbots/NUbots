@@ -54,7 +54,7 @@
 
 	\clearpage
 	\tableofcontents
-		
+
 	\clearpage
 
 \section{Project Quality}
@@ -68,7 +68,7 @@
 		It has also allowed for the easy construction of completely new systems such as Robot Dance and MechWarrior using components already available from NUClearPort.
 		NUClear was designed with a debug ability as a core goal, making the system much more maintainable. NUClear has been embraced by the NUBots team who are continuing the work on NUClearPort.
 		Additionally, the NUbots team are already using NUClear to assist in robot research.
-	
+
 	\subsection{NUClearPort}
 		While NUClearPort did not progress as far as originally intended, it is well on its way to converting the old NUbots soccer system to NUClear.
 		It has given the NUbots team a significant starting point to complete the transfer to NUClear.
@@ -79,8 +79,8 @@
 		Roles can be used for easily creating new unit tests for components or even to allow NUbots system components to be used for completely different purposes such as Robot Dance.
 		Each component of the system is designed to be cohesive and the framework ensures that the components are very loosely coupled.
 		This greatly improves the ability to maintain the system, as new members only need to learn how the single component they are trying to fix or improve works.
-		This maintainability will be further improved when NUbugger is upgraded with debugging that will be built into NUClear. 
-	
+		This maintainability will be further improved when NUbugger is upgraded with debugging that will be built into NUClear.
+
 	\subsection{Robot Dance}
 		Robot Dance has achieved its purpose of being able to dance in time to the beats of music.
 		The core of the system is solid, but some components could use improvement.
@@ -92,15 +92,15 @@
 		The dance system excels in its ability to easily add more dance scripts.
 		We have developed a separate role that allows the user to create dance moves by moving the robot into a series of positions and taking a snapshot of those positions.
 		A script will then be created that allows the robot to move between these positions and do a dance move.
-		
+
 \section{Engineering Approaches}
 	\subsection{Project Planning}
 		While we were unable to complete all of the estimated goals, we were prepared.
 		The group focused on porting the core functionality for the NUbots system first so that if we were unable to complete it, the NUbots team would have a much easier time finishing it.
 		Additionally, unplanned complications such as having two members of the team leave resulted in some changes to the project plan.
 		For example, the dancing in response to video was not able to be achieved due to the restricted number of group members.
-		Fortunately, no group members left the NUClear Focus Group, which the whole project is dependent on. 
-	
+		Fortunately, no group members left the NUClear Focus Group, which the whole project is dependent on.
+
 	\subsection{Group Co-ordination}
 		Our team met once a week during the past two university semesters.
 		This worked well for the team.
@@ -109,27 +109,35 @@
 		We also used BaseCamp for group communication, particularly for discussing and sharing documentation.
 		During the second semester, there were only four group members and so BaseCamp became less necessary as all the team members were able to communicate directly and git was used for sharing documents.
 		Skype was also employed regularly for group communication.
-	
+
 	\subsection{Software Engineering Methodologies}
 		Due to our close communication with the NUbots team as well as our small team size, our group approach evolved into a semi-agile approach.
 		This was expressed through the use of an evolutionary prototype that was used in the design and development of NUClear.
 		It allowed us to see what could be done with the tools we had available.
 		We were however, constrained in following agile development to some extent by the quantity of documentation required for the project.
-				We followed several development ideologies for the project.
-				One of these ideologies was the Make It Easy To Succeed (MIETS) approach.
+
+		We followed several development ideologies for the project.
+
+		One of these ideologies was the Make It Easy To Succeed (MIETS) approach.
 		This is the idea that the architecture is designed so that it is difficult to use it incorrectly.
 		Architecture designed work is often valuable in theory, but in practice, the system is limited because the developer’s did not follow the ideal set out in the architecture.
-		NUClear is designed so that the developers are required to follow NUClear’s way, making it much more difficult for the system to become an architectural mess in the future.		Another ideology we used was literate programming.
+		NUClear is designed so that the developers are required to follow NUClear’s way, making it much more difficult for the system to become an architectural mess in the future.
+
+		Another ideology we used was literate programming.
 		NUClear was designed so that it is named in a way that makes it intuitive to use.
 		This makes it much easier to read the code.
 		Even if you are inexperienced with NUClear, you should still have a general idea of what is happening.
-		This can be seen in the naming of ’on’ and ’emit’, which are keywords for a component triggering on a message and for emitting a message, respectively.		A related ideology to the previous two is KISS (Keep It Simple Stupid).
+		This can be seen in the naming of ’on’ and ’emit’, which are keywords for a component triggering on a message and for emitting a message, respectively.
+
+		A related ideology to the previous two is KISS (Keep It Simple Stupid).
 		NUClear was designed to be easy to use and easy to learn.
 		NUClear is a very powerful tool, which innovates complicated things like compile time message routing and behind the scenes thread management.
 		Yet despite this, it is still very easy to use.
 		This was achieved by using the full extent of C++ features including template meta programming.
 		Programming NUClear was a difficult task that was only possible due to having very experienced C++ programmers on our team.
-		So while the core NUClear code would be very difficult for someone without a great knowledge of C++, the user of NUClear would have a much easier time programming.		Another core software engineering ideology we used was Separation of Concerns.
+		So while the core NUClear code would be very difficult for someone without a great knowledge of C++, the user of NUClear would have a much easier time programming.
+
+		Another core software engineering ideology we used was Separation of Concerns.
 		This was a core design principle of our architecture.
 		Every component of a system should be highly cohesive.
 		Every component should only do a single task.
@@ -140,7 +148,8 @@
 		NUClear makes it easy to be loosely coupled since each component only cares about what type of message the other components send to it, or expect to receive from it.
 		NUClearPort also used this ideology. Using the features of NUClear, the role system makes it easy to recombine components into different systems.
 		For example, a unit test could be created easily by creating dummy components that emit test data to the component being tested and trigger on the data the component emits to verify the output.
-		Components can also easily be replaced with different versions, such as different beat trackers for robot dance that can be swapped by replacing one line in a script. All this was achieved because we made separation of concerns a core ideology for our project. 		
+		Components can also easily be replaced with different versions, such as different beat trackers for robot dance that can be swapped by replacing one line in a script. All this was achieved because we made separation of concerns a core ideology for our project.
+
 	\subsection{Documentation}
 		Due to losing team members, documentation became more of a burden than we originally estimated.
 		Focus had to be allocated to finishing the documentation rather than making further progress with the project, particularly with NUClearPort.
@@ -154,7 +163,7 @@
 			\item Group Reflection (This Document)
 			\item NUbots training document
 		\end{itemize}
-		
+
 		Due to our agile approach and close communication with the NUbots team, at times the documentation seemed more of a burden than actually useful.
 		The Project Plan, however, helped us consider the risks that could take place in our project.
 		Also, the Requirement Document helped us to fully clarify some of the requirements we had previously overlooked.
@@ -193,25 +202,25 @@
 		Some of our group members had little C++ experience at the start of the project.
 		Those group members’ skills improved during the project.
 		However, this lack of experience caused some setbacks, particularly for the robot dance.
-		
+
 \section{Overall Development}
 	%TODO More stuff in this section?
 	\subsection{Things to improve}
 		The work on NUClearPort is incomplete.
 		Its completion was desired, however, the group was setback due to the lack of team members and the documentation required.
 		NUClearPort will be completed by the NUbots team.
-		
+
 		Robot dance, while able to fulfill its objectives, can be improved.
 		The beat tracking algorithm can be improved to use a more modern beat tracker.
-		Additionally, a noise filter could be implemented to remove background noise from the audio signal. 
-	
+		Additionally, a noise filter could be implemented to remove background noise from the audio signal.
+
 	\subsection{What the group has learned}
 		One major lesson we have learned as a group is to not underestimate the amount of work required for a project.
 		This mistake was shown by our inability to finish porting the soccer system to NUClear.
 		If we were doing this project again we would have started working on NUClearPort in semester one rather than waiting until semester two.
 		We also would have made better contingency plans if we ran out of time to complete a task.
 		We also would not underestimate the amount of documentation required for our project and how much time that can take from other tasks.
-		A time plan is needed. 
+		A time plan is needed.
 
 		We also learned that while formal approaches to software engineering are important and very useful, in a project with a small team, they are less useful.
 		We realised that less formal approaches were more efficient in getting the job done.
@@ -229,14 +238,14 @@
 		We also developed a lot in our programming skill during the course of this project.
 		Some of us were inexperienced with C++ at the start of the project, but now at the end are very competent with it.
 		Part of this was the development of C++ template meta programming skills that were used to build NUClear.
-		We also learned a lot about working with hardware as we were writing software for robots, circuit design, low level software concepts such as interfacing with hardware and signal processing for audio and also mathematical concepts such as Fourier transforms and lambda calculus. 
-		
+		We also learned a lot about working with hardware as we were writing software for robots, circuit design, low level software concepts such as interfacing with hardware and signal processing for audio and also mathematical concepts such as Fourier transforms and lambda calculus.
+
 		We also learnt about software architecture due to our project being about designing a system architecture.
 		Part of this was learning about architectural concepts such as orchestration and modular design.
-		
+
 \section{Conclusion}
 	Despite the setbacks that have been sustained during the course of this project, the members of the NUClear team have all gained a significant boost to their software engineering skill.
 	The NUClear framework and architecture that was created is exponentially faster then the state of the art designs produced for other systems.
 	The design and code that was developed in this project will continue to be used by the NUBots team and potentially many other applications for years to come.
-	
+
 \end{document}

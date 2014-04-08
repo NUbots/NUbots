@@ -1,18 +1,18 @@
 /*
- * This file is part of FeatureDetector.
+ * This file is part of the NUbots Codebase.
  *
- * FeatureDetector is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * FeatureDetector is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FeatureDetector.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -21,7 +21,7 @@
 
 namespace modules {
 	namespace vision {
-	
+
 		LSFittedLine::LSFittedLine() {
 			clearPoints();
 		}
@@ -60,7 +60,7 @@ namespace modules {
 			sumXY += point[0] * point[1];
 			points.push_back(point);
 			valid = (points.size() >= 2);
-				
+
 			if (valid) {
 				calcLine();
 			}
@@ -74,12 +74,12 @@ namespace modules {
 				    sumX2 += point[0] * point[0];
 				    sumY2 += point[1] * point[1];
 				    sumXY += point[0] * point[1];
-				    
+
 				    points.push_back(point);
 				}
-				
+
 				valid = (points.size() >= 2);
-				
+
 				if (valid) {
 				    calcLine();
 				}
@@ -96,9 +96,9 @@ namespace modules {
 			for (const auto& point : sourceLine.points) {
 				points.push_back(point);
 			}
-		
+
 			valid = (points.size() >= 2);
-				
+
 			if (valid) {
 				calcLine();
 			}
@@ -107,36 +107,36 @@ namespace modules {
 		arma::vec2 LSFittedLine::combinedR2TLSandMSD(const LSFittedLine &sourceLine) const {
 			double sxx, syy, sxy, Sigma;
 			double TsumX, TsumY, TsumX2, TsumY2, TsumXY, TnumPoints;
-		
+
 			TsumX = sumX + sourceLine.sumX;
 			TsumY = sumY + sourceLine.sumY;
 			TsumX2 = sumX2 + sourceLine.sumX2;
 			TsumY2 = sumY2 + sourceLine.sumY2;
 			TsumXY = sumXY + sourceLine.sumXY;
 			TnumPoints = points.size() + sourceLine.points.size();
-		
+
 			arma::vec2 results;
 
 			sxx = TsumX2 - ((TsumX * TsumX) / TnumPoints);
 			syy = TsumY2 - ((TsumY * TsumY) / TnumPoints);
 			sxy = TsumXY - ((TsumX * TsumY) / TnumPoints);
-		
+
 			Sigma = (sxx + syy - std::sqrt(((sxx - syy) * (sxx - syy)) + (4 * sxy * sxy))) / 2;
-		
+
 			results[0] = 1.0 - ((4.0 * Sigma * Sigma) / (((sxx + syy) * (sxx + syy)) + ((sxx - syy) * (sxx - syy)) + (4.0 * sxy * sxy)));
 			results[1] = Sigma / TnumPoints;
-		
+
 			return results;
 		}
 
 		bool LSFittedLine::isValid() const {
 			return valid;
 		}
-			
+
 		size_t LSFittedLine::getNumPoints() const {
 			return points.size();
 		}
-			
+
 		double LSFittedLine::getMSD () const {
 			return MSD;
 		}
@@ -154,7 +154,7 @@ namespace modules {
 			syy = sumY2 - ((sumY * sumY) / numPoints);
 			sxy = sumXY - ((sumX * sumY) / numPoints);
 			Sigma = ((sxx + syy) - std::sqrt(((sxx - syy) * (sxx - syy)) + (4 * sxy * sxy))) / 2;
-		
+
 			MSD = Sigma / numPoints;
 			r2tls = 1.0 - ((4.0 * Sigma * Sigma) / (((sxx + syy) * (sxx + syy)) + ((sxx - syy) * (sxx - syy)) + (4.0 * sxy * sxy)));
 
@@ -164,13 +164,13 @@ namespace modules {
 				B = (sxx - Sigma);
 				C = -((sumX * sxy) - ((sxx - Sigma) * sumY)) / numPoints;
 			}
-	
+
 			else {
 				A = (syy - Sigma);
 				B = -sxy;
 				C = -((sumY * sxy) - ((syy - Sigma) * sumX)) / numPoints;
 			}
-	
+
 			setLine(A, B, C);
 		}
 
@@ -180,7 +180,7 @@ namespace modules {
 
 			float min = std::numeric_limits<float>::max();
 			float max = -std::numeric_limits<float>::max();
-	
+
 			std::vector< arma::vec2 >::const_iterator p, p_min, p_max;
 
 		    for(p = points.begin(), p_min = p_max = p; p!=points.end(); p++) {
@@ -235,11 +235,11 @@ namespace modules {
 				// Determine distances from the two possible pairings.
 				double d1 = 0.5 * (arma::norm(ep1 - other_ep1, 2) + arma::norm(ep2 - other_ep2, 2));
 				double d2 = 0.5 * (arma::norm(ep2 - other_ep1, 2) + arma::norm(ep1 - other_ep2, 2));
-				       
+
 				// Best pairing results in minimum distance.
-				return std::min(d1, d2); 
+				return std::min(d1, d2);
 			}
-		
+
 			// Test for this - distances should always be positive.
 			return -1.0;
 		}

@@ -1,18 +1,18 @@
 /*
- * This file is part of NUBots Utility.
+ * This file is part of the NUbots Codebase.
  *
- * NUBots Utility is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * NUBots Utility is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with NUBots Utility.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -26,7 +26,7 @@
 
 namespace utility {
     namespace math {
-  
+
         /**
          * Some general matrix utilities (generating rotation matrices).
          *
@@ -35,12 +35,12 @@ namespace utility {
 		 * @author Brendan Annable
          */
         namespace matrix {
-        	
+
         	inline arma::mat22 rotationMatrix(double angle) {
 				double cosAngle = std::cos(angle);
 				double sinAngle = std::sin(angle);
 				arma::mat22 result;
-                result << cosAngle    << -sinAngle   <<  arma::endr 
+                result << cosAngle    << -sinAngle   <<  arma::endr
 	                   << sinAngle    << cosAngle;
                 return result;
             }
@@ -49,8 +49,8 @@ namespace utility {
 				double cosAngle = cos(angle);
 				double sinAngle = sin(angle);
                 arma::mat33 result;
-                result << 1           << 0           << 0           <<	arma::endr  
-                       << 0           << cosAngle    << -sinAngle   << 	arma::endr 
+                result << 1           << 0           << 0           <<	arma::endr
+                       << 0           << cosAngle    << -sinAngle   << 	arma::endr
                        << 0           << sinAngle    << cosAngle;
                 return result;
 			}
@@ -58,8 +58,8 @@ namespace utility {
 				double cosAngle = cos(angle);
 				double sinAngle = sin(angle);
 				arma::mat33 result;
-                result << cosAngle    << 0           << sinAngle    <<  arma::endr 
-                       << 0           << 1           << 0           << arma::endr 
+                result << cosAngle    << 0           << sinAngle    <<  arma::endr
+                       << 0           << 1           << 0           << arma::endr
                        << -sinAngle   << 0           << cosAngle;
                 return result;
             }
@@ -68,8 +68,8 @@ namespace utility {
 				double cosAngle = cos(angle);
 				double sinAngle = sin(angle);
 				arma::mat33 result;
-                result << cosAngle    << -sinAngle   << 0           <<  arma::endr 
-	                   << sinAngle    << cosAngle    << 0           <<  arma::endr 
+                result << cosAngle    << -sinAngle   << 0           <<  arma::endr
+	                   << sinAngle    << cosAngle    << 0           <<  arma::endr
 	                   << 0           << 0           << 1;
                 return result;
             }
@@ -79,7 +79,7 @@ namespace utility {
 					throw std::runtime_error("Rotations in two dimensions cannot be done about the x-axis. Use the z-axis.");
 				}
 				arma::mat rot(size, size, arma::fill::eye);
-				rot.submat(0,0,2,2) = xRotationMatrix(angle);		 			
+				rot.submat(0,0,2,2) = xRotationMatrix(angle);
 				return rot;
 			}
 
@@ -88,18 +88,18 @@ namespace utility {
 					throw std::runtime_error("Rotations in two dimensions cannot be done about the y-axis. Use the z-axis.");
 				}
 				arma::mat rot(size, size, arma::fill::eye);
-				rot.submat(0,0,2,2) = yRotationMatrix(angle);		 			
+				rot.submat(0,0,2,2) = yRotationMatrix(angle);
 				return rot;
-			}	
+			}
 
 			inline arma::mat zRotationMatrix(double angle, int size) {
 				if (size <= 2) {
-					return zRotationMatrix(angle).submat(0,1,0,1); 				
+					return zRotationMatrix(angle).submat(0,1,0,1);
 				}
 				arma::mat rot(size, size, arma::fill::eye);
-				rot.submat(0,0,2,2) = zRotationMatrix(angle);		 			
+				rot.submat(0,0,2,2) = zRotationMatrix(angle);
 				return rot;
-			}	
+			}
 
 			inline arma::mat44 translationMatrix(arma::vec3 v){
 				arma::mat44 result = arma::eye(4,4);
@@ -130,8 +130,8 @@ namespace utility {
 				}
 
 				//Get second orthogonal vector
-				B.col(2) = arma::cross(B.col(0),B.col(1));	
-				
+				B.col(2) = arma::cross(B.col(0),B.col(1));
+
  				return B * xRotationMatrix(angle) * B.t();
 			}
 			/*! @return Pair containing the axis of the rotation as a unit vector followed by the rotation angle.*/
@@ -152,7 +152,7 @@ namespace utility {
                 } else {
                 	NUClear::log<NUClear::ERROR>("utility::math::matrix::axisAngleRotationMatrix -  ERROR :  No rotation found");
                 	return result;
-                }                
+                }
 
                 //Construct an ONB
                 arma::vec3 s = {0,-result.first[2],result.first[1]};	//orth to result.first
@@ -177,7 +177,7 @@ namespace utility {
 				minverse.submat(0,3,2,3) = -minverse.submat(0,0,2,2) * m.submat(0,3,2,3);
 				return minverse;
 			}
-			
+
         }
     }
 }

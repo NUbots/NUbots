@@ -1,18 +1,18 @@
 /*
- * This file is part of MockRobot.
+ * This file is part of the NUbots Codebase.
  *
- * MockRobot is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * MockRobot is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with MockRobot.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -82,7 +82,7 @@ namespace localisation {
             robot_position_ = { wave1 * x_amp, wave2 * y_amp };
 
             arma::vec diff = robot_position_ - old_pos;
- 
+
             robot_heading_ = arma::normalise(diff);
             robot_velocity_ = robot_heading_ / 100.0;
         });
@@ -116,7 +116,7 @@ namespace localisation {
 // // Note: M can only attempt to track the robot's orientation - not its position.
 // //       i.e. The origin of the world coords resulting from M is still the
 // //            robot's torso, but the axes are parallel to the field axes.
-//             arma::mat33 M = 
+//             arma::mat33 M =
 
 
 //         });
@@ -124,13 +124,13 @@ namespace localisation {
         // Simulate Odometry
         on<Trigger<Every<100, std::chrono::milliseconds>>>("Odometry Simulation",
             [this](const time_t&) {
-            
+
             auto odom = std::make_unique<messages::localisation::FakeOdometry>();
 
             double old_heading = std::atan2(odom_old_robot_heading_[1],
                                             odom_old_robot_heading_[0]);
             double new_heading = std::atan2(robot_heading_[1],
-                                            robot_heading_[0]); 
+                                            robot_heading_[0]);
             double heading_diff = new_heading - old_heading;
             odom->torso_rotation = utility::math::angle::normalizeAngle(heading_diff);
 
@@ -146,7 +146,7 @@ namespace localisation {
             odom_old_robot_position_ = robot_position_;
             odom_old_robot_heading_ = robot_heading_;
 
-            emit(graph("Odometry torso_displacement", 
+            emit(graph("Odometry torso_displacement",
                 odom->torso_displacement[0],
                 odom->torso_displacement[1]));
             emit(graph("Odometry torso_rotation", odom->torso_rotation));
@@ -174,7 +174,7 @@ namespace localisation {
             auto goal2 = messages::vision::Goal();
             goal1.type = messages::vision::Goal::RIGHT;
             goal2.type = messages::vision::Goal::LEFT;
-            
+
             // (dist, bearing, declination)
             goal1.sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(goal1_pos - camera_pos);
             goal2.sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(goal2_pos - camera_pos);
@@ -208,7 +208,7 @@ namespace localisation {
            Options<Sync<MockRobot>>>("NUbugger Output",
             [this](const time_t&,
                    const std::vector<messages::localisation::Self>& robots) {
-            
+
             emit(graph("Actual robot position", robot_position_[0], robot_position_[1]));
             emit(graph("Actual robot heading", robot_heading_[0], robot_heading_[1]));
             emit(graph("Actual robot velocity", robot_velocity_[0], robot_velocity_[1]));
@@ -221,7 +221,7 @@ namespace localisation {
             // Robot message
             auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
             std::vector<messages::localisation::FieldObject::Model> robot_msg_models;
-            
+
             for (auto& model : robots) {
                 messages::localisation::FieldObject::Model robot_model;
                 robot_msg->name = "self";
@@ -236,7 +236,7 @@ namespace localisation {
                 robot_model.lost = false;
                 robot_msg_models.push_back(robot_model);
             }
-            
+
             messages::localisation::FieldObject::Model actual_robot;
             robot_msg->name = "self";
             actual_robot.wm_x = robot_position_[0];

@@ -1,18 +1,18 @@
 /*
- * This file is part of FeatureDetector.
+ * This file is part of the NUbots Codebase.
  *
- * FeatureDetector is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * FeatureDetector is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FeatureDetector.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -90,7 +90,7 @@ namespace modules {
 
                 return false;
             }
-            
+
             // //Distance discrepency throwout - if width method says ball is a lot closer than d2p (by specified value) then discard
             // if ((THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL) && (std::abs(width_dist - d2p) > MAX_DISTANCE_METHOD_DISCREPENCY_BALL)) {
             //     return false;
@@ -100,12 +100,12 @@ namespace modules {
             if (THROWOUT_SMALL_BALLS && (m_diameter < MIN_BALL_DIAMETER_PIXELS)) {
                 return false;
             }
-            
+
             // Throw out if ball is too far away.
             if (THROWOUT_DISTANT_BALLS && (m_location.neckRelativeRadial[0] > MAX_BALL_DISTANCE)) {
                 return false;
             }
-            
+
             // All checks passed, keep ball.
             return true;
         }
@@ -202,7 +202,7 @@ namespace modules {
             output << "Ball " << std::endl;
             output << "\tpixelloc: [" << ball.m_location.screenCartesian[0] << ", " << ball.m_location.screenCartesian[1] << "]" << std::endl;
             output << " angularloc: [" << ball.m_location.screenAngular[0] << ", " << ball.m_location.screenAngular[1] << "]" << std::endl;
-            output << "\trelative field coords: [" << ball.m_location.neckRelativeRadial[0] << ", " << ball.m_location.neckRelativeRadial[1] << 
+            output << "\trelative field coords: [" << ball.m_location.neckRelativeRadial[0] << ", " << ball.m_location.neckRelativeRadial[1] <<
                         ", " << ball.m_location.neckRelativeRadial[2] << "]" << std::endl;
             output << "\tspherical error: [" << ball.m_sphericalError[0] << ", " << ball.m_sphericalError[1] <<", "<< ball.m_sphericalError[2] << "]" << std::endl;
             output << "\tsize on screen: [" << ball.m_sizeOnScreen[0] << ", " << ball.m_sizeOnScreen[1] << "]";

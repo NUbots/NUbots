@@ -1,18 +1,18 @@
 /*
- * This file is part of NUBots FeatureDetector. 
+ * This file is part of the NUbots Codebase.
  *
- * NUBots FeatureDetector is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * NUBots FeatureDetector is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with NUBots FeatureDetector.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -44,10 +44,10 @@ namespace modules {
 												const arma::vec3& CAMERA_POSITION_OFFSET_,
                                                 float SCREEN_LOCATION_UNCERTAINTY_PIXELS_) {
 			RADIAL_CORRECTION_COEFFICIENT = RADIAL_CORRECTION_COEFFICIENT_;
-			
+
 			BODY_ANGLE_OFFSET = BODY_ANGLE_OFFSET_;
 			CAMERA_ANGLE_OFFSET = CAMERA_ANGLE_OFFSET_;
-			
+
 			NECK_POSITION_OFFSET = NECK_POSITION_OFFSET_;
 
 			BODY_POSITION_OFFSET = BODY_POSITION_OFFSET_;
@@ -83,7 +83,7 @@ namespace modules {
         }
 
         void VisionKinematics::preCalculateTransforms() {
-            enum{ 
+            enum{
                 ROLL = 0,          // X-axis
                 PITCH = 1,         // Y-axis
                 YAW = 2       // Z-axis
@@ -121,7 +121,7 @@ namespace modules {
 
             m_camVector = (headV2RobotRotation * CAMERA_POSITION_OFFSET) + m_neckPosition;
             m_camV2RobotRotation = headV2RobotRotation * cameraPitch_rot * cameraRoll_rot * cameraYaw_rot;
-            
+
 
         }
 
@@ -144,7 +144,7 @@ namespace modules {
             }
             arma::vec3 cartesian = utility::math::coordinates::Spherical2Cartesian(point.neckRelativeRadial);
             point.groundCartesian[0] = cartesian[0];
-            point.groundCartesian[1] = cartesian[1];          
+            point.groundCartesian[1] = cartesian[1];
         }
 
         void VisionKinematics::calculateRepresentationsFromPixelLocation(std::vector<NUPoint>& points, bool knownDistance, double val) const {
@@ -340,7 +340,7 @@ namespace modules {
         double VisionKinematics::getD2PError(const NUPoint& location) const{
             double declination_error = SCREEN_LOCATION_UNCERTAINTY_PIXELS*m_FOV[1]/m_imageSize[1];
             double robot_height = std::abs(m_neckPosition[2]);
-            double sin_elevation = std::sin(location.neckRelativeRadial[2]-arma::math::pi()); 
+            double sin_elevation = std::sin(location.neckRelativeRadial[2]-arma::math::pi());
             return declination_error*robot_height/(sin_elevation*sin_elevation);
         }
 
@@ -367,7 +367,7 @@ namespace modules {
                     break;
                 }
 
-                case LEAST: {                   
+                case LEAST: {
                     double width_error = SCREEN_LOCATION_UNCERTAINTY_PIXELS*location.neckRelativeRadial[0]/width;
                     double d2p_error = getD2PError(location);
 
@@ -382,11 +382,11 @@ namespace modules {
                 }
             }
 
-            sphericalError[1] = SCREEN_LOCATION_UNCERTAINTY_PIXELS*getFOV()[0]/getImageSize()[0];  //Erordp =1 
+            sphericalError[1] = SCREEN_LOCATION_UNCERTAINTY_PIXELS*getFOV()[0]/getImageSize()[0];  //Erordp =1
             sphericalError[2] = SCREEN_LOCATION_UNCERTAINTY_PIXELS*getFOV()[1]/getImageSize()[1];  //Erordp =1
             return sphericalError;
         }
 
     }
 }
-        
+

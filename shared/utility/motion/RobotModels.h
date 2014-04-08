@@ -1,3 +1,21 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
 
 #ifndef UTILITY_MOTION_KINEMATICS_ROBOTMODELS_H
 #define UTILITY_MOTION_KINEMATICS_ROBOTMODELS_H
@@ -15,7 +33,7 @@ namespace utility{
 
 			class DarwinModel{
 			public:
-                
+
 				class Leg {
 				public:
 					static constexpr float LENGTH_BETWEEN_LEGS = 0.074;
@@ -23,7 +41,7 @@ namespace utility{
 			        static constexpr float HIP_OFFSET_X = 0.00; //DARWIN SAYS THIS IS 0.008
 					static constexpr float UPPER_LEG_LENGTH = 0.093;
 					static constexpr float LOWER_LEG_LENGTH = 0.093;
-					static constexpr float FOOT_HEIGHT = 0.0335;	
+					static constexpr float FOOT_HEIGHT = 0.0335;
 
 
 					static constexpr int LEFT_TO_RIGHT_HIP_YAW = 	   -1;
@@ -44,13 +62,13 @@ namespace utility{
 
 				class Arm {//ROUGH MEASUREMENTS
 				public:
-					static constexpr float DISTANCE_BETWEEN_SHOULDERS = 0.114;				
-					static constexpr float SHOULDER_Z_OFFSET = 0.088;					
+					static constexpr float DISTANCE_BETWEEN_SHOULDERS = 0.114;
+					static constexpr float SHOULDER_Z_OFFSET = 0.088;
 					static constexpr float SHOULDER_X_OFFSET = 0.01;
 
 					static constexpr float SHOULDER_LENGTH = 0.017;
 					static constexpr float SHOULDER_WIDTH = 0.0245;
-					static constexpr float SHOULDER_HEIGHT = 0;	
+					static constexpr float SHOULDER_HEIGHT = 0;
 
 					static constexpr float UPPER_ARM_LENGTH = 0.0615;
 					static constexpr float UPPER_ARM_Y_OFFSET = 0;
@@ -58,7 +76,7 @@ namespace utility{
 
 					static constexpr float LOWER_ARM_LENGTH = 0.13;
 					static constexpr float LOWER_ARM_Y_OFFSET = 0;
-					static constexpr float LOWER_ARM_Z_OFFSET = 0;	//Very rough	
+					static constexpr float LOWER_ARM_Z_OFFSET = 0;	//Very rough
 
 
 				};
@@ -92,9 +110,9 @@ namespace utility{
 					};
 
 				};
-				static constexpr float TEAMDARWINCHEST_TO_ORIGIN = 0.096 - Leg::HIP_OFFSET_Z; //Taken from team darwin OPkinematics.cpp : hipOffsetZ = .096; 
+				static constexpr float TEAMDARWINCHEST_TO_ORIGIN = 0.096 - Leg::HIP_OFFSET_Z; //Taken from team darwin OPkinematics.cpp : hipOffsetZ = .096;
 			};
-			
+
 		}
 	}
 }

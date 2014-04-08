@@ -29,59 +29,59 @@
 \definecolor{lgrey}{rgb}{0.9,0.9,0.9}
 \definecolor{darkblue}{rgb}{0.0,0.0,0.6}
 \lstdefinelanguage{nuclear}{
-	backgroundcolor=\color{gray!10},  
-	basicstyle=\footnotesize \ttfamily \color{black} \bfseries,   
-	breakatwhitespace=false,	   
-	breaklines=true,			   
-	captionpos=b,				   
-	commentstyle=\color{green!50!black},   
-	deletekeywords={...},		  
-	escapeinside={\%*}{*)},				  
-	frame=single,				  
-	language=C++,				
-	keywordstyle=\color{violet},  
-	morekeywords={constexpr}, 
+	backgroundcolor=\color{gray!10},
+	basicstyle=\footnotesize \ttfamily \color{black} \bfseries,
+	breakatwhitespace=false,
+	breaklines=true,
+	captionpos=b,
+	commentstyle=\color{green!50!black},
+	deletekeywords={...},
+	escapeinside={\%*}{*)},
+	frame=single,
+	language=C++,
+	keywordstyle=\color{violet},
+	morekeywords={constexpr},
 	identifierstyle=\color{black},
-	stringstyle=\color{red},	  
-	numbers=left,				 
-	numbersep=5pt,				  
-	numberstyle=\tiny\color{black}, 
-	rulecolor=\color{black},		
-	showspaces=false,			   
-	showstringspaces=false,		
-	showtabs=false,				
-	stepnumber=1,				   
-	tabsize=5,					 
-	title=\lstname, 
+	stringstyle=\color{red},
+	numbers=left,
+	numbersep=5pt,
+	numberstyle=\tiny\color{black},
+	rulecolor=\color{black},
+	showspaces=false,
+	showstringspaces=false,
+	showtabs=false,
+	stepnumber=1,
+	tabsize=5,
+	title=\lstname,
 	emph={on, emit, Trigger, With, Options},
 	emphstyle={\color{blue}}
 }
 
 \lstdefinelanguage{nuclear-cmake}{
-	backgroundcolor=\color{gray!10},  
-	basicstyle=\footnotesize \ttfamily \color{black} \bfseries,   
-	breakatwhitespace=false,	   
-	breaklines=true,			   
-	captionpos=b,				   
-	commentstyle=\color{green!50!black},   
-	deletekeywords={...},		  
-	escapeinside={\%*}{*)},				  
-	frame=single,				  
-	language=bash,				
-	keywordstyle=\color{violet},  
-	morekeywords={ADD_HAT}, 
+	backgroundcolor=\color{gray!10},
+	basicstyle=\footnotesize \ttfamily \color{black} \bfseries,
+	breakatwhitespace=false,
+	breaklines=true,
+	captionpos=b,
+	commentstyle=\color{green!50!black},
+	deletekeywords={...},
+	escapeinside={\%*}{*)},
+	frame=single,
+	language=bash,
+	keywordstyle=\color{violet},
+	morekeywords={ADD_HAT},
 	identifierstyle=\color{black},
-	stringstyle=\color{red},	  
-	numbers=left,				 
-	numbersep=5pt,				  
-	numberstyle=\tiny\color{black}, 
-	rulecolor=\color{black},		
-	showspaces=false,			   
-	showstringspaces=false,		
-	showtabs=false,				
-	stepnumber=1,				   
-	tabsize=5,					 
-	title=\lstname, 
+	stringstyle=\color{red},
+	numbers=left,
+	numbersep=5pt,
+	numberstyle=\tiny\color{black},
+	rulecolor=\color{black},
+	showspaces=false,
+	showstringspaces=false,
+	showtabs=false,
+	stepnumber=1,
+	tabsize=5,
+	title=\lstname,
 	emph={NAME, MODULES},
 	emphstyle={\color{blue}}
 }
@@ -109,7 +109,7 @@
 \begin{document}
 
 %----------------------------------------------------------------------------------------
-% Title Slide 
+% Title Slide
 %----------------------------------------------------------------------------------------
 \begin{frame}
 	\titlepage % Print the title page as the first slide
@@ -185,7 +185,7 @@
 				\item Takes input images and finds objects
 				\item Classifies images into colour classifications
 				\item Uses RANSAC to find lines in the classified image
-				\item Uses a highly optimized circle finder (relying on 
+				\item Uses a highly optimized circle finder (relying on
 			\end{itemize}
 		\item Localisation
 			\begin{itemize}
@@ -315,7 +315,7 @@
 		\path [read, out=10, in=200] (behavior) edge (blackboard);
 		\path [write, out=5, in=185] (behavior) edge (jobs);
 		\path [write, out=-5, in=160] (behavior) edge (actionators);
-		
+
 		%% Center connections
 		\path [readwrite] (kinematics) edge (blackboard);
 
@@ -326,53 +326,53 @@
 		\path [write, out=10, in=190] (jobs) edge (camera);
 		\path [write, out=200, in=20] (motion) edge (actionators);
 		\path [read, out=150, in=0] (motion) edge (kinematics);
-		
+
 		%%% Configuration Colours
 		%% Vision
 		\filldraw[fileconfig] ([yshift=-.5em,xshift=.5em]vision.north west) circle (3pt);
 		\filldraw[hardcodedconfig] ([yshift=-1.25em,xshift=.5em]vision.north west) circle(3pt);
-		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]vision.north east) rectangle ++(6pt, 6pt);	
-		
+		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]vision.north east) rectangle ++(6pt, 6pt);
+
 		%% Localization
 		\filldraw[fileconfig] ([yshift=-.5em,xshift=.5em]localization.north west) circle(3pt);
 		\filldraw[hardcodedconfig] ([yshift=-1.25em,xshift=.5em]localization.north west) circle (3pt);
 		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]localization.north east) rectangle ++(6pt, 6pt);
-		
+
 		%% Behavior
 		\filldraw[fileconfig] ([yshift=-.5em,xshift=.5em]behavior.north west) circle(3pt);
 		\filldraw[hardcodedconfig] ([yshift=-1.25em,xshift=.5em]behavior.north west) circle(3pt);
-		
+
 		%% Blackboard
 		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]blackboard.north east) rectangle ++(6pt, 6pt);
-		
+
 		%% Kinematics
 		\filldraw[fileconfig] ([yshift=-.5em,xshift=.5em]kinematics.north west) circle(3pt);
 		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]kinematics.north east) rectangle ++(6pt, 6pt);
-		
+
 		%% Jobs
 		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]jobs.north east) rectangle ++(6pt, 6pt);
-		
+
 		%% Actionators
 		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]actionators.north east) rectangle ++(6pt, 6pt);
-		
+
 		%% Sensors
 		\filldraw[hardcodedconfig] ([yshift=-.5em,xshift=.5em]sensors.north west) circle(3pt);
-		
+
 		%% Camera
 		\filldraw[jobconfig] ([yshift=-.5em,xshift=.5em]camera.north west) circle(3pt);
 		\filldraw[fileconfig] ([yshift=-1.25em,xshift=.5em]camera.north west) circle(3pt);
 		\filldraw[hardcodedconfig] ([yshift=-2em,xshift=.5em]camera.north west) circle (3pt);
 		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]camera.north east) rectangle ++(6pt, 6pt);
-		
+
 		%% Motion
 		\filldraw[hardcodedconfig] ([yshift=-.5em,xshift=.5em]motion.north west) circle (3pt);
 		\filldraw[configsystemconfig] ([yshift=-2.25em,xshift=.5em]motion.north west) circle (3pt);
 		\filldraw[fileconfig] ([yshift=-3.5em,xshift=.5em]motion.north west) circle(3pt);
 		\filldraw[publicinterface] ([yshift=-.8em,xshift=-0.9em]motion.north east) rectangle ++(6pt, 6pt);
-		
+
 		%%% Legend
 		\coordinate (legendpoint) at (.55, .35);
-		
+
 		%% Public Interface
 		\node [below=3pt of legendpoint,anchor=south east] (publicinterfacelabel) {\tiny Provides a Singleton Public Interface};
 		\filldraw[publicinterface] ([yshift=-3pt,xshift=-3pt]publicinterfacelabel.west) rectangle ++(6pt, 6pt);
@@ -380,7 +380,7 @@
 		%% Hard Coded Config
 		\node [below=0.9em of publicinterfacelabel.south west,anchor=south west] (hardcodedconfiglabel) {\tiny Configured by Hardcoding Values};
 		\filldraw[hardcodedconfig] ([yshift=.5pt]hardcodedconfiglabel.west) circle (3pt);
-		
+
 		%% File Config
 		\node [below=0.8em of hardcodedconfiglabel.south west,anchor=south west] (fileconfiglabel) {\tiny Configured by Custom Files};
 		\filldraw[fileconfig] ([yshift=.5pt]fileconfiglabel.west) circle (3pt);
@@ -392,12 +392,12 @@
 		%% Config System Config
 		\node [below=0.8em of jobconfiglabel.south west,anchor=south west] (configsystemconfiglabel) {\tiny Configured by Configuration System};
 		\filldraw[configsystemconfig] ([yshift=.5pt]configsystemconfiglabel.west) circle (3pt);
-		
+
 		%%% Decorations
 		%% SeeThink header
 		\node[fit=(vision)(localization)(behavior)](leftgroup){};
-		\draw[rounded corners] 
-		(leftgroup.north west)--(leftgroup.south west) -- ++(0.10,0);			
+		\draw[rounded corners]
+		(leftgroup.north west)--(leftgroup.south west) -- ++(0.10,0);
 		\draw[decorate,decoration={amplitude=7pt,brace}] % Header line
 		(leftgroup.north west) -- (leftgroup.north east);
 
@@ -405,7 +405,7 @@
 
 		%% SenseMove header
 		\node[fit=(sensors)(camera)(motion)](rightgroup){};
-		\draw[rounded corners] 
+		\draw[rounded corners]
 		(rightgroup.north east) -- (rightgroup.south east) -- ++(-0.10,0);
 		\draw[decorate,decoration={amplitude=7pt,brace}]
 		(rightgroup.north west) -- (rightgroup.north east);
@@ -458,7 +458,7 @@
 
 		%%% Draw all of our components in a circle
 		\foreach [count=\i] \reactor in {Camera, Vision, Localization, Behavior, Network, Sensors, Kinematics, Motion, Actionators} {
-		
+
 			% Draw the reactors around the central star
 			\node[reactor] (\reactor) at ({360/9 * (\i - 1)}:7cm) {$\reactor$};
 		};
@@ -505,7 +505,7 @@
 				\item For example, localizations dependency on the Stationary/Mobile object system.
 				\item These hidden dependencies make it difficult to work on a system without understanding the whole system
 			\end{itemize}
-	
+
 		\item Threading Issues
 			\begin{itemize}
 				\item Current system does not handle synchronisation between the two threads well
@@ -517,14 +517,14 @@
 
 \begin{frame}
 	\frametitle{Problems in Existing System}
-	\begin{itemize}			
+	\begin{itemize}
 		\item Network Communication
 			\begin{itemize}
 				\item Network communication is currently entirely through Localisation and Behaviour
 				\item Adding new network communication requires modifying these two systems
 				\item Because of the difficulty of adding new networking, no new networking will be added
 			\end{itemize}
-			
+
 		\item Build System
 			\begin{itemize}
 				\item The current build system uses a make file that calls cmake that builds a make file that is called by the original make file
@@ -543,7 +543,7 @@
 				\item Being able to compose various modules into a binary would allow the robot to do more
 				\item Enabling the sharing of these modules between researchers would result in better development (more people using the same code)
 			\end{itemize}
-			
+
 		\item Transparent Multithreading
 			\begin{itemize}
 				\item Modern CPUs are getting more cores, rather then becoming faster
@@ -552,7 +552,7 @@
 			\end{itemize}
 	\end{itemize}
 \end{frame}
-			
+
 \begin{frame}
 	\frametitle{Wishlist}
 	\begin{itemize}
@@ -561,7 +561,7 @@
 				\item When optimising programs for speed it is useful to see how long each section of the code took
 				\item Breaking up the modules and timing their execution better shows where CPU time is being used
 			\end{itemize}
-			
+
 		\item Fine Grained Debugging
 			\begin{itemize}
 				\item When debugging a large system, there is often a low signal to noise ratio as a lot of debug lines are not useful
@@ -593,7 +593,7 @@
 		\item When copied the unique\_ptr transfers ownership to the new unique\_ptr and the old one becomes invalid.
 		\item When you pass a unique\_ptr to a function you are giving away it's ownership.
 		\item Don't use a unique\_ptr after it has been passed or copied. It will be null!
-		\item unique\_ptr deletes it's data when it goes out of scope. 
+		\item unique\_ptr deletes it's data when it goes out of scope.
 		\item This should be your go-to pointer unless you have a good reason otherwise.
 	\end{itemize}
 \end{frame}
@@ -633,24 +633,24 @@
 \begin{frame}[fragile]
 	\frametitle{C++ Review - std::unique\_ptr}
 
-	std::unique\_ptr uses move semantics!	
+	std::unique\_ptr uses move semantics!
 
 	\begin{lstlisting}[language=nuclear]
 		#include <memory> // unique_ptr & shared_ptr
 
 		void processImage(const Image& image) {
-		    std::unique_ptr<MyData> chump = 
+		    std::unique_ptr<MyData> chump =
 		        std::make_unique<MyData>();
 
 		    chump->something; // Access pointer-style:* and ->
-			
+
 		    // theif has stolen chump's pointer.
 		    // you can't use chump to get to the
 		    // data since he doesn't have it.
-		    std::unique_ptr<MyData> thief = std::move(data); 
+		    std::unique_ptr<MyData> thief = std::move(data);
 		    thief->something; // No problem!
 		    chump->something; // Error. Bad chump!
-		} // thief automatically releases memory here. 
+		} // thief automatically releases memory here.
 	\end{lstlisting}
 \end{frame}
 
@@ -659,10 +659,10 @@
 	\begin{itemize}
 		\item shared\_ptr is a reference counting pointer.
 		\item When no shared\_ptr's point to a particular bit of data it will be deleted.
-		\item When you copy a shared\_ptr it increments a shared reference counter. 
+		\item When you copy a shared\_ptr it increments a shared reference counter.
 		\item When a shared\_ptr falls out of scope is decrements the shared reference counter.
 		\item When the counter is zero your data is deleted.
-		\item shared\_ptr should be used when you truly need to share data and there is no clear single-owner. 
+		\item shared\_ptr should be used when you truly need to share data and there is no clear single-owner.
 			This is more rare then people might like to believe.
 	\end{itemize}
 \end{frame}
@@ -676,7 +676,7 @@
 		\item Templates let you provide a "blueprint" for a function or class allowing the compiler to generate
 			copies of the same class that vary based on what type they are templated with.
 		\item For example the std::vector class is a template which lets the compiler generate a concrete
-			std::vector$<$int$>$ or std::vector$<$MyClass$>$ on demand when a user tries to use those classes 
+			std::vector$<$int$>$ or std::vector$<$MyClass$>$ on demand when a user tries to use those classes
 			in a vector.
 	\end{itemize}
 \end{frame}
@@ -689,7 +689,7 @@
 		T add(const T& first, const T& second) {
 		    return first + second;
 		}
-		
+
 		// Generates a "int" version of add at compile time.
 		std::cout << add<int>(1, 2) << std::endl;
 
@@ -720,17 +720,17 @@
 \begin{frame}[fragile]
 	\frametitle{C++ Review - Calling template functions}
 	\begin{itemize}
-		\item NUClear's On and Emit functions look weird to new C++ programmers as they contain a lot of arguments in angle brackets 
+		\item NUClear's On and Emit functions look weird to new C++ programmers as they contain a lot of arguments in angle brackets
 			$<>$ instead of the expected round braces ().
 		\item The easiest way to think about this is angle bracket arguments are evaluated at compile time while round braces are
-			evalutaed at runtime. 
+			evalutaed at runtime.
 	\end{itemize}
 
 	\begin{lstlisting}[language=nuclear]
 		//	      <Compile>(Runtime)
 		something<1, 2, 3>(4, 5, 6);
 
-		// 1, 2 and 3 will be evaluated when the program 
+		// 1, 2 and 3 will be evaluated when the program
 		// is compiled and as such can't change based on
 		// user input. 4, 5 and 6 are regular parameters.
 	\end{lstlisting}
@@ -782,7 +782,7 @@
 \begin{frame}
 	\frametitle{Lambdas}
 	\begin{itemize}
-		\item Lambdas are functions that have no name. 
+		\item Lambdas are functions that have no name.
 		\item They are useful in callback system as they allow you to write a function without providing the full boilerplate
 			to define a new function in a class.
 		\item First introduced in C++11 they are a conveinient way to provide NUClear callbacks.
@@ -801,11 +801,11 @@
 
 		int main() {
 		    int data = 5;
-		    auto myLambda = [data](int arg){ 
+		    auto myLambda = [data](int arg){
 		        // do something with data and arg.
 		        // data is copied so you can access is even if it goes out of scope.
 		    };
-		    
+
 		    // Calls myLambda with arg=100. data will be 5.
 		    myLambda(100);
 		}
@@ -899,27 +899,27 @@
 				sensortriggered/.style={fill=red!10}]
 
 				\draw (1, 1) grid (21, 4);
-				
+
 				%% Thread 1
 				\draw[cameratriggered, task] (1, 3) rectangle node {Camera} (6, 4);
 				\draw[sensortriggered, task] (8, 3) rectangle node {Field Mapper} (12, 4);
 				\draw[cameratriggered, task] (13, 3) rectangle node {Localisation} (17, 4);
 				\draw[cameratriggered, task] (19, 3) rectangle node {Motion} (21, 4);
-				
+
 				%% Thread 2
 				\draw[sensortriggered, task] (1, 2) rectangle node {Sensors} (5, 3);
 				\draw[cameratriggered, task] (6, 2) rectangle node {Vision} (13, 3);
 				\draw[cameratriggered, task] (17, 2) rectangle node {Behaviour} (19, 3);
-				
+
 				%% Thread 3
 				\draw[sensortriggered, task] (5, 1) rectangle node {Odometry} (8, 2);
 				\draw[sensortriggered, task] (12, 1) rectangle node {Map Combiner (Network)} (19, 2);
-				
+
 				% Row labels
 				\node[anchor=east, inner sep=0] at (.8, 3.5) {Thread 1};
 				\node[anchor=east, inner sep=0] at (.8, 2.5) {Thread 2};
 				\node[anchor=east, inner sep=0] at (.8, 1.5) {Thread 3};
-				
+
 				% Column Labels
 				\foreach \i in {1,...,20} {
 				\node[anchor=north, inner sep=0] at (\i + .5, .8) {\i};
@@ -966,7 +966,7 @@
 		\item A reaction is a single function that is run in response to new data
 		\item They take as arguments constant references to the data that they use
 		\item The data that is passed into a reaction function can be considered thread safe
-		\item The lifetime of the data used is managed by the Powerplant 
+		\item The lifetime of the data used is managed by the Powerplant
 			\begin{itemize}
 				\item If you really need to save the data, you will need to save a copy
 			\end{itemize}
@@ -998,7 +998,7 @@
 		reactor/.style={draw, circle, thick},
 		write/.style={->,thick},
 		read/.style={<-,thick}]
-	
+
 		%%% Left Power Plant
 		\node at (0, 0) [draw,star,star points=8,star point ratio=0.875,minimum width=3cm] (plantA) {Powerplant A};
 		\node [above=of plantA,reactor] (sensorsA) {Sensors};
@@ -1006,7 +1006,7 @@
 		\path [A, write] (sensorsA) edge node[A,left] {Image(A)} (plantA);
 		\path [A, read] (fieldmapperA.110) edge node[left] {Image(A)} (plantA.260);
 		\path [B, read] (fieldmapperA.70) edge node[right] {Image(B)} (plantA.280);
-	
+
 		%%% Right Power Plant
 		\node at (2, 0)
 			[draw,star,star points=8,star point ratio=0.875,minimum width=3cm]
@@ -1016,15 +1016,15 @@
 		\path [B, write] (sensorsB) edge node[left] {Image(B)} (plantB);
 		\path [A, read] (fieldmapperB.110) edge node[left] {Image(A)} (plantB.260);
 		\path [B, read] (fieldmapperB.70) edge node[right] {Image(B)} (plantB.280);
-	
+
 		%%% Network & Network Connections
 		\node at (1, 0) [draw,cloud,cloud puffs=10,minimum width=3.5cm]
 		(network) {Network};
-	
+
 		%% Plant A connections
 		\path [A, write] (plantA.10) edge node[A, above] {Image(A)} (network.169);
 		\path [B, read] (plantA.-9) edge node[B, below] {Image(B)} (network.190);
-	
+
 		%% Plant B connections
 		\path [A, read] (plantB.171) edge node[A, above] {Image(A)}  (network.10);
 		\path [B, write] (plantB.190) edge node[B, below] {Image(B)} (network.-11);
@@ -1096,16 +1096,16 @@
 		, reactor/.style={draw, double circle}
 		, readwrite/.style={<->, thick}
 	]
-	
+
 	% Draw our central Power Plant star
 	\node [draw,star,star points=8,star point ratio=0.875,minimum width=5cm] (powerplant) {\Huge Powerplant};
-	
+
 	% Loop through each of our reactors
 	\foreach [count=\i] \reactor in {Camera, Vision, Localisation, Behaviour, Sensors, Kinematics, Motion Manager} {
-	
+
 		% Draw the reactors around the central star
 		\node[draw,reactor] (reactorcircle) at ({360/7 * (\i - 1)}:6cm) {$\reactor$};
-	
+
 		% Draw a line from our reactor to our powerplant
 		\path[readwrite] (reactorcircle) edge (powerplant);
 	};
@@ -1144,7 +1144,7 @@
 	\end{itemize}
 
 	\begin{lstlisting}[language=nuclear]
-		// Order of arguments needs to match the order of 
+		// Order of arguments needs to match the order of
 		// Trigger and With arguments.
 		void processData(
 		    const Image& image,
@@ -1152,7 +1152,7 @@
 		    // Do something with image and sensors
 		}
 
-		// Calls process data when a new image frame is 
+		// Calls process data when a new image frame is
 		// captured. Also passes the most recent sensordata
 		// to processData.
 		on<Trigger<Image>, With<SensorData>>(processData);
@@ -1175,9 +1175,9 @@
 		}
 
 		// We can either use With multiple times or With<A,B>
-		on<Trigger<Image>, 
+		on<Trigger<Image>,
 		   With<SensorData, AudioData>>(processData);
-		on<Trigger<Image>, 
+		on<Trigger<Image>,
 		   With<SensorData>, With<AudioData>>(processData);
 	\end{lstlisting}
 \end{frame}
@@ -1216,7 +1216,7 @@
 
 		// Now only one Image will be processed at a time.
 		// If new ones come they'll be dropped
-		on<Trigger<Image>, 
+		on<Trigger<Image>,
 		   Options<Single>>(processData);
 	\end{lstlisting}
 \end{frame}
@@ -1236,16 +1236,16 @@
 		void processData(const Image& image) {
 		    // Do some thread unsafe operations!
 		}
-		
+
 		void processMoarData(const Duck& duck) {
 		    // Do some more thread unsafe operations!
 		}
 
 		// The no two reactions with the same type in the Sync template
 		// will execute at the same time
-		on<Trigger<Image>, 
+		on<Trigger<Image>,
 		   Options<Sync<MyReactor>>>(processData);
-		on<Trigger<Duck>, 
+		on<Trigger<Duck>,
 		   Options<Sync<MyReactor>>>(processMoarData);
 	\end{lstlisting}
 \end{frame}
@@ -1261,9 +1261,9 @@
 
 	\begin{lstlisting}[language=nuclear]
 		// We have a unique pointer to the data we want to send
-		std::unique_ptr<MyData> myData = 
+		std::unique_ptr<MyData> myData =
 		    std::make_unique<MyData>();
-		
+
 		// Send the data out to the world!
 		emit(std::move(myData));
 	\end{lstlisting}
@@ -1280,9 +1280,9 @@
 
 	\begin{lstlisting}[language=nuclear]
 		// We have a unique pointer to the data we want to send
-		std::unique_ptr<MyData> myData = 
+		std::unique_ptr<MyData> myData =
 		    std::make_unique<MyData>();
-		
+
 		// Send the data out to the world! like all of it
 		emit<Scope::NETWORK>(std::move(myData));
 	\end{lstlisting}
@@ -1297,9 +1297,9 @@
 
 	\begin{lstlisting}[language=nuclear]
 		// We have a unique pointer to the data we want to send
-		std::unique_ptr<MyData> myData = 
+		std::unique_ptr<MyData> myData =
 		    std::make_unique<MyData>();
-		
+
 		// Send the data out to the world! like all of it
 		emit<Scope::NETWORK, Scope::LOCAL>(std::move(myData));
 	\end{lstlisting}
@@ -1316,9 +1316,9 @@
 
 	\begin{lstlisting}[language=nuclear]
 		// We have a unique pointer to the data we want to send
-		std::unique_ptr<MyData> myData = 
+		std::unique_ptr<MyData> myData =
 		    std::make_unique<MyData>();
-		
+
 		// Send the data out to the world! like all of it
 		emit<Scope::INITIALIZE>(std::move(myData));
 	\end{lstlisting}
@@ -1335,9 +1335,9 @@
 
 	\begin{lstlisting}[language=nuclear]
 		// We have a unique pointer to the data we want to send
-		std::unique_ptr<MyData> myData = 
+		std::unique_ptr<MyData> myData =
 		    std::make_unique<MyData>();
-		
+
 		// Send the data out to the world! like all of it
 		emit<Scope::DIRECT>(std::move(myData));
 	\end{lstlisting}
@@ -1353,9 +1353,9 @@
 
 	\begin{lstlisting}[language=nuclear]
 		// We have a unique pointer to the data we want to send
-		std::unique_ptr<MyData> myData = 
+		std::unique_ptr<MyData> myData =
 		    std::make_unique<MyData>();
-		
+
 		// Send the data out to the world! like all of it
 		emit<MyAwesomeDatabaseScope>(std::move(myData));
 	\end{lstlisting}
@@ -1474,7 +1474,7 @@
 
 	\begin{lstlisting}[language=nuclear]
 		int number = 5;
-		log<DEBUG>("Your number is: ", number); 
+		log<DEBUG>("Your number is: ", number);
 	\end{lstlisting}
 \end{frame}
 
@@ -1489,14 +1489,14 @@
 	\begin{lstlisting}[language=nuclear]
 		// Assume example has operator<< defined for istream
 		MyClass example;
-		log<INFO>("Running function with: ", example, 
+		log<INFO>("Running function with: ", example,
 		    " with param ", example.height);
 	\end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]
 	\frametitle{Complete Reactor Example}
-		
+
 	\begin{lstlisting}[language=nuclear]
 	// Vision.h
 	class Vision : public NUClear::Reactor {
@@ -1504,11 +1504,11 @@
 	    Vision(NUClear::PowerPlant* plant);
 	};
 	\end{lstlisting}
-	
+
 	\begin{lstlisting}[language=nuclear]
 	// Vision.cpp
 	Vision::Vision(NUClear::PowerPlant* plant)
-	: Reactor(plant) {        
+	: Reactor(plant) {
 	    on<Trigger<Image>>
 	    ([this](const Image& image) {
 	        // Make a classified image and emit it
@@ -1549,7 +1549,7 @@
 		\item It will give you as many as the system has (up to a max)
 		\item The type of data that you get back is a vector of pointers (the LastList$<$type$>$ is there for convenience)
 	\end{itemize}
-	
+
 	\begin{lstlisting}[language=nuclear]
 	on<Trigger<Last<5, Image>>>
 	([](const LastList<Image>& list) {
@@ -1565,7 +1565,7 @@
 		\item The data will come from all of the other systems on your network
 		\item Each Network object contains both the data, and the source of the data
 	\end{itemize}
-	
+
 	\begin{lstlisting}[language=nuclear]
 	on<Trigger<Network<BallLocation>>>
 	([](const Network<BallLocation>& ball) {
@@ -1581,12 +1581,12 @@
 		\item Configurations will trigger every time the file is modified
 		\item They contain a datatype called config which can be automagically typed to any data it knows about
 	\end{itemize}
-	
+
 	\begin{lstlisting}[language=nuclear]
 	struct MyConfigPath {
 	    static constexpr char* path = "Mine.json";
 	}
-	
+
 	on<Trigger<Configuration<MyConfigPath>>>
 	([](const Configuration<MyConfigPath>& config) {
 	    // config.name has the name of the file
@@ -1597,18 +1597,18 @@
 
 \begin{frame}[fragile]
 	\frametitle{Smart Types - Configuration}
-	
+
 	\begin{itemize}
 		\item Configurations can also be set as directories
 		\item In this case they will emit an event for every item in the directory
 		\item They will emit events whenever an element is added or modified in that directory
 	\end{itemize}
-	
+
 	\begin{lstlisting}[language=nuclear]
 	struct Scripts {
 	    static constexpr char* path = "scripts/";
 	}
-	
+
 	on<Trigger<Configuration<Scripts>>>
 	([](const Configuration<MyConfigPath>& config) {
 	    // config.name has the name of the script
@@ -1650,11 +1650,11 @@
 
 	\begin{lstlisting}[language=nuclear]
 	on<Trigger<Image>>([](const Image& image) {
-	
+
 	    // This could be emitted for others to use
 	    // Saving them the trouble of recoding or copying code
 	    auto classified = makeClassifiedImage(image);
-		
+
 	    auto seenObjects = findObjects(classified)
 	}
 	\end{lstlisting}
@@ -1675,7 +1675,7 @@
 			\item Modules -  Code to help CMake find our dependencies.
 			\item Scripts - Scripts used by cmake for build/deploying
 		\end{itemize}
-		
+
 		\item doc - Documentation like this one! Mostly LaTeX.
 		\item hats - Defines the executable payloads and their modules.
 		\item lib - Library dependencies that aren't on apt-get and are easy to build.
@@ -1737,7 +1737,7 @@
 		\begin{itemize}
 			\item This will build all of the targets in the project
 		\end{itemize}
-		
+
 		\item make install
 		\begin{itemize}
 			\item You need set the arguments robot=robotip
@@ -1748,7 +1748,7 @@
 				\item i or ignore does not try to send configuration files at all
 			\end{itemize}
 		\end{itemize}
-		
+
 		\item make test
 		\begin{itemize}
 			\item Runs the unit test for every used module in the system
@@ -1760,10 +1760,10 @@
 	\frametitle{Hats}
 	\begin{itemize}
 		\item Q: "What the hell is a hat?"
-		\item A: Hats are the combination of modules that combine to form a single executable. 
+		\item A: Hats are the combination of modules that combine to form a single executable.
 			The robot can be through of as "putting on it's robocup hat" or "putting on it's marketing hat".
 		\item You can define new hats using the CMakeLists.txt in the hats subdirectory.
-		\item Each hat has a name and a list of modules you want installed. 
+		\item Each hat has a name and a list of modules you want installed.
 			CMake will generate and compile a .cpp file based on the name and modules you specify.
 		\item Specification is done using the ADD\_HAT cmake function.
 		\item The Configuration module is special due to the crazy template stuff. If you're using it you
@@ -1795,7 +1795,7 @@
 		        Platform::Darwin::HardwareIO
 		        AudioInput
 		        BeatDetector)
-		    
+
 	\end{lstlisting}
 \end{frame}
 
@@ -1807,23 +1807,23 @@
 			\begin{itemize}
 				\item PartyDarwin
 			\end{itemize}
-			
+
 		\item Last example
 			\begin{itemize}
 				\item BeatDetector
 			\end{itemize}
-			
+
 		\item Configuration example
 			\begin{itemize}
 				\item Configuration Directory: Script Engine
 				\item Configuration File: LinuxCameraStreamer
 			\end{itemize}
-			
+
 		\item Service Thread example
 			\begin{itemize}
 				\item ScriptTuner
 			\end{itemize}
-			
+
 		\item Extension example
 			\begin{itemize}
 				\item ConfigSystem
@@ -1840,13 +1840,13 @@
 				\item This is the reactor that communicates directly with the hardware
 				\item This is a complete rewrite of the poorly coded drivers provided by Robotis
 			\end{itemize}
-		
+
 		\item Platform::Darwin::MotionManager
 			\begin{itemize}
 				\item This is a wrapper around the hardware and allows queuing of waypoints
 				\item This module replaces the Actionators from the old system
 			\end{itemize}
-		
+
 		\item LinuxCameraStreamer
 			\begin{itemize}
 				\item Gets a stream of images from the camera using V4L2
@@ -1863,13 +1863,13 @@
 				\item Given JSON configuration files, loads them in and distributes them
 				\item Based on the new config system in the existing system, however uses NUClear as a transport rather then its callback method
 			\end{itemize}
-			
+
 		\item ConsoleLogHandler
 			\begin{itemize}
 				\item A log handler which handles logs by printing them to the console
 				\item This corresponds to using cout in the old system
 			\end{itemize}
-			
+
 		\item NUbugger
 			\begin{itemize}
 				\item Streams NUbugger events the the NUbugger web UI
@@ -1883,7 +1883,7 @@
 	\begin{itemize}
 		\item ScriptEngine
 			\begin{itemize}
-				\item Given a script, it feeds the waypoints to run it into 
+				\item Given a script, it feeds the waypoints to run it into
 				\item This corresponds to the script engine in the existing code
 			\end{itemize}
 
@@ -1892,7 +1892,7 @@
 				\item By running this you are able to move the
 				\item This is a port of the Script Tuner in the existing system to an NCurses UI
 			\end{itemize}
-			
+
 		\item SignalCatcher
 			\begin{itemize}
 				\item When this module is installed, segfaults and sigints are converted to exceptions and shutdown commands
@@ -1900,7 +1900,7 @@
 			\end{itemize}
 	\end{itemize}
 \end{frame}
-			
+
 \begin{frame}
 	\frametitle{New Modules}
 	\begin{itemize}
@@ -1908,24 +1908,24 @@
 			\begin{itemize}
 				\item Reads a file given by the config system in chunks and emits it in real time
 			\end{itemize}
-			
+
 		\item AudioInput
 			\begin{itemize}
 				\item Listens to the audio input from the microphone
 			\end{itemize}
-			
+
 		\item BeatDetector
 			\begin{itemize}
 				\item Using a stream of audio, detects the beat frequency of the music
 			\end{itemize}
-			
+
 		\item eSpeak
 			\begin{itemize}
 				\item By emitting a Say event, this uses eSpeak to perform text to speech
 			\end{itemize}
 	\end{itemize}
 \end{frame}
-			
+
 \begin{frame}
 	\frametitle{New Modules}
 	\begin{itemize}
@@ -1938,7 +1938,7 @@
 			\begin{itemize}
 				\item This is the UI for the script-runner hat, which allows chaining scripts to be run by name
 			\end{itemize}
-			
+
 		\item DanceEngine
 			\begin{itemize}
 				\item This is the controller to make the darwin perform dances. It randomly selects a dance from its bank of scripts
@@ -1946,4 +1946,4 @@
 	\end{itemize}
 \end{frame}
 
-\end{document} 
+\end{document}

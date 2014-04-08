@@ -1,18 +1,18 @@
 /*
- * This file is part of LinuxCameraStreamer.
+ * This file is part of the NUbots Codebase.
  *
- * LinuxCameraStreamer is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * LinuxCameraStreamer is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with LinuxCameraStreamer.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -29,7 +29,7 @@ namespace messages {
         rotated(rotated_),
         data(std::move(data)){
         }
-        
+
         Image::Image(size_t width, size_t height, std::vector<Pixel>&& data, std::vector<uint8_t>&& source, bool rotated_) :
         imgWidth(width),
         imgHeight(height),
@@ -45,7 +45,7 @@ namespace messages {
                 new_y = imgHeight-y-1;
                 new_x = imgWidth-x-1;
             }
-            return data[new_y*imgWidth+new_x];            
+            return data[new_y*imgWidth+new_x];
         }
 
         const Image::Pixel& Image::operator ()(size_t x, size_t y) const {
@@ -55,7 +55,7 @@ namespace messages {
                 new_y = imgHeight-y-1;
                 new_x = imgWidth-x-1;
             }
-            return data[new_y*imgWidth+new_x];     
+            return data[new_y*imgWidth+new_x];
         }
 
         size_t Image::width() const {
@@ -65,14 +65,14 @@ namespace messages {
         size_t Image::height() const {
             return imgHeight;
         }
-        
+
         const std::vector<Image::Pixel>& Image::raw() const {
             return data;
         }
-        
+
         const std::vector<uint8_t>& Image::source() const {
             return src;
         }
-    
+
     }  // input
 }  // messages

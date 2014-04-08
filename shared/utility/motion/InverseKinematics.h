@@ -1,18 +1,18 @@
 /*
- * This file is part of InverseKinematics.
+ * This file is part of the NUbots Codebase.
  *
- * InverseKinematics is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * InverseKinematics is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with InverseKinematics.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -33,7 +33,7 @@
 namespace utility {
 namespace motion {
 namespace kinematics {
-	
+
 	/*! @brief Calculates the leg joints for a given input ankle position.
 			The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint of the hips.
 			Robot coordinate system:
@@ -48,7 +48,7 @@ namespace kinematics {
 		@param isLeft Request for left leg motors or right leg motors?
 		@param RobotKinematicModel The class containing the leg model of the robot.
 	*/
-    template <typename RobotKinematicModel> 
+    template <typename RobotKinematicModel>
 	std::vector< std::pair<messages::input::ServoID, float> > calculateLegJoints(arma::mat44 target, Side isLeft) {
         const float LENGTH_BETWEEN_LEGS = RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS;
         const float DISTANCE_FROM_BODY_TO_HIP_JOINT = RobotKinematicModel::Leg::HIP_OFFSET_Z;
@@ -136,7 +136,7 @@ namespace kinematics {
         arma::vec3 globalZ = {0,0,1};
 
         bool isAnkleAboveWaist = arma::dot(unitTargetLeg,globalZ)<0;
-        
+
         float cosZandHipX = arma::dot(globalZ, hipX);
         bool hipRollPositive = cosZandHipX <= 0;
         arma::vec3 legPlaneGlobalZ = (isAnkleAboveWaist ? -1 : 1 ) * (globalZ - ( cosZandHipX * hipX));
@@ -154,15 +154,15 @@ namespace kinematics {
         //Superposition values:
         float sinPIminusPhi2 = std::sin(M_PI - phi2);
         arma::vec3 unitUpperLeg = unitTargetLeg * (std::sin(phi2 - phi4) / sinPIminusPhi2) + ankleY * (std::sin(phi4) / sinPIminusPhi2);
-        bool isHipPitchPositive = dot(hipX,cross(unitUpperLeg, legPlaneGlobalZ))>=0;    
+        bool isHipPitchPositive = dot(hipX,cross(unitUpperLeg, legPlaneGlobalZ))>=0;
 
         hipPitch = (isHipPitchPositive ? 1 : -1) * acos(arma::dot(legPlaneGlobalZ, unitUpperLeg));
-        
-        arma::vec3 hipXProjected = (isAnkleAboveWaist ? -1 : 1) * hipX;  //If leg is above waist then hipX is pointing in the wrong direction in the xy plane 
+
+        arma::vec3 hipXProjected = (isAnkleAboveWaist ? -1 : 1) * hipX;  //If leg is above waist then hipX is pointing in the wrong direction in the xy plane
         hipXProjected[2] = 0;
         hipXProjected /= arma::norm(hipXProjected, 2);
         bool isHipYawPositive = arma::dot(hipXProjected,globalY)>=0;
-       
+
         hipYaw = (isHipYawPositive ? 1 : -1) * acos(arma::dot( hipXProjected,globalX));
 
         if (static_cast<bool>(isLeft)) {
@@ -184,7 +184,7 @@ namespace kinematics {
         return positions;
     }
 
-    template <typename RobotKinematicModel> 
+    template <typename RobotKinematicModel>
 	std::vector<double> calculateLegJointsTeamDarwin(arma::mat44 target, bool isLeft) {
         std::vector<double> joints(6);
         //NUClear::log<NUClear::DEBUG>(isLeft ? "Left Leg" : "Right Leg");
@@ -203,7 +203,7 @@ namespace kinematics {
         return joints;
     }
 
-    template <typename RobotKinematicModel> 
+    template <typename RobotKinematicModel>
     std::vector< std::pair<messages::input::ServoID, float> > calculateHeadJoints(arma::vec3 cameraUnitVector){
         std::vector< std::pair<messages::input::ServoID, float> > positions;
         positions.push_back(std::make_pair(messages::input::ServoID::HEAD_YAW, atan2(cameraUnitVector[1],cameraUnitVector[0]) ));

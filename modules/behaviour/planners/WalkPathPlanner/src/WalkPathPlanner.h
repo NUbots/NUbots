@@ -1,18 +1,18 @@
 /*
- * This file is part of ScriptRunner.
+ * This file is part of the NUbots Codebase.
  *
- * ScriptRunner is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ScriptRunner is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ScriptRunner.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -47,62 +47,62 @@ namespace modules {
                     float turnSpeed;
                     float forwardSpeed;
                     float footSeparation;
-                    
+
                     //XXX: load from robot model
                     float footSize;
-                    
+
                     //timers for starting turning and walking
                     double walkStartTime;
                     double walkTurnTime;
-                    
+
                     //walk accel/deccel controls
                     double accelerationTime;
                     float accelerationFraction;
-                    
+
                     //approach speeds
                     float closeApproachSpeed;
                     float closeApproachDistance;
                     float midApproachSpeed;
                     float midApproachDistance;
-                    
+
                     //turning values
                     float turnDeviation;
-                    
+
                     //state controls
                     int approachDistance;
-                    
+
                     //hystereses
                     float distanceHysteresis;
                     float turningHysteresis;
                     float positionHysteresis;
-                    
+
                     //ball lineup
                     //vector<float> ballApproachAngle;
                     //vector<int> ballKickFoot;
                     float ballLineupDistance;
                     int ballLineupMinDistance;
-                    
+
                     //extra config options
                     bool useAvoidance;
                     float assumedObstacleWidth;
                     float avoidDistance;
-                    
+
                     float bearingSensitivity;
                     float ApproachCurveFactor;
-                    
-                    
+
+
                     //-----------non-config variables-----------
-                    
+
                     //hysteresis variables
                     int turning;
                     int distanceIncrement;
-                    
+
                     //info for the current walk
                     arma::vec2 currentTargetPosition;
                     arma::vec2 currentTargetHeading;
                     messages::behaviour::WalkApproach planType;
                     messages::behaviour::WalkTarget targetHeading,targetPosition;
-                    
+
                     //-----------internal fns--------------
                     arma::vec3 generateWalk(const arma::vec3& move, bool omniPositioning);
                     arma::vec3 approachFromDirection(const messages::localisation::Self& self,
@@ -113,14 +113,14 @@ namespace modules {
                                          const arma::vec2& direction);
                     arma::vec3 avoidObstacles(const std::vector<messages::vision::Obstacle>& robotPosition,
                                               const arma::vec3& movePlan);
-                    
-                    
+
+
                 public:
                     explicit WalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
                     static constexpr const char* CONFIGURATION_PATH = "WalkPathPlanner.json";
             };
-            
-        } 
+
+        }
     }  // behaviours
 }  // modules
 

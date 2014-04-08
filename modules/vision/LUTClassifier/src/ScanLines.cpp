@@ -1,18 +1,18 @@
 /*
- * This file is part of ScanLines.
+ * This file is part of the NUbots Codebase.
  *
- * ScanLines is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ScanLines is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ScanLines.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -31,13 +31,13 @@ namespace modules {
 		using messages::vision::SegmentedRegion;
 		using messages::vision::ScanDirection;
 		using messages::vision::LookUpTable;
-        
+
  		ScanLines::ScanLines() {
  			// Empty Constructor.
  		}
 
 		void ScanLines::generateScanLines(const Image& img, const GreenHorizon& greenHorizon, std::vector<int>* resulting_scan_lines) {
-			
+
 			int bottomHorizontalScan = img.height() - 1;														//we need h-scans under the GH for field lines
 			const std::vector<arma::vec2>& horizonPoints = greenHorizon.getInterpolatedPoints();		// Need this to get the left and right
 			//std::cout << "Num Horizon points = " << horizonPoints.size()<< std::endl;
@@ -48,12 +48,12 @@ namespace modules {
 //				NUClear::log<NUClear::WARN>("Left horizon limit exceeds image height: ", left[1]);
 				std::cout << "Left horizon limit exceeds image height: " << left[1] << std::endl;
 			}
-			
+
 			if (right[1] >= img.height()) { // Element 1 is the y-component.
 //				NUClear::log<NUClear::WARN>("Left horizon limit exceeds image height: ", right[1]);
 				std::cout << "Left horizon limit exceeds image height: " << right[1] << std::endl;
 			}
-			
+
 			const int SPACING = std::max(HORIZONTAL_SCANLINE_SPACING, 1U);
 
 			for (int y = bottomHorizontalScan; y >= 0; y -= SPACING) {
@@ -62,7 +62,7 @@ namespace modules {
 		}
 
 		void ScanLines::classifyHorizontalScanLines(const Image& originalImage, const std::vector<int>& horizontalScanLines, const LookUpTable& LUT, messages::vision::SegmentedRegion* resulting_region) {
-			
+
 
 		    for (const auto& scanLine : horizontalScanLines) {
 				classifyHorizontalScan(originalImage, scanLine, LUT, resulting_region/*Will be modified*/);
@@ -72,9 +72,9 @@ namespace modules {
 		}
 
 		void ScanLines::classifyVerticalScanLines(const Image& originalImage, const GreenHorizon& greenHorizon, const LookUpTable& LUT, messages::vision::SegmentedRegion* resulting_region) {
-			
+
 			const std::vector<arma::vec2>& verticalStartPoints = greenHorizon.getInterpolatedSubset(VERTICAL_SCANLINE_SPACING);
-			
+
 
 		    for (const auto& scanLine : verticalStartPoints) {
 				classifyVerticalScan(originalImage, scanLine, LUT, resulting_region/*Will be modified*/);
@@ -85,7 +85,7 @@ namespace modules {
 
         void ScanLines::classifyHorizontalScan(const Image& image, unsigned int y, const LookUpTable& LUT, SegmentedRegion* region) {
 			//Number of scanlines is given by integer ratio plus one for scanline at origin
-			std::vector<ColourSegment> result;			
+			std::vector<ColourSegment> result;
 			region->m_segmentedScans.push_back(result);
 
 			//Reserve memory to reduce time taken by reallocation with push_back
@@ -134,11 +134,11 @@ namespace modules {
 
 		void ScanLines::classifyVerticalScan(const Image& image, const arma::vec2& start, const LookUpTable& LUT, SegmentedRegion* region) {
 			//Number of scanlines is given by integer ratio plus one for scanline at origin
-			std::vector<ColourSegment> result;			
+			std::vector<ColourSegment> result;
 			region->m_segmentedScans.push_back(result);
 
 			//Reserve memory to reduce time taken by reallocation with push_back
-			region->m_segmentedScans.back().reserve((2+(image.width()/HORIZONTAL_SCANLINE_SPACING))*APPROXIMATE_SEGS_PER_VERT_SCAN); 
+			region->m_segmentedScans.back().reserve((2+(image.width()/HORIZONTAL_SCANLINE_SPACING))*APPROXIMATE_SEGS_PER_VERT_SCAN);
 
 			arma::vec2 startPoint, endPoint;
 

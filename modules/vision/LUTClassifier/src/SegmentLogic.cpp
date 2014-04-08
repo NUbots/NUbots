@@ -1,30 +1,31 @@
 /*
- * This file is part of SementLogic.
+ * This file is part of the NUbots Codebase.
  *
- * SementLogic is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * SementLogic is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with SementLogic.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
+
 #include "SegmentLogic.h"
- 
+
 namespace modules{
     namespace vision{
 
         using messages::vision::ClassifiedImage;
         using messages::vision::ColourSegment;
         using messages::vision::Colour;
-        
+
 
         SegmentLogic::SegmentLogic() {
             // Empty constructor.
@@ -51,7 +52,7 @@ namespace modules{
                 colourSegment.m_start = other.m_start;
             }
 
-            else if ((colourSegment.m_end[0] == other.m_start[0]) && (colourSegment.m_end[1] == other.m_start[1])) { 
+            else if ((colourSegment.m_end[0] == other.m_start[0]) && (colourSegment.m_end[1] == other.m_start[1])) {
                 colourSegment.m_end = other.m_end;
             }
 
@@ -90,6 +91,6 @@ namespace modules{
         bool operator== (const ColourSegment& lhs, const ColourSegment& rhs) {
             // Compare both elements in both centre points for equality.
             return ((lhs.m_centre[0] == rhs.m_centre[0]) && (lhs.m_centre[1] == rhs.m_centre[1]));
-        } 
+        }
     }
 }

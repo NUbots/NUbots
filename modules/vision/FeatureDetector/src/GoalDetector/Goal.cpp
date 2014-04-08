@@ -1,3 +1,22 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+
 #include "Goal.h"
 
 namespace modules {
@@ -18,14 +37,14 @@ namespace modules {
             valid = (calculatePositions(visionKinematics) && check());
         }
 
-        void Goal::setParameters(bool THROWOUT_SHORT_GOALS_, 
-                                    bool THROWOUT_NARROW_GOALS_, 
-                                    bool THROWOUT_ON_ABOVE_KIN_HOR_GOALS_, 
-                                    bool THROWOUT_DISTANT_GOALS_, 
-                                    float MAX_GOAL_DISTANCE_, 
-                                    int MIN_GOAL_HEIGHT_, 
-                                    int MIN_GOAL_WIDTH_, 
-                                    float GOAL_WIDTH_, 
+        void Goal::setParameters(bool THROWOUT_SHORT_GOALS_,
+                                    bool THROWOUT_NARROW_GOALS_,
+                                    bool THROWOUT_ON_ABOVE_KIN_HOR_GOALS_,
+                                    bool THROWOUT_DISTANT_GOALS_,
+                                    float MAX_GOAL_DISTANCE_,
+                                    int MIN_GOAL_HEIGHT_,
+                                    int MIN_GOAL_WIDTH_,
+                                    float GOAL_WIDTH_,
                                     const DISTANCE_METHOD& GOAL_DISTANCE_METHOD_,
                                     int EDGE_OF_SCREEN_MARGIN_) {
             THROWOUT_SHORT_GOALS = THROWOUT_SHORT_GOALS_;
@@ -36,9 +55,9 @@ namespace modules {
             MIN_GOAL_HEIGHT = MIN_GOAL_HEIGHT_;
             MIN_GOAL_WIDTH = MIN_GOAL_WIDTH_;
             GOAL_WIDTH = GOAL_WIDTH_;
-            GOAL_DISTANCE_METHOD = GOAL_DISTANCE_METHOD_; 
+            GOAL_DISTANCE_METHOD = GOAL_DISTANCE_METHOD_;
             EDGE_OF_SCREEN_MARGIN = EDGE_OF_SCREEN_MARGIN_;
-                     
+
         }
 
         void Goal::setBase(const VisionKinematics& visionKinematics, const arma::vec2& base) {
@@ -81,14 +100,14 @@ namespace modules {
             if (THROWOUT_DISTANT_GOALS && (m_location.neckRelativeRadial[0] > MAX_GOAL_DISTANCE)) {
                 return false;
             }
-            
+
             //all checks passed, keep goalpost
             return true;
         }
 
         /*!
         *   @brief Updates the spherical position, angular location and transformed spherical position.
-        *   
+        *
         *   This method uses the camera transform and as such if it was not valid when retrieved from the wrapper
         *   this will leave m_transformed_spherical_position at all zeros.
         */
@@ -196,8 +215,8 @@ namespace modules {
                 case messages::vision::Goal::UNKNOWN: {
                     output << "Unknown Goal - " << std::endl;
                     break;
-                }                   
-            }        
+                }
+            }
             output << "Distance type = " << g.GOAL_DISTANCE_METHOD << std::endl;
             output << "\tpixelloc: " << g.m_location.screenCartesian << std::endl;
             output << "\tangularloc: " << g.m_location.screenAngular << std::endl;
@@ -216,13 +235,13 @@ namespace modules {
          */
         std::ostream& operator<< (std::ostream& output, const std::vector<Goal>& goals) {
             for (const auto& goal : goals) {
-                output << goal << std::endl;        
+                output << goal << std::endl;
             }
 
             return output;
         }
 
-       
+
 
     }
-}        
+}

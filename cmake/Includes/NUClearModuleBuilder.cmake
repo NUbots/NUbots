@@ -66,8 +66,8 @@ FUNCTION(NUCLEAR_MODULE)
         FILE(GLOB_RECURSE test_src "tests/**.cpp" , "tests/**.h")
         ADD_EXECUTABLE(${test_module_name} ${test_src})
         TARGET_LINK_LIBRARIES(${test_module_name} ${module_name} ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
-        
-        
+
+
         SET_PROPERTY(TARGET ${test_module_name} PROPERTY FOLDER "modules/tests")
 
     ENDIF()

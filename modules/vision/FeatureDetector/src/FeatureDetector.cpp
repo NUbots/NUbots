@@ -1,18 +1,18 @@
 /*
- * This file is part of FeatureDetector.
+ * This file is part of the NUbots Codebase.
  *
- * FeatureDetector is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * FeatureDetector is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FeatureDetector.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -33,9 +33,9 @@ namespace modules {
         using messages::input::Sensors;
         using messages::input::ServoID;
 
-        
-        FeatureDetector::FeatureDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), 
-                                m_visionKinematics() { //, m_ballDetector(), m_goalDetector(), m_fieldPointDetector(), m_obstacleDetector() { 
+
+        FeatureDetector::FeatureDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)),
+                                m_visionKinematics() { //, m_ballDetector(), m_goalDetector(), m_fieldPointDetector(), m_obstacleDetector() {
 
             // Load feature detector constants.
                     /*
@@ -44,11 +44,11 @@ namespace modules {
                 DETECT_GOALS = constants.config["DETECT_GOALS"];
                 DETECT_BALLS = constants.config["DETECT_BALLS"];
                 DETECT_OBSTACTLES = constants.config["DETECT_OBSTACTLES"];
-                
+
                 if (DETECT_LINES) {
                     m_detectLineObjects.enable();
                 }
-                
+
                 else {
                     m_detectLineObjects.disable();
                 }
@@ -56,7 +56,7 @@ namespace modules {
                 if (DETECT_GOALS) {
                     m_detectGoals.enable();
                 }
-                
+
                 else {
                     m_detectGoals.disable();
                 }
@@ -64,7 +64,7 @@ namespace modules {
                 if (DETECT_BALLS) {
                     m_detectBalls.enable();
                 }
-                
+
                 else {
                     m_detectBalls.disable();
                 }
@@ -72,7 +72,7 @@ namespace modules {
                 if (DETECT_OBSTACTLES) {
                     m_detectObstacles.enable();
                 }
-                
+
                 else {
                     m_detectObstacles.disable();
                 }
@@ -98,11 +98,11 @@ namespace modules {
                 BODY_POSITION_OFFSET << BODY_POSITION_OFFSET_[0] << BODY_POSITION_OFFSET_[1] << BODY_POSITION_OFFSET_[2];
                 CAMERA_POSITION_OFFSET << CAMERA_POSITION_OFFSET_[0] << CAMERA_POSITION_OFFSET_[1] << CAMERA_POSITION_OFFSET_[2];
 
-                m_visionKinematics.setParameters(constants.config["RADIAL_CORRECTION_COEFFICIENT"], 
-                                            BODY_ANGLE_OFFSET, 
-                                            CAMERA_ANGLE_OFFSET, 
-                                            NECK_POSITION_OFFSET, 
-                                            BODY_POSITION_OFFSET, 
+                m_visionKinematics.setParameters(constants.config["RADIAL_CORRECTION_COEFFICIENT"],
+                                            BODY_ANGLE_OFFSET,
+                                            CAMERA_ANGLE_OFFSET,
+                                            NECK_POSITION_OFFSET,
+                                            BODY_POSITION_OFFSET,
                                             CAMERA_POSITION_OFFSET,
                                             constants.config["SCREEN_LOCATION_UNCERTAINTY_PIXELS"]);
             });
@@ -117,7 +117,7 @@ namespace modules {
                     if (BALL_DISTANCE_METHOD.compare("WIDTH") == 0) {
                         distanceMethod = DISTANCE_METHOD::WIDTH;
                     }
-                    
+
                     else if (BALL_DISTANCE_METHOD.compare("D2P") == 0) {
                         distanceMethod = DISTANCE_METHOD::D2P;
                     }
@@ -148,9 +148,9 @@ namespace modules {
                                                  constants.config["BALL_WIDTH"],
                                                  distanceMethod
                                                  );
-                                                 
+
             });
-            
+
             on<Trigger<Configuration<GoalDetectorConfig>>>([this](const Configuration<GoalDetectorConfig>& constants) {
                     RANSAC_SELECTION_METHOD selectionMethod;
                     DISTANCE_METHOD distanceMethod;
@@ -160,7 +160,7 @@ namespace modules {
                     if (GOAL_DISTANCE_METHOD.compare("WIDTH") == 0) {
                         distanceMethod = DISTANCE_METHOD::WIDTH;
                     }
-                    
+
                     else if (GOAL_DISTANCE_METHOD.compare("D2P") == 0) {
                         distanceMethod = DISTANCE_METHOD::D2P;
                     }
@@ -180,7 +180,7 @@ namespace modules {
                     if (SELECTION_METHOD.compare("LARGEST_CONSENSUS") == 0) {
                         selectionMethod = RANSAC_SELECTION_METHOD::LargestConsensus;
                     }
-                    
+
                     else if (SELECTION_METHOD.compare("BEST_FITTING_CONSENSUS") == 0) {
                         selectionMethod = RANSAC_SELECTION_METHOD::BestFittingConsensus;
                     }
@@ -189,7 +189,7 @@ namespace modules {
                         selectionMethod = RANSAC_SELECTION_METHOD::LargestConsensus;
                     }
 
-                    
+
                     m_goalDetector.setParameters(constants.config["MINIMUM_POINTS"],
                                                  constants.config["MAX_ITERATIONS_PER_FITTING"],
                                                  constants.config["CONSENSUS_THRESHOLD"],
@@ -210,10 +210,10 @@ namespace modules {
                                                  constants.config["GOAL_WIDTH"],
                                                  distanceMethod,
                                                  constants.config["EDGE_OF_SCREEN_MARGIN"]);
-                                                 
+
             });
 
-            on<Trigger<Configuration<ObstacleDetectorConfig>>>([this](const Configuration<ObstacleDetectorConfig>& constants) {                    
+            on<Trigger<Configuration<ObstacleDetectorConfig>>>([this](const Configuration<ObstacleDetectorConfig>& constants) {
                     m_obstacleDetector.setParameters(constants.config["MIN_DISTANCE_FROM_HORIZON"],
                                                  constants.config["VERTICAL_SCANLINE_SPACING"],
                                                  constants.config["MIN_CONSECUTIVE_POINTS"],
@@ -221,15 +221,15 @@ namespace modules {
                                                  constants.config["MAX_OTHER_COLOUR_THRESHOLD"],
                                                  constants.config["VER_THRESHOLD"],
                                                  constants.config["OBJECT_THRESHOLD_MULT"]);
-                                                 
+
             });
 
             on<Trigger<Configuration<CameraConfig>>>([this](const Configuration<CameraConfig>& config) {
                     arma::vec2 FOV, imageSize;
-                    
+
                     FOV[0] = config.config["FOV_X"];
                     FOV[1] = config.config["FOV_Y"];
-                    
+
                     imageSize[0] = config.config["imageWidth"];
                     imageSize[1] = config.config["imageHeight"];
 
@@ -237,7 +237,7 @@ namespace modules {
                     m_visionKinematics.setSensors(0, 0, arma::vec3("0 0 -9.8"), arma::vec3("0 0 0.30"));
             });
 
-          
+
             on<Trigger<Sensors>/*TODO SYNC!!!*/>([this](const Sensors& sensors){
                 m_visionKinematics.setSensors(sensors.servos[static_cast<int>(ServoID::HEAD_PITCH)].presentPosition,
                                               sensors.servos[static_cast<int>(ServoID::HEAD_YAW)].presentPosition,
@@ -245,7 +245,7 @@ namespace modules {
                                               arma::vec3("0 0 0.35"));
 
             });
-            
+
             /*
             m_detectLineObjects = on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
 
@@ -253,25 +253,25 @@ namespace modules {
 
             m_detectGoals =
 
-            */ 
-            
-            on<Trigger<ClassifiedImage>, Options<Single>>([this](const ClassifiedImage& classifiedImage) {             
+            */
+
+            on<Trigger<ClassifiedImage>, Options<Single>>([this](const ClassifiedImage& classifiedImage) {
                 if (classifiedImage.matchedHorizontalSegments.count(messages::vision::GOAL_COLOUR) &&
                     classifiedImage.matchedVerticalSegments.count(messages::vision::GOAL_COLOUR)) {
                     emit(
                         m_goalDetector.run(m_visionKinematics,
-                                           classifiedImage.matchedHorizontalSegments.at(messages::vision::GOAL_COLOUR), 
+                                           classifiedImage.matchedHorizontalSegments.at(messages::vision::GOAL_COLOUR),
                                            classifiedImage.matchedVerticalSegments.at(messages::vision::GOAL_COLOUR))
                         );
                 }
             });
 
-            //m_detectBalls = 
+            //m_detectBalls =
             on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
                 emit(
-                    m_ballDetector.run( 
-                                        classifiedImage.matchedHorizontalSegments.at(messages::vision::BALL_COLOUR), 
-                                        classifiedImage.matchedVerticalSegments.at(messages::vision::BALL_COLOUR),   
+                    m_ballDetector.run(
+                                        classifiedImage.matchedHorizontalSegments.at(messages::vision::BALL_COLOUR),
+                                        classifiedImage.matchedVerticalSegments.at(messages::vision::BALL_COLOUR),
                                         classifiedImage.greenHorizonInterpolatedPoints,
                                         *(classifiedImage.image),
                                         *(classifiedImage.LUT),
@@ -280,19 +280,19 @@ namespace modules {
                 );
             });
 
-            //m_detectObstacles = 
-            on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {          
+            //m_detectObstacles =
+            on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
                 emit(
-                    m_obstacleDetector.run(classifiedImage.greenHorizonInterpolatedPoints, 
-                                           *(classifiedImage.LUT), 
+                    m_obstacleDetector.run(classifiedImage.greenHorizonInterpolatedPoints,
+                                           *(classifiedImage.LUT),
                                            *(classifiedImage.image),
                                            classifiedImage.getAllMatchedSegments(messages::vision::TEAM_CYAN_COLOUR),
                                            classifiedImage.getAllMatchedSegments(messages::vision::TEAM_MAGENTA_COLOUR),
                                            m_visionKinematics
                                           )
-                );     
+                );
             });
-            
+
         }
     }  // vision
 }  // modules

@@ -1,5 +1,5 @@
 #!/bin/bash
-# 
+#
 # File:   run.sh
 # Author: Trent Houliston <trent@houliston.me>
 #

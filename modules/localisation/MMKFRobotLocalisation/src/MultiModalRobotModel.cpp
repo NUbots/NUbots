@@ -1,18 +1,18 @@
 /*
- * This file is part of Localisation.
+ * This file is part of the NUbots Codebase.
  *
- * Localisation is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Localisation is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Localisation.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -33,7 +33,7 @@ namespace localisation {
 std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
     arma::vec::fixed<robot::RobotModel::size> est = h.filter_.get();
 
-    return os 
+    return os
         << "{ "
         << "weight: "
             << std::setw(7) << h.weight_ << ", "
@@ -102,8 +102,8 @@ double RobotHypothesis::MeasurementUpdate(
 }
 
 
-/*! @brief Performs an ambiguous measurement update using the exhaustive 
- *  process. 
+/*! @brief Performs an ambiguous measurement update using the exhaustive
+ *  process.
  *  This creates a new model for each possible location for the measurement.
  */
 void MultiModalRobotModel::AmbiguousMeasurementUpdate(
@@ -140,9 +140,9 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
     robot_models_ = std::move(new_models);
 
     // Sort models by weight from largest to smallest.
-    std::sort(robot_models_.begin(), robot_models_.end(), 
-        [](const std::unique_ptr<RobotHypothesis> & a, 
-           const std::unique_ptr<RobotHypothesis> & b) { 
+    std::sort(robot_models_.begin(), robot_models_.end(),
+        [](const std::unique_ptr<RobotHypothesis> & a,
+           const std::unique_ptr<RobotHypothesis> & b) {
             return a->GetFilterWeight() > b->GetFilterWeight();
         });
 }
@@ -183,9 +183,9 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
     robot_models_ = std::move(new_models);
 
     // Sort models by weight from largest to smallest.
-    std::sort(robot_models_.begin(), robot_models_.end(), 
-        [](const std::unique_ptr<RobotHypothesis> & a, 
-           const std::unique_ptr<RobotHypothesis> & b) { 
+    std::sort(robot_models_.begin(), robot_models_.end(),
+        [](const std::unique_ptr<RobotHypothesis> & a,
+           const std::unique_ptr<RobotHypothesis> & b) {
             return a->GetFilterWeight() > b->GetFilterWeight();
         });
 }
@@ -197,7 +197,7 @@ void MultiModalRobotModel::RemoveOldModels() {
     // For each model:
     while (!robot_models_.empty()) {
         auto model = std::move(robot_models_.back());
-        
+
         if (model->obs_count_ <= 4) {
             new_models.push_back(std::move(model));
         }
@@ -237,18 +237,18 @@ bool MultiModalRobotModel::ModelsAreSimilar(
     // Unit vector orientation
     auto heading_dist = diff[robot::kHeadingX] + diff[robot::kHeadingY];
 
-    return (translation_dist < cfg_.merge_min_translation_dist) && 
+    return (translation_dist < cfg_.merge_min_translation_dist) &&
            (heading_dist < cfg_.merge_min_heading_dist);
 }
 
 /// Reduces the number of active models by merging similar models together
 // TODO: Find a neater, yet performant way of writing this method
 void MultiModalRobotModel::MergeSimilarModels() {
-    
+
     // Sort models by weight from smallest to largest.
-    std::sort(robot_models_.begin(), robot_models_.end(), 
-        [](const std::unique_ptr<RobotHypothesis> & a, 
-           const std::unique_ptr<RobotHypothesis> & b) { 
+    std::sort(robot_models_.begin(), robot_models_.end(),
+        [](const std::unique_ptr<RobotHypothesis> & a,
+           const std::unique_ptr<RobotHypothesis> & b) {
             return a->GetFilterWeight() < b->GetFilterWeight();
         });
 
@@ -264,7 +264,7 @@ void MultiModalRobotModel::MergeSimilarModels() {
     for (int ma = robot_models_.size() - 1; ma >= 0; ma--) {
         if (merged[ma])
             continue;
-    
+
         // Compare the last model in the list to all the models before it
         for (int mb = ma - 1; mb >= 0; mb--) {
             if (merged[mb])
@@ -278,7 +278,7 @@ void MultiModalRobotModel::MergeSimilarModels() {
 
             float wa = model_a->GetFilterWeight();
             float wb = model_b->GetFilterWeight();
-            
+
             if (wa < wb) {
                 merged[ma] = true;
                 model_b->SetFilterWeight(wa + wb);
@@ -308,13 +308,13 @@ void MultiModalRobotModel::MergeSimilarModels() {
  */
 void MultiModalRobotModel::PruneViterbi(unsigned int order) {
     // No pruning required if not above maximum.
-    if(robot_models_.size() <= order) 
+    if(robot_models_.size() <= order)
         return;
 
     // Sort models by weight from largest to smallest.
-    std::sort(robot_models_.begin(), robot_models_.end(), 
-        [](const std::unique_ptr<RobotHypothesis> & a, 
-           const std::unique_ptr<RobotHypothesis> & b) { 
+    std::sort(robot_models_.begin(), robot_models_.end(),
+        [](const std::unique_ptr<RobotHypothesis> & a,
+           const std::unique_ptr<RobotHypothesis> & b) {
             return a->GetFilterWeight() > b->GetFilterWeight();
         });
 
@@ -327,14 +327,14 @@ void MultiModalRobotModel::PruneViterbi(unsigned int order) {
 */
 void MultiModalRobotModel::NormaliseAlphas() {
     double sumAlpha = 0.0;
-    
+
     for (auto& model : robot_models_)
         sumAlpha += model->GetFilterWeight();
 
-    // if (sumAlpha == 1) 
+    // if (sumAlpha == 1)
     //     return;
 
-    if (sumAlpha == 0) 
+    if (sumAlpha == 0)
         sumAlpha = 1e-12;
 
     for (auto& model : robot_models_)

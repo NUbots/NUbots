@@ -1,3 +1,22 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+
 #include "Obstacle.h"
 
 namespace modules {
@@ -11,11 +30,11 @@ namespace modules {
             m_sizeOnScreen = arma::vec2({width, height});
             m_colour = colour;
 
-            // CALCULATE DISTANCE AND BEARING VALS            
+            // CALCULATE DISTANCE AND BEARING VALS
             valid = (calculatePositions(visionKinematics) && check());
         }
 
-      
+
 
         bool Obstacle::check() const {
             //! TODO: Do a check based on width and d2p consistency
@@ -61,17 +80,17 @@ namespace modules {
             switch(obstacle.m_colour){
                 case COLOUR_CLASS::UNKNOWN_COLOUR:
                     output << "\tRobot team colour: UNKNOWN " << std::endl;
-                    break;  
+                    break;
                 case COLOUR_CLASS::TEAM_MAGENTA_COLOUR:
                     output << "\tRobot team colour: TEAM_MAGENTA " << std::endl;
-                    break;  
+                    break;
                 case COLOUR_CLASS::TEAM_CYAN_COLOUR:
                     output << "\tRobot team colour: TEAM_CYAN " << std::endl;
-                    break;  
-                default:
-                    output << "\tRobot team colour: Not robot colour type!!!" << std::endl;                
                     break;
-            } 
+                default:
+                    output << "\tRobot team colour: Not robot colour type!!!" << std::endl;
+                    break;
+            }
             output << "\tSpherical error: " << obstacle.m_sphericalError << std::endl;
 
 
