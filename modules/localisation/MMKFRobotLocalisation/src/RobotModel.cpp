@@ -60,6 +60,20 @@ arma::vec RobotModel::predictedObservation(
     return {radial[0], heading_x, heading_y};
 }
 
+arma::vec RobotModel::predictedObservation(
+    const arma::vec::fixed<RobotModel::size>& state, 
+    const std::vector<arma::vec2>& actual_positions) {
+
+    // // Radial coordinates
+    arma::vec2 diff_1 = actual_positions[0] - state.rows(0, 1);
+    arma::vec2 diff_2 = actual_positions[1] - state.rows(0, 1);
+    arma::vec2 radial_1 = utility::math::coordinates::Cartesian2Radial(diff_1);
+    arma::vec2 radial_2 = utility::math::coordinates::Cartesian2Radial(diff_2);
+
+    auto angle_diff = utility::math::angle::difference(radial_1[1], radial_2[1]);
+
+    return { std::abs(angle_diff) };
+}
 
 
 arma::vec RobotModel::observationDifference(const arma::vec& a, 

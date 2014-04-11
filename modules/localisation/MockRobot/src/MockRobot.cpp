@@ -69,9 +69,9 @@ namespace localisation {
         // Update robot position
         on<Trigger<Every<10, std::chrono::milliseconds>>>("Robot motion", [this](const time_t&){
             auto t = absolute_time();
-            double period = 37;
-            double x_amp = 1;
-            double y_amp = 1;
+            double period = 100;
+            double x_amp = 3;
+            double y_amp = 2;
 
             arma::vec old_pos = robot_position_;
 
@@ -155,7 +155,7 @@ namespace localisation {
         });
 
         // Simulate Vision
-        on<Trigger<Every<1000, std::chrono::milliseconds>>,
+        on<Trigger<Every<200, std::chrono::milliseconds>>,
            Options<Sync<MockRobot>>>("Vision Simulation", [this](const time_t&) {
 
             // Camera setup

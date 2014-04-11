@@ -105,7 +105,8 @@ namespace localisation {
                  field_description_->GetLFO(LFOId::kGoalYR)}
             };
 
-            robot_models_.AmbiguousMeasurementUpdate(vis_objs, objs);
+            // robot_models_.AmbiguousMeasurementUpdate(vis_objs, objs);
+            robot_models_.AmbiguousMultipleMeasurementUpdate(vis_objs, objs);
         } else {
             for (auto& ambiguous_object : ambiguous_objects) {
                 // Get a vector of all field objects that the observed object could

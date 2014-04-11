@@ -74,6 +74,10 @@ namespace localisation {
             const messages::vision::VisionObject& observed_object,
             const utility::localisation::LocalisationFieldObject& actual_object);
 
+        double MeasurementUpdate(
+            const std::vector<messages::vision::VisionObject>& observed_objects,
+            const std::vector<utility::localisation::LocalisationFieldObject>& actual_objects);
+
         void TimeUpdate(double seconds);
         void TimeUpdate(double seconds, const messages::localisation::FakeOdometry& odom);
 
@@ -112,13 +116,20 @@ namespace localisation {
         void MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,
             const utility::localisation::LocalisationFieldObject& actual_object);
-        // void MultipleLandmarkUpdate();
+        
+        void MeasurementUpdate(
+            const std::vector<messages::vision::VisionObject>& observed_objects,
+            const std::vector<utility::localisation::LocalisationFieldObject>& actual_objects);
 
         void AmbiguousMeasurementUpdate(
             const messages::vision::VisionObject& ambiguous_object,
             const std::vector<utility::localisation::LocalisationFieldObject>& possible_objects);
 
         void AmbiguousMeasurementUpdate(
+            const std::vector<messages::vision::VisionObject>& ambiguous_objects,
+            const std::vector<std::vector<utility::localisation::LocalisationFieldObject>>& possible_object_sets);
+
+        void AmbiguousMultipleMeasurementUpdate(
             const std::vector<messages::vision::VisionObject>& ambiguous_objects,
             const std::vector<std::vector<utility::localisation::LocalisationFieldObject>>& possible_object_sets);
 
