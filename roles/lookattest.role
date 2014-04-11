@@ -1,0 +1,22 @@
+ADD_ROLE(
+    NAME lookattest
+    MODULES
+        support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem    
+        #support::configuration::NetworkingConfiguration
+        platform::darwin::HardwareIO
+        platform::darwin::SensorFilter
+        support::NUbugger
+        debug::NUbugger
+        behaviour::Controller
+        behaviour::reflexes::Stand
+        behaviour::reflexes::FallingRelax
+        behaviour::reflexes::Getup
+        behaviour::reflexes::Look
+        behaviour::planners::LookAtGoal
+        motion::ScriptEngine
+        input::LinuxCamera
+        vision::LUTClassifier
+        vision::FeatureDetector
+)
