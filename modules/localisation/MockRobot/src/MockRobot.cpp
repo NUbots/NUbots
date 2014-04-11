@@ -268,6 +268,9 @@ namespace localisation {
             arma::vec2 ball_pos = utility::localisation::transform::RobotBall2FieldBall(
                 robot_position_, robot_heading_, ball.position);
 
+            arma::vec2 robot_ball_pos = utility::localisation::transform::RobotBall2FieldBall(
+                robots[0].position, robots[0].heading, ball.position);
+
             emit(graph("Estimated ball position", ball_pos[0], ball_pos[1]));
             // emit(graph("Estimated ball velocity", state[2], state[3]));
             emit(graph("Actual ball position", ball_position_[0], ball_position_[1]));
@@ -302,18 +305,18 @@ namespace localisation {
             ball_marker_model.lost = false;
             ball_msg_models.push_back(ball_marker_model);
 
-            // messages::localisation::FieldObject::Model robot_ball_model;
-            // ball_msg->name = "ball";
-            // robot_ball_model.wm_x = ball.position[0];
-            // robot_ball_model.wm_y = ball.position[1];
-            // robot_ball_model.heading = 0;
-            // robot_ball_model.sd_x = 0.005;
-            // robot_ball_model.sd_y = 0.005;
-            // robot_ball_model.sr_xx = 0.01;
-            // robot_ball_model.sr_xy = 0;
-            // robot_ball_model.sr_yy = 0.01;
-            // robot_ball_model.lost = false;
-            // ball_msg_models.push_back(robot_ball_model);
+            messages::localisation::FieldObject::Model robot_ball_model;
+            ball_msg->name = "ball";
+            robot_ball_model.wm_x = robot_ball_pos[0];
+            robot_ball_model.wm_y = robot_ball_pos[1];
+            robot_ball_model.heading = 0;
+            robot_ball_model.sd_x = 0.005;
+            robot_ball_model.sd_y = 0.005;
+            robot_ball_model.sr_xx = 0.01;
+            robot_ball_model.sr_xy = 0;
+            robot_ball_model.sr_yy = 0.01;
+            robot_ball_model.lost = false;
+            ball_msg_models.push_back(robot_ball_model);
 
             ball_msg->models = ball_msg_models;
             emit(std::move(ball_msg));

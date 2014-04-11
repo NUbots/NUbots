@@ -31,11 +31,14 @@
 
 namespace modules {
 namespace localisation {
+    struct MMKFRobotLocalisationEngineConfig {
+        static constexpr const char* CONFIGURATION_PATH = "MMKFRobotLocalisationEngine.json";
+    };
 
     class MMKFRobotLocalisationEngine {
         public:
 
-        MMKFRobotLocalisationEngine() {
+        MMKFRobotLocalisationEngine() : cfg_({true}) {
             last_time_update_time_ = NUClear::clock::now();
         }
 
@@ -64,14 +67,27 @@ namespace localisation {
         };
         
         void UpdateConfiguration(
-            const messages::support::Configuration<modules::localisation::MultiModalRobotModelConfig>& config) {
+            const messages::support::Configuration<MultiModalRobotModelConfig>& config) {
             robot_models_.UpdateConfiguration(config);
         };
+
+        void UpdateConfiguration(
+            const messages::support::Configuration<MMKFRobotLocalisationEngineConfig>& config) {
+            cfg_.angle_between_goals_observation_enabled = config["AngleBetweenGoalsObservationEnabled"];
+            cfg_.goal_pair_observation_enabled = config["GoalPairObservationEnabled"];
+        };
+
     // private:
         /// Contains the dimensions of the field
         std::shared_ptr<utility::localisation::FieldDescription> field_description_;
 
         MultiModalRobotModel robot_models_;
+
+    private:
+        struct {
+            bool angle_between_goals_observation_enabled;
+            bool goal_pair_observation_enabled;
+        } cfg_;
 
         std::chrono::system_clock::time_point last_time_update_time_;
     };

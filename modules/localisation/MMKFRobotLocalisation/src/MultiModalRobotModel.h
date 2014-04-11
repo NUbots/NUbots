@@ -30,7 +30,6 @@
 
 namespace modules {
 namespace localisation {
-    /// @brief General localisation configuration.
     struct MultiModalRobotModelConfig {
         static constexpr const char* CONFIGURATION_PATH = "MultiModalRobotModel.json";
     };
