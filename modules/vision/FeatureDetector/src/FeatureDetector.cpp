@@ -239,11 +239,11 @@ namespace modules {
 
 
             on<Trigger<Sensors>/*TODO SYNC!!!*/>([this](const Sensors& sensors){
+            arma::vec v = {0,0,0.35};
                 m_visionKinematics.setSensors(sensors.servos[static_cast<int>(ServoID::HEAD_PITCH)].presentPosition,
                                               sensors.servos[static_cast<int>(ServoID::HEAD_YAW)].presentPosition,
-                                              sensors.orientation,
-                                              arma::vec3("0 0 0.35"));
-
+                                              sensors.orientation.col(2),
+                                              v);
             });
 
             /*

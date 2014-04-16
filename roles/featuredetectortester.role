@@ -7,5 +7,7 @@ ADD_ROLE(
         vision::LUTClassifier
         vision::FeatureDetector
         support::NUbugger
+        platform::darwin::HardwareIO
+        platform::darwin::SensorFilter
 )
 
