@@ -42,7 +42,10 @@ namespace modules {
             using messages::behaviour::ActionPriorites;
             using messages::behaviour::LimbID;
 
-            Getup::Getup(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)), gettingUp(false) {
+            Getup::Getup(std::unique_ptr<NUClear::Environment> environment)
+                : Reactor(std::move(environment))
+                , id(size_t(this) * size_t(this) - size_t(this))
+                , gettingUp(false) {
 
                 //do a little configurating
                 on<Trigger<Configuration<Getup>>>([this] (const Configuration<Getup>& file){

@@ -1,18 +1,18 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of WalkEngine.
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * WalkEngine is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
+ * WalkEngine is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * along with WalkEngine.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -32,6 +32,9 @@
 #include "utility/math/matrix.h"
 #include "OPKinematics.h"
 #include "utility/nubugger/NUgraph.h"
+#include "messages/motion/WalkCommand.h"
+#include "messages/motion/ServoTarget.h"
+#include "messages/behaviour/Action.h"
 
 
 namespace modules {
@@ -45,13 +48,61 @@ namespace modules {
         using NUClear::log;
         using NUClear::DEBUG;
         using messages::input::Sensors;
+        using messages::motion::WalkCommand;
+        using messages::motion::WalkStartCommand;
+        using messages::motion::WalkStopCommand;
+        using messages::motion::ServoTarget;
+        using messages::behaviour::RegisterAction;
+        using messages::behaviour::ActionPriorites;
+        using messages::behaviour::LimbID;
+        
+        WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment))
+            , id(size_t(this) * size_t(this) - size_t(this)) {
 
-        WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
+            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+                id,
+                {
+                    std::pair<float, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG}),
+                    std::pair<float, std::set<LimbID>>(0, {LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
+                },
+                [this] (const std::set<LimbID>& givenLimbs) {
+                    if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
+                        // legs are available, start walking
+                        stanceReset();
+                        updateHandle.enable();
+                    }
+                },
+                [this] (const std::set<LimbID>& takenLimbs) {
+                    if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
+                        // legs are no longer available, reset walking (too late to stop walking)
+                        updateHandle.disable();
+                    }
+                },
+                [this] (const std::set<ServoID>&) {
+                    // nothing
+                }
+            }));
 
-            struct WalkCommand {
-                arma::vec2 velocity; // in m/s
-                float rotationalSpeed; // in rads/s
-            };
+            updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, With<Sensors>, Options<Single> >([this](const time_t&, const Sensors& sensors) {
+                update(sensors);
+            });
+
+            updateHandle.disable();
+
+            on<Trigger<WalkCommand>>([this](const WalkCommand& walkCommand) {
+                setVelocity(walkCommand.velocity[1], walkCommand.velocity[0], walkCommand.rotationalSpeed);
+            });
+
+            on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
+                start();
+                emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 25, 10 }}));
+            });
+
+            on<Trigger<WalkStopCommand>>([this](const WalkStopCommand&) {
+                stop();
+                // TODO: set priorities to 0 when stopped - somehow
+            });
 
             on<Trigger<Configuration<WalkEngine> > >([this](const Configuration<WalkEngine>& config) {
 
@@ -137,7 +188,7 @@ namespace modules {
                 frontComp = config["frontComp"];
                 AccelComp = config["AccelComp"];
 
-                // gInitial body swing
+                // gInitial body swing 
                 supportModYInitial = config["supportModYInitial"];
                 
                 //XXX: this isn't a real config variable - it derives from akleMod[0]
@@ -145,8 +196,8 @@ namespace modules {
 
                 useAlternativeTrajectory = config["useAlternativeTrajectory"];
 
-                setVelocity(config["velCommandX"], config["velCommandY"], config["velCommandAngular"]);
-
+//                setVelocity(config["velCommandX"], config["velCommandY"], config["velCommandAngular"]);
+                
             });
 
             on<Trigger<Startup>>([this](const Startup&) {
@@ -217,7 +268,7 @@ namespace modules {
                 // gqLArm0={qLArm[1],qLArm[2]};
                 // gqRArm0={qRArm[1],qRArm[2]};
 
-                // gStandard offset
+                // gStandard offset 
                 uLRFootOffset = {0, footY + supportY, 0};
 
                 // gWalking/Stepping transition variables
@@ -230,15 +281,11 @@ namespace modules {
                 comdot = {0, 0};
                 hasBall = 0;
 
-
+                
                 stanceReset();
-                start();
+                //start();
             });
-
-            on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, With<Sensors>, Options<Single> >([this](const time_t&, const Sensors& sensors) {
-                update(sensors);
-            });
-
+			
         }
         // TODO: add others
 
@@ -260,7 +307,7 @@ namespace modules {
             // always stops with feet together (which helps transition)
             stopRequest = std::max(1, stopRequest);
         }
-
+        
         void WalkEngine::update(const Sensors& sensors) {
             //advanceMotion();
             double time = getTime();
@@ -272,7 +319,7 @@ namespace modules {
 
             if (!active) {
                 moving = false;
-                updateStill();
+                updateStill(sensors);
                 return;
             }
 
@@ -351,7 +398,7 @@ namespace modules {
                         }
                     }
                 }
-
+                
                 uTorso2 = stepTorso(uLeft2, uRight2, shiftFactor);
 
                 // adjustable initial step body swing
@@ -433,7 +480,7 @@ namespace modules {
             if (velDiff[0] > 0.02) {
                 frontCompX = frontCompX + AccelComp;
             }
-
+            
             float armPosCompX, armPosCompY;
 
             // arm movement compensation
@@ -482,7 +529,7 @@ namespace modules {
             //motionArms();
         }
 
-        void WalkEngine::updateStill() {
+        void WalkEngine::updateStill(const Sensors& sensors) {
             uTorso = stepTorso(uLeft, uRight, 0.5);
 
             float armPosCompX, armPosCompY;
@@ -523,16 +570,16 @@ namespace modules {
             pRLeg[2] = uRight[2];
 
             std::vector<double> qLegs = darwinop_kinematics_inverse_legs_nubots(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
-            motionLegs(qLegs, true, Sensors());
+            motionLegs(qLegs, true, sensors);
            //motionArms();
         }
 
         void WalkEngine::motionLegs(std::vector<double> qLegs, bool gyroOff, const Sensors& sensors) {
-            float phComp = std::min({1.0, phSingle / 0.1, (1 - phSingle) / 0.1});
+            float phComp = std::min({1.0, phSingle / 0.1, (1 - phSingle) / 0.1});                  
             ServoID supportLegID = (supportLeg == LEFT) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
             arma::mat33 ankleRotation = sensors.forwardKinematics.find(supportLegID)->second.submat(0,0,2,2);
             // get effective gyro angle considering body angle offset
-            arma::mat33 kinematicGyroSORAMatrix = sensors.orientation * ankleRotation;   //DOUBLE TRANSPOSE
+            arma::mat33 kinematicGyroSORAMatrix = sensors.orientation * ankleRotation;   //DOUBLE TRANSPOSE       
             std::pair<arma::vec3, double> axisAngle = utility::math::matrix::axisAngleFromRotationMatrix(kinematicGyroSORAMatrix);
             float weight = 1;
             arma::vec3 kinematicsGyro = axisAngle.first * (axisAngle.second / weight);
@@ -571,7 +618,7 @@ namespace modules {
             hipShift[1] += hipImuParamY[0] * (hipShiftY - hipShift[1]);
             armShift[0] += armImuParamX[0] * (armShiftX - armShift[0]);
             armShift[1] += armImuParamY[0] * (armShiftY - armShift[1]);
-
+            
             // TODO: toe/heel lifting
 
             if (!active) {
@@ -585,8 +632,8 @@ namespace modules {
                 qLegs[9] += kneeShift; // Knee pitch stabilization
                 qLegs[10] += ankleShift[0]; // Ankle pitch stabilization
                 // qLegs[11] += ankleShift[1]; // Ankle roll stabilization
-
-
+                
+                
 
 
             } else if (supportLeg == LEFT) {
@@ -626,7 +673,7 @@ namespace modules {
             10 = rightAnklePitch
             11 = rightAnkleRoll*/
 
-            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(1000000000/UPDATE_FREQUENCY);
+            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
 
             waypoints->push_back({id, time, ServoID::L_HIP_YAW,     float(qLegs[0]),  float(leftLegHardness * 100)});
             waypoints->push_back({id, time, ServoID::L_HIP_ROLL,    float(qLegs[1]),  float(leftLegHardness * 100)});
@@ -675,7 +722,7 @@ namespace modules {
                     -5 * M_PI / 180 + std::max(0.0f, rotRightA) / 2
                     - std::max(0.0, rightLegTorso[1] - 0.04) / 0.02 * (6 * M_PI / 180)
                     , qLArmActual[1]);
-
+            
             if (upperBodyOverridden <= 0 && motionPlaying <= 0) {
                 qLArmActual[2] = qLArm[2];
                 qRArmActual[2] = qRArm[2];
@@ -765,7 +812,7 @@ namespace modules {
             vx = std::min(std::max(vx, velLimitX[0]), velLimitX[1]);
             vy = std::min(std::max(vy, velLimitY[0]), velLimitY[1]);
             va = std::min(std::max(va, velLimitA[0]), velLimitA[1]);
-
+            
             // slow down when turning
             double vFactor = 1 - std::abs(va) / vaFactor;
 
@@ -783,9 +830,9 @@ namespace modules {
 
         void WalkEngine::updateVelocity() {
             if (velCurrent[0] > velXHigh) {
-                // Slower acceleration at high speed
+                // Slower acceleration at high speed 
                 velDiff[0] = std::min(std::max(velCommand[0] - velCurrent[0],
-                        -velDelta[0]), velDeltaXHigh);
+                        -velDelta[0]), velDeltaXHigh); 
             } else {
                 velDiff[0] = std::min(std::max(velCommand[0] - velCurrent[0],
                         -velDelta[0]), velDelta[0]);
@@ -877,7 +924,7 @@ namespace modules {
             float aN = (c1 * expTStep - c2) / (expTStep - 1 / expTStep);
             return std::make_pair(aP, aN);
         }
-
+        
         arma::vec3 WalkEngine::zmpCom(float ph) {
             arma::vec3 com = {0, 0, 0};
             float expT = std::exp(tStep * ph / tZmp);
@@ -917,56 +964,52 @@ namespace modules {
               return t.tv_sec + 1E-6 * t.tv_usec;
         }
 
-        double WalkEngine::procFunc(double a, double deadband, double maxvalue) { //a function for IMU feedback (originally from teamdarwin2013release/player/util/util.lua)
-            double   ret  = std::min( std::max(0., std::abs(a)-deadband), maxvalue);
-            if(a<=0) ret *= -1.;
-            return   ret;
-        }
+		double WalkEngine::procFunc(double a, double deadband, double maxvalue) { //a function for IMU feedback (originally from teamdarwin2013release/player/util/util.lua)
+			double   ret  = std::min( std::max(0., std::abs(a)-deadband), maxvalue);
+			if(a<=0) ret *= -1.;
+			return   ret;
+		}
 
-        double WalkEngine::modAngle(double value) { // reduce an angle to [-pi, pi)
+		double WalkEngine::modAngle(double value) { // reduce an angle to [-pi, pi)
             double angle = std::fmod(value, 2 * M_PI);
             if (angle <= -M_PI) angle += 2 * M_PI;
             else if (angle > M_PI) angle -= 2 * M_PI;
 
             return angle;
-        }
+		}
 
-        /**
-         * @brief Transforms pRelative from pose co-ordinates to global co-ordinates in 2 dimensions
-         *  using the third element as bearing angle
-         */
-        arma::vec3 WalkEngine::poseGlobal(arma::vec3 pRelative, arma::vec3 pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!
-            double ca = std::cos(pose[2]);
-            double sa = std::sin(pose[2]);
+		arma::vec3 WalkEngine::poseGlobal(arma::vec3 pRelative, arma::vec3 pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!
+			double ca = std::cos(pose[2]);
+			double sa = std::sin(pose[2]);
             return {
                 pose[0] + ca * pRelative[0] - sa * pRelative[1],
                 pose[1] + sa * pRelative[0] + ca * pRelative[1],
                 pose[2] + pRelative[2]
             };
-        }
+		}
 
-        arma::vec3 WalkEngine::poseRelative(arma::vec3 pGlobal, arma::vec3 pose) {
-            double ca = std::cos(pose[2]);
-            double sa = std::sin(pose[2]);
-            double px = pGlobal[0] - pose[0];
-            double py = pGlobal[1] - pose[1];
-            double pa = pGlobal[2] - pose[2];
+		arma::vec3 WalkEngine::poseRelative(arma::vec3 pGlobal, arma::vec3 pose) {
+			double ca = std::cos(pose[2]);
+			double sa = std::sin(pose[2]);
+			double px = pGlobal[0] - pose[0];
+			double py = pGlobal[1] - pose[1];
+			double pa = pGlobal[2] - pose[2];
             return {
                 ca * px + sa * py,
                 -sa * px + ca * py,
                 modAngle(pa)
             };
-        }
+		}
 
-        //should t be an integer???
-        arma::vec3 WalkEngine::se2Interpolate(double t, arma::vec3 u1, arma::vec3 u2) { //helps smooth out the motions using a weighted average
+		//should t be an integer???
+		arma::vec3 WalkEngine::se2Interpolate(double t, arma::vec3 u1, arma::vec3 u2) { //helps smooth out the motions using a weighted average
             return {
                 u1[0] + t * (u2[0] - u1[0]),
                 u1[1] + t * (u2[1] - u1[1]),
                 u1[2] + t * modAngle(u2[2] - u1[2])
             };
-        }
-
+		}
+        
     }  // motion
 }  // modules
 
