@@ -1,8 +1,8 @@
 {
 	"FastSpeed" : 0.8,
 	"SlowSpeed" : 0.1,
-	"minYaw" : -3.0,
-	"maxYaw" : 3.0,
+	"minYaw" : -1.5,
+	"maxYaw" : 1.5,
 	"minPitch" : -1.2,
 	"maxPitch" : 1.2,
 }
