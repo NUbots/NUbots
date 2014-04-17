@@ -257,8 +257,8 @@ namespace modules {
             std::unique_ptr< std::vector<messages::vision::Obstacle> > obstacle_message = std::make_unique< std::vector<messages::vision::Obstacle> >();
             for(auto& obstacle : obstacles){
                 obstacle_message->push_back(messages::vision::Obstacle());
-                //NUClear::log<NUClear::DEBUG>("Found ",obstacle);
                 if (obstacle.isValid()) {
+                    // NUClear::log<NUClear::DEBUG>("Found ",obstacle);
                     obstacle_message->back().sphericalFromNeck = obstacle.m_location.neckRelativeRadial;
                     obstacle_message->back().sphericalError = obstacle.m_sphericalError;
                     obstacle_message->back().screenAngular = obstacle.m_location.screenAngular;

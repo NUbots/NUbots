@@ -33,6 +33,10 @@ namespace modules {
             using messages::support::Configuration;
             using messages::input::Sensors;
             using messages::motion::WalkCommand;
+            using messages::behaviour::WalkTarget;
+            using messages::behaviour::WalkApproach;
+            using messages::motion::WalkStartCommand;
+            using messages::motion::WalkStopCommand;
             //using namespace messages;
 
             //using messages::input::ServoID;
@@ -42,7 +46,6 @@ namespace modules {
             //using messages::behaviour::LimbID;
 
             WalkPathPlanner::WalkPathPlanner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-
                 //we will initially stand still
                 planType = messages::behaviour::WalkApproach::StandStill;
 
@@ -95,17 +98,26 @@ namespace modules {
                     ApproachCurveFactor = file.config["ApproachCurveFactor"];
                 });
 
-                on<Trigger<Every<20, Per<std::chrono::seconds>>>, With<messages::localisation::Ball,
-                                     messages::localisation::Self,
-                                     std::vector<messages::vision::Obstacle>>,
-                                     Options<Sync<WalkPathPlanner>>>([this]
-                                     (const time_t& now,
-                                      const messages::localisation::Ball& ball,
-                                      const messages::localisation::Self& self,
-                                      const std::vector<messages::vision::Obstacle>& robots
-                                      ) {
-                    arma::vec2 targetPos, targetHead;
+                // on<
+                //     Trigger<Every<20, Per<std::chrono::seconds>>>,
+                //     With<messages::localisation::Ball>,
+                //     With<std::vector<messages::localisation::Self>>
+                // >([this](const time_t&, const messages::localisation::Ball&, const std::vector<messages::localisation::Self>&) {
+                //     NUClear::log("Working");
+                // });
 
+                on<Trigger<Every<20, Per<std::chrono::seconds>>>, 
+                    With<messages::localisation::Ball>,
+                    With<std::vector<messages::localisation::Self>>,
+                    With<std::vector<messages::vision::Obstacle>>,
+                    Options<Sync<WalkPathPlanner>>
+                   >([this] (
+                     const time_t& now,
+                     const messages::localisation::Ball& ball,
+                     const std::vector<messages::localisation::Self>& self,
+                     const std::vector<messages::vision::Obstacle>& robots
+                    ) {
+                    arma::vec2 targetPos, targetHead;
 
                     //work out where we're going
                     if (targetPosition == messages::behaviour::WalkTarget::Robot) {
@@ -125,20 +137,21 @@ namespace modules {
                         targetHead = arma::normalise(currentTargetHeading-targetPos);
                     }
 
+//JO: THERE IS A SEGFAULT BETWEEN HERE AND 
                     //calculate the basic movement plan
                     arma::vec3 movePlan;
                     switch (planType) {
                         case messages::behaviour::WalkApproach::ApproachFromDirection:
-                            movePlan = approachFromDirection(self,targetPos,targetHead);
+                            movePlan = approachFromDirection(self.front(),targetPos,targetHead);
                             break;
                         case messages::behaviour::WalkApproach::WalkToPoint:
-                            movePlan = goToPoint(self,targetPos,targetHead);
+                            movePlan = goToPoint(self.front(),targetPos,targetHead);
                             break;
                         case messages::behaviour::WalkApproach::OmnidirectionalReposition:
-                            movePlan = goToPoint(self,targetPos,targetHead);
+                            movePlan = goToPoint(self.front(),targetPos,targetHead);
                             break;
                         case messages::behaviour::WalkApproach::StandStill:
-                            //emit(); //XXX: fix
+                            emit(std::make_unique<WalkStopCommand>());
                             return;
                     }
 
@@ -155,7 +168,12 @@ namespace modules {
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
                     command->velocity = arma::vec({movePlan[0],movePlan[1]});
                     command->rotationalSpeed = movePlan[2];
+//HERE
+                    NUClear::log("Walk command:", movePlan[0],movePlan[1],movePlan[2]);
                     emit(std::move(command));//XXX: emit here
+
+                     
+                    emit(std::make_unique<WalkStartCommand>());
                 });
 
                 on<Trigger<messages::behaviour::WalkStrategy>, Options<Sync<WalkPathPlanner>>>([this] (const messages::behaviour::WalkStrategy& cmd) {
@@ -170,6 +188,14 @@ namespace modules {
                     currentTargetPosition = cmd.target;
                     currentTargetHeading = cmd.heading;
                 });
+
+                //Walk planning testing: Walk to ball face to goal
+                auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
+                approach->targetPositionType = WalkTarget::Ball; 
+                approach->targetHeadingType = WalkTarget::WayPoint;
+                approach->walkMovementType = WalkApproach::ApproachFromDirection;
+                approach->heading = arma::vec({3,0});
+                emit(std::move(approach));
             }
 
             arma::vec3 WalkPathPlanner::generateWalk(const arma::vec3& move, bool omniPositioning) {

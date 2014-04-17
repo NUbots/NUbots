@@ -49,6 +49,7 @@ namespace localisation {
             "Configuration Update",
             [this](const Configuration<MultiModalRobotModelConfig>& config) {
             engine_->UpdateConfiguration(config);
+            NUClear::log("Localisation config finished successfully!");
         });
 
         on<Trigger<Configuration<FieldDescriptionConfig>>>(
@@ -56,6 +57,7 @@ namespace localisation {
             [this](const Configuration<FieldDescriptionConfig>& config) {
             auto fd = std::make_shared<utility::localisation::FieldDescription>(config);
             engine_->set_field_description(fd);
+            NUClear::log("Localisation config finished successfully!");
         });
 
         // Emit to NUbugger
@@ -76,7 +78,6 @@ namespace localisation {
                 robot_model.sr_yy = model_cov(1, 1);
                 robot_msg->push_back(robot_model);
             }
-
             emit(std::move(robot_msg));
         });
 

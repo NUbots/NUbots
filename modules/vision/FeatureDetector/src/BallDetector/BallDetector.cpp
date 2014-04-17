@@ -332,7 +332,7 @@ namespace modules {
             std::unique_ptr< std::vector<messages::vision::Ball> > ball_message = std::make_unique< std::vector<messages::vision::Ball> >();
             for(auto& ball : balls){
                 if(ball.valid){
-                    std::cout << "Emmiting " << ball << std::endl;
+                    // std::cout << "Emmiting " << ball << std::endl;
                     ball_message->push_back(messages::vision::Ball());
                     ball_message->back().sphericalFromNeck = ball.m_location.neckRelativeRadial;
                     ball_message->back().sphericalError = ball.m_sphericalError;
@@ -341,7 +341,7 @@ namespace modules {
                     ball_message->back().sizeOnScreen = ball.m_sizeOnScreen;
                     ball_message->back().timestamp = NUClear::clock::now();
                     ball_message->back().diameter = ball.m_diameter;
-                    NUClear::log("Emitting ball_message screen angular", ball_message->back().screenAngular);
+                    //NUClear::log("Emitting ball_message screen angular", ball_message->back().screenAngular);
                 }
             }
             return std::move(ball_message);

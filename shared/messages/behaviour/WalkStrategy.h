@@ -39,7 +39,7 @@ namespace messages {
 
         struct WalkStrategy {
             arma::vec2 target;
-            arma::vec2 heading;
+            arma::vec2 heading; //Desired global heading at point
             WalkTarget targetPositionType;
             WalkTarget targetHeadingType;
             WalkApproach walkMovementType;
