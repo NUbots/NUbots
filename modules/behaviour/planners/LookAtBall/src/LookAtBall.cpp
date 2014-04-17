@@ -31,9 +31,10 @@ namespace modules {
 
             LookAtBall::LookAtBall(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-                on<Trigger<Every<30,Per<std::chrono::seconds>>>, With<std::vector<Ball>>>([this] (const time_t& now, const std::vector<Ball>& balls) {
+                on<Trigger<std::vector<Ball>>>([this] (const std::vector<Ball>& balls) {
                     if (balls.size() > 0) {
-                        emit(std::make_unique<LookAtAngle>(LookAtAngle {balls[0].screenAngular[0],balls[0].screenAngular[0]}));
+                        //NUClear::log<NUClear::DEBUG>("LookatBall: \n", balls[0].screenAngular[0],", ",balls[0].screenAngular[1]);
+                        emit(std::make_unique<LookAtAngle>(LookAtAngle {balls[0].screenAngular[0],-balls[0].screenAngular[1]}));
                     }
 
                 });

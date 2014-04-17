@@ -31,9 +31,9 @@ namespace modules {
 
             LookAtGoal::LookAtGoal(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-                on<Trigger<Every<30,Per<std::chrono::seconds>>>, With<std::vector<Goal>>>([this] (const time_t& now, const std::vector<Goal>& goals) {
+                on<Trigger<std::vector<Goal>>>([this] (const std::vector<Goal>& goals) {
                     if (goals.size() > 0) {
-                        emit(std::make_unique<LookAtAngle>(LookAtAngle {goals[0].screenAngular[0],goals[0].screenAngular[0]}));
+                        emit(std::make_unique<LookAtAngle>(LookAtAngle {goals[0].screenAngular[0],-goals[0].screenAngular[1]}));
                     }
 
                 });

@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_REFLEX_GETUP_H
-#define MODULES_BEHAVIOUR_REFLEX_GETUP_H
+#ifndef MODULES_BEHAVIOUR_PLANNERS_WALKPATHPLANNER_H
+#define MODULES_BEHAVIOUR_PLANNERS_WALKPATHPLANNER_H
 
 #include <nuclear>
 #include <armadillo>

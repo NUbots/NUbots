@@ -68,7 +68,7 @@ namespace modules {
                     double distance = look.pitch*look.pitch+look.yaw*look.yaw;
                     panTime = distance/fastSpeed;
                     headYaw = std::fmin(std::fmax(look.yaw+sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition,minYaw),maxYaw);
-                    headPitch = std::fmin(std::fmax(look.pitch-sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition,minPitch),maxPitch);
+                    headPitch = std::fmin(std::fmax(look.pitch+sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition,minPitch),maxPitch);
                     
                     
                     //this might find a better location eventually - it is the generic "gotopoint" code

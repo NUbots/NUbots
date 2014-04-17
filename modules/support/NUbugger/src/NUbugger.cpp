@@ -181,7 +181,7 @@ namespace modules {
                 }
             });
 
-            /*on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
+            on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
                 Message message;
                 message.set_type(Message::REACTION_STATISTICS);
                 message.set_utc_timestamp(std::time(0));
@@ -202,7 +202,7 @@ namespace modules {
                 reactionStatistics->set_functionname(stats.identifier[2]);
 
                 send(message);
-            });*/
+            });
 
             on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
 

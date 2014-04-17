@@ -1,6 +1,6 @@
 {
 	"turnSpeed" : 0.4,
-    "forwardSpeed" : ,
+    "forwardSpeed" : 0.8,
     "footSeparation" : 14.0,
     "footSize" : 10.0,
                     
@@ -29,5 +29,5 @@
     "avoidDistance" : 50.0,
     
     "bearingSensitivity" : 1.5,
-    "ApproachCurveFactor" : 0.45,
+    "ApproachCurveFactor" : 0.45
 }

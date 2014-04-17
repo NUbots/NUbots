@@ -32,6 +32,7 @@ namespace modules {
 
             using messages::support::Configuration;
             using messages::input::Sensors;
+            using messages::motion::WalkCommand;
             //using namespace messages;
 
             //using messages::input::ServoID;
@@ -151,8 +152,10 @@ namespace modules {
                     movePlan = generateWalk(movePlan,
                                planType == messages::behaviour::WalkApproach::OmnidirectionalReposition);
 
-
-                    emit(std::move(std::make_unique<WalkCommand>({arma::vec({movePlan[0],movePlan[1]}),movePlan[2]})));//XXX: emit here
+                    std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
+                    command->velocity = arma::vec({movePlan[0],movePlan[1]});
+                    command->rotationalSpeed = movePlan[2];
+                    emit(std::move(command));//XXX: emit here
                 });
 
                 on<Trigger<messages::behaviour::WalkStrategy>, Options<Sync<WalkPathPlanner>>>([this] (const messages::behaviour::WalkStrategy& cmd) {
