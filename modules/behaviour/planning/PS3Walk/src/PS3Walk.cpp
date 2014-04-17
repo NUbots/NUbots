@@ -38,10 +38,10 @@ namespace planning {
                 if (event.isAxis()) {
                     switch (event.number) {
                         case LEFT_JOYSTICK_HORIZONTAL:
-                            strafe[0] = -event.value;
+                            strafe[1] = -event.value;
                             break;
                         case LEFT_JOYSTICK_VERTICAL:
-                            strafe[1] = -event.value;
+                            strafe[0] = -event.value;
                             break;
                         case RIGHT_JOYSTICK_HORIZONTAL:
                             rotationalSpeed = -event.value;

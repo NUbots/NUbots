@@ -91,7 +91,9 @@ namespace modules {
             updateHandle.disable();
 
             on<Trigger<WalkCommand>>([this](const WalkCommand& walkCommand) {
-                setVelocity(walkCommand.velocity[1], walkCommand.velocity[0], walkCommand.rotationalSpeed);
+                setVelocity(walkCommand.velocity[0] * (walkCommand.velocity[0] > 0 ? velLimitX[1] : -velLimitX[0]),
+                            walkCommand.velocity[1] * (walkCommand.velocity[1] > 0 ? velLimitY[1] : -velLimitY[0]),
+                            walkCommand.rotationalSpeed * (walkCommand.rotationalSpeed > 0 ? velLimitA[1] : -velLimitA[0]));
             });
 
             on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
