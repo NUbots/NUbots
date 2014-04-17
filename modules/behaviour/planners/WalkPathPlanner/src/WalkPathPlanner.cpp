@@ -24,6 +24,7 @@
 #include "messages/input/Sensors.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/motion/WalkCommand.h"
 
 namespace modules {
     namespace behaviour {
@@ -151,7 +152,7 @@ namespace modules {
                                planType == messages::behaviour::WalkApproach::OmnidirectionalReposition);
 
 
-                    //XXX: emit here
+                    emit(std::move(std::make_unique<WalkCommand>({arma::vec({movePlan[0],movePlan[1]}),movePlan[2]})));//XXX: emit here
                 });
 
                 on<Trigger<messages::behaviour::WalkStrategy>, Options<Sync<WalkPathPlanner>>>([this] (const messages::behaviour::WalkStrategy& cmd) {
