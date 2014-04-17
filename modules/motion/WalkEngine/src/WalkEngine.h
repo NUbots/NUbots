@@ -47,6 +47,8 @@ namespace modules {
                 RIGHT
             };
 
+            ReactionHandle updateHandle;
+
             /// Subsumption ID key to access motors
             const size_t id;
 
@@ -251,7 +253,7 @@ namespace modules {
 //            arma::vec3 rightLegCommand;
 
             void update(const messages::input::Sensors& sensors);
-            void updateStill();
+            void updateStill(const messages::input::Sensors& sensors);
             void motionLegs(std::vector<double> qLegs, bool gyroOff, const messages::input::Sensors& sensors);
             void motionArms();
             void exit();
