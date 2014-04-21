@@ -4,7 +4,7 @@ ADD_ROLE(
         support::SignalCatcher
         support::configuration::ConfigSystem
         input::LinuxCamera
-        vision::LUTClassifier
+        vision::QuexLUTClassifier
         vision::FeatureDetector
         support::NUbugger
         platform::darwin::HardwareIO
