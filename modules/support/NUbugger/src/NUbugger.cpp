@@ -377,6 +377,7 @@ namespace modules {
         }
 
         void NUbugger::recvMessage(const Message& message) {
+            NUClear::log("Received message of type:", message.type());
             switch (message.type()) {
                 case Message::Type::Message_Type_COMMAND:
                     recvCommand(message);
@@ -391,6 +392,7 @@ namespace modules {
 
         void NUbugger::recvCommand(const Message& message) {
             std::string command = message.command().command();
+            NUClear::log("Received command:", command);
             if (command == "download_lut") {
                 auto lut = powerplant.get<LookUpTable>();
 
@@ -400,7 +402,7 @@ namespace modules {
                 message.set_utc_timestamp(std::time(0));
 
                 Message::LookupTable* api_lookup_table = message.mutable_lookuptable();
-                api_lookup_table->set_table(lut->getData());
+                api_lookup_table->set_table(lut->getData(), LookUpTable::LUT_SIZE);
 
                 send(message);
             }
