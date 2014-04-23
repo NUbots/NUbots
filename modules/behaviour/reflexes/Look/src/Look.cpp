@@ -68,7 +68,7 @@ namespace modules {
                     double distance = look.pitch*look.pitch+look.yaw*look.yaw;
                     panTime = distance/fastSpeed;
                     headYaw = std::fmin(std::fmax(look.yaw+sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition,minYaw),maxYaw);
-                    headPitch = std::fmin(std::fmax(look.pitch-sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition,minPitch),maxPitch);
+                    headPitch = std::fmin(std::fmax(look.pitch+sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition,minPitch),maxPitch);
                     
                     
                     //this might find a better location eventually - it is the generic "gotopoint" code
@@ -78,7 +78,7 @@ namespace modules {
                     waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW,     float(sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition),  30.f});
                     waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH,    float(sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition), 30.f});
                     waypoints->push_back({id, time, ServoID::HEAD_YAW,     float(std::fmin(std::fmax(headYaw,minYaw),maxYaw)),  30.f});
-                    waypoints->push_back({id, time, ServoID::HEAD_PITCH,    float(std::fmin(std::fmax(headPitch,minYaw),maxYaw)), 30.f});
+                    waypoints->push_back({id, time, ServoID::HEAD_PITCH,    float(std::fmin(std::fmax(headPitch,minPitch),maxPitch)), 30.f});
                     emit(std::move(waypoints));
                 });
 

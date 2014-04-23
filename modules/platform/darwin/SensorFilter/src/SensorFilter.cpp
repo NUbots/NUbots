@@ -209,6 +209,7 @@ namespace modules {
                     arma::mat44 odometryLeftFoot = arma::eye(4,4);
                     arma::mat44 odometryRightFoot = arma::eye(4,4);
                     if(previousSensors){
+                        //NOTE: calculateOdometryMatrix requires sensors->forwardKinematics to be calculated before calling
                         odometryLeftFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::LEFT);
                         odometryRightFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::RIGHT);
                     }
@@ -274,7 +275,7 @@ namespace modules {
                         bodyFromAnkleInitialInverse = previousSensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL);   //Double Inverse
                         bodyFromAnkleFinal = orthonormal44Inverse(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL));
                     }
-                    return bodyFromAnkleFinal * bodyFromAnkleInitialInverse;
+                    return  bodyFromAnkleInitialInverse * bodyFromAnkleFinal;
             }
 
 

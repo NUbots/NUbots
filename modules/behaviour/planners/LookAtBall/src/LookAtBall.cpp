@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "LookAtGoal.h"
+#include "LookAtBall.h"
 
 #include "messages/vision/VisionObjects.h"
 #include "messages/behaviour/LookStrategy.h"
@@ -26,14 +26,15 @@ namespace modules {
     namespace behaviour {
         namespace planners {
 
-            using messages::vision::Goal;
+            using messages::vision::Ball;
             using messages::behaviour::LookAtAngle;
 
-            LookAtGoal::LookAtGoal(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+            LookAtBall::LookAtBall(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-                on<Trigger<std::vector<Goal>>>([this] (const std::vector<Goal>& goals) {
-                    if (goals.size() > 0) {
-                        emit(std::make_unique<LookAtAngle>(LookAtAngle {goals[0].screenAngular[0],-goals[0].screenAngular[1]}));
+                on<Trigger<std::vector<Ball>>>([this] (const std::vector<Ball>& balls) {
+                    if (balls.size() > 0) {
+                        //NUClear::log<NUClear::DEBUG>("LookatBall: \n", balls[0].screenAngular[0],", ",balls[0].screenAngular[1]);
+                        emit(std::make_unique<LookAtAngle>(LookAtAngle {balls[0].screenAngular[0],-balls[0].screenAngular[1]}));
                     }
 
                 });

@@ -61,7 +61,6 @@ namespace localisation {
             ball_msg->sr_xx = model_cov(0, 0);
             ball_msg->sr_xy = model_cov(0, 1);
             ball_msg->sr_yy = model_cov(1, 1);
-
             emit(std::move(ball_msg));
         });
 

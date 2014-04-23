@@ -91,7 +91,9 @@ namespace modules {
             updateHandle.disable();
 
             on<Trigger<WalkCommand>>([this](const WalkCommand& walkCommand) {
-                setVelocity(walkCommand.velocity[1], walkCommand.velocity[0], walkCommand.rotationalSpeed);
+                setVelocity(walkCommand.velocity[0] * (walkCommand.velocity[0] > 0 ? velLimitX[1] : -velLimitX[0]),
+                            walkCommand.velocity[1] * (walkCommand.velocity[1] > 0 ? velLimitY[1] : -velLimitY[0]),
+                            walkCommand.rotationalSpeed * (walkCommand.rotationalSpeed > 0 ? velLimitA[1] : -velLimitA[0]));
             });
 
             on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
@@ -160,7 +162,7 @@ namespace modules {
 
                 // gCompensation parameters
                 hipRollCompensation = 4 * M_PI / 180;
-                ankleMod = arma::vec2{-1, 0} * 1 * M_PI / 180;
+                ankleMod = arma::vec2{-double(config["toeTipCompensation"]), 0} * 1 * M_PI / 180;
                 spreadComp = config["spreadComp"];
                 turnCompThreshold = config["turnCompThreshold"];
                 turnComp = config["turnComp"];
@@ -190,7 +192,8 @@ namespace modules {
 
                 // gInitial body swing 
                 supportModYInitial = config["supportModYInitial"];
-
+                
+                //XXX: this isn't a real config variable - it derives from akleMod[0]
                 toeTipCompensation = config["toeTipCompensation"];
 
                 useAlternativeTrajectory = config["useAlternativeTrajectory"];

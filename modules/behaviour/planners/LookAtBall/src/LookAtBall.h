@@ -17,27 +17,34 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "LookAtGoal.h"
+#ifndef MODULES_BEHAVIOUR_PLANNERS_LOOKATBALL_H
+#define MODULES_BEHAVIOUR_PLANNERS_LOOKATBALL_H
 
-#include "messages/vision/VisionObjects.h"
-#include "messages/behaviour/LookStrategy.h"
+#include <nuclear>
+
+
 
 namespace modules {
     namespace behaviour {
         namespace planners {
 
-            using messages::vision::Goal;
-            using messages::behaviour::LookAtAngle;
+            /**
+             * Executes a getup script if the robot falls over.
+             *
+             * @author Josiah Walker
+             */
+            class LookAtBall : public NUClear::Reactor {
+            private:
+                //const size_t id;
 
-            LookAtGoal::LookAtGoal(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+            public:
+                explicit LookAtBall(std::unique_ptr<NUClear::Environment> environment);
+                //static constexpr const char* CONFIGURATION_PATH = "Stand.json";
+            };
 
-                on<Trigger<std::vector<Goal>>>([this] (const std::vector<Goal>& goals) {
-                    if (goals.size() > 0) {
-                        emit(std::make_unique<LookAtAngle>(LookAtAngle {goals[0].screenAngular[0],-goals[0].screenAngular[1]}));
-                    }
-
-                });
-            }
-        }  // tools
+        }  // planners
     }  // behaviours
 }  // modules
+
+#endif  // MODULES_BEHAVIOUR_PLANNERS_LOOKATBALL_H
+
