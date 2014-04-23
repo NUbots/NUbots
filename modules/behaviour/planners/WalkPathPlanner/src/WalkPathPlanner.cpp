@@ -157,6 +157,7 @@ namespace modules {
                         //this is a vision-based temporary for avoidance
                         movePlan = avoidObstacles(robots,movePlan);
                     }
+                    //NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
 
                     //this applies acceleration/deceleration and hysteresis to movement
                     movePlan = generateWalk(movePlan,
@@ -168,6 +169,7 @@ namespace modules {
                     NUClear::log("Self Position:", self[0].position[0],self[0].position[1]);
                     NUClear::log("Target Position:", targetPos[0],targetPos[1]);
                     NUClear::log("Walk command:", movePlan[0],movePlan[1],movePlan[2]);
+                    //NUClear::log("Ball Position:", ball.position[0],ball.position[1]);
                     emit(std::move(command));//XXX: emit here
 
                      
