@@ -104,14 +104,14 @@ namespace modules {
                     messages::behaviour::WalkTarget targetHeading,targetPosition;
 
                     //-----------internal fns--------------
-                    arma::vec3 generateWalk(const arma::vec3& move, bool omniPositioning);
-                    arma::vec3 approachFromDirection(const messages::localisation::Self& self,
-                                                   const arma::vec2& target,
-                                                   const arma::vec2& direction);
-                    arma::vec3 goToPoint(const messages::localisation::Self& self,
+                    arma::vec generateWalk(const arma::vec& move, bool omniPositioning);
+                    arma::vec approachFromDirection(const messages::localisation::Self& self,
+                                                   const arma::vec& target,
+                                                   const arma::vec& direction);
+                    arma::vec goToPoint(const messages::localisation::Self& self,
                                          const arma::vec2& target,
                                          const arma::vec2& direction);
-                    arma::vec3 avoidObstacles(const std::vector<messages::vision::Obstacle>& robotPosition,
+                    arma::vec avoidObstacles(const std::vector<messages::vision::Obstacle>& robotPosition,
                                               const arma::vec3& movePlan);
 
 
