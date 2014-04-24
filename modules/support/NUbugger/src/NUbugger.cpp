@@ -402,7 +402,7 @@ namespace modules {
                 message.set_utc_timestamp(std::time(0));
 
                 Message::LookupTable* api_lookup_table = message.mutable_lookuptable();
-                api_lookup_table->set_table(lut->getData(), LookUpTable::LUT_SIZE);
+                api_lookup_table->set_table(lut->getData());
 
                 send(message);
             }

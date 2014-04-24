@@ -71,7 +71,7 @@ namespace planning {
             auto strafeNorm = strafe / std::numeric_limits<short>::max();
             auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
             emit(std::make_unique<WalkCommand>(WalkCommand{
-                strafeNorm * 0.03, // TODO: non-magic numbers
+                strafeNorm,
                 rotationalSpeedNorm
             }));
         });
