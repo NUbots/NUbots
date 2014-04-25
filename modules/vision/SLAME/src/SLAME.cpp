@@ -52,7 +52,7 @@ namespace modules {
 
                 //Get matches: format (featureIndex, extractedFeatureIndex, matchStrength)
                 //Order of vector is strongest to weakest
-                //Add new features here??
+                //Add new features here to the feature list and pick up missing filters and strengths below
                 std::vector<std::tuple<int, int, float>> matches = featureExtractor.matchFeatures(features, extractedFeatures, MAX_MATCHES);
 
                 auto objectMessage = std::make_unique<std::vector<SLAMEObjects>>();
@@ -60,26 +60,33 @@ namespace modules {
 
                 for(auto& match : matches){
                     if(std::get<0>(match) < featureFilters.size()){     //That is, we have seen this object before
+                        //Create message about where we have seen the feature
                         objectMessage->push_back();
-                        objectMessage->back().expectedFieldLocation = featureFilters[std::get<0>].getFieldCartesian();
-                        objectMessage->back().sphericalFromNeck = extractedFeatures[std::get<1>(match)].getSphericalFromNeck();   //neckRelativeRadial
-                        objectMessage->back().sphericalError = extractedFeatures[std::get<1>(match)].getSphericalError();
-                        objectMessage->back().screenAngular = extractedFeatures[std::get<1>(match)].getScreenAngular();   //Polar around view vector on image
-                        objectMessage->back().screenCartesian = extractedFeatures[std::get<1>(match)].getScreenCartesian();
-                        objectMessage->back().sizeOnScreen = extractedFeatures[std::get<1>(match)].getSizeOnScreen();
-                        objectMessage->back().timestamp = sensors->timestamp;
 
+                        objectMessage->back().expectedFieldLocation = featureFilters[std::get<0>].getFieldCartesian();
+
+                        objectMessage->back().sphericalFromNeck =   extractedFeatures[std::get<1>(match)].getSphericalFromNeck(sensors);
+                        objectMessage->back().sphericalError =      extractedFeatures[std::get<1>(match)].getSphericalError(sensors);
+                        objectMessage->back().screenAngular =       extractedFeatures[std::get<1>(match)].getScreenAngular(sensors);
+                        objectMessage->back().screenCartesian =     extractedFeatures[std::get<1>(match)].getScreenCartesian(sensors);
+                        objectMessage->back().sizeOnScreen =        extractedFeatures[std::get<1>(match)].getSizeOnScreen(sensors);
+                        objectMessage->back().timestamp =           sensors->timestamp;
+
+                        //Update our beleif
                         featureStrengths[std::get<0>(match)] += std::get<2>(match);
                         featureFilters[std::get<0>(match)].timeUpdate(deltaT);
                         featureFilters[std::get<0>(match)].measurementUpdate(extractedFeatures[std::get<1>(match)], self, sensors);
-                    } else {
-                        featureFilters.push_back();
+                    } else {    //Otherwise we initialise a filter for the object
+                        featureFilters.resize(std::get<0>(match)+1);
+                        featureStrengths.resize(std::get<0>(match)+1);
 
+                        featureFilters[std::get<0>(match)].resetState(extractedFeatures[std::get<1>(match)].getScreenAngular(sensors), self);
+                        featureStrengths[std::get<0>(match)] = std::get<2>(match);
                     }
                 }
 
                 lastTime = sensors.timestamp;
-                emit(std::move(features));
+                emit(std::move(objectMessage));
             });
            
         }
