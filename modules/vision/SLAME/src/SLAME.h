@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_RESEARCH_HAPTICS_H
-#define MODULES_RESEARCH_HAPTICS_H
+#ifndef MODULES_RESEARCH_SLAME_H
+#define MODULES_RESEARCH_SLAME_H
 
 #include <nuclear>
 
