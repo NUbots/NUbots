@@ -103,6 +103,10 @@ namespace messages {
             std::vector<FieldLine> field_lines;
         };
 
+        class SLAMEObject : VisionObject {
+            arma::vec3 expectedFieldLocation;
+        };
+
     }
 }
 
