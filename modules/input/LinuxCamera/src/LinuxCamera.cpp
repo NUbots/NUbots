@@ -58,16 +58,16 @@ namespace modules {
                 m->camera.closeCamera();
             });
 
-            on<Trigger<Configuration<LinuxCamera>>>([this](const Configuration<LinuxCamera>& settings) {
+            on<Trigger<Configuration<LinuxCamera>>>([this](const Configuration<LinuxCamera>& config) {
                 auto& camera = m->camera;
 
                 try {
                     // Recreate the camera device at the required resolution
-                    int width = settings.config["imageWidth"];
-                    int height = settings.config["imageHeight"];
-                    std::string deviceID = settings.config["deviceID"];
-                    std::string format = settings.config["imageFormat"];
-                    bool rotated = settings.config["rotated"];
+                    int width = config["imageWidth"];
+                    int height = config["imageHeight"];
+                    std::string deviceID = config["deviceID"];
+                    std::string format = config["imageFormat"];
+                    bool rotated = config["rotated"];
 
                     if (camera.getWidth() != static_cast<size_t>(width)
                         || camera.getHeight() != static_cast<size_t>(height)
@@ -78,7 +78,7 @@ namespace modules {
 
                     // Set all other camera settings
                     for(auto& setting : camera.getSettings()) {
-                        int value = settings.config[setting.first];
+                        int value = config[setting.first];
                         if(setting.second.set(value) == false) {
                             NUClear::log<NUClear::DEBUG>("Failed to set " + setting.first + " on camera");
                         }

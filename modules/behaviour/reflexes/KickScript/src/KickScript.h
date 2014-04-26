@@ -17,32 +17,36 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_MOTION_WALKCOMMAND_H
-#define MESSAGES_MOTION_WALKCOMMAND_H
+#ifndef MODULES_BEHAVIOUR_REFLEXES_KICKSCRIPT_H
+#define MODULES_BEHAVIOUR_REFLEXES_KICKSCRIPT_H
 
 #include <nuclear>
+#include "messages/motion/KickCommand.h"
 
-namespace messages {
-    namespace motion {
+namespace modules {
+namespace behaviour {
+namespace reflexes {
 
-        /**
-         * TODO document
-         *
-         * @author Trent Houliston
-         * @author Brendan Annable
-         */
-        struct WalkCommand {
-            arma::vec2 velocity; // in m/s
-            float rotationalSpeed; // in rads/s
-        };
-        
-        struct WalkStartCommand {
-        };
+    class KickScript : public NUClear::Reactor {
+    public:
+        /// @brief Called by the powerplant to build and setup the KickScript reactor.
+        explicit KickScript(std::unique_ptr<NUClear::Environment> environment);
+        static constexpr const char* CONFIGURATION_PATH = "KickScript.json";
+    private:
+        const size_t id;
 
-        struct WalkStopCommand {
-        };
-        
-    }  // motion
-}  // messages
+        float KICK_PRIORITY;
+        float EXECUTION_PRIORITY;
 
-#endif  // MESSAGES_MOTION_WALKCOMMAND_H
+        messages::motion::KickCommand kickCommand;
+
+        void updatePriority(const float& priority);
+
+    };
+
+}
+}
+}
+
+
+#endif

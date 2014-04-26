@@ -39,6 +39,10 @@ namespace planning {
         static constexpr uint BUTTON_CIRCLE = 13;
         static constexpr uint BUTTON_CROSS = 14;
         static constexpr uint BUTTON_SQUARE = 15;
+        static constexpr uint BUTTON_L2 = 8;
+        static constexpr uint BUTTON_R2 = 9;
+        static constexpr uint BUTTON_L1 = 10;
+        static constexpr uint BUTTON_R1 = 11;
 
         /// @brief Called by the powerplant to build and setup the PS3Walk reactor.
         explicit PS3Walk(std::unique_ptr<NUClear::Environment> environment);
