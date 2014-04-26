@@ -90,6 +90,8 @@ namespace reflexes {
             float x = direction[0];
             float y = direction[1];
 
+            // These represent 4 directions of looking, see https://www.desmos.com/calculator/x8v1abfzi7 for a graph of the 4 quadrants
+            // Note that x is forward in relation to the robot so the forward quadrant is x >= |y|
             int quadrant = x >=  std::abs(y) ? 0
                          : y >=  std::abs(x) ? 1
                          : x <= -std::abs(y) ? 2
@@ -99,7 +101,7 @@ namespace reflexes {
             if (leg == LimbID::RIGHT_LEG) {
                 if (quadrant == 0) {
                     // front
-                    emit(std::make_unique<ExecuteScriptByName>(id, "KickRight.json"));
+                    emit(std::make_unique<ExecuteScriptByName>(id, "RightFootKickForward.json"));
                 } else if (quadrant == 1) {
                     // side
                     emit(std::make_unique<ExecuteScriptByName>(id, "RightFootKickLeft.json"));
@@ -107,7 +109,7 @@ namespace reflexes {
             } else if (leg == LimbID::LEFT_LEG) {
                 if (quadrant == 0) {
                     // front
-                    emit(std::make_unique<ExecuteScriptByName>(id, "KickLeft.json"));
+                    emit(std::make_unique<ExecuteScriptByName>(id, "LeftFootKickForward.json"));
                 } else if (quadrant == 3) {
                     // side
                     emit(std::make_unique<ExecuteScriptByName>(id, "LeftFootKickRight.json"));
