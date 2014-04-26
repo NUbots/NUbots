@@ -53,14 +53,10 @@ namespace reflexes {
         on<Trigger<KickCommand>>([this] (const KickCommand& kickCommand) {
             auto direction = kickCommand.direction;
             auto leg = kickCommand.leg;
-            float x = direction[0];
-            float y = direction[1];
 
-            int quadrant = x >=  std::abs(y) ? 0
-                         : y >=  std::abs(x) ? 1
-                         : x <= -std::abs(y) ? 2
-                         : 3;
+            int quadrant = getDirectionalQuadrant(direction[0], direction[1]);
 
+            // check if the command was valid
             bool valid = true;
             if (leg == LimbID::RIGHT_LEG) {
                 if (quadrant == 2 || quadrant == 3) {
@@ -87,17 +83,9 @@ namespace reflexes {
         on<Trigger<ExecuteKick>>([this] (const ExecuteKick&) {
             auto direction = kickCommand.direction;
             auto leg = kickCommand.leg;
-            float x = direction[0];
-            float y = direction[1];
 
-            // These represent 4 directions of looking, see https://www.desmos.com/calculator/x8v1abfzi7 for a graph of the 4 quadrants
-            // Note that x is forward in relation to the robot so the forward quadrant is x >= |y|
-            int quadrant = x >=  std::abs(y) ? 0
-                         : y >=  std::abs(x) ? 1
-                         : x <= -std::abs(y) ? 2
-                         : 3;
-            // assume valid at this point
-
+            int quadrant = getDirectionalQuadrant(direction[0], direction[1]);
+            // assume valid at this point as this is checked on the walkcommand trigger
             if (leg == LimbID::RIGHT_LEG) {
                 if (quadrant == 0) {
                     // front
@@ -143,6 +131,15 @@ namespace reflexes {
         emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { priority }}));
     }
 
+    int KickScript::getDirectionalQuadrant(float x, float y) {
+
+            // These represent 4 directions of looking, see https://www.desmos.com/calculator/x8v1abfzi7 for a graph of the 4 quadrants
+            // Note that x is forward in relation to the robot so the forward quadrant is x >= |y|
+            return x >=  std::abs(y) ? 0  // forward 
+                 : y >=  std::abs(x) ? 1  // left
+                 : x <= -std::abs(y) ? 2  // backward
+                 :                     3; // right
+    }
 }
 }
 }

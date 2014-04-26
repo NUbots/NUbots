@@ -41,6 +41,7 @@ namespace reflexes {
         messages::motion::KickCommand kickCommand;
 
         void updatePriority(const float& priority);
+        int getDirectionalQuadrant(float x, float y);
 
     };
 

@@ -41,13 +41,13 @@ namespace planning {
             if (joystick.sample(&event)) {
                 if (event.isAxis()) {
                     switch (event.number) {
-                        case LEFT_JOYSTICK_HORIZONTAL:
+                        case AXIS_LEFT_JOYSTICK_HORIZONTAL:
                             strafe[1] = -event.value;
                             break;
-                        case LEFT_JOYSTICK_VERTICAL:
+                        case AXIS_LEFT_JOYSTICK_VERTICAL:
                             strafe[0] = -event.value;
                             break;
-                        case RIGHT_JOYSTICK_HORIZONTAL:
+                        case AXIS_RIGHT_JOYSTICK_HORIZONTAL:
                             rotationalSpeed = -event.value;
                             break;
                     }
