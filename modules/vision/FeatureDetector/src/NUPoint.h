@@ -31,7 +31,7 @@ namespace modules {
             arma::vec2 screenCartesian;
             arma::vec2 screenAngular;
             arma::vec2 groundCartesian;
-            arma::vec3 neckRelativeRadial;
+            arma::vec3 bodyRelativeSpherical;
         } NUPoint;
     }
 }

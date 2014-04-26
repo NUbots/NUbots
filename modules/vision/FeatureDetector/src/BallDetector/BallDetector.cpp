@@ -334,7 +334,7 @@ namespace modules {
                 if(ball.valid){
                     // std::cout << "Emmiting " << ball << std::endl;
                     ball_message->push_back(messages::vision::Ball());
-                    ball_message->back().sphericalFromNeck = ball.m_location.neckRelativeRadial;
+                    ball_message->back().sphericalFromNeck = ball.m_location.bodyRelativeSpherical;
                     ball_message->back().sphericalError = ball.m_sphericalError;
                     ball_message->back().screenAngular = ball.m_location.screenAngular;
                     ball_message->back().screenCartesian = ball.m_location.screenCartesian;

@@ -479,7 +479,7 @@ namespace modules {
             for (auto& post : *goal_posts){
                 if(post.valid){
                     goal_message->push_back(messages::vision::Goal());
-                    goal_message->back().sphericalFromNeck = post.m_location.neckRelativeRadial;
+                    goal_message->back().sphericalFromNeck = post.m_location.bodyRelativeSpherical;
                     //goal_message->back().sphericalError = goal_location.
                     goal_message->back().screenAngular = post.m_location.screenAngular;
                     goal_message->back().screenCartesian = post.m_location.screenCartesian;

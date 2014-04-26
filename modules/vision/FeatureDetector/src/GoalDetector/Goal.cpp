@@ -97,7 +97,7 @@ namespace modules {
             }*/
 
             // Throw out if goal is too far away.
-            if (THROWOUT_DISTANT_GOALS && (m_location.neckRelativeRadial[0] > MAX_GOAL_DISTANCE)) {
+            if (THROWOUT_DISTANT_GOALS && (m_location.bodyRelativeSpherical[0] > MAX_GOAL_DISTANCE)) {
                 return false;
             }
 
@@ -141,7 +141,7 @@ namespace modules {
 
             if (m_offBottom && m_offSide) {
                 // We can't tell distance to these goals.
-                m_location.neckRelativeRadial = arma::vec3();
+                m_location.bodyRelativeSpherical = arma::vec3();
 
                 return false;
             }
@@ -175,7 +175,7 @@ namespace modules {
                     case AVERAGE: {
                         // Average distances.
                         m_location.screenCartesian = (m_d2pLocation.screenCartesian + m_widthLocation.screenCartesian) * 0.5;
-                        m_location.neckRelativeRadial = (m_d2pLocation.neckRelativeRadial + m_widthLocation.neckRelativeRadial) * 0.5;
+                        m_location.bodyRelativeSpherical = (m_d2pLocation.bodyRelativeSpherical + m_widthLocation.bodyRelativeSpherical) * 0.5;
                         m_location.screenAngular = (m_d2pLocation.screenAngular + m_widthLocation.screenAngular) * 0.5;
                         m_location.groundCartesian = (m_d2pLocation.groundCartesian + m_widthLocation.groundCartesian) * 0.5;
 
@@ -183,7 +183,7 @@ namespace modules {
                     }
 
                     case LEAST: {
-                        m_location = ((m_d2pLocation.neckRelativeRadial[0] < m_widthLocation.neckRelativeRadial[0]) ? m_d2pLocation : m_widthLocation);
+                        m_location = ((m_d2pLocation.bodyRelativeSpherical[0] < m_widthLocation.bodyRelativeSpherical[0]) ? m_d2pLocation : m_widthLocation);
 
                         break;
                     }
@@ -197,7 +197,7 @@ namespace modules {
             }
 
             m_sphericalError = visionKinematics.calculateSphericalError(m_location, GOAL_DISTANCE_METHOD, m_sizeOnScreen[0]);
-            return ( m_location.neckRelativeRadial[0] > 0.0);
+            return ( m_location.bodyRelativeSpherical[0] > 0.0);
         }
 
         /*! @brief Stream insertion operator for a single ColourSegment.
@@ -220,7 +220,7 @@ namespace modules {
             output << "Distance type = " << g.GOAL_DISTANCE_METHOD << std::endl;
             output << "\tpixelloc: " << g.m_location.screenCartesian << std::endl;
             output << "\tangularloc: " << g.m_location.screenAngular << std::endl;
-            output << "\trelative field coords: " << g.m_location.neckRelativeRadial << std::endl;
+            output << "\trelative field coords: " << g.m_location.bodyRelativeSpherical << std::endl;
             output << "\tspherical error: " << g.m_sphericalError << std::endl;
             output << "\tsize on screen: " << g.m_sizeOnScreen;
             output << "\tm_offTop: " << g.m_offTop << std::endl;

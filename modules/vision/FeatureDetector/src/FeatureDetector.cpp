@@ -238,7 +238,9 @@ namespace modules {
             });
 
 
-            on<Trigger<Sensors>/*TODO SYNC!!!*/>([this](const Sensors& sensors){
+            on<Trigger<Sensors>, Options<Sync<ObstacleDetectorConfig>, 
+                                         Sync<BallDetectorConfig>, 
+                                         Sync<GoalDetectorConfig>>>([this](const Sensors& sensors){
             arma::vec v = {0,0,0.35};
                 m_visionKinematics.setSensors(sensors.servos[static_cast<int>(ServoID::HEAD_PITCH)].presentPosition,
                                               sensors.servos[static_cast<int>(ServoID::HEAD_YAW)].presentPosition,
@@ -255,7 +257,7 @@ namespace modules {
 
             */
 
-            on<Trigger<ClassifiedImage>, Options<Single>>([this](const ClassifiedImage& classifiedImage) {
+            on<Trigger<ClassifiedImage>, Options<Single, Options<Single, Sync<GoalDetectorConfig>>>([this](const ClassifiedImage& classifiedImage) {
                 if (classifiedImage.matchedHorizontalSegments.count(messages::vision::GOAL_COLOUR) &&
                     classifiedImage.matchedVerticalSegments.count(messages::vision::GOAL_COLOUR)) {
                     emit(
@@ -267,7 +269,7 @@ namespace modules {
             });
 
             //m_detectBalls =
-            on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
+            on<Trigger<ClassifiedImage>, Options<Single, Sync<BallDetectorConfig>>>([this](const ClassifiedImage& classifiedImage) {
                 emit(
                     m_ballDetector.run(
                                         classifiedImage.matchedHorizontalSegments.at(messages::vision::BALL_COLOUR),
@@ -281,7 +283,7 @@ namespace modules {
             });
 
             //m_detectObstacles =
-            on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
+            on<Trigger<ClassifiedImage>, Options<Single, Sync<ObstacleDetectorConfig>>>([this](const ClassifiedImage& classifiedImage) {
                 emit(
                     m_obstacleDetector.run(classifiedImage.greenHorizonInterpolatedPoints,
                                            *(classifiedImage.LUT),

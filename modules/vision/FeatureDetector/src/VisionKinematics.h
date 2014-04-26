@@ -39,12 +39,7 @@ namespace modules {
             VisionKinematics();
 
             void setParameters(float RADIAL_CORRECTION_COEFFICIENT_,
-                                const arma::vec2& BODY_ANGLE_OFFSET_,
-                                const arma::vec3& CAMERA_ANGLE_OFFSET_,
-                                const arma::vec3& NECK_POSITION_OFFSET_,
-                                const arma::vec3& BODY_POITION_OFFSET_,
-                                const arma::vec3& CAMERA_POSITION_OFFSET_,
-                                float SCREEN_LOCATION_UNCERTAINTY_PIXELS_
+                               float SCREEN_LOCATION_UNCERTAINTY_PIXELS_
                                 );
 
             // 2D distortion transform.
@@ -52,12 +47,7 @@ namespace modules {
 
             void calculateRepresentationsFromPixelLocation(NUPoint& pt, bool knownDistance = false, double val = 0.0) const;
             void calculateRepresentationsFromPixelLocation(std::vector<NUPoint>& pts, bool knownDistance = false, double val = 0.0) const;
-            void calculateRepresentationsFromGroundCartesianLocation(NUPoint& pt) const;
-            void calculateRepresentationsFromGroundCartesianLocation(std::vector<NUPoint>& pts) const;
-
-        //    NUPoint calculateRepresentations(const Point& pt, bool ground = true, double val = 0.0) const;
-        //    std::vector<NUPoint> calculateRepresentations(const std::vector<Point>& pts, bool ground = true, double val = 0.0) const;
-
+     
             double getCameraDistanceInPixels() const;
 
             arma::vec2 getFOV() const;
@@ -71,21 +61,15 @@ namespace modules {
             //! Calculate the field of view and effective camera distance in pixels.
             void setCamParams(arma::vec2 imagesize, arma::vec2 fov);
 
-            void setSensors(double headPitch, double headYaw, const arma::vec3& gravity, const arma::vec3& neckPosition);
+            void setSensors(const Sensors& sensors);
 
             arma::vec3 calculateSphericalError(NUPoint location, DISTANCE_METHOD distanceMethod, float width) const;
 
         private:
-            void preCalculateTransforms();
+            // void preCalculateTransforms();
 
             void screenToRadial3D(NUPoint &point, double distance) const;
             NUPoint screenToRadial3D(const arma::vec2& point, double distance) const;
-
-            //2D pixel - 2D cartesian (feet relative) - assumes point is on the ground
-        //    void screenToGroundCartesian(NUPoint& pt) const;
-        //    void screenToGroundCartesian(vector<NUPoint>& pts) const;
-        //    NUPoint screenToGroundCartesian(const Point& pt) const;
-        //    vector<NUPoint> screenToGroundCartesian(const vector<Point>& pts) const;
 
             /**
               * Calculates the distance to a point at a given height
@@ -99,35 +83,16 @@ namespace modules {
             arma::vec2 m_FOV;               //!FOV in radians horizontally and vertically
             double m_effectiveCameraDistancePixels;
 
-//WHERE IS THIS USED? WHAT IS IT FOR?
-            //arma::mat m_ctgTransform;
-            //bool m_ctgValid;              //! @variable Whether the ctgvector is valid.
-        //    std::vector<float> m_ctVector;     //! @variable The camera transform vector.
-        //    bool m_ctValid;               //! @variable Whether the ctvector is valid.
-
             arma::vec2 m_imageSize;
             arma::vec2 m_imageCentre;
             arma::vec2 m_tanHalfFOV;
             arma::vec2 m_screenToRadialFactor;
 
             // New for transforms.
-            arma::vec3 m_camVector;
-            arma::mat33 m_camV2RobotRotation;
-            double m_headPitch;
-            double m_headYaw;
-            arma::vec3 m_gravity;
-            double m_bodyRoll;
-            double m_bodyPitch;
-            arma::vec3 m_neckPosition;
+            
+            arma::mat44 m_camToBodyMatrix;           
 
             float RADIAL_CORRECTION_COEFFICIENT;
-
-            arma::vec2 BODY_ANGLE_OFFSET;
-            arma::vec3 CAMERA_ANGLE_OFFSET;
-            arma::vec3 NECK_POSITION_OFFSET;
-            arma::vec3 BODY_POSITION_OFFSET;
-            arma::vec3 CAMERA_POSITION_OFFSET;
-
             float SCREEN_LOCATION_UNCERTAINTY_PIXELS;
         };
 
