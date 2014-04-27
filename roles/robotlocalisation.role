@@ -5,7 +5,7 @@ ADD_ROLE(
         support::configuration::ConfigSystem
         support::NUbugger
         vision::FeatureDetector
-        vision::LUTClassifier
+        vision::QuexLUTClassifier
         input::LinuxCamera
         localisation::MMKFRobotLocalisation)
 

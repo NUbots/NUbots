@@ -11,6 +11,6 @@ ADD_ROLE(
         input::LinuxCamera
         support::NUbugger
         debug::NUbugger
-        vision::LUTClassifier
+        vision::QuexLUTClassifier
         vision::FeatureDetector
 )

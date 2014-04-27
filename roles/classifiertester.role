@@ -5,6 +5,6 @@ ADD_ROLE(
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
         input::LinuxCamera
-        vision::LUTClassifier
+        vision::QuexLUTClassifier
         support::NUbugger
 )
