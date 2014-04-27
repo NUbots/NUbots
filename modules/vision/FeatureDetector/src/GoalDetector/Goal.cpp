@@ -46,7 +46,8 @@ namespace modules {
                                     int MIN_GOAL_WIDTH_,
                                     float GOAL_WIDTH_,
                                     const DISTANCE_METHOD& GOAL_DISTANCE_METHOD_,
-                                    int EDGE_OF_SCREEN_MARGIN_) {
+                                    int EDGE_OF_SCREEN_MARGIN_,
+                                    float D2P_ADAPTIVE_THRESHOLD_) {
             THROWOUT_SHORT_GOALS = THROWOUT_SHORT_GOALS_;
             THROWOUT_NARROW_GOALS = THROWOUT_NARROW_GOALS_;
             THROWOUT_ON_ABOVE_KIN_HOR_GOALS = THROWOUT_ON_ABOVE_KIN_HOR_GOALS_;
@@ -57,6 +58,7 @@ namespace modules {
             GOAL_WIDTH = GOAL_WIDTH_;
             GOAL_DISTANCE_METHOD = GOAL_DISTANCE_METHOD_;
             EDGE_OF_SCREEN_MARGIN = EDGE_OF_SCREEN_MARGIN_;
+            D2P_ADAPTIVE_THRESHOLD = D2P_ADAPTIVE_THRESHOLD_;
 
         }
 
@@ -186,6 +188,14 @@ namespace modules {
                         m_location = ((m_d2pLocation.bodyRelativeSpherical[0] < m_widthLocation.bodyRelativeSpherical[0]) ? m_d2pLocation : m_widthLocation);
 
                         break;
+                    }
+
+                    case ADAPTIVE:{
+                        if(m_widthDistance > D2P_ADAPTIVE_THRESHOLD){
+                            m_location = m_d2pLocation;
+                        } else {
+                            m_location = m_widthLocation;
+                        }
                     }
 
                     default: {

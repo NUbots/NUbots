@@ -48,7 +48,8 @@ namespace modules {
                                int MIN_GOAL_WIDTH_,
                                float GOAL_WIDTH_,
                                const DISTANCE_METHOD& GOAL_DISTANCE_METHOD_,
-                               int EDGE_OF_SCREEN_MARGIN_);
+                               int EDGE_OF_SCREEN_MARGIN_,
+                               float D2P_ADAPTIVE_THRESHOLD_);
 
             void setBase(const VisionKinematics& visionKinematics,const arma::vec2& base);
 
@@ -112,6 +113,7 @@ namespace modules {
             DISTANCE_METHOD GOAL_DISTANCE_METHOD;
 
             int EDGE_OF_SCREEN_MARGIN;
+            float D2P_ADAPTIVE_THRESHOLD;
 
             messages::vision::Goal::Type m_goalType;
 

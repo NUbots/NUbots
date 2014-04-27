@@ -107,6 +107,10 @@ namespace modules {
                         distanceMethod = DISTANCE_METHOD::LEAST;
                     }
 
+                    else if (BALL_DISTANCE_METHOD.compare("ADAPTIVE") == 0) {
+                        distanceMethod = DISTANCE_METHOD::ADAPTIVE;
+                    }
+
                     else {
                         distanceMethod = DISTANCE_METHOD::WIDTH;
                     }
@@ -123,7 +127,8 @@ namespace modules {
                                                  constants.config["THROWOUT_DISTANT_BALLS"],
                                                  constants.config["MAX_BALL_DISTANCE"],
                                                  constants.config["BALL_WIDTH"],
-                                                 distanceMethod
+                                                 distanceMethod,
+                                                 constants.config["D2P_ADAPTIVE_THRESHOLD"]
                                                  );
 
             });
@@ -148,6 +153,9 @@ namespace modules {
 
                     else if (GOAL_DISTANCE_METHOD.compare("LEAST") == 0) {
                         distanceMethod = DISTANCE_METHOD::LEAST;
+                    }
+                    else if (GOAL_DISTANCE_METHOD.compare("ADAPTIVE") == 0) {
+                        distanceMethod = DISTANCE_METHOD::ADAPTIVE;
                     }
 
                     else {
@@ -186,7 +194,8 @@ namespace modules {
                                                  constants.config["MIN_GOAL_WIDTH"],
                                                  constants.config["GOAL_WIDTH"],
                                                  distanceMethod,
-                                                 constants.config["EDGE_OF_SCREEN_MARGIN"]);
+                                                 constants.config["EDGE_OF_SCREEN_MARGIN"],
+                                                 constants.config["D2P_ADAPTIVE_THRESHOLD"]);
 
             });
 

@@ -58,6 +58,7 @@ namespace modules {
                                 bool THROWOUT_DISTANT_BALLS_,
                                 float MAX_BALL_DISTANCE_,
                                 float BALL_WIDTH_,
+                                float D2P_ADAPTIVE_THRESHOLD_,
                                 const DISTANCE_METHOD& BALL_DISTANCE_METHOD_,
                                 const VisionKinematics& visionKinematics) {
             THROWOUT_ON_ABOVE_KIN_HOR_BALL = THROWOUT_ON_ABOVE_KIN_HOR_BALL_;
@@ -69,6 +70,7 @@ namespace modules {
             MAX_BALL_DISTANCE = MAX_BALL_DISTANCE_;
             BALL_WIDTH = BALL_WIDTH_;
             BALL_DISTANCE_METHOD = BALL_DISTANCE_METHOD_;
+            D2P_ADAPTIVE_THRESHOLD = D2P_ADAPTIVE_THRESHOLD_;
 
             // Internal variables contain valid values at this point.
             // All necessary constants have been set.
@@ -149,6 +151,15 @@ namespace modules {
 
                     break;
                 }
+
+                case ADAPTIVE:{
+                    if(widthDistance > D2P_ADAPTIVE_THRESHOLD){
+                        m_location = d2pLocation;
+                    } else {
+                        m_location = widthLocation;
+                    }
+                }
+
             }
             m_sphericalError = visionKinematics.calculateSphericalError(m_location, BALL_DISTANCE_METHOD, m_diameter);
             return (m_location.bodyRelativeSpherical[0] > 0);

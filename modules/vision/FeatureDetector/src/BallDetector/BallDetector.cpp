@@ -49,7 +49,8 @@ namespace modules {
                                         bool THROWOUT_DISTANT_BALLS_,
                                         float MAX_BALL_DISTANCE_,
                                         float BALL_WIDTH_,
-                                        const DISTANCE_METHOD& BALL_DISTANCE_METHOD_
+                                        const DISTANCE_METHOD& BALL_DISTANCE_METHOD_,
+                                        float D2P_ADAPTIVE_THRESHOLD_
                                         ) {
             BALL_MIN_PERCENT_ORANGE = BALL_MIN_PERCENT_ORANGE_;
             BALL_ORANGE_TOLERANCE = BALL_ORANGE_TOLERANCE_;
@@ -65,7 +66,7 @@ namespace modules {
             MAX_BALL_DISTANCE = MAX_BALL_DISTANCE_;
             BALL_WIDTH = BALL_WIDTH_;
             BALL_DISTANCE_METHOD = BALL_DISTANCE_METHOD_;
-
+            D2P_ADAPTIVE_THRESHOLD = D2P_ADAPTIVE_THRESHOLD_;
         }
 
         // BROKEN
@@ -280,6 +281,7 @@ namespace modules {
                                                 THROWOUT_DISTANT_BALLS,
                                                 MAX_BALL_DISTANCE,
                                                 BALL_WIDTH,
+                                                D2P_ADAPTIVE_THRESHOLD,
                                                 BALL_DISTANCE_METHOD,
                                                 visionKinematics);
                             balls.push_back(ball);
@@ -299,6 +301,7 @@ namespace modules {
                                             THROWOUT_DISTANT_BALLS,
                                             MAX_BALL_DISTANCE,
                                             BALL_WIDTH,
+                                            D2P_ADAPTIVE_THRESHOLD,
                                             BALL_DISTANCE_METHOD,
                                             visionKinematics);
                         balls.push_back(ball);

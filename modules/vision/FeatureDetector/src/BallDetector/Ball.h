@@ -47,6 +47,7 @@ namespace modules {
                                 bool THROWOUT_DISTANT_BALLS_,
                                 float MAX_BALL_DISTANCE_,
                                 float BALL_WIDTH_,
+                                float D2P_ADAPTIVE_THRESHOLD_,
                                 const DISTANCE_METHOD& BALL_DISTANCE_METHOD_,
                                 const VisionKinematics& visionKinematics);
 
@@ -91,6 +92,7 @@ namespace modules {
                 bool THROWOUT_DISTANT_BALLS;
                 float MAX_BALL_DISTANCE;
                 float BALL_WIDTH;
+                float D2P_ADAPTIVE_THRESHOLD;
                 DISTANCE_METHOD BALL_DISTANCE_METHOD;
 
             //private:
