@@ -204,7 +204,7 @@ namespace modules {
             //     send(message);
             // });
 
-            on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
+            /*on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
 
                 Message message;
                 message.set_type(Message::VISION);
@@ -291,7 +291,7 @@ namespace modules {
 
                 send(message);
 
-            });
+            });*/
 
             on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Goal> goals){
                 Message message;

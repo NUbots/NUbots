@@ -32,273 +32,29 @@ namespace messages {
     namespace vision {
 
         /**
-        * The possible alignment for segments in a segmented region.
-        */
-        enum ScanDirection {
-            VERTICAL,
-            HORIZONTAL
-        };
-
-        typedef struct {
-            Colour m_colour;
-            unsigned int m_lengthPixels;
-            arma::vec2 m_start;             //! @variable The start pixel location.
-            arma::vec2 m_end;               //! @variable The end  pixellocation.
-            arma::vec2 m_centre;            //! @variable The centre pixellocation.
-        } ColourSegment;
-
-        typedef struct {
-            std::vector<std::vector<ColourSegment> > m_segmentedScans;       //! @variable The segments in this region.
-            ScanDirection m_direction;                                      //! @variable The alignment of the scans in this region.
-        } SegmentedRegion;
-
-        /**
-         * This class contains all information about a classified image.
+         * @brief Holds the transitions from a classifeid image
          *
-         * @author Jake Fountain
+         * @author Trent Houliston
          */
-        class ClassifiedImage {
-        public:
+        struct ClassifiedImage {
 
-            ClassifiedImage(){}
-            /**
-             * Provides some simple routines for handling colours.
-             *
-             * @author Alex Biddulph
-             */
-              //Image variables:
-            SegmentedRegion horizontalFilteredSegments;       //! @variable The filtered segmented horizontal scanlines.
-            SegmentedRegion verticalFilteredSegments;         //! @variable The filtered segmented vertical scanlines.
+            struct Transition {
 
-            //! Transitions
-            std::map<COLOUR_CLASS, std::vector<ColourSegment>> matchedHorizontalSegments;
-            std::map<COLOUR_CLASS, std::vector<ColourSegment>> matchedVerticalSegments;
+                struct Segment {
+                    size_t length;
+                    ColourClass colour;
+                };
 
-            std::vector<arma::vec2> greenHorizonInterpolatedPoints;
+                arma::vec2 position;
+                Segment before;
+                Segment after;
+            };
 
-            std::shared_ptr<const messages::input::Image> image;         //@! The image from which the segments are derived.
+            std::vector<arma::vec2> greenHorizon;
 
-            std::shared_ptr<const messages::vision::LookUpTable> LUT;
-
-
-            /*!
-            Gets the name of the given colour.
-            @param colour The colour name desired.
-            @return The name of the colour.
-            */
-            static std::string getColourName(const Colour& colour) {
-                switch (colour) {
-                    case unclassified: {
-                        return "unclassified";
-                    }
-
-                    case white: {
-                        return "white";
-                    }
-
-                    case green: {
-                        return "green";
-                    }
-
-                    case shadow_object: {
-                        return "shadow-object";
-                    }
-
-                    case pink: {
-                        return "pink";
-                    }
-
-                    case pink_orange: {
-                        return "pink-orange";
-                    }
-
-                    case orange: {
-                        return "orange";
-                    }
-
-                    case yellow_orange: {
-                        return "yellow-orange";
-                    }
-
-                    case yellow: {
-                        return "yellow";
-                    }
-
-                    case blue: {
-                        return "blue";
-                    }
-
-                    case shadow_blue: {
-                        return "shadow-blue";
-                    }
-
-                    default: {
-                        return "unknown colour!";
-                    }
-                }
-            }
-
-            /*!
-              Gets the colour matching given name.
-              @param name String name of the colour desired.
-              @return The method mathing the given name.
-              */
-            static Colour getColourFromName(const std::string& name) {
-                if (name.compare("unclassified") == 0) {
-                    return unclassified;
-                }
-
-                else if (name.compare("white") == 0) {
-                    return white;
-                }
-
-                else if (name.compare("green") == 0) {
-                    return green;
-                }
-
-                else if (name.compare("shadow-object") == 0) {
-                    return shadow_object;
-                }
-
-                else if (name.compare("pink") == 0) {
-                    return pink;
-                }
-
-                else if (name.compare("pink-orange") == 0) {
-                    return pink_orange;
-                }
-
-                else if (name.compare("orange") == 0) {
-                    return orange;
-                }
-
-                else if (name.compare("yellow-orange") == 0) {
-                    return yellow_orange;
-                }
-
-                else if (name.compare("yellow") == 0) {
-                    return yellow;
-                }
-
-                else if (name.compare("blue") == 0) {
-                    return blue;
-                }
-
-                else if (name.compare("shadow-blue") == 0) {
-                    return shadow_blue;
-                }
-
-                else {
-                    return invalid;
-                }
-            }
-
-            //! @brief converts a string into a colour class.
-            static COLOUR_CLASS getColourClassFromName(const std::string& name) {
-                if (name.compare("BALL_COLOUR") == 0) {
-                    return BALL_COLOUR;
-                }
-
-                else if (name.compare("GOAL_COLOUR") == 0) {
-                    return GOAL_COLOUR;
-                }
-
-    /*
-                else if (name.compare("GOAL_Y_COLOUR") == 0) {
-                    return GOAL_Y_COLOUR;
-                }
-
-                else if (name.compare("GOAL_B_COLOUR") == 0) {
-                    return GOAL_B_COLOUR;
-                }
-    */
-
-                else if (name.compare("LINE_COLOUR") == 0) {
-                    return LINE_COLOUR;
-                }
-
-                else {
-                    return UNKNOWN_COLOUR;
-                }
-            }
-
-            //! @brief converts a colour class into a string.
-            static std::string getColourClassName(const COLOUR_CLASS& id) {
-                switch (id) {
-                    case BALL_COLOUR: {
-                        return "BALL_COLOUR";
-                    }
-
-                    case GOAL_COLOUR: {
-                        return "GOAL_COLOUR";
-                    }
-
-    /*
-                    case GOAL_Y_COLOUR: {
-                        return "GOAL_Y_COLOUR";
-                    }
-
-                    case GOAL_B_COLOUR: {
-                        return "GOAL_B_COLOUR";
-                    }
-    */
-
-                    case LINE_COLOUR: {
-                        return "LINE_COLOUR";
-                    }
-
-                    default: {
-                        return "UNKNOWN_COLOUR";
-                    }
-                }
-            }
-
-            //! gets the colour class corresponding to the colour
-            static COLOUR_CLASS getClassOfColour(const Colour& c) {
-                switch (c) {
-                    case yellow: {
-                        return GOAL_COLOUR;
-                    }
-
-                    case orange: {
-                        return BALL_COLOUR;
-                    }
-
-                    case white: {
-                        return LINE_COLOUR;
-                    }
-
-                    case blue: {
-                        return TEAM_CYAN_COLOUR;
-                    }
-
-                    case pink: {
-                        return TEAM_MAGENTA_COLOUR;
-                    }
-
-                    case green: {
-                        return FIELD_COLOUR;
-                    }
-
-                    default: {
-                        return UNKNOWN_COLOUR;
-                    }
-                }
-            }
-
-            std::vector<ColourSegment> getAllMatchedSegments(COLOUR_CLASS c) const{
-
-                std::vector<ColourSegment> result;
-                try{
-                    result.reserve(matchedVerticalSegments.at(c).size()+matchedHorizontalSegments.at(c).size());
-                    result.insert(result.end(), matchedHorizontalSegments.at(c).begin(), matchedHorizontalSegments.at(c).end());
-                    result.insert(result.end(), matchedVerticalSegments.at(c).begin(), matchedVerticalSegments.at(c).end());
-                }catch(const std::out_of_range& e){
-                    //NUClear::log<NUClear::DEBUG>("getAllMatchedSegments : no horizontal or vertical segments existing for Colour Class ",c, "exception:", e.what());
-                }
-                return result;
-            }
-
+            std::multimap<ColourClass, Transition> horizontalTransitions;
+            std::multimap<ColourClass, Transition> verticalTransitions;
+            std::multimap<ColourClass, arma::vec2> midpoints;
         };
 
     }  // vision
