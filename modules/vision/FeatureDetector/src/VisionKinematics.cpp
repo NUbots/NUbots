@@ -19,20 +19,23 @@
 
 #include "VisionKinematics.h"
 
-#include "messages::input::ServoID";
+#include "utility/math/matrix.h"
+#include "messages/input/ServoID.h"
+
 
 namespace modules {
     namespace vision {
 
         using messages::input::ServoID;
+        using utility::math::matrix::orthonormal44Inverse;
+        using messages::input::Sensors;
 
         VisionKinematics::VisionKinematics() {
             m_FOV << 0 << 0;
             m_effectiveCameraDistancePixels = 0;
-
-            m_headPitch = m_headYaw = m_bodyRoll = 0;
-
-            m_neckPosition << 0 << 0 << 0;
+            m_camToBodyMatrix = arma::zeros(4,4);
+            m_bodyHeight = 0.22;    //Initial guess
+            
 
             m_imageSize << 0 << 0;
             m_imageCentre << 0 << 0;
@@ -42,9 +45,10 @@ namespace modules {
 
         void VisionKinematics::setParameters(float RADIAL_CORRECTION_COEFFICIENT_,
                                              float SCREEN_LOCATION_UNCERTAINTY_PIXELS_) {
-            RADIAL_CORRECTION_COEFFICIENT = RADIAL_CORRECTION_COEFFICIENT_;
 
+            RADIAL_CORRECTION_COEFFICIENT = RADIAL_CORRECTION_COEFFICIENT_;
             SCREEN_LOCATION_UNCERTAINTY_PIXELS = SCREEN_LOCATION_UNCERTAINTY_PIXELS_;
+
         }
 
         /**
@@ -99,7 +103,7 @@ namespace modules {
                 calculateRepresentationsFromPixelLocation(point, knownDistance, val);
             }
         }
-        /
+        
         ///// @note Assumes radial calculation already done
         //void VisionKinematics::radial2DToRadial3D(NUPoint& point, double distance) const {
         //    arma::vec3 imagePositionSpherical;
@@ -132,79 +136,40 @@ namespace modules {
             // or like this?
             // -(m_imageSize[0] * 0.5) + pixel[0],
             // -(m_imageSize[1] * 0.5) + pixel[1]});
-            // std::cout "VisionKinematics::distanceToPoint - cameraToObjectDirection_cam = "<< cameraToObjectDirection_cam << std::endl;
+            std::cout << "VisionKinematics::distanceToPoint - cameraToObjectDirection_cam = "<< cameraToObjectDirection_cam << std::endl;
 
             arma::vec3 cameraToObjectDirection_robot = m_camToBodyMatrix.submat(0,0,2,2) * cameraToObjectDirection_cam;
-            // std::cout "VisionKinematics::distanceToPoint - cameraToObjectDirection_robot = "<< cameraToObjectDirection_robot << std::endl;
+            std::cout << "VisionKinematics::distanceToPoint - cameraToObjectDirection_robot = "<< cameraToObjectDirection_robot << std::endl;
 
-            double alpha = std::abs(m_camToBodyMatrix.col(3)[2] - objectHeight) / std::abs(cameraToObjectDirection_robot[2]);      //Similar triangle ratio
-            // std::cout "VisionKinematics::distanceToPoint - alpha = "<< alpha << std::endl;
-
+            float z_camToObjectDir = -cameraToObjectDirection_robot[2];
+            double alpha;
+            if(z_camToObjectDir <= 0){
+                NUClear::log<NUClear::WARN>("VisionKinematics::distanceToPoint - Object above kinematics horizon!!!");
+                return arma::vec3({0,0,0});
+            } else {
+                alpha = std::abs(m_camToBodyMatrix.col(3)[2] + m_bodyHeight - objectHeight) / z_camToObjectDir;      //Similar triangle ratio
+                std::cout << "VisionKinematics::distanceToPoint - alpha = "<< alpha << std::endl;
+            }
             //alpha == cameraToObject_world / norm(cameraToObjectDirection_robot)
             //therefore
             arma::vec3 cameraToObject_robot = alpha * cameraToObjectDirection_robot; //as they are parallel
-            // std::cout "VisionKinematics::distanceToPoint - cameraToObject_world = "<< cameraToObject_world << std::endl;
+            std::cout << "VisionKinematics::distanceToPoint - cameraToObject_robot = "<< cameraToObject_robot << std::endl;
 
             //
             return utility::math::coordinates::Cartesian2Spherical(cameraToObject_robot);
 
-
-            /*
-             arma::vec3 result;
-
-            arma::vec3 vcam
-            << m_effectiveCameraDistancePixels
-            << m_imageSize[0] * 0.5) - pixel[0]
-            << (m_imageSize[1] * 0.5) - pixel[1];   //Are the pixels mapped like this?
-
-            arma::vec3 roboVdir = m_camV2RobotRotation * vcam;
-            double alpha = (objectHeight - m_camVector[2]) / roboVdir[2];
-            arma::vec3 v2FieldPoint = (alpha * roboVdir) + m_camVector;
-
-            arma::vec3 temp;
-            temp << v2FieldPoint[0] << v2FieldPoint[1]<< (objectHeight - m_camVector[2]);
-            result[0] = arma::norm(temp, 2);
-            result[1] = std::atan2(v2FieldPoint[1], v2FieldPoint[0]);
-            result[2] = std::asin((objectHeight - m_camVector[2] / result[0]);
-
-           return result;*/
         }
 
-        //void VisionKinematics::screenToGroundCartesian(NUPoint& point) const {
-        //    arma::vec3 v = distanceToPoint(point.screenCartesian, 0.0);
-        //
-        //    arma::vec3 sphericalFootRelative = Kinematics::TransformPosition(ctgRransform, v);
-        //
-        //    arma::vec3 cartesianFootRelative = mathGeneral::Spherical2Cartesian(sphericalFootRelative);
-        //
-        //    point.groundCartesian << cartesianFootRelative[0] << cartesianFootRelative[1];
-        //}
-
-        //void VisionKinematics::screenToGroundCartesian(vector<NUPoint>& points) const {
-        //    for (NUPoint& point : points) {
-        //        screenToGroundCartesian(point);
-        //    }
-        //}
-
-        //NUPoint VisionKinematics::screenToGroundCartesian(const arma::vec2& point) const {
-        //    NUPoint ground;
-        //    ground.screenCartesian = point;
-        //    screenToGroundCartesian(ground);
-        //    return ground;
-        //}
-
-        //std::vector<NUPoint> VisionKinematics::screenToGroundCartesian(const std::vector<arma::vec2>& points) const {
-        //    std::vector<NUPoint> groundPoints;
-        //
-        //    for (const arma::vec2& point : points) {
-        //        groundPoints.push_back(screenToGroundCartesian(point));
-        //    }
-        //
-        //    return groundPoints;
-        //}
-
         void VisionKinematics::setSensors(const Sensors& sensors) {
-            m_camToBodyMatrix = sensors.forwardKinematics[ServoID::HEAD_PITCH];
+            m_camToBodyMatrix = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
+
+            if(sensors.leftFootDown){
+                m_bodyHeight = orthonormal44Inverse(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL)).col(3)[2];
+            }else if (sensors.rightFootDown){
+                m_bodyHeight = orthonormal44Inverse(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL)).col(3)[2];
+            }else{
+                m_bodyHeight = 0;
+            }
         }
 
         void VisionKinematics::setCamParams(arma::vec2 imageSize, arma::vec2 FOV) {
@@ -221,9 +186,8 @@ namespace modules {
 
         double VisionKinematics::getD2PError(const NUPoint& location) const{
             double declination_error = SCREEN_LOCATION_UNCERTAINTY_PIXELS*m_FOV[1]/m_imageSize[1];
-            double robot_height = std::abs(m_neckPosition[2]);
             double sin_elevation = std::sin(location.bodyRelativeSpherical[2]-arma::math::pi());
-            return declination_error*robot_height/(sin_elevation*sin_elevation);
+            return declination_error*(m_bodyHeight+m_camToBodyMatrix.col(3)[2])/(sin_elevation*sin_elevation);
         }
 
         arma::vec3 VisionKinematics::calculateSphericalError(NUPoint location, DISTANCE_METHOD distanceMethod, float width) const{

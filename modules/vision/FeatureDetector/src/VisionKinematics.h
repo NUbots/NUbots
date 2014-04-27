@@ -28,6 +28,7 @@
 #include "utility/math/matrix.h"
 #include "utility/math/coordinates.h"
 #include "VisionFieldObject.h"
+#include "messages/input/Sensors.h"
 
 #include "NUPoint.h"
 
@@ -61,7 +62,7 @@ namespace modules {
             //! Calculate the field of view and effective camera distance in pixels.
             void setCamParams(arma::vec2 imagesize, arma::vec2 fov);
 
-            void setSensors(const Sensors& sensors);
+            void setSensors(const messages::input::Sensors& sensors);
 
             arma::vec3 calculateSphericalError(NUPoint location, DISTANCE_METHOD distanceMethod, float width) const;
 
@@ -90,7 +91,8 @@ namespace modules {
 
             // New for transforms.
             
-            arma::mat44 m_camToBodyMatrix;           
+            arma::mat44 m_camToBodyMatrix;    
+            float m_bodyHeight;       
 
             float RADIAL_CORRECTION_COEFFICIENT;
             float SCREEN_LOCATION_UNCERTAINTY_PIXELS;
