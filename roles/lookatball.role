@@ -18,8 +18,8 @@ ADD_ROLE(
         vision::FeatureDetector
 
         #Localisation
-        #localisation::MMKFRobotLocalisation
-        #localisation::KFBallLocalisation
+        localisation::MMKFRobotLocalisation
+        localisation::KFBallLocalisation
         
         #Behaviour
         behaviour::Controller
@@ -28,9 +28,7 @@ ADD_ROLE(
         behaviour::reflexes::Getup
         behaviour::reflexes::Look
         behaviour::planners::LookAtBall
-        #behaviour::planners::WalkPathPlanner
         
         #Motion
         motion::ScriptEngine
-        motion::WalkEngine
 )

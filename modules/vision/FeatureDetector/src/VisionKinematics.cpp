@@ -144,7 +144,7 @@ namespace modules {
             float z_camToObjectDir = -cameraToObjectDirection_robot[2];
             double alpha;
             if(z_camToObjectDir <= 0){
-                NUClear::log<NUClear::WARN>("VisionKinematics::distanceToPoint - Object above kinematics horizon!!!");
+                //NUClear::log<NUClear::WARN>("VisionKinematics::distanceToPoint - Object above kinematics horizon!!!");
                 return arma::vec3({0,0,0});
             } else {
                 alpha = std::abs(m_camToBodyMatrix.col(3)[2] + m_bodyHeight - objectHeight) / z_camToObjectDir;      //Similar triangle ratio
