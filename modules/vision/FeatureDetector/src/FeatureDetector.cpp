@@ -80,31 +80,8 @@ namespace modules {
                 */
 
             on<Trigger<Configuration<VisionKinematicsConfig>>>([this](const Configuration<VisionKinematicsConfig>& constants) {
-                arma::vec2 BODY_ANGLE_OFFSET;
-                arma::vec3 CAMERA_ANGLE_OFFSET;
-                arma::vec3 NECK_POSITION_OFFSET;
-                arma::vec3 BODY_POSITION_OFFSET;
-                arma::vec3 CAMERA_POSITION_OFFSET;
-
-                std::vector<double> BODY_ANGLE_OFFSET_ = constants.config["BODY_ANGLE_OFFSET"];
-                std::vector<double> CAMERA_ANGLE_OFFSET_ = constants.config["CAMERA_ANGLE_OFFSET"];
-                std::vector<double> NECK_POSITION_OFFSET_ = constants.config["NECK_POSITION_OFFSET"];
-                std::vector<double> BODY_POSITION_OFFSET_ = constants.config["BODY_POSITION_OFFSET"];
-                std::vector<double> CAMERA_POSITION_OFFSET_ = constants.config["CAMERA_POSITION_OFFSET"];
-
-                BODY_ANGLE_OFFSET << BODY_ANGLE_OFFSET_[0] << BODY_ANGLE_OFFSET_[1];
-                CAMERA_ANGLE_OFFSET << CAMERA_ANGLE_OFFSET_[0] << CAMERA_ANGLE_OFFSET_[1] << CAMERA_ANGLE_OFFSET_[2];
-                NECK_POSITION_OFFSET << NECK_POSITION_OFFSET_[0] << NECK_POSITION_OFFSET_[1] << NECK_POSITION_OFFSET_[2];
-                BODY_POSITION_OFFSET << BODY_POSITION_OFFSET_[0] << BODY_POSITION_OFFSET_[1] << BODY_POSITION_OFFSET_[2];
-                CAMERA_POSITION_OFFSET << CAMERA_POSITION_OFFSET_[0] << CAMERA_POSITION_OFFSET_[1] << CAMERA_POSITION_OFFSET_[2];
-
-                m_visionKinematics.setParameters(constants.config["RADIAL_CORRECTION_COEFFICIENT"],
-                                            BODY_ANGLE_OFFSET,
-                                            CAMERA_ANGLE_OFFSET,
-                                            NECK_POSITION_OFFSET,
-                                            BODY_POSITION_OFFSET,
-                                            CAMERA_POSITION_OFFSET,
-                                            constants.config["SCREEN_LOCATION_UNCERTAINTY_PIXELS"]);
+                m_visionKinematics.setParameters(constants.config["RADIAL_CORRECTION_COEFFICIENT"],                                            
+                                                 constants.config["SCREEN_LOCATION_UNCERTAINTY_PIXELS"]);
             });
 
             // TODO: on<Trigger<Configuration<FieldPointDetectorConfig>>>().
@@ -130,6 +107,10 @@ namespace modules {
                         distanceMethod = DISTANCE_METHOD::LEAST;
                     }
 
+                    else if (BALL_DISTANCE_METHOD.compare("ADAPTIVE") == 0) {
+                        distanceMethod = DISTANCE_METHOD::ADAPTIVE;
+                    }
+
                     else {
                         distanceMethod = DISTANCE_METHOD::WIDTH;
                     }
@@ -146,7 +127,8 @@ namespace modules {
                                                  constants.config["THROWOUT_DISTANT_BALLS"],
                                                  constants.config["MAX_BALL_DISTANCE"],
                                                  constants.config["BALL_WIDTH"],
-                                                 distanceMethod
+                                                 distanceMethod,
+                                                 constants.config["D2P_ADAPTIVE_THRESHOLD"]
                                                  );
 
             });
@@ -171,6 +153,9 @@ namespace modules {
 
                     else if (GOAL_DISTANCE_METHOD.compare("LEAST") == 0) {
                         distanceMethod = DISTANCE_METHOD::LEAST;
+                    }
+                    else if (GOAL_DISTANCE_METHOD.compare("ADAPTIVE") == 0) {
+                        distanceMethod = DISTANCE_METHOD::ADAPTIVE;
                     }
 
                     else {
@@ -209,7 +194,8 @@ namespace modules {
                                                  constants.config["MIN_GOAL_WIDTH"],
                                                  constants.config["GOAL_WIDTH"],
                                                  distanceMethod,
-                                                 constants.config["EDGE_OF_SCREEN_MARGIN"]);
+                                                 constants.config["EDGE_OF_SCREEN_MARGIN"],
+                                                 constants.config["D2P_ADAPTIVE_THRESHOLD"]);
 
             });
 
@@ -234,16 +220,14 @@ namespace modules {
                     imageSize[1] = config.config["imageHeight"];
 
                     m_visionKinematics.setCamParams(imageSize,FOV);
-                    m_visionKinematics.setSensors(0, 0, arma::vec3("0 0 -9.8"), arma::vec3("0 0 0.30"));
             });
 
 
-            on<Trigger<Sensors>/*TODO SYNC!!!*/>([this](const Sensors& sensors){
-            arma::vec v = {0,0,0.35};
-                m_visionKinematics.setSensors(sensors.servos[static_cast<int>(ServoID::HEAD_PITCH)].presentPosition,
-                                              sensors.servos[static_cast<int>(ServoID::HEAD_YAW)].presentPosition,
-                                              sensors.orientation.col(2),
-                                              v);
+            on<Trigger<Sensors>, Options<Sync<ObstacleDetectorConfig>, 
+                                         Sync<BallDetectorConfig>, 
+                                         Sync<GoalDetectorConfig>>>([this](const Sensors& sensors){
+                arma::vec v = {0,0,0.35};
+                m_visionKinematics.setSensors(sensors);
             });
 
             /*
@@ -251,11 +235,11 @@ namespace modules {
 
             });
 
-            m_detectGoals =
-
             */
+            //m_detectGoals =
 
-            on<Trigger<ClassifiedImage>, Options<Single>>([this](const ClassifiedImage& classifiedImage) {
+
+            on<Trigger<ClassifiedImage>, Options<Single, Sync<GoalDetectorConfig>>>([this](const ClassifiedImage& classifiedImage) {
                 if (classifiedImage.matchedHorizontalSegments.count(messages::vision::GOAL_COLOUR) &&
                     classifiedImage.matchedVerticalSegments.count(messages::vision::GOAL_COLOUR)) {
                     emit(
@@ -267,7 +251,7 @@ namespace modules {
             });
 
             //m_detectBalls =
-            on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
+            on<Trigger<ClassifiedImage>, Options<Single, Sync<BallDetectorConfig>>>([this](const ClassifiedImage& classifiedImage) {
                 emit(
                     m_ballDetector.run(
                                         classifiedImage.matchedHorizontalSegments.at(messages::vision::BALL_COLOUR),
@@ -281,7 +265,7 @@ namespace modules {
             });
 
             //m_detectObstacles =
-            on<Trigger<ClassifiedImage>>([this](const ClassifiedImage& classifiedImage) {
+            on<Trigger<ClassifiedImage>, Options<Single, Sync<ObstacleDetectorConfig>>>([this](const ClassifiedImage& classifiedImage) {
                 emit(
                     m_obstacleDetector.run(classifiedImage.greenHorizonInterpolatedPoints,
                                            *(classifiedImage.LUT),

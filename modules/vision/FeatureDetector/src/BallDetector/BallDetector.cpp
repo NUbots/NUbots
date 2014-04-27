@@ -49,7 +49,8 @@ namespace modules {
                                         bool THROWOUT_DISTANT_BALLS_,
                                         float MAX_BALL_DISTANCE_,
                                         float BALL_WIDTH_,
-                                        const DISTANCE_METHOD& BALL_DISTANCE_METHOD_
+                                        const DISTANCE_METHOD& BALL_DISTANCE_METHOD_,
+                                        float D2P_ADAPTIVE_THRESHOLD_
                                         ) {
             BALL_MIN_PERCENT_ORANGE = BALL_MIN_PERCENT_ORANGE_;
             BALL_ORANGE_TOLERANCE = BALL_ORANGE_TOLERANCE_;
@@ -65,7 +66,7 @@ namespace modules {
             MAX_BALL_DISTANCE = MAX_BALL_DISTANCE_;
             BALL_WIDTH = BALL_WIDTH_;
             BALL_DISTANCE_METHOD = BALL_DISTANCE_METHOD_;
-
+            D2P_ADAPTIVE_THRESHOLD = D2P_ADAPTIVE_THRESHOLD_;
         }
 
         // BROKEN
@@ -280,6 +281,7 @@ namespace modules {
                                                 THROWOUT_DISTANT_BALLS,
                                                 MAX_BALL_DISTANCE,
                                                 BALL_WIDTH,
+                                                D2P_ADAPTIVE_THRESHOLD,
                                                 BALL_DISTANCE_METHOD,
                                                 visionKinematics);
                             balls.push_back(ball);
@@ -299,6 +301,7 @@ namespace modules {
                                             THROWOUT_DISTANT_BALLS,
                                             MAX_BALL_DISTANCE,
                                             BALL_WIDTH,
+                                            D2P_ADAPTIVE_THRESHOLD,
                                             BALL_DISTANCE_METHOD,
                                             visionKinematics);
                         balls.push_back(ball);
@@ -331,17 +334,16 @@ namespace modules {
         std::unique_ptr< std::vector<messages::vision::Ball> > BallDetector::createBallMessage(const std::vector<Ball>& balls){
             std::unique_ptr< std::vector<messages::vision::Ball> > ball_message = std::make_unique< std::vector<messages::vision::Ball> >();
             for(auto& ball : balls){
+                    std::cout << "Checking " << ball << "\n This ball is "<< (ball.valid ? "valid." : "NOT valid.") << std::endl;
                 if(ball.valid){
-                    // std::cout << "Emmiting " << ball << std::endl;
                     ball_message->push_back(messages::vision::Ball());
-                    ball_message->back().sphericalFromNeck = ball.m_location.neckRelativeRadial;
+                    ball_message->back().sphericalFromNeck = ball.m_location.bodyRelativeSpherical;
                     ball_message->back().sphericalError = ball.m_sphericalError;
                     ball_message->back().screenAngular = ball.m_location.screenAngular;
                     ball_message->back().screenCartesian = ball.m_location.screenCartesian;
                     ball_message->back().sizeOnScreen = ball.m_sizeOnScreen;
                     ball_message->back().timestamp = NUClear::clock::now();
                     ball_message->back().diameter = ball.m_diameter;
-                    //NUClear::log("Emitting ball_message screen angular", ball_message->back().screenAngular);
                 }
             }
             return std::move(ball_message);

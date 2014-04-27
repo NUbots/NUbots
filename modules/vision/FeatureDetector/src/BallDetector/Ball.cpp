@@ -58,6 +58,7 @@ namespace modules {
                                 bool THROWOUT_DISTANT_BALLS_,
                                 float MAX_BALL_DISTANCE_,
                                 float BALL_WIDTH_,
+                                float D2P_ADAPTIVE_THRESHOLD_,
                                 const DISTANCE_METHOD& BALL_DISTANCE_METHOD_,
                                 const VisionKinematics& visionKinematics) {
             THROWOUT_ON_ABOVE_KIN_HOR_BALL = THROWOUT_ON_ABOVE_KIN_HOR_BALL_;
@@ -69,6 +70,7 @@ namespace modules {
             MAX_BALL_DISTANCE = MAX_BALL_DISTANCE_;
             BALL_WIDTH = BALL_WIDTH_;
             BALL_DISTANCE_METHOD = BALL_DISTANCE_METHOD_;
+            D2P_ADAPTIVE_THRESHOLD = D2P_ADAPTIVE_THRESHOLD_;
 
             // Internal variables contain valid values at this point.
             // All necessary constants have been set.
@@ -102,7 +104,7 @@ namespace modules {
             }
 
             // Throw out if ball is too far away.
-            if (THROWOUT_DISTANT_BALLS && (m_location.neckRelativeRadial[0] > MAX_BALL_DISTANCE)) {
+            if (THROWOUT_DISTANT_BALLS && (m_location.bodyRelativeSpherical[0] > MAX_BALL_DISTANCE)) {
                 return false;
             }
 
@@ -137,7 +139,7 @@ namespace modules {
                 case AVERAGE: {
                     //average distances
                     m_location.screenCartesian      = (d2pLocation.screenCartesian + widthLocation.screenCartesian) * 0.5;
-                    m_location.neckRelativeRadial   = (d2pLocation.neckRelativeRadial + widthLocation.neckRelativeRadial) * 0.5;
+                    m_location.bodyRelativeSpherical   = (d2pLocation.bodyRelativeSpherical + widthLocation.bodyRelativeSpherical) * 0.5;
                     m_location.screenAngular        = (d2pLocation.screenAngular + widthLocation.screenAngular) * 0.5;
                     m_location.groundCartesian      = (d2pLocation.groundCartesian + widthLocation.groundCartesian) * 0.5;
 
@@ -145,13 +147,22 @@ namespace modules {
                 }
 
                 case LEAST: {
-                    m_location = ((d2pLocation.neckRelativeRadial[0] < widthLocation.neckRelativeRadial[0]) ? d2pLocation : widthLocation);
+                    m_location = ((d2pLocation.bodyRelativeSpherical[0] < widthLocation.bodyRelativeSpherical[0]) ? d2pLocation : widthLocation);
 
                     break;
                 }
+
+                case ADAPTIVE:{
+                    if(widthDistance > D2P_ADAPTIVE_THRESHOLD){
+                        m_location = d2pLocation;
+                    } else {
+                        m_location = widthLocation;
+                    }
+                }
+
             }
             m_sphericalError = visionKinematics.calculateSphericalError(m_location, BALL_DISTANCE_METHOD, m_diameter);
-            return (m_location.neckRelativeRadial[0] > 0);
+            return (m_location.bodyRelativeSpherical[0] > 0);
         }
 
 
@@ -202,8 +213,8 @@ namespace modules {
             output << "Ball " << std::endl;
             output << "\tpixelloc: [" << ball.m_location.screenCartesian[0] << ", " << ball.m_location.screenCartesian[1] << "]" << std::endl;
             output << " angularloc: [" << ball.m_location.screenAngular[0] << ", " << ball.m_location.screenAngular[1] << "]" << std::endl;
-            output << "\trelative field coords: [" << ball.m_location.neckRelativeRadial[0] << ", " << ball.m_location.neckRelativeRadial[1] <<
-                        ", " << ball.m_location.neckRelativeRadial[2] << "]" << std::endl;
+            output << "\trelative field coords: [" << ball.m_location.bodyRelativeSpherical[0] << ", " << ball.m_location.bodyRelativeSpherical[1] <<
+                        ", " << ball.m_location.bodyRelativeSpherical[2] << "]" << std::endl;
             output << "\tspherical error: [" << ball.m_sphericalError[0] << ", " << ball.m_sphericalError[1] <<", "<< ball.m_sphericalError[2] << "]" << std::endl;
             output << "\tsize on screen: [" << ball.m_sizeOnScreen[0] << ", " << ball.m_sizeOnScreen[1] << "]";
 
