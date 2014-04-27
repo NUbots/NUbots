@@ -20,14 +20,18 @@
 #include "PS3Walk.h"
 #include <nuclear>
 #include "messages/motion/WalkCommand.h"
+#include "messages/motion/KickCommand.h"
+#include "messages/behaviour/Action.h"
 
 namespace modules {
 namespace behaviour {
 namespace planning {
 
+    using messages::motion::KickCommand;
     using messages::motion::WalkCommand;
     using messages::motion::WalkStartCommand;
     using messages::motion::WalkStopCommand;
+    using messages::behaviour::LimbID;
 
     PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -37,13 +41,13 @@ namespace planning {
             if (joystick.sample(&event)) {
                 if (event.isAxis()) {
                     switch (event.number) {
-                        case LEFT_JOYSTICK_HORIZONTAL:
+                        case AXIS_LEFT_JOYSTICK_HORIZONTAL:
                             strafe[1] = -event.value;
                             break;
-                        case LEFT_JOYSTICK_VERTICAL:
+                        case AXIS_LEFT_JOYSTICK_VERTICAL:
                             strafe[0] = -event.value;
                             break;
-                        case RIGHT_JOYSTICK_HORIZONTAL:
+                        case AXIS_RIGHT_JOYSTICK_HORIZONTAL:
                             rotationalSpeed = -event.value;
                             break;
                     }
@@ -62,6 +66,42 @@ namespace planning {
                                 moving = !moving;
                             }
                             break;
+                        case BUTTON_L1:
+                            if (event.value > 0) {
+                                NUClear::log("Requesting Left Side Kick");
+                                emit(std::make_unique<KickCommand>(KickCommand{
+                                    {0, -1, 0},
+                                    LimbID::LEFT_LEG
+                                }));
+                            }
+                            break;
+                        case BUTTON_L2:
+                            if (event.value > 0) {
+                                NUClear::log("Requesting Left Front Kick");
+                                emit(std::make_unique<KickCommand>(KickCommand{
+                                    {1, 0, 0},
+                                    LimbID::LEFT_LEG
+                                }));
+                            }
+                            break;
+                        case BUTTON_R1:
+                            if (event.value > 0) {
+                                NUClear::log("Requesting Right Side Kick");
+                                emit(std::make_unique<KickCommand>(KickCommand{
+                                    {0, 1, 0},
+                                    LimbID::RIGHT_LEG
+                                }));
+                            }
+                            break;
+                        case BUTTON_R2:
+                            if (event.value > 0) {
+                                NUClear::log("Requesting Right Front Kick");
+                                emit(std::make_unique<KickCommand>(KickCommand{
+                                    {1, 0, 0},
+                                    LimbID::RIGHT_LEG
+                                }));
+                            }
+                            break;
                     }
                 }
             }
@@ -71,7 +111,7 @@ namespace planning {
             auto strafeNorm = strafe / std::numeric_limits<short>::max();
             auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
             emit(std::make_unique<WalkCommand>(WalkCommand{
-                strafeNorm * 0.03, // TODO: non-magic numbers
+                strafeNorm,
                 rotationalSpeedNorm
             }));
         });

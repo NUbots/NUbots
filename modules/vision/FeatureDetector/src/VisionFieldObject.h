@@ -36,7 +36,8 @@ namespace modules {
             WIDTH,
             D2P,
             AVERAGE,
-            LEAST
+            LEAST,
+            ADAPTIVE
         };
 
         //! VFO_ID enum and associated std::string conversion methods

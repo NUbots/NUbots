@@ -1,0 +1,36 @@
+ADD_ROLE(
+    NAME chaseball
+    MODULES        
+        #Support
+        support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem    
+        #support::configuration::NetworkingConfiguration
+        support::NUbugger
+        
+        #Sensors
+        input::LinuxCamera
+        platform::darwin::HardwareIO
+        platform::darwin::SensorFilter
+
+        #Vision
+        vision::LUTClassifier
+        vision::FeatureDetector
+
+        #Localisation
+        localisation::MMKFRobotLocalisation
+        localisation::KFBallLocalisation
+        
+        #Behaviour
+        behaviour::Controller
+        behaviour::reflexes::Stand
+        behaviour::reflexes::FallingRelax
+        behaviour::reflexes::Getup
+        behaviour::reflexes::Look
+        behaviour::planners::LookAtBall
+        behaviour::planners::WalkPathPlanner
+        
+        #Motion
+        motion::ScriptEngine
+        motion::WalkEngine
+)

@@ -98,7 +98,7 @@ namespace modules {
 
             on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
                 start();
-                emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 25, 10 }}));
+                emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 25, 10 }})); // TODO: config
             });
 
             on<Trigger<WalkStopCommand>>([this](const WalkStopCommand&) {

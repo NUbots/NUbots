@@ -7,7 +7,6 @@ ADD_ROLE(
         support::configuration::ConfigSystem    
         #support::configuration::NetworkingConfiguration
         support::NUbugger
-        debug::NUbugger
         
         #Sensors
         input::LinuxCamera
@@ -17,8 +16,12 @@ ADD_ROLE(
         #Vision
         vision::LUTClassifier
         vision::FeatureDetector
+
+        #Localisation
+        localisation::MMKFRobotLocalisation
+        localisation::KFBallLocalisation
         
-        #Vision
+        #Behaviour
         behaviour::Controller
         behaviour::reflexes::Stand
         behaviour::reflexes::FallingRelax

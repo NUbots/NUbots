@@ -181,28 +181,28 @@ namespace modules {
                 }
             });
 
-            on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
-                Message message;
-                message.set_type(Message::REACTION_STATISTICS);
-                message.set_utc_timestamp(std::time(0));
+            // on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
+            //     Message message;
+            //     message.set_type(Message::REACTION_STATISTICS);
+            //     message.set_utc_timestamp(std::time(0));
 
-                auto* reactionStatistics = message.mutable_reactionstatistics();
+            //     auto* reactionStatistics = message.mutable_reactionstatistics();
 
-                //reactionStatistics->set_name(stats.name);
-                reactionStatistics->set_reactionid(stats.reactionId);
-                reactionStatistics->set_taskid(stats.taskId);
-                reactionStatistics->set_causereactionid(stats.causeReactionId);
-                reactionStatistics->set_causetaskid(stats.causeTaskId);
-                reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
-                reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
-                reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
+            //     //reactionStatistics->set_name(stats.name);
+            //     reactionStatistics->set_reactionid(stats.reactionId);
+            //     reactionStatistics->set_taskid(stats.taskId);
+            //     reactionStatistics->set_causereactionid(stats.causeReactionId);
+            //     reactionStatistics->set_causetaskid(stats.causeTaskId);
+            //     reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
+            //     reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
+            //     reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
 
-                reactionStatistics->set_name(stats.identifier[0]);
-                reactionStatistics->set_triggername(stats.identifier[1]);
-                reactionStatistics->set_functionname(stats.identifier[2]);
+            //     reactionStatistics->set_name(stats.identifier[0]);
+            //     reactionStatistics->set_triggername(stats.identifier[1]);
+            //     reactionStatistics->set_functionname(stats.identifier[2]);
 
-                send(message);
-            });
+            //     send(message);
+            // });
 
             on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
 
@@ -377,6 +377,7 @@ namespace modules {
         }
 
         void NUbugger::recvMessage(const Message& message) {
+            NUClear::log("Received message of type:", message.type());
             switch (message.type()) {
                 case Message::Type::Message_Type_COMMAND:
                     recvCommand(message);
@@ -391,6 +392,7 @@ namespace modules {
 
         void NUbugger::recvCommand(const Message& message) {
             std::string command = message.command().command();
+            NUClear::log("Received command:", command);
             if (command == "download_lut") {
                 auto lut = powerplant.get<LookUpTable>();
 

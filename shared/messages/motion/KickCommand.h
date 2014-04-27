@@ -17,23 +17,28 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_VISION_NUPOINT_H
-#define MODULES_VISION_NUPOINT_H
+#ifndef MESSAGES_MOTION_KICKCOMMAND_H
+#define MESSAGES_MOTION_KICKCOMMAND_H
 
 #include <nuclear>
 #include <armadillo>
-#include <ostream>
+#include "messages/behaviour/Action.h"
 
-namespace modules {
-    namespace vision {
+namespace messages {
+    namespace motion {
 
-        typedef struct {
-            arma::vec2 screenCartesian;
-            arma::vec2 screenAngular;
-            arma::vec2 groundCartesian;
-            arma::vec3 bodyRelativeSpherical;
-        } NUPoint;
-    }
-}
+        /**
+         * TODO document
+         *
+         * @author Trent Houliston
+         * @author Brendan Annable
+         */
+        struct KickCommand {
+            arma::vec3 direction; // force is the magnitude
+            behaviour::LimbID leg;
+        };
+        
+    }  // motion
+}  // messages
 
-#endif // MODULES_VISION_NUPOINT_H
+#endif  // MESSAGES_MOTION_KICKCOMMAND_H
