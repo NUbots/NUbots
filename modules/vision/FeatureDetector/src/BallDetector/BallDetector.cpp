@@ -334,7 +334,7 @@ namespace modules {
         std::unique_ptr< std::vector<messages::vision::Ball> > BallDetector::createBallMessage(const std::vector<Ball>& balls){
             std::unique_ptr< std::vector<messages::vision::Ball> > ball_message = std::make_unique< std::vector<messages::vision::Ball> >();
             for(auto& ball : balls){
-                    std::cout << "Checking " << ball << "\n This ball is "<< (ball.valid ? "valid." : "NOT valid.") << std::endl;
+                    //std::cout << "Checking " << ball << "\n This ball is "<< (ball.valid ? "valid." : "NOT valid.") << std::endl;
                 if(ball.valid){
                     ball_message->push_back(messages::vision::Ball());
                     ball_message->back().sphericalFromNeck = ball.m_location.bodyRelativeSpherical;

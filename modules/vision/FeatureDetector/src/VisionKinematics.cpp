@@ -85,7 +85,7 @@ namespace modules {
                 // In this case val represents known distance (for e.g. found by perspective comparison).
                 arma::vec3 imagePositionSpherical;
                 imagePositionSpherical << val << point.screenAngular[0] << arma::math::pi()/2-point.screenAngular[1];       //Changed to agree with standard convention for spherical coordinates(using declination)
-                point.bodyRelativeSpherical = utility::math::coordinates::Cartesian2Spherical(m_camToBodyMatrix.submat(0,0,2,2) * utility::math::coordinates::Spherical2Cartesian(imagePositionSpherical));
+                point.bodyRelativeSpherical = utility::math::coordinates::Cartesian2Spherical(m_camToBodyMatrix.submat(0,3,2,3) + m_camToBodyMatrix.submat(0,0,2,2) * utility::math::coordinates::Spherical2Cartesian(imagePositionSpherical));
             }
 
             else {
@@ -136,10 +136,10 @@ namespace modules {
             // or like this?
             // -(m_imageSize[0] * 0.5) + pixel[0],
             // -(m_imageSize[1] * 0.5) + pixel[1]});
-            std::cout << "VisionKinematics::distanceToPoint - cameraToObjectDirection_cam = "<< cameraToObjectDirection_cam << std::endl;
+            //std::cout << "VisionKinematics::distanceToPoint - cameraToObjectDirection_cam = "<< cameraToObjectDirection_cam << std::endl;
 
             arma::vec3 cameraToObjectDirection_robot = m_camToBodyMatrix.submat(0,0,2,2) * cameraToObjectDirection_cam;
-            std::cout << "VisionKinematics::distanceToPoint - cameraToObjectDirection_robot = "<< cameraToObjectDirection_robot << std::endl;
+            //std::cout << "VisionKinematics::distanceToPoint - cameraToObjectDirection_robot = "<< cameraToObjectDirection_robot << std::endl;
 
             float z_camToObjectDir = -cameraToObjectDirection_robot[2];
             double alpha;
@@ -148,15 +148,15 @@ namespace modules {
                 return arma::vec3({0,0,0});
             } else {
                 alpha = std::abs(m_camToBodyMatrix.col(3)[2] + m_bodyHeight - objectHeight) / z_camToObjectDir;      //Similar triangle ratio
-                std::cout << "VisionKinematics::distanceToPoint - alpha = "<< alpha << std::endl;
+                //std::cout << "VisionKinematics::distanceToPoint - alpha = "<< alpha << std::endl;
             }
             //alpha == cameraToObject_world / norm(cameraToObjectDirection_robot)
             //therefore
-            arma::vec3 cameraToObject_robot = alpha * cameraToObjectDirection_robot; //as they are parallel
-            std::cout << "VisionKinematics::distanceToPoint - cameraToObject_robot = "<< cameraToObject_robot << std::endl;
+            arma::vec3 bodyToObject = alpha * cameraToObjectDirection_robot + m_camToBodyMatrix.submat(0,3,2,3); 
+            //std::cout << "VisionKinematics::distanceToPoint - cameraToObject_robot = "<< cameraToObject_robot << std::endl;
 
             //
-            return utility::math::coordinates::Cartesian2Spherical(cameraToObject_robot);
+            return utility::math::coordinates::Cartesian2Spherical(bodyToObject);
 
         }
 
