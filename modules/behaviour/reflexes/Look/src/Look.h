@@ -37,6 +37,7 @@ namespace modules {
                 double fastSpeed,slowSpeed,headYaw,headPitch,panTime,minYaw,maxYaw,minPitch,maxPitch,screenPadding;
                 
                 double prevPitch,prevYaw;
+                size_t counter = 0;
             public:
                 explicit Look(std::unique_ptr<NUClear::Environment> environment);
                 static constexpr const char* CONFIGURATION_PATH = "Look.json";

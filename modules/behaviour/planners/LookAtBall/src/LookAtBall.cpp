@@ -30,6 +30,8 @@ namespace modules {
             using messages::vision::Ball;
             using messages::vision::Goal;
             using messages::behaviour::LookAtAngle;
+            using messages::behaviour::LookAtPoint;
+            using messages::behaviour::LookAtPosition;
 
             LookAtBall::LookAtBall(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
                 
@@ -42,9 +44,11 @@ namespace modules {
                      const std::shared_ptr<const messages::localisation::Ball>& ball) {
                 
                     if (balls.size() > 0) {
-                        std::vector<LookAtAngle> angles(4);
+                        std::vector<LookAtAngle> angles;
+                        angles.reserve(4);
                         
                         angles.emplace_back(LookAtAngle {balls[0].screenAngular[0],-balls[0].screenAngular[1]});
+                        
                         
                         for (const auto& g : goals) {
                             angles.emplace_back(LookAtAngle {g.screenAngular[0],-g.screenAngular[1]});
@@ -52,10 +56,37 @@ namespace modules {
                         
                         //XXX: add looking at robots as well
                         
+                        
+                        //this does a small pan around the ball to try to find other objects
+                        //XXX: under development
+                        /*if (angles.size() == 1) {
+                            double theta = atan2(-angles[0].pitch,angles[0].yaw) + 0.001; //XXX: configurate the pan
+                            const double distance = 0.5; //XXX: configurate this distance
+                            angles.push_back(LookAtAngle {cos(theta)*distance-angles[0].pitch,-sin(theta)*distance-angles[0].yaw});
+                            std::cout << theta << ", " << distance << ", " << angles[0].pitch << ", " << -angles[0].yaw << std::endl;
+                            std::cout << cos(theta) << ", " << sin(theta) << ", " << cos(theta)*distance-angles[0].pitch << ", " << -sin(theta)*distance-angles[0].yaw << std::endl;
+                        }*/
+                        
                         emit(std::make_unique<std::vector<LookAtAngle>>(angles));
+                    //} else if (ball != NULL) {
+                        //XXX: add a localisation based scan'n'pan
+                    
+                    
                     } else {
-                        //XXX: do a scan'n'pan
-                        //std::vector<LookAtPoint> points(8);
+                        //do a blind scan'n'pan
+                        //XXX: this needs to be a look at sequence rather than a look at point
+                        std::vector<LookAtPosition> angles;
+                        
+                        const double scanYaw = 1.5;
+                        const double scanPitch = 1.0; 
+                        
+                        
+                        const size_t panPoints = 6;
+                        for (size_t i = 0; i < panPoints+1; ++i) {
+                            angles.emplace_back(LookAtPosition {i*scanYaw/panPoints-scanYaw/2,scanPitch*(i%2)-scanPitch/2});
+                        }
+                        
+                        emit(std::make_unique<std::vector<LookAtPosition>>(angles));
                     }
 
                 });
