@@ -1,5 +1,5 @@
 {
-	"FastSpeed" : 0.8,
+	"FastSpeed" : 0.6,
 	"SlowSpeed" : 0.1,
 	"minYaw" : -1.5,
 	"maxYaw" : 1.5,

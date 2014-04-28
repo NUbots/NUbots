@@ -20,6 +20,7 @@
 #include "LookAtBall.h"
 
 #include "messages/vision/VisionObjects.h"
+#include "messages/localisation/FieldObject.h"
 #include "messages/behaviour/LookStrategy.h"
 
 namespace modules {
@@ -27,14 +28,34 @@ namespace modules {
         namespace planners {
 
             using messages::vision::Ball;
+            using messages::vision::Goal;
             using messages::behaviour::LookAtAngle;
 
             LookAtBall::LookAtBall(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-
-                on<Trigger<std::vector<Ball>>>([this] (const std::vector<Ball>& balls) {
+                
+                //this reaction focuses on the ball - pan'n'scan if not visible and focus on as many objects as possible if visible
+                on<Trigger<std::vector<Ball>>,
+                    With<std::vector<Goal>>,
+                    With<Optional<messages::localisation::Ball>> >([this] 
+                    (const std::vector<Ball>& balls,
+                     const std::vector<Goal>& goals,
+                     const std::shared_ptr<const messages::localisation::Ball>& ball) {
+                
                     if (balls.size() > 0) {
-                        //NUClear::log<NUClear::DEBUG>("LookatBall: \n", balls[0].screenAngular[0],", ",balls[0].screenAngular[1]);
-                        emit(std::make_unique<LookAtAngle>(LookAtAngle {balls[0].screenAngular[0],-balls[0].screenAngular[1]}));
+                        std::vector<LookAtAngle> angles(4);
+                        
+                        angles.emplace_back(LookAtAngle {balls[0].screenAngular[0],-balls[0].screenAngular[1]});
+                        
+                        for (const auto& g : goals) {
+                            angles.emplace_back(LookAtAngle {g.screenAngular[0],-g.screenAngular[1]});
+                        }
+                        
+                        //XXX: add looking at robots as well
+                        
+                        emit(std::make_unique<std::vector<LookAtAngle>>(angles));
+                    } else {
+                        //XXX: do a scan'n'pan
+                        //std::vector<LookAtPoint> points(8);
                     }
 
                 });
