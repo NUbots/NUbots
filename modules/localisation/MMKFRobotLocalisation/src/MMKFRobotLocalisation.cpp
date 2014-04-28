@@ -81,11 +81,18 @@ namespace localisation {
             emit(std::move(robot_msg));
         });
 
-       on<Trigger<FakeOdometry>,
+        on<Trigger<FakeOdometry>,
            Options<Sync<MMKFRobotLocalisation>>
           >("MMKFRobotLocalisation Odometry", [this](const FakeOdometry& odom) {
             auto curr_time = NUClear::clock::now();
             engine_->TimeUpdate(curr_time, odom);
+        });
+
+        on<Trigger<Sensors>,
+           Options<Sync<MMKFRobotLocalisation>>
+          >("MMKFRobotLocalisation Odometry", [this](const FakeOdometry& odom) {
+            auto curr_time = NUClear::clock::now();
+            engine_->TimeUpdate(curr_time, sensors.odometry);
         });
 
         on<Trigger<std::vector<messages::vision::Goal>>,
