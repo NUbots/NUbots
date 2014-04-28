@@ -58,6 +58,7 @@ namespace modules {
         using messages::support::nubugger::proto::Message;
         using messages::support::nubugger::proto::Message_Type;
         using messages::vision::Goal;
+        using messages::vision::Ball;
         using messages::vision::SaveLookUpTable;
 
         NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
@@ -334,6 +335,31 @@ namespace modules {
                 send(message);
             });
 
+            on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Ball> balls){
+                Message message;
+
+                message.set_type(Message::VISION);
+                message.set_utc_timestamp(std::time(0));
+
+                Message::Vision* api_vision = message.mutable_vision();
+                //std::cout<< "NUbugger::on<Trigger<std::vector<Ball>>> : sending " << balls.size() << " balls to NUbugger." << std::endl;
+                for (auto& ball : balls){
+                    Message::VisionFieldObject* api_ball = api_vision->add_vision_object();
+
+                    api_ball->set_shape_type(Message::VisionFieldObject::CIRCLE);
+                    api_ball->set_name("Ball");
+                    api_ball->set_width(ball.sizeOnScreen[0]);
+                    api_ball->set_height(ball.sizeOnScreen[1]);
+                    api_ball->set_screen_x(ball.screenCartesian[0]);
+                    api_ball->set_screen_y(ball.screenCartesian[1]);
+
+                    api_ball->set_radius(ball.diameter / 2.0);
+                    for(auto& coord : ball.sphericalFromNeck){
+                        api_ball->add_measured_relative_position(coord);
+                    }
+                }
+                send(message);
+            });
 
             on<Trigger<messages::localisation::FieldObject>,
                Options<Priority<NUClear::LOW>>>([this](const messages::localisation::FieldObject& field_object) {

@@ -133,7 +133,7 @@ namespace reflexes {
 
     int KickScript::getDirectionalQuadrant(float x, float y) {
 
-            // These represent 4 directions of looking, see https://www.desmos.com/calculator/x8v1abfzi7 for a graph of the 4 quadrants
+            // These represent 4 directions of looking, see https://www.desmos.com/calculator/mm8cnsnpdt for a graph of the 4 quadrants
             // Note that x is forward in relation to the robot so the forward quadrant is x >= |y|
             return x >=  std::abs(y) ? 0  // forward 
                  : y >=  std::abs(x) ? 1  // left
