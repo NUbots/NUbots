@@ -52,12 +52,10 @@ namespace modules {
                 //do a little configurating
                 on<Trigger<Configuration<WalkPathPlanner>>>([this] (const Configuration<WalkPathPlanner>& file){
 
-                    //XXX: load these values from walk config
                     turnSpeed = file.config["turnSpeed"];
                     forwardSpeed = file.config["forwardSpeed"];
                     footSeparation = file.config["footSeparation"];
 
-                    //XXX: load from robot model
                     footSize = file.config["footSize"];
 
                     //timers for starting turning and walking
@@ -117,6 +115,7 @@ namespace modules {
                      const std::vector<messages::localisation::Self>& self,
                      const std::vector<messages::vision::Obstacle>& robots
                     ) {
+                    std::cout << "starting path planning" << std::endl;
                     arma::vec targetPos, targetHead;
                     //work out where we're going
                     if (targetPosition == messages::behaviour::WalkTarget::Robot) {
@@ -126,14 +125,13 @@ namespace modules {
                     } else { //other types default to position/waypoint location
                         targetPos = currentTargetPosition;
                     }
-
                     //work out where to face when we get there
                     if (targetHeading == messages::behaviour::WalkTarget::Robot) {
                         //XXX: check if robot is visible
                     } else if (targetHeading == messages::behaviour::WalkTarget::Ball) {
-                        targetHead = arma::normalise(ball.position-targetPos);
+                        targetHead = arma::normalise(arma::vec(ball.position)-targetPos);
                     } else { //other types default to position/waypoint bearings
-                        targetHead = arma::normalise(currentTargetHeading-targetPos);
+                        targetHead = arma::normalise(arma::vec(currentTargetHeading)-targetPos);
                     }
                     //calculate the basic movement plan
                     arma::vec movePlan;
@@ -158,7 +156,8 @@ namespace modules {
                         movePlan = avoidObstacles(robots,movePlan);
                     }
                     //NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
-
+                    
+                    NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
                     //this applies acceleration/deceleration and hysteresis to movement
                     movePlan = generateWalk(movePlan,
                                planType == messages::behaviour::WalkApproach::OmnidirectionalReposition);
@@ -169,7 +168,7 @@ namespace modules {
                     NUClear::log("Self Position:", self[0].position[0],self[0].position[1]);
                     NUClear::log("Target Position:", targetPos[0],targetPos[1]);
                     NUClear::log("Walk command:", movePlan[0],movePlan[1],movePlan[2]);
-                    //NUClear::log("Ball Position:", ball.position[0],ball.position[1]);
+                    NUClear::log("Ball Position:", ball.position[0],ball.position[1]);
                     emit(std::move(command));//XXX: emit here
 
                      
@@ -195,7 +194,7 @@ namespace modules {
                 approach->targetHeadingType = WalkTarget::WayPoint;
                 approach->walkMovementType = WalkApproach::ApproachFromDirection;
                 approach->heading = arma::vec({3,0});
-                approach->heading = arma::vec({1,1});
+                approach->target = arma::vec({1,1});
                 emit(std::move(approach));
             }
 
@@ -273,8 +272,10 @@ namespace modules {
                 std::vector<double> costs(3);
                 for (size_t i = 0; i < 3; ++i) {
                     //calculate the heading the robot wants to achieve at its destination
-                    const double waypointHeading = atan2(-waypoints[i][1],-waypoints[i][0])-selfHeading;
-                    headings[i] = atan2(cos(waypointHeading),sin(waypointHeading));
+                    const double waypointHeading = atan2(waypoints[i][1],waypoints[i][0])-selfHeading;
+                    
+                    std::cout << selfHeading << ", " << waypointHeading << ", " << waypoints[i][0] << ", " << waypoints[i][1] << std::endl;
+                    headings[i] = atan2(sin(waypointHeading),cos(waypointHeading));
                     
                     //calculate the distance to destination
                     arma::vec waypointPos = waypoints[i]+target-arma::vec(self.position);
@@ -282,8 +283,9 @@ namespace modules {
                     
                     //calculate the angle between the current direction and the destination
                     const double waypointBearing = atan2(waypointPos[1],waypointPos[0])-selfHeading;
-                    bearings[i] = atan2(cos(waypointBearing),sin(waypointBearing));
+                    bearings[i] = atan2(sin(waypointBearing),cos(waypointBearing));
                     
+                    std::cout << selfHeading << ", " << waypointBearing << ", " << waypointPos[0] << ", " << waypointPos[1] << ", " << bearings[i] << std::endl << std::endl;
                     //costs defines which move plan is the most appropriate
                     costs[i] = bearings[i]*bearings[i]*bearingSensitivity+distances[i]*distances[i];
                     
@@ -321,8 +323,8 @@ namespace modules {
 
                 arma::vec result;
                 result[0] = targetDistance;
-                result[1] = atan2(cos(targetBearing),sin(targetBearing));
-                result[2] = atan2(cos(targetHeading),sin(targetHeading));
+                result[1] = atan2(sin(targetBearing),cos(targetBearing));
+                result[2] = atan2(sin(targetHeading),cos(targetHeading));
                 return result;
             }
 
