@@ -56,6 +56,7 @@ namespace modules {
                     maxYaw = file.config["maxYaw"];
                     minPitch = file.config["minPitch"];
                     maxPitch = file.config["maxPitch"];
+                    screenPadding = file.config["screenPadding"];
                 });
                 
                 on<Trigger<ExecuteLook>>([this] (const ExecuteLook& e) {
