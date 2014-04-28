@@ -59,10 +59,18 @@ void MultiModalRobotModel::TimeUpdate(double seconds, const FakeOdometry& odom) 
         model->TimeUpdate(seconds, odom);
 }
 
+void MultiModalRobotModel::TimeUpdate(double seconds, const arma::mat44& odom) {
+    for (auto& model : robot_models_)
+        model->TimeUpdate(seconds, odom);
+}
+
 void RobotHypothesis::TimeUpdate(double seconds) {
     filter_.timeUpdate(seconds, nullptr);
 }
 void RobotHypothesis::TimeUpdate(double seconds, const FakeOdometry& odom) {
+    filter_.timeUpdate(seconds, odom);
+}
+void RobotHypothesis::TimeUpdate(double seconds, const arma::mat44& odom) {
     filter_.timeUpdate(seconds, odom);
 }
 

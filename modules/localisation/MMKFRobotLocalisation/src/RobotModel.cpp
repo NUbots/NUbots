@@ -56,6 +56,18 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     return result;
 }
 
+arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
+    const arma::vec::fixed<RobotModel::size>& state, double deltaT,
+    const arma::mat44& odom) {
+    auto result = state;
+
+    arma::vec4 updated_heading = odom * arma::vec4({state[kHeadingX], state[kHeadingY], 0, 0});
+    arma::vec4 updated_position = arma::vec4({state[kX], state[kY], 0, 1}) + odom * arma::vec4({0, 0, 0, 1});
+
+
+    return {updated_position[0], updated_position[1], updated_heading[0], updated_heading[1]};
+}
+
 
 /// Return the predicted observation of an object at the given position
 arma::vec RobotModel::predictedObservation(
