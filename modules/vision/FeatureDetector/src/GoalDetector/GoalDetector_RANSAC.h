@@ -66,7 +66,8 @@ namespace modules {
                                 int MIN_GOAL_WIDTH_,
                                 float GOAL_WIDTH_,
                                 const DISTANCE_METHOD& GOAL_DISTANCE_METHOD_,
-                                int EDGE_OF_SCREEN_MARGIN_);
+                                int EDGE_OF_SCREEN_MARGIN_,
+                                float D2P_ADAPTIVE_THRESHOLD_);
 
         private:
             std::list<Quad> buildQuadsFromLines(const std::vector<LSFittedLine>& start_lines,
@@ -110,6 +111,7 @@ namespace modules {
             float GOAL_WIDTH;
             DISTANCE_METHOD GOAL_DISTANCE_METHOD;
             int EDGE_OF_SCREEN_MARGIN;
+            float D2P_ADAPTIVE_THRESHOLD;
 
             std::unique_ptr<std::vector<messages::vision::Goal>> createGoalMessage(const std::unique_ptr<std::vector<Goal>>& goal_posts);
         };

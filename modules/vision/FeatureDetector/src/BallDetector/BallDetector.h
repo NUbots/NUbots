@@ -61,7 +61,8 @@ namespace modules {
                                 bool THROWOUT_DISTANT_BALLS_,
                                 float MAX_BALL_DISTANCE_,
                                 float BALL_WIDTH_,
-                                const DISTANCE_METHOD& BALL_DISTANCE_METHOD_
+                                const DISTANCE_METHOD& BALL_DISTANCE_METHOD_,
+                                float D2P_ADAPTIVE_THRESHOLD_
                                );
 
         private:
@@ -83,6 +84,7 @@ namespace modules {
             float MAX_BALL_DISTANCE;
             float BALL_WIDTH;
             DISTANCE_METHOD BALL_DISTANCE_METHOD;
+            float D2P_ADAPTIVE_THRESHOLD;
 
 
             std::unique_ptr< std::vector<messages::vision::Ball> > createBallMessage(const std::vector<Ball>& balls);

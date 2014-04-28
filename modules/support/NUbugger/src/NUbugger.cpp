@@ -377,6 +377,7 @@ namespace modules {
         }
 
         void NUbugger::recvMessage(const Message& message) {
+            NUClear::log("Received message of type:", message.type());
             switch (message.type()) {
                 case Message::Type::Message_Type_COMMAND:
                     recvCommand(message);
@@ -391,6 +392,7 @@ namespace modules {
 
         void NUbugger::recvCommand(const Message& message) {
             std::string command = message.command().command();
+            NUClear::log("Received command:", command);
             if (command == "download_lut") {
                 auto lut = powerplant.get<LookUpTable>();
 

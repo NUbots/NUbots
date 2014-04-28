@@ -71,14 +71,26 @@ namespace localisation {
             engine_.TimeUpdate(curr_time, odom);
         });
 
-       on<Trigger<messages::vision::Ball>,
+       on<Trigger<std::vector<messages::vision::Ball>>,
            Options<Sync<KFBallLocalisation>>
           >("KFBallLocalisation Step",
-            [this](const messages::vision::Ball& ball) {
+            [this](const std::vector<messages::vision::Ball>& balls) {
 
+            if(balls.size() > 0){
+                auto curr_time = NUClear::clock::now();
+                engine_.TimeUpdate(curr_time);
+                engine_.MeasurementUpdate(balls[0]);
+            }
+        });
+       on<Trigger<messages::vision::Ball>,
+            Options<Sync<KFBallLocalisation>>
+            >("KFBallLocalisation Step",
+            [this](const messages::vision::Ball& ball) {
+        
             auto curr_time = NUClear::clock::now();
             engine_.TimeUpdate(curr_time);
             engine_.MeasurementUpdate(ball);
+            
         });
     }
 }

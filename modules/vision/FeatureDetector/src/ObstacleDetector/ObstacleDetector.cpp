@@ -259,7 +259,7 @@ namespace modules {
                 obstacle_message->push_back(messages::vision::Obstacle());
                 if (obstacle.isValid()) {
                     // NUClear::log<NUClear::DEBUG>("Found ",obstacle);
-                    obstacle_message->back().sphericalFromNeck = obstacle.m_location.neckRelativeRadial;
+                    obstacle_message->back().sphericalFromNeck = obstacle.m_location.bodyRelativeSpherical;
                     obstacle_message->back().sphericalError = obstacle.m_sphericalError;
                     obstacle_message->back().screenAngular = obstacle.m_location.screenAngular;
                     obstacle_message->back().screenCartesian = obstacle.m_location.screenCartesian;

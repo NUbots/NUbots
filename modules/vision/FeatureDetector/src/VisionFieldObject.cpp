@@ -51,7 +51,7 @@ namespace modules {
         }
 
         arma::vec3 VisionFieldObject::getRelativeFieldCoords() const {
-            return m_location.neckRelativeRadial;
+            return m_location.bodyRelativeSpherical;
         }
 
         arma::vec2 VisionFieldObject::getLocationPixels() const {

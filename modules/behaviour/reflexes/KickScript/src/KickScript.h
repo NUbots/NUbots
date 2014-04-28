@@ -17,23 +17,37 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_VISION_NUPOINT_H
-#define MODULES_VISION_NUPOINT_H
+#ifndef MODULES_BEHAVIOUR_REFLEXES_KICKSCRIPT_H
+#define MODULES_BEHAVIOUR_REFLEXES_KICKSCRIPT_H
 
 #include <nuclear>
-#include <armadillo>
-#include <ostream>
+#include "messages/motion/KickCommand.h"
 
 namespace modules {
-    namespace vision {
+namespace behaviour {
+namespace reflexes {
 
-        typedef struct {
-            arma::vec2 screenCartesian;
-            arma::vec2 screenAngular;
-            arma::vec2 groundCartesian;
-            arma::vec3 bodyRelativeSpherical;
-        } NUPoint;
-    }
+    class KickScript : public NUClear::Reactor {
+    public:
+        /// @brief Called by the powerplant to build and setup the KickScript reactor.
+        explicit KickScript(std::unique_ptr<NUClear::Environment> environment);
+        static constexpr const char* CONFIGURATION_PATH = "KickScript.json";
+    private:
+        const size_t id;
+
+        float KICK_PRIORITY;
+        float EXECUTION_PRIORITY;
+
+        messages::motion::KickCommand kickCommand;
+
+        void updatePriority(const float& priority);
+        int getDirectionalQuadrant(float x, float y);
+
+    };
+
+}
+}
 }
 
-#endif // MODULES_VISION_NUPOINT_H
+
+#endif

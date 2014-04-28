@@ -22,6 +22,7 @@ node nuclearportvm {
   package { 'gdb': ensure => latest, }
   package { 'cmake-curses-gui': ensure => latest, }
   package { 'linux-headers-generic': ensure => latest, }
+  package { 'dos2unix': ensure => latest, }
 }
 
 # node nubuggervm {
@@ -90,6 +91,7 @@ node packer-virtualbox-iso, packer-vmware-iso {
   package { 'gdb': ensure => latest, }
   package { 'cmake-curses-gui': ensure => latest, }
   package { 'linux-headers-generic': ensure => latest, }
+  package { 'dos2unix': ensure => latest, }
 
   # NFS for better Vagrant shared folders
   package { 'nfs-common': ensure => latest, }

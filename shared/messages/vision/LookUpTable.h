@@ -78,10 +78,8 @@ namespace messages {
             void loadLUTFromFile(const std::string& fileName);
             void loadLUTFromArray(const char* array);
             void save(const std::string& fileName) const;
-            char* getData() const {
-                char* result = new char[LUT_SIZE];
-                std::memcpy(result, LUT, LUT_SIZE);
-                return result;
+            std::string getData() const {
+                return std::string(LUT, LUT_SIZE);
             }
             /*!
                 @brief Classifies a pixel

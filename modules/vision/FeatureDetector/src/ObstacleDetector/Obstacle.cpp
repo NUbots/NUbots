@@ -65,7 +65,7 @@ namespace modules {
 
             m_sphericalError = visionKinematics.calculateSphericalError(m_location, DISTANCE_METHOD::D2P, 0);
 
-            return (m_location.neckRelativeRadial[0] > 0);
+            return (m_location.bodyRelativeSpherical[0] > 0);
         }
 
         /*! @brief Stream insertion operator for a single ColourSegment.
@@ -75,7 +75,7 @@ namespace modules {
             output << "Obstacle" << std::endl;
             output << "\tpixelloc: " << obstacle.m_location.screenCartesian << std::endl;
             output << "\tangularloc: " << obstacle.m_location.screenAngular << std::endl;
-            output << "\trelative field coords: " << obstacle.m_location.neckRelativeRadial << std::endl;
+            output << "\trelative field coords: " << obstacle.m_location.bodyRelativeSpherical << std::endl;
             output << "\tSize on screen: " << obstacle.m_sizeOnScreen << std::endl;
             switch(obstacle.m_colour){
                 case COLOUR_CLASS::UNKNOWN_COLOUR:

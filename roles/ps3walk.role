@@ -23,4 +23,5 @@ ADD_ROLE(
         behaviour::reflexes::Stand
         behaviour::reflexes::FallingRelax
         behaviour::reflexes::Getup
+        behaviour::reflexes::KickScript
 )
