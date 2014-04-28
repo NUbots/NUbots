@@ -29,9 +29,9 @@ namespace transform {
     inline arma::vec2 RobotBall2FieldBall(const arma::vec2& robot_pos,
                                           const arma::vec2& robot_heading,
                                           const arma::vec2& ball_pos) {
-        arma::vec2 u = arma::normalise(robot_heading);
-        arma::mat22 rot = {  u[0], u[1],
-                            -u[1], u[0] };
+        arma::vec u = arma::normalise(robot_heading);
+        arma::mat rot = arma::mat22({  u[0], u[1],
+                            -u[1], u[0] });
         // Rotate ball_pos by -robot_heading, then add robot_pos.
         return rot * ball_pos + robot_pos;
 
