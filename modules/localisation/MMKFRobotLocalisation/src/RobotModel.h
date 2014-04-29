@@ -60,6 +60,10 @@ namespace robot {
             const arma::vec::fixed<RobotModel::size>& state, double deltaT,
             const messages::localisation::FakeOdometry& odom);
 
+        arma::vec::fixed<RobotModel::size> timeUpdate(
+            const arma::vec::fixed<RobotModel::size>& state, double deltaT,
+            const arma::mat44& odom);
+
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
             const arma::vec2& actual_position);

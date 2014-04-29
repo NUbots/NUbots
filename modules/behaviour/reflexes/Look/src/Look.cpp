@@ -32,6 +32,7 @@ namespace modules {
             using messages::input::ServoID;
             using messages::input::Sensors;
             using messages::behaviour::LookAtAngle;
+            using messages::behaviour::LookAtPosition;
             using messages::behaviour::RegisterAction;
             using messages::behaviour::LimbID;
             using messages::support::Configuration;
@@ -44,7 +45,8 @@ namespace modules {
                 
                 //do a little configurating
                 on<Trigger<Configuration<Look>>>([this] (const Configuration<Look>& file){
-
+                    
+                    counter = 0;
                     //load fast and slow panspeed settings
                     
                     //pan speeds
@@ -56,6 +58,7 @@ namespace modules {
                     maxYaw = file.config["maxYaw"];
                     minPitch = file.config["minPitch"];
                     maxPitch = file.config["maxPitch"];
+                    screenPadding = file.config["screenPadding"];
                 });
                 
                 on<Trigger<ExecuteLook>>([this] (const ExecuteLook& e) {
@@ -63,7 +66,9 @@ namespace modules {
                     
                 });
                 
+                //look at a single visible object using the angular offsets in the image
                 on<Trigger<LookAtAngle>, With<Sensors>>([this] (const LookAtAngle& look, const Sensors& sensors) {
+                    counter = 0;
                     //speeds should take into account the angle delta
                     double distance = look.pitch*look.pitch+look.yaw*look.yaw;
                     panTime = distance/fastSpeed;
@@ -81,10 +86,121 @@ namespace modules {
                     waypoints->push_back({id, time, ServoID::HEAD_PITCH,    float(std::fmin(std::fmax(headPitch,minPitch),maxPitch)), 30.f});
                     emit(std::move(waypoints));
                 });
+                
+                //look at multiple visible objects using the angular offsets in the image
+                on<Trigger<std::vector<LookAtAngle>>, With<Sensors>>([this] (const std::vector<LookAtAngle>& look, const Sensors& sensors) {
+                    counter = 0;
+                    double pitchLow = 0.0,
+                           pitchHigh = 0.0,
+                           yawLeft = 0.0,
+                           yawRight = 0.0;
+                    
+                    //XXX: config this; it is the space between the edge of the screen and the object
+                    double offset = 0.15;
+                    
+                    //loop through and get the yaw/pitch bounds
+                    for (const auto& l : look) {
+                        pitchLow = fmin(pitchLow,l.pitch-offset);
+                        pitchHigh = fmax(pitchHigh,l.pitch+offset);
+                        
+                        //XXX: we need to add object width metadata
+                        yawLeft = fmin(yawLeft,l.yaw-offset);
+                        yawRight = fmax(yawRight,l.yaw+offset);
+                        offset = 0.0;
+                    }
+                    
+                    double pitch = (pitchLow+pitchHigh)/2.0;
+                    double yaw = (yawLeft+yawRight)/2.0;
+                    //std::cout << pitch << ", " << yaw << ", " << look.size() << std::endl;
+                    //smoothing to reduce jerky movement
+                    //pitch = prevPitch = (pitch+prevPitch)/2.0;
+                    //yaw = prevYaw = (yaw+prevYaw)/2.0;
+                    
+                    //speeds should take into account the angle delta
+                    double distance = sqrt(pitch*pitch+yaw*yaw);
+                    panTime = distance/fastSpeed;
+                    headYaw = std::fmin(std::fmax(yaw+sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition,minYaw),maxYaw);
+                    headPitch = std::fmin(std::fmax(pitch+sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition,minPitch),maxPitch);
+                    
+                    
+                    //this might find a better location eventually - it is the generic "gotopoint" code
+                    time_t time = NUClear::clock::now() + std::chrono::nanoseconds(size_t(std::nano::den*panTime));
+                    auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+                    waypoints->reserve(4);
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW,     float(sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition),  30.f});
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH,    float(sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition), 30.f});
+                    waypoints->push_back({id, time, ServoID::HEAD_YAW,     float(std::fmin(std::fmax(headYaw,minYaw),maxYaw)),  30.f});
+                    waypoints->push_back({id, time, ServoID::HEAD_PITCH,    float(std::fmin(std::fmax(headPitch,minPitch),maxPitch)), 30.f});
+                    emit(std::move(waypoints));
+                });
+                
+                
+                //look at multiple visible objects using the angular offsets in the image
+                on<Trigger<std::vector<LookAtPosition>>, With<Sensors>>([this] (const std::vector<LookAtPosition>& look, const Sensors& sensors) {
+                    
+                    
+                    double pitch = look[counter%look.size()].pitch;
+                    double yaw = look[counter%look.size()].yaw;
+                    //speeds should take into account the angle delta
+                    double distance = sqrt(pitch*pitch+yaw*yaw);
+                    panTime = distance/fastSpeed;
+                    headYaw = std::fmin(std::fmax(yaw+sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition,minYaw),maxYaw);
+                    headPitch = std::fmin(std::fmax(pitch+sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition,minPitch),maxPitch);
+                    
+                    
+                    //this might find a better location eventually - it is the generic "gotopoint" code
+                    time_t time = NUClear::clock::now() + std::chrono::nanoseconds(size_t(std::nano::den*panTime));
+                    auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+                    waypoints->reserve(4);
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW,     float(sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition),  30.f});
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH,    float(sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition), 30.f});
+                    waypoints->push_back({id, time, ServoID::HEAD_YAW,     float(std::fmin(std::fmax(headYaw,minYaw),maxYaw)),  30.f});
+                    waypoints->push_back({id, time, ServoID::HEAD_PITCH,    float(std::fmin(std::fmax(headPitch,minPitch),maxPitch)), 30.f});
+                    emit(std::move(waypoints));
+                });
+                
+                /*
+                on<Trigger<LookAtPoint>, With<Sensors>>([this] (const LookAtPoint& look, const Sensors& sensors) {
+                    //speeds should take into account the angle delta
+                    double distance = look.pitch*look.pitch+look.yaw*look.yaw;
+                    panTime = distance/fastSpeed;
+                    headYaw = std::fmin(std::fmax(look.yaw+sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition,minYaw),maxYaw);
+                    headPitch = std::fmin(std::fmax(look.pitch+sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition,minPitch),maxPitch);
+                    
+                    
+                    //this might find a better location eventually - it is the generic "gotopoint" code
+                    time_t time = NUClear::clock::now() + std::chrono::nanoseconds(size_t(std::nano::den*panTime));
+                    auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+                    waypoints->reserve(4);
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW,     float(sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition),  30.f});
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH,    float(sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition), 30.f});
+                    waypoints->push_back({id, time, ServoID::HEAD_YAW,     float(std::fmin(std::fmax(headYaw,minYaw),maxYaw)),  30.f});
+                    waypoints->push_back({id, time, ServoID::HEAD_PITCH,    float(std::fmin(std::fmax(headPitch,minPitch),maxPitch)), 30.f});
+                    emit(std::move(waypoints));
+                });
+                
+                on<Trigger<std::vector<LookAtPoint>>, With<Sensors>>([this] (const std::vector<LookAtPoint>& look, const Sensors& sensors) {
+                    //speeds should take into account the angle delta
+                    double distance = look.pitch*look.pitch+look.yaw*look.yaw;
+                    panTime = distance/fastSpeed;
+                    headYaw = std::fmin(std::fmax(look.yaw+sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition,minYaw),maxYaw);
+                    headPitch = std::fmin(std::fmax(look.pitch+sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition,minPitch),maxPitch);
+                    
+                    
+                    //this might find a better location eventually - it is the generic "gotopoint" code
+                    time_t time = NUClear::clock::now() + std::chrono::nanoseconds(size_t(std::nano::den*panTime));
+                    auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+                    waypoints->reserve(4);
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW,     float(sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition),  30.f});
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH,    float(sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition), 30.f});
+                    waypoints->push_back({id, time, ServoID::HEAD_YAW,     float(std::fmin(std::fmax(headYaw,minYaw),maxYaw)),  30.f});
+                    waypoints->push_back({id, time, ServoID::HEAD_PITCH,    float(std::fmin(std::fmax(headPitch,minPitch),maxPitch)), 30.f});
+                    emit(std::move(waypoints));
+                });*/
 
                 emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                     id,
-                    { std::pair<float, std::set<LimbID>>(3.0, { LimbID::HEAD }) },
+                    { std::pair<float, std::set<LimbID>>(30.0, { LimbID::HEAD }) },
                     [this] (const std::set<LimbID>&) {
                         emit(std::make_unique<ExecuteLook>());
                     },

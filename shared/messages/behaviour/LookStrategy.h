@@ -26,6 +26,19 @@ namespace messages {
         struct LookAtAngle {
             double yaw;
             double pitch;
+            //double width;
+        };
+        
+        struct LookAtPosition {
+            double yaw;
+            double pitch;
+        };
+        
+        struct LookAtPoint {
+            double x;
+            double y;
+            double xError;
+            double yError;
         };
     }
 }

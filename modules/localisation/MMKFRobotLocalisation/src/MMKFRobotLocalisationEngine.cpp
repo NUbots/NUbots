@@ -46,6 +46,13 @@ namespace localisation {
         last_time_update_time_ = current_time;
         robot_models_.TimeUpdate(seconds, odom);
     }
+    
+    void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
+                                              const arma::mat44& odom) {
+        double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
+        last_time_update_time_ = current_time;
+        robot_models_.TimeUpdate(seconds, odom);
+    }
 
     std::vector<LocalisationFieldObject> MMKFRobotLocalisationEngine::GetPossibleObjects(
             const messages::vision::Goal& ambiguous_object) {

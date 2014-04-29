@@ -26,12 +26,13 @@ namespace utility {
 namespace localisation {
 namespace transform {
 
-    inline arma::vec2 RobotBall2FieldBall(const arma::vec& robot_pos,
-                                          const arma::vec& robot_heading,
-                                          const arma::vec& ball_pos) {
-        arma::vec2 u = arma::normalise(robot_heading);
-        arma::mat22 rot = {  u[0], u[1],
-                            -u[1], u[0] };
+    inline arma::vec RobotBall2FieldBall(const arma::vec& robot_pos,
+                                         const arma::vec& robot_heading,
+                                         const arma::vec& ball_pos) {
+        arma::vec u = arma::normalise(robot_heading);
+        arma::mat rot = arma::mat({  u[0], u[1],
+                                    -u[1], u[0] });
+        rot.resize(2,2);
         // Rotate ball_pos by -robot_heading, then add robot_pos.
         return rot * ball_pos + robot_pos;
     }

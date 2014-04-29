@@ -47,6 +47,9 @@ namespace localisation {
         void TimeUpdate(std::chrono::system_clock::time_point current_time,
                         const messages::localisation::FakeOdometry& odom);
 
+        void TimeUpdate(std::chrono::system_clock::time_point current_time,
+                                              const arma::mat44& odom); 
+
         std::vector<utility::localisation::LocalisationFieldObject> GetPossibleObjects(
             const messages::vision::Goal& ambiguous_object);
 

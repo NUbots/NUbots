@@ -68,7 +68,7 @@ namespace modules {
                 },
                 [this] (const std::set<LimbID>& givenLimbs) {
                     if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
-                        // legs are available, start walking
+                        // legs are available, start 
                         stanceReset();
                         updateHandle.enable();
                     }

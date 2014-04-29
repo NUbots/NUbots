@@ -79,6 +79,7 @@ namespace localisation {
 
         void TimeUpdate(double seconds);
         void TimeUpdate(double seconds, const messages::localisation::FakeOdometry& odom);
+        void TimeUpdate(double seconds, const arma::mat44& odom);
 
 
         friend std::ostream& operator<<(std::ostream &os, const RobotHypothesis& h);
@@ -111,6 +112,7 @@ namespace localisation {
 
         void TimeUpdate(double seconds);
         void TimeUpdate(double seconds, const messages::localisation::FakeOdometry& odom);
+        void TimeUpdate(double seconds, const arma::mat44& odom);
 
         void MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,
