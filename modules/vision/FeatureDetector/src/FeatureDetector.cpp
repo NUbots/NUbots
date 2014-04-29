@@ -242,16 +242,19 @@ namespace modules {
             on<Trigger<ClassifiedImage>, Options<Single, Sync<GoalDetectorConfig>>>([this](const ClassifiedImage& classifiedImage) {
                 if (classifiedImage.matchedHorizontalSegments.count(messages::vision::GOAL_COLOUR) &&
                     classifiedImage.matchedVerticalSegments.count(messages::vision::GOAL_COLOUR)) {
+                    // NUClear::log("Goal Detector Start");
                     emit(
                         m_goalDetector.run(m_visionKinematics,
                                            classifiedImage.matchedHorizontalSegments.at(messages::vision::GOAL_COLOUR),
                                            classifiedImage.matchedVerticalSegments.at(messages::vision::GOAL_COLOUR))
                         );
+                    // NUClear::log("Goal Detector End");
                 }
             });
 
             //m_detectBalls =
             on<Trigger<ClassifiedImage>, Options<Single, Sync<BallDetectorConfig>>>([this](const ClassifiedImage& classifiedImage) {
+                // NUClear::log("Ball Detector Start");
                 emit(
                     m_ballDetector.run(
                                         classifiedImage.matchedHorizontalSegments.at(messages::vision::BALL_COLOUR),
@@ -262,10 +265,12 @@ namespace modules {
                                         m_visionKinematics
                                        )
                 );
+                // NUClear::log("Ball Detector End");
             });
 
             //m_detectObstacles =
             on<Trigger<ClassifiedImage>, Options<Single, Sync<ObstacleDetectorConfig>>>([this](const ClassifiedImage& classifiedImage) {
+                // NUClear::log("Obstacle Detector Start");                
                 emit(
                     m_obstacleDetector.run(classifiedImage.greenHorizonInterpolatedPoints,
                                            *(classifiedImage.LUT),
@@ -275,6 +280,8 @@ namespace modules {
                                            m_visionKinematics
                                           )
                 );
+                // NUClear::log("Obstacle Detector End");                
+
             });
 
         }
