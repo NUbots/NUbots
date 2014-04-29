@@ -95,8 +95,12 @@ namespace localisation {
 
     void MMKFRobotLocalisationEngine::ProcessAmbiguousObjects(
         const std::vector<messages::vision::Goal>& ambiguous_objects) {
+        
+        bool pair_observations_enabled = 
+            cfg_.goal_pair_observation_enabled ||
+            cfg_.angle_between_goals_observation_enabled;
 
-        if (GoalPairObserved(ambiguous_objects)) {
+        if (pair_observations_enabled && GoalPairObserved(ambiguous_objects)) {
             std::vector<messages::vision::VisionObject> vis_objs;
             // Ensure left goal is always first.
             if (ambiguous_objects[0].type == messages::vision::Goal::Type::LEFT){
@@ -112,7 +116,11 @@ namespace localisation {
                  field_description_->GetLFO(LFOId::kGoalYR)}
             };
 
-            robot_models_.AmbiguousMeasurementUpdate(vis_objs, objs);
+            if(cfg_.goal_pair_observation_enabled)
+                robot_models_.AmbiguousMeasurementUpdate(vis_objs, objs);
+            
+            if (cfg_.angle_between_goals_observation_enabled)
+                robot_models_.AmbiguousMultipleMeasurementUpdate(vis_objs, objs);
         } else {
             for (auto& ambiguous_object : ambiguous_objects) {
                 // Get a vector of all field objects that the observed object could

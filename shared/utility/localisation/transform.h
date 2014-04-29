@@ -27,20 +27,14 @@ namespace localisation {
 namespace transform {
 
     inline arma::vec RobotBall2FieldBall(const arma::vec& robot_pos,
-                                          const arma::vec& robot_heading,
-                                          const arma::vec& ball_pos) {
+                                         const arma::vec& robot_heading,
+                                         const arma::vec& ball_pos) {
         arma::vec u = arma::normalise(robot_heading);
         arma::mat rot = arma::mat({  u[0], u[1],
-                            -u[1], u[0] });
+                                    -u[1], u[0] });
         rot.resize(2,2);
         // Rotate ball_pos by -robot_heading, then add robot_pos.
         return rot * ball_pos + robot_pos;
-
-
-        // double t = -std::atan2(robot_heading[1], robot_heading[0]);
-        // arma::mat22 rot = {  std::cos(t), -std::sin(t),
-        //                      std::sin(t),  std::cos(t) };
-        // return rot * ball_pos + robot_pos;
     }
 
 }

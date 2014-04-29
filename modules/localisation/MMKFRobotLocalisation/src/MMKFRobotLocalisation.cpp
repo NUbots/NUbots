@@ -48,14 +48,20 @@ namespace localisation {
           Reactor(std::move(environment)) {
 
         on<Trigger<Configuration<MultiModalRobotModelConfig>>>(
-            "Configuration Update",
+            "MultiModalRobotModelConfig Update",
             [this](const Configuration<MultiModalRobotModelConfig>& config) {
             engine_->UpdateConfiguration(config);
             NUClear::log("Localisation config finished successfully!");
         });
 
+        on<Trigger<Configuration<MMKFRobotLocalisationEngineConfig>>>(
+            "MMKFRobotLocalisationEngineConfig Update",
+            [this](const Configuration<MMKFRobotLocalisationEngineConfig>& config) {
+            engine_->UpdateConfiguration(config);
+        });
+
         on<Trigger<Configuration<FieldDescriptionConfig>>>(
-            "Configuration Update",
+            "FieldDescriptionConfig Update",
             [this](const Configuration<FieldDescriptionConfig>& config) {
             auto fd = std::make_shared<utility::localisation::FieldDescription>(config);
             engine_->set_field_description(fd);
