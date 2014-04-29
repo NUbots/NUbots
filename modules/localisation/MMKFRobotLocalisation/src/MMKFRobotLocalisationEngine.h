@@ -38,7 +38,7 @@ namespace localisation {
     class MMKFRobotLocalisationEngine {
         public:
 
-        MMKFRobotLocalisationEngine() : cfg_({true}) {
+        MMKFRobotLocalisationEngine() : cfg_({true, true}) {
             last_time_update_time_ = NUClear::clock::now();
         }
 
