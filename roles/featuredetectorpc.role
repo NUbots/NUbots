@@ -1,0 +1,13 @@
+ADD_ROLE(
+    NAME featuredetectorpc
+    MODULES
+        support::SignalCatcher
+        support::configuration::ConfigSystem
+        input::LinuxCamera
+        vision::LUTClassifier
+        vision::FeatureDetector
+        support::NUbugger
+        #platform::darwin::HardwareIO
+        #platform::darwin::SensorFilter
+)
+
