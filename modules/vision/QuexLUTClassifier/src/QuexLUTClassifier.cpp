@@ -32,12 +32,42 @@ namespace modules {
 
             //on<Trigger<Every<10, Per<std::chrono::second>>>([this] (const time_t& t) {});
 
-            on<Trigger<Image>, With<LookUpTable, std::vector<ScanStrategy>>, Options<Single>>([this](const Image& image, const LookUpTable& lut) {
+            on<Trigger<Image>, With<LookUpTable, Sensors>, Options<Single>>([this](const Image& image, const LookUpTable& lut, const Sensors& sensors) {
 
 
+                // We need a quex classifier object
+                // We need a way of passing in the LUTified data to the classifer object
+
+                // Make a classified image
+                auto classifiedimage out = std::make_unique<ClassifiedImage>();
+
+                // Cast lines to find the green horizon
+                //      Get the kinematics horizon
+                //      Cast lines from slightly above it to the bottom of the image
+                //      Cast them at a width that will find a ball at the bottom of the image
+                //      Convex hull the green horizon
+
+                // Cast lines down from the green horizon to find the ball at varying depths
+                //      Calculate the line distances given kinematics etc...
+                //      Cast the lines and classify
+
+                // Cast horizontal lines to find the goals
+                //      Cast horizontal lines above the green horizon and slightly below
+
+                // Cross hatch the ball locations
+                //      Get the midpoints for orange
+                //      do a p-norm the midpoints to find a "centre"
+                //      Using the expected ball size for that distance cross hatch around to cover
+
+                // Cross hatch the goal locations
+                //      Get the transition points for yellow
+                //      using the segments, ensure that there are horizontal hatches along the goal height
+                //      find the lowest and highest pairs and hatch around it to find the bottoms and tops
+                //      cast several close horizontal lines at the tops to find the crossbar
+                //      Cast vertical lines to finish the crossbar
 
                 for(strategy : strategies) {
-                    std::vector<segment> a = strategy1.request(classifiedimage);
+                    std::vector<segment> a = strategy1.request(*classifiedimage);
                     segments = quex.classify(image, lut, a);
                     strategy1.resolve(segments, classifiedImage);
                 }

@@ -24,7 +24,7 @@
 #endif
 
 #define QUEX_SETTING_VERSION           "0.64.8"
-#define QUEX_SETTING_BUILD_DATE        "Thu Apr 10 14:30:00 2014"
+#define QUEX_SETTING_BUILD_DATE        "Mon Apr 28 02:38:57 2014"
 #define QUEX_SETTING_ANALYZER_VERSION  "0.0.0-pre-release"
 
 #ifndef    __QUEX_OPTION_PLAIN_C
@@ -117,7 +117,7 @@
 #define    QUEX_OPTION_LINE_NUMBER_COUNTING         
 #endif
 #ifndef    QUEX_OPTION_COLUMN_NUMBER_COUNTING          
-#define    QUEX_OPTION_COLUMN_NUMBER_COUNTING       
+/* #define QUEX_OPTION_COLUMN_NUMBER_COUNTING */       
 #endif
 
 #define    QUEX_IF_IS_NEWLINE(X)    if( X == '\n' )
@@ -131,7 +131,7 @@
  *    then code for mode transition control is inserted. It can be deactivated
  *    by commenting the following option out.                                  */
 #ifndef QUEX_OPTION_RUNTIME_MODE_TRANSITION_CHECK
-#define    QUEX_OPTION_RUNTIME_MODE_TRANSITION_CHECK
+/* #define QUEX_OPTION_RUNTIME_MODE_TRANSITION_CHECK */
 #endif
 
 #ifndef    QUEX_SETTING_MODE_STACK_SIZE 
@@ -143,7 +143,7 @@
 
 /* Include Stack Support                                                   */
 #ifndef   QUEX_OPTION_INCLUDE_STACK
-#define    QUEX_OPTION_INCLUDE_STACK
+/* #define QUEX_OPTION_INCLUDE_STACK */
 #endif
 
 /* BLC -- Buffer Limit Code:
@@ -189,7 +189,7 @@
 #endif
 
 #ifndef  QUEX_OPTION_STRING_ACCUMULATOR
-#define    QUEX_OPTION_STRING_ACCUMULATOR
+/* #define QUEX_OPTION_STRING_ACCUMULATOR */
 #endif 
 /* Initial size of the character accumulator. */
 #ifndef     QUEX_SETTING_ACCUMULATOR_INITIAL_SIZE
