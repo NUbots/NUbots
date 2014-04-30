@@ -53,9 +53,10 @@ node packer-virtualbox-iso, packer-vmware-iso {
   $username = 'vagrant'
 
   # nuclear::build_dep
-  include gcc48
+  # include gcc48
   include catch
-  include zmq
+  # include zmq
+  package { 'libzmq3-dev': ensure => latest }
 
   # nuclearport::build_dep
   package { 'build-essential': ensure => latest }
