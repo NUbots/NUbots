@@ -311,7 +311,7 @@ namespace modules {
                 message.set_utc_timestamp(std::time(0));
 
                 Message::Vision* api_vision = message.mutable_vision();
-                //std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : sending " << goals.size() << " goals to NUbugger." << std::endl;
+                //NUClear::log("NUbugger emmitting goals: ", goals.size());
                 for (auto& goal : goals){
                     Message::VisionFieldObject* api_goal = api_vision->add_vision_object();
 

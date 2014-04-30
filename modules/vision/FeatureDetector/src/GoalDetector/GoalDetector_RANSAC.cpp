@@ -484,6 +484,7 @@ namespace modules {
             std::unique_ptr<std::vector<messages::vision::Goal>> goal_message = std::unique_ptr<std::vector<messages::vision::Goal>>(new std::vector<messages::vision::Goal>());
 
             for (auto& post : *goal_posts){
+                //NUClear::log("Checking post.", post.valid ? "VALID\n" : "INVALID\n", post);
                 if(post.valid){
                     goal_message->push_back(messages::vision::Goal());
                     goal_message->back().sphericalFromNeck = post.m_location.bodyRelativeSpherical;
@@ -504,7 +505,6 @@ namespace modules {
 
                     goal_message->back().screen_quad = post.m_corners.getVertices();
 
-                    //NUClear::log("Emitting ", post);
                 }
             }
 
