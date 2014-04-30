@@ -20,13 +20,20 @@
 #include <math.h> //needed for normalisation function
 #include <assert.h>
 #include "InverseDepthPointModel.h" //includes armadillo
+#include "messages/localisation/FieldObject.h"
+#include "messages/input/Sensors.h"
 
 #include <iostream>
 
 namespace utility {
     namespace math {
         namespace kalman {
+
+            using messages::localisation::Self;
+            using messages::input::Sensors;
+
             arma::vec::fixed<InverseDepthPointModel::size> InverseDepthPointModel::limitState(const arma::vec::fixed<size>& state) {
+                
                 return state;
             }
 
@@ -36,11 +43,17 @@ namespace utility {
             // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation.
             // @return The new estimated system state.
             arma::vec::fixed<InverseDepthPointModel::size> InverseDepthPointModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& measurement) {
-               
                 return state;
             }
 
-            arma::vec InverseDepthPointModel::predictedObservation(const arma::vec::fixed<size>& state, std::nullptr_t) {
+            arma::vec InverseDepthPointModel::predictedObservation(const arma::vec::fixed<size>& state, const std::pair<const Sensors&, const Self&> stateData) {
+                arma::mat44 robotToWorld_world = arma::mat44({stateData.second.heading[0], -stateData.second.heading[1], 0,     StateData.second.position[0],
+                                                              stateData.second.heading[1],  stateData.second.heading[0], 0,     stateData.second.position[1],
+                                                                                        0,                            0, 1, stateData.first.bodyCentreHeight,
+                                                                                        0,                            0, 0,                                1});
+                arma::mat44 cameraToRobot_robot = stateData.first.forwardKinematics[ServoID::HEAD_PITCH];
+                arma::vec4 cameraToFeatureVector_cam =  * 
+
                 return state;
             }
 

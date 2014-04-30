@@ -34,7 +34,7 @@ namespace modules {
         using messages::vision::SLAMEObjects;
         using messages::input::Image;
         using messages::localisation::Self;
-        using messages/input/Sensors;
+        using messages::input::Sensors;
 
         using utility::vision::ExtractedFeature;
         using utility::vision::FeatureExtractor;

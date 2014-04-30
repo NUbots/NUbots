@@ -33,8 +33,8 @@ namespace modules {
         class SLAME : public NUClear::Reactor {
         private:
             std::vector<float> featureStrengths;
-            std::vector<ExtractedFeature> features;
-            std::vector<SLAMEFeatureUKF> featureFilters;
+            std::vector<utility::vision::ExtractedFeature> features;
+            std::vector<utility::vision::SLAMEFeatureFilter> featureFilters;
 
             utility::vision::FeatureExtractor featureExtractor;
 

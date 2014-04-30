@@ -30,6 +30,8 @@ namespace utility {
                 //(x,y,z,rho,theta,phi)
                 static constexpr size_t size = 6;
 
+                static constexpr kX, kY, kZ, kRHO, kTHETA, kPHI = 0,1,2,3,4,5;
+
                 InverseDepthPointModel() {} // empty constructor
 
                 arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& measurement);

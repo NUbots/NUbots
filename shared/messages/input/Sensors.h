@@ -67,6 +67,8 @@ namespace messages {
 
             arma::mat44 odometry;
 
+            float bodyCentreHeight;
+
             arma::vec4 centreOfMass;
 
             std::vector<Servo> servos;
