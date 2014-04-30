@@ -119,6 +119,7 @@ namespace modules {
             arma::vec4 hipImuParamY;
             arma::vec4 armImuParamX;
             arma::vec4 armImuParamY;
+            double balanceWeight;
 
             // Support bias parameters to reduce backlash-based instability
             float velFastForward;

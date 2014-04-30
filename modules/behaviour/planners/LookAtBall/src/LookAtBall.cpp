@@ -81,9 +81,12 @@ namespace modules {
                         const double scanPitch = 1.0; 
                         
                         
-                        const size_t panPoints = 6;
+                        const size_t panPoints = 4;
                         for (size_t i = 0; i < panPoints+1; ++i) {
-                            angles.emplace_back(LookAtPosition {i*scanYaw/panPoints-scanYaw/2,scanPitch*(i%2)-scanPitch/2});
+                            angles.emplace_back(LookAtPosition {i*scanYaw/panPoints-scanYaw/2.0,scanPitch*(i%2)-scanPitch*0.6});
+                        }
+                        for (size_t i = 0; i < panPoints+1; ++i) {
+                            angles.emplace_back(LookAtPosition {-(i*scanYaw/panPoints-scanYaw/2.0),scanPitch*((i+1)%2)-scanPitch*0.6});
                         }
                         
                         emit(std::make_unique<std::vector<LookAtPosition>>(angles));
