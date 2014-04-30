@@ -51,9 +51,10 @@ namespace messages {
          * @author Trent Houliston
          */
         struct ExecuteScriptByName {
-            ExecuteScriptByName(const size_t& id, const std::string script, NUClear::clock::time_point start = NUClear::clock::now()) : sourceId(id), script(script), start(start) {};
+            ExecuteScriptByName(const size_t& id, const std::string script, NUClear::clock::time_point start = NUClear::clock::now()) : sourceId(id), scripts({script}), start(start) {};
+            ExecuteScriptByName(const size_t& id, const std::vector<std::string> scripts, NUClear::clock::time_point start = NUClear::clock::now()) : sourceId(id), scripts(scripts), start(start) {};
             size_t sourceId;
-            std::string script;
+            std::vector<std::string> scripts;
             NUClear::clock::time_point start;
         };
 

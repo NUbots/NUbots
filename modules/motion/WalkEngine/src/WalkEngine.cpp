@@ -334,7 +334,7 @@ namespace modules {
 
             ph0 = ph;
             moving = true;
-
+    
             ph = (time - tLastStep) / tStep;
 
             if (ph > 1) {

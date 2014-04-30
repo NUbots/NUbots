@@ -73,10 +73,10 @@ namespace modules {
 
                     // Check with side we're getting up from
                     if (sensors.orientation(0,2) < 0.0) {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "StandUpFront.json"));
+                        emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"StandUpFront.json","Stand.json"})));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "StandUpBack.json"));
+                        emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"StandUpBack.json","Stand.json"})));
                     }
                     updatePriority(EXECUTION_PRIORITY);
                 });
