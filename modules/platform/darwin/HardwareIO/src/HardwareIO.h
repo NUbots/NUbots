@@ -38,6 +38,7 @@ namespace darwin {
     private:
         /// @brief Our internal darwin class that is used for interacting with the hardware
         Darwin::Darwin darwin;
+        Converter converter;
 
     public:
         /// @brief called by a Powerplant to construct this reactor
