@@ -22,6 +22,7 @@
 #include "InverseDepthPointModel.h" //includes armadillo
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/Sensors.h"
+#include "utility/motion/ForwardKinematics.h"
 
 #include <iostream>
 
@@ -47,14 +48,24 @@ namespace utility {
             }
 
             arma::vec InverseDepthPointModel::predictedObservation(const arma::vec::fixed<size>& state, const std::pair<const Sensors&, const Self&> stateData) {
+                
                 arma::mat44 robotToWorld_world = arma::mat44({stateData.second.heading[0], -stateData.second.heading[1], 0,     StateData.second.position[0],
                                                               stateData.second.heading[1],  stateData.second.heading[0], 0,     stateData.second.position[1],
                                                                                         0,                            0, 1, stateData.first.bodyCentreHeight,
                                                                                         0,                            0, 0,                                1});
-                arma::mat44 cameraToRobot_robot = stateData.first.forwardKinematics[ServoID::HEAD_PITCH];
-                arma::vec4 cameraToFeatureVector_cam =  * 
 
-                return state;
+                arma::mat44 cameraToBody_body = stateData.first.forwardKinematics[ServoID::HEAD_PITCH];
+
+                arma::mat44 robotToBody_body = arma::eye(4,4);
+                worldToBody_body.submat(0,0,2,2) = stateData.first.orientation;
+
+                arma::mat44 worldToCamera_camera = utility::motion::kinematics::orthonormalInverse(cameraToBody_body) * robotToBody_body * utility::motion::kinematics::orthonormalInverse(robotToWorld_world);
+
+                arma::vec4 initialObservedDirection = utility::math::matrix::yRotationMatrix(-state[5],4) * utility::math::matrix::yRotationMatrix(state[4],4) * arma::zeros(4,1);
+                
+                arma::vec4 cameraToFeatureVector_cam =  worldToCamera_camera * ((arma::vec4({state[0],state[1],state[2],1}) - worldToCamera_camera.submat(0,3,3,3)) * state[3] + initialObservedDirection);
+
+                return cameraToFeatureVector_cam.rows(1,2);     //Camera y,z = hor, vert
             }
 
 
@@ -63,7 +74,6 @@ namespace utility {
             }
 
             arma::mat::fixed<InverseDepthPointModel::size, InverseDepthPointModel::size> InverseDepthPointModel::processNoise() {
-
                 return arma::eye(size, size) *1e-6; //std::numeric_limits<double>::epsilon();
             }
 
