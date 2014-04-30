@@ -17,30 +17,28 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_WALKSTRATEGY_H
-#define MESSAGES_BEHAVIOUR_WALKSTRATEGY_H
+#ifndef MESSAGES_MOTION_KICKCOMMAND_H
+#define MESSAGES_MOTION_KICKCOMMAND_H
 
+#include <nuclear>
+#include <armadillo>
+#include "messages/behaviour/Action.h"
 
 namespace messages {
-    namespace behaviour {
-        struct LookAtAngle {
-            double yaw;
-            double pitch;
-            //double width;
-        };
-        
-        struct LookAtPosition {
-            double yaw;
-            double pitch;
-        };
-        
-        struct LookAtPoint {
-            double x;
-            double y;
-            double xError;
-            double yError;
-        };
-    }
-}
+    namespace motion {
 
-#endif
+        /**
+         * TODO document
+         *
+         * @author Trent Houliston
+         * @author Brendan Annable
+         */
+        struct KickCommand {
+            arma::vec3 direction; // force is the magnitude
+            behaviour::LimbID leg;
+        };
+        
+    }  // motion
+}  // messages
+
+#endif  // MESSAGES_MOTION_KICKCOMMAND_H

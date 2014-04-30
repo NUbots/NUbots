@@ -59,5 +59,6 @@
 
     "velCommandX" : 0.035,
     "velCommandY" : 0.0,
-    "velCommandAngular" : 0.0
+    "velCommandAngular" : 0.0,
+    "balanceWeight" : 0.7
 }

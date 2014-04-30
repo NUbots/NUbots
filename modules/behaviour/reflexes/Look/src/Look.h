@@ -34,7 +34,10 @@ namespace modules {
             class Look : public NUClear::Reactor {
             private:
                 const size_t id;
-                double fastSpeed,slowSpeed,headYaw,headPitch,panTime,minYaw,maxYaw,minPitch,maxPitch;
+                double fastSpeed,slowSpeed,headYaw,headPitch,panTime,minYaw,maxYaw,minPitch,maxPitch,screenPadding;
+                
+                double prevPitch,prevYaw;
+                time_t lastPanEnd;
             public:
                 explicit Look(std::unique_ptr<NUClear::Environment> environment);
                 static constexpr const char* CONFIGURATION_PATH = "Look.json";

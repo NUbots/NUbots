@@ -46,6 +46,13 @@ namespace localisation {
         last_time_update_time_ = current_time;
         robot_models_.TimeUpdate(seconds, odom);
     }
+    
+    void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
+                                              const arma::mat44& odom) {
+        double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
+        last_time_update_time_ = current_time;
+        robot_models_.TimeUpdate(seconds, odom);
+    }
 
     std::vector<LocalisationFieldObject> MMKFRobotLocalisationEngine::GetPossibleObjects(
             const messages::vision::Goal& ambiguous_object) {
@@ -88,8 +95,12 @@ namespace localisation {
 
     void MMKFRobotLocalisationEngine::ProcessAmbiguousObjects(
         const std::vector<messages::vision::Goal>& ambiguous_objects) {
+        
+        bool pair_observations_enabled = 
+            cfg_.goal_pair_observation_enabled ||
+            cfg_.angle_between_goals_observation_enabled;
 
-        if (GoalPairObserved(ambiguous_objects)) {
+        if (pair_observations_enabled && GoalPairObserved(ambiguous_objects)) {
             std::vector<messages::vision::VisionObject> vis_objs;
             // Ensure left goal is always first.
             if (ambiguous_objects[0].type == messages::vision::Goal::Type::LEFT){
@@ -105,7 +116,11 @@ namespace localisation {
                  field_description_->GetLFO(LFOId::kGoalYR)}
             };
 
-            robot_models_.AmbiguousMeasurementUpdate(vis_objs, objs);
+            if(cfg_.goal_pair_observation_enabled)
+                robot_models_.AmbiguousMeasurementUpdate(vis_objs, objs);
+            
+            if (cfg_.angle_between_goals_observation_enabled)
+                robot_models_.AmbiguousMultipleMeasurementUpdate(vis_objs, objs);
         } else {
             for (auto& ambiguous_object : ambiguous_objects) {
                 // Get a vector of all field objects that the observed object could

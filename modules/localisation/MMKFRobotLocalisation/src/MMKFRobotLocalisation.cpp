@@ -27,6 +27,7 @@
 #include "utility/localisation/FieldDescription.h"
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
 #include "MMKFRobotLocalisationEngine.h"
@@ -38,6 +39,7 @@ using utility::localisation::LocalisationFieldObject;
 using messages::localisation::FakeOdometry;
 using modules::localisation::MultiModalRobotModelConfig;
 using utility::localisation::FieldDescriptionConfig;
+using messages::input::Sensors;
 
 namespace modules {
 namespace localisation {
@@ -46,14 +48,20 @@ namespace localisation {
           Reactor(std::move(environment)) {
 
         on<Trigger<Configuration<MultiModalRobotModelConfig>>>(
-            "Configuration Update",
+            "MultiModalRobotModelConfig Update",
             [this](const Configuration<MultiModalRobotModelConfig>& config) {
             engine_->UpdateConfiguration(config);
             NUClear::log("Localisation config finished successfully!");
         });
 
+        on<Trigger<Configuration<MMKFRobotLocalisationEngineConfig>>>(
+            "MMKFRobotLocalisationEngineConfig Update",
+            [this](const Configuration<MMKFRobotLocalisationEngineConfig>& config) {
+            engine_->UpdateConfiguration(config);
+        });
+
         on<Trigger<Configuration<FieldDescriptionConfig>>>(
-            "Configuration Update",
+            "FieldDescriptionConfig Update",
             [this](const Configuration<FieldDescriptionConfig>& config) {
             auto fd = std::make_shared<utility::localisation::FieldDescription>(config);
             engine_->set_field_description(fd);
@@ -81,11 +89,18 @@ namespace localisation {
             emit(std::move(robot_msg));
         });
 
-       on<Trigger<FakeOdometry>,
+        on<Trigger<FakeOdometry>,
            Options<Sync<MMKFRobotLocalisation>>
           >("MMKFRobotLocalisation Odometry", [this](const FakeOdometry& odom) {
             auto curr_time = NUClear::clock::now();
             engine_->TimeUpdate(curr_time, odom);
+        });
+
+        on<Trigger<Sensors>,
+           Options<Sync<MMKFRobotLocalisation>>
+          >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
+            auto curr_time = NUClear::clock::now();
+            engine_->TimeUpdate(curr_time, sensors.odometry);
         });
 
         on<Trigger<std::vector<messages::vision::Goal>>,

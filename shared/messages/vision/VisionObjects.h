@@ -32,7 +32,7 @@ namespace messages {
         public:
             VisionObject() {}
 
-            arma::vec3 sphericalFromNeck;   //neckRelativeRadial
+            arma::vec3 sphericalFromNeck;   //bodyRelativeSpherical
             arma::vec3 sphericalError;
             arma::vec2 screenAngular;   //Polar around view vector on image
             arma::vec2 screenCartesian;

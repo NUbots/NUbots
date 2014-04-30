@@ -68,7 +68,7 @@ namespace modules {
                 },
                 [this] (const std::set<LimbID>& givenLimbs) {
                     if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
-                        // legs are available, start walking
+                        // legs are available, start 
                         stanceReset();
                         updateHandle.enable();
                     }
@@ -98,7 +98,7 @@ namespace modules {
 
             on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
                 start();
-                emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 25, 10 }}));
+                emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 25, 10 }})); // TODO: config
             });
 
             on<Trigger<WalkStopCommand>>([this](const WalkStopCommand&) {
@@ -189,6 +189,8 @@ namespace modules {
 
                 frontComp = config["frontComp"];
                 AccelComp = config["AccelComp"];
+                
+                balanceWeight = config["balanceWeight"];
 
                 // gInitial body swing 
                 supportModYInitial = config["supportModYInitial"];
@@ -583,8 +585,7 @@ namespace modules {
             // get effective gyro angle considering body angle offset
             arma::mat33 kinematicGyroSORAMatrix = sensors.orientation * ankleRotation;   //DOUBLE TRANSPOSE       
             std::pair<arma::vec3, double> axisAngle = utility::math::matrix::axisAngleFromRotationMatrix(kinematicGyroSORAMatrix);
-            float weight = 1;
-            arma::vec3 kinematicsGyro = axisAngle.first * (axisAngle.second / weight);
+            arma::vec3 kinematicsGyro = axisAngle.first * (axisAngle.second / balanceWeight);
 
             float gyroRoll0 = -kinematicsGyro[0]*180.0/M_PI;
             float gyroPitch0 = -kinematicsGyro[1]*180.0/M_PI;

@@ -31,12 +31,22 @@
 #include "messages/vision/SaveLookUpTable.h"
 #include "messages/localisation/FieldObject.h"
 #include "utility/nubugger/NUgraph.h"
-
+#include "utility/math/angle.h"
+#include "utility/math/coordinates.h"
+#include "utility/nubugger/NUgraph.h"
+#include "utility/localisation/transform.h"
+#include "messages/vision/VisionObjects.h"
+#include "messages/support/Configuration.h"
+#include "messages/localisation/FieldObject.h"
+// #include "BallModel.h"
 #include "utility/image/ColorModelConversions.h"
 
 namespace modules {
     namespace support {
 
+
+        using utility::nubugger::graph;
+        using messages::support::Configuration;
         using messages::input::Sensors;
         using messages::input::Image;
         using messages::vision::ClassifiedImage;
@@ -48,6 +58,7 @@ namespace modules {
         using messages::support::nubugger::proto::Message;
         using messages::support::nubugger::proto::Message_Type;
         using messages::vision::Goal;
+        using messages::vision::Ball;
         using messages::vision::SaveLookUpTable;
 
         NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
@@ -300,7 +311,7 @@ namespace modules {
                 message.set_utc_timestamp(std::time(0));
 
                 Message::Vision* api_vision = message.mutable_vision();
-                //std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : sending " << goals.size() << " goals to NUbugger." << std::endl;
+                //NUClear::log("NUbugger emmitting goals: ", goals.size());
                 for (auto& goal : goals){
                     Message::VisionFieldObject* api_goal = api_vision->add_vision_object();
 
@@ -324,6 +335,31 @@ namespace modules {
                 send(message);
             });
 
+            on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Ball> balls){
+                Message message;
+
+                message.set_type(Message::VISION);
+                message.set_utc_timestamp(std::time(0));
+
+                Message::Vision* api_vision = message.mutable_vision();
+                //std::cout<< "NUbugger::on<Trigger<std::vector<Ball>>> : sending " << balls.size() << " balls to NUbugger." << std::endl;
+                for (auto& ball : balls){
+                    Message::VisionFieldObject* api_ball = api_vision->add_vision_object();
+
+                    api_ball->set_shape_type(Message::VisionFieldObject::CIRCLE);
+                    api_ball->set_name("Ball");
+                    api_ball->set_width(ball.sizeOnScreen[0]);
+                    api_ball->set_height(ball.sizeOnScreen[1]);
+                    api_ball->set_screen_x(ball.screenCartesian[0]);
+                    api_ball->set_screen_y(ball.screenCartesian[1]);
+
+                    api_ball->set_radius(ball.diameter / 2.0);
+                    for(auto& coord : ball.sphericalFromNeck){
+                        api_ball->add_measured_relative_position(coord);
+                    }
+                }
+                send(message);
+            });
 
             on<Trigger<messages::localisation::FieldObject>,
                Options<Priority<NUClear::LOW>>>([this](const messages::localisation::FieldObject& field_object) {
@@ -349,10 +385,77 @@ namespace modules {
                     api_model->set_sr_yy(model.sr_yy);
                     api_model->set_lost(model.lost);
                 }
-
                 send(message);
             });
 
+            on<Trigger<Every<100, std::chrono::milliseconds>>,
+               With<messages::localisation::Ball>,
+               // With<messages::vision::Ball>,
+               With<std::vector<messages::localisation::Self>>,
+               Options<Single>>("Localisation Ball",
+                [this](const time_t&,
+                       const messages::localisation::Ball& ball,
+                       // const messages::vision::Ball& vision_ball,
+                       const std::vector<messages::localisation::Self>& robots) {
+                if(robots.size() > 0){                
+                    arma::vec2 ball_pos = utility::localisation::transform::RobotBall2FieldBall(
+                        robots[0].position,robots[0].heading, ball.position);
+
+                    // Ball message
+                    auto ball_msg = std::make_unique<messages::localisation::FieldObject>();
+                    std::vector<messages::localisation::FieldObject::Model> ball_msg_models;
+                    messages::localisation::FieldObject::Model ball_model;
+                    ball_msg->name = "ball";
+                    ball_model.wm_x = ball_pos[0];
+                    ball_model.wm_y = ball_pos[1];
+                    ball_model.heading = 0;
+                    ball_model.sd_x = 0.1;
+                    ball_model.sd_y = 0.1;
+
+                    //Do we need to rotate the variances?
+                    ball_model.sr_xx = ball.sr_xx;
+                    ball_model.sr_xy = ball.sr_xy;
+                    ball_model.sr_yy = ball.sr_yy;
+                    ball_model.lost = false;
+                    ball_msg_models.push_back(ball_model);
+
+                    ball_msg->models = ball_msg_models;
+                    emit(std::move(ball_msg));
+                }
+            });
+            // Emit robot to NUbugger
+            on<Trigger<Every<100, std::chrono::milliseconds>>,
+               With<std::vector<messages::localisation::Self>>,
+               Options<Single>>("Localisation Self",
+                [this](const time_t&,
+                       const std::vector<messages::localisation::Self>& robots) {
+                if(robots.size() > 0){
+                    // Robot message
+                    auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
+                    std::vector<messages::localisation::FieldObject::Model> robot_msg_models;
+
+                    //for (auto& model : robots) {
+                    auto model = robots[0];
+                        messages::localisation::FieldObject::Model robot_model;
+                        robot_msg->name = "self";
+                        robot_model.wm_x = model.position[0];
+                        robot_model.wm_y = model.position[1];
+                        robot_model.heading = std::atan2(model.heading[1], model.heading[0]);
+                        robot_model.sd_x = 1;
+                        robot_model.sd_y = 0.25;
+                        robot_model.sr_xx = model.sr_xx; // * 100;
+                        robot_model.sr_xy = model.sr_xy; // * 100;
+                        robot_model.sr_yy = model.sr_yy; // * 100;
+                        robot_model.lost = false;
+                        robot_msg_models.push_back(robot_model);
+                    //}
+
+                    
+                    robot_msg->models = robot_msg_models;
+                    emit(std::move(robot_msg));
+                }
+            });
+      
             // When we shutdown, close our publisher
             on<Trigger<Shutdown>>([this](const Shutdown&) {
                 pub.close();
@@ -402,7 +505,7 @@ namespace modules {
                 message.set_utc_timestamp(std::time(0));
 
                 Message::LookupTable* api_lookup_table = message.mutable_lookuptable();
-                api_lookup_table->set_table(lut->getData(), LookUpTable::LUT_SIZE);
+                api_lookup_table->set_table(lut->getData());
 
                 send(message);
             }

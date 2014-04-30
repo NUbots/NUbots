@@ -49,7 +49,8 @@ namespace modules {
                                                 int MIN_GOAL_WIDTH_,
                                                 float GOAL_WIDTH_,
                                                 const DISTANCE_METHOD& GOAL_DISTANCE_METHOD_,
-                                                int EDGE_OF_SCREEN_MARGIN_) {
+                                                int EDGE_OF_SCREEN_MARGIN_,
+                                                float D2P_ADAPTIVE_THRESHOLD_) {
             MINIMUM_POINTS = MINIMUM_POINTS_;                                   // Minimum points needed to make a line (Min pts to line essentially)
                                                                                     // Original value: 25 / VisionConstants::HORIZONTAL_SCANLINE_SPACING;
             MAX_ITERATIONS_PER_FITTING = MAX_ITERATIONS_PER_FITTING_;               // Number of iterations per fitting attempt
@@ -77,6 +78,8 @@ namespace modules {
             GOAL_WIDTH = GOAL_WIDTH_;
             GOAL_DISTANCE_METHOD = GOAL_DISTANCE_METHOD_;
             EDGE_OF_SCREEN_MARGIN = EDGE_OF_SCREEN_MARGIN_;
+
+            D2P_ADAPTIVE_THRESHOLD = D2P_ADAPTIVE_THRESHOLD_;
         }
 
         // std::vector<ColourSegment> verticalSegments = ClassifiedImage::matched_vertical_segments[GOAL_COLOUR];
@@ -325,7 +328,8 @@ namespace modules {
                                    MIN_GOAL_WIDTH,
                                    GOAL_WIDTH,
                                    GOAL_DISTANCE_METHOD,
-                                   EDGE_OF_SCREEN_MARGIN);
+                                   EDGE_OF_SCREEN_MARGIN,
+                                   D2P_ADAPTIVE_THRESHOLD);
 
                 return std::move(  std::unique_ptr<std::vector<Goal>>(  new std::vector<Goal>(1, goal)  )  );
             }
@@ -372,7 +376,8 @@ namespace modules {
                                            MIN_GOAL_WIDTH,
                                            GOAL_WIDTH,
                                            GOAL_DISTANCE_METHOD,
-                                           EDGE_OF_SCREEN_MARGIN);
+                                           EDGE_OF_SCREEN_MARGIN,
+                                           D2P_ADAPTIVE_THRESHOLD);
                     rightPost.setParameters(THROWOUT_SHORT_GOALS,
                                             THROWOUT_NARROW_GOALS,
                                             THROWOUT_ON_ABOVE_KIN_HOR_GOALS,
@@ -382,7 +387,8 @@ namespace modules {
                                             MIN_GOAL_WIDTH,
                                             GOAL_WIDTH,
                                             GOAL_DISTANCE_METHOD,
-                                            EDGE_OF_SCREEN_MARGIN);
+                                            EDGE_OF_SCREEN_MARGIN,
+                                            D2P_ADAPTIVE_THRESHOLD);
                     goals->push_back(leftPost);
                     goals->push_back(rightPost);
                 }
@@ -406,7 +412,8 @@ namespace modules {
                                         MIN_GOAL_WIDTH,
                                         GOAL_WIDTH,
                                         GOAL_DISTANCE_METHOD,
-                                        EDGE_OF_SCREEN_MARGIN);
+                                        EDGE_OF_SCREEN_MARGIN,
+                                        D2P_ADAPTIVE_THRESHOLD);
                     goals->push_back(goal);
                 }
             }
@@ -477,9 +484,10 @@ namespace modules {
             std::unique_ptr<std::vector<messages::vision::Goal>> goal_message = std::unique_ptr<std::vector<messages::vision::Goal>>(new std::vector<messages::vision::Goal>());
 
             for (auto& post : *goal_posts){
+                //NUClear::log("Checking post.", post.valid ? "VALID\n" : "INVALID\n", post);
                 if(post.valid){
                     goal_message->push_back(messages::vision::Goal());
-                    goal_message->back().sphericalFromNeck = post.m_location.neckRelativeRadial;
+                    goal_message->back().sphericalFromNeck = post.m_location.bodyRelativeSpherical;
                     //goal_message->back().sphericalError = goal_location.
                     goal_message->back().screenAngular = post.m_location.screenAngular;
                     goal_message->back().screenCartesian = post.m_location.screenCartesian;
@@ -497,7 +505,6 @@ namespace modules {
 
                     goal_message->back().screen_quad = post.m_corners.getVertices();
 
-                    //NUClear::log("Emitting ", post);
                 }
             }
 
