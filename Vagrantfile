@@ -12,9 +12,13 @@ Vagrant.configure("2") do |config|
     # Run ./b create_box virtualbox to create it.
     config.vm.box = "nubots-14.02"
   else
-    # 'precise32' is an old box, and should not be used.
-    config.vm.box = "precise32"
-    config.vm.box_url = "http://files.vagrantup.com/precise32.box"
+    # # 'precise32' was used prior to 2014-04-30.
+    # config.vm.box = "precise32"
+    # config.vm.box_url = "http://files.vagrantup.com/precise32.box"
+
+    # The NUbots changed to 'trusty32' on 2014-04-30.
+    config.vm.box = "trusty32"
+    config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-i386-vagrant-disk1.box"
   end
   
   # Create a public network, which generally matched to bridged network.
