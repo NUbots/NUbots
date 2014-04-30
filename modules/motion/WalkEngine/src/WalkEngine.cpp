@@ -346,6 +346,8 @@ namespace modules {
             if (iStep > iStep0 && stopRequest == 2) {
                 stopRequest = 0;
                 active = false;
+                emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 0, 0 }})); // TODO: config
+
                 return; // TODO: return "stop"
             }
 
