@@ -80,16 +80,16 @@ def box_exists(box_name, provider):
     return p2.communicate()[0] != ''
 
 def box_generated(provider):
-    return os.path.isfile("packer/nubots-ubuntu-12-04-x86-{}.box".format(provider))
+    return os.path.isfile("packer/nubots-ubuntu-14-04-x86-{}.box".format(provider))
 
 def packer_is_installed():
     return not call(['which', 'packer'])
 
 def packer(provider):
-    box_name = 'nubots-14.02'
+    box_name = 'nubots-14.04'
 
     if box_generated(provider):
-        call(['rm', 'nubots-ubuntu-12-04-x86-{}.box'.format(provider)], cwd='packer')
+        call(['rm', 'nubots-ubuntu-14-04-x86-{}.box'.format(provider)], cwd='packer')
     
     call(['packer', 'build', '-only={}-iso'.format(provider), 'template.json'], cwd='packer')
     
@@ -98,7 +98,7 @@ def packer(provider):
             call(['vagrant', 'box', 'remove', box_name]) # TODO: only remove box for given provider
         
         call(['vagrant', 'box', 'add', box_name,
-              'nubots-ubuntu-12-04-x86-{}.box'.format(provider)],
+              'nubots-ubuntu-14-04-x86-{}.box'.format(provider)],
              cwd='packer')
 
 def create_box(provider):

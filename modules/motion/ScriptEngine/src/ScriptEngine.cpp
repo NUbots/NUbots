@@ -38,13 +38,20 @@ namespace modules {
             });
 
             on<Trigger<messages::motion::ExecuteScriptByName>>([this](const messages::motion::ExecuteScriptByName& command) {
-                auto script = scripts.find(command.script);
+                NUClear::clock::duration offset(0);
+                for(const auto& scriptName : command.scripts) {
+                    auto script = scripts.find(scriptName);
 
-                if(script == std::end(scripts)) {
-                    throw std::runtime_error("The script " + command.script + " is not loaded in the system");
-                }
-                else {
-                    emit(std::make_unique<messages::motion::ExecuteScript>(command.sourceId, script->second, command.start));
+                    if(script == std::end(scripts)) {
+                        throw std::runtime_error("The script " + scriptName + " is not loaded in the system");
+                    }
+                    else {
+                        emit<Scope::DIRECT>(std::make_unique<messages::motion::ExecuteScript>(command.sourceId, script->second, command.start + offset));
+
+                        for(const auto& f : script->second.frames) {
+                            offset += f.duration;
+                        }
+                    }
                 }
             });
 

@@ -61,6 +61,55 @@ namespace modules {
         using messages::vision::Ball;
         using messages::vision::SaveLookUpTable;
 
+    void NUbugger::EmitLocalisationModels(
+    const std::unique_ptr<messages::localisation::FieldObject>& robot_model,
+    const std::unique_ptr<messages::localisation::FieldObject>& ball_model) {
+
+        Message message;
+
+        message.set_type(Message::LOCALISATION);
+        message.set_utc_timestamp(std::time(0));
+        auto* localisation = message.mutable_localisation();
+
+        auto* api_field_object = localisation->add_field_object();
+        api_field_object->set_name(robot_model->name);
+
+        for (messages::localisation::FieldObject::Model model : robot_model->models) {
+            auto* api_model = api_field_object->add_models();
+
+            api_model->set_wm_x(model.wm_x);
+            api_model->set_wm_y(model.wm_y);
+            api_model->set_heading(model.heading);
+            api_model->set_sd_x(model.sd_x);
+            api_model->set_sd_y(model.sd_y);
+            api_model->set_sr_xx(model.sr_xx);
+            api_model->set_sr_xy(model.sr_xy);
+            api_model->set_sr_yy(model.sr_yy);
+            api_model->set_lost(model.lost);
+        }
+
+        api_field_object = localisation->add_field_object();
+        api_field_object->set_name(ball_model->name);
+
+        for (messages::localisation::FieldObject::Model model : ball_model->models) {
+            auto* api_model = api_field_object->add_models();
+
+            api_model->set_wm_x(model.wm_x);
+            api_model->set_wm_y(model.wm_y);
+            api_model->set_heading(model.heading);
+            api_model->set_sd_x(model.sd_x);
+            api_model->set_sd_y(model.sd_y);
+            api_model->set_sr_xx(model.sr_xx);
+            api_model->set_sr_xy(model.sr_xy);
+            api_model->set_sr_yy(model.sr_yy);
+            api_model->set_lost(model.lost);
+        }
+
+
+        send(message);
+    }
+
+
         NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
             , pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB)
@@ -311,7 +360,7 @@ namespace modules {
                 message.set_utc_timestamp(std::time(0));
 
                 Message::Vision* api_vision = message.mutable_vision();
-                //std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : sending " << goals.size() << " goals to NUbugger." << std::endl;
+                //NUClear::log("NUbugger emmitting goals: ", goals.size());
                 for (auto& goal : goals){
                     Message::VisionFieldObject* api_goal = api_vision->add_vision_object();
 
@@ -361,33 +410,6 @@ namespace modules {
                 send(message);
             });
 
-            on<Trigger<messages::localisation::FieldObject>,
-               Options<Priority<NUClear::LOW>>>([this](const messages::localisation::FieldObject& field_object) {
-                Message message;
-
-                message.set_type(Message::LOCALISATION);
-                message.set_utc_timestamp(std::time(0));
-
-                auto* localisation = message.mutable_localisation();
-                auto* api_field_object = localisation->add_field_object();
-                api_field_object->set_name(field_object.name);
-
-                for (messages::localisation::FieldObject::Model model : field_object.models) {
-                    auto* api_model = api_field_object->add_models();
-
-                    api_model->set_wm_x(model.wm_x);
-                    api_model->set_wm_y(model.wm_y);
-                    api_model->set_heading(model.heading);
-                    api_model->set_sd_x(model.sd_x);
-                    api_model->set_sd_y(model.sd_y);
-                    api_model->set_sr_xx(model.sr_xx);
-                    api_model->set_sr_xy(model.sr_xy);
-                    api_model->set_sr_yy(model.sr_yy);
-                    api_model->set_lost(model.lost);
-                }
-                send(message);
-            });
-
             on<Trigger<Every<100, std::chrono::milliseconds>>,
                With<messages::localisation::Ball>,
                // With<messages::vision::Ball>,
@@ -420,22 +442,14 @@ namespace modules {
                     ball_msg_models.push_back(ball_model);
 
                     ball_msg->models = ball_msg_models;
-                    emit(std::move(ball_msg));
-                }
-            });
-            // Emit robot to NUbugger
-            on<Trigger<Every<100, std::chrono::milliseconds>>,
-               With<std::vector<messages::localisation::Self>>,
-               Options<Single>>("Localisation Self",
-                [this](const time_t&,
-                       const std::vector<messages::localisation::Self>& robots) {
-                if(robots.size() > 0){
+                    // emit(std::move(ball_msg));
+                
                     // Robot message
                     auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
                     std::vector<messages::localisation::FieldObject::Model> robot_msg_models;
 
-                    //for (auto& model : robots) {
-                    auto model = robots[0];
+                    for (auto& model : robots) {
+                    // auto model = robots[0];
                         messages::localisation::FieldObject::Model robot_model;
                         robot_msg->name = "self";
                         robot_model.wm_x = model.position[0];
@@ -448,11 +462,13 @@ namespace modules {
                         robot_model.sr_yy = model.sr_yy; // * 100;
                         robot_model.lost = false;
                         robot_msg_models.push_back(robot_model);
-                    //}
+                    }
 
                     
                     robot_msg->models = robot_msg_models;
-                    emit(std::move(robot_msg));
+                    // emit(std::move(robot_msg));
+
+                    EmitLocalisationModels(robot_msg, ball_msg);
                 }
             });
       
