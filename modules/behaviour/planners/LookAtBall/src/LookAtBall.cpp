@@ -78,15 +78,15 @@ namespace modules {
                         std::vector<LookAtPosition> angles;
                         
                         const double scanYaw = 1.5;
-                        const double scanPitch = 1.0; 
+                        const double scanPitch = 0.8; 
                         
                         
                         const size_t panPoints = 4;
                         for (size_t i = 0; i < panPoints+1; ++i) {
-                            angles.emplace_back(LookAtPosition {i*scanYaw/panPoints-scanYaw/2.0,scanPitch*(i%2)-scanPitch*0.6});
+                            angles.emplace_back(LookAtPosition {i*scanYaw/panPoints-scanYaw/2.0,scanPitch*(i%2)-scanPitch});
                         }
                         for (size_t i = 0; i < panPoints+1; ++i) {
-                            angles.emplace_back(LookAtPosition {-(i*scanYaw/panPoints-scanYaw/2.0),scanPitch*((i+1)%2)-scanPitch*0.6});
+                            angles.emplace_back(LookAtPosition {-(i*scanYaw/panPoints-scanYaw/2.0),scanPitch*((i+1)%2)-scanPitch});
                         }
                         
                         emit(std::make_unique<std::vector<LookAtPosition>>(angles));
