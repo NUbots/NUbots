@@ -153,7 +153,7 @@
                 };
 
                 messages::platform::darwin::DarwinSensors convert(const Darwin::BulkReadResults& in);
-                Darwin::Types::ServoValues convert(const messages::motion::ServoTarget& in);
+                Darwin::Types::ServoValues convert(const messages::motion::ServoTarget& in, const messages::platform::darwin::DarwinSensors& sensors);
 
             private:
                 // Conversion functions

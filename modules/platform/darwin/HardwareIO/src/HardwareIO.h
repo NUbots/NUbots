@@ -23,6 +23,7 @@
 #include <nuclear>
 
 #include "darwin/Darwin.h"
+#include "Converter.h"
 
 namespace modules {
 namespace platform {

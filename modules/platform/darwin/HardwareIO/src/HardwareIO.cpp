@@ -18,7 +18,6 @@
  */
 
 #include "HardwareIO.h"
-#include "Convert.h"
 
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/motion/ServoTarget.h"
@@ -31,7 +30,7 @@ namespace darwin {
     using messages::platform::darwin::DarwinSensors;
     using messages::motion::ServoTarget;
 
-    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/ttyUSB0") {
+    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/ttyUSB0"), converter() {
 
         // This trigger gets the sensor data from the CM730
         on<Trigger<Every<60, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
@@ -59,7 +58,7 @@ namespace darwin {
 
                 // Otherwise write the command using sync write
                 else {
-                    values.push_back(convert(command));
+                    values.push_back(converter.convert(command, sensors));
                 }
             }
 
@@ -77,12 +76,12 @@ namespace darwin {
 
         // If we get a HeadLED command then write it
         on<Trigger<DarwinSensors::HeadLED>>([this](const DarwinSensors::HeadLED& led) {
-            darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, Convert::colourLEDInverse(led.r, led.g, led.b));
+            darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, ((led.r >> 3)) | ((led.g >> 3) << 5) | ((led.b >> 3) << 10));
         });
 
         // If we get a HeadLED command then write it
         on<Trigger<DarwinSensors::EyeLED>>([this](const DarwinSensors::EyeLED& led) {
-            darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(led.r, led.g, led.b));
+            darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, ((led.r >> 3)) | ((led.g >> 3) << 5) | ((led.b >> 3) << 10));
         });
     }
 }
