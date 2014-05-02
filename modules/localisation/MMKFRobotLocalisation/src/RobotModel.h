@@ -78,8 +78,8 @@ namespace robot {
 
         arma::mat::fixed<size, size> processNoise();
 
-        // static constexpr double processNoiseFactor = 1e-6;
-        static constexpr double processNoiseFactor = 1e-3;
+        // double processNoiseFactor = 1e-6;
+        double processNoiseFactor = 1e-3;
     };
 }
 }
