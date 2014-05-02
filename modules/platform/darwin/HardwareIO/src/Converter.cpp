@@ -76,11 +76,6 @@ namespace modules {
                 sensors.gyroscope.y = (data.cm730.gyroscope.y - 512) * GYROSCOPE_CONVERSION_FACTOR_Y;
                 sensors.gyroscope.z = (data.cm730.gyroscope.z - 512) * GYROSCOPE_CONVERSION_FACTOR_Z;
 
-                std::cout << sensors.gyroscope.x << " ";
-                std::cout << sensors.gyroscope.x << " ";
-                std::cout << sensors.gyroscope.x << " ";
-                std::cout << std::endl;
-
                 /*
                  Force Sensitive Resistor Data
                  */
