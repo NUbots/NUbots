@@ -27,6 +27,10 @@
 namespace modules {
 namespace localisation {
 
+    struct MockRobotConfig {
+        static constexpr const char* CONFIGURATION_PATH = "MockRobotConfig.json";
+    };
+
     class MockRobot : public NUClear::Reactor {
     private:
         arma::vec ball_position_ = { 0, 0 };
@@ -38,6 +42,29 @@ namespace localisation {
         arma::vec odom_old_robot_heading_ = { 1, 0 };
 
         std::shared_ptr<utility::localisation::FieldDescription> field_description_;
+
+        struct {
+            bool simulate_vision;
+            bool simulate_goal_observations;
+            bool simulate_ball_observations;
+            bool simulate_odometry;
+            bool simulate_robot_movement;
+            bool simulate_ball_movement;
+            bool emit_robot_fieldobjects;
+            bool emit_ball_fieldobjects;
+        } cfg_;
+
+        void UpdateConfiguration(
+            const messages::support::Configuration<MockRobotConfig>& config) {
+            cfg_.simulate_vision = config["SimulateVision"];
+            cfg_.simulate_goal_observations = config["SimulateGoalObservations"];
+            cfg_.simulate_ball_observations = config["SimulateBallObservations"];
+            cfg_.simulate_odometry = config["SimulateOdometry"];
+            cfg_.simulate_robot_movement = config["SimulateRobotMovement"];
+            cfg_.simulate_ball_movement = config["SimulateBallMovement"];
+            cfg_.emit_robot_fieldobjects = config["EmitRobotFieldobjects"];
+            cfg_.emit_ball_fieldobjects = config["EmitBallFieldobjects"];
+        };
 
     public:
         /// @brief Called by the powerplant to build and setup the MockRobot reactor.
