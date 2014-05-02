@@ -95,7 +95,8 @@ namespace modules {
                     bearingSensitivity = file.config["bearingSensitivity"];
                     ApproachCurveFactor = file.config["ApproachCurveFactor"];
                 });
-
+                
+                // add in fake walk localisation
                 // on<
                 //     Trigger<Every<20, Per<std::chrono::seconds>>>,
                 //     With<messages::localisation::Ball>,

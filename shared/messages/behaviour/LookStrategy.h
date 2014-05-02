@@ -23,6 +23,11 @@
 
 namespace messages {
     namespace behaviour {
+        struct HeadBehaviourConfig{
+            static constexpr const char* CONFIGURATION_PATH = "HeadBehaviour.json";
+        };
+
+
         struct LookAtAngle {
             double yaw;
             double pitch;
