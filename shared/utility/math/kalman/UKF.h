@@ -30,10 +30,11 @@ namespace utility {
 
             template <typename Model> //model is is a template parameter that Kalman also inherits
             class UKF {
-            private:
+            public:
                 // The model
                 Model model;
-
+                
+            private:
                 // The number of sigma points
                 static constexpr uint NUM_SIGMA_POINTS = (Model::size * 2) + 1;
 
