@@ -79,6 +79,7 @@ node packer-virtualbox-iso, packer-vmware-iso {
   package { 'pkg-config': ensure => latest, }
   package { 'uuid-dev': ensure => latest, }
   package { 'nodejs': ensure => latest, }
+  package { 'npm': ensure => latest, }
 
   # Non-essential developer tools:
   class { 'vim':  username => $username, }
