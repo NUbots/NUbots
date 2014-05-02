@@ -14,6 +14,7 @@ class nubugger(
   package { 'pkg-config': ensure => latest, }
   package { 'uuid-dev': ensure => latest, }
   package { 'nodejs': ensure => latest, }
+  package { 'npm': ensure => latest, }
 
   vcsrepo { 'nubugger_repo':
     require => [File['nubots_dir'], Package['git']],
