@@ -23,6 +23,8 @@
 #include "RobotModel.h"
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "utility/math/angle.h"
+#include "utility/math/coordinates.h"
+
 
 using utility::localisation::LocalisationFieldObject;
 using messages::localisation::FakeOdometry;
@@ -104,12 +106,9 @@ double RobotHypothesis::MeasurementUpdate(
 
     // Unit vector orientation
     arma::vec2 actual_pos = actual_object.location();
-    arma::vec3 measurement = { observed_object.sphericalFromNeck[0],
-                               std::cos(observed_object.sphericalFromNeck[1]),
-                               std::sin(observed_object.sphericalFromNeck[1]) };
-    arma::mat33 cov = { observed_object.sphericalError[0], 0, 0,
-                        0, observed_object.sphericalError[1], 0,
-                        0, 0, observed_object.sphericalError[1] };
+    arma::vec2 measurement = utility::math::coordinates::Spherical2Cartesian(observed_object.sphericalFromNeck).rows(0,1);
+    arma::mat22 cov = { observed_object.sphericalError[0], 0, 
+                        0, observed_object.sphericalError[0]};  //HACK Cebit 2014
 
     double quality = filter_.measurementUpdate(measurement, cov, actual_pos);
 

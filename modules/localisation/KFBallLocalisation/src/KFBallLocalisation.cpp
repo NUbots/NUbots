@@ -73,12 +73,12 @@ namespace localisation {
             engine_.TimeUpdate(curr_time, odom);
         });
 
-       on<Trigger<Every<100, Per<std::chrono::seconds>>>,
-           Options<Sync<KFBallLocalisation>>
-          >("KFBallLocalisation Time", [this](const time_t&) {
-            auto curr_time = NUClear::clock::now();
-            engine_.TimeUpdate(curr_time);
-        });
+       // on<Trigger<Every<100, Per<std::chrono::seconds>>>,
+       //     Options<Sync<KFBallLocalisation>>
+       //    >("KFBallLocalisation Time", [this](const time_t&) {
+       //      auto curr_time = NUClear::clock::now();
+       //      engine_.TimeUpdate(curr_time);
+       //  });
 
        on<Trigger<std::vector<messages::vision::Ball>>,
            Options<Sync<KFBallLocalisation>>

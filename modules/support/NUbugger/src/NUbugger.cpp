@@ -448,8 +448,8 @@ namespace modules {
                     auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
                     std::vector<messages::localisation::FieldObject::Model> robot_msg_models;
 
-                    for (auto& model : robots) {
-                    // auto model = robots[0];
+                    //for (auto& model : robots) {
+                    auto model = robots[0];
                         messages::localisation::FieldObject::Model robot_model;
                         robot_msg->name = "self";
                         robot_model.wm_x = model.position[0];
@@ -462,7 +462,7 @@ namespace modules {
                         robot_model.sr_yy = model.sr_yy; // * 100;
                         robot_model.lost = false;
                         robot_msg_models.push_back(robot_model);
-                    }
+                    //}
 
                     
                     robot_msg->models = robot_msg_models;
