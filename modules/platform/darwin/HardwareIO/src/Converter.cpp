@@ -44,38 +44,37 @@ namespace modules {
                 // Read our Error code
                 sensors.cm730ErrorFlags = data.cm730ErrorCode == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.cm730ErrorCode);
 
-                // LED Panel
-                sensors.ledPanel.led2 = Convert::getBit<1>(data.cm730.ledPanel);
+                // LED Panel - Unpack the bits
+                sensors.ledPanel.led2 = data.cm730.ledPanel & (1 << 1) == (1 << 1);
+                sensors.ledPanel.led3 = data.cm730.ledPanel & (1 << 2) == (1 << 2);
+                sensors.ledPanel.led4 = data.cm730.ledPanel & (1 << 3) == (1 << 3);
 
+                // Head LED - Extract the colours
+                sensors.headLED.r = (data.cm730.headLED & 0x001F) << 3;
+                sensors.headLED.g = (data.cm730.headLED & 0x03E0) >> 2;
+                sensors.headLED.b = (data.cm730.headLED & 0x7C00) >> 7;
 
-            return (value & (1 << bit)) == (1 << bit);
+                // Eye LED - Extract the colours
+                sensors.eyeLED.r = (data.cm730.eyeLED & 0x001F) << 3;
+                sensors.eyeLED.g = (data.cm730.eyeLED & 0x03E0) >> 2;
+                sensors.eyeLED.b = (data.cm730.eyeLED & 0x7C00) >> 7;
 
+                // Buttons - Extract the bits
+                sensors.buttons.left = data.cm730.buttons & (1 << 1) == (1 << 1);
+                sensors.buttons.middle = data.cm730.buttons & (1 << 2) == (1 << 2);
 
-                sensors.ledPanel.led3 = Convert::getBit<2>(data.cm730.ledPanel);
-                sensors.ledPanel.led4 = Convert::getBit<3>(data.cm730.ledPanel);
+                // Voltage (in volts) - Times by the conversion factor
+                sensors.voltage = data.cm730 * VOLTAGE_CONVERSION_FACTOR;
 
-                // Head LED
-                std::tie(sensors.headLED.r, sensors.headLED.g, sensors.headLED.b) = Convert::colourLED(data.cm730.headLED);
+                // Accelerometer (in m/s^2) - Times by the conversion factors
+                sensors.accelerometer.x = data.cm730.accelerometer.x * ACCELEROMETER_CONVERSION_FACTOR_X;
+                sensors.accelerometer.y = data.cm730.accelerometer.y * ACCELEROMETER_CONVERSION_FACTOR_Y;
+                sensors.accelerometer.z = data.cm730.accelerometer.z * ACCELEROMETER_CONVERSION_FACTOR_Z;
 
-                // Head LED
-                std::tie(sensors.eyeLED.r, sensors.eyeLED.g, sensors.eyeLED.b) = Convert::colourLED(data.cm730.eyeLED);
-
-                // Buttons
-                sensors.buttons.left = Convert::getBit<1>(data.cm730.buttons);
-                sensors.buttons.middle = Convert::getBit<1>(data.cm730.buttons);
-
-                // Voltage (in volts)
-                sensors.voltage = Convert::voltage(data.cm730.voltage);
-
-                // Accelerometer (in m/s^2)
-                sensors.accelerometer.x = Convert::accelerometer(data.cm730.accelerometer.x);
-                sensors.accelerometer.y = Convert::accelerometer(data.cm730.accelerometer.y);
-                sensors.accelerometer.z = Convert::accelerometer(data.cm730.accelerometer.z);
-
-                // Gyroscope (in radians/second)
-                sensors.gyroscope.x = Convert::gyroscope(data.cm730.gyroscope.x);
-                sensors.gyroscope.y = Convert::gyroscope(data.cm730.gyroscope.y);
-                sensors.gyroscope.z = Convert::gyroscope(data.cm730.gyroscope.z);
+                // Gyroscope (in radians/second) - Times by the conversion factors
+                sensors.gyroscope.x = data.cm730.gyroscope.x * GYROSCOPE_CONVERSION_FACTOR_X;
+                sensors.gyroscope.y = data.cm730.gyroscope.y * GYROSCOPE_CONVERSION_FACTOR_Y;
+                sensors.gyroscope.z = data.cm730.gyroscope.z * GYROSCOPE_CONVERSION_FACTOR_Z;
 
                 /*
                  Force Sensitive Resistor Data
@@ -86,10 +85,10 @@ namespace modules {
                 sensors.fsr.right.errorFlags = data.fsrErrorCodes[0] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.fsrErrorCodes[0]);
 
                 // Sensors
-                sensors.fsr.right.fsr1 = Convert::fsrForce(data.fsr[0].fsr1);
-                sensors.fsr.right.fsr2 = Convert::fsrForce(data.fsr[0].fsr2);
-                sensors.fsr.right.fsr3 = Convert::fsrForce(data.fsr[0].fsr3);
-                sensors.fsr.right.fsr4 = Convert::fsrForce(data.fsr[0].fsr4);
+                sensors.fsr.right.fsr1 = data.fsr[0].fsr1 * FSR_FORCE_CONVERSION_FACTOR_R1;
+                sensors.fsr.right.fsr2 = data.fsr[0].fsr2 * FSR_FORCE_CONVERSION_FACTOR_R2;
+                sensors.fsr.right.fsr3 = data.fsr[0].fsr3 * FSR_FORCE_CONVERSION_FACTOR_R3;
+                sensors.fsr.right.fsr4 = data.fsr[0].fsr4 * FSR_FORCE_CONVERSION_FACTOR_R4;
 
                 // Centre
                 sensors.fsr.right.centreX = Convert::fsrCentre(false, true, data.fsr[0].centreX);
@@ -171,115 +170,115 @@ namespace modules {
 
         }
 
-/*
-    float Convert::accelerometer(uint16_t value) {
-        return (value - 512) * ACCELEROMETER_CONVERSION_FACTOR;
-    }
 
-    float Convert::gyroscope(uint16_t value) {
-        return (value - 512) * GYROSCOPE_CONVERSION_FACTOR;
-    }
-
-    float Convert::voltage(const uint8_t value) {
-        return value * VOLTAGE_CONVERSION_FACTOR;
-    }
-
-    float Convert::fsrForce(const uint16_t value) {
-        return value * FSR_FORCE_CONVERSION_FACTOR;
-    }
-
-    float Convert::fsrCentre(const bool left, const bool x, const uint8_t value) {
-        if(value == 0xFF) {
-            // Return NaN if there is no centre
-            return std::numeric_limits<float>::quiet_NaN();
+        float Convert::accelerometer(uint16_t value) {
+            return (value - 512) * ACCELEROMETER_CONVERSION_FACTOR;
         }
-        // On the right foot, the X is the correct way around while the Y is flipped
-        // On the left foot, the X is flipped and the Y is the correct way around
-        // Because of this, we can implement the resulting logic using an xor
-        else if(left ^ x) {
-            return double(value - 127) / 127.0;
+
+        float Convert::gyroscope(uint16_t value) {
+            return (value - 512) * GYROSCOPE_CONVERSION_FACTOR;
         }
-        else {
-            return double(127 - value) / 127.0;
+
+        float Convert::voltage(const uint8_t value) {
+            return value * VOLTAGE_CONVERSION_FACTOR;
         }
-    }
 
-    std::tuple<uint8_t, uint8_t, uint8_t> Convert::colourLED(uint16_t value) {
-        return std::make_tuple(static_cast<uint8_t>((value & 0x001F) << 3),
-                               static_cast<uint8_t>((value & 0x03E0) >> 2),
-                               static_cast<uint8_t>((value & 0x7C00) >> 7));
-    }
+        float Convert::fsrForce(const uint16_t value) {
+            return value * FSR_FORCE_CONVERSION_FACTOR;
+        }
 
-    uint16_t Convert::colourLEDInverse(uint8_t r, uint8_t g, uint8_t b) {
-        return ((r >> 3))
-             | ((g >> 3) << 5)
-             | ((b >> 3) << 10);
-    }
+        float Convert::fsrCentre(const bool left, const bool x, const uint8_t value) {
+            if(value == 0xFF) {
+                // Return NaN if there is no centre
+                return std::numeric_limits<float>::quiet_NaN();
+            }
+            // On the right foot, the X is the correct way around while the Y is flipped
+            // On the left foot, the X is flipped and the Y is the correct way around
+            // Because of this, we can implement the resulting logic using an xor
+            else if(left ^ x) {
+                return double(value - 127) / 127.0;
+            }
+            else {
+                return double(127 - value) / 127.0;
+            }
+        }
 
-    float Convert::gain(const uint8_t value) {
-        return value * GAIN_CONVERSION_FACTOR;
-    }
+        std::tuple<uint8_t, uint8_t, uint8_t> Convert::colourLED(uint16_t value) {
+            return std::make_tuple(static_cast<uint8_t>((value & 0x001F) << 3),
+                                   static_cast<uint8_t>((value & 0x03E0) >> 2),
+                                   static_cast<uint8_t>((value & 0x7C00) >> 7));
+        }
 
-    uint8_t Convert::gainInverse(const float value) {
-        return value >= 100 ? 254 // If we are greater then 100, then set to 100
-                : value < 0 ? 0  // If we are less then 0, then set to 0
-                : std::round(value / GAIN_CONVERSION_FACTOR); // Otherwise do our conversion
-    }
+        uint16_t Convert::colourLEDInverse(uint8_t r, uint8_t g, uint8_t b) {
+            return ((r >> 3))
+                 | ((g >> 3) << 5)
+                 | ((b >> 3) << 10);
+        }
 
-    float Convert::servoPosition(const uint8_t id, const uint16_t value) {
-        // offset and normalize the angle
-        return utility::math::angle::normalizeAngle((((value - 2048) * POSITION_CONVERSION_FACTOR) + SERVO_OFFSET[id]) * SERVO_DIRECTION[id]);
-    }
+        float Convert::gain(const uint8_t value) {
+            return value * GAIN_CONVERSION_FACTOR;
+        }
 
-    uint16_t Convert::servoPositionInverse(const uint8_t id, const float value) {
-        float angle = value;
+        uint8_t Convert::gainInverse(const float value) {
+            return value >= 100 ? 254 // If we are greater then 100, then set to 100
+                    : value < 0 ? 0  // If we are less then 0, then set to 0
+                    : std::round(value / GAIN_CONVERSION_FACTOR); // Otherwise do our conversion
+        }
 
-        // Undo our conversion operations
-        angle *= SERVO_DIRECTION[id];
-        angle -= SERVO_OFFSET[id];
+        float Convert::servoPosition(const uint8_t id, const uint16_t value) {
+            // offset and normalize the angle
+            return utility::math::angle::normalizeAngle((((value - 2048) * POSITION_CONVERSION_FACTOR) + SERVO_OFFSET[id]) * SERVO_DIRECTION[id]);
+        }
 
-        // Normalize the angle
-        angle = utility::math::angle::normalizeAngle(angle);
+        uint16_t Convert::servoPositionInverse(const uint8_t id, const float value) {
+            float angle = value;
 
-        // Convert it back
-        return (angle / POSITION_CONVERSION_FACTOR) + 2048;
-    }
+            // Undo our conversion operations
+            angle *= SERVO_DIRECTION[id];
+            angle -= SERVO_OFFSET[id];
 
-    float Convert::servoSpeed(const uint8_t id, const uint16_t value) {
+            // Normalize the angle
+            angle = utility::math::angle::normalizeAngle(angle);
 
-        // We only care about the lower bits
-        float raw = (value & 0x3FF) * SPEED_CONVERSION_FACTOR[id];
+            // Convert it back
+            return (angle / POSITION_CONVERSION_FACTOR) + 2048;
+        }
 
-        // If bit 10 is set we are moving Clockwise
-        raw *= value & 0x400 ? -1 : 1;
+        float Convert::servoSpeed(const uint8_t id, const uint16_t value) {
 
-        // Go the correct direction
-        raw *= SERVO_DIRECTION[id];
+            // We only care about the lower bits
+            float raw = (value & 0x3FF) * SPEED_CONVERSION_FACTOR[id];
 
-        return raw;
-    }
-    uint16_t Convert::servoSpeedInverse(const uint8_t id, const float value) {
-        uint16_t raw = round(value / SPEED_CONVERSION_FACTOR[id]);
+            // If bit 10 is set we are moving Clockwise
+            raw *= value & 0x400 ? -1 : 1;
 
-        // If the value is greater then 1023, then set to max speed (0)
-        return raw > 1023 ? 0 : raw;
-    }
+            // Go the correct direction
+            raw *= SERVO_DIRECTION[id];
 
-    float Convert::torqueLimit(const uint16_t value) {
-        return value * TORQUE_LIMIT_CONVERSION_FACTOR;
-    }
+            return raw;
+        }
+        uint16_t Convert::servoSpeedInverse(const uint8_t id, const float value) {
+            uint16_t raw = round(value / SPEED_CONVERSION_FACTOR[id]);
 
-    float Convert::servoLoad(const uint8_t id, const uint16_t value) {
-         // We only care about the lower bits if bit 10 is set then we are moving clockwise
-        float raw = (value & 0x3FF) * (value & 0x400 ? -1 : 1);
-        raw *= LOAD_CONVERSION_FACTOR;
+            // If the value is greater then 1023, then set to max speed (0)
+            return raw > 1023 ? 0 : raw;
+        }
 
-        // Go the correct direction
-        return raw * SERVO_DIRECTION[id];;
-    }
+        float Convert::torqueLimit(const uint16_t value) {
+            return value * TORQUE_LIMIT_CONVERSION_FACTOR;
+        }
 
-    float Convert::temperature(const uint8_t value) {
-        return value * TEMPERATURE_CONVERSION_FACTOR;
-    }*/
+        float Convert::servoLoad(const uint8_t id, const uint16_t value) {
+             // We only care about the lower bits if bit 10 is set then we are moving clockwise
+            float raw = (value & 0x3FF) * (value & 0x400 ? -1 : 1);
+            raw *= LOAD_CONVERSION_FACTOR;
+
+            // Go the correct direction
+            return raw * SERVO_DIRECTION[id];;
+        }
+
+        float Convert::temperature(const uint8_t value) {
+            return value * TEMPERATURE_CONVERSION_FACTOR;
+        }
     }
 }
