@@ -1,0 +1,10 @@
+{
+	"SimulateVision" : true,
+	"SimulateGoalObservations" : true,
+	"SimulateBallObservations" : true,
+	"SimulateOdometry" : true,
+	"SimulateRobotMovement" : true,
+	"SimulateBallMovement" : true,
+	"EmitRobotFieldobjects" : true,
+	"EmitBallFieldobjects" : true
+}
