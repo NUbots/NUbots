@@ -38,7 +38,7 @@ namespace localisation {
     class MMKFRobotLocalisationEngine {
         public:
 
-        MMKFRobotLocalisationEngine() : cfg_({true, true}) {
+        MMKFRobotLocalisationEngine() : cfg_({true, true, false}) {
             last_time_update_time_ = NUClear::clock::now();
         }
 
@@ -78,6 +78,7 @@ namespace localisation {
             const messages::support::Configuration<MMKFRobotLocalisationEngineConfig>& config) {
             cfg_.angle_between_goals_observation_enabled = config["AngleBetweenGoalsObservationEnabled"];
             cfg_.goal_pair_observation_enabled = config["GoalPairObservationEnabled"];
+            cfg_.all_goals_are_blue = config["AllGoalsAreBlue"];
         };
 
     // private:
@@ -90,6 +91,7 @@ namespace localisation {
         struct {
             bool angle_between_goals_observation_enabled;
             bool goal_pair_observation_enabled;
+            bool all_goals_are_blue;
         } cfg_;
 
         std::chrono::system_clock::time_point last_time_update_time_;

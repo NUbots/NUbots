@@ -1,5 +1,6 @@
 {
     "MaxModelsAfterMerge": 4,
     "MergeMinTranslationDist": 0.025,
-    "MergeMinHeadingDist": 0.01
+    "MergeMinHeadingDist": 0.01,
+    "ProcessNoiseFactor": 1e-3
 }
