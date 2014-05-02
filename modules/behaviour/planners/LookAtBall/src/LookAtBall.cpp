@@ -22,6 +22,9 @@
 #include "messages/vision/VisionObjects.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/behaviour/LookStrategy.h"
+#include "messages/input/Sensors.h"
+#include "messages/support/Configuration.h"
+
 
 namespace modules {
     namespace behaviour {
@@ -32,18 +35,28 @@ namespace modules {
             using messages::behaviour::LookAtAngle;
             using messages::behaviour::LookAtPoint;
             using messages::behaviour::LookAtPosition;
+            using messages::behaviour::HeadBehaviourConfig;
+            using messages::input::Sensors;
+            using messages::support::Configuration;
 
             LookAtBall::LookAtBall(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+
+                on<Trigger<Configuration<HeadBehaviourConfig>>>([this](const Configuration<HeadBehaviourConfig>& config) {
+                    BALL_SEARCH_TIMEOUT_MILLISECONDS = config["BALL_SEARCH_TIMEOUT_MILLISECONDS"];
+                });
                 
                 //this reaction focuses on the ball - pan'n'scan if not visible and focus on as many objects as possible if visible
                 on<Trigger<std::vector<Ball>>,
                     With<std::vector<Goal>>,
-                    With<Optional<messages::localisation::Ball>> >([this] 
+                    With<Optional<messages::localisation::Ball>>,
+                    With<Sensors> >([this] 
                     (const std::vector<Ball>& balls,
                      const std::vector<Goal>& goals,
-                     const std::shared_ptr<const messages::localisation::Ball>& ball) {
+                     const std::shared_ptr<const messages::localisation::Ball>& ball,
+                     const Sensors& sensors) {
                 
                     if (balls.size() > 0) {
+                        timeSinceLastSeen = sensors.timestamp;
                         std::vector<LookAtAngle> angles;
                         angles.reserve(4);
                         
@@ -72,14 +85,13 @@ namespace modules {
                         //XXX: add a localisation based scan'n'pan
                     
                     
-                    } else {
+                    } else if(std::chrono::duration<float, std::ratio<1,1000>>(sensors.timestamp - timeSinceLastSeen).count() > BALL_SEARCH_TIMEOUT_MILLISECONDS){
                         //do a blind scan'n'pan
                         //XXX: this needs to be a look at sequence rather than a look at point
                         std::vector<LookAtPosition> angles;
                         
                         const double scanYaw = 1.5;
                         const double scanPitch = 1.0; 
-                        
                         
                         const size_t panPoints = 4;
                         for (size_t i = 0; i < panPoints+1; ++i) {

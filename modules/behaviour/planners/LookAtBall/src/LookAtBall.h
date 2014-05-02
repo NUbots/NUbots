@@ -36,9 +36,12 @@ namespace modules {
             class LookAtBall : public NUClear::Reactor {
             private:
                 //const size_t id;
+                NUClear::clock::time_point timeSinceLastSeen;
 
+                float BALL_SEARCH_TIMEOUT_MILLISECONDS;
             public:
                 explicit LookAtBall(std::unique_ptr<NUClear::Environment> environment);
+
                 //static constexpr const char* CONFIGURATION_PATH = "Stand.json";
             };
 
