@@ -4,15 +4,15 @@ ADD_ROLE(
         #Support
         support::SignalCatcher
         support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem    
+        support::configuration::ConfigSystem
         #support::configuration::NetworkingConfiguration
         support::NUbugger
-        
+
         #Sensors
         input::LinuxCamera
         platform::darwin::HardwareIO
         platform::darwin::SensorFilter
- 
+
         #Vision
         vision::LUTClassifier
         vision::FeatureDetector
@@ -20,15 +20,15 @@ ADD_ROLE(
         #Localisation
         localisation::MMKFRobotLocalisation
         localisation::KFBallLocalisation
-        
+
         #Behaviour
         behaviour::Controller
-        behaviour::reflexes::Stand
-        behaviour::reflexes::FallingRelax
-        behaviour::reflexes::Getup
-        behaviour::reflexes::Look
-        behaviour::planners::LookAtGoal
-        
+        behaviour::skills::Stand
+        behaviour::skills::FallingRelax
+        behaviour::skills::Getup
+        behaviour::skills::Look
+        behaviour::planning::LookAtGoal
+
         #Motion
         motion::ScriptEngine
 )
