@@ -18,12 +18,15 @@
  */
 
 #include "GoalDetector_RANSAC.h"
+#include "utility/nubugger/NUgraph.h"
+
 
 namespace modules {
     namespace vision {
 
         using messages::vision::ColourSegment;
         using utility::math::Line;
+        using utility::nubugger::graph;
 
         GoalDetector_RANSAC::GoalDetector_RANSAC() {
             // Empty constructor.
@@ -484,8 +487,8 @@ namespace modules {
             std::unique_ptr<std::vector<messages::vision::Goal>> goal_message = std::unique_ptr<std::vector<messages::vision::Goal>>(new std::vector<messages::vision::Goal>());
 
             for (auto& post : *goal_posts){
-                //NUClear::log("Checking post.", post.valid ? "VALID\n" : "INVALID\n", post);
                 if(post.valid){
+                   // NUClear::log("Emmiting valid post.",post);
                     goal_message->push_back(messages::vision::Goal());
                     goal_message->back().sphericalFromNeck = post.m_location.bodyRelativeSpherical;
                     //goal_message->back().sphericalError = goal_location.
@@ -502,10 +505,12 @@ namespace modules {
                     //goal_message->back().timestamp = goal_location.
 
                     goal_message->back().type = post.m_goalType;
-
+                    
+                    
                     goal_message->back().screen_quad = post.m_corners.getVertices();
 
                 }
+
             }
 
             return goal_message;

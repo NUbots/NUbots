@@ -30,6 +30,16 @@ namespace planning {
     public:
         /// @brief Called by the powerplant to build and setup the KickPlanner reactor.
         explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
+        static constexpr const char* CONFIGURATION_PATH = "KickPlanner.json";
+
+    private:
+       	arma::vec2 TARGET_FIELD_POS;
+       	float MIN_BALL_DISTANCE;
+       	float KICK_CORRIDOR_WIDTH;
+       	float KICK_FORWARD_ANGLE_LIMIT;
+       	float KICK_SIDE_ANGLE_LIMIT;
+
+
     };
 
 }
