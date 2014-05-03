@@ -21,6 +21,10 @@
 
 #include "messages/motion/WalkCommand.h"
 #include "messages/motion/KickCommand.h"
+#include "messages/localisation/FieldObject.h"
+#include "messages/support/Configuration.h"
+#include "messages/behaviour/Action.h"
+#include "messages/vision/VisionObjects.h"
 
 
 namespace modules {
@@ -28,14 +32,27 @@ namespace behaviour {
 namespace planning {
 
     using messages::localisation::Ball;
-    using messages::localisation::Goal;
+    using messages::localisation::Self;
     using messages::motion::KickCommand;
+    using messages::support::Configuration;
     using messages::motion::WalkStopCommand;
+    using messages::behaviour::LimbID;
 
     KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<Ball>, With<Goal>>([this] (const Ball& ball, const Goal& goal) {
+
+        on<Trigger<Configuration<KickPlanner> > >([this](const Configuration<KickPlanner>& config) {
+            TARGET_FIELD_POS = config["TARGET_FIELD_POS"].as<arma::vec>();
+
+            MIN_BALL_DISTANCE = config["MIN_BALL_DISTANCE"];
+            KICK_CORRIDOR_WIDTH = config["KICK_CORRIDOR_WIDTH"];
+            KICK_FORWARD_ANGLE_LIMIT = config["KICK_FORWARD_ANGLE_LIMIT"];
+            KICK_SIDE_ANGLE_LIMIT = config["KICK_SIDE_ANGLE_LIMIT"];
+        });
+
+
+        on<Trigger<Ball>, With<std::vector<Self>>, With<std::vector<messages::vision::Ball>>>([this] (const Ball& ball, const std::vector<Self>& selfs, const std::vector<messages::vision::Ball>& vision_balls) {
 
             // TODO check if the ball is within our kick box using some math or something
 
@@ -43,35 +60,68 @@ namespace planning {
 
             // TODO If we satisfy condtions then pick a kick to execute
 
-            // Left side kick
-            emit(std::make_unique<WalkStopCommand>()); // Stop the walk
-            emit(std::make_unique<KickCommand>(KickCommand{{0, -1, 0}, LimbID::LEFT_LEG }));
-            // TODO when the kick finishes, we need to start the walk
-            // Probably need to add something to the KickScript.cpp
+            auto self = selfs[0];
 
-            // Left front kick
-            emit(std::make_unique<WalkStopCommand>()); // Stop the walk
-            emit(std::make_unique<KickCommand>(KickCommand{{1,  0, 0}, LimbID::LEFT_LEG }));
-            // TODO when the kick finishes, we need to start the walk
-            // Probably need to add something to the KickScript.cpp
+            arma::vec3 goalPosition = arma::vec3({TARGET_FIELD_POS[0],TARGET_FIELD_POS[1],1});
 
-            // Right side kick
-            emit(std::make_unique<WalkStopCommand>()); // Stop the walk
-            emit(std::make_unique<KickCommand>(KickCommand{{0,  1, 0}, LimbID::RIGHT_LEG }));
-            // TODO when the kick finishes, we need to start the walk
-            // Probably need to add something to the KickScript.cpp
+            arma::vec2 normed_heading = arma::normalise(self.heading);
+            arma::mat33 worldToRobotTransform = arma::mat33{      normed_heading[0],  normed_heading[1],         0,
+                                                                 -normed_heading[1],  normed_heading[0],         0,
+                                                                                  0,                 0,         1};
 
-            // Right front kick
-            emit(std::make_unique<WalkStopCommand>()); // Stop the walk
-            emit(std::make_unique<KickCommand>(KickCommand{{1,  0, 0}, LimbID::RIGHT_LEG }));
-            // TODO when the kick finishes, we need to start the walk
-            // Probably need to add something to the KickScript.cpp
+            worldToRobotTransform.submat(0,2,1,2) = -worldToRobotTransform.submat(0,0,1,1) * self.position;
+            
+            arma::vec3 homogeneousKickTarget = worldToRobotTransform * goalPosition;
+            arma::vec2 kickTarget = homogeneousKickTarget.rows(0,1);    //In robot coords
 
+            // NUClear::log("kickTarget = ", kickTarget);
+            // NUClear::log("ball position = ", ball.position);
+
+            if(vision_balls.size() > 0 && 
+               ball.position[0] < MIN_BALL_DISTANCE && 
+               std::fabs(ball.position[1]) < KICK_CORRIDOR_WIDTH / 2){
+
+                float targetBearing = std::atan2(kickTarget[1],kickTarget[0]);
+                //NUClear::log("targetBearing = ", targetBearing);
+                if( std::fabs(targetBearing) < KICK_FORWARD_ANGLE_LIMIT){
+                    if(ball.position[1] < 0){
+                        // Right front kick
+                        //NUClear::log("Kicking forward with right foot");
+                        emit(std::make_unique<WalkStopCommand>()); // Stop the walk
+                        emit(std::make_unique<KickCommand>(KickCommand{{1,  0, 0}, LimbID::RIGHT_LEG }));
+                        // TODO when the kick finishes, we need to start the walk
+                        // Probably need to add something to the KickScript.cpp
+                    } else {
+                        // Left front kick
+                        //NUClear::log("Kicking forward with left foot");
+                        emit(std::make_unique<WalkStopCommand>()); // Stop the walk
+                        emit(std::make_unique<KickCommand>(KickCommand{{1,  0, 0}, LimbID::LEFT_LEG }));
+                        // TODO when the kick finishes, we need to start the walk
+                        // Probably need to add something to the KickScript.cpp
+                    }
+                } else if (std::fabs(targetBearing) < KICK_SIDE_ANGLE_LIMIT) {
+                    if(targetBearing < 0 && ball.position[1] < 0){
+                        // Left side kick
+                        //NUClear::log("Kicking side with left foot");
+                        emit(std::make_unique<WalkStopCommand>()); // Stop the walk
+                        emit(std::make_unique<KickCommand>(KickCommand{{0, -1, 0}, LimbID::LEFT_LEG }));
+                        // TODO when the kick finishes, we need to start the walk
+                        // Probably need to add something to the KickScript.cpp
+                    } else if(targetBearing > 0 && ball.position[1] > 0) {                    
+                        // Right side kick
+                        //NUClear::log("Kicking side with right foot");
+                        emit(std::make_unique<WalkStopCommand>()); // Stop the walk
+                        emit(std::make_unique<KickCommand>(KickCommand{{0,  1, 0}, LimbID::RIGHT_LEG }));
+                        // TODO when the kick finishes, we need to start the walk
+                        // Probably need to add something to the KickScript.cpp
+                    }
+                }
+                
+            }
 
             // Most of this code will be similar to that in PS3Walk.cpp
 
         });
-
     }
 
 }

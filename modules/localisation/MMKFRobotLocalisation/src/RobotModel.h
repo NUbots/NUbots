@@ -85,6 +85,7 @@ namespace robot {
 
         arma::mat33 getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state);
 
+
     };
 }
 }
