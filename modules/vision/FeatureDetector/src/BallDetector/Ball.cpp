@@ -87,11 +87,11 @@ namespace modules {
 
             // Throwout for below horizon.
             // TODO: Add kinematics horizon.
-            if (THROWOUT_ON_ABOVE_KIN_HOR_BALL && true /* !(VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location.screenCartesian[0], m_location.screenCartesian[1]))*/ ) {
-                std::cout << "Ball::check() - Ball above horizon: should not occur" << std::endl;
+            // if (THROWOUT_ON_ABOVE_KIN_HOR_BALL && true  !(VisionBlackboard::getInstance()->getKinematicsHorizon().IsBelowHorizon(m_location.screenCartesian[0], m_location.screenCartesian[1])) ) {
+            //     std::cout << "Ball::check() - Ball above horizon: should not occur" << std::endl;
 
-                return false;
-            }
+            //     return false;
+            // }
 
             // //Distance discrepency throwout - if width method says ball is a lot closer than d2p (by specified value) then discard
             // if ((THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL) && (std::abs(width_dist - d2p) > MAX_DISTANCE_METHOD_DISCREPENCY_BALL)) {
@@ -162,7 +162,7 @@ namespace modules {
 
             }
             m_sphericalError = visionKinematics.calculateSphericalError(m_location, BALL_DISTANCE_METHOD, m_diameter);
-            return (m_location.bodyRelativeSpherical[0] > 0);
+            return (check() && m_location.bodyRelativeSpherical[0] > 0);
         }
 
 

@@ -372,6 +372,18 @@ namespace modules {
                     api_goal->set_screen_x(goal.screenCartesian[0]);
                     api_goal->set_screen_y(goal.screenCartesian[1]);
 
+                    switch(int(goal.type)){
+                        case(0):
+                            emit(graph("Left goal distance", goal.sphericalFromNeck[0]));
+                            break;
+                        case(1):
+                            emit(graph("Right goal distance", goal.sphericalFromNeck[0]));
+                            break;
+                        case(2):
+                            emit(graph("Ambiguous goal distance", goal.sphericalFromNeck[0]));
+                    }
+
+
                     for(auto& point : goal.screen_quad){
                         api_goal->add_points(point[0]);
                         api_goal->add_points(point[1]);

@@ -73,10 +73,9 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
 
 /// Return the predicted observation of an object at the given position
 arma::vec RobotModel::predictedObservation(
-    const arma::vec::fixed<RobotModel::size>& state, const arma::vec2& actual_position) {
+    const arma::vec::fixed<RobotModel::size>& state, const arma::vec& actual_position) {
 
     arma::mat worldToRobot = getWorldToRobotTransform(state);
-
     arma::vec objectPosition = arma::vec({actual_position[0], actual_position[1], 1});
     arma::vec expectedObservation = worldToRobot * objectPosition;
 
@@ -105,13 +104,13 @@ arma::vec RobotModel::predictedObservation(
 
 arma::vec RobotModel::predictedObservation(
     const arma::vec::fixed<RobotModel::size>& state, 
-    const std::vector<arma::vec2>& actual_positions) {
+    const std::vector<arma::vec>& actual_positions) {
 
     // // Radial coordinates
-    arma::vec2 diff_1 = actual_positions[0] - state.rows(kX, kY);
-    arma::vec2 diff_2 = actual_positions[1] - state.rows(kX, kY);
-    arma::vec2 radial_1 = utility::math::coordinates::Cartesian2Radial(diff_1);
-    arma::vec2 radial_2 = utility::math::coordinates::Cartesian2Radial(diff_2);
+    arma::vec diff_1 = actual_positions[0] - state.rows(kX, kY);
+    arma::vec diff_2 = actual_positions[1] - state.rows(kX, kY);
+    arma::vec radial_1 = utility::math::coordinates::Cartesian2Radial(diff_1);
+    arma::vec radial_2 = utility::math::coordinates::Cartesian2Radial(diff_2);
 
     auto angle_diff = utility::math::angle::difference(radial_1[1], radial_2[1]);
 
@@ -165,8 +164,8 @@ arma::vec::fixed<RobotModel::size> RobotModel::limitState(
 
 
     // Unit vector orientation
-    // arma::vec2 heading = { state[kHeadingX], state[kHeadingY] };
-    // arma::vec2 unit = arma::normalise(heading);u
+    arma::vec2 heading = { state[kHeadingX], state[kHeadingY] };
+    arma::vec2 unit = arma::normalise(heading);
     return arma::vec({ state[kX], state[kY], state[kHeadingX], state[kHeadingY] });
 
 }

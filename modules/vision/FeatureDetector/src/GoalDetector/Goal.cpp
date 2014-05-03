@@ -207,7 +207,7 @@ namespace modules {
             }
 
             m_sphericalError = visionKinematics.calculateSphericalError(m_location, GOAL_DISTANCE_METHOD, m_sizeOnScreen[0]);
-            return ( m_location.bodyRelativeSpherical[0] > 0.0);
+            return ( check() && m_location.bodyRelativeSpherical[0] > 0.0);
         }
 
         /*! @brief Stream insertion operator for a single ColourSegment.
