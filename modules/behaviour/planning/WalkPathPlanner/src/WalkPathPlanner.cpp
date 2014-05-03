@@ -25,6 +25,8 @@
 #include "messages/localisation/FieldObject.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/motion/WalkCommand.h"
+#include "utility/nubugger/NUgraph.h"
+
 
 namespace modules {
     namespace behaviour {
@@ -37,6 +39,7 @@ namespace modules {
             using messages::behaviour::WalkApproach;
             using messages::motion::WalkStartCommand;
             using messages::motion::WalkStopCommand;
+            using utility::nubugger::graph;
             //using namespace messages;
 
             //using messages::input::ServoID;
@@ -158,7 +161,7 @@ namespace modules {
                     }
                     //NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
 
-                    NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
+                    // NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
                     //this applies acceleration/deceleration and hysteresis to movement
                     movePlan = generateWalk(movePlan,
                                planType == messages::behaviour::WalkApproach::OmnidirectionalReposition);
@@ -166,10 +169,10 @@ namespace modules {
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
                     command->velocity = arma::vec({movePlan[0],movePlan[1]});
                     command->rotationalSpeed = movePlan[2];
-                    NUClear::log("Self Position:", self[0].position[0],self[0].position[1]);
-                    NUClear::log("Target Position:", targetPos[0],targetPos[1]);
-                    NUClear::log("Walk command:", movePlan[0],movePlan[1],movePlan[2]);
-                    NUClear::log("Ball Position:", ball.position[0],ball.position[1]);
+                    // NUClear::log("Self Position:", self[0].position[0],self[0].position[1]);
+                    // NUClear::log("Target Position:", targetPos[0],targetPos[1]);
+                    emit(graph("Walk command:", movePlan[0],movePlan[1],movePlan[2]));
+                    // NUClear::log("Ball Position:", ball.position[0],ball.position[1]);
                     emit(std::move(command));//XXX: emit here
 
 

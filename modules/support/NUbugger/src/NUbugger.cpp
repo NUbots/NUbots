@@ -373,15 +373,17 @@ namespace modules {
                     api_goal->set_screen_x(goal.screenCartesian[0]);
                     api_goal->set_screen_y(goal.screenCartesian[1]);
 
+                    arma::vec3 goal_pos = utility::math::coordinates::Spherical2Cartesian(goal.sphericalFromNeck);
+
                     switch(int(goal.type)){
                         case(0):
-                            emit(graph("Left goal distance", goal.sphericalFromNeck[0]));
+                            emit(graph("Left vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
                             break;
                         case(1):
-                            emit(graph("Right goal distance", goal.sphericalFromNeck[0]));
+                            emit(graph("Right vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
                             break;
                         case(2):
-                            emit(graph("Ambiguous goal distance", goal.sphericalFromNeck[0]));
+                            emit(graph("Ambiguous vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
                     }
 
 
