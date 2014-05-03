@@ -66,11 +66,11 @@ namespace robot {
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
-            const arma::vec2& actual_position);
+            const arma::vec& actual_position);
         
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state, 
-            const std::vector<arma::vec2>& actual_positions);
+            const std::vector<arma::vec>& actual_positions);
 
         arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
@@ -78,8 +78,11 @@ namespace robot {
 
         arma::mat::fixed<size, size> processNoise();
 
-        // double processNoiseFactor = 1e-6;
         double processNoiseFactor = 1e-3;
+
+        arma::mat33 getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state);
+
+        arma::mat33 getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state);
     };
 }
 }

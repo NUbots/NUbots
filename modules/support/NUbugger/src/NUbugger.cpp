@@ -37,6 +37,7 @@
 #include "utility/localisation/transform.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/support/Configuration.h"
+#include "utility/math/coordinates.h"
 #include "messages/localisation/FieldObject.h"
 // #include "BallModel.h"
 #include "utility/image/ColorModelConversions.h"
@@ -372,6 +373,20 @@ namespace modules {
                     api_goal->set_screen_x(goal.screenCartesian[0]);
                     api_goal->set_screen_y(goal.screenCartesian[1]);
 
+                    arma::vec3 goal_pos = utility::math::coordinates::Spherical2Cartesian(goal.sphericalFromNeck);
+
+                    switch(int(goal.type)){
+                        case(0):
+                            emit(graph("Left vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
+                            break;
+                        case(1):
+                            emit(graph("Right vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
+                            break;
+                        case(2):
+                            emit(graph("Ambiguous vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
+                    }
+
+
                     for(auto& point : goal.screen_quad){
                         api_goal->add_points(point[0]);
                         api_goal->add_points(point[1]);
@@ -392,6 +407,10 @@ namespace modules {
 
                 Message::Vision* api_vision = message.mutable_vision();
                 //std::cout<< "NUbugger::on<Trigger<std::vector<Ball>>> : sending " << balls.size() << " balls to NUbugger." << std::endl;
+                if(balls.size()>0){
+                    arma::vec3 first_ball_pos= utility::math::coordinates::Spherical2Cartesian(balls[0].sphericalFromNeck);
+                    emit(graph("Vision Ball pos", first_ball_pos[0], first_ball_pos[1],first_ball_pos[2]));
+                }
                 for (auto& ball : balls){
                     Message::VisionFieldObject* api_ball = api_vision->add_vision_object();
 
@@ -448,8 +467,8 @@ namespace modules {
                     auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
                     std::vector<messages::localisation::FieldObject::Model> robot_msg_models;
 
-                    for (auto& model : robots) {
-                    // auto model = robots[0];
+                    //for (auto& model : robots) {
+                    auto model = robots[0];
                         messages::localisation::FieldObject::Model robot_model;
                         robot_msg->name = "self";
                         robot_model.wm_x = model.position[0];
@@ -462,7 +481,7 @@ namespace modules {
                         robot_model.sr_yy = model.sr_yy; // * 100;
                         robot_model.lost = false;
                         robot_msg_models.push_back(robot_model);
-                    }
+                    //}
 
                     
                     robot_msg->models = robot_msg_models;
