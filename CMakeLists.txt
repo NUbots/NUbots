@@ -8,6 +8,9 @@ SET(VERSION_PATCH 0)
 # Set to off to ignore building tests
 OPTION(BUILD_TESTS "Builds all of the tests for each module." ON)
 
+# Set to on to build as shared libraries
+OPTION(SHARED_BUILD "Build the binaries by linking to shared libraries." ON)
+
 # We use additional modules that cmake needs to know about
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
