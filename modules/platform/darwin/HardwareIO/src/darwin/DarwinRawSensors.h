@@ -103,7 +103,7 @@ namespace Darwin {
             uint8_t iGain;
             uint8_t pGain;
             uint8_t reserved;
-            uint16_t goalPosition;
+            uint16_t goalPostion;
             uint16_t movingSpeed;
         };
     }  // namespace Types
