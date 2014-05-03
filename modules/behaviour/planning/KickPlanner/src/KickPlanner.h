@@ -20,6 +20,7 @@
 #ifndef MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
 #define MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
 
+#include <armadillo>
 
 #include <nuclear>
 namespace modules {

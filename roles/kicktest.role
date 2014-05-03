@@ -26,7 +26,8 @@ ADD_ROLE(
         behaviour::skills::FallingRelax
         behaviour::skills::Getup
         behaviour::skills::Look
-        behaviour::planning::LookAtBall
+        behaviour::skills::KickScript
+        #behaviour::planning::LookAtBall
         behaviour::planning::KickPlanner
 
         #Motion
