@@ -16,10 +16,10 @@
             { "id": "L_KNEE", "position": 0.625498, "gain": 80 },
             { "id": "R_ANKLE_PITCH", "position": -0.337558, "gain": 80 },
             { "id": "L_ANKLE_PITCH", "position": -0.337558, "gain": 80 },
-            { "id": "R_HIP_ROLL", "position": -0.053702, "gain": 80 },
-            { "id": "L_HIP_ROLL", "position": 0.053702, "gain": 80 },
-            { "id": "R_ANKLE_ROLL", "position": 0.049099, "gain": 80 },
-            { "id": "L_ANKLE_ROLL", "position": -0.056771, "gain": 80 }
+            { "id": "R_HIP_ROLL", "position": -0.053702, "gain": 40 },
+            { "id": "L_HIP_ROLL", "position": 0.053702, "gain": 40 },
+            { "id": "R_ANKLE_ROLL", "position": 0.049099, "gain": 40 },
+            { "id": "L_ANKLE_ROLL", "position": -0.056771, "gain": 40 }
         ]
     }
 ]
