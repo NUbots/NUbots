@@ -3,15 +3,15 @@ ADD_ROLE(
     MODULES
         support::SignalCatcher
         support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem    
+        support::configuration::ConfigSystem
         #support::configuration::NetworkingConfiguration
         platform::darwin::HardwareIO
         platform::darwin::SensorFilter
         support::NUbugger
         debug::NUbugger
         behaviour::Controller
-        behaviour::reflexes::Stand
-        behaviour::reflexes::FallingRelax
-        behaviour::reflexes::Getup
+        behaviour::skills::Stand
+        behaviour::skills::FallingRelax
+        behaviour::skills::Getup
         motion::ScriptEngine
 )

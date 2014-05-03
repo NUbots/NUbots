@@ -17,36 +17,27 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_PLATFORM_DARWIN_HARDWAREIO_H
-#define MODULES_PLATFORM_DARWIN_HARDWAREIO_H
+#include "LookAtGoal.h"
 
-#include <nuclear>
-
-#include "darwin/Darwin.h"
-#include "Converter.h"
+#include "messages/vision/VisionObjects.h"
+#include "messages/behaviour/LookStrategy.h"
 
 namespace modules {
-namespace platform {
-namespace darwin {
+    namespace behaviour {
+        namespace planning {
 
-    /**
-     * This NUClear Reactor is responsible for reading in the data for the Darwin Platform and emitting it to the rest
-     * of the system
-     *
-     * @author Trent Houliston
-     */
-    class HardwareIO : public NUClear::Reactor {
-    private:
-        /// @brief Our internal darwin class that is used for interacting with the hardware
-        Darwin::Darwin darwin;
-        Converter converter;
+            using messages::vision::Goal;
+            using messages::behaviour::LookAtAngle;
 
-    public:
-        /// @brief called by a Powerplant to construct this reactor
-        explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
-    };
-}
-}
-}
-#endif
+            LookAtGoal::LookAtGoal(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
+                on<Trigger<std::vector<Goal>>>([this] (const std::vector<Goal>& goals) {
+                    if (goals.size() > 0) {
+                        emit(std::make_unique<LookAtAngle>(LookAtAngle {goals[0].screenAngular[0],-goals[0].screenAngular[1]}));
+                    }
+
+                });
+            }
+        }  // planning
+    }  // behaviours
+}  // modules
