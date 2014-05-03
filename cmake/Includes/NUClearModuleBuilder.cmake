@@ -39,6 +39,28 @@ FUNCTION(NUCLEAR_MODULE)
     # Find all our files
     FILE(GLOB_RECURSE src "src/**.cpp" , "src/**.h")
 
+    # Get our configuration files
+    FILE(GLOB_RECURSE config_files "config/**")
+
+    FOREACH(config_file ${config_files})
+
+        # Calculate the Output Directory
+        FILE(RELATIVE_PATH output_file "${CMAKE_CURRENT_SOURCE_DIR}/config" ${config_file})
+        SET(output_file "${CMAKE_BINARY_DIR}/config/${output_file}")
+
+        # Add the two files we will generate to our output
+        LIST(APPEND configuration "${output_file}")
+
+        # Copy configuration files over as needed
+        ADD_CUSTOM_COMMAND(
+            OUTPUT ${output_file}
+            COMMAND ${CMAKE_COMMAND} -E copy ${config_file} ${output_file}
+            DEPENDS ${config_file}
+            COMMENT "Copying updated configuration file ${config_file}"
+        )
+
+    ENDFOREACH()
+
     # Include our own src dir and the shared dirs
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/src)
     INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/shared)
@@ -48,14 +70,11 @@ FUNCTION(NUCLEAR_MODULE)
     INCLUDE_DIRECTORIES(${INCLUDES})
 
     # Add all our code to a library
-    ADD_LIBRARY(${module_name} ${src})
+    ADD_LIBRARY(${module_name} ${src} ${configuration})
     TARGET_LINK_LIBRARIES(${module_name} ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
 
     # Put it in an IDE group for shared
     SET_PROPERTY(TARGET ${module_name} PROPERTY FOLDER ${module_path})
-
-    ADD_CUSTOM_COMMAND(TARGET ${module_name} PRE_BUILD
-                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/config ${CMAKE_BINARY_DIR}/config)
 
     # If we are doing tests then build the tests for this
     IF(BUILD_TESTS)

@@ -47,7 +47,7 @@ with open(role_name, 'w') as file:
     main = """
 int main(int argc, char** argv) {
     NUClear::PowerPlant::Configuration config;
-    config.threadCount = 4;
+    config.threadCount = 8;
 
     NUClear::PowerPlant plant(config, argc, const_cast<const char**>(argv));
 """

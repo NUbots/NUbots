@@ -17,36 +17,32 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_PLATFORM_DARWIN_HARDWAREIO_H
-#define MODULES_PLATFORM_DARWIN_HARDWAREIO_H
+#ifndef MODULES_BEHAVIOUR_REFLEX_STAND_H
+#define MODULES_BEHAVIOUR_REFLEX_STAND_H
 
 #include <nuclear>
 
-#include "darwin/Darwin.h"
-#include "Converter.h"
-
 namespace modules {
-namespace platform {
-namespace darwin {
+    namespace behaviour {
+        namespace skills {
 
-    /**
-     * This NUClear Reactor is responsible for reading in the data for the Darwin Platform and emitting it to the rest
-     * of the system
-     *
-     * @author Trent Houliston
-     */
-    class HardwareIO : public NUClear::Reactor {
-    private:
-        /// @brief Our internal darwin class that is used for interacting with the hardware
-        Darwin::Darwin darwin;
-        Converter converter;
+            /**
+             * Executes a getup script if the robot falls over.
+             *
+             * @author Josiah Walker
+             */
+            class Stand : public NUClear::Reactor {
+            private:
+                const size_t id;
 
-    public:
-        /// @brief called by a Powerplant to construct this reactor
-        explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
-    };
-}
-}
-}
-#endif
+            public:
+                explicit Stand(std::unique_ptr<NUClear::Environment> environment);
+                static constexpr const char* CONFIGURATION_PATH = "Stand.json";
+            };
+
+        }  // reflexes
+    }  // behaviours
+}  // modules
+
+#endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_H
 

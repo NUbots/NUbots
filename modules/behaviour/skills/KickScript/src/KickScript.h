@@ -17,36 +17,37 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_PLATFORM_DARWIN_HARDWAREIO_H
-#define MODULES_PLATFORM_DARWIN_HARDWAREIO_H
+#ifndef MODULES_BEHAVIOUR_REFLEXES_KICKSCRIPT_H
+#define MODULES_BEHAVIOUR_REFLEXES_KICKSCRIPT_H
 
 #include <nuclear>
-
-#include "darwin/Darwin.h"
-#include "Converter.h"
+#include "messages/motion/KickCommand.h"
 
 namespace modules {
-namespace platform {
-namespace darwin {
+namespace behaviour {
+namespace skills {
 
-    /**
-     * This NUClear Reactor is responsible for reading in the data for the Darwin Platform and emitting it to the rest
-     * of the system
-     *
-     * @author Trent Houliston
-     */
-    class HardwareIO : public NUClear::Reactor {
-    private:
-        /// @brief Our internal darwin class that is used for interacting with the hardware
-        Darwin::Darwin darwin;
-        Converter converter;
-
+    class KickScript : public NUClear::Reactor {
     public:
-        /// @brief called by a Powerplant to construct this reactor
-        explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
-    };
-}
-}
-}
-#endif
+        /// @brief Called by the powerplant to build and setup the KickScript reactor.
+        explicit KickScript(std::unique_ptr<NUClear::Environment> environment);
+        static constexpr const char* CONFIGURATION_PATH = "KickScript.json";
+    private:
+        const size_t id;
 
+        float KICK_PRIORITY;
+        float EXECUTION_PRIORITY;
+
+        messages::motion::KickCommand kickCommand;
+
+        void updatePriority(const float& priority);
+        int getDirectionalQuadrant(float x, float y);
+
+    };
+
+}
+}
+}
+
+
+#endif
