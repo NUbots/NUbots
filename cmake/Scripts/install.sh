@@ -20,9 +20,11 @@ else
 fi
 
 # Copy our binaries over
-cd roles
-file -i * | grep 'x-executable; charset=binary' | cut -f1 -d: | rsync --files-from=- -avzP . "darwin@$robotIP:/home/darwin/"
-cd ..
+#cd roles
+#file -i * | grep -P '(?:x-executable)|(?:x-sharedlib); charset=binary' | cut -f1 -d: | rsync --files-from=- -avzP . "darwin@$robotIP:/home/darwin/"
+#cd ..
+rsync -avz -e ssh bin/* "darwin@$robotIP:/home/darwin/"
+
 
 # Overwrite configuration files
 if [ "$config" == "update" ] || [ "$config" == "u" ] ;

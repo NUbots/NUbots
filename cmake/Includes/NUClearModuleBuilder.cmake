@@ -1,3 +1,15 @@
+
+IF(SHARED_BUILD)
+    # use, i.e. don't skip the full RPATH for the build tree
+    SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+
+    # Build the RPATH into the binary before install
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+
+    # the RPATH to be used
+    SET(CMAKE_INSTALL_RPATH "lib/")
+ENDIF()
+
 FUNCTION(NUCLEAR_MODULE)
 
     STRING(REGEX REPLACE "^.*modules/(.+)$" "\\1;" module_name "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -70,8 +82,16 @@ FUNCTION(NUCLEAR_MODULE)
     INCLUDE_DIRECTORIES(${INCLUDES})
 
     # Add all our code to a library
-    ADD_LIBRARY(${module_name} ${src} ${configuration})
+    IF(SHARED_BUILD)
+        ADD_LIBRARY(${module_name} SHARED ${src} ${configuration})
+        SET_PROPERTY(TARGET ${module_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/lib")
+    ELSE()
+        ADD_LIBRARY(${module_name} STATIC ${src} ${configuration})
+    ENDIF()
+
     TARGET_LINK_LIBRARIES(${module_name} ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
+
+    SET_PROPERTY(TARGET ${module_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/lib")
 
     # Put it in an IDE group for shared
     SET_PROPERTY(TARGET ${module_name} PROPERTY FOLDER ${module_path})
