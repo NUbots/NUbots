@@ -116,66 +116,140 @@ namespace modules {
                    >([this] (
                      const time_t& now,
                      const messages::localisation::Ball& ball,
-                     const std::vector<messages::localisation::Self>& self,
+                     const std::vector<messages::localisation::Self>& selfs,
                      const std::vector<messages::vision::Obstacle>& robots
                     ) {
-                    std::cout << "starting path planning" << std::endl;
-                    arma::vec targetPos, targetHead;
-                    //work out where we're going
-                    if (targetPosition == messages::behaviour::WalkTarget::Robot) {
-                        //XXX: check if robot is visible
-                    } else if (targetPosition ==messages::behaviour::WalkTarget::Ball) {
-                        targetPos = ball.position;
-                    } else { //other types default to position/waypoint location
-                        targetPos = currentTargetPosition;
-                    }
-                    //work out where to face when we get there
-                    if (targetHeading == messages::behaviour::WalkTarget::Robot) {
-                        //XXX: check if robot is visible
-                    } else if (targetHeading == messages::behaviour::WalkTarget::Ball) {
-                        targetHead = arma::normalise(arma::vec(ball.position)-targetPos);
-                    } else { //other types default to position/waypoint bearings
-                        targetHead = arma::normalise(arma::vec(currentTargetHeading)-targetPos);
-                    }
-                    //calculate the basic movement plan
-                    arma::vec movePlan;
 
-                    switch (planType) {
-                        case messages::behaviour::WalkApproach::ApproachFromDirection:
-                            movePlan = approachFromDirection(self.front(),targetPos,targetHead);
-                            break;
-                        case messages::behaviour::WalkApproach::WalkToPoint:
-                            movePlan = goToPoint(self.front(),targetPos,targetHead);
-                            break;
-                        case messages::behaviour::WalkApproach::OmnidirectionalReposition:
-                            movePlan = goToPoint(self.front(),targetPos,targetHead);
-                            break;
-                        case messages::behaviour::WalkApproach::StandStill:
-                            emit(std::make_unique<WalkStopCommand>());
-                            return;
-                    }
-                    //work out if we have to avoid something
-                    if (useAvoidance) {
-                        //this is a vision-based temporary for avoidance
-                        movePlan = avoidObstacles(robots,movePlan);
-                    }
-                    //NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
+                    //Jake walk path planner:
+                    NUClear::log(__LINE__);
+                    auto self = selfs[0];
 
-                    // NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
-                    //this applies acceleration/deceleration and hysteresis to movement
-                    movePlan = generateWalk(movePlan,
-                               planType == messages::behaviour::WalkApproach::OmnidirectionalReposition);
+                    NUClear::log(__LINE__);
+                    arma::vec3 goalPosition = arma::vec3({-3,0,1});
 
+                    NUClear::log(__LINE__);
+                    arma::vec2 normed_heading = arma::normalise(self.heading);
+                    NUClear::log(__LINE__);
+                    arma::mat33 worldToRobotTransform = arma::mat33{      normed_heading[0],  normed_heading[1],         0,
+                                                                         -normed_heading[1],  normed_heading[0],         0,
+                                                                                          0,                 0,         1};
+
+                    NUClear::log(__LINE__);
+                    worldToRobotTransform.submat(0,2,1,2) = -worldToRobotTransform.submat(0,0,1,1) * self.position;
+                    
+                    NUClear::log(__LINE__);
+                    arma::vec3 homogeneousKickTarget = worldToRobotTransform * goalPosition;
+                    NUClear::log(__LINE__);
+                    arma::vec kickTarget_robot = homogeneousKickTarget.rows(0,1);    //In robot coords
+                    NUClear::log(__LINE__);
+                    arma::vec2 kickDirection = arma::normalise(kickTarget_robot-ball.position);    //In robot coords
+                    NUClear::log(__LINE__);
+                    arma::vec2 kickDirectionNormal = arma::vec2({-kickDirection[1], kickDirection[0]});
+
+                    //float kickTargetBearing_robot = std::atan2(kickTarget_robot[1],kickTarget_robot[0]);
+                    NUClear::log(__LINE__);
+                    float ballBearing = std::atan2(ball.position[1],ball.position[0]);
+                    
+                    //calc self in kick coords
+                    NUClear::log(__LINE__);
+                    arma::vec2 moveTarget = ball.position - ballLineupDistance * kickDirection;
+
+                    NUClear::log(__LINE__);
+                    arma::mat33 robotToKickFrame = arma::mat33{      kickDirection[0],  kickDirection[1],         0,
+                                                                    -kickDirection[1],  kickDirection[0],         0,
+                                                                                          0,                 0,         1};
+                    NUClear::log(__LINE__);
+                    robotToKickFrame.submat(0,2,1,2) = -robotToKickFrame.submat(0,0,1,1) * moveTarget;
+                    
+                    NUClear::log(__LINE__);
+                    arma::vec3 selfInKickFrame = robotToKickFrame * arma::vec3({0,0,1});
+
+                    //Hyperboal x >a*sqrt(y^2/a^2 + 1)
+                    NUClear::log(__LINE__);
+                    if(selfInKickFrame[0] > ballLineupDistance * std::sqrt(selfInKickFrame[1]*selfInKickFrame[1]/(ApproachCurveFactor*ApproachCurveFactor) + 1)){   //Inside concave part
+                    NUClear::log(__LINE__);
+                        arma::vec2 moveTargetA = ball.position + ballLineupDistance * kickDirectionNormal;
+                    NUClear::log(__LINE__);
+                        arma::vec2 moveTargetB = ball.position - ballLineupDistance * kickDirectionNormal;
+                        if(arma::norm(moveTargetA) < arma::norm(moveTargetB)){
+                    NUClear::log(__LINE__);
+                            moveTarget = moveTargetA;
+                        } else {
+                    NUClear::log(__LINE__);
+                            moveTarget = moveTargetB;
+                        }                        
+                    NUClear::log(__LINE__);
+                    }
+
+                    NUClear::log(__LINE__);
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
-                    command->velocity = arma::vec({movePlan[0],movePlan[1]});
-                    command->rotationalSpeed = movePlan[2];
-                    // NUClear::log("Self Position:", self[0].position[0],self[0].position[1]);
-                    // NUClear::log("Target Position:", targetPos[0],targetPos[1]);
-                    emit(graph("Walk command:", movePlan[0],movePlan[1],movePlan[2]));
+
+                    NUClear::log(__LINE__);
+                    command->velocity = arma::normalise(arma::vec2{moveTarget[0],moveTarget[1]});
+                    NUClear::log(__LINE__);
+                    command->rotationalSpeed = -ballBearing;  //vx,vy, alpha
+
+
+                    // //std::cout << "starting path planning" << std::endl;
+                    // arma::vec targetPos, targetHead;
+                    // //work out where we're going
+                    // if (targetPosition == messages::behaviour::WalkTarget::Robot) {
+                    //     //XXX: check if robot is visible
+                    // } else if (targetPosition ==messages::behaviour::WalkTarget::Ball) {
+                    //     targetPos = ball.position;
+                    // } else { //other types default to position/waypoint location
+                    //     targetPos = currentTargetPosition;
+                    // }
+                    // //work out where to face when we get there
+                    // if (targetHeading == messages::behaviour::WalkTarget::Robot) {
+                    //     //XXX: check if robot is visible
+                    // } else if (targetHeading == messages::behaviour::WalkTarget::Ball) {
+                    //     targetHead = arma::normalise(arma::vec(ball.position)-targetPos);
+                    // } else { //other types default to position/waypoint bearings
+                    //     targetHead = arma::normalise(arma::vec(currentTargetHeading)-targetPos);
+                    // }
+                    // //calculate the basic movement plan
+                    // arma::vec movePlan;
+
+                    // switch (planType) {
+                    //     case messages::behaviour::WalkApproach::ApproachFromDirection:
+                    //         movePlan = approachFromDirection(self.front(),targetPos,targetHead);
+                    //         break;
+                    //     case messages::behaviour::WalkApproach::WalkToPoint:
+                    //         movePlan = goToPoint(self.front(),targetPos,targetHead);
+                    //         break;
+                    //     case messages::behaviour::WalkApproach::OmnidirectionalReposition:
+                    //         movePlan = goToPoint(self.front(),targetPos,targetHead);
+                    //         break;
+                    //     case messages::behaviour::WalkApproach::StandStill:
+                    //         emit(std::make_unique<WalkStopCommand>());
+                    //         return;
+                    // }
+                    // //work out if we have to avoid something
+                    // if (useAvoidance) {
+                    //     //this is a vision-based temporary for avoidance
+                    //     movePlan = avoidObstacles(robots,movePlan);
+                    // }
+                    // //NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
+
+                    // // NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
+                    // //this applies acceleration/deceleration and hysteresis to movement
+                    // movePlan = generateWalk(movePlan,
+                    //            planType == messages::behaviour::WalkApproach::OmnidirectionalReposition);
+
+                    // std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
+                    // command->velocity = arma::vec({movePlan[0],movePlan[1]});
+                    // command->rotationalSpeed = movePlan[2];
+                    // // NUClear::log("Self Position:", self[0].position[0],self[0].position[1]);
+                    // // NUClear::log("Target Position:", targetPos[0],targetPos[1]);
+                    NUClear::log(__LINE__);
+                    emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));
                     // NUClear::log("Ball Position:", ball.position[0],ball.position[1]);
+                    NUClear::log(__LINE__);
                     emit(std::move(command));//XXX: emit here
 
 
+                    NUClear::log(__LINE__);
                     emit(std::move(std::make_unique<WalkStartCommand>()));
                 });
 
@@ -278,7 +352,7 @@ namespace modules {
                     //calculate the heading the robot wants to achieve at its destination
                     const double waypointHeading = atan2(waypoints[i][1],waypoints[i][0])-selfHeading;
 
-                    std::cout << selfHeading << ", " << waypointHeading << ", " << waypoints[i][0] << ", " << waypoints[i][1] << std::endl;
+                    //std::cout << selfHeading << ", " << waypointHeading << ", " << waypoints[i][0] << ", " << waypoints[i][1] << std::endl;
                     headings[i] = atan2(sin(waypointHeading),cos(waypointHeading));
 
                     //calculate the distance to destination
@@ -289,7 +363,7 @@ namespace modules {
                     const double waypointBearing = atan2(waypointPos[1],waypointPos[0])-selfHeading;
                     bearings[i] = atan2(sin(waypointBearing),cos(waypointBearing));
 
-                    std::cout << selfHeading << ", " << waypointBearing << ", " << waypointPos[0] << ", " << waypointPos[1] << ", " << bearings[i] << std::endl << std::endl;
+                    //std::cout << selfHeading << ", " << waypointBearing << ", " << waypointPos[0] << ", " << waypointPos[1] << ", " << bearings[i] << std::endl << std::endl;
                     //costs defines which move plan is the most appropriate
                     costs[i] = bearings[i]*bearings[i]*bearingSensitivity+distances[i]*distances[i];
 
