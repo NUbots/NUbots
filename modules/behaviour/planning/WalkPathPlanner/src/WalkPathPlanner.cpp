@@ -100,6 +100,62 @@ namespace modules {
                 });
 
                 // add in fake walk localisation
+                on<Trigger<Every<30, Per<std::chrono::seconds>>>, With<Optional<WalkCommand>
+                    ([this](const time_t&, const std::shared_ptr<const WalkCommand>& w) {
+                    static size_t ctr = 0;
+                    
+                    const double ballx = 0.0,
+                                 bally = 0.0,
+                                 targetx = 3.0,
+                                 targety = 0.0;
+                    
+                    static double x,y,h;
+                    
+                    if ( (ctr % 3*1800) == 0) {
+                        set position
+                        x = -1.0;
+                        y = -2.0;
+                        h = -1.5;
+                        
+                        //emit ball pos
+                        std::unique_ptr<messages::localisation::Ball> b = std::make_unique<messages::localisation::Ball>();
+                        b->position = arma::vec({ballx,bally});
+                        emit(std::move(b));
+                        
+                        //emit robots:
+                        auto o = std::make_unique<std::vector<messages::vision::Obstacle>>();
+                        emit(std::move(o));
+                    }
+                    
+                    //update self pos
+                    if (w != NULL) {
+                        x += (w->velocity[0]*cos(h) - w->velocity[1]*sin(h)) * 0.1;
+                        y += (w->velocity[0]*sin(h) + w->velocity[1]*cos(h)) * 0.1;
+                        h += (w->rotationalSpeed) * 0.1;
+                    }
+                    
+                    
+                    //emit self pos
+                    /*std::unique_ptr<std::vector<messages::localisation::Self>> s = std::make_unique<std::vector<messages::localisation::Self>>(1);
+                    s[0]->position = arma::vec({x,y});
+                    s[0]->heading = arma::vec({cos(h),sin(h)});
+                    emit(std::move(s));*/
+                    
+                    auto robot_msg = std::make_unique<std::vector<messages::localisation::Self>>();
+
+                    messages::localisation::Self robot_model;
+                    robot_model.position = arma::vec({x,y});
+                    robot_model.heading = arma::vec({cos(h),sin(h)});
+                    robot_model.sr_xx = 0.1;
+                    robot_model.sr_xy = 0.1;
+                    robot_model.sr_yy = 0.1;
+                    robot_msg->push_back(robot_model);
+                    
+                    emit(std::move(robot_msg));
+                    
+                    ++ctr;
+                    }
+                
                 // on<
                 //     Trigger<Every<20, Per<std::chrono::seconds>>>,
                 //     With<messages::localisation::Ball>,
@@ -198,7 +254,7 @@ namespace modules {
                 approach->targetHeadingType = WalkTarget::WayPoint;
                 approach->walkMovementType = WalkApproach::ApproachFromDirection;
                 approach->heading = arma::vec({3,0});
-                approach->target = arma::vec({1,1});
+                approach->target = arma::vec({0,0});
                 emit(std::move(approach));
             }
 
