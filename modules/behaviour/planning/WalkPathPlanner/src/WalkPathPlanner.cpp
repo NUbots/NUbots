@@ -120,74 +120,53 @@ namespace modules {
                      const std::vector<messages::vision::Obstacle>& robots
                     ) {
 
+                    arma::vec ballPosition = ball.position;
+
                     //Jake walk path planner:
-                    NUClear::log(__LINE__);
                     auto self = selfs[0];
 
-                    NUClear::log(__LINE__);
-                    arma::vec3 goalPosition = arma::vec3({-3,0,1});
+                    arma::vec goalPosition = arma::vec3({-3,0,1});
 
-                    NUClear::log(__LINE__);
-                    arma::vec2 normed_heading = arma::normalise(self.heading);
-                    NUClear::log(__LINE__);
-                    arma::mat33 worldToRobotTransform = arma::mat33{      normed_heading[0],  normed_heading[1],         0,
+                    arma::vec normed_heading = arma::normalise(self.heading);
+                    arma::mat worldToRobotTransform = arma::mat33{      normed_heading[0],  normed_heading[1],         0,
                                                                          -normed_heading[1],  normed_heading[0],         0,
                                                                                           0,                 0,         1};
 
-                    NUClear::log(__LINE__);
                     worldToRobotTransform.submat(0,2,1,2) = -worldToRobotTransform.submat(0,0,1,1) * self.position;
                     
-                    NUClear::log(__LINE__);
-                    arma::vec3 homogeneousKickTarget = worldToRobotTransform * goalPosition;
-                    NUClear::log(__LINE__);
+                    arma::vec homogeneousKickTarget = worldToRobotTransform * goalPosition;
                     arma::vec kickTarget_robot = homogeneousKickTarget.rows(0,1);    //In robot coords
-                    NUClear::log(__LINE__);
-                    arma::vec2 kickDirection = arma::normalise(kickTarget_robot-ball.position);    //In robot coords
-                    NUClear::log(__LINE__);
-                    arma::vec2 kickDirectionNormal = arma::vec2({-kickDirection[1], kickDirection[0]});
+                    arma::vec kickDirection = arma::normalise(kickTarget_robot-ballPosition);    //In robot coords
+                    arma::vec kickDirectionNormal = arma::vec2({-kickDirection[1], kickDirection[0]});
 
                     //float kickTargetBearing_robot = std::atan2(kickTarget_robot[1],kickTarget_robot[0]);
-                    NUClear::log(__LINE__);
-                    float ballBearing = std::atan2(ball.position[1],ball.position[0]);
+                    float ballBearing = std::atan2(ballPosition[1],ballPosition[0]);
                     
                     //calc self in kick coords
-                    NUClear::log(__LINE__);
-                    arma::vec2 moveTarget = ball.position - ballLineupDistance * kickDirection;
+                    arma::vec moveTarget = ballPosition - ballLineupDistance * kickDirection;
 
-                    NUClear::log(__LINE__);
-                    arma::mat33 robotToKickFrame = arma::mat33{      kickDirection[0],  kickDirection[1],         0,
+                    arma::mat robotToKickFrame = arma::mat33{      kickDirection[0],  kickDirection[1],         0,
                                                                     -kickDirection[1],  kickDirection[0],         0,
                                                                                           0,                 0,         1};
-                    NUClear::log(__LINE__);
                     robotToKickFrame.submat(0,2,1,2) = -robotToKickFrame.submat(0,0,1,1) * moveTarget;
                     
-                    NUClear::log(__LINE__);
-                    arma::vec3 selfInKickFrame = robotToKickFrame * arma::vec3({0,0,1});
+                    arma::vec selfInKickFrame = robotToKickFrame * arma::vec3({0,0,1});
 
                     //Hyperboal x >a*sqrt(y^2/a^2 + 1)
-                    NUClear::log(__LINE__);
                     if(selfInKickFrame[0] > ballLineupDistance * std::sqrt(selfInKickFrame[1]*selfInKickFrame[1]/(ApproachCurveFactor*ApproachCurveFactor) + 1)){   //Inside concave part
-                    NUClear::log(__LINE__);
-                        arma::vec2 moveTargetA = ball.position + ballLineupDistance * kickDirectionNormal;
-                    NUClear::log(__LINE__);
-                        arma::vec2 moveTargetB = ball.position - ballLineupDistance * kickDirectionNormal;
+                        arma::vec moveTargetA = ballPosition + ballLineupDistance * kickDirectionNormal;
+                        arma::vec moveTargetB = ballPosition - ballLineupDistance * kickDirectionNormal;
                         if(arma::norm(moveTargetA) < arma::norm(moveTargetB)){
-                    NUClear::log(__LINE__);
                             moveTarget = moveTargetA;
                         } else {
-                    NUClear::log(__LINE__);
                             moveTarget = moveTargetB;
                         }                        
-                    NUClear::log(__LINE__);
                     }
 
-                    NUClear::log(__LINE__);
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
 
-                    NUClear::log(__LINE__);
                     command->velocity = arma::normalise(arma::vec2{moveTarget[0],moveTarget[1]});
-                    NUClear::log(__LINE__);
-                    command->rotationalSpeed = -ballBearing;  //vx,vy, alpha
+                    command->rotationalSpeed = ballBearing;  //vx,vy, alpha
 
 
                     // //std::cout << "starting path planning" << std::endl;
@@ -242,14 +221,11 @@ namespace modules {
                     // command->rotationalSpeed = movePlan[2];
                     // // NUClear::log("Self Position:", self[0].position[0],self[0].position[1]);
                     // // NUClear::log("Target Position:", targetPos[0],targetPos[1]);
-                    NUClear::log(__LINE__);
                     emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));
                     // NUClear::log("Ball Position:", ball.position[0],ball.position[1]);
-                    NUClear::log(__LINE__);
                     emit(std::move(command));//XXX: emit here
 
 
-                    NUClear::log(__LINE__);
                     emit(std::move(std::make_unique<WalkStartCommand>()));
                 });
 

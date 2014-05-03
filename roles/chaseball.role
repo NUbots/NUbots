@@ -29,6 +29,7 @@ ADD_ROLE(
         behaviour::skills::Look
         behaviour::planning::LookAtBall
         behaviour::planning::WalkPathPlanner
+        behaviour::planning::KickPlanner
 
         #Motion
         motion::ScriptEngine
