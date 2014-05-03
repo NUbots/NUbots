@@ -162,7 +162,7 @@ namespace modules {
 
             }
             m_sphericalError = visionKinematics.calculateSphericalError(m_location, BALL_DISTANCE_METHOD, m_diameter);
-            return (check() && m_location.bodyRelativeSpherical[0] > 0);
+            return ( m_location.bodyRelativeSpherical[0] > 0);
         }
 
 

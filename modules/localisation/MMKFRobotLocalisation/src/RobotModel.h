@@ -78,7 +78,6 @@ namespace robot {
 
         arma::mat::fixed<size, size> processNoise();
 
-        // double processNoiseFactor = 1e-6;
         double processNoiseFactor = 1e-3;
 
         arma::mat33 getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state);

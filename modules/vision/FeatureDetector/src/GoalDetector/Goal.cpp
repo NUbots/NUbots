@@ -34,7 +34,6 @@ namespace modules {
             m_sizeOnScreen[1] = corners.getAverageHeight();
 
             //CALCULATE DISTANCE AND BEARING VALS
-            valid = (calculatePositions(visionKinematics) && check());
         }
 
         void Goal::setParameters(bool THROWOUT_SHORT_GOALS_,
@@ -47,7 +46,8 @@ namespace modules {
                                     float GOAL_WIDTH_,
                                     const DISTANCE_METHOD& GOAL_DISTANCE_METHOD_,
                                     int EDGE_OF_SCREEN_MARGIN_,
-                                    float D2P_ADAPTIVE_THRESHOLD_) {
+                                    float D2P_ADAPTIVE_THRESHOLD_,
+                                    const VisionKinematics& visionKinematics) {
             THROWOUT_SHORT_GOALS = THROWOUT_SHORT_GOALS_;
             THROWOUT_NARROW_GOALS = THROWOUT_NARROW_GOALS_;
             THROWOUT_ON_ABOVE_KIN_HOR_GOALS = THROWOUT_ON_ABOVE_KIN_HOR_GOALS_;
@@ -59,6 +59,8 @@ namespace modules {
             GOAL_DISTANCE_METHOD = GOAL_DISTANCE_METHOD_;
             EDGE_OF_SCREEN_MARGIN = EDGE_OF_SCREEN_MARGIN_;
             D2P_ADAPTIVE_THRESHOLD = D2P_ADAPTIVE_THRESHOLD_;
+
+            valid = (calculatePositions(visionKinematics) && check());
 
         }
 
@@ -207,7 +209,7 @@ namespace modules {
             }
 
             m_sphericalError = visionKinematics.calculateSphericalError(m_location, GOAL_DISTANCE_METHOD, m_sizeOnScreen[0]);
-            return ( check() && m_location.bodyRelativeSpherical[0] > 0.0);
+            return (m_location.bodyRelativeSpherical[0] > 0.0);
         }
 
         /*! @brief Stream insertion operator for a single ColourSegment.

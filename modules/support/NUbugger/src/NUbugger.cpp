@@ -37,6 +37,7 @@
 #include "utility/localisation/transform.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/support/Configuration.h"
+#include "utility/math/coordinates.h"
 #include "messages/localisation/FieldObject.h"
 // #include "BallModel.h"
 #include "utility/image/ColorModelConversions.h"
@@ -404,6 +405,10 @@ namespace modules {
 
                 Message::Vision* api_vision = message.mutable_vision();
                 //std::cout<< "NUbugger::on<Trigger<std::vector<Ball>>> : sending " << balls.size() << " balls to NUbugger." << std::endl;
+                if(balls.size()>0){
+                    arma::vec3 first_ball_pos= utility::math::coordinates::Spherical2Cartesian(balls[0].sphericalFromNeck);
+                    emit(graph("Vision Ball pos", first_ball_pos[0], first_ball_pos[1],first_ball_pos[2]));
+                }
                 for (auto& ball : balls){
                     Message::VisionFieldObject* api_ball = api_vision->add_vision_object();
 
