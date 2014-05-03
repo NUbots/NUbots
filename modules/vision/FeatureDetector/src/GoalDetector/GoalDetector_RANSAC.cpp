@@ -332,7 +332,8 @@ namespace modules {
                                    GOAL_WIDTH,
                                    GOAL_DISTANCE_METHOD,
                                    EDGE_OF_SCREEN_MARGIN,
-                                   D2P_ADAPTIVE_THRESHOLD);
+                                   D2P_ADAPTIVE_THRESHOLD,
+                                   visionKinematics);
 
                 return std::move(  std::unique_ptr<std::vector<Goal>>(  new std::vector<Goal>(1, goal)  )  );
             }
@@ -380,7 +381,8 @@ namespace modules {
                                            GOAL_WIDTH,
                                            GOAL_DISTANCE_METHOD,
                                            EDGE_OF_SCREEN_MARGIN,
-                                           D2P_ADAPTIVE_THRESHOLD);
+                                           D2P_ADAPTIVE_THRESHOLD,
+                                           visionKinematics);
                     rightPost.setParameters(THROWOUT_SHORT_GOALS,
                                             THROWOUT_NARROW_GOALS,
                                             THROWOUT_ON_ABOVE_KIN_HOR_GOALS,
@@ -391,7 +393,8 @@ namespace modules {
                                             GOAL_WIDTH,
                                             GOAL_DISTANCE_METHOD,
                                             EDGE_OF_SCREEN_MARGIN,
-                                            D2P_ADAPTIVE_THRESHOLD);
+                                            D2P_ADAPTIVE_THRESHOLD,
+                                            visionKinematics);
                     goals->push_back(leftPost);
                     goals->push_back(rightPost);
                 }
@@ -416,7 +419,8 @@ namespace modules {
                                         GOAL_WIDTH,
                                         GOAL_DISTANCE_METHOD,
                                         EDGE_OF_SCREEN_MARGIN,
-                                        D2P_ADAPTIVE_THRESHOLD);
+                                        D2P_ADAPTIVE_THRESHOLD,
+                                        visionKinematics);
                     goals->push_back(goal);
                 }
             }
@@ -488,7 +492,7 @@ namespace modules {
 
             for (auto& post : *goal_posts){
                 if(post.valid){
-                   // NUClear::log("Emmiting valid post.",post);
+                    //NUClear::log("Emmiting valid post.",post);
                     goal_message->push_back(messages::vision::Goal());
                     goal_message->back().sphericalFromNeck = post.m_location.bodyRelativeSpherical;
                     //goal_message->back().sphericalError = goal_location.

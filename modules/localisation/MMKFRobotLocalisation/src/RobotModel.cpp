@@ -26,6 +26,8 @@
 #include "utility/math/coordinates.h"
 #include "messages/localisation/FieldObject.h"
 
+#include <nuclear>
+
 using messages::localisation::FakeOdometry;
 using utility::math::matrix::rotationMatrix;
 
@@ -71,35 +73,44 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
 
 /// Return the predicted observation of an object at the given position
 arma::vec RobotModel::predictedObservation(
-    const arma::vec::fixed<RobotModel::size>& state, const arma::vec2& actual_position) {
+    const arma::vec::fixed<RobotModel::size>& state, const arma::vec& actual_position) {
 
-    // // Radial coordinates
-    arma::vec2 diff = actual_position - state.rows(kX, kY);
-    arma::vec2 radial = utility::math::coordinates::Cartesian2Radial(diff);
-    // radial(1) = utility::math::angle::normalizeAngle(radial[1] - state[kHeading]);
-    // return radial;
+    arma::mat worldToRobot = getWorldToRobotTransform(state);
+    arma::vec objectPosition = arma::vec({actual_position[0], actual_position[1], 1});
+    arma::vec expectedObservation = worldToRobot * objectPosition;
 
-    auto heading_angle = std::atan2(state[kHeadingY], state[kHeadingX]);
+    // NUClear::log("worldToRobot =\n", worldToRobot);
+    // NUClear::log("objectPosition =\n", objectPosition);
+    // NUClear::log("predictedObservation =\n", expectedObservation);
 
-    // Distance and unit vector heading
-    heading_angle = utility::math::angle::normalizeAngle(radial[1] - heading_angle);
+    return expectedObservation.rows(0,1);
+    // // // Radial coordinates
+    // arma::vec2 diff = actual_position - state.rows(kX, kY);
+    // arma::vec2 radial = utility::math::coordinates::Cartesian2Radial(diff);
+    // // radial(1) = utility::math::angle::normalizeAngle(radial[1] - state[kHeading]);
+    // // return radial;
 
-    auto heading_x = std::cos(heading_angle);
-    auto heading_y = std::sin(heading_angle);
+    // auto heading_angle = std::atan2(state[kHeadingY], state[kHeadingX]);
 
-    // arma::vec2 heading = arma::normalise(diff);
-    return {radial[0], heading_x, heading_y};
+    // // Distance and unit vector heading
+    // heading_angle = utility::math::angle::normalizeAngle(radial[1] - heading_angle);
+
+    // auto heading_x = std::cos(heading_angle);
+    // auto heading_y = std::sin(heading_angle);
+
+    // // arma::vec2 heading = arma::normalise(diff);
+    // return {radial[0], heading_x, heading_y};
 }
 
 arma::vec RobotModel::predictedObservation(
     const arma::vec::fixed<RobotModel::size>& state, 
-    const std::vector<arma::vec2>& actual_positions) {
+    const std::vector<arma::vec>& actual_positions) {
 
     // // Radial coordinates
-    arma::vec2 diff_1 = actual_positions[0] - state.rows(kX, kY);
-    arma::vec2 diff_2 = actual_positions[1] - state.rows(kX, kY);
-    arma::vec2 radial_1 = utility::math::coordinates::Cartesian2Radial(diff_1);
-    arma::vec2 radial_2 = utility::math::coordinates::Cartesian2Radial(diff_2);
+    arma::vec diff_1 = actual_positions[0] - state.rows(kX, kY);
+    arma::vec diff_2 = actual_positions[1] - state.rows(kX, kY);
+    arma::vec radial_1 = utility::math::coordinates::Cartesian2Radial(diff_1);
+    arma::vec radial_2 = utility::math::coordinates::Cartesian2Radial(diff_2);
 
     auto angle_diff = utility::math::angle::difference(radial_1[1], radial_2[1]);
 
@@ -155,11 +166,30 @@ arma::vec::fixed<RobotModel::size> RobotModel::limitState(
     // Unit vector orientation
     arma::vec2 heading = { state[kHeadingX], state[kHeadingY] };
     arma::vec2 unit = arma::normalise(heading);
-    return { state[kX], state[kY], unit[0], unit[1] };
+    return arma::vec({ state[kX], state[kY], state[kHeadingX], state[kHeadingY] });
+
 }
 
 arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() {
     return arma::eye(RobotModel::size, RobotModel::size) * processNoiseFactor;
+}
+
+arma::mat33 RobotModel::getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state){
+    arma::vec2 normed_heading = arma::normalise(state.rows(kHeadingX,kHeadingY));
+    arma::mat33 T = arma::mat33{normed_heading[0], -normed_heading[1], state[kX],
+                                normed_heading[1],  normed_heading[0], state[kY],
+                                               0,                 0,         1};
+    return T;
+}
+
+arma::mat33 RobotModel::getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state){
+    arma::vec2 normed_heading = arma::normalise(state.rows(kHeadingX,kHeadingY));
+    arma::mat33 Tinverse = arma::mat33{      normed_heading[0],  normed_heading[1],         0,
+                                            -normed_heading[1],  normed_heading[0],         0,
+                                                             0,                 0,         1};
+
+    Tinverse.submat(0,2,1,2) = -Tinverse.submat(0,0,1,1) * arma::vec2({state[kX], state[kY]});
+    return Tinverse;
 }
 
 }
