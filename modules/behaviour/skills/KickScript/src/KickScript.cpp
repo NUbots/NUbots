@@ -24,6 +24,7 @@
 #include "messages/motion/Script.h"
 #include "messages/behaviour/Action.h"
 #include "messages/support/Configuration.h"
+#include "messages/motion/WalkCommand.h"
 
 namespace modules {
 namespace behaviour {
@@ -37,6 +38,7 @@ namespace skills {
     using messages::motion::ExecuteScriptByName;
     using messages::behaviour::RegisterAction;
     using messages::behaviour::ActionPriorites;
+    using messages::motion::WalkStartCommand;
     using messages::behaviour::LimbID;
     using messages::motion::KickCommand;
 
@@ -109,6 +111,7 @@ namespace skills {
         });
 
         on<Trigger<FinishKick>>([this] (const FinishKick&) {
+            emit(std::move(std::make_unique<WalkStartCommand>()));
             updatePriority(0);
         });
 

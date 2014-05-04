@@ -153,66 +153,89 @@ namespace modules {
                     ++ctr;
                     });*/
 
+                on<Trigger<Startup>>([this](const Startup&) {
+                    emit(std::make_unique<WalkStartCommand>());
+                });
+
                 on<Trigger<Every<20, Per<std::chrono::seconds>>>,
                     With<messages::localisation::Ball>,
                     With<std::vector<messages::localisation::Self>>,
                     With<std::vector<messages::vision::Obstacle>>,
+                    With<std::vector<messages::vision::Ball>>,
                     Options<Sync<WalkPathPlanner>>
                    >([this] (
                      const time_t& now,
                      const messages::localisation::Ball& ball,
-                     const std::vector<messages::localisation::Self>& self,
-                     const std::vector<messages::vision::Obstacle>& robots
+                     const std::vector<messages::localisation::Self>& selfs,
+                     const std::vector<messages::vision::Obstacle>& robots,
+                     const std::vector<messages::vision::Ball>& visionBalls
                     ) {
-                    /*
-                    arma::vec ballPosition = ball.position;
+                    if(visionBalls.size()>0){
+                        arma::vec ballPosition = ball.position;
 
-                    //Jake walk path planner:
-                    auto self = selfs[0];
+                        //Jake walk path planner:
+                        auto self = selfs[0];
 
-                    arma::vec goalPosition = arma::vec3({-3,0,1});
+                        arma::vec goalPosition = arma::vec3({-3,0,1});
 
-                    arma::vec normed_heading = arma::normalise(self.heading);
-                    arma::mat worldToRobotTransform = arma::mat33{      normed_heading[0],  normed_heading[1],         0,
-                                                                         -normed_heading[1],  normed_heading[0],         0,
-                                                                                          0,                 0,         1};
+                        arma::vec normed_heading = arma::normalise(self.heading);
+                        arma::mat worldToRobotTransform = arma::mat33{      normed_heading[0],  normed_heading[1],         0,
+                                                                             -normed_heading[1],  normed_heading[0],         0,
+                                                                                              0,                 0,         1};
 
-                    worldToRobotTransform.submat(0,2,1,2) = -worldToRobotTransform.submat(0,0,1,1) * self.position;
-                    
-                    arma::vec homogeneousKickTarget = worldToRobotTransform * goalPosition;
-                    arma::vec kickTarget_robot = homogeneousKickTarget.rows(0,1);    //In robot coords
-                    arma::vec kickDirection = arma::normalise(kickTarget_robot-ballPosition);    //In robot coords
-                    arma::vec kickDirectionNormal = arma::vec2({-kickDirection[1], kickDirection[0]});
+                        worldToRobotTransform.submat(0,2,1,2) = -worldToRobotTransform.submat(0,0,1,1) * self.position;
+                        
+                        arma::vec homogeneousKickTarget = worldToRobotTransform * goalPosition;
+                        arma::vec kickTarget_robot = homogeneousKickTarget.rows(0,1);    //In robot coords
+                        arma::vec kickDirection = arma::normalise(kickTarget_robot-ballPosition);    //In robot coords
+                        arma::vec kickDirectionNormal = arma::vec2({-kickDirection[1], kickDirection[0]});
 
-                    //float kickTargetBearing_robot = std::atan2(kickTarget_robot[1],kickTarget_robot[0]);
-                    float ballBearing = std::atan2(ballPosition[1],ballPosition[0]);
-                    
-                    //calc self in kick coords
-                    arma::vec moveTarget = ballPosition - ballLineupDistance * kickDirection;
+                        //float kickTargetBearing_robot = std::atan2(kickTarget_robot[1],kickTarget_robot[0]);
+                        float ballBearing = std::atan2(ballPosition[1],ballPosition[0]);
+                        
+                        //calc self in kick coords
+                        arma::vec moveTarget = ballPosition - ballLineupDistance * kickDirection;
 
-                    arma::mat robotToKickFrame = arma::mat33{      kickDirection[0],  kickDirection[1],         0,
-                                                                    -kickDirection[1],  kickDirection[0],         0,
-                                                                                          0,                 0,         1};
-                    robotToKickFrame.submat(0,2,1,2) = -robotToKickFrame.submat(0,0,1,1) * moveTarget;
-                    
-                    arma::vec selfInKickFrame = robotToKickFrame * arma::vec3({0,0,1});
+                        arma::mat robotToKickFrame = arma::mat33{      kickDirection[0],  kickDirection[1],         0,
+                                                                        -kickDirection[1],  kickDirection[0],         0,
+                                                                                              0,                 0,         1};
+                        robotToKickFrame.submat(0,2,1,2) = -robotToKickFrame.submat(0,0,1,1) * moveTarget;
+                        
+                        arma::vec selfInKickFrame = robotToKickFrame * arma::vec3({0,0,1});
 
-                    //Hyperboal x >a*sqrt(y^2/a^2 + 1)
-                    if(selfInKickFrame[0] > ballLineupDistance * std::sqrt(selfInKickFrame[1]*selfInKickFrame[1]/(ApproachCurveFactor*ApproachCurveFactor) + 1)){   //Inside concave part
-                        arma::vec moveTargetA = ballPosition + ballLineupDistance * kickDirectionNormal;
-                        arma::vec moveTargetB = ballPosition - ballLineupDistance * kickDirectionNormal;
-                        if(arma::norm(moveTargetA) < arma::norm(moveTargetB)){
-                            moveTarget = moveTargetA;
-                        } else {
-                            moveTarget = moveTargetB;
-                        }                        
+                        //Hyperboal x >a*sqrt(y^2/a^2 + 1)
+                        if(selfInKickFrame[0] > ballLineupDistance * std::sqrt(selfInKickFrame[1]*selfInKickFrame[1]/(ApproachCurveFactor*ApproachCurveFactor) + 1)){   //Inside concave part
+                            arma::vec moveTargetA = ballPosition + ballLineupDistance * kickDirectionNormal;
+                            arma::vec moveTargetB = ballPosition - ballLineupDistance * kickDirectionNormal;
+                            if(arma::norm(moveTargetA) < arma::norm(moveTargetB)){
+                                moveTarget = moveTargetA;
+                            } else {
+                                moveTarget = moveTargetB;
+                            }                        
+                        }
+
+                        if(arma::norm(moveTarget) < closeApproachDistance) {
+                            moveTarget = moveTarget * closeApproachSpeed;
+                        }
+
+                        std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
+
+                        command->velocity = arma::normalise(arma::vec2{moveTarget[0],moveTarget[1]});
+                        command->rotationalSpeed = ballBearing;  //vx,vy, alpha
+                        emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));
+                        emit(std::move(command));//XXX: emit here
+
+
+                        //emit(std::move(std::make_unique<WalkStartCommand>()));
+
+                    } else {
+                        std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
+                        command->velocity = arma::vec({0,0});
+                        command->rotationalSpeed = -turnSpeed;  //vx,vy, alpha
+                        emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));
+                        emit(std::move(command));//XXX: emit here
                     }
-
-                    std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
-
-                    command->velocity = arma::normalise(arma::vec2{moveTarget[0],moveTarget[1]});
-                    command->rotationalSpeed = ballBearing;  //vx,vy, alpha
-                    */
+                    /*
 
                     //std::cout << "starting path planning" << std::endl;
                     arma::vec targetPos, targetHead;
@@ -265,13 +288,13 @@ namespace modules {
                     command->rotationalSpeed = movePlan[2];
                     // NUClear::log("Self Position:", self[0].position[0],self[0].position[1]);
                     // NUClear::log("Target Position:", targetPos[0],targetPos[1]);
-                    //emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));
+                    emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));
                     // NUClear::log("Ball Position:", ball.position[0],ball.position[1]);
                     //std::cout << command->velocity << std::endl;
                     emit(std::move(command));//XXX: emit here
 
 
-                    emit(std::move(std::make_unique<WalkStartCommand>()));
+                    emit(std::move(std::make_unique<WalkStartCommand>()));*/
                 });
 
                 on<Trigger<messages::behaviour::WalkStrategy>, Options<Sync<WalkPathPlanner>>>([this] (const messages::behaviour::WalkStrategy& cmd) {
@@ -288,14 +311,18 @@ namespace modules {
                 });
 
                 //Walk planning testing: Walk to ball face to goal
-                auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
-                approach->targetPositionType = WalkTarget::Ball;
-                approach->targetHeadingType = WalkTarget::WayPoint;
-                approach->walkMovementType = WalkApproach::ApproachFromDirection;
-                approach->heading = arma::vec({3,0});
-                approach->target = arma::vec({0,0});
-                emit(std::move(approach));
+                // auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
+                // approach->targetPositionType = WalkTarget::Ball;
+                // approach->targetHeadingType = WalkTarget::WayPoint;
+                // approach->walkMovementType = WalkApproach::ApproachFromDirection;
+                // approach->heading = arma::vec({-3,0});
+                // approach->target = arma::vec({0,0});
+                // emit(std::move(approach));
+                
+
             }
+
+
 
             arma::vec WalkPathPlanner::generateWalk(const arma::vec& move, bool omniPositioning) {
                 //this uses hystereses to provide a stable, consistent positioning and movement
