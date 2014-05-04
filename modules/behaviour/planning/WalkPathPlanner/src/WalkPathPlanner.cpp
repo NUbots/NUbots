@@ -100,19 +100,19 @@ namespace modules {
                 });
 
                 // add in fake walk localisation
-                on<Trigger<Every<30, Per<std::chrono::seconds>>>, With<Optional<WalkCommand>
+                on<Trigger<Every<30, Per<std::chrono::seconds>>>, With<Optional<WalkCommand>>>
                     ([this](const time_t&, const std::shared_ptr<const WalkCommand>& w) {
                     static size_t ctr = 0;
                     
-                    const double ballx = 0.0,
-                                 bally = 0.0,
-                                 targetx = 3.0,
-                                 targety = 0.0;
+                    const double ballx = 0.0;
+                    const double bally = 0.0;
+                    const double targetx = 3.0;
+                    const double targety = 0.0;
                     
                     static double x,y,h;
                     
                     if ( (ctr % 3*1800) == 0) {
-                        set position
+                        //set position
                         x = -1.0;
                         y = -2.0;
                         h = -1.5;
@@ -154,7 +154,7 @@ namespace modules {
                     emit(std::move(robot_msg));
                     
                     ++ctr;
-                    }
+                    });
                 
                 // on<
                 //     Trigger<Every<20, Per<std::chrono::seconds>>>,
