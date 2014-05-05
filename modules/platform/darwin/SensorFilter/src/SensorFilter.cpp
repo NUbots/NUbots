@@ -99,24 +99,24 @@ namespace modules {
                     // Read through all of our sensors
                     for(uint i = 0; i < 20; ++i) {
                         auto& original = input.servo[i];
-                        auto& error = input.servo[i].errorFlags;
+                        auto& error = original.errorFlags;
 
                         // Check for an error on the servo and report it
                         if(error != DarwinSensors::Error::OK) {
                             std::stringstream s;
-                            s << "Error on Servo " << (i + 1) << ":";
+                            s << "Error on Servo " << (i + 1) << " (" << messages::input::stringFromId(ServoID(i)) << "):";
 
                             if(error & DarwinSensors::Error::INPUT_VOLTAGE) {
-                                s << " Input Voltage ";
+                                s << " Input Voltage - " << original.voltage;
                             }
                             if(error & DarwinSensors::Error::ANGLE_LIMIT) {
-                                s << " Angle Limit ";
+                                s << " Angle Limit - " << original.presentPosition;
                             }
                             if(error & DarwinSensors::Error::OVERHEATING) {
-                                s << " Overheating ";
+                                s << " Overheating - " << original.temperature;
                             }
                             if(error & DarwinSensors::Error::OVERLOAD) {
-                                s << " Overloaded ";
+                                s << " Overloaded - " << original.load;
                             }
                             if(error & DarwinSensors::Error::INSTRUCTION) {
                                 s << " Bad Instruction ";
