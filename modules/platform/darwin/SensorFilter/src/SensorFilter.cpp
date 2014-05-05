@@ -151,13 +151,19 @@ namespace modules {
                     }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
-                    if(previousSensors && input.cm730ErrorFlags != DarwinSensors::Error::OK) {
+                    if(previousSensors && (input.cm730ErrorFlags)) {
                         sensors->accelerometer = previousSensors->accelerometer;
-                        sensors->gyroscope = previousSensors->gyroscope;
                     }
-                    // Otherwise convert our new data
                     else {
                         sensors->accelerometer = {-input.accelerometer.y, input.accelerometer.x, -input.accelerometer.z};
+                    }
+
+                    // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
+                    if(previousSensors && (input.cm730ErrorFlags || arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2) > 4 * M_PI)) {
+                        NUClear::log("Bad gyroscope value", arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2));
+                        sensors->gyroscope = previousSensors->gyroscope;
+                    }
+                    else {
                         sensors->gyroscope = {-input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
                     }
 
