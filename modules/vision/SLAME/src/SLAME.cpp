@@ -21,11 +21,7 @@
 
 namespace modules {
     namespace vision {
-
-
-
-
-        SLAME::SLAME(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), ORBModule() {
+        SLAME::SLAME(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), ORBModule(), MockSLAMEModule() {
 
             on<Trigger<Configuration<SLAME>>>([this](const Configuration<SLAME>& config) {
                 std::string featureExtractorName = config["FEATURE_EXTRACTOR_TYPE"];
@@ -34,23 +30,39 @@ namespace modules {
                     FEATURE_EXTRACTOR_TYPE = FeatureExtractorType::ORB;
                 } else if(featureExtractorName.compare("LSH") == 0) {
                     FEATURE_EXTRACTOR_TYPE = FeatureExtractorType::LSH;
+                } else if(featureExtractorName.compare("MOCK") == 0) {
+                    FEATURE_EXTRACTOR_TYPE = FeatureExtractorType::MOCK;
                 } else {
-                    NUClear::log<NUClear::WARN>("SLAME - Loading default ORB feature detector.");
+                    NUClear::log<NUClear::WARN>("SLAME - BAD CONFIG STRING: Loading default ORB feature detector.");
                     FEATURE_EXTRACTOR_TYPE = FeatureExtractorType::ORB;
                 }
 
             });
 
-            on<Trigger<Image>, With<std:vector<Self>, Sensors>>([this](const time_t&, const Image& image, const Self& self, const sensors& sensors){               
+            on<Trigger<Image>, With<std:vector<Self>, Sensors>>([this](const time_t&, const Image& image, const std::vector<Self>& selfs, const sensors& sensors){               
                 switch(FEATURE_EXTRACTOR_TYPE){
                     case (FeatureExtractorType::ORB):
-                        emit(ORBModule.getSLAMEObjects(image, self, sensors));
+                        emit(ORBModule.getSLAMEObjects(image, selfs[0], sensors));
                         break;
                     case (FeatureExtractorType::LSH):
                         break;
+                    case (FeatureExtractorType::MOCK):
+                        emit(MockSLAMEModule.getSLAMEObjects(image, selfs[0], sensors));
+                        break;
                 }
             });
-           
+            
+            debugHandle = on<Trigger<Every<10, Per<std::chrono::seconds>>>>([this] (const time_t& now, const Sensors& sensors) {
+                switch(FEATURE_EXTRACTOR_TYPE){
+                    case (FeatureExtractorType::ORB):
+                        emit(ORBModule.testSLAME(sensors));
+                        break;
+                    case (FeatureExtractorType::LSH):
+                        break;
+                    case (FeatureExtractorType::MOCK):
+                        break;
+                }
+            });
         }
     }
 }

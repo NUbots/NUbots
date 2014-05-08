@@ -16,6 +16,9 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
+#ifndef MODULES_VISION_SLAME_MODULE_H
+#define MODULES_VISION_SLAME_MODULE_H
+
 #include "SLAMEFeature.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/Image.h"

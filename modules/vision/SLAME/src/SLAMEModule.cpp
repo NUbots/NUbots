@@ -37,7 +37,7 @@ namespace modules{
 		std::unique_ptr<SLAMEObjects> SLAMEModule<FeatureDetectorClass>::getSLAMEObjects(const Image& image, const Self& self, const Sensors& sensors){
 			auto objectMessage = std::make_unique<std::vector<SLAMEObjects>>();	            
 
-            std::vector<FeatureDetectorClass::ExtractedFeature> extractedFeatures = featureExtractor.extractFeatures(image);
+            std::vector<FeatureDetectorClass::ExtractedFeature> extractedFeatures = featureExtractor.extractFeatures(image, self, sensors);
 
             //Get matches: tuple = (featureIndex in featureFilters, extractedFeatureIndex in extractedFeatures, matchStrength)
             //Order of vector is strongest to weakest

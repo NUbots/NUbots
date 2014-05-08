@@ -16,7 +16,12 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
+#ifndef UTILITY_VISION_ORB_FEATURE_EXTRACTOR_H
+#define UTILITY_VISION_ORB_FEATURE_EXTRACTOR_H
+
 #include "messages/input/Image.h"
+#include "messages/input/Sensors.h"
+#include "messages/localisation/FieldObject.h"
 
 #include <armadillo>
 
@@ -30,7 +35,7 @@ namespace utility {
 				arma::vec2 screenAngular;	//Compulsory
 			};
 			ORBFeatureExtractor();
-			std::vector<ExtractedFeature> extractFeatures(const messages::input::Image& image);
+			std::vector<ExtractedFeature> extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors);
 
 			//Get matches: tuple = (featureIndex in featureFilters, extractedFeatureIndex in extractedFeatures, matchStrength)
             //Order of vector is strongest to weakest
@@ -41,3 +46,5 @@ namespace utility {
 		};
 	}
 }
+
+#endif

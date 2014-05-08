@@ -22,7 +22,7 @@ namespace utility {
 	namespace vision {
 			ORBFeatureExtractor::ORBFeatureExtractor(){}
 
-			std::vector<ORBFeatureExtractor::ExtractedFeature> ORBFeatureExtractor::extractFeatures(const messages::input::Image& image){
+			std::vector<ORBFeatureExtractor::ExtractedFeature> ORBFeatureExtractor::extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
 				//TODO: feature detection
 				return std::vector<ExtractedFeature>();
 			}

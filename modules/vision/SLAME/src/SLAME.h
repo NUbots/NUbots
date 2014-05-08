@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_RESEARCH_SLAME_H
-#define MODULES_RESEARCH_SLAME_H
+#ifndef MODULES_VISION_SLAME_H
+#define MODULES_VISION_SLAME_H
 
 #include <nuclear>
 #include "utility/math/kalman/UKF.h"
@@ -31,7 +31,8 @@ namespace modules {
 
         enum FeatureExtractorType{
             ORB,
-            LSH
+            LSH,
+            MOCK
         };
 
         /**
@@ -46,7 +47,8 @@ namespace modules {
             int MAX_FEATURE_MATCHES;
             
             SLAMEModule<utility::vision::ORBFeatureExtractor> ORBModule;
-          
+            SLAMEModule<utility::vision::MockFeatureExtractor> MockSLAMEModule;
+            ReactionHandle debugHandle;
         public:
             static constexpr const char* CONFIGURATION_PATH = "SLAME.json";
             explicit SLAME(std::unique_ptr<NUClear::Environment> environment);
