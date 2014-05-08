@@ -20,9 +20,8 @@
 #include <math.h> //needed for normalisation function
 #include <assert.h>
 #include "InverseDepthPointModel.h" //includes armadillo
-#include "messages/localisation/FieldObject.h"
-#include "messages/input/Sensors.h"
 #include "utility/motion/ForwardKinematics.h"
+#include "messages/input/ServoID.h"
 
 #include <iostream>
 
@@ -32,6 +31,7 @@ namespace utility {
 
             using messages::localisation::Self;
             using messages::input::Sensors;
+            using messages::input::ServoID;
 
             arma::vec::fixed<InverseDepthPointModel::size> InverseDepthPointModel::limitState(const arma::vec::fixed<size>& state) {
                 
@@ -43,29 +43,32 @@ namespace utility {
             // @param deltaT The amount of time that has passed since the previous update, in seconds.
             // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation.
             // @return The new estimated system state.
-            arma::vec::fixed<InverseDepthPointModel::size> InverseDepthPointModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& measurement) {
+            arma::vec::fixed<InverseDepthPointModel::size> InverseDepthPointModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT) {
                 return state;
             }
 
             arma::vec InverseDepthPointModel::predictedObservation(const arma::vec::fixed<size>& state, const std::pair<const Sensors&, const Self&> stateData) {
                 
-                arma::mat44 robotToWorld_world = arma::mat44({stateData.second.heading[0], -stateData.second.heading[1], 0,     StateData.second.position[0],
+                arma::mat44 robotToWorld_world = arma::mat44({stateData.second.heading[0], -stateData.second.heading[1], 0,     stateData.second.position[0],
                                                               stateData.second.heading[1],  stateData.second.heading[0], 0,     stateData.second.position[1],
                                                                                         0,                            0, 1, stateData.first.bodyCentreHeight,
                                                                                         0,                            0, 0,                                1});
 
-                arma::mat44 cameraToBody_body = stateData.first.forwardKinematics[ServoID::HEAD_PITCH];
+                arma::mat44 cameraToBody_body = stateData.first.forwardKinematics.at(ServoID::HEAD_PITCH);
 
                 arma::mat44 robotToBody_body = arma::eye(4,4);
-                worldToBody_body.submat(0,0,2,2) = stateData.first.orientation;
+                //TODO: copy localisation in develop
+                robotToBody_body.submat(0,0,2,2) = stateData.first.orientation;
 
-                arma::mat44 worldToCamera_camera = utility::motion::kinematics::orthonormalInverse(cameraToBody_body) * robotToBody_body * utility::motion::kinematics::orthonormalInverse(robotToWorld_world);
+                arma::mat44 worldToCamera_camera = utility::math::matrix::orthonormal44Inverse(cameraToBody_body) * robotToBody_body * utility::math::matrix::orthonormal44Inverse(robotToWorld_world);
 
-                arma::vec4 initialObservedDirection = utility::math::matrix::yRotationMatrix(-state[5],4) * utility::math::matrix::yRotationMatrix(state[4],4) * arma::zeros(4,1);
+                arma::vec4 initialObservedDirection = utility::math::matrix::yRotationMatrix(-state[kPHI],4) * utility::math::matrix::zRotationMatrix(state[kTHETA],4) * arma::vec4{1,0,0,0};
                 
-                arma::vec4 cameraToFeatureVector_cam =  worldToCamera_camera * ((arma::vec4({state[0],state[1],state[2],1}) - worldToCamera_camera.submat(0,3,3,3)) * state[3] + initialObservedDirection);
+                arma::vec4 cameraToFeatureVector_cam =  worldToCamera_camera * ((arma::vec4({state[kX],state[kY],state[kZ],1}) - worldToCamera_camera.submat(0,3,3,3)) * state[kRHO] + initialObservedDirection);
 
-                return cameraToFeatureVector_cam.rows(1,2);     //Camera y,z = hor, vert
+                arma::vec screenAngular = { std::atan2(cameraToFeatureVector_cam[1], cameraToFeatureVector_cam[0]) , std::atan2(cameraToFeatureVector_cam[2], cameraToFeatureVector_cam[0])};
+
+                return screenAngular;     //Camera y,z = hor, vert
             }
 
 

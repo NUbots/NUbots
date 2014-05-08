@@ -21,22 +21,31 @@
 #define UTILITY_MATH_KALMAN_INVERSE_DEPTH_MODEL_H
 
 #include <armadillo>
+#include "messages/localisation/FieldObject.h"
+#include "messages/input/Sensors.h"
+
 namespace utility {
     namespace math {
         namespace kalman {
+            enum IDPStateComponents{
+                kX = 0,
+                kY = 1,
+                kZ = 2,
+                kRHO = 3,
+                kTHETA = 4,
+                kPHI = 5
+            };
 
             class InverseDepthPointModel {
             public:
                 //(x,y,z,rho,theta,phi)
                 static constexpr size_t size = 6;
 
-                static constexpr kX, kY, kZ, kRHO, kTHETA, kPHI = 0,1,2,3,4,5;
-
                 InverseDepthPointModel() {} // empty constructor
 
-                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& measurement);
+                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 
-                arma::vec predictedObservation(const arma::vec::fixed<size>& state, std::nullptr_t);
+                arma::vec predictedObservation(const arma::vec::fixed<size>& state, const std::pair<const messages::input::Sensors&, const messages::localisation::Self&> stateData);
 
                 arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 

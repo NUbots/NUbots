@@ -103,8 +103,11 @@ namespace messages {
             std::vector<FieldLine> field_lines;
         };
 
-        class SLAMEObject : VisionObject {
-            arma::vec3 expectedFieldLocation;
+        class SLAMEObject {
+            NUClear::clock::time_point timestamp;
+            arma::vec::fixed<6> expectedState;
+            arma::vec2 screenAngular;  //theta, phi
+            float strength;
         };
 
     }

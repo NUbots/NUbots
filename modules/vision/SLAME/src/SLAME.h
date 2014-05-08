@@ -21,9 +21,18 @@
 #define MODULES_RESEARCH_SLAME_H
 
 #include <nuclear>
+#include "utility/math/kalman/UKF.h"
+#include "utility/math/kalman/InverseDepthPointModel.h"
+#include "utility/vision/FeatureExtractor.h"   //Parent class
+#include "utility/vision/ORBFeatureExtractor.h"    //Example subclass of SLAMEFeatureDetector
 
 namespace modules {
     namespace vision {
+
+        enum FeatureExtractorType{
+            ORB,
+            LSH
+        };
 
         /**
          * TODO document
@@ -32,13 +41,12 @@ namespace modules {
          */
         class SLAME : public NUClear::Reactor {
         private:
-            std::vector<float> featureStrengths;
-            std::vector<utility::vision::ExtractedFeature> features;
-            std::vector<utility::vision::SLAMEFeatureFilter> featureFilters;
-
-            utility::vision::FeatureExtractor featureExtractor;
-
-            NUClear::clock::time_point lastTime;
+            //Three following vectors have corresponding entries:
+            FeatureExtractorType FEATURE_EXTRACTOR_TYPE;
+            int MAX_FEATURE_MATCHES;
+            
+            SLAMEModule<utility::vision::ORBFeatureExtractor> ORBModule;
+          
         public:
             static constexpr const char* CONFIGURATION_PATH = "SLAME.json";
             explicit SLAME(std::unique_ptr<NUClear::Environment> environment);

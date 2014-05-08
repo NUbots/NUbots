@@ -21,7 +21,7 @@
 #define MESSAGES_INPUT_SENSORS_H
 
 #include <armadillo>
-
+#include <nuclear>
 #include "ServoID.h"
 
 namespace messages {
