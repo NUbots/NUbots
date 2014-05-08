@@ -38,13 +38,17 @@ namespace planning {
 
         on<Trigger<Every<1, std::chrono::milliseconds>>, Options<Single>>([this](const time_t&) {
             JoystickEvent event;
+            // read from joystick
             if (joystick.sample(&event)) {
                 if (event.isAxis()) {
+                    // event was an axis event
                     switch (event.number) {
                         case AXIS_LEFT_JOYSTICK_HORIZONTAL:
+                            // y is left relative to robot
                             strafe[1] = -event.value;
                             break;
                         case AXIS_LEFT_JOYSTICK_VERTICAL:
+                            // x is forward relative to robot
                             strafe[0] = -event.value;
                             break;
                         case AXIS_RIGHT_JOYSTICK_HORIZONTAL:
@@ -52,10 +56,10 @@ namespace planning {
                             break;
                     }
                 } else if (event.isButton()) {
-//                    NUClear::log("button", int(event.number), int(event.value));
+                    // event was a button event
                     switch (event.number) {
                         case BUTTON_TRIANGLE:
-                            if (event.value > 0) {
+                            if (event.value > 0) { // button down
                                 if (moving) {
                                     NUClear::log("Stop walking");
                                     emit(std::make_unique<WalkStopCommand>());
@@ -67,37 +71,37 @@ namespace planning {
                             }
                             break;
                         case BUTTON_L1:
-                            if (event.value > 0) {
+                            if (event.value > 0) { // button down
                                 NUClear::log("Requesting Left Side Kick");
                                 emit(std::make_unique<KickCommand>(KickCommand{
-                                    {0, -1, 0},
+                                    {0, -1, 0}, // vector pointing right relative to robot
                                     LimbID::LEFT_LEG
                                 }));
                             }
                             break;
                         case BUTTON_L2:
-                            if (event.value > 0) {
+                            if (event.value > 0) { // button down
                                 NUClear::log("Requesting Left Front Kick");
                                 emit(std::make_unique<KickCommand>(KickCommand{
-                                    {1, 0, 0},
+                                    {1, 0, 0}, // vector pointing forward relative to robot
                                     LimbID::LEFT_LEG
                                 }));
                             }
                             break;
                         case BUTTON_R1:
-                            if (event.value > 0) {
+                            if (event.value > 0) { // button down
                                 NUClear::log("Requesting Right Side Kick");
                                 emit(std::make_unique<KickCommand>(KickCommand{
-                                    {0, 1, 0},
+                                    {0, 1, 0}, // vector pointing left relative to robot
                                     LimbID::RIGHT_LEG
                                 }));
                             }
                             break;
                         case BUTTON_R2:
-                            if (event.value > 0) {
+                            if (event.value > 0) { // button down
                                 NUClear::log("Requesting Right Front Kick");
                                 emit(std::make_unique<KickCommand>(KickCommand{
-                                    {1, 0, 0},
+                                    {1, 0, 0}, // vector pointing forward relative to robot
                                     LimbID::RIGHT_LEG
                                 }));
                             }
@@ -107,8 +111,10 @@ namespace planning {
             }
         });
 
+        // output walk command based on updated strafe and rotation speed from joystick
+        // TODO: potential performance gain: ignore if value hasn't changed since last emit?
         on<Trigger<Every<50, std::chrono::milliseconds>>>([this](const time_t&) {
-            auto strafeNorm = strafe / std::numeric_limits<short>::max();
+            arma::vec strafeNorm = strafe / std::numeric_limits<short>::max();
             auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
             emit(std::make_unique<WalkCommand>(WalkCommand{
                 strafeNorm,

@@ -58,6 +58,10 @@ namespace localisation {
         // bool active() const { return active_; }
         // void set_active(bool active) { active_ = active; }
 
+        void SetProcessNoiseFactor(double process_noise_factor) {
+            filter_.model.processNoiseFactor = process_noise_factor;
+        };
+
         float GetFilterWeight() const { return weight_; }
         void SetFilterWeight(float weight) { weight_ = weight; }
 
@@ -88,7 +92,7 @@ namespace localisation {
     class MultiModalRobotModel {
     public:
         MultiModalRobotModel() :
-            cfg_({ 4, 0.025, 0.01 }) {
+            cfg_({ 4, 0.025, 0.01, 1e-3 }) {
             robot_models_.push_back(std::make_unique<RobotHypothesis>());
         }
 
@@ -97,6 +101,10 @@ namespace localisation {
             cfg_.max_models_after_merge = config["MaxModelsAfterMerge"];
             cfg_.merge_min_translation_dist = config["MergeMinTranslationDist"];
             cfg_.merge_min_heading_dist = config["MergeMinHeadingDist"];
+            cfg_.process_noise_factor = config["ProcessNoiseFactor"];
+
+            for (auto& model : robot_models_)
+                model->SetProcessNoiseFactor(cfg_.process_noise_factor);
         };
 
         void RemoveOldModels();
@@ -159,6 +167,7 @@ namespace localisation {
             int max_models_after_merge;
             float merge_min_translation_dist;
             float merge_min_heading_dist;
+            float process_noise_factor;
         } cfg_;
     };
 }

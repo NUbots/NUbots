@@ -7,9 +7,7 @@ class nuclear(
     $nubots_dir = "/home/${username}/nubots", #"
     $clone_directory = "${nubots_dir}/NUClear", #"
   ) {
-  include gcc48
   include catch
-  include zmq
 
   $nuclear_build_dir = "${clone_directory}/build"
 
@@ -32,9 +30,8 @@ class nuclear(
   } ~>
   exec { 'nuclear_cmake':
     require => [
-        Class['gcc48'],
         Class['catch'],
-        Class['zmq'],
+        Package['libzmq3-dev'],
         Package['build-essential'],
         Package['cmake'],
         Package['protobuf-compiler'],

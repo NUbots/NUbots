@@ -99,24 +99,24 @@ namespace modules {
                     // Read through all of our sensors
                     for(uint i = 0; i < 20; ++i) {
                         auto& original = input.servo[i];
-                        auto& error = input.servo[i].errorFlags;
+                        auto& error = original.errorFlags;
 
                         // Check for an error on the servo and report it
                         if(error != DarwinSensors::Error::OK) {
                             std::stringstream s;
-                            s << "Error on Servo " << (i + 1) << ":";
+                            s << "Error on Servo " << (i + 1) << " (" << messages::input::stringFromId(ServoID(i)) << "):";
 
                             if(error & DarwinSensors::Error::INPUT_VOLTAGE) {
-                                s << " Input Voltage ";
+                                s << " Input Voltage - " << original.voltage;
                             }
                             if(error & DarwinSensors::Error::ANGLE_LIMIT) {
-                                s << " Angle Limit ";
+                                s << " Angle Limit - " << original.presentPosition;
                             }
                             if(error & DarwinSensors::Error::OVERHEATING) {
-                                s << " Overheating ";
+                                s << " Overheating - " << original.temperature;
                             }
                             if(error & DarwinSensors::Error::OVERLOAD) {
-                                s << " Overloaded ";
+                                s << " Overloaded - " << original.load;
                             }
                             if(error & DarwinSensors::Error::INSTRUCTION) {
                                 s << " Bad Instruction ";
@@ -151,13 +151,19 @@ namespace modules {
                     }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
-                    if(previousSensors && input.cm730ErrorFlags != DarwinSensors::Error::OK) {
+                    if(previousSensors && (input.cm730ErrorFlags)) {
                         sensors->accelerometer = previousSensors->accelerometer;
-                        sensors->gyroscope = previousSensors->gyroscope;
                     }
-                    // Otherwise convert our new data
                     else {
                         sensors->accelerometer = {-input.accelerometer.y, input.accelerometer.x, -input.accelerometer.z};
+                    }
+
+                    // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
+                    if(previousSensors && (input.cm730ErrorFlags || arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2) > 4 * M_PI)) {
+                        NUClear::log("Bad gyroscope value", arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2));
+                        sensors->gyroscope = previousSensors->gyroscope;
+                    }
+                    else {
                         sensors->gyroscope = {-input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
                     }
 

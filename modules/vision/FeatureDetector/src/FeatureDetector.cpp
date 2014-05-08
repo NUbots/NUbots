@@ -226,7 +226,6 @@ namespace modules {
             on<Trigger<Sensors>, Options<Sync<ObstacleDetectorConfig>, 
                                          Sync<BallDetectorConfig>, 
                                          Sync<GoalDetectorConfig>>>([this](const Sensors& sensors){
-                arma::vec v = {0,0,0.35};
                 m_visionKinematics.setSensors(sensors);
             });
 

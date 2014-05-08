@@ -60,19 +60,23 @@ namespace localisation {
 
         if (ambiguous_object.type == messages::vision::Goal::Type::LEFT) {
             possible.push_back(field_description_->GetLFO(LFOId::kGoalBL));
-            possible.push_back(field_description_->GetLFO(LFOId::kGoalYL));
+            if (!cfg_.all_goals_are_blue)
+                possible.push_back(field_description_->GetLFO(LFOId::kGoalYL));
         }
 
         if (ambiguous_object.type == messages::vision::Goal::Type::RIGHT) {
             possible.push_back(field_description_->GetLFO(LFOId::kGoalBR));
-            possible.push_back(field_description_->GetLFO(LFOId::kGoalYR));
+            if (!cfg_.all_goals_are_blue)
+                possible.push_back(field_description_->GetLFO(LFOId::kGoalYR));
         }
 
         if (ambiguous_object.type == messages::vision::Goal::Type::UNKNOWN) {
             possible.push_back(field_description_->GetLFO(LFOId::kGoalBL));
-            possible.push_back(field_description_->GetLFO(LFOId::kGoalYL));
             possible.push_back(field_description_->GetLFO(LFOId::kGoalBR));
-            possible.push_back(field_description_->GetLFO(LFOId::kGoalYR));
+            if (!cfg_.all_goals_are_blue) {
+                possible.push_back(field_description_->GetLFO(LFOId::kGoalYL));
+                possible.push_back(field_description_->GetLFO(LFOId::kGoalYR));
+            }
         }
 
         return std::move(possible);
@@ -109,12 +113,13 @@ namespace localisation {
                 vis_objs = { ambiguous_objects[1], ambiguous_objects[0] };
             }
 
-            std::vector<std::vector<LocalisationFieldObject>> objs = {
-                {field_description_->GetLFO(LFOId::kGoalBL),
-                 field_description_->GetLFO(LFOId::kGoalBR)},
-                {field_description_->GetLFO(LFOId::kGoalYL),
-                 field_description_->GetLFO(LFOId::kGoalYR)}
-            };
+            std::vector<std::vector<LocalisationFieldObject>> objs;
+            objs.push_back({field_description_->GetLFO(LFOId::kGoalBL),
+                            field_description_->GetLFO(LFOId::kGoalBR)});
+        
+            if (!cfg_.all_goals_are_blue)
+                objs.push_back({field_description_->GetLFO(LFOId::kGoalYL),
+                                field_description_->GetLFO(LFOId::kGoalYR)});
 
             if(cfg_.goal_pair_observation_enabled)
                 robot_models_.AmbiguousMeasurementUpdate(vis_objs, objs);

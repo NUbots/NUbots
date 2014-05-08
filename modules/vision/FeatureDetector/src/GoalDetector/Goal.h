@@ -49,7 +49,8 @@ namespace modules {
                                float GOAL_WIDTH_,
                                const DISTANCE_METHOD& GOAL_DISTANCE_METHOD_,
                                int EDGE_OF_SCREEN_MARGIN_,
-                               float D2P_ADAPTIVE_THRESHOLD_);
+                               float D2P_ADAPTIVE_THRESHOLD_,
+                                const VisionKinematics& visionKinematics);
 
             void setBase(const VisionKinematics& visionKinematics,const arma::vec2& base);
 

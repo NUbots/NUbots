@@ -4,8 +4,18 @@ ADD_ROLE(
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
         support::NUbugger
+
+        #Sensors
+        input::LinuxCamera
+        platform::darwin::HardwareIO
+        platform::darwin::SensorFilter
+        
+        #Vision
         vision::FeatureDetector
         vision::LUTClassifier
-        input::LinuxCamera
-        localisation::MMKFRobotLocalisation)
+
+        #Localisation
+        localisation::MMKFRobotLocalisation
+        localisation::KFBallLocalisation
+)
 

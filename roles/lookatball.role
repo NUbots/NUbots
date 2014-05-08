@@ -1,13 +1,12 @@
 ADD_ROLE(
     NAME lookatball
-    MODULES        
+    MODULES
         #Support
         support::SignalCatcher
         support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem    
-        #support::configuration::NetworkingConfiguration
+        support::configuration::ConfigSystem
         support::NUbugger
-        
+
         #Sensors
         input::LinuxCamera
         platform::darwin::HardwareIO
@@ -20,15 +19,15 @@ ADD_ROLE(
         #Localisation
         localisation::MMKFRobotLocalisation
         localisation::KFBallLocalisation
-        
+
         #Behaviour
         behaviour::Controller
-        behaviour::reflexes::Stand
-        behaviour::reflexes::FallingRelax
-        behaviour::reflexes::Getup
-        behaviour::reflexes::Look
-        behaviour::planners::LookAtBall
-        
+        behaviour::skills::Stand
+        behaviour::skills::FallingRelax
+        behaviour::skills::Getup
+        behaviour::skills::Look
+        behaviour::planning::LookAtBall
+
         #Motion
         motion::ScriptEngine
 )

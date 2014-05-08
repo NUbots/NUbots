@@ -84,7 +84,7 @@ namespace modules {
                 }
             }));
 
-            updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, With<Sensors>, Options<Single> >([this](const time_t&, const Sensors& sensors) {
+            updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, With<Sensors>, Options<Single, Priority<NUClear::HIGH>> >([this](const time_t&, const Sensors& sensors) {
                 update(sensors);
             });
 
@@ -334,7 +334,7 @@ namespace modules {
 
             ph0 = ph;
             moving = true;
-
+    
             ph = (time - tLastStep) / tStep;
 
             if (ph > 1) {
@@ -346,6 +346,8 @@ namespace modules {
             if (iStep > iStep0 && stopRequest == 2) {
                 stopRequest = 0;
                 active = false;
+                emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 0, 0 }})); // TODO: config
+
                 return; // TODO: return "stop"
             }
 
@@ -567,11 +569,11 @@ namespace modules {
 
             pLLeg[0] = uLeft[0];
             pLLeg[1] = uLeft[1];
-            pLLeg[2] = uLeft[2];
+            pLLeg[5] = uLeft[2];
 
             pRLeg[0] = uRight[0];
             pRLeg[1] = uRight[1];
-            pRLeg[2] = uRight[2];
+            pRLeg[5] = uRight[2];
 
             std::vector<double> qLegs = darwinop_kinematics_inverse_legs_nubots(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
             motionLegs(qLegs, true, sensors);

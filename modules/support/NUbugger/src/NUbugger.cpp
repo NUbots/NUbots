@@ -37,6 +37,7 @@
 #include "utility/localisation/transform.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/support/Configuration.h"
+#include "utility/math/coordinates.h"
 #include "messages/localisation/FieldObject.h"
 // #include "BallModel.h"
 #include "utility/image/ColorModelConversions.h"
@@ -60,6 +61,55 @@ namespace modules {
         using messages::vision::Goal;
         using messages::vision::Ball;
         using messages::vision::SaveLookUpTable;
+
+    void NUbugger::EmitLocalisationModels(
+    const std::unique_ptr<messages::localisation::FieldObject>& robot_model,
+    const std::unique_ptr<messages::localisation::FieldObject>& ball_model) {
+
+        Message message;
+
+        message.set_type(Message::LOCALISATION);
+        message.set_utc_timestamp(std::time(0));
+        auto* localisation = message.mutable_localisation();
+
+        auto* api_field_object = localisation->add_field_object();
+        api_field_object->set_name(robot_model->name);
+
+        for (messages::localisation::FieldObject::Model model : robot_model->models) {
+            auto* api_model = api_field_object->add_models();
+
+            api_model->set_wm_x(model.wm_x);
+            api_model->set_wm_y(model.wm_y);
+            api_model->set_heading(model.heading);
+            api_model->set_sd_x(model.sd_x);
+            api_model->set_sd_y(model.sd_y);
+            api_model->set_sr_xx(model.sr_xx);
+            api_model->set_sr_xy(model.sr_xy);
+            api_model->set_sr_yy(model.sr_yy);
+            api_model->set_lost(model.lost);
+        }
+
+        api_field_object = localisation->add_field_object();
+        api_field_object->set_name(ball_model->name);
+
+        for (messages::localisation::FieldObject::Model model : ball_model->models) {
+            auto* api_model = api_field_object->add_models();
+
+            api_model->set_wm_x(model.wm_x);
+            api_model->set_wm_y(model.wm_y);
+            api_model->set_heading(model.heading);
+            api_model->set_sd_x(model.sd_x);
+            api_model->set_sd_y(model.sd_y);
+            api_model->set_sr_xx(model.sr_xx);
+            api_model->set_sr_xy(model.sr_xy);
+            api_model->set_sr_yy(model.sr_yy);
+            api_model->set_lost(model.lost);
+        }
+
+
+        send(message);
+    }
+
 
         NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -323,6 +373,20 @@ namespace modules {
                     api_goal->set_screen_x(goal.screenCartesian[0]);
                     api_goal->set_screen_y(goal.screenCartesian[1]);
 
+                    arma::vec3 goal_pos = utility::math::coordinates::Spherical2Cartesian(goal.sphericalFromNeck);
+
+                    switch(int(goal.type)){
+                        case(0):
+                            emit(graph("Left vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
+                            break;
+                        case(1):
+                            emit(graph("Right vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
+                            break;
+                        case(2):
+                            emit(graph("Ambiguous vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
+                    }
+
+
                     for(auto& point : goal.screen_quad){
                         api_goal->add_points(point[0]);
                         api_goal->add_points(point[1]);
@@ -343,6 +407,10 @@ namespace modules {
 
                 Message::Vision* api_vision = message.mutable_vision();
                 //std::cout<< "NUbugger::on<Trigger<std::vector<Ball>>> : sending " << balls.size() << " balls to NUbugger." << std::endl;
+                if(balls.size()>0){
+                    arma::vec3 first_ball_pos= utility::math::coordinates::Spherical2Cartesian(balls[0].sphericalFromNeck);
+                    emit(graph("Vision Ball pos", first_ball_pos[0], first_ball_pos[1],first_ball_pos[2]));
+                }
                 for (auto& ball : balls){
                     Message::VisionFieldObject* api_ball = api_vision->add_vision_object();
 
@@ -357,33 +425,6 @@ namespace modules {
                     for(auto& coord : ball.sphericalFromNeck){
                         api_ball->add_measured_relative_position(coord);
                     }
-                }
-                send(message);
-            });
-
-            on<Trigger<messages::localisation::FieldObject>,
-               Options<Priority<NUClear::LOW>>>([this](const messages::localisation::FieldObject& field_object) {
-                Message message;
-
-                message.set_type(Message::LOCALISATION);
-                message.set_utc_timestamp(std::time(0));
-
-                auto* localisation = message.mutable_localisation();
-                auto* api_field_object = localisation->add_field_object();
-                api_field_object->set_name(field_object.name);
-
-                for (messages::localisation::FieldObject::Model model : field_object.models) {
-                    auto* api_model = api_field_object->add_models();
-
-                    api_model->set_wm_x(model.wm_x);
-                    api_model->set_wm_y(model.wm_y);
-                    api_model->set_heading(model.heading);
-                    api_model->set_sd_x(model.sd_x);
-                    api_model->set_sd_y(model.sd_y);
-                    api_model->set_sr_xx(model.sr_xx);
-                    api_model->set_sr_xy(model.sr_xy);
-                    api_model->set_sr_yy(model.sr_yy);
-                    api_model->set_lost(model.lost);
                 }
                 send(message);
             });
@@ -420,16 +461,8 @@ namespace modules {
                     ball_msg_models.push_back(ball_model);
 
                     ball_msg->models = ball_msg_models;
-                    emit(std::move(ball_msg));
-                }
-            });
-            // Emit robot to NUbugger
-            on<Trigger<Every<100, std::chrono::milliseconds>>,
-               With<std::vector<messages::localisation::Self>>,
-               Options<Single>>("Localisation Self",
-                [this](const time_t&,
-                       const std::vector<messages::localisation::Self>& robots) {
-                if(robots.size() > 0){
+                    // emit(std::move(ball_msg));
+                
                     // Robot message
                     auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
                     std::vector<messages::localisation::FieldObject::Model> robot_msg_models;
@@ -452,7 +485,9 @@ namespace modules {
 
                     
                     robot_msg->models = robot_msg_models;
-                    emit(std::move(robot_msg));
+                    // emit(std::move(robot_msg));
+
+                    EmitLocalisationModels(robot_msg, ball_msg);
                 }
             });
       

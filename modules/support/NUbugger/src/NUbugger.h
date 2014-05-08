@@ -22,6 +22,7 @@
 
 #include <nuclear>
 #include <zmq.hpp>
+#include "messages/localisation/FieldObject.h"
 #include "messages/support/nubugger/proto/Message.pb.h"
 
 namespace modules {
@@ -48,6 +49,10 @@ namespace modules {
             void recvMessage(const messages::support::nubugger::proto::Message& message);
             void recvCommand(const messages::support::nubugger::proto::Message& message);
             void recvLookupTable(const messages::support::nubugger::proto::Message& message);
+
+            void EmitLocalisationModels(
+                const std::unique_ptr<messages::localisation::FieldObject>& robot_model,
+                const std::unique_ptr<messages::localisation::FieldObject>& ball_model);
 
             void run();
             void kill();

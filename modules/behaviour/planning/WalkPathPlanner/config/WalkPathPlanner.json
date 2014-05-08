@@ -1,0 +1,34 @@
+{
+    "forwardSpeed" : 0.8,
+    "footSeparation" : 0.140,
+    "footSize" : 0.10,
+                    
+    "walkStartTime" : 0.2,
+    "walkTurnTime" : 0.2,
+    
+    "accelerationTime" : 0.2,
+    "accelerationFraction" : 0.5,
+    
+    "midApproachSpeed" : 1.0,
+    "midApproachDistance" : 0.60,
+    
+    "turnDeviation" : 0.1,
+    
+    "ballLineupDistance" : 0.2,
+    "ApproachCurveFactor" : 0.2,
+    "closeApproachSpeed" : 0.25,
+    "closeApproachDistance" : 0.30,
+	"turnSpeed" : 0.4,
+    
+    "distanceHysteresis" : 0.10,
+    "turningHysteresis" : 0.1,
+    "positionHysteresis" : 0.30,
+    
+    
+    "ballLineupMinDistance" : 0.060,
+    "useAvoidance" : 0,
+    "assumedObstacleWidth" : 0.250,
+    "avoidDistance" : 0.500,
+    
+    "bearingSensitivity" : 1.5
+}
