@@ -227,9 +227,9 @@ namespace modules {
                     }
 
                     if(sensors->leftFootDown){
-                        sensors->bodyCentreHeight = -forwardKinematics[ServoID::L_ANKLE_PITCH](3,2);
-                    } else (sensors->rightFootDown){
-                        sensors->bodyCentreHeight = -forwardKinematics[ServoID::R_ANKLE_PITCH](3,2);                        
+                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::L_ANKLE_PITCH](3,2);
+                    } else if(sensors->rightFootDown){
+                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::R_ANKLE_PITCH](3,2);                        
                     } else {
                         sensors->bodyCentreHeight = 0;
                     }

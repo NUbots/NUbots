@@ -20,19 +20,21 @@
 
 namespace utility {
 	namespace vision {
-			ORBFeatureExtractor::ORBFeatureExtractor() : FeatureExtractor() {}
+			ORBFeatureExtractor::ORBFeatureExtractor(){}
 
 			std::vector<ORBFeatureExtractor::ExtractedFeature> ORBFeatureExtractor::extractFeatures(const messages::input::Image& image){
+				//TODO: feature detection
 				return std::vector<ExtractedFeature>();
 			}
 
 			//Get matches: tuple = (featureIndex in featureFilters, extractedFeatureIndex in extractedFeatures, matchStrength)
             //Order of vector is strongest to weakest
             //Add new features here to the feature list and pick up missing filters and strengths below
-			std::vector<std::tuple<int, int, float>> ORBFeatureExtractor::matchFeatures(std::vector<ExtractedFeature> features, 
+			std::vector<std::tuple<int, int, float>> ORBFeatureExtractor::matchFeatures(std::vector<ExtractedFeature>& features, 
 																					    const std::vector<ExtractedFeature>& newFeatures,
 																					    int MAX_MATCHES)
 			{
+				//TODO: feature matching
 				return std::vector<std::tuple<int, int, float>>();
 			}
 	}

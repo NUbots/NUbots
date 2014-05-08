@@ -16,12 +16,13 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
-#include "utility/vision/FeatureExtractor.h"
+#include "messages/input/Image.h"
+
 #include <armadillo>
- 
+
 namespace utility {
 	namespace vision {
-		class ORBFeatureExtractor : public FeatureExtractor{
+		class ORBFeatureExtractor{
 		public:
 
 			class ExtractedFeature {
@@ -29,14 +30,14 @@ namespace utility {
 				arma::vec2 screenAngular;	//Compulsory
 			};
 			ORBFeatureExtractor();
-			virtual std::vector<ExtractedFeature> 			 extractFeatures(const messages::input::Image& image);
+			std::vector<ExtractedFeature> extractFeatures(const messages::input::Image& image);
 
 			//Get matches: tuple = (featureIndex in featureFilters, extractedFeatureIndex in extractedFeatures, matchStrength)
             //Order of vector is strongest to weakest
             //Add new features here to the feature list and pick up missing filters and strengths below
-			virtual std::vector<std::tuple<int, int, float>> matchFeatures(std::vector<ExtractedFeature>& features, 
-																		   const std::vector<ExtractedFeature>& newFeatures,
-																		   int MAX_MATCHES);
+			std::vector<std::tuple<int, int, float>> matchFeatures(std::vector<ExtractedFeature>& features, 
+																   const std::vector<ExtractedFeature>& newFeatures,
+																   int MAX_MATCHES);
 		};
 	}
 }
