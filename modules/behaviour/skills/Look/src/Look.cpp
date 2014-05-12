@@ -161,7 +161,7 @@ namespace modules {
                             double yaw = look[i].yaw;
                             //speeds should take into account the angle delta
                             double distance = sqrt(pitch*pitch+yaw*yaw);
-                            panTime = distance/slowSpeed;
+                            panTime = distance/fastSpeed;
                             time += std::chrono::nanoseconds(size_t(std::nano::den*panTime));
                             headYaw = std::fmin(std::fmax(yaw,minYaw),maxYaw);
                             headPitch = std::fmin(std::fmax(pitch,minPitch),maxPitch);

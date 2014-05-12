@@ -1,1 +1,186 @@
-[{"duration": 500, "targets": [{"gain": 30.000000, "id": "R_SHOULDER_PITCH", "position": 2.152690}, {"gain": 30.000000, "id": "L_SHOULDER_PITCH", "position": 2.152690}, {"gain": 30.000000, "id": "R_SHOULDER_ROLL", "position": -0.199418}, {"gain": 30.000000, "id": "L_SHOULDER_ROLL", "position": 0.199418}, {"gain": 30.000000, "id": "R_ELBOW", "position": -0.802783}, {"gain": 30.000000, "id": "L_ELBOW", "position": -0.802783}, {"gain": 30.000000, "id": "R_HIP_YAW", "position": 0.000000}, {"gain": 30.000000, "id": "L_HIP_YAW", "position": 0.000000}, {"gain": 30.000000, "id": "R_HIP_ROLL", "position": 0.000000}, {"gain": 30.000000, "id": "L_HIP_ROLL", "position": 0.000000}, {"gain": 30.000000, "id": "R_HIP_PITCH", "position": -1.094240}, {"gain": 30.000000, "id": "L_HIP_PITCH", "position": -1.089130}, {"gain": 30.000000, "id": "R_KNEE", "position": 1.661810}, {"gain": 30.000000, "id": "L_KNEE", "position": 1.692490}, {"gain": 30.000000, "id": "R_ANKLE_PITCH", "position": -0.792557}, {"gain": 30.000000, "id": "L_ANKLE_PITCH", "position": -0.736311}, {"gain": 30.000000, "id": "R_ANKLE_ROLL", "position": 0.092039}, {"gain": 30.000000, "id": "L_ANKLE_ROLL", "position": 0.097152}]}, {"duration": 500, "targets": [{"gain": 30.000000, "id": "R_SHOULDER_PITCH", "position": 3.799160}, {"gain": 30.000000, "id": "L_SHOULDER_PITCH", "position": 3.799160}, {"gain": 30.000000, "id": "R_SHOULDER_ROLL", "position": -0.005113}, {"gain": 30.000000, "id": "L_SHOULDER_ROLL", "position": 0.005113}, {"gain": 30.000000, "id": "R_ELBOW", "position": -2.571970}, {"gain": 30.000000, "id": "L_ELBOW", "position": -2.571970}, {"gain": 30.000000, "id": "R_HIP_YAW", "position": 0.000000}, {"gain": 30.000000, "id": "L_HIP_YAW", "position": 0.000000}, {"gain": 30.000000, "id": "R_HIP_ROLL", "position": 0.000000}, {"gain": 30.000000, "id": "L_HIP_ROLL", "position": 0.000000}, {"gain": 30.000000, "id": "R_HIP_PITCH", "position": -0.766990}, {"gain": 30.000000, "id": "L_HIP_PITCH", "position": -0.787443}, {"gain": 30.000000, "id": "R_KNEE", "position": 1.595340}, {"gain": 30.000000, "id": "L_KNEE", "position": 1.615790}, {"gain": 30.000000, "id": "R_ANKLE_PITCH", "position": 0.455081}, {"gain": 30.000000, "id": "L_ANKLE_PITCH", "position": 0.465308}, {"gain": 30.000000, "id": "R_ANKLE_ROLL", "position": 0.178964}, {"gain": 30.000000, "id": "L_ANKLE_ROLL", "position": 0.046019}]}, {"duration": 500, "targets": [{"gain": 30.000000, "id": "R_SHOULDER_PITCH", "position": 4.085500}, {"gain": 30.000000, "id": "L_SHOULDER_PITCH", "position": 4.085500}, {"gain": 30.000000, "id": "R_SHOULDER_ROLL", "position": -0.056246}, {"gain": 30.000000, "id": "L_SHOULDER_ROLL", "position": 0.056246}, {"gain": 30.000000, "id": "R_ELBOW", "position": -1.810100}, {"gain": 30.000000, "id": "L_ELBOW", "position": -1.810100}, {"gain": 30.000000, "id": "R_HIP_YAW", "position": 0.000000}, {"gain": 30.000000, "id": "L_HIP_YAW", "position": 0.000000}, {"gain": 30.000000, "id": "R_HIP_ROLL", "position": 0.000000}, {"gain": 30.000000, "id": "L_HIP_ROLL", "position": 0.000000}, {"gain": 30.000000, "id": "R_HIP_PITCH", "position": -1.232300}, {"gain": 30.000000, "id": "L_HIP_PITCH", "position": -1.196510}, {"gain": 30.000000, "id": "R_KNEE", "position": 1.769190}, {"gain": 30.000000, "id": "L_KNEE", "position": 1.779420}, {"gain": 30.000000, "id": "R_ANKLE_PITCH", "position": 0.453722}, {"gain": 30.000000, "id": "L_ANKLE_PITCH", "position": 0.457249}, {"gain": 30.000000, "id": "R_ANKLE_ROLL", "position": -0.035793}, {"gain": 30.000000, "id": "L_ANKLE_ROLL", "position": -0.010227}]}, {"duration": 500, "targets": [{"gain": 30.000000, "id": "R_SHOULDER_PITCH", "position": 3.390100}, {"gain": 30.000000, "id": "L_SHOULDER_PITCH", "position": 3.390100}, {"gain": 30.000000, "id": "R_SHOULDER_ROLL", "position": -0.015340}, {"gain": 30.000000, "id": "L_SHOULDER_ROLL", "position": 0.015340}, {"gain": 30.000000, "id": "R_ELBOW", "position": -0.480647}, {"gain": 30.000000, "id": "L_ELBOW", "position": -0.480647}, {"gain": 50.000000, "id": "R_HIP_YAW", "position": 0.000000}, {"gain": 50.000000, "id": "L_HIP_YAW", "position": 0.000000}, {"gain": 50.000000, "id": "R_HIP_ROLL", "position": 0.000000}, {"gain": 50.000000, "id": "L_HIP_ROLL", "position": 0.000000}, {"gain": 50.000000, "id": "R_HIP_PITCH", "position": 0.046019}, {"gain": 50.000000, "id": "L_HIP_PITCH", "position": 0.143172}, {"gain": 50.000000, "id": "R_KNEE", "position": 1.528870}, {"gain": 50.000000, "id": "L_KNEE", "position": 1.426600}, {"gain": 50.000000, "id": "R_ANKLE_PITCH", "position": -0.291456}, {"gain": 50.000000, "id": "L_ANKLE_PITCH", "position": -0.296570}, {"gain": 50.000000, "id": "R_ANKLE_ROLL", "position": -0.025566}, {"gain": 50.000000, "id": "L_ANKLE_ROLL", "position": -0.102265}]}, {"duration": 1000, "targets": [{"gain": 30.000000, "id": "R_SHOULDER_PITCH", "position": 2.689341}, {"gain": 30.000000, "id": "L_SHOULDER_PITCH", "position": 2.709288}, {"gain": 30.000000, "id": "R_SHOULDER_ROLL", "position": -0.053511}, {"gain": 30.000000, "id": "L_SHOULDER_ROLL", "position": 0.056579}, {"gain": 30.000000, "id": "R_ELBOW", "position": 0.044880}, {"gain": 30.000000, "id": "L_ELBOW", "position": 0.029536}, {"gain": 100.000000, "id": "R_HIP_YAW", "position": -0.018412}, {"gain": 100.000000, "id": "L_HIP_YAW", "position": 0.023015}, {"gain": 100.000000, "id": "R_HIP_ROLL", "position": -0.016878}, {"gain": 100.000000, "id": "L_HIP_ROLL", "position": -0.026084}, {"gain": 100.000000, "id": "R_HIP_PITCH", "position": 0.291528}, {"gain": 100.000000, "id": "L_HIP_PITCH", "position": 0.291528}, {"gain": 100.000000, "id": "R_KNEE", "position": 1.927150}, {"gain": 100.000000, "id": "L_KNEE", "position": 1.919479}, {"gain": 100.000000, "id": "R_ANKLE_PITCH", "position": -1.232087}, {"gain": 100.000000, "id": "L_ANKLE_PITCH", "position": -1.219813}, {"gain": 100.000000, "id": "R_ANKLE_ROLL", "position": -0.009206}, {"gain": 100.000000, "id": "L_ANKLE_ROLL", "position": 0.023015}]}, {"duration": 500, "targets": [{"gain": 30.000000, "id": "R_SHOULDER_PITCH", "position": 2.433920}, {"gain": 30.000000, "id": "L_SHOULDER_PITCH", "position": 2.433056}, {"gain": 30.000000, "id": "R_SHOULDER_ROLL", "position": -0.138058}, {"gain": 30.000000, "id": "L_SHOULDER_ROLL", "position": 0.138058}, {"gain": 30.000000, "id": "R_ELBOW", "position": -0.465308}, {"gain": 30.000000, "id": "L_ELBOW", "position": -0.465308}, {"gain": 100.000000, "id": "R_HIP_YAW", "position": 0.000000}, {"gain": 100.000000, "id": "L_HIP_YAW", "position": 0.000000}, {"gain": 100.000000, "id": "R_HIP_ROLL", "position": 0.000000}, {"gain": 100.000000, "id": "L_HIP_ROLL", "position": 0.000000}, {"gain": 100.000000, "id": "R_HIP_PITCH", "position": 0.516440}, {"gain": 100.000000, "id": "L_HIP_PITCH", "position": 0.516440}, {"gain": 100.000000, "id": "R_KNEE", "position": 1.758500}, {"gain": 100.000000, "id": "L_KNEE", "position": 1.755210}, {"gain": 100.000000, "id": "R_ANKLE_PITCH", "position": -1.288540}, {"gain": 100.000000, "id": "L_ANKLE_PITCH", "position": -1.375470}, {"gain": 100.000000, "id": "R_ANKLE_ROLL", "position": -0.010227}, {"gain": 100.000000, "id": "L_ANKLE_ROLL", "position": -0.071586}]}, {"duration": 1000, "targets": [{"gain": 30.000000, "id": "R_SHOULDER_PITCH", "position": 1.605570}, {"gain": 30.000000, "id": "L_SHOULDER_PITCH", "position": 1.605570}, {"gain": 30.000000, "id": "R_SHOULDER_ROLL", "position": -0.138058}, {"gain": 30.000000, "id": "L_SHOULDER_ROLL", "position": 0.138058}, {"gain": 30.000000, "id": "R_ELBOW", "position": -0.639159}, {"gain": 30.000000, "id": "L_ELBOW", "position": -0.639159}, {"gain": 100.000000, "id": "R_HIP_YAW", "position": 0.000000}, {"gain": 100.000000, "id": "L_HIP_YAW", "position": 0.000000}, {"gain": 100.000000, "id": "R_HIP_ROLL", "position": 0.000000}, {"gain": 100.000000, "id": "L_HIP_ROLL", "position": 0.000000}, {"gain": 100.000000, "id": "R_HIP_PITCH", "position": -0.501100}, {"gain": 100.000000, "id": "L_HIP_PITCH", "position": -0.572686}, {"gain": 100.000000, "id": "R_KNEE", "position": 1.700000}, {"gain": 100.000000, "id": "L_KNEE", "position": 1.700000}, {"gain": 100.000000, "id": "R_ANKLE_PITCH", "position": -1.000130}, {"gain": 100.000000, "id": "L_ANKLE_PITCH", "position": -1.000130}, {"gain": 100.000000, "id": "R_ANKLE_ROLL", "position": 0.035793}, {"gain": 100.000000, "id": "L_ANKLE_ROLL", "position": -0.061359}]}, {"duration": 500, "targets": [{"gain": 30.000000, "id": "R_SHOULDER_PITCH", "position": 1.830000}, {"gain": 30.000000, "id": "L_SHOULDER_PITCH", "position": 1.830000}, {"gain": 30.000000, "id": "R_SHOULDER_ROLL", "position": -0.520000}, {"gain": 30.000000, "id": "L_SHOULDER_ROLL", "position": 0.520000}, {"gain": 30.000000, "id": "R_ELBOW", "position": -0.790000}, {"gain": 30.000000, "id": "L_ELBOW", "position": -0.790000}, {"gain": 100.000000, "id": "R_HIP_YAW", "position": 0.000000}, {"gain": 100.000000, "id": "L_HIP_YAW", "position": 0.000000}, {"gain": 100.000000, "id": "R_HIP_ROLL", "position": -0.055000}, {"gain": 100.000000, "id": "L_HIP_ROLL", "position": 0.055000}, {"gain": 100.000000, "id": "R_HIP_PITCH", "position": -0.770000}, {"gain": 100.000000, "id": "L_HIP_PITCH", "position": -0.770000}, {"gain": 100.000000, "id": "R_KNEE", "position": 1.650000}, {"gain": 100.000000, "id": "L_KNEE", "position": 1.650000}, {"gain": 100.000000, "id": "R_ANKLE_PITCH", "position": -1.000000}, {"gain": 100.000000, "id": "L_ANKLE_PITCH", "position": -1.000000}, {"gain": 100.000000, "id": "R_ANKLE_ROLL", "position": 0.055000}, {"gain": 100.000000, "id": "L_ANKLE_ROLL", "position": -0.055000}]}]
+[
+    {
+        "duration": 500,
+        "targets": [
+            { "id": "R_SHOULDER_PITCH", "position": 2.15269, "gain": 30 },
+            { "id": "L_SHOULDER_PITCH", "position": 2.15269, "gain": 30 },
+            { "id": "R_SHOULDER_ROLL", "position": -0.199418, "gain": 30 },
+            { "id": "L_SHOULDER_ROLL", "position": 0.199418, "gain": 30 },
+            { "id": "R_ELBOW", "position": -0.802783, "gain": 30 },
+            { "id": "L_ELBOW", "position": -0.802783, "gain": 30 },
+            { "id": "R_HIP_YAW", "position": 0, "gain": 30 },
+            { "id": "L_HIP_YAW", "position": 0, "gain": 30 },
+            { "id": "R_HIP_ROLL", "position": 0, "gain": 30 },
+            { "id": "L_HIP_ROLL", "position": 0, "gain": 30 },
+            { "id": "R_HIP_PITCH", "position": -1.09424, "gain": 30 },
+            { "id": "L_HIP_PITCH", "position": -1.08913, "gain": 30 },
+            { "id": "R_KNEE", "position": 1.66181, "gain": 30 },
+            { "id": "L_KNEE", "position": 1.69249, "gain": 30 },
+            { "id": "R_ANKLE_PITCH", "position": -0.792557, "gain": 30 },
+            { "id": "L_ANKLE_PITCH", "position": -0.736311, "gain": 30 },
+            { "id": "R_ANKLE_ROLL", "position": 0.092039, "gain": 30 },
+            { "id": "L_ANKLE_ROLL", "position": 0.097152, "gain": 30 }
+        ]
+    },
+    {
+        "duration": 500,
+        "targets": [
+            { "id": "R_SHOULDER_PITCH", "position": 3.79916, "gain": 30 },
+            { "id": "L_SHOULDER_PITCH", "position": 3.79916, "gain": 30 },
+            { "id": "R_SHOULDER_ROLL", "position": -0.005113, "gain": 30 },
+            { "id": "L_SHOULDER_ROLL", "position": 0.005113, "gain": 30 },
+            { "id": "R_ELBOW", "position": -2.57197, "gain": 30 },
+            { "id": "L_ELBOW", "position": -2.57197, "gain": 30 },
+            { "id": "R_HIP_YAW", "position": 0, "gain": 30 },
+            { "id": "L_HIP_YAW", "position": 0, "gain": 30 },
+            { "id": "R_HIP_ROLL", "position": 0, "gain": 30 },
+            { "id": "L_HIP_ROLL", "position": 0, "gain": 30 },
+            { "id": "R_HIP_PITCH", "position": -0.76699, "gain": 30 },
+            { "id": "L_HIP_PITCH", "position": -0.787443, "gain": 30 },
+            { "id": "R_KNEE", "position": 1.59534, "gain": 30 },
+            { "id": "L_KNEE", "position": 1.61579, "gain": 30 },
+            { "id": "R_ANKLE_PITCH", "position": 0.455081, "gain": 30 },
+            { "id": "L_ANKLE_PITCH", "position": 0.465308, "gain": 30 },
+            { "id": "R_ANKLE_ROLL", "position": 0.178964, "gain": 30 },
+            { "id": "L_ANKLE_ROLL", "position": 0.046019, "gain": 30 }
+        ]
+    },
+    {
+        "duration": 500,
+        "targets": [
+            { "id": "R_SHOULDER_PITCH", "position": 4.0855, "gain": 30 },
+            { "id": "L_SHOULDER_PITCH", "position": 4.0855, "gain": 30 },
+            { "id": "R_SHOULDER_ROLL", "position": -0.056246, "gain": 30 },
+            { "id": "L_SHOULDER_ROLL", "position": 0.056246, "gain": 30 },
+            { "id": "R_ELBOW", "position": -1.8101, "gain": 30 },
+            { "id": "L_ELBOW", "position": -1.8101, "gain": 30 },
+            { "id": "R_HIP_YAW", "position": 0, "gain": 30 },
+            { "id": "L_HIP_YAW", "position": 0, "gain": 30 },
+            { "id": "R_HIP_ROLL", "position": 0, "gain": 30 },
+            { "id": "L_HIP_ROLL", "position": 0, "gain": 30 },
+            { "id": "R_HIP_PITCH", "position": -1.2323, "gain": 30 },
+            { "id": "L_HIP_PITCH", "position": -1.19651, "gain": 30 },
+            { "id": "R_KNEE", "position": 1.76919, "gain": 30 },
+            { "id": "L_KNEE", "position": 1.77942, "gain": 30 },
+            { "id": "R_ANKLE_PITCH", "position": 0.453722, "gain": 30 },
+            { "id": "L_ANKLE_PITCH", "position": 0.457249, "gain": 30 },
+            { "id": "R_ANKLE_ROLL", "position": -0.035793, "gain": 30 },
+            { "id": "L_ANKLE_ROLL", "position": -0.010227, "gain": 30 }
+        ]
+    },
+    {
+        "duration": 500,
+        "targets": [
+            { "id": "R_SHOULDER_PITCH", "position": 3.3901, "gain": 30 },
+            { "id": "L_SHOULDER_PITCH", "position": 3.3901, "gain": 30 },
+            { "id": "R_SHOULDER_ROLL", "position": -0.01534, "gain": 30 },
+            { "id": "L_SHOULDER_ROLL", "position": 0.01534, "gain": 30 },
+            { "id": "R_ELBOW", "position": -0.480647, "gain": 30 },
+            { "id": "L_ELBOW", "position": -0.480647, "gain": 30 },
+            { "id": "R_HIP_YAW", "position": 0, "gain": 50 },
+            { "id": "L_HIP_YAW", "position": 0, "gain": 50 },
+            { "id": "R_HIP_ROLL", "position": 0, "gain": 50 },
+            { "id": "L_HIP_ROLL", "position": 0, "gain": 50 },
+            { "id": "R_HIP_PITCH", "position": 0.046019, "gain": 50 },
+            { "id": "L_HIP_PITCH", "position": 0.143172, "gain": 50 },
+            { "id": "R_KNEE", "position": 1.52887, "gain": 50 },
+            { "id": "L_KNEE", "position": 1.4266, "gain": 50 },
+            { "id": "R_ANKLE_PITCH", "position": -0.291456, "gain": 50 },
+            { "id": "L_ANKLE_PITCH", "position": -0.29657, "gain": 50 },
+            { "id": "R_ANKLE_ROLL", "position": -0.025566, "gain": 50 },
+            { "id": "L_ANKLE_ROLL", "position": -0.102265, "gain": 50 }
+        ]
+    },
+    {
+        "duration": 1000,
+        "targets": [
+            { "id": "R_SHOULDER_PITCH", "position": 2.689341, "gain": 30 },
+            { "id": "L_SHOULDER_PITCH", "position": 2.709288, "gain": 30 },
+            { "id": "R_SHOULDER_ROLL", "position": -0.053511, "gain": 30 },
+            { "id": "L_SHOULDER_ROLL", "position": 0.056579, "gain": 30 },
+            { "id": "R_ELBOW", "position": 0.04488, "gain": 30 },
+            { "id": "L_ELBOW", "position": 0.029536, "gain": 30 },
+            { "id": "R_HIP_YAW", "position": -0.018412, "gain": 100 },
+            { "id": "L_HIP_YAW", "position": 0.023015, "gain": 100 },
+            { "id": "R_HIP_ROLL", "position": -0.016878, "gain": 100 },
+            { "id": "L_HIP_ROLL", "position": -0.026084, "gain": 100 },
+            { "id": "R_HIP_PITCH", "position": 0.291528, "gain": 100 },
+            { "id": "L_HIP_PITCH", "position": 0.291528, "gain": 100 },
+            { "id": "R_KNEE", "position": 1.92715, "gain": 100 },
+            { "id": "L_KNEE", "position": 1.919479, "gain": 100 },
+            { "id": "R_ANKLE_PITCH", "position": -1.232087, "gain": 100 },
+            { "id": "L_ANKLE_PITCH", "position": -1.219813, "gain": 100 },
+            { "id": "R_ANKLE_ROLL", "position": -0.009206, "gain": 100 },
+            { "id": "L_ANKLE_ROLL", "position": 0.023015, "gain": 100 }
+        ]
+    },
+    {
+        "duration": 500,
+        "targets": [
+            { "id": "R_SHOULDER_PITCH", "position": 2.43392, "gain": 30 },
+            { "id": "L_SHOULDER_PITCH", "position": 2.433056, "gain": 30 },
+            { "id": "R_SHOULDER_ROLL", "position": -0.138058, "gain": 30 },
+            { "id": "L_SHOULDER_ROLL", "position": 0.138058, "gain": 30 },
+            { "id": "R_ELBOW", "position": -0.465308, "gain": 30 },
+            { "id": "L_ELBOW", "position": -0.465308, "gain": 30 },
+            { "id": "R_HIP_YAW", "position": 0, "gain": 100 },
+            { "id": "L_HIP_YAW", "position": 0, "gain": 100 },
+            { "id": "R_HIP_ROLL", "position": 0, "gain": 100 },
+            { "id": "L_HIP_ROLL", "position": 0, "gain": 100 },
+            { "id": "R_HIP_PITCH", "position": 0.51644, "gain": 100 },
+            { "id": "L_HIP_PITCH", "position": 0.51644, "gain": 100 },
+            { "id": "R_KNEE", "position": 1.7585, "gain": 100 },
+            { "id": "L_KNEE", "position": 1.75521, "gain": 100 },
+            { "id": "R_ANKLE_PITCH", "position": -1.28854, "gain": 100 },
+            { "id": "L_ANKLE_PITCH", "position": -1.37547, "gain": 100 },
+            { "id": "R_ANKLE_ROLL", "position": -0.010227, "gain": 100 },
+            { "id": "L_ANKLE_ROLL", "position": -0.071586, "gain": 100 }
+        ]
+    },
+    {
+        "duration": 1000,
+        "targets": [
+            { "id": "R_SHOULDER_PITCH", "position": 1.60557, "gain": 30 },
+            { "id": "L_SHOULDER_PITCH", "position": 1.60557, "gain": 30 },
+            { "id": "R_SHOULDER_ROLL", "position": -0.138058, "gain": 30 },
+            { "id": "L_SHOULDER_ROLL", "position": 0.138058, "gain": 30 },
+            { "id": "R_ELBOW", "position": -0.639159, "gain": 30 },
+            { "id": "L_ELBOW", "position": -0.639159, "gain": 30 },
+            { "id": "R_HIP_YAW", "position": 0, "gain": 100 },
+            { "id": "L_HIP_YAW", "position": 0, "gain": 100 },
+            { "id": "R_HIP_ROLL", "position": 0, "gain": 100 },
+            { "id": "L_HIP_ROLL", "position": 0, "gain": 100 },
+            { "id": "R_HIP_PITCH", "position": -0.5011, "gain": 100 },
+            { "id": "L_HIP_PITCH", "position": -0.572686, "gain": 100 },
+            { "id": "R_KNEE", "position": 1.7, "gain": 100 },
+            { "id": "L_KNEE", "position": 1.7, "gain": 100 },
+            { "id": "R_ANKLE_PITCH", "position": -1.00013, "gain": 100 },
+            { "id": "L_ANKLE_PITCH", "position": -1.00013, "gain": 100 },
+            { "id": "R_ANKLE_ROLL", "position": 0.035793, "gain": 100 },
+            { "id": "L_ANKLE_ROLL", "position": -0.061359, "gain": 100 }
+        ]
+    },
+    {
+        "duration": 500,
+        "targets": [
+            { "id": "R_SHOULDER_PITCH", "position": 1.83, "gain": 30 },
+            { "id": "L_SHOULDER_PITCH", "position": 1.83, "gain": 30 },
+            { "id": "R_SHOULDER_ROLL", "position": -0.52, "gain": 30 },
+            { "id": "L_SHOULDER_ROLL", "position": 0.52, "gain": 30 },
+            { "id": "R_ELBOW", "position": -0.79, "gain": 30 },
+            { "id": "L_ELBOW", "position": -0.79, "gain": 30 },
+            { "id": "R_HIP_YAW", "position": 0, "gain": 100 },
+            { "id": "L_HIP_YAW", "position": 0, "gain": 100 },
+            { "id": "R_HIP_ROLL", "position": -0.055, "gain": 100 },
+            { "id": "L_HIP_ROLL", "position": 0.055, "gain": 100 },
+            { "id": "R_HIP_PITCH", "position": -0.77, "gain": 100 },
+            { "id": "L_HIP_PITCH", "position": -0.77, "gain": 100 },
+            { "id": "R_KNEE", "position": 1.65, "gain": 100 },
+            { "id": "L_KNEE", "position": 1.65, "gain": 100 },
+            { "id": "R_ANKLE_PITCH", "position": -1, "gain": 100 },
+            { "id": "L_ANKLE_PITCH", "position": -1, "gain": 100 },
+            { "id": "R_ANKLE_ROLL", "position": 0.055, "gain": 100 },
+            { "id": "L_ANKLE_ROLL", "position": -0.055, "gain": 100 }
+        ]
+    }
+]
