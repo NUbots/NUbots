@@ -303,18 +303,18 @@ namespace modules {
                 double walk_bearing;
 
                 //check what distance increment we're in:
-                if (distanceIncrement == 3 or move[0] > midApproachDistance+distanceHysteresis) {
+                if (move[0] > midApproachDistance+distanceHysteresis) {
                     distanceIncrement = 3;
                     walk_speed = forwardSpeed;
-                } else if (distanceIncrement == 2 or move[0] > closeApproachDistance + distanceHysteresis and
+                } else if (move[0] > closeApproachDistance + distanceHysteresis and
                            move[0] < midApproachDistance) {
                     distanceIncrement = 2;
                     walk_speed = midApproachSpeed;
-                } else if (distanceIncrement == 1 or move[0] > ballLineupDistance + distanceHysteresis and
+                } else if (move[0] > ballLineupDistance + distanceHysteresis and
                            move[0] < closeApproachDistance) {
                     distanceIncrement = 1;
                     walk_speed = closeApproachSpeed;
-                } else {
+                } else if (move[0] < ballLineupDistance + distanceHysteresis) {
                     distanceIncrement = 0;
                     walk_speed = 0.f;
                 }
