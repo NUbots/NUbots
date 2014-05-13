@@ -22,12 +22,12 @@
     "positionHysteresis" : 0.30,
     
     
-    "ballLineupDistance" : 0.2,
+    "ballLineupDistance" : 0.10,
     "ballLineupMinDistance" : 0.060,
     "useAvoidance" : 0,
     "assumedObstacleWidth" : 0.250,
     "avoidDistance" : 0.500,
     
     "bearingSensitivity" : 1.5,
-    "ApproachCurveFactor" : 0.2
+    "ApproachCurveFactor" : 0.45
 }
