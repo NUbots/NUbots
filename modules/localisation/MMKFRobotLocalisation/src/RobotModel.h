@@ -22,6 +22,8 @@
 
 #include <armadillo>
 #include "messages/localisation/FieldObject.h"
+#include "messages/input/Sensors.h"
+
 
 namespace modules {
 namespace localisation {
@@ -62,7 +64,7 @@ namespace robot {
 
         arma::vec::fixed<RobotModel::size> timeUpdate(
             const arma::vec::fixed<RobotModel::size>& state, double deltaT,
-            const arma::mat44& odom);
+            const  messages::input::Sensors& sensors);
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,

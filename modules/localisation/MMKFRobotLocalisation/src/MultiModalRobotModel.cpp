@@ -24,8 +24,9 @@
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
-
-
+#include "messages/input/Sensors.h"
+ 
+using messages::input::Sensors;
 using utility::localisation::LocalisationFieldObject;
 using messages::localisation::FakeOdometry;
 
@@ -61,9 +62,9 @@ void MultiModalRobotModel::TimeUpdate(double seconds, const FakeOdometry& odom) 
         model->TimeUpdate(seconds, odom);
 }
 
-void MultiModalRobotModel::TimeUpdate(double seconds, const arma::mat44& odom) {
+void MultiModalRobotModel::TimeUpdate(double seconds, const Sensors& sensors) {
     for (auto& model : robot_models_)
-        model->TimeUpdate(seconds, odom);
+        model->TimeUpdate(seconds, sensors);
 }
 
 void RobotHypothesis::TimeUpdate(double seconds) {
@@ -72,8 +73,8 @@ void RobotHypothesis::TimeUpdate(double seconds) {
 void RobotHypothesis::TimeUpdate(double seconds, const FakeOdometry& odom) {
     filter_.timeUpdate(seconds, odom);
 }
-void RobotHypothesis::TimeUpdate(double seconds, const arma::mat44& odom) {
-    filter_.timeUpdate(seconds, odom);
+void RobotHypothesis::TimeUpdate(double seconds, const Sensors& sensors) {
+    filter_.timeUpdate(seconds, sensors);
 }
 
 

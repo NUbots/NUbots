@@ -212,25 +212,31 @@ namespace modules {
                     if(input.fsr.right.fsr1 + input.fsr.right.fsr2 + input.fsr.right.fsr3 + input.fsr.right.fsr4 > SUPPORT_FOOT_FSR_THRESHOLD && zeroSensorsRight <= 4 - REQUIRED_NUMBER_OF_FSRS){
                         sensors->rightFootDown = true;
                     }
-                    arma::mat44 odometryLeftFoot = arma::eye(4,4);
-                    arma::mat44 odometryRightFoot = arma::eye(4,4);
-                    if(previousSensors){
-                        //NOTE: calculateOdometryMatrix requires sensors->forwardKinematics to be calculated before calling
-                        odometryLeftFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::LEFT);
-                        odometryRightFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::RIGHT);
-                    }
+                    
 
                     sensors->odometry = arma::eye(4,4);
-
-                    if(sensors->leftFootDown || sensors->rightFootDown){
-                        sensors->odometry.submat(0,3,2,3) = (odometryLeftFoot.submat(0,3,2,3) * sensors->leftFootDown + odometryLeftFoot.submat(0,3,2,3) * sensors->rightFootDown)
-                                                            / (sensors->leftFootDown + sensors->rightFootDown);
-                        if(sensors->leftFootDown && sensors->rightFootDown){
-                            sensors->odometry.submat(0,0,2,2) = odometryLeftFoot.submat(0,0,2,2);
-                        } else {
-                            sensors->odometry.submat(0,0,2,2) = odometryLeftFoot.submat(0,0,2,2) * sensors->leftFootDown + odometryRightFoot.submat(0,0,2,2) * sensors->rightFootDown;
-                        }
+                    if(previousSensors){
+                        sensors->odometry.submat(0,0,2,2) =  previousSensors->orientation.t() * sensors->orientation;
                     }
+                    //Broken odometry
+                    // arma::mat44 odometryRightFoot = arma::eye(4,4);
+                    // arma::mat44 odometryLeftFoot = arma::eye(4,4);
+                    // if(previousSensors){
+                    //     //NOTE: calculateOdometryMatrix requires sensors->forwardKinematics to be calculated before calling
+                    //     odometryLeftFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::LEFT);
+                    //     odometryRightFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::RIGHT);
+                    // }
+
+
+                    // if(sensors->leftFootDown || sensors->rightFootDown){
+                    //     sensors->odometry.submat(0,3,2,3) = (odometryLeftFoot.submat(0,3,2,3) * sensors->leftFootDown + odometryLeftFoot.submat(0,3,2,3) * sensors->rightFootDown)
+                    //                                         / (sensors->leftFootDown + sensors->rightFootDown);
+                    //     if(sensors->leftFootDown && sensors->rightFootDown){
+                    //         sensors->odometry.submat(0,0,2,2) = odometryLeftFoot.submat(0,0,2,2);
+                    //     } else {
+                    //         sensors->odometry.submat(0,0,2,2) = odometryLeftFoot.submat(0,0,2,2) * sensors->leftFootDown + odometryRightFoot.submat(0,0,2,2) * sensors->rightFootDown;
+                    //     }
+                    // }
 
                     /************************************************
                      *                  Mass Model                  *
