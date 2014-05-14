@@ -23,6 +23,7 @@
 
 #include "messages/input/Image.h"
 #include "messages/input/Sensors.h"
+#include "messages/input/Image.h"
 #include "messages/localisation/FieldObject.h"
 
 #include <armadillo>
@@ -31,9 +32,17 @@ namespace utility {
 	namespace vision {
 		class MockFeatureExtractor{
 		private:
-			std::vector<arma::vec3> mockFeatures;
+			std::vector<arma::vec4> mockFeatures;
 		public:
-
+			void setParameters(int NUMBER_OF_MOCK_POINTS,
+							   float MEAN_RADIUS,
+							   float RADIAL_DEVIATION,
+							   float HEIGHT,
+							   float HEIGHT_DEVIATION,
+							   float ANGULAR_DEVIATION,
+							   bool RANDOMIZE,
+							   int SEED
+							   );
 			class ExtractedFeature {
 			public:
 				arma::vec2 screenAngular;	//Compulsory

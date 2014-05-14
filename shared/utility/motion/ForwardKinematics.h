@@ -327,9 +327,6 @@ namespace kinematics {
         }
     }
 
-    
-    template <typename RobotKinematicModel>
-    arma::vec2 worldToCameraAngular(point, sensors, self);
 
 } // kinematics
 }  // motion

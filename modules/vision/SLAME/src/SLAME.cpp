@@ -37,6 +37,15 @@ namespace modules {
                     FEATURE_EXTRACTOR_TYPE = FeatureExtractorType::ORB;
                 }
 
+                MockSLAMEModule.setParameters(config["NUMBER_OF_MOCK_POINTS"],
+                                              config["MEAN_RADIUS"],
+                                              config["RADIAL_DEVIATION"],
+                                              config["HEIGHT"],
+                                              config["HEIGHT_DEVIATION"],
+                                              config["ANGULAR_DEVIATION"],
+                                              config["RANDOMIZE"],
+                                              config["SEED"]);
+
             });
 
             on<Trigger<Image>, With<std:vector<Self>, Sensors>>([this](const time_t&, const Image& image, const std::vector<Self>& selfs, const sensors& sensors){               

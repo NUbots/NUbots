@@ -17,19 +17,19 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 #include "MockFeatureExtractor.h"
-#include "utility/motion/kinematics/ForwardKinematics.h"
-#include "utility/motion/kinematics/RobotModels.h"
+#include "utility/math/matrix.h"
+#include "messages/input/ServoID.h"
 #include <cstdlib>
 #include <ctime>
 
 namespace utility {
 	namespace vision {
 
-			using utility::motion::kinematics::DarwinModel;
-			
+			using messages::input::ServoID;
+
 			MockFeatureExtractor::MockFeatureExtractor(){}
 
-			MockFeatureExtractor::setParameters(int NUMBER_OF_MOCK_POINTS,
+			void MockFeatureExtractor::setParameters(int NUMBER_OF_MOCK_POINTS,
 												float MEAN_RADIUS,
 												float RADIAL_DEVIATION,
 												float HEIGHT,
@@ -43,10 +43,11 @@ namespace utility {
 					float r = MEAN_RADIUS + 2 * RADIAL_DEVIATION * (std::rand() / float(RAND_MAX) - 0.5); 
 					float z = HEIGHT + 2 * HEIGHT_DEVIATION * (std::rand() / float(RAND_MAX) - 0.5);
 					float theta = 2 * M_PI * i / float(NUMBER_OF_MOCK_POINTS) +  2 * ANGULAR_DEVIATION * (std::rand() / float(RAND_MAX) - 0.5);
-					mockFeatures.push_back(arma::vec3({
+					mockFeatures.push_back(arma::vec4({
 						r * std::cos(theta),
 						r * std::sin(theta),
-						z
+						z,
+						1
 					}));
 				}
 
@@ -55,11 +56,25 @@ namespace utility {
 			std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
 				//TODO: feature detection
 				std::vector<ExtractedFeature> features;
+					arma::vec2 selfHeading = arma::normalise(self.heading);
+					arma::mat44 robotToWorld_world = arma::mat44({   		  selfHeading[0],   		   -selfHeading[1], 0,            	 	self.position[0],
+	                                                                 		  selfHeading[1],   		    selfHeading[0], 0,            	 	self.position[1],
+	                                                                                        0,                            0, 1,         sensors.bodyCentreHeight,
+	                                                                                        0,                            0, 0,                                1});
+
+	                arma::mat44 cameraToBody_body = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
+
+	                arma::mat44 robotToBody_body = arma::eye(4,4);
+	                //TODO: copy localisation in develop
+	                robotToBody_body.submat(0,0,2,2) = sensors.orientation;
+
+	                arma::mat44 worldToCamera_camera = utility::math::matrix::orthonormal44Inverse(cameraToBody_body) * robotToBody_body * utility::math::matrix::orthonormal44Inverse(robotToWorld_world);	                
 
 				for (auto point : mockFeatures){
 					ExtractedFeature f;
-					f.screenAngular = utility::motion::kinematics::worldToCameraAngular<DarwinModel>(point, sensors, self);
-					features.push_back(f);					
+	                arma::vec4 cameraToFeatureVector_cam =  worldToCamera_camera * point;
+	                f.screenAngular = arma::vec2({ std::atan2(cameraToFeatureVector_cam[1], cameraToFeatureVector_cam[0]) , std::atan2(cameraToFeatureVector_cam[2], cameraToFeatureVector_cam[0])});
+					features.push_back(f);
 				}
 
 				return features;

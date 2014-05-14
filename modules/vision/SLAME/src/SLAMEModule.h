@@ -41,6 +41,23 @@ namespace modules{
  		public:
  		 	SLAMEModule();
  		 	std::unique_ptr<messages::vision::SLAMEObjects> getSLAMEObjects(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors);        
+
+ 		 	setParameters(int NUMBER_OF_MOCK_POINTS,
+						  float MEAN_RADIUS,
+						  float RADIAL_DEVIATION,
+						  float HEIGHT,
+						  float HEIGHT_DEVIATION,
+						  float ANGULAR_DEVIATION,
+						  bool RANDOMIZE,
+						  int SEED
+						  ){featureExtractor.setParameters(NUMBER_OF_MOCK_POINTS,
+						   								   MEAN_RADIUS,
+						   								   RADIAL_DEVIATION,
+						   								   HEIGHT,
+						   								   HEIGHT_DEVIATION,
+						   								   ANGULAR_DEVIATION,
+						   								   RANDOMIZE,
+						   								   SEED);}
  		};
  	}
  }

@@ -48,9 +48,9 @@ namespace utility {
             }
 
             arma::vec InverseDepthPointModel::predictedObservation(const arma::vec::fixed<size>& state, const std::pair<const Sensors&, const Self&> stateData) {
-                
-                arma::mat44 robotToWorld_world = arma::mat44({stateData.second.heading[0], -stateData.second.heading[1], 0,     stateData.second.position[0],
-                                                              stateData.second.heading[1],  stateData.second.heading[0], 0,     stateData.second.position[1],
+                arma::vec2 selfHeading = arma::normalise(stateData.second.heading);
+                arma::mat44 robotToWorld_world = arma::mat44({             selfHeading[0],              -selfHeading[1], 0,     stateData.second.position[0],
+                                                                           selfHeading[1],               selfHeading[0], 0,     stateData.second.position[1],
                                                                                         0,                            0, 1, stateData.first.bodyCentreHeight,
                                                                                         0,                            0, 0,                                1});
 
