@@ -84,8 +84,9 @@ namespace utility {
 
                         auto deviation = chol.col(i - 1);
 
-                        points.col(i)               = mean + deviation;
-                        points.col(i + Model::size) = mean - deviation;
+                        points.col(i)               = model.limitState(mean + deviation);
+                        points.col(i + Model::size) = model.limitState(mean - deviation);
+                        
                     }
 
                     return points;
@@ -152,13 +153,13 @@ namespace utility {
 
                 template <typename TMeasurement>
                 void timeUpdate(double delta_t, const TMeasurement& measurement = TMeasurement()) {
-
+                    
                     // Generate our sigma points
                     sigmaPoints = generateSigmaPoints(mean, covariance);
 
                     // Write the propagated version of the sigma point
                     for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
-                        sigmaPoints.col(i) = model.timeUpdate(sigmaPoints.col(i), delta_t, measurement);
+                        sigmaPoints.col(i) = model.limitState(model.timeUpdate(sigmaPoints.col(i), delta_t, measurement));
                     }
 
                     // Calculate the new mean and covariance values.
@@ -214,7 +215,7 @@ namespace utility {
                                             (measurement_variance + predictedObservations * covarianceUpdate * predictedObservations.t()).i() *
                                             predictedObservations * covarianceUpdate;
 
-                        d += predictedObservations.t() * measurement_variance.i() * innovation;
+                        d += (predictedObservations.t()) * measurement_variance.i() * innovation;
 
                         // Update our mean and covariance
                         mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
