@@ -24,11 +24,11 @@
     "turningHysteresis" : 0.1,
     "positionHysteresis" : 0.30,
     
-    
     "ballLineupMinDistance" : 0.060,
     "useAvoidance" : 0,
     "assumedObstacleWidth" : 0.250,
     "avoidDistance" : 0.500,
     
-    "bearingSensitivity" : 1.5
+    "bearingSensitivity" : 1.5,
+    "ApproachCurveFactor" : 0.45
 }

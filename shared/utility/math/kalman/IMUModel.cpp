@@ -50,7 +50,8 @@ namespace utility {
             arma::vec::fixed<IMUModel::size> IMUModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& measurement) {
                 //new universal rotation code for gyro (SORA)
                 //See: http://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Simultaneous_orthogonal_rotation_angle
-                arma::vec3 omega = measurement * deltaT;
+                //XXX: use http://en.wikipedia.org/wiki/Rotation_matrix#Exponential_map
+                arma::vec3 omega = measurement * deltaT; //XXX: limit to something practical (+/- pi/2)
                 double phi = arma::norm(omega, 2);
                 if (phi == 0) {
                     return state;
