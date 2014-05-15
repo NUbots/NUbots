@@ -532,7 +532,7 @@ namespace modules {
 
             std::vector<double> qLegs = darwinop_kinematics_inverse_legs_nubots(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
             motionLegs(qLegs, false, sensors);
-            //motionArms();
+            // motionArms();
         }
 
         void WalkEngine::updateStill(const Sensors& sensors) {
@@ -577,7 +577,7 @@ namespace modules {
 
             std::vector<double> qLegs = darwinop_kinematics_inverse_legs_nubots(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
             motionLegs(qLegs, true, sensors);
-           //motionArms();
+            // motionArms();
         }
 
         void WalkEngine::motionLegs(std::vector<double> qLegs, bool gyroOff, const Sensors& sensors) {
@@ -735,7 +735,7 @@ namespace modules {
 
             auto waypoints = std::make_unique<std::vector<ServoCommand>>();
             waypoints->reserve(6);
-            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(1000000000/UPDATE_FREQUENCY);
+            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
 
             waypoints->push_back({id, time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]),  float(hardnessArm * 100)});
             waypoints->push_back({id, time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]),  float(hardnessArm * 100)});
