@@ -189,9 +189,6 @@ namespace modules {
 
             int initialStep;
 
-            int upperBodyOverridden;
-            int motionPlaying;
-
             // TODO:
             arma::vec3 qLArmOR;
             arma::vec3 qRArmOR;
@@ -223,7 +220,6 @@ namespace modules {
             bool startFromStep;
 
             arma::vec2 comdot;
-            int hasBall;
 
             Leg supportLeg = LEFT;
             arma::vec2 supportMod;
