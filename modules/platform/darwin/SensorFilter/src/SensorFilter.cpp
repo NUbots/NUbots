@@ -222,11 +222,11 @@ namespace modules {
                         sensors->rightFootDown = true;
                     }
 
-                    if(previousSensors && (!sensors->leftFootDown && !sensors->rightFootDown )) {
-                        std::cout << "No feet down!" << std::endl;
-                        sensors->leftFootDown = previousSensors->leftFootDown;
-                        sensors->rightFootDown = previousSensors->rightFootDown;
-                    }
+                    // if(previousSensors && (!sensors->leftFootDown && !sensors->rightFootDown )) {
+                    //     //std::cout << "No feet down!" << std::endl;
+                    //     sensors->leftFootDown = previousSensors->leftFootDown;
+                    //     sensors->rightFootDown = previousSensors->rightFootDown;
+                    // }
 
                     sensors->odometry = arma::eye(4,4);
                     // // Kinematics odometry
