@@ -248,9 +248,6 @@ namespace modules {
 
                 initialStep = 2;
 
-                upperBodyOverridden = 0;
-                motionPlaying = 0;
-
                 qLArmOR0 = qLArm0;
                 qRArmOR0 = qRArm0;
                 bodyRot0 = {0, bodyTilt, 0};
@@ -283,8 +280,6 @@ namespace modules {
                 startFromStep = false;
 
                 comdot = {0, 0};
-                hasBall = 0;
-
                 
                 stanceReset();
                 //start();
@@ -490,32 +485,13 @@ namespace modules {
             float armPosCompX, armPosCompY;
 
             // arm movement compensation
-            if (upperBodyOverridden > 0 || motionPlaying > 0) {
-                // mass shift to X
-                float elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qLArmOR[1])
-                               -std::sin(qRArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qRArmOR[1]);
+            
+            armPosCompX = 0;
+            armPosCompY = 0;
 
-                // mass shift to Y
-                float elbowY = std::sin(qLArmOR[1]) + std::sin(qRArmOR[1]);
-                armPosCompX = elbowX * -0.009;
-                armPosCompY = elbowY * -0.009;
-
-                pTorso[3] = bodyRot[0];
-                pTorso[4] = bodyRot[1];
-                pTorso[5] = bodyRot[2];
-            } else {
-                armPosCompX = 0;
-                armPosCompY = 0;
-
-                pTorso[3] = 0;
-                pTorso[4] = bodyTilt;
-                pTorso[5] = 0;
-            }
-
-            // TODO: paramaterize/config
-            if (hasBall > 0) {
-                turnCompX = turnCompX - 0.01;
-            }
+            pTorso[3] = 0;
+            pTorso[4] = bodyTilt;
+            pTorso[5] = 0;       
 
             arma::vec3 uTorsoActual = poseGlobal({-footX + frontCompX + turnCompX + armPosCompX, armPosCompY, 0}, uTorso);
             pTorso[0] = uTorsoActual[0];
@@ -540,27 +516,13 @@ namespace modules {
 
             float armPosCompX, armPosCompY;
 
-            if (upperBodyOverridden > 0 || motionPlaying > 0) {
-                // mass shift to X
-                float elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qLArmOR[1])
-                               -std::sin(qRArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qRArmOR[1]);
+            armPosCompX = 0;
+            armPosCompY = 0;
 
-                // mass shift to Y
-                float elbowY = std::sin(qLArmOR[1]) + std::sin(qRArmOR[1]);
-                armPosCompX = elbowX * -0.007;
-                armPosCompY = elbowY * -0.007;
-
-                pTorso[3] = bodyRot[0];
-                pTorso[4] = bodyRot[1];
-                pTorso[5] = bodyRot[2];
-            } else {
-                armPosCompX = 0;
-                armPosCompY = 0;
-
-                pTorso[3] = 0;
-                pTorso[4] = bodyTilt;
-                pTorso[5] = 0;
-            }
+            pTorso[3] = 0;
+            pTorso[4] = bodyTilt;
+            pTorso[5] = 0;
+            
 
             uTorsoActual = poseGlobal({-footX + armPosCompX, armPosCompY, 0}, uTorso);
             pTorso[0] = uTorsoActual[0];
@@ -698,18 +660,9 @@ namespace modules {
         }
 
         void WalkEngine::motionArms() {
-            // TODO: paramaterize/config
-            if (hasBall > 0) {
-                return;
-            }
-
+                   
             arma::vec3 qLArmActual = {qLArm0[0] + armShift[0], qLArm0[1] + armShift[1], 0};
             arma::vec3 qRArmActual = {qRArm0[0] + armShift[0], qRArm0[1] + armShift[1], 0};
-
-            if (upperBodyOverridden > 0 || motionPlaying > 0) {
-                qLArmActual = {qLArm0[0], qLArmOR[1], qLArmOR[2]};
-                qRArmActual = {qRArm0[0], qRArmOR[1], qRArmOR[2]};
-            }
 
             // check leg hitting
             float rotLeftA = modAngle(uLeft[2] - uTorso[2]);
@@ -728,10 +681,10 @@ namespace modules {
                     - std::max(0.0, rightLegTorso[1] - 0.04) / 0.02 * (6 * M_PI / 180)
                     , qLArmActual[1]);
             
-            if (upperBodyOverridden <= 0 && motionPlaying <= 0) {
-                qLArmActual[2] = qLArm[2];
-                qRArmActual[2] = qRArm[2];
-            }
+        
+            qLArmActual[2] = qLArm[2];
+            qRArmActual[2] = qRArm[2];
+            
 
             auto waypoints = std::make_unique<std::vector<ServoCommand>>();
             waypoints->reserve(6);
@@ -904,8 +857,6 @@ namespace modules {
             uSupport = uTorso;
             tLastStep = getTime();
             currentStepType = 0;
-            motionPlaying = 0;
-            upperBodyOverridden = 0;
             uLRFootOffset = {0, footY, 0};
             startFromStep = false;
         }

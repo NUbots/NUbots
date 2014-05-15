@@ -221,6 +221,8 @@ namespace Darwin {
         // Read our responses for each of the packets
         for (int i = 0; i < responses; ++i) {
             results[i] = readPacket();
+
+            if(results[i].header.errorcode != 0) break;
         }
 
         return results;
