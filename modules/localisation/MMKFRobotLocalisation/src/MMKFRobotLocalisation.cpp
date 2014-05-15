@@ -106,7 +106,7 @@ namespace localisation {
            Options<Sync<MMKFRobotLocalisation>>
           >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
             auto curr_time = NUClear::clock::now();
-            engine_->TimeUpdate(curr_time, sensors.odometry);
+            engine_->TimeUpdate(curr_time, sensors);
         });
 
         on<Trigger<std::vector<messages::vision::Goal>>,

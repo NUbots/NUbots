@@ -52,6 +52,9 @@ namespace modules {
 
                 double SUPPORT_FOOT_FSR_THRESHOLD;
                 int REQUIRED_NUMBER_OF_FSRS;
+
+                arma::vec2 integratedOdometry;
+
                 static constexpr const char* CONFIGURATION_PATH = "DarwinSensorFilter.json";
             private:
                 arma::mat44 calculateOdometryMatrix(

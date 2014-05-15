@@ -20,6 +20,7 @@
 #ifndef MESSAGES_INPUT_SENSORS_H
 #define MESSAGES_INPUT_SENSORS_H
 
+#include <nuclear>
 #include <armadillo>
 
 #include "ServoID.h"

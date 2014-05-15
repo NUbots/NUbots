@@ -115,7 +115,7 @@ namespace utility {
                 if(normAxis != 0){
                     B.col(0) = axis/normAxis;
                 } else {
-                    NUClear::log<NUClear::WARN>("utility::math::matrix::axisAngleRotationMatrix - WARNING Zero rotation axis given");
+                    //NUClear::log<NUClear::WARN>("utility::math::matrix::axisAngleRotationMatrix - WARNING Zero rotation axis given");
                     return arma::eye(3,3);
                 }
 

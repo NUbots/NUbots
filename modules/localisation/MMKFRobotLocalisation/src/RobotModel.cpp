@@ -25,9 +25,10 @@
 #include "utility/math/matrix.h"
 #include "utility/math/coordinates.h"
 #include "messages/localisation/FieldObject.h"
-
+#include "messages/input/Sensors.h"
 #include <nuclear>
 
+using messages::input::Sensors;
 using messages::localisation::FakeOdometry;
 using utility::math::matrix::rotationMatrix;
 
@@ -60,14 +61,18 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
 
 arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     const arma::vec::fixed<RobotModel::size>& state, double deltaT,
-    const arma::mat44& odom) {
+    const Sensors& sensors) {
     auto result = state;
-
-    arma::vec4 updated_heading = odom * arma::vec4({state[kHeadingX], state[kHeadingY], 0, 0});
+    arma::mat44 odom = sensors.odometry;
+    arma::vec3 updated_heading3 = odom.submat(0,0,2,2).t() * arma::vec3({state[kHeadingX], state[kHeadingY],0});
+    arma::vec2 updated_heading = arma::normalise(updated_heading3.rows(0,1));
     arma::vec4 updated_position = arma::vec4({state[kX], state[kY], 0, 1}) + odom * arma::vec4({0, 0, 0, 1});
 
-
-    return {updated_position[0], updated_position[1], updated_heading[0], updated_heading[1]};
+    if(arma::norm(updated_heading) > 0){
+        return {updated_position[0], updated_position[1], updated_heading[0], updated_heading[1]};
+    } else {
+        return {updated_position[0], updated_position[1], state[kHeadingX], state[kHeadingY]};
+    }
 }
 
 
