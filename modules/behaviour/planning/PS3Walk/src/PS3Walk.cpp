@@ -114,8 +114,13 @@ namespace planning {
         // output walk command based on updated strafe and rotation speed from joystick
         // TODO: potential performance gain: ignore if value hasn't changed since last emit?
         on<Trigger<Every<50, std::chrono::milliseconds>>>([this](const time_t&) {
-            arma::vec strafeNorm = strafe / std::numeric_limits<short>::max();
+
+            // Why armadillo why!!!
+            arma::vec s = { strafe[0], strafe[1] };
+            arma::vec strafeNorm = s / std::numeric_limits<short>::max();
+
             auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
+
             emit(std::make_unique<WalkCommand>(WalkCommand{
                 strafeNorm,
                 rotationalSpeedNorm
