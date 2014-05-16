@@ -31,6 +31,7 @@ namespace messages {
          * TODO document
          *
          * @author Trent Houliston
+         * @author Trent Houliston
          */
         struct Script {
             struct Frame {

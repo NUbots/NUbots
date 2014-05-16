@@ -73,6 +73,11 @@ namespace modules {
                 m->reactor = this;
                 m->watchDir(impl::BASE_CONFIGURATION_PATH);
 
+                on<Trigger<messages::support::SaveConfiguration>>([this](const messages::support::SaveConfiguration& saveConfig){
+                    utility::file::writeToFile(saveConfig.path, utility::configuration::json::serialize(saveConfig.config));
+                    NUClear::log("Saving config:", saveConfig.path);
+                });
+
                 on<Trigger<messages::support::ConfigurationConfiguration>>([this](const messages::support::ConfigurationConfiguration& command) {
 
                     // Check if we have already loaded this type's handler

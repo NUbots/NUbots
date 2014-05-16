@@ -34,7 +34,7 @@ namespace modules {
 
             on<Trigger<messages::support::Configuration<Scripts>>>([this](const messages::support::Configuration<Scripts>& script) {
                 // Add this script to our list of scripts
-                scripts.insert(std::make_pair(script.name, script.config));
+                scripts[script.name] = script.config;
             });
 
             on<Trigger<messages::motion::ExecuteScriptByName>>([this](const messages::motion::ExecuteScriptByName& command) {

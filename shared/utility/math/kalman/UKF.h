@@ -84,8 +84,8 @@ namespace utility {
 
                         auto deviation = chol.col(i - 1);
 
-                        points.col(i)               = model.limitState(mean + deviation);
-                        points.col(i + Model::size) = model.limitState(mean - deviation);
+                        points.col(i)               = mean + deviation;
+                        points.col(i + Model::size) = mean - deviation;
                         
                     }
 
@@ -159,7 +159,7 @@ namespace utility {
 
                     // Write the propagated version of the sigma point
                     for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
-                        sigmaPoints.col(i) = model.limitState(model.timeUpdate(sigmaPoints.col(i), delta_t, measurement));
+                        sigmaPoints.col(i) = model.timeUpdate(sigmaPoints.col(i), delta_t, measurement);
                     }
 
                     // Calculate the new mean and covariance values.

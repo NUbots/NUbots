@@ -24,6 +24,8 @@
 #include <armadillo>
 
 #include "utility/configuration/ConfigurationNode.h"
+#include "messages/support/Configuration.h"
+#include "messages/behaviour/Action.h"
 #include "messages/input/Sensors.h"
 
 namespace modules {
@@ -249,11 +251,13 @@ namespace modules {
 //            arma::vec3 leftLegCommand;
 //            arma::vec3 rightLegCommand;
 
-            void update(const messages::input::Sensors& sensors);
-            void updateStill(const messages::input::Sensors& sensors);
-            void motionLegs(std::vector<double> qLegs, bool gyroOff, const messages::input::Sensors& sensors);
-            void motionArms();
+            std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> update(const messages::input::Sensors& sensors);
+            std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> updateStill(const messages::input::Sensors& sensors = messages::input::Sensors());
+            std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionLegs(std::vector<double> qLegs, bool gyroOff, const messages::input::Sensors& sensors);
+            std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionArms();
+
             void exit();
+            void reset();
             arma::vec3 stepLeftDestination(arma::vec3 vel, arma::vec3 uLeft, arma::vec3 uRight);
             arma::vec3 stepRightDestination(arma::vec3 vel, arma::vec3 uLeft, arma::vec3 uRight);
             arma::vec3 stepTorso(arma::vec3 uLeft, arma::vec3 uRight, float shiftFactor);

@@ -223,7 +223,11 @@ namespace Darwin {
             results[i] = readPacket();
 
             // If we get a timeout don't wait for other packets (other errors are fine)
-            if(results[i].header.errorcode == ErrorCode::NO_RESPONSE) break;
+            if(results[i].header.errorcode == ErrorCode::NO_RESPONSE) {
+                configure(1000000);
+                break;
+            }
+
         }
 
         return results;
