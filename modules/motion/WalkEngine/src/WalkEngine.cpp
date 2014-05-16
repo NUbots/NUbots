@@ -47,7 +47,7 @@ namespace modules {
         using messages::support::Configuration;
         using utility::motion::kinematics::DarwinModel;
         using utility::nubugger::graph;
-        // using NUClear::log;
+        using NUClear::log;
         using NUClear::DEBUG;
         using messages::input::Sensors;
         using messages::motion::WalkCommand;
@@ -369,7 +369,7 @@ namespace modules {
             if (iStep > iStep0 && stopRequest == 2) {
                 stopRequest = 0;
                 active = false;
-                //emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 0, 0 }})); // TODO: config
+                emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 0, 0 }})); // TODO: config
 
                 return std::make_unique<std::vector<ServoCommand>>(); // TODO: return "stop"
             }

@@ -25,6 +25,7 @@
 #include "messages/localisation/FieldObject.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/motion/WalkCommand.h"
+#include "messages/motion/KickCommand.h"
 #include "utility/nubugger/NUgraph.h"
 
 
@@ -39,6 +40,7 @@ namespace modules {
             using messages::behaviour::WalkApproach;
             using messages::motion::WalkStartCommand;
             using messages::motion::WalkStopCommand;
+            using messages::motion::KickFinished;
             using utility::nubugger::graph;
             //using namespace messages;
 
@@ -97,6 +99,11 @@ namespace modules {
 
                     bearingSensitivity = file.config["bearingSensitivity"];
                     ApproachCurveFactor = file.config["ApproachCurveFactor"];
+                });
+
+
+                on<Trigger<KickFinished>>([this] (const KickFinished&) {
+                    emit(std::move(std::make_unique<WalkStartCommand>()));            
                 });
 
                 // add in fake walk localisation
@@ -229,9 +236,10 @@ namespace modules {
                         //emit(std::move(std::make_unique<WalkStartCommand>()));
 
                     } else {
+                        float ballBearing = std::atan2(ball.position[1],ball.position[0]);                        
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
                         command->velocity = arma::vec({0,0});
-                        command->rotationalSpeed = -turnSpeed;  //vx,vy, alpha
+                        command->rotationalSpeed = turnSpeed * (ballBearing > 0 ? 1 : -1 );  //vx,vy, alpha
                         emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));
                         emit(std::move(command));//XXX: emit here
                     }

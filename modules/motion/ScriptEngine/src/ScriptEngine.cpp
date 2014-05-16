@@ -24,6 +24,8 @@
 
 namespace modules {
     namespace motion {
+        
+        using messages::motion::Script;
 
         struct Scripts {
             // For scripts we want updates on the whole scripts directory
@@ -34,11 +36,11 @@ namespace modules {
 
             on<Trigger<messages::support::Configuration<Scripts>>>([this](const messages::support::Configuration<Scripts>& script) {
                 // Add this script to our list of scripts
-                scripts[script.name] = script.config;
+                scripts.insert(std::make_pair(script.name, script.config));
             });
 
             on<Trigger<messages::motion::ExecuteScriptByName>>([this](const messages::motion::ExecuteScriptByName& command) {
-                NUClear::clock::duration offset(0);
+                std::vector<Script> scriptList;
                 for(const auto& scriptName : command.scripts) {
                     auto script = scripts.find(scriptName);
 
@@ -46,13 +48,10 @@ namespace modules {
                         throw std::runtime_error("The script " + scriptName + " is not loaded in the system");
                     }
                     else {
-                        emit<Scope::DIRECT>(std::make_unique<messages::motion::ExecuteScript>(command.sourceId, script->second, command.start + offset));
-
-                        for(const auto& f : script->second.frames) {
-                            offset += f.duration;
-                        }
+                        scriptList.push_back(script->second);
                     }
                 }
+                emit<Scope::DIRECT>(std::make_unique<messages::motion::ExecuteScript>(command.sourceId, scriptList, command.start));
             });
 
             on<Trigger<messages::motion::ExecuteScript>>([this](const messages::motion::ExecuteScript& command) {
@@ -60,19 +59,21 @@ namespace modules {
                 auto waypoints = std::make_unique<std::vector<messages::behaviour::ServoCommand>>();
 
                 auto time = command.start;
-                for(const auto& frame : command.script.frames) {
-                    // Move along our duration in time
-                    time += frame.duration;
+                for(const auto& script : command.scripts){
+                    for(const auto& frame : script.frames) {
+                        // Move along our duration in time
+                        time += frame.duration;
 
-                    // Loop through all the motors and make a servo waypoint for it
-                    for(const auto& target : frame.targets) {
-                        waypoints->push_back({
-                            command.sourceId,
-                            time,
-                            target.id,
-                            target.position,
-                            target.gain
-                        });
+                        // Loop through all the motors and make a servo waypoint for it
+                        for(const auto& target : frame.targets) {
+                            waypoints->push_back({
+                                command.sourceId,
+                                time,
+                                target.id,
+                                target.position,
+                                target.gain
+                            });
+                        }
                     }
                 }
 
