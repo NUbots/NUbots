@@ -120,7 +120,6 @@ namespace fakedarwin {
 
             // Booleans
             servo.torqueEnabled = true;
-            servo.led = false;
 
             // Gain
             servo.dGain = 0;
@@ -130,7 +129,6 @@ namespace fakedarwin {
             // Targets
             servo.goalPosition = 0;
             servo.movingSpeed = M_PI_4;
-            servo.torqueLimit = 0;
 
             // Present Data
             servo.presentPosition = 0;

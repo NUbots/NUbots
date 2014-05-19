@@ -158,6 +158,9 @@ namespace darwin {
                 // If gain is 0, do a normal write to disable torque (syncwrite won't write to torqueEnable)
                 if(isnan(command.gain)) {
                     darwin[static_cast<int>(command.id) + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
+
+                    // Update our internal state
+                    servoState[uint(command.id)].torqueEnabled = false;
                 }
 
                 // Otherwise write the command using sync write
@@ -166,6 +169,14 @@ namespace darwin {
                     NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                     float speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+
+                    // Update our internal state
+                    servoState[uint(command.id)].torqueEnabled = true;
+                    servoState[uint(command.id)].pGain = command.gain;
+                    servoState[uint(command.id)].iGain = command.gain * 0;
+                    servoState[uint(command.id)].dGain = command.gain * 0;
+                    servoState[uint(command.id)].movingSpeed = speed;
+                    servoState[uint(command.id)].goalPosition = command.position;
 
                     values.push_back({
                         static_cast<uint8_t>(static_cast<int>(command.id) + 1),  // The id's on the robot start with ID 1
@@ -194,11 +205,17 @@ namespace darwin {
 
         // If we get a HeadLED command then write it
         on<Trigger<DarwinSensors::HeadLED>>([this](const DarwinSensors::HeadLED& led) {
+            // Update our internal state
+            cm730State.headLED = led;
+
             darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, Convert::colourLEDInverse(led.r, led.g, led.b));
         });
 
-        // If we get a HeadLED command then write it
+        // If we get a EyeLED command then write it
         on<Trigger<DarwinSensors::EyeLED>>([this](const DarwinSensors::EyeLED& led) {
+            // Update our internal state
+            cm730State.eyeLED = led;
+
             darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(led.r, led.g, led.b));
         });
     }
