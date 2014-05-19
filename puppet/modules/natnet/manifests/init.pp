@@ -12,7 +12,6 @@ class natnet(
   package { 'libboost-dev': ensure => latest, }
   package { 'libboost-thread-dev': ensure => latest, }
   package { 'libboost-system-dev': ensure => latest, }
-  package { 'libboost-program-options-dev': ensure => latest, }
 
   file { 'natnet_dir':
     path => $dir,
@@ -40,7 +39,7 @@ class natnet(
     group => $username,
   } ~>
   exec { 'natnet_cmake':
-    command => 'cmake ..',
+    command => 'cmake .. -DBUILD_EXAMPLES=OFF',
     cwd => $build_dir,
     path => $path,
     refreshonly => true,
