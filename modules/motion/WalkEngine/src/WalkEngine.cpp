@@ -35,6 +35,8 @@
 #include "messages/motion/WalkCommand.h"
 #include "messages/motion/ServoTarget.h"
 #include "messages/behaviour/Action.h"
+#include "messages/motion/Script.h"
+
 
 
 namespace modules {
@@ -55,6 +57,9 @@ namespace modules {
         using messages::behaviour::RegisterAction;
         using messages::behaviour::ActionPriorites;
         using messages::behaviour::LimbID;
+        using messages::motion::Script;
+        using messages::support::SaveConfiguration;
+
         
         WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -68,7 +73,7 @@ namespace modules {
                 },
                 [this] (const std::set<LimbID>& givenLimbs) {
                     if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
-                        // legs are available, start walking
+                        // legs are available, start 
                         stanceReset();
                         updateHandle.enable();
                     }
@@ -84,8 +89,8 @@ namespace modules {
                 }
             }));
 
-            updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, With<Sensors>, Options<Single> >([this](const time_t&, const Sensors& sensors) {
-                update(sensors);
+            updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, With<Sensors>, Options<Single, Priority<NUClear::HIGH>> >([this](const time_t&, const Sensors& sensors) {
+                emit(update(sensors));
             });
 
             updateHandle.disable();
@@ -143,6 +148,7 @@ namespace modules {
 
                 // gHardness parameters
                 hardnessSupport = config["hardnessSupport"];
+             
                 hardnessSwing = config["hardnessSwing"];
 
                 hardnessArm0 = config["hardnessArm"];
@@ -189,6 +195,8 @@ namespace modules {
 
                 frontComp = config["frontComp"];
                 AccelComp = config["AccelComp"];
+                
+                balanceWeight = config["balanceWeight"];
 
                 // gInitial body swing 
                 supportModYInitial = config["supportModYInitial"];
@@ -199,11 +207,38 @@ namespace modules {
                 useAlternativeTrajectory = config["useAlternativeTrajectory"];
 
 //                setVelocity(config["velCommandX"], config["velCommandY"], config["velCommandAngular"]);
-                
+                //Generate stand script
+                reset();
+                stanceReset();
+                auto waypoints = updateStill();
+
+                Script standScript;
+                Script::Frame frame;
+                frame.duration = std::chrono::milliseconds(config["STAND_SCRIPT_DURATION_MILLISECONDS"]);
+                for(auto& waypoint : *waypoints){
+                    frame.targets.push_back(Script::Frame::Target({waypoint.id,
+                                                                   waypoint.position,
+                                                                   waypoint.gain}
+                                                                  )
+                                           );
+                }
+                standScript.frames.push_back(frame);
+                auto saveScript = std::make_unique<SaveConfiguration>();
+                saveScript->path = "config/scripts/Stand.json";
+                saveScript->config = standScript;
+                emit(std::move(saveScript));
             });
 
             on<Trigger<Startup>>([this](const Startup&) {
-                // g--------------------------------------------------------
+                reset();
+                //start();
+            });
+			
+        }
+        // TODO: add others
+
+        void WalkEngine::reset(){
+            // g--------------------------------------------------------
                 // g Walk state variables
                 // g--------------------------------------------------------
 
@@ -246,9 +281,6 @@ namespace modules {
 
                 initialStep = 2;
 
-                upperBodyOverridden = 0;
-                motionPlaying = 0;
-
                 qLArmOR0 = qLArm0;
                 qRArmOR0 = qRArm0;
                 bodyRot0 = {0, bodyTilt, 0};
@@ -281,15 +313,9 @@ namespace modules {
                 startFromStep = false;
 
                 comdot = {0, 0};
-                hasBall = 0;
-
                 
                 stanceReset();
-                //start();
-            });
-			
         }
-        // TODO: add others
 
         void WalkEngine::start() {
             stopRequest = 0;
@@ -310,7 +336,7 @@ namespace modules {
             stopRequest = std::max(1, stopRequest);
         }
         
-        void WalkEngine::update(const Sensors& sensors) {
+        std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> WalkEngine::update(const Sensors& sensors) {
             //advanceMotion();
             double time = getTime();
 
@@ -321,8 +347,7 @@ namespace modules {
 
             if (!active) {
                 moving = false;
-                updateStill(sensors);
-                return;
+                return updateStill(sensors);                
             }
 
             if (!started) {
@@ -332,7 +357,7 @@ namespace modules {
 
             ph0 = ph;
             moving = true;
-
+    
             ph = (time - tLastStep) / tStep;
 
             if (ph > 1) {
@@ -344,7 +369,9 @@ namespace modules {
             if (iStep > iStep0 && stopRequest == 2) {
                 stopRequest = 0;
                 active = false;
-                return; // TODO: return "stop"
+                emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 0, 0 }})); // TODO: config
+
+                return std::make_unique<std::vector<ServoCommand>>(); // TODO: return "stop"
             }
 
             // new step
@@ -486,34 +513,19 @@ namespace modules {
             float armPosCompX, armPosCompY;
 
             // arm movement compensation
-            if (upperBodyOverridden > 0 || motionPlaying > 0) {
-                // mass shift to X
-                float elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qLArmOR[1])
-                               -std::sin(qRArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qRArmOR[1]);
+            
+            armPosCompX = 0;
+            armPosCompY = 0;
 
-                // mass shift to Y
-                float elbowY = std::sin(qLArmOR[1]) + std::sin(qRArmOR[1]);
-                armPosCompX = elbowX * -0.009;
-                armPosCompY = elbowY * -0.009;
-
-                pTorso[3] = bodyRot[0];
-                pTorso[4] = bodyRot[1];
-                pTorso[5] = bodyRot[2];
-            } else {
-                armPosCompX = 0;
-                armPosCompY = 0;
-
-                pTorso[3] = 0;
-                pTorso[4] = bodyTilt;
-                pTorso[5] = 0;
-            }
-
-            // TODO: paramaterize/config
-            if (hasBall > 0) {
-                turnCompX = turnCompX - 0.01;
-            }
+            pTorso[3] = 0;
+            pTorso[4] = bodyTilt;
+            pTorso[5] = 0;       
+            // NUClear::log("uLeft Motion\n", uLeft);
+            // NUClear::log("uTorso Motion\n", uTorso);
+            // NUClear::log("uRight Motion\n", uRight);
 
             arma::vec3 uTorsoActual = poseGlobal({-footX + frontCompX + turnCompX + armPosCompX, armPosCompY, 0}, uTorso);
+            // NUClear::log("uTorsoActual Motion\n", uTorsoActual);
             pTorso[0] = uTorsoActual[0];
             pTorso[1] = uTorsoActual[1];
             pTorso[5] += uTorsoActual[2];
@@ -527,70 +539,70 @@ namespace modules {
             pRLeg[5] = uRight[2];
 
             std::vector<double> qLegs = darwinop_kinematics_inverse_legs_nubots(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
-            motionLegs(qLegs, false, sensors);
-            //motionArms();
+            auto waypoints = motionLegs(qLegs, true, sensors);
+            // auto arms = motionArms();
+            // waypoints.insert(waypoints->end(), arms->begin(), arms->end());
+
+            return waypoints;
         }
 
-        void WalkEngine::updateStill(const Sensors& sensors) {
+        std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> WalkEngine::updateStill(const Sensors& sensors) {
+            leftLegHardness = hardnessSupport;
+            rightLegHardness = hardnessSupport;
+
             uTorso = stepTorso(uLeft, uRight, 0.5);
 
             float armPosCompX, armPosCompY;
 
-            if (upperBodyOverridden > 0 || motionPlaying > 0) {
-                // mass shift to X
-                float elbowX = -std::sin(qLArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qLArmOR[1])
-                               -std::sin(qRArmOR[0] - M_PI_2 + bodyRot[0]) * std::cos(qRArmOR[1]);
+            armPosCompX = 0;
+            armPosCompY = 0;
 
-                // mass shift to Y
-                float elbowY = std::sin(qLArmOR[1]) + std::sin(qRArmOR[1]);
-                armPosCompX = elbowX * -0.007;
-                armPosCompY = elbowY * -0.007;
+            pTorso[3] = 0;
+            pTorso[4] = bodyTilt;
+            pTorso[5] = 0;
+            
 
-                pTorso[3] = bodyRot[0];
-                pTorso[4] = bodyRot[1];
-                pTorso[5] = bodyRot[2];
-            } else {
-                armPosCompX = 0;
-                armPosCompY = 0;
-
-                pTorso[3] = 0;
-                pTorso[4] = bodyTilt;
-                pTorso[5] = 0;
-            }
-
+            // NUClear::log("uLeft Still\n", uLeft);
+            // NUClear::log("uRight Still\n", uRight);
+            // NUClear::log("uTorso Still\n", uTorso);
             uTorsoActual = poseGlobal({-footX + armPosCompX, armPosCompY, 0}, uTorso);
+            // NUClear::log("uTorsoActual Still\n", uTorsoActual);
             pTorso[0] = uTorsoActual[0];
             pTorso[1] = uTorsoActual[1];
             pTorso[5] += uTorsoActual[2];
 
             pLLeg[0] = uLeft[0];
             pLLeg[1] = uLeft[1];
-            pLLeg[2] = uLeft[2];
+            pLLeg[5] = uLeft[2];
 
             pRLeg[0] = uRight[0];
             pRLeg[1] = uRight[1];
-            pRLeg[2] = uRight[2];
+            pRLeg[5] = uRight[2];
 
             std::vector<double> qLegs = darwinop_kinematics_inverse_legs_nubots(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr(), supportLeg);
-            motionLegs(qLegs, true, sensors);
-           //motionArms();
+            
+            auto waypoints = motionLegs(qLegs, true, sensors);
+            // auto arms = motionArms();
+            // waypoints.insert(waypoints->end(), arms->begin(), arms->end());
+
+            return waypoints;
         }
 
-        void WalkEngine::motionLegs(std::vector<double> qLegs, bool gyroOff, const Sensors& sensors) {
-            float phComp = std::min({1.0, phSingle / 0.1, (1 - phSingle) / 0.1});                  
-            ServoID supportLegID = (supportLeg == LEFT) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
-            arma::mat33 ankleRotation = sensors.forwardKinematics.find(supportLegID)->second.submat(0,0,2,2);
-            // get effective gyro angle considering body angle offset
-            arma::mat33 kinematicGyroSORAMatrix = sensors.orientation * ankleRotation;   //DOUBLE TRANSPOSE       
-            std::pair<arma::vec3, double> axisAngle = utility::math::matrix::axisAngleFromRotationMatrix(kinematicGyroSORAMatrix);
-            float weight = 1;
-            arma::vec3 kinematicsGyro = axisAngle.first * (axisAngle.second / weight);
+        std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> WalkEngine::motionLegs(std::vector<double> qLegs, bool gyroOff, const Sensors& sensors) {
+            float gyroRoll0 = 0;
+            float gyroPitch0 = 0;
 
-            float gyroRoll0 = -kinematicsGyro[0]*180.0/M_PI;
-            float gyroPitch0 = -kinematicsGyro[1]*180.0/M_PI;
-            if (gyroOff) {
-                gyroRoll0 = 0;
-                gyroPitch0 = 0;
+            float phComp = std::min({1.0, phSingle / 0.1, (1 - phSingle) / 0.1});                  
+            if (!gyroOff) {
+                ServoID supportLegID = (supportLeg == LEFT) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
+                arma::mat33 ankleRotation = sensors.forwardKinematics.find(supportLegID)->second.submat(0,0,2,2);
+                // get effective gyro angle considering body angle offset
+                arma::mat33 kinematicGyroSORAMatrix = sensors.orientation * ankleRotation;   //DOUBLE TRANSPOSE       
+                std::pair<arma::vec3, double> axisAngle = utility::math::matrix::axisAngleFromRotationMatrix(kinematicGyroSORAMatrix);
+                arma::vec3 kinematicsGyro = axisAngle.first * (axisAngle.second / balanceWeight);
+
+                gyroRoll0 = -kinematicsGyro[0]*180.0/M_PI;
+                gyroPitch0 = -kinematicsGyro[1]*180.0/M_PI;               
             }
 
             float yawAngle = 0;
@@ -691,22 +703,13 @@ namespace modules {
             waypoints->push_back({id, time, ServoID::R_ANKLE_PITCH, float(qLegs[10]), float(rightLegHardness * 100)});
             waypoints->push_back({id, time, ServoID::R_ANKLE_ROLL,  float(qLegs[11]), float(rightLegHardness * 100)});
 
-            emit(std::move(waypoints));
+            return std::move(waypoints);
         }
 
-        void WalkEngine::motionArms() {
-            // TODO: paramaterize/config
-            if (hasBall > 0) {
-                return;
-            }
-
+        std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> WalkEngine::motionArms() {
+                   
             arma::vec3 qLArmActual = {qLArm0[0] + armShift[0], qLArm0[1] + armShift[1], 0};
             arma::vec3 qRArmActual = {qRArm0[0] + armShift[0], qRArm0[1] + armShift[1], 0};
-
-            if (upperBodyOverridden > 0 || motionPlaying > 0) {
-                qLArmActual = {qLArm0[0], qLArmOR[1], qLArmOR[2]};
-                qRArmActual = {qRArm0[0], qRArmOR[1], qRArmOR[2]};
-            }
 
             // check leg hitting
             float rotLeftA = modAngle(uLeft[2] - uTorso[2]);
@@ -725,14 +728,14 @@ namespace modules {
                     - std::max(0.0, rightLegTorso[1] - 0.04) / 0.02 * (6 * M_PI / 180)
                     , qLArmActual[1]);
             
-            if (upperBodyOverridden <= 0 && motionPlaying <= 0) {
-                qLArmActual[2] = qLArm[2];
-                qRArmActual[2] = qRArm[2];
-            }
+        
+            qLArmActual[2] = qLArm[2];
+            qRArmActual[2] = qRArm[2];
+            
 
             auto waypoints = std::make_unique<std::vector<ServoCommand>>();
             waypoints->reserve(6);
-            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(1000000000/UPDATE_FREQUENCY);
+            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
 
             waypoints->push_back({id, time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]),  float(hardnessArm * 100)});
             waypoints->push_back({id, time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]),  float(hardnessArm * 100)});
@@ -749,7 +752,7 @@ namespace modules {
             emit(graph("R Shoulder Roll", qRArmActual[1]));
             emit(graph("R Elbow", qRArmActual[2]));*/
 
-            emit(std::move(waypoints));
+            return std::move(waypoints);
         }
 
         void WalkEngine::exit() {
@@ -901,8 +904,6 @@ namespace modules {
             uSupport = uTorso;
             tLastStep = getTime();
             currentStepType = 0;
-            motionPlaying = 0;
-            upperBodyOverridden = 0;
             uLRFootOffset = {0, footY, 0};
             startFromStep = false;
         }

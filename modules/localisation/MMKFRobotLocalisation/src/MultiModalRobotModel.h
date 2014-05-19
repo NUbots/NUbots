@@ -27,10 +27,10 @@
 #include "messages/support/Configuration.h"
 #include "messages/vision/VisionObjects.h"
 #include "RobotModel.h"
+#include "messages/input/Sensors.h"
 
 namespace modules {
 namespace localisation {
-    /// @brief General localisation configuration.
     struct MultiModalRobotModelConfig {
         static constexpr const char* CONFIGURATION_PATH = "MultiModalRobotModel.json";
     };
@@ -59,6 +59,10 @@ namespace localisation {
         // bool active() const { return active_; }
         // void set_active(bool active) { active_ = active; }
 
+        void SetProcessNoiseFactor(double process_noise_factor) {
+            filter_.model.processNoiseFactor = process_noise_factor;
+        };
+
         float GetFilterWeight() const { return weight_; }
         void SetFilterWeight(float weight) { weight_ = weight; }
 
@@ -74,8 +78,13 @@ namespace localisation {
             const messages::vision::VisionObject& observed_object,
             const utility::localisation::LocalisationFieldObject& actual_object);
 
+        double MeasurementUpdate(
+            const std::vector<messages::vision::VisionObject>& observed_objects,
+            const std::vector<utility::localisation::LocalisationFieldObject>& actual_objects);
+
         void TimeUpdate(double seconds);
         void TimeUpdate(double seconds, const messages::localisation::FakeOdometry& odom);
+        void TimeUpdate(double seconds, const messages::input::Sensors& sensors);
 
 
         friend std::ostream& operator<<(std::ostream &os, const RobotHypothesis& h);
@@ -84,7 +93,7 @@ namespace localisation {
     class MultiModalRobotModel {
     public:
         MultiModalRobotModel() :
-            cfg_({ 4, 0.025, 0.01 }) {
+            cfg_({ 4, 0.025, 0.01, 1e-3 }) {
             robot_models_.push_back(std::make_unique<RobotHypothesis>());
         }
 
@@ -93,6 +102,10 @@ namespace localisation {
             cfg_.max_models_after_merge = config["MaxModelsAfterMerge"];
             cfg_.merge_min_translation_dist = config["MergeMinTranslationDist"];
             cfg_.merge_min_heading_dist = config["MergeMinHeadingDist"];
+            cfg_.process_noise_factor = config["ProcessNoiseFactor"];
+
+            for (auto& model : robot_models_)
+                model->SetProcessNoiseFactor(cfg_.process_noise_factor);
         };
 
         void RemoveOldModels();
@@ -108,17 +121,25 @@ namespace localisation {
 
         void TimeUpdate(double seconds);
         void TimeUpdate(double seconds, const messages::localisation::FakeOdometry& odom);
+        void TimeUpdate(double seconds, const messages::input::Sensors& sensors);
 
         void MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,
             const utility::localisation::LocalisationFieldObject& actual_object);
-        // void MultipleLandmarkUpdate();
+        
+        void MeasurementUpdate(
+            const std::vector<messages::vision::VisionObject>& observed_objects,
+            const std::vector<utility::localisation::LocalisationFieldObject>& actual_objects);
 
         void AmbiguousMeasurementUpdate(
             const messages::vision::VisionObject& ambiguous_object,
             const std::vector<utility::localisation::LocalisationFieldObject>& possible_objects);
 
         void AmbiguousMeasurementUpdate(
+            const std::vector<messages::vision::VisionObject>& ambiguous_objects,
+            const std::vector<std::vector<utility::localisation::LocalisationFieldObject>>& possible_object_sets);
+
+        void AmbiguousMultipleMeasurementUpdate(
             const std::vector<messages::vision::VisionObject>& ambiguous_objects,
             const std::vector<std::vector<utility::localisation::LocalisationFieldObject>>& possible_object_sets);
 
@@ -147,6 +168,7 @@ namespace localisation {
             int max_models_after_merge;
             float merge_min_translation_dist;
             float merge_min_heading_dist;
+            float process_noise_factor;
         } cfg_;
     };
 }

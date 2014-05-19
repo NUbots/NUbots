@@ -23,6 +23,7 @@
 #include <nuclear>
 
 #include "darwin/Darwin.h"
+#include "messages/platform/darwin/DarwinSensors.h"
 
 namespace modules {
 namespace platform {
@@ -38,6 +39,25 @@ namespace darwin {
     private:
         /// @brief Our internal darwin class that is used for interacting with the hardware
         Darwin::Darwin darwin;
+
+        /// @brief Our state for our CM730 for variables we send to it
+        struct {
+            messages::platform::darwin::DarwinSensors::LEDPanel ledPanel = { false, false, false };
+            messages::platform::darwin::DarwinSensors::HeadLED headLED = { 0x00, 0xFF, 0x00 };
+            messages::platform::darwin::DarwinSensors::EyeLED eyeLED = { 0x00, 0x00, 0xFF };
+        } cm730State;
+
+        /// @brief Our state for or MX28s for variables we send to it
+        struct {
+            bool torqueEnabled = false;
+            float pGain = 32.0/255.0;
+            float iGain = 0;
+            float dGain = 0;
+
+            float movingSpeed = 0;
+            float goalPosition = 0;
+
+        } servoState[20];
 
     public:
         /// @brief called by a Powerplant to construct this reactor

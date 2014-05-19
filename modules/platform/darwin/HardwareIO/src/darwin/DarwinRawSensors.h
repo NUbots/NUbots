@@ -52,15 +52,6 @@ namespace Darwin {
          * @brief This represents the data that comes from one of the MX28 motors
          */
         struct MX28Data {
-            bool torqueEnabled;
-            bool LED;
-            uint8_t dGain;
-            uint8_t iGain;
-            uint8_t pGain;
-            uint8_t reservedByte;
-            uint16_t goalPosition;
-            uint16_t movingSpeed;
-            uint16_t torqueLimit;
             uint16_t presentPosition;
             uint16_t presentSpeed;
             uint16_t load;
@@ -84,9 +75,6 @@ namespace Darwin {
          * @brief This represents data that comes from the CM730
          */
         struct CM730Data {
-            uint8_t ledPanel;
-            uint16_t headLED;
-            uint16_t eyeLED;
             uint8_t buttons;
             uint8_t reserved[7];
             Gyro gyroscope;

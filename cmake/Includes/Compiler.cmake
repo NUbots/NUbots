@@ -17,7 +17,7 @@ IF("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
         message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.7.2 or greater.")
     ENDIF()
 
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 ELSEIF("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic -stdlib=libc++")

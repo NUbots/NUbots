@@ -1,0 +1,45 @@
+package messages.input.proto;
+
+message MotionCapture {
+    
+    message Point {
+        required string identifier = 1;
+        required double size = 2;
+        required double x = 3;
+        required double y = 4;
+        required double z = 5;
+    };
+
+    message RigidBody {
+        required string identifier = 1;
+        required double mean_error = 2;
+
+        // The rotation quaternion
+        required double qw = 3;
+        required double qx = 4;
+        required double qy = 5;
+        required double qz = 6;
+
+        repeated Point points = 7;
+    };
+
+    message Bone {
+        optional uint32 parent = 1;
+        required RigidBody object = 2;
+    };
+
+    message Skeleton {
+        required string identifier = 1;
+        repeated Bone bones = 3;
+    };
+
+    message MarkerSet {
+        optional string name = 1;
+        repeated Point points = 2;
+    };
+
+    repeated MarkerSet marker_sets = 1;
+    repeated Point unidentified_points = 2;
+    repeated RigidBody rigid_bodies = 3;
+    repeated Skeleton skeletons = 4;
+}

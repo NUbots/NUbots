@@ -6,8 +6,6 @@ class nuclearport(
     $username = 'nubot',
     $nubots_dir = "/home/${username}/NUbots", #"
   ) {
-  include gcc48
-
   $nuclearport_build_dir = "${nubots_dir}/NUClearPort/build"
 
   vcsrepo { 'nuclearport_repo':
@@ -29,7 +27,6 @@ class nuclearport(
   } ~>
   exec { 'nuclearport_cmake':
     require => [
-        Class['gcc48'],
         Class['nuclear'],
         Package['build-essential'],
         Package['libespeak-dev'],

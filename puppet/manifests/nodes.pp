@@ -5,6 +5,17 @@ class initial_apt_update {
   } -> Package <| |>
 }
 
+class developer_tools {
+  class { 'vim':  username => $username, }
+  package { 'screen': ensure => latest, }
+  package { 'htop': ensure => latest, }
+  package { 'gdb': ensure => latest, }
+  package { 'cmake-curses-gui': ensure => latest, }
+  package { 'linux-headers-generic': ensure => latest, }
+  package { 'dos2unix': ensure => latest, }
+  package { 'rsync': ensure => latest, }
+}
+
 node nuclearportvm {
   include initial_apt_update
 
@@ -15,37 +26,15 @@ node nuclearportvm {
 
   class { 'nubugger': username => $username, }
 
+  # ps3 controller tools
+  package { 'software-properties-common': ensure => latest, }
+
+  # natnet motion capture streaming
+  class { 'natnet':  username => $username, }
+
   # Non-essential developer tools:
-  class { 'vim':  username => $username, }
-  package { 'screen': ensure => latest, }
-  package { 'htop': ensure => latest, }
-  package { 'gdb': ensure => latest, }
-  package { 'cmake-curses-gui': ensure => latest, }
-  package { 'linux-headers-generic': ensure => latest, }
-  package { 'dos2unix': ensure => latest, }
+  include developer_tools
 }
-
-# node nubuggervm {
-#   include initial_apt_update
-
-#   # define variables for this node
-#   $username = 'vagrant'
-
-#   # these (and most packages) should be virtual resources
-#   package { 'build-essential': ensure => latest }
-#   package { 'git': ensure => latest }
-
-#   file { 'nubots_dir':
-#     path => "/home/${username}/nubots",
-#     ensure => directory,
-#     owner => $username,
-#     group => $username,
-#   }
-
-#   class { 'nubugger': username => $username, }
-
-#   class { 'vim': username => $username, }
-# }
 
 node packer-virtualbox-iso, packer-vmware-iso {
   include initial_apt_update
@@ -53,9 +42,7 @@ node packer-virtualbox-iso, packer-vmware-iso {
   $username = 'vagrant'
 
   # nuclear::build_dep
-  include gcc48
   include catch
-  include zmq
 
   # nuclearport::build_dep
   package { 'build-essential': ensure => latest }
@@ -63,6 +50,7 @@ node packer-virtualbox-iso, packer-vmware-iso {
   package { 'git': ensure => latest }
   # package { 'openssh-server': ensure => latest }
   package { ['libprotobuf-dev', 'protobuf-compiler']: ensure => latest }
+  package { 'libzmq3-dev': ensure => latest }
   package { 'libespeak-dev': ensure => latest }
   package { 'librtaudio-dev': ensure => latest }
   package { 'libncurses5-dev': ensure => latest }
@@ -75,23 +63,14 @@ node packer-virtualbox-iso, packer-vmware-iso {
   # nubugger::build_dep
   package { 'pkg-config': ensure => latest, }
   package { 'uuid-dev': ensure => latest, }
+  package { 'nodejs': ensure => latest, }
+  package { 'npm': ensure => latest, }
 
-  class { 'ruby':
-    gems_version  => 'latest'
-  }
-  class { 'nodejs':
-    version => 'stable',
-    make_install => false,
-  }
+  # natnet motion capture streaming
+  # class { 'natnet':  username => $username, }
 
   # Non-essential developer tools:
-  class { 'vim':  username => $username, }
-  package { 'screen': ensure => latest, }
-  package { 'htop': ensure => latest, }
-  package { 'gdb': ensure => latest, }
-  package { 'cmake-curses-gui': ensure => latest, }
-  package { 'linux-headers-generic': ensure => latest, }
-  package { 'dos2unix': ensure => latest, }
+  include developer_tools
 
   # NFS for better Vagrant shared folders
   package { 'nfs-common': ensure => latest, }

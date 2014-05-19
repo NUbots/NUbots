@@ -221,6 +221,13 @@ namespace Darwin {
         // Read our responses for each of the packets
         for (int i = 0; i < responses; ++i) {
             results[i] = readPacket();
+
+            // If we get a timeout don't wait for other packets (other errors are fine)
+            if(results[i].header.errorcode == ErrorCode::NO_RESPONSE) {
+                configure(1000000);
+                break;
+            }
+
         }
 
         return results;

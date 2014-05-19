@@ -31,6 +31,7 @@ namespace messages {
          * TODO document
          *
          * @author Trent Houliston
+         * @author Trent Houliston
          */
         struct Script {
             struct Frame {
@@ -45,15 +46,23 @@ namespace messages {
             std::vector<Frame> frames;
         };
 
+        Script operator +(const Script& s1, const Script& s2){
+            Script s;
+            s.frames.insert(s.frames.end(), s1.frames.begin(), s1.frames.end());
+            s.frames.insert(s.frames.end(), s2.frames.begin(), s2.frames.end());
+            return s;
+        }
+
         /**
          * TODO document
          *
          * @author Trent Houliston
          */
         struct ExecuteScriptByName {
-            ExecuteScriptByName(const size_t& id, const std::string script, NUClear::clock::time_point start = NUClear::clock::now()) : sourceId(id), script(script), start(start) {};
+            ExecuteScriptByName(const size_t& id, const std::string script, NUClear::clock::time_point start = NUClear::clock::now()) : sourceId(id), scripts({script}), start(start) {};
+            ExecuteScriptByName(const size_t& id, const std::vector<std::string> scripts, NUClear::clock::time_point start = NUClear::clock::now()) : sourceId(id), scripts(scripts), start(start) {};
             size_t sourceId;
-            std::string script;
+            std::vector<std::string> scripts;
             NUClear::clock::time_point start;
         };
 
@@ -63,9 +72,10 @@ namespace messages {
          * @author Trent Houliston
          */
         struct ExecuteScript {
-            ExecuteScript(const size_t& id, const Script& script, NUClear::clock::time_point start = NUClear::clock::now()) : sourceId(id), script(script), start(start) {};
+            ExecuteScript(const size_t& id, const Script& script, NUClear::clock::time_point start = NUClear::clock::now()) : sourceId(id), scripts({script}), start(start) {};
+            ExecuteScript(const size_t& id, const std::vector<Script>& scripts, NUClear::clock::time_point start = NUClear::clock::now()) : sourceId(id), scripts(scripts), start(start) {};
             size_t sourceId;
-            Script script;
+            std::vector<Script> scripts;
             NUClear::clock::time_point start;
         };
 

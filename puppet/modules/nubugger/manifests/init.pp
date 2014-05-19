@@ -13,11 +13,8 @@ class nubugger(
 
   package { 'pkg-config': ensure => latest, }
   package { 'uuid-dev': ensure => latest, }
-
-  class { 'nodejs':
-    version => 'stable',
-    make_install => false,
-  }
+  package { 'nodejs': ensure => latest, }
+  package { 'npm': ensure => latest, }
 
   vcsrepo { 'nubugger_repo':
     require => [File['nubots_dir'], Package['git']],
@@ -31,8 +28,7 @@ class nubugger(
   } ~> 
   exec { 'npm_install':
     require => [
-        Class['nodejs'],
-        Class['zmq'],
+        Package['libzmq3-dev'],
         Package['build-essential'],
         Package['pkg-config'],
         Package['uuid-dev'],

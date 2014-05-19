@@ -57,14 +57,13 @@ message Sensors {
 
         optional float goal_position = 7;
         optional float goal_speed = 8;
-        optional float torque_limit = 9;
 
-        optional float present_position = 10;
-        optional float present_speed = 11;
+        optional float present_position = 9;
+        optional float present_speed = 10;
 
-        optional float load = 12;
-        optional float voltage = 13;
-        optional float temperature = 14;
+        optional float load = 11;
+        optional float voltage = 12;
+        optional float temperature = 13;
     }
 
     message Accelerometer {

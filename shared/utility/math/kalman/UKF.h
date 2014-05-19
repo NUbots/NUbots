@@ -30,10 +30,11 @@ namespace utility {
 
             template <typename Model> //model is is a template parameter that Kalman also inherits
             class UKF {
-            private:
+            public:
                 // The model
                 Model model;
-
+                
+            private:
                 // The number of sigma points
                 static constexpr uint NUM_SIGMA_POINTS = (Model::size * 2) + 1;
 
@@ -85,6 +86,7 @@ namespace utility {
 
                         points.col(i)               = mean + deviation;
                         points.col(i + Model::size) = mean - deviation;
+                        
                     }
 
                     return points;
@@ -151,7 +153,7 @@ namespace utility {
 
                 template <typename TMeasurement>
                 void timeUpdate(double delta_t, const TMeasurement& measurement = TMeasurement()) {
-
+                    
                     // Generate our sigma points
                     sigmaPoints = generateSigmaPoints(mean, covariance);
 
@@ -213,7 +215,7 @@ namespace utility {
                                             (measurement_variance + predictedObservations * covarianceUpdate * predictedObservations.t()).i() *
                                             predictedObservations * covarianceUpdate;
 
-                        d += predictedObservations.t() * measurement_variance.i() * innovation;
+                        d += (predictedObservations.t()) * measurement_variance.i() * innovation;
 
                         // Update our mean and covariance
                         mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;

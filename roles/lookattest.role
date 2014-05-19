@@ -14,7 +14,7 @@ ADD_ROLE(
         platform::darwin::SensorFilter
 
         #Vision
-        vision::QuexLUTClassifier
+        vision::LUTClassifier
         vision::FeatureDetector
 
         #Localisation
@@ -23,11 +23,11 @@ ADD_ROLE(
 
         #Behaviour
         behaviour::Controller
-        behaviour::reflexes::Stand
-        behaviour::reflexes::FallingRelax
-        behaviour::reflexes::Getup
-        behaviour::reflexes::Look
-        behaviour::planners::LookAtGoal
+        behaviour::skills::Stand
+        behaviour::skills::FallingRelax
+        behaviour::skills::Getup
+        behaviour::skills::Look
+        behaviour::planning::LookAtGoal
 
         #Motion
         motion::ScriptEngine

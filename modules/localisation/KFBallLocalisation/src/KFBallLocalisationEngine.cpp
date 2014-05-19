@@ -47,6 +47,7 @@ void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point 
 double KFBallLocalisationEngine::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object) {
 
+    auto groundDist = observed_object.sphericalFromNeck[0] * std::sin(observed_object.sphericalFromNeck[2]);
     // // Radial coordinates
     // arma::vec2 measurement = { observed_object.sphericalFromNeck[0],
     //                            observed_object.sphericalFromNeck[1] };
@@ -54,22 +55,21 @@ double KFBallLocalisationEngine::MeasurementUpdate(
     //                     0, observed_object.sphericalError[1] };
 
     // Distance and unit vector heading
-    arma::vec3 measurement = { observed_object.sphericalFromNeck[0],
-                               std::cos(observed_object.sphericalFromNeck[1]),
-                               std::sin(observed_object.sphericalFromNeck[1]) };
-    arma::mat33 cov = { observed_object.sphericalError[0], 0, 0,
-                        0, observed_object.sphericalError[1], 0,
-                        0, 0, observed_object.sphericalError[1] };
+    // arma::vec3 measurement = { groundDist,
+    //                            std::cos(observed_object.sphericalFromNeck[1]),
+    //                            std::sin(observed_object.sphericalFromNeck[1]) };
+    // arma::mat33 cov = { observed_object.sphericalError[0], 0, 0,
+    //                     0, observed_object.sphericalError[1], 0,
+    //                     0, 0, observed_object.sphericalError[1] };
 
     // // Robot relative cartesian coordinates
-    // auto dist = observed_object.sphericalFromNeck[0];
-    // auto heading = observed_object.sphericalFromNeck[1];
-    // arma::vec2 measurement = { dist * std::cos(heading),
-    //                            dist * std::sin(heading) };
-    // auto dist_error = observed_object.sphericalError[0];
-    // auto heading_error = observed_object.sphericalError[1];
-    // arma::mat22 cov = { dist_error * heading_error, 0,
-    //                     0, dist_error * heading_error };
+    auto heading = observed_object.sphericalFromNeck[1];
+    arma::vec2 measurement = { groundDist * std::cos(heading),
+                               groundDist * std::sin(heading) };
+    auto dist_error = observed_object.sphericalError[0];
+    auto heading_error = observed_object.sphericalError[1];
+    arma::mat22 cov = { dist_error * heading_error, 0,
+                        0, dist_error * heading_error };
 
     double quality = ball_filter_.measurementUpdate(measurement, cov);
 

@@ -135,11 +135,15 @@ namespace Darwin {
             // Lock the mutex
             std::lock_guard<std::mutex> lock(mutex);
 
+            // Write our command to the UART
+            int written = write(fd, &command, sizeof(TPacket));
+
+            // Wait until we finish writing before continuing (no buffering)
+            tcdrain(fd);
+
             // We flush our buffer, just in case there was anything random in it
             tcflush(fd, TCIFLUSH);
 
-            // Write our command to the UART
-            int written = write(fd, &command, sizeof(TPacket));
             assert(written == sizeof(TPacket));
             // If compiled with NDEBUG then technically written is unused, suppress that warning
             (void) written;

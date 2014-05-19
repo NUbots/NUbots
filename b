@@ -48,7 +48,7 @@ def make(args):
     call(['make'] + args, cwd='build')
 
 def role_exists(role):
-    return os.path.isfile("build/roles/{}".format(role))
+    return os.path.isfile("build/bin/{}".format(role))
 
 def run(role):
     if role == '':
@@ -58,7 +58,10 @@ Usage: b run <role>
 Please provide the name of the role to run.
 '''
     elif role_exists(role):
-        call("./roles/{}".format(role), cwd='build/')
+        env = os.environ.copy()
+        # env['LD_LIBRARY_PATH'], "bin/lib:{}".format(env["LD_LIBRARY_PATH"]))
+        env['LD_LIBRARY_PATH'] = "bin/lib"
+        call(["./bin/{}".format(role)], cwd='build/', env=env)
     else:
         print "The role '{}' does not exist or did not build correctly.".format(role)
 
@@ -70,7 +73,10 @@ Usage: b debug <role>
 Please provide the name of the role to debug.
 '''
     elif role_exists(role):
-        call(["gdb", "./roles/{}".format(role), "-ex", "r"], cwd='build/')
+        env = os.environ.copy()
+        # env['LD_LIBRARY_PATH'], "bin/lib:{}".format(env["LD_LIBRARY_PATH"]))
+        env['LD_LIBRARY_PATH'] = "bin/lib"
+        call(["gdb", "./bin/{}".format(role), "-ex", "r"], cwd='build/', env=env)
     else:
         print "The role '{}' does not exist or did not build correctly.".format(role)
 
@@ -80,16 +86,16 @@ def box_exists(box_name, provider):
     return p2.communicate()[0] != ''
 
 def box_generated(provider):
-    return os.path.isfile("packer/nubots-ubuntu-12-04-x86-{}.box".format(provider))
+    return os.path.isfile("packer/nubots-ubuntu-14-04-x86-{}.box".format(provider))
 
 def packer_is_installed():
     return not call(['which', 'packer'])
 
 def packer(provider):
-    box_name = 'nubots-14.02'
+    box_name = 'nubots-14.04'
 
     if box_generated(provider):
-        call(['rm', 'nubots-ubuntu-12-04-x86-{}.box'.format(provider)], cwd='packer')
+        call(['rm', 'nubots-ubuntu-14-04-x86-{}.box'.format(provider)], cwd='packer')
     
     call(['packer', 'build', '-only={}-iso'.format(provider), 'template.json'], cwd='packer')
     
@@ -98,7 +104,7 @@ def packer(provider):
             call(['vagrant', 'box', 'remove', box_name]) # TODO: only remove box for given provider
         
         call(['vagrant', 'box', 'add', box_name,
-              'nubots-ubuntu-12-04-x86-{}.box'.format(provider)],
+              'nubots-ubuntu-14-04-x86-{}.box'.format(provider)],
              cwd='packer')
 
 def create_box(provider):

@@ -64,7 +64,7 @@ namespace planning {
         explicit PS3Walk(std::unique_ptr<NUClear::Environment> environment);
     private:
         Joystick joystick{"/dev/input/js0"}; // TODO: make configurable
-        arma::vec2 strafe{0, 0};
+        arma::vec strafe{0, 0};
         float rotationalSpeed = 0;
         bool moving = false;
     };

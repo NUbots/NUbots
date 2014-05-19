@@ -75,14 +75,14 @@ arma::vec BallModel::predictedObservation(
     const arma::vec::fixed<BallModel::size>& state, std::nullptr_t unused) {
 
     // // Robot-relative cartesian
-    // return { state[kX], state[kY] };
+    return { state[kX], state[kY] };
 
     // Distance and unit vector heading
-    arma::vec2 radial = utility::math::coordinates::Cartesian2Radial(state.rows(0, 1));
-    auto heading_angle = radial[1];
-    auto heading_x = std::cos(heading_angle);
-    auto heading_y = std::sin(heading_angle);
-    return {radial[0], heading_x, heading_y};
+    // arma::vec2 radial = utility::math::coordinates::Cartesian2Radial(state.rows(0, 1));
+    // auto heading_angle = radial[1];
+    // auto heading_x = std::cos(heading_angle);
+    // auto heading_y = std::sin(heading_angle);
+    // return {radial[0], heading_x, heading_y};
 }
 
 arma::vec BallModel::observationDifference(const arma::vec& a,

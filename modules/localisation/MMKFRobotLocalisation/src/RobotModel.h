@@ -22,6 +22,8 @@
 
 #include <armadillo>
 #include "messages/localisation/FieldObject.h"
+#include "messages/input/Sensors.h"
+
 
 namespace modules {
 namespace localisation {
@@ -60,9 +62,17 @@ namespace robot {
             const arma::vec::fixed<RobotModel::size>& state, double deltaT,
             const messages::localisation::FakeOdometry& odom);
 
+        arma::vec::fixed<RobotModel::size> timeUpdate(
+            const arma::vec::fixed<RobotModel::size>& state, double deltaT,
+            const  messages::input::Sensors& sensors);
+
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
-            const arma::vec2& actual_position);
+            const arma::vec& actual_position);
+        
+        arma::vec predictedObservation(
+            const arma::vec::fixed<RobotModel::size>& state, 
+            const std::vector<arma::vec>& actual_positions);
 
         arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
@@ -70,8 +80,11 @@ namespace robot {
 
         arma::mat::fixed<size, size> processNoise();
 
-        // static constexpr double processNoiseFactor = 1e-6;
-        static constexpr double processNoiseFactor = 1e-3;
+        double processNoiseFactor = 1e-3;
+
+        arma::mat33 getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state);
+
+        arma::mat33 getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state);
     };
 }
 }

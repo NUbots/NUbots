@@ -8,9 +8,9 @@ INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/AddRole.cmake")
 # This gets all of our source files
 FILE(GLOB roledefs "*.role")
 
-FOREACH(roledef ${roledefs}) 
-    INCLUDE(${roledef}) 
-ENDFOREACH(roledef) 
+FOREACH(roledef ${roledefs})
+    INCLUDE(${roledef})
+ENDFOREACH(roledef)
 
 # The ADD_ROLE function appends itself to the ${roles} variable.
 # We need to expose this to our parent scope so the DarwinSend.cmake
