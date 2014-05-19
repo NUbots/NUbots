@@ -101,35 +101,48 @@ namespace support {
             }
             std::cout << frame << std::endl;
 
-            for (auto marker : frame.markerSets()) {
+            auto moCap = std::make_unique<MotionCapture>();
 
-                marker.name();
+            for (auto marker : frame.markerSets()) {
+                auto* markerSet = moCap->add_marker_sets();
+
+                markerSet->set_name(marker.name());
                 for (auto point : marker.markers()) {
-                    point.x;
-                    point.y;
-                    point.z;
+                    auto* marker_point = markerSet->add_points();
+                    marker_point->set_x(point.x);
+                    marker_point->set_y(point.y);
+                    marker_point->set_z(point.z);
                 }
             }
 
             for (auto point : frame.unIdMarkers()) {
-                point.x;
-                point.y;
-                point.z;
+                auto* marker_point = moCap->add_unidentified_points();
+                marker_point->set_x(point.x);
+                marker_point->set_y(point.y);
+                marker_point->set_z(point.z);
             }
 
-            for (auto rigidBody : frame.rigidBodies()) {
-                rigidBody.id();
-                rigidBody.location();
-                rigidBody.orientation();
-                for (auto point : rigidBody.markers()) {
-                    point.x;
-                    point.y;
-                    point.z;
+            for (auto fRigidBody : frame.rigidBodies()) {
+                auto* rigidBody = moCap->add_rigid_bodies();
+                rigidBody->set_identifier(std::to_string(fRigidBody.id()));
+
+                auto rotation = fRigidBody.orientation();
+
+                rigidBody->set_qw(rotation.qw);
+                rigidBody->set_qx(rotation.qx);
+                rigidBody->set_qy(rotation.qy);
+                rigidBody->set_qz(rotation.qz);
+                // TODO: fRigidBody.location();
+                for (auto point : fRigidBody.markers()) {
+                    auto* marker_point = rigidBody->add_points();
+                    marker_point->set_x(point.x);
+                    marker_point->set_y(point.y);
+                    marker_point->set_z(point.z);
                 }
             }
 
+            emit<Scope::NETWORK>(std::move(moCap));
 
-            MotionCapture moCap;
         });
 
         on<Trigger<Shutdown>>([this](const Shutdown&) {

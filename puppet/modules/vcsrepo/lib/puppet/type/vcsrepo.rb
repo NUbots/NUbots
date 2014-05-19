@@ -31,6 +31,12 @@ Puppet::Type.newtype(:vcsrepo) do
   feature :multiple_remotes,
           "The repository tracks multiple remote repositories"
 
+  feature :configuration,
+          "The configuration directory to use"
+
+  feature :cvs_rsh,
+          "The provider understands the CVS_RSH environment variable"
+
   ensurable do
     attr_accessor :latest
 
@@ -38,16 +44,16 @@ Puppet::Type.newtype(:vcsrepo) do
       @should ||= []
 
       case should
-        when :present
-          return true unless [:absent, :purged, :held].include?(is)
-        when :latest
-          if is == :latest
-            return true
-          else
-            return false
-          end
-		when :bare
-		  return is == :bare
+      when :present
+        return true unless [:absent, :purged, :held].include?(is)
+      when :latest
+        if is == :latest
+          return true
+        else
+          return false
+        end
+      when :bare
+        return is == :bare
       end
     end
 
@@ -57,7 +63,7 @@ Puppet::Type.newtype(:vcsrepo) do
     end
 
     newvalue :bare, :required_features => [:bare_repositories] do
-	  if !provider.exists?
+      if !provider.exists?
         provider.create
       end
     end
@@ -175,6 +181,18 @@ Puppet::Type.newtype(:vcsrepo) do
   newparam :remote, :required_features => [:multiple_remotes] do
     desc "The remote repository to track"
     defaultto "origin"
+  end
+
+  newparam :configuration, :required_features => [:configuration]  do
+    desc "The configuration directory to use"
+  end
+
+  newparam :cvs_rsh, :required_features => [:cvs_rsh] do
+    desc "The value to be used for the CVS_RSH environment variable."
+  end
+
+  autorequire(:package) do
+    ['git', 'git-core']
   end
 
 end

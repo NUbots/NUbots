@@ -14,25 +14,13 @@ message MotionCapture {
         required string identifier = 1;
         required double mean_error = 2;
 
-        // The matrix
-        required double xx = 3;
-        required double xy = 4;
-        required double xz = 5;
-        required double xt = 6;
-        required double yx = 7;
-        required double yy = 8;
-        required double yz = 9;
-        required double yt = 10;
-        required double zx = 11;
-        required double zy = 12;
-        required double zz = 13;
-        required double zt = 14;
-        required double tx = 15;
-        required double ty = 16;
-        required double tz = 17;
-        required double tt = 18;
+        // The rotation quaternion
+        required double qw = 3;
+        required double qx = 4;
+        required double qy = 5;
+        required double qz = 6;
 
-        repeated Point points = 19;
+        repeated Point points = 7;
     };
 
     message Bone {
@@ -45,7 +33,13 @@ message MotionCapture {
         repeated Bone bones = 3;
     };
 
-    repeated Point points = 1;
-    repeated RigidBody rigid_bodies = 2;
-    repeated Skeleton skeletons = 3;
+    message MarkerSet {
+        optional string name = 1;
+        repeated Point points = 2;
+    };
+
+    repeated MarkerSet marker_sets = 1;
+    repeated Point unidentified_points = 2;
+    repeated RigidBody rigid_bodies = 3;
+    repeated Skeleton skeletons = 4;
 }
