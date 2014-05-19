@@ -43,7 +43,6 @@ namespace messages {
 
                 float goalPosition;
                 float goalSpeed;
-                float torqueLimit;
 
                 float presentPosition;
                 float presentSpeed;

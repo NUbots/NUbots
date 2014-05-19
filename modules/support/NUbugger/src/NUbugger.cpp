@@ -169,7 +169,6 @@ namespace modules {
 
                     servo->set_goal_position(s.goalPosition);
                     servo->set_goal_speed(s.goalSpeed);
-                    servo->set_torque_limit(s.torqueLimit);
 
                     servo->set_present_position(s.presentPosition);
                     servo->set_present_speed(s.presentSpeed);
@@ -438,7 +437,7 @@ namespace modules {
                        const messages::localisation::Ball& ball,
                        // const messages::vision::Ball& vision_ball,
                        const std::vector<messages::localisation::Self>& robots) {
-                if(robots.size() > 0){                
+                if(robots.size() > 0){
                     arma::vec2 ball_pos = utility::localisation::transform::RobotBall2FieldBall(
                         robots[0].position,robots[0].heading, ball.position);
 
@@ -462,7 +461,7 @@ namespace modules {
 
                     ball_msg->models = ball_msg_models;
                     // emit(std::move(ball_msg));
-                
+
                     // Robot message
                     auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
                     std::vector<messages::localisation::FieldObject::Model> robot_msg_models;
@@ -483,14 +482,14 @@ namespace modules {
                         robot_msg_models.push_back(robot_model);
                     //}
 
-                    
+
                     robot_msg->models = robot_msg_models;
                     // emit(std::move(robot_msg));
 
                     EmitLocalisationModels(robot_msg, ball_msg);
                 }
             });
-      
+
             // When we shutdown, close our publisher
             on<Trigger<Shutdown>>([this](const Shutdown&) {
                 pub.close();

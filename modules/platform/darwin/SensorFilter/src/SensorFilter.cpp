@@ -141,7 +141,6 @@ namespace modules {
                             original.dGain,
                             original.goalPosition,
                             original.movingSpeed,
-                            original.torqueLimit,
                             original.presentPosition,
                             original.presentSpeed,
                             original.load,
@@ -212,7 +211,7 @@ namespace modules {
                     // if(input.fsr.right.fsr1 + input.fsr.right.fsr2 + input.fsr.right.fsr3 + input.fsr.right.fsr4 > SUPPORT_FOOT_FSR_THRESHOLD && zeroSensorsRight <= 4 - REQUIRED_NUMBER_OF_FSRS){
                     //     sensors->rightFootDown = true;
                     // }
-                    
+
                     if(!std::isnan(input.fsr.left.centreX) && !std::isnan(input.fsr.left.centreY)) {
                         // Left foot is on the ground?
                         sensors->leftFootDown = true;
@@ -248,7 +247,7 @@ namespace modules {
                     //         sensors->odometry.submat(0,0,2,2) = odometryLeftFoot.submat(0,0,2,2) * sensors->leftFootDown + odometryRightFoot.submat(0,0,2,2) * sensors->rightFootDown;
                     //     }
                     // }
-                        
+
                     if(previousSensors){
                         if(sensors->leftFootDown || sensors->rightFootDown){
                             arma::vec3 measuredTorsoFromLeftFoot = -sensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL).submat(0,0,2,2).t() * sensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL).col(3).rows(0,2);
@@ -262,8 +261,8 @@ namespace modules {
 
                             arma::vec3 averageVelocity = (torsoVelFromLeftFoot * static_cast<int>(sensors->leftFootDown) + torsoVelFromRightFoot * static_cast<int>(sensors->rightFootDown))/(static_cast<int>(sensors->rightFootDown) + static_cast<int>(sensors->leftFootDown));
                             sensors->odometry.submat(0,3,2,3) = averageVelocity;
-                        }                       
-                          
+                        }
+
                         // Gyro based odometry for orientation
                         sensors->odometry.submat(0,0,2,2) =  previousSensors->orientation.t() * sensors->orientation;
                     }

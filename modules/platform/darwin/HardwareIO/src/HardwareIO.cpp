@@ -53,15 +53,13 @@ namespace darwin {
             sensors->cm730ErrorFlags = data.cm730ErrorCode == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.cm730ErrorCode);
 
             // LED Panel
-            //sensors->ledPanel.led2 = Convert::getBit<1>(data.cm730.ledPanel);
-            //sensors->ledPanel.led3 = Convert::getBit<2>(data.cm730.ledPanel);
-            //sensors->ledPanel.led4 = Convert::getBit<3>(data.cm730.ledPanel);
+            sensors->ledPanel = cm730State.ledPanel;
 
             // Head LED
-            //std::tie(sensors->headLED.r, sensors->headLED.g, sensors->headLED.b) = Convert::colourLED(data.cm730.headLED);
+            sensors->headLED = cm730State.headLED;
 
-            // Head LED
-            //std::tie(sensors->eyeLED.r, sensors->eyeLED.g, sensors->eyeLED.b) = Convert::colourLED(data.cm730.eyeLED);
+            // Eye LED
+            sensors->eyeLED = cm730State.eyeLED;
 
             // Buttons
             sensors->buttons.left = Convert::getBit<1>(data.cm730.buttons);
@@ -124,18 +122,16 @@ namespace darwin {
                 servo.errorFlags = data.servoErrorCodes[i] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.servoErrorCodes[i]);
 
                 // Booleans
-                //servo.torqueEnabled = data.servos[i].torqueEnabled;
-                //servo.led = data.servos[i].LED;
+                servo.torqueEnabled = servoState[i].torqueEnabled;
 
                 // Gain
-                //servo.dGain = Convert::gain(data.servos[i].dGain);
-                //servo.iGain = Convert::gain(data.servos[i].iGain);
-                //servo.pGain = Convert::gain(data.servos[i].pGain);
+                servo.pGain = servoState[i].pGain;
+                servo.iGain = servoState[i].iGain;
+                servo.dGain = servoState[i].dGain;
 
                 // Targets
-                //servo.goalPosition = Convert::servoPosition(i, data.servos[i].goalPosition);
-                //servo.movingSpeed = Convert::servoSpeed(i, data.servos[i].movingSpeed);
-                //servo.torqueLimit = Convert::torqueLimit(data.servos[i].torqueLimit);
+                servo.goalPosition = servoState[i].goalPosition;
+                servo.movingSpeed = servoState[i].movingSpeed;
 
                 // Present Data
                 servo.presentPosition = Convert::servoPosition(i, data.servos[i].presentPosition);
