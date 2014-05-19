@@ -19,20 +19,29 @@
 
 #include "DisplayTest.h"
 #include "utility/nubugger/NUgraph.h"
+#include "messages/input/proto/MotionCapture.pb.h"
 
 using utility::nubugger::graph;
 
 namespace modules {
-    namespace support {
-        DisplayTest::DisplayTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+namespace support {
 
-            // TODO: remove - just for debugging the graph
-            /*on<Trigger<Every<100, std::chrono::milliseconds>>>([this](const time_t&) {
+    using messages::input::proto::MotionCapture;
 
-                float value = float(rand()) / RAND_MAX * 100;
-                emit(graph("Debug", value));
+    DisplayTest::DisplayTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            });*/
-        }
+        // TODO: remove - just for debugging the graph
+        /*on<Trigger<Every<100, std::chrono::milliseconds>>>([this](const time_t&) {
+
+            float value = float(rand()) / RAND_MAX * 100;
+            emit(graph("Debug", value));
+
+        });*/
+
+        on<Trigger<Network<MotionCapture>>>([this](const Network<MotionCapture>& net) {
+//            auto mocap = net.data;
+            NUClear::log("I got things from", net.sender);
+        });
     }
+}
 }
