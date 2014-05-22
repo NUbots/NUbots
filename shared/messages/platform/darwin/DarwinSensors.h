@@ -49,7 +49,8 @@ namespace messages {
                     OVERLOAD        = 1 << 5,
                     INSTRUCTION     = 1 << 6,
                     CORRUPT_DATA    = 1 << 7,
-                    TIMEOUT         = 1 << 8
+                    TIMEOUT         = 1 << 8,
+                    TIMEOUT_VICTIM  = 1 << 9
                 };
 
                 NUClear::clock::time_point timestamp;

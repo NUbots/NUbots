@@ -19,8 +19,10 @@
 
 #include "UART.h"
 
+#include <thread>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <iostream>
 
 namespace Darwin {
     uint8_t calculateChecksum(void* command) {
@@ -113,8 +115,9 @@ namespace Darwin {
     CommandResult UART::readPacket() {
 
         // We will wait this long for an initial packet header
-        int PACKET_WAIT = 20000;
-        // We will only wait 1ms for an individual byte (the USB delay time)
+
+        int PACKET_WAIT = 10000;
+        // We will only wait a maximum of 1000 microseconds between bytes in a packet (assumes baud of 1000000bps)
         int BYTE_WAIT = 1000;
 
         // Our result
@@ -224,6 +227,21 @@ namespace Darwin {
         // Read our responses for each of the packets
         for (int i = 0; i < responses; ++i) {
             results[i] = readPacket();
+            // If we get a timeout don't wait for other packets (other errors are fine)
+            if(results[i].header.errorcode == ErrorCode::NO_RESPONSE) {
+                // Set our timedout IDs
+                results[i].header.id = command[7 + i * 3];
+                for(i++; i < responses; ++i) {
+                    results[i].header.id = command[7 + i * 3];
+                    results[i].header.errorcode = ErrorCode::CORRUPT_DATA;
+                }
+
+                // Wait for 100ms for the bus to reset
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+                // Stop trying to read future packets
+                break;
+            }
         }
 
         return results;
