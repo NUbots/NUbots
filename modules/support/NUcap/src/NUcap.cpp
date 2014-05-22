@@ -117,7 +117,7 @@ namespace support {
 
             for (auto point : frame.unIdMarkers()) {
                 auto* marker_point = moCap->add_unidentified_points();
-                NUClear::log("Point", point.x, point.y, point.z);
+//                NUClear::log("Point", point.x, point.y, point.z);
                 marker_point->set_x(point.x);
                 marker_point->set_y(point.y);
                 marker_point->set_z(point.z);

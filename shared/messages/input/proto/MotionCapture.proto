@@ -3,16 +3,16 @@ package messages.input.proto;
 message MotionCapture {
     
     message Point {
-        required string identifier = 1;
-        required double size = 2;
+        optional string identifier = 1;
+        optional double size = 2;
         required double x = 3;
         required double y = 4;
         required double z = 5;
     };
 
     message RigidBody {
-        required string identifier = 1;
-        required double mean_error = 2;
+        optional string identifier = 1;
+        optional double mean_error = 2;
 
         // The rotation quaternion
         required double qw = 3;

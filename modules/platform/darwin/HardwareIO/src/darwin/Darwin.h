@@ -25,7 +25,6 @@
 #include <vector>
 
 #include "CM730.h"
-#include "MLNCH.h"
 #include "MX28.h"
 #include "FSR.h"
 
@@ -61,8 +60,6 @@ namespace Darwin {
             HEAD_PITCH = 20,
             R_FSR = 111,
             L_FSR = 112,
-            R_MISSILE = 50,
-            L_MISSILE = 51,
             BROADCAST = 254
         };
     }  // namespace ID
@@ -136,10 +133,6 @@ namespace Darwin {
         FSR rFSR;
         /// The Left Foot FSR
         FSR lFSR;
-        /// The Right Missle Launcher
-        MLNCH rMissile;
-        /// The Left Missle Launcher
-        MLNCH lMissile;
 
         /**
          * @brief Gets the darwin device with the given sensor id

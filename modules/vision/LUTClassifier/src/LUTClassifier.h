@@ -17,63 +17,26 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_VISION_LUTCLASSIFIER_H
-#define MODULES_VISION_LUTCLASSIFIER_H
+#ifndef MODULES_VISION_QUEXLUTCLASSIFIER_H
+#define MODULES_VISION_QUEXLUTCLASSIFIER_H
 
 #include <nuclear>
-#include <string>
-#include <armadillo>
-#include <chrono>
-
-#include "messages/input/Image.h"
-#include "messages/vision/ClassifiedImage.h"
-#include "messages/support/Configuration.h"
-
-#include "GreenHorizon.h"
-#include "ScanLines.h"
-#include "SegmentFilter.h"
-#include "ColourReplacementRule.h"
-#include "ColourTransitionRule.h"
 
 namespace modules {
     namespace vision {
-        struct VisionConstants{
-            static constexpr const char* CONFIGURATION_PATH = "VisionConstants.json";
-        };
-
-        struct LUTLocations{
-            static constexpr const char* CONFIGURATION_PATH = "LUTLocations.json";
-        };
-
-        struct GreenHorizonConfig{
-            static constexpr const char* CONFIGURATION_PATH = "GreenHorizon.json";
-        };
-
-        struct ScanLinesConfig{
-            static constexpr const char* CONFIGURATION_PATH = "ScanLines.json";
-        };
-
-        struct RulesConfig{
-            static constexpr const char* CONFIGURATION_PATH = "Rules.json";
-        };
 
         /**
          * Classifies a raw image, producing the colour segments for object detection
          *
-         * @author Jake Fountain
+         * @author Trent Houliston
          */
         class LUTClassifier : public NUClear::Reactor {
-        private:
-            GreenHorizon greenHorizon;
-            ScanLines scanLines;
-            SegmentFilter segmentFilter;
-
         public:
-            explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
+            explicit QuexLUTClassifier(std::unique_ptr<NUClear::Environment> environment);
         };
 
     }  // vision
 }  // modules
 
-#endif  // MODULES_VISION_LUTCLASSIFIER_H
+#endif  // MODULES_VISION_QUEXLUTCLASSIFIER_H
 

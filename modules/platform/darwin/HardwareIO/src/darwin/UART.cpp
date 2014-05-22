@@ -19,8 +19,10 @@
 
 #include "UART.h"
 
+#include <thread>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <iostream>
 
 namespace Darwin {
     uint8_t calculateChecksum(void* command) {
@@ -93,6 +95,9 @@ namespace Darwin {
         serinfo.flags &= ~ASYNC_SPD_MASK;
         serinfo.flags |= ASYNC_SPD_CUST;
 
+        // Set our serial port to use low latency mode (otherwise the USB driver buffers for 16ms before sending data)
+        serinfo.flags |= ASYNC_LOW_LATENCY;
+
         // Set our custom divsor for our speed
         serinfo.custom_divisor = serinfo.baud_base / baud;
 
@@ -110,7 +115,8 @@ namespace Darwin {
     CommandResult UART::readPacket() {
 
         // We will wait this long for an initial packet header
-        int PACKET_WAIT = 20000;
+
+        int PACKET_WAIT = 10000;
         // We will only wait a maximum of 1000 microseconds between bytes in a packet (assumes baud of 1000000bps)
         int BYTE_WAIT = 1000;
 
@@ -221,13 +227,21 @@ namespace Darwin {
         // Read our responses for each of the packets
         for (int i = 0; i < responses; ++i) {
             results[i] = readPacket();
-
             // If we get a timeout don't wait for other packets (other errors are fine)
             if(results[i].header.errorcode == ErrorCode::NO_RESPONSE) {
-                configure(1000000);
+                // Set our timedout IDs
+                results[i].header.id = command[7 + i * 3];
+                for(i++; i < responses; ++i) {
+                    results[i].header.id = command[7 + i * 3];
+                    results[i].header.errorcode = ErrorCode::CORRUPT_DATA;
+                }
+
+                // Wait for 100ms for the bus to reset
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+                // Stop trying to read future packets
                 break;
             }
-
         }
 
         return results;

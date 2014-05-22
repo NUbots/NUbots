@@ -102,7 +102,7 @@ namespace modules {
                         auto& error = original.errorFlags;
 
                         // Check for an error on the servo and report it
-                        if(error != DarwinSensors::Error::OK) {
+                        while(error != DarwinSensors::Error::OK) {
                             std::stringstream s;
                             s << "Error on Servo " << (i + 1) << " (" << messages::input::stringFromId(ServoID(i)) << "):";
 
@@ -123,12 +123,14 @@ namespace modules {
                             }
                             if(error & DarwinSensors::Error::CORRUPT_DATA) {
                                 s << " Corrupt Data ";
+                                break;
                             }
                             if(error & DarwinSensors::Error::TIMEOUT) {
                                 s << " Timeout ";
                             }
 
                             NUClear::log<NUClear::WARN>(s.str());
+                            break;
                         }
 
                         // Add the sensor values to the system properly
@@ -159,7 +161,7 @@ namespace modules {
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
                     if(previousSensors && (input.cm730ErrorFlags || arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2) > 4 * M_PI)) {
-                        NUClear::log("Bad gyroscope value", arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2));
+                        // NUClear::log("Bad gyroscope value", arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2));
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
                     else {
