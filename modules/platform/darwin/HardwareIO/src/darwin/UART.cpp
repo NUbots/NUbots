@@ -93,6 +93,9 @@ namespace Darwin {
         serinfo.flags &= ~ASYNC_SPD_MASK;
         serinfo.flags |= ASYNC_SPD_CUST;
 
+        // Set our serial port to use low latency mode (otherwise the USB driver buffers for 16ms before sending data)
+        serinfo.flags |= ASYNC_LOW_LATENCY;
+
         // Set our custom divsor for our speed
         serinfo.custom_divisor = serinfo.baud_base / baud;
 
@@ -111,7 +114,7 @@ namespace Darwin {
 
         // We will wait this long for an initial packet header
         int PACKET_WAIT = 20000;
-        // We will only wait a maximum of 1000 microseconds between bytes in a packet (assumes baud of 1000000bps)
+        // We will only wait 1ms for an individual byte (the USB delay time)
         int BYTE_WAIT = 1000;
 
         // Our result
@@ -221,13 +224,6 @@ namespace Darwin {
         // Read our responses for each of the packets
         for (int i = 0; i < responses; ++i) {
             results[i] = readPacket();
-
-            // If we get a timeout don't wait for other packets (other errors are fine)
-            if(results[i].header.errorcode == ErrorCode::NO_RESPONSE) {
-                configure(1000000);
-                break;
-            }
-
         }
 
         return results;

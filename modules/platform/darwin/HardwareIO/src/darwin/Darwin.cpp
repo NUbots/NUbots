@@ -47,9 +47,7 @@ namespace Darwin {
     , headPan(uart, ID::HEAD_YAW)
     , headTilt(uart, ID::HEAD_PITCH)
     , rFSR(uart, ID::R_FSR)
-    , lFSR(uart, ID::L_FSR)
-    , rMissile(uart, ID::R_MISSILE)
-    , lMissile(uart, ID::L_MISSILE) {
+    , lFSR(uart, ID::L_FSR) {
 
         // Turn on the dynamixel power
         cm730.turnOnDynamixel();
