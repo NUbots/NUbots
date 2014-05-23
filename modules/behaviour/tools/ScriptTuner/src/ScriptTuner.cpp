@@ -25,6 +25,7 @@
 #include "utility/file/fileutil.h"
 #include "utility/configuration/json/parse.h"
 #include "utility/configuration/json/serialize.h"
+#include "messages/behaviour/Action.h"
 
 #include <ncurses.h>
 #include <sstream>
@@ -35,10 +36,13 @@ namespace modules {
             using messages::motion::ExecuteScript;
             using messages::input::ServoID;
             using messages::motion::ServoTarget;
+            using messages::behaviour::RegisterAction;
+            using messages::behaviour::LimbID;
 
             struct LockServo {};
 
             ScriptTuner::ScriptTuner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)),
+                    id(size_t(this) * size_t(this) - size_t(this)),
                     scriptPath("ERROR"),
                     frame(0),
                     selection(0),
@@ -87,8 +91,20 @@ namespace modules {
                     emit(std::move(waypoint));
                 });
 
+                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+                    id,
+                    { std::pair<float, std::set<LimbID>>(1, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD }) },
+                    [this] (const std::set<LimbID>&) {
+                    },
+                    [this] (const std::set<LimbID>&) {
+                    },
+                    [this] (const std::set<ServoID>&) {
+                    }
+                }));
+
                 powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&ScriptTuner::run), this),
                                                                                          std::bind(std::mem_fn(&ScriptTuner::kill), this)));
+
             }
 
             void ScriptTuner::run() {
@@ -243,8 +259,8 @@ namespace modules {
                                      "T",
                                      "J",
                                      "G",
-                                     "S",
-                                     "X"};
+                                     "P",
+                                     "S"};
 
                 //Each Meaning
                 const char* MEANINGS[] = {
@@ -256,8 +272,8 @@ namespace modules {
                                      "Edit Duration",
                                      "Jump to Frame",
                                      "Change Gains",
-                                     "Save",
-                                     "Exit (Use Ctr C)"};
+                                     "Play",
+                                     "Save"};
 
                 //Prints commands and their meanings to the screen
                 for (size_t i = 0; i < 10; i = i + 2) {
@@ -523,7 +539,8 @@ namespace modules {
                                              "S",
                                              "X",
                                              "R",
-                                             "G"};
+                                             "G",
+                                             "Ctr C"};
 
                     const char* ALL_MEANINGS[] = {
                                              "Left a frame",
@@ -537,7 +554,8 @@ namespace modules {
                                              "Save",
                                              "Exit (this works to exit help and editGain)",
                                              "Manual Refresh View",
-                                             "Edit the gains of an entire Script or Frame"};
+                                             "Edit the gains of an entire Script or Frame",
+                                             "Quit Scripttuner"};
 
                     size_t longestCommand = 0;
                     for(const auto& command : ALL_COMMANDS) {
@@ -550,7 +568,7 @@ namespace modules {
                     mvprintw(0,(COLS - 14)/2, " Script Tuner ");
                     mvprintw(3,2, "Help Commands:");
                     attroff(A_BOLD);
-                    for(size_t i = 0; i < 12; i++) {
+                    for(size_t i = 0; i < 13; i++) {
                         mvprintw(5 + i, 2, ALL_COMMANDS[i]);
                         mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
                     }
@@ -563,7 +581,7 @@ namespace modules {
                         mvprintw(3,2, "Help Commands:");
                         attroff(A_BOLD);
 
-                        for(size_t i = 0; i < 12; i++) {
+                        for(size_t i = 0; i < 13; i++) {
                             mvprintw(5 + i, 2, ALL_COMMANDS[i]);
                             mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
                         }
@@ -579,9 +597,7 @@ namespace modules {
 
             //emits a message so motion can pick up the script
             void ScriptTuner::playScript() {
-
-                // TODO Broken, need to fix sometime
-                //emit(std::make_unique<ExecuteScript>(script));
+                emit(std::make_unique<ExecuteScript>(id, script));
             }
 
             //allows user to jump to a specific frame without engaging the motors
@@ -607,6 +623,7 @@ namespace modules {
                 mvprintw(6,2,"All: ---.- Upper: ---.- Lower: ---.-");
                 mvprintw(7,2, "For Frame: %d", frame+1);
                 mvprintw(8,2,"All: ---.- Upper: ---.- Lower: ---.-");
+                mvprintw(10,2,"Use X to exit Edit Gain");
                 move(6,7);
                 curs_set(false);
                 size_t YPOSITION[3][3] = {{6,6,6}, {7, 0, 0}, {8,8,8}};
@@ -797,11 +814,12 @@ namespace modules {
                                         changedUpper = true;
                                         changedLower = true;
                                     }
-
+                                    /*
                                     mvprintw(20,2,"upperGainS = %5.1f",upperGainS);
                                     mvprintw(21,2,"lowerGainS = %5.1f",lowerGainS);
                                     mvprintw(22,2,"upperGainF = %5.1f",upperGainF);
                                     mvprintw(23,2,"lowerGainF = %5.1f",lowerGainF);
+                                    */
 
                                     // if user has entered the same gain in upper and lower then automatically prints value in both and dashes upper and lower
                                     if ((upperGainS == lowerGainS) && (upperGainS >= 0)) {
