@@ -35,6 +35,7 @@ namespace modules {
              */
             class ScriptTuner : public NUClear::Reactor {
             private:
+                const size_t id;
                 /// The path to the script we are editing
                 std::string scriptPath;
                 /// The script object we are editing
