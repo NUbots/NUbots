@@ -51,16 +51,6 @@ namespace messages {
             WHITE_GREEN  = 'f'
         };
 
-        enum ColourClass {
-            BALL,
-            GOAL,
-            LINE,
-            TEAM_CYAN,
-            TEAM_MAGENTA,
-            FIELD,
-            UNKNOWN
-        };
-
         class LookUpTable {
         public:
             static constexpr const int BITS_PER_COLOUR = 7;
@@ -82,7 +72,7 @@ namespace messages {
                 @param p the pixel
                 @return Returns the colour classification of this pixel
              */
-            messages::vision::Colour classifyPixel(const messages::input::Image::Pixel& p) const;
+            messages::vision::Colour classify(const messages::input::Image::Pixel& p) const;
         private:
 
             /*!

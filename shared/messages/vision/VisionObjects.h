@@ -68,7 +68,7 @@ namespace messages {
             //  TEAM_MAGENTA,
             //  UNKNOWN
             // }
-            ColourClass colour;
+            ObjectClass colour;
         };
 
         //Line objects:

@@ -20,41 +20,47 @@
 #ifndef MESSAGES_VISION_CLASSIFIEDIMAGE_H
 #define MESSAGES_VISION_CLASSIFIEDIMAGE_H
 
-#include <string>
-#include <vector>
 #include <map>
 #include <armadillo>
-#include <memory>
-#include "messages/input/Image.h"
-#include "messages/vision/LookUpTable.h"
 
 namespace messages {
     namespace vision {
+
+        enum class ObjectClass {
+            BALL,
+            GOAL,
+            LINE,
+            TEAM_CYAN,
+            TEAM_MAGENTA,
+            FIELD,
+            UNKNOWN
+        };
 
         /**
          * @brief Holds the transitions from a classifeid image
          *
          * @author Trent Houliston
+         *
+         * @tparam TClass the object that devides different classes in the image.
          */
+        template <typename TClass>
         struct ClassifiedImage {
 
-            struct Transition {
+            struct Segment {
 
-                struct Segment {
-                    size_t length;
-                    ColourClass colour;
-                };
+                ObjectClass colour;
 
-                arma::vec2 position;
-                Segment before;
-                Segment after;
+                arma::vec2 start;
+                arma::vec2 end;
+
+                Segment* previous;
+                Segment* next;
             };
 
-            std::vector<arma::vec2> greenHorizon;
+            std::vector<arma::vec2> visualHorizon;
 
-            std::multimap<ColourClass, Transition> horizontalTransitions;
-            std::multimap<ColourClass, Transition> verticalTransitions;
-            std::multimap<ColourClass, arma::vec2> midpoints;
+            std::multimap<TClass, Segment> horizontalTransitions;
+            std::multimap<TClass, Segment> verticalTransitions;
         };
 
     }  // vision

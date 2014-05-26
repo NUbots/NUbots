@@ -17,26 +17,29 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_VISION_LUTCLASSIFIER_H
-#define MODULES_VISION_LUTCLASSIFIER_H
+#ifndef MODULES_VISION_QUEXCLASSIFIER_H
+#define MODULES_VISION_QUEXCLASSIFIER_H
 
-#include <nuclear>
+#include <map>
+
+#include "Lexer.hpp"
+#include "messages/input/Image.h"
+#include "messages/vision/LookUpTable.h"
+#include "messages/vision/ClassifiedImage.h"
 
 namespace modules {
-    namespace vision {
+	namespace vision {
+		class QuexClassifier {
+		private:
+			std::vector<uint8_t> buffer;
+			quex::Lexer lexer;
 
-        /**
-         * Classifies a raw image, producing the colour segments for object detection
-         *
-         * @author Trent Houliston
-         */
-        class LUTClassifier : public NUClear::Reactor {
-        public:
-            explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
-        };
+			void ensureCapacity();
 
-    }  // vision
-}  // modules
+		public:
+			std::multimap<messages::vision::ObjectClass, messages::vision::ClassifiedImage::Segment> classify(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const arma::vec2& start, const arma::vec2& end);
+		};
+	}
+}
 
-#endif  // MODULES_VISION_QUEXLUTCLASSIFIER_H
-
+#endif

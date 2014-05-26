@@ -19,13 +19,15 @@
 
 #include "LUTClassifier.h"
 #include "messages/input/Image.h"
+#include "messages/input/Sensors.h"
 #include "messages/vision/LookUpTable.h"
-#include "Replacement.hpp"
+#include "Lexer.hpp"
 
 namespace modules {
     namespace vision {
 
         using messages::input::Image;
+        using messages::input::Sensors;
         using messages::vision::LookUpTable;
 
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -39,7 +41,7 @@ namespace modules {
                 // We need a way of passing in the LUTified data to the classifer object
 
                 // Make a classified image
-                auto classifiedimage out = std::make_unique<ClassifiedImage>();
+                //auto classifiedimage out = std::make_unique<ClassifiedImage>();
 
                 // Cast lines to find the green horizon
                 //      Get the kinematics horizon
@@ -66,13 +68,12 @@ namespace modules {
                 //      cast several close horizontal lines at the tops to find the crossbar
                 //      Cast vertical lines to finish the crossbar
 
-                for(strategy : strategies) {
+                /*for(strategy : strategies) {
                     std::vector<segment> a = strategy1.request(*classifiedimage);
                     segments = quex.classify(image, lut, a);
                     strategy1.resolve(segments, classifiedImage);
-                }
+                }*/
 
-                emit(classifiedimage);
 
 
                 // Stage 1 - Find green horizon
@@ -82,54 +83,6 @@ namespace modules {
                 // Stage 2/3 - Do the horizontal goal finder
 
                 // Stage 4 - Crosshatch
-
-                // Heap allocate the most memory we will need
-                std::vector<char> in;
-                in.reserve(std::max(image.width(), image.height()));
-
-                // Make our classifier object
-                quex::Replacement classifier(in.data(), in.size(), in.data() + 1);
-
-                classifier.buffer_fill_region_prepare();
-
-                // Write to our buffer
-
-                classifer.buffer_fill_region_finish(numofchars);
-
-                do {
-                    qlex.token_p_switch(&token);
-                    qlex.receive();
-
-                    switch(token.type_id) {
-                        case QUEX_TKN_BALL:
-                            //token.number;
-                            break;
-
-                        case QUEX_TKN_CYAN_TEAM:
-                            //token.number;
-                            break;
-
-                        case QUEX_TKN_FIELD:
-                            //token.number;
-                            break;
-
-                        case QUEX_TKN_GOAL:
-                            //token.number;
-                            break;
-
-                        case QUEX_TKN_LINE:
-                            //token.number;
-                            break;
-
-                        case QUEX_TKN_MAGENTA_TEAM:
-                            //token.number;
-                            break;
-
-                        case QUEX_TKN_UNCLASSIFIED:
-                            //token.number;
-                            break;
-                }
-                while(token.type_id() != QUEX_TKN_TERMINATION);
             });
 
         }

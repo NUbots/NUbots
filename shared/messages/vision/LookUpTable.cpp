@@ -33,7 +33,7 @@ namespace messages {
             std::memcpy(&LUT, array, LUT_SIZE);
         }
 
-        messages::vision::Colour LookUpTable::classifyPixel(const messages::input::Image::Pixel& p) const {
+        messages::vision::Colour LookUpTable::classify(const messages::input::Image::Pixel& p) const {
             return messages::vision::Colour(LUT[getLUTIndex(p)]); // 7bit LUT
         }
 

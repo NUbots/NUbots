@@ -25,6 +25,7 @@ FUNCTION(NUCLEAR_MODULE)
     SET(LIBRARIES "")
     SET(ISLIBS "FALSE")
     SET(ISINCS "FALSE")
+    SET(ISSRCS "FALSE")
 
     # Loop through all our args
     FOREACH(arg ${ARGV})
@@ -32,9 +33,16 @@ FUNCTION(NUCLEAR_MODULE)
         IF(${arg} STREQUAL "INCLUDES")
             SET(ISLIBS "FALSE")
             SET(ISINCS "TRUE")
+            SET(ISSRCS "FALSE")
         ELSEIF(${arg} STREQUAL "LIBRARIES")
             SET(ISLIBS "TRUE")
             SET(ISINCS "FALSE")
+            SET(ISSRCS "FALSE")
+
+        ELSEIF(${arg} STREQUAL "SOURCES")
+            SET(ISLIBS "FALSE")
+            SET(ISINCS "FALSE")
+            SET(ISSRCS "TRUE")
 
         # Store this argument in the correct list
         ELSE()
@@ -42,14 +50,16 @@ FUNCTION(NUCLEAR_MODULE)
                 SET(LIBRARIES ${LIBRARIES} ${arg})
             ELSEIF(ISINCS)
                 SET(INCLUDES ${INCLUDES} ${arg})
+            ELSEIF(ISSRCS)
+                SET(SOURCES ${SOURCES} ${arg})
             ELSE()
-                MESSAGE(FATAL_ERROR "Modules take LIBRARIES or INCLUDES only")
+                MESSAGE(FATAL_ERROR "Modules take LIBRARIES, INCLUDES and SOURCES only")
             ENDIF()
         ENDIF()
     ENDFOREACH()
 
     # Find all our files
-    FILE(GLOB_RECURSE src "src/**.cpp" , "src/**.h")
+    FILE(GLOB_RECURSE src "${CMAKE_CURRENT_SOURCE_DIR}/src/**.cpp" , "${CMAKE_CURRENT_SOURCE_DIR}/src/**.h")
 
     # Get our configuration files
     FILE(GLOB_RECURSE config_files "config/**")
@@ -75,6 +85,7 @@ FUNCTION(NUCLEAR_MODULE)
 
     # Include our own src dir and the shared dirs
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/src)
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/src)
     INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/shared)
     INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/shared)
 
@@ -83,10 +94,10 @@ FUNCTION(NUCLEAR_MODULE)
 
     # Add all our code to a library
     IF(SHARED_BUILD)
-        ADD_LIBRARY(${module_name} SHARED ${src} ${configuration})
+        ADD_LIBRARY(${module_name} SHARED ${src} ${SOURCES} ${configuration})
         SET_PROPERTY(TARGET ${module_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/lib")
     ELSE()
-        ADD_LIBRARY(${module_name} STATIC ${src} ${configuration})
+        ADD_LIBRARY(${module_name} STATIC ${src} ${SOURCES} ${configuration})
     ENDIF()
 
     TARGET_LINK_LIBRARIES(${module_name} ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
