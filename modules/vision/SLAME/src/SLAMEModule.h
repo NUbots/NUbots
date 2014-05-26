@@ -20,10 +20,12 @@
 #define MODULES_VISION_SLAME_MODULE_H
 
 #include "SLAMEFeature.h"
+#include "SLAME.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/Image.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/Sensors.h"
+#include "messages/support/Configuration.h"
 
 namespace modules{
 	namespace vision{
@@ -42,22 +44,11 @@ namespace modules{
  		 	SLAMEModule();
  		 	std::unique_ptr<messages::vision::SLAMEObjects> getSLAMEObjects(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors);        
 
- 		 	setParameters(int NUMBER_OF_MOCK_POINTS,
-						  float MEAN_RADIUS,
-						  float RADIAL_DEVIATION,
-						  float HEIGHT,
-						  float HEIGHT_DEVIATION,
-						  float ANGULAR_DEVIATION,
-						  bool RANDOMIZE,
-						  int SEED
-						  ){featureExtractor.setParameters(NUMBER_OF_MOCK_POINTS,
-						   								   MEAN_RADIUS,
-						   								   RADIAL_DEVIATION,
-						   								   HEIGHT,
-						   								   HEIGHT_DEVIATION,
-						   								   ANGULAR_DEVIATION,
-						   								   RANDOMIZE,
-						   								   SEED);}
+ 		 	setParameters(const messages::support::Configuration<FeatureDetectorClass>& config){
+ 		 		featureExtractor.setParameters(config);
+ 		 	}
  		};
  	}
  }
+
+ #endif

@@ -22,6 +22,7 @@
 #include "messages/input/Image.h"
 #include "messages/input/Sensors.h"
 #include "messages/localisation/FieldObject.h"
+#include "messages/support/Configuration.h"
 
 #include <armadillo>
 
@@ -37,12 +38,15 @@ namespace utility {
 			ORBFeatureExtractor();
 			std::vector<ExtractedFeature> extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors);
 
+			void setParameters(const messages::support::Configuration<ORBFeatureExtractor>& config);
 			//Get matches: tuple = (featureIndex in featureFilters, extractedFeatureIndex in extractedFeatures, matchStrength)
             //Order of vector is strongest to weakest
             //Add new features here to the feature list and pick up missing filters and strengths below
 			std::vector<std::tuple<int, int, float>> matchFeatures(std::vector<ExtractedFeature>& features, 
 																   const std::vector<ExtractedFeature>& newFeatures,
 																   int MAX_MATCHES);
+            static constexpr const char* CONFIGURATION_PATH = "ORBFeatureExtractor.json";
+
 		};
 	}
 }

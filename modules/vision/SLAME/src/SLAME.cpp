@@ -21,6 +21,9 @@
 
 namespace modules {
     namespace vision {
+
+        using utility::vision::ORBFeatureExtractor;
+        using utility::vision::MockFeatureExtractor;
         SLAME::SLAME(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), ORBModule(), MockSLAMEModule() {
 
             on<Trigger<Configuration<SLAME>>>([this](const Configuration<SLAME>& config) {
@@ -36,16 +39,14 @@ namespace modules {
                     NUClear::log<NUClear::WARN>("SLAME - BAD CONFIG STRING: Loading default ORB feature detector.");
                     FEATURE_EXTRACTOR_TYPE = FeatureExtractorType::ORB;
                 }
+            });
+            
+            on<Trigger<Configuration<MockFeatureExtractor>>>([this](const Configuration<MockFeatureExtractor>& config) {
+                MockSLAMEModule.setParameters(config);
+            });o
 
-                MockSLAMEModule.setParameters(config["NUMBER_OF_MOCK_POINTS"],
-                                              config["MEAN_RADIUS"],
-                                              config["RADIAL_DEVIATION"],
-                                              config["HEIGHT"],
-                                              config["HEIGHT_DEVIATION"],
-                                              config["ANGULAR_DEVIATION"],
-                                              config["RANDOMIZE"],
-                                              config["SEED"]);
-
+            on<Trigger<Configuration<ORBFeatureExtractor>>>([this](const Configuration<ORBFeatureExtractor>& config) {
+                ORBModule.setParameters(config);
             });
 
             on<Trigger<Image>, With<std:vector<Self>, Sensors>>([this](const time_t&, const Image& image, const std::vector<Self>& selfs, const sensors& sensors){               

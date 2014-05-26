@@ -25,6 +25,7 @@
 #include "messages/input/Sensors.h"
 #include "messages/input/Image.h"
 #include "messages/localisation/FieldObject.h"
+#include "messages/support/Configuration.h"
 
 #include <armadillo>
 
@@ -34,15 +35,8 @@ namespace utility {
 		private:
 			std::vector<arma::vec4> mockFeatures;
 		public:
-			void setParameters(int NUMBER_OF_MOCK_POINTS,
-							   float MEAN_RADIUS,
-							   float RADIAL_DEVIATION,
-							   float HEIGHT,
-							   float HEIGHT_DEVIATION,
-							   float ANGULAR_DEVIATION,
-							   bool RANDOMIZE,
-							   int SEED
-							   );
+            static constexpr const char* CONFIGURATION_PATH = "MockFeatureExtractor.json";
+			void setParameters(const messages::support::Configuration<MockFeatureExtractor>& config);
 			class ExtractedFeature {
 			public:
 				arma::vec2 screenAngular;	//Compulsory

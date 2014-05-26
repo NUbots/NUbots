@@ -21,10 +21,8 @@
 #define MODULES_VISION_SLAME_H
 
 #include <nuclear>
-#include "utility/math/kalman/UKF.h"
-#include "utility/math/kalman/InverseDepthPointModel.h"
-#include "utility/vision/FeatureExtractor.h"   //Parent class
 #include "utility/vision/ORBFeatureExtractor.h"    //Example subclass of SLAMEFeatureDetector
+#include "utility/vision/MockFeatureExtractor.h"    
 
 namespace modules {
     namespace vision {

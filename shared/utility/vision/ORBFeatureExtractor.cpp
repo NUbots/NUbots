@@ -22,6 +22,10 @@ namespace utility {
 	namespace vision {
 			ORBFeatureExtractor::ORBFeatureExtractor(){}
 
+			void ORBFeatureExtractor::setParameters(const messages::support::Configuration<ORBFeatureExtractor>& config){
+
+			}			
+
 			std::vector<ORBFeatureExtractor::ExtractedFeature> ORBFeatureExtractor::extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
 				//TODO: feature detection
 				return std::vector<ExtractedFeature>();
@@ -37,5 +41,7 @@ namespace utility {
 				//TODO: feature matching
 				return std::vector<std::tuple<int, int, float>>();
 			}
+
+
 	}
 }

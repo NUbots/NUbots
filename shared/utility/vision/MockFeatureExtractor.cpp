@@ -29,15 +29,16 @@ namespace utility {
 
 			MockFeatureExtractor::MockFeatureExtractor(){}
 
-			void MockFeatureExtractor::setParameters(int NUMBER_OF_MOCK_POINTS,
-												float MEAN_RADIUS,
-												float RADIAL_DEVIATION,
-												float HEIGHT,
-												float HEIGHT_DEVIATION,
-												float ANGULAR_DEVIATION,
-												bool RANDOMIZE,
-												int SEED
-												){
+			void MockFeatureExtractor::setParameters(const messages::support::Configuration<MockFeatureExtractor>& config){
+				int NUMBER_OF_MOCK_POINTS = config["NUMBER_OF_MOCK_POINTS"];
+				float MEAN_RADIUS = config["MEAN_RADIUS"];
+				float RADIAL_DEVIATION = config["RADIAL_DEVIATION"];
+				float HEIGHT = config["HEIGHT"];
+				float HEIGHT_DEVIATION = config["HEIGHT_DEVIATION"];
+				float ANGULAR_DEVIATION = config["ANGULAR_DEVIATION"];
+				bool RANDOMIZE = config["RANDOMIZE"];
+				int SEED = config["SEED"];
+
 				std::srand(SEED + std::time(0) * int(RANDOMIZE));
 				for(int i = 0; i < NUMBER_OF_MOCK_POINTS; i++){
 					float r = MEAN_RADIUS + 2 * RADIAL_DEVIATION * (std::rand() / float(RAND_MAX) - 0.5); 
@@ -47,15 +48,14 @@ namespace utility {
 						r * std::cos(theta),
 						r * std::sin(theta),
 						z,
-						1
-					}));
+						1								}));
 				}
 
 			}
 
 			std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
 				//TODO: feature detection
-				std::vector<ExtractedFeature> features;
+					std::vector<ExtractedFeature> features;
 					arma::vec2 selfHeading = arma::normalise(self.heading);
 					arma::mat44 robotToWorld_world = arma::mat44({   		  selfHeading[0],   		   -selfHeading[1], 0,            	 	self.position[0],
 	                                                                 		  selfHeading[1],   		    selfHeading[0], 0,            	 	self.position[1],
