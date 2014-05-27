@@ -1,5 +1,5 @@
 ADD_ROLE(
-    NAME chaseball
+    NAME nucapchaseball
     MODULES
         #Support
         support::SignalCatcher
