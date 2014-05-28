@@ -39,6 +39,9 @@ namespace utility {
 				bool RANDOMIZE = config["RANDOMIZE"];
 				int SEED = config["SEED"];
 
+				FOV_X = config["FOV_X"];
+				FOV_Y = config["FOV_Y"];
+
 				std::srand(SEED + std::time(0) * int(RANDOMIZE));
 				for(int i = 0; i < NUMBER_OF_MOCK_POINTS; i++){
 					float r = MEAN_RADIUS + 2 * RADIAL_DEVIATION * (std::rand() / float(RAND_MAX) - 0.5); 
@@ -48,7 +51,8 @@ namespace utility {
 						r * std::cos(theta),
 						r * std::sin(theta),
 						z,
-						1								}));
+						1								
+					}));
 				}
 
 			}
@@ -70,13 +74,16 @@ namespace utility {
 
 	                arma::mat44 worldToCamera_camera = utility::math::matrix::orthonormal44Inverse(cameraToBody_body) * robotToBody_body * utility::math::matrix::orthonormal44Inverse(robotToWorld_world);	                
 
+	            int id = 0;
 				for (auto point : mockFeatures){
 					ExtractedFeature f;
 	                arma::vec4 cameraToFeatureVector_cam =  worldToCamera_camera * point;
 	                f.screenAngular = arma::vec2({ std::atan2(cameraToFeatureVector_cam[1], cameraToFeatureVector_cam[0]) , std::atan2(cameraToFeatureVector_cam[2], cameraToFeatureVector_cam[0])});
-					features.push_back(f);
+	                f.featureID = id++;
+					if(std::fabs(f.screenAngular[0]) < FOV_X/2.0 && std::fabs(f.screenAngular[1]) < FOV_Y/2.0){
+						features.push_back(f);
+					}
 				}
-
 				return features;
 			}
 
@@ -85,10 +92,28 @@ namespace utility {
             //Add new features here to the feature list and pick up missing filters and strengths below
 			std::vector<std::tuple<int, int, float>> MockFeatureExtractor::matchFeatures(std::vector<ExtractedFeature>& features, 
 																					    const std::vector<ExtractedFeature>& newFeatures,
-																					    int MAX_MATCHES)
+																					    size_t MAX_MATCHES)
 			{
+				std::vector<std::tuple<int, int, float>> matches;
 				//TODO: feature matching
-				return std::vector<std::tuple<int, int, float>>();
+				
+				for(size_t newFeatureIndex = 0; newFeatureIndex < newFeatures.size(); newFeatureIndex++){	//For each new feature	
+					auto& newFeature = newFeatures[newFeatureIndex];
+
+					for(size_t featureIndex = 0; featureIndex < features.size(); featureIndex++){		//Check if it matches any known features
+						auto& feature = features[featureIndex];
+						if(newFeature == feature){
+							matches.push_back(std::tuple<int,int,float>(featureIndex,newFeatureIndex,1.0));
+							break;
+						}
+						if(featureIndex == features.size()-1 && features.size() < MAX_MATCHES){	//If we dont match any known features, add it too the list if there is space
+							features.push_back(newFeature);
+							matches.push_back(std::tuple<int,int,float>(featureIndex+1,newFeatureIndex,1.0));
+
+						}
+					}
+				}
+				return matches;
 			}
 	}
 }

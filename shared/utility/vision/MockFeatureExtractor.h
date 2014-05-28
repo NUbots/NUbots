@@ -40,17 +40,22 @@ namespace utility {
 			class ExtractedFeature {
 			public:
 				arma::vec2 screenAngular;	//Compulsory
+				int featureID;
 			};
 			MockFeatureExtractor();
 			std::vector<ExtractedFeature> extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors);
+			
+			float FOV_X;
+			float FOV_Y;
 
 			//Get matches: tuple = (featureIndex in featureFilters, extractedFeatureIndex in extractedFeatures, matchStrength)
             //Order of vector is strongest to weakest
             //Add new features here to the feature list and pick up missing filters and strengths below
 			std::vector<std::tuple<int, int, float>> matchFeatures(std::vector<ExtractedFeature>& features, 
 																   const std::vector<ExtractedFeature>& newFeatures,
-																   int MAX_MATCHES);
+																   size_t MAX_MATCHES);
 		};
+		bool operator==(const MockFeatureExtractor::ExtractedFeature& lhs, const MockFeatureExtractor::ExtractedFeature& rhs){return (lhs.featureID == rhs.featureID);}
 	}
 }
 

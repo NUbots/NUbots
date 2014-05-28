@@ -62,17 +62,17 @@ namespace modules {
                 }
             });
             
-            debugHandle = on<Trigger<Every<10, Per<std::chrono::seconds>>>>([this] (const time_t& now, const Sensors& sensors) {
-                switch(FEATURE_EXTRACTOR_TYPE){
-                    case (FeatureExtractorType::ORB):
-                        emit(ORBModule.testSLAME(sensors));
-                        break;
-                    case (FeatureExtractorType::LSH):
-                        break;
-                    case (FeatureExtractorType::MOCK):
-                        break;
-                }
-            });
+            // debugHandle = on<Trigger<Every<10, Per<std::chrono::seconds>>>>([this] (const time_t& now, const Sensors& sensors) {
+            //     switch(FEATURE_EXTRACTOR_TYPE){
+            //         case (FeatureExtractorType::ORB):
+            //             emit(ORBModule.testSLAME(sensors));
+            //             break;
+            //         case (FeatureExtractorType::LSH):
+            //             break;
+            //         case (FeatureExtractorType::MOCK):
+            //             break;
+            //     }
+            // });
         }
     }
 }

@@ -35,6 +35,7 @@ namespace utility {
 			public:
 				arma::vec2 screenAngular;	//Compulsory
 			};
+
 			ORBFeatureExtractor();
 			std::vector<ExtractedFeature> extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors);
 
@@ -44,7 +45,7 @@ namespace utility {
             //Add new features here to the feature list and pick up missing filters and strengths below
 			std::vector<std::tuple<int, int, float>> matchFeatures(std::vector<ExtractedFeature>& features, 
 																   const std::vector<ExtractedFeature>& newFeatures,
-																   int MAX_MATCHES);
+																   size_t MAX_MATCHES);
             static constexpr const char* CONFIGURATION_PATH = "ORBFeatureExtractor.json";
 
 		};

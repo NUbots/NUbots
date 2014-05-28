@@ -36,7 +36,7 @@ namespace utility {
             //Add new features here to the feature list and pick up missing filters and strengths below
 			std::vector<std::tuple<int, int, float>> ORBFeatureExtractor::matchFeatures(std::vector<ExtractedFeature>& features, 
 																					    const std::vector<ExtractedFeature>& newFeatures,
-																					    int MAX_MATCHES)
+																					    size_t MAX_MATCHES)
 			{
 				//TODO: feature matching
 				return std::vector<std::tuple<int, int, float>>();
