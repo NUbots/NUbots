@@ -104,6 +104,7 @@ namespace messages {
         };
 
         class SLAMEObject {
+        public:
             NUClear::clock::time_point timestamp;
             arma::vec::fixed<6> expectedState;
             arma::vec2 screenAngular;  //theta, phi

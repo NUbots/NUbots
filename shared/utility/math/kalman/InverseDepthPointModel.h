@@ -43,7 +43,7 @@ namespace utility {
 
                 InverseDepthPointModel() {} // empty constructor
 
-                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
+                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, int placeholder_measurement_type);
 
                 arma::vec predictedObservation(const arma::vec::fixed<size>& state, const std::pair<const messages::input::Sensors&, const messages::localisation::Self&> stateData);
 

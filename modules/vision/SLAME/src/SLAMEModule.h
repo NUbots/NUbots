@@ -19,32 +19,35 @@
 #ifndef MODULES_VISION_SLAME_MODULE_H
 #define MODULES_VISION_SLAME_MODULE_H
 
-#include "SLAMEFeature.h"
-#include "SLAME.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/Image.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
+#include "utility/math/kalman/UKF.h"
+#include "utility/math/kalman/InverseDepthPointModel.h"
 
 namespace modules{
 	namespace vision{
  		template <class FeatureDetectorClass>
  		class SLAMEModule{
  		private:
+
  			std::vector<float> featureStrengths;
-            std::vector<FeatureDetectorClass::ExtractedFeature> features;
+            std::vector<typename FeatureDetectorClass::ExtractedFeature> features;
             std::vector<utility::math::kalman::UKF<utility::math::kalman::InverseDepthPointModel>> featureFilters;
 
             FeatureDetectorClass featureExtractor;
+            size_t MAX_MATCHES;
 
             NUClear::clock::time_point lastTime;
 
  		public:
  		 	SLAMEModule();
- 		 	std::unique_ptr<messages::vision::SLAMEObjects> getSLAMEObjects(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors);        
+ 		 	std::unique_ptr<std::vector<messages::vision::SLAMEObject>> getSLAMEObjects(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors);        
 
- 		 	setParameters(const messages::support::Configuration<FeatureDetectorClass>& config){
+ 		 	void setParameters(const messages::support::Configuration<FeatureDetectorClass>& config){
+ 		 		MAX_MATCHES = config["MAX_MATCHES"];
  		 		featureExtractor.setParameters(config);
  		 	}
  		};

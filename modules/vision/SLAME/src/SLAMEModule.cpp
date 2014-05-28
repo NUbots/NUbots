@@ -17,12 +17,13 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
- #include "SLAMEModule.h"
+#include "SLAMEModule.h"
+#include <nuclear>
 
 namespace modules{
 	namespace vision{
 		
-		using messages::vision::SLAMEObjects;
+		using messages::vision::SLAMEObject;
         using messages::input::Image;
         using messages::localisation::Self;
         using messages::input::Sensors;
@@ -34,10 +35,10 @@ namespace modules{
 
 
 		template <class FeatureDetectorClass>
-		std::unique_ptr<SLAMEObjects> SLAMEModule<FeatureDetectorClass>::getSLAMEObjects(const Image& image, const Self& self, const Sensors& sensors){
-			auto objectMessage = std::make_unique<std::vector<SLAMEObjects>>();	            
+		std::unique_ptr<std::vector<SLAMEObject>> SLAMEModule<FeatureDetectorClass>::getSLAMEObjects(const Image& image, const Self& self, const Sensors& sensors){
+			auto objectMessage = std::make_unique<std::vector<SLAMEObject>>();	            
 
-            std::vector<FeatureDetectorClass::ExtractedFeature> extractedFeatures = featureExtractor.extractFeatures(image, self, sensors);
+            std::vector<typename FeatureDetectorClass::ExtractedFeature> extractedFeatures = featureExtractor.extractFeatures(image, self, sensors);
 
             //Get matches: tuple = (featureIndex in featureFilters, extractedFeatureIndex in extractedFeatures, matchStrength)
             //Order of vector is strongest to weakest
@@ -50,16 +51,16 @@ namespace modules{
                 if(std::get<0>(match) < featureFilters.size()){     
                 	//That is, we have seen this object before
                     //Create message about where we have seen the feature
-                    objectMessage->push_back();
+                    objectMessage->push_back(SLAMEObject());
 
                     objectMessage->back().expectedState = featureFilters[std::get<0>(match)].get();
                     objectMessage->back().screenAngular = extractedFeatures[std::get<1>(match)].screenAngular;
                     objectMessage->back().strength = featureStrengths[std::get<0>(match)];
-                    objectMessage->back().timestamp = sensors->timestamp;
+                    objectMessage->back().timestamp = sensors.timestamp;
 
                     //Update our beleif
                     featureStrengths[std::get<0>(match)] += std::get<2>(match);	//TODO make this better and use strengths
-                    featureFilters[std::get<0>(match)].timeUpdate(deltaT);
+                    featureFilters[std::get<0>(match)].timeUpdate(deltaT, int(0));
                     featureFilters[std::get<0>(match)].measurementUpdate(extractedFeatures[std::get<1>(match)].screenAngular, std::pair<const Self&, const Sensors&>(self, sensors));
                 } else {    //Otherwise we initialise a filter for the object
                     featureFilters.push_back(utility::math::kalman::UKF<utility::math::kalman::InverseDepthPointModel>());
@@ -69,6 +70,7 @@ namespace modules{
                     //featureFilters[std::get<0>(match)].reset(extractedFeatures[std::get<1>(match)].getScreenAngular(sensors), self);
                 }
             }
+
 
             //TODO: sort objectMessage by strengths and take top k
             lastTime = sensors.timestamp;

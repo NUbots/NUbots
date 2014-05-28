@@ -18,12 +18,20 @@
  */
 
 #include "SLAME.h"
+#include <cmath>
+#include "SLAMEModule.h"
+
 
 namespace modules {
     namespace vision {
 
         using utility::vision::ORBFeatureExtractor;
         using utility::vision::MockFeatureExtractor;
+        using messages::input::Image;
+        using messages::localisation::Self;
+        using messages::support::Configuration;
+        using messages::input::Sensors;
+
         SLAME::SLAME(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), ORBModule(), MockSLAMEModule() {
 
             on<Trigger<Configuration<SLAME>>>([this](const Configuration<SLAME>& config) {
@@ -35,6 +43,7 @@ namespace modules {
                     FEATURE_EXTRACTOR_TYPE = FeatureExtractorType::LSH;
                 } else if(featureExtractorName.compare("MOCK") == 0) {
                     FEATURE_EXTRACTOR_TYPE = FeatureExtractorType::MOCK;
+                    fakeLocalisationHandle.enable();
                 } else {
                     NUClear::log<NUClear::WARN>("SLAME - BAD CONFIG STRING: Loading default ORB feature detector.");
                     FEATURE_EXTRACTOR_TYPE = FeatureExtractorType::ORB;
@@ -42,14 +51,16 @@ namespace modules {
             });
             
             on<Trigger<Configuration<MockFeatureExtractor>>>([this](const Configuration<MockFeatureExtractor>& config) {
+                FAKE_LOCALISATION_PERIOD = config["FAKE_LOCALISATION_CONFIG"];
+                FAKE_LOCALISATION_RADIUS = config["FAKE_LOCALISATION_RADIUS"];
                 MockSLAMEModule.setParameters(config);
-            });o
+            });
 
             on<Trigger<Configuration<ORBFeatureExtractor>>>([this](const Configuration<ORBFeatureExtractor>& config) {
                 ORBModule.setParameters(config);
             });
 
-            on<Trigger<Image>, With<std:vector<Self>, Sensors>>([this](const time_t&, const Image& image, const std::vector<Self>& selfs, const sensors& sensors){               
+            on<Trigger<Image>, With<std::vector<Self>, Sensors>>("SLAME Main Loop", [this](const Image& image, const std::vector<Self>& selfs, const Sensors& sensors){               
                 switch(FEATURE_EXTRACTOR_TYPE){
                     case (FeatureExtractorType::ORB):
                         emit(ORBModule.getSLAMEObjects(image, selfs[0], sensors));
@@ -61,7 +72,20 @@ namespace modules {
                         break;
                 }
             });
-            
+
+            fakeLocalisationHandle = on<Trigger<Every<30, std::chrono::milliseconds>>>("Fake Localisation", [this](const time_t&){
+                auto selfs = std::make_unique<std::vector<Self>>(1);                
+                auto& s = selfs->back();
+                NUClear::clock::time_point now = NUClear::clock::now();
+                NUClear::clock::duration t = now - start_time;
+                s.position = arma::vec2({FAKE_LOCALISATION_RADIUS * std::cos(2 * M_PI * std::chrono::duration_cast<std::chrono::seconds>(t).count() / FAKE_LOCALISATION_PERIOD), 
+                                         FAKE_LOCALISATION_RADIUS * std::sin(2 * M_PI * std::chrono::duration_cast<std::chrono::seconds>(t).count() / FAKE_LOCALISATION_PERIOD)});
+                s.heading = arma::vec2({cos(2 * M_PI * std::chrono::duration_cast<std::chrono::seconds>(t).count() / FAKE_LOCALISATION_PERIOD), 
+                                        sin(2 * M_PI * std::chrono::duration_cast<std::chrono::seconds>(t).count() / FAKE_LOCALISATION_PERIOD)});
+                emit(std::move(selfs));
+            });
+            fakeLocalisationHandle.disable();
+            start_time = NUClear::clock::now();
             // debugHandle = on<Trigger<Every<10, Per<std::chrono::seconds>>>>([this] (const time_t& now, const Sensors& sensors) {
             //     switch(FEATURE_EXTRACTOR_TYPE){
             //         case (FeatureExtractorType::ORB):

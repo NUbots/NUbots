@@ -24,6 +24,7 @@
 
 namespace utility {
 	namespace vision {
+			bool operator==(const MockFeatureExtractor::ExtractedFeature& lhs, const MockFeatureExtractor::ExtractedFeature& rhs){return (lhs.featureID == rhs.featureID);}
 
 			using messages::input::ServoID;
 
@@ -58,7 +59,7 @@ namespace utility {
 			}
 
 			std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
-				//TODO: feature detection
+				
 					std::vector<ExtractedFeature> features;
 					arma::vec2 selfHeading = arma::normalise(self.heading);
 					arma::mat44 robotToWorld_world = arma::mat44({   		  selfHeading[0],   		   -selfHeading[1], 0,            	 	self.position[0],
@@ -69,7 +70,7 @@ namespace utility {
 	                arma::mat44 cameraToBody_body = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
 
 	                arma::mat44 robotToBody_body = arma::eye(4,4);
-	                //TODO: copy localisation in develop
+	                
 	                robotToBody_body.submat(0,0,2,2) = sensors.orientation;
 
 	                arma::mat44 worldToCamera_camera = utility::math::matrix::orthonormal44Inverse(cameraToBody_body) * robotToBody_body * utility::math::matrix::orthonormal44Inverse(robotToWorld_world);	                
@@ -95,7 +96,6 @@ namespace utility {
 																					    size_t MAX_MATCHES)
 			{
 				std::vector<std::tuple<int, int, float>> matches;
-				//TODO: feature matching
 				
 				for(size_t newFeatureIndex = 0; newFeatureIndex < newFeatures.size(); newFeatureIndex++){	//For each new feature	
 					auto& newFeature = newFeatures[newFeatureIndex];

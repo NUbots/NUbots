@@ -55,7 +55,6 @@ namespace utility {
 																   const std::vector<ExtractedFeature>& newFeatures,
 																   size_t MAX_MATCHES);
 		};
-		bool operator==(const MockFeatureExtractor::ExtractedFeature& lhs, const MockFeatureExtractor::ExtractedFeature& rhs){return (lhs.featureID == rhs.featureID);}
 	}
 }
 
