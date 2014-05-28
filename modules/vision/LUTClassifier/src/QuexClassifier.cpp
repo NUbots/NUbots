@@ -27,9 +27,9 @@ namespace modules {
         using messages::vision::ClassifiedImage;
 
         QuexClassifier() {
-        };
+        }
 
-        std::multimap<ObjectClass, ClassifiedImage::Segment> QuexClassifier::classify(const Image& image, const LookUpTable& lut, const arma::vec2& start, const arma::vec2& end) {
+        std::multimap<ObjectClass, ClassifiedImage<ObjectClass>::Segment> QuexClassifier::classify(const Image& image, const LookUpTable& lut, const arma::vec2& start, const arma::vec2& end) {
 
             // Reset our buffer
 

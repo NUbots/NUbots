@@ -37,7 +37,7 @@ namespace modules {
 			void ensureCapacity();
 
 		public:
-			std::multimap<messages::vision::ObjectClass, messages::vision::ClassifiedImage::Segment> classify(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const arma::vec2& start, const arma::vec2& end);
+			std::multimap<messages::vision::ObjectClass, messages::vision::ClassifiedImage<messages::vision::ObjectClass>::Segment> classify(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const arma::vec2& start, const arma::vec2& end);
 		};
 	}
 }
