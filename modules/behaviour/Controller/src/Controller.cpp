@@ -172,7 +172,7 @@ namespace modules {
                         }
                     }
 
-                    // Dirty hack, we set source to 0 when it's processed
+                    // Dirty hack, we set source to 0 when it's processed (we ensure nobody else can use 0)
                     if(!queue.empty() && queue.front().source != 0) {
 
                         auto& command = queue.front();
@@ -202,7 +202,7 @@ namespace modules {
 
                     for (auto& servo : emptiedQueues) {
 
-                        // Get the id of the limb this was leased to
+                        // Get the lease holder on the limb this servo belongs to
                         auto id = limbAccess[uint(messages::behaviour::limbForServo(servo))];
                         completeMap[id].insert(servo);
                     }

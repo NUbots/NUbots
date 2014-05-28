@@ -96,6 +96,65 @@ namespace modules {
                         NUClear::log<NUClear::WARN>(s.str());
                     }
 
+                    // Output errors on the FSRs
+                    if (input.fsr.left.errorFlags != DarwinSensors::Error::OK) {
+                        std::stringstream s;
+                        s << "Error on Left FSR:";
+
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::INPUT_VOLTAGE) {
+                            s << " Input Voltage ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::ANGLE_LIMIT) {
+                            s << " Angle Limit ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERHEATING) {
+                            s << " Overheating ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERLOAD) {
+                            s << " Overloaded ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::INSTRUCTION) {
+                            s << " Bad Instruction ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::CORRUPT_DATA) {
+                            s << " Corrupt Data ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::TIMEOUT) {
+                            s << " Timeout ";
+                        }
+
+                        NUClear::log<NUClear::WARN>(s.str());
+                    }
+
+                    if (input.fsr.right.errorFlags != DarwinSensors::Error::OK) {
+                        std::stringstream s;
+                        s << "Error on Right FSR:";
+
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::INPUT_VOLTAGE) {
+                            s << " Input Voltage ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::ANGLE_LIMIT) {
+                            s << " Angle Limit ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERHEATING) {
+                            s << " Overheating ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERLOAD) {
+                            s << " Overloaded ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::INSTRUCTION) {
+                            s << " Bad Instruction ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::CORRUPT_DATA) {
+                            s << " Corrupt Data ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::TIMEOUT) {
+                            s << " Timeout ";
+                        }
+
+                        NUClear::log<NUClear::WARN>(s.str());
+                    }
+
                     // Read through all of our sensors
                     for(uint i = 0; i < 20; ++i) {
                         auto& original = input.servo[i];
