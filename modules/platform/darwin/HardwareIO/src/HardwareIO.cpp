@@ -23,6 +23,7 @@
 #include "utility/math/angle.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/motion/ServoTarget.h"
+#include "messages/support/Configuration.h"
 
 
 namespace modules {
@@ -30,12 +31,16 @@ namespace platform {
 namespace darwin {
 
     using messages::platform::darwin::DarwinSensors;
-    using  messages::motion::ServoTarget;
+    using messages::motion::ServoTarget;
+    using messages::support::Configuration;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/ttyUSB0") {
 
+        on<Trigger<Configuration<Darwin::UART>>>([this](const Configuration<Darwin::UART>& config){
+            darwin.setConfig(config);
+        });
         // This trigger gets the sensor data from the CM730
-        on<Trigger<Every<60, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
+        on<Trigger<Every<50, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
 
             // Read our data
             Darwin::BulkReadResults data = darwin.bulkRead();

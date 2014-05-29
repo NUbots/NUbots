@@ -114,12 +114,6 @@ namespace Darwin {
 
     CommandResult UART::readPacket() {
 
-        // We will wait this long for an initial packet header
-
-        int PACKET_WAIT = 10000;
-        // We will only wait a maximum of 1000 microseconds between bytes in a packet (assumes baud of 1000000bps)
-        int BYTE_WAIT = 1000;
-
         // Our result
         CommandResult result;
 
