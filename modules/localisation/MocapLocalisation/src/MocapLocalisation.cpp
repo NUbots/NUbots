@@ -41,18 +41,18 @@ namespace support {
 
         on<Trigger<Network<MotionCapture>>>([this](const Network<MotionCapture>& net) {
             // NUClear::log("I got things from", net.sender)
-            auto mocap = net.data;
-            arma::mat33 mocapToField = arma::eye(3,3);
-            arma::vec3 fieldX, fieldY, fieldOrigin;
-            for (auto& rigid_body : mocap->rigid_bodies){
-                if(rigid_body.identifier.equals("x")){
-                    fieldx = arma::vec3({});
-                }
-                if(rigid_body.identifier.equals("y")){
-                }
-                if(rigid_body.identifier.equals("origin")){
-                }
-            }
+            // auto mocap = net.data;
+            // arma::mat33 mocapToField = arma::eye(3,3);
+            // arma::vec3 fieldX, fieldY, fieldOrigin;
+            // for (auto& rigid_body : mocap->rigid_bodies){
+            //     if(rigid_body.identifier.equals("x")){
+            //         fieldx = arma::vec3({});
+            //     }
+            //     if(rigid_body.identifier.equals("y")){
+            //     }
+            //     if(rigid_body.identifier.equals("origin")){
+            //     }
+            // }
             
 
         });
