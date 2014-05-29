@@ -51,6 +51,12 @@ namespace Darwin {
         return (~checksum);
     }
 
+    void UART::setConfig(const messages::support::Configuration<UART>& config){
+        PACKET_WAIT = config["PACKET_WAIT"];
+        BYTE_WAIT = config["BYTE_WAIT"];
+        BUS_RESET_WAIT_TIME_uS = config["BUS_RESET_WAIT_TIME_uS"];
+    }        
+
     UART::UART(const char* name) {
 
         double baud = 1000000;  // (1mb/s)
@@ -231,7 +237,7 @@ namespace Darwin {
                 }
 
                 // Wait for 100ms for the bus to reset
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::microseconds(BUS_RESET_WAIT_TIME_uS));
 
                 // Stop trying to read future packets
                 break;

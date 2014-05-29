@@ -109,8 +109,8 @@ double RobotHypothesis::MeasurementUpdate(
     arma::vec2 actual_pos = actual_object.location();
     arma::vec2 measurement = utility::math::coordinates::Spherical2Cartesian(observed_object.sphericalFromNeck).rows(0,1);
     arma::mat22 cov;
-    cov <<   0.1 * observed_object.sphericalFromNeck[0]  <<                                          0 << arma::endr 
-        <<                                            0 << 0.1 * observed_object.sphericalFromNeck[0] ;  //HACK Cebit 2014
+    cov <<   0.1 * observed_object.sphericalError[0]  <<                                          0 << arma::endr 
+        <<                                            0 << 0.1 * observed_object.sphericalError[0] ;  //HACK Cebit 2014
 
 
     double quality = filter_.measurementUpdate(measurement, cov, arma::vec2({actual_pos[0],actual_pos[1]}));
