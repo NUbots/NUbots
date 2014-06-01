@@ -43,6 +43,8 @@ namespace ball {
     public:
         static constexpr size_t size = 4;
 
+        double ballDragCoefficient = 0.9;
+
         BallModel() {} // empty constructor
 
         arma::vec::fixed<size> timeUpdate(
@@ -59,6 +61,10 @@ namespace ball {
         arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
 
         arma::mat::fixed<size, size> processNoise();
+
+        arma::vec::fixed<BallModel::size> ApplyVelocity(
+            const arma::vec::fixed<BallModel::size>& state,
+            double deltaT);
 
         // TODO: Add to config system?
         // static constexpr double processNoiseFactor = 1e-6;

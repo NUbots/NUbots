@@ -23,8 +23,12 @@
 #include "utility/time/time.h"
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/input/Sensors.h"
 #include "messages/localisation/FieldObject.h"
 
+
+
+using messages::input::Sensors;
 using utility::localisation::LFOId;
 using utility::localisation::LocalisationFieldObject;
 using utility::time::TimeDifferenceSeconds;
@@ -48,10 +52,10 @@ namespace localisation {
     }
     
     void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
-                                              const arma::mat44& odom) {
+                                              const Sensors& sensors) {
         double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
         last_time_update_time_ = current_time;
-        robot_models_.TimeUpdate(seconds, odom);
+        robot_models_.TimeUpdate(seconds, sensors);
     }
 
     std::vector<LocalisationFieldObject> MMKFRobotLocalisationEngine::GetPossibleObjects(

@@ -25,6 +25,7 @@
 #include "messages/localisation/FieldObject.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/motion/WalkCommand.h"
+#include "messages/motion/KickCommand.h"
 #include "utility/nubugger/NUgraph.h"
 
 
@@ -39,6 +40,7 @@ namespace modules {
             using messages::behaviour::WalkApproach;
             using messages::motion::WalkStartCommand;
             using messages::motion::WalkStopCommand;
+            using messages::motion::KickFinished;
             using utility::nubugger::graph;
             //using namespace messages;
 
@@ -97,6 +99,11 @@ namespace modules {
 
                     bearingSensitivity = file.config["bearingSensitivity"];
                     ApproachCurveFactor = file.config["ApproachCurveFactor"];
+                });
+
+
+                on<Trigger<KickFinished>>([this] (const KickFinished&) {
+                    emit(std::move(std::make_unique<WalkStartCommand>()));            
                 });
 
                 // add in fake walk localisation
@@ -229,9 +236,10 @@ namespace modules {
                         //emit(std::move(std::make_unique<WalkStartCommand>()));
 
                     } else {
+                        float ballBearing = std::atan2(ball.position[1],ball.position[0]);                        
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
                         command->velocity = arma::vec({0,0});
-                        command->rotationalSpeed = -turnSpeed;  //vx,vy, alpha
+                        command->rotationalSpeed = turnSpeed * (ballBearing > 0 ? 1 : -1 );  //vx,vy, alpha
                         emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));
                         emit(std::move(command));//XXX: emit here
                     }
@@ -330,18 +338,18 @@ namespace modules {
                 double walk_bearing;
 
                 //check what distance increment we're in:
-                if (distanceIncrement == 3 or move[0] > midApproachDistance+distanceHysteresis) {
+                if (move[0] > midApproachDistance+distanceHysteresis) {
                     distanceIncrement = 3;
                     walk_speed = forwardSpeed;
-                } else if (distanceIncrement == 2 or move[0] > closeApproachDistance + distanceHysteresis and
+                } else if (move[0] > closeApproachDistance + distanceHysteresis and
                            move[0] < midApproachDistance) {
                     distanceIncrement = 2;
                     walk_speed = midApproachSpeed;
-                } else if (distanceIncrement == 1 or move[0] > ballLineupDistance + distanceHysteresis and
+                } else if (move[0] > ballLineupDistance + distanceHysteresis and
                            move[0] < closeApproachDistance) {
                     distanceIncrement = 1;
                     walk_speed = closeApproachSpeed;
-                } else {
+                } else if (move[0] < ballLineupDistance + distanceHysteresis) {
                     distanceIncrement = 0;
                     walk_speed = 0.f;
                 }

@@ -96,13 +96,72 @@ namespace modules {
                         NUClear::log<NUClear::WARN>(s.str());
                     }
 
+                    // Output errors on the FSRs
+                    if (input.fsr.left.errorFlags != DarwinSensors::Error::OK) {
+                        std::stringstream s;
+                        s << "Error on Left FSR:";
+
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::INPUT_VOLTAGE) {
+                            s << " Input Voltage ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::ANGLE_LIMIT) {
+                            s << " Angle Limit ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERHEATING) {
+                            s << " Overheating ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERLOAD) {
+                            s << " Overloaded ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::INSTRUCTION) {
+                            s << " Bad Instruction ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::CORRUPT_DATA) {
+                            s << " Corrupt Data ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::TIMEOUT) {
+                            s << " Timeout ";
+                        }
+
+                        NUClear::log<NUClear::WARN>(s.str());
+                    }
+
+                    if (input.fsr.right.errorFlags != DarwinSensors::Error::OK) {
+                        std::stringstream s;
+                        s << "Error on Right FSR:";
+
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::INPUT_VOLTAGE) {
+                            s << " Input Voltage ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::ANGLE_LIMIT) {
+                            s << " Angle Limit ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERHEATING) {
+                            s << " Overheating ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERLOAD) {
+                            s << " Overloaded ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::INSTRUCTION) {
+                            s << " Bad Instruction ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::CORRUPT_DATA) {
+                            s << " Corrupt Data ";
+                        }
+                        if(input.cm730ErrorFlags & DarwinSensors::Error::TIMEOUT) {
+                            s << " Timeout ";
+                        }
+
+                        NUClear::log<NUClear::WARN>(s.str());
+                    }
+
                     // Read through all of our sensors
                     for(uint i = 0; i < 20; ++i) {
                         auto& original = input.servo[i];
                         auto& error = original.errorFlags;
 
                         // Check for an error on the servo and report it
-                        if(error != DarwinSensors::Error::OK) {
+                        while(error != DarwinSensors::Error::OK) {
                             std::stringstream s;
                             s << "Error on Servo " << (i + 1) << " (" << messages::input::stringFromId(ServoID(i)) << "):";
 
@@ -123,12 +182,14 @@ namespace modules {
                             }
                             if(error & DarwinSensors::Error::CORRUPT_DATA) {
                                 s << " Corrupt Data ";
+                                break;
                             }
                             if(error & DarwinSensors::Error::TIMEOUT) {
                                 s << " Timeout ";
                             }
 
                             NUClear::log<NUClear::WARN>(s.str());
+                            break;
                         }
 
                         // Add the sensor values to the system properly
@@ -141,7 +202,6 @@ namespace modules {
                             original.dGain,
                             original.goalPosition,
                             original.movingSpeed,
-                            original.torqueLimit,
                             original.presentPosition,
                             original.presentSpeed,
                             original.load,
@@ -160,7 +220,7 @@ namespace modules {
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
                     if(previousSensors && (input.cm730ErrorFlags || arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2) > 4 * M_PI)) {
-                        NUClear::log("Bad gyroscope value", arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2));
+                        // NUClear::log("Bad gyroscope value", arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2));
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
                     else {
@@ -203,33 +263,69 @@ namespace modules {
                     sensors->leftFootDown = false;
                     sensors->rightFootDown = false;
 
-                    int zeroSensorsLeft = (input.fsr.left.fsr1 == 0) + (input.fsr.left.fsr2 == 0) + (input.fsr.left.fsr3 == 0) + (input.fsr.left.fsr4 == 0);
-                    int zeroSensorsRight = (input.fsr.right.fsr1 == 0) + (input.fsr.right.fsr2 == 0) + (input.fsr.right.fsr3 == 0) + (input.fsr.right.fsr4 == 0);
+                    // int zeroSensorsLeft = (input.fsr.left.fsr1 == 0) + (input.fsr.left.fsr2 == 0) + (input.fsr.left.fsr3 == 0) + (input.fsr.left.fsr4 == 0);
+                    // int zeroSensorsRight = (input.fsr.right.fsr1 == 0) + (input.fsr.right.fsr2 == 0) + (input.fsr.right.fsr3 == 0) + (input.fsr.right.fsr4 == 0);
 
-                    if(input.fsr.left.fsr1 + input.fsr.left.fsr2 + input.fsr.left.fsr3 + input.fsr.left.fsr4 > SUPPORT_FOOT_FSR_THRESHOLD && zeroSensorsLeft <= 4 - REQUIRED_NUMBER_OF_FSRS){
+                    // if(input.fsr.left.fsr1 + input.fsr.left.fsr2 + input.fsr.left.fsr3 + input.fsr.left.fsr4 > SUPPORT_FOOT_FSR_THRESHOLD && zeroSensorsLeft <= 4 - REQUIRED_NUMBER_OF_FSRS){
+                    //     sensors->leftFootDown = true;
+                    // }
+                    // if(input.fsr.right.fsr1 + input.fsr.right.fsr2 + input.fsr.right.fsr3 + input.fsr.right.fsr4 > SUPPORT_FOOT_FSR_THRESHOLD && zeroSensorsRight <= 4 - REQUIRED_NUMBER_OF_FSRS){
+                    //     sensors->rightFootDown = true;
+                    // }
+
+                    if(!std::isnan(input.fsr.left.centreX) && !std::isnan(input.fsr.left.centreY)) {
+                        // Left foot is on the ground?
                         sensors->leftFootDown = true;
                     }
-                    if(input.fsr.right.fsr1 + input.fsr.right.fsr2 + input.fsr.right.fsr3 + input.fsr.right.fsr4 > SUPPORT_FOOT_FSR_THRESHOLD && zeroSensorsRight <= 4 - REQUIRED_NUMBER_OF_FSRS){
+                    if(!std::isnan(input.fsr.right.centreX) && !std::isnan(input.fsr.right.centreY)) {
+                        // Right foot is on the ground?
                         sensors->rightFootDown = true;
                     }
-                    arma::mat44 odometryLeftFoot = arma::eye(4,4);
-                    arma::mat44 odometryRightFoot = arma::eye(4,4);
-                    if(previousSensors){
-                        //NOTE: calculateOdometryMatrix requires sensors->forwardKinematics to be calculated before calling
-                        odometryLeftFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::LEFT);
-                        odometryRightFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::RIGHT);
-                    }
+
+                    // if(previousSensors && (!sensors->leftFootDown && !sensors->rightFootDown )) {
+                    //     //std::cout << "No feet down!" << std::endl;
+                    //     sensors->leftFootDown = previousSensors->leftFootDown;
+                    //     sensors->rightFootDown = previousSensors->rightFootDown;
+                    // }
 
                     sensors->odometry = arma::eye(4,4);
+                    // // Kinematics odometry
+                    // arma::mat44 odometryRightFoot = arma::eye(4,4);
+                    // arma::mat44 odometryLeftFoot = arma::eye(4,4);
+                    // if(previousSensors){
+                    //     //NOTE: calculateOdometryMatrix requires sensors->forwardKinematics to be calculated before calling
+                    //     odometryLeftFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::LEFT);
+                    //     odometryRightFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::RIGHT);
+                    // }
 
-                    if(sensors->leftFootDown || sensors->rightFootDown){
-                        sensors->odometry.submat(0,3,2,3) = (odometryLeftFoot.submat(0,3,2,3) * sensors->leftFootDown + odometryLeftFoot.submat(0,3,2,3) * sensors->rightFootDown)
-                                                            / (sensors->leftFootDown + sensors->rightFootDown);
-                        if(sensors->leftFootDown && sensors->rightFootDown){
-                            sensors->odometry.submat(0,0,2,2) = odometryLeftFoot.submat(0,0,2,2);
-                        } else {
-                            sensors->odometry.submat(0,0,2,2) = odometryLeftFoot.submat(0,0,2,2) * sensors->leftFootDown + odometryRightFoot.submat(0,0,2,2) * sensors->rightFootDown;
+
+                    // if(sensors->leftFootDown || sensors->rightFootDown){
+                    //     sensors->odometry.submat(0,3,2,3) = (odometryLeftFoot.submat(0,3,2,3) * sensors->leftFootDown + odometryLeftFoot.submat(0,3,2,3) * sensors->rightFootDown)
+                    //                                         / (sensors->leftFootDown + sensors->rightFootDown);
+                    //     if(sensors->leftFootDown && sensors->rightFootDown){
+                    //         sensors->odometry.submat(0,0,2,2) = odometryLeftFoot.submat(0,0,2,2);
+                    //     } else {
+                    //         sensors->odometry.submat(0,0,2,2) = odometryLeftFoot.submat(0,0,2,2) * sensors->leftFootDown + odometryRightFoot.submat(0,0,2,2) * sensors->rightFootDown;
+                    //     }
+                    // }
+
+                    if(previousSensors){
+                        if(sensors->leftFootDown || sensors->rightFootDown){
+                            arma::vec3 measuredTorsoFromLeftFoot = -sensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL).submat(0,0,2,2).t() * sensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL).col(3).rows(0,2);
+                            arma::vec3 measuredTorsoFromRightFoot = -sensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL).submat(0,0,2,2).t() * sensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL).col(3).rows(0,2);
+
+                            arma::vec3 previousMeasuredTorsoFromLeftFoot = -previousSensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL).submat(0,0,2,2).t() * previousSensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL).col(3).rows(0,2);
+                            arma::vec3 previousMeasuredTorsoFromRightFoot = -previousSensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL).submat(0,0,2,2).t() * previousSensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL).col(3).rows(0,2);
+
+                            arma::vec3 torsoVelFromLeftFoot =  -(measuredTorsoFromLeftFoot - previousMeasuredTorsoFromLeftFoot);//negate hack
+                            arma::vec3 torsoVelFromRightFoot =  -(measuredTorsoFromRightFoot - previousMeasuredTorsoFromRightFoot);
+
+                            arma::vec3 averageVelocity = (torsoVelFromLeftFoot * static_cast<int>(sensors->leftFootDown) + torsoVelFromRightFoot * static_cast<int>(sensors->rightFootDown))/(static_cast<int>(sensors->rightFootDown) + static_cast<int>(sensors->leftFootDown));
+                            sensors->odometry.submat(0,3,2,3) = averageVelocity;
                         }
+
+                        // Gyro based odometry for orientation
+                        sensors->odometry.submat(0,0,2,2) =  previousSensors->orientation.t() * sensors->orientation;
                     }
 
                     if(sensors->leftFootDown){
@@ -239,7 +335,6 @@ namespace modules {
                     } else {
                         sensors->bodyCentreHeight = 0;
                     }
-
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
@@ -264,11 +359,16 @@ namespace modules {
                         ));
                     emit(graph("Gyro Filtered", sensors->gyroscope[0],sensors->gyroscope[1], sensors->gyroscope[2]
                         ));*/
-                    emit(graph("L FSR", input.fsr.left.fsr1, input.fsr.left.fsr2, input.fsr.left.fsr3, input.fsr.left.fsr4
+
+                        integratedOdometry += sensors->odometry.submat(0,3,1,3);
+
+                    emit(graph("LFoot Down", sensors->leftFootDown
                         ));
-                    emit(graph("R FSR", input.fsr.right.fsr1, input.fsr.right.fsr2, input.fsr.right.fsr3, input.fsr.right.fsr4
+                    emit(graph("RFoot Down", sensors->rightFootDown
                         ));
-                    emit(graph("Torso Velocity", sensors->odometry(0,3), sensors->odometry(1,3), sensors->odometry(2,3)
+                    emit(graph("Torso Velocity (vx,vy,vz)", sensors->odometry(0,3), sensors->odometry(1,3), sensors->odometry(2,3)
+                        ));
+                    emit(graph("Integrated Odometry", integratedOdometry[0], integratedOdometry[1]
                         ));
                     emit(graph("COM", sensors->centreOfMass[0], sensors->centreOfMass[1], sensors->centreOfMass[2], sensors->centreOfMass[3]
                         ));

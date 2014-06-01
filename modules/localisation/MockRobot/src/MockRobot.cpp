@@ -156,8 +156,10 @@ namespace localisation {
             // Calculate torso displacement in robot-space:
             arma::vec2 position_diff = robot_position_ - odom_old_robot_position_;
             double theta = -new_heading;
-            arma::mat22 rot = {  std::cos(theta), std::sin(theta),
-                                -std::sin(theta), std::cos(theta) };
+            arma::mat22 rot;
+            //NOTE: Matrix initialisation changed by jake fountain 29th may 2014
+            rot <<  std::cos(theta) << std::sin(theta) << arma::endr
+                << -std::sin(theta) << std::cos(theta);
             // Rotate position_diff by -new_heading.
             odom->torso_displacement = rot * position_diff;
 

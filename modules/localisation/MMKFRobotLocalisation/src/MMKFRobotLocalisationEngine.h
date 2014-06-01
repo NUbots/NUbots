@@ -24,7 +24,6 @@
 #include <chrono>
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "utility/localisation/FieldDescription.h"
-#include "utility/localisation/FieldDescription.h"
 #include "messages/support/Configuration.h"
 #include "messages/vision/VisionObjects.h"
 #include "MultiModalRobotModel.h"
@@ -48,7 +47,7 @@ namespace localisation {
                         const messages::localisation::FakeOdometry& odom);
 
         void TimeUpdate(std::chrono::system_clock::time_point current_time,
-                                              const arma::mat44& odom); 
+                                              const messages::input::Sensors& sensors); 
 
         std::vector<utility::localisation::LocalisationFieldObject> GetPossibleObjects(
             const messages::vision::Goal& ambiguous_object);

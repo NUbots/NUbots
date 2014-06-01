@@ -25,9 +25,9 @@
 #include <vector>
 
 #include "CM730.h"
-#include "MLNCH.h"
 #include "MX28.h"
 #include "FSR.h"
+#include "messages/support/Configuration.h"
 
 #include "DarwinRawSensors.h"
 
@@ -61,8 +61,6 @@ namespace Darwin {
             HEAD_PITCH = 20,
             R_FSR = 111,
             L_FSR = 112,
-            R_MISSILE = 50,
-            L_MISSILE = 51,
             BROADCAST = 254
         };
     }  // namespace ID
@@ -78,7 +76,7 @@ namespace Darwin {
      * @author Trent Houliston
      */
     class Darwin {
-    private:
+    private:        
         /// Our UART class that we will communicate through
         UART uart;
         /// Our Prebuilt bulk read command
@@ -90,6 +88,9 @@ namespace Darwin {
         void buildBulkReadPacket();
 
     public:
+        void setConfig(const messages::support::Configuration<UART>& config){
+            uart.setConfig(config);
+        }
         /// The CM730
         CM730 cm730;
         /// The Right Shoulder Pitch MX28
@@ -136,10 +137,6 @@ namespace Darwin {
         FSR rFSR;
         /// The Left Foot FSR
         FSR lFSR;
-        /// The Right Missle Launcher
-        MLNCH rMissile;
-        /// The Left Missle Launcher
-        MLNCH lMissile;
 
         /**
          * @brief Gets the darwin device with the given sensor id

@@ -51,7 +51,6 @@ namespace planning {
             KICK_SIDE_ANGLE_LIMIT = config["KICK_SIDE_ANGLE_LIMIT"];
         });
 
-
         on<Trigger<Ball>, With<std::vector<Self>>, With<std::vector<messages::vision::Ball>>>([this] (const Ball& ball, const std::vector<Self>& selfs, const std::vector<messages::vision::Ball>& vision_balls) {
 
             // TODO check if the ball is within our kick box using some math or something

@@ -26,6 +26,8 @@
 #include <stdint.h>
 #include <linux/serial.h>
 
+#include "messages/support/Configuration.h"
+
 #include <mutex>
 #include <cstring>
 #include <vector>
@@ -91,6 +93,13 @@ namespace Darwin {
      */
     class UART {
     private:
+
+        // We will wait this long for an initial packet header
+        int PACKET_WAIT= 10000;
+        // We will only wait a maximum of BYTE_WAIT microseconds between bytes in a packet (assumes baud of 1000000bps)
+        int BYTE_WAIT = 1000;
+        int BUS_RESET_WAIT_TIME_uS = 100000;
+
         /// @brief The file descriptor for the USB TTY device we use to communicate with the devices
         int fd;
         /// @brief A mutex which is used for flow control on the USB TTY device
@@ -106,6 +115,8 @@ namespace Darwin {
         bool configure(double baud);
 
     public:
+        static constexpr const char* CONFIGURATION_PATH = "DarwinPlatform.json";
+        void setConfig(const messages::support::Configuration<UART>& config);
         /**
          * @brief Constructs a new UART instance using the passed device path as the TTY device
          *
@@ -135,11 +146,15 @@ namespace Darwin {
             // Lock the mutex
             std::lock_guard<std::mutex> lock(mutex);
 
+            // Write our command to the UART
+            int written = write(fd, &command, sizeof(TPacket));
+
+            // Wait until we finish writing before continuing (no buffering)
+            tcdrain(fd);
+
             // We flush our buffer, just in case there was anything random in it
             tcflush(fd, TCIFLUSH);
 
-            // Write our command to the UART
-            int written = write(fd, &command, sizeof(TPacket));
             assert(written == sizeof(TPacket));
             // If compiled with NDEBUG then technically written is unused, suppress that warning
             (void) written;

@@ -5,6 +5,17 @@ class initial_apt_update {
   } -> Package <| |>
 }
 
+class developer_tools {
+  class { 'vim':  username => $username, }
+  package { 'screen': ensure => latest, }
+  package { 'htop': ensure => latest, }
+  package { 'gdb': ensure => latest, }
+  package { 'cmake-curses-gui': ensure => latest, }
+  package { 'linux-headers-generic': ensure => latest, }
+  package { 'dos2unix': ensure => latest, }
+  package { 'rsync': ensure => latest, }
+}
+
 node nuclearportvm {
   include initial_apt_update
 
@@ -18,38 +29,12 @@ node nuclearportvm {
   # ps3 controller tools
   package { 'software-properties-common': ensure => latest, }
 
+  # natnet motion capture streaming
+  class { 'natnet':  username => $username, }
+
   # Non-essential developer tools:
-  class { 'vim':  username => $username, }
-  package { 'screen': ensure => latest, }
-  package { 'htop': ensure => latest, }
-  package { 'gdb': ensure => latest, }
-  package { 'cmake-curses-gui': ensure => latest, }
-  package { 'linux-headers-generic': ensure => latest, }
-  package { 'dos2unix': ensure => latest, }
-  package { 'rsync': ensure => latest, }
+  include developer_tools
 }
-
-# node nubuggervm {
-#   include initial_apt_update
-
-#   # define variables for this node
-#   $username = 'vagrant'
-
-#   # these (and most packages) should be virtual resources
-#   package { 'build-essential': ensure => latest }
-#   package { 'git': ensure => latest }
-
-#   file { 'nubots_dir':
-#     path => "/home/${username}/nubots",
-#     ensure => directory,
-#     owner => $username,
-#     group => $username,
-#   }
-
-#   class { 'nubugger': username => $username, }
-
-#   class { 'vim': username => $username, }
-# }
 
 node packer-virtualbox-iso, packer-vmware-iso {
   include initial_apt_update
@@ -81,15 +66,11 @@ node packer-virtualbox-iso, packer-vmware-iso {
   package { 'nodejs': ensure => latest, }
   package { 'npm': ensure => latest, }
 
+  # natnet motion capture streaming
+  # class { 'natnet':  username => $username, }
+
   # Non-essential developer tools:
-  class { 'vim':  username => $username, }
-  package { 'screen': ensure => latest, }
-  package { 'htop': ensure => latest, }
-  package { 'gdb': ensure => latest, }
-  package { 'cmake-curses-gui': ensure => latest, }
-  package { 'linux-headers-generic': ensure => latest, }
-  package { 'dos2unix': ensure => latest, }
-  package { 'rsync': ensure => latest, }
+  include developer_tools
 
   # NFS for better Vagrant shared folders
   package { 'nfs-common': ensure => latest, }

@@ -33,16 +33,15 @@ namespace modules {
 namespace localisation {
 namespace ball {
 
-arma::vec::fixed<BallModel::size> ApplyVelocity(
+arma::vec::fixed<BallModel::size> BallModel::ApplyVelocity(
     const arma::vec::fixed<BallModel::size>& state, double deltaT) {
     auto result = state;
 
     // Apply ball velocity
     result[kX] += state[kVx] * deltaT;
     result[kY] += state[kVy] * deltaT;
-    const double kDragCoefficient = 1.0; // TODO: Config system
-    result[kVx] *= kDragCoefficient;
-    result[kVy] *= kDragCoefficient;
+    result[kVx] -= result[kVx] * ballDragCoefficient * deltaT;
+    result[kVy] -= result[kVy] * ballDragCoefficient * deltaT;
 
     return result;
 }

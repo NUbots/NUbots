@@ -18,7 +18,7 @@
     "stanceLimitY2": 0.02,
 
     "bodyHeight": 0.285,
-    "bodyTilt": 0.3491,
+    "bodyTilt": 0.4091,
     "footX": 0.0,
     "footY": 0.035,
     "supportX": 0.02,
@@ -32,7 +32,7 @@
 
     "tStep": 0.25,
     "tZmp": 0.165,
-    "stepHeight": 0.035,
+    "stepHeight": 0.015,
     "phSingle": [0.1, 0.9],
 
     "spreadComp": 0.015,
@@ -48,8 +48,8 @@
     "supportSideY": -0.005,
     "supportTurn": 0.02,
 
-    "frontComp": 0.00,
-    "AccelComp": 0.00,
+    "frontComp": 0.0,
+    "AccelComp": 0.1,
 
     "supportModYInitial": 0,
 
@@ -60,5 +60,7 @@
     "velCommandX" : 0.035,
     "velCommandY" : 0.0,
     "velCommandAngular" : 0.0,
-    "balanceWeight" : 0.7
+    "balanceWeight" : 0.7,
+
+    "STAND_SCRIPT_DURATION_MILLISECONDS" : 1000
 }

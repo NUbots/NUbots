@@ -47,9 +47,7 @@ namespace Darwin {
     , headPan(uart, ID::HEAD_YAW)
     , headTilt(uart, ID::HEAD_PITCH)
     , rFSR(uart, ID::R_FSR)
-    , lFSR(uart, ID::L_FSR)
-    , rMissile(uart, ID::R_MISSILE)
-    , lMissile(uart, ID::L_MISSILE) {
+    , lFSR(uart, ID::L_FSR) {
 
         // Turn on the dynamixel power
         cm730.turnOnDynamixel();
@@ -86,11 +84,11 @@ namespace Darwin {
     void Darwin::buildBulkReadPacket() {
 
         // Double check that our type is big enough to hold the result
-        static_assert(sizeof(Types::CM730Data) == CM730::Address::VOLTAGE - CM730::Address::LED_PANNEL + 1,
+        static_assert(sizeof(Types::CM730Data) == CM730::Address::VOLTAGE - CM730::Address::BUTTON + 1,
                       "The CM730 type is the wrong size");
 
         // Double check that our type is big enough to hold the result
-        static_assert(sizeof(Types::MX28Data) == MX28::Address::PRESENT_TEMPERATURE - MX28::Address::TORQUE_ENABLE + 1,
+        static_assert(sizeof(Types::MX28Data) == MX28::Address::PRESENT_TEMPERATURE - MX28::Address::PRESENT_POSITION_L + 1,
                       "The MX28 type is the wrong size");
 
         // Double check that our type is big enough to hold the result
@@ -114,7 +112,7 @@ namespace Darwin {
 
                 // If it's the CM730
                 case ID::CM730:
-                    request.push_back(std::make_tuple(CM730::Address::LED_PANNEL, ID::CM730, sizeof(Types::CM730Data)));
+                    request.push_back(std::make_tuple(CM730::Address::BUTTON, ID::CM730, sizeof(Types::CM730Data)));
                     break;
 
                 // If it's the FSRs
@@ -125,7 +123,7 @@ namespace Darwin {
 
                 // Otherwise we assume that it's a servo
                 default:
-                    request.push_back(std::make_tuple(MX28::Address::TORQUE_ENABLE, sensor.first, sizeof(Types::MX28Data)));
+                    request.push_back(std::make_tuple(MX28::Address::PRESENT_POSITION_L, sensor.first, sizeof(Types::MX28Data)));
                     break;
             }
         }

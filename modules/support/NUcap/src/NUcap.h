@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,19 +17,34 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef DARWIN_MLNCH_H_
-#define DARWIN_MLNCH_H_
+#ifndef MODULES_SUPPORT_NUCAP_H
+#define MODULES_SUPPORT_NUCAP_H
 
-#include "DarwinDevice.h"
+#include <nuclear>
 
-namespace Darwin {
+#include <NatNetLinux/CommandListener.h>
+#include <NatNetLinux/FrameListener.h>
 
-    class MLNCH : public DarwinDevice {
+namespace modules {
+namespace support {
+
+    class NUcap : public NUClear::Reactor {
     public:
-        MLNCH(UART& coms, int id);
+        /// @brief Called by the powerplant to build and setup the NUcap reactor.
+        static constexpr const char* CONFIGURATION_PATH = "NUcap.json";
+        explicit NUcap(std::unique_ptr<NUClear::Environment> environment);
+    private:
+        // Sockets
+        int sdCommand;
+        int sdData;
 
-        void fire();
+        // listeners
+        std::unique_ptr<CommandListener> commandListener;
+        std::unique_ptr<FrameListener> frameListener;
     };
-}  // namespace Darwin
+
+}
+}
+
 
 #endif

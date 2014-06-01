@@ -24,4 +24,9 @@ ADD_ROLE(
         behaviour::skills::FallingRelax
         behaviour::skills::Getup
         behaviour::skills::KickScript
+
+        
+        #Localisation
+        localisation::MMKFRobotLocalisation
+        localisation::KFBallLocalisation
 )

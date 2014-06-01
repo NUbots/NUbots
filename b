@@ -48,7 +48,7 @@ def make(args):
     call(['make'] + args, cwd='build')
 
 def role_exists(role):
-    return os.path.isfile("build/roles/{}".format(role))
+    return os.path.isfile("build/bin/{}".format(role))
 
 def run(role):
     if role == '':
@@ -58,7 +58,10 @@ Usage: b run <role>
 Please provide the name of the role to run.
 '''
     elif role_exists(role):
-        call("./roles/{}".format(role), cwd='build/')
+        env = os.environ.copy()
+        # env['LD_LIBRARY_PATH'], "bin/lib:{}".format(env["LD_LIBRARY_PATH"]))
+        env['LD_LIBRARY_PATH'] = "bin/lib"
+        call(["./bin/{}".format(role)], cwd='build/', env=env)
     else:
         print "The role '{}' does not exist or did not build correctly.".format(role)
 
@@ -70,7 +73,10 @@ Usage: b debug <role>
 Please provide the name of the role to debug.
 '''
     elif role_exists(role):
-        call(["gdb", "./roles/{}".format(role), "-ex", "r"], cwd='build/')
+        env = os.environ.copy()
+        # env['LD_LIBRARY_PATH'], "bin/lib:{}".format(env["LD_LIBRARY_PATH"]))
+        env['LD_LIBRARY_PATH'] = "bin/lib"
+        call(["gdb", "./bin/{}".format(role), "-ex", "r"], cwd='build/', env=env)
     else:
         print "The role '{}' does not exist or did not build correctly.".format(role)
 

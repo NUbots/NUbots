@@ -20,6 +20,7 @@
 #ifndef MESSAGES_INPUT_SENSORS_H
 #define MESSAGES_INPUT_SENSORS_H
 
+#include <nuclear>
 #include <armadillo>
 #include <nuclear>
 #include "ServoID.h"
@@ -42,7 +43,6 @@ namespace messages {
 
                 float goalPosition;
                 float goalSpeed;
-                float torqueLimit;
 
                 float presentPosition;
                 float presentSpeed;

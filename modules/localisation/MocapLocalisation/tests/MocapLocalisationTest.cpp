@@ -17,15 +17,5 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "MLNCH.h"
-
-namespace Darwin {
-
-    MLNCH::MLNCH(UART& coms, int id) : DarwinDevice(coms, id) {}
-
-    void MLNCH::fire() {
-        std::vector<uint8_t> command({0xFF, 0xFF, 51, 2, 3, 0x00});
-        //coms.calculateChecksum(command.data());
-        coms.executeBroadcast(command);
-    }
-} // Darwin
+#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#include <catch.hpp>

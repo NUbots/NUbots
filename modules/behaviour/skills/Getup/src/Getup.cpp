@@ -95,8 +95,16 @@ namespace modules {
                     [this] (const std::set<LimbID>&) {
                         emit(std::make_unique<KillGetup>());
                     },
-                    [this] (const std::set<ServoID>&) {
+                    [this] (const std::set<ServoID>& servoSet) {
+                        //HACK 2014 Jake Fountain, Trent Houliston 
+                        //TODO track set limbs and wait for all to finish
+                        if(servoSet.find(ServoID::L_ANKLE_PITCH) != servoSet.end() || 
+                           servoSet.find(ServoID::R_ANKLE_PITCH) != servoSet.end()) 
+                        { 
+
                         emit(std::make_unique<KillGetup>());
+
+                        }
                     }
                 }));
             }

@@ -1,5 +1,5 @@
 {
 	"AngleBetweenGoalsObservationEnabled": 1,
 	"GoalPairObservationEnabled": 1,
-	"AllGoalsAreBlue": 1
+	"AllGoalsAreBlue": 0
 }

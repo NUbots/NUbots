@@ -37,6 +37,9 @@ namespace messages {
             arma::vec3 direction; // force is the magnitude
             behaviour::LimbID leg;
         };
+
+        struct KickFinished{
+        };
         
     }  // motion
 }  // messages

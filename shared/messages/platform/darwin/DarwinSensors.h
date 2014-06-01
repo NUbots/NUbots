@@ -49,7 +49,8 @@ namespace messages {
                     OVERLOAD        = 1 << 5,
                     INSTRUCTION     = 1 << 6,
                     CORRUPT_DATA    = 1 << 7,
-                    TIMEOUT         = 1 << 8
+                    TIMEOUT         = 1 << 8,
+                    TIMEOUT_VICTIM  = 1 << 9
                 };
 
                 NUClear::clock::time_point timestamp;
@@ -62,16 +63,16 @@ namespace messages {
                     bool led4;
                 } ledPanel;
 
-                struct ColouredLED {
+                struct HeadLED {
                     uint8_t r;
                     uint8_t g;
                     uint8_t b;
-                };
-
-                struct HeadLED : public ColouredLED {
                 } headLED;
 
-                struct EyeLED : public ColouredLED {
+                struct EyeLED {
+                    uint8_t r;
+                    uint8_t g;
+                    uint8_t b;
                 } eyeLED;
 
                 struct Buttons {
@@ -115,7 +116,6 @@ namespace messages {
                     uint16_t errorFlags;
 
                     bool torqueEnabled;
-                    bool led;
 
                     float pGain;
                     float iGain;
@@ -123,7 +123,6 @@ namespace messages {
 
                     float goalPosition;
                     float movingSpeed;
-                    float torqueLimit;
 
                     float presentPosition;
                     float presentSpeed;

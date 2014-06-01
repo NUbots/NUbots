@@ -19,8 +19,10 @@
 
 #include "UART.h"
 
+#include <thread>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <iostream>
 
 namespace Darwin {
     uint8_t calculateChecksum(void* command) {
@@ -48,6 +50,12 @@ namespace Darwin {
 
         return (~checksum);
     }
+
+    void UART::setConfig(const messages::support::Configuration<UART>& config){
+        PACKET_WAIT = config["PACKET_WAIT"];
+        BYTE_WAIT = config["BYTE_WAIT"];
+        BUS_RESET_WAIT_TIME_uS = config["BUS_RESET_WAIT_TIME_uS"];
+    }        
 
     UART::UART(const char* name) {
 
@@ -93,6 +101,9 @@ namespace Darwin {
         serinfo.flags &= ~ASYNC_SPD_MASK;
         serinfo.flags |= ASYNC_SPD_CUST;
 
+        // Set our serial port to use low latency mode (otherwise the USB driver buffers for 16ms before sending data)
+        serinfo.flags |= ASYNC_LOW_LATENCY;
+
         // Set our custom divsor for our speed
         serinfo.custom_divisor = serinfo.baud_base / baud;
 
@@ -108,11 +119,6 @@ namespace Darwin {
     }
 
     CommandResult UART::readPacket() {
-
-        // We will wait this long for an initial packet header
-        int PACKET_WAIT = 20000;
-        // We will only wait a maximum of 1000 microseconds between bytes in a packet (assumes baud of 1000000bps)
-        int BYTE_WAIT = 1000;
 
         // Our result
         CommandResult result;
@@ -221,6 +227,21 @@ namespace Darwin {
         // Read our responses for each of the packets
         for (int i = 0; i < responses; ++i) {
             results[i] = readPacket();
+            // If we get a timeout don't wait for other packets (other errors are fine)
+            if(results[i].header.errorcode == ErrorCode::NO_RESPONSE) {
+                // Set our timedout IDs
+                results[i].header.id = command[7 + i * 3];
+                for(i++; i < responses; ++i) {
+                    results[i].header.id = command[7 + i * 3];
+                    results[i].header.errorcode = ErrorCode::CORRUPT_DATA;
+                }
+
+                // Wait for 100ms for the bus to reset
+                std::this_thread::sleep_for(std::chrono::microseconds(BUS_RESET_WAIT_TIME_uS));
+
+                // Stop trying to read future packets
+                break;
+            }
         }
 
         return results;

@@ -27,6 +27,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/vision/VisionObjects.h"
 #include "RobotModel.h"
+#include "messages/input/Sensors.h"
 
 namespace modules {
 namespace localisation {
@@ -83,7 +84,7 @@ namespace localisation {
 
         void TimeUpdate(double seconds);
         void TimeUpdate(double seconds, const messages::localisation::FakeOdometry& odom);
-        void TimeUpdate(double seconds, const arma::mat44& odom);
+        void TimeUpdate(double seconds, const messages::input::Sensors& sensors);
 
 
         friend std::ostream& operator<<(std::ostream &os, const RobotHypothesis& h);
@@ -120,7 +121,7 @@ namespace localisation {
 
         void TimeUpdate(double seconds);
         void TimeUpdate(double seconds, const messages::localisation::FakeOdometry& odom);
-        void TimeUpdate(double seconds, const arma::mat44& odom);
+        void TimeUpdate(double seconds, const messages::input::Sensors& sensors);
 
         void MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,

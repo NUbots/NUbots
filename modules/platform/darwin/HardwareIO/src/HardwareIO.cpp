@@ -23,6 +23,7 @@
 #include "utility/math/angle.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/motion/ServoTarget.h"
+#include "messages/support/Configuration.h"
 
 
 namespace modules {
@@ -30,12 +31,16 @@ namespace platform {
 namespace darwin {
 
     using messages::platform::darwin::DarwinSensors;
-    using  messages::motion::ServoTarget;
+    using messages::motion::ServoTarget;
+    using messages::support::Configuration;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/ttyUSB0") {
 
+        on<Trigger<Configuration<Darwin::UART>>>([this](const Configuration<Darwin::UART>& config){
+            darwin.setConfig(config);
+        });
         // This trigger gets the sensor data from the CM730
-        on<Trigger<Every<60, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
+        on<Trigger<Every<50, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
 
             // Read our data
             Darwin::BulkReadResults data = darwin.bulkRead();
@@ -53,15 +58,13 @@ namespace darwin {
             sensors->cm730ErrorFlags = data.cm730ErrorCode == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.cm730ErrorCode);
 
             // LED Panel
-            sensors->ledPanel.led2 = Convert::getBit<1>(data.cm730.ledPanel);
-            sensors->ledPanel.led3 = Convert::getBit<2>(data.cm730.ledPanel);
-            sensors->ledPanel.led4 = Convert::getBit<3>(data.cm730.ledPanel);
+            sensors->ledPanel = cm730State.ledPanel;
 
             // Head LED
-            std::tie(sensors->headLED.r, sensors->headLED.g, sensors->headLED.b) = Convert::colourLED(data.cm730.headLED);
+            sensors->headLED = cm730State.headLED;
 
-            // Head LED
-            std::tie(sensors->eyeLED.r, sensors->eyeLED.g, sensors->eyeLED.b) = Convert::colourLED(data.cm730.eyeLED);
+            // Eye LED
+            sensors->eyeLED = cm730State.eyeLED;
 
             // Buttons
             sensors->buttons.left = Convert::getBit<1>(data.cm730.buttons);
@@ -124,18 +127,16 @@ namespace darwin {
                 servo.errorFlags = data.servoErrorCodes[i] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.servoErrorCodes[i]);
 
                 // Booleans
-                servo.torqueEnabled = data.servos[i].torqueEnabled;
-                servo.led = data.servos[i].LED;
+                servo.torqueEnabled = servoState[i].torqueEnabled;
 
                 // Gain
-                servo.dGain = Convert::gain(data.servos[i].dGain);
-                servo.iGain = Convert::gain(data.servos[i].iGain);
-                servo.pGain = Convert::gain(data.servos[i].pGain);
+                servo.pGain = servoState[i].pGain;
+                servo.iGain = servoState[i].iGain;
+                servo.dGain = servoState[i].dGain;
 
                 // Targets
-                servo.goalPosition = Convert::servoPosition(i, data.servos[i].goalPosition);
-                servo.movingSpeed = Convert::servoSpeed(i, data.servos[i].movingSpeed);
-                servo.torqueLimit = Convert::torqueLimit(data.servos[i].torqueLimit);
+                servo.goalPosition = servoState[i].goalPosition;
+                servo.movingSpeed = servoState[i].movingSpeed;
 
                 // Present Data
                 servo.presentPosition = Convert::servoPosition(i, data.servos[i].presentPosition);
@@ -162,6 +163,9 @@ namespace darwin {
                 // If gain is 0, do a normal write to disable torque (syncwrite won't write to torqueEnable)
                 if(isnan(command.gain)) {
                     darwin[static_cast<int>(command.id) + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
+
+                    // Update our internal state
+                    servoState[uint(command.id)].torqueEnabled = false;
                 }
 
                 // Otherwise write the command using sync write
@@ -170,6 +174,14 @@ namespace darwin {
                     NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                     float speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+
+                    // Update our internal state
+                    servoState[uint(command.id)].torqueEnabled = true;
+                    servoState[uint(command.id)].pGain = command.gain;
+                    servoState[uint(command.id)].iGain = command.gain * 0;
+                    servoState[uint(command.id)].dGain = command.gain * 0;
+                    servoState[uint(command.id)].movingSpeed = speed;
+                    servoState[uint(command.id)].goalPosition = command.position;
 
                     values.push_back({
                         static_cast<uint8_t>(static_cast<int>(command.id) + 1),  // The id's on the robot start with ID 1
@@ -198,11 +210,17 @@ namespace darwin {
 
         // If we get a HeadLED command then write it
         on<Trigger<DarwinSensors::HeadLED>>([this](const DarwinSensors::HeadLED& led) {
+            // Update our internal state
+            cm730State.headLED = led;
+
             darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, Convert::colourLEDInverse(led.r, led.g, led.b));
         });
 
-        // If we get a HeadLED command then write it
+        // If we get a EyeLED command then write it
         on<Trigger<DarwinSensors::EyeLED>>([this](const DarwinSensors::EyeLED& led) {
+            // Update our internal state
+            cm730State.eyeLED = led;
+
             darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(led.r, led.g, led.b));
         });
     }

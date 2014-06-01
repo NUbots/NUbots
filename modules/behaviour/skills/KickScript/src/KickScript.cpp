@@ -41,6 +41,7 @@ namespace skills {
     using messages::motion::WalkStartCommand;
     using messages::behaviour::LimbID;
     using messages::motion::KickCommand;
+    using messages::motion::KickFinished;
 
     KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -91,18 +92,18 @@ namespace skills {
             if (leg == LimbID::RIGHT_LEG) {
                 if (quadrant == 0) {
                     // front
-                    emit(std::make_unique<ExecuteScriptByName>(id, "RightFootKickForward.json"));
+                    emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"RightFootKickForward.json", "Stand.json"})));
                 } else if (quadrant == 1) {
                     // side
-                    emit(std::make_unique<ExecuteScriptByName>(id, "RightFootKickLeft.json"));
+                    emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"RightFootKickLeft.json", "Stand.json"})));
                 }
             } else if (leg == LimbID::LEFT_LEG) {
                 if (quadrant == 0) {
                     // front
-                    emit(std::make_unique<ExecuteScriptByName>(id, "LeftFootKickForward.json"));
+                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"LeftFootKickForward.json", "Stand.json"})));
                 } else if (quadrant == 3) {
                     // side
-                    emit(std::make_unique<ExecuteScriptByName>(id, "LeftFootKickRight.json"));
+                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"LeftFootKickRight.json", "Stand.json"})));
                 }
             }
 
@@ -111,7 +112,7 @@ namespace skills {
         });
 
         on<Trigger<FinishKick>>([this] (const FinishKick&) {
-            emit(std::move(std::make_unique<WalkStartCommand>()));
+            emit(std::move(std::make_unique<KickFinished>()));
             updatePriority(0);
         });
 
