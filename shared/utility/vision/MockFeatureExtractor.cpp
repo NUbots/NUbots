@@ -19,6 +19,7 @@
 #include "MockFeatureExtractor.h"
 #include "utility/math/matrix.h"
 #include "messages/input/ServoID.h"
+#include "utility/math/vision.h"
 #include <cstdlib>
 #include <ctime>
 
@@ -59,27 +60,14 @@ namespace utility {
 			}
 
 			std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
-				
-					std::vector<ExtractedFeature> features;
-					arma::vec2 selfHeading = arma::normalise(self.heading);
-					arma::mat44 robotToWorld_world = arma::mat44({   		  selfHeading[0],   		   -selfHeading[1], 0,            	 	self.position[0],
-	                                                                 		  selfHeading[1],   		    selfHeading[0], 0,            	 	self.position[1],
-	                                                                                        0,                            0, 1,         sensors.bodyCentreHeight,
-	                                                                                        0,                            0, 0,                                1});
-
-	                arma::mat44 cameraToBody_body = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
-
-	                arma::mat44 robotToBody_body = arma::eye(4,4);
-	                
-	                robotToBody_body.submat(0,0,2,2) = sensors.orientation;
-
-	                arma::mat44 worldToCamera_camera = utility::math::matrix::orthonormal44Inverse(cameraToBody_body) * robotToBody_body * utility::math::matrix::orthonormal44Inverse(robotToWorld_world);	                
+				std::vector<MockFeatureExtractor::ExtractedFeature> features;
+				arma::mat44 worldToCamera_camera = utility::math::vision::calculateWorldToCameraTransform(sensors, self);
 
 	            int id = 0;
 				for (auto point : mockFeatures){
 					ExtractedFeature f;
 	                arma::vec4 cameraToFeatureVector_cam =  worldToCamera_camera * point;
-	                f.screenAngular = arma::vec2({ std::atan2(cameraToFeatureVector_cam[1], cameraToFeatureVector_cam[0]) , std::atan2(cameraToFeatureVector_cam[2], cameraToFeatureVector_cam[0])});
+	                f.screenAngular = utility::math::vision::screenAngularFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));
 	                f.featureID = id++;
 					if(std::fabs(f.screenAngular[0]) < FOV_X/2.0 && std::fabs(f.screenAngular[1]) < FOV_Y/2.0){
 						features.push_back(f);

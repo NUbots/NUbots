@@ -40,7 +40,7 @@ namespace kinematics {
 
 
     template <typename RobotKinematicModel>
-    std::map<messages::input::ServoID, arma::mat44> calculateHeadJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID){
+    inline std::map<messages::input::ServoID, arma::mat44> calculateHeadJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID){
         std::map<messages::input::ServoID, arma::mat44> positions;
 
         arma::mat44 runningTransform = arma::eye(4,4);
@@ -90,7 +90,7 @@ namespace kinematics {
         The basis 'faces' down its x axis.
     */
     template <typename RobotKinematicModel>
-    std::map<messages::input::ServoID, arma::mat44> calculateLegJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID, Side isLeft){
+    inline std::map<messages::input::ServoID, arma::mat44> calculateLegJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID, Side isLeft){
         std::map<messages::input::ServoID, arma::mat44> positions;
         arma::mat44 runningTransform = arma::eye(4,4);
         //Variables to mask left and right leg differences:
@@ -180,7 +180,7 @@ namespace kinematics {
         The basis 'faces' down its x axis.
     */
     template <typename RobotKinematicModel>
-    std::map<messages::input::ServoID, arma::mat44> calculateArmJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID, Side isLeft){
+    inline std::map<messages::input::ServoID, arma::mat44> calculateArmJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID, Side isLeft){
         std::map<messages::input::ServoID, arma::mat44> positions;
         arma::mat44 runningTransform = arma::eye(4,4);
         //Variables to mask left and right leg differences:
@@ -238,7 +238,7 @@ namespace kinematics {
     /*! @brief
     */
     template <typename RobotKinematicModel>
-    std::map<messages::input::ServoID, arma::mat44> calculatePosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID) {
+    inline std::map<messages::input::ServoID, arma::mat44> calculatePosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID) {
         switch(servoID) {
             case messages::input::ServoID::HEAD_YAW:
             case messages::input::ServoID::HEAD_PITCH:
@@ -271,7 +271,7 @@ namespace kinematics {
 
 
     template <typename RobotKinematicModel>
-    std::map<messages::input::ServoID, arma::mat44> calculateAllPositions(const messages::input::Sensors& sensors) {
+    inline std::map<messages::input::ServoID, arma::mat44> calculateAllPositions(const messages::input::Sensors& sensors) {
         std::map<messages::input::ServoID, arma::mat44> result = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::L_ANKLE_ROLL);
         std::map<messages::input::ServoID, arma::mat44> rightLegPositions = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::R_ANKLE_ROLL);
         std::map<messages::input::ServoID, arma::mat44> headPositions = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::HEAD_PITCH);
@@ -287,7 +287,7 @@ namespace kinematics {
         @return [x_com, y_com, z_com, total_mass] relative to the torso basis
     */
     template <typename RobotKinematicModel>
-    arma::vec4 calculateCentreOfMass(const std::map<messages::input::ServoID, arma::mat44>& jointPositions, bool includeTorso){
+    inline arma::vec4 calculateCentreOfMass(const std::map<messages::input::ServoID, arma::mat44>& jointPositions, bool includeTorso){
         arma::vec4 totalMassVector;
 
         for(auto& joint : jointPositions){
@@ -326,6 +326,7 @@ namespace kinematics {
             return arma::vec4();
         }
     }
+
 
 
 } // kinematics

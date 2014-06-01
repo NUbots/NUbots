@@ -45,7 +45,7 @@ namespace utility {
 
                 arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, int placeholder_measurement_type);
 
-                arma::vec predictedObservation(const arma::vec::fixed<size>& state, const std::pair<const messages::input::Sensors&, const messages::localisation::Self&> stateData);
+                arma::vec predictedObservation(const arma::vec::fixed<size>& state, const arma::mat44& worldToCamera_camera);
 
                 arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 

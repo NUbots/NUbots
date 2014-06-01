@@ -22,6 +22,8 @@
 #include "InverseDepthPointModel.h" //includes armadillo
 #include "utility/motion/ForwardKinematics.h"
 #include "messages/input/ServoID.h"
+#include "utility/math/vision.h"
+
 
 #include <iostream>
 
@@ -47,26 +49,15 @@ namespace utility {
                 return state;
             }
 
-            arma::vec InverseDepthPointModel::predictedObservation(const arma::vec::fixed<size>& state, const std::pair<const Sensors&, const Self&> stateData) {
-                arma::vec2 selfHeading = arma::normalise(stateData.second.heading);
-                arma::mat44 robotToWorld_world = arma::mat44({             selfHeading[0],              -selfHeading[1], 0,     stateData.second.position[0],
-                                                                           selfHeading[1],               selfHeading[0], 0,     stateData.second.position[1],
-                                                                                        0,                            0, 1, stateData.first.bodyCentreHeight,
-                                                                                        0,                            0, 0,                                1});
-
-                arma::mat44 cameraToBody_body = stateData.first.forwardKinematics.at(ServoID::HEAD_PITCH);
-
-                arma::mat44 robotToBody_body = arma::eye(4,4);
-                //TODO: copy localisation in develop
-                robotToBody_body.submat(0,0,2,2) = stateData.first.orientation;
-
-                arma::mat44 worldToCamera_camera = utility::math::matrix::orthonormal44Inverse(cameraToBody_body) * robotToBody_body * utility::math::matrix::orthonormal44Inverse(robotToWorld_world);
+            arma::vec InverseDepthPointModel::predictedObservation(const arma::vec::fixed<size>& state, const arma::mat44& worldToCamera_camera) {
 
                 arma::vec4 initialObservedDirection = utility::math::matrix::yRotationMatrix(-state[kPHI],4) * utility::math::matrix::zRotationMatrix(state[kTHETA],4) * arma::vec4{1,0,0,0};
                 
-                arma::vec4 cameraToFeatureVector_cam =  worldToCamera_camera * ((arma::vec4({state[kX],state[kY],state[kZ],1}) - worldToCamera_camera.submat(0,3,3,3)) * state[kRHO] + initialObservedDirection);
+                arma::vec4 cameraToFeatureVector_cam =  worldToCamera_camera *(((arma::vec3({state[kX],state[kY],state[kZ],0}) - worldToCamera_camera.submat(0,3,2,3)) * state[kRHO] + initialObservedDirection) + arma::vec4{0,0,0,1});
 
-                arma::vec screenAngular = { std::atan2(cameraToFeatureVector_cam[1], cameraToFeatureVector_cam[0]) , std::atan2(cameraToFeatureVector_cam[2], cameraToFeatureVector_cam[0])};
+                arma::vec screenAngular = utility::math::vision::screenAngularFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));
+
+                NUClear::log( "\nscreenAngular\n", screenAngular);
 
                 return screenAngular;     //Camera y,z = hor, vert
             }
@@ -77,7 +68,7 @@ namespace utility {
             }
 
             arma::mat::fixed<InverseDepthPointModel::size, InverseDepthPointModel::size> InverseDepthPointModel::processNoise() {
-                return arma::eye(size, size) *1e-6; //std::numeric_limits<double>::epsilon();
+                return arma::eye(size, size) * 1e-6; //std::numeric_limits<double>::epsilon();
             }
 
         }
