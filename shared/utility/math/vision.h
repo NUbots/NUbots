@@ -32,38 +32,36 @@ namespace utility {
     namespace vision {
         /*! @brief Calculates the transformation for taking homogeneous points from world coordinates to camera coordinates
         */
-        inline arma::mat44 calculateWorldToCameraTransform(const messages::input::Sensors& sensors, const messages::localisation::Self& self){
-            arma::vec2 selfHeading = arma::normalise(self.heading);
-            arma::mat44 robotToWorld_world;
+        inline arma::mat calculateWorldToCameraTransform(const messages::input::Sensors& sensors, const messages::localisation::Self& self){
+            arma::vec selfHeading = arma::normalise(self.heading);
+            arma::mat robotToWorld_world;
             robotToWorld_world <<  selfHeading[0]  <<  -selfHeading[1]  <<  0 <<      self.position[0] << arma::endr
                                <<  selfHeading[1]  <<   selfHeading[0]  <<  0 <<      self.position[1] << arma::endr
                                <<               0  <<                0  <<  1 <<  sensors.bodyCentreHeight << arma::endr
                                <<               0  <<                0  <<  0 <<                                 1;
 
-
-            arma::mat44 cameraToBody_body = sensors.forwardKinematics.at(messages::input::ServoID::HEAD_PITCH);
-
-            arma::mat44 robotToBody_body = arma::eye(4,4);
-            //TODO: copy localisation in develop
+            arma::mat cameraToBody_body = sensors.forwardKinematics.at(messages::input::ServoID::HEAD_PITCH);
+            arma::mat robotToBody_body = arma::eye(4,4);
             robotToBody_body.submat(0,0,2,2) = sensors.orientation;
+
             auto worldToCamera_camera = utility::math::matrix::orthonormal44Inverse(cameraToBody_body) * robotToBody_body * utility::math::matrix::orthonormal44Inverse(robotToWorld_world);
-            NUClear::log("\nrobotToWorld_world\n", robotToWorld_world,"\nrobotToBody_body\n", robotToBody_body,"\nworldToCamera_camera\n", worldToCamera_camera);
+            // NUClear::log( utility::math::matrix::orthonormal44Inverse(cameraToBody_body) , robotToBody_body , utility::math::matrix::orthonormal44Inverse(robotToWorld_world), worldToCamera_camera);
             return worldToCamera_camera;
         }
 
 
-        inline arma::vec4 directionVectorFromScreenAngular(const arma::vec2& screenAngular){
+        inline arma::vec directionVectorFromScreenAngular(const arma::vec& screenAngular){
           double theta = screenAngular[0];
           double phi = screenAngular[1];
           return {std::cos(theta) * std::cos(phi), std::sin(theta) * std::cos(phi), std::sin(phi), 0};
         }
         /*! Uses vec for backwards compatibility with 3d homogeneous coordinates
         */
-        inline arma::vec2 screenAngularFromDirectionVector(const arma::vec& direction){
-          return { std::atan2(direction[1], direction[0]) , std::atan2(direction[2], arma::norm(arma::vec2({direction[0], direction[1]})))};
+        inline arma::vec screenAngularFromDirectionVector(const arma::vec& direction){
+          return { std::atan2(direction[1], direction[0]) , std::atan2(direction[2], arma::norm(arma::vec({direction[0], direction[1]})))};
         }
 
-        inline arma::vec2 rotateAngularDirection(const arma::vec2& screenAngular, const arma::mat44& R){                  
+        inline arma::vec rotateAngularDirection(const arma::vec& screenAngular, const arma::mat& R){                  
             return screenAngularFromDirectionVector(R*directionVectorFromScreenAngular(screenAngular));
         }
     }

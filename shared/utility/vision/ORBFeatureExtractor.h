@@ -33,7 +33,7 @@ namespace utility {
 
 			class ExtractedFeature {
 			public:
-				arma::vec2 screenAngular;	//Compulsory
+				arma::vec screenAngular;	//Compulsory
 			};
 
 			ORBFeatureExtractor();

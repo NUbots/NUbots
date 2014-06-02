@@ -54,8 +54,8 @@ namespace modules {
             SLAMEModule<utility::vision::MockFeatureExtractor> MockSLAMEModule;
             
             ReactionHandle fakeLocalisationHandle;
-            float FAKE_LOCALISATION_PERIOD;
-            float FAKE_LOCALISATION_RADIUS;
+            double FAKE_LOCALISATION_PERIOD = 1;
+            double FAKE_LOCALISATION_RADIUS = 1;
             NUClear::clock::time_point start_time;
         public:
             static constexpr const char* CONFIGURATION_PATH = "SLAME.json";

@@ -45,13 +45,15 @@ namespace utility {
 
                 arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, int placeholder_measurement_type);
 
-                arma::vec predictedObservation(const arma::vec::fixed<size>& state, const arma::mat44& worldToCamera_camera);
+                arma::vec predictedObservation(const arma::vec::fixed<size>& state, const arma::mat& worldToCamera_camera);
 
                 arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
                 arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
 
                 arma::mat::fixed<size, size> processNoise();
+
+                static arma::vec getFieldPosFromState(const arma::vec::fixed<size>& state);
             };
 
 

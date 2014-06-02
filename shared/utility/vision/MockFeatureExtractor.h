@@ -33,13 +33,13 @@ namespace utility {
 	namespace vision {
 		class MockFeatureExtractor{
 		private:
-			std::vector<arma::vec4> mockFeatures;
+			std::vector<arma::vec> mockFeatures;
 		public:
             static constexpr const char* CONFIGURATION_PATH = "MockFeatureExtractor.json";
 			void setParameters(const messages::support::Configuration<MockFeatureExtractor>& config);
 			class ExtractedFeature {
 			public:
-				arma::vec2 screenAngular;	//Compulsory
+				arma::vec screenAngular;	//Compulsory
 				int featureID;
 			};
 			MockFeatureExtractor();

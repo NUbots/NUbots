@@ -65,15 +65,12 @@ namespace modules{
  		 		lastTime = NUClear::clock::now();
  		 	}
  		 	void setParameters(const messages::support::Configuration<FeatureDetectorClass>& config){
-                NUClear::log(__PRETTY_FUNCTION__,__LINE__);
  		 		MAX_MATCHES = config["MAX_MATCHES"];
  		 		MEASUREMENT_COV_FACTOR = config["MEASUREMENT_COV_FACTOR"];
  		 		RHO_INITIAL = config["RHO_INITIAL"];
  		 		RHO_COV_INITIAL = config["RHO_COV_INITIAL"];
  		 		ANGULAR_COVARIANCE = config["ANGULAR_COVARIANCE"];
-                NUClear::log(__PRETTY_FUNCTION__,__LINE__);
  		 		featureExtractor.setParameters(config);
-                NUClear::log(__PRETTY_FUNCTION__,__LINE__);
  		 	}
 
  		 	arma::mat getMeasurementCovariance(){
@@ -83,22 +80,20 @@ namespace modules{
  		 	/*!
  		 		@param Rwc is the worldToCamera transform
  		 	*/
- 		 	StateVector getInitialMean(arma::vec2 screenAngular, arma::mat44 Rwc, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
-                NUClear::log(__PRETTY_FUNCTION__,__LINE__);
+ 		 	StateVector getInitialMean(arma::vec screenAngular, arma::mat Rwc, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
  		 		StateVector v;
- 		 		arma::mat44 Rcw = utility::math::matrix::orthonormal44Inverse(Rwc);
+ 		 		arma::mat Rcw = utility::math::matrix::orthonormal44Inverse(Rwc);
  		 		v.rows(stateOf::kX,stateOf::kZ) = Rcw.submat(0,3,2,3);
  		 		v[stateOf::kRHO] = RHO_INITIAL;
- 		 		arma::vec2 worldAngular = utility::math::vision::rotateAngularDirection(screenAngular, Rcw);
+ 		 		arma::vec worldAngular = utility::math::vision::rotateAngularDirection(screenAngular, Rcw);
  		 		v[stateOf::kTHETA] = worldAngular[0];
  		 		v[stateOf::kPHI] = worldAngular[1];
-                NUClear::log(__PRETTY_FUNCTION__,__LINE__);
+				NUClear::log("Initial state = ", v);
  		 		return v;
  		 	}
 
-			CovarianceMatrix getInitialCovariance(arma::vec2 screenAngular, arma::mat44 Rwc, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
-                NUClear::log(__PRETTY_FUNCTION__,__LINE__);
-				CovarianceMatrix M;
+			CovarianceMatrix getInitialCovariance(arma::vec screenAngular, arma::mat Rwc, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
+				CovarianceMatrix M = arma::eye(MODEL_SIZE, MODEL_SIZE);
 				double max_pos_variance = std::max(self.sr_xx, std::max(self.sr_xy,self.sr_yy));
 				M(stateOf::kX, stateOf::kX) = self.sr_xx;
 				M(stateOf::kY, stateOf::kX) = self.sr_xy;
@@ -108,7 +103,7 @@ namespace modules{
 				M(stateOf::kRHO, stateOf::kRHO) = RHO_COV_INITIAL;
 				M(stateOf::kTHETA, stateOf::kTHETA) = ANGULAR_COVARIANCE;
 				M(stateOf::kPHI, stateOf::kPHI) = ANGULAR_COVARIANCE;
-                NUClear::log(__PRETTY_FUNCTION__,__LINE__);
+				NUClear::log("Initial covariance = ", M);
 				return M;
 			}
 
@@ -116,8 +111,7 @@ namespace modules{
  		 		                                                                        const messages::localisation::Self& self, 
  		 		                                                                        const messages::input::Sensors& sensors)
  		 	{
-                NUClear::log(__PRETTY_FUNCTION__,__LINE__);
- 		 		arma::mat44 worldToCameraTransform = utility::math::vision::calculateWorldToCameraTransform(sensors, self);
+ 		 		arma::mat worldToCameraTransform = utility::math::vision::calculateWorldToCameraTransform(sensors, self);
 
  		 		auto objectMessage = std::make_unique<std::vector<messages::vision::SLAMEObject>>();	            
 
@@ -129,17 +123,14 @@ namespace modules{
 	            std::vector<std::tuple<int, int, float>> matches = featureExtractor.matchFeatures(features, extractedFeatures, MAX_MATCHES);
 
 	            double deltaT = (sensors.timestamp - lastTime).count() / double(NUClear::clock::period::den);
-                NUClear::log(__PRETTY_FUNCTION__,__LINE__);
 
 	            for(auto& match : matches){
 
-                NUClear::log(__PRETTY_FUNCTION__,__LINE__);
 	            	int fI = std::get<0>(match);	//featureIndex
 	            	int eFI = std::get<1>(match);	//extractedFeatureIndex
 	            	float strength = std::get<2>(match);
 
 	                if(fI < featureFilters.size()){     
-                NUClear::log(__PRETTY_FUNCTION__,__LINE__);
 	                	//That is, we have seen this object before
 	                    //Create message about where we have seen the feature
 	                    objectMessage->push_back(messages::vision::SLAMEObject());
@@ -156,15 +147,28 @@ namespace modules{
 	                } else {    //Otherwise we initialise a filter for the object
 	                    featureStrengths.push_back(strength);
 
-                NUClear::log(__PRETTY_FUNCTION__,__LINE__);
 	                    auto initialMean = getInitialMean(extractedFeatures[eFI].screenAngular, worldToCameraTransform, self, sensors);
 	                    auto initialCovariance = getInitialCovariance(extractedFeatures[eFI].screenAngular, worldToCameraTransform, self, sensors);
 	                    featureFilters.push_back(utility::math::kalman::UKF<utility::math::kalman::InverseDepthPointModel>(initialMean, initialCovariance));
 	                }
 	            }
+				NUClear::log("Extrated features:", extractedFeatures.size());
+				NUClear::log("Matches:", matches.size());
+				NUClear::log("number of strengths", featureStrengths.size());
+				NUClear::log("Number of features:", features.size());
+				NUClear::log("Feature filter states:", featureFilters.size(),"\n");
+	            for(auto& f : featureFilters){
+					arma::vec state = f.get();
+					if(state[stateOf::kRHO] > 0){
+						arma::vec p = utility::math::kalman::InverseDepthPointModel::getFieldPosFromState(state);
+						for(auto coord : p){
+							std::cout<< " " << coord << " ";
+						}
+					}
+					std::cout << std::endl;
+	            }
 	            //TODO: sort objectMessage by strengths and take top k
 	            lastTime = sensors.timestamp;
-                NUClear::log(__PRETTY_FUNCTION__,__LINE__);
 
 	            return std::move(objectMessage);
  		 	}

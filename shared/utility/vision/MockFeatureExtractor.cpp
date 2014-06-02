@@ -22,6 +22,8 @@
 #include "utility/math/vision.h"
 #include <cstdlib>
 #include <ctime>
+#include <iostream>
+#include <armadillo>
 
 namespace utility {
 	namespace vision {
@@ -43,33 +45,37 @@ namespace utility {
 
 				FOV_X = config["FOV_X"];
 				FOV_Y = config["FOV_Y"];
-
+				mockFeatures.clear();
 				std::srand(SEED + std::time(0) * int(RANDOMIZE));
+				NUClear::log("Generating mock features:");
 				for(int i = 0; i < NUMBER_OF_MOCK_POINTS; i++){
 					float r = MEAN_RADIUS + 2 * RADIAL_DEVIATION * (std::rand() / float(RAND_MAX) - 0.5); 
 					float z = HEIGHT + 2 * HEIGHT_DEVIATION * (std::rand() / float(RAND_MAX) - 0.5);
 					float theta = 2 * M_PI * i / float(NUMBER_OF_MOCK_POINTS) +  2 * ANGULAR_DEVIATION * (std::rand() / float(RAND_MAX) - 0.5);
-					mockFeatures.push_back(arma::vec4({
+					mockFeatures.push_back(arma::vec({
 						r * std::cos(theta),
 						r * std::sin(theta),
 						z,
 						1								
 					}));
+					std::cout << mockFeatures.back().at(0) << " " << mockFeatures.back().at(1) << " " << mockFeatures.back().at(2) << std::endl;
 				}
 
 			}
 
 			std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
 				std::vector<MockFeatureExtractor::ExtractedFeature> features;
-				arma::mat44 worldToCamera_camera = utility::math::vision::calculateWorldToCameraTransform(sensors, self);
+				arma::mat worldToCamera_camera = utility::math::vision::calculateWorldToCameraTransform(sensors, self);
 
 	            int id = 0;
 				for (auto point : mockFeatures){
 					ExtractedFeature f;
-	                arma::vec4 cameraToFeatureVector_cam =  worldToCamera_camera * point;
+	                arma::vec cameraToFeatureVector_cam =  worldToCamera_camera * point;
 	                f.screenAngular = utility::math::vision::screenAngularFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));
 	                f.featureID = id++;
+	                NUClear::log("Feature id,", f.featureID, "has screenAngular", f.screenAngular[0], f.screenAngular[1]);
 					if(std::fabs(f.screenAngular[0]) < FOV_X/2.0 && std::fabs(f.screenAngular[1]) < FOV_Y/2.0){
+	                    NUClear::log("Feature added to list");
 						features.push_back(f);
 					}
 				}
@@ -84,23 +90,27 @@ namespace utility {
 																					    size_t MAX_MATCHES)
 			{
 				std::vector<std::tuple<int, int, float>> matches;
+				NUClear::log("MockFeatureExtractor::matchFeatures");
 				
 				for(size_t newFeatureIndex = 0; newFeatureIndex < newFeatures.size(); newFeatureIndex++){	//For each new feature	
 					auto& newFeature = newFeatures[newFeatureIndex];
 
-					for(size_t featureIndex = 0; featureIndex < features.size(); featureIndex++){		//Check if it matches any known features
-						auto& feature = features[featureIndex];
-						if(newFeature == feature){
+					for(size_t featureIndex = 0; featureIndex <= features.size(); featureIndex++){		//Check if it matches any known features
+						if(featureIndex == features.size() && features.size() < MAX_MATCHES){	//If we dont match any known features, add it too the list if there is space
+							NUClear::log("MockFeatureExtractor::matchFeatures - new feature found(id =", newFeature.featureID, "). Adding to list of features");
+							features.push_back(newFeature);
 							matches.push_back(std::tuple<int,int,float>(featureIndex,newFeatureIndex,1.0));
 							break;
 						}
-						if(featureIndex == features.size()-1 && features.size() < MAX_MATCHES){	//If we dont match any known features, add it too the list if there is space
-							features.push_back(newFeature);
-							matches.push_back(std::tuple<int,int,float>(featureIndex+1,newFeatureIndex,1.0));
-
+						auto& feature = features[featureIndex];
+						if(newFeature.featureID == feature.featureID){
+							matches.push_back(std::tuple<int,int,float>(featureIndex,newFeatureIndex,1.0));
+							NUClear::log("MockFeatureExtractor::matchFeatures - features matched: newFeature", newFeatureIndex, "has id ", newFeature.featureID);
+							break;
 						}
 					}
 				}
+				NUClear::log("MockFeatureExtractor::matchFeatures END");
 				return matches;
 			}
 	}
