@@ -26,7 +26,6 @@ namespace messages {
     namespace vision {
 
         struct SaveLookUpTable {
-            LookUpTable lut;
         };
 
 

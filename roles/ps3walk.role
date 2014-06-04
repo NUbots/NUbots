@@ -12,6 +12,11 @@ ADD_ROLE(
         platform::darwin::HardwareIO
         #platform::fakedarwin::HardwareIO
         platform::darwin::SensorFilter
+        input::LinuxCamera
+
+        # Vision
+        vision::LUTClassifier
+        vision::FeatureDetector
 
         # Motion
         motion::WalkEngine
@@ -24,6 +29,10 @@ ADD_ROLE(
         behaviour::skills::FallingRelax
         behaviour::skills::Getup
         behaviour::skills::KickScript
+
+        # Lookat ball
+        behaviour::skills::Look
+        behaviour::planning::LookAtBall
 
         
         #Localisation

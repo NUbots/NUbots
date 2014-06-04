@@ -45,14 +45,12 @@ namespace modules {
             //Load LUTs
             on<Trigger<Configuration<LUTLocations>>>([this](const Configuration<LUTLocations>& config) {
                 std::string LUTLocation = config["LUT_LOCATION"];
-                auto lut = std::make_unique<LookUpTable>();
-                lut->loadLUTFromFile(LUTLocation);
-                emit(std::move(lut));
+                emit(std::make_unique<LookUpTable>(LUTLocation));
             });
 
-            on<Trigger<SaveLookUpTable>, With<Configuration<LUTLocations>>>([this](const SaveLookUpTable& saveLut, const Configuration<LUTLocations>& config) {
+            on<Trigger<SaveLookUpTable>, With<LookUpTable, Configuration<LUTLocations>>>([this](const SaveLookUpTable&, const LookUpTable& lut, const Configuration<LUTLocations>& config) {
                 std::string LUTLocation = config["LUT_LOCATION"];
-                saveLut.lut.save(LUTLocation);
+                lut.save(LUTLocation);
             });
 
             //Load in greenhorizon parameters
