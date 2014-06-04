@@ -19,52 +19,46 @@
 
 #include "QuexClassifier.h"
 
+#include <iostream>
+
 namespace modules {
     namespace vision {
         using messages::input::Image;
         using messages::vision::LookUpTable;
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
+        using quex::Token;
 
-        QuexClassifier() {
+        QuexClassifier::QuexClassifier() : lexer(buffer, BUFFER_SIZE, buffer + 1) {
         }
 
         std::multimap<ObjectClass, ClassifiedImage<ObjectClass>::Segment> QuexClassifier::classify(const Image& image, const LookUpTable& lut, const arma::vec2& start, const arma::vec2& end) {
 
-            // Reset our buffer
-
-            // Reset the quex lexer
-
-
             // Start reading data
-            classifier.buffer_fill_region_prepare();
-
-            // For horizontal runs
-            if(start[0] == end[0]) {
-
-                size_t length = end[1] - start[1];
-                ensureCapacity(length);
-
-                for(uint i = start[1]; i < end[1]; ++i) {
-
-                    char v = lut.classify(image(start[0], i));
-                }
-
-                classifer.buffer_fill_region_finish(length);
-            }
+            lexer.buffer_fill_region_prepare();
 
             // For vertical runs
-            else if(start[1] == end[1]) {
+            if(start[0] == end[0]) {
 
-                size_t length = end[0] - start[0];
-                ensureCapacity(length);
+                size_t length = end[1] - start[1] + 1;
 
-                for(uint i = start[0]; i < end[0]; ++i) {
-
-                    char v = lut.classify(image(i, start[1]));
+                for(uint i = 0; i < length; ++i) {
+                    buffer[i + 1] = lut.classify(image(start[0], start[1] + i));
                 }
 
-                classifer.buffer_fill_region_finish(length);
+                lexer.buffer_fill_region_finish(length);
+            }
+            // For horizontal runs
+            else if(start[1] == end[1]) {
+
+                size_t length = end[0] - start[0] + 1;
+
+                for(uint i = 0; i < length; ++i) {
+                    buffer[i + 1] = lut.classify(image(start[0] + 1, start[1]));
+                }
+
+                lexer.buffer_fill_region_finish(length - 1);
+                lexer.buffer_input_pointer_set(buffer + 1);
             }
 
             // Diagonal run
@@ -73,41 +67,43 @@ namespace modules {
             }
 
             // Read our lexing tokens
+            Token token;
             do {
-                Token token;
-                qlex.token_p_switch(&token);
-                qlex.receive();
+                lexer.token_p_switch(&token);
+                lexer.receive();
 
-                switch(token.type_id) {
+                switch(token.type_id()) {
                     case QUEX_TKN_BALL:
-                        //token.number;
+                        std::cout << "Ball: " << token.number << std::endl;
                         break;
 
                     case QUEX_TKN_CYAN_TEAM:
-                        //token.number;
+                        std::cout << "Cyan: " << token.number << std::endl;
                         break;
 
                     case QUEX_TKN_FIELD:
-                        //token.number;
+                        std::cout << "Field: " << token.number << std::endl;
                         break;
 
                     case QUEX_TKN_GOAL:
-                        //token.number;
+                        std::cout << "Goal: " << token.number << std::endl;
                         break;
-
                     case QUEX_TKN_LINE:
-                        //token.number;
+                        std::cout << "Line: " << token.number << std::endl;
                         break;
 
                     case QUEX_TKN_MAGENTA_TEAM:
-                        //token.number;
+                        std::cout << "Magenta: " << token.number << std::endl;
                         break;
 
                     case QUEX_TKN_UNCLASSIFIED:
-                        //token.number;
+                        std::cout << "Unclassified: " << token.number << std::endl;
                         break;
+                }
             }
             while(token.type_id() != QUEX_TKN_TERMINATION);
+
+            return {};
 
         }
     }

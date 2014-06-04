@@ -21,9 +21,15 @@
 #define MODULES_VISION_LUTCLASSIFIER_H
 
 #include <nuclear>
+#include "QuexClassifier.h"
+#include "messages/support/Configuration.h"
 
 namespace modules {
     namespace vision {
+
+        struct LUTLocations{
+            static constexpr const char* CONFIGURATION_PATH = "LUTLocations.json";
+        };
 
         /**
          * Classifies a raw image, producing the colour segments for object detection
@@ -31,6 +37,8 @@ namespace modules {
          * @author Trent Houliston
          */
         class LUTClassifier : public NUClear::Reactor {
+        private:
+            QuexClassifier quex;
         public:
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
         };

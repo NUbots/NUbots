@@ -12,6 +12,9 @@ FUNCTION(ADD_ROLE)
         DEPENDS "${CMAKE_SOURCE_DIR}/cmake/Scripts/generate.py")
 
     INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}")
+    INCLUDE_DIRECTORIES("${CMAKE_BINARY_DIR}")
+    INCLUDE_DIRECTORIES("${CMAKE_BINARY_DIR}/modules/vision/LUTClassifier/src/") # TODO: fix this hacking
+
 
     STRING(REPLACE "::" "" ROLE_MODULES_TARGETS "${ROLE_MODULES}")
 

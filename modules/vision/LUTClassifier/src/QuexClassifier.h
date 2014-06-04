@@ -22,6 +22,7 @@
 
 #include <map>
 
+#define QUEX_SETTING_BUFFER_MIN_FALLBACK_N 0
 #include "Lexer.hpp"
 #include "messages/input/Image.h"
 #include "messages/vision/LookUpTable.h"
@@ -31,12 +32,13 @@ namespace modules {
 	namespace vision {
 		class QuexClassifier {
 		private:
-			std::vector<uint8_t> buffer;
+            static constexpr size_t BUFFER_SIZE = 2000;
+            uint8_t buffer[BUFFER_SIZE]; // This should be big enough for now
 			quex::Lexer lexer;
 
-			void ensureCapacity();
-
 		public:
+            QuexClassifier();
+
 			std::multimap<messages::vision::ObjectClass, messages::vision::ClassifiedImage<messages::vision::ObjectClass>::Segment> classify(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const arma::vec2& start, const arma::vec2& end);
 		};
 	}

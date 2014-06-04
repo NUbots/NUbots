@@ -64,7 +64,7 @@ namespace messages {
             return std::make_tuple(bitsY, bitsCb, bitsCr, std::move(data));
         }
 
-        messages::vision::Colour LookUpTable::classifyPixel(const messages::input::Image::Pixel& p) const {
+        messages::vision::Colour LookUpTable::classify(const messages::input::Image::Pixel& p) const {
             return messages::vision::Colour(data[getLUTIndex(p)]); // 7bit LUT
         }
 

@@ -27,7 +27,7 @@ ADD_CUSTOM_COMMAND(
            "${outputpath}/Lexer-token_ids.hpp"
            "${outputpath}/Lexer-configuration.hpp"
     COMMAND "quex"
-    ARGS -i ${abs_file} --file-extension-scheme pp --output-directory ${outputpath} --language c++
+    ARGS -i ${abs_file} --file-extension-scheme pp --output-directory ${outputpath} --language C++ --engine Lexer --token-policy single --token-memory-management-by-user
     DEPENDS ${abs_file}
     COMMENT "Generating Quex lexer for vision"
     VERBATIM)
