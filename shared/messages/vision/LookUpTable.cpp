@@ -35,7 +35,7 @@ namespace messages {
             , BITS_CR_REMOVED(sizeof(uint8_t) * 8 - BITS_CR)
             , BITS_CB_CR(BITS_CB + BITS_CR)
             , data(std::move(data)) {
-            
+
         }
 
         LookUpTable::LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr)
@@ -45,9 +45,9 @@ namespace messages {
 
 
         LookUpTable::LookUpTable(std::tuple<uint8_t, uint8_t, uint8_t, std::unique_ptr<char[]>> data)
-            : LookUpTable(std::get<0>(data), std::get<1>(data), std::get<2>(data), std::move(std::get<3>(data))) {   
+            : LookUpTable(std::get<0>(data), std::get<1>(data), std::get<2>(data), std::move(std::get<3>(data))) {
         }
-        
+
         LookUpTable::LookUpTable(std::string& filename) : LookUpTable(createLookUpTableFromFile(filename)) {
         }
 
@@ -55,9 +55,9 @@ namespace messages {
             // read
             std::ifstream lutfile(filename, std::ios::binary);
             auto input = std::istreambuf_iterator<char>(lutfile);
-            uint8_t bitsY = *(input++);
-            uint8_t bitsCb = *(input++);
-            uint8_t bitsCr = *(input++);
+            uint8_t bitsY = *(input++) - 48;  // Convert the string to a number
+            uint8_t bitsCb = *(input++) - 48; // Convert the string to a number
+            uint8_t bitsCr = *(input++) - 48; // Convert the string to a number
             const size_t size = std::exp2(bitsY + bitsCb + bitsCr);
             auto data = std::unique_ptr<char[]>(new char[size]);
             std::copy(input, std::istreambuf_iterator<char>(), data.get());
@@ -81,9 +81,9 @@ namespace messages {
         void LookUpTable::save(const std::string& fileName) const {
             std::ofstream lutfile(fileName, std::ios::binary);
             auto output = std::ostreambuf_iterator<char>(lutfile);
-            output = BITS_Y;
-            output = BITS_CB;
-            output = BITS_CR;
+            output = BITS_Y + 48;  // Convert the number to a string
+            output = BITS_CB + 48; // Convert the number to a string
+            output = BITS_CR + 48; // Convert the number to a string
             std::copy(data.get(), data.get() + LUT_SIZE, output);
         }
 
