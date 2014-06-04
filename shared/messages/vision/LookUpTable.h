@@ -29,6 +29,7 @@
 #ifndef MESSAGES_VISION_LOOKUPTABLE_H
 #define MESSAGES_VISION_LOOKUPTABLE_H
 
+#include <memory>
 #include <string>
 #include <cmath>
 #include <cstring>
@@ -53,19 +54,18 @@ namespace messages {
 
         class LookUpTable {
         public:
-            static constexpr const int BITS_PER_COLOUR = 7;
-            static constexpr const int LUT_SIZE = std::pow(2, 3 * BITS_PER_COLOUR); //!< The size of a lookup table in bytes.
+            const uint8_t BITS_Y;
+            const uint8_t BITS_CB;
+            const uint8_t BITS_CR;
+            const size_t LUT_SIZE; //!< The size of a lookup table in bytes.
 
-            /*!
-                @brief Loads a new LUT from a given file.
-                @param filename The filename std::string.
-                @return Returns the success of the operation.
-             */
-            void loadLUTFromFile(const std::string& fileName);
-            void loadLUTFromArray(const char* array);
+            LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr);
+            LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::unique_ptr<char[]>&& data);
+            LookUpTable(std::string& filename);
+
             void save(const std::string& fileName) const;
             std::string getData() const {
-                return std::string(LUT, LUT_SIZE);
+                return std::string(data.get(), LUT_SIZE);
             }
             /*!
                 @brief Classifies a pixel
@@ -74,15 +74,21 @@ namespace messages {
              */
             messages::vision::Colour classify(const messages::input::Image::Pixel& p) const;
         private:
+            LookUpTable(std::tuple<uint8_t, uint8_t, uint8_t, std::unique_ptr<char[]>> data);
+
+            const uint8_t BITS_Y_REMOVED;
+            const uint8_t BITS_CB_REMOVED;
+            const uint8_t BITS_CR_REMOVED;
+            const uint8_t BITS_CB_CR;
 
             /*!
              *   @brief Gets the index of the pixel in the LUT
              *   @param p The pixel to be classified.
              *   @return Returns the colour index for the given pixel.
              */
-            static uint getLUTIndex(const messages::input::Image::Pixel& colour);
-
-            char LUT[LUT_SIZE] = {0}; //! @variable temp LUT for loading.
+            uint getLUTIndex(const messages::input::Image::Pixel& colour) const;
+            static std::tuple<uint8_t, uint8_t, uint8_t, std::unique_ptr<char[]>> createLookUpTableFromFile(std::string& filename);
+            std::unique_ptr<char[]> data;
         };
 
     } //vision

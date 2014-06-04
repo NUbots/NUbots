@@ -81,6 +81,9 @@ arma::vec RobotModel::predictedObservation(
     const arma::vec::fixed<RobotModel::size>& state, const arma::vec& actual_position) {
 
     arma::mat worldToRobot = getWorldToRobotTransform(state);
+    arma::mat robotToWorld = getRobotToWorldTransform(state);
+    arma::mat identity = worldToRobot * robotToWorld;
+    // NUClear::log("worldToRobot\n",worldToRobot, "\nrobotToWorld\n",robotToWorld, "\nidentity\n",identity);
     arma::vec objectPosition = arma::vec({actual_position[0], actual_position[1], 1});
     arma::vec expectedObservation = worldToRobot * objectPosition;
 
@@ -181,17 +184,21 @@ arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() 
 
 arma::mat33 RobotModel::getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state){
     arma::vec2 normed_heading = arma::normalise(state.rows(kHeadingX,kHeadingY));
-    arma::mat33 T = arma::mat33{normed_heading[0], -normed_heading[1], state[kX],
-                                normed_heading[1],  normed_heading[0], state[kY],
-                                               0,                 0,         1};
+    arma::mat33 T;
+
+    T << normed_heading[0] << -normed_heading[1] << state[kX] << arma::endr
+      << normed_heading[1] <<  normed_heading[0] << state[kY] << arma::endr
+      <<                 0 <<                  0 <<         1; 
+
     return T;
 }
 
 arma::mat33 RobotModel::getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state){
     arma::vec2 normed_heading = arma::normalise(state.rows(kHeadingX,kHeadingY));
-    arma::mat33 Tinverse = arma::mat33{      normed_heading[0],  normed_heading[1],         0,
-                                            -normed_heading[1],  normed_heading[0],         0,
-                                                             0,                 0,         1};
+    arma::mat33 Tinverse;
+    Tinverse << normed_heading[0] <<  normed_heading[1] <<         0 << arma::endr
+             <<-normed_heading[1] <<  normed_heading[0] <<         0 << arma::endr
+             <<                 0 <<                  0 <<         1;
 
     Tinverse.submat(0,2,1,2) = -Tinverse.submat(0,0,1,1) * arma::vec2({state[kX], state[kY]});
     return Tinverse;

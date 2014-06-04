@@ -66,10 +66,11 @@ namespace kinematics {
         float ankleRoll = 0;
 
         //TODO remove this. It was due to wrong convention use
-        arma::mat44 inputCoordinatesToCalcCoordinates{0, 1, 0, 0,
-                                                      1, 0, 0, 0 ,
-                                                      0, 0, -1,0,
-                                                      0, 0, 0, 1};
+        arma::mat44 inputCoordinatesToCalcCoordinates;
+        inputCoordinatesToCalcCoordinates << 0<< 1<< 0<< 0<< arma::endr
+                                          << 1<< 0<< 0<< 0<< arma::endr
+                                          << 0<< 0<<-1<< 0<< arma::endr
+                                          << 0<< 0<< 0<< 1;
         //Rotate input position from standard robot coords to foot coords
         //NUClear::log<NUClear::DEBUG>("Target Original\n", target);
         arma::vec4 fourthColumn = inputCoordinatesToCalcCoordinates * target.col(3);

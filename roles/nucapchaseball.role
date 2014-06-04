@@ -1,0 +1,40 @@
+ADD_ROLE(
+    NAME nucapchaseball
+    MODULES
+        #Support
+        support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem
+        #support::configuration::NetworkingConfiguration
+        support::NUbugger
+
+        #Sensors
+        input::LinuxCamera
+        platform::darwin::HardwareIO
+        platform::darwin::SensorFilter
+
+        #Vision
+        vision::LUTClassifier
+        vision::FeatureDetector
+
+        #Localisation
+        localisation::KFBallLocalisation
+
+        #Mocap
+        support::NUcap
+        
+        #Behaviour
+        behaviour::Controller
+        behaviour::skills::Stand
+        behaviour::skills::FallingRelax
+        behaviour::skills::Getup
+        behaviour::skills::Look
+        behaviour::planning::LookAtBall
+        behaviour::planning::WalkPathPlanner
+        behaviour::planning::KickPlanner
+        behaviour::skills::KickScript
+
+        #Motion
+        motion::ScriptEngine
+        motion::WalkEngine
+)

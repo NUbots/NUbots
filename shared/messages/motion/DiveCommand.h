@@ -17,20 +17,30 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_VISION_SAVELOOKUPTABLE_H
-#define MESSAGES_VISION_SAVELOOKUPTABLE_H
+#ifndef MESSAGES_MOTION_DIVECOMMAND_H
+#define MESSAGES_MOTION_DIVECOMMAND_H
 
-#include "messages/vision/LookUpTable.h"
+#include <nuclear>
+#include <armadillo>
+#include "messages/behaviour/Action.h"
 
 namespace messages {
-    namespace vision {
+    namespace motion {
 
-        struct SaveLookUpTable {
+        /**
+         * TODO document
+         *
+         * @author Trent Houliston
+         * @author Jake Fountain
+         */
+        struct DiveCommand {
+            arma::vec2 direction;
         };
 
+        struct DiveFinished{
+        };
+        
+    }  // motion
+}  // messages
 
-    }
-}
-
-#endif // MESSAGES_VISION_SAVELOOKUPTABLE_H
-
+#endif  // MESSAGES_MOTION_KICKCOMMAND_H

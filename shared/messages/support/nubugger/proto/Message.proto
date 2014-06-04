@@ -50,7 +50,10 @@ message Message {
 
     message LookupTable {
         optional bytes table = 1;
-        optional bool save = 2;
+        optional uint32 bits_y = 2;
+        optional uint32 bits_cb = 3;
+        optional uint32 bits_cr = 4;
+        optional bool save = 5;
     }
 
     message ReactionStatistics {

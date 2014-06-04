@@ -17,20 +17,20 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_VISION_SAVELOOKUPTABLE_H
-#define MESSAGES_VISION_SAVELOOKUPTABLE_H
+#ifndef MODULES_MOCAP_TEST_H
+#define MODULES_MOCAP_TEST_H
 
-#include "messages/vision/LookUpTable.h"
+#include <nuclear>
 
-namespace messages {
-    namespace vision {
+namespace modules {
+    namespace support {
 
-        struct SaveLookUpTable {
+        class MocapTest : public NUClear::Reactor {
+        public:
+            explicit MocapTest(std::unique_ptr<NUClear::Environment> environment);
         };
-
 
     }
 }
-
-#endif // MESSAGES_VISION_SAVELOOKUPTABLE_H
+#endif
 

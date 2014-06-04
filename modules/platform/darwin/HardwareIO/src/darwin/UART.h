@@ -26,6 +26,8 @@
 #include <stdint.h>
 #include <linux/serial.h>
 
+#include "messages/support/Configuration.h"
+
 #include <mutex>
 #include <cstring>
 #include <vector>
@@ -91,6 +93,13 @@ namespace Darwin {
      */
     class UART {
     private:
+
+        // We will wait this long for an initial packet header
+        int PACKET_WAIT= 10000;
+        // We will only wait a maximum of BYTE_WAIT microseconds between bytes in a packet (assumes baud of 1000000bps)
+        int BYTE_WAIT = 1000;
+        int BUS_RESET_WAIT_TIME_uS = 100000;
+
         /// @brief The file descriptor for the USB TTY device we use to communicate with the devices
         int fd;
         /// @brief A mutex which is used for flow control on the USB TTY device
@@ -106,6 +115,8 @@ namespace Darwin {
         bool configure(double baud);
 
     public:
+        static constexpr const char* CONFIGURATION_PATH = "DarwinPlatform.json";
+        void setConfig(const messages::support::Configuration<UART>& config);
         /**
          * @brief Constructs a new UART instance using the passed device path as the TTY device
          *

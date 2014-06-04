@@ -550,17 +550,15 @@ namespace modules {
             auto lookuptable = message.lookuptable();
             const std::string& lutData = lookuptable.table();
 
+            NUClear::log("Loading LUT");
+            auto data = std::unique_ptr<char[]>(new char[lutData.size()]);
+            std::copy(std::begin(lutData), std::end(lutData), data.get());
+            auto lut = std::make_unique<LookUpTable>(lookuptable.bits_y(), lookuptable.bits_cb(), lookuptable.bits_cr(), std::move(data));
+            emit<Scope::DIRECT>(std::move(lut));
+
             if (lookuptable.save()) {
-                NUClear::log("Loading LUT and saving");
-                auto savelut = std::make_unique<SaveLookUpTable>();
-                savelut->lut.loadLUTFromArray(lutData.data());
-                emit(std::move(savelut));
-            }
-            else {
-                NUClear::log("Loading LUT");
-                auto lut = std::make_unique<LookUpTable>();
-                lut->loadLUTFromArray(lutData.data());
-                emit(std::move(lut));
+                NUClear::log("Saving LUT to file");
+                emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
             }
         }
 

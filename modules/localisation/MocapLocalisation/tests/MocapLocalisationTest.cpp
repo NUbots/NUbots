@@ -17,20 +17,5 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_VISION_SAVELOOKUPTABLE_H
-#define MESSAGES_VISION_SAVELOOKUPTABLE_H
-
-#include "messages/vision/LookUpTable.h"
-
-namespace messages {
-    namespace vision {
-
-        struct SaveLookUpTable {
-        };
-
-
-    }
-}
-
-#endif // MESSAGES_VISION_SAVELOOKUPTABLE_H
-
+#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#include <catch.hpp>

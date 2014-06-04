@@ -68,6 +68,7 @@ double KFBallLocalisationEngine::MeasurementUpdate(
                                groundDist * std::sin(heading) };
     auto dist_error = observed_object.sphericalError[0];
     auto heading_error = observed_object.sphericalError[1];
+    //TODO: initialise matrices with streamers (<<)
     arma::mat22 cov = { dist_error * heading_error, 0,
                         0, dist_error * heading_error };
 

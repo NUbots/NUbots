@@ -1,0 +1,10 @@
+ADD_ROLE(
+    NAME nubuggertest
+    MODULES
+        support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem
+        support::NUbugger
+        debug::NUbugger
+)
+

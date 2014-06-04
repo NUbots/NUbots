@@ -25,12 +25,16 @@
 #include <chrono>
 
 #include "utility/math/kalman/UKF.h"
+#include "messages/support/Configuration.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/localisation/FieldObject.h"
 #include "BallModel.h"
 
 namespace modules {
 namespace localisation {
+    struct KFBallLocalisationEngineConfig {
+        static constexpr const char* CONFIGURATION_PATH = "KFBallLocalisationEngine.json";
+    };
 
     class KFBallLocalisationEngine {
         public:
@@ -52,9 +56,19 @@ namespace localisation {
 
         double MeasurementUpdate(const messages::vision::VisionObject& observed_object);
 
+        void UpdateConfiguration(
+            const messages::support::Configuration<KFBallLocalisationEngineConfig>& config) {
+            // cfg_.ball_drag_coefficient = config["BallDragCoefficient"];
+            ball_filter_.model.ballDragCoefficient = config["BallDragCoefficient"];
+        };
+
         utility::math::kalman::UKF<ball::BallModel> ball_filter_;
 
     private:
+        // struct {
+        //     float ball_drag_coefficient;
+        // } cfg_;
+
         double SecondsSinceLastTimeUpdate(std::chrono::system_clock::time_point current_time);
 
         std::chrono::system_clock::time_point last_time_update_time_;

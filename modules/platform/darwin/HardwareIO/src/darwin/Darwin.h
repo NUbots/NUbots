@@ -27,6 +27,7 @@
 #include "CM730.h"
 #include "MX28.h"
 #include "FSR.h"
+#include "messages/support/Configuration.h"
 
 #include "DarwinRawSensors.h"
 
@@ -75,7 +76,7 @@ namespace Darwin {
      * @author Trent Houliston
      */
     class Darwin {
-    private:
+    private:        
         /// Our UART class that we will communicate through
         UART uart;
         /// Our Prebuilt bulk read command
@@ -87,6 +88,9 @@ namespace Darwin {
         void buildBulkReadPacket();
 
     public:
+        void setConfig(const messages::support::Configuration<UART>& config){
+            uart.setConfig(config);
+        }
         /// The CM730
         CM730 cm730;
         /// The Right Shoulder Pitch MX28

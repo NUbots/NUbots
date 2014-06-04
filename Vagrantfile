@@ -7,7 +7,7 @@ Vagrant.configure("2") do |config|
   
   # Determine the base box to use by checking the hostname.
   # Add your hostname to the list to opt-out of nubots-14.04.
-  if Socket.gethostname == 'brain'
+  if Socket.gethostname == 'nubots-b767f2s'
     # # 'precise32' was used prior to 2014-04-30.
     # config.vm.box = "precise32"
     # config.vm.box_url = "http://files.vagrantup.com/precise32.box"
@@ -41,8 +41,10 @@ Vagrant.configure("2") do |config|
   # Define the NUClearPort development VM, snd make it the primary VM
   # (meaning that a plain `vagrant up` will only create this machine)
   config.vm.define "nuclearportvm", primary: true do |nuclearport|
-    nuclearport.vm.hostname = "nuclearportvm"
+    nuclearport.vm.hostname = "nuclearportvm.nubots.net"
     
+    # nuclearport.vm.network :private_network, ip: "192.168.33.77"
+
     nuclearport.vm.network :forwarded_port, guest: 12000, host: 12000
     nuclearport.vm.network :forwarded_port, guest: 12001, host: 12001
 
