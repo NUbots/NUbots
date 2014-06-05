@@ -20,6 +20,7 @@
 package messages.support.nubugger.proto;
 
 import "messages/input/proto/Sensors.proto";
+import "messages/input/proto/Image.proto";
 import "messages/localisation/proto/Localisation.proto";
 import "messages/vision/proto/ClassifiedImage.proto";
 import "messages/vision/proto/LookUpTable.proto";
@@ -63,16 +64,9 @@ message Message {
         optional uint64 finished = 10;
     }
 
-
     message DataPoint {
         optional string label = 1;
         repeated float value = 2;
-    }
-
-    message Image {
-        optional uint32 width = 1;
-        optional uint32 height = 2;
-        optional bytes data = 3;
     }
 
     message VisionFieldObject {
@@ -115,12 +109,8 @@ message Message {
     }
 
     message Vision {
-        optional Image image = 1;
+        optional messages.input.proto.Image image = 1;
         repeated VisionFieldObject vision_object = 2;
         optional messages.vision.proto.ClassifiedImage classified_image = 3;
-    }
-
-    message Vector {
-        repeated float float_value = 1;
     }
 }
