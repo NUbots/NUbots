@@ -30,15 +30,16 @@
 #include "messages/vision/LookUpTable.h"
 #include "messages/vision/SaveLookUpTable.h"
 #include "messages/localisation/FieldObject.h"
+#include "messages/vision/VisionObjects.h"
+#include "messages/support/Configuration.h"
+#include "messages/localisation/FieldObject.h"
+
 #include "utility/nubugger/NUgraph.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/nubugger/NUgraph.h"
 #include "utility/localisation/transform.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/support/Configuration.h"
 #include "utility/math/coordinates.h"
-#include "messages/localisation/FieldObject.h"
 // #include "BallModel.h"
 #include "utility/image/ColorModelConversions.h"
 
@@ -53,10 +54,11 @@ namespace modules {
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
         using messages::vision::LookUpTable;
-        using NUClear::DEBUG;
-        using utility::nubugger::graph;
         using std::chrono::duration_cast;
         using std::chrono::microseconds;
+        using NUClear::DEBUG;
+        using utility::nubugger::graph;
+        using messages::support::nubugger::proto::DataPoint;
         using messages::support::nubugger::proto::Message;
         using messages::support::nubugger::proto::Message_Type;
         using messages::vision::Goal;
@@ -132,11 +134,7 @@ namespace modules {
                 message.set_type(Message::DATA_POINT);
                 message.set_utc_timestamp(std::time(0));
 
-                auto* dataPoint = message.mutable_datapoint();
-                dataPoint->set_label(data_point.label);
-                for (auto value : data_point.values) {
-                    dataPoint->add_value(value);
-                }
+                *message.mutable_datapoint() = data_point;
 
                 send(message);
             });

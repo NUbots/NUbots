@@ -21,18 +21,21 @@
 #define NUGRAPH_H
 
 #include <nuclear>
-#include "messages/NUbuggerDataPoint.h"
-
-using messages::NUbugger::DataPoint;
+#include "messages/support/nubugger/proto/DataPoint.pb.h"
 
 namespace utility {
 namespace nubugger{
 
     template<typename... Values>
-    inline std::unique_ptr<DataPoint> graph(std::string label, Values... values) {
-        return std::make_unique<DataPoint>(DataPoint{
-            label, {float(values)...}
-        });
+    inline std::unique_ptr<messages::support::nubugger::proto::DataPoint> graph(std::string label, Values... values) {
+
+
+    	auto dataPoint = std::make_unique<messages::support::nubugger::proto::DataPoint>();
+    	dataPoint->set_label(label);
+    	for(const auto& value : { float(values)... }) {
+    		dataPoint->add_value(value);
+    	}
+    	return std::move(dataPoint);
     }
 
 }

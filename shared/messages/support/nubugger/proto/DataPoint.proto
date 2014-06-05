@@ -17,21 +17,9 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_NUBUGGERDATAPOINT_H
-#define MESSAGES_NUBUGGERDATAPOINT_H
+package messages.support.nubugger.proto;
 
-namespace messages {
-
-    namespace NUbugger {
-
-        struct DataPoint {
-            std::string label;
-            std::vector<float> values;
-        };
-
-    }
-
+message DataPoint {
+    required string label = 1;
+    repeated float value = 2;
 }
-
-#endif
-
