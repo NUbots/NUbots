@@ -50,6 +50,7 @@ namespace modules {
         using messages::support::Configuration;
         using messages::input::Sensors;
         using messages::input::Image;
+        using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
         using messages::vision::LookUpTable;
         using NUClear::DEBUG;
@@ -264,7 +265,7 @@ namespace modules {
             //     send(message);
             // });
 
-            on<Trigger<ClassifiedImage<ObjectClass>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
+            on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
                 // TODO output the classified image
             });
 
@@ -542,13 +543,12 @@ namespace modules {
                 message.set_type(Message::LOOKUP_TABLE);
                 message.set_utc_timestamp(std::time(0));
 
-                Message::LookupTable* api_lookup_table = message.mutable_lookuptable();
+                auto* api_lookup_table = message.mutable_lookuptable();
                 api_lookup_table->set_table(lut->getData());
 
                 send(message);
             }
         }
-
 
         void NUbugger::recvLookupTable(const Message& message) {
             auto lookuptable = message.lookuptable();

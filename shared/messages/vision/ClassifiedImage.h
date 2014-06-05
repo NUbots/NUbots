@@ -57,7 +57,7 @@ namespace messages {
                 Segment* next;
             };
 
-            arma::vec2 horizonStart
+            arma::vec2 horizonStart;
             arma::vec2 horizonEnd;
 
             std::vector<arma::vec2> visualHorizon;

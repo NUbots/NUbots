@@ -22,6 +22,7 @@ package messages.support.nubugger.proto;
 import "messages/input/proto/Sensors.proto";
 import "messages/localisation/proto/Localisation.proto";
 import "messages/vision/proto/ClassifiedImage.proto";
+import "messages/vision/proto/LookUpTable.proto";
 
 message Message {
     enum Type {
@@ -42,19 +43,11 @@ message Message {
     optional messages.localisation.proto.Localisation localisation = 5;
     optional DataPoint dataPoint = 6;
     optional ReactionStatistics reactionStatistics = 7;
-    optional LookupTable lookupTable = 8;
+    optional messages.vision.proto.LookupTable lookupTable = 8;
     optional Command command = 9;
 
     message Command {
         optional string command = 1;
-    }
-
-    message LookupTable {
-        optional bytes table = 1;
-        optional uint32 bits_y = 2;
-        optional uint32 bits_cb = 3;
-        optional uint32 bits_cr = 4;
-        optional bool save = 5;
     }
 
     message ReactionStatistics {
