@@ -49,7 +49,7 @@ namespace modules {
                 lut.save(LUTLocation);
             });
 
-            on<Trigger<Image>, With<LookUpTable, Sensors>, Options<Single>>([this](const Image& image, const LookUpTable& lut, const Sensors& sensors) {
+            on<Trigger<Image>, With<LookUpTable, Sensors>, Options<Single>>("Classify Image", [this](const Image& image, const LookUpTable& lut, const Sensors& sensors) {
 
                 auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
 

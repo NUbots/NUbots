@@ -21,6 +21,7 @@ package messages.support.nubugger.proto;
 
 import "messages/input/proto/Sensors.proto";
 import "messages/localisation/proto/Localisation.proto";
+import "messages/vision/proto/ClassifiedImage.proto";
 
 message Message {
     enum Type {
@@ -120,44 +121,10 @@ message Message {
         optional ObstacleColour obstacle_colour = 12;
     }
 
-    message VisionClassifiedSegment {
-        optional uint32 start_x = 1;
-        optional uint32 start_y = 2;
-
-        optional uint32 end_x = 3;
-        optional uint32 end_y = 4;
-
-        optional uint32 colour = 5;
-    }
-
-    message VisionTransitionSegment {
-        optional uint32 start_x = 1;
-        optional uint32 start_y = 2;
-
-        optional uint32 end_x = 3;
-        optional uint32 end_y = 4;
-
-        optional uint32 colour = 5;
-
-        optional uint32 colour_class = 6;
-    }
-
-    message VisionGreenHorizonPoint {
-        optional uint32 x = 1;
-        optional uint32 y = 2;
-    }
-
-    message VisionClassifiedImage {
-        optional uint32 num_segments = 1;
-        repeated VisionClassifiedSegment segment = 2;
-        repeated VisionTransitionSegment transition_segment = 3;
-        repeated VisionGreenHorizonPoint green_horizon_point = 4;
-    }
-
     message Vision {
         optional Image image = 1;
         repeated VisionFieldObject vision_object = 2;
-        optional VisionClassifiedImage classified_image = 3;
+        optional messages.vision.proto.ClassifiedImage classified_image = 3;
     }
 
     message Vector {
