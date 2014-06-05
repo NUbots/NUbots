@@ -1,6 +1,3 @@
-//generate the lexer with the --file-extension-scheme 'pp' to get .hpp extenions on headers ie;
-//quex -i Replacement.qx -o Replacement --language C++ --fes pp
-
 header {
     // Header stuff goes here
 }

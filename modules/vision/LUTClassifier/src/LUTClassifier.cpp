@@ -31,6 +31,8 @@ namespace modules {
         using messages::input::Sensors;
         using messages::vision::LookUpTable;
         using messages::vision::SaveLookUpTable;
+        using messages::vision::ObjectClass;
+        using messages::vision::ClassifiedImage;
         using messages::support::Configuration;
 
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -48,8 +50,60 @@ namespace modules {
             });
 
             on<Trigger<Image>, With<LookUpTable, Sensors>, Options<Single>>([this](const Image& image, const LookUpTable& lut, const Sensors& sensors) {
-                
-                quex.classify(image, lut, {0,0}, {10,0});
+
+                auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
+
+                // TODO temp, do the horizontal classifications
+                for(uint i = 0; i < image.height(); i += 4) {
+
+                    auto segments = quex.classify(image, lut, { 0, i }, { image.width() - 1, i });
+
+                    ClassifiedImage<ObjectClass>::Segment* previous = nullptr;
+                    ClassifiedImage<ObjectClass>::Segment* current = nullptr;
+
+                    for (auto& s : segments) {
+
+                        // Move in the data
+                        current = &(classifiedImage->horizontalSegments.insert(std::make_pair(s.colour, std::move(s)))->second);
+
+                        // Link up the results
+                        current->previous = previous;
+                        if(previous) {
+                            previous->next = current;
+                        }
+
+                        // Get ready for our next one
+                        previous = current;
+                    }
+                }
+
+                // TODO temp, do the vertical classifications
+                for(uint i = 0; i < image.width(); i += 4) {
+
+                    auto segments = quex.classify(image, lut, { i, 0 }, { i, image.height() - 1});
+
+                    ClassifiedImage<ObjectClass>::Segment* previous = nullptr;
+                    ClassifiedImage<ObjectClass>::Segment* current = nullptr;
+
+                    for (auto& s : segments) {
+
+                        // Move in the data
+                        current = &(classifiedImage->verticalSegments.insert(std::make_pair(s.colour, std::move(s)))->second);
+
+                        // Link up the results
+                        current->previous = previous;
+                        if(previous) {
+                            previous->next = current;
+                        }
+
+                        // Get ready for our next one
+                        previous = current;
+                    }
+                }
+
+                emit(std::move(classifiedImage));
+
+                // classify every 4th line vert/horizontal
 
                 // We need a quex classifier object
                 // We need a way of passing in the LUTified data to the classifer object

@@ -264,6 +264,10 @@ namespace modules {
             //     send(message);
             // });
 
+            on<Trigger<ClassifiedImage<ObjectClass>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
+                // TODO output the classified image
+            });
+
             /*on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
 
                 Message message;

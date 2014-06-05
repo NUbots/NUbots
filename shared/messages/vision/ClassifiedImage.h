@@ -30,8 +30,8 @@ namespace messages {
             BALL,
             GOAL,
             LINE,
-            TEAM_CYAN,
-            TEAM_MAGENTA,
+            CYAN_TEAM,
+            MAGENTA_TEAM,
             FIELD,
             UNKNOWN
         };
@@ -41,17 +41,17 @@ namespace messages {
          *
          * @author Trent Houliston
          *
-         * @tparam TClass the object that devides different classes in the image.
+         * @tparam TClass the object that dividess different classes in the image.
          */
         template <typename TClass>
         struct ClassifiedImage {
 
             struct Segment {
 
-                ObjectClass colour;
+                TClass colour;
 
-                arma::vec2 start;
-                arma::vec2 end;
+                arma::uvec2 start;
+                arma::uvec2 end;
 
                 Segment* previous;
                 Segment* next;
@@ -59,8 +59,8 @@ namespace messages {
 
             std::vector<arma::vec2> visualHorizon;
 
-            std::multimap<TClass, Segment> horizontalTransitions;
-            std::multimap<TClass, Segment> verticalTransitions;
+            std::multimap<TClass, Segment> horizontalSegments;
+            std::multimap<TClass, Segment> verticalSegments;
         };
 
     }  // vision

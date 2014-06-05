@@ -32,7 +32,7 @@ namespace modules {
         QuexClassifier::QuexClassifier() : lexer(buffer, BUFFER_SIZE, buffer + 1) {
         }
 
-        std::multimap<ObjectClass, ClassifiedImage<ObjectClass>::Segment> QuexClassifier::classify(const Image& image, const LookUpTable& lut, const arma::vec2& start, const arma::vec2& end) {
+        std::vector<ClassifiedImage<ObjectClass>::Segment> QuexClassifier::classify(const Image& image, const LookUpTable& lut, const arma::uvec2& start, const arma::uvec2& end) {
 
             // Start reading data
             lexer.buffer_fill_region_prepare();
@@ -48,6 +48,7 @@ namespace modules {
 
                 lexer.buffer_fill_region_finish(length);
             }
+
             // For horizontal runs
             else if(start[1] == end[1]) {
 
@@ -67,43 +68,58 @@ namespace modules {
             }
 
             // Read our lexing tokens
-            Token token;
+            Token lexeme;
+
+            // Our output, the previously inserted token is also held to perform linking
+            std::vector<ClassifiedImage<ObjectClass>::Segment> output;
+
+            // Our vector of position
+            arma::uvec2 position = start;
+
+            // A reference to the relevant movement direction
+            uint& movement = start[1] == end[1] ? position[0] : position[1];
+
             do {
-                lexer.token_p_switch(&token);
+                lexer.token_p_switch(&lexeme);
                 lexer.receive();
 
-                switch(token.type_id()) {
-                    case QUEX_TKN_BALL:
-                        std::cout << "Ball: " << token.number << std::endl;
-                        break;
+                // Update our position
+                arma::uvec2 s = position;
+                movement += lexeme.number;
 
-                    case QUEX_TKN_CYAN_TEAM:
-                        std::cout << "Cyan: " << token.number << std::endl;
-                        break;
-
+                switch(lexeme.type_id()) {
                     case QUEX_TKN_FIELD:
-                        std::cout << "Field: " << token.number << std::endl;
+                        output.push_back({ObjectClass::FIELD, s, position, nullptr, nullptr});
+                        break;
+
+                    case QUEX_TKN_BALL:
+                        output.push_back({ObjectClass::BALL, s, position, nullptr, nullptr});
                         break;
 
                     case QUEX_TKN_GOAL:
-                        std::cout << "Goal: " << token.number << std::endl;
+                        output.push_back({ObjectClass::GOAL, s, position, nullptr, nullptr});
                         break;
+
                     case QUEX_TKN_LINE:
-                        std::cout << "Line: " << token.number << std::endl;
+                        output.push_back({ObjectClass::LINE, s, position, nullptr, nullptr});
+                        break;
+
+                    case QUEX_TKN_CYAN_TEAM:
+                        output.push_back({ObjectClass::CYAN_TEAM, s, position, nullptr, nullptr});
                         break;
 
                     case QUEX_TKN_MAGENTA_TEAM:
-                        std::cout << "Magenta: " << token.number << std::endl;
+                        output.push_back({ObjectClass::MAGENTA_TEAM, s, position, nullptr, nullptr});
                         break;
 
                     case QUEX_TKN_UNCLASSIFIED:
-                        std::cout << "Unclassified: " << token.number << std::endl;
+                        output.push_back({ObjectClass::UNKNOWN, s, position, nullptr, nullptr});
                         break;
                 }
             }
-            while(token.type_id() != QUEX_TKN_TERMINATION);
+            while(lexeme.type_id() != QUEX_TKN_TERMINATION);
 
-            return {};
+            return output;
 
         }
     }

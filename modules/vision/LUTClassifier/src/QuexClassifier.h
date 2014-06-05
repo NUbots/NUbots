@@ -20,9 +20,10 @@
 #ifndef MODULES_VISION_QUEXCLASSIFIER_H
 #define MODULES_VISION_QUEXCLASSIFIER_H
 
-#include <map>
+#include <vector>
 
 #define QUEX_SETTING_BUFFER_MIN_FALLBACK_N 0
+#define QUEX_OPTION_ASSERTS_DISABLED
 #include "Lexer.hpp"
 #include "messages/input/Image.h"
 #include "messages/vision/LookUpTable.h"
@@ -39,7 +40,7 @@ namespace modules {
 		public:
             QuexClassifier();
 
-			std::multimap<messages::vision::ObjectClass, messages::vision::ClassifiedImage<messages::vision::ObjectClass>::Segment> classify(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const arma::vec2& start, const arma::vec2& end);
+			std::vector<messages::vision::ClassifiedImage<messages::vision::ObjectClass>::Segment> classify(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const arma::uvec2& start, const arma::uvec2& end);
 		};
 	}
 }
