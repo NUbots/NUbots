@@ -18,10 +18,16 @@
  */
 
 #include "LUTClassifier.h"
+#include "utility/idiom/pimpl_impl.h"
+
 #include "messages/input/Image.h"
 #include "messages/input/Sensors.h"
 #include "messages/vision/LookUpTable.h"
 #include "messages/vision/SaveLookUpTable.h"
+#include "messages/support/Configuration.h"
+
+#include "QuexClassifier.h"
+
 #include "Lexer.hpp"
 
 namespace modules {
@@ -34,6 +40,12 @@ namespace modules {
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
         using messages::support::Configuration;
+
+        // Implement our impl class.
+        class LUTClassifier::impl {
+            public:
+            QuexClassifier quex;
+        };
 
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -56,7 +68,7 @@ namespace modules {
                 // TODO temp, do the horizontal classifications
                 for(uint i = 0; i < image.height(); i += 4) {
 
-                    auto segments = quex.classify(image, lut, { 0, i }, { image.width() - 1, i });
+                    auto segments = m->quex.classify(image, lut, { 0, i }, { image.width() - 1, i });
 
                     ClassifiedImage<ObjectClass>::Segment* previous = nullptr;
                     ClassifiedImage<ObjectClass>::Segment* current = nullptr;
@@ -80,7 +92,7 @@ namespace modules {
                 // TODO temp, do the vertical classifications
                 for(uint i = 0; i < image.width(); i += 4) {
 
-                    auto segments = quex.classify(image, lut, { i, 0 }, { i, image.height() - 1});
+                    auto segments = m->quex.classify(image, lut, { i, 0 }, { i, image.height() - 1});
 
                     ClassifiedImage<ObjectClass>::Segment* previous = nullptr;
                     ClassifiedImage<ObjectClass>::Segment* current = nullptr;

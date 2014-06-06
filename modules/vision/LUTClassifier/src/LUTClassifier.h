@@ -21,8 +21,7 @@
 #define MODULES_VISION_LUTCLASSIFIER_H
 
 #include <nuclear>
-#include "QuexClassifier.h"
-#include "messages/support/Configuration.h"
+#include "utility/idiom/pimpl.h"
 
 namespace modules {
     namespace vision {
@@ -38,7 +37,9 @@ namespace modules {
          */
         class LUTClassifier : public NUClear::Reactor {
         private:
-            QuexClassifier quex;
+            class impl;
+            utility::idiom::pimpl<impl> m;
+
         public:
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
         };
