@@ -22,7 +22,3 @@ SET(NUBOTS_SHARED_LIBRARIES
     ${ZMQ_LIBRARIES}
     ${ARMADILLO_LIBRARIES}
     ${PROTOBUF_LIBRARIES})
-
-# These libraries are actually built as part of the build process but are treated as ordinary libraries
-ADD_SUBDIRECTORY(lib/jsmn)
-INCLUDE_DIRECTORIES(${JSMN_INCLUDE_DIRS})
