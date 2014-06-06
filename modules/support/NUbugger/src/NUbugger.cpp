@@ -264,7 +264,57 @@ namespace modules {
             // });
 
             on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
-                // TODO output the classified image
+
+                Message message;
+                message.set_type(Message::VISION);
+                message.set_utc_timestamp(std::time(0));
+
+                auto* visionData = message.mutable_vision();
+                auto* imageData = visionData->mutable_classified_image();
+
+                // Add the vertical segments to the list
+                for(const auto& segment : image.verticalSegments) {
+                    auto* s = imageData->add_segment();
+
+                    s->set_colour(uint(segment.first));
+
+                    auto* start = s->mutable_start();
+                    start->set_x(segment.second.start[0]);
+                    start->set_y(segment.second.start[1]);
+
+                    auto* end = s->mutable_end();
+                    end->set_x(segment.second.end[0]);
+                    end->set_y(segment.second.end[1]);
+                }
+
+                // Add the horizontal segments to the list
+                for(const auto& segment : image.horizontalSegments) {
+                    auto* s = imageData->add_segment();
+
+                    s->set_colour(uint(segment.first));
+
+                    auto* start = s->mutable_start();
+                    start->set_x(segment.second.start[0]);
+                    start->set_y(segment.second.start[1]);
+
+                    auto* end = s->mutable_end();
+                    end->set_x(segment.second.end[0]);
+                    end->set_y(segment.second.end[1]);
+                }
+
+                // Add in the actual horizon (the points on the left and right side)
+                auto* horizon = imageData->mutable_horizon();
+                horizon->set_x(image.horizon[0]);
+                horizon->set_y(image.horizon[0]);
+
+                for(const auto& visualHorizon : image.visualHorizon) {
+                    auto* vh = imageData->add_visual_horizon();
+
+                    vh->set_x(visualHorizon[0]);
+                    vh->set_y(visualHorizon[1]);
+                }
+
+                send(message);
             });
 
             /*on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
