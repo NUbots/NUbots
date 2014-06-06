@@ -29,7 +29,7 @@ namespace modules {
         using messages::vision::ClassifiedImage;
         using quex::Token;
 
-        QuexClassifier::QuexClassifier() : lexer(buffer, BUFFER_SIZE, buffer + 1) {
+        QuexClassifier::QuexClassifier() : lexer(buffer, BUFFER_SIZE, buffer + 1), tknNumber(lexer.token_p()->number) {
         }
 
         std::vector<ClassifiedImage<ObjectClass>::Segment> QuexClassifier::classify(const Image& image, const LookUpTable& lut, const arma::uvec2& start, const arma::uvec2& end) {
@@ -58,17 +58,13 @@ namespace modules {
                     buffer[i + 1] = lut.classify(image(start[0] + 1, start[1]));
                 }
 
-                lexer.buffer_fill_region_finish(length - 1);
-                lexer.buffer_input_pointer_set(buffer + 1);
+                lexer.buffer_fill_region_finish(length);
             }
 
             // Diagonal run
             else {
-                // TODO not implemented
+                // TODO not implemented (and probably won't implement)
             }
-
-            // Read our lexing tokens
-            Token lexeme;
 
             // Our output, the previously inserted token is also held to perform linking
             std::vector<ClassifiedImage<ObjectClass>::Segment> output;
@@ -79,15 +75,13 @@ namespace modules {
             // A reference to the relevant movement direction
             uint& movement = start[1] == end[1] ? position[0] : position[1];
 
-            do {
-                lexer.token_p_switch(&lexeme);
-                lexer.receive();
+            for(uint32_t typeID = lexer.receive(); typeID != QUEX_TKN_TERMINATION; typeID = lexer.receive()) {
 
                 // Update our position
                 arma::uvec2 s = position;
-                movement += lexeme.number;
+                movement += tknNumber;
 
-                switch(lexeme.type_id()) {
+                switch(typeID) {
                     case QUEX_TKN_FIELD:
                         output.push_back({ObjectClass::FIELD, s, position, nullptr, nullptr});
                         break;
@@ -117,7 +111,6 @@ namespace modules {
                         break;
                 }
             }
-            while(lexeme.type_id() != QUEX_TKN_TERMINATION);
 
             return output;
 

@@ -27,7 +27,20 @@ ADD_CUSTOM_COMMAND(
            "${outputpath}/Lexer-token.hpp"
            "${outputpath}/Lexer-configuration.hpp"
     COMMAND "quex"
-    ARGS -i ${abs_file} --file-extension-scheme pp --output-directory ${outputpath} --language C++ --engine Lexer --token-policy single --token-memory-management-by-user
+    ARGS -i ${abs_file} --file-extension-scheme pp --output-directory ${outputpath} --language C++ --engine Lexer --token-policy single
+
+    # TODO to try and improve performanec
+    # Enable computed gotos (QUEX_OPTION_COMPUTED_GOTOS)
+    # Enable template compression
+    # Enable path compression
+    # Disable the string accumulator (--no-string-accumulator)
+    # Disable line counting (--no-count-lines)
+    # Enable Single Mode Analyser (--single-mode-analyzer)
+    # Disable Transition check (--no-mode-transition-check)
+    # Disable DOS eol checks (probably won't help) (--no-DOS)
+    # Set the codec to ascii (rather then the default utf8) (--codec ASCII)
+    # disable setting a termination zero (maybe miniscule speedup?) QUEX_OPTION_TERMINATION_ZERO_DISABLED
+
     DEPENDS ${abs_file}
     COMMENT "Generating Quex lexer for vision"
     VERBATIM)
