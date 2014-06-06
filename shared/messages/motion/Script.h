@@ -21,7 +21,8 @@
 #define MESSAGES_SCRIPT_H
 
 #include <chrono>
-#include "utility/configuration/ConfigurationNode.h"
+#include <yaml-cpp/yaml.h>
+
 #include "messages/input/ServoID.h"
 
 namespace messages {
@@ -82,88 +83,65 @@ namespace messages {
     }  // motion
 }  // messages
 
-namespace utility {
-namespace configuration {
-
-    /**
-     * TODO document
-     *
-     * @author Trent Houliston
-     */
+namespace YAML {
     template<>
-    struct utility::configuration::ConfigurationNode::ConvertNode<messages::motion::Script::Frame::Target> {
+    struct convert<messages::motion::Script::Frame::Target> {
+        static Node encode(const messages::motion::Script::Frame::Target& rhs) {
+            Node node;
 
-        static utility::configuration::ConfigurationNode makeNode(const messages::motion::Script::Frame::Target input) {
-
-            utility::configuration::ConfigurationNode node;
-
-            node["id"] = messages::input::stringFromId(input.id);
-            node["position"] = input.position;
-            node["gain"] = input.gain;
+            node["id"] = messages::input::stringFromId(rhs.id);
+            node["position"] = rhs.position;
+            node["gain"] = rhs.gain;
 
             return node;
         }
 
-        static messages::motion::Script::Frame::Target makeValue(const utility::configuration::ConfigurationNode& node) {
+        static bool decode(const Node& node, messages::motion::Script::Frame::Target& rhs) {
 
-            return
-            {
-                messages::input::idFromString(node["id"]),
-                        static_cast<float>(node["position"]),
-                        static_cast<float>(node["gain"])
-            };
+            rhs = { messages::input::idFromString(node["id"]), node["position"].as<float>(), node["gain"].as<float>() };
+            return true;
         }
     };
 
-    /**
-     * TODO document
-     *
-     * @author Trent Houliston
-     */
     template<>
-    struct utility::configuration::ConfigurationNode::ConvertNode<messages::motion::Script::Frame> {
+    struct convert<messages::motion::Script::Frame> {
+        static Node encode(const messages::motion::Script::Frame& rhs) {
+            Node node;
 
-        static utility::configuration::ConfigurationNode makeNode(const messages::motion::Script::Frame input) {
-
-            utility::configuration::ConfigurationNode node;
-
-            node["duration"] = std::chrono::duration_cast<std::chrono::milliseconds>(input.duration).count();
-            node["targets"] = input.targets;
+            node["duration"] = std::chrono::duration_cast<std::chrono::milliseconds>(rhs.duration).count();
+            node["targets"] = rhs.targets;
 
             return node;
         }
 
-        static messages::motion::Script::Frame makeValue(const utility::configuration::ConfigurationNode& node) {
+        static bool decode(const Node& node, messages::motion::Script::Frame& rhs) {
 
-            int millis = node["duration"];
+            int millis = node["duration"].as<int>;
             std::chrono::milliseconds duration(millis);
 
-            std::vector<messages::motion::Script::Frame::Target> targets = node["targets"];
+            std::vector<messages::motion::Script::Frame::Target> targets = node["targets"].as<std::vector<messages::motion::Script::Frame::Target>>();
 
-            return {duration, std::move(targets)};
+            rhs = { duration, std::move(targets) };
+            return true;
         }
     };
 
-    /**
-     * TODO document
-     *
-     * @author Trent Houliston
-     */
     template<>
-    struct utility::configuration::ConfigurationNode::ConvertNode<messages::motion::Script> {
+    struct convert<messages::motion::Script> {
+        static Node encode(const messages::motion::Script& rhs) {
+            Node node;
 
-        static utility::configuration::ConfigurationNode makeNode(const messages::motion::Script input) {
-            utility::configuration::ConfigurationNode node;
-            node = input.frames;
+            node = rhs.frames;
+
             return node;
         }
 
-        static messages::motion::Script makeValue(const utility::configuration::ConfigurationNode& node) {
-            std::vector<messages::motion::Script::Frame> frames = node;
-            return {std::move(frames)};
+        static bool decode(const Node& node, messages::motion::Script& rhs) {
+            std::vector<std::messages::Script::Frame> frames = node;
+            rhs = { std::move(frames) };
+            return true;
         }
     };
-}  // namespace configuration
-}  // namespace utility
+}
 
 #endif
