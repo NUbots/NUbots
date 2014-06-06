@@ -24,7 +24,7 @@ ADD_CUSTOM_COMMAND(
     OUTPUT "${outputpath}/Lexer-token_ids.hpp"
            "${outputpath}/Lexer.cpp"
            "${outputpath}/Lexer.hpp"
-           "${outputpath}/Lexer-token_ids.hpp"
+           "${outputpath}/Lexer-token.hpp"
            "${outputpath}/Lexer-configuration.hpp"
     COMMAND "quex"
     ARGS -i ${abs_file} --file-extension-scheme pp --output-directory ${outputpath} --language C++ --engine Lexer --token-policy single --token-memory-management-by-user
@@ -37,5 +37,5 @@ NUCLEAR_MODULE(SOURCES
     ${outputpath}/Lexer-token_ids.hpp
     ${outputpath}/Lexer.cpp
     ${outputpath}/Lexer.hpp
-    ${outputpath}/Lexer-token_ids.hpp
+    ${outputpath}/Lexer-token.hpp
     ${outputpath}/Lexer-configuration.hpp)
