@@ -19,6 +19,8 @@
 
 #include "ConfigSystem.h"
 
+#include <yaml-cpp/yaml.h>
+
 extern "C" {
     #include <sys/inotify.h>
     #include <sys/eventfd.h>
@@ -28,9 +30,6 @@ extern "C" {
 }
 
 #include "utility/strutil/strutil.h"
-#include "utility/configuration/ConfigurationNode.h"
-#include "utility/configuration/json/parse.h"
-#include "utility/configuration/json/serialize.h"
 #include "utility/file/fileutil.h"
 #include "utility/idiom/pimpl_impl.h"
 
@@ -42,7 +41,7 @@ namespace modules {
 
             class ConfigSystem::impl {
             public:
-                using HandlerFunction = std::function<void (NUClear::Reactor*, const std::string&, const messages::support::ConfigurationNode&)>;
+                using HandlerFunction = std::function<void (NUClear::Reactor*, const std::string&, const YAML::Node&)>;
 
                 std::set<std::type_index> loaded;
                 std::map<std::string, std::vector<HandlerFunction>> handler;
@@ -58,7 +57,7 @@ namespace modules {
                 void kill();
                 void loadDir(const std::string& path, HandlerFunction emit);
                 void watchDir(const std::string& path);
-                messages::support::ConfigurationNode buildConfigurationNode(const std::string& filePath);
+                YAML::Node buildConfigurationNode(const std::string& filePath);
 
                 // Lots of space for events (definitely more then needed)
                 static constexpr size_t MAX_EVENT_LEN = sizeof (inotify_event) * 1024 + 16;
@@ -106,7 +105,7 @@ namespace modules {
                         else {
                             auto lastSlashIndex = command.configPath.rfind('/');
                             auto fileName = command.configPath.substr(lastSlashIndex == std::string::npos ? 0 : lastSlashIndex);
-                            command.initialEmitter(this, fileName, messages::support::ConfigurationNode(m->buildConfigurationNode(fullPath)));
+                            command.initialEmitter(this, fileName, YAML::Node(m->buildConfigurationNode(fullPath)));
                         }
 
                         handlers.push_back(command.emitter);
@@ -119,9 +118,9 @@ namespace modules {
                 powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(run, kill));
             }
 
-            messages::support::ConfigurationNode ConfigSystem::impl::buildConfigurationNode(const std::string& filePath) {
+            YAML::Node ConfigSystem::impl::buildConfigurationNode(const std::string& filePath) {
                 timestamp[filePath] = NUClear::clock::now();
-                return utility::configuration::json::parse(utility::file::loadFromFile(filePath));
+                return YAML::LoadFile(filePath);
             }
 
             void ConfigSystem::impl::loadDir(const std::string& path, ConfigSystem::impl::HandlerFunction emit) {
@@ -130,7 +129,7 @@ namespace modules {
 
                 for (const auto& element : elements) {
                     if (utility::strutil::endsWith(element, ".json")) {
-                        emit(reactor, element, messages::support::ConfigurationNode(buildConfigurationNode(path + element)));
+                        emit(reactor, element, YAML::Node(buildConfigurationNode(path + element)));
                     }
                 }
             }
@@ -195,7 +194,7 @@ namespace modules {
                                             NUClear::log<NUClear::INFO>("Loading", fullPath, "with handler for", handlers->first);
                                             try {
                                                 for (auto& emitter : handlers->second) {
-                                                    emitter(reactor, name, messages::support::ConfigurationNode(buildConfigurationNode(fullPath)));
+                                                    emitter(reactor, name, YAML::Node(buildConfigurationNode(fullPath)));
                                                 }
                                             }
                                             catch(const std::exception& e) {
