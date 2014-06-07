@@ -27,13 +27,13 @@ namespace messages {
     namespace vision {
 
         enum class ObjectClass {
-            BALL,
-            GOAL,
-            LINE,
-            CYAN_TEAM,
-            MAGENTA_TEAM,
-            FIELD,
-            UNKNOWN
+            UNKNOWN = 0,
+            FIELD = 1,
+            BALL = 2,
+            GOAL = 3,
+            LINE = 4,
+            CYAN_TEAM = 5,
+            MAGENTA_TEAM = 6,
         };
 
         /**

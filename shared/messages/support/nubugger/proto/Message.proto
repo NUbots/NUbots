@@ -55,6 +55,6 @@ message Message {
     optional messages.localisation.proto.Localisation localisation = 7;
     optional messages.support.nubugger.proto.DataPoint data_point = 8;
     optional messages.support.nuclear.proto.ReactionStatistics reaction_statistics = 9;
-    optional messages.vision.proto.LookupTable lookup_table = 10;
+    optional messages.vision.proto.LookUpTable lookup_table = 10;
     optional Command command = 11;
 }

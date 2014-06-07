@@ -19,7 +19,7 @@
 
 package messages.vision.proto;
 
-message LookupTable {
+message LookUpTable {
     optional bytes table = 1;
     optional uint32 bits_y = 2;
     optional uint32 bits_cb = 3;

@@ -51,7 +51,7 @@ mode ReplacementRules {
     g+                  => QUEX_TKN_FIELD(number=(LexemeL));
     o+                  => QUEX_TKN_BALL(number=(LexemeL));
     y+                  => QUEX_TKN_GOAL(number=(LexemeL));
-    p+                  => QUEX_TKN_MAGENTA_TEAM(number=(LexemeL));
+    m+                  => QUEX_TKN_MAGENTA_TEAM(number=(LexemeL));
     c+                  => QUEX_TKN_CYAN_TEAM(number=(LexemeL));
     u+                  => QUEX_TKN_UNCLASSIFIED(number=(LexemeL));
 }
