@@ -30,7 +30,6 @@
 #include "messages/vision/LookUpTable.h"
 #include "messages/vision/SaveLookUpTable.h"
 #include "messages/localisation/FieldObject.h"
-#include "messages/vision/VisionObjects.h"
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
 
@@ -221,11 +220,10 @@ namespace modules {
                 if(!image.source().empty()) {
 
                     Message message;
-                    message.set_type(Message::VISION);
+                    message.set_type(Message::IMAGE);
                     message.set_utc_timestamp(std::time(0));
 
-                    auto* visionData = message.mutable_vision();
-                    auto* imageData = visionData->mutable_image();
+                    auto* imageData = message.mutable_image();
                     std::string* imageBytes = imageData->mutable_data();
 
                     // Reserve enough space in the image data to store the output
@@ -234,7 +232,6 @@ namespace modules {
                     imageData->set_height(image.height());
 
                     imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
-
 
                     send(message);
                 }
@@ -269,8 +266,7 @@ namespace modules {
                 message.set_type(Message::VISION);
                 message.set_utc_timestamp(std::time(0));
 
-                auto* visionData = message.mutable_vision();
-                auto* imageData = visionData->mutable_classified_image();
+                auto* imageData = message.mutable_classified_image();
 
                 // Add the vertical segments to the list
                 for(const auto& segment : image.verticalSegments) {
@@ -405,7 +401,7 @@ namespace modules {
                 send(message);
 
             });*/
-
+            /*
             on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Goal> goals){
                 Message message;
 
@@ -479,7 +475,7 @@ namespace modules {
                     }
                 }
                 send(message);
-            });
+            });*/
 
             on<Trigger<Every<100, std::chrono::milliseconds>>,
                With<messages::localisation::Ball>,
@@ -591,7 +587,7 @@ namespace modules {
                 message.set_type(Message::LOOKUP_TABLE);
                 message.set_utc_timestamp(std::time(0));
 
-                auto* api_lookup_table = message.mutable_lookuptable();
+                auto* api_lookup_table = message.mutable_lookup_table();
                 api_lookup_table->set_table(lut->getData());
 
                 send(message);
@@ -599,7 +595,7 @@ namespace modules {
         }
 
         void NUbugger::recvLookupTable(const Message& message) {
-            auto lookuptable = message.lookuptable();
+            auto lookuptable = message.lookup_table();
             const std::string& lutData = lookuptable.table();
 
             NUClear::log("Loading LUT");
