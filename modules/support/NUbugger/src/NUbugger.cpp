@@ -133,7 +133,7 @@ namespace modules {
                 message.set_type(Message::DATA_POINT);
                 message.set_utc_timestamp(std::time(0));
 
-                *message.mutable_datapoint() = data_point;
+                *(message.mutable_data_point()) = data_point;
 
                 send(message);
             });
@@ -263,7 +263,7 @@ namespace modules {
             on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
 
                 Message message;
-                message.set_type(Message::VISION);
+                message.set_type(Message::CLASSIFIED_IMAGE);
                 message.set_utc_timestamp(std::time(0));
 
                 auto* imageData = message.mutable_classified_image();
