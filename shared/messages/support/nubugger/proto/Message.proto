@@ -34,12 +34,11 @@ message Message {
         IMAGE = 2;
         CLASSIFIED_IMAGE = 3;
         VISION_OBJECT = 4;
-        VISION = 5;
-        LOCALISATION = 6;
-        DATA_POINT = 7;
-        REACTION_STATISTICS = 8;
-        LOOKUP_TABLE = 9;
-        COMMAND = 10;
+        LOCALISATION = 5;
+        DATA_POINT = 6;
+        REACTION_STATISTICS = 7;
+        LOOKUP_TABLE = 8;
+        COMMAND = 9;
     }
 
     message Command {
