@@ -73,27 +73,27 @@ namespace messages {
 
             Configuration(const std::string& name, YAML::Node config) : name(name), config(config) {};
 
-            YAML::Node& operator [] (const std::string& key) {
+            YAML::Node operator [] (const std::string& key) {
                 return config[key];
             }
 
-            const YAML::Node& operator [] (const std::string& key) const {
+            const YAML::Node operator [] (const std::string& key) const {
                 return config[key];
             }
 
-            YAML::Node& operator [] (const char* key) {
+            YAML::Node operator [] (const char* key) {
                 return config[key];
             }
 
-            const YAML::Node& operator [] (const char* key) const {
+            const YAML::Node operator [] (const char* key) const {
                 return config[key];
             }
 
-            YAML::Node& operator [] (size_t index) {
+            YAML::Node operator [] (size_t index) {
                 return config[index];
             }
 
-            const YAML::Node& operator [] (size_t index) const {
+            const YAML::Node operator [] (size_t index) const {
                 return config[index];
             }
         };

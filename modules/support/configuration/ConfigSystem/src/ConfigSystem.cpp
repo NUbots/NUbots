@@ -72,8 +72,9 @@ namespace modules {
                 m->reactor = this;
                 m->watchDir(impl::BASE_CONFIGURATION_PATH);
 
-                on<Trigger<messages::support::SaveConfiguration>>([this](const messages::support::SaveConfiguration& saveConfig){
-                    utility::file::writeToFile(saveConfig.path, utility::configuration::json::serialize(saveConfig.config));
+                on<Trigger<messages::support::SaveConfiguration>>([this](const messages::support::SaveConfiguration& saveConfig) {
+
+                    utility::file::writeToFile(saveConfig.path, saveConfig.config);
                     NUClear::log("Saving config:", saveConfig.path);
                 });
 

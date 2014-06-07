@@ -116,7 +116,7 @@ namespace YAML {
 
         static bool decode(const Node& node, messages::motion::Script::Frame& rhs) {
 
-            int millis = node["duration"].as<int>;
+            int millis = node["duration"].as<int>();
             std::chrono::milliseconds duration(millis);
 
             std::vector<messages::motion::Script::Frame::Target> targets = node["targets"].as<std::vector<messages::motion::Script::Frame::Target>>();
@@ -137,7 +137,7 @@ namespace YAML {
         }
 
         static bool decode(const Node& node, messages::motion::Script& rhs) {
-            std::vector<std::messages::Script::Frame> frames = node;
+            std::vector<messages::motion::Script::Frame> frames = node.as<std::vector<messages::motion::Script::Frame>>();
             rhs = { std::move(frames) };
             return true;
         }

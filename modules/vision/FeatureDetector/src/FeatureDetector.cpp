@@ -22,11 +22,10 @@
 namespace modules {
     namespace vision {
 
-            using messages::support::Configuration;
-            using utility::configuration::ConfigurationNode;
+        using messages::support::Configuration;
         using messages::vision::ClassifiedImage;
         using messages::vision::COLOUR_CLASS;
-            using messages::vision::ColourSegment;
+        using messages::vision::ColourSegment;
         using messages::platform::darwin::DarwinSensors;
         using messages::vision::LookUpTable;
 
@@ -80,7 +79,7 @@ namespace modules {
                 */
 
             on<Trigger<Configuration<VisionKinematicsConfig>>>([this](const Configuration<VisionKinematicsConfig>& constants) {
-                m_visionKinematics.setParameters(constants.config["RADIAL_CORRECTION_COEFFICIENT"],                                            
+                m_visionKinematics.setParameters(constants.config["RADIAL_CORRECTION_COEFFICIENT"],
                                                  constants.config["SCREEN_LOCATION_UNCERTAINTY_PIXELS"]);
             });
 
@@ -223,8 +222,8 @@ namespace modules {
             });
 
 
-            on<Trigger<Sensors>, Options<Sync<ObstacleDetectorConfig>, 
-                                         Sync<BallDetectorConfig>, 
+            on<Trigger<Sensors>, Options<Sync<ObstacleDetectorConfig>,
+                                         Sync<BallDetectorConfig>,
                                          Sync<GoalDetectorConfig>>>([this](const Sensors& sensors){
                 m_visionKinematics.setSensors(sensors);
             });
@@ -269,7 +268,7 @@ namespace modules {
 
             //m_detectObstacles =
             on<Trigger<ClassifiedImage>, Options<Single, Sync<ObstacleDetectorConfig>>>([this](const ClassifiedImage& classifiedImage) {
-                // NUClear::log("Obstacle Detector Start");                
+                // NUClear::log("Obstacle Detector Start");
                 emit(
                     m_obstacleDetector.run(classifiedImage.greenHorizonInterpolatedPoints,
                                            *(classifiedImage.LUT),
@@ -279,7 +278,7 @@ namespace modules {
                                            m_visionKinematics
                                           )
                 );
-                // NUClear::log("Obstacle Detector End");                
+                // NUClear::log("Obstacle Detector End");
 
             });
 

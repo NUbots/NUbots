@@ -18,6 +18,9 @@
  */
 
 #include "LUTClassifier.h"
+
+#include <yaml-cpp/yaml.h>
+
 #include "messages/vision/LookUpTable.h"
 #include "messages/vision/SaveLookUpTable.h"
 
@@ -27,7 +30,6 @@ namespace modules {
         using messages::input::Image;
         using messages::vision::ColourSegment;
         using messages::support::Configuration;
-        using utility::configuration::ConfigurationNode;
         using messages::vision::ClassifiedImage;
         using messages::vision::SegmentedRegion;
         using messages::vision::LookUpTable;
@@ -77,9 +79,8 @@ namespace modules {
                 //std::cout<< "Loading Rules config."<<std::endl;
                 segmentFilter.clearRules();
                 if(rules.config["USE_REPLACEMENT_RULES"]){
-                    std::map<std::string, ConfigurationNode> replacementRules = rules.config["REPLACEMENT_RULES"];
 
-                    for (const auto& rule : replacementRules) {
+                    for (const auto& rule : rules.config["REPLACEMENT_RULES"]) {
                         //std::cout << "Loading Replacement rule : " << rule.first << std::endl;
 
                         ColourReplacementRule r;
@@ -115,8 +116,7 @@ namespace modules {
                     }
                 }
 
-                std::map<std::string, ConfigurationNode> transitionRules = rules.config["TRANSITION_RULES"];
-                for(const auto& rule : transitionRules) {
+                for(const auto& rule : rules.config["TRANSITION_RULES"]) {
                     //std::cout << "Loading Transition rule : " << rule.first << std::endl;
 
                     ColourTransitionRule r;

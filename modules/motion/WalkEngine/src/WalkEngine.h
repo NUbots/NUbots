@@ -23,7 +23,6 @@
 #include <nuclear>
 #include <armadillo>
 
-#include "utility/configuration/ConfigurationNode.h"
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/Action.h"
 #include "messages/input/Sensors.h"
