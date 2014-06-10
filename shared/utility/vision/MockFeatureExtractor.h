@@ -36,7 +36,7 @@ namespace utility {
 			std::vector<arma::vec> mockFeatures;
 		public:
             static constexpr const char* CONFIGURATION_PATH = "MockFeatureExtractor.json";
-			void setParameters(const messages::support::Configuration<MockFeatureExtractor>& config);
+			std::vector<arma::vec> setParameters(const messages::support::Configuration<MockFeatureExtractor>& config);
 			class ExtractedFeature {
 			public:
 				arma::vec screenAngular;	//Compulsory

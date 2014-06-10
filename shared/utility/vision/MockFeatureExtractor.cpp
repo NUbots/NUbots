@@ -33,7 +33,7 @@ namespace utility {
 
 			MockFeatureExtractor::MockFeatureExtractor(){}
 
-			void MockFeatureExtractor::setParameters(const messages::support::Configuration<MockFeatureExtractor>& config){
+			std::vector<arma::vec> MockFeatureExtractor::setParameters(const messages::support::Configuration<MockFeatureExtractor>& config){
 				int NUMBER_OF_MOCK_POINTS = config["NUMBER_OF_MOCK_POINTS"];
 				float MEAN_RADIUS = config["MEAN_RADIUS"];
 				float RADIAL_DEVIATION = config["RADIAL_DEVIATION"];
@@ -60,7 +60,7 @@ namespace utility {
 					}));
 					std::cout << i+1 << " " << mockFeatures.back().at(0) << " " << mockFeatures.back().at(1) << " " << mockFeatures.back().at(2) << std::endl;
 				}
-
+				return mockFeatures;
 			}
 
 			std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
