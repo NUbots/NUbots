@@ -68,6 +68,7 @@ namespace modules {
 
             // Our output, the previously inserted token is also held to perform linking
             std::vector<ClassifiedImage<ObjectClass>::Segment> output;
+            output.reserve(64);
 
             // Our vector of position
             arma::uvec2 position = start;

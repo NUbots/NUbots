@@ -5,7 +5,7 @@ ADD_ROLE(
         support::configuration::ConfigSystem
         input::LinuxCamera
         vision::LUTClassifier
-        #vision::FeatureDetector
+        vision::FeatureDetector
         support::NUbugger
         support::logging::ConsoleLogHandler
         platform::darwin::HardwareIO
