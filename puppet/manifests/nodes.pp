@@ -58,6 +58,7 @@ node packer-virtualbox-iso, packer-vmware-iso {
   package { 'libfftw3-dev': ensure => latest }
   package { 'libaubio-dev': ensure => latest }
   package { 'libsndfile-dev': ensure => latest }
+  package { 'libtcmalloc-minimal4': ensure => latest }
   # package { 'libboost-math-dev': ensure => latest }
 
   # nubugger::build_dep
@@ -74,7 +75,7 @@ node packer-virtualbox-iso, packer-vmware-iso {
 
   # NFS for better Vagrant shared folders
   package { 'nfs-common': ensure => latest, }
-    
+
   # sharing fix, see http://superuser.com/questions/736024/cannot-share-host-directory-with-virtualbox-guest-mint-16-64-bit
   file { '/sbin/mount.vboxsf':
   	ensure => 'link',
