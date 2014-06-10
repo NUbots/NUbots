@@ -23,7 +23,7 @@
 #include <nuclear>
 
 #include "utility/math/kalman/UKF.h"
-#include "utility/math/kalman/AdaptiveIMUModelQ.h"
+#include "utility/math/kalman/IMUModel.h"
 #include "utility/math/kalman/LinearVec3Model.h"
 #include "utility/motion/RobotModels.h"
 #include "messages/input/Sensors.h"
@@ -42,7 +42,7 @@ namespace modules {
             public:
                 explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
-                utility::math::kalman::UKF<utility::math::kalman::AdaptiveIMUModelQ> orientationFilter;
+                utility::math::kalman::UKF<utility::math::kalman::IMUModel> orientationFilter;
                 utility::math::kalman::UKF<utility::math::kalman::LinearVec3Model> velocityFilter;
 
                 double DEFAULT_NOISE_GAIN;

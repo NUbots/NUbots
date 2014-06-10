@@ -151,14 +151,14 @@ namespace utility {
                     centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
                 }
 
-                void timeUpdate(double delta_t) {
+                void timeUpdate(double deltaT) {
 
                     // Generate our sigma points
                     sigmaPoints = generateSigmaPoints(mean, covariance);
 
                     // Write the propagated version of the sigma point
                     for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
-                        sigmaPoints.col(i) = model.timeUpdate(sigmaPoints.col(i), delta_t);
+                        sigmaPoints.col(i) = model.timeUpdate(sigmaPoints.col(i), deltaT);
                     }
 
                     // Calculate the new mean and covariance values.
@@ -188,6 +188,8 @@ namespace utility {
                     for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
                         predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), measurementArgs...);
                     }
+
+
 
                     // Now calculate the mean of these measurement sigmas.
                     arma::vec predictedMean = meanFromSigmas(predictedObservations);

@@ -41,10 +41,11 @@ namespace modules {
             using utility::motion::kinematics::calculateCentreOfMass;
             using utility::motion::kinematics::Side;
             using utility::math::matrix::orthonormal44Inverse;
+            using utility::math::matrix::quaternionToRotationMatrix;
 
             SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
-            , orientationFilter(arma::vec({0,0,-1,1,0,0,0}))
+            , orientationFilter(arma::vec({0,0,0,0,0,0,1}))
             , velocityFilter(arma::vec3({0,0,0})) {
 
                 on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){
@@ -235,22 +236,17 @@ namespace modules {
                     double deltaT = ((previousSensors ? previousSensors->timestamp : input.timestamp) - input.timestamp).count() / double(NUClear::clock::period::den);
 
                     orientationFilter.timeUpdate(deltaT);
-                    arma::mat observationNoise = arma::eye(3,3) * DEFAULT_NOISE_GAIN;
-                    double normAcc = std::abs(arma::norm(sensors->accelerometer,2) - 9.80665);
 
-                    if(normAcc > HIGH_NOISE_THRESHOLD){
-                        observationNoise *= HIGH_NOISE_GAIN;
-                    } else if(normAcc > LOW_NOISE_THRESHOLD){
-                        observationNoise = arma::eye(3,3) * (HIGH_NOISE_GAIN - DEFAULT_NOISE_GAIN) * (normAcc - LOW_NOISE_THRESHOLD) / (HIGH_NOISE_THRESHOLD - LOW_NOISE_THRESHOLD);
-                    }
+                    orientationFilter.measurementUpdate(sensors->accelerometer, arma::eye(3, 3) * 1e-7, float(0));
+                    orientationFilter.measurementUpdate(sensors->gyroscope,     arma::eye(3, 3) * 1e-4, int(1));
 
-                    orientationFilter.measurementUpdate(sensors->accelerometer, observationNoise, 0.7);
-                    orientationFilter.measurementUpdate(sensors->gyroscope, observationNoise, 1);
+                    // Gives us the quaternion representation
+                    arma::vec o = orientationFilter.get();
+                    sensors->orientation = quaternionToRotationMatrix(o.rows(orientationFilter.model.QW, orientationFilter.model.QZ));
 
-                    arma::vec orientation = orientationFilter.get();
-                    sensors->orientation.col(2) = -orientation.rows(0,2);
-                    sensors->orientation.col(0) = orientation.rows(3,5);
-                    sensors->orientation.col(1) = arma::cross(sensors->orientation.col(2), sensors->orientation.col(0));
+                    // sensors->orientation.col(2) = -orientation.rows(0,2);
+                    // sensors->orientation.col(0) = orientation.rows(3,5);
+                    // sensors->orientation.col(1) = arma::cross(sensors->orientation.col(2), sensors->orientation.col(0));
 
                     /************************************************
                      *                  Kinematics                  *
