@@ -52,9 +52,9 @@ namespace ball {
             const messages::localisation::FakeOdometry& odom);
 
         arma::vec::fixed<size> timeUpdate(
-            const arma::vec::fixed<size>& state, double deltaT, std::nullptr_t foo);
+            const arma::vec::fixed<size>& state, double deltaT);
 
-        arma::vec predictedObservation(const arma::vec::fixed<size>& state, std::nullptr_t unused);
+        arma::vec predictedObservation(const arma::vec::fixed<size>& state);
 
         arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 

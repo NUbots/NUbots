@@ -44,7 +44,7 @@ namespace modules {
 
             SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
-            , orientationFilter(arma::vec({0,0,-1,1,0,0}))
+            , orientationFilter(arma::vec({0,0,-1,1,0,0,0}))
             , velocityFilter(arma::vec3({0,0,0})) {
 
                 on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){
@@ -234,7 +234,7 @@ namespace modules {
                     // Calculate our time offset from the last read
                     double deltaT = ((previousSensors ? previousSensors->timestamp : input.timestamp) - input.timestamp).count() / double(NUClear::clock::period::den);
 
-                    orientationFilter.timeUpdate(deltaT, sensors->gyroscope);
+                    orientationFilter.timeUpdate(deltaT);
                     arma::mat observationNoise = arma::eye(3,3) * DEFAULT_NOISE_GAIN;
                     double normAcc = std::abs(arma::norm(sensors->accelerometer,2) - 9.80665);
 
@@ -244,7 +244,9 @@ namespace modules {
                         observationNoise = arma::eye(3,3) * (HIGH_NOISE_GAIN - DEFAULT_NOISE_GAIN) * (normAcc - LOW_NOISE_THRESHOLD) / (HIGH_NOISE_THRESHOLD - LOW_NOISE_THRESHOLD);
                     }
 
-                    orientationFilter.measurementUpdate(sensors->accelerometer, observationNoise);
+                    orientationFilter.measurementUpdate(sensors->accelerometer, observationNoise, 0.7);
+                    orientationFilter.measurementUpdate(sensors->gyroscope, observationNoise, 1);
+
                     arma::vec orientation = orientationFilter.get();
                     sensors->orientation.col(2) = -orientation.rows(0,2);
                     sensors->orientation.col(0) = orientation.rows(3,5);

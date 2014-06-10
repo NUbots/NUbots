@@ -34,14 +34,14 @@ namespace localisation {
 void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time) {
     double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
     last_time_update_time_ = current_time;
-    ball_filter_.timeUpdate(seconds, nullptr);
+    ball_filter_.timeUpdate(seconds);
 }
 
 void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
                                           const FakeOdometry& odom) {
     double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
     last_time_update_time_ = current_time;
-    ball_filter_.timeUpdate(seconds, odom);
+    ball_filter_.timeUpdate(seconds); // TODO odometry was removed from here odom
 }
 
 double KFBallLocalisationEngine::MeasurementUpdate(
