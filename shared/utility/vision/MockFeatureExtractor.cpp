@@ -58,7 +58,7 @@ namespace utility {
 						z,
 						1								
 					}));
-					std::cout << mockFeatures.back().at(0) << " " << mockFeatures.back().at(1) << " " << mockFeatures.back().at(2) << std::endl;
+					std::cout << i+1 << " " << mockFeatures.back().at(0) << " " << mockFeatures.back().at(1) << " " << mockFeatures.back().at(2) << std::endl;
 				}
 
 			}
@@ -67,15 +67,16 @@ namespace utility {
 				std::vector<MockFeatureExtractor::ExtractedFeature> features;
 				arma::mat worldToCamera_camera = utility::math::vision::calculateWorldToCameraTransform(sensors, self);
 
-	            int id = 0;
+	            int id = 1;
 				for (auto point : mockFeatures){
 					ExtractedFeature f;
 	                arma::vec cameraToFeatureVector_cam =  worldToCamera_camera * point;
 	                f.screenAngular = utility::math::vision::screenAngularFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));
+	                f.screenPosition = utility::math::vision::screenPositionFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));
 	                f.featureID = id++;
-	                NUClear::log("Feature id,", f.featureID, "has screenAngular", f.screenAngular[0], f.screenAngular[1]);
+	                // NUClear::log("Feature id,", f.featureID, "has screenAngular", f.screenAngular[0], f.screenAngular[1]);
 					if(std::fabs(f.screenAngular[0]) < FOV_X/2.0 && std::fabs(f.screenAngular[1]) < FOV_Y/2.0){
-	                    NUClear::log("Feature added to list");
+	                    // NUClear::log("Feature added to list");
 						features.push_back(f);
 					}
 				}
@@ -90,14 +91,12 @@ namespace utility {
 																					    size_t MAX_MATCHES)
 			{
 				std::vector<std::tuple<int, int, float>> matches;
-				NUClear::log("MockFeatureExtractor::matchFeatures");
 				
 				for(size_t newFeatureIndex = 0; newFeatureIndex < newFeatures.size(); newFeatureIndex++){	//For each new feature	
 					auto& newFeature = newFeatures[newFeatureIndex];
 
 					for(size_t featureIndex = 0; featureIndex <= features.size(); featureIndex++){		//Check if it matches any known features
 						if(featureIndex == features.size() && features.size() < MAX_MATCHES){	//If we dont match any known features, add it too the list if there is space
-							NUClear::log("MockFeatureExtractor::matchFeatures - new feature found(id =", newFeature.featureID, "). Adding to list of features");
 							features.push_back(newFeature);
 							matches.push_back(std::tuple<int,int,float>(featureIndex,newFeatureIndex,1.0));
 							break;
@@ -105,12 +104,10 @@ namespace utility {
 						auto& feature = features[featureIndex];
 						if(newFeature.featureID == feature.featureID){
 							matches.push_back(std::tuple<int,int,float>(featureIndex,newFeatureIndex,1.0));
-							NUClear::log("MockFeatureExtractor::matchFeatures - features matched: newFeature", newFeatureIndex, "has id ", newFeature.featureID);
 							break;
 						}
 					}
 				}
-				NUClear::log("MockFeatureExtractor::matchFeatures END");
 				return matches;
 			}
 	}

@@ -23,6 +23,7 @@
 #include "utility/motion/ForwardKinematics.h"
 #include "messages/input/ServoID.h"
 #include "utility/math/vision.h"
+#include "utility/math/matrix.h"
 
 
 #include <iostream>
@@ -50,14 +51,20 @@ namespace utility {
             }
 
             arma::vec InverseDepthPointModel::predictedObservation(const arma::vec::fixed<size>& state, const arma::mat& worldToCamera_camera) {
-
+                NUClear::log("State = ",state);
+                NUClear::log("worldToCamera_camera", worldToCamera_camera);
                 arma::vec initialObservedDirection = utility::math::vision::directionVectorFromScreenAngular({state[kTHETA], state[kPHI]});
-                
-                arma::vec cameraToFeatureVector_cam =  worldToCamera_camera *(((arma::vec4({state[kX],state[kY],state[kZ],1}) - worldToCamera_camera.submat(0,3,3,3)) * state[kRHO] + initialObservedDirection) + arma::vec{0,0,0,1});
-
+                arma::mat cameraToWorld_world = utility::math::matrix::orthonormal44Inverse(worldToCamera_camera);
+                NUClear::log("World Coordinate of feature direction\n", (arma::vec4({state[kX],state[kY],state[kZ],0}) - cameraToWorld_world.submat(0,3,3,3) + arma::vec{0,0,0,1}) * state[kRHO] + initialObservedDirection);
+                arma::vec cameraToFeatureVector_cam =  worldToCamera_camera * ((arma::vec4({state[kX],state[kY],state[kZ],0}) - cameraToWorld_world.submat(0,3,3,3) + arma::vec{0,0,0,1}) * state[kRHO] + initialObservedDirection);
+                //OLD ANGLE METHOD
                 arma::vec screenAngular = utility::math::vision::screenAngularFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));
-
+                NUClear::log("Predicted screen angular of feature =", screenAngular);
                 return screenAngular;     //Camera y,z = hor, vert
+                
+                //NEW
+                // arma::vec screenBearing = utility::math::vision::screenPositionFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));                
+                // return screenBearing;     //Camera y,z = hor, vert
             }
 
 

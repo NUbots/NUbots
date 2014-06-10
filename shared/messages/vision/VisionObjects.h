@@ -108,6 +108,7 @@ namespace messages {
             NUClear::clock::time_point timestamp;
             arma::vec::fixed<6> expectedState;
             arma::vec2 screenAngular;  //theta, phi
+            arma::vec2 screenPosition;  //theta, phi
             float strength;
         };
 

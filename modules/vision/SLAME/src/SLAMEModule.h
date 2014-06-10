@@ -31,6 +31,7 @@
 #include "utility/math/kalman/InverseDepthPointModel.h"
 
 
+
 namespace modules{
 	namespace vision{
 
@@ -88,13 +89,11 @@ namespace modules{
  		 		arma::vec worldAngular = utility::math::vision::rotateAngularDirection(screenAngular, Rcw);
  		 		v[stateOf::kTHETA] = worldAngular[0];
  		 		v[stateOf::kPHI] = worldAngular[1];
-				NUClear::log("Initial state = ", v);
  		 		return v;
  		 	}
 
 			CovarianceMatrix getInitialCovariance(arma::vec screenAngular, arma::mat Rwc, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
 				CovarianceMatrix M = arma::eye(MODEL_SIZE, MODEL_SIZE);
-				double max_pos_variance = std::max(self.sr_xx, std::max(self.sr_xy,self.sr_yy));
 				M(stateOf::kX, stateOf::kX) = self.sr_xx;
 				M(stateOf::kY, stateOf::kX) = self.sr_xy;
 				M(stateOf::kX, stateOf::kY) = self.sr_xy;
@@ -103,7 +102,6 @@ namespace modules{
 				M(stateOf::kRHO, stateOf::kRHO) = RHO_COV_INITIAL;
 				M(stateOf::kTHETA, stateOf::kTHETA) = ANGULAR_COVARIANCE;
 				M(stateOf::kPHI, stateOf::kPHI) = ANGULAR_COVARIANCE;
-				NUClear::log("Initial covariance = ", M);
 				return M;
 			}
 
@@ -137,6 +135,7 @@ namespace modules{
 
 	                    objectMessage->back().expectedState = featureFilters[fI].get();
 	                    objectMessage->back().screenAngular = extractedFeatures[eFI].screenAngular;
+	                    objectMessage->back().screenPosition = extractedFeatures[eFI].screenPosition;
 	                    objectMessage->back().strength = featureStrengths[fI];
 	                    objectMessage->back().timestamp = sensors.timestamp;
 
@@ -156,16 +155,19 @@ namespace modules{
 				NUClear::log("Matches:", matches.size());
 				NUClear::log("number of strengths", featureStrengths.size());
 				NUClear::log("Number of features:", features.size());
-				NUClear::log("Feature filter states:", featureFilters.size(),"\n");
-	            for(auto& f : featureFilters){
+				NUClear::log("Feature filter states:", featureFilters.size());
+				std::cerr << "====================================================" << std::endl;
+	            for(int i = 0; i < featureFilters.size(); i++){
+	            	auto& f = featureFilters[i];
 					arma::vec state = f.get();
+					std::cerr << features[i].featureID << " ";
 					if(state[stateOf::kRHO] > 0){
 						arma::vec p = utility::math::kalman::InverseDepthPointModel::getFieldPosFromState(state);
 						for(auto coord : p){
-							std::cout<< " " << coord << " ";
+							std::cerr << coord << " ";
 						}
 					}
-					std::cout << std::endl;
+					std::cerr << std::endl;
 	            }
 	            //TODO: sort objectMessage by strengths and take top k
 	            lastTime = sensors.timestamp;

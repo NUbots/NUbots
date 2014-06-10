@@ -50,7 +50,7 @@ namespace modules {
             FeatureExtractorType FEATURE_EXTRACTOR_TYPE;
             int MAX_FEATURE_MATCHES;
             
-            SLAMEModule<utility::vision::ORBFeatureExtractor> ORBModule;
+            //SLAMEModule<utility::vision::ORBFeatureExtractor> ORBModule;
             SLAMEModule<utility::vision::MockFeatureExtractor> MockSLAMEModule;
             
             ReactionHandle fakeLocalisationHandle;

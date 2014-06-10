@@ -45,7 +45,7 @@ namespace utility {
             robotToBody_body.submat(0,0,2,2) = sensors.orientation;
 
             auto worldToCamera_camera = utility::math::matrix::orthonormal44Inverse(cameraToBody_body) * robotToBody_body * utility::math::matrix::orthonormal44Inverse(robotToWorld_world);
-            // NUClear::log( utility::math::matrix::orthonormal44Inverse(cameraToBody_body) , robotToBody_body , utility::math::matrix::orthonormal44Inverse(robotToWorld_world), worldToCamera_camera);
+            //Confirmed to be correct by Jake Fountain 2014
             return worldToCamera_camera;
         }
 
@@ -63,6 +63,14 @@ namespace utility {
 
         inline arma::vec rotateAngularDirection(const arma::vec& screenAngular, const arma::mat& R){                  
             return screenAngularFromDirectionVector(R*directionVectorFromScreenAngular(screenAngular));
+        }
+
+        inline arma::vec screenPositionFromDirectionVector(const arma::vec& directionVector){
+            return {directionVector[1] / directionVector[0], directionVector[2] / directionVector[0]};
+        }
+
+        inline arma::vec screenPositionFromScreenAngular(const arma::vec& screenAngular){
+            return screenPositionFromDirectionVector(directionVectorFromScreenAngular(screenAngular));
         }
     }
   }

@@ -40,6 +40,7 @@ namespace utility {
 			class ExtractedFeature {
 			public:
 				arma::vec screenAngular;	//Compulsory
+				arma::vec screenPosition;
 				int featureID;
 			};
 			MockFeatureExtractor();
