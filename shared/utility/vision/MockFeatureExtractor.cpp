@@ -27,88 +27,120 @@
 
 namespace utility {
 	namespace vision {
-			bool operator==(const MockFeatureExtractor::ExtractedFeature& lhs, const MockFeatureExtractor::ExtractedFeature& rhs){return (lhs.featureID == rhs.featureID);}
+		bool operator==(const MockFeatureExtractor::ExtractedFeature& lhs, const MockFeatureExtractor::ExtractedFeature& rhs){return (lhs.featureID == rhs.featureID);}
 
-			using messages::input::ServoID;
+		using messages::input::ServoID;
 
-			MockFeatureExtractor::MockFeatureExtractor(){}
+		MockFeatureExtractor::MockFeatureExtractor(){}
 
-			std::vector<arma::vec> MockFeatureExtractor::setParameters(const messages::support::Configuration<MockFeatureExtractor>& config){
-				int NUMBER_OF_MOCK_POINTS = config["NUMBER_OF_MOCK_POINTS"];
-				float MEAN_RADIUS = config["MEAN_RADIUS"];
-				float RADIAL_DEVIATION = config["RADIAL_DEVIATION"];
-				float HEIGHT = config["HEIGHT"];
-				float HEIGHT_DEVIATION = config["HEIGHT_DEVIATION"];
-				float ANGULAR_DEVIATION = config["ANGULAR_DEVIATION"];
-				bool RANDOMIZE = config["RANDOMIZE"];
-				int SEED = config["SEED"];
+		std::vector<MockFeatureExtractor::MockFeature> MockFeatureExtractor::setParameters(const messages::support::Configuration<MockFeatureExtractor>& config){
+			int NUMBER_OF_MOCK_POINTS = config["NUMBER_OF_MOCK_POINTS"];
 
-				FOV_X = config["FOV_X"];
-				FOV_Y = config["FOV_Y"];
-				mockFeatures.clear();
-				std::srand(SEED + std::time(0) * int(RANDOMIZE));
-				NUClear::log("Generating mock features:");
-				for(int i = 0; i < NUMBER_OF_MOCK_POINTS; i++){
-					float r = MEAN_RADIUS + 2 * RADIAL_DEVIATION * (std::rand() / float(RAND_MAX) - 0.5); 
-					float z = HEIGHT + 2 * HEIGHT_DEVIATION * (std::rand() / float(RAND_MAX) - 0.5);
-					float theta = 2 * M_PI * i / float(NUMBER_OF_MOCK_POINTS) +  2 * ANGULAR_DEVIATION * (std::rand() / float(RAND_MAX) - 0.5);
-					mockFeatures.push_back(arma::vec({
-						r * std::cos(theta),
-						r * std::sin(theta),
-						z,
-						1								
-					}));
-					std::cout << i+1 << " " << mockFeatures.back().at(0) << " " << mockFeatures.back().at(1) << " " << mockFeatures.back().at(2) << std::endl;
-				}
-				return mockFeatures;
+			arma::vec RADIUS = config["RADIUS"].as<arma::vec>();
+			arma::vec HEIGHT = config["HEIGHT"].as<arma::vec>();
+			
+			float ANGULAR_DEVIATION = config["ANGULAR_DEVIATION"];
+			bool RANDOMIZE = config["RANDOMIZE"];
+			int SEED = config["SEED"];
+
+			arma::vec FALSE_NEGATIVE_PROB = config["FALSE_NEGATIVE_PROB"].as<arma::vec>();				
+			arma::vec MISCLASSIFIED_PROB = config["MISCLASSIFIED_PROB"].as<arma::vec>();
+			arma::vec MISCLASSIFIED_AS_NEW_PROB = config["MISCLASSIFIED_AS_NEW_PROB"].as<arma::vec>();
+
+			MAX_DISTINCT_FALSE_FEATURES = config["MAX_DISTINCT_FALSE_FEATURES"];
+
+			FOV_X = config["FOV_X"];
+			FOV_Y = config["FOV_Y"];
+
+			mockFeatures.clear();
+			std::srand(SEED + std::time(0) * int(RANDOMIZE));
+			NUClear::log("Generating mock features:");
+			for(int i = 0; i < NUMBER_OF_MOCK_POINTS; i++){
+				float r = uniformSample(RADIUS);
+				float z = uniformSample(HEIGHT);
+				float theta = 2 * M_PI * i / float(NUMBER_OF_MOCK_POINTS) +  2 * ANGULAR_DEVIATION * (std::rand() / float(RAND_MAX) - 0.5);
+				mockFeatures.push_back({ arma::vec({r * std::cos(theta), r * std::sin(theta), z, 1}),
+										 uniformSample(FALSE_NEGATIVE_PROB),
+										 uniformSample(MISCLASSIFIED_PROB),
+										 uniformSample(MISCLASSIFIED_AS_NEW_PROB),
+										 i+1
+										});
+				std::cout << i+1 << " " << mockFeatures.back().position.at(0) << " " << mockFeatures.back().position.at(1) << " " << mockFeatures.back().position.at(2) << std::endl;
 			}
+			return mockFeatures;
+		}
 
-			std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
-				std::vector<MockFeatureExtractor::ExtractedFeature> features;
-				arma::mat worldToCamera_camera = utility::math::vision::calculateWorldToCameraTransform(sensors, self);
+		std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
+			std::vector<MockFeatureExtractor::ExtractedFeature> features;
+			arma::mat worldToCamera_camera = utility::math::vision::calculateWorldToCameraTransform(sensors, self);
 
-	            int id = 1;
-				for (auto point : mockFeatures){
-					ExtractedFeature f;
-	                arma::vec cameraToFeatureVector_cam =  worldToCamera_camera * point;
-	                f.screenAngular = utility::math::vision::screenAngularFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));
-	                f.screenPosition = utility::math::vision::screenPositionFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));
-	                f.featureID = id++;
-	                // NUClear::log("Feature id,", f.featureID, "has screenAngular", f.screenAngular[0], f.screenAngular[1]);
-					if(std::fabs(f.screenAngular[0]) < FOV_X/2.0 && std::fabs(f.screenAngular[1]) < FOV_Y/2.0){
-	                    // NUClear::log("Feature added to list");
-						features.push_back(f);
+			for (auto feature : mockFeatures){
+
+				ExtractedFeature f;
+
+                arma::vec cameraToFeatureVector_cam =  worldToCamera_camera * feature.position;                
+                f.screenAngular = utility::math::vision::screenAngularFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));
+                f.screenPosition = utility::math::vision::screenPositionFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));
+
+                if(sampleRandomBool(feature.MISCLASSIFIED_PROB)){
+                	f.MISCLASSIFIED_PROB = (1-feature.MISCLASSIFIED_AS_NEW_PROB) / float(mockFeatures.size());	//Assumes classifier knows when it is really wrong
+                	if(sampleRandomBool(feature.MISCLASSIFIED_AS_NEW_PROB)){
+                		f.featureID = numberOfFalseFeaturesDetected;
+                		numberOfFalseFeaturesDetected = 1+(numberOfFalseFeaturesDetected) % MAX_DISTINCT_FALSE_FEATURES;
+                	} else{
+                		f.featureID = 1 + std::rand() % mockFeatures.size();
+                	}
+                } else {
+                	f.featureID = feature.id;
+                	f.MISCLASSIFIED_PROB = feature.MISCLASSIFIED_PROB;
+                }
+
+				if(std::fabs(f.screenAngular[0]) < FOV_X/2.0 && std::fabs(f.screenAngular[1]) < FOV_Y/2.0 && !sampleRandomBool(feature.FALSE_NEGATIVE_PROB)){
+					features.push_back(f);
+				}
+
+			}
+			return features;
+		}
+
+		//Get matches: tuple = (featureIndex in featureFilters, extractedFeatureIndex in extractedFeatures, matchStrength)
+        //Order of vector is strongest to weakest
+        //Add new features here to the feature list and pick up missing filters and strengths below
+		std::vector<std::tuple<int, int, float>> MockFeatureExtractor::matchFeatures(std::vector<ExtractedFeature>& features, 
+																				    const std::vector<ExtractedFeature>& newFeatures,
+																				    size_t MAX_MATCHES)
+		{
+			std::vector<std::tuple<int, int, float>> matches;
+			
+			for(size_t newFeatureIndex = 0; newFeatureIndex < newFeatures.size(); newFeatureIndex++){	//For each new feature	
+				auto& newFeature = newFeatures[newFeatureIndex];
+
+				for(size_t featureIndex = 0; featureIndex <= features.size(); featureIndex++){		//Check if it matches any known features
+					if(featureIndex == features.size() && features.size() < MAX_MATCHES){	//If we dont match any known features, add it too the list if there is space
+						features.push_back(newFeature);
+						matches.push_back(std::tuple<int,int,float>(featureIndex,newFeatureIndex,1-newFeature.MISCLASSIFIED_PROB));
+						break;
+					}
+					auto& feature = features[featureIndex];
+					if(newFeature.featureID == feature.featureID){
+						matches.push_back(std::tuple<int,int,float>(featureIndex,newFeatureIndex,1-newFeature.MISCLASSIFIED_PROB));
+						break;
 					}
 				}
-				return features;
 			}
+			return matches;
+		}
 
-			//Get matches: tuple = (featureIndex in featureFilters, extractedFeatureIndex in extractedFeatures, matchStrength)
-            //Order of vector is strongest to weakest
-            //Add new features here to the feature list and pick up missing filters and strengths below
-			std::vector<std::tuple<int, int, float>> MockFeatureExtractor::matchFeatures(std::vector<ExtractedFeature>& features, 
-																					    const std::vector<ExtractedFeature>& newFeatures,
-																					    size_t MAX_MATCHES)
-			{
-				std::vector<std::tuple<int, int, float>> matches;
-				
-				for(size_t newFeatureIndex = 0; newFeatureIndex < newFeatures.size(); newFeatureIndex++){	//For each new feature	
-					auto& newFeature = newFeatures[newFeatureIndex];
+		double MockFeatureExtractor::uniformSample(arma::vec/*2*/ range){
+			double random = (std::rand() / float(RAND_MAX)); 
+			return range[0]*(1-random) + range[1]*(random); 
+		}
 
-					for(size_t featureIndex = 0; featureIndex <= features.size(); featureIndex++){		//Check if it matches any known features
-						if(featureIndex == features.size() && features.size() < MAX_MATCHES){	//If we dont match any known features, add it too the list if there is space
-							features.push_back(newFeature);
-							matches.push_back(std::tuple<int,int,float>(featureIndex,newFeatureIndex,1.0));
-							break;
-						}
-						auto& feature = features[featureIndex];
-						if(newFeature.featureID == feature.featureID){
-							matches.push_back(std::tuple<int,int,float>(featureIndex,newFeatureIndex,1.0));
-							break;
-						}
-					}
-				}
-				return matches;
-			}
+		bool MockFeatureExtractor::sampleRandomBool(double probability_true){
+			double random = (std::rand() / float(RAND_MAX));			
+			return random < probability_true;
+		}
+
+
 	}
 }

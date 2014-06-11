@@ -52,7 +52,7 @@ namespace modules{
             using stateOf = utility::math::kalman::IDPStateComponents;
 
             //Testing with mock
-			std::vector<arma::vec> knownFeatures;
+			std::vector<typename FeatureDetectorClass::MockFeature> knownFeatures;
 
             FeatureDetectorClass featureExtractor;
             size_t MAX_MATCHES;
@@ -61,6 +61,10 @@ namespace modules{
             float RHO_INITIAL = 0.1;
 			float RHO_COV_INITIAL = 0.5;
 			float ANGULAR_COVARIANCE = 0.0174 * 0.0174;
+			float STRENGTH_CHANGE_RATE = 0.8;
+
+			float FOV_X = 1.0472;
+			float FOV_Y = 0.785398;
 
             NUClear::clock::time_point lastTime;
 
@@ -75,6 +79,11 @@ namespace modules{
  		 		RHO_INITIAL = config["RHO_INITIAL"];
  		 		RHO_COV_INITIAL = config["RHO_COV_INITIAL"];
  		 		ANGULAR_COVARIANCE = config["ANGULAR_COVARIANCE"];
+ 		 		STRENGTH_CHANGE_RATE = config["STRENGTH_CHANGE_RATE"];
+
+ 		 		FOV_X = config["FOV_X"];
+				FOV_Y = config["FOV_Y"];
+
  		 		knownFeatures = featureExtractor.setParameters(config);
  		 	}
 
@@ -116,22 +125,38 @@ namespace modules{
 	            	auto& f = featureFilters[i];
 	            	int featureID = features[i].featureID;
 					arma::vec state = f.get();
-					arma::vec knownPosition = knownFeatures[featureID-1].rows(0,2);
-					if(state[stateOf::kRHO] > 0){
-						arma::vec p = utility::math::kalman::InverseDepthPointModel::getFieldPosFromState(state).rows(0,2);
-						euclidean_errors(double(arma::norm(p-knownPosition)));
-						float measured_global_bearing = std::atan2(p[1],p[0]);
-						float known_global_bearing = std::atan2(knownPosition[1],knownPosition[0]);
-						global_bearing_errors(double(std::fabs(utility::math::angle::normalizeAngle(measured_global_bearing - known_global_bearing))));
-					}			
+					if(featureID<=knownFeatures.size()){
+						if(state[stateOf::kRHO] > 0){
+							arma::vec knownPosition = knownFeatures[featureID-1].position.rows(0,2);
+							arma::vec p = utility::math::kalman::InverseDepthPointModel::getFieldPosFromState(state).rows(0,2);
+							euclidean_errors(double(arma::norm(p-knownPosition)));
+							float measured_global_bearing = std::atan2(p[1],p[0]);
+							float known_global_bearing = std::atan2(knownPosition[1],knownPosition[0]);
+							global_bearing_errors(double(std::fabs(utility::math::angle::normalizeAngle(measured_global_bearing - known_global_bearing))));
+						}			
+					}
 	            }
 	            return {euclidean_errors.max(),euclidean_errors.mean(),euclidean_errors.min(),global_bearing_errors.max(),global_bearing_errors.mean(),global_bearing_errors.min()};
+			}
+
+			std::vector<bool> getExpectations(arma::mat worldToCameraTransform){
+				std::vector<bool> expectations;
+				for (auto& filter : featureFilters){
+					arma::vec screenAngular = utility::math::kalman::InverseDepthPointModel::predictedObservation(filter.get(), worldToCameraTransform);
+					expectations.push_back(std::fabs(screenAngular[0]) < FOV_X/2.0 && std::fabs(screenAngular[1]) < FOV_Y/2.0);
+				}
+				return expectations;
+			}
+
+			void sortAndTruncateFeatureList(){
+				
 			}
 
  		 	std::unique_ptr<std::vector<messages::vision::SLAMEObject>> getSLAMEObjects(const messages::input::Image& image, 
  		 		                                                                        const messages::localisation::Self& self, 
  		 		                                                                        const messages::input::Sensors& sensors)
  		 	{
+
  		 		arma::mat worldToCameraTransform = utility::math::vision::calculateWorldToCameraTransform(sensors, self);
 
  		 		auto objectMessage = std::make_unique<std::vector<messages::vision::SLAMEObject>>();	            
@@ -144,6 +169,8 @@ namespace modules{
 	            std::vector<std::tuple<int, int, float>> matches = featureExtractor.matchFeatures(features, extractedFeatures, MAX_MATCHES);
 
 	            double deltaT = (sensors.timestamp - lastTime).count() / double(NUClear::clock::period::den);
+
+	            std::vector<bool> expectations = getExpectations(worldToCameraTransform);
 
 	            for(auto& match : matches){
 
@@ -163,17 +190,26 @@ namespace modules{
 	                    objectMessage->back().timestamp = sensors.timestamp;
 
 	                    //Update our beleif
-	                    featureStrengths[fI] += strength;	//TODO make this better and use strengths
+	                    featureStrengths[fI] = strength * STRENGTH_CHANGE_RATE * int(expectations[fI]) + (1-STRENGTH_CHANGE_RATE) * featureStrengths[fI];	//TODO make this better and use strengths
+	                    expectations[fI] = false;
 	                    featureFilters[fI].timeUpdate(deltaT, int(0));
 	                    featureFilters[fI].measurementUpdate(extractedFeatures[eFI].screenAngular, getMeasurementCovariance(),worldToCameraTransform);
 	                } else {    //Otherwise we initialise a filter for the object
 	                    featureStrengths.push_back(strength);
 
+	                    expectations.push_back(false);
 	                    auto initialMean = getInitialMean(extractedFeatures[eFI].screenAngular, worldToCameraTransform, self, sensors);
 	                    auto initialCovariance = getInitialCovariance(extractedFeatures[eFI].screenAngular, worldToCameraTransform, self, sensors);
 	                    featureFilters.push_back(utility::math::kalman::UKF<utility::math::kalman::InverseDepthPointModel>(initialMean, initialCovariance));
 	                }
 	            }
+
+	            for(int i = 0; i < featureStrengths.size(); i++){
+	            	if(expectations[i]){	//If we expected to see it, but didn't (because above we set expectation to zero when we see it)
+	            		featureStrengths[i] = (1 - STRENGTH_CHANGE_RATE) * featureStrengths[i];
+	            	}
+	            }
+
 				// NUClear::log("Extrated features:", extractedFeatures.size());
 				// NUClear::log("Matches:", matches.size());
 				// NUClear::log("number of strengths", featureStrengths.size());
@@ -192,9 +228,12 @@ namespace modules{
 							std::cout << coord << " ";
 						}
 					}
+					std::cout << featureStrengths[i] << " ";
 					std::cout << std::endl;
 	            }
 	            //TODO: sort objectMessage by strengths and take top k
+
+	            sortAndTruncateFeatureList();
 
 	            lastTime = sensors.timestamp;
 

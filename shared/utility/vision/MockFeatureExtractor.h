@@ -32,15 +32,28 @@
 namespace utility {
 	namespace vision {
 		class MockFeatureExtractor{
+		public:
+			struct MockFeature{
+				arma::vec position;
+				double FALSE_NEGATIVE_PROB;
+				double MISCLASSIFIED_PROB;
+				double MISCLASSIFIED_AS_NEW_PROB;
+				int id;
+			};
 		private:
-			std::vector<arma::vec> mockFeatures;
+			int numberOfFalseFeaturesDetected = 1;
+			int MAX_DISTINCT_FALSE_FEATURES;
+			std::vector<MockFeature> mockFeatures;
+			double uniformSample(arma::vec/*2*/ range);
+			bool sampleRandomBool(double probability_true);
 		public:
             static constexpr const char* CONFIGURATION_PATH = "MockFeatureExtractor.json";
-			std::vector<arma::vec> setParameters(const messages::support::Configuration<MockFeatureExtractor>& config);
+			std::vector<MockFeature> setParameters(const messages::support::Configuration<MockFeatureExtractor>& config);
 			class ExtractedFeature {
 			public:
 				arma::vec screenAngular;	//Compulsory
 				arma::vec screenPosition;
+				double MISCLASSIFIED_PROB;
 				int featureID;
 			};
 			MockFeatureExtractor();
