@@ -55,6 +55,7 @@ namespace utility {
 				arma::vec screenPosition;
 				double MISCLASSIFIED_PROB;
 				int featureID;
+				int numberOfTimesUpdated;
 			};
 			MockFeatureExtractor();
 			std::vector<ExtractedFeature> extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors);

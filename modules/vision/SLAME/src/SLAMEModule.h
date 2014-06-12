@@ -30,7 +30,7 @@
 #include "utility/math/matrix.h"
 #include "utility/math/angle.h"
 #include "utility/math/kalman/InverseDepthPointModel.h"
-
+#include <algorithm>
 
 
 namespace modules{
@@ -41,7 +41,6 @@ namespace modules{
  		template <class FeatureDetectorClass>
  		class SLAMEModule{
  		private:
-
  			std::vector<float> featureStrengths;
             std::vector<typename FeatureDetectorClass::ExtractedFeature> features;
             std::vector<utility::math::kalman::UKF<utility::math::kalman::InverseDepthPointModel>> featureFilters;
@@ -66,6 +65,8 @@ namespace modules{
 			float FOV_X = 1.0472;
 			float FOV_Y = 0.785398;
 
+			int MIN_MEASUREMENTS_FOR_THROWOUT = 10;
+
             NUClear::clock::time_point lastTime;
 
  		public:
@@ -83,6 +84,8 @@ namespace modules{
 
  		 		FOV_X = config["FOV_X"];
 				FOV_Y = config["FOV_Y"];
+
+				MIN_MEASUREMENTS_FOR_THROWOUT = config["MIN_MEASUREMENTS_FOR_THROWOUT"];
 
  		 		knownFeatures = featureExtractor.setParameters(config);
  		 	}
@@ -121,22 +124,31 @@ namespace modules{
 			arma::vec calculateErrors(){
 				arma::running_stat<double> euclidean_errors;
 				arma::running_stat<double> global_bearing_errors;
+				arma::running_stat<double> strength_errors;
 				for(int i = 0; i < featureFilters.size(); i++){
 	            	auto& f = featureFilters[i];
 	            	int featureID = features[i].featureID;
 					arma::vec state = f.get();
 					if(featureID<=knownFeatures.size()){
 						if(state[stateOf::kRHO] > 0){
+							
 							arma::vec knownPosition = knownFeatures[featureID-1].position.rows(0,2);
+							float knownStrength = (1-knownFeatures[featureID-1].FALSE_NEGATIVE_PROB)*(1-knownFeatures[featureID-1].MISCLASSIFIED_PROB);
+
 							arma::vec p = utility::math::kalman::InverseDepthPointModel::getFieldPosFromState(state).rows(0,2);
 							euclidean_errors(double(arma::norm(p-knownPosition)));
+							
 							float measured_global_bearing = std::atan2(p[1],p[0]);
 							float known_global_bearing = std::atan2(knownPosition[1],knownPosition[0]);
 							global_bearing_errors(double(std::fabs(utility::math::angle::normalizeAngle(measured_global_bearing - known_global_bearing))));
+
+							strength_errors(std::fabs(knownStrength-featureStrengths[i]));
 						}			
 					}
 	            }
-	            return {euclidean_errors.max(),euclidean_errors.mean(),euclidean_errors.min(),global_bearing_errors.max(),global_bearing_errors.mean(),global_bearing_errors.min()};
+	            return {euclidean_errors.max(),euclidean_errors.mean(),euclidean_errors.min(),
+	            	    global_bearing_errors.max(),global_bearing_errors.mean(),global_bearing_errors.min(),
+	            	    strength_errors.max(),strength_errors.mean(),strength_errors.min()};
 			}
 
 			std::vector<bool> getExpectations(arma::mat worldToCameraTransform){
@@ -149,7 +161,37 @@ namespace modules{
 			}
 
 			void sortAndTruncateFeatureList(){
-				
+				//sort: EWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+
+				std::vector<float> sortedStrengths(featureStrengths);
+				std::sort(sortedStrengths.begin(),sortedStrengths.end());
+				NUClear::log("strengths sortedStrengths");
+
+				for(int i = 0; i<featureStrengths.size(); i++){
+					NUClear::log(featureStrengths[i], sortedStrengths[i]);
+					// Do not truncate if not enough measurements performed on each feature
+					if(features[i].numberOfTimesUpdated < MIN_MEASUREMENTS_FOR_THROWOUT) return;
+				}
+
+				float cutoffStrength = sortedStrengths[std::max(0, std::min(int(sortedStrengths.size() - MAX_MATCHES), int(sortedStrengths.size()-1)))];
+
+				if(featureStrengths.size() != featureFilters.size() || features.size() != featureFilters.size()){
+					NUClear::log("filterStrengths.size() != featureFilters.size() || features.size() != featureFilters.size()");
+					throw std::exception();
+				}
+				//remove weak features
+				int index = 0;
+				while(index < featureStrengths.size()){
+					if(featureStrengths[index] < cutoffStrength){
+						NUClear::log("removing feature:", features[index].featureID, "strength", featureStrengths[index], " < ", cutoffStrength, ", N = ", features[index].numberOfTimesUpdated);
+						featureStrengths.erase(featureStrengths.begin() + index);
+						featureFilters.erase(featureFilters.begin() + index);
+						features.erase(features.begin() + index);
+					} else {
+						index++;
+					}
+				}
+				// END EWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 			}
 
  		 	std::unique_ptr<std::vector<messages::vision::SLAMEObject>> getSLAMEObjects(const messages::input::Image& image, 
@@ -190,8 +232,8 @@ namespace modules{
 	                    objectMessage->back().timestamp = sensors.timestamp;
 
 	                    //Update our beleif
-	                    featureStrengths[fI] = strength * STRENGTH_CHANGE_RATE * int(expectations[fI]) + (1-STRENGTH_CHANGE_RATE) * featureStrengths[fI];	//TODO make this better and use strengths
-	                    expectations[fI] = false;
+	                    //Strength updated with total average model
+	                    featureStrengths[fI] = ( features[fI].numberOfTimesUpdated * featureStrengths[fI] + strength * int(expectations[fI]) ) / (features[fI].numberOfTimesUpdated+1);	
 	                    featureFilters[fI].timeUpdate(deltaT, int(0));
 	                    featureFilters[fI].measurementUpdate(extractedFeatures[eFI].screenAngular, getMeasurementCovariance(),worldToCameraTransform);
 	                } else {    //Otherwise we initialise a filter for the object
@@ -205,9 +247,10 @@ namespace modules{
 	            }
 
 	            for(int i = 0; i < featureStrengths.size(); i++){
-	            	if(expectations[i]){	//If we expected to see it, but didn't (because above we set expectation to zero when we see it)
-	            		featureStrengths[i] = (1 - STRENGTH_CHANGE_RATE) * featureStrengths[i];
+	            	if(expectations[i]){	//Expected but not seen
+	            		featureStrengths[i] = features[i].numberOfTimesUpdated * featureStrengths[i] / (features[i].numberOfTimesUpdated+1);
 	            	}
+	            	features[i].numberOfTimesUpdated++;
 	            }
 
 				// NUClear::log("Extrated features:", extractedFeatures.size());
@@ -218,6 +261,7 @@ namespace modules{
 				std::cerr << "====================================================" << std::endl;
 				std::cerr << calculateErrors() << std::endl;
 				std::cerr << "====================================================" << std::endl;
+				std::cout << "====================================================" << std::endl;
 	            for(int i = 0; i < featureFilters.size(); i++){
 	            	auto& f = featureFilters[i];
 					arma::vec state = f.get();
@@ -228,13 +272,13 @@ namespace modules{
 							std::cout << coord << " ";
 						}
 					}
-					std::cout << featureStrengths[i] << " ";
+					std::cout << featureStrengths[i] << " " << features[i].numberOfTimesUpdated;
 					std::cout << std::endl;
 	            }
-	            //TODO: sort objectMessage by strengths and take top k
-
-	            sortAndTruncateFeatureList();
-
+	            if(featureStrengths.size() > MAX_MATCHES){
+	         	   sortAndTruncateFeatureList();
+	        	}
+				std::cout << "====================================================" << std::endl;
 	            lastTime = sensors.timestamp;
 
 	            return std::move(objectMessage);

@@ -65,7 +65,10 @@ namespace utility {
 										 uniformSample(MISCLASSIFIED_AS_NEW_PROB),
 										 i+1
 										});
-				std::cout << i+1 << " " << mockFeatures.back().position.at(0) << " " << mockFeatures.back().position.at(1) << " " << mockFeatures.back().position.at(2) << std::endl;
+				std::cout << i+1 << " " << mockFeatures.back().position.at(0) << " " 
+				                        << mockFeatures.back().position.at(1) << " " 
+				                        << mockFeatures.back().position.at(2) << " " 
+				                        <<(1-mockFeatures.back().FALSE_NEGATIVE_PROB)*(1-mockFeatures.back().MISCLASSIFIED_PROB) << std::endl;
 			}
 			return mockFeatures;
 		}
@@ -81,7 +84,8 @@ namespace utility {
                 arma::vec cameraToFeatureVector_cam =  worldToCamera_camera * feature.position;                
                 f.screenAngular = utility::math::vision::screenAngularFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));
                 f.screenPosition = utility::math::vision::screenPositionFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));
-
+                f.numberOfTimesUpdated = 0;
+                
                 if(sampleRandomBool(feature.MISCLASSIFIED_PROB)){
                 	f.MISCLASSIFIED_PROB = (1-feature.MISCLASSIFIED_AS_NEW_PROB) / float(mockFeatures.size());	//Assumes classifier knows when it is really wrong
                 	if(sampleRandomBool(feature.MISCLASSIFIED_AS_NEW_PROB)){
@@ -108,7 +112,7 @@ namespace utility {
         //Add new features here to the feature list and pick up missing filters and strengths below
 		std::vector<std::tuple<int, int, float>> MockFeatureExtractor::matchFeatures(std::vector<ExtractedFeature>& features, 
 																				    const std::vector<ExtractedFeature>& newFeatures,
-																				    size_t MAX_MATCHES)
+																				    size_t MAX_MATCHES/*TODO change to max search depth or something*/)
 		{
 			std::vector<std::tuple<int, int, float>> matches;
 			
@@ -116,7 +120,7 @@ namespace utility {
 				auto& newFeature = newFeatures[newFeatureIndex];
 
 				for(size_t featureIndex = 0; featureIndex <= features.size(); featureIndex++){		//Check if it matches any known features
-					if(featureIndex == features.size() && features.size() < MAX_MATCHES){	//If we dont match any known features, add it too the list if there is space
+					if(featureIndex == features.size()){	//If we dont match any known features, add it too the list if there is space
 						features.push_back(newFeature);
 						matches.push_back(std::tuple<int,int,float>(featureIndex,newFeatureIndex,1-newFeature.MISCLASSIFIED_PROB));
 						break;

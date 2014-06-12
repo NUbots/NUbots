@@ -54,6 +54,7 @@ namespace utility {
                 arma::mat::fixed<size, size> processNoise();
 
                 static arma::vec getFieldPosFromState(const arma::vec::fixed<size>& state);
+
             };
 
 
