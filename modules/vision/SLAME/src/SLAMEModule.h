@@ -60,12 +60,12 @@ namespace modules{
             float RHO_INITIAL = 0.1;
 			float RHO_COV_INITIAL = 0.5;
 			float ANGULAR_COVARIANCE = 0.0174 * 0.0174;
-			float STRENGTH_CHANGE_RATE = 0.8;
 
 			float FOV_X = 1.0472;
 			float FOV_Y = 0.785398;
 
-			int MIN_MEASUREMENTS_FOR_THROWOUT = 10;
+			int MIN_MEASUREMENTS_FOR_THROWOUT = 5;
+			int THRESHOLD_FOR_THROWOUTS = 10;
 
             NUClear::clock::time_point lastTime;
 
@@ -80,12 +80,12 @@ namespace modules{
  		 		RHO_INITIAL = config["RHO_INITIAL"];
  		 		RHO_COV_INITIAL = config["RHO_COV_INITIAL"];
  		 		ANGULAR_COVARIANCE = config["ANGULAR_COVARIANCE"];
- 		 		STRENGTH_CHANGE_RATE = config["STRENGTH_CHANGE_RATE"];
 
  		 		FOV_X = config["FOV_X"];
 				FOV_Y = config["FOV_Y"];
 
 				MIN_MEASUREMENTS_FOR_THROWOUT = config["MIN_MEASUREMENTS_FOR_THROWOUT"];
+				THRESHOLD_FOR_THROWOUTS = config["THRESHOLD_FOR_THROWOUTS"];
 
  		 		knownFeatures = featureExtractor.setParameters(config);
  		 	}
@@ -173,7 +173,7 @@ namespace modules{
 					if(features[i].numberOfTimesUpdated < MIN_MEASUREMENTS_FOR_THROWOUT) return;
 				}
 
-				float cutoffStrength = sortedStrengths[std::max(0, std::min(int(sortedStrengths.size() - MAX_MATCHES), int(sortedStrengths.size()-1)))];
+				float cutoffStrength = sortedStrengths[std::max(0, std::min(int(sortedStrengths.size() - THRESHOLD_FOR_THROWOUTS), int(sortedStrengths.size()-1)))];
 
 				if(featureStrengths.size() != featureFilters.size() || features.size() != featureFilters.size()){
 					NUClear::log("filterStrengths.size() != featureFilters.size() || features.size() != featureFilters.size()");
@@ -216,9 +216,11 @@ namespace modules{
 
 	            for(auto& match : matches){
 
-	            	int fI = std::get<0>(match);	//featureIndex
-	            	int eFI = std::get<1>(match);	//extractedFeatureIndex
-	            	float strength = std::get<2>(match);
+
+	            	int fI; //featureIndex
+	            	int eFI; //extractedFeatureIndex
+	            	float strength;
+	            	std::tie(fI, eFI, strength) = match;
 
 	                if(fI < featureFilters.size()){     
 	                	//That is, we have seen this object before
@@ -233,7 +235,10 @@ namespace modules{
 
 	                    //Update our beleif
 	                    //Strength updated with total average model
+
 	                    featureStrengths[fI] = ( features[fI].numberOfTimesUpdated * featureStrengths[fI] + strength * int(expectations[fI]) ) / (features[fI].numberOfTimesUpdated+1);	
+	            		features[fI].numberOfTimesUpdated++;
+	            		expectations[fI] = false;
 	                    featureFilters[fI].timeUpdate(deltaT, int(0));
 	                    featureFilters[fI].measurementUpdate(extractedFeatures[eFI].screenAngular, getMeasurementCovariance(),worldToCameraTransform);
 	                } else {    //Otherwise we initialise a filter for the object
@@ -249,8 +254,8 @@ namespace modules{
 	            for(int i = 0; i < featureStrengths.size(); i++){
 	            	if(expectations[i]){	//Expected but not seen
 	            		featureStrengths[i] = features[i].numberOfTimesUpdated * featureStrengths[i] / (features[i].numberOfTimesUpdated+1);
+	            		features[i].numberOfTimesUpdated++;
 	            	}
-	            	features[i].numberOfTimesUpdated++;
 	            }
 
 				// NUClear::log("Extrated features:", extractedFeatures.size());
@@ -275,7 +280,7 @@ namespace modules{
 					std::cout << featureStrengths[i] << " " << features[i].numberOfTimesUpdated;
 					std::cout << std::endl;
 	            }
-	            if(featureStrengths.size() > MAX_MATCHES){
+	            if(featureStrengths.size() > THRESHOLD_FOR_THROWOUTS){
 	         	   sortAndTruncateFeatureList();
 	        	}
 				std::cout << "====================================================" << std::endl;
