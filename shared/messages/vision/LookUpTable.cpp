@@ -43,29 +43,12 @@ namespace messages {
             std::fill(data.get(), data.get() + LUT_SIZE, 0);
         }
 
-
-        LookUpTable::LookUpTable(std::tuple<uint8_t, uint8_t, uint8_t, std::unique_ptr<char[]>> data)
-            : LookUpTable(std::get<0>(data), std::get<1>(data), std::get<2>(data), std::move(std::get<3>(data))) {
-        }
-
-        LookUpTable::LookUpTable(std::string& filename) : LookUpTable(createLookUpTableFromFile(filename)) {
-        }
-
-        std::tuple<uint8_t, uint8_t, uint8_t, std::unique_ptr<char[]>> LookUpTable::createLookUpTableFromFile(std::string& filename) {
-            // read
-            std::ifstream lutfile(filename, std::ios::binary);
-            auto input = std::istreambuf_iterator<char>(lutfile);
-            uint8_t bitsY = *(input++) - 48;  // Convert the string to a number
-            uint8_t bitsCb = *(input++) - 48; // Convert the string to a number
-            uint8_t bitsCr = *(input++) - 48; // Convert the string to a number
-            const size_t size = std::exp2(bitsY + bitsCb + bitsCr);
-            auto data = std::unique_ptr<char[]>(new char[size]);
-            std::copy(input, std::istreambuf_iterator<char>(), data.get());
-            return std::make_tuple(bitsY, bitsCb, bitsCr, std::move(data));
-        }
-
         messages::vision::Colour LookUpTable::classify(const messages::input::Image::Pixel& p) const {
             return messages::vision::Colour(data[getLUTIndex(p)]); // 7bit LUT
+        }
+
+        std::string LookUpTable::getData() const {
+            return std::string(data.get(), LUT_SIZE);
         }
 
         uint LookUpTable::getLUTIndex(const messages::input::Image::Pixel& colour) const {
@@ -76,17 +59,6 @@ namespace messages {
             index += (colour.cr >> BITS_CR_REMOVED);
 
             return index;
-        }
-
-        void LookUpTable::save(const std::string& fileName) const {
-            std::ofstream lutfile(fileName, std::ios::binary);
-            auto output = std::ostreambuf_iterator<char>(lutfile);
-
-            output = BITS_Y + 48;  // Convert the number to a string
-            output = BITS_CB + 48; // Convert the number to a string
-            output = BITS_CR + 48; // Convert the number to a string
-
-            std::copy(data.get(), data.get() + LUT_SIZE, output);
         }
 
     } //vision

@@ -26,8 +26,8 @@
 namespace modules {
     namespace vision {
 
-        struct LUTLocations{
-            static constexpr const char* CONFIGURATION_PATH = "LUTLocations.json";
+        struct LUTLocation {
+            static constexpr const char* CONFIGURATION_PATH = "LookUpTable.yaml";
         };
 
         /**

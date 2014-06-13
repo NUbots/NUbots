@@ -33,6 +33,7 @@
 #include <string>
 #include <cmath>
 #include <cstring>
+#include <yaml-cpp/yaml.h>
 #include "messages/input/Image.h"
 
 namespace messages {
@@ -61,12 +62,9 @@ namespace messages {
 
             LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr);
             LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::unique_ptr<char[]>&& data);
-            LookUpTable(std::string& filename);
 
-            void save(const std::string& fileName) const;
-            std::string getData() const {
-                return std::string(data.get(), LUT_SIZE);
-            }
+            std::string getData() const;
+
             /*!
                 @brief Classifies a pixel
                 @param p the pixel
@@ -87,11 +85,45 @@ namespace messages {
              *   @return Returns the colour index for the given pixel.
              */
             uint getLUTIndex(const messages::input::Image::Pixel& colour) const;
-            static std::tuple<uint8_t, uint8_t, uint8_t, std::unique_ptr<char[]>> createLookUpTableFromFile(std::string& filename);
             std::unique_ptr<char[]> data;
         };
 
     } //vision
 } // messages
+
+// YAML conversions
+namespace YAML {
+
+    template<>
+    struct convert<messages::vision::LookUpTable> {
+        static Node encode(const messages::vision::LookUpTable& rhs) {
+            Node node;
+
+            node["bits"]["y"] = rhs.BITS_Y;
+            node["bits"]["cb"] = rhs.BITS_CB;
+            node["bits"]["cr"] = rhs.BITS_CR;
+
+            node["lut"] = rhs.getData();
+
+            return node;
+        }
+
+        static bool decode(const Node& node, messages::vision::LookUpTable& rhs) {
+
+            uint8_t bitsY = node["bits"]["y"].as<uint8_t>();
+            uint8_t bitsCb = node["bits"]["cb"].as<uint8_t>();
+            uint8_t bitsCr = node["bits"]["cr"].as<uint8_t>();
+
+            std::string dataString = node["lut"].as<std::string>();
+
+            std::unique_ptr<char[]> data(new char[1 << (bitsY + bitsCb + bitsCr)]);
+            std::copy(dataString.begin(), dataString.end(), data.get());
+
+            rhs = messages::vision::LookUpTable(bitsY, bitsCb, bitsCr, std::move(data));
+
+            return true;
+        }
+    };
+}
 
 #endif // MESSAGES_VISION_LOOKUPTABLE_H
