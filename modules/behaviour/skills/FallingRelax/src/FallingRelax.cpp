@@ -101,7 +101,7 @@ namespace modules {
 
                 on<Trigger<Falling>>([this] (const Falling&) {
 
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Relax.json"));
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Relax.yaml"));
                 });
 
                 on<Trigger<KillFalling>>([this] (const KillFalling&) {

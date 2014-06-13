@@ -19,7 +19,7 @@ class Facter::Util::DotD
     @dir = dir
     @cache_file = cache_file
     @cache = nil
-    @types = {".txt" => :txt, ".json" => :json, ".yaml" => :yaml}
+    @types = {".txt" => :txt, ".yaml" => :json, ".yaml" => :yaml}
   end
 
   def entries

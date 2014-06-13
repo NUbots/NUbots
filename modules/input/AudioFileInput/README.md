@@ -37,7 +37,7 @@ input with pre-recorded sound.
 
 ## Configuration
 
-This module's configuration is stored in AudioFileInput.json. There is only one
+This module's configuration is stored in AudioFileInput.yaml. There is only one
 setting, which is required.
 
 * "file": the name of the audio file to read samples from

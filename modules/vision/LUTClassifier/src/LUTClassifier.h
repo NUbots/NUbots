@@ -38,23 +38,23 @@
 namespace modules {
     namespace vision {
         struct VisionConstants{
-            static constexpr const char* CONFIGURATION_PATH = "VisionConstants.json";
+            static constexpr const char* CONFIGURATION_PATH = "VisionConstants.yaml";
         };
 
         struct LUTLocations{
-            static constexpr const char* CONFIGURATION_PATH = "LUTLocations.json";
+            static constexpr const char* CONFIGURATION_PATH = "LUTLocations.yaml";
         };
 
         struct GreenHorizonConfig{
-            static constexpr const char* CONFIGURATION_PATH = "GreenHorizon.json";
+            static constexpr const char* CONFIGURATION_PATH = "GreenHorizon.yaml";
         };
 
         struct ScanLinesConfig{
-            static constexpr const char* CONFIGURATION_PATH = "ScanLines.json";
+            static constexpr const char* CONFIGURATION_PATH = "ScanLines.yaml";
         };
 
         struct RulesConfig{
-            static constexpr const char* CONFIGURATION_PATH = "Rules.json";
+            static constexpr const char* CONFIGURATION_PATH = "Rules.yaml";
         };
 
         /**

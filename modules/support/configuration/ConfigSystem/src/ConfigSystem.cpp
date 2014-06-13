@@ -129,7 +129,7 @@ namespace modules {
                 auto elements = utility::file::listDir(path);
 
                 for (const auto& element : elements) {
-                    if (utility::strutil::endsWith(element, ".json")) {
+                    if (utility::strutil::endsWith(element, ".yaml")) {
                         emit(reactor, element, YAML::Node(buildConfigurationNode(path + element)));
                     }
                 }
@@ -171,7 +171,7 @@ namespace modules {
                             // If a config file was modified touched or created (not a directory)
                             if (event->mask & (IN_ATTRIB | IN_CREATE | IN_MODIFY | IN_MOVED_TO) && !(event->mask & IN_ISDIR)) {
                                 std::string name = std::string(event->name);
-                                if (utility::strutil::endsWith(name, ".json")) {
+                                if (utility::strutil::endsWith(name, ".yaml")) {
                                     const std::string& parent = watchPath[event->wd];
                                     std::string fullPath = parent + name;
 

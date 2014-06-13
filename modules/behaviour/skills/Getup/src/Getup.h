@@ -47,7 +47,7 @@ namespace modules {
 
             public:
                 explicit Getup(std::unique_ptr<NUClear::Environment> environment);
-                static constexpr const char* CONFIGURATION_PATH = "Getup.json";
+                static constexpr const char* CONFIGURATION_PATH = "Getup.yaml";
             };
         }  // skills
     }  // behaviours

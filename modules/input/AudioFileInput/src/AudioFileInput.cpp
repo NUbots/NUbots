@@ -37,7 +37,7 @@ namespace modules {
         };
 
         struct AudioFileConfiguration {
-            static constexpr const char* CONFIGURATION_PATH = "AudioFileInput.json";
+            static constexpr const char* CONFIGURATION_PATH = "AudioFileInput.yaml";
         };
 
         AudioFileInput::AudioFileInput(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {

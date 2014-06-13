@@ -33,7 +33,7 @@
 namespace modules {
 namespace localisation {
     struct KFBallLocalisationEngineConfig {
-        static constexpr const char* CONFIGURATION_PATH = "KFBallLocalisationEngine.json";
+        static constexpr const char* CONFIGURATION_PATH = "KFBallLocalisationEngine.yaml";
     };
 
     class KFBallLocalisationEngine {

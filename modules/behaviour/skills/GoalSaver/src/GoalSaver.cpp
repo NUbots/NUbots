@@ -103,10 +103,10 @@ namespace skills {
             // assume valid at this point as this is checked on the walkcommand trigger
             if (quadrant == 1) {
                 // side
-                emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"BlockLeft.json"})));
+                emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"BlockLeft.yaml"})));
             } else if (quadrant == 3) {
                 // side
-                emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"BlockRight.json"})));
+                emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"BlockRight.yaml"})));
             }
 
 

@@ -96,11 +96,11 @@
 	\paragraph{Configuration} This allows a system to access configuration files through the config system.\\
 	\begin{cppcode}
 		struct Type {
-			static constexpr const char* CONFIGURATION_PATH = "Something.json"
+			static constexpr const char* CONFIGURATION_PATH = "Something.yaml"
 		}
 
 		on<Trigger<Configuration<Type>>>([](const Configuration<Type>& config) {
-			// This has the configuration from Something.json
+			// This has the configuration from Something.yaml
 		});
 	\end{cppcode}
 \end{document}

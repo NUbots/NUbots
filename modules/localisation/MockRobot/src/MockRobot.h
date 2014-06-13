@@ -28,7 +28,7 @@ namespace modules {
 namespace localisation {
 
     struct MockRobotConfig {
-        static constexpr const char* CONFIGURATION_PATH = "MockRobotConfig.json";
+        static constexpr const char* CONFIGURATION_PATH = "MockRobotConfig.yaml";
     };
 
     class MockRobot : public NUClear::Reactor {

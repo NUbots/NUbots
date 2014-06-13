@@ -115,7 +115,7 @@ namespace Darwin {
         bool configure(double baud);
 
     public:
-        static constexpr const char* CONFIGURATION_PATH = "DarwinPlatform.json";
+        static constexpr const char* CONFIGURATION_PATH = "DarwinPlatform.yaml";
         void setConfig(const messages::support::Configuration<UART>& config);
         /**
          * @brief Constructs a new UART instance using the passed device path as the TTY device

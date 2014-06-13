@@ -39,7 +39,7 @@ namespace modules {
 
                 on<Trigger<ExecuteStand>>([this] (const ExecuteStand&) {
 
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Stand.json"));
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Stand.yaml"));
 
                 });
 

@@ -40,7 +40,7 @@ namespace modules {
                 time_t lastPanEnd;
             public:
                 explicit Look(std::unique_ptr<NUClear::Environment> environment);
-                static constexpr const char* CONFIGURATION_PATH = "Look.json";
+                static constexpr const char* CONFIGURATION_PATH = "Look.yaml";
             };
 
         }  // reflexes

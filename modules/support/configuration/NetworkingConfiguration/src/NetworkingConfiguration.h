@@ -34,7 +34,7 @@ namespace modules {
              */
             class NetworkingConfiguration : public NUClear::Reactor {
             public:
-                static constexpr const char* CONFIGURATION_PATH = "NetworkingConfiguration.json";
+                static constexpr const char* CONFIGURATION_PATH = "NetworkingConfiguration.yaml";
                 explicit NetworkingConfiguration(std::unique_ptr<NUClear::Environment> environment);
             };
 

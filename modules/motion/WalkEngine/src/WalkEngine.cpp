@@ -225,7 +225,7 @@ namespace modules {
                 }
                 standScript.frames.push_back(frame);
                 auto saveScript = std::make_unique<SaveConfiguration>();
-                saveScript->path = "config/scripts/Stand.json";
+                saveScript->path = "config/scripts/Stand.yaml";
                 saveScript->config = standScript;
                 emit(std::move(saveScript));
             });

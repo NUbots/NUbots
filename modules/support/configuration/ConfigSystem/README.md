@@ -15,7 +15,7 @@ member called `CONFIGURATION_PATH`, set to the name of the configuration file
 or directory to load. All paths are relative to the base configuration
 directory, which is 'config/'.
 
-Config files must have a .json extension, all other files are ignored by the
+Config files must have a .yaml extension, all other files are ignored by the
 directory watching thread. If a directory is specified as the config path then
 all JSON files directly inside it will be loaded and it will be watched for new
 or changed files. Subdirectories of these directories are not loaded
