@@ -21,12 +21,11 @@
 #define MESSAGES_SUPPORT_CONFIGURATION_H_
 
 #include <nuclear>
-#include "utility/configuration/ConfigurationNode.h"
+#include <yaml-cpp/yaml.h>
 
 namespace messages {
     namespace support {
 
-        using namespace utility::configuration;
         using namespace NUClear::metaprogramming;
 
         // Anonymous namespace to hide details
@@ -69,31 +68,32 @@ namespace messages {
         struct Configuration {
             static_assert(HasConfiguration<TType>::value, "The passed type does not have a CONFIGURATION_PATH variable");
 
-            Configuration(const std::string& name, ConfigurationNode config) : name(name), config(config) {};
             std::string name;
-            ConfigurationNode config;
+            YAML::Node config;
 
-            ConfigurationNode& operator [] (const std::string& key) {
+            Configuration(const std::string& name, YAML::Node config) : name(name), config(config) {};
+
+            YAML::Node operator [] (const std::string& key) {
                 return config[key];
             }
 
-            const ConfigurationNode& operator [] (const std::string& key) const {
+            const YAML::Node operator [] (const std::string& key) const {
                 return config[key];
             }
 
-            ConfigurationNode& operator [] (const char* key) {
+            YAML::Node operator [] (const char* key) {
                 return config[key];
             }
 
-            const ConfigurationNode& operator [] (const char* key) const {
+            const YAML::Node operator [] (const char* key) const {
                 return config[key];
             }
 
-            ConfigurationNode& operator [] (size_t index) {
+            YAML::Node operator [] (size_t index) {
                 return config[index];
             }
 
-            const ConfigurationNode& operator [] (size_t index) const {
+            const YAML::Node operator [] (size_t index) const {
                 return config[index];
             }
         };
@@ -105,7 +105,7 @@ namespace messages {
          */
         struct SaveConfiguration {
             std::string path;
-            ConfigurationNode config;
+            YAML::Node config;
         };
 
         /**
@@ -116,8 +116,8 @@ namespace messages {
         struct ConfigurationConfiguration {
             std::type_index requester;
             std::string configPath;
-            std::function<void (NUClear::Reactor*, const std::string&, const messages::support::ConfigurationNode&)> emitter;
-            std::function<void (NUClear::Reactor*, const std::string&, const messages::support::ConfigurationNode&)> initialEmitter;
+            std::function<void (NUClear::Reactor*, const std::string&, const YAML::Node&)> emitter;
+            std::function<void (NUClear::Reactor*, const std::string&, const YAML::Node&)> initialEmitter;
         };
 
     }  // support
@@ -136,16 +136,16 @@ namespace NUClear {
         static void exists(NUClear::Reactor& context) {
 
             // Build our lambda we will use to trigger this reaction
-            std::function<void (Reactor*, const std::string&, const messages::support::ConfigurationNode&)> emitter =
-            [](Reactor* configReactor, const std::string& name, const messages::support::ConfigurationNode& node) {
+            std::function<void (Reactor*, const std::string&, const YAML::Node&)> emitter =
+            [](Reactor* configReactor, const std::string& name, const YAML::Node& node) {
                 // Cast our node to be the correct type (and wrap it in a unique pointer)
                 configReactor->emit(std::make_unique<messages::support::Configuration<TConfiguration>>(name, node));
             };
 
             // We need to emit our initial configuration directly in order to avoid race conditions where
             // a main reactor tries to load configuration information before the configurations are loaded.
-            std::function<void (Reactor*, const std::string&, const messages::support::ConfigurationNode&)> initialEmitter =
-            [](Reactor* configReactor, const std::string& name, const messages::support::ConfigurationNode& node) {
+            std::function<void (Reactor*, const std::string&, const YAML::Node&)> initialEmitter =
+            [](Reactor* configReactor, const std::string& name, const YAML::Node& node) {
                 // Cast our node to be the correct type (and wrap it in a unique pointer)
                 configReactor->emit<Scope::DIRECT>(std::make_unique<messages::support::Configuration<TConfiguration>>(name, node));
             };

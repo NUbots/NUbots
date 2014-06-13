@@ -18,6 +18,9 @@
  */
 
 #include "LUTClassifier.h"
+
+#include <yaml-cpp/yaml.h>
+
 #include "messages/vision/LookUpTable.h"
 #include "messages/vision/SaveLookUpTable.h"
 
@@ -27,7 +30,6 @@ namespace modules {
         using messages::input::Image;
         using messages::vision::ColourSegment;
         using messages::support::Configuration;
-        using utility::configuration::ConfigurationNode;
         using messages::vision::ClassifiedImage;
         using messages::vision::SegmentedRegion;
         using messages::vision::LookUpTable;
@@ -44,31 +46,31 @@ namespace modules {
 
             //Load LUTs
             on<Trigger<Configuration<LUTLocations>>>([this](const Configuration<LUTLocations>& config) {
-                std::string LUTLocation = config["LUT_LOCATION"];
+                std::string LUTLocation = config["LUT_LOCATION"].as<std::string>();
                 emit(std::make_unique<LookUpTable>(LUTLocation));
             });
 
             on<Trigger<SaveLookUpTable>, With<LookUpTable, Configuration<LUTLocations>>>([this](const SaveLookUpTable&, const LookUpTable& lut, const Configuration<LUTLocations>& config) {
-                std::string LUTLocation = config["LUT_LOCATION"];
+                std::string LUTLocation = config["LUT_LOCATION"].as<std::string>();
                 lut.save(LUTLocation);
             });
 
             //Load in greenhorizon parameters
             on<Trigger<Configuration<GreenHorizonConfig>>>([this](const Configuration<GreenHorizonConfig>& constants) {
                 //std::cout<< "Loading gh cONFIG."<<std::endl;
-                greenHorizon.setParameters(constants.config["GREEN_HORIZON_SCAN_SPACING"],
-                                           constants.config["GREEN_HORIZON_MIN_GREEN_PIXELS"],
-                                           constants.config["GREEN_HORIZON_UPPER_THRESHOLD_MULT"]);
+                greenHorizon.setParameters(constants.config["GREEN_HORIZON_SCAN_SPACING"].as<uint>(),
+                                           constants.config["GREEN_HORIZON_MIN_GREEN_PIXELS"].as<uint>(),
+                                           constants.config["GREEN_HORIZON_UPPER_THRESHOLD_MULT"].as<float>());
                 //std::cout<< "Finished Config Loading successfully."<<std::endl;
             });
 
             //Load in scanline parameters
             on<Trigger<Configuration<ScanLinesConfig>>>([this](const Configuration<ScanLinesConfig>& constants) {
                 //std::cout<< "Loading ScanLines config."<<std::endl;
-                scanLines.setParameters(constants.config["HORIZONTAL_SCANLINE_SPACING"],
-                                         constants.config["VERTICAL_SCANLINE_SPACING"],
-                                         constants.config["APPROXIMATE_SEGS_PER_HOR_SCAN"],
-                                         constants.config["APPROXIMATE_SEGS_PER_VERT_SCAN"]);
+                scanLines.setParameters(constants.config["HORIZONTAL_SCANLINE_SPACING"].as<uint>(),
+                                         constants.config["VERTICAL_SCANLINE_SPACING"].as<uint>(),
+                                         constants.config["APPROXIMATE_SEGS_PER_HOR_SCAN"].as<uint>(),
+                                         constants.config["APPROXIMATE_SEGS_PER_VERT_SCAN"].as<uint>());
                 //std::cout<< "Finished Config Loading successfully."<<std::endl;
             });
 
@@ -77,27 +79,26 @@ namespace modules {
                 //std::cout<< "Loading Rules config."<<std::endl;
                 segmentFilter.clearRules();
                 if(rules.config["USE_REPLACEMENT_RULES"]){
-                    std::map<std::string, ConfigurationNode> replacementRules = rules.config["REPLACEMENT_RULES"];
 
-                    for (const auto& rule : replacementRules) {
+                    for (const auto& rule : rules.config["REPLACEMENT_RULES"]) {
                         //std::cout << "Loading Replacement rule : " << rule.first << std::endl;
 
                         ColourReplacementRule r;
 
-                        std::vector<unsigned int> before = rule.second["before"]["vec"];
-                        std::vector<unsigned int> middle = rule.second["middle"]["vec"];
-                        std::vector<unsigned int> after = rule.second["after"]["vec"];
+                        std::vector<uint> before = rule.second["before"]["vec"].as<std::vector<uint>>();
+                        std::vector<uint> middle = rule.second["middle"]["vec"].as<std::vector<uint>>();
+                        std::vector<uint> after = rule.second["after"]["vec"].as<std::vector<uint>>();
 
-                        r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
-                                                rule.second["middle"]["colour"],
-                                                rule.second["after"]["colour"],
+                        r.loadRuleFromConfigInfo(rule.second["before"]["colour"].as<std::string>(),
+                                                rule.second["middle"]["colour"].as<std::string>(),
+                                                rule.second["after"]["colour"].as<std::string>(),
                                                 before[0],//min
                                                 before[1],//max, etc.
                                                 middle[0],
                                                 middle[1],
                                                 after[0],
                                                 after[1],
-                                                rule.second["replacement"]);
+                                                rule.second["replacement"].as<std::string>());
 
                         //Neat method which is broken due to config system
                         /*r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
@@ -115,19 +116,18 @@ namespace modules {
                     }
                 }
 
-                std::map<std::string, ConfigurationNode> transitionRules = rules.config["TRANSITION_RULES"];
-                for(const auto& rule : transitionRules) {
+                for(const auto& rule : rules.config["TRANSITION_RULES"]) {
                     //std::cout << "Loading Transition rule : " << rule.first << std::endl;
 
                     ColourTransitionRule r;
 
-                    std::vector<unsigned int> before = rule.second["before"]["vec"];
-                    std::vector<unsigned int> middle = rule.second["middle"]["vec"];
-                    std::vector<unsigned int> after = rule.second["after"]["vec"];
+                    std::vector<unsigned int> before = rule.second["before"]["vec"].as<std::vector<uint>>();
+                    std::vector<unsigned int> middle = rule.second["middle"]["vec"].as<std::vector<uint>>();
+                    std::vector<unsigned int> after = rule.second["after"]["vec"].as<std::vector<uint>>();
 
-                    r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
-                                            rule.second["middle"]["colour"],
-                                            rule.second["after"]["colour"],
+                    r.loadRuleFromConfigInfo(rule.second["before"]["colour"].as<std::string>(),
+                                            rule.second["middle"]["colour"].as<std::string>(),
+                                            rule.second["after"]["colour"].as<std::string>(),
                                             before[0],//min
                                             before[1],//max, etc.
                                             middle[0],

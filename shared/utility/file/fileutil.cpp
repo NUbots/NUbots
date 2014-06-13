@@ -25,7 +25,6 @@ extern "C" {
 }
 
 #include <sstream>
-#include <fstream>
 #include <system_error>
 
 namespace utility {
@@ -39,14 +38,6 @@ namespace file {
         stream << data.rdbuf();
 
         return stream.str();
-    }
-
-    void writeToFile(const std::string& path, const std::string& data, bool append) {
-        std::ofstream file(path,
-            append
-                ? std::ios::out | std::ios::app
-                : std::ios::out);
-        file << data;
     }
 
     bool exists(const std::string& path) {

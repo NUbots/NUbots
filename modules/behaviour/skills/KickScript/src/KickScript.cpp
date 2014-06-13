@@ -49,8 +49,8 @@ namespace skills {
 
         // do a little configurating
         on<Trigger<Configuration<KickScript>>>([this] (const Configuration<KickScript>& config){
-            KICK_PRIORITY = config["KICK_PRIORITY"];
-            EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"];
+            KICK_PRIORITY = config["KICK_PRIORITY"].as<float>();
+            EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
         on<Trigger<KickCommand>>([this] (const KickCommand& kickCommand) {

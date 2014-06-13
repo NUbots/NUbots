@@ -79,7 +79,7 @@ namespace modules {
                     //vector<float> ballApproachAngle;
                     //vector<int> ballKickFoot;
                     float ballLineupDistance;
-                    int ballLineupMinDistance;
+                    float ballLineupMinDistance;
 
                     //extra config options
                     bool useAvoidance;

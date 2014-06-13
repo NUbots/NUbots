@@ -49,13 +49,13 @@ namespace modules {
             , velocityFilter(arma::vec3({0,0,0})) {
 
                 on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){
-                    DEFAULT_NOISE_GAIN = file.config["DEFAULT_NOISE_GAIN"];
-                    HIGH_NOISE_THRESHOLD = file.config["HIGH_NOISE_THRESHOLD"];
-                    HIGH_NOISE_GAIN = file.config["HIGH_NOISE_GAIN"];
-                    LOW_NOISE_THRESHOLD = file.config["LOW_NOISE_THRESHOLD"];
+                    DEFAULT_NOISE_GAIN = file.config["DEFAULT_NOISE_GAIN"].as<double>();
+                    HIGH_NOISE_THRESHOLD = file.config["HIGH_NOISE_THRESHOLD"].as<double>();
+                    HIGH_NOISE_GAIN = file.config["HIGH_NOISE_GAIN"].as<double>();
+                    LOW_NOISE_THRESHOLD = file.config["LOW_NOISE_THRESHOLD"].as<double>();
 
-                    SUPPORT_FOOT_FSR_THRESHOLD = file.config["SUPPORT_FOOT_FSR_THRESHOLD"];
-                    REQUIRED_NUMBER_OF_FSRS = file.config["REQUIRED_NUMBER_OF_FSRS"];
+                    SUPPORT_FOOT_FSR_THRESHOLD = file.config["SUPPORT_FOOT_FSR_THRESHOLD"].as<double>();
+                    REQUIRED_NUMBER_OF_FSRS = file.config["REQUIRED_NUMBER_OF_FSRS"].as<int>();
                 });
 
                 on<Trigger<DarwinSensors>,

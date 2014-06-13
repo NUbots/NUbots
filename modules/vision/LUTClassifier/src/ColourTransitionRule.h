@@ -26,8 +26,6 @@
 
 #include "messages/vision/ClassifiedImage.h"
 
-#include "utility/configuration/ConfigurationNode.h"
-
 namespace modules {
     namespace vision {
         class ColourTransitionRule {

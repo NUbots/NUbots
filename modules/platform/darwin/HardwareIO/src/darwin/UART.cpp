@@ -52,10 +52,10 @@ namespace Darwin {
     }
 
     void UART::setConfig(const messages::support::Configuration<UART>& config){
-        PACKET_WAIT = config["PACKET_WAIT"];
-        BYTE_WAIT = config["BYTE_WAIT"];
-        BUS_RESET_WAIT_TIME_uS = config["BUS_RESET_WAIT_TIME_uS"];
-    }        
+        PACKET_WAIT = config["PACKET_WAIT"].as<int>();
+        BYTE_WAIT = config["BYTE_WAIT"].as<int>();
+        BUS_RESET_WAIT_TIME_uS = config["BUS_RESET_WAIT_TIME_uS"].as<int>();
+    }
 
     UART::UART(const char* name) {
 

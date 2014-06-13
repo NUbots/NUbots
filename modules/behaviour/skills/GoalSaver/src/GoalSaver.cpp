@@ -76,21 +76,21 @@ namespace skills {
                     }
                 }
             }
-            
+
 
         });
-        
+
         // do a little configurating
         on<Trigger<Configuration<GoalSaver>>>([this] (const Configuration<GoalSaver>& config){
-            DIVE_PRIORITY = config["DIVE_PRIORITY"];
-            EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"];
+            DIVE_PRIORITY = config["DIVE_PRIORITY"].as<float>();
+            EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
 
-            SPEED_THRESHOLD = config["SPEED_THRESHOLD"];
-            DISTANCE_THRESHOLD = config["DISTANCE_THRESHOLD"];
+            SPEED_THRESHOLD = config["SPEED_THRESHOLD"].as<float>();
+            DISTANCE_THRESHOLD = config["DISTANCE_THRESHOLD"].as<float>();
         });
 
         on<Trigger<DiveCommand>>([this] (const DiveCommand& diveCommand) {
-            
+
             this->diveCommand = diveCommand;
             updatePriority(DIVE_PRIORITY);
 
@@ -108,7 +108,7 @@ namespace skills {
                 // side
                 emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"BlockRight.json"})));
             }
-            
+
 
             updatePriority(EXECUTION_PRIORITY);
 

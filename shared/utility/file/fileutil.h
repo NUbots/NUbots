@@ -22,6 +22,7 @@
 
 #include <string>
 #include <vector>
+#include <fstream>
 
 namespace utility {
     /**
@@ -33,7 +34,14 @@ namespace utility {
     namespace file {
         std::string loadFromFile(const std::string& path);
 
-        void writeToFile(const std::string& path, const std::string& data, bool append = false);
+        template <typename TData>
+        void writeToFile(const std::string& path, const TData& data, bool append = false) {
+            std::ofstream file(path,
+                append
+                    ? std::ios::out | std::ios::app
+                    : std::ios::out);
+            file << data;
+        }
 
         bool exists(const std::string& path);
 
