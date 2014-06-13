@@ -55,6 +55,7 @@ int main(int argc, char** argv) {
     file.write(main)
 
     for module in sys.argv[2:]:
+        file.write('\tstd::cout << "Installing " << "{0}" << std::endl;\n'.format(module))
         file.write('\tplant.install<modules::{0}>();\n'.format(module))
 
     end = """
