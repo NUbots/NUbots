@@ -87,7 +87,7 @@ namespace modules {
             0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFF, 0xDA
         };
 
-        V4L2Camera::V4L2Camera() : fd(-1), width(0), height(0), deviceID(""), streaming(false) , rotated(false){
+        V4L2Camera::V4L2Camera() : fd(-1), width(0), height(0), deviceID(""), streaming(false) {
         }
 
         std::unique_ptr<Image> V4L2Camera::getImage() {
@@ -145,9 +145,10 @@ namespace modules {
                 // Start decompression
                 jpeg_start_decompress(&cinfo);
 
-                for (Image::Pixel* row = data.data();
+                // Decompress the JPEG in reverse so we get a right handed coordinate system
+                for (Image::Pixel* row = data.data() + (width * height) - width;
                         cinfo.output_scanline < cinfo.output_height;
-                        row += width) {
+                        row -= width) {
 
                     // Read the scanline into place
                     jpeg_read_scanlines(&cinfo, reinterpret_cast<uint8_t**>(&row), 1);
@@ -158,7 +159,7 @@ namespace modules {
                 jpeg_destroy_decompress(&cinfo);
 
                 // Move this data into the image along with the jpeg source
-                image = std::unique_ptr<Image>(new Image(width, height, std::move(data), std::move(jpegData), rotated));
+                image = std::unique_ptr<Image>(new Image(width, height, std::move(data), std::move(jpegData)));
             }
 
             else {
@@ -179,8 +180,7 @@ namespace modules {
                 }
 
                 // Move this data into the image
-                std::unique_ptr<Image> image =
-                        std::unique_ptr<Image>(new Image(width, height, std::move(data), rotated));
+                image = std::unique_ptr<Image>(new Image(width, height, std::move(data)));
             }
 
             // Enqueue our next buffer so it can be written to
@@ -192,7 +192,7 @@ namespace modules {
             return image;
         }
 
-        void V4L2Camera::resetCamera(const std::string& device, const std::string& fmt, size_t w, size_t h, bool f) {
+        void V4L2Camera::resetCamera(const std::string& device, const std::string& fmt, size_t w, size_t h) {
             // if the camera device is already open, close it
             closeCamera();
 
@@ -201,7 +201,6 @@ namespace modules {
             format = fmt;
             width = w;
             height = h;
-            rotated = f;
 
             // Open the camera device
             fd = open(deviceID.c_str(), O_RDWR);
