@@ -47,6 +47,28 @@ namespace modules {
             QuexClassifier quex;
         };
 
+        void insertSegments(ClassifiedImage<ObjectClass>& image, std::vector<ClassifiedImage<ObjectClass>::Segment>& segments, bool vertical) {
+            ClassifiedImage<ObjectClass>::Segment* previous = nullptr;
+            ClassifiedImage<ObjectClass>::Segment* current = nullptr;
+
+            auto& target = vertical ? image.verticalSegments : image.horizontalSegments;
+
+            for (auto& s : segments) {
+
+                // Move in the data
+                current = &(target.insert(std::make_pair(s.colour, std::move(s)))->second);
+
+                // Link up the results
+                current->previous = previous;
+                if(previous) {
+                    previous->next = current;
+                }
+
+                // Get ready for our next one
+                previous = current;
+            }
+        }
+
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
             //on<Trigger<Every<10, Per<std::chrono::second>>>([this] (const time_t& t) {});
@@ -57,62 +79,36 @@ namespace modules {
 
             on<Trigger<Image>, With<LookUpTable, Sensors>, Options<Single>>("Classify Image", [this](const Image& image, const LookUpTable& lut, const Sensors& sensors) {
 
+                constexpr uint VISUAL_HORIZON_SPACING = 10;
+                constexpr uint HORIZON_BUFFER = 10;
+
                 auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
 
-                // TODO temp, do the horizontal classifications
-                for(uint i = 0; i < image.height(); i += 4) {
+                // Get our actual horizon
+                arma::vec2 horizon = {10, 10};
+                classifiedImage->horizon = horizon;
 
-                    auto segments = m->quex.classify(image, lut, { 0, i }, { image.width() - 1, i });
+                // Get the equation to find the horizon at each point
+                float gradient = (horizon[1] - horizon[0]);
 
-                    ClassifiedImage<ObjectClass>::Segment* previous = nullptr;
-                    ClassifiedImage<ObjectClass>::Segment* current = nullptr;
+                // Find our visual horizon
+                for(uint i = 0; i < image.width(); i += VISUAL_HORIZON_SPACING) {
 
-                    for (auto& s : segments) {
+                    // Find our point to classify from (slightly above the horizon)
+                    uint top = std::min(uint(i * gradient + horizon[0] + HORIZON_BUFFER), uint(image.height()));
 
-                        // Move in the data
-                        current = &(classifiedImage->horizontalSegments.insert(std::make_pair(s.colour, std::move(s)))->second);
-
-                        // Link up the results
-                        current->previous = previous;
-                        if(previous) {
-                            previous->next = current;
-                        }
-
-                        // Get ready for our next one
-                        previous = current;
-                    }
+                    // Classify our segments
+                    auto segments = m->quex.classify(image, lut, { i, 0 }, { i, top});
+                    insertSegments(*classifiedImage, segments, true);
                 }
 
-                // TODO temp, do the vertical classifications
-                for(uint i = 0; i < image.width(); i += 4) {
-
-                    auto segments = m->quex.classify(image, lut, { i, 0 }, { i, image.height() - 1});
-
-                    ClassifiedImage<ObjectClass>::Segment* previous = nullptr;
-                    ClassifiedImage<ObjectClass>::Segment* current = nullptr;
-
-                    for (auto& s : segments) {
-
-                        // Move in the data
-                        current = &(classifiedImage->verticalSegments.insert(std::make_pair(s.colour, std::move(s)))->second);
-
-                        // Link up the results
-                        current->previous = previous;
-                        if(previous) {
-                            previous->next = current;
-                        }
-
-                        // Get ready for our next one
-                        previous = current;
-                    }
+                // Do our convex hull to build our visual horizon
+                {
+                    // Get our candidate points
                 }
+
 
                 emit(std::move(classifiedImage));
-
-                // classify every 4th line vert/horizontal
-
-                // We need a quex classifier object
-                // We need a way of passing in the LUTified data to the classifer object
 
                 // Make a classified image
                 //auto classifiedimage out = std::make_unique<ClassifiedImage>();
