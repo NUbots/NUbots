@@ -243,7 +243,6 @@ namespace modules{
 	                    featureFilters[fI].measurementUpdate(extractedFeatures[eFI].screenAngular, getMeasurementCovariance(),worldToCameraTransform);
 	                } else {    //Otherwise we initialise a filter for the object
 	                    featureStrengths.push_back(strength);
-
 	                    expectations.push_back(false);
 	                    auto initialMean = getInitialMean(extractedFeatures[eFI].screenAngular, worldToCameraTransform, self, sensors);
 	                    auto initialCovariance = getInitialCovariance(extractedFeatures[eFI].screenAngular, worldToCameraTransform, self, sensors);
