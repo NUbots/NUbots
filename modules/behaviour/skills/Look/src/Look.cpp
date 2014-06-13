@@ -50,15 +50,15 @@ namespace modules {
                     //load fast and slow panspeed settings
 
                     //pan speeds
-                    fastSpeed = file.config["FastSpeed"];
-                    slowSpeed = file.config["SlowSpeed"];
+                    fastSpeed = file.config["FastSpeed"].as<double>();
+                    slowSpeed = file.config["SlowSpeed"].as<double>();
 
                     //head limits
-                    minYaw = file.config["minYaw"];
-                    maxYaw = file.config["maxYaw"];
-                    minPitch = file.config["minPitch"];
-                    maxPitch = file.config["maxPitch"];
-                    screenPadding = file.config["screenPadding"];
+                    minYaw = file.config["minYaw"].as<double>();
+                    maxYaw = file.config["maxYaw"].as<double>();
+                    minPitch = file.config["minPitch"].as<double>();
+                    maxPitch = file.config["maxPitch"].as<double>();
+                    screenPadding = file.config["screenPadding"].as<double>();
                 });
 
                 on<Trigger<ExecuteLook>>([this] (const ExecuteLook& e) {

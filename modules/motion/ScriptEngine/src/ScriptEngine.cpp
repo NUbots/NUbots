@@ -24,8 +24,12 @@
 
 namespace modules {
     namespace motion {
-        
+
+        using messages::support::Configuration;
+        using messages::behaviour::ServoCommand;
         using messages::motion::Script;
+        using messages::motion::ExecuteScriptByName;
+        using messages::motion::ExecuteScript;
 
         struct Scripts {
             // For scripts we want updates on the whole scripts directory
@@ -34,12 +38,12 @@ namespace modules {
 
         ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Trigger<messages::support::Configuration<Scripts>>>([this](const messages::support::Configuration<Scripts>& script) {
+            on<Trigger<Configuration<Scripts>>>([this](const Configuration<Scripts>& script) {
                 // Add this script to our list of scripts
-                scripts.insert(std::make_pair(script.name, script.config));
+                scripts.insert(std::make_pair(script.name, script.config.as<Script>()));
             });
 
-            on<Trigger<messages::motion::ExecuteScriptByName>>([this](const messages::motion::ExecuteScriptByName& command) {
+            on<Trigger<ExecuteScriptByName>>([this](const ExecuteScriptByName& command) {
                 std::vector<Script> scriptList;
                 for(const auto& scriptName : command.scripts) {
                     auto script = scripts.find(scriptName);
@@ -51,12 +55,12 @@ namespace modules {
                         scriptList.push_back(script->second);
                     }
                 }
-                emit<Scope::DIRECT>(std::make_unique<messages::motion::ExecuteScript>(command.sourceId, scriptList, command.start));
+                emit<Scope::DIRECT>(std::make_unique<ExecuteScript>(command.sourceId, scriptList, command.start));
             });
 
-            on<Trigger<messages::motion::ExecuteScript>>([this](const messages::motion::ExecuteScript& command) {
+            on<Trigger<ExecuteScript>>([this](const ExecuteScript& command) {
 
-                auto waypoints = std::make_unique<std::vector<messages::behaviour::ServoCommand>>();
+                auto waypoints = std::make_unique<std::vector<ServoCommand>>();
 
                 auto time = command.start;
                 for(const auto& script : command.scripts){

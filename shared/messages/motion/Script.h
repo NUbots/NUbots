@@ -98,7 +98,8 @@ namespace YAML {
 
         static bool decode(const Node& node, messages::motion::Script::Frame::Target& rhs) {
 
-            rhs = { messages::input::idFromString(node["id"]), node["position"].as<float>(), node["gain"].as<float>() };
+            rhs = { messages::input::idFromString(node["id"].as<std::string>())
+                  , node["position"].as<float>(), node["gain"].as<float>() };
             return true;
         }
     };

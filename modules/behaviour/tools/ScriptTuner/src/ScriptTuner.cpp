@@ -422,7 +422,7 @@ namespace modules {
             }
 
             void ScriptTuner::saveScript() {
-                YAML::Node n = script;
+                YAML::Node n(script);
                 utility::file::writeToFile(scriptPath, n);
             }
 

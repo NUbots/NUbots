@@ -46,10 +46,10 @@ namespace planning {
         on<Trigger<Configuration<KickPlanner> > >([this](const Configuration<KickPlanner>& config) {
             TARGET_FIELD_POS = config["TARGET_FIELD_POS"].as<arma::vec>();
 
-            MIN_BALL_DISTANCE = config["MIN_BALL_DISTANCE"];
-            KICK_CORRIDOR_WIDTH = config["KICK_CORRIDOR_WIDTH"];
-            KICK_FORWARD_ANGLE_LIMIT = config["KICK_FORWARD_ANGLE_LIMIT"];
-            KICK_SIDE_ANGLE_LIMIT = config["KICK_SIDE_ANGLE_LIMIT"];
+            MIN_BALL_DISTANCE = config["MIN_BALL_DISTANCE"].as<float>();
+            KICK_CORRIDOR_WIDTH = config["KICK_CORRIDOR_WIDTH"].as<float>();
+            KICK_FORWARD_ANGLE_LIMIT = config["KICK_FORWARD_ANGLE_LIMIT"].as<float>();
+            KICK_SIDE_ANGLE_LIMIT = config["KICK_SIDE_ANGLE_LIMIT"].as<float>();
         });
 
         on<Trigger<Ball>, With<std::vector<Self>>, With<std::vector<messages::vision::Ball>>>([this] (const Ball& ball, const std::vector<Self>& selfs, const std::vector<messages::vision::Ball>& vision_balls) {

@@ -123,58 +123,58 @@ namespace modules {
                 velLimitY = config["velLimitY"].as<arma::vec>();
                 velLimitA = config["velLimitA"].as<arma::vec>();
                 velDelta = config["velDelta"].as<arma::vec>();
-                vaFactor = config["vaFactor"];
+                vaFactor = config["vaFactor"].as<float>();
 
-                velXHigh = config["velXHigh"];
-                velDeltaXHigh = config["velDeltaXHigh"];
+                velXHigh = config["velXHigh"].as<double>();
+                velDeltaXHigh = config["velDeltaXHigh"].as<double>();
 
                 // gToe/heel overlap checking values
                 footSizeX = config["footSizeX"].as<arma::vec>();
-                stanceLimitMarginY = config["stanceLimitMarginY"];
-                stanceLimitY2 = 2 * double(config["footY"]) - double(config["stanceLimitMarginY"]);
+                stanceLimitMarginY = config["stanceLimitMarginY"].as<float>();
+                stanceLimitY2 = 2 * config["footY"].as<double>() - config["stanceLimitMarginY"].as<double>();
 
                 // gOP default stance width: 0.0375*2 = 0.075
                 // gHeel overlap At radian 0.15 at each foot = 0.05*sin(0.15)*2=0.015
                 // gHeel overlap At radian 0.30 at each foot = 0.05*sin(0.15)*2=0.030
 
                 // gStance parameters
-                bodyHeight = config["bodyHeight"];
-                bodyTilt = config["bodyTilt"];
-                footX = config["footX"];
-                footY = config["footY"];
-                supportX = config["supportX"];
-                supportY = config["supportY"];
+                bodyHeight = config["bodyHeight"].as<float>();
+                bodyTilt = config["bodyTilt"].as<float>();
+                footX = config["footX"].as<float>();
+                footY = config["footY"].as<float>();
+                supportX = config["supportX"].as<float>();
+                supportY = config["supportY"].as<float>();
                 qLArm0 = M_PI / 180.0 * arma::vec3{90, 2, -20};
                 qRArm0 = M_PI / 180.0 * arma::vec3{90, -2, -20};
 
                 // gHardness parameters
-                hardnessSupport = config["hardnessSupport"];
+                hardnessSupport = config["hardnessSupport"].as<float>();
 
-                hardnessSwing = config["hardnessSwing"];
+                hardnessSwing = config["hardnessSwing"].as<float>();
 
-                hardnessArm0 = config["hardnessArm"];
-                hardnessArm = config["hardnessArm"];
+                hardnessArm0 = config["hardnessArm"].as<float>();
+                hardnessArm = config["hardnessArm"].as<float>();
 
                 // gGait parameters
 
-                tStep = config["tStep"];
+                tStep = config["tStep"].as<float>();
                 tStep0 = tStep;
-                tZmp = config["tZmp"];
-                stepHeight = config["stepHeight"];
+                tZmp = config["tZmp"].as<float>();
+                stepHeight = config["stepHeight"].as<float>();
                 stepHeight0 = stepHeight;
-                ph1Single = config["phSingle"][size_t(0)];
-                ph2Single = config["phSingle"][size_t(1)];
+                ph1Single = config["phSingle"][0].as<float>();
+                ph2Single = config["phSingle"][1].as<float>();
                 ph1Zmp = ph1Single;
                 ph2Zmp = ph2Single;
 
                 // gCompensation parameters
                 hipRollCompensation = 4 * M_PI / 180;
-                ankleMod = arma::vec2{-double(config["toeTipCompensation"]), 0} * 1 * M_PI / 180;
-                spreadComp = config["spreadComp"];
-                turnCompThreshold = config["turnCompThreshold"];
-                turnComp = config["turnComp"];
+                ankleMod = arma::vec2{-config["toeTipCompensation"].as<double>(), 0} * 1 * M_PI / 180;
+                spreadComp = config["spreadComp"].as<float>();
+                turnCompThreshold = config["turnCompThreshold"].as<float>();
+                turnComp = config["turnComp"].as<float>();
 
-                float gyroFactor = float(config["gyroFactor"]) * 0.273 * M_PI / 180 * 300 / 1024; //dps to rad/s conversion
+                float gyroFactor = config["gyroFactor"].as<float>() * 0.273 * M_PI / 180 * 300 / 1024; //dps to rad/s conversion
 
                 // gGyro stabilization parameters
                 ankleImuParamX = {0.5, 0.3 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
@@ -185,27 +185,27 @@ namespace modules {
                 armImuParamY = {0.5, 0.0 * gyroFactor, 20 * M_PI / 180, 45 * M_PI / 180};
 
                 // gSupport bias parameters to reduce backlash-based instability
-                velFastForward = config["velFastForward"];
-                velFastTurn = config["velFastTurn"];
-                supportFront = config["supportFront"];
-                supportFront2 = config["supportFront2"];
-                supportBack = config["supportBack"];
-                supportSideX = config["supportSideX"];
-                supportSideY = config["supportSideY"];
-                supportTurn = config["supportTurn"];
+                velFastForward = config["velFastForward"].as<float>();
+                velFastTurn = config["velFastTurn"].as<float>();
+                supportFront = config["supportFront"].as<float>();
+                supportFront2 = config["supportFront2"].as<float>();
+                supportBack = config["supportBack"].as<float>();
+                supportSideX = config["supportSideX"].as<float>();
+                supportSideY = config["supportSideY"].as<float>();
+                supportTurn = config["supportTurn"].as<float>();
 
-                frontComp = config["frontComp"];
-                AccelComp = config["AccelComp"];
+                frontComp = config["frontComp"].as<float>();
+                AccelComp = config["AccelComp"].as<float>();
 
-                balanceWeight = config["balanceWeight"];
+                balanceWeight = config["balanceWeight"].as<float>();
 
                 // gInitial body swing
-                supportModYInitial = config["supportModYInitial"];
+                supportModYInitial = config["supportModYInitial"].as<float>();
 
                 //XXX: this isn't a real config variable - it derives from akleMod[0]
-                toeTipCompensation = config["toeTipCompensation"];
+                toeTipCompensation = config["toeTipCompensation"].as<float>();
 
-                useAlternativeTrajectory = config["useAlternativeTrajectory"];
+                useAlternativeTrajectory = config["useAlternativeTrajectory"].as<float>();
 
 //                setVelocity(config["velCommandX"], config["velCommandY"], config["velCommandAngular"]);
                 //Generate stand script
@@ -215,7 +215,7 @@ namespace modules {
 
                 Script standScript;
                 Script::Frame frame;
-                frame.duration = std::chrono::milliseconds(config["STAND_SCRIPT_DURATION_MILLISECONDS"]);
+                frame.duration = std::chrono::milliseconds(config["STAND_SCRIPT_DURATION_MILLISECONDS"].as<int>());
                 for(auto& waypoint : *waypoints){
                     frame.targets.push_back(Script::Frame::Target({waypoint.id,
                                                                    waypoint.position,

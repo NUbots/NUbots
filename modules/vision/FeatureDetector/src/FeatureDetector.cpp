@@ -79,8 +79,8 @@ namespace modules {
                 */
 
             on<Trigger<Configuration<VisionKinematicsConfig>>>([this](const Configuration<VisionKinematicsConfig>& constants) {
-                m_visionKinematics.setParameters(constants.config["RADIAL_CORRECTION_COEFFICIENT"],
-                                                 constants.config["SCREEN_LOCATION_UNCERTAINTY_PIXELS"]);
+                m_visionKinematics.setParameters(constants.config["RADIAL_CORRECTION_COEFFICIENT"].as<float>(),
+                                                 constants.config["SCREEN_LOCATION_UNCERTAINTY_PIXELS"].as<float>());
             });
 
             // TODO: on<Trigger<Configuration<FieldPointDetectorConfig>>>().
@@ -88,7 +88,7 @@ namespace modules {
             // TODO: Ensure all config files are up to date and include constants for the appropriate subclasses.
             on<Trigger<Configuration<BallDetectorConfig>>>([this](const Configuration<BallDetectorConfig>& constants) {
                     DISTANCE_METHOD distanceMethod;
-                    std::string BALL_DISTANCE_METHOD = constants.config["BALL_DISTANCE_METHOD"];
+                    std::string BALL_DISTANCE_METHOD = constants.config["BALL_DISTANCE_METHOD"].as<std::string>();
 
                     if (BALL_DISTANCE_METHOD.compare("WIDTH") == 0) {
                         distanceMethod = DISTANCE_METHOD::WIDTH;
@@ -115,19 +115,19 @@ namespace modules {
                     }
 
 
-                    m_ballDetector.setParameters(constants.config["BALL_EDGE_THRESHOLD"],
-                                                 constants.config["BALL_ORANGE_TOLERANCE"],
-                                                 constants.config["BALL_MIN_PERCENT_ORANGE"],
-                                                 constants.config["THROWOUT_ON_ABOVE_KIN_HOR_BALL"],
-                                                 constants.config["MAX_DISTANCE_METHOD_DISCREPENCY_BALL"],
-                                                 constants.config["THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL"],
-                                                 constants.config["THROWOUT_SMALL_BALLS"],
-                                                 constants.config["MIN_BALL_DIAMETER_PIXELS"],
-                                                 constants.config["THROWOUT_DISTANT_BALLS"],
-                                                 constants.config["MAX_BALL_DISTANCE"],
-                                                 constants.config["BALL_WIDTH"],
+                    m_ballDetector.setParameters(constants.config["BALL_EDGE_THRESHOLD"].as<int>(),
+                                                 constants.config["BALL_ORANGE_TOLERANCE"].as<int>(),
+                                                 constants.config["BALL_MIN_PERCENT_ORANGE"].as<float>(),
+                                                 constants.config["THROWOUT_ON_ABOVE_KIN_HOR_BALL"].as<bool>(),
+                                                 constants.config["MAX_DISTANCE_METHOD_DISCREPENCY_BALL"].as<float>(),
+                                                 constants.config["THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BALL"].as<bool>(),
+                                                 constants.config["THROWOUT_SMALL_BALLS"].as<bool>(),
+                                                 constants.config["MIN_BALL_DIAMETER_PIXELS"].as<float>(),
+                                                 constants.config["THROWOUT_DISTANT_BALLS"].as<bool>(),
+                                                 constants.config["MAX_BALL_DISTANCE"].as<float>(),
+                                                 constants.config["BALL_WIDTH"].as<float>(),
                                                  distanceMethod,
-                                                 constants.config["D2P_ADAPTIVE_THRESHOLD"]
+                                                 constants.config["D2P_ADAPTIVE_THRESHOLD"].as<float>()
                                                  );
 
             });
@@ -135,8 +135,8 @@ namespace modules {
             on<Trigger<Configuration<GoalDetectorConfig>>>([this](const Configuration<GoalDetectorConfig>& constants) {
                     RANSAC_SELECTION_METHOD selectionMethod;
                     DISTANCE_METHOD distanceMethod;
-                    std::string GOAL_DISTANCE_METHOD = constants.config["GOAL_DISTANCE_METHOD"];
-                    std::string SELECTION_METHOD = constants.config["SELECTION_METHOD"];
+                    std::string GOAL_DISTANCE_METHOD = constants.config["GOAL_DISTANCE_METHOD"].as<std::string>();
+                    std::string SELECTION_METHOD = constants.config["SELECTION_METHOD"].as<std::string>();
 
                     if (GOAL_DISTANCE_METHOD.compare("WIDTH") == 0) {
                         distanceMethod = DISTANCE_METHOD::WIDTH;
@@ -173,50 +173,49 @@ namespace modules {
                         selectionMethod = RANSAC_SELECTION_METHOD::LargestConsensus;
                     }
 
-
-                    m_goalDetector.setParameters(constants.config["MINIMUM_POINTS"],
-                                                 constants.config["MAX_ITERATIONS_PER_FITTING"],
-                                                 constants.config["CONSENSUS_THRESHOLD"],
-                                                 constants.config["MAX_FITTING_ATTEMPTS"],
-                                                 constants.config["ANGLE_MARGIN"],
+                    m_goalDetector.setParameters(constants.config["MINIMUM_POINTS"].as<uint>(),
+                                                 constants.config["MAX_ITERATIONS_PER_FITTING"].as<uint>(),
+                                                 constants.config["CONSENSUS_THRESHOLD"].as<double>(),
+                                                 constants.config["MAX_FITTING_ATTEMPTS"].as<uint>(),
+                                                 constants.config["ANGLE_MARGIN"].as<double>(),
 //                                                 KinematicsHorizon,
                                                  selectionMethod,
-                                                 constants.config["RANSAC_MATCHING_TOLERANCE"],
-                                                 constants.config["MIN_GOAL_SEPARATION"],
-                                                 constants.config["GOAL_HEIGHT_TO_WIDTH_RATIO_MIN"],
-                                                 constants.config["THROWOUT_SHORT_GOALS"],
-                                                 constants.config["THROWOUT_NARROW_GOALS"],
-                                                 constants.config["THROWOUT_ON_ABOVE_KIN_HOR_GOALS"],
-                                                 constants.config["THROWOUT_DISTANT_GOALS"],
-                                                 constants.config["MAX_GOAL_DISTANCE"],
-                                                 constants.config["MIN_GOAL_HEIGHT"],
-                                                 constants.config["MIN_GOAL_WIDTH"],
-                                                 constants.config["GOAL_WIDTH"],
+                                                 constants.config["RANSAC_MATCHING_TOLERANCE"].as<double>(),
+                                                 constants.config["MIN_GOAL_SEPARATION"].as<int>(),
+                                                 constants.config["GOAL_HEIGHT_TO_WIDTH_RATIO_MIN"].as<float>(),
+                                                 constants.config["THROWOUT_SHORT_GOALS"].as<bool>(),
+                                                 constants.config["THROWOUT_NARROW_GOALS"].as<bool>(),
+                                                 constants.config["THROWOUT_ON_ABOVE_KIN_HOR_GOALS"].as<bool>(),
+                                                 constants.config["THROWOUT_DISTANT_GOALS"].as<bool>(),
+                                                 constants.config["MAX_GOAL_DISTANCE"].as<float>(),
+                                                 constants.config["MIN_GOAL_HEIGHT"].as<int>(),
+                                                 constants.config["MIN_GOAL_WIDTH"].as<int>(),
+                                                 constants.config["GOAL_WIDTH"].as<float>(),
                                                  distanceMethod,
-                                                 constants.config["EDGE_OF_SCREEN_MARGIN"],
-                                                 constants.config["D2P_ADAPTIVE_THRESHOLD"]);
+                                                 constants.config["EDGE_OF_SCREEN_MARGIN"].as<int>(),
+                                                 constants.config["D2P_ADAPTIVE_THRESHOLD"].as<float>());
 
             });
 
             on<Trigger<Configuration<ObstacleDetectorConfig>>>([this](const Configuration<ObstacleDetectorConfig>& constants) {
-                    m_obstacleDetector.setParameters(constants.config["MIN_DISTANCE_FROM_HORIZON"],
-                                                 constants.config["VERTICAL_SCANLINE_SPACING"],
-                                                 constants.config["MIN_CONSECUTIVE_POINTS"],
-                                                 constants.config["MIN_COLOUR_THRESHOLD"],
-                                                 constants.config["MAX_OTHER_COLOUR_THRESHOLD"],
-                                                 constants.config["VER_THRESHOLD"],
-                                                 constants.config["OBJECT_THRESHOLD_MULT"]);
+                    m_obstacleDetector.setParameters(constants.config["MIN_DISTANCE_FROM_HORIZON"].as<int>(),
+                                                 constants.config["VERTICAL_SCANLINE_SPACING"].as<uint>(),
+                                                 constants.config["MIN_CONSECUTIVE_POINTS"].as<int>(),
+                                                 constants.config["MIN_COLOUR_THRESHOLD"].as<int>(),
+                                                 constants.config["MAX_OTHER_COLOUR_THRESHOLD"].as<int>(),
+                                                 constants.config["VER_THRESHOLD"].as<int>(),
+                                                 constants.config["OBJECT_THRESHOLD_MULT"].as<double>());
 
             });
 
             on<Trigger<Configuration<CameraConfig>>>([this](const Configuration<CameraConfig>& config) {
                     arma::vec2 FOV, imageSize;
 
-                    FOV[0] = config.config["FOV_X"];
-                    FOV[1] = config.config["FOV_Y"];
+                    FOV[0] = config.config["FOV_X"].as<double>();
+                    FOV[1] = config.config["FOV_Y"].as<double>();
 
-                    imageSize[0] = config.config["imageWidth"];
-                    imageSize[1] = config.config["imageHeight"];
+                    imageSize[0] = config.config["imageWidth"].as<double>();
+                    imageSize[1] = config.config["imageHeight"].as<double>();
 
                     m_visionKinematics.setCamParams(imageSize,FOV);
             });
