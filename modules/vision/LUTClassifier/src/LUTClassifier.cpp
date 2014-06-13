@@ -51,8 +51,8 @@ namespace modules {
 
             //on<Trigger<Every<10, Per<std::chrono::second>>>([this] (const time_t& t) {});
                         //Load LUTs
-            on<Trigger<Configuration<LUTLocation>>>([this](const Configuration<LUTLocations>& config) {
-                emit(std::make_unique<LookUpTable>(config.config.as<LookUpTable>()))
+            on<Trigger<Configuration<LUTLocation>>>([this](const Configuration<LUTLocation>& config) {
+                emit(std::make_unique<LookUpTable>(config.config.as<LookUpTable>()));
             });
 
             on<Trigger<Image>, With<LookUpTable, Sensors>, Options<Single>>("Classify Image", [this](const Image& image, const LookUpTable& lut, const Sensors& sensors) {

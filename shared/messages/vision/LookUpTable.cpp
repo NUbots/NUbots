@@ -25,7 +25,7 @@
 namespace messages {
     namespace vision {
 
-        LookUpTable::LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::unique_ptr<char[]>&& data)
+        LookUpTable::LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::vector<char>&& data)
             : BITS_Y(bitsY)
             , BITS_CB(bitsCb)
             , BITS_CR(bitsCr)
@@ -35,12 +35,9 @@ namespace messages {
             , BITS_CR_REMOVED(sizeof(uint8_t) * 8 - BITS_CR)
             , BITS_CB_CR(BITS_CB + BITS_CR)
             , data(std::move(data)) {
-
         }
 
-        LookUpTable::LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr)
-            : LookUpTable(bitsY, bitsCb, bitsCr, std::unique_ptr<char[]>(new char[1 << (bitsY + bitsCb + bitsCr)])) {
-            std::fill(data.get(), data.get() + LUT_SIZE, 0);
+        LookUpTable::LookUpTable() {
         }
 
         messages::vision::Colour LookUpTable::classify(const messages::input::Image::Pixel& p) const {
@@ -48,7 +45,7 @@ namespace messages {
         }
 
         std::string LookUpTable::getData() const {
-            return std::string(data.get(), LUT_SIZE);
+            return std::string(data.begin(), data.end());
         }
 
         uint LookUpTable::getLUTIndex(const messages::input::Image::Pixel& colour) const {
