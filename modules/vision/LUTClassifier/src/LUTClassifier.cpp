@@ -52,12 +52,12 @@ namespace modules {
             //on<Trigger<Every<10, Per<std::chrono::second>>>([this] (const time_t& t) {});
                         //Load LUTs
             on<Trigger<Configuration<LUTLocations>>>([this](const Configuration<LUTLocations>& config) {
-                std::string LUTLocation = config["LUT_LOCATION"];
+                std::string LUTLocation = config["LUT_LOCATION"].as<std::string>();
                 emit(std::make_unique<LookUpTable>(LUTLocation));
             });
 
             on<Trigger<SaveLookUpTable>, With<LookUpTable, Configuration<LUTLocations>>>([this](const SaveLookUpTable&, const LookUpTable& lut, const Configuration<LUTLocations>& config) {
-                std::string LUTLocation = config["LUT_LOCATION"];
+                std::string LUTLocation = config["LUT_LOCATION"].as<std::string>();
                 lut.save(LUTLocation);
             });
 

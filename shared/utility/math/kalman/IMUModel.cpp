@@ -17,29 +17,15 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include <math.h> //needed for normalisation function
-#include <assert.h>
-#include "IMUModel.h" //includes armadillo
-
-#include <iostream>
+#include "IMUModel.h"
 
 namespace utility {
     namespace math {
         namespace kalman {
             arma::vec::fixed<IMUModel::size> IMUModel::limitState(const arma::vec::fixed<size>& state) {
-                // const float pi_2 = 0.5 * M_PI;
-                // if(fabs(state(kstates_body_angle_x, 0)) > pi_2 and fabs(state(kstates_body_angle_y, 0)) > pi_2) { // This part checks for the event where a large roll and large pitch puts the robot back upright
-                //     state(kstates_body_angle_x, 0) = state(kstates_body_angle_x, 0) - sign(state(kstates_body_angle_x, 0)) * M_PI;
-                //     state(kstates_body_angle_y, 0) = state(kstates_body_angle_y, 0) - sign(state(kstates_body_angle_y, 0)) * M_PI;
-                //     state(kstates_body_angle_z, 0) = state(kstates_body_angle_z, 0) - sign(state(kstates_body_angle_z, 0)) * M_PI;
-                // }
-
-                // Regular unwrapping.
-                //state(kstates_body_angle_x, 0) = normaliseAngle(state(kstates_body_angle_x, 0));
-                //state(kstates_body_angle_y, 0) = normaliseAngle(state(kstates_body_angle_y, 0));
-                //state(kstates_body_angle_z, 0) = normaliseAngle(state(kstates_body_angle_z, 0));
-
-                return state;///arma::norm(state, 2);
+                arma::vec::fixed<size> newState = state;
+                newState.rows(QW, QZ) = arma::normalise(newState.rows(QW, QZ));
+                return newState;
             }
 
             // @brief The process equation is used to update the systems state using the process euquations of the system.
@@ -47,32 +33,56 @@ namespace utility {
             // @param deltaT The amount of time that has passed since the previous update, in seconds.
             // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation.
             // @return The new estimated system state.
-            arma::vec::fixed<IMUModel::size> IMUModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& measurement) {
-                //new universal rotation code for gyro (SORA)
-                //See: http://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Simultaneous_orthogonal_rotation_angle
-                //XXX: use http://en.wikipedia.org/wiki/Rotation_matrix#Exponential_map
-                arma::vec3 omega = measurement * deltaT; //XXX: limit to something practical (+/- pi/2)
-                double phi = arma::norm(omega, 2);
-                if (phi == 0) {
-                    return state;
-                }
-                arma::vec3 unitOmega = omega / phi;
-                const auto omegaCrossState = arma::cross(unitOmega,state);
-                return state * cos(phi) + omegaCrossState * sin(phi) + unitOmega * arma::dot(unitOmega, state) * (1.0 - cos(phi));
+            arma::vec::fixed<IMUModel::size> IMUModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT) {
+
+                arma::mat v(3, 4);
+
+                v << -state[QX] <<   state[QW] <<  state[QZ]  << -state[QY]  << arma::endr
+                  << -state[QY] <<  -state[QZ] <<  state[QW]  <<  state[QX]  << arma::endr
+                  << -state[QZ] <<   state[QY] << -state[QX]  <<  state[QW];
+
+                arma::vec::fixed<IMUModel::size> newState;
+
+                newState = state;
+                newState.rows(QW, QZ) += 0.5 * deltaT * v.t() * state.rows(VX, VZ);
+                return newState;
+
             }
 
-            arma::vec IMUModel::predictedObservation(const arma::vec::fixed<size>& state, std::nullptr_t) {
-                return state ;
+
+            // Accelerometer
+            arma::vec3 IMUModel::predictedObservation(const arma::vec::fixed<size>& state, float x) {
+
+                arma::vec3 down = { 2 * state[QX] * state[QZ] + 2 * state[QY] * state[QW]
+                                  , 2 * state[QY] * state[QZ] - 2 * state[QX] * state[QW]
+                                  , 1 - 2 * state[QX] * state[QX] - 2 * state[QY] * state[QY] };
+
+                down *= G;
+
+                return down;
             }
 
+            // Gyroscope
+            arma::vec3 IMUModel::predictedObservation(const arma::vec::fixed<size>& state, int y) {
+                return state.rows(VX, VZ);
+            }
+
+
+            // Forward Vector
+            arma::vec3 IMUModel::predictedObservation(const arma::vec::fixed<size>& state) {
+
+                return { 1 - 2 * state[QY] * state[QY] - 2 * state[QZ] * state[QZ]
+                       , 2 * state[QX] * state[QY] + 2 * state[QZ] * state[QW]
+                       , 2 * state[QX] * state[QZ] - 2 * state[QY] * state[QW] };
+            }
 
             arma::vec IMUModel::observationDifference(const arma::vec& a, const arma::vec& b) {
                 return a - b;
+
             }
 
             arma::mat::fixed<IMUModel::size, IMUModel::size> IMUModel::processNoise() {
-
-                return arma::eye(size, size) *1e-6; //std::numeric_limits<double>::epsilon();
+                return arma::eye(size, size) * processNoiseFactor;
             }
 
         }

@@ -33,7 +33,7 @@ namespace utility {
 namespace localisation {
 
 struct FieldDescriptionConfig {
-    static constexpr const char* CONFIGURATION_PATH = "FieldDescription.json";
+    static constexpr const char* CONFIGURATION_PATH = "FieldDescription.yaml";
 };
 
 class FieldDescription {

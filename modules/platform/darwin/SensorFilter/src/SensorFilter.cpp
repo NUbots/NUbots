@@ -41,20 +41,21 @@ namespace modules {
             using utility::motion::kinematics::calculateCentreOfMass;
             using utility::motion::kinematics::Side;
             using utility::math::matrix::orthonormal44Inverse;
+            using utility::math::matrix::quaternionToRotationMatrix;
 
             SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
-            , orientationFilter(arma::vec({0,0,-1,1,0,0}))
+            , orientationFilter(arma::vec({0,0,0,0,0,0,1}))
             , velocityFilter(arma::vec3({0,0,0})) {
 
                 on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){
-                    DEFAULT_NOISE_GAIN = file.config["DEFAULT_NOISE_GAIN"];
-                    HIGH_NOISE_THRESHOLD = file.config["HIGH_NOISE_THRESHOLD"];
-                    HIGH_NOISE_GAIN = file.config["HIGH_NOISE_GAIN"];
-                    LOW_NOISE_THRESHOLD = file.config["LOW_NOISE_THRESHOLD"];
+                    DEFAULT_NOISE_GAIN = file.config["DEFAULT_NOISE_GAIN"].as<double>();
+                    HIGH_NOISE_THRESHOLD = file.config["HIGH_NOISE_THRESHOLD"].as<double>();
+                    HIGH_NOISE_GAIN = file.config["HIGH_NOISE_GAIN"].as<double>();
+                    LOW_NOISE_THRESHOLD = file.config["LOW_NOISE_THRESHOLD"].as<double>();
 
-                    SUPPORT_FOOT_FSR_THRESHOLD = file.config["SUPPORT_FOOT_FSR_THRESHOLD"];
-                    REQUIRED_NUMBER_OF_FSRS = file.config["REQUIRED_NUMBER_OF_FSRS"];
+                    SUPPORT_FOOT_FSR_THRESHOLD = file.config["SUPPORT_FOOT_FSR_THRESHOLD"].as<double>();
+                    REQUIRED_NUMBER_OF_FSRS = file.config["REQUIRED_NUMBER_OF_FSRS"].as<int>();
                 });
 
                 on<Trigger<DarwinSensors>,
@@ -234,21 +235,18 @@ namespace modules {
                     // Calculate our time offset from the last read
                     double deltaT = ((previousSensors ? previousSensors->timestamp : input.timestamp) - input.timestamp).count() / double(NUClear::clock::period::den);
 
-                    orientationFilter.timeUpdate(deltaT, sensors->gyroscope);
-                    arma::mat observationNoise = arma::eye(3,3) * DEFAULT_NOISE_GAIN;
-                    double normAcc = std::abs(arma::norm(sensors->accelerometer,2) - 9.80665);
+                    orientationFilter.timeUpdate(deltaT);
 
-                    if(normAcc > HIGH_NOISE_THRESHOLD){
-                        observationNoise *= HIGH_NOISE_GAIN;
-                    } else if(normAcc > LOW_NOISE_THRESHOLD){
-                        observationNoise = arma::eye(3,3) * (HIGH_NOISE_GAIN - DEFAULT_NOISE_GAIN) * (normAcc - LOW_NOISE_THRESHOLD) / (HIGH_NOISE_THRESHOLD - LOW_NOISE_THRESHOLD);
-                    }
+                    orientationFilter.measurementUpdate(sensors->accelerometer, arma::eye(3, 3) * 1e-7, float(0));
+                    orientationFilter.measurementUpdate(sensors->gyroscope,     arma::eye(3, 3) * 1e-4, int(1));
 
-                    orientationFilter.measurementUpdate(sensors->accelerometer, observationNoise);
-                    arma::vec orientation = orientationFilter.get();
-                    sensors->orientation.col(2) = -orientation.rows(0,2);
-                    sensors->orientation.col(0) = orientation.rows(3,5);
-                    sensors->orientation.col(1) = arma::cross(sensors->orientation.col(2), sensors->orientation.col(0));
+                    // Gives us the quaternion representation
+                    arma::vec o = orientationFilter.get();
+                    sensors->orientation = quaternionToRotationMatrix(o.rows(orientationFilter.model.QW, orientationFilter.model.QZ));
+
+                    // sensors->orientation.col(2) = -orientation.rows(0,2);
+                    // sensors->orientation.col(0) = orientation.rows(3,5);
+                    // sensors->orientation.col(1) = arma::cross(sensors->orientation.col(2), sensors->orientation.col(0));
 
                     /************************************************
                      *                  Kinematics                  *

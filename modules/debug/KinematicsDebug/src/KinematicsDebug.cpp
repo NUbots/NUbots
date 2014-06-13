@@ -48,17 +48,17 @@ namespace modules {
             KinematicsDebug::KinematicsDebug(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
                     on< Trigger<Configuration<InverseKinematicsRequest>> >([this](const Configuration<InverseKinematicsRequest>& request) {
                         return;
-                        arma::mat44 target = yRotationMatrix(request.config["yAngle"], 4);
-                        target *= xRotationMatrix(request.config["xAngle"], 4);
-                        target *= zRotationMatrix(request.config["zAngle"], 4);
+                        arma::mat44 target = yRotationMatrix(request.config["yAngle"].as<double>(), 4);
+                        target *= xRotationMatrix(request.config["xAngle"].as<double>(), 4);
+                        target *= zRotationMatrix(request.config["zAngle"].as<double>(), 4);
 
                         // translation
-                        target(0,3) = request.config["x"]; // down/up
-                        target(1,3) = request.config["y"]; // left/right
-                        target(2,3) = request.config["z"]; // front/back
+                        target(0,3) = request.config["x"].as<double>(); // down/up
+                        target(1,3) = request.config["y"].as<double>(); // left/right
+                        target(2,3) = request.config["z"].as<double>(); // front/back
 
-                        bool left = request.config["left"];
-                        bool right = request.config["right"];
+                        bool left = request.config["left"].as<bool>();
+                        bool right = request.config["right"].as<bool>();
 
                         auto waypoints = std::make_unique<std::vector<ServoTarget> >();
 
@@ -110,23 +110,23 @@ namespace modules {
                     on< Trigger<Configuration<LegKinematicsNULLTest>> >([this](const Configuration<LegKinematicsNULLTest>& request) {
                         int iterations = 1;
                         int numberOfFails = 0;
-                        float ERROR_THRESHOLD = request.config["ERROR_THRESHOLD"];
+                        float ERROR_THRESHOLD = request.config["ERROR_THRESHOLD"].as<float>();
 
-                        if(request.config["RANDOMIZE"]){
-                            iterations = request.config["RANDOM_ITERATIONS"];
+                        if(request.config["RANDOMIZE"].as<bool>()){
+                            iterations = request.config["RANDOM_ITERATIONS"].as<int>();
                         }
 
                         for(int i = 0; i<iterations; i++){
-                            arma::mat44 ikRequest = yRotationMatrix(request.config["yAngle"], 4);
-                            ikRequest *= xRotationMatrix(request.config["xAngle"], 4);
-                            ikRequest *= zRotationMatrix(request.config["zAngle"], 4);
+                            arma::mat44 ikRequest = yRotationMatrix(request.config["yAngle"].as<double>(), 4);
+                            ikRequest *= xRotationMatrix(request.config["xAngle"].as<double>(), 4);
+                            ikRequest *= zRotationMatrix(request.config["zAngle"].as<double>(), 4);
 
                             // translation
-                            ikRequest(0,3) = request.config["x"];
-                            ikRequest(1,3) = request.config["y"];
-                            ikRequest(2,3) = request.config["z"];
+                            ikRequest(0,3) = request.config["x"].as<double>();
+                            ikRequest(1,3) = request.config["y"].as<double>();
+                            ikRequest(2,3) = request.config["z"].as<double>();
 
-                            if(request.config["RANDOMIZE"]){
+                            if(request.config["RANDOMIZE"].as<bool>()){
                                 ikRequest = yRotationMatrix(2*M_PI*rand()/static_cast<double>(RAND_MAX), 4);
                                 ikRequest *= xRotationMatrix(2*M_PI*rand()/static_cast<double>(RAND_MAX), 4);
                                 ikRequest *= zRotationMatrix(2*M_PI*rand()/static_cast<double>(RAND_MAX), 4);
@@ -135,8 +135,8 @@ namespace modules {
                                 ikRequest(2,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);
                             }
 
-                            bool left = request.config["left"];
-                            bool right = request.config["right"];
+                            bool left = request.config["left"].as<bool>();
+                            bool right = request.config["right"].as<bool>();
 
                             std::unique_ptr<Sensors> sensors = std::make_unique<Sensors>();
                             sensors->servos = std::vector<Sensors::Servo>(20);
@@ -204,14 +204,14 @@ namespace modules {
                     on< Trigger<Configuration<HeadKinematicsNULLTest>> >([this](const Configuration<HeadKinematicsNULLTest>& request) {
                         int iterations = 1;
                         int numberOfFails = 0;
-                        float ERROR_THRESHOLD = request.config["ERROR_THRESHOLD"];
-                        float yaw = request.config["yaw"];
-                        float pitch = request.config["pitch"];
-                        bool RANDOMIZE = request.config["RANDOMIZE"];
+                        float ERROR_THRESHOLD = request.config["ERROR_THRESHOLD"].as<float>();
+                        float yaw = request.config["yaw"].as<float>();
+                        float pitch = request.config["pitch"].as<float>();
+                        bool RANDOMIZE = request.config["RANDOMIZE"].as<bool>();
 
                         arma::vec3 cameraVec = {cos(yaw)*cos(pitch), sin(yaw)*cos(pitch), -sin(pitch)};
                         if(RANDOMIZE){
-                            iterations = request.config["RANDOM_ITERATIONS"];
+                            iterations = request.config["RANDOM_ITERATIONS"].as<int>();
                         }
 
                         for(int i = 0; i<iterations; i++){

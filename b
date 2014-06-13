@@ -19,7 +19,7 @@ related to building and running NUClearPort and related projects.
 Command summary:
   - help              Show this help.
   - clean             Deletes the build directory.
-  - cmake             Runs cmake in the build directory (creating it if it 
+  - cmake             Runs cmake in the build directory (creating it if it
                       doesn't exist).
   - make [arg]...     Runs cmake, then make in the build directory (creating it
                       if it doesn't exist), passing any arguments to the make
@@ -40,7 +40,7 @@ def clean():
 
 def cmake():
     if not os.path.exists('build'):
-        os.mkdir('build') 
+        os.mkdir('build')
     call(['cmake', '..'], cwd='build')
 
 
@@ -96,13 +96,13 @@ def packer(provider):
 
     if box_generated(provider):
         call(['rm', 'nubots-ubuntu-14-04-x86-{}.box'.format(provider)], cwd='packer')
-    
-    call(['packer', 'build', '-only={}-iso'.format(provider), 'template.json'], cwd='packer')
-    
+
+    call(['packer', 'build', '-only={}-iso'.format(provider), 'template.yaml'], cwd='packer')
+
     if box_generated(provider):
         if box_exists(box_name, provider):
             call(['vagrant', 'box', 'remove', box_name]) # TODO: only remove box for given provider
-        
+
         call(['vagrant', 'box', 'add', box_name,
               'nubots-ubuntu-14-04-x86-{}.box'.format(provider)],
              cwd='packer')
@@ -199,7 +199,7 @@ def build_module_implementation(path):
 """.format(module_name)
 
     code = surround_with_namespaces(constructor, module_namespaces)
-    
+
     return """#include "{0}.h"
 #include <nuclear>
 
@@ -251,7 +251,7 @@ You need to provide the path to the module to generate.
 Usage: b module generate <module-path>
 
 e.g. The command:
-    
+
     $ ./b module generate platform/darwin/HardwareIO
 
 would generate a new module 'modules::platform::darwin::HardwareIO' in the

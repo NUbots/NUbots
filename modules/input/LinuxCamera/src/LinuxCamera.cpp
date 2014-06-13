@@ -63,11 +63,11 @@ namespace modules {
 
                 try {
                     // Recreate the camera device at the required resolution
-                    int width = config["imageWidth"];
-                    int height = config["imageHeight"];
-                    std::string deviceID = config["deviceID"];
-                    std::string format = config["imageFormat"];
-                    bool rotated = config["rotated"];
+                    int width = config["imageWidth"].as<int>();
+                    int height = config["imageHeight"].as<int>();
+                    std::string deviceID = config["deviceID"].as<std::string>();
+                    std::string format = config["imageFormat"].as<std::string>();
+                    bool rotated = config["rotated"].as<bool>();
 
                     if (camera.getWidth() != static_cast<size_t>(width)
                         || camera.getHeight() != static_cast<size_t>(height)
@@ -78,7 +78,7 @@ namespace modules {
 
                     // Set all other camera settings
                     for(auto& setting : camera.getSettings()) {
-                        int value = config[setting.first];
+                        int value = config[setting.first].as<int>();
                         if(setting.second.set(value) == false) {
                             NUClear::log<NUClear::DEBUG>("Failed to set " + setting.first + " on camera");
                         }

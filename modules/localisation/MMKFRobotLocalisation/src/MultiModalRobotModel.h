@@ -32,7 +32,7 @@
 namespace modules {
 namespace localisation {
     struct MultiModalRobotModelConfig {
-        static constexpr const char* CONFIGURATION_PATH = "MultiModalRobotModel.json";
+        static constexpr const char* CONFIGURATION_PATH = "MultiModalRobotModel.yaml";
     };
 
     class RobotHypothesis {
@@ -99,10 +99,10 @@ namespace localisation {
 
         void UpdateConfiguration(
             const messages::support::Configuration<modules::localisation::MultiModalRobotModelConfig>& config) {
-            cfg_.max_models_after_merge = config["MaxModelsAfterMerge"];
-            cfg_.merge_min_translation_dist = config["MergeMinTranslationDist"];
-            cfg_.merge_min_heading_dist = config["MergeMinHeadingDist"];
-            cfg_.process_noise_factor = config["ProcessNoiseFactor"];
+            cfg_.max_models_after_merge = config["MaxModelsAfterMerge"].as<int>();
+            cfg_.merge_min_translation_dist = config["MergeMinTranslationDist"].as<float>();
+            cfg_.merge_min_heading_dist = config["MergeMinHeadingDist"].as<float>();
+            cfg_.process_noise_factor = config["ProcessNoiseFactor"].as<float>();
 
             for (auto& model : robot_models_)
                 model->SetProcessNoiseFactor(cfg_.process_noise_factor);
@@ -126,7 +126,7 @@ namespace localisation {
         void MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,
             const utility::localisation::LocalisationFieldObject& actual_object);
-        
+
         void MeasurementUpdate(
             const std::vector<messages::vision::VisionObject>& observed_objects,
             const std::vector<utility::localisation::LocalisationFieldObject>& actual_objects);

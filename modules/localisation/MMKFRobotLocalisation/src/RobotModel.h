@@ -55,23 +55,14 @@ namespace robot {
         RobotModel() {} // empty constructor
 
         arma::vec::fixed<RobotModel::size> timeUpdate(
-            const arma::vec::fixed<RobotModel::size>& state, double deltaT,
-            std::nullptr_t foo);
-
-        arma::vec::fixed<RobotModel::size> timeUpdate(
-            const arma::vec::fixed<RobotModel::size>& state, double deltaT,
-            const messages::localisation::FakeOdometry& odom);
-
-        arma::vec::fixed<RobotModel::size> timeUpdate(
-            const arma::vec::fixed<RobotModel::size>& state, double deltaT,
-            const  messages::input::Sensors& sensors);
+            const arma::vec::fixed<RobotModel::size>& state, double deltaT);
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
             const arma::vec& actual_position);
-        
+
         arma::vec predictedObservation(
-            const arma::vec::fixed<RobotModel::size>& state, 
+            const arma::vec::fixed<RobotModel::size>& state,
             const std::vector<arma::vec>& actual_positions);
 
         arma::vec observationDifference(const arma::vec& a, const arma::vec& b);

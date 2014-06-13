@@ -73,20 +73,20 @@ namespace localisation {
         Configuration<FieldDescriptionConfig> config) {
         FieldDescription::FieldDimensions d;
 
-         d.line_width = config.config["LineWidth"];
-         d.mark_width = config.config["MarkWidth"];
-         d.field_length = config.config["FieldLength"];
-         d.field_width = config.config["FieldWidth"];
-         d.goal_depth = config.config["GoalDepth"];
-         d.goal_width = config.config["GoalWidth"];
-         d.goal_area_length = config.config["GoalAreaLength"];
-         d.goal_area_width = config.config["GoalAreaWidth"];
-         d.goal_crossbar_height = config.config["GoalCrossbarHeight"];
-         d.goalpost_diameter = config.config["GoalpostDiameter"];
-         d.goal_net_height = config.config["GoalNetHeight"];
-         d.penalty_mark_distance = config.config["PenaltyMarkDistance"];
-         d.center_circle_diameter = config.config["CenterCircleDiameter"];
-         d.border_strip_min_width = config.config["BorderStripMinWidth"];
+         d.line_width = config.config["LineWidth"].as<double>();
+         d.mark_width = config.config["MarkWidth"].as<double>();
+         d.field_length = config.config["FieldLength"].as<double>();
+         d.field_width = config.config["FieldWidth"].as<double>();
+         d.goal_depth = config.config["GoalDepth"].as<double>();
+         d.goal_width = config.config["GoalWidth"].as<double>();
+         d.goal_area_length = config.config["GoalAreaLength"].as<double>();
+         d.goal_area_width = config.config["GoalAreaWidth"].as<double>();
+         d.goal_crossbar_height = config.config["GoalCrossbarHeight"].as<double>();
+         d.goalpost_diameter = config.config["GoalpostDiameter"].as<double>();
+         d.goal_net_height = config.config["GoalNetHeight"].as<double>();
+         d.penalty_mark_distance = config.config["PenaltyMarkDistance"].as<double>();
+         d.center_circle_diameter = config.config["CenterCircleDiameter"].as<double>();
+         d.border_strip_min_width = config.config["BorderStripMinWidth"].as<double>();
 
         return d;
     }

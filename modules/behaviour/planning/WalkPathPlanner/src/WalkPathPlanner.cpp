@@ -57,53 +57,53 @@ namespace modules {
                 //do a little configurating
                 on<Trigger<Configuration<WalkPathPlanner>>>([this] (const Configuration<WalkPathPlanner>& file){
 
-                    turnSpeed = file.config["turnSpeed"];
-                    forwardSpeed = file.config["forwardSpeed"];
-                    footSeparation = file.config["footSeparation"];
+                    turnSpeed = file.config["turnSpeed"].as<float>();
+                    forwardSpeed = file.config["forwardSpeed"].as<float>();
+                    footSeparation = file.config["footSeparation"].as<float>();
 
-                    footSize = file.config["footSize"];
+                    footSize = file.config["footSize"].as<float>();
 
                     //timers for starting turning and walking
-                    walkStartTime = file.config["walkStartTime"];
-                    walkTurnTime = file.config["walkTurnTime"];
+                    walkStartTime = file.config["walkStartTime"].as<double>();
+                    walkTurnTime = file.config["walkTurnTime"].as<double>();
 
                     //walk accel/deccel controls
-                    accelerationTime = file.config["accelerationTime"];
-                    accelerationFraction = file.config["accelerationFraction"];
+                    accelerationTime = file.config["accelerationTime"].as<double>();
+                    accelerationFraction = file.config["accelerationFraction"].as<float>();
 
                     //approach speeds
-                    closeApproachSpeed = file.config["closeApproachSpeed"];
-                    closeApproachDistance = file.config["closeApproachDistance"];
-                    midApproachSpeed = file.config["midApproachSpeed"];
-                    midApproachDistance = file.config["midApproachDistance"];
+                    closeApproachSpeed = file.config["closeApproachSpeed"].as<float>();
+                    closeApproachDistance = file.config["closeApproachDistance"].as<float>();
+                    midApproachSpeed = file.config["midApproachSpeed"].as<float>();
+                    midApproachDistance = file.config["midApproachDistance"].as<float>();
 
                     //turning values
-                    turnDeviation = file.config["turnDeviation"];
+                    turnDeviation = file.config["turnDeviation"].as<float>();
 
                     //hystereses
-                    distanceHysteresis = file.config["distanceHysteresis"];
-                    turningHysteresis = file.config["turningHysteresis"];
-                    positionHysteresis = file.config["positionHysteresis"];
+                    distanceHysteresis = file.config["distanceHysteresis"].as<float>();
+                    turningHysteresis = file.config["turningHysteresis"].as<float>();
+                    positionHysteresis = file.config["positionHysteresis"].as<float>();
 
                     //ball lineup
                     //XXX: add these once we know what they do
                     //vector<float> ballApproachAngle = file.config["ballApproachAngle"];
                     //svector<int> ballKickFoot = file.config["ballKickFoot"];
-                    ballLineupDistance = file.config["ballLineupDistance"];
-                    ballLineupMinDistance = file.config["ballLineupMinDistance"];
+                    ballLineupDistance = file.config["ballLineupDistance"].as<float>();
+                    ballLineupMinDistance = file.config["ballLineupMinDistance"].as<float>();
 
                     //extra config options
-                    useAvoidance = int(file.config["useAvoidance"]) != 0;
-                    assumedObstacleWidth = file.config["assumedObstacleWidth"];
-                    avoidDistance = file.config["avoidDistance"];
+                    useAvoidance = file.config["useAvoidance"].as<bool>();
+                    assumedObstacleWidth = file.config["assumedObstacleWidth"].as<float>();
+                    avoidDistance = file.config["avoidDistance"].as<float>();
 
-                    bearingSensitivity = file.config["bearingSensitivity"];
-                    ApproachCurveFactor = file.config["ApproachCurveFactor"];
+                    bearingSensitivity = file.config["bearingSensitivity"].as<float>();
+                    ApproachCurveFactor = file.config["ApproachCurveFactor"].as<float>();
                 });
 
 
                 on<Trigger<KickFinished>>([this] (const KickFinished&) {
-                    emit(std::move(std::make_unique<WalkStartCommand>()));            
+                    emit(std::move(std::make_unique<WalkStartCommand>()));
                 });
 
                 // add in fake walk localisation
@@ -111,40 +111,40 @@ namespace modules {
                 on<Trigger<Every<3, Per<std::chrono::seconds>>>, With<Optional<WalkCommand>>>
                     ([this](const time_t&, const std::shared_ptr<const WalkCommand>& w) {
                     static size_t ctr = 0;
-                    
+
                     const double ballx = 0.0;
                     const double bally = 0.0;
                     const double targetx = 3.0;
                     const double targety = 0.0;
-                    
+
                     static double x,y,h;
-                    
+
                     if ( (ctr % 1000000000) == 0) {
                         //set position
                         x = -1.0;
                         y = -2.0;
                         h = -1.5;
-                        
+
                         //emit ball pos
                         std::unique_ptr<messages::localisation::Ball> b = std::make_unique<messages::localisation::Ball>();
                         b->position = arma::vec({ballx,bally});
                         emit(std::move(b));
-                        
+
                         //emit robots:
                         auto o = std::make_unique<std::vector<messages::vision::Obstacle>>();
                         emit(std::move(o));
                     }
-                    
+
                     //update self pos
                     if (w != NULL) {
                         x += (w->velocity[0]*cos(h) - w->velocity[1]*sin(h)) * 0.015;
                         y += (w->velocity[0]*sin(h) + w->velocity[1]*cos(h)) * 0.015;
                         h += (w->rotationalSpeed) * 0.1;
                     }
-                    
-                    
-                    
-                    
+
+
+
+
                     auto robot_msg = std::make_unique<std::vector<messages::localisation::Self>>();
 
                     messages::localisation::Self robot_model;
@@ -154,9 +154,9 @@ namespace modules {
                     robot_model.sr_xy = 0.1;
                     robot_model.sr_yy = 0.1;
                     robot_msg->push_back(robot_model);
-                    
+
                     emit(std::move(robot_msg));
-                    
+
                     ++ctr;
                     });*/
 
@@ -191,7 +191,7 @@ namespace modules {
                                                                                               0,                 0,         1};
 
                         worldToRobotTransform.submat(0,2,1,2) = -worldToRobotTransform.submat(0,0,1,1) * self.position;
-                        
+
                         arma::vec homogeneousKickTarget = worldToRobotTransform * goalPosition;
                         arma::vec kickTarget_robot = homogeneousKickTarget.rows(0,1);    //In robot coords
                         arma::vec kickDirection = arma::normalise(kickTarget_robot-ballPosition);    //In robot coords
@@ -199,7 +199,7 @@ namespace modules {
 
                         //float kickTargetBearing_robot = std::atan2(kickTarget_robot[1],kickTarget_robot[0]);
                         float ballBearing = std::atan2(ballPosition[1],ballPosition[0]);
-                        
+
                         //calc self in kick coords
                         arma::vec moveTarget = ballPosition - ballLineupDistance * kickDirection;
 
@@ -207,7 +207,7 @@ namespace modules {
                                                                         -kickDirection[1],  kickDirection[0],         0,
                                                                                               0,                 0,         1};
                         robotToKickFrame.submat(0,2,1,2) = -robotToKickFrame.submat(0,0,1,1) * moveTarget;
-                        
+
                         arma::vec selfInKickFrame = robotToKickFrame * arma::vec3({0,0,1});
 
                         //Hyperboal x >a*sqrt(y^2/a^2 + 1)
@@ -218,7 +218,7 @@ namespace modules {
                                 moveTarget = moveTargetA;
                             } else {
                                 moveTarget = moveTargetB;
-                            }                        
+                            }
                         }
 
                         if(arma::norm(moveTarget) < closeApproachDistance) {
@@ -236,7 +236,7 @@ namespace modules {
                         //emit(std::move(std::make_unique<WalkStartCommand>()));
 
                     } else {
-                        float ballBearing = std::atan2(ball.position[1],ball.position[0]);                        
+                        float ballBearing = std::atan2(ball.position[1],ball.position[0]);
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
                         command->velocity = arma::vec({0,0});
                         command->rotationalSpeed = turnSpeed * (ballBearing > 0 ? 1 : -1 );  //vx,vy, alpha
@@ -326,7 +326,7 @@ namespace modules {
                 // approach->heading = arma::vec({-3,0});
                 // approach->target = arma::vec({0,0});
                 // emit(std::move(approach));
-                
+
 
             }
 

@@ -25,7 +25,7 @@
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "messages/input/Sensors.h"
- 
+
 using messages::input::Sensors;
 using utility::localisation::LocalisationFieldObject;
 using messages::localisation::FakeOdometry;
@@ -59,22 +59,22 @@ void MultiModalRobotModel::TimeUpdate(double seconds) {
 }
 void MultiModalRobotModel::TimeUpdate(double seconds, const FakeOdometry& odom) {
     for (auto& model : robot_models_)
-        model->TimeUpdate(seconds, odom);
+        model->TimeUpdate(seconds); // TODO re add in odometry
 }
 
 void MultiModalRobotModel::TimeUpdate(double seconds, const Sensors& sensors) {
     for (auto& model : robot_models_)
-        model->TimeUpdate(seconds, sensors);
+        model->TimeUpdate(seconds); // TODO re add in odometry
 }
 
 void RobotHypothesis::TimeUpdate(double seconds) {
-    filter_.timeUpdate(seconds, nullptr);
+    filter_.timeUpdate(seconds);
 }
 void RobotHypothesis::TimeUpdate(double seconds, const FakeOdometry& odom) {
-    filter_.timeUpdate(seconds, odom);
+    filter_.timeUpdate(seconds); // TODO re add in odometry
 }
 void RobotHypothesis::TimeUpdate(double seconds, const Sensors& sensors) {
-    filter_.timeUpdate(seconds, sensors);
+    filter_.timeUpdate(seconds); // TODO re add in odometry sensors
 }
 
 
@@ -109,7 +109,7 @@ double RobotHypothesis::MeasurementUpdate(
     arma::vec2 actual_pos = actual_object.location();
     arma::vec2 measurement = utility::math::coordinates::Spherical2Cartesian(observed_object.sphericalFromNeck).rows(0,1);
     arma::mat22 cov;
-    cov <<   0.1 * observed_object.sphericalError[0]  <<                                          0 << arma::endr 
+    cov <<   0.1 * observed_object.sphericalError[0]  <<                                          0 << arma::endr
         <<                                            0 << 0.1 * observed_object.sphericalError[0] ;  //HACK Cebit 2014
 
 
@@ -121,13 +121,13 @@ double RobotHypothesis::MeasurementUpdate(
 double RobotHypothesis::MeasurementUpdate(
     const std::vector<messages::vision::VisionObject>& observed_objects,
     const std::vector<LocalisationFieldObject>& actual_objects) {
-    
+
     auto& obv_a = observed_objects[0];
     auto& obv_b = observed_objects[1];
     auto& lfo_a = actual_objects[0];
     auto& lfo_b = actual_objects[1];
 
-    std::vector<arma::vec> actual_positions = { 
+    std::vector<arma::vec> actual_positions = {
         arma::vec(lfo_a.location()), arma::vec(lfo_b.location())
     };
 

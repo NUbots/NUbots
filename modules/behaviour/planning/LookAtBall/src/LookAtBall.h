@@ -40,7 +40,7 @@ namespace modules {
             public:
                 explicit LookAtBall(std::unique_ptr<NUClear::Environment> environment);
 
-                //static constexpr const char* CONFIGURATION_PATH = "Stand.json";
+                //static constexpr const char* CONFIGURATION_PATH = "Stand.yaml";
             };
 
         }  // planning

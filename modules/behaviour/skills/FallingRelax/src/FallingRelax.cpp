@@ -48,16 +48,16 @@ namespace modules {
                 on<Trigger<Configuration<FallingRelax>>>([this] (const Configuration<FallingRelax>& config){
 
                     // Store falling angle as a cosine so we can compare it directly to the z axis value
-                    double fallingAngle = config["FALLING_ANGLE"];
+                    double fallingAngle = config["FALLING_ANGLE"].as<double>();
                     FALLING_ANGLE = cos(fallingAngle);
 
                     // When falling the acceleration should drop below this value
-                    FALLING_ACCELERATION = config["FALLING_ACCELERATION"];
+                    FALLING_ACCELERATION = config["FALLING_ACCELERATION"].as<float>();
 
                     // Once the acceleration has stabalized, we are no longer falling
                     RECOVERY_ACCELERATION = config["RECOVERY_ACCELERATION"].as<std::vector<float>>();
 
-                    PRIORITY = config["PRIORITY"];
+                    PRIORITY = config["PRIORITY"].as<float>();
                 });
 
                 on<Trigger<Last<5, Sensors>>, Options<Single>>([this] (const LastList<Sensors>& sensors) {
@@ -101,7 +101,7 @@ namespace modules {
 
                 on<Trigger<Falling>>([this] (const Falling&) {
 
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Relax.json"));
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Relax.yaml"));
                 });
 
                 on<Trigger<KillFalling>>([this] (const KillFalling&) {

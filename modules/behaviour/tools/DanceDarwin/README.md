@@ -12,7 +12,7 @@ This module loads dance scripts in the same format as the scripting engine.
 Each one should be designed to last the duration of a single beat.
 
 When the dance engine receives a `messages::Beat` it tells the robot to stand
-by running the Stand.json script. Once this is complete, it chooses a dance
+by running the Stand.yaml script. Once this is complete, it chooses a dance
 script at random, then scales its timing to match the tempo of the music. The
 adjusted script is then sent as a `messages::ExecuteScript`.
 

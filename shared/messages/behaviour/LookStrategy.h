@@ -24,7 +24,7 @@
 namespace messages {
     namespace behaviour {
         struct HeadBehaviourConfig{
-            static constexpr const char* CONFIGURATION_PATH = "HeadBehaviour.json";
+            static constexpr const char* CONFIGURATION_PATH = "HeadBehaviour.yaml";
         };
 
 
@@ -33,12 +33,12 @@ namespace messages {
             double pitch;
             //double width;
         };
-        
+
         struct LookAtPosition {
             double yaw;
             double pitch;
         };
-        
+
         struct LookAtPoint {
             double x;
             double y;

@@ -33,8 +33,10 @@ namespace modules {
                     auto c = std::make_unique<NUClear::extensions::NetworkingConfiguration>();
 
                     // Put our configuration options into a NUClear config object
-                    std::string deviceName = config.config["deviceName"];
-                    std::string networkAddress = config.config["networkAddress"];
+                    std::string deviceName = config.config["deviceName"].as<std::string>();
+                    std::string networkAddress = config.config["networkAddress"].as<std::string>();
+
+                    std::cout << "Tag: " << config.config["deviceName"].Tag() << std::endl;
 
                     c->deviceName = deviceName;
                     c->networkAddress = networkAddress;

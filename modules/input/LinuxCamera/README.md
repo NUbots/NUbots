@@ -38,7 +38,7 @@ to be known at compile time. The currently chosen value is 30fps.
 
 ## Configuration
 
-This module's configuration is stored in LinuxCameraStreamer.json. All of the
+This module's configuration is stored in LinuxCameraStreamer.yaml. All of the
 following settings must be present.
 
 * "deviceID": the name of the camera device, e.g. /dev/video0

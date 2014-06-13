@@ -47,7 +47,7 @@ arma::vec::fixed<BallModel::size> BallModel::ApplyVelocity(
 }
 
 arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
-    const arma::vec::fixed<BallModel::size>& state, double deltaT, std::nullptr_t foo) {
+    const arma::vec::fixed<BallModel::size>& state, double deltaT) {
 
     return ApplyVelocity(state, deltaT);
 }
@@ -71,7 +71,7 @@ arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
 
 /// Return the predicted observation of an object at the given position
 arma::vec BallModel::predictedObservation(
-    const arma::vec::fixed<BallModel::size>& state, std::nullptr_t unused) {
+    const arma::vec::fixed<BallModel::size>& state) {
 
     // // Robot-relative cartesian
     return { state[kX], state[kY] };

@@ -33,7 +33,7 @@ namespace utility {
             public:
                 // The model
                 Model model;
-                
+
             private:
                 // The number of sigma points
                 static constexpr uint NUM_SIGMA_POINTS = (Model::size * 2) + 1;
@@ -86,7 +86,7 @@ namespace utility {
 
                         points.col(i)               = mean + deviation;
                         points.col(i + Model::size) = mean - deviation;
-                        
+
                     }
 
                     return points;
@@ -151,15 +151,14 @@ namespace utility {
                     centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
                 }
 
-                template <typename TMeasurement>
-                void timeUpdate(double delta_t, const TMeasurement& measurement = TMeasurement()) {
-                    
+                void timeUpdate(double deltaT) {
+
                     // Generate our sigma points
                     sigmaPoints = generateSigmaPoints(mean, covariance);
 
                     // Write the propagated version of the sigma point
                     for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
-                        sigmaPoints.col(i) = model.timeUpdate(sigmaPoints.col(i), delta_t, measurement);
+                        sigmaPoints.col(i) = model.timeUpdate(sigmaPoints.col(i), deltaT);
                     }
 
                     // Calculate the new mean and covariance values.
@@ -177,17 +176,20 @@ namespace utility {
                     centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
                 }
 
-                template <typename TMeasurement, typename TArgs = nullptr_t>
+                template <typename TMeasurement, typename... TMeasurementType>
                 double measurementUpdate(const TMeasurement& measurement,
                                          const arma::mat& measurement_variance,
-                                         const TArgs& args = nullptr) {
+                                         const TMeasurementType... measurementArgs) {
+
                     // Allocate room for our predictions
                     arma::mat predictedObservations(measurement.n_elem, NUM_SIGMA_POINTS);
 
                     // First step is to calculate the expected measurement for each sigma point.
                     for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
-                        predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), std::forward<const TArgs&>(args));
+                        predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), measurementArgs...);
                     }
+
+
 
                     // Now calculate the mean of these measurement sigmas.
                     arma::vec predictedMean = meanFromSigmas(predictedObservations);

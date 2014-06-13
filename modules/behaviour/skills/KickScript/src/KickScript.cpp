@@ -49,8 +49,8 @@ namespace skills {
 
         // do a little configurating
         on<Trigger<Configuration<KickScript>>>([this] (const Configuration<KickScript>& config){
-            KICK_PRIORITY = config["KICK_PRIORITY"];
-            EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"];
+            KICK_PRIORITY = config["KICK_PRIORITY"].as<float>();
+            EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
         on<Trigger<KickCommand>>([this] (const KickCommand& kickCommand) {
@@ -92,18 +92,18 @@ namespace skills {
             if (leg == LimbID::RIGHT_LEG) {
                 if (quadrant == 0) {
                     // front
-                    emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"RightFootKickForward.json", "Stand.json"})));
+                    emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"RightFootKickForward.yaml", "Stand.yaml"})));
                 } else if (quadrant == 1) {
                     // side
-                    emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"RightFootKickLeft.json", "Stand.json"})));
+                    emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"RightFootKickLeft.yaml", "Stand.yaml"})));
                 }
             } else if (leg == LimbID::LEFT_LEG) {
                 if (quadrant == 0) {
                     // front
-                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"LeftFootKickForward.json", "Stand.json"})));
+                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"LeftFootKickForward.yaml", "Stand.yaml"})));
                 } else if (quadrant == 3) {
                     // side
-                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"LeftFootKickRight.json", "Stand.json"})));
+                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"LeftFootKickRight.yaml", "Stand.yaml"})));
                 }
             }
 

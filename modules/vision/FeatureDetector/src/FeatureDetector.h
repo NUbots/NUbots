@@ -40,31 +40,31 @@ namespace modules {
     namespace vision {
 
         struct FeatureDetectorConfig{
-            static constexpr const char* CONFIGURATION_PATH = "FeatureDetector.json";
+            static constexpr const char* CONFIGURATION_PATH = "FeatureDetector.yaml";
         };
 
         struct VisionKinematicsConfig{
-            static constexpr const char* CONFIGURATION_PATH = "VisionKinematics.json";
+            static constexpr const char* CONFIGURATION_PATH = "VisionKinematics.yaml";
         };
 
         struct BallDetectorConfig{
-            static constexpr const char* CONFIGURATION_PATH = "BallDetector.json";
+            static constexpr const char* CONFIGURATION_PATH = "BallDetector.yaml";
         };
 
         struct GoalDetectorConfig{
-            static constexpr const char* CONFIGURATION_PATH = "GoalDetector.json";
+            static constexpr const char* CONFIGURATION_PATH = "GoalDetector.yaml";
         };
 
         struct FieldPointDetectorConfig{
-            static constexpr const char* CONFIGURATION_PATH = "FieldPointDetector.json";
+            static constexpr const char* CONFIGURATION_PATH = "FieldPointDetector.yaml";
         };
 
         struct ObstacleDetectorConfig{
-            static constexpr const char* CONFIGURATION_PATH = "ObstacleDetector.json";
+            static constexpr const char* CONFIGURATION_PATH = "ObstacleDetector.yaml";
         };
 
         struct CameraConfig {
-            static constexpr const char* CONFIGURATION_PATH = "LinuxCamera.json";
+            static constexpr const char* CONFIGURATION_PATH = "LinuxCamera.yaml";
         };
         /**
          * Searches for interesting features in a classified image.

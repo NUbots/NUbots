@@ -32,7 +32,7 @@ start. Alternatively you can also emit a `messages::ExecuteScript` to run a
 ## Configuration
 
 Script files are stored in a folder called `scripts` under the base config
-directory and must have a .json extension. They are composed of an array of
+directory and must have a .yaml extension. They are composed of an array of
 'frames', each of which contains 'targets' for servos.
 
 Frames are objects with the properties:

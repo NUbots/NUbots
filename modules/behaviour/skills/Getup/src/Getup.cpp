@@ -51,12 +51,12 @@ namespace modules {
                 on<Trigger<Configuration<Getup>>>([this] (const Configuration<Getup>& file){
 
                     //encode fallen angle as a cosine so we can compare it directly to the z axis value
-                    double fallenAngleConfig = file.config["FALLEN_ANGLE"];
+                    double fallenAngleConfig = file.config["FALLEN_ANGLE"].as<double>();
                     FALLEN_ANGLE = cos(fallenAngleConfig);
 
                     //load priorities for the getup
-                    GETUP_PRIORITY = file.config["GETUP_PRIORITY"];
-                    EXECUTION_PRIORITY = file.config["EXECUTION_PRIORITY"];
+                    GETUP_PRIORITY = file.config["GETUP_PRIORITY"].as<float>();
+                    EXECUTION_PRIORITY = file.config["EXECUTION_PRIORITY"].as<float>();
                 });
 
                 on<Trigger<Sensors>, Options<Single>>([this] (const Sensors& sensors) {
@@ -73,10 +73,10 @@ namespace modules {
 
                     // Check with side we're getting up from
                     if (sensors.orientation(0,2) < 0.0) {
-                        emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"StandUpFront.json","Stand.json"})));
+                        emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"StandUpFront.yaml","Stand.yaml"})));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"StandUpBack.json","Stand.json"})));
+                        emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"StandUpBack.yaml","Stand.yaml"})));
                     }
                     updatePriority(EXECUTION_PRIORITY);
                 });
@@ -96,11 +96,11 @@ namespace modules {
                         emit(std::make_unique<KillGetup>());
                     },
                     [this] (const std::set<ServoID>& servoSet) {
-                        //HACK 2014 Jake Fountain, Trent Houliston 
+                        //HACK 2014 Jake Fountain, Trent Houliston
                         //TODO track set limbs and wait for all to finish
-                        if(servoSet.find(ServoID::L_ANKLE_PITCH) != servoSet.end() || 
-                           servoSet.find(ServoID::R_ANKLE_PITCH) != servoSet.end()) 
-                        { 
+                        if(servoSet.find(ServoID::L_ANKLE_PITCH) != servoSet.end() ||
+                           servoSet.find(ServoID::R_ANKLE_PITCH) != servoSet.end())
+                        {
 
                         emit(std::make_unique<KillGetup>());
 

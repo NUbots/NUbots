@@ -22,33 +22,49 @@
 
 /* Inertial Motion Unit*/
 #include <armadillo>
+
 namespace utility {
     namespace math {
         namespace kalman {
 
             class IMUModel {
-                // Number of dimensions
-                // Store unit vector pointing globally down (gravity)
-                // Coordinate system (same as CM730 coords):
-                //                  x = forward, out of chest
-                //                  y = leftwards
-                //                  z = robot upward, towards head
             public:
-                static constexpr size_t size = 3;
+
+                static constexpr double G = -9.80665;
+
+                // The indicies for our vector
+                static constexpr uint VX = 0;
+                static constexpr uint VY = 1;
+                static constexpr uint VZ = 2;
+                static constexpr uint QW = 3;
+                static constexpr uint QX = 4;
+                static constexpr uint QY = 5;
+                static constexpr uint QZ = 6;
+
+                struct MeasurementType {
+                    struct GYROSCOPE;
+                    struct ACCELEROMETER;
+                    struct FORWARD;
+                };
+
+                static constexpr size_t size = 7;
 
                 IMUModel() {} // empty constructor
 
-                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& measurement);
+                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 
-                arma::vec predictedObservation(const arma::vec::fixed<size>& state, std::nullptr_t);
+                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state);
+                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, float);
+                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, int);
 
                 arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
                 arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
 
                 arma::mat::fixed<size, size> processNoise();
-            };
 
+                static constexpr double processNoiseFactor = 1e-6;
+            };
 
         }
     }

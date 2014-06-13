@@ -23,7 +23,6 @@
 #include <nuclear>
 #include <armadillo>
 
-#include "utility/configuration/ConfigurationNode.h"
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/Action.h"
 #include "messages/input/Sensors.h"
@@ -40,7 +39,7 @@ namespace modules {
         public:
             static constexpr size_t UPDATE_FREQUENCY = 60;
 
-            static constexpr const char* CONFIGURATION_PATH = "WalkEngine.json";
+            static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
             explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
         private:
 

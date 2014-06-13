@@ -33,7 +33,7 @@
 namespace modules {
 namespace localisation {
     struct KFBallLocalisationEngineConfig {
-        static constexpr const char* CONFIGURATION_PATH = "KFBallLocalisationEngine.json";
+        static constexpr const char* CONFIGURATION_PATH = "KFBallLocalisationEngine.yaml";
     };
 
     class KFBallLocalisationEngine {
@@ -59,7 +59,7 @@ namespace localisation {
         void UpdateConfiguration(
             const messages::support::Configuration<KFBallLocalisationEngineConfig>& config) {
             // cfg_.ball_drag_coefficient = config["BallDragCoefficient"];
-            ball_filter_.model.ballDragCoefficient = config["BallDragCoefficient"];
+            ball_filter_.model.ballDragCoefficient = config["BallDragCoefficient"].as<double>();
         };
 
         utility::math::kalman::UKF<ball::BallModel> ball_filter_;

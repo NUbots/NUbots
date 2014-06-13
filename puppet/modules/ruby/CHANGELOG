@@ -2,10 +2,10 @@
 
 Summary:
 
-Tiny fix to the metadata.json.
+Tiny fix to the metadata.yaml.
 
 Fixes:
-- metadata.json.
+- metadata.yaml.
 
 2013-10-08 - Version 0.1.0
 

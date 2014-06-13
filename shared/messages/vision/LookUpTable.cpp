@@ -81,9 +81,11 @@ namespace messages {
         void LookUpTable::save(const std::string& fileName) const {
             std::ofstream lutfile(fileName, std::ios::binary);
             auto output = std::ostreambuf_iterator<char>(lutfile);
+
             output = BITS_Y + 48;  // Convert the number to a string
             output = BITS_CB + 48; // Convert the number to a string
             output = BITS_CR + 48; // Convert the number to a string
+
             std::copy(data.get(), data.get() + LUT_SIZE, output);
         }
 

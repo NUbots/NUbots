@@ -23,8 +23,6 @@
 #include "messages/motion/ServoTarget.h"
 #include "utility/math/angle.h"
 #include "utility/file/fileutil.h"
-#include "utility/configuration/json/parse.h"
-#include "utility/configuration/json/serialize.h"
 #include "messages/behaviour/Action.h"
 
 #include <ncurses.h>
@@ -33,6 +31,7 @@
 namespace modules {
     namespace behaviour {
         namespace tools {
+            using messages::motion::Script;
             using messages::motion::ExecuteScript;
             using messages::input::ServoID;
             using messages::motion::ServoTarget;
@@ -74,7 +73,7 @@ namespace modules {
 
                     auto id = selection < 2 ? 18 + selection : selection - 2;
 
-                    messages::motion::Script::Frame::Target target;
+                    Script::Frame::Target target;
 
                     target.id = static_cast<messages::input::ServoID>(id);
                     target.position = sensors.servo[id].presentPosition;
@@ -348,7 +347,7 @@ namespace modules {
             void ScriptTuner::toggleLockMotor() {
 
                 // This finds if we have this particular motor stored in the frame
-                auto targetFinder = [=](const messages::motion::Script::Frame::Target& target) {
+                auto targetFinder = [=](const Script::Frame::Target& target) {
                                             return (static_cast<size_t>(target.id) + 2) % 20 == selection;
                 };
 
@@ -419,11 +418,12 @@ namespace modules {
             }
 
             void ScriptTuner::loadScript(const std::string& path) {
-                script = utility::configuration::json::parse(utility::file::loadFromFile(path));
+                script = YAML::LoadFile(path).as<Script>();
             }
 
             void ScriptTuner::saveScript() {
-                utility::file::writeToFile(scriptPath, utility::configuration::json::serialize(script));
+                YAML::Node n(script);
+                utility::file::writeToFile(scriptPath, n);
             }
 
             void ScriptTuner::editDuration() {
@@ -468,7 +468,7 @@ namespace modules {
                         double num = stod(result);
 
                         // This finds if we have this particular motor stored in the frame
-                        auto targetFinder = [=](const messages::motion::Script::Frame::Target& target) {
+                        auto targetFinder = [=](const Script::Frame::Target& target) {
                                                     return (static_cast<size_t>(target.id) + 2) % 20 == selection;
                         };
 

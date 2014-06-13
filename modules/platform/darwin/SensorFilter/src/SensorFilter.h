@@ -23,7 +23,7 @@
 #include <nuclear>
 
 #include "utility/math/kalman/UKF.h"
-#include "utility/math/kalman/AdaptiveIMUModel.h"
+#include "utility/math/kalman/IMUModel.h"
 #include "utility/math/kalman/LinearVec3Model.h"
 #include "utility/motion/RobotModels.h"
 #include "messages/input/Sensors.h"
@@ -42,7 +42,7 @@ namespace modules {
             public:
                 explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
-                utility::math::kalman::UKF<utility::math::kalman::AdaptiveIMUModel> orientationFilter;
+                utility::math::kalman::UKF<utility::math::kalman::IMUModel> orientationFilter;
                 utility::math::kalman::UKF<utility::math::kalman::LinearVec3Model> velocityFilter;
 
                 double DEFAULT_NOISE_GAIN;
@@ -55,7 +55,7 @@ namespace modules {
 
                 arma::vec2 integratedOdometry;
 
-                static constexpr const char* CONFIGURATION_PATH = "DarwinSensorFilter.json";
+                static constexpr const char* CONFIGURATION_PATH = "DarwinSensorFilter.yaml";
             private:
                 arma::mat44 calculateOdometryMatrix(
                     const messages::input::Sensors& sensors,

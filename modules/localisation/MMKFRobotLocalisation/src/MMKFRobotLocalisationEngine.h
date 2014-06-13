@@ -31,7 +31,7 @@
 namespace modules {
 namespace localisation {
     struct MMKFRobotLocalisationEngineConfig {
-        static constexpr const char* CONFIGURATION_PATH = "MMKFRobotLocalisationEngine.json";
+        static constexpr const char* CONFIGURATION_PATH = "MMKFRobotLocalisationEngine.yaml";
     };
 
     class MMKFRobotLocalisationEngine {
@@ -47,7 +47,7 @@ namespace localisation {
                         const messages::localisation::FakeOdometry& odom);
 
         void TimeUpdate(std::chrono::system_clock::time_point current_time,
-                                              const messages::input::Sensors& sensors); 
+                                              const messages::input::Sensors& sensors);
 
         std::vector<utility::localisation::LocalisationFieldObject> GetPossibleObjects(
             const messages::vision::Goal& ambiguous_object);

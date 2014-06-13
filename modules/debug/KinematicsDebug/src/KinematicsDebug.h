@@ -26,16 +26,16 @@ namespace modules {
     namespace debug {
 
             struct InverseKinematicsRequest{
-                static constexpr const char* CONFIGURATION_PATH = "InverseKinematicsRequest.json";
+                static constexpr const char* CONFIGURATION_PATH = "InverseKinematicsRequest.yaml";
             };
             struct ForwardKinematicsRequest{
-                static constexpr const char* CONFIGURATION_PATH = "ForwardKinematicsRequest.json";
+                static constexpr const char* CONFIGURATION_PATH = "ForwardKinematicsRequest.yaml";
             };
             struct LegKinematicsNULLTest{
-                static constexpr const char* CONFIGURATION_PATH = "LegKinematicsNULLTest.json";
+                static constexpr const char* CONFIGURATION_PATH = "LegKinematicsNULLTest.yaml";
             };
             struct HeadKinematicsNULLTest{
-                static constexpr const char* CONFIGURATION_PATH = "HeadKinematicsNULLTest.json";
+                static constexpr const char* CONFIGURATION_PATH = "HeadKinematicsNULLTest.yaml";
             };
 
 

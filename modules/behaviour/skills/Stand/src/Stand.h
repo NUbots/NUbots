@@ -37,7 +37,7 @@ namespace modules {
 
             public:
                 explicit Stand(std::unique_ptr<NUClear::Environment> environment);
-                static constexpr const char* CONFIGURATION_PATH = "Stand.json";
+                static constexpr const char* CONFIGURATION_PATH = "Stand.yaml";
             };
 
         }  // reflexes
