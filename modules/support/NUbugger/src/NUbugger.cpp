@@ -241,8 +241,10 @@ namespace modules {
                 Message message;
                 message.set_type(Message::REACTION_STATISTICS);
                 message.set_utc_timestamp(std::time(0));
-
                 auto* reactionStatistics = message.mutable_reaction_statistics();
+
+                auto* reactionStatistics = message.mutable_reactionstatistics();
+
 
                 //reactionStatistics->set_name(stats.name);
                 reactionStatistics->set_reactionid(stats.reactionId);
@@ -259,6 +261,7 @@ namespace modules {
 
                 send(message);
             });
+
 
             on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
 
@@ -312,6 +315,8 @@ namespace modules {
 
                 send(message);
             });
+
+
 
             /*on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
 

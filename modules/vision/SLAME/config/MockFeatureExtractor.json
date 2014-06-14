@@ -1,0 +1,30 @@
+{
+        "FAKE_LOCALISATION_PERIOD" : 1.0,
+        "FAKE_LOCALISATION_RADIUS" : 1.0,
+
+        "MAX_MATCHES" : 10,
+        "MEASUREMENT_COV_FACTOR" : 0.0174,
+
+        "RHO_INITIAL" : 0.1,
+        "RHO_COV_INITIAL" : 0.5,
+        "ANGULAR_COVARIANCE" : 0.0003,
+
+        "NUMBER_OF_MOCK_POINTS" : 10,
+        "RADIUS" : [5, 5],
+        "HEIGHT" : [0.3,0.3],
+
+        "ANGULAR_DEVIATION" : 0.01,
+        "RANDOMIZE" : false,
+        "SEED" : 1,
+        "FOV_X" : 1.0472,
+        "FOV_Y" : 0.785398,
+
+        "MIN_MEASUREMENTS_FOR_THROWOUT" : 10,
+        "THRESHOLD_FOR_THROWOUTS" : 5,
+
+
+        "FALSE_NEGATIVE_PROB" : [0,1],
+        "MISCLASSIFIED_PROB" : [0, 0.1],
+        "MISCLASSIFIED_AS_NEW_PROB" : [0, 0.5],
+        "MAX_DISTINCT_FALSE_FEATURES" : 1000
+}

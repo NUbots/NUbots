@@ -22,7 +22,7 @@
 
 #include <nuclear>
 #include <armadillo>
-
+#include <nuclear>
 #include "ServoID.h"
 
 namespace messages {
@@ -66,6 +66,8 @@ namespace messages {
             std::map<messages::input::ServoID, arma::mat44> forwardKinematics;
 
             arma::mat44 odometry;
+
+            float bodyCentreHeight;
 
             arma::vec4 centreOfMass;
 

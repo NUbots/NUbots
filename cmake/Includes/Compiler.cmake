@@ -1,7 +1,6 @@
 # Common C++ Flags
 SET(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wpedantic -Wextra -g -march=atom -mtune=atom -fdiagnostics-color=always")
 SET(CMAKE_C_FLAGS "-O3 -DNDEBUG")
-
 # XCode support
 IF("${CMAKE_GENERATOR}" MATCHES "Xcode")
     message("Enabling xcode support")

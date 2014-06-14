@@ -326,7 +326,13 @@ namespace modules {
                         sensors->odometry.submat(0,0,2,2) =  previousSensors->orientation.t() * sensors->orientation;
                     }
 
-
+                    if(sensors->leftFootDown){
+                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::L_ANKLE_PITCH](3,2);
+                    } else if(sensors->rightFootDown){
+                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::R_ANKLE_PITCH](3,2);                        
+                    } else {
+                        sensors->bodyCentreHeight = 0;
+                    }
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
