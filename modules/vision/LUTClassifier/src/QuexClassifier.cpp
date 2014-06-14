@@ -81,34 +81,35 @@ namespace modules {
                 // Update our position
                 arma::uvec2 s = position;
                 movement += tknNumber;
+                arma::uvec2 m = s + position / 2;
 
                 switch(typeID) {
                     case QUEX_TKN_FIELD:
-                        output.push_back({ObjectClass::FIELD, s, position, nullptr, nullptr});
+                        output.push_back({ObjectClass::FIELD, tknNumber, s, position, m, nullptr, nullptr});
                         break;
 
                     case QUEX_TKN_BALL:
-                        output.push_back({ObjectClass::BALL, s, position, nullptr, nullptr});
+                        output.push_back({ObjectClass::BALL, tknNumber, s, position, m, nullptr, nullptr});
                         break;
 
                     case QUEX_TKN_GOAL:
-                        output.push_back({ObjectClass::GOAL, s, position, nullptr, nullptr});
+                        output.push_back({ObjectClass::GOAL, tknNumber, s, position, m, nullptr, nullptr});
                         break;
 
                     case QUEX_TKN_LINE:
-                        output.push_back({ObjectClass::LINE, s, position, nullptr, nullptr});
+                        output.push_back({ObjectClass::LINE, tknNumber, s, position, m, nullptr, nullptr});
                         break;
 
                     case QUEX_TKN_CYAN_TEAM:
-                        output.push_back({ObjectClass::CYAN_TEAM, s, position, nullptr, nullptr});
+                        output.push_back({ObjectClass::CYAN_TEAM, tknNumber, s, position, m, nullptr, nullptr});
                         break;
 
                     case QUEX_TKN_MAGENTA_TEAM:
-                        output.push_back({ObjectClass::MAGENTA_TEAM, s, position, nullptr, nullptr});
+                        output.push_back({ObjectClass::MAGENTA_TEAM, tknNumber, s, position, m, nullptr, nullptr});
                         break;
 
                     case QUEX_TKN_UNCLASSIFIED:
-                        output.push_back({ObjectClass::UNKNOWN, s, position, nullptr, nullptr});
+                        output.push_back({ObjectClass::UNKNOWN, tknNumber, s, position, m, nullptr, nullptr});
                         break;
                 }
             }

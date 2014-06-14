@@ -79,80 +79,145 @@ namespace modules {
 
             on<Trigger<Image>, With<LookUpTable, Sensors>, Options<Single>>("Classify Image", [this](const Image& image, const LookUpTable& lut, const Sensors& sensors) {
 
+                // TODO this should be wide enough to ensure a really close ball has at least 2 lines passing thorugh it
+                // It should also ensure that the 0th column and last column is done
                 constexpr uint VISUAL_HORIZON_SPACING = 10;
                 constexpr uint HORIZON_BUFFER = 10;
+                constexpr uint MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE = 5;
+                constexpr uint GOAL_LINE_SPACING = 5;
 
                 auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
 
+                /**********************************************
+                 *                FIND HORIZON                *
+                 **********************************************/
+
                 // Get our actual horizon
-                arma::vec2 horizon = {10, 10};
+                arma::vec2 horizon = {10, 10}; // Element 0 is gradient, element 1 is intercept
                 classifiedImage->horizon = horizon;
 
-                // Get the equation to find the horizon at each point
-                float gradient = (horizon[1] - horizon[0]);
 
-                // Find our visual horizon
+                /**********************************************
+                 *             FIND VISUAL HORIZON            *
+                 **********************************************/
+
+                // Cast lines to find our visual horizon
                 for(uint i = 0; i < image.width(); i += VISUAL_HORIZON_SPACING) {
 
                     // Find our point to classify from (slightly above the horizon)
-                    uint top = std::min(uint(i * gradient + horizon[0] + HORIZON_BUFFER), uint(image.height()));
+                    uint top = std::min(uint(i * horizon[0] + horizon[1] + HORIZON_BUFFER), uint(image.height()));
 
                     // Classify our segments
-                    auto segments = m->quex.classify(image, lut, { i, 0 }, { i, top});
+                    auto segments = m->quex.classify(image, lut, { i, 0 }, { i, top });
                     insertSegments(*classifiedImage, segments, true);
                 }
 
-                // Do our convex hull to build our visual horizon
-                {
-                    // Get our candidate points
+                // Find our candidate points for the horizon
+                std::map<uint, uint> points;
+                for(auto it = classifiedImage->verticalSegments.lower_bound(ObjectClass::FIELD);
+                    it != classifiedImage->verticalSegments.upper_bound(ObjectClass::FIELD);
+                    ++it)
+
+                    // If this segment is large enough
+                    if(it->second.length > MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE) {
+
+                        // Add the point if it's larger then the current one
+                    }
                 }
 
+                // Do a convex hull on the map points to build the horizon
+
+
+
+                /**********************************************
+                 *           CAST BALL FINDER LINES           *
+                 **********************************************/
+
+                /*
+                    Here we cast lines to find balls.
+                    To do this, we cast lines seperated so that any ball will have at least 2 lines
+                    passing though it (possibly 3).
+                    This means that lines get logrithmically less dense as we decend the image as a balls
+                    apparent size will be larger.
+                    These lines are cast from slightly above the visual horizon to a point where it is needed
+                    (for the logrithmic grid)
+                 */
+
+                // Based on the horizon and level get an end point
+
+                // line starts at visual horizon + buffer down to end point
+
+
+                /**********************************************
+                 *           CAST GOAL FINDER LINES           *
+                 **********************************************/
+
+                /*
+                   Here we cast classification lines to attempt to locate the general area of the goals.
+                   We cast lines only above the visual horizon (with some buffer) so that we do not over.
+                   classify the mostly empty green below.
+                 */
+                uint lowerBound = std::min(horizon[1], horizon[0] * image.width() + horizon[1]);
+                for(uint i = lowerBound; i > image.height(); i += GOAL_LINE_SPACING) {
+
+                    // Cast a full horizontal line here
+                    auto segments = m->quex.classify(image, lut, { 0, i }, { image.width(), i });
+                    insertSegments(*classifiedImage, segments, true);
+                }
+
+                /**********************************************
+                 *              CROSSHATCH BALLS              *
+                 **********************************************/
+
+                /*
+                    This section improves the classification of the ball.
+                    We first find all of the orange transitions that are below the visual horizon.
+                    We then take the norm of these points to attempt to find a very rough "centre" for the ball.
+                    Using the expected size of the ball at this position on the screen, we then crosshatch 2x the
+                    size needed to ensure that the ball is totally covered.
+                 */
+
+                /**********************************************
+                 *              CROSSHATCH GOALS              *
+                 **********************************************/
+
+                /*
+                    Here we improve the classification of goals.
+                    We do this by taking our course classification of the whole image
+                    and generating new segments where yellow was detected.
+                    We first generate segments above and below that are 2x the width of the segment
+                    We then take these segments and generate segments that are 1.2x the width
+                    This should allow a high level of detail without overclassifying the image
+                 */
+                for(auto it = classifiedImage.horizontalSegments.lower_bound(ObjectClass::GOAL);
+                    it != classifiedImage.horizontalSegments.upper_bound(ObjectClass::GOAL);
+                    ++it) {
+
+                    auto& elem = it->second;
+
+                    // Get the new points to classify above
+                    arma::vec2 begin = elem.midpoint + arma::vec2({ GOAL_LINE_SPACING ,  elem.length });
+                    arma::vec2 end = elem.midpoint + arma::vec2({ GOAL_LINE_SPACING , -elem.length });;
+
+                    // Classify the new segments above
+                    auto segments = m->quex.classify(image, lut, begin, end);
+
+                    // Get the new points to classify below
+                    begin = elem.midpoint + arma::vec2({ -GOAL_LINE_SPACING ,  elem.length });
+                    end = elem.midpoint + arma::vec2({ -GOAL_LINE_SPACING , -elem.length });;
+
+                    // Classify the new segments below
+                    auto segments = m->quex.classify(image, lut, begin, end);
+                }
+
+                // Do the same thing again, with a finer grain and only 1.2x the size
+
+                // For each yellow segment of large enough size
+                // cast a line N above and N below that is 2x the width of this segment
+
+                // Iterate through this n times
 
                 emit(std::move(classifiedImage));
-
-                // Make a classified image
-                //auto classifiedimage out = std::make_unique<ClassifiedImage>();
-
-                // Cast lines to find the green horizon
-                //      Get the kinematics horizon
-                //      Cast lines from slightly above it to the bottom of the image
-                //      Cast them at a width that will find a ball at the bottom of the image
-                //      Convex hull the green horizon
-
-                // Cast lines down from the green horizon to find the ball at varying depths
-                //      Calculate the line distances given kinematics etc...
-                //      Cast the lines and classify
-
-                // Cast horizontal lines to find the goals
-                //      Cast horizontal lines above the green horizon and slightly below
-
-                // Cross hatch the ball locations
-                //      Get the midpoints for orange
-                //      do a p-norm the midpoints to find a "centre"
-                //      Using the expected ball size for that distance cross hatch around to cover
-
-                // Cross hatch the goal locations
-                //      Get the transition points for yellow
-                //      using the segments, ensure that there are horizontal hatches along the goal height
-                //      find the lowest and highest pairs and hatch around it to find the bottoms and tops
-                //      cast several close horizontal lines at the tops to find the crossbar
-                //      Cast vertical lines to finish the crossbar
-
-                /*for(strategy : strategies) {
-                    std::vector<segment> a = strategy1.request(*classifiedimage);
-                    segments = quex.classify(image, lut, a);
-                    strategy1.resolve(segments, classifiedImage);
-                }*/
-
-
-
-                // Stage 1 - Find green horizon
-
-                // Stage 2 - Do the logrithmic ball finder
-
-                // Stage 2/3 - Do the horizontal goal finder
-
-                // Stage 4 - Crosshatch
             });
 
         }

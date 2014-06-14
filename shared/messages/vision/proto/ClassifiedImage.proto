@@ -29,7 +29,7 @@ message ClassifiedImage {
         required uvec2 end = 3;
     }
 
-    optional uvec2 horizon = 1;
+    optional vec2 horizon = 1;
     repeated uvec2 visual_horizon = 2;
     repeated Segment segment = 3;
 }

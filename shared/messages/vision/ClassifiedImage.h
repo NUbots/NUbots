@@ -50,8 +50,11 @@ namespace messages {
 
                 TClass colour;
 
+                uint length;
+
                 arma::uvec2 start;
                 arma::uvec2 end;
+                arma::uvec2 midpoint;
 
                 Segment* previous;
                 Segment* next;
@@ -59,7 +62,7 @@ namespace messages {
 
             arma::vec2 horizon;
 
-            std::vector<arma::vec2> visualHorizon;
+            std::vector<arma::uvec2> visualHorizon;
 
             std::multimap<TClass, Segment> horizontalSegments;
             std::multimap<TClass, Segment> verticalSegments;
