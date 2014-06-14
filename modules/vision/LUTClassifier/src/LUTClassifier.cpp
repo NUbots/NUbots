@@ -93,7 +93,7 @@ namespace modules {
                  **********************************************/
 
                 // Get our actual horizon
-                arma::vec2 horizon = {10, 10}; // Element 0 is gradient, element 1 is intercept
+                arma::vec2 horizon = sensors->kinematicsHorizon; // Element 0 is gradient, element 1 is intercept (confirmed by Jake's Implementation)
                 classifiedImage->horizon = horizon;
 
 
