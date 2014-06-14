@@ -177,6 +177,20 @@ namespace modules {
                     Using the expected size of the ball at this position on the screen, we then crosshatch 2x the
                     size needed to ensure that the ball is totally covered.
                  */
+                arma::running_stat_vec<arma::uvec> centre;
+                for(auto it = classifiedImage->horizontalSegments.lower_bound(ObjectClass::BALL);
+                    it != classifiedImage->horizontalSegments.upper_bound(ObjectClass::BALL);
+                    ++it) {
+
+                    auto& elem = it->second;
+
+                    centre(elem.midpoint);
+                }
+
+                // Find the size of a ball at the position
+                auto ballSize = centre.mean();
+
+                // Cast lines in a radius around where the ball should be
 
                 /**********************************************
                  *              CROSSHATCH GOALS              *
@@ -200,16 +214,16 @@ namespace modules {
                     arma::vec2 midpoint = arma::conv_to<arma::vec>::from(elem.midpoint);
 
                     // Get the new points to classify above
-                    arma::uvec2 begin = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ GOAL_LINE_SPACING / 3,  elem.length }));
-                    arma::uvec2 end = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ GOAL_LINE_SPACING / 3, -elem.length }));
+                    arma::uvec2 begin = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ GOAL_LINE_SPACING / 3,  double(elem.length) }));
+                    arma::uvec2 end   = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ GOAL_LINE_SPACING / 3, -double(elem.length) }));
 
                     // Classify the new segments above
                     auto segments = m->quex.classify(image, lut, begin, end);
                     newSegments.insert(std::end(newSegments), std::begin(newSegments), std::end(newSegments));
 
                     // Get the new points to classify below
-                    begin = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ -GOAL_LINE_SPACING / 3,  elem.length }));
-                    end = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ -GOAL_LINE_SPACING / 3, -elem.length }));
+                    begin = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ -GOAL_LINE_SPACING / 3,  double(elem.length) }));
+                    end   = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ -GOAL_LINE_SPACING / 3, -double(elem.length) }));
 
                     // Classify the new segments below
                     segments = m->quex.classify(image, lut, begin, end);
@@ -227,16 +241,16 @@ namespace modules {
                     arma::vec2 midpoint = arma::conv_to<arma::vec>::from(elem.midpoint);
 
                     // Get the new points to classify above
-                    arma::uvec2 begin = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ GOAL_LINE_SPACING / 9,  elem.length * 0.6 }));
-                    arma::uvec2 end = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ GOAL_LINE_SPACING / 9, -elem.length * 0.6 }));
+                    arma::uvec2 begin = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ GOAL_LINE_SPACING / 9,  double(elem.length) * 0.6 }));
+                    arma::uvec2 end   = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ GOAL_LINE_SPACING / 9, -double(elem.length) * 0.6 }));
 
                     // Classify the new segments above
                     auto segments = m->quex.classify(image, lut, begin, end);
                     newSegments.insert(std::end(newSegments), std::begin(newSegments), std::end(newSegments));
 
                     // Get the new points to classify below
-                    begin = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ -GOAL_LINE_SPACING / 9,  elem.length * 0.6 }));
-                    end = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ -GOAL_LINE_SPACING / 9, -elem.length * 0.6 }));
+                    begin = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ -GOAL_LINE_SPACING / 9,  double(elem.length) * 0.6 }));
+                    end   = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ -GOAL_LINE_SPACING / 9, -double(elem.length) * 0.6 }));
 
                     // Classify the new segments below
                     segments = m->quex.classify(image, lut, begin, end);

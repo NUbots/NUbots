@@ -60,6 +60,9 @@ namespace messages {
             arma::vec3 leftFSR;
             arma::vec3 rightFSR;
 
+            arma::vec2 orientationHorizon;    //=[m,b] such that in camera coords p_y = m * p_x + b in pixels
+            arma::vec2 kinematicsHorizon;     //=[m,b] such that in camera coords p_y = m * p_x + b in pixels
+
             bool leftFootDown;
             bool rightFootDown;
 
@@ -72,9 +75,6 @@ namespace messages {
             arma::vec4 centreOfMass;
 
             std::vector<Servo> servos;
-
-            std::vec2 orientationHorizon;    //=[m,b] such that in camera coords p_y = m * p_x + b in pixels
-            std::vec2 kinematicsHorizon;    //=[m,b] such that in camera coords p_y = m * p_x + b in pixels
         };
     }
 }

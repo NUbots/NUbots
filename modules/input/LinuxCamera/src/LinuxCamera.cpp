@@ -65,11 +65,13 @@ namespace modules {
 
                 auto cameraParameters = std::make_unique<CameraParameters>();
 
-                cameraParameters->imageSizePixels << config["imageWidth"] << config["imageHeight"];
-                cameraParameters->FOV << config["FOV_X"] << config["FOV_Y"];
-                cameraParameters->distortionFactor = config["DISTORTION_FACTOR"];
-                arma::vec2 tanHalfFOV << std::tan(cameraParameters->FOV[0] * 0.5) << std::tan(cameraParameters->FOV[1] * 0.5);
-                arma::vec2 imageCentre << cameraParameters->imageSizePixels[0] * 0.5 << cameraParameters->imageSizePixels[1] * 0.5;
+                cameraParameters->imageSizePixels << config["imageWidth"].as<uint>() << config["imageHeight"].as<uint>();
+                cameraParameters->FOV << config["FOV_X"].as<double>() << config["FOV_Y"].as<double>();
+                cameraParameters->distortionFactor = config["DISTORTION_FACTOR"].as<double>();
+                arma::vec2 tanHalfFOV;
+                tanHalfFOV << std::tan(cameraParameters->FOV[0] * 0.5) << std::tan(cameraParameters->FOV[1] * 0.5);
+                arma::vec2 imageCentre;
+                imageCentre << cameraParameters->imageSizePixels[0] * 0.5 << cameraParameters->imageSizePixels[1] * 0.5;
                 cameraParameters->screenToAngularFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
                 cameraParameters->effectiveScreenDistancePixels = imageCentre[0] / tanHalfFOV[0];
 
@@ -77,8 +79,8 @@ namespace modules {
 
                 try {
                     // Recreate the camera device at the required resolution
-                    int width = config["imageWidth"].as<int>();
-                    int height = config["imageHeight"].as<int>();
+                    int width = config["imageWidth"].as<uint>();
+                    int height = config["imageHeight"].as<uint>();
                     std::string deviceID = config["deviceID"].as<std::string>();
                     std::string format = config["imageFormat"].as<std::string>();
 

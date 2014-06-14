@@ -60,11 +60,12 @@ namespace modules {
                     REQUIRED_NUMBER_OF_FSRS = file.config["REQUIRED_NUMBER_OF_FSRS"].as<int>();
                 });
 
-                on<Trigger<DarwinSensors>,
-                   With<Optional<Sensors>, CameraParameters>,
-                   Options<Single>>([this](const DarwinSensors& input, 
-                                            const std::shared_ptr<const Sensors>& previousSensors, 
-                                            const std::shared_ptr<const CameraParameters>& cameraParameters) {
+                on< Trigger<DarwinSensors>
+                  , With<Optional<Sensors>>
+                  , With<CameraParameters>
+                  , Options<Single>>([this](const DarwinSensors& input,
+                                            const std::shared_ptr<const Sensors>& previousSensors,
+                                            CameraParameters& cameraParameters) {
 
                     auto sensors = std::make_unique<Sensors>();
 
@@ -334,7 +335,7 @@ namespace modules {
                     if(sensors->leftFootDown){
                         sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::L_ANKLE_PITCH](3,2);
                     } else if(sensors->rightFootDown){
-                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::R_ANKLE_PITCH](3,2);                        
+                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::R_ANKLE_PITCH](3,2);
                     } else {
                         sensors->bodyCentreHeight = 0;
                     }
@@ -345,12 +346,12 @@ namespace modules {
                     arma::vec4 COM = calculateCentreOfMass<DarwinModel>(sensors->forwardKinematics, true);
                     sensors->centreOfMass = {COM[0],COM[1], COM[2], COM[3]};
                     //END MASS MODEL
-                    
+
 
                     /************************************************
                      *                  Kinematics Horizon          *
                      ************************************************/
-                    
+
                     sensors->orientationHorizon = utility::motion::kinematics::calculateHorizon<DarwinModel>(
                         (sensors->orientation * sensors->forwardKinematics[ServoID::HEAD_PITCH].submat(0,0,2,2)).t(),
                         cameraParameters.effectiveScreenDistancePixels);
