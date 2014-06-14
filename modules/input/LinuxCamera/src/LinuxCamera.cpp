@@ -26,12 +26,14 @@ extern "C" {
 
 #include "V4L2Camera.h"
 #include "messages/input/Image.h"
+#include "messages/input/CameraParameters.h"
 #include "messages/support/Configuration.h"
 
 namespace modules {
     namespace input {
 
         using messages::support::Configuration;
+        using messages::input::CameraParameters;
 
         // Create our impl class as per the pimpl idiom.
         class LinuxCamera::impl {
@@ -60,6 +62,18 @@ namespace modules {
 
             on<Trigger<Configuration<LinuxCamera>>>([this](const Configuration<LinuxCamera>& config) {
                 auto& camera = m->camera;
+
+                auto cameraParameters = std::make_unique<CameraParameters>();
+
+                cameraParameters->imageSizePixels << config["imageWidth"] << config["imageHeight"];
+                cameraParameters->FOV << config["FOV_X"] << config["FOV_Y"];
+                cameraParameters->distortionFactor = config["DISTORTION_FACTOR"];
+                arma::vec2 tanHalfFOV << std::tan(cameraParameters->FOV[0] * 0.5) << std::tan(cameraParameters->FOV[1] * 0.5);
+                arma::vec2 imageCentre << cameraParameters->imageSizePixels[0] * 0.5 << cameraParameters->imageSizePixels[1] * 0.5;
+                cameraParameters->screenToAngularFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
+                cameraParameters->effectiveScreenDistancePixels = imageCentre[0] / tanHalfFOV[0];
+
+                emit(std::move(cameraParameters));
 
                 try {
                     // Recreate the camera device at the required resolution

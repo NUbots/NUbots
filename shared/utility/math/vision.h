@@ -72,6 +72,8 @@ namespace utility {
         inline arma::vec screenPositionFromScreenAngular(const arma::vec& screenAngular){
             return screenPositionFromDirectionVector(directionVectorFromScreenAngular(screenAngular));
         }
+
+        
     }
   }
 }

@@ -107,7 +107,7 @@ namespace utility {
                 return result;
             }
 
-            inline arma::mat33 quaternionToRotationMatrix(arma::vec4 q) {
+            inline arma::mat33 quaternionToRotationMatrix(arma::vec4 q) {//TODO document! How does this map? ...
                 arma::mat33 result;
 
                 result <<  1 - 2 * q[2] * q[2] - 2 * q[3] * q[3] << 2 * q[1] * q[2] - 2 * q[3] * q[0] << 2 * q[1] * q[3] + 2 * q[2] * q[0] << arma::endr
