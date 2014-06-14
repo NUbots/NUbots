@@ -12,13 +12,13 @@ ADD_ROLE(
         input::LinuxCamera
         platform::darwin::HardwareIO
         platform::darwin::SensorFilter
-        
+
         #To trigger nubugger localisation updates
         localisation::KFBallLocalisation
 
         #SLAME
-        vision::SLAME
-        
+        #vision::SLAME
+
         #Behaviour
         behaviour::Controller
         behaviour::skills::Stand

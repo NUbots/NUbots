@@ -65,7 +65,7 @@ namespace modules {
                   , With<CameraParameters>
                   , Options<Single>>([this](const DarwinSensors& input,
                                             const std::shared_ptr<const Sensors>& previousSensors,
-                                            CameraParameters& cameraParameters) {
+                                            const CameraParameters& cameraParameters) {
 
                     auto sensors = std::make_unique<Sensors>();
 

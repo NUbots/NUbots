@@ -93,7 +93,7 @@ namespace modules {
                  **********************************************/
 
                 // Get our actual horizon
-                arma::vec2 horizon = sensors->kinematicsHorizon; // Element 0 is gradient, element 1 is intercept (confirmed by Jake's Implementation)
+                arma::vec2 horizon = sensors.kinematicsHorizon; // Element 0 is gradient, element 1 is intercept (confirmed by Jake's Implementation)
                 //Coordinate system: 0,0 is the centre of the screen. pos[0] is along the y axis of the camera transform, pos[1] is along the z axis (x points out of the camera)
                 classifiedImage->horizon = horizon;
 

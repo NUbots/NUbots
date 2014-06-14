@@ -36,7 +36,7 @@
 namespace modules{
 	namespace vision{
 
-	    
+
 
  		template <class FeatureDetectorClass>
  		class SLAMEModule{
@@ -44,7 +44,7 @@ namespace modules{
  			std::vector<float> featureStrengths;
             std::vector<typename FeatureDetectorClass::ExtractedFeature> features;
             std::vector<utility::math::kalman::UKF<utility::math::kalman::InverseDepthPointModel>> featureFilters;
-            
+
             static constexpr size_t MODEL_SIZE = utility::math::kalman::InverseDepthPointModel::size;
             using StateVector = arma::vec::fixed<MODEL_SIZE>;
             using CovarianceMatrix = arma::mat::fixed<MODEL_SIZE, MODEL_SIZE>;
@@ -75,17 +75,17 @@ namespace modules{
  		 		lastTime = NUClear::clock::now();
  		 	}
  		 	void setParameters(const messages::support::Configuration<FeatureDetectorClass>& config){
- 		 		MAX_MATCHES = config["MAX_MATCHES"];
- 		 		MEASUREMENT_COV_FACTOR = config["MEASUREMENT_COV_FACTOR"];
- 		 		RHO_INITIAL = config["RHO_INITIAL"];
- 		 		RHO_COV_INITIAL = config["RHO_COV_INITIAL"];
- 		 		ANGULAR_COVARIANCE = config["ANGULAR_COVARIANCE"];
+ 		 		MAX_MATCHES = config["MAX_MATCHES"].as<size_t>();
+ 		 		MEASUREMENT_COV_FACTOR = config["MEASUREMENT_COV_FACTOR"].as<float>();
+ 		 		RHO_INITIAL = config["RHO_INITIAL"].as<float>();
+ 		 		RHO_COV_INITIAL = config["RHO_COV_INITIAL"].as<float>();
+ 		 		ANGULAR_COVARIANCE = config["ANGULAR_COVARIANCE"].as<float>();
 
- 		 		FOV_X = config["FOV_X"];
-				FOV_Y = config["FOV_Y"];
+ 		 		FOV_X = config["FOV_X"].as<float>();
+				FOV_Y = config["FOV_Y"].as<float>();
 
-				MIN_MEASUREMENTS_FOR_THROWOUT = config["MIN_MEASUREMENTS_FOR_THROWOUT"];
-				THRESHOLD_FOR_THROWOUTS = config["THRESHOLD_FOR_THROWOUTS"];
+				MIN_MEASUREMENTS_FOR_THROWOUT = config["MIN_MEASUREMENTS_FOR_THROWOUT"].as<int>();
+				THRESHOLD_FOR_THROWOUTS = config["THRESHOLD_FOR_THROWOUTS"].as<int>();
 
  		 		knownFeatures = featureExtractor.setParameters(config);
  		 	}
@@ -131,19 +131,19 @@ namespace modules{
 					arma::vec state = f.get();
 					if(featureID<=knownFeatures.size()){
 						if(state[stateOf::kRHO] > 0){
-							
+
 							arma::vec knownPosition = knownFeatures[featureID-1].position.rows(0,2);
 							float knownStrength = (1-knownFeatures[featureID-1].FALSE_NEGATIVE_PROB)*(1-knownFeatures[featureID-1].MISCLASSIFIED_PROB);
 
 							arma::vec p = utility::math::kalman::InverseDepthPointModel::getFieldPosFromState(state).rows(0,2);
 							euclidean_errors(double(arma::norm(p-knownPosition)));
-							
+
 							float measured_global_bearing = std::atan2(p[1],p[0]);
 							float known_global_bearing = std::atan2(knownPosition[1],knownPosition[0]);
 							global_bearing_errors(double(std::fabs(utility::math::angle::normalizeAngle(measured_global_bearing - known_global_bearing))));
 
 							strength_errors(std::fabs(knownStrength-featureStrengths[i]));
-						}			
+						}
 					}
 	            }
 	            return {euclidean_errors.max(),euclidean_errors.mean(),euclidean_errors.min(),
@@ -194,14 +194,14 @@ namespace modules{
 				// END EWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 			}
 
- 		 	std::unique_ptr<std::vector<messages::vision::SLAMEObject>> getSLAMEObjects(const messages::input::Image& image, 
- 		 		                                                                        const messages::localisation::Self& self, 
+ 		 	std::unique_ptr<std::vector<messages::vision::SLAMEObject>> getSLAMEObjects(const messages::input::Image& image,
+ 		 		                                                                        const messages::localisation::Self& self,
  		 		                                                                        const messages::input::Sensors& sensors)
  		 	{
 
  		 		arma::mat worldToCameraTransform = utility::math::vision::calculateWorldToCameraTransform(sensors, self);
 
- 		 		auto objectMessage = std::make_unique<std::vector<messages::vision::SLAMEObject>>();	            
+ 		 		auto objectMessage = std::make_unique<std::vector<messages::vision::SLAMEObject>>();
 
 	            std::vector<typename FeatureDetectorClass::ExtractedFeature> extractedFeatures = featureExtractor.extractFeatures(image, self, sensors);
 
@@ -222,7 +222,7 @@ namespace modules{
 	            	float strength;
 	            	std::tie(fI, eFI, strength) = match;
 
-	                if(fI < featureFilters.size()){     
+	                if(fI < featureFilters.size()){
 	                	//That is, we have seen this object before
 	                    //Create message about where we have seen the feature
 	                    objectMessage->push_back(messages::vision::SLAMEObject());
@@ -236,7 +236,7 @@ namespace modules{
 	                    //Update our beleif
 	                    //Strength updated with total average model
 
-	                    featureStrengths[fI] = ( features[fI].numberOfTimesUpdated * featureStrengths[fI] + strength * int(expectations[fI]) ) / (features[fI].numberOfTimesUpdated+1);	
+	                    featureStrengths[fI] = ( features[fI].numberOfTimesUpdated * featureStrengths[fI] + strength * int(expectations[fI]) ) / (features[fI].numberOfTimesUpdated+1);
 	            		features[fI].numberOfTimesUpdated++;
 	            		expectations[fI] = false;
 	                    featureFilters[fI].timeUpdate(deltaT, int(0));
