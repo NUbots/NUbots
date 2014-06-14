@@ -189,6 +189,8 @@ namespace modules {
                     We then take these segments and generate segments that are 1.2x the width
                     This should allow a high level of detail without overclassifying the image
                  */
+
+                std::vector<ClassifiedImage<ObjectClass>::Segment> newSegments;
                 for(auto it = classifiedImage->horizontalSegments.lower_bound(ObjectClass::GOAL);
                     it != classifiedImage->horizontalSegments.upper_bound(ObjectClass::GOAL);
                     ++it) {
@@ -202,7 +204,7 @@ namespace modules {
 
                     // Classify the new segments above
                     auto segments = m->quex.classify(image, lut, begin, end);
-                    // TODO use insertion hints to make sure they end up before our current iterator
+                    newSegments.insert(std::end(newSegments), std::begin(newSegments), std::end(newSegments));
 
                     // Get the new points to classify below
                     begin = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ -GOAL_LINE_SPACING / 3,  elem.length }));
@@ -210,10 +212,12 @@ namespace modules {
 
                     // Classify the new segments below
                     segments = m->quex.classify(image, lut, begin, end);
-                    // TODO use insertion hints to make sure they end up before our current iterator
+                    newSegments.insert(std::end(newSegments), std::begin(newSegments), std::end(newSegments));
                 }
+                insertSegments(*classifiedImage, newSegments, false);
 
                 // Do the same thing again, with a finer grain and only 1.2x the size
+                newSegments.clear();
                 for(auto it = classifiedImage->horizontalSegments.lower_bound(ObjectClass::GOAL);
                     it != classifiedImage->horizontalSegments.upper_bound(ObjectClass::GOAL);
                     ++it) {
@@ -227,7 +231,7 @@ namespace modules {
 
                     // Classify the new segments above
                     auto segments = m->quex.classify(image, lut, begin, end);
-                    // TODO use insertion hints to make sure they end up before our current iterator
+                    newSegments.insert(std::end(newSegments), std::begin(newSegments), std::end(newSegments));
 
                     // Get the new points to classify below
                     begin = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ -GOAL_LINE_SPACING / 9,  elem.length * 0.6 }));
@@ -235,8 +239,9 @@ namespace modules {
 
                     // Classify the new segments below
                     segments = m->quex.classify(image, lut, begin, end);
-                    // TODO use insertion hints to make sure they end up before our current iterator
+                    newSegments.insert(std::end(newSegments), std::begin(newSegments), std::end(newSegments));
                 }
+                insertSegments(*classifiedImage, newSegments, false);
 
                 emit(std::move(classifiedImage));
             });
