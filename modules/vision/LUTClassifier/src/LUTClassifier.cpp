@@ -196,21 +196,42 @@ namespace modules {
                     auto& elem = it->second;
 
                     // Get the new points to classify above
-                    arma::vec2 begin = elem.midpoint + arma::vec2({ GOAL_LINE_SPACING ,  elem.length });
-                    arma::vec2 end = elem.midpoint + arma::vec2({ GOAL_LINE_SPACING , -elem.length });;
+                    arma::vec2 begin = elem.midpoint + arma::vec2({ GOAL_LINE_SPACING / 3,  elem.length });
+                    arma::vec2 end = elem.midpoint + arma::vec2({ GOAL_LINE_SPACING / 3, -elem.length });;
 
                     // Classify the new segments above
                     auto segments = m->quex.classify(image, lut, begin, end);
 
                     // Get the new points to classify below
-                    begin = elem.midpoint + arma::vec2({ -GOAL_LINE_SPACING ,  elem.length });
-                    end = elem.midpoint + arma::vec2({ -GOAL_LINE_SPACING , -elem.length });;
+                    begin = elem.midpoint + arma::vec2({ -GOAL_LINE_SPACING / 3,  elem.length });
+                    end = elem.midpoint + arma::vec2({ -GOAL_LINE_SPACING / 3, -elem.length });;
 
                     // Classify the new segments below
                     auto segments = m->quex.classify(image, lut, begin, end);
                 }
 
                 // Do the same thing again, with a finer grain and only 1.2x the size
+                for(auto it = classifiedImage.horizontalSegments.lower_bound(ObjectClass::GOAL);
+                    it != classifiedImage.horizontalSegments.upper_bound(ObjectClass::GOAL);
+                    ++it) {
+
+                    auto& elem = it->second;
+
+                    // Get the new points to classify above
+                    arma::vec2 begin = elem.midpoint + arma::vec2({ GOAL_LINE_SPACING / 9,  elem.length * 0.6 });
+                    arma::vec2 end = elem.midpoint + arma::vec2({ GOAL_LINE_SPACING / 9, -elem.length * 0.6 });;
+
+                    // Classify the new segments above
+                    auto segments = m->quex.classify(image, lut, begin, end);
+
+                    // Get the new points to classify below
+                    begin = elem.midpoint + arma::vec2({ -GOAL_LINE_SPACING / 9,  elem.length * 0.6 });
+                    end = elem.midpoint + arma::vec2({ -GOAL_LINE_SPACING / 9, -elem.length * 0.6 });;
+
+                    // Classify the new segments below
+                    auto segments = m->quex.classify(image, lut, begin, end);
+                }
+
 
                 // For each yellow segment of large enough size
                 // cast a line N above and N below that is 2x the width of this segment
