@@ -75,17 +75,17 @@ namespace modules{
                 lastTime = NUClear::clock::now();
             }
             void setParameters(const messages::support::Configuration<FeatureDetectorClass>& config){
-                MAX_MATCHES = config["MAX_MATCHES"].as<size_t>();
-                MEASUREMENT_COV_FACTOR = config["MEASUREMENT_COV_FACTOR"].as<float>();
-                RHO_INITIAL = config["RHO_INITIAL"].as<float>();
-                RHO_COV_INITIAL = config["RHO_COV_INITIAL"].as<float>();
-                ANGULAR_COVARIANCE = config["ANGULAR_COVARIANCE"].as<float>();
+                MAX_MATCHES = config["MAX_MATCHES"].template as<size_t>();
+                MEASUREMENT_COV_FACTOR = config["MEASUREMENT_COV_FACTOR"].template as<float>();
+                RHO_INITIAL = config["RHO_INITIAL"].template as<float>();
+                RHO_COV_INITIAL = config["RHO_COV_INITIAL"].template as<float>();
+                ANGULAR_COVARIANCE = config["ANGULAR_COVARIANCE"].template as<float>();
 
-                FOV_X = config["FOV_X"].as<float>();
-                FOV_Y = config["FOV_Y"].as<float>();
+                FOV_X = config["FOV_X"].template as<float>();
+                FOV_Y = config["FOV_Y"].template as<float>();
 
-                MIN_MEASUREMENTS_FOR_THROWOUT = config["MIN_MEASUREMENTS_FOR_THROWOUT"].as<int>();
-                THRESHOLD_FOR_THROWOUTS = config["THRESHOLD_FOR_THROWOUTS"].as<int>();
+                MIN_MEASUREMENTS_FOR_THROWOUT = config["MIN_MEASUREMENTS_FOR_THROWOUT"].template as<int>();
+                THRESHOLD_FOR_THROWOUTS = config["THRESHOLD_FOR_THROWOUTS"].template as<int>();
 
                 knownFeatures = featureExtractor.setParameters(config);
             }
