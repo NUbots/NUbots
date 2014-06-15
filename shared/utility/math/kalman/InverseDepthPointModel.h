@@ -1,4 +1,4 @@
-/* Inverse Depth Parameterisation for SLAME 
+/* Inverse Depth Parameterisation for SLAME
  * This file is part of the NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
@@ -43,7 +43,7 @@ namespace utility {
 
                 InverseDepthPointModel() {} // empty constructor
 
-                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, int placeholder_measurement_type);
+                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 
                 static arma::vec predictedObservation(const arma::vec::fixed<size>& state, const arma::mat& worldToCamera_camera);
 

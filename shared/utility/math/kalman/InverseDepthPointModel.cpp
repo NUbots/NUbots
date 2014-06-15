@@ -37,7 +37,7 @@ namespace utility {
             using messages::input::ServoID;
 
             arma::vec::fixed<InverseDepthPointModel::size> InverseDepthPointModel::limitState(const arma::vec::fixed<size>& state) {
-                
+
                 return state;
             }
 
@@ -46,7 +46,7 @@ namespace utility {
             // @param deltaT The amount of time that has passed since the previous update, in seconds.
             // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation.
             // @return The new estimated system state.
-            arma::vec::fixed<InverseDepthPointModel::size> InverseDepthPointModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT, int placeholder_measurement_type) {
+            arma::vec::fixed<InverseDepthPointModel::size> InverseDepthPointModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT) {
                 return state;
             }
 
@@ -61,9 +61,9 @@ namespace utility {
                 arma::vec screenAngular = utility::math::vision::screenAngularFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));
                 // NUClear::log("Predicted screen angular of feature =", screenAngular);
                 return screenAngular;     //Camera y,z = hor, vert
-                
+
                 //NEW
-                // arma::vec screenBearing = utility::math::vision::screenPositionFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));                
+                // arma::vec screenBearing = utility::math::vision::screenPositionFromDirectionVector(cameraToFeatureVector_cam.rows(0,3));
                 // return screenBearing;     //Camera y,z = hor, vert
             }
 
@@ -82,7 +82,7 @@ namespace utility {
                     return arma::vec3();
                 }
                 arma::vec original_cam_pos = {state[kX], state[kY], state[kZ]};
-                arma::vec m = utility::math::vision::directionVectorFromScreenAngular({state[kTHETA], state[kPHI]}).rows(0,2);    
+                arma::vec m = utility::math::vision::directionVectorFromScreenAngular({state[kTHETA], state[kPHI]}).rows(0,2);
                 return original_cam_pos + m / state[kRHO];
             }
 
