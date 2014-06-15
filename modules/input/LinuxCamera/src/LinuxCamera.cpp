@@ -72,7 +72,7 @@ namespace modules {
                 tanHalfFOV << std::tan(cameraParameters->FOV[0] * 0.5) << std::tan(cameraParameters->FOV[1] * 0.5);
                 arma::vec2 imageCentre;
                 imageCentre << cameraParameters->imageSizePixels[0] * 0.5 << cameraParameters->imageSizePixels[1] * 0.5;
-                cameraParameters->screenToAngularFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
+                cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
                 cameraParameters->effectiveScreenDistancePixels = imageCentre[0] / tanHalfFOV[0];
 
                 emit(std::move(cameraParameters));
