@@ -20,9 +20,6 @@ ADD_ROLE(
         #Localisation
         localisation::KFBallLocalisation
 
-        #Mocap
-        support::NUcap
-        
         #Behaviour
         behaviour::Controller
         behaviour::skills::Stand
