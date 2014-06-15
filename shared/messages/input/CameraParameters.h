@@ -28,7 +28,7 @@ namespace messages {
         struct CameraParameters{
            arma::uvec2 imageSizePixels;
            arma::vec2 FOV;     //Anglular Field of view
-           arma::vec2 screenToAngularFactor;    //(x,y screen *-> thetax = x*screenAngularFactor[0], thetay = y*screenAngularFactor[1])
+           arma::vec2 pixelsToTanThetaFactor;    //(x,y) screen -> thetax =atan(x*screenAngularFactor[0]), thetay = atan(y*screenAngularFactor[1])
            double effectiveScreenDistancePixels;    //Distance to the virtual screen in pixels
 
            double distortionFactor; //see RADIAL_CORRECTION_COEFFICIENT in VisionKinematics.h (may not be used yet)
