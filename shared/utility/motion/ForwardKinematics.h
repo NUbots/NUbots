@@ -336,8 +336,8 @@ namespace kinematics {
         arma::vec3 yHead = {0,1,0};
         double phiX = std::acos(arma::dot(normal, xHead)) - M_PI_2;
         double phiY = std::acos(arma::dot(normal, yHead)) - M_PI_2;
-
-        return {std::tan(phiY), cameraDistancePixels * std::tan(phiX)};
+        //Matches new vision coords (x right, y up, z out of screen)
+        return {-std::tan(phiY), cameraDistancePixels * std::tan(phiX)};
     }
 
 
