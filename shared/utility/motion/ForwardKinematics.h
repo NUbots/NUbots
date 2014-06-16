@@ -328,7 +328,7 @@ namespace kinematics {
     }
 
     template <typename RobotKinematicModel>
-    inline arma::vec2 calculateHorizon(const arma::mat33& groundToHeadRotation, double cameraDistancePixels){
+    inline arma::vec2 calculateHorizon(const arma::mat33 groundToHeadRotation, double cameraDistancePixels){
         arma::vec3 zGround = {0,0,1};
         arma::vec3 normal = groundToHeadRotation * zGround;
 
@@ -336,11 +336,9 @@ namespace kinematics {
         arma::vec3 yHead = {0,1,0};
         double phiX = std::acos(arma::dot(normal, xHead)) - M_PI_2;
         double phiY = std::acos(arma::dot(normal, yHead)) - M_PI_2;
-        //Matches new vision coords (x right, y up, z out of screen)
-        return {-std::tan(phiY), cameraDistancePixels * std::tan(phiX)};
+
+        return { -std::tan(phiY), cameraDistancePixels * std::tan(phiX) };
     }
-
-
 
 } // kinematics
 }  // motion

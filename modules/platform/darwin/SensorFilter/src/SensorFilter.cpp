@@ -364,8 +364,9 @@ namespace modules {
                         sensors->kinematicsHorizon = utility::motion::kinematics::calculateHorizon<DarwinModel>(
                         sensors->forwardKinematics[ServoID::HEAD_PITCH].submat(0,0,2,2).t() * sensors->forwardKinematics[ServoID::R_ANKLE_ROLL].submat(0,0,2,2),
                         cameraParameters.effectiveScreenDistancePixels);
-                    } else {
-                        sensors->kinematicsHorizon = sensors->orientationHorizon;
+                    }
+                    else {
+                        sensors->kinematicsHorizon = { sensors->orientationHorizon[0], sensors->orientationHorizon[1] };
                     }
 
                     /*emit(graph("Filtered Gravity Vector",
