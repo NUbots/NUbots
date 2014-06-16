@@ -243,9 +243,6 @@ namespace modules {
                 message.set_utc_timestamp(std::time(0));
                 auto* reactionStatistics = message.mutable_reaction_statistics();
 
-                auto* reactionStatistics = message.mutable_reactionstatistics();
-
-
                 //reactionStatistics->set_name(stats.name);
                 reactionStatistics->set_reactionid(stats.reactionId);
                 reactionStatistics->set_taskid(stats.taskId);

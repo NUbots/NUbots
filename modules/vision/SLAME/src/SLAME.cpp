@@ -37,7 +37,7 @@ namespace modules {
         SLAME::SLAME(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), /*ORBModule(),*/ MockSLAMEModule() {
 
             on<Trigger<Configuration<SLAME>>>([this](const Configuration<SLAME>& config) {
-                std::string featureExtractorName = config["FEATURE_EXTRACTOR_TYPE"];
+                std::string featureExtractorName = config["FEATURE_EXTRACTOR_TYPE"].as<std::string>();
 
                 if(featureExtractorName.compare("ORB") == 0){
                     FEATURE_EXTRACTOR_TYPE = FeatureExtractorType::ORB;
@@ -51,7 +51,7 @@ namespace modules {
                     FEATURE_EXTRACTOR_TYPE = FeatureExtractorType::ORB;
                 }
             });
-            
+
             on<Trigger<Configuration<MockFeatureExtractor>>>([this](const Configuration<MockFeatureExtractor>& config) {
                 FAKE_LOCALISATION_PERIOD = 20;//config["FAKE_LOCALISATION_CONFIG"];
                 FAKE_LOCALISATION_RADIUS = 2;//config["FAKE_LOCALISATION_RADIUS"];
@@ -61,7 +61,7 @@ namespace modules {
                 //ORBModule.setParameters(config);
             });
 
-            on<Trigger<Image>, With<std::vector<Self>, Sensors>, Options<Single>>("SLAME", [this](const Image& image, const std::vector<Self>& selfs, const Sensors& sensors){               
+            on<Trigger<Image>, With<std::vector<Self>, Sensors>, Options<Single>>("SLAME", [this](const Image& image, const std::vector<Self>& selfs, const Sensors& sensors){
                 switch(FEATURE_EXTRACTOR_TYPE){
                     case (FeatureExtractorType::ORB):
                         //emit(ORBModule.getSLAMEObjects(image, selfs[0], sensors));
@@ -77,13 +77,13 @@ namespace modules {
             });
 
             fakeLocalisationHandle = on<Trigger<Every<30, std::chrono::milliseconds>>>("Fake Localisation", [this](const time_t&){
-                auto selfs = std::make_unique<std::vector<Self>>(1);                
+                auto selfs = std::make_unique<std::vector<Self>>(1);
                 auto& s = selfs->back();
                 NUClear::clock::time_point now = NUClear::clock::now();
                 NUClear::clock::duration t = now - start_time;
-                s.position = arma::vec({FAKE_LOCALISATION_RADIUS * std::cos(2 * M_PI * std::chrono::duration_cast<std::chrono::milliseconds>(t).count() / double(1000*FAKE_LOCALISATION_PERIOD)), 
+                s.position = arma::vec({FAKE_LOCALISATION_RADIUS * std::cos(2 * M_PI * std::chrono::duration_cast<std::chrono::milliseconds>(t).count() / double(1000*FAKE_LOCALISATION_PERIOD)),
                                          FAKE_LOCALISATION_RADIUS * std::sin(2 * M_PI * std::chrono::duration_cast<std::chrono::milliseconds>(t).count() / double(1000*FAKE_LOCALISATION_PERIOD))});
-                s.heading = arma::vec({cos(2 * M_PI * std::chrono::duration_cast<std::chrono::milliseconds>(t).count() / double(1000*FAKE_LOCALISATION_PERIOD)), 
+                s.heading = arma::vec({cos(2 * M_PI * std::chrono::duration_cast<std::chrono::milliseconds>(t).count() / double(1000*FAKE_LOCALISATION_PERIOD)),
                                         sin(2 * M_PI * std::chrono::duration_cast<std::chrono::milliseconds>(t).count() / double(1000*FAKE_LOCALISATION_PERIOD))});
                 emit(graph("Current localisation:", s.position[0],s.position[1]));
 
