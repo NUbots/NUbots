@@ -38,7 +38,7 @@ namespace messages {
 
             virtual WalkCommand getWalkCommand(const NUClear::clock::time_point& t);
         };
-       
+
     }
 }
 
