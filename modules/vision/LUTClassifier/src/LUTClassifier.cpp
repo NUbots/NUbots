@@ -92,12 +92,16 @@ namespace modules {
                  *                FIND HORIZON                *
                  **********************************************/
 
-                // Get our actual horizon
-                //arma::vec2 horizon = sensors->orientationHorizon; // Element 0 is gradient, element 1 is intercept (confirmed by Jake's Implementation)
-                arma::vec2 horizon = sensors->kinematicsHorizon; // Element 0 is gradient, element 1 is intercept (confirmed by Jake's Implementation)
-                //Coordinate system: 0,0 is the centre of the screen. pos[0] is along the y axis of the camera transform, pos[1] is along the z axis (x points out of the camera)
-                classifiedImage->horizon = horizon;
+                // Element 0 is gradient, element 1 is intercept (confirmed by Jake's Implementation)
+                // Coordinate system: 0,0 is the centre of the screen. pos[0] is along the y axis of the
+                // camera transform, pos[1] is along the z axis (x points out of the camera)
+                arma::vec2 horizon = sensors.kinematicsHorizon;
 
+                // Move the intercept to be at 0,0
+                horizon[1] += (image.height() / 2.0) + horizon[0] * -(image.width() / 2.0);
+
+                // This is our new images horizon
+                classifiedImage->horizon = horizon;
 
                 /**********************************************
                  *             FIND VISUAL HORIZON            *
@@ -107,10 +111,11 @@ namespace modules {
                 for(uint i = 0; i < image.width(); i += VISUAL_HORIZON_SPACING) {
 
                     // Find our point to classify from (slightly above the horizon)
-                    uint top = std::min(uint(i * horizon[0] + horizon[1] + HORIZON_BUFFER), uint(image.height()));
+                    uint top = std::min(uint(i * horizon[0] + horizon[1] + HORIZON_BUFFER), uint(image.height() - 1));
 
                     // Classify our segments
                     auto segments = m->quex.classify(image, lut, { i, 0 }, { i, top });
+
                     insertSegments(*classifiedImage, segments, true);
                 }
 
@@ -160,10 +165,10 @@ namespace modules {
                    classify the mostly empty green below.
                  */
                 uint lowerBound = std::min(horizon[1], horizon[0] * image.width() + horizon[1]);
-                for(uint i = lowerBound; i > image.height(); i += GOAL_LINE_SPACING) {
+                for(uint i = lowerBound; i < image.height(); i += GOAL_LINE_SPACING) {
 
                     // Cast a full horizontal line here
-                    auto segments = m->quex.classify(image, lut, { 0, i }, { image.width(), i });
+                    auto segments = m->quex.classify(image, lut, { 0, i }, { image.width() - 1, i });
                     insertSegments(*classifiedImage, segments, true);
                 }
 
