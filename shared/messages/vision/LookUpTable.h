@@ -109,9 +109,9 @@ namespace YAML {
 
         static bool decode(const Node& node, messages::vision::LookUpTable& rhs) {
 
-            uint8_t bitsY = node["bits"]["y"].as<uint8_t>();
-            uint8_t bitsCb = node["bits"]["cb"].as<uint8_t>();
-            uint8_t bitsCr = node["bits"]["cr"].as<uint8_t>();
+            uint8_t bitsY = node["bits"]["y"].as<uint>();
+            uint8_t bitsCb = node["bits"]["cb"].as<uint>();
+            uint8_t bitsCr = node["bits"]["cr"].as<uint>();
 
             std::string dataString = node["lut"].as<std::string>();
             std::vector<char> data(dataString.begin(), dataString.end());
