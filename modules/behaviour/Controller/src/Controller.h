@@ -39,8 +39,9 @@ namespace modules {
         struct Request {
             using callback = std::function<void (std::set<messages::behaviour::LimbID>)>;
 
-            Request(size_t id, callback start, callback kill, std::function<void (std::set<messages::input::ServoID>)> completed)
+            Request(size_t id, std::string name, callback start, callback kill, std::function<void (std::set<messages::input::ServoID>)> completed)
             : id(id)
+            , name(name)
             , active(false)
             , maxPriority(std::numeric_limits<float>::min())
             , start(start)
@@ -49,6 +50,9 @@ namespace modules {
 
             /// The ID of this request that will be sent with any motion commands
             size_t id;
+
+            /// The name of the requester
+            std::string name;
 
             /// If the main element of this request is active
             bool active;
