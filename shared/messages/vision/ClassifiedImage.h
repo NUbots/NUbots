@@ -62,7 +62,7 @@ namespace messages {
 
             arma::vec2 horizon;
 
-            std::vector<arma::uvec2> visualHorizon;
+            std::vector<arma::vec> visualHorizon;
 
             std::multimap<TClass, Segment> horizontalSegments;
             std::multimap<TClass, Segment> verticalSegments;

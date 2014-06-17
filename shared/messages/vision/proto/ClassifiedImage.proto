@@ -29,8 +29,8 @@ message ClassifiedImage {
         required uvec2 end = 3;
     }
 
-    optional vec2 horizon = 1;
-    repeated uvec2 visual_horizon = 2;
+    required vec2 horizon = 1;
+    repeated vec3 visual_horizon = 2;
     repeated Segment segment = 3;
 }
 

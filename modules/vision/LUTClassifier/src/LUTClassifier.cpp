@@ -98,7 +98,7 @@ namespace modules {
                 arma::vec2 horizon = sensors.kinematicsHorizon;
 
                 // Move the intercept to be at 0,0
-                horizon[1] += (image.height() / 2.0) + horizon[0] * -(image.width() / 2.0);
+                horizon[1] += (image.height() * 0.5) + horizon[0] * -(image.width() * 0.5);
 
                 // This is our new images horizon
                 classifiedImage->horizon = horizon;
@@ -107,34 +107,66 @@ namespace modules {
                  *             FIND VISUAL HORIZON            *
                  **********************************************/
 
+                std::vector<arma::uvec2> horizonPoints;
+
                 // Cast lines to find our visual horizon
                 for(uint i = 0; i < image.width(); i += VISUAL_HORIZON_SPACING) {
 
                     // Find our point to classify from (slightly above the horizon)
-                    uint top = std::min(uint(i * horizon[0] + horizon[1] + HORIZON_BUFFER), uint(image.height() - 1));
+                    uint top = std::max(int(i * horizon[0] + horizon[1] - HORIZON_BUFFER), int(0));
+                    top = std::min(top, image.height() - 1);
+                    //uint top = std::min(uint(i * horizon[0] + horizon[1] + HORIZON_BUFFER), uint(image.height() - 1));
 
                     // Classify our segments
-                    auto segments = m->quex.classify(image, lut, { i, 0 }, { i, top });
+                    auto segments = m->quex.classify(image, lut, { i, top }, { i, image.height() - 1 });
+
+                    // Our default green point is the bottom of the screen
+                    arma::uvec2 greenPoint = { i, image.height() - 1 };
+
+                    // Loop through our segments backward (top to bottom) to find our first green segment
+                    for (auto it = segments.begin(); it != segments.end(); ++it) {
+
+                        // If this a valid green point update our information
+                        if(it->colour == ObjectClass::FIELD && it->length >= MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE) {
+                            greenPoint = it->start;
+                            // We found our green
+                            break;
+                        }
+                    }
+
+                    horizonPoints.push_back(std::move(greenPoint));
 
                     insertSegments(*classifiedImage, segments, true);
                 }
 
-                // Find our candidate points for the horizon
-                std::map<uint, uint> points;
-                for(auto it = classifiedImage->verticalSegments.lower_bound(ObjectClass::FIELD);
-                    it != classifiedImage->verticalSegments.upper_bound(ObjectClass::FIELD);
-                    ++it) {
+                // Do a convex hull on the map points to build the horizon
+                for(auto a = horizonPoints.begin(); a < horizonPoints.end() - 3;) {
 
-                    // If this segment is large enough
-                    if(it->second.length > MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE) {
+                    auto b = a + 1;
+                    auto c = a + 2;
 
-                        // Add the point if it's larger then the current one
+                    // Get the Z component of a cross product to check if it is concave
+                    bool concave = 0 <   (double(a->at(0)) - double(b->at(0))) * (double(c->at(1)) - double(b->at(1)))
+                                       - (double(a->at(1)) - double(b->at(1))) * (double(c->at(0)) - double(b->at(0)));
+
+                    if(concave) {
+                        horizonPoints.erase(b);
+                        a = a == horizonPoints.begin() ? a : --a;
+                    }
+                    else {
+                        ++a;
                     }
                 }
 
-                // Do a convex hull on the map points to build the horizon
+                for(uint i = 0; i < horizonPoints.size() - 1; ++i) {
+                    const auto& p1 = horizonPoints[i];
+                    const auto& p2 = horizonPoints[i + 1];
 
+                    double m = (double(p2[1]) - double(p1[1])) / (double(p2[0]) - double(p1[0]));
+                    double b = - m * double(p1[0]) + double(p1[1]);
 
+                    classifiedImage->visualHorizon.push_back({ p1[0], m, b });
+                }
 
                 /**********************************************
                  *           CAST BALL FINDER LINES           *
@@ -164,13 +196,13 @@ namespace modules {
                    We cast lines only above the visual horizon (with some buffer) so that we do not over.
                    classify the mostly empty green below.
                  */
-                uint lowerBound = std::min(horizon[1], horizon[0] * image.width() + horizon[1]);
-                for(uint i = lowerBound; i < image.height(); i += GOAL_LINE_SPACING) {
+                /*uint upperBound = std::max({ int(horizon[1]), int(horizon[0] * image.width() + horizon[1]), int(0) });
+                for(uint i = 0; i < upperBound; i += GOAL_LINE_SPACING) {
 
                     // Cast a full horizontal line here
                     auto segments = m->quex.classify(image, lut, { 0, i }, { image.width() - 1, i });
                     insertSegments(*classifiedImage, segments, true);
-                }
+                }*/
 
                 /**********************************************
                  *              CROSSHATCH BALLS              *

@@ -145,10 +145,10 @@ namespace modules {
                 // Start decompression
                 jpeg_start_decompress(&cinfo);
 
-                // Decompress the JPEG in reverse so we get a right handed coordinate system
-                for (Image::Pixel* row = data.data() + (width * height) - width;
+                // Decompress the JPEG
+                for (Image::Pixel* row = data.data();
                         cinfo.output_scanline < cinfo.output_height;
-                        row -= width) {
+                        row += width) {
 
                     // Read the scanline into place
                     jpeg_read_scanlines(&cinfo, reinterpret_cast<uint8_t**>(&row), 1);

@@ -301,13 +301,14 @@ namespace modules {
                 // Add in the actual horizon (the points on the left and right side)
                 auto* horizon = imageData->mutable_horizon();
                 horizon->set_x(image.horizon[0]);
-                horizon->set_y(image.horizon[0]);
+                horizon->set_y(image.horizon[1]);
 
                 for(const auto& visualHorizon : image.visualHorizon) {
                     auto* vh = imageData->add_visual_horizon();
 
                     vh->set_x(visualHorizon[0]);
                     vh->set_y(visualHorizon[1]);
+                    vh->set_z(visualHorizon[2]);
                 }
 
                 send(message);

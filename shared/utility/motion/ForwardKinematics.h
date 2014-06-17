@@ -337,7 +337,7 @@ namespace kinematics {
         double phiX = std::acos(arma::dot(normal, xHead)) - M_PI_2;
         double phiY = std::acos(arma::dot(normal, yHead)) - M_PI_2;
 
-        return { -std::tan(phiY), cameraDistancePixels * std::tan(phiX) };
+        return { std::tan(phiY), cameraDistancePixels * -std::tan(phiX) };
     }
 
 } // kinematics
