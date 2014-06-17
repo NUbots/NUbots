@@ -45,7 +45,7 @@ namespace modules {
 
             SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
-            , orientationFilter(arma::vec({0,0,0,0,0,0,1}))
+            , orientationFilter(arma::vec({0,0,0,1,0,0,0}))
             , velocityFilter(arma::vec3({0,0,0})) {
 
                 on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){
@@ -250,7 +250,7 @@ namespace modules {
 
                     // Gives us the quaternion representation
                     arma::vec o = orientationFilter.get();
-                    sensors->orientation = quaternionToRotationMatrix(o.rows(orientationFilter.model.QW, orientationFilter.model.QZ));
+                    sensors->orientation = quaternionToRotationMatrix(o.rows(orientationFilter.model.QW, orientationFilter.model.QZ)).t();
 
                     // sensors->orientation.col(2) = -orientation.rows(0,2);
                     // sensors->orientation.col(0) = orientation.rows(3,5);

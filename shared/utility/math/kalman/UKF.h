@@ -82,9 +82,8 @@ namespace utility {
                     for (uint i = 1; i < Model::size + 1; ++i) {
 
                         auto deviation = chol.col(i - 1);
-
-                        points.col(i)               = mean + deviation;
-                        points.col(i + Model::size) = mean - deviation;
+                        points.col(i)               = (mean + deviation);
+                        points.col(i + Model::size) = (mean - deviation);
 
                     }
 
