@@ -81,10 +81,10 @@ namespace modules {
 
                 // TODO this should be wide enough to ensure a really close ball has at least 2 lines passing thorugh it
                 // It should also ensure that the 0th column and last column is done
-                constexpr uint VISUAL_HORIZON_SPACING = 10;
+                constexpr uint VISUAL_HORIZON_SPACING = 20;
                 constexpr uint HORIZON_BUFFER = 10;
                 constexpr uint MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE = 5;
-                constexpr uint GOAL_LINE_SPACING = 5;
+                constexpr uint GOAL_LINE_SPACING = 20;
 
                 auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
 
@@ -140,7 +140,7 @@ namespace modules {
                 }
 
                 // Do a convex hull on the map points to build the horizon
-                for(auto a = horizonPoints.begin(); a < horizonPoints.end() - 3;) {
+                for(auto a = horizonPoints.begin(); a < horizonPoints.end() - 2;) {
 
                     auto b = a + 1;
                     auto c = a + 2;
@@ -158,14 +158,18 @@ namespace modules {
                     }
                 }
 
+                uint maxVisualHorizon = 0;
+
                 for(uint i = 0; i < horizonPoints.size() - 1; ++i) {
                     const auto& p1 = horizonPoints[i];
                     const auto& p2 = horizonPoints[i + 1];
 
+                    maxVisualHorizon = std::max({ maxVisualHorizon, uint(p1[1]), uint(p2[1]) });
+
                     double m = (double(p2[1]) - double(p1[1])) / (double(p2[0]) - double(p1[0]));
                     double b = - m * double(p1[0]) + double(p1[1]);
 
-                    classifiedImage->visualHorizon.push_back({ p1[0], m, b });
+                    classifiedImage->visualHorizon.push_back({ double(p1[0]), m, b });
                 }
 
                 /**********************************************
@@ -196,13 +200,12 @@ namespace modules {
                    We cast lines only above the visual horizon (with some buffer) so that we do not over.
                    classify the mostly empty green below.
                  */
-                /*uint upperBound = std::max({ int(horizon[1]), int(horizon[0] * image.width() + horizon[1]), int(0) });
-                for(uint i = 0; i < upperBound; i += GOAL_LINE_SPACING) {
+                for(int i = maxVisualHorizon; i >= 0; i -= GOAL_LINE_SPACING) {
 
                     // Cast a full horizontal line here
-                    auto segments = m->quex.classify(image, lut, { 0, i }, { image.width() - 1, i });
-                    insertSegments(*classifiedImage, segments, true);
-                }*/
+                    auto segments = m->quex.classify(image, lut, { uint(0), uint(i) }, { image.width() - 1, uint(i) });
+                    insertSegments(*classifiedImage, segments, false);
+                }
 
                 /**********************************************
                  *              CROSSHATCH BALLS              *
@@ -223,6 +226,9 @@ namespace modules {
                     auto& elem = it->second;
 
                     centre(elem.midpoint);
+
+
+                    // Get the expected size of the ball at the
                 }
 
                 // Find the size of a ball at the position
@@ -243,58 +249,56 @@ namespace modules {
                     This should allow a high level of detail without overclassifying the image
                  */
 
-                std::vector<ClassifiedImage<ObjectClass>::Segment> newSegments;
-                for(auto it = classifiedImage->horizontalSegments.lower_bound(ObjectClass::GOAL);
-                    it != classifiedImage->horizontalSegments.upper_bound(ObjectClass::GOAL);
-                    ++it) {
+                std::vector<double> levels = { 2.0 * 0.5, 1.2 * 0.5 };
+                for (uint i = 0; i < levels.size(); ++i) {
 
-                    auto& elem = it->second;
-                    arma::vec2 midpoint = arma::conv_to<arma::vec>::from(elem.midpoint);
+                    std::vector<ClassifiedImage<ObjectClass>::Segment> newSegments;
 
-                    // Get the new points to classify above
-                    arma::uvec2 begin = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ GOAL_LINE_SPACING / 3,  double(elem.length) }));
-                    arma::uvec2 end   = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ GOAL_LINE_SPACING / 3, -double(elem.length) }));
+                    for(auto it = classifiedImage->horizontalSegments.lower_bound(ObjectClass::GOAL);
+                        it != classifiedImage->horizontalSegments.upper_bound(ObjectClass::GOAL);
+                        ++it) {
 
-                    // Classify the new segments above
-                    auto segments = m->quex.classify(image, lut, begin, end);
-                    newSegments.insert(std::end(newSegments), std::begin(newSegments), std::end(newSegments));
+                        auto& elem = it->second;
+                        arma::vec2 midpoint = arma::conv_to<arma::vec>::from(elem.midpoint);
 
-                    // Get the new points to classify below
-                    begin = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ -GOAL_LINE_SPACING / 3,  double(elem.length) }));
-                    end   = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ -GOAL_LINE_SPACING / 3, -double(elem.length) }));
+                        arma::vec upperBegin = midpoint + arma::vec({  GOAL_LINE_SPACING / 3.0 * double(i),  double(elem.length) * levels[i] });
+                        arma::vec upperEnd   = midpoint + arma::vec({  GOAL_LINE_SPACING / 3.0 * double(i), -double(elem.length) * levels[i] });
+                        arma::vec lowerBegin = midpoint + arma::vec({ -GOAL_LINE_SPACING / 3.0 * double(i),  double(elem.length) * levels[i] });
+                        arma::vec lowerEnd   = midpoint + arma::vec({ -GOAL_LINE_SPACING / 3.0 * double(i), -double(elem.length) * levels[i] });
 
-                    // Classify the new segments below
-                    segments = m->quex.classify(image, lut, begin, end);
-                    newSegments.insert(std::end(newSegments), std::begin(newSegments), std::end(newSegments));
+                        // If the upper segment is valid
+                        if((upperBegin[1] <= image.height() - 1 && upperBegin[1] >= 0)
+                          && (upperEnd[1] <= image.height() - 1 && upperEnd[1] > 0)) {
+
+                            upperBegin[0] = std::max(upperBegin[0], double(0));
+                            upperBegin[0] = std::min(upperBegin[0], double(image.width()));
+
+                            upperEnd[0] = std::max(upperEnd[0], double(0));
+                            upperEnd[0] = std::min(upperEnd[0], double(image.width()));
+
+                            auto segments = m->quex.classify(image, lut, arma::conv_to<arma::uvec>::from(upperBegin), arma::conv_to<arma::uvec>::from(upperEnd));
+
+                            newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
+                        }
+
+                        // If the lower segment is valid
+                        if((lowerBegin[1] <= image.height() - 1 && lowerBegin[1] >= 0)
+                          && (lowerEnd[1] <= image.height() - 1 && lowerEnd[1] > 0)) {
+
+                            lowerBegin[0] = std::max(lowerBegin[0], double(0));
+                            lowerBegin[0] = std::min(lowerBegin[0], double(image.width()));
+
+                            lowerEnd[0] = std::max(lowerEnd[0], double(0));
+                            lowerEnd[0] = std::min(lowerEnd[0], double(image.width()));
+
+                            auto segments = m->quex.classify(image, lut, arma::conv_to<arma::uvec>::from(lowerBegin), arma::conv_to<arma::uvec>::from(lowerEnd));
+
+                            newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
+                        }
+                    }
+
+                    insertSegments(*classifiedImage, newSegments, false);
                 }
-                insertSegments(*classifiedImage, newSegments, false);
-
-                // Do the same thing again, with a finer grain and only 1.2x the size
-                newSegments.clear();
-                for(auto it = classifiedImage->horizontalSegments.lower_bound(ObjectClass::GOAL);
-                    it != classifiedImage->horizontalSegments.upper_bound(ObjectClass::GOAL);
-                    ++it) {
-
-                    auto& elem = it->second;
-                    arma::vec2 midpoint = arma::conv_to<arma::vec>::from(elem.midpoint);
-
-                    // Get the new points to classify above
-                    arma::uvec2 begin = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ GOAL_LINE_SPACING / 9,  double(elem.length) * 0.6 }));
-                    arma::uvec2 end   = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ GOAL_LINE_SPACING / 9, -double(elem.length) * 0.6 }));
-
-                    // Classify the new segments above
-                    auto segments = m->quex.classify(image, lut, begin, end);
-                    newSegments.insert(std::end(newSegments), std::begin(newSegments), std::end(newSegments));
-
-                    // Get the new points to classify below
-                    begin = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ -GOAL_LINE_SPACING / 9,  double(elem.length) * 0.6 }));
-                    end   = arma::conv_to<arma::uvec>::from(midpoint + arma::vec2({ -GOAL_LINE_SPACING / 9, -double(elem.length) * 0.6 }));
-
-                    // Classify the new segments below
-                    segments = m->quex.classify(image, lut, begin, end);
-                    newSegments.insert(std::end(newSegments), std::begin(newSegments), std::end(newSegments));
-                }
-                insertSegments(*classifiedImage, newSegments, false);
 
                 emit(std::move(classifiedImage));
             });
