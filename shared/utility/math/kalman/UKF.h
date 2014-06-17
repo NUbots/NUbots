@@ -21,7 +21,6 @@
 #define UTILITY_MATH_KALMAN_UKF_H
 
 #include <nuclear>
-
 #include <armadillo>
 
 namespace utility {
