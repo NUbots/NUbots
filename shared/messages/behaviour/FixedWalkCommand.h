@@ -25,7 +25,7 @@
 namespace messages {
     namespace behaviour {
 
-        class WaypointFixedWalk {
+        class WaypointWalk{
         public:
             FixedWalkPointPath();
             struct Waypoint
@@ -39,7 +39,7 @@ namespace messages {
             std::vector<Waypoint> waypoints;
         };
 
-        class CircularFixedWalk {
+        class CircularWalk{
         public:
             double radius;
             double speed;

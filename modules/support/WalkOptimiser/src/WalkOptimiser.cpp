@@ -35,28 +35,31 @@ namespace modules {
                 });
 
                 on< Trigger< Every<100, Per<std::chrono::seconds>> >, With<Sensors> >([this]("Walk Data Manager", const time_t& t, const Sensors& sensors){
-                    if(t > current_script.end_time()){
-                        current_script = scripts.pop_front();
-                        fitnesses.push_back(current_fitness);
-                    }
-                    emit(current_script.getWalkCommand(t));
-
-                    current_fitness.update(sensors);
-
-                    if(scripts.empty()){
-                        emit(OptimisationComplete(current_fitness));
-                    }
+                    data.update(sensors);
                 });
 
                 on<Trigger<GetUp>>[this]("Getup Recording", const GetUp& sensors){
-                    current_fitness.update(getup);
+                    data.update(getup);
                 });
 
                 on<Trigger<OptimiseWalkCommand>>([this]("Optimise Walk", const OptimiseWalkCommand& command){
                     member arma::mat samples = PGA::getSamples(command.state_vec, 0.01 * command);
-                    for(sample : samples){
-                        scripts.push_back(WalkScript(sample, start_time));
+                    
+                    sampleNumber = 0;
+                    emit(std::make_unique<WalkParameters>(samples[sampleNumber]));
+                    emit(std::make_unique<WaypointWalk>(start_time));
+                    emit(std::make_unique<CircularWalk>(start_time));
+                    
+                });
+
+                on<Trigger<FixedWalkNothingToDo>> ([this]("Optimise Walk", const OptimiseWalkCommand& command){
+                    fitnesses.push_back(data.calculateFitness());
+                    if(sampleNumber == samples.n_rows-1){
+                        emit(std::make_unique<OptimisationComplete>);
                     }
+                    emit(std::make_unique<WalkParameters>(samples[++sampleNumber]));
+                    emit(std::make_unique<WaypointWalk>(start_time));
+                    emit(std::make_unique<CircularWalk>(start_time));
                 });
 
                 on<Trigger<OptimisationComplete>([this]("Record Results Script", const OptimisationComplete& results)){

@@ -29,6 +29,15 @@ namespace modules {
 
                  
                 });
+
+                on< Trigger< Every<100, Per<std::chrono::seconds>> >>([this]("Walk Data Manager", const time_t& t, const Sensors& sensors){
+                    if(t > current_script.end_time()){
+                        current_script = scripts.pop_front();
+                        fitnesses.push_back(current_fitness);
+                    }
+                });
+
+
             }
 
         }  // skills
