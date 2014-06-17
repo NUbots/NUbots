@@ -30,6 +30,33 @@ namespace modules {
                  
                 });
 
+    //             class TypeA {					
+				// 	int operator ()(int a) {
+				// 		// do things
+				// 		return 1;
+				// 	}
+				// };
+
+
+
+				// class TypeB {
+				// 	int operator ()(int a) {
+				// 		// do other things
+				// 		return 2;
+				// 	}	
+				// };
+
+
+				// int main() {
+
+				// 	std::vector<std::function<int (int)>> things;
+
+				// 	things.push_back(TypeA());
+				// 	things.push_back(TypeB());
+
+				// 	int x = things[0](5);
+				// }	
+
                 on< Trigger< Every<100, Per<std::chrono::seconds>> >>([this]("Walk Data Manager", const time_t& t, const Sensors& sensors){
                     if(t > current_script.end_time()){
                         current_script = scripts.pop_front();
@@ -37,7 +64,13 @@ namespace modules {
                     }
                 });
 
+				on<Trigger<CircularWalk> ([this](const CircularWalk& walk){
+					//push back circular walk
+				}); 
 
+				on<Trigger<WaypointWalk> ([this](const WaypointWalk& walk){
+					//push back waypoint walk
+				}); 
             }
 
         }  // skills
