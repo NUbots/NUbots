@@ -21,30 +21,29 @@
 #define MESSAGES_BEHAVIOUR_FIXED_WALK_COMMAND_H
 
 #include <nuclear>
+#include <armadillo>
 
 namespace messages {
     namespace behaviour {
 
-        class WaypointWalk{
+        struct FixedWalkFinished{};
+
+        class FixedWalkCommand{
         public:
-            FixedWalkPointPath();
-            struct Waypoint
+            FixedWalkCommand();
+
+            struct WalkSegment
             {
-                arma::vec2 position;
-                double bearing;
+                arma::vec2 direction;
+                double curvePeriod;
+
+                double normalisedVelocity;                
+                double normalisedAngularVelocity;                
                 NUClear::clock::duration duration;
             };
-
-            bool useRelativeCoordinates;
-            std::vector<Waypoint> waypoints;
+            
+            std::vector<WalkSegment> segments;            
         };
-
-        class CircularWalk{
-        public:
-            double radius;
-            double speed;
-            double rotationsPerOrbit;
-        };    
     }
 }
 

@@ -30,40 +30,40 @@ namespace modules {
                 : Reactor(std::move(environment)) {
 
                 on<Trigger<Configuration<WalkOptimiser>>>([this](const Configuration<WalkOptimiser>& config)){
-                    std::vector<string> parameterNames;
-                    parameterNames = config["PARAMETERS_TO_OPTIMISE"];
+                    // std::vector<string> parameterNames;
+                    // parameterNames = config["PARAMETERS_TO_OPTIMISE"];
                 });
 
                 on< Trigger< Every<100, Per<std::chrono::seconds>> >, With<Sensors> >([this]("Walk Data Manager", const time_t& t, const Sensors& sensors){
-                    data.update(sensors);
+                    // data.update(sensors);
                 });
 
                 on<Trigger<GetUp>>[this]("Getup Recording", const GetUp& sensors){
-                    data.update(getup);
+                    // data.update(getup);
                 });
 
                 on<Trigger<OptimiseWalkCommand>>([this]("Optimise Walk", const OptimiseWalkCommand& command){
-                    member arma::mat samples = PGA::getSamples(command.state_vec, 0.01 * command);
+                    // member arma::mat samples = PGA::getSamples(command.state_vec, 0.01 * command);
                     
-                    sampleNumber = 0;
-                    emit(std::make_unique<WalkParameters>(samples[sampleNumber]));
-                    emit(std::make_unique<WaypointWalk>(start_time));
-                    emit(std::make_unique<CircularWalk>(start_time));
+                    // sampleNumber = 0;
+                    // emit(std::make_unique<WalkParameters>(samples[sampleNumber]));
+                    // emit(std::make_unique<WaypointWalk>(start_time));
+                    // emit(std::make_unique<CircularWalk>(start_time));
                     
                 });
 
                 on<Trigger<FixedWalkNothingToDo>> ([this]("Optimise Walk", const OptimiseWalkCommand& command){
-                    fitnesses.push_back(data.calculateFitness());
-                    if(sampleNumber == samples.n_rows-1){
-                        emit(std::make_unique<OptimisationComplete>);
-                    }
-                    emit(std::make_unique<WalkParameters>(samples[++sampleNumber]));
-                    emit(std::make_unique<WaypointWalk>(start_time));
-                    emit(std::make_unique<CircularWalk>(start_time));
+                    // fitnesses.push_back(data.calculateFitness());
+                    // if(sampleNumber == samples.n_rows-1){
+                    //     emit(std::make_unique<OptimisationComplete>);
+                    // }
+                    // emit(std::make_unique<WalkParameters>(samples[++sampleNumber]));
+                    // emit(std::make_unique<WaypointWalk>(start_time));
+                    // emit(std::make_unique<CircularWalk>(start_time));
                 });
 
                 on<Trigger<OptimisationComplete>([this]("Record Results Script", const OptimisationComplete& results)){
-                    PGA::updateEstimate(samples, results.fitnesses);
+                    // PGA::updateEstimate(samples, results.fitnesses);
                 });
             }   
 

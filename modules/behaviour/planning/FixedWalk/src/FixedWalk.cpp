@@ -21,57 +21,57 @@
 
 namespace modules {
     namespace behaviour {
-        namespace skills {
+        namespace planner {
+
+        	using messages::motion::WalkCommand;
+			using messages::behaviour::FixedWalkCommand;
+			using messages::input::Sensors;
+
 
             FixedWalk::FixedWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-                //do a little configurating
-                on<Trigger<Configuration<FixedWalk>>>([this] (const Configuration<FixedWalk>& file){
+                // on<Trigger<Configuration<FixedWalk>>>([this] (const Configuration<FixedWalk>& file){                 
+                // });
 
-                 
-                });
-
-    //             class TypeA {					
-				// 	int operator ()(int a) {
-				// 		// do things
-				// 		return 1;
-				// 	}
-				// };
-
-
-
-				// class TypeB {
-				// 	int operator ()(int a) {
-				// 		// do other things
-				// 		return 2;
-				// 	}	
-				// };
-
-
-				// int main() {
-
-				// 	std::vector<std::function<int (int)>> things;
-
-				// 	things.push_back(TypeA());
-				// 	things.push_back(TypeB());
-
-				// 	int x = things[0](5);
-				// }	
-
-                on< Trigger< Every<100, Per<std::chrono::seconds>> >>([this]("Walk Data Manager", const time_t& t, const Sensors& sensors){
-                    if(t > current_script.end_time()){
-                        current_script = scripts.pop_front();
-                        fitnesses.push_back(current_fitness);
+                on< Trigger< Every<30, Per<std::chrono::seconds>>> , Options<Sync<FixedWalk>>, With<Sensors>>([this]("Fixed Walk Manager", const NUClear::clock::time_point& t, const Sensors& sensors){
+                    //Move to next segment if necessary
+                    if(t > segmentStart + walkSegments.front().duration){
+                        segmentStart += walkSegments.front().duration;                        
+                    	walkSegments.pop_front();
+                    	if(walkSegments.empty()){
+                    		emit(std::make_unique<FixedWalkFinished>());
+                    		return;
+                    	}
+	        			beginningOrientation = sensors.orientation;
                     }
+                    //Emit command
+                    if(!walkSegments.empty()){
+                		emit(getWalkCommand(walkSegments.front(), t-segmentStart, sensors));
+                	}
                 });
 
-				on<Trigger<CircularWalk> ([this](const CircularWalk& walk){
-					//push back circular walk
+				on<Trigger<FixedWalkCommand>, Options<Sync<FixedWalk>>, With<Sensors> >([this](const FixedWalkCommand& command, const Sensors& sensors){
+	        		if(walkSegments.empty()){
+	        			segmentStart = NUClear::clock::now();
+	        			beginningOrientation = sensors.orientation;
+	        		}
+	        		for(auto& segment: command.segments){
+	        			walkSegments.push_back(segment);
+	        		}
 				}); 
 
-				on<Trigger<WaypointWalk> ([this](const WaypointWalk& walk){
-					//push back waypoint walk
-				}); 
             }
+
+            std::unique_ptr<WalkCommand> getWalkCommand(const FixedWalkCommand::WalkSegment& segment, NUClear::clock::duration t, const Sensors& sensors){
+            	double vr = segment.normalisedAngularVelocity;
+
+            	double timeSeconds = std::chrono::duration_cast<std::chrono::seconds>(t).count() 
+            	arma::vec2 directionInOriginalCoords = (curvePeriod != 0 ? utility::math::matrix::zRotationMatrix(2 * M_PI * timeSeconds / segment.curvePeriod,2) : arma::eye(2,2) ) * segment.direction;
+            	arma::mat33 inverseRobotRotationSinceStart = sensors.orientation.t() * beginningOrientation;
+            	arma::vec2 direction = arma::normalise(inverseRobotRotationSinceStart.submat(0,0,1,1) * directionInOriginalCoords);
+
+            	return std::make_unique<WalkCommand>({segment.normaliseVelocity * direction, vr});
+            }
+
 
         }  // skills
     }  // behaviours

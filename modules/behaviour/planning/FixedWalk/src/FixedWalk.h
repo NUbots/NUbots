@@ -37,12 +37,14 @@ namespace modules {
                  * @author Jake Fountain
                  */
                 class FixedWalk : public NUClear::Reactor {
-            
-
+                private:
+                    std::queue<messages::behaviour::FixedWalkCommand::WalkSegment> walkSegments; 
+                    NUClear::clock::time_point segmentStart;
+                    arma::mat beginningOrientation;
                 public:
                     explicit FixedWalk(std::unique_ptr<NUClear::Environment> environment);
                     static constexpr const char* CONFIGURATION_PATH = "FixedWalk.yaml";
-            };
+                };
 
         }  // planning
     }  // behaviours
