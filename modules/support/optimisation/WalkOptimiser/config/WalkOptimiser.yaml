@@ -1,0 +1,31 @@
+segments:
+  -
+    curvePeriod: 0
+    direction: [1, 0]
+    normalisedVelocity: 1
+    normalisedAngularVelocity: 0
+    duration: 5
+  -
+    curvePeriod: 0
+    direction: [0, 1]
+    normalisedVelocity: 1
+    normalisedAngularVelocity: 0
+    duration: 5
+  -
+    curvePeriod: 0
+    direction: [-1, 0]
+    normalisedVelocity: 1
+    normalisedAngularVelocity: 0
+    duration: 5
+  -
+    curvePeriod: 0
+    direction: [0, 1]
+    normalisedVelocity: 1
+    normalisedAngularVelocity: 0
+    duration: 5
+  -
+    curvePeriod: 0
+    direction: [1, 1]
+    normalisedVelocity: 1
+    normalisedAngularVelocity: 1
+    duration: 5
