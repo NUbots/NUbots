@@ -45,7 +45,7 @@ namespace modules {
 
             SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
-            , orientationFilter(arma::vec({0,0,0,0,0,0,1}))
+            , orientationFilter(arma::vec({0,0,0,1,0,0,0}))
             , velocityFilter(arma::vec3({0,0,0})) {
 
                 on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){
@@ -56,6 +56,14 @@ namespace modules {
 
                     SUPPORT_FOOT_FSR_THRESHOLD = file.config["SUPPORT_FOOT_FSR_THRESHOLD"].as<double>();
                     REQUIRED_NUMBER_OF_FSRS = file.config["REQUIRED_NUMBER_OF_FSRS"].as<int>();
+
+                    orientationFilter.model.processNoiseDiagonal = arma::ones(orientationFilter.model.size);
+                    orientationFilter.model.processNoiseDiagonal.rows(orientationFilter.model.QW,orientationFilter.model.QZ) *= file["IMU_POSITION_PROCESS_NOISE"].as<double>();
+                    orientationFilter.model.processNoiseDiagonal.rows(orientationFilter.model.VX,orientationFilter.model.VZ) *= file["IMU_VELOCITY_PROCESS_NOISE"].as<double>();
+                    NUClear::log("ProcessNoise Set: \n", orientationFilter.model.processNoiseDiagonal.t());
+
+                    MEASUREMENT_NOISE_ACCELEROMETER = arma::eye(3,3) * file["MEASUREMENT_NOISE_ACCELEROMETER"].as<double>();
+                    MEASUREMENT_NOISE_GYROSCOPE = arma::eye(3,3) * file["MEASUREMENT_NOISE_GYROSCOPE"].as<double>();
                 });
 
                 on<Trigger<DarwinSensors>,
@@ -237,8 +245,8 @@ namespace modules {
 
                     orientationFilter.timeUpdate(deltaT);
 
-                    orientationFilter.measurementUpdate(sensors->accelerometer, arma::eye(3, 3) * 1e-7, float(0));
-                    orientationFilter.measurementUpdate(sensors->gyroscope,     arma::eye(3, 3) * 1e-4, int(1));
+                    orientationFilter.measurementUpdate(sensors->accelerometer, MEASUREMENT_NOISE_ACCELEROMETER, float(0));
+                    orientationFilter.measurementUpdate(sensors->gyroscope,     MEASUREMENT_NOISE_GYROSCOPE, int(1));
 
                     // Gives us the quaternion representation
                     arma::vec o = orientationFilter.get();

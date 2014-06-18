@@ -30,6 +30,8 @@ namespace modules {
         using messages::behaviour::ActionPriorites;
         using messages::behaviour::ServoCommand;
         using messages::behaviour::LimbID;
+        using messages::behaviour::ActionStart;
+        using messages::behaviour::ActionKill;
 
         // So we don't need a huge long type declaration everywhere...
         using iterators = std::pair<std::vector<std::reference_wrapper<RequestItem>>::iterator, std::vector<std::reference_wrapper<RequestItem>>::iterator>;
@@ -46,7 +48,7 @@ namespace modules {
                 };
 
                 // Make our request object
-                requests[action.id] = std::make_unique<Request>(action.id, action.start, action.kill, action.completed);
+                requests[action.id] = std::make_unique<Request>(action.id, action.name, action.start, action.kill, action.completed);
                 auto& request = requests[action.id];
 
                 // In order for our references to hold valid, we need to never reallocate this
@@ -385,7 +387,9 @@ namespace modules {
 
             // Execute all our kill commands
             for (const auto& k : killMap) {
-                requests[k.first]->kill(k.second);
+                auto& request = requests[k.first];
+                request->kill(k.second);
+                emit(std::make_unique<ActionKill>(ActionKill{request->id, request->name, k.second}));
 
                 // Clear our queues for this limb
                 for(const auto& limb : k.second) {
@@ -397,7 +401,9 @@ namespace modules {
 
             // Execute our start commands
             for (const auto& s : startMap) {
-                requests[s.first]->start(s.second);
+                auto& request = requests[s.first];
+                request->start(s.second);
+                emit(std::make_unique<ActionStart>(ActionStart{request->id, request->name, s.second}));
             }
 
             // Our actions are now these new actions

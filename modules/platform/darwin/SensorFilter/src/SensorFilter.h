@@ -53,6 +53,9 @@ namespace modules {
                 double SUPPORT_FOOT_FSR_THRESHOLD;
                 int REQUIRED_NUMBER_OF_FSRS;
 
+                arma::mat MEASUREMENT_NOISE_ACCELEROMETER;
+                arma::mat MEASUREMENT_NOISE_GYROSCOPE;
+
                 arma::vec2 integratedOdometry;
 
                 static constexpr const char* CONFIGURATION_PATH = "DarwinSensorFilter.yaml";

@@ -37,6 +37,7 @@ namespace messages {
         struct RegisterAction {
 
             size_t id;
+            std::string name;
 
             std::vector<std::pair<float, std::set<LimbID>>> limbSet;
 
@@ -58,6 +59,20 @@ namespace messages {
             input::ServoID id;
             float position;
             float gain;
+        };
+
+        struct ActionStart {
+            size_t id;
+            std::string name;
+
+            std::set<LimbID> limbs;
+        };
+
+        struct ActionKill {
+            size_t id;
+            std::string name;
+
+            std::set<LimbID> limbs;
         };
 
         std::set<messages::input::ServoID> servosForLimb(const LimbID& limb);

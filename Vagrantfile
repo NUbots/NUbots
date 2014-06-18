@@ -7,7 +7,7 @@ Vagrant.configure("2") do |config|
   
   # Determine the base box to use by checking the hostname.
   # Add your hostname to the list to opt-out of nubots-14.04.
-  if Socket.gethostname == 'nubots-b767f2s'
+  if Socket.gethostname == 'brain'
     # # 'precise32' was used prior to 2014-04-30.
     # config.vm.box = "precise32"
     # config.vm.box_url = "http://files.vagrantup.com/precise32.box"
