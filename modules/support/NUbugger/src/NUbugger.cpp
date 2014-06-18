@@ -32,6 +32,7 @@
 #include "messages/localisation/FieldObject.h"
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
+#include "messages/behaviour/Action.h"
 
 #include "utility/nubugger/NUgraph.h"
 #include "utility/math/angle.h"
@@ -63,55 +64,55 @@ namespace modules {
         using messages::vision::Goal;
         using messages::vision::Ball;
         using messages::vision::SaveLookUpTable;
+        using messages::behaviour::ActionStart;
+        using messages::behaviour::ActionKill;
+        using messages::localisation::FieldObject;
 
-    void NUbugger::EmitLocalisationModels(
-    const std::unique_ptr<messages::localisation::FieldObject>& robot_model,
-    const std::unique_ptr<messages::localisation::FieldObject>& ball_model) {
+        void NUbugger::EmitLocalisationModels(const std::unique_ptr<FieldObject>& robot_model, const std::unique_ptr<FieldObject>& ball_model) {
 
-        Message message;
+            Message message;
 
-        message.set_type(Message::LOCALISATION);
-        message.set_utc_timestamp(std::time(0));
-        auto* localisation = message.mutable_localisation();
+            message.set_type(Message::LOCALISATION);
+            message.set_utc_timestamp(std::time(0));
+            auto* localisation = message.mutable_localisation();
 
-        auto* api_field_object = localisation->add_field_object();
-        api_field_object->set_name(robot_model->name);
+            auto* api_field_object = localisation->add_field_object();
+            api_field_object->set_name(robot_model->name);
 
-        for (messages::localisation::FieldObject::Model model : robot_model->models) {
-            auto* api_model = api_field_object->add_models();
+            for (FieldObject::Model model : robot_model->models) {
+                auto* api_model = api_field_object->add_models();
 
-            api_model->set_wm_x(model.wm_x);
-            api_model->set_wm_y(model.wm_y);
-            api_model->set_heading(model.heading);
-            api_model->set_sd_x(model.sd_x);
-            api_model->set_sd_y(model.sd_y);
-            api_model->set_sr_xx(model.sr_xx);
-            api_model->set_sr_xy(model.sr_xy);
-            api_model->set_sr_yy(model.sr_yy);
-            api_model->set_lost(model.lost);
+                api_model->set_wm_x(model.wm_x);
+                api_model->set_wm_y(model.wm_y);
+                api_model->set_heading(model.heading);
+                api_model->set_sd_x(model.sd_x);
+                api_model->set_sd_y(model.sd_y);
+                api_model->set_sr_xx(model.sr_xx);
+                api_model->set_sr_xy(model.sr_xy);
+                api_model->set_sr_yy(model.sr_yy);
+                api_model->set_lost(model.lost);
+            }
+
+            api_field_object = localisation->add_field_object();
+            api_field_object->set_name(ball_model->name);
+
+            for (FieldObject::Model model : ball_model->models) {
+                auto* api_model = api_field_object->add_models();
+
+                api_model->set_wm_x(model.wm_x);
+                api_model->set_wm_y(model.wm_y);
+                api_model->set_heading(model.heading);
+                api_model->set_sd_x(model.sd_x);
+                api_model->set_sd_y(model.sd_y);
+                api_model->set_sr_xx(model.sr_xx);
+                api_model->set_sr_xy(model.sr_xy);
+                api_model->set_sr_yy(model.sr_yy);
+                api_model->set_lost(model.lost);
+            }
+
+
+            send(message);
         }
-
-        api_field_object = localisation->add_field_object();
-        api_field_object->set_name(ball_model->name);
-
-        for (messages::localisation::FieldObject::Model model : ball_model->models) {
-            auto* api_model = api_field_object->add_models();
-
-            api_model->set_wm_x(model.wm_x);
-            api_model->set_wm_y(model.wm_y);
-            api_model->set_heading(model.heading);
-            api_model->set_sd_x(model.sd_x);
-            api_model->set_sd_y(model.sd_y);
-            api_model->set_sr_xx(model.sr_xx);
-            api_model->set_sr_xy(model.sr_xy);
-            api_model->set_sr_yy(model.sr_yy);
-            api_model->set_lost(model.lost);
-        }
-
-
-        send(message);
-    }
-
 
         NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -136,6 +137,14 @@ namespace modules {
                 *(message.mutable_data_point()) = data_point;
 
                 send(message);
+            });
+
+            on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
+//                NUClear::log("Action Start: ", actionStart.name);
+            });
+
+            on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
+//                NUClear::log("Action Kill: ", actionKill.name);
             });
 
             // This trigger gets the output from the sensors (unfiltered)

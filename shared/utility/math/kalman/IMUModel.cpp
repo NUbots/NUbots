@@ -1,4 +1,5 @@
 /*
+ * Should produce world to robot coordinate transform 
  * This file is part of the NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
@@ -22,6 +23,7 @@
 namespace utility {
     namespace math {
         namespace kalman {
+
             arma::vec::fixed<IMUModel::size> IMUModel::limitState(const arma::vec::fixed<size>& state) {
                 arma::vec::fixed<size> newState = state;
                 newState.rows(QW, QZ) = arma::normalise(newState.rows(QW, QZ));
@@ -82,7 +84,7 @@ namespace utility {
             }
 
             arma::mat::fixed<IMUModel::size, IMUModel::size> IMUModel::processNoise() {
-                return arma::eye(size, size) * processNoiseFactor;
+                return arma::diagmat(processNoiseDiagonal);
             }
 
         }

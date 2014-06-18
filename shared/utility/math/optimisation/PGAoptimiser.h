@@ -26,39 +26,39 @@
 namespace utility {
     namespace math {
         namespace optimisation {
-            
-            /**
-             * Function to generate a new best-estimate using the parameter samples and fitnesses provided.
-             *
-             * Takes a row-wise list of sample parameters, a corresponding vector of fitnesses, and a selectivity constant c (don't change c unless you know what it does)
-             * @author Josiah Walker
-             */
-            arma::vec PGAupdateEstimate(const arma::mat& samples, const arma::vec& fitnesses, const double c = 7.0) {
-                
-                //create a vector of normed fitnesses
-                const double min = arma::min(fitnesses);
-                const double max = arma::max(fitnesses);
-                const arma::vec normedFitnesses = (max-fitnesses)/(max-min+std::numeric_limits<double>::epsilon());
-                
-                //create a set of weights per sample which specifies the likelihood that they are near the best estimate
-                const arma::vec sampleWeights = arma::exp(-c*normedFitnesses);
-                
-                //return the probabilistically weighted result estimate
-                return arma::sum(samples % arma::repmat(sampleWeights/arma::accu(sampleWeights),1,samples.n_cols),0).t();
-            }
+            namespace PGA {            
+                /**
+                 * Function to generate a new best-estimate using the parameter samples and fitnesses provided.
+                 *
+                 * Takes a row-wise list of sample parameters, a corresponding vector of fitnesses, and a selectivity constant c (don't change c unless you know what it does)
+                 * @author Josiah Walker
+                 */
+                arma::vec updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, const double c = 7.0) {
+                    
+                    //create a vector of normed fitnesses
+                    const double min = arma::min(fitnesses);
+                    const double max = arma::max(fitnesses);
+                    const arma::vec normedFitnesses = (max-fitnesses)/(max-min+std::numeric_limits<double>::epsilon());
+                    
+                    //create a set of weights per sample which specifies the likelihood that they are near the best estimate
+                    const arma::vec sampleWeights = arma::exp(-c*normedFitnesses);
+                    
+                    //return the probabilistically weighted result estimate
+                    return arma::sum(samples % arma::repmat(sampleWeights/arma::accu(sampleWeights),1,samples.n_cols),0).t();
+                }
 
-            /**
-             * Function to create a new set of parameter samples from a best estimate and
-             * a vec of per-dimension scales for the gaussian noise additive (sigmaweights).
-             *
-             * @author Josiah walker
-             */
-            arma::mat PGAgetSamples(const arma::vec& bestEstimate, const arma::vec& sigmaWeights, const size_t& numSamples) {
-                return   arma::randn<arma::mat>(numSamples,bestEstimate.n_elem) 
-                       % arma::repmat(sigmaWeights, 1, numSamples).t() 
-                       + arma::repmat(bestEstimate, 1, numSamples).t();
+                /**
+                 * Function to create a new set of parameter samples from a best estimate and
+                 * a vec of per-dimension scales for the gaussian noise additive (sigmaweights).
+                 *
+                 * @author Josiah walker
+                 */
+                inline arma::mat getSamples(const arma::vec& bestEstimate, const arma::vec& sigmaWeights, const size_t& numSamples) {
+                    return   arma::randn<arma::mat>(numSamples,bestEstimate.n_elem) 
+                           % arma::repmat(sigmaWeights, 1, numSamples).t() 
+                           + arma::repmat(bestEstimate, 1, numSamples).t();
+                }
             }
-        
         }
     }
 }
