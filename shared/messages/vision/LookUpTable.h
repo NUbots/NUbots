@@ -98,9 +98,9 @@ namespace YAML {
         static Node encode(const messages::vision::LookUpTable& rhs) {
             Node node;
 
-            node["bits"]["y"] = rhs.BITS_Y;
-            node["bits"]["cb"] = rhs.BITS_CB;
-            node["bits"]["cr"] = rhs.BITS_CR;
+            node["bits"]["y"] = uint(rhs.BITS_Y);
+            node["bits"]["cb"] = uint(rhs.BITS_CB);
+            node["bits"]["cr"] = uint(rhs.BITS_CR);
 
             node["lut"] = rhs.getData();
 
