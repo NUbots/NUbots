@@ -23,7 +23,7 @@ target_dir = '{0}@{1}:/home/{0}/'.format(username, robot_ip)
 
 # Copy the binaries over
 files = glob.glob('bin/*')
-call(['rsync', '-avzP', '-e ssh'] + files + [target_dir])
+call(['rsync', '-avzP', '--checksum', '-e ssh'] + files + [target_dir])
 
 
 # Overwrite configuration files
