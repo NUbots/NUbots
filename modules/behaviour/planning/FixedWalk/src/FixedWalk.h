@@ -24,11 +24,15 @@
 #include <nuclear>
 #include <armadillo>
 
+#include "messages/input/Sensors.h"
+#include "messages/motion/WalkCommand.h"
+#include "messages/behaviour/FixedWalkCommand.h"
+
 
 
 namespace modules {
     namespace behaviour {
-        namespace skills {
+        namespace planning {
 
                 //using namespace messages;
                 /**
@@ -38,9 +42,13 @@ namespace modules {
                  */
                 class FixedWalk : public NUClear::Reactor {
                 private:
+                    std::unique_ptr<messages::motion::WalkCommand> getWalkCommand(const messages::behaviour::FixedWalkCommand::WalkSegment& segment, 
+                                                                NUClear::clock::duration t, 
+                                                                const messages::input::Sensors& sensors);
                     std::queue<messages::behaviour::FixedWalkCommand::WalkSegment> walkSegments; 
-                    NUClear::clock::time_point segmentStart;
+                    time_t segmentStart;
                     arma::mat beginningOrientation;
+                    bool active;
                 public:
                     explicit FixedWalk(std::unique_ptr<NUClear::Environment> environment);
                     static constexpr const char* CONFIGURATION_PATH = "FixedWalk.yaml";

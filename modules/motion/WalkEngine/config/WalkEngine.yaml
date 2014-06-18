@@ -1,6 +1,6 @@
 {
-    "stanceLimitX": [-0.10 , 0.10],
-    "stanceLimitY": [0.07 , 0.20],
+    "stanceLimitX": [-0.10, 0.10],
+    "stanceLimitY": [0.07, 0.20],
     "stanceLimitA": [0, 0.5236],
     "velLimitX": [-0.03, 0.03],
     "velLimitY": [-0.03, 0.03],
@@ -13,7 +13,7 @@
     "velXHigh": 0.06,
     "velDeltaXHigh": 0.01,
 
-    "footSizeX": [-0.05,0.05],
+    "footSizeX": [-0.05, 0.05],
     "stanceLimitMarginY": 0.015,
     "stanceLimitY2": 0.02,
 
@@ -27,7 +27,7 @@
     "hardnessSupport": 0.3,
     "hardnessSwing": 0.3,
 
-    "hardnessArm0": 0.2,
+    "hardnessArm": 0.2,
     "hardnessArm": 0.3,
 
     "tStep": 0.25,

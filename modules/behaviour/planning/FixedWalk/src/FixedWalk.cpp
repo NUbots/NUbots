@@ -19,28 +19,36 @@
 
 #include "FixedWalk.h"
 
+#include "utility/math/matrix.h"
+
 namespace modules {
     namespace behaviour {
-        namespace planner {
+        namespace planning {
 
-        	using messages::motion::WalkCommand;
+            using messages::motion::WalkCommand;
+            using messages::motion::WalkStartCommand;
+        	using messages::motion::WalkStopCommand;
 			using messages::behaviour::FixedWalkCommand;
+			using messages::behaviour::FixedWalkFinished;
 			using messages::input::Sensors;
 
 
-            FixedWalk::FixedWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+            FixedWalk::FixedWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), active(false){
                 // on<Trigger<Configuration<FixedWalk>>>([this] (const Configuration<FixedWalk>& file){                 
                 // });
 
-                on< Trigger< Every<30, Per<std::chrono::seconds>>> , Options<Sync<FixedWalk>>, With<Sensors>>([this]("Fixed Walk Manager", const NUClear::clock::time_point& t, const Sensors& sensors){
-                    //Move to next segment if necessary
-                    if(t > segmentStart + walkSegments.front().duration){
+                on< Trigger< Every<30, Per<std::chrono::seconds>>> , Options<Sync<FixedWalk>>, With<Sensors>>("Fixed Walk Manager", [this]( const time_t& t, const Sensors& sensors){
+                    
+                    if(t > segmentStart + walkSegments.front().duration && active){//Move to next segment if possible
+                    	walkSegments.pop();
                         segmentStart += walkSegments.front().duration;                        
-                    	walkSegments.pop_front();
-                    	if(walkSegments.empty()){
-                    		emit(std::make_unique<FixedWalkFinished>());
-                    		return;
-                    	}
+                        if(walkSegments.empty()){
+                            emit(std::make_unique<FixedWalkFinished>());
+                            emit(std::make_unique<WalkCommand>());
+                            emit(std::make_unique<WalkStopCommand>());
+                            active = false;
+                            return;
+                        }
 	        			beginningOrientation = sensors.orientation;
                     }
                     //Emit command
@@ -50,26 +58,29 @@ namespace modules {
                 });
 
 				on<Trigger<FixedWalkCommand>, Options<Sync<FixedWalk>>, With<Sensors> >([this](const FixedWalkCommand& command, const Sensors& sensors){
-	        		if(walkSegments.empty()){
+	        		if(!active){
+                        active = true;
 	        			segmentStart = NUClear::clock::now();
 	        			beginningOrientation = sensors.orientation;
+                        emit(std::make_unique<WalkStartCommand>());
 	        		}
 	        		for(auto& segment: command.segments){
-	        			walkSegments.push_back(segment);
+	        			walkSegments.push(segment);
 	        		}
 				}); 
 
             }
 
-            std::unique_ptr<WalkCommand> getWalkCommand(const FixedWalkCommand::WalkSegment& segment, NUClear::clock::duration t, const Sensors& sensors){
+            std::unique_ptr<WalkCommand> FixedWalk::getWalkCommand(const FixedWalkCommand::WalkSegment& segment, NUClear::clock::duration t, const Sensors& sensors){
             	double vr = segment.normalisedAngularVelocity;
-
-            	double timeSeconds = std::chrono::duration_cast<std::chrono::seconds>(t).count() 
-            	arma::vec2 directionInOriginalCoords = (curvePeriod != 0 ? utility::math::matrix::zRotationMatrix(2 * M_PI * timeSeconds / segment.curvePeriod,2) : arma::eye(2,2) ) * segment.direction;
+             	double timeSeconds = std::chrono::duration_cast<std::chrono::seconds>(t).count();
+            	arma::vec2 directionInOriginalCoords = (segment.curvePeriod != 0 ? utility::math::matrix::zRotationMatrix(2 * M_PI * timeSeconds / segment.curvePeriod, 2) : arma::eye(2,2) ) * segment.direction;
             	arma::mat33 inverseRobotRotationSinceStart = sensors.orientation.t() * beginningOrientation;
-            	arma::vec2 direction = arma::normalise(inverseRobotRotationSinceStart.submat(0,0,1,1) * directionInOriginalCoords);
-
-            	return std::make_unique<WalkCommand>({segment.normaliseVelocity * direction, vr});
+            	arma::vec2 direction =  arma::normalise(inverseRobotRotationSinceStart.submat(0,0,1,1) * directionInOriginalCoords);
+            	auto result = std::make_unique<WalkCommand>();
+            	result->rotationalSpeed = vr;
+            	result->velocity = segment.normalisedVelocity * direction;
+            	return std::move(result);
             }
 
 

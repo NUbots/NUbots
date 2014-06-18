@@ -205,7 +205,7 @@ namespace modules {
                 //XXX: this isn't a real config variable - it derives from akleMod[0]
                 toeTipCompensation = config["toeTipCompensation"].as<float>();
 
-                useAlternativeTrajectory = config["useAlternativeTrajectory"].as<float>();
+                useAlternativeTrajectory = config["useAlternativeTrajectory"].as<bool>();
 
 //                setVelocity(config["velCommandX"], config["velCommandY"], config["velCommandAngular"]);
                 //Generate stand script

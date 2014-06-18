@@ -30,7 +30,7 @@ namespace messages {
 
         class FixedWalkCommand{
         public:
-            FixedWalkCommand();
+            FixedWalkCommand(){}
 
             struct WalkSegment
             {
