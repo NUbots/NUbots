@@ -41,7 +41,7 @@ namespace modules {
 		public:
             QuexClassifier();
 
-			std::vector<messages::vision::ClassifiedImage<messages::vision::ObjectClass>::Segment> classify(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const arma::uvec2& start, const arma::uvec2& end);
+			std::vector<messages::vision::ClassifiedImage<messages::vision::ObjectClass>::Segment> classify(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const arma::uvec2& start, const arma::uvec2& end, const uint& stratification = 1);
 		};
 	}
 }

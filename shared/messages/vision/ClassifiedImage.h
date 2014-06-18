@@ -51,6 +51,7 @@ namespace messages {
                 TClass colour;
 
                 uint length;
+                uint subsample;
 
                 arma::uvec2 start;
                 arma::uvec2 end;

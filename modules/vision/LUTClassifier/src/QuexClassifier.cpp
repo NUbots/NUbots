@@ -32,7 +32,7 @@ namespace modules {
         QuexClassifier::QuexClassifier() : lexer(buffer, BUFFER_SIZE, buffer + 1), tknNumber(lexer.token_p()->number) {
         }
 
-        std::vector<ClassifiedImage<ObjectClass>::Segment> QuexClassifier::classify(const Image& image, const LookUpTable& lut, const arma::uvec2& start, const arma::uvec2& end) {
+        std::vector<ClassifiedImage<ObjectClass>::Segment> QuexClassifier::classify(const Image& image, const LookUpTable& lut, const arma::uvec2& start, const arma::uvec2& end, const uint& subsample) {
 
             // Start reading data
             lexer.buffer_fill_region_prepare();
@@ -42,11 +42,11 @@ namespace modules {
 
                 size_t length = end[1] - start[1] + 1;
 
-                for(uint i = 0; i < length; ++i) {
+                for(uint i = 0; i < length; i += subsample) {
                     buffer[i + 1] = lut.classify(image(start[0], start[1] + i));
                 }
 
-                lexer.buffer_fill_region_finish(length);
+                lexer.buffer_fill_region_finish(length / subsample);
             }
 
             // For horizontal runs
@@ -54,11 +54,11 @@ namespace modules {
 
                 size_t length = end[0] - start[0] + 1;
 
-                for(uint i = 0; i < length; ++i) {
+                for(uint i = 0; i < length; i += subsample) {
                     buffer[i + 1] = lut.classify(image(start[0] + i, start[1]));
                 }
 
-                lexer.buffer_fill_region_finish(length);
+                lexer.buffer_fill_region_finish(length / subsample);
             }
 
             // Diagonal run
@@ -66,7 +66,7 @@ namespace modules {
                 // TODO not implemented (and probably won't implement)
             }
 
-            // Our output, the previously inserted token is also held to perform linking
+            // Our output
             std::vector<ClassifiedImage<ObjectClass>::Segment> output;
             output.reserve(64);
 
@@ -80,36 +80,37 @@ namespace modules {
 
                 // Update our position
                 arma::uvec2 s = position;
-                movement += tknNumber;
+                uint len = tknNumber * subsample;
+                movement += len;
                 arma::uvec2 m = (s + position) / 2;
 
                 switch(typeID) {
                     case QUEX_TKN_FIELD:
-                        output.push_back({ObjectClass::FIELD, tknNumber, s, position, m, nullptr, nullptr});
+                        output.push_back({ObjectClass::FIELD, len, subsample, s, position, m, nullptr, nullptr});
                         break;
 
                     case QUEX_TKN_BALL:
-                        output.push_back({ObjectClass::BALL, tknNumber, s, position, m, nullptr, nullptr});
+                        output.push_back({ObjectClass::BALL, len, subsample, s, position, m, nullptr, nullptr});
                         break;
 
                     case QUEX_TKN_GOAL:
-                        output.push_back({ObjectClass::GOAL, tknNumber, s, position, m, nullptr, nullptr});
+                        output.push_back({ObjectClass::GOAL, len, subsample, s, position, m, nullptr, nullptr});
                         break;
 
                     case QUEX_TKN_LINE:
-                        output.push_back({ObjectClass::LINE, tknNumber, s, position, m, nullptr, nullptr});
+                        output.push_back({ObjectClass::LINE, len, subsample, s, position, m, nullptr, nullptr});
                         break;
 
                     case QUEX_TKN_CYAN_TEAM:
-                        output.push_back({ObjectClass::CYAN_TEAM, tknNumber, s, position, m, nullptr, nullptr});
+                        output.push_back({ObjectClass::CYAN_TEAM, len, subsample, s, position, m, nullptr, nullptr});
                         break;
 
                     case QUEX_TKN_MAGENTA_TEAM:
-                        output.push_back({ObjectClass::MAGENTA_TEAM, tknNumber, s, position, m, nullptr, nullptr});
+                        output.push_back({ObjectClass::MAGENTA_TEAM, len, subsample, s, position, m, nullptr, nullptr});
                         break;
 
                     case QUEX_TKN_UNCLASSIFIED:
-                        output.push_back({ObjectClass::UNKNOWN, tknNumber, s, position, m, nullptr, nullptr});
+                        output.push_back({ObjectClass::UNKNOWN, len, subsample, s, position, m, nullptr, nullptr});
                         break;
                 }
             }

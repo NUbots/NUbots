@@ -25,8 +25,9 @@ message ClassifiedImage {
 
     message Segment {
         required uint32 colour = 1;
-        required uvec2 start = 2;
-        required uvec2 end = 3;
+        required uint32 subsample = 2;
+        required uvec2 start = 3;
+        required uvec2 end = 4;
     }
 
     required vec2 horizon = 1;

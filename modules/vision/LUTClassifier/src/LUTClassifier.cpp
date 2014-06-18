@@ -51,9 +51,11 @@ namespace modules {
             QuexClassifier quex;
 
             uint VISUAL_HORIZON_SPACING = 100;
-            uint HORIZON_BUFFER = 0;
+            uint VISUAL_HORIZON_BUFFER = 0;
             uint MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE = 0;
+            uint VISUAL_HORIZON_SUBSAMPLING = 1;
             uint GOAL_FINDER_LINE_SPACING = 100;
+            uint GOAL_FINDER_SUBSAMPLING = 1;
             std::vector<double> GOAL_FINDER_DETECTOR_LEVELS = { 2.0 };
             double BALL_SEARCH_FACTOR = 2.0;
             int MIN_BALL_SEARCH_JUMP = 1;
@@ -61,11 +63,13 @@ namespace modules {
             void setParameters(const CameraParameters& cam, const Configuration<LUTClassifier>& config) {
                 // Visual horizon detector
                 VISUAL_HORIZON_SPACING = cam.effectiveScreenDistancePixels * tan(config["visual_horizon"]["spacing"].as<double>());
-                HORIZON_BUFFER =  cam.effectiveScreenDistancePixels * tan(config["visual_horizon"]["horizon_buffer"].as<double>());
+                VISUAL_HORIZON_BUFFER = cam.effectiveScreenDistancePixels * tan(config["visual_horizon"]["horizon_buffer"].as<double>());
+                VISUAL_HORIZON_SUBSAMPLING = std::max(1, int(cam.effectiveScreenDistancePixels * tan(config["visual_horizon"]["subsampling"].as<double>())));
                 MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE = cam.effectiveScreenDistancePixels * tan(config["visual_horizon"]["minimum_segment_size"].as<double>());
 
                 // // Goal detector
                 GOAL_FINDER_LINE_SPACING = cam.effectiveScreenDistancePixels * tan(config["goals"]["spacing"].as<double>());
+                GOAL_FINDER_SUBSAMPLING = std::max(1, int(cam.effectiveScreenDistancePixels * tan(config["goals"]["subsampling"].as<double>())));
                 GOAL_FINDER_DETECTOR_LEVELS = config["goals"]["detector_levels"].as<std::vector<double>>();
 
                 // Halve our levels
@@ -76,7 +80,7 @@ namespace modules {
                 // // Ball Detector
                 double minIntersections = config["ball"]["intersections"].as<double>();
                 BALL_SEARCH_FACTOR = 2 * 0.1 * cam.pixelsToTanThetaFactor[1] / minIntersections;
-                MIN_BALL_SEARCH_JUMP = std::min(1, int(cam.effectiveScreenDistancePixels * tan(config["ball"]["min_jump"].as<double>())));
+                MIN_BALL_SEARCH_JUMP = std::max(1, int(cam.effectiveScreenDistancePixels * tan(config["ball"]["min_jump"].as<double>())));
             }
         };
 
@@ -148,9 +152,8 @@ namespace modules {
                 for(uint i = 0; i < image.width(); i += m->VISUAL_HORIZON_SPACING) {
 
                     // Find our point to classify from (slightly above the horizon)
-                    uint top = std::max(int(i * horizon[0] + horizon[1] - m->HORIZON_BUFFER), int(0));
+                    uint top = std::max(int(i * horizon[0] + horizon[1] - m->VISUAL_HORIZON_BUFFER), int(0));
                     top = std::min(top, image.height() - 1);
-                    //uint top = std::min(uint(i * horizon[0] + horizon[1] + HORIZON_BUFFER), uint(image.height() - 1));
 
                     // Classify our segments
                     auto segments = m->quex.classify(image, lut, { i, top }, { i, image.height() - 1 });
