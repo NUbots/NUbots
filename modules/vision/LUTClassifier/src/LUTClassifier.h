@@ -41,6 +41,8 @@ namespace modules {
             utility::idiom::pimpl<impl> m;
 
         public:
+            static constexpr const char* CONFIGURATION_PATH = "LUTClassifier.yaml";
+
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
         };
 

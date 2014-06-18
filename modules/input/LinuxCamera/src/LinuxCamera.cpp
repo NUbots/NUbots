@@ -75,7 +75,7 @@ namespace modules {
                 cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
                 cameraParameters->effectiveScreenDistancePixels = imageCentre[0] / tanHalfFOV[0];
 
-                emit(std::move(cameraParameters));
+                emit<Scope::DIRECT>(std::move(cameraParameters));
 
                 try {
                     // Recreate the camera device at the required resolution

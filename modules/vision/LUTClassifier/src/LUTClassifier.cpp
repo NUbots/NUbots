@@ -21,6 +21,7 @@
 #include "utility/idiom/pimpl_impl.h"
 
 #include "messages/input/Image.h"
+#include "messages/input/CameraParameters.h"
 #include "messages/input/Sensors.h"
 #include "messages/vision/LookUpTable.h"
 #include "messages/vision/SaveLookUpTable.h"
@@ -35,6 +36,7 @@ namespace modules {
 
         using messages::input::Image;
         using messages::input::Sensors;
+        using messages::input::CameraParameters;
         using messages::vision::LookUpTable;
         using messages::vision::SaveLookUpTable;
         using messages::vision::ObjectClass;
@@ -43,8 +45,30 @@ namespace modules {
 
         // Implement our impl class.
         class LUTClassifier::impl {
-            public:
+        public:
             QuexClassifier quex;
+
+            uint VISUAL_HORIZON_SPACING = 100;
+            uint HORIZON_BUFFER = 0;
+            uint MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE = 0;
+            uint GOAL_FINDER_LINE_SPACING = 100;
+            std::vector<double> GOAL_FINDER_DETECTOR_LEVELS = { 2.0 };
+            double BALL_SEARCH_FACTOR = 2.0;
+
+            void setParameters(const CameraParameters& cam, const Configuration<LUTClassifier>& config) {
+                // Visual horizon detector
+                VISUAL_HORIZON_SPACING = cam.effectiveScreenDistancePixels * tan(config["visual_horizon"]["spacing"].as<double>());
+                HORIZON_BUFFER =  cam.effectiveScreenDistancePixels * tan(config["visual_horizon"]["horizon_buffer"].as<double>());
+                MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE = cam.effectiveScreenDistancePixels * tan(config["visual_horizon"]["minimum_segment_size"].as<double>());
+
+                // // Goal detector
+                GOAL_FINDER_LINE_SPACING = cam.effectiveScreenDistancePixels * tan(config["goals"]["spacing"].as<double>());
+                GOAL_FINDER_DETECTOR_LEVELS = config["goals"]["detector_levels"].as<std::vector<double>>();
+
+                // // Ball Detector
+                double minIntersections = config["ball"]["intersections"].as<double>();
+                BALL_SEARCH_FACTOR = 0.1 * cam.pixelsToTanThetaFactor[1] / minIntersections;
+            }
         };
 
         void insertSegments(ClassifiedImage<ObjectClass>& image, std::vector<ClassifiedImage<ObjectClass>::Segment>& segments, bool vertical) {
@@ -71,22 +95,18 @@ namespace modules {
 
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            //on<Trigger<Every<10, Per<std::chrono::second>>>([this] (const time_t& t) {});
-                        //Load LUTs
             on<Trigger<Configuration<LUTLocation>>>([this](const Configuration<LUTLocation>& config) {
                 emit(std::make_unique<LookUpTable>(config.config.as<LookUpTable>()));
             });
 
+            auto setParams = [this] (const CameraParameters& cam, const Configuration<LUTClassifier>& config) {
+                m->setParameters(std::forward<const CameraParameters&>(cam), std::forward<const Configuration<LUTClassifier>&>(config));
+            };
+
+            on<Trigger<CameraParameters>, With<Configuration<LUTClassifier>>>(setParams);
+            on<With<CameraParameters>, Trigger<Configuration<LUTClassifier>>>(setParams);
+
             on<Trigger<Image>, With<LookUpTable, Sensors>, Options<Single>>("Classify Image", [this](const Image& image, const LookUpTable& lut, const Sensors& sensors) {
-
-                // TODO this should be wide enough to ensure a really close ball has at least 2 lines passing thorugh it
-                // It should also ensure that the 0th column and last column is done
-                constexpr uint VISUAL_HORIZON_SPACING = 20;
-                constexpr uint HORIZON_BUFFER = 10;
-                constexpr uint MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE = 5;
-                constexpr uint GOAL_LINE_SPACING = 20;
-
-                constexpr double MIN_BALL_FINDER_LINES = 2;
 
                 auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
 
@@ -112,10 +132,10 @@ namespace modules {
                 std::vector<arma::uvec2> horizonPoints;
 
                 // Cast lines to find our visual horizon
-                for(uint i = 0; i < image.width(); i += VISUAL_HORIZON_SPACING) {
+                for(uint i = 0; i < image.width(); i += m->VISUAL_HORIZON_SPACING) {
 
                     // Find our point to classify from (slightly above the horizon)
-                    uint top = std::max(int(i * horizon[0] + horizon[1] - HORIZON_BUFFER), int(0));
+                    uint top = std::max(int(i * horizon[0] + horizon[1] - m->HORIZON_BUFFER), int(0));
                     top = std::min(top, image.height() - 1);
                     //uint top = std::min(uint(i * horizon[0] + horizon[1] + HORIZON_BUFFER), uint(image.height() - 1));
 
@@ -129,7 +149,7 @@ namespace modules {
                     for (auto it = segments.begin(); it != segments.end(); ++it) {
 
                         // If this a valid green point update our information
-                        if(it->colour == ObjectClass::FIELD && it->length >= MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE) {
+                        if(it->colour == ObjectClass::FIELD && it->length >= m->MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE) {
                             greenPoint = it->start;
                             // We found our green
                             break;
@@ -246,7 +266,7 @@ namespace modules {
                 }
 
                 // Cast lines upward to find the goals
-                for(int i = goalSearchStart; i >= 0; i -= GOAL_LINE_SPACING) {
+                for(int i = goalSearchStart; i >= 0; i -= m->GOAL_FINDER_LINE_SPACING) {
 
                     // Cast a full horizontal line here
                     auto segments = m->quex.classify(image, lut, { uint(0), uint(i) }, { image.width() - 1, uint(i) });
@@ -295,8 +315,7 @@ namespace modules {
                     This should allow a high level of detail without overclassifying the image
                  */
 
-                std::vector<double> levels = { 2.0 * 0.5 };
-                for (uint i = 0; i < levels.size(); ++i) {
+                for (uint i = 0; i < m->GOAL_FINDER_DETECTOR_LEVELS.size(); ++i) {
 
                     std::vector<ClassifiedImage<ObjectClass>::Segment> newSegments;
 
@@ -307,10 +326,10 @@ namespace modules {
                         auto& elem = it->second;
                         arma::vec2 midpoint = arma::conv_to<arma::vec>::from(elem.midpoint);
 
-                        arma::vec upperBegin = midpoint + arma::vec({ -double(elem.length) * levels[i],  (GOAL_LINE_SPACING) / std::pow(3, i + 1) });
-                        arma::vec upperEnd   = midpoint + arma::vec({  double(elem.length) * levels[i],  (GOAL_LINE_SPACING) / std::pow(3, i + 1) });
-                        arma::vec lowerBegin = midpoint + arma::vec({ -double(elem.length) * levels[i], -double(GOAL_LINE_SPACING) / std::pow(3, i + 1) });
-                        arma::vec lowerEnd   = midpoint + arma::vec({  double(elem.length) * levels[i], -double(GOAL_LINE_SPACING) / std::pow(3, i + 1) });
+                        arma::vec upperBegin = midpoint + arma::vec({ -double(elem.length) * m->GOAL_FINDER_DETECTOR_LEVELS[i],  double(m->GOAL_FINDER_LINE_SPACING) / std::pow(3, i + 1) });
+                        arma::vec upperEnd   = midpoint + arma::vec({  double(elem.length) * m->GOAL_FINDER_DETECTOR_LEVELS[i],  double(m->GOAL_FINDER_LINE_SPACING) / std::pow(3, i + 1) });
+                        arma::vec lowerBegin = midpoint + arma::vec({ -double(elem.length) * m->GOAL_FINDER_DETECTOR_LEVELS[i], -double(m->GOAL_FINDER_LINE_SPACING) / std::pow(3, i + 1) });
+                        arma::vec lowerEnd   = midpoint + arma::vec({  double(elem.length) * m->GOAL_FINDER_DETECTOR_LEVELS[i], -double(m->GOAL_FINDER_LINE_SPACING) / std::pow(3, i + 1) });
 
                         upperBegin[0] = std::max(upperBegin[0], double(0));
                         upperBegin[0] = std::min(upperBegin[0], double(image.width() - 1));

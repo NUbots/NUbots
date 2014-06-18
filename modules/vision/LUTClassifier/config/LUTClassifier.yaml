@@ -1,0 +1,10 @@
+visual_horizon:
+  spacing: 0.05236
+  horizon_buffer: 0.08727
+  minimum_segment_size: 0.01745
+ball:
+  intersections: 2.0
+goals:
+  spacing: 0.05236
+  detector_levels:
+    - 2.0

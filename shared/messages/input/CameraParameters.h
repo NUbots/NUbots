@@ -23,7 +23,7 @@
 #include <armadillo>
 
 namespace messages {
-    namespace input{
+    namespace input {
 
         struct CameraParameters{
            arma::uvec2 imageSizePixels;
