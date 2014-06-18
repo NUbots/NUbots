@@ -81,7 +81,7 @@ namespace modules {
                 // Update our position
                 arma::uvec2 s = position;
                 movement += tknNumber;
-                arma::uvec2 m = s + position / 2;
+                arma::uvec2 m = (s + position) / 2;
 
                 switch(typeID) {
                     case QUEX_TKN_FIELD:

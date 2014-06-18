@@ -86,6 +86,8 @@ namespace modules {
                 constexpr uint MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE = 5;
                 constexpr uint GOAL_LINE_SPACING = 20;
 
+                constexpr double MIN_BALL_FINDER_LINES = 2;
+
                 auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
 
                 /**********************************************
@@ -159,12 +161,14 @@ namespace modules {
                 }
 
                 uint maxVisualHorizon = 0;
+                uint minVisualHorizon = image.height();
 
                 for(uint i = 0; i < horizonPoints.size() - 1; ++i) {
                     const auto& p1 = horizonPoints[i];
                     const auto& p2 = horizonPoints[i + 1];
 
                     maxVisualHorizon = std::max({ maxVisualHorizon, uint(p1[1]), uint(p2[1]) });
+                    minVisualHorizon = std::min({ minVisualHorizon, uint(p1[1]), uint(p2[1]) });
 
                     double m = (double(p2[1]) - double(p1[1])) / (double(p2[0]) - double(p1[0]));
                     double b = - m * double(p1[0]) + double(p1[1]);
@@ -186,6 +190,35 @@ namespace modules {
                     (for the logrithmic grid)
                  */
 
+                // Update equation
+                /// gives between l and l+1 lines through ball
+                ///
+                /// l        = min lines through ball
+                /// r        = radius of ball
+                /// h        = robot's camera height
+                /// p        = number of pixels below kinematics horizion
+                /// $\alpha$ = pixels to tan(\theta) ratio
+                ///
+                /// $\Delta p=p^{2}\frac{2r\alpha}{lh}$
+
+                // double screenBallSpacing = 0.5 / height;
+
+                // auto lineL = classifiedImage->horizonPoints.begin();
+                // auto lineR = classifiedImage->horizonPoints.end();
+
+                // // Find the apex segment
+                // for(auto it = visualHorizon.begin())
+
+                // for(uint p = minVisualHorizon; p < image.height; p += p * p * screenBallSpacing) {
+
+                //     // Test either end
+
+                //     arma::vec2 start = { };
+                //     arma::vec2 end = { };
+                // }
+                // Start at max green horizon
+                // p += min(p2 * constant, 1);
+
                 // Based on the horizon and level get an end point
 
                 // line starts at visual horizon + buffer down to end point
@@ -200,7 +233,20 @@ namespace modules {
                    We cast lines only above the visual horizon (with some buffer) so that we do not over.
                    classify the mostly empty green below.
                  */
-                for(int i = maxVisualHorizon; i >= 0; i -= GOAL_LINE_SPACING) {
+
+                // We start from either the lowest point on the green horizion, or the lowest goal transition
+                int goalSearchStart = maxVisualHorizon;
+
+                for(auto it = classifiedImage->verticalSegments.lower_bound(ObjectClass::GOAL);
+                    it != classifiedImage->verticalSegments.upper_bound(ObjectClass::GOAL);
+                    ++it) {
+
+                    goalSearchStart = std::max(goalSearchStart, int(it->second.end[1]));
+
+                }
+
+                // Cast lines upward to find the goals
+                for(int i = goalSearchStart; i >= 0; i -= GOAL_LINE_SPACING) {
 
                     // Cast a full horizontal line here
                     auto segments = m->quex.classify(image, lut, { uint(0), uint(i) }, { image.width() - 1, uint(i) });
@@ -249,7 +295,7 @@ namespace modules {
                     This should allow a high level of detail without overclassifying the image
                  */
 
-                std::vector<double> levels = { 2.0 * 0.5, 1.2 * 0.5 };
+                std::vector<double> levels = { 2.0 * 0.5 };
                 for (uint i = 0; i < levels.size(); ++i) {
 
                     std::vector<ClassifiedImage<ObjectClass>::Segment> newSegments;
@@ -261,35 +307,37 @@ namespace modules {
                         auto& elem = it->second;
                         arma::vec2 midpoint = arma::conv_to<arma::vec>::from(elem.midpoint);
 
-                        arma::vec upperBegin = midpoint + arma::vec({  GOAL_LINE_SPACING / 3.0 * double(i),  double(elem.length) * levels[i] });
-                        arma::vec upperEnd   = midpoint + arma::vec({  GOAL_LINE_SPACING / 3.0 * double(i), -double(elem.length) * levels[i] });
-                        arma::vec lowerBegin = midpoint + arma::vec({ -GOAL_LINE_SPACING / 3.0 * double(i),  double(elem.length) * levels[i] });
-                        arma::vec lowerEnd   = midpoint + arma::vec({ -GOAL_LINE_SPACING / 3.0 * double(i), -double(elem.length) * levels[i] });
+                        arma::vec upperBegin = midpoint + arma::vec({ -double(elem.length) * levels[i],  (GOAL_LINE_SPACING) / std::pow(3, i + 1) });
+                        arma::vec upperEnd   = midpoint + arma::vec({  double(elem.length) * levels[i],  (GOAL_LINE_SPACING) / std::pow(3, i + 1) });
+                        arma::vec lowerBegin = midpoint + arma::vec({ -double(elem.length) * levels[i], -double(GOAL_LINE_SPACING) / std::pow(3, i + 1) });
+                        arma::vec lowerEnd   = midpoint + arma::vec({  double(elem.length) * levels[i], -double(GOAL_LINE_SPACING) / std::pow(3, i + 1) });
+
+                        upperBegin[0] = std::max(upperBegin[0], double(0));
+                        upperBegin[0] = std::min(upperBegin[0], double(image.width() - 1));
+
+                        upperEnd[0] = std::max(upperEnd[0], double(0));
+                        upperEnd[0] = std::min(upperEnd[0], double(image.width() - 1));
+
+                        lowerBegin[0] = std::max(lowerBegin[0], double(0));
+                        lowerBegin[0] = std::min(lowerBegin[0], double(image.width() - 1));
+
+                        lowerEnd[0] = std::max(lowerEnd[0], double(0));
+                        lowerEnd[0] = std::min(lowerEnd[0], double(image.width() - 1));
 
                         // If the upper segment is valid
-                        if((upperBegin[1] <= image.height() - 1 && upperBegin[1] >= 0)
-                          && (upperEnd[1] <= image.height() - 1 && upperEnd[1] > 0)) {
-
-                            upperBegin[0] = std::max(upperBegin[0], double(0));
-                            upperBegin[0] = std::min(upperBegin[0], double(image.width()));
-
-                            upperEnd[0] = std::max(upperEnd[0], double(0));
-                            upperEnd[0] = std::min(upperEnd[0], double(image.width()));
+                        if(upperBegin[0] != upperEnd[0]
+                          && (upperBegin[1] < image.height() && upperBegin[1] >= 0)
+                          && (upperEnd[1] < image.height() && upperEnd[1] >= 0)) {
 
                             auto segments = m->quex.classify(image, lut, arma::conv_to<arma::uvec>::from(upperBegin), arma::conv_to<arma::uvec>::from(upperEnd));
 
                             newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
                         }
 
-                        // If the lower segment is valid
-                        if((lowerBegin[1] <= image.height() - 1 && lowerBegin[1] >= 0)
-                          && (lowerEnd[1] <= image.height() - 1 && lowerEnd[1] > 0)) {
-
-                            lowerBegin[0] = std::max(lowerBegin[0], double(0));
-                            lowerBegin[0] = std::min(lowerBegin[0], double(image.width()));
-
-                            lowerEnd[0] = std::max(lowerEnd[0], double(0));
-                            lowerEnd[0] = std::min(lowerEnd[0], double(image.width()));
+                        // If the lower segment is valid and not the same as the upper segment
+                        if(lowerBegin[0] != lowerEnd[0]
+                          && (lowerBegin[1] < image.height() && lowerBegin[1] >= 0)
+                          && (lowerEnd[1] < image.height() && lowerEnd[1] >= 0)) {
 
                             auto segments = m->quex.classify(image, lut, arma::conv_to<arma::uvec>::from(lowerBegin), arma::conv_to<arma::uvec>::from(lowerEnd));
 
