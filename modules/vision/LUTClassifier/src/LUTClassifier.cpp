@@ -35,6 +35,7 @@ namespace modules {
     namespace vision {
 
         using messages::input::Image;
+        using messages::input::ServoID;
         using messages::input::Sensors;
         using messages::input::CameraParameters;
         using messages::vision::LookUpTable;
@@ -42,6 +43,7 @@ namespace modules {
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
         using messages::support::Configuration;
+        using messages::support::SaveConfiguration;
 
         // Implement our impl class.
         class LUTClassifier::impl {
@@ -54,6 +56,7 @@ namespace modules {
             uint GOAL_FINDER_LINE_SPACING = 100;
             std::vector<double> GOAL_FINDER_DETECTOR_LEVELS = { 2.0 };
             double BALL_SEARCH_FACTOR = 2.0;
+            int MIN_BALL_SEARCH_JUMP = 1;
 
             void setParameters(const CameraParameters& cam, const Configuration<LUTClassifier>& config) {
                 // Visual horizon detector
@@ -65,9 +68,16 @@ namespace modules {
                 GOAL_FINDER_LINE_SPACING = cam.effectiveScreenDistancePixels * tan(config["goals"]["spacing"].as<double>());
                 GOAL_FINDER_DETECTOR_LEVELS = config["goals"]["detector_levels"].as<std::vector<double>>();
 
+                // Halve our levels
+                for(auto& d : GOAL_FINDER_DETECTOR_LEVELS) {
+                    d /= 2;
+                }
+
                 // // Ball Detector
                 double minIntersections = config["ball"]["intersections"].as<double>();
-                BALL_SEARCH_FACTOR = 0.1 * cam.pixelsToTanThetaFactor[1] / minIntersections;
+                BALL_SEARCH_FACTOR = 2 * 0.1 * cam.pixelsToTanThetaFactor[1] / minIntersections;
+
+                MIN_BALL_SEARCH_JUMP = 3;
             }
         };
 
@@ -97,6 +107,10 @@ namespace modules {
 
             on<Trigger<Configuration<LUTLocation>>>([this](const Configuration<LUTLocation>& config) {
                 emit(std::make_unique<LookUpTable>(config.config.as<LookUpTable>()));
+            });
+
+            on<Trigger<SaveLookUpTable>, With<LookUpTable>>([this](const SaveLookUpTable&, const LookUpTable& lut) {
+                emit(std::make_unique<SaveConfiguration>(SaveConfiguration{ LUTLocation::CONFIGURATION_PATH, YAML::Node(lut) }));
             });
 
             auto setParams = [this] (const CameraParameters& cam, const Configuration<LUTClassifier>& config) {
@@ -221,7 +235,63 @@ namespace modules {
                 ///
                 /// $\Delta p=p^{2}\frac{2r\alpha}{lh}$
 
-                // double screenBallSpacing = 0.5 / height;
+                double height = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second(3,2) - sensors.forwardKinematics.find(ServoID::L_ANKLE_PITCH)->second(3,2);
+                double eqConst = m->BALL_SEARCH_FACTOR / 0.4;
+
+                // Get the visual horizon intercepts for this point (either side)
+                auto maxPoint = std::min_element(horizonPoints.begin(), horizonPoints.end(), [] (const arma::uvec2& a, const arma::uvec2& b) {
+                    return a[1] < b[1];
+                });
+                auto hLeft = maxPoint == horizonPoints.begin() ? maxPoint : maxPoint - 1;
+                auto hRight = maxPoint + 1;
+
+                uint kinematicsHorizonPoint = horizon[1];
+
+                for(int p = minVisualHorizon - kinematicsHorizonPoint; p + kinematicsHorizonPoint < image.height(); p += std::max(int(p * p * eqConst), m->MIN_BALL_SEARCH_JUMP)) {
+
+                    uint y = p + kinematicsHorizonPoint;
+
+                    arma::uvec2 start = { 0, y };
+                    arma::uvec2 end = { image.width() - 1, y };
+
+                    auto segments = m->quex.classify(image, lut, start, end);
+                    insertSegments(*classifiedImage, segments, false);
+
+
+                    // if(hLeft > horizonPoints.begin()) {
+
+                    //     // Work out our X and Y
+                    //     uint d = std::distance(horizonPoints.begin(), hLeft);
+
+                    //     uint point = x * visualHorizon[d][0] + visualHorizon[d][1];
+                    //     if(point > hLeft->at(1) && point < (hLeft + 1)->at(1)) {
+                    //         // We intersect this line
+                    //     }
+                    //     else {
+                    //         // Try the previous point
+                    //         --hLeft;
+                    //     }
+
+                    //     // Solve our equation for our "segment"
+
+                    //     // Solve for our left and right intercept points
+                    //     uint yRight = (hLeft + 1)->at(0) * visualHorizon[d][0] + visualHorizon[d][1];
+
+                    //     hLeft->at(1)
+                    //     (hLeft + 1)->at(1)
+
+                    //     // Work out if our line is above points + 1 and below points - 1;
+
+                    //     // If not, --hLeft and try again
+                    // }
+
+                    // if(hRight < horizonPoints.end()) {
+
+                    // }
+
+
+                    // Draw a segment from { ghL, p + kinematicsHorizon } { ghr, p + kinematicsHorizon };
+                }
 
                 // auto lineL = classifiedImage->horizonPoints.begin();
                 // auto lineR = classifiedImage->horizonPoints.end();
@@ -254,19 +324,11 @@ namespace modules {
                    classify the mostly empty green below.
                  */
 
-                // We start from either the lowest point on the green horizion, or the lowest goal transition
-                int goalSearchStart = maxVisualHorizon;
-
-                for(auto it = classifiedImage->verticalSegments.lower_bound(ObjectClass::GOAL);
-                    it != classifiedImage->verticalSegments.upper_bound(ObjectClass::GOAL);
-                    ++it) {
-
-                    goalSearchStart = std::max(goalSearchStart, int(it->second.end[1]));
-
-                }
+                // Using yellow segments found by the ball finder, draw some vertical lines to find the bottom of the goals
+                // TODO implement
 
                 // Cast lines upward to find the goals
-                for(int i = goalSearchStart; i >= 0; i -= m->GOAL_FINDER_LINE_SPACING) {
+                for(int i = maxVisualHorizon; i >= 0; i -= m->GOAL_FINDER_LINE_SPACING) {
 
                     // Cast a full horizontal line here
                     auto segments = m->quex.classify(image, lut, { uint(0), uint(i) }, { image.width() - 1, uint(i) });
@@ -293,14 +355,19 @@ namespace modules {
 
                     centre(elem.midpoint);
 
-
                     // Get the expected size of the ball at the
                 }
 
                 // Find the size of a ball at the position
                 auto ballSize = centre.mean();
 
-                // Cast lines in a radius around where the ball should be
+                // Distance to point to centre ( n below horizon = h/alphax )
+
+                // Get the width of the imaginary ball
+
+                // Find the angular width of the ball at this distance
+
+                // Multiply tan of that angle by the angle->pixels constant (alpha?)
 
                 /**********************************************
                  *              CROSSHATCH GOALS              *
