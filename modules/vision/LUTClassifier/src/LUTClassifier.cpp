@@ -76,6 +76,7 @@ namespace modules {
                 // // Ball Detector
                 double minIntersections = config["ball"]["intersections"].as<double>();
                 BALL_SEARCH_FACTOR = 2 * 0.1 * cam.pixelsToTanThetaFactor[1] / minIntersections;
+                MIN_BALL_SEARCH_JUMP = config["ball"]["min_jump"].as<int>();
 
                 MIN_BALL_SEARCH_JUMP = 3;
             }
