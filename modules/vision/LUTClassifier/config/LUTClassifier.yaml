@@ -4,7 +4,7 @@ visual_horizon:
   minimum_segment_size: 0.02
 ball:
   intersections: 1.5
-  min_jump: 4
+  min_jump: 0.04
 goals:
   spacing: 0.05236
   detector_levels:
