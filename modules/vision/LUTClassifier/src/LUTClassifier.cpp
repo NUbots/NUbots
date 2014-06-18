@@ -256,65 +256,47 @@ namespace modules {
                     arma::uvec2 start = { 0, y };
                     arma::uvec2 end = { image.width() - 1, y };
 
+                    while (hLeft > horizonPoints.begin()) {
+
+                        auto& eq = classifiedImage->visualHorizon[std::distance(hLeft, horizonPoints.begin())];
+
+                        double y1 = (hLeft - 1)->at(0) * eq[0] + eq[1];
+                        double y2 = hLeft->at(0) * eq[0] + eq[1];
+
+                        if(y > y1 && y < y2) {
+
+                            // Solve the equation for x
+                            start[0] = std::round((y - eq[1]) / eq[0]);
+                            break;
+                        }
+                        // Try our previous point
+                        else {
+                            --hLeft;
+                        }
+                    }
+
+                    while (hRight < horizonPoints.end()) {
+
+                        auto& eq = classifiedImage->visualHorizon[std::distance(hLeft, horizonPoints.begin())]; // TODO either +1 or -1 here
+
+                        double y1 = (hRight - 1)->at(0) * eq[0] + eq[1];
+                        double y2 = hRight->at(0) * eq[0] + eq[1];
+
+                        if(y < y1 && y > y2) {
+
+                            // Solve the equation for x
+                            end[0] = std::round((y - eq[1]) / eq[0]);
+                            break;
+                        }
+                        // Try our previous point
+                        else {
+                            ++hRight;
+                        }
+                    }
+
                     auto segments = m->quex.classify(image, lut, start, end);
                     insertSegments(*classifiedImage, segments, false);
-
-
-                    // if(hLeft > horizonPoints.begin()) {
-
-                    //     // Work out our X and Y
-                    //     uint d = std::distance(horizonPoints.begin(), hLeft);
-
-                    //     uint point = x * visualHorizon[d][0] + visualHorizon[d][1];
-                    //     if(point > hLeft->at(1) && point < (hLeft + 1)->at(1)) {
-                    //         // We intersect this line
-                    //     }
-                    //     else {
-                    //         // Try the previous point
-                    //         --hLeft;
-                    //     }
-
-                    //     // Solve our equation for our "segment"
-
-                    //     // Solve for our left and right intercept points
-                    //     uint yRight = (hLeft + 1)->at(0) * visualHorizon[d][0] + visualHorizon[d][1];
-
-                    //     hLeft->at(1)
-                    //     (hLeft + 1)->at(1)
-
-                    //     // Work out if our line is above points + 1 and below points - 1;
-
-                    //     // If not, --hLeft and try again
-                    // }
-
-                    // if(hRight < horizonPoints.end()) {
-
-                    // }
-
-
-                    // Draw a segment from { ghL, p + kinematicsHorizon } { ghr, p + kinematicsHorizon };
                 }
-
-                // auto lineL = classifiedImage->horizonPoints.begin();
-                // auto lineR = classifiedImage->horizonPoints.end();
-
-                // // Find the apex segment
-                // for(auto it = visualHorizon.begin())
-
-                // for(uint p = minVisualHorizon; p < image.height; p += p * p * screenBallSpacing) {
-
-                //     // Test either end
-
-                //     arma::vec2 start = { };
-                //     arma::vec2 end = { };
-                // }
-                // Start at max green horizon
-                // p += min(p2 * constant, 1);
-
-                // Based on the horizon and level get an end point
-
-                // line starts at visual horizon + buffer down to end point
-
 
                 /**********************************************
                  *           CAST GOAL FINDER LINES           *
