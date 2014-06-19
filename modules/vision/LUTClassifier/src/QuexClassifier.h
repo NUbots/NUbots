@@ -24,6 +24,8 @@
 
 #define QUEX_SETTING_BUFFER_MIN_FALLBACK_N 0
 #define QUEX_OPTION_ASSERTS_DISABLED
+#define QUEX_OPTION_COMPUTED_GOTOS
+#define QUEX_OPTION_TERMINATION_ZERO_DISABLED
 #include "Lexer.hpp"
 #include "messages/input/Image.h"
 #include "messages/vision/LookUpTable.h"
