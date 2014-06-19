@@ -149,6 +149,8 @@ namespace modules {
                 std::vector<arma::uvec2> horizonPoints;
 
                 // Cast lines to find our visual horizon
+
+                // TODO enforce that a line is cast on the right hand side of the image
                 for(uint i = 0; i < image.width(); i += m->VISUAL_HORIZON_SPACING) {
 
                     // Find our point to classify from (slightly above the horizon)
@@ -244,7 +246,7 @@ namespace modules {
                 auto maxPoint = std::min_element(horizonPoints.begin(), horizonPoints.end(), [] (const arma::uvec2& a, const arma::uvec2& b) {
                     return a[1] < b[1];
                 });
-                auto hLeft = maxPoint == horizonPoints.begin() ? maxPoint : maxPoint - 1;
+                auto hLeft = maxPoint;
                 auto hRight = maxPoint + 1;
 
                 uint kinematicsHorizonPoint = horizon[1];
@@ -258,15 +260,15 @@ namespace modules {
 
                     while (hLeft > horizonPoints.begin()) {
 
-                        auto& eq = classifiedImage->visualHorizon[std::distance(hLeft, horizonPoints.begin())];
+                        auto& eq = classifiedImage->visualHorizon[std::distance(horizonPoints.begin(), hLeft) - 1];
 
-                        double y1 = (hLeft - 1)->at(0) * eq[0] + eq[1];
-                        double y2 = hLeft->at(0) * eq[0] + eq[1];
+                        double y1 = (hLeft - 1)->at(1);
+                        double y2 = hLeft->at(1);
 
-                        if(y > y1 && y < y2) {
+                        if(y <= y1 && y >= y2 && eq[1] != 0) {
 
                             // Solve the equation for x
-                            start[0] = std::round((y - eq[1]) / eq[0]);
+                            start[0] = std::round((y - eq[2]) / eq[1]);
                             break;
                         }
                         // Try our previous point
@@ -277,15 +279,15 @@ namespace modules {
 
                     while (hRight < horizonPoints.end()) {
 
-                        auto& eq = classifiedImage->visualHorizon[std::distance(hLeft, horizonPoints.begin())]; // TODO either +1 or -1 here
+                        auto& eq = classifiedImage->visualHorizon[std::distance(horizonPoints.begin(), hRight) - 1];
 
-                        double y1 = (hRight - 1)->at(0) * eq[0] + eq[1];
-                        double y2 = hRight->at(0) * eq[0] + eq[1];
+                        double y1 = (hRight - 1)->at(1);
+                        double y2 = hRight->at(1);
 
-                        if(y < y1 && y > y2) {
+                        if(y >= y1 && y <= y2 && eq[1] != 0) {
 
                             // Solve the equation for x
-                            end[0] = std::round((y - eq[1]) / eq[0]);
+                            end[0] = std::round((y - eq[2]) / eq[1]);
                             break;
                         }
                         // Try our previous point
@@ -311,12 +313,74 @@ namespace modules {
                 // Using yellow segments found by the ball finder, draw some vertical lines to find the bottom of the goals
                 // TODO implement
 
-                // Cast lines upward to find the goals
-                for(int i = maxVisualHorizon; i >= 0; i -= m->GOAL_FINDER_LINE_SPACING) {
+                // Reset our hMax and hMin so we can do the oppisite check for the ball (to search outside the horizon)
+                // The variables should already be set to this point... but just to be sure
+                hLeft = horizonPoints.begin();
+                hRight = horizonPoints.end() - 1;
 
-                    // Cast a full horizontal line here
-                    auto segments = m->quex.classify(image, lut, { uint(0), uint(i) }, { image.width() - 1, uint(i) });
-                    insertSegments(*classifiedImage, segments, false);
+                // Cast lines upward to find the goals
+                for(int y = maxVisualHorizon; y >= 0; y -= m->GOAL_FINDER_LINE_SPACING) {
+
+                    // If our left hand side is in range, or we are over the top
+                    if(hLeft->at(1) >= uint(y)) {
+
+                        arma::uvec2 start = { uint(0), uint(y) };
+                        arma::uvec2 end = { image.width() - 1, uint(y) };
+
+                        while(hLeft < maxPoint) {
+
+                            auto& eq = classifiedImage->visualHorizon[std::distance(horizonPoints.begin(), hLeft)];
+
+                            int y1 = hLeft->at(1);
+                            int y2 = (hLeft + 1)->at(1);
+
+                            if(y <= y1 && y >= y2 && eq[1] != 0) {
+
+                                // Solve the equation for x
+                                end[0] = std::round((double(y) - eq[2]) / eq[1]);
+                                break;
+                            }
+                            // Try our previous point
+                            else {
+                                ++hLeft;
+                            }
+                        }
+
+                        // Insert our segments
+                        auto segments = m->quex.classify(image, lut, start, end);
+                        insertSegments(*classifiedImage, segments, false);
+                    }
+
+                    // If our right hand side is in range and has not gone out of scope
+                    if(hRight->at(1) >= y && hRight > maxPoint) {
+
+                        arma::uvec2 start = { uint(0), uint(y) };
+                        arma::uvec2 end = { image.width() - 1, uint(y) };
+
+                        while(hRight > maxPoint) {
+
+                            auto& eq = classifiedImage->visualHorizon[std::distance(horizonPoints.begin(), hRight) - 1];
+
+                            int y1 = (hRight - 1)->at(1);
+                            int y2 = hRight->at(1);
+
+                            if(y >= y1 && y <= y2 && eq[1] != 0) {
+
+                                // Solve the equation for x
+                                start[0] = std::round((double(y) - eq[2]) / eq[1]);
+                                break;
+                            }
+                            // Try our previous point
+                            else {
+                                --hRight;
+                            }
+                        }
+
+                        // Insert our segments
+                        auto segments = m->quex.classify(image, lut, start, end);
+                        insertSegments(*classifiedImage, segments, false);
+
+                    }
                 }
 
                 /**********************************************

@@ -282,6 +282,7 @@ namespace modules {
                     auto* s = imageData->add_segment();
 
                     s->set_colour(uint(segment.first));
+                    s->set_subsample(segment.second.subsample);
 
                     auto* start = s->mutable_start();
                     start->set_x(segment.second.start[0]);
@@ -297,6 +298,7 @@ namespace modules {
                     auto* s = imageData->add_segment();
 
                     s->set_colour(uint(segment.first));
+                    s->set_subsample(segment.second.subsample);
 
                     auto* start = s->mutable_start();
                     start->set_x(segment.second.start[0]);
