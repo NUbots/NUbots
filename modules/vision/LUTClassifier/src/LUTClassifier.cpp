@@ -183,7 +183,10 @@ namespace modules {
                     // Our default green point is the bottom of the screen
                     arma::uvec2 greenPoint = { image.width() - 1, image.height() - 1 };
 
-                    auto segments = m->quex.classify(image, lut, { image.width() - 1, 0 }, { image.width() - 1, image.height() - 1 }, m->VISUAL_HORIZON_SUBSAMPLING);
+                    arma::uvec2 start = { image.width() - 1, uint(std::max(int((image.width() - 1) * horizon[0] + horizon[1] - m->VISUAL_HORIZON_BUFFER), int(0))) };
+                    arma::uvec2 end = { image.width() - 1, image.height() - 1 };
+
+                    auto segments = m->quex.classify(image, lut, start, end, m->VISUAL_HORIZON_SUBSAMPLING);
 
                     // Loop through our segments to find our first green segment
                     for (auto it = segments.begin(); it != segments.end(); ++it) {
