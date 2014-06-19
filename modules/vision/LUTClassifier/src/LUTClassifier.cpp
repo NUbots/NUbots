@@ -149,8 +149,6 @@ namespace modules {
                 std::vector<arma::uvec2> horizonPoints;
 
                 // Cast lines to find our visual horizon
-
-                // TODO enforce that a line is cast on the right hand side of the image
                 for(uint i = 0; i < image.width(); i += m->VISUAL_HORIZON_SPACING) {
 
                     // Find our point to classify from (slightly above the horizon)
@@ -158,7 +156,7 @@ namespace modules {
                     top = std::min(top, image.height() - 1);
 
                     // Classify our segments
-                    auto segments = m->quex.classify(image, lut, { i, top }, { i, image.height() - 1 });
+                    auto segments = m->quex.classify(image, lut, { i, top }, { i, image.height() - 1 }, m->VISUAL_HORIZON_SUBSAMPLING);
 
                     // Our default green point is the bottom of the screen
                     arma::uvec2 greenPoint = { i, image.height() - 1 };
@@ -185,7 +183,7 @@ namespace modules {
                     // Our default green point is the bottom of the screen
                     arma::uvec2 greenPoint = { image.width() - 1, image.height() - 1 };
 
-                    auto segments = m->quex.classify(image, lut, { image.width() - 1, 0 }, { image.width() - 1, image.height() - 1 });
+                    auto segments = m->quex.classify(image, lut, { image.width() - 1, 0 }, { image.width() - 1, image.height() - 1 }, m->VISUAL_HORIZON_SUBSAMPLING);
 
                     // Loop through our segments to find our first green segment
                     for (auto it = segments.begin(); it != segments.end(); ++it) {
@@ -372,7 +370,7 @@ namespace modules {
                         }
 
                         // Insert our segments
-                        auto segments = m->quex.classify(image, lut, start, end);
+                        auto segments = m->quex.classify(image, lut, start, end, m->GOAL_FINDER_SUBSAMPLING);
                         insertSegments(*classifiedImage, segments, false);
                     }
 
@@ -402,7 +400,7 @@ namespace modules {
                         }
 
                         // Insert our segments
-                        auto segments = m->quex.classify(image, lut, start, end);
+                        auto segments = m->quex.classify(image, lut, start, end, m->GOAL_FINDER_SUBSAMPLING);
                         insertSegments(*classifiedImage, segments, false);
 
                     }
