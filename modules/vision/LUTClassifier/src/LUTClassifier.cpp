@@ -56,9 +56,11 @@ namespace modules {
             uint VISUAL_HORIZON_SUBSAMPLING = 1;
             uint GOAL_FINDER_LINE_SPACING = 100;
             uint GOAL_FINDER_SUBSAMPLING = 1;
+            double MIN_BALL_INTERSECTIONS = 1;
             std::vector<double> GOAL_FINDER_DETECTOR_LEVELS = { 2.0 };
-            double BALL_SEARCH_FACTOR = 2.0;
+            double ALPHA = 2.0;
             int MIN_BALL_SEARCH_JUMP = 1;
+            double BALL_RADIUS = 0.05;
 
             void setParameters(const CameraParameters& cam, const Configuration<LUTClassifier>& config) {
                 // Visual horizon detector
@@ -78,8 +80,8 @@ namespace modules {
                 }
 
                 // // Ball Detector
-                double minIntersections = config["ball"]["intersections"].as<double>();
-                BALL_SEARCH_FACTOR = 2 * 0.1 * cam.pixelsToTanThetaFactor[1] / minIntersections;
+                MIN_BALL_INTERSECTIONS = config["ball"]["intersections"].as<double>();
+                ALPHA = cam.pixelsToTanThetaFactor[1];
                 MIN_BALL_SEARCH_JUMP = std::max(1, int(cam.effectiveScreenDistancePixels * tan(config["ball"]["min_jump"].as<double>())));
             }
         };
@@ -183,7 +185,11 @@ namespace modules {
                     // Our default green point is the bottom of the screen
                     arma::uvec2 greenPoint = { image.width() - 1, image.height() - 1 };
 
-                    arma::uvec2 start = { image.width() - 1, uint(std::max(int((image.width() - 1) * horizon[0] + horizon[1] - m->VISUAL_HORIZON_BUFFER), int(0))) };
+                    // Find our point to classify from (slightly above the horizon)
+                    uint top = std::max(int((image.width() - 1) * horizon[0] + horizon[1] - m->VISUAL_HORIZON_BUFFER), int(0));
+                    top = std::min(top, image.height() - 1);
+
+                    arma::uvec2 start = { image.width() - 1, top };
                     arma::uvec2 end = { image.width() - 1, image.height() - 1 };
 
                     auto segments = m->quex.classify(image, lut, start, end, m->VISUAL_HORIZON_SUBSAMPLING);
@@ -254,7 +260,7 @@ namespace modules {
                     (for the logrithmic grid)
                  */
 
-                // Update equation
+                // Update equation: p_{n+1}=\frac{h}{\frac{h}{p_{n}}-\frac{\alpha r}{\sin \left( \mbox{atan}\left( \alpha p_{n} \right) \right)}}
                 /// gives between l and l+1 lines through ball
                 ///
                 /// l        = min lines through ball
@@ -266,7 +272,9 @@ namespace modules {
                 /// $\Delta p=p^{2}\frac{2r\alpha}{lh}$
 
                 double height = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second(3,2) - sensors.forwardKinematics.find(ServoID::L_ANKLE_PITCH)->second(3,2);
-                double eqConst = m->BALL_SEARCH_FACTOR / 0.4;
+                height = 0.4;
+
+                height -= m->BALL_RADIUS;
 
                 // Get the visual horizon intercepts for this point (either side)
                 auto maxPoint = std::min_element(horizonPoints.begin(), horizonPoints.end(), [] (const arma::uvec2& a, const arma::uvec2& b) {
@@ -277,7 +285,9 @@ namespace modules {
 
                 uint kinematicsHorizonPoint = horizon[1];
 
-                for(int p = minVisualHorizon - kinematicsHorizonPoint; p + kinematicsHorizonPoint < image.height(); p += std::max(int(p * p * eqConst), m->MIN_BALL_SEARCH_JUMP)) {
+                for(int p = minVisualHorizon - kinematicsHorizonPoint;
+                    p + kinematicsHorizonPoint < image.height();
+                    p = std::max(p + m->MIN_BALL_SEARCH_JUMP, int(round(1.0 / ((1.0 / double(p)) - ((m->ALPHA * 2 * m->BALL_RADIUS) / (m->MIN_BALL_INTERSECTIONS * height))))))) {
 
                     uint y = p + kinematicsHorizonPoint;
 
