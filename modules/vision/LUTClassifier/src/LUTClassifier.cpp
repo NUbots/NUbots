@@ -163,7 +163,7 @@ namespace modules {
                     // Our default green point is the bottom of the screen
                     arma::uvec2 greenPoint = { i, image.height() - 1 };
 
-                    // Loop through our segments backward (top to bottom) to find our first green segment
+                    // Loop through our segments to find our first green segment
                     for (auto it = segments.begin(); it != segments.end(); ++it) {
 
                         // If this a valid green point update our information
@@ -177,6 +177,31 @@ namespace modules {
                     horizonPoints.push_back(std::move(greenPoint));
 
                     insertSegments(*classifiedImage, segments, true);
+                }
+
+                // If we don't have a line on the right of the image, make one
+                if(image.width() - 1 % m->VISUAL_HORIZON_SPACING != 0) {
+
+                    // Our default green point is the bottom of the screen
+                    arma::uvec2 greenPoint = { image.width() - 1, image.height() - 1 };
+
+                    auto segments = m->quex.classify(image, lut, { image.width() - 1, 0 }, { image.width() - 1, image.height() - 1 });
+
+                    // Loop through our segments to find our first green segment
+                    for (auto it = segments.begin(); it != segments.end(); ++it) {
+
+                        // If this a valid green point update our information
+                        if(it->colour == ObjectClass::FIELD && it->length >= m->MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE) {
+                            greenPoint = it->start;
+                            // We found our green
+                            break;
+                        }
+                    }
+
+                    horizonPoints.push_back(std::move(greenPoint));
+
+                    insertSegments(*classifiedImage, segments, true);
+
                 }
 
                 // Do a convex hull on the map points to build the horizon
@@ -352,7 +377,7 @@ namespace modules {
                     }
 
                     // If our right hand side is in range and has not gone out of scope
-                    if(hRight->at(1) >= y && hRight > maxPoint) {
+                    if(hRight->at(1) >= uint(y) && hRight > maxPoint) {
 
                         arma::uvec2 start = { uint(0), uint(y) };
                         arma::uvec2 end = { image.width() - 1, uint(y) };
