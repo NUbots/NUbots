@@ -153,7 +153,7 @@ namespace modules {
 
                 hardnessSwing = config["hardnessSwing"].as<float>();
 
-                hardnessArm0 = config["hardnessArm"].as<float>();
+                hardnessArm0 = config["hardnessArm0"].as<float>();
                 hardnessArm = config["hardnessArm"].as<float>();
 
                 // gGait parameters

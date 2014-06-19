@@ -1,31 +1,33 @@
+number_of_samples: 12
+parameters_and_sigmas:
+  bodyHeight: 0.05
+  bodyTilt: 0.05
+  footY: 0.005
+  tStep: 0.02
+  tZmp: 0.05
+  stepHeight: 0.005
 segments:
   -
     curvePeriod: 0
     direction: [1, 0]
     normalisedVelocity: 1
     normalisedAngularVelocity: 0
-    duration: 5
+    duration: 7
   -
     curvePeriod: 0
-    direction: [0, 1]
+    direction: [1, 0]
+    normalisedVelocity: 1
+    normalisedAngularVelocity: 0.5
+    duration: 6
+  -
+    curvePeriod: 0
+    direction: [1, 0]
     normalisedVelocity: 1
     normalisedAngularVelocity: 0
-    duration: 5
+    duration: 7
   -
     curvePeriod: 0
-    direction: [-1, 0]
+    direction: [1, 0]
     normalisedVelocity: 1
-    normalisedAngularVelocity: 0
-    duration: 5
-  -
-    curvePeriod: 0
-    direction: [0, 1]
-    normalisedVelocity: 1
-    normalisedAngularVelocity: 0
-    duration: 5
-  -
-    curvePeriod: 0
-    direction: [1, 1]
-    normalisedVelocity: 1
-    normalisedAngularVelocity: 1
-    duration: 5
+    normalisedAngularVelocity: 0.5
+    duration: 6

@@ -21,15 +21,54 @@
 #define MODULES_SUPPORT_OPTIMISATION_WALK_OPTIMISER_H
 
 #include <nuclear>
+#include <armadillo>
 
+#include "messages/input/Sensors.h"  
+#include "messages/motion/GetupCommand.h"
+#include "messages/support/Configuration.h"
+#include "messages/behaviour/FixedWalkCommand.h"
 
 
 namespace modules {
     namespace support {
         namespace optimisation {
 
+            struct OptimiseWalkCommand{};
+            struct OptimisationComplete{};
+
+            struct WalkEngineConfig{
+                static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
+            };
+
+            class FitnessData {
+            private:
+                int numberOfGetups = 0;
+                bool recording;
+            public:
+                double popFitness();
+                void update(const messages::input::Sensors& sensors);
+                void recordGetup();
+                void getupFinished();
+            };
+
             class WalkOptimiser : public NUClear::Reactor {
             private:
+                messages::behaviour::FixedWalkCommand walk_command;
+                std::vector<std::string> parameter_names;
+                arma::vec parameter_sigmas;
+                arma::vec fitnesses;
+
+                int currentSample;
+                arma::mat samples;
+                int number_of_samples;
+
+                messages::support::Configuration<WalkEngineConfig> initialConfig;
+
+                arma::vec getState(const messages::support::Configuration<WalkEngineConfig>& walkConfig);
+                messages::support::Configuration<WalkEngineConfig> getWalkConfig(const arma::vec& state);
+                void saveConfig(const messages::support::Configuration<WalkEngineConfig>& config);
+
+                FitnessData data;
             public:
                 static constexpr const char* CONFIGURATION_PATH = "WalkOptimiser.yaml";
                 explicit WalkOptimiser(std::unique_ptr<NUClear::Environment> environment);

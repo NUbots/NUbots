@@ -27,7 +27,7 @@
     "hardnessSupport": 0.3,
     "hardnessSwing": 0.3,
 
-    "hardnessArm": 0.2,
+    "hardnessArm0": 0.3,
     "hardnessArm": 0.3,
 
     "tStep": 0.25,

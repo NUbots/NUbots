@@ -20,6 +20,7 @@
 #include "FixedWalk.h"
 
 #include "utility/math/matrix.h"
+#include "messages/motion/GetupCommand.h"
 
 namespace modules {
     namespace behaviour {
@@ -30,6 +31,8 @@ namespace modules {
         	using messages::motion::WalkStopCommand;
 			using messages::behaviour::FixedWalkCommand;
 			using messages::behaviour::FixedWalkFinished;
+            using messages::motion::ExecuteGetup;
+            using messages::motion::KillGetup;
 			using messages::input::Sensors;
 
 
@@ -37,9 +40,20 @@ namespace modules {
                 // on<Trigger<Configuration<FixedWalk>>>([this] (const Configuration<FixedWalk>& file){                 
                 // });
 
+                on<Trigger<ExecuteGetup>>("FixedWalk::Getup", [this](const ExecuteGetup& command){
+                    //record fall time
+                    segmentElapsedTimeBeforeFall = NUClear::clock::now() - segmentStart;    
+                    fallen = true;                
+                });
+
+                on<Trigger<KillGetup>>("FixedWalk::Getup Finished", [this](const KillGetup& command){
+                    //getup finished
+                    segmentStart = NUClear::clock::now() - segmentElapsedTimeBeforeFall;
+                    fallen = false;
+                });
+
                 on< Trigger< Every<30, Per<std::chrono::seconds>>> , Options<Sync<FixedWalk>>, With<Sensors>>("Fixed Walk Manager", [this]( const time_t& t, const Sensors& sensors){
-                    
-                    if(t > segmentStart + walkSegments.front().duration && active){//Move to next segment
+                    if(t > segmentStart + walkSegments.front().duration && active && !fallen){//Move to next segment
                         segmentStart += walkSegments.front().duration;                        
                         walkSegments.pop();
                         if(walkSegments.empty()){

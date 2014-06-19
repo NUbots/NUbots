@@ -19,92 +19,153 @@
 
 #include "WalkOptimiser.h"
 
-#include "messages/input/Sensors.h"
-#include "messages/motion/WalkCommand.h"    
-#include "messages/behaviour/FixedWalkCommand.h"
-#include "messages/motion/GetupCommand.h"
-#include "messages/support/Configuration.h"
-#include "utility/support/armayamlconversions.h"
- 
 
+#include "utility/support/armayamlconversions.h"
+#include "utility/math/optimisation/PGAoptimiser.h"
 
 namespace modules {
     namespace support {
         namespace optimisation {
 
             using messages::support::Configuration;
-            using messages::motion::WalkCommand;
             using messages::behaviour::FixedWalkCommand;
             using messages::behaviour::FixedWalkFinished;
             using messages::input::Sensors;
             using messages::motion::ExecuteGetup;
             using messages::motion::KillGetup;
+            using messages::support::SaveConfiguration;
 
 
             WalkOptimiser::WalkOptimiser(std::unique_ptr<NUClear::Environment> environment)
-                : Reactor(std::move(environment)) {
+                : Reactor(std::move(environment)),
+                initialConfig("Jerry", YAML::Node()) {
 
                 on<Trigger<Configuration<WalkOptimiser>>>([this](const Configuration<WalkOptimiser>& config){
-                    // std::vector<string> parameterNames;
-                    // parameterNames = config["PARAMETERS_TO_OPTIMISE"];
-                    auto command = std::make_unique<FixedWalkCommand>();
-                    for(auto& segment : config["segments"]){
-                        command->segments.push_back(FixedWalkCommand::WalkSegment());
-                        command->segments.back().direction = segment["direction"].as<arma::vec>();
-                        NUClear::log("direction",command->segments.back().direction);
-                        command->segments.back().curvePeriod = segment["curvePeriod"].as<double>();
-                        NUClear::log("curvePeriod",command->segments.back().curvePeriod);
+                    number_of_samples = config["number_of_samples"].as<int>();
+                    parameter_sigmas.resize(number_of_samples);
+                    parameter_names.resize(number_of_samples);
+                    int i = 0;
 
-                        command->segments.back().normalisedVelocity = segment["normalisedVelocity"].as<double>();                
-                        NUClear::log("normalisedVelocity",command->segments.back().normalisedVelocity);
-                        command->segments.back().normalisedAngularVelocity = segment["normalisedAngularVelocity"].as<double>();                
-                        NUClear::log("normalisedAngularVelocity",command->segments.back().normalisedAngularVelocity);
-                        command->segments.back().duration = std::chrono::milliseconds(int(std::milli::den * segment["duration"].as<double>()));
-                        NUClear::log("duration",std::chrono::duration_cast<std::chrono::seconds>(command->segments.back().duration).count());
+                    for(const auto& parameter : config["parameters_and_sigmas"]) {
+                        parameter_names[i] = parameter.first.as<std::string>();
+                        NUClear::log("parameter_names[",i,"] = ",parameter_names[i]);
+                        parameter_sigmas[i] = parameter.second.as<double>();
+                        NUClear::log("parameter_sigmas[",i,"] = ",parameter_sigmas[i]);
+                        i++;
                     }
+
+                    for(auto& segment : config["segments"]){
+                        walk_command.segments.push_back(FixedWalkCommand::WalkSegment());
+                        walk_command.segments.back().direction = segment["direction"].as<arma::vec>();
+                        walk_command.segments.back().curvePeriod = segment["curvePeriod"].as<double>();
+
+                        walk_command.segments.back().normalisedVelocity = segment["normalisedVelocity"].as<double>();                
+                        walk_command.segments.back().normalisedAngularVelocity = segment["normalisedAngularVelocity"].as<double>();                
+                        walk_command.segments.back().duration = std::chrono::milliseconds(int(std::milli::den * segment["duration"].as<double>()));
+                    }
+                    emit(std::make_unique<OptimiseWalkCommand>());                    
+                });
+
+                on<Trigger<OptimiseWalkCommand>, With<Configuration<WalkEngineConfig>> >("Optimise Walk", [this]( const OptimiseWalkCommand&, const Configuration<WalkEngineConfig>& walkConfig){
+                    samples = utility::math::optimisation::PGA::getSamples(getState(walkConfig), parameter_sigmas, number_of_samples);
+                    fitnesses.zeros(number_of_samples);
+                    initialConfig = walkConfig;
+
+                    currentSample = 0;
+
+                    saveConfig(getWalkConfig(samples.row(currentSample)));
+                    
+                    auto command = std::make_unique<FixedWalkCommand>(walk_command);
                     emit(std::move(command));
                 });
 
-                on< Trigger< Every<100, Per<std::chrono::seconds>> >, With<Sensors> >("Walk Data Manager", [this](const time_t& t, const Sensors& sensors){
-                    // data.update(sensors);
+                on< Trigger< Every<25, Per<std::chrono::seconds>> >, With<Sensors> >("Walk Data Manager", [this](const time_t& t, const Sensors& sensors){
+                    data.update(sensors);
                 });
 
                 on<Trigger<ExecuteGetup>>("Getup Recording", [this](const ExecuteGetup& command){
-                    // data.update(getup);
-                    NUClear::log("!!! Getup Detected by Optimiser !!!");
+                    data.recordGetup();                    
+                });
+                on<Trigger<KillGetup>>("Getup Recording", [this](const KillGetup& command){
+                    data.getupFinished();                    
                 });
 
-                // on<Trigger<OptimiseWalkCommand>>([this]("Optimise Walk", const OptimiseWalkCommand& command){
-                //     // member arma::mat samples = PGA::getSamples(command.state_vec, 0.01 * command);
-                    
-                //     // sampleNumber = 0;
-                //     // emit(std::make_unique<WalkParameters>(samples[sampleNumber]));
-                //     // emit(std::make_unique<WaypointWalk>(start_time));
-                //     // emit(std::make_unique<CircularWalk>(start_time));
-                    
-                // });
+                on<Trigger<FixedWalkFinished>> ("Walk Routine Finised", [this](const FixedWalkFinished& command){
+                    //Get and reset data 
+                    fitnesses[currentSample] = data.popFitness();
+                    if(currentSample >= samples.n_rows-1){
+                        emit(std::make_unique<OptimisationComplete>());
+                    } else {
+                        //Setup new parameters
+                        saveConfig(getWalkConfig(samples.row(++currentSample)));
+                        //Start a walk routine
+                        auto command = std::make_unique<FixedWalkCommand>(walk_command);
+                        emit(std::move(command));
+                    }
+                });
 
-                on<Trigger<FixedWalkFinished>> ("Optimise Walk", [this](const FixedWalkFinished& command){
-                    
-                    NUClear::log("!!! FixedWalkFinished !!!");
-                    // fitnesses.push_back(data.calculateFitness());
-                    // if(sampleNumber == samples.n_rows-1){
-                    //     emit(std::make_unique<OptimisationComplete>);
-                    // }
-                    // emit(std::make_unique<WalkParameters>(samples[++sampleNumber]));
-                    // emit(std::make_unique<WaypointWalk>(start_time));
-                    // emit(std::make_unique<CircularWalk>(start_time));
+                on<Trigger<OptimisationComplete> >("Record Results", [this]( const OptimisationComplete&){
+                    //Combine samples
+                    arma::vec result = utility::math::optimisation::PGA::updateEstimate(samples, fitnesses);
+
+                    saveConfig(getWalkConfig(result));
+                    //Network::emit(std::make_unique<Configuration<WalkEngineConfig>>(getWalkConfig(result)));
+                    emit(std::make_unique<OptimiseWalkCommand>());
                 });
                 
-
-
-                // on<Trigger<OptimisationComplete>([this]("Record Results Script", const OptimisationComplete& results)){
-                //     // PGA::updateEstimate(samples, results.fitnesses);
+                //TODO network
+                // on<Trigger<Network<WalkEngineConfigParameters>>>("Add Sample",[this](const Configuration<WalkEngineConfig>& walkConfig)){
+                //     //samples.push_back(getState()));
+                    // fitnesses.resize(number_of_samples);
+                //      
                 // });
-            }   
 
 
+            }
 
+            arma::vec WalkOptimiser::getState(const Configuration<WalkEngineConfig>& walkConfig){
+                arma::vec state(parameter_names.size());
+                std::cout << "walkConfig.size()" << walkConfig.config.size() << std::endl;
+                int i = 0;
+                for(const std::string& name : parameter_names){
+                    // std::cout << name <<std::endl;
+                    state[i++] = walkConfig.config[name].as<double>();
+                    //std::cout << state[i-1]<<std::endl;                    
+                }
+                // std::cout << "State: "<< state <<std::endl;
+                return state;
+            }
+
+            Configuration<WalkEngineConfig> WalkOptimiser::getWalkConfig(const arma::vec& state){
+                Configuration<WalkEngineConfig> config(initialConfig);
+                for(int i = 0; i < state.size(); ++i){
+                    config[parameter_names[i]] = state[i];
+                }
+                return config;
+            }    
+
+            void WalkOptimiser::saveConfig(const Configuration<WalkEngineConfig>& config){
+                auto saveConfig = std::make_unique<SaveConfiguration>();
+                saveConfig->path = WalkEngineConfig::CONFIGURATION_PATH;
+                saveConfig->config = config.config;
+                emit(std::move(saveConfig));
+            }
+
+            double FitnessData::popFitness(){
+                double result = (numberOfGetups!=0 ? 1 : 1 / double(numberOfGetups));
+                numberOfGetups = 0;
+                return result;
+            }
+            void FitnessData::update(const messages::input::Sensors& sensors){
+
+            }
+            void FitnessData::recordGetup(){
+                numberOfGetups++;
+                recording = false;
+            }
+            void FitnessData::getupFinished(){
+                recording = true;
+            }
         } //optimisation
     } // support
 } // modules

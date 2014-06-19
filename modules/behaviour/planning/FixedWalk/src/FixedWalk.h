@@ -47,8 +47,11 @@ namespace modules {
                                                                 const messages::input::Sensors& sensors);
                     std::queue<messages::behaviour::FixedWalkCommand::WalkSegment> walkSegments; 
                     time_t segmentStart;
+                    NUClear::clock::duration segmentElapsedTimeBeforeFall;
+
                     arma::mat beginningOrientation;
                     bool active;
+                    bool fallen = false;
                 public:
                     explicit FixedWalk(std::unique_ptr<NUClear::Environment> environment);
                     static constexpr const char* CONFIGURATION_PATH = "FixedWalk.yaml";
