@@ -23,18 +23,23 @@ target_dir = '{0}@{1}:/home/{0}/'.format(username, robot_ip)
 
 # Copy the binaries over
 files = glob.glob('bin/*')
-call(['rsync', '-avzP', '-e ssh'] + files + [target_dir])
+call(['rsync', '-avzP', '--checksum', '-e ssh'] + files + [target_dir])
 
 
 # Overwrite configuration files
-if config in ['update', 'u']:
+if config in ['overwrite', 'o']:
     print 'Updating configuration files'
-    call(['rsync', '-avzP', '-e ssh', 'config', target_dir])
+    call(['rsync', '-avzP', '--checksum', '-e ssh', 'config', target_dir])
 
 # Update configuration files
+elif config in ['update', 'u']:
+    print 'Adding new configuration files only'
+    call(['rsync', '-avzuP', '--checksum', '-e ssh', 'config', target_dir])
+
+# Add new configuration files
 elif not config or config in ['new', 'n']:
     print 'Adding new configuration files only'
-    call(['rsync', '-avzP', '--ignore-existing', '-e ssh', 'config', target_dir])
+    call(['rsync', '-avzP', '--checksum', '--ignore-existing', '-e ssh', 'config', target_dir])
 
 # Ignore configuration files
 elif config in ['ignore', 'i']:
