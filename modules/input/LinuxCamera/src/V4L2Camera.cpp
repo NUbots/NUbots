@@ -170,13 +170,13 @@ namespace modules {
                 // Fix the colour information to be YUV444 rather then YUV422
                 for(size_t i = 0; i < total; ++++i) {
 
-                    data[total - i - 1].y  = input[i * 2];
-                    data[total - i - 1].cb = input[i * 2 + 1];
-                    data[total - i - 1].cr = input[i * 2 + 3];
+                    data[i].y  = input[i * 2];
+                    data[i].cb = input[i * 2 + 1];
+                    data[i].cr = input[i * 2 + 3];
 
-                    data[total - i].y  = input[i * 2 + 2];
-                    data[total - i].cb = input[i * 2 + 1];
-                    data[total - i].cr = input[i * 2 + 3];
+                    data[i + 1].y  = input[i * 2 + 2];
+                    data[i + 1].cb = input[i * 2 + 1];
+                    data[i + 1].cr = input[i * 2 + 3];
                 }
 
                 // Move this data into the image
