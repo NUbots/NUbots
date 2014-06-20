@@ -66,6 +66,9 @@ namespace modules {
             : Reactor(std::move(environment))
             , id(size_t(this) * size_t(this) - size_t(this)) {
 
+
+            std::cout << "Walk Engine ID: " << id << std::endl;
+
             emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                 id,
                 "walk_engine",
@@ -346,7 +349,7 @@ namespace modules {
 
 //            log<DEBUG>("velCurrent: ", velCurrent);
 //            log<DEBUG>("velCommand: ", velCommand);
-
+            NUClear::log("Walk Engine Active", active);
             if (!active) {
                 moving = false;
                 return updateStill(sensors);

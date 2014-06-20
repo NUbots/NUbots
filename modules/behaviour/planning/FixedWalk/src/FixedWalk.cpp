@@ -53,7 +53,8 @@ namespace modules {
                 });
 
                 on< Trigger< Every<30, Per<std::chrono::seconds>>> , Options<Sync<FixedWalk>>, With<Sensors>>("Fixed Walk Manager", [this]( const time_t& t, const Sensors& sensors){
-                    if(t > segmentStart + walkSegments.front().duration && active && !fallen){//Move to next segment
+                    if(t > segmentStart + walkSegments.front().duration && active && !fallen){
+                        //Move to next segment
                         segmentStart += walkSegments.front().duration;                        
                         walkSegments.pop();
                         if(walkSegments.empty()){

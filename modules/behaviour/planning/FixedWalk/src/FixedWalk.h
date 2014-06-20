@@ -50,7 +50,7 @@ namespace modules {
                     NUClear::clock::duration segmentElapsedTimeBeforeFall;
 
                     arma::mat beginningOrientation;
-                    bool active;
+                    bool active = false;
                     bool fallen = false;
                 public:
                     explicit FixedWalk(std::unique_ptr<NUClear::Environment> environment);

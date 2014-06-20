@@ -63,7 +63,8 @@ namespace modules {
                 int number_of_samples;
 
                 messages::support::Configuration<WalkEngineConfig> initialConfig;
-
+                
+                void printState(const arma::vec& state);
                 arma::vec getState(const messages::support::Configuration<WalkEngineConfig>& walkConfig);
                 messages::support::Configuration<WalkEngineConfig> getWalkConfig(const arma::vec& state);
                 void saveConfig(const messages::support::Configuration<WalkEngineConfig>& config);

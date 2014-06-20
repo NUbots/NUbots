@@ -387,6 +387,7 @@ namespace modules {
 
             // Execute all our kill commands
             for (const auto& k : killMap) {
+                std::cout << "Taking control: " << k.first << std::endl;
                 auto& request = requests[k.first];
                 request->kill(k.second);
                 emit(std::make_unique<ActionKill>(ActionKill{request->id, request->name, k.second}));
@@ -401,6 +402,7 @@ namespace modules {
 
             // Execute our start commands
             for (const auto& s : startMap) {
+                std::cout << "Giving control: " << s.first << std::endl;
                 auto& request = requests[s.first];
                 request->start(s.second);
                 emit(std::make_unique<ActionStart>(ActionStart{request->id, request->name, s.second}));
