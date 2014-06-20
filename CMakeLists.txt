@@ -62,4 +62,3 @@ INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/DarwinSend.cmake")
 
 # Put it in an IDE group for shared
 SET_PROPERTY(TARGET install PROPERTY FOLDER "ALL_BUILD/")
-SET_PROPERTY(TARGET run PROPERTY FOLDER "ALL_BUILD/")

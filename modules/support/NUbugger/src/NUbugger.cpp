@@ -144,13 +144,13 @@ namespace modules {
                 send(message);
             });
 
-            on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
-//                NUClear::log("Action Start: ", actionStart.name);
-            });
+            // on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
+            //     NUClear::log("Action Start: ", actionStart.name);
+            // });
 
-            on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
-//                NUClear::log("Action Kill: ", actionKill.name);
-            });
+            // on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
+            //     NUClear::log("Action Kill: ", actionKill.name);
+            // });
 
             // This trigger gets the output from the sensors (unfiltered)
             on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {

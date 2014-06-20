@@ -28,7 +28,8 @@ namespace modules {
 
             using messages::motion::WalkCommand;
             using messages::motion::WalkStartCommand;
-        	using messages::motion::WalkStopCommand;
+            using messages::motion::WalkStopCommand;
+        	using messages::motion::WalkStopped;
 			using messages::behaviour::FixedWalkCommand;
 			using messages::behaviour::FixedWalkFinished;
             using messages::motion::ExecuteGetup;
@@ -58,7 +59,6 @@ namespace modules {
                         segmentStart += walkSegments.front().duration;                        
                         walkSegments.pop();
                         if(walkSegments.empty()){
-                            emit(std::make_unique<FixedWalkFinished>());
                             emit(std::make_unique<WalkCommand>());
                             emit(std::make_unique<WalkStopCommand>());
                             active = false;
@@ -70,6 +70,14 @@ namespace modules {
                     if(!walkSegments.empty()){
                 		emit(getWalkCommand(walkSegments.front(), t-segmentStart, sensors));
                 	}
+                });
+
+                on<Trigger<WalkStopCommand>>([this](const WalkStopCommand&){
+                    if(!active){
+                        emit(std::make_unique<FixedWalkFinished>());
+                    } else {
+                        NUClear::log("!!!!!!!!!!!!!!!!!!!!WARNING: Walk finised prematurely!!!!!!!!!!!!!!!!!!!!");
+                    }
                 });
 
 				on<Trigger<FixedWalkCommand>, Options<Sync<FixedWalk>>, With<Sensors> >([this](const FixedWalkCommand& command, const Sensors& sensors){
