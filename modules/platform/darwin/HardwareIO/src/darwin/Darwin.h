@@ -172,13 +172,6 @@ namespace Darwin {
          * @brief This sends a raw command to the UART that the dynamixels are on without expecting a response
          */
         void sendRawCommand(std::vector<uint8_t>& packet);
-
-        /**
-         * @brief This writes a series of servo values to the device
-         *
-         * @param servos The servo objects to write
-         */
-        void writeServos(const std::vector<Types::ServoValues>& servos);
     };
 }  // namespace Darwin
 

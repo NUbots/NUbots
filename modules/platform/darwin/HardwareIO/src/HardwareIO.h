@@ -48,15 +48,13 @@ namespace darwin {
         };
 
         struct ServoState {
-            bool torqueEnabledDirty = false;
+            bool dirty = false;
+
             bool torqueEnabled = false;
 
-            bool gainDirty = false;
             float pGain = 32.0/255.0;
             float iGain = 0;
             float dGain = 0;
-
-            bool positionDirty = false;
             float movingSpeed = 0;
             float goalPosition = 0;
 
