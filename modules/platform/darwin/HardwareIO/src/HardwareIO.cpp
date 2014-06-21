@@ -169,7 +169,8 @@ namespace darwin {
 
                     if(!servoState[i].torqueEnabled) {
                         servoState[i].dirty = false;
-                        // Disable the torque and prepend it to the packet?
+
+                        darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
                     }
                     else {
                         // Clear our dirty flag
@@ -225,8 +226,6 @@ namespace darwin {
 
                 // If gain is 0, do a normal write to disable torque (syncwrite won't write to torqueEnable)
                 if(isnan(command.gain)) {
-                    darwin[static_cast<int>(command.id) + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
-
                     // Update our internal state
                     if(servoState[uint(command.id)].torqueEnabled) {
                         servoState[uint(command.id)].dirty = true;
