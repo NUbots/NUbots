@@ -78,8 +78,6 @@ namespace debug {
 
         });
 
-        NUClear::log<DEBUG>("NUbugger Debug Module Enabled");
-
     }
 
 } // debug
