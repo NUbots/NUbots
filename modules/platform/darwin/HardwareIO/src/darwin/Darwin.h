@@ -168,7 +168,10 @@ namespace Darwin {
          */
         BulkReadResults bulkRead();
 
-        void sendBroadcast(std::vector<uint8_t>& packet);
+        /**
+         * @brief This sends a raw command to the UART that the dynamixels are on without expecting a response
+         */
+        void sendRawCommand(std::vector<uint8_t>& packet);
 
         /**
          * @brief This writes a series of servo values to the device

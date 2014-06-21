@@ -153,135 +153,90 @@ namespace darwin {
             // Our final sensor output
             auto sensors = std::make_unique<DarwinSensors>();
 
-            std::vector<uint8_t> commandPacket;
-            commandPacket.push_back(0xFF);
-            commandPacket.push_back(0xFF);
-            commandPacket.push_back(Darwin::ID::BROADCAST);
-            commandPacket.push_back(Darwin::DarwinDevice::Instruction::BULK_WRITE);
-            commandPacket.push_back(0); // The packet length, to be filled in later
+            std::vector<uint8_t> command;
 
-            for(uint i = 0; i < sizeof(servoState); ++i) {
+
+            for(uint i = 0; i < servoState.size(); ++i) {
 
                 // If we are disabling the torque
                 if(servoState[i].torqueEnabledDirty && !servoState[i].torqueEnabled) {
 
-                    // We fixed it
+                    // We are resolving the dirty flag
                     servoState[i].torqueEnabledDirty = false;
 
-                    // Add our ID
-                    commandPacket.push_back(uint8_t(i + 1));
+                    Darwin::DarwinDevice::WriteCommand<bool> c(i + 1, Darwin::MX28::TORQUE_ENABLE, false);
 
-                    // Add our start
-                    commandPacket.push_back(uint8_t(24));
-
-                    // Add our length
-                    commandPacket.push_back(uint8_t(1));
-
-                    // Set torque enabled to false
-                    commandPacket.push_back(uint8_t(false));
-
+                    command.insert(std::end(command), reinterpret_cast<uint8_t*>(&c), reinterpret_cast<uint8_t*>(&c + sizeof(c)));
                 }
                 else if(servoState[i].positionDirty && servoState[i].gainDirty) {
 
-                    // We fixed it
+                    // We are resolving the dirty flags
                     servoState[i].torqueEnabledDirty = false;
                     servoState[i].gainDirty = false;
                     servoState[i].positionDirty = false;
 
-                    // Add our ID
-                    commandPacket.push_back(uint8_t(i + 1));
-
-                    // Add our start
-                    commandPacket.push_back(uint8_t(26));
-
-                    // Add our length
-                    commandPacket.push_back(uint8_t(8));
-
-                    // Add our gains
-                    commandPacket.push_back(Convert::gainInverse(servoState[i].dGain));
-                    commandPacket.push_back(Convert::gainInverse(servoState[i].iGain));
-                    commandPacket.push_back(Convert::gainInverse(servoState[i].pGain));
-
-                    // Add two reserved values
-                    commandPacket.push_back(0);
-
-                    // Add our goal position
+                    // Get our goal position and speed
                     uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
-
-                    // Lower then Upper bytes
-                    commandPacket.push_back(uint8_t(0xFF & goalPosition));
-                    commandPacket.push_back(uint8_t(0xFF & (goalPosition >> 8)));
-
-                    // Add our goal speed
                     uint16_t movingSpeed = Convert::servoSpeedInverse(i, servoState[i].movingSpeed);
 
-                    // Lower then Upper bytes
-                    commandPacket.push_back(uint8_t(0xFF & movingSpeed));
-                    commandPacket.push_back(uint8_t(0xFF & (movingSpeed >> 8)));
+                    // Build our packet
+                    Darwin::DarwinDevice::WriteCommand<std::array<uint8_t, 8>> c(i + 1, Darwin::MX28::D_GAIN, {
+                        Convert::gainInverse(servoState[i].dGain), // D Gain
+                        Convert::gainInverse(servoState[i].iGain), // I Gain
+                        Convert::gainInverse(servoState[i].pGain), // P Gain
+                        0,                                         // Reserved
+                        uint8_t(0xFF & goalPosition),              // Goal Position L
+                        uint8_t(0xFF & (goalPosition >> 8)),       // Goal Position H
+                        uint8_t(0xFF & movingSpeed),               // Goal Speed L
+                        uint8_t(0xFF & (movingSpeed >> 8))         // Goal Speed H
+                    });
+
+                    command.insert(std::end(command), reinterpret_cast<uint8_t*>(&c), reinterpret_cast<uint8_t*>(&c + sizeof(c)));
                 }
                 else if(servoState[i].positionDirty) {
 
-                    // We fixed it
+                    // We are resolving the dirty flags
                     servoState[i].torqueEnabledDirty = false;
                     servoState[i].positionDirty = false;
 
-                    // Add our ID
-                    commandPacket.push_back(uint8_t(i + 1));
-
-                    // Add our start
-                    commandPacket.push_back(uint8_t(30));
-
-                    // Add our length
-                    commandPacket.push_back(uint8_t(4));
-
-                    // Add our goal position
+                    // Get our goal position and speed
                     uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
+                    uint16_t movingSpeed = Convert::servoSpeedInverse(i, servoState[i].movingSpeed);
 
-                    // Lower then Upper bytes
-                    commandPacket.push_back(uint8_t(0xFF & goalPosition));
-                    commandPacket.push_back(uint8_t(0xFF & (goalPosition >> 8)));
+                    // Build our packet
+                    Darwin::DarwinDevice::WriteCommand<std::array<uint8_t, 4>> c(i + 1, Darwin::MX28::GOAL_POSITION_L, {
+                        uint8_t(0xFF & goalPosition),              // Goal Position L
+                        uint8_t(0xFF & (goalPosition >> 8)),       // Goal Position H
+                        uint8_t(0xFF & movingSpeed),               // Goal Speed L
+                        uint8_t(0xFF & (movingSpeed >> 8))         // Goal Speed H
+                    });
 
-                    // Add our goal speed
-                    uint16_t movingSpeed = Convert::servoSpeedInverse(i, servoState[i].goalPosition);
-
-                    // Lower then Upper bytes
-                    commandPacket.push_back(uint8_t(0xFF & movingSpeed));
-                    commandPacket.push_back(uint8_t(0xFF & (movingSpeed >> 8)));
+                    command.insert(std::end(command), reinterpret_cast<uint8_t*>(&c), reinterpret_cast<uint8_t*>(&c + sizeof(c)));
                 }
                 else if(servoState[i].gainDirty) {
 
-                    // We fixed it
+                    // We are resolving the dirty flags
                     servoState[i].torqueEnabledDirty = false;
                     servoState[i].gainDirty = false;
 
-                    // Add our ID
-                    commandPacket.push_back(uint8_t(i + 1));
+                    // Build our packet
+                    Darwin::DarwinDevice::WriteCommand<std::array<uint8_t, 3>> c(i + 1, Darwin::MX28::D_GAIN, {
+                        Convert::gainInverse(servoState[i].dGain), // D Gain
+                        Convert::gainInverse(servoState[i].iGain), // I Gain
+                        Convert::gainInverse(servoState[i].pGain), // P Gain
+                    });
 
-                    // Add our start
-                    commandPacket.push_back(uint8_t(26));
-
-                    // Add our length
-                    commandPacket.push_back(uint8_t(3));
-
-                    // Add our gains
-                    commandPacket.push_back(Convert::gainInverse(servoState[i].dGain));
-                    commandPacket.push_back(Convert::gainInverse(servoState[i].iGain));
-                    commandPacket.push_back(Convert::gainInverse(servoState[i].pGain));
+                    command.insert(std::end(command), reinterpret_cast<uint8_t*>(&c), reinterpret_cast<uint8_t*>(&c + sizeof(c)));
                 }
             }
-
-            // Set our packet size
-            commandPacket[3] = commandPacket.size() -  4;
-
-            // The checksum
-            commandPacket.push_back(0);
 
             // Read our data
             Darwin::BulkReadResults data = darwin.bulkRead();
 
             // Write our data (if we need to)
-            if(commandPacket[3] > 5) {
-                darwin.sendBroadcast(commandPacket);
+            if(command.size() > 0) {
+                std::cout << "Writing data" << std::endl;
+                darwin.sendRawCommand(command);
             }
 
             // Parse our data

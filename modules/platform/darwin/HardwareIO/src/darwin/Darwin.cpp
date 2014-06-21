@@ -59,7 +59,10 @@ namespace Darwin {
         buildBulkReadPacket();
 
         // Now that the dynamixels should have started up, set their delay time to 0 (it may not have been configured before)
-        uart.execute(DarwinDevice::WriteCommand<uint8_t>(ID::BROADCAST, CM730::Address::RETURN_DELAY_TIME, 0));
+        uart.executeWrite(DarwinDevice::WriteCommand<uint8_t>(ID::BROADCAST, CM730::Address::RETURN_DELAY_TIME, 0));
+
+        // Set the dynamixels to not return a status packet when written to (to allow consecutive writes)
+        uart.executeWrite(DarwinDevice::WriteCommand<uint8_t>(ID::BROADCAST, CM730::Address::RETURN_LEVEL, 1));
     }
 
     std::vector<std::pair<uint8_t, bool>> Darwin::selfTest() {
@@ -276,9 +279,7 @@ namespace Darwin {
         }
     }
 
-    void Darwin::sendBroadcast(std::vector<uint8_t>& packet) {
-
-        packet.back() = calculateChecksum(packet.data());
+    void Darwin::sendRawCommand(std::vector<uint8_t>& packet) {
 
         uart.executeBroadcast(packet);
     }
