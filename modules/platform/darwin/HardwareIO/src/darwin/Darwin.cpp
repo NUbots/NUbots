@@ -276,6 +276,13 @@ namespace Darwin {
         }
     }
 
+    void Darwin::sendBroadcast(std::vector<uint8_t>& packet) {
+
+        packet.back() = calculateChecksum(packet.data());
+
+        uart.executeBroadcast(packet);
+    }
+
     void Darwin::writeServos(const std::vector<Types::ServoValues>& servos) {
 
         // Check that our ServoValues object is the correct size (the difference + 1 + another for the id)

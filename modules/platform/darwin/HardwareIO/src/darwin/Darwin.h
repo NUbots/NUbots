@@ -76,7 +76,7 @@ namespace Darwin {
      * @author Trent Houliston
      */
     class Darwin {
-    private:        
+    private:
         /// Our UART class that we will communicate through
         UART uart;
         /// Our Prebuilt bulk read command
@@ -167,6 +167,8 @@ namespace Darwin {
          * @return A BulkReadResuts object containing all of the sensor data as it was read from the device (no trasforms)
          */
         BulkReadResults bulkRead();
+
+        void sendBroadcast(std::vector<uint8_t>& packet);
 
         /**
          * @brief This writes a series of servo values to the device

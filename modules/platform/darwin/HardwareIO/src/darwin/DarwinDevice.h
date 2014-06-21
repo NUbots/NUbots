@@ -47,8 +47,10 @@ namespace Darwin {
             REG_WRITE = 4,
             ACTION = 5,
             RESET = 6,
+            SYNC_READ = 130,
             SYNC_WRITE = 131,
-            BULK_READ = 146
+            BULK_READ = 146,
+            BULK_WRITE = 147
         };
 
         /**

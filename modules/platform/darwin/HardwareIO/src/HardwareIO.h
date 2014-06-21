@@ -39,6 +39,7 @@ namespace darwin {
     private:
         /// @brief Our internal darwin class that is used for interacting with the hardware
         Darwin::Darwin darwin;
+        messages::platform::darwin::DarwinSensors parseSensors(const Darwin::BulkReadResults& data);
 
         /// @brief Our state for our CM730 for variables we send to it
         struct {
@@ -49,11 +50,15 @@ namespace darwin {
 
         /// @brief Our state for or MX28s for variables we send to it
         struct {
+            bool torqueEnabledDirty = false;
             bool torqueEnabled = false;
+
+            bool gainDirty = false;
             float pGain = 32.0/255.0;
             float iGain = 0;
             float dGain = 0;
 
+            bool positionDirty = false;
             float movingSpeed = 0;
             float goalPosition = 0;
 
