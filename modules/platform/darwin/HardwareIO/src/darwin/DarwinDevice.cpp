@@ -25,7 +25,7 @@ namespace Darwin {
     bool DarwinDevice::ping() {
 
         // Ping and get the result
-        CommandResult result = coms.execute(PingCommand(id));
+        CommandResult result = coms.executeRead(PingCommand(id));
 
         // Check if there was an error code
         return result.header.errorcode == ErrorCode::NONE;
