@@ -191,7 +191,7 @@ namespace darwin {
                         uint8_t(0xFF & (movingSpeed >> 8))         // Goal Speed H
                     });
 
-                    command.insert(std::end(command), reinterpret_cast<uint8_t*>(&c), reinterpret_cast<uint8_t*>(&c + sizeof(c)));
+                    command.insert(std::end(command), reinterpret_cast<uint8_t*>(&c), reinterpret_cast<uint8_t*>(&c) + sizeof(c));
                 }
                 else if(servoState[i].positionDirty) {
 
@@ -235,7 +235,6 @@ namespace darwin {
 
             // Write our data (if we need to)
             if(command.size() > 0) {
-                std::cout << "Writing data" << std::endl;
                 darwin.sendRawCommand(command);
             }
 
