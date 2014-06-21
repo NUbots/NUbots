@@ -21,7 +21,9 @@
 #define UTILITY_SUPPORT_ARMAYAMLCONVERSION_H
 
 #include <armadillo>
+#include <iostream> 
 #include <yaml-cpp/yaml.h>
+
 
 namespace YAML {
 

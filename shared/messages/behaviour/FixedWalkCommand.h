@@ -1,5 +1,4 @@
 /*
- * Responsible for creating scripted walk sequences
  * This file is part of the NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
@@ -18,35 +17,34 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_PLANNERS_WALKPATHPLANNER_H
-#define MODULES_BEHAVIOUR_PLANNERS_WALKPATHPLANNER_H
+#ifndef MESSAGES_BEHAVIOUR_FIXED_WALK_COMMAND_H
+#define MESSAGES_BEHAVIOUR_FIXED_WALK_COMMAND_H
 
 #include <nuclear>
 #include <armadillo>
 
-
-
-namespace modules {
+namespace messages {
     namespace behaviour {
-        namespace skills {
 
-                //using namespace messages;
-                /**
-                 * Executes a getup script if the robot falls over.
-                 *
-                 * @author Jake Fountain
-                 */
-                class WalkPathPlanner : public NUClear::Reactor {
-            
+        struct FixedWalkFinished{};
 
-                public:
-                    explicit WalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
-                    static constexpr const char* CONFIGURATION_PATH = "WalkPathPlanner.yaml";
+        class FixedWalkCommand{
+        public:
+            FixedWalkCommand(){}
+
+            struct WalkSegment
+            {
+                arma::vec2 direction;
+                double curvePeriod;
+
+                double normalisedVelocity;                
+                double normalisedAngularVelocity;                
+                NUClear::clock::duration duration;
             };
+            
+            std::vector<WalkSegment> segments;            
+        };
+    }
+}
 
-        }  // planning
-    }  // behaviours
-}  // modules
-
-#endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_H
-
+#endif

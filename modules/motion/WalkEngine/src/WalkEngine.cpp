@@ -54,6 +54,7 @@ namespace modules {
         using messages::motion::WalkCommand;
         using messages::motion::WalkStartCommand;
         using messages::motion::WalkStopCommand;
+        using messages::motion::WalkStopped;
         using messages::motion::ServoTarget;
         using messages::behaviour::RegisterAction;
         using messages::behaviour::ActionPriorites;
@@ -153,7 +154,7 @@ namespace modules {
 
                 hardnessSwing = config["hardnessSwing"].as<float>();
 
-                hardnessArm0 = config["hardnessArm"].as<float>();
+                hardnessArm0 = config["hardnessArm0"].as<float>();
                 hardnessArm = config["hardnessArm"].as<float>();
 
                 // gGait parameters
@@ -206,7 +207,7 @@ namespace modules {
                 //XXX: this isn't a real config variable - it derives from akleMod[0]
                 toeTipCompensation = config["toeTipCompensation"].as<float>();
 
-                useAlternativeTrajectory = config["useAlternativeTrajectory"].as<float>();
+                useAlternativeTrajectory = config["useAlternativeTrajectory"].as<bool>();
 
 //                setVelocity(config["velCommandX"], config["velCommandY"], config["velCommandAngular"]);
                 //Generate stand script
@@ -232,6 +233,7 @@ namespace modules {
             });
 
             on<Trigger<Startup>>([this](const Startup&) {
+                stopRequest = 2;
                 reset();
                 //start();
             });
@@ -276,8 +278,6 @@ namespace modules {
                 tLastStep = getTime();
                 ph0=0;
                 ph=0;
-
-                stopRequest = 2;
 
                 currentStepType = 0;
 
@@ -342,11 +342,11 @@ namespace modules {
             //advanceMotion();
             double time = getTime();
 
+
             // TODO: bodyHeightCurrent = vcm.get_camera_bodyHeight();
 
 //            log<DEBUG>("velCurrent: ", velCurrent);
 //            log<DEBUG>("velCommand: ", velCommand);
-
             if (!active) {
                 moving = false;
                 return updateStill(sensors);
@@ -372,6 +372,7 @@ namespace modules {
                 stopRequest = 0;
                 active = false;
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 0, 0 }})); // TODO: config
+                emit(std::make_unique<WalkStopped>());
 
                 return std::make_unique<std::vector<ServoCommand>>(); // TODO: return "stop"
             }

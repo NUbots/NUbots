@@ -1,0 +1,46 @@
+number_of_samples: 4
+getup_cancel_trial_threshold: 5
+parameters_and_sigmas:
+  bodyHeight: 0.01
+  bodyTilt: 0.01
+  footY: 0.005
+  tStep: 0.02
+  tZmp: 0.05
+  stepHeight: 0.005
+segments:
+  -
+    curvePeriod: 0
+    direction: [1, 0]
+    normalisedVelocity: 0
+    normalisedAngularVelocity: 0
+    duration: 1
+  -
+    curvePeriod: 0
+    direction: [1, 0]
+    normalisedVelocity: 1
+    normalisedAngularVelocity: 0
+    duration: 7
+  -
+    curvePeriod: 0
+    direction: [1, 0]
+    normalisedVelocity: 1
+    normalisedAngularVelocity: 0.5
+    duration: 6
+  -
+    curvePeriod: 0
+    direction: [1, 0]
+    normalisedVelocity: 1
+    normalisedAngularVelocity: 0
+    duration: 7
+  -
+    curvePeriod: 0
+    direction: [1, 0]
+    normalisedVelocity: 1
+    normalisedAngularVelocity: 0.5
+    duration: 6
+  -
+    curvePeriod: 0
+    direction: [1, 0]
+    normalisedVelocity: 0
+    normalisedAngularVelocity: 0
+    duration: 1

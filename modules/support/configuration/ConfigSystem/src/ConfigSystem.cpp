@@ -74,8 +74,17 @@ namespace modules {
 
                 on<Trigger<messages::support::SaveConfiguration>>([this](const messages::support::SaveConfiguration& saveConfig) {
 
-                    utility::file::writeToFile(saveConfig.path, saveConfig.config);
+                    std::string tempName = "config/" + saveConfig.path + ".tmp";
+                    std::string finalName = "config/" + saveConfig.path;
+
+                    // Save the file to a temp location (so we don't try to read it as it's saving)
                     NUClear::log("Saving config:", saveConfig.path);
+                    utility::file::writeToFile(tempName, saveConfig.config);
+
+                    // Move the file into position
+                    rename (tempName.c_str(), finalName.c_str());
+
+                    NUClear::log("Saved config:", saveConfig.path);
                 });
 
                 on<Trigger<messages::support::ConfigurationConfiguration>>([this](const messages::support::ConfigurationConfiguration& command) {
