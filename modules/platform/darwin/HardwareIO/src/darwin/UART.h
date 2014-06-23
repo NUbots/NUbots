@@ -141,7 +141,7 @@ namespace Darwin {
          * @return the return value from executing this command
          */
         template <typename TPacket>
-        CommandResult execute(const TPacket& command) {
+        CommandResult executeRead(const TPacket& command) {
 
             // Lock the mutex
             std::lock_guard<std::mutex> lock(mutex);
@@ -161,6 +161,30 @@ namespace Darwin {
 
             // Read the packet that we get in response
             return readPacket();
+        }
+
+        /**
+         * @brief Executes a passed packet and does not wait for a response (for writes)
+         *
+         * @tparam TPacket the type of packet we are executing
+         *
+         * @param command the command we are executing
+         */
+        template <typename TPacket>
+        void executeWrite(const TPacket& command) {
+
+            // Lock the mutex
+            std::lock_guard<std::mutex> lock(mutex);
+
+            // Write our command to the UART
+            int written = write(fd, &command, sizeof(TPacket));
+
+            // Wait until we finish writing before continuing (no buffering)
+            tcdrain(fd);
+
+            assert(written == sizeof(TPacket));
+            // If compiled with NDEBUG then technically written is unused, suppress that warning
+            (void) written;
         }
 
         /**

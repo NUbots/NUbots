@@ -17,25 +17,26 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_SUPPORT_OPTIMISATION_WALK_OPTIMISER_H
-#define MODULES_SUPPORT_OPTIMISATION_WALK_OPTIMISER_H
+package messages.behaviour.proto;
 
-#include <nuclear>
+message Behaviour {
+    enum Type {
+        ACTION_STATE = 1;
+    }
 
-namespace modules {
-    namespace support {
-        namespace optimisation {
+    required Type type = 1;
 
-            class WalkOptimiser : public NUClear::Reactor {
-            private:
-            public:
-                static constexpr const char* CONFIGURATION_PATH = "WalkScripter.yaml";
-                explicit WalkOptimiser(std::unique_ptr<NUClear::Environment> environment);
-            };
+    optional ActionStateChange action_state_change = 2;
+}
 
-        } //optimisation
-    }  // support
-}  // modules
+message ActionStateChange {
 
-#endif  // MODULES_SUPPORT_NUBUGGER_H
+    enum State {
+        START = 1;
+        KILL = 2;
+    }
 
+    required State state = 1; 
+    required string name = 2;
+
+}

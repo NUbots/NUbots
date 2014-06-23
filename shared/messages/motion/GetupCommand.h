@@ -17,29 +17,14 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_WalkScript_H
-#define MESSAGES_BEHAVIOUR_WalkScript_H
-
-#include <nuclear>
+#ifndef MESSAGES_MOTION_GETUPCOMMAND_H
+#define MESSAGES_MOTION_GETUPCOMMAND_H
 
 namespace messages {
-    namespace behaviour {
-
-        class WalkScript {
-        public:
-            struct Waypoint
-            {
-                arma::vec2 position;
-                NUClear::clock::duration duration;               
-            };
-
-            bool relativeCoordinates;
-            std::vector<Waypoint> waypoints;            
-
-            virtual WalkCommand getWalkCommand(const NUClear::clock::time_point& t);
-        };
-
-    }
+    namespace motion { 
+    	//internal only callback messages to start and stop our action
+		struct ExecuteGetup{};
+		struct KillGetup{};
+	}
 }
-
-#endif
+#endif  // MESSAGES_MOTION_KICKCOMMAND_H

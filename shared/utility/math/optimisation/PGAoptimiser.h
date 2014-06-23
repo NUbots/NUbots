@@ -33,7 +33,7 @@ namespace utility {
                  * Takes a row-wise list of sample parameters, a corresponding vector of fitnesses, and a selectivity constant c (don't change c unless you know what it does)
                  * @author Josiah Walker
                  */
-                arma::vec updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, const double c = 7.0) {
+                inline arma::vec updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, const double c = 7.0) {
                     
                     //create a vector of normed fitnesses
                     const double min = arma::min(fitnesses);

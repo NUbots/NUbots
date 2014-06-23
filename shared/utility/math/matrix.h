@@ -94,7 +94,7 @@ namespace utility {
 
             inline arma::mat zRotationMatrix(double angle, int size) {
                 if (size <= 2) {
-                    return zRotationMatrix(angle).submat(0,1,0,1);
+                    return zRotationMatrix(angle).submat(0,0,1,1);
                 }
                 arma::mat rot(size, size, arma::fill::eye);
                 rot.submat(0,0,2,2) = zRotationMatrix(angle);

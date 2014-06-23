@@ -27,6 +27,7 @@ import "messages/localisation/proto/Localisation.proto";
 import "messages/vision/proto/ClassifiedImage.proto";
 import "messages/vision/proto/VisionObject.proto";
 import "messages/vision/proto/LookUpTable.proto";
+import "messages/behaviour/proto/Behaviour.proto";
 
 message Message {
     enum Type {
@@ -38,11 +39,8 @@ message Message {
         DATA_POINT = 6;
         REACTION_STATISTICS = 7;
         LOOKUP_TABLE = 8;
-        COMMAND = 9;
-    }
-
-    message Command {
-        optional string command = 1;
+        BEHAVIOUR = 9
+        COMMAND = 10;
     }
 
     required Type type = 1;
@@ -56,5 +54,10 @@ message Message {
     optional messages.support.nubugger.proto.DataPoint data_point = 8;
     optional messages.support.nuclear.proto.ReactionStatistics reaction_statistics = 9;
     optional messages.vision.proto.LookUpTable lookup_table = 10;
-    optional Command command = 11;
+    optional messages.behaviour.proto.Behaviour behaviour = 11;
+    optional Command command = 12;
+
+    message Command {
+        optional string command = 1;
+    }
 }

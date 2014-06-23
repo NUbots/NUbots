@@ -21,7 +21,9 @@
 #define UTILITY_SUPPORT_ARMAYAMLCONVERSION_H
 
 #include <armadillo>
+#include <iostream> 
 #include <yaml-cpp/yaml.h>
+
 
 namespace YAML {
 
@@ -38,7 +40,7 @@ namespace YAML {
         }
 
         static bool decode(const Node& node, arma::vec& rhs) {
-
+            rhs.resize(node.size());
             for (uint i = 0; i < node.size(); ++i) {
                 rhs[i] = node[i].as<double>();
             }

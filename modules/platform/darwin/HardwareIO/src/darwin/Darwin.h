@@ -76,7 +76,7 @@ namespace Darwin {
      * @author Trent Houliston
      */
     class Darwin {
-    private:        
+    private:
         /// Our UART class that we will communicate through
         UART uart;
         /// Our Prebuilt bulk read command
@@ -169,11 +169,9 @@ namespace Darwin {
         BulkReadResults bulkRead();
 
         /**
-         * @brief This writes a series of servo values to the device
-         *
-         * @param servos The servo objects to write
+         * @brief This sends a raw command to the UART that the dynamixels are on without expecting a response
          */
-        void writeServos(const std::vector<Types::ServoValues>& servos);
+        void sendRawCommand(std::vector<uint8_t>& packet);
     };
 }  // namespace Darwin
 

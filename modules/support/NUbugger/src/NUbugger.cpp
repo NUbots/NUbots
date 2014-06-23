@@ -33,6 +33,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/behaviour/Action.h"
+#include "messages/behaviour/proto/Behaviour.pb.h"
 
 #include "utility/nubugger/NUgraph.h"
 #include "utility/math/angle.h"
@@ -60,7 +61,8 @@ namespace modules {
         using utility::nubugger::graph;
         using messages::support::nubugger::proto::DataPoint;
         using messages::support::nubugger::proto::Message;
-        using messages::support::nubugger::proto::Message_Type;
+        using messages::behaviour::proto::Behaviour;
+        using messages::behaviour::proto::ActionStateChange;
         using messages::vision::Goal;
         using messages::vision::Ball;
         using messages::vision::SaveLookUpTable;
@@ -134,18 +136,38 @@ namespace modules {
                 message.set_type(Message::DATA_POINT);
                 message.set_utc_timestamp(std::time(0));
 
-                *(message.mutable_data_point()) = data_point;
+            *(message.mutable_data_point()) = data_point;
 
                 send(message);
             });
 
-            on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
-//                NUClear::log("Action Start: ", actionStart.name);
-            });
+             on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
+                Message message;
+                message.set_type(Message::BEHAVIOUR);
+                message.set_utc_timestamp(std::time(0));
 
-            on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
-//                NUClear::log("Action Kill: ", actionKill.name);
-            });
+                auto* behaviour = message.mutable_behaviour();
+                behaviour->set_type(Behaviour::ACTION_STATE);
+                auto* actionStateChange = behaviour->mutable_action_state_change();
+                actionStateChange->set_state(ActionStateChange::START);
+                actionStateChange->set_name(actionStart.name);
+
+                send(message);
+             });
+
+             on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
+                Message message;
+                message.set_type(Message::BEHAVIOUR);
+                message.set_utc_timestamp(std::time(0));
+
+                auto* behaviour = message.mutable_behaviour();
+                behaviour->set_type(Behaviour::ACTION_STATE);
+                auto* actionStateChange = behaviour->mutable_action_state_change();
+                actionStateChange->set_state(ActionStateChange::KILL);
+                actionStateChange->set_name(actionKill.name);
+
+                send(message);
+             });
 
             // This trigger gets the output from the sensors (unfiltered)
             on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
@@ -251,7 +273,6 @@ namespace modules {
             //     message.set_type(Message::REACTION_STATISTICS);
             //     message.set_utc_timestamp(std::time(0));
             //     auto* reactionStatistics = message.mutable_reaction_statistics();
-
             //     //reactionStatistics->set_name(stats.name);
             //     reactionStatistics->set_reactionid(stats.reactionId);
             //     reactionStatistics->set_taskid(stats.taskId);
@@ -579,10 +600,10 @@ namespace modules {
         void NUbugger::recvMessage(const Message& message) {
             NUClear::log("Received message of type:", message.type());
             switch (message.type()) {
-                case Message::Type::Message_Type_COMMAND:
+                case Message::COMMAND:
                     recvCommand(message);
                     break;
-                case Message::Type::Message_Type_LOOKUP_TABLE:
+                case Message::LOOKUP_TABLE:
                     recvLookupTable(message);
                     break;
                 default:
@@ -602,6 +623,7 @@ namespace modules {
                 message.set_utc_timestamp(std::time(0));
 
                 auto* api_lookup_table = message.mutable_lookup_table();
+
                 api_lookup_table->set_table(lut->getData());
 
                 send(message);
