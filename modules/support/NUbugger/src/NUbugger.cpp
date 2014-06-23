@@ -36,6 +36,7 @@
 #include "messages/behaviour/proto/Behaviour.pb.h"
 
 #include "utility/nubugger/NUgraph.h"
+#include "utility/time/time.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/nubugger/NUgraph.h"
@@ -59,6 +60,7 @@ namespace modules {
         using messages::vision::LookUpTable;
         using NUClear::DEBUG;
         using utility::nubugger::graph;
+        using utility::time::getUtcTimestamp;
         using std::chrono::duration_cast;
         using std::chrono::microseconds;
         using messages::support::nubugger::proto::Message;
@@ -69,6 +71,7 @@ namespace modules {
         using messages::vision::SaveLookUpTable;
         using messages::behaviour::ActionStart;
         using messages::behaviour::ActionKill;
+        using messages::behaviour::RegisterAction;
         using messages::localisation::FieldObject;
 
         void NUbugger::EmitLocalisationModels(const std::unique_ptr<FieldObject>& robot_model, const std::unique_ptr<FieldObject>& ball_model) {
@@ -76,7 +79,7 @@ namespace modules {
             Message message;
 
             message.set_type(Message::LOCALISATION);
-            message.set_utc_timestamp(std::time(0));
+            message.set_utc_timestamp(getUtcTimestamp());
             auto* localisation = message.mutable_localisation();
 
             auto* api_field_object = localisation->add_field_object();
@@ -135,7 +138,7 @@ namespace modules {
             on<Trigger<DataPoint>>([this](const DataPoint& data_point) {
                 Message message;
                 message.set_type(Message::DATA_POINT);
-                message.set_utc_timestamp(std::time(0));
+                message.set_utc_timestamp(getUtcTimestamp());
 
                 auto* dataPoint = message.mutable_data_point();
                 dataPoint->set_label(data_point.label);
@@ -149,13 +152,16 @@ namespace modules {
              on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
                 Message message;
                 message.set_type(Message::BEHAVIOUR);
-                message.set_utc_timestamp(std::time(0));
+                message.set_utc_timestamp(getUtcTimestamp());
 
                 auto* behaviour = message.mutable_behaviour();
                 behaviour->set_type(Behaviour::ACTION_STATE);
                 auto* actionStateChange = behaviour->mutable_action_state_change();
                 actionStateChange->set_state(ActionStateChange::START);
                 actionStateChange->set_name(actionStart.name);
+                for (auto& limbID : actionStart.limbs) {
+                    actionStateChange->add_limbs(static_cast<int>(limbID));
+                }
 
                 send(message);
              });
@@ -163,16 +169,40 @@ namespace modules {
              on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
                 Message message;
                 message.set_type(Message::BEHAVIOUR);
-                message.set_utc_timestamp(std::time(0));
+                message.set_utc_timestamp(getUtcTimestamp());
 
                 auto* behaviour = message.mutable_behaviour();
                 behaviour->set_type(Behaviour::ACTION_STATE);
                 auto* actionStateChange = behaviour->mutable_action_state_change();
                 actionStateChange->set_state(ActionStateChange::KILL);
                 actionStateChange->set_name(actionKill.name);
+                for (auto& limbID : actionKill.limbs) {
+                    actionStateChange->add_limbs(static_cast<int>(limbID));
+                }
 
                 send(message);
              });
+
+            on<Trigger<RegisterAction>>([this] (const RegisterAction& action) {
+                Message message;
+                message.set_type(Message::BEHAVIOUR);
+                message.set_utc_timestamp(getUtcTimestamp());
+
+                auto* behaviour = message.mutable_behaviour();
+                behaviour->set_type(Behaviour::ACTION_REGISTER);
+                auto* actionRegister = behaviour->mutable_action_register();
+                actionRegister->set_id(action.id);
+                actionRegister->set_name(action.name);
+                for(const auto& set : action.limbSet) {
+                    auto* limbSet = actionRegister->add_limb_set();
+                    limbSet->set_priority(set.first);
+                    for (auto& limbID : set.second) {
+                        limbSet->add_limbs(static_cast<int>(limbID));
+                    }
+                }
+
+                send(message);
+            });
 
             // This trigger gets the output from the sensors (unfiltered)
             on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
@@ -180,7 +210,7 @@ namespace modules {
                 Message message;
 
                 message.set_type(Message::SENSOR_DATA);
-                message.set_utc_timestamp(std::time(0));
+                message.set_utc_timestamp(getUtcTimestamp());
 
                 auto* sensorData = message.mutable_sensor_data();
 
@@ -257,7 +287,7 @@ namespace modules {
 
                     Message message;
                     message.set_type(Message::VISION);
-                    message.set_utc_timestamp(std::time(0));
+                    message.set_utc_timestamp(getUtcTimestamp());
 
                     auto* visionData = message.mutable_vision();
                     auto* imageData = visionData->mutable_image();
@@ -278,7 +308,7 @@ namespace modules {
              /*on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
                  Message message;
                  message.set_type(Message::REACTION_STATISTICS);
-                 message.set_utc_timestamp(std::time(0));
+                 message.set_utc_timestamp(getUtcTimestamp());
 
                  auto* reactionStatistics = message.mutable_reaction_statistics();
 
@@ -302,7 +332,7 @@ namespace modules {
 
                 Message message;
                 message.set_type(Message::VISION);
-                message.set_utc_timestamp(std::time(0));
+                message.set_utc_timestamp(getUtcTimestamp());
                 Message::Vision* api_vision = message.mutable_vision();
 
                 Message::VisionClassifiedImage* api_classified_image = api_vision->mutable_classified_image();
@@ -391,7 +421,7 @@ namespace modules {
                 Message message;
 
                 message.set_type(Message::VISION);
-                message.set_utc_timestamp(std::time(0));
+                message.set_utc_timestamp(getUtcTimestamp());
 
                 Message::Vision* api_vision = message.mutable_vision();
                 //NUClear::log("NUbugger emmitting goals: ", goals.size());
@@ -436,7 +466,7 @@ namespace modules {
                 Message message;
 
                 message.set_type(Message::VISION);
-                message.set_utc_timestamp(std::time(0));
+                message.set_utc_timestamp(getUtcTimestamp());
 
                 Message::Vision* api_vision = message.mutable_vision();
                 //std::cout<< "NUbugger::on<Trigger<std::vector<Ball>>> : sending " << balls.size() << " balls to NUbugger." << std::endl;
@@ -571,7 +601,7 @@ namespace modules {
                 Message message;
 
                 message.set_type(Message::LOOKUP_TABLE);
-                message.set_utc_timestamp(std::time(0));
+                message.set_utc_timestamp(getUtcTimestamp());
 
                 Message::LookupTable* api_lookup_table = message.mutable_lookup_table();
                 api_lookup_table->set_table(lut->getData());
