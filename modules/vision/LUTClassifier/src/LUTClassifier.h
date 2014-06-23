@@ -21,7 +21,6 @@
 #define MODULES_VISION_LUTCLASSIFIER_H
 
 #include <nuclear>
-#include "utility/idiom/pimpl.h"
 
 namespace modules {
     namespace vision {
@@ -38,12 +37,13 @@ namespace modules {
         class LUTClassifier : public NUClear::Reactor {
         private:
             class impl;
-            utility::idiom::pimpl<impl> m;
+            impl* m;
 
         public:
             static constexpr const char* CONFIGURATION_PATH = "LUTClassifier.yaml";
 
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
+            ~LUTClassifier();
         };
 
     }  // vision

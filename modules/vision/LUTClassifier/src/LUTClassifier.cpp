@@ -18,7 +18,6 @@
  */
 
 #include "LUTClassifier.h"
-#include "utility/idiom/pimpl_impl.h"
 
 #include "messages/input/Image.h"
 #include "messages/input/CameraParameters.h"
@@ -108,7 +107,7 @@ namespace modules {
             }
         }
 
-        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), m(new LUTClassifier::impl()) {
 
             on<Trigger<Configuration<LUTLocation>>>([this](const Configuration<LUTLocation>& config) {
                 emit(std::make_unique<LookUpTable>(config.config.as<LookUpTable>()));
@@ -168,7 +167,12 @@ namespace modules {
 
                         // If this a valid green point update our information
                         if(it->colour == ObjectClass::FIELD && it->length >= m->MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE) {
+
                             greenPoint = it->start;
+
+                            // We move our green point up by the scanning size if possible (assume more green horizon rather then less)
+                            greenPoint[1] = std::max(int(greenPoint[1] - m->VISUAL_HORIZON_SUBSAMPLING), 0);
+
                             // We found our green
                             break;
                         }
@@ -431,9 +435,8 @@ namespace modules {
                     size needed to ensure that the ball is totally covered.
                  */
                 arma::running_stat_vec<arma::uvec> centre;
-                for(auto it = classifiedImage->horizontalSegments.lower_bound(ObjectClass::BALL);
-                    it != classifiedImage->horizontalSegments.upper_bound(ObjectClass::BALL);
-                    ++it) {
+                auto ballSegments = classifiedImage->horizontalSegments.equal_range(ObjectClass::BALL);
+                for(auto it = ballSegments.first; it != ballSegments.second; ++it) {
 
                     auto& elem = it->second;
 
@@ -469,10 +472,9 @@ namespace modules {
                 for (uint i = 0; i < m->GOAL_FINDER_DETECTOR_LEVELS.size(); ++i) {
 
                     std::vector<ClassifiedImage<ObjectClass>::Segment> newSegments;
+                    auto goalSegments = classifiedImage->horizontalSegments.equal_range(ObjectClass::GOAL);
 
-                    for(auto it = classifiedImage->horizontalSegments.lower_bound(ObjectClass::GOAL);
-                        it != classifiedImage->horizontalSegments.upper_bound(ObjectClass::GOAL);
-                        ++it) {
+                    for(auto it = goalSegments.first; it != goalSegments.second; ++it) {
 
                         auto& elem = it->second;
                         arma::vec2 midpoint = arma::conv_to<arma::vec>::from(elem.midpoint);
@@ -521,6 +523,11 @@ namespace modules {
                 emit(std::move(classifiedImage));
             });
 
+        }
+
+        LUTClassifier::~LUTClassifier() {
+            // TODO work out how to fix pimpl and fix it damnit!!
+            delete m;
         }
 
     }  // vision
