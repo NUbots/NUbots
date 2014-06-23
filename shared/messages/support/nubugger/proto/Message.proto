@@ -39,7 +39,7 @@ message Message {
         DATA_POINT = 6;
         REACTION_STATISTICS = 7;
         LOOKUP_TABLE = 8;
-        BEHAVIOUR = 9
+        BEHAVIOUR = 9;
         COMMAND = 10;
     }
 
