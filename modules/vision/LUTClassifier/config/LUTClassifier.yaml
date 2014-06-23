@@ -1,13 +1,13 @@
 visual_horizon:
-  spacing: 0.2
-  subsampling: 0.2
-  horizon_buffer: 0.04
-  minimum_segment_size: 0.02
+  spacing: 0.1
+  subsampling: 0.04
+  horizon_buffer: 0.01
+  minimum_segment_size: 0.01
 ball:
-  intersections: 1.5
-  min_jump: 0.04
+  intersections: 2
+  min_jump: 0.02
 goals:
-  spacing: 0.05236
-  subsampling: 0.05236
+  spacing: 0.04
+  subsampling: 0.01
   detector_levels:
-    - 2.0
+    - 2.5

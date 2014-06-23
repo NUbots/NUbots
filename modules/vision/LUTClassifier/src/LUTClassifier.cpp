@@ -171,7 +171,7 @@ namespace modules {
                             greenPoint = it->start;
 
                             // We move our green point up by the scanning size if possible (assume more green horizon rather then less)
-                            greenPoint[1] = std::max(int(greenPoint[1] - m->VISUAL_HORIZON_SUBSAMPLING), 0);
+                            greenPoint[1] = std::max(int(greenPoint[1] - (m->VISUAL_HORIZON_SUBSAMPLING / 2)), 0);
 
                             // We found our green
                             break;
