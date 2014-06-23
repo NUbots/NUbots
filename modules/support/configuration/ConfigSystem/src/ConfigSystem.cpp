@@ -31,7 +31,6 @@ extern "C" {
 
 #include "utility/strutil/strutil.h"
 #include "utility/file/fileutil.h"
-#include "utility/idiom/pimpl_impl.h"
 
 #include "messages/support/Configuration.h"
 
@@ -39,38 +38,13 @@ namespace modules {
     namespace support {
         namespace configuration {
 
-            class ConfigSystem::impl {
-            public:
-                using HandlerFunction = std::function<void (NUClear::Reactor*, const std::string&, const YAML::Node&)>;
+            ConfigSystem::ConfigSystem(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment))
+                , watcherFd(inotify_init())
+                , killFd(eventfd(0, EFD_NONBLOCK))
+                , running(true) {
 
-                std::set<std::type_index> loaded;
-                std::map<std::string, std::vector<HandlerFunction>> handler;
-                std::map<int, std::string> watchPath;
-                std::map<std::string, NUClear::clock::time_point> timestamp;
-                int watcherFd;
-                int killFd;
-                ConfigSystem* reactor;
-
-                volatile bool running;
-
-                void run();
-                void kill();
-                void loadDir(const std::string& path, HandlerFunction emit);
-                void watchDir(const std::string& path);
-                YAML::Node buildConfigurationNode(const std::string& filePath);
-
-                // Lots of space for events (definitely more then needed)
-                static constexpr size_t MAX_EVENT_LEN = sizeof (inotify_event) * 1024 + 16;
-                static constexpr const char* BASE_CONFIGURATION_PATH = "config/";
-            };
-
-            ConfigSystem::ConfigSystem(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-
-                m->running = true;
-                m->watcherFd = inotify_init();
-                m->killFd = eventfd(0, EFD_NONBLOCK);
-                m->reactor = this;
-                m->watchDir(impl::BASE_CONFIGURATION_PATH);
+                // Watch our base directory
+                watchDir(BASE_CONFIGURATION_PATH);
 
                 on<Trigger<messages::support::SaveConfiguration>>([this](const messages::support::SaveConfiguration& saveConfig) {
 
@@ -90,12 +64,12 @@ namespace modules {
                 on<Trigger<messages::support::ConfigurationConfiguration>>([this](const messages::support::ConfigurationConfiguration& command) {
 
                     // Check if we have already loaded this type's handler
-                    if (m->loaded.find(command.requester) == std::end(m->loaded)) {
+                    if (loaded.find(command.requester) == std::end(loaded)) {
                         // We have now loaded the type
-                        m->loaded.insert(command.requester);
+                        loaded.insert(command.requester);
 
-                        std::string fullPath = impl::BASE_CONFIGURATION_PATH + command.configPath;
-                        auto& handlers = m->handler[fullPath];
+                        std::string fullPath = BASE_CONFIGURATION_PATH + command.configPath;
+                        auto& handlers = handler[fullPath];
 
                         if (utility::file::isDir(fullPath)) {
                             // Make sure fullPath has a trailing /
@@ -106,50 +80,50 @@ namespace modules {
                             // If this is the first type watching this config dir, add a watch
                             // on the directory
                             if (handlers.empty()) {
-                                m->watchDir(fullPath);
+                                watchDir(fullPath);
                             }
 
                             // Load all the config files in the given directory
-                            m->loadDir(fullPath, command.initialEmitter);
+                            loadDir(fullPath, command.initialEmitter);
                         }
                         else {
                             auto lastSlashIndex = command.configPath.rfind('/');
                             auto fileName = command.configPath.substr(lastSlashIndex == std::string::npos ? 0 : lastSlashIndex);
-                            command.initialEmitter(this, fileName, YAML::Node(m->buildConfigurationNode(fullPath)));
+                            command.initialEmitter(this, fileName, YAML::Node(buildConfigurationNode(fullPath)));
                         }
 
                         handlers.push_back(command.emitter);
                     }
                 });
 
-                std::function<void ()> run = std::bind(std::mem_fn(&impl::run), &*m);
-                std::function<void ()> kill = std::bind(std::mem_fn(&impl::kill), &*m);
+                std::function<void ()> run = std::bind(std::mem_fn(&ConfigSystem::run), this);
+                std::function<void ()> kill = std::bind(std::mem_fn(&ConfigSystem::kill), this);
 
                 powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(run, kill));
             }
 
-            YAML::Node ConfigSystem::impl::buildConfigurationNode(const std::string& filePath) {
+            YAML::Node ConfigSystem::buildConfigurationNode(const std::string& filePath) {
                 timestamp[filePath] = NUClear::clock::now();
                 return YAML::LoadFile(filePath);
             }
 
-            void ConfigSystem::impl::loadDir(const std::string& path, ConfigSystem::impl::HandlerFunction emit) {
+            void ConfigSystem::loadDir(const std::string& path, ConfigSystem::HandlerFunction emit) {
                 // List the directory and recursively walk its tree
                 auto elements = utility::file::listDir(path);
 
                 for (const auto& element : elements) {
                     if (utility::strutil::endsWith(element, ".yaml")) {
-                        emit(reactor, element, YAML::Node(buildConfigurationNode(path + element)));
+                        emit(this, element, YAML::Node(buildConfigurationNode(path + element)));
                     }
                 }
             }
 
-            void ConfigSystem::impl::watchDir(const std::string& path) {
+            void ConfigSystem::watchDir(const std::string& path) {
                 int wd = inotify_add_watch(watcherFd, path.c_str(), IN_ATTRIB | IN_MODIFY | IN_CREATE | IN_DELETE_SELF | IN_MOVE);
                 watchPath[wd] = path;
             }
 
-            void ConfigSystem::impl::run() {
+            void ConfigSystem::run() {
 
                 // Build our descriptor set with the watcherFd and an event FD to terminate on demand
                 fd_set fdset;
@@ -204,7 +178,7 @@ namespace modules {
                                             NUClear::log<NUClear::INFO>("Loading", fullPath, "with handler for", handlers->first);
                                             try {
                                                 for (auto& emitter : handlers->second) {
-                                                    emitter(reactor, name, YAML::Node(buildConfigurationNode(fullPath)));
+                                                    emitter(this, name, YAML::Node(buildConfigurationNode(fullPath)));
                                                 }
                                             }
                                             catch(const std::exception& e) {
@@ -276,7 +250,7 @@ namespace modules {
                 close(killFd);
             }
 
-            void ConfigSystem::impl::kill() {
+            void ConfigSystem::kill() {
                 // Stop running
                 running = false;
 
