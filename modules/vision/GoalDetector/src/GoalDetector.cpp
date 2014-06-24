@@ -94,6 +94,7 @@ namespace vision {
 
             auto hSegments = image.horizontalSegments.equal_range(ObjectClass::GOAL);
             for(auto it = hSegments.first; it != hSegments.second; ++it) {
+
                 // We throw out points if they are:
                 // Less the full quality (subsampled)
                 // Do not have a transition on either side (are on an edge)
@@ -108,11 +109,11 @@ namespace vision {
 
             // Use generic RANSAC implementation to find start lines (left edges).
             ransacResults = findMultipleModels<RansacLineModel<arma::vec2>, arma::vec2>(startPoints,
-                                                                                            CONSENSUS_THRESHOLD,
-                                                                                            MINIMUM_POINTS,
-                                                                                            MAX_ITERATIONS_PER_FITTING,
-                                                                                            MAX_FITTING_ATTEMPTS,
-                                                                                            SELECTION_METHOD);
+                                                                                        CONSENSUS_THRESHOLD,
+                                                                                        MINIMUM_POINTS,
+                                                                                        MAX_ITERATIONS_PER_FITTING,
+                                                                                        MAX_FITTING_ATTEMPTS,
+                                                                                        SELECTION_METHOD);
 
 
             for (auto& l : ransacResults) {
@@ -121,11 +122,11 @@ namespace vision {
 
             // Use generic RANSAC implementation to find end lines (right enddges).
             ransacResults = findMultipleModels<RansacLineModel<arma::vec2>, arma::vec2>(endPoints,
-                                                                                            CONSENSUS_THRESHOLD,
-                                                                                            MINIMUM_POINTS,
-                                                                                            MAX_ITERATIONS_PER_FITTING,
-                                                                                            MAX_FITTING_ATTEMPTS,
-                                                                                            SELECTION_METHOD);
+                                                                                        CONSENSUS_THRESHOLD,
+                                                                                        MINIMUM_POINTS,
+                                                                                        MAX_ITERATIONS_PER_FITTING,
+                                                                                        MAX_FITTING_ATTEMPTS,
+                                                                                        SELECTION_METHOD);
 
             for (auto& l : ransacResults) {
                 endLines.push_back(LSFittedLine(l.second));
