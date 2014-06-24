@@ -17,21 +17,36 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-package messages.vision.proto;
+package messages;
 
-import "messages/Vector.proto";
-
-message ClassifiedImage {
-
-    message Segment {
-        required uint32 colour = 1;
-        required uint32 subsample = 2;
-        required uvec2 start = 3;
-        required uvec2 end = 4;
-    }
-
-    required vec2 horizon = 1;
-    repeated vec3 visual_horizon = 2;
-    repeated Segment segment = 3;
+message vec2 {
+    required float x = 1;
+    required float y = 2;
 }
 
+message vec3 {
+    required float x = 1;
+    required float y = 2;
+    required float z = 3;
+}
+message ivec2 {
+    required int32 x = 1;
+    required int32 y = 2;
+}
+
+message ivec3 {
+    required int32 x = 1;
+    required int32 y = 2;
+    required int32 z = 3;
+}
+
+message uvec2 {
+    required uint32 x = 1;
+    required uint32 y = 2;
+}
+
+message uvec3 {
+    required uint32 x = 1;
+    required uint32 y = 2;
+    required uint32 z = 3;
+}

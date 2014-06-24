@@ -19,41 +19,23 @@
 
 package messages.vision.proto;
 
+import "messages/Vector.proto";
+import "messages/Matrix.proto";
+
 message VisionObject {
-    enum ShapeType {
-        CIRCLE = 1;
-        QUAD = 2;
-        POLYGON = 3;
-        UNKNOWN_SHAPE = 4;
+
+    message Quad {
+        required uvec2 tl = 1;
+        required uvec2 tr = 2;
+        required uvec2 bl = 3;
+        required uvec2 br = 4;
     }
 
-    enum GoalType {
-        LEFT = 1;
-        RIGHT = 2;
-        UNKNOWN_GOAL = 3;
+    message Ellipse {
+        required mat33 ellipse = 1; // See http://en.wikipedia.org/wiki/Matrix_representation_of_conic_sections
     }
 
-    enum ObstacleColour {
-        UNKNOWN = 1;
-        CYAN = 2;
-        MAGENTA = 3;
+    message Polygon {
+        repeated uvec2 point = 1;
     }
-
-    optional ShapeType shape_type = 1;
-    optional GoalType goal_type = 2;
-    optional string name = 3;
-
-    optional float screen_x = 4;
-    optional float screen_y = 5;
-
-    optional float rotation = 6;
-
-    optional uint32 radius = 7;
-    optional uint32 width = 8;
-    optional uint32 height = 9;
-    repeated uint32 points = 10;
-
-    repeated float measured_relative_position = 11; //Spherical
-
-    optional ObstacleColour obstacle_colour = 12;
 }

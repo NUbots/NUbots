@@ -112,7 +112,6 @@ namespace modules {
                 api_model->set_lost(model.lost);
             }
 
-
             send(message);
         }
 
@@ -346,96 +345,6 @@ namespace modules {
                 send(message);
             });
 
-
-
-            /*on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
-
-                Message message;
-                message.set_type(Message::VISION);
-                message.set_utc_timestamp(std::time(0));
-                Message::Vision* api_vision = message.mutable_vision();
-
-                Message::VisionClassifiedImage* api_classified_image = api_vision->mutable_classified_image();
-
-                for (auto& rowColourSegments : image.horizontalFilteredSegments.m_segmentedScans) {
-                    for (auto& colorSegment : rowColourSegments) {
-                        auto& start = colorSegment.m_start;
-                        auto& end = colorSegment.m_end;
-                        auto& colour = colorSegment.m_colour;
-
-                        Message::VisionClassifiedSegment* api_segment = api_classified_image->add_segment();
-                        api_segment->set_start_x(start[0]);
-                        api_segment->set_start_y(start[1]);
-                        api_segment->set_end_x(end[0]);
-                        api_segment->set_end_y(end[1]);
-                        api_segment->set_colour(colour);
-                    }
-                }
-
-                for (auto& columnColourSegments : image.verticalFilteredSegments.m_segmentedScans)
-                {
-                    for (auto& colorSegment : columnColourSegments)
-                    {
-                        auto& start = colorSegment.m_start;
-                        auto& end = colorSegment.m_end;
-                        auto& colour = colorSegment.m_colour;
-
-                        Message::VisionClassifiedSegment* api_segment = api_classified_image->add_segment();
-                        api_segment->set_start_x(start[0]);
-                        api_segment->set_start_y(start[1]);
-                        api_segment->set_end_x(end[0]);
-                        api_segment->set_end_y(end[1]);
-                        api_segment->set_colour(colour);
-                    }
-                }
-
-                for (auto& matchedSegment : image.matchedVerticalSegments)
-                {
-                    for (auto& columnColourSegment : matchedSegment.second)
-                    {
-                        auto& start = columnColourSegment.m_start;
-                        auto& end = columnColourSegment.m_end;
-                        auto& colour = columnColourSegment.m_colour;
-                        auto& colourClass = matchedSegment.first;
-
-                        Message::VisionTransitionSegment* api_segment = api_classified_image->add_transition_segment();
-                        api_segment->set_start_x(start[0]);
-                        api_segment->set_start_y(start[1]);
-                        api_segment->set_end_x(end[0]);
-                        api_segment->set_end_y(end[1]);
-                        api_segment->set_colour(colour);
-                        api_segment->set_colour_class(colourClass);
-                    }
-                }
-
-                for (auto& matchedSegment : image.matchedHorizontalSegments)
-                {
-                    for (auto& rowColourSegment : matchedSegment.second)
-                    {
-                        auto& start = rowColourSegment.m_start;
-                        auto& end = rowColourSegment.m_end;
-                        auto& colour = rowColourSegment.m_colour;
-                        auto& colourClass = matchedSegment.first;
-
-                        Message::VisionTransitionSegment* api_segment = api_classified_image->add_transition_segment();
-                        api_segment->set_start_x(start[0]);
-                        api_segment->set_start_y(start[1]);
-                        api_segment->set_end_x(end[0]);
-                        api_segment->set_end_y(end[1]);
-                        api_segment->set_colour(colour);
-                        api_segment->set_colour_class(colourClass);
-                    }
-                }
-
-                for (auto& greenHorizonPoint : image.greenHorizonInterpolatedPoints) {
-                    Message::VisionGreenHorizonPoint* api_ghpoint = api_classified_image->add_green_horizon_point();
-                    api_ghpoint->set_x(greenHorizonPoint[0]);
-                    api_ghpoint->set_y(greenHorizonPoint[1]);
-                }
-
-                send(message);
-
-            });*/
             /*
             on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Goal> goals){
                 Message message;

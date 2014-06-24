@@ -19,17 +19,6 @@
 
 package messages;
 
-message vec2 {
-    required float x = 1;
-    required float y = 2;
-}
-
-message vec3 {
-    required float x = 1;
-    required float y = 2;
-    required float z = 3;
-}
-
 message mat33 {
     required float xx = 1;
     required float xy = 2;
@@ -61,17 +50,6 @@ message mat44 {
     required float tt = 16;
 }
 
-message ivec2 {
-    required int32 x = 1;
-    required int32 y = 2;
-}
-
-message ivec3 {
-    required int32 x = 1;
-    required int32 y = 2;
-    required int32 z = 3;
-}
-
 message imat33 {
     required int32 xx = 1;
     required int32 xy = 2;
@@ -101,18 +79,6 @@ message imat44 {
     required int32 ty = 14;
     required int32 tz = 15;
     required int32 tt = 16;
-}
-
-
-message uvec2 {
-    required uint32 x = 1;
-    required uint32 y = 2;
-}
-
-message uvec3 {
-    required uint32 x = 1;
-    required uint32 y = 2;
-    required uint32 z = 3;
 }
 
 message umat33 {

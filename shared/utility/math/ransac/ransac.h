@@ -17,33 +17,46 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_VISION_RANSAC_H
-#define MODULES_VISION_RANSAC_H
+#ifndef UTILITY_MATH_RANSAC_RANSAC_H
+#define UTILITY_MATH_RANSAC_RANSAC_H
 
 #include <nuclear>
 #include <utility>
 #include <vector>
 
-namespace modules {
-    namespace vision {
-        enum RANSAC_SELECTION_METHOD {
-            LargestConsensus,
-            BestFittingConsensus
-        };
+namespace utility {
+    namespace math {
+        namespace ransac {
 
-        namespace RANSAC{
+            enum class RansacSelectionMethod {
+                LARGEST_CONSENSUS,
+                BEST_FITTING_CONSENSUS
+            };
 
             /************************************
              *      FUNCTION PROTOTYPES         *
              ************************************/
-            //Model must provide several features
+
+            /**
+             * @brief
+             *
+             * @tparam Model
+             * @tparam DataPoint
+             *
+             * @param points the datapoints to fit
+             * @param e consensus error threshold
+             * @param n minimum number of points for a fit
+             * @param k max iterations per ransac fitting
+             * @param max_iterations the maximum nubmer of ransac iterations to perform
+             * @param method the quality measurement method to use
+             */
             template<class Model, typename DataPoint>
             std::vector<std::pair<Model, std::vector<DataPoint>>> findMultipleModels(const std::vector<DataPoint>& line_points,
                                                                                         double e,
                                                                                         unsigned int n,
                                                                                         unsigned int k,
                                                                                         unsigned int max_iterations,
-                                                                                        RANSAC_SELECTION_METHOD method);
+                                                                                        RansacSelectionMethod method);
 
             template<class Model, typename DataPoint>
             bool findModel(std::vector<DataPoint> points,
@@ -54,7 +67,7 @@ namespace modules {
                            double e,
                            unsigned int n,
                            unsigned int k,
-                           RANSAC_SELECTION_METHOD method);
+                           RansacSelectionMethod method);
 
             template<class Model, typename DataPoint>
             Model generateRandomModel(const std::vector<DataPoint>& points);
@@ -68,10 +81,12 @@ namespace modules {
                                                     unsigned int n,
                                                     unsigned int k,
                                                     unsigned int max_iterations,
-                                                    RANSAC_SELECTION_METHOD method) {
+                                                    RansacSelectionMethod method) {
+
                 double variance;
                 bool found;
                 Model model;
+
                 std::vector<std::pair<Model, std::vector<DataPoint>>> results;
                 std::vector<DataPoint> consensus;
                 std::vector<DataPoint> remainder;
@@ -102,7 +117,7 @@ namespace modules {
                             double e,
                             unsigned int n,
                             unsigned int k,
-                            RANSAC_SELECTION_METHOD method) {
+                            RansacSelectionMethod method) {
                 if ((points.size() < n) || (n < result.minPointsForFit())) {
                     return false;
                 }
@@ -141,15 +156,6 @@ namespace modules {
                         cur_variance += (dist * in);
                         concensus_size += in;
                         cur_concensus[i] = in;
-
-        //                if (dist < e) {
-        //                    cur_variance += dist;
-        //                    concensus_size++;
-        //                    cur_concensus[i] = true;
-        //                }
-        //                else {
-        //                    cur_concensus[i] = false;
-        //                }
                     }
 
                     // Normalise the variance.
@@ -158,7 +164,7 @@ namespace modules {
                     // Determine whether the consensus is better.
                     if(concensus_size >= n) {
                         switch(method) {
-                            case LargestConsensus: {
+                            case RansacSelectionMethod::LARGEST_CONSENSUS: {
                                 if(concensus_size > largestconsensus) {
                                     found = true;
                                     result = m;
@@ -170,7 +176,7 @@ namespace modules {
                                 break;
                             }
 
-                            case BestFittingConsensus: {
+                            case RansacSelectionMethod::BEST_FITTING_CONSENSUS: {
                                 if(cur_variance < minerr) {
                                     found = true;
                                     result = m;
@@ -243,33 +249,10 @@ namespace modules {
                 }
 
                     return model;
-            //        Model model;
-            //        if(points.size() >= model.minPointsForFit()) {
-            //            std::vector<DataPoint> rand_pts;
-            //            DataPoint next;
-            //            rand_pts.push_back(points.at(rand() % points.size()));
-
-            //            while(rand_pts.size() < model.minPointsForFit()) {
-            //                bool unique;
-            //                do {
-            //                    unique = true;
-            //                    next = points.at(rand() % points.size());
-            //                    BOOST_FOREACH(DataPoint& pt, rand_pts) {
-            //                        if(pt == next)
-            //                            unique = false;
-            //                    }
-            //                }
-            //                while(!unique);
-            //                rand_pts.push_back(next);
-            //            }
-            //            model.regenerate(rand_pts);
-            //        }
-            //        return model;
 
             }
-
         }
     }
 }
 
-#endif //  MODULES_VISION_RANSAC_H
+#endif
