@@ -19,23 +19,27 @@
 
 package messages.vision.proto;
 
-import "messages/Vector.proto";
-import "messages/Matrix.proto";
+import "messages/Geometry.proto";
 
 message VisionObject {
 
-    message Quad {
-        required uvec2 tl = 1;
-        required uvec2 tr = 2;
-        required uvec2 bl = 3;
-        required uvec2 br = 4;
+    message Goal {
+
+        enum Side {
+            LEFT = 0;
+            RIGHT = 1;
+            UNKNOWN = 2;
+        }
+
+        required Side side = 1;
+        required Quad quad = 2;
     }
 
-    message Ellipse {
-        required mat33 ellipse = 1; // See http://en.wikipedia.org/wiki/Matrix_representation_of_conic_sections
+    enum ObjectType {
+        GOAL = 0;
     }
 
-    message Polygon {
-        repeated uvec2 point = 1;
-    }
+    required ObjectType type = 1;
+
+    optional Goal goal = 2;
 }

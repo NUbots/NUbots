@@ -17,22 +17,28 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-package messages.vision.proto;
+package messages;
 
 import "messages/Vector.proto";
-import "messages/Geometry.proto";
+import "messages/Matrix.proto";
 
-message ClassifiedImage {
-
-    message Segment {
-        required uint32 colour = 1;
-        required uint32 subsample = 2;
-        required uvec2 start = 3;
-        required uvec2 end = 4;
-    }
-
-    required Line horizon = 1;
-    repeated vec3 visual_horizon = 2;
-    repeated Segment segment = 3;
+message Line {
+    required double gradient = 1;
+    required double intercept = 2;
 }
 
+message Ellipse {
+    // See http://en.wikipedia.org/wiki/Matrix_representation_of_conic_sections
+    required mat33 ellipse = 1;
+}
+
+message Quad {
+    required uvec2 tl = 1;
+    required uvec2 tr = 2;
+    required uvec2 bl = 3;
+    required uvec2 br = 4;
+}
+
+message Polygon {
+    repeated uvec2 point = 1;
+}
