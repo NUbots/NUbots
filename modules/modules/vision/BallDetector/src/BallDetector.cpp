@@ -27,6 +27,14 @@ namespace vision {
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
+        // Find all the ball edges below the green horizon that are not hard edges (have segments beyond them)
+
+        // Do a ransac for the circle on the points
+
+        // Do vision kinematics for the circle
+
+
+
     }
 
 }
