@@ -22,6 +22,7 @@
 
 #include <armadillo>
 #include <chrono>
+#include <nuclear>
 
 namespace utility {
 namespace time {
@@ -32,6 +33,10 @@ namespace time {
         auto time_diff = end_time - start_time;
         double nano = std::chrono::duration_cast<std::chrono::nanoseconds>(time_diff).count();
         return nano * 1.0e-9;
+    }
+
+    inline uint64_t getUtcTimestamp() {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now().time_since_epoch()).count();
     }
 
 }

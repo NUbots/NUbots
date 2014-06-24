@@ -69,7 +69,7 @@ namespace modules {
 
             emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                 id,
-                "walk_engine",
+                "Walk Engine",
                 {
                     std::pair<float, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG}),
                     std::pair<float, std::set<LimbID>>(0, {LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),

@@ -21,12 +21,20 @@ package messages.behaviour.proto;
 
 message Behaviour {
     enum Type {
-        ACTION_STATE = 1;
+        ACTION_REGISTER = 1;
+        ACTION_STATE = 2;
     }
 
     required Type type = 1;
 
-    optional ActionStateChange action_state_change = 2;
+    optional ActionRegister action_register = 2;
+    optional ActionStateChange action_state_change = 3;
+}
+
+message ActionRegister {
+    required uint32 id = 1;
+    required string name = 2;
+    repeated LimbSet limb_set = 3;
 }
 
 message ActionStateChange {
@@ -38,5 +46,10 @@ message ActionStateChange {
 
     required State state = 1; 
     required string name = 2;
+    repeated uint32 limbs = 3;
+}
 
+message LimbSet {
+    required float priority = 1;
+    repeated uint32 limbs = 2;
 }
