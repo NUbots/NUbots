@@ -41,47 +41,19 @@ namespace utility {
 
                 newState = state;
                 
-                /*
-                arma::mat v(3, 4);
-                
-                
-                //this is A(a)^T or rotation in world coords
-                //v << -state[QX] <<   state[QW] <<  state[QZ]  << -state[QY]  << arma::endr
-                //  << -state[QY] <<  -state[QZ] <<  state[QW]  <<  state[QX]  << arma::endr
-                //  << -state[QZ] <<   state[QY] << -state[QX]  <<  state[QW];
-               
-                
-                //this is B(a)^T or rotation in robot coords
-                v <<  state[QX] <<   state[QW] <<  state[QZ]  << -state[QY]  << arma::endr
-                  <<  state[QY] <<  -state[QZ] <<  state[QW]  <<  state[QX]  << arma::endr
-                  <<  state[QZ] <<   state[QY] << -state[QX]  <<  state[QW];
-                
-                
-                
-                //calculate the delta for the quaternion
-                arma::vec velocities = state.rows(VX, VZ);
-                //velocities(2) *= -1;
-                //velocities(1) *= -1;
-                arma::vec deltaQ = 0.5 * deltaT * v.t() * velocities;
-                
-                //check whether we are in the wrong projection
-                if (arma::accu(deltaQ % state.rows(QW, QZ)) < 0) {
-                    deltaQ *= -1;
-                }
-                
-                newState.rows(QW, QZ) += deltaQ;*/
+                //make a rotation quaternion
                 const double omega = arma::norm(state.rows(VX, VZ)) + 0.00000000001;
                 const double theta = omega*deltaT*0.5;
                 const double sinTheta = sin(theta);
                 const double cosTheta = cos(theta);
                 arma::vec vq({cosTheta,state(VX)*sinTheta/omega,state(VY)*sinTheta/omega,state(VZ)*sinTheta/omega});
+                
+                //calculate quaternion multiplication
                 arma::vec qcross = arma::cross( vq.rows(1,3), state.rows(QX,QZ) );
                 newState(QW) = vq(0)*state(QW) - arma::dot(vq.rows(1,3), state.rows(QX,QZ));
                 newState(QX) = vq(0)*state(QX) + state(QW)*vq(1) + qcross(0);
                 newState(QY) = vq(0)*state(QY) + state(QW)*vq(2) + qcross(1);
                 newState(QZ) = vq(0)*state(QZ) + state(QW)*vq(3) + qcross(2);
-                
-                
                 
                 return newState;
 
