@@ -21,6 +21,7 @@
 
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/support/Configuration.h"
+#include "messages/vision/VisionObjects.h"
 
 #include "utility/math/geometry/Line.h"
 
@@ -173,7 +174,8 @@ namespace vision {
             // Only check upright posts for building candidates.
             mergeClose(postCandidates, 1.5);
 
-            std::cout << postCandidates.size() << std::endl;
+            log("Number of seen goals", postCandidates.size());
+
 //            for(auto& post : postCandidates) {
 //                std::cout << post << std::endl;
 //            }

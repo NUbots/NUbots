@@ -27,8 +27,6 @@
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/geometry/LSFittedLine.h"
 
-#include "messages/vision/VisionObjects.h"
-
 namespace modules {
 namespace vision {
 

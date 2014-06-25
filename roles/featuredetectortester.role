@@ -6,6 +6,7 @@ ADD_ROLE(
         input::LinuxCamera
         vision::LUTClassifier
         vision::GoalDetector
+        vision::BallDetector
         support::NUbugger
         support::logging::ConsoleLogHandler
         platform::darwin::HardwareIO
