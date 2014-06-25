@@ -30,7 +30,7 @@ namespace ransac {
     template<typename T>
     class RansacCircleModel {
     public:
-        RansacCircleModel() : m_centre(0,0), m_radius(0) {
+        RansacCircleModel() : radius(0) {
             // Empty constructor.
         }
 
@@ -48,16 +48,16 @@ namespace ransac {
             return 3;
         }
 
-        double calculateError(T p) const {
-            return std::abs(arma::norm(p.screen - m_centre.screen, 2) - m_radius);
+        double calculateError(const T& p) const {
+            return std::abs(arma::norm(p - centre, 2) - radius);
         }
 
         double getRadius() const {
-            return m_radius;
+            return radius;
         }
 
         T getCentre() const {
-            return m_centre;
+            return centre;
         }
 
     private:
@@ -77,17 +77,17 @@ namespace ransac {
             double bc_norm = (b_len_sqr - arma::dot(point3, point3)) / 2.0;
 
             det = 1 / det;
-            m_centre[0] = ((ab_norm * bc[1]) - (bc_norm * ab[1])) * det;
-            m_centre[1] = ((ab[0] * bc_norm) - (bc[0] * ab_norm)) * det;
+            centre[0] = ((ab_norm * bc[1]) - (bc_norm * ab[1])) * det;
+            centre[1] = ((ab[0] * bc_norm) - (bc[0] * ab_norm)) * det;
 
-            m_radius = arma::norm(m_centre - point1, 2);
+            radius = arma::norm(centre - point1, 2);
 
             return true;
         }
 
     private:
-        T m_centre;
-        double m_radius;
+        T centre;
+        double radius;
     };
 
 }

@@ -20,11 +20,11 @@
 #include "BallDetector.h"
 
 #include "messages/vision/ClassifiedImage.h"
+#include "messages/support/Configuration.h"
+#include "messages/vision/VisionObjects.h"
 
-#include "utility/math/ransac/ransac.h"
 #include "utility/math/ransac/RansacCircleModel.h"
 
-#include "messages/vision/VisionObjects.h"
 
 namespace modules {
 namespace vision {
@@ -37,57 +37,75 @@ namespace vision {
     using messages::vision::ClassifiedImage;
     using messages::vision::Ball;
 
+    using messages::support::Configuration;
+
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
+
+        on<Trigger<Configuration<BallDetector>>>([this](const Configuration<BallDetector>& config) {
+
+            std::string selectionMethod = config["SELECTION_METHOD"].as<std::string>();
+
+            if (selectionMethod.compare("LARGEST_CONSENSUS") == 0) {
+                SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
+            }
+            else if (selectionMethod.compare("BEST_FITTING_CONSENSUS") == 0) {
+                SELECTION_METHOD = RansacSelectionMethod::BEST_FITTING_CONSENSUS;
+            }
+            else {
+                SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
+            }
+
+            MINIMUM_POINTS = config["MINIMUM_POINTS"].as<uint>();
+            CONSENSUS_THRESHOLD = config["CONSENSUS_THRESHOLD"].as<double>();
+            MAX_ITERATIONS_PER_FITTING = config["MAX_ITERATIONS_PER_FITTING"].as<uint>();
+            MAX_FITTING_ATTEMPTS = config["MAX_FITTING_ATTEMPTS"].as<uint>();
+        });
 
 
         on<Trigger<ClassifiedImage<ObjectClass>>>([this](const ClassifiedImage<ObjectClass>& image) {
 
+            // This holds our points that may be a part of the ball
             std::vector<arma::vec2> ballPoints;
 
-            std::function<bool (const arma::uvec2&, const arma::vec3&)> cFunc = [] (const arma::uvec2& point, const arma::vec3& horizon) {
-                // Check if the X coordinate of the point is less then the x of the horizon
-                return point[0] < horizon[0];
-            };
+            // Get all the points that could make up the ball
+            for(int i = 0; i < 1; ++i) {
 
-            auto hSegments = image.horizontalSegments.equal_range(ObjectClass::BALL);
-            auto vSegments = image.verticalSegments.equal_range(ObjectClass::BALL);
+                auto segments = i ? image.horizontalSegments.equal_range(ObjectClass::BALL)
+                                  : image.verticalSegments.equal_range(ObjectClass::BALL);
 
-            for(auto it = hSegments.first; it != hSegments.second; ++it) {
+                for(auto it = segments.first; it != segments.second; ++it) {
 
-                // We throw out points if they are:
-                // Less the full quality (subsampled)
-                // Do not have a transition on either side (are on an edge)
-                if(it->second.subsample == 1
-                    && it->second.previous
-                    && it->second.next) {
+                    auto& start = it->second.start;
+                    auto& end = it->second.end;
 
-                    // Get the line segment before the point greater then it
-                    auto startHorizon = --std::upper_bound(image.visualHorizon.begin(), image.visualHorizon.end(), it->second.start, cFunc);
-                    auto endHorizon = --std::upper_bound(image.visualHorizon.begin(), image.visualHorizon.end(), it->second.end, cFunc);
+                    // We throw out points if they are:
+                    // Less the full quality (subsampled)
+                    // Do not have a transition on either side (are on an edge)
+                    if(it->second.subsample == 1
+                        && it->second.previous
+                        && it->second.next) {
 
-                    if((it->second.start[0] * startHorizon->at(1) + startHorizon->at(2)) < it->second.start[1]
-                    && (it->second.end[0] * endHorizon->at(1) + endHorizon->at(2)) < it->second.end[1]) {
-                        ballPoints.push_back({ double(it->second.start[0]), double(it->second.start[1]) });
-                        ballPoints.push_back({ double(it->second.end[0]), double(it->second.end[1]) });
+                        // If either point is in the green horizon, add both
+                        if(image.visualHorizonAtPoint(start[0]) < start[1] || image.visualHorizonAtPoint(end[0]) < end[1]) {
+
+                            ballPoints.push_back({ double(it->second.start[0]), double(it->second.start[1]) });
+                            ballPoints.push_back({ double(it->second.end[0]), double(it->second.end[1]) });
+                        }
                     }
                 }
             }
 
-            for(auto it = vSegments.first; it != vSegments.second; ++it) {
+            // Use ransac to find the ball
+            auto ransacResults = findMultipleModels<RansacCircleModel<arma::vec2>, arma::vec2>(ballPoints,
+                                                                                               CONSENSUS_THRESHOLD,
+                                                                                               MINIMUM_POINTS,
+                                                                                               MAX_ITERATIONS_PER_FITTING,
+                                                                                               MAX_FITTING_ATTEMPTS,
+                                                                                               SELECTION_METHOD);
 
-                // We throw out points if they are:
-                // Less the full quality (subsampled)
-                // Do not have a transition on either side (are on an edge)
-                if(it->second.subsample == 1
-                    && it->second.previous
-                    && it->second.next) {
-
-                    ballPoints.push_back({ double(it->second.start[0]), double(it->second.start[1]) });
-                }
-            }
-
-            log("BallPoints", ballPoints.size());
+            // Do vision kinematics on the ball to determine it's position and covariance matricies
+            log("Number of seen balls", ransacResults.size());
 
         });
     }

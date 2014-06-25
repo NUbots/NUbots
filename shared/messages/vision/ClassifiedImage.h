@@ -67,6 +67,17 @@ namespace messages {
 
             std::multimap<TClass, Segment> horizontalSegments;
             std::multimap<TClass, Segment> verticalSegments;
+
+            inline double visualHorizonAtPoint(double x) const {
+                auto segment = --std::upper_bound(visualHorizon.begin(), visualHorizon.end(), x, [] (const double& x, const arma::vec3& horizon) {
+                    // Check if the X coordinate of the point is less then the x of the horizon
+                    return x < horizon[0];
+                });
+
+                return segment->at(1) * x + segment->at(2);
+            }
+
+
         };
 
     }  // vision
