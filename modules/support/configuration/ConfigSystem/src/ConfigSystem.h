@@ -21,8 +21,7 @@
 #define MODULES_UTILITY_CONFIGURATION_CONFIGSYSTEM_H_
 
 #include <nuclear>
-
-#include "utility/idiom/pimpl.h"
+#include <yaml-cpp/yaml.h>
 
 namespace modules {
     namespace support {
@@ -37,10 +36,28 @@ namespace modules {
             class ConfigSystem : public NUClear::Reactor {
 
             private:
-                class impl;
-                ::utility::idiom::pimpl<impl> m;
+                using HandlerFunction = std::function<void (NUClear::Reactor*, const std::string&, const YAML::Node&)>;
 
-           public:
+                std::set<std::type_index> loaded;
+                std::map<std::string, std::vector<HandlerFunction>> handler;
+                std::map<int, std::string> watchPath;
+                std::map<std::string, NUClear::clock::time_point> timestamp;
+                int watcherFd;
+                int killFd;
+
+                volatile bool running;
+
+                void run();
+                void kill();
+                void loadDir(const std::string& path, HandlerFunction emit);
+                void watchDir(const std::string& path);
+                YAML::Node buildConfigurationNode(const std::string& filePath);
+
+                // Lots of space for events (definitely more then needed)
+                static constexpr size_t MAX_EVENT_LEN = 20 * 1024;
+                static constexpr const char* BASE_CONFIGURATION_PATH = "config/";
+
+            public:
                 explicit ConfigSystem(std::unique_ptr<NUClear::Environment> environment);
             };
 

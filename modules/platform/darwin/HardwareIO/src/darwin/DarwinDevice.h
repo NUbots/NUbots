@@ -47,8 +47,10 @@ namespace Darwin {
             REG_WRITE = 4,
             ACTION = 5,
             RESET = 6,
+            SYNC_READ = 130,
             SYNC_WRITE = 131,
-            BULK_READ = 146
+            BULK_READ = 146,
+            BULK_WRITE = 147
         };
 
         /**
@@ -181,11 +183,11 @@ namespace Darwin {
             static_assert(sizeof(ReadCommand<TType>) == 8, "The compiler is adding padding to this struct, Bad compiler!");
 
             // Execute our Read command through the uart
-            CommandResult result = coms.execute(ReadCommand<TType> (id, address));
+            CommandResult result = coms.executeRead(ReadCommand<TType> (id, address));
 
             // If there was an error then try reading again
             if (result.data.size() != sizeof(TType)) {
-                result = coms.execute(ReadCommand<TType> (id, address));
+                result = coms.executeRead(ReadCommand<TType> (id, address));
             }
 
             // If it's still bad then throw a runtime error
@@ -213,20 +215,15 @@ namespace Darwin {
          *
          * @param address   the address of the data that we are reading
          * @param data      the data that we are writing to the device
-         *
-         * @return the ErrorCode that was returned by the device
          */
         template <typename TType>
-        uint8_t write(uint8_t address, TType data) {
+        void write(uint8_t address, TType data) {
 
             // Check that this struct is not cache alligned
             static_assert(sizeof(WriteCommand<TType>) == 7 + sizeof(TType), "The compiler is adding padding to this struct, Bad compiler!");
 
             // Write our data over the UART
-            CommandResult result = coms.execute(WriteCommand<TType> (id, address, data));
-
-            // Return our resulting error code
-            return result.header.errorcode;
+            coms.executeWrite(WriteCommand<TType> (id, address, data));
         }
 
         /**

@@ -39,25 +39,32 @@ namespace darwin {
     private:
         /// @brief Our internal darwin class that is used for interacting with the hardware
         Darwin::Darwin darwin;
+        messages::platform::darwin::DarwinSensors parseSensors(const Darwin::BulkReadResults& data);
 
-        /// @brief Our state for our CM730 for variables we send to it
-        struct {
+        struct CM730State {
             messages::platform::darwin::DarwinSensors::LEDPanel ledPanel = { false, false, false };
             messages::platform::darwin::DarwinSensors::HeadLED headLED = { 0x00, 0xFF, 0x00 };
             messages::platform::darwin::DarwinSensors::EyeLED eyeLED = { 0x00, 0x00, 0xFF };
-        } cm730State;
+        };
 
-        /// @brief Our state for or MX28s for variables we send to it
-        struct {
+        struct ServoState {
+            bool dirty = false;
+
             bool torqueEnabled = false;
+
             float pGain = 32.0/255.0;
             float iGain = 0;
             float dGain = 0;
-
             float movingSpeed = 0;
             float goalPosition = 0;
 
-        } servoState[20];
+        };
+
+        /// @brief Our state for our CM730 for variables we send to it
+        CM730State cm730State;
+
+        /// @brief Our state for or MX28s for variables we send to it
+        std::array<ServoState, 20> servoState;
 
     public:
         /// @brief called by a Powerplant to construct this reactor

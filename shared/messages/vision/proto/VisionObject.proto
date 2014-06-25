@@ -19,41 +19,27 @@
 
 package messages.vision.proto;
 
+import "messages/Geometry.proto";
+
 message VisionObject {
-    enum ShapeType {
-        CIRCLE = 1;
-        QUAD = 2;
-        POLYGON = 3;
-        UNKNOWN_SHAPE = 4;
+
+    message Goal {
+
+        enum Side {
+            LEFT = 0;
+            RIGHT = 1;
+            UNKNOWN = 2;
+        }
+
+        required Side side = 1;
+        required Quad quad = 2;
     }
 
-    enum GoalType {
-        LEFT = 1;
-        RIGHT = 2;
-        UNKNOWN_GOAL = 3;
+    enum ObjectType {
+        GOAL = 0;
     }
 
-    enum ObstacleColour {
-        UNKNOWN = 1;
-        CYAN = 2;
-        MAGENTA = 3;
-    }
+    required ObjectType type = 1;
 
-    optional ShapeType shape_type = 1;
-    optional GoalType goal_type = 2;
-    optional string name = 3;
-
-    optional float screen_x = 4;
-    optional float screen_y = 5;
-
-    optional float rotation = 6;
-
-    optional uint32 radius = 7;
-    optional uint32 width = 8;
-    optional uint32 height = 9;
-    repeated uint32 points = 10;
-
-    repeated float measured_relative_position = 11; //Spherical
-
-    optional ObstacleColour obstacle_colour = 12;
+    optional Goal goal = 2;
 }

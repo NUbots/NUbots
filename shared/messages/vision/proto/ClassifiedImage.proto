@@ -19,7 +19,8 @@
 
 package messages.vision.proto;
 
-import "messages/Global.proto";
+import "messages/Vector.proto";
+import "messages/Geometry.proto";
 
 message ClassifiedImage {
 
@@ -30,7 +31,7 @@ message ClassifiedImage {
         required uvec2 end = 4;
     }
 
-    required vec2 horizon = 1;
+    required Line horizon = 1;
     repeated vec3 visual_horizon = 2;
     repeated Segment segment = 3;
 }

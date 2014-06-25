@@ -25,14 +25,13 @@
 #include "messages/behaviour/Action.h"
 #include "messages/support/Configuration.h"
 #include "messages/input/Sensors.h"
+#include "messages/motion/GetupCommand.h"
 
 namespace modules {
     namespace behaviour {
         namespace skills {
 
-            //internal only callback messages to start and stop our action
-            struct ExecuteGetup{};
-            struct KillGetup{};
+
 
             using messages::support::Configuration;
             using messages::input::Sensors;
@@ -41,6 +40,8 @@ namespace modules {
             using messages::behaviour::RegisterAction;
             using messages::behaviour::ActionPriorites;
             using messages::behaviour::LimbID;
+            using messages::motion::ExecuteGetup;
+            using messages::motion::KillGetup;
 
             Getup::Getup(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment))
@@ -88,7 +89,7 @@ namespace modules {
 
                 emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                     id,
-                    "getup",
+                    "Get Up",
                     { std::pair<float, std::set<LimbID>>(0, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD }) },
                     [this] (const std::set<LimbID>&) {
                         emit(std::make_unique<ExecuteGetup>());

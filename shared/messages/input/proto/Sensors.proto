@@ -19,6 +19,9 @@
 
 package messages.input.proto;
 
+import "messages/Vector.proto";
+import "messages/Matrix.proto";
+
 message Sensors {
 
     enum ServoID {
@@ -66,42 +69,12 @@ message Sensors {
         optional float temperature = 13;
     }
 
-    message Accelerometer {
-        optional float x = 1;
-        optional float y = 2;
-        optional float z = 3;
-    }
-
-    message Gyroscope {
-        optional float x = 1;
-        optional float y = 2;
-        optional float z = 3;
-    }
-
-    message Orientation {
-        optional float xx = 1;
-        optional float xy = 2;
-        optional float xz = 3;
-        optional float yx = 4;
-        optional float yy = 5;
-        optional float yz = 6;
-        optional float zx = 7;
-        optional float zy = 8;
-        optional float zz = 9;
-    }
-
-    message FSR {
-        optional float x = 1;
-        optional float y = 2;
-        optional float z = 3;
-    }
-
     required int64 timestamp = 1;
-    optional Accelerometer accelerometer = 2;
-    optional Gyroscope gyroscope = 3;
-    optional Orientation orientation = 4;
-    optional FSR left_FSR = 5;
-    optional FSR right_FSR = 6;
+    optional vec3 accelerometer = 2;
+    optional vec3 gyroscope = 3;
+    optional mat33 orientation = 4;
+    optional vec3 left_FSR = 5;
+    optional vec3 right_FSR = 6;
     repeated Servo servo = 7;
 }
 
