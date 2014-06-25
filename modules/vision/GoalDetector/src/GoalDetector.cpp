@@ -50,37 +50,36 @@ namespace vision {
 
         on<Trigger<Configuration<GoalDetector>>>([this](const Configuration<GoalDetector>& config) {
 
-                std::string selectionMethod = config["SELECTION_METHOD"].as<std::string>();
+            std::string selectionMethod = config["SELECTION_METHOD"].as<std::string>();
 
-                if (selectionMethod.compare("LARGEST_CONSENSUS") == 0) {
-                    SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
-                }
-                else if (selectionMethod.compare("BEST_FITTING_CONSENSUS") == 0) {
-                    SELECTION_METHOD = RansacSelectionMethod::BEST_FITTING_CONSENSUS;
-                }
-                else {
-                    SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
-                }
+            if (selectionMethod.compare("LARGEST_CONSENSUS") == 0) {
+                SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
+            }
+            else if (selectionMethod.compare("BEST_FITTING_CONSENSUS") == 0) {
+                SELECTION_METHOD = RansacSelectionMethod::BEST_FITTING_CONSENSUS;
+            }
+            else {
+                SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
+            }
 
-                MINIMUM_POINTS = config["MINIMUM_POINTS"].as<uint>();
-                MAX_ITERATIONS_PER_FITTING = config["MAX_ITERATIONS_PER_FITTING"].as<uint>();
-                MAX_FITTING_ATTEMPTS = config["MAX_FITTING_ATTEMPTS"].as<uint>();
-                ANGLE_MARGIN = config["ANGLE_MARGIN"].as<double>();
-                CONSENSUS_THRESHOLD = config["CONSENSUS_THRESHOLD"].as<double>();
-                RANSAC_MATCHING_TOLERANCE = config["RANSAC_MATCHING_TOLERANCE"].as<double>();
-                MIN_GOAL_SEPARATION = config["MIN_GOAL_SEPARATION"].as<int>();
-                GOAL_HEIGHT_TO_WIDTH_RATIO_MIN = config["GOAL_HEIGHT_TO_WIDTH_RATIO_MIN"].as<float>();
-                THROWOUT_SHORT_GOALS = config["THROWOUT_SHORT_GOALS"].as<bool>();
-                THROWOUT_NARROW_GOALS = config["THROWOUT_NARROW_GOALS"].as<bool>();
-                THROWOUT_ON_ABOVE_KIN_HOR_GOALS = config["THROWOUT_ON_ABOVE_KIN_HOR_GOALS"].as<bool>();
-                THROWOUT_DISTANT_GOALS = config["THROWOUT_DISTANT_GOALS"].as<bool>();
-                MAX_GOAL_DISTANCE = config["MAX_GOAL_DISTANCE"].as<float>();
-                MIN_GOAL_HEIGHT = config["MIN_GOAL_HEIGHT"].as<int>();
-                MIN_GOAL_WIDTH = config["MIN_GOAL_WIDTH"].as<int>();
-                GOAL_WIDTH = config["GOAL_WIDTH"].as<float>();
-                EDGE_OF_SCREEN_MARGIN = config["EDGE_OF_SCREEN_MARGIN"].as<int>();
-                D2P_ADAPTIVE_THRESHOLD = config["D2P_ADAPTIVE_THRESHOLD"].as<float>();
-
+            MINIMUM_POINTS = config["MINIMUM_POINTS"].as<uint>();
+            MAX_ITERATIONS_PER_FITTING = config["MAX_ITERATIONS_PER_FITTING"].as<uint>();
+            MAX_FITTING_ATTEMPTS = config["MAX_FITTING_ATTEMPTS"].as<uint>();
+            ANGLE_MARGIN = config["ANGLE_MARGIN"].as<double>();
+            CONSENSUS_THRESHOLD = config["CONSENSUS_THRESHOLD"].as<double>();
+            RANSAC_MATCHING_TOLERANCE = config["RANSAC_MATCHING_TOLERANCE"].as<double>();
+            MIN_GOAL_SEPARATION = config["MIN_GOAL_SEPARATION"].as<int>();
+            GOAL_HEIGHT_TO_WIDTH_RATIO_MIN = config["GOAL_HEIGHT_TO_WIDTH_RATIO_MIN"].as<float>();
+            THROWOUT_SHORT_GOALS = config["THROWOUT_SHORT_GOALS"].as<bool>();
+            THROWOUT_NARROW_GOALS = config["THROWOUT_NARROW_GOALS"].as<bool>();
+            THROWOUT_ON_ABOVE_KIN_HOR_GOALS = config["THROWOUT_ON_ABOVE_KIN_HOR_GOALS"].as<bool>();
+            THROWOUT_DISTANT_GOALS = config["THROWOUT_DISTANT_GOALS"].as<bool>();
+            MAX_GOAL_DISTANCE = config["MAX_GOAL_DISTANCE"].as<float>();
+            MIN_GOAL_HEIGHT = config["MIN_GOAL_HEIGHT"].as<int>();
+            MIN_GOAL_WIDTH = config["MIN_GOAL_WIDTH"].as<int>();
+            GOAL_WIDTH = config["GOAL_WIDTH"].as<float>();
+            EDGE_OF_SCREEN_MARGIN = config["EDGE_OF_SCREEN_MARGIN"].as<int>();
+            D2P_ADAPTIVE_THRESHOLD = config["D2P_ADAPTIVE_THRESHOLD"].as<float>();
         });
 
         on<Trigger<ClassifiedImage<ObjectClass>>>([this](const ClassifiedImage<ObjectClass>& image) {

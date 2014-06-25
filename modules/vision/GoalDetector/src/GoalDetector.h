@@ -37,7 +37,7 @@ namespace vision {
         unsigned int MAX_FITTING_ATTEMPTS;                      // Hard limit on number of fitting attempts
 
         double ANGLE_MARGIN;                                    // Used for filtering out goal posts which are on too much of a lean.
-        double CONSENSUS_THRESHOLD;                             // Threshold dtermining what constitutes a good fit (Consensus margin)
+        double CONSENSUS_THRESHOLD;                             // Threshold determining what constitutes a good fit (Consensus margin)
 
         utility::math::ransac::RansacSelectionMethod SELECTION_METHOD;
 //          Horizon& m_kinematicsHorizon;
