@@ -20,9 +20,8 @@
 #ifndef MODULES_MODULES_VISION_BALLDETECTOR_H
 #define MODULES_MODULES_VISION_BALLDETECTOR_H
 
-
 #include <nuclear>
-namespace modules {
+
 namespace modules {
 namespace vision {
 
@@ -32,7 +31,6 @@ namespace vision {
         explicit BallDetector(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}
 }
 }
 
