@@ -350,9 +350,6 @@ namespace modules {
                    classify the mostly empty green below.
                  */
 
-                // Using yellow segments found by the ball finder, draw some vertical lines to find the bottom of the goals
-                // TODO implement
-
                 // Reset our hMax and hMin so we can do the oppisite check for the ball (to search outside the horizon)
                 // The variables should already be set to this point... but just to be sure
                 hLeft = horizonPoints.begin();
@@ -424,7 +421,7 @@ namespace modules {
                 }
 
                 /**********************************************
-                 *              CROSSHATCH BALLS              *
+                 *                IMPROVE BALLS               *
                  **********************************************/
 
                 /*
@@ -445,6 +442,9 @@ namespace modules {
                     // Get the expected size of the ball at the
                 }
 
+                // Throw out any outliers (bigger then x sd)
+                centre.stddev();
+
                 // Find the size of a ball at the position
                 auto ballSize = centre.mean();
 
@@ -457,7 +457,7 @@ namespace modules {
                 // Multiply tan of that angle by the angle->pixels constant (alpha?)
 
                 /**********************************************
-                 *              CROSSHATCH GOALS              *
+                 *                IMPROVE GOALS               *
                  **********************************************/
 
                 /*
@@ -468,6 +468,11 @@ namespace modules {
                     We then take these segments and generate segments that are 1.2x the width
                     This should allow a high level of detail without overclassifying the image
                  */
+
+
+                // TODO improve this, it does not work effectilly
+                // It does not find the highest and lowest points of the goals well
+                // Also the ball finder lines screw up the goal detection
 
                 for (uint i = 0; i < m->GOAL_FINDER_DETECTOR_LEVELS.size(); ++i) {
 
@@ -519,6 +524,42 @@ namespace modules {
 
                     insertSegments(*classifiedImage, newSegments, false);
                 }
+
+                /**********************************************
+                 *     IMPROVE MIDPOINTS FOR TEAM COLOURS     *
+                 **********************************************/
+
+                 /*
+                    We do a few extra segments around the team colours to improve the accuracy of robot
+                    detection. Do an extra close segment above and below the detected colour.
+                 */
+
+                // TODO
+
+                /**********************************************
+                 *       DEFINE OBSTACLE AND GOAL BASES       *
+                 **********************************************/
+
+                /*
+                    Here we cast vertical lines to help find the bottoms of obstacles and other robots
+                    We do this by finding all of the x coordiantes of unclassified and enemy team
+                    midpoints that are below the green horizon.
+                    We then go through this list of points removing duplicate and close x co-ordiantes
+                    We are then able to do vertical scanlines from the green horizon down to the bottom
+                    of the image in order to find the bottom of this obstacle
+                 */
+
+                // Loop through the goal segments
+
+                // Loop through the unclassified segments below the green horizon
+
+                // Loop through all the cyan and magenta patches
+
+                // Sort the list of x coordiantes
+
+                // Remove any point that is not greater then a config paramter from the previous point
+
+                // Cast vertical lines from the green horizon down to the bottom of the screen at these X coordiantes
 
                 emit(std::move(classifiedImage));
             });
