@@ -73,19 +73,24 @@ namespace messages {
             std::multimap<TClass, Segment> horizontalSegments;
             std::multimap<TClass, Segment> verticalSegments;
 
-            inline int visualHorizonAtPoint(int x) const {
+            int visualHorizonAtPoint(int x) const {
+                
+                struct {
+                    bool operator()(const int& k, const arma::ivec& v) {
+                        return k < v[0];
+                    }
+                    
+                    bool operator()(const arma::ivec& v, const int& k) {
+                        return v[0] < k;
+                    }
+                } equalRangeComp;
 
-                auto comp = [] (const int& k, const arma::uvec2& v) {
-                    return v < k;
-                };
+                auto points = std::equal_range(visualHorizon.begin(), visualHorizon.end(), x, equalRangeComp);
 
-                auto v2 = std::upper_bound(visualHorizon.begin(), visualHorizon.end(), x, comp);
-                auto v1 = std::lower_bound(visualHorizon.begin(), visualHorizon.end(), x, comp);
-
-                int x1 = v1->at(0);
-                int y1 = v1->at(1);
-                int x2 = v2->at(0);
-                int y2 = v2->at(1);
+                int x1 = points.first->at(0);
+                int y1 = points.first->at(1);
+                int x2 = points.second->at(0);
+                int y2 = points.second->at(1);
 
 
                 return int(double(y2 - y1) / double(x2 - x1) * double(x - x1) + y1);

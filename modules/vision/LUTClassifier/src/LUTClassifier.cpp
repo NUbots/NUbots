@@ -88,6 +88,7 @@ namespace modules {
                 GOAL_FINDER_LINE_SPACING = cam.effectiveScreenDistancePixels * tan(config["goals"]["spacing"].as<double>());
                 GOAL_FINDER_SUBSAMPLING = std::max(1, int(cam.effectiveScreenDistancePixels * tan(config["goals"]["subsampling"].as<double>())));
                 GOAL_FINDER_DETECTOR_LEVELS = config["goals"]["detector_levels"].as<std::vector<double>>();
+                GOAL_FINDER_MINIMUM_VERTICAL_SPACING = std::max(1, int(cam.effectiveScreenDistancePixels * tan(config["goals"]["subsampling"].as<double>())));
 
                 // Halve our levels
                 for(auto& d : GOAL_FINDER_DETECTOR_LEVELS) {

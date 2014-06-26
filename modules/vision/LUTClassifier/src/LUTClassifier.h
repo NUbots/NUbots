@@ -46,12 +46,13 @@ namespace modules {
             // A pointer to our quex class (since it is generated it is not defined at this point)
             QuexClassifier* quex;
 
-            uint VISUAL_HORIZON_SPACING = 100;
-            uint VISUAL_HORIZON_BUFFER = 0;
+            int VISUAL_HORIZON_SPACING = 100;
+            int VISUAL_HORIZON_BUFFER = 0;
             uint MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE = 0;
-            uint VISUAL_HORIZON_SUBSAMPLING = 1;
-            uint GOAL_FINDER_LINE_SPACING = 100;
-            uint GOAL_FINDER_SUBSAMPLING = 1;
+            int VISUAL_HORIZON_SUBSAMPLING = 1;
+            int GOAL_FINDER_LINE_SPACING = 100;
+            int GOAL_FINDER_SUBSAMPLING = 1;
+            int GOAL_FINDER_MINIMUM_VERTICAL_SPACING = 1;
             double MIN_BALL_INTERSECTIONS = 1;
             std::vector<double> GOAL_FINDER_DETECTOR_LEVELS = { 2.0 };
             double ALPHA = 2.0;
