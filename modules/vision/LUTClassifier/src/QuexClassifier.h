@@ -32,20 +32,20 @@
 #include "messages/vision/ClassifiedImage.h"
 
 namespace modules {
-	namespace vision {
-		class QuexClassifier {
-		private:
+    namespace vision {
+        class QuexClassifier {
+        private:
             static constexpr size_t BUFFER_SIZE = 2000;
             uint8_t buffer[BUFFER_SIZE]; // This should be big enough for now
-			quex::Lexer lexer;
-			uint32_t& tknNumber;
+            quex::Lexer lexer;
+            uint32_t& tknNumber;
 
-		public:
+        public:
             QuexClassifier();
 
-			std::vector<messages::vision::ClassifiedImage<messages::vision::ObjectClass>::Segment> classify(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const arma::uvec2& start, const arma::uvec2& end, const uint& stratification = 1);
-		};
-	}
+            std::vector<messages::vision::ClassifiedImage<messages::vision::ObjectClass>::Segment> classify(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const arma::uvec2& start, const arma::uvec2& end, const uint& stratification = 1);
+        };
+    }
 }
 
 #endif

@@ -22,12 +22,19 @@
 
 #include <nuclear>
 
+#include "messages/input/Image.h"
+#include "messages/input/Sensors.h"
+#include "messages/vision/ClassifiedImage.h"
+#include "messages/vision/LookUpTable.h"
+
 namespace modules {
     namespace vision {
 
         struct LUTLocation {
             static constexpr const char* CONFIGURATION_PATH = "LookUpTable.yaml";
         };
+
+        class QuexClassifier;
 
         /**
          * Classifies a raw image, producing the colour segments for object detection
@@ -36,8 +43,40 @@ namespace modules {
          */
         class LUTClassifier : public NUClear::Reactor {
         private:
-            class impl;
-            impl* m;
+            // A pointer to our quex class (since it is generated it is not defined at this point)
+            QuexClassifier* quex;
+
+            uint VISUAL_HORIZON_SPACING = 100;
+            uint VISUAL_HORIZON_BUFFER = 0;
+            uint MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE = 0;
+            uint VISUAL_HORIZON_SUBSAMPLING = 1;
+            uint GOAL_FINDER_LINE_SPACING = 100;
+            uint GOAL_FINDER_SUBSAMPLING = 1;
+            double MIN_BALL_INTERSECTIONS = 1;
+            std::vector<double> GOAL_FINDER_DETECTOR_LEVELS = { 2.0 };
+            double ALPHA = 2.0;
+            int MIN_BALL_SEARCH_JUMP = 1;
+            double BALL_RADIUS = 0.05;
+
+            void insertSegments(messages::vision::ClassifiedImage<messages::vision::ObjectClass>& image
+                , std::vector<messages::vision::ClassifiedImage<messages::vision::ObjectClass>::Segment>& segments
+                , bool vertical);
+
+            void findHorizon(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+
+            void findVisualHorizon(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+
+            void findBall(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+
+            void findGoals(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+
+            void enhanceBall(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+
+            void enhanceGoals(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+
+            void findGoalBase(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+
+            void findObstacleBase(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
 
         public:
             static constexpr const char* CONFIGURATION_PATH = "LUTClassifier.yaml";

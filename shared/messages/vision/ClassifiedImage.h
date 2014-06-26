@@ -63,7 +63,13 @@ namespace messages {
 
             arma::vec2 horizon;
 
+            // The gradients of the visual horizion, stored as (startx, gradient, intercept)
             std::vector<arma::vec> visualHorizon;
+
+            // The points of the visual horizon
+            std::vector<arma::uvec> visualHorizonPoints;
+            std::vector<arma::uvec>::iterator maxVisualHorizonPoint;
+            std::vector<arma::uvec>::iterator minVisualHorizonPoint;
 
             std::multimap<TClass, Segment> horizontalSegments;
             std::multimap<TClass, Segment> verticalSegments;
