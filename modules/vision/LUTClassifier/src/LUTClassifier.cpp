@@ -465,8 +465,6 @@ namespace modules {
                     We do this by taking our course classification of the whole image
                     and generating new segments where yellow was detected.
                     We first generate segments above and below that are 2x the width of the segment
-                    We then take these segments and generate segments that are 1.2x the width
-                    This should allow a high level of detail without overclassifying the image
                  */
 
 
