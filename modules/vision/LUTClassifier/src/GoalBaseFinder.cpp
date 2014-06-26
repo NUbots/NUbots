@@ -28,7 +28,7 @@ namespace modules {
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
 
-        void LUTClassifier::findGoalBase(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
+        void LUTClassifier::findGoalBases(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
 
         }
 

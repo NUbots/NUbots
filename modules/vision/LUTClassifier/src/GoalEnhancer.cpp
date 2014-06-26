@@ -75,7 +75,7 @@ namespace modules {
                       && (upperBegin[1] < image.height() && upperBegin[1] >= 0)
                       && (upperEnd[1] < image.height() && upperEnd[1] >= 0)) {
 
-                        auto segments = quex->classify(image, lut, arma::conv_to<arma::uvec>::from(upperBegin), arma::conv_to<arma::uvec>::from(upperEnd));
+                        auto segments = quex->classify(image, lut, arma::conv_to<arma::ivec>::from(upperBegin), arma::conv_to<arma::ivec>::from(upperEnd));
 
                         newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
                     }
@@ -85,7 +85,7 @@ namespace modules {
                       && (lowerBegin[1] < image.height() && lowerBegin[1] >= 0)
                       && (lowerEnd[1] < image.height() && lowerEnd[1] >= 0)) {
 
-                        auto segments = quex->classify(image, lut, arma::conv_to<arma::uvec>::from(lowerBegin), arma::conv_to<arma::uvec>::from(lowerEnd));
+                        auto segments = quex->classify(image, lut, arma::conv_to<arma::ivec>::from(lowerBegin), arma::conv_to<arma::ivec>::from(lowerEnd));
 
                         newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
                     }

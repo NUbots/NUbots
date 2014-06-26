@@ -371,7 +371,6 @@ namespace modules {
 
                     vh->set_x(visualHorizon[0]);
                     vh->set_y(visualHorizon[1]);
-                    vh->set_z(visualHorizon[2]);
                 }
 
                 send(message);

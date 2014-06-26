@@ -37,7 +37,7 @@ namespace modules {
                 Using the expected size of the ball at this position on the screen, we then crosshatch 2x the
                 size needed to ensure that the ball is totally covered.
              */
-            arma::running_stat_vec<arma::uvec> centre;
+            arma::running_stat_vec<arma::ivec> centre;
             auto ballSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::BALL);
             for(auto it = ballSegments.first; it != ballSegments.second; ++it) {
 

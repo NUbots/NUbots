@@ -31,22 +31,24 @@ namespace modules {
 
         void LUTClassifier::findVisualHorizon(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
 
+            // Get some local references to class variables to make text shorter
             auto& horizon = classifiedImage.horizon;
-
-            std::vector<arma::uvec2> horizonPoints;
+            auto& visualHorizon = classifiedImage.visualHorizon;
+            auto& maxVisualHorizon = classifiedImage.maxVisualHorizon;
+            auto& minVisualHorizon = classifiedImage.minVisualHorizon;
 
             // Cast lines to find our visual horizon
             for(uint i = 0; i < image.width(); i += VISUAL_HORIZON_SPACING) {
 
                 // Find our point to classify from (slightly above the horizon)
-                uint top = std::max(int(i * horizon[0] + horizon[1] - VISUAL_HORIZON_BUFFER), int(0));
-                top = std::min(top, image.height() - 1);
+                int top = std::max(int(i * horizon[0] + horizon[1] - VISUAL_HORIZON_BUFFER), int(0));
+                top = std::min(top, int(image.height() - 1));
 
                 // Classify our segments
-                auto segments = quex->classify(image, lut, { i, top }, { i, image.height() - 1 }, VISUAL_HORIZON_SUBSAMPLING);
+                auto segments = quex->classify(image, lut, { int(i), top }, { int(i), int(image.height() - 1) }, VISUAL_HORIZON_SUBSAMPLING);
 
                 // Our default green point is the bottom of the screen
-                arma::uvec2 greenPoint = { i, image.height() - 1 };
+                arma::ivec2 greenPoint = { int(i), int(image.height() - 1) };
 
                 // Loop through our segments to find our first green segment
                 for (auto it = segments.begin(); it != segments.end(); ++it) {
@@ -64,7 +66,7 @@ namespace modules {
                     }
                 }
 
-                horizonPoints.push_back(std::move(greenPoint));
+                visualHorizon.push_back(std::move(greenPoint));
 
                 insertSegments(classifiedImage, segments, true);
             }
@@ -73,14 +75,14 @@ namespace modules {
             if(image.width() - 1 % VISUAL_HORIZON_SPACING != 0) {
 
                 // Our default green point is the bottom of the screen
-                arma::uvec2 greenPoint = { image.width() - 1, image.height() - 1 };
+                arma::ivec2 greenPoint = { int(image.width() - 1), int(image.height() - 1) };
 
                 // Find our point to classify from (slightly above the horizon)
-                uint top = std::max(int((image.width() - 1) * horizon[0] + horizon[1] - VISUAL_HORIZON_BUFFER), int(0));
-                top = std::min(top, image.height() - 1);
+                int top = std::max(int((image.width() - 1) * horizon[0] + horizon[1] - VISUAL_HORIZON_BUFFER), int(0));
+                top = std::min(top, int(image.height() - 1));
 
-                arma::uvec2 start = { image.width() - 1, top };
-                arma::uvec2 end = { image.width() - 1, image.height() - 1 };
+                arma::ivec2 start = { int(image.width() - 1), top };
+                arma::ivec2 end = { int(image.width() - 1), int(image.height() - 1) };
 
                 auto segments = quex->classify(image, lut, start, end, VISUAL_HORIZON_SUBSAMPLING);
 
@@ -95,14 +97,14 @@ namespace modules {
                     }
                 }
 
-                horizonPoints.push_back(std::move(greenPoint));
+                visualHorizon.push_back(std::move(greenPoint));
 
                 insertSegments(classifiedImage, segments, true);
 
             }
 
             // Do a convex hull on the map points to build the horizon
-            for(auto a = horizonPoints.begin(); a < horizonPoints.end() - 2;) {
+            for(auto a = visualHorizon.begin(); a < visualHorizon.end() - 2;) {
 
                 auto b = a + 1;
                 auto c = a + 2;
@@ -112,29 +114,25 @@ namespace modules {
                                    - (double(a->at(1)) - double(b->at(1))) * (double(c->at(0)) - double(b->at(0)));
 
                 if(concave) {
-                    horizonPoints.erase(b);
-                    a = a == horizonPoints.begin() ? a : --a;
+                    visualHorizon.erase(b);
+                    a = a == visualHorizon.begin() ? a : --a;
                 }
                 else {
                     ++a;
                 }
             }
 
-            uint maxVisualHorizon = 0;
-            uint minVisualHorizon = image.height();
+            // As this is a convex hull, the max visual horizon will always be at one of the edges
+            maxVisualHorizon = visualHorizon.front()[1] > visualHorizon.back()[1] ? visualHorizon.begin() : visualHorizon.end() - 1;
 
-            for(uint i = 0; i < horizonPoints.size() - 1; ++i) {
-                const auto& p1 = horizonPoints[i];
-                const auto& p2 = horizonPoints[i + 1];
+            // We will have to do a search for the minimum visual horizon point while we build the gradient map
+            minVisualHorizon = visualHorizon.begin();
 
-                maxVisualHorizon = std::max({ maxVisualHorizon, uint(p1[1]), uint(p2[1]) });
-                minVisualHorizon = std::min({ minVisualHorizon, uint(p1[1]), uint(p2[1]) });
-
-                double m = (double(p2[1]) - double(p1[1])) / (double(p2[0]) - double(p1[0]));
-                double b = - m * double(p1[0]) + double(p1[1]);
-
-                classifiedImage.visualHorizon.push_back({ double(p1[0]), m, b });
-            }
+            // As this is a convex function, we just need to progress till the next point is lower
+            for(minVisualHorizon = visualHorizon.begin();
+                minVisualHorizon < visualHorizon.end() - 1
+                && minVisualHorizon->at(1) < (minVisualHorizon + 1)->at(1);
+                ++minVisualHorizon);
         }
 
     }  // vision

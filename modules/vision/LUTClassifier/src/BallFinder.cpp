@@ -53,7 +53,7 @@ namespace modules {
             ///
             /// $\Delta p=p^{2}\frac{2r\alpha}{lh}$
 
-            auto& horizonPoints = classifiedImage.visualHorizonPoints;
+            auto& visualHorizon = classifiedImage.visualHorizon;
             auto& horizon = classifiedImage.horizon;
 
             double height = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second(3,2) - sensors.forwardKinematics.find(ServoID::L_ANKLE_PITCH)->second(3,2);
@@ -61,27 +61,23 @@ namespace modules {
 
             height -= BALL_RADIUS;
 
-            // Get the visual horizon intercepts for this point (either side)
-            auto maxPoint = std::min_element(horizonPoints.begin(), horizonPoints.end(), [] (const arma::uvec2& a, const arma::uvec2& b) {
-                return a[1] < b[1];
-            });
-            auto hLeft = maxPoint;
-            auto hRight = maxPoint + 1;
+            auto hLeft = classifiedImage.maxVisualHorizon;
+            auto hRight = classifiedImage.maxVisualHorizon + 1;
 
             uint kinematicsHorizonPoint = horizon[1];
 
-            for(int p = classifiedImage.minVisualHorizonPoint->at(1) - kinematicsHorizonPoint;
+            for(int p = classifiedImage.minVisualHorizon->at(1) - kinematicsHorizonPoint;
                 p + kinematicsHorizonPoint < image.height();
                 p = std::max(p + MIN_BALL_SEARCH_JUMP, int(round(1.0 / ((1.0 / double(p)) - ((ALPHA * 2 * BALL_RADIUS) / (MIN_BALL_INTERSECTIONS * height))))))) {
 
-                uint y = p + kinematicsHorizonPoint;
+                int y = p + kinematicsHorizonPoint;
 
-                arma::uvec2 start = { 0, y };
-                arma::uvec2 end = { image.width() - 1, y };
+                arma::ivec2 start = { 0, y };
+                arma::ivec2 end = { int(image.width() - 1), y };
 
-                while (hLeft > horizonPoints.begin()) {
+                while (hLeft > visualHorizon.begin()) {
 
-                    auto& eq = classifiedImage.visualHorizon[std::distance(horizonPoints.begin(), hLeft) - 1];
+                    auto& eq = classifiedImage.visualHorizon[std::distance(visualHorizon.begin(), hLeft) - 1];
 
                     double y1 = (hLeft - 1)->at(1);
                     double y2 = hLeft->at(1);
@@ -98,9 +94,9 @@ namespace modules {
                     }
                 }
 
-                while (hRight < horizonPoints.end()) {
+                while (hRight < visualHorizon.end()) {
 
-                    auto& eq = classifiedImage.visualHorizon[std::distance(horizonPoints.begin(), hRight) - 1];
+                    auto& eq = classifiedImage.visualHorizon[std::distance(visualHorizon.begin(), hRight) - 1];
 
                     double y1 = (hRight - 1)->at(1);
                     double y2 = hRight->at(1);

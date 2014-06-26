@@ -74,9 +74,9 @@ namespace modules {
 
             void enhanceGoals(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
 
-            void findGoalBase(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+            void findGoalBases(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
 
-            void findObstacleBase(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+            void findObstacleBases(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
 
         public:
             static constexpr const char* CONFIGURATION_PATH = "LUTClassifier.yaml";

@@ -32,7 +32,7 @@ namespace modules {
         QuexClassifier::QuexClassifier() : lexer(buffer, BUFFER_SIZE, buffer + 1), tknNumber(lexer.token_p()->number) {
         }
 
-        std::vector<ClassifiedImage<ObjectClass>::Segment> QuexClassifier::classify(const Image& image, const LookUpTable& lut, const arma::uvec2& start, const arma::uvec2& end, const uint& subsample) {
+        std::vector<ClassifiedImage<ObjectClass>::Segment> QuexClassifier::classify(const Image& image, const LookUpTable& lut, const arma::ivec2& start, const arma::ivec2& end, const uint& subsample) {
 
             // Start reading data
             lexer.buffer_fill_region_prepare();
@@ -71,18 +71,18 @@ namespace modules {
             output.reserve(64);
 
             // Our vector of position
-            arma::uvec2 position = start;
+            arma::ivec2 position = start;
 
             // A reference to the relevant movement direction
-            uint& movement = start[1] == end[1] ? position[0] : position[1];
+            int& movement = start[1] == end[1] ? position[0] : position[1];
 
             for(uint32_t typeID = lexer.receive(); typeID != QUEX_TKN_TERMINATION; typeID = lexer.receive()) {
 
                 // Update our position
-                arma::uvec2 s = position;
+                arma::ivec2 s = position;
                 uint len = tknNumber * subsample;
                 movement += len;
-                arma::uvec2 m = (s + position) / 2;
+                arma::ivec2 m = (s + position) / 2;
 
                 switch(typeID) {
                     case QUEX_TKN_FIELD:
