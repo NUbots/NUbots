@@ -51,14 +51,14 @@ namespace utility {
 
 
         inline arma::vec directionVectorFromScreenAngular(const arma::vec& screenAngular){
-          double theta = screenAngular[0];
-          double phi = screenAngular[1];
-          return {std::cos(theta) * std::cos(phi), std::sin(theta) * std::cos(phi), std::sin(phi), 0};
+            double theta = screenAngular[0];
+            double phi = screenAngular[1];
+            return {std::cos(theta) * std::cos(phi), std::sin(theta) * std::cos(phi), std::sin(phi), 0};
         }
         /*! Uses vec for backwards compatibility with 3d homogeneous coordinates
         */
         inline arma::vec screenAngularFromDirectionVector(const arma::vec& direction){
-          return { std::atan2(direction[1], direction[0]) , std::atan2(direction[2], arma::norm(arma::vec({direction[0], direction[1]})))};
+            return { std::atan2(direction[1], direction[0]) , std::atan2(direction[2], arma::norm(arma::vec({direction[0], direction[1]})))};
         }
 
         inline arma::vec rotateAngularDirection(const arma::vec& screenAngular, const arma::mat& R){                  
@@ -72,8 +72,45 @@ namespace utility {
         inline arma::vec screenPositionFromScreenAngular(const arma::vec& screenAngular){
             return screenPositionFromDirectionVector(directionVectorFromScreenAngular(screenAngular));
         }
+        /*! @param ballVisualCentrePixels - centre of the ball onscreen in centre-zero coordinates (x=0,y=0 at the centre of the screen)
+            @param ballVisualDiameterPixels
+            @param ballWidth
+            @param effectiveScreenDistancePixels
+        */
+        inline double widthBasedDistanceToBall(const arma::vec2& ballVisualCentrePixels,
+                                               const double& ballVisualDiameterPixels,
+                                               const double& ballWidth,
+                                               const double& effectiveScreenDistancePixels)
+        {
+            double ballVisualDistance = arma::norm(ballVisualCentrePixels); 
+            
+            double ballVisualRadius = ballVisualDiameterPixels / 2.0;
+            
+            double ballCloseDistance = ballVisualDistance - ballVisualRadius;
+            double ballFarDistance = ballVisualDistance + ballVisualRadius; 
 
-        
+            double thetaClose = std::atan2(ballCloseDistance, effectiveScreenDistancePixels);
+            double thetaFar = std::atan2(ballFarDistance, effectiveScreenDistancePixels);
+
+            double ballAngularWidth = thetaFar - thetaClose;
+
+            return (ballWidth / 2.0) / std::tan(ballAngularWidth / 2.0);
+        }
+
+        /*! @brief Assumes goal is normal to camera view 
+            @param goalBaseCentreVisualPixels - centre of the goal base onscreen in centre-zero coordinates (x=0,y=0 at the centre of the screen)
+            @param effectiveScreenDistancePixels
+        */
+        inline double widthBasedDistanceToGoal(const arma::vec2& goalBaseCentreVisualPixels,
+                                               const double& goalVisualDiameterPixels,
+                                               const double& goalWidth,
+                                               const double& effectiveScreenDistancePixels)
+        {
+            return widthBasedDistanceToBall({goalBaseCentreVisualPixels[0], 0},
+                                             goalVisualDiameterPixels,
+                                             goalWidth,
+                                             effectiveScreenDistancePixels);
+        }
     }
   }
 }
