@@ -52,7 +52,9 @@ namespace modules {
             int VISUAL_HORIZON_SUBSAMPLING = 1;
             int GOAL_FINDER_LINE_SPACING = 100;
             int GOAL_FINDER_SUBSAMPLING = 1;
-            int GOAL_FINDER_MINIMUM_VERTICAL_SPACING = 1;
+            int GOAL_FINDER_MAXIMUM_VERTICAL_CLUSTER_SPACING = 1;
+            int GOAL_FINDER_VERTICAL_CLUSTER_UPPER_BUFFER = 1;
+            int GOAL_FINDER_VERTICAL_CLUSTER_LOWER_BUFFER = 1;
             double MIN_BALL_INTERSECTIONS = 1;
             std::vector<double> GOAL_FINDER_DETECTOR_LEVELS = { 2.0 };
             double ALPHA = 2.0;

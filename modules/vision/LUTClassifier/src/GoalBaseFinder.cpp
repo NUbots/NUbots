@@ -30,11 +30,11 @@ namespace modules {
         using messages::vision::ClassifiedImage;
 
         void LUTClassifier::findGoalBases(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
-            
+
             // Get some local references to class variables to make text shorter
             auto& horizon = classifiedImage.horizon;
-            
-        	std::vector<int> points;
+
+        	std::vector<arma::ivec2> points;
 
         	// Loop through all of our goal segments
         	auto hSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::GOAL);
@@ -48,40 +48,64 @@ namespace modules {
                     && it->second.next) {
 
                     // Push back our midpoints x position
-                    points.push_back(it->second.midpoint[0]);
-                }
-            }
-            
-            // Sort our points
-            std::sort(points.begin(), points.end());
-            
-            // If we have some points
-            if(!points.empty()) {
-                
-                // Loop through our points removing close points
-                for(auto it = points.begin(); it < points.end() - 1; ++it) {
-                    
-                    // If our next point is not the minimum distance away, remove it
-                    if(*(it + 1) - *it < GOAL_FINDER_MINIMUM_VERTICAL_SPACING) {
-                        points.erase(it + 1);
-                    }
-                    // Otherwise, cast a line from the horizon down
-                    else {
-                        
-                        int x = *it;
-                        
-                        // Find our point to classify from (slightly above the horizon)
-                        int top = std::max(int(x * horizon[0] + horizon[1]), 0);
-                        top = std::min(top, int(image.height() - 1));
-                        
-                        
-                        // Classify our segments
-                        auto segments = quex->classify(image, lut, { x, top }, { x, int(image.height() - 1) }, 1);
-                        insertSegments(classifiedImage, segments, true);
-                    }
+                    points.push_back(it->second.midpoint);
                 }
             }
 
+            // Sort our points
+            std::sort(points.begin(), points.end(), [] (const arma::ivec2& a, const arma::ivec2& b) {
+                return a[0] < b[0];
+            });
+
+            // Our vector of statistics
+            arma::running_stat_vec<arma::ivec2> stats;
+            if(!points.empty()) {
+                stats(points.front());
+                for(auto it = points.begin(); it < points.end() - 1; ++it) {
+
+                    auto p1 = it;
+                    auto p2 = it + 1;
+
+                    // If the next point is too far away to be considered in this cluster
+                    if(p2->at(0) - p1->at(0) > GOAL_FINDER_MAXIMUM_VERTICAL_CLUSTER_SPACING) {
+
+                        // Get our relevant statistics
+                        auto max = stats.max();
+                        auto min = stats.min();
+                        auto mean = stats.mean();
+
+                        arma::ivec2 start = { mean[0], min[1] };
+                        arma::ivec2 end = { mean[0], max[1] };
+
+                        start[1] = std::max(start[1] - GOAL_FINDER_VERTICAL_CLUSTER_UPPER_BUFFER, 0);
+                        end[1] = std::min(end[1] + GOAL_FINDER_VERTICAL_CLUSTER_LOWER_BUFFER, int(image.height() - 1));
+
+                        // Classify our point based on these
+                        auto segments = quex->classify(image, lut, start, end, 1);
+                        insertSegments(classifiedImage, segments, false);
+
+                        stats.reset();
+                    }
+                    else {
+                        stats(*p2);
+                    }
+                }
+
+                if(stats.count() > 0) {
+
+                    // Get our relevant statistics
+                    auto max = stats.max();
+                    auto min = stats.min();
+                    auto mean = stats.mean();
+
+                    arma::ivec2 start = { mean[0], min[1] };
+                    arma::ivec2 end = { mean[0], max[1] };
+
+                    // Classify our point based on these
+                    auto segments = quex->classify(image, lut, start, end, 1);
+                    insertSegments(classifiedImage, segments, false);
+                }
+            }
         }
 
     }  // vision

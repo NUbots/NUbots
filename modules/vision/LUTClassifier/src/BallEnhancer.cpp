@@ -37,30 +37,21 @@ namespace modules {
                 Using the expected size of the ball at this position on the screen, we then crosshatch 2x the
                 size needed to ensure that the ball is totally covered.
              */
-            arma::running_stat_vec<arma::ivec> centre;
-            auto ballSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::BALL);
-            for(auto it = ballSegments.first; it != ballSegments.second; ++it) {
 
-                auto& elem = it->second;
 
-                centre(elem.midpoint);
+            // get a running stat vec of the ball points below the green horizon
 
-                // Get the expected size of the ball at the
-            }
+            // calculate the mean and SD of the points
 
-            // Throw out any outliers (bigger then x sd)
-            centre.stddev();
+            // Iterate through the points again and remove any that are outside the SD
 
-            // Find the size of a ball at the position
-            auto ballSize = centre.mean();
+            // Recalculate the mean
 
-            // Distance to point to centre ( n below horizon = h/alphax )
+            // Get the estimated ball width for this distance
 
-            // Get the width of the imaginary ball
+            // Create a field that is CONFIG * larger then this
 
-            // Find the angular width of the ball at this distance
-
-            // Multiply tan of that angle by the angle->pixels constant (alpha?)
+            // Within a circle of that config diameter, draw n lines, where n ensures that at least SOMECONFIG lines go through the ball
 
         }
 

@@ -38,10 +38,7 @@ namespace modules {
                 We first generate segments above and below that are 2x the width of the segment
              */
 
-
-            // TODO improve this, it does not work effectilly
-            // It does not find the highest and lowest points of the goals well
-            // Also the ball finder lines screw up the goal detection
+            // TODO add in the original lines as part of the values (since they are subsampled)
 
             for (uint i = 0; i < GOAL_FINDER_DETECTOR_LEVELS.size(); ++i) {
 
