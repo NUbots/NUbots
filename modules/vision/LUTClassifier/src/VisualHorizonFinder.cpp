@@ -131,7 +131,7 @@ namespace modules {
             // As this is a convex function, we just need to progress till the next point is lower
             for(minVisualHorizon = visualHorizon.begin();
                 minVisualHorizon < visualHorizon.end() - 1
-                && minVisualHorizon->at(1) < (minVisualHorizon + 1)->at(1);
+                && minVisualHorizon->at(1) > (minVisualHorizon + 1)->at(1);
                 ++minVisualHorizon);
         }
 

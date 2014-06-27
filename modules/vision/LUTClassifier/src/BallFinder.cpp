@@ -20,6 +20,8 @@
 #include "LUTClassifier.h"
 #include "QuexClassifier.h"
 
+#include "utility/math/geometry/Line.h"
+
 namespace modules {
     namespace vision {
 
@@ -29,6 +31,8 @@ namespace modules {
         using messages::vision::LookUpTable;
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
+
+        using utility::math::geometry::Line;
 
         void LUTClassifier::findBall(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
 
@@ -77,15 +81,21 @@ namespace modules {
 
                 while (hLeft > visualHorizon.begin()) {
 
-                    auto& eq = classifiedImage.visualHorizon[std::distance(visualHorizon.begin(), hLeft) - 1];
+                    auto p1 = hLeft - 1;
+                    auto p2 = hLeft;
 
-                    double y1 = (hLeft - 1)->at(1);
-                    double y2 = hLeft->at(1);
+                    if(y <= p1->at(1) && y >= p2->at(1)) {
 
-                    if(y <= y1 && y >= y2 && eq[1] != 0) {
+                        // Make a line from the two points and find our x
+                        Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
 
-                        // Solve the equation for x
-                        start[0] = std::round((y - eq[2]) / eq[1]);
+                        if(l.isHorizontal()) {
+                            start[0] = l.getC();
+                        }
+                        else {
+                            start[0] = round(l.findXFromY(y));
+                        }
+
                         break;
                     }
                     // Try our previous point
@@ -98,13 +108,21 @@ namespace modules {
 
                     auto& eq = classifiedImage.visualHorizon[std::distance(visualHorizon.begin(), hRight) - 1];
 
-                    double y1 = (hRight - 1)->at(1);
-                    double y2 = hRight->at(1);
+                    auto p1 = hRight - 1;
+                    auto p2 = hRight;
 
-                    if(y >= y1 && y <= y2 && eq[1] != 0) {
+                    if(y >= p1->at(1) && y <= p2->at(1)) {
 
-                        // Solve the equation for x
-                        end[0] = std::round((y - eq[2]) / eq[1]);
+                        // Make a line from the two points and find our x
+                        Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
+
+                        if(l.isHorizontal()) {
+                            end[0] = l.getC();
+                        }
+                        else {
+                            end[0] = round(l.findXFromY(y));
+                        }
+
                         break;
                     }
                     // Try our previous point

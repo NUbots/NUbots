@@ -43,6 +43,7 @@ namespace modules {
 
             auto& visualHorizon = classifiedImage.visualHorizon;
             auto& maxPoint = classifiedImage.maxVisualHorizon;
+            auto& minPoint = classifiedImage.minVisualHorizon;
 
             auto hLeft = visualHorizon.begin();
             auto hRight = visualHorizon.end() - 1;
@@ -56,7 +57,7 @@ namespace modules {
                     arma::ivec2 start = { 0, y };
                     arma::ivec2 end = { int(image.width() - 1), y };
 
-                    while(hLeft < maxPoint) {
+                    while(hLeft < minPoint) {
 
                         auto p1 = hLeft;
                         auto p2 = hLeft + 1;
@@ -65,7 +66,14 @@ namespace modules {
 
                             // Make a line from the two points and find our x
                             Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
-                            end[0] = round(l.findXFromY(y));
+
+                            if(l.isHorizontal()) {
+                                end[0] = l.getC();
+                            }
+                            else {
+                                end[0] = round(l.findXFromY(y));
+                            }
+
                             break;
                         }
                         // Try our previous point
@@ -80,12 +88,12 @@ namespace modules {
                 }
 
                 // If our right hand side is in range and has not gone out of scope
-                if(hRight->at(1) >= y && hRight > maxPoint) {
+                if(hRight->at(1) >= y && hRight > minPoint) {
 
                     arma::ivec2 start = { 0, y };
                     arma::ivec2 end = { int(image.width() - 1), y };
 
-                    while(hRight > maxPoint) {
+                    while(hRight > minPoint) {
 
                         auto p1 = hRight - 1;
                         auto p2 = hRight;
@@ -94,7 +102,13 @@ namespace modules {
 
                             // Make a line from the two points and find our x
                             Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
-                            start[0] = round(l.findXFromY(y));
+
+                            if(l.isHorizontal()) {
+                                start[0] = l.getC();
+                            }
+                            else {
+                                start[0] = round(l.findXFromY(y));
+                            }
 
                             break;
                         }

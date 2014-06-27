@@ -85,11 +85,6 @@ namespace messages {
                     }
                 } equalRangeComp;
 
-                //the first pointing to the first element that is not less
-                // than value and the second pointing to the first element
-                // greater than value.
-
-
                 auto points = std::equal_range(visualHorizon.rbegin(), visualHorizon.rend(), x, equalRangeComp);
 
                 int x1 = points.second->at(0);

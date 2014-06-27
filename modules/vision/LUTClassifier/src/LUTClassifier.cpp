@@ -110,7 +110,7 @@ namespace modules {
                 // Our classified image
                 auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
 
-                // Find our horizon
+                // // Find our horizon
                 findHorizon(image, lut, sensors, *classifiedImage);
 
                 // Find our visual horizon
@@ -126,13 +126,13 @@ namespace modules {
                 findBall(image, lut, sensors, *classifiedImage);
 
                 // Find our goals base
-                findGoalBases(image, lut, sensors, *classifiedImage);
+                // findGoalBases(image, lut, sensors, *classifiedImage);
 
-                // Find our obstacle bases
-                findObstacleBases(image, lut, sensors, *classifiedImage);
+                // // Find our obstacle bases
+                // findObstacleBases(image, lut, sensors, *classifiedImage);
 
-                // Enhance our ball
-                enhanceBall(image, lut, sensors, *classifiedImage);
+                // // Enhance our ball
+                // enhanceBall(image, lut, sensors, *classifiedImage);
 
                 // Emit our classified image
                 emit(std::move(classifiedImage));
