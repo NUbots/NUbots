@@ -98,10 +98,9 @@ namespace modules {
 
                         break;
                     }
+
                     // Try our previous point
-                    else {
-                        --hLeft;
-                    }
+                    --hLeft;
                 }
 
                 while (hRight < visualHorizon.end()) {
@@ -114,19 +113,14 @@ namespace modules {
                         // Make a line from the two points and find our x
                         Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
 
-                        if(l.isHorizontal()) {
-                            end[0] = l.getC();
-                        }
-                        else {
+                        if(!l.isHorizontal()) {
                             end[0] = round(l.findXFromY(y));
+                            break;
                         }
+                    }
 
-                        break;
-                    }
                     // Try our previous point
-                    else {
-                        ++hRight;
-                    }
+                    ++hRight;
                 }
 
                 auto segments = quex->classify(image, lut, start, end);
