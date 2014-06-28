@@ -95,7 +95,12 @@ namespace utility {
             return {camFocalLengthPixels * point[1] / point[0], camFocalLengthPixels * point[2] / point[0]};
         }
 
-        inline arma::vec3 getGroundPoint(const arma::vec2& screenPos, const arma::mat44& camToGround, const double& camFocalLengthPixels){
+        inline arma::vec2 projectWorldPointToCamera(const arma::vec4& point, const double& camFocalLengthPixels, const arma::mat44& camToGround){
+            arma::vec4 camSpacePoint = utility::math::matrix::orthonormal44Inverse(camToGround) * point;
+            return projectCamSpaceToScreen(camSpacePoint.rows(0,2), camFocalLengthPixels);
+        }
+
+        inline arma::vec3 getGroundPointFromScreen(const arma::vec2& screenPos, const arma::mat44& camToGround, const double& camFocalLengthPixels){
             arma::vec3 lineDirection = camToGround.submat(0,0,2,2) * arma::vec3{camFocalLengthPixels, screenPos[0], screenPos[1]};
             arma::vec3 linPosition = camToGround.submat(0,3,2,3);
 
@@ -105,8 +110,15 @@ namespace utility {
             utility::math::geometry::Plane<3> p;
             p.setFromNormal({0,0,1},{0,0,0});
 
-            return p.intersect(line);
+            auto intersection = p.intersect(line);
+            if(intersection.first){
+                return intersection.second;
+            } else {
+                NUClear::log<NUClear::ERROR>("getGroundPointFromScreen - point sampled at the horizon - infinite distance");
+                return intersection.second;
+            }
         }
+
     }
   }
 }

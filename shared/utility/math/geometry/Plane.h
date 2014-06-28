@@ -49,8 +49,12 @@ namespace geometry {
 			return arma::norm(normal,1) > 0;
 		}
 
-		Vector intersect(ParametricLine<n> l){
-			return arma::dot(point - l.point, normal) * l.direction / arma::dot(l.direction, normal) + l.point;   
+		std::pair<bool, Vector> intersect(ParametricLine<n> l){
+			double lDotN = arma::dot(l.direction, normal);
+			if(lDotN == 0){
+				return{false , Vector()};
+			}
+			return {true, arma::dot(point - l.point, normal) * l.direction / lDotN + l.point};   
 		}
 	};
 
