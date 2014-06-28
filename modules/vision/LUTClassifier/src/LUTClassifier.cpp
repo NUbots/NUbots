@@ -111,31 +111,24 @@ namespace modules {
             on<Trigger<Image>, With<LookUpTable, Sensors>, Options<Single>>("Classify Image", [this](const Image& image, const LookUpTable& lut, const Sensors& sensors) {
 
                 // Our classified image
-                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
 
                 // Find our horizon
-                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 findHorizon(image, lut, sensors, *classifiedImage);
 
                 // Find our visual horizon
-                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 findVisualHorizon(image, lut, sensors, *classifiedImage);
 
                 // Find our goals
-                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 findGoals(image, lut, sensors, *classifiedImage);
 
                 // Enhance our goals
-                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 enhanceGoals(image, lut, sensors, *classifiedImage);
 
                 // Find our ball
-                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 findBall(image, lut, sensors, *classifiedImage);
 
                 // Find our goals base
-                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 findGoalBases(image, lut, sensors, *classifiedImage);
 
                 // // Find our obstacle bases
@@ -145,7 +138,6 @@ namespace modules {
                 // enhanceBall(image, lut, sensors, *classifiedImage);
 
                 // Emit our classified image
-                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 emit(std::move(classifiedImage));
             });
 

@@ -381,9 +381,9 @@ namespace modules {
                     else {
                         sensors->kinematicsCamToGround = sensors->orientationCamToGround;
                     }
-                    std::cout << "sensors->kinematicsCamToGround\n" << sensors->kinematicsCamToGround << std::endl;
-                    std::cout << "sensors->orientationCamToGround\n" << sensors->orientationCamToGround << std::endl;
-                    std::cout << "sensors->bodyCentreHeight\n" << sensors->bodyCentreHeight << std::endl;
+                    // std::cout << "sensors->kinematicsCamToGround\n" << sensors->kinematicsCamToGround << std::endl;
+                    // std::cout << "sensors->orientationCamToGround\n" << sensors->orientationCamToGround << std::endl;
+                    // std::cout << "sensors->bodyCentreHeight\n" << sensors->bodyCentreHeight << std::endl;
 
                     sensors->kinematicsHorizon = utility::motion::kinematics::calculateHorizon(sensors->kinematicsCamToGround.submat(0,0,2,2).t(), cameraParameters.focalLengthPixels);
 
