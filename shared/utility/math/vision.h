@@ -24,6 +24,8 @@
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/Sensors.h"
 #include "utility/math/matrix.h"
+#include "utility/math/geometry/Plane.h"
+#include "utility/math/geometry/ParametricLine.h"
 #include <cmath>
 
 
@@ -92,6 +94,7 @@ namespace utility {
         inline arma::vec2 projectCamSpaceToScreen(const arma::vec3& point, const double& camFocalLengthPixels){
             return {camFocalLengthPixels * point[1] / point[0], camFocalLengthPixels * point[2] / point[0]};
         }
+
         
     }
   }
