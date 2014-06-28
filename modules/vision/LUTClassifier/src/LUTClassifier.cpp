@@ -91,6 +91,7 @@ namespace modules {
                 GOAL_FINDER_MAXIMUM_VERTICAL_CLUSTER_SPACING = std::max(1, int(cam.effectiveScreenDistancePixels * tan(config["goals"]["maximum_vertical_cluster_spacing"].as<double>())));
                 GOAL_FINDER_VERTICAL_CLUSTER_UPPER_BUFFER = std::max(1, int(cam.effectiveScreenDistancePixels * tan(config["goals"]["vertical_cluster_upper_buffer"].as<double>())));
                 GOAL_FINDER_VERTICAL_CLUSTER_LOWER_BUFFER = std::max(1, int(cam.effectiveScreenDistancePixels * tan(config["goals"]["vertical_cluster_lower_buffer"].as<double>())));
+                GOAL_FINDER_VERTICAL_SD_JUMP = config["goals"]["vertical_sd_jump"].as<double>();
 
                 // Halve our levels
                 for(auto& d : GOAL_FINDER_DETECTOR_LEVELS) {

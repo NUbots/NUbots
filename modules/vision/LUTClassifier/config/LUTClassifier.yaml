@@ -9,8 +9,9 @@ ball:
 goals:
   spacing: 0.04
   subsampling: 0.01
-  maximum_vertical_cluster_spacing: 0.01
+  maximum_vertical_cluster_spacing: 0.08
   vertical_cluster_upper_buffer: 0.04
   vertical_cluster_lower_buffer: 0.04
+  vertical_sd_jump: 2
   detector_levels:
     - 2.5
