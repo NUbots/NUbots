@@ -65,8 +65,8 @@ namespace modules {
 
             height -= BALL_RADIUS;
 
-            auto hLeft = classifiedImage.maxVisualHorizon;
-            auto hRight = classifiedImage.maxVisualHorizon + 1;
+            auto hLeft = classifiedImage.minVisualHorizon;
+            auto hRight = classifiedImage.minVisualHorizon + 1;
 
             uint kinematicsHorizonPoint = horizon[1];
 
@@ -105,8 +105,6 @@ namespace modules {
                 }
 
                 while (hRight < visualHorizon.end()) {
-
-                    auto& eq = classifiedImage.visualHorizon[std::distance(visualHorizon.begin(), hRight) - 1];
 
                     auto p1 = hRight - 1;
                     auto p2 = hRight;
