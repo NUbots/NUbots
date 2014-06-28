@@ -30,19 +30,19 @@ namespace geometry {
 	private:
 		using Vector = arma::vec::fixed<n>;
 
+	public:
 		Vector direction;
 		Vector point;
-	public:
 		ParametricLine(){}
 
-		bool setLineFromDirection(Vector direction_, Vector point_){
+		bool setFromDirection(Vector direction_, Vector point_){
 			bool success = arma::norm(direction,1) > 0;
 			direction = arma::normalise(direction);
 			point = point_;
 			return success;
 		}
 
-		bool setLineFromTwoPoints(Vector p1, Vector p2){
+		bool setFromTwoPoints(Vector p1, Vector p2){
 			bool success = arma::norm(p2-p1,1) > 0;
 			direction = arma::normalise(p2 - p1);
 			point = p1;

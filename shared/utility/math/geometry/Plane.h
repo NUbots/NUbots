@@ -29,29 +29,27 @@ namespace geometry {
 	template<int n>
 	class Plane {
 	private:
-		friend class ParametricLine<n>;
-
 		using Vector = arma::vec::fixed<n>;
 
+	public:
 		Vector normal;
 		Vector point;
 
-	public:
 		Plane(){}
 
-		bool setLineFromNormal(Vector normal_, Vector point_){
+		bool setFromNormal(Vector normal_, Vector point_){
 			normal = arma::normalise(normal_);
 			point = point_;
 			return arma::norm(normal,1) > 0; 
 		}
 
-		bool setLineFrom3Points(Vector p1, Vector p2, Vector p3){
+		bool setFrom3Points(Vector p1, Vector p2, Vector p3){
 			point = p1;
 			normal = arma::normalise(arma::cross(p2-p1,p3-p1));// Positive if p3 palmside (RHR) relative to p2
 			return arma::norm(normal,1) > 0;
 		}
 
-		Vector getIntersection(ParametricLine<n> l){
+		Vector intersect(ParametricLine<n> l){
 			return arma::dot(point - l.point, normal) * l.direction / arma::dot(l.direction, normal) + l.point;   
 		}
 	};

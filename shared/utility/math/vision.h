@@ -95,7 +95,18 @@ namespace utility {
             return {camFocalLengthPixels * point[1] / point[0], camFocalLengthPixels * point[2] / point[0]};
         }
 
-        
+        inline arma::vec3 getGroundPoint(const arma::vec2& screenPos, const arma::mat44& camToGround, const double& camFocalLengthPixels){
+            arma::vec3 lineDirection = camToGround.submat(0,0,2,2) * arma::vec3{camFocalLengthPixels, screenPos[0], screenPos[1]};
+            arma::vec3 linPosition = camToGround.submat(0,3,2,3);
+
+            utility::math::geometry::ParametricLine<3> line;
+            line.setFromDirection(lineDirection, linPosition);
+
+            utility::math::geometry::Plane<3> p;
+            p.setFromNormal({0,0,1},{0,0,0});
+
+            return p.intersect(line);
+        }
     }
   }
 }
