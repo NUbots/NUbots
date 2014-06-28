@@ -131,8 +131,8 @@ namespace modules {
                 // Find our goals base
                 findGoalBases(image, lut, sensors, *classifiedImage);
 
-                // // Enhance our ball
-                // enhanceBall(image, lut, sensors, *classifiedImage);
+                // Enhance our ball
+                enhanceBall(image, lut, sensors, *classifiedImage);
 
                 // Emit our classified image
                 emit(std::move(classifiedImage));

@@ -23,6 +23,8 @@
 #include <map>
 #include <armadillo>
 
+#include "utility/math/geometry/Line.h"
+
 namespace messages {
     namespace vision {
 
@@ -77,25 +79,24 @@ namespace messages {
 
                 struct {
                     bool operator()(const int& k, const arma::ivec& v) {
-                        return k > v[0];
+                        return k < v[0];
                     }
 
                     bool operator()(const arma::ivec& v, const int& k) {
-                        return v[0] > k;
+                        return v[0] < k;
                     }
-                } equalRangeComp;
+                } comparator;
 
-                auto points = std::equal_range(visualHorizon.rbegin(), visualHorizon.rend(), x, equalRangeComp);
+                // Find the point such that pt1 < x < pt2
 
-                int x1 = points.second->at(0);
-                int y1 = points.second->at(1);
-                int x2 = points.first->at(0);
-                int y2 = points.first->at(1);
+                auto p2 = std::upper_bound(visualHorizon.begin(), visualHorizon.end(), x, comparator);
+                p2 -= p2 == visualHorizon.end() ? 1 : 0;
+                auto p1 = p2 - 1;
 
+                utility::math::geometry::Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
 
-                return int(double(y2 - y1) / double(x2 - x1) * double(x - x1) + y1);
+                return int(lround(l.findYFromX(x)));
             }
-
 
         };
 

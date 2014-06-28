@@ -18,6 +18,7 @@
  */
 
 #include "LUTClassifier.h"
+#include "QuexClassifier.h"
 
 namespace modules {
     namespace vision {
@@ -38,6 +39,25 @@ namespace modules {
                 size needed to ensure that the ball is totally covered.
              */
 
+            std::vector<arma::ivec2> points;
+
+            auto ballSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::BALL);
+
+            for(auto it = ballSegments.first; it != ballSegments.second; ++it) {
+
+                auto& pt = it->second;
+
+                // We throw out points if they are:
+                // Have both edges above the green horizon
+                // Do not have a transition on either side (are on an edge)
+                if(classifiedImage.visualHorizonAtPoint(pt.start[0]) >= pt.start[1] || classifiedImage.visualHorizonAtPoint(pt.end[0]) >= pt.end[1]) {
+
+                    // Push back our midpoints x position
+                    points.push_back(pt.midpoint);
+                }
+            }
+
+            arma::ivec2 centre = arma::mean(points);
 
             // get a running stat vec of the ball points below the green horizon
 
