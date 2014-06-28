@@ -327,10 +327,9 @@ namespace kinematics {
         }
     }
 
-    template <typename RobotKinematicModel>
-    inline arma::vec2 calculateHorizon(const arma::mat33 groundToHeadRotation, double cameraDistancePixels){
+    inline arma::vec2 calculateHorizon(const arma::mat33 groundToCamRotation, double cameraDistancePixels){
         arma::vec3 zGround = {0,0,1};
-        arma::vec3 normal = groundToHeadRotation * zGround;
+        arma::vec3 normal = groundToCamRotation * zGround;
 
         arma::vec3 xHead = {1,0,0};
         arma::vec3 yHead = {0,1,0};
@@ -338,6 +337,33 @@ namespace kinematics {
         double phiY = std::acos(arma::dot(normal, yHead)) - M_PI_2;
 
         return { std::tan(phiY), cameraDistancePixels * -std::tan(phiX) };
+    }
+
+    inline arma::mat44 calculateCamToGround(arma::mat44 cameraToBody, arma::vec3 groundNormal_body, double bodyHeight){
+        arma::vec3 X = arma::vec{1,0,0};
+        double projectXOnNormal = arma::dot(X, groundNormal_body);
+
+        arma::vec3 groundMatrixX;
+        arma::vec3 groundMatrixY;
+
+        if(std::fabs(projectXOnNormal) == 1){ 
+            //Then x is parallel to the ground normal and we need to use projection onto +/-z instead
+            //If x parallel to normal, then use -z, if x antiparallel use z
+            arma::vec3 Z =  arma::vec3{0, 0, (projectXOnNormal > 0 ? -1 : 1 )};
+            double projectZOnNormal = arma::dot(Z, groundNormal_body);
+            groundMatrixX = arma::normalise(Z - projectZOnNormal * groundNormal_body);
+            groundMatrixY = arma::cross(groundNormal_body, groundMatrixX);
+        } else {
+            groundMatrixX = arma::normalise(X - projectXOnNormal * groundNormal_body);
+            groundMatrixY = arma::cross(groundNormal_body, groundMatrixX);
+        }
+        arma::mat44 groundToBody = arma::eye(4,4);
+        groundToBody.submat(0,0,2,0) = groundMatrixX;
+        groundToBody.submat(0,1,2,1) = groundMatrixY;
+        groundToBody.submat(0,2,2,2) = groundNormal_body;
+        groundToBody.submat(0,3,2,3) = arma::vec{0,0,-bodyHeight};
+
+        return utility::math::matrix::orthonormal44Inverse(groundToBody) * cameraToBody;
     }
 
 } // kinematics

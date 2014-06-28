@@ -72,45 +72,27 @@ namespace utility {
         inline arma::vec screenPositionFromScreenAngular(const arma::vec& screenAngular){
             return screenPositionFromDirectionVector(directionVectorFromScreenAngular(screenAngular));
         }
-        /*! @param ballVisualCentrePixels - centre of the ball onscreen in centre-zero coordinates (x=0,y=0 at the centre of the screen)
-            @param ballVisualDiameterPixels
-            @param ballWidth
-            @param effectiveScreenDistancePixels
+
+        /*! @param separation - Known distance between points in camera space
+            @param s1,s2 - Measured screen coordinates in pixels of points
+            @param camFocalLengthPixels - Distance to the virtual camera screen in pixels
         */
-        inline double widthBasedDistanceToBall(const arma::vec2& ballVisualCentrePixels,
-                                               const double& ballVisualDiameterPixels,
-                                               const double& ballWidth,
-                                               const double& effectiveScreenDistancePixels)
-        {
-            double ballVisualDistance = arma::norm(ballVisualCentrePixels); 
-            
-            double ballVisualRadius = ballVisualDiameterPixels / 2.0;
-            
-            double ballCloseDistance = ballVisualDistance - ballVisualRadius;
-            double ballFarDistance = ballVisualDistance + ballVisualRadius; 
+        inline double distanceToEquidistantPoints(const double& separation, const arma::vec2& s1, const arma::vec2& s2, const double& camFocalLengthPixels){
+            arma::vec3 camSpaceP1 = {camFocalLengthPixels, s1[0], s1[1]};
+            arma::vec3 camSpaceP2 = {camFocalLengthPixels, s2[0], s2[1]};
 
-            double thetaClose = std::atan2(ballCloseDistance, effectiveScreenDistancePixels);
-            double thetaFar = std::atan2(ballFarDistance, effectiveScreenDistancePixels);
+            double parallaxAngle = std::acos(arma::dot(camSpaceP1,camSpaceP2) / (arma::norm(camSpaceP1) * arma::norm(camSpaceP2)));
 
-            double ballAngularWidth = thetaFar - thetaClose;
+            return (separation / 2) / std::tan(parallaxAngle / 2);
 
-            return (ballWidth / 2.0) / std::tan(ballAngularWidth / 2.0);
         }
-
-        /*! @brief Assumes goal is normal to camera view 
-            @param goalBaseCentreVisualPixels - centre of the goal base onscreen in centre-zero coordinates (x=0,y=0 at the centre of the screen)
-            @param effectiveScreenDistancePixels
+        /*! @brief uses pinhole cam model
+            @param point - Point in camera space (x along view axis, y to left of screen, z up along screen)
         */
-        inline double widthBasedDistanceToGoal(const arma::vec2& goalBaseCentreVisualPixels,
-                                               const double& goalVisualDiameterPixels,
-                                               const double& goalWidth,
-                                               const double& effectiveScreenDistancePixels)
-        {
-            return widthBasedDistanceToBall({goalBaseCentreVisualPixels[0], 0},
-                                             goalVisualDiameterPixels,
-                                             goalWidth,
-                                             effectiveScreenDistancePixels);
+        inline arma::vec2 projectCamSpaceToScreen(const arma::vec3& point, const double& camFocalLengthPixels){
+            return {camFocalLengthPixels * point[1] / point[0], camFocalLengthPixels * point[2] / point[0]};
         }
+        
     }
   }
 }

@@ -29,7 +29,7 @@ namespace messages {
            arma::uvec2 imageSizePixels;
            arma::vec2 FOV;     //Anglular Field of view
            arma::vec2 pixelsToTanThetaFactor;    //(x,y) screen -> thetax =atan(x*screenAngularFactor[0]), thetay = atan(y*screenAngularFactor[1])
-           double effectiveScreenDistancePixels;    //Distance to the virtual screen in pixels
+           double focalLengthPixels;    //Distance to the virtual screen in pixels
 
            double distortionFactor; //see RADIAL_CORRECTION_COEFFICIENT in VisionKinematics.h (may not be used yet)
         };

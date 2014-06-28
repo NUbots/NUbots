@@ -63,7 +63,7 @@ namespace modules {
                 arma::vec2 imageCentre;
                 imageCentre << cameraParameters->imageSizePixels[0] * 0.5 << cameraParameters->imageSizePixels[1] * 0.5;
                 cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
-                cameraParameters->effectiveScreenDistancePixels = imageCentre[0] / tanHalfFOV[0];
+                cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
 
                 emit<Scope::DIRECT>(std::move(cameraParameters));
 

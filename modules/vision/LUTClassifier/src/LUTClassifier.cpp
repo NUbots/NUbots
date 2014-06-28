@@ -79,14 +79,14 @@ namespace modules {
             auto setParams = [this] (const CameraParameters& cam, const Configuration<LUTClassifier>& config) {
 
                 // Visual horizon detector
-                VISUAL_HORIZON_SPACING = cam.effectiveScreenDistancePixels * tan(config["visual_horizon"]["spacing"].as<double>());
-                VISUAL_HORIZON_BUFFER = cam.effectiveScreenDistancePixels * tan(config["visual_horizon"]["horizon_buffer"].as<double>());
-                VISUAL_HORIZON_SUBSAMPLING = std::max(1, int(cam.effectiveScreenDistancePixels * tan(config["visual_horizon"]["subsampling"].as<double>())));
-                MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE = cam.effectiveScreenDistancePixels * tan(config["visual_horizon"]["minimum_segment_size"].as<double>());
+                VISUAL_HORIZON_SPACING = cam.focalLengthPixels * tan(config["visual_horizon"]["spacing"].as<double>());
+                VISUAL_HORIZON_BUFFER = cam.focalLengthPixels * tan(config["visual_horizon"]["horizon_buffer"].as<double>());
+                VISUAL_HORIZON_SUBSAMPLING = std::max(1, int(cam.focalLengthPixels * tan(config["visual_horizon"]["subsampling"].as<double>())));
+                MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE = cam.focalLengthPixels * tan(config["visual_horizon"]["minimum_segment_size"].as<double>());
 
                 // // Goal detector
-                GOAL_FINDER_LINE_SPACING = cam.effectiveScreenDistancePixels * tan(config["goals"]["spacing"].as<double>());
-                GOAL_FINDER_SUBSAMPLING = std::max(1, int(cam.effectiveScreenDistancePixels * tan(config["goals"]["subsampling"].as<double>())));
+                GOAL_FINDER_LINE_SPACING = cam.focalLengthPixels * tan(config["goals"]["spacing"].as<double>());
+                GOAL_FINDER_SUBSAMPLING = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["subsampling"].as<double>())));
                 GOAL_FINDER_DETECTOR_LEVELS = config["goals"]["detector_levels"].as<std::vector<double>>();
                 GOAL_FINDER_MAXIMUM_VERTICAL_CLUSTER_SPACING = std::max(1, int(cam.effectiveScreenDistancePixels * tan(config["goals"]["maximum_vertical_cluster_spacing"].as<double>())));
                 GOAL_FINDER_VERTICAL_CLUSTER_UPPER_BUFFER = std::max(1, int(cam.effectiveScreenDistancePixels * tan(config["goals"]["vertical_cluster_upper_buffer"].as<double>())));
@@ -101,7 +101,7 @@ namespace modules {
                 // // Ball Detector
                 MIN_BALL_INTERSECTIONS = config["ball"]["intersections"].as<double>();
                 ALPHA = cam.pixelsToTanThetaFactor[1];
-                MIN_BALL_SEARCH_JUMP = std::max(1, int(cam.effectiveScreenDistancePixels * tan(config["ball"]["min_jump"].as<double>())));
+                MIN_BALL_SEARCH_JUMP = std::max(1, int(cam.focalLengthPixels * tan(config["ball"]["min_jump"].as<double>())));
             };
 
             // Trigger the same function when either update
@@ -111,24 +111,31 @@ namespace modules {
             on<Trigger<Image>, With<LookUpTable, Sensors>, Options<Single>>("Classify Image", [this](const Image& image, const LookUpTable& lut, const Sensors& sensors) {
 
                 // Our classified image
+                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
 
-                // // Find our horizon
+                // Find our horizon
+                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 findHorizon(image, lut, sensors, *classifiedImage);
 
                 // Find our visual horizon
+                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 findVisualHorizon(image, lut, sensors, *classifiedImage);
 
                 // Find our goals
+                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 findGoals(image, lut, sensors, *classifiedImage);
 
                 // Enhance our goals
+                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 enhanceGoals(image, lut, sensors, *classifiedImage);
 
                 // Find our ball
+                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 findBall(image, lut, sensors, *classifiedImage);
 
                 // Find our goals base
+                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 findGoalBases(image, lut, sensors, *classifiedImage);
 
                 // // Find our obstacle bases
@@ -138,6 +145,7 @@ namespace modules {
                 // enhanceBall(image, lut, sensors, *classifiedImage);
 
                 // Emit our classified image
+                std::cout << __PRETTY_FUNCTION__ <<std::endl;
                 emit(std::move(classifiedImage));
             });
 
