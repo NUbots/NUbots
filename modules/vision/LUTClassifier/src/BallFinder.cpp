@@ -64,11 +64,15 @@ namespace modules {
             auto& visualHorizon = classifiedImage.visualHorizon;
 
             double topY = -(classifiedImage.minVisualHorizon->at(1) - double(image.height() / 2));
+            std::cout << "topY" << topY << std::endl;
 
             // Get the positions of the top of our green horizion, and the bottom of the screen
             auto xb = getGroundPointFromScreen({ 0, -double(image.height() / 2)}, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
             auto xt = getGroundPointFromScreen({ 0, topY}, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
             double dx = 2 * BALL_RADIUS / MIN_BALL_INTERSECTIONS;
+            std::cout << "xb" << xb.t() << std::endl;
+            std::cout << "xt" << xt.t() << std::endl;
+            
 
             // This describes the direction of travel
             auto direction = arma::normalise(xb);
@@ -76,7 +80,11 @@ namespace modules {
             // Our
             double xStart = arma::norm(xb);
             xStart += dx - fmod(xStart, dx);
-            double xEnd = arma::norm(xb);
+            double xEnd = arma::norm(xt);
+
+            std::cout << "xStart " << xStart << std::endl;
+            std::cout << "xEnd " << xEnd << std::endl;
+            std::cout << "dx " << dx << std::endl;
 
             auto movement = arma::normalise(xb) * dx;
 
@@ -87,15 +95,17 @@ namespace modules {
 
                 arma::vec4 worldPosition = arma::ones(4);
 
-                worldPosition.rows(0, 1) = x * direction;
-                worldPosition[2] = BALL_RADIUS;
+                worldPosition.rows(0, 2) = x * direction;
+                worldPosition[2] += BALL_RADIUS;
 
                 // Transform x onto the camera
                 auto camPoint = projectWorldPointToCamera(worldPosition, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
-
+                std::cout << "worldPosition" << worldPosition.t() << std::endl;
+                std::cout << "camPoint" << camPoint.t() << std::endl;
                 // Transform into our coordinates
                 int y = lround(-camPoint[1] + (image.height() / 2));
-
+                
+                std::cout << "y" << y << std::endl;
                 arma::ivec2 start = { 0, y };
                 arma::ivec2 end = { int(image.width() - 1), y };
 

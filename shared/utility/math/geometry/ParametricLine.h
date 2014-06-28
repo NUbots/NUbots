@@ -36,8 +36,8 @@ namespace geometry {
 		ParametricLine(){}
 
 		bool setFromDirection(Vector direction_, Vector point_){
-			bool success = arma::norm(direction,1) > 0;
-			direction = arma::normalise(direction);
+			bool success = arma::norm(direction_,1) > 0;
+			direction = arma::normalise(direction_);
 			point = point_;
 			return success;
 		}

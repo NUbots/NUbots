@@ -103,15 +103,20 @@ namespace utility {
 
         inline arma::vec3 getGroundPointFromScreen(const arma::vec2& screenPos, const arma::mat44& camToGround, const double& camFocalLengthPixels){
             arma::vec3 lineDirection = camToGround.submat(0,0,2,2) * arma::vec3{camFocalLengthPixels, screenPos[0], screenPos[1]};
+            std::cout << "lineDirection   " << lineDirection.t() << std::endl;
             arma::vec3 linPosition = camToGround.submat(0,3,2,3);
+            std::cout << "linPosition   " << linPosition.t() << std::endl;
 
             utility::math::geometry::ParametricLine<3> line;
             line.setFromDirection(lineDirection, linPosition);
+            std::cout << "line   " << line.direction.t() << " "<< line.point.t() << std::endl;
 
             utility::math::geometry::Plane<3> p;
             p.setFromNormal({0,0,1},{0,0,0});
+            std::cout << "p   " << p.normal.t() << p.point.t() << std::endl;
 
             auto intersection = p.intersect(line);
+            std::cout << "intersection   " << intersection.second << std::endl;
             if(intersection.first){
                 return intersection.second;
             } else {
