@@ -22,6 +22,8 @@
 
 #include "utility/math/geometry/Line.h"
 
+#include "utility/math/vision.h"
+
 namespace modules {
     namespace vision {
 
@@ -33,6 +35,8 @@ namespace modules {
         using messages::vision::ClassifiedImage;
 
         using utility::math::geometry::Line;
+        using utility::math::vision::getGroundPointFromScreen;
+        using utility::math::vision::projectWorldPointToCamera;
 
         void LUTClassifier::findBall(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
 
@@ -58,23 +62,39 @@ namespace modules {
             /// $\Delta p=p^{2}\frac{2r\alpha}{lh}$
 
             auto& visualHorizon = classifiedImage.visualHorizon;
-            auto& horizon = classifiedImage.horizon;
 
-            double height = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second(3,2) - sensors.forwardKinematics.find(ServoID::L_ANKLE_PITCH)->second(3,2);
-            height = 0.4;
+            double topY = -(classifiedImage.minVisualHorizon->at(1) - double(image.height() / 2));
 
-            height -= BALL_RADIUS;
+            // Get the positions of the top of our green horizion, and the bottom of the screen
+            auto xb = getGroundPointFromScreen({ 0, -double(image.height() / 2)}, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
+            auto xt = getGroundPointFromScreen({ 0, topY}, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
+            double dx = 2 * BALL_RADIUS / MIN_BALL_INTERSECTIONS;
+
+            // This describes the direction of travel
+            auto direction = arma::normalise(xb);
+
+            // Our
+            double xStart = arma::norm(xb);
+            xStart += dx - fmod(xStart, dx);
+            double xEnd = arma::norm(xb);
+
+            auto movement = arma::normalise(xb) * dx;
 
             auto hLeft = classifiedImage.minVisualHorizon;
             auto hRight = classifiedImage.minVisualHorizon + 1;
 
-            uint kinematicsHorizonPoint = horizon[1];
+            for(double x = xStart; x < xEnd; x += dx) {
 
-            for(int p = classifiedImage.minVisualHorizon->at(1) - kinematicsHorizonPoint;
-                p + kinematicsHorizonPoint < image.height();
-                p = std::max(p + MIN_BALL_SEARCH_JUMP, int(round(1.0 / ((1.0 / double(p)) - ((ALPHA * 2 * BALL_RADIUS) / (MIN_BALL_INTERSECTIONS * height))))))) {
+                arma::vec4 worldPosition = arma::ones(4);
 
-                int y = p + kinematicsHorizonPoint;
+                worldPosition.rows(0, 1) = x * direction;
+                worldPosition[2] = BALL_RADIUS;
+
+                // Transform x onto the camera
+                auto camPoint = projectWorldPointToCamera(worldPosition, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
+
+                // Transform into our coordinates
+                int y = lround(-camPoint[1] + (image.height() / 2));
 
                 arma::ivec2 start = { 0, y };
                 arma::ivec2 end = { int(image.width() - 1), y };

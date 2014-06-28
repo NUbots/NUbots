@@ -60,6 +60,7 @@ namespace modules {
             std::vector<double> GOAL_FINDER_DETECTOR_LEVELS = { 2.0 };
 
             double MIN_BALL_INTERSECTIONS = 1;
+            double FOCAL_LENGTH_PIXELS = 2.0;
             double ALPHA = 2.0;
             int MIN_BALL_SEARCH_JUMP = 1;
             double BALL_RADIUS = 0.05;

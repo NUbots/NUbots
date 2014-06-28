@@ -101,6 +101,7 @@ namespace modules {
                 // Ball Detector
                 MIN_BALL_INTERSECTIONS = config["ball"]["intersections"].as<double>();
                 ALPHA = cam.pixelsToTanThetaFactor[1];
+                FOCAL_LENGTH_PIXELS = cam.focalLengthPixels;
                 MIN_BALL_SEARCH_JUMP = std::max(1, int(cam.focalLengthPixels * tan(config["ball"]["min_jump"].as<double>())));
             };
 

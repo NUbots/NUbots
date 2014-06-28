@@ -63,7 +63,7 @@ namespace utility {
             return { std::atan2(direction[1], direction[0]) , std::atan2(direction[2], arma::norm(arma::vec({direction[0], direction[1]})))};
         }
 
-        inline arma::vec rotateAngularDirection(const arma::vec& screenAngular, const arma::mat& R){                  
+        inline arma::vec rotateAngularDirection(const arma::vec& screenAngular, const arma::mat& R){
             return screenAngularFromDirectionVector(R*directionVectorFromScreenAngular(screenAngular));
         }
 
@@ -88,7 +88,7 @@ namespace utility {
             return (separation / 2) / std::tan(parallaxAngle / 2);
 
         }
-        
+
         /*! @brief uses pinhole cam model
             @param point - Point in camera space (x along view axis, y to left of screen, z up along screen)
         */
@@ -96,7 +96,7 @@ namespace utility {
             return {camFocalLengthPixels * point[1] / point[0], camFocalLengthPixels * point[2] / point[0]};
         }
 
-        inline arma::vec2 projectWorldPointToCamera(const arma::vec4& point, const double& camFocalLengthPixels, const arma::mat44& camToGround){
+        inline arma::vec2 projectWorldPointToCamera(const arma::vec4& point, const arma::mat44& camToGround, const double& camFocalLengthPixels){
             arma::vec4 camSpacePoint = utility::math::matrix::orthonormal44Inverse(camToGround) * point;
             return projectCamSpaceToScreen(camSpacePoint.rows(0,2), camFocalLengthPixels);
         }

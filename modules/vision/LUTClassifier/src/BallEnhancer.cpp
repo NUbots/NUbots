@@ -57,7 +57,7 @@ namespace modules {
                 }
             }
 
-            arma::ivec2 centre = arma::mean(points);
+            //arma::ivec2 centre = arma::mean(points);
 
             // get a running stat vec of the ball points below the green horizon
 
