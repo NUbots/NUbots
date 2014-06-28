@@ -82,9 +82,9 @@ namespace modules {
                 VISUAL_HORIZON_SPACING = cam.focalLengthPixels * tan(config["visual_horizon"]["spacing"].as<double>());
                 VISUAL_HORIZON_BUFFER = cam.focalLengthPixels * tan(config["visual_horizon"]["horizon_buffer"].as<double>());
                 VISUAL_HORIZON_SUBSAMPLING = std::max(1, int(cam.focalLengthPixels * tan(config["visual_horizon"]["subsampling"].as<double>())));
-                MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE = cam.focalLengthPixels * tan(config["visual_horizon"]["minimum_segment_size"].as<double>());
+                VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE = cam.focalLengthPixels * tan(config["visual_horizon"]["minimum_segment_size"].as<double>());
 
-                // // Goal detector
+                // Goal detector
                 GOAL_FINDER_LINE_SPACING = cam.focalLengthPixels * tan(config["goals"]["spacing"].as<double>());
                 GOAL_FINDER_SUBSAMPLING = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["subsampling"].as<double>())));
                 GOAL_FINDER_DETECTOR_LEVELS = config["goals"]["detector_levels"].as<std::vector<double>>();
@@ -98,7 +98,7 @@ namespace modules {
                     d /= 2;
                 }
 
-                // // Ball Detector
+                // Ball Detector
                 MIN_BALL_INTERSECTIONS = config["ball"]["intersections"].as<double>();
                 ALPHA = cam.pixelsToTanThetaFactor[1];
                 MIN_BALL_SEARCH_JUMP = std::max(1, int(cam.focalLengthPixels * tan(config["ball"]["min_jump"].as<double>())));
@@ -130,9 +130,6 @@ namespace modules {
 
                 // Find our goals base
                 findGoalBases(image, lut, sensors, *classifiedImage);
-
-                // // Find our obstacle bases
-                // findObstacleBases(image, lut, sensors, *classifiedImage);
 
                 // // Enhance our ball
                 // enhanceBall(image, lut, sensors, *classifiedImage);

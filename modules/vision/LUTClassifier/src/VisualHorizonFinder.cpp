@@ -54,7 +54,7 @@ namespace modules {
                 for (auto it = segments.begin(); it != segments.end(); ++it) {
 
                     // If this a valid green point update our information
-                    if(it->colour == ObjectClass::FIELD && it->length >= MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE) {
+                    if(it->colour == ObjectClass::FIELD && it->length >= VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE) {
 
                         greenPoint = it->start;
 
@@ -90,7 +90,7 @@ namespace modules {
                 for (auto it = segments.begin(); it != segments.end(); ++it) {
 
                     // If this a valid green point update our information
-                    if(it->colour == ObjectClass::FIELD && it->length >= MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE) {
+                    if(it->colour == ObjectClass::FIELD && it->length >= VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE) {
                         greenPoint = it->start;
                         // We found our green
                         break;

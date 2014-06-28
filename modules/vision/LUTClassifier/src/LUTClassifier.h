@@ -48,16 +48,18 @@ namespace modules {
 
             int VISUAL_HORIZON_SPACING = 100;
             int VISUAL_HORIZON_BUFFER = 0;
-            uint MINIMUM_VISUAL_HORIZON_SEGMENT_SIZE = 0;
+            uint VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE = 0;
             int VISUAL_HORIZON_SUBSAMPLING = 1;
+
             int GOAL_FINDER_LINE_SPACING = 100;
             int GOAL_FINDER_SUBSAMPLING = 1;
             int GOAL_FINDER_MAXIMUM_VERTICAL_CLUSTER_SPACING = 1;
             int GOAL_FINDER_VERTICAL_CLUSTER_UPPER_BUFFER = 1;
             int GOAL_FINDER_VERTICAL_CLUSTER_LOWER_BUFFER = 1;
             double GOAL_FINDER_VERTICAL_SD_JUMP = 1;
-            double MIN_BALL_INTERSECTIONS = 1;
             std::vector<double> GOAL_FINDER_DETECTOR_LEVELS = { 2.0 };
+
+            double MIN_BALL_INTERSECTIONS = 1;
             double ALPHA = 2.0;
             int MIN_BALL_SEARCH_JUMP = 1;
             double BALL_RADIUS = 0.05;
@@ -79,8 +81,6 @@ namespace modules {
             void enhanceGoals(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
 
             void findGoalBases(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
-
-            void findObstacleBases(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
 
         public:
             static constexpr const char* CONFIGURATION_PATH = "LUTClassifier.yaml";

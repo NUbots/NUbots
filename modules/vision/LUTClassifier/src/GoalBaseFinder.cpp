@@ -31,19 +31,15 @@ namespace modules {
 
         void LUTClassifier::findGoalBases(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
 
-            // Get some local references to class variables to make text shorter
-            auto& horizon = classifiedImage.horizon;
+            std::vector<arma::ivec2> points;
 
-        	std::vector<arma::ivec2> points;
-
-        	// Loop through all of our goal segments
-        	auto hSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::GOAL);
+            // Loop through all of our goal segments
+            auto hSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::GOAL);
             for(auto it = hSegments.first; it != hSegments.second; ++it) {
 
                 // We throw out points if they are:
                 // Less the full quality (subsampled)
                 // Do not have a transition on either side (are on an edge)
-                // Are below the actual horizon (should get rid of crossbars etc)
                 if(it->second.subsample == 1
                     && it->second.previous
                     && it->second.next) {
@@ -91,21 +87,21 @@ namespace modules {
 
                         // Classify our point based on these
                         auto segments = quex->classify(image, lut, start, end, 1);
-                        insertSegments(classifiedImage, segments, false);
+                        insertSegments(classifiedImage, segments, true);
 
                         // Shift our line right
                         start = { x + jump, start[1] };
                         end   = { x + jump, end[1] };
 
                         segments = quex->classify(image, lut, start, end, 1);
-                        insertSegments(classifiedImage, segments, false);
+                        insertSegments(classifiedImage, segments, true);
 
                         // Shift our line left
                         start = { x - jump, start[1] };
                         end   = { x - jump, end[1] };
 
                         segments = quex->classify(image, lut, start, end, 1);
-                        insertSegments(classifiedImage, segments, false);
+                        insertSegments(classifiedImage, segments, true);
 
                         stats.reset();
                     }
@@ -122,7 +118,7 @@ namespace modules {
                     int base = lround(stats.max()[1]);
                     int x = lround(stats.mean()[0]);
                     arma::vec sd = stats.stddev();
-                    int jump = sd.is_empty() ? 1 : std::max(1, int(lround(sd[0] * GOAL_FINDER_VERTICAL_SD_JUMP)));
+                    int jump = sd.is_empty() ? 1 : std::max(1, int(lround(sd[0] * 1)));
 
                     arma::ivec2 start = { x, top - GOAL_FINDER_VERTICAL_CLUSTER_UPPER_BUFFER };
                     arma::ivec2 end   = { x, base + GOAL_FINDER_VERTICAL_CLUSTER_LOWER_BUFFER };
@@ -133,21 +129,21 @@ namespace modules {
 
                     // Classify our point based on these
                     auto segments = quex->classify(image, lut, start, end, 1);
-                    insertSegments(classifiedImage, segments, false);
+                    insertSegments(classifiedImage, segments, true);
 
                     // Shift our line right
                     start = { x + jump, start[1] };
                     end   = { x + jump, end[1] };
 
                     segments = quex->classify(image, lut, start, end, 1);
-                    insertSegments(classifiedImage, segments, false);
+                    insertSegments(classifiedImage, segments, true);
 
                     // Shift our line left
                     start = { x - jump, start[1] };
                     end   = { x - jump, end[1] };
 
                     segments = quex->classify(image, lut, start, end, 1);
-                    insertSegments(classifiedImage, segments, false);
+                    insertSegments(classifiedImage, segments, true);
                 }
             }
         }
