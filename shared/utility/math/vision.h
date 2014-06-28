@@ -88,6 +88,7 @@ namespace utility {
             return (separation / 2) / std::tan(parallaxAngle / 2);
 
         }
+        
         /*! @brief uses pinhole cam model
             @param point - Point in camera space (x along view axis, y to left of screen, z up along screen)
         */
