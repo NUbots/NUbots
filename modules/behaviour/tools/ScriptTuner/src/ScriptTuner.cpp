@@ -33,6 +33,7 @@ namespace modules {
         namespace tools {
             using messages::motion::Script;
             using messages::motion::ExecuteScript;
+            using messages::motion::Script;
             using messages::input::ServoID;
             using messages::motion::ServoTarget;
             using messages::behaviour::RegisterAction;
@@ -154,6 +155,9 @@ namespace modules {
                         case 'S': // Save the current script
                             saveScript();
                             break;
+                        case 'A'://save script as
+                            saveScriptAs();
+                            break;
                         case 'T': // Edit this frames duration
                             editDuration();
                             break;
@@ -163,22 +167,25 @@ namespace modules {
                         case 'D': // Delete frame
                             deleteFrame();
                             break;
-                        case 'P':
+                        case 'P'://plays script through with correct durations
                             playScript();
                             break;
-                        case 'J':
+                        case 'J': //changes frame without out robot moving
                             jumpToFrame();
                             break;
-                        case 'R':
+                        case 'R'://updates visual changes
                             refreshView();
                             break;
-                        case 'G':
+                        case 'M':
+                            mirrorScript();
+                            break;
+                        case 'G'://allows multiple gains to be edited at once
                             editGain();
                             break;
-                        case':':
+                        case':': //lists commands
                             help();
                             break;
-                        case 'X':
+                        case 'X': //shutdowns powerplant
                             powerplant.shutdown();
                             break;
                     }
@@ -223,8 +230,6 @@ namespace modules {
                 mvprintw(4, 2, "Duration: %d", // Output the selected frames duration
                          std::chrono::duration_cast<std::chrono::milliseconds>(script.frames[frame].duration).count());
                 mvprintw(5,2, "_");
-                mvprintw(6,2, "Load Script:");
-                mvprintw(7,2, "Play Scripts:");
 
                 // Output all of our frame numbers and highlight the selected frame
                 move(3, 10);
@@ -536,11 +541,13 @@ namespace modules {
                                              " ",
                                              "T",
                                              "J",
+                                             "G",
                                              "P",
                                              "S",
-                                             "X",
+                                             "A",
                                              "R",
-                                             "G",
+                                             "M",
+                                             "X",
                                              "Ctr C"};
 
                     const char* ALL_MEANINGS[] = {
@@ -551,11 +558,13 @@ namespace modules {
                                              "Lock/Unlock",
                                              "Edit Duration",
                                              "Jump to Frame",
+                                             "Edit the gains of an entire Script or Frame",
                                              "Play",
                                              "Save",
-                                             "Exit (this works to exit help and editGain)",
+                                             "Saves Script As)",
                                              "Manual Refresh View",
-                                             "Edit the gains of an entire Script or Frame",
+                                             "Mirrors the script",
+                                             "Exit (this works to exit help and editGain)",
                                              "Quit Scripttuner"};
 
                     size_t longestCommand = 0;
@@ -569,7 +578,7 @@ namespace modules {
                     mvprintw(0,(COLS - 14)/2, " Script Tuner ");
                     mvprintw(3,2, "Help Commands:");
                     attroff(A_BOLD);
-                    for(size_t i = 0; i < 13; i++) {
+                    for(size_t i = 0; i < 15; i++) {
                         mvprintw(5 + i, 2, ALL_COMMANDS[i]);
                         mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
                     }
@@ -582,7 +591,7 @@ namespace modules {
                         mvprintw(3,2, "Help Commands:");
                         attroff(A_BOLD);
 
-                        for(size_t i = 0; i < 13; i++) {
+                        for(size_t i = 0; i < 15; i++) {
                             mvprintw(5 + i, 2, ALL_COMMANDS[i]);
                             mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
                         }
@@ -610,7 +619,121 @@ namespace modules {
                 curs_set(false);
             }
 
+            //switches angle and gains between corresponding left and right motors, flips script around z axis
+            void ScriptTuner::mirrorScript() {
 
+                for(auto& f : script.frames) {
+
+                    Script::Frame newFrame;
+                    newFrame.duration = f.duration;
+
+                    for(auto& target : f.targets) {
+
+                        switch(target.id) {
+                            case ServoID::HEAD_YAW:
+                                newFrame.targets.push_back({ ServoID::HEAD_YAW, target.position, target.gain});
+                                break;
+                            case ServoID::HEAD_PITCH:
+                                newFrame.targets.push_back({ ServoID::HEAD_PITCH, target.position, target.gain});
+                                break;
+                            case ServoID::R_SHOULDER_PITCH:
+                                newFrame.targets.push_back({ ServoID::L_SHOULDER_PITCH, target.position, target.gain});
+                                break;
+                            case ServoID::L_SHOULDER_PITCH:
+                                newFrame.targets.push_back({ ServoID::R_SHOULDER_PITCH, target.position, target.gain});
+                                break;
+                            case ServoID::R_ELBOW:
+                                newFrame.targets.push_back({ ServoID::L_ELBOW, target.position, target.gain});
+                                break;
+                            case ServoID::L_ELBOW:
+                                newFrame.targets.push_back({ ServoID::R_ELBOW, target.position, target.gain});
+                                break;
+                            case ServoID::R_HIP_PITCH:
+                                newFrame.targets.push_back({ ServoID::L_HIP_PITCH, target.position, target.gain});
+                                break;
+                            case ServoID::L_HIP_PITCH:
+                                newFrame.targets.push_back({ ServoID::R_HIP_PITCH, target.position, target.gain});
+                                break;
+                            case ServoID::R_KNEE:
+                                newFrame.targets.push_back({ ServoID::L_KNEE, target.position, target.gain});
+                                break;
+                            case ServoID::L_KNEE:
+                                newFrame.targets.push_back({ ServoID::R_KNEE,  target.position, target.gain});
+                                break;
+                            case ServoID::R_ANKLE_PITCH:
+                                newFrame.targets.push_back({ ServoID::L_ANKLE_PITCH, target.position, target.gain});
+                                break;
+                            case ServoID::L_ANKLE_PITCH:
+                                newFrame.targets.push_back({ ServoID::R_ANKLE_PITCH, target.position, target.gain});
+                                break;
+                            case ServoID::R_SHOULDER_ROLL:
+                                newFrame.targets.push_back({ ServoID::L_SHOULDER_ROLL, -target.position, target.gain});
+                                break;
+                            case ServoID::L_SHOULDER_ROLL:
+                                newFrame.targets.push_back({ ServoID::R_SHOULDER_ROLL, -target.position, target.gain});
+                                break;
+                            case ServoID::R_HIP_ROLL:
+                                newFrame.targets.push_back({ ServoID::L_HIP_ROLL, -target.position, target.gain});
+                                break;
+                            case ServoID::L_HIP_ROLL:
+                                newFrame.targets.push_back({ ServoID::R_HIP_ROLL, -target.position, target.gain});
+                                break;
+                            case ServoID::R_ANKLE_ROLL:
+                                newFrame.targets.push_back({ ServoID::L_ANKLE_ROLL, -target.position, target.gain});
+                                break;
+                            case ServoID::L_ANKLE_ROLL:
+                                newFrame.targets.push_back({ ServoID::R_ANKLE_ROLL, -target.position, target.gain});
+                                break;
+                            case ServoID::R_HIP_YAW:
+                                newFrame.targets.push_back({ ServoID::L_HIP_YAW, -target.position, target.gain});
+                                break;
+                            case ServoID::L_HIP_YAW:
+                                newFrame.targets.push_back({ ServoID::R_HIP_YAW, -target.position, target.gain});
+                                break;
+                        }//end switch(target.id)
+                    }
+                    f = newFrame;
+                    refreshView();
+                }
+            }//end mirrorScript()
+            
+            //change scriptPath and then call saveScript to Save As
+            void ScriptTuner::saveScriptAs() {
+                move(5,2);
+                curs_set(true);
+                std::string saveScriptAs = userInput();
+                if(utility::file::exists(saveScriptAs)){
+                    bool print = true;
+                    while(print) {
+                        mvprintw(6,2, "This file already exists.");
+                        mvprintw(7,2, "Press Enter to overwrite, or X to return to script.");
+                        switch(getch()) {
+                            case '\n':
+                            case KEY_ENTER: 
+                                move(5,2);
+                                curs_set(false);
+                                print = false;
+                                scriptPath = saveScriptAs;
+                                saveScript();
+                                refreshView();
+                                break;
+                            case 'X':
+                                move(5,2);
+                                curs_set(false);
+                                print = false;
+                                refreshView();
+                                break;
+                        }
+                    }
+                }
+                else {
+                    scriptPath = saveScriptAs;
+                    saveScript();
+                    move(5,2);
+                    curs_set(false);
+                    refreshView(); 
+                }
+            }
 
             //allows user to edit the gain for the entire script or specified frame
             void ScriptTuner::editGain() {
@@ -918,8 +1041,6 @@ namespace modules {
                         }
                     }
                 }
-
-                //output gains to scripttuner window automatic??
                 refreshView();
             }// editGain()
 
@@ -932,7 +1053,7 @@ namespace modules {
                 std::string tempframe = userInput();
                 if(!tempframe.empty() && tempframe.size() <= 4) {
                     try {
-                        int tempframe2 = stoi(tempframe); //int tempframe = stoi(tempframe):???
+                        int tempframe2 = stoi(tempframe);
 
                         //makes tempframe2 always positive
                         if(tempframe2 <= 0) {
@@ -957,12 +1078,12 @@ namespace modules {
                     }
                 }
             }
-
+            //converts valid user input to gain
             float ScriptTuner::userInputToGain() {
                 std::string tempGain = userInput();
                 try {
                     if (!tempGain.empty()) {
-                        float tempGain2 = stof(tempGain); //double tempGain = stod(tempGain)???;
+                        float tempGain2 = stof(tempGain);
                         if (tempGain2 >= 0 && tempGain2 <= 100){
                             return tempGain2;
                         }
@@ -978,18 +1099,6 @@ namespace modules {
 
                 return std::numeric_limits<float>::quiet_NaN();
             }
-
-
-// void userLoadScript() {
-// //make scripttuner independent of path
-// move(6,13);
-// curs_set(true);
-// std::string tempscript = userInput();
-//
-// if
-// }
-
-
         } // tools
     } // behaviours
 } // modules
