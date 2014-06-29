@@ -44,6 +44,7 @@ namespace vision {
     using messages::vision::Ball;
 
     using utility::math::vision::distanceToEquidistantPoints;
+    using utility::math::vision::getGroundPointMeanOfEquidistantPoints;
     using utility::math::vision::getGroundPointFromScreen;
     using utility::nubugger::graph;
 
@@ -127,11 +128,13 @@ namespace vision {
                 p2 = -(p2 - arma::vec2({double(320 - 1) / 2, double(double(240 - 1) / 2)}));
 
                 double wbd = distanceToEquidistantPoints(0.10, p1, p2, cam.focalLengthPixels);
-                auto d2p = getGroundPointFromScreen(p1, sensors.kinematicsCamToGround, cam.focalLengthPixels);
+                arma::vec3 wb = getGroundPointMeanOfEquidistantPoints(0.10, p1, p2, cam.focalLengthPixels, sensors.orientationCamToGround);
+                auto d2p = getGroundPointFromScreen(p1, sensors.orientationCamToGround, cam.focalLengthPixels);
                 std::cout << "Width: " << wbd << std::endl;
                 std::cout << "D2P: " << d2p.t() << std::endl;
 
-                emit(graph("Width Ball", wbd));
+                emit(graph("Width Ball Dist", wbd));
+                emit(graph("Width Ball Pos", wb[0],wb[1],wb[2]));
                 emit(graph("D2P Ball", d2p[0], d2p[1]));
             }
 

@@ -86,7 +86,32 @@ namespace utility {
             double parallaxAngle = std::acos(arma::dot(camSpaceP1,camSpaceP2) / (arma::norm(camSpaceP1) * arma::norm(camSpaceP2)));
 
             return (separation / 2) / std::tan(parallaxAngle / 2);
+        }
 
+        inline arma::vec3 getGroundPointMeanOfEquidistantPoints(const double& separation, const arma::vec2& s1, const arma::vec2& s2, const double& camFocalLengthPixels, const arma::mat44& camToGround){
+            double distanceFromCamera = distanceToEquidistantPoints(separation, s1, s2, camFocalLengthPixels);
+            
+            arma::vec4 camSpaceP1 = distanceFromCamera * arma::normalise(arma::vec4{camFocalLengthPixels, s1[0], s1[1],0}) + arma::vec4{0,0,0,1};
+            arma::vec4 camSpaceP2 = distanceFromCamera * arma::normalise(arma::vec4{camFocalLengthPixels, s2[0], s2[1],0}) + arma::vec4{0,0,0,1};
+            
+            arma::vec4 groundP1 = camToGround * camSpaceP1;
+            arma::vec4 groundP2 = camToGround * camSpaceP2;
+
+            return 0.5 * (groundP2.rows(0,2) + groundP2.rows(0,2));
+        }
+        /*! @brief 
+            @param cam - coordinates in camera space of the pixel (cam[0] = y coordinate pixels, cam[1] = z coordinate pixels)
+            @return im - coordinates on the screen in image space measured x across, y down, zero at top left
+        */
+        inline arma::ivec2 camToImage(const arma::vec2& cam, const arma::vec2& imageSize){
+            arma::vec2 v= (imageSize - 1) / 2 - cam;
+            return arma::ivec2({int(lround(v[0])), int(lround(v[1]))});
+        }
+        inline arma::vec2 imageToCam(const arma::ivec2& im, const arma::vec2& imageSize){
+            return (imageSize - 1) * 0.5 - im;
+        }
+        inline arma::vec2 imageToCam(const arma::vec2& im, const arma::vec2& imageSize){
+            return (imageSize - 1) * 0.5 - im;
         }
 
         /*! @brief uses pinhole cam model
@@ -99,6 +124,11 @@ namespace utility {
         inline arma::vec2 projectWorldPointToCamera(const arma::vec4& point, const arma::mat44& camToGround, const double& camFocalLengthPixels){
             arma::vec4 camSpacePoint = utility::math::matrix::orthonormal44Inverse(camToGround) * point;
             return projectCamSpaceToScreen(camSpacePoint.rows(0,2), camFocalLengthPixels);
+        }
+        inline arma::vec2 projectWorldPointToCamera(const arma::vec3& point, const arma::mat44& camToGround, const double& camFocalLengthPixels){
+            arma::vec4 point_ = arma::ones(4);
+            point_.rows(0,2) = point;
+            return projectWorldPointToCamera(point_, camToGround, camFocalLengthPixels);
         }
 
         inline arma::vec3 getGroundPointFromScreen(const arma::vec2& screenPos, const arma::mat44& camToGround, const double& camFocalLengthPixels){
@@ -119,6 +149,7 @@ namespace utility {
                 return intersection.second;
             }
         }
+
 
     }
   }

@@ -37,6 +37,8 @@ namespace modules {
         using utility::math::geometry::Line;
         using utility::math::vision::getGroundPointFromScreen;
         using utility::math::vision::projectWorldPointToCamera;
+        using utility::math::vision::camToImage;
+        using utility::math::vision::imageToCam;
 
         void LUTClassifier::findBall(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
 
@@ -53,13 +55,14 @@ namespace modules {
             auto& visualHorizon = classifiedImage.visualHorizon;
             auto& minHorizon = classifiedImage.minVisualHorizon;
 
-            double topY = -(minHorizon->at(1) - double(image.height() - 1) / 2);
+            arma::vec2 topY = imageToCam(arma::ivec2({classifiedImage.minVisualHorizon->at(0),int(classifiedImage.minVisualHorizon->at(1))}), arma::vec2{image.width(), image.height()});
+            topY[0] = 0;    //Choose centre of screen
 
             // Get the positions of the top of our green horizion, and the bottom of the screen
-            auto xb = getGroundPointFromScreen({ 0, -double(image.height() - 1) / 2}, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
-            auto xt = getGroundPointFromScreen({ 0, topY}, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
+            auto xb = getGroundPointFromScreen({ 0, -double(image.height() - 1) / 2}, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
+            auto xt = getGroundPointFromScreen(topY, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
             double dx = 2 * BALL_RADIUS / BALL_MINIMUM_INTERSECTIONS_COARSE;
-            double cameraHeight = sensors.kinematicsCamToGround(2,3);
+            double cameraHeight = sensors.orientationCamToGround(2,3);
 
             // This describes the direction of travel
             auto direction = arma::normalise(xb);
@@ -81,10 +84,10 @@ namespace modules {
                 worldPosition.rows(0, 2) = x * direction;
 
                 // Transform x onto the camera
-                auto camPoint = projectWorldPointToCamera(worldPosition, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
+                auto camPoint = projectWorldPointToCamera(worldPosition, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
 
                 // Transform into our coordinates
-                int y = lround(-camPoint[1] + double(image.height() - 1) / 2);
+                int y = camToImage(camPoint, arma::vec2{image.width(), image.height()})[1];
 
                 arma::ivec2 start = { 0, y };
                 arma::ivec2 end = { int(image.width() - 1), y };
