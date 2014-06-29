@@ -113,6 +113,10 @@ namespace modules {
                 // Our classified image
                 auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
 
+                // Set our width and height
+                classifiedImage->width = image.width();
+                classifiedImage->height = image.height();
+
                 // Find our horizon
                 findHorizon(image, lut, sensors, *classifiedImage);
 

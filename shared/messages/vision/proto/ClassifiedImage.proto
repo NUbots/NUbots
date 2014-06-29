@@ -31,8 +31,9 @@ message ClassifiedImage {
         required ivec2 end = 4;
     }
 
-    required Line horizon = 1;
-    repeated uvec2 visual_horizon = 2;
-    repeated Segment segment = 3;
+    required uvec2 size = 1;
+    required Line horizon = 2;
+    repeated uvec2 visual_horizon = 3;
+    repeated Segment segment = 4;
 }
 

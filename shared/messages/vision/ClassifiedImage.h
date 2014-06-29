@@ -63,6 +63,9 @@ namespace messages {
                 Segment* next;
             };
 
+            size_t width;
+            size_t height;
+
             // Our horizon as a gradient/intercept pair
             arma::vec2 horizon;
 

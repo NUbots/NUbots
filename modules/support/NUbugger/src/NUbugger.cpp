@@ -329,6 +329,9 @@ namespace modules {
 
                 auto* imageData = message.mutable_classified_image();
 
+                imageData->mutable_size()->set_x(image.width);
+                imageData->mutable_size()->set_y(image.height);
+
                 // Add the vertical segments to the list
                 for(const auto& segment : image.verticalSegments) {
                     auto* s = imageData->add_segment();
