@@ -152,7 +152,7 @@ namespace modules {
                     // Try our previous point
                     ++hRight;
                 }
-
+                std::cout << "start " << start << ", end " << end << std::endl;
                 auto segments = quex->classify(image, lut, start, end);
                 insertSegments(classifiedImage, segments, false);
             }
