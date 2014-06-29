@@ -78,13 +78,13 @@ namespace modules {
                 // Add our first point
                 stats(arma::vec2({ double(points.front()[0]), double(points.front()[1]) }));
 
-                for(auto it = points.begin(); it < points.end() - 1; ++it) {
+                for(auto it = points.begin(); it < points.end(); ++it) {
 
                     auto p1 = it;
                     auto p2 = it + 1;
 
                     // If the next point is too far away to be considered in this cluster
-                    if(p2->at(0) - p1->at(0) > BALL_MAXIMUM_VERTICAL_CLUSTER_SPACING) {
+                    if(p2 == points.end() || p2->at(0) - p1->at(0) > BALL_MAXIMUM_VERTICAL_CLUSTER_SPACING) {
 
                         // Get the centre point to use and translate it into the kinematics form
                         arma::vec2 centre = stats.mean();
@@ -150,74 +150,12 @@ namespace modules {
                     }
 
                     // Add the next point to the statistics
-                    stats(arma::vec2({ double(p2->at(0)), double(p2->at(1)) }));
-
-                }
-
-                if(stats.count() > 0) {
-
-                    // Get our relevant values
-                    arma::vec2 centre = stats.mean();
-                    arma::vec2 kinematicsCentre = imageToCam(stats.mean(),arma::vec2{image.width(), image.height()});
-
-                    // Shift the camera by BALL_RADIUS in order to move it to the correct position
-                    auto cameraMatrix = sensors.orientationCamToGround;
-                    cameraMatrix(2, 3) -= BALL_RADIUS;
-
-                    // Get our two points
-                    auto groundPoint = getGroundPointFromScreen(kinematicsCentre, cameraMatrix, FOCAL_LENGTH_PIXELS);
-                    arma::vec4 edgePoint = arma::ones(4);
-                    edgePoint.rows(0, 2) = groundPoint + (BALL_RADIUS * cameraMatrix.submat(0, 2, 2, 2));
-
-                    auto screenEdge = projectWorldPointToCamera(edgePoint, cameraMatrix, FOCAL_LENGTH_PIXELS);
-
-                    double radius = arma::norm(screenEdge - kinematicsCentre);
-
-                    auto getX = [] (double r, double x0, double y0, double y) {
-
-                        double a = y - y0;
-                        double b = sqrt(r * r - a * a);
-
-                        return std::make_pair(int(lround(x0 - b)), int(lround(x0 + b)));
-                    };
-
-                    int jumpSize = std::max(1, int(lround((2 * radius) / double(BALL_MINIMUM_INTERSECTIONS_FINE + 2))));
-
-                    int xStart = std::max(int(lround(centre[0] - radius * BALL_SEARCH_CIRCLE_SCALE + jumpSize)), 0);
-                    int xEnd   = std::min(int(lround(centre[0] + radius * BALL_SEARCH_CIRCLE_SCALE - jumpSize)), int(image.width() - 1));
-                    int yStart = std::max(int(lround(centre[1] - radius * BALL_SEARCH_CIRCLE_SCALE + jumpSize)), 0);
-                    int yEnd   = std::min(int(lround(centre[1] + radius * BALL_SEARCH_CIRCLE_SCALE - jumpSize)), int(image.height() - 1));
-
-                    for(int x = xStart; x <= xEnd; x += jumpSize) {
-
-                        auto ends = getX(BALL_SEARCH_CIRCLE_SCALE * radius, centre[1], centre[0], x);
-
-                        arma::ivec2 start = { x, ends.first };
-                        arma::ivec2 end = { x, ends.second };
-
-                        start[1] = std::max(start[1], 0);
-                        end[1] = std::min(end[1], int(image.height() - 1));
-
-                        auto segments = quex->classify(image, lut, start, end);
-                        insertSegments(classifiedImage, segments, true);
+                    if(p2 != points.end()) {
+                        stats(arma::vec2({ double(p2->at(0)), double(p2->at(1)) }));
                     }
 
-                    for(int y = yStart; y <= yEnd; y += jumpSize) {
-
-                        auto ends = getX(BALL_SEARCH_CIRCLE_SCALE * radius, centre[0], centre[1], y);
-
-                        arma::ivec2 start = { ends.first, y };
-                        arma::ivec2 end = { ends.second, y };
-
-                        start[0] = std::max(start[0], 0);
-                        end[0] = std::min(end[0], int(image.width() - 1));
-
-                        auto segments = quex->classify(image, lut, start, end);
-                        insertSegments(classifiedImage, segments, false);
-                    }
                 }
             }
-
         }
 
     }  // vision

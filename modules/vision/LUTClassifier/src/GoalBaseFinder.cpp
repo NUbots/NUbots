@@ -63,13 +63,13 @@ namespace modules {
                 // Add our first point
                 stats(arma::vec2({ double(points.front()[0]), double(points.front()[1]) }));
 
-                for(auto it = points.begin(); it < points.end() - 1; ++it) {
+                for(auto it = points.begin(); it < points.end(); ++it) {
 
                     auto p1 = it;
                     auto p2 = it + 1;
 
                     // If the next point is too far away to be considered in this cluster
-                    if(p2->at(0) - p1->at(0) > GOAL_MAXIMUM_VERTICAL_CLUSTER_SPACING) {
+                    if(p2 == points.end() || p2->at(0) - p1->at(0) > GOAL_MAXIMUM_VERTICAL_CLUSTER_SPACING) {
 
                         // Get our relevant values
                         int top = lround(stats.min()[1]);
@@ -107,43 +107,10 @@ namespace modules {
                     }
 
                     // Add the next point to the statistics
-                    stats(arma::vec2({ double(p2->at(0)), double(p2->at(1)) }));
+                    if(p2 != points.end()) {
+                        stats(arma::vec2({ double(p2->at(0)), double(p2->at(1)) }));
+                    }
 
-                }
-
-                if(stats.count() > 0) {
-
-                    // Get our relevant values
-                    int top = lround(stats.min()[1]);
-                    int base = lround(stats.max()[1]);
-                    int x = lround(stats.mean()[0]);
-                    arma::vec sd = stats.stddev();
-                    int jump = sd.is_empty() ? 1 : std::max(1, int(lround(sd[0] * 1)));
-
-                    arma::ivec2 start = { x, top - GOAL_VERTICAL_CLUSTER_UPPER_BUFFER };
-                    arma::ivec2 end   = { x, base + GOAL_VERTICAL_CLUSTER_LOWER_BUFFER };
-
-                    // Adjust our Y to stay on the screen
-                    start[1] = std::max(start[1], 0);
-                    end[1]   = std::min(end[1], int(image.height() - 1));
-
-                    // Classify our point based on these
-                    auto segments = quex->classify(image, lut, start, end, 1);
-                    insertSegments(classifiedImage, segments, true);
-
-                    // Shift our line right
-                    start = { x + jump, start[1] };
-                    end   = { x + jump, end[1] };
-
-                    segments = quex->classify(image, lut, start, end, 1);
-                    insertSegments(classifiedImage, segments, true);
-
-                    // Shift our line left
-                    start = { x - jump, start[1] };
-                    end   = { x - jump, end[1] };
-
-                    segments = quex->classify(image, lut, start, end, 1);
-                    insertSegments(classifiedImage, segments, true);
                 }
             }
         }
