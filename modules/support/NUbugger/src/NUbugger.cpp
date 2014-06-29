@@ -603,9 +603,11 @@ namespace modules {
         }
 
         void NUbugger::send(Message message) {
-            auto serialized = message.SerializeAsString();
-            zmq::message_t packet(serialized.size());
-            memcpy(packet.data(), serialized.data(), serialized.size());
+            size_t messageSize = message.ByteSize();
+            zmq::message_t packet(messageSize + 1);
+            char* dataPtr = static_cast<char*>(packet.data());
+            message.SerializeToArray(dataPtr + 1, messageSize);
+            dataPtr[0] = message.type();
             send(packet);
         }
 
