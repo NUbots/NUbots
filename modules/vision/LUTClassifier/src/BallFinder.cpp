@@ -51,8 +51,9 @@ namespace modules {
              */
 
             auto& visualHorizon = classifiedImage.visualHorizon;
+            auto& minHorizon = classifiedImage.minVisualHorizon;
 
-            double topY = -(classifiedImage.minVisualHorizon->at(1) - double(image.height() - 1) / 2);
+            double topY = -(minHorizon->at(1) - double(image.height() - 1) / 2);
 
             // Get the positions of the top of our green horizion, and the bottom of the screen
             auto xb = getGroundPointFromScreen({ 0, -double(image.height() - 1) / 2}, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
@@ -70,10 +71,10 @@ namespace modules {
 
             auto movement = arma::normalise(xb) * dx;
 
-            auto hLeft = classifiedImage.minVisualHorizon;
-            auto hRight = classifiedImage.minVisualHorizon + 1;
+            auto hLeft = visualHorizon.begin();
+            auto hRight = visualHorizon.end() - 1;
 
-            for(double x = xStart; x < xEnd; x += std::max(dx, (dx * x) / (cameraHeight - dx)))  {
+            for(double x = xStart; x < xEnd; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
 
                 arma::vec4 worldPosition = arma::ones(4);
 
@@ -85,56 +86,67 @@ namespace modules {
                 // Transform into our coordinates
                 int y = lround(-camPoint[1] + double(image.height() - 1) / 2);
 
-              //std::cout  << "y" << y << std::endl;
                 arma::ivec2 start = { 0, y };
                 arma::ivec2 end = { int(image.width() - 1), y };
 
-                while (hLeft > visualHorizon.begin()) {
+                // If our left hand side is in range, or we are over the top
+                if(hLeft->at(1) >= y) {
 
-                    auto p1 = hLeft - 1;
-                    auto p2 = hLeft;
+                    while(hLeft < minHorizon) {
 
-                    if(y <= p1->at(1) && y >= p2->at(1)) {
+                        auto p1 = hLeft;
+                        auto p2 = hLeft + 1;
 
-                        // Make a line from the two points and find our x
-                        Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
+                        if(y <= p1->at(1) && y >= p2->at(1)) {
 
-                        if(l.isHorizontal()) {
-                            start[0] = p2->at(0);
-                        }
-                        else {
-                            start[0] = round(l.findXFromY(y));
-                        }
+                            // Make a line from the two points and find our x
+                            Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
 
-                        break;
-                    }
+                            if(l.isHorizontal()) {
+                                start[0] = p2->at(0);
+                            }
+                            else {
+                                start[0] = round(l.findXFromY(y));
+                            }
 
-                    // Try our previous point
-                    --hLeft;
-                }
-
-                while (hRight < visualHorizon.end()) {
-
-                    auto p1 = hRight - 1;
-                    auto p2 = hRight;
-
-                    if(y >= p1->at(1) && y <= p2->at(1)) {
-
-                        // Make a line from the two points and find our x
-                        Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
-
-                        if(l.isHorizontal()) {
-                            end[0] = p1->at(0);
-                        }
-                        else {
-                            end[0] = round(l.findXFromY(y));
                             break;
                         }
+                        // Try our previous point
+                        else {
+                            ++hLeft;
+                        }
                     }
-
-                    // Try our previous point
-                    ++hRight;
                 }
+
+                // If our right hand side is in range and has not gone out of scope
+                if(hRight->at(1) >= y) {
+
+                    while(hRight > minHorizon) {
+
+                        auto p1 = hRight - 1;
+                        auto p2 = hRight;
+
+                        if(y >= p1->at(1) && y <= p2->at(1)) {
+
+                            // Make a line from the two points and find our x
+                            Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
+
+                            if(l.isHorizontal()) {
+                                end[0] = p1->at(0);
+                            }
+                            else {
+                                end[0] = round(l.findXFromY(y));
+                            }
+
+                            break;
+                        }
+                        // Try our previous point
+                        else {
+                            --hRight;
+                        }
+                    }
+                }
+
                 auto segments = quex->classify(image, lut, start, end);
                 insertSegments(classifiedImage, segments, false);
             }
