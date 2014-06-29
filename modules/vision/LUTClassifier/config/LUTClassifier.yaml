@@ -7,6 +7,7 @@ ball:
   intersections_coarse: 2
   intersections_fine: 10
   search_circle_scale: 1.5
+  maximum_vertical_cluster_spacing: 0.1
 goals:
   spacing: 0.04
   subsampling: 0.01

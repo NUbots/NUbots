@@ -44,7 +44,7 @@ namespace modules {
                     && it->second.previous
                     && it->second.next) {
 
-                    // Push back our midpoints x position
+                    // Push back our midpoint
                     points.push_back(it->second.midpoint);
                 }
             }
