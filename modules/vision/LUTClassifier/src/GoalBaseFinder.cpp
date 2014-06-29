@@ -57,16 +57,14 @@ namespace modules {
             // If we have some points draw lines from them
             if(!points.empty()) {
 
-                // Our vector of statistics
                 arma::running_stat_vec<arma::vec2> stats;
-
-                // Add our first point
-                stats(arma::vec2({ double(points.front()[0]), double(points.front()[1]) }));
-
                 for(auto it = points.begin(); it < points.end(); ++it) {
 
                     auto p1 = it;
                     auto p2 = it + 1;
+
+                    // Add our point to the stats
+                    stats(arma::vec2({ double(p2->at(0)), double(p2->at(1)) }));
 
                     // If the next point is too far away to be considered in this cluster
                     if(p2 == points.end() || p2->at(0) - p1->at(0) > GOAL_MAXIMUM_VERTICAL_CLUSTER_SPACING) {
@@ -105,12 +103,6 @@ namespace modules {
 
                         stats.reset();
                     }
-
-                    // Add the next point to the statistics
-                    if(p2 != points.end()) {
-                        stats(arma::vec2({ double(p2->at(0)), double(p2->at(1)) }));
-                    }
-
                 }
             }
         }
