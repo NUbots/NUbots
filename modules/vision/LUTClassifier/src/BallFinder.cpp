@@ -70,6 +70,7 @@ namespace modules {
             auto xb = getGroundPointFromScreen({ 0, -double(image.height() / 2)}, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
             auto xt = getGroundPointFromScreen({ 0, topY}, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
             double dx = 2 * BALL_RADIUS / MIN_BALL_INTERSECTIONS;
+            double cameraHeight = sensors.kinematicsCamToGround(2,3);
           //std::cout  << "xb" << xb.t() << std::endl;
           //std::cout  << "xt" << xt.t() << std::endl;
             
@@ -91,12 +92,11 @@ namespace modules {
             auto hLeft = classifiedImage.minVisualHorizon;
             auto hRight = classifiedImage.minVisualHorizon + 1;
 
-            for(double x = xStart; x < xEnd; x += dx) {
+            for(double x = xStart; x < xEnd; x += std::max(dx, (dx * x) / (cameraHeight - dx)))  {
 
                 arma::vec4 worldPosition = arma::ones(4);
 
                 worldPosition.rows(0, 2) = x * direction;
-                worldPosition[2] += BALL_RADIUS;
 
                 // Transform x onto the camera
                 auto camPoint = projectWorldPointToCamera(worldPosition, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
