@@ -19,12 +19,15 @@
 
 #include "BallDetector.h"
 
+#include "messages/input/Sensors.h"
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/support/Configuration.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/input/CameraParameters.h"
 
 #include "utility/math/ransac/RansacCircleModel.h"
-
+#include "utility/math/vision.h"
+#include "utility/nubugger/NUgraph.h"
 
 namespace modules {
 namespace vision {
@@ -33,9 +36,16 @@ namespace vision {
     using utility::math::ransac::findMultipleModels;
     using utility::math::ransac::RansacSelectionMethod;
 
+    using messages::input::CameraParameters;
+    using messages::input::Sensors;
+
     using messages::vision::ObjectClass;
     using messages::vision::ClassifiedImage;
     using messages::vision::Ball;
+
+    using utility::math::vision::distanceToEquidistantPoints;
+    using utility::math::vision::getGroundPointFromScreen;
+    using utility::nubugger::graph;
 
     using messages::support::Configuration;
 
@@ -63,7 +73,7 @@ namespace vision {
         });
 
 
-        on<Trigger<ClassifiedImage<ObjectClass>>>([this](const ClassifiedImage<ObjectClass>& image) {
+        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters, Sensors>>([this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const Sensors& sensors) {
 
             // This holds our points that may be a part of the ball
             std::vector<arma::vec2> ballPoints;
@@ -103,6 +113,27 @@ namespace vision {
                                                                                                MAX_ITERATIONS_PER_FITTING,
                                                                                                MAX_FITTING_ATTEMPTS,
                                                                                                SELECTION_METHOD);
+
+            for(auto& ball : ransacResults) {
+
+                auto centre = ball.first.getCentre();
+                auto p1 = centre;
+                auto p2 = centre;
+                p1[1] += ball.first.getRadius();
+                p2[1] -= ball.first.getRadius();
+
+                // Transform p1 p2 to kinematics coordinates
+                p1 = -(p1 - arma::vec2({double(320 - 1) / 2, double(double(240 - 1) / 2)}));
+                p2 = -(p2 - arma::vec2({double(320 - 1) / 2, double(double(240 - 1) / 2)}));
+
+                double wbd = distanceToEquidistantPoints(0.10, p1, p2, cam.focalLengthPixels);
+                auto d2p = getGroundPointFromScreen(p1, sensors.kinematicsCamToGround, cam.focalLengthPixels);
+                std::cout << "Width: " << wbd << std::endl;
+                std::cout << "D2P: " << d2p.t() << std::endl;
+
+                emit(graph("Width Ball", wbd));
+                emit(graph("D2P Ball", d2p[0], d2p[1]));
+            }
 
             // Do vision kinematics on the ball to determine it's position and covariance matricies
             log("Number of seen balls", ransacResults.size());

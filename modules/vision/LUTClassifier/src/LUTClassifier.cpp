@@ -99,10 +99,13 @@ namespace modules {
                 }
 
                 // Ball Detector
-                MIN_BALL_INTERSECTIONS = config["ball"]["intersections"].as<double>();
+                BALL_MINIMUM_INTERSECTIONS_COARSE = config["ball"]["intersections_coarse"].as<double>();
+                BALL_MINIMUM_INTERSECTIONS_FINE = config["ball"]["intersections_fine"].as<double>();
+                BALL_SEARCH_CIRCLE_SCALE = config["ball"]["search_circle_scale"].as<double>();
+
+                // Camera settings
                 ALPHA = cam.pixelsToTanThetaFactor[1];
                 FOCAL_LENGTH_PIXELS = cam.focalLengthPixels;
-                MIN_BALL_SEARCH_JUMP = std::max(1, int(cam.focalLengthPixels * tan(config["ball"]["min_jump"].as<double>())));
             };
 
             // Trigger the same function when either update

@@ -50,42 +50,23 @@ namespace modules {
                 (for the logrithmic grid)
              */
 
-            // Update equation: p_{n+1}=\frac{h}{\frac{h}{p_{n}}-\frac{\alpha r}{\sin \left( \mbox{atan}\left( \alpha p_{n} \right) \right)}}
-            /// gives between l and l+1 lines through ball
-            ///
-            /// l        = min lines through ball
-            /// r        = radius of ball
-            /// h        = robot's camera height
-            /// p        = number of pixels below kinematics horizion
-            /// $\alpha$ = pixels to tan(\theta) ratio
-            ///
-            /// $\Delta p=p^{2}\frac{2r\alpha}{lh}$
-
             auto& visualHorizon = classifiedImage.visualHorizon;
 
-            double topY = -(classifiedImage.minVisualHorizon->at(1) - double(image.height() / 2));
-          //std::cout  << "topY" << topY << std::endl;
+            double topY = -(classifiedImage.minVisualHorizon->at(1) - double(image.height() - 1) / 2);
 
             // Get the positions of the top of our green horizion, and the bottom of the screen
-            auto xb = getGroundPointFromScreen({ 0, -double(image.height() / 2)}, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
+            auto xb = getGroundPointFromScreen({ 0, -double(image.height() - 1) / 2}, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
             auto xt = getGroundPointFromScreen({ 0, topY}, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
-            double dx = 2 * BALL_RADIUS / MIN_BALL_INTERSECTIONS;
+            double dx = 2 * BALL_RADIUS / BALL_MINIMUM_INTERSECTIONS_COARSE;
             double cameraHeight = sensors.kinematicsCamToGround(2,3);
-          //std::cout  << "xb" << xb.t() << std::endl;
-          //std::cout  << "xt" << xt.t() << std::endl;
-            
 
             // This describes the direction of travel
             auto direction = arma::normalise(xb);
 
-            // Our
+            // Our start and end points
             double xStart = arma::norm(xb);
             xStart += dx - fmod(xStart, dx);
             double xEnd = arma::norm(xt);
-
-          //std::cout  << "xStart " << xStart << std::endl;
-          //std::cout  << "xEnd " << xEnd << std::endl;
-          //std::cout  << "dx " << dx << std::endl;
 
             auto movement = arma::normalise(xb) * dx;
 
@@ -100,11 +81,10 @@ namespace modules {
 
                 // Transform x onto the camera
                 auto camPoint = projectWorldPointToCamera(worldPosition, sensors.kinematicsCamToGround, FOCAL_LENGTH_PIXELS);
-              //std::cout  << "worldPosition" << worldPosition.t() << std::endl;
-              //std::cout  << "camPoint" << camPoint.t() << std::endl;
+
                 // Transform into our coordinates
-                int y = lround(-camPoint[1] + (image.height() / 2));
-                
+                int y = lround(-camPoint[1] + double(image.height() - 1) / 2);
+
               //std::cout  << "y" << y << std::endl;
                 arma::ivec2 start = { 0, y };
                 arma::ivec2 end = { int(image.width() - 1), y };
@@ -155,7 +135,6 @@ namespace modules {
                     // Try our previous point
                     ++hRight;
                 }
-                std::cout << "start " << start.t() << ", end " << end.t() << std::endl;
                 auto segments = quex->classify(image, lut, start, end);
                 insertSegments(classifiedImage, segments, false);
             }

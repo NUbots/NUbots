@@ -20,6 +20,8 @@
 #include "LUTClassifier.h"
 #include "QuexClassifier.h"
 
+#include "utility/math/vision.h"
+
 namespace modules {
     namespace vision {
 
@@ -28,6 +30,9 @@ namespace modules {
         using messages::vision::LookUpTable;
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
+
+        using utility::math::vision::getGroundPointFromScreen;
+        using utility::math::vision::projectWorldPointToCamera;
 
         void LUTClassifier::enhanceBall(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
 
@@ -39,7 +44,7 @@ namespace modules {
                 size needed to ensure that the ball is totally covered.
              */
 
-            std::vector<arma::ivec2> points;
+            arma::running_stat_vec<arma::vec2> stats;
 
             auto ballSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::BALL);
 
@@ -50,28 +55,77 @@ namespace modules {
                 // We throw out points if they are:
                 // Have both edges above the green horizon
                 // Do not have a transition on either side (are on an edge)
-                if(classifiedImage.visualHorizonAtPoint(pt.start[0]) >= pt.start[1] || classifiedImage.visualHorizonAtPoint(pt.end[0]) >= pt.end[1]) {
 
-                    // Push back our midpoints x position
-                    points.push_back(pt.midpoint);
+                if(classifiedImage.visualHorizonAtPoint(pt.start[0]) <= pt.start[1] || classifiedImage.visualHorizonAtPoint(pt.end[0]) <= pt.end[1]) {
+
+                    // Push back our midpoints position
+                    stats(arma::vec2{ double(pt.midpoint[0]), double(pt.midpoint[1]) });
                 }
             }
 
-            //arma::ivec2 centre = arma::mean(points);
+            // If we have orange pixels
+            if(stats.count() > 0) {
 
-            // get a running stat vec of the ball points below the green horizon
+                // Get the centre point to use and translate it into the kinematics form
+                arma::vec2 centre = stats.mean();
+                arma::vec2 kinematicsCentre = -(stats.mean() - arma::vec2({ double(image.width() - 1) / 2, double(image.height() - 1) / 2 }));
 
-            // calculate the mean and SD of the points
+                // Shift the camera by BALL_RADIUS in order to move it to the correct position
+                auto cameraMatrix = sensors.kinematicsCamToGround;
+                cameraMatrix(2, 3) -= BALL_RADIUS;
 
-            // Iterate through the points again and remove any that are outside the SD
+                // Get our two points
+                auto groundPoint = getGroundPointFromScreen(kinematicsCentre, cameraMatrix, FOCAL_LENGTH_PIXELS);
+                arma::vec4 edgePoint = arma::ones(4);
+                edgePoint.rows(0, 2) = groundPoint + (BALL_RADIUS * cameraMatrix.submat(0, 2, 2, 2));
 
-            // Recalculate the mean
+                auto screenEdge = projectWorldPointToCamera(edgePoint, cameraMatrix, FOCAL_LENGTH_PIXELS);
 
-            // Get the estimated ball width for this distance
+                double radius = arma::norm(screenEdge - kinematicsCentre);
 
-            // Create a field that is CONFIG * larger then this
+                auto getX = [] (double r, double x0, double y0, double y) {
 
-            // Within a circle of that config diameter, draw n lines, where n ensures that at least SOMECONFIG lines go through the ball
+                    double a = y - y0;
+                    double b = sqrt(r * r - a * a);
+
+                    return std::make_pair(int(lround(x0 - b)), int(lround(x0 + b)));
+                };
+
+                int jumpSize = std::max(1, int(lround((2 * radius) / double(BALL_MINIMUM_INTERSECTIONS_FINE + 2))));
+
+                int xStart = std::max(int(lround(centre[0] - radius * BALL_SEARCH_CIRCLE_SCALE + jumpSize)), 0);
+                int xEnd   = std::min(int(lround(centre[0] + radius * BALL_SEARCH_CIRCLE_SCALE - jumpSize)), int(image.width() - 1));
+                int yStart = std::max(int(lround(centre[1] - radius * BALL_SEARCH_CIRCLE_SCALE + jumpSize)), 0);
+                int yEnd   = std::min(int(lround(centre[1] + radius * BALL_SEARCH_CIRCLE_SCALE - jumpSize)), int(image.height() - 1));
+
+                for(int x = xStart; x <= xEnd; x += jumpSize) {
+
+                    auto ends = getX(BALL_SEARCH_CIRCLE_SCALE * radius, centre[1], centre[0], x);
+
+                    arma::ivec2 start = { x, ends.first };
+                    arma::ivec2 end = { x, ends.second };
+
+                    start[1] = std::max(start[1], 0);
+                    end[1] = std::min(end[1], int(image.height() - 1));
+
+                    auto segments = quex->classify(image, lut, start, end);
+                    insertSegments(classifiedImage, segments, true);
+                }
+
+                for(int y = yStart; y <= yEnd; y += jumpSize) {
+
+                    auto ends = getX(BALL_SEARCH_CIRCLE_SCALE * radius, centre[0], centre[1], y);
+
+                    arma::ivec2 start = { ends.first, y };
+                    arma::ivec2 end = { ends.second, y };
+
+                    start[0] = std::max(start[0], 0);
+                    end[0] = std::min(end[0], int(image.width() - 1));
+
+                    auto segments = quex->classify(image, lut, start, end);
+                    insertSegments(classifiedImage, segments, false);
+                }
+            }
 
         }
 

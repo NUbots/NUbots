@@ -59,11 +59,13 @@ namespace modules {
             double GOAL_FINDER_VERTICAL_SD_JUMP = 1;
             std::vector<double> GOAL_FINDER_DETECTOR_LEVELS = { 2.0 };
 
-            double MIN_BALL_INTERSECTIONS = 1;
+            double BALL_MINIMUM_INTERSECTIONS_COARSE = 1;
+            double BALL_MINIMUM_INTERSECTIONS_FINE = 1;
+            double BALL_SEARCH_CIRCLE_SCALE = 2;
+            double BALL_RADIUS = 0.05;
+
             double FOCAL_LENGTH_PIXELS = 2.0;
             double ALPHA = 2.0;
-            int MIN_BALL_SEARCH_JUMP = 1;
-            double BALL_RADIUS = 0.05;
 
             void insertSegments(messages::vision::ClassifiedImage<messages::vision::ObjectClass>& image
                 , std::vector<messages::vision::ClassifiedImage<messages::vision::ObjectClass>::Segment>& segments
