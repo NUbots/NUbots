@@ -135,7 +135,7 @@ namespace modules {
 
             powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&NUbugger::run), this), std::bind(std::mem_fn(&NUbugger::kill), this)));
 
-            on<Trigger<DataPoint>>([this](const DataPoint& data_point) {
+            dataPointHandle = on<Trigger<DataPoint>>([this](const DataPoint& data_point) {
                 Message message;
                 message.set_type(Message::DATA_POINT);
                 message.set_utc_timestamp(getUtcTimestamp());
@@ -149,41 +149,41 @@ namespace modules {
                 send(message);
             });
 
-             on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
-                Message message;
-                message.set_type(Message::BEHAVIOUR);
-                message.set_utc_timestamp(getUtcTimestamp());
+            actionStartHandle = on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
+               Message message;
+               message.set_type(Message::BEHAVIOUR);
+               message.set_utc_timestamp(getUtcTimestamp());
 
-                auto* behaviour = message.mutable_behaviour();
-                behaviour->set_type(Behaviour::ACTION_STATE);
-                auto* actionStateChange = behaviour->mutable_action_state_change();
-                actionStateChange->set_state(ActionStateChange::START);
-                actionStateChange->set_name(actionStart.name);
-                for (auto& limbID : actionStart.limbs) {
-                    actionStateChange->add_limbs(static_cast<int>(limbID));
-                }
-
-                send(message);
-             });
-
-             on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
-                Message message;
-                message.set_type(Message::BEHAVIOUR);
-                message.set_utc_timestamp(getUtcTimestamp());
-
-                auto* behaviour = message.mutable_behaviour();
-                behaviour->set_type(Behaviour::ACTION_STATE);
-                auto* actionStateChange = behaviour->mutable_action_state_change();
-                actionStateChange->set_state(ActionStateChange::KILL);
-                actionStateChange->set_name(actionKill.name);
-                for (auto& limbID : actionKill.limbs) {
-                    actionStateChange->add_limbs(static_cast<int>(limbID));
-                }
+               auto* behaviour = message.mutable_behaviour();
+               behaviour->set_type(Behaviour::ACTION_STATE);
+               auto* actionStateChange = behaviour->mutable_action_state_change();
+               actionStateChange->set_state(ActionStateChange::START);
+               actionStateChange->set_name(actionStart.name);
+               for (auto& limbID : actionStart.limbs) {
+                   actionStateChange->add_limbs(static_cast<int>(limbID));
+               }
 
                 send(message);
-             });
+            });
 
-            on<Trigger<RegisterAction>>([this] (const RegisterAction& action) {
+            actionKillHandle = on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
+               Message message;
+               message.set_type(Message::BEHAVIOUR);
+               message.set_utc_timestamp(getUtcTimestamp());
+
+               auto* behaviour = message.mutable_behaviour();
+               behaviour->set_type(Behaviour::ACTION_STATE);
+               auto* actionStateChange = behaviour->mutable_action_state_change();
+               actionStateChange->set_state(ActionStateChange::KILL);
+               actionStateChange->set_name(actionKill.name);
+               for (auto& limbID : actionKill.limbs) {
+                   actionStateChange->add_limbs(static_cast<int>(limbID));
+               }
+
+               send(message);
+            });
+
+            registerActionHandle = on<Trigger<RegisterAction>>([this] (const RegisterAction& action) {
                 Message message;
                 message.set_type(Message::BEHAVIOUR);
                 message.set_utc_timestamp(getUtcTimestamp());
@@ -205,7 +205,7 @@ namespace modules {
             });
 
             // This trigger gets the output from the sensors (unfiltered)
-            on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
+            sensorsHandle = on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
 
                 Message message;
 
@@ -281,7 +281,7 @@ namespace modules {
                 send(message);
             });
 
-            on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
+            imageHandle = on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
 
                 if(!image.source().empty()) {
 
@@ -305,30 +305,32 @@ namespace modules {
                 }
             });
 
-             /*on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
-                 Message message;
-                 message.set_type(Message::REACTION_STATISTICS);
-                 message.set_utc_timestamp(getUtcTimestamp());
+            reactionStatisticsHandle = on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
+                Message message;
+                message.set_type(Message::REACTION_STATISTICS);
+                message.set_utc_timestamp(getUtcTimestamp());
 
-                 auto* reactionStatistics = message.mutable_reaction_statistics();
+                auto* reactionStatistics = message.mutable_reaction_statistics();
 
 //                 reactionStatistics->set_name(stats.name);
-                 reactionStatistics->set_reactionid(stats.reactionId);
-                 reactionStatistics->set_taskid(stats.taskId);
-                 reactionStatistics->set_causereactionid(stats.causeReactionId);
-                 reactionStatistics->set_causetaskid(stats.causeTaskId);
-                 reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
-                 reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
-                 reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
+                reactionStatistics->set_reactionid(stats.reactionId);
+                reactionStatistics->set_taskid(stats.taskId);
+                reactionStatistics->set_causereactionid(stats.causeReactionId);
+                reactionStatistics->set_causetaskid(stats.causeTaskId);
+                reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
+                reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
+                reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
 
-                 reactionStatistics->set_name(stats.identifier[0]);
-                 reactionStatistics->set_triggername(stats.identifier[1]);
-                 reactionStatistics->set_functionname(stats.identifier[2]);
+                reactionStatistics->set_name(stats.identifier[0]);
+                reactionStatistics->set_triggername(stats.identifier[1]);
+                reactionStatistics->set_functionname(stats.identifier[2]);
 
-                 send(message);
-             });*/
+                send(message);
+            });
 
-            on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
+            reactionStatisticsHandle.disable();
+
+            classifiedImageHandle = on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
 
                 Message message;
                 message.set_type(Message::VISION);
@@ -417,7 +419,7 @@ namespace modules {
 
             });
 
-            on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Goal> goals){
+            goalsHandle = on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Goal> goals){
                 Message message;
 
                 message.set_type(Message::VISION);
@@ -462,7 +464,7 @@ namespace modules {
                 send(message);
             });
 
-            on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Ball> balls){
+            ballsHandle = on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Ball> balls){
                 Message message;
 
                 message.set_type(Message::VISION);
@@ -492,7 +494,7 @@ namespace modules {
                 send(message);
             });
 
-            on<Trigger<Every<100, std::chrono::milliseconds>>,
+            localisationBallHandle = on<Trigger<Every<100, std::chrono::milliseconds>>,
                With<messages::localisation::Ball>,
                // With<messages::vision::Ball>,
                With<std::vector<messages::localisation::Self>>,

@@ -41,6 +41,19 @@ namespace modules {
 
             bool listening = true;
 
+            // Reaction Handles
+            ReactionHandle dataPointHandle;
+            ReactionHandle actionStartHandle;
+            ReactionHandle actionKillHandle;
+            ReactionHandle registerActionHandle;
+            ReactionHandle sensorsHandle;
+            ReactionHandle imageHandle;
+            ReactionHandle reactionStatisticsHandle;
+            ReactionHandle classifiedImageHandle;
+            ReactionHandle goalsHandle;
+            ReactionHandle ballsHandle;
+            ReactionHandle localisationBallHandle;
+
             std::mutex mutex;
 
             void send(zmq::message_t& packet);
