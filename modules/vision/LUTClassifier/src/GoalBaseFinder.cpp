@@ -69,7 +69,7 @@ namespace modules {
                     auto p2 = it + 1;
 
                     // If the next point is too far away to be considered in this cluster
-                    if(p2->at(0) - p1->at(0) > GOAL_FINDER_MAXIMUM_VERTICAL_CLUSTER_SPACING) {
+                    if(p2->at(0) - p1->at(0) > GOAL_MAXIMUM_VERTICAL_CLUSTER_SPACING) {
 
                         // Get our relevant values
                         int top = lround(stats.min()[1]);
@@ -78,8 +78,8 @@ namespace modules {
                         arma::vec sd = stats.stddev();
                         int jump = sd.is_empty() ? 1 : std::max(1, int(lround(sd[0] * 1)));
 
-                        arma::ivec2 start = { x, top - GOAL_FINDER_VERTICAL_CLUSTER_UPPER_BUFFER };
-                        arma::ivec2 end   = { x, base + GOAL_FINDER_VERTICAL_CLUSTER_LOWER_BUFFER };
+                        arma::ivec2 start = { x, top - GOAL_VERTICAL_CLUSTER_UPPER_BUFFER };
+                        arma::ivec2 end   = { x, base + GOAL_VERTICAL_CLUSTER_LOWER_BUFFER };
 
                         // Adjust our Y to stay on the screen
                         start[1] = std::max(start[1], 0);
@@ -120,8 +120,8 @@ namespace modules {
                     arma::vec sd = stats.stddev();
                     int jump = sd.is_empty() ? 1 : std::max(1, int(lround(sd[0] * 1)));
 
-                    arma::ivec2 start = { x, top - GOAL_FINDER_VERTICAL_CLUSTER_UPPER_BUFFER };
-                    arma::ivec2 end   = { x, base + GOAL_FINDER_VERTICAL_CLUSTER_LOWER_BUFFER };
+                    arma::ivec2 start = { x, top - GOAL_VERTICAL_CLUSTER_UPPER_BUFFER };
+                    arma::ivec2 end   = { x, base + GOAL_VERTICAL_CLUSTER_LOWER_BUFFER };
 
                     // Adjust our Y to stay on the screen
                     start[1] = std::max(start[1], 0);

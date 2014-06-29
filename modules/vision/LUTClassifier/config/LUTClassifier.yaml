@@ -15,5 +15,4 @@ goals:
   vertical_cluster_upper_buffer: 0.04
   vertical_cluster_lower_buffer: 0.04
   vertical_sd_jump: 2
-  detector_levels:
-    - 2.5
+  extension_scale: 2.5

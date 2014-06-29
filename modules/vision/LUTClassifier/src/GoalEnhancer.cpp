@@ -38,58 +38,54 @@ namespace modules {
                 We first generate segments above and below that are 2x the width of the segment
              */
 
-            // TODO add in the original lines as part of the values (since they are subsampled)
+            std::vector<ClassifiedImage<ObjectClass>::Segment> newSegments;
+            auto goalSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::GOAL);
 
-            for (uint i = 0; i < GOAL_FINDER_DETECTOR_LEVELS.size(); ++i) {
+            for(auto it = goalSegments.first; it != goalSegments.second; ++it) {
 
-                std::vector<ClassifiedImage<ObjectClass>::Segment> newSegments;
-                auto goalSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::GOAL);
+                auto& elem = it->second;
+                arma::ivec2 midpoint = elem.midpoint;
 
-                for(auto it = goalSegments.first; it != goalSegments.second; ++it) {
+                // Replicate our midpoint for each of the points
+                arma::imat points = arma::repmat(midpoint, 1, 6);
 
-                    auto& elem = it->second;
-                    arma::vec2 midpoint = arma::conv_to<arma::vec>::from(elem.midpoint);
+                // Our even rows are moved to the left
+                points(arma::uvec({ 0 }), arma::uvec({ 0, 2, 4 })) -= lround(double(elem.length) * GOAL_EXTENSION_SCALE);
 
-                    arma::vec upperBegin = midpoint + arma::vec({ -double(elem.length) * GOAL_FINDER_DETECTOR_LEVELS[i],  double(GOAL_FINDER_LINE_SPACING) / std::pow(3, i + 1) });
-                    arma::vec upperEnd   = midpoint + arma::vec({  double(elem.length) * GOAL_FINDER_DETECTOR_LEVELS[i],  double(GOAL_FINDER_LINE_SPACING) / std::pow(3, i + 1) });
-                    arma::vec lowerBegin = midpoint + arma::vec({ -double(elem.length) * GOAL_FINDER_DETECTOR_LEVELS[i], -double(GOAL_FINDER_LINE_SPACING) / std::pow(3, i + 1) });
-                    arma::vec lowerEnd   = midpoint + arma::vec({  double(elem.length) * GOAL_FINDER_DETECTOR_LEVELS[i], -double(GOAL_FINDER_LINE_SPACING) / std::pow(3, i + 1) });
+                // Our odd rows are moved to the right
+                points(arma::uvec({ 0 }), arma::uvec({ 1, 3, 5 })) += lround(double(elem.length) * GOAL_EXTENSION_SCALE);
 
-                    upperBegin[0] = std::max(upperBegin[0], double(0));
-                    upperBegin[0] = std::min(upperBegin[0], double(image.width() - 1));
+                // Our top rows are moved up 1/3 of the distance
+                points(arma::uvec({ 1 }), arma::uvec({ 0, 1 })) -= lround(double(GOAL_LINE_SPACING / 3));
 
-                    upperEnd[0] = std::max(upperEnd[0], double(0));
-                    upperEnd[0] = std::min(upperEnd[0], double(image.width() - 1));
+                // Our bottom rows are moved down 1/3 of the distance
+                points(arma::uvec({ 1 }), arma::uvec({ 4, 5 })) += lround(double(GOAL_LINE_SPACING / 3));
 
-                    lowerBegin[0] = std::max(lowerBegin[0], double(0));
-                    lowerBegin[0] = std::min(lowerBegin[0], double(image.width() - 1));
+                // Our lhs must be at least 0
+                points(arma::uvec({ 0 }), arma::find(points.row(0) < 0)).fill(0);
 
-                    lowerEnd[0] = std::max(lowerEnd[0], double(0));
-                    lowerEnd[0] = std::min(lowerEnd[0], double(image.width() - 1));
+                // Our rhs must be at most the image width
+                points(arma::uvec({ 0 }), arma::find(points.row(0) > int(image.width() - 1))).fill(int(image.width() - 1));
 
-                    // If the upper segment is valid
-                    if(upperBegin[0] != upperEnd[0]
-                      && (upperBegin[1] < image.height() && upperBegin[1] >= 0)
-                      && (upperEnd[1] < image.height() && upperEnd[1] >= 0)) {
+                if(points(1, 0) >= 0 && points(1, 0) < image.height()) {
 
-                        auto segments = quex->classify(image, lut, arma::conv_to<arma::ivec>::from(upperBegin), arma::conv_to<arma::ivec>::from(upperEnd));
+                    auto segments = quex->classify(image, lut, points.col(0), points.col(1));
+                    newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
+                }
+                if(points(1, 2) >= 0 && points(1, 2) < image.height()) {
 
-                        newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
-                    }
+                    auto segments = quex->classify(image, lut, points.col(2), points.col(3));
+                    newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
+                }
+                if(points(1, 4) >= 0 && points(1, 4) < image.height()) {
 
-                    // If the lower segment is valid and not the same as the upper segment
-                    if(lowerBegin[0] != lowerEnd[0]
-                      && (lowerBegin[1] < image.height() && lowerBegin[1] >= 0)
-                      && (lowerEnd[1] < image.height() && lowerEnd[1] >= 0)) {
-
-                        auto segments = quex->classify(image, lut, arma::conv_to<arma::ivec>::from(lowerBegin), arma::conv_to<arma::ivec>::from(lowerEnd));
-
-                        newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
-                    }
+                    auto segments = quex->classify(image, lut, points.col(4), points.col(5));
+                    newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
                 }
 
-                insertSegments(classifiedImage, newSegments, false);
             }
+
+            insertSegments(classifiedImage, newSegments, false);
 
         }
 

@@ -98,9 +98,7 @@ namespace modules {
                 }
 
                 visualHorizon.push_back(std::move(greenPoint));
-
                 insertSegments(classifiedImage, segments, true);
-
             }
 
             // Do a convex hull on the map points to build the horizon
@@ -124,9 +122,6 @@ namespace modules {
 
             // As this is a convex hull, the max visual horizon will always be at one of the edges
             maxVisualHorizon = visualHorizon.front()[1] > visualHorizon.back()[1] ? visualHorizon.begin() : visualHorizon.end() - 1;
-
-            // We will have to do a search for the minimum visual horizon point while we build the gradient map
-            minVisualHorizon = visualHorizon.begin();
 
             // As this is a convex function, we just need to progress till the next point is lower
             for(minVisualHorizon = visualHorizon.begin();

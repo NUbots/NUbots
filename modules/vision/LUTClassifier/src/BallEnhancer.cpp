@@ -51,17 +51,18 @@ namespace modules {
             auto hSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::BALL);
             for(auto it = hSegments.first; it != hSegments.second; ++it) {
 
+                auto& pt = it->second;
+
                 // We throw out points if they are:
-                // Less the full quality (subsampled)
+                // Have both edges above the green horizon
                 // Do not have a transition on either side (are on an edge)
-                if(it->second.subsample == 1
-                    && it->second.previous
-                    && it->second.next) {
+                if(classifiedImage.visualHorizonAtPoint(pt.start[0]) <= pt.start[1] || classifiedImage.visualHorizonAtPoint(pt.end[0]) <= pt.end[1]) {
 
                     // Push back our midpoint
                     points.push_back(it->second.midpoint);
                 }
             }
+
 
             // Sort our points
             std::sort(points.begin(), points.end(), [] (const arma::ivec2& a, const arma::ivec2& b) {
@@ -214,25 +215,6 @@ namespace modules {
                         auto segments = quex->classify(image, lut, start, end);
                         insertSegments(classifiedImage, segments, false);
                     }
-                }
-            }
-
-            arma::running_stat_vec<arma::vec2> stats;
-
-            auto ballSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::BALL);
-
-            for(auto it = ballSegments.first; it != ballSegments.second; ++it) {
-
-                auto& pt = it->second;
-
-                // We throw out points if they are:
-                // Have both edges above the green horizon
-                // Do not have a transition on either side (are on an edge)
-
-                if(classifiedImage.visualHorizonAtPoint(pt.start[0]) <= pt.start[1] || classifiedImage.visualHorizonAtPoint(pt.end[0]) <= pt.end[1]) {
-
-                    // Push back our midpoints position
-                    stats(arma::vec2{ double(pt.midpoint[0]), double(pt.midpoint[1]) });
                 }
             }
 

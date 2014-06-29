@@ -49,7 +49,7 @@ namespace modules {
             auto hRight = visualHorizon.end() - 1;
 
             // Cast lines upward to find the goals
-            for(int y = maxPoint->at(1); y >= 0; y -= GOAL_FINDER_LINE_SPACING) {
+            for(int y = maxPoint->at(1); y >= 0; y -= GOAL_LINE_SPACING) {
 
                 // If our left hand side is in range, or we are over the top
                 if(hLeft->at(1) >= y) {
@@ -57,6 +57,7 @@ namespace modules {
                     arma::ivec2 start = { 0, y };
                     arma::ivec2 end = { int(image.width() - 1), y };
 
+                    // Clip the point to be outside the visual horizon
                     while(hLeft < minPoint) {
 
                         auto p1 = hLeft;
@@ -83,7 +84,7 @@ namespace modules {
                     }
 
                     // Insert our segments
-                    auto segments = quex->classify(image, lut, start, end, GOAL_FINDER_SUBSAMPLING);
+                    auto segments = quex->classify(image, lut, start, end, GOAL_SUBSAMPLING);
                     insertSegments(classifiedImage, segments, false);
                 }
 
@@ -93,6 +94,7 @@ namespace modules {
                     arma::ivec2 start = { 0, y };
                     arma::ivec2 end = { int(image.width() - 1), y };
 
+                    // Clip the point to be outside the visual horizon
                     while(hRight > minPoint) {
 
                         auto p1 = hRight - 1;
@@ -119,7 +121,7 @@ namespace modules {
                     }
 
                     // Insert our segments
-                    auto segments = quex->classify(image, lut, start, end, GOAL_FINDER_SUBSAMPLING);
+                    auto segments = quex->classify(image, lut, start, end, GOAL_SUBSAMPLING);
                     insertSegments(classifiedImage, segments, false);
 
                 }

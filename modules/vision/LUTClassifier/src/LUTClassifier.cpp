@@ -85,24 +85,19 @@ namespace modules {
                 VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE = cam.focalLengthPixels * tan(config["visual_horizon"]["minimum_segment_size"].as<double>());
 
                 // Goal detector
-                GOAL_FINDER_LINE_SPACING = cam.focalLengthPixels * tan(config["goals"]["spacing"].as<double>());
-                GOAL_FINDER_SUBSAMPLING = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["subsampling"].as<double>())));
-                GOAL_FINDER_DETECTOR_LEVELS = config["goals"]["detector_levels"].as<std::vector<double>>();
-                GOAL_FINDER_MAXIMUM_VERTICAL_CLUSTER_SPACING = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["maximum_vertical_cluster_spacing"].as<double>())));
-                GOAL_FINDER_VERTICAL_CLUSTER_UPPER_BUFFER = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["vertical_cluster_upper_buffer"].as<double>())));
-                GOAL_FINDER_VERTICAL_CLUSTER_LOWER_BUFFER = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["vertical_cluster_lower_buffer"].as<double>())));
-                GOAL_FINDER_VERTICAL_SD_JUMP = config["goals"]["vertical_sd_jump"].as<double>();
-
-                // Halve our levels
-                for(auto& d : GOAL_FINDER_DETECTOR_LEVELS) {
-                    d /= 2;
-                }
+                GOAL_LINE_SPACING = cam.focalLengthPixels * tan(config["goals"]["spacing"].as<double>());
+                GOAL_SUBSAMPLING = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["subsampling"].as<double>())));
+                GOAL_EXTENSION_SCALE = config["goals"]["extension_scale"].as<double>() / 2;
+                GOAL_MAXIMUM_VERTICAL_CLUSTER_SPACING = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["maximum_vertical_cluster_spacing"].as<double>())));
+                GOAL_VERTICAL_CLUSTER_UPPER_BUFFER = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["vertical_cluster_upper_buffer"].as<double>())));
+                GOAL_VERTICAL_CLUSTER_LOWER_BUFFER = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["vertical_cluster_lower_buffer"].as<double>())));
+                GOAL_VERTICAL_SD_JUMP = config["goals"]["vertical_sd_jump"].as<double>();
 
                 // Ball Detector
                 BALL_MINIMUM_INTERSECTIONS_COARSE = config["ball"]["intersections_coarse"].as<double>();
                 BALL_MINIMUM_INTERSECTIONS_FINE = config["ball"]["intersections_fine"].as<double>();
                 BALL_SEARCH_CIRCLE_SCALE = config["ball"]["search_circle_scale"].as<double>();
-                BALL_MAXIMUM_VERTICAL_CLUSTER_SPACING = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["maximum_vertical_cluster_spacing"].as<double>())));
+                BALL_MAXIMUM_VERTICAL_CLUSTER_SPACING = std::max(1, int(cam.focalLengthPixels * tan(config["ball"]["maximum_vertical_cluster_spacing"].as<double>())));
 
                 // Camera settings
                 ALPHA = cam.pixelsToTanThetaFactor[1];

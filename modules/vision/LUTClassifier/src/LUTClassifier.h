@@ -51,13 +51,13 @@ namespace modules {
             uint VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE = 0;
             int VISUAL_HORIZON_SUBSAMPLING = 1;
 
-            int GOAL_FINDER_LINE_SPACING = 100;
-            int GOAL_FINDER_SUBSAMPLING = 1;
-            int GOAL_FINDER_MAXIMUM_VERTICAL_CLUSTER_SPACING = 1;
-            int GOAL_FINDER_VERTICAL_CLUSTER_UPPER_BUFFER = 1;
-            int GOAL_FINDER_VERTICAL_CLUSTER_LOWER_BUFFER = 1;
-            double GOAL_FINDER_VERTICAL_SD_JUMP = 1;
-            std::vector<double> GOAL_FINDER_DETECTOR_LEVELS = { 2.0 };
+            int GOAL_LINE_SPACING = 100;
+            int GOAL_SUBSAMPLING = 1;
+            int GOAL_MAXIMUM_VERTICAL_CLUSTER_SPACING = 1;
+            int GOAL_VERTICAL_CLUSTER_UPPER_BUFFER = 1;
+            int GOAL_VERTICAL_CLUSTER_LOWER_BUFFER = 1;
+            double GOAL_VERTICAL_SD_JUMP = 1;
+            double GOAL_EXTENSION_SCALE = 2.0;
 
             double BALL_MINIMUM_INTERSECTIONS_COARSE = 1;
             double BALL_MINIMUM_INTERSECTIONS_FINE = 1;
