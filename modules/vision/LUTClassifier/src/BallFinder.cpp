@@ -120,7 +120,7 @@ namespace modules {
                         Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
 
                         if(l.isHorizontal()) {
-                            start[0] = l.getC();
+                            start[0] = p2->at(0);
                         }
                         else {
                             start[0] = round(l.findXFromY(y));
@@ -143,7 +143,10 @@ namespace modules {
                         // Make a line from the two points and find our x
                         Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
 
-                        if(!l.isHorizontal()) {
+                        if(l.isHorizontal()) {
+                            end[0] = p1->at(0);
+                        }
+                        else {
                             end[0] = round(l.findXFromY(y));
                             break;
                         }
@@ -152,7 +155,7 @@ namespace modules {
                     // Try our previous point
                     ++hRight;
                 }
-                std::cout << "start " << start << ", end " << end << std::endl;
+                std::cout << "start " << start.t() << ", end " << end.t() << std::endl;
                 auto segments = quex->classify(image, lut, start, end);
                 insertSegments(classifiedImage, segments, false);
             }
