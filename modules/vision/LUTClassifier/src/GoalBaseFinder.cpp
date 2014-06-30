@@ -64,42 +64,51 @@ namespace modules {
                     auto p2 = it + 1;
 
                     // Add our point to the stats
-                    stats(arma::vec2({ double(p2->at(0)), double(p2->at(1)) }));
+                    stats(arma::vec2({ double(p1->at(0)), double(p1->at(1)) }));
 
                     // If the next point is too far away to be considered in this cluster
                     if(p2 == points.end() || p2->at(0) - p1->at(0) > GOAL_MAXIMUM_VERTICAL_CLUSTER_SPACING) {
 
-                        // Get our relevant values
-                        int top = lround(stats.min()[1]);
-                        int base = lround(stats.max()[1]);
-                        int x = lround(stats.mean()[0]);
-                        arma::vec sd = stats.stddev();
-                        int jump = sd.is_empty() ? 1 : std::max(1, int(lround(sd[0] * 1)));
+                        arma::imat search(2, 6);
 
-                        arma::ivec2 start = { x, top - GOAL_VERTICAL_CLUSTER_UPPER_BUFFER };
-                        arma::ivec2 end   = { x, base + GOAL_VERTICAL_CLUSTER_LOWER_BUFFER };
+                        // Set our x to the mean x point
+                        search.row(0).fill(int(lround(stats.mean()[0])));
 
-                        // Adjust our Y to stay on the screen
-                        start[1] = std::max(start[1], 0);
-                        end[1]   = std::min(end[1], int(image.height() - 1));
+                        // Set our start points y to the top line found - some buffer
+                        search(arma::umat({ 1 }), arma::umat({ 0, 2, 4 })).fill(lround(stats.min()[1]) - GOAL_VERTICAL_CLUSTER_UPPER_BUFFER);
 
-                        // Classify our point based on these
-                        auto segments = quex->classify(image, lut, start, end, 1);
-                        insertSegments(classifiedImage, segments, true);
+                        // Set our base points to the bottom line found + some buffer
+                        search(arma::umat({ 1 }), arma::umat({ 1, 3, 5 })).fill(lround(stats.max()[1]) + GOAL_VERTICAL_CLUSTER_UPPER_BUFFER);
 
-                        // Shift our line right
-                        start = { x + jump, start[1] };
-                        end   = { x + jump, end[1] };
+                        auto sd = stats.stddev();
+                        int jump = sd.is_empty() ? 1 : std::max(1, int(lround(sd[0] * GOAL_VERTICAL_SD_JUMP)));
 
-                        segments = quex->classify(image, lut, start, end, 1);
-                        insertSegments(classifiedImage, segments, true);
+                        // Offset our x by some constant of standard deviations
+                        search(arma::umat({ 0 }), arma::umat({ 0, 1 })) -= jump;
+                        search(arma::umat({ 0 }), arma::umat({ 4, 5 })) += jump;
 
-                        // Shift our line left
-                        start = { x - jump, start[1] };
-                        end   = { x - jump, end[1] };
+                        // Our top must be at least 0
+                        search(arma::uvec({ 1 }), arma::find(search.row(1) < 0)).fill(0);
 
-                        segments = quex->classify(image, lut, start, end, 1);
-                        insertSegments(classifiedImage, segments, true);
+                        // Our base must be at most image height
+                        search(arma::uvec({ 1 }), arma::find(search.row(1) > int(image.height() - 1))).fill(int(image.height() - 1));
+
+                        // Only draw lines if they are in range
+                        if(search(0, 0) >= 0 && search(0, 0) < int(image.width())) {
+
+                            auto segments = quex->classify(image, lut, search.col(0), search.col(1));
+                            insertSegments(classifiedImage, segments, true);
+                        }
+                        if(search(0, 2) >= 0 && search(0, 2) < int(image.width())) {
+
+                            auto segments = quex->classify(image, lut, search.col(2), search.col(3));
+                            insertSegments(classifiedImage, segments, true);
+                        }
+                        if(search(0, 4) >= 0 && search(0, 4) < int(image.width())) {
+
+                            auto segments = quex->classify(image, lut, search.col(4), search.col(5));
+                            insertSegments(classifiedImage, segments, true);
+                        }
 
                         stats.reset();
                     }
