@@ -30,6 +30,7 @@ namespace messages {
         struct WalkOptimiserCommand{
             static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
         };
+        struct CancelFixedWalk{};
         class FixedWalkCommand{
         public:
             FixedWalkCommand(){}

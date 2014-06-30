@@ -94,7 +94,7 @@ namespace modules {
                 }
             }));
 
-            updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, With<Sensors>, Options<Single, Priority<NUClear::HIGH>> >([this](const time_t&, const Sensors& sensors) {
+            updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, With<Sensors>, Options< Single, Priority<NUClear::HIGH>> >([this](const time_t&, const Sensors& sensors) {
                 emit(update(sensors));
             });
 
@@ -116,10 +116,10 @@ namespace modules {
                 // TODO: set priorities to 0 when stopped - somehow
             });
 
-            on<Trigger<Configuration<WalkEngine> > >([this](const Configuration<WalkEngine>& config) {
+            on<Trigger<Configuration<WalkEngine>> >([this](const Configuration<WalkEngine>& config) {
                 configureWalk(config.config);
             });
-            on<Trigger<Configuration<WalkOptimiserCommand> > >([this](const Configuration<WalkOptimiserCommand>& config) {
+            on<Trigger<Configuration<WalkOptimiserCommand>> >([this](const Configuration<WalkOptimiserCommand>& config) {
                 configureWalk(config.config);
             });            
 
@@ -243,7 +243,7 @@ namespace modules {
             }
             standScript.frames.push_back(frame);
             auto saveScript = std::make_unique<SaveConfiguration>();
-            saveScript->path = "config/scripts/Stand.yaml";
+            saveScript->path = "scripts/Stand.yaml";
             saveScript->config = standScript;
             emit(std::move(saveScript));
         }

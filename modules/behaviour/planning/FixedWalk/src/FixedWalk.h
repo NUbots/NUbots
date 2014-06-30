@@ -45,7 +45,7 @@ namespace modules {
                     std::unique_ptr<messages::motion::WalkCommand> getWalkCommand(const messages::behaviour::FixedWalkCommand::WalkSegment& segment, 
                                                                 NUClear::clock::duration t, 
                                                                 const messages::input::Sensors& sensors);
-                    std::queue<messages::behaviour::FixedWalkCommand::WalkSegment> walkSegments; 
+                    std::deque<messages::behaviour::FixedWalkCommand::WalkSegment> walkSegments; 
                     time_t segmentStart;
                     NUClear::clock::duration segmentElapsedTimeBeforeFall;
 

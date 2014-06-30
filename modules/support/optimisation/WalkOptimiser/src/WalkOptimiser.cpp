@@ -72,27 +72,38 @@ namespace modules {
                 });
 
                 on<Trigger<OptimiseWalkCommand>, With<Configuration<WalkOptimiserCommand>> >("Optimise Walk", [this]( const OptimiseWalkCommand&, const Configuration<WalkOptimiserCommand>& walkConfig){
+                    
+                    //Start optimisation
                     std::cerr << "Optimiser command" << std::endl;
+                    //Get samples
                     samples = utility::math::optimisation::PGA::getSamples(getState(walkConfig), parameter_sigmas, number_of_samples);
+                    //Initialise fitnesses
                     fitnesses.zeros(number_of_samples);
+                    //Save the config which we loaded from file
                     initialConfig = walkConfig;
-
+                    //Set the sample we are currently on
+                    //Use iteritive evaluation so that more samples can be added at any time
                     currentSample = 0;
 
-                    std::cerr << "Sample: " << currentSample <<std::endl;                    
+                    std::cerr << "Sample: " << currentSample <<std::endl;            
+                    //Apply the parameters to the walk engine        
                     setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
-                    
+                    //Send our walk behaviour command
                     auto command = std::make_unique<FixedWalkCommand>(walk_command);
                     emit(std::move(command));
                 });
 
                 on< Trigger< Every<25, Per<std::chrono::seconds>> >, With<Sensors> >("Walk Data Manager", [this](const time_t& t, const Sensors& sensors){
+                    //Record data
                     data.update(sensors);
                 });
 
                 on<Trigger<ExecuteGetup>>("Getup Recording", [this](const ExecuteGetup& command){
+                    //Record the robot falling over
                     data.recordGetup();
+                    //If this set of parameters is very bad, stop the trial and send cancel fixed walk command
                     if(data.numberOfGetups > getup_cancel_trial_threshold){
+                        
                         emit(std::make_unique<FixedWalkFinished>());
                     }                   
                 });
