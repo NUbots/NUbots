@@ -62,6 +62,26 @@ namespace vision {
                 }
             }
 
+
+            // ALGORITHM
+
+            // we seperate into 3 sections, starts ends and other
+            // All horizontal segments that are 100% below the GH go to start/end
+            // end of vertical segments go to other
+
+            // We sort all of them by x
+
+            // We have a counter for "depth"
+            // We increment it for every start we se and decrement for every end
+            // We keep a record of the point with the largest Y (start end or other)
+            // If any of the segments are either cyan or magenta, we flag it as a team
+            // If we see both cyan and magenta then it goes back to being stuck at unknown
+            // When we hit the transition to 0 depth we make the previous points into an obstacle
+            // Once you have all the points, do a lower convex hull on them to try to determine it's size
+            // Do d2p at these points or something to try to determine the physical size of the obstacle on the field
+
+
+
             // Sort our points
             std::sort(points.begin(), points.end(), [] (const arma::ivec2& a, const arma::ivec2& b) {
                 return a[0] < b[0];

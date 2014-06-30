@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_VISION_QUAD_H
-#define MODULES_VISION_QUAD_H
+#ifndef UTILITY_MATH_GEOMETRY_QUAD_H
+#define UTILITY_MATH_GEOMETRY_QUAD_H
 
 #include <armadillo>
 #include <ostream>

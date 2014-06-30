@@ -17,43 +17,21 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-package messages.vision.proto;
+#ifndef UTILITY_MATH_GEOMETRY_POLYGON_H
+#define UTILITY_MATH_GEOMETRY_POLYGON_H
 
-import "messages/Geometry.proto";
+#include <armadillo>
+#include <ostream>
+#include <vector>
 
-message VisionObject {
+namespace utility {
+namespace math {
+namespace geometry {
 
-    message Goal {
-
-        enum Side {
-            LEFT = 0;
-            RIGHT = 1;
-            UNKNOWN = 2;
-        }
-
-        required Side side = 1;
-        required Quad quad = 2;
-    }
-
-    message Ball {
-
-        required Circle circle = 1;
-    }
-
-    message Obstacle {
-
-        required Polygon shape = 1;
-    }
-
-    enum ObjectType {
-        GOAL = 0;
-        BALL = 1;
-        OBSTACLE = 2;
-    }
-
-    required ObjectType type = 1;
-
-    optional Goal goal = 2;
-    optional Ball ball = 3;
-    optional Obstacle obstacle = 4;
+    class Polygon {
+    };
 }
+}
+}
+
+#endif

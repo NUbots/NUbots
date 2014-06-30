@@ -21,95 +21,50 @@
 #define MESSAGES_VISION_VISIONOBJECTS_H
 
 #include <armadillo>
-#include <nuclear>
 
-#include "messages/vision/ClassifiedImage.h"
+#include "utility/math/geometry/Circle.h"
+#include "utility/math/geometry/Quad.h"
+#include "utility/math/geometry/Polygon.h"
 
 namespace messages {
     namespace vision {
 
-        class VisionObject {
-        public:
-            VisionObject() {}
-
-            arma::vec3 sphericalFromNeck;   //bodyRelativeSpherical
-            arma::vec3 sphericalError;
-            arma::vec2 screenAngular;   //Polar around view vector on image
-            arma::vec2 screenCartesian;
-            arma::vec2 sizeOnScreen;
+        struct VisionObject {
+            // Time the image was taken
             NUClear::clock::time_point timestamp;
+
+            // Position of object relative to ground to centre of object
+            arma::vec3 position;
+            arma::mat33 error;
+
+            // Position in spherical coordinates relative to camera to centre of object
+            arma::vec3 sphericalFromCamera;
+
         };
 
-        class Ball : public VisionObject {
-        public:
-            Ball() : VisionObject() {}
-            float diameter;
+        struct Ball : public VisionObject {
+            utility::math::geometry::Circle circle;
         };
 
-        class Goal : public VisionObject {
-        public:
-            Goal() : VisionObject() {}
-            enum Type{
+        struct Goal : public VisionObject {
+            enum class Type {
                 LEFT,
                 RIGHT,
                 UNKNOWN
             } type;
 
-            //Order convention: tr, br, bl, tl,
-            std::vector<arma::vec2> screen_quad;
+            utility::math::geometry::Quad shape;
         };
 
-        class Obstacle : public VisionObject {
-        public:
-            Obstacle() : VisionObject() {}
-            float arcWidth;
-            // enum ColourType{
-            //  TEAM_CYAN,
-            //  TEAM_MAGENTA,
-            //  UNKNOWN
-            // }
-            ObjectClass colour;
-        };
+        struct Obstacle : public VisionObject {
 
-        //Line objects:
+            enum class Team {
+                NONE,
+                MAGENTA,
+                CYAN
+            } team;
 
-        class FieldLine : public VisionObject {
-        public:
-            FieldLine() : VisionObject() {}
-        };
-
-        class CornerPoint : public VisionObject {
-        public:
-            CornerPoint() : VisionObject() {}
-
-            enum Type {
-                L_CORNER,
-                T_CORNER,
-                X_CORNER,
-                INVALID
-            } type;
-        };
-
-        class CentreCircle : public VisionObject {
-        public:
-            CentreCircle() : VisionObject() {}
-        };
-
-        class LineObjects{
-        public:
-            LineObjects() {}
-            std::vector<CentreCircle> centre_circles;
-            std::vector<CornerPoint> corner_points;
-            std::vector<FieldLine> field_lines;
-        };
-
-        class SLAMEObject {
-        public:
-            NUClear::clock::time_point timestamp;
-            arma::vec::fixed<6> expectedState;
-            arma::vec2 screenAngular;  //theta, phi
-            arma::vec2 screenPosition;  //theta, phi
-            float strength;
+            utility::math::geometry::Polygon shape;
         };
 
     }

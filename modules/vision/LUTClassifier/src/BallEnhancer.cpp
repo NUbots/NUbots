@@ -58,8 +58,8 @@ namespace modules {
                 // Do not have a transition on either side (are on an edge)
                 if(classifiedImage.visualHorizonAtPoint(pt.start[0]) <= pt.start[1] || classifiedImage.visualHorizonAtPoint(pt.end[0]) <= pt.end[1]) {
 
-                    // Push back our midpoint
-                    points.push_back(it->second.midpoint);
+                    // Push back our midpoint offset to be in the middle of the subsample
+                    points.push_back(it->second.midpoint - arma::ivec2{ it->second.subsample / 2, 0 });
                 }
             }
 

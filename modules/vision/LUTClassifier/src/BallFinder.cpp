@@ -77,20 +77,24 @@ namespace modules {
             auto hLeft = visualHorizon.begin();
             auto hRight = visualHorizon.end() - 1;
 
+
+            // Do our inital calculation to get our first Y
+            arma::vec4 worldPosition = arma::ones(4);
+            worldPosition.rows(0, 2) = xStart * direction;
+            auto camPoint = projectWorldPointToCamera(worldPosition, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
+            int y = camToImage(camPoint, arma::vec2{image.width(), image.height()})[1];
+
             for(double x = xStart; x < xEnd; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
 
-                arma::vec4 worldPosition = arma::ones(4);
+                // Calculate our next Y
+                worldPosition.rows(0, 2) = (x + std::max(dx, (dx * x) / (cameraHeight - dx))) * direction;
+                camPoint = projectWorldPointToCamera(worldPosition, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
+                int nextY = camToImage(camPoint, arma::vec2{image.width(), image.height()})[1];
 
-                worldPosition.rows(0, 2) = x * direction;
-
-                // Transform x onto the camera
-                auto camPoint = projectWorldPointToCamera(worldPosition, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
-
-                // Transform into our coordinates
-                int y = camToImage(camPoint, arma::vec2{image.width(), image.height()})[1];
-
+                // Work out our details
                 arma::ivec2 start = { 0, y };
                 arma::ivec2 end = { int(image.width() - 1), y };
+                int subsample = std::max(1, int(lround((y - nextY) * BALL_HORIZONTAL_SUBSAMPLE_FACTOR)));
 
                 // If our left hand side is in range, or we are over the top
                 if(hLeft->at(1) >= y) {
@@ -150,7 +154,10 @@ namespace modules {
                     }
                 }
 
-                auto segments = quex->classify(image, lut, start, end);
+                // Our Y is now our next y
+                y = nextY;
+
+                auto segments = quex->classify(image, lut, start, end, subsample);
                 insertSegments(classifiedImage, segments, false);
             }
 
