@@ -18,7 +18,6 @@
  */
 
 #include "LinuxCamera.h"
-#include "utility/idiom/pimpl_impl.h"
 
 extern "C" {
     #include <jpeglib.h>
@@ -33,14 +32,6 @@ namespace modules {
 
         using messages::support::Configuration;
 
-        // Create our impl class as per the pimpl idiom.
-        class LinuxCamera::impl {
-            public:
-                /// @brief Our internal camera class that interacts with the physical device
-                V4L2Camera camera;
-        };
-
-
         // We assume that the device will always be video0, if not then change this
         LinuxCamera::LinuxCamera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -48,18 +39,17 @@ namespace modules {
             on<Trigger<Every<NUClear::clock::period::den / V4L2Camera::FRAMERATE, NUClear::clock::duration>>, Options<Single>>([this](const time_t&) {
 
                 // If the camera is ready, get an image and emit it
-                if (m->camera.isStreaming()) {
-                    emit(m->camera.getImage());
+                if (camera.isStreaming()) {
+                    emit(camera.getImage());
                 }
             });
 
             // When we shutdown, we must tell our camera class to close (stop streaming)
             on<Trigger<Shutdown>>([this](const Shutdown&) {
-                m->camera.closeCamera();
+                camera.closeCamera();
             });
 
             on<Trigger<Configuration<LinuxCamera>>>([this](const Configuration<LinuxCamera>& config) {
-                auto& camera = m->camera;
 
                 try {
                     // Recreate the camera device at the required resolution
@@ -85,7 +75,7 @@ namespace modules {
                     }
 
                     // Start the camera streaming video
-                    m->camera.startStreaming();
+                    camera.startStreaming();
                 } catch(const std::exception& e) {
                     NUClear::log<NUClear::DEBUG>(std::string("Exception while setting camera configuration: ") + e.what());
                 }

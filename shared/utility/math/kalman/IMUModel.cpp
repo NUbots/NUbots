@@ -36,17 +36,25 @@ namespace utility {
             // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation.
             // @return The new estimated system state.
             arma::vec::fixed<IMUModel::size> IMUModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT) {
-
-                arma::mat v(3, 4);
-
-                v << -state[QX] <<   state[QW] <<  state[QZ]  << -state[QY]  << arma::endr
-                  << -state[QY] <<  -state[QZ] <<  state[QW]  <<  state[QX]  << arma::endr
-                  << -state[QZ] <<   state[QY] << -state[QX]  <<  state[QW];
-
+                
                 arma::vec::fixed<IMUModel::size> newState;
 
                 newState = state;
-                newState.rows(QW, QZ) += 0.5 * deltaT * v.t() * state.rows(VX, VZ);
+                
+                //make a rotation quaternion
+                const double omega = arma::norm(state.rows(VX, VZ)) + 0.00000000001;
+                const double theta = omega*deltaT*0.5;
+                const double sinTheta = sin(theta);
+                const double cosTheta = cos(theta);
+                arma::vec vq({cosTheta,state(VX)*sinTheta/omega,state(VY)*sinTheta/omega,state(VZ)*sinTheta/omega});
+                
+                //calculate quaternion multiplication
+                arma::vec qcross = arma::cross( vq.rows(1,3), state.rows(QX,QZ) );
+                newState(QW) = vq(0)*state(QW) - arma::dot(vq.rows(1,3), state.rows(QX,QZ));
+                newState(QX) = vq(0)*state(QX) + state(QW)*vq(1) + qcross(0);
+                newState(QY) = vq(0)*state(QY) + state(QW)*vq(2) + qcross(1);
+                newState(QZ) = vq(0)*state(QZ) + state(QW)*vq(3) + qcross(2);
+                
                 return newState;
 
             }

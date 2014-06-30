@@ -59,7 +59,10 @@ namespace Darwin {
         buildBulkReadPacket();
 
         // Now that the dynamixels should have started up, set their delay time to 0 (it may not have been configured before)
-        uart.execute(DarwinDevice::WriteCommand<uint8_t>(ID::BROADCAST, CM730::Address::RETURN_DELAY_TIME, 0));
+        uart.executeWrite(DarwinDevice::WriteCommand<uint8_t>(ID::BROADCAST, CM730::Address::RETURN_DELAY_TIME, 0));
+
+        // Set the dynamixels to not return a status packet when written to (to allow consecutive writes)
+        uart.executeWrite(DarwinDevice::WriteCommand<uint8_t>(ID::BROADCAST, CM730::Address::RETURN_LEVEL, 1));
     }
 
     std::vector<std::pair<uint8_t, bool>> Darwin::selfTest() {
@@ -276,34 +279,8 @@ namespace Darwin {
         }
     }
 
-    void Darwin::writeServos(const std::vector<Types::ServoValues>& servos) {
+    void Darwin::sendRawCommand(std::vector<uint8_t>& packet) {
 
-        // Check that our ServoValues object is the correct size (the difference + 1 + another for the id)
-        static_assert(sizeof(Types::ServoValues) == MX28::Address::MOVING_SPEED_H - MX28::Address::D_GAIN + 2,
-                      "The ServoValues type is the wrong size");
-
-        // We allocate 8 bytes for normal things, and then space for all the servo values
-        std::vector<uint8_t> packet;
-        packet.resize(8 + (servos.size() * sizeof(Types::ServoValues)));
-
-        // Build our packet
-        packet[Packet::MAGIC] = 0xFF;
-        packet[Packet::MAGIC + 1] = 0xFF;
-        packet[Packet::ID] = ID::BROADCAST; // Broadcast id
-        packet[Packet::LENGTH] = 4 + (servos.size() * sizeof(Types::ServoValues));
-        packet[Packet::INSTRUCTION] = DarwinDevice::Instruction::SYNC_WRITE;
-
-        // Our data length (not including our ID)
-        packet[Packet::PARAMETER] = MX28::Address::D_GAIN;
-        packet[Packet::PARAMETER + 1] = sizeof(Types::ServoValues) - 1;
-
-        // Our motor values
-        memcpy(&packet[Packet::PARAMETER + 2], servos.data(), servos.size() * sizeof(Types::ServoValues));
-
-        // Our checksum
-        packet.back() = calculateChecksum(packet.data());
-
-        // Execute the command
         uart.executeBroadcast(packet);
     }
 }

@@ -66,7 +66,8 @@ namespace modules {
                 void jumpToFrame();
                 void help();
                 void editGainInput();
-
+                void mirrorScript();
+                void saveScriptAs();
                 void editGain();
                 void userInputToFrame();
                 float userInputToGain();

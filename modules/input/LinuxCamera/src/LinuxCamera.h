@@ -21,7 +21,7 @@
 #define MODULES_INPUT_LINUXCAMERA_H
 
 #include <nuclear>
-#include "utility/idiom/pimpl.h"
+#include "V4L2Camera.h"
 
 namespace modules {
     namespace input {
@@ -41,8 +41,8 @@ namespace modules {
         class LinuxCamera : public NUClear::Reactor {
 
         private:
-            class impl;
-            utility::idiom::pimpl<impl> m;
+            /// @brief Our internal camera class that interacts with the physical device
+            V4L2Camera camera;
         public:
             /// @brief Our configuration file for this class
             static constexpr const char* CONFIGURATION_PATH = "LinuxCamera.yaml";

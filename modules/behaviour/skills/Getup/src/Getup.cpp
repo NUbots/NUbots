@@ -89,7 +89,7 @@ namespace modules {
 
                 emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                     id,
-                    "getup",
+                    "Get Up",
                     { std::pair<float, std::set<LimbID>>(0, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD }) },
                     [this] (const std::set<LimbID>&) {
                         emit(std::make_unique<ExecuteGetup>());

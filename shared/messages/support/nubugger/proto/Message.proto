@@ -21,6 +21,7 @@ package messages.support.nubugger.proto;
 
 import "messages/input/proto/Sensors.proto";
 import "messages/localisation/proto/Localisation.proto";
+import "messages/behaviour/proto/Behaviour.proto";
 
 message Message {
     enum Type {
@@ -30,7 +31,8 @@ message Message {
         DATA_POINT = 4;
         REACTION_STATISTICS = 5;
         LOOKUP_TABLE = 6;
-        COMMAND = 7;
+        BEHAVIOUR = 7;
+        COMMAND = 8;
     }
 
     required Type type = 1;
@@ -39,10 +41,11 @@ message Message {
     optional messages.input.proto.Sensors sensor_data = 3;
     optional Vision vision = 4;
     optional messages.localisation.proto.Localisation localisation = 5;
-    optional DataPoint dataPoint = 6;
-    optional ReactionStatistics reactionStatistics = 7;
-    optional LookupTable lookupTable = 8;
-    optional Command command = 9;
+    optional DataPoint data_point = 6;
+    optional ReactionStatistics reaction_statistics = 7;
+    optional LookupTable lookup_table = 8;
+    optional messages.behaviour.proto.Behaviour behaviour = 9;
+    optional Command command = 10;
 
     message Command {
         optional string command = 1;
