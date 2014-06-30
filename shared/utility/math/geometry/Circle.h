@@ -26,7 +26,10 @@ namespace utility {
 namespace math {
 namespace geometry {
 
-    class Circle {
+    struct Circle {
+
+    	double radius;
+    	arma::vec2 centre;
     };
 }
 }

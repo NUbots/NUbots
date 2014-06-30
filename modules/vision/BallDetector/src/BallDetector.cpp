@@ -116,7 +116,9 @@ namespace vision {
                                                                                                MAX_FITTING_ATTEMPTS,
                                                                                                SELECTION_METHOD);
 
-            std::vector<Ball> balls;
+            auto balls = std::make_unique<std::vector<Ball>>();
+            balls->reserve(ransacResults.size());
+
             for(auto& ball : ransacResults) {
 
 
@@ -142,17 +144,18 @@ namespace vision {
 
                 // TODO fuse the width and point based distances
 
-                // Ball b;
+                Ball b;
 
-                // b.position = ;
-                // b.error = ;
-                // b.sphericalFromCamera = ;
-                // b.circle = Circle();
+                b.circle.radius = ball.first.getRadius();
+                b.circle.centre = ball.first.getCentre();
 
+                balls->push_back(std::move(b));
             }
 
             // Do vision kinematics on the ball to determine it's position and covariance matricies
             log("Number of seen balls", ransacResults.size());
+
+            emit(std::move(balls));
 
         });
     }

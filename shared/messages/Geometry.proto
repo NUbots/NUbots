@@ -29,7 +29,7 @@ message Line {
 
 message Circle {
 	required double radius = 1;
-	required ivec2 position = 2;
+	required ivec2 centre = 2;
 }
 
 message Ellipse {

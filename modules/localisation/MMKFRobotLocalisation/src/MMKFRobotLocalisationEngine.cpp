@@ -50,7 +50,7 @@ namespace localisation {
         last_time_update_time_ = current_time;
         robot_models_.TimeUpdate(seconds, odom);
     }
-    
+
     void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
                                               const Sensors& sensors) {
         double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
@@ -62,19 +62,19 @@ namespace localisation {
             const messages::vision::Goal& ambiguous_object) {
         std::vector<LocalisationFieldObject> possible;
 
-        if (ambiguous_object.type == messages::vision::Goal::Type::LEFT) {
+        if (ambiguous_object.side == messages::vision::Goal::Side::LEFT) {
             possible.push_back(field_description_->GetLFO(LFOId::kGoalBL));
             if (!cfg_.all_goals_are_blue)
                 possible.push_back(field_description_->GetLFO(LFOId::kGoalYL));
         }
 
-        if (ambiguous_object.type == messages::vision::Goal::Type::RIGHT) {
+        if (ambiguous_object.side == messages::vision::Goal::Side::RIGHT) {
             possible.push_back(field_description_->GetLFO(LFOId::kGoalBR));
             if (!cfg_.all_goals_are_blue)
                 possible.push_back(field_description_->GetLFO(LFOId::kGoalYR));
         }
 
-        if (ambiguous_object.type == messages::vision::Goal::Type::UNKNOWN) {
+        if (ambiguous_object.side == messages::vision::Goal::Side::UNKNOWN) {
             possible.push_back(field_description_->GetLFO(LFOId::kGoalBL));
             possible.push_back(field_description_->GetLFO(LFOId::kGoalBR));
             if (!cfg_.all_goals_are_blue) {
@@ -95,23 +95,23 @@ namespace localisation {
         auto& ob = ambiguous_objects[1];
 
         return
-            (oa.type == messages::vision::Goal::Type::RIGHT &&
-             ob.type == messages::vision::Goal::Type::LEFT) ||
-            (oa.type == messages::vision::Goal::Type::LEFT &&
-             ob.type == messages::vision::Goal::Type::RIGHT);
+            (oa.side == messages::vision::Goal::Side::RIGHT &&
+             ob.side == messages::vision::Goal::Side::LEFT) ||
+            (oa.side == messages::vision::Goal::Side::LEFT &&
+             ob.side == messages::vision::Goal::Side::RIGHT);
     }
 
     void MMKFRobotLocalisationEngine::ProcessAmbiguousObjects(
         const std::vector<messages::vision::Goal>& ambiguous_objects) {
-        
-        bool pair_observations_enabled = 
+
+        bool pair_observations_enabled =
             cfg_.goal_pair_observation_enabled ||
             cfg_.angle_between_goals_observation_enabled;
 
         if (pair_observations_enabled && GoalPairObserved(ambiguous_objects)) {
             std::vector<messages::vision::VisionObject> vis_objs;
             // Ensure left goal is always first.
-            if (ambiguous_objects[0].type == messages::vision::Goal::Type::LEFT){
+            if (ambiguous_objects[0].side == messages::vision::Goal::Side::LEFT){
                 vis_objs = { ambiguous_objects[0], ambiguous_objects[1] };
             } else {
                 vis_objs = { ambiguous_objects[1], ambiguous_objects[0] };
@@ -120,14 +120,14 @@ namespace localisation {
             std::vector<std::vector<LocalisationFieldObject>> objs;
             objs.push_back({field_description_->GetLFO(LFOId::kGoalBL),
                             field_description_->GetLFO(LFOId::kGoalBR)});
-        
+
             if (!cfg_.all_goals_are_blue)
                 objs.push_back({field_description_->GetLFO(LFOId::kGoalYL),
                                 field_description_->GetLFO(LFOId::kGoalYR)});
 
             if(cfg_.goal_pair_observation_enabled)
                 robot_models_.AmbiguousMeasurementUpdate(vis_objs, objs);
-            
+
             if (cfg_.angle_between_goals_observation_enabled)
                 robot_models_.AmbiguousMultipleMeasurementUpdate(vis_objs, objs);
         } else {
@@ -150,10 +150,10 @@ namespace localisation {
 
             LocalisationFieldObject actual_object;
 
-            if (observed_object.type == messages::vision::Goal::Type::LEFT)
+            if (observed_object.side == messages::vision::Goal::Side::LEFT)
                 actual_object = field_description_->GetLFO(LFOId::kGoalBL);
 
-            if (observed_object.type == messages::vision::Goal::Type::RIGHT)
+            if (observed_object.side == messages::vision::Goal::Side::RIGHT)
                 actual_object = field_description_->GetLFO(LFOId::kGoalBR);
 
             robot_models_.MeasurementUpdate(observed_object, actual_object);

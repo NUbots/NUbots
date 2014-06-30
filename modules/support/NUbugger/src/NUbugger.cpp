@@ -70,8 +70,8 @@ namespace modules {
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
         using messages::vision::LookUpTable;
-        using messages::vision::Goal;
-        using messages::vision::Ball;
+        using VisionGoal = messages::vision::Goal;
+        using VisionBall = messages::vision::Ball;
         using messages::vision::SaveLookUpTable;
 
         using messages::localisation::FieldObject;
@@ -381,81 +381,54 @@ namespace modules {
                 send(message);
             });
 
-            /*
-            on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Goal> goals){
-                Message message;
+            on<Trigger<std::vector<VisionBall>>>([this] (const std::vector<VisionBall>& balls) {
 
-                message.set_type(Message::VISION);
+                Message message;
+                message.set_type(Message::VISION_OBJECT);
                 message.set_utc_timestamp(getUtcTimestamp());
 
-                Message::Vision* api_vision = message.mutable_vision();
-                //NUClear::log("NUbugger emmitting goals: ", goals.size());
-                for (auto& goal : goals){
-                    Message::VisionFieldObject* api_goal = api_vision->add_vision_object();
+                for(const auto& b : balls) {
+                    auto* object = message.add_vision_object();
 
-                    api_goal->set_shape_type(Message::VisionFieldObject::QUAD);
-                    api_goal->set_goal_type(Message::VisionFieldObject::GoalType(1+int(goal.type))); //+1 to account for zero vs one referencing in message buffer.
-                    api_goal->set_name("Goal");
-                    api_goal->set_width(goal.sizeOnScreen[0]);
-                    api_goal->set_height(goal.sizeOnScreen[1]);
-                    api_goal->set_screen_x(goal.screenCartesian[0]);
-                    api_goal->set_screen_y(goal.screenCartesian[1]);
+                    object->set_type(messages::vision::proto::VisionObject::BALL);
+                    auto* ball = object->mutable_ball();
 
-                    arma::vec3 goal_pos = utility::math::coordinates::Spherical2Cartesian(goal.sphericalFromNeck);
-
-                    switch(int(goal.type)){
-                        case(0):
-                            emit(graph("Left vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
-                            break;
-                        case(1):
-                            emit(graph("Right vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
-                            break;
-                        case(2):
-                            emit(graph("Ambiguous vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
-                    }
-
-
-                    for(auto& point : goal.screen_quad){
-                        api_goal->add_points(point[0]);
-                        api_goal->add_points(point[1]);
-                        //std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : adding quad point ( " << point[0] << " , " << point[1] << " )."<< std::endl;
-                    }
-                    for(auto& coord : goal.sphericalFromNeck){
-                        api_goal->add_measured_relative_position(coord);
-                    }
+                    ball->mutable_circle()->set_radius(b.circle.radius);
+                    ball->mutable_circle()->mutable_centre()->set_x(b.circle.centre[0]);
+                    ball->mutable_circle()->mutable_centre()->set_y(b.circle.centre[1]);
                 }
+
                 send(message);
+
             });
 
-            on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Ball> balls){
-                Message message;
+            on<Trigger<std::vector<VisionGoal>>>([this] (const std::vector<VisionGoal>& goals) {
 
-                message.set_type(Message::VISION);
+                Message message;
+                message.set_type(Message::VISION_OBJECT);
                 message.set_utc_timestamp(getUtcTimestamp());
 
-                Message::Vision* api_vision = message.mutable_vision();
-                //std::cout<< "NUbugger::on<Trigger<std::vector<Ball>>> : sending " << balls.size() << " balls to NUbugger." << std::endl;
-                if(balls.size()>0){
-                    arma::vec3 first_ball_pos= utility::math::coordinates::Spherical2Cartesian(balls[0].sphericalFromNeck);
-                    emit(graph("Vision Ball pos", first_ball_pos[0], first_ball_pos[1],first_ball_pos[2]));
-                }
-                for (auto& ball : balls){
-                    Message::VisionFieldObject* api_ball = api_vision->add_vision_object();
+                for(const auto& g : goals) {
+                    auto* object = message.add_vision_object();
 
-                    api_ball->set_shape_type(Message::VisionFieldObject::CIRCLE);
-                    api_ball->set_name("Ball");
-                    api_ball->set_width(ball.sizeOnScreen[0]);
-                    api_ball->set_height(ball.sizeOnScreen[1]);
-                    api_ball->set_screen_x(ball.screenCartesian[0]);
-                    api_ball->set_screen_y(ball.screenCartesian[1]);
+                    object->set_type(messages::vision::proto::VisionObject::GOAL);
+                    auto* goal = object->mutable_goal();
 
-                    api_ball->set_radius(ball.diameter / 2.0);
-                    for(auto& coord : ball.sphericalFromNeck){
-                        api_ball->add_measured_relative_position(coord);
-                    }
+                    goal->set_side(g.side == VisionGoal::Side::LEFT ? messages::vision::proto::VisionObject::Goal::LEFT
+                                 : g.side == VisionGoal::Side::RIGHT ? messages::vision::proto::VisionObject::Goal::RIGHT
+                                 : messages::vision::proto::VisionObject::Goal::UNKNOWN);
+                    goal->mutable_quad()->mutable_tl()->set_x(g.quad.getTopLeft()[0]);
+                    goal->mutable_quad()->mutable_tl()->set_y(g.quad.getTopLeft()[1]);
+                    goal->mutable_quad()->mutable_tr()->set_x(g.quad.getTopRight()[0]);
+                    goal->mutable_quad()->mutable_tr()->set_y(g.quad.getTopRight()[1]);
+                    goal->mutable_quad()->mutable_bl()->set_x(g.quad.getBottomLeft()[0]);
+                    goal->mutable_quad()->mutable_bl()->set_y(g.quad.getBottomLeft()[1]);
+                    goal->mutable_quad()->mutable_br()->set_x(g.quad.getBottomRight()[0]);
+                    goal->mutable_quad()->mutable_br()->set_y(g.quad.getBottomRight()[1]);
                 }
+
                 send(message);
-            });*/
+            });
 
             on<Trigger<Every<100, std::chrono::milliseconds>>,
                With<messages::localisation::Ball>,

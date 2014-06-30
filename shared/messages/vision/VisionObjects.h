@@ -47,13 +47,13 @@ namespace messages {
         };
 
         struct Goal : public VisionObject {
-            enum class Type {
+            enum class Side {
                 LEFT,
                 RIGHT,
                 UNKNOWN
-            } type;
+            } side;
 
-            utility::math::geometry::Quad shape;
+            utility::math::geometry::Quad quad;
         };
 
         struct Obstacle : public VisionObject {
@@ -64,7 +64,7 @@ namespace messages {
                 CYAN
             } team;
 
-            utility::math::geometry::Polygon shape;
+            utility::math::geometry::Polygon polygon;
         };
 
     }
