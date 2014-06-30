@@ -46,6 +46,7 @@ namespace vision {
     using utility::math::vision::distanceToEquidistantPoints;
     using utility::math::vision::getGroundPointMeanOfEquidistantPoints;
     using utility::math::vision::getGroundPointFromScreen;
+    using utility::math::vision::imageToCam;
     using utility::nubugger::graph;
 
     using messages::support::Configuration;
@@ -115,7 +116,9 @@ namespace vision {
                                                                                                MAX_FITTING_ATTEMPTS,
                                                                                                SELECTION_METHOD);
 
+            std::vector<Ball> balls;
             for(auto& ball : ransacResults) {
+
 
                 auto centre = ball.first.getCentre();
                 auto p1 = centre;
@@ -124,8 +127,8 @@ namespace vision {
                 p2[1] -= ball.first.getRadius();
 
                 // Transform p1 p2 to kinematics coordinates
-                p1 = -(p1 - arma::vec2({double(320 - 1) / 2, double(double(240 - 1) / 2)}));
-                p2 = -(p2 - arma::vec2({double(320 - 1) / 2, double(double(240 - 1) / 2)}));
+                p1 = imageToCam(p1, { double(image.dimensions[0]), double(image.dimensions[1]) });
+                p2 = imageToCam(p2, { double(image.dimensions[0]), double(image.dimensions[1]) });
 
                 double wbd = distanceToEquidistantPoints(0.10, p1, p2, cam.focalLengthPixels);
                 arma::vec3 wb = getGroundPointMeanOfEquidistantPoints(0.10, p1, p2, cam.focalLengthPixels, sensors.orientationCamToGround);
@@ -136,6 +139,16 @@ namespace vision {
                 emit(graph("Width Ball Dist", wbd));
                 emit(graph("Width Ball Pos", wb[0],wb[1],wb[2]));
                 emit(graph("D2P Ball", d2p[0], d2p[1]));
+
+                // TODO fuse the width and point based distances
+
+                // Ball b;
+
+                // b.position = ;
+                // b.error = ;
+                // b.sphericalFromCamera = ;
+                // b.circle = Circle();
+
             }
 
             // Do vision kinematics on the ball to determine it's position and covariance matricies

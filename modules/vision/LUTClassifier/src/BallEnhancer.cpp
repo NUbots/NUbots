@@ -86,7 +86,7 @@ namespace modules {
 
                         // Get the centre point to use and translate it into the kinematics form
                         arma::vec2 centre = stats.mean();
-                        arma::vec2 kinematicsCentre = imageToCam(stats.mean(),arma::vec2{image.width(), image.height()});
+                        arma::vec2 kinematicsCentre = imageToCam(stats.mean(), arma::vec2{image.width(), image.height()});
 
                         // Shift the camera by BALL_RADIUS in order to move it to the correct position
                         auto cameraMatrix = sensors.orientationCamToGround;

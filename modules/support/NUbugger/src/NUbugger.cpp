@@ -289,10 +289,12 @@ namespace modules {
                     auto* imageData = message.mutable_image();
                     std::string* imageBytes = imageData->mutable_data();
 
+                    imageData->set_format(messages::input::proto::Image::JPEG);
+
                     // Reserve enough space in the image data to store the output
                     imageBytes->resize(image.source().size());
-                    imageData->set_width(image.width());
-                    imageData->set_height(image.height());
+                    imageData->mutable_dimensions()->set_x(image.width());
+                    imageData->mutable_dimensions()->set_y(image.height());
 
                     imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
 
@@ -329,8 +331,8 @@ namespace modules {
 
                 auto* imageData = message.mutable_classified_image();
 
-                imageData->mutable_size()->set_x(image.width);
-                imageData->mutable_size()->set_y(image.height);
+                imageData->mutable_dimensions()->set_x(image.dimensions[0]);
+                imageData->mutable_dimensions()->set_y(image.dimensions[1]);
 
                 // Add the vertical segments to the list
                 for(const auto& segment : image.verticalSegments) {
