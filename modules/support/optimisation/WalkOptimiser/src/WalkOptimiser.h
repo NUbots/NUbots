@@ -36,9 +36,7 @@ namespace modules {
             struct OptimiseWalkCommand{};
             struct OptimisationComplete{};
 
-            struct WalkEngineConfig{
-                static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
-            };
+            
 
             class FitnessData {
             public:
@@ -63,15 +61,16 @@ namespace modules {
 
                 int getup_cancel_trial_threshold;
 
-                messages::support::Configuration<WalkEngineConfig> initialConfig;
+                messages::support::Configuration<messages::behaviour::WalkOptimiserCommand> initialConfig;
 
                 static constexpr const char* backupLocation = "WalkEngine_Optimised.yaml";
                 
                 void printState(const arma::vec& state);
-                arma::vec getState(const messages::support::Configuration<WalkEngineConfig>& walkConfig);
-                messages::support::Configuration<WalkEngineConfig> getWalkConfig(const arma::vec& state);
-                void saveConfig(const messages::support::Configuration<WalkEngineConfig>& config);
-                void saveGoodConfigBackup(const messages::support::Configuration<WalkEngineConfig>& config);
+                arma::vec getState(const messages::support::Configuration<messages::behaviour::WalkOptimiserCommand>& walkConfig);
+                messages::support::Configuration<messages::behaviour::WalkOptimiserCommand> getWalkConfig(const arma::vec& state);
+                void saveConfig(const messages::support::Configuration<messages::behaviour::WalkOptimiserCommand>& config);
+                void saveGoodConfigBackup(const messages::support::Configuration<messages::behaviour::WalkOptimiserCommand>& config);
+                void setWalkParameters(const messages::support::Configuration<messages::behaviour::WalkOptimiserCommand>& config);
 
                 FitnessData data;
             public:

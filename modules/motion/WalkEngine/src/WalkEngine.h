@@ -26,6 +26,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/Action.h"
 #include "messages/input/Sensors.h"
+#include <yaml-cpp/yaml.h>
 
 namespace modules {
     namespace motion {
@@ -249,6 +250,7 @@ namespace modules {
 //            arma::vec3 rightArmCommand;
 //            arma::vec3 leftLegCommand;
 //            arma::vec3 rightLegCommand;
+            void configureWalk(const YAML::Node& config);
 
             std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> update(const messages::input::Sensors& sensors);
             std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> updateStill(const messages::input::Sensors& sensors = messages::input::Sensors());

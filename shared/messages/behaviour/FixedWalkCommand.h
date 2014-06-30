@@ -27,7 +27,9 @@ namespace messages {
     namespace behaviour {
 
         struct FixedWalkFinished{};
-
+        struct WalkOptimiserCommand{
+            static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
+        };
         class FixedWalkCommand{
         public:
             FixedWalkCommand(){}

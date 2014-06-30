@@ -30,6 +30,7 @@ namespace modules {
             using messages::support::Configuration;
             using messages::behaviour::FixedWalkCommand;
             using messages::behaviour::FixedWalkFinished;
+            using messages::behaviour::WalkOptimiserCommand;
             using messages::input::Sensors;
             using messages::motion::ExecuteGetup;
             using messages::motion::KillGetup;
@@ -70,7 +71,7 @@ namespace modules {
                     emit(std::make_unique<OptimiseWalkCommand>());
                 });
 
-                on<Trigger<OptimiseWalkCommand>, With<Configuration<WalkEngineConfig>> >("Optimise Walk", [this]( const OptimiseWalkCommand&, const Configuration<WalkEngineConfig>& walkConfig){
+                on<Trigger<OptimiseWalkCommand>, With<Configuration<WalkOptimiserCommand>> >("Optimise Walk", [this]( const OptimiseWalkCommand&, const Configuration<WalkOptimiserCommand>& walkConfig){
                     std::cerr << "Optimiser command" << std::endl;
                     samples = utility::math::optimisation::PGA::getSamples(getState(walkConfig), parameter_sigmas, number_of_samples);
                     fitnesses.zeros(number_of_samples);
@@ -79,7 +80,7 @@ namespace modules {
                     currentSample = 0;
 
                     std::cerr << "Sample: " << currentSample <<std::endl;                    
-                    saveConfig(getWalkConfig(samples.row(currentSample).t()));
+                    setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
                     
                     auto command = std::make_unique<FixedWalkCommand>(walk_command);
                     emit(std::move(command));
@@ -108,7 +109,7 @@ namespace modules {
                     } else {
                         //Setup new parameters
                         std::cerr << "Sample:" << ++currentSample <<std::endl;
-                        saveConfig(getWalkConfig(samples.row(currentSample).t()));
+                        setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
                         //Start a walk routine
                         auto command = std::make_unique<FixedWalkCommand>(walk_command);
                         emit(std::move(command));
@@ -126,7 +127,7 @@ namespace modules {
                 });
                 
                 //TODO network
-                // on<Trigger<Network<WalkEngineConfigParameters>>>("Add Sample",[this](const Configuration<WalkEngineConfig>& walkConfig)){
+                // on<Trigger<Network<WalkOptimiserCommandParameters>>>("Add Sample",[this](const Configuration<WalkOptimiserCommand>& walkConfig)){
                 //     //samples.push_back(getState()));
                     // fitnesses.resize(number_of_samples);
                 //      
@@ -135,7 +136,7 @@ namespace modules {
 
             }
 
-            arma::vec WalkOptimiser::getState(const Configuration<WalkEngineConfig>& walkConfig){
+            arma::vec WalkOptimiser::getState(const Configuration<WalkOptimiserCommand>& walkConfig){
                 arma::vec state(parameter_names.size());
                 std::cerr << "walkConfig.size() = " << walkConfig.config.size() << "\nLoading state:"<< std::endl;
                 int i = 0;
@@ -154,8 +155,8 @@ namespace modules {
                 std::cerr << std::endl;
             }
 
-            Configuration<WalkEngineConfig> WalkOptimiser::getWalkConfig(const arma::vec& state){
-                Configuration<WalkEngineConfig> config(initialConfig);
+            Configuration<WalkOptimiserCommand> WalkOptimiser::getWalkConfig(const arma::vec& state){
+                Configuration<WalkOptimiserCommand> config(initialConfig);
                 for(int i = 0; i < state.size(); ++i){
                     config.config[parameter_names[i]] = state[i];
                 }
@@ -163,14 +164,18 @@ namespace modules {
                 return config;
             }    
 
-            void WalkOptimiser::saveConfig(const Configuration<WalkEngineConfig>& config){
+            void WalkOptimiser::saveConfig(const Configuration<WalkOptimiserCommand>& config){
                 auto saveConfig = std::make_unique<SaveConfiguration>();
-                saveConfig->path = WalkEngineConfig::CONFIGURATION_PATH;
+                saveConfig->path = WalkOptimiserCommand::CONFIGURATION_PATH;
                 saveConfig->config = config.config;
                 emit(std::move(saveConfig));
             }
 
-            void WalkOptimiser::saveGoodConfigBackup(const Configuration<WalkEngineConfig>& config){
+            void WalkOptimiser::setWalkParameters(const Configuration<WalkOptimiserCommand>& config){
+                emit(std::make_unique<Configuration<WalkOptimiserCommand>>(config));
+            }
+
+            void WalkOptimiser::saveGoodConfigBackup(const Configuration<WalkOptimiserCommand>& config){
                 auto saveConfig = std::make_unique<SaveConfiguration>();
                 saveConfig->path = backupLocation;
                 saveConfig->config = config.config;
