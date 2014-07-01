@@ -1,3 +1,4 @@
+MAX_BALL_DISTANCE: 10
 ZONE:
   - [0,1]
   - [0,1]

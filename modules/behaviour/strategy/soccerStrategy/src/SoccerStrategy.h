@@ -27,16 +27,17 @@ namespace modules {
         namespace strategy {
 
             /**
-             * Executes a getup script if the robot falls over.
+             * High level behaviour for robot soccer.
              *
-             * @author Josiah Walker
+             * @author Alex Biddulph
              */
             class SoccerStrategy : public NUClear::Reactor {
             private:
-                //const size_t id;
                 NUClear::clock::time_point timeSinceLastSeen;
 
-                float BALL_SEARCH_TIMEOUT_MILLISECONDS;
+                std::vector<arma::vec> MY_ZONE;
+		int MAX_BALL_DISTANCE;
+
             public:
                 explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
 
