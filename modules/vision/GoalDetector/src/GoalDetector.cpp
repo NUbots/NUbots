@@ -173,7 +173,19 @@ namespace vision {
             // Only check upright posts for building candidates.
             mergeClose(postCandidates, 1.5);
 
-            log("Number of seen goals", postCandidates.size());
+            auto goals = std::make_unique<std::vector<Goal>>();
+
+            for(auto& q : postCandidates) {
+
+                Goal goal;
+
+                goal.quad = q;
+
+                goals->push_back(std::move(goal));
+
+            }
+
+            emit(std::move(goals));
 
 //            for(auto& post : postCandidates) {
 //                std::cout << post << std::endl;

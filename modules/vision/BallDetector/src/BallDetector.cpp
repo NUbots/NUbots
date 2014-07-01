@@ -151,9 +151,6 @@ namespace vision {
                 balls->push_back(std::move(b));
             }
 
-            // Do vision kinematics on the ball to determine it's position and covariance matricies
-            log("Number of seen balls", ransacResults.size());
-
             emit(std::move(balls));
 
         });
