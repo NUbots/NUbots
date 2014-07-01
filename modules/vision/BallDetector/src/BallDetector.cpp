@@ -134,8 +134,6 @@ namespace vision {
                 double wbd = distanceToEquidistantPoints(0.10, p1, p2, cam.focalLengthPixels);
                 arma::vec3 wb = getGroundPointMeanOfEquidistantPoints(0.10, p1, p2, cam.focalLengthPixels, sensors.orientationCamToGround);
                 auto d2p = getGroundPointFromScreen(p1, sensors.orientationCamToGround, cam.focalLengthPixels);
-                std::cout << "Width: " << wbd << std::endl;
-                std::cout << "D2P: " << d2p.t() << std::endl;
 
                 emit(graph("Width Ball Dist", wbd));
                 emit(graph("Width Ball Pos", wb[0],wb[1],wb[2]));

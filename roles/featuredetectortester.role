@@ -1,7 +1,6 @@
 ADD_ROLE(
     NAME featuredetectortester
     MODULES
-        support::SignalCatcher
         support::configuration::ConfigSystem
         input::LinuxCamera
         vision::LUTClassifier

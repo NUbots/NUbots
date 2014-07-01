@@ -97,7 +97,7 @@ namespace vision {
                                                                                         MINIMUM_POINTS,
                                                                                         MAX_ITERATIONS_PER_FITTING,
                                                                                         MAX_FITTING_ATTEMPTS,
-                                                                                        SELECTION_METHOD) {
+                                                                                        SELECTION_METHOD)) {
                 startLines.push_back(LSFittedLine(l.second));
             }
 
@@ -107,27 +107,54 @@ namespace vision {
                                                                                         MINIMUM_POINTS,
                                                                                         MAX_ITERATIONS_PER_FITTING,
                                                                                         MAX_FITTING_ATTEMPTS,
-                                                                                        SELECTION_METHOD) {
+                                                                                        SELECTION_METHOD)) {
                 endLines.push_back(LSFittedLine(l.second));
             }
 
-            // Make quads I guess?
-
-
-
-
-
             auto goals = std::make_unique<std::vector<Goal>>();
+            goals->reserve(startLines.size() * endLines.size());
 
-            for(auto& q : postCandidates) {
+            // Make all line combinations to make quads for goal
+            for(uint i = 0; i < startLines.size(); ++i) {
+                for(uint j = 0; j < endLines.size(); ++j) {
 
-                Goal goal;
+                    arma::vec2 tl, tr, bl, br;
+                    startLines[i].getEndPoints(tl, bl);
+                    endLines[j].getEndPoints(tr, br);
 
-                goal.quad = q;
+                    // Check our edges before making a quad
+                    if(    tl[0] < tr[0]
+                        && bl[0] < br[0]
+                        && tl[1] < bl[1]
+                        && tr[1] < br[1]) {
 
-                goals->push_back(std::move(goal));
+                        // Add a new possible goal
+                        goals->emplace_back();
 
+                        goals->back().quad.set(bl, tl, tr, br);
+                    }
+                }
             }
+
+            for(auto it = goals->begin(); it < goals->end(); ++it) {
+
+                bool valid = true;
+
+                // Do some checks and remove invalid goals
+
+                if(!valid) {
+                    std::cout << "Erasing" << std::endl;
+                    goals->erase(it);
+                }
+            }
+
+            // Throwout when the quads are invalid (points are in a bad order)
+            // Throwout when the quads are an invalid aspect ratio
+            // Throwout when the top is below or the bottom is above the KH
+
+            // Merge close goals
+
+            // Use the vertical transitions in order to improve the top and bottom of the quad
 
             emit(std::move(goals));
         });
