@@ -9,9 +9,9 @@ ADD_ROLE(
         input::LinuxCamera
         platform::darwin::HardwareIO
         platform::darwin::SensorFilter
-        
+
         #Vision
-        vision::FeatureDetector
+        #vision::FeatureDetector
         vision::LUTClassifier
 
         #Localisation

@@ -47,7 +47,6 @@ void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point 
 double KFBallLocalisationEngine::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object) {
 
-    auto groundDist = observed_object.sphericalFromNeck[0] * std::sin(observed_object.sphericalFromNeck[2]);
     // // Radial coordinates
     // arma::vec2 measurement = { observed_object.sphericalFromNeck[0],
     //                            observed_object.sphericalFromNeck[1] };
@@ -63,14 +62,8 @@ double KFBallLocalisationEngine::MeasurementUpdate(
     //                     0, 0, observed_object.sphericalError[1] };
 
     // // Robot relative cartesian coordinates
-    auto heading = observed_object.sphericalFromNeck[1];
-    arma::vec2 measurement = { groundDist * std::cos(heading),
-                               groundDist * std::sin(heading) };
-    auto dist_error = observed_object.sphericalError[0];
-    auto heading_error = observed_object.sphericalError[1];
-    //TODO: initialise matrices with streamers (<<)
-    arma::mat22 cov = { dist_error * heading_error, 0,
-                        0, dist_error * heading_error };
+    arma::vec2 measurement = observed_object.position.rows(0, 1);
+    arma::mat22 cov = observed_object.error.submat(0, 0, 2, 2);
 
     double quality = ball_filter_.measurementUpdate(measurement, cov);
 

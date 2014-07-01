@@ -23,39 +23,25 @@
 namespace messages {
     namespace input {
 
-        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data, bool rotated_) :
-        imgWidth(width),
-        imgHeight(height),
-        rotated(rotated_),
-        data(std::move(data)){
+        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data)
+            : imgWidth(width)
+            , imgHeight(height)
+            , data(std::move(data)) {
         }
 
-        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data, std::vector<uint8_t>&& source, bool rotated_) :
-        imgWidth(width),
-        imgHeight(height),
-        rotated(rotated_),
-        data(std::move(data)),
-        src(std::move(source)) {
+        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data, std::vector<uint8_t>&& source)
+            : imgWidth(width)
+            , imgHeight(height)
+            , data(std::move(data))
+            , src(std::move(source)) {
         }
 
         Image::Pixel& Image::operator ()(size_t x, size_t y) {
-            int new_y = y;
-            int new_x = x;
-            if(rotated){
-                new_y = imgHeight-y-1;
-                new_x = imgWidth-x-1;
-            }
-            return data[new_y*imgWidth+new_x];
+            return data[(imgHeight - y - 1) * imgWidth + (imgWidth - x - 1)];
         }
 
         const Image::Pixel& Image::operator ()(size_t x, size_t y) const {
-            int new_y = y;
-            int new_x = x;
-            if(rotated){
-                new_y = imgHeight-y-1;
-                new_x = imgWidth-x-1;
-            }
-            return data[new_y*imgWidth+new_x];
+            return data[(imgHeight - y - 1) * imgWidth + (imgWidth - x - 1)];
         }
 
         size_t Image::width() const {

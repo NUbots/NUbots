@@ -15,14 +15,11 @@ ADD_ROLE(
 
         #Vision
         vision::LUTClassifier
-        vision::FeatureDetector
+        #vision::FeatureDetector
 
         #Localisation
         localisation::KFBallLocalisation
 
-        #Mocap
-        support::NUcap
-        
         #Behaviour
         behaviour::Controller
         behaviour::skills::Stand

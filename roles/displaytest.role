@@ -1,16 +1,17 @@
 ADD_ROLE(
     NAME displaytest
     MODULES
-        support::SignalCatcher
+        #support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
         support::configuration::NetworkingConfiguration
         support::DisplayTest
-        #platform::darwin::HardwareIO
-        #platform::darwin::SensorFilter
-        #input::LinuxCamera
+        platform::darwin::HardwareIO
+        platform::darwin::SensorFilter
+        input::LinuxCamera
         support::NUbugger
         debug::NUbugger
-        #vision::LUTClassifier
+
+        vision::LUTClassifier
         #vision::FeatureDetector
 )
