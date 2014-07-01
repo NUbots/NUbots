@@ -107,7 +107,7 @@ namespace utility {
                 return result;
             }
 
-            inline arma::mat33 quaternionToRotationMatrix(arma::vec4 q) {
+            inline arma::mat33 quaternionToRotationMatrix(arma::vec4 q) {//TODO document! How does this map? ...
                 arma::mat33 result;
 
                 result <<  1 - 2 * q[2] * q[2] - 2 * q[3] * q[3] << 2 * q[1] * q[2] - 2 * q[3] * q[0] << 2 * q[1] * q[3] + 2 * q[2] * q[0] << arma::endr
@@ -184,6 +184,10 @@ namespace utility {
                 arma::mat44 minverse = arma::eye(4,4);
                 minverse.submat(0,0,2,2) = m.submat(0,0,2,2).t();
                 minverse.submat(0,3,2,3) = -minverse.submat(0,0,2,2) * m.submat(0,3,2,3);
+                if(arma::norm(minverse*m - arma::eye(4,4)) > 1e-10){
+                    NUClear::log("\n\n\n\n\n\nInverse failed!\n\n\n\n\n\nResult=");
+                    NUClear::log(m, minverse, minverse*m);
+                }
                 return minverse;
             }
 

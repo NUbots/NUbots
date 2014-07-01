@@ -107,11 +107,8 @@ double RobotHypothesis::MeasurementUpdate(
 
     // Unit vector orientation
     arma::vec2 actual_pos = actual_object.location();
-    arma::vec2 measurement = utility::math::coordinates::Spherical2Cartesian(observed_object.sphericalFromNeck).rows(0,1);
-    arma::mat22 cov;
-    cov <<   0.1 * observed_object.sphericalError[0]  <<                                          0 << arma::endr
-        <<                                            0 << 0.1 * observed_object.sphericalError[0] ;  //HACK Cebit 2014
-
+    arma::vec2 measurement = observed_object.position.rows(0, 1);
+    arma::mat22 cov = observed_object.error.submat(0, 0, 2, 2);
 
     double quality = filter_.measurementUpdate(measurement, cov, arma::vec2({actual_pos[0],actual_pos[1]}));
 
@@ -131,12 +128,11 @@ double RobotHypothesis::MeasurementUpdate(
         arma::vec(lfo_a.location()), arma::vec(lfo_b.location())
     };
 
-    auto heading_diff = utility::math::angle::difference(
-        obv_a.sphericalFromNeck[1],
-        obv_b.sphericalFromNeck[1]);
+    // Our heading difference should be our dot product (TODO check this I am guessing and tired)
+    double heading_diff = arma::dot(obv_a.position.rows(0, 1), obv_b.position.rows(0, 1));
+
     arma::vec measurement = { std::abs(heading_diff) };
-    arma::mat cov;
-    cov << obv_a.sphericalError[1] + obv_b.sphericalError[1] << arma::endr;
+    arma::mat cov; // No idea how to get this :P
 
     double quality = filter_.measurementUpdate(measurement, cov, actual_positions);
 

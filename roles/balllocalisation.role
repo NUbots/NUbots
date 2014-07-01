@@ -4,9 +4,9 @@ ADD_ROLE(
         #Support
         support::SignalCatcher
         support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem    
+        support::configuration::ConfigSystem
         support::NUbugger
-        
+
         #Sensors
         input::LinuxCamera
         platform::darwin::HardwareIO
@@ -14,7 +14,7 @@ ADD_ROLE(
 
         #Vision
         vision::LUTClassifier
-        vision::FeatureDetector
+        #vision::FeatureDetector
 
         #Localisation
         localisation::MMKFRobotLocalisation

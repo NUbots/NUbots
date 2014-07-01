@@ -40,7 +40,7 @@ namespace kinematics {
 
 
     template <typename RobotKinematicModel>
-    std::map<messages::input::ServoID, arma::mat44> calculateHeadJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID){
+    inline std::map<messages::input::ServoID, arma::mat44> calculateHeadJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID){
         std::map<messages::input::ServoID, arma::mat44> positions;
 
         arma::mat44 runningTransform = arma::eye(4,4);
@@ -90,7 +90,7 @@ namespace kinematics {
         The basis 'faces' down its x axis.
     */
     template <typename RobotKinematicModel>
-    std::map<messages::input::ServoID, arma::mat44> calculateLegJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID, Side isLeft){
+    inline std::map<messages::input::ServoID, arma::mat44> calculateLegJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID, Side isLeft){
         std::map<messages::input::ServoID, arma::mat44> positions;
         arma::mat44 runningTransform = arma::eye(4,4);
         //Variables to mask left and right leg differences:
@@ -180,7 +180,7 @@ namespace kinematics {
         The basis 'faces' down its x axis.
     */
     template <typename RobotKinematicModel>
-    std::map<messages::input::ServoID, arma::mat44> calculateArmJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID, Side isLeft){
+    inline std::map<messages::input::ServoID, arma::mat44> calculateArmJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID, Side isLeft){
         std::map<messages::input::ServoID, arma::mat44> positions;
         arma::mat44 runningTransform = arma::eye(4,4);
         //Variables to mask left and right leg differences:
@@ -238,7 +238,7 @@ namespace kinematics {
     /*! @brief
     */
     template <typename RobotKinematicModel>
-    std::map<messages::input::ServoID, arma::mat44> calculatePosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID) {
+    inline std::map<messages::input::ServoID, arma::mat44> calculatePosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID) {
         switch(servoID) {
             case messages::input::ServoID::HEAD_YAW:
             case messages::input::ServoID::HEAD_PITCH:
@@ -271,7 +271,7 @@ namespace kinematics {
 
 
     template <typename RobotKinematicModel>
-    std::map<messages::input::ServoID, arma::mat44> calculateAllPositions(const messages::input::Sensors& sensors) {
+    inline std::map<messages::input::ServoID, arma::mat44> calculateAllPositions(const messages::input::Sensors& sensors) {
         std::map<messages::input::ServoID, arma::mat44> result = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::L_ANKLE_ROLL);
         std::map<messages::input::ServoID, arma::mat44> rightLegPositions = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::R_ANKLE_ROLL);
         std::map<messages::input::ServoID, arma::mat44> headPositions = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::HEAD_PITCH);
@@ -287,7 +287,7 @@ namespace kinematics {
         @return [x_com, y_com, z_com, total_mass] relative to the torso basis
     */
     template <typename RobotKinematicModel>
-    arma::vec4 calculateCentreOfMass(const std::map<messages::input::ServoID, arma::mat44>& jointPositions, bool includeTorso){
+    inline arma::vec4 calculateCentreOfMass(const std::map<messages::input::ServoID, arma::mat44>& jointPositions, bool includeTorso){
         arma::vec4 totalMassVector;
 
         for(auto& joint : jointPositions){
@@ -325,6 +325,45 @@ namespace kinematics {
             NUClear::log<NUClear::ERROR>("ForwardKinematics::calculateCentreOfMass - Empty centre of mass request or no mass in mass model.");
             return arma::vec4();
         }
+    }
+
+    inline arma::vec2 calculateHorizon(const arma::mat33 groundToCamRotation, double cameraDistancePixels){
+        arma::vec3 zGround = {0,0,1};
+        arma::vec3 normal = groundToCamRotation * zGround;
+
+        arma::vec3 xHead = {1,0,0};
+        arma::vec3 yHead = {0,1,0};
+        double phiX = std::acos(arma::dot(normal, xHead)) - M_PI_2;
+        double phiY = std::acos(arma::dot(normal, yHead)) - M_PI_2;
+
+        return { std::tan(phiY), cameraDistancePixels * -std::tan(phiX) };
+    }
+
+    inline arma::mat44 calculateCamToGround(arma::mat44 cameraToBody, arma::vec3 groundNormal_body, double bodyHeight){
+        arma::vec3 X = arma::vec{1,0,0};
+        double projectXOnNormal = arma::dot(X, groundNormal_body);
+
+        arma::vec3 groundMatrixX;
+        arma::vec3 groundMatrixY;
+
+        if(std::fabs(projectXOnNormal) == 1){ 
+            //Then x is parallel to the ground normal and we need to use projection onto +/-z instead
+            //If x parallel to normal, then use -z, if x antiparallel use z
+            arma::vec3 Z =  arma::vec3{0, 0, (projectXOnNormal > 0 ? -1 : 1 )};
+            double projectZOnNormal = arma::dot(Z, groundNormal_body);
+            groundMatrixX = arma::normalise(Z - projectZOnNormal * groundNormal_body);
+            groundMatrixY = arma::cross(groundNormal_body, groundMatrixX);
+        } else {
+            groundMatrixX = arma::normalise(X - projectXOnNormal * groundNormal_body);
+            groundMatrixY = arma::cross(groundNormal_body, groundMatrixX);
+        }
+        arma::mat44 groundToBody = arma::eye(4,4);
+        groundToBody.submat(0,0,2,0) = groundMatrixX;
+        groundToBody.submat(0,1,2,1) = groundMatrixY;
+        groundToBody.submat(0,2,2,2) = groundNormal_body;
+        groundToBody.submat(0,3,2,3) = arma::vec{0,0,-bodyHeight};
+
+        return utility::math::matrix::orthonormal44Inverse(groundToBody) * cameraToBody;
     }
 
 } // kinematics

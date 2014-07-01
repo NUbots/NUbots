@@ -39,7 +39,7 @@ namespace utility {
             std::ofstream file(path,
                 append
                     ? std::ios::out | std::ios::app
-                    : std::ios::out);
+                    : std::ios::out | std::ios::trunc);
             file << data;
         }
 
