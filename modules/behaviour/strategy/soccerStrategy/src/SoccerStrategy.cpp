@@ -68,7 +68,18 @@ namespace modules {
 						// Assumption: We could potentially kick a goal if we are in the other half of the field).
 						// Assumption: goal.position is the x, y coordinates of the goals relative to us.
 						goalInRange = ((goal.position[0] > 0) && (ball.position[0] > 0));
-				
+
+						
+
+						// Approach ball Code (given by Josiah - need to update)
+						auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
+							approach->targetPositionType = WalkTarget::Ball;
+							approach->targetHeadingType = WalkTarget::WayPoint;
+							approach->walkMovementType = WalkApproach::ApproachFromDirection;
+							approach->heading = arma::vec({-3,0});
+							approach->target = arma::vec({0,0});
+						emit(std::move(approach));
+
 
 //                        emit(std::make_unique<std::vector<LookAtPosition>>(angles));
                 });
