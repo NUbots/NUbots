@@ -18,7 +18,7 @@ class nuclearport::build_dep (
   package { 'libfftw3-dev': ensure => latest }
   package { 'libaubio-dev': ensure => latest }
   package { 'libsndfile-dev': ensure => latest }
-  package { 'libboost-math-dev': ensure => latest }
+  package { 'libyaml-cpp-dev': ensure => latest }
   include armadillo
 
   class { 'nuclear':
