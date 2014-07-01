@@ -41,7 +41,7 @@ namespace modules {
             class FitnessData {
             public:
                 int numberOfGetups = 0;
-                arma::running_stat_vec<double> tilt;
+                arma::running_stat<double> tilt;
                 bool recording;
                 double popFitness();
                 void update(const messages::input::Sensors& sensors);

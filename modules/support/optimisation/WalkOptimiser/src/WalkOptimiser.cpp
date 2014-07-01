@@ -212,9 +212,10 @@ namespace modules {
                 if(recording){
                     arma::vec3 verticalKinematics = sensors.orientationCamToGround.submat(0,2,2,2);
                     arma::vec3 verticalOrientation = sensors.kinematicsCamToGround.submat(0,2,2,2);
-                    tilt(std::acos(arma::dot(verticalOrientation, verticalKinematics)));
-                }
-                
+                    double tiltMag = std::acos(arma::dot(verticalOrientation, verticalKinematics));
+                    std::cout << tiltMag << std::endl;
+                    tilt(tiltMag);
+                }                
             }
             void FitnessData::recordGetup(){
                 numberOfGetups++;
