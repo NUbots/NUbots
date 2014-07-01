@@ -43,17 +43,34 @@ namespace modules {
 
 				
                 on<Trigger<Configuration<SoccerStrategyConfig>>>([this](const Configuration<SoccerStrategyConfig>& config) {
-                    BALL_SEARCH_TIMEOUT_MILLISECONDS = config["BALL_SEARCH_TIMEOUT_MILLISECONDS"].as<float>();
+                    ;
                 });
 
-                //this reaction focuses on the ball - pan'n'scan if not visible and focus on as many objects as possible if visible
-				on<Trigger<Every<30, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
+				on<Trigger<Every<30, Per<std::chrono::seconds>>>, Options<Single>, 
+                    With<std::vector<Goal>>,
+                    With<messages::localisation::Ball>,
+                    With<messages::localisation::Self>,
+                    >([this](
+						const std::shared_ptr<const messages::localisation::Goal>& goal,
+						const std::shared_ptr<const messages::localisation::Ball>& ball,
+						const std::shared_ptr<const messages::localisation::Self>& self,
+						const time_t&) {
+				
+						// Am I in my zone?
+						selfInZone = pointInPolygon(myZone, self.position);
+						
+						// Is the ball in my zone?
+						ballInZone = pointInPolygon(myZone, ball.position);
+						
+						// Are the goals in range?
+						// x = position[0]?
+						// x = 0 = centre field.
+						// Assumption: We could potentially kick a goal if we are in the other half of the field).
+						// Assumption: goal.position is the x, y coordinates of the goals relative to us.
+						goalInRange = ((goal.position[0] > 0) && (ball.position[0] > 0));
 				
 
-
 //                        emit(std::make_unique<std::vector<LookAtPosition>>(angles));
-                    
-
                 });
             }
         }  // planning
