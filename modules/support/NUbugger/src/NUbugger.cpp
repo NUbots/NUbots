@@ -41,37 +41,39 @@
 #include "utility/math/coordinates.h"
 #include "utility/nubugger/NUgraph.h"
 #include "utility/localisation/transform.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/support/Configuration.h"
 #include "utility/math/coordinates.h"
-#include "messages/localisation/FieldObject.h"
 // #include "BallModel.h"
 #include "utility/image/ColorModelConversions.h"
 
 namespace modules {
     namespace support {
 
-
-        using utility::nubugger::graph;
-        using messages::support::Configuration;
-        using messages::input::Sensors;
-        using messages::input::Image;
-        using messages::vision::ClassifiedImage;
-        using messages::vision::LookUpTable;
-        using NUClear::DEBUG;
-        using utility::nubugger::graph;
-        using utility::time::getUtcTimestamp;
         using std::chrono::duration_cast;
         using std::chrono::microseconds;
+
+        using utility::nubugger::graph;
+        using utility::time::getUtcTimestamp;
+
+        using messages::support::Configuration;
+        using messages::support::nubugger::proto::DataPoint;
         using messages::support::nubugger::proto::Message;
-        using messages::behaviour::proto::Behaviour;
-        using messages::behaviour::proto::ActionStateChange;
-        using messages::vision::Goal;
-        using messages::vision::Ball;
-        using messages::vision::SaveLookUpTable;
+
+        using messages::input::Sensors;
+        using messages::input::Image;
+
         using messages::behaviour::ActionStart;
         using messages::behaviour::ActionKill;
         using messages::behaviour::RegisterAction;
+        using messages::behaviour::proto::Behaviour;
+        using messages::behaviour::proto::ActionStateChange;
+
+        using messages::vision::ObjectClass;
+        using messages::vision::ClassifiedImage;
+        using messages::vision::LookUpTable;
+        using VisionGoal = messages::vision::Goal;
+        using VisionBall = messages::vision::Ball;
+        using messages::vision::SaveLookUpTable;
+
         using messages::localisation::FieldObject;
 
         void NUbugger::EmitLocalisationModels(const std::unique_ptr<FieldObject>& robot_model, const std::unique_ptr<FieldObject>& ball_model) {
@@ -116,7 +118,6 @@ namespace modules {
                 api_model->set_lost(model.lost);
             }
 
-
             send(message);
         }
 
@@ -140,11 +141,7 @@ namespace modules {
                 message.set_type(Message::DATA_POINT);
                 message.set_utc_timestamp(getUtcTimestamp());
 
-                auto* dataPoint = message.mutable_data_point();
-                dataPoint->set_label(data_point.label);
-                for (auto value : data_point.values) {
-                    dataPoint->add_value(value);
-                }
+            *(message.mutable_data_point()) = data_point;
 
                 send(message);
             });
@@ -286,211 +283,150 @@ namespace modules {
                 if(!image.source().empty()) {
 
                     Message message;
-                    message.set_type(Message::VISION);
+                    message.set_type(Message::IMAGE);
                     message.set_utc_timestamp(getUtcTimestamp());
 
-                    auto* visionData = message.mutable_vision();
-                    auto* imageData = visionData->mutable_image();
+                    auto* imageData = message.mutable_image();
                     std::string* imageBytes = imageData->mutable_data();
+
+                    imageData->set_format(messages::input::proto::Image::JPEG);
 
                     // Reserve enough space in the image data to store the output
                     imageBytes->resize(image.source().size());
-                    imageData->set_width(image.width());
-                    imageData->set_height(image.height());
+                    imageData->mutable_dimensions()->set_x(image.width());
+                    imageData->mutable_dimensions()->set_y(image.height());
 
                     imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
-
 
                     send(message);
                 }
             });
 
-            reactionStatisticsHandle = on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
+            // reactionStatisticsHandle = on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
+            //     Message message;
+            //     message.set_type(Message::REACTION_STATISTICS);
+            //     message.set_utc_timestamp(getUtcTimestamp());
+            //     auto* reactionStatistics = message.mutable_reaction_statistics();
+            //     //reactionStatistics->set_name(stats.name);
+            //     reactionStatistics->set_reactionid(stats.reactionId);
+            //     reactionStatistics->set_taskid(stats.taskId);
+            //     reactionStatistics->set_causereactionid(stats.causeReactionId);
+            //     reactionStatistics->set_causetaskid(stats.causeTaskId);
+            //     reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
+            //     reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
+            //     reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
+            //     reactionStatistics->set_name(stats.identifier[0]);
+            //     reactionStatistics->set_triggername(stats.identifier[1]);
+            //     reactionStatistics->set_functionname(stats.identifier[2]);
+
+            //     send(message);
+            // });
+
+
+            on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
+
                 Message message;
-                message.set_type(Message::REACTION_STATISTICS);
+                message.set_type(Message::CLASSIFIED_IMAGE);
                 message.set_utc_timestamp(getUtcTimestamp());
 
-                auto* reactionStatistics = message.mutable_reaction_statistics();
+                auto* imageData = message.mutable_classified_image();
 
-//                 reactionStatistics->set_name(stats.name);
-                reactionStatistics->set_reactionid(stats.reactionId);
-                reactionStatistics->set_taskid(stats.taskId);
-                reactionStatistics->set_causereactionid(stats.causeReactionId);
-                reactionStatistics->set_causetaskid(stats.causeTaskId);
-                reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
-                reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
-                reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
+                imageData->mutable_dimensions()->set_x(image.dimensions[0]);
+                imageData->mutable_dimensions()->set_y(image.dimensions[1]);
 
-                reactionStatistics->set_name(stats.identifier[0]);
-                reactionStatistics->set_triggername(stats.identifier[1]);
-                reactionStatistics->set_functionname(stats.identifier[2]);
+                // Add the vertical segments to the list
+                for(const auto& segment : image.verticalSegments) {
+                    auto* s = imageData->add_segment();
+
+                    s->set_colour(uint(segment.first));
+                    s->set_subsample(segment.second.subsample);
+
+                    auto* start = s->mutable_start();
+                    start->set_x(segment.second.start[0]);
+                    start->set_y(segment.second.start[1]);
+
+                    auto* end = s->mutable_end();
+                    end->set_x(segment.second.end[0]);
+                    end->set_y(segment.second.end[1]);
+                }
+
+                // Add the horizontal segments to the list
+                for(const auto& segment : image.horizontalSegments) {
+                    auto* s = imageData->add_segment();
+
+                    s->set_colour(uint(segment.first));
+                    s->set_subsample(segment.second.subsample);
+
+                    auto* start = s->mutable_start();
+                    start->set_x(segment.second.start[0]);
+                    start->set_y(segment.second.start[1]);
+
+                    auto* end = s->mutable_end();
+                    end->set_x(segment.second.end[0]);
+                    end->set_y(segment.second.end[1]);
+                }
+
+                // Add in the actual horizon (the points on the left and right side)
+                auto* horizon = imageData->mutable_horizon();
+                horizon->set_gradient(image.horizon[0]);
+                horizon->set_intercept(image.horizon[1]);
+
+                for(const auto& visualHorizon : image.visualHorizon) {
+                    auto* vh = imageData->add_visual_horizon();
+
+                    vh->set_x(visualHorizon[0]);
+                    vh->set_y(visualHorizon[1]);
+                }
 
                 send(message);
             });
 
-            reactionStatisticsHandle.disable();
-
-            classifiedImageHandle = on<Trigger<ClassifiedImage>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage& image) {
+            goalsHandle = on<Trigger<std::vector<VisionBall>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionBall>& balls) {
 
                 Message message;
-                message.set_type(Message::VISION);
+                message.set_type(Message::VISION_OBJECT);
                 message.set_utc_timestamp(getUtcTimestamp());
-                Message::Vision* api_vision = message.mutable_vision();
 
-                Message::VisionClassifiedImage* api_classified_image = api_vision->mutable_classified_image();
+                for(const auto& b : balls) {
+                    auto* object = message.add_vision_object();
 
-                for (auto& rowColourSegments : image.horizontalFilteredSegments.m_segmentedScans) {
-                    for (auto& colorSegment : rowColourSegments) {
-                        auto& start = colorSegment.m_start;
-                        auto& end = colorSegment.m_end;
-                        auto& colour = colorSegment.m_colour;
+                    object->set_type(messages::vision::proto::VisionObject::BALL);
+                    auto* ball = object->mutable_ball();
 
-                        Message::VisionClassifiedSegment* api_segment = api_classified_image->add_segment();
-                        api_segment->set_start_x(start[0]);
-                        api_segment->set_start_y(start[1]);
-                        api_segment->set_end_x(end[0]);
-                        api_segment->set_end_y(end[1]);
-                        api_segment->set_colour(colour);
-                    }
-                }
-
-                for (auto& columnColourSegments : image.verticalFilteredSegments.m_segmentedScans)
-                {
-                    for (auto& colorSegment : columnColourSegments)
-                    {
-                        auto& start = colorSegment.m_start;
-                        auto& end = colorSegment.m_end;
-                        auto& colour = colorSegment.m_colour;
-
-                        Message::VisionClassifiedSegment* api_segment = api_classified_image->add_segment();
-                        api_segment->set_start_x(start[0]);
-                        api_segment->set_start_y(start[1]);
-                        api_segment->set_end_x(end[0]);
-                        api_segment->set_end_y(end[1]);
-                        api_segment->set_colour(colour);
-                    }
-                }
-
-                for (auto& matchedSegment : image.matchedVerticalSegments)
-                {
-                    for (auto& columnColourSegment : matchedSegment.second)
-                    {
-                        auto& start = columnColourSegment.m_start;
-                        auto& end = columnColourSegment.m_end;
-                        auto& colour = columnColourSegment.m_colour;
-                        auto& colourClass = matchedSegment.first;
-
-                        Message::VisionTransitionSegment* api_segment = api_classified_image->add_transition_segment();
-                        api_segment->set_start_x(start[0]);
-                        api_segment->set_start_y(start[1]);
-                        api_segment->set_end_x(end[0]);
-                        api_segment->set_end_y(end[1]);
-                        api_segment->set_colour(colour);
-                        api_segment->set_colour_class(colourClass);
-                    }
-                }
-
-                for (auto& matchedSegment : image.matchedHorizontalSegments)
-                {
-                    for (auto& rowColourSegment : matchedSegment.second)
-                    {
-                        auto& start = rowColourSegment.m_start;
-                        auto& end = rowColourSegment.m_end;
-                        auto& colour = rowColourSegment.m_colour;
-                        auto& colourClass = matchedSegment.first;
-
-                        Message::VisionTransitionSegment* api_segment = api_classified_image->add_transition_segment();
-                        api_segment->set_start_x(start[0]);
-                        api_segment->set_start_y(start[1]);
-                        api_segment->set_end_x(end[0]);
-                        api_segment->set_end_y(end[1]);
-                        api_segment->set_colour(colour);
-                        api_segment->set_colour_class(colourClass);
-                    }
-                }
-
-                for (auto& greenHorizonPoint : image.greenHorizonInterpolatedPoints) {
-                    Message::VisionGreenHorizonPoint* api_ghpoint = api_classified_image->add_green_horizon_point();
-                    api_ghpoint->set_x(greenHorizonPoint[0]);
-                    api_ghpoint->set_y(greenHorizonPoint[1]);
+                    ball->mutable_circle()->set_radius(b.circle.radius);
+                    ball->mutable_circle()->mutable_centre()->set_x(b.circle.centre[0]);
+                    ball->mutable_circle()->mutable_centre()->set_y(b.circle.centre[1]);
                 }
 
                 send(message);
 
             });
 
-            goalsHandle = on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Goal> goals){
-                Message message;
+            ballsHandle = on<Trigger<std::vector<VisionGoal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionGoal>& goals) {
 
-                message.set_type(Message::VISION);
+                Message message;
+                message.set_type(Message::VISION_OBJECT);
                 message.set_utc_timestamp(getUtcTimestamp());
 
-                Message::Vision* api_vision = message.mutable_vision();
-                //NUClear::log("NUbugger emmitting goals: ", goals.size());
-                for (auto& goal : goals){
-                    Message::VisionFieldObject* api_goal = api_vision->add_vision_object();
+                for(const auto& g : goals) {
+                    auto* object = message.add_vision_object();
 
-                    api_goal->set_shape_type(Message::VisionFieldObject::QUAD);
-                    api_goal->set_goal_type(Message::VisionFieldObject::GoalType(1+int(goal.type))); //+1 to account for zero vs one referencing in message buffer.
-                    api_goal->set_name("Goal");
-                    api_goal->set_width(goal.sizeOnScreen[0]);
-                    api_goal->set_height(goal.sizeOnScreen[1]);
-                    api_goal->set_screen_x(goal.screenCartesian[0]);
-                    api_goal->set_screen_y(goal.screenCartesian[1]);
+                    object->set_type(messages::vision::proto::VisionObject::GOAL);
+                    auto* goal = object->mutable_goal();
 
-                    arma::vec3 goal_pos = utility::math::coordinates::Spherical2Cartesian(goal.sphericalFromNeck);
-
-                    switch(int(goal.type)){
-                        case(0):
-                            emit(graph("Left vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
-                            break;
-                        case(1):
-                            emit(graph("Right vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
-                            break;
-                        case(2):
-                            emit(graph("Ambiguous vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
-                    }
-
-
-                    for(auto& point : goal.screen_quad){
-                        api_goal->add_points(point[0]);
-                        api_goal->add_points(point[1]);
-                        //std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : adding quad point ( " << point[0] << " , " << point[1] << " )."<< std::endl;
-                    }
-                    for(auto& coord : goal.sphericalFromNeck){
-                        api_goal->add_measured_relative_position(coord);
-                    }
+                    goal->set_side(g.side == VisionGoal::Side::LEFT ? messages::vision::proto::VisionObject::Goal::LEFT
+                                 : g.side == VisionGoal::Side::RIGHT ? messages::vision::proto::VisionObject::Goal::RIGHT
+                                 : messages::vision::proto::VisionObject::Goal::UNKNOWN);
+                    goal->mutable_quad()->mutable_tl()->set_x(g.quad.getTopLeft()[0]);
+                    goal->mutable_quad()->mutable_tl()->set_y(g.quad.getTopLeft()[1]);
+                    goal->mutable_quad()->mutable_tr()->set_x(g.quad.getTopRight()[0]);
+                    goal->mutable_quad()->mutable_tr()->set_y(g.quad.getTopRight()[1]);
+                    goal->mutable_quad()->mutable_bl()->set_x(g.quad.getBottomLeft()[0]);
+                    goal->mutable_quad()->mutable_bl()->set_y(g.quad.getBottomLeft()[1]);
+                    goal->mutable_quad()->mutable_br()->set_x(g.quad.getBottomRight()[0]);
+                    goal->mutable_quad()->mutable_br()->set_y(g.quad.getBottomRight()[1]);
                 }
-                send(message);
-            });
 
-            ballsHandle = on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Ball> balls){
-                Message message;
-
-                message.set_type(Message::VISION);
-                message.set_utc_timestamp(getUtcTimestamp());
-
-                Message::Vision* api_vision = message.mutable_vision();
-                //std::cout<< "NUbugger::on<Trigger<std::vector<Ball>>> : sending " << balls.size() << " balls to NUbugger." << std::endl;
-                if(balls.size()>0){
-                    arma::vec3 first_ball_pos= utility::math::coordinates::Spherical2Cartesian(balls[0].sphericalFromNeck);
-                    emit(graph("Vision Ball pos", first_ball_pos[0], first_ball_pos[1],first_ball_pos[2]));
-                }
-                for (auto& ball : balls){
-                    Message::VisionFieldObject* api_ball = api_vision->add_vision_object();
-
-                    api_ball->set_shape_type(Message::VisionFieldObject::CIRCLE);
-                    api_ball->set_name("Ball");
-                    api_ball->set_width(ball.sizeOnScreen[0]);
-                    api_ball->set_height(ball.sizeOnScreen[1]);
-                    api_ball->set_screen_x(ball.screenCartesian[0]);
-                    api_ball->set_screen_y(ball.screenCartesian[1]);
-
-                    api_ball->set_radius(ball.diameter / 2.0);
-                    for(auto& coord : ball.sphericalFromNeck){
-                        api_ball->add_measured_relative_position(coord);
-                    }
-                }
                 send(message);
             });
 
@@ -589,7 +525,6 @@ namespace modules {
                     recvLookupTable(message);
                     break;
                 default:
-                    NUClear::log<NUClear::WARN>("NUbugger received unknown message type");
                     return;
             }
         }
@@ -605,21 +540,20 @@ namespace modules {
                 message.set_type(Message::LOOKUP_TABLE);
                 message.set_utc_timestamp(getUtcTimestamp());
 
-                Message::LookupTable* api_lookup_table = message.mutable_lookup_table();
+                auto* api_lookup_table = message.mutable_lookup_table();
+
                 api_lookup_table->set_table(lut->getData());
 
                 send(message);
             }
         }
 
-
         void NUbugger::recvLookupTable(const Message& message) {
             auto lookuptable = message.lookup_table();
             const std::string& lutData = lookuptable.table();
 
             NUClear::log("Loading LUT");
-            auto data = std::unique_ptr<char[]>(new char[lutData.size()]);
-            std::copy(std::begin(lutData), std::end(lutData), data.get());
+            auto data = std::vector<char>(lutData.begin(), lutData.end());
             auto lut = std::make_unique<LookUpTable>(lookuptable.bits_y(), lookuptable.bits_cb(), lookuptable.bits_cr(), std::move(data));
             emit<Scope::DIRECT>(std::move(lut));
 
@@ -644,9 +578,11 @@ namespace modules {
         }
 
         void NUbugger::send(Message message) {
-            auto serialized = message.SerializeAsString();
-            zmq::message_t packet(serialized.size());
-            memcpy(packet.data(), serialized.data(), serialized.size());
+            size_t messageSize = message.ByteSize();
+            zmq::message_t packet(messageSize + 1);
+            char* dataPtr = static_cast<char*>(packet.data());
+            message.SerializeToArray(dataPtr + 1, messageSize);
+            dataPtr[0] = message.type();
             send(packet);
         }
 

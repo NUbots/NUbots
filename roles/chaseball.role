@@ -15,7 +15,7 @@ ADD_ROLE(
 
         #Vision
         vision::LUTClassifier
-        vision::FeatureDetector
+        #vision::FeatureDetector
 
         #Localisation
         localisation::MMKFRobotLocalisation

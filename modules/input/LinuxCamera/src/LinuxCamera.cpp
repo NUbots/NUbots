@@ -25,12 +25,14 @@ extern "C" {
 
 #include "V4L2Camera.h"
 #include "messages/input/Image.h"
+#include "messages/input/CameraParameters.h"
 #include "messages/support/Configuration.h"
 
 namespace modules {
     namespace input {
 
         using messages::support::Configuration;
+        using messages::input::CameraParameters;
 
         // We assume that the device will always be video0, if not then change this
         LinuxCamera::LinuxCamera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -51,19 +53,32 @@ namespace modules {
 
             on<Trigger<Configuration<LinuxCamera>>>([this](const Configuration<LinuxCamera>& config) {
 
+                auto cameraParameters = std::make_unique<CameraParameters>();
+
+                cameraParameters->imageSizePixels << config["imageWidth"].as<uint>() << config["imageHeight"].as<uint>();
+                cameraParameters->FOV << config["FOV_X"].as<double>() << config["FOV_Y"].as<double>();
+                cameraParameters->distortionFactor = config["DISTORTION_FACTOR"].as<double>();
+                arma::vec2 tanHalfFOV;
+                tanHalfFOV << std::tan(cameraParameters->FOV[0] * 0.5) << std::tan(cameraParameters->FOV[1] * 0.5);
+                arma::vec2 imageCentre;
+                imageCentre << cameraParameters->imageSizePixels[0] * 0.5 << cameraParameters->imageSizePixels[1] * 0.5;
+                cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
+                cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
+
+                emit<Scope::DIRECT>(std::move(cameraParameters));
+
                 try {
                     // Recreate the camera device at the required resolution
-                    int width = config["imageWidth"].as<int>();
-                    int height = config["imageHeight"].as<int>();
+                    int width = config["imageWidth"].as<uint>();
+                    int height = config["imageHeight"].as<uint>();
                     std::string deviceID = config["deviceID"].as<std::string>();
                     std::string format = config["imageFormat"].as<std::string>();
-                    bool rotated = config["rotated"].as<bool>();
 
                     if (camera.getWidth() != static_cast<size_t>(width)
                         || camera.getHeight() != static_cast<size_t>(height)
                         || camera.getFormat() != format
                         || camera.getDeviceID() != deviceID) {
-                        camera.resetCamera(deviceID, format, width, height, rotated);
+                        camera.resetCamera(deviceID, format, width, height);
                     }
 
                     // Set all other camera settings

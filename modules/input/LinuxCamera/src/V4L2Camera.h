@@ -76,8 +76,6 @@ namespace modules {
             /// @brief Whether the camera is currently in streaming mode
             bool streaming;
 
-            /// @brief Whether the camera is mounted upside down
-            bool rotated;
         public:
 
             /// @brief this enum holds important constants (we are c++ we don't use defines for this kind of thing)
@@ -113,7 +111,7 @@ namespace modules {
              * @param h the image's height
              * @param f whether the camera is mounted upside down
              */
-            void resetCamera(const std::string& device, const std::string& fmt, size_t w, size_t h, bool f);
+            void resetCamera(const std::string& device, const std::string& fmt, size_t w, size_t h);
 
             /**
              * @brief Returns a map of all configurable settings

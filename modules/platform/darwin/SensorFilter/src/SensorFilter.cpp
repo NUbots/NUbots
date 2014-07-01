@@ -21,6 +21,7 @@
 
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/Sensors.h"
+#include "messages/input/CameraParameters.h"
 #include "messages/support/Configuration.h"
 #include "utility/nubugger/NUgraph.h"
 #include "utility/math/matrix.h"
@@ -34,6 +35,7 @@ namespace modules {
             using messages::support::Configuration;
             using messages::platform::darwin::DarwinSensors;
             using messages::input::Sensors;
+            using messages::input::CameraParameters;
             using utility::nubugger::graph;
             using messages::input::ServoID;
             using utility::motion::kinematics::calculateAllPositions;
@@ -66,9 +68,12 @@ namespace modules {
                     MEASUREMENT_NOISE_GYROSCOPE = arma::eye(3,3) * file["MEASUREMENT_NOISE_GYROSCOPE"].as<double>();
                 });
 
-                on<Trigger<DarwinSensors>,
-                   With<Optional<Sensors>>,
-                   Options<Single>>([this](const DarwinSensors& input, const std::shared_ptr<const Sensors>& previousSensors) {
+                on< Trigger<DarwinSensors>
+                  , With<Optional<Sensors>>
+                  , With<CameraParameters>
+                  , Options<Single>>([this](const DarwinSensors& input,
+                                            const std::shared_ptr<const Sensors>& previousSensors,
+                                            const CameraParameters& cameraParameters) {
 
                     auto sensors = std::make_unique<Sensors>();
 
@@ -250,6 +255,7 @@ namespace modules {
 
                     // Gives us the quaternion representation
                     arma::vec o = orientationFilter.get();
+                    //Map from robot to world coordinates
                     sensors->orientation = quaternionToRotationMatrix(o.rows(orientationFilter.model.QW, orientationFilter.model.QZ));
 
                     // sensors->orientation.col(2) = -orientation.rows(0,2);
@@ -334,6 +340,13 @@ namespace modules {
                         sensors->odometry.submat(0,0,2,2) =  previousSensors->orientation.t() * sensors->orientation;
                     }
 
+                    if(sensors->leftFootDown){
+                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::L_ANKLE_PITCH](2,3);
+                    } else if(sensors->rightFootDown){
+                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::R_ANKLE_PITCH](2,3);
+                    } else {
+                        sensors->bodyCentreHeight = 0;
+                    }
 
                     /************************************************
                      *                  Mass Model                  *
@@ -342,6 +355,37 @@ namespace modules {
                     arma::vec4 COM = calculateCentreOfMass<DarwinModel>(sensors->forwardKinematics, true);
                     sensors->centreOfMass = {COM[0],COM[1], COM[2], COM[3]};
                     //END MASS MODEL
+
+
+                    /************************************************
+                     *                  Kinematics Horizon          *
+                     ************************************************/
+
+
+                    sensors->orientationCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH], 
+                                                                                                        sensors->orientation.submat(0,2,2,2),
+                                                                                                        sensors->bodyCentreHeight);
+                    sensors->orientationHorizon = utility::motion::kinematics::calculateHorizon(sensors->orientationCamToGround.submat(0,0,2,2).t(),cameraParameters.focalLengthPixels);
+
+
+                    if(sensors->leftFootDown) {
+                        sensors->kinematicsCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH], 
+                                                                                                        sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,2,2,2),
+                                                                                                        sensors->bodyCentreHeight);
+                        
+                    } else if (sensors->rightFootDown) {
+                        sensors->kinematicsCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH], 
+                                                                                                        sensors->forwardKinematics[ServoID::R_ANKLE_ROLL].submat(0,2,2,2),
+                                                                                                        sensors->bodyCentreHeight);
+                    }
+                    else {
+                        sensors->kinematicsCamToGround = sensors->orientationCamToGround;
+                    }
+                    // std::cout << "sensors->kinematicsCamToGround\n" << sensors->kinematicsCamToGround << std::endl;
+                    // std::cout << "sensors->orientationCamToGround\n" << sensors->orientationCamToGround << std::endl;
+                    // std::cout << "sensors->bodyCentreHeight\n" << sensors->bodyCentreHeight << std::endl;
+
+                    sensors->kinematicsHorizon = utility::motion::kinematics::calculateHorizon(sensors->kinematicsCamToGround.submat(0,0,2,2).t(), cameraParameters.focalLengthPixels);
 
                     /*emit(graph("Filtered Gravity Vector",
                             float(orientation[0]*9.807),
