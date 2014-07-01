@@ -22,19 +22,25 @@
 
 #include "utility/support/armayamlconversions.h"
 #include "utility/math/optimisation/PGAoptimiser.h"
+#include "messages/input/ServoID.h"
 
 namespace modules {
     namespace support {
         namespace optimisation {
 
-            using messages::support::Configuration;
             using messages::behaviour::FixedWalkCommand;
             using messages::behaviour::FixedWalkFinished;
             using messages::behaviour::WalkOptimiserCommand;
+            using messages::behaviour::WalkConfigSaved;
+
             using messages::input::Sensors;
+            using messages::input::ServoID;
+
             using messages::motion::ExecuteGetup;
             using messages::motion::KillGetup;
+            
             using messages::support::SaveConfiguration;
+            using messages::support::Configuration;
 
 
             WalkOptimiser::WalkOptimiser(std::unique_ptr<NUClear::Environment> environment)
@@ -88,9 +94,14 @@ namespace modules {
                     std::cerr << "Sample: " << currentSample <<std::endl;            
                     //Apply the parameters to the walk engine        
                     setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
-                    //Send our walk behaviour command
+                    //Now wait for WalkConfigSaved
+                    
+                });
+
+                on<Trigger<WalkConfigSaved>>([this](const WalkConfigSaved&){
+                    //Start a walk routine
                     auto command = std::make_unique<FixedWalkCommand>(walk_command);
-                    emit(std::move(command));
+                    emit(std::move(command));                   
                 });
 
                 on< Trigger< Every<25, Per<std::chrono::seconds>> >, With<Sensors> >("Walk Data Manager", [this](const time_t& t, const Sensors& sensors){
@@ -102,11 +113,11 @@ namespace modules {
                     //Record the robot falling over
                     data.recordGetup();
                     //If this set of parameters is very bad, stop the trial and send cancel fixed walk command
-                    if(data.numberOfGetups > getup_cancel_trial_threshold){
-                        
+                    if(data.numberOfGetups > getup_cancel_trial_threshold){                        
                         emit(std::make_unique<FixedWalkFinished>());
                     }                   
                 });
+
                 on<Trigger<KillGetup>>("Getup Recording", [this](const KillGetup& command){
                     data.getupFinished();                    
                 });
@@ -121,9 +132,7 @@ namespace modules {
                         //Setup new parameters
                         std::cerr << "Sample:" << ++currentSample <<std::endl;
                         setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
-                        //Start a walk routine
-                        auto command = std::make_unique<FixedWalkCommand>(walk_command);
-                        emit(std::move(command));
+                        //Now wait for WalkConfigSaved
                     }
                 });
 
@@ -173,7 +182,7 @@ namespace modules {
                 }
                 printState(state);
                 return config;
-            }    
+            }
 
             void WalkOptimiser::saveConfig(const Configuration<WalkOptimiserCommand>& config){
                 auto saveConfig = std::make_unique<SaveConfiguration>();
@@ -200,6 +209,12 @@ namespace modules {
                 return result;
             }
             void FitnessData::update(const messages::input::Sensors& sensors){
+                if(recording){
+                    arma::vec3 verticalKinematics = sensors.orientationCamToGround.submat(0,2,2,2);
+                    arma::vec3 verticalOrientation = sensors.kinematicsCamToGround.submat(0,2,2,2);
+                    tilt(std::acos(arma::dot(verticalOrientation, verticalKinematics)));
+                }
+                
             }
             void FitnessData::recordGetup(){
                 numberOfGetups++;

@@ -89,7 +89,7 @@ namespace modules {
                 });
 
 				on<Trigger<FixedWalkCommand>, Options<Sync<FixedWalk>>, With<Sensors> >([this](const FixedWalkCommand& command, const Sensors& sensors){
-	        		if(!active){
+                    if(!active && !command.segments.empty()){
                         active = true;
 	        			segmentStart = NUClear::clock::now();
 	        			beginningOrientation = sensors.orientation;

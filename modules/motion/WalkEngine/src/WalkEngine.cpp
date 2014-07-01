@@ -47,6 +47,7 @@ namespace modules {
         using messages::input::ServoID;
         using messages::behaviour::ServoCommand;
         using messages::behaviour::WalkOptimiserCommand;
+        using messages::behaviour::WalkConfigSaved;
         using messages::support::Configuration;
         using utility::motion::kinematics::DarwinModel;
         using utility::nubugger::graph;
@@ -124,7 +125,7 @@ namespace modules {
             });            
 
             on<Trigger<Startup>>([this](const Startup&) {
-                stopRequest = 2;
+                
                 reset();
                 //start();
             });
@@ -246,12 +247,14 @@ namespace modules {
             saveScript->path = "scripts/Stand.yaml";
             saveScript->config = standScript;
             emit(std::move(saveScript));
+            emit(std::make_unique<WalkConfigSaved>());
         }
 
         void WalkEngine::reset(){
             // g--------------------------------------------------------
                 // g Walk state variables
                 // g--------------------------------------------------------
+                stopRequest = 2;
 
                 uTorso = {supportX, 0, 0};
                 uLeft = {0, footY, 0};
@@ -285,7 +288,6 @@ namespace modules {
                 tLastStep = getTime();
                 ph0=0;
                 ph=0;
-
                 currentStepType = 0;
 
                 initialStep = 2;
