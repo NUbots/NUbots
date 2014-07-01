@@ -20,6 +20,7 @@ class nuclearport::build_dep (
   package { 'libsndfile-dev': ensure => latest }
   package { 'libyaml-cpp-dev': ensure => latest }
   include armadillo
+  include quex
 
   class { 'nuclear':
     username => $username,
