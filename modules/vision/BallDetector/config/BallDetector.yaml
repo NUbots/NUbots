@@ -1,5 +1,6 @@
-MINIMUM_POINTS: 6
-MAX_ITERATIONS_PER_FITTING: 100
-CONSENSUS_THRESHOLD: 5.0
-MAX_FITTING_ATTEMPTS: 3
-SELECTION_METHOD: LARGEST_CONSENSUS
+ransac:
+  minimum_points: 10
+  max_iterations_per_fitting: 100
+  consensus_threshold: 1
+  max_fitting_attempts: 2
+  selection_method: LARGEST_CONSENSUS

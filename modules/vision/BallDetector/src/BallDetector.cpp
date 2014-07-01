@@ -56,7 +56,7 @@ namespace vision {
 
         on<Trigger<Configuration<BallDetector>>>([this](const Configuration<BallDetector>& config) {
 
-            std::string selectionMethod = config["SELECTION_METHOD"].as<std::string>();
+            std::string selectionMethod = config["ransac"]["selection_method"].as<std::string>();
 
             if (selectionMethod.compare("LARGEST_CONSENSUS") == 0) {
                 SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
@@ -68,10 +68,10 @@ namespace vision {
                 SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
             }
 
-            MINIMUM_POINTS = config["MINIMUM_POINTS"].as<uint>();
-            CONSENSUS_THRESHOLD = config["CONSENSUS_THRESHOLD"].as<double>();
-            MAX_ITERATIONS_PER_FITTING = config["MAX_ITERATIONS_PER_FITTING"].as<uint>();
-            MAX_FITTING_ATTEMPTS = config["MAX_FITTING_ATTEMPTS"].as<uint>();
+            MINIMUM_POINTS = config["ransac"]["minimum_points"].as<uint>();
+            CONSENSUS_THRESHOLD = config["ransac"]["consensus_threshold"].as<double>();
+            MAX_ITERATIONS_PER_FITTING = config["ransac"]["max_iterations_per_fitting"].as<uint>();
+            MAX_FITTING_ATTEMPTS = config["ransac"]["max_fitting_attempts"].as<uint>();
         });
 
 
