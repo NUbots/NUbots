@@ -8,6 +8,7 @@ class nuclearport::build_dep (
   ) {
   package { 'build-essential': ensure => latest }
   package { 'cmake': ensure => latest }
+  include ninja
   package { 'git': ensure => latest }
   # package { 'openssh-server': ensure => latest }
   package { ['libprotobuf-dev', 'protobuf-compiler']: ensure => latest }
@@ -17,7 +18,8 @@ class nuclearport::build_dep (
   package { 'libjpeg-turbo8-dev': ensure => latest }
   package { 'libfftw3-dev': ensure => latest }
   package { 'libaubio-dev': ensure => latest }
-  package { 'libsndfile-dev': ensure => latest }
+  package { 'libsndfile-dev': ensure => latest } # virtual package
+  # package { 'libsndfile1-dev': ensure => latest } # we only need this?
   package { 'libyaml-cpp-dev': ensure => latest }
   include armadillo
   include quex

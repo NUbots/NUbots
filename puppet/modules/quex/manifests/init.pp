@@ -8,5 +8,6 @@ class quex {
     exec { 'install-quex':
         command => 'bash /tmp/installquex.sh',
         path => $path,
+        creates => '/usr/local/bin/quex',
     }
 }
