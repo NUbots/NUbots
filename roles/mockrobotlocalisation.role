@@ -1,9 +1,0 @@
-ADD_ROLE(
-    NAME mockrobotlocalisation
-    MODULES
-        support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem
-        support::NUbugger
-        localisation::MMKFRobotLocalisation
-        localisation::KFBallLocalisation
-        localisation::MockRobot)

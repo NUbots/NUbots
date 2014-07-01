@@ -19,175 +19,134 @@
 
 #include "LUTClassifier.h"
 
-#include <yaml-cpp/yaml.h>
-
+#include "messages/input/Image.h"
+#include "messages/input/CameraParameters.h"
+#include "messages/input/Sensors.h"
 #include "messages/vision/LookUpTable.h"
 #include "messages/vision/SaveLookUpTable.h"
+#include "messages/support/Configuration.h"
+
+#include "QuexClassifier.h"
+
+#include "Lexer.hpp"
 
 namespace modules {
     namespace vision {
 
         using messages::input::Image;
-        using messages::vision::ColourSegment;
-        using messages::support::Configuration;
-        using messages::vision::ClassifiedImage;
-        using messages::vision::SegmentedRegion;
+        using messages::input::ServoID;
+        using messages::input::Sensors;
+        using messages::input::CameraParameters;
         using messages::vision::LookUpTable;
         using messages::vision::SaveLookUpTable;
+        using messages::vision::ObjectClass;
+        using messages::vision::ClassifiedImage;
+        using messages::support::Configuration;
+        using messages::support::SaveConfiguration;
 
-        using std::chrono::system_clock;
+        void LUTClassifier::insertSegments(ClassifiedImage<ObjectClass>& image, std::vector<ClassifiedImage<ObjectClass>::Segment>& segments, bool vertical) {
+            ClassifiedImage<ObjectClass>::Segment* previous = nullptr;
+            ClassifiedImage<ObjectClass>::Segment* current = nullptr;
 
-        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), greenHorizon(), scanLines() {
+            auto& target = vertical ? image.verticalSegments : image.horizontalSegments;
 
-            on<Trigger<Configuration<VisionConstants>>>([this](const Configuration<VisionConstants>&) {
-                //std::cout<< "Loading VisionConstants."<<std::endl;
-                //std::cout<< "Finished Config Loading successfully."<<std::endl;
-            });
+            for (auto& s : segments) {
 
-            //Load LUTs
-            on<Trigger<Configuration<LUTLocations>>>([this](const Configuration<LUTLocations>& config) {
-                std::string LUTLocation = config["LUT_LOCATION"].as<std::string>();
-                emit(std::make_unique<LookUpTable>(LUTLocation));
-            });
+                // Move in the data
+                current = &(target.insert(std::make_pair(s.colour, std::move(s)))->second);
 
-            on<Trigger<SaveLookUpTable>, With<LookUpTable, Configuration<LUTLocations>>>([this](const SaveLookUpTable&, const LookUpTable& lut, const Configuration<LUTLocations>& config) {
-                std::string LUTLocation = config["LUT_LOCATION"].as<std::string>();
-                lut.save(LUTLocation);
-            });
-
-            //Load in greenhorizon parameters
-            on<Trigger<Configuration<GreenHorizonConfig>>>([this](const Configuration<GreenHorizonConfig>& constants) {
-                //std::cout<< "Loading gh cONFIG."<<std::endl;
-                greenHorizon.setParameters(constants.config["GREEN_HORIZON_SCAN_SPACING"].as<uint>(),
-                                           constants.config["GREEN_HORIZON_MIN_GREEN_PIXELS"].as<uint>(),
-                                           constants.config["GREEN_HORIZON_UPPER_THRESHOLD_MULT"].as<float>());
-                //std::cout<< "Finished Config Loading successfully."<<std::endl;
-            });
-
-            //Load in scanline parameters
-            on<Trigger<Configuration<ScanLinesConfig>>>([this](const Configuration<ScanLinesConfig>& constants) {
-                //std::cout<< "Loading ScanLines config."<<std::endl;
-                scanLines.setParameters(constants.config["HORIZONTAL_SCANLINE_SPACING"].as<uint>(),
-                                         constants.config["VERTICAL_SCANLINE_SPACING"].as<uint>(),
-                                         constants.config["APPROXIMATE_SEGS_PER_HOR_SCAN"].as<uint>(),
-                                         constants.config["APPROXIMATE_SEGS_PER_VERT_SCAN"].as<uint>());
-                //std::cout<< "Finished Config Loading successfully."<<std::endl;
-            });
-
-
-            on<Trigger<Configuration<RulesConfig>>>([this](const Configuration<RulesConfig>& rules) {
-                //std::cout<< "Loading Rules config."<<std::endl;
-                segmentFilter.clearRules();
-                if(rules.config["USE_REPLACEMENT_RULES"]){
-
-                    for (const auto& rule : rules.config["REPLACEMENT_RULES"]) {
-                        //std::cout << "Loading Replacement rule : " << rule.first << std::endl;
-
-                        ColourReplacementRule r;
-
-                        std::vector<uint> before = rule.second["before"]["vec"].as<std::vector<uint>>();
-                        std::vector<uint> middle = rule.second["middle"]["vec"].as<std::vector<uint>>();
-                        std::vector<uint> after = rule.second["after"]["vec"].as<std::vector<uint>>();
-
-                        r.loadRuleFromConfigInfo(rule.second["before"]["colour"].as<std::string>(),
-                                                rule.second["middle"]["colour"].as<std::string>(),
-                                                rule.second["after"]["colour"].as<std::string>(),
-                                                before[0],//min
-                                                before[1],//max, etc.
-                                                middle[0],
-                                                middle[1],
-                                                after[0],
-                                                after[1],
-                                                rule.second["replacement"].as<std::string>());
-
-                        //Neat method which is broken due to config system
-                        /*r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
-                                                rule.second["middle"]["colour"],
-                                                rule.second["after"]["colour"],
-                                                unint_32(rule.second["before"]["vec"][0]),//min
-                                                unint_32(rule.second["before"]["vec"][1]),//max, etc.
-                                                unint_32(rule.second["middle"]["vec"][0]),
-                                                unint_32(rule.second["middle"]["vec"][1]),
-                                                unint_32(rule.second["after"]["vec"][0]),
-                                                unint_32(rule.second["after"]["vec"][1]),
-                                                rule.second["replacement"]);*/
-                        segmentFilter.addReplacementRule(r);
-                        //std::cout<< "Finished Config Loading successfully."<<std::endl;
-                    }
+                // Link up the results
+                current->previous = previous;
+                if(previous) {
+                    previous->next = current;
                 }
 
-                for(const auto& rule : rules.config["TRANSITION_RULES"]) {
-                    //std::cout << "Loading Transition rule : " << rule.first << std::endl;
+                // Get ready for our next one
+                previous = current;
+            }
+        }
 
-                    ColourTransitionRule r;
+        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), quex(new QuexClassifier) {
 
-                    std::vector<unsigned int> before = rule.second["before"]["vec"].as<std::vector<uint>>();
-                    std::vector<unsigned int> middle = rule.second["middle"]["vec"].as<std::vector<uint>>();
-                    std::vector<unsigned int> after = rule.second["after"]["vec"].as<std::vector<uint>>();
-
-                    r.loadRuleFromConfigInfo(rule.second["before"]["colour"].as<std::string>(),
-                                            rule.second["middle"]["colour"].as<std::string>(),
-                                            rule.second["after"]["colour"].as<std::string>(),
-                                            before[0],//min
-                                            before[1],//max, etc.
-                                            middle[0],
-                                            middle[1],
-                                            after[0],
-                                            after[1]);
-                    //Neat method which is broken due to config system
-                    /*r.loadRuleFromConfigInfo(rule.second["before"]["colour"],
-                                            rule.second["middle"]["colour"],
-                                            rule.second["after"]["colour"],
-                                            static_cast<uint_32>(rule.second["before"]["vec"][0]),
-                                            static_cast<uint_32>(rule.second["before"]["vec"][1]),
-                                            static_cast<uint_32>(rule.second["middle"]["vec"][0]),
-                                            static_cast<uint_32>(rule.second["middle"]["vec"][1]),
-                                            static_cast<uint_32>(rule.second["after"]["vec"][0]),
-                                            static_cast<uint_32>(rule.second["after"]["vec"][1]));
-                                            unint_32(rule.second["after"]["vec"][1]));*/
-                    segmentFilter.addTransitionRule(r);
-                    //std::cout<< "Finished Config Loading successfully."<<std::endl;
-                }
+            on<Trigger<Configuration<LUTLocation>>>([this](const Configuration<LUTLocation>& config) {
+                emit(std::make_unique<LookUpTable>(config.config.as<LookUpTable>()));
             });
 
-            on<Trigger<Image>, With<LookUpTable, Raw<Image>, Raw<LookUpTable>>, Options<Single>>([this](const Image& image, const LookUpTable& lut, const std::shared_ptr<const Image>& imagePtr, const std::shared_ptr<const LookUpTable> lutPtr) { // TODO: fix!
-                /*std::vector<arma::vec2> green_horizon_points = */
-                //std::cout << "Image size = "<< image.width() << "x" << image.height() <<std::endl;
-                //std::cout << "LUTClassifier::on<Trigger<Image>> calculateGreenHorizon" << std::endl;
-                greenHorizon.calculateGreenHorizon(image, lut);
+            on<Trigger<SaveLookUpTable>, With<LookUpTable>>([this](const SaveLookUpTable&, const LookUpTable& lut) {
+                emit(std::make_unique<SaveConfiguration>(SaveConfiguration{ LUTLocation::CONFIGURATION_PATH, YAML::Node(lut) }));
+            });
 
-                //std::cout << "LUTClassifier::on<Trigger<Image>> generateScanLines" << std::endl;
-                std::vector<int> generatedScanLines;
-                SegmentedRegion horizontalClassifiedSegments, verticalClassifiedSegments;
+            auto setParams = [this] (const CameraParameters& cam, const Configuration<LUTClassifier>& config) {
 
-                scanLines.generateScanLines(image, greenHorizon, &generatedScanLines);
+                // Visual horizon detector
+                VISUAL_HORIZON_SPACING = cam.focalLengthPixels * tan(config["visual_horizon"]["spacing"].as<double>());
+                VISUAL_HORIZON_BUFFER = cam.focalLengthPixels * tan(config["visual_horizon"]["horizon_buffer"].as<double>());
+                VISUAL_HORIZON_SUBSAMPLING = std::max(1, int(cam.focalLengthPixels * tan(config["visual_horizon"]["subsampling"].as<double>())));
+                VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE = cam.focalLengthPixels * tan(config["visual_horizon"]["minimum_segment_size"].as<double>());
 
-                //std::cout << "LUTClassifier::on<Trigger<Image>> classifyHorizontalScanLines" << std::endl;
-                scanLines.classifyHorizontalScanLines(image, generatedScanLines, lut, &horizontalClassifiedSegments);
+                // Goal detector
+                GOAL_LINE_SPACING = cam.focalLengthPixels * tan(config["goals"]["spacing"].as<double>());
+                GOAL_SUBSAMPLING = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["subsampling"].as<double>())));
+                GOAL_EXTENSION_SCALE = config["goals"]["extension_scale"].as<double>() / 2;
+                GOAL_MAXIMUM_VERTICAL_CLUSTER_SPACING = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["maximum_vertical_cluster_spacing"].as<double>())));
+                GOAL_VERTICAL_CLUSTER_UPPER_BUFFER = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["vertical_cluster_upper_buffer"].as<double>())));
+                GOAL_VERTICAL_CLUSTER_LOWER_BUFFER = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["vertical_cluster_lower_buffer"].as<double>())));
+                GOAL_VERTICAL_SD_JUMP = config["goals"]["vertical_sd_jump"].as<double>();
 
-                //std::cout << "LUTClassifier::on<Trigger<Image>> classifyVerticalScanLines" << std::endl;
-                scanLines.classifyVerticalScanLines(image, greenHorizon, lut, &verticalClassifiedSegments);
+                // Ball Detector
+                BALL_MINIMUM_INTERSECTIONS_COARSE = config["ball"]["intersections_coarse"].as<double>();
+                BALL_MINIMUM_INTERSECTIONS_FINE = config["ball"]["intersections_fine"].as<double>();
+                BALL_SEARCH_CIRCLE_SCALE = config["ball"]["search_circle_scale"].as<double>();
+                BALL_MAXIMUM_VERTICAL_CLUSTER_SPACING = std::max(1, int(cam.focalLengthPixels * tan(config["ball"]["maximum_vertical_cluster_spacing"].as<double>())));
+                BALL_HORIZONTAL_SUBSAMPLE_FACTOR = config["ball"]["horizontal_subsample_factor"].as<double>();
 
-                //std::cout << "LUTClassifier::on<Trigger<Image>> classifyImage" << std::endl;
-                std::unique_ptr<ClassifiedImage> classifiedImage = segmentFilter.classifyImage(horizontalClassifiedSegments, verticalClassifiedSegments);
-                classifiedImage->image = imagePtr;
-                classifiedImage->LUT = lutPtr;
-                classifiedImage->greenHorizonInterpolatedPoints = greenHorizon.getInterpolatedPoints();
+                // Camera settings
+                ALPHA = cam.pixelsToTanThetaFactor[1];
+                FOCAL_LENGTH_PIXELS = cam.focalLengthPixels;
+            };
 
-                //std::cout << "LUTClassifier::on<Trigger<Image>> emit(std::move(classified_image));" << std::endl;
+            // Trigger the same function when either update
+            on<Trigger<CameraParameters>, With<Configuration<LUTClassifier>>>(setParams);
+            on<With<CameraParameters>, Trigger<Configuration<LUTClassifier>>>(setParams);
+
+            on<Trigger<Image>, With<LookUpTable, Sensors>, Options<Single>>("Classify Image", [this](const Image& image, const LookUpTable& lut, const Sensors& sensors) {
+
+                // Our classified image
+                auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
+
+                // Set our width and height
+                classifiedImage->dimensions = { image.width(), image.height() };
+
+                // Find our horizon
+                findHorizon(image, lut, sensors, *classifiedImage);
+
+                // Find our visual horizon
+                findVisualHorizon(image, lut, sensors, *classifiedImage);
+
+                // Find our goals
+                findGoals(image, lut, sensors, *classifiedImage);
+
+                // Enhance our goals
+                enhanceGoals(image, lut, sensors, *classifiedImage);
+
+                // Find our ball
+                findBall(image, lut, sensors, *classifiedImage);
+
+                // Find our goals base
+                findGoalBases(image, lut, sensors, *classifiedImage);
+
+                // Enhance our ball
+                enhanceBall(image, lut, sensors, *classifiedImage);
+
+                // Emit our classified image
                 emit(std::move(classifiedImage));
             });
 
-            // on<Trigger<Image>>([this](const Image& image) {
+        }
 
-            //  //NUClear::log("Waiting 100 milliseconds...");
-
-            //  system_clock::time_point start = system_clock::now();
-
-            //  while (std::chrono::duration_cast<std::chrono::milliseconds>(system_clock::now().time_since_epoch()) -
-            //          std::chrono::duration_cast<std::chrono::milliseconds>(start.time_since_epoch())  < std::chrono::milliseconds(3)){}
-
-            // });
+        LUTClassifier::~LUTClassifier() {
+            // TODO work out how to fix pimpl and fix it damnit!!
+            delete quex;
         }
 
     }  // vision

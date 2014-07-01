@@ -25,7 +25,7 @@
 namespace messages {
     namespace vision {
 
-        LookUpTable::LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::unique_ptr<char[]>&& data)
+        LookUpTable::LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::vector<char>&& data)
             : BITS_Y(bitsY)
             , BITS_CB(bitsCb)
             , BITS_CR(bitsCr)
@@ -35,37 +35,17 @@ namespace messages {
             , BITS_CR_REMOVED(sizeof(uint8_t) * 8 - BITS_CR)
             , BITS_CB_CR(BITS_CB + BITS_CR)
             , data(std::move(data)) {
-            
         }
 
-        LookUpTable::LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr)
-            : LookUpTable(bitsY, bitsCb, bitsCr, std::unique_ptr<char[]>(new char[1 << (bitsY + bitsCb + bitsCr)])) {
-            std::fill(data.get(), data.get() + LUT_SIZE, 0);
+        LookUpTable::LookUpTable() {
         }
 
-
-        LookUpTable::LookUpTable(std::tuple<uint8_t, uint8_t, uint8_t, std::unique_ptr<char[]>> data)
-            : LookUpTable(std::get<0>(data), std::get<1>(data), std::get<2>(data), std::move(std::get<3>(data))) {   
-        }
-        
-        LookUpTable::LookUpTable(std::string& filename) : LookUpTable(createLookUpTableFromFile(filename)) {
-        }
-
-        std::tuple<uint8_t, uint8_t, uint8_t, std::unique_ptr<char[]>> LookUpTable::createLookUpTableFromFile(std::string& filename) {
-            // read
-            std::ifstream lutfile(filename, std::ios::binary);
-            auto input = std::istreambuf_iterator<char>(lutfile);
-            uint8_t bitsY = *(input++);
-            uint8_t bitsCb = *(input++);
-            uint8_t bitsCr = *(input++);
-            const size_t size = std::exp2(bitsY + bitsCb + bitsCr);
-            auto data = std::unique_ptr<char[]>(new char[size]);
-            std::copy(input, std::istreambuf_iterator<char>(), data.get());
-            return std::make_tuple(bitsY, bitsCb, bitsCr, std::move(data));
-        }
-
-        messages::vision::Colour LookUpTable::classifyPixel(const messages::input::Image::Pixel& p) const {
+        messages::vision::Colour LookUpTable::classify(const messages::input::Image::Pixel& p) const {
             return messages::vision::Colour(data[getLUTIndex(p)]); // 7bit LUT
+        }
+
+        std::string LookUpTable::getData() const {
+            return std::string(data.begin(), data.end());
         }
 
         uint LookUpTable::getLUTIndex(const messages::input::Image::Pixel& colour) const {
@@ -76,15 +56,6 @@ namespace messages {
             index += (colour.cr >> BITS_CR_REMOVED);
 
             return index;
-        }
-
-        void LookUpTable::save(const std::string& fileName) const {
-            std::ofstream lutfile(fileName, std::ios::binary);
-            auto output = std::ostreambuf_iterator<char>(lutfile);
-            output = (char) BITS_Y;
-            output = (char) BITS_CB;
-            output = (char) BITS_CR;
-            std::copy(data.get(), data.get() + LUT_SIZE, output);
         }
 
     } //vision

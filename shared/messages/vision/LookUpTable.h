@@ -33,67 +33,50 @@
 #include <string>
 #include <cmath>
 #include <cstring>
+#include <yaml-cpp/yaml.h>
 #include "messages/input/Image.h"
 
 namespace messages {
     namespace vision {
 
-        enum Colour {
-            unclassified, //!< Colour has not be given a category.
-            white, //!< Colour is in the White region.
-            green, //!< Colour is in the Green region.
-            shadow_object, //!< Colour is part of a shadowed area.
-            pink, //!< Colour is in the Red region.
-            pink_orange, //!< Colour is in the region of overlap between Red and Orange.
-            orange, //!< Colour is in the Orange region.
-            yellow_orange, //!< Colour is in the region of overlap between Yellow and Orange.
-            yellow, //!< Colour is in the Yellow region.
-            blue, //!< Colour is in the Sky Blue region.
-            shadow_blue, //!< Colour is in the Dark Blue region.
-            num_colours, //!< Total number of colour categories.
-            invalid
-        };
+        enum Colour : char {
+            // Main classifications
+            UNCLASSIFIED = 'u',
+            WHITE        = 'w',
+            GREEN        = 'g',
+            ORANGE       = 'o',
+            YELLOW       = 'y',
+            CYAN         = 'c',
+            MAGENTA      = 'm',
 
-        enum COLOUR_CLASS {
-            BALL_COLOUR,
-            GOAL_COLOUR,
-            // GOAL_Y_COLOUR,
-            // GOAL_B_COLOUR,
-            LINE_COLOUR,
-            TEAM_CYAN_COLOUR,
-            TEAM_MAGENTA_COLOUR,
-            FIELD_COLOUR,
-            UNKNOWN_COLOUR
+            // Ambiguous Classifications
+            WHITE_GREEN  = 'f'
         };
 
         class LookUpTable {
         public:
-            const uint8_t BITS_Y;
-            const uint8_t BITS_CB;
-            const uint8_t BITS_CR;
-            const size_t LUT_SIZE; //!< The size of a lookup table in bytes.
+            uint8_t BITS_Y;
+            uint8_t BITS_CB;
+            uint8_t BITS_CR;
+            size_t LUT_SIZE; //!< The size of a lookup table in bytes.
 
-            LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr);
-            LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::unique_ptr<char[]>&& data);
-            LookUpTable(std::string& filename);
+            LookUpTable();
+            LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::vector<char>&& data);
 
-            void save(const std::string& fileName) const;
-            std::string getData() const {
-                return std::string(data.get(), LUT_SIZE);
-            }
+            std::string getData() const;
+
             /*!
                 @brief Classifies a pixel
                 @param p the pixel
                 @return Returns the colour classification of this pixel
              */
-            messages::vision::Colour classifyPixel(const messages::input::Image::Pixel& p) const;
+            messages::vision::Colour classify(const messages::input::Image::Pixel& p) const;
         private:
-            LookUpTable(std::tuple<uint8_t, uint8_t, uint8_t, std::unique_ptr<char[]>> data);
 
-            const uint8_t BITS_Y_REMOVED;
-            const uint8_t BITS_CB_REMOVED;
-            const uint8_t BITS_CR_REMOVED;
-            const uint8_t BITS_CB_CR;
+            uint8_t BITS_Y_REMOVED;
+            uint8_t BITS_CB_REMOVED;
+            uint8_t BITS_CR_REMOVED;
+            uint8_t BITS_CB_CR;
 
             /*!
              *   @brief Gets the index of the pixel in the LUT
@@ -101,11 +84,43 @@ namespace messages {
              *   @return Returns the colour index for the given pixel.
              */
             uint getLUTIndex(const messages::input::Image::Pixel& colour) const;
-            static std::tuple<uint8_t, uint8_t, uint8_t, std::unique_ptr<char[]>> createLookUpTableFromFile(std::string& filename);
-            std::unique_ptr<char[]> data;
+            std::vector<char> data;
         };
 
     } //vision
 } // messages
+
+// YAML conversions
+namespace YAML {
+
+    template<>
+    struct convert<messages::vision::LookUpTable> {
+        static Node encode(const messages::vision::LookUpTable& rhs) {
+            Node node;
+
+            node["bits"]["y"] = uint(rhs.BITS_Y);
+            node["bits"]["cb"] = uint(rhs.BITS_CB);
+            node["bits"]["cr"] = uint(rhs.BITS_CR);
+
+            node["lut"] = rhs.getData();
+
+            return node;
+        }
+
+        static bool decode(const Node& node, messages::vision::LookUpTable& rhs) {
+
+            uint8_t bitsY = node["bits"]["y"].as<uint>();
+            uint8_t bitsCb = node["bits"]["cb"].as<uint>();
+            uint8_t bitsCr = node["bits"]["cr"].as<uint>();
+
+            std::string dataString = node["lut"].as<std::string>();
+            std::vector<char> data(dataString.begin(), dataString.end());
+
+            rhs = messages::vision::LookUpTable(bitsY, bitsCb, bitsCr, std::move(data));
+
+            return true;
+        }
+    };
+}
 
 #endif // MESSAGES_VISION_LOOKUPTABLE_H

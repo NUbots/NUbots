@@ -20,7 +20,7 @@ IF("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
     ENDIF()
 
     IF(GCC_VERSION VERSION_GREATER "4.9" OR GCC_VERSION VERSION_EQUAL "4.9")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined -fdiagnostics-color=always")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
     ENDIF()
 
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")

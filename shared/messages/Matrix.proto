@@ -1,0 +1,113 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+
+package messages;
+
+message mat33 {
+    required float xx = 1;
+    required float xy = 2;
+    required float xz = 3;
+    required float yx = 4;
+    required float yy = 5;
+    required float yz = 6;
+    required float zx = 7;
+    required float zy = 8;
+    required float zz = 9;
+}
+
+message mat44 {
+    required float xx = 1;
+    required float xy = 2;
+    required float xz = 3;
+    required float xt = 4;
+    required float yx = 5;
+    required float yy = 6;
+    required float yz = 7;
+    required float yt = 8;
+    required float zx = 9;
+    required float zy = 10;
+    required float zz = 11;
+    required float zt = 12;
+    required float tx = 13;
+    required float ty = 14;
+    required float tz = 15;
+    required float tt = 16;
+}
+
+message imat33 {
+    required int32 xx = 1;
+    required int32 xy = 2;
+    required int32 xz = 3;
+    required int32 yx = 4;
+    required int32 yy = 5;
+    required int32 yz = 6;
+    required int32 zx = 7;
+    required int32 zy = 8;
+    required int32 zz = 9;
+}
+
+message imat44 {
+    required int32 xx = 1;
+    required int32 xy = 2;
+    required int32 xz = 3;
+    required int32 xt = 4;
+    required int32 yx = 5;
+    required int32 yy = 6;
+    required int32 yz = 7;
+    required int32 yt = 8;
+    required int32 zx = 9;
+    required int32 zy = 10;
+    required int32 zz = 11;
+    required int32 zt = 12;
+    required int32 tx = 13;
+    required int32 ty = 14;
+    required int32 tz = 15;
+    required int32 tt = 16;
+}
+
+message umat33 {
+    required uint32 xx = 1;
+    required uint32 xy = 2;
+    required uint32 xz = 3;
+    required uint32 yx = 4;
+    required uint32 yy = 5;
+    required uint32 yz = 6;
+    required uint32 zx = 7;
+    required uint32 zy = 8;
+    required uint32 zz = 9;
+}
+
+message umat44 {
+    required uint32 xx = 1;
+    required uint32 xy = 2;
+    required uint32 xz = 3;
+    required uint32 xt = 4;
+    required uint32 yx = 5;
+    required uint32 yy = 6;
+    required uint32 yz = 7;
+    required uint32 yt = 8;
+    required uint32 zx = 9;
+    required uint32 zy = 10;
+    required uint32 zz = 11;
+    required uint32 zt = 12;
+    required uint32 tx = 13;
+    required uint32 ty = 14;
+    required uint32 tz = 15;
+    required uint32 tt = 16;
+}

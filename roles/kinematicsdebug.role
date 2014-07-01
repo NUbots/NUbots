@@ -3,7 +3,7 @@ ADD_ROLE(
     MODULES
         support::SignalCatcher
         support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem 
+        support::configuration::ConfigSystem
         support::NUbugger
         debug::NUbugger
         debug::KinematicsDebug
