@@ -56,6 +56,7 @@ namespace modules {
 			feetOnGround = (sensors.leftFootDown && sensors.rightFootDown);
 		});
 
+
 		on<Trigger<Every<30, Per<std::chrono::seconds>>>, Options<Single>, 
                     With<std::vector<Goal>>,
                     With<messages::localisation::Ball>,
@@ -66,11 +67,37 @@ namespace modules {
 				const std::shared_ptr<const messages::localisation::Ball>& ball,
 				const std::shared_ptr<const messages::localisation::Self>& self) {
 				
+				// What state is the game in?
+				// Initial?
+				// Set?
+				// Ready?
+				// Finish?
+				// Kick-off?
+				// Playing?
+				
+				// Are we kicking off?
+
+				// Am I the kicker?
+
+				// Have I been picked up?
+
+				// Am I penalised?
+
+				// Was I just put down?
+				
+				// Did I just become unpenalised?
+
 				// Am I in my zone?
-				selfInZone = pointInPolygon(myZone, self.position);
+				selfInZone = pointInPolygon(MY_ZONE, self.position);
 						
+				// Can I see the ball?
+
+				// Can anyone else see the ball?
+
+				// Is the ball lost?
+
 				// Is the ball in my zone?
-				ballInZone = pointInPolygon(myZone, ball.position);
+				ballInZone = pointInPolygon(MY_ZONE, ball.position);
 						
 				// Are the goals in range?
 				// x = position[0]?
@@ -79,7 +106,16 @@ namespace modules {
 				// Assumption: goal.position is the x, y coordinates of the goals relative to us.
 				goalInRange = (arma::norm(self.position - ball.position, 2) < MAX_BALL_DISTANCE) && (ball.position[0] > 0));
 
+				// Am I already kicking the ball?
+				
+				// Am I already approaching the ball?
+				
+				// Am I in position to kick the ball?
+				
+				// Am I the goalie?
 
+				// Is the ball approaching me?
+				
 				// Approach ball Code (given by Josiah - need to update)
 /*
 				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
