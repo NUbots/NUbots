@@ -27,27 +27,33 @@ namespace geometry {
     }
 
     Line::Line(const arma::vec2& a, const arma::vec2& b) {
-        setFromPoints(std::forward<const arma::vec2&>(a), std::forward<const arma::vec2&>(b))
+        setFromPoints(std::forward<const arma::vec2&>(a), std::forward<const arma::vec2&>(b));
     }
 
     void Line::setFromPoints(const arma::vec2& a, const arma::vec2& b) {
-        auto l = arma::norm(a - b);
+        arma::vec2 l = arma::normalise(a - b);
 
         normal = arma::vec2({ -l[1], l[0] });
         distance = arma::dot(normal, a);
     }
 
-    double Line::x(double y) {
-        return (d - y * n[1]) / n[0];
+    double Line::x(const double& y) const {
+        return (distance - y * normal[1]) / normal[0];
     }
 
-    double Line::y(double x) {
-        return (d - x * n[0]) / n[1];
+    double Line::y(const double& x) const {
+        return (distance - x * normal[0]) / normal[1];
     }
 
-
-    double Line::distanceToPoint(const arma::vec2& point) {
+    double Line::distanceToPoint(const arma::vec2& point) const {
         return arma::dot(point, normal) - distance;
+    }
+
+    bool Line::isHorizontal() const {
+        return normal[1] == 0;
+    }
+    bool Line::isVertical() const {
+        return normal[0] == 0;
     }
 }
 }

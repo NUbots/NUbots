@@ -37,7 +37,7 @@ namespace ransac {
         }
 
         bool regenerate(const std::vector<T>& points) {
-            if (points.size() == minPointsForFit()) {
+            if (points.size() == MIN_POINTS_FOR_FIT) {
                 return constructFromPoints(points[0], points[1], points[2], 1.0e-2);
             }
 

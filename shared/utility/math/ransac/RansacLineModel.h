@@ -34,8 +34,8 @@ namespace ransac {
         RansacLineModel() {}
 
         bool regenerate(const std::vector<T>& pts) {
-            if(pts.size() == minPointsForFit()) {
-                setLineFromPoints(pts[0], pts[1]);
+            if(pts.size() == MIN_POINTS_FOR_FIT) {
+                setFromPoints(pts[0], pts[1]);
                 return true;
             }
             else {
@@ -44,7 +44,7 @@ namespace ransac {
         }
 
         double calculateError(const T& p) const {
-            double val = getLinePointDistance(std::forward<const T&>(p));
+            double val = distanceToPoint(std::forward<const T&>(p));
             return val * val;
         }
     };

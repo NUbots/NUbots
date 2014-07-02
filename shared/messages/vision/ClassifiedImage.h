@@ -97,7 +97,7 @@ namespace messages {
 
                 utility::math::geometry::Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
 
-                return int(lround(l.findYFromX(x)));
+                return int(lround(l.y(x)));
             }
 
         };

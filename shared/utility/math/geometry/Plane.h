@@ -16,8 +16,8 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
-#ifndef UTILITY_MATH_GEOMETRY_LINE_H
-#define UTILITY_MATH_GEOMETRY_LINE_H
+#ifndef UTILITY_MATH_GEOMETRY_PLANE_H
+#define UTILITY_MATH_GEOMETRY_PLANE_H
 
 #include <armadillo>
 #include "utility/math/geometry/ParametricLine.h"
@@ -40,7 +40,7 @@ namespace geometry {
 		bool setFromNormal(Vector normal_, Vector point_){
 			normal = arma::normalise(normal_);
 			point = point_;
-			return arma::norm(normal,1) > 0; 
+			return arma::norm(normal,1) > 0;
 		}
 
 		bool setFrom3Points(Vector p1, Vector p2, Vector p3){
@@ -54,7 +54,7 @@ namespace geometry {
 			if(lDotN == 0){
 				return{false , Vector()};
 			}
-			return {true, arma::dot(point - l.point, normal) * l.direction / lDotN + l.point};   
+			return {true, arma::dot(point - l.point, normal) * l.direction / lDotN + l.point};
 		}
 	};
 

@@ -32,7 +32,7 @@ namespace geometry {
 
     class Line {
     private:
-        arma::vec2 norm;
+        arma::vec2 normal;
         double distance;
 
     public:
@@ -42,10 +42,13 @@ namespace geometry {
 
         void setFromPoints(const arma::vec2& a, const arma::vec2& b);
 
-        double x(const double& y);
-        double y(const double& x);
+        double x(const double& y) const;
+        double y(const double& x) const;
 
-        distanceToPoint(const arma::vec2& point);
+        double distanceToPoint(const arma::vec2& point) const;
+
+        bool isHorizontal() const;
+        bool isVertical() const;
     };
 
 }

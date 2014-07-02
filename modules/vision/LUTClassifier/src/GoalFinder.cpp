@@ -72,7 +72,7 @@ namespace modules {
                                 end[0] = p1->at(0);
                             }
                             else {
-                                end[0] = round(l.findXFromY(y));
+                                end[0] = round(l.x(y));
                             }
 
                             break;
@@ -109,7 +109,7 @@ namespace modules {
                                 start[0] = p2->at(0);
                             }
                             else {
-                                start[0] = round(l.findXFromY(y));
+                                start[0] = round(l.x(y));
                             }
 
                             break;

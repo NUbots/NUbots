@@ -118,7 +118,7 @@ namespace utility {
                             unsigned int n,
                             unsigned int k,
                             RansacSelectionMethod method) {
-                if ((points.size() < n) || (n < result.minPointsForFit())) {
+                if ((points.size() < n) || (n < Model::MIN_POINTS_FOR_FIT)) {
                     return false;
                 }
 
@@ -217,13 +217,13 @@ namespace utility {
                 Model model;
                 size_t n = points.size();
 
-                if (n >= model.minPointsForFit()) {
+                if (n >= Model::MIN_POINTS_FOR_FIT) {
                     std::vector<size_t> indices;
                     size_t next;
 
                     indices.push_back(rand() % n);
 
-                    while(indices.size() < model.minPointsForFit()) {
+                    while(indices.size() < Model::MIN_POINTS_FOR_FIT) {
                         bool unique;
 
                         do {
