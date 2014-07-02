@@ -43,10 +43,12 @@ namespace vision {
     using messages::vision::ClassifiedImage;
     using messages::vision::Ball;
 
-    using utility::math::vision::distanceToEquidistantPoints;
-    using utility::math::vision::getGroundPointMeanOfEquidistantPoints;
+    using utility::math::vision::widthBasedDistanceToCircle;
+    using utility::math::vision::projectCamToGroundPlane;
     using utility::math::vision::getGroundPointFromScreen;
-    using utility::math::vision::imageToCam;
+    using utility::math::vision::imageToScreen;
+    using utility::math::vision::getCamFromScreen;
+    using utility::math::vision::projectCamToGroundPlane;
     using utility::nubugger::graph;
 
     using messages::support::Configuration;
@@ -120,35 +122,53 @@ namespace vision {
 
             for(auto& ball : ransacResults) {
 
-
+                double BALL_DIAMETER = 0.1; //TODO:Universal CONFIG 
                 auto centre = ball.first.getCentre();
                 auto p1 = centre;
                 auto p2 = centre;
                 p1[1] += ball.first.getRadius();
                 p2[1] -= ball.first.getRadius();
+                //TODO: CHECK THAT BALL IS VALID FOR THE DISTANCE CALCULATIONS:
+                // if(arma::norm(p1 - p2) = 0){
+                //     break;
+                // }
 
                 // Transform p1 p2 to kinematics coordinates
-                p1 = imageToCam(p1, { double(image.dimensions[0]), double(image.dimensions[1]) });
-                p2 = imageToCam(p2, { double(image.dimensions[0]), double(image.dimensions[1]) });
+                p1 = imageToScreen(p1, { double(image.dimensions[0]), double(image.dimensions[1]) });
+                p2 = imageToScreen(p2, { double(image.dimensions[0]), double(image.dimensions[1]) });
 
-                double wbd = distanceToEquidistantPoints(0.10, p1, p2, cam.focalLengthPixels);
-                arma::vec3 wb = getGroundPointMeanOfEquidistantPoints(0.10, p1, p2, cam.focalLengthPixels, sensors.orientationCamToGround);
-                auto d2p = getGroundPointFromScreen(p1, sensors.orientationCamToGround, cam.focalLengthPixels);
-                std::cout << "Width: " << wbd << std::endl;
-                std::cout << "D2P: " << d2p.t() << std::endl;
+                arma::vec3 camUnitP1 = arma::normalise(getCamFromScreen(p1, cam.focalLengthPixels));
+                arma::vec3 camUnitP2 = arma::normalise(getCamFromScreen(p2, cam.focalLengthPixels));
+
+                arma::vec3 ballCentreRay = arma::normalise(0.5 * (camUnitP1 + camUnitP2));
+                
+                //Width based method
+                double wbd = widthBasedDistanceToCircle(BALL_DIAMETER, p1, p2, cam.focalLengthPixels);
+                arma::vec3 ballCentreGroundWidth = wbd * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
+                
+                //Projection to plane method
+                arma::mat44 ballBisectorPlaneTransform = sensors.orientationCamToGround;
+                ballBisectorPlaneTransform(2,3) -= BALL_DIAMETER / 2.0;
+
+                arma::vec3 ballCentreGroundProj = arma::vec3{0,0,BALL_DIAMETER / 2.0} + projectCamToGroundPlane(ballCentreRay, ballBisectorPlaneTransform);                
+
+                // std::cout << "orientationCamToGround\n" << sensors.orientationCamToGround << std::endl;
+                // std::cout << "Width distance: " << wbd << std::endl;
+                // std::cout << "Width ground pos: " << ballCentreGroundWidth.t() << std::endl;
+                // std::cout << "D2P: " << ballCentreGroundProj.t() << std::endl;
 
                 emit(graph("Width Ball Dist", wbd));
-                emit(graph("Width Ball Pos", wb[0],wb[1],wb[2]));
-                emit(graph("D2P Ball", d2p[0], d2p[1]));
+                emit(graph("Width Ball Pos", ballCentreGroundWidth[0],ballCentreGroundWidth[1],ballCentreGroundWidth[2]));
+                emit(graph("D2P Ball", ballCentreGroundProj[0], ballCentreGroundProj[1]));
 
                 // TODO fuse the width and point based distances
 
-                Ball b;
+                // Ball b;
 
-                b.circle.radius = ball.first.getRadius();
-                b.circle.centre = ball.first.getCentre();
+                // b.circle.radius = ball.first.getRadius();
+                // b.circle.centre = ball.first.getCentre();
 
-                balls->push_back(std::move(b));
+                // balls->push_back(std::move(b));
             }
 
             emit(std::move(balls));
