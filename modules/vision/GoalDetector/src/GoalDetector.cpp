@@ -78,12 +78,12 @@ namespace vision {
 
                 // We throw out points if they are:
                 // Less the full quality (subsampled)
-                // Do not have a transition on either side (are on an edge)
-                if(it->second.subsample == 1
-                    && it->second.previous
-                    && it->second.next) {
-
+                // Do not have a transition on the other side
+                if(it->second.subsample == 1 && it->second.previous) {
                     startPoints.push_back({ double(it->second.start[0]), double(it->second.start[1]) });
+                }
+
+                if(it->second.subsample == 1 && it->second.next) {
                     endPoints.push_back({ double(it->second.end[0]), double(it->second.end[1]) });
                 }
             }
