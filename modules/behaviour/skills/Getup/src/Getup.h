@@ -37,6 +37,7 @@ namespace modules {
                 const size_t id;
 
                 bool gettingUp;
+                ReactionHandle fallenCheck;
 
                 /// config settings
                 float FALLEN_ANGLE;
