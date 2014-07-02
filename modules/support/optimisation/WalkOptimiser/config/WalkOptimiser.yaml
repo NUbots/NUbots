@@ -1,11 +1,11 @@
 number_of_samples: 4
 getup_cancel_trial_threshold: 5
 parameters_and_sigmas:
-  bodyHeight: 0.001
-  bodyTilt: 0.001
+  bodyHeight: 0.0001
+  bodyTilt: 0.0001
   footY: 0.0005
-  tStep: 0.002
-  tZmp: 0.005
+  tStep: 0.0002
+  tZmp: 0.0005
   stepHeight: 0.0005
 segments:
   -

@@ -99,6 +99,7 @@ namespace modules {
                 });
 
                 on<Trigger<WalkConfigSaved>>([this](const WalkConfigSaved&){
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
                     //Start a walk routine
                     auto command = std::make_unique<FixedWalkCommand>(walk_command);
                     emit(std::move(command));                   
@@ -203,18 +204,21 @@ namespace modules {
             }
 
             double FitnessData::popFitness(){
-                double result = (numberOfGetups == 0 ? 1 : 1 / double(1+numberOfGetups));
+                double stabilityFitness = (M_PI_4 - tilt.mean()) / M_PI_4;
+                double getupFitness = (numberOfGetups == 0 ? 1 : 1 / double(1+numberOfGetups));
                 numberOfGetups = 0;
+                tilt.reset();
                 //Reset all data
-                return result;
+                return getupFitness + stabilityFitness;
             }
             void FitnessData::update(const messages::input::Sensors& sensors){
                 if(recording){
                     arma::vec3 verticalKinematics = sensors.orientationCamToGround.submat(0,2,2,2);
                     arma::vec3 verticalOrientation = sensors.kinematicsCamToGround.submat(0,2,2,2);
                     double tiltMag = std::acos(arma::dot(verticalOrientation, verticalKinematics));
-                    std::cout << tiltMag << std::endl;
-                    tilt(tiltMag);
+                    if(std::fabs(tiltMag) < M_PI_4){
+                        tilt(tiltMag);
+                    }
                 }                
             }
             void FitnessData::recordGetup(){
