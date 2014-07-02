@@ -48,6 +48,7 @@ namespace vision {
     using utility::math::vision::getGroundPointFromScreen;
     using utility::math::vision::imageToScreen;
     using utility::math::vision::getCamFromScreen;
+    using utility::math::vision::getParallaxAngle;
     using utility::math::vision::projectCamToGroundPlane;
     using utility::nubugger::graph;
 
@@ -169,6 +170,17 @@ namespace vision {
                 // b.circle.centre = ball.first.getCentre();
 
                 // balls->push_back(std::move(b));
+
+                //Get angular width
+                auto p3 = centre;
+                auto p4 = centre;
+                p3[0] += ball.first.getRadius();
+                p4[0] -= ball.first.getRadius();
+                p3 = imageToScreen(p3, { double(image.dimensions[0]), double(image.dimensions[1]) });
+                p4 = imageToScreen(p4, { double(image.dimensions[0]), double(image.dimensions[1]) });
+
+                // ball.angularSize[0] = getParallaxAngle(p3, p4, cam.focalLengthPixels)
+                // ball.angularSize[1] = getParallaxAngle(p1, p2, cam.focalLengthPixels);
             }
 
             emit(std::move(balls));

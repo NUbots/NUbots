@@ -83,6 +83,13 @@ namespace utility {
          *                 GOOD STUFF                   *
          ************************************************/
 
+        inline double getParallaxAngle(const arma::vec2& screen1, const arma::vec2& screen2, const double& camFocalLengthPixels){
+            arma::vec3 camSpaceP1 = {camFocalLengthPixels, screen1[0], screen1[1]};
+            arma::vec3 camSpaceP2 = {camFocalLengthPixels, screen2[0], screen2[1]};
+
+            return std::acos(arma::dot(camSpaceP1,camSpaceP2) / (arma::norm(camSpaceP1) * arma::norm(camSpaceP2)));
+        }
+
         inline double widthBasedDistanceToCircle(const double& circleDiameter, const arma::vec2& s1, const arma::vec2& s2, const double& camFocalLengthPixels){
             arma::vec3 camSpaceP1 = {camFocalLengthPixels, s1[0], s1[1]};
             arma::vec3 camSpaceP2 = {camFocalLengthPixels, s2[0], s2[1]};
