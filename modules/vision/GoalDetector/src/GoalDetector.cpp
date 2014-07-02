@@ -70,13 +70,8 @@ namespace vision {
 
         on<Trigger<ClassifiedImage<ObjectClass>>>([this](const ClassifiedImage<ObjectClass>& image) {
 
-            std::vector<Quad> quads, postCandidates;
-            std::pair<bool, Quad> crossbar(false, Quad());
-            std::vector<Goal> posts;
-
             std::vector<arma::vec2> startPoints, endPoints;
-            std::vector<RansacLineModel<arma::vec2>> startLines, endLines;
-            std::vector<std::pair<RansacLineModel<arma::vec2>, std::vector<arma::vec2>>> ransacResults;
+            std::vector<arma::mat22> starts, ends;
 
             auto hSegments = image.horizontalSegments.equal_range(ObjectClass::GOAL);
             for(auto it = hSegments.first; it != hSegments.second; ++it) {
@@ -93,42 +88,64 @@ namespace vision {
                 }
             }
 
-            // Use generic RANSAC implementation to find start lines (left edges).
-            ransacResults = findMultipleModels<RansacLineModel<arma::vec2>, arma::vec2>(startPoints,
+            // Use ransac to find left edges.
+            for (auto& line : findMultipleModels<RansacLineModel<arma::vec2>, arma::vec2>(startPoints,
                                                                                         CONSENSUS_THRESHOLD,
                                                                                         MINIMUM_POINTS,
                                                                                         MAX_ITERATIONS_PER_FITTING,
                                                                                         MAX_FITTING_ATTEMPTS,
-                                                                                        SELECTION_METHOD);
+                                                                                        SELECTION_METHOD)) {
 
+                // Compare based on Y co-ordinate
+                auto comp = [] (const arma::vec2& a, const arma::vec2& b) {
+                    return a[1] < b[1];
+                };
 
-            for (auto& l : ransacResults) {
-                startLines.push_back(l.first);
+                // Find min and max y
+                auto high = std::min_element(line.second.begin(), line.second.end(), comp);
+                auto low = std::max_element(line.second.begin(), line.second.end(), comp);
+
+                // Store the values
+                starts.emplace_back();
+                starts.back().col(0) = line.first.orthogonalProjection(*high);
+                starts.back().col(1) = line.first.orthogonalProjection(*low);;
             }
 
-            // Use generic RANSAC implementation to find end lines (right enddges).
-            ransacResults = findMultipleModels<RansacLineModel<arma::vec2>, arma::vec2>(endPoints,
+            // Use ransac to find right edges.
+            for (auto& line : findMultipleModels<RansacLineModel<arma::vec2>, arma::vec2>(endPoints,
                                                                                         CONSENSUS_THRESHOLD,
                                                                                         MINIMUM_POINTS,
                                                                                         MAX_ITERATIONS_PER_FITTING,
                                                                                         MAX_FITTING_ATTEMPTS,
-                                                                                        SELECTION_METHOD);
+                                                                                        SELECTION_METHOD)) {
 
-            for (auto& l : ransacResults) {
-                endLines.push_back(l.first);
+                auto comp = [] (const arma::vec2& a, const arma::vec2& b) {
+                    return a[1] < b[1];
+                };
+
+                // Find min and max y
+                auto high = std::min_element(line.second.begin(), line.second.end(), comp);
+                auto low = std::max_element(line.second.begin(), line.second.end(), comp);
+
+                // Store the values
+                ends.emplace_back();
+                ends.back().col(0) = line.first.orthogonalProjection(*high);
+                ends.back().col(1) = line.first.orthogonalProjection(*low);;
             }
 
 
             auto goals = std::make_unique<std::vector<Goal>>();
 
-            for(auto& q : postCandidates) {
+            for(auto& line : starts) {
 
-                Goal goal;
+                goals->emplace_back();
+                goals->back().quad.set(line.col(1), line.col(0), line.col(0), line.col(1));
+            }
 
-                goal.quad = q;
+            for(auto& line : ends) {
 
-                goals->push_back(std::move(goal));
-
+                goals->emplace_back();
+                goals->back().quad.set(line.col(1), line.col(0), line.col(0), line.col(1));
             }
 
             emit(std::move(goals));

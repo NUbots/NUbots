@@ -52,8 +52,13 @@ namespace geometry {
     bool Line::isHorizontal() const {
         return normal[1] == 0;
     }
+
     bool Line::isVertical() const {
         return normal[0] == 0;
+    }
+
+    arma::vec2 Line::orthogonalProjection(const arma::vec2 x) {
+        return x - (arma::dot(x, normal) - distance) * normal;
     }
 }
 }

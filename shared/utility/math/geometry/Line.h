@@ -49,6 +49,8 @@ namespace geometry {
 
         bool isHorizontal() const;
         bool isVertical() const;
+
+        arma::vec2 orthogonalProjection(const arma::vec2 x);
     };
 
 }
