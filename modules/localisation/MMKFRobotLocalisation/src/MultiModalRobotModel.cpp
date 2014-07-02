@@ -52,32 +52,26 @@ std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
 }
 
 void MultiModalRobotModel::TimeUpdate(double seconds) {
-        NUClear::log(__PRETTY_FUNCTION__);
     for (auto& model : robot_models_)
         model->TimeUpdate(seconds);
 }
 void MultiModalRobotModel::TimeUpdate(double seconds, const FakeOdometry& odom) {
-        NUClear::log(__PRETTY_FUNCTION__);
     for (auto& model : robot_models_)
         model->TimeUpdate(seconds); // TODO re add in odometry
 }
 
 void MultiModalRobotModel::TimeUpdate(double seconds, const Sensors& sensors) {
-        NUClear::log(__PRETTY_FUNCTION__);
     for (auto& model : robot_models_)
         model->TimeUpdate(seconds); // TODO re add in odometry
 }
 
 void RobotHypothesis::TimeUpdate(double seconds) {
-        NUClear::log(__PRETTY_FUNCTION__);
     filter_.timeUpdate(seconds);
 }
 void RobotHypothesis::TimeUpdate(double seconds, const FakeOdometry& odom) {
-        NUClear::log(__PRETTY_FUNCTION__);
     filter_.timeUpdate(seconds); // TODO re add in odometry
 }
 void RobotHypothesis::TimeUpdate(double seconds, const Sensors& sensors) {
-        NUClear::log(__PRETTY_FUNCTION__);
     filter_.timeUpdate(seconds); // TODO re add in odometry sensors
 }
 
@@ -85,7 +79,6 @@ void RobotHypothesis::TimeUpdate(double seconds, const Sensors& sensors) {
 void MultiModalRobotModel::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object,
     const LocalisationFieldObject& actual_object) {
-        NUClear::log(__PRETTY_FUNCTION__);
 
     for (auto& model : robot_models_)
         model->MeasurementUpdate(observed_object, actual_object);
@@ -94,7 +87,6 @@ void MultiModalRobotModel::MeasurementUpdate(
 void MultiModalRobotModel::MeasurementUpdate(
     const std::vector<messages::vision::VisionObject>& observed_objects,
     const std::vector<LocalisationFieldObject>& actual_objects) {
-        NUClear::log(__PRETTY_FUNCTION__);
 
     for (auto& model : robot_models_)
         model->MeasurementUpdate(observed_objects, actual_objects);
@@ -103,7 +95,6 @@ void MultiModalRobotModel::MeasurementUpdate(
 double RobotHypothesis::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object,
     const LocalisationFieldObject& actual_object) {
-        NUClear::log(__PRETTY_FUNCTION__);
 
     // // Radial coordinates
     // arma::vec2 actual_pos = actual_object.location();
@@ -125,7 +116,6 @@ double RobotHypothesis::MeasurementUpdate(
 double RobotHypothesis::MeasurementUpdate(
     const std::vector<messages::vision::VisionObject>& observed_objects,
     const std::vector<LocalisationFieldObject>& actual_objects) {
-        NUClear::log(__PRETTY_FUNCTION__);
 
     auto& obv_a = observed_objects[0];
     auto& obv_b = observed_objects[1];
@@ -155,7 +145,6 @@ double RobotHypothesis::MeasurementUpdate(
 void MultiModalRobotModel::AmbiguousMeasurementUpdate(
     const messages::vision::VisionObject& ambiguous_object,
     const std::vector<LocalisationFieldObject>& possible_objects) {
-        NUClear::log(__PRETTY_FUNCTION__);
 
     std::vector<std::unique_ptr<RobotHypothesis>> new_models;
     new_models.reserve(possible_objects.size() * robot_models_.size());
@@ -197,7 +186,6 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
 void MultiModalRobotModel::AmbiguousMeasurementUpdate(
     const std::vector<messages::vision::VisionObject>& ambiguous_objects,
     const std::vector<std::vector<LocalisationFieldObject>>& possible_object_sets) {
-        NUClear::log(__PRETTY_FUNCTION__);
 
     std::vector<std::unique_ptr<RobotHypothesis>> new_models;
     new_models.reserve(possible_object_sets.size() * robot_models_.size());
@@ -240,7 +228,6 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
 void MultiModalRobotModel::AmbiguousMultipleMeasurementUpdate(
     const std::vector<messages::vision::VisionObject>& ambiguous_objects,
     const std::vector<std::vector<LocalisationFieldObject>>& possible_object_sets) {
-        NUClear::log(__PRETTY_FUNCTION__);
 
     std::vector<std::unique_ptr<RobotHypothesis>> new_models;
     new_models.reserve(possible_object_sets.size() * robot_models_.size());
@@ -273,7 +260,6 @@ void MultiModalRobotModel::AmbiguousMultipleMeasurementUpdate(
 }
 
 void MultiModalRobotModel::RemoveOldModels() {
-        NUClear::log(__PRETTY_FUNCTION__);
     std::vector<std::unique_ptr<RobotHypothesis>> new_models;
     new_models.reserve(robot_models_.size());
 
@@ -292,13 +278,10 @@ void MultiModalRobotModel::RemoveOldModels() {
 }
 
 void MultiModalRobotModel::PruneModels() {
-        NUClear::log(__PRETTY_FUNCTION__);
-    // NUClear::log(__PRETTY_FUNCTION__, "Number of models before merging: ",
     //                      robot_models_.size());
 
     MergeSimilarModels();
 
-    // NUClear::log(__PRETTY_FUNCTION__, "Number of models before pruning: ",
     //                      robot_models_.size());
 
     // RemoveOldModels();
@@ -311,7 +294,6 @@ void MultiModalRobotModel::PruneModels() {
 bool MultiModalRobotModel::ModelsAreSimilar(
     const std::unique_ptr<RobotHypothesis> &model_a,
     const std::unique_ptr<RobotHypothesis> &model_b) {
-        NUClear::log(__PRETTY_FUNCTION__);
     arma::vec::fixed<robot::RobotModel::size> diff = model_a->GetEstimate() - model_b->GetEstimate();
 
     auto translation_dist = arma::norm(diff.rows(0, 1), 2);
@@ -329,7 +311,6 @@ bool MultiModalRobotModel::ModelsAreSimilar(
 /// Reduces the number of active models by merging similar models together
 // TODO: Find a neater, yet performant way of writing this method
 void MultiModalRobotModel::MergeSimilarModels() {
-        NUClear::log(__PRETTY_FUNCTION__);
 
     // Sort models by weight from smallest to largest.
     std::sort(robot_models_.begin(), robot_models_.end(),
@@ -393,7 +374,6 @@ void MultiModalRobotModel::MergeSimilarModels() {
  * @param order The maximum number of models to remain after pruning.
  */
 void MultiModalRobotModel::PruneViterbi(unsigned int order) {
-        NUClear::log(__PRETTY_FUNCTION__);
     // No pruning required if not above maximum.
     if(robot_models_.size() <= order)
         return;
@@ -413,7 +393,6 @@ void MultiModalRobotModel::PruneViterbi(unsigned int order) {
     The alphas of all active models are normalised so that the total probablility of the set sums to 1.0.
 */
 void MultiModalRobotModel::NormaliseAlphas() {
-        NUClear::log(__PRETTY_FUNCTION__);
     double sumAlpha = 0.0;
 
     for (auto& model : robot_models_)

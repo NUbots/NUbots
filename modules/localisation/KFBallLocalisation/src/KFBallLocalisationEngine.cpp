@@ -32,7 +32,6 @@ namespace localisation {
 
 /// Integrate time-dependent observations on all objects
 void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time) {
-        NUClear::log(__PRETTY_FUNCTION__);
     double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
     last_time_update_time_ = current_time;
     ball_filter_.timeUpdate(seconds);
@@ -40,7 +39,6 @@ void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point 
 
 void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
                                           const FakeOdometry& odom) {
-        NUClear::log(__PRETTY_FUNCTION__);
     double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
     last_time_update_time_ = current_time;
     ball_filter_.timeUpdate(seconds); // TODO odometry was removed from here odom
@@ -48,7 +46,6 @@ void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point 
 
 double KFBallLocalisationEngine::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object) {
-        NUClear::log(__PRETTY_FUNCTION__);
 
     // // Radial coordinates
     // arma::vec2 measurement = { observed_object.sphericalFromNeck[0],
@@ -66,12 +63,9 @@ double KFBallLocalisationEngine::MeasurementUpdate(
 
     // // Robot relative cartesian coordinates
     arma::vec2 measurement = observed_object.position.rows(0, 1);
-        NUClear::log(__PRETTY_FUNCTION__);
     arma::mat22 cov = observed_object.error.submat(0, 0, 1, 1);
-        NUClear::log(__PRETTY_FUNCTION__);
 
     double quality = ball_filter_.measurementUpdate(measurement, cov);
-        NUClear::log(__PRETTY_FUNCTION__);
 
     return quality;
 }

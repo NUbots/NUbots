@@ -35,7 +35,6 @@ namespace ball {
 
 arma::vec::fixed<BallModel::size> BallModel::ApplyVelocity(
     const arma::vec::fixed<BallModel::size>& state, double deltaT) {
-        NUClear::log(__PRETTY_FUNCTION__);
     auto result = state;
 
     // Apply ball velocity
@@ -49,7 +48,6 @@ arma::vec::fixed<BallModel::size> BallModel::ApplyVelocity(
 
 arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
     const arma::vec::fixed<BallModel::size>& state, double deltaT) {
-        NUClear::log(__PRETTY_FUNCTION__);
 
     return ApplyVelocity(state, deltaT);
 }
@@ -57,7 +55,6 @@ arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
 arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
     const arma::vec::fixed<BallModel::size>& state, double deltaT,
     const FakeOdometry& odom) {
-        NUClear::log(__PRETTY_FUNCTION__);
 
     auto result = ApplyVelocity(state, deltaT);
 
@@ -75,7 +72,6 @@ arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
 /// Return the predicted observation of an object at the given position
 arma::vec BallModel::predictedObservation(
     const arma::vec::fixed<BallModel::size>& state) {
-        NUClear::log(__PRETTY_FUNCTION__);
 
     // // Robot-relative cartesian
     return { state[kX], state[kY] };
@@ -90,14 +86,12 @@ arma::vec BallModel::predictedObservation(
 
 arma::vec BallModel::observationDifference(const arma::vec& a,
                                             const arma::vec& b){
-        NUClear::log(__PRETTY_FUNCTION__);
     // Distance and unit vector heading
     return a - b;
 }
 
 arma::vec::fixed<BallModel::size> BallModel::limitState(
     const arma::vec::fixed<BallModel::size>& state) {
-        NUClear::log(__PRETTY_FUNCTION__);
 
     return { state[kX], state[kY], state[kVx], state[kVy] };
 
@@ -109,7 +103,6 @@ arma::vec::fixed<BallModel::size> BallModel::limitState(
 }
 
 arma::mat::fixed<BallModel::size, BallModel::size> BallModel::processNoise() {
-        NUClear::log(__PRETTY_FUNCTION__);
     arma::mat noise = arma::eye(BallModel::size, BallModel::size) * processNoiseFactor;
 
     // noise(kX, kX) = processNoiseFactor * 100;
