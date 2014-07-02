@@ -23,14 +23,31 @@ namespace utility {
 namespace math {
 namespace geometry {
 
-    Line();
+    Line::Line() {
+    }
 
-    Line(const arma::vec2& a, const arma::vec2& b) {
+    Line::Line(const arma::vec2& a, const arma::vec2& b) {
         setFromPoints(std::forward<const arma::vec2&>(a), std::forward<const arma::vec2&>(b))
     }
 
-    void setFromPoints(const arma::vec2& a, const arma::vec2& b) {
+    void Line::setFromPoints(const arma::vec2& a, const arma::vec2& b) {
+        auto l = arma::norm(a - b);
 
+        normal = arma::vec2({ -l[1], l[0] });
+        distance = arma::dot(normal, a);
+    }
+
+    double Line::x(double y) {
+        return (d - y * n[1]) / n[0];
+    }
+
+    double Line::y(double x) {
+        return (d - x * n[0]) / n[1];
+    }
+
+
+    double Line::distanceToPoint(const arma::vec2& point) {
+        return arma::dot(point, normal) - distance;
     }
 }
 }

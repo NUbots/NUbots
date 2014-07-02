@@ -44,7 +44,8 @@ namespace ransac {
         }
 
         double calculateError(const T& p) const {
-            return getLinePointDistance(std::forward<const T&>(p));
+            double val = getLinePointDistance(std::forward<const T&>(p));
+            return val * val;
         }
     };
 

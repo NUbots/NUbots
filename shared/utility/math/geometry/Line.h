@@ -18,8 +18,8 @@
  */
 
 
-#ifndef UTILITY_MATH_LINE_H
-#define UTILITY_MATH_LINE_H
+#ifndef UTILITY_MATH_GEOMETRY_LINE_H
+#define UTILITY_MATH_GEOMETRY_LINE_H
 
 #include <armadillo>
 #include <iostream>
@@ -44,6 +44,8 @@ namespace geometry {
 
         double x(const double& y);
         double y(const double& x);
+
+        distanceToPoint(const arma::vec2& point);
     };
 
 }
