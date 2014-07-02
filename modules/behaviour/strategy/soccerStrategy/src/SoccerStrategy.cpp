@@ -19,12 +19,13 @@
 
 #include "SoccerStrategy.h"
 
-#include "messages/localisation/FieldObject.h"
 #include "messages/behaviour/LookStrategy.h"
 #include "messages/input/Sensors.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/support/Configuration.h"
 
+#include "utility/math/geometry/Plane.h"
+#include "utility/math/geometry/ParametricLine.h"
 
 namespace modules {
     namespace behaviour {
@@ -41,6 +42,8 @@ namespace modules {
 		using messages::platform::darwin::DarwinSensors;
 		using messages::support::Configuration;
 
+		using utility::math::geometry;
+
 		SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 			bool penalisedButtonStatus = false, feetOnGround = true, isKicking = false, isWalking = false;
 			const messages::motion::KickCommand& kickData;
@@ -51,6 +54,8 @@ namespace modules {
 				KICK_DISTANCE_THRESHOLD = config["KICK_DISTANCE_THRESHOLD"].as<float>();
 				BALL_CERTAINTY_THRESHOLD = config["BALL_CERTAINTY_THRESHOLD"].as<float>();
 				IS_GOALIE = (config["GOALIE"].as<int>() == 1);
+				FIELD_LENGTH = config["FIELD_LENGTH"].as<float>();
+				GOAL_WIDTH = config["GOAL_WIDTH"].as<float>();
 				START_POSITION = config["START_POSITION"].as<arma::vec2>();
 				MY_ZONE = config["ZONE"].as<std::vector<arma::vec2>>();
 			});
@@ -184,7 +189,19 @@ namespace modules {
 					currentState.ballApproaching = !currentState.ballLost && (arma::dot(-certainBall.position, certainBall.velocity) > 0);
 				
 					// Is the ball approaching our goals?
-					currentState.ballAppraochingGoal = ;
+					Plane<2> plane;
+					ParametricLine<2> line;
+					arma::vec2 xaxis = {1, 0};
+					arma::vec2 fieldWidth = {-FIELD_LENGTH / 2, 0};
+
+					plane.setFromNormal(xaxis, fieldWidth);
+					line.setFromDirection((self.robot_to_world * certainBall.velocity), (self.robot_to_world * certainBall.position + self.position));
+
+					auto intersection = plane.intersect(line);
+
+					if (intersection.first) {
+						currentState.ballApproachingGoal = ((intersection.second[1] <= (GOAL_WIDTH / 2)) && (intersection.second[1] >= -(GOAL_WIDTH / 2)));
+					}	
 
 					if (currentState.gameStateInitial || currentState.gameStateSet || currentState.gameStateFinished || currentState.penalised || currentState.isPickedUp) {
 						stopMoving();
@@ -226,7 +243,7 @@ namespace modules {
 					}
 
 					else if (currentState.goalInRange || currentState.ballInZone || currentState.ballApproaching) {
-						approachBall(certainBall);
+						approachBall(certainBall, self);
 
 						emit("Walking to ball.");
 					}
@@ -245,17 +262,6 @@ namespace modules {
 	
 						emit("Unknown behavioural state. Finding self, finding ball.");
 					}
-
-					// Approach ball Code (given by Josiah - need to update)
-/*
-					auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
-					approach->targetPositionType = WalkTarget::Ball;
-					approach->targetHeadingType = WalkTarget::WayPoint;
-					approach->walkMovementType = WalkApproach::ApproachFromDirection;
-					approach->heading = arma::vec({-3,0});
-					approach->target = arma::vec({0,0});
-					emit(std::move(approach));
-*/
 				});
 			}
 
@@ -274,7 +280,14 @@ namespace modules {
 			void SoccerStrategy::watchBall(const messages::localisation::Ball& ball) {
 			}
 
-			void SoccerStrategy::approachBall(const messages::localisation::Ball& ball) {
+			void SoccerStrategy::approachBall(const messages::localisation::Ball& ball, const messages::localisation::Self& self) {
+				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
+				approach->targetPositionType = WalkTarget::Ball;
+				approach->targetHeadingType = WalkTarget::WayPoint;
+				approach->walkMovementType = WalkApproach::ApproachFromDirection;
+				approach->heading = arma::vec({-3,0});
+				approach->target = self.robot_to_world * ball.position + self.position;
+				emit(std::move(approach));
 			}
 
 			void SoccerStrategy::kickBall(const messages::localisation::Ball& ball) {

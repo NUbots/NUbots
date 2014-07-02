@@ -21,6 +21,9 @@
 #define MODULES_BEHAVIOUR_STRATEGY_SOCCERSTRATEGGY_H
 
 #include <nuclear>
+#include <armadillo>
+
+#include "messages/localisation/FieldObject.h"
 
 namespace modules {
     namespace behaviour {
@@ -67,10 +70,19 @@ namespace modules {
 			float MAX_BALL_DISTANCE;
 			float KICK_DISTANCE_THRESHOLD;
 			float BALL_CERTAINTY_THRESHOLD;
+			float FIELD_LENGTH;
+			float GOAL_WIDTH;
 			arma::vec2 START_POSITION;
 			bool IS_GOALIE;
 
 			State previousState, currentState;
+
+			void SoccerStrategy::stopMoving();
+			void SoccerStrategy::findSelf();
+			void SoccerStrategy::findBall(const std::vector<messages::localisation::Ball>& hints);
+			void SoccerStrategy::goToPoint(const arma::vec2& point);
+			void SoccerStrategy::watchBall(const messages::localisation::Ball& ball);
+			void SoccerStrategy::approachBall(const messages::localisation::Ball& ball, const messages::localisation::Self& self);
 
 		public:
 			explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
