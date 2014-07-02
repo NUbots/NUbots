@@ -393,9 +393,10 @@ namespace modules {
                     object->set_type(messages::vision::proto::VisionObject::BALL);
                     auto* ball = object->mutable_ball();
 
-                    ball->mutable_circle()->set_radius(b.circle.radius);
-                    ball->mutable_circle()->mutable_centre()->set_x(b.circle.centre[0]);
-                    ball->mutable_circle()->mutable_centre()->set_y(b.circle.centre[1]);
+                    auto* circle = ball->mutable_circle();
+                    circle->set_radius(b.circle.radius);
+                    circle->mutable_centre()->set_x(b.circle.centre[0]);
+                    circle->mutable_centre()->set_y(b.circle.centre[1]);
                 }
 
                 send(message);
@@ -417,14 +418,16 @@ namespace modules {
                     goal->set_side(g.side == VisionGoal::Side::LEFT ? messages::vision::proto::VisionObject::Goal::LEFT
                                  : g.side == VisionGoal::Side::RIGHT ? messages::vision::proto::VisionObject::Goal::RIGHT
                                  : messages::vision::proto::VisionObject::Goal::UNKNOWN);
-                    goal->mutable_quad()->mutable_tl()->set_x(g.quad.getTopLeft()[0]);
-                    goal->mutable_quad()->mutable_tl()->set_y(g.quad.getTopLeft()[1]);
-                    goal->mutable_quad()->mutable_tr()->set_x(g.quad.getTopRight()[0]);
-                    goal->mutable_quad()->mutable_tr()->set_y(g.quad.getTopRight()[1]);
-                    goal->mutable_quad()->mutable_bl()->set_x(g.quad.getBottomLeft()[0]);
-                    goal->mutable_quad()->mutable_bl()->set_y(g.quad.getBottomLeft()[1]);
-                    goal->mutable_quad()->mutable_br()->set_x(g.quad.getBottomRight()[0]);
-                    goal->mutable_quad()->mutable_br()->set_y(g.quad.getBottomRight()[1]);
+
+                    auto* quad = goal->mutable_quad();
+                    quad->mutable_tl()->set_x(g.quad.getTopLeft()[0]);
+                    quad->mutable_tl()->set_y(g.quad.getTopLeft()[1]);
+                    quad->mutable_tr()->set_x(g.quad.getTopRight()[0]);
+                    quad->mutable_tr()->set_y(g.quad.getTopRight()[1]);
+                    quad->mutable_bl()->set_x(g.quad.getBottomLeft()[0]);
+                    quad->mutable_bl()->set_y(g.quad.getBottomLeft()[1]);
+                    quad->mutable_br()->set_x(g.quad.getBottomRight()[0]);
+                    quad->mutable_br()->set_y(g.quad.getBottomRight()[1]);
                 }
 
                 send(message);
