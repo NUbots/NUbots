@@ -60,14 +60,14 @@ namespace geometry {
 		double y(double x);
 	};
 
-	template <>
-	double ParametricLine<2>::x(const double& y) {
-		return (y - point[1]) * direction[0] / direction[1] + point[0];
-	}
-	template <>
-	double ParametricLine<2>::y(const double& x) {
-		return (x - point[0]) * direction[1] / direction[0] + point[1];
-	}
+	// template <>
+	// double ParametricLine<2>::x(const double& y) {
+	// 	return (y - point[1]) * direction[0] / direction[1] + point[0];
+	// }
+	// template <>
+	// double ParametricLine<2>::y(const double& x) {
+	// 	return (x - point[0]) * direction[1] / direction[0] + point[1];
+	// }
 
 }
 }
