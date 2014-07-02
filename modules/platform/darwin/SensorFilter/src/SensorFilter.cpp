@@ -341,12 +341,13 @@ namespace modules {
                     }
 
                     if(sensors->leftFootDown){
-                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::L_ANKLE_PITCH](2,3);
+                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::L_ANKLE_ROLL](2,3);
                     } else if(sensors->rightFootDown){
-                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::R_ANKLE_PITCH](2,3);
+                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::R_ANKLE_ROLL](2,3);
                     } else {
                         sensors->bodyCentreHeight = 0;
                     }
+
 
                     /************************************************
                      *                  Mass Model                  *
@@ -386,6 +387,8 @@ namespace modules {
                     // std::cout << "sensors->bodyCentreHeight\n" << sensors->bodyCentreHeight << std::endl;
 
                     sensors->kinematicsHorizon = utility::motion::kinematics::calculateHorizon(sensors->kinematicsCamToGround.submat(0,0,2,2).t(), cameraParameters.focalLengthPixels);
+                    std::cout << "sensors->bodyCentreHeight = " << sensors->bodyCentreHeight <<std::endl;
+                    std::cout << "sensors->orientationCamToGround height = " << sensors->orientationCamToGround(2,3) <<std::endl;
 
                     /*emit(graph("Filtered Gravity Vector",
                             float(orientation[0]*9.807),
