@@ -20,32 +20,15 @@
 #ifndef SHARED_UTILITY_LOCALISATION_FIELDDESCRIPTION_H
 #define SHARED_UTILITY_LOCALISATION_FIELDDESCRIPTION_H
 
-#include <unordered_map>
 #include <armadillo>
 
-#include "messages/support/Configuration.h"
-#include "utility/localisation/LocalisationFieldObject.h"
-
-using messages::support::Configuration;
-using utility::localisation::LocalisationFieldObject;
-
-namespace utility {
-namespace localisation {
-
-struct FieldDescriptionConfig {
-    static constexpr const char* CONFIGURATION_PATH = "FieldDescription.yaml";
-};
+namespace messages {
+namespace support {
 
 class FieldDescription {
 public:
-    FieldDescription(Configuration<FieldDescriptionConfig> config);
 
-    void AddLFO(LocalisationFieldObject lfo);
-    LocalisationFieldObject GetLFO(LFOId id);
-
-    // Can't use unordered map without a hash function
-    std::map<LFOId, LocalisationFieldObject> field_objects_;
-
+    // Field dimensions as defined in the Robocup rules:
     struct FieldDimensions {
         double line_width;
         double mark_width;
@@ -63,7 +46,14 @@ public:
         double border_strip_min_width;
     } dimensions;
 
-    void AddGoals(FieldDimensions d);
+    double ball_radius;
+
+    // Coordinates of goalpost centers calculated from the FieldDimensions:
+    // (arma::vec2)
+    arma::vec2 goalpost_bl;
+    arma::vec2 goalpost_br;
+    arma::vec2 goalpost_yl;
+    arma::vec2 goalpost_yr;
 };
 
 }

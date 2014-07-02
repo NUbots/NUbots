@@ -78,6 +78,7 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
 /// Return the predicted observation of an object at the given position
 arma::vec RobotModel::predictedObservation(
     const arma::vec::fixed<RobotModel::size>& state, const arma::vec& actual_position) {
+    NUClear::log(__PRETTY_FUNCTION__);
 
     arma::mat worldToRobot = getWorldToRobotTransform(state);
     arma::mat robotToWorld = getRobotToWorldTransform(state);
@@ -112,6 +113,7 @@ arma::vec RobotModel::predictedObservation(
 arma::vec RobotModel::predictedObservation(
     const arma::vec::fixed<RobotModel::size>& state,
     const std::vector<arma::vec>& actual_positions) {
+    NUClear::log(__PRETTY_FUNCTION__);
 
     // // Radial coordinates
     arma::vec diff_1 = actual_positions[0] - state.rows(kX, kY);
@@ -120,6 +122,8 @@ arma::vec RobotModel::predictedObservation(
     arma::vec radial_2 = utility::math::coordinates::Cartesian2Radial(diff_2);
 
     auto angle_diff = utility::math::angle::difference(radial_1[1], radial_2[1]);
+    
+    NUClear::log(__PRETTY_FUNCTION__);
 
     return { std::abs(angle_diff) };
 }
@@ -132,6 +136,9 @@ arma::vec RobotModel::observationDifference(const arma::vec& a,
     // // result(1) = utility::math::angle::normalizeAngle(result[1]);
     // result(1) = utility::math::angle::difference(a[1], b[1]);
     // return result;
+
+        NUClear::log(__PRETTY_FUNCTION__);
+
 
     // Distance and unit vector heading
     return a - b;
@@ -169,19 +176,21 @@ arma::vec::fixed<RobotModel::size> RobotModel::limitState(
     // // result[kHeading] = utility::math::angle::normalizeAngle(result[kHeading]);
     // return result;
 
+    NUClear::log(__PRETTY_FUNCTION__);
 
     // Unit vector orientation
     arma::vec2 heading = { state[kHeadingX], state[kHeadingY] };
     arma::vec2 unit = arma::normalise(heading);
     return arma::vec({ state[kX], state[kY], state[kHeadingX], state[kHeadingY] });
-
 }
 
 arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() {
+    NUClear::log(__PRETTY_FUNCTION__);
     return arma::eye(RobotModel::size, RobotModel::size) * processNoiseFactor;
 }
 
 arma::mat33 RobotModel::getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state){
+        NUClear::log(__PRETTY_FUNCTION__);
     arma::vec2 normed_heading = arma::normalise(state.rows(kHeadingX,kHeadingY));
     arma::mat33 T;
 
@@ -193,6 +202,7 @@ arma::mat33 RobotModel::getRobotToWorldTransform(const arma::vec::fixed<RobotMod
 }
 
 arma::mat33 RobotModel::getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state){
+        NUClear::log(__PRETTY_FUNCTION__);
     arma::vec2 normed_heading = arma::normalise(state.rows(kHeadingX,kHeadingY));
     arma::mat33 Tinverse;
     Tinverse << normed_heading[0] <<  normed_heading[1] <<         0 << arma::endr

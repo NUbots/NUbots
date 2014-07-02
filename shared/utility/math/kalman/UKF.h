@@ -163,15 +163,18 @@ namespace utility {
                     mean = meanFromSigmas(sigmaPoints);
                     mean = model.limitState(mean);
                     covariance = covarianceFromSigmas(sigmaPoints, mean) + model.processNoise();
+        NUClear::log(__PRETTY_FUNCTION__);
 
                     // Re calculate our sigma points
                     sigmaMean = mean;
                     sigmaPoints = generateSigmaPoints(mean, covariance);
+        NUClear::log(__PRETTY_FUNCTION__);
 
                     // Reset our state for more measurements
                     covarianceUpdate = defaultCovarianceUpdate;
                     d.zeros();
                     centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
+        NUClear::log(__PRETTY_FUNCTION__);
                 }
 
                 template <typename TMeasurement, typename... TMeasurementType>
