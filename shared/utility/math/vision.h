@@ -141,13 +141,7 @@ namespace utility {
             utility::math::geometry::Plane<3> p;
             p.setFromNormal({0,0,1},{0,0,0});
 
-            auto intersection = p.intersect(line);
-            if(intersection.first){
-                return intersection.second;
-            } else {
-                NUClear::log<NUClear::ERROR>("getGroundPointFromScreen - point sampled at the horizon - infinite distance");
-                return intersection.second;
-            }
+            return p.intersect(line);      
         }
 
 
