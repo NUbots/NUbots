@@ -177,9 +177,9 @@ namespace modules {
                      const std::vector<messages::vision::Obstacle>& robots,
                      const std::vector<messages::vision::Ball>& visionBalls
                     ) {
-                    if(visionBalls.size()>0){
+                    /*if(visionBalls.size()>0){
                         arma::vec ballPosition = ball.position;
-
+                        
                         //Jake walk path planner:
                         auto self = selfs[0];
 
@@ -242,16 +242,22 @@ namespace modules {
                         command->rotationalSpeed = turnSpeed * (ballBearing > 0 ? 1 : -1 );  //vx,vy, alpha
                         emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));
                         emit(std::move(command));//XXX: emit here
-                    }
-                    /*
+                    }*/
+                    
 
-                    //std::cout << "starting path planning" << std::endl;
-                    arma::vec targetPos, targetHead;
+                    std::cout << "starting path planning" << std::endl;
+                    arma::vec normed_heading = arma::normalise(selfs.front().heading);
+                    arma::mat robotToWorldRotation;
+                    robotToWorldRotation << normed_heading[0] << -normed_heading[1] << arma::endr
+                                         << normed_heading[1] <<  normed_heading[0];
+                    arma::vec ballPos = robotToWorldRotation*arma::vec(ball.position) + arma::vec(selfs.front().position);
+                    std::cout << "ball pos found" << std::endl;
+                    arma::vec targetPos,targetHead;
                     //work out where we're going
                     if (targetPosition == messages::behaviour::WalkTarget::Robot) {
                         //XXX: check if robot is visible
                     } else if (targetPosition ==messages::behaviour::WalkTarget::Ball) {
-                        targetPos = ball.position;
+                        targetPos = ballPos;
                     } else { //other types default to position/waypoint location
                         targetPos = currentTargetPosition;
                     }
@@ -259,7 +265,7 @@ namespace modules {
                     if (targetHeading == messages::behaviour::WalkTarget::Robot) {
                         //XXX: check if robot is visible
                     } else if (targetHeading == messages::behaviour::WalkTarget::Ball) {
-                        targetHead = arma::normalise(arma::vec(ball.position)-targetPos);
+                        targetHead = arma::normalise(ballPos-targetPos);
                     } else { //other types default to position/waypoint bearings
                         targetHead = arma::normalise(arma::vec(currentTargetHeading)-targetPos);
                     }
@@ -268,18 +274,23 @@ namespace modules {
 
                     switch (planType) {
                         case messages::behaviour::WalkApproach::ApproachFromDirection:
-                            movePlan = approachFromDirection(self.front(),targetPos,targetHead);
+                            movePlan = approachFromDirection(selfs.front(),targetPos,targetHead);
                             break;
                         case messages::behaviour::WalkApproach::WalkToPoint:
-                            movePlan = goToPoint(self.front(),targetPos,targetHead);
+                            movePlan = goToPoint(selfs.front(),targetPos,targetHead);
                             break;
                         case messages::behaviour::WalkApproach::OmnidirectionalReposition:
-                            movePlan = goToPoint(self.front(),targetPos,targetHead);
+                            movePlan = goToPoint(selfs.front(),targetPos,targetHead);
                             break;
                         case messages::behaviour::WalkApproach::StandStill:
                             emit(std::make_unique<WalkStopCommand>());
                             return;
                     }
+                    //std::cout << "Target Position: " << targetPos[0] << ", " << targetPos[1] << std::endl;
+                    //std::cout << "Self Position: " << selfs.front().position[0] << ", " << selfs.front().position[1] << std::endl;
+                    //std::cout << "Self Heading: " << selfs.front().heading[0] << ", " << selfs.front().heading[1] << std::endl;
+                    
+                    //std::cout << "Move Plan: " << movePlan[0] << ", " << movePlan[1] << ", " << movePlan[2] << std::endl;
                     //work out if we have to avoid something
                     if (useAvoidance) {
                         //this is a vision-based temporary for avoidance
@@ -290,19 +301,18 @@ namespace modules {
                     //this applies acceleration/deceleration and hysteresis to movement
                     movePlan = generateWalk(movePlan,
                                planType == messages::behaviour::WalkApproach::OmnidirectionalReposition);
-
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
                     command->velocity = arma::vec({movePlan[0],movePlan[1]});
                     command->rotationalSpeed = movePlan[2];
-                    // NUClear::log("Self Position:", self[0].position[0],self[0].position[1]);
+                    // NUClear::log("Self Position:", selfs[0].position[0],selfs[0].position[1]);
                     // NUClear::log("Target Position:", targetPos[0],targetPos[1]);
                     emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));
+                    //std::cout << "Walk command: " << command->velocity[0] << ", " << command->velocity[1] << ", " << command->rotationalSpeed << std::endl;
                     // NUClear::log("Ball Position:", ball.position[0],ball.position[1]);
                     //std::cout << command->velocity << std::endl;
+                    emit(std::move(std::make_unique<WalkStartCommand>()));
                     emit(std::move(command));//XXX: emit here
 
-
-                    emit(std::move(std::make_unique<WalkStartCommand>()));*/
                 });
 
                 on<Trigger<messages::behaviour::WalkStrategy>, Options<Sync<WalkPathPlanner>>>([this] (const messages::behaviour::WalkStrategy& cmd) {
@@ -319,13 +329,13 @@ namespace modules {
                 });
 
                 //Walk planning testing: Walk to ball face to goal
-                // auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
-                // approach->targetPositionType = WalkTarget::Ball;
-                // approach->targetHeadingType = WalkTarget::WayPoint;
-                // approach->walkMovementType = WalkApproach::ApproachFromDirection;
-                // approach->heading = arma::vec({-3,0});
-                // approach->target = arma::vec({0,0});
-                // emit(std::move(approach));
+                auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
+                approach->targetPositionType = WalkTarget::Ball;
+                approach->targetHeadingType = WalkTarget::WayPoint;
+                approach->walkMovementType = WalkApproach::ApproachFromDirection;
+                approach->heading = arma::vec({-3,0});
+                approach->target = arma::vec({0,0});
+                emit(std::move(approach));
 
 
             }
@@ -336,26 +346,24 @@ namespace modules {
                 //this uses hystereses to provide a stable, consistent positioning and movement
                 double walk_speed;
                 double walk_bearing;
-
+                
                 //check what distance increment we're in:
-                if (move[0] > midApproachDistance+distanceHysteresis) {
+                if (move[0] > midApproachDistance+distanceHysteresis and distanceIncrement < 3 or 
+                    move[0] > midApproachDistance and distanceIncrement == 3) {
                     distanceIncrement = 3;
                     walk_speed = forwardSpeed;
-                } else if (move[0] > closeApproachDistance + distanceHysteresis and
-                           move[0] < midApproachDistance) {
+                } else if (move[0] > closeApproachDistance+distanceHysteresis and distanceIncrement < 2 or 
+                           move[0] > closeApproachDistance and distanceIncrement == 2) {
                     distanceIncrement = 2;
                     walk_speed = midApproachSpeed;
-                } else if (move[0] > ballLineupDistance + distanceHysteresis and
-                           move[0] < closeApproachDistance) {
+                } else if (move[0] > ballLineupDistance+distanceHysteresis and distanceIncrement < 1 or 
+                           move[0] > ballLineupDistance and distanceIncrement == 1) {
                     distanceIncrement = 1;
                     walk_speed = closeApproachSpeed;
                 } else if (move[0] < ballLineupDistance + distanceHysteresis) {
                     distanceIncrement = 0;
                     walk_speed = 0.f;
                 }
-                //std::cout << "fwd: " << forwardSpeed << ", " << distanceIncrement << std::endl;
-                //std::cout << midApproachDistance << ", " << closeApproachDistance << ", " << ballLineupDistance << ", " << distanceHysteresis << std::endl;
-                //std::cout << move[0] << std::endl;
 
                 //decide between heading and bearing
                 if (distanceIncrement > 1) {
@@ -363,7 +371,7 @@ namespace modules {
                 } else {
                     walk_bearing = move[2];
                 }
-
+                walk_bearing = fmin(turnSpeed,fmax(walk_bearing,-turnSpeed));
                 //check turning hysteresis
                 /*if (turning < 0 and walk_bearing < -turnDeviation) {
                     //walk_speed = std::min(walk_bearing,turnSpeed);
@@ -392,7 +400,6 @@ namespace modules {
                 //this method calculates the possible ball approach commands for the robot
                 //and then chooses the lowest cost action
                 std::vector<arma::vec> waypoints(3);
-
                 //calculate the values we need to set waypoints
                 const double ballDistance = arma::norm(target-self.position);
                 const double selfHeading = atan2(self.heading[1],self.heading[0]);
@@ -401,8 +408,8 @@ namespace modules {
                 waypoints[0] = -direction*ballDistance*ApproachCurveFactor;
                 waypoints[1] = arma::vec({waypoints[0][1],-waypoints[0][0]});
                 waypoints[2] = arma::vec({-waypoints[0][1],waypoints[0][0]});
-
-
+                
+                
                 //fill target headings and distances, and movement bearings and costs
                 std::vector<double> headings(3);
                 std::vector<double> distances(3);
@@ -417,6 +424,7 @@ namespace modules {
 
                     //calculate the distance to destination
                     arma::vec waypointPos = waypoints[i]+target-arma::vec(self.position);
+                    std::cout << waypointPos.t();
                     distances[i] = arma::norm(waypointPos);
 
                     //calculate the angle between the current direction and the destination
@@ -429,7 +437,6 @@ namespace modules {
 
                 }
 
-
                 //decide which approach to the ball is cheapest
                 size_t selected;
                 if (costs[0] < costs[1] and costs[0] < costs[2]) {
@@ -440,14 +447,9 @@ namespace modules {
                     selected = 2;
                 }
 
-                //return the values for the selected approach
-                /*arma::vec result;
-                result[0] = ;
-                result[1] = ;
-                result[2] = ;*/
                 return arma::vec({distances[selected],bearings[selected],headings[selected]});
             }
-
+            
             arma::vec WalkPathPlanner::goToPoint(const messages::localisation::Self& self,
                                                   const arma::vec2& target,
                                                   const arma::vec2& direction) {

@@ -56,7 +56,7 @@ namespace vision {
 
         on<Trigger<Configuration<BallDetector>>>([this](const Configuration<BallDetector>& config) {
 
-            std::string selectionMethod = config["SELECTION_METHOD"].as<std::string>();
+            std::string selectionMethod = config["ransac"]["selection_method"].as<std::string>();
 
             if (selectionMethod.compare("LARGEST_CONSENSUS") == 0) {
                 SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
@@ -68,10 +68,10 @@ namespace vision {
                 SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
             }
 
-            MINIMUM_POINTS = config["MINIMUM_POINTS"].as<uint>();
-            CONSENSUS_THRESHOLD = config["CONSENSUS_THRESHOLD"].as<double>();
-            MAX_ITERATIONS_PER_FITTING = config["MAX_ITERATIONS_PER_FITTING"].as<uint>();
-            MAX_FITTING_ATTEMPTS = config["MAX_FITTING_ATTEMPTS"].as<uint>();
+            MINIMUM_POINTS = config["ransac"]["minimum_points"].as<uint>();
+            CONSENSUS_THRESHOLD = config["ransac"]["consensus_threshold"].as<double>();
+            MAX_ITERATIONS_PER_FITTING = config["ransac"]["max_iterations_per_fitting"].as<uint>();
+            MAX_FITTING_ATTEMPTS = config["ransac"]["max_fitting_attempts"].as<uint>();
         });
 
 
@@ -94,16 +94,15 @@ namespace vision {
                     // We throw out points if they are:
                     // Less the full quality (subsampled)
                     // Do not have a transition on either side (are on an edge)
-                    if(it->second.subsample == 1
-                        && it->second.previous
-                        && it->second.next) {
 
-                        // If either point is in the green horizon, add both
-                        if(image.visualHorizonAtPoint(start[0]) < start[1] || image.visualHorizonAtPoint(end[0]) < end[1]) {
+                    if(it->second.subsample == 1 && it->second.next && image.visualHorizonAtPoint(end[0]) < end[1]) {
 
-                            ballPoints.push_back({ double(it->second.start[0]), double(it->second.start[1]) });
-                            ballPoints.push_back({ double(it->second.end[0]), double(it->second.end[1]) });
-                        }
+                        ballPoints.push_back({ double(it->second.end[0]), double(it->second.end[1]) });
+                    }
+
+                    if(it->second.subsample == 1 && it->second.previous && image.visualHorizonAtPoint(start[0]) < start[1]) {
+
+                        ballPoints.push_back({ double(it->second.start[0]), double(it->second.start[1]) });
                     }
                 }
             }
@@ -151,9 +150,6 @@ namespace vision {
 
                 balls->push_back(std::move(b));
             }
-
-            // Do vision kinematics on the ball to determine it's position and covariance matricies
-            log("Number of seen balls", ransacResults.size());
 
             emit(std::move(balls));
 

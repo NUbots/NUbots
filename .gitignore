@@ -25,6 +25,9 @@ install_manifest.txt
 *.box
 *.iso
 *.deb
+packer/build.hwm
+packer/build.pwd
+packer/build.pwi
 
 # LaTeX stuff
 *.aux
