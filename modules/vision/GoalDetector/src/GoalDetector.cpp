@@ -223,6 +223,35 @@ namespace vision {
 
             // return std::move(finalGoals);
 
+
+            //JAKE's Vision Kinematics for distance to goal:
+            arma::vec3 p1 = imageToScreen(goalBaseSideLeft, { double(image.dimensions[0]), double(image.dimensions[1]) });
+            arma::vec3 p2 = imageToScreen(goalBaseSideRight, { double(image.dimensions[0]), double(image.dimensions[1]) });
+
+            arma::vec3 camUnitP1 = arma::normalise(getCamFromScreen(p1, cam.focalLengthPixels));
+            arma::vec3 camUnitP2 = arma::normalise(getCamFromScreen(p2, cam.focalLengthPixels));
+
+            arma::vec3 goalBaseCentreRay = arma::normalise(0.5 * (camUnitP1 + camUnitP2));
+            
+            //Width based method
+            double wbd = widthBasedDistanceToCircle(BALL_DIAMETER, p1, p2, cam.focalLengthPixels);
+            arma::vec3 ballCentreGroundWidth = wbd * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
+            
+            //Projection to plane method
+            arma::mat44 ballBisectorPlaneTransform = sensors.orientationCamToGround;
+            ballBisectorPlaneTransform(2,3) -= BALL_DIAMETER / 2.0;
+
+            arma::vec3 ballCentreGroundProj = arma::vec3{0,0,BALL_DIAMETER / 2.0} + projectCamToGroundPlane(ballCentreRay, ballBisectorPlaneTransform);                
+
+            // std::cout << "orientationCamToGround\n" << sensors.orientationCamToGround << std::endl;
+            // std::cout << "Width distance: " << wbd << std::endl;
+            // std::cout << "Width ground pos: " << ballCentreGroundWidth.t() << std::endl;
+            // std::cout << "D2P: " << ballCentreGroundProj.t() << std::endl;
+
+            emit(graph("Width Ball Dist", wbd));
+            emit(graph("Width Ball Pos", ballCentreGroundWidth[0],ballCentreGroundWidth[1],ballCentreGroundWidth[2]));
+            emit(graph("D2P Ball", ballCentreGroundProj[0], ballCentreGroundProj[1]));
+
         });
     }
 
