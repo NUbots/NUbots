@@ -26,26 +26,60 @@ namespace modules {
     namespace behaviour {
         namespace strategy {
 
-            /**
-             * High level behaviour for robot soccer.
-             *
-             * @author Alex Biddulph
-             */
-            class SoccerStrategy : public NUClear::Reactor {
-            private:
-                NUClear::clock::time_point timeSinceLastSeen;
+		typedef struct {
+			bool selfInZone;
+			bool ballInZone;
+			bool goalInRange;
+			bool kicker;
+			bool pickedUp;
+			bool putDown;
+			bool penalised;
+			bool unPenalised;
+			bool kickOff;
+			bool gameStateInitial;
+			bool gameStateSet;
+			bool gameStateReady;
+			bool gameStateFinish;
+			bool gameStatePlaying;
+			bool ballSeen;
+			bool ballLost;
+			bool teamBallSeen;
+			bool ballApproaching;
+			bool ballApproachingGoal;
+			bool kickPosition;
 
-                std::vector<arma::vec> MY_ZONE;
-		int MAX_BALL_DISTANCE;
+			arma::vec2 currentHeading;
+			arma::vec2 currentPosition;
+			arma::vec2 targetHeading;
+			arma::vec2 targetPosition;
+		} State;
 
-            public:
-                explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
+		/**
+		* High level behaviour for robot soccer.
+		*
+		* @author Alex Biddulph
+		*/
+		class SoccerStrategy : public NUClear::Reactor {
+		private:
+			NUClear::clock::time_point timeSinceLastSeen;
 
-                static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";
-            };
+			std::vector<arma::vec2> MY_ZONE;
+			float MAX_BALL_DISTANCE;
+			float KICK_DISTANCE_THRESHOLD;
+			float BALL_CERTAINTY_THRESHOLD;
+			arma::vec2 START_POSITION;
+			bool IS_GOALIE;
 
-        }  // strategy
-    }  // behaviours
+			State previousState, currentState;
+
+		public:
+			explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
+
+			static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";
+			};
+
+		}  // strategy
+	}  // behaviours
 }  // modules
 
 #endif  // MODULES_BEHAVIOUR_STRATEGY_SOCCERSTRATEGGY_H

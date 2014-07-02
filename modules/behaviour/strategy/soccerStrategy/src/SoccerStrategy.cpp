@@ -42,12 +42,17 @@ namespace modules {
 		using messages::support::Configuration;
 
 		SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-			bool penalisedButtonStatus = false, feetOnGround = true;
-			bool selfInZone, ballInZone, goalInRange;
+			bool penalisedButtonStatus = false, feetOnGround = true, isKicking = false, isWalking = false;
+			const messages::motion::KickCommand& kickData;
+			const messages::motion::WalkCommand& walkData;
 
 			on<Trigger<Configuration<SoccerStrategyConfig>>>([this](const Configuration<SoccerStrategyConfig>& config) {
-				MAX_BALL_DISTANCE = config["MAX_BALL_DISTANCE"].as<int>();
-				MY_ZONE = config["ZONE"].as<std::vector<arma::vec>>();
+				MAX_BALL_DISTANCE = config["MAX_BALL_DISTANCE"].as<float>();
+				KICK_DISTANCE_THRESHOLD = config["KICK_DISTANCE_THRESHOLD"].as<float>();
+				BALL_CERTAINTY_THRESHOLD = config["BALL_CERTAINTY_THRESHOLD"].as<float>();
+				IS_GOALIE = (config["GOALIE"].as<int>() == 1);
+				START_POSITION = config["START_POSITION"].as<arma::vec2>();
+				MY_ZONE = config["ZONE"].as<std::vector<arma::vec2>>();
 			});
 
 			// Last 10 to do some button debouncing.
@@ -55,70 +60,192 @@ namespace modules {
 				penalisedButtonStatus = (senosors.buttons.middle == true) ? !penalisedButtonStatus : penalisedButtonStatus;
 			});
 
+			// Check to see if both feet are on the ground.
 			on<Trigger<messages::input::Sensors>>([this](const messages::input::Sensors& sensors) {
 				feetOnGround = (sensors.leftFootDown && sensors.rightFootDown);
 			});
 
+			// Check to see if we are about to kick.
+			on<Trigger<messages::motion::KickCommand>>([this](const messages::motion::KickCommand& kick) {
+				isKicking = true;
+				kickData = kick;
+			});
+
+			// Check to see if the kick has finished.
+			on<Trigger<messages::motion::KickFinished>>([this](const messages::motion::KickFinished& kick) {
+				isKicking = false;
+			});
+
+			// Check to see if we are walking.
+			on<Trigger<messages::motion::WalkStartCommand>, With<messages::motion::WalkCommand>>
+				([this](const messages::motion::WalkStartCommand& walkStart,
+					const messages::motion::WalkCommand& walk) {
+				isWalking = true;
+				walkData = walk;
+			});
+
+			// Check to see if we are no longer walking.
+			on<Trigger<messages::motion::WalkStopCommand>([this](const messages::motion::WalkStopCommand& walkStop) {
+				isWalking = false;
+			});
 
 			on<Trigger<Every<30, Per<std::chrono::seconds>>>, Options<Single>, 
 				With<messages::lcoalisation::Goal>,
 				With<messages::localisation::Ball>,
 				With<messages::localisation::Self>
-				/* Need to add in game controller triggers. */>([this](	const time_t&,
+				/* Need to add in game controller triggers. */
+				/* Need to add team localisation triggers. */>([this](	const time_t&,
 											const std::shared_ptr<const messages::localisation::Goal>& goal,
 											const std::shared_ptr<const messages::localisation::Ball>& ball,
 											const std::shared_ptr<const messages::localisation::Self>& self
-											/* Need to add in game controller parameters. */) {
-					
+											/* Need to add in game controller parameters. */
+											/* Need to add in team localisation  parameters. */) {
+
+					// Our ball is almost always the corrent ball to use, unless we dont know where it is.
+					Ball& certainBall = ball;
+
+					// Make a copy of the previous state.					
+					memcpy(&previousState, &currentState, sizeof(State));
+
+					// Store current position and heading.
+					currentState.currentHeading = self.heading;
+					currentState.currentPosition = self.position;
+
 					// What state is the game in?
 					// Initial?
+					/* curretnState.gameStateInitial = gameController[STATE_INITIAL] */;
 					// Set?
+					/* curretnState.gameStateSet = gameController[STATE_SET] */;
 					// Ready?
+					/* curretnState.gameStateReady = gameController[STATE_READY] */;
 					// Finish?
-					// Kick-off?
+					/* curretnState.gameStateFinish = gameController[STATE_FINISH] */;
 					// Playing?
+					/* curretnState.gameStatePlaying = gameController[STATE_PLAYING] */;
 					
 					// Are we kicking off?
+					/* currentState.kickOff = gameController[KICK_OFF] */;
 
 					// Am I the kicker?
+					// Does my zone contain the centre field point?
+					currentState.kicker = pointInPolygon(MY_ZONE, zeros<arma::vec>(2)); 
 
 					// Have I been picked up?
+					currentState.pickedUp = !feetOnGround;
 
 					// Am I penalised?
+					currentStatus.penalised = penalisedButtonStatus /* || gameController[PENALISED] */;
 
 					// Was I just put down?
+					currentState.putDown = feetOnGround && previousState.pickedUp;
 					
 					// Did I just become unpenalised?
+					currentState.unPenalised = !penalised && previousState.penalised;
 
 					// Am I in my zone?
-					selfInZone = pointInPolygon(MY_ZONE, self.position);
+					currentState.selfInZone = pointInPolygon(MY_ZONE, self.position);
 							
 					// Can I see the ball?
+					currentState.ballSeen = ((ball.sr_xx < BALL_CERTAINTY_THRESHOLD) && (ball.sr_xy < BALL_CERTAINTY_THRESHOLD) && (ball.sr_yy < BALL_CERTAINTY_THREHOLD)));
 
 					// Can anyone else see the ball?
+					/* currentState.teamBallSeen = ((teamBall.sr_xx < BALL_CERTAINTY_THRESHOLD) && (teamBall.sr_xy < BALL_CERTAINTY_THRESHOLD) && (teamBall.sr_yy < BALL_CERTAINTY_THREHOLD))); */
 
 					// Is the ball lost?
+					currentState.ballLost = !currentState.ballSeen && !currentState.teamBallSeen;
+
+					// Select the best ball to use (our ball or the teams ball).
+					// We could be a little more sophisticated here and consider how certain we are about the 
+					// balls location.
+					if (!currentState.ballLost && currentState.ballSeen) {
+						certainBall = ball;
+					}
+
+					else if (!currentState.ballLost && currentState.teamBallSeen)  {
+						/* certainBall = teamBall */;
+					}
 
 					// Is the ball in my zone?
-					ballInZone = pointInPolygon(MY_ZONE, ball.position);
+					currentState.ballInZone = (!currentState.ballLost && pointInPolygon(MY_ZONE, certainBall.position));
 							
 					// Are the goals in range?
 					// x = position[0]?
 					// x = 0 = centre field.
 					// Assumption: We could potentially kick a goal if we are in the other half of the field).
 					// Assumption: goal.position is the x, y coordinates of the goals relative to us.
-					goalInRange = (arma::norm(self.position - ball.position, 2) < MAX_BALL_DISTANCE) && (ball.position[0] > 0));
+					currentState.goalInRange = (!currentState.ballLost && (arma::norm(certainBall.position, 2) < MAX_BALL_DISTANCE) && (certainBall.position[0] > 0)));
 
-					// Am I already kicking the ball?
-					
-					// Am I already approaching the ball?
-					
 					// Am I in position to kick the ball?
+					currentState.kickPosition = (currentState.currentPosition == previousSate.targetPosition) &&
+									(currentState.currentHeading == previousState.targetHeading) &&
+									(arma::norm(ball.position, 2) < KICK_DISTANCE_THRESHOLD);
 					
-					// Am I the goalie?
+					// Is the ball heading in my direction?
+					currentState.ballApproaching = !currentState.ballLost && (arma::dot(-certainBall.position, certainBall.velocity) > 0);
+				
+					// Is the ball approaching our goals?
+					currentState.ballAppraochingGoal = ;
 
-					// Is the ball approaching me?
-					
+					if (currentState.gameStateInitial || currentState.gameStateSet || currentState.gameStateFinished || currentState.penalised || currentState.isPickedUp) {
+						stopMoving();
+		
+						emit("Standing still.");
+					}
+	
+					else if (!currentState.selfInZone) {
+						goToPoint(polygonCentroid(MY_ZONE));
+
+						emit("I am not where I should be. Going there now.");
+					}
+
+					else if (currentState.gameStateReady) {
+						goToPoint(START_POSITION);
+
+						emit("Game is about to start. I should be in my starting position.");
+					}
+
+					else if (isKicking) {
+						watchBall(certainBall);
+
+						emit("I be looking at what I am kicking.");
+					}
+
+					else if (currentState.unPenalised || currentState.putDown) {
+						findSelf();
+
+						emit("I don't know where I am. Beginning s spiritual journey to find myself.");
+					}
+
+
+					else if (currentState.ballLost) {
+						std::vector<messages::localisation::Ball> hints = {ball, teamBall};
+
+						findBall(hints);
+
+						emit("Don't know where the ball is. Looking for it.");
+					}
+
+					else if (currentState.goalInRange || currentState.ballInZone || currentState.ballApproaching) {
+						approachBall(certainBall);
+
+						emit("Walking to ball.");
+					}
+
+					else if (currentState.kickPosition && !isKicking) {
+						kickBall(certainBall);
+	
+						emit("In kicking position. Kicking ball.");
+					}
+
+					else {
+						std::vector<messages::localisation::Ball> hints = {ball, teamBall};
+
+						findSelf();
+						findBall(hints);
+	
+						emit("Unknown behavioural state. Finding self, finding ball.");
+					}
+
 					// Approach ball Code (given by Josiah - need to update)
 /*
 					auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
@@ -130,6 +257,27 @@ namespace modules {
 					emit(std::move(approach));
 */
 				});
+			}
+
+			void SoccerStrategy::stopMoving() {
+			}
+
+			void SoccerStrategy::findSelf() {
+			}
+
+			void SoccerStrategy::findBall(const std::vector<messages::localisation::Ball>& hints) {
+			}
+
+			void SoccerStrategy::goToPoint(const arma::vec2& point) {
+			}
+
+			void SoccerStrategy::watchBall(const messages::localisation::Ball& ball) {
+			}
+
+			void SoccerStrategy::approachBall(const messages::localisation::Ball& ball) {
+			}
+
+			void SoccerStrategy::kickBall(const messages::localisation::Ball& ball) {
 			}
 		}  // strategy
 	}  // behaviours
