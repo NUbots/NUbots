@@ -70,10 +70,8 @@ namespace modules {
 
                 on< Trigger<DarwinSensors>
                   , With<Optional<Sensors>>
-                  , With<CameraParameters>
                   , Options<Single>>([this](const DarwinSensors& input,
-                                            const std::shared_ptr<const Sensors>& previousSensors,
-                                            const CameraParameters& cameraParameters) {
+                                            const std::shared_ptr<const Sensors>& previousSensors) {
 
                     auto sensors = std::make_unique<Sensors>();
 
@@ -366,13 +364,11 @@ namespace modules {
                     sensors->orientationCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH], 
                                                                                                         sensors->orientation.submat(0,2,2,2),
                                                                                                         sensors->bodyCentreHeight);
-                    sensors->orientationHorizon = utility::motion::kinematics::calculateHorizon(sensors->orientationCamToGround.submat(0,0,2,2).t(),cameraParameters.focalLengthPixels);
-
 
                     if(sensors->leftFootDown) {
                         sensors->kinematicsCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH], 
-                                                                                                        sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,2,2,2),
-                                          A                                                              sensors->bodyCentreHeight);
+                                                                                                         sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,2,2,2),
+                                                                                                         sensors->bodyCentreHeight);
                         
                     } else if (sensors->rightFootDown) {
                         sensors->kinematicsCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH], 
@@ -385,8 +381,6 @@ namespace modules {
                     // std::cout << "sensors->kinematicsCamToGround\n" << sensors->kinematicsCamToGround << std::endl;
                     // std::cout << "sensors->orientationCamToGround\n" << sensors->orientationCamToGround << std::endl;
                     // std::cout << "sensors->bodyCentreHeight\n" << sensors->bodyCentreHeight << std::endl;
-
-                    sensors->kinematicsHorizon = utility::motion::kinematics::calculateHorizon(sensors->kinematicsCamToGround.submat(0,0,2,2).t(), cameraParameters.focalLengthPixels);
 
                     /*emit(graph("Filtered Gravity Vector",
                             float(orientation[0]*9.807),

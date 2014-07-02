@@ -122,11 +122,13 @@ namespace modules {
             });
             on<Trigger<Configuration<WalkOptimiserCommand>> >([this](const Configuration<WalkOptimiserCommand>& config) {
                 configureWalk(config.config);
+                emit(std::make_unique<WalkConfigSaved>());
             });            
 
             on<Trigger<Startup>>([this](const Startup&) {
                 
                 reset();
+                stopRequest = 2;
                 //start();
             });
 
@@ -247,14 +249,13 @@ namespace modules {
             saveScript->path = "scripts/Stand.yaml";
             saveScript->config = standScript;
             emit(std::move(saveScript));
-            emit(std::make_unique<WalkConfigSaved>());
         }
 
         void WalkEngine::reset(){
             // g--------------------------------------------------------
                 // g Walk state variables
                 // g--------------------------------------------------------
-                stopRequest = 2;
+                
 
                 uTorso = {supportX, 0, 0};
                 uLeft = {0, footY, 0};

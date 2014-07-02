@@ -60,9 +60,6 @@ namespace messages {
             arma::vec3 leftFSR;
             arma::vec3 rightFSR;
 
-            arma::vec orientationHorizon;    //=[m,b] such that in camera coords p_y = m * p_x + b in pixels
-            arma::vec kinematicsHorizon;     //=[m,b] such that in camera coords p_y = m * p_x + b in pixels
-
             bool leftFootDown;
             bool rightFootDown;
 

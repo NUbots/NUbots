@@ -18,6 +18,7 @@
  */
 
 #include "LUTClassifier.h"
+#include "utility/motion/ForwardKinematics.h"
 
 namespace modules {
     namespace vision {
@@ -33,7 +34,7 @@ namespace modules {
                 // Element 0 is gradient, element 1 is intercept (confirmed by Jake's Implementation)
                 // Coordinate system: 0,0 is the centre of the screen. pos[0] is along the y axis of the
                 // camera transform, pos[1] is along the z axis (x points out of the camera)
-                classifiedImage.horizon = sensors.orientationHorizon;
+                classifiedImage.horizon = utility::motion::kinematics::calculateHorizon(sensors.orientationCamToGround.submat(0,0,2,2).t(), FOCAL_LENGTH_PIXELS);
 
                 // Move the intercept to be at 0,0
                 classifiedImage.horizon[1] += (image.height() * 0.5) + classifiedImage.horizon[0] * -(image.width() * 0.5);
