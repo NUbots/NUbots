@@ -95,7 +95,6 @@ namespace utility {
             arma::vec3 camSpaceP2 = {camFocalLengthPixels, s2[0], s2[1]};
 
             double parallaxAngle = std::acos(arma::dot(camSpaceP1,camSpaceP2) / (arma::norm(camSpaceP1) * arma::norm(camSpaceP2)));
-            std::cout << "parallaxAngle = " << parallaxAngle <<std::endl;
             double correctionForClosenessEffect = 0.5 * circleDiameter * std::cos((M_PI-parallaxAngle) / 2.0);
 
             return (circleDiameter / 2) / std::tan(parallaxAngle / 2) + correctionForClosenessEffect;
@@ -114,7 +113,7 @@ namespace utility {
             return (separation / 2) / std::tan(parallaxAngle / 2);
         }
 
-        /*! @brief 
+        /*! @brief
             @param cam - coordinates in camera space of the pixel (cam[0] = y coordinate pixels, cam[1] = z coordinate pixels)
             @return im - coordinates on the screen in image space measured x across, y down, zero at top left
         */
@@ -149,7 +148,7 @@ namespace utility {
         inline arma::vec3 getCamFromScreen(const arma::vec2& screen, const double& camFocalLengthPixels){
             return arma::vec3{camFocalLengthPixels, screen[0], screen[1]};
         }
-            
+
         inline arma::vec3 projectCamToGroundPlane(const arma::vec3& cam, const arma::mat44& camToGround){
             arma::vec3 lineDirection = camToGround.submat(0,0,2,2) * cam;
             arma::vec3 linePosition = camToGround.submat(0,3,2,3);
