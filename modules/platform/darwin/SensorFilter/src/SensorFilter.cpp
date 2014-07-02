@@ -372,7 +372,7 @@ namespace modules {
                     if(sensors->leftFootDown) {
                         sensors->kinematicsCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH], 
                                                                                                         sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,2,2,2),
-                                                                                                        sensors->bodyCentreHeight);
+                                          A                                                              sensors->bodyCentreHeight);
                         
                     } else if (sensors->rightFootDown) {
                         sensors->kinematicsCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH], 
@@ -387,8 +387,6 @@ namespace modules {
                     // std::cout << "sensors->bodyCentreHeight\n" << sensors->bodyCentreHeight << std::endl;
 
                     sensors->kinematicsHorizon = utility::motion::kinematics::calculateHorizon(sensors->kinematicsCamToGround.submat(0,0,2,2).t(), cameraParameters.focalLengthPixels);
-                    std::cout << "sensors->bodyCentreHeight = " << sensors->bodyCentreHeight <<std::endl;
-                    std::cout << "sensors->orientationCamToGround height = " << sensors->orientationCamToGround(2,3) <<std::endl;
 
                     /*emit(graph("Filtered Gravity Vector",
                             float(orientation[0]*9.807),
