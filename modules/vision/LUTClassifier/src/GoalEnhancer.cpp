@@ -67,6 +67,8 @@ namespace modules {
                 // Our rhs must be at most the image width
                 points(arma::uvec({ 0 }), arma::find(points.row(0) > int(image.width() - 1))).fill(int(image.width() - 1));
 
+                // TODO only do the extra segments if they are above, and do not intersect the visual horizon
+
                 if(points(1, 0) >= 0 && points(1, 0) < image.height()) {
 
                     auto segments = quex->classify(image, lut, points.col(0), points.col(1));
