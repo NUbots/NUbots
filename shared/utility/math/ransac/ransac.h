@@ -40,8 +40,7 @@ namespace utility {
             /**
              * @brief
              *
-             * @tparam Model
-             * @tparam DataPoint
+             * @tparam Model the model to use for the fitting
              *
              * @param points the datapoints to fit
              * @param e consensus error threshold
@@ -50,7 +49,7 @@ namespace utility {
              * @param max_iterations the maximum nubmer of ransac iterations to perform
              * @param method the quality measurement method to use
              */
-            template<class Model, typename DataPoint>
+            template<class Model, typename DataPoint = typename Model::DataPoint>
             std::vector<std::pair<Model, std::vector<DataPoint>>> findMultipleModels(const std::vector<DataPoint>& line_points,
                                                                                         double e,
                                                                                         unsigned int n,
@@ -58,7 +57,7 @@ namespace utility {
                                                                                         unsigned int max_iterations,
                                                                                         RansacSelectionMethod method);
 
-            template<class Model, typename DataPoint>
+            template<class Model, typename DataPoint = typename Model::DataPoint>
             bool findModel(std::vector<DataPoint> points,
                            Model& result,
                            std::vector<DataPoint>& consensus,
@@ -69,13 +68,13 @@ namespace utility {
                            unsigned int k,
                            RansacSelectionMethod method);
 
-            template<class Model, typename DataPoint>
+            template<class Model, typename DataPoint = typename Model::DataPoint>
             Model generateRandomModel(const std::vector<DataPoint>& points);
 
             /************************************
              *      FUNCTION IMPLEMENTATIONS    *
              ************************************/
-            template<class Model, typename DataPoint>
+            template<class Model, typename DataPoint = typename Model::DataPoint>
             std::vector<std::pair<Model, std::vector<DataPoint>>> findMultipleModels(const std::vector<DataPoint>& points,
                                                     double e,
                                                     unsigned int n,
@@ -108,7 +107,7 @@ namespace utility {
                 return results;
             }
 
-            template<class Model, typename DataPoint>
+            template<class Model, typename DataPoint = typename Model::DataPoint>
             bool findModel(std::vector<DataPoint> points,
                             Model &result,
                             std::vector<DataPoint>& consensus,
@@ -118,7 +117,7 @@ namespace utility {
                             unsigned int n,
                             unsigned int k,
                             RansacSelectionMethod method) {
-                if ((points.size() < n) || (n < Model::MIN_POINTS_FOR_FIT)) {
+                if ((points.size() < n) || (n < Model::MINIMUM_POINTS)) {
                     return false;
                 }
 
@@ -212,18 +211,18 @@ namespace utility {
 
             //NOTE: Assumes that there are no duplicates in the data
             //      point set (only way to guarantee no infinite loop)
-            template<class Model, typename DataPoint>
+            template<class Model, typename DataPoint = typename Model::DataPoint>
             Model generateRandomModel(const std::vector<DataPoint>& points) {
                 Model model;
                 size_t n = points.size();
 
-                if (n >= Model::MIN_POINTS_FOR_FIT) {
+                if (n >= Model::MINIMUM_POINTS) {
                     std::vector<size_t> indices;
                     size_t next;
 
                     indices.push_back(rand() % n);
 
-                    while(indices.size() < Model::MIN_POINTS_FOR_FIT) {
+                    while(indices.size() < Model::MINIMUM_POINTS) {
                         bool unique;
 
                         do {
@@ -248,7 +247,7 @@ namespace utility {
                     model.regenerate(rand_pts);
                 }
 
-                    return model;
+                return model;
 
             }
         }

@@ -112,12 +112,12 @@ namespace vision {
             }
 
             // Use ransac to find the ball
-            auto ransacResults = findMultipleModels<RansacCircleModel<arma::vec2>, arma::vec2>(ballPoints,
-                                                                                               CONSENSUS_THRESHOLD,
-                                                                                               MINIMUM_POINTS,
-                                                                                               MAX_ITERATIONS_PER_FITTING,
-                                                                                               MAX_FITTING_ATTEMPTS,
-                                                                                               SELECTION_METHOD);
+            auto ransacResults = findMultipleModels<RansacCircleModel>(ballPoints,
+                                                                       CONSENSUS_THRESHOLD,
+                                                                       MINIMUM_POINTS,
+                                                                       MAX_ITERATIONS_PER_FITTING,
+                                                                       MAX_FITTING_ATTEMPTS,
+                                                                       SELECTION_METHOD);
 
             auto balls = std::make_unique<std::vector<Ball>>();
             balls->reserve(ransacResults.size());

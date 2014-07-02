@@ -26,27 +26,16 @@ namespace utility {
 namespace math {
 namespace ransac {
 
-    template<typename T>
     class RansacLineModel : public utility::math::geometry::Line {
     public:
-        static constexpr size_t MIN_POINTS_FOR_FIT = 3;
+        static constexpr size_t MINIMUM_POINTS = 2;
+        using DataType = arma::vec2;
 
         RansacLineModel() {}
 
-        bool regenerate(const std::vector<T>& pts) {
-            if(pts.size() == MIN_POINTS_FOR_FIT) {
-                setFromPoints(pts[0], pts[1]);
-                return true;
-            }
-            else {
-                return false;
-            }
-        }
+        bool regenerate(const std::vector<DataType>& pts);
 
-        double calculateError(const T& p) const {
-            double val = distanceToPoint(std::forward<const T&>(p));
-            return val * val;
-        }
+        double calculateError(const DataType& p) const;
     };
 
 }

@@ -89,12 +89,12 @@ namespace vision {
             }
 
             // Use ransac to find left edges.
-            for (auto& line : findMultipleModels<RansacLineModel<arma::vec2>, arma::vec2>(startPoints,
-                                                                                        CONSENSUS_THRESHOLD,
-                                                                                        MINIMUM_POINTS,
-                                                                                        MAX_ITERATIONS_PER_FITTING,
-                                                                                        MAX_FITTING_ATTEMPTS,
-                                                                                        SELECTION_METHOD)) {
+            for (auto& line : findMultipleModels<RansacLineModel>(startPoints,
+                                                                  CONSENSUS_THRESHOLD,
+                                                                  MINIMUM_POINTS,
+                                                                  MAX_ITERATIONS_PER_FITTING,
+                                                                  MAX_FITTING_ATTEMPTS,
+                                                                  SELECTION_METHOD)) {
 
                 // Compare based on Y co-ordinate
                 auto comp = [] (const arma::vec2& a, const arma::vec2& b) {
@@ -112,12 +112,12 @@ namespace vision {
             }
 
             // Use ransac to find right edges.
-            for (auto& line : findMultipleModels<RansacLineModel<arma::vec2>, arma::vec2>(endPoints,
-                                                                                        CONSENSUS_THRESHOLD,
-                                                                                        MINIMUM_POINTS,
-                                                                                        MAX_ITERATIONS_PER_FITTING,
-                                                                                        MAX_FITTING_ATTEMPTS,
-                                                                                        SELECTION_METHOD)) {
+            for (auto& line : findMultipleModels<RansacLineModel>(endPoints,
+                                                                  CONSENSUS_THRESHOLD,
+                                                                  MINIMUM_POINTS,
+                                                                  MAX_ITERATIONS_PER_FITTING,
+                                                                  MAX_FITTING_ATTEMPTS,
+                                                                  SELECTION_METHOD)) {
 
                 auto comp = [] (const arma::vec2& a, const arma::vec2& b) {
                     return a[1] < b[1];

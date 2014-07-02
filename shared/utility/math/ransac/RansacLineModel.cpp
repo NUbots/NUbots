@@ -17,42 +17,27 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MATH_RANSAC_RANSACCIRCLEMODEL_H
-#define UTILITY_MATH_RANSAC_RANSACCIRCLEMODEL_H
-
-#include <vector>
-#include <armadillo>
+#include "RansacLineModel.h"
 
 namespace utility {
 namespace math {
 namespace ransac {
 
-    class RansacCircleModel {
-    private:
-        arma::vec2 centre;
-        double radius;
+    bool RansacLineModel::regenerate(const std::vector<DataType>& pts) {
+        if(pts.size() == MINIMUM_POINTS) {
+            setFromPoints(pts[0], pts[1]);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
-    public:
-
-        static constexpr size_t MINIMUM_POINTS = 3;
-        using DataType = arma::vec2;
-
-        RansacCircleModel() {};
-
-        bool regenerate(const std::vector<DataType>& points);
-
-        double calculateError(const DataType& p) const;
-
-        double getRadius() const;
-
-        arma::vec2 getCentre() const;
-
-    private:
-        bool constructFromPoints(const DataType& point1, const DataType& point2, const DataType& point3, double tolerance = 1.0e-6);
-    };
+    double RansacLineModel::calculateError(const DataType& p) const {
+        double val = distanceToPoint(std::forward<const DataType&>(p));
+        return val * val;
+    }
 
 }
 }
 }
-
-#endif
