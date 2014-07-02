@@ -30,6 +30,8 @@ namespace ransac {
     template<typename T>
     class RansacCircleModel {
     public:
+        static constexpr size_t MIN_POINTS_FOR_FIT = 3;
+
         RansacCircleModel() : radius(0) {
             // Empty constructor.
         }
@@ -44,12 +46,9 @@ namespace ransac {
             }
         }
 
-        unsigned int minPointsForFit() const {
-            return 3;
-        }
-
         double calculateError(const T& p) const {
-            return std::abs(arma::norm(p - centre, 2) - radius);
+            double val = arma::norm(p - centre) - radius;
+            return val * val;
         }
 
         double getRadius() const {

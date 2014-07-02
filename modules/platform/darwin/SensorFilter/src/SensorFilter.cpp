@@ -341,12 +341,13 @@ namespace modules {
                     }
 
                     if(sensors->leftFootDown){
-                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::L_ANKLE_PITCH](2,3);
+                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::L_ANKLE_ROLL](2,3);
                     } else if(sensors->rightFootDown){
-                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::R_ANKLE_PITCH](2,3);
+                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::R_ANKLE_ROLL](2,3);
                     } else {
                         sensors->bodyCentreHeight = 0;
                     }
+
 
                     /************************************************
                      *                  Mass Model                  *

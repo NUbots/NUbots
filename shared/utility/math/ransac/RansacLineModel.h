@@ -29,6 +29,8 @@ namespace ransac {
     template<typename T>
     class RansacLineModel : public utility::math::geometry::Line {
     public:
+        static constexpr size_t MIN_POINTS_FOR_FIT = 3;
+
         RansacLineModel() {}
 
         bool regenerate(const std::vector<T>& pts) {
@@ -39,10 +41,6 @@ namespace ransac {
             else {
                 return false;
             }
-        }
-
-        inline size_t minPointsForFit() const {
-            return 2;
         }
 
         double calculateError(const T& p) const {
