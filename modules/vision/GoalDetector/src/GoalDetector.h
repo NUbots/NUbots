@@ -31,6 +31,9 @@ namespace vision {
         uint MAXIMUM_ITERATIONS_PER_FITTING;
         uint MAXIMUM_FITTED_MODELS;
         double CONSENSUS_ERROR_THRESHOLD;
+
+        double MAXIMUM_ASPECT_RATIO;
+        double MINIMUM_ASPECT_RATIO;
     public:
 
         static constexpr const char* CONFIGURATION_PATH = "GoalDetector.yaml";

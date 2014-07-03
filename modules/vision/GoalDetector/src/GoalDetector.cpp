@@ -53,6 +53,9 @@ namespace vision {
             CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<double>();
             MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
             MAXIMUM_FITTED_MODELS = config["ransac"]["maximum_fitted_models"].as<uint>();
+
+            MINIMUM_ASPECT_RATIO = config["aspect_ratio_range"][0].as<double>();
+            MAXIMUM_ASPECT_RATIO = config["aspect_ratio_range"][1].as<double>();
         });
 
         on<Trigger<ClassifiedImage<ObjectClass>>>([this](const ClassifiedImage<ObjectClass>& image) {
@@ -120,20 +123,56 @@ namespace vision {
                 ends.back().col(1) = result.model.orthogonalProjection(*low);
             }
 
-
+            // Our output goal vector
             auto goals = std::make_unique<std::vector<Goal>>();
+            goals->reserve(starts.size() * ends.size());
 
-            for(auto& line : starts) {
+            // Form quads from all of the lines
+            for(auto& start : starts) {
+                for(auto& end : ends) {
 
-                goals->emplace_back();
-                goals->back().quad.set(line.col(1), line.col(0), line.col(0), line.col(1));
+                    // If we can make a valid quad from the points
+                    if(start(0, 0) < end(0, 1) && start(1, 0) < end(1, 1)) {
+                        goals->emplace_back();
+                        goals->back().quad.set(start.col(1), start.col(0), end.col(0), end.col(1));
+                    }
+                }
             }
 
-            for(auto& line : ends) {
+            // Throwout obviously invalid quads
+            for(auto it = goals->begin(); it < goals->end();) {
 
-                goals->emplace_back();
-                goals->back().quad.set(line.col(1), line.col(0), line.col(0), line.col(1));
+
+                bool throwout = it->quad.aspectRatio() < MINIMUM_ASPECT_RATIO
+                             || it->quad.aspectRatio() > MAXIMUM_ASPECT_RATIO;
+
+
+                // Check the aspect ratio
+                // Check that the goals base is within x of the GH
+                // Check that the kh is off the screen, or that
+
+                if(throwout) {
+                    it = goals->erase(it);
+                }
+                else {
+                    ++it;
+                }
             }
+
+            // Combine all possible lines into quads
+
+            // Throw out bad quads
+
+            // bad aspect ratio
+            // base must be below the vh
+            // Top of goals is above the kinematics horizion OR kh is above the screen
+
+            // Refine the tops and bottoms of the goals using the vertical segments
+
+            // Try and assign left and right
+                // Check for left side vs right side
+                // Check for a crossbar
+
 
             emit(std::move(goals));
 
