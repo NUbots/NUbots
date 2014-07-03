@@ -26,6 +26,7 @@
 
 namespace utility {
 namespace math {
+namespace ransac {
 
     template <typename Model>
     struct Ransac {
@@ -86,15 +87,15 @@ namespace math {
             Model bestModel;
             Model model;
 
-            for(uint i = 0; i < numIterations; ++i) {
+            for(uint i = 0; i < maximumIterationsPerFitting; ++i) {
 
                 uint consensusSize = 0;
 
-                regenerateRandomModel(Model, first, last);
+                regenerateRandomModel(model, first, last);
 
                 for(auto it = first; it < last; ++it) {
 
-                    if(model.calculateError(*it) < errorThreshold) {
+                    if(model.calculateError(*it) < consensusErrorThreshold) {
                         ++consensusSize;
                     }
                 }
@@ -105,10 +106,10 @@ namespace math {
                 }
             }
 
-            if(largestConsensus > minConsensus) {
+            if(largestConsensus >= minimumPointsForConsensus) {
 
-                auto newFirst = std::partition(first, last, [bestModel] (const DataPoint& point) {
-                    return errorThreshold > bestModel.calculateError(std::forward<const DataPoint&>(point));
+                auto newFirst = std::partition(first, last, [consensusErrorThreshold, bestModel] (const DataPoint& point) {
+                    return consensusErrorThreshold > bestModel.calculateError(std::forward<const DataPoint&>(point));
                 });
 
                 model.setEnds(first, newFirst);
@@ -129,11 +130,11 @@ namespace math {
                                           , double consensusErrorThreshold) {
 
             std::vector<Model> results;
-            results.reserve(numFittings);
+            results.reserve(maximumFittedModels);
 
             while(results.size() < maximumFittedModels) {
                 Model m;
-                std::tie(first, m) = findModel(first, last);
+                std::tie(first, m) = findModel(first, last, minimumPointsForConsensus, maximumIterationsPerFitting, consensusErrorThreshold);
 
                 // If we have more datapoints left then add this one and continue
                 if(!m.empty()) {
@@ -147,6 +148,8 @@ namespace math {
             return results;
         }
     };
+
+}
 }
 }
 

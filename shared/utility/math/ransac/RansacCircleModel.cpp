@@ -23,8 +23,8 @@ namespace utility {
 namespace math {
 namespace ransac {
 
-  bool RansacCircleModel::regenerate(const std::vector<DataType>& points) {
-        if (points.size() == MINIMUM_POINTS) {
+  bool RansacCircleModel::regenerate(const std::vector<DataPoint>& points) {
+        if (points.size() == REQUIRED_POINTS) {
             return constructFromPoints(points[0], points[1], points[2], 1.0e-2);
         }
 
@@ -33,7 +33,7 @@ namespace ransac {
         }
     }
 
-    double RansacCircleModel::calculateError(const DataType& p) const {
+    double RansacCircleModel::calculateError(const DataPoint& p) const {
         return std::abs(arma::norm(p - centre, 2) - radius);
     }
 
@@ -41,13 +41,17 @@ namespace ransac {
         return radius;
     }
 
-    RansacCircleModel::DataType RansacCircleModel::getCentre() const {
+    RansacCircleModel::DataPoint RansacCircleModel::getCentre() const {
         return centre;
     }
 
-    bool RansacCircleModel::constructFromPoints(const DataType& point1, const DataType& point2, const DataType& point3, double tolerance) {
-        DataType ab = point1 - point2;
-        DataType bc = point2 - point3;
+    bool RansacCircleModel::empty() const {
+        // TODO find out if we are empty?
+    }
+
+    bool RansacCircleModel::constructFromPoints(const DataPoint& point1, const DataPoint& point2, const DataPoint& point3, double tolerance) {
+        DataPoint ab = point1 - point2;
+        DataPoint bc = point2 - point3;
         double det = ((ab[0] * bc[1]) - (bc[0] * ab[1]));
 
         if (std::abs(det) < tolerance) {

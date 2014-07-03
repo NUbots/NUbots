@@ -101,9 +101,9 @@ namespace vision {
             // Use ransac to find the ball
             auto ransacResults = Ransac<RansacCircleModel>::fitModels(ballPoints.begin()
                                                                     , ballPoints.end()
-                                                                    , MINIMUM_POINTS_FOR_CONSENSUS;
-                                                                    , MAXIMUM_ITERATIONS_PER_FITTING;
-                                                                    , MAXIMUM_FITTED_MODELS;
+                                                                    , MINIMUM_POINTS_FOR_CONSENSUS
+                                                                    , MAXIMUM_ITERATIONS_PER_FITTING
+                                                                    , MAXIMUM_FITTED_MODELS
                                                                     , CONSENSUS_ERROR_THRESHOLD);
 
             auto balls = std::make_unique<std::vector<Ball>>();
@@ -117,11 +117,11 @@ namespace vision {
 
 
 
-                auto centre = ball.first.getCentre();
+                auto centre = ball.getCentre();
                 auto p1 = centre;
                 auto p2 = centre;
-                p1[1] += ball.first.getRadius();
-                p2[1] -= ball.first.getRadius();
+                p1[1] += ball.getRadius();
+                p2[1] -= ball.getRadius();
 
                 // Transform p1 p2 to kinematics coordinates
                 p1 = imageToScreen(p1, { double(image.dimensions[0]), double(image.dimensions[1]) });
@@ -144,8 +144,8 @@ namespace vision {
                 //Get angular width
                 auto p3 = centre;
                 auto p4 = centre;
-                p3[0] += ball.first.getRadius();
-                p4[0] -= ball.first.getRadius();
+                p3[0] += ball.getRadius();
+                p4[0] -= ball.getRadius();
                 p3 = imageToScreen(p3, { double(image.dimensions[0]), double(image.dimensions[1]) });
                 p4 = imageToScreen(p4, { double(image.dimensions[0]), double(image.dimensions[1]) });
 
@@ -155,8 +155,8 @@ namespace vision {
                 Ball b;
 
                 // On screen visual shape
-                b.circle.radius = ball.first.getRadius();
-                b.circle.centre = ball.first.getCentre();
+                b.circle.radius = ball.getRadius();
+                b.circle.centre = ball.getCentre();
 
                 // Camera dimensions
                 b.screenAngular = arma::atan(cam.pixelsToTanThetaFactor % ballCentreScreen);

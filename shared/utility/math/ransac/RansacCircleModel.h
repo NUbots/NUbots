@@ -34,21 +34,23 @@ namespace ransac {
 
     public:
 
-        static constexpr size_t MINIMUM_POINTS = 3;
-        using DataType = arma::vec2;
+        static constexpr size_t REQUIRED_POINTS = 3;
+        using DataPoint = arma::vec2;
 
         RansacCircleModel() {};
 
-        bool regenerate(const std::vector<DataType>& points);
+        bool regenerate(const std::vector<DataPoint>& points);
 
-        double calculateError(const DataType& p) const;
+        double calculateError(const DataPoint& p) const;
+
+        bool empty() const;
 
         double getRadius() const;
 
         arma::vec2 getCentre() const;
 
     private:
-        bool constructFromPoints(const DataType& point1, const DataType& point2, const DataType& point3, double tolerance = 1.0e-6);
+        bool constructFromPoints(const DataPoint& point1, const DataPoint& point2, const DataPoint& point3, double tolerance = 1.0e-6);
     };
 
 }

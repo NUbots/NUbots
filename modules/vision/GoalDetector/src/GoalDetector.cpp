@@ -78,9 +78,9 @@ namespace vision {
             // Use ransac to find left edges.
             for (auto& line : Ransac<RansacLineModel>::fitModels(startPoints.begin()
                                                                , startPoints.end()
-                                                               , MINIMUM_POINTS_FOR_CONSENSUS;
-                                                               , MAXIMUM_ITERATIONS_PER_FITTING;
-                                                               , MAXIMUM_FITTED_MODELS;
+                                                               , MINIMUM_POINTS_FOR_CONSENSUS
+                                                               , MAXIMUM_ITERATIONS_PER_FITTING
+                                                               , MAXIMUM_FITTED_MODELS
                                                                , CONSENSUS_ERROR_THRESHOLD)) {
 
                 // Compare based on Y co-ordinate
@@ -101,9 +101,9 @@ namespace vision {
             // Use ransac to find right edges.
             for (auto& line : Ransac<RansacLineModel>::fitModels(endPoints.begin()
                                                                 , endPoints.end()
-                                                                , MINIMUM_POINTS_FOR_CONSENSUS;
-                                                                , MAXIMUM_ITERATIONS_PER_FITTING;
-                                                                , MAXIMUM_FITTED_MODELS;
+                                                                , MINIMUM_POINTS_FOR_CONSENSUS
+                                                                , MAXIMUM_ITERATIONS_PER_FITTING
+                                                                , MAXIMUM_FITTED_MODELS
                                                                 , CONSENSUS_ERROR_THRESHOLD)) {
 
                 auto comp = [] (const arma::vec2& a, const arma::vec2& b) {

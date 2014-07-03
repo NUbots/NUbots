@@ -29,15 +29,15 @@ namespace ransac {
     class RansacLineModel : public utility::math::geometry::Line {
     public:
         static constexpr size_t REQUIRED_POINTS = 2;
-        using DataType = arma::vec2;
+        using DataPoint = arma::vec2;
 
         RansacLineModel() {}
 
-        bool regenerate(const std::vector<DataType>& pts);
+        bool regenerate(const std::vector<DataPoint>& pts);
 
-        bool empty();
+        bool empty() const;
 
-        double calculateError(const DataType& p) const;
+        double calculateError(const DataPoint& p) const;
     };
 
 }

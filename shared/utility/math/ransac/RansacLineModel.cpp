@@ -23,7 +23,7 @@ namespace utility {
 namespace math {
 namespace ransac {
 
-    bool RansacLineModel::regenerate(const std::vector<DataType>& pts) {
+    bool RansacLineModel::regenerate(const std::vector<DataPoint>& pts) {
         if(pts.size() == REQUIRED_POINTS) {
             setFromPoints(pts[0], pts[1]);
             return true;
@@ -33,12 +33,12 @@ namespace ransac {
         }
     }
 
-    bool RansacLineModel::empty() {
+    bool RansacLineModel::empty() const {
         // TODO find out if we are empty?
     }
 
-    double RansacLineModel::calculateError(const DataType& p) const {
-        double val = distanceToPoint(std::forward<const DataType&>(p));
+    double RansacLineModel::calculateError(const DataPoint& p) const {
+        double val = distanceToPoint(std::forward<const DataPoint&>(p));
         return val * val;
     }
 
