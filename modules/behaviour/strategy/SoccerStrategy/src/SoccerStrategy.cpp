@@ -219,13 +219,18 @@ namespace modules {
 					plane.setFromNormal(xaxis, fieldWidth);
 					line.setFromDirection((currentState.currentTransform * certainBall.velocity), (currentState.currentTransform * certainBall.position + currentState.currentPosition));
 
-					auto intersection = plane.intersect(line);
+					try {
+						// Throws std::domain_error if there is no intersection.
+						currentState.ballGoalIntersection = plane.intersect(line);
 
-					if (intersection.first) {
-						currentState.ballApproachingGoal = ((intersection.second[1] <= (FIELD_DESCRIPTION.dimensions.goal_area_width / 2)) && (intersection.second[1] >= -(FIELD_DESCRIPTION.dimensions.goal_area_width / 2)));
+						currentState.ballApproachingGoal = ((currentState.ballGoalIntersection[1] <= (FIELD_DESCRIPTION.dimensions.goal_area_width / 2)) &&
+											 (currentState.ballGoalIntersection[1] >= -(FIELD_DESCRIPTION.dimensions.goal_area_width / 2)));
+					}
 
-						currentState.ballGoalIntersection = intersection.second;
-					}	
+					catch (std::domain_error e) {
+						currentState.ballApproachingGoal = false;
+					}
+
 
 
 
