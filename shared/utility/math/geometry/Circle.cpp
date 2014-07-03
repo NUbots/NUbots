@@ -71,15 +71,20 @@ namespace geometry {
         //Method posted on a mailing list at:
         //http://www.math.niu.edu/~rusin/known-math/96/circle.fit
         //Reference: [Pawel Gora, Zdislav V. Kovarik, Daniel Pfenniger, Condensed by Amara Graps]
-        arma::mat linearEq1(3,std::distance(first,last));
+        arma::mat linearEq1(std::distance(first,last),3);
         arma::vec linearEq2(std::distance(first,last));
         size_t i = 0;
         for (auto it = first; it != last; ++it) {
-            linearEq1.row(i).cols(0,1) = (*it).t();
-            linearEq1(i,2) = 1.0;
-            linearEq2(i) = -arma::dot((*it),(*it));
-            ++i;
+            const double diff = distanceToPoint(*it);
+            if (diff*diff < candidateThreshold) {
+                linearEq1.row(i).cols(0,1) = (*it).t();
+                linearEq1(i,2) = 1.0;
+                linearEq2(i) = -arma::dot((*it),(*it));
+                ++i;
+            }
         }
+        linearEq1.shed_rows(i,std::distance(first,last)-1);
+        linearEq2.shed_rows(i,std::distance(first,last)-1);
         arma::vec3 results = arma::solve(linearEq1,linearEq2);
         centre = {results[0]*0.5, results[1]*0.5};
         radius = arma::dot(centre,centre)-results[2];
