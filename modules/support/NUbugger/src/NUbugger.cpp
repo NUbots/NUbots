@@ -302,25 +302,25 @@ namespace modules {
                 }
             });
 
-            // reactionStatisticsHandle = on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
-            //     Message message;
-            //     message.set_type(Message::REACTION_STATISTICS);
-            //     message.set_utc_timestamp(getUtcTimestamp());
-            //     auto* reactionStatistics = message.mutable_reaction_statistics();
-            //     //reactionStatistics->set_name(stats.name);
-            //     reactionStatistics->set_reactionid(stats.reactionId);
-            //     reactionStatistics->set_taskid(stats.taskId);
-            //     reactionStatistics->set_causereactionid(stats.causeReactionId);
-            //     reactionStatistics->set_causetaskid(stats.causeTaskId);
-            //     reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
-            //     reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
-            //     reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
-            //     reactionStatistics->set_name(stats.identifier[0]);
-            //     reactionStatistics->set_triggername(stats.identifier[1]);
-            //     reactionStatistics->set_functionname(stats.identifier[2]);
+            reactionStatisticsHandle = on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
+                Message message;
+                message.set_type(Message::REACTION_STATISTICS);
+                message.set_utc_timestamp(getUtcTimestamp());
+                auto* reactionStatistics = message.mutable_reaction_statistics();
+                //reactionStatistics->set_name(stats.name);
+                reactionStatistics->set_reactionid(stats.reactionId);
+                reactionStatistics->set_taskid(stats.taskId);
+                reactionStatistics->set_causereactionid(stats.causeReactionId);
+                reactionStatistics->set_causetaskid(stats.causeTaskId);
+                reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
+                reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
+                reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
+                reactionStatistics->set_name(stats.identifier[0]);
+                reactionStatistics->set_triggername(stats.identifier[1]);
+                reactionStatistics->set_functionname(stats.identifier[2]);
 
-            //     send(message);
-            // });
+                send(message);
+            });
 
 
             on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {

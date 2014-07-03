@@ -55,7 +55,6 @@ namespace modules {
             const size_t id;
 
             // start_config_params
-
             // Walk Parameters
             // Stance and velocity limit values
             arma::vec2 stanceLimitX;

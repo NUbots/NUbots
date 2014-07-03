@@ -81,13 +81,13 @@ namespace modules {
                     if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
                         // legs are available, start
                         stanceReset();
-                        updateHandle.enable();
+                        //updateHandle.enable();
                     }
                 },
                 [this] (const std::set<LimbID>& takenLimbs) {
                     if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
                         // legs are no longer available, reset walking (too late to stop walking)
-                        updateHandle.disable();
+                        //updateHandle.disable();
                     }
                 },
                 [this] (const std::set<ServoID>&) {
@@ -99,7 +99,7 @@ namespace modules {
                 emit(update(sensors));
             });
 
-            updateHandle.disable();
+            //updateHandle.disable();
 
             on<Trigger<WalkCommand>>([this](const WalkCommand& walkCommand) {
                 setVelocity(walkCommand.velocity[0] * (walkCommand.velocity[0] > 0 ? velLimitX[1] : -velLimitX[0]),
@@ -120,8 +120,8 @@ namespace modules {
             on<Trigger<Configuration<WalkEngine>> >([this](const Configuration<WalkEngine>& config) {
                 configureWalk(config.config);
             });
-            on<Trigger<Configuration<WalkOptimiserCommand>> >([this](const Configuration<WalkOptimiserCommand>& config) {
-                configureWalk(config.config);
+            on<Trigger<WalkOptimiserCommand> >([this](const WalkOptimiserCommand& command) {
+                configureWalk(command.walkConfig);
                 emit(std::make_unique<WalkConfigSaved>());
             });            
 
@@ -249,6 +249,9 @@ namespace modules {
             saveScript->path = "scripts/Stand.yaml";
             saveScript->config = standScript;
             emit(std::move(saveScript));
+            //Try update(); ?
+            reset();
+            stanceReset();
         }
 
         void WalkEngine::reset(){
@@ -281,7 +284,7 @@ namespace modules {
                 hipShift = {0, 0};
                 armShift = {0, 0};
 
-                active = true;
+                active = false;
                 started = false;
                 iStep0 = -1;
                 iStep = 0;
@@ -382,6 +385,7 @@ namespace modules {
                 stopRequest = 0;
                 active = false;
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 0, 0 }})); // TODO: config
+                std::cout << "Walk Engine:: stop request complete" << std::endl;
                 emit(std::make_unique<WalkStopped>());
 
                 return std::make_unique<std::vector<ServoCommand>>(); // TODO: return "stop"
