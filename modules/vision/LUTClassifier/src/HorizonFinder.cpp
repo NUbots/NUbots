@@ -30,13 +30,10 @@ namespace modules {
 
         void LUTClassifier::findHorizon(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
 
-                // Element 0 is gradient, element 1 is intercept (confirmed by Jake's Implementation)
-                // Coordinate system: 0,0 is the centre of the screen. pos[0] is along the y axis of the
-                // camera transform, pos[1] is along the z axis (x points out of the camera)
                 classifiedImage.horizon = sensors.orientationHorizon;
 
-                // Move the intercept to be at 0,0
-                classifiedImage.horizon[1] += (image.height() * 0.5) + classifiedImage.horizon[0] * -(image.width() * 0.5);
+                // Move our axis to be at the top left of the screen
+                classifiedImage.horizon.distance = classifiedImage.horizon.distanceToPoint({ -image.width() * 0.5, -image.height() * 0.5 });
         }
 
     }  // vision

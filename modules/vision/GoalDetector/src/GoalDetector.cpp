@@ -139,17 +139,20 @@ namespace vision {
                 }
             }
 
-            // Throwout obviously invalid quads
+            // Throwout invalid quads
             for(auto it = goals->begin(); it < goals->end();) {
 
+                auto& quad = it->quad;
 
-                bool throwout = it->quad.aspectRatio() < MINIMUM_ASPECT_RATIO
-                             || it->quad.aspectRatio() > MAXIMUM_ASPECT_RATIO;
-
-
-                // Check the aspect ratio
-                // Check that the goals base is within x of the GH
-                // Check that the kh is off the screen, or that
+                // Check if we are within the aspect ratio range
+                bool throwout = quad.aspectRatio() < MINIMUM_ASPECT_RATIO
+                             || quad.aspectRatio() > MAXIMUM_ASPECT_RATIO
+                // Check if we are close enough to the visual horizon
+                             || (image.visualHorizonAtPoint(quad.getBottomLeft()[0]) > quad.getBottomLeft()[1]
+                                 && image.visualHorizonAtPoint(quad.getBottomRight()[0]) > quad.getBottomLeft()[1])
+                // Check we finish above the kinematics horizon or or kinematics horizon is off the screen
+                             || image.horizon.y(quad.getTopLeft()[0]) > quad.getTopLeft()[1]
+                             || image.horizon.y(quad.getTopRight()[0]) > quad.getTopRight()[1];
 
                 if(throwout) {
                     it = goals->erase(it);
