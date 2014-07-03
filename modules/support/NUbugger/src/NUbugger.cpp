@@ -516,7 +516,7 @@ namespace modules {
         }
 
         void NUbugger::recvMessage(const Message& message) {
-            NUClear::log("Received message of type:", message.type());
+            log("Received message of type:", message.type());
             switch (message.type()) {
                 case Message::COMMAND:
                     recvCommand(message);
@@ -534,7 +534,7 @@ namespace modules {
 
         void NUbugger::recvCommand(const Message& message) {
             std::string command = message.command().command();
-            NUClear::log("Received command:", command);
+            log("Received command:", command);
             if (command == "download_lut") {
                 auto lut = powerplant.get<LookUpTable>();
 
@@ -555,13 +555,13 @@ namespace modules {
             auto lookuptable = message.lookup_table();
             const std::string& lutData = lookuptable.table();
 
-            NUClear::log("Loading LUT");
+            log("Loading LUT");
             auto data = std::vector<char>(lutData.begin(), lutData.end());
             auto lut = std::make_unique<LookUpTable>(lookuptable.bits_y(), lookuptable.bits_cb(), lookuptable.bits_cr(), std::move(data));
             emit<Scope::DIRECT>(std::move(lut));
 
             if (lookuptable.save()) {
-                NUClear::log("Saving LUT to file");
+                log("Saving LUT to file");
                 emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
             }
         }
