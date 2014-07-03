@@ -76,7 +76,7 @@ namespace geometry {
             //step 2: calculate the slope and intercept - this is long because we need 2 cases for this line representation
             arma::vec2 line;
             double m,b;
-            if (normal[0] > normal[1]) { //check whether to use y=mx+b or x=my+b
+            if (std::abs(normal[0]) > std::abs(normal[1])) { //check whether to use y=mx+b or x=my+b
                 m = (jointaverage - average[0] * average[1] / ctr)/(squaredaverage[0] - average[0]*average[0]/ctr);
                 b = average[1] - m * average[0];
                 line = arma::normalise(arma::vec2({ 1.0, m }));
@@ -89,7 +89,7 @@ namespace geometry {
                 m = line[0];
             }
 
-            normal = { -line[1], line[0] };
+            normal = { line[1], -line[0] };
             distance = m * b;
         }
     };
