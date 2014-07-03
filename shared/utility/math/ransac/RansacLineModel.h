@@ -35,8 +35,6 @@ namespace ransac {
 
         bool regenerate(const std::vector<DataPoint>& pts);
 
-        bool empty() const;
-
         double calculateError(const DataPoint& p) const;
     };
 

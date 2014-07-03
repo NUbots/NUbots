@@ -43,8 +43,6 @@ namespace ransac {
 
         double calculateError(const DataPoint& p) const;
 
-        bool empty() const;
-
         double getRadius() const;
 
         arma::vec2 getCentre() const;

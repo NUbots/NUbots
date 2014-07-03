@@ -24,17 +24,13 @@ namespace math {
 namespace ransac {
 
     bool RansacLineModel::regenerate(const std::vector<DataPoint>& pts) {
-        if(pts.size() == REQUIRED_POINTS) {
+        if(pts.size() == REQUIRED_POINTS && !arma::all(pts[0] == pts[1])) {
             setFromPoints(pts[0], pts[1]);
             return true;
         }
         else {
             return false;
         }
-    }
-
-    bool RansacLineModel::empty() const {
-        // TODO find out if we are empty?
     }
 
     double RansacLineModel::calculateError(const DataPoint& p) const {

@@ -56,22 +56,25 @@ namespace ransac {
 
             // Get random points between first and last
             uint range = std::distance(first, last) + 1;
-
-            std::set<uint64_t> indices;
             std::vector<DataPoint> points;
 
-            while(indices.size() < Model::REQUIRED_POINTS) {
-                indices.insert(xorShift() % range);
-            }
+            do {
+                points.clear();
+                std::set<uint64_t> indices;
 
-            for(auto& i : indices) {
-                auto it = first;
-                std::advance(it, i);
-                points.push_back(*it);
-            }
+                while(indices.size() < Model::REQUIRED_POINTS) {
+                    indices.insert(xorShift() % range);
+                }
 
-            // If this returns false then it was an invalid model
-            model.regenerate(points);
+                for(auto& i : indices) {
+                    auto it = first;
+                    std::advance(it, i);
+                    points.push_back(*it);
+                }
+
+                // If this returns false then it was an invalid model
+            }
+            while(!model.regenerate(points));
         }
 
         /**
@@ -81,10 +84,10 @@ namespace ransac {
          */
         template <typename Iterator>
         static std::pair<Iterator, RansacResult<Iterator>> findModel(Iterator first
-                                                  , Iterator last
-                                                  , uint minimumPointsForConsensus
-                                                  , uint maximumIterationsPerFitting
-                                                  , double consensusErrorThreshold) {
+                                                                   , Iterator last
+                                                                   , uint minimumPointsForConsensus
+                                                                   , uint maximumIterationsPerFitting
+                                                                   , double consensusErrorThreshold) {
 
             // Check we have enough points
             if(std::distance(first, last) < int(minimumPointsForConsensus)) {
@@ -102,7 +105,6 @@ namespace ransac {
                 regenerateRandomModel(model, first, last);
 
                 for(auto it = first; it < last; ++it) {
-
                     if(model.calculateError(*it) < consensusErrorThreshold) {
                         ++consensusSize;
                     }
@@ -110,6 +112,7 @@ namespace ransac {
 
                 // If largest consensus
                 if(consensusSize > largestConsensus) {
+                    largestConsensus = consensusSize;
                     bestModel = std::move(model);
                 }
             }
@@ -120,8 +123,7 @@ namespace ransac {
                     return consensusErrorThreshold > bestModel.calculateError(std::forward<const DataPoint&>(point));
                 });
 
-
-                return std::make_pair(newFirst, RansacResult<Iterator>{ true, model, first, newFirst });
+                return std::make_pair(newFirst, RansacResult<Iterator>{ true, bestModel, first, newFirst });
             }
             else {
                 return std::make_pair(last, RansacResult<Iterator>{ false, Model(), Iterator(), Iterator() });
@@ -130,11 +132,11 @@ namespace ransac {
 
         template <typename Iterator>
         static std::vector<RansacResult<Iterator>> fitModels(Iterator first
-                                          , Iterator last
-                                          , uint minimumPointsForConsensus
-                                          , uint maximumIterationsPerFitting
-                                          , uint maximumFittedModels
-                                          , double consensusErrorThreshold) {
+                                                           , Iterator last
+                                                           , uint minimumPointsForConsensus
+                                                           , uint maximumIterationsPerFitting
+                                                           , uint maximumFittedModels
+                                                           , double consensusErrorThreshold) {
 
             std::vector<RansacResult<Iterator>> results;
             results.reserve(maximumFittedModels);

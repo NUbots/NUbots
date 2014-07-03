@@ -30,12 +30,11 @@ namespace utility {
 namespace math {
 namespace geometry {
 
-class Line {
-    private:
+    class Line {
+    public:
         arma::vec2 normal;
         double distance;
 
-    public:
         Line();
 
         Line(const arma::vec2& a, const arma::vec2& b);

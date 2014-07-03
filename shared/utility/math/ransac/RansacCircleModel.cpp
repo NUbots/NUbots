@@ -24,7 +24,10 @@ namespace math {
 namespace ransac {
 
   bool RansacCircleModel::regenerate(const std::vector<DataPoint>& points) {
-        if (points.size() == REQUIRED_POINTS) {
+        if (points.size() == REQUIRED_POINTS
+            && !arma::all(points[0] == points[1])
+            && !arma::all(points[0] == points[2])
+            && !arma::all(points[1] == points[2])) {
             return constructFromPoints(points[0], points[1], points[2], 1.0e-2);
         }
 
@@ -34,7 +37,8 @@ namespace ransac {
     }
 
     double RansacCircleModel::calculateError(const DataPoint& p) const {
-        return std::abs(arma::norm(p - centre, 2) - radius);
+        double error = arma::norm(p - centre) - radius;
+        return error * error;
     }
 
     double RansacCircleModel::getRadius() const {
@@ -43,10 +47,6 @@ namespace ransac {
 
     RansacCircleModel::DataPoint RansacCircleModel::getCentre() const {
         return centre;
-    }
-
-    bool RansacCircleModel::empty() const {
-        // TODO find out if we are empty?
     }
 
     bool RansacCircleModel::constructFromPoints(const DataPoint& point1, const DataPoint& point2, const DataPoint& point3, double tolerance) {
