@@ -1,0 +1,25 @@
+ADD_ROLE(
+    NAME strategy 
+    MODULES
+        #Support
+        support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem
+        support::NUbugger
+
+        #Localisation
+        localisation::MMKFRobotLocalisation
+        localisation::KFBallLocalisation
+
+        #Behaviour
+        behaviour::Controller
+        behaviour::skills::Stand
+        behaviour::skills::FallingRelax
+        behaviour::skills::Getup
+        behaviour::skills::Look
+        behaviour::planning::LookAtBall
+        behaviour::planning::LookAtGoal
+        behaviour::planning::FixedWalk
+        behaviour::planning::KickPlanner
+	behaviour::strategy::SoccerStrategy
+)

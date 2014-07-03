@@ -71,7 +71,7 @@ namespace messages {
         public:
             Self() : LocalisationObject() {}
             arma::vec2 heading;
-            // arma::mat22 robot_to_world_rotation;
+            arma::mat22 robot_to_world_rotation;
         };
     }
 }

@@ -24,6 +24,7 @@
 #include <armadillo>
 
 #include "messages/localisation/FieldObject.h"
+#include "messages/support/FieldDescription.h"
 
 namespace modules {
     namespace behaviour {
@@ -42,7 +43,7 @@ namespace modules {
 			bool gameStateInitial;
 			bool gameStateSet;
 			bool gameStateReady;
-			bool gameStateFinish;
+			bool gameStateFinished;
 			bool gameStatePlaying;
 			bool ballSeen;
 			bool ballLost;
@@ -51,11 +52,18 @@ namespace modules {
 			bool ballApproachingGoal;
 			bool kickPosition;
 
-			arma::vec2 currentHeading;
+			arma::vec2 ballGoalIntersection;
+
+			arma::mat22 currentTransform;
 			arma::vec2 currentPosition;
+			arma::vec2 currentHeading;
 			arma::vec2 targetHeading;
 			arma::vec2 targetPosition;
 		} State;
+
+		struct SoccerStrategyConfig {
+			static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";
+		};
 
 		/**
 		* High level behaviour for robot soccer.
@@ -70,25 +78,24 @@ namespace modules {
 			float MAX_BALL_DISTANCE;
 			float KICK_DISTANCE_THRESHOLD;
 			float BALL_CERTAINTY_THRESHOLD;
-			float FIELD_LENGTH;
-			float GOAL_WIDTH;
 			arma::vec2 START_POSITION;
 			bool IS_GOALIE;
 
+			messages::support::FieldDescription FIELD_DESCRIPTION;
+
 			State previousState, currentState;
 
-			void SoccerStrategy::stopMoving();
-			void SoccerStrategy::findSelf();
-			void SoccerStrategy::findBall(const std::vector<messages::localisation::Ball>& hints);
-			void SoccerStrategy::goToPoint(const arma::vec2& point);
-			void SoccerStrategy::watchBall(const messages::localisation::Ball& ball);
-			void SoccerStrategy::approachBall(const messages::localisation::Ball& ball, const messages::localisation::Self& self);
+			void stopMoving();
+			void findSelf();
+			void findBall(const std::vector<std::shared_ptr<const messages::localisation::Ball>>& hints);
+			void goToPoint(const arma::vec2& point);
+			void watchBall(const std::shared_ptr<const messages::localisation::Ball>& ball);
+			void kickBall(const std::shared_ptr<const messages::localisation::Ball>& ball);
+			void approachBall(const std::shared_ptr<const messages::localisation::Ball>& ball, const std::shared_ptr<const messages::localisation::Self>& self);
 
 		public:
 			explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
-
-			static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";
-			};
+		};
 
 		}  // strategy
 	}  // behaviours

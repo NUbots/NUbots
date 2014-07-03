@@ -23,6 +23,8 @@ namespace utility {
 namespace math {
 namespace geometry {
 
+	// Points should be stored in clockwise order.
+
 }
 }
 }
