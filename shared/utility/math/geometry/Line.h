@@ -51,12 +51,45 @@ class Line {
         bool isVertical() const;
 
         arma::vec2 orthogonalProjection(const arma::vec2 x);
-        
+
         //Perform a least squares fit on a line, optionally using a distance
         //squared threshold away from the current model to filter candidates
-        void leastSquaresUpdate(const Iterator<arma::vec2>& first, 
-                                const Iterator<arma::vec2>& last,
-                                const double& candidateThreshold = std::numeric_limits<double>::max());
+        template <typename Iterator>
+        void leastSquaresUpdate(const Iterator& first,
+                                const Iterator& last,
+                                const double& candidateThreshold = std::numeric_limits<double>::max()) {
+
+            arma::vec2 average({ 0.0, 0.0 });
+            arma::vec2 squaredaverage({ 0.0, 0.0 });
+            double jointaverage = 0.0;
+
+            //step 1: calculate means and grab candidates
+            for (auto it = first; it != last; ++it) {
+                const double diff = distanceToPoint(*it);
+                if ( diff*diff < candidateThreshold ) {
+                    average += *it;
+                    squaredaverage += (*it) % (*it);
+                    jointaverage += (*it)[0] * (*it)[1];
+                }
+            }
+
+            //step 2: calculate the slope and intercept - this is long because we need 2 cases for this line representation
+            arma::vec2 line;
+            double m,b;
+            if (normal[0] > normal[1]) { //check whether to use y=mx+b or x=my+b
+                m = (jointaverage - average[0] * average[1])/(squaredaverage[0]);
+                b = average[1] - m * average[0];
+                line = arma::normalise(arma::vec2({ 1.0, m }));
+
+            } else {
+                m = (jointaverage - average[0] * average[1]) / (squaredaverage[1]);
+                b = average[0] - m*average[1];
+                line = arma::normalise(arma::vec2({ m, 1.0 }));
+            }
+
+            normal = { -line[1], line[0] };
+            distance = m * b;
+        }
     };
 
 }
