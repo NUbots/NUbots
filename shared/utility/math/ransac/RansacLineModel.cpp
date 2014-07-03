@@ -17,23 +17,27 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_VISION_NUPOINT_H
-#define MODULES_VISION_NUPOINT_H
+#include "RansacLineModel.h"
 
-#include <nuclear>
-#include <armadillo>
-#include <ostream>
+namespace utility {
+namespace math {
+namespace ransac {
 
-namespace modules {
-    namespace vision {
-
-        typedef struct {
-            arma::vec2 screenCartesian;
-            arma::vec2 screenAngular;
-            arma::vec2 groundCartesian;
-            arma::vec3 bodyRelativeSpherical;
-        } NUPoint;
+    bool RansacLineModel::regenerate(const std::vector<DataPoint>& pts) {
+        if(pts.size() == REQUIRED_POINTS && !arma::all(pts[0] == pts[1])) {
+            setFromPoints(pts[0], pts[1]);
+            return true;
+        }
+        else {
+            return false;
+        }
     }
-}
 
-#endif // MODULES_VISION_NUPOINT_H
+    double RansacLineModel::calculateError(const DataPoint& p) const {
+        double val = distanceToPoint(std::forward<const DataPoint&>(p));
+        return val * val;
+    }
+
+}
+}
+}

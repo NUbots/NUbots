@@ -50,7 +50,7 @@ message Message {
     optional messages.input.proto.Sensors sensor_data = 3;
     optional messages.input.proto.Image image = 4;
     optional messages.vision.proto.ClassifiedImage classified_image = 5;
-    repeated messages.vision.proto.VisionObject vision_object = 6;
+    optional messages.vision.proto.VisionObject vision_object = 6;
     optional messages.localisation.proto.Localisation localisation = 7;
     optional messages.support.nubugger.proto.DataPoint data_point = 8;
     optional messages.support.nuclear.proto.ReactionStatistics reaction_statistics = 9;
@@ -62,7 +62,7 @@ message Message {
     message Command {
         optional string command = 1;
     }
-    
+
     message ReactionHandlers {
         required bool dataPoints = 1;
         required bool actionStart = 2;

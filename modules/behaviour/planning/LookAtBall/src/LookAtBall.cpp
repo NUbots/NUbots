@@ -60,11 +60,11 @@ namespace modules {
                         std::vector<LookAtAngle> angles;
                         angles.reserve(4);
 
-                        angles.emplace_back(LookAtAngle {balls[0].sphericalFromCamera[0],-balls[0].sphericalFromCamera[1]});
+                        angles.emplace_back(LookAtAngle {balls[0].screenAngular[0],-balls[0].screenAngular[1]});
 
 
                         for (const auto& g : goals) {
-                            angles.emplace_back(LookAtAngle {g.sphericalFromCamera[0],-g.sphericalFromCamera[1]});
+                            angles.emplace_back(LookAtAngle {g.screenAngular[0],-g.screenAngular[1]});
                         }
 
                         //XXX: add looking at robots as well

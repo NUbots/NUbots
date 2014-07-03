@@ -30,15 +30,21 @@ namespace messages {
     namespace vision {
 
         struct VisionObject {
+
+            struct Measurement {
+                arma::vec3 position;
+                arma::mat33 error;
+            };
+
             // Time the image was taken
             NUClear::clock::time_point timestamp;
 
             // Position of object relative to ground to centre of object
-            arma::vec3 position;
-            arma::mat33 error;
+            std::vector<Measurement> measurements;
 
             // Position in spherical coordinates relative to camera to centre of object
-            arma::vec3 sphericalFromCamera;
+            arma::vec2 screenAngular;
+            arma::vec2 angularSize;
 
         };
 

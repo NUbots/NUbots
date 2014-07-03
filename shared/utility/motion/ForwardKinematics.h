@@ -170,7 +170,7 @@ namespace kinematics {
         runningTransform *= utility::math::matrix::yRotationMatrix(-M_PI/2, 4);
         //Translate to ground
         runningTransform *= utility::math::matrix::translationMatrix(arma::vec3({0, 0, -RobotKinematicModel::Leg::FOOT_HEIGHT}));
-        //Return basis with x out of the front of the toe and z out the top of foot. Pos = ankle axis centre
+        //Return basis with x out of the front of the toe and z out the top of foot. Pos = ankle axis centre projected to ground
         positions[ANKLE_ROLL] = runningTransform;
         return positions;
     }

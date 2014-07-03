@@ -32,8 +32,8 @@ namespace modules {
         using messages::vision::ClassifiedImage;
 
         using utility::math::vision::getGroundPointFromScreen;
-        using utility::math::vision::projectWorldPointToCamera;
-        using utility::math::vision::imageToCam;
+        using utility::math::vision::projectWorldPointToScreen;
+        using utility::math::vision::imageToScreen;
 
         void LUTClassifier::enhanceBall(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
 
@@ -86,7 +86,7 @@ namespace modules {
 
                         // Get the centre point to use and translate it into the kinematics form
                         arma::vec2 centre = stats.mean();
-                        arma::vec2 kinematicsCentre = imageToCam(stats.mean(), arma::vec2{image.width(), image.height()});
+                        arma::vec2 kinematicsCentre = imageToScreen(stats.mean(), arma::vec2{image.width(), image.height()});
 
                         // Shift the camera by BALL_RADIUS in order to move it to the correct position
                         auto cameraMatrix = sensors.orientationCamToGround;
@@ -97,7 +97,7 @@ namespace modules {
                         arma::vec4 edgePoint = arma::ones(4);
                         edgePoint.rows(0, 2) = groundPoint + (BALL_RADIUS * cameraMatrix.submat(0, 2, 2, 2));
 
-                        auto screenEdge = projectWorldPointToCamera(edgePoint, cameraMatrix, FOCAL_LENGTH_PIXELS);
+                        auto screenEdge = projectWorldPointToScreen(edgePoint, cameraMatrix, FOCAL_LENGTH_PIXELS);
 
                         double radius = arma::norm(screenEdge - kinematicsCentre);
 

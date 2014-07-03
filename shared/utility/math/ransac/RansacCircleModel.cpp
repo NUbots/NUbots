@@ -17,5 +17,30 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-#include <catch.hpp>
+#include "RansacCircleModel.h"
+
+namespace utility {
+namespace math {
+namespace ransac {
+
+  bool RansacCircleModel::regenerate(const std::vector<DataPoint>& points) {
+        if (points.size() == REQUIRED_POINTS
+            && !arma::all(points[0] == points[1])
+            && !arma::all(points[0] == points[2])
+            && !arma::all(points[1] == points[2])) {
+            return setFromPoints(points[0], points[1], points[2], 1.0e-2);
+        }
+
+        else {
+            return false;
+        }
+    }
+
+    double RansacCircleModel::calculateError(const DataPoint& p) const {
+        double error = distanceToPoint(p);
+        return error * error;
+    }
+
+}
+}
+}

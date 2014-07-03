@@ -387,11 +387,12 @@ namespace modules {
                 message.set_type(Message::VISION_OBJECT);
                 message.set_utc_timestamp(getUtcTimestamp());
 
-                for(const auto& b : balls) {
-                    auto* object = message.add_vision_object();
+                auto* object = message.mutable_vision_object();
+                object->set_type(messages::vision::proto::VisionObject::BALL);
 
-                    object->set_type(messages::vision::proto::VisionObject::BALL);
-                    auto* ball = object->mutable_ball();
+                for(const auto& b : balls) {
+
+                    auto* ball = object->add_ball();
 
                     auto* circle = ball->mutable_circle();
                     circle->set_radius(b.circle.radius);
@@ -409,11 +410,12 @@ namespace modules {
                 message.set_type(Message::VISION_OBJECT);
                 message.set_utc_timestamp(getUtcTimestamp());
 
-                for(const auto& g : goals) {
-                    auto* object = message.add_vision_object();
+                auto* object = message.mutable_vision_object();
 
-                    object->set_type(messages::vision::proto::VisionObject::GOAL);
-                    auto* goal = object->mutable_goal();
+                object->set_type(messages::vision::proto::VisionObject::GOAL);
+
+                for(const auto& g : goals) {
+                    auto* goal = object->add_goal();
 
                     goal->set_side(g.side == VisionGoal::Side::LEFT ? messages::vision::proto::VisionObject::Goal::LEFT
                                  : g.side == VisionGoal::Side::RIGHT ? messages::vision::proto::VisionObject::Goal::RIGHT
