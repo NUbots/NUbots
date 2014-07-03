@@ -56,7 +56,7 @@ namespace geometry {
             //Reference: [Pawel Gora, Zdislav V. Kovarik, Daniel Pfenniger, Condensed by Amara Graps]
             arma::mat linearEq1(std::distance(first, last), 3);
             arma::vec linearEq2(std::distance(first, last));
-            size_t i = 0;
+            uint i = 0;
             for (auto it = first; it != last; ++it) {
                 const double diff = distanceToPoint(*it);
                 if (diff * diff < candidateThreshold) {
@@ -66,9 +66,7 @@ namespace geometry {
                     ++i;
                 }
             }
-            linearEq1.shed_rows(i, std::distance(first, last) - 1);
-            linearEq2.shed_rows(i, std::distance(first, last) - 1);
-            arma::vec3 results = arma::solve(linearEq1, linearEq2);
+            arma::vec3 results = arma::solve(linearEq1.rows(0, i - 1), linearEq2.rows(0, i - 1));
             centre = { results[0] * 0.5, results[1] * 0.5 };
             radius = arma::dot(centre, centre) - results[2];
         }

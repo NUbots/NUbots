@@ -3,3 +3,4 @@ ransac:
   maximum_iterations_per_fitting: 100
   maximum_fitted_models: 3
   consensus_error_threshold: 5.0
+aspect_ratio_range: [ 2, 10 ]
