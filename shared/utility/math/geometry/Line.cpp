@@ -57,7 +57,7 @@ namespace geometry {
         return normal[1] == 0;
     }
 
-    arma::vec2 Line::orthogonalProjection(const arma::vec2 x) {
+    arma::vec2 Line::orthogonalProjection(const arma::vec2& x) {
         return x - (arma::dot(x, normal) - distance) * normal;
     }
 }

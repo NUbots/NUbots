@@ -117,11 +117,11 @@ namespace vision {
 
 
 
-                auto centre = result.model.getCentre();
+                auto centre = result.model.centre;
                 auto p1 = centre;
                 auto p2 = centre;
-                p1[1] += result.model.getRadius();
-                p2[1] -= result.model.getRadius();
+                p1[1] += result.model.radius;
+                p2[1] -= result.model.radius;
 
                 // Transform p1 p2 to kinematics coordinates
                 p1 = imageToScreen(p1, { double(image.dimensions[0]), double(image.dimensions[1]) });
@@ -144,8 +144,8 @@ namespace vision {
                 //Get angular width
                 auto p3 = centre;
                 auto p4 = centre;
-                p3[0] += result.model.getRadius();
-                p4[0] -= result.model.getRadius();
+                p3[0] += result.model.radius;
+                p4[0] -= result.model.radius;
                 p3 = imageToScreen(p3, { double(image.dimensions[0]), double(image.dimensions[1]) });
                 p4 = imageToScreen(p4, { double(image.dimensions[0]), double(image.dimensions[1]) });
 
@@ -155,8 +155,8 @@ namespace vision {
                 Ball b;
 
                 // On screen visual shape
-                b.circle.radius = result.model.getRadius();
-                b.circle.centre = result.model.getCentre();
+                b.circle.radius = result.model.radius;
+                b.circle.centre = result.model.centre;
 
                 // Camera dimensions
                 b.screenAngular = arma::atan(cam.pixelsToTanThetaFactor % ballCentreScreen);

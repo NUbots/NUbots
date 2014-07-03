@@ -20,35 +20,22 @@
 #ifndef UTILITY_MATH_RANSAC_RANSACCIRCLEMODEL_H
 #define UTILITY_MATH_RANSAC_RANSACCIRCLEMODEL_H
 
-#include <vector>
 #include <armadillo>
+#include "utility/math/geometry/Circle.h"
 
 namespace utility {
 namespace math {
 namespace ransac {
 
-    class RansacCircleModel {
-    private:
-        arma::vec2 centre;
-        double radius;
-
+    class RansacCircleModel : public utility::math::geometry::Circle {
     public:
 
         static constexpr size_t REQUIRED_POINTS = 3;
         using DataPoint = arma::vec2;
 
-        RansacCircleModel() {};
-
         bool regenerate(const std::vector<DataPoint>& points);
 
         double calculateError(const DataPoint& p) const;
-
-        double getRadius() const;
-
-        arma::vec2 getCentre() const;
-
-    private:
-        bool constructFromPoints(const DataPoint& point1, const DataPoint& point2, const DataPoint& point3, double tolerance = 1.0e-6);
     };
 
 }
