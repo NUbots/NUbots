@@ -573,136 +573,36 @@ namespace modules {
             auto reactionHandlers = message.reactionhandlers();
 
             log("Reaction Handler Changes:");
-            // TODO: is there a better way? e.g. map or something?
-            if (reactionHandlers.datapoints()) {
-                if (!dataPointHandle.isEnabled()) {
-                    dataPointHandle.enable();
-                    log("Data Points Enabled");
-                }
-            } else {
-                if (dataPointHandle.isEnabled()) {
-                    dataPointHandle.disable();
-                    log("Data Points Disabled");
-                }
-            }
+            std::vector<std::tuple<bool, ReactionHandle, std::string>> handlers = {
+                std::make_tuple(reactionHandlers.datapoints(), dataPointHandle, "Data Points"),
+                std::make_tuple(reactionHandlers.actionstart(), actionStartHandle, "Action Start"),
+                std::make_tuple(reactionHandlers.actionkill(), actionKillHandle, "Action Kill"),
+                std::make_tuple(reactionHandlers.registeraction(), registerActionHandle, "Register Action"),
+                std::make_tuple(reactionHandlers.sensors(), sensorsHandle, "Sensors"),
+                std::make_tuple(reactionHandlers.image(), imageHandle, "Image"),
+                std::make_tuple(reactionHandlers.reactionstatistics(), reactionStatisticsHandle, "Reaction Statistics"),
+                std::make_tuple(reactionHandlers.classifiedimage(), classifiedImageHandle, "Classified Image"),
+                std::make_tuple(reactionHandlers.goals(), goalsHandle, "Goals"),
+                std::make_tuple(reactionHandlers.balls(), ballsHandle, "Balls"),
+                std::make_tuple(reactionHandlers.localisation(), localisationHandle, "Localisation")
+            };
 
-            if (reactionHandlers.actionstart()) {
-                if (!actionStartHandle.isEnabled()) {
-                    actionStartHandle.enable();
-                    log("Action Start Enabled");
-                }
-            } else {
-                if (actionStartHandle.isEnabled()) {
-                    actionStartHandle.disable();
-                    log("Action Start Disabled");
-                }
-            }
-            
-            if (reactionHandlers.actionkill()) {
-                if (!actionKillHandle.isEnabled()) {
-                    actionKillHandle.enable();
-                    log("Action Kill Enabled");
-                }
-            } else {
-                if (actionKillHandle.isEnabled()) {
-                    actionKillHandle.disable();
-                    log("Action Kill Disabled");
-                }
-            }
-            
-            if (reactionHandlers.registeraction()) {
-                if (!registerActionHandle.isEnabled()) {
-                    registerActionHandle.enable();
-                    log("Register Action Enabled");
-                }
-            } else {
-                if (registerActionHandle.isEnabled()) {
-                    registerActionHandle.disable();
-                    log("Register Action Disabled");
-                }
-            }
-            
-            if (reactionHandlers.sensors()) {
-                if (!sensorsHandle.isEnabled()) {
-                    sensorsHandle.enable();
-                    log("Sensors Enabled");
-                }
-            } else {
-                if (sensorsHandle.isEnabled()) {
-                    sensorsHandle.disable();
-                    log("Sensors Disabled");
-                }
-            }
+            for (auto& handle : handlers) {
+                bool enabled;
+                ReactionHandle reactionHandle;
+                std::string name;
+                std::tie(enabled, reactionHandle, name) = handle;
 
-            if (reactionHandlers.reactionstatistics()) {
-                if (!reactionStatisticsHandle.isEnabled()) {
-                    reactionStatisticsHandle.enable();
-                    log("Reaction Statistics Enabled");
-                }
-            } else {
-                if (reactionStatisticsHandle.isEnabled()) {
-                    reactionStatisticsHandle.disable();
-                    log("Reaction Statistics Disabled");
-                }
-            }
-
-            if (reactionHandlers.image()) {
-                if (!imageHandle.isEnabled()) {
-                    imageHandle.enable();
-                    log("Image Enabled");
-                }
-            } else {
-                if (imageHandle.isEnabled()) {
-                    imageHandle.disable();
-                    log("Image Disabled");
-                }
-            }
-            
-            if (reactionHandlers.classifiedimage()) {
-                if (!classifiedImageHandle.isEnabled()) {
-                    classifiedImageHandle.enable();
-                    log("Classified Image Enabled");
-                }
-            } else {
-                if (classifiedImageHandle.isEnabled()) {
-                    classifiedImageHandle.disable();
-                    log("Classified Image Disabled");
-                }
-            }
-            
-            if (reactionHandlers.goals()) {
-                if (!goalsHandle.isEnabled()) {
-                    goalsHandle.enable();
-                    log("Goals Enabled");
-                }
-            } else {
-                if (goalsHandle.isEnabled()) {
-                    goalsHandle.disable();
-                    log("Goals Disabled");
-                }
-            }
-            
-            if (reactionHandlers.balls()) {
-                if (!ballsHandle.isEnabled()) {
-                    ballsHandle.enable();
-                    log("Balls Enabled");
-                }
-            } else {
-                if (ballsHandle.isEnabled()) {
-                    ballsHandle.disable();
-                    log("Balls Disabled");
-                }
-            }
-            
-            if (reactionHandlers.localisation()) {
-                if (!localisationHandle.isEnabled()) {
-                    localisationHandle.enable();
-                    log("Localisation Enabled");
-                }
-            } else {
-                if (localisationHandle.isEnabled()) {
-                    localisationHandle.disable();
-                    log("Localisation Disabled");
+                if (enabled) {
+                    if (!reactionHandle.isEnabled()) {
+                        reactionHandle.enable();
+                        log(name, "Enabled");
+                    }
+                } else {
+                    if (reactionHandle.isEnabled()) {
+                        reactionHandle.disable();
+                        log(name, "Disabled");
+                    }
                 }
             }
         }
