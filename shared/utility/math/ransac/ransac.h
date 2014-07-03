@@ -25,233 +25,129 @@
 #include <vector>
 
 namespace utility {
-    namespace math {
-        namespace ransac {
+namespace math {
 
-            enum class RansacSelectionMethod {
-                LARGEST_CONSENSUS,
-                BEST_FITTING_CONSENSUS
-            };
+    template <typename Model>
+    struct Ransac {
 
-            /************************************
-             *      FUNCTION PROTOTYPES         *
-             ************************************/
+        using DataPoint = typename Model::DataPoint;
 
-            /**
-             * @brief
-             *
-             * @tparam Model the model to use for the fitting
-             *
-             * @param points the datapoints to fit
-             * @param e consensus error threshold
-             * @param n minimum number of points for a fit
-             * @param k max iterations per ransac fitting
-             * @param max_iterations the maximum nubmer of ransac iterations to perform
-             * @param method the quality measurement method to use
-             */
-            template<class Model, typename DataPoint = typename Model::DataPoint>
-            std::vector<std::pair<Model, std::vector<DataPoint>>> findMultipleModels(const std::vector<DataPoint>& line_points,
-                                                                                        double e,
-                                                                                        unsigned int n,
-                                                                                        unsigned int k,
-                                                                                        unsigned int max_iterations,
-                                                                                        RansacSelectionMethod method);
+        static uint64_t xorShift() {
+            static thread_local uint64_t s[2] = { rand(), rand() };
 
-            template<class Model, typename DataPoint = typename Model::DataPoint>
-            bool findModel(std::vector<DataPoint> points,
-                           Model& result,
-                           std::vector<DataPoint>& consensus,
-                           std::vector<DataPoint>& remainder,
-                           double& variance,
-                           double e,
-                           unsigned int n,
-                           unsigned int k,
-                           RansacSelectionMethod method);
+            uint64_t s1 = s[0];
+            const uint64_t s0 = s[1];
+            s[0] = s0;
+            s1  ^= s1 << 23;
+            return (s[1] = (s1 ^ s0 ^ (s1 >> 17) ^ (s0 >> 26))) + s0;
+        }
 
-            template<class Model, typename DataPoint = typename Model::DataPoint>
-            Model generateRandomModel(const std::vector<DataPoint>& points);
+        template <typename Iterator>
+        static void regenerateRandomModel(Model& model, const Iterator first, const Iterator last) {
 
-            /************************************
-             *      FUNCTION IMPLEMENTATIONS    *
-             ************************************/
-            template<class Model, typename DataPoint = typename Model::DataPoint>
-            std::vector<std::pair<Model, std::vector<DataPoint>>> findMultipleModels(const std::vector<DataPoint>& points,
-                                                    double e,
-                                                    unsigned int n,
-                                                    unsigned int k,
-                                                    unsigned int max_iterations,
-                                                    RansacSelectionMethod method) {
+            // Get random points between first and last
+            uint range = std::distance(first, last) + 1;
 
-                double variance;
-                bool found;
-                Model model;
+            std::set<uint64_t> indices;
+            std::vector<DataPoint> points;
 
-                std::vector<std::pair<Model, std::vector<DataPoint>>> results;
-                std::vector<DataPoint> consensus;
-                std::vector<DataPoint> remainder;
-
-                // Run first iterations.
-                found = findModel(points, model, consensus, remainder, variance, e, n, k, method);
-
-                if (found) {
-                    results.push_back(std::pair<Model, std::vector<DataPoint>>(model, consensus));
-
-                    while (found && results.size() < max_iterations) {
-                        found = findModel(remainder, model, consensus, remainder, variance, e, n, k, method);
-
-                        if(found)
-                            results.push_back(std::pair<Model, std::vector<DataPoint>>(model, consensus));
-                    }
-                }
-
-                return results;
+            while(indices.size() < Model::REQUIRED_POINTS) {
+                indices.insert(xorShift() % range);
             }
 
-            template<class Model, typename DataPoint = typename Model::DataPoint>
-            bool findModel(std::vector<DataPoint> points,
-                            Model &result,
-                            std::vector<DataPoint>& consensus,
-                            std::vector<DataPoint>& remainder,
-                            double& variance,
-                            double e,
-                            unsigned int n,
-                            unsigned int k,
-                            RansacSelectionMethod method) {
-                if ((points.size() < n) || (n < Model::MINIMUM_POINTS)) {
-                    return false;
-                }
-
-                // Used for BestFittingConsensus method.
-                double minerr = std::numeric_limits<double>::max();
-
-                // Used for LargestConsensus method.
-                size_t largestconsensus = 0;
-
-                // Arrays for storing concensus sets.
-                bool c1[points.size()];
-                bool c2[points.size()];
-
-                bool* best_concensus = c1;
-                bool* cur_concensus;
-                double cur_variance;
-                bool found = false;
-
-                for (unsigned int i = 0; i < k; ++i) {
-                    // Randomly select 2 distinct points.
-                    Model m = generateRandomModel<Model, DataPoint>(points);
-                    cur_variance = 0;
-
-                    unsigned int concensus_size = 0;
-
-                    // Use the concensus that is not currently the best.
-                    cur_concensus = ((c1 == best_concensus) ? c2 : c1);
-
-                    // Determine consensus set.
-                    for (size_t i = 0; i < points.size(); i++) {
-                        double dist = m.calculateError(points.at(i));
-
-                        // Cheap and nasty - assuming that true.
-                        bool in = (dist < e);
-                        cur_variance += (dist * in);
-                        concensus_size += in;
-                        cur_concensus[i] = in;
-                    }
-
-                    // Normalise the variance.
-                    cur_variance /= concensus_size;
-
-                    // Determine whether the consensus is better.
-                    if(concensus_size >= n) {
-                        switch(method) {
-                            case RansacSelectionMethod::LARGEST_CONSENSUS: {
-                                if(concensus_size > largestconsensus) {
-                                    found = true;
-                                    result = m;
-                                    largestconsensus = concensus_size;
-                                    minerr = cur_variance;                          // Keep variance for other purposes.
-                                    best_concensus = cur_concensus;
-                                }
-
-                                break;
-                            }
-
-                            case RansacSelectionMethod::BEST_FITTING_CONSENSUS: {
-                                if(cur_variance < minerr) {
-                                    found = true;
-                                    result = m;
-                                    minerr = cur_variance;
-                                    best_concensus = cur_concensus;
-                                }
-
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                variance = minerr;
-
-                if(found) {
-                    consensus.clear();
-                    remainder.clear();
-
-                    for(unsigned int i = 0; i < points.size(); i++) {
-                        if(best_concensus[i]) {
-                            consensus.push_back(points.at(i));
-                        }
-
-                        else {
-                            remainder.push_back(points.at(i));
-                        }
-                    }
-                }
-
-                return found;
+            for(auto& i : indices) {
+                auto it = first;
+                std::advance(it, i);
+                points.push_back(*it);
             }
 
-            //NOTE: Assumes that there are no duplicates in the data
-            //      point set (only way to guarantee no infinite loop)
-            template<class Model, typename DataPoint = typename Model::DataPoint>
-            Model generateRandomModel(const std::vector<DataPoint>& points) {
-                Model model;
-                size_t n = points.size();
+            // If this returns false then it was an invalid model
+            model.regenerate(points);
+        }
 
-                if (n >= Model::MINIMUM_POINTS) {
-                    std::vector<size_t> indices;
-                    size_t next;
+        /**
+         * Finds an individual ransac model that fits the data
+         *
+         * @return A pair containing an iterator to the start of the remaining set, and the best fitting model
+         */
+        template <typename Iterator>
+        static std::pair<Iterator, Model> findModel(Iterator first
+                                                  , Iterator last
+                                                  , uint minimumPointsForConsensus
+                                                  , uint maximumIterationsPerFitting
+                                                  , double consensusErrorThreshold) {
 
-                    indices.push_back(rand() % n);
+            // Check we have enough points
+            if(std::distance(first, last) < minimumPointsForConsensus) {
+                return std::make_pair(last, Model());
+            }
 
-                    while(indices.size() < Model::MINIMUM_POINTS) {
-                        bool unique;
+            uint largestConsensus = 0;
+            Model bestModel;
+            Model model;
 
-                        do {
-                            unique = true;
-                            next = rand() % n;
+            for(uint i = 0; i < numIterations; ++i) {
 
-                            for (size_t i : indices) {
-                                if(i == next)
-                                    unique = false;
-                            }
-                        } while(!unique);
+                uint consensusSize = 0;
 
-                        indices.push_back(next);
+                regenerateRandomModel(Model, first, last);
+
+                for(auto it = first; it < last; ++it) {
+
+                    if(model.calculateError(*it) < errorThreshold) {
+                        ++consensusSize;
                     }
-
-                    std::vector<DataPoint> rand_pts;
-
-                    for (size_t i : indices) {
-                        rand_pts.push_back(points.at(i));
-                    }
-
-                    model.regenerate(rand_pts);
                 }
 
-                return model;
+                // If largest consensus
+                if(consensusSize > largestConsensus) {
+                    bestModel = std::move(model);
+                }
+            }
 
+            if(largestConsensus > minConsensus) {
+
+                auto newFirst = std::partition(first, last, [bestModel] (const DataPoint& point) {
+                    return errorThreshold > bestModel.calculateError(std::forward<const DataPoint&>(point));
+                });
+
+                model.setEnds(first, newFirst);
+
+                return std::make_pair(newFirst, std::move(model));
+            }
+            else {
+                return std::make_pair(last, Model());
             }
         }
-    }
+
+        template <typename Iterator>
+        static std::vector<Model> fitModels(Iterator first
+                                          , Iterator last
+                                          , uint minimumPointsForConsensus
+                                          , uint maximumIterationsPerFitting
+                                          , uint maximumFittedModels
+                                          , double consensusErrorThreshold) {
+
+            std::vector<Model> results;
+            results.reserve(numFittings);
+
+            while(results.size() < maximumFittedModels) {
+                Model m;
+                std::tie(first, m) = findModel(first, last);
+
+                // If we have more datapoints left then add this one and continue
+                if(!m.empty()) {
+                    results.push_back(std::move(m));
+                }
+                else {
+                    return results;
+                }
+            }
+
+            return results;
+        }
+    };
+}
 }
 
 #endif

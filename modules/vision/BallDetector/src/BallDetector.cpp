@@ -25,16 +25,13 @@
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/CameraParameters.h"
 
+#include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacCircleModel.h"
 #include "utility/math/vision.h"
 #include "utility/nubugger/NUgraph.h"
 
 namespace modules {
 namespace vision {
-
-    using utility::math::ransac::RansacCircleModel;
-    using utility::math::ransac::findMultipleModels;
-    using utility::math::ransac::RansacSelectionMethod;
 
     using messages::input::CameraParameters;
     using messages::input::Sensors;
@@ -55,27 +52,17 @@ namespace vision {
 
     using messages::support::Configuration;
 
+    using utility::math::ransac::Ransac;
+    using utility::math::ransac::RansacCircleModel;
+
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
         on<Trigger<Configuration<BallDetector>>>([this](const Configuration<BallDetector>& config) {
-
-            std::string selectionMethod = config["ransac"]["selection_method"].as<std::string>();
-
-            if (selectionMethod.compare("LARGEST_CONSENSUS") == 0) {
-                SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
-            }
-            else if (selectionMethod.compare("BEST_FITTING_CONSENSUS") == 0) {
-                SELECTION_METHOD = RansacSelectionMethod::BEST_FITTING_CONSENSUS;
-            }
-            else {
-                SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
-            }
-
-            MINIMUM_POINTS = config["ransac"]["minimum_points"].as<uint>();
-            CONSENSUS_THRESHOLD = config["ransac"]["consensus_threshold"].as<double>();
-            MAX_ITERATIONS_PER_FITTING = config["ransac"]["max_iterations_per_fitting"].as<uint>();
-            MAX_FITTING_ATTEMPTS = config["ransac"]["max_fitting_attempts"].as<uint>();
+            MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
+            CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<double>();
+            MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
+            MAXIMUM_FITTED_MODELS = config["ransac"]["maximum_fitted_models"].as<uint>();
         });
 
 
@@ -112,12 +99,12 @@ namespace vision {
             }
 
             // Use ransac to find the ball
-            auto ransacResults = findMultipleModels<RansacCircleModel>(ballPoints,
-                                                                       CONSENSUS_THRESHOLD,
-                                                                       MINIMUM_POINTS,
-                                                                       MAX_ITERATIONS_PER_FITTING,
-                                                                       MAX_FITTING_ATTEMPTS,
-                                                                       SELECTION_METHOD);
+            auto ransacResults = Ransac<RansacCircleModel>::fitModels(ballPoints.begin()
+                                                                    , ballPoints.end()
+                                                                    , MINIMUM_POINTS_FOR_CONSENSUS;
+                                                                    , MAXIMUM_ITERATIONS_PER_FITTING;
+                                                                    , MAXIMUM_FITTED_MODELS;
+                                                                    , CONSENSUS_ERROR_THRESHOLD);
 
             auto balls = std::make_unique<std::vector<Ball>>();
             balls->reserve(ransacResults.size());
