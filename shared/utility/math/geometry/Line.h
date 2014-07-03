@@ -30,7 +30,7 @@ namespace utility {
 namespace math {
 namespace geometry {
 
-    class Line {
+class Line {
     private:
         arma::vec2 normal;
         double distance;

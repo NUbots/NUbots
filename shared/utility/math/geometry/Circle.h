@@ -26,11 +26,33 @@ namespace utility {
 namespace math {
 namespace geometry {
 
-    struct Circle {
+    class Circle {
 
-    	double radius;
-    	arma::vec2 centre;
+    	
     };
+class Line {
+    private:
+        double radius;
+    	arma::vec2 centre;
+
+    public:
+        Circle();
+
+        Circle(const arma::vec2& a, const arma::vec2& b, , const arma::vec2& c, const double tolerance = std::numeric_limits<double>::min();
+
+        void setFromPoints(const arma::vec2& a, const arma::vec2& b, const arma::vec2& b, const double tolerance = std::numeric_limits<double>::min();
+
+        double distanceToPoint(const arma::vec2& point) const;
+        
+        arma::vec2 Line::orthogonalProjection(const arma::vec2 x);
+        
+        //Perform a least squares fit on a line, optionally using a distance
+        //squared threshold away from the current model to filter candidates
+        void leastSquaresUpdate(const Iterator<arma::vec2>& first, 
+                                const Iterator<arma::vec2>& last,
+                                const double& candidateThreshold = std::numeric_limits<double>::max());
+    };
+
 }
 }
 }
