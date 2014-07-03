@@ -88,18 +88,9 @@ namespace localisation {
             if(balls.size() > 0){
                 auto curr_time = NUClear::clock::now();
                 engine_.TimeUpdate(curr_time);
+
                 engine_.MeasurementUpdate(balls[0]);
             }
-        });
-       on<Trigger<messages::vision::Ball>,
-            Options<Sync<KFBallLocalisation>>
-            >("KFBallLocalisation Step",
-            [this](const messages::vision::Ball& ball) {
-        
-            auto curr_time = NUClear::clock::now();
-            engine_.TimeUpdate(curr_time);
-            engine_.MeasurementUpdate(ball);
-            
         });
     }
 }

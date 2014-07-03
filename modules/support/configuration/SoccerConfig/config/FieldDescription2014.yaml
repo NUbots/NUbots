@@ -1,5 +1,6 @@
 {
-    "Units": "cm",
+    "Units": "m",
+    "BallRadius": 0.05,
     "LineWidth": 0.05,
     "MarkWidth": 0.1,
     "FieldLength": 9,

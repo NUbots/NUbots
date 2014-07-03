@@ -30,6 +30,7 @@
 
 using utility::nubugger::graph;
 using messages::support::Configuration;
+using messages::support::FieldDescription;
 using modules::localisation::MockRobotConfig;
 
 namespace modules {
@@ -57,14 +58,23 @@ namespace localisation {
         return t;
     }
 
+    void MockRobot::UpdateConfiguration(
+        const messages::support::Configuration<MockRobotConfig>& config) {
+        cfg_.simulate_vision = config["SimulateVision"];
+        cfg_.simulate_goal_observations = config["SimulateGoalObservations"];
+        cfg_.simulate_ball_observations = config["SimulateBallObservations"];
+        cfg_.simulate_odometry = config["SimulateOdometry"];
+        cfg_.simulate_robot_movement = config["SimulateRobotMovement"];
+        cfg_.simulate_ball_movement = config["SimulateBallMovement"];
+        cfg_.emit_robot_fieldobjects = config["EmitRobotFieldobjects"];
+        cfg_.emit_ball_fieldobjects = config["EmitBallFieldobjects"];
+    }
+
     MockRobot::MockRobot(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<utility::localisation::FieldDescriptionConfig>>>(
-            "Configuration Update",
-            [this](const Configuration<utility::localisation::FieldDescriptionConfig>& config) {
-            auto fd = std::make_shared<utility::localisation::FieldDescription>(config);
-            field_description_ = fd;
+        on<Trigger<FieldDescription>>("FieldDescription Update", [this](const FieldDescription& desc) {
+            field_description_ = std::make_shared<FieldDescription>(desc);
         });
 
         on<Trigger<Configuration<MockRobotConfig>>>(
@@ -186,26 +196,24 @@ namespace localisation {
             double camera_heading = std::atan2(robot_heading_[1], robot_heading_[0]);
 
             // Goal observation
-            if (cfg_.simulate_goal_observations) {
-                auto fd = field_description_;
-                auto goal_br_pos = fd->GetLFO(utility::localisation::LFOId::kGoalBR).location();
-                auto goal_bl_pos = fd->GetLFO(utility::localisation::LFOId::kGoalBL).location();
-                auto goal1_pos = arma::vec3 { goal_br_pos[0], goal_br_pos[1], 0.0 };
-                auto goal2_pos = arma::vec3 { goal_bl_pos[0], goal_bl_pos[1], 0.0 };
+            if (cfg_.simulate_goal_observations && field_description_ != nullptr) {
+                auto& fd = field_description_;
+                auto goal1_pos = arma::vec3 { fd->goalpost_br[0], fd->goalpost_br[1], 0.0 };
+                auto goal2_pos = arma::vec3 { fd->goalpost_bl[0], fd->goalpost_bl[1], 0.0 };
                 // NUClear::log("Goal positions\n", goal1_pos, goal2_pos);
 
                 auto goal1 = messages::vision::Goal();
                 auto goal2 = messages::vision::Goal();
-                goal1.type = messages::vision::Goal::RIGHT;
-                goal2.type = messages::vision::Goal::LEFT;
+                goal1.side = messages::vision::Goal::Side::RIGHT;
+                goal2.side = messages::vision::Goal::Side::LEFT;
 
                 // (dist, bearing, declination)
-                goal1.sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(goal1_pos - camera_pos);
-                goal2.sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(goal2_pos - camera_pos);
-                goal1.sphericalFromNeck[1] = utility::math::angle::normalizeAngle(goal1.sphericalFromNeck[1] - camera_heading);
-                goal2.sphericalFromNeck[1] = utility::math::angle::normalizeAngle(goal2.sphericalFromNeck[1] - camera_heading);
-                goal1.sphericalError = { 0.0001, 0.0001, 0.000001 };
-                goal2.sphericalError = { 0.0001, 0.0001, 0.000001 };
+                goal1.sphericalFromCamera = utility::math::coordinates::Cartesian2Spherical(goal1_pos - camera_pos);
+                goal2.sphericalFromCamera = utility::math::coordinates::Cartesian2Spherical(goal2_pos - camera_pos);
+                goal1.sphericalFromCamera[1] = utility::math::angle::normalizeAngle(goal1.sphericalFromCamera[1] - camera_heading);
+                goal2.sphericalFromCamera[1] = utility::math::angle::normalizeAngle(goal2.sphericalFromCamera[1] - camera_heading);
+                goal1.error = arma::eye(3, 3) * 0.1;
+                goal2.error = arma::eye(3, 3) * 0.1;
 
                 auto goals = std::make_unique<std::vector<messages::vision::Goal>>();
 
@@ -217,15 +225,18 @@ namespace localisation {
 
             // Ball observation
             if (cfg_.simulate_ball_observations) {
-                auto ball = std::make_unique<messages::vision::Ball>();
+                auto ball_vec = std::make_unique<std::vector<messages::vision::Ball>>();
 
                 // (dist, bearing, declination)
+                messages::vision::Ball ball;
                 auto ball_pos = arma::vec3 { ball_position_[0], ball_position_[1], 0.0 };
-                ball->sphericalFromNeck = utility::math::coordinates::Cartesian2Spherical(ball_pos - camera_pos);
-                ball->sphericalFromNeck[1] = utility::math::angle::normalizeAngle(ball->sphericalFromNeck[1] - camera_heading);
-                ball->sphericalError = { 0.0001, 0.0001, 0.000001 };
+                ball.sphericalFromCamera = utility::math::coordinates::Cartesian2Spherical(ball_pos - camera_pos);
+                ball.sphericalFromCamera[1] = utility::math::angle::normalizeAngle(ball.sphericalFromCamera[1] - camera_heading);
+                ball.error = arma::eye(3, 3) * 0.1;
 
-                emit(std::move(ball));
+                ball_vec->push_back(ball);
+
+                emit(std::move(ball_vec));
             }
         });
 
@@ -297,6 +308,9 @@ namespace localisation {
 
             arma::vec2 ball_pos = utility::localisation::transform::RobotBall2FieldBall(
                 robot_position_, robot_heading_, ball.position);
+
+            if (robots.empty())
+                return;
 
             arma::vec2 robot_ball_pos = utility::localisation::transform::RobotBall2FieldBall(
                 robots[0].position, robots[0].heading, ball.position);

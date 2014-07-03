@@ -77,6 +77,7 @@ namespace modules {
             RequestItem(Request& group, size_t index, float priority, const std::set<messages::behaviour::LimbID>& limbSet)
             : group(group)
             , index(index)
+            , active(false)
             , priority(priority)
             , limbSet(limbSet) {}
 

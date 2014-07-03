@@ -35,20 +35,39 @@ namespace geometry {
 		Vector point;
 		ParametricLine(){}
 
-		bool setFromDirection(Vector direction_, Vector point_){
-			bool success = arma::norm(direction_,1) > 0;
+		void setFromDirection(const Vector& direction_, const Vector& point_){
+			if(arma::norm(direction_,1) <= 0){
+				throw std::domain_error("ParametricLine::setFromDirection - Direction is zero vector!");
+			}
 			direction = arma::normalise(direction_);
 			point = point_;
-			return success;
 		}
 
-		bool setFromTwoPoints(Vector p1, Vector p2){
-			bool success = arma::norm(p2-p1,1) > 0;
+		void setFromTwoPoints(const Vector& p1, const Vector& p2){
+			if(arma::norm(p2-p1,1) <= 0){
+				throw std::domain_error("ParametricLine::setFromTwoPoints - Two points are identical!");
+			}
 			direction = arma::normalise(p2 - p1);
 			point = p1;
-			return success;
+		} 
+
+		double distanceToPoint(const Vector& p){
+			Vector x = p - point;
+			return arma::norm(x - arma::dot(x,direction) * direction);
 		}
+
+		double x(double y);
+		double y(double x);
 	};
+
+	// template <>
+	// double ParametricLine<2>::x(const double& y) {
+	// 	return (y - point[1]) * direction[0] / direction[1] + point[0];
+	// }
+	// template <>
+	// double ParametricLine<2>::y(const double& x) {
+	// 	return (x - point[0]) * direction[1] / direction[0] + point[1];
+	// }
 
 }
 }

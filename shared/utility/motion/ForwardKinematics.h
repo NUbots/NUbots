@@ -168,6 +168,8 @@ namespace kinematics {
         runningTransform *= utility::math::matrix::zRotationMatrix(sensors.servos[static_cast<int>(ANKLE_ROLL)].presentPosition , 4);
         //Rotate so x faces towar toes
         runningTransform *= utility::math::matrix::yRotationMatrix(-M_PI/2, 4);
+        //Translate to ground
+        runningTransform *= utility::math::matrix::translationMatrix(arma::vec3({0, 0, -RobotKinematicModel::Leg::FOOT_HEIGHT}));
         //Return basis with x out of the front of the toe and z out the top of foot. Pos = ankle axis centre
         positions[ANKLE_ROLL] = runningTransform;
         return positions;

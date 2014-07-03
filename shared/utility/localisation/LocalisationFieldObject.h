@@ -35,8 +35,6 @@ enum class LFOId {
     kGoalBR,
 };
 
-
-// Should be abstract
 class LocalisationFieldObject {
 private:
     arma::vec location_;
@@ -63,9 +61,6 @@ public:
             << " }";
     }
 };
-
-// class StationaryFieldObject : public LocalisationFieldObject { };
-// class MobileFieldObject : public LocalisationFieldObject { };
 
 }
 }

@@ -120,6 +120,7 @@ arma::vec RobotModel::predictedObservation(
     arma::vec radial_2 = utility::math::coordinates::Cartesian2Radial(diff_2);
 
     auto angle_diff = utility::math::angle::difference(radial_1[1], radial_2[1]);
+    
 
     return { std::abs(angle_diff) };
 }
@@ -132,6 +133,8 @@ arma::vec RobotModel::observationDifference(const arma::vec& a,
     // // result(1) = utility::math::angle::normalizeAngle(result[1]);
     // result(1) = utility::math::angle::difference(a[1], b[1]);
     // return result;
+
+
 
     // Distance and unit vector heading
     return a - b;
@@ -174,7 +177,6 @@ arma::vec::fixed<RobotModel::size> RobotModel::limitState(
     arma::vec2 heading = { state[kHeadingX], state[kHeadingY] };
     arma::vec2 unit = arma::normalise(heading);
     return arma::vec({ state[kX], state[kY], state[kHeadingX], state[kHeadingY] });
-
 }
 
 arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() {

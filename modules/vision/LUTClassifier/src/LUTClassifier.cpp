@@ -126,11 +126,11 @@ namespace modules {
                 // Find our goals
                 findGoals(image, lut, sensors, *classifiedImage);
 
+                // Find our ball (also helps with the bottom of goals)
+                findBall(image, lut, sensors, *classifiedImage);
+
                 // Enhance our goals
                 enhanceGoals(image, lut, sensors, *classifiedImage);
-
-                // Find our ball
-                findBall(image, lut, sensors, *classifiedImage);
 
                 // Find our goals base
                 findGoalBases(image, lut, sensors, *classifiedImage);

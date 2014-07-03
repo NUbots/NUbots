@@ -430,7 +430,7 @@ namespace modules {
                 send(message);
             });
 
-            localisationBallHandle = on<Trigger<Every<100, std::chrono::milliseconds>>,
+            localisationHandle = on<Trigger<Every<100, std::chrono::milliseconds>>,
                With<messages::localisation::Ball>,
                // With<messages::vision::Ball>,
                With<std::vector<messages::localisation::Self>>,
@@ -524,6 +524,9 @@ namespace modules {
                 case Message::LOOKUP_TABLE:
                     recvLookupTable(message);
                     break;
+                case Message::REACTION_HANDLERS:
+                    recvReactionHandlers(message);
+                    break;
                 default:
                     return;
             }
@@ -560,6 +563,157 @@ namespace modules {
             if (lookuptable.save()) {
                 NUClear::log("Saving LUT to file");
                 emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
+            }
+        }
+
+        void NUbugger::recvReactionHandlers(const Message& message) {
+            auto reactionHandlers = message.reactionhandlers();
+            log("Reaction Handlers:");
+            log("Data Points:", reactionHandlers.datapoints());
+            log("Action Start", reactionHandlers.actionstart());
+            log("Action Kill:", reactionHandlers.actionkill());
+            log("Register Action:", reactionHandlers.registeraction());
+            log("Sensors:", reactionHandlers.sensors());
+            log("Reaction Statistics:", reactionHandlers.reactionstatistics());
+            log("Image:", reactionHandlers.image());
+            log("Classified Image:", reactionHandlers.classifiedimage());
+            log("Goals:", reactionHandlers.goals());
+            log("Balls:", reactionHandlers.balls());
+            log("Localisation:", reactionHandlers.localisation());
+
+            log("Changes:");
+
+            // TODO: is there a better way? e.g. map or something?
+            if (reactionHandlers.datapoints()) {
+                if (!dataPointHandle.isEnabled()) {
+                    dataPointHandle.enable();
+                    log("Data Points Enabled");
+                }
+            } else {
+                if (dataPointHandle.isEnabled()) {
+                    dataPointHandle.disable();
+                    log("Data Points Disabled");
+                }
+            }
+
+            if (reactionHandlers.actionstart()) {
+                if (!actionStartHandle.isEnabled()) {
+                    actionStartHandle.enable();
+                    log("Action Start Enabled");
+                }
+            } else {
+                if (actionStartHandle.isEnabled()) {
+                    actionStartHandle.disable();
+                    log("Action Start Disabled");
+                }
+            }
+            
+            if (reactionHandlers.actionkill()) {
+                if (!actionKillHandle.isEnabled()) {
+                    actionKillHandle.enable();
+                    log("Action Kill Enabled");
+                }
+            } else {
+                if (actionKillHandle.isEnabled()) {
+                    actionKillHandle.disable();
+                    log("Action Kill Disabled");
+                }
+            }
+            
+            if (reactionHandlers.registeraction()) {
+                if (!registerActionHandle.isEnabled()) {
+                    registerActionHandle.enable();
+                    log("Register Action Enabled");
+                }
+            } else {
+                if (registerActionHandle.isEnabled()) {
+                    registerActionHandle.disable();
+                    log("Register Action Disabled");
+                }
+            }
+            
+            if (reactionHandlers.sensors()) {
+                if (!sensorsHandle.isEnabled()) {
+                    sensorsHandle.enable();
+                    log("Sensors Enabled");
+                }
+            } else {
+                if (sensorsHandle.isEnabled()) {
+                    sensorsHandle.disable();
+                    log("Sensors Disabled");
+                }
+            }
+
+            if (reactionHandlers.reactionstatistics()) {
+                if (!reactionStatisticsHandle.isEnabled()) {
+                    reactionStatisticsHandle.enable();
+                    log("Reaction Statistics Enabled");
+                }
+            } else {
+                if (reactionStatisticsHandle.isEnabled()) {
+                    reactionStatisticsHandle.disable();
+                    log("Reaction Statistics Disabled");
+                }
+            }
+
+            if (reactionHandlers.image()) {
+                if (!imageHandle.isEnabled()) {
+                    imageHandle.enable();
+                    log("Image Enabled");
+                }
+            } else {
+                if (imageHandle.isEnabled()) {
+                    imageHandle.disable();
+                    log("Image Disabled");
+                }
+            }
+            
+            if (reactionHandlers.classifiedimage()) {
+                if (!classifiedImageHandle.isEnabled()) {
+                    classifiedImageHandle.enable();
+                    log("Classified Image Enabled");
+                }
+            } else {
+                if (classifiedImageHandle.isEnabled()) {
+                    classifiedImageHandle.disable();
+                    log("Classified Image Disabled");
+                }
+            }
+            
+            if (reactionHandlers.goals()) {
+                if (!goalsHandle.isEnabled()) {
+                    goalsHandle.enable();
+                    log("Goals Enabled");
+                }
+            } else {
+                if (goalsHandle.isEnabled()) {
+                    goalsHandle.disable();
+                    log("Goals Disabled");
+                }
+            }
+            
+            if (reactionHandlers.balls()) {
+                if (!ballsHandle.isEnabled()) {
+                    ballsHandle.enable();
+                    log("Balls Enabled");
+                }
+            } else {
+                if (ballsHandle.isEnabled()) {
+                    ballsHandle.disable();
+                    log("Balls Disabled");
+                }
+            }
+            
+            if (reactionHandlers.localisation()) {
+                if (!localisationHandle.isEnabled()) {
+                    localisationHandle.enable();
+                    log("Localisation Enabled");
+                }
+            } else {
+                if (localisationHandle.isEnabled()) {
+                    localisationHandle.disable();
+                    log("Localisation Disabled");
+                }
             }
         }
 

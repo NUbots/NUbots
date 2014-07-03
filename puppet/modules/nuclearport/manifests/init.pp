@@ -27,16 +27,7 @@ class nuclearport(
   } ~>
   exec { 'nuclearport_cmake':
     require => [
-        Class['nuclear'],
-        Package['build-essential'],
-        Package['libespeak-dev'],
-        Package['librtaudio-dev'],
-        Package['libncurses5-dev'],
-        Package['libjpeg-turbo8-dev'],
-        Package['libfftw3-dev'],
-        Package['libaubio-dev'],
-        Package['libboost-math-dev'],
-        Package['libarmadillo-dev'],
+        Class['nuclearport::build_dep'],
       ],
     command => 'cmake ..',
     cwd => $nuclearport_build_dir,
