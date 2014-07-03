@@ -87,11 +87,11 @@ namespace modules {
 
 			void stopMoving();
 			void findSelf();
-			void findBall(const std::vector<std::shared_ptr<const messages::localisation::Ball>>& hints);
+			void findBall(const std::vector<messages::localisation::Ball>& hints);
 			void goToPoint(const arma::vec2& point);
-			void watchBall(const std::shared_ptr<const messages::localisation::Ball>& ball);
-			void kickBall(const std::shared_ptr<const messages::localisation::Ball>& ball);
-			void approachBall(const std::shared_ptr<const messages::localisation::Ball>& ball, const std::shared_ptr<const messages::localisation::Self>& self);
+			void watchBall(const messages::localisation::Ball& ball);
+			void kickBall(const messages::localisation::Ball& ball);
+			void approachBall(const messages::localisation::Ball& ball, const messages::localisation::Self& self);
 
 		public:
 			explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
