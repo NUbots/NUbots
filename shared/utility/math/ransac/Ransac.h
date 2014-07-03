@@ -95,24 +95,29 @@ namespace ransac {
             }
 
             uint largestConsensus = 0;
+            double bestError = std::numeric_limits<double>::max();
             Model bestModel;
             Model model;
 
             for(uint i = 0; i < maximumIterationsPerFitting; ++i) {
 
                 uint consensusSize = 0;
+                double error = 0.0;
 
                 regenerateRandomModel(model, first, last);
 
                 for(auto it = first; it < last; ++it) {
                     if(model.calculateError(*it) < consensusErrorThreshold) {
                         ++consensusSize;
+                        error += consensusErrorThreshold;
                     }
                 }
 
                 // If largest consensus
-                if(consensusSize > largestConsensus) {
+                if(consensusSize > largestConsensus or 
+                   (consensusSize == largestConsensus and error < bestError)) {
                     largestConsensus = consensusSize;
+                    bestError = error;
                     bestModel = std::move(model);
                 }
             }
