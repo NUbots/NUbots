@@ -80,11 +80,13 @@ namespace geometry {
                 m = (jointaverage - average[0] * average[1] / ctr)/(squaredaverage[0]);
                 b = average[1] - m * average[0];
                 line = arma::normalise(arma::vec2({ 1.0, m }));
+                m = line[1];
 
             } else {
                 m = (jointaverage - average[0] * average[1] / ctr) / (squaredaverage[1]);
                 b = average[0] - m*average[1];
                 line = arma::normalise(arma::vec2({ m, 1.0 }));
+                m = line[0];
             }
 
             normal = { -line[1], line[0] };
