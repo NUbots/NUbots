@@ -26,6 +26,7 @@
 
 #include "utility/math/geometry/Line.h"
 
+#include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacLineModel.h"
 
 namespace modules {
@@ -34,9 +35,8 @@ namespace vision {
     using utility::math::geometry::Line;
     using utility::math::geometry::Quad;
 
+    using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacLineModel;
-    using utility::math::ransac::findMultipleModels;
-    using utility::math::ransac::RansacSelectionMethod;
 
     using messages::vision::ObjectClass;
     using messages::vision::ClassifiedImage;
@@ -49,23 +49,10 @@ namespace vision {
         : Reactor(std::move(environment)) {
 
         on<Trigger<Configuration<GoalDetector>>>([this](const Configuration<GoalDetector>& config) {
-
-            std::string selectionMethod = config["ransac"]["selection_method"].as<std::string>();
-
-            if (selectionMethod.compare("LARGEST_CONSENSUS") == 0) {
-                SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
-            }
-            else if (selectionMethod.compare("BEST_FITTING_CONSENSUS") == 0) {
-                SELECTION_METHOD = RansacSelectionMethod::BEST_FITTING_CONSENSUS;
-            }
-            else {
-                SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
-            }
-
-            MINIMUM_POINTS = config["ransac"]["minimum_points"].as<uint>();
-            MAX_ITERATIONS_PER_FITTING = config["ransac"]["max_iterations_per_fitting"].as<uint>();
-            MAX_FITTING_ATTEMPTS = config["ransac"]["max_fitting_attempts"].as<uint>();
-            CONSENSUS_THRESHOLD = config["ransac"]["consensus_threshold"].as<double>();
+            MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
+            CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<double>();
+            MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
+            MAXIMUM_FITTED_MODELS = config["ransac"]["maximum_fitted_models"].as<uint>();
         });
 
         on<Trigger<ClassifiedImage<ObjectClass>>>([this](const ClassifiedImage<ObjectClass>& image) {
@@ -89,12 +76,12 @@ namespace vision {
             }
 
             // Use ransac to find left edges.
-            for (auto& line : findMultipleModels<RansacLineModel>(startPoints,
-                                                                  CONSENSUS_THRESHOLD,
-                                                                  MINIMUM_POINTS,
-                                                                  MAX_ITERATIONS_PER_FITTING,
-                                                                  MAX_FITTING_ATTEMPTS,
-                                                                  SELECTION_METHOD)) {
+            for (auto& line : Ransac<RansacLineModel>::fitModels(startPoints.begin()
+                                                               , startPoints.end()
+                                                               , MINIMUM_POINTS_FOR_CONSENSUS;
+                                                               , MAXIMUM_ITERATIONS_PER_FITTING;
+                                                               , MAXIMUM_FITTED_MODELS;
+                                                               , CONSENSUS_ERROR_THRESHOLD)) {
 
                 // Compare based on Y co-ordinate
                 auto comp = [] (const arma::vec2& a, const arma::vec2& b) {
@@ -102,8 +89,8 @@ namespace vision {
                 };
 
                 // Find min and max y
-                auto high = std::min_element(line.second.begin(), line.second.end(), comp);
-                auto low = std::max_element(line.second.begin(), line.second.end(), comp);
+                std::vector<arma::vec2>::iterator high, low;
+                std::tie(high, low) = std::minmax_element(line.second.begin(), line.second.end(), comp);
 
                 // Store the values
                 starts.emplace_back();
@@ -112,20 +99,20 @@ namespace vision {
             }
 
             // Use ransac to find right edges.
-            for (auto& line : findMultipleModels<RansacLineModel>(endPoints,
-                                                                  CONSENSUS_THRESHOLD,
-                                                                  MINIMUM_POINTS,
-                                                                  MAX_ITERATIONS_PER_FITTING,
-                                                                  MAX_FITTING_ATTEMPTS,
-                                                                  SELECTION_METHOD)) {
+            for (auto& line : Ransac<RansacLineModel>::fitModels(endPoints.begin()
+                                                                , endPoints.end()
+                                                                , MINIMUM_POINTS_FOR_CONSENSUS;
+                                                                , MAXIMUM_ITERATIONS_PER_FITTING;
+                                                                , MAXIMUM_FITTED_MODELS;
+                                                                , CONSENSUS_ERROR_THRESHOLD)) {
 
                 auto comp = [] (const arma::vec2& a, const arma::vec2& b) {
                     return a[1] < b[1];
                 };
 
                 // Find min and max y
-                auto high = std::min_element(line.second.begin(), line.second.end(), comp);
-                auto low = std::max_element(line.second.begin(), line.second.end(), comp);
+                std::vector<arma::vec2>::iterator high, low;
+                std::tie(high, low) = std::minmax_element(line.second.begin(), line.second.end(), comp);
 
                 // Store the values
                 ends.emplace_back();

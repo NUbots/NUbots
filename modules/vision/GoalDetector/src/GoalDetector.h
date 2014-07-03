@@ -22,19 +22,15 @@
 
 #include <nuclear>
 
-#include "utility/math/ransac/ransac.h"
-
 namespace modules {
 namespace vision {
 
     class GoalDetector : public NUClear::Reactor {
     private:
-    	unsigned int MINIMUM_POINTS;                            // Minimum points needed to make a line (Min pts to line essentially)
-        unsigned int MAX_ITERATIONS_PER_FITTING;                // Number of iterations per fitting attempt
-        unsigned int MAX_FITTING_ATTEMPTS;                      // Hard limit on number of fitting attempts
-        double CONSENSUS_THRESHOLD;                             // Threshold determining what constitutes a good fit (Consensus margin)
-        utility::math::ransac::RansacSelectionMethod SELECTION_METHOD;
-
+        uint MINIMUM_POINTS_FOR_CONSENSUS;
+        uint MAXIMUM_ITERATIONS_PER_FITTING;
+        uint MAXIMUM_FITTED_MODELS;
+        double CONSENSUS_ERROR_THRESHOLD;
     public:
 
         static constexpr const char* CONFIGURATION_PATH = "GoalDetector.yaml";

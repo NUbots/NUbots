@@ -28,12 +28,14 @@ namespace ransac {
 
     class RansacLineModel : public utility::math::geometry::Line {
     public:
-        static constexpr size_t MINIMUM_POINTS = 2;
+        static constexpr size_t REQUIRED_POINTS = 2;
         using DataType = arma::vec2;
 
         RansacLineModel() {}
 
         bool regenerate(const std::vector<DataType>& pts);
+
+        bool empty();
 
         double calculateError(const DataType& p) const;
     };
