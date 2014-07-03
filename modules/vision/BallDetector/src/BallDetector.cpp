@@ -109,7 +109,7 @@ namespace vision {
             auto balls = std::make_unique<std::vector<Ball>>();
             balls->reserve(ransacResults.size());
 
-            for(auto& ball : ransacResults) {
+            for(auto& result : ransacResults) {
 
                 double BALL_DIAMETER = 0.1; //TODO:Universal CONFIG
 
@@ -117,11 +117,11 @@ namespace vision {
 
 
 
-                auto centre = ball.getCentre();
+                auto centre = result.model.getCentre();
                 auto p1 = centre;
                 auto p2 = centre;
-                p1[1] += ball.getRadius();
-                p2[1] -= ball.getRadius();
+                p1[1] += result.model.getRadius();
+                p2[1] -= result.model.getRadius();
 
                 // Transform p1 p2 to kinematics coordinates
                 p1 = imageToScreen(p1, { double(image.dimensions[0]), double(image.dimensions[1]) });
@@ -144,8 +144,8 @@ namespace vision {
                 //Get angular width
                 auto p3 = centre;
                 auto p4 = centre;
-                p3[0] += ball.getRadius();
-                p4[0] -= ball.getRadius();
+                p3[0] += result.model.getRadius();
+                p4[0] -= result.model.getRadius();
                 p3 = imageToScreen(p3, { double(image.dimensions[0]), double(image.dimensions[1]) });
                 p4 = imageToScreen(p4, { double(image.dimensions[0]), double(image.dimensions[1]) });
 
@@ -155,8 +155,8 @@ namespace vision {
                 Ball b;
 
                 // On screen visual shape
-                b.circle.radius = ball.getRadius();
-                b.circle.centre = ball.getCentre();
+                b.circle.radius = result.model.getRadius();
+                b.circle.centre = result.model.getCentre();
 
                 // Camera dimensions
                 b.screenAngular = arma::atan(cam.pixelsToTanThetaFactor % ballCentreScreen);

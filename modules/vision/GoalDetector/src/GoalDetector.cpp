@@ -76,7 +76,7 @@ namespace vision {
             }
 
             // Use ransac to find left edges.
-            for (auto& line : Ransac<RansacLineModel>::fitModels(startPoints.begin()
+            for (auto& result : Ransac<RansacLineModel>::fitModels(startPoints.begin()
                                                                , startPoints.end()
                                                                , MINIMUM_POINTS_FOR_CONSENSUS
                                                                , MAXIMUM_ITERATIONS_PER_FITTING
@@ -90,16 +90,16 @@ namespace vision {
 
                 // Find min and max y
                 std::vector<arma::vec2>::iterator high, low;
-                std::tie(high, low) = std::minmax_element(line.second.begin(), line.second.end(), comp);
+                std::tie(high, low) = std::minmax_element(result.first, result.last, comp);
 
                 // Store the values
                 starts.emplace_back();
-                starts.back().col(0) = line.first.orthogonalProjection(*high);
-                starts.back().col(1) = line.first.orthogonalProjection(*low);;
+                starts.back().col(0) = result.model.orthogonalProjection(*high);
+                starts.back().col(1) = result.model.orthogonalProjection(*low);
             }
 
             // Use ransac to find right edges.
-            for (auto& line : Ransac<RansacLineModel>::fitModels(endPoints.begin()
+            for (auto& result : Ransac<RansacLineModel>::fitModels(endPoints.begin()
                                                                 , endPoints.end()
                                                                 , MINIMUM_POINTS_FOR_CONSENSUS
                                                                 , MAXIMUM_ITERATIONS_PER_FITTING
@@ -112,12 +112,12 @@ namespace vision {
 
                 // Find min and max y
                 std::vector<arma::vec2>::iterator high, low;
-                std::tie(high, low) = std::minmax_element(line.second.begin(), line.second.end(), comp);
+                std::tie(high, low) = std::minmax_element(result.first, result.last, comp);
 
                 // Store the values
                 ends.emplace_back();
-                ends.back().col(0) = line.first.orthogonalProjection(*high);
-                ends.back().col(1) = line.first.orthogonalProjection(*low);;
+                ends.back().col(0) = result.model.orthogonalProjection(*high);
+                ends.back().col(1) = result.model.orthogonalProjection(*low);
             }
 
 
