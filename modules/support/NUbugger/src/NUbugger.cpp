@@ -280,26 +280,33 @@ namespace modules {
 
             imageHandle = on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
 
+                Message message;
+                message.set_type(Message::IMAGE);
+                message.set_utc_timestamp(getUtcTimestamp());
+
+                auto* imageData = message.mutable_image();
+
+                imageData->mutable_dimensions()->set_x(image.width());
+                imageData->mutable_dimensions()->set_y(image.height());
+
+                std::string* imageBytes = imageData->mutable_data();
                 if(!image.source().empty()) {
-
-                    Message message;
-                    message.set_type(Message::IMAGE);
-                    message.set_utc_timestamp(getUtcTimestamp());
-
-                    auto* imageData = message.mutable_image();
-                    std::string* imageBytes = imageData->mutable_data();
-
                     imageData->set_format(messages::input::proto::Image::JPEG);
 
                     // Reserve enough space in the image data to store the output
-                    imageBytes->resize(image.source().size());
-                    imageData->mutable_dimensions()->set_x(image.width());
-                    imageData->mutable_dimensions()->set_y(image.height());
+                    imageBytes->reserve(image.source().size());
 
                     imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
-
-                    send(message);
                 }
+                else {
+                    imageData->set_format(messages::input::proto::Image::YCbCr444);
+
+                    imageBytes->reserve(image.raw().size() * sizeof(Image::Pixel));
+
+                    imageBytes->insert(imageBytes->begin(), reinterpret_cast<const char*>(&image.raw().front()), reinterpret_cast<const char*>(&image.raw().back()));
+                }
+
+                send(message);
             });
 
             reactionStatisticsHandle = on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
