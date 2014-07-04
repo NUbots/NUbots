@@ -54,7 +54,7 @@ namespace geometry {
         centre[0] = ((ab_norm * bc[1]) - (bc_norm * ab[1])) * det;
         centre[1] = ((ab[0] * bc_norm) - (bc[0] * ab_norm)) * det;
         
-        radiusSq = arma::accu(arma::square(a - centre))
+        radiusSq = arma::accu(arma::square(a - centre));
         radius = std::sqrt(radiusSq);
 
         return true;
