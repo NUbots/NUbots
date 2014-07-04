@@ -59,34 +59,39 @@ namespace geometry {
                                 const double& candidateThreshold = std::numeric_limits<double>::max()) {
 
             arma::vec2 average({ 0.0, 0.0 });
-            arma::vec2 squaredaverage({ 0.0, 0.0 });
-            double jointaverage = 0.0;
+            arma::mat22 covmat({ 0.0, 0.0, 0.0, 0.0 });
             size_t ctr = 0;
             //step 1: calculate means and grab candidates
             for (auto it = first; it != last; ++it) {
                 const double diff = distanceToPoint(*it);
                 if ( diff*diff < candidateThreshold ) {
                     average += *it;
-                    squaredaverage += (*it) % (*it);
-                    jointaverage += (*it)[0] * (*it)[1];
+                    covmat += *it * (*it).t();
                     ++ctr;
                 }
             }
+            
+            if (ctr > 1) {
+                //normalise the average to save some divides later and make code clearer
+                average /= (ctr);
+                covmat /= (ctr);
 
-            //step 2: calculate the slope and intercept - this is long because we need 2 cases for this line representation
-            arma::vec2 line;
-            double m,b;
-            if (std::abs(normal[0]) > std::abs(normal[1])) { //check whether to use y=mx+b or x=my+b
-                m = (jointaverage - average[0] * average[1] / ctr)/(squaredaverage[0] - average[0]*average[0]/ctr);
-                line = arma::normalise(arma::vec2({ 1.0, m }));
-
-            } else {
-                m = (jointaverage - average[0] * average[1] / ctr) / (squaredaverage[1] - average[1]*average[1]/ctr);
-                line = arma::normalise(arma::vec2({ m, 1.0 }));
+                //step 2: calculate the slope and intercept
+                double m = (covmat[1] - average[0] * average[1]);
+                if (std::abs(normal[0]) > std::abs(normal[1])) { //check whether to use y=mx+b or x=my+b
+                    //make a unit vector at right angles to the direction of slope
+                    normal = arma::normalise(
+                                arma::vec2({ -1.0, m / (covmat[0] - average[0] * average[0])}));
+                } else {
+                    //make a unit vector at right angles to the direction of slope
+                    normal = arma::normalise(
+                                arma::vec2({ 1.0, -m / (covmat[3] - average[1] * average[1]) }));
+                    
+                }
+                
+                //find distance the usual way
+                distance = arma::dot(average,normal);
             }
-
-            normal = { line[1], -line[0] };
-            distance = arma::dot(average,normal)/ctr;
         }
     };
 
