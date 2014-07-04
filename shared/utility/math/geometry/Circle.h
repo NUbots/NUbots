@@ -47,7 +47,7 @@ namespace geometry {
         //squared threshold away from the current model to filter candidates
         template <typename Iterator>
         void leastSquaresUpdate(Iterator& first, Iterator& last, const double& candidateThreshold = std::numeric_limits<double>::max()) {
-
+               
             //Perform a least squares fit on a circle, optionally using a distance
             //squared threshold away from the current model to filter candidates
 

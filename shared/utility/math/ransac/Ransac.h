@@ -106,7 +106,6 @@ namespace ransac {
                 double error = 0.0;
 
                 regenerateRandomModel(model, first, last);
-                model.leastSquaresUpdate(first,last,consensusErrorThreshold);
                 for(auto it = first; it < last; ++it) {
                     if(model.calculateError(*it) < consensusErrorThreshold) {
                         ++consensusSize;
@@ -124,7 +123,9 @@ namespace ransac {
             }
 
             if(largestConsensus >= minimumPointsForConsensus) {
-
+                
+                model.refineModel(first,last,consensusErrorThreshold);
+                
                 auto newFirst = std::partition(first, last, [consensusErrorThreshold, bestModel] (const DataPoint& point) {
                     return consensusErrorThreshold > bestModel.calculateError(std::forward<const DataPoint&>(point));
                 });

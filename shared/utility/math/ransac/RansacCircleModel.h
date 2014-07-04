@@ -36,6 +36,12 @@ namespace ransac {
         bool regenerate(const std::vector<DataPoint>& points);
 
         double calculateError(const DataPoint& p) const;
+        
+        template <typename Iterator>
+        void refineModel(Iterator& first, Iterator& last, const double& candidateThreshold) {
+            //commented out due to performance concerns - works well though
+            //leastSquaresUpdate(first,last,candidateThreshold);
+        }
     };
 
 }
