@@ -63,14 +63,14 @@ namespace ransac {
 
                 while(indices.size() < Model::REQUIRED_POINTS) {
                     indices.insert(xorShift() % range);
-                    
+
                 }
 
                 for(auto& i : indices) {
                     auto it = first;
                     std::advance(it, i);
                     points.push_back(*it);
-                    
+
                 }
 
                 // If this returns false then it was an invalid model
@@ -114,7 +114,7 @@ namespace ransac {
                 }
 
                 // If largest consensus
-                if(consensusSize > largestConsensus or 
+                if(consensusSize > largestConsensus or
                    (consensusSize == largestConsensus and error < bestError)) {
                     largestConsensus = consensusSize;
                     bestError = error;
@@ -123,9 +123,9 @@ namespace ransac {
             }
 
             if(largestConsensus >= minimumPointsForConsensus) {
-                
+
                 model.refineModel(first,last,consensusErrorThreshold);
-                
+
                 auto newFirst = std::partition(first, last, [consensusErrorThreshold, bestModel] (const DataPoint& point) {
                     return consensusErrorThreshold > bestModel.calculateError(std::forward<const DataPoint&>(point));
                 });

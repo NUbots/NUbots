@@ -37,7 +37,7 @@ namespace ransac {
     }
 
     double RansacCircleModel::calculateError(const DataPoint& p) const {
-        double error = squaresDifference(p);
+        double error = distanceToPoint(p);
         return error * error;
     }
 

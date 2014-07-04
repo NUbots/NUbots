@@ -389,7 +389,7 @@ namespace modules {
                 send(message);
             });
 
-            goalsHandle = on<Trigger<std::vector<VisionBall>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionBall>& balls) {
+            ballsHandle = on<Trigger<std::vector<VisionBall>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionBall>& balls) {
 
                 Message message;
                 message.set_type(Message::VISION_OBJECT);
@@ -412,7 +412,7 @@ namespace modules {
 
             });
 
-            ballsHandle = on<Trigger<std::vector<VisionGoal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionGoal>& goals) {
+            goalsHandle = on<Trigger<std::vector<VisionGoal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionGoal>& goals) {
 
                 Message message;
                 message.set_type(Message::VISION_OBJECT);
