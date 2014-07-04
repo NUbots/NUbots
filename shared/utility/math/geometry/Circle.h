@@ -41,6 +41,8 @@ namespace geometry {
         bool setFromPoints(const arma::vec2& a, const arma::vec2& b, const arma::vec2& c, const double tolerance = std::numeric_limits<double>::min());
 
         double distanceToPoint(const arma::vec2& point) const;
+        
+        double squaresDifference(const arma::vec2& point) const;
 
         arma::vec2 orthogonalProjection(const arma::vec2& x);
 
