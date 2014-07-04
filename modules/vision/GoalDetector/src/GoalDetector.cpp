@@ -28,10 +28,12 @@
 
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacLineModel.h"
+#include "messages/input/CameraParameters.h"
 
 namespace modules {
 namespace vision {
 
+    using messages::input::CameraParameters;
     using utility::math::geometry::Line;
     using utility::math::geometry::Quad;
 
@@ -44,11 +46,11 @@ namespace vision {
 
     using messages::support::Configuration;
 
-
     GoalDetector::GoalDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<GoalDetector>>>([this](const Configuration<GoalDetector>& config) {
+        auto setParams = [this] (const CameraParameters& cam, const Configuration<GoalDetector>& config) {
+
             MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
             CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<double>();
             MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
@@ -56,7 +58,12 @@ namespace vision {
 
             MINIMUM_ASPECT_RATIO = config["aspect_ratio_range"][0].as<double>();
             MAXIMUM_ASPECT_RATIO = config["aspect_ratio_range"][1].as<double>();
-        });
+            VISUAL_HORIZON_BUFFER = std::max(1, int(cam.focalLengthPixels * tan(config["visual_horizon_buffer"].as<double>())));
+        };
+
+        // Trigger the same function when either update
+        on<Trigger<CameraParameters>, With<Configuration<GoalDetector>>>(setParams);
+        on<With<CameraParameters>, Trigger<Configuration<GoalDetector>>>(setParams);
 
         on<Trigger<ClassifiedImage<ObjectClass>>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image) {
 
@@ -145,16 +152,18 @@ namespace vision {
                 auto& quad = it->quad;
 
                 // Check if we are within the aspect ratio range
-                bool throwout = quad.aspectRatio() < MINIMUM_ASPECT_RATIO
-                             || quad.aspectRatio() > MAXIMUM_ASPECT_RATIO;
+                bool valid = quad.aspectRatio() > MINIMUM_ASPECT_RATIO
+                          && quad.aspectRatio() < MAXIMUM_ASPECT_RATIO
                 // Check if we are close enough to the visual horizon
-                //              || (image.visualHorizonAtPoint(quad.getBottomLeft()[0]) > quad.getBottomLeft()[1]
-                //                  && image.visualHorizonAtPoint(quad.getBottomRight()[0]) > quad.getBottomLeft()[1])
+                          && (image.visualHorizonAtPoint(quad.getBottomLeft()[0]) < quad.getBottomLeft()[1] + VISUAL_HORIZON_BUFFER
+                              || image.visualHorizonAtPoint(quad.getBottomRight()[0]) < quad.getBottomRight()[1] + VISUAL_HORIZON_BUFFER)
                 // // Check we finish above the kinematics horizon or or kinematics horizon is off the screen
-                //              || image.horizon.y(quad.getTopLeft()[0]) > quad.getTopLeft()[1]
-                //              || image.horizon.y(quad.getTopRight()[0]) > quad.getTopRight()[1];
+                          && (image.horizon.y(quad.getTopLeft()[0]) > quad.getTopLeft()[1] || image.horizon.y(quad.getTopLeft()[0]) < 0)
+                          && (image.horizon.y(quad.getTopRight()[0]) > quad.getTopRight()[1] || image.horizon.y(quad.getTopRight()[0]) < 0);
 
-                if(throwout) {
+                          // Throwout based on angle vs the kinematics horizon
+
+                if(!valid) {
                     it = goals->erase(it);
                 }
                 else {
@@ -162,20 +171,22 @@ namespace vision {
                 }
             }
 
-            // Combine all possible lines into quads
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO //
+            //                                                                                                                         //
+            // Do a throwout based on the angle of lines with the kinematics horizon (dotproduct of sides with normal of horizon)      //
+            // Merge goals that overlap                                                                                                //
+            // Use the vertical transitions to improve the tops and bottoms of the quads                                               //
+            // Do the kinematics for the goals                                                                                         //
+            // Assign left and right goals                                                                                             //
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            // Throw out bad quads
+            // Do the kinematics for the goals
+            for(auto it = goals->begin(); it < goals->end(); ++it) {
 
-            // bad aspect ratio
-            // base must be below the vh
-            // Top of goals is above the kinematics horizion OR kh is above the screen
+            }
 
-            // Refine the tops and bottoms of the goals using the vertical segments
-
-            // Try and assign left and right
-                // Check for left side vs right side
-                // Check for a crossbar
-
+            // Do some extra throwouts for goals based on kinematics
 
             emit(std::move(goals));
 
