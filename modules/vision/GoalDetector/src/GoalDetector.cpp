@@ -58,7 +58,7 @@ namespace vision {
             MAXIMUM_ASPECT_RATIO = config["aspect_ratio_range"][1].as<double>();
         });
 
-        on<Trigger<ClassifiedImage<ObjectClass>>>([this](const ClassifiedImage<ObjectClass>& image) {
+        on<Trigger<ClassifiedImage<ObjectClass>>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image) {
 
             std::vector<arma::vec2> startPoints, endPoints;
             std::vector<arma::mat22> starts, ends;
