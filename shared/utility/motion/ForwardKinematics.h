@@ -329,7 +329,7 @@ namespace kinematics {
         }
     }
 
-    inline arma::vec2 calculateHorizon(const arma::mat33 groundToCamRotation, double cameraDistancePixels){
+    inline utility::math::geometry::Line calculateHorizon(const arma::mat33 groundToCamRotation, double cameraDistancePixels){
         arma::vec3 zGround = {0,0,1};
         arma::vec3 normal = groundToCamRotation * zGround;
 
@@ -338,7 +338,13 @@ namespace kinematics {
         double phiX = std::acos(arma::dot(normal, xHead)) - M_PI_2;
         double phiY = std::acos(arma::dot(normal, yHead)) - M_PI_2;
 
-        return { std::tan(phiY), cameraDistancePixels * -std::tan(phiX) };
+        // TODO ask jake to fix this :P
+
+        // Since I don't know how to math this properly, make two random points and make a line from those
+        double m = std::tan(phiY);
+        double b = cameraDistancePixels * -std::tan(phiX);
+
+        return utility::math::geometry::Line(arma::vec2({ 0, b }), arma::vec2({ 1, m + b }));
     }
 
     inline arma::mat44 calculateCamToGround(arma::mat44 cameraToBody, arma::vec3 groundNormal_body, double bodyHeight){
@@ -348,7 +354,7 @@ namespace kinematics {
         arma::vec3 groundMatrixX;
         arma::vec3 groundMatrixY;
 
-        if(std::fabs(projectXOnNormal) == 1){ 
+        if(std::fabs(projectXOnNormal) == 1){
             //Then x is parallel to the ground normal and we need to use projection onto +/-z instead
             //If x parallel to normal, then use -z, if x antiparallel use z
             arma::vec3 Z =  arma::vec3{0, 0, (projectXOnNormal > 0 ? -1 : 1 )};

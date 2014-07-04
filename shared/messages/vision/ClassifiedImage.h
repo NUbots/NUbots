@@ -65,8 +65,8 @@ namespace messages {
 
             arma::uvec2 dimensions;
 
-            // Our horizon as a gradient/intercept pair
-            arma::vec2 horizon;
+            // Our horizon
+            utility::math::geometry::Line horizon;
 
             // The points of the visual horizon
             std::vector<arma::ivec2> visualHorizon;
