@@ -55,21 +55,22 @@ namespace ransac {
         static void regenerateRandomModel(Model& model, const Iterator first, const Iterator last) {
 
             // Get random points between first and last
-            uint range = std::distance(first, last) + 1;
+            uint range = std::distance(first, last);
             std::vector<DataPoint> points;
-
             do {
                 points.clear();
                 std::set<uint64_t> indices;
 
                 while(indices.size() < Model::REQUIRED_POINTS) {
                     indices.insert(xorShift() % range);
+                    
                 }
 
                 for(auto& i : indices) {
                     auto it = first;
                     std::advance(it, i);
                     points.push_back(*it);
+                    
                 }
 
                 // If this returns false then it was an invalid model
@@ -105,7 +106,7 @@ namespace ransac {
                 double error = 0.0;
 
                 regenerateRandomModel(model, first, last);
-
+                model.leastSquaresUpdate(first,last,consensusErrorThreshold);
                 for(auto it = first; it < last; ++it) {
                     if(model.calculateError(*it) < consensusErrorThreshold) {
                         ++consensusSize;
