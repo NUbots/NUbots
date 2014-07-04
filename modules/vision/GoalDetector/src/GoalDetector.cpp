@@ -146,13 +146,13 @@ namespace vision {
 
                 // Check if we are within the aspect ratio range
                 bool throwout = quad.aspectRatio() < MINIMUM_ASPECT_RATIO
-                             || quad.aspectRatio() > MAXIMUM_ASPECT_RATIO
+                             || quad.aspectRatio() > MAXIMUM_ASPECT_RATIO;
                 // Check if we are close enough to the visual horizon
-                             || (image.visualHorizonAtPoint(quad.getBottomLeft()[0]) > quad.getBottomLeft()[1]
-                                 && image.visualHorizonAtPoint(quad.getBottomRight()[0]) > quad.getBottomLeft()[1])
-                // Check we finish above the kinematics horizon or or kinematics horizon is off the screen
-                             || image.horizon.y(quad.getTopLeft()[0]) > quad.getTopLeft()[1]
-                             || image.horizon.y(quad.getTopRight()[0]) > quad.getTopRight()[1];
+                //              || (image.visualHorizonAtPoint(quad.getBottomLeft()[0]) > quad.getBottomLeft()[1]
+                //                  && image.visualHorizonAtPoint(quad.getBottomRight()[0]) > quad.getBottomLeft()[1])
+                // // Check we finish above the kinematics horizon or or kinematics horizon is off the screen
+                //              || image.horizon.y(quad.getTopLeft()[0]) > quad.getTopLeft()[1]
+                //              || image.horizon.y(quad.getTopRight()[0]) > quad.getTopRight()[1];
 
                 if(throwout) {
                     it = goals->erase(it);
