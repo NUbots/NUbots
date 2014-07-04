@@ -33,7 +33,7 @@ namespace modules {
                 classifiedImage.horizon = sensors.orientationHorizon;
 
                 // Move our axis to be at the top left of the screen
-                classifiedImage.horizon.distance = classifiedImage.horizon.distanceToPoint({ -image.width() * 0.5, -image.height() * 0.5 });
+                classifiedImage.horizon.distance = -classifiedImage.horizon.distanceToPoint({ -double(image.width()) * 0.5, -double(image.height()) * 0.5 });
         }
 
     }  // vision
