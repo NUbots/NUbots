@@ -303,7 +303,7 @@ namespace modules {
 
                     imageBytes->reserve(image.raw().size() * sizeof(Image::Pixel));
 
-                    imageBytes->insert(imageBytes->begin(), reinterpret_cast<const char*>(&image.raw().front()), reinterpret_cast<const char*>(&image.raw().back()));
+                    imageBytes->insert(imageBytes->begin(), reinterpret_cast<const char*>(&image.raw().front()), reinterpret_cast<const char*>(&image.raw().back() + 1));
                 }
 
                 send(message);
