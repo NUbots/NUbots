@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,36 +17,37 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "MocapLocalisation.h"
-#include "utility/nubugger/NUgraph.h"
-#include "messages/input/proto/MotionCapture.pb.h"
-#include <armadillo>
+#include "NUcap.h"
+#include <nuclear>
 
-using utility::nubugger::graph;
+#include "messages/input/proto/MotionCapture.pb.h"
 
 namespace modules {
-namespace localisation {
+namespace debug {
 
     using messages::input::proto::MotionCapture;
 
-    MocapLocalisation::MocapLocalisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    NUcap::NUcap(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment)) {
 
         on<Trigger<Network<MotionCapture>>>([this](const Network<MotionCapture>& net) {
             auto& mocap = net.data;
             for (auto& rigidBody : mocap->rigid_bodies()) {
 
-
                 int id = rigidBody.identifier();
                 float x = rigidBody.location().x();
                 float y = rigidBody.location().y();
                 float z = rigidBody.location().z();
-                if (id == 2) { // Robot #2
-                    // TODO: transform from head to field
-                    emit(graph("NUcap", x, y, z));
-                }
+
+                log("NUcap:", id, "x:", x, "y:", y, "z:", z);
+                emit(graph("NUcap", x, y, z));
+                // TODO: transform from head to field
             }
 
         });
+
     }
+
 }
 }
+

@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,20 +17,22 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MOCAP_LOCALISATION_H
-#define MODULES_MOCAP_LOCALISATION_H
+#ifndef MODULES_DEBUG_NUCAP_H
+#define MODULES_DEBUG_NUCAP_H
+
 
 #include <nuclear>
-
 namespace modules {
-namespace localisation {
+namespace debug {
 
-    class MocapLocalisation : public NUClear::Reactor {
+    class NUcap : public NUClear::Reactor {
     public:
-        explicit MocapLocalisation(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the NUcap reactor.
+        explicit NUcap(std::unique_ptr<NUClear::Environment> environment);
     };
 
 }
 }
-#endif
 
+
+#endif

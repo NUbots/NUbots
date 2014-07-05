@@ -5,7 +5,7 @@ ADD_ROLE(
         support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
-        #support::configuration::NetworkingConfiguration
+        support::configuration::NetworkingConfiguration
         support::NUbugger
 
         #Sensors
@@ -18,7 +18,7 @@ ADD_ROLE(
         #vision::FeatureDetector
 
         #Localisation
-        localisation::KFBallLocalisation
+        localisation::MocapLocalisation
 
         #Behaviour
         behaviour::Controller

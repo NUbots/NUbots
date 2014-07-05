@@ -60,7 +60,7 @@ namespace support {
 
             NUClear::log("serverIP", serverIP);
             NUClear::log("clientIP", clientIP);
-            
+
 
             // Version number of the NatNet protocol, as reported by the server.
             unsigned char natNetMajor;
@@ -125,7 +125,13 @@ namespace support {
 
             for (auto fRigidBody : frame.rigidBodies()) {
                 auto* rigidBody = moCap->add_rigid_bodies();
-                rigidBody->set_identifier(std::to_string(fRigidBody.id()));
+                rigidBody->set_identifier(fRigidBody.id());
+
+                auto* location = rigidBody->mutable_location();
+                // normalize to robot coordinate system, x foward, y left, z up
+                location->set_x(-fRigidBody.location().z);
+                location->set_y(-fRigidBody.location().x);
+                location->set_z(fRigidBody.location().y);
 
                 auto rotation = fRigidBody.orientation();
 
@@ -133,7 +139,7 @@ namespace support {
                 rigidBody->set_qx(rotation.qx);
                 rigidBody->set_qy(rotation.qy);
                 rigidBody->set_qz(rotation.qz);
-                // TODO: fRigidBody.location();
+
                 for (auto point : fRigidBody.markers()) {
                     auto* marker_point = rigidBody->add_points();
                     marker_point->set_x(point.x);
