@@ -25,6 +25,8 @@
 
 #include "messages/localisation/FieldObject.h"
 #include "messages/support/FieldDescription.h"
+#include "messages/motion/KickCommand.h"
+#include "messages/motion/WalkCommand.h"
 
 namespace modules {
     namespace behaviour {
@@ -74,7 +76,9 @@ namespace modules {
 		private:
 			NUClear::clock::time_point timeSinceLastSeen;
 
-			std::vector<arma::vec2> MY_ZONE;
+			std::vector<std::vector<arma::vec2>> ZONES;
+			std::vector<arma::vec2> ZONE_DEFAULTS;
+			int MY_ZONE;
 			float MAX_BALL_DISTANCE;
 			float KICK_DISTANCE_THRESHOLD;
 			float BALL_CERTAINTY_THRESHOLD;
@@ -85,6 +89,14 @@ namespace modules {
 
 			State previousState, currentState;
 
+			bool penalisedButtonStatus;
+			bool feetOnGround;
+			bool isKicking;
+			bool isWalking;
+			messages::motion::KickCommand kickData;
+			messages::motion::WalkCommand walkData;
+
+			arma::vec2 findOptimalPosition();
 			void stopMoving();
 			void findSelf();
 			void findBall(const std::vector<messages::localisation::Ball>& hints);

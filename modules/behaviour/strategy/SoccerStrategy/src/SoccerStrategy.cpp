@@ -24,8 +24,6 @@
 #include "messages/input/Sensors.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/support/Configuration.h"
-#include "messages/motion/KickCommand.h"
-#include "messages/motion/WalkCommand.h"
 
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/ParametricLine.h"
@@ -55,24 +53,43 @@ namespace modules {
 		using utility::math::geometry::ParametricLine;
 
 		SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-			bool penalisedButtonStatus = false, feetOnGround = true, isKicking = false, isWalking = false;
-			KickCommand kickData;
-			WalkCommand walkData;
+			penalisedButtonStatus = false;
+			feetOnGround = true;
+			isKicking = false;
+			isWalking = false;
 
 			on<Trigger<Configuration<SoccerStrategyConfig>>>([this](const Configuration<SoccerStrategyConfig>& config) {
+				std::vector<arma::vec2> zone;
+
 				MAX_BALL_DISTANCE = config["MAX_BALL_DISTANCE"].as<float>();
 				KICK_DISTANCE_THRESHOLD = config["KICK_DISTANCE_THRESHOLD"].as<float>();
 				BALL_CERTAINTY_THRESHOLD = config["BALL_CERTAINTY_THRESHOLD"].as<float>();
 				IS_GOALIE = (config["GOALIE"].as<int>() == 1);
 				START_POSITION = config["START_POSITION"].as<arma::vec2>();
-				MY_ZONE = config["ZONE"].as<std::vector<arma::vec2>>();
+				MY_ZONE = config["MY_ZONE"].as<int>();
+
+				ZONE_DEFAULTS.push_back(config["ZONE_1_DEFAULT"].as<arma::vec2>());
+				zone = config["ZONE_1"].as<std::vector<arma::vec2>>();
+				ZONES.push_back(zone);
+
+				ZONE_DEFAULTS.push_back(config["ZONE_2_DEFAULT"].as<arma::vec2>());
+				zone = config["ZONE_2"].as<std::vector<arma::vec2>>();
+				ZONES.push_back(zone);
+
+				ZONE_DEFAULTS.push_back(config["ZONE_3_DEFAULT"].as<arma::vec2>());
+				zone = config["ZONE_3"].as<std::vector<arma::vec2>>();
+				ZONES.push_back(zone);
+
+				ZONE_DEFAULTS.push_back(config["ZONE_4_DEFAULT"].as<arma::vec2>());
+				zone = config["ZONE_4"].as<std::vector<arma::vec2>>();
+				ZONES.push_back(zone);
 			});
 
 			// Last 10 to do some button debouncing.
-			on<Trigger<Last<10, messages::platform::darwin::DarwinSensors>>>([this, &penalisedButtonStatus](const std::vector<std::shared_ptr<const messages::platform::darwin::DarwinSensors>>& sensors) {
+			on<Trigger<Last<10, messages::platform::darwin::DarwinSensors>>>([this](const std::vector<std::shared_ptr<const messages::platform::darwin::DarwinSensors>>& sensors) {
 				int trueCount = 0;
 
-				for (int i = 0; i < sensors.size(); i++) {
+				for (size_t i = 0; i < sensors.size(); i++) {
 					if (sensors.at(i)->buttons.middle) {
 						trueCount++;
 					}
@@ -82,31 +99,31 @@ namespace modules {
 			});
 
 			// Check to see if both feet are on the ground.
-			on<Trigger<messages::input::Sensors>>([this, &feetOnGround](const messages::input::Sensors& sensors) {
+			on<Trigger<messages::input::Sensors>>([this](const messages::input::Sensors& sensors) {
 				feetOnGround = (sensors.leftFootDown && sensors.rightFootDown);
 			});
 
 			// Check to see if we are about to kick.
-			on<Trigger<messages::motion::KickCommand>>([this, &isKicking, &kickData](const messages::motion::KickCommand& kick) {
+			on<Trigger<messages::motion::KickCommand>>([this](const messages::motion::KickCommand& kick) {
 				isKicking = true;
 				kickData = kick;
 			});
 
 			// Check to see if the kick has finished.
-			on<Trigger<messages::motion::KickFinished>>([this, &isKicking](const messages::motion::KickFinished& kick) {
+			on<Trigger<messages::motion::KickFinished>>([this](const messages::motion::KickFinished& kick) {
 				isKicking = false;
 			});
 
 			// Check to see if we are walking.
 			on<Trigger<messages::motion::WalkStartCommand>, With<messages::motion::WalkCommand>>
-				([this, &isWalking, &walkData](const messages::motion::WalkStartCommand& walkStart,
+				([this](const messages::motion::WalkStartCommand& walkStart,
 					const messages::motion::WalkCommand& walk) {
 				isWalking = true;
 				walkData = walk;
 			});
 
 			// Check to see if we are no longer walking.
-			on<Trigger<messages::motion::WalkStopCommand>>([this, &isWalking](const messages::motion::WalkStopCommand& walkStop) {
+			on<Trigger<messages::motion::WalkStopCommand>>([this](const messages::motion::WalkStopCommand& walkStop) {
 				isWalking = false;
 			});
 
@@ -119,7 +136,7 @@ namespace modules {
 				With<messages::localisation::Ball>,
 				With<messages::localisation::Self>
 				/* Need to add in game controller triggers. */
-				/* Need to add team localisation triggers. */>([this, &penalisedButtonStatus, &feetOnGround, &isKicking, &isWalking, &kickData, &walkData](
+				/* Need to add team localisation triggers. */>([this](
 											const time_t&,
 											const messages::localisation::Ball& ball,
 											const messages::localisation::Self& self
@@ -234,6 +251,10 @@ namespace modules {
 
 
 
+					// Create a list of hints in case we need to search for the ball.
+					std::vector<messages::localisation::Ball> hints = {ball/*, teamBall*/};
+					arma::vec2 optimalPosition = findOptimalPosition();
+
 					// Determine current state and appropriate action(s).
 					if (currentState.gameStateInitial || currentState.gameStateSet || currentState.gameStateFinished || currentState.penalised || currentState.pickedUp) {
 						stopMoving();
@@ -241,40 +262,45 @@ namespace modules {
 						NUClear::log<NUClear::INFO>("Standing still.");
 					}
 	
-					else if (!currentState.selfInZone) {
-						/* goToPoint(polygonCentroid(MY_ZONE)); */
-
-						NUClear::log<NUClear::INFO>("I am not where I should be. Going there now.");
-					}
-
 					else if (currentState.gameStateReady) {
 						goToPoint(START_POSITION);
 
 						NUClear::log<NUClear::INFO>("Game is about to start. I should be in my starting position.");
 					}
 
+					else if (!currentState.selfInZone) {
+						goToPoint(optimalPosition);
+
+						NUClear::log<NUClear::INFO>("I am not where I should be. Going there now.");
+					}
+
+					else if(currentState.penalised && currentState.putDown) {
+						findSelf();
+						findBall(hints);
+
+						NUClear::log<NUClear::INFO>("I am penalised and have been put down. I must be on the side line somewhere. Where am I?");
+					}
+
+					else if (currentState.unPenalised) {
+						goToPoint(optimalPosition);
+
+						NUClear::log<NUClear::INFO>("I am unpenalised, I should already know where I am and where the ball is. So find the most optimal location in my zone to go to.");
+					}
+
 					else if (isKicking) {
 						watchBall(certainBall);
 
-						NUClear::log<NUClear::INFO>("I be looking at what I am kicking.");
-					}
-
-					else if (currentState.unPenalised || currentState.putDown) {
-						findSelf();
-
-						NUClear::log<NUClear::INFO>("I don't know where I am. Beginning s spiritual journey to find myself.");
+						NUClear::log<NUClear::INFO>("I be looking at what I be kicking.");
 					}
 
 
 					else if (currentState.ballLost) {
-						std::vector<messages::localisation::Ball> hints = {ball/*, teamBall*/};
-
 						findBall(hints);
 
 						NUClear::log<NUClear::INFO>("Don't know where the ball is. Looking for it.");
 					}
 
-					else if (currentState.goalInRange || currentState.ballInZone || currentState.ballApproaching) {
+					else if (currentState.ballInZone || currentState.ballApproaching) {
 						approachBall(certainBall, self);
 
 						NUClear::log<NUClear::INFO>("Walking to ball.");
@@ -286,6 +312,13 @@ namespace modules {
 						NUClear::log<NUClear::INFO>("In kicking position. Kicking ball.");
 					}
 
+					else if (currentState.goalInRange) {
+						approachBall(certainBall, self);
+						kickBall(certainBall);
+
+						NUClear::log<NUClear::INFO>("Kick for goal.");
+					}
+
 					else if (IS_GOALIE && currentState.ballApproachingGoal) {
 						goToPoint(currentState.ballGoalIntersection);
 
@@ -293,14 +326,19 @@ namespace modules {
 					}
 
 					else {
-						std::vector<messages::localisation::Ball> hints = {ball/*, teamBall*/};
-
 						findSelf();
 						findBall(hints);
+						goToPoint(ZONE_DEFAULTS.at(MY_ZONE));
 	
-						NUClear::log<NUClear::INFO>("Unknown behavioural state. Finding self, finding ball.");
+						NUClear::log<NUClear::INFO>("Unknown behavioural state. Finding self, finding ball, moving to default position.");
 					}
 				});
+			}
+
+			arma::vec2 SoccerStrategy::findOptimalPosition() {
+				arma::vec2 optimalPosition = {0, 0};
+
+				return(optimalPosition);
 			}
 
 			void SoccerStrategy::stopMoving() {
