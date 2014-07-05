@@ -29,6 +29,7 @@ namespace geometry {
     class Circle {
     public:
         double radius;
+        double radiusSq;
         arma::vec2 centre;
 
         Circle();
@@ -40,6 +41,8 @@ namespace geometry {
         bool setFromPoints(const arma::vec2& a, const arma::vec2& b, const arma::vec2& c, const double tolerance = std::numeric_limits<double>::min());
 
         double distanceToPoint(const arma::vec2& point) const;
+        
+        double squaresDifference(const arma::vec2& point) const;
 
         arma::vec2 orthogonalProjection(const arma::vec2& x);
 
@@ -47,7 +50,7 @@ namespace geometry {
         //squared threshold away from the current model to filter candidates
         template <typename Iterator>
         void leastSquaresUpdate(Iterator& first, Iterator& last, const double& candidateThreshold = std::numeric_limits<double>::max()) {
-
+               
             //Perform a least squares fit on a circle, optionally using a distance
             //squared threshold away from the current model to filter candidates
 
@@ -66,9 +69,12 @@ namespace geometry {
                     ++i;
                 }
             }
-            arma::vec3 results = arma::solve(linearEq1.rows(0, i - 1), linearEq2.rows(0, i - 1));
-            centre = { results[0] * 0.5, results[1] * 0.5 };
-            radius = arma::dot(centre, centre) - results[2];
+            if (i != 0) {
+                arma::vec3 results = arma::solve(linearEq1.rows(0, i - 1), linearEq2.rows(0, i - 1));
+                centre = arma::abs(arma::vec2({ results[0] * 0.5, results[1] * 0.5 })) % arma::sign(centre);
+                radiusSq = arma::dot(centre, centre) - results[2];
+                radius = std::sqrt(radiusSq);
+            }
         }
     };
 

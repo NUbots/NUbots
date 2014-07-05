@@ -53,8 +53,9 @@ namespace geometry {
 
         centre[0] = ((ab_norm * bc[1]) - (bc_norm * ab[1])) * det;
         centre[1] = ((ab[0] * bc_norm) - (bc[0] * ab_norm)) * det;
-
-        radius = arma::norm(centre - a, 2);
+        
+        radiusSq = arma::accu(arma::square(a - centre));
+        radius = std::sqrt(radiusSq);
 
         return true;
     }
@@ -62,7 +63,11 @@ namespace geometry {
     double Circle::distanceToPoint(const arma::vec2& point) const {
         return arma::norm(point - centre) - radius;
     }
-
+    
+    double Circle::squaresDifference(const arma::vec2& point) const {
+        return arma::accu(arma::square(point - centre)) - radiusSq;
+    }
+    
     arma::vec2 Circle::orthogonalProjection(const arma::vec2& point) {
         return arma::normalise(point - centre) * radius + centre;
     }

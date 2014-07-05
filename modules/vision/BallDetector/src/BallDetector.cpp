@@ -38,6 +38,7 @@ namespace vision {
 
     using messages::vision::ObjectClass;
     using messages::vision::ClassifiedImage;
+    using messages::vision::VisionObject;
     using messages::vision::Ball;
 
     using utility::math::vision::widthBasedDistanceToCircle;
@@ -66,7 +67,7 @@ namespace vision {
         });
 
 
-        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters, Sensors>>([this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const Sensors& sensors) {
+        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters, Sensors>, Options<Single>>("Ball Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const Sensors& sensors) {
 
             // This holds our points that may be a part of the ball
             std::vector<arma::vec2> ballPoints;
@@ -113,41 +114,36 @@ namespace vision {
 
                 double BALL_DIAMETER = 0.1; //TODO:Universal CONFIG
 
+                std::vector<VisionObject::Measurement> measurements;
+                measurements.reserve(2);
 
+                // Transform our centre into kinematics coordinates
+                auto centre = imageToScreen(result.model.centre, { double(image.dimensions[0]), double(image.dimensions[1]) });
 
+                // Get the 4 points around our circle
+                auto top   = centre + arma::vec2({ 0,  result.model.radius });
+                auto base  = centre + arma::vec2({ 0, -result.model.radius });
+                auto left  = centre + arma::vec2({  result.model.radius, 0 });
+                auto right = centre + arma::vec2({ -result.model.radius, 0 });
 
-
-                auto centre = result.model.centre;
-                auto p1 = centre;
-                auto p2 = centre;
-                p1[1] += result.model.radius;
-                p2[1] -= result.model.radius;
-
-                // Transform p1 p2 to kinematics coordinates
-                p1 = imageToScreen(p1, { double(image.dimensions[0]), double(image.dimensions[1]) });
-                p2 = imageToScreen(p2, { double(image.dimensions[0]), double(image.dimensions[1]) });
-
-                arma::vec3 camUnitP1 = arma::normalise(getCamFromScreen(p1, cam.focalLengthPixels));
-                arma::vec3 camUnitP2 = arma::normalise(getCamFromScreen(p2, cam.focalLengthPixels));
-                arma::vec3 ballCentreRay = arma::normalise(0.5 * (camUnitP1 + camUnitP2));
+                // Get a unit vector pointing to the centre of the ball
+                arma::vec3 ballCentreRay = arma::normalise(arma::normalise(getCamFromScreen(top, cam.focalLengthPixels))
+                                                           + arma::normalise(getCamFromScreen(base, cam.focalLengthPixels)));
+                // Get the centre of our ball ins creen space
                 arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay, cam.focalLengthPixels);
 
-                //Width based method
-                double wbd = widthBasedDistanceToCircle(BALL_DIAMETER, p1, p2, cam.focalLengthPixels);
-                arma::vec3 ballCentreGroundWidth = wbd * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
+                // Get our width based distance to the circle
+                double widthDistance = widthBasedDistanceToCircle(BALL_DIAMETER, top, base, cam.focalLengthPixels);
+                arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
+                // TODO convert this into sphericial coordiantes and error
+                measurements.push_back({{0,0,0}, arma::eye(3,3)});
 
-                //Projection to plane method
+                // Project this vector to a plane midway through the ball
                 arma::mat44 ballBisectorPlaneTransform = sensors.orientationCamToGround;
                 ballBisectorPlaneTransform(2,3) -= BALL_DIAMETER / 2.0;
                 arma::vec3 ballCentreGroundProj = arma::vec3({ 0, 0, BALL_DIAMETER / 2.0 }) + projectCamToGroundPlane(ballCentreRay, ballBisectorPlaneTransform);
-
-                //Get angular width
-                auto p3 = centre;
-                auto p4 = centre;
-                p3[0] += result.model.radius;
-                p4[0] -= result.model.radius;
-                p3 = imageToScreen(p3, { double(image.dimensions[0]), double(image.dimensions[1]) });
-                p4 = imageToScreen(p4, { double(image.dimensions[0]), double(image.dimensions[1]) });
+                // TODO convert this into sphericial coordiantes and error
+                measurements.push_back({{0,0,0}, arma::eye(3,3)});
 
                 /*
                  *  BUILD OUR BALL
@@ -158,18 +154,14 @@ namespace vision {
                 b.circle.radius = result.model.radius;
                 b.circle.centre = result.model.centre;
 
-                // Camera dimensions
+                // Angular positions from the camera
                 b.screenAngular = arma::atan(cam.pixelsToTanThetaFactor % ballCentreScreen);
-                b.angularSize = { getParallaxAngle(p3, p4, cam.focalLengthPixels), getParallaxAngle(p1, p2, cam.focalLengthPixels) };
+                b.angularSize = { getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels) };
 
-                b.measurements.push_back({ ballCentreGroundWidth, arma::eye(3,3) });
-                b.measurements.push_back({ ballCentreGroundProj, arma::eye(3,3) });
+                // Move our measurements
+                b.measurements = std::move(measurements);
 
                 balls->push_back(std::move(b));
-
-                emit(graph("Width Ball Dist", wbd));
-                emit(graph("Width Ball Pos", ballCentreGroundWidth[0],ballCentreGroundWidth[1],ballCentreGroundWidth[2]));
-                emit(graph("D2P Ball", ballCentreGroundProj[0], ballCentreGroundProj[1]));
             }
 
             emit(std::move(balls));

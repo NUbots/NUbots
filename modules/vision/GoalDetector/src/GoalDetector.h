@@ -34,6 +34,8 @@ namespace vision {
 
         double MAXIMUM_ASPECT_RATIO;
         double MINIMUM_ASPECT_RATIO;
+        double VISUAL_HORIZON_BUFFER;
+
     public:
 
         static constexpr const char* CONFIGURATION_PATH = "GoalDetector.yaml";
