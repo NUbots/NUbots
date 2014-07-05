@@ -248,6 +248,8 @@ namespace vision {
 
             // Do some extra throwouts for goals based on kinematics
 
+            // Assign leftness and rightness to goals
+
             emit(std::move(goals));
 
         });
