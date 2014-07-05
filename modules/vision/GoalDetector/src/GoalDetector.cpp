@@ -59,9 +59,9 @@ namespace vision {
             MINIMUM_ASPECT_RATIO = config["aspect_ratio_range"][0].as<double>();
             MAXIMUM_ASPECT_RATIO = config["aspect_ratio_range"][1].as<double>();
             VISUAL_HORIZON_BUFFER = std::max(1, int(cam.focalLengthPixels * tan(config["visual_horizon_buffer"].as<double>())));
-            MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE = std::cos(config["minimum_goal_horizon_angle"].as<double>() - M_PI);
+            MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE = std::cos(config["minimum_goal_horizon_angle"].as<double>() - M_PI_2);
             MAXIMUM_ANGLE_BETWEEN_GOALS = std::cos(config["maximum_angle_between_goals"].as<double>());
-            MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE = std::sin(config["maximum_vertical_goal_perspective_angle"].as<double>());
+            MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE = std::sin(-config["maximum_vertical_goal_perspective_angle"].as<double>());
         };
 
         // Trigger the same function when either update
@@ -165,19 +165,19 @@ namespace vision {
                 // Check we finish above the kinematics horizon or or kinematics horizon is off the screen
                           && (image.horizon.y(quad.getTopLeft()[0]) > quad.getTopLeft()[1] || image.horizon.y(quad.getTopLeft()[0]) < 0)
                           && (image.horizon.y(quad.getTopRight()[0]) > quad.getTopRight()[1] || image.horizon.y(quad.getTopRight()[0]) < 0)
-                // Check that our two goal lines are perpendicular with the horizon
+                // Check that our two goal lines are perpendicular with the horizon must use greater than rather then less than because of the cos
                           && std::abs(arma::dot(lhs, image.horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
                           && std::abs(arma::dot(rhs, image.horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
-                // Check that our two goal lines are approximatly parallel and if not they go in the correct perspective
+                // Check that our two goal lines are approximatly parallel
                           && std::abs(arma::dot(lhs, rhs)) > MAXIMUM_ANGLE_BETWEEN_GOALS
-                          && lhs.at(0) * rhs.at(1) - lhs.at(1) * rhs.at(0) < MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
+                // Check that our goals don't form too much of an upward cup (not really possible for us)
+                          && lhs.at(0) * rhs.at(1) - lhs.at(1) * rhs.at(0) > MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
+
 
                 if(!valid) {
                     it = goals->erase(it);
                 }
                 else {
-                    std::cout << std::acos(std::abs(arma::dot(arma::normalise(quad.getTopLeft() - quad.getBottomLeft()), image.horizon.normal))) << std::endl;
-                    std::cout << std::acos(std::abs(arma::dot(arma::normalise(quad.getTopRight() - quad.getBottomRight()), image.horizon.normal))) << std::endl;
                     ++it;
                 }
             }
