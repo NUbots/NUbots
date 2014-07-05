@@ -67,9 +67,7 @@ namespace ransac {
                 }
 
                 for(auto& i : indices) {
-                    auto it = first;
-                    std::advance(it, i);
-                    points.push_back(*it);
+                    points.push_back(*std::next(first, i));
 
                 }
 
@@ -106,7 +104,7 @@ namespace ransac {
                 double error = 0.0;
 
                 regenerateRandomModel(model, first, last);
-                for(auto it = first; it < last; ++it) {
+                for(auto it = first; it != last; ++it) {
                     if(model.calculateError(*it) < consensusErrorThreshold) {
                         ++consensusSize;
                         error += consensusErrorThreshold;
