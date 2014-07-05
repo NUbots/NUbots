@@ -35,6 +35,9 @@ namespace vision {
         double MAXIMUM_ASPECT_RATIO;
         double MINIMUM_ASPECT_RATIO;
         double VISUAL_HORIZON_BUFFER;
+        double MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE;
+        double MAXIMUM_ANGLE_BETWEEN_GOALS;
+        double MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
 
     public:
 

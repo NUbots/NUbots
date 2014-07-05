@@ -59,6 +59,9 @@ namespace vision {
             MINIMUM_ASPECT_RATIO = config["aspect_ratio_range"][0].as<double>();
             MAXIMUM_ASPECT_RATIO = config["aspect_ratio_range"][1].as<double>();
             VISUAL_HORIZON_BUFFER = std::max(1, int(cam.focalLengthPixels * tan(config["visual_horizon_buffer"].as<double>())));
+            MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE = std::cos(config["minimum_goal_horizon_angle"].as<double>() - M_PI);
+            MAXIMUM_ANGLE_BETWEEN_GOALS = std::cos(config["maximum_angle_between_goals"].as<double>());
+            MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE = std::sin(config["maximum_vertical_goal_perspective_angle"].as<double>());
         };
 
         // Trigger the same function when either update
@@ -150,6 +153,8 @@ namespace vision {
             for(auto it = goals->begin(); it < goals->end();) {
 
                 auto& quad = it->quad;
+                arma::vec2 lhs = arma::normalise(quad.getTopLeft() - quad.getBottomLeft());
+                arma::vec2 rhs = arma::normalise(quad.getTopRight() - quad.getBottomRight());
 
                 // Check if we are within the aspect ratio range
                 bool valid = quad.aspectRatio() > MINIMUM_ASPECT_RATIO
@@ -157,16 +162,22 @@ namespace vision {
                 // Check if we are close enough to the visual horizon
                           && (image.visualHorizonAtPoint(quad.getBottomLeft()[0]) < quad.getBottomLeft()[1] + VISUAL_HORIZON_BUFFER
                               || image.visualHorizonAtPoint(quad.getBottomRight()[0]) < quad.getBottomRight()[1] + VISUAL_HORIZON_BUFFER)
-                // // Check we finish above the kinematics horizon or or kinematics horizon is off the screen
+                // Check we finish above the kinematics horizon or or kinematics horizon is off the screen
                           && (image.horizon.y(quad.getTopLeft()[0]) > quad.getTopLeft()[1] || image.horizon.y(quad.getTopLeft()[0]) < 0)
-                          && (image.horizon.y(quad.getTopRight()[0]) > quad.getTopRight()[1] || image.horizon.y(quad.getTopRight()[0]) < 0);
-
-                          // Throwout based on angle vs the kinematics horizon
+                          && (image.horizon.y(quad.getTopRight()[0]) > quad.getTopRight()[1] || image.horizon.y(quad.getTopRight()[0]) < 0)
+                // Check that our two goal lines are perpendicular with the horizon
+                          && std::abs(arma::dot(lhs, image.horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                          && std::abs(arma::dot(rhs, image.horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                // Check that our two goal lines are approximatly parallel and if not they go in the correct perspective
+                          && std::abs(arma::dot(lhs, rhs)) > MAXIMUM_ANGLE_BETWEEN_GOALS
+                          && lhs.at(0) * rhs.at(1) - lhs.at(1) * rhs.at(0) < MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
 
                 if(!valid) {
                     it = goals->erase(it);
                 }
                 else {
+                    std::cout << std::acos(std::abs(arma::dot(arma::normalise(quad.getTopLeft() - quad.getBottomLeft()), image.horizon.normal))) << std::endl;
+                    std::cout << std::acos(std::abs(arma::dot(arma::normalise(quad.getTopRight() - quad.getBottomRight()), image.horizon.normal))) << std::endl;
                     ++it;
                 }
             }

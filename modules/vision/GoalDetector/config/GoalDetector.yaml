@@ -5,3 +5,5 @@ ransac:
   consensus_error_threshold: 5.5
 aspect_ratio_range: [ 2, 10 ]
 visual_horizon_buffer: 0.1
+minimum_goal_horizon_angle: 1.3
+maximum_vertical_goal_perspective_angle: 10
