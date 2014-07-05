@@ -133,7 +133,7 @@ namespace modules {
                 enhanceGoals(image, lut, sensors, *classifiedImage);
 
                 // Find our goals base
-                findGoalBases(image, lut, sensors, *classifiedImage);
+                //findGoalBases(image, lut, sensors, *classifiedImage);
 
                 // Enhance our ball
                 enhanceBall(image, lut, sensors, *classifiedImage);

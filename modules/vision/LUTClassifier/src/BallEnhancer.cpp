@@ -73,7 +73,7 @@ namespace modules {
             if(!points.empty()) {
 
                 arma::running_stat_vec<arma::vec2> stats;
-                for(auto it = points.begin(); it < points.end(); ++it) {
+                for(auto it = points.begin(); it != points.end(); ++it) {
 
                     auto p1 = it;
                     auto p2 = it + 1;

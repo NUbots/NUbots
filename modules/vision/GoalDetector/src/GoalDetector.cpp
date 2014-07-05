@@ -19,6 +19,7 @@
 
 #include "GoalDetector.h"
 
+#include "messages/input/Sensors.h"
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/support/Configuration.h"
 #include "messages/vision/VisionObjects.h"
@@ -28,20 +29,33 @@
 
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacLineModel.h"
+#include "utility/math/vision.h"
 #include "messages/input/CameraParameters.h"
 
 namespace modules {
 namespace vision {
 
     using messages::input::CameraParameters;
+    using messages::input::Sensors;
+
     using utility::math::geometry::Line;
     using utility::math::geometry::Quad;
 
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacLineModel;
 
+    using utility::math::vision::widthBasedDistanceToCircle;
+    using utility::math::vision::projectCamToGroundPlane;
+    using utility::math::vision::getGroundPointFromScreen;
+    using utility::math::vision::imageToScreen;
+    using utility::math::vision::getCamFromScreen;
+    using utility::math::vision::getParallaxAngle;
+    using utility::math::vision::projectCamSpaceToScreen;
+    using utility::math::vision::projectCamToGroundPlane;
+
     using messages::vision::ObjectClass;
     using messages::vision::ClassifiedImage;
+    using messages::vision::VisionObject;
     using messages::vision::Goal;
 
     using messages::support::Configuration;
@@ -68,7 +82,7 @@ namespace vision {
         on<Trigger<CameraParameters>, With<Configuration<GoalDetector>>>(setParams);
         on<With<CameraParameters>, Trigger<Configuration<GoalDetector>>>(setParams);
 
-        on<Trigger<ClassifiedImage<ObjectClass>>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image) {
+        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters, Sensors>, Options<Single>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const Sensors& sensors) {
 
             std::vector<arma::vec2> startPoints, endPoints;
             std::vector<arma::mat22> starts, ends;
@@ -150,7 +164,7 @@ namespace vision {
             }
 
             // Throwout invalid quads
-            for(auto it = goals->begin(); it < goals->end();) {
+            for(auto it = goals->begin(); it != goals->end();) {
 
                 auto& quad = it->quad;
                 arma::vec2 lhs = arma::normalise(quad.getTopLeft() - quad.getBottomLeft());
@@ -169,9 +183,9 @@ namespace vision {
                           && std::abs(arma::dot(lhs, image.horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
                           && std::abs(arma::dot(rhs, image.horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
                 // Check that our two goal lines are approximatly parallel
-                          && std::abs(arma::dot(lhs, rhs)) > MAXIMUM_ANGLE_BETWEEN_GOALS
+                          && std::abs(arma::dot(lhs, rhs)) > MAXIMUM_ANGLE_BETWEEN_GOALS;
                 // Check that our goals don't form too much of an upward cup (not really possible for us)
-                          && lhs.at(0) * rhs.at(1) - lhs.at(1) * rhs.at(0) > MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
+                          //&& lhs.at(0) * rhs.at(1) - lhs.at(1) * rhs.at(0) > MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
 
 
                 if(!valid) {
@@ -182,19 +196,54 @@ namespace vision {
                 }
             }
 
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO //
-            //                                                                                                                         //
-            // Do a throwout based on the angle of lines with the kinematics horizon (dotproduct of sides with normal of horizon)      //
-            // Merge goals that overlap                                                                                                //
-            // Use the vertical transitions to improve the tops and bottoms of the quads                                               //
-            // Do the kinematics for the goals                                                                                         //
-            // Assign left and right goals                                                                                             //
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // Merge close goals
+            for (auto a = goals->begin(); a != goals->end(); ++a) {
+                for (auto b = std::next(a); b != goals->end();) {
+
+                    if (a->quad.overlapsHorizontally(b->quad)) {
+                        // Get outer lines.
+                        arma::vec2 tl;
+                        arma::vec2 tr;
+                        arma::vec2 bl;
+                        arma::vec2 br;
+
+                        tl = { std::min(a->quad.getTopLeft()[0],     b->quad.getTopLeft()[0]),     std::min(a->quad.getTopLeft()[1],     b->quad.getTopLeft()[1]) };
+                        tr = { std::max(a->quad.getTopRight()[0],    b->quad.getTopRight()[0]),    std::min(a->quad.getTopRight()[1],    b->quad.getTopRight()[1]) };
+                        bl = { std::min(a->quad.getBottomLeft()[0],  b->quad.getBottomLeft()[0]),  std::max(a->quad.getBottomLeft()[1],  b->quad.getBottomLeft()[1]) };
+                        br = { std::max(a->quad.getBottomRight()[0], b->quad.getBottomRight()[0]), std::max(a->quad.getBottomRight()[1], b->quad.getBottomRight()[1]) };
+
+                        // Replace original two quads with the new one.
+                        a->quad.set(bl, tl, tr, br);
+                        b = goals->erase(b);
+                    }
+                    else {
+                        b++;
+                    }
+                }
+            }
 
             // Do the kinematics for the goals
-            for(auto it = goals->begin(); it < goals->end(); ++it) {
+            for(auto it = goals->begin(); it != goals->end(); ++it) {
 
+                double GOAL_DIAMETER = 0.1;
+
+                std::vector<VisionObject::Measurement> measurements;
+
+                arma::vec3 goalBaseCentreRay = arma::normalise(arma::normalise(getCamFromScreen(it->quad.getBottomLeft(), cam.focalLengthPixels))
+                                                           + arma::normalise(getCamFromScreen(it->quad.getBottomRight(), cam.focalLengthPixels)));
+
+                // Get our width based distance to the cylinder
+                double widthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, it->quad.getBottomLeft(), it->quad.getBottomRight(), cam.focalLengthPixels);
+                arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * goalBaseCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
+                // TODO convert this into sphericial coordiantes and error
+                measurements.push_back({{0,0,0}, arma::eye(3,3)});
+
+                // Project this vector to a plane midway through the ball
+                arma::vec3 ballCentreGroundProj = arma::vec3({ 0, 0, GOAL_DIAMETER / 2.0 }) + projectCamToGroundPlane(goalBaseCentreRay, sensors.orientationCamToGround);
+                // TODO convert this into sphericial coordiantes and error
+                measurements.push_back({{0,0,0}, arma::eye(3,3)});
+
+                it->measurements = measurements;
             }
 
             // Do some extra throwouts for goals based on kinematics
