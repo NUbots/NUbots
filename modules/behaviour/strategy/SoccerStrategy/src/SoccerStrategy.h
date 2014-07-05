@@ -84,6 +84,7 @@ namespace modules {
 			float BALL_CERTAINTY_THRESHOLD;
 			arma::vec2 START_POSITION;
 			bool IS_GOALIE;
+			arma::vec2 BALL_LOOK_ERROR;
 
 			messages::support::FieldDescription FIELD_DESCRIPTION;
 

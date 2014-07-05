@@ -64,6 +64,7 @@ namespace modules {
 				MAX_BALL_DISTANCE = config["MAX_BALL_DISTANCE"].as<float>();
 				KICK_DISTANCE_THRESHOLD = config["KICK_DISTANCE_THRESHOLD"].as<float>();
 				BALL_CERTAINTY_THRESHOLD = config["BALL_CERTAINTY_THRESHOLD"].as<float>();
+				BALL_LOOK_ERROR = config["BALL_LOOK_ERROR"].as<arma::vec2>();
 				IS_GOALIE = (config["GOALIE"].as<int>() == 1);
 				START_POSITION = config["START_POSITION"].as<arma::vec2>();
 				MY_ZONE = config["MY_ZONE"].as<int>();
@@ -171,7 +172,7 @@ namespace modules {
 
 					// Am I the kicker?
 					// Does my zone contain the centre field point?
-					/* currentState.kicker = pointInPolygon(MY_ZONE, arma::zeros<arma::vec>(2)); */
+					/* currentState.kicker = pointInPolygon(MY_ZONE, arma::<arma::vec>(2)); */
 
 					// Have I been picked up?
 					currentState.pickedUp = !feetOnGround;
@@ -342,18 +343,43 @@ namespace modules {
 			}
 
 			void SoccerStrategy::stopMoving() {
+				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
+				approach->targetPositionType = WalkTarget::Robot;
+				approach->targetHeadingType = WalkTarget::Robot;
+				approach->walkMovementType = WalkApproach::StandStill;
+				approach->heading = currentState.currentHeading; 
+				approach->target = currentState.currentPosition; 
+				emit(std::move(approach));
 			}
 
 			void SoccerStrategy::findSelf() {
+				/* Try to locate both goals. */
+				/* Look at closest goal for short period to reset localisation. */
 			}
 
 			void SoccerStrategy::findBall(const std::vector<Ball>& hints) {
+				/* Look for the ball. Use the provided hints as the last known locations to attempt to speed up the search. */
 			}
 
 			void SoccerStrategy::goToPoint(const arma::vec2& point) {
+				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
+				approach->targetPositionType = WalkTarget::WayPoint;
+				approach->targetHeadingType = WalkTarget::WayPoint;
+				approach->walkMovementType = WalkApproach::WalkToPoint;
+				approach->heading = arma::zeros<arma::vec>(2); 			// TODO: fix me! 
+				approach->target = point; 
+				emit(std::move(approach));
 			}
 
 			void SoccerStrategy::watchBall(const Ball& ball) {
+				arma::vec2 ballPosition = currentState.currentTransform * ball.position + currentState.currentPosition;
+
+				auto look = std::make_unique<messages::behaviour::LookAtPoint>();
+				look->x = ballPosition[0];
+				look->y = ballPosition[1];
+				look->xError = BALL_LOOK_ERROR[0];
+				look->yError = BALL_LOOK_ERROR[1];
+				emit(std::move(look));
 			}
 
 			void SoccerStrategy::approachBall(const Ball& ball, const Self& self) {
@@ -368,6 +394,7 @@ namespace modules {
 
 			void SoccerStrategy::kickBall(const Ball& ball) {
 			}
+
 		}  // strategy
 	}  // behaviours
 }  // modules
