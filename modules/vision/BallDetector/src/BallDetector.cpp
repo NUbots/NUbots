@@ -118,7 +118,7 @@ namespace vision {
                 measurements.reserve(2);
 
                 // Transform our centre into kinematics coordinates
-                auto centre = imageToScreen(result.model.centre, { double(image.dimensions[0]), double(image.dimensions[1]) });
+                auto centre = imageToScreen(result.model.centre, image.dimensions);
 
                 // Get the 4 points around our circle
                 auto top   = centre + arma::vec2({ 0,  result.model.radius });
