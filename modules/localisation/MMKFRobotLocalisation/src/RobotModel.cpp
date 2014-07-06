@@ -59,7 +59,7 @@ namespace robot {
 // }
 
 arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
-    const arma::vec::fixed<RobotModel::size>& state, double deltaT) {
+    const arma::vec::fixed<RobotModel::size>& state, double) {
     return state;
     // auto result = state;
     // arma::mat44 odom = sensors.odometry;
@@ -120,7 +120,7 @@ arma::vec RobotModel::predictedObservation(
     arma::vec radial_2 = utility::math::coordinates::Cartesian2Radial(diff_2);
 
     auto angle_diff = utility::math::angle::difference(radial_1[1], radial_2[1]);
-    
+
 
     return { std::abs(angle_diff) };
 }
