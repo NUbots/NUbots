@@ -90,19 +90,19 @@ namespace modules {
 
 			// Last 10 to do some button debouncing.
 			on<Trigger<Last<10, messages::platform::darwin::DarwinSensors>>>([this](const std::vector<std::shared_ptr<const messages::platform::darwin::DarwinSensors>>& sensors) {
-				int leftCount = 0, middleCount = 0;
+				float leftCount = 0.0, middleCount = 0.0;
 
 				for (size_t i = 0; i < sensors.size(); i++) {
 					if (sensors.at(i)->buttons.left) {
-						leftCount++;
+						leftCount += 0.1;
 					}
 					if (sensors.at(i)->buttons.middle) {
-						middleCount++;
+						middleCount += 0.1;
 					}
 				}
 
-				penalisedButtonStatus = ((leftCount / 10) >= 0.75) ? !penalisedButtonStatus : penalisedButtonStatus;
-				penalisedButtonStatus = ((middleCount / 10) >= 0.75) ? !penalisedButtonStatus : penalisedButtonStatus;
+				gameStateButtonStatus = (leftCount > 0.7) ? !gameStateButtonStatus : gameStateButtonStatus;
+				penalisedButtonStatus = (middleCount > 0.7) ? !penalisedButtonStatus : penalisedButtonStatus;
 			});
 
 			// Check to see if both feet are on the ground.

@@ -32,22 +32,78 @@ namespace modules {
     namespace behaviour {
         namespace strategy {
 
-		typedef struct {
-			bool initial;
-			bool set;
-			bool ready;
-			bool finished;
-			bool playing;
-			bool penaltyKick;
-			bool freeKick;
-			bool goalKick;
-			bool cornerKick;
-			bool throwIn;
-			bool paused;
-		} GameState;
+		enum class GameStatePrimary : char {
+			INITAL = 0,
+			SET = 1,
+			READY = 2,
+			PLAYING = 3,
+			FINISHED = 4
+		};
+
+		enum class GameStateSecondary : char {
+			NORMAL = 0,
+			PENALTY_KICK = 1,
+			FREE_KICK = 2,
+			GOAL_KICK = 3,
+			CORNER_KICK = 4,
+			THROW_IN = 5,
+			PAUSED = 6
+		};
+
+		GameStatePrimary& operator++(GameStatePrimary& gameState) {
+			switch (gameState) {
+				case INITIAL:
+					return(gameState = SET);
+				case SET:
+					return(gameState = READY);
+				case READY:
+					return(gameState = PLAYING);
+				case PLAYING:
+					return(gameState = FINISHED);
+				case FINISHED:
+				default:
+					return(gameState = INITIAL);
+			}
+		}
+
+		GameStatePrimary operator++(GameStatePrimary& gameState, int) {
+			GameStatePrimary tmp(gameState);
+			++gameState;
+			return(tmp);
+		}
+
+		GameStateSecondary& operator++(GameStateSecondary& gameState) {
+			switch (gameState) {
+				case NORMAL:
+					return(gameState = PENALTY_KICK);
+				case PENALTY_KICK:
+					return(gameState = FREE_KICK);
+				case FREE_KICK:
+					return(gameState = GOAL_KICK;
+				case GOAL_KICK:
+					return(gameState = CORNER_KICK);
+				case CORNER_KICK:
+					return(gameState = THROW_IN);
+				case THROW_IN:
+					return(gameState = PAUSED);
+				case PAUSED:
+				default:
+					return(gameState = NORMAL);
+			}
+		}
+
+		GameStateSecondary operator++(GameStateSecondary& gameState, int) {
+			GameStateSecondary tmp(gameState);
+			++gameState;
+			return(tmp);
+		}
 
 		typedef struct {
-			GameState gameState;
+			GameStatePrimary primaryGameState;
+			GameStateSecondary secondaryGameState;
+
+			bool gameStateButtonStatus;
+			bool penalisedButtonStatus;
 
 			bool selfInZone;
 			bool ballInZone;
@@ -107,7 +163,6 @@ namespace modules {
 
 			State previousState, currentState;
 
-			bool penalisedButtonStatus;
 			bool feetOnGround;
 			bool isKicking;
 			bool isWalking;
