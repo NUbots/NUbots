@@ -32,6 +32,11 @@ namespace gameevents {
         OPPONENT
     };
 
+    enum Colour {
+        CYAN,
+        MAGENTA
+    };
+
     struct Score {
         uint ownScore;
         uint opponentScore;
@@ -71,6 +76,56 @@ namespace gameevents {
         Context team;
     };
 
+    struct TeamColour {
+        Colour colour;
+    };
+
+    enum GamePhase {
+        INITIAL,
+        READY,
+        SET,
+        PLAYING,
+        FINISHED
+    };
+
+    enum GameMode {
+        NORMAL,
+        PENALTY_SHOOTOUT,
+        OVERTIME,
+        TIMEOUT
+    };
+
+    template <enum GamePhase>
+    struct GameState;
+
+    template <>
+    struct GameState<INITIAL> {
+        GameMode mode;
+    };
+
+    template <>
+    struct GameState<READY> {
+        GameMode mode;
+        NUClear::clock::time_point readyTime;
+    };
+
+    template <>
+    struct GameState<SET> {
+        GameMode mode;
+    };
+
+    template <>
+    struct GameState<PLAYING> {
+        GameMode mode;
+        NUClear::clock::time_point endHalf;
+        NUClear::clock::time_point ballFree;
+    };
+
+    template <>
+    struct GameState<FINISHED> {
+        GameMode mode;
+        NUClear::clock::time_point nextHalf;
+    };
 
 }
 }

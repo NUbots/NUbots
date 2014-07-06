@@ -34,11 +34,11 @@ namespace input {
         FINISHED = 4
     };
 
-    enum class SecondaryState : uint8_t {
-        NORMAL       = 0,
-        PENALTYSHOOT = 1,
-        OVERTIME     = 2,
-        TIMEOUT      = 3
+    enum class Mode : uint8_t {
+        NORMAL           = 0,
+        PENALTY_SHOOTOUT = 1,
+        OVERTIME         = 2,
+        TIMEOUT          = 3
     };
 
     enum class TeamColour : uint8_t {
@@ -47,7 +47,7 @@ namespace input {
     };
 
     struct Robot {
-      bool penalised;                 // penalty state of the player
+      bool penalised;             // penalty state of the player
       uint8_t penalisedTimeLeft;  // estimate of time till unpenalised (seconds)
     };
 
@@ -70,7 +70,7 @@ namespace input {
         State state;                   // state of the game (STATE_READY, STATE_PLAYING, etc)
         bool firstHalf;                // 1 = game in first half, 0 otherwise
         TeamColour kickOffTeam;        // the next team to kick off (TEAM_BLUE, TEAM_RED)
-        SecondaryState secondaryState; // Extra state information - (STATE2_NORMAL, STATE2_PENALTYSHOOT, etc)
+        Mode mode;                     // Extra state information - (STATE2_NORMAL, STATE2_PENALTYSHOOT, etc)
         TeamColour dropInTeam;         // team that caused last drop in
         int16_t dropInTime;            // number of seconds passed since the last drop in.  -1 before first dropin
         uint16_t secsRemaining;        // estimate of number of seconds remaining in the half

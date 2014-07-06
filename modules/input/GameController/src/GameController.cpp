@@ -32,6 +32,7 @@ namespace input {
 
     using messages::support::Configuration;
     using namespace messages::input::gameevents;
+    using TeamColourEvent = messages::input::gameevents::TeamColour;
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), socket(0) {
 
@@ -199,16 +200,55 @@ namespace input {
             emit(std::make_unique<KickOffTeam>(KickOffTeam{team}));
         }
 
-        /*
-         * TODO:
-         *
-         * State changes
-         * Subsate changes
-         * OurTeamColour
-         * SecondsRemaining (combine with state changes)
-         * SecondaryTimeRemaining (combine with state changes)
-         */
 
+        /*******************************************************************************************
+         * Process our team colour
+         ******************************************************************************************/
+        if (oldOwnTeam.teamColour != newOwnTeam.teamColour) {
+            Colour colour = newOwnTeam.teamColour == TeamColour::CYAN ? Colour::CYAN : Colour::MAGENTA;
+            emit(std::make_unique<TeamColourEvent>(TeamColourEvent{colour}));
+        }
+
+
+        /*******************************************************************************************
+         * Process state/mode changes
+         ******************************************************************************************/
+        if (oldState.state != newState.state || oldState.mode != newState.mode) {
+            auto mode = newState.mode == Mode::TIMEOUT          ? GameMode::TIMEOUT
+                      : newState.mode == Mode::PENALTY_SHOOTOUT ? GameMode::PENALTY_SHOOTOUT
+                      : newState.mode == Mode::OVERTIME         ? GameMode::OVERTIME
+                                                                : GameMode::NORMAL;
+
+            // TODO: handle timeouts and dropped balls
+            switch (newState.state) {
+                case State::INITIAL: {
+                    // TODO no timers at all
+                    emit(std::make_unique<GameState<GamePhase::INITIAL>>(GameState<GamePhase::INITIAL>{mode}));
+                    break;
+                }
+                case State::READY: {
+                    // TODO secondary timer counts down time to get ready
+                    auto time = NUClear::clock::now() + std::chrono::seconds(newState.secondaryTime);
+                    emit(std::make_unique<GameState<GamePhase::READY>>(GameState<GamePhase::READY>{mode, time}));
+                    break;
+                }
+                case State::SET: {
+                    // TODO no timers at all
+                    emit(std::make_unique<GameState<GamePhase::SET>>(GameState<GamePhase::SET>{mode}));
+                    break;
+                }
+                case State::PLAYING: {
+                    // TODO: Primary timer counts time in half, secondary counts time to kick ball
+                    // emit(std::make_unique<GameState<GamePhase::PLAYING>>(GameState<GamePhase::PLAYING>{mode}));
+                    break;
+                }
+                case State::FINISHED: {
+                    // TODO: Secondary timer counts time till next half
+                    // emit(std::make_unique<GameState<GamePhase::FINISHED>>(GameState<GamePhase::FINISHED>{mode}));
+                    break;
+                }
+            }
+        }
     }
 
     Team& GameController::getOwnTeam(GameControllerPacket& state) {
