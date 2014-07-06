@@ -22,22 +22,42 @@
 
 #include <nuclear>
 
+#include "GameControllerData.h"
+
 namespace modules {
     namespace input {
 
         /**
          * Monitors the match Game Controller
          *
+         * @author Brendan Annable
          * @author Jordan Johnson
+         * @author Trent Houliston
          */
         class GameController : public NUClear::Reactor {
-            public:
-                explicit GameController(std::unique_ptr<NUClear::Environment> environment);
             private:
-                
+                static constexpr const uint SUPPORTED_VERSION = 8;
+
+                volatile bool listening = true;
+                std::atomic<int> socket;
+                uint port;
+                GameControllerPacket state;
+                uint TEAM_ID;
+                uint PLAYER_ID;
+
+                void kill();
+                void run();
+                void process(GameControllerPacket oldState, GameControllerPacket newState);
+                Team& getOwnTeam(GameControllerPacket& state);
+                Team& getOpponentTeam(GameControllerPacket& state);
+            public:
+                static constexpr const char* CONFIGURATION_PATH = "GameController.yaml";
+
+                explicit GameController(std::unique_ptr<NUClear::Environment> environment);
+
         };
 
     }  // input
 }  // modules
 
-#endif  // MODULES_INPUT_AUDIOINPUT_H
+#endif  // MODULES_INPUT_GAMECONTROLLER_H
