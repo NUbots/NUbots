@@ -23,13 +23,16 @@
 
 namespace messages {
     namespace behaviour {
-
+        
+        //define a target: x/y waypoint in field coords; robot we are tracking (for future use); ball position (updated by localisation).
         enum class WalkTarget {
             WayPoint = 0,
             Robot = 1,
             Ball = 2
         };
-
+        
+        //this is the type of walk command given: stand still; approach from a direction (for kicking);
+        //walk to a point (ie initial positioning); omni-directional positioning (face heading direction while moving to position ie goalkeeper).
         enum class WalkApproach {
             StandStill = 0,
             ApproachFromDirection = 1,
@@ -38,10 +41,20 @@ namespace messages {
         };
 
         struct WalkStrategy {
+            
+            //the target waypoint in x/y field coordinates if applicable
             arma::vec2 target;
-            arma::vec2 heading; //Desired global heading at point
+            
+            //the point to face in x/y field coordinates at the destination if applicable
+            arma::vec2 heading;
+            
+            //define where to walk to (point, robot or ball)
             WalkTarget targetPositionType;
+            
+            //define where to face (point, robot or ball)
             WalkTarget targetHeadingType;
+            
+            //define the type of walk to use
             WalkApproach walkMovementType;
         };
     }
