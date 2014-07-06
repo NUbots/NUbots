@@ -90,6 +90,10 @@ namespace input {
         Team& oldOpponentTeam = getOpponentTeam(oldState);
         Team& newOpponentTeam = getOpponentTeam(newState);
 
+
+        /*******************************************************************************************
+         * Process score updates
+         ******************************************************************************************/
         if (oldOwnTeam.score != newOwnTeam.score || oldOpponentTeam.score != newOpponentTeam.score) {
             // score update
             emit(std::make_unique<Score>(Score{newOwnTeam.score, newOpponentTeam.score}));
@@ -105,6 +109,10 @@ namespace input {
             }
         }
 
+
+        /*******************************************************************************************
+         * Process penality updates
+         ******************************************************************************************/
         // Note: assumes playersPerTeam never changes
         for (uint i = 0; i < newState.playersPerTeam; i++) {
             auto& oldOwnPlayer = oldOwnTeam.players[i];
@@ -143,6 +151,10 @@ namespace input {
             }
         }
 
+
+        /*******************************************************************************************
+         * Process coach messages
+         ******************************************************************************************/
         if (std::strcmp(oldOwnTeam.coachMessage, newOwnTeam.coachMessage) != 0) {
             // listen to the coach? o_O
             emit(std::make_unique<TeamCoachMessage>(TeamCoachMessage{std::string(newOwnTeam.coachMessage)}));
@@ -153,12 +165,22 @@ namespace input {
             emit(std::make_unique<OpponentCoachMessage>(OpponentCoachMessage{std::string(newOpponentTeam.coachMessage)}));
         }
 
+
+        /*******************************************************************************************
+         * Process half changes
+         ******************************************************************************************/
+        if (!oldState.firstHalf && newState.firstHalf) {
+            // half time
+            emit(std::make_unique<HalfTime>());
+        } else if (oldState.firstHalf && !newState.firstHalf) {
+            // TODO: undo?
+        }
+
         /*
          * TODO:
          *
          * State changes
          * Subsate changes
-         * Half changes
          * OurTeamColour
          * SecondsRemaining (combine with state changes)
          * SecondaryTimeRemaining (combine with state changes)

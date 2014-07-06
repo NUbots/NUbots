@@ -74,6 +74,9 @@ namespace gameevents {
         std::string message;
     };
 
+    struct HalfTime {
+    };
+
 
 }
 }
