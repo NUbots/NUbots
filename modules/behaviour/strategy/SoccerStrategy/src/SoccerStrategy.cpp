@@ -64,7 +64,9 @@ namespace modules {
 				MAX_BALL_DISTANCE = config["MAX_BALL_DISTANCE"].as<float>();
 				KICK_DISTANCE_THRESHOLD = config["KICK_DISTANCE_THRESHOLD"].as<float>();
 				BALL_CERTAINTY_THRESHOLD = config["BALL_CERTAINTY_THRESHOLD"].as<float>();
+				BALL_SELF_INTERSECTION_REGION = config["BALL_SELF_INTERSECTION_REGION"].as<float>();
 				BALL_LOOK_ERROR = config["BALL_LOOK_ERROR"].as<arma::vec2>();
+				BALL_MOVEMENT_THRESHOLD = config["BALL_MOVEMENT_THRESHOLD"].as<float>();
 				IS_GOALIE = (config["GOALIE"].as<int>() == 1);
 				START_POSITION = config["START_POSITION"].as<arma::vec2>();
 				MY_ZONE = config["MY_ZONE"].as<int>();
@@ -144,35 +146,45 @@ namespace modules {
 											/* Need to add in game controller parameters. */
 											/* Need to add in team localisation  parameters. */) {
 
-					// Our ball is almost always the corrent ball to use, unless we dont know where it is.
-					auto certainBall = ball;
-
 					// Make a copy of the previous state.					
 					memcpy(&previousState, &currentState, sizeof(State));
 
 					// Store current position and heading.
-					currentState.currentTransform = self.robot_to_world_rotation;
-					currentState.currentPosition = self.position;
-					currentState.currentHeading = atan2(currentState.currentTransform(1, 0), currentState.currentTransform(0, 0));
+					currentState.transform = self.robot_to_world_rotation;
+					currentState.position = self.position;
+					currentState.heading = atan2(currentState.transform(1, 0), currentState.transform(0, 0));
 
 					// What state is the game in?
 					// Initial?
-					/* currentState.gameStateInitial = gameController[STATE_INITIAL] */;
+					/* currentState.gameState.Initial = gameController[STATE_INITIAL] */;
 					// Set?
-					/* currentState.gameStateSet = gameController[STATE_SET] */;
+					/* currentState.gameState.Set = gameController[STATE_SET] */;
 					// Ready?
-					/* currentState.gameStateReady = gameController[STATE_READY] */;
+					/* currentState.gameState.Ready = gameController[STATE_READY] */;
 					// Finish?
-					/* currentState.gameStateFinish = gameController[STATE_FINISH] */;
+					/* currentState.gameState.Finish = gameController[STATE_FINISH] */;
 					// Playing?
-					/* currentState.gameStatePlaying = gameController[STATE_PLAYING] */;
+					/* currentState.gameState.Playing = gameController[STATE_PLAYING] */;
+					// Penalty kick?
+					/* currentState.gameState.penaltyKick = gameController[STATE_PENALTY_KICK] */;
+					// Free kick?
+					/* currentState.gameState.freeKick = gameController[STATE_FREE_KICK] */;
+					// Goal kick?
+					/* currentState.gameState.goalKick = gameController[STATE_GOAL_KICK] */;
+					// Corner kick?
+					/* currentState.gameState.cornerKick = gameController[STATE_CORNER_KICK] */;
+					// Throw-In?
+					/* currentState.gameState.throwIn = gameController[STATE_THROW_IN] */;
+					// Paused?
+					/* currentState.gameState.paused = gameController[STATE_PAUSED] */;
 					
 					// Are we kicking off?
 					/* currentState.kickOff = gameController[KICK_OFF] */;
 
 					// Am I the kicker?
-					// Does my zone contain the centre field point?
-					/* currentState.kicker = pointInPolygon(MY_ZONE, arma::<arma::vec>(2)); */
+					// Is my start position inside the centre circle? 
+					currentState.kicker = ((arma::norm(START_POSITION, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.gameState.ready || currentState.gameState.set || currentState.gameState.playing)) || 
+								((currentState.gameState.penaltyKick || currentState.gameState.freeKick || currentState.gameState.goalKick || currentState.gameState.cornerKick) /* && currentState.??? */);
 
 					// Have I been picked up?
 					currentState.pickedUp = !feetOnGround;
@@ -202,68 +214,89 @@ namespace modules {
 					// We could be a little more sophisticated here and consider how certain we are about the 
 					// balls location.
 					if (!currentState.ballLost && currentState.ballSeen) {
-						certainBall = ball;
+						memcpy(&currentState.ball, &ball, sizeof(Ball));
 					}
 
-					else if (!currentState.ballLost && currentState.teamBallSeen)  {
-						/* certainBall = teamBall */;
+					else if (!currentState.ballLost && currentState.teamBallSeen)  { 
+						/* memcpy(&currentState.ball, &teamBall, sizeof(Ball)) */;
 					}
+
+					// Has the ball moved?
+					currentState.ballHasMoved = arma::norm(currentState.ball.position - previousState.ball.position, 2) > BALL_MOVEMENT_THRESHOLD;
 
 					// Is the ball in my zone?
-					currentState.ballInZone = (!currentState.ballLost /* && pointInPolygon(MY_ZONE, certainBall->position) */);
+					currentState.ballInZone = (!currentState.ballLost /* && pointInPolygon(MY_ZONE, currentState.ball.position) */);
 							
 					// Are the goals in range?
 					// x = position[0]?
 					// x = 0 = centre field.
 					// Assumption: We could potentially kick a goal if we are in the other half of the field.
 					// Assumption: goal.position is the x, y coordinates of the goals relative to us.
-					currentState.goalInRange = (!currentState.ballLost && (arma::norm(certainBall.position, 2) < MAX_BALL_DISTANCE) && (certainBall.position[0] > 0));
+					currentState.goalInRange = (!currentState.ballLost && (arma::norm(currentState.ball.position, 2) < MAX_BALL_DISTANCE) && ((transformPoint(currentState.ball.position) + currentState.position)[0] > 0));
 
 					// Am I in position to kick the ball?
-					bool kickThreshold = arma::norm(ball.position, 2) < KICK_DISTANCE_THRESHOLD;
-					bool inPosition = (currentState.currentPosition[0] == previousState.targetPosition[0]) && (currentState.currentPosition[1] == previousState.targetPosition[1]);
-					bool correctHeading = (currentState.currentHeading[0] == previousState.targetHeading[0]) && (currentState.currentHeading[1] == previousState.targetHeading[1]);
+					bool kickThreshold = arma::norm(currentState.ball.position, 2) < KICK_DISTANCE_THRESHOLD;
+					bool inPosition = (currentState.position[0] == previousState.targetPosition[0]) && (currentState.position[1] == previousState.targetPosition[1]);
+					bool correctHeading = (currentState.heading[0] == previousState.targetHeading[0]) && (currentState.heading[1] == previousState.targetHeading[1]);
 					currentState.kickPosition = (inPosition && correctHeading && kickThreshold);
-					
-					// Is the ball heading in my direction?
-					currentState.ballApproaching = !currentState.ballLost && (arma::dot(-certainBall.position, certainBall.velocity) > 0);
 				
-					// Is the ball approaching our goals?
-					Plane<2> plane;
+					// Make preparations to calculate whether the ball is approaching our own goals or ourselves.
+					Plane<2> planeGoal, planeSelf;
 					ParametricLine<2> line;
 					arma::vec2 xaxis = {1, 0};
 					arma::vec2 fieldWidth = {-FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 
-					plane.setFromNormal(xaxis, fieldWidth);
-					line.setFromDirection((currentState.currentTransform * certainBall.velocity), (currentState.currentTransform * certainBall.position + currentState.currentPosition));
+					planeGoal.setFromNormal(xaxis, fieldWidth);
+					planeSelf.setFromNormal(transformPoint(currentState.ball.position), currentState.position);
 
+					line.setFromDirection(transformPoint(currentState.ball.velocity), (transformPoint(currentState.ball.position) + currentState.position));
+
+					// Is the ball approaching our goals?
 					try {
 						// Throws std::domain_error if there is no intersection.
-						currentState.ballGoalIntersection = plane.intersect(line);
+						currentState.ballGoalIntersection = planeGoal.intersect(line);
 
-						currentState.ballApproachingGoal = ((currentState.ballGoalIntersection[1] <= (FIELD_DESCRIPTION.dimensions.goal_area_width / 2)) &&
-											 (currentState.ballGoalIntersection[1] >= -(FIELD_DESCRIPTION.dimensions.goal_area_width / 2)));
+						currentState.ballApproachingGoal = arma::norm(fieldWidth - currentState.ballGoalIntersection, 2) <= (FIELD_DESCRIPTION.dimensions.goal_area_width / 2);
+						/* currentState.ballApproachingGoal = ((currentState.ballGoalIntersection[1] <= (FIELD_DESCRIPTION.dimensions.goal_area_width / 2)) &&
+											 (currentState.ballGoalIntersection[1] >= -(FIELD_DESCRIPTION.dimensions.goal_area_width / 2))); */
 					}
 
 					catch (std::domain_error e) {
 						currentState.ballApproachingGoal = false;
 					}
 
+					
+					// Is the ball heading in my direction?
+					try {
+						// Throws std::domain_error if there is no intersection.
+						currentState.ballSelfIntersection = planeSelf.intersect(line);
+
+						currentState.ballApproaching = arma::norm(currentState.position - currentState.ballSelfIntersection, 2) <= (BALL_SELF_INTERSECTION_REGION / 2);
+					}
+
+					catch (std::domain_error e) {
+						currentState.ballApproaching = false;
+					}
+
+
+
 
 
 
 					// Create a list of hints in case we need to search for the ball.
 					std::vector<messages::localisation::Ball> hints = {ball/*, teamBall*/};
+
+					// Calculate the optimal zone position.
 					arma::vec2 optimalPosition = findOptimalPosition();
 
 					// Determine current state and appropriate action(s).
-					if (currentState.gameStateInitial || currentState.gameStateSet || currentState.gameStateFinished || currentState.penalised || currentState.pickedUp) {
+					if (currentState.gameState.initial || currentState.gameState.set || currentState.gameState.finished || currentState.penalised || currentState.pickedUp) {
 						stopMoving();
 		
 						NUClear::log<NUClear::INFO>("Standing still.");
 					}
 	
-					else if (currentState.gameStateReady) {
+					else if (currentState.gameState.ready) {
 						goToPoint(START_POSITION);
 
 						NUClear::log<NUClear::INFO>("Game is about to start. I should be in my starting position.");
@@ -288,8 +321,40 @@ namespace modules {
 						NUClear::log<NUClear::INFO>("I am unpenalised, I should already know where I am and where the ball is. So find the most optimal location in my zone to go to.");
 					}
 
+					else if (currentState.gameState.penaltyKick && IS_GOALIE && currentState.ballLost) {
+						findBall(hints);
+
+						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
+					}
+
+					else if (currentState.gameState.penaltyKick && IS_GOALIE && !currentState.ballLost && currentState.ballHasMoved && !currentState.ballApproachingGoal) {
+						arma::vec2 blockPosition = {currentState.position[0], (transformPoint(currentState.ball.position) + currentState.position)[1]};
+						goToPoint(blockPosition);
+						watchBall();
+
+						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
+					}
+
+					else if (currentState.gameState.penaltyKick && currentState.ballLost && currentState.kicker) {
+						findBall(hints);
+
+						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
+					}
+
+					else if (currentState.gameState.penaltyKick && !currentState.ballLost && currentState.kicker) {
+						approachBall();
+
+						NUClear::log<NUClear::INFO>("Penalty kick in progress. Approaching ball.");
+					}
+
+					else if (previousState.gameState.set && currentState.gameState.playing && currentState.kickOff && currentState.kicker) {
+						kickBall();
+
+						NUClear::log<NUClear::INFO>("Game just started. Time to kick off.");
+					}
+
 					else if (isKicking) {
-						watchBall(certainBall);
+						watchBall();
 
 						NUClear::log<NUClear::INFO>("I be looking at what I be kicking.");
 					}
@@ -302,20 +367,20 @@ namespace modules {
 					}
 
 					else if (currentState.ballInZone || currentState.ballApproaching) {
-						approachBall(certainBall, self);
+						approachBall();
 
 						NUClear::log<NUClear::INFO>("Walking to ball.");
 					}
 
 					else if (currentState.kickPosition && !isKicking) {
-						kickBall(certainBall);
+						kickBall();
 	
 						NUClear::log<NUClear::INFO>("In kicking position. Kicking ball.");
 					}
 
 					else if (currentState.goalInRange) {
-						approachBall(certainBall, self);
-						kickBall(certainBall);
+						approachBall();
+						kickBall();
 
 						NUClear::log<NUClear::INFO>("Kick for goal.");
 					}
@@ -347,8 +412,8 @@ namespace modules {
 				approach->targetPositionType = WalkTarget::Robot;
 				approach->targetHeadingType = WalkTarget::Robot;
 				approach->walkMovementType = WalkApproach::StandStill;
-				approach->heading = currentState.currentHeading; 
-				approach->target = currentState.currentPosition; 
+				approach->heading = currentState.heading; 
+				approach->target = currentState.position; 
 				emit(std::move(approach));
 			}
 
@@ -371,8 +436,8 @@ namespace modules {
 				emit(std::move(approach));
 			}
 
-			void SoccerStrategy::watchBall(const Ball& ball) {
-				arma::vec2 ballPosition = currentState.currentTransform * ball.position + currentState.currentPosition;
+			void SoccerStrategy::watchBall() {
+				arma::vec2 ballPosition = transformPoint(currentState.ball.position) + currentState.position;
 
 				auto look = std::make_unique<messages::behaviour::LookAtPoint>();
 				look->x = ballPosition[0];
@@ -382,19 +447,22 @@ namespace modules {
 				emit(std::move(look));
 			}
 
-			void SoccerStrategy::approachBall(const Ball& ball, const Self& self) {
+			void SoccerStrategy::approachBall() {
 				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
 				approach->targetPositionType = WalkTarget::Ball;
 				approach->targetHeadingType = WalkTarget::WayPoint;
 				approach->walkMovementType = WalkApproach::ApproachFromDirection;
 				approach->heading = arma::vec({-3,0});
-				approach->target = currentState.currentTransform * ball.position + currentState.currentPosition;
+				approach->target = transformPoint(currentState.ball.position) + currentState.position;
 				emit(std::move(approach));
 			}
 
-			void SoccerStrategy::kickBall(const Ball& ball) {
+			void SoccerStrategy::kickBall() {
 			}
 
+			arma::vec2 SoccerStrategy::transformPoint(const arma::vec2& point) {
+				return (currentState.transform * point);
+			}
 		}  // strategy
 	}  // behaviours
 }  // modules

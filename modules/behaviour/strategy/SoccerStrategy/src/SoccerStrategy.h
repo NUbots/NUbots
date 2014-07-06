@@ -33,6 +33,22 @@ namespace modules {
         namespace strategy {
 
 		typedef struct {
+			bool initial;
+			bool set;
+			bool ready;
+			bool finished;
+			bool playing;
+			bool penaltyKick;
+			bool freeKick;
+			bool goalKick;
+			bool cornerKick;
+			bool throwIn;
+			bool paused;
+		} GameState;
+
+		typedef struct {
+			GameState gameState;
+
 			bool selfInZone;
 			bool ballInZone;
 			bool goalInRange;
@@ -42,23 +58,22 @@ namespace modules {
 			bool penalised;
 			bool unPenalised;
 			bool kickOff;
-			bool gameStateInitial;
-			bool gameStateSet;
-			bool gameStateReady;
-			bool gameStateFinished;
-			bool gameStatePlaying;
 			bool ballSeen;
 			bool ballLost;
 			bool teamBallSeen;
 			bool ballApproaching;
 			bool ballApproachingGoal;
+			bool ballHasMoved;
 			bool kickPosition;
 
 			arma::vec2 ballGoalIntersection;
+			arma::vec2 ballSelfIntersection;
 
-			arma::mat22 currentTransform;
-			arma::vec2 currentPosition;
-			arma::vec2 currentHeading;
+			arma::mat22 transform;
+			arma::vec2 position;
+			arma::vec2 heading;
+			messages::localisation::Ball ball;
+
 			arma::vec2 targetHeading;
 			arma::vec2 targetPosition;
 		} State;
@@ -82,6 +97,8 @@ namespace modules {
 			float MAX_BALL_DISTANCE;
 			float KICK_DISTANCE_THRESHOLD;
 			float BALL_CERTAINTY_THRESHOLD;
+			float BALL_SELF_INTERSECTION_REGION;
+			float BALL_MOVEMENT_THRESHOLD;
 			arma::vec2 START_POSITION;
 			bool IS_GOALIE;
 			arma::vec2 BALL_LOOK_ERROR;
@@ -102,9 +119,10 @@ namespace modules {
 			void findSelf();
 			void findBall(const std::vector<messages::localisation::Ball>& hints);
 			void goToPoint(const arma::vec2& point);
-			void watchBall(const messages::localisation::Ball& ball);
-			void kickBall(const messages::localisation::Ball& ball);
-			void approachBall(const messages::localisation::Ball& ball, const messages::localisation::Self& self);
+			void watchBall();
+			void kickBall();
+			void approachBall();
+			arma::vec2 transformPoint(const arma::vec2& point);
 
 		public:
 			explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
