@@ -23,6 +23,54 @@ namespace utility {
 namespace math {
 namespace geometry {
 
+    Circle::Circle() {
+    }
+
+
+    Circle::Circle(const double& radius, const arma::vec2& centre) : radius(radius), centre(centre) {
+    }
+
+    Circle::Circle(const arma::vec2& a, const arma::vec2& b, const arma::vec2& c, const double tolerance) {
+        setFromPoints(std::forward<const arma::vec2&>(a), std::forward<const arma::vec2&>(b), std::forward<const arma::vec2&>(c),tolerance);
+    }
+
+    bool Circle::setFromPoints(const arma::vec2& a, const arma::vec2& b, const arma::vec2& c, const double tolerance) {
+
+        const arma::vec2 ab = a - b;
+        const arma::vec2 bc = b - c;
+        double det = ((ab[0] * bc[1]) - (bc[0] * ab[1]));
+
+        if (std::abs(det) < tolerance) {
+            return false;
+        }
+        det = 1.0 / det;
+
+        double b_len_sqr = arma::dot(b, b);
+
+        double ab_norm = (arma::dot(a, a) - b_len_sqr) * 0.5;
+        double bc_norm = (b_len_sqr - arma::dot(c, c)) * 0.5;
+
+
+        centre[0] = ((ab_norm * bc[1]) - (bc_norm * ab[1])) * det;
+        centre[1] = ((ab[0] * bc_norm) - (bc[0] * ab_norm)) * det;
+        
+        radiusSq = arma::accu(arma::square(a - centre));
+        radius = std::sqrt(radiusSq);
+
+        return true;
+    }
+
+    double Circle::distanceToPoint(const arma::vec2& point) const {
+        return arma::norm(point - centre) - radius;
+    }
+    
+    double Circle::squaresDifference(const arma::vec2& point) const {
+        return arma::accu(arma::square(point - centre)) - radiusSq;
+    }
+    
+    arma::vec2 Circle::orthogonalProjection(const arma::vec2& point) {
+        return arma::normalise(point - centre) * radius + centre;
+    }
 }
 }
 }

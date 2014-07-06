@@ -57,12 +57,12 @@ void MultiModalRobotModel::TimeUpdate(double seconds) {
     for (auto& model : robot_models_)
         model->TimeUpdate(seconds);
 }
-void MultiModalRobotModel::TimeUpdate(double seconds, const FakeOdometry& odom) {
+void MultiModalRobotModel::TimeUpdate(double seconds, const FakeOdometry&) {
     for (auto& model : robot_models_)
         model->TimeUpdate(seconds); // TODO re add in odometry
 }
 
-void MultiModalRobotModel::TimeUpdate(double seconds, const Sensors& sensors) {
+void MultiModalRobotModel::TimeUpdate(double seconds, const Sensors&) {
     for (auto& model : robot_models_)
         model->TimeUpdate(seconds); // TODO re add in odometry
 }
@@ -70,10 +70,10 @@ void MultiModalRobotModel::TimeUpdate(double seconds, const Sensors& sensors) {
 void RobotHypothesis::TimeUpdate(double seconds) {
     filter_.timeUpdate(seconds);
 }
-void RobotHypothesis::TimeUpdate(double seconds, const FakeOdometry& odom) {
+void RobotHypothesis::TimeUpdate(double seconds, const FakeOdometry&) {
     filter_.timeUpdate(seconds); // TODO re add in odometry
 }
-void RobotHypothesis::TimeUpdate(double seconds, const Sensors& sensors) {
+void RobotHypothesis::TimeUpdate(double seconds, const Sensors&) {
     filter_.timeUpdate(seconds); // TODO re add in odometry sensors
 }
 
@@ -107,8 +107,8 @@ double RobotHypothesis::MeasurementUpdate(
 
     // Unit vector orientation
     arma::vec2 actual_pos = actual_object.location();
-    arma::vec2 measurement = observed_object.position.rows(0, 1);
-    arma::mat22 cov = observed_object.error.submat(0, 0, 2, 2);
+    arma::vec2 measurement = observed_object.measurements[0].position.rows(0, 1);
+    arma::mat22 cov = observed_object.measurements[0].error.submat(0, 0, 2, 2);
 
     double quality = filter_.measurementUpdate(measurement, cov, arma::vec2({actual_pos[0],actual_pos[1]}));
 
@@ -129,7 +129,7 @@ double RobotHypothesis::MeasurementUpdate(
     };
 
     // Our heading difference should be our dot product (TODO check this I am guessing and tired)
-    double heading_diff = arma::dot(obv_a.position.rows(0, 1), obv_b.position.rows(0, 1));
+    double heading_diff = arma::dot(obv_a.measurements[0].position.rows(0, 1), obv_b.measurements[0].position.rows(0, 1));
 
     arma::vec measurement = { std::abs(heading_diff) };
     arma::mat cov; // No idea how to get this :P

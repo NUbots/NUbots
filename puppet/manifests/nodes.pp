@@ -59,7 +59,6 @@ node packer-virtualbox-iso, packer-vmware-iso {
   package { 'libaubio-dev': ensure => latest }
   package { 'libsndfile-dev': ensure => latest }
   package { 'libtcmalloc-minimal4': ensure => latest }
-  # package { 'libboost-math-dev': ensure => latest }
 
   # nubugger::build_dep
   package { 'pkg-config': ensure => latest, }

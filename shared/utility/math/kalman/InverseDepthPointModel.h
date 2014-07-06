@@ -43,7 +43,7 @@ namespace utility {
 
                 InverseDepthPointModel() {} // empty constructor
 
-                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
+                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, const double& deltaT);
 
                 static arma::vec predictedObservation(const arma::vec::fixed<size>& state, const arma::mat& worldToCamera_camera);
 

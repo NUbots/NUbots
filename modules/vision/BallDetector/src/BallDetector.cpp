@@ -25,6 +25,7 @@
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/CameraParameters.h"
 
+#include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacCircleModel.h"
 #include "utility/math/vision.h"
 #include "utility/nubugger/NUgraph.h"
@@ -32,50 +33,41 @@
 namespace modules {
 namespace vision {
 
-    using utility::math::ransac::RansacCircleModel;
-    using utility::math::ransac::findMultipleModels;
-    using utility::math::ransac::RansacSelectionMethod;
-
     using messages::input::CameraParameters;
     using messages::input::Sensors;
 
     using messages::vision::ObjectClass;
     using messages::vision::ClassifiedImage;
+    using messages::vision::VisionObject;
     using messages::vision::Ball;
 
-    using utility::math::vision::distanceToEquidistantPoints;
-    using utility::math::vision::getGroundPointMeanOfEquidistantPoints;
+    using utility::math::vision::widthBasedDistanceToCircle;
+    using utility::math::vision::projectCamToGroundPlane;
     using utility::math::vision::getGroundPointFromScreen;
-    using utility::math::vision::imageToCam;
+    using utility::math::vision::imageToScreen;
+    using utility::math::vision::getCamFromScreen;
+    using utility::math::vision::getParallaxAngle;
+    using utility::math::vision::projectCamSpaceToScreen;
+    using utility::math::vision::projectCamToGroundPlane;
     using utility::nubugger::graph;
 
     using messages::support::Configuration;
+
+    using utility::math::ransac::Ransac;
+    using utility::math::ransac::RansacCircleModel;
 
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
         on<Trigger<Configuration<BallDetector>>>([this](const Configuration<BallDetector>& config) {
-
-            std::string selectionMethod = config["SELECTION_METHOD"].as<std::string>();
-
-            if (selectionMethod.compare("LARGEST_CONSENSUS") == 0) {
-                SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
-            }
-            else if (selectionMethod.compare("BEST_FITTING_CONSENSUS") == 0) {
-                SELECTION_METHOD = RansacSelectionMethod::BEST_FITTING_CONSENSUS;
-            }
-            else {
-                SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
-            }
-
-            MINIMUM_POINTS = config["MINIMUM_POINTS"].as<uint>();
-            CONSENSUS_THRESHOLD = config["CONSENSUS_THRESHOLD"].as<double>();
-            MAX_ITERATIONS_PER_FITTING = config["MAX_ITERATIONS_PER_FITTING"].as<uint>();
-            MAX_FITTING_ATTEMPTS = config["MAX_FITTING_ATTEMPTS"].as<uint>();
+            MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
+            CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<double>();
+            MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
+            MAXIMUM_FITTED_MODELS = config["ransac"]["maximum_fitted_models"].as<uint>();
         });
 
 
-        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters, Sensors>>([this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const Sensors& sensors) {
+        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters, Sensors>, Options<Single>>("Ball Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const Sensors& sensors) {
 
             // This holds our points that may be a part of the ball
             std::vector<arma::vec2> ballPoints;
@@ -94,66 +86,83 @@ namespace vision {
                     // We throw out points if they are:
                     // Less the full quality (subsampled)
                     // Do not have a transition on either side (are on an edge)
-                    if(it->second.subsample == 1
-                        && it->second.previous
-                        && it->second.next) {
 
-                        // If either point is in the green horizon, add both
-                        if(image.visualHorizonAtPoint(start[0]) < start[1] || image.visualHorizonAtPoint(end[0]) < end[1]) {
+                    if(it->second.subsample == 1 && it->second.next && image.visualHorizonAtPoint(end[0]) < end[1]) {
 
-                            ballPoints.push_back({ double(it->second.start[0]), double(it->second.start[1]) });
-                            ballPoints.push_back({ double(it->second.end[0]), double(it->second.end[1]) });
-                        }
+                        ballPoints.push_back({ double(it->second.end[0]), double(it->second.end[1]) });
+                    }
+
+                    if(it->second.subsample == 1 && it->second.previous && image.visualHorizonAtPoint(start[0]) < start[1]) {
+
+                        ballPoints.push_back({ double(it->second.start[0]), double(it->second.start[1]) });
                     }
                 }
             }
 
             // Use ransac to find the ball
-            auto ransacResults = findMultipleModels<RansacCircleModel<arma::vec2>, arma::vec2>(ballPoints,
-                                                                                               CONSENSUS_THRESHOLD,
-                                                                                               MINIMUM_POINTS,
-                                                                                               MAX_ITERATIONS_PER_FITTING,
-                                                                                               MAX_FITTING_ATTEMPTS,
-                                                                                               SELECTION_METHOD);
+            auto ransacResults = Ransac<RansacCircleModel>::fitModels(ballPoints.begin()
+                                                                    , ballPoints.end()
+                                                                    , MINIMUM_POINTS_FOR_CONSENSUS
+                                                                    , MAXIMUM_ITERATIONS_PER_FITTING
+                                                                    , MAXIMUM_FITTED_MODELS
+                                                                    , CONSENSUS_ERROR_THRESHOLD);
 
             auto balls = std::make_unique<std::vector<Ball>>();
             balls->reserve(ransacResults.size());
 
-            for(auto& ball : ransacResults) {
+            for(auto& result : ransacResults) {
 
+                double BALL_DIAMETER = 0.1; //TODO:Universal CONFIG
 
-                auto centre = ball.first.getCentre();
-                auto p1 = centre;
-                auto p2 = centre;
-                p1[1] += ball.first.getRadius();
-                p2[1] -= ball.first.getRadius();
+                std::vector<VisionObject::Measurement> measurements;
+                measurements.reserve(2);
 
-                // Transform p1 p2 to kinematics coordinates
-                p1 = imageToCam(p1, { double(image.dimensions[0]), double(image.dimensions[1]) });
-                p2 = imageToCam(p2, { double(image.dimensions[0]), double(image.dimensions[1]) });
+                // Transform our centre into kinematics coordinates
+                auto centre = imageToScreen(result.model.centre, image.dimensions);
 
-                double wbd = distanceToEquidistantPoints(0.10, p1, p2, cam.focalLengthPixels);
-                arma::vec3 wb = getGroundPointMeanOfEquidistantPoints(0.10, p1, p2, cam.focalLengthPixels, sensors.orientationCamToGround);
-                auto d2p = getGroundPointFromScreen(p1, sensors.orientationCamToGround, cam.focalLengthPixels);
-                std::cout << "Width: " << wbd << std::endl;
-                std::cout << "D2P: " << d2p.t() << std::endl;
+                // Get the 4 points around our circle
+                auto top   = centre + arma::vec2({ 0,  result.model.radius });
+                auto base  = centre + arma::vec2({ 0, -result.model.radius });
+                auto left  = centre + arma::vec2({  result.model.radius, 0 });
+                auto right = centre + arma::vec2({ -result.model.radius, 0 });
 
-                emit(graph("Width Ball Dist", wbd));
-                emit(graph("Width Ball Pos", wb[0],wb[1],wb[2]));
-                emit(graph("D2P Ball", d2p[0], d2p[1]));
+                // Get a unit vector pointing to the centre of the ball
+                arma::vec3 ballCentreRay = arma::normalise(arma::normalise(getCamFromScreen(top, cam.focalLengthPixels))
+                                                           + arma::normalise(getCamFromScreen(base, cam.focalLengthPixels)));
+                // Get the centre of our ball ins creen space
+                arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay, cam.focalLengthPixels);
 
-                // TODO fuse the width and point based distances
+                // Get our width based distance to the circle
+                double widthDistance = widthBasedDistanceToCircle(BALL_DIAMETER, top, base, cam.focalLengthPixels);
+                arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
+                // TODO convert this into sphericial coordiantes and error
+                measurements.push_back({{0,0,0}, arma::eye(3,3)});
 
+                // Project this vector to a plane midway through the ball
+                arma::mat44 ballBisectorPlaneTransform = sensors.orientationCamToGround;
+                ballBisectorPlaneTransform(2,3) -= BALL_DIAMETER / 2.0;
+                arma::vec3 ballCentreGroundProj = arma::vec3({ 0, 0, BALL_DIAMETER / 2.0 }) + projectCamToGroundPlane(ballCentreRay, ballBisectorPlaneTransform);
+                // TODO convert this into sphericial coordiantes and error
+                measurements.push_back({{0,0,0}, arma::eye(3,3)});
+
+                /*
+                 *  BUILD OUR BALL
+                 */
                 Ball b;
 
-                b.circle.radius = ball.first.getRadius();
-                b.circle.centre = ball.first.getCentre();
+                // On screen visual shape
+                b.circle.radius = result.model.radius;
+                b.circle.centre = result.model.centre;
+
+                // Angular positions from the camera
+                b.screenAngular = arma::atan(cam.pixelsToTanThetaFactor % ballCentreScreen);
+                b.angularSize = { getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels) };
+
+                // Move our measurements
+                b.measurements = std::move(measurements);
 
                 balls->push_back(std::move(b));
             }
-
-            // Do vision kinematics on the ball to determine it's position and covariance matricies
-            log("Number of seen balls", ransacResults.size());
 
             emit(std::move(balls));
 

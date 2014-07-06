@@ -23,6 +23,7 @@
 #include <map>
 #include <armadillo>
 
+#include "messages/input/Sensors.h"
 #include "utility/math/geometry/Line.h"
 
 namespace messages {
@@ -63,10 +64,14 @@ namespace messages {
                 Segment* next;
             };
 
+            // The sensor frame that happened with this image
+            std::shared_ptr<const messages::input::Sensors> sensors;
+
+            // Our images dimensions
             arma::uvec2 dimensions;
 
-            // Our horizon as a gradient/intercept pair
-            arma::vec2 horizon;
+            // Our horizon
+            utility::math::geometry::Line horizon;
 
             // The points of the visual horizon
             std::vector<arma::ivec2> visualHorizon;
@@ -97,7 +102,7 @@ namespace messages {
 
                 utility::math::geometry::Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
 
-                return int(lround(l.findYFromX(x)));
+                return int(lround(l.y(x)));
             }
 
         };

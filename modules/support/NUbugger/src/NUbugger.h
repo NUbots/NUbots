@@ -52,7 +52,7 @@ namespace modules {
             ReactionHandle classifiedImageHandle;
             ReactionHandle goalsHandle;
             ReactionHandle ballsHandle;
-            ReactionHandle localisationBallHandle;
+            ReactionHandle localisationHandle;
 
             std::mutex mutex;
 
@@ -62,6 +62,7 @@ namespace modules {
             void recvMessage(const messages::support::nubugger::proto::Message& message);
             void recvCommand(const messages::support::nubugger::proto::Message& message);
             void recvLookupTable(const messages::support::nubugger::proto::Message& message);
+            void recvReactionHandlers(const messages::support::nubugger::proto::Message& message);
 
             void EmitLocalisationModels(
                 const std::unique_ptr<messages::localisation::FieldObject>& robot_model,

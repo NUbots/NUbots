@@ -63,7 +63,7 @@ namespace localisation {
             ball_msg->sr_yy = model_cov(1, 1);
             emit(std::move(ball_msg));
 
-            emit(graph("Ball (robot-space)", model_state(0), model_state(1)));
+            // emit(graph("Ball (robot-space)", model_state(0), model_state(1)));
         });
 
        on<Trigger<FakeOdometry>,
@@ -88,18 +88,9 @@ namespace localisation {
             if(balls.size() > 0){
                 auto curr_time = NUClear::clock::now();
                 engine_.TimeUpdate(curr_time);
+
                 engine_.MeasurementUpdate(balls[0]);
             }
-        });
-       on<Trigger<messages::vision::Ball>,
-            Options<Sync<KFBallLocalisation>>
-            >("KFBallLocalisation Step",
-            [this](const messages::vision::Ball& ball) {
-        
-            auto curr_time = NUClear::clock::now();
-            engine_.TimeUpdate(curr_time);
-            engine_.MeasurementUpdate(ball);
-            
         });
     }
 }

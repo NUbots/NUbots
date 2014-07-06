@@ -17,26 +17,20 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MODULES_VISION_BALLDETECTOR_H
-#define MODULES_MODULES_VISION_BALLDETECTOR_H
+#ifndef MODULES_VISION_BALLDETECTOR_H
+#define MODULES_VISION_BALLDETECTOR_H
 
 #include <nuclear>
-
-#include "utility/math/ransac/ransac.h"
 
 namespace modules {
 namespace vision {
 
     class BallDetector : public NUClear::Reactor {
     private:
-    	unsigned int MINIMUM_POINTS;                            // Minimum points needed to make a line (Min pts to line essentially)
-        unsigned int MAX_ITERATIONS_PER_FITTING;                // Number of iterations per fitting attempt
-        unsigned int MAX_FITTING_ATTEMPTS;                      // Hard limit on number of fitting attempts
-
-        double ANGLE_MARGIN;                                    // Used for filtering out goal posts which are on too much of a lean.
-        double CONSENSUS_THRESHOLD;                             // Threshold determining what constitutes a good fit (Consensus margin)
-
-        utility::math::ransac::RansacSelectionMethod SELECTION_METHOD;
+        uint MINIMUM_POINTS_FOR_CONSENSUS;
+        uint MAXIMUM_ITERATIONS_PER_FITTING;
+        uint MAXIMUM_FITTED_MODELS;
+        double CONSENSUS_ERROR_THRESHOLD;
     public:
 
         static constexpr const char* CONFIGURATION_PATH = "BallDetector.yaml";

@@ -33,7 +33,7 @@ namespace modules {
 
                 on<Trigger<std::vector<Goal>>>([this] (const std::vector<Goal>& goals) {
                     if (goals.size() > 0) {
-                        emit(std::make_unique<LookAtAngle>(LookAtAngle {goals[0].sphericalFromCamera[0],-goals[0].sphericalFromCamera[1]}));
+                        emit(std::make_unique<LookAtAngle>(LookAtAngle {goals[0].screenAngular[0],-goals[0].screenAngular[1]}));
                     }
 
                 });

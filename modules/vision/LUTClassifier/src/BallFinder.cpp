@@ -36,11 +36,11 @@ namespace modules {
 
         using utility::math::geometry::Line;
         using utility::math::vision::getGroundPointFromScreen;
-        using utility::math::vision::projectWorldPointToCamera;
-        using utility::math::vision::camToImage;
-        using utility::math::vision::imageToCam;
+        using utility::math::vision::projectWorldPointToScreen;
+        using utility::math::vision::screenToImage;
+        using utility::math::vision::imageToScreen;
 
-        void LUTClassifier::findBall(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
+        void LUTClassifier::findBall(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
 
             /*
                 Here we cast lines to find balls.
@@ -54,8 +54,10 @@ namespace modules {
 
             auto& visualHorizon = classifiedImage.visualHorizon;
             auto& minHorizon = classifiedImage.minVisualHorizon;
+            auto& sensors = *classifiedImage.sensors;
 
-            arma::vec2 topY = imageToCam(arma::ivec2({classifiedImage.minVisualHorizon->at(0),int(classifiedImage.minVisualHorizon->at(1))}), arma::vec2{image.width(), image.height()});
+            arma::vec2 topY = imageToScreen(arma::ivec2({ classifiedImage.minVisualHorizon->at(0), int(classifiedImage.minVisualHorizon->at(1)) })
+                                          , classifiedImage.dimensions);
             topY[0] = 0;    //Choose centre of screen
 
             // Get the positions of the top of our green horizion, and the bottom of the screen
@@ -81,15 +83,15 @@ namespace modules {
             // Do our inital calculation to get our first Y
             arma::vec4 worldPosition = arma::ones(4);
             worldPosition.rows(0, 2) = xStart * direction;
-            auto camPoint = projectWorldPointToCamera(worldPosition, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
-            int y = camToImage(camPoint, arma::vec2{image.width(), image.height()})[1];
+            auto camPoint = projectWorldPointToScreen(worldPosition, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
+            int y = screenToImage(camPoint, classifiedImage.dimensions)[1];
 
-            for(double x = xStart; x < xEnd; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
+            for(double x = xStart; x < xEnd && y >= 0; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
 
                 // Calculate our next Y
                 worldPosition.rows(0, 2) = (x + std::max(dx, (dx * x) / (cameraHeight - dx))) * direction;
-                camPoint = projectWorldPointToCamera(worldPosition, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
-                int nextY = camToImage(camPoint, arma::vec2{image.width(), image.height()})[1];
+                camPoint = projectWorldPointToScreen(worldPosition, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
+                int nextY = screenToImage(camPoint, classifiedImage.dimensions)[1];
 
                 // Work out our details
                 arma::ivec2 start = { 0, y };
@@ -113,7 +115,7 @@ namespace modules {
                                 start[0] = p2->at(0);
                             }
                             else {
-                                start[0] = round(l.findXFromY(y));
+                                start[0] = round(l.x(y));
                             }
 
                             break;
@@ -142,7 +144,7 @@ namespace modules {
                                 end[0] = p1->at(0);
                             }
                             else {
-                                end[0] = round(l.findXFromY(y));
+                                end[0] = round(l.x(y));
                             }
 
                             break;

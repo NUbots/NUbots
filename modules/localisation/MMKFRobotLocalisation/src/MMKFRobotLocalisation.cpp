@@ -24,28 +24,28 @@
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/nubugger/NUgraph.h"
-#include "utility/localisation/FieldDescription.h"
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
+#include "messages/support/FieldDescription.h"
 #include "messages/localisation/FieldObject.h"
 #include "MMKFRobotLocalisationEngine.h"
 #include "RobotModel.h"
 
 using utility::nubugger::graph;
-using messages::support::Configuration;
 using utility::localisation::LocalisationFieldObject;
+using messages::support::Configuration;
+using messages::support::FieldDescription;
 using messages::localisation::FakeOdometry;
-using modules::localisation::MultiModalRobotModelConfig;
-using utility::localisation::FieldDescriptionConfig;
 using messages::input::Sensors;
+using modules::localisation::MultiModalRobotModelConfig;
 
 namespace modules {
 namespace localisation {
     MMKFRobotLocalisation::MMKFRobotLocalisation(std::unique_ptr<NUClear::Environment> environment)
-        : engine_(std::make_unique<MMKFRobotLocalisationEngine>()),
-          Reactor(std::move(environment)) {
+        : Reactor(std::move(environment)),
+          engine_(std::make_unique<MMKFRobotLocalisationEngine>()) {
 
         on<Trigger<Configuration<MultiModalRobotModelConfig>>>(
             "MultiModalRobotModelConfig Update",
@@ -60,12 +60,10 @@ namespace localisation {
             engine_->UpdateConfiguration(config);
         });
 
-        on<Trigger<Configuration<FieldDescriptionConfig>>>(
-            "FieldDescriptionConfig Update",
-            [this](const Configuration<FieldDescriptionConfig>& config) {
-            auto fd = std::make_shared<utility::localisation::FieldDescription>(config);
+        on<Trigger<FieldDescription>>("FieldDescription Update", [this](const FieldDescription& desc) {
+            NUClear::log("FieldDescription Update");
+            auto fd = std::make_shared<FieldDescription>(desc);
             engine_->set_field_description(fd);
-            NUClear::log("Localisation config finished successfully!");
         });
 
         // Emit to NUbugger
