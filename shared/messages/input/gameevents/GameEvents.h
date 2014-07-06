@@ -59,11 +59,16 @@ namespace gameevents {
     };
 
     struct HalfTime {
+        bool firstHalf;
     };
 
     template <enum Context>
     struct BallKickedOut {
         NUClear::clock::time_point time;
+    };
+
+    struct KickOffTeam {
+        Context team;
     };
 
 

@@ -169,13 +169,10 @@ namespace input {
         /*******************************************************************************************
          * Process half changes
          ******************************************************************************************/
-        if (!oldState.firstHalf && newState.firstHalf) {
+        if (oldState.firstHalf != newState.firstHalf) {
             // half time
-            emit(std::make_unique<HalfTime>());
-        } else if (oldState.firstHalf && !newState.firstHalf) {
-            // TODO: undo?
+            emit(std::make_unique<HalfTime>(HalfTime{newState.firstHalf}));
         }
-
 
         /*******************************************************************************************
          * Process ball kicked out
@@ -192,6 +189,16 @@ namespace input {
             }
         }
 
+
+        /*******************************************************************************************
+         * Process kick off team
+         ******************************************************************************************/
+        if (oldState.kickOffTeam != newState.kickOffTeam) {
+            // new kick off team? :/
+            Context team = newState.kickOffTeam == newOwnTeam.teamColour ? TEAM : OPPONENT;
+            emit(std::make_unique<KickOffTeam>(KickOffTeam{team}));
+        }
+
         /*
          * TODO:
          *
@@ -200,7 +207,6 @@ namespace input {
          * OurTeamColour
          * SecondsRemaining (combine with state changes)
          * SecondaryTimeRemaining (combine with state changes)
-         * KickoffTeam
          */
 
     }
