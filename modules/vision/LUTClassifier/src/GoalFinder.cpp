@@ -33,7 +33,7 @@ namespace modules {
 
         using utility::math::geometry::Line;
 
-        void LUTClassifier::findGoals(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
+        void LUTClassifier::findGoals(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
 
             /*
                Here we cast classification lines to attempt to locate the general area of the goals.

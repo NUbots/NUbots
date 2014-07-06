@@ -38,16 +38,16 @@ namespace modules {
 
 
             FixedWalk::FixedWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), active(false){
-                // on<Trigger<Configuration<FixedWalk>>>([this] (const Configuration<FixedWalk>& file){                 
+                // on<Trigger<Configuration<FixedWalk>>>([this] (const Configuration<FixedWalk>& file){
                 // });
 
-                on<Trigger<ExecuteGetup>>("FixedWalk::Getup", [this](const ExecuteGetup& command){
+                on<Trigger<ExecuteGetup>>("FixedWalk::Getup", [this](const ExecuteGetup&){
                     //record fall time
-                    segmentElapsedTimeBeforeFall = NUClear::clock::now() - segmentStart;    
-                    fallen = true;                
+                    segmentElapsedTimeBeforeFall = NUClear::clock::now() - segmentStart;
+                    fallen = true;
                 });
 
-                on<Trigger<KillGetup>>("FixedWalk::Getup Finished", [this](const KillGetup& command){
+                on<Trigger<KillGetup>>("FixedWalk::Getup Finished", [this](const KillGetup&){
                     //getup finished
                     segmentStart = NUClear::clock::now() - segmentElapsedTimeBeforeFall;
                     fallen = false;
@@ -56,7 +56,7 @@ namespace modules {
                 on< Trigger< Every<30, Per<std::chrono::seconds>>> , Options<Sync<FixedWalk>>, With<Sensors>>("Fixed Walk Manager", [this]( const time_t& t, const Sensors& sensors){
                     if(t > segmentStart + walkSegments.front().duration && active && !fallen){
                         //Move to next segment
-                        segmentStart += walkSegments.front().duration;                        
+                        segmentStart += walkSegments.front().duration;
                         walkSegments.pop();
                         if(walkSegments.empty()){
                             emit(std::make_unique<WalkCommand>());
@@ -90,11 +90,11 @@ namespace modules {
 	        		for(auto& segment: command.segments){
 	        			walkSegments.push(segment);
 	        		}
-				}); 
+				});
 
             }
 
-            std::unique_ptr<WalkCommand> FixedWalk::getWalkCommand(const FixedWalkCommand::WalkSegment& segment, NUClear::clock::duration t, const Sensors& sensors){
+            std::unique_ptr<WalkCommand> FixedWalk::getWalkCommand(const FixedWalkCommand::WalkSegment& segment, NUClear::clock::duration t, const Sensors&){
              	double timeSeconds = std::chrono::duration_cast<std::chrono::seconds>(t).count();
             	arma::vec2 directionInOriginalCoords = (segment.curvePeriod != 0 ? utility::math::matrix::zRotationMatrix(2 * M_PI * timeSeconds / segment.curvePeriod, 2) : arma::eye(2,2) ) * segment.direction;
             	arma::vec2 direction =  arma::normalise(directionInOriginalCoords);

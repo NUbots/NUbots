@@ -48,11 +48,9 @@ namespace modules {
                 //this reaction focuses on the ball - pan'n'scan if not visible and focus on as many objects as possible if visible
                 on<Trigger<std::vector<Ball>>,
                     With<std::vector<Goal>>,
-                    With<Optional<messages::localisation::Ball>>,
                     With<Sensors> >([this]
                     (const std::vector<Ball>& balls,
                      const std::vector<Goal>& goals,
-                     const std::shared_ptr<const messages::localisation::Ball>& ball,
                      const Sensors& sensors) {
 
                     if (balls.size() > 0) {
@@ -61,7 +59,6 @@ namespace modules {
                         angles.reserve(4);
 
                         angles.emplace_back(LookAtAngle {balls[0].screenAngular[0],-balls[0].screenAngular[1]});
-
 
                         for (const auto& g : goals) {
                             angles.emplace_back(LookAtAngle {g.screenAngular[0],-g.screenAngular[1]});

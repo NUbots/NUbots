@@ -28,9 +28,9 @@ namespace modules {
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
 
-        void LUTClassifier::findHorizon(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
+        void LUTClassifier::findHorizon(const Image& image, const LookUpTable&, ClassifiedImage<ObjectClass>& classifiedImage) {
 
-                classifiedImage.horizon = sensors.orientationHorizon;
+                classifiedImage.horizon = classifiedImage.sensors->orientationHorizon;
 
                 // Move our axis to be at the top left of the screen
                 classifiedImage.horizon.distance = -classifiedImage.horizon.distanceToPoint({ -double(image.width()) * 0.5, -double(image.height()) * 0.5 });

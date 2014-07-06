@@ -24,12 +24,11 @@ namespace modules {
     namespace vision {
 
         using messages::input::Image;
-        using messages::input::Sensors;
         using messages::vision::LookUpTable;
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
 
-        void LUTClassifier::enhanceGoals(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
+        void LUTClassifier::enhanceGoals(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
 
             /*
                 Here we improve the classification of goals.
@@ -69,17 +68,17 @@ namespace modules {
 
                 // TODO only do the extra segments if they are above, and do not intersect the visual horizon
 
-                if(points(1, 0) >= 0 && points(1, 0) < image.height()) {
+                if(points(1, 0) >= 0 && points(1, 0) < int(image.height())) {
 
                     auto segments = quex->classify(image, lut, points.col(0), points.col(1));
                     newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
                 }
-                if(points(1, 2) >= 0 && points(1, 2) < image.height()) {
+                if(points(1, 2) >= 0 && points(1, 2) < int(image.height())) {
 
                     auto segments = quex->classify(image, lut, points.col(2), points.col(3));
                     newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
                 }
-                if(points(1, 4) >= 0 && points(1, 4) < image.height()) {
+                if(points(1, 4) >= 0 && points(1, 4) < int(image.height())) {
 
                     auto segments = quex->classify(image, lut, points.col(4), points.col(5));
                     newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
