@@ -24,12 +24,11 @@ namespace modules {
     namespace vision {
 
         using messages::input::Image;
-        using messages::input::Sensors;
         using messages::vision::LookUpTable;
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
 
-        void LUTClassifier::findVisualHorizon(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
+        void LUTClassifier::findVisualHorizon(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
 
             // Get some local references to class variables to make text shorter
             auto& horizon = classifiedImage.horizon;

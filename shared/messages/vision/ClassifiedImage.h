@@ -23,6 +23,7 @@
 #include <map>
 #include <armadillo>
 
+#include "messages/input/Sensors.h"
 #include "utility/math/geometry/Line.h"
 
 namespace messages {
@@ -63,6 +64,10 @@ namespace messages {
                 Segment* next;
             };
 
+            // The sensor frame that happened with this image
+            std::shared_ptr<const messages::input::Sensors> sensors;
+
+            // Our images dimensions
             arma::uvec2 dimensions;
 
             // Our horizon

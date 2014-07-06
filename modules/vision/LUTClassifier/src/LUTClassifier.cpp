@@ -109,7 +109,7 @@ namespace modules {
             on<Trigger<CameraParameters>, With<Configuration<LUTClassifier>>>(setParams);
             on<With<CameraParameters>, Trigger<Configuration<LUTClassifier>>>(setParams);
 
-            on<Trigger<Image>, With<LookUpTable, Sensors>, Options<Single>>("Classify Image", [this](const Image& image, const LookUpTable& lut, const Sensors& sensors) {
+            on<Trigger<Image>, With<LookUpTable>, With<Raw<Sensors>>, Options<Single>>("Classify Image", [this](const Image& image, const LookUpTable& lut, const std::shared_ptr<const Sensors>& sensors) {
 
                 // Our classified image
                 auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
@@ -117,26 +117,29 @@ namespace modules {
                 // Set our width and height
                 classifiedImage->dimensions = { image.width(), image.height() };
 
+                // Attach our sensors
+                classifiedImage->sensors = sensors;
+
                 // Find our horizon
-                findHorizon(image, lut, sensors, *classifiedImage);
+                findHorizon(image, lut, *classifiedImage);
 
                 // Find our visual horizon
-                findVisualHorizon(image, lut, sensors, *classifiedImage);
+                findVisualHorizon(image, lut, *classifiedImage);
 
                 // Find our goals
-                findGoals(image, lut, sensors, *classifiedImage);
+                findGoals(image, lut, *classifiedImage);
 
                 // Find our ball (also helps with the bottom of goals)
-                findBall(image, lut, sensors, *classifiedImage);
+                findBall(image, lut, *classifiedImage);
 
                 // Enhance our goals
-                enhanceGoals(image, lut, sensors, *classifiedImage);
+                enhanceGoals(image, lut, *classifiedImage);
 
                 // Find our goals base
-                //findGoalBases(image, lut, sensors, *classifiedImage);
+                //findGoalBases(image, lut, *classifiedImage);
 
                 // Enhance our ball
-                enhanceBall(image, lut, sensors, *classifiedImage);
+                enhanceBall(image, lut, *classifiedImage);
 
                 // Emit our classified image
                 emit(std::move(classifiedImage));

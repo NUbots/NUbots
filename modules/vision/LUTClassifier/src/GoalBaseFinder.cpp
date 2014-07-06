@@ -24,12 +24,11 @@ namespace modules {
     namespace vision {
 
         using messages::input::Image;
-        using messages::input::Sensors;
         using messages::vision::LookUpTable;
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
 
-        void LUTClassifier::findGoalBases(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
+        void LUTClassifier::findGoalBases(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
 
             std::vector<arma::ivec2> points;
 

@@ -40,7 +40,7 @@ namespace modules {
         using utility::math::vision::screenToImage;
         using utility::math::vision::imageToScreen;
 
-        void LUTClassifier::findBall(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
+        void LUTClassifier::findBall(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
 
             /*
                 Here we cast lines to find balls.
@@ -54,6 +54,7 @@ namespace modules {
 
             auto& visualHorizon = classifiedImage.visualHorizon;
             auto& minHorizon = classifiedImage.minVisualHorizon;
+            auto& sensors = *classifiedImage.sensors;
 
             arma::vec2 topY = imageToScreen(arma::ivec2({ classifiedImage.minVisualHorizon->at(0), int(classifiedImage.minVisualHorizon->at(1)) })
                                           , classifiedImage.dimensions);
