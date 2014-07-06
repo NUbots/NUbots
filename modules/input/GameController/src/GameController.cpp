@@ -117,31 +117,54 @@ namespace input {
             if (newOwnPlayer.penalised && !oldOwnPlayer.penalised) {
                 auto unpenalisedTime = NUClear::clock::now() + std::chrono::seconds(newOwnPlayer.penalisedTimeLeft);
                 if (i == PLAYER_ID) {
-                    // self penalised
+                    // self penalised :@
                     emit(std::make_unique<SelfPenalised>(SelfPenalised{i, unpenalisedTime}));
                 } else {
-                    // team mate penalised
+                    // team mate penalised :'(
                     emit(std::make_unique<TeamMatePenalised>(TeamMatePenalised{i, unpenalisedTime}));
                 }
             } else if (!newOwnPlayer.penalised && oldOwnPlayer.penalised) {
                 if (i == PLAYER_ID) {
-                    // self unpenalised
+                    // self unpenalised :)
                     emit(std::make_unique<SelfUnpenalised>(SelfUnpenalised{i}));
                 } else {
-                    // team mate unpenalised
+                    // team mate unpenalised :)
                     emit(std::make_unique<TeamMateUnpenalised>(TeamMateUnpenalised{i}));
                 }
             }
 
             if (newOpponentPlayer.penalised && !oldOpponentPlayer.penalised) {
                 auto unpenalisedTime = NUClear::clock::now() + std::chrono::seconds(newOpponentPlayer.penalisedTimeLeft);
-                // opponent penalised
+                // opponent penalised :D
                 emit(std::make_unique<OpponentPenalised>(OpponentPenalised{i, unpenalisedTime}));
             } else if (!newOpponentPlayer.penalised && oldOpponentPlayer.penalised) {
-                // opponent unpenalised
+                // opponent unpenalised D:
                 emit(std::make_unique<OpponentUnpenalised>(OpponentUnpenalised{i}));
             }
         }
+
+        if (std::strcmp(oldOwnTeam.coachMessage, newOwnTeam.coachMessage) != 0) {
+            // listen to the coach? o_O
+            emit(std::make_unique<TeamCoachMessage>(TeamCoachMessage{std::string(newOwnTeam.coachMessage)}));
+        }
+
+        if (std::strcmp(oldOpponentTeam.coachMessage, newOpponentTeam.coachMessage) != 0) {
+            // listen in on the enemy! >:D
+            emit(std::make_unique<OpponentCoachMessage>(OpponentCoachMessage{std::string(newOpponentTeam.coachMessage)}));
+        }
+
+        /*
+         * TODO:
+         *
+         * State changes
+         * Subsate changes
+         * Half changes
+         * OurTeamColour
+         * SecondsRemaining (combine with state changes)
+         * SecondaryTimeRemaining (combine with state changes)
+         * KickoffTeam
+         * BallKickedOut
+         */
 
 
     }

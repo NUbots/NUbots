@@ -80,17 +80,5 @@ namespace input {
     #pragma pack(pop)
 }
 }
-/*
-    Goal Scored (our team opponent team)
-    Robot Penalised (with time unpenalised)
-    State changes
-    Subsate changes
-    Half changes
-    OurTeamColour
-    SecondsRemaining (combine with state changes)
-    SecondaryTimeRemaining (combine with state changes)
-    CoachMessage
-    KickoffTeam
-    BallKickedOut
- */
+
 #endif  // MODULES_INPUT_GAMECONTROLLERDATA_H
