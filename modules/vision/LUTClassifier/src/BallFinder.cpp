@@ -55,7 +55,8 @@ namespace modules {
             auto& visualHorizon = classifiedImage.visualHorizon;
             auto& minHorizon = classifiedImage.minVisualHorizon;
 
-            arma::vec2 topY = imageToScreen(arma::ivec2({classifiedImage.minVisualHorizon->at(0),int(classifiedImage.minVisualHorizon->at(1))}), arma::vec2{image.width(), image.height()});
+            arma::vec2 topY = imageToScreen(arma::ivec2({ classifiedImage.minVisualHorizon->at(0), int(classifiedImage.minVisualHorizon->at(1)) })
+                                          , classifiedImage.dimensions);
             topY[0] = 0;    //Choose centre of screen
 
             // Get the positions of the top of our green horizion, and the bottom of the screen
@@ -82,14 +83,14 @@ namespace modules {
             arma::vec4 worldPosition = arma::ones(4);
             worldPosition.rows(0, 2) = xStart * direction;
             auto camPoint = projectWorldPointToScreen(worldPosition, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
-            int y = screenToImage(camPoint, arma::vec2{image.width(), image.height()})[1];
+            int y = screenToImage(camPoint, classifiedImage.dimensions)[1];
 
             for(double x = xStart; x < xEnd; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
 
                 // Calculate our next Y
                 worldPosition.rows(0, 2) = (x + std::max(dx, (dx * x) / (cameraHeight - dx))) * direction;
                 camPoint = projectWorldPointToScreen(worldPosition, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
-                int nextY = screenToImage(camPoint, arma::vec2{image.width(), image.height()})[1];
+                int nextY = screenToImage(camPoint, classifiedImage.dimensions)[1];
 
                 // Work out our details
                 arma::ivec2 start = { 0, y };
