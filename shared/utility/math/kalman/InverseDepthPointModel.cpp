@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include <math.h> //needed for normalisation function
-#include <assert.h>
+#include <cmath> //needed for normalisation function
+#include <cassert>
 #include "InverseDepthPointModel.h" //includes armadillo
 #include "utility/motion/ForwardKinematics.h"
 #include "messages/input/ServoID.h"
@@ -46,7 +46,7 @@ namespace utility {
             // @param deltaT The amount of time that has passed since the previous update, in seconds.
             // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation.
             // @return The new estimated system state.
-            arma::vec::fixed<InverseDepthPointModel::size> InverseDepthPointModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT) {
+            arma::vec::fixed<InverseDepthPointModel::size> InverseDepthPointModel::timeUpdate(const arma::vec::fixed<size>& state, const double&) {
                 return state;
             }
 

@@ -357,7 +357,7 @@ namespace kinematics {
         if(std::fabs(projectXOnNormal) == 1){
             //Then x is parallel to the ground normal and we need to use projection onto +/-z instead
             //If x parallel to normal, then use -z, if x antiparallel use z
-            arma::vec3 Z =  arma::vec3{0, 0, (projectXOnNormal > 0 ? -1 : 1 )};
+            arma::vec3 Z =  arma::vec3{0, 0, (projectXOnNormal > 0 ? -1.0 : 1.0 )};
             double projectZOnNormal = arma::dot(Z, groundNormal_body);
             groundMatrixX = arma::normalise(Z - projectZOnNormal * groundNormal_body);
             groundMatrixY = arma::cross(groundNormal_body, groundMatrixX);
