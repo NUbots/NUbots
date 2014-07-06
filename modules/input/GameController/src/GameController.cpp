@@ -100,12 +100,12 @@ namespace input {
 
             if (oldOwnTeam.score > newOwnTeam.score) {
                 // we scored! :D
-                emit(std::make_unique<GoalScoredFor>(GoalScoredFor{newOwnTeam.score}));
+                emit(std::make_unique<GoalScored<TEAM>>(GoalScored<TEAM>{newOwnTeam.score}));
             }
 
             if (oldOpponentTeam.score > newOpponentTeam.score) {
                 // they scored :( boo
-                emit(std::make_unique<GoalScoredAgainst>(GoalScoredAgainst{newOpponentTeam.score}));
+                emit(std::make_unique<GoalScored<OPPONENT>>(GoalScored<OPPONENT>{newOpponentTeam.score}));
             }
         }
 
@@ -126,28 +126,28 @@ namespace input {
                 auto unpenalisedTime = NUClear::clock::now() + std::chrono::seconds(newOwnPlayer.penalisedTimeLeft);
                 if (i == PLAYER_ID) {
                     // self penalised :@
-                    emit(std::make_unique<SelfPenalised>(SelfPenalised{i, unpenalisedTime}));
+                    emit(std::make_unique<Penalisation<SELF>>(Penalisation<SELF>{i, unpenalisedTime}));
                 } else {
                     // team mate penalised :'(
-                    emit(std::make_unique<TeamMatePenalised>(TeamMatePenalised{i, unpenalisedTime}));
+                    emit(std::make_unique<Penalisation<TEAM>>(Penalisation<TEAM>{i, unpenalisedTime}));
                 }
             } else if (!newOwnPlayer.penalised && oldOwnPlayer.penalised) {
                 if (i == PLAYER_ID) {
                     // self unpenalised :)
-                    emit(std::make_unique<SelfUnpenalised>(SelfUnpenalised{i}));
+                    emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{i}));
                 } else {
                     // team mate unpenalised :)
-                    emit(std::make_unique<TeamMateUnpenalised>(TeamMateUnpenalised{i}));
+                    emit(std::make_unique<Unpenalisation<TEAM>>(Unpenalisation<TEAM>{i}));
                 }
             }
 
             if (newOpponentPlayer.penalised && !oldOpponentPlayer.penalised) {
                 auto unpenalisedTime = NUClear::clock::now() + std::chrono::seconds(newOpponentPlayer.penalisedTimeLeft);
                 // opponent penalised :D
-                emit(std::make_unique<OpponentPenalised>(OpponentPenalised{i, unpenalisedTime}));
+                emit(std::make_unique<Penalisation<OPPONENT>>(Penalisation<OPPONENT>{i, unpenalisedTime}));
             } else if (!newOpponentPlayer.penalised && oldOpponentPlayer.penalised) {
                 // opponent unpenalised D:
-                emit(std::make_unique<OpponentUnpenalised>(OpponentUnpenalised{i}));
+                emit(std::make_unique<Unpenalisation<OPPONENT>>(Unpenalisation<OPPONENT>{i}));
             }
         }
 
@@ -157,12 +157,12 @@ namespace input {
          ******************************************************************************************/
         if (std::strcmp(oldOwnTeam.coachMessage, newOwnTeam.coachMessage) != 0) {
             // listen to the coach? o_O
-            emit(std::make_unique<TeamCoachMessage>(TeamCoachMessage{std::string(newOwnTeam.coachMessage)}));
+            emit(std::make_unique<CoachMessage<TEAM>>(CoachMessage<TEAM>{std::string(newOwnTeam.coachMessage)}));
         }
 
         if (std::strcmp(oldOpponentTeam.coachMessage, newOpponentTeam.coachMessage) != 0) {
             // listen in on the enemy! >:D
-            emit(std::make_unique<OpponentCoachMessage>(OpponentCoachMessage{std::string(newOpponentTeam.coachMessage)}));
+            emit(std::make_unique<CoachMessage<OPPONENT>>(CoachMessage<OPPONENT>{std::string(newOpponentTeam.coachMessage)}));
         }
 
 
@@ -176,6 +176,22 @@ namespace input {
             // TODO: undo?
         }
 
+
+        /*******************************************************************************************
+         * Process ball kicked out
+         ******************************************************************************************/
+        if (oldState.dropInTime >= 0 && oldState.dropInTime > newState.dropInTime)  {
+            // ball was kicked out by dropInTeam
+            auto time = NUClear::clock::now() - std::chrono::seconds(newState.dropInTime);
+            if (newState.dropInTeam == newOwnTeam.teamColour) {
+                // we kicked the ball out :S
+                emit(std::make_unique<BallKickedOut<TEAM>>(BallKickedOut<TEAM>{time}));
+            } else {
+                // they kicked the ball out! ^_^
+                emit(std::make_unique<BallKickedOut<OPPONENT>>(BallKickedOut<OPPONENT>{time}));
+            }
+        }
+
         /*
          * TODO:
          *
@@ -185,9 +201,7 @@ namespace input {
          * SecondsRemaining (combine with state changes)
          * SecondaryTimeRemaining (combine with state changes)
          * KickoffTeam
-         * BallKickedOut
          */
-
 
     }
 

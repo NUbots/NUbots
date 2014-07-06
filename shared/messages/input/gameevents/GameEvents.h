@@ -26,55 +26,44 @@ namespace messages {
 namespace input {
 namespace gameevents {
 
+    enum Context {
+        SELF,
+        TEAM,
+        OPPONENT
+    };
+
     struct Score {
         uint ownScore;
         uint opponentScore;
     };
 
-    struct GoalScoredFor {
+    template <enum Context>
+    struct GoalScored {
         uint totalScore;
     };
 
-    struct GoalScoredAgainst {
-        uint totalScore;
-    };
-
-    struct OpponentPenalised {
+    template <enum Context>
+    struct Penalisation {
         uint robotId;
         NUClear::clock::time_point ends;
     };
 
-    struct TeamMatePenalised {
-        uint robotId;
-        NUClear::clock::time_point ends;
-    };
-
-    struct SelfPenalised {
-        uint robotId;
-        NUClear::clock::time_point ends;
-    };
-
-    struct OpponentUnpenalised {
+    template <enum Context>
+    struct Unpenalisation {
         uint robotId;
     };
 
-    struct TeamMateUnpenalised {
-        uint robotId;
-    };
-
-    struct SelfUnpenalised {
-        uint robotId;
-    };
-
-    struct TeamCoachMessage {
-        std::string message;
-    };
-
-    struct OpponentCoachMessage {
+    template <enum Context>
+    struct CoachMessage {
         std::string message;
     };
 
     struct HalfTime {
+    };
+
+    template <enum Context>
+    struct BallKickedOut {
+        NUClear::clock::time_point time;
     };
 
 
