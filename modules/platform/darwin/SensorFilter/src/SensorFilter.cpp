@@ -407,7 +407,7 @@ namespace modules {
 
                         integratedOdometry += sensors->odometry.submat(0,3,1,3);
 
-                    emit(graph("LFoot Down", sensors->leftFootDown
+                    /*emit(graph("LFoot Down", sensors->leftFootDown
                         ));
                     emit(graph("RFoot Down", sensors->rightFootDown
                         ));
@@ -416,7 +416,7 @@ namespace modules {
                     emit(graph("Integrated Odometry", integratedOdometry[0], integratedOdometry[1]
                         ));
                     emit(graph("COM", sensors->centreOfMass[0], sensors->centreOfMass[1], sensors->centreOfMass[2], sensors->centreOfMass[3]
-                        ));
+                        ));*/
 
                     emit(std::move(sensors));
                 });

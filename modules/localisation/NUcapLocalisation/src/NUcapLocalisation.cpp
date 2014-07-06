@@ -17,33 +17,33 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "MocapLocalisation.h"
+#include "NUcapLocalisation.h"
 #include "utility/nubugger/NUgraph.h"
 #include "messages/input/proto/MotionCapture.pb.h"
 #include <armadillo>
 
-using utility::nubugger::graph;
 
 namespace modules {
 namespace localisation {
 
+    using utility::nubugger::graph;
     using messages::input::proto::MotionCapture;
 
-    MocapLocalisation::MocapLocalisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    NUcapLocalisation::NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Trigger<Network<MotionCapture>>>([this](const Network<MotionCapture>& net) {
             auto& mocap = net.data;
             for (auto& rigidBody : mocap->rigid_bodies()) {
 
 
-                int id = rigidBody.identifier();
+                /*int id = rigidBody.identifier();
                 float x = rigidBody.location().x();
                 float y = rigidBody.location().y();
                 float z = rigidBody.location().z();
                 if (id == 2) { // Robot #2
                     // TODO: transform from head to field
-                    emit(graph("NUcap", x, y, z));
-                }
+                    // emit(graph("NUcap", x, y, z));
+                }*/
             }
 
         });

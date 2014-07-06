@@ -63,7 +63,7 @@ namespace localisation {
             ball_msg->sr_yy = model_cov(1, 1);
             emit(std::move(ball_msg));
 
-            emit(graph("Ball (robot-space)", model_state(0), model_state(1)));
+            // emit(graph("Ball (robot-space)", model_state(0), model_state(1)));
         });
 
        on<Trigger<FakeOdometry>,

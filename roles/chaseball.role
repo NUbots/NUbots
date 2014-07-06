@@ -15,7 +15,9 @@ ADD_ROLE(
 
         #Vision
         vision::LUTClassifier
-        #vision::FeatureDetector
+        vision::GoalDetector
+        vision::BallDetector
+        vision::ObstacleDetector
 
         #Localisation
         localisation::MMKFRobotLocalisation

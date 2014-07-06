@@ -91,7 +91,7 @@ namespace support {
 
         });
 
-        on<Trigger<Every<1, std::chrono::milliseconds>>>([this](const time_t&) {
+        on<Trigger<Every<100, std::chrono::milliseconds>>>([this](const time_t&) {
             bool valid;
             // Try to get a new frame from the listener.
             MocapFrame frame(frameListener->pop(&valid).first);
@@ -133,6 +133,8 @@ namespace support {
                 location->set_y(-fRigidBody.location().x);
                 location->set_z(fRigidBody.location().y);
 
+                // log("Received:", rigidBody->identifier(), location->x(), location->y(), location->z());
+//
                 auto rotation = fRigidBody.orientation();
 
                 rigidBody->set_qw(rotation.qw);

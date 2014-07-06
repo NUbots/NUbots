@@ -20,26 +20,29 @@
 #include "NUcap.h"
 #include <nuclear>
 
+#include "utility/nubugger/NUgraph.h"
 #include "messages/input/proto/MotionCapture.pb.h"
 
 namespace modules {
 namespace debug {
 
+    using utility::nubugger::graph;
     using messages::input::proto::MotionCapture;
 
     NUcap::NUcap(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
         on<Trigger<Network<MotionCapture>>>([this](const Network<MotionCapture>& net) {
+            // log("NUcap:", id, "x:", x, "y:", y, "z:", z);
             auto& mocap = net.data;
             for (auto& rigidBody : mocap->rigid_bodies()) {
 
-                int id = rigidBody.identifier();
+                // int id = rigidBody.identifier();
                 float x = rigidBody.location().x();
                 float y = rigidBody.location().y();
                 float z = rigidBody.location().z();
 
-                log("NUcap:", id, "x:", x, "y:", y, "z:", z);
+                // log("NUcap:", id, "x:", x, "y:", y, "z:", z);
                 emit(graph("NUcap", x, y, z));
                 // TODO: transform from head to field
             }

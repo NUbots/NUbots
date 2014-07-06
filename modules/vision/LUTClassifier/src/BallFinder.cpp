@@ -86,7 +86,7 @@ namespace modules {
             auto camPoint = projectWorldPointToScreen(worldPosition, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
             int y = screenToImage(camPoint, classifiedImage.dimensions)[1];
 
-            for(double x = xStart; x < xEnd; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
+            for(double x = xStart; x < xEnd && y >= 0; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
 
                 // Calculate our next Y
                 worldPosition.rows(0, 2) = (x + std::max(dx, (dx * x) / (cameraHeight - dx))) * direction;

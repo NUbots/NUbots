@@ -17,17 +17,17 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MOCAP_LOCALISATION_H
-#define MODULES_MOCAP_LOCALISATION_H
+#ifndef MODULES_NUCAP_LOCALISATION_H
+#define MODULES_NUCAP_LOCALISATION_H
 
 #include <nuclear>
 
 namespace modules {
 namespace localisation {
 
-    class MocapLocalisation : public NUClear::Reactor {
+    class NUcapLocalisation : public NUClear::Reactor {
     public:
-        explicit MocapLocalisation(std::unique_ptr<NUClear::Environment> environment);
+        explicit NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment);
     };
 
 }

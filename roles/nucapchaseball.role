@@ -15,10 +15,12 @@ ADD_ROLE(
 
         #Vision
         vision::LUTClassifier
-        #vision::FeatureDetector
+        vision::GoalDetector
+        vision::BallDetector
+        vision::ObstacleDetector
 
         #Localisation
-        localisation::MocapLocalisation
+        localisation::NUcapLocalisation
 
         #Behaviour
         behaviour::Controller
@@ -34,4 +36,7 @@ ADD_ROLE(
         #Motion
         motion::ScriptEngine
         motion::WalkEngine
+
+        #Debug
+        debug::NUcap
 )
