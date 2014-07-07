@@ -435,7 +435,7 @@ namespace modules {
 					}
 
 					else if (IS_GOALIE && currentState.ballApproachingGoal) {
-						goToPoint(currentState.ballGoalIntersection);
+						sideStepToPoint(currentState.ballGoalIntersection);
 
 						NUClear::log<NUClear::INFO>("Ball is approaching goal. Goalie moving to block it.");
 					}
