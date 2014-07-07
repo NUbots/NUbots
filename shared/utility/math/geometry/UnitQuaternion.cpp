@@ -1,0 +1,92 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+
+#include "UnitQuaternion.h"
+#include "utility/math/matrix.h"
+
+
+namespace utility {
+namespace math {
+namespace geometry {
+
+    UnitQuaternion::UnitQuaternion(arma::vec4 q_){
+    	q = q_;
+    }
+
+    UnitQuaternion::UnitQuaternion(arma::vec3 v){
+    	q.rows(QX,QZ) = v;
+    }
+
+    UnitQuaternion::UnitQuaternion(double angle, arma::vec3 axis){
+    	q[QW] = std::cos(angle / 2.0);
+    	q.rows(QX,QZ) = std::sin(angle / 2.0) * arma::normalise(axis);
+    }
+
+    UnitQuaternion UnitQuaternion::i(){
+    	arma::vec4 qi = q;
+    	qi.rows(QX,QZ) *= -1;
+    	return UnitQuaternion(qi);
+    }
+
+    arma::vec3 UnitQuaternion::rotateVector(arma::vec3 v){
+    	return q * UnitQuaternion(v) * q.i();
+    }
+
+    arma::vec3 UnitQuaternion::getAxis(){
+    	double angle = getAngle();
+    	double sinThetaOnTwo = std::sin(angle / 2.0);
+    	return q.rows(QX,QZ) / sinThetaOnTwo;
+    }
+
+    double UnitQuaternion::getAngle(){
+    	return 2 * std::acos(q[QW]);
+    }
+
+    arma::mat33 UnitQuaternion::getMatrix(){
+    	// Jake's method. Does it work? Nobody knows!!
+    	// arma::mat33 m;
+    	// arma::vec3 X = {1,0,0};
+    	// arma::vec3 Y = {0,1,0};
+    	// arma::vec3 Z = {0,0,1};
+    	// m.col(0) = rotateVector(X);
+    	// m.col(1) = rotateVector(Y);
+    	// m.col(2) = rotateVector(Z);
+    	// return m;
+    	return utility::math::matrix::quaternionToRotationMatrix(q);
+    }
+
+	UnitQuaternion operator * (const UnitQuaternion& p) const{
+		//From http://en.wikipedia.org/wiki/Quaternion#Quaternions_and_the_geometry_of_R3
+		arma::vec4 qDotP;
+		qDotP[0] = arma::dot(q.rows(QX,QZ), p.rows(QX,QZ));
+		arma::vec4 qsps;
+		qsps[0] = q[QW] * p[QW];
+		arma::vec4 qspv;
+		qspv.rows(QX,QZ) = q[QW] * p.rows(QX,QZ);
+		arma::vec4 qvps;
+		qvps.rows(QX,QZ) = q.rows(QX,QZ) * p[QW];
+		arma::vec4 qCrossP;
+		qCrossP.rows(QX,QZ) = arma::cross(q.rows(QX,QZ), p.rows(QX,QZ));
+		return UnitQuaternion(qsps - qDotP + qspv + qvps + qCrossP);
+	}
+
+
+}
+}
+}
