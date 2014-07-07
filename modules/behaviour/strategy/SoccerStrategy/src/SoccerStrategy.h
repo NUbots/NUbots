@@ -33,36 +33,36 @@ namespace modules {
         namespace strategy {
 
 		enum class GameStatePrimary : char {
-			INITAL = 0,
-			SET = 1,
-			READY = 2,
-			PLAYING = 3,
-			FINISHED = 4
+			INITIAL,
+			SET,
+			READY,
+			PLAYING,
+			FINISHED
 		};
 
 		enum class GameStateSecondary : char {
-			NORMAL = 0,
-			PENALTY_KICK = 1,
-			FREE_KICK = 2,
-			GOAL_KICK = 3,
-			CORNER_KICK = 4,
-			THROW_IN = 5,
-			PAUSED = 6
+			NORMAL,
+			PENALTY_KICK,
+			FREE_KICK,
+			GOAL_KICK,
+			CORNER_KICK,
+			THROW_IN,
+			PAUSED
 		};
 
 		GameStatePrimary& operator++(GameStatePrimary& gameState) {
 			switch (gameState) {
-				case INITIAL:
-					return(gameState = SET);
-				case SET:
-					return(gameState = READY);
-				case READY:
-					return(gameState = PLAYING);
-				case PLAYING:
-					return(gameState = FINISHED);
-				case FINISHED:
+				case GameStatePrimary::INITIAL:
+					return(gameState = GameStatePrimary::SET);
+				case GameStatePrimary::SET:
+					return(gameState = GameStatePrimary::READY);
+				case GameStatePrimary::READY:
+					return(gameState = GameStatePrimary::PLAYING);
+				case GameStatePrimary::PLAYING:
+					return(gameState = GameStatePrimary::FINISHED);
+				case GameStatePrimary::FINISHED:
 				default:
-					return(gameState = INITIAL);
+					return(gameState = GameStatePrimary::INITIAL);
 			}
 		}
 
@@ -74,21 +74,21 @@ namespace modules {
 
 		GameStateSecondary& operator++(GameStateSecondary& gameState) {
 			switch (gameState) {
-				case NORMAL:
-					return(gameState = PENALTY_KICK);
-				case PENALTY_KICK:
-					return(gameState = FREE_KICK);
-				case FREE_KICK:
-					return(gameState = GOAL_KICK;
-				case GOAL_KICK:
-					return(gameState = CORNER_KICK);
-				case CORNER_KICK:
-					return(gameState = THROW_IN);
-				case THROW_IN:
-					return(gameState = PAUSED);
-				case PAUSED:
+				case GameStateSecondary::NORMAL:
+					return(gameState = GameStateSecondary::PENALTY_KICK);
+				case GameStateSecondary::PENALTY_KICK:
+					return(gameState = GameStateSecondary::FREE_KICK);
+				case GameStateSecondary::FREE_KICK:
+					return(gameState = GameStateSecondary::GOAL_KICK);
+				case GameStateSecondary::GOAL_KICK:
+					return(gameState = GameStateSecondary::CORNER_KICK);
+				case GameStateSecondary::CORNER_KICK:
+					return(gameState = GameStateSecondary::THROW_IN);
+				case GameStateSecondary::THROW_IN:
+					return(gameState = GameStateSecondary::PAUSED);
+				case GameStateSecondary::PAUSED:
 				default:
-					return(gameState = NORMAL);
+					return(gameState = GameStateSecondary::NORMAL);
 			}
 		}
 
@@ -101,9 +101,6 @@ namespace modules {
 		typedef struct {
 			GameStatePrimary primaryGameState;
 			GameStateSecondary secondaryGameState;
-
-			bool gameStateButtonStatus;
-			bool penalisedButtonStatus;
 
 			bool selfInZone;
 			bool ballInZone;
@@ -162,6 +159,9 @@ namespace modules {
 			messages::support::FieldDescription FIELD_DESCRIPTION;
 
 			State previousState, currentState;
+
+			bool gameStateButtonStatus;
+			bool penalisedButtonStatus;
 
 			bool feetOnGround;
 			bool isKicking;

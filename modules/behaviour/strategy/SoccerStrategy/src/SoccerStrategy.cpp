@@ -24,6 +24,7 @@
 #include "messages/input/Sensors.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/support/Configuration.h"
+#include "messages/input/gameevents/GameEvents.h"
 
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/ParametricLine.h"
@@ -48,6 +49,17 @@ namespace modules {
 		using messages::behaviour::WalkStrategy;
 		using messages::behaviour::WalkTarget;
 		using messages::behaviour::WalkApproach;
+
+		using messages::input::gameevents::GameState;
+		using messages::input::gameevents::KickOffTeam;
+		using messages::input::gameevents::TeamColour;
+		using messages::input::gameevents::BallKickedOut;
+		using messages::input::gameevents::HalfTime;
+		using messages::input::gameevents::CoachMessage;
+		using messages::input::gameevents::Penalisation;
+		using messages::input::gameevents::Unpenalisation;
+		using messages::input::gameevents::GoalScored;
+		using messages::input::gameevents::Scor;
 
 		using utility::math::geometry::Plane;
 		using utility::math::geometry::ParametricLine;
@@ -101,7 +113,7 @@ namespace modules {
 					}
 				}
 
-				gameStateButtonStatus = (leftCount > 0.7) ? !gameStateButtonStatus : gameStateButtonStatus;
+				gameStateButtonStatus = (leftCount > 0.7);
 				penalisedButtonStatus = (middleCount > 0.7) ? !penalisedButtonStatus : penalisedButtonStatus;
 			});
 
@@ -118,6 +130,8 @@ namespace modules {
 
 			// Check to see if the kick has finished.
 			on<Trigger<messages::motion::KickFinished>>([this](const messages::motion::KickFinished& kick) {
+				(void)kick;
+
 				isKicking = false;
 			});
 
@@ -125,12 +139,16 @@ namespace modules {
 			on<Trigger<messages::motion::WalkStartCommand>, With<messages::motion::WalkCommand>>
 				([this](const messages::motion::WalkStartCommand& walkStart,
 					const messages::motion::WalkCommand& walk) {
+				(void)walkStart;
+
 				isWalking = true;
 				walkData = walk;
 			});
 
 			// Check to see if we are no longer walking.
 			on<Trigger<messages::motion::WalkStopCommand>>([this](const messages::motion::WalkStopCommand& walkStop) {
+				(void)walkStop;
+
 				isWalking = false;
 			});
 
@@ -141,13 +159,31 @@ namespace modules {
 
 			on<Trigger<Every<30, Per<std::chrono::seconds>>>, Options<Single>, 
 				With<messages::localisation::Ball>,
-				With<messages::localisation::Self>
-				/* Need to add in game controller triggers. */
+				With<messages::localisation::Self>,
+				With<messages::input::gameevents::GameState>,
+				With<messages::input::gameevents::KickOffTeam>,
+				With<messages::input::gameevents::TeamColour>,
+				With<messages::input::gameevents::BallKickedOut>,
+				With<messages::input::gameevents::HalfTime>,
+				With<messages::input::gameevents::CoachMessage>,
+				With<messages::input::gameevents::Penalisation>,
+				With<messages::input::gameevents::Unpenalisation>,
+				With<messages::input::gameevents::GoalScored>,
+				With<messages::input::gameevents::Score>
 				/* Need to add team localisation triggers. */>([this](
 											const time_t&,
 											const messages::localisation::Ball& ball,
-											const messages::localisation::Self& self
-											/* Need to add in game controller parameters. */
+											const messages::localisation::Self& self,
+											const messages::input::gameevents::GameState& gameState,
+											const messages::input::gameevents::KickOffTeam& kickOffTeam,
+											const messages::input::gameevents::TeamColour& colour,
+											const messages::input::gameevents::BallKickedOut& ballOut,
+											const messages::input::gameevents::HalfTime& halfTime,
+											const messages::input::gameevents::CoachMessage message,
+											const messages::input::gameevents::Penalisation& penalisation,
+											const messages::input::gameevents::Unpenalisation& unpenalisation,
+											const messages::input::gameevents::GoalScored& goalScored,
+											const messages::input::gameevents::Score& score
 											/* Need to add in team localisation  parameters. */) {
 
 					// Make a copy of the previous state.					
