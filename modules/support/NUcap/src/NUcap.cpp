@@ -108,45 +108,49 @@ namespace support {
 
                 markerSet->set_name(marker.name());
                 for (auto point : marker.markers()) {
-                    auto* marker_point = markerSet->add_points();
-                    marker_point->set_x(point.x);
-                    marker_point->set_y(point.y);
-                    marker_point->set_z(point.z);
+                    auto* markerPoint = markerSet->add_points();
+                    auto* position = markerPoint->mutable_position();
+                    position->set_x(point.x);
+                    position->set_y(point.y);
+                    position->set_z(point.z);
                 }
             }
 
             for (auto point : frame.unIdMarkers()) {
-                auto* marker_point = moCap->add_unidentified_points();
+                auto* markerPoint = moCap->add_unidentified_points();
 //                NUClear::log("Point", point.x, point.y, point.z);
-                marker_point->set_x(point.x);
-                marker_point->set_y(point.y);
-                marker_point->set_z(point.z);
+                auto* position = markerPoint->mutable_position();
+                position->set_x(point.x);
+                position->set_y(point.y);
+                position->set_z(point.z);
             }
 
             for (auto fRigidBody : frame.rigidBodies()) {
                 auto* rigidBody = moCap->add_rigid_bodies();
                 rigidBody->set_identifier(fRigidBody.id());
 
-                auto* location = rigidBody->mutable_location();
+                auto* position = rigidBody->mutable_position();
                 // normalize to robot coordinate system, x foward, y left, z up
-                location->set_x(-fRigidBody.location().z);
-                location->set_y(-fRigidBody.location().x);
-                location->set_z(fRigidBody.location().y);
+                position->set_x(-fRigidBody.location().z);
+                position->set_y(-fRigidBody.location().x);
+                position->set_z(fRigidBody.location().y);
 
-                // log("Received:", rigidBody->identifier(), location->x(), location->y(), location->z());
+                // log("Received:", rigidBody->identifier(), position->x(), position->y(), position->z());
 //
-                auto rotation = fRigidBody.orientation();
+                auto fRotation = fRigidBody.orientation();
 
-                rigidBody->set_qw(rotation.qw);
-                rigidBody->set_qx(rotation.qx);
-                rigidBody->set_qy(rotation.qy);
-                rigidBody->set_qz(rotation.qz);
+                auto* rotation = rigidBody->mutable_rotation();
+                rotation->set_w(fRotation.qw);
+                rotation->set_x(fRotation.qx);
+                rotation->set_y(fRotation.qy);
+                rotation->set_z(fRotation.qz);
 
                 for (auto point : fRigidBody.markers()) {
-                    auto* marker_point = rigidBody->add_points();
-                    marker_point->set_x(point.x);
-                    marker_point->set_y(point.y);
-                    marker_point->set_z(point.z);
+                    auto* markerPoint = rigidBody->add_points();
+                    auto* position = markerPoint->mutable_position();
+                    position->set_x(point.x);
+                    position->set_y(point.y);
+                    position->set_z(point.z);
                 }
             }
 

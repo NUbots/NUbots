@@ -37,9 +37,9 @@ namespace localisation {
 
 
                 /*int id = rigidBody.identifier();
-                float x = rigidBody.location().x();
-                float y = rigidBody.location().y();
-                float z = rigidBody.location().z();
+                float x = rigidBody.position().x();
+                float y = rigidBody.position().y();
+                float z = rigidBody.position().z();
                 if (id == 2) { // Robot #2
                     // TODO: transform from head to field
                     // emit(graph("NUcap", x, y, z));
