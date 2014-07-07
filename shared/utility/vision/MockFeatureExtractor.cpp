@@ -74,7 +74,7 @@ namespace utility {
 			return mockFeatures;
 		}
 
-		std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
+		std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const messages::localisation::Self& self, const messages::input::Sensors& sensors){
 			std::vector<MockFeatureExtractor::ExtractedFeature> features;
 			arma::mat worldToCamera_camera = utility::math::vision::calculateWorldToCameraTransform(sensors, self);
 

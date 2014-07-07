@@ -164,7 +164,7 @@ namespace modules {
                         case 'N': // New frame
                             newFrame();
                             break;
-                        case 'D': // Delete frame
+                        case 'I': // Delete frame
                             deleteFrame();
                             break;
                         case 'P'://plays script through with correct durations
@@ -201,7 +201,7 @@ namespace modules {
                 auto waypoints = std::make_unique<std::vector<ServoTarget>>();
                 for(auto& target : script.frames[frame].targets) {
                     waypoints->push_back(ServoTarget {
-                        NUClear::clock::now() + std::chrono::milliseconds(500)
+                        NUClear::clock::now() + std::chrono::milliseconds(1000)
                         , target.id
                         , target.position
                         , target.gain
@@ -259,7 +259,7 @@ namespace modules {
                                      ",",
                                      ".",
                                      "N",
-                                     "D",
+                                     "I",
                                      " ",
                                      "T",
                                      "J",
@@ -537,7 +537,7 @@ namespace modules {
                                              ",",
                                              ".",
                                              "N",
-                                             "D",
+                                             "I",
                                              " ",
                                              "T",
                                              "J",

@@ -43,7 +43,7 @@ namespace localisation {
     std::shared_ptr<messages::support::FieldDescription> MMKFRobotLocalisationEngine::field_description() {
         return field_description_;
     }
-    
+
     void MMKFRobotLocalisationEngine::set_field_description(std::shared_ptr<messages::support::FieldDescription> desc) {
         field_description_ = desc;
         goalpost_lfos_.bl = {field_description_->goalpost_bl, LFOId::kGoalBL, "goalpost_blue_left"};
@@ -169,7 +169,7 @@ namespace localisation {
 
     void MMKFRobotLocalisationEngine::IndividualStationaryObjectUpdate(
         const std::vector<messages::vision::Goal>& goals,
-        float time_increment) {
+        float) {
 
         for (auto& observed_object : goals) {
 

@@ -28,9 +28,6 @@ namespace modules {
             struct InverseKinematicsRequest{
                 static constexpr const char* CONFIGURATION_PATH = "InverseKinematicsRequest.yaml";
             };
-            struct ForwardKinematicsRequest{
-                static constexpr const char* CONFIGURATION_PATH = "ForwardKinematicsRequest.yaml";
-            };
             struct LegKinematicsNULLTest{
                 static constexpr const char* CONFIGURATION_PATH = "LegKinematicsNULLTest.yaml";
             };

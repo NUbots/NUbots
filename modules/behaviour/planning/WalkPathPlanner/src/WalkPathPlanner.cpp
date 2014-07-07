@@ -42,6 +42,12 @@ namespace modules {
             using messages::motion::WalkStopCommand;
             using messages::motion::KickFinished;
             using utility::nubugger::graph;
+
+            using LocalisationBall = messages::localisation::Ball;
+            using Self = messages::localisation::Self;
+            using VisionBall = messages::vision::Ball;
+            using VisionObstacle = messages::vision::Obstacle;
+
             //using namespace messages;
 
             //using messages::input::ServoID;
@@ -171,15 +177,15 @@ namespace modules {
                     With<std::vector<messages::vision::Ball>>,
                     Options<Sync<WalkPathPlanner>>
                    >([this] (
-                     const time_t& now,
-                     const messages::localisation::Ball& ball,
-                     const std::vector<messages::localisation::Self>& selfs,
-                     const std::vector<messages::vision::Obstacle>& robots,
-                     const std::vector<messages::vision::Ball>& visionBalls
+                     const time_t&,
+                     const LocalisationBall& ball,
+                     const std::vector<Self>& selfs,
+                     const std::vector<VisionObstacle>& robots,
+                     const std::vector<VisionBall>&
                     ) {
                     /*if(visionBalls.size()>0){
                         arma::vec ballPosition = ball.position;
-                        
+
                         //Jake walk path planner:
                         auto self = selfs[0];
 
@@ -243,7 +249,7 @@ namespace modules {
                         emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));
                         emit(std::move(command));//XXX: emit here
                     }*/
-                    
+
 
                     std::cout << "starting path planning" << std::endl;
                     arma::vec normed_heading = arma::normalise(selfs.front().heading);
@@ -289,7 +295,7 @@ namespace modules {
                     //std::cout << "Target Position: " << targetPos[0] << ", " << targetPos[1] << std::endl;
                     //std::cout << "Self Position: " << selfs.front().position[0] << ", " << selfs.front().position[1] << std::endl;
                     //std::cout << "Self Heading: " << selfs.front().heading[0] << ", " << selfs.front().heading[1] << std::endl;
-                    
+
                     //std::cout << "Move Plan: " << movePlan[0] << ", " << movePlan[1] << ", " << movePlan[2] << std::endl;
                     //work out if we have to avoid something
                     if (useAvoidance) {
@@ -340,39 +346,55 @@ namespace modules {
 
             }
 
-
-
             arma::vec WalkPathPlanner::generateWalk(const arma::vec& move, bool omniPositioning) {
+
+                // TODO why is omniPositioning not used?
+                (void)omniPositioning;
+
                 //this uses hystereses to provide a stable, consistent positioning and movement
-                double walk_speed;
-                double walk_bearing;
-                
-                //check what distance increment we're in:
-                if (move[0] > midApproachDistance+distanceHysteresis and distanceIncrement < 3 or 
-                    move[0] > midApproachDistance and distanceIncrement == 3) {
+                double walk_speed = 0.0;
+                double walk_bearing = 0.0;
+                double walk_rotation = 0.0;
+
+                //check what distance increment we're in and swap/set speed accordingly:
+                if ((move[0] > midApproachDistance + distanceHysteresis and distanceIncrement < 3)
+                    or
+                    (move[0] > midApproachDistance and distanceIncrement == 3)) {
+
                     distanceIncrement = 3;
                     walk_speed = forwardSpeed;
-                } else if (move[0] > closeApproachDistance+distanceHysteresis and distanceIncrement < 2 or 
-                           move[0] > closeApproachDistance and distanceIncrement == 2) {
+                }
+                else if ((move[0] > closeApproachDistance+distanceHysteresis and distanceIncrement < 2)
+                         or
+                         (move[0] > closeApproachDistance and distanceIncrement == 2)) {
+
                     distanceIncrement = 2;
                     walk_speed = midApproachSpeed;
-                } else if (move[0] > ballLineupDistance+distanceHysteresis and distanceIncrement < 1 or 
-                           move[0] > ballLineupDistance and distanceIncrement == 1) {
+                }
+                else if ((move[0] > ballLineupDistance+distanceHysteresis and distanceIncrement < 1)
+                         or
+                         (move[0] > ballLineupDistance and distanceIncrement == 1)) {
+
                     distanceIncrement = 1;
                     walk_speed = closeApproachSpeed;
-                } else if (move[0] < ballLineupDistance + distanceHysteresis) {
+                }
+                else if (move[0] < ballLineupDistance + distanceHysteresis) {
                     distanceIncrement = 0;
                     walk_speed = 0.f;
                 }
 
                 //decide between heading and bearing
                 if (distanceIncrement > 1) {
-                    walk_bearing = move[1];
+                    walk_rotation = move[1];
                 } else {
-                    walk_bearing = move[2];
+                    walk_bearing = move[1];
+                    walk_rotation = move[2];
                 }
-                walk_bearing = fmin(turnSpeed,fmax(walk_bearing,-turnSpeed));
-                //check turning hysteresis
+
+                //make sure our rotation is normalised to our turning limits
+                walk_rotation = fmin(turnSpeed,fmax(walk_rotation,-turnSpeed));
+
+                //apply turning hysteresis
                 /*if (turning < 0 and walk_bearing < -turnDeviation) {
                     //walk_speed = std::min(walk_bearing,turnSpeed);
                 } else if (m_turning > 0 and walk_bearing > turnDeviation) {
@@ -381,18 +403,13 @@ namespace modules {
                     walk_bearing = 0;
                 }*/
 
-                //This replaces turn hysteresis with a unicorn equation
-                float g = 1./(1.+std::exp(-4.*walk_bearing*walk_bearing));
+                //Replacing turn hysteresis with a unicorn equation
+                float g = 1./(1.+std::exp(-4.*walk_rotation*walk_rotation));
 
-                /*arma::vec result;
-                result[0] = walk_speed*(1.-g);
-                result[1] = 0;
-                result[2] = walk_bearing*g;*/
-                //std::cout << walk_speed << ", " << g << std::endl;
-                return arma::vec({walk_speed*(1.-g),0,walk_bearing*g});
+                return arma::vec({walk_speed*(1.-g)*cos(walk_bearing),walk_speed*(1.-g)*sin(walk_bearing),walk_rotation*g});
             }
 
-            arma::vec WalkPathPlanner::approachFromDirection(const messages::localisation::Self& self,
+            arma::vec WalkPathPlanner::approachFromDirection(const Self& self,
                                                              const arma::vec& target,
                                                              const arma::vec& direction) {
 
@@ -404,35 +421,44 @@ namespace modules {
                 const double ballDistance = arma::norm(target-self.position);
                 const double selfHeading = atan2(self.heading[1],self.heading[0]);
 
-                //create our waypoints
+                //create our waypoints - these are approach vectors offset from the ball
                 waypoints[0] = -direction*ballDistance*ApproachCurveFactor;
                 waypoints[1] = arma::vec({waypoints[0][1],-waypoints[0][0]});
                 waypoints[2] = arma::vec({-waypoints[0][1],waypoints[0][0]});
-                
-                
+
+                //offset the waypoints by the foot separation so we are aiming at the ball with the correct foot
+                const auto footOffset = arma::normalise(waypoints[0])*(footSeparation+footSize)*0.5;
+
+                //do a foot offset for the straight approach case
+                if (arma::dot(waypoints[1],waypoints[1]) < arma::dot(waypoints[1],waypoints[1])) {
+                    waypoints[0] += arma::normalise(waypoints[1])*(footSeparation+footSize)*0.5;
+                } else {
+                    waypoints[0] += arma::normalise(waypoints[2])*(footSeparation+footSize)*0.5;
+                }
+
+                //add the foot offsets for sidekicks to the side approach case
+                waypoints[1] += footOffset;
+                waypoints[2] += footOffset;
+
                 //fill target headings and distances, and movement bearings and costs
                 std::vector<double> headings(3);
                 std::vector<double> distances(3);
                 std::vector<double> bearings(3);
                 std::vector<double> costs(3);
                 for (size_t i = 0; i < 3; ++i) {
-                    //calculate the heading the robot wants to achieve at its destination
+                    //store the directions we want to face when we get to the ball in headings
                     const double waypointHeading = atan2(-waypoints[i][1],-waypoints[i][0])-selfHeading;
-
-                    //std::cout << selfHeading << ", " << waypointHeading << ", " << waypoints[i][0] << ", " << waypoints[i][1] << std::endl;
                     headings[i] = atan2(sin(waypointHeading),cos(waypointHeading));
 
-                    //calculate the distance to destination
+                    //calculate the estimated distance to destination
                     arma::vec waypointPos = waypoints[i]+target-arma::vec(self.position);
-                    std::cout << waypointPos.t();
                     distances[i] = arma::norm(waypointPos);
 
-                    //calculate the angle between the current direction and the destination
+                    //calculate the angle between the current direction and the bearing of the destination
                     const double waypointBearing = atan2(waypointPos[1],waypointPos[0])-selfHeading;
                     bearings[i] = atan2(sin(waypointBearing),cos(waypointBearing));
 
-                    //std::cout << selfHeading << ", " << waypointBearing << ", " << waypointPos[0] << ", " << waypointPos[1] << ", " << bearings[i] << ", " << headings[i] << std::endl << std::endl;
-                    //costs defines which move plan is the most appropriate
+                    //costs defines which move plan is the most appropriate - the sensitivity gives us control over whether the robots prefers translation or rotation
                     costs[i] = bearings[i]*bearings[i]*bearingSensitivity+distances[i]*distances[i];
 
                 }
@@ -449,8 +475,8 @@ namespace modules {
 
                 return arma::vec({distances[selected],bearings[selected],headings[selected]});
             }
-            
-            arma::vec WalkPathPlanner::goToPoint(const messages::localisation::Self& self,
+
+            arma::vec WalkPathPlanner::goToPoint(const Self& self,
                                                   const arma::vec2& target,
                                                   const arma::vec2& direction) {
                 //quick and dirty go to point calculator
@@ -468,7 +494,7 @@ namespace modules {
                 return result;
             }
 
-            arma::vec WalkPathPlanner::avoidObstacles(const std::vector<messages::vision::Obstacle>& robotPosition,
+            arma::vec WalkPathPlanner::avoidObstacles(const std::vector<VisionObstacle>&,
                                                   const arma::vec3& movePlan) {
                 return movePlan; //XXX:unimplemented
                 //double heading = 0.0;

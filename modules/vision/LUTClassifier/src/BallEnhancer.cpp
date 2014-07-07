@@ -26,16 +26,15 @@ namespace modules {
     namespace vision {
 
         using messages::input::Image;
-        using messages::input::Sensors;
         using messages::vision::LookUpTable;
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
 
         using utility::math::vision::getGroundPointFromScreen;
-        using utility::math::vision::projectWorldPointToCamera;
-        using utility::math::vision::imageToCam;
+        using utility::math::vision::projectWorldPointToScreen;
+        using utility::math::vision::imageToScreen;
 
-        void LUTClassifier::enhanceBall(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
+        void LUTClassifier::enhanceBall(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
 
         	/*
                 This section improves the classification of the ball.
@@ -46,6 +45,7 @@ namespace modules {
              */
 
             std::vector<arma::ivec2> points;
+            auto& sensors = *classifiedImage.sensors;
 
             // Loop through all of our goal segments
             auto hSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::BALL);
@@ -59,7 +59,7 @@ namespace modules {
                 if(classifiedImage.visualHorizonAtPoint(pt.start[0]) <= pt.start[1] || classifiedImage.visualHorizonAtPoint(pt.end[0]) <= pt.end[1]) {
 
                     // Push back our midpoint offset to be in the middle of the subsample
-                    points.push_back(it->second.midpoint - arma::ivec2{ it->second.subsample / 2, 0 });
+                    points.push_back(it->second.midpoint - arma::ivec2{ int(it->second.subsample) / 2, 0 });
                 }
             }
 
@@ -73,7 +73,7 @@ namespace modules {
             if(!points.empty()) {
 
                 arma::running_stat_vec<arma::vec2> stats;
-                for(auto it = points.begin(); it < points.end(); ++it) {
+                for(auto it = points.begin(); it != points.end(); ++it) {
 
                     auto p1 = it;
                     auto p2 = it + 1;
@@ -86,7 +86,7 @@ namespace modules {
 
                         // Get the centre point to use and translate it into the kinematics form
                         arma::vec2 centre = stats.mean();
-                        arma::vec2 kinematicsCentre = imageToCam(stats.mean(), arma::vec2{image.width(), image.height()});
+                        arma::vec2 kinematicsCentre = imageToScreen(stats.mean(), classifiedImage.dimensions);
 
                         // Shift the camera by BALL_RADIUS in order to move it to the correct position
                         auto cameraMatrix = sensors.orientationCamToGround;
@@ -97,7 +97,7 @@ namespace modules {
                         arma::vec4 edgePoint = arma::ones(4);
                         edgePoint.rows(0, 2) = groundPoint + (BALL_RADIUS * cameraMatrix.submat(0, 2, 2, 2));
 
-                        auto screenEdge = projectWorldPointToCamera(edgePoint, cameraMatrix, FOCAL_LENGTH_PIXELS);
+                        auto screenEdge = projectWorldPointToScreen(edgePoint, cameraMatrix, FOCAL_LENGTH_PIXELS);
 
                         double radius = arma::norm(screenEdge - kinematicsCentre);
 

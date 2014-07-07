@@ -73,19 +73,19 @@ namespace modules {
                 , std::vector<messages::vision::ClassifiedImage<messages::vision::ObjectClass>::Segment>& segments
                 , bool vertical);
 
-            void findHorizon(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+            void findHorizon(const messages::input::Image& image, const messages::vision::LookUpTable& lut, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
 
-            void findVisualHorizon(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+            void findVisualHorizon(const messages::input::Image& image, const messages::vision::LookUpTable& lut, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
 
-            void findBall(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+            void findBall(const messages::input::Image& image, const messages::vision::LookUpTable& lut, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
 
-            void findGoals(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+            void findGoals(const messages::input::Image& image, const messages::vision::LookUpTable& lut, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
 
-            void enhanceBall(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+            void enhanceBall(const messages::input::Image& image, const messages::vision::LookUpTable& lut, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
 
-            void enhanceGoals(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+            void enhanceGoals(const messages::input::Image& image, const messages::vision::LookUpTable& lut, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
 
-            void findGoalBases(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const messages::input::Sensors& sensors, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+            void findGoalBases(const messages::input::Image& image, const messages::vision::LookUpTable& lut, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
 
         public:
             static constexpr const char* CONFIGURATION_PATH = "LUTClassifier.yaml";

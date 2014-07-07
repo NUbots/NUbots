@@ -1,0 +1,13 @@
+ADD_ROLE(
+    NAME gamecontrollertest
+    MODULES
+
+        # Support and Configuration
+        support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem
+        support::NUbugger
+
+        input::GameController
+
+)

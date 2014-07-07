@@ -60,8 +60,8 @@ namespace modules {
                         walk_command.segments.back().direction = segment["direction"].as<arma::vec>();
                         walk_command.segments.back().curvePeriod = segment["curvePeriod"].as<double>();
 
-                        walk_command.segments.back().normalisedVelocity = segment["normalisedVelocity"].as<double>();                
-                        walk_command.segments.back().normalisedAngularVelocity = segment["normalisedAngularVelocity"].as<double>();                
+                        walk_command.segments.back().normalisedVelocity = segment["normalisedVelocity"].as<double>();
+                        walk_command.segments.back().normalisedAngularVelocity = segment["normalisedAngularVelocity"].as<double>();
                         walk_command.segments.back().duration = std::chrono::milliseconds(int(std::milli::den * segment["duration"].as<double>()));
                     }
 
@@ -78,29 +78,29 @@ namespace modules {
 
                     currentSample = 0;
 
-                    std::cerr << "Sample: " << currentSample <<std::endl;                    
+                    std::cerr << "Sample: " << currentSample <<std::endl;
                     saveConfig(getWalkConfig(samples.row(currentSample).t()));
-                    
+
                     auto command = std::make_unique<FixedWalkCommand>(walk_command);
                     emit(std::move(command));
                 });
 
-                on< Trigger< Every<25, Per<std::chrono::seconds>> >, With<Sensors> >("Walk Data Manager", [this](const time_t& t, const Sensors& sensors){
+                on< Trigger< Every<25, Per<std::chrono::seconds>> >, With<Sensors> >("Walk Data Manager", [this](const time_t&, const Sensors& sensors){
                     data.update(sensors);
                 });
 
-                on<Trigger<ExecuteGetup>>("Getup Recording", [this](const ExecuteGetup& command){
+                on<Trigger<ExecuteGetup>>("Getup Recording", [this](const ExecuteGetup&){
                     data.recordGetup();
                     if(data.numberOfGetups > getup_cancel_trial_threshold){
                         emit(std::make_unique<FixedWalkFinished>());
-                    }                   
+                    }
                 });
-                on<Trigger<KillGetup>>("Getup Recording", [this](const KillGetup& command){
-                    data.getupFinished();                    
+                on<Trigger<KillGetup>>("Getup Recording", [this](const KillGetup&) {
+                    data.getupFinished();
                 });
 
-                on<Trigger<FixedWalkFinished>> ("Walk Routine Finised", [this](const FixedWalkFinished& command){
-                    //Get and reset data 
+                on<Trigger<FixedWalkFinished>> ("Walk Routine Finised", [this](const FixedWalkFinished&){
+                    //Get and reset data
                     fitnesses[currentSample] = data.popFitness();
                     std::cerr << "Sample Done! Fitness: " << fitnesses[currentSample] << std::endl;
                     if(currentSample >= samples.n_rows-1){
@@ -115,21 +115,21 @@ namespace modules {
                     }
                 });
 
-                on<Trigger<OptimisationComplete> >("Record Results", [this]( const OptimisationComplete&){
+                on<Trigger<OptimisationComplete> >("Record Results", [this](const OptimisationComplete&){
                     //Combine samples
                     arma::vec result = utility::math::optimisation::PGA::updateEstimate(samples, fitnesses);
-                    
+
                     std::cerr << "Final Result:"<<std::endl;
                     auto cfg = getWalkConfig(result);
                     saveConfig(cfg);
                     saveGoodConfigBackup(cfg);
                 });
-                
+
                 //TODO network
                 // on<Trigger<Network<WalkEngineConfigParameters>>>("Add Sample",[this](const Configuration<WalkEngineConfig>& walkConfig)){
                 //     //samples.push_back(getState()));
                     // fitnesses.resize(number_of_samples);
-                //      
+                //
                 // });
 
 
@@ -139,8 +139,8 @@ namespace modules {
                 arma::vec state(parameter_names.size());
                 std::cerr << "walkConfig.size() = " << walkConfig.config.size() << "\nLoading state:"<< std::endl;
                 int i = 0;
-                for(const std::string& name : parameter_names){ 
-                    state[i++] = walkConfig.config[name].as<double>();                  
+                for(const std::string& name : parameter_names){
+                    state[i++] = walkConfig.config[name].as<double>();
                 }
                 std::cerr << "Loaded Walk Config State:"<<std::endl;
                 printState(state);
@@ -156,12 +156,12 @@ namespace modules {
 
             Configuration<WalkEngineConfig> WalkOptimiser::getWalkConfig(const arma::vec& state){
                 Configuration<WalkEngineConfig> config(initialConfig);
-                for(int i = 0; i < state.size(); ++i){
+                for(uint i = 0; i < state.size(); ++i){
                     config.config[parameter_names[i]] = state[i];
                 }
                 printState(state);
                 return config;
-            }    
+            }
 
             void WalkOptimiser::saveConfig(const Configuration<WalkEngineConfig>& config){
                 auto saveConfig = std::make_unique<SaveConfiguration>();
@@ -184,6 +184,7 @@ namespace modules {
                 return result;
             }
             void FitnessData::update(const messages::input::Sensors& sensors){
+                (void)sensors;
             }
             void FitnessData::recordGetup(){
                 numberOfGetups++;

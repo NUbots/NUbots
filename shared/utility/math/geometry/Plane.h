@@ -16,8 +16,8 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
-#ifndef UTILITY_MATH_GEOMETRY_LINE_H
-#define UTILITY_MATH_GEOMETRY_LINE_H
+#ifndef UTILITY_MATH_GEOMETRY_PLANE_H
+#define UTILITY_MATH_GEOMETRY_PLANE_H
 
 #include <armadillo>
 #include "utility/math/geometry/ParametricLine.h"
@@ -36,26 +36,35 @@ namespace geometry {
 		Vector point;
 
 		Plane(){}
-
-		bool setFromNormal(Vector normal_, Vector point_){
-			normal = arma::normalise(normal_);
-			point = point_;
-			return arma::norm(normal,1) > 0; 
+		Plane(Vector normal_, Vector point_){
+			setFromNormal(normal_, point_);
 		}
 
-		bool setFrom3Points(Vector p1, Vector p2, Vector p3){
+		void setFromNormal(Vector normal_, Vector point_){
+			if(arma::norm(normal_, 1) <= 0){
+				throw std::domain_error("Plane::setFromNormal - Normal is zero vector. Normal to plane must be non-zero!");
+			} 
+			normal = arma::normalise(normal_);
+			point = point_;				
+		}
+
+		void setFrom3Points(Vector p1, Vector p2, Vector p3){
 			point = p1;
 			normal = arma::normalise(arma::cross(p2-p1,p3-p1));// Positive if p3 palmside (RHR) relative to p2
-			return arma::norm(normal,1) > 0;
+			if(arma::norm(normal, 1) <= 0){
+				throw std::domain_error("Plane::setFrom3Points - 3 Points are colinear!");
+			}
 		}
 
-		std::pair<bool, Vector> intersect(ParametricLine<n> l){
+		Vector intersect(ParametricLine<n> l){
 			double lDotN = arma::dot(l.direction, normal);
 			if(lDotN == 0){
-				return{false , Vector()};
+				throw std::domain_error("Plane::intersect - Plane does not meet line!");
 			}
-			return {true, arma::dot(point - l.point, normal) * l.direction / lDotN + l.point};   
+			return arma::dot(point - l.point, normal) * l.direction / lDotN + l.point;   
 		}
+
+		
 	};
 
 }

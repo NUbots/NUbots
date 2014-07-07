@@ -280,50 +280,57 @@ namespace modules {
 
             imageHandle = on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
 
+                Message message;
+                message.set_type(Message::IMAGE);
+                message.set_utc_timestamp(getUtcTimestamp());
+
+                auto* imageData = message.mutable_image();
+
+                imageData->mutable_dimensions()->set_x(image.width());
+                imageData->mutable_dimensions()->set_y(image.height());
+
+                std::string* imageBytes = imageData->mutable_data();
                 if(!image.source().empty()) {
-
-                    Message message;
-                    message.set_type(Message::IMAGE);
-                    message.set_utc_timestamp(getUtcTimestamp());
-
-                    auto* imageData = message.mutable_image();
-                    std::string* imageBytes = imageData->mutable_data();
-
                     imageData->set_format(messages::input::proto::Image::JPEG);
 
                     // Reserve enough space in the image data to store the output
-                    imageBytes->resize(image.source().size());
-                    imageData->mutable_dimensions()->set_x(image.width());
-                    imageData->mutable_dimensions()->set_y(image.height());
+                    imageBytes->reserve(image.source().size());
 
                     imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
-
-                    send(message);
                 }
+                else {
+                    imageData->set_format(messages::input::proto::Image::YCbCr444);
+
+                    imageBytes->reserve(image.raw().size() * sizeof(Image::Pixel));
+
+                    imageBytes->insert(imageBytes->begin(), reinterpret_cast<const char*>(&image.raw().front()), reinterpret_cast<const char*>(&image.raw().back() + 1));
+                }
+
+                send(message);
             });
 
-            // reactionStatisticsHandle = on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
-            //     Message message;
-            //     message.set_type(Message::REACTION_STATISTICS);
-            //     message.set_utc_timestamp(getUtcTimestamp());
-            //     auto* reactionStatistics = message.mutable_reaction_statistics();
-            //     //reactionStatistics->set_name(stats.name);
-            //     reactionStatistics->set_reactionid(stats.reactionId);
-            //     reactionStatistics->set_taskid(stats.taskId);
-            //     reactionStatistics->set_causereactionid(stats.causeReactionId);
-            //     reactionStatistics->set_causetaskid(stats.causeTaskId);
-            //     reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
-            //     reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
-            //     reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
-            //     reactionStatistics->set_name(stats.identifier[0]);
-            //     reactionStatistics->set_triggername(stats.identifier[1]);
-            //     reactionStatistics->set_functionname(stats.identifier[2]);
+            reactionStatisticsHandle = on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
+                Message message;
+                message.set_type(Message::REACTION_STATISTICS);
+                message.set_utc_timestamp(getUtcTimestamp());
+                auto* reactionStatistics = message.mutable_reaction_statistics();
+                //reactionStatistics->set_name(stats.name);
+                reactionStatistics->set_reactionid(stats.reactionId);
+                reactionStatistics->set_taskid(stats.taskId);
+                reactionStatistics->set_causereactionid(stats.causeReactionId);
+                reactionStatistics->set_causetaskid(stats.causeTaskId);
+                reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
+                reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
+                reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
+                reactionStatistics->set_name(stats.identifier[0]);
+                reactionStatistics->set_triggername(stats.identifier[1]);
+                reactionStatistics->set_functionname(stats.identifier[2]);
 
-            //     send(message);
-            // });
+                send(message);
+            });
+            reactionStatisticsHandle.disable();
 
-
-            on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
+            classifiedImageHandle = on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
 
                 Message message;
                 message.set_type(Message::CLASSIFIED_IMAGE);
@@ -368,8 +375,9 @@ namespace modules {
 
                 // Add in the actual horizon (the points on the left and right side)
                 auto* horizon = imageData->mutable_horizon();
-                horizon->set_gradient(image.horizon[0]);
-                horizon->set_intercept(image.horizon[1]);
+                horizon->mutable_normal()->set_x(image.horizon.normal[0]);
+                horizon->mutable_normal()->set_y(image.horizon.normal[1]);
+                horizon->set_distance(image.horizon.distance);
 
                 for(const auto& visualHorizon : image.visualHorizon) {
                     auto* vh = imageData->add_visual_horizon();
@@ -381,50 +389,55 @@ namespace modules {
                 send(message);
             });
 
-            goalsHandle = on<Trigger<std::vector<VisionBall>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionBall>& balls) {
+            ballsHandle = on<Trigger<std::vector<VisionBall>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionBall>& balls) {
 
                 Message message;
                 message.set_type(Message::VISION_OBJECT);
                 message.set_utc_timestamp(getUtcTimestamp());
 
+                auto* object = message.mutable_vision_object();
+                object->set_type(messages::vision::proto::VisionObject::BALL);
+
                 for(const auto& b : balls) {
-                    auto* object = message.add_vision_object();
 
-                    object->set_type(messages::vision::proto::VisionObject::BALL);
-                    auto* ball = object->mutable_ball();
+                    auto* ball = object->add_ball();
 
-                    ball->mutable_circle()->set_radius(b.circle.radius);
-                    ball->mutable_circle()->mutable_centre()->set_x(b.circle.centre[0]);
-                    ball->mutable_circle()->mutable_centre()->set_y(b.circle.centre[1]);
+                    auto* circle = ball->mutable_circle();
+                    circle->set_radius(b.circle.radius);
+                    circle->mutable_centre()->set_x(b.circle.centre[0]);
+                    circle->mutable_centre()->set_y(b.circle.centre[1]);
                 }
 
                 send(message);
 
             });
 
-            ballsHandle = on<Trigger<std::vector<VisionGoal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionGoal>& goals) {
+            goalsHandle = on<Trigger<std::vector<VisionGoal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionGoal>& goals) {
 
                 Message message;
                 message.set_type(Message::VISION_OBJECT);
                 message.set_utc_timestamp(getUtcTimestamp());
 
-                for(const auto& g : goals) {
-                    auto* object = message.add_vision_object();
+                auto* object = message.mutable_vision_object();
 
-                    object->set_type(messages::vision::proto::VisionObject::GOAL);
-                    auto* goal = object->mutable_goal();
+                object->set_type(messages::vision::proto::VisionObject::GOAL);
+
+                for(const auto& g : goals) {
+                    auto* goal = object->add_goal();
 
                     goal->set_side(g.side == VisionGoal::Side::LEFT ? messages::vision::proto::VisionObject::Goal::LEFT
                                  : g.side == VisionGoal::Side::RIGHT ? messages::vision::proto::VisionObject::Goal::RIGHT
                                  : messages::vision::proto::VisionObject::Goal::UNKNOWN);
-                    goal->mutable_quad()->mutable_tl()->set_x(g.quad.getTopLeft()[0]);
-                    goal->mutable_quad()->mutable_tl()->set_y(g.quad.getTopLeft()[1]);
-                    goal->mutable_quad()->mutable_tr()->set_x(g.quad.getTopRight()[0]);
-                    goal->mutable_quad()->mutable_tr()->set_y(g.quad.getTopRight()[1]);
-                    goal->mutable_quad()->mutable_bl()->set_x(g.quad.getBottomLeft()[0]);
-                    goal->mutable_quad()->mutable_bl()->set_y(g.quad.getBottomLeft()[1]);
-                    goal->mutable_quad()->mutable_br()->set_x(g.quad.getBottomRight()[0]);
-                    goal->mutable_quad()->mutable_br()->set_y(g.quad.getBottomRight()[1]);
+
+                    auto* quad = goal->mutable_quad();
+                    quad->mutable_tl()->set_x(g.quad.getTopLeft()[0]);
+                    quad->mutable_tl()->set_y(g.quad.getTopLeft()[1]);
+                    quad->mutable_tr()->set_x(g.quad.getTopRight()[0]);
+                    quad->mutable_tr()->set_y(g.quad.getTopRight()[1]);
+                    quad->mutable_bl()->set_x(g.quad.getBottomLeft()[0]);
+                    quad->mutable_bl()->set_y(g.quad.getBottomLeft()[1]);
+                    quad->mutable_br()->set_x(g.quad.getBottomRight()[0]);
+                    quad->mutable_br()->set_y(g.quad.getBottomRight()[1]);
                 }
 
                 send(message);
@@ -517,7 +530,7 @@ namespace modules {
         }
 
         void NUbugger::recvMessage(const Message& message) {
-            NUClear::log("Received message of type:", message.type());
+            log("Received message of type:", message.type());
             switch (message.type()) {
                 case Message::COMMAND:
                     recvCommand(message);
@@ -535,7 +548,7 @@ namespace modules {
 
         void NUbugger::recvCommand(const Message& message) {
             std::string command = message.command().command();
-            NUClear::log("Received command:", command);
+            log("Received command:", command);
             if (command == "download_lut") {
                 auto lut = powerplant.get<LookUpTable>();
 
@@ -556,164 +569,51 @@ namespace modules {
             auto lookuptable = message.lookup_table();
             const std::string& lutData = lookuptable.table();
 
-            NUClear::log("Loading LUT");
+            log("Loading LUT");
             auto data = std::vector<char>(lutData.begin(), lutData.end());
             auto lut = std::make_unique<LookUpTable>(lookuptable.bits_y(), lookuptable.bits_cb(), lookuptable.bits_cr(), std::move(data));
             emit<Scope::DIRECT>(std::move(lut));
 
             if (lookuptable.save()) {
-                NUClear::log("Saving LUT to file");
+                log("Saving LUT to file");
                 emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
             }
         }
 
         void NUbugger::recvReactionHandlers(const Message& message) {
             auto reactionHandlers = message.reactionhandlers();
-            log("Reaction Handlers:");
-            log("Data Points:", reactionHandlers.datapoints());
-            log("Action Start", reactionHandlers.actionstart());
-            log("Action Kill:", reactionHandlers.actionkill());
-            log("Register Action:", reactionHandlers.registeraction());
-            log("Sensors:", reactionHandlers.sensors());
-            log("Reaction Statistics:", reactionHandlers.reactionstatistics());
-            log("Image:", reactionHandlers.image());
-            log("Classified Image:", reactionHandlers.classifiedimage());
-            log("Goals:", reactionHandlers.goals());
-            log("Balls:", reactionHandlers.balls());
-            log("Localisation:", reactionHandlers.localisation());
 
-            log("Changes:");
+            log("Reaction Handler Changes:");
+            std::vector<std::tuple<bool, ReactionHandle, std::string>> handlers = {
+                std::make_tuple(reactionHandlers.datapoints(), dataPointHandle, "Data Points"),
+                std::make_tuple(reactionHandlers.actionstart(), actionStartHandle, "Action Start"),
+                std::make_tuple(reactionHandlers.actionkill(), actionKillHandle, "Action Kill"),
+                std::make_tuple(reactionHandlers.registeraction(), registerActionHandle, "Register Action"),
+                std::make_tuple(reactionHandlers.sensors(), sensorsHandle, "Sensors"),
+                std::make_tuple(reactionHandlers.image(), imageHandle, "Image"),
+                std::make_tuple(reactionHandlers.reactionstatistics(), reactionStatisticsHandle, "Reaction Statistics"),
+                std::make_tuple(reactionHandlers.classifiedimage(), classifiedImageHandle, "Classified Image"),
+                std::make_tuple(reactionHandlers.goals(), goalsHandle, "Goals"),
+                std::make_tuple(reactionHandlers.balls(), ballsHandle, "Balls"),
+                std::make_tuple(reactionHandlers.localisation(), localisationHandle, "Localisation")
+            };
 
-            // TODO: is there a better way? e.g. map or something?
-            if (reactionHandlers.datapoints()) {
-                if (!dataPointHandle.isEnabled()) {
-                    dataPointHandle.enable();
-                    log("Data Points Enabled");
-                }
-            } else {
-                if (dataPointHandle.isEnabled()) {
-                    dataPointHandle.disable();
-                    log("Data Points Disabled");
-                }
-            }
+            for (auto& handle : handlers) {
+                bool enabled;
+                ReactionHandle reactionHandle;
+                std::string name;
+                std::tie(enabled, reactionHandle, name) = handle;
 
-            if (reactionHandlers.actionstart()) {
-                if (!actionStartHandle.isEnabled()) {
-                    actionStartHandle.enable();
-                    log("Action Start Enabled");
-                }
-            } else {
-                if (actionStartHandle.isEnabled()) {
-                    actionStartHandle.disable();
-                    log("Action Start Disabled");
-                }
-            }
-            
-            if (reactionHandlers.actionkill()) {
-                if (!actionKillHandle.isEnabled()) {
-                    actionKillHandle.enable();
-                    log("Action Kill Enabled");
-                }
-            } else {
-                if (actionKillHandle.isEnabled()) {
-                    actionKillHandle.disable();
-                    log("Action Kill Disabled");
-                }
-            }
-            
-            if (reactionHandlers.registeraction()) {
-                if (!registerActionHandle.isEnabled()) {
-                    registerActionHandle.enable();
-                    log("Register Action Enabled");
-                }
-            } else {
-                if (registerActionHandle.isEnabled()) {
-                    registerActionHandle.disable();
-                    log("Register Action Disabled");
-                }
-            }
-            
-            if (reactionHandlers.sensors()) {
-                if (!sensorsHandle.isEnabled()) {
-                    sensorsHandle.enable();
-                    log("Sensors Enabled");
-                }
-            } else {
-                if (sensorsHandle.isEnabled()) {
-                    sensorsHandle.disable();
-                    log("Sensors Disabled");
-                }
-            }
-
-            if (reactionHandlers.reactionstatistics()) {
-                if (!reactionStatisticsHandle.isEnabled()) {
-                    reactionStatisticsHandle.enable();
-                    log("Reaction Statistics Enabled");
-                }
-            } else {
-                if (reactionStatisticsHandle.isEnabled()) {
-                    reactionStatisticsHandle.disable();
-                    log("Reaction Statistics Disabled");
-                }
-            }
-
-            if (reactionHandlers.image()) {
-                if (!imageHandle.isEnabled()) {
-                    imageHandle.enable();
-                    log("Image Enabled");
-                }
-            } else {
-                if (imageHandle.isEnabled()) {
-                    imageHandle.disable();
-                    log("Image Disabled");
-                }
-            }
-            
-            if (reactionHandlers.classifiedimage()) {
-                if (!classifiedImageHandle.isEnabled()) {
-                    classifiedImageHandle.enable();
-                    log("Classified Image Enabled");
-                }
-            } else {
-                if (classifiedImageHandle.isEnabled()) {
-                    classifiedImageHandle.disable();
-                    log("Classified Image Disabled");
-                }
-            }
-            
-            if (reactionHandlers.goals()) {
-                if (!goalsHandle.isEnabled()) {
-                    goalsHandle.enable();
-                    log("Goals Enabled");
-                }
-            } else {
-                if (goalsHandle.isEnabled()) {
-                    goalsHandle.disable();
-                    log("Goals Disabled");
-                }
-            }
-            
-            if (reactionHandlers.balls()) {
-                if (!ballsHandle.isEnabled()) {
-                    ballsHandle.enable();
-                    log("Balls Enabled");
-                }
-            } else {
-                if (ballsHandle.isEnabled()) {
-                    ballsHandle.disable();
-                    log("Balls Disabled");
-                }
-            }
-            
-            if (reactionHandlers.localisation()) {
-                if (!localisationHandle.isEnabled()) {
-                    localisationHandle.enable();
-                    log("Localisation Enabled");
-                }
-            } else {
-                if (localisationHandle.isEnabled()) {
-                    localisationHandle.disable();
-                    log("Localisation Disabled");
+                if (enabled) {
+                    if (!reactionHandle.isEnabled()) {
+                        reactionHandle.enable();
+                        log(name, "Enabled");
+                    }
+                } else {
+                    if (reactionHandle.isEnabled()) {
+                        reactionHandle.disable();
+                        log(name, "Disabled");
+                    }
                 }
             }
         }
