@@ -231,7 +231,6 @@ namespace input {
 
             // State has changed, process it
 
-            // TODO: handle timeouts and dropped balls
             switch (newState.state) {
                 case State::INITIAL: {
                     emit(std::make_unique<GameState<GamePhase::INITIAL>>());
