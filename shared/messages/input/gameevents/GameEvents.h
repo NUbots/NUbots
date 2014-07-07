@@ -80,51 +80,56 @@ namespace gameevents {
         Colour colour;
     };
 
-    enum GamePhase {
+    enum class GamePhase {
         INITIAL,
         READY,
         SET,
         PLAYING,
+        TIMEOUT,
         FINISHED
     };
 
-    enum GameMode {
-        NORMAL,
-        PENALTY_SHOOTOUT,
-        OVERTIME,
-        TIMEOUT
-    };
 
     template <enum GamePhase>
     struct GameState;
 
     template <>
-    struct GameState<INITIAL> {
-        GameMode mode;
+    struct GameState<GamePhase::INITIAL> {
     };
 
     template <>
-    struct GameState<READY> {
-        GameMode mode;
+    struct GameState<GamePhase::READY> {
         NUClear::clock::time_point readyTime;
     };
 
     template <>
-    struct GameState<SET> {
-        GameMode mode;
+    struct GameState<GamePhase::SET> {
     };
 
     template <>
-    struct GameState<PLAYING> {
-        GameMode mode;
+    struct GameState<GamePhase::PLAYING> {
         NUClear::clock::time_point endHalf;
         NUClear::clock::time_point ballFree;
     };
 
     template <>
-    struct GameState<FINISHED> {
-        GameMode mode;
+    struct GameState<GamePhase::TIMEOUT> {
+        NUClear::clock::time_point ends;
+    };
+
+    template <>
+    struct GameState<GamePhase::FINISHED> {
         NUClear::clock::time_point nextHalf;
+    };
+
+    struct GameMode {
+        enum class Mode {
+            NORMAL,
+            PENALTY_SHOOTOUT,
+            OVERTIME
+        };
+
+        Mode mode;
     };
 
 }
