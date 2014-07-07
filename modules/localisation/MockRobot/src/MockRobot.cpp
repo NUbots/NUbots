@@ -277,10 +277,12 @@ namespace localisation {
 
         // Emit robot to NUbugger
         on<Trigger<Every<100, std::chrono::milliseconds>>,
-           With<std::vector<messages::localisation::Self>>,
+           With<Mock<std::vector<messages::localisation::Self>>>,
            Options<Sync<MockRobot>>>("NUbugger Output",
             [this](const time_t&,
-                   const std::vector<messages::localisation::Self>& robots) {
+                   const Mock<std::vector<messages::localisation::Self>>& mock_robots) {
+
+            auto& robots = mock_robots.data;
 
             emit(graph("Actual robot position", robot_position_[0], robot_position_[1]));
             emit(graph("Actual robot heading", robot_heading_[0], robot_heading_[1]));
@@ -295,39 +297,21 @@ namespace localisation {
             if (!cfg_.emit_robot_fieldobjects)
                 return;
 
-            auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
-            std::vector<messages::localisation::FieldObject::Model> robot_msg_models;
+            auto robots_msg = std::make_unique<std::vector<messages::localisation::Self>>();
+            
+            for (auto& model : robots) {
+                robots_msg->push_back(model);
+            }
 
-            // for (auto& model : robots) {
-            //     messages::localisation::FieldObject::Model robot_model;
-            //     robot_msg->name = "self";
-            //     robot_model.wm_x = model.position[0];
-            //     robot_model.wm_y = model.position[1];
-            //     robot_model.heading = std::atan2(model.heading[1], model.heading[0]);
-            //     robot_model.sd_x = 1;
-            //     robot_model.sd_y = 0.25;
-            //     robot_model.sr_xx = model.sr_xx; // * 100;
-            //     robot_model.sr_xy = model.sr_xy; // * 100;
-            //     robot_model.sr_yy = model.sr_yy; // * 100;
-            //     robot_model.lost = false;
-            //     robot_msg_models.push_back(robot_model);
-            // }
+            messages::localisation::Self self_marker;
+            self_marker.position = robot_position_;
+            self_marker.heading = robot_heading_;
+            self_marker.sr_xx = 0.01;
+            self_marker.sr_xy = 0;
+            self_marker.sr_yy = 0.01;
+            robots_msg->push_back(self_marker);
 
-            messages::localisation::FieldObject::Model actual_robot;
-            robot_msg->name = "self";
-            actual_robot.wm_x = robot_position_[0];
-            actual_robot.wm_y = robot_position_[1];
-            actual_robot.heading = std::atan2(robot_heading_[1], robot_heading_[0]);
-            actual_robot.sd_x = 1;
-            actual_robot.sd_y = 0.25;
-            actual_robot.sr_xx = 0.01;
-            actual_robot.sr_xy = 0.0;
-            actual_robot.sr_yy = 0.01;
-            actual_robot.lost = false;
-            robot_msg_models.push_back(actual_robot);
-
-            robot_msg->models = robot_msg_models;
-            emit(std::move(robot_msg));
+            emit(std::move(robots_msg));
         });
 
         // Emit ball to Nubugger
@@ -338,6 +322,7 @@ namespace localisation {
             [this](const time_t&,
                    const Mock<messages::localisation::Ball>& mock_ball,
                    const Mock<std::vector<messages::localisation::Self>>& mock_robots) {
+
 
             auto& ball = mock_ball.data;
             auto& robots = mock_robots.data;
@@ -360,49 +345,33 @@ namespace localisation {
             if (!cfg_.emit_ball_fieldobjects)
                 return;
             
-            auto ball_msg = std::make_unique<messages::localisation::FieldObject>();
-            std::vector<messages::localisation::FieldObject::Model> ball_msg_models;
-            // messages::localisation::FieldObject::Model ball_model;
-            // ball_msg->name = "ball";
-            // ball_model.wm_x = ball_pos[0];
-            // ball_model.wm_y = ball_pos[1];
-            // ball_model.heading = 0;
-            // ball_model.sd_x = 0.1;
-            // ball_model.sd_y = 0.1;
-            // ball_model.sr_xx = ball.sr_xx;
-            // ball_model.sr_xy = ball.sr_xy;
-            // ball_model.sr_yy = ball.sr_yy;
-            // ball_model.lost = false;
-            // ball_msg_models.push_back(ball_model);
+            auto balls_msg = std::make_unique<std::vector<messages::localisation::Ball>>();
 
-            messages::localisation::FieldObject::Model ball_marker_model;
-            ball_msg->name = "ball";
-            ball_marker_model.wm_x = ball_position_[0];
-            ball_marker_model.wm_y = ball_position_[1];
-            ball_marker_model.heading = 0;
-            ball_marker_model.sd_x = 0.01;
-            ball_marker_model.sd_y = 0.01;
-            ball_marker_model.sr_xx = 0.01;
-            ball_marker_model.sr_xy = 0;
-            ball_marker_model.sr_yy = 0.01;
-            ball_marker_model.lost = false;
-            ball_msg_models.push_back(ball_marker_model);
+            messages::localisation::Ball ball_model;
+            ball_model.position = ball_pos;
+            ball_model.velocity = ball_velocity_;
+            ball_model.sr_xx = ball.sr_xx;
+            ball_model.sr_xy = ball.sr_xy;
+            ball_model.sr_yy = ball.sr_yy;
+            balls_msg->push_back(ball_model);
 
-            // messages::localisation::FieldObject::Model robot_ball_model;
-            // ball_msg->name = "ball";
-            // robot_ball_model.wm_x = robot_ball_pos[0];
-            // robot_ball_model.wm_y = robot_ball_pos[1];
-            // robot_ball_model.heading = 0;
-            // robot_ball_model.sd_x = 0.005;
-            // robot_ball_model.sd_y = 0.005;
-            // robot_ball_model.sr_xx = 0.01;
-            // robot_ball_model.sr_xy = 0;
-            // robot_ball_model.sr_yy = 0.01;
-            // robot_ball_model.lost = false;
-            // ball_msg_models.push_back(robot_ball_model);
+            messages::localisation::Ball ball_marker;
+            ball_marker.position = ball_position_;
+            ball_marker.velocity = ball_velocity_;
+            ball_marker.sr_xx = 0.01;
+            ball_marker.sr_xy = 0;
+            ball_marker.sr_yy = 0.01;
+            balls_msg->push_back(ball_marker);
 
-            ball_msg->models = ball_msg_models;
-            emit(std::move(ball_msg));
+            messages::localisation::Ball robot_ball;
+            robot_ball.position = robot_ball_pos;
+            robot_ball.velocity = ball_velocity_;
+            robot_ball.sr_xx = 0.01;
+            robot_ball.sr_xy = 0;
+            robot_ball.sr_yy = 0.01;
+            balls_msg->push_back(robot_ball);
+
+            emit(std::move(balls_msg));
         });
     }
 }

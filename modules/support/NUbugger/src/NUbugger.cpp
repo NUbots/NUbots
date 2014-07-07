@@ -474,7 +474,7 @@ namespace modules {
                         ball_model.lost = false;
                         ball_msg_models.push_back(ball_model);
 
-                        break; // Only output a single model
+                        // break; // Only output a single model
                     }
                     ball_msg->models = ball_msg_models;
 
@@ -496,7 +496,7 @@ namespace modules {
                         robot_model.lost = false;
                         robot_msg_models.push_back(robot_model);
 
-                        break; // Only output a single model
+                        // break; // Only output a single model
                     }
                     robot_msg->models = robot_msg_models;
 

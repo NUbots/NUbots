@@ -65,12 +65,13 @@ namespace localisation {
             if (engine_.CanEmitFieldObjects()) {
                 auto ball_msg = std::make_unique<Ball>(ball);
                 emit(std::move(ball_msg));
-                emit(graph("Ball (robot-space)", model_state(0), model_state(1)));
             } else {
                 Mock<Ball> mock_ball = Mock<Ball>(ball);
                 auto mock_ball_msg = std::make_unique<Mock<Ball>>(mock_ball);
                 emit(std::move(mock_ball_msg));
             }
+
+            emit(graph("Ball (robot-space)", model_state(0), model_state(1)));
         });
 
        on<Trigger<FakeOdometry>,
