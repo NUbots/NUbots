@@ -213,38 +213,55 @@ namespace input {
         /*******************************************************************************************
          * Process state/mode changes
          ******************************************************************************************/
-        if (oldState.state != newState.state || oldState.mode != newState.mode) {
-            auto mode = newState.mode == Mode::TIMEOUT          ? GameMode::TIMEOUT
-                      : newState.mode == Mode::PENALTY_SHOOTOUT ? GameMode::PENALTY_SHOOTOUT
-                      : newState.mode == Mode::OVERTIME         ? GameMode::OVERTIME
-                                                                : GameMode::NORMAL;
+        if(oldState.mode != newState.mode && newState.mode != Mode::TIMEOUT) {
+            // Changed modes but not to timeout
+            auto mode = newState.mode == Mode::PENALTY_SHOOTOUT ? GameMode::Mode::PENALTY_SHOOTOUT
+                      : newState.mode == Mode::OVERTIME         ? GameMode::Mode::OVERTIME
+                                                                : GameMode::Mode::NORMAL;
+            emit(std::make_unique<GameMode>(GameMode{mode}));
+
+        }
+
+        if (oldState.mode != Mode::TIMEOUT && newState.mode == Mode::TIMEOUT) {
+            // Change the game state to timeout
+            auto time = NUClear::clock::now() + std::chrono::seconds(newState.secondaryTime);
+            emit(std::make_unique<GameState<GamePhase::TIMEOUT>>(GameState<GamePhase::TIMEOUT>{time}));
+        }
+        else if (oldState.state != newState.state) {
+
+            // State has changed, process it
 
             // TODO: handle timeouts and dropped balls
             switch (newState.state) {
                 case State::INITIAL: {
-                    // TODO no timers at all
-                    emit(std::make_unique<GameState<GamePhase::INITIAL>>(GameState<GamePhase::INITIAL>{mode}));
+                    emit(std::make_unique<GameState<GamePhase::INITIAL>>());
                     break;
                 }
                 case State::READY: {
-                    // TODO secondary timer counts down time to get ready
+                    /* Note: It was concluded that a specific 'dropped ball' event
+                     * was not needed, but in the case that it is, this is how and
+                     * where you would emit it:
+                     */
+                    // if (oldState.state == State::PLAYING) {
+                    //     // DROPPED BALL
+                    // }
                     auto time = NUClear::clock::now() + std::chrono::seconds(newState.secondaryTime);
-                    emit(std::make_unique<GameState<GamePhase::READY>>(GameState<GamePhase::READY>{mode, time}));
+                    emit(std::make_unique<GameState<GamePhase::READY>>(GameState<GamePhase::READY>{time}));
                     break;
                 }
                 case State::SET: {
-                    // TODO no timers at all
-                    emit(std::make_unique<GameState<GamePhase::SET>>(GameState<GamePhase::SET>{mode}));
+                    emit(std::make_unique<GameState<GamePhase::SET>>());
                     break;
                 }
                 case State::PLAYING: {
-                    // TODO: Primary timer counts time in half, secondary counts time to kick ball
-                    // emit(std::make_unique<GameState<GamePhase::PLAYING>>(GameState<GamePhase::PLAYING>{mode}));
+                    auto endHalf = NUClear::clock::now() + std::chrono::seconds(newState.secsRemaining);
+                    auto ballFree = NUClear::clock::now() + std::chrono::seconds(newState.secondaryTime);
+                    emit(std::make_unique<GameState<GamePhase::PLAYING>>(GameState<GamePhase::PLAYING>{endHalf, ballFree}));
                     break;
                 }
                 case State::FINISHED: {
-                    // TODO: Secondary timer counts time till next half
-                    // emit(std::make_unique<GameState<GamePhase::FINISHED>>(GameState<GamePhase::FINISHED>{mode}));
+                    auto nextHalf = NUClear::clock::now() + std::chrono::seconds(newState.secsRemaining);
+                    emit(std::make_unique<GameState<GamePhase::FINISHED>>(GameState<GamePhase::FINISHED>{nextHalf}));
                     break;
                 }
             }
