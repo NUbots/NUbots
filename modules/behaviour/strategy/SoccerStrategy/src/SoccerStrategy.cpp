@@ -189,6 +189,9 @@ namespace modules {
 					// Make a copy of the previous state.					
 					memcpy(&previousState, &currentState, sizeof(State));
 
+					// Make a copy of the ball.
+					memcpy(&currentState.ball, &ball, sizeof(Ball));
+
 					// Store current position and heading.
 					currentState.transform = self.robot_to_world_rotation;
 					currentState.position = self.position;
@@ -200,7 +203,7 @@ namespace modules {
 					// Set?
 					/* currentState.gameState.Set = gameController[STATE_SET] */;
 					// Ready?
-					/* currentState.gameState.Ready = gameController[STATE_READY] */;
+					/* currentState.gameState.Ready = gameController[STATE_GameStatePrimary::READY] */;
 					// Finish?
 					/* currentState.gameState.Finish = gameController[STATE_FINISH] */;
 					// Playing?
@@ -223,8 +226,10 @@ namespace modules {
 
 					// Am I the kicker?
 					// Is my start position inside the centre circle? 
-					currentState.kicker = ((arma::norm(START_POSITION, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.gameState.ready || currentState.gameState.set || currentState.gameState.playing)) || 
-								((currentState.gameState.penaltyKick || currentState.gameState.freeKick || currentState.gameState.goalKick || currentState.gameState.cornerKick) /* && currentState.??? */);
+					currentState.kicker = ((arma::norm(START_POSITION, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.primaryGameState == GameStatePrimary::READY || 
+								currentState.primaryGameState == GameStatePrimary::SET || currentState.primaryGameState == GameStatePrimary::PLAYING)) || ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK || 
+								currentState.secondaryGameState == GameStateSecondary::FREE_KICK || currentState.secondaryGameState == GameStateSecondary::GOAL_KICK || currentState.secondaryGameState == GameStateSecondary::CORNER_KICK) && 
+								currentState.primaryGameState == GameStatePrimary::PLAYING /* && currentState.??? */);
 
 					// Have I been picked up?
 					currentState.pickedUp = !feetOnGround;
@@ -242,24 +247,10 @@ namespace modules {
 					/* currentState.selfInZone = pointInPolygon(MY_ZONE, self.position); */
 							
 					// Can I see the ball?
-					currentState.ballSeen = ((ball.sr_xx < BALL_CERTAINTY_THRESHOLD) && (ball.sr_xy < BALL_CERTAINTY_THRESHOLD) && (ball.sr_yy < BALL_CERTAINTY_THRESHOLD));
-
-					// Can anyone else see the ball?
-					/* currentState.teamBallSeen = ((teamBall.sr_xx < BALL_CERTAINTY_THRESHOLD) && (teamBall.sr_xy < BALL_CERTAINTY_THRESHOLD) && (teamBall.sr_yy < BALL_CERTAINTY_THREHOLD)); */
+					currentState.ballSeen = ((currentState.ball.sr_xx < BALL_CERTAINTY_THRESHOLD) && (currentState.ball.sr_xy < BALL_CERTAINTY_THRESHOLD) && (currentState.ball.sr_yy < BALL_CERTAINTY_THRESHOLD));
 
 					// Is the ball lost?
-					currentState.ballLost = !currentState.ballSeen && !currentState.teamBallSeen;
-
-					// Select the best ball to use (our ball or the teams ball).
-					// We could be a little more sophisticated here and consider how certain we are about the 
-					// balls location.
-					if (!currentState.ballLost && currentState.ballSeen) {
-						memcpy(&currentState.ball, &ball, sizeof(Ball));
-					}
-
-					else if (!currentState.ballLost && currentState.teamBallSeen)  { 
-						/* memcpy(&currentState.ball, &teamBall, sizeof(Ball)) */;
-					}
+					currentState.ballLost = !currentState.ballSeen;
 
 					// Has the ball moved?
 					currentState.ballHasMoved = arma::norm(currentState.ball.position - previousState.ball.position, 2) > BALL_MOVEMENT_THRESHOLD;
@@ -327,13 +318,13 @@ namespace modules {
 					arma::vec2 optimalPosition = findOptimalPosition(ZONES.at(MY_ZONE));
 
 					// Determine current state and appropriate action(s).
-					if ((currentState.GameStatePrimary == INITIAL) || (currentState.GameStatePrimary == SET) || (currentState.GameStatePrimary == FINISHED) || currentState.pickedUp) {
+					if ((currentState.primaryGameState == GameStatePrimary::INITIAL) || (currentState.primaryGameState == GameStatePrimary::SET) || (currentState.primaryGameState == GameStatePrimary::FINISHED) || currentState.pickedUp) {
 						stopMoving();
 		
 						NUClear::log<NUClear::INFO>("Standing still.");
 					}
 	
-					else if (currentState.GameStatePrimary == READY) {
+					else if (currentState.primaryGameState == GameStatePrimary::READY) {
 						goToPoint(START_POSITION);
 
 						NUClear::log<NUClear::INFO>("Game is about to start. I should be in my starting position.");
@@ -364,34 +355,34 @@ namespace modules {
 						NUClear::log<NUClear::INFO>("I am unpenalised, I should already know where I am and where the ball is. So find the most optimal location in my zone to go to.");
 					}
 
-					else if ((currentState.GameStateSecondary == PENALTY_KICK) && IS_GOALIE && currentState.ballLost) {
+					else if ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK) && IS_GOALIE && currentState.ballLost) {
 						findBall();
 
 						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
 					}
 
-					else if ((currentState.GameStateSecondary == PENALTY_KICK) && IS_GOALIE && !currentState.ballLost && currentState.ballHasMoved && !currentState.ballApproachingGoal) {
+					else if ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK) && IS_GOALIE && !currentState.ballLost && currentState.ballHasMoved && !currentState.ballApproachingGoal) {
 						arma::vec2 blockPosition = {currentState.position[0], (transformPoint(currentState.ball.position) + currentState.position)[1]};
 						sideStepToPoint(blockPosition);
 
 						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
 					}
 
-					else if ((currentState.GameStateSecondary == PENALTY_KICK) && currentState.ballLost && currentState.kicker) {
+					else if ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK) && currentState.ballLost && currentState.kicker) {
 						findBall();
 
 						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
 					}
 
-					else if (currentState.gameState.penaltyKick && !currentState.ballLost && currentState.kicker) {
+					else if (currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK && !currentState.ballLost && currentState.kicker) {
 						arma::vec2 goal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 						approachBall(goal);
 
 						NUClear::log<NUClear::INFO>("Penalty kick in progress. Approaching ball.");
 					}
 
-					else if ((previousState.GameStatePrimary == SET) && (currentState.GameStatePrimary == PLAYING) && currentState.kickOff && currentState.kicker) {
-						kickBall(arma::normalise(currentState.heading, 2);
+					else if ((previousState.primaryGameState == GameStatePrimary::SET) && (currentState.primaryGameState == GameStatePrimary::PLAYING) && currentState.kickOff && currentState.kicker) {
+						kickBall(arma::normalise(currentState.heading, 2));
 
 						NUClear::log<NUClear::INFO>("Game just started. Time to kick off.");
 					}
@@ -494,6 +485,10 @@ namespace modules {
 				approach->walkMovementType = WalkApproach::WalkToPoint;
 				approach->heading = transformPoint(currentState.ball.position) + currentState.position;
 				approach->target = position; 
+
+				currentState.targetPosition = approach->target;
+				currentState.targetHeading = approach->heading;
+
 				emit(std::move(approach));
 			}
 
@@ -516,6 +511,10 @@ namespace modules {
 				approach->walkMovementType = WalkApproach::OmnidirectionalReposition;
 				approach->heading = transformPoint(currentState.ball.position) + currentState.position;
 				approach->target = position; 
+
+				currentState.targetPosition = approach->target;
+				currentState.targetHeading = approach->heading;
+
 				emit(std::move(approach));
 			}
 
@@ -526,6 +525,10 @@ namespace modules {
 				approach->walkMovementType = WalkApproach::ApproachFromDirection;
 				approach->heading = heading;
 				approach->target = transformPoint(currentState.ball.position) + currentState.position;
+
+				currentState.targetPosition = approach->target;
+				currentState.targetHeading = approach->heading;
+
 				emit(std::move(approach));
 			}
 

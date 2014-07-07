@@ -121,14 +121,13 @@ namespace modules {
 
 			arma::vec2 ballGoalIntersection;
 			arma::vec2 ballSelfIntersection;
+			messages::localisation::Ball ball;
 
 			arma::mat22 transform;
 			arma::vec2 position;
 			arma::vec2 heading;
-			messages::localisation::Ball ball;
-
-			arma::vec2 targetHeading;
 			arma::vec2 targetPosition;
+			arma::vec2 targetHeading;
 		} State;
 
 		struct SoccerStrategyConfig {
@@ -158,7 +157,7 @@ namespace modules {
 
 			messages::support::FieldDescription FIELD_DESCRIPTION;
 
-			State previousState, currentState;
+			State currentState, previousState;
 
 			bool gameStateButtonStatus;
 			bool penalisedButtonStatus;
