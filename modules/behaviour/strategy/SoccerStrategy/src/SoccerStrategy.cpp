@@ -197,6 +197,12 @@ namespace modules {
 					currentState.position = self.position;
 					currentState.heading = atan2(currentState.transform(1, 0), currentState.transform(0, 0));
 
+					// Allow the back panel button to cycle through the primary game states.
+					if (gameStateButtonStatus) {
+						gameStateButtonStatus = false;
+						currentState.primaryGameState++;
+					}
+
 					// What state is the game in?
 					// Initial?
 					/* currentState.gameState.Initial = gameController[STATE_INITIAL] */;
