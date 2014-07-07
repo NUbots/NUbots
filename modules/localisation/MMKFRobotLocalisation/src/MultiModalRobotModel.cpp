@@ -108,7 +108,7 @@ double RobotHypothesis::MeasurementUpdate(
     // Unit vector orientation
     arma::vec2 actual_pos = actual_object.location();
     arma::vec2 measurement = observed_object.measurements[0].position.rows(0, 1);
-    arma::mat22 cov = observed_object.measurements[0].error.submat(0, 0, 2, 2);
+    arma::mat22 cov = observed_object.measurements[0].error.submat(0, 0, 1, 1);
 
     double quality = filter_.measurementUpdate(measurement, cov, arma::vec2({actual_pos[0],actual_pos[1]}));
 
@@ -128,11 +128,13 @@ double RobotHypothesis::MeasurementUpdate(
         arma::vec(lfo_a.location()), arma::vec(lfo_b.location())
     };
 
-    // Our heading difference should be our dot product (TODO check this I am guessing and tired)
-    double heading_diff = arma::dot(obv_a.measurements[0].position.rows(0, 1), obv_b.measurements[0].position.rows(0, 1));
+    // Use a dot product to calculate heading distance:
+    arma::vec unit_a = arma::normalise(obv_a.measurements[0].position.rows(0, 1));
+    arma::vec unit_b = arma::normalise(obv_b.measurements[0].position.rows(0, 1));
+    double heading_diff = std::acos(arma::dot(arma::vec(unit_a), arma::vec(unit_b)));
 
     arma::vec measurement = { std::abs(heading_diff) };
-    arma::mat cov; // No idea how to get this :P
+    arma::mat cov = arma::eye(1, 1) * 0.1; // TODO: Calculate correct covariance
 
     double quality = filter_.measurementUpdate(measurement, cov, actual_positions);
 

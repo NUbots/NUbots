@@ -20,6 +20,7 @@
 #include "MockRobot.h"
 #include <nuclear>
 #include "utility/math/angle.h"
+#include "utility/math/matrix.h"
 #include "utility/math/coordinates.h"
 #include "utility/nubugger/NUgraph.h"
 #include "utility/localisation/transform.h"
@@ -121,10 +122,12 @@ namespace localisation {
 
         // Update ball position
         on<Trigger<Every<10, std::chrono::milliseconds>>>("Ball motion", [this](const time_t&){
+
             if (!cfg_.simulate_ball_movement) {
                 ball_velocity_ = { 0, 0 };
                 return;
             }
+
 
             auto t = absolute_time();
             double period = 40;
@@ -210,20 +213,34 @@ namespace localisation {
                 auto& fd = field_description_;
                 auto goal1_pos = arma::vec3 { fd->goalpost_br[0], fd->goalpost_br[1], 0.0 };
                 auto goal2_pos = arma::vec3 { fd->goalpost_bl[0], fd->goalpost_bl[1], 0.0 };
-                // NUClear::log("Goal positions\n", goal1_pos, goal2_pos);
 
                 auto goal1 = messages::vision::Goal();
                 auto goal2 = messages::vision::Goal();
                 goal1.side = messages::vision::Goal::Side::RIGHT;
                 goal2.side = messages::vision::Goal::Side::LEFT;
 
-                // (dist, bearing, declination)
-                goal1.sphericalFromCamera = utility::math::coordinates::Cartesian2Spherical(goal1_pos - camera_pos);
-                goal2.sphericalFromCamera = utility::math::coordinates::Cartesian2Spherical(goal2_pos - camera_pos);
-                goal1.sphericalFromCamera[1] = utility::math::angle::normalizeAngle(goal1.sphericalFromCamera[1] - camera_heading);
-                goal2.sphericalFromCamera[1] = utility::math::angle::normalizeAngle(goal2.sphericalFromCamera[1] - camera_heading);
-                goal1.error = arma::eye(3, 3) * 0.1;
-                goal2.error = arma::eye(3, 3) * 0.1;
+                // // Observations in spherical from camera: (dist, bearing, declination)
+                // messages::vision::VisionObject::Measurement g1_m;
+                // messages::vision::VisionObject::Measurement g2_m;
+                // g1_m.sphericalFromCamera = utility::math::coordinates::Cartesian2Spherical(goal1_pos - camera_pos);
+                // g2_m.sphericalFromCamera = utility::math::coordinates::Cartesian2Spherical(goal2_pos - camera_pos);
+                // g1_m.sphericalFromCamera[1] = utility::math::angle::normalizeAngle(goal1.sphericalFromCamera[1] - camera_heading);
+                // g2_m.sphericalFromCamera[1] = utility::math::angle::normalizeAngle(goal2.sphericalFromCamera[1] - camera_heading);
+                // g1_m.error = arma::eye(3, 3) * 0.1;
+                // g2_m.error = arma::eye(3, 3) * 0.1;
+                // goal1.measurements.push_back(g1_m);
+                // goal2.measurements.push_back(g2_m);
+
+                // Observations in robot-relative cartesian:
+                messages::vision::VisionObject::Measurement g1_m;
+                messages::vision::VisionObject::Measurement g2_m;
+                auto rot = utility::math::matrix::zRotationMatrix(camera_heading);
+                g1_m.position = rot * (goal1_pos - camera_pos);
+                g2_m.position = rot * (goal2_pos - camera_pos);
+                g1_m.error = arma::eye(3, 3) * 0.1;
+                g2_m.error = arma::eye(3, 3) * 0.1;
+                goal1.measurements.push_back(g1_m);
+                goal2.measurements.push_back(g2_m);
 
                 auto goals = std::make_unique<std::vector<messages::vision::Goal>>();
 
@@ -237,13 +254,21 @@ namespace localisation {
             if (cfg_.simulate_ball_observations) {
                 auto ball_vec = std::make_unique<std::vector<messages::vision::Ball>>();
 
-                // (dist, bearing, declination)
                 messages::vision::Ball ball;
+                messages::vision::VisionObject::Measurement b_m;
                 auto ball_pos = arma::vec3 { ball_position_[0], ball_position_[1], 0.0 };
-                ball.sphericalFromCamera = utility::math::coordinates::Cartesian2Spherical(ball_pos - camera_pos);
-                ball.sphericalFromCamera[1] = utility::math::angle::normalizeAngle(ball.sphericalFromCamera[1] - camera_heading);
-                ball.error = arma::eye(3, 3) * 0.1;
+                
+                // // Observations in spherical from camera: (dist, bearing, declination)
+                // b_m.sphericalFromCamera = utility::math::coordinates::Cartesian2Spherical(ball_pos - camera_pos);
+                // b_m.sphericalFromCamera[1] = utility::math::angle::normalizeAngle(ball.sphericalFromCamera[1] - camera_heading);
+                // b_m.error = arma::eye(3, 3) * 0.1;
 
+                // Observations in robot-relative cartesian:
+                auto rot = utility::math::matrix::zRotationMatrix(camera_heading);
+                b_m.position = rot * (ball_pos - camera_pos);
+                b_m.error = arma::eye(3, 3) * 0.1;
+
+                ball.measurements.push_back(b_m);
                 ball_vec->push_back(ball);
 
                 emit(std::move(ball_vec));

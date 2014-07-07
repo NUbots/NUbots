@@ -53,30 +53,29 @@ namespace localisation {
         on<Trigger<Every<100, std::chrono::milliseconds>>,
            Options<Sync<KFBallLocalisation>>>("NUbugger Output", [this](const time_t&) {
             auto model_state = engine_.ball_filter_.get();
-            // auto model_cov = engine_.ball_filter_.getCovariance();
+            auto model_cov = engine_.ball_filter_.getCovariance();
 
             messages::localisation::Ball ball;
             ball.position = model_state.rows(0, 1);
             ball.velocity = model_state.rows(2, 3);
-            // ball.sr_xx = model_cov(0, 0);
-            // ball.sr_xy = model_cov(0, 1);
-            // ball.sr_yy = model_cov(1, 1);
+            ball.sr_xx = model_cov(0, 0);
+            ball.sr_xy = model_cov(0, 1);
+            ball.sr_yy = model_cov(1, 1);
 
-            // if (engine_.CanEmitFieldObjects()) {
+            if (engine_.CanEmitFieldObjects()) {
                 auto ball_msg = std::make_unique<Ball>(ball);
                 emit(std::move(ball_msg));
-            // } else {
-            //     Mock<Ball> mock_ball = Mock<Ball>(ball);
-            //     auto mock_ball_msg = std::make_unique<Mock<Ball>>(mock_ball);
-            //     emit(std::move(mock_ball_msg));
-            // }
-
-            // emit(graph("Ball (robot-space)", model_state(0), model_state(1)));
+                emit(graph("Ball (robot-space)", model_state(0), model_state(1)));
+            } else {
+                Mock<Ball> mock_ball = Mock<Ball>(ball);
+                auto mock_ball_msg = std::make_unique<Mock<Ball>>(mock_ball);
+                emit(std::move(mock_ball_msg));
+            }
         });
 
        on<Trigger<FakeOdometry>,
            Options<Sync<KFBallLocalisation>>
-          >("KFBallLocalisation Odometry", [this](const FakeOdometry& odom) {
+           >("KFBallLocalisation Odometry", [this](const FakeOdometry& odom) {
             auto curr_time = NUClear::clock::now();
             engine_.TimeUpdate(curr_time, odom);
         });
@@ -90,7 +89,7 @@ namespace localisation {
 
        on<Trigger<std::vector<messages::vision::Ball>>,
            Options<Sync<KFBallLocalisation>>
-          >("KFBallLocalisation Step",
+           >("KFBallLocalisation Step",
             [this](const std::vector<messages::vision::Ball>& balls) {
 
             if(balls.size() > 0){

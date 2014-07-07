@@ -63,7 +63,7 @@ double KFBallLocalisationEngine::MeasurementUpdate(
 
     // // Robot relative cartesian coordinates
     arma::vec2 measurement = observed_object.measurements[0].position.rows(0, 1);
-    arma::mat22 cov = observed_object.measurements[0].error.submat(0, 0, 2, 2);
+    arma::mat22 cov = observed_object.measurements[0].error.submat(0, 0, 1, 1);
 
     double quality = ball_filter_.measurementUpdate(measurement, cov);
 
