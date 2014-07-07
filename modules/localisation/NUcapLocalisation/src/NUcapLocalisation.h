@@ -21,7 +21,6 @@
 #define MODULES_NUCAP_LOCALISATION_H
 
 #include <nuclear>
-#include "utility/math/geometry/UnitQuaternion.h"
 
 namespace modules {
 namespace localisation {

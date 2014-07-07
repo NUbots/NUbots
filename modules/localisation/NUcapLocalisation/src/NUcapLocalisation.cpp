@@ -21,6 +21,7 @@
 #include "utility/nubugger/NUgraph.h"
 #include "messages/input/proto/MotionCapture.pb.h"
 #include "messages/input/Sensors.h"
+#include "utility/math/geometry/UnitQuaternion.h"
 #include <armadillo>
 
 namespace modules {
@@ -44,10 +45,10 @@ namespace localisation {
                     float x = rigidBody.position().x();
                     float y = rigidBody.position().y();
                     float z = rigidBody.position().z();
-                    // UnitQuaternion q(arma::vec4{rigidBody.rotation().w(),
-                    //                             rigidBody.rotation().x(),
-                    //                             rigidBody.rotation().y(),
-                    //                             rigidBody.rotation().z()});
+                    // UnitQuaternion q = UnitQuaternion(arma::vec4{rigidBody.rotation().w(),
+                    //                                              rigidBody.rotation().x(),
+                    //                                              rigidBody.rotation().y(),
+                    //                                              rigidBody.rotation().z()});
 
                     // arma::mat33 groundToWorldRotation = q.getMatrix() * sensors.orientationCamToGround.submat(0,0,2,2).t();
                     
