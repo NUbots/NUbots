@@ -324,10 +324,10 @@ namespace modules {
 
 
 					// Calculate the optimal zone position.
-					arma::vec2 optimalPosition = findOptimalPosition();
+					arma::vec2 optimalPosition = findOptimalPosition(ZONES.at(MY_ZONE));
 
 					// Determine current state and appropriate action(s).
-					if (currentState.gameState.initial || currentState.gameState.set || currentState.gameState.finished || currentState.penalised || currentState.pickedUp) {
+					if (currentState.gameState.initial || currentState.gameState.set || currentState.gameState.finished || currentState.pickedUp) {
 						stopMoving();
 		
 						NUClear::log<NUClear::INFO>("Standing still.");
@@ -339,10 +339,10 @@ namespace modules {
 						NUClear::log<NUClear::INFO>("Game is about to start. I should be in my starting position.");
 					}
 
-					else if (!currentState.selfInZone) {
-						goToPoint(optimalPosition);
+					else if(currentState.penalised && !currentState.pickedUp && !currentState.putDown) {
+						stopMoving();
 
-						NUClear::log<NUClear::INFO>("I am not where I should be. Going there now.");
+						NUClear::log<NUClear::INFO>("I am penalised and have not been picked up yet. Don't move");
 					}
 
 					else if(currentState.penalised && currentState.putDown) {
@@ -350,6 +350,12 @@ namespace modules {
 						findBall();
 
 						NUClear::log<NUClear::INFO>("I am penalised and have been put down. I must be on the side line somewhere. Where am I?");
+					}
+
+					else if (!currentState.selfInZone) {
+						goToPoint(optimalPosition);
+
+						NUClear::log<NUClear::INFO>("I am not where I should be. Going there now.");
 					}
 
 					else if (currentState.unPenalised) {
@@ -385,7 +391,7 @@ namespace modules {
 					}
 
 					else if (previousState.gameState.set && currentState.gameState.playing && currentState.kickOff && currentState.kicker) {
-						kickBall();
+						kickBall(arma::normalise(currentState.heading, 2));
 
 						NUClear::log<NUClear::INFO>("Game just started. Time to kick off.");
 					}
@@ -418,7 +424,7 @@ namespace modules {
 					}
 
 					else if (currentState.kickPosition && !isKicking) {
-						kickBall();
+						kickBall(arma::normalise(currentState.heading, 2));
 	
 						NUClear::log<NUClear::INFO>("In kicking position. Kicking ball.");
 					}
@@ -426,7 +432,7 @@ namespace modules {
 					else if (currentState.goalInRange && !isKicking) {
 						arma::vec2 goal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 						approachBall(goal);
-//						kickBall();				// Do we need this???
+						kickBall(arma::normalise(goal, 2));
 
 						NUClear::log<NUClear::INFO>("Kick for goal.");
 					}
@@ -447,8 +453,16 @@ namespace modules {
 				});
 			}
 
-			arma::vec2 SoccerStrategy::findOptimalPosition() {
-				arma::vec2 optimalPosition = {0, 0};
+			arma::vec2 SoccerStrategy::findOptimalPosition(const std::vector<arma::vec2>& zone) {
+				arma::vec2 optimalPosition;
+
+				if (zone.size() > 0) {
+					optimalPosition = zone.at(0);
+				}
+
+				else {
+					optimalPosition = {0, 0};
+				}
 
 				return(optimalPosition);
 			}
@@ -484,6 +498,7 @@ namespace modules {
 			}
 
 			void SoccerStrategy::watchBall() {
+				// This needs to be replaced with a proper lookAtBall command.
 				arma::vec2 ballPosition = transformPoint(currentState.ball.position) + currentState.position;
 
 				auto look = std::make_unique<messages::behaviour::LookAtPoint>();
@@ -514,8 +529,10 @@ namespace modules {
 				emit(std::move(approach));
 			}
 
-			void SoccerStrategy::kickBall() {
+			void SoccerStrategy::kickBall(const arma::vec2& direction) {
 				// Emit aim vector.
+				// Currently not implemented. Kick should happen when robot is close enough to the ball.
+				(void)direction;
 			}
 
 			arma::vec2 SoccerStrategy::transformPoint(const arma::vec2& point) {

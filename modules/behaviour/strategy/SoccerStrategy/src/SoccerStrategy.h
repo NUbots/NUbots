@@ -169,14 +169,14 @@ namespace modules {
 			messages::motion::KickCommand kickData;
 			messages::motion::WalkCommand walkData;
 
-			arma::vec2 findOptimalPosition();
+			arma::vec2 findOptimalPosition(const std::vector<arma::vec2>& zone);
 			void stopMoving();
 			void findSelf();
 			void findBall();
 			void goToPoint(const arma::vec2& position);
 			void sideStepToPoint(const arma::vec2& position);
 			void watchBall();
-			void kickBall();
+			void kickBall(const arma::vec2& direction);
 			void approachBall(const arma::vec2& haading);
 			arma::vec2 transformPoint(const arma::vec2& point);
 
