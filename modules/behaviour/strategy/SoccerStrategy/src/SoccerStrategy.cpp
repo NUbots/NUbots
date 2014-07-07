@@ -59,7 +59,7 @@ namespace modules {
 		using messages::input::gameevents::Penalisation;
 		using messages::input::gameevents::Unpenalisation;
 		using messages::input::gameevents::GoalScored;
-		using messages::input::gameevents::Scor;
+		using messages::input::gameevents::Score;
 
 		using utility::math::geometry::Plane;
 		using utility::math::geometry::ParametricLine;
@@ -330,13 +330,13 @@ namespace modules {
 					arma::vec2 optimalPosition = findOptimalPosition();
 
 					// Determine current state and appropriate action(s).
-					if (currentState.gameState.initial || currentState.gameState.set || currentState.gameState.finished || currentState.penalised || currentState.pickedUp) {
+					if ((currentState.GameStatePrimary == INITIAL) || (currentState.GameStatePrimary == SET) || (currentState.GameStatePrimary == FINISHED) || currentState.penalised || currentState.pickedUp) {
 						stopMoving();
 		
 						NUClear::log<NUClear::INFO>("Standing still.");
 					}
 	
-					else if (currentState.gameState.ready) {
+					else if (currentState.GameStatePrimary == READY) {
 						goToPoint(START_POSITION);
 
 						NUClear::log<NUClear::INFO>("Game is about to start. I should be in my starting position.");
@@ -361,13 +361,13 @@ namespace modules {
 						NUClear::log<NUClear::INFO>("I am unpenalised, I should already know where I am and where the ball is. So find the most optimal location in my zone to go to.");
 					}
 
-					else if (currentState.gameState.penaltyKick && IS_GOALIE && currentState.ballLost) {
+					else if ((currentState.GameStateSecondary == PENALTY_KICK) && IS_GOALIE && currentState.ballLost) {
 						findBall(hints);
 
 						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
 					}
 
-					else if (currentState.gameState.penaltyKick && IS_GOALIE && !currentState.ballLost && currentState.ballHasMoved && !currentState.ballApproachingGoal) {
+					else if ((currentState.GameStateSecondary == PENALTY_KICK) && IS_GOALIE && !currentState.ballLost && currentState.ballHasMoved && !currentState.ballApproachingGoal) {
 						arma::vec2 blockPosition = {currentState.position[0], (transformPoint(currentState.ball.position) + currentState.position)[1]};
 						goToPoint(blockPosition);
 						watchBall();
@@ -375,19 +375,19 @@ namespace modules {
 						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
 					}
 
-					else if (currentState.gameState.penaltyKick && currentState.ballLost && currentState.kicker) {
+					else if ((currentState.GameStateSecondary == PENALTY_KICK) && currentState.ballLost && currentState.kicker) {
 						findBall(hints);
 
 						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
 					}
 
-					else if (currentState.gameState.penaltyKick && !currentState.ballLost && currentState.kicker) {
+					else if ((currentState.GameStateSecondary == PENALTY_KICK) && !currentState.ballLost && currentState.kicker) {
 						approachBall();
 
 						NUClear::log<NUClear::INFO>("Penalty kick in progress. Approaching ball.");
 					}
 
-					else if (previousState.gameState.set && currentState.gameState.playing && currentState.kickOff && currentState.kicker) {
+					else if ((previousState.GameStatePrimary == SET) && (currentState.GameStatePrimary == PLAYING) && currentState.kickOff && currentState.kicker) {
 						kickBall();
 
 						NUClear::log<NUClear::INFO>("Game just started. Time to kick off.");
