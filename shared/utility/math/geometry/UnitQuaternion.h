@@ -32,10 +32,10 @@ namespace geometry {
         */
         UnitQuaternion(const arma::vec3& v);
 
-        static constexpr uint QW = 0;   //real part
-        static constexpr uint QX = 1;
-        static constexpr uint QY = 2;
-        static constexpr uint QZ = 3;
+        static constexpr uint kW = 0;   //real part
+        static constexpr uint kX = 1;
+        static constexpr uint kY = 2;
+        static constexpr uint kZ = 3;
     public:
         //q stores the components of the quaternion, with real part first
         arma::vec4 q;
