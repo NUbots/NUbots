@@ -33,7 +33,7 @@ namespace modules {
 
         using utility::math::geometry::Line;
 
-        void LUTClassifier::findGoals(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
+        void LUTClassifier::findGoals(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
 
             /*
                Here we cast classification lines to attempt to locate the general area of the goals.
@@ -72,7 +72,7 @@ namespace modules {
                                 end[0] = p1->at(0);
                             }
                             else {
-                                end[0] = round(l.findXFromY(y));
+                                end[0] = round(l.x(y));
                             }
 
                             break;
@@ -109,7 +109,7 @@ namespace modules {
                                 start[0] = p2->at(0);
                             }
                             else {
-                                start[0] = round(l.findXFromY(y));
+                                start[0] = round(l.x(y));
                             }
 
                             break;

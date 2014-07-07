@@ -9,7 +9,7 @@ ADD_ROLE(
         support::NUbugger
 
         #Localisation
-        localisation::MockRobot
+        #localisation::MockRobot
         localisation::MMKFRobotLocalisation
         localisation::KFBallLocalisation
 )

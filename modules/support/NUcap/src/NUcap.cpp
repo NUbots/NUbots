@@ -60,7 +60,7 @@ namespace support {
 
             NUClear::log("serverIP", serverIP);
             NUClear::log("clientIP", clientIP);
-            
+
 
             // Version number of the NatNet protocol, as reported by the server.
             unsigned char natNetMajor;
@@ -91,7 +91,7 @@ namespace support {
 
         });
 
-        on<Trigger<Every<1, std::chrono::milliseconds>>>([this](const time_t&) {
+        on<Trigger<Every<100, std::chrono::milliseconds>>>([this](const time_t&) {
             bool valid;
             // Try to get a new frame from the listener.
             MocapFrame frame(frameListener->pop(&valid).first);
@@ -125,15 +125,23 @@ namespace support {
 
             for (auto fRigidBody : frame.rigidBodies()) {
                 auto* rigidBody = moCap->add_rigid_bodies();
-                rigidBody->set_identifier(std::to_string(fRigidBody.id()));
+                rigidBody->set_identifier(fRigidBody.id());
 
+                auto* location = rigidBody->mutable_location();
+                // normalize to robot coordinate system, x foward, y left, z up
+                location->set_x(-fRigidBody.location().z);
+                location->set_y(-fRigidBody.location().x);
+                location->set_z(fRigidBody.location().y);
+
+                // log("Received:", rigidBody->identifier(), location->x(), location->y(), location->z());
+//
                 auto rotation = fRigidBody.orientation();
 
                 rigidBody->set_qw(rotation.qw);
                 rigidBody->set_qx(rotation.qx);
                 rigidBody->set_qy(rotation.qy);
                 rigidBody->set_qz(rotation.qz);
-                // TODO: fRigidBody.location();
+
                 for (auto point : fRigidBody.markers()) {
                     auto* marker_point = rigidBody->add_points();
                     marker_point->set_x(point.x);

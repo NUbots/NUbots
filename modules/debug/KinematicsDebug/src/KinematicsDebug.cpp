@@ -103,10 +103,6 @@ namespace modules {
                         emit(std::move(waypoints));
                     });
 
-                    on< Trigger<Configuration<ForwardKinematicsRequest>> >([this](const Configuration<ForwardKinematicsRequest>& request) {
-
-                    });
-
                     on< Trigger<Configuration<LegKinematicsNULLTest>> >([this](const Configuration<LegKinematicsNULLTest>& request) {
                         int iterations = 1;
                         int numberOfFails = 0;

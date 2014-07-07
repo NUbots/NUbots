@@ -1,5 +1,5 @@
 /*
- * Should produce world to robot coordinate transform 
+ * Should produce world to robot coordinate transform
  * This file is part of the NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
@@ -36,32 +36,32 @@ namespace utility {
             // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation.
             // @return The new estimated system state.
             arma::vec::fixed<IMUModel::size> IMUModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT) {
-                
+
                 arma::vec::fixed<IMUModel::size> newState;
 
                 newState = state;
-                
+
                 //make a rotation quaternion
                 const double omega = arma::norm(state.rows(VX, VZ)) + 0.00000000001;
                 const double theta = omega*deltaT*0.5;
                 const double sinTheta = sin(theta);
                 const double cosTheta = cos(theta);
                 arma::vec vq({cosTheta,state(VX)*sinTheta/omega,state(VY)*sinTheta/omega,state(VZ)*sinTheta/omega});
-                
+
                 //calculate quaternion multiplication
                 arma::vec qcross = arma::cross( vq.rows(1,3), state.rows(QX,QZ) );
                 newState(QW) = vq(0)*state(QW) - arma::dot(vq.rows(1,3), state.rows(QX,QZ));
                 newState(QX) = vq(0)*state(QX) + state(QW)*vq(1) + qcross(0);
                 newState(QY) = vq(0)*state(QY) + state(QW)*vq(2) + qcross(1);
                 newState(QZ) = vq(0)*state(QZ) + state(QW)*vq(3) + qcross(2);
-                
+
                 return newState;
 
             }
 
 
             // Accelerometer
-            arma::vec3 IMUModel::predictedObservation(const arma::vec::fixed<size>& state, float x) {
+            arma::vec3 IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&) {
 
                 arma::vec3 down = { 2 * state[QX] * state[QZ] + 2 * state[QY] * state[QW]
                                   , 2 * state[QY] * state[QZ] - 2 * state[QX] * state[QW]
@@ -73,7 +73,7 @@ namespace utility {
             }
 
             // Gyroscope
-            arma::vec3 IMUModel::predictedObservation(const arma::vec::fixed<size>& state, int y) {
+            arma::vec3 IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&) {
                 return state.rows(VX, VZ);
             }
 

@@ -42,9 +42,9 @@ namespace utility {
                 static constexpr uint QZ = 6;
 
                 struct MeasurementType {
-                    struct GYROSCOPE;
-                    struct ACCELEROMETER;
-                    struct FORWARD;
+                    struct GYROSCOPE {};
+                    struct ACCELEROMETER {};
+                    struct FORWARD {};
                 };
 
                 arma::vec processNoiseDiagonal;
@@ -56,8 +56,8 @@ namespace utility {
                 arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 
                 arma::vec3 predictedObservation(const arma::vec::fixed<size>& state);
-                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, float);
-                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, int);
+                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&);
+                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&);
 
                 arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 

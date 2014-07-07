@@ -44,6 +44,7 @@ namespace modules {
             using utility::motion::kinematics::Side;
             using utility::math::matrix::orthonormal44Inverse;
             using utility::math::matrix::quaternionToRotationMatrix;
+            using utility::math::kalman::IMUModel;
 
             SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -250,8 +251,8 @@ namespace modules {
 
                     orientationFilter.timeUpdate(deltaT);
 
-                    orientationFilter.measurementUpdate(sensors->accelerometer, MEASUREMENT_NOISE_ACCELEROMETER, float(0));
-                    orientationFilter.measurementUpdate(sensors->gyroscope,     MEASUREMENT_NOISE_GYROSCOPE, int(1));
+                    orientationFilter.measurementUpdate(sensors->accelerometer, MEASUREMENT_NOISE_ACCELEROMETER, IMUModel::MeasurementType::ACCELEROMETER());
+                    orientationFilter.measurementUpdate(sensors->gyroscope,     MEASUREMENT_NOISE_GYROSCOPE, IMUModel::MeasurementType::GYROSCOPE());
 
                     // Gives us the quaternion representation
                     arma::vec o = orientationFilter.get();
@@ -363,18 +364,18 @@ namespace modules {
                      ************************************************/
 
 
-                    sensors->orientationCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH], 
+                    sensors->orientationCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH],
                                                                                                         sensors->orientation.submat(0,2,2,2),
                                                                                                         sensors->bodyCentreHeight);
                     sensors->orientationHorizon = utility::motion::kinematics::calculateHorizon(sensors->orientationCamToGround.submat(0,0,2,2).t(),cameraParameters.focalLengthPixels);
 
 
                     if(sensors->leftFootDown) {
-                        sensors->kinematicsCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH], 
+                        sensors->kinematicsCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH],
                                                                                                            sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,2,2,2),
-                                                                                                           sensors->bodyCentreHeight);                        
+                                                                                                           sensors->bodyCentreHeight);
                     } else if (sensors->rightFootDown) {
-                        sensors->kinematicsCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH], 
+                        sensors->kinematicsCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH],
                                                                                                            sensors->forwardKinematics[ServoID::R_ANKLE_ROLL].submat(0,2,2,2),
                                                                                                            sensors->bodyCentreHeight);
                     }
@@ -406,7 +407,7 @@ namespace modules {
 
                         integratedOdometry += sensors->odometry.submat(0,3,1,3);
 
-                    emit(graph("LFoot Down", sensors->leftFootDown
+                    /*emit(graph("LFoot Down", sensors->leftFootDown
                         ));
                     emit(graph("RFoot Down", sensors->rightFootDown
                         ));
@@ -415,7 +416,7 @@ namespace modules {
                     emit(graph("Integrated Odometry", integratedOdometry[0], integratedOdometry[1]
                         ));
                     emit(graph("COM", sensors->centreOfMass[0], sensors->centreOfMass[1], sensors->centreOfMass[2], sensors->centreOfMass[3]
-                        ));
+                        ));*/
 
                     emit(std::move(sensors));
                 });
