@@ -27,7 +27,21 @@ namespace math {
 namespace geometry {
 
     class UnitQuaternion {
+    private:
+        /* @brief Constructor for non-unit quaternion for purpose of point representation
+        */
+        UnitQuaternion(const arma::vec3& v);
+
+        static constexpr uint kW = 0;   //real part
+        static constexpr uint kX = 1;
+        static constexpr uint kY = 2;
+        static constexpr uint kZ = 3;
     public:
+        //q stores the components of the quaternion, with real part first
+        arma::vec4 q;
+
+        UnitQuaternion operator * (const UnitQuaternion& p) const;
+
         /*! @brief Instantiates quat directly
         WARNING: FOR EFFICIENCY THIS ASSUMES q_ IS A UNIT QUATERNION
         @param q_ UNIT quaternion in real, imaginary order
@@ -44,6 +58,7 @@ namespace geometry {
         arma::vec3 rotateVector(const arma::vec3& v);
 
         arma::vec3 getAxis();
+
         double getAngle();
 
         /*! @brief Returns the matrix which performs the same rotation as the rotateVector method. 
@@ -51,19 +66,15 @@ namespace geometry {
         */
         arma::mat33 getMatrix();
 
-        UnitQuaternion operator * (const UnitQuaternion& p) const;
-    private:
-        /* @brief Constructor for non-unit quaternion for purpose of point representation
+        /*! @brief Calls corresponding function on stored q vector
+        Note: ACCESS ONLY (NO WRITING)
         */
-        UnitQuaternion(const arma::vec3& v);
-
-        static constexpr uint QW = 0;   //real part
-        static constexpr uint QX = 1;
-        static constexpr uint QY = 2;
-        static constexpr uint QZ = 3;
-
-        arma::vec4 q;
-
+        arma::vec rows(const uint& i, const uint& j) const;
+        /*! @brief Calls corresponding function on stored q vector
+        Note: ACCESS ONLY (NO WRITING)
+        */
+        double operator [] (const uint& i) const;
+        
     };
 
 }
