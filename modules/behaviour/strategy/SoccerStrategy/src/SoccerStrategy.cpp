@@ -50,16 +50,16 @@ namespace modules {
 		using messages::behaviour::WalkTarget;
 		using messages::behaviour::WalkApproach;
 
-		using messages::input::gameevents::GameState;
-		using messages::input::gameevents::KickOffTeam;
-		using messages::input::gameevents::TeamColour;
-		using messages::input::gameevents::BallKickedOut;
-		using messages::input::gameevents::HalfTime;
-		using messages::input::gameevents::CoachMessage;
-		using messages::input::gameevents::Penalisation;
-		using messages::input::gameevents::Unpenalisation;
-		using messages::input::gameevents::GoalScored;
-		using messages::input::gameevents::Scor;
+//		using messages::input::gameevents::GameState;
+//		using messages::input::gameevents::KickOffTeam;
+//		using messages::input::gameevents::TeamColour;
+//		using messages::input::gameevents::BallKickedOut;
+//		using messages::input::gameevents::HalfTime;
+//		using messages::input::gameevents::CoachMessage;
+//		using messages::input::gameevents::Penalisation;
+//		using messages::input::gameevents::Unpenalisation;
+//		using messages::input::gameevents::GoalScored;
+//		using messages::input::gameevents::Score;
 
 		using utility::math::geometry::Plane;
 		using utility::math::geometry::ParametricLine;
@@ -159,31 +159,31 @@ namespace modules {
 
 			on<Trigger<Every<30, Per<std::chrono::seconds>>>, Options<Single>, 
 				With<messages::localisation::Ball>,
-				With<messages::localisation::Self>,
-				With<messages::input::gameevents::GameState>,
-				With<messages::input::gameevents::KickOffTeam>,
-				With<messages::input::gameevents::TeamColour>,
-				With<messages::input::gameevents::BallKickedOut>,
-				With<messages::input::gameevents::HalfTime>,
-				With<messages::input::gameevents::CoachMessage>,
-				With<messages::input::gameevents::Penalisation>,
-				With<messages::input::gameevents::Unpenalisation>,
-				With<messages::input::gameevents::GoalScored>,
-				With<messages::input::gameevents::Score>
+				With<messages::localisation::Self>
+//				With<messages::input::gameevents::GameState<>>,
+//				With<messages::input::gameevents::KickOffTeam>,
+//				With<messages::input::gameevents::TeamColour>,
+//				With<messages::input::gameevents::BallKickedOut>,
+//				With<messages::input::gameevents::HalfTime>,
+//				With<messages::input::gameevents::CoachMessage>,
+//				With<messages::input::gameevents::Penalisation>,
+//				With<messages::input::gameevents::Unpenalisation>,
+//				With<messages::input::gameevents::GoalScored>,
+//				With<messages::input::gameevents::Score>
 				/* Need to add team localisation triggers. */>([this](
 											const time_t&,
 											const messages::localisation::Ball& ball,
-											const messages::localisation::Self& self,
-											const messages::input::gameevents::GameState& gameState,
-											const messages::input::gameevents::KickOffTeam& kickOffTeam,
-											const messages::input::gameevents::TeamColour& colour,
-											const messages::input::gameevents::BallKickedOut& ballOut,
-											const messages::input::gameevents::HalfTime& halfTime,
-											const messages::input::gameevents::CoachMessage message,
-											const messages::input::gameevents::Penalisation& penalisation,
-											const messages::input::gameevents::Unpenalisation& unpenalisation,
-											const messages::input::gameevents::GoalScored& goalScored,
-											const messages::input::gameevents::Score& score
+											const messages::localisation::Self& self
+//											const messages::input::gameevents::GameState& gameState,
+//											const messages::input::gameevents::KickOffTeam& kickOffTeam,
+//											const messages::input::gameevents::TeamColour& colour,
+//											const messages::input::gameevents::BallKickedOut& ballOut,
+//											const messages::input::gameevents::HalfTime& halfTime,
+//											const messages::input::gameevents::CoachMessage message,
+//											const messages::input::gameevents::Penalisation& penalisation,
+//											const messages::input::gameevents::Unpenalisation& unpenalisation,
+//											const messages::input::gameevents::GoalScored& goalScored,
+//											const messages::input::gameevents::Score& score
 											/* Need to add in team localisation  parameters. */) {
 
 					// Make a copy of the previous state.					
@@ -323,9 +323,6 @@ namespace modules {
 
 
 
-					// Create a list of hints in case we need to search for the ball.
-					std::vector<messages::localisation::Ball> hints = {ball/*, teamBall*/};
-
 					// Calculate the optimal zone position.
 					arma::vec2 optimalPosition = findOptimalPosition();
 
@@ -350,7 +347,7 @@ namespace modules {
 
 					else if(currentState.penalised && currentState.putDown) {
 						findSelf();
-						findBall(hints);
+						findBall();
 
 						NUClear::log<NUClear::INFO>("I am penalised and have been put down. I must be on the side line somewhere. Where am I?");
 					}
@@ -362,27 +359,27 @@ namespace modules {
 					}
 
 					else if (currentState.gameState.penaltyKick && IS_GOALIE && currentState.ballLost) {
-						findBall(hints);
+						findBall();
 
 						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
 					}
 
 					else if (currentState.gameState.penaltyKick && IS_GOALIE && !currentState.ballLost && currentState.ballHasMoved && !currentState.ballApproachingGoal) {
 						arma::vec2 blockPosition = {currentState.position[0], (transformPoint(currentState.ball.position) + currentState.position)[1]};
-						goToPoint(blockPosition);
-						watchBall();
+						sideStepToPoint(blockPosition);
 
 						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
 					}
 
 					else if (currentState.gameState.penaltyKick && currentState.ballLost && currentState.kicker) {
-						findBall(hints);
+						findBall();
 
 						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
 					}
 
 					else if (currentState.gameState.penaltyKick && !currentState.ballLost && currentState.kicker) {
-						approachBall();
+						arma::vec2 goal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
+						approachBall(goal);
 
 						NUClear::log<NUClear::INFO>("Penalty kick in progress. Approaching ball.");
 					}
@@ -401,13 +398,21 @@ namespace modules {
 
 
 					else if (currentState.ballLost) {
-						findBall(hints);
+						findBall();
 
 						NUClear::log<NUClear::INFO>("Don't know where the ball is. Looking for it.");
 					}
 
-					else if (currentState.ballInZone || currentState.ballApproaching) {
-						approachBall();
+					else if ((currentState.ballInZone || currentState.ballApproaching) && currentState.goalInRange) {
+						arma::vec2 goal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
+						approachBall(goal);
+
+						NUClear::log<NUClear::INFO>("Walking to ball.");
+					}
+
+					else if ((currentState.ballInZone || currentState.ballApproaching) && !currentState.goalInRange) {
+						arma::vec2 nearestZone = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0}; // Find the optimal point in the nearest zone, reflect the position closer to the enemy goal.
+						approachBall(nearestZone);
 
 						NUClear::log<NUClear::INFO>("Walking to ball.");
 					}
@@ -418,9 +423,10 @@ namespace modules {
 						NUClear::log<NUClear::INFO>("In kicking position. Kicking ball.");
 					}
 
-					else if (currentState.goalInRange) {
-						approachBall();
-						kickBall();
+					else if (currentState.goalInRange && !isKicking) {
+						arma::vec2 goal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
+						approachBall(goal);
+//						kickBall();				// Do we need this???
 
 						NUClear::log<NUClear::INFO>("Kick for goal.");
 					}
@@ -433,7 +439,7 @@ namespace modules {
 
 					else {
 						findSelf();
-						findBall(hints);
+						findBall();
 						goToPoint(ZONE_DEFAULTS.at(MY_ZONE));
 	
 						NUClear::log<NUClear::INFO>("Unknown behavioural state. Finding self, finding ball, moving to default position.");
@@ -449,11 +455,12 @@ namespace modules {
 
 			void SoccerStrategy::stopMoving() {
 				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
-				approach->targetPositionType = WalkTarget::Robot;
-				approach->targetHeadingType = WalkTarget::Robot;
+//				// These four parameters are not important for standing still.
+//				approach->targetPositionType = WalkTarget::Robot;
+//				approach->targetHeadingType = WalkTarget::Robot;
+//				approach->heading = currentState.heading; 
+//				approach->target = currentState.position; 
 				approach->walkMovementType = WalkApproach::StandStill;
-				approach->heading = currentState.heading; 
-				approach->target = currentState.position; 
 				emit(std::move(approach));
 			}
 
@@ -462,17 +469,17 @@ namespace modules {
 				/* Look at closest goal for short period to reset localisation. */
 			}
 
-			void SoccerStrategy::findBall(const std::vector<Ball>& hints) {
-				/* Look for the ball. Use the provided hints as the last known locations to attempt to speed up the search. */
+			void SoccerStrategy::findBall() {
+				/* Look for the ball. */
 			}
 
-			void SoccerStrategy::goToPoint(const arma::vec2& point) {
+			void SoccerStrategy::goToPoint(const arma::vec2& position) {
 				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
 				approach->targetPositionType = WalkTarget::WayPoint;
-				approach->targetHeadingType = WalkTarget::WayPoint;
+				approach->targetHeadingType = WalkTarget::Ball;
 				approach->walkMovementType = WalkApproach::WalkToPoint;
-				approach->heading = arma::zeros<arma::vec>(2); 			// TODO: fix me! 
-				approach->target = point; 
+				approach->heading = transformPoint(currentState.ball.position) + currentState.position;
+				approach->target = position; 
 				emit(std::move(approach));
 			}
 
@@ -487,17 +494,28 @@ namespace modules {
 				emit(std::move(look));
 			}
 
-			void SoccerStrategy::approachBall() {
+			void SoccerStrategy::sideStepToPoint(const arma::vec2& position) {
+				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
+				approach->targetPositionType = WalkTarget::WayPoint;
+				approach->targetHeadingType = WalkTarget::Ball;
+				approach->walkMovementType = WalkApproach::OmnidirectionalReposition;
+				approach->heading = transformPoint(currentState.ball.position) + currentState.position;
+				approach->target = position; 
+				emit(std::move(approach));
+			}
+
+			void SoccerStrategy::approachBall(const arma::vec2& heading) {
 				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
 				approach->targetPositionType = WalkTarget::Ball;
 				approach->targetHeadingType = WalkTarget::WayPoint;
 				approach->walkMovementType = WalkApproach::ApproachFromDirection;
-				approach->heading = arma::vec({-3,0});
+				approach->heading = heading;
 				approach->target = transformPoint(currentState.ball.position) + currentState.position;
 				emit(std::move(approach));
 			}
 
 			void SoccerStrategy::kickBall() {
+				// Emit aim vector.
 			}
 
 			arma::vec2 SoccerStrategy::transformPoint(const arma::vec2& point) {

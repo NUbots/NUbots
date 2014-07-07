@@ -172,11 +172,12 @@ namespace modules {
 			arma::vec2 findOptimalPosition();
 			void stopMoving();
 			void findSelf();
-			void findBall(const std::vector<messages::localisation::Ball>& hints);
-			void goToPoint(const arma::vec2& point);
+			void findBall();
+			void goToPoint(const arma::vec2& position);
+			void sideStepToPoint(const arma::vec2& position);
 			void watchBall();
 			void kickBall();
-			void approachBall();
+			void approachBall(const arma::vec2& haading);
 			arma::vec2 transformPoint(const arma::vec2& point);
 
 		public:
