@@ -41,4 +41,7 @@ ADD_ROLE(
         #Motion
         motion::ScriptEngine
         motion::WalkEngine
+	
+	#Output
+	output::eSpeak
 )

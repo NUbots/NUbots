@@ -27,6 +27,7 @@
 #include "messages/input/gameevents/GameEvents.h"
 #include "messages/motion/GetupCommand.h"
 #include "messages/motion/DiveCommand.h"
+#include "messages/output/Say.h"
 
 #include "utility/math/angle.h"
 #include "utility/math/geometry/Plane.h"
@@ -63,6 +64,8 @@ namespace modules {
 //		using messages::input::gameevents::Unpenalisation;
 //		using messages::input::gameevents::GoalScored;
 //		using messages::input::gameevents::Score;
+
+		using messages::output::Say;
 
 		using utility::math::geometry::Polygon;
 		using utility::math::geometry::Plane;
@@ -223,6 +226,39 @@ namespace modules {
 					if (gameStateButtonStatus) {
 						gameStateButtonStatus = false;
 						currentState.primaryGameState++;
+
+						switch (currentState.primaryGameState) {
+							case GameStatePrimary::INITIAL: {
+								emit(std::move(std::make_unique<messages::output::Say>("Initial")));
+								break;
+							}
+
+							case GameStatePrimary::SET: {
+								emit(std::move(std::make_unique<messages::output::Say>("Set")));
+								break;
+							}
+
+							case GameStatePrimary::READY: {
+								emit(std::move(std::make_unique<messages::output::Say>("Readu")));
+								break;
+							}
+
+							case GameStatePrimary::PLAYING: {
+								emit(std::move(std::make_unique<messages::output::Say>("Playing")));
+								break;
+							}
+
+							case GameStatePrimary::FINISHED: {
+								emit(std::move(std::make_unique<messages::output::Say>("Finished")));
+								break;
+							}
+
+							default: {
+								currentState.primaryGameState = GameStatePrimary::INITIAL;
+								emit(std::move(std::make_unique<messages::output::Say>("Initial")));
+								break;
+							}
+						}
 					}
 
 					// What state is the game in?
@@ -292,7 +328,7 @@ namespace modules {
 					// Assumption: goal.position is the x, y coordinates of the goals relative to us.
 					currentState.goalInRange = (!currentState.ballLost && (arma::norm(currentState.ball.position, 2) < MAX_BALL_DISTANCE) && ((transformPoint(currentState.ball.position) + currentState.position)[0] > 0));
 
-					// Am I in position to kick the ball?
+					// Perform calculations to see if we have reached the assigned target position and heading.
 					arma::vec2 selfToPoint = currentState.targetHeading - currentState.position;
 					arma::vec2 selfRotation = currentState.heading - currentState.position;
 
@@ -302,13 +338,13 @@ namespace modules {
 					currentState.correctHeading = utility::math::angle::normalizeAngle(selfAngle - selfToPointAngle) < ANGLE_THRESHOLD;
 					currentState.inPosition = arma::norm(currentState.position - currentState.targetPosition, 2) < POSITION_THRESHOLD_TIGHT;
 
+					currentState.outOfPosition = (arma::norm(currentState.position - currentState.targetPosition, 2) >= POSITION_THRESHOLD_LOOSE) && previousState.inPosition;
+					
+					// Am I in position to kick the ball?
 					bool kickThreshold = arma::norm(currentState.ball.position, 2) < KICK_DISTANCE_THRESHOLD;
 					
 					currentState.kickPosition = (currentState.inPosition && currentState.correctHeading && kickThreshold && !currentState.outOfPosition);
-				
-					// Check to see if we have left our target position.
-					currentState.outOfPosition = (arma::norm(currentState.position - currentState.targetPosition, 2) >= POSITION_THRESHOLD_LOOSE) && previousState.inPosition;
-					
+
 					// Make preparations to calculate whether the ball is approaching our own goals or ourselves.
 					Plane<2> planeGoal, planeSelf;
 					ParametricLine<2> line;
