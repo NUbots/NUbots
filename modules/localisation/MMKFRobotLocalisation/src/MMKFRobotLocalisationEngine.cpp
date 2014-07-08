@@ -36,6 +36,10 @@ using messages::localisation::FakeOdometry;
 namespace modules {
 namespace localisation {
 
+    bool MMKFRobotLocalisationEngine::CanEmitFieldObjects() {
+        return cfg_.emit_robot_fieldobjects;
+    }
+
     std::shared_ptr<messages::support::FieldDescription> MMKFRobotLocalisationEngine::field_description() {
         return field_description_;
     }
@@ -55,9 +59,10 @@ namespace localisation {
 
     void MMKFRobotLocalisationEngine::UpdateConfiguration(
         const messages::support::Configuration<MMKFRobotLocalisationEngineConfig>& config) {
-        cfg_.angle_between_goals_observation_enabled = config["AngleBetweenGoalsObservationEnabled"];
-        cfg_.goal_pair_observation_enabled = config["GoalPairObservationEnabled"];
-        cfg_.all_goals_are_blue = config["AllGoalsAreBlue"];
+        cfg_.angle_between_goals_observation_enabled = config["AngleBetweenGoalsObservationEnabled"].as<bool>();
+        cfg_.goal_pair_observation_enabled = config["GoalPairObservationEnabled"].as<bool>();
+        cfg_.all_goals_are_blue = config["AllGoalsAreBlue"].as<bool>();
+        cfg_.emit_robot_fieldobjects = config["EmitRobotFieldobjects"].as<bool>();
     }
 
     void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time) {

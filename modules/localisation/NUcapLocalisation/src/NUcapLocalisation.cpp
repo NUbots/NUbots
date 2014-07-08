@@ -20,30 +20,45 @@
 #include "NUcapLocalisation.h"
 #include "utility/nubugger/NUgraph.h"
 #include "messages/input/proto/MotionCapture.pb.h"
+#include "messages/input/Sensors.h"
+#include "utility/math/geometry/UnitQuaternion.h"
 #include <armadillo>
-
 
 namespace modules {
 namespace localisation {
 
     using utility::nubugger::graph;
     using messages::input::proto::MotionCapture;
+    using messages::input::Sensors;
+    using utility::math::geometry::UnitQuaternion;
 
     NUcapLocalisation::NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Trigger<Network<MotionCapture>>>([this](const Network<MotionCapture>& net) {
+        on<Trigger<Network<MotionCapture>>, With<Sensors> >([this](const Network<MotionCapture>& net, const Sensors&) {
             auto& mocap = net.data;
             for (auto& rigidBody : mocap->rigid_bodies()) {
 
 
-                /*int id = rigidBody.identifier();
-                float x = rigidBody.location().x();
-                float y = rigidBody.location().y();
-                float z = rigidBody.location().z();
+                int id = rigidBody.identifier();
                 if (id == 2) { // Robot #2
+                    //TODO: switch to correct xyz coordinate system!!!!!!!!!!
+                    float x = rigidBody.position().x();
+                    float y = rigidBody.position().y();
+                    float z = rigidBody.position().z();
+                    // UnitQuaternion q = UnitQuaternion(arma::vec4{rigidBody.rotation().w(),
+                    //                                              rigidBody.rotation().x(),
+                    //                                              rigidBody.rotation().y(),
+                    //                                              rigidBody.rotation().z()});
+
+                    // arma::mat33 groundToWorldRotation = q.getMatrix() * sensors.orientationCamToGround.submat(0,0,2,2).t();
+                    
+                    // double bearing = std::acos(groundToWorldRotation(0,0));
+
                     // TODO: transform from head to field
-                    // emit(graph("NUcap", x, y, z));
-                }*/
+
+                    emit(graph("NUcap pos", x, y, z));
+                    // emit(graph("NUcap bearing", bearing));
+                }
             }
 
         });

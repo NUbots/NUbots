@@ -38,9 +38,9 @@ namespace debug {
             for (auto& rigidBody : mocap->rigid_bodies()) {
 
                 // int id = rigidBody.identifier();
-                float x = rigidBody.location().x();
-                float y = rigidBody.location().y();
-                float z = rigidBody.location().z();
+                float x = rigidBody.position().x();
+                float y = rigidBody.position().y();
+                float z = rigidBody.position().z();
 
                 // log("NUcap:", id, "x:", x, "y:", y, "z:", z);
                 emit(graph("NUcap", x, y, z));

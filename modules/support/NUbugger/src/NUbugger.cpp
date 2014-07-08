@@ -444,45 +444,45 @@ namespace modules {
             });
 
             localisationHandle = on<Trigger<Every<100, std::chrono::milliseconds>>,
-               With<messages::localisation::Ball>,
-               // With<messages::vision::Ball>,
+               With<std::vector<messages::localisation::Ball>>,
                With<std::vector<messages::localisation::Self>>,
                Options<Single>>("Localisation Ball",
                 [this](const time_t&,
-                       const messages::localisation::Ball& ball,
-                       // const messages::vision::Ball& vision_ball,
+                       const std::vector<messages::localisation::Ball>& balls,
                        const std::vector<messages::localisation::Self>& robots) {
-                if(robots.size() > 0){
+                if(robots.size() > 0 && balls.size() > 0){
                     arma::vec2 ball_pos = utility::localisation::transform::RobotBall2FieldBall(
-                        robots[0].position,robots[0].heading, ball.position);
+                        robots[0].position, robots[0].heading, balls[0].position);
 
                     // Ball message
                     auto ball_msg = std::make_unique<messages::localisation::FieldObject>();
                     std::vector<messages::localisation::FieldObject::Model> ball_msg_models;
-                    messages::localisation::FieldObject::Model ball_model;
-                    ball_msg->name = "ball";
-                    ball_model.wm_x = ball_pos[0];
-                    ball_model.wm_y = ball_pos[1];
-                    ball_model.heading = 0;
-                    ball_model.sd_x = 0.1;
-                    ball_model.sd_y = 0.1;
+                    
+                    for (auto& model : balls) {
+                        messages::localisation::FieldObject::Model ball_model;
+                        ball_msg->name = "ball";
+                        ball_model.wm_x = ball_pos[0];
+                        ball_model.wm_y = ball_pos[1];
+                        ball_model.heading = 0;
+                        ball_model.sd_x = 0.1;
+                        ball_model.sd_y = 0.1;
 
-                    //Do we need to rotate the variances?
-                    ball_model.sr_xx = ball.sr_xx;
-                    ball_model.sr_xy = ball.sr_xy;
-                    ball_model.sr_yy = ball.sr_yy;
-                    ball_model.lost = false;
-                    ball_msg_models.push_back(ball_model);
+                        //Do we need to rotate the variances?
+                        ball_model.sr_xx = model.sr_xx;
+                        ball_model.sr_xy = model.sr_xy;
+                        ball_model.sr_yy = model.sr_yy;
+                        ball_model.lost = false;
+                        ball_msg_models.push_back(ball_model);
 
+                        // break; // Only output a single model
+                    }
                     ball_msg->models = ball_msg_models;
-                    // emit(std::move(ball_msg));
 
                     // Robot message
                     auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
                     std::vector<messages::localisation::FieldObject::Model> robot_msg_models;
 
-                    //for (auto& model : robots) {
-                    auto model = robots[0];
+                    for (auto& model : robots) {
                         messages::localisation::FieldObject::Model robot_model;
                         robot_msg->name = "self";
                         robot_model.wm_x = model.position[0];
@@ -495,12 +495,13 @@ namespace modules {
                         robot_model.sr_yy = model.sr_yy; // * 100;
                         robot_model.lost = false;
                         robot_msg_models.push_back(robot_model);
-                    //}
 
-
+                        // break; // Only output a single model
+                    }
                     robot_msg->models = robot_msg_models;
-                    // emit(std::move(robot_msg));
 
+                    // emit(std::move(ball_msg));
+                    // emit(std::move(robot_msg));
                     EmitLocalisationModels(robot_msg, ball_msg);
                 }
             });

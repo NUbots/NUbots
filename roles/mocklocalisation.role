@@ -1,15 +1,15 @@
 ADD_ROLE(
     NAME mocklocalisation
     MODULES
-        #Support
+        # Support
         # support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
         support::configuration::SoccerConfig
         support::NUbugger
 
-        #Localisation
-        #localisation::MockRobot
+        # Localisation
+        localisation::MockRobot
         localisation::MMKFRobotLocalisation
         localisation::KFBallLocalisation
 )
