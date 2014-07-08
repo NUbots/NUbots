@@ -45,13 +45,18 @@ namespace modules {
             });                    
         }
 
-        bool MathTester::testPolygon(bool verbose,const YAML::Node& config){
+        bool MathTester::testPolygon(bool verbose,const YAML::Node&){
+
             if(verbose) {}
             std::cerr << "Beginning polygon test.===============" << std::endl;            
-            std::vector<arma::vec2> vertices = config["polygon_vertices"].as<std::vector<arma::vec2>>();
-            // for(auto& v : config["polygon_vertices"].as<std::vector<arma::vec2>>()){
-            //     vertices.push_back(v);
+            std::vector<arma::vec2> vertices;//config["polygon_vertices"].as<std::vector<arma::vec2>>()
+            // for(auto& v : config["polygon_vertices"].as<std::vector<std::vector<double>>>()){
+            //     vertices.push_back(arma::vec2{v[0],v[1]});
             // }
+            vertices.push_back(arma::vec2{1,1});
+            vertices.push_back(arma::vec2{-1,1});
+            vertices.push_back(arma::vec2{-1,-1});
+            vertices.push_back(arma::vec2{1,-1});
             Polygon poly(vertices);
             std::cerr << "Generated polygon with vertices:" << std::endl;                
             for(auto& v : vertices){
@@ -61,9 +66,10 @@ namespace modules {
 
             std::cerr << "Creating sample points:" << std::endl;            
             std::vector<arma::vec2> samples;
-            for(int i = 0; i < config["number_of_samples"].as<int>(); i++){
-                float r = config["sample_radius"].as<double>();
-                float theta = 2 * M_PI * i / float(config["number_of_samples"].as<int>()) ;
+            int number_of_samples = 50;//config["number_of_samples"].as<int>()
+            float r = 1.2;//config["sample_radius"].as<double>();
+            for(int i = 0; i < number_of_samples; i++){
+                float theta = 2 * M_PI * i / float(number_of_samples) ;
                 arma::vec2 p = {r * std::cos(theta), r * std::sin(theta)};
                 samples.push_back(p);
                 std::cerr << i << " " << p.t();                
@@ -79,7 +85,7 @@ namespace modules {
 
 
             //Test projectPointToPolygon
-            std::cerr << "Testing containment:" << std::endl;
+            std::cerr << "Testing projection:" << std::endl;
             i = 0;
             for(auto& sample : samples){
                 std::cerr << i++ << " " << poly.projectPointToPolygon(sample).t();
