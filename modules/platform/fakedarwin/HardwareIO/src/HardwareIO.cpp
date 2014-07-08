@@ -68,7 +68,7 @@ namespace fakedarwin {
         // Accelerometer (in m/s^2)
         sensors.accelerometer.x = 0;
         sensors.accelerometer.y = 0;
-        sensors.accelerometer.z = 0;
+        sensors.accelerometer.z = 9.8;
 
         // Gyroscope (in radians/second)
         sensors.gyroscope.x = 0;
