@@ -48,6 +48,12 @@ Vagrant.configure("2") do |config|
     nuclearport.vm.network :forwarded_port, guest: 12000, host: 12000
     nuclearport.vm.network :forwarded_port, guest: 12001, host: 12001
 
+    # Add hostname here if running NUbugger on the VM
+    if ['Ne'].include?(Socket.gethostname) # NUbugger Port
+      nuclearport.vm.network :forwarded_port, guest: 9090, host: 9090
+    end
+
+
     # Syntax: "path/on/host", "/path/on/guest"
     # nuclearport.vm.synced_folder ".", "/home/vagrant/nubots/NUClearPort"
 
