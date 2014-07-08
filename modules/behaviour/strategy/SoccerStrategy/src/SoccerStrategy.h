@@ -130,6 +130,10 @@ namespace modules {
 			arma::vec2 heading;
 			arma::vec2 targetPosition;
 			arma::vec2 targetHeading;
+
+			bool inPosition;
+			bool outOfPosition;
+			bool correctHeading;
 		} State;
 
 		struct SoccerStrategyConfig {
@@ -157,6 +161,9 @@ namespace modules {
 			bool IS_GOALIE;
 			arma::vec2 BALL_LOOK_ERROR;
 			arma::vec2 GOAL_LOOK_ERROR;
+			float ANGLE_THRESHOLD;
+			float POSITION_THRESHOLD_TIGHT;
+			float POSITION_THRESHOLD_LOOSE;
 
 			messages::support::FieldDescription FIELD_DESCRIPTION;
 

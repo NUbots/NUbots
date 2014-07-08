@@ -28,6 +28,7 @@
 #include "messages/motion/GetupCommand.h"
 #include "messages/motion/DiveCommand.h"
 
+#include "utility/math/angle.h"
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/ParametricLine.h"
 #include "utility/support/armayamlconversions.h"
@@ -83,6 +84,9 @@ namespace modules {
 				BALL_LOOK_ERROR = config["BALL_LOOK_ERROR"].as<arma::vec2>();
 				BALL_MOVEMENT_THRESHOLD = config["BALL_MOVEMENT_THRESHOLD"].as<float>();
 				GOAL_LOOK_ERROR = config["GOAL_LOOK_ERROR"].as<arma::vec2>();
+				ANGLE_THRESHOLD = config["ANGLE_THRESHOLD"].as<float>();
+				POSITION_THRESHOLD_TIGHT = config["POSITION_THRESHOLD_TIGHT"].as<float>();
+				POSITION_THRESHOLD_LOOSE = config["POSITION_THRESHOLD_LOOSE"].as<float>();
 				IS_GOALIE = (config["GOALIE"].as<int>() == 1);
 				START_POSITION = config["START_POSITION"].as<arma::vec2>();
 				MY_ZONE = config["MY_ZONE"].as<int>();
@@ -213,7 +217,7 @@ namespace modules {
 					// Store current position and heading.
 					currentState.transform = self.robot_to_world_rotation;
 					currentState.position = self.position;
-					currentState.heading = atan2(currentState.transform(1, 0), currentState.transform(0, 0));
+					currentState.heading = currentState.position + currentState.transform.col(0);
 
 					// Allow the back panel button to cycle through the primary game states.
 					if (gameStateButtonStatus) {
@@ -289,11 +293,22 @@ namespace modules {
 					currentState.goalInRange = (!currentState.ballLost && (arma::norm(currentState.ball.position, 2) < MAX_BALL_DISTANCE) && ((transformPoint(currentState.ball.position) + currentState.position)[0] > 0));
 
 					// Am I in position to kick the ball?
+					arma::vec2 selfToPoint = currentState.targetHeading - currentState.position;
+					arma::vec2 selfRotation = currentState.heading - currentState.position;
+
+					double selfToPointAngle = atan2(selfToPoint[1], selfToPoint[0]);					
+					double selfAngle = atan2(selfRotation[1], selfRotation[0]);
+
+					currentState.correctHeading = utility::math::angle::normalizeAngle(selfAngle - selfToPointAngle) < ANGLE_THRESHOLD;
+					currentState.inPosition = arma::norm(currentState.position - currentState.targetPosition, 2) < POSITION_THRESHOLD_TIGHT;
+
 					bool kickThreshold = arma::norm(currentState.ball.position, 2) < KICK_DISTANCE_THRESHOLD;
-					bool inPosition = (currentState.position[0] == previousState.targetPosition[0]) && (currentState.position[1] == previousState.targetPosition[1]);
-					bool correctHeading = (currentState.heading[0] == previousState.targetHeading[0]) && (currentState.heading[1] == previousState.targetHeading[1]);
-					currentState.kickPosition = (inPosition && correctHeading && kickThreshold);
+					
+					currentState.kickPosition = (currentState.inPosition && currentState.correctHeading && kickThreshold && !currentState.outOfPosition);
 				
+					// Check to see if we have left our target position.
+					currentState.outOfPosition = (arma::norm(currentState.position - currentState.targetPosition, 2) >= POSITION_THRESHOLD_LOOSE) && previousState.inPosition;
+					
 					// Make preparations to calculate whether the ball is approaching our own goals or ourselves.
 					Plane<2> planeGoal, planeSelf;
 					ParametricLine<2> line;
