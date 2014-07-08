@@ -61,6 +61,7 @@ namespace modules {
 //		using messages::input::gameevents::GoalScored;
 //		using messages::input::gameevents::Score;
 
+		using utility::math::geometry::Polygon;
 		using utility::math::geometry::Plane;
 		using utility::math::geometry::ParametricLine;
 
@@ -79,25 +80,26 @@ namespace modules {
 				BALL_SELF_INTERSECTION_REGION = config["BALL_SELF_INTERSECTION_REGION"].as<float>();
 				BALL_LOOK_ERROR = config["BALL_LOOK_ERROR"].as<arma::vec2>();
 				BALL_MOVEMENT_THRESHOLD = config["BALL_MOVEMENT_THRESHOLD"].as<float>();
+				GOAL_LOOK_ERROR = config["GOAL_LOOK_ERROR"].as<arma::vec2>();
 				IS_GOALIE = (config["GOALIE"].as<int>() == 1);
 				START_POSITION = config["START_POSITION"].as<arma::vec2>();
 				MY_ZONE = config["MY_ZONE"].as<int>();
 
 				ZONE_DEFAULTS.push_back(config["ZONE_1_DEFAULT"].as<arma::vec2>());
 				zone = config["ZONE_1"].as<std::vector<arma::vec2>>();
-				ZONES.push_back(zone);
+				ZONES.push_back(Polygon(zone));
 
 				ZONE_DEFAULTS.push_back(config["ZONE_2_DEFAULT"].as<arma::vec2>());
 				zone = config["ZONE_2"].as<std::vector<arma::vec2>>();
-				ZONES.push_back(zone);
+				ZONES.push_back(Polygon(zone));
 
 				ZONE_DEFAULTS.push_back(config["ZONE_3_DEFAULT"].as<arma::vec2>());
 				zone = config["ZONE_3"].as<std::vector<arma::vec2>>();
-				ZONES.push_back(zone);
+				ZONES.push_back(Polygon(zone));
 
 				ZONE_DEFAULTS.push_back(config["ZONE_4_DEFAULT"].as<arma::vec2>());
 				zone = config["ZONE_4"].as<std::vector<arma::vec2>>();
-				ZONES.push_back(zone);
+				ZONES.push_back(Polygon(zone));
 			});
 
 			// Last 10 to do some button debouncing.
@@ -250,7 +252,7 @@ namespace modules {
 					currentState.unPenalised = !currentState.penalised && previousState.penalised;
 
 					// Am I in my zone?
-					/* currentState.selfInZone = pointInPolygon(MY_ZONE, self.position); */
+					currentState.selfInZone = ZONES.at(MY_ZONE).pointContained(self.position);
 							
 					// Can I see the ball?
 					currentState.ballSeen = ((currentState.ball.sr_xx < BALL_CERTAINTY_THRESHOLD) && (currentState.ball.sr_xy < BALL_CERTAINTY_THRESHOLD) && (currentState.ball.sr_yy < BALL_CERTAINTY_THRESHOLD));
@@ -262,10 +264,9 @@ namespace modules {
 					currentState.ballHasMoved = arma::norm(currentState.ball.position - previousState.ball.position, 2) > BALL_MOVEMENT_THRESHOLD;
 
 					// Is the ball in my zone?
-					currentState.ballInZone = (!currentState.ballLost /* && pointInPolygon(MY_ZONE, currentState.ball.position) */);
+					currentState.ballInZone = (!currentState.ballLost && ZONES.at(MY_ZONE).pointContained(transformPoint(currentState.ball.position) + currentState.position));
 							
 					// Are the goals in range?
-					// x = position[0]?
 					// x = 0 = centre field.
 					// Assumption: We could potentially kick a goal if we are in the other half of the field.
 					// Assumption: goal.position is the x, y coordinates of the goals relative to us.
@@ -294,8 +295,6 @@ namespace modules {
 						currentState.ballGoalIntersection = planeGoal.intersect(line);
 
 						currentState.ballApproachingGoal = arma::norm(fieldWidth - currentState.ballGoalIntersection, 2) <= (FIELD_DESCRIPTION.dimensions.goal_area_width / 2);
-						/* currentState.ballApproachingGoal = ((currentState.ballGoalIntersection[1] <= (FIELD_DESCRIPTION.dimensions.goal_area_width / 2)) &&
-											 (currentState.ballGoalIntersection[1] >= -(FIELD_DESCRIPTION.dimensions.goal_area_width / 2))); */
 					}
 
 					catch (std::domain_error e) {
@@ -321,7 +320,7 @@ namespace modules {
 
 
 					// Calculate the optimal zone position.
-					arma::vec2 optimalPosition = findOptimalPosition(ZONES.at(MY_ZONE));
+					arma::vec2 optimalPosition = findOptimalPosition(ZONES.at(MY_ZONE), transformPoint(currentState.ball.position) + currentState.position);
 
 					// Determine current state and appropriate action(s).
 					if ((currentState.primaryGameState == GameStatePrimary::INITIAL) || (currentState.primaryGameState == GameStatePrimary::SET) || (currentState.primaryGameState == GameStatePrimary::FINISHED) || currentState.pickedUp) {
@@ -450,18 +449,8 @@ namespace modules {
 				});
 			}
 
-			arma::vec2 SoccerStrategy::findOptimalPosition(const std::vector<arma::vec2>& zone) {
-				arma::vec2 optimalPosition;
-
-				if (zone.size() > 0) {
-					optimalPosition = zone.at(0);
-				}
-
-				else {
-					optimalPosition = {0, 0};
-				}
-
-				return(optimalPosition);
+			arma::vec2 SoccerStrategy::findOptimalPosition(const Polygon& zone, const arma::vec2& point) {
+				return(zone.projectPointToPolygon(point));
 			}
 
 			void SoccerStrategy::stopMoving() {
@@ -478,10 +467,37 @@ namespace modules {
 			void SoccerStrategy::findSelf() {
 				/* Try to locate both goals. */
 				/* Look at closest goal for short period to reset localisation. */
+				arma::vec2 goalPosition = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
+				arma::vec2 ballPosition = transformPoint(currentState.ball.position) + currentState.position;
+
+				// Look at our goals.
+				auto lookAtGoal = std::make_unique<messages::behaviour::LookAtPoint>();
+				lookAtGoal->x = -goalPosition[0];
+				lookAtGoal->y = goalPosition[1];
+				lookAtGoal->xError = GOAL_LOOK_ERROR[0];
+				lookAtGoal->yError = GOAL_LOOK_ERROR[1];
+				emit(std::move(lookAtGoal));
+
+				// Look at enemy goals.
+				lookAtGoal->x = goalPosition[0];
+				lookAtGoal->y = goalPosition[1];
+				lookAtGoal->xError = GOAL_LOOK_ERROR[0];
+				lookAtGoal->yError = GOAL_LOOK_ERROR[1];
+				emit(std::move(lookAtGoal));
+
+				// Look for ball.
 			}
 
 			void SoccerStrategy::findBall() {
-				/* Look for the ball. */
+				// This needs to be replaced with a proper lookAtBall command.
+				arma::vec2 ballPosition = transformPoint(currentState.ball.position) + currentState.position;
+
+				auto look = std::make_unique<messages::behaviour::LookAtPoint>();
+				look->x = ballPosition[0];
+				look->y = ballPosition[1];
+				look->xError = BALL_LOOK_ERROR[0];
+				look->yError = BALL_LOOK_ERROR[1];
+				emit(std::move(look));
 			}
 
 			void SoccerStrategy::goToPoint(const arma::vec2& position) {

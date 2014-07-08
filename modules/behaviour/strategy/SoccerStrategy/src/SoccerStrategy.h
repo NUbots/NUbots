@@ -28,6 +28,8 @@
 #include "messages/motion/KickCommand.h"
 #include "messages/motion/WalkCommand.h"
 
+#include "utility/math/geometry/Polygon.h"
+
 namespace modules {
     namespace behaviour {
         namespace strategy {
@@ -143,7 +145,7 @@ namespace modules {
 		private:
 			NUClear::clock::time_point timeSinceLastSeen;
 
-			std::vector<std::vector<arma::vec2>> ZONES;
+			std::vector<utility::math::geometry::Polygon> ZONES;
 			std::vector<arma::vec2> ZONE_DEFAULTS;
 			int MY_ZONE;
 			float MAX_BALL_DISTANCE;
@@ -154,6 +156,7 @@ namespace modules {
 			arma::vec2 START_POSITION;
 			bool IS_GOALIE;
 			arma::vec2 BALL_LOOK_ERROR;
+			arma::vec2 GOAL_LOOK_ERROR;
 
 			messages::support::FieldDescription FIELD_DESCRIPTION;
 
@@ -168,7 +171,7 @@ namespace modules {
 			messages::motion::KickCommand kickData;
 			messages::motion::WalkCommand walkData;
 
-			arma::vec2 findOptimalPosition(const std::vector<arma::vec2>& zone);
+			arma::vec2 findOptimalPosition(const utility::math::geometry::Polygon& zone, const arma::vec2& point);
 			void stopMoving();
 			void findSelf();
 			void findBall();
