@@ -33,7 +33,6 @@ ADD_ROLE(
         behaviour::skills::GoalSaver
         behaviour::planning::LookAtBall
         behaviour::planning::LookAtGoal
-        behaviour::planning::FixedWalk
         behaviour::planning::KickPlanner
         behaviour::planning::WalkPathPlanner
 	behaviour::strategy::SoccerStrategy
