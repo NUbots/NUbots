@@ -167,6 +167,8 @@ namespace modules {
 
 			bool feetOnGround;
 			bool isKicking;
+			bool isDiving;
+			bool isGettingUp;
 			bool isWalking;
 			messages::motion::KickCommand kickData;
 			messages::motion::WalkCommand walkData;

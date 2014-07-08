@@ -25,6 +25,8 @@
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/support/Configuration.h"
 #include "messages/input/gameevents/GameEvents.h"
+#include "messages/motion/GetupCommand.h"
+#include "messages/motion/DiveCommand.h"
 
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/ParametricLine.h"
@@ -124,6 +126,26 @@ namespace modules {
 				feetOnGround = (sensors.leftFootDown && sensors.rightFootDown);
 			});
 
+			// Check to see if we are currently in the process of getting up.
+			on<Trigger<messages::motion::ExecuteGetup>>([this](const messages::motion::ExecuteGetup&) {
+				isGettingUp = true;
+			});
+
+			// Check to see if we have finished getting up.
+			on<Trigger<messages::motion::KillGetup>>([this](const messages::motion::KillGetup&) {
+				isGettingUp = false;
+			});
+
+			// Check to see if we are currently in the process of diving.
+			on<Trigger<messages::motion::DiveCommand>>([this](const messages::motion::DiveCommand&) {
+				isDiving = true;
+			});
+
+			// Check to see if we have finished diving.
+			on<Trigger<messages::motion::DiveFinished>>([this](const messages::motion::DiveFinished&) {
+				isDiving = false;
+			});
+
 			// Check to see if we are about to kick.
 			on<Trigger<messages::motion::KickCommand>>([this](const messages::motion::KickCommand& kick) {
 				isKicking = true;
@@ -131,26 +153,20 @@ namespace modules {
 			});
 
 			// Check to see if the kick has finished.
-			on<Trigger<messages::motion::KickFinished>>([this](const messages::motion::KickFinished& kick) {
-				(void)kick;
-
+			on<Trigger<messages::motion::KickFinished>>([this](const messages::motion::KickFinished&) {
 				isKicking = false;
 			});
 
 			// Check to see if we are walking.
 			on<Trigger<messages::motion::WalkStartCommand>, With<messages::motion::WalkCommand>>
-				([this](const messages::motion::WalkStartCommand& walkStart,
+				([this](const messages::motion::WalkStartCommand&,
 					const messages::motion::WalkCommand& walk) {
-				(void)walkStart;
-
 				isWalking = true;
 				walkData = walk;
 			});
 
 			// Check to see if we are no longer walking.
-			on<Trigger<messages::motion::WalkStopCommand>>([this](const messages::motion::WalkStopCommand& walkStop) {
-				(void)walkStop;
-
+			on<Trigger<messages::motion::WalkStopCommand>>([this](const messages::motion::WalkStopCommand&) {
 				isWalking = false;
 			});
 
@@ -240,7 +256,7 @@ namespace modules {
 								currentState.primaryGameState == GameStatePrimary::PLAYING /* && currentState.??? */);
 
 					// Have I been picked up?
-					currentState.pickedUp = !feetOnGround;
+					currentState.pickedUp = !feetOnGround && !isGettingUp && !isDiving && !isWalking && !isKicking;
 
 					// Am I penalised?
 					currentState.penalised = penalisedButtonStatus /* || gameController[PENALISED] */;
