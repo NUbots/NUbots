@@ -38,8 +38,8 @@ ADD_ROLE(
 	behaviour::strategy::SoccerStrategy
 
         #Motion
-        #motion::ScriptEngine
-        #motion::WalkEngine
+        motion::ScriptEngine
+        motion::WalkEngine
 	
 	#Output
 	output::eSpeak

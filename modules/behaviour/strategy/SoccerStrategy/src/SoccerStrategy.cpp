@@ -76,6 +76,9 @@ namespace modules {
 			feetOnGround = true;
 			isKicking = false;
 			isWalking = false;
+			
+			currentState.primaryGameState = GameStatePrimary::INITIAL;
+			currentState.secondaryGameState = GameStateSecondary::NORMAL;
 
 			on<Trigger<Configuration<SoccerStrategyConfig>>>([this](const Configuration<SoccerStrategyConfig>& config) {
 				std::vector<arma::vec2> zone;
