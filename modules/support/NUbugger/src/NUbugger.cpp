@@ -451,8 +451,17 @@ namespace modules {
                        const std::vector<messages::localisation::Ball>& balls,
                        const std::vector<messages::localisation::Self>& robots) {
                 if(robots.size() > 0 && balls.size() > 0){
-                    arma::vec2 ball_pos = utility::localisation::transform::RobotBall2FieldBall(
+                NUClear::log(__FILE__, __LINE__, __func__);
+
+                    arma::vec2 ball_pos = balls[0].position;
+                NUClear::log(__FILE__, __LINE__, __func__);
+
+                    if (!balls[0].world_space) {
+                NUClear::log(__FILE__, __LINE__, __func__);
+                        ball_pos = utility::localisation::transform::RobotToWorldTransform(
                         robots[0].position, robots[0].heading, balls[0].position);
+                    }
+                NUClear::log(__FILE__, __LINE__, __func__);
 
                     // Ball message
                     auto ball_msg = std::make_unique<messages::localisation::FieldObject>();

@@ -80,8 +80,8 @@ arma::vec RobotModel::predictedObservation(
     const arma::vec::fixed<RobotModel::size>& state, const arma::vec& actual_position) {
 
     arma::mat worldToRobot = getWorldToRobotTransform(state);
-    arma::mat robotToWorld = getRobotToWorldTransform(state);
-    arma::mat identity = worldToRobot * robotToWorld;
+    // arma::mat robotToWorld = getRobotToWorldTransform(state);
+    // arma::mat identity = worldToRobot * robotToWorld;
     // NUClear::log("worldToRobot\n",worldToRobot, "\nrobotToWorld\n",robotToWorld, "\nidentity\n",identity);
     arma::vec objectPosition = arma::vec({actual_position[0], actual_position[1], 1});
     arma::vec expectedObservation = worldToRobot * objectPosition;
