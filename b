@@ -3,6 +3,7 @@
 import sys
 import os
 import shutil
+import platform
 from subprocess import call
 from subprocess import Popen
 from subprocess import PIPE
@@ -102,7 +103,8 @@ def box_generated(provider):
     return os.path.isfile("packer/nubots-ubuntu-14-04-x86-{}.box".format(provider))
 
 def packer_is_installed():
-    return not call(['which', 'packer'])
+    cmd = "where" if platform.system() == "Windows" else "which" #which is where on windows
+    return not call([cmd, 'packer'])
 
 def packer(provider):
     box_name = 'nubots-14.04'

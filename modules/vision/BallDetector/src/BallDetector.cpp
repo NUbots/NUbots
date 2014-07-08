@@ -29,6 +29,7 @@
 #include "utility/math/ransac/RansacCircleModel.h"
 #include "utility/math/vision.h"
 #include "utility/nubugger/NUgraph.h"
+#include "utility/math/coordinates.h"
 
 namespace modules {
 namespace vision {
@@ -49,6 +50,8 @@ namespace vision {
     using utility::math::vision::getParallaxAngle;
     using utility::math::vision::projectCamSpaceToScreen;
     using utility::math::vision::projectCamToGroundPlane;
+
+    using utility::math::coordinates::cartesianToSpherical;
     using utility::nubugger::graph;
 
     using messages::support::Configuration;
@@ -132,18 +135,26 @@ namespace vision {
                 // Get the centre of our ball ins creen space
                 arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay, cam.focalLengthPixels);
 
-                // Get our width based distance to the circle
+                // Get our width based distance to the ball
                 double widthDistance = widthBasedDistanceToCircle(BALL_DIAMETER, top, base, cam.focalLengthPixels);
                 arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
-                // TODO convert this into sphericial coordiantes and error
-                measurements.push_back({{0,0,0}, arma::eye(3,3)});
+
+                measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), arma::diagmat(arma::vec({0.003505351, 0.001961638, 1.68276E-05})) });
 
                 // Project this vector to a plane midway through the ball
                 arma::mat44 ballBisectorPlaneTransform = sensors.orientationCamToGround;
                 ballBisectorPlaneTransform(2,3) -= BALL_DIAMETER / 2.0;
                 arma::vec3 ballCentreGroundProj = arma::vec3({ 0, 0, BALL_DIAMETER / 2.0 }) + projectCamToGroundPlane(ballCentreRay, ballBisectorPlaneTransform);
-                // TODO convert this into sphericial coordiantes and error
-                measurements.push_back({{0,0,0}, arma::eye(3,3)});
+
+                measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), arma::diagmat(arma::vec({0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
+
+                std::cerr << measurements[0].position[0]
+                   << "," << measurements[0].position[1]
+                   << "," << measurements[0].position[2]
+                   << "," << measurements[1].position[0]
+                   << "," << measurements[1].position[1]
+                   << "," << measurements[1].position[2]
+                   << std::endl;
 
                 /*
                  *  BUILD OUR BALL

@@ -170,6 +170,7 @@ namespace modules {
                 ph2Zmp = ph2Single;
 
                 // gCompensation parameters
+                //TODO:config hiprollcomp?
                 hipRollCompensation = 4 * M_PI / 180;
                 ankleMod = arma::vec2{-config["toeTipCompensation"].as<double>(), 0} * 1 * M_PI / 180;
                 spreadComp = config["spreadComp"].as<float>();
@@ -179,6 +180,7 @@ namespace modules {
                 float gyroFactor = config["gyroFactor"].as<float>() * 0.273 * M_PI / 180 * 300 / 1024; //dps to rad/s conversion
 
                 // gGyro stabilization parameters
+                //TODO:config this?
                 ankleImuParamX = {0.5, 0.3 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
                 ankleImuParamY = {0.5, 1.2 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
                 kneeImuParamX = {0.5, 0.7 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
