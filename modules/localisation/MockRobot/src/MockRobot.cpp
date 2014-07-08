@@ -99,7 +99,6 @@ namespace localisation {
 
         // Update robot position
         on<Trigger<Every<10, std::chrono::milliseconds>>>("Robot motion", [this](const time_t&){
-                NUClear::log(__FILE__, __LINE__, __func__);
             if (!cfg_.simulate_robot_movement) {
                 robot_velocity_ = { 0, 0 };
                 return;
@@ -126,7 +125,6 @@ namespace localisation {
 
         // Update ball position
         on<Trigger<Every<10, std::chrono::milliseconds>>>("Ball motion", [this](const time_t&){
-                NUClear::log(__FILE__, __LINE__, __func__);
 
             if (!cfg_.simulate_ball_movement) {
                 ball_velocity_ = { 0, 0 };
@@ -169,7 +167,6 @@ namespace localisation {
         // Simulate Odometry
         on<Trigger<Every<100, std::chrono::milliseconds>>>("Odometry Simulation",
             [this](const time_t&) {
-                NUClear::log(__FILE__, __LINE__, __func__);
             if (!cfg_.simulate_odometry)
                 return;
 
@@ -207,7 +204,6 @@ namespace localisation {
         // Simulate Vision
         on<Trigger<Every<30, Per<std::chrono::seconds>>>,
            Options<Sync<MockRobot>>>("Vision Simulation", [this](const time_t&) {
-                NUClear::log(__FILE__, __LINE__, __func__);
             if (!cfg_.simulate_vision)
                 return;
 
@@ -247,7 +243,9 @@ namespace localisation {
                 auto g1_pos = WorldToRobotTransform(robot_position_, robot_heading_, fd->goalpost_br);
                 g1_m.position = arma::vec3({ g1_pos(0), g1_pos(1), 0 });
 
-                g2_m.position = WorldToRobotTransform(robot_position_, robot_heading_, fd->goalpost_bl);
+                auto g2_pos = WorldToRobotTransform(robot_position_, robot_heading_, fd->goalpost_bl);
+                g2_m.position = arma::vec3({ g2_pos(0), g2_pos(1), 0 });
+                
                 g1_m.error = arma::eye(3, 3) * 0.1;
                 g2_m.error = arma::eye(3, 3) * 0.1;
                 goal1.measurements.push_back(g1_m);
@@ -263,7 +261,6 @@ namespace localisation {
 
             // Ball observation
             if (cfg_.simulate_ball_observations) {
-                NUClear::log(__FILE__, __LINE__, __func__);
 
                 auto ball_vec = std::make_unique<std::vector<messages::vision::Ball>>();
 
@@ -279,12 +276,9 @@ namespace localisation {
                 // Observations in robot-relative cartesian:
                 // auto rot = utility::math::matrix::zRotationMatrix(camera_heading);
                 // b_m.position = rot * (ball_pos - camera_pos);
-                NUClear::log(__FILE__, __LINE__, __func__);
                 auto ball_pos = WorldToRobotTransform(robot_position_, robot_heading_, ball_position_);
                 b_m.position = arma::vec3({ ball_pos(0), ball_pos(1), 0 });
-                NUClear::log(__FILE__, __LINE__, __func__);
                 b_m.error = arma::eye(3, 3) * 0.1;
-                NUClear::log(__FILE__, __LINE__, __func__);
 
                 ball.measurements.push_back(b_m);
                 ball_vec->push_back(ball);
@@ -299,7 +293,6 @@ namespace localisation {
            Options<Sync<MockRobot>>>("NUbugger Output",
             [this](const time_t&,
                    const Mock<std::vector<messages::localisation::Self>>& mock_robots) {
-                NUClear::log(__FILE__, __LINE__, __func__);
 
             auto& robots = mock_robots.data;
 
@@ -341,7 +334,6 @@ namespace localisation {
             [this](const time_t&,
                    const Mock<messages::localisation::Ball>& mock_ball,
                    const Mock<std::vector<messages::localisation::Self>>& mock_robots) {
-                NUClear::log(__FILE__, __LINE__, __func__);
 
 
             auto& ball = mock_ball.data;
