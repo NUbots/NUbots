@@ -116,8 +116,8 @@ arma::vec RobotModel::predictedObservation(
     // // Radial coordinates
     arma::vec diff_1 = actual_positions[0] - state.rows(kX, kY);
     arma::vec diff_2 = actual_positions[1] - state.rows(kX, kY);
-    arma::vec radial_1 = utility::math::coordinates::Cartesian2Radial(diff_1);
-    arma::vec radial_2 = utility::math::coordinates::Cartesian2Radial(diff_2);
+    arma::vec radial_1 = utility::math::coordinates::cartesianToRadial(diff_1);
+    arma::vec radial_2 = utility::math::coordinates::cartesianToRadial(diff_2);
 
     auto angle_diff = utility::math::angle::difference(radial_1[1], radial_2[1]);
 

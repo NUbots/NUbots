@@ -17,31 +17,24 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MATH_GEOMETRY_POLYGON_H
-#define UTILITY_MATH_GEOMETRY_POLYGON_H
+#ifndef MODULES_DEBUG_MATHTESTER_H
+#define MODULES_DEBUG_MATHTESTER_H
 
-#include <armadillo>
-#include "ParametricLine.h"
+#include <nuclear>
+#include <yaml-cpp/yaml.h>
 
-namespace utility {
-namespace math {
-namespace geometry {
+namespace modules {
+    namespace debug {
 
-    class Polygon {
-    private:
-    	std::vector<ParametricLine<2>> edges;
-    public:
-    	Polygon(const std::vector<arma::vec2>& vertices);
+            class MathTester : public NUClear::Reactor {
+            public:
+                bool testPolygon(bool verbose, const YAML::Node& config);
+                static constexpr const char* CONFIGURATION_PATH = "HeadKinematicsNULLTest.yaml";
+                explicit MathTester(std::unique_ptr<NUClear::Environment> environment);
+            };
 
-    	/*! @brief Checks if the point lies within the boundary of the polygon
-    	*/
-    	bool pointContained(const arma::vec2& p) const;
-    	/*! @brief Gets the closest point in the polygon to the specified point
-    	*/
-    	arma::vec2 projectPointToPolygon(const arma::vec2& p) const;
-    };
-}
-}
-}
+    }  // debug
+}  // modules
 
-#endif
+#endif  // MODULES_DEBUG_MATHTESTER_H
+
