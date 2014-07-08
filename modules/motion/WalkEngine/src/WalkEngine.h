@@ -249,6 +249,7 @@ namespace modules {
 //            arma::vec3 rightArmCommand;
 //            arma::vec3 leftLegCommand;
 //            arma::vec3 rightLegCommand;
+            void generateAndSaveStandScript();
             void configureWalk(const YAML::Node& config);
 
             std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> update(const messages::input::Sensors& sensors);

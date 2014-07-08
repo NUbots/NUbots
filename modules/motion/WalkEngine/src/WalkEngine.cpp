@@ -119,6 +119,7 @@ namespace modules {
 
             on<Trigger<Configuration<WalkEngine>> >([this](const Configuration<WalkEngine>& config) {
                 configureWalk(config.config);
+                generateAndSaveStandScript();
             });
             on<Trigger<WalkOptimiserCommand> >([this](const WalkOptimiserCommand& command) {
                 configureWalk(command.walkConfig);
@@ -227,9 +228,10 @@ namespace modules {
             toeTipCompensation = config["toeTipCompensation"].as<float>();
 
             useAlternativeTrajectory = config["useAlternativeTrajectory"].as<bool>();
+            
+        }
 
-//                setVelocity(config["velCommandX"], config["velCommandY"], config["velCommandAngular"]);
-            //Generate stand script
+        void WalkEngine::generateAndSaveStandScript(){
             reset();
             stanceReset();
             auto waypoints = updateStill();
