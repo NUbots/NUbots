@@ -61,6 +61,7 @@ namespace localisation {
             ball.sr_xx = model_cov(0, 0);
             ball.sr_xy = model_cov(0, 1);
             ball.sr_yy = model_cov(1, 1);
+            ball.world_space = false;
 
             if (engine_.CanEmitFieldObjects()) {
                 auto ball_msg = std::make_unique<Ball>(ball);
@@ -81,12 +82,12 @@ namespace localisation {
             engine_.TimeUpdate(curr_time, odom);
         });
 
-       // on<Trigger<Every<100, Per<std::chrono::seconds>>>,
-       //     Options<Sync<KFBallLocalisation>>
-       //    >("KFBallLocalisation Time", [this](const time_t&) {
-       //      auto curr_time = NUClear::clock::now();
-       //      engine_.TimeUpdate(curr_time);
-       //  });
+       on<Trigger<Every<100, Per<std::chrono::seconds>>>,
+           Options<Sync<KFBallLocalisation>>
+          >("KFBallLocalisation Time", [this](const time_t&) {
+            auto curr_time = NUClear::clock::now();
+            engine_.TimeUpdate(curr_time);
+        });
 
        on<Trigger<std::vector<messages::vision::Ball>>,
            Options<Sync<KFBallLocalisation>>

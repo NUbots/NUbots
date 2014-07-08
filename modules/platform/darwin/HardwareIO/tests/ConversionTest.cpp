@@ -33,9 +33,9 @@ TEST_CASE("Testing the hardware accelerometer conversions to SI units", "[hardwa
 
 TEST_CASE("Testing the hardware gyroscope conversions to SI units", "[hardware][conversion][gyroscope]") {
 
-    REQUIRE(Convert::gyroscope(0)    == Approx((-1600.0 * M_PI) / 180.0)); // Should be -1600 degrees/second in radians/second
+    REQUIRE(Convert::gyroscope(0)    == Approx((-1800.0 * M_PI) / 180.0)); // Should be -1800 degrees/second in radians/second
     REQUIRE(Convert::gyroscope(512)  == Approx(0));                        // Should be 0
-    REQUIRE(Convert::gyroscope(1024) == Approx((1600.0 * M_PI) / 180.0));  // Should be 1600 degrees/second in radians/second
+    REQUIRE(Convert::gyroscope(1024) == Approx((1800.0 * M_PI) / 180.0));  // Should be 1800 degrees/second in radians/second
 }
 
 TEST_CASE("Testing the hardware voltage conversions to SI units", "[hardware][conversion][voltage]") {

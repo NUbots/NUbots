@@ -34,7 +34,7 @@ namespace localisation {
 
     NUcapLocalisation::NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Trigger<Network<MotionCapture>>, With<Sensors> >([this](const Network<MotionCapture>& net, const Sensors&) {
+        on<Trigger<Network<MotionCapture>>, With<Sensors> >([this](const Network<MotionCapture>& net, const Sensors& sensors) {
             auto& mocap = net.data;
             for (auto& rigidBody : mocap->rigid_bodies()) {
 
@@ -45,19 +45,19 @@ namespace localisation {
                     float x = rigidBody.position().x();
                     float y = rigidBody.position().y();
                     float z = rigidBody.position().z();
-                    // UnitQuaternion q = UnitQuaternion(arma::vec4{rigidBody.rotation().w(),
-                    //                                              rigidBody.rotation().x(),
-                    //                                              rigidBody.rotation().y(),
-                    //                                              rigidBody.rotation().z()});
+                    UnitQuaternion q(arma::vec4{rigidBody.rotation().w(),
+                                                rigidBody.rotation().x(),
+                                                rigidBody.rotation().y(),
+                                                rigidBody.rotation().z()});
 
-                    // arma::mat33 groundToWorldRotation = q.getMatrix() * sensors.orientationCamToGround.submat(0,0,2,2).t();
-                    
-                    // double bearing = std::acos(groundToWorldRotation(0,0));
+                    arma::mat33 groundToWorldRotation = q.getMatrix() * sensors.orientationCamToGround.submat(0,0,2,2).t();
+
+                    double bearing = std::acos(groundToWorldRotation(0,0));
 
                     // TODO: transform from head to field
 
                     emit(graph("NUcap pos", x, y, z));
-                    // emit(graph("NUcap bearing", bearing));
+                    emit(graph("NUcap bearing", bearing));
                 }
             }
 

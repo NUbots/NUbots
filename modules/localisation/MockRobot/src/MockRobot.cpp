@@ -28,7 +28,10 @@
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
 // #include "BallModel.h"
+#include "utility/localisation/transform.h"
 
+using utility::localisation::transform::WorldToRobotTransform;
+using utility::localisation::transform::RobotToWorldTransform;
 using utility::nubugger::graph;
 using messages::support::Configuration;
 using messages::support::FieldDescription;
@@ -199,20 +202,20 @@ namespace localisation {
         });
 
         // Simulate Vision
-        on<Trigger<Every<200, std::chrono::milliseconds>>,
+        on<Trigger<Every<30, Per<std::chrono::seconds>>>,
            Options<Sync<MockRobot>>>("Vision Simulation", [this](const time_t&) {
             if (!cfg_.simulate_vision)
                 return;
 
             // Camera setup
             auto camera_pos = arma::vec3 { robot_position_[0], robot_position_[1], 0.0 };
-            double camera_heading = std::atan2(robot_heading_[1], robot_heading_[0]);
+            // double camera_heading = std::atan2(robot_heading_[1], robot_heading_[0]);
 
             // Goal observation
             if (cfg_.simulate_goal_observations && field_description_ != nullptr) {
                 auto& fd = field_description_;
-                auto goal1_pos = arma::vec3 { fd->goalpost_br[0], fd->goalpost_br[1], 0.0 };
-                auto goal2_pos = arma::vec3 { fd->goalpost_bl[0], fd->goalpost_bl[1], 0.0 };
+                // auto goal1_pos = arma::vec3 { fd->goalpost_br[0], fd->goalpost_br[1], 0.0 };
+                // auto goal2_pos = arma::vec3 { fd->goalpost_bl[0], fd->goalpost_bl[1], 0.0 };
 
                 auto goal1 = messages::vision::Goal();
                 auto goal2 = messages::vision::Goal();
@@ -234,9 +237,15 @@ namespace localisation {
                 // Observations in robot-relative cartesian:
                 messages::vision::VisionObject::Measurement g1_m;
                 messages::vision::VisionObject::Measurement g2_m;
-                auto rot = utility::math::matrix::zRotationMatrix(camera_heading);
-                g1_m.position = rot * (goal1_pos - camera_pos);
-                g2_m.position = rot * (goal2_pos - camera_pos);
+                // auto rot = utility::math::matrix::zRotationMatrix(camera_heading);
+                // g1_m.position = rot * (goal1_pos - camera_pos);
+                // g2_m.position = rot * (goal2_pos - camera_pos);
+                auto g1_pos = WorldToRobotTransform(robot_position_, robot_heading_, fd->goalpost_br);
+                g1_m.position = arma::vec3({ g1_pos(0), g1_pos(1), 0 });
+
+                auto g2_pos = WorldToRobotTransform(robot_position_, robot_heading_, fd->goalpost_bl);
+                g2_m.position = arma::vec3({ g2_pos(0), g2_pos(1), 0 });
+                
                 g1_m.error = arma::eye(3, 3) * 0.1;
                 g2_m.error = arma::eye(3, 3) * 0.1;
                 goal1.measurements.push_back(g1_m);
@@ -252,11 +261,12 @@ namespace localisation {
 
             // Ball observation
             if (cfg_.simulate_ball_observations) {
+
                 auto ball_vec = std::make_unique<std::vector<messages::vision::Ball>>();
 
                 messages::vision::Ball ball;
                 messages::vision::VisionObject::Measurement b_m;
-                auto ball_pos = arma::vec3 { ball_position_[0], ball_position_[1], 0.0 };
+                // auto ball_pos = arma::vec3 { ball_position_[0], ball_position_[1], 0.0 };
                 
                 // // Observations in spherical from camera: (dist, bearing, declination)
                 // b_m.sphericalFromCamera = utility::math::coordinates::Cartesian2Spherical(ball_pos - camera_pos);
@@ -264,8 +274,10 @@ namespace localisation {
                 // b_m.error = arma::eye(3, 3) * 0.1;
 
                 // Observations in robot-relative cartesian:
-                auto rot = utility::math::matrix::zRotationMatrix(camera_heading);
-                b_m.position = rot * (ball_pos - camera_pos);
+                // auto rot = utility::math::matrix::zRotationMatrix(camera_heading);
+                // b_m.position = rot * (ball_pos - camera_pos);
+                auto ball_pos = WorldToRobotTransform(robot_position_, robot_heading_, ball_position_);
+                b_m.position = arma::vec3({ ball_pos(0), ball_pos(1), 0 });
                 b_m.error = arma::eye(3, 3) * 0.1;
 
                 ball.measurements.push_back(b_m);
@@ -327,15 +339,15 @@ namespace localisation {
             auto& ball = mock_ball.data;
             auto& robots = mock_robots.data;
 
-            arma::vec2 ball_pos = utility::localisation::transform::RobotBall2FieldBall(
-                robot_position_, robot_heading_, ball.position);
+
 
             if (robots.empty())
                 return;
 
-            arma::vec2 robot_ball_pos = utility::localisation::transform::RobotBall2FieldBall(
+            arma::vec2 robot_ball_pos = RobotToWorldTransform(
                 robots[0].position, robots[0].heading, ball.position);
-
+            arma::vec2 ball_pos = RobotToWorldTransform(
+                robot_position_, robot_heading_, ball.position);
             emit(graph("Estimated ball position", ball_pos[0], ball_pos[1]));
             // emit(graph("Estimated ball velocity", state[2], state[3]));
             emit(graph("Actual ball position", ball_position_[0], ball_position_[1]));
@@ -353,6 +365,7 @@ namespace localisation {
             ball_model.sr_xx = ball.sr_xx;
             ball_model.sr_xy = ball.sr_xy;
             ball_model.sr_yy = ball.sr_yy;
+            ball_model.world_space = true;
             balls_msg->push_back(ball_model);
 
             messages::localisation::Ball ball_marker;
@@ -361,6 +374,7 @@ namespace localisation {
             ball_marker.sr_xx = 0.01;
             ball_marker.sr_xy = 0;
             ball_marker.sr_yy = 0.01;
+            ball_marker.world_space = true;
             balls_msg->push_back(ball_marker);
 
             messages::localisation::Ball robot_ball;
@@ -369,6 +383,7 @@ namespace localisation {
             robot_ball.sr_xx = 0.01;
             robot_ball.sr_xy = 0;
             robot_ball.sr_yy = 0.01;
+            robot_ball.world_space = true;
             balls_msg->push_back(robot_ball);
 
             emit(std::move(balls_msg));
