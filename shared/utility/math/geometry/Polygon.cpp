@@ -49,23 +49,22 @@ namespace geometry {
 	}
 
 	arma::vec2 Polygon::projectPointToPolygon(const arma::vec::fixed<2>& p) const{
-		// if(pointContained(p)){
-		// 	return p;
-		// }
-		// double minDistance = std::numeric_limits<double>::infinity();
-		// arma::vec2 closestPoint;
-		// for(auto& edge : edges){
-		// 	//Get projection
-		// 	arma::vec2 proj = edge.projectPointToLine(p);
-		// 	double dist = arma::norm(proj - p);
-		// 	//If this is closer then update
-		// 	if(dist < minDistance){
-		// 		minDistance = dist;
-		// 		closestPoint = proj;
-		// 	}
-		// }
-		// return closestPoint;
-		return p;
+		if(pointContained(p)){
+			return p;
+		}
+		double minDistance = std::numeric_limits<double>::infinity();
+		arma::vec2 closestPoint;
+		for(auto& edge : edges){
+			//Get projection
+			arma::vec2 proj = edge.projectPointToLine(p);
+			double dist = arma::norm(proj - p);
+			//If this is closer then update
+			if(dist < minDistance){
+				minDistance = dist;
+				closestPoint = proj;
+			}
+		}
+		return closestPoint;
 	}
 
 
