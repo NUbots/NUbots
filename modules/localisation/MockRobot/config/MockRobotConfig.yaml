@@ -1,7 +1,7 @@
 SimulateVision: true
 SimulateGoalObservations: true
 SimulateBallObservations: true
-SimulateOdometry: true
+SimulateOdometry: false
 SimulateRobotMovement: true
 SimulateBallMovement: true
 EmitRobotFieldobjects: true

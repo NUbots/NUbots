@@ -30,6 +30,11 @@
 // #include "BallModel.h"
 #include "utility/localisation/transform.h"
 
+using utility::math::matrix::rotationMatrix;
+using utility::math::angle::normalizeAngle;
+using utility::math::angle::vectorToBearing;
+using utility::math::angle::bearingToUnitVector;
+using utility::math::coordinates::Cartesian2Spherical;
 using utility::localisation::transform::WorldToRobotTransform;
 using utility::localisation::transform::RobotToWorldTransform;
 using utility::nubugger::graph;
@@ -119,7 +124,7 @@ namespace localisation {
 
             arma::vec diff = robot_position_ - old_pos;
 
-            robot_heading_ = arma::normalise(diff);
+            robot_heading_ = vectorToBearing(diff);
             robot_velocity_ = robot_heading_ / 100.0;
         });
 
@@ -172,23 +177,13 @@ namespace localisation {
 
             auto odom = std::make_unique<messages::localisation::FakeOdometry>();
 
-            double old_heading = std::atan2(odom_old_robot_heading_[1],
-                                            odom_old_robot_heading_[0]);
-            double new_heading = std::atan2(robot_heading_[1],
-                                            robot_heading_[0]);
-            double heading_diff = new_heading - old_heading;
-            odom->torso_rotation = utility::math::angle::normalizeAngle(heading_diff);
+            double heading_diff = robot_heading_ - odom_old_robot_heading_;
+            odom->torso_rotation = normalizeAngle(heading_diff);
 
             // Calculate torso displacement in robot-space:
             arma::vec2 position_diff = robot_position_ - odom_old_robot_position_;
-            double theta = -new_heading;
-            arma::mat22 rot;
-            //NOTE: Matrix initialisation changed by jake fountain 29th may 2014
-            rot <<  std::cos(theta) << std::sin(theta) << arma::endr
-                << -std::sin(theta) << std::cos(theta);
-            // Rotate position_diff by -new_heading.
+            arma::mat22 rot = rotationMatrix(robot_heading_);
             odom->torso_displacement = rot * position_diff;
-
 
             odom_old_robot_position_ = robot_position_;
             odom_old_robot_heading_ = robot_heading_;
@@ -207,12 +202,17 @@ namespace localisation {
             if (!cfg_.simulate_vision)
                 return;
 
+            if (field_description_ == nullptr) {
+                NUClear::log(__FILE__, __LINE__, ": field_description_ == nullptr");
+                return;
+            }
+
             // Camera setup
             auto camera_pos = arma::vec3 { robot_position_[0], robot_position_[1], 0.0 };
             // double camera_heading = std::atan2(robot_heading_[1], robot_heading_[0]);
 
             // Goal observation
-            if (cfg_.simulate_goal_observations && field_description_ != nullptr) {
+            if (cfg_.simulate_goal_observations) {
                 auto& fd = field_description_;
                 // auto goal1_pos = arma::vec3 { fd->goalpost_br[0], fd->goalpost_br[1], 0.0 };
                 // auto goal2_pos = arma::vec3 { fd->goalpost_bl[0], fd->goalpost_bl[1], 0.0 };
@@ -222,30 +222,16 @@ namespace localisation {
                 goal1.side = messages::vision::Goal::Side::RIGHT;
                 goal2.side = messages::vision::Goal::Side::LEFT;
 
-                // // Observations in spherical from camera: (dist, bearing, declination)
-                // messages::vision::VisionObject::Measurement g1_m;
-                // messages::vision::VisionObject::Measurement g2_m;
-                // g1_m.sphericalFromCamera = utility::math::coordinates::Cartesian2Spherical(goal1_pos - camera_pos);
-                // g2_m.sphericalFromCamera = utility::math::coordinates::Cartesian2Spherical(goal2_pos - camera_pos);
-                // g1_m.sphericalFromCamera[1] = utility::math::angle::normalizeAngle(goal1.sphericalFromCamera[1] - camera_heading);
-                // g2_m.sphericalFromCamera[1] = utility::math::angle::normalizeAngle(goal2.sphericalFromCamera[1] - camera_heading);
-                // g1_m.error = arma::eye(3, 3) * 0.1;
-                // g2_m.error = arma::eye(3, 3) * 0.1;
-                // goal1.measurements.push_back(g1_m);
-                // goal2.measurements.push_back(g2_m);
-
-                // Observations in robot-relative cartesian:
                 messages::vision::VisionObject::Measurement g1_m;
-                messages::vision::VisionObject::Measurement g2_m;
-                // auto rot = utility::math::matrix::zRotationMatrix(camera_heading);
-                // g1_m.position = rot * (goal1_pos - camera_pos);
-                // g2_m.position = rot * (goal2_pos - camera_pos);
-                auto g1_pos = WorldToRobotTransform(robot_position_, robot_heading_, fd->goalpost_br);
-                g1_m.position = arma::vec3({ g1_pos(0), g1_pos(1), 0 });
+                auto g1_pos_2d = WorldToRobotTransform(robot_position_, robot_heading_, fd->goalpost_br);
+                auto g1_pos_cartesian = arma::vec3({ g1_pos_2d(0), g1_pos_2d(1), 0 });
+                g1_m.position = Cartesian2Spherical(g1_pos_cartesian);
 
-                auto g2_pos = WorldToRobotTransform(robot_position_, robot_heading_, fd->goalpost_bl);
-                g2_m.position = arma::vec3({ g2_pos(0), g2_pos(1), 0 });
-                
+                messages::vision::VisionObject::Measurement g2_m;
+                auto g2_pos_2d = WorldToRobotTransform(robot_position_, robot_heading_, fd->goalpost_bl);
+                auto g2_pos_cartesian = arma::vec3({ g2_pos_2d(0), g2_pos_2d(1), 0 });
+                g2_m.position = Cartesian2Spherical(g2_pos_cartesian);
+
                 g1_m.error = arma::eye(3, 3) * 0.1;
                 g2_m.error = arma::eye(3, 3) * 0.1;
                 goal1.measurements.push_back(g1_m);
@@ -264,20 +250,12 @@ namespace localisation {
 
                 auto ball_vec = std::make_unique<std::vector<messages::vision::Ball>>();
 
+                // Observations in spherical from ground reference: (dist, bearing, declination)
                 messages::vision::Ball ball;
                 messages::vision::VisionObject::Measurement b_m;
-                // auto ball_pos = arma::vec3 { ball_position_[0], ball_position_[1], 0.0 };
-                
-                // // Observations in spherical from camera: (dist, bearing, declination)
-                // b_m.sphericalFromCamera = utility::math::coordinates::Cartesian2Spherical(ball_pos - camera_pos);
-                // b_m.sphericalFromCamera[1] = utility::math::angle::normalizeAngle(ball.sphericalFromCamera[1] - camera_heading);
-                // b_m.error = arma::eye(3, 3) * 0.1;
-
-                // Observations in robot-relative cartesian:
-                // auto rot = utility::math::matrix::zRotationMatrix(camera_heading);
-                // b_m.position = rot * (ball_pos - camera_pos);
-                auto ball_pos = WorldToRobotTransform(robot_position_, robot_heading_, ball_position_);
-                b_m.position = arma::vec3({ ball_pos(0), ball_pos(1), 0 });
+                auto ball_pos_2d = WorldToRobotTransform(robot_position_, robot_heading_, ball_position_);
+                auto ball_pos_cartesian = arma::vec3({ ball_pos_2d(0), ball_pos_2d(1), field_description_->ball_radius });
+                b_m.position = Cartesian2Spherical(ball_pos_cartesian);
                 b_m.error = arma::eye(3, 3) * 0.1;
 
                 ball.measurements.push_back(b_m);
@@ -297,7 +275,8 @@ namespace localisation {
             auto& robots = mock_robots.data;
 
             emit(graph("Actual robot position", robot_position_[0], robot_position_[1]));
-            emit(graph("Actual robot heading", robot_heading_[0], robot_heading_[1]));
+            // emit(graph("Actual robot heading", robot_heading_[0], robot_heading_[1]));
+            emit(graph("Actual robot heading", robot_heading_));
             emit(graph("Actual robot velocity", robot_velocity_[0], robot_velocity_[1]));
 
             if (robots.size() >= 1) {
@@ -317,7 +296,7 @@ namespace localisation {
 
             messages::localisation::Self self_marker;
             self_marker.position = robot_position_;
-            self_marker.heading = robot_heading_;
+            self_marker.heading = bearingToUnitVector(robot_heading_);
             self_marker.sr_xx = 0.01;
             self_marker.sr_xy = 0;
             self_marker.sr_yy = 0.01;

@@ -21,6 +21,7 @@
 #define UTILITY_MATH_ANGLE_H
 
 #include <cmath>
+#include <armadillo>
 
 namespace utility {
 namespace math {
@@ -30,7 +31,6 @@ namespace math {
      * @author Trent Houliston
      */
     namespace angle {
-
 
         /**
          * Takes an angle in radians and normalizes it to be between -pi and pi
@@ -56,6 +56,14 @@ namespace math {
         inline double difference(const double a, const double b) {
 
             return M_PI - std::fabs(std::fmod(std::fabs(a - b), 2 * M_PI) - M_PI);
+        }
+
+        inline double vectorToBearing(arma::vec2 dirVec) {
+            return std::atan2(dirVec(1), dirVec(0));
+        }
+
+        inline arma::vec2 bearingToUnitVector(double angle) {
+            return arma::vec2({std::cos(angle), std::sin(angle)});
         }
     }
 }

@@ -33,6 +33,7 @@
 #include "MMKFRobotLocalisationEngine.h"
 #include "RobotModel.h"
 
+using utility::math::angle::bearingToUnitVector;
 using utility::nubugger::graph;
 using utility::localisation::LocalisationFieldObject;
 using messages::support::Configuration;
@@ -80,8 +81,8 @@ namespace localisation {
                 auto model_cov = model->GetCovariance();
 
                 Self robot_model;
-                robot_model.position = model_state.rows(0, 1);
-                robot_model.heading = model_state.rows(2, 3);
+                robot_model.position = model_state.rows(robot::kX, robot::kY);
+                robot_model.heading = bearingToUnitVector(model_state(robot::kHeading));
                 robot_model.sr_xx = model_cov(0, 0);
                 robot_model.sr_xy = model_cov(0, 1);
                 robot_model.sr_yy = model_cov(1, 1);
