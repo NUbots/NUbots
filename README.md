@@ -2,7 +2,7 @@ NUbots NUClearPort Project [![Build Status][travis-develop-image]][nuclearport-t
 ==========================
 
 The [NUClearPort][] project is an effort to port the [NUbots][]' [robocup][] 
-codebase to use the new [NUClear][] framework.
+codebase to use the new [NUClear][] fframework.
 
 Vagrant
 --------

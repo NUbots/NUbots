@@ -116,13 +116,16 @@ namespace modules {
 				float leftCount = 0.0, middleCount = 0.0;
 
 				for (size_t i = 0; i < sensors.size(); i++) {
-					if (sensors.at(i)->buttons.left) {
+					if (sensors.at(i)->buttons.left) { //leftbutton fixed in hardwareIO.cpp
 						leftCount += 0.1;
 					}
 					if (sensors.at(i)->buttons.middle) {
 						middleCount += 0.1;
 					}
 				}
+
+				//if(leftCount>0 || middleCount>0)
+				//	std::cout << "(" << sensors.size() << ", " << leftCount << ", " << middleCount << ")" << std::endl; //Test the button pressing	
 
 				gameStateButtonStatus = (leftCount > 0.7);
 				penalisedButtonStatus = (middleCount > 0.7) ? !penalisedButtonStatus : penalisedButtonStatus;
@@ -230,32 +233,38 @@ namespace modules {
 						switch (currentState.primaryGameState) {
 							case GameStatePrimary::INITIAL: {
 								emit(std::move(std::make_unique<messages::output::Say>("Initial")));
+								//std::cout << "initial" << std::endl;
 								break;
 							}
 
 							case GameStatePrimary::SET: {
 								emit(std::move(std::make_unique<messages::output::Say>("Set")));
+								//std::cout << "set" << std::endl;
 								break;
 							}
 
 							case GameStatePrimary::READY: {
-								emit(std::move(std::make_unique<messages::output::Say>("Readu")));
+								emit(std::move(std::make_unique<messages::output::Say>("Ready")));
+								//std::cout << "ready" << std::endl;
 								break;
 							}
 
 							case GameStatePrimary::PLAYING: {
 								emit(std::move(std::make_unique<messages::output::Say>("Playing")));
+								//std::cout << "playing" << std::endl;
 								break;
 							}
 
 							case GameStatePrimary::FINISHED: {
 								emit(std::move(std::make_unique<messages::output::Say>("Finished")));
+								//std::cout << "finished" << std::endl;
 								break;
 							}
 
 							default: {
 								currentState.primaryGameState = GameStatePrimary::INITIAL;
 								emit(std::move(std::make_unique<messages::output::Say>("Initial")));
+								//std::cout << "initial" << std::endl;
 								break;
 							}
 						}
@@ -437,7 +446,6 @@ namespace modules {
 						arma::vec2 blockPosition = {currentState.position[0], (transformPoint(currentState.ball.position) + currentState.position)[1]};
 						sideStepToPoint(blockPosition);
 
-						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
 					}
 
 					else if ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK) && currentState.ballLost && currentState.kicker) {
