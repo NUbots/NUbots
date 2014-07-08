@@ -71,6 +71,33 @@ namespace geometry {
 			return arma::norm(vectorToLine(p));
 		}
 
+		Vector intersect(const ParametricLine<n>& l){
+			//Do not use for n > 2
+			if(n > 2){
+				throw std::domain_error("Line::intersect - Lines in more than two dimensions rarely meet! Feature to be added later.");
+			}
+			//Setup linear equations:
+			arma::mat22 A;
+			A.col(0) = direction;
+			A.col(1) = -l.direction;
+
+			//Check extended lines intersect at all
+			arma::vec2 tValues;
+			try{
+				tValues = arma::solve(A, l.point - point);
+			} catch (const std::runtime_error& e) {
+				throw std::domain_error("Line::intersect - Lines do not intersect (parallel)");
+			}
+
+			//Check bounds of line segments
+			if(tValues[0] < tLimits[0] || tValues[0] > tLimits[1] //ie outside range of first line
+			|| tValues[1] < l.tLimits[0] || tValues[1] > l.tLimits[1] //outside range of second
+			  ){
+				throw std::domain_error("Line::intersect - Lines do not intersect (parallel)");
+			}
+			return point + tValues[0] * direction;
+		}
+
 		double x(double y);
 		double y(double x);
 	};
