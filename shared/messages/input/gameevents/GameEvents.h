@@ -32,7 +32,7 @@ namespace gameevents {
         OPPONENT
     };
 
-    enum Colour {
+    enum TeamColour {
         CYAN,
         MAGENTA
     };
@@ -76,11 +76,13 @@ namespace gameevents {
         Context team;
     };
 
-    struct TeamColour {
-        Colour colour;
+    enum class Mode {
+        NORMAL,
+        PENALTY_SHOOTOUT,
+        OVERTIME
     };
 
-    enum class GamePhase {
+    enum class Phase {
         INITIAL,
         READY,
         SET,
@@ -90,46 +92,66 @@ namespace gameevents {
     };
 
 
-    template <enum GamePhase>
-    struct GameState;
+    template <enum Phase>
+    struct GamePhase;
 
     template <>
-    struct GameState<GamePhase::INITIAL> {
+    struct GamePhase<Phase::INITIAL> {
     };
 
     template <>
-    struct GameState<GamePhase::READY> {
+    struct GamePhase<Phase::READY> {
         NUClear::clock::time_point readyTime;
     };
 
     template <>
-    struct GameState<GamePhase::SET> {
+    struct GamePhase<Phase::SET> {
     };
 
     template <>
-    struct GameState<GamePhase::PLAYING> {
+    struct GamePhase<Phase::PLAYING> {
         NUClear::clock::time_point endHalf;
         NUClear::clock::time_point ballFree;
     };
 
     template <>
-    struct GameState<GamePhase::TIMEOUT> {
+    struct GamePhase<Phase::TIMEOUT> {
         NUClear::clock::time_point ends;
     };
 
     template <>
-    struct GameState<GamePhase::FINISHED> {
+    struct GamePhase<Phase::FINISHED> {
         NUClear::clock::time_point nextHalf;
     };
 
+    template <enum Mode>
     struct GameMode {
-        enum class Mode {
-            NORMAL,
-            PENALTY_SHOOTOUT,
-            OVERTIME
+    };
+
+    struct GameState {
+
+        struct Robot {
+          bool penalised;
+          NUClear::clock::time_point unpenalised;
         };
 
+        struct Team {
+            uint teamId;                         // unique team number
+            uint score;                              // team's score
+            std::string coachMessage;  // the coach's message to the team
+            std::vector<Robot> players;
+        };
+
+        Phase phase;
         Mode mode;
+        bool firstHalf;
+        bool kickedOutByUs;
+        NUClear::clock::time_point kickedOutTime;
+        bool ourKickOff;
+        NUClear::clock::time_point primaryTime;
+        NUClear::clock::time_point secondaryTime;
+        Team team;
+        Team opponent;
     };
 
 }
