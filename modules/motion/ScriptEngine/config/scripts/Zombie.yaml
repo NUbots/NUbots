@@ -53,10 +53,10 @@
     - id: L_ANKLE_ROLL
       gain: 30
       position: 0
-    - id: UNKNOWN
-      gain: 0
+    - id: HEAD_PITCH
+      gain: 30
       position: 0
-    - id: UNKNOWN
+    - id: HEAD_YAW
       position: 0
-      gain: 0
+      gain: 30
   duration: 1000

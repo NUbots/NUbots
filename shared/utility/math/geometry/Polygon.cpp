@@ -36,10 +36,20 @@ namespace geometry {
 		ParametricLine<2> ray;
 		int intersectionCount = 0;
 		ray.setFromDirection(arma::vec2{1,0}, p, arma::vec2({0,std::numeric_limits<double>::infinity()}));
+		arma::vec2 lastIntersection = {0,0};
+		bool hadPreviousIntersection = false;
 		for(auto& edge : edges){
 			try {
-				ray.intersect(edge);
-				intersectionCount++;
+				arma::vec2 intersection = ray.intersect(edge);
+				if(hadPreviousIntersection){
+					if(arma::norm(intersection - lastIntersection) > 1e-6){
+						intersectionCount++;
+					}
+				} else {
+					intersectionCount++;
+				}
+				hadPreviousIntersection = true;
+				lastIntersection = intersection;
 			} catch (const std::domain_error& e){
 				//We didnt intersect with the line!
 				//I know, seems kind of silly to use an exception here, but it works nicely with everything else
