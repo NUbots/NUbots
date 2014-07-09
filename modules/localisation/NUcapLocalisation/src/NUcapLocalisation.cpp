@@ -22,6 +22,7 @@
 #include "messages/input/proto/MotionCapture.pb.h"
 #include "messages/input/Sensors.h"
 #include "utility/math/geometry/UnitQuaternion.h"
+#include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
 #include <armadillo>
 
@@ -33,17 +34,22 @@ namespace localisation {
     using messages::input::Sensors;
     using utility::math::geometry::UnitQuaternion;
     using messages::localisation::Self;
+    using messages::support::Configuration;
 
     NUcapLocalisation::NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        
+        on<Trigger<Configuration<NUcapLocalisation>>>([this](const Configuration<NUcapLocalisation>& config){
+            robot_id = config["robot_id"].as<int>();
+            NUClear::log("NUcapLocalisation::robot_id = ", robot_id, ". If incorrect change config/NUcapLocalisation.yaml");
+        });
 
         on<Trigger<Network<MotionCapture>>, With<Sensors> >([this](const Network<MotionCapture>& net, const Sensors&) {
             
             auto& mocap = net.data;
             for (auto& rigidBody : mocap->rigid_bodies()) {
 
-
                 int id = rigidBody.identifier();
-                if (id == 2) { // Robot #2
+                if (id == robot_id) {
                     //TODO: switch to correct xyz coordinate system!!!!!!!!!!
                     float x = rigidBody.position().x();
                     float y = rigidBody.position().y();
