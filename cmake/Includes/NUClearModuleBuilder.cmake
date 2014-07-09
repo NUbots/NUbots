@@ -7,7 +7,7 @@ IF(SHARED_BUILD)
     SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
     # the RPATH to be used
-    SET(CMAKE_INSTALL_RPATH "lib/" "../lib/")
+    SET(CMAKE_INSTALL_RPATH "lib/" "../lib/" "bin/lib")
 ENDIF()
 
 FUNCTION(NUCLEAR_MODULE)

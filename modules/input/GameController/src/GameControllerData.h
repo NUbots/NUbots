@@ -22,6 +22,7 @@
 
 namespace modules {
 namespace input {
+namespace gamecontroller {
     constexpr size_t MAX_NUM_PLAYERS = 11;
     constexpr size_t SPL_COACH_MESSAGE_SIZE = 40;
 
@@ -78,6 +79,7 @@ namespace input {
         Team teams[2];
     };
     #pragma pack(pop)
+}
 }
 }
 
