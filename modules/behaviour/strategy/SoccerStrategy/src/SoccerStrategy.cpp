@@ -137,6 +137,8 @@ namespace modules {
 				if(leftCount>0 || middleCount>0)
 					std::cerr << "(" << sensors.size() << ", " << leftCount << ", " << middleCount << ")" << std::endl; //Test the button pressing	
 */
+				gameStateButtonStatusPrev = gameStateButtonStatus;
+				penalisedButtonStatusPrev = penalisedButtonStatus;
 				gameStateButtonStatus = (leftCount > 0.7);
 				penalisedButtonStatus = (middleCount > 0.7) ? !penalisedButtonStatus : penalisedButtonStatus;
 			});
@@ -218,8 +220,7 @@ namespace modules {
 					}
 
 					// Allow the back panel button to cycle through the primary game states.
-					if (gameStateButtonStatus) {
-						gameStateButtonStatus = false;
+					if (gameStateButtonStatus && !gameStateButtonStatusPrev) {
 						currentState.primaryGameState++;
 
 						switch (currentState.primaryGameState) {

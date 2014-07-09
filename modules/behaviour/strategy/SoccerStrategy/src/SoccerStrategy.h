@@ -170,7 +170,9 @@ namespace modules {
 			State currentState, previousState;
 
 			bool gameStateButtonStatus;
+			bool gameStateButtonStatusPrev;
 			bool penalisedButtonStatus;
+			bool penalisedButtonStatusPrev;
 
 			bool feetOnGround;
 			bool isKicking;
