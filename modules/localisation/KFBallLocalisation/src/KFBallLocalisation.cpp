@@ -49,6 +49,10 @@ namespace localisation {
     KFBallLocalisation::KFBallLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
+        on<Trigger<Configuration<KFBallLocalisationEngineConfig>>>([this](const Configuration<KFBallLocalisationEngineConfig>& config) {
+		engine_.UpdateConfiguration(config);
+	});
+
         // Emit to NUbugger
         on<Trigger<Every<100, std::chrono::milliseconds>>,
            Options<Sync<KFBallLocalisation>>>("NUbugger Output", [this](const time_t&) {

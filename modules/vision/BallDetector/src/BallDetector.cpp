@@ -148,6 +148,7 @@ namespace vision {
 
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), arma::diagmat(arma::vec({0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
 
+/*
                 std::cerr << measurements[0].position[0]
                    << "," << measurements[0].position[1]
                    << "," << measurements[0].position[2]
@@ -155,7 +156,7 @@ namespace vision {
                    << "," << measurements[1].position[1]
                    << "," << measurements[1].position[2]
                    << std::endl;
-
+*/
                 /*
                  *  BUILD OUR BALL
                  */

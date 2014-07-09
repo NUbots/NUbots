@@ -133,9 +133,10 @@ namespace modules {
 					}
 				}
 
-				//if(leftCount>0 || middleCount>0)
-				//	std::cout << "(" << sensors.size() << ", " << leftCount << ", " << middleCount << ")" << std::endl; //Test the button pressing	
-
+/*
+				if(leftCount>0 || middleCount>0)
+					std::cerr << "(" << sensors.size() << ", " << leftCount << ", " << middleCount << ")" << std::endl; //Test the button pressing	
+*/
 				gameStateButtonStatus = (leftCount > 0.7);
 				penalisedButtonStatus = (middleCount > 0.7) ? !penalisedButtonStatus : penalisedButtonStatus;
 			});
@@ -194,34 +195,14 @@ namespace modules {
 				FIELD_DESCRIPTION = field;
 			});
 
-			on<Trigger<Every<30, Per<std::chrono::seconds>>>, Options<Single>, 
+			on<Trigger<Every<30, Per<std::chrono::seconds>>>, 
 				With<messages::localisation::Ball>,
-				With<messages::localisation::Self>
-//				With<messages::input::gameevents::GameState<>>,
-//				With<messages::input::gameevents::KickOffTeam>,
-//				With<messages::input::gameevents::TeamColour>,
-//				With<messages::input::gameevents::BallKickedOut>,
-//				With<messages::input::gameevents::HalfTime>,
-//				With<messages::input::gameevents::CoachMessage>,
-//				With<messages::input::gameevents::Penalisation>,
-//				With<messages::input::gameevents::Unpenalisation>,
-//				With<messages::input::gameevents::GoalScored>,
-//				With<messages::input::gameevents::Score>
-				/* Need to add team localisation triggers. */>([this](
-											const time_t&,
-											const messages::localisation::Ball& ball,
-											const messages::localisation::Self& self
-//											const messages::input::gameevents::GameState& gameState,
-//											const messages::input::gameevents::KickOffTeam& kickOffTeam,
-//											const messages::input::gameevents::TeamColour& colour,
-//											const messages::input::gameevents::BallKickedOut& ballOut,
-//											const messages::input::gameevents::HalfTime& halfTime,
-//											const messages::input::gameevents::CoachMessage message,
-//											const messages::input::gameevents::Penalisation& penalisation,
-//											const messages::input::gameevents::Unpenalisation& unpenalisation,
-//											const messages::input::gameevents::GoalScored& goalScored,
-//											const messages::input::gameevents::Score& score
-											/* Need to add in team localisation  parameters. */) {
+				With<std::vector<messages::localisation::Self>>,
+				Options<Single>>([this](const time_t&,
+							const messages::localisation::Ball& ball,
+							const std::vector<messages::localisation::Self>& selfs) {
+
+					std::cerr << "30 Hz" << std::endl;
 
 					// Make a copy of the previous state.					
 					memcpy(&previousState, &currentState, sizeof(State));
@@ -230,9 +211,11 @@ namespace modules {
 					memcpy(&currentState.ball, &ball, sizeof(Ball));
 
 					// Store current position and heading.
-					currentState.transform = self.robot_to_world_rotation;
-					currentState.position = self.position;
-					currentState.heading = currentState.position + currentState.transform.col(0);
+					if (selfs.size() > 0) {
+						currentState.transform = selfs.at(0).robot_to_world_rotation;
+						currentState.position = selfs.at(0).position;
+						currentState.heading = currentState.position + currentState.transform.col(0);
+					}
 
 					// Allow the back panel button to cycle through the primary game states.
 					if (gameStateButtonStatus) {
@@ -241,39 +224,39 @@ namespace modules {
 
 						switch (currentState.primaryGameState) {
 							case GameStatePrimary::INITIAL: {
-								emit(std::move(std::make_unique<messages::output::Say>("Initial")));
-								//std::cout << "initial" << std::endl;
+								//emit(std::move(std::make_unique<messages::output::Say>("Initial")));
+								std::cerr << "initial" << std::endl;
 								break;
 							}
 
 							case GameStatePrimary::SET: {
-								emit(std::move(std::make_unique<messages::output::Say>("Set")));
-								//std::cout << "set" << std::endl;
+								//emit(std::move(std::make_unique<messages::output::Say>("Set")));
+								std::cerr << "set" << std::endl;
 								break;
 							}
 
 							case GameStatePrimary::READY: {
-								emit(std::move(std::make_unique<messages::output::Say>("Ready")));
-								//std::cout << "ready" << std::endl;
+								//emit(std::move(std::make_unique<messages::output::Say>("Ready")));
+								std::cerr << "ready" << std::endl;
 								break;
 							}
 
 							case GameStatePrimary::PLAYING: {
-								emit(std::move(std::make_unique<messages::output::Say>("Playing")));
-								//std::cout << "playing" << std::endl;
+								//emit(std::move(std::make_unique<messages::output::Say>("Playing")));
+								std::cerr << "playing" << std::endl;
 								break;
 							}
 
 							case GameStatePrimary::FINISHED: {
-								emit(std::move(std::make_unique<messages::output::Say>("Finished")));
-								//std::cout << "finished" << std::endl;
+								//emit(std::move(std::make_unique<messages::output::Say>("Finished")));
+								std::cerr << "finished" << std::endl;
 								break;
 							}
 
 							default: {
 								currentState.primaryGameState = GameStatePrimary::INITIAL;
-								emit(std::move(std::make_unique<messages::output::Say>("Initial")));
-								//std::cout << "initial" << std::endl;
+								//emit(std::move(std::make_unique<messages::output::Say>("Initial")));
+								std::cerr << "initial" << std::endl;
 								break;
 							}
 						}
@@ -281,43 +264,43 @@ namespace modules {
 
 					// What state is the game in?
 					// Initial?
-					/* currentState.gameState.Initial = gameController[STATE_INITIAL] */;
+					// currentState.gameState.Initial = gameController[STATE_INITIAL];
 					// Set?
-					/* currentState.gameState.Set = gameController[STATE_SET] */;
+					// currentState.gameState.Set = gameController[STATE_SET];
 					// Ready?
-					/* currentState.gameState.Ready = gameController[STATE_GameStatePrimary::READY] */;
+					// currentState.gameState.Ready = gameController[STATE_GameStatePrimary::READY];
 					// Finish?
-					/* currentState.gameState.Finish = gameController[STATE_FINISH] */;
+					// currentState.gameState.Finish = gameController[STATE_FINISH];
 					// Playing?
-					/* currentState.gameState.Playing = gameController[STATE_PLAYING] */;
+					// currentState.gameState.Playing = gameController[STATE_PLAYING];
 					// Penalty kick?
-					/* currentState.gameState.penaltyKick = gameController[STATE_PENALTY_KICK] */;
+					// currentState.gameState.penaltyKick = gameController[STATE_PENALTY_KICK];
 					// Free kick?
-					/* currentState.gameState.freeKick = gameController[STATE_FREE_KICK] */;
+					// currentState.gameState.freeKick = gameController[STATE_FREE_KICK];
 					// Goal kick?
-					/* currentState.gameState.goalKick = gameController[STATE_GOAL_KICK] */;
+					// currentState.gameState.goalKick = gameController[STATE_GOAL_KICK];
 					// Corner kick?
-					/* currentState.gameState.cornerKick = gameController[STATE_CORNER_KICK] */;
+					// currentState.gameState.cornerKick = gameController[STATE_CORNER_KICK];
 					// Throw-In?
-					/* currentState.gameState.throwIn = gameController[STATE_THROW_IN] */;
+					// currentState.gameState.throwIn = gameController[STATE_THROW_IN];
 					// Paused?
-					/* currentState.gameState.paused = gameController[STATE_PAUSED] */;
+					// currentState.gameState.paused = gameController[STATE_PAUSED];
 					
 					// Are we kicking off?
-					/* currentState.kickOff = gameController[KICK_OFF] */;
+					// currentState.kickOff = gameController[KICK_OFF];
 
 					// Am I the kicker?
 					// Is my start position inside the centre circle? 
 					currentState.kicker = ((arma::norm(START_POSITION, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.primaryGameState == GameStatePrimary::READY || 
 								currentState.primaryGameState == GameStatePrimary::SET || currentState.primaryGameState == GameStatePrimary::PLAYING)) || ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK || 
 								currentState.secondaryGameState == GameStateSecondary::FREE_KICK || currentState.secondaryGameState == GameStateSecondary::GOAL_KICK || currentState.secondaryGameState == GameStateSecondary::CORNER_KICK) && 
-								currentState.primaryGameState == GameStatePrimary::PLAYING /* && currentState.??? */);
+								currentState.primaryGameState == GameStatePrimary::PLAYING); // && currentState.???);
 
 					// Have I been picked up?
 					currentState.pickedUp = !feetOnGround && !isGettingUp && !isDiving && !isWalking && !isKicking;
 
 					// Am I penalised?
-					currentState.penalised = penalisedButtonStatus /* || gameController[PENALISED] */;
+					currentState.penalised = penalisedButtonStatus; //|| gameController[PENALISED];
 
 					// Was I just put down?
 					currentState.putDown = feetOnGround && previousState.pickedUp;
@@ -326,8 +309,18 @@ namespace modules {
 					currentState.unPenalised = !currentState.penalised && previousState.penalised;
 
 					// Am I in my zone?
-					currentState.selfInZone = ZONES.at(MY_ZONE).pointContained(self.position);
-							
+					try {
+						currentState.selfInZone = ZONES.at(MY_ZONE).pointContained(currentState.position);
+					}
+						
+					catch (const std::domain_error& e) {
+						std::cerr << "pointContained failed." << std::endl;
+					}
+
+					catch (const std::exception& e) {
+						std::cerr << "exception caught: " << e.what() << std::endl;
+					}
+/*
 					// Can I see the ball?
 					currentState.ballSeen = ((currentState.ball.sr_xx < BALL_CERTAINTY_THRESHOLD) && (currentState.ball.sr_xy < BALL_CERTAINTY_THRESHOLD) && (currentState.ball.sr_yy < BALL_CERTAINTY_THRESHOLD));
 
@@ -398,7 +391,6 @@ namespace modules {
 					catch (const std::domain_error& e) {
 						currentState.ballApproaching = false;
 					}
-
 
 
 
@@ -530,11 +522,18 @@ namespace modules {
 	
 						NUClear::log<NUClear::INFO>("Unknown behavioural state. Finding self, finding ball, moving to default position.");
 					}
+*/
 				});
 			}
 
 			arma::vec2 SoccerStrategy::findOptimalPosition(const Polygon& zone, const arma::vec2& point) {
-				return(zone.projectPointToPolygon(point));
+				try {
+					return(zone.projectPointToPolygon(point));
+				}
+
+				catch (const std::domain_error& e) {
+					return(point);
+				}
 			}
 
 			void SoccerStrategy::stopMoving() {

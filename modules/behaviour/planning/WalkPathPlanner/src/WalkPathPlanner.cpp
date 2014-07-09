@@ -335,6 +335,7 @@ namespace modules {
                 });
 
                 //Walk planning testing: Walk to ball face to goal
+/*
                 auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
                 approach->targetPositionType = WalkTarget::Ball;
                 approach->targetHeadingType = WalkTarget::WayPoint;
@@ -342,7 +343,7 @@ namespace modules {
                 approach->heading = arma::vec({-3,0});
                 approach->target = arma::vec({0,0});
                 emit(std::move(approach));
-
+*/
 
             }
 

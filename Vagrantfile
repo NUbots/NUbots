@@ -43,7 +43,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "nuclearportvm", primary: true do |nuclearport|
     nuclearport.vm.hostname = "nuclearportvm.nubots.net"
     
-    # nuclearport.vm.network :private_network, ip: "192.168.33.77"
+    nuclearport.vm.network :private_network, ip: "192.168.33.77"
 
     nuclearport.vm.network :forwarded_port, guest: 12000, host: 12000
     nuclearport.vm.network :forwarded_port, guest: 12001, host: 12001
