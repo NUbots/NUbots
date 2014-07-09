@@ -88,7 +88,6 @@ arma::vec RobotModel::predictedObservation(
     const arma::vec::fixed<RobotModel::size>& state,
     const std::vector<arma::vec>& actual_positions) {
 
-    // // Radial coordinates
     arma::vec diff_1 = actual_positions[0].rows(0, 1) - state.rows(kX, kY);
     arma::vec diff_2 = actual_positions[1].rows(0, 1) - state.rows(kX, kY);
     arma::vec radial_1 = cartesianToRadial(diff_1);
@@ -99,7 +98,6 @@ arma::vec RobotModel::predictedObservation(
     return { std::abs(angle_diff) };
 }
 
-
 arma::vec RobotModel::observationDifference(const arma::vec& a,
                                             const arma::vec& b) {
     if (a.n_elem == 1) {
@@ -107,12 +105,11 @@ arma::vec RobotModel::observationDifference(const arma::vec& a,
     } else {
         // Spherical coordinates
         arma::vec3 result = a - b;
-        result(1) = utility::math::angle::normalizeAngle(result(1)) * 0.2;
-        result(2) = utility::math::angle::normalizeAngle(result(2)) * 0.2;
+        result(1) = utility::math::angle::normalizeAngle(result(1)) * cfg_.observationDifferenceBearingFactor;
+        result(2) = utility::math::angle::normalizeAngle(result(2)) * cfg_.observationDifferenceElevationFactor;
         return result;
     }
 }
-
 
 arma::vec::fixed<RobotModel::size> RobotModel::limitState(
     const arma::vec::fixed<RobotModel::size>& state) {
@@ -121,7 +118,11 @@ arma::vec::fixed<RobotModel::size> RobotModel::limitState(
 }
 
 arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() {
-    return arma::eye(RobotModel::size, RobotModel::size) * processNoiseFactor;
+    arma::mat noise = arma::eye(RobotModel::size, RobotModel::size);
+    noise(kX, kX) *= cfg_.processNoisePositionFactor;
+    noise(kY, kY) *= cfg_.processNoisePositionFactor;
+    noise(kHeading, kHeading) *= cfg_.processNoiseHeadingFactor;
+    return noise;
 }
 
 // arma::mat33 RobotModel::getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state){

@@ -63,8 +63,7 @@ namespace robot {
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
-            const arma::vec3& actual_position,
-            const double& mean_actual_position_heading);
+            const arma::vec3& actual_position);
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
@@ -76,11 +75,15 @@ namespace robot {
 
         arma::mat::fixed<size, size> processNoise();
 
-        double processNoiseFactor = 1e-3;
+        struct Config {
+            double processNoisePositionFactor = 1e-3;
+            double processNoiseHeadingFactor = 1e-3;
+            double observationDifferenceBearingFactor = 0.2;
+            double observationDifferenceElevationFactor = 0.2;
+        } cfg_;
 
-        arma::mat33 getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state);
-
-        arma::mat33 getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state);
+        // arma::mat33 getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state);
+        // arma::mat33 getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state);
     };
 }
 }

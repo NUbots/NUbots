@@ -100,11 +100,6 @@ double RobotHypothesis::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object,
     const LocalisationFieldObject& actual_object) {
 
-    // Radial coordinates
-    // arma::vec2 measurement = spherical2Radial(observed_object.measurements[0].position);
-    // Note: Ignoring declination in covariance matrix
-    // arma::mat22 cov = observed_object.measurements[0].error.submat(0, 0, 1, 1);
-
     // Spherical from ground:
     arma::vec3 measurement = observed_object.measurements[0].position;
     arma::mat33 cov = observed_object.measurements[0].error;
@@ -112,13 +107,7 @@ double RobotHypothesis::MeasurementUpdate(
     arma::vec2 actual_2d = actual_object.location();
     arma::vec3 actual_pos = arma::vec3({actual_2d(0), actual_2d(1), 0});
 
-    auto state = filter_.get();
-    auto obs = SphericalRobotObservation(state.rows(robot::kX, robot::kY),
-                                         0.0,
-                                         actual_pos);
-
-    double quality = filter_.measurementUpdate(measurement, cov, actual_pos, obs[1]);
-
+    double quality = filter_.measurementUpdate(measurement, cov, actual_pos);
     return quality;
 }
 
@@ -165,11 +154,6 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
         auto model = std::move(robot_models_.back());
         robot_models_.pop_back();
 
-        std::cout << __FILE__ << ", " << __LINE__ << ": "<<__func__<< "model = " << *model << std::endl;
-        std::cout << "-----" << std::endl;
-
-        std::cout << "ambiguous_object: " << ambiguous_object.measurements[0].position.t();
-
         // Split the model for each possible object, and observe that object:
         // (TODO: Micro-optimisation: use model as the last split_model)
         for (auto& possible_object : possible_objects) {
@@ -187,15 +171,9 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
             auto weight = split_model->GetFilterWeight();
             split_model->SetFilterWeight(weight * quality);
 
-        std::cout << __FILE__ << ", " <<__LINE__ << ": "<<__func__<< "model = " << *split_model << std::endl;
-
             new_models.push_back(std::move(split_model));
         }
-
-        std::cout << "=========" << std::endl;
     }
-
-    std::cout << "<<<<<=========>>>>>>" << std::endl;
 
     robot_models_ = std::move(new_models);
 }
@@ -302,15 +280,7 @@ void MultiModalRobotModel::RemoveOldModels() {
 }
 
 void MultiModalRobotModel::PruneModels() {
-    // NUClear::log(__PRETTY_FUNCTION__, "Number of models before merging: ",
-    //                      robot_models_.size());
-
     MergeSimilarModels();
-
-    // NUClear::log(__PRETTY_FUNCTION__, "Number of models before pruning: ",
-    //                      robot_models_.size());
-
-    // RemoveOldModels();
 
     PruneViterbi(cfg_.max_models_after_merge);
 

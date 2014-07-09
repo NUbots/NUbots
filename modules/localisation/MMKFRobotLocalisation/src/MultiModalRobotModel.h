@@ -59,8 +59,8 @@ namespace localisation {
         // bool active() const { return active_; }
         // void set_active(bool active) { active_ = active; }
 
-        void SetProcessNoiseFactor(double process_noise_factor) {
-            filter_.model.processNoiseFactor = process_noise_factor;
+        void SetConfig(const robot::RobotModel::Config& cfg) {
+            filter_.model.cfg_ = cfg;
         };
 
         float GetFilterWeight() const { return weight_; }
@@ -92,8 +92,7 @@ namespace localisation {
 
     class MultiModalRobotModel {
     public:
-        MultiModalRobotModel() :
-            cfg_({ 4, 0.025, 0.01, 1e-3 }) {
+        MultiModalRobotModel() {
             robot_models_.push_back(std::make_unique<RobotHypothesis>());
         }
 
@@ -102,10 +101,17 @@ namespace localisation {
             cfg_.max_models_after_merge = config["MaxModelsAfterMerge"].as<int>();
             cfg_.merge_min_translation_dist = config["MergeMinTranslationDist"].as<float>();
             cfg_.merge_min_heading_dist = config["MergeMinHeadingDist"].as<float>();
-            cfg_.process_noise_factor = config["ProcessNoiseFactor"].as<float>();
+            
+            robot::RobotModel::Config rm_cfg;
+            rm_cfg.processNoisePositionFactor = config["ProcessNoisePositionFactor"].as<double>();
+            rm_cfg.processNoiseHeadingFactor = config["ProcessNoiseHeadingFactor"].as<double>();
+            rm_cfg.observationDifferenceBearingFactor = config["ObservationDifferenceBearingFactor"].as<double>();
+            rm_cfg.observationDifferenceElevationFactor = config["ObservationDifferenceElevationFactor"].as<double>();
 
-            for (auto& model : robot_models_)
-                model->SetProcessNoiseFactor(cfg_.process_noise_factor);
+            for (auto& model : robot_models_) {
+                // std::cout << (model == nullptr) << std::endl;
+                model->SetConfig(rm_cfg);
+            }
         };
 
         void RemoveOldModels();
