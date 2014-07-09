@@ -36,7 +36,7 @@ namespace localisation {
 
     NUcapLocalisation::NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Trigger<Network<MotionCapture>>, With<Sensors> >([this](const Network<MotionCapture>& net, const Sensors& sensors) {
+        on<Trigger<Network<MotionCapture>>, With<Sensors> >([this](const Network<MotionCapture>& net, const Sensors&) {
             
             auto& mocap = net.data;
             for (auto& rigidBody : mocap->rigid_bodies()) {
@@ -53,7 +53,7 @@ namespace localisation {
                                                 rigidBody.rotation().y(),
                                                 rigidBody.rotation().z()});
 
-                    arma::mat33 groundToWorldRotation = q.getMatrix() * sensors.orientationCamToGround.submat(0,0,2,2).t();
+                    arma::mat33 groundToWorldRotation = q.getMatrix();// * sensors.orientationCamToGround.submat(0,0,2,2).t();
 
                     double heading = std::acos(groundToWorldRotation(0,0));
 
