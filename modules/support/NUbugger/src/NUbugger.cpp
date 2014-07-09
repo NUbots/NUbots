@@ -444,13 +444,46 @@ namespace modules {
             });
 
             localisationHandle = on<Trigger<Every<100, std::chrono::milliseconds>>,
-               With<std::vector<messages::localisation::Ball>>,
-               With<std::vector<messages::localisation::Self>>,
-               Options<Single>>("Localisation Ball",
+               With<Optional<std::vector<messages::localisation::Ball>>>,
+               With<Optional<std::vector<messages::localisation::Self>>>,
+               Options<Single>>("Localisation Reaction (NUbugger.cpp)",
                 [this](const time_t&,
-                       const std::vector<messages::localisation::Ball>& balls,
-                       const std::vector<messages::localisation::Self>& robots) {
-                if(robots.size() > 0 && balls.size() > 0){
+                       const std::shared_ptr<const std::vector<messages::localisation::Ball>>& opt_balls,
+                       const std::shared_ptr<const std::vector<messages::localisation::Self>>& opt_robots) {
+                auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
+                auto ball_msg = std::make_unique<messages::localisation::FieldObject>();
+                bool robot_msg_set = false;
+                bool ball_msg_set = false;
+
+                if(opt_robots != nullptr && opt_robots->size() > 0) {
+                    const auto& robots = *opt_robots;
+
+                    // Robot message
+                    std::vector<messages::localisation::FieldObject::Model> robot_msg_models;
+
+                    for (auto& model : robots) {
+                        messages::localisation::FieldObject::Model robot_model;
+                        robot_msg->name = "self";
+                        robot_model.wm_x = model.position[0];
+                        robot_model.wm_y = model.position[1];
+                        robot_model.heading = std::atan2(model.heading[1], model.heading[0]);
+                        robot_model.sd_x = 1;
+                        robot_model.sd_y = 0.25;
+                        robot_model.sr_xx = model.sr_xx; // * 100;
+                        robot_model.sr_xy = model.sr_xy; // * 100;
+                        robot_model.sr_yy = model.sr_yy; // * 100;
+                        robot_model.lost = false;
+                        robot_msg_models.push_back(robot_model);
+
+                        // break; // Only output a single model
+                    }
+                    robot_msg->models = robot_msg_models;
+                    robot_msg_set = true;
+                }
+
+                if(robot_msg_set && opt_balls != nullptr && opt_balls->size() > 0) {
+                    const auto& balls = *opt_balls;
+                    const auto& robots = *opt_robots;
 
                     arma::vec2 ball_pos = balls[0].position;
 
@@ -460,7 +493,6 @@ namespace modules {
                     }
 
                     // Ball message
-                    auto ball_msg = std::make_unique<messages::localisation::FieldObject>();
                     std::vector<messages::localisation::FieldObject::Model> ball_msg_models;
                     
                     for (auto& model : balls) {
@@ -482,33 +514,11 @@ namespace modules {
                         // break; // Only output a single model
                     }
                     ball_msg->models = ball_msg_models;
-
-                    // Robot message
-                    auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
-                    std::vector<messages::localisation::FieldObject::Model> robot_msg_models;
-
-                    for (auto& model : robots) {
-                        messages::localisation::FieldObject::Model robot_model;
-                        robot_msg->name = "self";
-                        robot_model.wm_x = model.position[0];
-                        robot_model.wm_y = model.position[1];
-                        robot_model.heading = std::atan2(model.heading[1], model.heading[0]);
-                        robot_model.sd_x = 1;
-                        robot_model.sd_y = 0.25;
-                        robot_model.sr_xx = model.sr_xx; // * 100;
-                        robot_model.sr_xy = model.sr_xy; // * 100;
-                        robot_model.sr_yy = model.sr_yy; // * 100;
-                        robot_model.lost = false;
-                        robot_msg_models.push_back(robot_model);
-
-                        // break; // Only output a single model
-                    }
-                    robot_msg->models = robot_msg_models;
-
-                    // emit(std::move(ball_msg));
-                    // emit(std::move(robot_msg));
-                    EmitLocalisationModels(robot_msg, ball_msg);
+                    ball_msg_set = true;
                 }
+
+                if (robot_msg_set || ball_msg_set)
+                    EmitLocalisationModels(robot_msg, ball_msg);
             });
 
             // When we shutdown, close our publisher
