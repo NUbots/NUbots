@@ -57,17 +57,16 @@ namespace localisation {
         double MeasurementUpdate(const messages::vision::VisionObject& observed_object);
 
         void UpdateConfiguration(
-            const messages::support::Configuration<KFBallLocalisationEngineConfig>& config) {
-            // cfg_.ball_drag_coefficient = config["BallDragCoefficient"];
-            ball_filter_.model.ballDragCoefficient = config["BallDragCoefficient"].as<double>();
-        };
+            const messages::support::Configuration<KFBallLocalisationEngineConfig>& config);
+
+        bool CanEmitFieldObjects();
 
         utility::math::kalman::UKF<ball::BallModel> ball_filter_;
 
     private:
-        // struct {
-        //     float ball_drag_coefficient;
-        // } cfg_;
+        struct {
+            bool emit_ball_fieldobjects;
+        } cfg_;
 
         double SecondsSinceLastTimeUpdate(std::chrono::system_clock::time_point current_time);
 

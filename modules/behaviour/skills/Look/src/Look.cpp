@@ -61,7 +61,7 @@ namespace modules {
                     screenPadding = file.config["screenPadding"].as<double>();
                 });
 
-                on<Trigger<ExecuteLook>>([this] (const ExecuteLook& e) {
+                on<Trigger<ExecuteLook>>([this] (const ExecuteLook&) {
                     //we are active!
 
                 });
@@ -155,23 +155,23 @@ namespace modules {
                         waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH,    float(sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition), 30.f});
 
                         //this might find a better location eventually - it is the generic "gotopoint" code
-                        
+
                         //find the closest point
                         size_t offset = 0;
                         double offsetdist = 100.0;
                         for (size_t i = 0; i < look.size(); ++i) {
-                            
+
                             const double diffx = sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition - look[i].yaw;
                             const double diffy = sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition - look[i].pitch;
                             const double dist = diffx*diffx+diffy*diffy;
-                            
+
                             if (dist < offsetdist) {
                                 offset = i;
                                 offsetdist = dist;
                             }
-                            
+
                         }
-                        
+
                         //do the pan
                         time_t time = NUClear::clock::now();
                         double speed = slowSpeed;

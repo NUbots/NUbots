@@ -14,11 +14,13 @@ ADD_ROLE(
 
         #Vision
         vision::LUTClassifier
-        #vision::FeatureDetector
+        vision::BallDetector
+        vision::GoalDetector
+        vision::ObstacleDetector
 
         #Localisation
-        localisation::MMKFRobotLocalisation
-        localisation::KFBallLocalisation
+        #localisation::MMKFRobotLocalisation
+        #localisation::KFBallLocalisation
 
         #Behaviour
         behaviour::Controller

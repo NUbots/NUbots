@@ -64,7 +64,7 @@
       "disk_size": 40960,
       "guest_os_type": "Ubuntu",
       "http_directory": "http",
-      "iso_url": "ubuntu-14.04-server-i386.iso",
+      "iso_url": "http://ftp.iinet.net.au/pub/ubuntu-releases/14.04/ubuntu-14.04-server-i386.iso",
       "iso_checksum": "85c738fefe7c9ff683f927c23f5aa82864866c2391aeb376abfec2dfc08ea873",
       "iso_checksum_type": "sha256",
       "ssh_username": "vagrant",

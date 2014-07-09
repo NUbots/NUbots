@@ -33,7 +33,7 @@ namespace utility {
          * @author Alex Biddulph
          */
         namespace coordinates {
-            inline arma::vec3 Spherical2Cartesian(const arma::vec3& sphericalCoordinates) {
+            inline arma::vec3 sphericalToCartesian(const arma::vec3& sphericalCoordinates) {
                 double distance = sphericalCoordinates[0];
                 double cos_phi = cos(sphericalCoordinates[1]);
                 double sin_phi = sin(sphericalCoordinates[1]);
@@ -48,7 +48,7 @@ namespace utility {
                 return result;
             }
 
-            inline arma::vec3 Cartesian2Spherical(const arma::vec3& cartesianCoordinates)  {
+            inline arma::vec3 cartesianToSpherical(const arma::vec3& cartesianCoordinates)  {
                 double x = cartesianCoordinates[0];
                 double y = cartesianCoordinates[1];
                 double z = cartesianCoordinates[2];
@@ -61,11 +61,23 @@ namespace utility {
                 return result;
             }
 
-            inline arma::vec2 Cartesian2Radial(const arma::vec2& cartesianCoordinates)  {
+            inline arma::vec2 cartesianToRadial(const arma::vec2& cartesianCoordinates)  {
                 double x = cartesianCoordinates[0];
                 double y = cartesianCoordinates[1];
 
                 return { sqrt(x*x + y*y), atan2(y, x) };
+            }
+
+            inline arma::vec2 spherical2Radial(const arma::vec3& sphericalCoordinates) {
+                double dist = sphericalCoordinates(0);
+                double declination = sphericalCoordinates(2);
+                double flat_distance = dist * std::cos(declination);
+                
+                arma::vec2 result;
+                result[0] = flat_distance;
+                result[1] = sphericalCoordinates(1);
+
+                return result;
             }
         }
     }

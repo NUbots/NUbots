@@ -48,7 +48,7 @@ namespace localisation {
 
         RobotHypothesis() :
             filter_(
-                {0, 0, -1, 0}, // mean
+                {0, 0, 0}, // mean
                 // {0, 0, 3.141},
                 arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 1, // cov
                 1), // alpha
@@ -162,6 +162,7 @@ namespace localisation {
         //     AmbiguousObject &ambiguous_object,
         //     const std::vector<StationaryObject*>& possible_objects);
 
+    public: // temporary - debugging 09/07/2014
         std::vector<std::unique_ptr<RobotHypothesis>> robot_models_;
 
         struct {

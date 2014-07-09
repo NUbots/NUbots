@@ -24,6 +24,7 @@
 #include <armadillo>
 #include <nuclear>
 #include "ServoID.h"
+#include "utility/math/geometry/Line.h"
 
 namespace messages {
     namespace input {

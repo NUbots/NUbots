@@ -280,26 +280,33 @@ namespace modules {
 
             imageHandle = on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
 
+                Message message;
+                message.set_type(Message::IMAGE);
+                message.set_utc_timestamp(getUtcTimestamp());
+
+                auto* imageData = message.mutable_image();
+
+                imageData->mutable_dimensions()->set_x(image.width());
+                imageData->mutable_dimensions()->set_y(image.height());
+
+                std::string* imageBytes = imageData->mutable_data();
                 if(!image.source().empty()) {
-
-                    Message message;
-                    message.set_type(Message::IMAGE);
-                    message.set_utc_timestamp(getUtcTimestamp());
-
-                    auto* imageData = message.mutable_image();
-                    std::string* imageBytes = imageData->mutable_data();
-
                     imageData->set_format(messages::input::proto::Image::JPEG);
 
                     // Reserve enough space in the image data to store the output
-                    imageBytes->resize(image.source().size());
-                    imageData->mutable_dimensions()->set_x(image.width());
-                    imageData->mutable_dimensions()->set_y(image.height());
+                    imageBytes->reserve(image.source().size());
 
                     imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
-
-                    send(message);
                 }
+                else {
+                    imageData->set_format(messages::input::proto::Image::YCbCr444);
+
+                    imageBytes->reserve(image.raw().size() * sizeof(Image::Pixel));
+
+                    imageBytes->insert(imageBytes->begin(), reinterpret_cast<const char*>(&image.raw().front()), reinterpret_cast<const char*>(&image.raw().back() + 1));
+                }
+
+                send(message);
             });
 
             reactionStatisticsHandle = on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
@@ -321,9 +328,10 @@ namespace modules {
 
                 send(message);
             });
+            reactionStatisticsHandle.disable();
 
+            classifiedImageHandle = on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
 
-            on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
 
                 Message message;
                 message.set_type(Message::CLASSIFIED_IMAGE);
@@ -368,8 +376,9 @@ namespace modules {
 
                 // Add in the actual horizon (the points on the left and right side)
                 auto* horizon = imageData->mutable_horizon();
-                horizon->set_gradient(image.horizon[0]);
-                horizon->set_intercept(image.horizon[1]);
+                horizon->mutable_normal()->set_x(image.horizon.normal[0]);
+                horizon->mutable_normal()->set_y(image.horizon.normal[1]);
+                horizon->set_distance(image.horizon.distance);
 
                 for(const auto& visualHorizon : image.visualHorizon) {
                     auto* vh = imageData->add_visual_horizon();
@@ -381,95 +390,79 @@ namespace modules {
                 send(message);
             });
 
-            goalsHandle = on<Trigger<std::vector<VisionBall>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionBall>& balls) {
+            ballsHandle = on<Trigger<std::vector<VisionBall>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionBall>& balls) {
 
                 Message message;
                 message.set_type(Message::VISION_OBJECT);
                 message.set_utc_timestamp(getUtcTimestamp());
 
+                auto* object = message.mutable_vision_object();
+                object->set_type(messages::vision::proto::VisionObject::BALL);
+
                 for(const auto& b : balls) {
-                    auto* object = message.add_vision_object();
 
-                    object->set_type(messages::vision::proto::VisionObject::BALL);
-                    auto* ball = object->mutable_ball();
+                    auto* ball = object->add_ball();
 
-                    ball->mutable_circle()->set_radius(b.circle.radius);
-                    ball->mutable_circle()->mutable_centre()->set_x(b.circle.centre[0]);
-                    ball->mutable_circle()->mutable_centre()->set_y(b.circle.centre[1]);
+                    auto* circle = ball->mutable_circle();
+                    circle->set_radius(b.circle.radius);
+                    circle->mutable_centre()->set_x(b.circle.centre[0]);
+                    circle->mutable_centre()->set_y(b.circle.centre[1]);
                 }
 
                 send(message);
 
             });
 
-            ballsHandle = on<Trigger<std::vector<VisionGoal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionGoal>& goals) {
+            goalsHandle = on<Trigger<std::vector<VisionGoal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionGoal>& goals) {
 
                 Message message;
                 message.set_type(Message::VISION_OBJECT);
                 message.set_utc_timestamp(getUtcTimestamp());
 
-                for(const auto& g : goals) {
-                    auto* object = message.add_vision_object();
+                auto* object = message.mutable_vision_object();
 
-                    object->set_type(messages::vision::proto::VisionObject::GOAL);
-                    auto* goal = object->mutable_goal();
+                object->set_type(messages::vision::proto::VisionObject::GOAL);
+
+                for(const auto& g : goals) {
+                    auto* goal = object->add_goal();
 
                     goal->set_side(g.side == VisionGoal::Side::LEFT ? messages::vision::proto::VisionObject::Goal::LEFT
                                  : g.side == VisionGoal::Side::RIGHT ? messages::vision::proto::VisionObject::Goal::RIGHT
                                  : messages::vision::proto::VisionObject::Goal::UNKNOWN);
-                    goal->mutable_quad()->mutable_tl()->set_x(g.quad.getTopLeft()[0]);
-                    goal->mutable_quad()->mutable_tl()->set_y(g.quad.getTopLeft()[1]);
-                    goal->mutable_quad()->mutable_tr()->set_x(g.quad.getTopRight()[0]);
-                    goal->mutable_quad()->mutable_tr()->set_y(g.quad.getTopRight()[1]);
-                    goal->mutable_quad()->mutable_bl()->set_x(g.quad.getBottomLeft()[0]);
-                    goal->mutable_quad()->mutable_bl()->set_y(g.quad.getBottomLeft()[1]);
-                    goal->mutable_quad()->mutable_br()->set_x(g.quad.getBottomRight()[0]);
-                    goal->mutable_quad()->mutable_br()->set_y(g.quad.getBottomRight()[1]);
+
+                    auto* quad = goal->mutable_quad();
+                    quad->mutable_tl()->set_x(g.quad.getTopLeft()[0]);
+                    quad->mutable_tl()->set_y(g.quad.getTopLeft()[1]);
+                    quad->mutable_tr()->set_x(g.quad.getTopRight()[0]);
+                    quad->mutable_tr()->set_y(g.quad.getTopRight()[1]);
+                    quad->mutable_bl()->set_x(g.quad.getBottomLeft()[0]);
+                    quad->mutable_bl()->set_y(g.quad.getBottomLeft()[1]);
+                    quad->mutable_br()->set_x(g.quad.getBottomRight()[0]);
+                    quad->mutable_br()->set_y(g.quad.getBottomRight()[1]);
                 }
 
                 send(message);
             });
 
             localisationHandle = on<Trigger<Every<100, std::chrono::milliseconds>>,
-               With<messages::localisation::Ball>,
-               // With<messages::vision::Ball>,
-               With<std::vector<messages::localisation::Self>>,
-               Options<Single>>("Localisation Ball",
+               With<Optional<std::vector<messages::localisation::Ball>>>,
+               With<Optional<std::vector<messages::localisation::Self>>>,
+               Options<Single>>("Localisation Reaction (NUbugger.cpp)",
                 [this](const time_t&,
-                       const messages::localisation::Ball& ball,
-                       // const messages::vision::Ball& vision_ball,
-                       const std::vector<messages::localisation::Self>& robots) {
-                if(robots.size() > 0){
-                    arma::vec2 ball_pos = utility::localisation::transform::RobotBall2FieldBall(
-                        robots[0].position,robots[0].heading, ball.position);
+                       const std::shared_ptr<const std::vector<messages::localisation::Ball>>& opt_balls,
+                       const std::shared_ptr<const std::vector<messages::localisation::Self>>& opt_robots) {
+                auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
+                auto ball_msg = std::make_unique<messages::localisation::FieldObject>();
+                bool robot_msg_set = false;
+                bool ball_msg_set = false;
 
-                    // Ball message
-                    auto ball_msg = std::make_unique<messages::localisation::FieldObject>();
-                    std::vector<messages::localisation::FieldObject::Model> ball_msg_models;
-                    messages::localisation::FieldObject::Model ball_model;
-                    ball_msg->name = "ball";
-                    ball_model.wm_x = ball_pos[0];
-                    ball_model.wm_y = ball_pos[1];
-                    ball_model.heading = 0;
-                    ball_model.sd_x = 0.1;
-                    ball_model.sd_y = 0.1;
-
-                    //Do we need to rotate the variances?
-                    ball_model.sr_xx = ball.sr_xx;
-                    ball_model.sr_xy = ball.sr_xy;
-                    ball_model.sr_yy = ball.sr_yy;
-                    ball_model.lost = false;
-                    ball_msg_models.push_back(ball_model);
-
-                    ball_msg->models = ball_msg_models;
-                    // emit(std::move(ball_msg));
+                if(opt_robots != nullptr && opt_robots->size() > 0) {
+                    const auto& robots = *opt_robots;
 
                     // Robot message
-                    auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
                     std::vector<messages::localisation::FieldObject::Model> robot_msg_models;
 
-                    //for (auto& model : robots) {
-                    auto model = robots[0];
+                    for (auto& model : robots) {
                         messages::localisation::FieldObject::Model robot_model;
                         robot_msg->name = "self";
                         robot_model.wm_x = model.position[0];
@@ -482,14 +475,51 @@ namespace modules {
                         robot_model.sr_yy = model.sr_yy; // * 100;
                         robot_model.lost = false;
                         robot_msg_models.push_back(robot_model);
-                    //}
 
-
+                        // break; // Only output a single model
+                    }
                     robot_msg->models = robot_msg_models;
-                    // emit(std::move(robot_msg));
-
-                    EmitLocalisationModels(robot_msg, ball_msg);
+                    robot_msg_set = true;
                 }
+
+                if(robot_msg_set && opt_balls != nullptr && opt_balls->size() > 0) {
+                    const auto& balls = *opt_balls;
+                    const auto& robots = *opt_robots;
+
+                    arma::vec2 ball_pos = balls[0].position;
+
+                    if (!balls[0].world_space) {
+                        ball_pos = utility::localisation::transform::RobotToWorldTransform(
+                        robots[0].position, robots[0].heading, balls[0].position);
+                    }
+
+                    // Ball message
+                    std::vector<messages::localisation::FieldObject::Model> ball_msg_models;
+                    
+                    for (auto& model : balls) {
+                        messages::localisation::FieldObject::Model ball_model;
+                        ball_msg->name = "ball";
+                        ball_model.wm_x = ball_pos[0];
+                        ball_model.wm_y = ball_pos[1];
+                        ball_model.heading = 0;
+                        ball_model.sd_x = 0.1;
+                        ball_model.sd_y = 0.1;
+
+                        //Do we need to rotate the variances?
+                        ball_model.sr_xx = model.sr_xx;
+                        ball_model.sr_xy = model.sr_xy;
+                        ball_model.sr_yy = model.sr_yy;
+                        ball_model.lost = false;
+                        ball_msg_models.push_back(ball_model);
+
+                        // break; // Only output a single model
+                    }
+                    ball_msg->models = ball_msg_models;
+                    ball_msg_set = true;
+                }
+
+                if (robot_msg_set || ball_msg_set)
+                    EmitLocalisationModels(robot_msg, ball_msg);
             });
 
             // When we shutdown, close our publisher
@@ -516,7 +546,7 @@ namespace modules {
         }
 
         void NUbugger::recvMessage(const Message& message) {
-            NUClear::log("Received message of type:", message.type());
+            log("Received message of type:", message.type());
             switch (message.type()) {
                 case Message::COMMAND:
                     recvCommand(message);
@@ -534,7 +564,7 @@ namespace modules {
 
         void NUbugger::recvCommand(const Message& message) {
             std::string command = message.command().command();
-            NUClear::log("Received command:", command);
+            log("Received command:", command);
             if (command == "download_lut") {
                 auto lut = powerplant.get<LookUpTable>();
 
@@ -555,164 +585,51 @@ namespace modules {
             auto lookuptable = message.lookup_table();
             const std::string& lutData = lookuptable.table();
 
-            NUClear::log("Loading LUT");
+            log("Loading LUT");
             auto data = std::vector<char>(lutData.begin(), lutData.end());
             auto lut = std::make_unique<LookUpTable>(lookuptable.bits_y(), lookuptable.bits_cb(), lookuptable.bits_cr(), std::move(data));
             emit<Scope::DIRECT>(std::move(lut));
 
             if (lookuptable.save()) {
-                NUClear::log("Saving LUT to file");
+                log("Saving LUT to file");
                 emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
             }
         }
 
         void NUbugger::recvReactionHandlers(const Message& message) {
             auto reactionHandlers = message.reactionhandlers();
-            log("Reaction Handlers:");
-            log("Data Points:", reactionHandlers.datapoints());
-            log("Action Start", reactionHandlers.actionstart());
-            log("Action Kill:", reactionHandlers.actionkill());
-            log("Register Action:", reactionHandlers.registeraction());
-            log("Sensors:", reactionHandlers.sensors());
-            log("Reaction Statistics:", reactionHandlers.reactionstatistics());
-            log("Image:", reactionHandlers.image());
-            log("Classified Image:", reactionHandlers.classifiedimage());
-            log("Goals:", reactionHandlers.goals());
-            log("Balls:", reactionHandlers.balls());
-            log("Localisation:", reactionHandlers.localisation());
 
-            log("Changes:");
+            log("Reaction Handler Changes:");
+            std::vector<std::tuple<bool, ReactionHandle, std::string>> handlers = {
+                std::make_tuple(reactionHandlers.datapoints(), dataPointHandle, "Data Points"),
+                std::make_tuple(reactionHandlers.actionstart(), actionStartHandle, "Action Start"),
+                std::make_tuple(reactionHandlers.actionkill(), actionKillHandle, "Action Kill"),
+                std::make_tuple(reactionHandlers.registeraction(), registerActionHandle, "Register Action"),
+                std::make_tuple(reactionHandlers.sensors(), sensorsHandle, "Sensors"),
+                std::make_tuple(reactionHandlers.image(), imageHandle, "Image"),
+                std::make_tuple(reactionHandlers.reactionstatistics(), reactionStatisticsHandle, "Reaction Statistics"),
+                std::make_tuple(reactionHandlers.classifiedimage(), classifiedImageHandle, "Classified Image"),
+                std::make_tuple(reactionHandlers.goals(), goalsHandle, "Goals"),
+                std::make_tuple(reactionHandlers.balls(), ballsHandle, "Balls"),
+                std::make_tuple(reactionHandlers.localisation(), localisationHandle, "Localisation")
+            };
 
-            // TODO: is there a better way? e.g. map or something?
-            if (reactionHandlers.datapoints()) {
-                if (!dataPointHandle.isEnabled()) {
-                    dataPointHandle.enable();
-                    log("Data Points Enabled");
-                }
-            } else {
-                if (dataPointHandle.isEnabled()) {
-                    dataPointHandle.disable();
-                    log("Data Points Disabled");
-                }
-            }
+            for (auto& handle : handlers) {
+                bool enabled;
+                ReactionHandle reactionHandle;
+                std::string name;
+                std::tie(enabled, reactionHandle, name) = handle;
 
-            if (reactionHandlers.actionstart()) {
-                if (!actionStartHandle.isEnabled()) {
-                    actionStartHandle.enable();
-                    log("Action Start Enabled");
-                }
-            } else {
-                if (actionStartHandle.isEnabled()) {
-                    actionStartHandle.disable();
-                    log("Action Start Disabled");
-                }
-            }
-            
-            if (reactionHandlers.actionkill()) {
-                if (!actionKillHandle.isEnabled()) {
-                    actionKillHandle.enable();
-                    log("Action Kill Enabled");
-                }
-            } else {
-                if (actionKillHandle.isEnabled()) {
-                    actionKillHandle.disable();
-                    log("Action Kill Disabled");
-                }
-            }
-            
-            if (reactionHandlers.registeraction()) {
-                if (!registerActionHandle.isEnabled()) {
-                    registerActionHandle.enable();
-                    log("Register Action Enabled");
-                }
-            } else {
-                if (registerActionHandle.isEnabled()) {
-                    registerActionHandle.disable();
-                    log("Register Action Disabled");
-                }
-            }
-            
-            if (reactionHandlers.sensors()) {
-                if (!sensorsHandle.isEnabled()) {
-                    sensorsHandle.enable();
-                    log("Sensors Enabled");
-                }
-            } else {
-                if (sensorsHandle.isEnabled()) {
-                    sensorsHandle.disable();
-                    log("Sensors Disabled");
-                }
-            }
-
-            if (reactionHandlers.reactionstatistics()) {
-                if (!reactionStatisticsHandle.isEnabled()) {
-                    reactionStatisticsHandle.enable();
-                    log("Reaction Statistics Enabled");
-                }
-            } else {
-                if (reactionStatisticsHandle.isEnabled()) {
-                    reactionStatisticsHandle.disable();
-                    log("Reaction Statistics Disabled");
-                }
-            }
-
-            if (reactionHandlers.image()) {
-                if (!imageHandle.isEnabled()) {
-                    imageHandle.enable();
-                    log("Image Enabled");
-                }
-            } else {
-                if (imageHandle.isEnabled()) {
-                    imageHandle.disable();
-                    log("Image Disabled");
-                }
-            }
-            
-            if (reactionHandlers.classifiedimage()) {
-                if (!classifiedImageHandle.isEnabled()) {
-                    classifiedImageHandle.enable();
-                    log("Classified Image Enabled");
-                }
-            } else {
-                if (classifiedImageHandle.isEnabled()) {
-                    classifiedImageHandle.disable();
-                    log("Classified Image Disabled");
-                }
-            }
-            
-            if (reactionHandlers.goals()) {
-                if (!goalsHandle.isEnabled()) {
-                    goalsHandle.enable();
-                    log("Goals Enabled");
-                }
-            } else {
-                if (goalsHandle.isEnabled()) {
-                    goalsHandle.disable();
-                    log("Goals Disabled");
-                }
-            }
-            
-            if (reactionHandlers.balls()) {
-                if (!ballsHandle.isEnabled()) {
-                    ballsHandle.enable();
-                    log("Balls Enabled");
-                }
-            } else {
-                if (ballsHandle.isEnabled()) {
-                    ballsHandle.disable();
-                    log("Balls Disabled");
-                }
-            }
-            
-            if (reactionHandlers.localisation()) {
-                if (!localisationHandle.isEnabled()) {
-                    localisationHandle.enable();
-                    log("Localisation Enabled");
-                }
-            } else {
-                if (localisationHandle.isEnabled()) {
-                    localisationHandle.disable();
-                    log("Localisation Disabled");
+                if (enabled) {
+                    if (!reactionHandle.isEnabled()) {
+                        reactionHandle.enable();
+                        log(name, "Enabled");
+                    }
+                } else {
+                    if (reactionHandle.isEnabled()) {
+                        reactionHandle.disable();
+                        log(name, "Disabled");
+                    }
                 }
             }
         }

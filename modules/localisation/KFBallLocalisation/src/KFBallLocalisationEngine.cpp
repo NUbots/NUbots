@@ -38,7 +38,7 @@ void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point 
 }
 
 void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
-                                          const FakeOdometry& odom) {
+                                          const FakeOdometry&) {
     double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
     last_time_update_time_ = current_time;
     ball_filter_.timeUpdate(seconds); // TODO odometry was removed from here odom
@@ -62,12 +62,22 @@ double KFBallLocalisationEngine::MeasurementUpdate(
     //                     0, 0, observed_object.sphericalError[1] };
 
     // // Robot relative cartesian coordinates
-    arma::vec2 measurement = observed_object.position.rows(0, 1);
-    arma::mat22 cov = observed_object.error.submat(0, 0, 2, 2);
+    arma::vec2 measurement = observed_object.measurements[0].position.rows(0, 1);
+    arma::mat22 cov = observed_object.measurements[0].error.submat(0, 0, 1, 1);
 
     double quality = ball_filter_.measurementUpdate(measurement, cov);
 
     return quality;
+}
+
+void KFBallLocalisationEngine::UpdateConfiguration(
+    const messages::support::Configuration<KFBallLocalisationEngineConfig>& config) {
+    ball_filter_.model.ballDragCoefficient = config["BallDragCoefficient"].as<double>();
+    cfg_.emit_ball_fieldobjects = config["EmitBallFieldobjects"].as<bool>();
+}
+
+bool KFBallLocalisationEngine::CanEmitFieldObjects() {
+    return cfg_.emit_ball_fieldobjects;
 }
 
 }

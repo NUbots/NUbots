@@ -20,74 +20,28 @@
 #ifndef UTILITY_MATH_RANSAC_RANSACCIRCLEMODEL_H
 #define UTILITY_MATH_RANSAC_RANSACCIRCLEMODEL_H
 
-#include <vector>
 #include <armadillo>
+#include "utility/math/geometry/Circle.h"
 
 namespace utility {
 namespace math {
 namespace ransac {
 
-    template<typename T>
-    class RansacCircleModel {
+    class RansacCircleModel : public utility::math::geometry::Circle {
     public:
-        RansacCircleModel() : radius(0) {
-            // Empty constructor.
+
+        static constexpr size_t REQUIRED_POINTS = 3;
+        using DataPoint = arma::vec2;
+
+        bool regenerate(const std::vector<DataPoint>& points);
+
+        double calculateError(const DataPoint& p) const;
+
+        template <typename Iterator>
+        void refineModel(Iterator&, Iterator&, const double&) {
+            //commented out due to performance concerns - works well though
+            //leastSquaresUpdate(first,last,candidateThreshold);
         }
-
-        bool regenerate(const std::vector<T>& points) {
-            if (points.size() == minPointsForFit()) {
-                return constructFromPoints(points[0], points[1], points[2], 1.0e-2);
-            }
-
-            else {
-                return false;
-            }
-        }
-
-        unsigned int minPointsForFit() const {
-            return 3;
-        }
-
-        double calculateError(const T& p) const {
-            return std::abs(arma::norm(p - centre, 2) - radius);
-        }
-
-        double getRadius() const {
-            return radius;
-        }
-
-        T getCentre() const {
-            return centre;
-        }
-
-    private:
-        bool constructFromPoints(const T& point1, const T& point2, const T& point3, double tolerance = 1.0e-6) {
-            T ab = point1 - point2;
-            T bc = point2 - point3;
-            double det = ((ab[0] * bc[1]) - (bc[0] * ab[1]));
-
-            if (std::abs(det) < tolerance) {
-                return false;
-            }
-
-            // double b_len_sqr = p2.squareAbs();
-            double b_len_sqr = arma::dot(point2, point2);
-
-            double ab_norm = (arma::dot(point1, point1) - b_len_sqr) / 2.0;
-            double bc_norm = (b_len_sqr - arma::dot(point3, point3)) / 2.0;
-
-            det = 1 / det;
-            centre[0] = ((ab_norm * bc[1]) - (bc_norm * ab[1])) * det;
-            centre[1] = ((ab[0] * bc_norm) - (bc[0] * ab_norm)) * det;
-
-            radius = arma::norm(centre - point1, 2);
-
-            return true;
-        }
-
-    private:
-        T centre;
-        double radius;
     };
 
 }

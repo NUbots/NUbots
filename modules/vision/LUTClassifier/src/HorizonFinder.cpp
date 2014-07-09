@@ -29,15 +29,17 @@ namespace modules {
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
 
-        void LUTClassifier::findHorizon(const Image& image, const LookUpTable& lut, const Sensors& sensors, ClassifiedImage<ObjectClass>& classifiedImage) {
-
-                // Element 0 is gradient, element 1 is intercept (confirmed by Jake's Implementation)
+        void LUTClassifier::findHorizon(const Image& image, const LookUpTable&, ClassifiedImage<ObjectClass>& classifiedImage) {
+                
+                auto& sensors = *classifiedImage.sensors;
+                
                 // Coordinate system: 0,0 is the centre of the screen. pos[0] is along the y axis of the
                 // camera transform, pos[1] is along the z axis (x points out of the camera)
                 classifiedImage.horizon = utility::motion::kinematics::calculateHorizon(sensors.orientationCamToGround.submat(0,0,2,2).t(), FOCAL_LENGTH_PIXELS);
 
-                // Move the intercept to be at 0,0
-                classifiedImage.horizon[1] += (image.height() * 0.5) + classifiedImage.horizon[0] * -(image.width() * 0.5);
+
+                // Move our axis to be at the top left of the screen
+                classifiedImage.horizon.distance = -classifiedImage.horizon.distanceToPoint({ -double(image.width()) * 0.5, -double(image.height()) * 0.5 });
         }
 
     }  // vision

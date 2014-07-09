@@ -182,7 +182,7 @@ namespace darwin {
 
                         // Add to our sync write command
                         command.insert(command.end(), {
-                            i + 1,
+                            uint8_t(i + 1),
                             Convert::gainInverse(servoState[i].dGain), // D Gain
                             Convert::gainInverse(servoState[i].iGain), // I Gain
                             Convert::gainInverse(servoState[i].pGain), // P Gain

@@ -19,27 +19,26 @@
 
 package messages.input.proto;
 
+import "messages/Vector.proto";
+
 message MotionCapture {
 
     message Point {
         optional string identifier = 1;
         optional double size = 2;
-        required double x = 3;
-        required double y = 4;
-        required double z = 5;
+        optional vec3 position = 3;
     };
 
     message RigidBody {
-        optional string identifier = 1;
+        optional uint32 identifier = 1;
         optional double mean_error = 2;
 
-        // The rotation quaternion
-        required double qw = 3;
-        required double qx = 4;
-        required double qy = 5;
-        required double qz = 6;
+        required vec3 position = 3;
 
-        repeated Point points = 7;
+        // The rotation quaternion
+        optional vec4 rotation = 4;
+
+        repeated Point points = 5;
     };
 
     message Bone {

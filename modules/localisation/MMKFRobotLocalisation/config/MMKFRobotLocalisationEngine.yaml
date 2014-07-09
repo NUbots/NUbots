@@ -1,5 +1,4 @@
-{
-	"AngleBetweenGoalsObservationEnabled": 1,
-	"GoalPairObservationEnabled": 1,
-	"AllGoalsAreBlue": 0
-}
+AngleBetweenGoalsObservationEnabled: true
+GoalPairObservationEnabled: true
+AllGoalsAreBlue: false
+EmitRobotFieldobjects: false

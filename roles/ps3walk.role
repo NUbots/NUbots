@@ -6,6 +6,7 @@ ADD_ROLE(
         #support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
+        support::configuration::NetworkingConfiguration
         support::NUbugger
 
         # Hardware Interface
@@ -16,7 +17,9 @@ ADD_ROLE(
 
         # Vision
         vision::LUTClassifier
-        #vision::FeatureDetector
+        vision::GoalDetector
+        vision::BallDetector
+        vision::ObstacleDetector
 
         # Motion
         motion::WalkEngine
@@ -34,8 +37,11 @@ ADD_ROLE(
         behaviour::skills::Look
         behaviour::planning::LookAtBall
 
-        
-        #Localisation
-        localisation::MMKFRobotLocalisation
-        localisation::KFBallLocalisation
+        # Localisation
+        #localisation::MMKFRobotLocalisation
+        #localisation::KFBallLocalisation
+        localisation::NUcapLocalisation
+
+        # Debug
+        debug::NUcap
 )

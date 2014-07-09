@@ -39,13 +39,13 @@ namespace modules {
 
 
             FixedWalk::FixedWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), active(false){
-                // on<Trigger<Configuration<FixedWalk>>>([this] (const Configuration<FixedWalk>& file){                 
+                // on<Trigger<Configuration<FixedWalk>>>([this] (const Configuration<FixedWalk>& file){
                 // });
 
                 on<Trigger<ExecuteGetup>>("FixedWalk::Getup", [this](const ExecuteGetup&){
                     //record fall time
-                    segmentElapsedTimeBeforeFall = NUClear::clock::now() - segmentStart;    
-                    fallen = true;                
+                    segmentElapsedTimeBeforeFall = NUClear::clock::now() - segmentStart;
+                    fallen = true;
                 });
 
                 on<Trigger<KillGetup>>("FixedWalk::Getup Finished", [this](const KillGetup&){
@@ -59,6 +59,7 @@ namespace modules {
                         //Move to next segment
                         segmentStart += walkSegments.front().duration;                        
                         walkSegments.pop_front();
+
                         if(walkSegments.empty()){
                             emit(std::make_unique<WalkCommand>());
                             emit(std::make_unique<WalkStopCommand>());
@@ -104,7 +105,7 @@ namespace modules {
 
             }
 
-            std::unique_ptr<WalkCommand> FixedWalk::getWalkCommand(const FixedWalkCommand::WalkSegment& segment, NUClear::clock::duration t, const Sensors& sensors){
+            std::unique_ptr<WalkCommand> FixedWalk::getWalkCommand(const FixedWalkCommand::WalkSegment& segment, NUClear::clock::duration t, const Sensors&){
              	double timeSeconds = std::chrono::duration_cast<std::chrono::seconds>(t).count();
             	arma::vec2 directionInOriginalCoords = (segment.curvePeriod != 0 ? utility::math::matrix::zRotationMatrix(2 * M_PI * timeSeconds / segment.curvePeriod, 2) : arma::eye(2,2) ) * segment.direction;
             	arma::vec2 direction =  arma::normalise(directionInOriginalCoords);

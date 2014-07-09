@@ -23,8 +23,8 @@ import "messages/Vector.proto";
 import "messages/Matrix.proto";
 
 message Line {
-    required double gradient = 1;
-    required double intercept = 2;
+    required vec2 normal = 1;
+    required double distance = 2;
 }
 
 message Circle {

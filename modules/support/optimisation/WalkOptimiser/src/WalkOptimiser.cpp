@@ -70,8 +70,8 @@ namespace modules {
                         walk_command.segments.back().direction = segment["direction"].as<arma::vec>();
                         walk_command.segments.back().curvePeriod = segment["curvePeriod"].as<double>();
 
-                        walk_command.segments.back().normalisedVelocity = segment["normalisedVelocity"].as<double>();                
-                        walk_command.segments.back().normalisedAngularVelocity = segment["normalisedAngularVelocity"].as<double>();                
+                        walk_command.segments.back().normalisedVelocity = segment["normalisedVelocity"].as<double>();
+                        walk_command.segments.back().normalisedAngularVelocity = segment["normalisedAngularVelocity"].as<double>();
                         walk_command.segments.back().duration = std::chrono::milliseconds(int(std::milli::den * segment["duration"].as<double>()));
                     }
 
@@ -151,12 +151,12 @@ namespace modules {
                     auto cfg = getWalkConfig(result);
                     saveConfig(cfg);
                 });
-                
+
                 //TODO network
                 // on<Trigger<Network<WalkOptimiserCommandParameters>>>("Add Sample",[this](const Configuration<WalkOptimiserCommand>& walkConfig)){
                 //     //samples.push_back(getState()));
                     // fitnesses.resize(number_of_samples);
-                //      
+                //
                 // });
 
 
@@ -166,8 +166,8 @@ namespace modules {
                 arma::vec state(parameter_names.size());
                 std::cerr << "walkConfig.size() = " << walkConfig.config.size() << "\nLoading state:"<< std::endl;
                 int i = 0;
-                for(const std::string& name : parameter_names){ 
-                    state[i++] = walkConfig.config[name].as<double>();                  
+                for(const std::string& name : parameter_names){
+                    state[i++] = walkConfig.config[name].as<double>();
                 }
                 std::cerr << "Loaded Walk Config State:"<<std::endl;
                 printState(state);

@@ -33,12 +33,12 @@ namespace robot {
     //    1. The x position on the field
     //    2. The y position on the field
     //    3. The robot's heading (in radians)
-    enum RobotModelStateComponents {
+    enum RobotModelStateComponents : int {
         kX = 0,
         kY = 1,
-        // kHeading = 2,
-        kHeadingX = 2,
-        kHeadingY = 3,
+        kHeading = 2,
+        // kHeadingX = 2,
+        // kHeadingY = 3,
     };
 
     enum class MeasurementType {
@@ -50,16 +50,20 @@ namespace robot {
 
     class RobotModel {
     public:
-        static constexpr size_t size = 4;
+        static constexpr size_t size = 3;
 
         RobotModel() {} // empty constructor
 
         arma::vec::fixed<RobotModel::size> timeUpdate(
             const arma::vec::fixed<RobotModel::size>& state, double deltaT);
 
+        // arma::vec predictedObservation(
+        //     const arma::vec::fixed<RobotModel::size>& state,
+        //     const arma::vec& actual_position);
+
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
-            const arma::vec& actual_position);
+            const arma::vec3& actual_position);
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,

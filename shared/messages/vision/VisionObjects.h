@@ -30,15 +30,26 @@ namespace messages {
     namespace vision {
 
         struct VisionObject {
+
+            /**
+             * Measurements are taken from the ground plane below the robot
+             * It is measured in spherical coodinates and the error is a covariance
+             * matrix representing the uncertinaty.
+             */
+            struct Measurement {
+                arma::vec3 position;
+                arma::mat33 error;
+            };
+
             // Time the image was taken
             NUClear::clock::time_point timestamp;
 
-            // Position of object relative to ground to centre of object
-            arma::vec3 position;
-            arma::mat33 error;
+            // Position of object relative to ground to centre of object in spherical coordinates
+            std::vector<Measurement> measurements;
 
-            // Position in spherical coordinates relative to camera to centre of object
-            arma::vec3 sphericalFromCamera;
+            // The angular position and size from the perspective of the camera
+            arma::vec2 screenAngular;
+            arma::vec2 angularSize;
 
         };
 

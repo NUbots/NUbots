@@ -19,482 +19,241 @@
 
 #include "GoalDetector.h"
 
+#include "messages/input/Sensors.h"
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/support/Configuration.h"
 #include "messages/vision/VisionObjects.h"
+#include "utility/math/geometry/Quad.h"
 
 #include "utility/math/geometry/Line.h"
 
+#include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacLineModel.h"
+#include "utility/math/vision.h"
+#include "messages/input/CameraParameters.h"
 
 namespace modules {
 namespace vision {
 
+    using messages::input::CameraParameters;
+    using messages::input::Sensors;
+
     using utility::math::geometry::Line;
     using utility::math::geometry::Quad;
-    using utility::math::geometry::LSFittedLine;
 
+    using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacLineModel;
-    using utility::math::ransac::findMultipleModels;
-    using utility::math::ransac::RansacSelectionMethod;
+
+    using utility::math::vision::widthBasedDistanceToCircle;
+    using utility::math::vision::projectCamToGroundPlane;
+    using utility::math::vision::getGroundPointFromScreen;
+    using utility::math::vision::imageToScreen;
+    using utility::math::vision::getCamFromScreen;
+    using utility::math::vision::getParallaxAngle;
+    using utility::math::vision::projectCamSpaceToScreen;
+    using utility::math::vision::projectCamToGroundPlane;
 
     using messages::vision::ObjectClass;
     using messages::vision::ClassifiedImage;
+    using messages::vision::VisionObject;
     using messages::vision::Goal;
 
     using messages::support::Configuration;
 
-
     GoalDetector::GoalDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<GoalDetector>>>([this](const Configuration<GoalDetector>& config) {
+        auto setParams = [this] (const CameraParameters& cam, const Configuration<GoalDetector>& config) {
 
-            std::string selectionMethod = config["SELECTION_METHOD"].as<std::string>();
+            MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
+            CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<double>();
+            MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
+            MAXIMUM_FITTED_MODELS = config["ransac"]["maximum_fitted_models"].as<uint>();
 
-            if (selectionMethod.compare("LARGEST_CONSENSUS") == 0) {
-                SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
-            }
-            else if (selectionMethod.compare("BEST_FITTING_CONSENSUS") == 0) {
-                SELECTION_METHOD = RansacSelectionMethod::BEST_FITTING_CONSENSUS;
-            }
-            else {
-                SELECTION_METHOD = RansacSelectionMethod::LARGEST_CONSENSUS;
-            }
+            MINIMUM_ASPECT_RATIO = config["aspect_ratio_range"][0].as<double>();
+            MAXIMUM_ASPECT_RATIO = config["aspect_ratio_range"][1].as<double>();
+            VISUAL_HORIZON_BUFFER = std::max(1, int(cam.focalLengthPixels * tan(config["visual_horizon_buffer"].as<double>())));
+            MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE = std::cos(config["minimum_goal_horizon_angle"].as<double>() - M_PI_2);
+            MAXIMUM_ANGLE_BETWEEN_GOALS = std::cos(config["maximum_angle_between_goals"].as<double>());
+            MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE = std::sin(-config["maximum_vertical_goal_perspective_angle"].as<double>());
+        };
 
-            MINIMUM_POINTS = config["MINIMUM_POINTS"].as<uint>();
-            MAX_ITERATIONS_PER_FITTING = config["MAX_ITERATIONS_PER_FITTING"].as<uint>();
-            MAX_FITTING_ATTEMPTS = config["MAX_FITTING_ATTEMPTS"].as<uint>();
-            ANGLE_MARGIN = config["ANGLE_MARGIN"].as<double>();
-            CONSENSUS_THRESHOLD = config["CONSENSUS_THRESHOLD"].as<double>();
-            RANSAC_MATCHING_TOLERANCE = config["RANSAC_MATCHING_TOLERANCE"].as<double>();
-            MIN_GOAL_SEPARATION = config["MIN_GOAL_SEPARATION"].as<int>();
-            GOAL_HEIGHT_TO_WIDTH_RATIO_MIN = config["GOAL_HEIGHT_TO_WIDTH_RATIO_MIN"].as<float>();
-            THROWOUT_SHORT_GOALS = config["THROWOUT_SHORT_GOALS"].as<bool>();
-            THROWOUT_NARROW_GOALS = config["THROWOUT_NARROW_GOALS"].as<bool>();
-            THROWOUT_ON_ABOVE_KIN_HOR_GOALS = config["THROWOUT_ON_ABOVE_KIN_HOR_GOALS"].as<bool>();
-            THROWOUT_DISTANT_GOALS = config["THROWOUT_DISTANT_GOALS"].as<bool>();
-            MAX_GOAL_DISTANCE = config["MAX_GOAL_DISTANCE"].as<float>();
-            MIN_GOAL_HEIGHT = config["MIN_GOAL_HEIGHT"].as<int>();
-            MIN_GOAL_WIDTH = config["MIN_GOAL_WIDTH"].as<int>();
-            GOAL_WIDTH = config["GOAL_WIDTH"].as<float>();
-            EDGE_OF_SCREEN_MARGIN = config["EDGE_OF_SCREEN_MARGIN"].as<int>();
-            D2P_ADAPTIVE_THRESHOLD = config["D2P_ADAPTIVE_THRESHOLD"].as<float>();
-        });
+        // Trigger the same function when either update
+        on<Trigger<CameraParameters>, With<Configuration<GoalDetector>>>(setParams);
+        on<With<CameraParameters>, Trigger<Configuration<GoalDetector>>>(setParams);
 
-        on<Trigger<ClassifiedImage<ObjectClass>>>([this](const ClassifiedImage<ObjectClass>& image) {
-
-            std::vector<Quad> quads, postCandidates;
-            std::pair<bool, Quad> crossbar(false, Quad());
-            std::vector<Goal> posts;
+        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters, Sensors>, Options<Single>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const Sensors& sensors) {
 
             std::vector<arma::vec2> startPoints, endPoints;
-            std::vector<LSFittedLine> startLines, endLines;
-            std::vector<std::pair<RansacLineModel<arma::vec2>, std::vector<arma::vec2>>> ransacResults;
+            std::vector<arma::mat22> starts, ends;
 
             auto hSegments = image.horizontalSegments.equal_range(ObjectClass::GOAL);
             for(auto it = hSegments.first; it != hSegments.second; ++it) {
 
                 // We throw out points if they are:
                 // Less the full quality (subsampled)
-                // Do not have a transition on either side (are on an edge)
-                if(it->second.subsample == 1
-                    && it->second.previous
-                    && it->second.next) {
-
+                // Do not have a transition on the other side
+                if(it->second.subsample == 1 && it->second.previous) {
                     startPoints.push_back({ double(it->second.start[0]), double(it->second.start[1]) });
+                }
+
+                if(it->second.subsample == 1 && it->second.next) {
                     endPoints.push_back({ double(it->second.end[0]), double(it->second.end[1]) });
                 }
             }
 
-            // Use generic RANSAC implementation to find start lines (left edges).
-            ransacResults = findMultipleModels<RansacLineModel<arma::vec2>, arma::vec2>(startPoints,
-                                                                                        CONSENSUS_THRESHOLD,
-                                                                                        MINIMUM_POINTS,
-                                                                                        MAX_ITERATIONS_PER_FITTING,
-                                                                                        MAX_FITTING_ATTEMPTS,
-                                                                                        SELECTION_METHOD);
+            // Use ransac to find left edges.
+            for (auto& result : Ransac<RansacLineModel>::fitModels(startPoints.begin()
+                                                               , startPoints.end()
+                                                               , MINIMUM_POINTS_FOR_CONSENSUS
+                                                               , MAXIMUM_ITERATIONS_PER_FITTING
+                                                               , MAXIMUM_FITTED_MODELS
+                                                               , CONSENSUS_ERROR_THRESHOLD)) {
 
+                // Compare based on Y co-ordinate
+                auto comp = [] (const arma::vec2& a, const arma::vec2& b) {
+                    return a[1] < b[1];
+                };
 
-            for (auto& l : ransacResults) {
-                startLines.push_back(LSFittedLine(l.second));
+                // Find min and max y
+                std::vector<arma::vec2>::iterator high, low;
+                std::tie(high, low) = std::minmax_element(result.first, result.last, comp);
+
+                // Store the values
+                starts.emplace_back();
+                starts.back().col(0) = result.model.orthogonalProjection(*high);
+                starts.back().col(1) = result.model.orthogonalProjection(*low);
             }
 
-            // Use generic RANSAC implementation to find end lines (right enddges).
-            ransacResults = findMultipleModels<RansacLineModel<arma::vec2>, arma::vec2>(endPoints,
-                                                                                        CONSENSUS_THRESHOLD,
-                                                                                        MINIMUM_POINTS,
-                                                                                        MAX_ITERATIONS_PER_FITTING,
-                                                                                        MAX_FITTING_ATTEMPTS,
-                                                                                        SELECTION_METHOD);
+            // Use ransac to find right edges.
+            for (auto& result : Ransac<RansacLineModel>::fitModels(endPoints.begin()
+                                                                , endPoints.end()
+                                                                , MINIMUM_POINTS_FOR_CONSENSUS
+                                                                , MAXIMUM_ITERATIONS_PER_FITTING
+                                                                , MAXIMUM_FITTED_MODELS
+                                                                , CONSENSUS_ERROR_THRESHOLD)) {
 
-            for (auto& l : ransacResults) {
-                endLines.push_back(LSFittedLine(l.second));
+                auto comp = [] (const arma::vec2& a, const arma::vec2& b) {
+                    return a[1] < b[1];
+                };
+
+                // Find min and max y
+                std::vector<arma::vec2>::iterator high, low;
+                std::tie(high, low) = std::minmax_element(result.first, result.last, comp);
+
+                // Store the values
+                ends.emplace_back();
+                ends.back().col(0) = result.model.orthogonalProjection(*high);
+                ends.back().col(1) = result.model.orthogonalProjection(*low);
             }
 
-            // Build candidates out of lines - this finds candidates irrespective of rotation - filtering must be done later.
-            quads = buildQuadsFromLines(startLines, endLines, RANSAC_MATCHING_TOLERANCE);
-
-            // Remove posts with invalid aspect ratio : check potential cross bars AND posts.
-            removeInvalid(quads);
-
-            // Sort out potential crossbars and vertical posts (posts on too large of a lean will be removed).
-            // Edit ANGLE_MARGIN to affect this.
-            double halfPI = arma::math::pi() * 0.5;
-            double lowerAngleThreshold = (ANGLE_MARGIN * halfPI);
-            double upperAngleThreshold = halfPI - lowerAngleThreshold;
-
-
-            for (const Quad& quad : quads) {
-
-                //TODO!!!!!!!!!!!!!!!!!!!!!!!!!!! - add in filtering with kinematics horizon
-                //double angle = m_kinematicsHorizon.getAngleBetween(Line(quad.getTopCentre(), quad.getBottomCentre()));
-                Line horizontal_line;
-                horizontal_line.setLine(0,1,0); //0*x+y=0
-                double angle = horizontal_line.getAngleBetween(Line(quad.getTopCentre(), quad.getBottomCentre()));
-
-                if (angle >= upperAngleThreshold) {
-                    postCandidates.push_back(quad);
-                }
-
-                else if (angle <= lowerAngleThreshold) {
-                    // Only keep largest crossbar candidate.
-                    if (!crossbar.first) {
-                        crossbar.first = true;
-                        crossbar.second = quad;
-                    }
-
-                    else if (crossbar.second.area() < quad.area()) {
-                        crossbar.second = quad;
-                    }
-                }
-            }
-
-            // Only check upright posts for building candidates.
-            mergeClose(postCandidates, 1.5);
-
+            // Our output goal vector
             auto goals = std::make_unique<std::vector<Goal>>();
+            goals->reserve(starts.size() * ends.size());
 
-            for(auto& q : postCandidates) {
+            // Form quads from all of the lines
+            for(auto& start : starts) {
+                for(auto& end : ends) {
 
-                Goal goal;
-
-                goal.quad = q;
-
-                goals->push_back(std::move(goal));
-
+                    // If we can make a valid quad from the points
+                    if(start(0, 0) < end(0, 1) && start(1, 0) < end(1, 1)) {
+                        goals->emplace_back();
+                        goals->back().quad.set(start.col(1), start.col(0), end.col(0), end.col(1));
+                    }
+                }
             }
+
+            // Throwout invalid quads
+            for(auto it = goals->begin(); it != goals->end();) {
+
+                auto& quad = it->quad;
+                arma::vec2 lhs = arma::normalise(quad.getTopLeft() - quad.getBottomLeft());
+                arma::vec2 rhs = arma::normalise(quad.getTopRight() - quad.getBottomRight());
+
+                // Check if we are within the aspect ratio range
+                bool valid = quad.aspectRatio() > MINIMUM_ASPECT_RATIO
+                          && quad.aspectRatio() < MAXIMUM_ASPECT_RATIO
+                // Check if we are close enough to the visual horizon
+                          && (image.visualHorizonAtPoint(quad.getBottomLeft()[0]) < quad.getBottomLeft()[1] + VISUAL_HORIZON_BUFFER
+                              || image.visualHorizonAtPoint(quad.getBottomRight()[0]) < quad.getBottomRight()[1] + VISUAL_HORIZON_BUFFER)
+                // Check we finish above the kinematics horizon or or kinematics horizon is off the screen
+                          && (image.horizon.y(quad.getTopLeft()[0]) > quad.getTopLeft()[1] || image.horizon.y(quad.getTopLeft()[0]) < 0)
+                          && (image.horizon.y(quad.getTopRight()[0]) > quad.getTopRight()[1] || image.horizon.y(quad.getTopRight()[0]) < 0)
+                // Check that our two goal lines are perpendicular with the horizon must use greater than rather then less than because of the cos
+                          && std::abs(arma::dot(lhs, image.horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                          && std::abs(arma::dot(rhs, image.horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                // Check that our two goal lines are approximatly parallel
+                          && std::abs(arma::dot(lhs, rhs)) > MAXIMUM_ANGLE_BETWEEN_GOALS;
+                // Check that our goals don't form too much of an upward cup (not really possible for us)
+                          //&& lhs.at(0) * rhs.at(1) - lhs.at(1) * rhs.at(0) > MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
+
+
+                if(!valid) {
+                    it = goals->erase(it);
+                }
+                else {
+                    ++it;
+                }
+            }
+
+            // Merge close goals
+            for (auto a = goals->begin(); a != goals->end(); ++a) {
+                for (auto b = std::next(a); b != goals->end();) {
+
+                    if (a->quad.overlapsHorizontally(b->quad)) {
+                        // Get outer lines.
+                        arma::vec2 tl;
+                        arma::vec2 tr;
+                        arma::vec2 bl;
+                        arma::vec2 br;
+
+                        tl = { std::min(a->quad.getTopLeft()[0],     b->quad.getTopLeft()[0]),     std::min(a->quad.getTopLeft()[1],     b->quad.getTopLeft()[1]) };
+                        tr = { std::max(a->quad.getTopRight()[0],    b->quad.getTopRight()[0]),    std::min(a->quad.getTopRight()[1],    b->quad.getTopRight()[1]) };
+                        bl = { std::min(a->quad.getBottomLeft()[0],  b->quad.getBottomLeft()[0]),  std::max(a->quad.getBottomLeft()[1],  b->quad.getBottomLeft()[1]) };
+                        br = { std::max(a->quad.getBottomRight()[0], b->quad.getBottomRight()[0]), std::max(a->quad.getBottomRight()[1], b->quad.getBottomRight()[1]) };
+
+                        // Replace original two quads with the new one.
+                        a->quad.set(bl, tl, tr, br);
+                        b = goals->erase(b);
+                    }
+                    else {
+                        b++;
+                    }
+                }
+            }
+
+            // Do the kinematics for the goals
+            for(auto it = goals->begin(); it != goals->end(); ++it) {
+
+                double GOAL_DIAMETER = 0.1;
+
+                std::vector<VisionObject::Measurement> measurements;
+
+                arma::vec3 goalBaseCentreRay = arma::normalise(arma::normalise(getCamFromScreen(it->quad.getBottomLeft(), cam.focalLengthPixels))
+                                                           + arma::normalise(getCamFromScreen(it->quad.getBottomRight(), cam.focalLengthPixels)));
+
+                // Get our width based distance to the cylinder
+                double widthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, it->quad.getBottomLeft(), it->quad.getBottomRight(), cam.focalLengthPixels);
+                arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * goalBaseCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
+                // TODO convert this into sphericial coordiantes and error
+                measurements.push_back({{0,0,0}, arma::eye(3,3)});
+
+                // Project this vector to a plane midway through the ball
+                arma::vec3 ballCentreGroundProj = arma::vec3({ 0, 0, GOAL_DIAMETER / 2.0 }) + projectCamToGroundPlane(goalBaseCentreRay, sensors.orientationCamToGround);
+                // TODO convert this into sphericial coordiantes and error
+                measurements.push_back({{0,0,0}, arma::eye(3,3)});
+
+                it->measurements = measurements;
+            }
+
+            // Do some extra throwouts for goals based on kinematics
+
+            // Assign leftness and rightness to goals
 
             emit(std::move(goals));
-
-//            for(auto& post : postCandidates) {
-//                std::cout << post << std::endl;
-//            }
-//            std::cout << std::endl;
-
-            // Beyond here needs vision kinematics
-
-            // // Generate actual goal from candidate posts.
-            // if (crossbar.first) {
-            //     // If a cross bar has been found use it to help assign left and right.
-            //     posts = assignGoals(visionKinematics, postCandidates, crossbar.second);
-            // }
-            // else {
-            //     // No crossbar, just use general method.
-            //     posts = assignGoals(visionKinematics, postCandidates);
-            // }
-
-            // // Improves bottom centre estimate using vertical transitions.
-            // int numberOfBasesSet = 0;
-            // for (const ColourSegment& segment : verticalSegments) {
-
-            //     const arma::vec2& point = segment.m_end;
-            //     for (Goal& post : *posts) {
-            //         if ((point[0] <= post.getQuad().getRight()) &&
-            //                 (point[0] >= post.getQuad().getLeft()) &&
-            //                 (point[1] > post.getLocationPixels()[1])) {
-            //             post.setBase(visionKinematics, point);
-            //             numberOfBasesSet++;
-            //         }
-            //     }
-            // }
-
-            // std::unique_ptr<std::vector<messages::vision::Goal>> finalGoals = std::move(createGoalMessage(posts));
-
-            // return std::move(finalGoals);
 
         });
     }
 
-std::vector<Quad> GoalDetector::buildQuadsFromLines(const std::vector<LSFittedLine>& startLines,
-                                                  const std::vector<LSFittedLine>& endLines, double tolerance) {
-    // (must match exactly) 0 <= tolerance <= 1 (any pair will be accepted)
-    //
-    // LSFittedLine objects contain std::vectors of points and can be quite large,
-    // therefore it is more efficient to pass by const reference and maintain
-    // a std::vector of matched end lines than to pass by copy so that the end lines
-    // std::vector can be shrunk.
-
-    if ((tolerance < 0) || (tolerance > 1)) {
-        tolerance = 1;                  // TODO: Pick a better action here? We used to throw.
-    }
-
-    std::vector<Quad> quads;
-    std::vector<bool> used(endLines.size(), false);
-
-    for (const LSFittedLine& startLine : startLines) {
-        std::vector<bool> tried(used);                      // Consider all used lines tried.
-        bool matched = false;
-
-        // Try end lines in order of closeness.
-        for (unsigned int i = getClosestUntriedLine(startLine, endLines, tried);
-                                ((i < endLines.size()) && (!matched));
-                                i = getClosestUntriedLine(startLine, endLines, tried)) {
-
-            const LSFittedLine& endLine = endLines.at(i);
-
-            // Check angles.
-            if (startLine.getAngleBetween(endLine) <= (tolerance * arma::math::pi() * 0.5)) {                   // Dodgy way (linear with angle between).
-            //if(std::min(a1/a2, a2/a1) <= (1 - tolerance)) {
-                // Get the end points of each line.
-                arma::vec2 sp1, sp2, ep1, ep2;
-
-                if (startLine.getEndPoints(sp1, sp2) && endLine.getEndPoints(ep1, ep2)) {
-                    // Find lengths of line segments.
-                    double l1 = arma::norm((sp1 - sp2), 2);
-                    double l2 = arma::norm((ep1 - ep2), 2);
-
-                    // Check lengths.
-                    if (std::min((l1 / l2), (l2 / l1)) >= (1 - tolerance)) {
-                        // Get num points.
-                        double n1 = startLine.getNumPoints(), n2 = endLine.getNumPoints();
-
-                        if (std::min((n1 / n2), (n2 / n1)) >= (1 - tolerance)) {
-                            // Check start is to left of end.
-                            if ((0.5 * (sp1[0] + sp2[0])) < (0.5 * (ep1[0] + ep2[0]))) {
-                                // Success
-                                // Order points
-                                if (sp1[1] < sp2[1]) {
-                                    arma::vec2 c = sp1;
-                                    sp1 = sp2;
-                                    sp2 = c;
-                                }
-
-                                if (ep1[1] < ep2[1]) {
-                                    arma::vec2 c = ep1;
-                                    ep1 = ep2;
-                                    ep2 = c;
-                                }
-
-                                quads.push_back(Quad(sp1, sp2, ep2, ep1));                      // Generate candidate.
-                                used.at(i) = true;                                              // Remove end line from consideration.
-                                matched = true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return quads;
-}
-
-unsigned int GoalDetector::getClosestUntriedLine(const LSFittedLine& start,
-                                                        const std::vector<LSFittedLine>& endLines,
-                                                        std::vector<bool>& tried) {
-    if (endLines.size() != tried.size()) {
-        return 0;                   // TODO: Pick a better action here? We used to throw.
-    }
-
-    unsigned int best = endLines.size();                                            // For if all have been tried.
-    double d_best = std::numeric_limits<double>::max();
-
-    for (unsigned int i = 0; i < endLines.size(); i++) {
-        // Check if tried yet.
-        if (!tried[i]) {
-            // Check if distance is smallest.
-            double d = start.averageDistanceBetween(endLines[i]);
-
-            if (d < d_best) {
-                best = i;
-                d_best = d;
-            }
-        }
-    }
-
-    // Mark as used.
-    if (best < endLines.size())
-        tried[best] = true;
-
-    return best;
-}
-
-// std::unique_ptr<std::vector<Goal> > GoalDetector::assignGoals(const VisionKinematics& visionKinematics, const std::vector<Quad>& candidates, const Quad& crossbar) const {
-//     if (candidates.size() == 1) {
-//         Goal goal(visionKinematics);
-
-//         if (crossbar.getCentre()[0] < candidates.front().getCentre()[0]) {
-//             goal = Goal(visionKinematics, messages::vision::Goal::Type::RIGHT, candidates.front());
-//         }
-
-//         else {
-//             goal = Goal(visionKinematics, messages::vision::Goal::Type::LEFT, candidates.front());
-//         }
-
-//         goal.setParameters(THROWOUT_SHORT_GOALS,
-//                            THROWOUT_NARROW_GOALS,
-//                            THROWOUT_ON_ABOVE_KIN_HOR_GOALS,
-//                            THROWOUT_DISTANT_GOALS,
-//                            MAX_GOAL_DISTANCE,
-//                            MIN_GOAL_HEIGHT,
-//                            MIN_GOAL_WIDTH,
-//                            GOAL_WIDTH,
-//                            GOAL_DISTANCE_METHOD,
-//                            EDGE_OF_SCREEN_MARGIN,
-//                            D2P_ADAPTIVE_THRESHOLD,
-//                            visionKinematics);
-
-//         return std::move(  std::unique_ptr<std::vector<Goal>>(  new std::vector<Goal>(1, goal)  )  );
-//     }
-
-//     return assignGoals(visionKinematics, candidates);
-// }
-
-// std::unique_ptr<std::vector<Goal> > GoalDetector::assignGoals(const VisionKinematics& visionKinematics, const std::vector<Quad>& candidates) const {
-
-//     std::unique_ptr<std::vector<Goal> > goals = std::unique_ptr<std::vector<Goal>>(new std::vector<Goal>());
-
-//     if (candidates.size() == 2) {
-//         Goal leftPost(visionKinematics), rightPost(visionKinematics);
-
-//         //there are exactly two candidates, identify each as left or right
-//         Quad post1 = candidates.front();
-//         Quad post2 = candidates.back();
-
-//         //calculate separation between candidates
-//         double pos1 = std::min(post1.getRight(), post2.getRight());      // inside right
-//         double pos2 = std::max(post1.getLeft(), post2.getLeft());  // inside left
-
-//         //only publish if the candidates are far enough apart
-//         if (std::abs(pos2 - pos1) >= MIN_GOAL_SEPARATION) {
-//             //flip if necessary
-//             if (post1.getCentre()[0] > post2.getCentre()[0]) {
-//                 leftPost = Goal(visionKinematics, messages::vision::Goal::Type::LEFT, post2);
-//                 rightPost = Goal(visionKinematics, messages::vision::Goal::Type::RIGHT, post1);
-//             }
-
-//             else {
-//                 leftPost = Goal(visionKinematics, messages::vision::Goal::Type::LEFT, post1);
-//                 rightPost = Goal(visionKinematics, messages::vision::Goal::Type::RIGHT, post2);
-//             }
-
-
-
-//            leftPost.setParameters(THROWOUT_SHORT_GOALS,
-//                                    THROWOUT_NARROW_GOALS,
-//                                    THROWOUT_ON_ABOVE_KIN_HOR_GOALS,
-//                                    THROWOUT_DISTANT_GOALS,
-//                                    MAX_GOAL_DISTANCE,
-//                                    MIN_GOAL_HEIGHT,
-//                                    MIN_GOAL_WIDTH,
-//                                    GOAL_WIDTH,
-//                                    GOAL_DISTANCE_METHOD,
-//                                    EDGE_OF_SCREEN_MARGIN,
-//                                    D2P_ADAPTIVE_THRESHOLD,
-//                                    visionKinematics);
-//             rightPost.setParameters(THROWOUT_SHORT_GOALS,
-//                                     THROWOUT_NARROW_GOALS,
-//                                     THROWOUT_ON_ABOVE_KIN_HOR_GOALS,
-//                                     THROWOUT_DISTANT_GOALS,
-//                                     MAX_GOAL_DISTANCE,
-//                                     MIN_GOAL_HEIGHT,
-//                                     MIN_GOAL_WIDTH,
-//                                     GOAL_WIDTH,
-//                                     GOAL_DISTANCE_METHOD,
-//                                     EDGE_OF_SCREEN_MARGIN,
-//                                     D2P_ADAPTIVE_THRESHOLD,
-//                                     visionKinematics);
-//             goals->push_back(leftPost);
-//             goals->push_back(rightPost);
-//         }
-
-//         else {
-//             //should merge
-//         }
-//     }
-
-//     else {
-//         //unable to identify which post is which
-//         //setting all to unknown
-//         for(const Quad& candidate : candidates) {
-//             Goal goal = Goal(visionKinematics, messages::vision::Goal::Type::UNKNOWN, candidate);
-//             goal.setParameters(THROWOUT_SHORT_GOALS,
-//                                 THROWOUT_NARROW_GOALS,
-//                                 THROWOUT_ON_ABOVE_KIN_HOR_GOALS,
-//                                 THROWOUT_DISTANT_GOALS,
-//                                 MAX_GOAL_DISTANCE,
-//                                 MIN_GOAL_HEIGHT,
-//                                 MIN_GOAL_WIDTH,
-//                                 GOAL_WIDTH,
-//                                 GOAL_DISTANCE_METHOD,
-//                                 EDGE_OF_SCREEN_MARGIN,
-//                                 D2P_ADAPTIVE_THRESHOLD,
-//                                 visionKinematics);
-//             goals->push_back(goal);
-//         }
-//     }
-
-//     return std::move(goals);
-// }
-
-void GoalDetector::mergeClose(std::vector<Quad>& posts, double widthMultipleToMerge) {
-    if(posts.size()<2){
-        return;
-    }
-    for (std::vector<Quad>::iterator a = posts.begin(); a != posts.end(); a++) {
-        for (std::vector<Quad>::iterator b = (std::next(a))/*Init b as a+1.*/; b != posts.end(); /* Iteration done inside the 'for' loop */ ) {
-            // If the posts overlap.
-            // Or if their centres are horizontally closer than the largest widths multiplied by widthMultipleToMerge.
-
-            if (a->overlapsHorizontally(*b) ||
-               std::abs(a->getCentre()[0] - b->getCentre()[0]) <= std::max(a->getAverageWidth(), b->getAverageWidth()) * widthMultipleToMerge) {
-                // Get outer lines.
-                arma::vec2 tl;
-                arma::vec2 tr;
-                arma::vec2 bl;
-                arma::vec2 br;
-
-                tl << std::min(a->getTopLeft()[0],     b->getTopLeft()[0])     << std::min(a->getTopLeft()[1],     b->getTopLeft()[1]);
-                tr << std::max(a->getTopRight()[0],    b->getTopRight()[0])    << std::min(a->getTopRight()[1],    b->getTopRight()[1]);
-                bl << std::min(a->getBottomLeft()[0],  b->getBottomLeft()[0])  << std::max(a->getBottomLeft()[1],  b->getBottomLeft()[1]);
-                br << std::max(a->getBottomRight()[0], b->getBottomRight()[0]) << std::max(a->getBottomRight()[1], b->getBottomRight()[1]);
-
-                // Replace original two quads with the new one.
-                a->set(bl, tl, tr, br);
-                b = posts.erase(b);
-            }
-
-            else {
-                b++;
-            }
-        }
-    }
-}
-
-void GoalDetector::removeInvalid(std::vector<Quad>& posts) {
-    std::vector<Quad>::iterator it = posts.begin();
-
-    for (std::vector<Quad>::iterator post = posts.begin(); post != posts.end(); /* Iteration done in for loop */ ) {
-        // Remove all posts whos' aspect ratios are too low.
-        if (post->aspectRatio() < GOAL_HEIGHT_TO_WIDTH_RATIO_MIN || !post->checkCornersValid()) {
-            post = posts.erase(post);
-        } else {
-            post++;
-        }
-    }
-}
-
 }
 }
-

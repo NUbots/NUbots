@@ -29,6 +29,7 @@
 using messages::input::Sensors;
 using utility::localisation::LocalisationFieldObject;
 using messages::localisation::FakeOdometry;
+using utility::math::coordinates::spherical2Radial;
 
 namespace modules {
 namespace localisation {
@@ -43,8 +44,9 @@ std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
         << "estimate: ["
             << std::setw(7) << est[robot::kX] << ", "
             << std::setw(7) << est[robot::kY] << ", "
-            << std::setw(7) << est[robot::kHeadingX] << ", "
-            << std::setw(7) << est[robot::kHeadingY] << "]"
+            // << std::setw(7) << est[robot::kHeadingX] << ", "
+            // << std::setw(7) << est[robot::kHeadingY] << "]"
+            << std::setw(7) << est[robot::kHeading] << "]"
         // << ", observation trail: [" << h.obs_trail_ << "]"
         // << ", covariance:\n" << h.GetCovariance()
         << ", observation count: " << h.obs_count_
@@ -52,17 +54,15 @@ std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
 }
 
 void MultiModalRobotModel::TimeUpdate(double seconds) {
-    // robot_models_ = std::vector<std::unique_ptr<RobotHypothesis>>();
-    // robot_models_.push_back(std::make_unique<RobotHypothesis>());
     for (auto& model : robot_models_)
         model->TimeUpdate(seconds);
 }
-void MultiModalRobotModel::TimeUpdate(double seconds, const FakeOdometry& odom) {
+void MultiModalRobotModel::TimeUpdate(double seconds, const FakeOdometry&) {
     for (auto& model : robot_models_)
         model->TimeUpdate(seconds); // TODO re add in odometry
 }
 
-void MultiModalRobotModel::TimeUpdate(double seconds, const Sensors& sensors) {
+void MultiModalRobotModel::TimeUpdate(double seconds, const Sensors&) {
     for (auto& model : robot_models_)
         model->TimeUpdate(seconds); // TODO re add in odometry
 }
@@ -70,10 +70,10 @@ void MultiModalRobotModel::TimeUpdate(double seconds, const Sensors& sensors) {
 void RobotHypothesis::TimeUpdate(double seconds) {
     filter_.timeUpdate(seconds);
 }
-void RobotHypothesis::TimeUpdate(double seconds, const FakeOdometry& odom) {
+void RobotHypothesis::TimeUpdate(double seconds, const FakeOdometry&) {
     filter_.timeUpdate(seconds); // TODO re add in odometry
 }
-void RobotHypothesis::TimeUpdate(double seconds, const Sensors& sensors) {
+void RobotHypothesis::TimeUpdate(double seconds, const Sensors&) {
     filter_.timeUpdate(seconds); // TODO re add in odometry sensors
 }
 
@@ -98,19 +98,18 @@ double RobotHypothesis::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object,
     const LocalisationFieldObject& actual_object) {
 
-    // // Radial coordinates
-    // arma::vec2 actual_pos = actual_object.location();
-    // arma::vec2 measurement = { observed_object.sphericalFromNeck[0],
-    //                            observed_object.sphericalFromNeck[1] };
-    // arma::mat22 cov = { observed_object.sphericalError[0], 0,
-    //                     0, observed_object.sphericalError[1] };
+    // Radial coordinates
+    // arma::vec2 measurement = spherical2Radial(observed_object.measurements[0].position);
+    // Note: Ignoring declination in covariance matrix
+    // arma::mat22 cov = observed_object.measurements[0].error.submat(0, 0, 1, 1);
 
-    // Unit vector orientation
-    arma::vec2 actual_pos = actual_object.location();
-    arma::vec2 measurement = observed_object.position.rows(0, 1);
-    arma::mat22 cov = observed_object.error.submat(0, 0, 2, 2);
+    // Spherical from ground:
+    arma::vec3 measurement = observed_object.measurements[0].position;
+    arma::mat33 cov = observed_object.measurements[0].error;
 
-    double quality = filter_.measurementUpdate(measurement, cov, arma::vec2({actual_pos[0],actual_pos[1]}));
+    arma::vec2 actual_2d = actual_object.location();
+    arma::vec3 actual_pos = arma::vec3({actual_2d(0), actual_2d(1), 0});
+    double quality = filter_.measurementUpdate(measurement, cov, actual_pos);
 
     return quality;
 }
@@ -128,11 +127,13 @@ double RobotHypothesis::MeasurementUpdate(
         arma::vec(lfo_a.location()), arma::vec(lfo_b.location())
     };
 
-    // Our heading difference should be our dot product (TODO check this I am guessing and tired)
-    double heading_diff = arma::dot(obv_a.position.rows(0, 1), obv_b.position.rows(0, 1));
+    // Use a dot product to calculate heading distance:
+    arma::vec unit_a = arma::normalise(obv_a.measurements[0].position.rows(0, 1));
+    arma::vec unit_b = arma::normalise(obv_b.measurements[0].position.rows(0, 1));
+    double heading_diff = std::acos(arma::dot(arma::vec(unit_a), arma::vec(unit_b)));
 
     arma::vec measurement = { std::abs(heading_diff) };
-    arma::mat cov; // No idea how to get this :P
+    arma::mat cov = arma::eye(1, 1) * 0.1; // TODO: Calculate correct covariance
 
     double quality = filter_.measurementUpdate(measurement, cov, actual_positions);
 
@@ -304,9 +305,10 @@ bool MultiModalRobotModel::ModelsAreSimilar(
 
     // // Radial coords
     // auto heading_dist = std::abs(utility::math::angle::normalizeAngle(diff[kHeading]));
+    auto heading_dist = diff[robot::kHeading];
 
     // Unit vector orientation
-    auto heading_dist = diff[robot::kHeadingX] + diff[robot::kHeadingY];
+    // auto heading_dist = diff[robot::kHeadingX] + diff[robot::kHeadingY];
 
     return (translation_dist < cfg_.merge_min_translation_dist) &&
            (heading_dist < cfg_.merge_min_heading_dist);

@@ -92,7 +92,7 @@ darwinop_kinematics_forward_rleg(const double *q)
 std::vector<double>
 darwinop_kinematics_inverse_leg(
                Transform trLeg,
-               int leg, double unused)
+               int leg, double)
 {
   std::vector<double> qLeg(6);
   bool left = (leg == LEG_LEFT); // Left leg
@@ -170,7 +170,7 @@ darwinop_kinematics_inverse_legs(
                 const double *pLLeg,
                 const double *pRLeg,
                 const double *pTorso,
-                int legSupport)
+                int)
 {
   std::vector<double> qLLeg(12), qRLeg;
   Transform trLLeg = transform6D(pLLeg);
@@ -192,7 +192,7 @@ darwinop_kinematics_inverse_legs_nubots (
                 const double *pLLeg,
                 const double *pRLeg,
                 const double *pTorso,
-                int legSupport)
+                int)
 {
   std::vector<double> qLLeg(12), qRLeg;
   Transform trLLeg = transform6D(pLLeg);
@@ -212,7 +212,7 @@ darwinop_kinematics_inverse_legs_nubots (
 std::vector<double> darwinop_kinematics_inverse_larm(const double *dArm)
 {
   std::vector<double> qArm(3,-999); // Init the 3 angles with value 0
-    
+
     //printf("\n");
     double dx = dArm[0];
     double dy = dArm[1] - shoulderOffsetY;
@@ -248,7 +248,7 @@ std::vector<double> darwinop_kinematics_inverse_larm(const double *dArm)
     //printf("x0: %.2f, z0: %.2f\n",x0,z0);
     //printf("th0: %.2f, dth: %.2f\n",th0*180/PI,dth*180/PI);
   */
-  
+
   qArm[0] = 0;
   Transform tbow = darwinop_kinematics_forward_larm(&qArm[0]);
   double dz0 = tbow(2,3) - shoulderOffsetZ;
@@ -262,8 +262,8 @@ std::vector<double> darwinop_kinematics_inverse_larm(const double *dArm)
     //printf("th0: %.2f, dth: %.2f\n",th0*180/PI,dth*180/PI);
 
     qArm[0] = -1*(dth-th0);
-    
-    
+
+
   return qArm;
 }
 
@@ -271,7 +271,7 @@ std::vector<double> darwinop_kinematics_inverse_larm(const double *dArm)
 std::vector<double> darwinop_kinematics_inverse_rarm(const double *dArm)
 {
   std::vector<double> qArm(3,-999); // Init the 3 angles with value 0
-    
+
     //printf("\n");
     double dx = dArm[0];
     double dy = -1*dArm[1] - shoulderOffsetY;
@@ -307,7 +307,7 @@ std::vector<double> darwinop_kinematics_inverse_rarm(const double *dArm)
     //printf("x0: %.2f, z0: %.2f\n",x0,z0);
     //printf("th0: %.2f, dth: %.2f\n",th0*180/PI,dth*180/PI);
   */
-  
+
   qArm[0] = 0;
   Transform tbow = darwinop_kinematics_forward_rarm(&qArm[0]);
   double dz0 = tbow(2,3) - shoulderOffsetZ;
@@ -319,7 +319,7 @@ std::vector<double> darwinop_kinematics_inverse_rarm(const double *dArm)
   // Want to be at this theta
     double dth = atan2(dz,dx);
     qArm[0] = -1*(dth-th0);
-    
-    
+
+
   return qArm;
 }
