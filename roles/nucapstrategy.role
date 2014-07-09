@@ -1,0 +1,46 @@
+ADD_ROLE(
+    NAME nucapstrategy 
+    MODULES
+        #Support
+        support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem
+        support::configuration::NetworkingConfiguration
+        support::NUbugger
+
+        #Sensors
+        input::LinuxCamera
+        platform::darwin::HardwareIO
+        platform::darwin::SensorFilter
+
+        #Vision
+        vision::LUTClassifier
+        vision::GoalDetector
+        vision::BallDetector
+        vision::ObstacleDetector
+
+        #Localisation
+        localisation::NUcapLocalisation
+        localisation::KFBallLocalisation
+
+        #Behaviour
+        behaviour::Controller
+        behaviour::skills::Stand
+        behaviour::skills::FallingRelax
+        behaviour::skills::Getup
+        behaviour::skills::Look
+        behaviour::skills::KickScript
+        behaviour::skills::GoalSaver
+        behaviour::planning::LookAtBall
+        behaviour::planning::LookAtGoal
+        behaviour::planning::KickPlanner
+        behaviour::planning::WalkPathPlanner
+	behaviour::strategy::SoccerStrategy
+
+        #Motion
+        motion::ScriptEngine
+        motion::WalkEngine
+	
+	#Output
+	output::eSpeak
+)
