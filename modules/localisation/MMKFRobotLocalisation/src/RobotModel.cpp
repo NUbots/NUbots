@@ -43,13 +43,6 @@ namespace robot {
 
 // arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
 //     const arma::vec::fixed<RobotModel::size>& state, double deltaT) {
-//         return state;
-//     auto result = state;
-//     return result;
-// }
-
-// arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
-//     const arma::vec::fixed<RobotModel::size>& state, double deltaT) {
     // auto result = state;
 
     // // Apply robot odometry / robot position change
@@ -82,80 +75,12 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
 /// Return the predicted observation of an object at the given position
 arma::vec RobotModel::predictedObservation(
     const arma::vec::fixed<RobotModel::size>& state,
-    const arma::vec3& actual_position,
-    const double& mean_actual_position_heading) {
-    // arma::mat worldToRobot = getWorldToRobotTransform(state);
-    // // arma::mat robotToWorld = getRobotToWorldTransform(state);
-    // // arma::mat identity = worldToRobot * robotToWorld;
-    // // NUClear::log("worldToRobot\n",worldToRobot, "\nrobotToWorld\n",robotToWorld, "\nidentity\n",identity);
-    // arma::vec objectPosition = arma::vec({actual_position[0], actual_position[1], 1});
-    // arma::vec expectedObservation = worldToRobot * objectPosition;
-    // return cartesianToRadial(expectedObservation.rows(0, 1));
+    const arma::vec3& actual_position) {
 
     auto obs = SphericalRobotObservation(state.rows(kX, kY),
                                          state(kHeading),
-                                         // mean_actual_position_heading,
                                          actual_position);
-
-    // obs(1) += state(kHeading) + mean_actual_position_heading;
-
-    // auto actual_pos_robot_2d = WorldToRobotTransform(state.rows(kX, kY),
-    //                                                  state(kHeading),
-    //                                                  actual_position.rows(0, 1));
-    // auto actual_pos_robot_3d = arma::vec3({actual_pos_robot_2d(0),
-    //                                        actual_pos_robot_2d(1),
-    //                                        actual_position(2)});
-
-    // auto obs = cartesianToSpherical(actual_pos_robot_3d);
-    std::cout << "predicted_observation: " << obs.t();
     return obs;
-
-
-    // Hack
-    // auto actual_pos_robot_2d = WorldToRobotTransform(state.rows(kX, kY),
-    //                                                  // state(kHeading),
-    //                                                  0,
-    //                                                  actual_position.rows(0, 1));
-    // double heading_adjustment = -state(kHeading);
-    // if (actual_pos_robot_2d[0] < 0.0 && std::abs(actual_pos_robot_2d(0)) > std::abs(actual_pos_robot_2d(1))) { //determine how to wrap radians intelligently
-    //     actual_pos_robot_2d = WorldToRobotTransform(state.rows(kX, kY),
-    //                                                  M_PI,
-    //                                                  actual_position.rows(0, 1));
-    //     heading_adjustment -= M_PI;
-    // }
-
-    // auto actual_pos_robot_3d = arma::vec3({actual_pos_robot_2d(0),
-    //                                        actual_pos_robot_2d(1),
-    //                                        actual_position(2)});
-
-    // auto obs = cartesianToSpherical(actual_pos_robot_3d);
-
-    // obs(1) += heading_adjustment;
-    // std::cout << "predicted_observation: " << obs.t();
-    // return obs;
-
-
-
-    // NUClear::log("worldToRobot =\n", worldToRobot);
-    // NUClear::log("objectPosition =\n", objectPosition);
-    // NUClear::log("predictedObservation =\n", expectedObservation);
-
-    // // // Radial coordinates
-    // arma::vec2 diff = actual_position - state.rows(kX, kY);
-    // arma::vec2 radial = utility::math::coordinates::cartesianToRadial(diff);
-    // // radial(1) = utility::math::angle::normalizeAngle(radial[1] - state[kHeading]);
-    // // return radial;
-
-    // auto heading_angle = std::atan2(state[kHeadingY], state[kHeadingX]);
-
-    // // Distance and unit vector heading
-    // heading_angle = utility::math::angle::normalizeAngle(radial[1] - heading_angle);
-
-    // auto heading_x = std::cos(heading_angle);
-    // auto heading_y = std::sin(heading_angle);
-
-    // // arma::vec2 heading = arma::normalise(diff);
-    // return {radial[0], heading_x, heading_y};
 }
 
 // Angle between goals
@@ -182,19 +107,10 @@ arma::vec RobotModel::observationDifference(const arma::vec& a,
     } else {
         // Spherical coordinates
         arma::vec3 result = a - b;
-        // result(1) = utility::math::angle::normalizeAngle(result[1]);
         result(1) = utility::math::angle::normalizeAngle(result(1)) * 0.2;
         result(2) = utility::math::angle::normalizeAngle(result(2)) * 0.2;
-        std::cout << __FILE__ << ", " <<__LINE__ << ": "<<__func__<< "diff = " << result.t();
         return result;
     }
-
-    // // Distance and unit vector heading
-    // return a - b;
-    // arma::vec2 result = a - b;
-    // arma::vec2 heading_diff = {result[1], result[2]};
-    // arma::vec2 heading = arma::normalise(heading_diff);
-    // return {result[0], heading[0], heading[1]};
 }
 
 
@@ -202,21 +118,6 @@ arma::vec::fixed<RobotModel::size> RobotModel::limitState(
     const arma::vec::fixed<RobotModel::size>& state) {
 
     return state;
-
-    // auto result = state;
-    // // // // How to get clipping values from config system?
-    // // // result[kX] = std::max(std::min(result[kX], 4.5 + 0.7) , -4.5 -0.7);
-    // // // result[kY] = std::max(std::min(result[kY], 3 + 0.7) , -3 -0.7);
-
-    // // // Radial coordinates
-    // // result[kHeading] = utility::math::angle::normalizeAngle(result[kHeading]);
-    // return result;
-
-
-    // // Unit vector orientation
-    // arma::vec2 heading = { state[kHeadingX], state[kHeadingY] };
-    // arma::vec2 unit = arma::normalise(heading);
-    // return arma::vec({ state[kX], state[kY], state[kHeadingX], state[kHeadingY] });
 }
 
 arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() {

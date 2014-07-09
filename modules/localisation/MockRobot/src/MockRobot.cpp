@@ -27,7 +27,6 @@
 #include "messages/vision/VisionObjects.h"
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
-// #include "BallModel.h"
 #include "utility/localisation/transform.h"
 
 using utility::math::matrix::rotationMatrix;
@@ -35,6 +34,7 @@ using utility::math::angle::normalizeAngle;
 using utility::math::angle::vectorToBearing;
 using utility::math::angle::bearingToUnitVector;
 using utility::math::coordinates::cartesianToSpherical;
+using utility::localisation::transform::SphericalRobotObservation;
 using utility::localisation::transform::WorldToRobotTransform;
 using utility::localisation::transform::RobotToWorldTransform;
 using utility::nubugger::graph;
@@ -136,7 +136,6 @@ namespace localisation {
                 return;
             }
 
-
             auto t = absolute_time();
             double period = 40;
             double x_amp = 3;
@@ -207,46 +206,34 @@ namespace localisation {
                 return;
             }
 
-            // Camera setup
-            // auto camera_pos = arma::vec3 { robot_position_[0], robot_position_[1], 0.0 };
-            // double camera_heading = std::atan2(robot_heading_[1], robot_heading_[0]);
-
             // Goal observation
             if (cfg_.simulate_goal_observations) {
-                auto& fd = field_description_;
-                // auto goal1_pos = arma::vec3 { fd->goalpost_br[0], fd->goalpost_br[1], 0.0 };
-                // auto goal2_pos = arma::vec3 { fd->goalpost_bl[0], fd->goalpost_bl[1], 0.0 };
-
-                auto goal1 = messages::vision::Goal();
-                auto goal2 = messages::vision::Goal();
-                goal1.side = messages::vision::Goal::Side::RIGHT;
-                goal2.side = messages::vision::Goal::Side::LEFT;
-
-                arma::vec2 goal_l_pos = fd->goalpost_yl;
-                arma::vec2 goal_r_pos = fd->goalpost_yr;
-                if (robot_heading_ < -M_PI * 0.5 || robot_heading_ > M_PI * 0.5) {
-                    goal_l_pos = fd->goalpost_bl;
-                    goal_r_pos = fd->goalpost_br;
-                }
-
-                messages::vision::VisionObject::Measurement g1_m;
-                auto g1_pos_2d = WorldToRobotTransform(robot_position_, robot_heading_, goal_r_pos);
-                auto g1_pos_cartesian = arma::vec3({ g1_pos_2d(0), g1_pos_2d(1), 0 });
-                g1_m.position = cartesianToSpherical(g1_pos_cartesian);
-
-                messages::vision::VisionObject::Measurement g2_m;
-                auto g2_pos_2d = WorldToRobotTransform(robot_position_, robot_heading_, goal_l_pos);
-                auto g2_pos_cartesian = arma::vec3({ g2_pos_2d(0), g2_pos_2d(1), 0 });
-                g2_m.position = cartesianToSpherical(g2_pos_cartesian);
-
-                g1_m.error = arma::eye(3, 3) * 0.1;
-                g2_m.error = arma::eye(3, 3) * 0.1;
-                goal1.measurements.push_back(g1_m);
-                goal2.measurements.push_back(g2_m);
-
                 auto goals = std::make_unique<std::vector<messages::vision::Goal>>();
 
+                // Only observe goals that are in front of the robot
+                arma::vec3 goal_l_pos = {0, 0, 0};
+                arma::vec3 goal_r_pos = {0, 0, 0};
+                goal_l_pos.rows(0, 1) = field_description_->goalpost_yl;
+                goal_r_pos.rows(0, 1) = field_description_->goalpost_yr;
+                if (robot_heading_ < -M_PI * 0.5 || robot_heading_ > M_PI * 0.5) {
+                    goal_l_pos.rows(0, 1) = field_description_->goalpost_bl;
+                    goal_r_pos.rows(0, 1) = field_description_->goalpost_br;
+                }
+
+                messages::vision::Goal goal1;
+                messages::vision::VisionObject::Measurement g1_m;
+                g1_m.position = SphericalRobotObservation(robot_position_, robot_heading_, goal_r_pos);
+                g1_m.error = arma::eye(3, 3) * 0.1;
+                goal1.measurements.push_back(g1_m);
+                goal1.side = messages::vision::Goal::Side::RIGHT;
                 goals->push_back(goal1);
+
+                messages::vision::Goal goal2;
+                messages::vision::VisionObject::Measurement g2_m;
+                g2_m.position = SphericalRobotObservation(robot_position_, robot_heading_, goal_l_pos);
+                g2_m.error = arma::eye(3, 3) * 0.1;
+                goal2.measurements.push_back(g2_m);
+                goal2.side = messages::vision::Goal::Side::LEFT;
                 goals->push_back(goal2);
 
                 emit(std::move(goals));
@@ -254,17 +241,14 @@ namespace localisation {
 
             // Ball observation
             if (cfg_.simulate_ball_observations) {
-
                 auto ball_vec = std::make_unique<std::vector<messages::vision::Ball>>();
 
-                // Observations in spherical from ground reference: (dist, bearing, declination)
                 messages::vision::Ball ball;
                 messages::vision::VisionObject::Measurement b_m;
-                auto ball_pos_2d = WorldToRobotTransform(robot_position_, robot_heading_, ball_position_);
-                auto ball_pos_cartesian = arma::vec3({ ball_pos_2d(0), ball_pos_2d(1), field_description_->ball_radius });
-                b_m.position = cartesianToSpherical(ball_pos_cartesian);
+                arma::vec3 ball_pos_3d = {0, 0, 0};
+                ball_pos_3d.rows(0, 1) = ball_position_;
+                b_m.position = SphericalRobotObservation(robot_position_, robot_heading_, ball_pos_3d);
                 b_m.error = arma::eye(3, 3) * 0.1;
-
                 ball.measurements.push_back(b_m);
                 ball_vec->push_back(ball);
 
@@ -320,12 +304,8 @@ namespace localisation {
             [this](const time_t&,
                    const Mock<messages::localisation::Ball>& mock_ball,
                    const Mock<std::vector<messages::localisation::Self>>& mock_robots) {
-
-
             auto& ball = mock_ball.data;
             auto& robots = mock_robots.data;
-
-
 
             if (robots.empty())
                 return;
