@@ -24,12 +24,14 @@
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
+#include "utility/localisation/transform.h"
 #include "messages/input/Sensors.h"
 
 using messages::input::Sensors;
 using utility::localisation::LocalisationFieldObject;
 using messages::localisation::FakeOdometry;
 using utility::math::coordinates::spherical2Radial;
+using utility::localisation::transform::SphericalRobotObservation;
 
 namespace modules {
 namespace localisation {
@@ -109,7 +111,13 @@ double RobotHypothesis::MeasurementUpdate(
 
     arma::vec2 actual_2d = actual_object.location();
     arma::vec3 actual_pos = arma::vec3({actual_2d(0), actual_2d(1), 0});
-    double quality = filter_.measurementUpdate(measurement, cov, actual_pos);
+
+    auto state = filter_.get();
+    auto obs = SphericalRobotObservation(state.rows(robot::kX, robot::kY),
+                                         0.0,
+                                         actual_pos);
+
+    double quality = filter_.measurementUpdate(measurement, cov, actual_pos, obs[1]);
 
     return quality;
 }
@@ -157,9 +165,16 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
         auto model = std::move(robot_models_.back());
         robot_models_.pop_back();
 
+        std::cout << __FILE__ << ", " << __LINE__ << ": "<<__func__<< "model = " << *model << std::endl;
+        std::cout << "-----" << std::endl;
+
+        std::cout << "ambiguous_object: " << ambiguous_object.measurements[0].position.t();
+
         // Split the model for each possible object, and observe that object:
         // (TODO: Micro-optimisation: use model as the last split_model)
         for (auto& possible_object : possible_objects) {
+            std::cout << "possible_object: " << possible_object << std::endl;
+
             auto split_model = std::make_unique<RobotHypothesis>(*model);
 
             split_model->obs_count_++;
@@ -172,9 +187,15 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
             auto weight = split_model->GetFilterWeight();
             split_model->SetFilterWeight(weight * quality);
 
+        std::cout << __FILE__ << ", " <<__LINE__ << ": "<<__func__<< "model = " << *split_model << std::endl;
+
             new_models.push_back(std::move(split_model));
         }
+
+        std::cout << "=========" << std::endl;
     }
+
+    std::cout << "<<<<<=========>>>>>>" << std::endl;
 
     robot_models_ = std::move(new_models);
 }
@@ -301,11 +322,11 @@ bool MultiModalRobotModel::ModelsAreSimilar(
     const std::unique_ptr<RobotHypothesis> &model_b) {
     arma::vec::fixed<robot::RobotModel::size> diff = model_a->GetEstimate() - model_b->GetEstimate();
 
-    auto translation_dist = arma::norm(diff.rows(0, 1), 2);
+    double translation_dist = arma::norm(diff.rows(0, 1), 2);
 
     // // Radial coords
     // auto heading_dist = std::abs(utility::math::angle::normalizeAngle(diff[kHeading]));
-    auto heading_dist = diff[robot::kHeading];
+    auto heading_dist = diff(robot::kHeading);
 
     // Unit vector orientation
     // auto heading_dist = diff[robot::kHeadingX] + diff[robot::kHeadingY];

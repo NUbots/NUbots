@@ -208,7 +208,7 @@ namespace localisation {
             }
 
             // Camera setup
-            auto camera_pos = arma::vec3 { robot_position_[0], robot_position_[1], 0.0 };
+            // auto camera_pos = arma::vec3 { robot_position_[0], robot_position_[1], 0.0 };
             // double camera_heading = std::atan2(robot_heading_[1], robot_heading_[0]);
 
             // Goal observation
@@ -222,13 +222,20 @@ namespace localisation {
                 goal1.side = messages::vision::Goal::Side::RIGHT;
                 goal2.side = messages::vision::Goal::Side::LEFT;
 
+                arma::vec2 goal_l_pos = fd->goalpost_yl;
+                arma::vec2 goal_r_pos = fd->goalpost_yr;
+                if (robot_heading_ < -M_PI * 0.5 || robot_heading_ > M_PI * 0.5) {
+                    goal_l_pos = fd->goalpost_bl;
+                    goal_r_pos = fd->goalpost_br;
+                }
+
                 messages::vision::VisionObject::Measurement g1_m;
-                auto g1_pos_2d = WorldToRobotTransform(robot_position_, robot_heading_, fd->goalpost_br);
+                auto g1_pos_2d = WorldToRobotTransform(robot_position_, robot_heading_, goal_r_pos);
                 auto g1_pos_cartesian = arma::vec3({ g1_pos_2d(0), g1_pos_2d(1), 0 });
                 g1_m.position = cartesianToSpherical(g1_pos_cartesian);
 
                 messages::vision::VisionObject::Measurement g2_m;
-                auto g2_pos_2d = WorldToRobotTransform(robot_position_, robot_heading_, fd->goalpost_bl);
+                auto g2_pos_2d = WorldToRobotTransform(robot_position_, robot_heading_, goal_l_pos);
                 auto g2_pos_cartesian = arma::vec3({ g2_pos_2d(0), g2_pos_2d(1), 0 });
                 g2_m.position = cartesianToSpherical(g2_pos_cartesian);
 

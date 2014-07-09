@@ -63,7 +63,8 @@ namespace robot {
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
-            const arma::vec3& actual_position);
+            const arma::vec3& actual_position,
+            const double& mean_actual_position_heading);
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,

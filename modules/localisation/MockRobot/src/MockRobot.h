@@ -42,6 +42,7 @@ namespace localisation {
         arma::vec robot_position_ = { 0, 0 };
         arma::vec robot_velocity_ = { 0, 0 };
         // arma::vec robot_heading_ = { 1, 0 };
+        // double robot_heading_ = 3.141;
         double robot_heading_ = 0;
         arma::vec odom_old_robot_position_ = { 0, 0 };
         // arma::vec odom_old_robot_heading_ = { 1, 0 };

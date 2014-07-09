@@ -48,8 +48,8 @@ namespace localisation {
 
         RobotHypothesis() :
             filter_(
-                {0, 0, 0}, // mean
-                // {0, 0, 3.141},
+                // {0, 0, 0}, // mean
+                {0, 0, 3.141},
                 arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 1, // cov
                 1), // alpha
             weight_(1),

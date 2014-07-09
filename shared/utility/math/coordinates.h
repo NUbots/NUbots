@@ -40,10 +40,14 @@ namespace utility {
                 double cos_theta = cos(sphericalCoordinates[2]);
                 double sin_theta = sin(sphericalCoordinates[2]);
                 arma::vec3 result;
+                
+                result[0] = distance * cos_theta * cos_phi;
+                result[1] = distance * cos_theta * sin_phi;
+                result[2] = distance * sin_theta;
 
-                result[0] = distance * sin_theta * cos_phi;
-                result[1] = distance * sin_theta * sin_phi;
-                result[2] = distance * cos_theta;
+                // result[0] = distance * sin_theta * cos_phi; (flipped on 09/07/14)
+                // result[1] = distance * sin_theta * sin_phi;
+                // result[2] = distance * cos_theta;
 
                 return result;
             }
@@ -56,7 +60,8 @@ namespace utility {
 
                 result[0] = sqrt(x*x + y*y + z*z);  //r
                 result[1] = atan2(y, x);            //phi
-                result[2] = acos(z / (result[0]));  //theta
+                result[2] = asin(z / (result[0]));  //theta (changed from acos on 09/07/14)
+                // result[2] = acos(z / (result[0]));  //theta
 
                 return result;
             }

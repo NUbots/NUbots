@@ -29,6 +29,7 @@
 #include "messages/input/Sensors.h"
 #include "utility/localisation/transform.h"
 
+using utility::localisation::transform::SphericalRobotObservation;
 using utility::localisation::transform::WorldToRobotTransform;
 using messages::input::Sensors;
 using messages::localisation::FakeOdometry;
@@ -78,10 +79,11 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     // }
 }
 
-
 /// Return the predicted observation of an object at the given position
-    arma::vec RobotModel::predictedObservation(
-        const arma::vec::fixed<RobotModel::size>& state, const arma::vec3& actual_position) {
+arma::vec RobotModel::predictedObservation(
+    const arma::vec::fixed<RobotModel::size>& state,
+    const arma::vec3& actual_position,
+    const double& mean_actual_position_heading) {
     // arma::mat worldToRobot = getWorldToRobotTransform(state);
     // // arma::mat robotToWorld = getRobotToWorldTransform(state);
     // // arma::mat identity = worldToRobot * robotToWorld;
@@ -90,13 +92,49 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     // arma::vec expectedObservation = worldToRobot * objectPosition;
     // return cartesianToRadial(expectedObservation.rows(0, 1));
 
-    auto actual_pos_robot_2d = WorldToRobotTransform(state.rows(kX, kY),
-                                                     state(kHeading),
-                                                     actual_position.rows(0, 1));
-    auto actual_pos_robot_3d = arma::vec3({actual_pos_robot_2d(0),
-                                           actual_pos_robot_2d(1),
-                                           actual_position(2)});
-    return cartesianToSpherical(actual_pos_robot_3d);
+    auto obs = SphericalRobotObservation(state.rows(kX, kY),
+                                         state(kHeading),
+                                         // mean_actual_position_heading,
+                                         actual_position);
+
+    // obs(1) += state(kHeading) + mean_actual_position_heading;
+
+    // auto actual_pos_robot_2d = WorldToRobotTransform(state.rows(kX, kY),
+    //                                                  state(kHeading),
+    //                                                  actual_position.rows(0, 1));
+    // auto actual_pos_robot_3d = arma::vec3({actual_pos_robot_2d(0),
+    //                                        actual_pos_robot_2d(1),
+    //                                        actual_position(2)});
+
+    // auto obs = cartesianToSpherical(actual_pos_robot_3d);
+    std::cout << "predicted_observation: " << obs.t();
+    return obs;
+
+
+    // Hack
+    // auto actual_pos_robot_2d = WorldToRobotTransform(state.rows(kX, kY),
+    //                                                  // state(kHeading),
+    //                                                  0,
+    //                                                  actual_position.rows(0, 1));
+    // double heading_adjustment = -state(kHeading);
+    // if (actual_pos_robot_2d[0] < 0.0 && std::abs(actual_pos_robot_2d(0)) > std::abs(actual_pos_robot_2d(1))) { //determine how to wrap radians intelligently
+    //     actual_pos_robot_2d = WorldToRobotTransform(state.rows(kX, kY),
+    //                                                  M_PI,
+    //                                                  actual_position.rows(0, 1));
+    //     heading_adjustment -= M_PI;
+    // }
+
+    // auto actual_pos_robot_3d = arma::vec3({actual_pos_robot_2d(0),
+    //                                        actual_pos_robot_2d(1),
+    //                                        actual_position(2)});
+
+    // auto obs = cartesianToSpherical(actual_pos_robot_3d);
+
+    // obs(1) += heading_adjustment;
+    // std::cout << "predicted_observation: " << obs.t();
+    // return obs;
+
+
 
     // NUClear::log("worldToRobot =\n", worldToRobot);
     // NUClear::log("objectPosition =\n", objectPosition);
@@ -126,13 +164,12 @@ arma::vec RobotModel::predictedObservation(
     const std::vector<arma::vec>& actual_positions) {
 
     // // Radial coordinates
-    arma::vec diff_1 = actual_positions[0] - state.rows(kX, kY);
-    arma::vec diff_2 = actual_positions[1] - state.rows(kX, kY);
+    arma::vec diff_1 = actual_positions[0].rows(0, 1) - state.rows(kX, kY);
+    arma::vec diff_2 = actual_positions[1].rows(0, 1) - state.rows(kX, kY);
     arma::vec radial_1 = cartesianToRadial(diff_1);
     arma::vec radial_2 = cartesianToRadial(diff_2);
 
     auto angle_diff = utility::math::angle::difference(radial_1[1], radial_2[1]);
-
 
     return { std::abs(angle_diff) };
 }
@@ -146,8 +183,9 @@ arma::vec RobotModel::observationDifference(const arma::vec& a,
         // Spherical coordinates
         arma::vec3 result = a - b;
         // result(1) = utility::math::angle::normalizeAngle(result[1]);
-        result(1) = utility::math::angle::difference(a(1), b(1));
-        result(2) = utility::math::angle::difference(a(2), b(2));
+        result(1) = utility::math::angle::normalizeAngle(result(1)) * 0.2;
+        result(2) = utility::math::angle::normalizeAngle(result(2)) * 0.2;
+        std::cout << __FILE__ << ", " <<__LINE__ << ": "<<__func__<< "diff = " << result.t();
         return result;
     }
 
