@@ -229,6 +229,7 @@ namespace modules {
 
             useAlternativeTrajectory = config["useAlternativeTrajectory"].as<bool>();
             
+            STAND_SCRIPT_DURATION_MILLISECONDS = config["STAND_SCRIPT_DURATION_MILLISECONDS"].as<int>();
         }
 
         void WalkEngine::generateAndSaveStandScript(){
@@ -238,7 +239,7 @@ namespace modules {
 
             Script standScript;
             Script::Frame frame;
-            frame.duration = std::chrono::milliseconds(config["STAND_SCRIPT_DURATION_MILLISECONDS"].as<int>());
+            frame.duration = std::chrono::milliseconds(STAND_SCRIPT_DURATION_MILLISECONDS);
             for(auto& waypoint : *waypoints){
                 frame.targets.push_back(Script::Frame::Target({waypoint.id,
                                                                waypoint.position,

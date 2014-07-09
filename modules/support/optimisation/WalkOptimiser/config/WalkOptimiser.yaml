@@ -2,12 +2,14 @@ number_of_samples: 4
 getup_cancel_trial_threshold: 1
 configuration_wait_milliseconds: 2000
 parameters_and_sigmas:
+  gyroFactor: 0.0001
   bodyHeight: 0.001
   bodyTilt: 0.001
   footY: 0.005
-  tStep: 0.002
   tZmp: 0.005
   stepHeight: 0.005
+  frontComp: 0.0005
+  AccelComp: 0.0005
 segments:
   -
     curvePeriod: 0
@@ -24,6 +26,18 @@ segments:
   -
     curvePeriod: 0
     direction: [1, 0]
-    normalisedVelocity: 0
+    normalisedVelocity: 1
+    normalisedAngularVelocity: 0.5
+    duration: 3
+  -
+    curvePeriod: 0
+    direction: [1, 0]
+    normalisedVelocity: 1
     normalisedAngularVelocity: 0
-    duration: 2
+    duration: 7
+  -
+    curvePeriod: 0
+    direction: [1, 0]
+    normalisedVelocity: 0
+    normalisedAngularVelocity: 0.5
+    duration: 3

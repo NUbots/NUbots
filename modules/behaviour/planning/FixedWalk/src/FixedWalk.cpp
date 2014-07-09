@@ -43,14 +43,12 @@ namespace modules {
                 // });
 
                 on<Trigger<ExecuteGetup>>("FixedWalk::Getup", [this](const ExecuteGetup&){
-                    std::cerr << "FixedWalk::ExecuteGetup" << __LINE__ <<std::endl;
                     //record fall time
                     segmentElapsedTimeBeforeFall = NUClear::clock::now() - segmentStart;    
                     fallen = true;                
                 });
 
                 on<Trigger<KillGetup>>("FixedWalk::Getup Finished", [this](const KillGetup&){
-                    std::cerr << "FixedWalk::KillGetup" << __LINE__ <<std::endl;
                     //getup finished
                     segmentStart = NUClear::clock::now() - segmentElapsedTimeBeforeFall;
                     fallen = false;
@@ -76,7 +74,6 @@ namespace modules {
                 });
                 
                 on<Trigger<CancelFixedWalk>, Options<Sync<FixedWalk>> >([this](const CancelFixedWalk&){
-                    std::cerr << "FixedWalk::CancelFixedWalk" << __LINE__ <<std::endl;
                     emit(std::make_unique<WalkStopCommand>());
                     // emit(std::make_unique<WalkCommand>());
                     active = false;
@@ -84,7 +81,6 @@ namespace modules {
                 });
 
                 on<Trigger<WalkStopped>, Options<Sync<FixedWalk>> >([this](const WalkStopped&){
-                    std::cout << "FixedWalk::WalkStopped" << __LINE__ <<std::endl;
                     if(!active){
                         emit(std::make_unique<FixedWalkFinished>());
                     } else {
@@ -93,7 +89,6 @@ namespace modules {
                 });
 
 				on<Trigger<FixedWalkCommand>, Options<Sync<FixedWalk>>, With<Sensors> >([this](const FixedWalkCommand& command, const Sensors& sensors){
-                    std::cerr << "FixedWalk::FixedWalkCommand" << __LINE__ <<std::endl;
                     if(!active && !command.segments.empty()){
                         active = true;
 	        			segmentStart = NUClear::clock::now();
@@ -103,6 +98,8 @@ namespace modules {
 	        		for(auto& segment: command.segments){
 	        			walkSegments.push_back(segment);
 	        		}
+                    std::cerr << "FixedWalk::FixedWalkCommand - Total walk segments pushed back:" << walkSegments.size() << " " << command.segments.size() <<std::endl;
+
 				}); 
 
             }

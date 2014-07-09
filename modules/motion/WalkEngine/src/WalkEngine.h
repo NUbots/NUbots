@@ -244,6 +244,8 @@ namespace modules {
             int motionIndex;
             float motionStartTime;
 
+            int STAND_SCRIPT_DURATION_MILLISECONDS;
+
             // TODO: sort it out
 //            arma::vec3 leftArmCommand;
 //            arma::vec3 rightArmCommand;

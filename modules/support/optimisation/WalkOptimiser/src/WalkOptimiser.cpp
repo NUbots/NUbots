@@ -49,7 +49,6 @@ namespace modules {
                 initialConfig("Jerry", YAML::Node()) {
 
                 on<Trigger<Configuration<WalkOptimiser>>>([this](const Configuration<WalkOptimiser>& config){
-                    std::cerr << "WalkOptimiser::WalkOptimiser " << __LINE__ << std::endl;
 
                     std::cerr << "Starting up walk optimiser" << std::endl;
 
@@ -64,7 +63,9 @@ namespace modules {
                         i++;
                     }
 
+                    walk_command.segments.clear();
                     for(auto& segment : config["segments"]){
+
                         walk_command.segments.push_back(FixedWalkCommand::WalkSegment());
                         walk_command.segments.back().direction = segment["direction"].as<arma::vec>();
                         walk_command.segments.back().curvePeriod = segment["curvePeriod"].as<double>();
@@ -82,7 +83,6 @@ namespace modules {
                 });
 
                 on<Trigger<OptimiseWalkCommand>, With<Configuration<WalkOptimiserCommand>>, Options<Sync<WalkOptimiser>> >("Optimise Walk", [this]( const OptimiseWalkCommand&, const Configuration<WalkOptimiserCommand>& walkConfig){
-                    std::cerr << "WalkOptimiser::OptimiseWalkCommand " << __LINE__ << std::endl;
                     
                     //Start optimisation
                     std::cerr << "Optimiser command" << std::endl;
@@ -98,14 +98,12 @@ namespace modules {
 
                     std::cerr << "Sample: " << currentSample <<std::endl;            
                     //Apply the parameters to the walk engine        
-                    // setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
+                    setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
                     //Now wait for WalkConfigSaved
-                    emit(std::make_unique<WalkConfigSaved>());    
                     
                 });
 
                 on<Trigger<WalkConfigSaved>, Options<Sync<WalkOptimiser>>>([this](const WalkConfigSaved&){
-                    std::cerr << "WalkOptimiser::WalkConfigSaved " << __LINE__ << std::endl;
                     std::this_thread::sleep_for(std::chrono::milliseconds(configuration_wait_milliseconds));
                     //Start a walk routine
                     auto command = std::make_unique<FixedWalkCommand>(walk_command);
@@ -118,23 +116,20 @@ namespace modules {
                 });
 
                 on<Trigger<ExecuteGetup>>("Getup Recording", [this](const ExecuteGetup& command){
-                    std::cerr << "WalkOptimiser::ExecuteGetup " << __LINE__ << std::endl;
                     //Record the robot falling over
                     data.recordGetup();
                               
                 });
 
                 on<Trigger<KillGetup>>("Getup Recording", [this](const KillGetup& command){
-                    std::cerr << "WalkOptimiser::KillGetup " << __LINE__ << std::endl;
                     data.getupFinished(); 
                     // //If this set of parameters is very bad, stop the trial and send cancel fixed walk command
-                    // if(data.numberOfGetups >= getup_cancel_trial_threshold){                        
-                    //     emit(std::make_unique<CancelFixedWalk>());
-                    // }
+                    if(data.numberOfGetups >= getup_cancel_trial_threshold){                        
+                        emit(std::make_unique<CancelFixedWalk>());
+                    }
                 });
 
                 on<Trigger<FixedWalkFinished>, Options<Sync<WalkOptimiser>> > ("Walk Routine Finised", [this](const FixedWalkFinished& command){
-                    std::cerr << "WalkOptimiser::FixedWalkFinished " << __LINE__ << std::endl;
                     //Get and reset data 
                     fitnesses[currentSample] = data.popFitness();
                     std::cerr << "Sample Done! Fitness: " << fitnesses[currentSample] << std::endl;
@@ -143,14 +138,12 @@ namespace modules {
                     } else {
                         //Setup new parameters
                         std::cerr << "Sample:" << ++currentSample <<std::endl;
-                        // setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
+                        setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
                         //Now wait for WalkConfigSaved
-                    emit(std::make_unique<WalkConfigSaved>());                            
                     }
                 });
 
                 on<Trigger<OptimisationComplete>, Options<Sync<WalkOptimiser>> >("Record Results", [this]( const OptimisationComplete&){
-                    std::cerr << "WalkOptimiser::OptimisationComplete " << __LINE__ << std::endl;
                     //Combine samples
                     arma::vec result = utility::math::optimisation::PGA::updateEstimate(samples, fitnesses);
                     
