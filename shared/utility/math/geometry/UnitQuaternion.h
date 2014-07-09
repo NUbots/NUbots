@@ -32,10 +32,6 @@ namespace geometry {
         */
         UnitQuaternion(const arma::vec3& v);
 
-        static constexpr uint kW = 0;   //real part
-        static constexpr uint kX = 1;
-        static constexpr uint kY = 2;
-        static constexpr uint kZ = 3;
     public:
         //q stores the components of the quaternion, with real part first
         arma::vec4 q;
@@ -61,7 +57,7 @@ namespace geometry {
 
         double getAngle();
 
-        /*! @brief Returns the matrix which performs the same rotation as the rotateVector method. 
+        /*! @brief Returns the matrix which performs the same rotation as the rotateVector method.
         When representing a basis, this transform maps points written in basis coords to points in world coords (i.e x,y,z) : B -> W
         */
         arma::mat33 getMatrix();
@@ -74,7 +70,7 @@ namespace geometry {
         Note: ACCESS ONLY (NO WRITING)
         */
         double operator [] (const uint& i) const;
-        
+
     };
 
 }

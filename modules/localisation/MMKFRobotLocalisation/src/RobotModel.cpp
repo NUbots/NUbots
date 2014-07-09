@@ -33,8 +33,8 @@ using utility::localisation::transform::WorldToRobotTransform;
 using messages::input::Sensors;
 using messages::localisation::FakeOdometry;
 using utility::math::matrix::rotationMatrix;
-using utility::math::coordinates::Cartesian2Radial;
-using utility::math::coordinates::Cartesian2Spherical;
+using utility::math::coordinates::cartesianToRadial;
+using utility::math::coordinates::cartesianToSpherical;
 
 namespace modules {
 namespace localisation {
@@ -88,7 +88,7 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     // // NUClear::log("worldToRobot\n",worldToRobot, "\nrobotToWorld\n",robotToWorld, "\nidentity\n",identity);
     // arma::vec objectPosition = arma::vec({actual_position[0], actual_position[1], 1});
     // arma::vec expectedObservation = worldToRobot * objectPosition;
-    // return Cartesian2Radial(expectedObservation.rows(0, 1));
+    // return cartesianToRadial(expectedObservation.rows(0, 1));
 
     auto actual_pos_robot_2d = WorldToRobotTransform(state.rows(kX, kY),
                                                      state(kHeading),
@@ -96,7 +96,7 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     auto actual_pos_robot_3d = arma::vec3({actual_pos_robot_2d(0),
                                            actual_pos_robot_2d(1),
                                            actual_position(2)});
-    return Cartesian2Spherical(actual_pos_robot_3d);
+    return cartesianToSpherical(actual_pos_robot_3d);
 
     // NUClear::log("worldToRobot =\n", worldToRobot);
     // NUClear::log("objectPosition =\n", objectPosition);
@@ -104,7 +104,7 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
 
     // // // Radial coordinates
     // arma::vec2 diff = actual_position - state.rows(kX, kY);
-    // arma::vec2 radial = utility::math::coordinates::Cartesian2Radial(diff);
+    // arma::vec2 radial = utility::math::coordinates::cartesianToRadial(diff);
     // // radial(1) = utility::math::angle::normalizeAngle(radial[1] - state[kHeading]);
     // // return radial;
 
@@ -128,8 +128,8 @@ arma::vec RobotModel::predictedObservation(
     // // Radial coordinates
     arma::vec diff_1 = actual_positions[0] - state.rows(kX, kY);
     arma::vec diff_2 = actual_positions[1] - state.rows(kX, kY);
-    arma::vec radial_1 = Cartesian2Radial(diff_1);
-    arma::vec radial_2 = Cartesian2Radial(diff_2);
+    arma::vec radial_1 = cartesianToRadial(diff_1);
+    arma::vec radial_2 = cartesianToRadial(diff_2);
 
     auto angle_diff = utility::math::angle::difference(radial_1[1], radial_2[1]);
 

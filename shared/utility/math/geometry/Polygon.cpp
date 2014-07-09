@@ -35,7 +35,7 @@ namespace geometry {
 	bool Polygon::pointContained(const arma::vec2& p) const{
 		ParametricLine<2> ray;
 		int intersectionCount = 0;
-		ray.setFromDirection(arma::vec2({1,0}), p, arma::vec2({0,std::numeric_limits<double>::infinity()}));
+		ray.setFromDirection(arma::vec2{1,0}, p, arma::vec2({0,std::numeric_limits<double>::infinity()}));
 		for(auto& edge : edges){
 			try {
 				ray.intersect(edge);
@@ -49,23 +49,22 @@ namespace geometry {
 	}
 
 	arma::vec2 Polygon::projectPointToPolygon(const arma::vec::fixed<2>& p) const{
-		// if(pointContained(p)){
-		// 	return p;
-		// }
-		// double minDistance = std::numeric_limits<double>::infinity();
-		// arma::vec2 closestPoint;
-		// for(auto& edge : edges){
-		// 	//Get projection
-		// 	arma::vec2 proj = edge.projectPointToLine(p);
-		// 	double dist = arma::norm(proj - p);
-		// 	//If this is closer then update
-		// 	if(dist < minDistance){
-		// 		minDistance = dist;
-		// 		closestPoint = proj;
-		// 	}
-		// }
-		// return closestPoint;
-		return p;
+		if(pointContained(p)){
+			return p;
+		}
+		double minDistance = std::numeric_limits<double>::infinity();
+		arma::vec2 closestPoint;
+		for(auto& edge : edges){
+			//Get projection
+			arma::vec2 proj = edge.projectPointToLine(p);
+			double dist = arma::norm(proj - p);
+			//If this is closer then update
+			if(dist < minDistance){
+				minDistance = dist;
+				closestPoint = proj;
+			}
+		}
+		return closestPoint;
 	}
 
 

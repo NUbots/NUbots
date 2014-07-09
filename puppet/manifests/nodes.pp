@@ -34,6 +34,12 @@ node nuclearportvm {
 
   # Non-essential developer tools:
   include developer_tools
+  
+  # sharing fix, see http://superuser.com/questions/736024/cannot-share-host-directory-with-virtualbox-guest-mint-16-64-bit
+  file { '/sbin/mount.vboxsf':
+    ensure => 'link',
+    target => '/usr/lib/i386-linux-gnu/VBoxGuestAdditions/mount.vboxsf'
+  }
 }
 
 node packer-virtualbox-iso, packer-vmware-iso {

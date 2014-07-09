@@ -34,7 +34,7 @@ using utility::math::matrix::rotationMatrix;
 using utility::math::angle::normalizeAngle;
 using utility::math::angle::vectorToBearing;
 using utility::math::angle::bearingToUnitVector;
-using utility::math::coordinates::Cartesian2Spherical;
+using utility::math::coordinates::cartesianToSpherical;
 using utility::localisation::transform::WorldToRobotTransform;
 using utility::localisation::transform::RobotToWorldTransform;
 using utility::nubugger::graph;
@@ -225,12 +225,12 @@ namespace localisation {
                 messages::vision::VisionObject::Measurement g1_m;
                 auto g1_pos_2d = WorldToRobotTransform(robot_position_, robot_heading_, fd->goalpost_br);
                 auto g1_pos_cartesian = arma::vec3({ g1_pos_2d(0), g1_pos_2d(1), 0 });
-                g1_m.position = Cartesian2Spherical(g1_pos_cartesian);
+                g1_m.position = cartesianToSpherical(g1_pos_cartesian);
 
                 messages::vision::VisionObject::Measurement g2_m;
                 auto g2_pos_2d = WorldToRobotTransform(robot_position_, robot_heading_, fd->goalpost_bl);
                 auto g2_pos_cartesian = arma::vec3({ g2_pos_2d(0), g2_pos_2d(1), 0 });
-                g2_m.position = Cartesian2Spherical(g2_pos_cartesian);
+                g2_m.position = cartesianToSpherical(g2_pos_cartesian);
 
                 g1_m.error = arma::eye(3, 3) * 0.1;
                 g2_m.error = arma::eye(3, 3) * 0.1;
@@ -255,7 +255,7 @@ namespace localisation {
                 messages::vision::VisionObject::Measurement b_m;
                 auto ball_pos_2d = WorldToRobotTransform(robot_position_, robot_heading_, ball_position_);
                 auto ball_pos_cartesian = arma::vec3({ ball_pos_2d(0), ball_pos_2d(1), field_description_->ball_radius });
-                b_m.position = Cartesian2Spherical(ball_pos_cartesian);
+                b_m.position = cartesianToSpherical(ball_pos_cartesian);
                 b_m.error = arma::eye(3, 3) * 0.1;
 
                 ball.measurements.push_back(b_m);

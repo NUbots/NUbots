@@ -29,7 +29,7 @@
 using messages::input::Sensors;
 using utility::localisation::LocalisationFieldObject;
 using messages::localisation::FakeOdometry;
-using utility::math::coordinates::Spherical2Radial;
+using utility::math::coordinates::spherical2Radial;
 
 namespace modules {
 namespace localisation {
@@ -54,8 +54,6 @@ std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
 }
 
 void MultiModalRobotModel::TimeUpdate(double seconds) {
-    // robot_models_ = std::vector<std::unique_ptr<RobotHypothesis>>();
-    // robot_models_.push_back(std::make_unique<RobotHypothesis>());
     for (auto& model : robot_models_)
         model->TimeUpdate(seconds);
 }
@@ -101,7 +99,7 @@ double RobotHypothesis::MeasurementUpdate(
     const LocalisationFieldObject& actual_object) {
 
     // Radial coordinates
-    // arma::vec2 measurement = Spherical2Radial(observed_object.measurements[0].position);
+    // arma::vec2 measurement = spherical2Radial(observed_object.measurements[0].position);
     // Note: Ignoring declination in covariance matrix
     // arma::mat22 cov = observed_object.measurements[0].error.submat(0, 0, 1, 1);
 

@@ -162,6 +162,7 @@ namespace localisation {
         //     AmbiguousObject &ambiguous_object,
         //     const std::vector<StationaryObject*>& possible_objects);
 
+    public: // temporary - debugging 09/07/2014
         std::vector<std::unique_ptr<RobotHypothesis>> robot_models_;
 
         struct {

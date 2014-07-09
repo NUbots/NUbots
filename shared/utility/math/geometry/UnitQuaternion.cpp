@@ -25,6 +25,11 @@ namespace utility {
 namespace math {
 namespace geometry {
 
+     constexpr uint kW = 0;   //real part
+     constexpr uint kX = 1;
+     constexpr uint kY = 2;
+     constexpr uint kZ = 3;
+
     UnitQuaternion::UnitQuaternion(const arma::vec4& q_){
     	q = q_;
     }

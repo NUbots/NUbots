@@ -1,0 +1,9 @@
+ADD_ROLE(
+    NAME mathtest
+    MODULES
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem
+        support::NUbugger
+        debug::NUbugger
+        debug::MathTester
+)
