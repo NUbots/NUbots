@@ -36,7 +36,4 @@ ADD_ROLE(
         #Motion
         motion::ScriptEngine
         motion::WalkEngine
-
-        #Debug
-        debug::NUcap
 )

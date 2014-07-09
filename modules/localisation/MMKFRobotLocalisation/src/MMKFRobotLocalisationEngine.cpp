@@ -92,13 +92,13 @@ namespace localisation {
         if (ambiguous_object.side == messages::vision::Goal::Side::LEFT) {
             possible.push_back(goalpost_lfos_.bl);
             if (!cfg_.all_goals_are_blue)
-            possible.push_back(goalpost_lfos_.yl);
+                possible.push_back(goalpost_lfos_.yl);
         }
 
         if (ambiguous_object.side == messages::vision::Goal::Side::RIGHT) {
             possible.push_back(goalpost_lfos_.br);
             if (!cfg_.all_goals_are_blue)
-            possible.push_back(goalpost_lfos_.yr);
+                possible.push_back(goalpost_lfos_.yr);
         }
 
         if (ambiguous_object.side == messages::vision::Goal::Side::UNKNOWN) {
@@ -194,6 +194,8 @@ namespace localisation {
         @param time_increment The time that has elapsed since the previous localisation frame.
      */
     void MMKFRobotLocalisationEngine::ProcessObjects(const std::vector<messages::vision::Goal>& goals) {
+        // robot_models_ = std::vector<std::unique_ptr<RobotHypothesis>>();
+        // robot_models_.push_back(std::make_unique<RobotHypothesis>());
         ProcessAmbiguousObjects(goals);
     }
 }

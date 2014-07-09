@@ -67,6 +67,18 @@ namespace utility {
 
                 return { sqrt(x*x + y*y), atan2(y, x) };
             }
+
+            inline arma::vec2 spherical2Radial(const arma::vec3& sphericalCoordinates) {
+                double dist = sphericalCoordinates(0);
+                double declination = sphericalCoordinates(2);
+                double flat_distance = dist * std::cos(declination);
+                
+                arma::vec2 result;
+                result[0] = flat_distance;
+                result[1] = sphericalCoordinates(1);
+
+                return result;
+            }
         }
     }
 }

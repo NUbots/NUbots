@@ -36,6 +36,13 @@ namespace geometry {
         arma::vec2 tLimits = {-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()};
         ParametricLine(){}
 
+        arma::vec2 start() const{
+            return point + tLimits[0] * direction;
+        }
+        arma::vec2 end() const{
+            return point + tLimits[1] * direction;
+        }
+
         void setFromDirection(const Vector& direction_, const Vector& point_, const arma::vec2& tLimits_ = {-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}){
             if(arma::norm(direction_,1) <= 0){
                 throw std::domain_error("ParametricLine::setFromDirection - Direction is zero vector!");
@@ -60,7 +67,7 @@ namespace geometry {
         Vector projectPointToLine(const Vector& p) const {
             Vector x = p - point;
             double tProjection = arma::dot(x,direction);
-            return std::min(std::max(tProjection, tLimits[0]),tLimits[1]) * direction;
+            return std::min(std::max(tProjection, tLimits[0]),tLimits[1]) * direction + point;
         }
 
         Vector vectorToLineFromPoint(const Vector& p) const {
@@ -71,29 +78,30 @@ namespace geometry {
             return arma::norm(vectorToLine(p));
         }
 
-        Vector intersect(const ParametricLine<n>& l){
+        Vector intersect(const ParametricLine<n>& l) const{
             //Do not use for n > 2
             if(n > 2){
                 throw std::domain_error("Line::intersect - Lines in more than two dimensions rarely meet! Feature to be added later.");
             }
             //Setup linear equations:
-            arma::mat22 A;
-            A.col(0) = direction;
-            A.col(1) = -l.direction;
-
+            arma::mat22 Ainverse;
             //Check extended lines intersect at all
-            arma::vec2 tValues;
-            try{
-                tValues = arma::solve(A, l.point - point);
-            } catch (const std::runtime_error& e) {
-                throw std::domain_error("Line::intersect - Lines do not intersect (parallel)");
+            double determinant = - direction[0] * l.direction[1] + direction[1] * l.direction[0];
+            if(determinant == 0){
+                throw std::domain_error("Line::intersect - Lines do not intersect (parallel)");                
+            } else {
+                Ainverse << -l.direction[1] << l.direction[0] << arma::endr
+                         << -direction[1]   << direction[0]; 
+                Ainverse *= 1 / determinant;
             }
+
+            arma::vec/*2*/ tValues = Ainverse * arma::vec(l.point - point);  //arma::meat 
 
             //Check bounds of line segments
             if(tValues[0] < tLimits[0] || tValues[0] > tLimits[1] //ie outside range of first line
             || tValues[1] < l.tLimits[0] || tValues[1] > l.tLimits[1] //outside range of second
               ){
-                throw std::domain_error("Line::intersect - Lines do not intersect (parallel)");
+                throw std::domain_error("Line::intersect - Lines do not intersect (tValues out of range)");
             }
             return point + tValues[0] * direction;
         }
