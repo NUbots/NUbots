@@ -173,14 +173,14 @@ namespace modules {
                 on<Trigger<Every<20, Per<std::chrono::seconds>>>,
                     With<messages::localisation::Ball>,
                     With<std::vector<messages::localisation::Self>>,
-                    With<std::vector<messages::vision::Obstacle>>,
+                    With<Optional<std::vector<messages::vision::Obstacle>>>,
                     With<std::vector<messages::vision::Ball>>,
                     Options<Sync<WalkPathPlanner>>
                    >([this] (
                      const time_t&,
                      const LocalisationBall& ball,
                      const std::vector<Self>& selfs,
-                     const std::vector<VisionObstacle>& robots,
+                     const std::shared_ptr<const std::vector<VisionObstacle>>& robots,
                      const std::vector<VisionBall>&
                     ) {
                     /*if(visionBalls.size()>0){
@@ -298,9 +298,9 @@ namespace modules {
 
                     //std::cout << "Move Plan: " << movePlan[0] << ", " << movePlan[1] << ", " << movePlan[2] << std::endl;
                     //work out if we have to avoid something
-                    if (useAvoidance) {
+                    if (useAvoidance && (robots != NULL)) {
                         //this is a vision-based temporary for avoidance
-                        movePlan = avoidObstacles(robots,movePlan);
+                        movePlan = avoidObstacles(*robots,movePlan);
                     }
                     //NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
                     // NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);

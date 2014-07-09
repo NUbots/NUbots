@@ -167,9 +167,9 @@ namespace modules {
 			});
 
 			// Check to see if we are about to kick.
-			on<Trigger<messages::motion::KickCommand>>([this](const messages::motion::KickCommand& kick) {
+			on<Trigger<messages::motion::KickCommand>>([this](const messages::motion::KickCommand&) {
 				isKicking = true;
-				kickData = kick;
+//				kickData = kick;
 			});
 
 			// Check to see if the kick has finished.
@@ -180,9 +180,9 @@ namespace modules {
 			// Check to see if we are walking.
 			on<Trigger<messages::motion::WalkStartCommand>, With<messages::motion::WalkCommand>>
 				([this](const messages::motion::WalkStartCommand&,
-					const messages::motion::WalkCommand& walk) {
+					const messages::motion::WalkCommand&) {
 				isWalking = true;
-				walkData = walk;
+//				walkData = walk;
 			});
 
 			// Check to see if we are no longer walking.
@@ -317,13 +317,8 @@ namespace modules {
 						std::cerr << "pointContained failed." << std::endl;
 					}
 
-					catch (const std::exception& e) {
-						std::cerr << "exception caught: " << e.what() << std::endl;
-					}
-/*
 					// Can I see the ball?
 					currentState.ballSeen = ((currentState.ball.sr_xx < BALL_CERTAINTY_THRESHOLD) && (currentState.ball.sr_xy < BALL_CERTAINTY_THRESHOLD) && (currentState.ball.sr_yy < BALL_CERTAINTY_THRESHOLD));
-
 					// Is the ball lost?
 					currentState.ballLost = !currentState.ballSeen;
 
@@ -356,43 +351,73 @@ namespace modules {
 					
 					currentState.kickPosition = (currentState.inPosition && currentState.correctHeading && kickThreshold && !currentState.outOfPosition);
 
-					// Make preparations to calculate whether the ball is approaching our own goals or ourselves.
-					Plane<2> planeGoal, planeSelf;
-					ParametricLine<2> line;
-					arma::vec2 xaxis = {1, 0};
-					arma::vec2 fieldWidth = {-FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
-
-					planeGoal.setFromNormal(xaxis, fieldWidth);
-					planeSelf.setFromNormal(transformPoint(currentState.ball.position), currentState.position);
-
-					line.setFromDirection(transformPoint(currentState.ball.velocity), (transformPoint(currentState.ball.position) + currentState.position));
-
-					// Is the ball approaching our goals?
-					try {
-						// Throws std::domain_error if there is no intersection.
-						currentState.ballGoalIntersection = planeGoal.intersect(line);
-
-						currentState.ballApproachingGoal = arma::norm(fieldWidth - currentState.ballGoalIntersection, 2) <= (FIELD_DESCRIPTION.dimensions.goal_area_width / 2);
-					}
-
-					catch (const std::domain_error& e) {
+					// If the balls position, relative to us is (0, 0) then the ball is inside us.
+					// If the balls velocity is (0, 0) then it can not be approaching anything.
+					if (((currentState.ball.position[0] == 0) && (currentState.ball.position[1] == 0)) || ((currentState.ball.velocity[0] == 0) && (currentState.ball.velocity[1] == 0))) {
+						currentState.ballApproaching = false;
 						currentState.ballApproachingGoal = false;
 					}
 
-					
-					// Is the ball heading in my direction?
-					try {
-						// Throws std::domain_error if there is no intersection.
-						currentState.ballSelfIntersection = planeSelf.intersect(line);
+					else {
+						// Make preparations to calculate whether the ball is approaching our own goals or ourselves.
+						Plane<2> planeGoal, planeSelf;
+						ParametricLine<2> line;
+						arma::vec2 xaxis = {1, 0};
+						arma::vec2 fieldWidth = {-FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 
-						currentState.ballApproaching = arma::norm(currentState.position - currentState.ballSelfIntersection, 2) <= (BALL_SELF_INTERSECTION_REGION / 2);
+						try {
+							planeGoal.setFromNormal(xaxis, fieldWidth);
+						}
+
+						catch (const std::domain_error& e) {
+							std::cerr << "xaxis - " << xaxis << std::endl;	
+							std::cerr << "fieldWidth - " << fieldWidth << std::endl;	
+						}
+
+						try {
+							planeSelf.setFromNormal(transformPoint(currentState.ball.position), currentState.position);
+						}
+
+						catch (const std::domain_error& e) {
+							std::cerr << "ballPosition - " << currentState.ball.position << std::endl;	
+							std::cerr << "position - " << currentState.position << std::endl;	
+						}
+
+
+						try {
+							line.setFromDirection(transformPoint(currentState.ball.velocity), (transformPoint(currentState.ball.position) + currentState.position));
+						}
+
+						catch (const std::domain_error& e) {
+							std::cerr << "ballVelocity - " << currentState.ball.velocity << std::endl;	
+							std::cerr << "globalBallPosition - " << (transformPoint(currentState.ball.position) + currentState.position) << std::endl;	
+						}
+
+						// Is the ball approaching our goals?
+						try {
+							// Throws std::domain_error if there is no intersection.
+							currentState.ballGoalIntersection = planeGoal.intersect(line);
+
+							currentState.ballApproachingGoal = arma::norm(fieldWidth - currentState.ballGoalIntersection, 2) <= (FIELD_DESCRIPTION.dimensions.goal_area_width / 2);
+						}
+
+						catch (const std::domain_error& e) {
+							currentState.ballApproachingGoal = false;
+						}
+
+						
+						// Is the ball heading in my direction?
+						try {
+							// Throws std::domain_error if there is no intersection.
+							currentState.ballSelfIntersection = planeSelf.intersect(line);
+
+							currentState.ballApproaching = arma::norm(currentState.position - currentState.ballSelfIntersection, 2) <= (BALL_SELF_INTERSECTION_REGION / 2);
+						}
+
+						catch (const std::domain_error& e) {
+							currentState.ballApproaching = false;
+						}
 					}
-
-					catch (const std::domain_error& e) {
-						currentState.ballApproaching = false;
-					}
-
-
 
 
 
@@ -405,6 +430,7 @@ namespace modules {
 		
 						NUClear::log<NUClear::INFO>("Standing still.");
 					}
+/*
 	
 					else if (currentState.primaryGameState == GameStatePrimary::READY) {
 						goToPoint(START_POSITION);
@@ -538,11 +564,11 @@ namespace modules {
 
 			void SoccerStrategy::stopMoving() {
 				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
-//				// These four parameters are not important for standing still.
-//				approach->targetPositionType = WalkTarget::Robot;
-//				approach->targetHeadingType = WalkTarget::Robot;
-//				approach->heading = currentState.heading; 
-//				approach->target = currentState.position; 
+				// These four parameters are not important for standing still.
+				approach->targetPositionType = WalkTarget::WayPoint;
+				approach->targetHeadingType = WalkTarget::WayPoint;
+				approach->heading = currentState.heading; 
+				approach->target = currentState.position; 
 				approach->walkMovementType = WalkApproach::StandStill;
 				emit(std::move(approach));
 			}
