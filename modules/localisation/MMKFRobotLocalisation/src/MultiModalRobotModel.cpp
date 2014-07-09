@@ -104,6 +104,7 @@ double RobotHypothesis::MeasurementUpdate(
     // arma::mat22 cov = observed_object.measurements[0].error.submat(0, 0, 1, 1);
 
     // Spherical from ground:
+
     arma::vec3 measurement = observed_object.measurements[0].position;
     arma::mat33 cov = observed_object.measurements[0].error;
 

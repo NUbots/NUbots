@@ -250,7 +250,6 @@ namespace modules {
                         emit(std::move(command));//XXX: emit here
                     }*/
 
-
                     std::cout << "starting path planning" << std::endl;
                     arma::vec normed_heading = arma::normalise(selfs.front().heading);
                     arma::mat robotToWorldRotation;
@@ -413,7 +412,6 @@ namespace modules {
             arma::vec WalkPathPlanner::approachFromDirection(const Self& self,
                                                              const arma::vec& target,
                                                              const arma::vec& direction) {
-
 
                 //this method calculates the possible ball approach commands for the robot
                 //and then chooses the lowest cost action

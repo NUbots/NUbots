@@ -37,7 +37,7 @@ enum class LFOId {
 
 class LocalisationFieldObject {
 private:
-    arma::vec location_;
+    arma::vec2 location_;
     LFOId id_;
     std::string name_;
 
