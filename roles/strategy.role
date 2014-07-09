@@ -35,12 +35,12 @@ ADD_ROLE(
         behaviour::planning::LookAtGoal
         behaviour::planning::KickPlanner
         behaviour::planning::WalkPathPlanner
-	behaviour::strategy::SoccerStrategy
+        behaviour::strategy::SoccerStrategy
 
         #Motion
         motion::ScriptEngine
         motion::WalkEngine
-	
-	#Output
-	output::eSpeak
+
+        #Output
+        output::eSpeak
 )

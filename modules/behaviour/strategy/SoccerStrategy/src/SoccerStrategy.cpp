@@ -204,7 +204,7 @@ namespace modules {
 							const messages::localisation::Ball& ball,
 							const std::vector<messages::localisation::Self>& selfs) {
 
-					std::cerr << "30 Hz" << std::endl;
+//					std::cerr << "30 Hz" << std::endl;
 
 					// Make a copy of the previous state.					
 					memcpy(&previousState, &currentState, sizeof(State));
@@ -225,38 +225,38 @@ namespace modules {
 
 						switch (currentState.primaryGameState) {
 							case GameStatePrimary::INITIAL: {
-								//emit(std::move(std::make_unique<messages::output::Say>("Initial")));
+								emit(std::move(std::make_unique<messages::output::Say>("Initial")));
 								std::cerr << "initial" << std::endl;
 								break;
 							}
 
 							case GameStatePrimary::SET: {
-								//emit(std::move(std::make_unique<messages::output::Say>("Set")));
+								emit(std::move(std::make_unique<messages::output::Say>("Set")));
 								std::cerr << "set" << std::endl;
 								break;
 							}
 
 							case GameStatePrimary::READY: {
-								//emit(std::move(std::make_unique<messages::output::Say>("Ready")));
+								emit(std::move(std::make_unique<messages::output::Say>("Ready")));
 								std::cerr << "ready" << std::endl;
 								break;
 							}
 
 							case GameStatePrimary::PLAYING: {
-								//emit(std::move(std::make_unique<messages::output::Say>("Playing")));
+								emit(std::move(std::make_unique<messages::output::Say>("Playing")));
 								std::cerr << "playing" << std::endl;
 								break;
 							}
 
 							case GameStatePrimary::FINISHED: {
-								//emit(std::move(std::make_unique<messages::output::Say>("Finished")));
+								emit(std::move(std::make_unique<messages::output::Say>("Finished")));
 								std::cerr << "finished" << std::endl;
 								break;
 							}
 
 							default: {
 								currentState.primaryGameState = GameStatePrimary::INITIAL;
-								//emit(std::move(std::make_unique<messages::output::Say>("Initial")));
+								emit(std::move(std::make_unique<messages::output::Say>("Initial")));
 								std::cerr << "initial" << std::endl;
 								break;
 							}
@@ -431,7 +431,7 @@ namespace modules {
 		
 						NUClear::log<NUClear::INFO>("Standing still.");
 					}
-/*
+
 	
 					else if (currentState.primaryGameState == GameStatePrimary::READY) {
 						goToPoint(START_POSITION);
@@ -549,7 +549,7 @@ namespace modules {
 	
 						NUClear::log<NUClear::INFO>("Unknown behavioural state. Finding self, finding ball, moving to default position.");
 					}
-*/
+
 				});
 			}
 

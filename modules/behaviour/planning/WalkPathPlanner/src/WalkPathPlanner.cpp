@@ -250,13 +250,13 @@ namespace modules {
                         emit(std::move(command));//XXX: emit here
                     }*/
 
-                    std::cout << "starting path planning" << std::endl;
+                    //std::cout << "starting path planning" << std::endl;
                     arma::vec normed_heading = arma::normalise(selfs.front().heading);
                     arma::mat robotToWorldRotation;
                     robotToWorldRotation << normed_heading[0] << -normed_heading[1] << arma::endr
                                          << normed_heading[1] <<  normed_heading[0];
                     arma::vec ballPos = robotToWorldRotation*arma::vec(ball.position) + arma::vec(selfs.front().position);
-                    std::cout << "ball pos found" << std::endl;
+                    //std::cout << "ball pos found" << std::endl;
                     arma::vec targetPos,targetHead;
                     //work out where we're going
                     if (targetPosition == messages::behaviour::WalkTarget::Robot) {
@@ -486,7 +486,7 @@ namespace modules {
                 const double targetHeading = atan2(posdiff[1],posdiff[0])-selfHeading;
                 const double targetBearing = atan2(direction[1],direction[0])-selfHeading;
 
-                arma::vec result;
+                arma::vec result(3);
                 result[0] = targetDistance;
                 result[1] = atan2(sin(targetBearing),cos(targetBearing));
                 result[2] = atan2(sin(targetHeading),cos(targetHeading));
