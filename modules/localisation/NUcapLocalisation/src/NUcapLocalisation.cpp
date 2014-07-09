@@ -22,6 +22,7 @@
 #include "messages/input/proto/MotionCapture.pb.h"
 #include "messages/input/Sensors.h"
 #include "utility/math/geometry/UnitQuaternion.h"
+#include "messages/localisation/FieldObject.h"
 #include <armadillo>
 
 namespace modules {
@@ -31,10 +32,12 @@ namespace localisation {
     using messages::input::proto::MotionCapture;
     using messages::input::Sensors;
     using utility::math::geometry::UnitQuaternion;
+    using messages::localisation::Self;
 
     NUcapLocalisation::NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Trigger<Network<MotionCapture>>, With<Sensors> >([this](const Network<MotionCapture>& net, const Sensors& sensors) {
+            
             auto& mocap = net.data;
             for (auto& rigidBody : mocap->rigid_bodies()) {
 
@@ -52,12 +55,17 @@ namespace localisation {
 
                     arma::mat33 groundToWorldRotation = q.getMatrix() * sensors.orientationCamToGround.submat(0,0,2,2).t();
 
-                    double bearing = std::acos(groundToWorldRotation(0,0));
+                    double heading = std::acos(groundToWorldRotation(0,0));
 
                     // TODO: transform from head to field
+                    auto selfs = std::make_unique<std::vector<Self>>();
+                    selfs->push_back(Self());
+                    selfs->back().heading = arma::normalise(groundToWorldRotation.submat(0,0,1,0));
+                    selfs->back().position = arma::vec2{x,y};
+                    emit(std::move(selfs));
 
                     emit(graph("NUcap pos", x, y, z));
-                    emit(graph("NUcap bearing", bearing));
+                    emit(graph("NUcap heading", heading));
                 }
             }
 
