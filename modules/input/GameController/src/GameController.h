@@ -42,8 +42,8 @@ namespace modules {
                 std::atomic<int> socket;
                 uint port;
                 gamecontroller::GameControllerPacket packet;
-                uint TEAM_ID;
-                uint PLAYER_ID;
+                uint8_t TEAM_ID;
+                uint8_t PLAYER_ID;
 
                 void kill();
                 void run();

@@ -23,8 +23,10 @@
 namespace modules {
 namespace input {
 namespace gamecontroller {
-    constexpr size_t MAX_NUM_PLAYERS = 11;
-    constexpr size_t SPL_COACH_MESSAGE_SIZE = 40;
+    constexpr const size_t MAX_NUM_PLAYERS = 11;
+    constexpr const size_t SPL_COACH_MESSAGE_SIZE = 40;
+    constexpr const char RETURN_HEADER[4] = {'R', 'G', 'r', 't'};
+    constexpr const size_t RETURN_VERSION = 2;
 
     #pragma pack(push, 1)
     enum class State : uint8_t {
@@ -45,6 +47,12 @@ namespace gamecontroller {
     enum class TeamColour : uint8_t {
         CYAN    = 0,
         MAGENTA = 1
+    };
+
+    enum class ReplyMessage : uint8_t {
+        PENALISE = 0,
+        UNPENALISE = 1,
+        ALIVE = 2
     };
 
     struct Robot {
@@ -77,6 +85,14 @@ namespace gamecontroller {
         uint16_t secsRemaining;        // estimate of number of seconds remaining in the half
         uint16_t secondaryTime;        // number of seconds shown as secondary time (remaining ready, until free ball, etc)
         Team teams[2];
+    };
+
+    struct GameControllerReplyPacket {
+        char header[4];
+        uint8_t version;
+        uint8_t team;    // team number
+        uint8_t player;  // player number starts with 1
+        uint8_t message; // one of the three messages defined above
     };
     #pragma pack(pop)
 }

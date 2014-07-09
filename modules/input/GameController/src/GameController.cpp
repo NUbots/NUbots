@@ -32,6 +32,8 @@ namespace input {
 
     using messages::support::Configuration;
     using gamecontroller::GameControllerPacket;
+    using gamecontroller::GameControllerReplyPacket;
+    using gamecontroller::ReplyMessage;
     using gamecontroller::Team;
     using namespace messages::input::gameevents;
     using TeamColourEvent = messages::input::gameevents::TeamColour;
@@ -40,7 +42,7 @@ namespace input {
 
         powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&GameController::run), this), std::bind(std::mem_fn(&GameController::kill), this)));
 
-        on<Trigger<Configuration<GameController>>>([this](const Configuration<GameController>& config) {
+        on<Trigger<Configuration<GameController>>>("GameController Configuration", [this](const Configuration<GameController>& config) {
 
             // TODO use an eventfd to allow changing the port dynamically
 
@@ -63,6 +65,18 @@ namespace input {
 
             if (oldSocket) {
                 ::close(oldSocket);
+            }
+        });
+
+        on<Trigger<Every<5, std::chrono::seconds>>>("GameController Reply", [this](const time_t&) {
+            if (socket) {
+                auto replyPacket = std::make_unique<GameControllerReplyPacket>();
+                std::copy(std::begin(gamecontroller::RETURN_HEADER), std::end(gamecontroller::RETURN_HEADER), std::begin(replyPacket->header));
+                replyPacket->version = gamecontroller::RETURN_VERSION;
+                replyPacket->team = TEAM_ID;
+                replyPacket->player = PLAYER_ID;
+                replyPacket->message = uint8_t(ReplyMessage::UNPENALISE); // TODO
+                ::send(socket, reinterpret_cast<char *>(&replyPacket), sizeof(replyPacket), 0);
             }
         });
 
