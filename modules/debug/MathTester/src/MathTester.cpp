@@ -53,9 +53,9 @@ namespace modules {
             // for(auto& v : config["polygon_vertices"].as<std::vector<std::vector<double>>>()){
             //     vertices.push_back(arma::vec2{v[0],v[1]});
             // }
-            vertices.push_back(arma::vec2{1,1});
-            vertices.push_back(arma::vec2{-1,1});
+            vertices.push_back(arma::vec2{0,1.5});
             vertices.push_back(arma::vec2{-1,-1});
+            vertices.push_back(arma::vec2{0,0});
             vertices.push_back(arma::vec2{1,-1});
             Polygon poly(vertices);
             std::cerr << "Generated polygon with vertices:" << std::endl;                

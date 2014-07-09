@@ -26,7 +26,7 @@ message MotionCapture {
     message Point {
         optional string identifier = 1;
         optional double size = 2;
-        required vec3 position = 3;
+        optional vec3 position = 3;
     };
 
     message RigidBody {
@@ -36,7 +36,7 @@ message MotionCapture {
         required vec3 position = 3;
 
         // The rotation quaternion
-        required vec4 rotation = 4;
+        optional vec4 rotation = 4;
 
         repeated Point points = 5;
     };
