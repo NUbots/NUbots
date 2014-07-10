@@ -184,7 +184,7 @@ namespace modules {
 			bool penalisedButtonStatus;
 			bool penalisedButtonStatusPrev;
 
-			bool feetOnGround;
+			bool feetOffGround;
 			bool isKicking;
 			bool isDiving;
 			bool isGettingUp;

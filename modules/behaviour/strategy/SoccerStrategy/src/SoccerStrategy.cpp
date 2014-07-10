@@ -66,7 +66,7 @@ namespace modules {
 
 		SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 			penalisedButtonStatus = false;
-			feetOnGround = true;
+			feetOffGround = true;
 			isKicking = false;
 			isWalking = false;
 			
@@ -86,7 +86,7 @@ namespace modules {
 				ANGLE_THRESHOLD = config["ANGLE_THRESHOLD"].as<float>();
 				POSITION_THRESHOLD_TIGHT = config["POSITION_THRESHOLD_TIGHT"].as<float>();
 				POSITION_THRESHOLD_LOOSE = config["POSITION_THRESHOLD_LOOSE"].as<float>();
-				IS_GOALIE = (config["GOALIE"].as<int>() == 1);
+				IS_GOALIE = config["GOALIE"].as<bool>();
 				START_POSITION = config["START_POSITION"].as<arma::vec2>();
 				MY_ZONE = config["MY_ZONE"].as<int>();
 
@@ -113,6 +113,10 @@ namespace modules {
 				}
 			});
 
+			on<Trigger<Startup>>([this](const Startup&) {
+				stopMoving();
+			});
+
 			// Last 10 to do some button debouncing.
 			on<Trigger<Last<10, messages::platform::darwin::DarwinSensors>>>([this](const std::vector<std::shared_ptr<const messages::platform::darwin::DarwinSensors>>& sensors) {
 				float leftCount = 0.0, middleCount = 0.0;
@@ -133,12 +137,12 @@ namespace modules {
 				gameStateButtonStatusPrev = gameStateButtonStatus;
 				penalisedButtonStatusPrev = penalisedButtonStatus;
 				gameStateButtonStatus = (leftCount > 0.7);
-				penalisedButtonStatus = (middleCount > 0.7) ? !penalisedButtonStatus : penalisedButtonStatus;
+				penalisedButtonStatus = (middleCount > 0.7);
 			});
 
 			// Check to see if both feet are on the ground.
 			on<Trigger<messages::input::Sensors>>([this](const messages::input::Sensors& sensors) {
-				feetOnGround = (sensors.leftFootDown && sensors.rightFootDown);
+				feetOffGround = (!sensors.leftFootDown && !sensors.rightFootDown);
 			});
 
 			// Check to see if we are currently in the process of getting up.
@@ -236,14 +240,29 @@ namespace modules {
 //								currentState.primaryGameState == GameStatePrimary::PLAYING); // && currentState.???);
 
 					// Have I been picked up?
-					currentState.pickedUp = !feetOnGround && !isGettingUp && !isDiving && !isWalking && !isKicking;
+					currentState.pickedUp = feetOffGround && !isGettingUp && !isDiving;
 
 					// Am I penalised?
+					if (penalisedButtonStatus && !penalisedButtonStatusPrev) {
+						if (!currentState.penalised) {
+							currentState.penalised = true;
+							emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
+						}
+	
+						else {
+							currentState.penalised = false;
+							emit(std::move(std::make_unique<messages::output::Say>("Unpenalised")));
+						}
+					}
+
 					// TODO: FIX ME!!!!
-					currentState.penalised = penalisedButtonStatus; // || gameController->team.players.at(0).penalised;
+//					if (gameController->team.players.at(0).penalised && !previousState.penalised) {
+//						currentState.penalised = true;
+//						emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
+//					}
 
 					// Was I just put down?
-					currentState.putDown = feetOnGround && previousState.pickedUp;
+					currentState.putDown = !feetOffGround && previousState.pickedUp;
 					
 					// Did I just become unpenalised?
 					currentState.unPenalised = !currentState.penalised && previousState.penalised;
@@ -321,7 +340,7 @@ namespace modules {
 						}
 
 						catch (const std::domain_error& e) {
-							std::cerr << "ballPosotion - (" << currentState.ball.position[0] << ", " << currentState.ball.position[1] << ")" << std::endl;	
+							std::cerr << "ballPosition - (" << currentState.ball.position[0] << ", " << currentState.ball.position[1] << ")" << std::endl;	
 							std::cerr << "selfPosition - (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;	
 						}
 
@@ -332,7 +351,7 @@ namespace modules {
 
 						catch (const std::domain_error& e) {
 							std::cerr << "ballVelocity - (" << currentState.ball.velocity[0] << ", " << currentState.ball.velocity[1] << ")" << std::endl;	
-							std::cerr << "ballPosotion - (" << globalBallPosition[0] << ", " << globalBallPosition[1] << ")" << std::endl;	
+							std::cerr << "ballPosition - (" << globalBallPosition[0] << ", " << globalBallPosition[1] << ")" << std::endl;	
 						}
 
 						// Is the ball approaching our goals?
@@ -373,7 +392,22 @@ namespace modules {
 //						NUClear::log<NUClear::INFO>("Standing still.");
 					}
 
-	
+					else if(currentState.penalised && !currentState.pickedUp && !currentState.putDown) {
+						stopMoving();
+
+//						NUClear::log<NUClear::INFO>("I am penalised and have not been picked up yet. Don't move");
+					}
+
+					else if(currentState.penalised && currentState.putDown) {
+						findSelf();
+						findBall();
+
+						// Force this state to happen until we are unpenalised.
+						currentState.pickedUp = true;
+
+//						NUClear::log<NUClear::INFO>("I am penalised and have been put down. I must be on the side line somewhere. Where am I?");
+					}
+
 					else if (currentState.primaryGameState == GameStatePrimary::READY) {
 						arma::vec2 heading = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 
@@ -386,19 +420,6 @@ namespace modules {
 						}
 
 //						NUClear::log<NUClear::INFO>("Game is about to start. I should be in my starting position.");
-					}
-
-					else if(currentState.penalised && !currentState.pickedUp && !currentState.putDown) {
-						stopMoving();
-
-//						NUClear::log<NUClear::INFO>("I am penalised and have not been picked up yet. Don't move");
-					}
-
-					else if(currentState.penalised && currentState.putDown) {
-						findSelf();
-						findBall();
-
-//						NUClear::log<NUClear::INFO>("I am penalised and have been put down. I must be on the side line somewhere. Where am I?");
 					}
 
 					else if (!currentState.selfInZone) {
@@ -662,9 +683,6 @@ namespace modules {
 				approach->walkMovementType = WalkApproach::WalkToPoint;
 				approach->heading = heading;
 				approach->target = position; 
-
-std::cerr << "target - (" << approach->target[0] << ", " << approach->target[1] << ")" << std::endl;
-std::cerr << "heading - (" << approach->heading[0] << ", " << approach->heading[1] << ")" << std::endl;
 
 				currentState.targetPosition = approach->target;
 				currentState.targetHeading = approach->heading;
