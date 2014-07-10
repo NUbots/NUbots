@@ -1,3 +1,2 @@
-{
-	"BallDragCoefficient": 0.1
-}
+BallDragCoefficient: 0.1
+EmitBallFieldobjects: false

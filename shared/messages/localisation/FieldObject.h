@@ -65,6 +65,8 @@ namespace messages {
         public:
             Ball() : LocalisationObject() {}
             arma::vec2 velocity;
+            bool world_space; // Ball will always be in robot space except 
+                              // when sent from MockRobot.
         };
 
         class Self : public LocalisationObject {
@@ -72,6 +74,13 @@ namespace messages {
             Self() : LocalisationObject() {}
             arma::vec2 heading;
             // arma::mat22 robot_to_world_rotation;
+        };
+
+        template<class T> class Mock {
+        public:
+            Mock() : data() {}
+            Mock(T t) : data(t) {}
+            T data;
         };
     }
 }

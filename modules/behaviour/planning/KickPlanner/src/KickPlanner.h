@@ -34,13 +34,10 @@ namespace planning {
         static constexpr const char* CONFIGURATION_PATH = "KickPlanner.yaml";
 
     private:
-       	arma::vec2 TARGET_FIELD_POS;
-       	float MIN_BALL_DISTANCE;
+       	float MAX_BALL_DISTANCE;
        	float KICK_CORRIDOR_WIDTH;
        	float KICK_FORWARD_ANGLE_LIMIT;
        	float KICK_SIDE_ANGLE_LIMIT;
-
-
     };
 
 }

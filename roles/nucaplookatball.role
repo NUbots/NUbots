@@ -1,0 +1,44 @@
+ADD_ROLE(
+    NAME nucaplookatball
+    MODULES
+        # Support and Configuration
+        #support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem
+        support::configuration::NetworkingConfiguration
+        support::NUbugger
+
+        # Hardware Interface
+        platform::darwin::HardwareIO
+        #platform::fakedarwin::HardwareIO
+        platform::darwin::SensorFilter
+        input::LinuxCamera
+
+        # Vision
+        vision::LUTClassifier
+        vision::GoalDetector
+        vision::BallDetector
+        vision::ObstacleDetector
+
+        # Motion
+        motion::WalkEngine
+        motion::ScriptEngine
+
+        # Behaviour
+        behaviour::Controller
+        behaviour::planning::PS3Walk
+        behaviour::skills::Stand
+        behaviour::skills::FallingRelax
+        behaviour::skills::Getup
+        behaviour::skills::KickScript
+
+        # Lookat ball
+        behaviour::skills::Look
+        #behaviour::planning::LookAtBall
+
+        # Localisation
+        localisation::NUcapLocalisation
+
+        # Debug
+        debug::NUcap
+)

@@ -26,8 +26,11 @@ namespace modules {
 namespace localisation {
 
     class NUcapLocalisation : public NUClear::Reactor {
+	private:
+		int robot_id;
     public:
         explicit NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment);
+        static constexpr const char* CONFIGURATION_PATH = "NUcapLocalisation.yaml";
     };
 
 }

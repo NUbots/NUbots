@@ -40,7 +40,7 @@ ADD_ROLE(
         # Localisation
         #localisation::MMKFRobotLocalisation
         #localisation::KFBallLocalisation
-        #localisation::NUcapLocalisation
+        localisation::NUcapLocalisation
 
         # Debug
         debug::NUcap

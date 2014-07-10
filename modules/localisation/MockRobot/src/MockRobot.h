@@ -41,21 +41,28 @@ namespace localisation {
         arma::vec ball_velocity_ = { 0, 0 };
         arma::vec robot_position_ = { 0, 0 };
         arma::vec robot_velocity_ = { 0, 0 };
-        arma::vec robot_heading_ = { 1, 0 };
+        arma::vec world_imu_direction = { 0, 1 };
+        arma::vec robot_imu_direction_ = { 0, 1, 0 };
+        // arma::vec robot_heading_ = { 1, 0 };
+        // double robot_heading_ = 3.141;
+        double robot_heading_ = 0;
         arma::vec odom_old_robot_position_ = { 0, 0 };
-        arma::vec odom_old_robot_heading_ = { 1, 0 };
+        // arma::vec odom_old_robot_heading_ = { 1, 0 };
+        double odom_old_robot_heading_ = 0;
 
         std::shared_ptr<messages::support::FieldDescription> field_description_;
 
         struct {
-            bool simulate_vision;
-            bool simulate_goal_observations;
-            bool simulate_ball_observations;
-            bool simulate_odometry;
-            bool simulate_robot_movement;
-            bool simulate_ball_movement;
-            bool emit_robot_fieldobjects;
-            bool emit_ball_fieldobjects;
+            bool simulate_vision = true;
+            bool simulate_goal_observations = true;
+            bool simulate_ball_observations = true;
+            bool simulate_odometry = false;
+            bool simulate_robot_movement = true;
+            double robot_movement_path_period = 100;
+            bool simulate_ball_movement = true;
+            bool emit_robot_fieldobjects = true;
+            bool emit_ball_fieldobjects = true;
+            double robot_imu_drift_period = 200;
         } cfg_;
 
     public:

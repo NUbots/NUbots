@@ -38,10 +38,10 @@ arma::vec::fixed<BallModel::size> BallModel::ApplyVelocity(
     auto result = state;
 
     // Apply ball velocity
-    result[kX] += state[kVx] * deltaT;
-    result[kY] += state[kVy] * deltaT;
-    result[kVx] -= result[kVx] * ballDragCoefficient * deltaT;
-    result[kVy] -= result[kVy] * ballDragCoefficient * deltaT;
+    result(kX) += state(kVx) * deltaT;
+    result(kY) += state(kVy) * deltaT;
+    result(kVx) -= result(kVx) * ballDragCoefficient * deltaT;
+    result(kVy) -= result(kVy) * ballDragCoefficient * deltaT;
 
     return result;
 }
@@ -74,7 +74,7 @@ arma::vec BallModel::predictedObservation(
     const arma::vec::fixed<BallModel::size>& state) {
 
     // // Robot-relative cartesian
-    return { state[kX], state[kY] };
+    return { state(kX), state(kY) };
 
     // Distance and unit vector heading
     // arma::vec2 radial = utility::math::coordinates::Cartesian2Radial(state.rows(0, 1));
@@ -93,7 +93,7 @@ arma::vec BallModel::observationDifference(const arma::vec& a,
 arma::vec::fixed<BallModel::size> BallModel::limitState(
     const arma::vec::fixed<BallModel::size>& state) {
 
-    return { state[kX], state[kY], state[kVx], state[kVy] };
+    return { state(kX), state(kY), state(kVx), state(kVy) };
 
 
     // // Radial coordinates

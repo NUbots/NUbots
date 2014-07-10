@@ -1,10 +1,10 @@
-{
-	"SimulateVision" : true,
-	"SimulateGoalObservations" : true,
-	"SimulateBallObservations" : true,
-	"SimulateOdometry" : true,
-	"SimulateRobotMovement" : true,
-	"SimulateBallMovement" : true,
-	"EmitRobotFieldobjects" : true,
-	"EmitBallFieldobjects" : true
-}
+SimulateVision: true
+SimulateGoalObservations: true
+SimulateBallObservations: true
+SimulateOdometry: false
+SimulateRobotMovement: true
+RobotMovementPathPeriod: 100
+SimulateBallMovement: true
+EmitRobotFieldobjects: true
+EmitBallFieldobjects: true
+RobotImuDriftPeriod: 300

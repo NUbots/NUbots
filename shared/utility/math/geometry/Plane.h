@@ -61,7 +61,11 @@ namespace geometry {
 			if(lDotN == 0){
 				throw std::domain_error("Plane::intersect - Plane does not meet line!");
 			}
-			return arma::dot(point - l.point, normal) * l.direction / lDotN + l.point;   
+			double tIntersection = arma::dot(point - l.point, normal) / lDotN;
+			if(tIntersection < l.tLimits[0] || tIntersection > l.tLimits[1]){
+				throw std::domain_error("Plane::intersect - Plane does not meet line segment (intersection falls off segment)!");
+			}
+			return tIntersection * l.direction + l.point;   
 		}
 
 		

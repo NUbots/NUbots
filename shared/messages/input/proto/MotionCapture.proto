@@ -26,24 +26,19 @@ message MotionCapture {
     message Point {
         optional string identifier = 1;
         optional double size = 2;
-        required double x = 3;
-        required double y = 4;
-        required double z = 5;
+        optional vec3 position = 3;
     };
 
     message RigidBody {
         optional uint32 identifier = 1;
         optional double mean_error = 2;
 
-        required vec3 location = 3;
+        required vec3 position = 3;
 
         // The rotation quaternion
-        required double qw = 4;
-        required double qx = 5;
-        required double qy = 6;
-        required double qz = 7;
+        optional vec4 rotation = 4;
 
-        repeated Point points = 8;
+        repeated Point points = 5;
     };
 
     message Bone {

@@ -175,7 +175,7 @@ namespace utility {
                 template <typename TMeasurement, typename... TMeasurementType>
                 double measurementUpdate(const TMeasurement& measurement,
                                          const arma::mat& measurement_variance,
-                                         const TMeasurementType... measurementArgs) {
+                                         const TMeasurementType&... measurementArgs) {
 
                     // Allocate room for our predictions
                     arma::mat predictedObservations(measurement.n_elem, NUM_SIGMA_POINTS);

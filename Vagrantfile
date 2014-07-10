@@ -7,7 +7,7 @@ Vagrant.configure("2") do |config|
   
   # Determine the base box to use by checking the hostname.
   # Add your hostname to the list to opt-out of nubots-14.04.
-  if Socket.gethostname == 'nubots-b767f2s'
+  if ['nubots-b767f2s', 'Ne', 'Jake'].include?(Socket.gethostname)
     # # 'precise32' was used prior to 2014-04-30.
     # config.vm.box = "precise32"
     # config.vm.box_url = "http://files.vagrantup.com/precise32.box"
@@ -47,6 +47,12 @@ Vagrant.configure("2") do |config|
 
     nuclearport.vm.network :forwarded_port, guest: 12000, host: 12000
     nuclearport.vm.network :forwarded_port, guest: 12001, host: 12001
+
+    # Add hostname here if running NUbugger on the VM
+    if ['Ne'].include?(Socket.gethostname) # NUbugger Port
+      nuclearport.vm.network :forwarded_port, guest: 9090, host: 9090
+    end
+
 
     # Syntax: "path/on/host", "/path/on/guest"
     # nuclearport.vm.synced_folder ".", "/home/vagrant/nubots/NUClearPort"

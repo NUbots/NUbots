@@ -24,11 +24,14 @@
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
+#include "utility/localisation/transform.h"
 #include "messages/input/Sensors.h"
 
 using messages::input::Sensors;
 using utility::localisation::LocalisationFieldObject;
 using messages::localisation::FakeOdometry;
+using utility::math::coordinates::spherical2Radial;
+using utility::localisation::transform::SphericalRobotObservation;
 
 namespace modules {
 namespace localisation {
@@ -43,8 +46,9 @@ std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
         << "estimate: ["
             << std::setw(7) << est[robot::kX] << ", "
             << std::setw(7) << est[robot::kY] << ", "
-            << std::setw(7) << est[robot::kHeadingX] << ", "
-            << std::setw(7) << est[robot::kHeadingY] << "]"
+            // << std::setw(7) << est[robot::kHeadingX] << ", "
+            // << std::setw(7) << est[robot::kHeadingY] << "]"
+            << std::setw(7) << est[robot::kImuOffset] << "]"
         // << ", observation trail: [" << h.obs_trail_ << "]"
         // << ", covariance:\n" << h.GetCovariance()
         << ", observation count: " << h.obs_count_
@@ -52,8 +56,6 @@ std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
 }
 
 void MultiModalRobotModel::TimeUpdate(double seconds) {
-    // robot_models_ = std::vector<std::unique_ptr<RobotHypothesis>>();
-    // robot_models_.push_back(std::make_unique<RobotHypothesis>());
     for (auto& model : robot_models_)
         model->TimeUpdate(seconds);
 }
@@ -98,46 +100,49 @@ double RobotHypothesis::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object,
     const LocalisationFieldObject& actual_object) {
 
-    // // Radial coordinates
-    // arma::vec2 actual_pos = actual_object.location();
-    // arma::vec2 measurement = { observed_object.sphericalFromNeck[0],
-    //                            observed_object.sphericalFromNeck[1] };
-    // arma::mat22 cov = { observed_object.sphericalError[0], 0,
-    //                     0, observed_object.sphericalError[1] };
+    // Spherical from ground:
+    arma::vec3 measurement = observed_object.measurements[0].position;
+    arma::mat33 cov = observed_object.measurements[0].error;
 
-    // Unit vector orientation
-    arma::vec2 actual_pos = actual_object.location();
-    arma::vec2 measurement = observed_object.measurements[0].position.rows(0, 1);
-    arma::mat22 cov = observed_object.measurements[0].error.submat(0, 0, 2, 2);
+    arma::vec2 actual_2d = actual_object.location();
+    arma::vec3 actual_pos = arma::vec3({actual_2d(0), actual_2d(1), 0});
 
-    double quality = filter_.measurementUpdate(measurement, cov, arma::vec2({actual_pos[0],actual_pos[1]}));
-
+    double quality = filter_.measurementUpdate(measurement, cov, actual_pos,
+                                               *(observed_object.sensors));
     return quality;
 }
 
 double RobotHypothesis::MeasurementUpdate(
-    const std::vector<messages::vision::VisionObject>& observed_objects,
-    const std::vector<LocalisationFieldObject>& actual_objects) {
+    const std::vector<messages::vision::VisionObject>& /*observed_objects (commented for warnings)*/,
+    const std::vector<LocalisationFieldObject>& /*actual_objects*/) {
 
-    auto& obv_a = observed_objects[0];
-    auto& obv_b = observed_objects[1];
-    auto& lfo_a = actual_objects[0];
-    auto& lfo_b = actual_objects[1];
+    // auto& obv_a = observed_objects[0];
+    // auto& obv_b = observed_objects[1];
+    // auto& lfo_a = actual_objects[0];
+    // auto& lfo_b = actual_objects[1];
 
-    std::vector<arma::vec> actual_positions = {
-        arma::vec(lfo_a.location()), arma::vec(lfo_b.location())
-    };
+    // std::vector<arma::vec> actual_positions = {
+    //     arma::vec(lfo_a.location()), arma::vec(lfo_b.location())
+    // };
 
-    // Our heading difference should be our dot product (TODO check this I am guessing and tired)
-    double heading_diff = arma::dot(obv_a.measurements[0].position.rows(0, 1), obv_b.measurements[0].position.rows(0, 1));
+    // // Use a dot product to calculate heading distance:
+    // arma::vec unit_a = arma::normalise(obv_a.measurements[0].position.rows(0, 1));
+    // arma::vec unit_b = arma::normalise(obv_b.measurements[0].position.rows(0, 1));
+    // double heading_diff = std::acos(arma::dot(arma::vec(unit_a), arma::vec(unit_b)));
 
-    arma::vec measurement = { std::abs(heading_diff) };
-    arma::mat cov; // No idea how to get this :P
+    // arma::vec measurement = { std::abs(heading_diff) };
+    // arma::mat cov = arma::eye(1, 1) * 0.1; // TODO: Calculate correct covariance
 
-    double quality = filter_.measurementUpdate(measurement, cov, actual_positions);
+    // double quality = filter_.measurementUpdate(measurement, cov, actual_positions);
 
-    return quality;
+    // return quality;
+    return 1;
 }
+
+// void MultiModalRobotModel::SensorsUpdate(const messages::input::Sensors& sensors) {
+//     for (auto& model : robot_models_)
+//         model->SetSensorsData(sensors);
+// }
 
 /*! @brief Performs an ambiguous measurement update using the exhaustive
  *  process.
@@ -159,6 +164,8 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
         // Split the model for each possible object, and observe that object:
         // (TODO: Micro-optimisation: use model as the last split_model)
         for (auto& possible_object : possible_objects) {
+            std::cout << "possible_object: " << possible_object << std::endl;
+
             auto split_model = std::make_unique<RobotHypothesis>(*model);
 
             split_model->obs_count_++;
@@ -280,15 +287,8 @@ void MultiModalRobotModel::RemoveOldModels() {
 }
 
 void MultiModalRobotModel::PruneModels() {
-    // NUClear::log(__PRETTY_FUNCTION__, "Number of models before merging: ",
-    //                      robot_models_.size());
-
-    MergeSimilarModels();
-
-    // NUClear::log(__PRETTY_FUNCTION__, "Number of models before pruning: ",
-    //                      robot_models_.size());
-
-    // RemoveOldModels();
+    if (cfg_.merging_enabled)
+        MergeSimilarModels();
 
     PruneViterbi(cfg_.max_models_after_merge);
 
@@ -300,13 +300,14 @@ bool MultiModalRobotModel::ModelsAreSimilar(
     const std::unique_ptr<RobotHypothesis> &model_b) {
     arma::vec::fixed<robot::RobotModel::size> diff = model_a->GetEstimate() - model_b->GetEstimate();
 
-    auto translation_dist = arma::norm(diff.rows(0, 1), 2);
+    double translation_dist = arma::norm(diff.rows(0, 1), 2);
 
     // // Radial coords
     // auto heading_dist = std::abs(utility::math::angle::normalizeAngle(diff[kHeading]));
+    auto heading_dist = diff(robot::kImuOffset);
 
     // Unit vector orientation
-    auto heading_dist = diff[robot::kHeadingX] + diff[robot::kHeadingY];
+    // auto heading_dist = diff[robot::kHeadingX] + diff[robot::kHeadingY];
 
     return (translation_dist < cfg_.merge_min_translation_dist) &&
            (heading_dist < cfg_.merge_min_heading_dist);
