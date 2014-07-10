@@ -8,6 +8,9 @@ ADD_ROLE(
         support::configuration::NetworkingConfiguration
         support::NUbugger
 
+	#input
+	input::GameController
+
         #Sensors
         input::LinuxCamera
         platform::darwin::HardwareIO

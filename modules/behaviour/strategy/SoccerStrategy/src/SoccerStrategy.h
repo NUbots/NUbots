@@ -27,6 +27,7 @@
 #include "messages/support/FieldDescription.h"
 #include "messages/motion/KickCommand.h"
 #include "messages/motion/WalkCommand.h"
+#include "messages/input/gameevents/GameEvents.h"
 
 #include "utility/math/geometry/Polygon.h"
 
@@ -39,11 +40,14 @@ namespace modules {
 			SET,
 			READY,
 			PLAYING,
+			TIMEOUT,
 			FINISHED
 		};
 
 		enum class GameStateSecondary : char {
 			NORMAL,
+			PENALTY_SHOOTOUT,
+			OVERTIME,
 			PENALTY_KICK,
 			FREE_KICK,
 			GOAL_KICK,
@@ -61,6 +65,8 @@ namespace modules {
 				case GameStatePrimary::READY:
 					return(gameState = GameStatePrimary::PLAYING);
 				case GameStatePrimary::PLAYING:
+					return(gameState = GameStatePrimary::TIMEOUT);
+				case GameStatePrimary::TIMEOUT:
 					return(gameState = GameStatePrimary::FINISHED);
 				case GameStatePrimary::FINISHED:
 				default:
@@ -77,6 +83,10 @@ namespace modules {
 		GameStateSecondary& operator++(GameStateSecondary& gameState) {
 			switch (gameState) {
 				case GameStateSecondary::NORMAL:
+					return(gameState = GameStateSecondary::PENALTY_SHOOTOUT);
+				case GameStateSecondary::PENALTY_SHOOTOUT:
+					return(gameState = GameStateSecondary::OVERTIME);
+				case GameStateSecondary::OVERTIME:
 					return(gameState = GameStateSecondary::PENALTY_KICK);
 				case GameStateSecondary::PENALTY_KICK:
 					return(gameState = GameStateSecondary::FREE_KICK);
@@ -186,12 +196,14 @@ namespace modules {
 			void stopMoving();
 			void findSelf();
 			void findBall();
-			void goToPoint(const arma::vec2& position);
+			void goToPoint(const arma::vec2& positioni, const arma::vec2& heading);
 			void sideStepToPoint(const arma::vec2& position);
 			void watchBall();
 			void kickBall(const arma::vec2& direction);
 			void approachBall(const arma::vec2& haading);
 			arma::vec2 transformPoint(const arma::vec2& point);
+
+			void updateGameState(const messages::input::gameevents::GameState& gameController);
 
 		public:
 			explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);

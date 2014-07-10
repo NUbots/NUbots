@@ -277,6 +277,11 @@ namespace modules {
                     //calculate the basic movement plan
                     arma::vec movePlan;
 
+std::cerr << "selfPos - (" << selfs.front().position[0] << ", " << selfs.front().position[1] << ")" << std::endl;
+std::cerr << "selfHead - (" << selfs.front().heading[0] << ", " << selfs.front().heading[1] << ")" << std::endl;
+std::cerr << "targetPos - (" << targetPos[0] << ", " << targetPos[1] << ")" << std::endl;
+std::cerr << "targetHead - (" << targetHead[0] << ", " << targetHead[1] << ")" << std::endl;
+
                     switch (planType) {
                         case messages::behaviour::WalkApproach::ApproachFromDirection:
                             movePlan = approachFromDirection(selfs.front(),targetPos,targetHead);
@@ -359,21 +364,21 @@ namespace modules {
                 //check what distance increment we're in and swap/set speed accordingly:
                 if ((move[0] > midApproachDistance + distanceHysteresis and distanceIncrement < 3)
                     or
-                    (move[0] > midApproachDistance and distanceIncrement == 3)) {
+                    (move[0] > midApproachDistance and distanceIncrement >= 3)) {
 
                     distanceIncrement = 3;
                     walk_speed = forwardSpeed;
                 }
                 else if ((move[0] > closeApproachDistance+distanceHysteresis and distanceIncrement < 2)
                          or
-                         (move[0] > closeApproachDistance and distanceIncrement == 2)) {
+                         (move[0] > closeApproachDistance and distanceIncrement >= 2)) {
 
                     distanceIncrement = 2;
                     walk_speed = midApproachSpeed;
                 }
                 else if ((move[0] > ballLineupDistance+distanceHysteresis and distanceIncrement < 1)
                          or
-                         (move[0] > ballLineupDistance and distanceIncrement == 1)) {
+                         (move[0] > ballLineupDistance and distanceIncrement >= 1)) {
 
                     distanceIncrement = 1;
                     walk_speed = closeApproachSpeed;
@@ -382,6 +387,8 @@ namespace modules {
                     distanceIncrement = 0;
                     walk_speed = 0.f;
                 }
+
+std::cerr << "distanceIncrement - " << distanceIncrement << std::endl;
 
                 //decide between heading and bearing
                 if (distanceIncrement > 1) {
@@ -393,6 +400,10 @@ namespace modules {
 
                 //make sure our rotation is normalised to our turning limits
                 walk_rotation = fmin(turnSpeed,fmax(walk_rotation,-turnSpeed));
+
+std::cerr << "walk_speed - " << walk_speed << std::endl;
+std::cerr << "walk_bearing - " << walk_bearing << std::endl;
+std::cerr << "walk_rotation - " << walk_rotation << std::endl;
 
                 //apply turning hysteresis
                 /*if (turning < 0 and walk_bearing < -turnDeviation) {
@@ -490,6 +501,12 @@ namespace modules {
                 result[0] = targetDistance;
                 result[1] = atan2(sin(targetBearing),cos(targetBearing));
                 result[2] = atan2(sin(targetHeading),cos(targetHeading));
+
+std::cerr << "targetDistance - " << result[0] << std::endl;
+std::cerr << "angleToLocation - " << result[1] << std::endl;
+std::cerr << "angleToHeading - " << result[2] << std::endl;
+
+                //apply turning hysteresis
                 return result;
             }
 

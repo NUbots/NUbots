@@ -24,7 +24,6 @@
 #include "messages/input/Sensors.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/support/Configuration.h"
-#include "messages/input/gameevents/GameEvents.h"
 #include "messages/motion/GetupCommand.h"
 #include "messages/motion/DiveCommand.h"
 #include "messages/output/Say.h"
@@ -54,16 +53,9 @@ namespace modules {
 		using messages::behaviour::WalkTarget;
 		using messages::behaviour::WalkApproach;
 
-//		using messages::input::gameevents::GameState;
-//		using messages::input::gameevents::KickOffTeam;
-//		using messages::input::gameevents::TeamColour;
-//		using messages::input::gameevents::BallKickedOut;
-//		using messages::input::gameevents::HalfTime;
-//		using messages::input::gameevents::CoachMessage;
-//		using messages::input::gameevents::Penalisation;
-//		using messages::input::gameevents::Unpenalisation;
-//		using messages::input::gameevents::GoalScored;
-//		using messages::input::gameevents::Score;
+		using messages::input::gameevents::GameState;
+		using messages::input::gameevents::Phase;
+		using messages::input::gameevents::Mode;
 
 		using messages::output::Say;
 
@@ -200,11 +192,12 @@ namespace modules {
 			on<Trigger<Every<30, Per<std::chrono::seconds>>>, 
 				With<messages::localisation::Ball>,
 				With<std::vector<messages::localisation::Self>>,
+//				With<Optional<messages::input::gameevents::GameState>>,
 				Options<Single>>([this](const time_t&,
 							const messages::localisation::Ball& ball,
-							const std::vector<messages::localisation::Self>& selfs) {
-
-//					std::cerr << "30 Hz" << std::endl;
+							const std::vector<messages::localisation::Self>& selfs
+//							const std::shared_ptr<const messages::input::gameevents::GameState>& gameController
+							) {
 
 					// Make a copy of the previous state.					
 					memcpy(&previousState, &currentState, sizeof(State));
@@ -219,89 +212,32 @@ namespace modules {
 						currentState.heading = currentState.position + currentState.transform.col(0);
 					}
 
-					// Allow the back panel button to cycle through the primary game states.
-					if (gameStateButtonStatus && !gameStateButtonStatusPrev) {
-						currentState.primaryGameState++;
+					// Parse game controller state infoirmation as well as button pushes.
+					messages::input::gameevents::GameState gameController;
+					updateGameState(gameController);
+//					if (gameController != NULL) {
+//						updateGameState(*gameController);
+//					}
 
-						switch (currentState.primaryGameState) {
-							case GameStatePrimary::INITIAL: {
-								emit(std::move(std::make_unique<messages::output::Say>("Initial")));
-								std::cerr << "initial" << std::endl;
-								break;
-							}
-
-							case GameStatePrimary::SET: {
-								emit(std::move(std::make_unique<messages::output::Say>("Set")));
-								std::cerr << "set" << std::endl;
-								break;
-							}
-
-							case GameStatePrimary::READY: {
-								emit(std::move(std::make_unique<messages::output::Say>("Ready")));
-								std::cerr << "ready" << std::endl;
-								break;
-							}
-
-							case GameStatePrimary::PLAYING: {
-								emit(std::move(std::make_unique<messages::output::Say>("Playing")));
-								std::cerr << "playing" << std::endl;
-								break;
-							}
-
-							case GameStatePrimary::FINISHED: {
-								emit(std::move(std::make_unique<messages::output::Say>("Finished")));
-								std::cerr << "finished" << std::endl;
-								break;
-							}
-
-							default: {
-								currentState.primaryGameState = GameStatePrimary::INITIAL;
-								emit(std::move(std::make_unique<messages::output::Say>("Initial")));
-								std::cerr << "initial" << std::endl;
-								break;
-							}
-						}
-					}
-
-					// What state is the game in?
-					// Initial?
-					// currentState.gameState.Initial = gameController[STATE_INITIAL];
-					// Set?
-					// currentState.gameState.Set = gameController[STATE_SET];
-					// Ready?
-					// currentState.gameState.Ready = gameController[STATE_GameStatePrimary::READY];
-					// Finish?
-					// currentState.gameState.Finish = gameController[STATE_FINISH];
-					// Playing?
-					// currentState.gameState.Playing = gameController[STATE_PLAYING];
-					// Penalty kick?
-					// currentState.gameState.penaltyKick = gameController[STATE_PENALTY_KICK];
-					// Free kick?
-					// currentState.gameState.freeKick = gameController[STATE_FREE_KICK];
-					// Goal kick?
-					// currentState.gameState.goalKick = gameController[STATE_GOAL_KICK];
-					// Corner kick?
-					// currentState.gameState.cornerKick = gameController[STATE_CORNER_KICK];
-					// Throw-In?
-					// currentState.gameState.throwIn = gameController[STATE_THROW_IN];
-					// Paused?
-					// currentState.gameState.paused = gameController[STATE_PAUSED];
-					
 					// Are we kicking off?
-					// currentState.kickOff = gameController[KICK_OFF];
+//					currentState.kickOff = gameController->ourKickOff;
 
 					// Am I the kicker?
 					// Is my start position inside the centre circle? 
 					currentState.kicker = ((arma::norm(START_POSITION, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.primaryGameState == GameStatePrimary::READY || 
-								currentState.primaryGameState == GameStatePrimary::SET || currentState.primaryGameState == GameStatePrimary::PLAYING)) || ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK || 
-								currentState.secondaryGameState == GameStateSecondary::FREE_KICK || currentState.secondaryGameState == GameStateSecondary::GOAL_KICK || currentState.secondaryGameState == GameStateSecondary::CORNER_KICK) && 
-								currentState.primaryGameState == GameStatePrimary::PLAYING); // && currentState.???);
+								currentState.primaryGameState == GameStatePrimary::SET || currentState.primaryGameState == GameStatePrimary::PLAYING));
+
+//					currentState.kicker = ((arma::norm(START_POSITION, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.primaryGameState == GameStatePrimary::READY || 
+//								currentState.primaryGameState == GameStatePrimary::SET || currentState.primaryGameState == GameStatePrimary::PLAYING)) || ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK || 
+//								currentState.secondaryGameState == GameStateSecondary::FREE_KICK || currentState.secondaryGameState == GameStateSecondary::GOAL_KICK || currentState.secondaryGameState == GameStateSecondary::CORNER_KICK) && 
+//								currentState.primaryGameState == GameStatePrimary::PLAYING); // && currentState.???);
 
 					// Have I been picked up?
 					currentState.pickedUp = !feetOnGround && !isGettingUp && !isDiving && !isWalking && !isKicking;
 
 					// Am I penalised?
-					currentState.penalised = penalisedButtonStatus; //|| gameController[PENALISED];
+					// TODO: FIX ME!!!!
+					currentState.penalised = penalisedButtonStatus; // || gameController->team.players.at(0).penalised;
 
 					// Was I just put down?
 					currentState.putDown = feetOnGround && previousState.pickedUp;
@@ -316,6 +252,8 @@ namespace modules {
 						
 					catch (const std::domain_error& e) {
 						std::cerr << "pointContained failed." << std::endl;
+						std::cerr << "selfPosition - (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;	
+						std::cerr << "MY_ZONE - (" << MY_ZONE << std::endl;	
 					}
 
 					// Can I see the ball?
@@ -365,14 +303,15 @@ namespace modules {
 						ParametricLine<2> line;
 						arma::vec2 xaxis = {1, 0};
 						arma::vec2 fieldWidth = {-FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
+						arma::vec2 globalBallPosition = transformPoint(currentState.ball.position) + currentState.position;
 
 						try {
 							planeGoal.setFromNormal(xaxis, fieldWidth);
 						}
 
 						catch (const std::domain_error& e) {
-							std::cerr << "xaxis - " << xaxis << std::endl;	
-							std::cerr << "fieldWidth - " << fieldWidth << std::endl;	
+							std::cerr << "xaxis - (" << xaxis[0] << ", " << xaxis[1] << ")" << std::endl;	
+							std::cerr << "fieldWidth - (" << fieldWidth[0] << ", " << fieldWidth[1] << ")" << std::endl;	
 						}
 
 						try {
@@ -380,18 +319,18 @@ namespace modules {
 						}
 
 						catch (const std::domain_error& e) {
-							std::cerr << "ballPosition - " << currentState.ball.position << std::endl;	
-							std::cerr << "position - " << currentState.position << std::endl;	
+							std::cerr << "ballPosotion - (" << currentState.ball.position[0] << ", " << currentState.ball.position[1] << ")" << std::endl;	
+							std::cerr << "selfPosition - (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;	
 						}
 
 
 						try {
-							line.setFromDirection(transformPoint(currentState.ball.velocity), (transformPoint(currentState.ball.position) + currentState.position));
+							line.setFromDirection(transformPoint(currentState.ball.velocity), globalBallPosition);
 						}
 
 						catch (const std::domain_error& e) {
-							std::cerr << "ballVelocity - " << currentState.ball.velocity << std::endl;	
-							std::cerr << "globalBallPosition - " << (transformPoint(currentState.ball.position) + currentState.position) << std::endl;	
+							std::cerr << "ballVelocity - (" << currentState.ball.velocity[0] << ", " << currentState.ball.velocity[1] << ")" << std::endl;	
+							std::cerr << "ballPosotion - (" << globalBallPosition[0] << ", " << globalBallPosition[1] << ")" << std::endl;	
 						}
 
 						// Is the ball approaching our goals?
@@ -429,45 +368,48 @@ namespace modules {
 					if ((currentState.primaryGameState == GameStatePrimary::INITIAL) || (currentState.primaryGameState == GameStatePrimary::SET) || (currentState.primaryGameState == GameStatePrimary::FINISHED) || currentState.pickedUp) {
 						stopMoving();
 		
-						NUClear::log<NUClear::INFO>("Standing still.");
+//						NUClear::log<NUClear::INFO>("Standing still.");
 					}
 
 	
 					else if (currentState.primaryGameState == GameStatePrimary::READY) {
-						goToPoint(START_POSITION);
+						arma::vec2 heading = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
+						goToPoint(START_POSITION, heading);
 
-						NUClear::log<NUClear::INFO>("Game is about to start. I should be in my starting position.");
+//						NUClear::log<NUClear::INFO>("Game is about to start. I should be in my starting position.");
 					}
 
 					else if(currentState.penalised && !currentState.pickedUp && !currentState.putDown) {
 						stopMoving();
 
-						NUClear::log<NUClear::INFO>("I am penalised and have not been picked up yet. Don't move");
+//						NUClear::log<NUClear::INFO>("I am penalised and have not been picked up yet. Don't move");
 					}
 
 					else if(currentState.penalised && currentState.putDown) {
 						findSelf();
 						findBall();
 
-						NUClear::log<NUClear::INFO>("I am penalised and have been put down. I must be on the side line somewhere. Where am I?");
+//						NUClear::log<NUClear::INFO>("I am penalised and have been put down. I must be on the side line somewhere. Where am I?");
 					}
 
 					else if (!currentState.selfInZone) {
-						goToPoint(optimalPosition);
+						arma::vec2 heading = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
+						goToPoint(optimalPosition, heading);
 
-						NUClear::log<NUClear::INFO>("I am not where I should be. Going there now.");
+//						NUClear::log<NUClear::INFO>("I am not where I should be. Going there now.");
 					}
 
 					else if (currentState.unPenalised) {
-						goToPoint(optimalPosition);
+						arma::vec2 heading = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
+						goToPoint(optimalPosition, heading);
 
-						NUClear::log<NUClear::INFO>("I am unpenalised, I should already know where I am and where the ball is. So find the most optimal location in my zone to go to.");
+//						NUClear::log<NUClear::INFO>("I am unpenalised, I should already know where I am and where the ball is. So find the most optimal location in my zone to go to.");
 					}
 
 					else if ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK) && IS_GOALIE && currentState.ballLost) {
 						findBall();
 
-						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
+//						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
 					}
 
 					else if ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK) && IS_GOALIE && !currentState.ballLost && currentState.ballHasMoved && !currentState.ballApproachingGoal) {
@@ -479,53 +421,53 @@ namespace modules {
 					else if ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK) && currentState.ballLost && currentState.kicker) {
 						findBall();
 
-						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
+//						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
 					}
 
 					else if (currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK && !currentState.ballLost && currentState.kicker) {
 						arma::vec2 goal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 						approachBall(goal);
 
-						NUClear::log<NUClear::INFO>("Penalty kick in progress. Approaching ball.");
+//						NUClear::log<NUClear::INFO>("Penalty kick in progress. Approaching ball.");
 					}
 
 					else if ((previousState.primaryGameState == GameStatePrimary::SET) && (currentState.primaryGameState == GameStatePrimary::PLAYING) && currentState.kickOff && currentState.kicker) {
 						kickBall(arma::normalise(currentState.heading, 2));
 
-						NUClear::log<NUClear::INFO>("Game just started. Time to kick off.");
+//						NUClear::log<NUClear::INFO>("Game just started. Time to kick off.");
 					}
 
 					else if (isKicking) {
 						watchBall();
 
-						NUClear::log<NUClear::INFO>("I be looking at what I be kicking.");
+//						NUClear::log<NUClear::INFO>("I be looking at what I be kicking.");
 					}
 
 
 					else if (currentState.ballLost) {
 						findBall();
 
-						NUClear::log<NUClear::INFO>("Don't know where the ball is. Looking for it.");
+//						NUClear::log<NUClear::INFO>("Don't know where the ball is. Looking for it.");
 					}
 
 					else if ((currentState.ballInZone || currentState.ballApproaching) && currentState.goalInRange) {
 						arma::vec2 goal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 						approachBall(goal);
 
-						NUClear::log<NUClear::INFO>("Walking to ball.");
+//						NUClear::log<NUClear::INFO>("Walking to ball.");
 					}
 
 					else if ((currentState.ballInZone || currentState.ballApproaching) && !currentState.goalInRange) {
 						arma::vec2 nearestZone = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0}; // Find the optimal point in the nearest zone, reflect the position closer to the enemy goal.
 						approachBall(nearestZone);
 
-						NUClear::log<NUClear::INFO>("Walking to ball.");
+//						NUClear::log<NUClear::INFO>("Walking to ball.");
 					}
 
 					else if (currentState.kickPosition && !isKicking) {
 						kickBall(arma::normalise(currentState.heading, 2));
 	
-						NUClear::log<NUClear::INFO>("In kicking position. Kicking ball.");
+//						NUClear::log<NUClear::INFO>("In kicking position. Kicking ball.");
 					}
 
 					else if (currentState.goalInRange && !isKicking) {
@@ -533,24 +475,118 @@ namespace modules {
 						approachBall(goal);
 						kickBall(arma::normalise(goal, 2));
 
-						NUClear::log<NUClear::INFO>("Kick for goal.");
+//						NUClear::log<NUClear::INFO>("Kick for goal.");
 					}
 
 					else if (IS_GOALIE && currentState.ballApproachingGoal) {
 						sideStepToPoint(currentState.ballGoalIntersection);
 
-						NUClear::log<NUClear::INFO>("Ball is approaching goal. Goalie moving to block it.");
+//						NUClear::log<NUClear::INFO>("Ball is approaching goal. Goalie moving to block it.");
 					}
 
 					else {
+						arma::vec2 heading = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 						findSelf();
 						findBall();
-						goToPoint(ZONE_DEFAULTS.at(MY_ZONE));
+						goToPoint(ZONE_DEFAULTS.at(MY_ZONE), heading);
 	
-						NUClear::log<NUClear::INFO>("Unknown behavioural state. Finding self, finding ball, moving to default position.");
+//						NUClear::log<NUClear::INFO>("Unknown behavioural state. Finding self, finding ball, moving to default position.");
 					}
 
 				});
+			}
+
+			void SoccerStrategy::updateGameState(const messages::input::gameevents::GameState& gameController) {
+				// Allow the back panel button to cycle through the primary game states.
+				if (gameStateButtonStatus && !gameStateButtonStatusPrev) {
+					currentState.primaryGameState++;
+
+					switch (currentState.primaryGameState) {
+						case GameStatePrimary::INITIAL: {
+							emit(std::move(std::make_unique<messages::output::Say>("Initial")));
+							std::cerr << "initial" << std::endl;
+							break;
+						}
+
+						case GameStatePrimary::SET: {
+							emit(std::move(std::make_unique<messages::output::Say>("Set")));
+							std::cerr << "set" << std::endl;
+							break;
+						}
+
+						case GameStatePrimary::READY: {
+							emit(std::move(std::make_unique<messages::output::Say>("Ready")));
+							std::cerr << "ready" << std::endl;
+							break;
+						}
+
+						case GameStatePrimary::PLAYING: {
+							emit(std::move(std::make_unique<messages::output::Say>("Playing")));
+							std::cerr << "playing" << std::endl;
+							break;
+						}
+
+						case GameStatePrimary::FINISHED: {
+							emit(std::move(std::make_unique<messages::output::Say>("Finished")));
+							std::cerr << "finished" << std::endl;
+							break;
+						}
+
+						default: {
+							currentState.primaryGameState = GameStatePrimary::INITIAL;
+							emit(std::move(std::make_unique<messages::output::Say>("Initial")));
+							std::cerr << "initial" << std::endl;
+							break;
+						}
+					}
+				}
+
+				(void)gameController;
+/*
+				// What state is the game in?
+				switch (gameController.phase) {
+					case messages::input::gameevents::Phase::READY:
+						currentState.primaryGameState = GameStatePrimary::READY;
+						break;
+
+					case messages::input::gameevents::Phase::SET:
+						currentState.primaryGameState = GameStatePrimary::SET;
+						break;
+
+					case messages::input::gameevents::Phase::PLAYING:
+						currentState.primaryGameState = GameStatePrimary::PLAYING;
+						break;
+
+					case messages::input::gameevents::Phase::TIMEOUT:
+						currentState.primaryGameState = GameStatePrimary::TIMEOUT;
+						break;
+
+					case messages::input::gameevents::Phase::FINISHED:
+						currentState.primaryGameState = GameStatePrimary::FINISHED;
+						break;
+
+					case messages::input::gameevents::Phase::INITIAL:
+					default:
+						currentState.primaryGameState = GameStatePrimary::INITIAL;
+						break;
+
+				}
+
+				switch (gameController.mode) {
+					case messages::input::gameevents::Mode::PENALTY_SHOOTOUT:
+						currentState.secondaryGameState = GameStateSecondary::PENALTY_SHOOTOUT;
+						break;
+
+					case messages::input::gameevents::Mode::OVERTIME:
+						currentState.secondaryGameState = GameStateSecondary::OVERTIME;
+						break;
+					
+					case messages::input::gameevents::Mode::NORMAL:
+					default:
+						currentState.secondaryGameState = GameStateSecondary::NORMAL;
+						break;
+				}
+*/
 			}
 
 			arma::vec2 SoccerStrategy::findOptimalPosition(const Polygon& zone, const arma::vec2& point) {
@@ -610,13 +646,16 @@ namespace modules {
 				emit(std::move(look));
 			}
 
-			void SoccerStrategy::goToPoint(const arma::vec2& position) {
+			void SoccerStrategy::goToPoint(const arma::vec2& position, const arma::vec2& heading) {
 				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
 				approach->targetPositionType = WalkTarget::WayPoint;
-				approach->targetHeadingType = WalkTarget::Ball;
+				approach->targetHeadingType = WalkTarget::WayPoint;
 				approach->walkMovementType = WalkApproach::WalkToPoint;
-				approach->heading = transformPoint(currentState.ball.position) + currentState.position;
+				approach->heading = heading;
 				approach->target = position; 
+
+std::cerr << "target - (" << approach->target[0] << ", " << approach->target[1] << ")" << std::endl;
+std::cerr << "heading - (" << approach->heading[0] << ", " << approach->heading[1] << ")" << std::endl;
 
 				currentState.targetPosition = approach->target;
 				currentState.targetHeading = approach->heading;
