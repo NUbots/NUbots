@@ -36,7 +36,8 @@ namespace robot {
     enum RobotModelStateComponents : int {
         kX = 0,
         kY = 1,
-        kHeading = 2,
+        kImuOffset = 2,
+        // kHeading = 2,
         // kHeadingX = 2,
         // kHeadingY = 3,
     };
@@ -63,7 +64,8 @@ namespace robot {
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
-            const arma::vec3& actual_position);
+            const arma::vec3& actual_position,
+            const messages::input::Sensors& sensors);
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
@@ -81,6 +83,8 @@ namespace robot {
             double observationDifferenceBearingFactor = 0.2;
             double observationDifferenceElevationFactor = 0.2;
         } cfg_;
+
+        arma::mat33 currentImuOrientation;
 
         // arma::mat33 getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state);
         // arma::mat33 getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state);

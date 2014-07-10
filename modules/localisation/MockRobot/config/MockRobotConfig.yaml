@@ -7,3 +7,4 @@ RobotMovementPathPeriod: 100
 SimulateBallMovement: true
 EmitRobotFieldobjects: true
 EmitBallFieldobjects: true
+RobotImuDriftPeriod: 300

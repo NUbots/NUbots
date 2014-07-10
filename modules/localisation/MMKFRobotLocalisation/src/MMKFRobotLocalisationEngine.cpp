@@ -153,8 +153,8 @@ namespace localisation {
             if(cfg_.goal_pair_observation_enabled)
                 robot_models_.AmbiguousMeasurementUpdate(vis_objs, objs);
 
-            if (cfg_.angle_between_goals_observation_enabled)
-                robot_models_.AmbiguousMultipleMeasurementUpdate(vis_objs, objs);
+            // if (cfg_.angle_between_goals_observation_enabled)
+            //     robot_models_.AmbiguousMultipleMeasurementUpdate(vis_objs, objs);
         } else {
             for (auto& ambiguous_object : ambiguous_objects) {
                 // Get a vector of all field objects that the observed object could
@@ -198,5 +198,9 @@ namespace localisation {
         // robot_models_.robot_models_.push_back(std::make_unique<RobotHypothesis>());
         ProcessAmbiguousObjects(goals);
     }
+
+    // void MMKFRobotLocalisationEngine::SensorsUpdate(const messages::input::Sensors& sensors) {
+    //     robot_models_.SensorsUpdate(sensors);
+    // }
 }
 }

@@ -63,6 +63,10 @@ namespace localisation {
             filter_.model.cfg_ = cfg;
         };
 
+        // void SetSensorsData(const messages::input::Sensors& sensors) {
+        //     filter_.model.currentImuOrientation = sensors.orientation;
+        // };
+
         float GetFilterWeight() const { return weight_; }
         void SetFilterWeight(float weight) { weight_ = weight; }
 
@@ -114,6 +118,8 @@ namespace localisation {
                 model->SetConfig(rm_cfg);
             }
         };
+
+        // void SensorsUpdate(const messages::input::Sensors& sensors);
 
         void RemoveOldModels();
 

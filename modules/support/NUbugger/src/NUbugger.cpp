@@ -275,7 +275,7 @@ namespace modules {
                 rfsr->set_y(sensors.rightFSR[1]);
                 rfsr->set_z(sensors.rightFSR[2]);
 
-                send(message);
+                // send(message);
             });
 
             imageHandle = on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {

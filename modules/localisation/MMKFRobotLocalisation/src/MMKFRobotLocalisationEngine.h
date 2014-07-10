@@ -26,6 +26,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/support/FieldDescription.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/input/Sensors.h"
 #include "MultiModalRobotModel.h"
 
 namespace modules {
@@ -60,6 +61,8 @@ namespace localisation {
             float time_increment);
 
         void ProcessObjects(const std::vector<messages::vision::Goal>& goals);
+        
+        // void SensorsUpdate(const messages::input::Sensors& sensors);
 
         std::shared_ptr<messages::support::FieldDescription> field_description();
 
