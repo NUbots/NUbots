@@ -119,7 +119,6 @@ namespace modules {
 			bool goalInRange;
 			bool kicker;
 			bool pickedUp;
-			bool putDown;
 			bool penalised;
 			bool unPenalised;
 			bool kickOff;

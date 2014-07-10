@@ -260,9 +260,6 @@ namespace modules {
 //						currentState.penalised = true;
 //						emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
 //					}
-
-					// Was I just put down?
-					currentState.putDown = !feetOffGround && previousState.pickedUp;
 					
 					// Did I just become unpenalised?
 					currentState.unPenalised = !currentState.penalised && previousState.penalised;
@@ -386,26 +383,20 @@ namespace modules {
 					arma::vec2 optimalPosition = findOptimalPosition(ZONES.at(MY_ZONE), globalBallPosition);
 
 					// Determine current state and appropriate action(s).
+					// Stop moving if in the initial, set or finished states, as well as when picked up
 					if ((currentState.primaryGameState == GameStatePrimary::INITIAL) || (currentState.primaryGameState == GameStatePrimary::SET) || (currentState.primaryGameState == GameStatePrimary::FINISHED) || currentState.pickedUp) {
 						stopMoving();
 		
 //						NUClear::log<NUClear::INFO>("Standing still.");
 					}
 
-					else if(currentState.penalised && !currentState.pickedUp && !currentState.putDown) {
+					// Stop moving and try to localise when penalised
+					else if(currentState.penalised) {
 						stopMoving();
-
-//						NUClear::log<NUClear::INFO>("I am penalised and have not been picked up yet. Don't move");
-					}
-
-					else if(currentState.penalised && currentState.putDown) {
 						findSelf();
 						findBall();
 
-						// Force this state to happen until we are unpenalised.
-						currentState.pickedUp = true;
-
-//						NUClear::log<NUClear::INFO>("I am penalised and have been put down. I must be on the side line somewhere. Where am I?");
+//						NUClear::log<NUClear::INFO>("I am penalised.");
 					}
 
 					else if (currentState.primaryGameState == GameStatePrimary::READY) {
