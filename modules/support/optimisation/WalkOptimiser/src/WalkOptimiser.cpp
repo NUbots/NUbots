@@ -39,7 +39,7 @@ namespace modules {
 
             using messages::motion::ExecuteGetup;
             using messages::motion::KillGetup;
-            
+
             using messages::support::SaveConfiguration;
             using messages::support::Configuration;
 
@@ -75,15 +75,15 @@ namespace modules {
                         walk_command.segments.back().duration = std::chrono::milliseconds(int(std::milli::den * segment["duration"].as<double>()));
                     }
 
-                    getup_cancel_trial_threshold = config["getup_cancel_trial_threshold"].as<double>();
+                    getup_cancel_trial_threshold = config["getup_cancel_trial_threshold"].as<uint>();
 
                     configuration_wait_milliseconds = config["configuration_wait_milliseconds"].as<int>();
 
                     emit(std::make_unique<OptimiseWalkCommand>());
                 });
 
-                on<Trigger<OptimiseWalkCommand>, With<Configuration<WalkOptimiserCommand>>, Options<Sync<WalkOptimiser>> >("Optimise Walk", [this]( const OptimiseWalkCommand&, const Configuration<WalkOptimiserCommand>& walkConfig){
-                    
+                on<Trigger<OptimiseWalkCommand>, With<Configuration<WalkOptimiserCommand>>, Options<Sync<WalkOptimiser>>>("Optimise Walk", [this](const OptimiseWalkCommand&, const Configuration<WalkOptimiserCommand>& walkConfig){
+
                     //Start optimisation
                     std::cerr << "Optimiser command" << std::endl;
                     //Get samples
@@ -96,19 +96,20 @@ namespace modules {
                     //Use iteritive evaluation so that more samples can be added at any time
                     currentSample = 0;
 
-                    std::cerr << "Sample: " << currentSample <<std::endl;            
-                    //Apply the parameters to the walk engine        
+                    std::cerr << "Sample: " << currentSample <<std::endl;
+                    //Apply the parameters to the walk engine
                     setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
                     //Now wait for WalkConfigSaved
-                    
+
                 });
 
                 on<Trigger<WalkConfigSaved>, Options<Sync<WalkOptimiser>>>([this](const WalkConfigSaved&){
                     std::this_thread::sleep_for(std::chrono::milliseconds(configuration_wait_milliseconds));
                     //Start a walk routine
                     auto command = std::make_unique<FixedWalkCommand>(walk_command);
-                    emit(std::move(command));                   
+                    emit(std::move(command));
                 });
+
 
                 on< Trigger< Every<25, Per<std::chrono::seconds>> >, With<Sensors>, Options<Sync<WalkOptimiser>> >("Walk Data Manager", [this](const time_t&, const Sensors& sensors){
                     //Record data
@@ -118,13 +119,13 @@ namespace modules {
                 on<Trigger<ExecuteGetup>>("Getup Recording", [this](const ExecuteGetup&){
                     //Record the robot falling over
                     data.recordGetup();
-                              
+
                 });
 
                 on<Trigger<KillGetup>>("Getup Recording", [this](const KillGetup&){
                     data.getupFinished(); 
                     // //If this set of parameters is very bad, stop the trial and send cancel fixed walk command
-                    if(data.numberOfGetups >= getup_cancel_trial_threshold){                        
+                    if(data.numberOfGetups >= getup_cancel_trial_threshold){
                         emit(std::make_unique<CancelFixedWalk>());
                     }
                 });
@@ -143,10 +144,10 @@ namespace modules {
                     }
                 });
 
-                on<Trigger<OptimisationComplete>, Options<Sync<WalkOptimiser>> >("Record Results", [this]( const OptimisationComplete&){
+                on<Trigger<OptimisationComplete>, Options<Sync<WalkOptimiser>>>("Record Results", [this]( const OptimisationComplete&){
                     //Combine samples
                     arma::vec result = utility::math::optimisation::PGA::updateEstimate(samples, fitnesses);
-                    
+
                     std::cerr << "Final Result:" <<std::endl;
                     auto cfg = getWalkConfig(result);
                     saveConfig(cfg);
@@ -219,7 +220,7 @@ namespace modules {
                     if(std::fabs(tiltMag) < M_PI_4){
                         tilt(tiltMag);
                     }
-                }                
+                }
             }
             void FitnessData::recordGetup(){
                 numberOfGetups++;

@@ -36,11 +36,11 @@ namespace modules {
             struct OptimiseWalkCommand{};
             struct OptimisationComplete{};
 
-            
+
 
             class FitnessData {
             public:
-                int numberOfGetups = 0;
+                uint numberOfGetups = 0;
                 arma::running_stat<double> tilt;
                 bool recording;
                 double popFitness();
@@ -62,7 +62,7 @@ namespace modules {
 
                 int getup_cancel_trial_threshold;
 
-                int configuration_wait_milliseconds = 2000; 
+                int configuration_wait_milliseconds = 2000;
 
                 messages::support::Configuration<messages::behaviour::WalkOptimiserCommand> initialConfig;
 
