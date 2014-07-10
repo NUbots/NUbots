@@ -70,7 +70,7 @@ namespace input {
             std::copy(std::begin(gamecontroller::RECEIVE_HEADER), std::end(gamecontroller::RECEIVE_HEADER), std::begin(packet.header));
             packet.version = SUPPORTED_VERSION;
             packet.packetNumber = 0;
-            packet.playersPerTeam = 6;
+            packet.playersPerTeam = PLAYERS_PER_TEAM;
             packet.state = gamecontroller::State::INITIAL;
             packet.firstHalf = true;
             packet.kickOffTeam = static_cast<gamecontroller::TeamColour>(-1);
@@ -79,7 +79,7 @@ namespace input {
             packet.dropInTime = -1;
             packet.secsRemaining = 0;
             packet.secondaryTime = 0;
-            for (uint i = 0; i < 2; i++) {
+            for (uint i = 0; i < NUM_TEAMS; i++) {
                 auto& ownTeam = packet.teams[i];
                 ownTeam.teamId = (i == 0 ? TEAM_ID : 0);
                 ownTeam.teamColour = static_cast<gamecontroller::TeamColour>(-1);
@@ -92,7 +92,7 @@ namespace input {
                 coach.penalisedTimeLeft = 0;
                 for (uint i = 0; i < gamecontroller::MAX_NUM_PLAYERS; i++) {
                     auto& player = ownTeam.players[i];
-                    if (i <= 6) {
+                    if (i <= PLAYERS_PER_TEAM) {
                         player.penaltyState = gamecontroller::PenaltyState::UNPENALISED;
                         player.penalisedTimeLeft = 0;
                     } else {
@@ -117,25 +117,29 @@ namespace input {
         });
 
         on<Trigger<Every<2, Per<std::chrono::seconds>>>>("GameController Reply", [this](const time_t&) {
-            if (socket) {
-
-                sockaddr_in socketAddress;
-                memset(&socketAddress, 0, sizeof(socketAddress));
-                socketAddress.sin_family = AF_INET;
-                socketAddress.sin_port = htons(port);
-                socketAddress.sin_addr.s_addr = (BROADCAST_IP.empty() ? INADDR_ANY : inet_addr(BROADCAST_IP.c_str()));
-
-                GameControllerReplyPacket replyPacket;
-                std::copy(std::begin(gamecontroller::RETURN_HEADER), std::end(gamecontroller::RETURN_HEADER), std::begin(replyPacket.header));
-                replyPacket.version = gamecontroller::RETURN_VERSION;
-                replyPacket.team = TEAM_ID;
-                replyPacket.player = PLAYER_ID;
-                replyPacket.message = uint8_t(ReplyMessage::ALIVE);
-                if(::sendto(socket, reinterpret_cast<char*>(&replyPacket), sizeof(replyPacket), 0, reinterpret_cast<sockaddr*>(&socketAddress), sizeof(socketAddress)) < 0) {
-                    throw std::system_error(errno, std::system_category());
-                }
-            }
+            sendReplyPacket(ReplyMessage::ALIVE);
         });
+    }
+
+    void GameController::sendReplyPacket(const ReplyMessage& replyMessage) const {
+        if (socket) {
+
+            sockaddr_in socketAddress;
+            memset(&socketAddress, 0, sizeof(socketAddress));
+            socketAddress.sin_family = AF_INET;
+            socketAddress.sin_port = htons(port);
+            socketAddress.sin_addr.s_addr = (BROADCAST_IP.empty() ? INADDR_ANY : inet_addr(BROADCAST_IP.c_str()));
+
+            GameControllerReplyPacket replyPacket;
+            std::copy(std::begin(gamecontroller::RETURN_HEADER), std::end(gamecontroller::RETURN_HEADER), std::begin(replyPacket.header));
+            replyPacket.version = gamecontroller::RETURN_VERSION;
+            replyPacket.team = TEAM_ID;
+            replyPacket.player = PLAYER_ID;
+            replyPacket.message = replyMessage;
+            if(::sendto(socket, reinterpret_cast<char*>(&replyPacket), sizeof(replyPacket), 0, reinterpret_cast<sockaddr*>(&socketAddress), sizeof(socketAddress)) < 0) {
+                throw std::system_error(errno, std::system_category());
+            }
+        }
     }
 
     void GameController::run() {
@@ -239,6 +243,7 @@ namespace input {
                     if (i == PLAYER_ID) {
                         // self penalised :@
                         emit(std::make_unique<Penalisation<SELF>>(Penalisation<SELF>{i, unpenalisedTime, reason}));
+                        sendReplyPacket(ReplyMessage::PENALISED);
                     }
                     else {
                         // team mate penalised :'(
@@ -252,6 +257,7 @@ namespace input {
                     if (i == PLAYER_ID) {
                         // self unpenalised :)
                         emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{i}));
+                        sendReplyPacket(ReplyMessage::UNPENALISED);
                     }
                     else {
                         // team mate unpenalised :)
@@ -530,7 +536,6 @@ namespace input {
     const Team& GameController::getOwnTeam(const GameControllerPacket& state) const {
 
         for (auto& team : state.teams) {
-            // log(TEAM_ID, "->", uint(team.teamId));
             if (team.teamId == TEAM_ID) {
                 return team;
             }

@@ -38,6 +38,8 @@ namespace modules {
         class GameController : public NUClear::Reactor {
             private:
                 static constexpr const uint SUPPORTED_VERSION = 8;
+                static constexpr const uint PLAYERS_PER_TEAM = 6;
+                static constexpr const uint NUM_TEAMS = 2;
 
                 volatile bool listening = true;
                 std::atomic<int> socket;
@@ -53,6 +55,8 @@ namespace modules {
                 const gamecontroller::Team& getOwnTeam(const gamecontroller::GameControllerPacket& packet) const;
                 const gamecontroller::Team& getOpponentTeam(const gamecontroller::GameControllerPacket& packet) const;
                 messages::input::gameevents::PenaltyReason getPenaltyReason(const gamecontroller::PenaltyState& penaltyState) const;
+
+                void sendReplyPacket(const gamecontroller::ReplyMessage& replyMessage) const;
             public:
                 static constexpr const char* CONFIGURATION_PATH = "GameController.yaml";
 
