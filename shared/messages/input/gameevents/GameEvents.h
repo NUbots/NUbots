@@ -37,6 +37,19 @@ namespace gameevents {
         MAGENTA
     };
 
+    enum class PenaltyReason {
+        UNPENALISED,
+        BALL_MANIPULATION,
+        PHYSICAL_CONTACT,
+        ILLEGAL_ATTACK,
+        ILLEGAL_DEFENSE,
+        REQUEST_FOR_PICKUP,
+        REQUEST_FOR_SERVICE,
+        REQUEST_FOR_PICKUP_TO_SERVICE,
+        SUBSTITUTE,
+        MANUAL
+    };
+
     struct Score {
         uint ownScore;
         uint opponentScore;
@@ -51,6 +64,7 @@ namespace gameevents {
     struct Penalisation {
         uint robotId;
         NUClear::clock::time_point ends;
+        PenaltyReason reason;
     };
 
     template <enum Context>
@@ -131,8 +145,9 @@ namespace gameevents {
     struct GameState {
 
         struct Robot {
-          bool penalised;
-          NUClear::clock::time_point unpenalised;
+            uint id;
+            PenaltyReason penaltyReason;
+            NUClear::clock::time_point unpenalised;
         };
 
         struct Team {
