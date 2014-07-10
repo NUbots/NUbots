@@ -58,9 +58,9 @@ namespace modules {
 
                 uint currentSample;
                 arma::mat samples;
-                uint number_of_samples;
+                int number_of_samples;
 
-                uint getup_cancel_trial_threshold;
+                int getup_cancel_trial_threshold;
 
                 int configuration_wait_milliseconds = 2000; 
 

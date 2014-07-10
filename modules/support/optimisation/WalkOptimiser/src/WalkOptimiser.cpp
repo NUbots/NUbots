@@ -110,18 +110,18 @@ namespace modules {
                     emit(std::move(command));                   
                 });
 
-                on< Trigger< Every<25, Per<std::chrono::seconds>> >, With<Sensors>, Options<Sync<WalkOptimiser>> >("Walk Data Manager", [this](const time_t& t, const Sensors& sensors){
+                on< Trigger< Every<25, Per<std::chrono::seconds>> >, With<Sensors>, Options<Sync<WalkOptimiser>> >("Walk Data Manager", [this](const time_t&, const Sensors& sensors){
                     //Record data
                     data.update(sensors);
                 });
 
-                on<Trigger<ExecuteGetup>>("Getup Recording", [this](const ExecuteGetup& command){
+                on<Trigger<ExecuteGetup>>("Getup Recording", [this](const ExecuteGetup&){
                     //Record the robot falling over
                     data.recordGetup();
                               
                 });
 
-                on<Trigger<KillGetup>>("Getup Recording", [this](const KillGetup& command){
+                on<Trigger<KillGetup>>("Getup Recording", [this](const KillGetup&){
                     data.getupFinished(); 
                     // //If this set of parameters is very bad, stop the trial and send cancel fixed walk command
                     if(data.numberOfGetups >= getup_cancel_trial_threshold){                        
@@ -129,7 +129,7 @@ namespace modules {
                     }
                 });
 
-                on<Trigger<FixedWalkFinished>, Options<Sync<WalkOptimiser>> > ("Walk Routine Finised", [this](const FixedWalkFinished& command){
+                on<Trigger<FixedWalkFinished>, Options<Sync<WalkOptimiser>> > ("Walk Routine Finised", [this](const FixedWalkFinished&){
                     //Get and reset data 
                     fitnesses[currentSample] = data.popFitness();
                     std::cerr << "Sample Done! Fitness: " << fitnesses[currentSample] << std::endl;
@@ -183,7 +183,7 @@ namespace modules {
 
             YAML::Node WalkOptimiser::getWalkConfig(const arma::vec& state){
                 YAML::Node config(initialConfig.config);
-                for(int i = 0; i < state.size(); ++i){  
+                for(uint i = 0; i < state.size(); ++i){  
                     config[parameter_names[i]] = state[i];
                 }
                 printState(state);
