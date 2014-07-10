@@ -29,7 +29,7 @@ namespace modules {
     namespace support {
 
         /**
-         * Intelligent debugging, logging and graphing for the NUBots system.
+         * Intelligent debugging, logging and graphing for the NUbots system.
          *
          * @author Brendan Annable
          * @author Trent Houliston
@@ -42,19 +42,17 @@ namespace modules {
             bool listening = true;
 
             // Reaction Handles
-            ReactionHandle dataPointHandle;
-            ReactionHandle actionStartHandle;
-            ReactionHandle actionKillHandle;
-            ReactionHandle registerActionHandle;
-            ReactionHandle sensorsHandle;
-            ReactionHandle imageHandle;
-            ReactionHandle reactionStatisticsHandle;
-            ReactionHandle classifiedImageHandle;
-            ReactionHandle goalsHandle;
-            ReactionHandle ballsHandle;
-            ReactionHandle localisationHandle;
+            std::map<std::string, std::vector<ReactionHandle>> handles;
 
             std::mutex mutex;
+
+            void provideDataPoints();
+            void provideBehaviour();
+            void provideGameController();
+            void provideLocalisation();
+            void provideReactionStatistics();
+            void provideSensors();
+            void provideVision();
 
             void send(zmq::message_t& packet);
             void send(messages::support::nubugger::proto::Message message);
@@ -62,7 +60,7 @@ namespace modules {
             void recvMessage(const messages::support::nubugger::proto::Message& message);
             void recvCommand(const messages::support::nubugger::proto::Message& message);
             void recvLookupTable(const messages::support::nubugger::proto::Message& message);
-            void recvReactionHandlers(const messages::support::nubugger::proto::Message& message);
+            void recvReactionHandles(const messages::support::nubugger::proto::Message& message);
 
             void EmitLocalisationModels(
                 const std::unique_ptr<messages::localisation::FieldObject>& robot_model,
@@ -71,6 +69,7 @@ namespace modules {
             void run();
             void kill();
         public:
+            static constexpr const char* CONFIGURATION_PATH = "NUbugger.yaml";
             explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);
         };
 

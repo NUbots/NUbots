@@ -26,6 +26,21 @@ namespace messages {
 namespace input {
 namespace gameevents {
 
+    enum class Mode {
+        NORMAL,
+        PENALTY_SHOOTOUT,
+        OVERTIME
+    };
+
+    enum class Phase {
+        INITIAL,
+        READY,
+        SET,
+        PLAYING,
+        TIMEOUT,
+        FINISHED
+    };
+
     enum Context {
         SELF,
         TEAM,
@@ -89,22 +104,6 @@ namespace gameevents {
     struct KickOffTeam {
         Context team;
     };
-
-    enum class Mode {
-        NORMAL,
-        PENALTY_SHOOTOUT,
-        OVERTIME
-    };
-
-    enum class Phase {
-        INITIAL,
-        READY,
-        SET,
-        PLAYING,
-        TIMEOUT,
-        FINISHED
-    };
-
 
     template <enum Phase>
     struct GamePhase;

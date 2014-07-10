@@ -17,20 +17,30 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_VISION_SAVELOOKUPTABLE_H
-#define MESSAGES_VISION_SAVELOOKUPTABLE_H
+#include "NUbugger.h"
 
-#include "messages/vision/LookUpTable.h"
+#include "messages/support/nubugger/proto/Message.pb.h"
 
-namespace messages {
-    namespace vision {
+#include "utility/time/time.h"
 
-        struct SaveLookUpTable {
-        };
+namespace modules {
+namespace support {
+    using messages::support::nubugger::proto::Message;
+    using utility::time::getUtcTimestamp;
 
+    using messages::support::nubugger::proto::DataPoint;
 
+    void NUbugger::provideDataPoints() {
+
+        handles["data_points"].push_back(on<Trigger<DataPoint>>([this](const DataPoint& data_point) {
+            Message message;
+            message.set_type(Message::DATA_POINT);
+            message.set_utc_timestamp(getUtcTimestamp());
+
+            *(message.mutable_data_point()) = data_point;
+
+            send(message);
+        }));
     }
 }
-
-#endif // MESSAGES_VISION_SAVELOOKUPTABLE_H
-
+}
