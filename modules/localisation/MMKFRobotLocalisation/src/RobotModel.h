@@ -75,11 +75,15 @@ namespace robot {
 
         arma::mat::fixed<size, size> processNoise();
 
-        double processNoiseFactor = 1e-3;
+        struct Config {
+            double processNoisePositionFactor = 1e-3;
+            double processNoiseHeadingFactor = 1e-3;
+            double observationDifferenceBearingFactor = 0.2;
+            double observationDifferenceElevationFactor = 0.2;
+        } cfg_;
 
-        arma::mat33 getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state);
-
-        arma::mat33 getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state);
+        // arma::mat33 getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state);
+        // arma::mat33 getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state);
     };
 }
 }

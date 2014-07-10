@@ -29,6 +29,7 @@
 #include "messages/input/Sensors.h"
 #include "utility/localisation/transform.h"
 
+using utility::localisation::transform::SphericalRobotObservation;
 using utility::localisation::transform::WorldToRobotTransform;
 using messages::input::Sensors;
 using messages::localisation::FakeOdometry;
@@ -39,13 +40,6 @@ using utility::math::coordinates::cartesianToSpherical;
 namespace modules {
 namespace localisation {
 namespace robot {
-
-// arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
-//     const arma::vec::fixed<RobotModel::size>& state, double deltaT) {
-//         return state;
-//     auto result = state;
-//     return result;
-// }
 
 // arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
 //     const arma::vec::fixed<RobotModel::size>& state, double deltaT) {
@@ -78,46 +72,15 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     // }
 }
 
-
 /// Return the predicted observation of an object at the given position
-    arma::vec RobotModel::predictedObservation(
-        const arma::vec::fixed<RobotModel::size>& state, const arma::vec3& actual_position) {
-    // arma::mat worldToRobot = getWorldToRobotTransform(state);
-    // // arma::mat robotToWorld = getRobotToWorldTransform(state);
-    // // arma::mat identity = worldToRobot * robotToWorld;
-    // // NUClear::log("worldToRobot\n",worldToRobot, "\nrobotToWorld\n",robotToWorld, "\nidentity\n",identity);
-    // arma::vec objectPosition = arma::vec({actual_position[0], actual_position[1], 1});
-    // arma::vec expectedObservation = worldToRobot * objectPosition;
-    // return cartesianToRadial(expectedObservation.rows(0, 1));
+arma::vec RobotModel::predictedObservation(
+    const arma::vec::fixed<RobotModel::size>& state,
+    const arma::vec3& actual_position) {
 
-    auto actual_pos_robot_2d = WorldToRobotTransform(state.rows(kX, kY),
-                                                     state(kHeading),
-                                                     actual_position.rows(0, 1));
-    auto actual_pos_robot_3d = arma::vec3({actual_pos_robot_2d(0),
-                                           actual_pos_robot_2d(1),
-                                           actual_position(2)});
-    return cartesianToSpherical(actual_pos_robot_3d);
-
-    // NUClear::log("worldToRobot =\n", worldToRobot);
-    // NUClear::log("objectPosition =\n", objectPosition);
-    // NUClear::log("predictedObservation =\n", expectedObservation);
-
-    // // // Radial coordinates
-    // arma::vec2 diff = actual_position - state.rows(kX, kY);
-    // arma::vec2 radial = utility::math::coordinates::cartesianToRadial(diff);
-    // // radial(1) = utility::math::angle::normalizeAngle(radial[1] - state[kHeading]);
-    // // return radial;
-
-    // auto heading_angle = std::atan2(state[kHeadingY], state[kHeadingX]);
-
-    // // Distance and unit vector heading
-    // heading_angle = utility::math::angle::normalizeAngle(radial[1] - heading_angle);
-
-    // auto heading_x = std::cos(heading_angle);
-    // auto heading_y = std::sin(heading_angle);
-
-    // // arma::vec2 heading = arma::normalise(diff);
-    // return {radial[0], heading_x, heading_y};
+    auto obs = SphericalRobotObservation(state.rows(kX, kY),
+                                         state(kHeading),
+                                         actual_position);
+    return obs;
 }
 
 // Angle between goals
@@ -125,18 +88,15 @@ arma::vec RobotModel::predictedObservation(
     const arma::vec::fixed<RobotModel::size>& state,
     const std::vector<arma::vec>& actual_positions) {
 
-    // // Radial coordinates
-    arma::vec diff_1 = actual_positions[0] - state.rows(kX, kY);
-    arma::vec diff_2 = actual_positions[1] - state.rows(kX, kY);
+    arma::vec diff_1 = actual_positions[0].rows(0, 1) - state.rows(kX, kY);
+    arma::vec diff_2 = actual_positions[1].rows(0, 1) - state.rows(kX, kY);
     arma::vec radial_1 = cartesianToRadial(diff_1);
     arma::vec radial_2 = cartesianToRadial(diff_2);
 
     auto angle_diff = utility::math::angle::difference(radial_1[1], radial_2[1]);
 
-
     return { std::abs(angle_diff) };
 }
-
 
 arma::vec RobotModel::observationDifference(const arma::vec& a,
                                             const arma::vec& b) {
@@ -145,44 +105,24 @@ arma::vec RobotModel::observationDifference(const arma::vec& a,
     } else {
         // Spherical coordinates
         arma::vec3 result = a - b;
-        // result(1) = utility::math::angle::normalizeAngle(result[1]);
-        result(1) = utility::math::angle::difference(a(1), b(1));
-        result(2) = utility::math::angle::difference(a(2), b(2));
+        result(1) = utility::math::angle::normalizeAngle(result(1)) * cfg_.observationDifferenceBearingFactor;
+        result(2) = utility::math::angle::normalizeAngle(result(2)) * cfg_.observationDifferenceElevationFactor;
         return result;
     }
-
-    // // Distance and unit vector heading
-    // return a - b;
-    // arma::vec2 result = a - b;
-    // arma::vec2 heading_diff = {result[1], result[2]};
-    // arma::vec2 heading = arma::normalise(heading_diff);
-    // return {result[0], heading[0], heading[1]};
 }
-
 
 arma::vec::fixed<RobotModel::size> RobotModel::limitState(
     const arma::vec::fixed<RobotModel::size>& state) {
 
     return state;
-
-    // auto result = state;
-    // // // // How to get clipping values from config system?
-    // // // result[kX] = std::max(std::min(result[kX], 4.5 + 0.7) , -4.5 -0.7);
-    // // // result[kY] = std::max(std::min(result[kY], 3 + 0.7) , -3 -0.7);
-
-    // // // Radial coordinates
-    // // result[kHeading] = utility::math::angle::normalizeAngle(result[kHeading]);
-    // return result;
-
-
-    // // Unit vector orientation
-    // arma::vec2 heading = { state[kHeadingX], state[kHeadingY] };
-    // arma::vec2 unit = arma::normalise(heading);
-    // return arma::vec({ state[kX], state[kY], state[kHeadingX], state[kHeadingY] });
 }
 
 arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() {
-    return arma::eye(RobotModel::size, RobotModel::size) * processNoiseFactor;
+    arma::mat noise = arma::eye(RobotModel::size, RobotModel::size);
+    noise(kX, kX) *= cfg_.processNoisePositionFactor;
+    noise(kY, kY) *= cfg_.processNoisePositionFactor;
+    noise(kHeading, kHeading) *= cfg_.processNoiseHeadingFactor;
+    return noise;
 }
 
 // arma::mat33 RobotModel::getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state){

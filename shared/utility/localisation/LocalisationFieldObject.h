@@ -56,8 +56,8 @@ public:
             << "{ "
             << "name: " << o.name_ << ", "
             << "position: ["
-                << std::setw(7) << o.location_[0] << ", "
-                << std::setw(7) << o.location_[1] << "]"
+                << std::setw(7) << o.location_(0) << ", "
+                << std::setw(7) << o.location_(1) << "]"
             << " }";
     }
 };

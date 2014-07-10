@@ -170,7 +170,7 @@ namespace localisation {
     void MMKFRobotLocalisationEngine::IndividualStationaryObjectUpdate(
         const std::vector<messages::vision::Goal>& goals,
         float) {
-
+        
         for (auto& observed_object : goals) {
 
             LocalisationFieldObject actual_object;
@@ -194,8 +194,8 @@ namespace localisation {
         @param time_increment The time that has elapsed since the previous localisation frame.
      */
     void MMKFRobotLocalisationEngine::ProcessObjects(const std::vector<messages::vision::Goal>& goals) {
-        // robot_models_ = std::vector<std::unique_ptr<RobotHypothesis>>();
-        // robot_models_.push_back(std::make_unique<RobotHypothesis>());
+        // robot_models_.robot_models_ = std::vector<std::unique_ptr<RobotHypothesis>>();
+        // robot_models_.robot_models_.push_back(std::make_unique<RobotHypothesis>());
         ProcessAmbiguousObjects(goals);
     }
 }

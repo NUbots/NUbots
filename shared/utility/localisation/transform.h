@@ -22,6 +22,7 @@
 
 #include <armadillo>
 #include "utility/math/matrix.h"
+#include "utility/math/coordinates.h"
 
 namespace utility {
 namespace localisation {
@@ -63,6 +64,22 @@ namespace transform {
         arma::mat rot = utility::math::matrix::rotationMatrix(-robot_heading);
         // Subtract robot_pos, then rotate relative_ball_pos by -robot_heading.
         return rot * (field_ball_pos - robot_pos);
+    }
+
+    inline arma::vec SphericalRobotObservation(
+            const arma::vec& robot_pos,
+            const double& robot_heading,
+            const arma::vec3& actual_position) {
+        auto actual_pos_robot_2d = WorldToRobotTransform(robot_pos,
+                                                     robot_heading,
+                                                     actual_position.rows(0, 1));
+        auto actual_pos_robot_3d = arma::vec3({actual_pos_robot_2d(0),
+                                           actual_pos_robot_2d(1),
+                                           actual_position(2)});
+
+        auto obs = utility::math::coordinates::cartesianToSpherical(actual_pos_robot_3d);
+
+        return obs;
     }
 
 }
