@@ -39,15 +39,18 @@ namespace modules {
             private:
                 static constexpr const uint SUPPORTED_VERSION = 8;
                 static constexpr const uint PLAYERS_PER_TEAM = 6;
+                static constexpr const uint ACTIVE_PLAYERS_PER_TEAM = 4;
                 static constexpr const uint NUM_TEAMS = 2;
 
                 volatile bool listening = true;
                 std::atomic<int> socket;
                 uint port;
-                gamecontroller::GameControllerPacket packet;
                 uint TEAM_ID;
                 uint PLAYER_ID;
                 std::string BROADCAST_IP;
+
+                gamecontroller::GameControllerPacket packet;
+                gamecontroller::Mode mode;
 
                 void kill();
                 void run();

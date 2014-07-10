@@ -67,14 +67,16 @@ namespace input {
                 ::close(oldSocket);
             }
 
+            mode = static_cast<gamecontroller::Mode>(-1);
+
             std::copy(std::begin(gamecontroller::RECEIVE_HEADER), std::end(gamecontroller::RECEIVE_HEADER), std::begin(packet.header));
             packet.version = SUPPORTED_VERSION;
             packet.packetNumber = 0;
             packet.playersPerTeam = PLAYERS_PER_TEAM;
-            packet.state = gamecontroller::State::INITIAL;
+            packet.state = static_cast<gamecontroller::State>(-1);
             packet.firstHalf = true;
             packet.kickOffTeam = static_cast<gamecontroller::TeamColour>(-1);
-            packet.mode = gamecontroller::Mode::NORMAL;
+            packet.mode = static_cast<gamecontroller::Mode>(-1);
             packet.dropInTeam = static_cast<gamecontroller::TeamColour>(-1);
             packet.dropInTime = -1;
             packet.secsRemaining = 0;
@@ -92,7 +94,7 @@ namespace input {
                 coach.penalisedTimeLeft = 0;
                 for (uint i = 0; i < gamecontroller::MAX_NUM_PLAYERS; i++) {
                     auto& player = ownTeam.players[i];
-                    if (i <= PLAYERS_PER_TEAM) {
+                    if (i <= ACTIVE_PLAYERS_PER_TEAM) {
                         player.penaltyState = gamecontroller::PenaltyState::UNPENALISED;
                         player.penalisedTimeLeft = 0;
                     } else {
@@ -329,7 +331,8 @@ namespace input {
         /*******************************************************************************************
          * Process ball kicked out
          ******************************************************************************************/
-        if (oldPacket.dropInTime >= 0 && oldPacket.dropInTime > newPacket.dropInTime)  {
+        // Woo boolean algebra!
+        if ((newPacket.dropInTime != -1 && ((newPacket.dropInTime < oldPacket.dropInTime) == (oldPacket.dropInTime != -1))) || newPacket.dropInTeam != oldPacket.dropInTeam) {
 
             // ball was kicked out by dropInTeam
             auto time = NUClear::clock::now() - std::chrono::seconds(newPacket.dropInTime);
@@ -383,9 +386,11 @@ namespace input {
         /*******************************************************************************************
          * Process state/mode changes
          ******************************************************************************************/
-        if (oldPacket.mode != newPacket.mode && newPacket.mode != gamecontroller::Mode::TIMEOUT) {
+        if (newPacket.mode != mode
+            && oldPacket.mode != gamecontroller::Mode::TIMEOUT
+            && newPacket.mode != gamecontroller::Mode::TIMEOUT) {
 
-            // TODO update our mode in our state
+            mode = newPacket.mode;
 
             // Changed modes but not to timeout
             switch (newPacket.mode) {
@@ -424,7 +429,7 @@ namespace input {
                 emit(std::make_unique<GamePhase<Phase::TIMEOUT>>(GamePhase<Phase::TIMEOUT>{time}));
             });
         }
-        else if (oldPacket.state != newPacket.state) {
+        else if (oldPacket.state != newPacket.state || (oldPacket.mode == gamecontroller::Mode::TIMEOUT && newPacket.mode != gamecontroller::Mode::TIMEOUT)) {
 
             // State has changed, process it
 
