@@ -26,6 +26,21 @@ namespace messages {
 namespace input {
 namespace gameevents {
 
+    enum class Mode {
+        NORMAL,
+        PENALTY_SHOOTOUT,
+        OVERTIME
+    };
+
+    enum class Phase {
+        INITIAL,
+        READY,
+        SET,
+        PLAYING,
+        TIMEOUT,
+        FINISHED
+    };
+
     enum Context {
         SELF,
         TEAM,
@@ -35,6 +50,19 @@ namespace gameevents {
     enum TeamColour {
         CYAN,
         MAGENTA
+    };
+
+    enum class PenaltyReason {
+        UNPENALISED,
+        BALL_MANIPULATION,
+        PHYSICAL_CONTACT,
+        ILLEGAL_ATTACK,
+        ILLEGAL_DEFENSE,
+        REQUEST_FOR_PICKUP,
+        REQUEST_FOR_SERVICE,
+        REQUEST_FOR_PICKUP_TO_SERVICE,
+        SUBSTITUTE,
+        MANUAL
     };
 
     struct Score {
@@ -51,6 +79,7 @@ namespace gameevents {
     struct Penalisation {
         uint robotId;
         NUClear::clock::time_point ends;
+        PenaltyReason reason;
     };
 
     template <enum Context>
@@ -75,22 +104,6 @@ namespace gameevents {
     struct KickOffTeam {
         Context team;
     };
-
-    enum class Mode {
-        NORMAL,
-        PENALTY_SHOOTOUT,
-        OVERTIME
-    };
-
-    enum class Phase {
-        INITIAL,
-        READY,
-        SET,
-        PLAYING,
-        TIMEOUT,
-        FINISHED
-    };
-
 
     template <enum Phase>
     struct GamePhase;
@@ -131,8 +144,9 @@ namespace gameevents {
     struct GameState {
 
         struct Robot {
-          bool penalised;
-          NUClear::clock::time_point unpenalised;
+            uint id;
+            PenaltyReason penaltyReason;
+            NUClear::clock::time_point unpenalised;
         };
 
         struct Team {

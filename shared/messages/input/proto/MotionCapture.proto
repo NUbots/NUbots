@@ -24,9 +24,9 @@ import "messages/Vector.proto";
 message MotionCapture {
 
     message Point {
-        optional string identifier = 1;
+        optional uint32 identifier = 1;
         optional double size = 2;
-        optional vec3 position = 3;
+        required vec3 position = 3;
     };
 
     message RigidBody {
@@ -36,7 +36,7 @@ message MotionCapture {
         required vec3 position = 3;
 
         // The rotation quaternion
-        optional vec4 rotation = 4;
+        required vec4 rotation = 4;
 
         repeated Point points = 5;
     };

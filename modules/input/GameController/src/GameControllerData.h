@@ -25,6 +25,7 @@ namespace input {
 namespace gamecontroller {
     constexpr const size_t MAX_NUM_PLAYERS = 11;
     constexpr const size_t SPL_COACH_MESSAGE_SIZE = 40;
+    constexpr const char RECEIVE_HEADER[4] = {'R', 'G', 'm', 'e'};
     constexpr const char RETURN_HEADER[4] = {'R', 'G', 'r', 't'};
     constexpr const size_t RETURN_VERSION = 2;
 
@@ -50,29 +51,43 @@ namespace gamecontroller {
     };
 
     enum class ReplyMessage : uint8_t {
-        PENALISE = 0,
-        UNPENALISE = 1,
+        PENALISED = 0,
+        UNPENALISED = 1,
         ALIVE = 2
     };
 
+    enum class PenaltyState : uint8_t {
+        UNPENALISED                   = 0,
+        BALL_MANIPULATION             = 1,
+        PHYSICAL_CONTACT              = 2,
+        ILLEGAL_ATTACK                = 3,
+        ILLEGAL_DEFENSE               = 4,
+        REQUEST_FOR_PICKUP            = 5,
+        REQUEST_FOR_SERVICE           = 6,
+        REQUEST_FOR_PICKUP_TO_SERVICE = 7,
+        SUBSTITUTE                    = 14,
+        MANUAL                        = 15
+    };
+
+
     struct Robot {
-      bool penalised;             // penalty state of the player
-      uint8_t penalisedTimeLeft;  // estimate of time till unpenalised (seconds)
+        PenaltyState penaltyState;  // penalty state of the player
+        uint8_t penalisedTimeLeft;  // estimate of time till unpenalised (seconds)
     };
 
     struct Team {
-        uint8_t teamId;                         // unique team number
-        TeamColour teamColour;                      // colour of the team
-        uint8_t score;                              // team's score
-        uint8_t penaltyShot;                        // penalty shot counter
-        uint16_t singleShots;                       // bits represent penalty shot success
-        char coachMessage[SPL_COACH_MESSAGE_SIZE];  // the coach's message to the team
-        Robot coach;
-        Robot players[MAX_NUM_PLAYERS];         // the team's players
+        uint8_t teamId;                                        // unique team number
+        TeamColour teamColour;                                 // colour of the team
+        uint8_t score;                                         // team's score
+        uint8_t penaltyShot;                                   // penalty shot counter
+        uint16_t singleShots;                                  // bits represent penalty shot success
+        std::array<char, SPL_COACH_MESSAGE_SIZE> coachMessage; // the coach's message to the team
+        Robot coach;                                           // the coach
+        Robot players[MAX_NUM_PLAYERS];                        // the team's players
     };
 
     struct GameControllerPacket {
-        char header[4];                // header to identify the structure
+        std::array<char, 4> header;    // header to identify the structure
         uint8_t version;               // version of the data structure
         uint8_t packetNumber;          // number incremented with each packet sent (with wraparound)
         uint8_t playersPerTeam;        // The number of players on a team
@@ -88,11 +103,11 @@ namespace gamecontroller {
     };
 
     struct GameControllerReplyPacket {
-        char header[4];
+        std::array<char, 4> header;
         uint8_t version;
         uint8_t team;    // team number
         uint8_t player;  // player number starts with 1
-        uint8_t message; // one of the three messages defined above
+        ReplyMessage message; // one of the three messages defined above
     };
     #pragma pack(pop)
 }
