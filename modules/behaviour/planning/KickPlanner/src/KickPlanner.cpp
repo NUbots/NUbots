@@ -39,7 +39,7 @@ namespace planning {
     using messages::support::Configuration;
     using messages::motion::WalkStopCommand;
     using messages::behaviour::LimbID;
-    using messages::planning::KickPlan;
+    using messages::behaviour::KickPlan;
 
     KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {

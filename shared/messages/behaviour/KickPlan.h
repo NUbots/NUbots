@@ -21,7 +21,7 @@
 #define MESSAGES_BEHAVIOUR_KICKPLAN_H
 
 namespace messages {
-namespace planning {
+namespace behaviour {
 
 	struct KickPlan { 
 		arma::vec2 target;
