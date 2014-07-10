@@ -10,27 +10,27 @@ POSITION_THRESHOLD_TIGHT: 0.3
 POSITION_THRESHOLD_LOOSE: 0.6
 GOALIE: false
 START_POSITION: [0, 0]
-MY_ZONE: 1
-ZONE_1_DEFAULT: [1.5, 0]
-ZONE_1:
+MY_ZONE: 0
+ZONE_0_DEFAULT: [1.5, 0]
+ZONE_0:
   - [0,2]
   - [3,2]
   - [3,-2]
   - [0,-2]
-ZONE_2_DEFAULT: [0, 0]
-ZONE_2:
+ZONE_1_DEFAULT: [0, 0]
+ZONE_1:
   - [-1.5,2]
   - [1.5,2]
   - [1.5,-2]
   - [-1.5,-2]
-ZONE_3_DEFAULT: [-1.5, 0]
-ZONE_3:
+ZONE_2_DEFAULT: [-1.5, 0]
+ZONE_2:
   - [-3,2]
   - [0,2]
   - [0,-2]
   - [-3,-2]
-ZONE_4_DEFAULT: [-2.75, 0]
-ZONE_4:
+ZONE_3_DEFAULT: [-2.75, 0]
+ZONE_3:
   - [-3,2]
   - [-2.5,2]
   - [-2.5,-2]

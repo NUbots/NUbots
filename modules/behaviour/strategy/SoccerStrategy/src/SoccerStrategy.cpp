@@ -94,6 +94,10 @@ namespace modules {
 				MY_ZONE = config["MY_ZONE"].as<int>();
 
 				try {
+					ZONE_DEFAULTS.push_back(config["ZONE_0_DEFAULT"].as<arma::vec2>());
+					zone = config["ZONE_0"].as<std::vector<arma::vec2>>();
+					ZONES.push_back(Polygon(zone));
+
 					ZONE_DEFAULTS.push_back(config["ZONE_1_DEFAULT"].as<arma::vec2>());
 					zone = config["ZONE_1"].as<std::vector<arma::vec2>>();
 					ZONES.push_back(Polygon(zone));
@@ -104,10 +108,6 @@ namespace modules {
 
 					ZONE_DEFAULTS.push_back(config["ZONE_3_DEFAULT"].as<arma::vec2>());
 					zone = config["ZONE_3"].as<std::vector<arma::vec2>>();
-					ZONES.push_back(Polygon(zone));
-
-					ZONE_DEFAULTS.push_back(config["ZONE_4_DEFAULT"].as<arma::vec2>());
-					zone = config["ZONE_4"].as<std::vector<arma::vec2>>();
 					ZONES.push_back(Polygon(zone));
 				}
 
@@ -610,7 +610,7 @@ namespace modules {
 				}
 
 				catch (const std::domain_error& e) {
-					return(point);
+					return(ZONE_DEFAULTS.at(MY_ZONE));
 				}
 			}
 
