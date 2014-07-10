@@ -90,24 +90,28 @@ namespace modules {
 				POSITION_THRESHOLD_TIGHT = config["POSITION_THRESHOLD_TIGHT"].as<float>();
 				POSITION_THRESHOLD_LOOSE = config["POSITION_THRESHOLD_LOOSE"].as<float>();
 				IS_GOALIE = config["GOALIE"].as<bool>();
-				START_POSITION = config["START_POSITION"].as<arma::vec2>();
+	//			START_POSITION = config["START_POSITION"].as<arma::vec2>();
 				MY_ZONE = config["MY_ZONE"].as<int>();
 
 				try {
 					ZONE_DEFAULTS.push_back(config["ZONE_0_DEFAULT"].as<arma::vec2>());
 					zone = config["ZONE_0"].as<std::vector<arma::vec2>>();
+					START_POSITION = config["ZONE_0_START_POSITION"].as<arma::vec2>();
 					ZONES.push_back(Polygon(zone));
 
 					ZONE_DEFAULTS.push_back(config["ZONE_1_DEFAULT"].as<arma::vec2>());
 					zone = config["ZONE_1"].as<std::vector<arma::vec2>>();
+					START_POSITION = config["ZONE_1_START_POSITION"].as<arma::vec2>();
 					ZONES.push_back(Polygon(zone));
 
 					ZONE_DEFAULTS.push_back(config["ZONE_2_DEFAULT"].as<arma::vec2>());
 					zone = config["ZONE_2"].as<std::vector<arma::vec2>>();
+					START_POSITION = config["ZONE_2_START_POSITION"].as<arma::vec2>();
 					ZONES.push_back(Polygon(zone));
 
 					ZONE_DEFAULTS.push_back(config["ZONE_3_DEFAULT"].as<arma::vec2>());
 					zone = config["ZONE_3"].as<std::vector<arma::vec2>>();
+					START_POSITION = config["ZONE_0_START_POSITION"].as<arma::vec2>();
 					ZONES.push_back(Polygon(zone));
 				}
 
