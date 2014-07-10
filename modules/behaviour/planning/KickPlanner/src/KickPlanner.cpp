@@ -25,6 +25,7 @@
 #include "messages/localisation/FieldObject.h"
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/Action.h"
+#include "messages/behaviour/KickPlan.h"
 #include "messages/vision/VisionObjects.h"
 
 
@@ -38,31 +39,28 @@ namespace planning {
     using messages::support::Configuration;
     using messages::motion::WalkStopCommand;
     using messages::behaviour::LimbID;
+    using messages::planning::KickPlan;
 
     KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
 
         on<Trigger<Configuration<KickPlanner> > >([this](const Configuration<KickPlanner>& config) {
-            TARGET_FIELD_POS = config["TARGET_FIELD_POS"].as<arma::vec>();
-
-            MIN_BALL_DISTANCE = config["MIN_BALL_DISTANCE"].as<float>();
+            MAX_BALL_DISTANCE = config["MAX_BALL_DISTANCE"].as<float>();
             KICK_CORRIDOR_WIDTH = config["KICK_CORRIDOR_WIDTH"].as<float>();
             KICK_FORWARD_ANGLE_LIMIT = config["KICK_FORWARD_ANGLE_LIMIT"].as<float>();
             KICK_SIDE_ANGLE_LIMIT = config["KICK_SIDE_ANGLE_LIMIT"].as<float>();
         });
 
-        on<Trigger<Ball>, With<std::vector<Self>>, With<std::vector<messages::vision::Ball>>>([this] (const Ball& ball, const std::vector<Self>& selfs, const std::vector<messages::vision::Ball>& vision_balls) {
-
-            // TODO check if the ball is within our kick box using some math or something
-
-            // TODO check if we are alligned enough with the goal
-
-            // TODO If we satisfy condtions then pick a kick to execute
+        on< Trigger<Ball>, With<std::vector<Self>>, With<std::vector<messages::vision::Ball>>, With<KickPlan> >([this] (
+            const Ball& ball, 
+            const std::vector<Self>& selfs, 
+            const std::vector<messages::vision::Ball>& vision_balls,
+            const KickPlan& kickPlan) {
 
             auto self = selfs[0];
 
-            arma::vec3 goalPosition = arma::vec3({TARGET_FIELD_POS[0],TARGET_FIELD_POS[1],1});
+            arma::vec3 goalPosition = arma::vec3({kickPlan.target[0],kickPlan.target[1],1});
 
             arma::vec2 normed_heading = arma::normalise(self.heading);
             arma::mat33 worldToRobotTransform = arma::mat33{      normed_heading[0],  normed_heading[1],         0,
@@ -78,7 +76,7 @@ namespace planning {
             // NUClear::log("ball position = ", ball.position);
 
             if(vision_balls.size() > 0 &&
-               ball.position[0] < MIN_BALL_DISTANCE &&
+               ball.position[0] < MAX_BALL_DISTANCE &&
                std::fabs(ball.position[1]) < KICK_CORRIDOR_WIDTH / 2){
 
                 float targetBearing = std::atan2(kickTarget[1],kickTarget[0]);
