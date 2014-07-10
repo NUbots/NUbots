@@ -3,6 +3,7 @@ SimulateGoalObservations: true
 SimulateBallObservations: true
 SimulateOdometry: false
 SimulateRobotMovement: true
+RobotMovementPathPeriod: 100
 SimulateBallMovement: true
 EmitRobotFieldobjects: true
 EmitBallFieldobjects: true

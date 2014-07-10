@@ -1,3 +1,4 @@
+MergingEnabled: Yes
 MaxModelsAfterMerge: 2
 MergeMinTranslationDist: 0.5
 MergeMinHeadingDist: 0.1

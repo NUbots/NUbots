@@ -75,6 +75,7 @@ namespace localisation {
         cfg_.simulate_ball_observations = config["SimulateBallObservations"].as<bool>();
         cfg_.simulate_odometry = config["SimulateOdometry"].as<bool>();
         cfg_.simulate_robot_movement = config["SimulateRobotMovement"].as<bool>();
+        cfg_.robot_movement_path_period = config["RobotMovementPathPeriod"].as<double>();
         cfg_.simulate_ball_movement = config["SimulateBallMovement"].as<bool>();
         cfg_.emit_robot_fieldobjects = config["EmitRobotFieldobjects"].as<bool>();
         cfg_.emit_ball_fieldobjects = config["EmitBallFieldobjects"].as<bool>();
@@ -110,7 +111,7 @@ namespace localisation {
             }
 
             auto t = absolute_time();
-            double period = 100;
+            double period = cfg_.robot_movement_path_period;
             double x_amp = 3;
             double y_amp = 2;
 

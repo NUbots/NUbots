@@ -281,7 +281,8 @@ void MultiModalRobotModel::RemoveOldModels() {
 }
 
 void MultiModalRobotModel::PruneModels() {
-    MergeSimilarModels();
+    if (cfg_.merging_enabled)
+        MergeSimilarModels();
 
     PruneViterbi(cfg_.max_models_after_merge);
 

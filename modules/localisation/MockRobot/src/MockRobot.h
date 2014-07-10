@@ -51,14 +51,15 @@ namespace localisation {
         std::shared_ptr<messages::support::FieldDescription> field_description_;
 
         struct {
-            bool simulate_vision;
-            bool simulate_goal_observations;
-            bool simulate_ball_observations;
-            bool simulate_odometry;
-            bool simulate_robot_movement;
-            bool simulate_ball_movement;
-            bool emit_robot_fieldobjects;
-            bool emit_ball_fieldobjects;
+            bool simulate_vision = true;
+            bool simulate_goal_observations = true;
+            bool simulate_ball_observations = true;
+            bool simulate_odometry = false;
+            bool simulate_robot_movement = true;
+            double robot_movement_path_period = 100;
+            bool simulate_ball_movement = true;
+            bool emit_robot_fieldobjects = true;
+            bool emit_ball_fieldobjects = true;
         } cfg_;
 
     public:

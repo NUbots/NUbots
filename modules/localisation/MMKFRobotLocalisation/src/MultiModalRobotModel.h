@@ -98,6 +98,7 @@ namespace localisation {
 
         void UpdateConfiguration(
             const messages::support::Configuration<modules::localisation::MultiModalRobotModelConfig>& config) {
+            cfg_.merging_enabled = config["MergingEnabled"].as<bool>();
             cfg_.max_models_after_merge = config["MaxModelsAfterMerge"].as<int>();
             cfg_.merge_min_translation_dist = config["MergeMinTranslationDist"].as<float>();
             cfg_.merge_min_heading_dist = config["MergeMinHeadingDist"].as<float>();
@@ -172,6 +173,7 @@ namespace localisation {
         std::vector<std::unique_ptr<RobotHypothesis>> robot_models_;
 
         struct {
+            bool merging_enabled;
             int max_models_after_merge;
             float merge_min_translation_dist;
             float merge_min_heading_dist;
