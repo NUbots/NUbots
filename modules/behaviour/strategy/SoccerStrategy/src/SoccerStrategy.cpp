@@ -54,7 +54,7 @@ namespace modules {
 		using messages::behaviour::WalkStrategy;
 		using messages::behaviour::WalkTarget;
 		using messages::behaviour::WalkApproach;
-		using messages::behaviour::KickPlan
+		using messages::behaviour::KickPlan;
 
 		using messages::input::gameevents::GameState;
 		using messages::input::gameevents::Phase;
