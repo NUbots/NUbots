@@ -215,6 +215,7 @@ namespace input {
 
         // Note: assumes playersPerTeam never changes
         for (uint i = 0; i < newPacket.playersPerTeam; i++) {
+            uint playerId = i + 1;
             auto& oldOwnPlayer = oldOwnTeam.players[i];
             auto& newOwnPlayer = newOwnTeam.players[i];
 
@@ -223,12 +224,12 @@ namespace input {
 
             // Update our state
             state->team.players.push_back({
-                i,
+                playerId,
                 getPenaltyReason(newOwnPlayer.penaltyState),
                 NUClear::clock::now() + std::chrono::seconds(newOwnPlayer.penalisedTimeLeft)
             });
             state->opponent.players.push_back({
-                i,
+                playerId,
                 getPenaltyReason(newOpponentPlayer.penaltyState),
                 NUClear::clock::now() + std::chrono::seconds(newOpponentPlayer.penalisedTimeLeft)
             });
@@ -239,29 +240,29 @@ namespace input {
 
                 auto unpenalisedTime = NUClear::clock::now() + std::chrono::seconds(newOwnPlayer.penalisedTimeLeft);
                 auto reason = getPenaltyReason(newOwnPlayer.penaltyState);
-                stateChanges.push_back([this, i, unpenalisedTime, reason] {
-                    if (i == PLAYER_ID) {
+                stateChanges.push_back([this, playerId, unpenalisedTime, reason] {
+                    if (playerId == PLAYER_ID) {
                         // self penalised :@
-                        emit(std::make_unique<Penalisation<SELF>>(Penalisation<SELF>{i, unpenalisedTime, reason}));
+                        emit(std::make_unique<Penalisation<SELF>>(Penalisation<SELF>{playerId, unpenalisedTime, reason}));
                         sendReplyPacket(ReplyMessage::PENALISED);
                     }
                     else {
                         // team mate penalised :'(
-                        emit(std::make_unique<Penalisation<TEAM>>(Penalisation<TEAM>{i, unpenalisedTime, reason}));
+                        emit(std::make_unique<Penalisation<TEAM>>(Penalisation<TEAM>{playerId, unpenalisedTime, reason}));
                     }
                 });
             }
             else if (newOwnPlayer.penaltyState == gamecontroller::PenaltyState::UNPENALISED
                 && oldOwnPlayer.penaltyState != gamecontroller::PenaltyState::UNPENALISED) {
-                stateChanges.push_back([this, i] {
-                    if (i == PLAYER_ID) {
+                stateChanges.push_back([this, playerId] {
+                    if (playerId == PLAYER_ID) {
                         // self unpenalised :)
-                        emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{i}));
+                        emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{playerId}));
                         sendReplyPacket(ReplyMessage::UNPENALISED);
                     }
                     else {
                         // team mate unpenalised :)
-                        emit(std::make_unique<Unpenalisation<TEAM>>(Unpenalisation<TEAM>{i}));
+                        emit(std::make_unique<Unpenalisation<TEAM>>(Unpenalisation<TEAM>{playerId}));
                     }
                 });
             }
@@ -271,15 +272,15 @@ namespace input {
                 auto unpenalisedTime = NUClear::clock::now() + std::chrono::seconds(newOpponentPlayer.penalisedTimeLeft);
                 auto reason = getPenaltyReason(newOpponentPlayer.penaltyState);
                 // opponent penalised :D
-                stateChanges.push_back([this, i, unpenalisedTime, reason] {
-                    emit(std::make_unique<Penalisation<OPPONENT>>(Penalisation<OPPONENT>{i, unpenalisedTime, reason}));
+                stateChanges.push_back([this, playerId, unpenalisedTime, reason] {
+                    emit(std::make_unique<Penalisation<OPPONENT>>(Penalisation<OPPONENT>{playerId, unpenalisedTime, reason}));
                 });
             }
             else if (newOpponentPlayer.penaltyState == gamecontroller::PenaltyState::UNPENALISED
                 && oldOpponentPlayer.penaltyState != gamecontroller::PenaltyState::UNPENALISED) {
                 // opponent unpenalised D:
-                stateChanges.push_back([this, i] {
-                    emit(std::make_unique<Unpenalisation<OPPONENT>>(Unpenalisation<OPPONENT>{i}));
+                stateChanges.push_back([this, playerId] {
+                    emit(std::make_unique<Unpenalisation<OPPONENT>>(Unpenalisation<OPPONENT>{playerId}));
                 });
             }
         }
