@@ -65,11 +65,11 @@ namespace support {
 
                 bool found = false;
                 for (auto& handle : handles[name]) {
-                    if (enabled && !handle.isEnabled()) {
+                    if (enabled && !handle.enabled()) {
                         handle.enable();
                         found = true;
                     }
-                    else if (!enabled && handle.isEnabled()) {
+                    else if (!enabled && handle.enabled()) {
                         handle.disable();
                         found = true;
                     }
