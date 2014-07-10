@@ -28,7 +28,11 @@
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
 #include "utility/localisation/transform.h"
+#include "messages/input/Sensors.h"
+#include "messages/input/ServoID.h"
 
+using messages::input::Sensors;
+using messages::input::ServoID;
 using utility::math::matrix::rotationMatrix;
 using utility::math::angle::normalizeAngle;
 using utility::math::angle::vectorToBearing;
@@ -79,15 +83,16 @@ namespace localisation {
         cfg_.simulate_ball_movement = config["SimulateBallMovement"].as<bool>();
         cfg_.emit_robot_fieldobjects = config["EmitRobotFieldobjects"].as<bool>();
         cfg_.emit_ball_fieldobjects = config["EmitBallFieldobjects"].as<bool>();
+        cfg_.robot_imu_drift_period = config["RobotImuDriftPeriod"].as<double>();
 
-        NUClear::log(__func__, "cfg_.simulate_vision = ", cfg_.simulate_vision);
-        NUClear::log(__func__, "cfg_.simulate_goal_observations = ", cfg_.simulate_goal_observations);
-        NUClear::log(__func__, "cfg_.simulate_ball_observations = ", cfg_.simulate_ball_observations);
-        NUClear::log(__func__, "cfg_.simulate_odometry = ", cfg_.simulate_odometry);
-        NUClear::log(__func__, "cfg_.simulate_robot_movement = ", cfg_.simulate_robot_movement);
-        NUClear::log(__func__, "cfg_.simulate_ball_movement = ", cfg_.simulate_ball_movement);
-        NUClear::log(__func__, "cfg_.emit_robot_fieldobjects = ", cfg_.emit_robot_fieldobjects);
-        NUClear::log(__func__, "cfg_.emit_ball_fieldobjects = ", cfg_.emit_ball_fieldobjects);
+        // NUClear::log(__func__, "cfg_.simulate_vision = ", cfg_.simulate_vision);
+        // NUClear::log(__func__, "cfg_.simulate_goal_observations = ", cfg_.simulate_goal_observations);
+        // NUClear::log(__func__, "cfg_.simulate_ball_observations = ", cfg_.simulate_ball_observations);
+        // NUClear::log(__func__, "cfg_.simulate_odometry = ", cfg_.simulate_odometry);
+        // NUClear::log(__func__, "cfg_.simulate_robot_movement = ", cfg_.simulate_robot_movement);
+        // NUClear::log(__func__, "cfg_.simulate_ball_movement = ", cfg_.simulate_ball_movement);
+        // NUClear::log(__func__, "cfg_.emit_robot_fieldobjects = ", cfg_.emit_robot_fieldobjects);
+        // NUClear::log(__func__, "cfg_.emit_ball_fieldobjects = ", cfg_.emit_ball_fieldobjects);
     }
 
     MockRobot::MockRobot(std::unique_ptr<NUClear::Environment> environment)
@@ -104,7 +109,7 @@ namespace localisation {
         });
 
         // Update robot position
-        on<Trigger<Every<10, std::chrono::milliseconds>>>("Robot motion", [this](const time_t&){
+        on<Trigger<Every<10, std::chrono::milliseconds>>>("Mock Robot motion", [this](const time_t&){
             if (!cfg_.simulate_robot_movement) {
                 robot_velocity_ = { 0, 0 };
                 return;
@@ -127,10 +132,15 @@ namespace localisation {
 
             robot_heading_ = vectorToBearing(diff);
             robot_velocity_ = robot_heading_ / 100.0;
+
+
+            double imu_period = cfg_.robot_imu_drift_period;
+            world_imu_direction = { std::cos(2 * M_PI * t / imu_period),
+                                    std::sin(2 * M_PI * t / imu_period) };
         });
 
         // Update ball position
-        on<Trigger<Every<10, std::chrono::milliseconds>>>("Ball motion", [this](const time_t&){
+        on<Trigger<Every<10, std::chrono::milliseconds>>>("Mock Ball motion", [this](const time_t&){
 
             if (!cfg_.simulate_ball_movement) {
                 ball_velocity_ = { 0, 0 };
@@ -151,54 +161,36 @@ namespace localisation {
             ball_velocity_ = { velocity_x, velocity_y };
         });
 
-//         // Simulate orientation matrix
-//         on<Trigger<Every<10, std::chrono::milliseconds>>>(
-//             "Orientation Matrix Simulation", [this](const time_t&){
-// // orient =   M: W -> R
-// //          M^T: R -> W
+        // // Simulate Odometry
+        // on<Trigger<Every<100, std::chrono::milliseconds>>>("Mock Odometry Simulation",
+        //     [this](const time_t&) {
+        //     if (!cfg_.simulate_odometry)
+        //         return;
 
-// //          a, x_w,  M*R_a*x_w = x_r
+        //     auto odom = std::make_unique<messages::localisation::FakeOdometry>();
 
-// // M is an orthonormal basis for world coords expressed in robot coords
-// // i.e. M contains unit vectors pointing along each of the world axes
-// // Note: M can only attempt to track the robot's orientation - not its position.
-// //       i.e. The origin of the world coords resulting from M is still the
-// //            robot's torso, but the axes are parallel to the field axes.
-//             arma::mat33 M =
+        //     double heading_diff = robot_heading_ - odom_old_robot_heading_;
+        //     odom->torso_rotation = normalizeAngle(heading_diff);
 
+        //     // Calculate torso displacement in robot-space:
+        //     arma::vec2 position_diff = robot_position_ - odom_old_robot_position_;
+        //     arma::mat22 rot = rotationMatrix(robot_heading_);
+        //     odom->torso_displacement = rot * position_diff;
 
-//         });
+        //     odom_old_robot_position_ = robot_position_;
+        //     odom_old_robot_heading_ = robot_heading_;
 
-        // Simulate Odometry
-        on<Trigger<Every<100, std::chrono::milliseconds>>>("Odometry Simulation",
-            [this](const time_t&) {
-            if (!cfg_.simulate_odometry)
-                return;
+        //     emit(graph("Odometry torso_displacement",
+        //         odom->torso_displacement[0],
+        //         odom->torso_displacement[1]));
+        //     emit(graph("Odometry torso_rotation", odom->torso_rotation));
 
-            auto odom = std::make_unique<messages::localisation::FakeOdometry>();
-
-            double heading_diff = robot_heading_ - odom_old_robot_heading_;
-            odom->torso_rotation = normalizeAngle(heading_diff);
-
-            // Calculate torso displacement in robot-space:
-            arma::vec2 position_diff = robot_position_ - odom_old_robot_position_;
-            arma::mat22 rot = rotationMatrix(robot_heading_);
-            odom->torso_displacement = rot * position_diff;
-
-            odom_old_robot_position_ = robot_position_;
-            odom_old_robot_heading_ = robot_heading_;
-
-            emit(graph("Odometry torso_displacement",
-                odom->torso_displacement[0],
-                odom->torso_displacement[1]));
-            emit(graph("Odometry torso_rotation", odom->torso_rotation));
-
-            emit(std::move(odom));
-        });
+        //     emit(std::move(odom));
+        // });
 
         // Simulate Vision
         on<Trigger<Every<30, Per<std::chrono::seconds>>>,
-           Options<Sync<MockRobot>>>("Vision Simulation", [this](const time_t&) {
+           Options<Sync<MockRobot>>>("Mock Vision Simulation", [this](const time_t&) {
             if (!cfg_.simulate_vision)
                 return;
 
@@ -206,6 +198,22 @@ namespace localisation {
                 NUClear::log(__FILE__, __LINE__, ": field_description_ == nullptr");
                 return;
             }
+
+            // Sensors:
+            auto sensors = std::make_shared<messages::input::Sensors>();
+
+            // orientation
+            arma::vec2 robot_imu_dir_ = WorldToRobotTransform(arma::vec2({0, 0}), robot_heading_, world_imu_direction);
+            arma::mat orientation = arma::eye(3, 3);
+            orientation.submat(0, 0, 1, 0) = robot_imu_dir_;
+            orientation.submat(0, 1, 1, 1) = arma::vec2({ -robot_imu_dir_(1), robot_imu_dir_(0) });
+            sensors->orientation = orientation;
+
+            // orientationCamToGround
+            sensors->orientationCamToGround = arma::eye(4, 4);
+
+            // forwardKinematics
+            sensors->forwardKinematics[ServoID::HEAD_PITCH] = arma::eye(4, 4);
 
             // Goal observation
             if (cfg_.simulate_goal_observations) {
@@ -227,6 +235,7 @@ namespace localisation {
                 g1_m.error = arma::eye(3, 3) * 0.1;
                 goal1.measurements.push_back(g1_m);
                 goal1.side = messages::vision::Goal::Side::RIGHT;
+                goal1.sensors = sensors;
                 goals->push_back(goal1);
 
                 messages::vision::Goal goal2;
@@ -235,6 +244,7 @@ namespace localisation {
                 g2_m.error = arma::eye(3, 3) * 0.1;
                 goal2.measurements.push_back(g2_m);
                 goal2.side = messages::vision::Goal::Side::LEFT;
+                goal2.sensors = sensors;
                 goals->push_back(goal2);
 
                 emit(std::move(goals));
@@ -251,10 +261,13 @@ namespace localisation {
                 b_m.position = SphericalRobotObservation(robot_position_, robot_heading_, ball_pos_3d);
                 b_m.error = arma::eye(3, 3) * 0.1;
                 ball.measurements.push_back(b_m);
+                ball.sensors = sensors;
                 ball_vec->push_back(ball);
 
                 emit(std::move(ball_vec));
             }
+
+            emit(std::make_unique<Sensors>(*sensors));
         });
 
         // Emit robot to NUbugger

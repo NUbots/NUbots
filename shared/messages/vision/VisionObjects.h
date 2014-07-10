@@ -25,6 +25,7 @@
 #include "utility/math/geometry/Circle.h"
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/geometry/Polygon.h"
+#include "messages/input/Sensors.h"
 
 namespace messages {
     namespace vision {
@@ -50,7 +51,8 @@ namespace messages {
             // The angular position and size from the perspective of the camera
             arma::vec2 screenAngular;
             arma::vec2 angularSize;
-
+            
+            std::shared_ptr<const messages::input::Sensors> sensors;
         };
 
         struct Ball : public VisionObject {

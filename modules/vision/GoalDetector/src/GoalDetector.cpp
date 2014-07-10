@@ -244,6 +244,7 @@ namespace vision {
                 measurements.push_back({{0,0,0}, arma::eye(3,3)});
 
                 it->measurements = measurements;
+                it->sensors = image.sensors;
             }
 
             // Do some extra throwouts for goals based on kinematics

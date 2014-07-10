@@ -41,6 +41,8 @@ namespace localisation {
         arma::vec ball_velocity_ = { 0, 0 };
         arma::vec robot_position_ = { 0, 0 };
         arma::vec robot_velocity_ = { 0, 0 };
+        arma::vec world_imu_direction = { 0, 1 };
+        arma::vec robot_imu_direction_ = { 0, 1, 0 };
         // arma::vec robot_heading_ = { 1, 0 };
         // double robot_heading_ = 3.141;
         double robot_heading_ = 0;
@@ -60,6 +62,7 @@ namespace localisation {
             bool simulate_ball_movement = true;
             bool emit_robot_fieldobjects = true;
             bool emit_ball_fieldobjects = true;
+            double robot_imu_drift_period = 200;
         } cfg_;
 
     public:

@@ -23,6 +23,7 @@
 
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
+#include "utility/math/matrix.h"
 #include "utility/nubugger/NUgraph.h"
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "messages/vision/VisionObjects.h"
@@ -34,6 +35,7 @@
 #include "RobotModel.h"
 
 using utility::math::angle::bearingToUnitVector;
+using utility::math::matrix::zRotationMatrix;
 using utility::nubugger::graph;
 using utility::localisation::LocalisationFieldObject;
 using messages::support::Configuration;
@@ -71,8 +73,9 @@ namespace localisation {
 
         // Emit to NUbugger
         on<Trigger<Every<100, std::chrono::milliseconds>>,
+           With<Sensors>,
            Options<Sync<MMKFRobotLocalisation>>
-           >("NUbugger Output", [this](const time_t&) {
+           >("NUbugger Output", [this](const time_t&, const Sensors& sensors) {
             
             auto robots = std::vector<Self>();
             
@@ -82,7 +85,9 @@ namespace localisation {
 
                 Self robot_model;
                 robot_model.position = model_state.rows(robot::kX, robot::kY);
-                robot_model.heading = bearingToUnitVector(model_state(robot::kHeading));
+                auto imuRotation = zRotationMatrix(-model_state(robot::kImuOffset));
+                arma::vec3 world_heading = imuRotation * arma::mat(sensors.orientation.t()).col(0);
+                robot_model.heading = world_heading.rows(0, 1);
                 robot_model.sr_xx = model_cov(0, 0);
                 robot_model.sr_xy = model_cov(0, 1);
                 robot_model.sr_yy = model_cov(1, 1);
@@ -99,18 +104,19 @@ namespace localisation {
             }
         });
 
-        on<Trigger<FakeOdometry>,
-           Options<Sync<MMKFRobotLocalisation>>
-          >("MMKFRobotLocalisation Odometry", [this](const FakeOdometry& odom) {
-            auto curr_time = NUClear::clock::now();
-            engine_->TimeUpdate(curr_time, odom);
-        });
-        on<Trigger<Sensors>,
-           Options<Sync<MMKFRobotLocalisation>>
-          >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
-            auto curr_time = NUClear::clock::now();
-            engine_->TimeUpdate(curr_time, sensors);
-        });
+        // on<Trigger<FakeOdometry>,
+        //    Options<Sync<MMKFRobotLocalisation>>
+        //   >("MMKFRobotLocalisation Odometry", [this](const FakeOdometry& odom) {
+        //     auto curr_time = NUClear::clock::now();
+        //     engine_->TimeUpdate(curr_time, odom);
+        // });
+        // on<Trigger<Sensors>,
+        //    Options<Sync<MMKFRobotLocalisation>>
+        //   >("MMKFRobotLocalisation Sensors", [this](const Sensors& sensors) {
+        //     auto curr_time = NUClear::clock::now();
+        //     engine_->TimeUpdate(curr_time);
+        //     // engine_->SensorsUpdate(sensors);
+        // });
         on<Trigger<Every<100, Per<std::chrono::seconds>>>,
            Options<Sync<MMKFRobotLocalisation>>
           >("MMKFRobotLocalisation Time", [this](const time_t&) {

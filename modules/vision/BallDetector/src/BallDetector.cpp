@@ -173,6 +173,7 @@ namespace vision {
                 // Move our measurements
                 b.measurements = std::move(measurements);
 
+                b.sensors = image.sensors;
                 balls->push_back(std::move(b));
             }
 

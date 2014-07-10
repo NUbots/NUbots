@@ -48,7 +48,7 @@ std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
             << std::setw(7) << est[robot::kY] << ", "
             // << std::setw(7) << est[robot::kHeadingX] << ", "
             // << std::setw(7) << est[robot::kHeadingY] << "]"
-            << std::setw(7) << est[robot::kHeading] << "]"
+            << std::setw(7) << est[robot::kImuOffset] << "]"
         // << ", observation trail: [" << h.obs_trail_ << "]"
         // << ", covariance:\n" << h.GetCovariance()
         << ", observation count: " << h.obs_count_
@@ -108,13 +108,14 @@ double RobotHypothesis::MeasurementUpdate(
     arma::vec2 actual_2d = actual_object.location();
     arma::vec3 actual_pos = arma::vec3({actual_2d(0), actual_2d(1), 0});
 
-    double quality = filter_.measurementUpdate(measurement, cov, actual_pos);
+    double quality = filter_.measurementUpdate(measurement, cov, actual_pos,
+                                               *(observed_object.sensors));
     return quality;
 }
 
 double RobotHypothesis::MeasurementUpdate(
-    const std::vector<messages::vision::VisionObject>& observed_objects,
-    const std::vector<LocalisationFieldObject>& actual_objects) {
+    const std::vector<messages::vision::VisionObject>& /*observed_objects (commented for warnings)*/,
+    const std::vector<LocalisationFieldObject>& /*actual_objects*/) {
 
 	(void)observed_objects;
 	(void)actual_objects;
@@ -141,6 +142,11 @@ double RobotHypothesis::MeasurementUpdate(
     // return quality;
     return 1;
 }
+
+// void MultiModalRobotModel::SensorsUpdate(const messages::input::Sensors& sensors) {
+//     for (auto& model : robot_models_)
+//         model->SetSensorsData(sensors);
+// }
 
 /*! @brief Performs an ambiguous measurement update using the exhaustive
  *  process.
@@ -302,7 +308,7 @@ bool MultiModalRobotModel::ModelsAreSimilar(
 
     // // Radial coords
     // auto heading_dist = std::abs(utility::math::angle::normalizeAngle(diff[kHeading]));
-    auto heading_dist = diff(robot::kHeading);
+    auto heading_dist = diff(robot::kImuOffset);
 
     // Unit vector orientation
     // auto heading_dist = diff[robot::kHeadingX] + diff[robot::kHeadingY];

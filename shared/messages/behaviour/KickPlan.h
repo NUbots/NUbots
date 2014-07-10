@@ -1,5 +1,5 @@
 /*
- * This file is part of NUbots Codebase.
+ * This file is part of the NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,32 +17,16 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
-#define MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
+#ifndef MESSAGES_BEHAVIOUR_KICKPLAN_H
+#define MESSAGES_BEHAVIOUR_KICKPLAN_H
 
-#include <armadillo>
-
-#include <nuclear>
-namespace modules {
-namespace behaviour {
+namespace messages {
 namespace planning {
 
-    class KickPlanner : public NUClear::Reactor {
-    public:
-        /// @brief Called by the powerplant to build and setup the KickPlanner reactor.
-        explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
-        static constexpr const char* CONFIGURATION_PATH = "KickPlanner.yaml";
-
-    private:
-       	float MAX_BALL_DISTANCE;
-       	float KICK_CORRIDOR_WIDTH;
-       	float KICK_FORWARD_ANGLE_LIMIT;
-       	float KICK_SIDE_ANGLE_LIMIT;
-    };
+	struct KickPlan { 
+		arma::vec2 target;
+	};
 
 }
 }
-}
-
-
 #endif
