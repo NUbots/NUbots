@@ -23,6 +23,7 @@
 #include <nuclear>
 
 #include "GameControllerData.h"
+#include "messages/input/gameevents/GameEvents.h"
 
 namespace modules {
     namespace input {
@@ -42,14 +43,15 @@ namespace modules {
                 std::atomic<int> socket;
                 uint port;
                 gamecontroller::GameControllerPacket packet;
-                uint8_t TEAM_ID;
-                uint8_t PLAYER_ID;
+                uint TEAM_ID;
+                uint PLAYER_ID;
 
                 void kill();
                 void run();
                 void process(gamecontroller::GameControllerPacket oldPacket, gamecontroller::GameControllerPacket newPacket);
                 gamecontroller::Team& getOwnTeam(gamecontroller::GameControllerPacket& packet);
                 gamecontroller::Team& getOpponentTeam(gamecontroller::GameControllerPacket& packet);
+                messages::input::gameevents::PenaltyReason getPenaltyReason(gamecontroller::PenaltyState& penaltyState);
             public:
                 static constexpr const char* CONFIGURATION_PATH = "GameController.yaml";
 

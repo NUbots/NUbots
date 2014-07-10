@@ -55,9 +55,21 @@ namespace gamecontroller {
         ALIVE = 2
     };
 
+    enum class PenaltyState : uint8_t {
+        UNPENALISED                   = 0,
+        BALL_MANIPULATION             = 1,
+        PHYSICAL_CONTACT              = 2,
+        ILLEGAL_ATTACK                = 3,
+        ILLEGAL_DEFENSE               = 4,
+        REQUEST_FOR_PICKUP            = 5,
+        REQUEST_FOR_SERVICE           = 6,
+        REQUEST_FOR_PICKUP_TO_SERVICE = 7
+    };
+
+
     struct Robot {
-      bool penalised;             // penalty state of the player
-      uint8_t penalisedTimeLeft;  // estimate of time till unpenalised (seconds)
+        PenaltyState penaltyState;             // penalty state of the player
+        uint8_t penalisedTimeLeft;  // estimate of time till unpenalised (seconds)
     };
 
     struct Team {

@@ -19,7 +19,6 @@
 
 #include <atomic>
 #include "GameController.h"
-#include "messages/input/gameevents/GameEvents.h"
 #include "messages/support/Configuration.h"
 
 extern "C" {
@@ -80,13 +79,14 @@ namespace input {
             }
         });
 
-        auto gameState = std::make_unique<GameState>();
-        // default to reasonable values for initial state
-        gameState->phase = Phase::INITIAL;
-        gameState->mode = Mode::NORMAL;
-        gameState->firstHalf = true;
-        emit(std::move(gameState));
+        // auto initialPacket = std::make_unique<GameControllerPacket>();
 
+        auto initialState = std::make_unique<GameState>();
+        // default to reasonable values for initial state
+        initialState->phase = Phase::INITIAL;
+        initialState->mode = Mode::NORMAL;
+        initialState->firstHalf = true;
+        emit(std::move(initialState));
     }
 
     void GameController::run() {
@@ -98,7 +98,12 @@ namespace input {
             recvfrom(socket, reinterpret_cast<char*>(&newPacket), sizeof(GameControllerPacket), 0, reinterpret_cast<sockaddr*>(&broadcastSocket), &slen);
 
             if (newPacket.version == SUPPORTED_VERSION) {
-                process(packet, newPacket);
+                try {
+                    process(packet, newPacket);
+                } catch (std::runtime_error err) {
+                    log(err.what());
+                    continue;
+                }
 
                 packet = newPacket;
 
@@ -151,7 +156,7 @@ namespace input {
 
 
         /*******************************************************************************************
-         * Process penality updates
+         * Process penalty updates
          ******************************************************************************************/
         // Clear our player state (easier to just rebuild)
         state->team.players.clear();
@@ -167,29 +172,35 @@ namespace input {
 
             // Update our state
             state->team.players.push_back({
-                newOwnPlayer.penalised,
+                i,
+                getPenaltyReason(newOwnPlayer.penaltyState),
                 NUClear::clock::now() + std::chrono::seconds(newOwnPlayer.penalisedTimeLeft)
             });
             state->opponent.players.push_back({
-                newOpponentPlayer.penalised,
+                i,
+                getPenaltyReason(newOpponentPlayer.penaltyState),
                 NUClear::clock::now() + std::chrono::seconds(newOpponentPlayer.penalisedTimeLeft)
             });
 
             // check if player on own team is penalised
-            if (newOwnPlayer.penalised && !oldOwnPlayer.penalised) {
+            if (newOwnPlayer.penaltyState != oldOwnPlayer.penaltyState
+                && newOwnPlayer.penaltyState != gamecontroller::PenaltyState::UNPENALISED) {
+
                 auto unpenalisedTime = NUClear::clock::now() + std::chrono::seconds(newOwnPlayer.penalisedTimeLeft);
-                stateChanges.push_back([this, i, unpenalisedTime] {
+                auto reason = getPenaltyReason(newOwnPlayer.penaltyState);
+                stateChanges.push_back([this, i, unpenalisedTime, reason] {
                     if (i == PLAYER_ID) {
                         // self penalised :@
-                        emit(std::make_unique<Penalisation<SELF>>(Penalisation<SELF>{i, unpenalisedTime}));
+                        emit(std::make_unique<Penalisation<SELF>>(Penalisation<SELF>{i, unpenalisedTime, reason}));
                     }
                     else {
                         // team mate penalised :'(
-                        emit(std::make_unique<Penalisation<TEAM>>(Penalisation<TEAM>{i, unpenalisedTime}));
+                        emit(std::make_unique<Penalisation<TEAM>>(Penalisation<TEAM>{i, unpenalisedTime, reason}));
                     }
                 });
             }
-            else if (!newOwnPlayer.penalised && oldOwnPlayer.penalised) {
+            else if (newOwnPlayer.penaltyState == gamecontroller::PenaltyState::UNPENALISED
+                && oldOwnPlayer.penaltyState != gamecontroller::PenaltyState::UNPENALISED) {
                 stateChanges.push_back([this, i] {
                     if (i == PLAYER_ID) {
                         // self unpenalised :)
@@ -202,14 +213,17 @@ namespace input {
                 });
             }
 
-            if (newOpponentPlayer.penalised && !oldOpponentPlayer.penalised) {
+            if (newOpponentPlayer.penaltyState != oldOpponentPlayer.penaltyState
+                && newOpponentPlayer.penaltyState != gamecontroller::PenaltyState::UNPENALISED) {
                 auto unpenalisedTime = NUClear::clock::now() + std::chrono::seconds(newOpponentPlayer.penalisedTimeLeft);
+                auto reason = getPenaltyReason(newOpponentPlayer.penaltyState);
                 // opponent penalised :D
-                stateChanges.push_back([this, i, unpenalisedTime] {
-                    emit(std::make_unique<Penalisation<OPPONENT>>(Penalisation<OPPONENT>{i, unpenalisedTime}));
+                stateChanges.push_back([this, i, unpenalisedTime, reason] {
+                    emit(std::make_unique<Penalisation<OPPONENT>>(Penalisation<OPPONENT>{i, unpenalisedTime, reason}));
                 });
             }
-            else if (!newOpponentPlayer.penalised && oldOpponentPlayer.penalised) {
+            else if (newOpponentPlayer.penaltyState == gamecontroller::PenaltyState::UNPENALISED
+                && oldOpponentPlayer.penaltyState != gamecontroller::PenaltyState::UNPENALISED) {
                 // opponent unpenalised D:
                 stateChanges.push_back([this, i] {
                     emit(std::make_unique<Unpenalisation<OPPONENT>>(Unpenalisation<OPPONENT>{i}));
@@ -436,6 +450,30 @@ namespace input {
             }
         }
 
+    }
+
+    PenaltyReason GameController::getPenaltyReason(gamecontroller::PenaltyState& penaltyState) {
+        // ugly incoming
+        switch (penaltyState) {
+            case gamecontroller::PenaltyState::UNPENALISED:
+                return PenaltyReason::UNPENALISED;
+            case gamecontroller::PenaltyState::BALL_MANIPULATION:
+                return PenaltyReason::BALL_MANIPULATION;
+            case gamecontroller::PenaltyState::PHYSICAL_CONTACT:
+                return PenaltyReason::PHYSICAL_CONTACT;
+            case gamecontroller::PenaltyState::ILLEGAL_ATTACK:
+                return PenaltyReason::ILLEGAL_ATTACK;
+            case gamecontroller::PenaltyState::ILLEGAL_DEFENSE:
+                return PenaltyReason::ILLEGAL_DEFENSE;
+            case gamecontroller::PenaltyState::REQUEST_FOR_PICKUP:
+                return PenaltyReason::REQUEST_FOR_PICKUP;
+            case gamecontroller::PenaltyState::REQUEST_FOR_SERVICE:
+                return PenaltyReason::REQUEST_FOR_SERVICE;
+            case gamecontroller::PenaltyState::REQUEST_FOR_PICKUP_TO_SERVICE:
+                return PenaltyReason::REQUEST_FOR_PICKUP_TO_SERVICE;
+            default:
+                throw std::runtime_error("Invalid Penalty State");
+        }
     }
 
     Team& GameController::getOwnTeam(GameControllerPacket& state) {
