@@ -21,6 +21,7 @@
 
 #include "messages/behaviour/LookStrategy.h"
 #include "messages/behaviour/WalkStrategy.h"
+#include "messages/behaviour/KickPlan.h"
 #include "messages/input/Sensors.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/support/Configuration.h"
@@ -53,6 +54,7 @@ namespace modules {
 		using messages::behaviour::WalkStrategy;
 		using messages::behaviour::WalkTarget;
 		using messages::behaviour::WalkApproach;
+		using messages::behaviour::KickPlan;
 
 		using messages::input::gameevents::GameState;
 		using messages::input::gameevents::Phase;
@@ -453,7 +455,7 @@ namespace modules {
 					}
 
 					else if ((previousState.primaryGameState == GameStatePrimary::SET) && (currentState.primaryGameState == GameStatePrimary::PLAYING) && currentState.kickOff && currentState.kicker) {
-						kickBall(arma::normalise(currentState.heading, 2));
+						kickBall(currentState.heading);
 
 //						NUClear::log<NUClear::INFO>("Game just started. Time to kick off.");
 					}
@@ -486,7 +488,7 @@ namespace modules {
 					}
 
 					else if (currentState.kickPosition && !isKicking) {
-						kickBall(arma::normalise(currentState.heading, 2));
+						kickBall(currentState.heading);
 	
 //						NUClear::log<NUClear::INFO>("In kicking position. Kicking ball.");
 					}
@@ -494,7 +496,7 @@ namespace modules {
 					else if (currentState.goalInRange && !isKicking) {
 						arma::vec2 goal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 						approachBall(goal);
-						kickBall(arma::normalise(goal, 2));
+						kickBall(goal);
 
 //						NUClear::log<NUClear::INFO>("Kick for goal.");
 					}
@@ -724,7 +726,9 @@ namespace modules {
 			void SoccerStrategy::kickBall(const arma::vec2& direction) {
 				// Emit aim vector.
 				// Currently not implemented. Kick should happen when robot is close enough to the ball.
-				(void)direction;
+				auto kick = std::make_unique<messages::behaviour::KickPlan>();
+				kick->target = direction;
+				emit(std::move(kick));
 			}
 		}  // strategy
 	}  // behaviours

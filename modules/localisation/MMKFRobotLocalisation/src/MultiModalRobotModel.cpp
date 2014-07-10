@@ -117,9 +117,6 @@ double RobotHypothesis::MeasurementUpdate(
     const std::vector<messages::vision::VisionObject>& /*observed_objects (commented for warnings)*/,
     const std::vector<LocalisationFieldObject>& /*actual_objects*/) {
 
-	(void)observed_objects;
-	(void)actual_objects;
-
     // auto& obv_a = observed_objects[0];
     // auto& obv_b = observed_objects[1];
     // auto& lfo_a = actual_objects[0];
