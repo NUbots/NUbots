@@ -201,7 +201,6 @@ namespace modules {
 			void watchBall();
 			void kickBall(const arma::vec2& direction);
 			void approachBall(const arma::vec2& haading);
-			arma::vec2 transformPoint(const arma::vec2& point);
 
 			void updateGameState(const messages::input::gameevents::GameState& gameController);
 

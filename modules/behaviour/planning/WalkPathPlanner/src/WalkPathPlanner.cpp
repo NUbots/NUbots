@@ -277,11 +277,6 @@ namespace modules {
                     //calculate the basic movement plan
                     arma::vec movePlan;
 
-std::cerr << "selfPos - (" << selfs.front().position[0] << ", " << selfs.front().position[1] << ")" << std::endl;
-std::cerr << "selfHead - (" << selfs.front().heading[0] << ", " << selfs.front().heading[1] << ")" << std::endl;
-std::cerr << "targetPos - (" << targetPos[0] << ", " << targetPos[1] << ")" << std::endl;
-std::cerr << "targetHead - (" << targetHead[0] << ", " << targetHead[1] << ")" << std::endl;
-
                     switch (planType) {
                         case messages::behaviour::WalkApproach::ApproachFromDirection:
                             movePlan = approachFromDirection(selfs.front(),targetPos,targetHead);
@@ -388,8 +383,6 @@ std::cerr << "targetHead - (" << targetHead[0] << ", " << targetHead[1] << ")" <
                     walk_speed = 0.f;
                 }
 
-std::cerr << "distanceIncrement - " << distanceIncrement << std::endl;
-
                 //decide between heading and bearing
                 if (distanceIncrement > 1) {
                     walk_rotation = move[1];
@@ -400,10 +393,6 @@ std::cerr << "distanceIncrement - " << distanceIncrement << std::endl;
 
                 //make sure our rotation is normalised to our turning limits
                 walk_rotation = fmin(turnSpeed,fmax(walk_rotation,-turnSpeed));
-
-std::cerr << "walk_speed - " << walk_speed << std::endl;
-std::cerr << "walk_bearing - " << walk_bearing << std::endl;
-std::cerr << "walk_rotation - " << walk_rotation << std::endl;
 
                 //apply turning hysteresis
                 /*if (turning < 0 and walk_bearing < -turnDeviation) {
@@ -491,20 +480,16 @@ std::cerr << "walk_rotation - " << walk_rotation << std::endl;
                                                   const arma::vec2& direction) {
                 //quick and dirty go to point calculator
                 //gets position and heading difference and returns walk params for it
-                const arma::vec2 posdiff = target-self.position;
+                const arma::vec2 posdiff = target - self.position;
                 const double targetDistance = arma::norm(posdiff);
-                const double selfHeading = atan2(self.heading[1],self.heading[0]);
-                const double targetHeading = atan2(posdiff[1],posdiff[0])-selfHeading;
-                const double targetBearing = atan2(direction[1],direction[0])-selfHeading;
+                const double selfHeading = std::atan2(self.heading[1],self.heading[0]);
+                const double targetHeading = std::atan2(posdiff[1],posdiff[0])-selfHeading;
+                const double targetBearing = std::atan2(direction[1],direction[0])-selfHeading;
 
                 arma::vec result(3);
                 result[0] = targetDistance;
-                result[1] = atan2(sin(targetBearing),cos(targetBearing));
-                result[2] = atan2(sin(targetHeading),cos(targetHeading));
-
-std::cerr << "targetDistance - " << result[0] << std::endl;
-std::cerr << "angleToLocation - " << result[1] << std::endl;
-std::cerr << "angleToHeading - " << result[2] << std::endl;
+                result[1] = atan2(sin(targetHeading),cos(targetHeading));
+                result[2] = atan2(sin(targetBearing),cos(targetBearing));
 
                 //apply turning hysteresis
                 return result;

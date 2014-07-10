@@ -31,6 +31,7 @@
 #include "utility/math/angle.h"
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/ParametricLine.h"
+#include "utility/localisation/transform.h"
 #include "utility/support/armayamlconversions.h"
 
 namespace modules {
@@ -199,6 +200,9 @@ namespace modules {
 //							const std::shared_ptr<const messages::input::gameevents::GameState>& gameController
 							) {
 
+					// Calculate the position of the ball in field coordinates.
+					arma::vec2 globalBallPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
+
 					// Make a copy of the previous state.					
 					memcpy(&previousState, &currentState, sizeof(State));
 
@@ -207,9 +211,8 @@ namespace modules {
 
 					// Store current position and heading.
 					if (selfs.size() > 0) {
-						currentState.transform = selfs.at(0).robot_to_world_rotation;
 						currentState.position = selfs.at(0).position;
-						currentState.heading = currentState.position + currentState.transform.col(0);
+						currentState.heading = selfs.at(0).heading;
 					}
 
 					// Parse game controller state infoirmation as well as button pushes.
@@ -265,22 +268,22 @@ namespace modules {
 					currentState.ballHasMoved = arma::norm(currentState.ball.position - previousState.ball.position, 2) > BALL_MOVEMENT_THRESHOLD;
 
 					// Is the ball in my zone?
-					currentState.ballInZone = (!currentState.ballLost && ZONES.at(MY_ZONE).pointContained(transformPoint(currentState.ball.position) + currentState.position));
+					currentState.ballInZone = !currentState.ballLost && ZONES.at(MY_ZONE).pointContained(globalBallPosition);
 							
 					// Are the goals in range?
 					// x = 0 = centre field.
 					// Assumption: We could potentially kick a goal if we are in the other half of the field.
 					// Assumption: goal.position is the x, y coordinates of the goals relative to us.
-					currentState.goalInRange = (!currentState.ballLost && (arma::norm(currentState.ball.position, 2) < MAX_BALL_DISTANCE) && ((transformPoint(currentState.ball.position) + currentState.position)[0] > 0));
+					currentState.goalInRange = (!currentState.ballLost && (arma::norm(currentState.ball.position, 2) < MAX_BALL_DISTANCE) && (globalBallPosition[0] > 0));
 
 					// Perform calculations to see if we have reached the assigned target position and heading.
 					arma::vec2 selfToPoint = currentState.targetHeading - currentState.position;
 					arma::vec2 selfRotation = currentState.heading - currentState.position;
 
-					double selfToPointAngle = atan2(selfToPoint[1], selfToPoint[0]);					
-					double selfAngle = atan2(selfRotation[1], selfRotation[0]);
+					double selfToPointAngle = std::atan2(selfToPoint[1], selfToPoint[0]);					
+					double selfAngle = std::atan2(selfRotation[1], selfRotation[0]);
 
-					currentState.correctHeading = utility::math::angle::normalizeAngle(selfAngle - selfToPointAngle) < ANGLE_THRESHOLD;
+					currentState.correctHeading = std::fabs(utility::math::angle::normalizeAngle(selfAngle - selfToPointAngle)) < ANGLE_THRESHOLD;
 					currentState.inPosition = arma::norm(currentState.position - currentState.targetPosition, 2) < POSITION_THRESHOLD_TIGHT;
 
 					currentState.outOfPosition = (arma::norm(currentState.position - currentState.targetPosition, 2) >= POSITION_THRESHOLD_LOOSE) && previousState.inPosition;
@@ -303,7 +306,6 @@ namespace modules {
 						ParametricLine<2> line;
 						arma::vec2 xaxis = {1, 0};
 						arma::vec2 fieldWidth = {-FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
-						arma::vec2 globalBallPosition = transformPoint(currentState.ball.position) + currentState.position;
 
 						try {
 							planeGoal.setFromNormal(xaxis, fieldWidth);
@@ -315,7 +317,7 @@ namespace modules {
 						}
 
 						try {
-							planeSelf.setFromNormal(transformPoint(currentState.ball.position), currentState.position);
+							planeSelf.setFromNormal(globalBallPosition - currentState.position, currentState.position);
 						}
 
 						catch (const std::domain_error& e) {
@@ -325,7 +327,7 @@ namespace modules {
 
 
 						try {
-							line.setFromDirection(transformPoint(currentState.ball.velocity), globalBallPosition);
+							line.setFromDirection(utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.velocity) - currentState.position, globalBallPosition);
 						}
 
 						catch (const std::domain_error& e) {
@@ -362,7 +364,7 @@ namespace modules {
 
 
 					// Calculate the optimal zone position.
-					arma::vec2 optimalPosition = findOptimalPosition(ZONES.at(MY_ZONE), transformPoint(currentState.ball.position) + currentState.position);
+					arma::vec2 optimalPosition = findOptimalPosition(ZONES.at(MY_ZONE), globalBallPosition);
 
 					// Determine current state and appropriate action(s).
 					if ((currentState.primaryGameState == GameStatePrimary::INITIAL) || (currentState.primaryGameState == GameStatePrimary::SET) || (currentState.primaryGameState == GameStatePrimary::FINISHED) || currentState.pickedUp) {
@@ -374,7 +376,24 @@ namespace modules {
 	
 					else if (currentState.primaryGameState == GameStatePrimary::READY) {
 						arma::vec2 heading = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
-						goToPoint(START_POSITION, heading);
+
+						if (isWalking && currentState.inPosition && currentState.correctHeading) {
+							stopMoving();
+
+std::cerr << "currentPosition - (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;
+std::cerr << "targetPosition - (" << currentState.targetPosition[0] << ", " << currentState.targetPosition[1] << ")" << std::endl;
+std::cerr << "currentHeading - (" << currentState.heading[0] << ", " << currentState.heading[1] << ")" << std::endl;
+std::cerr << "targetHeading - (" << currentState.targetHeading[0] << ", " << currentState.targetHeading[1] << ")" << std::endl;
+std::cerr << "selfToPoint - (" << selfToPoint[0] << ", " << selfToPoint[1] << ")" << std::endl;
+std::cerr << "selfRotation - (" << selfRotation[0] << ", " << selfRotation[1] << ")" << std::endl;
+std::cerr << "selfToPointAngle - " << selfToPointAngle << std::endl;
+std::cerr << "selfAngle - " << selfAngle << std::endl;
+std::cerr << "std::fabs(utility::math::angle::normalizeAngle(selfAngle - selfToPointAngle)) - " << std::fabs(utility::math::angle::normalizeAngle(selfAngle - selfToPointAngle)) << std::endl;
+						}
+
+						if (!isWalking && (!currentState.inPosition || !currentState.correctHeading)) {
+							goToPoint(START_POSITION, heading);
+						}
 
 //						NUClear::log<NUClear::INFO>("Game is about to start. I should be in my starting position.");
 					}
@@ -413,7 +432,7 @@ namespace modules {
 					}
 
 					else if ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK) && IS_GOALIE && !currentState.ballLost && currentState.ballHasMoved && !currentState.ballApproachingGoal) {
-						arma::vec2 blockPosition = {currentState.position[0], (transformPoint(currentState.ball.position) + currentState.position)[1]};
+						arma::vec2 blockPosition = {currentState.position[0], globalBallPosition[1]};
 						sideStepToPoint(blockPosition);
 
 					}
@@ -614,7 +633,7 @@ namespace modules {
 				/* Try to locate both goals. */
 				/* Look at closest goal for short period to reset localisation. */
 				arma::vec2 goalPosition = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
-				arma::vec2 ballPosition = transformPoint(currentState.ball.position) + currentState.position;
+				arma::vec2 ballPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
 
 				// Look at our goals.
 				auto lookAtGoal = std::make_unique<messages::behaviour::LookAtPoint>();
@@ -636,7 +655,7 @@ namespace modules {
 
 			void SoccerStrategy::findBall() {
 				// This needs to be replaced with a proper lookAtBall command.
-				arma::vec2 ballPosition = transformPoint(currentState.ball.position) + currentState.position;
+				arma::vec2 ballPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
 
 				auto look = std::make_unique<messages::behaviour::LookAtPoint>();
 				look->x = ballPosition[0];
@@ -665,7 +684,7 @@ std::cerr << "heading - (" << approach->heading[0] << ", " << approach->heading[
 
 			void SoccerStrategy::watchBall() {
 				// This needs to be replaced with a proper lookAtBall command.
-				arma::vec2 ballPosition = transformPoint(currentState.ball.position) + currentState.position;
+				arma::vec2 ballPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
 
 				auto look = std::make_unique<messages::behaviour::LookAtPoint>();
 				look->x = ballPosition[0];
@@ -680,7 +699,7 @@ std::cerr << "heading - (" << approach->heading[0] << ", " << approach->heading[
 				approach->targetPositionType = WalkTarget::WayPoint;
 				approach->targetHeadingType = WalkTarget::Ball;
 				approach->walkMovementType = WalkApproach::OmnidirectionalReposition;
-				approach->heading = transformPoint(currentState.ball.position) + currentState.position;
+				approach->heading = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
 				approach->target = position; 
 
 				currentState.targetPosition = approach->target;
@@ -695,7 +714,7 @@ std::cerr << "heading - (" << approach->heading[0] << ", " << approach->heading[
 				approach->targetHeadingType = WalkTarget::WayPoint;
 				approach->walkMovementType = WalkApproach::ApproachFromDirection;
 				approach->heading = heading;
-				approach->target = transformPoint(currentState.ball.position) + currentState.position;
+				approach->target = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
 
 				currentState.targetPosition = approach->target;
 				currentState.targetHeading = approach->heading;
@@ -707,10 +726,6 @@ std::cerr << "heading - (" << approach->heading[0] << ", " << approach->heading[
 				// Emit aim vector.
 				// Currently not implemented. Kick should happen when robot is close enough to the ball.
 				(void)direction;
-			}
-
-			arma::vec2 SoccerStrategy::transformPoint(const arma::vec2& point) {
-				return (currentState.transform * point);
 			}
 		}  // strategy
 	}  // behaviours
