@@ -60,10 +60,16 @@ namespace modules {
 
                 static constexpr const char* CONFIGURATION_PATH = "DarwinSensorFilter.yaml";
             private:
+                static constexpr const uint DEBOUNCE_THRESHOLD = 7;
+
                 arma::mat44 calculateOdometryMatrix(
                     const messages::input::Sensors& sensors,
                     const messages::input::Sensors& previousSensors,
                     utility::motion::kinematics::Side side);
+
+                // used to debounce button presses
+                bool leftDown = false;
+                bool middleDown = false;
             };
         }
     }

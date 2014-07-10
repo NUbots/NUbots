@@ -47,6 +47,8 @@ namespace modules {
 		using messages::behaviour::HeadBehaviourConfig;
 		using messages::input::Sensors;
 		using messages::platform::darwin::DarwinSensors;
+		using messages::platform::darwin::ButtonLeftDown;
+		using messages::platform::darwin::ButtonMiddleDown;
 		using messages::support::Configuration;
 		using messages::support::FieldDescription;
 		using messages::motion::KickCommand;
@@ -71,7 +73,7 @@ namespace modules {
 			feetOffGround = true;
 			isKicking = false;
 			isWalking = false;
-			
+
 			currentState.primaryGameState = GameStatePrimary::INITIAL;
 			currentState.secondaryGameState = GameStateSecondary::NORMAL;
 			currentState.penalised = false;
@@ -124,27 +126,59 @@ namespace modules {
 				stopMoving();
 			});
 
-			// Last 10 to do some button debouncing.
-			on<Trigger<Last<10, messages::platform::darwin::DarwinSensors>>>([this](const std::vector<std::shared_ptr<const messages::platform::darwin::DarwinSensors>>& sensors) {
-				float leftCount = 0.0, middleCount = 0.0;
+			on<Trigger<ButtonLeftDown>>([this](const ButtonLeftDown&) {
+				currentState.primaryGameState++;
 
-				for (size_t i = 0; i < sensors.size(); i++) {
-					if (sensors.at(i)->buttons.left) { //leftbutton fixed in hardwareIO.cpp
-						leftCount += 0.1;
+				switch (currentState.primaryGameState) {
+					case GameStatePrimary::INITIAL: {
+						emit(std::move(std::make_unique<messages::output::Say>("Initial")));
+						std::cerr << "initial" << std::endl;
+						break;
 					}
-					if (sensors.at(i)->buttons.middle) {
-						middleCount += 0.1;
+
+					case GameStatePrimary::SET: {
+						emit(std::move(std::make_unique<messages::output::Say>("Set")));
+						std::cerr << "set" << std::endl;
+						break;
+					}
+
+					case GameStatePrimary::READY: {
+						emit(std::move(std::make_unique<messages::output::Say>("Ready")));
+						std::cerr << "ready" << std::endl;
+						break;
+					}
+
+					case GameStatePrimary::PLAYING: {
+						emit(std::move(std::make_unique<messages::output::Say>("Playing")));
+						std::cerr << "playing" << std::endl;
+						break;
+					}
+
+					case GameStatePrimary::FINISHED: {
+						emit(std::move(std::make_unique<messages::output::Say>("Finished")));
+						std::cerr << "finished" << std::endl;
+						break;
+					}
+
+					default: {
+						emit(std::move(std::make_unique<messages::output::Say>("Undefined State. Something broke")));
+						std::cerr << "Undefined State. Something broke" << std::endl;
+						break;
 					}
 				}
+			});
 
-/*
-				if(leftCount>0 || middleCount>0)
-					std::cerr << "(" << sensors.size() << ", " << leftCount << ", " << middleCount << ")" << std::endl; //Test the button pressing	
-*/
-				gameStateButtonStatusPrev = gameStateButtonStatus;
-				penalisedButtonStatusPrev = penalisedButtonStatus;
-				gameStateButtonStatus = (leftCount > 0.7);
-				penalisedButtonStatus = (middleCount > 0.7);
+			on<Trigger<ButtonMiddleDown>>([this](const ButtonMiddleDown&) {
+				// Am I penalised?
+				if (!currentState.penalised) {
+					currentState.penalised = true;
+					emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
+				}
+
+				else {
+					currentState.penalised = false;
+					emit(std::move(std::make_unique<messages::output::Say>("Unpenalised")));
+				}
 			});
 
 			// Check to see if both feet are on the ground.
@@ -201,20 +235,20 @@ namespace modules {
 				FIELD_DESCRIPTION = field;
 			});
 
-			on<Trigger<Every<30, Per<std::chrono::seconds>>>, 
+			on<Trigger<Every<30, Per<std::chrono::seconds>>>,
 				With<messages::localisation::Ball>,
 				With<std::vector<messages::localisation::Self>>,
 //				With<Optional<messages::input::gameevents::GameState>>,
 				Options<Single>>([this](const time_t&,
 							const messages::localisation::Ball& ball,
 							const std::vector<messages::localisation::Self>& selfs
-//							const std::shared_ptr<const messages::input::gameevents::GameState>& gameController
+//							const std::shared_ptr<const messages::input::gameevents::GameState>& gameState
 							) {
 
 					// Calculate the position of the ball in field coordinates.
 					arma::vec2 globalBallPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
 
-					// Make a copy of the previous state.					
+					// Make a copy of the previous state.
 					memcpy(&previousState, &currentState, sizeof(State));
 
 					// Make a copy of the ball.
@@ -227,43 +261,31 @@ namespace modules {
 					}
 
 					// Parse game controller state infoirmation as well as button pushes.
-					messages::input::gameevents::GameState gameController;
-					updateGameState(gameController);
-//					if (gameController != NULL) {
-//						updateGameState(*gameController);
+					messages::input::gameevents::GameState gameState;
+					updateGameState(gameState);
+//					if (gameState != NULL) {
+//						updateGameState(*gameState);
 //					}
 
 					// Are we kicking off?
-//					currentState.kickOff = gameController->ourKickOff;
+//					currentState.kickOff = gameState->ourKickOff;
 
 					// Am I the kicker?
-					// Is my start position inside the centre circle? 
-					currentState.kicker = ((arma::norm(START_POSITION, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.primaryGameState == GameStatePrimary::READY || 
+					// Is my start position inside the centre circle?
+					currentState.kicker = ((arma::norm(START_POSITION, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.primaryGameState == GameStatePrimary::READY ||
 								currentState.primaryGameState == GameStatePrimary::SET || currentState.primaryGameState == GameStatePrimary::PLAYING));
 
-//					currentState.kicker = ((arma::norm(START_POSITION, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.primaryGameState == GameStatePrimary::READY || 
-//								currentState.primaryGameState == GameStatePrimary::SET || currentState.primaryGameState == GameStatePrimary::PLAYING)) || ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK || 
-//								currentState.secondaryGameState == GameStateSecondary::FREE_KICK || currentState.secondaryGameState == GameStateSecondary::GOAL_KICK || currentState.secondaryGameState == GameStateSecondary::CORNER_KICK) && 
+//					currentState.kicker = ((arma::norm(START_POSITION, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.primaryGameState == GameStatePrimary::READY ||
+//								currentState.primaryGameState == GameStatePrimary::SET || currentState.primaryGameState == GameStatePrimary::PLAYING)) || ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK ||
+//								currentState.secondaryGameState == GameStateSecondary::FREE_KICK || currentState.secondaryGameState == GameStateSecondary::GOAL_KICK || currentState.secondaryGameState == GameStateSecondary::CORNER_KICK) &&
 //								currentState.primaryGameState == GameStatePrimary::PLAYING); // && currentState.???);
 
 					// Have I been picked up?
 					currentState.pickedUp = feetOffGround && !isGettingUp && !isDiving;
 
-					// Am I penalised?
-					if (penalisedButtonStatus && !penalisedButtonStatusPrev) {
-						if (!currentState.penalised) {
-							currentState.penalised = true;
-							emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
-						}
-	
-						else {
-							currentState.penalised = false;
-							emit(std::move(std::make_unique<messages::output::Say>("Unpenalised")));
-						}
-					}
 
 					// TODO: FIX ME!!!!
-//					if (gameController->team.players.at(0).penalised && !previousState.penalised) {
+//					if (gameState->team.players.at(0).penalised && !previousState.penalised) {
 //						currentState.penalised = true;
 //						emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
 //					}
@@ -272,11 +294,11 @@ namespace modules {
 					try {
 						currentState.selfInZone = ZONES.at(MY_ZONE).pointContained(currentState.position);
 					}
-						
+
 					catch (const std::domain_error& e) {
 						std::cerr << "pointContained failed." << std::endl;
-						std::cerr << "selfPosition - (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;	
-						std::cerr << "MY_ZONE - (" << MY_ZONE << std::endl;	
+						std::cerr << "selfPosition - (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;
+						std::cerr << "MY_ZONE - (" << MY_ZONE << std::endl;
 					}
 
 					// Can I see the ball?
@@ -289,7 +311,7 @@ namespace modules {
 
 					// Is the ball in my zone?
 					currentState.ballInZone = !currentState.ballLost && ZONES.at(MY_ZONE).pointContained(globalBallPosition);
-							
+
 					// Are the goals in range?
 					// x = 0 = centre field.
 					// Assumption: We could potentially kick a goal if we are in the other half of the field.
@@ -300,17 +322,17 @@ namespace modules {
 					arma::vec2 selfToPoint = currentState.targetHeading - currentState.position;
 					arma::vec2 selfRotation = currentState.heading - currentState.position;
 
-					double selfToPointAngle = std::atan2(selfToPoint[1], selfToPoint[0]);					
+					double selfToPointAngle = std::atan2(selfToPoint[1], selfToPoint[0]);
 					double selfAngle = std::atan2(selfRotation[1], selfRotation[0]);
 
 					currentState.correctHeading = std::fabs(utility::math::angle::normalizeAngle(selfAngle - selfToPointAngle)) < ANGLE_THRESHOLD;
 					currentState.inPosition = arma::norm(currentState.position - currentState.targetPosition, 2) < POSITION_THRESHOLD_TIGHT;
 
 					currentState.outOfPosition = (arma::norm(currentState.position - currentState.targetPosition, 2) >= POSITION_THRESHOLD_LOOSE) && previousState.inPosition;
-					
+
 					// Am I in position to kick the ball?
 					bool kickThreshold = arma::norm(currentState.ball.position, 2) < KICK_DISTANCE_THRESHOLD;
-					
+
 					currentState.kickPosition = (currentState.inPosition && currentState.correctHeading && kickThreshold && !currentState.outOfPosition);
 
 					// If the balls position, relative to us is (0, 0) then the ball is inside us.
@@ -332,8 +354,8 @@ namespace modules {
 						}
 
 						catch (const std::domain_error& e) {
-							std::cerr << "xaxis - (" << xaxis[0] << ", " << xaxis[1] << ")" << std::endl;	
-							std::cerr << "fieldWidth - (" << fieldWidth[0] << ", " << fieldWidth[1] << ")" << std::endl;	
+							std::cerr << "xaxis - (" << xaxis[0] << ", " << xaxis[1] << ")" << std::endl;
+							std::cerr << "fieldWidth - (" << fieldWidth[0] << ", " << fieldWidth[1] << ")" << std::endl;
 						}
 
 						try {
@@ -341,8 +363,8 @@ namespace modules {
 						}
 
 						catch (const std::domain_error& e) {
-							std::cerr << "ballPosition - (" << currentState.ball.position[0] << ", " << currentState.ball.position[1] << ")" << std::endl;	
-							std::cerr << "selfPosition - (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;	
+							std::cerr << "ballPosition - (" << currentState.ball.position[0] << ", " << currentState.ball.position[1] << ")" << std::endl;
+							std::cerr << "selfPosition - (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;
 						}
 
 
@@ -351,8 +373,8 @@ namespace modules {
 						}
 
 						catch (const std::domain_error& e) {
-							std::cerr << "ballVelocity - (" << currentState.ball.velocity[0] << ", " << currentState.ball.velocity[1] << ")" << std::endl;	
-							std::cerr << "ballPosition - (" << globalBallPosition[0] << ", " << globalBallPosition[1] << ")" << std::endl;	
+							std::cerr << "ballVelocity - (" << currentState.ball.velocity[0] << ", " << currentState.ball.velocity[1] << ")" << std::endl;
+							std::cerr << "ballPosition - (" << globalBallPosition[0] << ", " << globalBallPosition[1] << ")" << std::endl;
 						}
 
 						// Is the ball approaching our goals?
@@ -367,7 +389,7 @@ namespace modules {
 							currentState.ballApproachingGoal = false;
 						}
 
-						
+
 						// Is the ball heading in my direction?
 						try {
 							// Throws std::domain_error if there is no intersection.
@@ -391,7 +413,7 @@ namespace modules {
 					// Stop moving if in the initial, set or finished states, as well as when picked up
 					if ((currentState.primaryGameState == GameStatePrimary::INITIAL) || (currentState.primaryGameState == GameStatePrimary::SET) || (currentState.primaryGameState == GameStatePrimary::FINISHED) || currentState.pickedUp) {
 						stopMoving();
-		
+
 //						NUClear::log<NUClear::INFO>("Standing still.");
 					}
 
@@ -486,7 +508,7 @@ namespace modules {
 
 					else if (currentState.kickPosition && !isKicking) {
 						kickBall(currentState.heading);
-	
+
 //						NUClear::log<NUClear::INFO>("In kicking position. Kicking ball.");
 					}
 
@@ -509,61 +531,19 @@ namespace modules {
 						findSelf();
 						findBall();
 						goToPoint(ZONE_DEFAULTS.at(MY_ZONE), heading);
-	
+
 //						NUClear::log<NUClear::INFO>("Unknown behavioural state. Finding self, finding ball, moving to default position.");
 					}
 
 				});
 			}
 
-			void SoccerStrategy::updateGameState(const messages::input::gameevents::GameState& gameController) {
-				// Allow the back panel button to cycle through the primary game states.
-				if (gameStateButtonStatus && !gameStateButtonStatusPrev) {
-					currentState.primaryGameState++;
+			void SoccerStrategy::updateGameState(const messages::input::gameevents::GameState& gameState) {
 
-					switch (currentState.primaryGameState) {
-						case GameStatePrimary::INITIAL: {
-							emit(std::move(std::make_unique<messages::output::Say>("Initial")));
-							std::cerr << "initial" << std::endl;
-							break;
-						}
-
-						case GameStatePrimary::SET: {
-							emit(std::move(std::make_unique<messages::output::Say>("Set")));
-							std::cerr << "set" << std::endl;
-							break;
-						}
-
-						case GameStatePrimary::READY: {
-							emit(std::move(std::make_unique<messages::output::Say>("Ready")));
-							std::cerr << "ready" << std::endl;
-							break;
-						}
-
-						case GameStatePrimary::PLAYING: {
-							emit(std::move(std::make_unique<messages::output::Say>("Playing")));
-							std::cerr << "playing" << std::endl;
-							break;
-						}
-
-						case GameStatePrimary::FINISHED: {
-							emit(std::move(std::make_unique<messages::output::Say>("Finished")));
-							std::cerr << "finished" << std::endl;
-							break;
-						}
-
-						default: {
-							emit(std::move(std::make_unique<messages::output::Say>("Undefined State. Something broke")));
-							std::cerr << "Undefined State. Something broke" << std::endl;
-							break;
-						}
-					}
-				}
-
-				(void)gameController;
+				(void)gameState;
 /*
 				// What state is the game in?
-				switch (gameController.phase) {
+				switch (gameState.phase) {
 					case messages::input::gameevents::Phase::READY:
 						currentState.primaryGameState = GameStatePrimary::READY;
 						break;
@@ -591,7 +571,7 @@ namespace modules {
 
 				}
 
-				switch (gameController.mode) {
+				switch (gameState.mode) {
 					case messages::input::gameevents::Mode::PENALTY_SHOOTOUT:
 						currentState.secondaryGameState = GameStateSecondary::PENALTY_SHOOTOUT;
 						break;
@@ -599,7 +579,7 @@ namespace modules {
 					case messages::input::gameevents::Mode::OVERTIME:
 						currentState.secondaryGameState = GameStateSecondary::OVERTIME;
 						break;
-					
+
 					case messages::input::gameevents::Mode::NORMAL:
 					default:
 						currentState.secondaryGameState = GameStateSecondary::NORMAL;
@@ -623,8 +603,8 @@ namespace modules {
 				// These four parameters are not important for standing still.
 				approach->targetPositionType = WalkTarget::WayPoint;
 				approach->targetHeadingType = WalkTarget::WayPoint;
-				approach->heading = currentState.heading; 
-				approach->target = currentState.position; 
+				approach->heading = currentState.heading;
+				approach->target = currentState.position;
 				approach->walkMovementType = WalkApproach::StandStill;
 				emit(std::move(approach));
 			}
@@ -671,7 +651,7 @@ namespace modules {
 				approach->targetHeadingType = WalkTarget::WayPoint;
 				approach->walkMovementType = WalkApproach::WalkToPoint;
 				approach->heading = heading;
-				approach->target = position; 
+				approach->target = position;
 
 				currentState.targetPosition = approach->target;
 				currentState.targetHeading = approach->heading;
@@ -697,7 +677,7 @@ namespace modules {
 				approach->targetHeadingType = WalkTarget::Ball;
 				approach->walkMovementType = WalkApproach::OmnidirectionalReposition;
 				approach->heading = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
-				approach->target = position; 
+				approach->target = position;
 
 				currentState.targetPosition = approach->target;
 				currentState.targetHeading = approach->heading;

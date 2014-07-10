@@ -34,6 +34,10 @@ namespace modules {
 
             using messages::support::Configuration;
             using messages::platform::darwin::DarwinSensors;
+            using messages::platform::darwin::ButtonLeftDown;
+            using messages::platform::darwin::ButtonLeftUp;
+            using messages::platform::darwin::ButtonMiddleDown;
+            using messages::platform::darwin::ButtonMiddleUp;
             using messages::input::Sensors;
             using messages::input::CameraParameters;
             using utility::nubugger::graph;
@@ -100,6 +104,38 @@ namespace modules {
 
                     MEASUREMENT_NOISE_ACCELEROMETER = arma::eye(3,3) * file["MEASUREMENT_NOISE_ACCELEROMETER"].as<double>();
                     MEASUREMENT_NOISE_GYROSCOPE = arma::eye(3,3) * file["MEASUREMENT_NOISE_GYROSCOPE"].as<double>();
+                });
+
+                on<Trigger<Last<10, messages::platform::darwin::DarwinSensors>>>([this](const std::vector<std::shared_ptr<const messages::platform::darwin::DarwinSensors>>& sensors) {
+                    uint buttonLeftCount = 0;
+                    uint buttonMiddleCount = 0;
+
+                    for (auto& sensor : sensors) {
+                        if (sensor->buttons.left) {
+                            buttonLeftCount++;
+                        }
+                        if (sensor->buttons.middle) {
+                            buttonMiddleCount++;
+                        }
+                    }
+
+                    if (!leftDown && buttonLeftCount >= DEBOUNCE_THRESHOLD) {
+                        emit(std::make_unique<ButtonLeftDown>());
+                        leftDown = true;
+                    }
+                    else if (leftDown && buttonLeftCount < DEBOUNCE_THRESHOLD) {
+                        emit(std::make_unique<ButtonLeftUp>());
+                        leftDown = false;
+                    }
+
+                    if (!middleDown && buttonMiddleCount > DEBOUNCE_THRESHOLD) {
+                        emit(std::make_unique<ButtonMiddleDown>());
+                        middleDown = true;
+                    }
+                    else if (middleDown && buttonMiddleCount < DEBOUNCE_THRESHOLD) {
+                        emit(std::make_unique<ButtonMiddleUp>());
+                        middleDown = false;
+                    }
                 });
 
                 on< Trigger<DarwinSensors>

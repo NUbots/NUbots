@@ -414,6 +414,7 @@ namespace input {
                     break;
                 default:
                     throw std::runtime_error("Invalid mode change");
+                emit(std::make_unique<Mode>(state->mode));
             }
         }
 
@@ -496,6 +497,8 @@ namespace input {
                     break;
                 }
             }
+
+            emit(std::make_unique<Phase>(state->phase));
 
         }
 
