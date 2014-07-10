@@ -205,8 +205,12 @@ namespace modules {
             }
 
             double FitnessData::popFitness(){
+                std::cerr << "Calculating fitness: " <<std::endl;
                 double stabilityFitness = (M_PI_4 - tilt.mean()) / M_PI_4;
+                std::cerr << "stabilityFitness = " << stabilityFitness <<std::endl;
                 double getupFitness = (numberOfGetups == 0 ? 1 : 1 / double(1+numberOfGetups));
+                std::cerr << "numberOfGetups = " <<  numberOfGetups <<std::endl;
+                std::cerr << "getupFitness = " <<  getupFitness <<std::endl;
                 numberOfGetups = 0;
                 tilt.reset();
                 //Reset all data

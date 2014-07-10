@@ -56,11 +56,11 @@ namespace modules {
                 arma::vec parameter_sigmas;
                 arma::vec fitnesses;
 
-                uint currentSample;
+                unsigned int currentSample;
                 arma::mat samples;
                 int number_of_samples;
 
-                int getup_cancel_trial_threshold;
+                unsigned int getup_cancel_trial_threshold;
 
                 int configuration_wait_milliseconds = 2000;
 

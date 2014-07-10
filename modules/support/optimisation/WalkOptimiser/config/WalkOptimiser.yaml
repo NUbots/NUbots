@@ -1,5 +1,5 @@
 number_of_samples: 4
-getup_cancel_trial_threshold: 1
+getup_cancel_trial_threshold: 3
 configuration_wait_milliseconds: 2000
 parameters_and_sigmas:
   gyroFactor: 0.0001
