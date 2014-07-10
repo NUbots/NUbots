@@ -379,16 +379,6 @@ namespace modules {
 
 						if (isWalking && currentState.inPosition && currentState.correctHeading) {
 							stopMoving();
-
-std::cerr << "currentPosition - (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;
-std::cerr << "targetPosition - (" << currentState.targetPosition[0] << ", " << currentState.targetPosition[1] << ")" << std::endl;
-std::cerr << "currentHeading - (" << currentState.heading[0] << ", " << currentState.heading[1] << ")" << std::endl;
-std::cerr << "targetHeading - (" << currentState.targetHeading[0] << ", " << currentState.targetHeading[1] << ")" << std::endl;
-std::cerr << "selfToPoint - (" << selfToPoint[0] << ", " << selfToPoint[1] << ")" << std::endl;
-std::cerr << "selfRotation - (" << selfRotation[0] << ", " << selfRotation[1] << ")" << std::endl;
-std::cerr << "selfToPointAngle - " << selfToPointAngle << std::endl;
-std::cerr << "selfAngle - " << selfAngle << std::endl;
-std::cerr << "std::fabs(utility::math::angle::normalizeAngle(selfAngle - selfToPointAngle)) - " << std::fabs(utility::math::angle::normalizeAngle(selfAngle - selfToPointAngle)) << std::endl;
 						}
 
 						if (!isWalking && (!currentState.inPosition || !currentState.correctHeading)) {
