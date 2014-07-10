@@ -109,7 +109,7 @@ namespace localisation {
             rm_cfg.observationDifferenceElevationFactor = config["ObservationDifferenceElevationFactor"].as<double>();
 
             for (auto& model : robot_models_) {
-                // std::cout << (model == nullptr) << std::endl;
+                std::cout << __FILE__ << "," << __LINE__ << ": SEGMENTATION FAULT occurs when this cout is absent." << std::endl;
                 model->SetConfig(rm_cfg);
             }
         };

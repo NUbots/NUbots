@@ -115,26 +115,27 @@ double RobotHypothesis::MeasurementUpdate(
     const std::vector<messages::vision::VisionObject>& observed_objects,
     const std::vector<LocalisationFieldObject>& actual_objects) {
 
-    auto& obv_a = observed_objects[0];
-    auto& obv_b = observed_objects[1];
-    auto& lfo_a = actual_objects[0];
-    auto& lfo_b = actual_objects[1];
+    // auto& obv_a = observed_objects[0];
+    // auto& obv_b = observed_objects[1];
+    // auto& lfo_a = actual_objects[0];
+    // auto& lfo_b = actual_objects[1];
 
-    std::vector<arma::vec> actual_positions = {
-        arma::vec(lfo_a.location()), arma::vec(lfo_b.location())
-    };
+    // std::vector<arma::vec> actual_positions = {
+    //     arma::vec(lfo_a.location()), arma::vec(lfo_b.location())
+    // };
 
-    // Use a dot product to calculate heading distance:
-    arma::vec unit_a = arma::normalise(obv_a.measurements[0].position.rows(0, 1));
-    arma::vec unit_b = arma::normalise(obv_b.measurements[0].position.rows(0, 1));
-    double heading_diff = std::acos(arma::dot(arma::vec(unit_a), arma::vec(unit_b)));
+    // // Use a dot product to calculate heading distance:
+    // arma::vec unit_a = arma::normalise(obv_a.measurements[0].position.rows(0, 1));
+    // arma::vec unit_b = arma::normalise(obv_b.measurements[0].position.rows(0, 1));
+    // double heading_diff = std::acos(arma::dot(arma::vec(unit_a), arma::vec(unit_b)));
 
-    arma::vec measurement = { std::abs(heading_diff) };
-    arma::mat cov = arma::eye(1, 1) * 0.1; // TODO: Calculate correct covariance
+    // arma::vec measurement = { std::abs(heading_diff) };
+    // arma::mat cov = arma::eye(1, 1) * 0.1; // TODO: Calculate correct covariance
 
-    double quality = filter_.measurementUpdate(measurement, cov, actual_positions);
+    // double quality = filter_.measurementUpdate(measurement, cov, actual_positions);
 
-    return quality;
+    // return quality;
+    return 1;
 }
 
 /*! @brief Performs an ambiguous measurement update using the exhaustive

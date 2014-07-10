@@ -1,4 +1,4 @@
-AngleBetweenGoalsObservationEnabled: true
+AngleBetweenGoalsObservationEnabled: false
 GoalPairObservationEnabled: true
 AllGoalsAreBlue: false
 EmitRobotFieldobjects: false

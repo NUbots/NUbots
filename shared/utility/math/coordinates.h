@@ -35,19 +35,15 @@ namespace utility {
         namespace coordinates {
             inline arma::vec3 sphericalToCartesian(const arma::vec3& sphericalCoordinates) {
                 double distance = sphericalCoordinates[0];
-                double cos_phi = cos(sphericalCoordinates[1]);
-                double sin_phi = sin(sphericalCoordinates[1]);
-                double cos_theta = cos(sphericalCoordinates[2]);
-                double sin_theta = sin(sphericalCoordinates[2]);
+                double cos_theta = cos(sphericalCoordinates[1]);
+                double sin_theta = sin(sphericalCoordinates[1]);
+                double cos_phi = cos(sphericalCoordinates[2]);
+                double sin_phi = sin(sphericalCoordinates[2]);
                 arma::vec3 result;
                 
                 result[0] = distance * cos_theta * cos_phi;
-                result[1] = distance * cos_theta * sin_phi;
-                result[2] = distance * sin_theta;
-
-                // result[0] = distance * sin_theta * cos_phi; (flipped on 09/07/14)
-                // result[1] = distance * sin_theta * sin_phi;
-                // result[2] = distance * cos_theta;
+                result[1] = distance * sin_theta * cos_phi;
+                result[2] = distance * sin_phi;
 
                 return result;
             }
@@ -59,9 +55,8 @@ namespace utility {
                 arma::vec3 result;
 
                 result[0] = sqrt(x*x + y*y + z*z);  //r
-                result[1] = atan2(y, x);            //phi
-                result[2] = asin(z / (result[0]));  //theta (changed from acos on 09/07/14)
-                // result[2] = acos(z / (result[0]));  //theta
+                result[1] = atan2(y, x);            //theta
+                result[2] = asin(z / (result[0]));  //phi
 
                 return result;
             }
