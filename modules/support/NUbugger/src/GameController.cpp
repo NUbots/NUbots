@@ -27,32 +27,112 @@ namespace support {
     using namespace messages::input::gameevents;
 
     void NUbugger::provideGameController() {
-        // TODO.
-        handles["game_controller"].push_back(on<Trigger<TeamColour>>([this](const TeamColour&) {}));
-        handles["game_controller"].push_back(on<Trigger<Score>>([this](const Score&) {}));
-        handles["game_controller"].push_back(on<Trigger<GoalScored<TEAM>>>([this](const GoalScored<TEAM>&) {}));
-        handles["game_controller"].push_back(on<Trigger<GoalScored<OPPONENT>>>([this](const GoalScored<OPPONENT>&) {}));
-        handles["game_controller"].push_back(on<Trigger<Penalisation<SELF>>>([this](const Penalisation<SELF>&) {}));
-        handles["game_controller"].push_back(on<Trigger<Penalisation<TEAM>>>([this](const Penalisation<TEAM>&) {}));
-        handles["game_controller"].push_back(on<Trigger<Penalisation<OPPONENT>>>([this](const Penalisation<OPPONENT>&) {}));
-        handles["game_controller"].push_back(on<Trigger<Unpenalisation<SELF>>>([this](const Unpenalisation<SELF>&) {}));
-        handles["game_controller"].push_back(on<Trigger<Unpenalisation<TEAM>>>([this](const Unpenalisation<TEAM>&) {}));
-        handles["game_controller"].push_back(on<Trigger<Unpenalisation<OPPONENT>>>([this](const Unpenalisation<OPPONENT>&) {}));
-        handles["game_controller"].push_back(on<Trigger<CoachMessage<TEAM>>>([this](const CoachMessage<TEAM>&) {}));
-        handles["game_controller"].push_back(on<Trigger<CoachMessage<OPPONENT>>>([this](const CoachMessage<OPPONENT>&) {}));
-        handles["game_controller"].push_back(on<Trigger<HalfTime>>([this](const HalfTime&) {}));
-        handles["game_controller"].push_back(on<Trigger<BallKickedOut<TEAM>>>([this](const BallKickedOut<TEAM>&) {}));
-        handles["game_controller"].push_back(on<Trigger<BallKickedOut<OPPONENT>>>([this](const BallKickedOut<OPPONENT>&) {}));
-        handles["game_controller"].push_back(on<Trigger<KickOffTeam>>([this](const KickOffTeam&) {}));
-        handles["game_controller"].push_back(on<Trigger<GamePhase<Phase::INITIAL>>>([this](const GamePhase<Phase::INITIAL>&) {}));
-        handles["game_controller"].push_back(on<Trigger<GamePhase<Phase::READY>>>([this](const GamePhase<Phase::READY>&) {}));
-        handles["game_controller"].push_back(on<Trigger<GamePhase<Phase::SET>>>([this](const GamePhase<Phase::SET>&) {}));
-        handles["game_controller"].push_back(on<Trigger<GamePhase<Phase::PLAYING>>>([this](const GamePhase<Phase::PLAYING>&) {}));
-        handles["game_controller"].push_back(on<Trigger<GamePhase<Phase::TIMEOUT>>>([this](const GamePhase<Phase::TIMEOUT>&) {}));
-        handles["game_controller"].push_back(on<Trigger<GamePhase<Phase::FINISHED>>>([this](const GamePhase<Phase::FINISHED>&) {}));
-        handles["game_controller"].push_back(on<Trigger<GameMode<Mode::NORMAL>>>([this](const GameMode<Mode::NORMAL>&) {}));
-        handles["game_controller"].push_back(on<Trigger<GameMode<Mode::PENALTY_SHOOTOUT>>>([this](const GameMode<Mode::PENALTY_SHOOTOUT>&) {}));
-        handles["game_controller"].push_back(on<Trigger<GameMode<Mode::OVERTIME>>>([this](const GameMode<Mode::OVERTIME>&) {}));
+
+        // HALP X_X
+
+        handles["game_controller"].push_back(on<Trigger<TeamColour>, With<GameState>>([this](const TeamColour&, const GameState& gameState) {
+            sendGameState("TeamColour", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<Score>, With<GameState>>([this](const Score&, const GameState& gameState) {
+            sendGameState("Score", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<GoalScored<TEAM>>, With<GameState>>([this](const GoalScored<TEAM>&, const GameState& gameState) {
+            sendGameState("GoalScored<TEAM>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<GoalScored<OPPONENT>>, With<GameState>>([this](const GoalScored<OPPONENT>&, const GameState& gameState) {
+            sendGameState("GoalScored<OPPONENT>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<Penalisation<SELF>>, With<GameState>>([this](const Penalisation<SELF>&, const GameState& gameState) {
+            sendGameState("Penalisation<SELF>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<Penalisation<TEAM>>, With<GameState>>([this](const Penalisation<TEAM>&, const GameState& gameState) {
+            sendGameState("Penalisation<TEAM>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<Penalisation<OPPONENT>>, With<GameState>>([this](const Penalisation<OPPONENT>&, const GameState& gameState) {
+            sendGameState("Penalisation<OPPONENT>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<Unpenalisation<SELF>>, With<GameState>>([this](const Unpenalisation<SELF>&, const GameState& gameState) {
+            sendGameState("Unpenalisation<SELF>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<Unpenalisation<TEAM>>, With<GameState>>([this](const Unpenalisation<TEAM>&, const GameState& gameState) {
+            sendGameState("Unpenalisation<TEAM>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<Unpenalisation<OPPONENT>>, With<GameState>>([this](const Unpenalisation<OPPONENT>&, const GameState& gameState) {
+            sendGameState("Unpenalisation<OPPONENT>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<CoachMessage<TEAM>>, With<GameState>>([this](const CoachMessage<TEAM>&, const GameState& gameState) {
+            sendGameState("CoachMessage<TEAM>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<CoachMessage<OPPONENT>>, With<GameState>>([this](const CoachMessage<OPPONENT>&, const GameState& gameState) {
+            sendGameState("CoachMessage<OPPONENT>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<HalfTime>, With<GameState>>([this](const HalfTime&, const GameState& gameState) {
+            sendGameState("HalfTime", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<BallKickedOut<TEAM>>, With<GameState>>([this](const BallKickedOut<TEAM>&, const GameState& gameState) {
+            sendGameState("BallKickedOut<TEAM>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<BallKickedOut<OPPONENT>>, With<GameState>>([this](const BallKickedOut<OPPONENT>&, const GameState& gameState) {
+            sendGameState("BallKickedOut<OPPONENT>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<KickOffTeam>, With<GameState>>([this](const KickOffTeam&, const GameState& gameState) {
+            sendGameState("KickOffTeam", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<GamePhase<Phase::INITIAL>>, With<GameState>>([this](const GamePhase<Phase::INITIAL>&, const GameState& gameState) {
+            sendGameState("GamePhase<Phase::INITIAL>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<GamePhase<Phase::READY>>, With<GameState>>([this](const GamePhase<Phase::READY>&, const GameState& gameState) {
+            sendGameState("GamePhase<Phase::READY>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<GamePhase<Phase::SET>>, With<GameState>>([this](const GamePhase<Phase::SET>&, const GameState& gameState) {
+            sendGameState("GamePhase<Phase::SET>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<GamePhase<Phase::PLAYING>>, With<GameState>>([this](const GamePhase<Phase::PLAYING>&, const GameState& gameState) {
+            sendGameState("GamePhase<Phase::PLAYING>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<GamePhase<Phase::TIMEOUT>>, With<GameState>>([this](const GamePhase<Phase::TIMEOUT>&, const GameState& gameState) {
+            sendGameState("GamePhase<Phase::TIMEOUT>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<GamePhase<Phase::FINISHED>>, With<GameState>>([this](const GamePhase<Phase::FINISHED>&, const GameState& gameState) {
+            sendGameState("GamePhase<Phase::FINISHED>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<GameMode<Mode::NORMAL>>, With<GameState>>([this](const GameMode<Mode::NORMAL>&, const GameState& gameState) {
+            sendGameState("GameMode<Mode::NORMAL>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<GameMode<Mode::PENALTY_SHOOTOUT>>, With<GameState>>([this](const GameMode<Mode::PENALTY_SHOOTOUT>&, const GameState& gameState) {
+            sendGameState("GameMode<Mode::PENALTY_SHOOTOUT>", gameState);
+        }));
+
+        handles["game_controller"].push_back(on<Trigger<GameMode<Mode::OVERTIME>>, With<GameState>>([this](const GameMode<Mode::OVERTIME>&, const GameState& gameState) {
+            sendGameState("GameMode<Mode::OVERTIME>", gameState);
+        }));
+    }
+
+    void NUbugger::sendGameState(std::string event, const GameState&) {
+        log(event);
     }
 }
 }

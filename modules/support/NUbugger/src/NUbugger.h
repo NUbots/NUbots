@@ -22,8 +22,9 @@
 
 #include <nuclear>
 #include <zmq.hpp>
-#include "messages/localisation/FieldObject.h"
 #include "messages/support/nubugger/proto/Message.pb.h"
+#include "messages/localisation/FieldObject.h"
+#include "messages/input/gameevents/GameEvents.h"
 
 namespace modules {
     namespace support {
@@ -53,6 +54,8 @@ namespace modules {
             void provideReactionStatistics();
             void provideSensors();
             void provideVision();
+
+            void sendGameState(std::string event, const messages::input::gameevents::GameState& gameState);
 
             void send(zmq::message_t& packet);
             void send(messages::support::nubugger::proto::Message message);
