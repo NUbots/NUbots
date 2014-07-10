@@ -41,15 +41,15 @@ namespace modules {
                 volatile bool listening = true;
                 std::atomic<int> socket;
                 uint port;
-                GameControllerPacket state;
-                uint TEAM_ID;
-                uint PLAYER_ID;
+                gamecontroller::GameControllerPacket packet;
+                uint8_t TEAM_ID;
+                uint8_t PLAYER_ID;
 
                 void kill();
                 void run();
-                void process(GameControllerPacket oldState, GameControllerPacket newState);
-                Team& getOwnTeam(GameControllerPacket& state);
-                Team& getOpponentTeam(GameControllerPacket& state);
+                void process(gamecontroller::GameControllerPacket oldPacket, gamecontroller::GameControllerPacket newPacket);
+                gamecontroller::Team& getOwnTeam(gamecontroller::GameControllerPacket& packet);
+                gamecontroller::Team& getOpponentTeam(gamecontroller::GameControllerPacket& packet);
             public:
                 static constexpr const char* CONFIGURATION_PATH = "GameController.yaml";
 

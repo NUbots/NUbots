@@ -91,7 +91,7 @@ namespace support {
 
         });
 
-        on<Trigger<Every<100, std::chrono::milliseconds>>>([this](const time_t&) {
+        on<Trigger<Every<15, Per<std::chrono::seconds>>>>([this](const time_t&) {
             bool valid;
             // Try to get a new frame from the listener.
             MocapFrame frame(frameListener->pop(&valid).first);
@@ -141,9 +141,9 @@ namespace support {
 
                 auto* rotation = rigidBody->mutable_rotation();
                 rotation->set_w(fRotation.qw);
-                rotation->set_x(fRotation.qx);
-                rotation->set_y(fRotation.qy);
-                rotation->set_z(fRotation.qz);
+                rotation->set_x(-fRotation.qz);
+                rotation->set_y(-fRotation.qx);
+                rotation->set_z(fRotation.qy);
 
                 for (auto point : fRigidBody.markers()) {
                     auto* markerPoint = rigidBody->add_points();

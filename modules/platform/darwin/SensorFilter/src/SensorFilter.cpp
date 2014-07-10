@@ -46,6 +46,39 @@ namespace modules {
             using utility::math::matrix::quaternionToRotationMatrix;
             using utility::math::kalman::IMUModel;
 
+
+            std::string makeErrorString(const std::string& src, uint errorCode) {
+                std::stringstream s;
+
+                s << "Error on ";
+                s << src;
+                s << ":";
+
+                if(errorCode & DarwinSensors::Error::INPUT_VOLTAGE) {
+                    s << " Input Voltage ";
+                }
+                if(errorCode & DarwinSensors::Error::ANGLE_LIMIT) {
+                    s << " Angle Limit ";
+                }
+                if(errorCode & DarwinSensors::Error::OVERHEATING) {
+                    s << " Overheating ";
+                }
+                if(errorCode & DarwinSensors::Error::OVERLOAD) {
+                    s << " Overloaded ";
+                }
+                if(errorCode & DarwinSensors::Error::INSTRUCTION) {
+                    s << " Bad Instruction ";
+                }
+                if(errorCode & DarwinSensors::Error::CORRUPT_DATA) {
+                    s << " Corrupt Data ";
+                }
+                if(errorCode & DarwinSensors::Error::TIMEOUT) {
+                    s << " Timeout ";
+                }
+
+                return s.str();
+            }
+
             SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
             , orientationFilter(arma::vec({0,0,0,1,0,0,0}))
@@ -83,91 +116,16 @@ namespace modules {
 
                     // This checks for an error on the CM730 and reports it
                     if (input.cm730ErrorFlags != DarwinSensors::Error::OK) {
-                        std::stringstream s;
-                        s << "Error on CM730:";
-
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::INPUT_VOLTAGE) {
-                            s << " Input Voltage ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::ANGLE_LIMIT) {
-                            s << " Angle Limit ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERHEATING) {
-                            s << " Overheating ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERLOAD) {
-                            s << " Overloaded ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::INSTRUCTION) {
-                            s << " Bad Instruction ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::CORRUPT_DATA) {
-                            s << " Corrupt Data ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::TIMEOUT) {
-                            s << " Timeout ";
-                        }
-
-                        NUClear::log<NUClear::WARN>(s.str());
+                        NUClear::log<NUClear::WARN>(makeErrorString("CM730", input.cm730ErrorFlags));
                     }
 
                     // Output errors on the FSRs
                     if (input.fsr.left.errorFlags != DarwinSensors::Error::OK) {
-                        std::stringstream s;
-                        s << "Error on Left FSR:";
-
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::INPUT_VOLTAGE) {
-                            s << " Input Voltage ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::ANGLE_LIMIT) {
-                            s << " Angle Limit ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERHEATING) {
-                            s << " Overheating ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERLOAD) {
-                            s << " Overloaded ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::INSTRUCTION) {
-                            s << " Bad Instruction ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::CORRUPT_DATA) {
-                            s << " Corrupt Data ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::TIMEOUT) {
-                            s << " Timeout ";
-                        }
-
-                        NUClear::log<NUClear::WARN>(s.str());
+                        NUClear::log<NUClear::WARN>(makeErrorString("Left FSR", input.fsr.left.errorFlags));
                     }
 
                     if (input.fsr.right.errorFlags != DarwinSensors::Error::OK) {
-                        std::stringstream s;
-                        s << "Error on Right FSR:";
-
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::INPUT_VOLTAGE) {
-                            s << " Input Voltage ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::ANGLE_LIMIT) {
-                            s << " Angle Limit ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERHEATING) {
-                            s << " Overheating ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERLOAD) {
-                            s << " Overloaded ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::INSTRUCTION) {
-                            s << " Bad Instruction ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::CORRUPT_DATA) {
-                            s << " Corrupt Data ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::TIMEOUT) {
-                            s << " Timeout ";
-                        }
-
-                        NUClear::log<NUClear::WARN>(s.str());
+                        NUClear::log<NUClear::WARN>(makeErrorString("Right FSR", input.fsr.right.errorFlags));
                     }
 
                     // Read through all of our sensors
