@@ -52,13 +52,14 @@ namespace support {
         pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
         sub.setsockopt(ZMQ_SUBSCRIBE, 0, 0);
 
-        // Bind to port 12000
-        pub.bind("tcp://*:12000");
-        sub.bind("tcp://*:12001");
 
         powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&NUbugger::run), this), std::bind(std::mem_fn(&NUbugger::kill), this)));
 
         on<Trigger<Configuration<NUbugger>>>([this] (const Configuration<NUbugger>& config) {
+            // TODO: unbind old port
+            pub.bind(("tcp://*:" + config["network"]["pub_port"].as<std::string>()).c_str());
+            sub.bind(("tcp://*:" + config["network"]["sub_port"].as<std::string>()).c_str());
+
             for (auto& setting : config["reaction_handles"]) {
                 std::string name = setting.first.as<std::string>();
                 bool enabled = setting.second.as<bool>();
