@@ -120,7 +120,6 @@ namespace modules {
 			bool kicker;
 			bool pickedUp;
 			bool penalised;
-			bool unPenalised;
 			bool kickOff;
 			bool ballSeen;
 			bool ballLost;

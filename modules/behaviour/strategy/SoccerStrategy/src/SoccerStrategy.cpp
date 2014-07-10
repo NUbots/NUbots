@@ -74,6 +74,7 @@ namespace modules {
 			
 			currentState.primaryGameState = GameStatePrimary::INITIAL;
 			currentState.secondaryGameState = GameStateSecondary::NORMAL;
+			currentState.penalised = false;
 
 			on<Trigger<Configuration<SoccerStrategyConfig>>>([this](const Configuration<SoccerStrategyConfig>& config) {
 				std::vector<arma::vec2> zone;
@@ -262,9 +263,6 @@ namespace modules {
 //						currentState.penalised = true;
 //						emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
 //					}
-					
-					// Did I just become unpenalised?
-					currentState.unPenalised = !currentState.penalised && previousState.penalised;
 
 					// Am I in my zone?
 					try {
@@ -379,12 +377,13 @@ namespace modules {
 						}
 					}
 
-
-
 					// Calculate the optimal zone position.
 					arma::vec2 optimalPosition = findOptimalPosition(ZONES.at(MY_ZONE), globalBallPosition);
 
-					// Determine current state and appropriate action(s).
+					// ------
+					// Take appropriate action depending on state
+					// ------
+
 					// Stop moving if in the initial, set or finished states, as well as when picked up
 					if ((currentState.primaryGameState == GameStatePrimary::INITIAL) || (currentState.primaryGameState == GameStatePrimary::SET) || (currentState.primaryGameState == GameStatePrimary::FINISHED) || currentState.pickedUp) {
 						stopMoving();
@@ -395,12 +394,13 @@ namespace modules {
 					// Stop moving and try to localise when penalised
 					else if(currentState.penalised) {
 						stopMoving();
-						findSelf();
-						findBall();
+						//findSelf();
+						//findBall();
 
 //						NUClear::log<NUClear::INFO>("I am penalised.");
 					}
 
+					// Move to the start position if in ready state
 					else if (currentState.primaryGameState == GameStatePrimary::READY) {
 						arma::vec2 heading = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 
@@ -415,18 +415,12 @@ namespace modules {
 //						NUClear::log<NUClear::INFO>("Game is about to start. I should be in my starting position.");
 					}
 
+					// Move to optimal position within zone, if not in zone
 					else if (!currentState.selfInZone) {
 						arma::vec2 heading = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 						goToPoint(optimalPosition, heading);
 
 //						NUClear::log<NUClear::INFO>("I am not where I should be. Going there now.");
-					}
-
-					else if (currentState.unPenalised) {
-						arma::vec2 heading = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
-						goToPoint(optimalPosition, heading);
-
-//						NUClear::log<NUClear::INFO>("I am unpenalised, I should already know where I am and where the ball is. So find the most optimal location in my zone to go to.");
 					}
 
 					else if ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK) && IS_GOALIE && currentState.ballLost) {
@@ -465,7 +459,6 @@ namespace modules {
 
 //						NUClear::log<NUClear::INFO>("I be looking at what I be kicking.");
 					}
-
 
 					else if (currentState.ballLost) {
 						findBall();
@@ -556,9 +549,8 @@ namespace modules {
 						}
 
 						default: {
-							currentState.primaryGameState = GameStatePrimary::INITIAL;
-							emit(std::move(std::make_unique<messages::output::Say>("Initial")));
-							std::cerr << "initial" << std::endl;
+							emit(std::move(std::make_unique<messages::output::Say>("Undefined State. Something broke")));
+							std::cerr << "Undefined State. Something broke" << std::endl;
 							break;
 						}
 					}
