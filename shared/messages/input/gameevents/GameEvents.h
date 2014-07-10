@@ -45,7 +45,9 @@ namespace gameevents {
         ILLEGAL_DEFENSE,
         REQUEST_FOR_PICKUP,
         REQUEST_FOR_SERVICE,
-        REQUEST_FOR_PICKUP_TO_SERVICE
+        REQUEST_FOR_PICKUP_TO_SERVICE,
+        SUBSTITUTE,
+        MANUAL
     };
 
     struct Score {

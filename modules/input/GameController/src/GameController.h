@@ -45,13 +45,14 @@ namespace modules {
                 gamecontroller::GameControllerPacket packet;
                 uint TEAM_ID;
                 uint PLAYER_ID;
+                std::string BROADCAST_IP;
 
                 void kill();
                 void run();
-                void process(gamecontroller::GameControllerPacket oldPacket, gamecontroller::GameControllerPacket newPacket);
-                gamecontroller::Team& getOwnTeam(gamecontroller::GameControllerPacket& packet);
-                gamecontroller::Team& getOpponentTeam(gamecontroller::GameControllerPacket& packet);
-                messages::input::gameevents::PenaltyReason getPenaltyReason(gamecontroller::PenaltyState& penaltyState);
+                void process(const gamecontroller::GameControllerPacket& oldPacket, const gamecontroller::GameControllerPacket& newPacket);
+                const gamecontroller::Team& getOwnTeam(const gamecontroller::GameControllerPacket& packet) const;
+                const gamecontroller::Team& getOpponentTeam(const gamecontroller::GameControllerPacket& packet) const;
+                messages::input::gameevents::PenaltyReason getPenaltyReason(const gamecontroller::PenaltyState& penaltyState) const;
             public:
                 static constexpr const char* CONFIGURATION_PATH = "GameController.yaml";
 
