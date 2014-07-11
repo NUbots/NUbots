@@ -236,6 +236,7 @@ namespace vision {
                                                            + arma::normalise(getCamFromScreen(it->quad.getBottomRight(), cam.focalLengthPixels)));
 
                 // Get our width based distance to the cylinder
+                // arma::vec2 goalLeft = it->quad.getRight
                 double widthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, it->quad.getBottomLeft(), it->quad.getBottomRight(), cam.focalLengthPixels);
                 arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * goalBaseCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
                 // TODO convert this into sphericial coordiantes and error
