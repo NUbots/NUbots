@@ -26,6 +26,7 @@
 #include "utility/math/geometry/Quad.h"
 
 #include "utility/math/geometry/Line.h"
+#include "utility/math/geometry/ParametricLine.h"
 
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacLineModel.h"
@@ -42,6 +43,7 @@ namespace vision {
     using utility::math::coordinates::cartesianToSpherical;
 
     using utility::math::geometry::Line;
+    using utility::math::geometry::ParametricLine;
     using utility::math::geometry::Quad;
 
     using utility::math::ransac::Ransac;
@@ -85,7 +87,7 @@ namespace vision {
         on<Trigger<CameraParameters>, With<Configuration<GoalDetector>>>(setParams);
         on<With<CameraParameters>, Trigger<Configuration<GoalDetector>>>(setParams);
 
-        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters, Sensors>, Options<Single>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const Sensors& sensors) {
+        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters>, Options<Single>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam) {
 
             std::vector<arma::vec2> startPoints, endPoints;
             std::vector<arma::mat22> starts, ends;
@@ -242,26 +244,26 @@ namespace vision {
                 try {
                     goalRight = rightGoalLine.intersect(horizonLevel);
                 } catch (const std::domain_error&){
-                    NUClear::log<WARN>("Goal Found which is parallel to kinematics horizon!!");
+                    NUClear::log<NUClear::WARN>("Goal Found which is parallel to kinematics horizon!!");
                     goalLeft = it->quad.getBottomLeft();
                     goalRight = it->quad.getBottomRight();
                 }
 
-                arma::vec3 goalCentreRay = arma::normalise(arma::normalise(getCamFromScreen(goalRight, cam.focalLengthPixels))
-                                                           + arma::normalise(getCamFromScreen(goalLeft, cam.focalLengthPixels)));
+                arma::vec3 goalCentreRay = arma::normalise(arma::normalise(getCamFromScreen(imageToScreen(goalRight,cam.imageSizePixels), cam.focalLengthPixels))
+                                                           + arma::normalise(getCamFromScreen(imageToScreen(goalLeft,cam.imageSizePixels), cam.focalLengthPixels)));
 
                 double widthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, goalLeft, goalRight, cam.focalLengthPixels);
-                arma::vec3 goalCentreGroundSpace = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * goalCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
+                arma::vec3 goalCentreGroundSpace = widthDistance * image.sensors->orientationCamToGround.submat(0,0,2,2) * goalCentreRay + image.sensors->orientationCamToGround.submat(0,3,2,3);
                 // TODO convert this into sphericial coordiantes and error
-                NUClear::log("goalCentreGroundSpace =", goalCentreGroundSpace.t());
+                // NUClear::log("Goal pos = ", goalCentreGroundSpace.t());
                 goalCentreGroundSpace[2] = 0; //Project to ground
                 measurements.push_back({ cartesianToSpherical(goalCentreGroundSpace), arma::diagmat(arma::vec({0.002357231 * 4, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
                 // Project this vector to a plane midway through the ball
-                arma::vec3 ballCentreGroundProj = arma::vec3({ 0, 0, GOAL_DIAMETER / 2.0 }) + projectCamToGroundPlane(goalCentreRay, sensors.orientationCamToGround);
+                arma::vec3 goalCentreGroundProj = arma::vec3({ 0, 0, GOAL_DIAMETER / 2.0 }) + projectCamToGroundPlane(goalCentreRay, image.sensors->orientationCamToGround);
                 // TODO convert this into sphericial coordiantes and error
                 //measurements.push_back({{0,0,0}, arma::eye(3,3)});
 
-                measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), arma::diagmat(arma::vec({0.002357231 * 8, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
+                measurements.push_back({ cartesianToSpherical(goalCentreGroundProj), arma::diagmat(arma::vec({0.002357231 * 8, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
                 it->measurements = measurements;
                 it->sensors = image.sensors;
             }

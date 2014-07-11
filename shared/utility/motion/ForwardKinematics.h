@@ -347,9 +347,9 @@ namespace kinematics {
         return utility::math::geometry::Line(arma::vec2({ 0, b }), arma::vec2({ 1, m + b }));
     }
 
-    inline std::vector<arma::mat44> calculateGroundTransforms(arma::mat44 cameraToBody, arma::vec3 groundNormal_body, double bodyHeight){
+    inline arma::mat44 calculateBodyToGround(arma::vec3 groundNormal_body, double bodyHeight){
         arma::vec3 X = arma::vec{1,0,0};
-        double projectXOnNormal = arma::dot(X, groundNormal_body);
+        double projectXOnNormal = groundNormal_body[0];
 
         arma::vec3 groundMatrixX;
         arma::vec3 groundMatrixY;
@@ -372,11 +372,7 @@ namespace kinematics {
         groundToBody.submat(0,2,2,2) = groundNormal_body;
         groundToBody.submat(0,3,2,3) = arma::vec{0, 0, -bodyHeight};
 
-        std::vector<arma::mat44> matrices;
-        matrices.push_back(groundToBody);
-        matrices.push_back(utility::math::matrix::orthonormal44Inverse(groundToBody) * cameraToBody);
-
-        return matrices;
+        return utility::math::matrix::orthonormal44Inverse(groundToBody);
     }
 
 } // kinematics
