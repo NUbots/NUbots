@@ -27,8 +27,10 @@
 #include <nuclear>
 
 #include "utility/math/matrix.h"
+#include "utility/math/coordinates.h"
 #include "utility/motion/RobotModels.h"
 #include "messages/input/ServoID.h"
+#include "messages/input/Sensors.h"
 
 namespace utility {
 namespace motion {
@@ -210,6 +212,14 @@ namespace kinematics {
         positions.push_back(std::make_pair(messages::input::ServoID::HEAD_YAW, atan2(cameraUnitVector[1],cameraUnitVector[0]) ));
         positions.push_back(std::make_pair(messages::input::ServoID::HEAD_PITCH, atan2(-cameraUnitVector[2], std::sqrt(cameraUnitVector[0]*cameraUnitVector[0]+cameraUnitVector[1]*cameraUnitVector[1])) ));
         return positions;
+    }
+
+    inline arma::vec2 calculateHeadJointsToLookAt(arma::vec4 groundPoint, const arma::mat44& orientationCamToGround, const arma::mat44& orientationBodyToGround){
+        arma::vec3 cameraPosition = orientationCamToGround.col(3);
+        arma::vec3 groundSpaceLookVector = groundPoint - cameraPosition;
+        arma::vec3 lookVector = orientationBodyToGround.submat(0,0,2,2).t() * groundSpaceLookVector;
+        arma::vec3 lookVectorSpherical = utility::math::coordinates::cartesianToSpherical(lookVector);
+        return lookVectorSpherical.rows(1,2);
     }
 
 } // kinematics
