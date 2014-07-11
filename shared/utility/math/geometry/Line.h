@@ -51,7 +51,7 @@ namespace geometry {
 
         arma::vec2 orthogonalProjection(const arma::vec2& x);
 
-        Line getParallelLineThrough(const arma::vec2& x)
+        Line getParallelLineThrough(const arma::vec2& x);
 
         //Perform a least squares fit on a line, optionally using a distance
         //squared threshold away from the current model to filter candidates

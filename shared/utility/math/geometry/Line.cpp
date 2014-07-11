@@ -65,7 +65,7 @@ namespace geometry {
         Line result;
         result.normal = normal;
         result.distance = arma::dot(x, normal);
-        return Line;
+        return result;
     }
 
 }
