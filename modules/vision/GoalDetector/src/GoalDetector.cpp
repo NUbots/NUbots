@@ -236,13 +236,15 @@ namespace vision {
                 double widthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, it->quad.getBottomLeft(), it->quad.getBottomRight(), cam.focalLengthPixels);
                 arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * goalBaseCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
                 // TODO convert this into sphericial coordiantes and error
-                measurements.push_back({{0,0,0}, arma::eye(3,3)});
+               // measurements.push_back({{0,0,0}, arma::eye(3,3)});
 
+                measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), arma::diagmat(arma::vec({0.002357231 * 4, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
                 // Project this vector to a plane midway through the ball
                 arma::vec3 ballCentreGroundProj = arma::vec3({ 0, 0, GOAL_DIAMETER / 2.0 }) + projectCamToGroundPlane(goalBaseCentreRay, sensors.orientationCamToGround);
                 // TODO convert this into sphericial coordiantes and error
-                measurements.push_back({{0,0,0}, arma::eye(3,3)});
+                //measurements.push_back({{0,0,0}, arma::eye(3,3)});
 
+                measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), arma::diagmat(arma::vec({0.002357231 * 8, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
                 it->measurements = measurements;
                 it->sensors = image.sensors;
             }
