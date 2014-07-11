@@ -30,6 +30,7 @@
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacLineModel.h"
 #include "utility/math/vision.h"
+#include "utility/math/coordinates.h"
 #include "messages/input/CameraParameters.h"
 
 namespace modules {
@@ -37,6 +38,8 @@ namespace vision {
 
     using messages::input::CameraParameters;
     using messages::input::Sensors;
+
+    using utility::math::coordinates::cartesianToSpherical;
 
     using utility::math::geometry::Line;
     using utility::math::geometry::Quad;
