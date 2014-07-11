@@ -27,6 +27,17 @@ namespace messages {
             static constexpr const char* CONFIGURATION_PATH = "HeadBehaviour.yaml";
         };
 
+	struct LookAtBallStart {
+	};
+
+	struct LookAtBallStop {
+	};
+
+	struct LookAtGoalStart {
+	};
+
+	struct LookAtGoalStop {
+	};
 
         struct LookAtAngle {
             double yaw;

@@ -37,6 +37,8 @@ namespace modules {
             private:
                 //const size_t id;
 
+		ReactionHandle handle;
+
             public:
                 explicit LookAtGoal(std::unique_ptr<NUClear::Environment> environment);
                 //static constexpr const char* CONFIGURATION_PATH = "Stand.yaml";

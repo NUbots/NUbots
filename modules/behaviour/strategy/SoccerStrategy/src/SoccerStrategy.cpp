@@ -41,6 +41,10 @@ namespace modules {
 
 		using messages::localisation::Ball;
 		using messages::localisation::Self;
+		using messages::behaviour::LookAtBallStart;
+		using messages::behaviour::LookAtBallStop;
+		using messages::behaviour::LookAtGoalStart;
+		using messages::behaviour::LookAtGoalStop;
 		using messages::behaviour::LookAtAngle;
 		using messages::behaviour::LookAtPoint;
 		using messages::behaviour::LookAtPosition;
@@ -70,15 +74,6 @@ namespace modules {
 		using utility::math::geometry::ParametricLine;
 
 		SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-			penalisedButtonStatus = false;
-			feetOffGround = true;
-			isKicking = false;
-			isWalking = false;
-
-			currentState.primaryGameState = GameStatePrimary::INITIAL;
-			currentState.secondaryGameState = GameStateSecondary::NORMAL;
-			currentState.penalised = false;
-
 			on<Trigger<Configuration<SoccerStrategyConfig>>>([this](const Configuration<SoccerStrategyConfig>& config) {
 				std::vector<arma::vec2> zone;
 
@@ -124,6 +119,17 @@ namespace modules {
 			});
 
 			on<Trigger<Startup>>([this](const Startup&) {
+				penalisedButtonStatus = false;
+				feetOffGround = true;
+				isKicking = false;
+				isWalking = false;
+				lookingAtBall = false;
+				lookingAtGoal = false;
+
+				currentState.primaryGameState = GameStatePrimary::INITIAL;
+				currentState.secondaryGameState = GameStateSecondary::NORMAL;
+				currentState.penalised = false;
+
 				stopMoving();
 			});
 
@@ -210,7 +216,6 @@ namespace modules {
 			// Check to see if we are about to kick.
 			on<Trigger<messages::motion::KickCommand>>([this](const messages::motion::KickCommand&) {
 				isKicking = true;
-//				kickData = kick;
 			});
 
 			// Check to see if the kick has finished.
@@ -223,7 +228,6 @@ namespace modules {
 				([this](const messages::motion::WalkStartCommand&,
 					const messages::motion::WalkCommand&) {
 				isWalking = true;
-//				walkData = walk;
 			});
 
 			// Check to see if we are no longer walking.
@@ -234,6 +238,26 @@ namespace modules {
 			// Get the field description.
 			on<Trigger<messages::support::FieldDescription>>([this](const messages::support::FieldDescription& field) {
 				FIELD_DESCRIPTION = field;
+			});
+
+			// Check to see if we are looking at the ball.
+			on<Trigger<LookAtBallStart>>([this](const LookAtBallStart&) {
+				lookingAtBall = true;
+			});
+
+			// Check to see if we are no longer looking at the ball.
+			on<Trigger<LookAtBallStop>>([this](const LookAtBallStop&) {
+				lookingAtBall = false;
+			});
+
+			// Check to see if we are looking at the goals.
+			on<Trigger<LookAtGoalStart>>([this](const LookAtGoalStart&) {
+				lookingAtGoal = true;
+			});
+
+			// Check to see if we are no longer looking at the goals.
+			on<Trigger<LookAtGoalStop>>([this](const LookAtGoalStop&) {
+				lookingAtGoal = false;
 			});
 
 			on<Trigger<Every<30, Per<std::chrono::seconds>>>,
@@ -609,37 +633,64 @@ namespace modules {
 			void SoccerStrategy::findSelf() {
 				/* Try to locate both goals. */
 				/* Look at closest goal for short period to reset localisation. */
-				arma::vec2 goalPosition = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
-				arma::vec2 ballPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
+
+
+				// Alternate looking at the goals and looking at the ball.
+				if (!lookingAtGoal) {
+					emit(std::make_unique<LookAtGoalStart>());
+				}
+
+				else {
+					emit(std::make_unique<LookAtGoalStop>());
+				}
+
+				if (!lookingAtBall && !lookingAtGoal) {
+					emit(std::make_unique<LookAtBallStart>());
+				}
+
+				else {
+					emit(std::make_unique<LookAtBallStop>());
+				}
+
+//				arma::vec2 goalPosition = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
+//				arma::vec2 ballPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
 
 				// Look at our goals.
-				auto lookAtGoal = std::make_unique<messages::behaviour::LookAtPoint>();
-				lookAtGoal->x = -goalPosition[0];
-				lookAtGoal->y = goalPosition[1];
-				lookAtGoal->xError = GOAL_LOOK_ERROR[0];
-				lookAtGoal->yError = GOAL_LOOK_ERROR[1];
-				emit(std::move(lookAtGoal));
+//				auto lookAtGoal = std::make_unique<messages::behaviour::LookAtPoint>();
+//				lookAtGoal->x = -goalPosition[0];
+//				lookAtGoal->y = goalPosition[1];
+//				lookAtGoal->xError = GOAL_LOOK_ERROR[0];
+//				lookAtGoal->yError = GOAL_LOOK_ERROR[1];
+//				emit(std::move(lookAtGoal));
 
 				// Look at enemy goals.
-				lookAtGoal->x = goalPosition[0];
-				lookAtGoal->y = goalPosition[1];
-				lookAtGoal->xError = GOAL_LOOK_ERROR[0];
-				lookAtGoal->yError = GOAL_LOOK_ERROR[1];
-				emit(std::move(lookAtGoal));
+//				lookAtGoal->x = goalPosition[0];
+//				lookAtGoal->y = goalPosition[1];
+//				lookAtGoal->xError = GOAL_LOOK_ERROR[0];
+//				lookAtGoal->yError = GOAL_LOOK_ERROR[1];
+//				emit(std::move(lookAtGoal));
 
 				// Look for ball.
 			}
 
 			void SoccerStrategy::findBall() {
-				// This needs to be replaced with a proper lookAtBall command.
-				arma::vec2 ballPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
+				if (lookingAtGoal) {
+					emit(std::make_unique<LookAtGoalStop>());
+				}
 
-				auto look = std::make_unique<messages::behaviour::LookAtPoint>();
-				look->x = ballPosition[0];
-				look->y = ballPosition[1];
-				look->xError = BALL_LOOK_ERROR[0];
-				look->yError = BALL_LOOK_ERROR[1];
-				emit(std::move(look));
+				if (!lookingAtBall) {
+					emit(std::make_unique<LookAtBallStart>());
+				}
+
+				// This needs to be replaced with a proper lookAtBall command.
+//				arma::vec2 ballPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
+
+//				auto look = std::make_unique<messages::behaviour::LookAtPoint>();
+//				look->x = ballPosition[0];
+//				look->y = ballPosition[1];
+//				look->xError = BALL_LOOK_ERROR[0];
+//				look->yError = BALL_LOOK_ERROR[1];
+//				emit(std::move(look));
 			}
 
 			void SoccerStrategy::goToPoint(const arma::vec2& position, const arma::vec2& heading) {
@@ -657,15 +708,24 @@ namespace modules {
 			}
 
 			void SoccerStrategy::watchBall() {
-				// This needs to be replaced with a proper lookAtBall command.
-				arma::vec2 ballPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
+				if (lookingAtGoal) {
+					emit(std::make_unique<LookAtGoalStop>());
+				}
 
-				auto look = std::make_unique<messages::behaviour::LookAtPoint>();
-				look->x = ballPosition[0];
-				look->y = ballPosition[1];
-				look->xError = BALL_LOOK_ERROR[0];
-				look->yError = BALL_LOOK_ERROR[1];
-				emit(std::move(look));
+				if (!lookingAtBall) {
+					emit(std::make_unique<LookAtBallStart>());
+				}
+
+				// This needs to be replaced with a proper lookAtBall command.
+//				arma::vec2 ballPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
+
+//				auto look = std::make_unique<messages::behaviour::LookAtPoint>();
+//				look->x = ballPosition[0];
+//				look->y = ballPosition[1];
+//				look->xError = BALL_LOOK_ERROR[0];
+//				look->yError = BALL_LOOK_ERROR[1];
+//				emit(std::move(look));
+				// This needs to be replaced with a proper lookAtBall command.
 			}
 
 			void SoccerStrategy::sideStepToPoint(const arma::vec2& position) {

@@ -28,14 +28,88 @@ namespace modules {
 
             using messages::vision::Goal;
             using messages::behaviour::LookAtAngle;
+            using messages::behaviour::LookAtGoalStart;
+            using messages::behaviour::LookAtGoalStop;
 
             LookAtGoal::LookAtGoal(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-                on<Trigger<std::vector<Goal>>>([this] (const std::vector<Goal>& goals) {
-                    if (goals.size() > 0) {
-                        emit(std::make_unique<LookAtAngle>(LookAtAngle {goals[0].screenAngular[0],-goals[0].screenAngular[1]}));
-                    }
+		on<Trigger<LookAtGoalStart>>([this](const LookAtGoalStart&) {
+			if (!handle.enabled()) {
+				handle.enable();
+			}
+		});
 
+		on<Trigger<LookAtGoalStop>>([this](const LookAtGoalStop&) {
+			if (handle.enabled()) {
+				handle.disable();
+			}
+		});
+
+		handle = on<Trigger<std::vector<Goal>>>([this] (const std::vector<Goal>& goals) {
+			if (goals.size() > 0) {
+				std::vector<LookAtAngle> angles;
+				angles.reserve(4);
+
+				for (const auto& g : goals) {
+					angles.emplace_back(LookAtAngle {g.screenAngular[0], -g.screenAngular[1]});
+				}
+
+				emit(std::make_unique<std::vector<LookAtAngle>>(angles));
+			}
+			if (balls.size() > 0) {
+				timeSinceLastSeen = sensors.timestamp;
+				std::vector<LookAtAngle> angles;
+				angles.reserve(4);
+
+				angles.emplace_back(LookAtAngle {balls[0].screenAngular[0], -balls[0].screenAngular[1]});
+
+				for (const auto& g : goals) {
+					angles.emplace_back(LookAtAngle {g.screenAngular[0], -g.screenAngular[1]});
+				}
+
+				emit(std::make_unique<std::vector<LookAtAngle>>(angles));
+			} 
+
+			else if (ball != NULL) {
+//				double xFactor = X_FACTOR * std::sqrt(ball->sr_xx);
+//				double yFactor = Y_FACTOR * std::sqrt(ball->sr_yy);
+	
+				std::vector<LookAtAngle> angles;
+				angles.reserve(10);
+
+//				angles.emplace_back(LookAtAngle {});
+//				angles.emplace_back(LookAtAngle {});
+//				angles.emplace_back(LookAtAngle {});
+//				angles.emplace_back(LookAtAngle {});
+//				angles.emplace_back(LookAtAngle {});
+
+				for (const auto& g : goals) {
+					angles.emplace_back(LookAtAngle {g.screenAngular[0], -g.screenAngular[1]});
+				}
+	
+				emit(std::make_unique<std::vector<LookAtAngle>>(angles));
+			} 
+
+			else if(std::chrono::duration<float, std::ratio<1,1000>>(sensors.timestamp - timeSinceLastSeen).count() > BALL_SEARCH_TIMEOUT_MILLISECONDS){
+                        //do a blind scan'n'pan
+                        //XXX: this needs to be a look at sequence rather than a look at point
+                        std::vector<LookAtPosition> angles;
+
+                        const double scanYaw = 1.5;
+                        const double scanPitch = 0.8;
+
+                        const size_t panPoints = 4;
+
+                        for (size_t i = 0; i < panPoints+1; ++i) {
+                            angles.emplace_back(LookAtPosition {i * scanYaw / panPoints-scanYaw / 2.0, -scanPitch * (i % 2) + scanPitch});
+                        }
+
+                        for (size_t i = 0; i < panPoints+1; ++i) {
+                            angles.emplace_back(LookAtPosition {-(i * scanYaw / panPoints - scanYaw / 2.0), -scanPitch * ((i + 1) % 2) + scanPitch});
+                        }
+
+                        emit(std::make_unique<std::vector<LookAtPosition>>(angles));
+                    }
                 });
             }
         }  // planning

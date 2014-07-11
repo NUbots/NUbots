@@ -187,8 +187,8 @@ namespace modules {
 			bool isDiving;
 			bool isGettingUp;
 			bool isWalking;
-			messages::motion::KickCommand kickData;
-			messages::motion::WalkCommand walkData;
+			bool lookingAtBall;
+			bool lookingAtGoal;
 
 			arma::vec2 findOptimalPosition(const utility::math::geometry::Polygon& zone, const arma::vec2& point);
 			void stopMoving();

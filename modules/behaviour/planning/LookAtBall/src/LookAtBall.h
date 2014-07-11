@@ -37,6 +37,11 @@ namespace modules {
                 NUClear::clock::time_point timeSinceLastSeen;
 
                 float BALL_SEARCH_TIMEOUT_MILLISECONDS;
+		float X_FACTOR;
+		float Y_FACTOR;
+		
+		ReactionHandle handle;
+
             public:
                 explicit LookAtBall(std::unique_ptr<NUClear::Environment> environment);
 
