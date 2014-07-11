@@ -10,7 +10,7 @@ ADD_ROLE(
 	support::configuration::SoccerConfig
 
 	#input
-#	input::GameController
+	input::GameController
 
         #Sensors
         input::LinuxCamera

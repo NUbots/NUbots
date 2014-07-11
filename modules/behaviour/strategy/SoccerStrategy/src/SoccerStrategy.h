@@ -37,8 +37,8 @@ namespace modules {
 
 		enum class GameStatePrimary : char {
 			INITIAL,
-			SET,
 			READY,
+			SET,
 			PLAYING,
 			TIMEOUT,
 			FINISHED
@@ -60,10 +60,10 @@ namespace modules {
 			switch (gameState) {
 				case GameStatePrimary::INITIAL:
 					return(gameState = GameStatePrimary::SET);
-				case GameStatePrimary::SET:
-					return(gameState = GameStatePrimary::READY);
 				case GameStatePrimary::READY:
 					return(gameState = GameStatePrimary::PLAYING);
+				case GameStatePrimary::SET:
+					return(gameState = GameStatePrimary::READY);
 				case GameStatePrimary::PLAYING:
 					return(gameState = GameStatePrimary::TIMEOUT);
 				case GameStatePrimary::TIMEOUT:
