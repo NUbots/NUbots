@@ -81,23 +81,27 @@ arma::vec RobotModel::predictedObservation(
     const arma::vec3& actual_position,
     const Sensors& sensors) {
 
-    auto& orientation = sensors.orientation;
-    auto& camToGround = sensors.orientationCamToGround;
-    auto camToBody = sensors.forwardKinematics.at(ServoID::HEAD_PITCH).submat(0,0,2,2);
-    arma::mat33 bodyToGround = camToGround.submat(0,0,2,2) * camToBody.submat(0,0,2,2).t();
+    //First Attempt:
+    // auto& orientation = sensors.orientation;
+    // auto& camToGround = sensors.orientationCamToGround;
+    // auto camToBody = sensors.forwardKinematics.at(ServoID::HEAD_PITCH).submat(0,0,2,2);
+    // arma::mat33 bodyToGround = camToGround.submat(0,0,2,2) * camToBody.submat(0,0,2,2).t();
+    // arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
+    // arma::vec3 robotPos3d = arma::vec3({state(kX), state(kY), 0});
+    // arma::vec3 actualPositionRelative = actual_position - robotPos3d;
+
+    // arma::mat33 tmp2 = bodyToGround * orientation;
+    // arma::vec3 tmp1 = imuRotation * actualPositionRelative;
+    // arma::vec3 obs_cartesian = arma::vec3(tmp2 * tmp1);
+
+    // auto obs = cartesianToSpherical(obs_cartesian);
+
+    //Rewrite:
     arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
-    arma::vec3 robotPos3d = arma::vec3({state(kX), state(kY), 0});
-    arma::vec3 actualPositionRelative = actual_position - robotPos3d;
-
-    arma::mat33 tmp2 = bodyToGround * orientation;
-    arma::vec3 tmp1 = imuRotation * actualPositionRelative;
-    arma::vec3 obs_cartesian = arma::vec3(tmp2 * tmp1);
-
-    auto obs = cartesianToSpherical(obs_cartesian);
-
-    // auto obs = SphericalRobotObservation(state.rows(kX, kY),
-    //                                      state(kHeading),
-    //                                      actual_position);
+    arma::vec2 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).submat(0,0,1,0);   //first two entries of first column of transpose 
+    auto obs = SphericalRobotObservation(state.rows(kX, kY),
+                                         robotHeading_world,
+                                         actual_position);
     return obs;
 }
 

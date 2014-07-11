@@ -82,6 +82,22 @@ namespace transform {
         return obs;
     }
 
+    inline arma::vec SphericalRobotObservation(
+            const arma::vec& robot_pos,
+            const arma::vec2& robot_heading,
+            const arma::vec3& actual_position) {
+        auto actual_pos_robot_2d = WorldToRobotTransform(robot_pos,
+                                                     robot_heading,
+                                                     actual_position.rows(0, 1));
+        auto actual_pos_robot_3d = arma::vec3({actual_pos_robot_2d(0),
+                                           actual_pos_robot_2d(1),
+                                           actual_position(2)});
+
+        auto obs = utility::math::coordinates::cartesianToSpherical(actual_pos_robot_3d);
+
+        return obs;
+    }
+
 }
 }
 }
