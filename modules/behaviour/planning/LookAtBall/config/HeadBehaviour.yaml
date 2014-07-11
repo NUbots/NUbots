@@ -1,3 +1,5 @@
 {
 	"BALL_SEARCH_TIMEOUT_MILLISECONDS" : 500
+        "X_FACTOR" : 3
+        "Y_FACTOR" : 3
 }

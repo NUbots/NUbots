@@ -109,7 +109,7 @@ namespace modules {
 
 					ZONE_DEFAULTS.push_back(config["ZONE_3_DEFAULT"].as<arma::vec2>());
 					zone = config["ZONE_3"].as<std::vector<arma::vec2>>();
-					START_POSITION = config["ZONE_0_START_POSITION"].as<arma::vec2>();
+					START_POSITION = config["ZONE_3_START_POSITION"].as<arma::vec2>();
 					ZONES.push_back(Polygon(zone));
 				}
 
@@ -286,11 +286,7 @@ namespace modules {
 					}
 
 					// Parse game controller state infoirmation as well as button pushes.
-					//messages::input::gameevents::GameState gameState;
 					updateGameState(gameState);
-//					if (gameState != NULL) {
-//						updateGameState(*gameState);
-//					}
 
 					// Are we kicking off?
 //					currentState.kickOff = gameState->ourKickOff;
@@ -674,7 +670,7 @@ namespace modules {
 
 			void SoccerStrategy::stopMoving() {
 				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
-				// These four parameters are not important for standing still.
+
 				approach->targetPositionType = WalkTarget::WayPoint;
 				approach->targetHeadingType = WalkTarget::WayPoint;
 				approach->heading = currentState.heading;
@@ -686,7 +682,6 @@ namespace modules {
 			void SoccerStrategy::findSelf() {
 				/* Try to locate both goals. */
 				/* Look at closest goal for short period to reset localisation. */
-
 
 				// Alternate looking at the goals and looking at the ball.
 				if (!lookingAtGoal) {
@@ -811,7 +806,6 @@ namespace modules {
 
 			void SoccerStrategy::kickBall(const arma::vec2& direction) {
 				// Emit aim vector.
-				// Currently not implemented. Kick should happen when robot is close enough to the ball.
 				auto kick = std::make_unique<messages::behaviour::KickPlan>();
 				kick->target = direction;
 				emit(std::move(kick));
