@@ -61,6 +61,7 @@ namespace modules {
 		using messages::input::gameevents::GameState;
 		using messages::input::gameevents::Phase;
 		using messages::input::gameevents::Mode;
+		using messages::input::gameevents::PenaltyReason;
 
 		using messages::output::Say;
 
@@ -238,11 +239,11 @@ namespace modules {
 			on<Trigger<Every<30, Per<std::chrono::seconds>>>,
 				With<messages::localisation::Ball>,
 				With<std::vector<messages::localisation::Self>>,
-//				With<Optional<messages::input::gameevents::GameState>>,
+				With<messages::input::gameevents::GameState>,
 				Options<Single>>([this](const time_t&,
 							const messages::localisation::Ball& ball,
-							const std::vector<messages::localisation::Self>& selfs
-//							const std::shared_ptr<const messages::input::gameevents::GameState>& gameState
+							const std::vector<messages::localisation::Self>& selfs,
+							const messages::input::gameevents::GameState& gameState
 							) {
 
 					// Calculate the position of the ball in field coordinates.
@@ -261,7 +262,7 @@ namespace modules {
 					}
 
 					// Parse game controller state infoirmation as well as button pushes.
-					messages::input::gameevents::GameState gameState;
+					//messages::input::gameevents::GameState gameState;
 					updateGameState(gameState);
 //					if (gameState != NULL) {
 //						updateGameState(*gameState);
@@ -285,10 +286,10 @@ namespace modules {
 
 
 					// TODO: FIX ME!!!!
-//					if (gameState->team.players.at(0).penalised && !previousState.penalised) {
-//						currentState.penalised = true;
-//						emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
-//					}
+					if (gameState.team.players.at(0).penaltyReason != PenaltyReason::UNPENALISED && !previousState.penalised) {
+						currentState.penalised = true;
+						emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
+					}
 
 					// Am I in my zone?
 					try {
@@ -539,9 +540,6 @@ namespace modules {
 			}
 
 			void SoccerStrategy::updateGameState(const messages::input::gameevents::GameState& gameState) {
-
-				(void)gameState;
-/*
 				// What state is the game in?
 				switch (gameState.phase) {
 					case messages::input::gameevents::Phase::READY:
@@ -585,7 +583,6 @@ namespace modules {
 						currentState.secondaryGameState = GameStateSecondary::NORMAL;
 						break;
 				}
-*/
 			}
 
 			arma::vec2 SoccerStrategy::findOptimalPosition(const Polygon& zone, const arma::vec2& point) {
