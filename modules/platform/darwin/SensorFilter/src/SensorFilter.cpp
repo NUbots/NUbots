@@ -358,24 +358,22 @@ namespace modules {
                      ************************************************/
 
 
-                    sensors->orientationCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH],
-                                                                                                        sensors->orientation.submat(0,2,2,2),
-                                                                                                        sensors->bodyCentreHeight);
+                    sensors->orientationBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->orientation.submat(0,2,2,2), sensors->bodyCentreHeight);
+                    sensors->orientationCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
+
                     sensors->orientationHorizon = utility::motion::kinematics::calculateHorizon(sensors->orientationCamToGround.submat(0,0,2,2).t(),cameraParameters.focalLengthPixels);
 
 
                     if(sensors->leftFootDown) {
-                        sensors->kinematicsCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH],
-                                                                                                           sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,2,2,2),
-                                                                                                           sensors->bodyCentreHeight);
+                        sensors->kinematicsBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,2,2,2),sensors->bodyCentreHeight);
                     } else if (sensors->rightFootDown) {
-                        sensors->kinematicsCamToGround = utility::motion::kinematics::calculateCamToGround(sensors->forwardKinematics[ServoID::HEAD_PITCH],
-                                                                                                           sensors->forwardKinematics[ServoID::R_ANKLE_ROLL].submat(0,2,2,2),
-                                                                                                           sensors->bodyCentreHeight);
+                        sensors->kinematicsBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->forwardKinematics[ServoID::R_ANKLE_ROLL].submat(0,2,2,2),sensors->bodyCentreHeight);                        
                     }
                     else {
-                        sensors->kinematicsCamToGround = sensors->orientationCamToGround;
+                        sensors->kinematicsBodyToGround = sensors->orientationCamToGround;
                     }
+                    sensors->kinematicsCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
+
                     // std::cout << "sensors->kinematicsCamToGround\n" << sensors->kinematicsCamToGround << std::endl;
                     // std::cout << "sensors->orientationCamToGround\n" << sensors->orientationCamToGround << std::endl;
                     // std::cout << "sensors->bodyCentreHeight\n" << sensors->bodyCentreHeight << std::endl;

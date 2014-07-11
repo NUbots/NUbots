@@ -60,6 +60,14 @@ namespace geometry {
     arma::vec2 Line::orthogonalProjection(const arma::vec2& x) {
         return x - (arma::dot(x, normal) - distance) * normal;
     }
+
+    Line Line::getParallelLineThrough(const arma::vec2& x){
+        Line result;
+        result.normal = normal;
+        result.distance = arma::dot(x, normal);
+        return result;
+    }
+
 }
 }
 }

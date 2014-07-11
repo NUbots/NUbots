@@ -96,6 +96,14 @@ namespace geometry {
         return ((bl + br) * 0.5);
     }
 
+    arma::vec2 Quad::getRightCentre() const {
+        return ((br + tr) * 0.5);
+    }
+
+    arma::vec2 Quad::getLeftCentre() const {
+        return ((bl + tl) * 0.5);
+    }
+
     arma::vec2 Quad::getBottomLeft() const {
         return bl;
     }

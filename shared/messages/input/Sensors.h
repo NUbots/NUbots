@@ -75,7 +75,9 @@ namespace messages {
 
             arma::vec4 centreOfMass;
 
+            arma::mat44 orientationBodyToGround;
             arma::mat44 orientationCamToGround;
+            arma::mat44 kinematicsBodyToGround;
             arma::mat44 kinematicsCamToGround;
 
             std::vector<Servo> servos;

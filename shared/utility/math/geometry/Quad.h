@@ -55,6 +55,8 @@ namespace geometry {
 
         arma::vec2 getTopCentre() const;                                //! Returns the bottom centre pixel location of the Quad.
         arma::vec2 getBottomCentre() const;                             //! Returns the bottom centre pixel location of the Quad.
+        arma::vec2 getRightCentre() const;
+        arma::vec2 getLeftCentre() const;
 
         arma::vec2 getCentre() const;                                   //! Returns the centre pixel location  of the Quad.
 

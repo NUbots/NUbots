@@ -26,10 +26,12 @@
 #include "utility/math/geometry/Quad.h"
 
 #include "utility/math/geometry/Line.h"
+#include "utility/math/geometry/ParametricLine.h"
 
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacLineModel.h"
 #include "utility/math/vision.h"
+#include "utility/math/coordinates.h"
 #include "messages/input/CameraParameters.h"
 
 namespace modules {
@@ -38,7 +40,10 @@ namespace vision {
     using messages::input::CameraParameters;
     using messages::input::Sensors;
 
+    using utility::math::coordinates::cartesianToSpherical;
+
     using utility::math::geometry::Line;
+    using utility::math::geometry::ParametricLine;
     using utility::math::geometry::Quad;
 
     using utility::math::ransac::Ransac;
@@ -82,7 +87,7 @@ namespace vision {
         on<Trigger<CameraParameters>, With<Configuration<GoalDetector>>>(setParams);
         on<With<CameraParameters>, Trigger<Configuration<GoalDetector>>>(setParams);
 
-        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters, Sensors>, Options<Single>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const Sensors& sensors) {
+        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters>, Options<Single>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam) {
 
             std::vector<arma::vec2> startPoints, endPoints;
             std::vector<arma::mat22> starts, ends;
@@ -229,20 +234,36 @@ namespace vision {
 
                 std::vector<VisionObject::Measurement> measurements;
 
-                arma::vec3 goalBaseCentreRay = arma::normalise(arma::normalise(getCamFromScreen(it->quad.getBottomLeft(), cam.focalLengthPixels))
-                                                           + arma::normalise(getCamFromScreen(it->quad.getBottomRight(), cam.focalLengthPixels)));
-
                 // Get our width based distance to the cylinder
-                double widthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, it->quad.getBottomLeft(), it->quad.getBottomRight(), cam.focalLengthPixels);
-                arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * goalBaseCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
-                // TODO convert this into sphericial coordiantes and error
-                measurements.push_back({{0,0,0}, arma::eye(3,3)});
+                arma::vec2 goalLeft = it->quad.getLeftCentre();
+                ParametricLine<2> horizonLevel;
+                horizonLevel.setFromDirection(arma::vec2({-image.horizon.normal[1], image.horizon.normal[0]}), goalLeft);
+                ParametricLine<2> rightGoalLine;
+                rightGoalLine.setFromTwoPoints(it->quad.getTopRight(), it->quad.getBottomRight());
+                arma::vec2 goalRight;
+                try {
+                    goalRight = rightGoalLine.intersect(horizonLevel);
+                } catch (const std::domain_error&){
+                    NUClear::log<NUClear::WARN>("Goal Found which is parallel to kinematics horizon!!");
+                    goalLeft = it->quad.getBottomLeft();
+                    goalRight = it->quad.getBottomRight();
+                }
 
+                arma::vec3 goalCentreRay = arma::normalise(arma::normalise(getCamFromScreen(imageToScreen(goalRight,cam.imageSizePixels), cam.focalLengthPixels))
+                                                           + arma::normalise(getCamFromScreen(imageToScreen(goalLeft,cam.imageSizePixels), cam.focalLengthPixels)));
+
+                double widthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, goalLeft, goalRight, cam.focalLengthPixels);
+                arma::vec3 goalCentreGroundSpace = widthDistance * image.sensors->orientationCamToGround.submat(0,0,2,2) * goalCentreRay + image.sensors->orientationCamToGround.submat(0,3,2,3);
+                // TODO convert this into sphericial coordiantes and error
+                // NUClear::log("Goal pos = ", goalCentreGroundSpace.t());
+                goalCentreGroundSpace[2] = 0; //Project to ground
+                measurements.push_back({ cartesianToSpherical(goalCentreGroundSpace), arma::diagmat(arma::vec({0.002357231 * 4, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
                 // Project this vector to a plane midway through the ball
-                arma::vec3 ballCentreGroundProj = arma::vec3({ 0, 0, GOAL_DIAMETER / 2.0 }) + projectCamToGroundPlane(goalBaseCentreRay, sensors.orientationCamToGround);
+                arma::vec3 goalCentreGroundProj = arma::vec3({ 0, 0, GOAL_DIAMETER / 2.0 }) + projectCamToGroundPlane(goalCentreRay, image.sensors->orientationCamToGround);
                 // TODO convert this into sphericial coordiantes and error
-                measurements.push_back({{0,0,0}, arma::eye(3,3)});
+                //measurements.push_back({{0,0,0}, arma::eye(3,3)});
 
+                measurements.push_back({ cartesianToSpherical(goalCentreGroundProj), arma::diagmat(arma::vec({0.002357231 * 8, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
                 it->measurements = measurements;
                 it->sensors = image.sensors;
             }
