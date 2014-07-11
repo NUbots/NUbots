@@ -284,11 +284,14 @@ namespace modules {
 					// Have I been picked up?
 					currentState.pickedUp = feetOffGround && !isGettingUp && !isDiving;
 
-
-					// TODO: FIX ME!!!!
+					// Have I been penalised or unpenalised?
 					if (gameState.team.players.at(0).penaltyReason != PenaltyReason::UNPENALISED && !previousState.penalised) {
 						currentState.penalised = true;
 						emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
+					}
+					else if(gameState.team.players.at(0).penaltyReason == PenaltyReason::UNPENALISED && previousState.penalised) {
+						currentState.penalised = false;
+						emit(std::move(std::make_unique<messages::output::Say>("Unpenalised")));
 					}
 
 					// Am I in my zone?
@@ -367,7 +370,6 @@ namespace modules {
 							std::cerr << "ballPosition - (" << currentState.ball.position[0] << ", " << currentState.ball.position[1] << ")" << std::endl;
 							std::cerr << "selfPosition - (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;
 						}
-
 
 						try {
 							line.setFromDirection(utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.velocity) - currentState.position, globalBallPosition);
@@ -542,98 +544,80 @@ namespace modules {
 			void SoccerStrategy::updateGameState(const messages::input::gameevents::GameState& gameState) {
 				// What state is the game in?
 				switch (gameState.phase) {
-					case messages::input::gameevents::Phase::READY:
+					case Phase::READY:
 						currentState.primaryGameState = GameStatePrimary::READY;
-
 						if(currentState.primaryGameState != previousState.primaryGameState) {
-							emit(std::move(std::make_unique<messages::output::Say>("Initial")));
-							std::cerr << "initial" << std::endl;
+							emit(std::move(std::make_unique<messages::output::Say>("ready")));
+							std::cerr << "ready" << std::endl;
 						}
-
 						break;
 
-					case messages::input::gameevents::Phase::SET:
+					case Phase::SET:
 						currentState.primaryGameState = GameStatePrimary::SET;
-
 						if(currentState.primaryGameState != previousState.primaryGameState) {
 							emit(std::move(std::make_unique<messages::output::Say>("set")));
 							std::cerr << "set" << std::endl;
 						}
-
 						break;
 
-					case messages::input::gameevents::Phase::PLAYING:
+					case Phase::PLAYING:
 						currentState.primaryGameState = GameStatePrimary::PLAYING;
-
 						if(currentState.primaryGameState != previousState.primaryGameState) {
 							emit(std::move(std::make_unique<messages::output::Say>("playing")));
 							std::cerr << "playing" << std::endl;
 						}
-
 						break;
 
-					case messages::input::gameevents::Phase::TIMEOUT:
+					case Phase::TIMEOUT:
 						currentState.primaryGameState = GameStatePrimary::TIMEOUT;
-
 						if(currentState.primaryGameState != previousState.primaryGameState) {
 							emit(std::move(std::make_unique<messages::output::Say>("timeout")));
 							std::cerr << "timeout" << std::endl;
 						}
-
 						break;
 
-					case messages::input::gameevents::Phase::FINISHED:
+					case Phase::FINISHED:
 						currentState.primaryGameState = GameStatePrimary::FINISHED;
-
 						if(currentState.primaryGameState != previousState.primaryGameState) {
 							emit(std::move(std::make_unique<messages::output::Say>("finished")));
 							std::cerr << "finished" << std::endl;
 						}
-
 						break;
 
-					case messages::input::gameevents::Phase::INITIAL:
+					case Phase::INITIAL:
 					default:
 						currentState.primaryGameState = GameStatePrimary::INITIAL;
-
 						if(currentState.primaryGameState != previousState.primaryGameState) {
-							emit(std::move(std::make_unique<messages::output::Say>("initial default gamestate")));
-							std::cerr << "initial default gamestate" << std::endl;
+							emit(std::move(std::make_unique<messages::output::Say>("initial")));
+							std::cerr << "initial" << std::endl;
 						}
-
 						break;
 				}
 
 				switch (gameState.mode) {
 					case messages::input::gameevents::Mode::PENALTY_SHOOTOUT:
 						currentState.secondaryGameState = GameStateSecondary::PENALTY_SHOOTOUT;
-
 						if(currentState.secondaryGameState != previousState.secondaryGameState) {
 							emit(std::move(std::make_unique<messages::output::Say>("penalty shoot out")));
 							std::cerr << "penalty shootout" << std::endl;
 						}
-
 						break;
 
 					case messages::input::gameevents::Mode::OVERTIME:
 						currentState.secondaryGameState = GameStateSecondary::OVERTIME;
-
 						if(currentState.secondaryGameState != previousState.secondaryGameState) {
 							emit(std::move(std::make_unique<messages::output::Say>("over time")));
 							std::cerr << "overtime" << std::endl;
 						}
-
 						break;
 
 					case messages::input::gameevents::Mode::NORMAL:
 					default:
 						currentState.secondaryGameState = GameStateSecondary::NORMAL;
-
 						if(currentState.secondaryGameState != previousState.secondaryGameState) {
 							emit(std::move(std::make_unique<messages::output::Say>("normal")));
 							std::cerr << "normal" << std::endl;
 						}
-
 						break;
 				}
 			}

@@ -464,7 +464,7 @@ namespace input {
                 }
                 case gamecontroller::State::SET: {
 
-                    state->phase = Phase::READY;
+                    state->phase = Phase::SET;
 
                     stateChanges.push_back([this] {
                         emit(std::make_unique<GamePhase<Phase::SET>>());
