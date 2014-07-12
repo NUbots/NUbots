@@ -388,9 +388,11 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 						arma::vec2 xaxis = {1, 0};
 						arma::vec2 fieldWidth = {-FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 
+						arma::vec2 psudoFieldWidth = {-(FIELD_DESCRIPTION.dimensions.field_length - FIELD_DESCRIPTION.dimensions.goal_area_length) / 2, 0}; //we want the robot to move in a line in the middle of the goal box
+
 //std::cerr << __FILE__ << ": "<< __func__ << " - " << __LINE__ << std::endl;
 						try {
-							planeGoal.setFromNormal(xaxis, fieldWidth);
+							planeGoal.setFromNormal(xaxis, psudoFieldWidth);
 						}
 
 						catch (const std::domain_error& e) {
@@ -739,6 +741,8 @@ std::cerr << "Emitting LookAtBallStop" << std::endl;
 				approach->walkMovementType = WalkApproach::OmnidirectionalReposition;
 				approach->heading = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
 				approach->target = position;
+
+				std::cerr << "I Am side stepping to: (" << position[0] << ", " << position[1] << ")" << std::endl; //test the position
 
 				currentState.targetPosition = approach->target;
 				currentState.targetHeading = approach->heading;
