@@ -85,7 +85,7 @@ namespace localisation {
 
                 Self robot_model;
                 robot_model.position = model_state.rows(robot::kX, robot::kY);
-                auto imuRotation = zRotationMatrix(model_state(robot::kImuOffset));
+                auto imuRotation = zRotationMatrix(-model_state(robot::kImuOffset));
                 arma::vec3 world_heading = imuRotation * arma::mat(sensors.orientation.t()).col(0);
                 robot_model.heading = world_heading.rows(0, 1);
                 robot_model.sr_xx = model_cov(0, 0);

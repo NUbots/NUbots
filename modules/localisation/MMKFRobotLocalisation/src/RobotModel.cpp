@@ -98,7 +98,7 @@ arma::vec RobotModel::predictedObservation(
 
     //Rewrite:
     arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
-    arma::vec2 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).submat(0,0,1,0);   //first two entries of first column of transpose 
+    arma::vec3 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).col(0);
     auto obs = SphericalRobotObservation(state.rows(kX, kY),
                                          robotHeading_world,
                                          actual_position);
