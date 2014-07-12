@@ -36,6 +36,10 @@
 #include "utility/localisation/transform.h"
 #include "utility/support/armayamlconversions.h"
 
+namespace modules {
+    namespace behaviour {
+        namespace strategy {
+
 		using messages::localisation::Ball;
 		using messages::localisation::Self;
 		using messages::behaviour::LookAtBallStart;
@@ -71,7 +75,7 @@
 		using utility::math::geometry::ParametricLine;
 
 		GoalieStrategy::GoalieStrategy(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-			on<Trigger<Configuration<GoalieStrategyConfig>>>([this](const Configuration<SoccerStrategyConfig>& config) {
+			on<Trigger<Configuration<GoalieStrategyConfig>>>([this](const Configuration<GoalieStrategyConfig>& config) {
 				Zone zone;
 
 				MAX_BALL_DISTANCE = config["MAX_BALL_DISTANCE"].as<float>();
@@ -112,7 +116,7 @@
 				}
 
 				catch (const std::domain_error& e) {
-					throw std::domain_error("SoccerStrategy::on<Trigger<Configuration<SoccerStrategyConfig>>> - Invalid zone description!");
+					throw std::domain_error("GoalieStrategy::on<Trigger<Configuration<GoalieStrategyConfig>>> - Invalid zone description!");
 				}
 			});
 
@@ -291,7 +295,7 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 					}
 					
 					else {
-						std::cerr << "SoccerStrategy - No Self!!!!" << std::endl;
+						std::cerr << "GoalieStrategy - No Self!!!!" << std::endl;
 					}
 
 //std::cerr << __FILE__ << ": "<< __func__ << " - " << __LINE__ << std::endl;
@@ -487,26 +491,6 @@ std::cerr << "GoToPoint(startPosition): (" << ZONES.at(MY_ZONE).startPosition[0]
 //						NUClear::log<NUClear::INFO>("Game is about to start. I should be in my starting position.");
 					}
 
-					// Move to optimal position within zone, if not in zone
-					else if (!currentState.selfInZone) {
-						arma::vec2 heading = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
-
-						if (currentState.ballLost) {
-							optimalPosition = ZONES.at(MY_ZONE).defaultPosition;
-						}
-
-std::cerr << "selfPosition: (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;
-std::cerr << "GoToPoint(optimalPosition): (" << optimalPosition[0] << ", " << optimalPosition[1] << ")" << std::endl;
-
-						// Only emit a goToPoint command when we are changing our destination.
-						if ((optimalPosition[0] != previousState.targetPosition[0]) || (optimalPosition[1] != previousState.targetPosition[1])) {
-							goToPoint(optimalPosition, heading);
-						}
-
-						findBall();
-//						NUClear::log<NUClear::INFO>("I am not where I should be. Going there now.");
-					}
-
 					else if ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK) && IS_GOALIE && currentState.ballLost) {
 						findBall();
 
@@ -519,76 +503,10 @@ std::cerr << "GoToPoint(optimalPosition): (" << optimalPosition[0] << ", " << op
 
 					}
 
-					else if ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK) && currentState.ballLost && currentState.kicker) {
-						findBall();
-
-//						NUClear::log<NUClear::INFO>("Penalty kick in progress. Locating ball.");
-					}
-
-					else if (currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK && !currentState.ballLost && currentState.kicker) {
-						arma::vec2 goal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
-						approachBall(goal);
-
-//						NUClear::log<NUClear::INFO>("Penalty kick in progress. Approaching ball.");
-					}
-
-					else if ((previousState.primaryGameState == GameStatePrimary::SET) && (currentState.primaryGameState == GameStatePrimary::PLAYING) && currentState.kickOff && currentState.kicker) {
-						kickBall(currentState.heading);
-
-//						NUClear::log<NUClear::INFO>("Game just started. Time to kick off.");
-					}
-
-					else if (isKicking) {
-						watchBall();
-
-//						NUClear::log<NUClear::INFO>("I be looking at what I be kicking.");
-					}
-
 					else if (currentState.ballLost) {
 						findBall();
 
 //						NUClear::log<NUClear::INFO>("Don't know where the ball is. Looking for it.");
-					}
-
-					else if ((currentState.ballInZone || currentState.ballApproaching) && currentState.goalInRange) {
-						arma::vec2 goal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
-						arma::vec2 target = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
-
-						if ((target[0] != previousState.targetPosition[0]) || (target[1] != previousState.targetPosition[1])) {
-							approachBall(goal);
-						}
-
-//						NUClear::log<NUClear::INFO>("Walking to ball.");
-					}
-
-					else if ((currentState.ballInZone || currentState.ballApproaching) && !currentState.goalInRange) {
-						arma::vec2 nearestZone = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0}; // Find the optimal point in the nearest zone, reflect the position closer to the enemy goal.
-						arma::vec2 target = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
-
-						if ((target[0] != previousState.targetPosition[0]) || (target[1] != previousState.targetPosition[1])) {
-							approachBall(nearestZone);
-						}
-
-//						NUClear::log<NUClear::INFO>("Walking to ball.");
-					}
-
-					else if (currentState.kickPosition && !isKicking) {
-						kickBall(currentState.heading);
-
-//						NUClear::log<NUClear::INFO>("In kicking position. Kicking ball.");
-					}
-
-					else if (currentState.goalInRange && !isKicking) {
-						arma::vec2 goal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
-						arma::vec2 target = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
-
-						if ((target[0] != previousState.targetPosition[0]) || (target[1] != previousState.targetPosition[1])) {
-							approachBall(goal);
-						}
-
-						kickBall(goal);
-
-//						NUClear::log<NUClear::INFO>("Kick for goal.");
 					}
 
 					else if (IS_GOALIE && currentState.ballApproachingGoal) {
@@ -611,7 +529,7 @@ std::cerr << "GoToPoint(optimalPosition): (" << optimalPosition[0] << ", " << op
 				});
 			}
 
-			void SoccerStrategy::updateGameState(const messages::input::gameevents::GameState& gameState) {
+			void GoalieStrategy::updateGameState(const messages::input::gameevents::GameState& gameState) {
 				// What state is the game in?
 				switch (gameState.phase) {
 					case Phase::READY:
@@ -692,7 +610,7 @@ std::cerr << "GoToPoint(optimalPosition): (" << optimalPosition[0] << ", " << op
 				}
 			}
 
-			arma::vec2 SoccerStrategy::findOptimalPosition(const Polygon& zone, const arma::vec2& point) {
+			arma::vec2 GoalieStrategy::findOptimalPosition(const Polygon& zone, const arma::vec2& point) {
 				try {
 					return(zone.projectPointToPolygon(point));
 				}
@@ -702,7 +620,7 @@ std::cerr << "GoToPoint(optimalPosition): (" << optimalPosition[0] << ", " << op
 				}
 			}
 
-			void SoccerStrategy::stopMoving() {
+			void GoalieStrategy::stopMoving() {
 				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
 
 				approach->targetPositionType = WalkTarget::WayPoint;
@@ -713,7 +631,7 @@ std::cerr << "GoToPoint(optimalPosition): (" << optimalPosition[0] << ", " << op
 				emit(std::move(approach));
 			}
 
-			void SoccerStrategy::findSelf() {
+			void GoalieStrategy::findSelf() {
 				/* Try to locate both goals. */
 				/* Look at closest goal for short period to reset localisation. */
 
@@ -759,7 +677,7 @@ std::cerr << "Emitting LookAtBallStop" << std::endl;
 				// Look for ball.
 			}
 
-			void SoccerStrategy::findBall() {
+			void GoalieStrategy::findBall() {
 //				if (lookingAtGoal) {
 //					emit(std::make_unique<LookAtGoalStop>());
 //				}
@@ -779,7 +697,7 @@ std::cerr << "Emitting LookAtBallStop" << std::endl;
 //				emit(std::move(look));
 			}
 
-			void SoccerStrategy::goToPoint(const arma::vec2& position, const arma::vec2& heading) {
+			void GoalieStrategy::goToPoint(const arma::vec2& position, const arma::vec2& heading) {
 				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
 				approach->targetPositionType = WalkTarget::WayPoint;
 				approach->targetHeadingType = WalkTarget::WayPoint;
@@ -793,7 +711,7 @@ std::cerr << "Emitting LookAtBallStop" << std::endl;
 				emit(std::move(approach));
 			}
 
-			void SoccerStrategy::watchBall() {
+			void GoalieStrategy::watchBall() {
 				if (lookingAtGoal) {
 					emit(std::make_unique<LookAtGoalStop>());
 				}
@@ -814,7 +732,7 @@ std::cerr << "Emitting LookAtBallStop" << std::endl;
 				// This needs to be replaced with a proper lookAtBall command.
 			}
 
-			void SoccerStrategy::sideStepToPoint(const arma::vec2& position) {
+			void GoalieStrategy::sideStepToPoint(const arma::vec2& position) {
 				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
 				approach->targetPositionType = WalkTarget::WayPoint;
 				approach->targetHeadingType = WalkTarget::Ball;
@@ -828,7 +746,7 @@ std::cerr << "Emitting LookAtBallStop" << std::endl;
 				emit(std::move(approach));
 			}
 
-			void SoccerStrategy::approachBall(const arma::vec2& heading) {
+			void GoalieStrategy::approachBall(const arma::vec2& heading) {
 				auto approach = std::make_unique<messages::behaviour::WalkStrategy>();
 				approach->targetPositionType = WalkTarget::Ball;
 				approach->targetHeadingType = WalkTarget::WayPoint;
@@ -842,7 +760,7 @@ std::cerr << "Emitting LookAtBallStop" << std::endl;
 				emit(std::move(approach));
 			}
 
-			void SoccerStrategy::kickBall(const arma::vec2& direction) {
+			void GoalieStrategy::kickBall(const arma::vec2& direction) {
 				// Emit aim vector.
 				if (!isKicking) {
 					stopMoving();

@@ -1,5 +1,5 @@
 ADD_ROLE(
-    NAME nucapstrategy 
+    NAME nucapgoalie 
     MODULES
         #Support
         support::SignalCatcher
