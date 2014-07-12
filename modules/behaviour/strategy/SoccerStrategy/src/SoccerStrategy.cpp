@@ -399,13 +399,15 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 
 //std::cerr << __FILE__ << ": "<< __func__ << " - " << __LINE__ << std::endl;
 						try {
-							planeSelf.setFromNormal(globalBallPosition - currentState.position, currentState.position);
+//							planeSelf.setFromNormal(globalBallPosition - currentState.position, currentState.position);
+							planeSelf.setFromNormal(currentState.ball.position, currentState.position);
 						}
 
 						catch (const std::domain_error& e) {
 							std::cerr << "ballPosition - (" << currentState.ball.position[0] << ", " << currentState.ball.position[1] << ")" << std::endl;
 							std::cerr << "selfPosition - (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;
-							std::cerr << "normal - (" << (globalBallPosition - currentState.position)[0] << ", " << (globalBallPosition - currentState.position)[1] << ")" << std::endl;
+//							std::cerr << "normal - (" << (globalBallPosition - currentState.position)[0] << ", " << (globalBallPosition - currentState.position)[1] << ")" << std::endl;
+							std::cerr << "normal - (" << currentState.ball.position[0] << ", " << currentState.ball.position[1] << ")" << std::endl;
 						}
 
 //std::cerr << __FILE__ << ": "<< __func__ << " - " << __LINE__ << std::endl;
