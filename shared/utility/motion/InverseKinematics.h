@@ -214,7 +214,7 @@ namespace kinematics {
         return positions;
     }
 
-    inline arma::vec2 calculateHeadJointsToLookAt(arma::vec4 groundPoint, const arma::mat44& orientationCamToGround, const arma::mat44& orientationBodyToGround){
+    inline arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint, const arma::mat44& orientationCamToGround, const arma::mat44& orientationBodyToGround){
         arma::vec3 cameraPosition = orientationCamToGround.col(3);
         arma::vec3 groundSpaceLookVector = groundPoint - cameraPosition;
         arma::vec3 lookVector = orientationBodyToGround.submat(0,0,2,2).t() * groundSpaceLookVector;
