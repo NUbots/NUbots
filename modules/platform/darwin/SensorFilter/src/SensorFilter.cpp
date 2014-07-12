@@ -140,10 +140,8 @@ namespace modules {
 
                 on< Trigger<DarwinSensors>
                   , With<Optional<Sensors>>
-                  , With<CameraParameters>
                   , Options<Single>>([this](const DarwinSensors& input,
-                                            const std::shared_ptr<const Sensors>& previousSensors,
-                                            const CameraParameters& cameraParameters) {
+                                            const std::shared_ptr<const Sensors>& previousSensors) {
 
                     auto sensors = std::make_unique<Sensors>();
 
@@ -356,13 +354,8 @@ namespace modules {
                     /************************************************
                      *                  Kinematics Horizon          *
                      ************************************************/
-
-
                     sensors->orientationBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->orientation.submat(0,2,2,2), sensors->bodyCentreHeight);
                     sensors->orientationCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
-
-                    sensors->orientationHorizon = utility::motion::kinematics::calculateHorizon(sensors->orientationCamToGround.submat(0,0,2,2).t(),cameraParameters.focalLengthPixels);
-
 
                     if(sensors->leftFootDown) {
                         sensors->kinematicsBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,2,2,2),sensors->bodyCentreHeight);
@@ -377,8 +370,6 @@ namespace modules {
                     // std::cout << "sensors->kinematicsCamToGround\n" << sensors->kinematicsCamToGround << std::endl;
                     // std::cout << "sensors->orientationCamToGround\n" << sensors->orientationCamToGround << std::endl;
                     // std::cout << "sensors->bodyCentreHeight\n" << sensors->bodyCentreHeight << std::endl;
-
-                    sensors->kinematicsHorizon = utility::motion::kinematics::calculateHorizon(sensors->kinematicsCamToGround.submat(0,0,2,2).t(), cameraParameters.focalLengthPixels);
 
                     /*emit(graph("Filtered Gravity Vector",
                             float(orientation[0]*9.807),

@@ -31,7 +31,8 @@ namespace modules {
             using messages::motion::WalkStopCommand;
         	using messages::motion::WalkStopped;
 			using messages::behaviour::FixedWalkCommand;
-			using messages::behaviour::FixedWalkFinished;
+            using messages::behaviour::FixedWalkFinished;
+			using messages::behaviour::CancelFixedWalk;
             using messages::motion::ExecuteGetup;
             using messages::motion::KillGetup;
 			using messages::input::Sensors;
@@ -54,10 +55,11 @@ namespace modules {
                 });
 
                 on< Trigger< Every<30, Per<std::chrono::seconds>>> , Options<Sync<FixedWalk>>, With<Sensors>>("Fixed Walk Manager", [this]( const time_t& t, const Sensors& sensors){
-                    if(t > segmentStart + walkSegments.front().duration && active && !fallen){
+                    if(active && t > segmentStart + walkSegments.front().duration && !fallen){
                         //Move to next segment
-                        segmentStart += walkSegments.front().duration;
-                        walkSegments.pop();
+                        segmentStart += walkSegments.front().duration;                        
+                        walkSegments.pop_front();
+
                         if(walkSegments.empty()){
                             emit(std::make_unique<WalkCommand>());
                             emit(std::make_unique<WalkStopCommand>());
@@ -71,8 +73,15 @@ namespace modules {
                 		emit(getWalkCommand(walkSegments.front(), t-segmentStart, sensors));
                 	}
                 });
+                
+                on<Trigger<CancelFixedWalk>, Options<Sync<FixedWalk>> >([this](const CancelFixedWalk&){
+                    emit(std::make_unique<WalkStopCommand>());
+                    // emit(std::make_unique<WalkCommand>());
+                    active = false;
+                    walkSegments.clear();
+                });
 
-                on<Trigger<WalkStopCommand>>([this](const WalkStopCommand&){
+                on<Trigger<WalkStopped>, Options<Sync<FixedWalk>> >([this](const WalkStopped&){
                     if(!active){
                         emit(std::make_unique<FixedWalkFinished>());
                     } else {
@@ -81,16 +90,18 @@ namespace modules {
                 });
 
 				on<Trigger<FixedWalkCommand>, Options<Sync<FixedWalk>>, With<Sensors> >([this](const FixedWalkCommand& command, const Sensors& sensors){
-	        		if(!active){
+                    if(!active && !command.segments.empty()){
                         active = true;
 	        			segmentStart = NUClear::clock::now();
 	        			beginningOrientation = sensors.orientation;
                         emit(std::make_unique<WalkStartCommand>());
 	        		}
 	        		for(auto& segment: command.segments){
-	        			walkSegments.push(segment);
+	        			walkSegments.push_back(segment);
 	        		}
-				});
+                    std::cerr << "FixedWalk::FixedWalkCommand - Total walk segments pushed back:" << walkSegments.size() << " " << command.segments.size() <<std::endl;
+
+				}); 
 
             }
 

@@ -70,6 +70,7 @@ namespace support {
                         handle.enable();
                         found = true;
                     }
+
                     else if (!enabled && handle.enabled()) {
                         handle.disable();
                         found = true;

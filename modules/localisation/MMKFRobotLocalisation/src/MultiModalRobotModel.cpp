@@ -101,15 +101,13 @@ double RobotHypothesis::MeasurementUpdate(
     const LocalisationFieldObject& actual_object) {
 
     // Spherical from ground:
-
-    arma::vec3 measurement = observed_object.measurements[0].position;
-    arma::mat33 cov = observed_object.measurements[0].error;
+    arma::vec3 measurement = observed_object.measurements[1].position;
+    arma::mat33 cov = observed_object.measurements[1].error;
 
     arma::vec2 actual_2d = actual_object.location();
     arma::vec3 actual_pos = arma::vec3({actual_2d(0), actual_2d(1), 0});
 
-    double quality = filter_.measurementUpdate(measurement, cov, actual_pos,
-                                               *(observed_object.sensors));
+    double quality = filter_.measurementUpdate(measurement, cov, actual_pos, *(observed_object.sensors));
     return quality;
 }
 
@@ -165,7 +163,7 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
         // Split the model for each possible object, and observe that object:
         // (TODO: Micro-optimisation: use model as the last split_model)
         for (auto& possible_object : possible_objects) {
-            std::cout << "possible_object: " << possible_object << std::endl;
+            // std::cout << "possible_object: " << possible_object << std::endl;
 
             auto split_model = std::make_unique<RobotHypothesis>(*model);
 
@@ -213,8 +211,7 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
             for (int i = 0; i < int(object_set.size()); i++) {
                 split_model->obs_count_++;
 
-                auto quality = split_model->MeasurementUpdate(ambiguous_objects[i],
-                                                              object_set[i]);
+                auto quality = split_model->MeasurementUpdate(ambiguous_objects[i], object_set[i]);
 
                 // Weight the new model based on the 'quality' of the observation
                 // just made.
@@ -227,6 +224,7 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
     }
 
     robot_models_ = std::move(new_models);
+
 }
 
 // For an ordered list of observations which is known to be correspond one of

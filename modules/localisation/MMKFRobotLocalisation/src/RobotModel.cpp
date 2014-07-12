@@ -80,7 +80,6 @@ arma::vec RobotModel::predictedObservation(
     const arma::vec::fixed<RobotModel::size>& state,
     const arma::vec3& actual_position,
     const Sensors& sensors) {
-
     //First Attempt:
     // auto& orientation = sensors.orientation;
     // auto& camToGround = sensors.orientationCamToGround;
@@ -93,15 +92,15 @@ arma::vec RobotModel::predictedObservation(
     // arma::mat33 tmp2 = bodyToGround * orientation;
     // arma::vec3 tmp1 = imuRotation * actualPositionRelative;
     // arma::vec3 obs_cartesian = arma::vec3(tmp2 * tmp1);
-
     // auto obs = cartesianToSpherical(obs_cartesian);
 
     //Rewrite:
     arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
-    arma::vec2 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).submat(0,0,1,0);   //first two entries of first column of transpose 
+    arma::vec3 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).col(0);
     auto obs = SphericalRobotObservation(state.rows(kX, kY),
-                                         robotHeading_world,
+                                         robotHeading_world.rows(0,1),
                                          actual_position);
+
     return obs;
 }
 
