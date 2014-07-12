@@ -75,7 +75,7 @@ namespace modules {
 
 		SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 			on<Trigger<Configuration<SoccerStrategyConfig>>>([this](const Configuration<SoccerStrategyConfig>& config) {
-				std::vector<arma::vec2> zone;
+				Zone zone;
 
 				MAX_BALL_DISTANCE = config["MAX_BALL_DISTANCE"].as<float>();
 				KICK_DISTANCE_THRESHOLD = config["KICK_DISTANCE_THRESHOLD"].as<float>();
@@ -88,29 +88,30 @@ namespace modules {
 				POSITION_THRESHOLD_TIGHT = config["POSITION_THRESHOLD_TIGHT"].as<float>();
 				POSITION_THRESHOLD_LOOSE = config["POSITION_THRESHOLD_LOOSE"].as<float>();
 				IS_GOALIE = config["GOALIE"].as<bool>();
-	//			START_POSITION = config["START_POSITION"].as<arma::vec2>();
 				MY_ZONE = config["MY_ZONE"].as<int>();
 
+				ZONES.reserve(4);
+
 				try {
-					ZONE_DEFAULTS.push_back(config["ZONE_0_DEFAULT"].as<arma::vec2>());
-					zone = config["ZONE_0"].as<std::vector<arma::vec2>>();
-					START_POSITION = config["ZONE_0_START_POSITION"].as<arma::vec2>();
-					ZONES.push_back(Polygon(zone));
+					zone.defaultPosition = config["ZONE_0_DEFAULT_POSITION"].as<arma::vec2>();
+					zone.startPosition = config["ZONE_0_START_POSITION"].as<arma::vec2>();
+					zone.zone.set(config["ZONE_0"].as<std::vector<arma::vec2>>());
+					ZONES.emplace_back(zone);
 
-					ZONE_DEFAULTS.push_back(config["ZONE_1_DEFAULT"].as<arma::vec2>());
-					zone = config["ZONE_1"].as<std::vector<arma::vec2>>();
-					START_POSITION = config["ZONE_1_START_POSITION"].as<arma::vec2>();
-					ZONES.push_back(Polygon(zone));
+					zone.defaultPosition = config["ZONE_1_DEFAULT_POSITION"].as<arma::vec2>();
+					zone.startPosition = config["ZONE_1_START_POSITION"].as<arma::vec2>();
+					zone.zone.set(config["ZONE_1"].as<std::vector<arma::vec2>>());
+					ZONES.emplace_back(zone);
 
-					ZONE_DEFAULTS.push_back(config["ZONE_2_DEFAULT"].as<arma::vec2>());
-					zone = config["ZONE_2"].as<std::vector<arma::vec2>>();
-					START_POSITION = config["ZONE_2_START_POSITION"].as<arma::vec2>();
-					ZONES.push_back(Polygon(zone));
+					zone.defaultPosition = config["ZONE_2_DEFAULT_POSITION"].as<arma::vec2>();
+					zone.startPosition = config["ZONE_2_START_POSITION"].as<arma::vec2>();
+					zone.zone.set(config["ZONE_2"].as<std::vector<arma::vec2>>());
+					ZONES.emplace_back(zone);
 
-					ZONE_DEFAULTS.push_back(config["ZONE_3_DEFAULT"].as<arma::vec2>());
-					zone = config["ZONE_3"].as<std::vector<arma::vec2>>();
-					START_POSITION = config["ZONE_3_START_POSITION"].as<arma::vec2>();
-					ZONES.push_back(Polygon(zone));
+					zone.defaultPosition = config["ZONE_3_DEFAULT_POSITION"].as<arma::vec2>();
+					zone.startPosition = config["ZONE_3_START_POSITION"].as<arma::vec2>();
+					zone.zone.set(config["ZONE_3"].as<std::vector<arma::vec2>>());
+					ZONES.emplace_back(zone);
 				}
 
 				catch (const std::domain_error& e) {
@@ -243,6 +244,7 @@ namespace modules {
 			// Check to see if we are looking at the ball.
 			on<Trigger<LookAtBallStart>>([this](const LookAtBallStart&) {
 				lookingAtBall = true;
+std::cerr << "LOOKING AT BALL" << std::endl;
 			});
 
 			// Check to see if we are no longer looking at the ball.
@@ -253,6 +255,7 @@ namespace modules {
 			// Check to see if we are looking at the goals.
 			on<Trigger<LookAtGoalStart>>([this](const LookAtGoalStart&) {
 				lookingAtGoal = true;
+std::cerr << "LOOKING AT GOAL" << std::endl;
 			});
 
 			// Check to see if we are no longer looking at the goals.
@@ -293,10 +296,10 @@ namespace modules {
 
 					// Am I the kicker?
 					// Is my start position inside the centre circle?
-					currentState.kicker = ((arma::norm(START_POSITION, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.primaryGameState == GameStatePrimary::READY ||
+					currentState.kicker = ((arma::norm(ZONES.at(MY_ZONE).startPosition, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.primaryGameState == GameStatePrimary::READY ||
 								currentState.primaryGameState == GameStatePrimary::SET || currentState.primaryGameState == GameStatePrimary::PLAYING));
 
-//					currentState.kicker = ((arma::norm(START_POSITION, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.primaryGameState == GameStatePrimary::READY ||
+//					currentState.kicker = ((arma::norm(ZONES.at(MY_ZONE).startPosition, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.primaryGameState == GameStatePrimary::READY ||
 //								currentState.primaryGameState == GameStatePrimary::SET || currentState.primaryGameState == GameStatePrimary::PLAYING)) || ((currentState.secondaryGameState == GameStateSecondary::PENALTY_KICK ||
 //								currentState.secondaryGameState == GameStateSecondary::FREE_KICK || currentState.secondaryGameState == GameStateSecondary::GOAL_KICK || currentState.secondaryGameState == GameStateSecondary::CORNER_KICK) &&
 //								currentState.primaryGameState == GameStatePrimary::PLAYING); // && currentState.???);
@@ -316,7 +319,7 @@ namespace modules {
 
 					// Am I in my zone?
 					try {
-						currentState.selfInZone = ZONES.at(MY_ZONE).pointContained(currentState.position);
+						currentState.selfInZone = ZONES.at(MY_ZONE).zone.pointContained(currentState.position);
 					}
 
 					catch (const std::domain_error& e) {
@@ -334,7 +337,7 @@ namespace modules {
 					currentState.ballHasMoved = arma::norm(currentState.ball.position - previousState.ball.position, 2) > BALL_MOVEMENT_THRESHOLD;
 
 					// Is the ball in my zone?
-					currentState.ballInZone = !currentState.ballLost && ZONES.at(MY_ZONE).pointContained(globalBallPosition);
+					currentState.ballInZone = !currentState.ballLost && ZONES.at(MY_ZONE).zone.pointContained(globalBallPosition);
 
 					// Are the goals in range?
 					// x = 0 = centre field.
@@ -389,6 +392,7 @@ namespace modules {
 						catch (const std::domain_error& e) {
 							std::cerr << "ballPosition - (" << currentState.ball.position[0] << ", " << currentState.ball.position[1] << ")" << std::endl;
 							std::cerr << "selfPosition - (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;
+							std::cerr << "normal - (" << (globalBallPosition - currentState.position)[0] << ", " << (globalBallPosition - currentState.position)[1] << ")" << std::endl;
 						}
 
 						try {
@@ -427,7 +431,7 @@ namespace modules {
 					}
 
 					// Calculate the optimal zone position.
-					arma::vec2 optimalPosition = findOptimalPosition(ZONES.at(MY_ZONE), globalBallPosition);
+					arma::vec2 optimalPosition = findOptimalPosition(ZONES.at(MY_ZONE).zone, globalBallPosition);
 
 					// ------
 					// Take appropriate action depending on state
@@ -443,8 +447,7 @@ namespace modules {
 					// Stop moving and try to localise when penalised
 					else if(currentState.penalised) {
 						stopMoving();
-						//findSelf();
-						//findBall();
+						findSelf();
 
 //						NUClear::log<NUClear::INFO>("I am penalised.");
 					}
@@ -458,7 +461,7 @@ namespace modules {
 						}
 
 						if (!isWalking && (!currentState.inPosition || !currentState.correctHeading)) {
-							goToPoint(START_POSITION, heading);
+							goToPoint(ZONES.at(MY_ZONE).startPosition, heading);
 						}
 
 //						NUClear::log<NUClear::INFO>("Game is about to start. I should be in my starting position.");
@@ -467,6 +470,11 @@ namespace modules {
 					// Move to optimal position within zone, if not in zone
 					else if (!currentState.selfInZone) {
 						arma::vec2 heading = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
+
+						if (currentState.ballLost) {
+							optimalPosition = ZONES.at(MY_ZONE).defaultPosition;
+						}
+
 						goToPoint(optimalPosition, heading);
 
 //						NUClear::log<NUClear::INFO>("I am not where I should be. Going there now.");
@@ -553,7 +561,7 @@ namespace modules {
 						arma::vec2 heading = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 						findSelf();
 						findBall();
-						goToPoint(ZONE_DEFAULTS.at(MY_ZONE), heading);
+						goToPoint(ZONES.at(MY_ZONE).defaultPosition, heading);
 
 //						NUClear::log<NUClear::INFO>("Unknown behavioural state. Finding self, finding ball, moving to default position.");
 					}
@@ -648,7 +656,7 @@ namespace modules {
 				}
 
 				catch (const std::domain_error& e) {
-					return(ZONE_DEFAULTS.at(MY_ZONE));
+					return(ZONES.at(MY_ZONE).defaultPosition);
 				}
 			}
 

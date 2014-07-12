@@ -251,12 +251,15 @@ namespace modules {
                     }*/
 
                     //std::cout << "starting path planning" << std::endl;
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     arma::vec normed_heading = arma::normalise(selfs.front().heading);
                     arma::mat robotToWorldRotation;
                     robotToWorldRotation << normed_heading[0] << -normed_heading[1] << arma::endr
                                          << normed_heading[1] <<  normed_heading[0];
-                    arma::vec ballPos = robotToWorldRotation*arma::vec(ball.position) + arma::vec(selfs.front().position);
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
+                    arma::vec ballPos = robotToWorldRotation * arma::vec(ball.position) + arma::vec(selfs.front().position);
                     //std::cout << "ball pos found" << std::endl;
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     arma::vec targetPos,targetHead;
                     //work out where we're going
                     if (targetPosition == messages::behaviour::WalkTarget::Robot) {
@@ -277,6 +280,7 @@ namespace modules {
                     //calculate the basic movement plan
                     arma::vec movePlan;
 
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     switch (planType) {
                         case messages::behaviour::WalkApproach::ApproachFromDirection:
                             movePlan = approachFromDirection(selfs.front(),targetPos,targetHead);
@@ -304,11 +308,13 @@ namespace modules {
                     //NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
                     // NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
                     //this applies acceleration/deceleration and hysteresis to movement
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     movePlan = generateWalk(movePlan,
                                planType == messages::behaviour::WalkApproach::OmnidirectionalReposition);
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
                     command->velocity = arma::vec({movePlan[0],movePlan[1]});
                     command->rotationalSpeed = movePlan[2];
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     // NUClear::log("Self Position:", selfs[0].position[0],selfs[0].position[1]);
                     // NUClear::log("Target Position:", targetPos[0],targetPos[1]);
                     emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));

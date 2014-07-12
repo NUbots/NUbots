@@ -23,12 +23,18 @@
 namespace utility {
 namespace math {
 namespace geometry {
+
     Polygon::Polygon(const std::vector<arma::vec2>& vertices){
+	set(vertices);
+    }
+
+    void Polygon::set(const std::vector<arma::vec2>& vertices){
     	for(uint i = 0; i < vertices.size(); i++){
 			edges.push_back(ParametricLine<2>());
 			edges.back().setFromTwoPoints(vertices[(i+1) % vertices.size()], vertices[i], true);
     	}
     }
+
     // Use the raycasting method: any plane (equivalent to a line in 2D, but a plane for programming reasons)
     // throught the point will intersect an even number of times with edges of the polygon iff the point lies
     // within the polygon

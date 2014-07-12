@@ -144,6 +144,14 @@ namespace modules {
 			bool correctHeading;
 		} State;
 
+		struct Zone {
+			arma::vec2 defaultPosition;
+			arma::vec2 startPosition;
+			utility::math::geometry::Polygon zone;
+
+			Zone() {}
+		};
+
 		struct SoccerStrategyConfig {
 			static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";
 		};
@@ -157,15 +165,13 @@ namespace modules {
 		private:
 			NUClear::clock::time_point timeSinceLastSeen;
 
-			std::vector<utility::math::geometry::Polygon> ZONES;
-			std::vector<arma::vec2> ZONE_DEFAULTS;
+			std::vector<Zone> ZONES;
 			int MY_ZONE;
 			float MAX_BALL_DISTANCE;
 			float KICK_DISTANCE_THRESHOLD;
 			float BALL_CERTAINTY_THRESHOLD;
 			float BALL_SELF_INTERSECTION_REGION;
 			float BALL_MOVEMENT_THRESHOLD;
-			arma::vec2 START_POSITION;
 			bool IS_GOALIE;
 			arma::vec2 BALL_LOOK_ERROR;
 			arma::vec2 GOAL_LOOK_ERROR;
