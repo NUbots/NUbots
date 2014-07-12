@@ -255,11 +255,16 @@ namespace vision {
                 double widthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, goalLeft, goalRight, cam.focalLengthPixels);
                 arma::vec3 goalCentreGroundSpace = widthDistance * image.sensors->orientationCamToGround.submat(0,0,2,2) * goalCentreRay + image.sensors->orientationCamToGround.submat(0,3,2,3);
                 // TODO convert this into sphericial coordiantes and error
-                // NUClear::log("Goal pos = ", goalCentreGroundSpace.t());
+                NUClear::log("Goal pos = ", goalCentreGroundSpace.t());
                 goalCentreGroundSpace[2] = 0; //Project to ground
                 measurements.push_back({ cartesianToSpherical(goalCentreGroundSpace), arma::diagmat(arma::vec({0.002357231 * 4, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
+                
+                // Projection Method:
+                arma::vec3 goalBaseCentreRay = arma::normalise(arma::normalise(getCamFromScreen(imageToScreen(it->quad.getBottomRight(),cam.imageSizePixels), cam.focalLengthPixels))
+                                                             + arma::normalise(getCamFromScreen(imageToScreen(it->quad.getBottomLeft(),cam.imageSizePixels), cam.focalLengthPixels)));
+
                 // Project this vector to a plane midway through the ball
-                arma::vec3 goalCentreGroundProj = arma::vec3({ 0, 0, GOAL_DIAMETER / 2.0 }) + projectCamToGroundPlane(goalCentreRay, image.sensors->orientationCamToGround);
+                arma::vec3 goalCentreGroundProj = projectCamToGroundPlane(goalBaseCentreRay, image.sensors->orientationCamToGround);
                 // TODO convert this into sphericial coordiantes and error
                 //measurements.push_back({{0,0,0}, arma::eye(3,3)});
 
@@ -271,6 +276,15 @@ namespace vision {
             // Do some extra throwouts for goals based on kinematics
 
             // Assign leftness and rightness to goals
+            if (goals->size() == 2) {
+                if (goals->at(0).quad.getCentre()(0) < goals->at(1).quad.getCentre()(0)) {
+                    goals->at(0).side = Goal::Side::LEFT;
+                    goals->at(1).side = Goal::Side::RIGHT;
+                } else {
+                    goals->at(0).side = Goal::Side::RIGHT;
+                    goals->at(1).side = Goal::Side::LEFT;
+                }
+            }
 
             emit(std::move(goals));
 

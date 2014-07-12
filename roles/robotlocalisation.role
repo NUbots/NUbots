@@ -1,8 +1,11 @@
 ADD_ROLE(
     NAME robotlocalisation
     MODULES
+        #Support
+        # support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
+        support::configuration::SoccerConfig
         support::NUbugger
 
         #Sensors
@@ -13,9 +16,23 @@ ADD_ROLE(
         #Vision
         #vision::FeatureDetector
         vision::LUTClassifier
+        vision::BallDetector
+        vision::GoalDetector
+        vision::ObstacleDetector
 
         #Localisation
         localisation::MMKFRobotLocalisation
-        localisation::KFBallLocalisation
+        # localisation::KFBallLocalisation
+
+        #Behaviour
+        behaviour::Controller
+        behaviour::skills::Stand
+        # behaviour::skills::FallingRelax
+        # behaviour::skills::Getup
+        behaviour::skills::Look
+        behaviour::planning::LookAtBall
+
+		#Motion
+        motion::ScriptEngine
 )
 

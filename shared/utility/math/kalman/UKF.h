@@ -76,7 +76,16 @@ namespace utility {
                     points.col(0) = mean;
 
                     // Get our cholskey decomposition
-                    arma::mat chol = arma::chol(covarianceSigmaWeights * covariance);
+
+                    arma::mat chol;
+                    try {
+                        chol = arma::chol(covarianceSigmaWeights * covariance);
+                    } catch (const std::runtime_error& e) {
+                        if (Model::size == 3) std::cerr << __FILE__ << " " << __LINE__ << " : covarianceSigmaWeights * covariance was NOT positive-definite and the cholskey "
+                                  << "decomposition failed.\ncovarianceSigmaWeights * covariance = \n" << std::endl
+                                  << covarianceSigmaWeights * covariance << std::endl;
+                        throw e;
+                    }
 
                     // Put our values in either end of the matrix
                     for (uint i = 1; i < Model::size + 1; ++i) {
@@ -148,18 +157,18 @@ namespace utility {
                 }
 
                 void timeUpdate(double deltaT) {
-
                     // Generate our sigma points
                     sigmaPoints = generateSigmaPoints(mean, covariance);
+
 
                     // Write the propagated version of the sigma point
                     for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
                         sigmaPoints.col(i) = model.timeUpdate(sigmaPoints.col(i), deltaT);
                     }
 
+
                     // Calculate the new mean and covariance values.
-                    mean = meanFromSigmas(sigmaPoints);
-                    mean = model.limitState(mean);
+                    mean = meanFromSigmas(sigmaPoints);                    mean = model.limitState(mean);
                     covariance = covarianceFromSigmas(sigmaPoints, mean) + model.processNoise();
 
                     // Re calculate our sigma points
@@ -189,14 +198,17 @@ namespace utility {
                     arma::vec predictedMean = meanFromSigmas(predictedObservations);
                     predictedObservations.each_col() -= predictedMean;
 
+
                     arma::mat predictedCovariance = covarianceFromSigmas(predictedObservations, predictedMean);
 
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
+
 
                     // Update our state
                     covarianceUpdate -= covarianceUpdate.t() * predictedObservations.t() *
                                         (measurement_variance + predictedObservations * covarianceUpdate * predictedObservations.t()).i() *
                                         predictedObservations * covarianceUpdate;
+
 
                     d += (predictedObservations.t()) * measurement_variance.i() * innovation;
 

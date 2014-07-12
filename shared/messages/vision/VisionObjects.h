@@ -61,9 +61,9 @@ namespace messages {
 
         struct Goal : public VisionObject {
             enum class Side {
+                UNKNOWN,
                 LEFT,
                 RIGHT,
-                UNKNOWN
             } side;
 
             utility::math::geometry::Quad quad;
