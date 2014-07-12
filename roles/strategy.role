@@ -1,5 +1,5 @@
 ADD_ROLE(
-    NAME strategy 
+    NAME strategy
     MODULES
         #Support
         support::SignalCatcher
@@ -9,8 +9,8 @@ ADD_ROLE(
         support::NUbugger
 	support::configuration::SoccerConfig
 
-	#input
-	input::GameController
+        #input
+        input::GameController
 
         #Sensors
         input::LinuxCamera

@@ -4,7 +4,7 @@
 require 'socket'
 
 Vagrant.configure("2") do |config|
-  
+
   # Determine the base box to use by checking the hostname.
   # Add your hostname to the list to opt-out of nubots-14.04.
   if ['nubots-b767f2s', 'Ne', 'Jake', 'reasearchlaptop'].include?(Socket.gethostname)
@@ -20,7 +20,7 @@ Vagrant.configure("2") do |config|
     # Run ./b create_box virtualbox to create it.
     config.vm.box = "nubots-14.04"
   end
-  
+
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
   # your network.
@@ -42,8 +42,8 @@ Vagrant.configure("2") do |config|
   # (meaning that a plain `vagrant up` will only create this machine)
   config.vm.define "nuclearportvm", primary: true do |nuclearport|
     nuclearport.vm.hostname = "nuclearportvm.nubots.net"
-    
-    nuclearport.vm.network :private_network, ip: "192.168.33.77"
+
+    # nuclearport.vm.network :private_network, ip: "192.168.33.77"
 
     nuclearport.vm.network :forwarded_port, guest: 12000, host: 12000
     nuclearport.vm.network :forwarded_port, guest: 12001, host: 12001
@@ -53,6 +53,9 @@ Vagrant.configure("2") do |config|
       nuclearport.vm.network :forwarded_port, guest: 9090, host: 9090
     end
 
+    if ['s24'].include?(Socket.gethostname) # NUbugger Port
+      nuclearport.vm.network :public_network, bridge: "Wireless Network Connection"
+    end
 
     # Syntax: "path/on/host", "/path/on/guest"
     # nuclearport.vm.synced_folder ".", "/home/vagrant/nubots/NUClearPort"
