@@ -147,6 +147,8 @@ namespace vision {
                 }
 
                 double dSd = dist.stddev();
+                double min = stat.max();
+                double max = stat.min();
 
                 // Look through leftover segments to find better endpoints
                 for(auto it = models.back().last; it < segments.end(); ++it) {
@@ -157,10 +159,10 @@ namespace vision {
                     double dR = mid.distanceToPoint(it->right);
 
                     // Don't want if if yellow shirt guy
-                    if(std::abs(dL) < 2 * dSd) {
+                    if(std::abs(dL) < 2 * dSd && tL > max + 2 * dSd && tL > min - 2 * dSd) {
                         stat(tL);
                     }
-                    if(std::abs(dR) < 2 * dSd) {
+                    if(std::abs(dR) < 2 * dSd && tR < max + 2 * dSd && tR > min - 2 * dSd) {
                         stat(tR);
                     }
                 }
