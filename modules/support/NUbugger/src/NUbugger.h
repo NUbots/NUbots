@@ -40,6 +40,10 @@ namespace modules {
             zmq::socket_t pub;
             zmq::socket_t sub;
 
+            uint pubPort = 0;
+            uint subPort = 0;
+            bool connected = false;
+
             bool listening = true;
 
             // Reaction Handles
