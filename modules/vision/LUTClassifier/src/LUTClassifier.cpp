@@ -87,10 +87,7 @@ namespace modules {
                 GOAL_LINE_SPACING = cam.focalLengthPixels * tan(config["goals"]["spacing"].as<double>());
                 GOAL_SUBSAMPLING = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["subsampling"].as<double>())));
                 GOAL_EXTENSION_SCALE = config["goals"]["extension_scale"].as<double>() / 2;
-                GOAL_MAXIMUM_VERTICAL_CLUSTER_SPACING = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["maximum_vertical_cluster_spacing"].as<double>())));
-                GOAL_VERTICAL_CLUSTER_UPPER_BUFFER = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["vertical_cluster_upper_buffer"].as<double>())));
-                GOAL_VERTICAL_CLUSTER_LOWER_BUFFER = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["vertical_cluster_lower_buffer"].as<double>())));
-                GOAL_VERTICAL_SD_JUMP = config["goals"]["vertical_sd_jump"].as<double>();
+                GOAL_LINE_DENSITY = config["goals"]["line_density"].as<int>();
 
                 // Ball Detector
                 BALL_MINIMUM_INTERSECTIONS_COARSE = config["ball"]["intersections_coarse"].as<double>();
@@ -133,9 +130,6 @@ namespace modules {
 
                 // Enhance our goals
                 enhanceGoals(image, lut, *classifiedImage);
-
-                // Find our goals base
-                //findGoalBases(image, lut, *classifiedImage);
 
                 // Enhance our ball
                 enhanceBall(image, lut, *classifiedImage);

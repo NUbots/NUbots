@@ -40,50 +40,39 @@ namespace modules {
             std::vector<ClassifiedImage<ObjectClass>::Segment> newSegments;
             auto goalSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::GOAL);
 
+            // Draw 2n + 1 lines each n/(2n - 1) apart
             for(auto it = goalSegments.first; it != goalSegments.second; ++it) {
 
                 auto& elem = it->second;
-                arma::ivec2 midpoint = elem.midpoint;
 
-                // Replicate our midpoint for each of the points
-                arma::imat points = arma::repmat(midpoint, 1, 6);
+                // We need 2n + 1 points, each with a start and end based on the midpoint
+                arma::mat points = arma::repmat(arma::vec({ double(elem.midpoint[0]), double(elem.midpoint[1]) }), 2, 2 * GOAL_LINE_DENSITY + 1);
 
-                // Our even rows are moved to the left
-                points(arma::uvec({ 0 }), arma::uvec({ 0, 2, 4 })) -= lround(double(elem.length) * GOAL_EXTENSION_SCALE);
+                // Move our X coordinates left and right
+                points.each_col() += arma::vec({ -double(elem.length) * GOAL_EXTENSION_SCALE, 0, double(elem.length) * GOAL_EXTENSION_SCALE, 0 });
 
-                // Our odd rows are moved to the right
-                points(arma::uvec({ 0 }), arma::uvec({ 1, 3, 5 })) += lround(double(elem.length) * GOAL_EXTENSION_SCALE);
-
-                // Our top rows are moved up 1/3 of the distance
-                points(arma::uvec({ 1 }), arma::uvec({ 0, 1 })) -= lround(double(GOAL_LINE_SPACING / 3));
-
-                // Our bottom rows are moved down 1/3 of the distance
-                points(arma::uvec({ 1 }), arma::uvec({ 4, 5 })) += lround(double(GOAL_LINE_SPACING / 3));
+                // Generate all our Y values for our points
+                points.row(1) += GOAL_LINE_SPACING * ((arma::linspace(-GOAL_LINE_DENSITY, GOAL_LINE_DENSITY, 2 * GOAL_LINE_DENSITY + 1).t() * GOAL_LINE_DENSITY) / (2 * GOAL_LINE_DENSITY + 1));
+                // Copy over to the end
+                points.row(3) = points.row(1);
 
                 // Our lhs must be at least 0
                 points(arma::uvec({ 0 }), arma::find(points.row(0) < 0)).fill(0);
 
                 // Our rhs must be at most the image width
-                points(arma::uvec({ 0 }), arma::find(points.row(0) > int(image.width() - 1))).fill(int(image.width() - 1));
+                points(arma::uvec({ 2 }), arma::find(points.row(2) > double(image.width() - 1))).fill(double(image.width() - 1));
 
-                // TODO only do the extra segments if they are above, and do not intersect the visual horizon
+                // Classify each of our points
+                for(uint i = 0; i < points.n_cols; ++i) {
 
-                if(points(1, 0) >= 0 && points(1, 0) < int(image.height())) {
+                    auto element = points.col(i);
 
-                    auto segments = quex->classify(image, lut, points.col(0), points.col(1));
-                    newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
+                    // Check our Y is within the bounds (no need to check the end since they are the same)
+                    if(element(1) >= 0 && element(1) < int(image.height())) {
+                        auto segments = quex->classify(image, lut, { int(element(0)), int(element(1)) }, { int(element(2)), int(element(3)) });
+                        newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
+                    }
                 }
-                if(points(1, 2) >= 0 && points(1, 2) < int(image.height())) {
-
-                    auto segments = quex->classify(image, lut, points.col(2), points.col(3));
-                    newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
-                }
-                if(points(1, 4) >= 0 && points(1, 4) < int(image.height())) {
-
-                    auto segments = quex->classify(image, lut, points.col(4), points.col(5));
-                    newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
-                }
-
             }
 
             insertSegments(classifiedImage, newSegments, false);

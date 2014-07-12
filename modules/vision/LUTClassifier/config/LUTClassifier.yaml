@@ -28,13 +28,7 @@ goals:
   spacing: 0.04
   # The spacing in radians between sampled pixels (for finding)
   subsampling: 0.01
-  # When clustering goals on the X axis, if a gap of at least this amount is detected it will be a new cluster
-  maximum_vertical_cluster_spacing: 0.08
-  # The amount to extend vertical lines above the found goal segments (in radians)
-  vertical_cluster_upper_buffer: 0.04
-  # The amount to extend vertical lines below the found goal segments (in radians)
-  vertical_cluster_lower_buffer: 0.04
-  # The number of standard deviations that the vertical lines will be spaced
-  vertical_sd_jump: 2
+  # The density of extra lines to generate (as well as their range) calcluated as n lines per line separated by n/(2n + 1) jumps
+  line_density: 2
   # The amount larger then the original data the goal lines will be
   extension_scale: 2.5
