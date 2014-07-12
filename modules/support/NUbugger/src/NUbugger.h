@@ -56,6 +56,9 @@ namespace modules {
             void provideVision();
 
             void sendGameState(std::string event, const messages::input::gameevents::GameState& gameState);
+            messages::input::proto::GameState::Data::Phase getPhase(const messages::input::gameevents::Phase& phase);
+            messages::input::proto::GameState::Data::Mode getMode(const messages::input::gameevents::Mode& phase);
+            messages::input::proto::GameState::Data::PenaltyReason getPenaltyReason(const messages::input::gameevents::PenaltyReason& penaltyReason);
 
             void send(zmq::message_t& packet);
             void send(messages::support::nubugger::proto::Message message);
