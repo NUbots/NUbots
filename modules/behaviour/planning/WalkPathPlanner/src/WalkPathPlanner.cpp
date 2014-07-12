@@ -283,15 +283,19 @@ std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
 std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     switch (planType) {
                         case messages::behaviour::WalkApproach::ApproachFromDirection:
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                             movePlan = approachFromDirection(selfs.front(),targetPos,targetHead);
                             break;
                         case messages::behaviour::WalkApproach::WalkToPoint:
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                             movePlan = goToPoint(selfs.front(),targetPos,targetHead);
                             break;
                         case messages::behaviour::WalkApproach::OmnidirectionalReposition:
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                             movePlan = goToPoint(selfs.front(),targetPos,targetHead);
                             break;
                         case messages::behaviour::WalkApproach::StandStill:
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                             emit(std::make_unique<WalkStopCommand>());
                             return;
                     }
@@ -486,13 +490,20 @@ std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                                                   const arma::vec2& direction) {
                 //quick and dirty go to point calculator
                 //gets position and heading difference and returns walk params for it
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 const arma::vec2 posdiff = target - self.position;
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 const double targetDistance = arma::norm(posdiff);
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 const double selfHeading = std::atan2(self.heading[1],self.heading[0]);
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 const double targetHeading = std::atan2(posdiff[1],posdiff[0])-selfHeading;
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 const double targetBearing = std::atan2(direction[1],direction[0])-selfHeading;
 
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 arma::vec result(3);
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 result[0] = targetDistance;
                 result[1] = atan2(sin(targetHeading),cos(targetHeading));
                 result[2] = atan2(sin(targetBearing),cos(targetBearing));

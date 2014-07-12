@@ -118,25 +118,25 @@ namespace modules {
 			} 
 
 			else if(std::chrono::duration<float, std::ratio<1,1000>>(sensors.timestamp - timeSinceLastSeen).count() > BALL_SEARCH_TIMEOUT_MILLISECONDS){
-                        //do a blind scan'n'pan
-                        //XXX: this needs to be a look at sequence rather than a look at point
-                        std::vector<LookAtPosition> angles;
+				//do a blind scan'n'pan
+				//XXX: this needs to be a look at sequence rather than a look at point
+				std::vector<LookAtPosition> angles;
 
-                        const double scanYaw = 1.5;
-                        const double scanPitch = 0.8;
+				const double scanYaw = 1.5;
+				const double scanPitch = 0.8;
 
-                        const size_t panPoints = 4;
+				const size_t panPoints = 4;
 
-                        for (size_t i = 0; i < panPoints+1; ++i) {
-                            angles.emplace_back(LookAtPosition {i * scanYaw / panPoints-scanYaw / 2.0, -scanPitch * (i % 2) + scanPitch});
-                        }
+				for (size_t i = 0; i < panPoints+1; ++i) {
+					angles.emplace_back(LookAtPosition {i * scanYaw / panPoints-scanYaw / 2.0, -scanPitch * (i % 2) + scanPitch});
+				}
 
-                        for (size_t i = 0; i < panPoints+1; ++i) {
-                            angles.emplace_back(LookAtPosition {-(i * scanYaw / panPoints - scanYaw / 2.0), -scanPitch * ((i + 1) % 2) + scanPitch});
-                        }
+				for (size_t i = 0; i < panPoints+1; ++i) {
+					angles.emplace_back(LookAtPosition {-(i * scanYaw / panPoints - scanYaw / 2.0), -scanPitch * ((i + 1) % 2) + scanPitch});
+				}
 
-                        emit(std::make_unique<std::vector<LookAtPosition>>(angles));
-                    }
+				emit(std::make_unique<std::vector<LookAtPosition>>(angles));
+			}
 
                 });
             }
