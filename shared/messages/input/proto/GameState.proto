@@ -19,7 +19,7 @@
 
 package messages.input.proto;
 
-message GameController {
+message GameState {
     message Data {
         enum Mode {
             NORMAL           = 1;
@@ -52,28 +52,28 @@ message GameController {
         message Robot {
             required uint32 id                    = 1;
             required PenaltyReason penalty_reason = 2;
+            required uint64 unpenalised           = 3;
         }
 
         message Team {
-            required uint32 teamId       = 1; // unique team number
+            required uint32 team_id       = 1; // unique team number
             required uint32 score        = 2; // team's score
-            required string coachMessage = 3; // the coach's message to the team
+            required string coach_message = 3; // the coach's message to the team
             repeated Robot players       = 4;
         }
 
         required Phase phase          = 1;
         required Mode mode            = 2;
-        required bool firstHalf       = 3;
-        required bool kickedOutByUs   = 4;
-        required uint64 kickedOutTime = 5;
-        required bool ourKickOff      = 6;
-        required uint64 primaryTime   = 7;
-        required uint64 secondaryTime = 8;
+        required bool first_half       = 3;
+        required bool kicked_out_by_us   = 4;
+        required uint64 kicked_out_time = 5;
+        required bool our_kick_off      = 6;
+        required uint64 primary_time   = 7;
+        required uint64 secondary_time = 8;
         required Team team            = 9;
         required Team opponent        = 10;
     }
 
-    enum Change {
-        TEAM_GOAL_SCORED = 1;
-    }
+    required Data data = 1;
+    required string event = 2;
 }

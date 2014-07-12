@@ -19,12 +19,20 @@
 
 #include "NUbugger.h"
 
+#include "messages/support/nubugger/proto/Message.pb.h"
 #include "messages/input/gameevents/GameEvents.h"
+
+#include "utility/time/time.h"
 
 namespace modules {
 namespace support {
+    using messages::support::nubugger::proto::Message;
+    using utility::time::getUtcTimestamp;
 
     using namespace messages::input::gameevents;
+    using GameStateData = messages::input::proto::GameState::Data;
+    using std::chrono::duration_cast;
+    using std::chrono::milliseconds;
 
     void NUbugger::provideGameController() {
 
@@ -131,8 +139,111 @@ namespace support {
         }));
     }
 
-    void NUbugger::sendGameState(std::string event, const GameState&) {
-        log(event);
+    void NUbugger::sendGameState(std::string event, const GameState& gameState) {
+        log("GameEvent:", event);
+
+        Message message;
+        message.set_type(Message::GAME_STATE);
+        message.set_utc_timestamp(getUtcTimestamp());
+
+        auto* gameController = message.mutable_game_state();
+        gameController->set_event(event);
+        auto* data = gameController->mutable_data();
+
+        data->set_phase(getPhase(gameState.phase));
+        data->set_mode(getMode(gameState.mode));
+        data->set_first_half(gameState.firstHalf);
+        data->set_kicked_out_by_us(gameState.kickedOutByUs);
+        data->set_kicked_out_time(getUtcTimestamp<milliseconds>(gameState.kickedOutTime));
+        data->set_our_kick_off(gameState.ourKickOff);
+        data->set_primary_time(getUtcTimestamp<milliseconds>(gameState.primaryTime));
+        data->set_secondary_time(getUtcTimestamp<milliseconds>(gameState.secondaryTime));
+
+        auto* team = data->mutable_team();
+        auto& gameStateTeam = gameState.team;
+        team->set_team_id(gameStateTeam.teamId);
+        team->set_score(gameStateTeam.score);
+        team->set_coach_message(gameStateTeam.coachMessage);
+
+        for (auto& gameStatePlayer : gameStateTeam.players) {
+            auto* player = team->add_players();
+            player->set_id(gameStatePlayer.id);
+            player->set_penalty_reason(getPenaltyReason(gameStatePlayer.penaltyReason));
+            player->set_unpenalised(getUtcTimestamp<milliseconds>(gameStatePlayer.unpenalised));
+        }
+
+        auto* opponent = data->mutable_opponent();
+        auto& gameStateOpponent = gameState.opponent;
+        opponent->set_team_id(gameStateOpponent.teamId);
+        opponent->set_score(gameStateOpponent.score);
+        opponent->set_coach_message(gameStateOpponent.coachMessage);
+        for (auto& gameStatePlayer : gameStateOpponent.players) {
+            auto* player = opponent->add_players();
+            player->set_id(gameStatePlayer.id);
+            player->set_penalty_reason(getPenaltyReason(gameStatePlayer.penaltyReason));
+            player->set_unpenalised(getUtcTimestamp<milliseconds>(gameStatePlayer.unpenalised));
+        }
+
+        send(message);
+    }
+
+    GameStateData::Phase NUbugger::getPhase(const Phase& phase) {
+        switch (phase) {
+            case Phase::INITIAL:
+                return GameStateData::INITIAL;
+            case Phase::READY:
+                return GameStateData::READY;
+            case Phase::SET:
+                return GameStateData::SET;
+            case Phase::PLAYING:
+                return GameStateData::PLAYING;
+            case Phase::TIMEOUT:
+                return GameStateData::TIMEOUT;
+            case Phase::FINISHED:
+                return GameStateData::FINISHED;
+            default:
+                throw std::runtime_error("Invalid Phase");
+        }
+    }
+
+    GameStateData::Mode NUbugger::getMode(const Mode& mode) {
+        switch (mode) {
+            case Mode::NORMAL:
+                return GameStateData::NORMAL;
+            case Mode::PENALTY_SHOOTOUT:
+                return GameStateData::PENALTY_SHOOTOUT;
+            case Mode::OVERTIME:
+                return GameStateData::OVERTIME;
+            default:
+                throw std::runtime_error("Invalid Mode");
+        }
+    }
+
+    GameStateData::PenaltyReason NUbugger::getPenaltyReason(const PenaltyReason& penaltyReason) {
+        switch (penaltyReason) {
+            case PenaltyReason::UNPENALISED:
+                return GameStateData::UNPENALISED;
+            case PenaltyReason::BALL_MANIPULATION:
+                return GameStateData::BALL_MANIPULATION;
+            case PenaltyReason::PHYSICAL_CONTACT:
+                return GameStateData::PHYSICAL_CONTACT;
+            case PenaltyReason::ILLEGAL_ATTACK:
+                return GameStateData::ILLEGAL_ATTACK;
+            case PenaltyReason::ILLEGAL_DEFENSE:
+                return GameStateData::ILLEGAL_DEFENSE;
+            case PenaltyReason::REQUEST_FOR_PICKUP:
+                return GameStateData::REQUEST_FOR_PICKUP;
+            case PenaltyReason::REQUEST_FOR_SERVICE:
+                return GameStateData::REQUEST_FOR_SERVICE;
+            case PenaltyReason::REQUEST_FOR_PICKUP_TO_SERVICE:
+                return GameStateData::REQUEST_FOR_PICKUP_TO_SERVICE;
+            case PenaltyReason::SUBSTITUTE:
+                return GameStateData::SUBSTITUTE;
+            case PenaltyReason::MANUAL:
+                return GameStateData::MANUAL;
+            default:
+                throw std::runtime_error("Invalid Penalty Reason");
+        }
     }
 }
 }
