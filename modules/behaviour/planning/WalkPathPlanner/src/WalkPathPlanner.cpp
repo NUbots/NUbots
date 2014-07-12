@@ -358,9 +358,6 @@ std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
 
             arma::vec WalkPathPlanner::generateWalk(const arma::vec& move, bool omniPositioning) {
 
-                // TODO why is omniPositioning not used?
-                (void)omniPositioning;
-
                 //this uses hystereses to provide a stable, consistent positioning and movement
                 double walk_speed = 0.0;
                 double walk_bearing = 0.0;
@@ -394,7 +391,7 @@ std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 }
 
                 //decide between heading and bearing
-                if (distanceIncrement > 1) {
+                if ((distanceIncrement > 1) && (!omniPositioning)) {
                     walk_rotation = move[1];
                 } else {
                     walk_bearing = move[1];

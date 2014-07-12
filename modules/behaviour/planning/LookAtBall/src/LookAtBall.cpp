@@ -48,7 +48,7 @@ namespace modules {
 			BALL_SEARCH_TIMEOUT_MILLISECONDS = config["BALL_SEARCH_TIMEOUT_MILLISECONDS"].as<float>();
 			X_FACTOR = config["X_FACTOR"].as<float>();	
 			Y_FACTOR = config["Y_FACTOR"].as<float>();	
-			BALL_UNCERTAINTY_THRESHOLD = config["BALL_UNCERTAINTY_THRESHOLD"].as<float>();	
+			BALL_UNCERNTAINTY_THRESHOLD = config["BALL_UNCERTAINTY_THRESHOLD"].as<float>();	
                 });
 
 		on<Trigger<LookAtBallStart>>([this](const LookAtBallStart&) {
@@ -88,7 +88,7 @@ namespace modules {
 				emit(std::make_unique<std::vector<LookAtAngle>>(angles));
 			} 
 
-			else if ((ball != NULL) && ((ball->sr_xx > BALL_UNCERNTAINTY_THRESHOLD) || (ball->sr_yy > BALL_UNCERTAINTY_THRESHOLD))) {
+			else if ((ball != NULL) && ((ball->sr_xx > BALL_UNCERNTAINTY_THRESHOLD) || (ball->sr_yy > BALL_UNCERNTAINTY_THRESHOLD))) {
 				double xFactor = X_FACTOR * std::sqrt(ball->sr_xx);
 				double yFactor = Y_FACTOR * std::sqrt(ball->sr_yy);
 
