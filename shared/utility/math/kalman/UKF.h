@@ -203,12 +203,10 @@ namespace utility {
 
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
 
-
                     // Update our state
                     covarianceUpdate -= covarianceUpdate.t() * predictedObservations.t() *
                                         (measurement_variance + predictedObservations * covarianceUpdate * predictedObservations.t()).i() *
                                         predictedObservations * covarianceUpdate;
-
 
                     d += (predictedObservations.t()) * measurement_variance.i() * innovation;
 

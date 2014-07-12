@@ -21,7 +21,7 @@ package messages.support.nubugger.proto;
 
 import "messages/input/proto/Sensors.proto";
 import "messages/input/proto/Image.proto";
-import "messages/input/proto/GameController.proto";
+import "messages/input/proto/GameState.proto";
 import "messages/support/nuclear/proto/ReactionStatistics.proto";
 import "messages/support/nubugger/proto/DataPoint.proto";
 import "messages/localisation/proto/Localisation.proto";
@@ -43,7 +43,7 @@ message Message {
         BEHAVIOUR = 9;
         COMMAND = 10;
         REACTION_HANDLES = 11;
-        GAMECONTROLLER = 12;
+        GAME_STATE = 12;
     }
 
     required Type type = 1;
@@ -58,7 +58,7 @@ message Message {
     optional messages.support.nuclear.proto.ReactionStatistics reaction_statistics = 9;
     optional messages.vision.proto.LookUpTable lookup_table = 10;
     optional messages.behaviour.proto.Behaviour behaviour = 11;
-    optional messages.input.proto.GameController game_controller = 12;
+    optional messages.input.proto.GameState game_state = 12;
     optional Command command = 13;
     optional ReactionHandles reaction_handles = 14;
 

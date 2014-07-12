@@ -8,3 +8,6 @@ SimulateBallMovement: true
 EmitRobotFieldobjects: true
 EmitBallFieldobjects: true
 RobotImuDriftPeriod: 300
+ObserveLeftGoal: yes
+ObserveRightGoal: yes
+DistinguishLeftAndRightGoals: yes
