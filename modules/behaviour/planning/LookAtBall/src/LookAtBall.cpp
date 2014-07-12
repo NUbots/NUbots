@@ -25,6 +25,7 @@
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
 
+#include "utility/motion/InverseKinematics.h"
 
 namespace modules {
     namespace behaviour {
@@ -87,17 +88,27 @@ namespace modules {
 			} 
 
 			else if (ball != NULL) {
-//				double xFactor = X_FACTOR * std::sqrt(ball->sr_xx);
-//				double yFactor = Y_FACTOR * std::sqrt(ball->sr_yy);
+				double xFactor = X_FACTOR * std::sqrt(ball->sr_xx);
+				double yFactor = Y_FACTOR * std::sqrt(ball->sr_yy);
 	
 				std::vector<LookAtAngle> angles;
+				arma::vec2 screenAngular;
 				angles.reserve(10);
 
-//				angles.emplace_back(LookAtAngle {});
-//				angles.emplace_back(LookAtAngle {});
-//				angles.emplace_back(LookAtAngle {});
-//				angles.emplace_back(LookAtAngle {});
-//				angles.emplace_back(LookAtAngle {});
+				screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+				angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+
+				screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0] + xFactor, ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+				angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+
+				screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0] - xFactor, ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+				angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+
+				screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1] + yFactor, 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+				angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+
+				screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1] - yFactor, 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+				angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
 
 				for (const auto& g : goals) {
 					angles.emplace_back(LookAtAngle {g.screenAngular[0], -g.screenAngular[1]});

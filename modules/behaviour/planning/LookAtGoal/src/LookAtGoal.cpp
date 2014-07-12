@@ -24,6 +24,8 @@
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
 
+#include "utility/motion/InverseKinematics.h"
+
 namespace modules {
     namespace behaviour {
         namespace planning {
@@ -72,6 +74,7 @@ namespace modules {
 					std::vector<LookAtAngle> angles;
 					angles.reserve(10);
 					std::vector<Goal> nonConstGoals;
+					arma::vec2 screenAngular;
 
 					nonConstGoals.reserve(goals.size());
 
@@ -95,14 +98,23 @@ namespace modules {
 					}
 
 					else if (ball != NULL) {
-//						double xFactor = X_FACTOR * std::sqrt(ball->sr_xx);
-//						double yFactor = Y_FACTOR * std::sqrt(ball->sr_yy);
+						double xFactor = X_FACTOR * std::sqrt(ball->sr_xx);
+						double yFactor = Y_FACTOR * std::sqrt(ball->sr_yy);
 			
-//						angles.emplace_back(LookAtAngle {});
-//						angles.emplace_back(LookAtAngle {});
-//						angles.emplace_back(LookAtAngle {});
-//						angles.emplace_back(LookAtAngle {});
-//						angles.emplace_back(LookAtAngle {});
+						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+						angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+
+						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0] + xFactor, ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+						angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+
+						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0] - xFactor, ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+						angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+
+						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1] + yFactor, 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+						angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+
+						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1] - yFactor, 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+						angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
 					} 
 
 					emit(std::make_unique<std::vector<LookAtAngle>>(angles));
