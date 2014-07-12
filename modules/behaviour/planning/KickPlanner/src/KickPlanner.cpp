@@ -52,11 +52,11 @@ namespace planning {
             KICK_SIDE_ANGLE_LIMIT = config["KICK_SIDE_ANGLE_LIMIT"].as<float>();
         });
 
-        on< Trigger<Ball>, With<std::vector<Self>>, With<std::vector<messages::vision::Ball>>, With<KickPlan> >([this] (
-            const Ball& ball, 
+        on< Trigger<KickPlan>, With<std::vector<Self>>, With<std::vector<messages::vision::Ball>>, With<Ball> >([this] (
+            const KickPlan& kickPlan,
             const std::vector<Self>& selfs, 
             const std::vector<messages::vision::Ball>& vision_balls,
-            const KickPlan& kickPlan) {
+            const Ball& ball) {
 
             auto self = selfs[0];
 

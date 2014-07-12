@@ -216,11 +216,13 @@ namespace modules {
 
 			// Check to see if we are about to kick.
 			on<Trigger<messages::motion::KickCommand>>([this](const messages::motion::KickCommand&) {
+				emit(std::move(std::make_unique<messages::output::Say>("Kicking")));
 				isKicking = true;
 			});
 
 			// Check to see if the kick has finished.
 			on<Trigger<messages::motion::KickFinished>>([this](const messages::motion::KickFinished&) {
+				emit(std::move(std::make_unique<messages::output::Say>("Kick finished")));
 				isKicking = false;
 			});
 
@@ -453,7 +455,8 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 					// ------
 
 					// Stop moving if in the initial, ready or finished states, as well as when picked up
-					if ((currentState.primaryGameState == GameStatePrimary::INITIAL) || (currentState.primaryGameState == GameStatePrimary::READY) || (currentState.primaryGameState == GameStatePrimary::FINISHED) || currentState.pickedUp) {
+					if ((currentState.primaryGameState == GameStatePrimary::INITIAL) || (currentState.primaryGameState == GameStatePrimary::SET) || (currentState.primaryGameState == GameStatePrimary::FINISHED) || currentState.pickedUp) {
+//std::cerr << "selfHeading: (" << currentState.heading[0] << ", " << currentState.heading[1] << ")" << std::endl;
 						stopMoving();
 
 //						NUClear::log<NUClear::INFO>("Standing still.");
@@ -468,7 +471,7 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 					}
 
 					// Move to the start position if in set state
-					else if (currentState.primaryGameState == GameStatePrimary::SET) {
+					else if (currentState.primaryGameState == GameStatePrimary::READY) {
 						arma::vec2 heading = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 
 						if (isWalking && currentState.inPosition && currentState.correctHeading) {
@@ -495,8 +498,13 @@ std::cerr << "GoToPoint(startPosition): (" << ZONES.at(MY_ZONE).startPosition[0]
 
 std::cerr << "selfPosition: (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;
 std::cerr << "GoToPoint(optimalPosition): (" << optimalPosition[0] << ", " << optimalPosition[1] << ")" << std::endl;
-						goToPoint(optimalPosition, heading);
 
+						// Only emit a goToPoint command when we are changing our destination.
+						if ((optimalPosition[0] != previousState.targetPosition[0]) || (optimalPosition[1] != previousState.targetPosition[1])) {
+							goToPoint(optimalPosition, heading);
+						}
+
+						findBall();
 //						NUClear::log<NUClear::INFO>("I am not where I should be. Going there now.");
 					}
 
@@ -545,14 +553,22 @@ std::cerr << "GoToPoint(optimalPosition): (" << optimalPosition[0] << ", " << op
 
 					else if ((currentState.ballInZone || currentState.ballApproaching) && currentState.goalInRange) {
 						arma::vec2 goal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
-						approachBall(goal);
+						arma::vec2 target = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
+
+						if ((target[0] != previousState.targetPosition[0]) || (target[1] != previousState.targetPosition[1])) {
+							approachBall(goal);
+						}
 
 //						NUClear::log<NUClear::INFO>("Walking to ball.");
 					}
 
 					else if ((currentState.ballInZone || currentState.ballApproaching) && !currentState.goalInRange) {
 						arma::vec2 nearestZone = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0}; // Find the optimal point in the nearest zone, reflect the position closer to the enemy goal.
-						approachBall(nearestZone);
+						arma::vec2 target = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
+
+						if ((target[0] != previousState.targetPosition[0]) || (target[1] != previousState.targetPosition[1])) {
+							approachBall(nearestZone);
+						}
 
 //						NUClear::log<NUClear::INFO>("Walking to ball.");
 					}
@@ -565,7 +581,12 @@ std::cerr << "GoToPoint(optimalPosition): (" << optimalPosition[0] << ", " << op
 
 					else if (currentState.goalInRange && !isKicking) {
 						arma::vec2 goal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
-						approachBall(goal);
+						arma::vec2 target = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
+
+						if ((target[0] != previousState.targetPosition[0]) || (target[1] != previousState.targetPosition[1])) {
+							approachBall(goal);
+						}
+
 						kickBall(goal);
 
 //						NUClear::log<NUClear::INFO>("Kick for goal.");
@@ -580,8 +601,10 @@ std::cerr << "GoToPoint(optimalPosition): (" << optimalPosition[0] << ", " << op
 					else {
 						arma::vec2 heading = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 						findSelf();
-						findBall();
-						goToPoint(ZONES.at(MY_ZONE).defaultPosition, heading);
+
+						if ((ZONES.at(MY_ZONE).defaultPosition[0] != previousState.targetPosition[0]) || (ZONES.at(MY_ZONE).defaultPosition[1] != previousState.targetPosition[1])) {
+							goToPoint(ZONES.at(MY_ZONE).defaultPosition, heading);
+						}
 
 //						NUClear::log<NUClear::INFO>("Unknown behavioural state. Finding self, finding ball, moving to default position.");
 					}
@@ -738,9 +761,9 @@ std::cerr << "Emitting LookAtBallStop" << std::endl;
 			}
 
 			void SoccerStrategy::findBall() {
-				if (lookingAtGoal) {
-					emit(std::make_unique<LookAtGoalStop>());
-				}
+//				if (lookingAtGoal) {
+//					emit(std::make_unique<LookAtGoalStop>());
+//				}
 
 				if (!lookingAtBall) {
 					emit(std::make_unique<LookAtBallStart>());
@@ -822,9 +845,14 @@ std::cerr << "Emitting LookAtBallStop" << std::endl;
 
 			void SoccerStrategy::kickBall(const arma::vec2& direction) {
 				// Emit aim vector.
-				auto kick = std::make_unique<messages::behaviour::KickPlan>();
-				kick->target = direction;
-				emit(std::move(kick));
+				if (!isKicking) {
+					stopMoving();
+
+					emit(std::move(std::make_unique<messages::output::Say>("Emit kick command")));
+					auto kick = std::make_unique<messages::behaviour::KickPlan>();
+					kick->target = direction;
+					emit(std::move(kick));
+				}
 			}
 		}  // strategy
 	}  // behaviours
