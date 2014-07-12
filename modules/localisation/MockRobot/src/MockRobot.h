@@ -63,6 +63,9 @@ namespace localisation {
             bool emit_robot_fieldobjects = true;
             bool emit_ball_fieldobjects = true;
             double robot_imu_drift_period = 200;
+            bool observe_left_goal = true;
+            bool observe_right_goal = true;
+            bool distinguish_left_and_right_goals = true;
         } cfg_;
 
     public:
