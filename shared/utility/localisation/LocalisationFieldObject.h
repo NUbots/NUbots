@@ -37,7 +37,7 @@ enum class LFOId {
 
 class LocalisationFieldObject {
 private:
-    arma::vec location_;
+    arma::vec2 location_;
     LFOId id_;
     std::string name_;
 
@@ -48,7 +48,7 @@ public:
         : location_(location), id_(id), name_(name) { }
 
     LFOId id() const { return id_; }
-    arma::vec location() const { return location_; }
+    arma::vec2 location() const { return location_; }
     std::string name() const { return name_; }
 
     friend std::ostream& operator<<(std::ostream &os, const LocalisationFieldObject& o) {

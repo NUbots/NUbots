@@ -45,6 +45,7 @@ namespace localisation {
     }
 
     void MMKFRobotLocalisationEngine::set_field_description(std::shared_ptr<messages::support::FieldDescription> desc) {
+
         field_description_ = desc;
         goalpost_lfos_.bl = {field_description_->goalpost_bl, LFOId::kGoalBL, "goalpost_blue_left"};
         goalpost_lfos_.br = {field_description_->goalpost_br, LFOId::kGoalBR, "goalpost_blue_right"};
@@ -54,11 +55,13 @@ namespace localisation {
 
     void MMKFRobotLocalisationEngine::UpdateConfiguration(
         const messages::support::Configuration<MultiModalRobotModelConfig>& config) {
+
         robot_models_.UpdateConfiguration(config);
     }
 
     void MMKFRobotLocalisationEngine::UpdateConfiguration(
         const messages::support::Configuration<MMKFRobotLocalisationEngineConfig>& config) {
+
         cfg_.angle_between_goals_observation_enabled = config["AngleBetweenGoalsObservationEnabled"].as<bool>();
         cfg_.goal_pair_observation_enabled = config["GoalPairObservationEnabled"].as<bool>();
         cfg_.all_goals_are_blue = config["AllGoalsAreBlue"].as<bool>();
@@ -66,6 +69,7 @@ namespace localisation {
     }
 
     void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time) {
+
         double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
         last_time_update_time_ = current_time;
         robot_models_.TimeUpdate(seconds);
@@ -73,6 +77,7 @@ namespace localisation {
 
     void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
                                               const FakeOdometry& odom) {
+
         double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
         last_time_update_time_ = current_time;
         robot_models_.TimeUpdate(seconds, odom);
@@ -80,6 +85,7 @@ namespace localisation {
 
     void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
                                               const Sensors& sensors) {
+
         double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
         last_time_update_time_ = current_time;
         robot_models_.TimeUpdate(seconds, sensors);
@@ -87,6 +93,7 @@ namespace localisation {
 
     std::vector<LocalisationFieldObject> MMKFRobotLocalisationEngine::GetPossibleObjects(
             const messages::vision::Goal& ambiguous_object) {
+
         std::vector<LocalisationFieldObject> possible;
 
         if (ambiguous_object.side == messages::vision::Goal::Side::LEFT) {
@@ -115,6 +122,7 @@ namespace localisation {
 
     bool GoalPairObserved(
         const std::vector<messages::vision::Goal>& ambiguous_objects) {
+
         if (ambiguous_objects.size() != 2)
             return false;
 
@@ -130,6 +138,7 @@ namespace localisation {
 
     void MMKFRobotLocalisationEngine::ProcessAmbiguousObjects(
         const std::vector<messages::vision::Goal>& ambiguous_objects) {
+
 
         bool pair_observations_enabled =
             cfg_.goal_pair_observation_enabled ||
@@ -165,6 +174,7 @@ namespace localisation {
         }
 
         robot_models_.PruneModels();
+
     }
 
     void MMKFRobotLocalisationEngine::IndividualStationaryObjectUpdate(
@@ -196,6 +206,7 @@ namespace localisation {
     void MMKFRobotLocalisationEngine::ProcessObjects(const std::vector<messages::vision::Goal>& goals) {
         // robot_models_.robot_models_ = std::vector<std::unique_ptr<RobotHypothesis>>();
         // robot_models_.robot_models_.push_back(std::make_unique<RobotHypothesis>());
+
         ProcessAmbiguousObjects(goals);
     }
 

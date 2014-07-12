@@ -45,6 +45,7 @@ using messages::input::Sensors;
 using modules::localisation::MultiModalRobotModelConfig;
 using messages::localisation::Mock;
 using messages::localisation::Self;
+using messages::vision::Goal;
 
 namespace modules {
 namespace localisation {
@@ -128,9 +129,26 @@ namespace localisation {
            Options<Sync<MMKFRobotLocalisation>>
           >("MMKFRobotLocalisation Step",
             [this](const std::vector<messages::vision::Goal>& goals) {
+            if (goals.size() < 2)
+                return;
+
+            std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
+            for (auto& goal : goals) {
+                std::cout << __FILE__ << ", " << __LINE__ << ":" << std::endl;
+                std::cout << "position:" << goal.measurements[0].position.t() << std::endl;
+                std::cout << "error:" << goal.measurements[0].error << std::endl;
+                std::cout << "side:";
+                std::cout << ((goal.side == Goal::Side::LEFT) ? "LEFT" :
+                              (goal.side == Goal::Side::RIGHT) ? "RIGHT" : "UNKNOWN")
+                          << std::endl;
+            }
+
             auto curr_time = NUClear::clock::now();
+            std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
             engine_->TimeUpdate(curr_time);
+            std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
             engine_->ProcessObjects(goals);
+            std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
         });
     }
 }
