@@ -93,13 +93,18 @@ arma::vec RobotModel::predictedObservation(
     // arma::vec3 tmp1 = imuRotation * actualPositionRelative;
     // arma::vec3 obs_cartesian = arma::vec3(tmp2 * tmp1);
     // auto obs = cartesianToSpherical(obs_cartesian);
+    std::cerr << __FILE__ << ", " << __LINE__ << __func__ << std::endl;
 
     //Rewrite:
     arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
+    std::cerr << __FILE__ << ", " << __LINE__ << __func__ << std::endl;
     arma::vec3 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).col(0);
+    std::cerr << __FILE__ << ", " << __LINE__ << __func__ << std::endl;
     auto obs = SphericalRobotObservation(state.rows(kX, kY),
-                                         robotHeading_world,
+                                         robotHeading_world.rows(0,1),
                                          actual_position);
+
+    std::cerr << __FILE__ << ", " << __LINE__ << __func__ << std::endl;
     return obs;
 }
 
@@ -124,9 +129,11 @@ arma::vec RobotModel::observationDifference(const arma::vec& a,
         return a - b;
     } else {
         // Spherical coordinates
+    std::cerr << __FILE__ << ", " << __LINE__ << __func__ << std::endl;
         arma::vec3 result = a - b;
         result(1) = utility::math::angle::normalizeAngle(result(1)) * cfg_.observationDifferenceBearingFactor;
         result(2) = utility::math::angle::normalizeAngle(result(2)) * cfg_.observationDifferenceElevationFactor;
+    std::cerr << __FILE__ << ", " << __LINE__ << __func__ << std::endl;
         return result;
     }
 }
