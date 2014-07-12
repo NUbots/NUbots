@@ -89,6 +89,7 @@ namespace vision {
 
         on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters>, Options<Single>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam) {
 
+            auto& sensors = *image.sensors;
             // Our segments that may be a part of a goal
             std::vector<RansacGoalModel::GoalSegment> segments;
             auto goals = std::make_unique<std::vector<Goal>>();
@@ -254,42 +255,49 @@ namespace vision {
             for(auto it = goals->begin(); it != goals->end(); ++it) {
 
                 double GOAL_DIAMETER = 0.1;
+                double GOAL_HEIGHT = 0.8;
 
                 std::vector<VisionObject::Measurement> measurements;
 
-                // Get our width based distance to the cylinder
-                arma::vec2 goalLeft = it->quad.getLeftCentre();
-                ParametricLine<2> horizonLevel;
-                horizonLevel.setFromDirection(arma::vec2({-image.horizon.normal[1], image.horizon.normal[0]}), goalLeft);
-                ParametricLine<2> rightGoalLine;
-                rightGoalLine.setFromTwoPoints(it->quad.getTopRight(), it->quad.getBottomRight());
-                arma::vec2 goalRight;
-                try {
-                    goalRight = rightGoalLine.intersect(horizonLevel);
-                } catch (const std::domain_error&){
-                    NUClear::log<NUClear::WARN>("Goal Found which is parallel to kinematics horizon!!");
-                    goalLeft = it->quad.getBottomLeft();
-                    goalRight = it->quad.getBottomRight();
+                // Get the quad points in screen coords
+                arma::vec2 tl = imageToScreen(it->quad.getTopLeft(), image.dimensions);
+                arma::vec2 tr = imageToScreen(it->quad.getTopRight(), image.dimensions);
+                arma::vec2 bl = imageToScreen(it->quad.getBottomLeft(), image.dimensions);
+                arma::vec2 br = imageToScreen(it->quad.getTopLeft(), image.dimensions);
+
+                // Projection rays ray
+                arma::vec3 topRay = arma::normalise(arma::normalise(getCamFromScreen(tl, cam.focalLengthPixels))
+                                                           + arma::normalise(getCamFromScreen(tr, cam.focalLengthPixels)));
+                arma::vec3 baseRay = arma::normalise(arma::normalise(getCamFromScreen(bl, cam.focalLengthPixels))
+                                                           + arma::normalise(getCamFromScreen(br, cam.focalLengthPixels)));
+
+                // Measure the distance to the top of the goals
+                arma::mat44 topPlaneTransform = sensors.orientationCamToGround;
+                topPlaneTransform(2,3) -= GOAL_HEIGHT;
+                arma::vec3 goalTopProj = projectCamToGroundPlane(topRay, topPlaneTransform);
+                measurements.push_back({ cartesianToSpherical(goalTopProj), arma::diagmat(arma::vec({ 1, 1, 1 })) });
+
+                // Measure the distance to the base of the goals
+                arma::vec3 goalBaseProj = projectCamToGroundPlane(baseRay, sensors.orientationCamToGround);
+                measurements.push_back({ cartesianToSpherical(goalBaseProj), arma::diagmat(arma::vec({ 1, 1, 1 })) });
+
+                // Measure the width based distance to the bottom
+                double widthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, bl, br, cam.focalLengthPixels);
+                arma::vec3 goalWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * baseRay + sensors.orientationCamToGround.submat(0,3,2,3);
+                measurements.push_back({ cartesianToSpherical(goalWidth), arma::diagmat(arma::vec({ 1, 1, 1 })) });
+
+                // Measure the height based distance
+                double heightDistance = 0;
+                arma::vec3 goalHeight = heightDistance * sensors.orientationCamToGround.submat(0,0,2,2) * baseRay + sensors.orientationCamToGround.submat(0,3,2,3);
+                measurements.push_back({ cartesianToSpherical(goalHeight), arma::diagmat(arma::vec({ 1, 1, 1 })) });
+
+                std::cout << "Measurements" << std::endl;
+                for(auto& measurement : measurements) {
+                    std::cout << measurement.position.t();
                 }
+                std::cout << std::endl;
 
-                arma::vec3 goalCentreRay = arma::normalise(arma::normalise(getCamFromScreen(imageToScreen(goalRight,cam.imageSizePixels), cam.focalLengthPixels))
-                                                           + arma::normalise(getCamFromScreen(imageToScreen(goalLeft,cam.imageSizePixels), cam.focalLengthPixels)));
-
-                double widthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, goalLeft, goalRight, cam.focalLengthPixels);
-                arma::vec3 goalCentreGroundSpace = widthDistance * image.sensors->orientationCamToGround.submat(0,0,2,2) * goalCentreRay + image.sensors->orientationCamToGround.submat(0,3,2,3);
-                goalCentreGroundSpace[2] = 0; //Project to ground
-                measurements.push_back({ cartesianToSpherical(goalCentreGroundSpace), arma::diagmat(arma::vec({0.002357231 * 4, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
-
-                // Projection Method:
-                arma::vec3 goalBaseCentreRay = arma::normalise(arma::normalise(getCamFromScreen(imageToScreen(it->quad.getBottomRight(),cam.imageSizePixels), cam.focalLengthPixels))
-                                                             + arma::normalise(getCamFromScreen(imageToScreen(it->quad.getBottomLeft(),cam.imageSizePixels), cam.focalLengthPixels)));
-
-                // Project this vector to a plane midway through the ball
-                arma::vec3 goalCentreGroundProj = projectCamToGroundPlane(goalBaseCentreRay, image.sensors->orientationCamToGround);
-                // TODO convert this into sphericial coordiantes and error
-                //measurements.push_back({{0,0,0}, arma::eye(3,3)});
-
-                measurements.push_back({ cartesianToSpherical(goalCentreGroundProj), arma::diagmat(arma::vec({0.002357231 * 8, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
+                // Add our variables
                 it->measurements = measurements;
                 it->sensors = image.sensors;
             }
