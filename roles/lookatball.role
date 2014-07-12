@@ -19,7 +19,7 @@ ADD_ROLE(
         vision::ObstacleDetector
 
         #Localisation
-        #localisation::MMKFRobotLocalisation
+        localisation::MMKFRobotLocalisation
         #localisation::KFBallLocalisation
 
         #Behaviour
