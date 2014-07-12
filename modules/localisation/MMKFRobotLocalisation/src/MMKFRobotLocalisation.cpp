@@ -138,16 +138,16 @@ namespace localisation {
             // if (goals.size() < 2)
             //     return;
 
-            std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
-            for (auto& goal : goals) {
-                std::cout << __FILE__ << ", " << __LINE__ << ":" << std::endl;
-                std::cout << "position:" << goal.measurements[0].position.t() << std::endl;
-                std::cout << "error:" << goal.measurements[0].error << std::endl;
-                std::cout << "side:";
-                std::cout << ((goal.side == Goal::Side::LEFT) ? "LEFT" :
-                              (goal.side == Goal::Side::RIGHT) ? "RIGHT" : "UNKNOWN")
-                          << std::endl;
-            }
+            // std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
+            // for (auto& goal : goals) {
+            //     std::cout << __FILE__ << ", " << __LINE__ << ":" << std::endl;
+            //     std::cout << "position:" << goal.measurements[0].position.t() << std::endl;
+            //     std::cout << "error:" << goal.measurements[0].error << std::endl;
+            //     std::cout << "side:";
+            //     std::cout << ((goal.side == Goal::Side::LEFT) ? "LEFT" :
+            //                   (goal.side == Goal::Side::RIGHT) ? "RIGHT" : "UNKNOWN")
+            //               << std::endl;
+            // }
 
             auto curr_time = NUClear::clock::now();
             engine_->TimeUpdate(curr_time);
