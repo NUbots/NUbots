@@ -170,7 +170,11 @@ namespace support {
 
     void NUbugger::recvReactionHandles(const Message& message) {
 
+        auto currentConfig = powerplant.get<Configuration<NUbugger>>();
+
         auto config = std::make_unique<SaveConfiguration>();
+        config->config = currentConfig->config;
+
         for (const auto& command : message.reaction_handles().handles()) {
 
             std::string name = command.name();
