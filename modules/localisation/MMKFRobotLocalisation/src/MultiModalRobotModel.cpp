@@ -101,8 +101,8 @@ double RobotHypothesis::MeasurementUpdate(
     const LocalisationFieldObject& actual_object) {
 
     // Spherical from ground:
-    arma::vec3 measurement = observed_object.measurements[0].position;
-    arma::mat33 cov = observed_object.measurements[0].error;
+    arma::vec3 measurement = observed_object.measurements[1].position;
+    arma::mat33 cov = observed_object.measurements[1].error;
 
     arma::vec2 actual_2d = actual_object.location();
     arma::vec3 actual_pos = arma::vec3({actual_2d(0), actual_2d(1), 0});

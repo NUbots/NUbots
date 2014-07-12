@@ -5,6 +5,7 @@ ADD_ROLE(
         # support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
+        support::configuration::SoccerConfig
         support::NUbugger
 
         #Sensors
@@ -33,7 +34,5 @@ ADD_ROLE(
 
 		#Motion
         motion::ScriptEngine
-
-
 )
 

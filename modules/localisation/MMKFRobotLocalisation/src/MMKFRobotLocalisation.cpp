@@ -66,9 +66,15 @@ namespace localisation {
             engine_->UpdateConfiguration(config);
         });
 
-        on<Trigger<FieldDescription>>("FieldDescription Update", [this](const FieldDescription& desc) {
-            NUClear::log("FieldDescription Update");
-            auto fd = std::make_shared<FieldDescription>(desc);
+        on<Trigger<Startup>,
+           With<Optional<FieldDescription>>>("FieldDescription Update",
+           [this](const Startup&, const std::shared_ptr<const FieldDescription>& desc) {
+            if (desc == nullptr) {
+                NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: SoccerConfig module might not be installed.");
+                throw std::runtime_error("FieldDescription Update: SoccerConfig module might not be installed");
+            }
+
+            auto fd = std::make_shared<FieldDescription>(*desc);
             engine_->set_field_description(fd);
         });
 
@@ -83,7 +89,6 @@ namespace localisation {
             for (auto& model : engine_->robot_models_.hypotheses()) {
                 arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
                 auto model_cov = model->GetCovariance();
-    std::cerr << __FILE__ << ", " << __LINE__ << __func__ << std::endl;
 
                 Self robot_model;
                 robot_model.position = model_state.rows(robot::kX, robot::kY);
@@ -93,7 +98,6 @@ namespace localisation {
                 robot_model.sr_xx = model_cov(0, 0);
                 robot_model.sr_xy = model_cov(0, 1);
                 robot_model.sr_yy = model_cov(1, 1);
-    std::cerr << __FILE__ << ", " << __LINE__ << __func__ << std::endl;
                 robots.push_back(robot_model);
             }
 
@@ -134,23 +138,20 @@ namespace localisation {
             if (goals.size() < 2)
                 return;
 
-            std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
-            for (auto& goal : goals) {
-                std::cout << __FILE__ << ", " << __LINE__ << ":" << std::endl;
-                std::cout << "position:" << goal.measurements[0].position.t() << std::endl;
-                std::cout << "error:" << goal.measurements[0].error << std::endl;
-                std::cout << "side:";
-                std::cout << ((goal.side == Goal::Side::LEFT) ? "LEFT" :
-                              (goal.side == Goal::Side::RIGHT) ? "RIGHT" : "UNKNOWN")
-                          << std::endl;
-            }
+            // std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
+            // for (auto& goal : goals) {
+            //     std::cout << __FILE__ << ", " << __LINE__ << ":" << std::endl;
+            //     std::cout << "position:" << goal.measurements[0].position.t() << std::endl;
+            //     std::cout << "error:" << goal.measurements[0].error << std::endl;
+            //     std::cout << "side:";
+            //     std::cout << ((goal.side == Goal::Side::LEFT) ? "LEFT" :
+            //                   (goal.side == Goal::Side::RIGHT) ? "RIGHT" : "UNKNOWN")
+            //               << std::endl;
+            // }
 
             auto curr_time = NUClear::clock::now();
-            std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
             engine_->TimeUpdate(curr_time);
-            std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
             engine_->ProcessObjects(goals);
-            std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
         });
     }
 }

@@ -56,7 +56,11 @@ namespace utility {
 
                 result[0] = sqrt(x*x + y*y + z*z);  //r
                 result[1] = atan2(y, x);            //theta
-                result[2] = asin(z / (result[0]));  //phi
+                if(result[0] == 0) {
+                    result[2] = 0;
+                } else {
+                    result[2] = asin(z / (result[0]));  //phi
+                }
 
                 return result;
             }

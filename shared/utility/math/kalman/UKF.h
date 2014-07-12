@@ -81,8 +81,8 @@ namespace utility {
                     try {
                         chol = arma::chol(covarianceSigmaWeights * covariance);
                     } catch (const std::runtime_error& e) {
-                        std::cerr << __FILE__ << " " << __LINE__ << " : covarianceSigmaWeights * covariance was NOT positive-definite and the cholskey "
-                                  << "decomposition failed.\ncovarianceSigmaWeights * covariance = " << std::endl
+                        if (Model::size == 3) std::cerr << __FILE__ << " " << __LINE__ << " : covarianceSigmaWeights * covariance was NOT positive-definite and the cholskey "
+                                  << "decomposition failed.\ncovarianceSigmaWeights * covariance = \n" << std::endl
                                   << covarianceSigmaWeights * covariance << std::endl;
                         throw e;
                     }
@@ -157,13 +157,8 @@ namespace utility {
                 }
 
                 void timeUpdate(double deltaT) {
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": covariance = " << covariance << std::endl;
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": mean = " << mean << std::endl;
-
                     // Generate our sigma points
                     sigmaPoints = generateSigmaPoints(mean, covariance);
-
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": sigmaPoints = " << sigmaPoints << std::endl;
 
 
                     // Write the propagated version of the sigma point
@@ -171,16 +166,9 @@ namespace utility {
                         sigmaPoints.col(i) = model.timeUpdate(sigmaPoints.col(i), deltaT);
                     }
 
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": new sigmaPoints = " << sigmaPoints << std::endl;
-
 
                     // Calculate the new mean and covariance values.
-                    mean = meanFromSigmas(sigmaPoints);
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": meanFromSigmas = " << mean << std::endl;
-                    mean = model.limitState(mean);
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": limited mean = " << mean << std::endl;
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": model.processNoise() = " << model.processNoise() << std::endl;
-
+                    mean = meanFromSigmas(sigmaPoints);                    mean = model.limitState(mean);
                     covariance = covarianceFromSigmas(sigmaPoints, mean) + model.processNoise();
 
                     // Re calculate our sigma points
@@ -198,45 +186,28 @@ namespace utility {
                                          const arma::mat& measurement_variance,
                                          const TMeasurementType&... measurementArgs) {
 
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": ================ " << std::endl;
-
                     // Allocate room for our predictions
                     arma::mat predictedObservations(measurement.n_elem, NUM_SIGMA_POINTS);
-
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": covariance = " << covariance << std::endl;
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": mean = " << mean << std::endl;
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": sigmaPoints = " << sigmaPoints << std::endl;
 
                     // First step is to calculate the expected measurement for each sigma point.
                     for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
                         predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), measurementArgs...);
                     }
 
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": predictedObservations = " << predictedObservations << std::endl;
-
                     // Now calculate the mean of these measurement sigmas.
                     arma::vec predictedMean = meanFromSigmas(predictedObservations);
                     predictedObservations.each_col() -= predictedMean;
 
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": predictedMean = " << predictedMean << std::endl;
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": centered predictedObservations = " << predictedObservations << std::endl;
-
 
                     arma::mat predictedCovariance = covarianceFromSigmas(predictedObservations, predictedMean);
 
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": predictedCovariance = " << predictedCovariance << std::endl;
-
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
-
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": innovation = " << innovation << std::endl;
 
 
                     // Update our state
                     covarianceUpdate -= covarianceUpdate.t() * predictedObservations.t() *
                                         (measurement_variance + predictedObservations * covarianceUpdate * predictedObservations.t()).i() *
                                         predictedObservations * covarianceUpdate;
-
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": covarianceUpdate = " << covarianceUpdate << std::endl;
 
 
                     d += (predictedObservations.t()) * measurement_variance.i() * innovation;
@@ -246,10 +217,6 @@ namespace utility {
                     mean = model.limitState(mean);
                     covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
 
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": covariance = " << covariance << std::endl;
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": mean = " << mean << std::endl;
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": sigmaPoints = " << sigmaPoints << std::endl;
-
                     // Magical quality calculation
                     arma::mat innovationVariance = predictedCovariance + measurement_variance;
                     arma::mat innovationCovariance = ((innovation.t() * innovationVariance.i()) * innovation);
@@ -257,10 +224,6 @@ namespace utility {
                     double expTerm = -0.5 * innovationCovariance(0, 0);
                     double fract = 1 / sqrt(pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance));
                     const float outlierProbability = 0.05;
-
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": covariance = " << covariance << std::endl;
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": mean = " << mean << std::endl;
-                    std::cerr << __FILE__ << ", " << __LINE__ << ": sigmaPoints = " << sigmaPoints << std::endl;
 
                     return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
                 }
