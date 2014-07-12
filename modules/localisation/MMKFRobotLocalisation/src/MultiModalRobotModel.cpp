@@ -100,14 +100,19 @@ double RobotHypothesis::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object,
     const LocalisationFieldObject& actual_object) {
 
-    // Spherical from ground:
-    arma::vec3 measurement = observed_object.measurements[1].position;
-    arma::mat33 cov = observed_object.measurements[1].error;
+    double quality = 1.0;
 
-    arma::vec2 actual_2d = actual_object.location();
-    arma::vec3 actual_pos = arma::vec3({actual_2d(0), actual_2d(1), 0});
+    for (auto& measurement : observed_object.measurements) {
+        // Spherical from ground:
+        arma::vec3 measured_pos = measurement.position;
+        arma::mat33 cov = measurement.error;
 
-    double quality = filter_.measurementUpdate(measurement, cov, actual_pos, *(observed_object.sensors));
+        arma::vec2 actual_2d = actual_object.location();
+        arma::vec3 actual_pos = arma::vec3({actual_2d(0), actual_2d(1), 0});
+
+        quality *= filter_.measurementUpdate(measured_pos, cov, actual_pos, *(observed_object.sensors));
+    }
+
     return quality;
 }
 

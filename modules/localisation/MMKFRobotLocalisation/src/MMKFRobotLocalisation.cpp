@@ -135,18 +135,28 @@ namespace localisation {
            Options<Sync<MMKFRobotLocalisation>>
           >("MMKFRobotLocalisation Step",
             [this](const std::vector<messages::vision::Goal>& goals) {
-            if (goals.size() < 2)
-                return;
+            // if (goals.size() < 2)
+            //     return;
 
             // std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
             // for (auto& goal : goals) {
             //     std::cout << __FILE__ << ", " << __LINE__ << ":" << std::endl;
-            //     std::cout << "position:" << goal.measurements[0].position.t() << std::endl;
-            //     std::cout << "error:" << goal.measurements[0].error << std::endl;
-            //     std::cout << "side:";
+            //     std::cout << "  side:";
             //     std::cout << ((goal.side == Goal::Side::LEFT) ? "LEFT" :
             //                   (goal.side == Goal::Side::RIGHT) ? "RIGHT" : "UNKNOWN")
             //               << std::endl;
+
+            //     int num = 0;
+            //     for (auto& measurement : goal.measurements) {
+            //         std::stringstream msg;
+            //         msg << ((goal.side == Goal::Side::LEFT) ? "LGoal Pos" :
+            //                (goal.side == Goal::Side::RIGHT) ? "RGoal Pos" : "UGoal Pos") << 
+            //          " " << num;
+            //         emit(graph(msg.str(), measurement.position[0], measurement.position[1], measurement.position[2]));
+            //         std::cout << "  measurement: " << num++ << std::endl;
+            //         std::cout << "    position:" << measurement.position.t() << std::endl;
+            //         std::cout << "    error:" << measurement.error << std::endl;
+            //     }
             // }
 
             auto curr_time = NUClear::clock::now();

@@ -47,18 +47,36 @@ namespace support {
         : Reactor(std::move(environment))
         , pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB)
         , sub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_SUB) {
-        // Set our high water mark
-        int hwm = 50;
-        pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
-        sub.setsockopt(ZMQ_SUBSCRIBE, 0, 0);
-
 
         powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&NUbugger::run), this), std::bind(std::mem_fn(&NUbugger::kill), this)));
 
         on<Trigger<Configuration<NUbugger>>>([this] (const Configuration<NUbugger>& config) {
             // TODO: unbind old port
-            pub.bind(("tcp://*:" + config["network"]["pub_port"].as<std::string>()).c_str());
-            sub.bind(("tcp://*:" + config["network"]["sub_port"].as<std::string>()).c_str());
+            uint newPubPort = config["network"]["pub_port"].as<uint>();
+            uint newSubPort = config["network"]["sub_port"].as<uint>();
+
+            if (newPubPort != pubPort) {
+                if (connected) {
+                    pub.unbind(("tcp://*:" + std::to_string(pubPort)).c_str());
+                }
+                pubPort = newPubPort;
+                pub.bind(("tcp://*:" + std::to_string(pubPort)).c_str());
+            }
+
+            if (newSubPort != subPort) {
+                if (connected) {
+                    sub.unbind(("tcp://*:" + std::to_string(subPort)).c_str());
+                }
+                subPort = newSubPort;
+                sub.bind(("tcp://*:" + std::to_string(subPort)).c_str());
+            }
+
+            // Set our high water mark
+            int hwm = config["network"]["high_water_mark"].as<int>();
+            pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
+            sub.setsockopt(ZMQ_SUBSCRIBE, 0, 0);
+
+            connected = true;
 
             for (auto& setting : config["reaction_handles"]) {
                 std::string name = setting.first.as<std::string>();
@@ -85,6 +103,13 @@ namespace support {
                     }
                 }
             }
+        });
+
+        on<Trigger<Every<5, std::chrono::seconds>>>([this] (const time_t&) {
+            Message message;
+            message.set_type(Message::PING);
+            message.set_utc_timestamp(getUtcTimestamp());
+            send(message);
         });
 
         provideDataPoints();

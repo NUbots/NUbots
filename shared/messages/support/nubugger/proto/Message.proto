@@ -32,18 +32,19 @@ import "messages/behaviour/proto/Behaviour.proto";
 
 message Message {
     enum Type {
-        SENSOR_DATA = 1;
-        IMAGE = 2;
-        CLASSIFIED_IMAGE = 3;
-        VISION_OBJECT = 4;
-        LOCALISATION = 5;
-        DATA_POINT = 6;
-        REACTION_STATISTICS = 7;
-        LOOKUP_TABLE = 8;
-        BEHAVIOUR = 9;
-        COMMAND = 10;
-        REACTION_HANDLES = 11;
-        GAME_STATE = 12;
+        PING = 1;
+        SENSOR_DATA = 2;
+        IMAGE = 3;
+        CLASSIFIED_IMAGE = 4;
+        VISION_OBJECT = 5;
+        LOCALISATION = 6;
+        DATA_POINT = 7;
+        REACTION_STATISTICS = 8;
+        LOOKUP_TABLE = 9;
+        BEHAVIOUR = 10;
+        COMMAND = 11;
+        REACTION_HANDLES = 12;
+        GAME_STATE = 13;
     }
 
     required Type type = 1;

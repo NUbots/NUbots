@@ -84,15 +84,9 @@ namespace localisation {
         cfg_.emit_robot_fieldobjects = config["EmitRobotFieldobjects"].as<bool>();
         cfg_.emit_ball_fieldobjects = config["EmitBallFieldobjects"].as<bool>();
         cfg_.robot_imu_drift_period = config["RobotImuDriftPeriod"].as<double>();
-
-        // NUClear::log(__func__, "cfg_.simulate_vision = ", cfg_.simulate_vision);
-        // NUClear::log(__func__, "cfg_.simulate_goal_observations = ", cfg_.simulate_goal_observations);
-        // NUClear::log(__func__, "cfg_.simulate_ball_observations = ", cfg_.simulate_ball_observations);
-        // NUClear::log(__func__, "cfg_.simulate_odometry = ", cfg_.simulate_odometry);
-        // NUClear::log(__func__, "cfg_.simulate_robot_movement = ", cfg_.simulate_robot_movement);
-        // NUClear::log(__func__, "cfg_.simulate_ball_movement = ", cfg_.simulate_ball_movement);
-        // NUClear::log(__func__, "cfg_.emit_robot_fieldobjects = ", cfg_.emit_robot_fieldobjects);
-        // NUClear::log(__func__, "cfg_.emit_ball_fieldobjects = ", cfg_.emit_ball_fieldobjects);
+        cfg_.observe_left_goal = config["ObserveLeftGoal"].as<bool>();
+        cfg_.observe_right_goal = config["ObserveRightGoal"].as<bool>();
+        cfg_.distinguish_left_and_right_goals = config["DistinguishLeftAndRightGoals"].as<bool>();
     }
 
     MockRobot::MockRobot(std::unique_ptr<NUClear::Environment> environment)
@@ -229,25 +223,41 @@ namespace localisation {
                     goal_r_pos.rows(0, 1) = field_description_->goalpost_br;
                 }
 
-                messages::vision::Goal goal1;
-                messages::vision::VisionObject::Measurement g1_m;
-                g1_m.position = SphericalRobotObservation(robot_position_, robot_heading_, goal_r_pos);
-                g1_m.error = arma::eye(3, 3) * 0.1;
-                goal1.measurements.push_back(g1_m);
-                goal1.side = messages::vision::Goal::Side::RIGHT;
-                goal1.sensors = sensors;
-                goals->push_back(goal1);
+                if (cfg_.observe_left_goal) {
+                    messages::vision::Goal goal1;
+                    messages::vision::VisionObject::Measurement g1_m;
+                    g1_m.position = SphericalRobotObservation(robot_position_, robot_heading_, goal_r_pos);
+                    g1_m.error = arma::eye(3, 3) * 0.1;
+                    goal1.measurements.push_back(g1_m);
+                    goal1.measurements.push_back(g1_m);
+                    goal1.side = messages::vision::Goal::Side::RIGHT;
+                    if (cfg_.distinguish_left_and_right_goals) {
+                        goal1.side = messages::vision::Goal::Side::RIGHT;
+                    } else {
+                        goal1.side = messages::vision::Goal::Side::UNKNOWN;
+                    }
+                    goal1.sensors = sensors;
+                    goals->push_back(goal1);
+                }
 
-                messages::vision::Goal goal2;
-                messages::vision::VisionObject::Measurement g2_m;
-                g2_m.position = SphericalRobotObservation(robot_position_, robot_heading_, goal_l_pos);
-                g2_m.error = arma::eye(3, 3) * 0.1;
-                goal2.measurements.push_back(g2_m);
-                goal2.side = messages::vision::Goal::Side::LEFT;
-                goal2.sensors = sensors;
-                goals->push_back(goal2);
+                if (cfg_.observe_right_goal) {
+                    messages::vision::Goal goal2;
+                    messages::vision::VisionObject::Measurement g2_m;
+                    g2_m.position = SphericalRobotObservation(robot_position_, robot_heading_, goal_l_pos);
+                    g2_m.error = arma::eye(3, 3) * 0.1;
+                    goal2.measurements.push_back(g2_m);
+                    goal2.measurements.push_back(g2_m);
+                    if (cfg_.distinguish_left_and_right_goals) {
+                        goal2.side = messages::vision::Goal::Side::LEFT;
+                    } else {
+                        goal2.side = messages::vision::Goal::Side::UNKNOWN;
+                    }
+                    goal2.sensors = sensors;
+                    goals->push_back(goal2);
+                }
 
-                emit(std::move(goals));
+                if (goals->size() > 0)
+                    emit(std::move(goals));
             }
 
             // Ball observation

@@ -42,9 +42,9 @@ namespace support {
             reactionStatistics->set_taskid(stats.taskId);
             reactionStatistics->set_causereactionid(stats.causeReactionId);
             reactionStatistics->set_causetaskid(stats.causeTaskId);
-            reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
-            reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
-            reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
+            reactionStatistics->set_emitted(getUtcTimestamp<microseconds>(stats.emitted));
+            reactionStatistics->set_started(getUtcTimestamp<microseconds>(stats.started));
+            reactionStatistics->set_finished(getUtcTimestamp<microseconds>(stats.finished));
             reactionStatistics->set_name(stats.identifier[0]);
             reactionStatistics->set_triggername(stats.identifier[1]);
             reactionStatistics->set_functionname(stats.identifier[2]);
