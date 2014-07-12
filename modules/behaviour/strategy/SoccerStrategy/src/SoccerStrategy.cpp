@@ -250,6 +250,7 @@ std::cerr << "LOOKING AT BALL" << std::endl;
 			// Check to see if we are no longer looking at the ball.
 			on<Trigger<LookAtBallStop>>([this](const LookAtBallStop&) {
 				lookingAtBall = false;
+std::cerr << "NOT LOOKING AT BALL" << std::endl;
 			});
 
 			// Check to see if we are looking at the goals.
@@ -261,6 +262,7 @@ std::cerr << "LOOKING AT GOAL" << std::endl;
 			// Check to see if we are no longer looking at the goals.
 			on<Trigger<LookAtGoalStop>>([this](const LookAtGoalStop&) {
 				lookingAtGoal = false;
+std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 			});
 
 			on<Trigger<Every<30, Per<std::chrono::seconds>>>,
@@ -275,6 +277,7 @@ std::cerr << "LOOKING AT GOAL" << std::endl;
 
 					// Calculate the position of the ball in field coordinates.
 					arma::vec2 globalBallPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
+//std::cerr << __FILE__ << ": "<< __func__ << " - " << __LINE__ << std::endl;
 
 					// Make a copy of the previous state.
 					memcpy(&previousState, &currentState, sizeof(State));
@@ -287,12 +290,17 @@ std::cerr << "LOOKING AT GOAL" << std::endl;
 						currentState.position = selfs.at(0).position;
 						currentState.heading = selfs.at(0).heading;
 					}
+					
+					else {
+						std::cerr << "SoccerStrategy - No Self!!!!" << std::endl;
+					}
 
+//std::cerr << __FILE__ << ": "<< __func__ << " - " << __LINE__ << std::endl;
 					// Parse game controller state infoirmation as well as button pushes.
 					updateGameState(gameState);
 
 					// Are we kicking off?
-//					currentState.kickOff = gameState->ourKickOff;
+					currentState.kickOff = gameState.ourKickOff;
 
 					// Am I the kicker?
 					// Is my start position inside the centre circle?
@@ -307,6 +315,7 @@ std::cerr << "LOOKING AT GOAL" << std::endl;
 					// Have I been picked up?
 					currentState.pickedUp = feetOffGround && !isGettingUp && !isDiving;
 
+//std::cerr << __FILE__ << ": "<< __func__ << " - " << __LINE__ << std::endl;
 					// Have I been penalised or unpenalised?
 					if (gameState.team.players.at(0).penaltyReason != PenaltyReason::UNPENALISED && !previousState.penalised) {
 						currentState.penalised = true;
@@ -376,6 +385,7 @@ std::cerr << "LOOKING AT GOAL" << std::endl;
 						arma::vec2 xaxis = {1, 0};
 						arma::vec2 fieldWidth = {-FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 
+//std::cerr << __FILE__ << ": "<< __func__ << " - " << __LINE__ << std::endl;
 						try {
 							planeGoal.setFromNormal(xaxis, fieldWidth);
 						}
@@ -385,6 +395,7 @@ std::cerr << "LOOKING AT GOAL" << std::endl;
 							std::cerr << "fieldWidth - (" << fieldWidth[0] << ", " << fieldWidth[1] << ")" << std::endl;
 						}
 
+//std::cerr << __FILE__ << ": "<< __func__ << " - " << __LINE__ << std::endl;
 						try {
 							planeSelf.setFromNormal(globalBallPosition - currentState.position, currentState.position);
 						}
@@ -395,6 +406,7 @@ std::cerr << "LOOKING AT GOAL" << std::endl;
 							std::cerr << "normal - (" << (globalBallPosition - currentState.position)[0] << ", " << (globalBallPosition - currentState.position)[1] << ")" << std::endl;
 						}
 
+//std::cerr << __FILE__ << ": "<< __func__ << " - " << __LINE__ << std::endl;
 						try {
 							line.setFromDirection(utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.velocity) - currentState.position, globalBallPosition);
 						}
@@ -404,6 +416,7 @@ std::cerr << "LOOKING AT GOAL" << std::endl;
 							std::cerr << "ballPosition - (" << globalBallPosition[0] << ", " << globalBallPosition[1] << ")" << std::endl;
 						}
 
+//std::cerr << __FILE__ << ": "<< __func__ << " - " << __LINE__ << std::endl;
 						// Is the ball approaching our goals?
 						try {
 							// Throws std::domain_error if there is no intersection.
@@ -416,6 +429,7 @@ std::cerr << "LOOKING AT GOAL" << std::endl;
 							currentState.ballApproachingGoal = false;
 						}
 
+//std::cerr << __FILE__ << ": "<< __func__ << " - " << __LINE__ << std::endl;
 
 						// Is the ball heading in my direction?
 						try {
@@ -433,6 +447,7 @@ std::cerr << "LOOKING AT GOAL" << std::endl;
 					// Calculate the optimal zone position.
 					arma::vec2 optimalPosition = findOptimalPosition(ZONES.at(MY_ZONE).zone, globalBallPosition);
 
+//std::cerr << __FILE__ << ": "<< __func__ << " - " << __LINE__ << std::endl;
 					// ------
 					// Take appropriate action depending on state
 					// ------
@@ -461,6 +476,9 @@ std::cerr << "LOOKING AT GOAL" << std::endl;
 						}
 
 						if (!isWalking && (!currentState.inPosition || !currentState.correctHeading)) {
+std::cerr << "selfPosition: (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;
+std::cerr << "targetPosition: (" << currentState.targetPosition[0] << ", " << currentState.targetPosition[1] << ")" << std::endl;
+std::cerr << "GoToPoint(startPosition): (" << ZONES.at(MY_ZONE).startPosition[0] << ", " << ZONES.at(MY_ZONE).startPosition[1] << ")" << std::endl;
 							goToPoint(ZONES.at(MY_ZONE).startPosition, heading);
 						}
 
@@ -475,6 +493,8 @@ std::cerr << "LOOKING AT GOAL" << std::endl;
 							optimalPosition = ZONES.at(MY_ZONE).defaultPosition;
 						}
 
+std::cerr << "selfPosition: (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;
+std::cerr << "GoToPoint(optimalPosition): (" << optimalPosition[0] << ", " << optimalPosition[1] << ")" << std::endl;
 						goToPoint(optimalPosition, heading);
 
 //						NUClear::log<NUClear::INFO>("I am not where I should be. Going there now.");
@@ -677,18 +697,22 @@ std::cerr << "LOOKING AT GOAL" << std::endl;
 
 				// Alternate looking at the goals and looking at the ball.
 				if (!lookingAtGoal) {
+std::cerr << "Emitting LookAtGoalStart" << std::endl;
 					emit(std::make_unique<LookAtGoalStart>());
 				}
 
 				else {
+std::cerr << "Emitting LookAtGoalStop" << std::endl;
 					emit(std::make_unique<LookAtGoalStop>());
 				}
 
 				if (!lookingAtBall && !lookingAtGoal) {
+std::cerr << "Emitting LookAtBallStart" << std::endl;
 					emit(std::make_unique<LookAtBallStart>());
 				}
 
 				else {
+std::cerr << "Emitting LookAtBallStop" << std::endl;
 					emit(std::make_unique<LookAtBallStop>());
 				}
 

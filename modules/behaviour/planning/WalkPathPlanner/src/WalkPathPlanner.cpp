@@ -363,6 +363,7 @@ std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 double walk_bearing = 0.0;
                 double walk_rotation = 0.0;
 
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 //check what distance increment we're in and swap/set speed accordingly:
                 if ((move[0] > midApproachDistance + distanceHysteresis and distanceIncrement < 3)
                     or
@@ -390,6 +391,7 @@ std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     walk_speed = 0.f;
                 }
 
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 //decide between heading and bearing
                 if ((distanceIncrement > 1) && (!omniPositioning)) {
                     walk_rotation = move[1];
@@ -398,6 +400,7 @@ std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     walk_rotation = move[2];
                 }
 
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 //make sure our rotation is normalised to our turning limits
                 walk_rotation = fmin(turnSpeed,fmax(walk_rotation,-turnSpeed));
 
@@ -410,36 +413,39 @@ std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     walk_bearing = 0;
                 }*/
 
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 //Replacing turn hysteresis with a unicorn equation
                 float g = 1./(1.+std::exp(-4.*walk_rotation*walk_rotation));
 
+std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 return arma::vec({walk_speed*(1.-g)*cos(walk_bearing),walk_speed*(1.-g)*sin(walk_bearing),walk_rotation*g});
             }
 
             arma::vec WalkPathPlanner::approachFromDirection(const Self& self,
-                                                             const arma::vec& target,
-                                                             const arma::vec& direction) {
+                                                             const arma::vec2& target,
+                                                             const arma::vec2& direction) {
 
                 //this method calculates the possible ball approach commands for the robot
                 //and then chooses the lowest cost action
-                std::vector<arma::vec> waypoints(3);
+                std::vector<arma::vec2> waypoints(3);
+
                 //calculate the values we need to set waypoints
-                const double ballDistance = arma::norm(target-self.position);
-                const double selfHeading = atan2(self.heading[1],self.heading[0]);
+                const double ballDistance = arma::norm(target - self.position, 2);
+                const double selfHeading = atan2(self.heading[1], self.heading[0]);
 
                 //create our waypoints - these are approach vectors offset from the ball
-                waypoints[0] = -direction*ballDistance*ApproachCurveFactor;
-                waypoints[1] = arma::vec({waypoints[0][1],-waypoints[0][0]});
-                waypoints[2] = arma::vec({-waypoints[0][1],waypoints[0][0]});
+                waypoints[0] = -direction * ballDistance * ApproachCurveFactor;
+                waypoints[1] = arma::vec2({waypoints[0][1], -waypoints[0][0]});
+                waypoints[2] = arma::vec2({-waypoints[0][1], waypoints[0][0]});
 
                 //offset the waypoints by the foot separation so we are aiming at the ball with the correct foot
-                const auto footOffset = arma::normalise(waypoints[0])*(footSeparation+footSize)*0.5;
+                const auto footOffset = arma::normalise(waypoints[0]) * (footSeparation + footSize) * 0.5;
 
                 //do a foot offset for the straight approach case
-                if (arma::dot(waypoints[1],waypoints[1]) < arma::dot(waypoints[1],waypoints[1])) {
-                    waypoints[0] += arma::normalise(waypoints[1])*(footSeparation+footSize)*0.5;
+                if (arma::dot(waypoints[1], waypoints[1]) < arma::dot(waypoints[1], waypoints[1])) {
+                    waypoints[0] += arma::normalise(waypoints[1]) * (footSeparation + footSize) * 0.5;
                 } else {
-                    waypoints[0] += arma::normalise(waypoints[2])*(footSeparation+footSize)*0.5;
+                    waypoints[0] += arma::normalise(waypoints[2]) * (footSeparation + footSize) * 0.5;
                 }
 
                 //add the foot offsets for sidekicks to the side approach case
@@ -451,21 +457,22 @@ std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 std::vector<double> distances(3);
                 std::vector<double> bearings(3);
                 std::vector<double> costs(3);
+
                 for (size_t i = 0; i < 3; ++i) {
                     //store the directions we want to face when we get to the ball in headings
-                    const double waypointHeading = atan2(-waypoints[i][1],-waypoints[i][0])-selfHeading;
-                    headings[i] = atan2(sin(waypointHeading),cos(waypointHeading));
+                    const double waypointHeading = atan2(-waypoints[i][1], -waypoints[i][0]) - selfHeading;
+                    headings[i] = atan2(sin(waypointHeading), cos(waypointHeading));
 
                     //calculate the estimated distance to destination
-                    arma::vec waypointPos = waypoints[i]+target-arma::vec(self.position);
-                    distances[i] = arma::norm(waypointPos);
+                    arma::vec waypointPos = waypoints[i] + target - self.position;
+                    distances[i] = arma::norm(waypointPos, 2);
 
                     //calculate the angle between the current direction and the bearing of the destination
-                    const double waypointBearing = atan2(waypointPos[1],waypointPos[0])-selfHeading;
-                    bearings[i] = atan2(sin(waypointBearing),cos(waypointBearing));
+                    const double waypointBearing = atan2(waypointPos[1], waypointPos[0]) - selfHeading;
+                    bearings[i] = atan2(sin(waypointBearing), cos(waypointBearing));
 
                     //costs defines which move plan is the most appropriate - the sensitivity gives us control over whether the robots prefers translation or rotation
-                    costs[i] = bearings[i]*bearings[i]*bearingSensitivity+distances[i]*distances[i];
+                    costs[i] = bearings[i] * bearings[i] * bearingSensitivity + distances[i] * distances[i];
 
                 }
 
@@ -479,7 +486,7 @@ std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     selected = 2;
                 }
 
-                return arma::vec({distances[selected],bearings[selected],headings[selected]});
+                return arma::vec({distances[selected], bearings[selected], headings[selected]});
             }
 
             arma::vec WalkPathPlanner::goToPoint(const Self& self,
@@ -504,6 +511,17 @@ std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 result[0] = targetDistance;
                 result[1] = atan2(sin(targetHeading),cos(targetHeading));
                 result[2] = atan2(sin(targetBearing),cos(targetBearing));
+
+//std::cerr << __func__ << ": selfPosition - (" << self.position[0] << ", " << self.position[1] << ")" << std::endl;
+//std::cerr << __func__ << ": selfheading - (" << self.heading[0] << ", " << self.heading[1] << ")" << std::endl;
+//std::cerr << __func__ << ": target - (" << target[0] << ", " << target[1] << ")" << std::endl;
+//std::cerr << __func__ << ": direction - (" << direction[0] << ", " << direction[1] << ")" << std::endl;
+//std::cerr << __func__ << ": selfHeading - " << selfHeading << std::endl;
+//std::cerr << __func__ << ": targetHeading - " << targetHeading << std::endl;
+//std::cerr << __func__ << ": targetBearing - " << targetBearing << std::endl;
+//std::cerr << __func__ << ": targetDistance - " << result[0] << std::endl;
+//std::cerr << __func__ << ": angleToTarget - " << result[1] << std::endl;
+//std::cerr << __func__ << ": angleToCenter - " << result[2] << std::endl;
 
                 //apply turning hysteresis
                 return result;
