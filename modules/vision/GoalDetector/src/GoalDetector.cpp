@@ -19,6 +19,8 @@
 
 #include "GoalDetector.h"
 
+#include "RansacGoalModel.h"
+
 #include "messages/input/Sensors.h"
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/support/Configuration.h"
@@ -29,7 +31,6 @@
 #include "utility/math/geometry/ParametricLine.h"
 
 #include "utility/math/ransac/Ransac.h"
-#include "utility/math/ransac/RansacLineModel.h"
 #include "utility/math/vision.h"
 #include "utility/math/coordinates.h"
 #include "messages/input/CameraParameters.h"
@@ -47,7 +48,6 @@ namespace vision {
     using utility::math::geometry::Quad;
 
     using utility::math::ransac::Ransac;
-    using utility::math::ransac::RansacLineModel;
 
     using utility::math::vision::widthBasedDistanceToCircle;
     using utility::math::vision::projectCamToGroundPlane;
@@ -89,83 +89,104 @@ namespace vision {
 
         on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters>, Options<Single>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam) {
 
-            std::vector<arma::vec2> startPoints, endPoints;
-            std::vector<arma::mat22> starts, ends;
+            // Our segments that may be a part of a goal
+            std::vector<RansacGoalModel::GoalSegment> segments;
+            auto goals = std::make_unique<std::vector<Goal>>();
 
+            // Get our goal segments
             auto hSegments = image.horizontalSegments.equal_range(ObjectClass::GOAL);
             for(auto it = hSegments.first; it != hSegments.second; ++it) {
 
                 // We throw out points if they are:
                 // Less the full quality (subsampled)
                 // Do not have a transition on the other side
-                if(it->second.subsample == 1 && it->second.previous) {
-                    startPoints.push_back({ double(it->second.start[0]), double(it->second.start[1]) });
-                }
-
-                if(it->second.subsample == 1 && it->second.next) {
-                    endPoints.push_back({ double(it->second.end[0]), double(it->second.end[1]) });
+                if(it->second.subsample == 1 && it->second.previous && it->second.next) {
+                    segments.push_back({ { double(it->second.start[0]), double(it->second.start[1]) }, { double(it->second.end[0]), double(it->second.end[1]) } });
                 }
             }
 
-            // Use ransac to find left edges.
-            for (auto& result : Ransac<RansacLineModel>::fitModels(startPoints.begin()
-                                                               , startPoints.end()
-                                                               , MINIMUM_POINTS_FOR_CONSENSUS
-                                                               , MAXIMUM_ITERATIONS_PER_FITTING
-                                                               , MAXIMUM_FITTED_MODELS
-                                                               , CONSENSUS_ERROR_THRESHOLD)) {
+            // Ransac for goals
+            auto models = Ransac<RansacGoalModel>::fitModels(segments.begin()
+                                                           , segments.end()
+                                                           , MINIMUM_POINTS_FOR_CONSENSUS
+                                                           , MAXIMUM_ITERATIONS_PER_FITTING
+                                                           , MAXIMUM_FITTED_MODELS
+                                                           , CONSENSUS_ERROR_THRESHOLD);
 
-                // Compare based on Y co-ordinate
-                auto comp = [] (const arma::vec2& a, const arma::vec2& b) {
-                    return a[1] < b[1];
-                };
+            // Look at our results
+            for (auto& result : models) {
 
-                // Find min and max y
-                std::vector<arma::vec2>::iterator high, low;
-                std::tie(high, low) = std::minmax_element(result.first, result.last, comp);
+                // Get our left, right and midlines
+                Line& left = result.model.left;
+                Line& right = result.model.right;
+                Line mid;
 
-                // Store the values
-                starts.emplace_back();
-                starts.back().col(0) = result.model.orthogonalProjection(*high);
-                starts.back().col(1) = result.model.orthogonalProjection(*low);
-            }
+                // Normals in same direction
+                if(arma::dot(left.normal, right.normal) > 0) {
+                    mid.normal = arma::normalise(right.normal + left.normal);
+                    mid.distance = ((right.distance / arma::dot(right.normal, mid.normal)) + (left.distance / arma::dot(left.normal, mid.normal))) * 0.5;
+                }
+                // Normals opposed
+                else {
+                    mid.normal = arma::normalise(right.normal - left.normal);
+                    mid.distance = ((right.distance / arma::dot(right.normal, mid.normal)) - (left.distance / arma::dot(left.normal, mid.normal))) * 0.5;
+                }
 
-            // Use ransac to find right edges.
-            for (auto& result : Ransac<RansacLineModel>::fitModels(endPoints.begin()
-                                                                , endPoints.end()
-                                                                , MINIMUM_POINTS_FOR_CONSENSUS
-                                                                , MAXIMUM_ITERATIONS_PER_FITTING
-                                                                , MAXIMUM_FITTED_MODELS
-                                                                , CONSENSUS_ERROR_THRESHOLD)) {
+                arma::running_stat<double> stat;
+                arma::running_stat<double> dist;
 
-                auto comp = [] (const arma::vec2& a, const arma::vec2& b) {
-                    return a[1] < b[1];
-                };
+                // Look through our segments to find endpoints
+                for(auto it = result.first; it != result.last; ++it) {
+                    // Project left and right onto midpoint keep top and bottom
+                    stat(mid.tangentialDistanceToPoint(it->left));
+                    stat(mid.tangentialDistanceToPoint(it->right));
 
-                // Find min and max y
-                std::vector<arma::vec2>::iterator high, low;
-                std::tie(high, low) = std::minmax_element(result.first, result.last, comp);
+                    // Work out our distance to the point for throwouts
+                    dist(mid.distanceToPoint(it->left));
+                    dist(mid.distanceToPoint(it->right));
+                }
 
-                // Store the values
-                ends.emplace_back();
-                ends.back().col(0) = result.model.orthogonalProjection(*high);
-                ends.back().col(1) = result.model.orthogonalProjection(*low);
-            }
+                double dSd = dist.stddev();
 
-            // Our output goal vector
-            auto goals = std::make_unique<std::vector<Goal>>();
-            goals->reserve(starts.size() * ends.size());
+                // Look through leftover segments to find better endpoints
+                for(auto it = models.back().last; it < segments.end(); ++it) {
+                    // Project onto midpoint
+                    double tL = mid.tangentialDistanceToPoint(it->left);
+                    double dL = mid.distanceToPoint(it->left);
+                    double tR = mid.tangentialDistanceToPoint(it->right);
+                    double dR = mid.distanceToPoint(it->right);
 
-            // Form quads from all of the lines
-            for(auto& start : starts) {
-                for(auto& end : ends) {
-
-                    // If we can make a valid quad from the points
-                    if(start(0, 0) < end(0, 1) && start(1, 0) < end(1, 1)) {
-                        goals->emplace_back();
-                        goals->back().quad.set(start.col(1), start.col(0), end.col(0), end.col(1));
+                    // Don't want if if yellow shirt guy
+                    if(std::abs(dL) < 2 * dSd) {
+                        stat(tL);
+                    }
+                    if(std::abs(dR) < 2 * dSd) {
+                        stat(tR);
                     }
                 }
+
+                // Get our endpoints from the min and max points on the line
+                arma::vec2 midP1 = mid.pointFromTangentialDistance(stat.min());
+                arma::vec2 midP2 = mid.pointFromTangentialDistance(stat.max());
+
+                // Project those points outward onto the quad
+                arma::vec2 p1 = midP1 - left.distanceToPoint(midP1) * arma::dot(left.normal, mid.normal) * mid.normal;
+                arma::vec2 p2 = midP2 - left.distanceToPoint(midP2) * arma::dot(left.normal, mid.normal) * mid.normal;
+                arma::vec2 p3 = midP1 - right.distanceToPoint(midP1) * arma::dot(right.normal, mid.normal) * mid.normal;
+                arma::vec2 p4 = midP2 - right.distanceToPoint(midP2) * arma::dot(right.normal, mid.normal) * mid.normal;
+
+                // Make a quad
+                Goal g;
+
+                // Seperate tl and bl
+                arma::vec2 tl = p1[1] > p2[1] ? p2 : p1;
+                arma::vec2 bl = p1[1] > p2[1] ? p1 : p2;
+                arma::vec2 tr = p3[1] > p4[1] ? p4 : p3;
+                arma::vec2 br = p3[1] > p4[1] ? p3 : p4;
+
+                g.quad.set(bl, tl, tr, br);
+
+                goals->push_back(std::move(g));
             }
 
             // Throwout invalid quads
@@ -254,11 +275,9 @@ namespace vision {
 
                 double widthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, goalLeft, goalRight, cam.focalLengthPixels);
                 arma::vec3 goalCentreGroundSpace = widthDistance * image.sensors->orientationCamToGround.submat(0,0,2,2) * goalCentreRay + image.sensors->orientationCamToGround.submat(0,3,2,3);
-                // TODO convert this into sphericial coordiantes and error
-                NUClear::log("Goal pos = ", goalCentreGroundSpace.t());
                 goalCentreGroundSpace[2] = 0; //Project to ground
                 measurements.push_back({ cartesianToSpherical(goalCentreGroundSpace), arma::diagmat(arma::vec({0.002357231 * 4, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
-                
+
                 // Projection Method:
                 arma::vec3 goalBaseCentreRay = arma::normalise(arma::normalise(getCamFromScreen(imageToScreen(it->quad.getBottomRight(),cam.imageSizePixels), cam.focalLengthPixels))
                                                              + arma::normalise(getCamFromScreen(imageToScreen(it->quad.getBottomLeft(),cam.imageSizePixels), cam.focalLengthPixels)));
