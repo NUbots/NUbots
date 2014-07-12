@@ -15,7 +15,6 @@
     "turnDeviation" : 0.1,
 
     "ballLineupDistance" : 0.2,
-    "ApproachCurveFactor" : 0.2,
     "closeApproachSpeed" : 0.45,
     "closeApproachDistance" : 0.30,
 	"turnSpeed" : 1,
