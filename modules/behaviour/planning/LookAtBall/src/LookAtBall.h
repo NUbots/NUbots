@@ -39,6 +39,7 @@ namespace modules {
                 float BALL_SEARCH_TIMEOUT_MILLISECONDS;
 		float X_FACTOR;
 		float Y_FACTOR;
+		float BALL_UNCERTAINTY_THRESHOLD;
 		
 		ReactionHandle handle;
 

@@ -32,13 +32,12 @@ namespace modules {
 
 		using messages::vision::Ball;
 		using messages::vision::Goal;
-		using messages::behaviour::LookAtAngle;
 		using messages::behaviour::LookAtPoint;
 		using messages::behaviour::LookAtPosition;
 		using messages::behaviour::HeadBehaviourConfig;
 		using messages::input::Sensors;
 		using messages::support::Configuration;
-		using messages::behaviour::LookAtAngle;
+		using messages::behaviour::LookAtPosition;
 		using messages::behaviour::LookAtGoalStart;
 		using messages::behaviour::LookAtGoalStop;
 
@@ -48,6 +47,7 @@ namespace modules {
 				BALL_SEARCH_TIMEOUT_MILLISECONDS = config["BALL_SEARCH_TIMEOUT_MILLISECONDS"].as<float>();
 				X_FACTOR = config["X_FACTOR"].as<float>();	
 				Y_FACTOR = config["Y_FACTOR"].as<float>();	
+				BALL_UNCERTAINTY_THRESHOLD = config["BALL_UNCERTAINTY_THRESHOLD"].as<float>();	
 			});
 
 			on<Trigger<LookAtGoalStart>>([this](const LookAtGoalStart&) {
@@ -71,7 +71,7 @@ namespace modules {
 
 				if (goals.size() > 0) {
 					timeSinceLastSeen = sensors.timestamp;
-					std::vector<LookAtAngle> angles;
+					std::vector<LookAtPosition> angles;
 					angles.reserve(10);
 					std::vector<Goal> nonConstGoals;
 					arma::vec2 screenAngular;
@@ -90,34 +90,34 @@ namespace modules {
 
 					// Add all goals to angles in order of which goal is closest to centre-screen.
 					for (auto& g : goals) {
-						angles.emplace_back(LookAtAngle {g.screenAngular[0], -g.screenAngular[1]});
+						angles.emplace_back(LookAtPosition {g.screenAngular[0], -g.screenAngular[1]});
 					}
 
 					if (balls.size() > 0) {
-						angles.emplace_back(LookAtAngle {balls[0].screenAngular[0], -balls[0].screenAngular[1]});
+						angles.emplace_back(LookAtPosition {balls[0].screenAngular[0], -balls[0].screenAngular[1]});
 					}
 
-					else if (ball != NULL) {
+					else if ((ball != NULL) && ((ball->sr_xx > BALL_UNCERNTAINTY_THRESHOLD) || (ball->sr_yy > BALL_UNCERTAINTY_THRESHOLD))) {
 						double xFactor = X_FACTOR * std::sqrt(ball->sr_xx);
 						double yFactor = Y_FACTOR * std::sqrt(ball->sr_yy);
 			
 						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
-						angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+						angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
 
 						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0] + xFactor, ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
-						angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+						angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
 
 						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0] - xFactor, ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
-						angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+						angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
 
 						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1] + yFactor, 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
-						angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+						angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
 
 						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1] - yFactor, 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
-						angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+						angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
 					} 
 
-					emit(std::make_unique<std::vector<LookAtAngle>>(angles));
+					emit(std::make_unique<std::vector<LookAtPosition>>(angles));
 				} 
 
 				else if(std::chrono::duration<float, std::ratio<1,1000>>(sensors.timestamp - timeSinceLastSeen).count() > BALL_SEARCH_TIMEOUT_MILLISECONDS) {
