@@ -37,6 +37,7 @@
 #include "messages/motion/ServoTarget.h"
 #include "messages/behaviour/Action.h"
 #include "messages/motion/Script.h"
+#include "messages/behaviour/FixedWalkCommand.h"
 
 
 
@@ -45,6 +46,8 @@ namespace modules {
 
         using messages::input::ServoID;
         using messages::behaviour::ServoCommand;
+        using messages::behaviour::WalkOptimiserCommand;
+        using messages::behaviour::WalkConfigSaved;
         using messages::support::Configuration;
         using utility::motion::kinematics::DarwinModel;
         using utility::nubugger::graph;
@@ -78,13 +81,13 @@ namespace modules {
                     if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
                         // legs are available, start
                         stanceReset();
-                        updateHandle.enable();
+                        //updateHandle.enable();
                     }
                 },
                 [this] (const std::set<LimbID>& takenLimbs) {
                     if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
                         // legs are no longer available, reset walking (too late to stop walking)
-                        updateHandle.disable();
+                        //updateHandle.disable();
                     }
                 },
                 [this] (const std::set<ServoID>&) {
@@ -92,11 +95,11 @@ namespace modules {
                 }
             }));
 
-            updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, With<Sensors>, Options<Single, Priority<NUClear::HIGH>> >([this](const time_t&, const Sensors& sensors) {
+            updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, With<Sensors>, Options< Single, Priority<NUClear::HIGH>> >([this](const time_t&, const Sensors& sensors) {
                 emit(update(sensors));
             });
 
-            updateHandle.disable();
+            //updateHandle.disable();
 
             on<Trigger<WalkCommand>>([this](const WalkCommand& walkCommand) {
                 setVelocity(walkCommand.velocity[0] * (walkCommand.velocity[0] > 0 ? velLimitX[1] : -velLimitX[0]),
@@ -114,139 +117,151 @@ namespace modules {
                 // TODO: set priorities to 0 when stopped - somehow
             });
 
-            on<Trigger<Configuration<WalkEngine> > >([this](const Configuration<WalkEngine>& config) {
-
-                // g Walk Parameters
-                // g Stance and velocity limit values
-                stanceLimitX = config["stanceLimitX"].as<arma::vec>();
-                stanceLimitY = config["stanceLimitY"].as<arma::vec>();
-                stanceLimitA = config["stanceLimitA"].as<arma::vec>();
-                velLimitX = config["velLimitX"].as<arma::vec>();
-                velLimitY = config["velLimitY"].as<arma::vec>();
-                velLimitA = config["velLimitA"].as<arma::vec>();
-                velDelta = config["velDelta"].as<arma::vec>();
-                vaFactor = config["vaFactor"].as<float>();
-
-                velXHigh = config["velXHigh"].as<double>();
-                velDeltaXHigh = config["velDeltaXHigh"].as<double>();
-
-                // gToe/heel overlap checking values
-                footSizeX = config["footSizeX"].as<arma::vec>();
-                stanceLimitMarginY = config["stanceLimitMarginY"].as<float>();
-                stanceLimitY2 = 2 * config["footY"].as<double>() - config["stanceLimitMarginY"].as<double>();
-
-                // gOP default stance width: 0.0375*2 = 0.075
-                // gHeel overlap At radian 0.15 at each foot = 0.05*sin(0.15)*2=0.015
-                // gHeel overlap At radian 0.30 at each foot = 0.05*sin(0.15)*2=0.030
-
-                // gStance parameters
-                bodyHeight = config["bodyHeight"].as<float>();
-                bodyTilt = config["bodyTilt"].as<float>();
-                footX = config["footX"].as<float>();
-                footY = config["footY"].as<float>();
-                supportX = config["supportX"].as<float>();
-                supportY = config["supportY"].as<float>();
-                qLArm0 = M_PI / 180.0 * arma::vec3{90, 2, -20};
-                qRArm0 = M_PI / 180.0 * arma::vec3{90, -2, -20};
-
-                // gHardness parameters
-                hardnessSupport = config["hardnessSupport"].as<float>();
-
-                hardnessSwing = config["hardnessSwing"].as<float>();
-
-                hardnessArm0 = config["hardnessArm0"].as<float>();
-                hardnessArm = config["hardnessArm"].as<float>();
-
-                // gGait parameters
-
-                tStep = config["tStep"].as<float>();
-                tStep0 = tStep;
-                tZmp = config["tZmp"].as<float>();
-                stepHeight = config["stepHeight"].as<float>();
-                stepHeight0 = stepHeight;
-                ph1Single = config["phSingle"][0].as<float>();
-                ph2Single = config["phSingle"][1].as<float>();
-                ph1Zmp = ph1Single;
-                ph2Zmp = ph2Single;
-
-                // gCompensation parameters
-                //TODO:config hiprollcomp?
-                hipRollCompensation = 4 * M_PI / 180;
-                ankleMod = arma::vec2{-config["toeTipCompensation"].as<double>(), 0} * 1 * M_PI / 180;
-                spreadComp = config["spreadComp"].as<float>();
-                turnCompThreshold = config["turnCompThreshold"].as<float>();
-                turnComp = config["turnComp"].as<float>();
-
-                float gyroFactor = config["gyroFactor"].as<float>() * 0.273 * M_PI / 180 * 300 / 1024; //dps to rad/s conversion
-
-                // gGyro stabilization parameters
-                //TODO:config this?
-                ankleImuParamX = {0.5, 0.3 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
-                ankleImuParamY = {0.5, 1.2 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
-                kneeImuParamX = {0.5, 0.7 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
-                hipImuParamY = {0.5, 0.3 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
-                armImuParamX = {0.5, 10.0 * gyroFactor, 20 * M_PI / 180, 45 * M_PI / 180};
-                armImuParamY = {0.5, 0.0 * gyroFactor, 20 * M_PI / 180, 45 * M_PI / 180};
-
-                // gSupport bias parameters to reduce backlash-based instability
-                velFastForward = config["velFastForward"].as<float>();
-                velFastTurn = config["velFastTurn"].as<float>();
-                supportFront = config["supportFront"].as<float>();
-                supportFront2 = config["supportFront2"].as<float>();
-                supportBack = config["supportBack"].as<float>();
-                supportSideX = config["supportSideX"].as<float>();
-                supportSideY = config["supportSideY"].as<float>();
-                supportTurn = config["supportTurn"].as<float>();
-
-                frontComp = config["frontComp"].as<float>();
-                AccelComp = config["AccelComp"].as<float>();
-
-                balanceWeight = config["balanceWeight"].as<float>();
-
-                // gInitial body swing
-                supportModYInitial = config["supportModYInitial"].as<float>();
-
-                //XXX: this isn't a real config variable - it derives from akleMod[0]
-                toeTipCompensation = config["toeTipCompensation"].as<float>();
-
-                useAlternativeTrajectory = config["useAlternativeTrajectory"].as<bool>();
-
-//                setVelocity(config["velCommandX"], config["velCommandY"], config["velCommandAngular"]);
-                //Generate stand script
-                reset();
-                stanceReset();
-                auto waypoints = updateStill();
-
-                Script standScript;
-                Script::Frame frame;
-                frame.duration = std::chrono::milliseconds(config["STAND_SCRIPT_DURATION_MILLISECONDS"].as<int>());
-                for(auto& waypoint : *waypoints){
-                    frame.targets.push_back(Script::Frame::Target({waypoint.id,
-                                                                   waypoint.position,
-                                                                   waypoint.gain}
-                                                                  )
-                                           );
-                }
-                standScript.frames.push_back(frame);
-                auto saveScript = std::make_unique<SaveConfiguration>();
-                saveScript->path = "config/scripts/Stand.yaml";
-                saveScript->config = standScript;
-                emit(std::move(saveScript));
+            on<Trigger<Configuration<WalkEngine>> >([this](const Configuration<WalkEngine>& config) {
+                configureWalk(config.config);
+                generateAndSaveStandScript();
             });
+            on<Trigger<WalkOptimiserCommand> >([this](const WalkOptimiserCommand& command) {
+                configureWalk(command.walkConfig);
+                emit(std::make_unique<WalkConfigSaved>());
+            });            
 
             on<Trigger<Startup>>([this](const Startup&) {
-                stopRequest = 2;
+                
                 reset();
+                stopRequest = 2;
                 //start();
             });
 
         }
         // TODO: add others
+        void WalkEngine::configureWalk(const YAML::Node& config){
+            // g Walk Parameters
+            // g Stance and velocity limit values
+            stanceLimitX = config["stanceLimitX"].as<arma::vec>();
+            stanceLimitY = config["stanceLimitY"].as<arma::vec>();
+            stanceLimitA = config["stanceLimitA"].as<arma::vec>();
+            velLimitX = config["velLimitX"].as<arma::vec>();
+            velLimitY = config["velLimitY"].as<arma::vec>();
+            velLimitA = config["velLimitA"].as<arma::vec>();
+            velDelta = config["velDelta"].as<arma::vec>();
+            vaFactor = config["vaFactor"].as<float>();
+
+            velXHigh = config["velXHigh"].as<double>();
+            velDeltaXHigh = config["velDeltaXHigh"].as<double>();
+
+            // gToe/heel overlap checking values
+            footSizeX = config["footSizeX"].as<arma::vec>();
+            stanceLimitMarginY = config["stanceLimitMarginY"].as<float>();
+            stanceLimitY2 = 2 * config["footY"].as<double>() - config["stanceLimitMarginY"].as<double>();
+
+            // gOP default stance width: 0.0375*2 = 0.075
+            // gHeel overlap At radian 0.15 at each foot = 0.05*sin(0.15)*2=0.015
+            // gHeel overlap At radian 0.30 at each foot = 0.05*sin(0.15)*2=0.030
+
+            // gStance parameters
+            bodyHeight = config["bodyHeight"].as<float>();
+            bodyTilt = config["bodyTilt"].as<float>();
+            footX = config["footX"].as<float>();
+            footY = config["footY"].as<float>();
+            supportX = config["supportX"].as<float>();
+            supportY = config["supportY"].as<float>();
+            qLArm0 = M_PI / 180.0 * arma::vec3{90, 2, -20};
+            qRArm0 = M_PI / 180.0 * arma::vec3{90, -2, -20};
+
+            // gHardness parameters
+            hardnessSupport = config["hardnessSupport"].as<float>();
+
+            hardnessSwing = config["hardnessSwing"].as<float>();
+
+            hardnessArm0 = config["hardnessArm0"].as<float>();
+            hardnessArm = config["hardnessArm"].as<float>();
+
+            // gGait parameters
+
+            tStep = config["tStep"].as<float>();
+            tStep0 = tStep;
+            tZmp = config["tZmp"].as<float>();
+            stepHeight = config["stepHeight"].as<float>();
+            stepHeight0 = stepHeight;
+            ph1Single = config["phSingle"][0].as<float>();
+            ph2Single = config["phSingle"][1].as<float>();
+            ph1Zmp = ph1Single;
+            ph2Zmp = ph2Single;
+
+            // gCompensation parameters
+            hipRollCompensation = 4 * M_PI / 180;
+            ankleMod = arma::vec2{-config["toeTipCompensation"].as<double>(), 0} * 1 * M_PI / 180;
+            spreadComp = config["spreadComp"].as<float>();
+            turnCompThreshold = config["turnCompThreshold"].as<float>();
+            turnComp = config["turnComp"].as<float>();
+
+            float gyroFactor = config["gyroFactor"].as<float>() * 0.273 * M_PI / 180 * 300 / 1024; //dps to rad/s conversion
+
+            // gGyro stabilization parameters
+            ankleImuParamX = {0.5, 0.3 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
+            ankleImuParamY = {0.5, 1.2 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
+            kneeImuParamX = {0.5, 0.7 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
+            hipImuParamY = {0.5, 0.3 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
+            armImuParamX = {0.5, 10.0 * gyroFactor, 20 * M_PI / 180, 45 * M_PI / 180};
+            armImuParamY = {0.5, 0.0 * gyroFactor, 20 * M_PI / 180, 45 * M_PI / 180};
+
+            // gSupport bias parameters to reduce backlash-based instability
+            velFastForward = config["velFastForward"].as<float>();
+            velFastTurn = config["velFastTurn"].as<float>();
+            supportFront = config["supportFront"].as<float>();
+            supportFront2 = config["supportFront2"].as<float>();
+            supportBack = config["supportBack"].as<float>();
+            supportSideX = config["supportSideX"].as<float>();
+            supportSideY = config["supportSideY"].as<float>();
+            supportTurn = config["supportTurn"].as<float>();
+
+            frontComp = config["frontComp"].as<float>();
+            AccelComp = config["AccelComp"].as<float>();
+
+            balanceWeight = config["balanceWeight"].as<float>();
+
+            // gInitial body swing
+            supportModYInitial = config["supportModYInitial"].as<float>();
+
+            //XXX: this isn't a real config variable - it derives from akleMod[0]
+            toeTipCompensation = config["toeTipCompensation"].as<float>();
+
+            useAlternativeTrajectory = config["useAlternativeTrajectory"].as<bool>();
+            
+            STAND_SCRIPT_DURATION_MILLISECONDS = config["STAND_SCRIPT_DURATION_MILLISECONDS"].as<int>();
+        }
+
+        void WalkEngine::generateAndSaveStandScript(){
+            reset();
+            stanceReset();
+            auto waypoints = updateStill();
+
+            Script standScript;
+            Script::Frame frame;
+            frame.duration = std::chrono::milliseconds(STAND_SCRIPT_DURATION_MILLISECONDS);
+            for(auto& waypoint : *waypoints){
+                frame.targets.push_back(Script::Frame::Target({waypoint.id,
+                                                               waypoint.position,
+                                                               waypoint.gain}
+                                                              )
+                                       );
+            }
+            standScript.frames.push_back(frame);
+            auto saveScript = std::make_unique<SaveConfiguration>();
+            saveScript->path = "scripts/Stand.yaml";
+            saveScript->config = standScript;
+            emit(std::move(saveScript));
+            //Try update(); ?
+            reset();
+            stanceReset();
+        }
 
         void WalkEngine::reset(){
             // g--------------------------------------------------------
                 // g Walk state variables
                 // g--------------------------------------------------------
+                
 
                 uTorso = {supportX, 0, 0};
                 uLeft = {0, footY, 0};
@@ -272,7 +287,7 @@ namespace modules {
                 hipShift = {0, 0};
                 armShift = {0, 0};
 
-                active = true;
+                active = false;
                 started = false;
                 iStep0 = -1;
                 iStep = 0;
@@ -280,7 +295,6 @@ namespace modules {
                 tLastStep = getTime();
                 ph0=0;
                 ph=0;
-
                 currentStepType = 0;
 
                 initialStep = 2;
@@ -374,6 +388,7 @@ namespace modules {
                 stopRequest = 0;
                 active = false;
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 0, 0 }})); // TODO: config
+                std::cout << "Walk Engine:: stop request complete" << std::endl;
                 emit(std::make_unique<WalkStopped>());
 
                 return std::make_unique<std::vector<ServoCommand>>(); // TODO: return "stop"

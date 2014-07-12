@@ -61,9 +61,6 @@ namespace messages {
             arma::vec3 leftFSR;
             arma::vec3 rightFSR;
 
-            utility::math::geometry::Line orientationHorizon;
-            utility::math::geometry::Line kinematicsHorizon;
-
             bool leftFootDown;
             bool rightFootDown;
 

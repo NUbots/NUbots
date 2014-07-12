@@ -26,6 +26,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/Action.h"
 #include "messages/input/Sensors.h"
+#include <yaml-cpp/yaml.h>
 
 namespace modules {
     namespace motion {
@@ -54,7 +55,6 @@ namespace modules {
             const size_t id;
 
             // start_config_params
-
             // Walk Parameters
             // Stance and velocity limit values
             arma::vec2 stanceLimitX;
@@ -244,11 +244,15 @@ namespace modules {
             int motionIndex;
             float motionStartTime;
 
+            int STAND_SCRIPT_DURATION_MILLISECONDS;
+
             // TODO: sort it out
 //            arma::vec3 leftArmCommand;
 //            arma::vec3 rightArmCommand;
 //            arma::vec3 leftLegCommand;
 //            arma::vec3 rightLegCommand;
+            void generateAndSaveStandScript();
+            void configureWalk(const YAML::Node& config);
 
             std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> update(const messages::input::Sensors& sensors);
             std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> updateStill(const messages::input::Sensors& sensors = messages::input::Sensors());
