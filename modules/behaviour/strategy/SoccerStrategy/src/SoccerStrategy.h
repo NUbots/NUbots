@@ -209,6 +209,19 @@ namespace modules {
 
 			void updateGameState(const messages::input::gameevents::GameState& gameController);
 
+
+			//NEW
+
+			bool penalised(const GameState& gameState);
+			void playSoccer(const LocalisationBall& localisationBall, const VisionBall& visionBall, const Self& self, const GameState& gameState);
+			void searchForBall(const LocalisationBall& localisationBall, const Self& self, const GameState& gameState);
+
+			void walkToStartPosition();
+			void stopWalking();
+			void findSelfAndBall();
+
+
+			arma::vec2 enemyGoal;
 		public:
 			explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
 		};

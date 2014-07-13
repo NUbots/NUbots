@@ -184,17 +184,25 @@ namespace modules {
                      const std::vector<VisionBall>&
                     ) {
                     
+                    if(planType = messages::behaviour::WalkApproach::StandStill){
+                        emit(std::make_unique<WalkStopCommand>());
+                        return;
+                    } else (planType = messages::behaviour::WalkApproach::DirectCommand){
+                        std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
+                        command->velocity = currentTargetPosition;
+                        command->rotationalSpeed = currentTargetHeading[0];
+                        emit(std::move(command));                        
+                        emit(std::move(std::make_unique<WalkStartCommand>()));
+                        return;
+                    }
 
                     //std::cout << "starting path planning" << std::endl;
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     arma::vec normed_heading = arma::normalise(selfs.front().heading);
                     arma::mat robotToWorldRotation;
                     robotToWorldRotation << normed_heading[0] << -normed_heading[1] << arma::endr
                                          << normed_heading[1] <<  normed_heading[0];
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     arma::vec ballPos = robotToWorldRotation * arma::vec(ball.position) + arma::vec(selfs.front().position);
                     //std::cout << "ball pos found" << std::endl;
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     arma::vec targetPos,targetHead;
                     //work out where we're going
                     if (targetPosition == messages::behaviour::WalkTarget::Robot) {
@@ -215,24 +223,16 @@ namespace modules {
                     //calculate the basic movement plan
                     arma::vec movePlan;
 
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     switch (planType) {
                         case messages::behaviour::WalkApproach::ApproachFromDirection:
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                             movePlan = approachFromDirection(selfs.front(),targetPos,targetHead);
                             break;
                         case messages::behaviour::WalkApproach::WalkToPoint:
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                             movePlan = goToPoint(selfs.front(),targetPos,targetHead);
                             break;
                         case messages::behaviour::WalkApproach::OmnidirectionalReposition:
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                             movePlan = goToPoint(selfs.front(),targetPos,targetHead);
                             break;
-                        case messages::behaviour::WalkApproach::StandStill:
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
-                            emit(std::make_unique<WalkStopCommand>());
-                            return;
                     }
                     //std::cout << "Target Position: " << targetPos[0] << ", " << targetPos[1] << std::endl;
                     //std::cout << "Self Position: " << selfs.front().position[0] << ", " << selfs.front().position[1] << std::endl;
@@ -247,13 +247,11 @@ namespace modules {
                     //NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
                     // NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
                     //this applies acceleration/deceleration and hysteresis to movement
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     movePlan = generateWalk(movePlan,
-                               planType == messages::behaviour::WalkApproach::OmnidirectionalReposition);
+                                            planType == messages::behaviour::WalkApproach::OmnidirectionalReposition);
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
                     command->velocity = arma::vec({movePlan[0],movePlan[1]});
                     command->rotationalSpeed = movePlan[2];
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                     // NUClear::log("Self Position:", selfs[0].position[0],selfs[0].position[1]);
                     // NUClear::log("Target Position:", targetPos[0],targetPos[1]);
                     emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));
@@ -298,7 +296,6 @@ namespace modules {
                 double walk_bearing = 0.0;
                 double walk_rotation = 0.0;
 
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 //check what distance increment we're in and swap/set speed accordingly:
                 if ((move[0] > midApproachDistance + distanceHysteresis and distanceIncrement < 3)
                     or
@@ -326,7 +323,6 @@ namespace modules {
                     walk_speed = 0.f;
                 }
 
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 //decide between heading and bearing
                 if ((distanceIncrement > 1) && (!omniPositioning)) {
                     walk_rotation = move[1];
@@ -335,7 +331,6 @@ namespace modules {
                     walk_rotation = move[2];
                 }
 
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 //make sure our rotation is normalised to our turning limits
                 walk_rotation = fmin(turnSpeed,fmax(walk_rotation,-turnSpeed));
 
@@ -348,11 +343,9 @@ namespace modules {
                     walk_bearing = 0;
                 }*/
 
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 //Replacing turn hysteresis with a unicorn equation
                 float g = 1./(1.+std::exp(-4.*walk_rotation*walk_rotation));
 
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 return arma::vec({walk_speed*(1.-g)*cos(walk_bearing),walk_speed*(1.-g)*sin(walk_bearing),walk_rotation*g});
             }
 
@@ -364,18 +357,15 @@ namespace modules {
                 //and then chooses the lowest cost action
                 std::vector<arma::vec2> waypoints(3);
 
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 //calculate the values we need to set waypoints
                 const double ballDistance = arma::norm(target - self.position, 2);
                 const double selfHeading = atan2(self.heading[1], self.heading[0]);
 
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 //create our waypoints - these are approach vectors offset from the ball
                 waypoints[0] = -direction * ballDistance * ApproachCurveFactor;
                 waypoints[1] = arma::vec2({waypoints[0][1], -waypoints[0][0]});
                 waypoints[2] = arma::vec2({-waypoints[0][1], waypoints[0][0]});
 
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
 
                 //offset the waypoints by the foot separation so we are aiming at the ball with the correct foot
                 std::vector<arma::vec2> footOffsets(3);
@@ -397,7 +387,6 @@ namespace modules {
                 std::vector<double> bearings(3);
                 std::vector<double> costs(3);
 
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 for (size_t i = 0; i < 3; ++i) {
                     //store the directions we want to face when we get to the ball in headings
                     const double waypointHeading = atan2(-waypoints[i][1], -waypoints[i][0]) - selfHeading;
@@ -416,7 +405,6 @@ namespace modules {
 
                 }
 
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 //decide which approach to the ball is cheapest
                 size_t selected;
                 if (costs[0] < costs[1] and costs[0] < costs[2]) {
@@ -427,7 +415,6 @@ namespace modules {
                     selected = 2;
                 }
 
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 return arma::vec({distances[selected], bearings[selected], headings[selected]});
             }
 
@@ -436,20 +423,13 @@ namespace modules {
                                                   const arma::vec2& direction) {
                 //quick and dirty go to point calculator
                 //gets position and heading difference and returns walk params for it
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 const arma::vec2 posdiff = target - self.position;
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 const double targetDistance = arma::norm(posdiff);
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 const double selfHeading = std::atan2(self.heading[1],self.heading[0]);
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 const double targetHeading = std::atan2(posdiff[1],posdiff[0])-selfHeading;
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 const double targetBearing = std::atan2(direction[1],direction[0])-selfHeading;
 
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 arma::vec result(3);
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
                 result[0] = targetDistance;
                 result[1] = atan2(sin(targetHeading),cos(targetHeading));
                 result[2] = atan2(sin(targetBearing),cos(targetBearing));
