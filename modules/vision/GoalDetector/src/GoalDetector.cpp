@@ -55,6 +55,7 @@ namespace vision {
     using utility::math::vision::getCamFromScreen;
     using utility::math::vision::getParallaxAngle;
     using utility::math::vision::projectCamSpaceToScreen;
+    using utility::math::vision::distanceToVerticalObject;
 
     using messages::vision::ObjectClass;
     using messages::vision::ClassifiedImage;
@@ -290,15 +291,9 @@ namespace vision {
                 measurements.push_back({ (topGoalWidth), arma::diagmat(arma::vec({ 1, 1, 1 })) });
 
                 // Measure the height based distance
-                // double heightDistance = 0;
-                // arma::vec3 goalHeight = heightDistance * sensors.orientationCamToGround.submat(0,0,2,2) * baseRay + sensors.orientationCamToGround.submat(0,3,2,3) + arma::vec({ 0, 0, GOAL_HEIGHT / 2 });
-                // measurements.push_back({ (goalHeight), arma::diagmat(arma::vec({ 1, 1, 1 })) });
-
-                // std::cout << "Measurements" << std::endl;
-                // for(auto& measurement : measurements) {
-                //     std::cout << measurement.position.t();
-                // }
-                // std::cout << std::endl;
+                double heightDistance = distanceToVerticalObject((tl + tr) * 0.5, (bl + br) * 0.5, GOAL_HEIGHT, sensors.orientationCamToGround(2,3), cam.focalLengthPixels);
+                arma::vec3 goalHeight = heightDistance * sensors.orientationCamToGround.submat(0,0,2,2) * baseRay + sensors.orientationCamToGround.submat(0,3,2,3) + arma::vec({ 0, 0, GOAL_HEIGHT / 2 });
+                measurements.push_back({ (goalHeight), arma::diagmat(arma::vec({ 1, 1, 1 })) });
 
                 // Add our variables
                 it->measurements = measurements;
@@ -325,3 +320,4 @@ namespace vision {
 
 }
 }
+
