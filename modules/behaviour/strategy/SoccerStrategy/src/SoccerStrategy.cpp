@@ -234,14 +234,21 @@ namespace modules {
 			});
 
 			// Check to see if we are no longer walking.
-			on<Trigger<messages::motion::WalkStopCommand>>([this](const messages::motion::WalkStopCommand&) {
+			on<Trigger<messages::motion::WalkStopped>>([this](const messages::motion::WalkStopped&) {
 				isWalking = false;
 			});
 
 			// Get the field description.
-			on<Trigger<messages::support::FieldDescription>>([this](const messages::support::FieldDescription& field) {
-				FIELD_DESCRIPTION = field;
-			});
+			on<Trigger<Startup>,
+	           With<Optional<FieldDescription>>>("FieldDescription Update",
+	           [this](const Startup&, const std::shared_ptr<const FieldDescription>& desc) {
+	            if (desc == nullptr) {
+	                NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: SoccerConfig module might not be installed.");
+	                throw std::runtime_error("FieldDescription Update: SoccerConfig module might not be installed");
+	            }
+
+	            FIELD_DESCRIPTION fd = *desc;
+	        });
 
 			// Check to see if we are looking at the ball.
 			on<Trigger<LookAtBallStart>>([this](const LookAtBallStart&) {
@@ -267,6 +274,7 @@ std::cerr << "LOOKING AT GOAL" << std::endl;
 std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 			});
 
+			//Main Loop?
 			on<Trigger<Every<30, Per<std::chrono::seconds>>>,
 				With<messages::localisation::Ball>,
 				With<std::vector<messages::localisation::Self>>,
