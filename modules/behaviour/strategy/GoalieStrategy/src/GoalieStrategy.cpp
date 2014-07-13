@@ -385,10 +385,13 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 						// Make preparations to calculate whether the ball is approaching our own goals or ourselves.
 						Plane<2> planeGoal, planeSelf;
 						ParametricLine<2> line;
+						ParametricLine<2> goalie_line;
 						arma::vec2 xaxis = {1, 0};
 						arma::vec2 fieldWidth = {-FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 
 						arma::vec2 psudoFieldWidth = {-(FIELD_DESCRIPTION.dimensions.field_length - FIELD_DESCRIPTION.dimensions.goal_area_length) / 2, 0}; //we want the robot to move in a line in the middle of the goal box
+
+//						std::cerr << "psudoFieldWidth: (" << psudoFieldWidth[0] << ", " << psudoFieldWidth[1] << ")" << std::endl;
 
 //std::cerr << __FILE__ << ": "<< __func__ << " - " << __LINE__ << std::endl;
 						try {
@@ -416,6 +419,13 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 //std::cerr << __FILE__ << ": "<< __func__ << " - " << __LINE__ << std::endl;
 						try {
 							line.setFromDirection(utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.velocity) - currentState.position, globalBallPosition);
+
+							// Set up vector point as centre of goals
+							arma::vec2 centre_goal = {-FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
+							goalie_line.setFromTwoPoints(centre_goal, globalBallPosition);
+
+//							std::cerr << "Centre goal: (" << centre_goal[0] << ", " << centre_goal[1] << ")" << std::endl;
+//							std::cerr << "Ball position: (" << globalBallPosition[0] << ", " << globalBallPosition[1] << ")" << std::endl;
 						}
 
 						catch (const std::domain_error& e) {
@@ -427,7 +437,7 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 						// Is the ball approaching our goals?
 						try {
 							// Throws std::domain_error if there is no intersection.
-							currentState.ballGoalIntersection = planeGoal.intersect(line);
+							currentState.ballGoalIntersection = planeGoal.intersect(goalie_line);
 
 							currentState.ballApproachingGoal = arma::norm(fieldWidth - currentState.ballGoalIntersection, 2) <= (FIELD_DESCRIPTION.dimensions.goal_area_width / 2);
 						}
@@ -511,7 +521,10 @@ std::cerr << "GoToPoint(startPosition): (" << ZONES.at(MY_ZONE).startPosition[0]
 //						NUClear::log<NUClear::INFO>("Don't know where the ball is. Looking for it.");
 					}
 
-					else if (IS_GOALIE && currentState.ballApproachingGoal) {
+					else if (IS_GOALIE /*&& currentState.ballApproachingGoal*/) {
+
+				//		arma::vec2 a{-2.4,1.1};
+
 						sideStepToPoint(currentState.ballGoalIntersection);
 
 //						NUClear::log<NUClear::INFO>("Ball is approaching goal. Goalie moving to block it.");
@@ -739,7 +752,7 @@ std::cerr << "Emitting LookAtBallStop" << std::endl;
 				approach->targetPositionType = WalkTarget::WayPoint;
 				approach->targetHeadingType = WalkTarget::Ball;
 				approach->walkMovementType = WalkApproach::OmnidirectionalReposition;
-				approach->heading = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
+				approach->heading = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position) - currentState.position;
 				approach->target = position;
 
 				std::cerr << "I Am side stepping to: (" << position[0] << ", " << position[1] << ")" << std::endl; //test the position
@@ -747,7 +760,7 @@ std::cerr << "Emitting LookAtBallStop" << std::endl;
 				currentState.targetPosition = approach->target;
 				currentState.targetHeading = approach->heading;
 
-				emit(std::move(approach));
+			//	emit(std::move(approach));
 			}
 
 			void GoalieStrategy::approachBall(const arma::vec2& heading) {
