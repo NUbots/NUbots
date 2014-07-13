@@ -177,6 +177,7 @@ namespace support {
             Message message;
 
             message.set_type(Message::LOOKUP_TABLE);
+            message.set_filter_id(0);
             message.set_utc_timestamp(getUtcTimestamp());
 
             auto* api_lookup_table = message.mutable_lookup_table();
