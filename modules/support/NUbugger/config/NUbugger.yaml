@@ -1,5 +1,6 @@
 network:
   pub_port: 12000
   sub_port: 12001
+  high_water_mark: 50
 reaction_handles:
   reaction_statistics: false

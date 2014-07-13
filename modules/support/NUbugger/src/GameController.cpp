@@ -154,10 +154,10 @@ namespace support {
         data->set_mode(getMode(gameState.mode));
         data->set_first_half(gameState.firstHalf);
         data->set_kicked_out_by_us(gameState.kickedOutByUs);
-        data->set_kicked_out_time(getUtcTimestamp<milliseconds>(gameState.kickedOutTime));
+        data->set_kicked_out_time(getUtcTimestamp(gameState.kickedOutTime));
         data->set_our_kick_off(gameState.ourKickOff);
-        data->set_primary_time(getUtcTimestamp<milliseconds>(gameState.primaryTime));
-        data->set_secondary_time(getUtcTimestamp<milliseconds>(gameState.secondaryTime));
+        data->set_primary_time(getUtcTimestamp(gameState.primaryTime));
+        data->set_secondary_time(getUtcTimestamp(gameState.secondaryTime));
 
         auto* team = data->mutable_team();
         auto& gameStateTeam = gameState.team;
@@ -169,7 +169,7 @@ namespace support {
             auto* player = team->add_players();
             player->set_id(gameStatePlayer.id);
             player->set_penalty_reason(getPenaltyReason(gameStatePlayer.penaltyReason));
-            player->set_unpenalised(getUtcTimestamp<milliseconds>(gameStatePlayer.unpenalised));
+            player->set_unpenalised(getUtcTimestamp(gameStatePlayer.unpenalised));
         }
 
         auto* opponent = data->mutable_opponent();
@@ -181,7 +181,7 @@ namespace support {
             auto* player = opponent->add_players();
             player->set_id(gameStatePlayer.id);
             player->set_penalty_reason(getPenaltyReason(gameStatePlayer.penaltyReason));
-            player->set_unpenalised(getUtcTimestamp<milliseconds>(gameStatePlayer.unpenalised));
+            player->set_unpenalised(getUtcTimestamp(gameStatePlayer.unpenalised));
         }
 
         send(message);

@@ -54,7 +54,7 @@ Vagrant.configure("2") do |config|
     end
 
     if ['s24'].include?(Socket.gethostname) # NUbugger Port
-      nuclearport.vm.network :public_network, bridge: "Wireless Network Connection"
+      nuclearport.vm.network :public_network, bridge: "WiFi"
     end
 
     # Syntax: "path/on/host", "/path/on/guest"
