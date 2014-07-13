@@ -39,6 +39,7 @@ namespace support {
         handles["behaviour"].push_back(on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
             Message message;
             message.set_type(Message::BEHAVIOUR);
+            message.set_filter_id(0);
             message.set_utc_timestamp(getUtcTimestamp());
 
             auto* behaviour = message.mutable_behaviour();
@@ -56,6 +57,7 @@ namespace support {
         handles["behaviour"].push_back(on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
             Message message;
             message.set_type(Message::BEHAVIOUR);
+            message.set_filter_id(0);
             message.set_utc_timestamp(getUtcTimestamp());
 
             auto* behaviour = message.mutable_behaviour();
@@ -73,6 +75,7 @@ namespace support {
         handles["behaviour"].push_back(on<Trigger<RegisterAction>>([this] (const RegisterAction& action) {
             Message message;
             message.set_type(Message::BEHAVIOUR);
+            message.set_filter_id(0);
             message.set_utc_timestamp(getUtcTimestamp());
 
             auto* behaviour = message.mutable_behaviour();

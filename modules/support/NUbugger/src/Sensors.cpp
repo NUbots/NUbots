@@ -39,6 +39,7 @@ namespace support {
             Message message;
 
             message.set_type(Message::SENSOR_DATA);
+            message.set_filter_id(1);
             message.set_utc_timestamp(getUtcTimestamp());
 
             auto* sensorData = message.mutable_sensor_data();

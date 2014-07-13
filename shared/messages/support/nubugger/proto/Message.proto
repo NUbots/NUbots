@@ -48,20 +48,21 @@ message Message {
     }
 
     required Type type = 1;
-    required uint64 utc_timestamp = 2;
+    required uint32 filter_id = 3;
+    required uint64 utc_timestamp = 4;
 
-    optional messages.input.proto.Sensors sensor_data = 3;
-    optional messages.input.proto.Image image = 4;
-    optional messages.vision.proto.ClassifiedImage classified_image = 5;
-    optional messages.vision.proto.VisionObject vision_object = 6;
-    optional messages.localisation.proto.Localisation localisation = 7;
-    optional messages.support.nubugger.proto.DataPoint data_point = 8;
-    optional messages.support.nuclear.proto.ReactionStatistics reaction_statistics = 9;
-    optional messages.vision.proto.LookUpTable lookup_table = 10;
-    optional messages.behaviour.proto.Behaviour behaviour = 11;
-    optional messages.input.proto.GameState game_state = 12;
-    optional Command command = 13;
-    optional ReactionHandles reaction_handles = 14;
+    optional messages.input.proto.Sensors sensor_data = 5;
+    optional messages.input.proto.Image image = 6;
+    optional messages.vision.proto.ClassifiedImage classified_image = 7;
+    optional messages.vision.proto.VisionObject vision_object = 8;
+    optional messages.localisation.proto.Localisation localisation = 9;
+    optional messages.support.nubugger.proto.DataPoint data_point = 10;
+    optional messages.support.nuclear.proto.ReactionStatistics reaction_statistics = 11;
+    optional messages.vision.proto.LookUpTable lookup_table = 12;
+    optional messages.behaviour.proto.Behaviour behaviour = 13;
+    optional messages.input.proto.GameState game_state = 14;
+    optional Command command = 15;
+    optional ReactionHandles reaction_handles = 16;
 
     message Command {
         optional string command = 1;
