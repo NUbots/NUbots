@@ -397,12 +397,16 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 
 					else {
 						// Make preparations to calculate whether the ball is approaching our own goals or ourselves.
-						Plane<2> planeGoal, planeSelf;
+						Plane<2> planeGoal, planeGoalie, planeSelf;
 						ParametricLine<2> line;
+						ParametricLine<2> goalie_line;
 						arma::vec2 xaxis = {1, 0};
 						arma::vec2 centreOfOurGoal = {-FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
+						arma::vec2 goaliePoint = {-(FIELD_DESCRIPTION.dimensions.field_length - FIELD_DESCRIPTION.dimensions.goal_area_length) / 2, 0}; //we want the robot to move in a line in the middle of the goal box
+
 
 						planeGoal.setFromNormal(xaxis, centreOfOurGoal);
+						planeGoalie.setFromNormal(xaxis, goaliePoint);
 						
 //						planeSelf.setFromNormal(globalBallPosition - currentState.position, currentState.position);
 						planeSelf.setFromNormal(currentState.ball.position, currentState.position);
@@ -410,11 +414,14 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 						line.setFromDirection(utility::localisation::transform::RobotToWorldTransform(arma::vec2{0,0}, currentState.heading, currentState.ball.velocity), 
 							                  globalBallPosition,
 							                  arma::vec2{0,std::numeric_limits<double>::infinity()});	//Check forward along line only
+
+						goalie_line.setFromTwoPoints(centreOfOurGoal, globalBallPosition);
 						
 						// Is the ball approaching our goals?
 						try {
 							// Throws std::domain_error if there is no intersection.
 							currentState.ballGoalIntersection = planeGoal.intersect(line);
+							currentState.ballGoalieIntersection = planeGoalie.intersect(goalie_line);
 							currentState.ballApproachingGoal = arma::norm(centreOfOurGoal - currentState.ballGoalIntersection, 2) <= (FIELD_DESCRIPTION.dimensions.goal_area_width / 2);
 						}
 
@@ -593,7 +600,7 @@ std::cerr << "GoToPoint(optimalPosition): (" << optimalPosition[0] << ", " << op
 					}
 
 					else if (IS_GOALIE && currentState.ballApproachingGoal) {
-						sideStepToPoint(currentState.ballGoalIntersection);
+						sideStepToPoint(currentState.ballGoalieIntersection);
 
 //						NUClear::log<NUClear::INFO>("Ball is approaching goal. Goalie moving to block it.");
 					}
@@ -825,6 +832,8 @@ std::cerr << "Emitting LookAtBallStop" << std::endl;
 
 				currentState.targetPosition = approach->target;
 				currentState.targetHeading = approach->heading;
+
+				std::cerr << "I Am side stepping to: (" << position[0] << ", " << position[1] << ")" << std::endl; //test the position
 
 				emit(std::move(approach));
 			}

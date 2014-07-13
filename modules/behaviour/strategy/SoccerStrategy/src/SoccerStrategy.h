@@ -130,6 +130,7 @@ namespace modules {
 			bool kickPosition;
 
 			arma::vec2 ballGoalIntersection;
+			arma::vec2 ballGoalieIntersection;
 			arma::vec2 ballSelfIntersection;
 			messages::localisation::Ball ball;
 
