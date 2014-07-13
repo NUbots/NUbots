@@ -246,7 +246,6 @@ namespace modules {
 	                NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: SoccerConfig module might not be installed.");
 	                throw std::runtime_error("FieldDescription Update: SoccerConfig module might not be installed");
 	            }
-
 	            FIELD_DESCRIPTION = *desc;
 	        });
 
@@ -401,55 +400,27 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 						Plane<2> planeGoal, planeSelf;
 						ParametricLine<2> line;
 						arma::vec2 xaxis = {1, 0};
-						arma::vec2 fieldWidth = {-FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
+						arma::vec2 centreOfOurGoal = {-FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
 
+						planeGoal.setFromNormal(xaxis, centreOfOurGoal);
+						
+//						planeSelf.setFromNormal(globalBallPosition - currentState.position, currentState.position);
+						planeSelf.setFromNormal(currentState.ball.position, currentState.position);
 
-						try {
-							planeGoal.setFromNormal(xaxis, fieldWidth);
-						}
-
-						catch (const std::domain_error& e) {
-							std::cerr << "xaxis - (" << xaxis[0] << ", " << xaxis[1] << ")" << std::endl;
-							std::cerr << "fieldWidth - (" << fieldWidth[0] << ", " << fieldWidth[1] << ")" << std::endl;
-						}
-
-
-						try {
-//							planeSelf.setFromNormal(globalBallPosition - currentState.position, currentState.position);
-							planeSelf.setFromNormal(currentState.ball.position, currentState.position);
-						}
-
-						catch (const std::domain_error& e) {
-							std::cerr << "ballPosition - (" << currentState.ball.position[0] << ", " << currentState.ball.position[1] << ")" << std::endl;
-							std::cerr << "selfPosition - (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;
-//							std::cerr << "normal - (" << (globalBallPosition - currentState.position)[0] << ", " << (globalBallPosition - currentState.position)[1] << ")" << std::endl;
-							std::cerr << "normal - (" << currentState.ball.position[0] << ", " << currentState.ball.position[1] << ")" << std::endl;
-						}
-
-
-						try {
-							line.setFromDirection(utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.velocity) - currentState.position, globalBallPosition);
-						}
-
-						catch (const std::domain_error& e) {
-							std::cerr << "ballVelocity - (" << currentState.ball.velocity[0] << ", " << currentState.ball.velocity[1] << ")" << std::endl;
-							std::cerr << "ballPosition - (" << globalBallPosition[0] << ", " << globalBallPosition[1] << ")" << std::endl;
-						}
-
-
+						line.setFromDirection(utility::localisation::transform::RobotToWorldTransform(arma::vec2{0,0}, currentState.heading, currentState.ball.velocity), 
+							                  globalBallPosition,
+							                  arma::vec2{0,std::numeric_limits<double>::infinity()});	//Check forward along line only
+						
 						// Is the ball approaching our goals?
 						try {
 							// Throws std::domain_error if there is no intersection.
 							currentState.ballGoalIntersection = planeGoal.intersect(line);
-
-							currentState.ballApproachingGoal = arma::norm(fieldWidth - currentState.ballGoalIntersection, 2) <= (FIELD_DESCRIPTION.dimensions.goal_area_width / 2);
+							currentState.ballApproachingGoal = arma::norm(centreOfOurGoal - currentState.ballGoalIntersection, 2) <= (FIELD_DESCRIPTION.dimensions.goal_area_width / 2);
 						}
 
 						catch (const std::domain_error& e) {
 							currentState.ballApproachingGoal = false;
 						}
-
-
 
 						// Is the ball heading in my direction?
 						try {
@@ -470,10 +441,14 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 
 					// ------
 					// Take appropriate action depending on state
+					// TODO: USE BRANCHING IFS RATHER THAN HUGE BOOLEAN COMBINATIONS TO IMPROVE READABILITY
 					// ------
 
 					// Stop moving if in the initial, ready or finished states, as well as when picked up
-					if ((currentState.primaryGameState == GameStatePrimary::INITIAL) || (currentState.primaryGameState == GameStatePrimary::SET) || (currentState.primaryGameState == GameStatePrimary::FINISHED) || currentState.pickedUp) {
+					if ((currentState.primaryGameState == GameStatePrimary::INITIAL) || 
+						(currentState.primaryGameState == GameStatePrimary::SET) || 
+						(currentState.primaryGameState == GameStatePrimary::FINISHED) || 
+						currentState.pickedUp) {
 //std::cerr << "selfHeading: (" << currentState.heading[0] << ", " << currentState.heading[1] << ")" << std::endl;
 						stopMoving();
 
@@ -868,16 +843,12 @@ std::cerr << "Emitting LookAtBallStop" << std::endl;
 				emit(std::move(approach));
 			}
 
-			void SoccerStrategy::kickBall(const arma::vec2& direction) {
-				// Emit aim vector.
-				if (!isKicking) {
-					stopMoving();
-
-					//emit(std::move(std::make_unique<messages::output::Say>("Emit kick command")));
-					auto kick = std::make_unique<messages::behaviour::KickPlan>();
-					kick->target = direction;
-					emit(std::move(kick));
-				}
+			void SoccerStrategy::kickBall(const arma::vec2& target) {
+				
+				auto kick = std::make_unique<messages::behaviour::KickPlan>();
+				kick->target = target;
+				emit(std::move(kick));
+				
 			}
 		}  // strategy
 	}  // behaviours

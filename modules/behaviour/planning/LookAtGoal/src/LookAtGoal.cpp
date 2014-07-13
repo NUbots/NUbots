@@ -116,7 +116,7 @@ namespace modules {
 						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1] - yFactor, 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
 						angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
 					} 
-
+					
 					emit(std::make_unique<std::vector<LookAtPosition>>(angles));
 				} 
 
