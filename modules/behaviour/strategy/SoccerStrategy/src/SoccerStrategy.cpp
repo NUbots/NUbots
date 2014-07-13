@@ -40,7 +40,7 @@ namespace modules {
         namespace strategy {
 
 		using LocalisationBall = messages::localisation::Ball;
-		using VisionBall = messages::vision::Ball;
+		using VisionBall = arma::vec2; // replace messages::vision::Ball with arma::vec2
 		using messages::localisation::Self;
 		using messages::behaviour::LookAtBallStart;
 		using messages::behaviour::LookAtBallStop;
@@ -69,7 +69,6 @@ namespace modules {
 		using messages::input::gameevents::PenaltyReason;
 
 		using messages::output::Say;
-
 		using utility::math::geometry::Polygon;
 		using utility::math::geometry::Plane;
 		using utility::math::geometry::ParametricLine;
@@ -114,12 +113,11 @@ namespace modules {
 					zone.zone.set(config["ZONE_3"].as<std::vector<arma::vec2>>());
 					ZONES.emplace_back(zone);
 				}
-
-				initial_goal_heading = config["initial_goal_heading"].as<arma::vec2>();
-
 				catch (const std::domain_error& e) {
 					throw std::domain_error("SoccerStrategy::on<Trigger<Configuration<SoccerStrategyConfig>>> - Invalid zone description!");
 				}
+
+				arma::vec2 initial_goal_heading = config["initial_goal_heading"].as<arma::vec2>(); //this is not used yet
 			});
 
 			on<Trigger<Startup>>([this](const Startup&) {
@@ -303,7 +301,7 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 					memcpy(&previousState, &currentState, sizeof(State));
 
 					// Make a copy of the ball.
-					memcpy(&currentState.ball, &ball, sizeof(Ball));
+					memcpy(&currentState.ball, &ball, sizeof(LocalisationBall)); //assuming localisationball & not vision ball
 
 					// Store current position and heading.
 					if (selfs.size() > 0) {
@@ -484,7 +482,6 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 							} else {
 
 								if(IS_GOALIE) {
-
 
 									if(visionBalls.size() > 0){
 										
@@ -714,7 +711,7 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 
 			//NEw
 
-			void SoccerStrategy::playSoccer(const arma::vec2& localisationBall, const arma::vec2& visionBall, const Self& self, const GameState& gameState){
+			void SoccerStrategy::playSoccer(const arma::vec2& localisationBall, const arma::vec2& visionBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState){
 				arma::vec2 goalPosition = ZONES.at(MY_ZONE).zone.projectPointToPolygon(localisationBall);
 
 				if(arma::norm(goalPosition - localisationBall) < 0.1){
@@ -726,7 +723,7 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 				kickBall(enemyGoal);
 			}
 
-			void SoccerStrategy::searchForBall(const LocalisationBall& localisationBall, const Self& self, const GameState& gameState){
+			void SoccerStrategy::searchForBall(const messages::localisation::Ball& localisationBall, const Self& self, const GameState& gameState){
 				//TODO enhance this behaviour
 				if (isWalking && arma::norm(self.position - ZONES.at(MY_ZONE).defaultPosition) < POSITION_THRESHOLD_TIGHT) 
 				{

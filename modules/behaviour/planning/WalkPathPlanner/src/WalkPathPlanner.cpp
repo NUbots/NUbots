@@ -187,7 +187,7 @@ namespace modules {
                     if(planType == messages::behaviour::WalkApproach::StandStill){
                         emit(std::make_unique<WalkStopCommand>());
                         return;
-                    } else if(planType == messages::behaviour::WalkApproach::DirectCommand){
+                     } else if(planType == messages::behaviour::WalkApproach::DirectCommand){
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
                         command->velocity = currentTargetPosition;
                         command->rotationalSpeed = currentTargetHeading[0];
@@ -223,7 +223,7 @@ namespace modules {
                     //calculate the basic movement plan
                     arma::vec movePlan;
 
-                    /*switch (planType) { //compiler wont enumerating the switch, converting to if-else
+                    /*switch (planType) { //compiler wont enumerate the switch, converting to if-else
                         case messages::behaviour::WalkApproach::ApproachFromDirection:
                             movePlan = approachFromDirection(selfs.front(),targetPos,targetHead);
                             break;

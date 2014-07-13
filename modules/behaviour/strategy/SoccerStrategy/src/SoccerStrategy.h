@@ -212,9 +212,9 @@ namespace modules {
 
 			//NEW
 
-			bool penalised(const GameState& gameState);
-			void playSoccer(const LocalisationBall& localisationBall, const VisionBall& visionBall, const Self& self, const GameState& gameState);
-			void searchForBall(const LocalisationBall& localisationBall, const Self& self, const GameState& gameState);
+			bool penalised(const messages::input::gameevents::GameState& gameState);
+			void playSoccer(const arma::vec2& localisationBall, const arma::vec2& visionBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState);
+			void searchForBall(const messages::localisation::Ball& localisationBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState);
 
 			void walkToStartPosition();
 			void stopWalking();
