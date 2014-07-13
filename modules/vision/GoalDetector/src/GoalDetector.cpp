@@ -21,12 +21,12 @@
 
 #include "RansacGoalModel.h"
 
-#include "messages/input/Sensors.h"
 #include "messages/vision/ClassifiedImage.h"
-#include "messages/support/Configuration.h"
 #include "messages/vision/VisionObjects.h"
-#include "utility/math/geometry/Quad.h"
+#include "messages/support/Configuration.h"
+#include "messages/support/FieldDescription.h"
 
+#include "utility/math/geometry/Quad.h"
 #include "utility/math/geometry/Line.h"
 #include "utility/math/geometry/Plane.h"
 
@@ -63,6 +63,7 @@ namespace vision {
     using messages::vision::Goal;
 
     using messages::support::Configuration;
+    using messages::support::FieldDescription;
 
     GoalDetector::GoalDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -86,12 +87,14 @@ namespace vision {
         on<Trigger<CameraParameters>, With<Configuration<GoalDetector>>>(setParams);
         on<With<CameraParameters>, Trigger<Configuration<GoalDetector>>>(setParams);
 
-        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters>, Options<Single>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam) {
+        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters>, With<FieldDescription>, Options<Single>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const FieldDescription& field) {
 
             auto& sensors = *image.sensors;
             // Our segments that may be a part of a goal
             std::vector<RansacGoalModel::GoalSegment> segments;
             auto goals = std::make_unique<std::vector<Goal>>();
+            const double& GOAL_HEIGHT = field.dimensions.goal_crossbar_height;
+            const double& GOAL_DIAMETER = field.dimensions.goalpost_diameter;
 
             // Get our goal segments
             auto hSegments = image.horizontalSegments.equal_range(ObjectClass::GOAL);
@@ -252,9 +255,6 @@ namespace vision {
 
             // Do the kinematics for the goals
             for(auto it = goals->begin(); it != goals->end(); ++it) {
-
-                double GOAL_DIAMETER = 0.1;
-                double GOAL_HEIGHT = 0.8;
 
                 std::vector<VisionObject::Measurement> measurements;
 

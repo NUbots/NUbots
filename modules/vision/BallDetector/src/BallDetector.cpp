@@ -19,11 +19,11 @@
 
 #include "BallDetector.h"
 
-#include "messages/input/Sensors.h"
 #include "messages/vision/ClassifiedImage.h"
-#include "messages/support/Configuration.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/CameraParameters.h"
+#include "messages/support/Configuration.h"
+#include "messages/support/FieldDescription.h"
 
 #include "utility/math/geometry/Plane.h"
 
@@ -57,6 +57,7 @@ namespace vision {
     using utility::nubugger::graph;
 
     using messages::support::Configuration;
+    using messages::support::FieldDescription;
 
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacCircleModel;
@@ -72,10 +73,11 @@ namespace vision {
         });
 
 
-        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters, Sensors>, Options<Single>>("Ball Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const Sensors& sensors) {
+        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters>, With<FieldDescription>, Options<Single>>("Ball Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const FieldDescription& field) {
 
             // This holds our points that may be a part of the ball
             std::vector<arma::vec2> ballPoints;
+            const auto& sensors = *image.sensors;
 
             // Get all the points that could make up the ball
             for(int i = 0; i < 1; ++i) {
@@ -117,8 +119,6 @@ namespace vision {
 
             for(auto& result : ransacResults) {
 
-                double BALL_DIAMETER = 0.1; //TODO:Universal CONFIG
-
                 std::vector<VisionObject::Measurement> measurements;
                 measurements.reserve(2);
 
@@ -138,13 +138,13 @@ namespace vision {
                 arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay, cam.focalLengthPixels);
 
                 // Get our width based distance to the ball
-                double widthDistance = widthBasedDistanceToCircle(BALL_DIAMETER, top, base, cam.focalLengthPixels);
+                double widthDistance = widthBasedDistanceToCircle(field.ball_radius * 2, top, base, cam.focalLengthPixels);
                 arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
 
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), arma::diagmat(arma::vec({0.003505351, 0.001961638, 1.68276E-05})) });
 
                 // Project this vector to a plane midway through the ball
-                Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, BALL_DIAMETER / 2.0 });
+                Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, field.ball_radius });
                 arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, sensors.orientationCamToGround, ballBisectorPlane);
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), arma::diagmat(arma::vec({0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
 
