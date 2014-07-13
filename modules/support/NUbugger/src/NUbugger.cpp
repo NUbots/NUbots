@@ -164,7 +164,14 @@ namespace support {
         std::string command = message.command().command();
         log("Received command:", command);
         if (command == "download_lut") {
-            auto lut = powerplant.get<LookUpTable>();
+            std::shared_ptr<LookUpTable> lut;
+            try {
+                lut = powerplant.get<LookUpTable>();
+            }
+            catch (NUClear::metaprogramming::NoDataException err) {
+                log("There is no LUT loaded");
+                return;
+            }
 
             Message message;
 
