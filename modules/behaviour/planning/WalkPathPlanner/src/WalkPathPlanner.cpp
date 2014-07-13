@@ -184,10 +184,10 @@ namespace modules {
                      const std::vector<VisionBall>&
                     ) {
                     
-                    if(planType = messages::behaviour::WalkApproach::StandStill){
+                    if(planType == messages::behaviour::WalkApproach::StandStill){
                         emit(std::make_unique<WalkStopCommand>());
                         return;
-                    } else (planType = messages::behaviour::WalkApproach::DirectCommand){
+                    } else if(planType == messages::behaviour::WalkApproach::DirectCommand){
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
                         command->velocity = currentTargetPosition;
                         command->rotationalSpeed = currentTargetHeading[0];
@@ -207,7 +207,7 @@ namespace modules {
                     //work out where we're going
                     if (targetPosition == messages::behaviour::WalkTarget::Robot) {
                         //XXX: check if robot is visible
-                    } else if (targetPosition ==messages::behaviour::WalkTarget::Ball) {
+                    } else if (targetPosition == messages::behaviour::WalkTarget::Ball) {
                         targetPos = ballPos;
                     } else { //other types default to position/waypoint location
                         targetPos = currentTargetPosition;
@@ -223,7 +223,7 @@ namespace modules {
                     //calculate the basic movement plan
                     arma::vec movePlan;
 
-                    switch (planType) {
+                    /*switch (planType) { //compiler wont enumerating the switch, converting to if-else
                         case messages::behaviour::WalkApproach::ApproachFromDirection:
                             movePlan = approachFromDirection(selfs.front(),targetPos,targetHead);
                             break;
@@ -233,7 +233,16 @@ namespace modules {
                         case messages::behaviour::WalkApproach::OmnidirectionalReposition:
                             movePlan = goToPoint(selfs.front(),targetPos,targetHead);
                             break;
+                    }*/
+
+                    if(planType == messages::behaviour::WalkApproach::ApproachFromDirection) {
+                        movePlan = approachFromDirection(selfs.front(),targetPos,targetHead);  
+                    } else if(planType == messages::behaviour::WalkApproach::WalkToPoint) {
+                        movePlan = goToPoint(selfs.front(),targetPos,targetHead);
+                    } else if(planType == messages::behaviour::WalkApproach::OmnidirectionalReposition) {
+                        movePlan = goToPoint(selfs.front(),targetPos,targetHead);
                     }
+
                     //std::cout << "Target Position: " << targetPos[0] << ", " << targetPos[1] << std::endl;
                     //std::cout << "Self Position: " << selfs.front().position[0] << ", " << selfs.front().position[1] << std::endl;
                     //std::cout << "Self Heading: " << selfs.front().heading[0] << ", " << selfs.front().heading[1] << std::endl;
