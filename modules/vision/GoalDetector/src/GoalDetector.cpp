@@ -255,6 +255,8 @@ namespace vision {
                 double widthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, goalLeft, goalRight, cam.focalLengthPixels);
                 arma::vec3 goalCentreGroundSpace = widthDistance * image.sensors->orientationCamToGround.submat(0,0,2,2) * goalCentreRay + image.sensors->orientationCamToGround.submat(0,3,2,3);
                 // TODO convert this into sphericial coordiantes and error
+
+//              NUClear::log("Goal pos = ", goalCentreGroundSpace.t());
                 goalCentreGroundSpace[2] = 0; //Project to ground
                 measurements.push_back({ cartesianToSpherical(goalCentreGroundSpace), arma::diagmat(arma::vec({0.002357231 * 4, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
                 
