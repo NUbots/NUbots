@@ -247,7 +247,7 @@ namespace modules {
 	                throw std::runtime_error("FieldDescription Update: SoccerConfig module might not be installed");
 	            }
 
-	            FIELD_DESCRIPTION fd = *desc;
+	            FIELD_DESCRIPTION = *desc;
 	        });
 
 			// Check to see if we are looking at the ball.
