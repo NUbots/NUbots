@@ -25,6 +25,8 @@
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/CameraParameters.h"
 
+#include "utility/math/geometry/Plane.h"
+
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacCircleModel.h"
 #include "utility/math/vision.h"
@@ -42,14 +44,14 @@ namespace vision {
     using messages::vision::VisionObject;
     using messages::vision::Ball;
 
+    using Plane = utility::math::geometry::Plane<3>;
+
     using utility::math::vision::widthBasedDistanceToCircle;
-    using utility::math::vision::projectCamToGroundPlane;
-    using utility::math::vision::getGroundPointFromScreen;
+    using utility::math::vision::projectCamToPlane;
     using utility::math::vision::imageToScreen;
     using utility::math::vision::getCamFromScreen;
     using utility::math::vision::getParallaxAngle;
     using utility::math::vision::projectCamSpaceToScreen;
-    using utility::math::vision::projectCamToGroundPlane;
 
     using utility::math::coordinates::cartesianToSpherical;
     using utility::nubugger::graph;
@@ -142,10 +144,8 @@ namespace vision {
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), arma::diagmat(arma::vec({0.003505351, 0.001961638, 1.68276E-05})) });
 
                 // Project this vector to a plane midway through the ball
-                arma::mat44 ballBisectorPlaneTransform = sensors.orientationCamToGround;
-                ballBisectorPlaneTransform(2,3) -= BALL_DIAMETER / 2.0;
-                arma::vec3 ballCentreGroundProj = arma::vec3({ 0, 0, BALL_DIAMETER / 2.0 }) + projectCamToGroundPlane(ballCentreRay, ballBisectorPlaneTransform);
-
+                Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, BALL_DIAMETER / 2.0 });
+                arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, sensors.orientationCamToGround, ballBisectorPlane);
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), arma::diagmat(arma::vec({0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
 
                 // std::cerr << measurements[0].position[0]
@@ -155,6 +155,9 @@ namespace vision {
                 //    << "," << measurements[1].position[1]
                 //    << "," << measurements[1].position[2]
                 //    << std::endl;
+
+                emit(graph("Ball Width", measurements[0].position[0], measurements[0].position[1], measurements[0].position[2]));
+                emit(graph("Ball D2P", measurements[1].position[0], measurements[1].position[1], measurements[1].position[2]));
 
                 /*
                  *  BUILD OUR BALL

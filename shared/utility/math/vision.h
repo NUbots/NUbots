@@ -141,21 +141,18 @@ namespace vision {
         return arma::vec3{camFocalLengthPixels, screen[0], screen[1]};
     }
 
-    inline arma::vec3 projectCamToGroundPlane(const arma::vec3& cam, const arma::mat44& camToGround){
+    inline arma::vec3 projectCamToPlane(const arma::vec3& cam, const arma::mat44& camToGround, const utility::math::geometry::Plane<3>& plane){
         arma::vec3 lineDirection = camToGround.submat(0,0,2,2) * cam;
         arma::vec3 linePosition = camToGround.submat(0,3,2,3);
 
         utility::math::geometry::ParametricLine<3> line;
         line.setFromDirection(lineDirection, linePosition);
 
-        utility::math::geometry::Plane<3> p;
-        p.setFromNormal({0,0,1},{0,0,0});
-
-        return p.intersect(line);
+        return plane.intersect(line);
     }
 
     inline arma::vec3 getGroundPointFromScreen(const arma::vec2& screenPos, const arma::mat44& camToGround, const double& camFocalLengthPixels){
-        return projectCamToGroundPlane(getCamFromScreen(screenPos, camFocalLengthPixels), camToGround);
+        return projectCamToPlane(getCamFromScreen(screenPos, camFocalLengthPixels), camToGround, utility::math::geometry::Plane<3>({ 0, 0, 1 }, { 0, 0, 0 }));
     }
 
 

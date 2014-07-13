@@ -107,7 +107,7 @@ namespace support {
             rfsr->set_y(sensors.rightFSR[1]);
             rfsr->set_z(sensors.rightFSR[2]);
 
-            // send(message);
+            send(message);
 
         }));
     }

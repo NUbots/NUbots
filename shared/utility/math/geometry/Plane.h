@@ -43,9 +43,9 @@ namespace geometry {
 		void setFromNormal(Vector normal_, Vector point_){
 			if(arma::norm(normal_, 1) <= 0){
 				throw std::domain_error("Plane::setFromNormal - Normal is zero vector. Normal to plane must be non-zero!");
-			} 
+			}
 			normal = arma::normalise(normal_);
-			point = point_;				
+			point = point_;
 		}
 
 		void setFrom3Points(Vector p1, Vector p2, Vector p3){
@@ -56,7 +56,7 @@ namespace geometry {
 			}
 		}
 
-		Vector intersect(ParametricLine<n> l){
+		Vector intersect(ParametricLine<n> l) const {
 			double lDotN = arma::dot(l.direction, normal);
 			if(lDotN == 0){
 				throw std::domain_error("Plane::intersect - Plane does not meet line!");
@@ -65,10 +65,10 @@ namespace geometry {
 			if(tIntersection < l.tLimits[0] || tIntersection > l.tLimits[1]){
 				throw std::domain_error("Plane::intersect - Plane does not meet line segment (intersection falls off segment)!");
 			}
-			return tIntersection * l.direction + l.point;   
+			return tIntersection * l.direction + l.point;
 		}
 
-		
+
 	};
 
 }
