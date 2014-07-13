@@ -183,72 +183,7 @@ namespace modules {
                      const std::shared_ptr<const std::vector<VisionObstacle>>& robots,
                      const std::vector<VisionBall>&
                     ) {
-                    /*if(visionBalls.size()>0){
-                        arma::vec ballPosition = ball.position;
-
-                        //Jake walk path planner:
-                        auto self = selfs[0];
-
-                        arma::vec goalPosition = arma::vec3({-3,0,1});
-
-                        arma::vec normed_heading = arma::normalise(self.heading);
-                        arma::mat worldToRobotTransform = arma::mat33{      normed_heading[0],  normed_heading[1],         0,
-                                                                             -normed_heading[1],  normed_heading[0],         0,
-                                                                                              0,                 0,         1};
-
-                        worldToRobotTransform.submat(0,2,1,2) = -worldToRobotTransform.submat(0,0,1,1) * self.position;
-
-                        arma::vec homogeneousKickTarget = worldToRobotTransform * goalPosition;
-                        arma::vec kickTarget_robot = homogeneousKickTarget.rows(0,1);    //In robot coords
-                        arma::vec kickDirection = arma::normalise(kickTarget_robot-ballPosition);    //In robot coords
-                        arma::vec kickDirectionNormal = arma::vec2({-kickDirection[1], kickDirection[0]});
-
-                        //float kickTargetBearing_robot = std::atan2(kickTarget_robot[1],kickTarget_robot[0]);
-                        float ballBearing = std::atan2(ballPosition[1],ballPosition[0]);
-
-                        //calc self in kick coords
-                        arma::vec moveTarget = ballPosition - ballLineupDistance * kickDirection;
-
-                        arma::mat robotToKickFrame = arma::mat33{      kickDirection[0],  kickDirection[1],         0,
-                                                                        -kickDirection[1],  kickDirection[0],         0,
-                                                                                              0,                 0,         1};
-                        robotToKickFrame.submat(0,2,1,2) = -robotToKickFrame.submat(0,0,1,1) * moveTarget;
-
-                        arma::vec selfInKickFrame = robotToKickFrame * arma::vec3({0,0,1});
-
-                        //Hyperboal x >a*sqrt(y^2/a^2 + 1)
-                        if(selfInKickFrame[0] > ballLineupDistance * std::sqrt(selfInKickFrame[1]*selfInKickFrame[1]/(ApproachCurveFactor*ApproachCurveFactor) + 1)){   //Inside concave part
-                            arma::vec moveTargetA = ballPosition + ballLineupDistance * kickDirectionNormal;
-                            arma::vec moveTargetB = ballPosition - ballLineupDistance * kickDirectionNormal;
-                            if(arma::norm(moveTargetA) < arma::norm(moveTargetB)){
-                                moveTarget = moveTargetA;
-                            } else {
-                                moveTarget = moveTargetB;
-                            }
-                        }
-
-                        if(arma::norm(moveTarget) < closeApproachDistance) {
-                            moveTarget = moveTarget * closeApproachSpeed;
-                        }
-
-                        std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
-
-                        command->velocity = arma::normalise(arma::vec2{moveTarget[0],moveTarget[1]});
-                        command->rotationalSpeed = ballBearing;  //vx,vy, alpha
-                        emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));
-                        emit(std::move(command));//XXX: emit here
-
-
-                        //emit(std::move(std::make_unique<WalkStartCommand>()));
-
-                    } else {
-                        float ballBearing = std::atan2(ball.position[1],ball.position[0]);
-                        std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
-                        command->velocity = arma::vec({0,0});
-                        command->rotationalSpeed = turnSpeed * (ballBearing > 0 ? 1 : -1 );  //vx,vy, alpha
-                        emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));
-                        emit(std::move(command));//XXX: emit here
-                    }*/
+                    
 
                     //std::cout << "starting path planning" << std::endl;
 //std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
@@ -441,20 +376,20 @@ namespace modules {
                 waypoints[2] = arma::vec2({-waypoints[0][1], waypoints[0][0]});
 
 //std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
-                //offset the waypoints by the foot separation so we are aiming at the ball with the correct foot
-                arma::vec2 footOffset = arma::normalise(waypoints[0]) * (footSeparation + footSize) * 0.5;
 
+                //offset the waypoints by the foot separation so we are aiming at the ball with the correct foot
+                std::vector<arma::vec2> footOffsets(3);
+                footOffsets[1] = footOffsets[2] = arma::normalise(waypoints[0]) * (footSeparation + footSize) * 0.5;
                 //do a foot offset for the straight approach case
                 if (arma::dot(waypoints[1], waypoints[1]) < arma::dot(waypoints[1], waypoints[1])) {
-                    waypoints[0] += arma::normalise(waypoints[1]) * (footSeparation + footSize) * 0.5;
+                    footOffsets[0] = arma::normalise(waypoints[1]) * (footSeparation + footSize) * 0.5;
                 } else {
-                    waypoints[0] += arma::normalise(waypoints[2]) * (footSeparation + footSize) * 0.5;
+                    footOffsets[0] = arma::normalise(waypoints[2]) * (footSeparation + footSize) * 0.5;
                 }
 
                 //add the foot offsets for sidekicks to the side approach case
-//std::cerr << __FILE__ << ":" << __func__ << " - " << __LINE__ << std::endl;
-                waypoints[1] += footOffset;
-                waypoints[2] += footOffset;
+                //waypoints[1] += footOffset;
+                //waypoints[2] += footOffset;
 
                 //fill target headings and distances, and movement bearings and costs
                 std::vector<double> headings(3);
@@ -468,8 +403,8 @@ namespace modules {
                     const double waypointHeading = atan2(-waypoints[i][1], -waypoints[i][0]) - selfHeading;
                     headings[i] = atan2(sin(waypointHeading), cos(waypointHeading));
 
-                    //calculate the estimated distance to destination
-                    arma::vec waypointPos = waypoints[i] + target - self.position;
+                    //calculate the estimated distance to destination - include the foot offset for ball lineup at this point
+                    arma::vec waypointPos = waypoints[i] + target - self.position + footOffsets[i];
                     distances[i] = arma::norm(waypointPos, 2);
 
                     //calculate the angle between the current direction and the bearing of the destination
