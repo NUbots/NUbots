@@ -62,6 +62,9 @@ namespace vision {
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacCircleModel;
 
+    // TODO the ball detector can detect multiple balls in the same ball due to classification errors, merge or throwout
+    // TODO the ball detector can see balls that are far too big or too small to be reasonable, throw those out too
+
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 

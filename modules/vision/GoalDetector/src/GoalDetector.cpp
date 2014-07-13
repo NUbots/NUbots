@@ -65,6 +65,9 @@ namespace vision {
     using messages::support::Configuration;
     using messages::support::FieldDescription;
 
+    // TODO the system is too generous with adding segments above and below the goals and makes them too tall, stop it
+    // TODO the system needs to throw out the kinematics and height based measurements when it cannot be sure it saw the tops and bottoms of the goals
+
     GoalDetector::GoalDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
