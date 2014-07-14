@@ -58,7 +58,7 @@ namespace planning {
             const std::vector<messages::vision::Ball>& vision_balls,
             const KickPlan& kickPlan) {
             
-            if (vision_balls.size() > 0) {
+            if (vision_balls.size() != 0) {
                 framesNotSeen++;
             } else {
                 framesNotSeen = 0;
