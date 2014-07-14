@@ -692,8 +692,21 @@ std::cerr << __func__ << std::endl;
 
 			void SoccerStrategy::playGoalie(const arma::vec2& localisationBall) {
 
-				sideStepToPoint(currentState.ballGoalieIntersection);
+				// Limit ballGoalieIntersection to within goal box
+				if(currentState.ballGoalieIntersection[1] > 0) {
+					arma::vec2 zoned_point = {ballGoalieIntersection[0], std::min(ballGoalieIntersection[1], FIELD_DESCRIPTION.dimensions.goal_width / 2)};
+				} else {
+					arma::vec2 zoned_point = {ballGoalieIntersection[0], std::max(ballGoalieIntersection[1], -FIELD_DESCRIPTION.dimensions.goal_width / 2)};
+				}
 
+				if(isWalking && arma::norm(self.position - zoned_point < POSITION_THRESHOLD_TIGHT
+							 && std::fabs(heading - std::cos(currentState.heading[0])) < ANGLE_THRESHOLD)) {
+					stopWalking();
+				} else if(arma::norm(self.position - zoned_point > POSITION_THRESHOLD_LOOSE))
+						||std::fabs(heading - std::cos(currentState.heading[0]) > ANGLE_THRESHOLD) {
+					sideStepToPoint(zoned_point);
+				}
+				
 				diveForBall(localisationBall);
 			}
 
@@ -729,10 +742,10 @@ std::cerr << __func__ << std::endl;
 				// Warning Oscillation with bad localisation
 				// Was arma::norm(self.position - )
 				if (isWalking && arma::norm(self.position - startPosition) < POSITION_THRESHOLD_TIGHT
-							  && std::fabs(heading - ANGLE_THRESHOLD) < ANGLE_THRESHOLD) {
+							  && std::fabs(heading - std::cos(currentState.heading[0]) < ANGLE_THRESHOLD) {
 					stopWalking();
 				} else if(arma::norm(self.position - ZONES.at(MY_ZONE).startPosition) > POSITION_THRESHOLD_LOOSE
-						||std::fabs(heading-ANGLE_THRESHOLD) > ANGLE_THRESHOLD) 
+						||std::fabs(heading - std::cos(currentState.heading[0]) > ANGLE_THRESHOLD) 
 				{
 					goToPoint(ZONES.at(MY_ZONE).startPosition, arma::vec2{std::cos(heading), std::sin(heading)});
 				}
