@@ -261,25 +261,25 @@ namespace modules {
 			// Check to see if we are looking at the ball.
 			on<Trigger<LookAtBallStart>>([this](const LookAtBallStart&) {
 				lookingAtBall = true;
-				std::cerr << "LOOKING AT BALL" << std::endl;
+//				std::cerr << "LOOKING AT BALL" << std::endl;
 			});
 
 			// Check to see if we are no longer looking at the ball.
 			on<Trigger<LookAtBallStop>>([this](const LookAtBallStop&) {
 				lookingAtBall = false;
-				std::cerr << "NOT LOOKING AT BALL" << std::endl;
+//				std::cerr << "NOT LOOKING AT BALL" << std::endl;
 			});
 
 			// Check to see if we are looking at the goals.
 			on<Trigger<LookAtGoalStart>>([this](const LookAtGoalStart&) {
 				lookingAtGoal = true;
-				std::cerr << "LOOKING AT GOAL" << std::endl;
+//				std::cerr << "LOOKING AT GOAL" << std::endl;
 			});
 
 			// Check to see if we are no longer looking at the goals.
 			on<Trigger<LookAtGoalStop>>([this](const LookAtGoalStop&) {
 				lookingAtGoal = false;
-				std::cerr << "NOT LOOKING AT GOAL" << std::endl;
+//				std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 			});
 
 			// Main Loop
@@ -459,6 +459,8 @@ namespace modules {
 								stopWalking();
 								findSelfAndBall();
 							} else {
+								kickBall(enemyGoal);
+
 								if(IS_GOALIE) {
 									// TODO - fix goalie logic
 									// At some stage he'll have to move to a default position (or possibly optimal?)
@@ -473,7 +475,6 @@ namespace modules {
 								} else {
 									searchForBall(ball, selfs[0], gameState);
 								}
-								findSelfAndBall();
 							}
 							break;
 						case Phase::TIMEOUT:
@@ -519,7 +520,7 @@ namespace modules {
 				}
 
 				// What state is the game in?
-				switch (gameState.phase) {
+				switch (gameState->phase) {
 					case Phase::READY:
 						currentState.primaryGameState = GameStatePrimary::READY;
 						if(currentState.primaryGameState != previousState.primaryGameState) {
@@ -570,7 +571,7 @@ namespace modules {
 						break;
 				}
 
-				switch (gameState.mode) {
+				switch (gameState->mode) {
 					case messages::input::gameevents::Mode::PENALTY_SHOOTOUT:
 						currentState.secondaryGameState = GameStateSecondary::PENALTY_SHOOTOUT;
 						if(currentState.secondaryGameState != previousState.secondaryGameState) {
@@ -674,20 +675,19 @@ namespace modules {
 			}
 
 			void SoccerStrategy::playSoccer(const arma::vec2& localisationBall, const VisionBall& visionBall, const messages::localisation::Self& self, const std::shared_ptr<const messages::input::gameevents::GameState>& gameState){
+std::cerr << __func__ << std::endl;
 				// TODO: What are these for?
 				(void)visionBall;
 				(void)self;
 				(void)gameState;
 
-//				arma::vec2 goalPosition = ZONES.at(MY_ZONE).zone.projectPointToPolygon(localisationBall);
+				arma::vec2 goalPosition = ZONES.at(MY_ZONE).zone.projectPointToPolygon(localisationBall);
 
-//				if(arma::norm(goalPosition - localisationBall) < 0.1){
+				if(arma::norm(goalPosition - localisationBall) < 0.1){
 					approachBall(enemyGoal);
-//				} else {
-//					goToPoint(goalPosition, localisationBall - goalPosition);
-//				}
-
-				kickBall(enemyGoal);
+				} else {
+					goToPoint(goalPosition, localisationBall - goalPosition);
+				}
 			}
 
 			void SoccerStrategy::playGoalie(const arma::vec2& localisationBall) {
@@ -698,6 +698,7 @@ namespace modules {
 			}
 
 			void SoccerStrategy::searchForBall(const messages::localisation::Ball& localisationBall, const Self& self, const std::shared_ptr<const messages::input::gameevents::GameState>& gameState){
+std::cerr << __func__ << std::endl;
 				(void)localisationBall;
 				(void)gameState;
 
@@ -708,7 +709,7 @@ namespace modules {
 					if (utility::time::TimeDifferenceSeconds(NUClear::clock::now(), currentState.timeBallLastSeen) > BALL_TIMEOUT_THRESHOLD) {
 						spin();
 					} else {
-						emit(std::make_unique<LookAtBallStart>());
+						findBall();
 					}
 				} else if(arma::norm(self.position - ZONES.at(MY_ZONE).defaultPosition) > POSITION_THRESHOLD_LOOSE) {
 					goToPoint(ZONES.at(MY_ZONE).defaultPosition, self.position-ZONES.at(MY_ZONE).defaultPosition);
@@ -746,6 +747,7 @@ namespace modules {
 			//TODO figure out what these should do
 
 			void SoccerStrategy::findSelfAndBall(){
+std::cerr << __func__ << std::endl;
 				// If we haven't seen the ball for some time now, look for the ball.
 				// Otherwise look for the goal.
 				// Try to mix these two actions nicely so we can get good localisation as well as adequate knowledge of the ball location.
@@ -776,6 +778,7 @@ namespace modules {
 			}
 
 			void SoccerStrategy::findSelf() {
+std::cerr << __func__ << std::endl;
 				// We can't be looking at both the ball and goal simulatenously.
 				if (lookingAtBall) {
 					emit(std::make_unique<LookAtBallStop>());
@@ -789,6 +792,7 @@ namespace modules {
 			}
 
 			void SoccerStrategy::findBall() {
+std::cerr << __func__ << std::endl;
 				// We can't be looking at both the ball and goal simulatenously.
 				if (lookingAtGoal) {
 					emit(std::make_unique<LookAtGoalStop>());
@@ -801,6 +805,7 @@ namespace modules {
 			}
 
 			void SoccerStrategy::spin(){
+std::cerr << __func__ << std::endl;
 				auto command = std::make_unique<WalkStrategy>();
 				command->walkMovementType = messages::behaviour::WalkApproach::DirectCommand;
 				command->target = {0,0};
@@ -811,4 +816,4 @@ namespace modules {
 
 		}  // strategy
 	}  // behaviours
-}  // modules
+} // modules
