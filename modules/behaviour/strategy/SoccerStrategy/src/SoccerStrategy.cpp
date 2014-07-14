@@ -82,10 +82,8 @@ namespace modules {
 				KICK_DISTANCE_THRESHOLD = config["KICK_DISTANCE_THRESHOLD"].as<float>();
 				BALL_CERTAINTY_THRESHOLD = config["BALL_CERTAINTY_THRESHOLD"].as<float>();
 				BALL_SELF_INTERSECTION_REGION = config["BALL_SELF_INTERSECTION_REGION"].as<float>();
-				BALL_LOOK_ERROR = config["BALL_LOOK_ERROR"].as<arma::vec2>();
 				BALL_MOVEMENT_THRESHOLD = config["BALL_MOVEMENT_THRESHOLD"].as<float>();
 				BALL_TIMEOUT_THRESHOLD = config["BALL_TIMEOUT_THRESHOLD"].as<float>();
-				GOAL_LOOK_ERROR = config["GOAL_LOOK_ERROR"].as<arma::vec2>();
 				ANGLE_THRESHOLD = config["ANGLE_THRESHOLD"].as<float>();
 				POSITION_THRESHOLD_TIGHT = config["POSITION_THRESHOLD_TIGHT"].as<float>();
 				POSITION_THRESHOLD_LOOSE = config["POSITION_THRESHOLD_LOOSE"].as<float>();
@@ -119,7 +117,7 @@ namespace modules {
 					throw std::domain_error("SoccerStrategy::on<Trigger<Configuration<SoccerStrategyConfig>>> - Invalid zone description!");
 				}
 
-				arma::vec2 initial_goal_heading = config["initial_goal_heading"].as<arma::vec2>(); //this is not used yet
+				arma::vec2 initial_goal_heading = config["INITIAL_GOAL_HEADING"].as<arma::vec2>(); //this is not used yet
 			});
 
 			on<Trigger<Startup>>([this](const Startup&) {

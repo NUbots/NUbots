@@ -177,8 +177,6 @@ namespace modules {
 			float BALL_MOVEMENT_THRESHOLD;
 			float BALL_TIMEOUT_THRESHOLD;
 			bool IS_GOALIE;
-			arma::vec2 BALL_LOOK_ERROR;
-			arma::vec2 GOAL_LOOK_ERROR;
 			float ANGLE_THRESHOLD;
 			float POSITION_THRESHOLD_TIGHT;
 			float POSITION_THRESHOLD_LOOSE;
