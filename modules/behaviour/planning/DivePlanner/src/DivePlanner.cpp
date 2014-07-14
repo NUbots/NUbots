@@ -34,7 +34,7 @@ namespace planning {
 
     using messages::localisation::Ball;
     using messages::localisation::Self;
-    using messages::motion::DickCommand;
+    using messages::motion::DiveCommand;
     using messages::support::Configuration;
     using messages::motion::WalkStopCommand;
     using messages::behaviour::LimbID;
@@ -54,22 +54,29 @@ namespace planning {
         	const std::vector<messages::vision::Ball>& vision_balls,
         	const DivePlan& divePlan) {
 
-            if(vision_balls.size()>0 && ball.position[0] > 0){
+        	// TODO: why are these used?
+        	(void)selfs;
+        	(void)divePlan;
+
+            if(vision_balls.size()>0 &&
+               ball.position[0] > 0 &&
+               -ball.velocity[0] > SPEED_THRESHOLD &&
+               ball.position[0] < DISTANCE_THRESHOLD ){
+
                 //NUClear::log("Ball Vel:", -ball.velocity[0] , ball.position[0]);
-                if(-ball.velocity[0] > SPEED_THRESHOLD && ball.position[0] < DISTANCE_THRESHOLD){
-                    if(ball.position[1]>0){
-                        //Dive left
-                        auto x = std::make_unique<DiveCommand>();
-                        x->direction[0] = 0;
-                        x->direction[1] = 1;
-                        emit(std::move(x));
-                    } else {
-                        //Dive right
-                        auto x = std::make_unique<DiveCommand>();
-                        x->direction[0] = 0;
-                        x->direction[1] = -1;
-                        emit(std::move(x));
-                    }
+                
+                if(ball.position[1]>0){
+                    //Dive left
+                    auto x = std::make_unique<DiveCommand>();
+                    x->direction[0] = 0;
+                    x->direction[1] = 1;
+                    emit(std::move(x));
+                } else {
+                    //Dive right
+                    auto x = std::make_unique<DiveCommand>();
+                    x->direction[0] = 0;
+                    x->direction[1] = -1;
+                    emit(std::move(x));
                 }
             }
         });

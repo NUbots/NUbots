@@ -25,7 +25,9 @@
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
 #include "utility/time/time.h"
+#include "messages/input/ServoID.h"
 #include "utility/motion/InverseKinematics.h"
+#include "messages/support/FieldDescription.h"
 
 namespace modules {
     namespace behaviour {
@@ -69,15 +71,24 @@ namespace modules {
 		handle = on<Trigger<std::vector<Ball>>,
 			With<std::vector<Goal>>,
 			With<Sensors>,
+			With<Optional<messages::support::FieldDescription>>,
+			With<Optional<std::vector<messages::localisation::Self>>>,
 			With<Optional<messages::localisation::Ball>>
 				>([this](const std::vector<Ball>& balls,
 					const std::vector<Goal>& goals,
 					const Sensors& sensors,
+					const std::shared_ptr<const messages::support::FieldDescription>& fieldDesc,
+					const std::shared_ptr<const std::vector<messages::localisation::Self>>& selfs,
 					const std::shared_ptr<const messages::localisation::Ball>& ball) {
             
             const bool ballIsLost = utility::time::TimeDifferenceSeconds(NUClear::clock::now(),timeLastSeen) > BALL_SEARCH_TIMEOUT_MILLISECONDS;
             const bool ballIsUncertain = ((ball->sr_xx > BALL_UNCERNTAINTY_THRESHOLD) || (ball->sr_yy > BALL_UNCERNTAINTY_THRESHOLD));
             ++framesSinceSeen;
+            
+            //XXX: assume these values are correct for global angle conversion
+            arma::vec2 cameraAngle = arma::vec2({sensors.servos[size_t(messages::input::ServoID::HEAD_YAW)].presentPosition,
+                                                sensors.servos[size_t(messages::input::ServoID::HEAD_PITCH)].presentPosition});
+            
             
             //if balls are seen, then place those and everything else that's useful into the look at list
 			if (balls.size() > 0) {
@@ -87,11 +98,41 @@ namespace modules {
 				angles.reserve(4);
 
 				angles.emplace_back(LookAtAngle {balls[0].screenAngular[0], -balls[0].screenAngular[1]});
-
-				for (const auto& g : goals) {
-					angles.emplace_back(LookAtAngle {g.screenAngular[0], -g.screenAngular[1]});
+                
+                //look for either visible or invisible goals
+                if (goals.size() > 0) {
+				    for (const auto& g : goals) {
+					    angles.emplace_back(LookAtAngle {g.screenAngular[0], -g.screenAngular[1]});
+				    }
+				} else if (fieldDesc != NULL && selfs != NULL) {
+				    arma::vec2 screenAngular;
+				    std::vector<arma::vec2> fieldGoalPos;
+				    
+				    
+                    arma::vec normed_heading = arma::normalise(selfs->front().heading);
+                    arma::mat robotToWorldRotation;
+                    robotToWorldRotation << normed_heading[0] << -normed_heading[1] << arma::endr
+                                         << normed_heading[1] <<  normed_heading[0];
+				    
+				    fieldGoalPos.push_back(robotToWorldRotation.t() * (fieldDesc->goalpost_bl - selfs->front().position));
+				    fieldGoalPos.push_back(robotToWorldRotation.t() * (fieldDesc->goalpost_br - selfs->front().position));
+				    fieldGoalPos.push_back(robotToWorldRotation.t() * (fieldDesc->goalpost_yl - selfs->front().position));
+				    fieldGoalPos.push_back(robotToWorldRotation.t() * (fieldDesc->goalpost_yr - selfs->front().position));
+				    
+				    for (const auto& g : fieldGoalPos) {
+				        //convert to local angle from global angle
+				        screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt(
+			                                                {g[0], g[1], 0}, 
+			                                                sensors.orientationCamToGround, 
+			                                                sensors.orientationBodyToGround) - cameraAngle;
+			            //XXX: change to use the camera description to filter these
+			            if (std::abs(balls[0].screenAngular[0] - screenAngular[0]) < M_PI/3.0 &&
+			                std::abs(-balls[0].screenAngular[0] - screenAngular[1]) < M_PI/4.5) {
+                            angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+                        }
+			        }
+			        
 				}
-
 				emit(std::make_unique<std::vector<LookAtAngle>>(angles));
 			} else if (BALL_SEEN_COUNT_THRESHOLD > framesSinceSeen) {
 			    //don't activate other options because we could still have the ball on screen
@@ -104,7 +145,7 @@ namespace modules {
 			                                            sensors.orientationCamToGround, 
 			                                            sensors.orientationBodyToGround);
 			    
-				angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+				angles.emplace_back(LookAtAngle {screenAngular[0]-cameraAngle[0], screenAngular[1]-cameraAngle[1]}) ;
 			    emit(std::make_unique<std::vector<LookAtAngle>>(angles));
             }
             //if the ball is lost, do a scan using uncertainties to try to find it
@@ -141,7 +182,6 @@ namespace modules {
 
 			else if(ballIsLost > BALL_SEARCH_TIMEOUT_MILLISECONDS){
 				//do a blind scan'n'pan
-				//XXX: this needs to be a look at sequence rather than a look at point
 				std::vector<LookAtPosition> angles;
 
 				const double scanYaw = 1.5;

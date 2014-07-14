@@ -112,59 +112,6 @@ namespace modules {
                     emit(std::move(std::make_unique<WalkStartCommand>()));
                 });
 
-                // add in fake walk localisation
-                /*
-                on<Trigger<Every<3, Per<std::chrono::seconds>>>, With<Optional<WalkCommand>>>
-                    ([this](const time_t&, const std::shared_ptr<const WalkCommand>& w) {
-                    static size_t ctr = 0;
-
-                    const double ballx = 0.0;
-                    const double bally = 0.0;
-                    const double targetx = 3.0;
-                    const double targety = 0.0;
-
-                    static double x,y,h;
-
-                    if ( (ctr % 1000000000) == 0) {
-                        //set position
-                        x = -1.0;
-                        y = -2.0;
-                        h = -1.5;
-
-                        //emit ball pos
-                        std::unique_ptr<messages::localisation::Ball> b = std::make_unique<messages::localisation::Ball>();
-                        b->position = arma::vec({ballx,bally});
-                        emit(std::move(b));
-
-                        //emit robots:
-                        auto o = std::make_unique<std::vector<messages::vision::Obstacle>>();
-                        emit(std::move(o));
-                    }
-
-                    //update self pos
-                    if (w != NULL) {
-                        x += (w->velocity[0]*cos(h) - w->velocity[1]*sin(h)) * 0.015;
-                        y += (w->velocity[0]*sin(h) + w->velocity[1]*cos(h)) * 0.015;
-                        h += (w->rotationalSpeed) * 0.1;
-                    }
-
-
-
-
-                    auto robot_msg = std::make_unique<std::vector<messages::localisation::Self>>();
-
-                    messages::localisation::Self robot_model;
-                    robot_model.position = arma::vec({x,y});
-                    robot_model.heading = arma::vec({cos(h),sin(h)});
-                    robot_model.sr_xx = 0.1;
-                    robot_model.sr_xy = 0.1;
-                    robot_model.sr_yy = 0.1;
-                    robot_msg->push_back(robot_model);
-
-                    emit(std::move(robot_msg));
-
-                    ++ctr;
-                    });*/
 
                 on<Trigger<Startup>>([this](const Startup&) {
                     emit(std::make_unique<WalkStartCommand>());
@@ -221,19 +168,7 @@ namespace modules {
                         targetHead = arma::normalise(arma::vec(currentTargetHeading)-targetPos);
                     }
                     //calculate the basic movement plan
-                    arma::vec movePlan;
-
-                    /*switch (planType) { //compiler wont enumerate the switch, converting to if-else
-                        case messages::behaviour::WalkApproach::ApproachFromDirection:
-                            movePlan = approachFromDirection(selfs.front(),targetPos,targetHead);
-                            break;
-                        case messages::behaviour::WalkApproach::WalkToPoint:
-                            movePlan = goToPoint(selfs.front(),targetPos,targetHead);
-                            break;
-                        case messages::behaviour::WalkApproach::OmnidirectionalReposition:
-                            movePlan = goToPoint(selfs.front(),targetPos,targetHead);
-                            break;
-                    }*/
+                    arma::vec movePlan = arma::vec({0.0,0.0,0.0});
 
                     if(planType == messages::behaviour::WalkApproach::ApproachFromDirection) {
                         movePlan = approachFromDirection(selfs.front(),targetPos,targetHead);  
@@ -243,30 +178,19 @@ namespace modules {
                         movePlan = goToPoint(selfs.front(),targetPos,targetHead);
                     }
 
-                    //std::cout << "Target Position: " << targetPos[0] << ", " << targetPos[1] << std::endl;
-                    //std::cout << "Self Position: " << selfs.front().position[0] << ", " << selfs.front().position[1] << std::endl;
-                    //std::cout << "Self Heading: " << selfs.front().heading[0] << ", " << selfs.front().heading[1] << std::endl;
-
-                    //std::cout << "Move Plan: " << movePlan[0] << ", " << movePlan[1] << ", " << movePlan[2] << std::endl;
                     //work out if we have to avoid something
-                    if (useAvoidance && (robots != NULL)) {
+                    if (useAvoidance && (robots != NULL) && robots->size() > 0) {
                         //this is a vision-based temporary for avoidance
                         movePlan = avoidObstacles(*robots,movePlan);
                     }
-                    //NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
-                    // NUClear::log("Move Plan:", movePlan[0],movePlan[1],movePlan[2]);
-                    //this applies acceleration/deceleration and hysteresis to movement
+                    
+                    //this applies limits and hysteresis to movement
                     movePlan = generateWalk(movePlan,
                                             planType == messages::behaviour::WalkApproach::OmnidirectionalReposition);
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
                     command->velocity = arma::vec({movePlan[0],movePlan[1]});
                     command->rotationalSpeed = movePlan[2];
-                    // NUClear::log("Self Position:", selfs[0].position[0],selfs[0].position[1]);
-                    // NUClear::log("Target Position:", targetPos[0],targetPos[1]);
                     emit(graph("Walk command:", command->velocity[0], command->velocity[1], command->rotationalSpeed));
-                    //std::cout << "Walk command: " << command->velocity[0] << ", " << command->velocity[1] << ", " << command->rotationalSpeed << std::endl;
-                    // NUClear::log("Ball Position:", ball.position[0],ball.position[1]);
-                    //std::cout << command->velocity << std::endl;
                     emit(std::move(std::make_unique<WalkStartCommand>()));
                     emit(std::move(command));//XXX: emit here
 
@@ -343,15 +267,6 @@ namespace modules {
                 //make sure our rotation is normalised to our turning limits
                 walk_rotation = fmin(turnSpeed,fmax(walk_rotation,-turnSpeed));
 
-                //apply turning hysteresis
-                /*if (turning < 0 and walk_bearing < -turnDeviation) {
-                    //walk_speed = std::min(walk_bearing,turnSpeed);
-                } else if (m_turning > 0 and walk_bearing > turnDeviation) {
-                    //walk_speed = std::min(walk_bearing,turnSpeed);
-                } else {
-                    walk_bearing = 0;
-                }*/
-
                 //Replacing turn hysteresis with a unicorn equation
                 float g = 1./(1.+std::exp(-4.*walk_rotation*walk_rotation));
 
@@ -385,11 +300,6 @@ namespace modules {
                 } else {
                     footOffsets[0] = arma::normalise(waypoints[2]) * (footSeparation + footSize) * 0.5;
                 }
-
-                //add the foot offsets for sidekicks to the side approach case
-                //waypoints[1] += footOffset;
-                //waypoints[2] += footOffset;
-
                 //fill target headings and distances, and movement bearings and costs
                 std::vector<double> headings(3);
                 std::vector<double> distances(3);
@@ -442,17 +352,6 @@ namespace modules {
                 result[0] = targetDistance;
                 result[1] = atan2(sin(targetHeading),cos(targetHeading));
                 result[2] = atan2(sin(targetBearing),cos(targetBearing));
-
-//std::cerr << __func__ << ": selfPosition - (" << self.position[0] << ", " << self.position[1] << ")" << std::endl;
-//std::cerr << __func__ << ": selfheading - (" << self.heading[0] << ", " << self.heading[1] << ")" << std::endl;
-//std::cerr << __func__ << ": target - (" << target[0] << ", " << target[1] << ")" << std::endl;
-//std::cerr << __func__ << ": direction - (" << direction[0] << ", " << direction[1] << ")" << std::endl;
-//std::cerr << __func__ << ": selfHeading - " << selfHeading << std::endl;
-//std::cerr << __func__ << ": targetHeading - " << targetHeading << std::endl;
-//std::cerr << __func__ << ": targetBearing - " << targetBearing << std::endl;
-//std::cerr << __func__ << ": targetDistance - " << result[0] << std::endl;
-//std::cerr << __func__ << ": angleToTarget - " << result[1] << std::endl;
-//std::cerr << __func__ << ": angleToCenter - " << result[2] << std::endl;
 
                 //apply turning hysteresis
                 return result;
