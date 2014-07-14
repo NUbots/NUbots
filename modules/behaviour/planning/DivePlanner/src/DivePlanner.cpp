@@ -64,18 +64,24 @@ namespace planning {
                ball.position[0] < DISTANCE_THRESHOLD ){
 
                 //NUClear::log("Ball Vel:", -ball.velocity[0] , ball.position[0]);
-                
+
                 if(ball.position[1]>0){
                     //Dive left
                     auto x = std::make_unique<DiveCommand>();
                     x->direction[0] = 0;
                     x->direction[1] = 1;
+
+                    std::cerr << "DIVE LEFT!" << std::endl;
+
                     emit(std::move(x));
                 } else {
                     //Dive right
                     auto x = std::make_unique<DiveCommand>();
                     x->direction[0] = 0;
                     x->direction[1] = -1;
+
+                    std::cerr << "DIVE RIGHT!" << std::endl;
+
                     emit(std::move(x));
                 }
             }
