@@ -222,60 +222,23 @@ namespace modules {
                 }
             }
 
-            // TODO try adding these in on the new system
-            // V4L2_CID_FOCUS_AUTO                 boolean     Enables automatic focus adjustments. The effect of manual focus adjustments while this feature is enabled is undefined, drivers should ignore such requests.
-            // V4L2_CID_FOCUS_ABSOLUTE             integer     This control sets the focal point of the camera to the specified position. The unit is undefined. Positive values set the focus closer to the camera, negative values towards infinity.
-            // V4L2_CID_BRIGHTNESS                 integer     Picture brightness, or more precisely, the black level.
-            // V4L2_CID_CONTRAST                   integer     Picture contrast or luma gain.
-            // V4L2_CID_SATURATION                 integer     Picture color saturation or chroma gain.
-            // V4L2_CID_HUE                        integer     Hue or color balance.
-            // V4L2_CID_EXPOSURE_ABSOLUTE          integer     Determines the exposure time of the camera sensor. The exposure time is limited by the frame interval. Drivers should interpret the values as 100 µs units, where the value 1 stands for 1/10000th of a second, 10000 for 1 second and 100000 for 10 seconds.
-            // V4L2_CID_EXPOSURE_AUTO_PRIORITY     boolean     When V4L2_CID_EXPOSURE_AUTO is set to AUTO or APERTURE_PRIORITY, this control determines if the device may dynamically vary the frame rate. By default this feature is disabled (0) and the frame rate must remain constant.
-            // V4L2_CID_AUTO_WHITE_BALANCE         boolean     Automatic white balance (cameras).
-            // V4L2_CID_DO_WHITE_BALANCE           button      This is an action control. When set (the value is ignored), the device will do a white balance and then hold the current setting. Contrast this with the boolean V4L2_CID_AUTO_WHITE_BALANCE, which, when activated, keeps adjusting the white balance.
-            // V4L2_CID_RED_BALANCE                integer     Red chroma balance.
-            // V4L2_CID_BLUE_BALANCE               integer     Blue chroma balance.
-            // V4L2_CID_GAMMA                      integer     Gamma adjust.
-            // V4L2_CID_AUTOGAIN                   boolean     Automatic gain/exposure control.
-            // V4L2_CID_GAIN                       integer     Gain control.
-            // V4L2_CID_POWER_LINE_FREQUENCY       enum        Enables a power line frequency filter to avoid flicker. Possible values for enum v4l2_power_line_frequency are: V4L2_CID_POWER_LINE_FREQUENCY_DISABLED (0), V4L2_CID_POWER_LINE_FREQUENCY_50HZ (1) and V4L2_CID_POWER_LINE_FREQUENCY_60HZ (2)
-            // V4L2_CID_HUE_AUTO                   boolean     Enables automatic hue control by the device. The effect of setting V4L2_CID_HUE while automatic hue control is enabled is undefined, drivers should ignore such request.
-            // V4L2_CID_WHITE_BALANCE_TEMPERATURE  integer     This control specifies the white balance settings as a color temperature in Kelvin. A driver should have a minimum of 2800 (incandescent) to 6500 (daylight). For more information about color temperature see Wikipedia.
-            // V4L2_CID_SHARPNESS                  integer     Adjusts the sharpness filters in a camera. The minimum value disables the filters, higher values give a sharper picture.
-            // V4L2_CID_BACKLIGHT_COMPENSATION     integer     Adjusts the backlight compensation in a camera. The minimum value disables backlight compensation.
-            // V4L2_CID_CHROMA_AGC                 boolean     Chroma automatic gain control.
-
-            // brightness                      (int): min=0 max=255 step=1 default=128 value=128
-            // contrast                        (int): min=0 max=255 step=1 default=128 value=128
-            // saturation                      (int): min=0 max=255 step=1 default=128 value=128
-            // white_balance_temperature_auto  (bool): default=1 value=1
-            // gain                            (int): min=0 max=255 step=1 default=0 value=0
-            // power_line_frequency            (menu): min=0 max=2 default=2 value=2
-            // white_balance_temperature       (int): min=2000 max=6500 step=1 default=4000 value=4000 flags=inactive
-            // sharpness                       (int): min=0 max=255 step=1 default=128 value=128
-            // backlight_compensation          (int): min=0 max=1 step=1 default=0 value=0
-            // exposure_auto                   (menu): min=0 max=3 default=3 value=3
-            // exposure_absolute               (int): min=3 max=2047 step=1 default=250 value=250 flags=inactive
-            // exposure_auto_priority          (bool)   : default=0 value=1
-            // pan_absolute                    (int): min=-36000 max=36000 step=3600 default=0 value=0
-            // tilt_absolute                   (int): min=-36000 max=36000 step=3600 default=0 value=0
-            // focus_absolute                  (int): min=0 max=250 step=5 default=0 value=0 flags=inactive
-            // focus_auto                      (bool): default=1 value=1
-            // zoom_absolute                   (int): min=100 max=500 step=1 default=100 value=100
-
-
-            // Populate our settings table
-            settings.insert(std::make_pair("autoWhiteBalance",        V4L2CameraSetting(fd, V4L2_CID_AUTO_WHITE_BALANCE)));
-            settings.insert(std::make_pair("whiteBalanceTemperature", V4L2CameraSetting(fd, V4L2_CID_WHITE_BALANCE_TEMPERATURE)));
-            settings.insert(std::make_pair("brightness",              V4L2CameraSetting(fd, V4L2_CID_BRIGHTNESS)));
-            settings.insert(std::make_pair("contrast",                V4L2CameraSetting(fd, V4L2_CID_CONTRAST)));
-            settings.insert(std::make_pair("saturation",              V4L2CameraSetting(fd, V4L2_CID_SATURATION)));
-            settings.insert(std::make_pair("gain",                    V4L2CameraSetting(fd, V4L2_CID_GAIN)));
-            settings.insert(std::make_pair("autoExposure",            V4L2CameraSetting(fd, V4L2_CID_EXPOSURE_AUTO))); // Can be set to V4L2_EXPOSURE_AUTO V4L2_EXPOSURE_MANUAL V4L2_EXPOSURE_SHUTTER_PRIORITY V4L2_EXPOSURE_APERTURE_PRIORITY
-            settings.insert(std::make_pair("autoExposurePriority",    V4L2CameraSetting(fd, V4L2_CID_EXPOSURE_AUTO_PRIORITY)));
-            settings.insert(std::make_pair("absoluteExposure",        V4L2CameraSetting(fd, V4L2_CID_EXPOSURE_ABSOLUTE)));
-            settings.insert(std::make_pair("powerLineFrequency",      V4L2CameraSetting(fd, V4L2_CID_POWER_LINE_FREQUENCY)));
-            settings.insert(std::make_pair("sharpness",               V4L2CameraSetting(fd, V4L2_CID_SHARPNESS)));
+            settings.insert(std::make_pair("brightness",                 V4L2CameraSetting(fd, V4L2_CID_BRIGHTNESS)));
+            settings.insert(std::make_pair("gain",                       V4L2CameraSetting(fd, V4L2_CID_GAIN)));
+            settings.insert(std::make_pair("contrast",                   V4L2CameraSetting(fd, V4L2_CID_CONTRAST)));
+            settings.insert(std::make_pair("saturation",                 V4L2CameraSetting(fd, V4L2_CID_SATURATION)));
+            settings.insert(std::make_pair("power_line_frequency",        V4L2CameraSetting(fd, V4L2_CID_POWER_LINE_FREQUENCY)));
+            settings.insert(std::make_pair("auto_white_balance",         V4L2CameraSetting(fd, V4L2_CID_AUTO_WHITE_BALANCE)));
+            settings.insert(std::make_pair("white_balance_temperature",  V4L2CameraSetting(fd, V4L2_CID_WHITE_BALANCE_TEMPERATURE)));
+            settings.insert(std::make_pair("auto_exposure",              V4L2CameraSetting(fd, V4L2_CID_EXPOSURE_AUTO)));
+            settings.insert(std::make_pair("auto_exposure_priority",     V4L2CameraSetting(fd, V4L2_CID_EXPOSURE_AUTO_PRIORITY)));
+            settings.insert(std::make_pair("absolute_exposure",          V4L2CameraSetting(fd, V4L2_CID_EXPOSURE_ABSOLUTE)));
+            settings.insert(std::make_pair("backlight_compensation",     V4L2CameraSetting(fd, V4L2_CID_BACKLIGHT_COMPENSATION)));
+            settings.insert(std::make_pair("auto_focus",                 V4L2CameraSetting(fd, V4L2_CID_FOCUS_AUTO)));
+            settings.insert(std::make_pair("absolute_focus",             V4L2CameraSetting(fd, V4L2_CID_FOCUS_ABSOLUTE)));
+            settings.insert(std::make_pair("absolute_zoom",              V4L2CameraSetting(fd, V4L2_CID_ZOOM_ABSOLUTE)));
+            settings.insert(std::make_pair("absolute_pan",               V4L2CameraSetting(fd, V4L2_CID_PAN_ABSOLUTE)));
+            settings.insert(std::make_pair("absolute_tilt",              V4L2CameraSetting(fd, V4L2_CID_TILT_ABSOLUTE)));
+            settings.insert(std::make_pair("sharpness",                  V4L2CameraSetting(fd, V4L2_CID_SHARPNESS)));
         }
 
         void V4L2Camera::startStreaming() {
