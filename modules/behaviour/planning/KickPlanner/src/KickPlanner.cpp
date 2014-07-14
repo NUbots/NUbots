@@ -67,7 +67,7 @@ namespace planning {
                                                                  -normed_heading[1],  normed_heading[0],         0,
                                                                                   0,                 0,         1};
 
-            worldToRobotTransform.submat(0,2,1,2) = -worldToRobotTransform.submat(0,0,1,1) * self.position;
+            worldToRobotTransform.submat(0,2,1,2) = worldToRobotTransform.submat(0,0,1,1).t() * self.position;
 
             arma::vec3 homogeneousKickTarget = worldToRobotTransform * goalPosition;
             arma::vec2 kickTarget = homogeneousKickTarget.rows(0,1);    //In robot coords
