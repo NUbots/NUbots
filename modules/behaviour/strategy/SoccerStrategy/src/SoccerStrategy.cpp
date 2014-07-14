@@ -29,6 +29,7 @@
 #include "messages/motion/GetupCommand.h"
 #include "messages/motion/DiveCommand.h"
 #include "messages/output/Say.h"
+#include "messages/vision/VisionObjects.h"
 
 #include "utility/time/time.h"
 #include "utility/math/angle.h"
@@ -42,7 +43,7 @@ namespace modules {
         namespace strategy {
 
 		using LocalisationBall = messages::localisation::Ball;
-		using VisionBall = arma::vec2; // replace messages::vision::Ball with arma::vec2
+		using VisionBall = messages::vision::Ball; // replace messages::vision::Ball with arma::vec2
 		using messages::localisation::Self;
 		using messages::behaviour::LookAtBallStart;
 		using messages::behaviour::LookAtBallStop;
@@ -287,16 +288,19 @@ namespace modules {
 				With<LocalisationBall>,
 				With<std::vector<VisionBall>>,
 				With<std::vector<messages::localisation::Self>>,
-				With<messages::input::gameevents::GameState>,
+				With<Optional<messages::input::gameevents::GameState>>,
 				Options<Single>>([this](const time_t&,
 							const LocalisationBall& ball,
 							const std::vector<VisionBall>& visionBalls,
 							const std::vector<messages::localisation::Self>& selfs,
-							const messages::input::gameevents::GameState& gameState
+							const std::shared_ptr<const messages::input::gameevents::GameState>& gameState
 							) {
 
+std::cerr << __func__ << "               " << __LINE__ << std::endl;
 					// Update game state from game controller
-					updateGameState(gameState);
+					if (gameState != NULL) {
+						updateGameState(*gameState);
+					}
 					
 					// Calculate the position of the ball in field coordinates.
 					arma::vec2 globalBallPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
@@ -317,7 +321,7 @@ namespace modules {
 					}
 
 					// Are we kicking off?
-					currentState.kickOff = gameState.ourKickOff;
+					currentState.kickOff = gameState->ourKickOff;
 
 					// Is my start position inside the centre circle?
 					currentState.kicker = ((arma::norm(ZONES.at(MY_ZONE).startPosition, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.primaryGameState == GameStatePrimary::READY ||
@@ -327,11 +331,11 @@ namespace modules {
 					currentState.pickedUp = feetOffGround && !isGettingUp && !isDiving;
 
 					// Have I been penalised or unpenalised?
-					if (gameState.team.players.at(0).penaltyReason != PenaltyReason::UNPENALISED && !previousState.penalised) {
+					if (gameState->team.players.at(0).penaltyReason != PenaltyReason::UNPENALISED && !previousState.penalised) {
 						currentState.penalised = true;
 						emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
 					}
-					else if(gameState.team.players.at(0).penaltyReason == PenaltyReason::UNPENALISED && previousState.penalised) {
+					else if(gameState->team.players.at(0).penaltyReason == PenaltyReason::UNPENALISED && previousState.penalised) {
 						currentState.penalised = false;
 						emit(std::move(std::make_unique<messages::output::Say>("Unpenalised")));
 					}
@@ -433,7 +437,7 @@ namespace modules {
 					// ------
 					// Take appropriate action depending on state
 					// ------
-					switch(gameState.phase){
+					switch(gameState->phase){
 						case Phase::INITIAL:
 							stopWalking();
 							findSelf();
@@ -465,9 +469,9 @@ namespace modules {
 										findSelfAndBall();
 									}
 								} else if(visionBalls.size() > 0) {
-									playSoccer(ball.position, visionBalls[0], selfs[0], gameState);									
+									playSoccer(ball.position, visionBalls.at(0), selfs[0], *gameState);									
 								} else {
-									searchForBall(ball, selfs[0], gameState);
+									searchForBall(ball, selfs[0], *gameState);
 								}
 								findSelfAndBall();
 							}
@@ -510,6 +514,7 @@ namespace modules {
 			}
 
 			void SoccerStrategy::updateGameState(const messages::input::gameevents::GameState& gameState) {
+std::cerr << __func__ << "               " << __LINE__ << std::endl;
 				// What state is the game in?
 				switch (gameState.phase) {
 					case Phase::READY:
@@ -665,7 +670,7 @@ namespace modules {
 				emit(std::move(dive));
 			}
 
-			void SoccerStrategy::playSoccer(const arma::vec2& localisationBall, const arma::vec2& visionBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState){
+			void SoccerStrategy::playSoccer(const arma::vec2& localisationBall, const VisionBall& visionBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState){
 				// TODO: What are these for?
 				(void)visionBall;
 				(void)self;

@@ -28,6 +28,7 @@
 #include "messages/motion/KickCommand.h"
 #include "messages/motion/WalkCommand.h"
 #include "messages/input/gameevents/GameEvents.h"
+#include "messages/vision/VisionObjects.h"
 
 #include "utility/math/geometry/Polygon.h"
 
@@ -211,7 +212,7 @@ namespace modules {
 
 			//NEW
 			bool penalised(const messages::input::gameevents::GameState& gameState);
-			void playSoccer(const arma::vec2& localisationBall, const arma::vec2& visionBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState);
+			void playSoccer(const arma::vec2& localisationBall, const messages::vision::Ball& visionBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState);
 			void playGoalie(const arma::vec2& localisationBall);
 			void searchForBall(const messages::localisation::Ball& localisationBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState);
 
