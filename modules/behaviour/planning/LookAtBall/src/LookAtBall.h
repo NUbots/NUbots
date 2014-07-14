@@ -35,7 +35,8 @@ namespace modules {
             private:
                 //const size_t id;
                 std::chrono::system_clock::time_point timeLastSeen;
-
+                size_t BALL_SEEN_COUNT_THRESHOLD = 3;
+                size_t framesSinceSeen = 0;
                 double BALL_SEARCH_TIMEOUT_MILLISECONDS;
 		        double X_FACTOR;
 		        double Y_FACTOR;

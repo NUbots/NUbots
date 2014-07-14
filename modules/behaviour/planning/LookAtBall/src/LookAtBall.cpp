@@ -77,9 +77,11 @@ namespace modules {
             
             const bool ballIsLost = utility::time::TimeDifferenceSeconds(NUClear::clock::now(),timeLastSeen) > BALL_SEARCH_TIMEOUT_MILLISECONDS;
             const bool ballIsUncertain = ((ball->sr_xx > BALL_UNCERNTAINTY_THRESHOLD) || (ball->sr_yy > BALL_UNCERNTAINTY_THRESHOLD));
+            ++framesSinceSeen;
             
             //if balls are seen, then place those and everything else that's useful into the look at list
 			if (balls.size() > 0) {
+			    framesSinceSeen = 0;
 				timeLastSeen = NUClear::clock::now();
 				std::vector<LookAtAngle> angles;
 				angles.reserve(4);
@@ -91,7 +93,9 @@ namespace modules {
 				}
 
 				emit(std::make_unique<std::vector<LookAtAngle>>(angles));
-			} 
+			} else if (BALL_SEEN_COUNT_THRESHOLD > framesSinceSeen) {
+			    //don't activate other options because we could still have the ball on screen
+			}
 			// if the ball isn't seen this frame, but we're certain of where it is, look there
 			else if ((ball != NULL) && !ballIsUncertain) {
 			    std::vector<LookAtAngle> angles;
