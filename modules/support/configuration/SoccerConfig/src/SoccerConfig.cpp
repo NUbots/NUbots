@@ -67,10 +67,14 @@ namespace configuration {
         d.goal_area_width = config.config["GoalAreaWidth"].as<double>();
         d.goal_crossbar_height = config.config["GoalCrossbarHeight"].as<double>();
         d.goalpost_diameter = config.config["GoalpostDiameter"].as<double>();
+        d.goal_crossbar_diameter = config.config["GoalCrossbarDiameter"].as<double>();
         d.goal_net_height = config.config["GoalNetHeight"].as<double>();
         d.penalty_mark_distance = config.config["PenaltyMarkDistance"].as<double>();
         d.center_circle_diameter = config.config["CenterCircleDiameter"].as<double>();
         d.border_strip_min_width = config.config["BorderStripMinWidth"].as<double>();
+        d.border_strip_min_width = config.config["BorderStripMinWidth"].as<double>();
+
+        desc.goalpost_top_height = d.goal_crossbar_height + d.goal_crossbar_diameter;
 
         SetGoalpostPositions(desc);
 
