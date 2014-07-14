@@ -143,6 +143,8 @@ namespace modules {
 			bool inPosition;
 			bool outOfPosition;
 			bool correctHeading;
+
+			std::chrono::system_clock::time_point timeBallLastSeen;
 		} State;
 
 		struct Zone {
@@ -173,6 +175,7 @@ namespace modules {
 			float BALL_CERTAINTY_THRESHOLD;
 			float BALL_SELF_INTERSECTION_REGION;
 			float BALL_MOVEMENT_THRESHOLD;
+			float BALL_TIMEOUT_THRESHOLD;
 			bool IS_GOALIE;
 			arma::vec2 BALL_LOOK_ERROR;
 			arma::vec2 GOAL_LOOK_ERROR;
