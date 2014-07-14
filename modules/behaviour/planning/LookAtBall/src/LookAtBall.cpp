@@ -149,7 +149,7 @@ namespace modules {
 			    emit(std::make_unique<std::vector<LookAtAngle>>(angles));
             }
             //if the ball is lost, do a scan using uncertainties to try to find it
-			else if (ball != NULL) {
+			else if (ball != NULL and not ballIsLost and ballIsUncertain) {
 				double xFactor = X_FACTOR * std::sqrt(ball->sr_xx);
 				double yFactor = Y_FACTOR * std::sqrt(ball->sr_yy);
 
@@ -160,10 +160,7 @@ namespace modules {
 				arma::mat offsets(5,3);
 				offsets  << 0.0 << 0.0 << 0.0 << arma::endr
                          << -xFactor << 0.0 << 0.0 << arma::endr
-                         //<< -xFactor << yFactor << 0.0 << arma::endr
                          << 0.0 << yFactor << 0.0 << arma::endr
-                         //<< 0.0 << -yFactor << 0.0 << arma::endr
-                         //<< xFactor << -yFactor << 0.0 << arma::endr
                          << xFactor << 0.0 << 0.0 << arma::endr
                          << 0.0 << -yFactor << 0.0;
 				
@@ -180,7 +177,7 @@ namespace modules {
 				emit(std::make_unique<std::vector<LookAtPosition>>(angles));
 			} 
 
-			else if(ballIsLost > BALL_SEARCH_TIMEOUT_MILLISECONDS){
+			else if(ballIsLost){
 				//do a blind scan'n'pan
 				std::vector<LookAtPosition> angles;
 
