@@ -676,13 +676,13 @@ std::cerr << __func__ << "               " << __LINE__ << std::endl;
 				(void)self;
 				(void)gameState;
 
-				arma::vec2 goalPosition = ZONES.at(MY_ZONE).zone.projectPointToPolygon(localisationBall);
+//				arma::vec2 goalPosition = ZONES.at(MY_ZONE).zone.projectPointToPolygon(localisationBall);
 
-				if(arma::norm(goalPosition - localisationBall) < 0.1){
+//				if(arma::norm(goalPosition - localisationBall) < 0.1){
 					approachBall(enemyGoal);
-				} else {
-					goToPoint(goalPosition, localisationBall - goalPosition);
-				}
+//				} else {
+//					goToPoint(goalPosition, localisationBall - goalPosition);
+//				}
 
 				kickBall(enemyGoal);
 			}
