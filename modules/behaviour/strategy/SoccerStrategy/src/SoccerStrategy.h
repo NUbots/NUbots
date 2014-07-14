@@ -201,20 +201,16 @@ namespace modules {
 			bool lookingAtGoal;
 
 			arma::vec2 findOptimalPosition(const utility::math::geometry::Polygon& zone, const arma::vec2& point);
-			void stopMoving();
 			void findSelf();
 			void findBall();
 			void goToPoint(const arma::vec2& positioni, const arma::vec2& heading);
 			void sideStepToPoint(const arma::vec2& position);
-			void watchBall();
 			void kickBall(const arma::vec2& direction);
 			void approachBall(const arma::vec2& haading);
-
+			
 			void updateGameState(const messages::input::gameevents::GameState& gameController);
 
-
 			//NEW
-
 			bool penalised(const messages::input::gameevents::GameState& gameState);
 			void playSoccer(const arma::vec2& localisationBall, const arma::vec2& visionBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState);
 			void searchForBall(const messages::localisation::Ball& localisationBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState);
