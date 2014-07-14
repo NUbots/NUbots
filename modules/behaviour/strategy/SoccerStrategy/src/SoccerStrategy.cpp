@@ -671,7 +671,7 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 				approach->targetPositionType = WalkTarget::WayPoint;
 				approach->targetHeadingType = WalkTarget::Ball;
 				approach->walkMovementType = WalkApproach::OmnidirectionalReposition;
-				approach->heading = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
+				approach->heading = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position) - currentState.position;
 				approach->target = position;
 
 				currentState.targetPosition = approach->target;
