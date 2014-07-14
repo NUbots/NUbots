@@ -216,9 +216,10 @@ namespace modules {
 			void playSoccer(const arma::vec2& localisationBall, const arma::vec2& visionBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState);
 			void searchForBall(const messages::localisation::Ball& localisationBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState);
 
-			void walkToStartPosition();
+			void walkToStartPosition(const messages::localisation::Self& self);
 			void stopWalking();
 			void findSelfAndBall();
+			void spin();
 
 
 			arma::vec2 enemyGoal;

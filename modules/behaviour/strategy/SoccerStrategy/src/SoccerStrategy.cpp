@@ -356,7 +356,7 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 					catch (const std::domain_error& e) {
 						std::cerr << "pointContained failed." << std::endl;
 						std::cerr << "selfPosition - (" << currentState.position[0] << ", " << currentState.position[1] << ")" << std::endl;
-						std::cerr << "MY_ZONE - (" << MY_ZONE << std::endl;
+						std::cerr << "MY_ZONE - " << MY_ZONE << std::endl;
 					}
 
 					// Can I see the ball?
@@ -467,7 +467,7 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 							if(currentState.penalised || currentState.pickedUp){
 								stopWalking();
 							} else{
-								walkToStartPosition();
+								walkToStartPosition(selfs[0]);
 							}
 							findSelf();
 							break;
@@ -484,7 +484,7 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 								if(IS_GOALIE) {
 
 									if(visionBalls.size() > 0){
-										
+										sideStepToPoint(currentState.ballGoalieIntersection);
 									} else {
 										stopWalking();
 										findSelfAndBall();
@@ -492,7 +492,7 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 
 
 								} else if(visionBalls.size() > 0){
-									playSoccer(ball, visionBalls[0], selfs[0], gameState);									
+									playSoccer(ball.position, visionBalls[0], selfs[0], gameState);									
 								} else {
 									searchForBall(ball, selfs[0], gameState);
 								}
@@ -507,9 +507,15 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 							stopWalking();
 							findSelfAndBall();
 							break;
+						default:
+							NUClear::log<NUClear::INFO>("Unknown behavioural state. Finding self, finding ball.");
+							stopWalking();
+							findSelfAndBall();
+							break;
+
 					}
 
-
+/* Commented out ------ to be merged into the above switch?
 					else if (IS_GOALIE && currentState.ballApproachingGoal) {
 						sideStepToPoint(currentState.ballGoalieIntersection);
 
@@ -526,6 +532,7 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 
 //						NUClear::log<NUClear::INFO>("Unknown behavioural state. Finding self, finding ball, moving to default position.");
 					}
+*/
 
 				});
 			}
@@ -657,17 +664,6 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 				if (!lookingAtBall) {
 					emit(std::make_unique<LookAtBallStart>());
 				}
-
-				// This needs to be replaced with a proper lookAtBall command.
-//				arma::vec2 ballPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
-
-//				auto look = std::make_unique<messages::behaviour::LookAtPoint>();
-//				look->x = ballPosition[0];
-//				look->y = ballPosition[1];
-//				look->xError = BALL_LOOK_ERROR[0];
-//				look->yError = BALL_LOOK_ERROR[1];
-//				emit(std::move(look));
-				// This needs to be replaced with a proper lookAtBall command.
 			}
 
 			void SoccerStrategy::sideStepToPoint(const arma::vec2& position) {
@@ -712,6 +708,11 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 			//NEw
 
 			void SoccerStrategy::playSoccer(const arma::vec2& localisationBall, const arma::vec2& visionBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState){
+				// TODO: What are these for?
+				(void)visionBall;
+				(void)self;
+				(void)gameState;
+
 				arma::vec2 goalPosition = ZONES.at(MY_ZONE).zone.projectPointToPolygon(localisationBall);
 
 				if(arma::norm(goalPosition - localisationBall) < 0.1){
@@ -724,28 +725,32 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 			}
 
 			void SoccerStrategy::searchForBall(const messages::localisation::Ball& localisationBall, const Self& self, const GameState& gameState){
+				(void)localisationBall;
+				(void)gameState;
+
 				//TODO enhance this behaviour
 				if (isWalking && arma::norm(self.position - ZONES.at(MY_ZONE).defaultPosition) < POSITION_THRESHOLD_TIGHT) 
 				{
 					spin();
-				} else if(arma::norm(self.position - ZONES.at(MY_ZONE).defaultPosition) > POSITION_THRESHOLD_LOOSE) 
-				{
+				} else if(arma::norm(self.position - ZONES.at(MY_ZONE).defaultPosition) > POSITION_THRESHOLD_LOOSE) {
 					goToPoint(ZONES.at(MY_ZONE).defaultPosition, self.position-ZONES.at(MY_ZONE).defaultPosition);
 				}
 			}
 
-			void SoccerStrategy::walkToStartPosition(){
+			void SoccerStrategy::walkToStartPosition(const Self& self) {
 				double heading = 0;
 				arma::vec2 startPosition;
+
 				if(!currentState.kickOff && currentState.kicker){
 					startPosition = ZONES.at(MY_ZONE).startPosition - arma::vec2{-FIELD_DESCRIPTION.dimensions.center_circle_diameter * 1.5, 0};
 				} else { 
 					startPosition = ZONES.at(MY_ZONE).startPosition;
 				}
-				//Warning Oscillation with bad localisation
-				if (isWalking && arma::norm(self.position - ) < POSITION_THRESHOLD_TIGHT
-							  && std::fabs(heading-ANGLE_THRESHOLD) < ANGLE_THRESHOLD) 
-				{
+				
+				// Warning Oscillation with bad localisation
+				// Was arma::norm(self.position - )
+				if (isWalking && arma::norm(self.position - startPosition) < POSITION_THRESHOLD_TIGHT
+							  && std::fabs(heading - ANGLE_THRESHOLD) < ANGLE_THRESHOLD) {
 					stopMoving();
 				} else if(arma::norm(self.position - ZONES.at(MY_ZONE).startPosition) > POSITION_THRESHOLD_LOOSE
 						||std::fabs(heading-ANGLE_THRESHOLD) > ANGLE_THRESHOLD) 
