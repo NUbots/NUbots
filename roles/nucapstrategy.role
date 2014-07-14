@@ -2,7 +2,7 @@ ADD_ROLE(
     NAME nucapstrategy 
     MODULES
         #Support
-        support::SignalCatcher
+#        support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
 	support::configuration::GlobalConfig

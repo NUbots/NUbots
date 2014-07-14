@@ -56,6 +56,7 @@ namespace modules {
 
 		on<Trigger<LookAtBallStart>>([this](const LookAtBallStart&) {
 			if (!handle.enabled()) {
+std::cerr << "LookAtBall - enabled" << std::endl;
 				handle.enable();
 			}
 		});
@@ -63,6 +64,7 @@ namespace modules {
 
 		on<Trigger<LookAtBallStop>>([this](const LookAtBallStop&) {
 			if (handle.enabled()) {
+std::cerr << "LookAtBall - disabled" << std::endl;
 				handle.disable();
 			}
 		});
@@ -80,9 +82,14 @@ namespace modules {
 					const std::shared_ptr<const messages::support::FieldDescription>& fieldDesc,
 					const std::shared_ptr<const std::vector<messages::localisation::Self>>& selfs,
 					const std::shared_ptr<const messages::localisation::Ball>& ball) {
-            
+
+			// TODO If not doing Josiah's fancy code, remove optional withs
+            (void)fieldDesc;
+            (void)selfs;
+            (void)ball;
+
             const bool ballIsLost = utility::time::TimeDifferenceSeconds(NUClear::clock::now(),timeLastSeen) > BALL_SEARCH_TIMEOUT_MILLISECONDS;
-            const bool ballIsUncertain = ((ball->sr_xx > BALL_UNCERNTAINTY_THRESHOLD) || (ball->sr_yy > BALL_UNCERNTAINTY_THRESHOLD));
+//            const bool ballIsUncertain = ((ball->sr_xx > BALL_UNCERNTAINTY_THRESHOLD) || (ball->sr_yy > BALL_UNCERNTAINTY_THRESHOLD));
             ++framesSinceSeen;
             
             //XXX: assume these values are correct for global angle conversion
@@ -104,7 +111,8 @@ namespace modules {
 				    for (const auto& g : goals) {
 					    angles.emplace_back(LookAtAngle {g.screenAngular[0], -g.screenAngular[1]});
 				    }
-				} else if (fieldDesc != NULL && selfs != NULL) {
+				}
+/*				} else if (fieldDesc != NULL && selfs != NULL) {
 				    arma::vec2 screenAngular;
 				    std::vector<arma::vec2> fieldGoalPos;
 				    
@@ -131,69 +139,88 @@ namespace modules {
                             angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
                         }
 			        }
-			        
 				}
+*/
 				emit(std::make_unique<std::vector<LookAtAngle>>(angles));
 			} else if (BALL_SEEN_COUNT_THRESHOLD > framesSinceSeen) {
 			    //don't activate other options because we could still have the ball on screen
 			}
 			// if the ball isn't seen this frame, but we're certain of where it is, look there
-			else if ((ball != NULL) && !ballIsUncertain) {
-			    std::vector<LookAtAngle> angles;
-			    arma::vec2 screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt(
-			                                            {ball->position[0], ball->position[1], 0}, 
-			                                            sensors.orientationCamToGround, 
-			                                            sensors.orientationBodyToGround);
-			    
-				angles.emplace_back(LookAtAngle {screenAngular[0]-cameraAngle[0], screenAngular[1]-cameraAngle[1]}) ;
-			    emit(std::make_unique<std::vector<LookAtAngle>>(angles));
-            }
+//		else if ((ball != NULL) && !ballIsUncertain) {
+//		    std::vector<LookAtAngle> angles;
+//		    arma::vec2 screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt(
+//		                                            {ball->position[0], ball->position[1], 0}, 
+//		                                            sensors.orientationCamToGround, 
+//		                                            sensors.orientationBodyToGround);
+//		    
+//			angles.emplace_back(LookAtAngle {screenAngular[0]-cameraAngle[0], screenAngular[1]-cameraAngle[1]}) ;
+//		    emit(std::make_unique<std::vector<LookAtAngle>>(angles));
+//    }
             //if the ball is lost, do a scan using uncertainties to try to find it
-			else if (ball != NULL and not ballIsLost and ballIsUncertain) {
-				double xFactor = X_FACTOR * std::sqrt(ball->sr_xx);
-				double yFactor = Y_FACTOR * std::sqrt(ball->sr_yy);
-
-				std::vector<LookAtPosition> angles;
-				arma::vec2 screenAngular;
-				
-				//load the offset path from where we think the ball is
-				arma::mat offsets(5,3);
-				offsets  << 0.0 << 0.0 << 0.0 << arma::endr
-                         << -xFactor << 0.0 << 0.0 << arma::endr
-                         << 0.0 << yFactor << 0.0 << arma::endr
-                         << xFactor << 0.0 << 0.0 << arma::endr
-                         << 0.0 << -yFactor << 0.0;
-				
-				angles.reserve(5);
-				arma::vec ballPos = arma::vec({ball->position[0], ball->position[1], 0.0});
-				for (size_t i = 0; i < offsets.n_rows; ++i) {
-				    arma::vec2 screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt(
-				                                        ballPos + offsets.row(i).t(),
-				                                        sensors.orientationCamToGround,
-				                                        sensors.orientationBodyToGround);
-				    angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
-				}
-	
-				emit(std::make_unique<std::vector<LookAtPosition>>(angles));
-			} 
+//	else if (ball != NULL and not ballIsLost and ballIsUncertain) {
+//		double xFactor = X_FACTOR * std::sqrt(ball->sr_xx);
+//		double yFactor = Y_FACTOR * std::sqrt(ball->sr_yy);
+//
+//		std::vector<LookAtPosition> angles;
+//		arma::vec2 screenAngular;
+//		
+//		//load the offset path from where we think the ball is
+//		arma::mat offsets(5,3);
+//		offsets  << 0.0 << 0.0 << 0.0 << arma::endr
+//         << -xFactor << 0.0 << 0.0 << arma::endr
+//         << 0.0 << yFactor << 0.0 << arma::endr
+//         << xFactor << 0.0 << 0.0 << arma::endr
+//         << 0.0 << -yFactor << 0.0;
+//		
+//		angles.reserve(5);
+//		arma::vec ballPos = arma::vec({ball->position[0], ball->position[1], 0.0});
+//		for (size_t i = 0; i < offsets.n_rows; ++i) {
+//		    arma::vec2 screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt(
+//		                                        ballPos + offsets.row(i).t(),
+//		                                        sensors.orientationCamToGround,
+//		                                        sensors.orientationBodyToGround);
+//		    angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
+//		}
+//
+//		emit(std::make_unique<std::vector<LookAtPosition>>(angles));
+//	} 
 
 			else if(ballIsLost){
 				//do a blind scan'n'pan
 				std::vector<LookAtPosition> angles;
 
-				const double scanYaw = 1.5;
-				const double scanPitch = 0.8;
+				angles.emplace_back(LookAtPosition {-M_PI / 2, -M_PI / 4});
+				angles.emplace_back(LookAtPosition {0, -M_PI / 4});
+				angles.emplace_back(LookAtPosition {M_PI / 2, -M_PI / 4});
+				angles.emplace_back(LookAtPosition {M_PI / 2, 0});
+				angles.emplace_back(LookAtPosition {0, 0});
+				angles.emplace_back(LookAtPosition {-M_PI / 2, 0});
+				angles.emplace_back(LookAtPosition {-M_PI / 2, M_PI / 4});
+				angles.emplace_back(LookAtPosition {0, M_PI / 4});
+				angles.emplace_back(LookAtPosition {M_PI / 2, M_PI / 4});
 
-				const size_t panPoints = 4;
-
-				for (size_t i = 0; i < panPoints+1; ++i) {
-					angles.emplace_back(LookAtPosition {i * scanYaw / panPoints-scanYaw / 2.0, -scanPitch * (i % 2) + scanPitch});
-				}
-
-				for (size_t i = 0; i < panPoints+1; ++i) {
-					angles.emplace_back(LookAtPosition {-(i * scanYaw / panPoints - scanYaw / 2.0), -scanPitch * ((i + 1) % 2) + scanPitch});
-				}
-
+				angles.emplace_back(LookAtPosition {M_PI / 2, -M_PI / 4});
+				angles.emplace_back(LookAtPosition {0, -M_PI / 4});
+				angles.emplace_back(LookAtPosition {-M_PI / 2, -M_PI / 4});
+				angles.emplace_back(LookAtPosition {-M_PI / 2, 0});
+				angles.emplace_back(LookAtPosition {0, 0});
+				angles.emplace_back(LookAtPosition {M_PI / 2, 0});
+				angles.emplace_back(LookAtPosition {M_PI / 2, M_PI / 4});
+				angles.emplace_back(LookAtPosition {0, M_PI / 4});
+				angles.emplace_back(LookAtPosition {-M_PI / 2, M_PI / 4});
+//			const double scanYaw = 1.5;
+//			const double scanPitch = 0.8;
+//
+//			const size_t panPoints = 4;
+//
+//			for (size_t i = 0; i < panPoints+1; ++i) {
+//				angles.emplace_back(LookAtPosition {-(i * scanYaw / panPoints - scanYaw / 2.0), -scanPitch * ((i + 1) % 2) + scanPitch});
+//			}
+//
+//			for (size_t i = 0; i < panPoints+1; ++i) {
+//				angles.emplace_back(LookAtPosition {i * scanYaw / panPoints-scanYaw / 2.0, -scanPitch * (i % 2) + scanPitch});
+//			}
+//
 				emit(std::make_unique<std::vector<LookAtPosition>>(angles));
 			}
 
