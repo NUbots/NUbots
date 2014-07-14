@@ -126,7 +126,7 @@ namespace modules {
 				arma::vec ballPos = arma::vec({ball->position[0], ball->position[1], 0.0});
 				for (size_t i = 0; i < offsets.n_rows; ++i) {
 				    arma::vec2 screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt(
-				                                        ballPos + offsets.row(i),
+				                                        ballPos + offsets.row(i).t(),
 				                                        sensors.orientationCamToGround,
 				                                        sensors.orientationBodyToGround);
 				    angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});

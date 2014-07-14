@@ -139,14 +139,14 @@ namespace NUClear {
             std::function<void (Reactor*, const std::string&, const YAML::Node&)> emitter =
             [](Reactor* configReactor, const std::string& name, const YAML::Node& node) {
                 // Cast our node to be the correct type (and wrap it in a unique pointer)
-		try {
+               try {
 			configReactor->emit(std::make_unique<messages::support::Configuration<TConfiguration>>(name, node));
-		}
+                }
 
-		catch (...) {
-			NUClear::log<NUClear::FATAL>("Config error in file: ", name);
-			throw;
-		}
+                catch (...) {
+                        NUClear::log<NUClear::FATAL>("Config error in file: ", name);
+                        throw;
+                }
             };
 
             // We need to emit our initial configuration directly in order to avoid race conditions where
@@ -154,14 +154,14 @@ namespace NUClear {
             std::function<void (Reactor*, const std::string&, const YAML::Node&)> initialEmitter =
             [](Reactor* configReactor, const std::string& name, const YAML::Node& node) {
                 // Cast our node to be the correct type (and wrap it in a unique pointer)
-		try {
+               try {
 			configReactor->emit<Scope::DIRECT>(std::make_unique<messages::support::Configuration<TConfiguration>>(name, node));
-		}
+                }
 
-		catch (...) {
-			NUClear::log<NUClear::FATAL>("Config error in file: ", name);
-			throw;
-		}
+                catch (...) {
+                        NUClear::log<NUClear::FATAL>("Config error in file: ", name);
+                        throw;
+                }
             };
 
             // Emit it from our reactor to the config system

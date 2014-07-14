@@ -44,6 +44,7 @@ namespace support {
 
             Message message;
             message.set_type(Message::IMAGE);
+            message.set_filter_id(1);
             message.set_utc_timestamp(getUtcTimestamp());
 
             auto* imageData = message.mutable_image();
@@ -75,6 +76,7 @@ namespace support {
 
             Message message;
             message.set_type(Message::CLASSIFIED_IMAGE);
+            message.set_filter_id(1);
             message.set_utc_timestamp(getUtcTimestamp());
 
             auto* imageData = message.mutable_classified_image();
@@ -134,6 +136,7 @@ namespace support {
 
             Message message;
             message.set_type(Message::VISION_OBJECT);
+            message.set_filter_id(1);
             message.set_utc_timestamp(getUtcTimestamp());
 
             auto* object = message.mutable_vision_object();
@@ -157,6 +160,7 @@ namespace support {
 
             Message message;
             message.set_type(Message::VISION_OBJECT);
+            message.set_filter_id(2);
             message.set_utc_timestamp(getUtcTimestamp());
 
             auto* object = message.mutable_vision_object();
