@@ -213,7 +213,7 @@ namespace modules {
 			//NEW
 			bool penalised(const std::shared_ptr<const messages::input::gameevents::GameState>& gameState);
 			void playSoccer(const arma::vec2& localisationBall, const messages::vision::Ball& visionBall, const messages::localisation::Self& self, const std::shared_ptr<const messages::input::gameevents::GameState>& gameState);
-			void playGoalie(const arma::vec2& localisationBall);
+			void playGoalie(const arma::vec2& localisationBall, const messages::localisation::Self& self);
 			void searchForBall(const messages::localisation::Ball& localisationBall, const messages::localisation::Self& self, const std::shared_ptr<const messages::input::gameevents::GameState>& gameState);
 
 			void walkToStartPosition(const messages::localisation::Self& self);
