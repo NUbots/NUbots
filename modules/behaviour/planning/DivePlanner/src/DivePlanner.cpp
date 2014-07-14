@@ -58,22 +58,25 @@ namespace planning {
         	(void)selfs;
         	(void)divePlan;
 
-            if(vision_balls.size()>0 && ball.position[0] > 0){
+            if(vision_balls.size()>0 &&
+               ball.position[0] > 0 &&
+               -ball.velocity[0] > SPEED_THRESHOLD &&
+               ball.position[0] < DISTANCE_THRESHOLD ){
+
                 //NUClear::log("Ball Vel:", -ball.velocity[0] , ball.position[0]);
-                if(-ball.velocity[0] > SPEED_THRESHOLD && ball.position[0] < DISTANCE_THRESHOLD){
-                    if(ball.position[1]>0){
-                        //Dive left
-                        auto x = std::make_unique<DiveCommand>();
-                        x->direction[0] = 0;
-                        x->direction[1] = 1;
-                        emit(std::move(x));
-                    } else {
-                        //Dive right
-                        auto x = std::make_unique<DiveCommand>();
-                        x->direction[0] = 0;
-                        x->direction[1] = -1;
-                        emit(std::move(x));
-                    }
+                
+                if(ball.position[1]>0){
+                    //Dive left
+                    auto x = std::make_unique<DiveCommand>();
+                    x->direction[0] = 0;
+                    x->direction[1] = 1;
+                    emit(std::move(x));
+                } else {
+                    //Dive right
+                    auto x = std::make_unique<DiveCommand>();
+                    x->direction[0] = 0;
+                    x->direction[1] = -1;
+                    emit(std::move(x));
                 }
             }
         });
