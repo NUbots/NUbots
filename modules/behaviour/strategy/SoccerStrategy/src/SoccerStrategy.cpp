@@ -50,8 +50,11 @@ namespace modules {
 		using messages::behaviour::LookAtAngle;
 		using messages::behaviour::LookAtPoint;
 		using messages::behaviour::LookAtPosition;
+		using messages::behaviour::WalkStrategy;
+		using messages::behaviour::WalkTarget;
+		using messages::behaviour::WalkApproach;
+		using messages::behaviour::KickPlan;
 		using messages::behaviour::HeadBehaviourConfig;
-		using messages::input::Sensors;
 		using messages::platform::darwin::DarwinSensors;
 		using messages::platform::darwin::ButtonLeftDown;
 		using messages::platform::darwin::ButtonMiddleDown;
@@ -59,17 +62,13 @@ namespace modules {
 		using messages::support::FieldDescription;
 		using messages::motion::KickCommand;
 		using messages::motion::WalkCommand;
-		using messages::behaviour::WalkStrategy;
-		using messages::behaviour::WalkTarget;
-		using messages::behaviour::WalkApproach;
-		using messages::behaviour::KickPlan;
-
+		using messages::input::Sensors;
 		using messages::input::gameevents::GameState;
 		using messages::input::gameevents::Phase;
 		using messages::input::gameevents::Mode;
 		using messages::input::gameevents::PenaltyReason;
-
 		using messages::output::Say;
+
 		using utility::math::geometry::Polygon;
 		using utility::math::geometry::Plane;
 		using utility::math::geometry::ParametricLine;
@@ -120,7 +119,9 @@ namespace modules {
 				arma::vec2 initial_goal_heading = config["INITIAL_GOAL_HEADING"].as<arma::vec2>(); //this is not used yet
 			});
 
+			// Set defaults on start up
 			on<Trigger<Startup>>([this](const Startup&) {
+				// TODO should these be moved to config?
 				penalisedButtonStatus = false;
 				feetOffGround = true;
 				isKicking = false;
@@ -134,7 +135,23 @@ namespace modules {
 				stopWalking();
 			});
 
+			// Get the field description on start up
+			on<Trigger<Startup>,
+				With<Optional<FieldDescription>>>("FieldDescription Update",
+				[this](const Startup&, const std::shared_ptr<const FieldDescription>& desc) {
+
+				if (desc == nullptr) {
+					NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: SoccerConfig module might not be installed.");
+					throw std::runtime_error("FieldDescription Update: SoccerConfig module might not be installed");
+				}
+
+				FIELD_DESCRIPTION = *desc;
+				enemyGoal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
+			});
+
+			// Manually cycle through game phases - left button push
 			on<Trigger<ButtonLeftDown>>([this](const ButtonLeftDown&) {
+				// Go to next game phase
 				currentState.primaryGameState++;
 
 				switch (currentState.primaryGameState) {
@@ -176,6 +193,8 @@ namespace modules {
 				}
 			});
 
+			// Manually trigger penalised and unpenalised - middle button push
+			// TODO Send output to game controller
 			on<Trigger<ButtonMiddleDown>>([this](const ButtonMiddleDown&) {
 				// Am I penalised?
 				if (!currentState.penalised) {
@@ -235,19 +254,6 @@ namespace modules {
 			on<Trigger<messages::motion::WalkStopped>>([this](const messages::motion::WalkStopped&) {
 				isWalking = false;
 			});
-
-			// Get the field description.
-			on<Trigger<Startup>,
-	           With<Optional<FieldDescription>>>("FieldDescription Update",
-	           [this](const Startup&, const std::shared_ptr<const FieldDescription>& desc) {
-	            if (desc == nullptr) {
-	                NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: SoccerConfig module might not be installed.");
-	                throw std::runtime_error("FieldDescription Update: SoccerConfig module might not be installed");
-	            }
-	            FIELD_DESCRIPTION = *desc;
-				enemyGoal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
-
-	        });
 
 			// Check to see if we are looking at the ball.
 			on<Trigger<LookAtBallStart>>([this](const LookAtBallStart&) {
@@ -355,7 +361,7 @@ namespace modules {
 
 					// Is the ball in my zone?
 					currentState.ballInZone = !currentState.ballLost && ZONES.at(MY_ZONE).zone.pointContained(globalBallPosition);
-*/
+
 					// Perform calculations to see if we have reached the assigned target position and heading.
 					arma::vec2 selfToPoint = currentState.targetHeading - currentState.position;
 					arma::vec2 selfRotation = currentState.heading - currentState.position;
@@ -366,6 +372,7 @@ namespace modules {
 					currentState.correctHeading = std::fabs(utility::math::angle::normalizeAngle(selfAngle - selfToPointAngle)) < ANGLE_THRESHOLD;
 					currentState.inPosition = arma::norm(currentState.position - currentState.targetPosition, 2) < POSITION_THRESHOLD_TIGHT;
 					currentState.outOfPosition = (arma::norm(currentState.position - currentState.targetPosition, 2) >= POSITION_THRESHOLD_LOOSE) && previousState.inPosition;
+
 
 					// If the balls position, relative to us is (0, 0) then the ball is inside us.
 					// If the balls velocity is (0, 0) then it can not be approaching anything.
@@ -416,10 +423,9 @@ namespace modules {
 							currentState.ballApproaching = false;
 						}
 					}
-
+*/
 					// Calculate the optimal zone position.
 					arma::vec2 optimalPosition = findOptimalPosition(ZONES.at(MY_ZONE).zone, globalBallPosition);
-
 
 					// ------
 					// Take appropriate action depending on state
@@ -450,7 +456,7 @@ namespace modules {
 									// TODO - fix goalie logic
 									// At some stage he'll have to move to a default position (or possibly optimal?)
 									if(visionBalls.size() > 0){
-										sideStepToPoint(currentState.ballGoalieIntersection);
+										//sideStepToPoint(currentState.ballGoalieIntersection);
 									} else {
 										stopWalking();
 										findSelfAndBall();
@@ -476,7 +482,6 @@ namespace modules {
 							stopWalking();
 							findSelfAndBall();
 							break;
-
 					}
 
 /* Commented out ------ to be merged into the above switch?
