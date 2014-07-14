@@ -34,7 +34,7 @@ namespace planning {
 
     using messages::localisation::Ball;
     using messages::localisation::Self;
-    using messages::motion::DickCommand;
+    using messages::motion::DiveCommand;
     using messages::support::Configuration;
     using messages::motion::WalkStopCommand;
     using messages::behaviour::LimbID;
@@ -53,6 +53,10 @@ namespace planning {
         	const std::vector<Self>& selfs,
         	const std::vector<messages::vision::Ball>& vision_balls,
         	const DivePlan& divePlan) {
+
+        	// TODO: why are these used?
+        	(void)selfs;
+        	(void)divePlan;
 
             if(vision_balls.size()>0 && ball.position[0] > 0){
                 //NUClear::log("Ball Vel:", -ball.velocity[0] , ball.position[0]);
