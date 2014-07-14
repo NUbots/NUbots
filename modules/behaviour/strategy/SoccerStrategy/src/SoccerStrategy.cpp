@@ -703,10 +703,10 @@ namespace modules {
 				}
 
 				if(isWalking && arma::norm(self.position - zoned_point) < POSITION_THRESHOLD_TIGHT
-							 && std::fabs(heading - std::cos(currentState.heading[0])) < ANGLE_THRESHOLD) {
+							 && std::fabs(heading - std::atan2(currentState.heading[1], currentState.heading[0])) < ANGLE_THRESHOLD) {
 					stopWalking();
 				} else if(arma::norm(self.position - zoned_point) > POSITION_THRESHOLD_LOOSE
-						||std::fabs(heading - std::cos(currentState.heading[0]) > ANGLE_THRESHOLD)) {
+						|| std::fabs(heading - std::atan2(currentState.heading[1], currentState.heading[0])) > ANGLE_THRESHOLD) {
 					sideStepToPoint(zoned_point);
 				}
 				
@@ -741,14 +741,14 @@ namespace modules {
 				} else { 
 					startPosition = ZONES.at(MY_ZONE).startPosition;
 				}
-				
+
 				// Warning Oscillation with bad localisation
 				// Was arma::norm(self.position - )
 				if (isWalking && arma::norm(self.position - startPosition) < POSITION_THRESHOLD_TIGHT
-							  && std::fabs(heading - std::cos(currentState.heading[0])) < ANGLE_THRESHOLD) {
+							  && std::fabs(heading - std::atan2(currentState.heading[1], currentState.heading[0])) < ANGLE_THRESHOLD) {
 					stopWalking();
 				} else if(arma::norm(self.position - ZONES.at(MY_ZONE).startPosition) > POSITION_THRESHOLD_LOOSE
-						||std::fabs(heading - std::cos(currentState.heading[0])) > ANGLE_THRESHOLD) 
+						||std::fabs(heading - std::atan2(currentState.heading[1], currentState.heading[0])) > ANGLE_THRESHOLD) 
 				{
 					goToPoint(ZONES.at(MY_ZONE).startPosition, arma::vec2{std::cos(heading), std::sin(heading)});
 				}
