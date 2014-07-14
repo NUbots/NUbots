@@ -29,7 +29,6 @@
 #include "messages/motion/GetupCommand.h"
 #include "messages/motion/DiveCommand.h"
 #include "messages/output/Say.h"
-#include "messages/vision/VisionObjects.h"
 
 #include "utility/time/time.h"
 #include "utility/math/angle.h"
@@ -296,15 +295,9 @@ namespace modules {
 							const std::shared_ptr<const messages::input::gameevents::GameState>& gameState
 							) {
 
-std::cerr << __func__ << "               " << __LINE__ << std::endl;
 					// Update game state from game controller
-					if (gameState != NULL) {
-						updateGameState(*gameState);
-					}
+					updateGameState(gameState);
 					
-					// Calculate the position of the ball in field coordinates.
-					arma::vec2 globalBallPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
-
 					// Make a copy of the previous state.
 					memcpy(&previousState, &currentState, sizeof(State));
 
@@ -320,8 +313,13 @@ std::cerr << __func__ << "               " << __LINE__ << std::endl;
 						std::cerr << "SoccerStrategy - No Self!!!!" << std::endl;
 					}
 
+					// Calculate the position of the ball in field coordinates.
+					arma::vec2 globalBallPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
+
 					// Are we kicking off?
-					currentState.kickOff = gameState->ourKickOff;
+					if (gameState != NULL) { 
+						currentState.kickOff = gameState->ourKickOff;
+					}
 
 					// Is my start position inside the centre circle?
 					currentState.kicker = ((arma::norm(ZONES.at(MY_ZONE).startPosition, 2) < (FIELD_DESCRIPTION.dimensions.center_circle_diameter / 2)) && (currentState.primaryGameState == GameStatePrimary::READY ||
@@ -331,13 +329,15 @@ std::cerr << __func__ << "               " << __LINE__ << std::endl;
 					currentState.pickedUp = feetOffGround && !isGettingUp && !isDiving;
 
 					// Have I been penalised or unpenalised?
-					if (gameState->team.players.at(0).penaltyReason != PenaltyReason::UNPENALISED && !previousState.penalised) {
-						currentState.penalised = true;
-						emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
-					}
-					else if(gameState->team.players.at(0).penaltyReason == PenaltyReason::UNPENALISED && previousState.penalised) {
-						currentState.penalised = false;
-						emit(std::move(std::make_unique<messages::output::Say>("Unpenalised")));
+					if (gameState != NULL) { 
+						if (gameState->team.players.at(0).penaltyReason != PenaltyReason::UNPENALISED && !previousState.penalised) {
+							currentState.penalised = true;
+							emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
+						}
+						else if(gameState->team.players.at(0).penaltyReason == PenaltyReason::UNPENALISED && previousState.penalised) {
+							currentState.penalised = false;
+							emit(std::move(std::make_unique<messages::output::Say>("Unpenalised")));
+						}
 					}
 
 // TODO --- Currently not being used - determine if needed
@@ -469,9 +469,9 @@ std::cerr << __func__ << "               " << __LINE__ << std::endl;
 										findSelfAndBall();
 									}
 								} else if(visionBalls.size() > 0) {
-									playSoccer(ball.position, visionBalls.at(0), selfs[0], *gameState);									
+									playSoccer(ball.position, visionBalls.at(0), selfs[0], gameState);
 								} else {
-									searchForBall(ball, selfs[0], *gameState);
+									searchForBall(ball, selfs[0], gameState);
 								}
 								findSelfAndBall();
 							}
@@ -513,8 +513,11 @@ std::cerr << __func__ << "               " << __LINE__ << std::endl;
 				});
 			}
 
-			void SoccerStrategy::updateGameState(const messages::input::gameevents::GameState& gameState) {
-std::cerr << __func__ << "               " << __LINE__ << std::endl;
+			void SoccerStrategy::updateGameState(const std::shared_ptr<const messages::input::gameevents::GameState>& gameState) {
+				if (gameState == NULL) {
+					return;
+				}
+
 				// What state is the game in?
 				switch (gameState.phase) {
 					case Phase::READY:
@@ -670,7 +673,7 @@ std::cerr << __func__ << "               " << __LINE__ << std::endl;
 				emit(std::move(dive));
 			}
 
-			void SoccerStrategy::playSoccer(const arma::vec2& localisationBall, const VisionBall& visionBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState){
+			void SoccerStrategy::playSoccer(const arma::vec2& localisationBall, const VisionBall& visionBall, const messages::localisation::Self& self, const std::shared_ptr<const messages::input::gameevents::GameState>& gameState){
 				// TODO: What are these for?
 				(void)visionBall;
 				(void)self;
@@ -694,7 +697,7 @@ std::cerr << __func__ << "               " << __LINE__ << std::endl;
 				diveForBall(localisationBall);
 			}
 
-			void SoccerStrategy::searchForBall(const messages::localisation::Ball& localisationBall, const Self& self, const GameState& gameState){
+			void SoccerStrategy::searchForBall(const messages::localisation::Ball& localisationBall, const Self& self, const std::shared_ptr<const messages::input::gameevents::GameState>& gameState){
 				(void)localisationBall;
 				(void)gameState;
 
@@ -792,8 +795,8 @@ std::cerr << __func__ << "               " << __LINE__ << std::endl;
 				}
 
 				// Prevent spamming.
-				if (!lookingAtGoal) {
-					emit(std::make_unique<LookAtGoalStart>());
+				if (!lookingAtBall) {
+					emit(std::make_unique<LookAtBallStart>());
 				}
 			}
 

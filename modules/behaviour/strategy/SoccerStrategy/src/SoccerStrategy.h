@@ -202,19 +202,19 @@ namespace modules {
 			arma::vec2 findOptimalPosition(const utility::math::geometry::Polygon& zone, const arma::vec2& point);
 			void findSelf();
 			void findBall();
-			void goToPoint(const arma::vec2& positioni, const arma::vec2& heading);
+			void goToPoint(const arma::vec2& position, const arma::vec2& heading);
 			void sideStepToPoint(const arma::vec2& position);
 			void kickBall(const arma::vec2& direction);
 			void diveForBall(const arma::vec2& target);
 			void approachBall(const arma::vec2& haading);
 			
-			void updateGameState(const messages::input::gameevents::GameState& gameController);
+			void updateGameState(const std::shared_ptr<const messages::input::gameevents::GameState>& gameController);
 
 			//NEW
-			bool penalised(const messages::input::gameevents::GameState& gameState);
-			void playSoccer(const arma::vec2& localisationBall, const messages::vision::Ball& visionBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState);
+			bool penalised(const std::shared_ptr<const messages::input::gameevents::GameState>& gameState);
+			void playSoccer(const arma::vec2& localisationBall, const messages::vision::Ball& visionBall, const messages::localisation::Self& self, const std::shared_ptr<const messages::input::gameevents::GameState>& gameState);
 			void playGoalie(const arma::vec2& localisationBall);
-			void searchForBall(const messages::localisation::Ball& localisationBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState);
+			void searchForBall(const messages::localisation::Ball& localisationBall, const messages::localisation::Self& self, const std::shared_ptr<const messages::input::gameevents::GameState>& gameState);
 
 			void walkToStartPosition(const messages::localisation::Self& self);
 			void stopWalking();
@@ -223,6 +223,7 @@ namespace modules {
 
 
 			arma::vec2 enemyGoal;
+
 		public:
 			explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
 		};
