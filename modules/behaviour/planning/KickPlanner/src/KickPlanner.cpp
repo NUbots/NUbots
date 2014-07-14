@@ -50,6 +50,7 @@ namespace planning {
             KICK_CORRIDOR_WIDTH = config["KICK_CORRIDOR_WIDTH"].as<float>();
             KICK_FORWARD_ANGLE_LIMIT = config["KICK_FORWARD_ANGLE_LIMIT"].as<float>();
             KICK_SIDE_ANGLE_LIMIT = config["KICK_SIDE_ANGLE_LIMIT"].as<float>();
+            FRAMES_NOT_SEEN_LIMIT = config["FRAMES_NOT_SEEN_LIMIT"].as<float>();
         });
 
         on< Trigger<Ball>, With<std::vector<Self>>, With<std::vector<messages::vision::Ball>>, With<KickPlan> >([this] (
@@ -58,7 +59,8 @@ namespace planning {
             const std::vector<messages::vision::Ball>& vision_balls,
             const KickPlan& kickPlan) {
             
-            if (vision_balls.size() != 0) {
+            // If we're not seeing any vision balls, count frames not seen
+            if (vision_balls.empty()) {
                 framesNotSeen++;
             } else {
                 framesNotSeen = 0;
@@ -82,7 +84,7 @@ namespace planning {
             // NUClear::log("kickTarget = ", kickTarget);
             // NUClear::log("ball position = ", ball.position);
 
-            if(framesNotSeen < 5 and
+            if(framesNotSeen < FRAMES_NOT_SEEN_LIMIT &&
                ball.position[0] < MAX_BALL_DISTANCE &&
                std::fabs(ball.position[1]) < KICK_CORRIDOR_WIDTH / 2){
 
