@@ -144,6 +144,7 @@ namespace support {
 
         Message message;
         message.set_type(Message::GAME_STATE);
+        message.set_filter_id(0);
         message.set_utc_timestamp(getUtcTimestamp());
 
         auto* gameController = message.mutable_game_state();

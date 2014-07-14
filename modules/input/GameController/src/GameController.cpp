@@ -20,6 +20,7 @@
 #include <atomic>
 #include "GameController.h"
 #include "messages/support/Configuration.h"
+#include "messages/support/GlobalConfig.h"
 
 extern "C" {
     #include <sys/socket.h>
@@ -30,6 +31,7 @@ namespace modules {
 namespace input {
 
     using messages::support::Configuration;
+    using messages::support::GlobalConfig;
     using gamecontroller::GameControllerPacket;
     using gamecontroller::GameControllerReplyPacket;
     using gamecontroller::ReplyMessage;
@@ -41,12 +43,12 @@ namespace input {
 
         powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&GameController::run), this), std::bind(std::mem_fn(&GameController::kill), this)));
 
-        on<Trigger<Configuration<GameController>>>("GameController Configuration", [this](const Configuration<GameController>& config) {
+        auto setup = [this] (const Configuration<GameController>& config, const GlobalConfig& globalConfig) {
 
             // TODO use an eventfd to allow changing the port dynamically
 
-            TEAM_ID = config["teamId"].as<uint>();
-            PLAYER_ID = config["playerId"].as<uint>();
+            PLAYER_ID = globalConfig.playerId;
+            TEAM_ID = globalConfig.teamId;
             BROADCAST_IP = config["broadcastIP"].as<std::string>();
 
             port = config["port"].as<uint>();
@@ -116,7 +118,11 @@ namespace input {
             initialState->opponent.teamId = 0;
 
             emit(std::move(initialState));
-        });
+        };
+
+        // Trigger the same function when either update
+        on<With<Configuration<GameController>>, Trigger<GlobalConfig>>("GameController Configuration", setup);
+        on<Trigger<Configuration<GameController>>, With<GlobalConfig>>("GameController Configuration", setup);
 
         on<Trigger<Every<2, Per<std::chrono::seconds>>>>("GameController Reply", [this](const time_t&) {
             sendReplyPacket(ReplyMessage::ALIVE);

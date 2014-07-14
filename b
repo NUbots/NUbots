@@ -199,8 +199,8 @@ def build_module_header(path):
 
     code = surround_with_namespaces(module_class, module_namespaces)
 
-    return surround_with_include_guard("""
-#include <nuclear>
+    return surround_with_include_guard("""#include <nuclear>
+
 {}""".format(code), path)
 
 def build_module_implementation(path):
@@ -216,7 +216,6 @@ def build_module_implementation(path):
     code = surround_with_namespaces(constructor, module_namespaces)
 
     return """#include "{0}.h"
-#include <nuclear>
 
 {1}
 """.format(module_name, code)
