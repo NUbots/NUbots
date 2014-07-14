@@ -22,6 +22,7 @@
 #include "messages/behaviour/LookStrategy.h"
 #include "messages/behaviour/WalkStrategy.h"
 #include "messages/behaviour/KickPlan.h"
+#include "messages/behaviour/DivePlan.h"
 #include "messages/input/Sensors.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/support/Configuration.h"
@@ -58,11 +59,13 @@ namespace modules {
 		using messages::support::Configuration;
 		using messages::support::FieldDescription;
 		using messages::motion::KickCommand;
+		using messages::motion::DiveCommand;
 		using messages::motion::WalkCommand;
 		using messages::behaviour::WalkStrategy;
 		using messages::behaviour::WalkTarget;
 		using messages::behaviour::WalkApproach;
 		using messages::behaviour::KickPlan;
+		using messages::behaviour::DivePlan;
 
 		using messages::input::gameevents::GameState;
 		using messages::input::gameevents::Phase;
@@ -490,7 +493,7 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 								if(IS_GOALIE) {
 
 									if(visionBalls.size() > 0){
-										sideStepToPoint(currentState.ballGoalieIntersection);
+										playGoalie(ball.position);
 									} else {
 										stopWalking();
 										findSelfAndBall();
@@ -713,6 +716,13 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 
 			//NEw
 
+			void SoccerStrategy::diveForBall(const arma::vec2& target) {
+
+				auto dive = std::make_unique<messages::behaviour::DivePlan>();
+				dive->target = target;
+				emit(std::move(dive));
+			}
+
 			void SoccerStrategy::playSoccer(const arma::vec2& localisationBall, const arma::vec2& visionBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState){
 				// TODO: What are these for?
 				(void)visionBall;
@@ -728,6 +738,13 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 				}
 
 				kickBall(enemyGoal);
+			}
+
+			void SoccerStrategy::playGoalie(const arma::vec2& localisationBall) {
+
+				sideStepToPoint(currentState.ballGoalieIntersection);
+
+				diveForBall(localisationBall);
 			}
 
 			void SoccerStrategy::searchForBall(const messages::localisation::Ball& localisationBall, const Self& self, const GameState& gameState){

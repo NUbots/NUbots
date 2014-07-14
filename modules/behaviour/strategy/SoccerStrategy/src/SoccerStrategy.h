@@ -208,6 +208,7 @@ namespace modules {
 			void sideStepToPoint(const arma::vec2& position);
 			void watchBall();
 			void kickBall(const arma::vec2& direction);
+			void diveForBall(const arma::vec2& target);
 			void approachBall(const arma::vec2& haading);
 
 			void updateGameState(const messages::input::gameevents::GameState& gameController);
@@ -217,6 +218,7 @@ namespace modules {
 
 			bool penalised(const messages::input::gameevents::GameState& gameState);
 			void playSoccer(const arma::vec2& localisationBall, const arma::vec2& visionBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState);
+			void playGoalie(const arma::vec2& localisationBall);
 			void searchForBall(const messages::localisation::Ball& localisationBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState);
 
 			void walkToStartPosition(const messages::localisation::Self& self);

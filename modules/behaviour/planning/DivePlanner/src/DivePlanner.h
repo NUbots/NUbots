@@ -17,30 +17,24 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_PLANNING_GOALSAVER_H
-#define MODULES_BEHAVIOUR_PLANNING_GOALSAVER_H
+#ifndef MODULES_BEHAVIOUR_PLANNING_DIVEPLANNER_H
+#define MODULES_BEHAVIOUR_PLANNING_DIVEPLANNER_H
+
 
 #include <nuclear>
-#include "messages/motion/DiveCommand.h"
-
 namespace modules {
 namespace behaviour {
-namespace skills {
+namespace planning {
 
-    class GoalSaver : public NUClear::Reactor {
+    class DivePlanner : public NUClear::Reactor {
     public:
-        /// @brief Called by the powerplant to build and setup the GoalSaver reactor.
-        explicit GoalSaver(std::unique_ptr<NUClear::Environment> environment);
-        static constexpr const char* CONFIGURATION_PATH = "GoalSaver.yaml";
+        /// @brief Called by the powerplant to build and setup the DivePlanner reactor.
+        explicit DivePlanner(std::unique_ptr<NUClear::Environment> environment);
+        static constexpr const char* CONFIGURATION_PATH = "DivePlanner.yaml";
 
     private:
-        const size_t id;
-        float DIVE_PRIORITY;
-        float EXECUTION_PRIORITY;
-        messages::motion::DiveCommand diveCommand;
-
-        void updatePriority(const float& priority);
-        int getDirectionalQuadrant(float x, float y);
+    	float SPEED_THRESHOLD;
+    	float DISTANCE_THRESHOLD;
     };
 
 }
