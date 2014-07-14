@@ -693,8 +693,19 @@ std::cerr << __func__ << std::endl;
 
 			void SoccerStrategy::playGoalie(const arma::vec2& localisationBall) {
 
-				sideStepToPoint(currentState.ballGoalieIntersection);
+				// Limit ballGoalieIntersection to within goal box
+				if(currentState.ballGoalieIntersection[1] > 0) {
+					arma::vec2 zoned_point = {ballGoalieIntersection[0], min(ballGoalieIntersection[1], FIELD_DESCRIPTION.dimensions.goal_width / 2)};
+				} else {
+					arma::vec2 zoned_point = {ballGoalieIntersection[0], max(ballGoalieIntersection[1], -FIELD_DESCRIPTION.dimensions.goal_width / 2)};
+				}
 
+				if(arma::norm(self.position - zoned_point < POSITION_THRESHOLD_TIGHT)) {
+					diveForBall(localisationBall);
+				} else if(arma::norm(self.position - zoned_point > POSITION_THRESHOLD_LOOSE)) {
+					sideStepToPoint(zoned_point);
+				}
+				
 				diveForBall(localisationBall);
 			}
 
