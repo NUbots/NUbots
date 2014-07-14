@@ -29,6 +29,7 @@
 #include "messages/motion/DiveCommand.h"
 #include "messages/output/Say.h"
 
+#include "utility/time/time.h"
 #include "utility/math/angle.h"
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/ParametricLine.h"
@@ -83,6 +84,7 @@ namespace modules {
 				BALL_SELF_INTERSECTION_REGION = config["BALL_SELF_INTERSECTION_REGION"].as<float>();
 				BALL_LOOK_ERROR = config["BALL_LOOK_ERROR"].as<arma::vec2>();
 				BALL_MOVEMENT_THRESHOLD = config["BALL_MOVEMENT_THRESHOLD"].as<float>();
+				BALL_TIMEOUT_THRESHOLD = config["BALL_TIMEOUT_THRESHOLD"].as<float>();
 				GOAL_LOOK_ERROR = config["GOAL_LOOK_ERROR"].as<arma::vec2>();
 				ANGLE_THRESHOLD = config["ANGLE_THRESHOLD"].as<float>();
 				POSITION_THRESHOLD_TIGHT = config["POSITION_THRESHOLD_TIGHT"].as<float>();
@@ -361,6 +363,10 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 
 					// Can I see the ball?
 					currentState.ballSeen = ((currentState.ball.sr_xx < BALL_CERTAINTY_THRESHOLD) && (currentState.ball.sr_xy < BALL_CERTAINTY_THRESHOLD) && (currentState.ball.sr_yy < BALL_CERTAINTY_THRESHOLD));
+
+					if (currentState.ballSeen) {
+						currentState.timeBallLastSeen = NUClear::clock::now();
+					}
 
 					// Is the ball lost?
 					currentState.ballLost = !currentState.ballSeen;
@@ -671,7 +677,7 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 				approach->targetPositionType = WalkTarget::WayPoint;
 				approach->targetHeadingType = WalkTarget::Ball;
 				approach->walkMovementType = WalkApproach::OmnidirectionalReposition;
-				approach->heading = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
+				approach->heading = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position) - currentState.position;
 				approach->target = position;
 
 				currentState.targetPosition = approach->target;
@@ -731,7 +737,12 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 				//TODO enhance this behaviour
 				if (isWalking && arma::norm(self.position - ZONES.at(MY_ZONE).defaultPosition) < POSITION_THRESHOLD_TIGHT) 
 				{
-					spin();
+
+					if (utility::time::TimeDifferenceSeconds(NUClear::clock::now(), currentState.timeBallLastSeen) > BALL_TIMEOUT_THRESHOLD) {
+						spin();
+					} else {
+						emit(std::make_unique<LookAtBallStart>());
+					}
 				} else if(arma::norm(self.position - ZONES.at(MY_ZONE).defaultPosition) > POSITION_THRESHOLD_LOOSE) {
 					goToPoint(ZONES.at(MY_ZONE).defaultPosition, self.position-ZONES.at(MY_ZONE).defaultPosition);
 				}
@@ -768,31 +779,58 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 			//TODO figure out what these should do
 
 			void SoccerStrategy::findSelfAndBall(){
-				if (!lookingAtGoal) {
-					emit(std::make_unique<LookAtGoalStart>());
+				// If we haven't seen the ball for some time now, look for the ball.
+				// Otherwise look for the goal.
+				// Try to mix these two actions nicely so we can get good localisation as well as adequate knowledge of the ball location.
+				if (!lookingAtBall && (utility::time::TimeDifferenceSeconds(NUClear::clock::now(), currentState.timeBallLastSeen) > BALL_TIMEOUT_THRESHOLD)) {
+					// We can't be looking at both the ball and goal simulatenously.
+					if (lookingAtGoal) {
+						emit(std::make_unique<LookAtGoalStop>());
+					}
+
+					// Prevent spamming.
+					if (!lookingAtGoal) {
+						emit(std::make_unique<LookAtGoalStart>());
+					}
 				}
 
 				else {
-					emit(std::make_unique<LookAtGoalStop>());
+					// We can't be looking at both the ball and goal simulatenously.
+					if (lookingAtBall) {
+						emit(std::make_unique<LookAtBallStop>());
+					}
+
+					// Looking for the goals should help localisation to converge on our position.
+					// Prevent spamming.
+					if (!lookingAtGoal) {
+						emit(std::make_unique<LookAtGoalStart>());
+					}
 				}
 			}
 
 			void SoccerStrategy::findSelf() {
-				/* Try to locate both goals. */
-				/* Look at closest goal for short period to reset localisation. */
-
-				// Alternate looking at the goals and looking at the ball.
-				if (!lookingAtGoal) {
-					emit(std::make_unique<LookAtGoalStart>());
+				// We can't be looking at both the ball and goal simulatenously.
+				if (lookingAtBall) {
+					emit(std::make_unique<LookAtBallStop>());
 				}
 
-				else {
-					emit(std::make_unique<LookAtGoalStop>());
+				// Looking for the goals should help localisation to converge on our position.
+				// Prevent spamming.
+				if (!lookingAtGoal) {
+					emit(std::make_unique<LookAtGoalStart>());
 				}
 			}
 
 			void SoccerStrategy::findBall() {
-				emit(std::make_unique<LookAtBallStart>());
+				// We can't be looking at both the ball and goal simulatenously.
+				if (lookingAtGoal) {
+					emit(std::make_unique<LookAtGoalStop>());
+				}
+
+				// Prevent spamming.
+				if (!lookingAtGoal) {
+					emit(std::make_unique<LookAtGoalStart>());
+				}
 			}
 
 			void SoccerStrategy::spin(){
