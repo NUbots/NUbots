@@ -459,7 +459,6 @@ namespace modules {
 								stopWalking();
 								findSelfAndBall();
 							} else {
-std::cerr << "enemyGoal - (" << enemyGoal[0] << ", " << enemyGoal[1] << ")" << std::endl;
 								kickBall(enemyGoal);
 
 								if(IS_GOALIE) {

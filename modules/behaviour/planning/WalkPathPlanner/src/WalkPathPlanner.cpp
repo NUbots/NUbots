@@ -334,6 +334,9 @@ namespace modules {
                     selected = 2;
                 }
 
+		// Disable sideways approaches.
+		selected = 0;
+
                 return arma::vec({distances[selected], bearings[selected], headings[selected]});
             }
 
