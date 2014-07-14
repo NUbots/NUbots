@@ -3,6 +3,7 @@
 import sys
 import os
 import shutil
+import platform
 from subprocess import call
 from subprocess import Popen
 from subprocess import PIPE
@@ -21,10 +22,12 @@ Command summary:
   - clean             Deletes the build directory.
   - cmake             Runs cmake in the build directory (creating it if it
                       doesn't exist).
+  - cmake_ninja       Runs cmake to generate a Ninja build.
   - make [arg]...     Runs cmake, then make in the build directory (creating it
                       if it doesn't exist), passing any arguments to the make
                       command.
   - makej             Same as make, but runs 'make -j'.
+  - ninja [arg]...    Same as the make command, but runs ninja instead.
   - run <role>        Runs the binary for the role of the given name.
   - debug <role>      Runs the binary for the role of the given name under gdb.
   - create_box <provider> Builds the nubots Vagrant box, for the given
@@ -43,9 +46,20 @@ def cmake():
         os.mkdir('build')
     call(['cmake', '..'], cwd='build')
 
-
 def make(args):
+    if not os.path.exists('build'):
+        cmake()
     call(['make'] + args, cwd='build')
+
+def cmake_ninja():
+    if not os.path.exists('build'):
+        os.mkdir('build')
+    call(['cmake', '..', '-G', 'Ninja'], cwd='build')
+
+def ninja(args):
+    if not os.path.exists('build'):
+        cmake_ninja()
+    call(['ninja'] + args, cwd='build')
 
 def role_exists(role):
     return os.path.isfile("build/bin/{}".format(role))
@@ -89,7 +103,8 @@ def box_generated(provider):
     return os.path.isfile("packer/nubots-ubuntu-14-04-x86-{}.box".format(provider))
 
 def packer_is_installed():
-    return not call(['which', 'packer'])
+    cmd = "where" if platform.system() == "Windows" else "which" #which is where on windows
+    return not call([cmd, 'packer'])
 
 def packer(provider):
     box_name = 'nubots-14.04'
@@ -184,8 +199,8 @@ def build_module_header(path):
 
     code = surround_with_namespaces(module_class, module_namespaces)
 
-    return surround_with_include_guard("""
-#include <nuclear>
+    return surround_with_include_guard("""#include <nuclear>
+
 {}""".format(code), path)
 
 def build_module_implementation(path):
@@ -201,7 +216,6 @@ def build_module_implementation(path):
     code = surround_with_namespaces(constructor, module_namespaces)
 
     return """#include "{0}.h"
-#include <nuclear>
 
 {1}
 """.format(module_name, code)
@@ -304,23 +318,33 @@ def execute_command(command, args):
         arg0 = args[0]
 
     if (command == '' or
-       command == 'help' or
-       command == '--help'):
+        command == 'help' or
+        command == '--help'):
         print_command_summary()
+
     elif command == 'clean':
         clean()
+
     elif command == 'cmake':
         cmake()
-    elif command == 'makej':
-        cmake()
-        make(['-j2'])
     elif command == 'make':
         cmake()
         make(arguments)
+    elif command == 'makej':
+        cmake()
+        make(['-j2'])
+
+    elif command == 'cmake_ninja':
+        cmake_ninja()
+    elif command == 'ninja':
+        cmake_ninja()
+        ninja(arguments)
+
     elif command == 'run':
         run(arg0)
     elif command == 'debug':
         debug(arg0)
+
     elif command == 'create_box':
         create_box(arg0)
     elif command == 'module':

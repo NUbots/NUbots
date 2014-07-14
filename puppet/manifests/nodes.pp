@@ -6,6 +6,7 @@ class initial_apt_update {
 }
 
 class developer_tools {
+  include vm_ssh_keys
   class { 'vim':  username => $username, }
   package { 'screen': ensure => latest, }
   package { 'htop': ensure => latest, }
@@ -19,7 +20,7 @@ class developer_tools {
 node nuclearportvm {
   include initial_apt_update
 
-  # # define variables for this node
+  # define variables for this node
   $username = 'vagrant'
 
   class { 'nuclearport::build_dep': username => $username, }
@@ -34,6 +35,12 @@ node nuclearportvm {
 
   # Non-essential developer tools:
   include developer_tools
+  
+  # sharing fix, see http://superuser.com/questions/736024/cannot-share-host-directory-with-virtualbox-guest-mint-16-64-bit
+  file { '/sbin/mount.vboxsf':
+    ensure => 'link',
+    target => '/usr/lib/i386-linux-gnu/VBoxGuestAdditions/mount.vboxsf'
+  }
 }
 
 node packer-virtualbox-iso, packer-vmware-iso {
@@ -59,12 +66,12 @@ node packer-virtualbox-iso, packer-vmware-iso {
   package { 'libaubio-dev': ensure => latest }
   package { 'libsndfile-dev': ensure => latest }
   package { 'libtcmalloc-minimal4': ensure => latest }
-  # package { 'libboost-math-dev': ensure => latest }
 
   # nubugger::build_dep
   package { 'pkg-config': ensure => latest, }
   package { 'uuid-dev': ensure => latest, }
   package { 'nodejs': ensure => latest, }
+  package { 'nodejs-legacy': ensure => latest, }
   package { 'npm': ensure => latest, }
 
   # natnet motion capture streaming

@@ -38,7 +38,7 @@ void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point 
 }
 
 void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
-                                          const FakeOdometry& odom) {
+                                          const FakeOdometry&) {
     double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
     last_time_update_time_ = current_time;
     ball_filter_.timeUpdate(seconds); // TODO odometry was removed from here odom
@@ -47,7 +47,6 @@ void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point 
 double KFBallLocalisationEngine::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object) {
 
-    auto groundDist = observed_object.sphericalFromNeck[0] * std::sin(observed_object.sphericalFromNeck[2]);
     // // Radial coordinates
     // arma::vec2 measurement = { observed_object.sphericalFromNeck[0],
     //                            observed_object.sphericalFromNeck[1] };
@@ -63,18 +62,22 @@ double KFBallLocalisationEngine::MeasurementUpdate(
     //                     0, 0, observed_object.sphericalError[1] };
 
     // // Robot relative cartesian coordinates
-    auto heading = observed_object.sphericalFromNeck[1];
-    arma::vec2 measurement = { groundDist * std::cos(heading),
-                               groundDist * std::sin(heading) };
-    auto dist_error = observed_object.sphericalError[0];
-    auto heading_error = observed_object.sphericalError[1];
-    //TODO: initialise matrices with streamers (<<)
-    arma::mat22 cov = { dist_error * heading_error, 0,
-                        0, dist_error * heading_error };
+    arma::vec2 measurement = observed_object.measurements[0].position.rows(0, 1);
+    arma::mat22 cov = observed_object.measurements[0].error.submat(0, 0, 1, 1);
 
     double quality = ball_filter_.measurementUpdate(measurement, cov);
 
     return quality;
+}
+
+void KFBallLocalisationEngine::UpdateConfiguration(
+    const messages::support::Configuration<KFBallLocalisationEngineConfig>& config) {
+    ball_filter_.model.ballDragCoefficient = config["BallDragCoefficient"].as<double>();
+    cfg_.emit_ball_fieldobjects = config["EmitBallFieldobjects"].as<bool>();
+}
+
+bool KFBallLocalisationEngine::CanEmitFieldObjects() {
+    return cfg_.emit_ball_fieldobjects;
 }
 
 }

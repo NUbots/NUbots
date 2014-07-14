@@ -66,4 +66,3 @@ namespace modules {
 }  // modules
 
 #endif  // MODULES_UTILITY_CONFIGURATION_CONFIGSYSTEM_H_
-

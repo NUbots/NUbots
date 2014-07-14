@@ -111,7 +111,7 @@ namespace YAML {
 
             node["duration"] = std::chrono::duration_cast<std::chrono::milliseconds>(rhs.duration).count();
             node["targets"] = rhs.targets;
-
+            
             return node;
         }
 

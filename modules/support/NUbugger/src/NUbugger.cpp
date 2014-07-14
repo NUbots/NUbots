@@ -20,592 +20,231 @@
 #include "NUbugger.h"
 
 #include <zmq.hpp>
-#include <jpeglib.h>
-#include <cxxabi.h>
 
-#include "messages/input/Sensors.h"
-#include "messages/input/Image.h"
-#include "messages/vision/ClassifiedImage.h"
-#include "messages/vision/VisionObjects.h"
 #include "messages/vision/LookUpTable.h"
-#include "messages/vision/SaveLookUpTable.h"
-#include "messages/localisation/FieldObject.h"
 #include "messages/support/Configuration.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/behaviour/Action.h"
-#include "messages/behaviour/proto/Behaviour.pb.h"
 
 #include "utility/nubugger/NUgraph.h"
 #include "utility/time/time.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
-#include "utility/nubugger/NUgraph.h"
-#include "utility/localisation/transform.h"
-#include "utility/math/coordinates.h"
-// #include "BallModel.h"
-#include "utility/image/ColorModelConversions.h"
 
 namespace modules {
-    namespace support {
+namespace support {
 
-        using std::chrono::duration_cast;
-        using std::chrono::microseconds;
+    using utility::nubugger::graph;
 
-        using utility::nubugger::graph;
-        using utility::time::getUtcTimestamp;
+    using messages::support::Configuration;
+    using messages::support::SaveConfiguration;
+    using messages::support::nubugger::proto::Message;
 
-        using messages::support::Configuration;
-        using messages::support::nubugger::proto::DataPoint;
-        using messages::support::nubugger::proto::Message;
+    using messages::vision::LookUpTable;
+    using messages::vision::SaveLookUpTable;
 
-        using messages::input::Sensors;
-        using messages::input::Image;
+    using utility::time::getUtcTimestamp;
 
-        using messages::behaviour::ActionStart;
-        using messages::behaviour::ActionKill;
-        using messages::behaviour::RegisterAction;
-        using messages::behaviour::proto::Behaviour;
-        using messages::behaviour::proto::ActionStateChange;
+    NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment))
+        , pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB)
+        , sub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_SUB) {
 
-        using messages::vision::ObjectClass;
-        using messages::vision::ClassifiedImage;
-        using messages::vision::LookUpTable;
-        using messages::vision::Goal;
-        using messages::vision::Ball;
-        using messages::vision::SaveLookUpTable;
+        powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&NUbugger::run), this), std::bind(std::mem_fn(&NUbugger::kill), this)));
 
-        using messages::localisation::FieldObject;
+        on<Trigger<Configuration<NUbugger>>>([this] (const Configuration<NUbugger>& config) {
+            // TODO: unbind old port
+            uint newPubPort = config["network"]["pub_port"].as<uint>();
+            uint newSubPort = config["network"]["sub_port"].as<uint>();
 
-        void NUbugger::EmitLocalisationModels(const std::unique_ptr<FieldObject>& robot_model, const std::unique_ptr<FieldObject>& ball_model) {
-
-            Message message;
-
-            message.set_type(Message::LOCALISATION);
-            message.set_utc_timestamp(getUtcTimestamp());
-            auto* localisation = message.mutable_localisation();
-
-            auto* api_field_object = localisation->add_field_object();
-            api_field_object->set_name(robot_model->name);
-
-            for (FieldObject::Model model : robot_model->models) {
-                auto* api_model = api_field_object->add_models();
-
-                api_model->set_wm_x(model.wm_x);
-                api_model->set_wm_y(model.wm_y);
-                api_model->set_heading(model.heading);
-                api_model->set_sd_x(model.sd_x);
-                api_model->set_sd_y(model.sd_y);
-                api_model->set_sr_xx(model.sr_xx);
-                api_model->set_sr_xy(model.sr_xy);
-                api_model->set_sr_yy(model.sr_yy);
-                api_model->set_lost(model.lost);
+            if (newPubPort != pubPort) {
+                if (connected) {
+                    pub.unbind(("tcp://*:" + std::to_string(pubPort)).c_str());
+                }
+                pubPort = newPubPort;
+                pub.bind(("tcp://*:" + std::to_string(pubPort)).c_str());
             }
 
-            api_field_object = localisation->add_field_object();
-            api_field_object->set_name(ball_model->name);
-
-            for (FieldObject::Model model : ball_model->models) {
-                auto* api_model = api_field_object->add_models();
-
-                api_model->set_wm_x(model.wm_x);
-                api_model->set_wm_y(model.wm_y);
-                api_model->set_heading(model.heading);
-                api_model->set_sd_x(model.sd_x);
-                api_model->set_sd_y(model.sd_y);
-                api_model->set_sr_xx(model.sr_xx);
-                api_model->set_sr_xy(model.sr_xy);
-                api_model->set_sr_yy(model.sr_yy);
-                api_model->set_lost(model.lost);
+            if (newSubPort != subPort) {
+                if (connected) {
+                    sub.unbind(("tcp://*:" + std::to_string(subPort)).c_str());
+                }
+                subPort = newSubPort;
+                sub.bind(("tcp://*:" + std::to_string(subPort)).c_str());
             }
 
-            send(message);
-        }
-
-        NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment))
-            , pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB)
-            , sub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_SUB) {
             // Set our high water mark
-            int hwm = 50;
+            int hwm = config["network"]["high_water_mark"].as<int>();
             pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
             sub.setsockopt(ZMQ_SUBSCRIBE, 0, 0);
 
-            // Bind to port 12000
-            pub.bind("tcp://*:12000");
-            sub.bind("tcp://*:12001");
+            connected = true;
 
-            powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&NUbugger::run), this), std::bind(std::mem_fn(&NUbugger::kill), this)));
+            for (auto& setting : config["reaction_handles"]) {
+                std::string name = setting.first.as<std::string>();
+                bool enabled = setting.second.as<bool>();
 
-            on<Trigger<DataPoint>>([this](const DataPoint& data_point) {
-                Message message;
-                message.set_type(Message::DATA_POINT);
-                message.set_utc_timestamp(getUtcTimestamp());
+                bool found = false;
+                for (auto& handle : handles[name]) {
+                    if (enabled && !handle.enabled()) {
+                        handle.enable();
+                        found = true;
+                    }
 
-            *(message.mutable_data_point()) = data_point;
-
-                send(message);
-            });
-
-             on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
-                Message message;
-                message.set_type(Message::BEHAVIOUR);
-                message.set_utc_timestamp(getUtcTimestamp());
-
-                auto* behaviour = message.mutable_behaviour();
-                behaviour->set_type(Behaviour::ACTION_STATE);
-                auto* actionStateChange = behaviour->mutable_action_state_change();
-                actionStateChange->set_state(ActionStateChange::START);
-                actionStateChange->set_name(actionStart.name);
-                for (auto& limbID : actionStart.limbs) {
-                    actionStateChange->add_limbs(static_cast<int>(limbID));
-                }
-
-                send(message);
-             });
-
-             on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
-                Message message;
-                message.set_type(Message::BEHAVIOUR);
-                message.set_utc_timestamp(getUtcTimestamp());
-
-                auto* behaviour = message.mutable_behaviour();
-                behaviour->set_type(Behaviour::ACTION_STATE);
-                auto* actionStateChange = behaviour->mutable_action_state_change();
-                actionStateChange->set_state(ActionStateChange::KILL);
-                actionStateChange->set_name(actionKill.name);
-                for (auto& limbID : actionKill.limbs) {
-                    actionStateChange->add_limbs(static_cast<int>(limbID));
-                }
-
-                send(message);
-             });
-
-            on<Trigger<RegisterAction>>([this] (const RegisterAction& action) {
-                Message message;
-                message.set_type(Message::BEHAVIOUR);
-                message.set_utc_timestamp(getUtcTimestamp());
-
-                auto* behaviour = message.mutable_behaviour();
-                behaviour->set_type(Behaviour::ACTION_REGISTER);
-                auto* actionRegister = behaviour->mutable_action_register();
-                actionRegister->set_id(action.id);
-                actionRegister->set_name(action.name);
-                for(const auto& set : action.limbSet) {
-                    auto* limbSet = actionRegister->add_limb_set();
-                    limbSet->set_priority(set.first);
-                    for (auto& limbID : set.second) {
-                        limbSet->add_limbs(static_cast<int>(limbID));
+                    else if (!enabled && handle.enabled()) {
+                        handle.disable();
+                        found = true;
                     }
                 }
 
-                send(message);
-            });
-
-            // This trigger gets the output from the sensors (unfiltered)
-            on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
-
-                Message message;
-
-                message.set_type(Message::SENSOR_DATA);
-                message.set_utc_timestamp(getUtcTimestamp());
-
-                auto* sensorData = message.mutable_sensor_data();
-
-                sensorData->set_timestamp(sensors.timestamp.time_since_epoch().count());
-
-                // Add each of the servos into the protocol buffer
-                for(const auto& s : sensors.servos) {
-
-                    auto* servo = sensorData->add_servo();
-
-                    servo->set_error_flags(s.errorFlags);
-
-                    servo->set_id(static_cast<messages::input::proto::Sensors_ServoID>(s.id));
-
-                    servo->set_enabled(s.enabled);
-
-                    servo->set_p_gain(s.pGain);
-                    servo->set_i_gain(s.iGain);
-                    servo->set_d_gain(s.dGain);
-
-                    servo->set_goal_position(s.goalPosition);
-                    servo->set_goal_speed(s.goalSpeed);
-
-                    servo->set_present_position(s.presentPosition);
-                    servo->set_present_speed(s.presentSpeed);
-
-                    servo->set_load(s.load);
-                    servo->set_voltage(s.voltage);
-                    servo->set_temperature(s.temperature);
-                }
-
-                // The gyroscope values (x,y,z)
-                auto* gyro = sensorData->mutable_gyroscope();
-                gyro->set_x(sensors.gyroscope[0]);
-                gyro->set_y(sensors.gyroscope[1]);
-                gyro->set_z(sensors.gyroscope[2]);
-
-                // The accelerometer values (x,y,z)
-                auto* accel = sensorData->mutable_accelerometer();
-                accel->set_x(sensors.accelerometer[0]);
-                accel->set_y(sensors.accelerometer[1]);
-                accel->set_z(sensors.accelerometer[2]);
-
-                // The orientation matrix
-                auto* orient = sensorData->mutable_orientation();
-                orient->set_xx(sensors.orientation(0,0));
-                orient->set_yx(sensors.orientation(1,0));
-                orient->set_zx(sensors.orientation(2,0));
-                orient->set_xy(sensors.orientation(0,1));
-                orient->set_yy(sensors.orientation(1,1));
-                orient->set_zy(sensors.orientation(2,1));
-                orient->set_xz(sensors.orientation(0,2));
-                orient->set_yz(sensors.orientation(1,2));
-                orient->set_zz(sensors.orientation(2,2));
-
-                // The left FSR values
-                auto* lfsr = sensorData->mutable_left_fsr();
-                lfsr->set_x(sensors.leftFSR[0]);
-                lfsr->set_y(sensors.leftFSR[1]);
-                lfsr->set_z(sensors.leftFSR[2]);
-
-                // The right FSR values
-                auto* rfsr = sensorData->mutable_right_fsr();
-                rfsr->set_x(sensors.rightFSR[0]);
-                rfsr->set_y(sensors.rightFSR[1]);
-                rfsr->set_z(sensors.rightFSR[2]);
-
-                send(message);
-            });
-
-            on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
-
-                if(!image.source().empty()) {
-
-                    Message message;
-                    message.set_type(Message::IMAGE);
-                    message.set_utc_timestamp(getUtcTimestamp());
-
-                    auto* imageData = message.mutable_image();
-                    std::string* imageBytes = imageData->mutable_data();
-
-                    // Reserve enough space in the image data to store the output
-                    imageBytes->resize(image.source().size());
-                    imageData->set_width(image.width());
-                    imageData->set_height(image.height());
-
-                    imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
-
-                    send(message);
-                }
-            });
-
-            // on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
-            //     Message message;
-            //     message.set_type(Message::REACTION_STATISTICS);
-            //     message.set_utc_timestamp(getUtcTimestamp());
-            //     auto* reactionStatistics = message.mutable_reaction_statistics();
-            //     //reactionStatistics->set_name(stats.name);
-            //     reactionStatistics->set_reactionid(stats.reactionId);
-            //     reactionStatistics->set_taskid(stats.taskId);
-            //     reactionStatistics->set_causereactionid(stats.causeReactionId);
-            //     reactionStatistics->set_causetaskid(stats.causeTaskId);
-            //     reactionStatistics->set_emitted(duration_cast<microseconds>(stats.emitted.time_since_epoch()).count());
-            //     reactionStatistics->set_started(duration_cast<microseconds>(stats.started.time_since_epoch()).count());
-            //     reactionStatistics->set_finished(duration_cast<microseconds>(stats.finished.time_since_epoch()).count());
-            //     reactionStatistics->set_name(stats.identifier[0]);
-            //     reactionStatistics->set_triggername(stats.identifier[1]);
-            //     reactionStatistics->set_functionname(stats.identifier[2]);
-
-            //     send(message);
-            // });
-
-
-            on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
-
-                Message message;
-                message.set_type(Message::CLASSIFIED_IMAGE);
-                message.set_utc_timestamp(getUtcTimestamp());
-
-                auto* imageData = message.mutable_classified_image();
-
-                // Add the vertical segments to the list
-                for(const auto& segment : image.verticalSegments) {
-                    auto* s = imageData->add_segment();
-
-                    s->set_colour(uint(segment.first));
-                    s->set_subsample(segment.second.subsample);
-
-                    auto* start = s->mutable_start();
-                    start->set_x(segment.second.start[0]);
-                    start->set_y(segment.second.start[1]);
-
-                    auto* end = s->mutable_end();
-                    end->set_x(segment.second.end[0]);
-                    end->set_y(segment.second.end[1]);
-                }
-
-                // Add the horizontal segments to the list
-                for(const auto& segment : image.horizontalSegments) {
-                    auto* s = imageData->add_segment();
-
-                    s->set_colour(uint(segment.first));
-                    s->set_subsample(segment.second.subsample);
-
-                    auto* start = s->mutable_start();
-                    start->set_x(segment.second.start[0]);
-                    start->set_y(segment.second.start[1]);
-
-                    auto* end = s->mutable_end();
-                    end->set_x(segment.second.end[0]);
-                    end->set_y(segment.second.end[1]);
-                }
-
-                // Add in the actual horizon (the points on the left and right side)
-                auto* horizon = imageData->mutable_horizon();
-                horizon->set_gradient(image.horizon[0]);
-                horizon->set_intercept(image.horizon[1]);
-
-                for(const auto& visualHorizon : image.visualHorizon) {
-                    auto* vh = imageData->add_visual_horizon();
-
-                    vh->set_x(visualHorizon[0]);
-                    vh->set_y(visualHorizon[1]);
-                    vh->set_z(visualHorizon[2]);
-                }
-
-                send(message);
-            });
-
-            /*
-            on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Goal> goals){
-                Message message;
-
-                message.set_type(Message::VISION);
-                message.set_utc_timestamp(getUtcTimestamp());
-
-                Message::Vision* api_vision = message.mutable_vision();
-                //NUClear::log("NUbugger emmitting goals: ", goals.size());
-                for (auto& goal : goals){
-                    Message::VisionFieldObject* api_goal = api_vision->add_vision_object();
-
-                    api_goal->set_shape_type(Message::VisionFieldObject::QUAD);
-                    api_goal->set_goal_type(Message::VisionFieldObject::GoalType(1+int(goal.type))); //+1 to account for zero vs one referencing in message buffer.
-                    api_goal->set_name("Goal");
-                    api_goal->set_width(goal.sizeOnScreen[0]);
-                    api_goal->set_height(goal.sizeOnScreen[1]);
-                    api_goal->set_screen_x(goal.screenCartesian[0]);
-                    api_goal->set_screen_y(goal.screenCartesian[1]);
-
-                    arma::vec3 goal_pos = utility::math::coordinates::Spherical2Cartesian(goal.sphericalFromNeck);
-
-                    switch(int(goal.type)){
-                        case(0):
-                            emit(graph("Left vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
-                            break;
-                        case(1):
-                            emit(graph("Right vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
-                            break;
-                        case(2):
-                            emit(graph("Ambiguous vgoal", goal_pos[0], goal_pos[1], goal_pos[2]));
+                if (found) {
+                    if (enabled) {
+                        log("Enabled:", name);
+                    } else {
+                        log("Disabled:", name);
                     }
-
-
-                    for(auto& point : goal.screen_quad){
-                        api_goal->add_points(point[0]);
-                        api_goal->add_points(point[1]);
-                        //std::cout<< "NUbugger::on<Trigger<std::vector<Goal>>> : adding quad point ( " << point[0] << " , " << point[1] << " )."<< std::endl;
-                    }
-                    for(auto& coord : goal.sphericalFromNeck){
-                        api_goal->add_measured_relative_position(coord);
-                    }
-                }
-                send(message);
-            });
-
-            on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Ball> balls){
-                Message message;
-
-                message.set_type(Message::VISION);
-                message.set_utc_timestamp(getUtcTimestamp());
-
-                Message::Vision* api_vision = message.mutable_vision();
-                //std::cout<< "NUbugger::on<Trigger<std::vector<Ball>>> : sending " << balls.size() << " balls to NUbugger." << std::endl;
-                if(balls.size()>0){
-                    arma::vec3 first_ball_pos= utility::math::coordinates::Spherical2Cartesian(balls[0].sphericalFromNeck);
-                    emit(graph("Vision Ball pos", first_ball_pos[0], first_ball_pos[1],first_ball_pos[2]));
-                }
-                for (auto& ball : balls){
-                    Message::VisionFieldObject* api_ball = api_vision->add_vision_object();
-
-                    api_ball->set_shape_type(Message::VisionFieldObject::CIRCLE);
-                    api_ball->set_name("Ball");
-                    api_ball->set_width(ball.sizeOnScreen[0]);
-                    api_ball->set_height(ball.sizeOnScreen[1]);
-                    api_ball->set_screen_x(ball.screenCartesian[0]);
-                    api_ball->set_screen_y(ball.screenCartesian[1]);
-
-                    api_ball->set_radius(ball.diameter / 2.0);
-                    for(auto& coord : ball.sphericalFromNeck){
-                        api_ball->add_measured_relative_position(coord);
-                    }
-                }
-                send(message);
-            });*/
-
-            on<Trigger<Every<100, std::chrono::milliseconds>>,
-               With<messages::localisation::Ball>,
-               // With<messages::vision::Ball>,
-               With<std::vector<messages::localisation::Self>>,
-               Options<Single>>("Localisation Ball",
-                [this](const time_t&,
-                       const messages::localisation::Ball& ball,
-                       // const messages::vision::Ball& vision_ball,
-                       const std::vector<messages::localisation::Self>& robots) {
-                if(robots.size() > 0){
-                    arma::vec2 ball_pos = utility::localisation::transform::RobotBall2FieldBall(
-                        robots[0].position,robots[0].heading, ball.position);
-
-                    // Ball message
-                    auto ball_msg = std::make_unique<messages::localisation::FieldObject>();
-                    std::vector<messages::localisation::FieldObject::Model> ball_msg_models;
-                    messages::localisation::FieldObject::Model ball_model;
-                    ball_msg->name = "ball";
-                    ball_model.wm_x = ball_pos[0];
-                    ball_model.wm_y = ball_pos[1];
-                    ball_model.heading = 0;
-                    ball_model.sd_x = 0.1;
-                    ball_model.sd_y = 0.1;
-
-                    //Do we need to rotate the variances?
-                    ball_model.sr_xx = ball.sr_xx;
-                    ball_model.sr_xy = ball.sr_xy;
-                    ball_model.sr_yy = ball.sr_yy;
-                    ball_model.lost = false;
-                    ball_msg_models.push_back(ball_model);
-
-                    ball_msg->models = ball_msg_models;
-                    // emit(std::move(ball_msg));
-
-                    // Robot message
-                    auto robot_msg = std::make_unique<messages::localisation::FieldObject>();
-                    std::vector<messages::localisation::FieldObject::Model> robot_msg_models;
-
-                    //for (auto& model : robots) {
-                    auto model = robots[0];
-                        messages::localisation::FieldObject::Model robot_model;
-                        robot_msg->name = "self";
-                        robot_model.wm_x = model.position[0];
-                        robot_model.wm_y = model.position[1];
-                        robot_model.heading = std::atan2(model.heading[1], model.heading[0]);
-                        robot_model.sd_x = 1;
-                        robot_model.sd_y = 0.25;
-                        robot_model.sr_xx = model.sr_xx; // * 100;
-                        robot_model.sr_xy = model.sr_xy; // * 100;
-                        robot_model.sr_yy = model.sr_yy; // * 100;
-                        robot_model.lost = false;
-                        robot_msg_models.push_back(robot_model);
-                    //}
-
-
-                    robot_msg->models = robot_msg_models;
-                    // emit(std::move(robot_msg));
-
-                    EmitLocalisationModels(robot_msg, ball_msg);
-                }
-            });
-
-            // When we shutdown, close our publisher
-            on<Trigger<Shutdown>>([this](const Shutdown&) {
-                pub.close();
-            });
-        }
-
-        void NUbugger::run() {
-            // TODO: fix this - still blocks on last recv even if listening = false
-            while (listening) {
-                zmq::message_t message;
-                sub.recv(&message);
-
-                // If our message size is 0, then it is probably our termination message
-                if (message.size() > 0) {
-
-                    // Parse our message
-                    Message proto;
-                    proto.ParseFromArray(message.data(), message.size());
-                    recvMessage(proto);
                 }
             }
-        }
+        });
 
-        void NUbugger::recvMessage(const Message& message) {
-            NUClear::log("Received message of type:", message.type());
-            switch (message.type()) {
-                case Message::COMMAND:
-                    recvCommand(message);
-                    break;
-                case Message::LOOKUP_TABLE:
-                    recvLookupTable(message);
-                    break;
-                default:
-                    return;
+        on<Trigger<Every<5, std::chrono::seconds>>>([this] (const time_t&) {
+            Message message;
+            message.set_type(Message::PING);
+            message.set_filter_id(0);
+            message.set_utc_timestamp(getUtcTimestamp());
+            send(message);
+        });
+
+        provideDataPoints();
+        provideBehaviour();
+        provideGameController();
+        provideLocalisation();
+        provideReactionStatistics();
+        provideSensors();
+        provideVision();
+
+        // When we shutdown, close our publisher
+        on<Trigger<Shutdown>>([this](const Shutdown&) {
+            pub.close();
+        });
+    }
+
+    void NUbugger::run() {
+        // TODO: fix this - still blocks on last recv even if listening = false
+        while (listening) {
+            zmq::message_t message;
+            sub.recv(&message);
+
+            // If our message size is 0, then it is probably our termination message
+            if (message.size() > 0) {
+
+                // Parse our message
+                Message proto;
+                proto.ParseFromArray(message.data(), message.size());
+                recvMessage(proto);
             }
         }
+    }
 
-        void NUbugger::recvCommand(const Message& message) {
-            std::string command = message.command().command();
-            NUClear::log("Received command:", command);
-            if (command == "download_lut") {
-                auto lut = powerplant.get<LookUpTable>();
+    void NUbugger::recvMessage(const Message& message) {
+        log("Received message of type:", message.type());
+        switch (message.type()) {
+            case Message::COMMAND:
+                recvCommand(message);
+                break;
+            case Message::LOOKUP_TABLE:
+                recvLookupTable(message);
+                break;
+            case Message::REACTION_HANDLES:
+                recvReactionHandles(message);
+                break;
+            default:
+                return;
+        }
+    }
 
-                Message message;
-
-                message.set_type(Message::LOOKUP_TABLE);
-                message.set_utc_timestamp(getUtcTimestamp());
-
-                auto* api_lookup_table = message.mutable_lookup_table();
-
-                api_lookup_table->set_table(lut->getData());
-
-                send(message);
+    void NUbugger::recvCommand(const Message& message) {
+        std::string command = message.command().command();
+        log("Received command:", command);
+        if (command == "download_lut") {
+            std::shared_ptr<LookUpTable> lut;
+            try {
+                lut = powerplant.get<LookUpTable>();
             }
-        }
-
-        void NUbugger::recvLookupTable(const Message& message) {
-            auto lookuptable = message.lookup_table();
-            const std::string& lutData = lookuptable.table();
-
-            NUClear::log("Loading LUT");
-            auto data = std::vector<char>(lutData.begin(), lutData.end());
-            auto lut = std::make_unique<LookUpTable>(lookuptable.bits_y(), lookuptable.bits_cb(), lookuptable.bits_cr(), std::move(data));
-            emit<Scope::DIRECT>(std::move(lut));
-
-            if (lookuptable.save()) {
-                NUClear::log("Saving LUT to file");
-                emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
+            catch (NUClear::metaprogramming::NoDataException err) {
+                log("There is no LUT loaded");
+                return;
             }
+
+            Message message;
+
+            message.set_type(Message::LOOKUP_TABLE);
+            message.set_filter_id(0);
+            message.set_utc_timestamp(getUtcTimestamp());
+
+            auto* api_lookup_table = message.mutable_lookup_table();
+
+            api_lookup_table->set_table(lut->getData());
+
+            send(message);
+        }
+    }
+
+    void NUbugger::recvLookupTable(const Message& message) {
+        auto lookuptable = message.lookup_table();
+        const std::string& lutData = lookuptable.table();
+
+        log("Loading LUT");
+        auto data = std::vector<char>(lutData.begin(), lutData.end());
+        auto lut = std::make_unique<LookUpTable>(lookuptable.bits_y(), lookuptable.bits_cb(), lookuptable.bits_cr(), std::move(data));
+        emit<Scope::DIRECT>(std::move(lut));
+
+        if (lookuptable.save()) {
+            log("Saving LUT to file");
+            emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
+        }
+    }
+
+    void NUbugger::recvReactionHandles(const Message& message) {
+
+        auto currentConfig = powerplant.get<Configuration<NUbugger>>();
+
+        auto config = std::make_unique<SaveConfiguration>();
+        config->config = currentConfig->config;
+
+        for (const auto& command : message.reaction_handles().handles()) {
+
+            std::string name = command.name();
+            bool enabled = command.enabled();
+
+            config->path = CONFIGURATION_PATH;
+            config->config["reaction_handles"][name] = enabled;
         }
 
-        void NUbugger::kill() {
-            listening = false;
-        }
+        emit(std::move(config));
+    }
 
-        /**
-         * This method needs to be used over pub.send as all calls to
-         * pub.send need to be synchronized with a concurrency primitive
-         * (such as a mutex)
-         */
-        void NUbugger::send(zmq::message_t& packet) {
-            std::lock_guard<std::mutex> lock(mutex);
-            pub.send(packet);
-        }
+    void NUbugger::kill() {
+        listening = false;
+    }
 
-        void NUbugger::send(Message message) {
-            auto serialized = message.SerializeAsString();
-            zmq::message_t packet(serialized.size());
-            memcpy(packet.data(), serialized.data(), serialized.size());
-            send(packet);
-        }
+    /**
+     * This method needs to be used over pub.send as all calls to
+     * pub.send need to be synchronized with a concurrency primitive
+     * (such as a mutex)
+     */
+    void NUbugger::send(zmq::message_t& packet) {
+        std::lock_guard<std::mutex> lock(mutex);
+        pub.send(packet);
+    }
 
-    } // support
+    void NUbugger::send(Message message) {
+        size_t messageSize = message.ByteSize();
+        zmq::message_t packet(messageSize + 2);
+        char* dataPtr = static_cast<char*>(packet.data());
+        message.SerializeToArray(dataPtr + 2, messageSize);
+        dataPtr[0] = uint8_t(message.type());
+        dataPtr[1] = uint8_t(message.filter_id());
+        send(packet);
+    }
+
+} // support
 } // modules

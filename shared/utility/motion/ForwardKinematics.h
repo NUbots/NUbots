@@ -43,7 +43,7 @@ namespace kinematics {
     inline std::map<messages::input::ServoID, arma::mat44> calculateHeadJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID){
         std::map<messages::input::ServoID, arma::mat44> positions;
 
-        arma::mat44 runningTransform = arma::eye(4,4);
+        arma::mat44 runningTransform = arma::eye(4, 4);
         float HEAD_PITCH = sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_PITCH)].presentPosition;
         float HEAD_YAW =  sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_YAW)].presentPosition;
         arma::vec3 NECK_POS = {RobotKinematicModel::Head::NECK_BASE_POS_FROM_ORIGIN[0],
@@ -57,7 +57,7 @@ namespace kinematics {
         //Translate to base of neck from origin
         runningTransform *= utility::math::matrix::translationMatrix(NECK_POS);
         //Rotate to face out of base of neck
-        runningTransform *= utility::math::matrix::yRotationMatrix(-M_PI/2, 4);
+        runningTransform *= utility::math::matrix::yRotationMatrix(-M_PI_2, 4);
         //Rotate head in yaw axis
         runningTransform *= utility::math::matrix::xRotationMatrix(HEAD_YAW, 4);
         //Translate to top of neck (i.e. next motor axle)
@@ -70,7 +70,7 @@ namespace kinematics {
         }
 
         //Rotate to face forward direction of neck
-        runningTransform *= utility::math::matrix::yRotationMatrix(M_PI/2, 4);
+        runningTransform *= utility::math::matrix::yRotationMatrix(M_PI_2, 4);
         //Rotate pitch
         runningTransform *= utility::math::matrix::yRotationMatrix(HEAD_PITCH, 4);
         //Translate to camera
@@ -92,7 +92,7 @@ namespace kinematics {
     template <typename RobotKinematicModel>
     inline std::map<messages::input::ServoID, arma::mat44> calculateLegJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID, Side isLeft){
         std::map<messages::input::ServoID, arma::mat44> positions;
-        arma::mat44 runningTransform = arma::eye(4,4);
+        arma::mat44 runningTransform = arma::eye(4, 4);
         //Variables to mask left and right leg differences:
         messages::input::ServoID HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL;
         int negativeIfRight = 1;
@@ -114,20 +114,20 @@ namespace kinematics {
             negativeIfRight = -1;
         }
 
-        arma::mat44 hipPos = arma::eye(4,4);
+        arma::mat44 hipPos = arma::eye(4, 4);
         hipPos.col(3)= arma::vec({ RobotKinematicModel::Leg::HIP_OFFSET_X, negativeIfRight * RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS/2, -RobotKinematicModel::Leg::HIP_OFFSET_Z,1});
         runningTransform *= hipPos;
         //Rotate to face down the leg (see above for definitions of terms, including 'facing')
-        runningTransform *= utility::math::matrix::yRotationMatrix(M_PI/2, 4);
+        runningTransform *= utility::math::matrix::yRotationMatrix(M_PI_2, 4);
         //Using right hand rule along global z gives positive direction of yaw:
-        runningTransform *= utility::math::matrix::xRotationMatrix(-sensors.servos[static_cast<int>(HIP_YAW)].presentPosition , 4);
+        runningTransform *= utility::math::matrix::xRotationMatrix(-sensors.servos[static_cast<int>(HIP_YAW)].presentPosition, 4);
         //Return basis facing from body to hip centre (down) with z aligned with the axis of the hip roll motor axis. Position at hip joint
         positions[HIP_YAW] = runningTransform;
         if(servoID == HIP_YAW) {
             return positions;
         }
 
-        runningTransform *= utility::math::matrix::zRotationMatrix(sensors.servos[static_cast<int>(HIP_ROLL)].presentPosition , 4);
+        runningTransform *= utility::math::matrix::zRotationMatrix(sensors.servos[static_cast<int>(HIP_ROLL)].presentPosition, 4);
         //Return basis facing down leg plane, with z oriented through axis of roll motor. Position still hip joint
         positions[HIP_ROLL] = runningTransform;
         if(servoID == HIP_ROLL) {
@@ -167,8 +167,10 @@ namespace kinematics {
         //Rotate to face down foot (roll)
         runningTransform *= utility::math::matrix::zRotationMatrix(sensors.servos[static_cast<int>(ANKLE_ROLL)].presentPosition , 4);
         //Rotate so x faces towar toes
-        runningTransform *= utility::math::matrix::yRotationMatrix(-M_PI/2, 4);
-        //Return basis with x out of the front of the toe and z out the top of foot. Pos = ankle axis centre
+        runningTransform *= utility::math::matrix::yRotationMatrix(-M_PI_2, 4);
+        //Translate to ground
+        runningTransform *= utility::math::matrix::translationMatrix(arma::vec3({0, 0, -RobotKinematicModel::Leg::FOOT_HEIGHT}));
+        //Return basis with x out of the front of the toe and z out the top of foot. Pos = ankle axis centre projected to ground
         positions[ANKLE_ROLL] = runningTransform;
         return positions;
     }
@@ -182,7 +184,7 @@ namespace kinematics {
     template <typename RobotKinematicModel>
     inline std::map<messages::input::ServoID, arma::mat44> calculateArmJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID, Side isLeft){
         std::map<messages::input::ServoID, arma::mat44> positions;
-        arma::mat44 runningTransform = arma::eye(4,4);
+        arma::mat44 runningTransform = arma::eye(4, 4);
         //Variables to mask left and right leg differences:
         messages::input::ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
         int negativeIfRight = 1;
@@ -298,7 +300,7 @@ namespace kinematics {
             //NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass ", messages::input::stringFromId(joint.first), massVector);
             double jointMass = massVector[3];
 
-            arma::mat44 massScaler = arma::eye(4,4);
+            arma::mat44 massScaler = arma::eye(4, 4);
             massScaler.submat(0,0,2,2) *= jointMass;
 
             totalMassVector +=  joint.second * massScaler * massVector; // = m * local centre of mass in global robot coords
@@ -311,12 +313,12 @@ namespace kinematics {
             }
             //NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass Torso", massVector);
             double jointMass = massVector[3];
-            arma::mat44 massScaler = arma::eye(4,4);
+            arma::mat44 massScaler = arma::eye(4, 4);
             massScaler.submat(0,0,2,2) *= jointMass;
             totalMassVector +=  massScaler * massVector; // = m * local centre of mass in global robot coords
         }
 
-        arma::mat44 normaliser = arma::eye(4,4);
+        arma::mat44 normaliser = arma::eye(4, 4);
         if(totalMassVector[3] > 0){
             normaliser.submat(0,0,2,2) *= 1 / totalMassVector[3];
             arma::vec4 result = normaliser * totalMassVector;
@@ -327,17 +329,50 @@ namespace kinematics {
         }
     }
 
-    template <typename RobotKinematicModel>
-    inline arma::vec2 calculateHorizon(const arma::mat33 groundToHeadRotation, double cameraDistancePixels){
+    inline utility::math::geometry::Line calculateHorizon(const arma::mat33 groundToCamRotation, double cameraDistancePixels){
         arma::vec3 zGround = {0,0,1};
-        arma::vec3 normal = groundToHeadRotation * zGround;
+        arma::vec3 normal = groundToCamRotation * zGround;
 
         arma::vec3 xHead = {1,0,0};
         arma::vec3 yHead = {0,1,0};
         double phiX = std::acos(arma::dot(normal, xHead)) - M_PI_2;
         double phiY = std::acos(arma::dot(normal, yHead)) - M_PI_2;
 
-        return { std::tan(phiY), cameraDistancePixels * -std::tan(phiX) };
+        // TODO ask jake to fix this :P
+
+        // Since I don't know how to math this properly, make two random points and make a line from those
+        double m = std::tan(phiY);
+        double b = cameraDistancePixels * -std::tan(phiX);
+
+        return utility::math::geometry::Line(arma::vec2({ 0, b }), arma::vec2({ 1, m + b }));
+    }
+
+    inline arma::mat44 calculateBodyToGround(arma::vec3 groundNormal_body, double bodyHeight){
+        arma::vec3 X = arma::vec{1,0,0};
+        double projectXOnNormal = groundNormal_body[0];
+
+        arma::vec3 groundMatrixX;
+        arma::vec3 groundMatrixY;
+
+        if(std::fabs(projectXOnNormal) == 1){
+            //Then x is parallel to the ground normal and we need to use projection onto +/-z instead
+            //If x parallel to normal, then use -z, if x antiparallel use z
+            arma::vec3 Z =  arma::vec3{0, 0, (projectXOnNormal > 0 ? -1.0 : 1.0 )};
+            double projectZOnNormal = arma::dot(Z, groundNormal_body);
+            groundMatrixX = arma::normalise(Z - projectZOnNormal * groundNormal_body);
+            groundMatrixY = arma::cross(groundNormal_body, groundMatrixX);
+        } else {
+            groundMatrixX = arma::normalise(X - projectXOnNormal * groundNormal_body);
+            groundMatrixY = arma::cross(groundNormal_body, groundMatrixX);
+        }
+
+        arma::mat44 groundToBody = arma::eye(4, 4);
+        groundToBody.submat(0,0,2,0) = groundMatrixX;
+        groundToBody.submat(0,1,2,1) = groundMatrixY;
+        groundToBody.submat(0,2,2,2) = groundNormal_body;
+        groundToBody.submat(0,3,2,3) = arma::vec{0, 0, -bodyHeight};
+
+        return utility::math::matrix::orthonormal44Inverse(groundToBody);
     }
 
 } // kinematics

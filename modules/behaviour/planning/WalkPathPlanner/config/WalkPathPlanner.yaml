@@ -16,7 +16,7 @@
 
     "ballLineupDistance" : 0.2,
     "ApproachCurveFactor" : 0.2,
-    "closeApproachSpeed" : 0.25,
+    "closeApproachSpeed" : 0.45,
     "closeApproachDistance" : 0.30,
 	"turnSpeed" : 0.4,
 
@@ -29,6 +29,6 @@
     "assumedObstacleWidth" : 0.250,
     "avoidDistance" : 0.500,
 
-    "bearingSensitivity" : 1.5,
+    "bearingSensitivity" : 0.15,
     "ApproachCurveFactor" : 0.45
 }

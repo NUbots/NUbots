@@ -60,11 +60,12 @@ namespace modules {
                     EXECUTION_PRIORITY = file.config["EXECUTION_PRIORITY"].as<float>();
                 });
 
-                on<Trigger<Sensors>, Options<Single>>([this] (const Sensors& sensors) {
+                fallenCheck = on<Trigger<Sensors>, Options<Single>>([this] (const Sensors& sensors) {
 
                     //check if the orientation is smaller than the cosine of our fallen angle
                     if (!gettingUp && fabs(sensors.orientation(2,2)) < FALLEN_ANGLE) {
                         updatePriority(GETUP_PRIORITY);
+                        fallenCheck.disable();
                     }
                 });
 
@@ -85,6 +86,7 @@ namespace modules {
                 on<Trigger<KillGetup>, Options<Sync<Getup>>>([this] (const KillGetup&) {
                     gettingUp = false;
                     updatePriority(0);
+                    fallenCheck.enable();
                 });
 
                 emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
@@ -101,11 +103,8 @@ namespace modules {
                         //HACK 2014 Jake Fountain, Trent Houliston
                         //TODO track set limbs and wait for all to finish
                         if(servoSet.find(ServoID::L_ANKLE_PITCH) != servoSet.end() ||
-                           servoSet.find(ServoID::R_ANKLE_PITCH) != servoSet.end())
-                        {
-
-                        emit(std::make_unique<KillGetup>());
-
+                           servoSet.find(ServoID::R_ANKLE_PITCH) != servoSet.end()) {
+                            emit(std::make_unique<KillGetup>());
                         }
                     }
                 }));

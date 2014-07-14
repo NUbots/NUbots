@@ -1,11 +1,12 @@
 ADD_ROLE(
     NAME featuredetectortester
     MODULES
-        support::SignalCatcher
         support::configuration::ConfigSystem
         input::LinuxCamera
         vision::LUTClassifier
         vision::GoalDetector
+        vision::BallDetector
+        vision::ObstacleDetector
         support::NUbugger
         support::logging::ConsoleLogHandler
         platform::darwin::HardwareIO

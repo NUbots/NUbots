@@ -27,12 +27,13 @@ message ClassifiedImage {
     message Segment {
         required uint32 colour = 1;
         required uint32 subsample = 2;
-        required uvec2 start = 3;
-        required uvec2 end = 4;
+        required ivec2 start = 3;
+        required ivec2 end = 4;
     }
 
-    required Line horizon = 1;
-    repeated vec3 visual_horizon = 2;
-    repeated Segment segment = 3;
+    required uvec2 dimensions = 1;
+    required Line horizon = 2;
+    repeated uvec2 visual_horizon = 3;
+    repeated Segment segment = 4;
 }
 

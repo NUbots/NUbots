@@ -22,14 +22,15 @@
 
 #include <nuclear>
 #include <zmq.hpp>
-#include "messages/localisation/FieldObject.h"
 #include "messages/support/nubugger/proto/Message.pb.h"
+#include "messages/localisation/FieldObject.h"
+#include "messages/input/gameevents/GameEvents.h"
 
 namespace modules {
     namespace support {
 
         /**
-         * Intelligent debugging, logging and graphing for the NUBots system.
+         * Intelligent debugging, logging and graphing for the NUbots system.
          *
          * @author Brendan Annable
          * @author Trent Houliston
@@ -39,9 +40,32 @@ namespace modules {
             zmq::socket_t pub;
             zmq::socket_t sub;
 
+            uint pubPort = 0;
+            uint subPort = 0;
+            bool connected = false;
+
             bool listening = true;
 
+            // Reaction Handles
+            std::map<std::string, std::vector<ReactionHandle>> handles;
+
+            std::map<std::string, uint> dataPointFilterIds;
+            uint dataPointFilterId = 1;
+
             std::mutex mutex;
+
+            void provideDataPoints();
+            void provideBehaviour();
+            void provideGameController();
+            void provideLocalisation();
+            void provideReactionStatistics();
+            void provideSensors();
+            void provideVision();
+
+            void sendGameState(std::string event, const messages::input::gameevents::GameState& gameState);
+            messages::input::proto::GameState::Data::Phase getPhase(const messages::input::gameevents::Phase& phase);
+            messages::input::proto::GameState::Data::Mode getMode(const messages::input::gameevents::Mode& phase);
+            messages::input::proto::GameState::Data::PenaltyReason getPenaltyReason(const messages::input::gameevents::PenaltyReason& penaltyReason);
 
             void send(zmq::message_t& packet);
             void send(messages::support::nubugger::proto::Message message);
@@ -49,6 +73,7 @@ namespace modules {
             void recvMessage(const messages::support::nubugger::proto::Message& message);
             void recvCommand(const messages::support::nubugger::proto::Message& message);
             void recvLookupTable(const messages::support::nubugger::proto::Message& message);
+            void recvReactionHandles(const messages::support::nubugger::proto::Message& message);
 
             void EmitLocalisationModels(
                 const std::unique_ptr<messages::localisation::FieldObject>& robot_model,
@@ -57,6 +82,7 @@ namespace modules {
             void run();
             void kill();
         public:
+            static constexpr const char* CONFIGURATION_PATH = "NUbugger.yaml";
             explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);
         };
 

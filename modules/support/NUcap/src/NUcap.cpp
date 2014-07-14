@@ -60,7 +60,7 @@ namespace support {
 
             NUClear::log("serverIP", serverIP);
             NUClear::log("clientIP", clientIP);
-            
+
 
             // Version number of the NatNet protocol, as reported by the server.
             unsigned char natNetMajor;
@@ -91,7 +91,7 @@ namespace support {
 
         });
 
-        on<Trigger<Every<1, std::chrono::milliseconds>>>([this](const time_t&) {
+        on<Trigger<Every<15, Per<std::chrono::seconds>>>>([this](const time_t&) {
             bool valid;
             // Try to get a new frame from the listener.
             MocapFrame frame(frameListener->pop(&valid).first);
@@ -108,37 +108,49 @@ namespace support {
 
                 markerSet->set_name(marker.name());
                 for (auto point : marker.markers()) {
-                    auto* marker_point = markerSet->add_points();
-                    marker_point->set_x(point.x);
-                    marker_point->set_y(point.y);
-                    marker_point->set_z(point.z);
+                    auto* markerPoint = markerSet->add_points();
+                    auto* position = markerPoint->mutable_position();
+                    position->set_x(point.x);
+                    position->set_y(point.y);
+                    position->set_z(point.z);
                 }
             }
 
             for (auto point : frame.unIdMarkers()) {
-                auto* marker_point = moCap->add_unidentified_points();
+                auto* markerPoint = moCap->add_unidentified_points();
 //                NUClear::log("Point", point.x, point.y, point.z);
-                marker_point->set_x(point.x);
-                marker_point->set_y(point.y);
-                marker_point->set_z(point.z);
+                auto* position = markerPoint->mutable_position();
+                position->set_x(point.x);
+                position->set_y(point.y);
+                position->set_z(point.z);
             }
 
             for (auto fRigidBody : frame.rigidBodies()) {
                 auto* rigidBody = moCap->add_rigid_bodies();
-                rigidBody->set_identifier(std::to_string(fRigidBody.id()));
+                rigidBody->set_identifier(fRigidBody.id());
 
-                auto rotation = fRigidBody.orientation();
+                auto* position = rigidBody->mutable_position();
+                // normalize to robot coordinate system, x foward, y left, z up
+                position->set_x(-fRigidBody.location().z);
+                position->set_y(-fRigidBody.location().x);
+                position->set_z(fRigidBody.location().y);
 
-                rigidBody->set_qw(rotation.qw);
-                rigidBody->set_qx(rotation.qx);
-                rigidBody->set_qy(rotation.qy);
-                rigidBody->set_qz(rotation.qz);
-                // TODO: fRigidBody.location();
+                // log("Received:", rigidBody->identifier(), position->x(), position->y(), position->z());
+//
+                auto fRotation = fRigidBody.orientation();
+
+                auto* rotation = rigidBody->mutable_rotation();
+                rotation->set_w(fRotation.qw);
+                rotation->set_x(-fRotation.qz);
+                rotation->set_y(-fRotation.qx);
+                rotation->set_z(fRotation.qy);
+
                 for (auto point : fRigidBody.markers()) {
-                    auto* marker_point = rigidBody->add_points();
-                    marker_point->set_x(point.x);
-                    marker_point->set_y(point.y);
-                    marker_point->set_z(point.z);
+                    auto* markerPoint = rigidBody->add_points();
+                    auto* position = markerPoint->mutable_position();
+                    position->set_x(point.x);
+                    position->set_y(point.y);
+                    position->set_z(point.z);
                 }
             }
 

@@ -21,6 +21,7 @@ package messages.support.nubugger.proto;
 
 import "messages/input/proto/Sensors.proto";
 import "messages/input/proto/Image.proto";
+import "messages/input/proto/GameState.proto";
 import "messages/support/nuclear/proto/ReactionStatistics.proto";
 import "messages/support/nubugger/proto/DataPoint.proto";
 import "messages/localisation/proto/Localisation.proto";
@@ -31,33 +32,48 @@ import "messages/behaviour/proto/Behaviour.proto";
 
 message Message {
     enum Type {
-        SENSOR_DATA = 1;
-        IMAGE = 2;
-        CLASSIFIED_IMAGE = 3;
-        VISION_OBJECT = 4;
-        LOCALISATION = 5;
-        DATA_POINT = 6;
-        REACTION_STATISTICS = 7;
-        LOOKUP_TABLE = 8;
-        BEHAVIOUR = 9;
-        COMMAND = 10;
+        PING = 1;
+        SENSOR_DATA = 2;
+        IMAGE = 3;
+        CLASSIFIED_IMAGE = 4;
+        VISION_OBJECT = 5;
+        LOCALISATION = 6;
+        DATA_POINT = 7;
+        REACTION_STATISTICS = 8;
+        LOOKUP_TABLE = 9;
+        BEHAVIOUR = 10;
+        COMMAND = 11;
+        REACTION_HANDLES = 12;
+        GAME_STATE = 13;
     }
 
     required Type type = 1;
-    required uint64 utc_timestamp = 2;
+    required uint32 filter_id = 3;
+    required uint64 utc_timestamp = 4;
 
-    optional messages.input.proto.Sensors sensor_data = 3;
-    optional messages.input.proto.Image image = 4;
-    optional messages.vision.proto.ClassifiedImage classified_image = 5;
-    repeated messages.vision.proto.VisionObject vision_object = 6;
-    optional messages.localisation.proto.Localisation localisation = 7;
-    optional messages.support.nubugger.proto.DataPoint data_point = 8;
-    optional messages.support.nuclear.proto.ReactionStatistics reaction_statistics = 9;
-    optional messages.vision.proto.LookUpTable lookup_table = 10;
-    optional messages.behaviour.proto.Behaviour behaviour = 11;
-    optional Command command = 12;
+    optional messages.input.proto.Sensors sensor_data = 5;
+    optional messages.input.proto.Image image = 6;
+    optional messages.vision.proto.ClassifiedImage classified_image = 7;
+    optional messages.vision.proto.VisionObject vision_object = 8;
+    optional messages.localisation.proto.Localisation localisation = 9;
+    optional messages.support.nubugger.proto.DataPoint data_point = 10;
+    optional messages.support.nuclear.proto.ReactionStatistics reaction_statistics = 11;
+    optional messages.vision.proto.LookUpTable lookup_table = 12;
+    optional messages.behaviour.proto.Behaviour behaviour = 13;
+    optional messages.input.proto.GameState game_state = 14;
+    optional Command command = 15;
+    optional ReactionHandles reaction_handles = 16;
 
     message Command {
         optional string command = 1;
+    }
+
+    message ReactionHandles {
+        message Handle {
+            required string name = 1;
+            required bool enabled = 2;
+        }
+
+        repeated Handle handles = 1;
     }
 }

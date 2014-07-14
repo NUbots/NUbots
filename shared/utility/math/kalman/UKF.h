@@ -76,7 +76,16 @@ namespace utility {
                     points.col(0) = mean;
 
                     // Get our cholskey decomposition
-                    arma::mat chol = arma::chol(covarianceSigmaWeights * covariance);
+
+                    arma::mat chol;
+                    try {
+                        chol = arma::chol(covarianceSigmaWeights * covariance);
+                    } catch (const std::runtime_error& e) {
+                        if (Model::size == 3) std::cerr << __FILE__ << " " << __LINE__ << " : covarianceSigmaWeights * covariance was NOT positive-definite and the cholskey "
+                                  << "decomposition failed.\ncovarianceSigmaWeights * covariance = \n" << std::endl
+                                  << covarianceSigmaWeights * covariance << std::endl;
+                        throw e;
+                    }
 
                     // Put our values in either end of the matrix
                     for (uint i = 1; i < Model::size + 1; ++i) {
@@ -137,8 +146,6 @@ namespace utility {
 
                     defaultCovarianceUpdate = arma::diagmat(covarianceWeights);
 
-                    // NUClear::log("initial covarianceWeights:\n", covarianceWeights);
-
                     // Calculate our sigma points
                     sigmaMean = mean;
                     sigmaPoints = generateSigmaPoints(mean, covariance);
@@ -150,18 +157,18 @@ namespace utility {
                 }
 
                 void timeUpdate(double deltaT) {
-
                     // Generate our sigma points
                     sigmaPoints = generateSigmaPoints(mean, covariance);
+
 
                     // Write the propagated version of the sigma point
                     for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
                         sigmaPoints.col(i) = model.timeUpdate(sigmaPoints.col(i), deltaT);
                     }
 
+
                     // Calculate the new mean and covariance values.
-                    mean = meanFromSigmas(sigmaPoints);
-                    mean = model.limitState(mean);
+                    mean = meanFromSigmas(sigmaPoints);                    mean = model.limitState(mean);
                     covariance = covarianceFromSigmas(sigmaPoints, mean) + model.processNoise();
 
                     // Re calculate our sigma points
@@ -177,7 +184,7 @@ namespace utility {
                 template <typename TMeasurement, typename... TMeasurementType>
                 double measurementUpdate(const TMeasurement& measurement,
                                          const arma::mat& measurement_variance,
-                                         const TMeasurementType... measurementArgs) {
+                                         const TMeasurementType&... measurementArgs) {
 
                     // Allocate room for our predictions
                     arma::mat predictedObservations(measurement.n_elem, NUM_SIGMA_POINTS);
@@ -187,55 +194,34 @@ namespace utility {
                         predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), measurementArgs...);
                     }
 
-
-
                     // Now calculate the mean of these measurement sigmas.
                     arma::vec predictedMean = meanFromSigmas(predictedObservations);
                     predictedObservations.each_col() -= predictedMean;
 
-                    // NUClear::log("---------------------", "measurement:\n", measurement);
-                    // NUClear::log("predictedMean:\n", predictedMean);
-                    // NUClear::log("covarianceWeights:\n", covarianceWeights);
 
-                    // Calculate our predicted covariance
                     arma::mat predictedCovariance = covarianceFromSigmas(predictedObservations, predictedMean);
-
-                    // NUClear::log("predictedCovariance:\n", predictedCovariance);
-
 
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
 
-                    // NUClear::log("innovation:\n", innovation);
+                    // Update our state
+                    covarianceUpdate -= covarianceUpdate.t() * predictedObservations.t() *
+                                        (measurement_variance + predictedObservations * covarianceUpdate * predictedObservations.t()).i() *
+                                        predictedObservations * covarianceUpdate;
 
-                    // Check for outlier, if outlier return without updating estimate.
-                    if(evaluateMeasurement(innovation, predictedCovariance, measurement_variance)) {
+                    d += (predictedObservations.t()) * measurement_variance.i() * innovation;
 
-                        // Update our state
-                        covarianceUpdate -= covarianceUpdate.t() * predictedObservations.t() *
-                                            (measurement_variance + predictedObservations * covarianceUpdate * predictedObservations.t()).i() *
-                                            predictedObservations * covarianceUpdate;
-
-                        d += (predictedObservations.t()) * measurement_variance.i() * innovation;
-
-                        // Update our mean and covariance
-                        mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
-                        mean = model.limitState(mean);
-                        covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
-                    }
+                    // Update our mean and covariance
+                    mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
+                    mean = model.limitState(mean);
+                    covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
 
                     // Magical quality calculation
                     arma::mat innovationVariance = predictedCovariance + measurement_variance;
                     arma::mat innovationCovariance = ((innovation.t() * innovationVariance.i()) * innovation);
 
-                    // NUClear::log("innovationVariance\n", innovationVariance);
-                    // NUClear::log("arma::det(innovationVariance): ", arma::det(innovationVariance));
-                    // NUClear::log("innovationCovariance: ", innovationCovariance);
-
                     double expTerm = -0.5 * innovationCovariance(0, 0);
                     double fract = 1 / sqrt(pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance));
                     const float outlierProbability = 0.05;
-
-                    // NUClear::log("fract: ", fract);
 
                     return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
                 }
@@ -246,38 +232,6 @@ namespace utility {
 
                 StateMat getCovariance() const {
                     return covariance;
-                }
-
-                bool evaluateMeasurement(const arma::mat& innovation, const arma::mat& estimateVariance, const arma::mat& measurementVariance) {
-
-                    return true;
-
-                    /*if(!outlierFiltering and !weighting) {
-                        return true;
-                    }
-
-                    //arma::mat innov_transp = innovation.t();
-                    arma::mat innovationVariance = estimateVariance + measurementVariance;
-
-                    if(outlierFiltering) {
-                        float innovation_2 = convDble(innovation.t() * innov_variance.i() * innovation);
-                        if(m_outlier_threshold > 0 and innovation_2 > outlierThreshold) {
-                            m_filter_weight *= 0.0005;
-                            return false;
-                        }
-                    }
-
-                    // If our measurements are terrible, then we reduce the weighting of this (for localization)
-
-                    if(weighting) {
-                        int measurement_dimensions = measurement_variance.n_rows; //.getm()
-                        const float outlier_probability = 0.05;
-                        double exp_term = -0.5 * convDble(innovation.t() * innov_variance.i() *  innovation);
-                        double fract = 1 / sqrt( pow(2 * M_PI, measurement_dimensions) * arma::det(innov_variance));
-                        m_filter_weight *= (1.f - outlier_probability) * fract * exp(exp_term) + outlier_probability;
-                    }
-
-                    return true;*/
                 }
             };
         }

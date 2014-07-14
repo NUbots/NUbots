@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_VISION_QUAD_H
-#define MODULES_VISION_QUAD_H
+#ifndef UTILITY_MATH_GEOMETRY_QUAD_H
+#define UTILITY_MATH_GEOMETRY_QUAD_H
 
 #include <armadillo>
 #include <ostream>
@@ -55,6 +55,8 @@ namespace geometry {
 
         arma::vec2 getTopCentre() const;                                //! Returns the bottom centre pixel location of the Quad.
         arma::vec2 getBottomCentre() const;                             //! Returns the bottom centre pixel location of the Quad.
+        arma::vec2 getRightCentre() const;
+        arma::vec2 getLeftCentre() const;
 
         arma::vec2 getCentre() const;                                   //! Returns the centre pixel location  of the Quad.
 

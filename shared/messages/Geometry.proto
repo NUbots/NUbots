@@ -23,8 +23,13 @@ import "messages/Vector.proto";
 import "messages/Matrix.proto";
 
 message Line {
-    required double gradient = 1;
-    required double intercept = 2;
+    required vec2 normal = 1;
+    required double distance = 2;
+}
+
+message Circle {
+	required double radius = 1;
+	required ivec2 centre = 2;
 }
 
 message Ellipse {
@@ -33,12 +38,12 @@ message Ellipse {
 }
 
 message Quad {
-    required uvec2 tl = 1;
-    required uvec2 tr = 2;
-    required uvec2 bl = 3;
-    required uvec2 br = 4;
+    required ivec2 tl = 1;
+    required ivec2 tr = 2;
+    required ivec2 bl = 3;
+    required ivec2 br = 4;
 }
 
 message Polygon {
-    repeated uvec2 point = 1;
+    repeated ivec2 point = 1;
 }

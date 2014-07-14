@@ -20,28 +20,29 @@
 #include "RobotModel.h"
 
 #include <armadillo>
+#include <nuclear>
 
 #include "utility/math/angle.h"
 #include "utility/math/matrix.h"
 #include "utility/math/coordinates.h"
 #include "messages/localisation/FieldObject.h"
+#include "utility/localisation/transform.h"
 #include "messages/input/Sensors.h"
-#include <nuclear>
+#include "messages/input/ServoID.h"
 
 using messages::input::Sensors;
+using messages::input::ServoID;
+using utility::localisation::transform::SphericalRobotObservation;
+using utility::localisation::transform::WorldToRobotTransform;
 using messages::localisation::FakeOdometry;
 using utility::math::matrix::rotationMatrix;
+using utility::math::matrix::zRotationMatrix;
+using utility::math::coordinates::cartesianToRadial;
+using utility::math::coordinates::cartesianToSpherical;
 
 namespace modules {
 namespace localisation {
 namespace robot {
-
-// arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
-//     const arma::vec::fixed<RobotModel::size>& state, double deltaT) {
-//         return state;
-//     auto result = state;
-//     return result;
-// }
 
 // arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
 //     const arma::vec::fixed<RobotModel::size>& state, double deltaT) {
@@ -59,7 +60,7 @@ namespace robot {
 // }
 
 arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
-    const arma::vec::fixed<RobotModel::size>& state, double deltaT) {
+    const arma::vec::fixed<RobotModel::size>& state, double) {
     return state;
     // auto result = state;
     // arma::mat44 odom = sensors.odometry;
@@ -74,134 +75,98 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     // }
 }
 
-
 /// Return the predicted observation of an object at the given position
 arma::vec RobotModel::predictedObservation(
-    const arma::vec::fixed<RobotModel::size>& state, const arma::vec& actual_position) {
+    const arma::vec::fixed<RobotModel::size>& state,
+    const arma::vec3& actual_position,
+    const Sensors& sensors) {
+    //First Attempt:
+    // auto& orientation = sensors.orientation;
+    // auto& camToGround = sensors.orientationCamToGround;
+    // auto camToBody = sensors.forwardKinematics.at(ServoID::HEAD_PITCH).submat(0,0,2,2);
+    // arma::mat33 bodyToGround = camToGround.submat(0,0,2,2) * camToBody.submat(0,0,2,2).t();
+    // arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
+    // arma::vec3 robotPos3d = arma::vec3({state(kX), state(kY), 0});
+    // arma::vec3 actualPositionRelative = actual_position - robotPos3d;
 
-    arma::mat worldToRobot = getWorldToRobotTransform(state);
-    arma::mat robotToWorld = getRobotToWorldTransform(state);
-    arma::mat identity = worldToRobot * robotToWorld;
-    // NUClear::log("worldToRobot\n",worldToRobot, "\nrobotToWorld\n",robotToWorld, "\nidentity\n",identity);
-    arma::vec objectPosition = arma::vec({actual_position[0], actual_position[1], 1});
-    arma::vec expectedObservation = worldToRobot * objectPosition;
+    // arma::mat33 tmp2 = bodyToGround * orientation;
+    // arma::vec3 tmp1 = imuRotation * actualPositionRelative;
+    // arma::vec3 obs_cartesian = arma::vec3(tmp2 * tmp1);
+    // auto obs = cartesianToSpherical(obs_cartesian);
 
-    // NUClear::log("worldToRobot =\n", worldToRobot);
-    // NUClear::log("objectPosition =\n", objectPosition);
-    // NUClear::log("predictedObservation =\n", expectedObservation);
+    //Rewrite:
+    arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
+    arma::vec3 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).col(0);
+    auto obs = SphericalRobotObservation(state.rows(kX, kY),
+                                         robotHeading_world.rows(0,1),
+                                         actual_position);
 
-    return expectedObservation.rows(0,1);
-    // // // Radial coordinates
-    // arma::vec2 diff = actual_position - state.rows(kX, kY);
-    // arma::vec2 radial = utility::math::coordinates::Cartesian2Radial(diff);
-    // // radial(1) = utility::math::angle::normalizeAngle(radial[1] - state[kHeading]);
-    // // return radial;
-
-    // auto heading_angle = std::atan2(state[kHeadingY], state[kHeadingX]);
-
-    // // Distance and unit vector heading
-    // heading_angle = utility::math::angle::normalizeAngle(radial[1] - heading_angle);
-
-    // auto heading_x = std::cos(heading_angle);
-    // auto heading_y = std::sin(heading_angle);
-
-    // // arma::vec2 heading = arma::normalise(diff);
-    // return {radial[0], heading_x, heading_y};
+    return obs;
 }
 
+// Angle between goals
 arma::vec RobotModel::predictedObservation(
     const arma::vec::fixed<RobotModel::size>& state,
     const std::vector<arma::vec>& actual_positions) {
 
-    // // Radial coordinates
-    arma::vec diff_1 = actual_positions[0] - state.rows(kX, kY);
-    arma::vec diff_2 = actual_positions[1] - state.rows(kX, kY);
-    arma::vec radial_1 = utility::math::coordinates::Cartesian2Radial(diff_1);
-    arma::vec radial_2 = utility::math::coordinates::Cartesian2Radial(diff_2);
+    arma::vec diff_1 = actual_positions[0].rows(0, 1) - state.rows(kX, kY);
+    arma::vec diff_2 = actual_positions[1].rows(0, 1) - state.rows(kX, kY);
+    arma::vec radial_1 = cartesianToRadial(diff_1);
+    arma::vec radial_2 = cartesianToRadial(diff_2);
 
     auto angle_diff = utility::math::angle::difference(radial_1[1], radial_2[1]);
 
     return { std::abs(angle_diff) };
 }
 
-
 arma::vec RobotModel::observationDifference(const arma::vec& a,
-                                            const arma::vec& b){
-    // // Radial coordinates
-    // arma::vec2 result = a - b;
-    // // result(1) = utility::math::angle::normalizeAngle(result[1]);
-    // result(1) = utility::math::angle::difference(a[1], b[1]);
-    // return result;
-
-    // Distance and unit vector heading
-    return a - b;
-    // arma::vec2 result = a - b;
-    // arma::vec2 heading_diff = {result[1], result[2]};
-    // arma::vec2 heading = arma::normalise(heading_diff);
-    // return {result[0], heading[0], heading[1]};
-
-
-    // Matrix result;
-    // switch(type)
-    // {
-    //     case MeasurementType::kLandmarkMeasurement:
-    //         result = measurement1 - measurement2;
-    //         result[1] = utility::math::angle::normalizeAngle(result[1]);
-    //         break;
-    //     case MeasurementType::kAngleBetweenLandmarksMeasurement:
-    //         result = measurement1 - measurement2;
-    //         result[0] = utility::math::angle::normalizeAngle(result[0]);
-    //         break;
-    // };
-    // return result;
+                                            const arma::vec& b) {
+    if (a.n_elem == 1) {
+        return a - b;
+    } else {
+        // Spherical coordinates
+        arma::vec3 result = a - b;
+        result(1) = utility::math::angle::normalizeAngle(result(1)) * cfg_.observationDifferenceBearingFactor;
+        result(2) = utility::math::angle::normalizeAngle(result(2)) * cfg_.observationDifferenceElevationFactor;
+        return result;
+    }
 }
-
 
 arma::vec::fixed<RobotModel::size> RobotModel::limitState(
     const arma::vec::fixed<RobotModel::size>& state) {
 
-    // auto result = state;
-    // // // // How to get clipping values from config system?
-    // // // result[kX] = std::max(std::min(result[kX], 4.5 + 0.7) , -4.5 -0.7);
-    // // // result[kY] = std::max(std::min(result[kY], 3 + 0.7) , -3 -0.7);
-
-    // // // Radial coordinates
-    // // result[kHeading] = utility::math::angle::normalizeAngle(result[kHeading]);
-    // return result;
-
-
-    // Unit vector orientation
-    arma::vec2 heading = { state[kHeadingX], state[kHeadingY] };
-    arma::vec2 unit = arma::normalise(heading);
-    return arma::vec({ state[kX], state[kY], state[kHeadingX], state[kHeadingY] });
-
+    return state;
 }
 
 arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() {
-    return arma::eye(RobotModel::size, RobotModel::size) * processNoiseFactor;
+    arma::mat noise = arma::eye(RobotModel::size, RobotModel::size);
+    noise(kX, kX) *= cfg_.processNoisePositionFactor;
+    noise(kY, kY) *= cfg_.processNoisePositionFactor;
+    noise(kImuOffset, kImuOffset) *= cfg_.processNoiseHeadingFactor;
+    return noise;
 }
 
-arma::mat33 RobotModel::getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state){
-    arma::vec2 normed_heading = arma::normalise(state.rows(kHeadingX,kHeadingY));
-    arma::mat33 T;
+// arma::mat33 RobotModel::getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state){
+//     arma::vec2 normed_heading = arma::normalise(state.rows(kHeadingX,kHeadingY));
+//     arma::mat33 T;
 
-    T << normed_heading[0] << -normed_heading[1] << state[kX] << arma::endr
-      << normed_heading[1] <<  normed_heading[0] << state[kY] << arma::endr
-      <<                 0 <<                  0 <<         1;
+//     T << normed_heading[0] << -normed_heading[1] << state[kX] << arma::endr
+//       << normed_heading[1] <<  normed_heading[0] << state[kY] << arma::endr
+//       <<                 0 <<                  0 <<         1;
 
-    return T;
-}
+//     return T;
+// }
 
-arma::mat33 RobotModel::getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state){
-    arma::vec2 normed_heading = arma::normalise(state.rows(kHeadingX,kHeadingY));
-    arma::mat33 Tinverse;
-    Tinverse << normed_heading[0] <<  normed_heading[1] <<         0 << arma::endr
-             <<-normed_heading[1] <<  normed_heading[0] <<         0 << arma::endr
-             <<                 0 <<                  0 <<         1;
+// arma::mat33 RobotModel::getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state){
+//     arma::vec2 normed_heading = arma::normalise(state.rows(kHeadingX,kHeadingY));
+//     arma::mat33 Tinverse;
+//     Tinverse << normed_heading[0] <<  normed_heading[1] <<         0 << arma::endr
+//              <<-normed_heading[1] <<  normed_heading[0] <<         0 << arma::endr
+//              <<                 0 <<                  0 <<         1;
 
-    Tinverse.submat(0,2,1,2) = -Tinverse.submat(0,0,1,1) * arma::vec2({state[kX], state[kY]});
-    return Tinverse;
-}
+//     Tinverse.submat(0,2,1,2) = -Tinverse.submat(0,0,1,1) * arma::vec2({state[kX], state[kY]});
+//     return Tinverse;
+// }
 
 }
 }

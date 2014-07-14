@@ -87,6 +87,9 @@ namespace messages {
             std::vector<char> data;
         };
 
+        struct SaveLookUpTable {
+        };
+
     } //vision
 } // messages
 

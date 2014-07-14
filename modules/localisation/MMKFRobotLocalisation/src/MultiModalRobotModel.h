@@ -48,8 +48,8 @@ namespace localisation {
 
         RobotHypothesis() :
             filter_(
-                {0, 0, -1, 0}, // mean
-                // {0, 0, 3.141},
+                // {0, 0, 0}, // mean
+                {0, 0, 3.141},
                 arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 1, // cov
                 1), // alpha
             weight_(1),
@@ -59,9 +59,13 @@ namespace localisation {
         // bool active() const { return active_; }
         // void set_active(bool active) { active_ = active; }
 
-        void SetProcessNoiseFactor(double process_noise_factor) {
-            filter_.model.processNoiseFactor = process_noise_factor;
+        void SetConfig(const robot::RobotModel::Config& cfg) {
+            filter_.model.cfg_ = cfg;
         };
+
+        // void SetSensorsData(const messages::input::Sensors& sensors) {
+        //     filter_.model.currentImuOrientation = sensors.orientation;
+        // };
 
         float GetFilterWeight() const { return weight_; }
         void SetFilterWeight(float weight) { weight_ = weight; }
@@ -92,21 +96,30 @@ namespace localisation {
 
     class MultiModalRobotModel {
     public:
-        MultiModalRobotModel() :
-            cfg_({ 4, 0.025, 0.01, 1e-3 }) {
+        MultiModalRobotModel() {
             robot_models_.push_back(std::make_unique<RobotHypothesis>());
         }
 
         void UpdateConfiguration(
             const messages::support::Configuration<modules::localisation::MultiModalRobotModelConfig>& config) {
+            cfg_.merging_enabled = config["MergingEnabled"].as<bool>();
             cfg_.max_models_after_merge = config["MaxModelsAfterMerge"].as<int>();
             cfg_.merge_min_translation_dist = config["MergeMinTranslationDist"].as<float>();
             cfg_.merge_min_heading_dist = config["MergeMinHeadingDist"].as<float>();
-            cfg_.process_noise_factor = config["ProcessNoiseFactor"].as<float>();
+            
+            robot::RobotModel::Config rm_cfg;
+            rm_cfg.processNoisePositionFactor = config["ProcessNoisePositionFactor"].as<double>();
+            rm_cfg.processNoiseHeadingFactor = config["ProcessNoiseHeadingFactor"].as<double>();
+            rm_cfg.observationDifferenceBearingFactor = config["ObservationDifferenceBearingFactor"].as<double>();
+            rm_cfg.observationDifferenceElevationFactor = config["ObservationDifferenceElevationFactor"].as<double>();
 
-            for (auto& model : robot_models_)
-                model->SetProcessNoiseFactor(cfg_.process_noise_factor);
+            for (auto& model : robot_models_) {
+                std::cout << __FILE__ << "," << __LINE__ << ": SEGMENTATION FAULT occurs when this cout is absent." << std::endl;
+                model->SetConfig(rm_cfg);
+            }
         };
+
+        // void SensorsUpdate(const messages::input::Sensors& sensors);
 
         void RemoveOldModels();
 
@@ -162,9 +175,11 @@ namespace localisation {
         //     AmbiguousObject &ambiguous_object,
         //     const std::vector<StationaryObject*>& possible_objects);
 
+    public: // temporary - debugging 09/07/2014
         std::vector<std::unique_ptr<RobotHypothesis>> robot_models_;
 
         struct {
+            bool merging_enabled;
             int max_models_after_merge;
             float merge_min_translation_dist;
             float merge_min_heading_dist;

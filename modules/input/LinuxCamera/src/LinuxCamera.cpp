@@ -38,7 +38,7 @@ namespace modules {
         LinuxCamera::LinuxCamera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
             // This trigger gets us as close as we can to the frame rate as possible (as high resolution as we can)
-            on<Trigger<Every<NUClear::clock::period::den / V4L2Camera::FRAMERATE, NUClear::clock::duration>>, Options<Single>>([this](const time_t&) {
+            on<Trigger<Every<NUClear::clock::period::den / V4L2Camera::FRAMERATE, NUClear::clock::duration>>, Options<Single>>("Read Camera", [this](const time_t&) {
 
                 // If the camera is ready, get an image and emit it
                 if (camera.isStreaming()) {
@@ -63,7 +63,7 @@ namespace modules {
                 arma::vec2 imageCentre;
                 imageCentre << cameraParameters->imageSizePixels[0] * 0.5 << cameraParameters->imageSizePixels[1] * 0.5;
                 cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
-                cameraParameters->effectiveScreenDistancePixels = imageCentre[0] / tanHalfFOV[0];
+                cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
 
                 emit<Scope::DIRECT>(std::move(cameraParameters));
 

@@ -58,15 +58,15 @@ namespace utility {
 				int numberOfTimesUpdated;
 			};
 			MockFeatureExtractor();
-			std::vector<ExtractedFeature> extractFeatures(const messages::input::Image& image, const messages::localisation::Self& self, const messages::input::Sensors& sensors);
-			
+			std::vector<ExtractedFeature> extractFeatures(const messages::localisation::Self& self, const messages::input::Sensors& sensors);
+
 			float FOV_X;
 			float FOV_Y;
 
 			//Get matches: tuple = (featureIndex in featureFilters, extractedFeatureIndex in extractedFeatures, matchStrength)
             //Order of vector is strongest to weakest
             //Add new features here to the feature list and pick up missing filters and strengths below
-			std::vector<std::tuple<int, int, float>> matchFeatures(std::vector<ExtractedFeature>& features, 
+			std::vector<std::tuple<int, int, float>> matchFeatures(std::vector<ExtractedFeature>& features,
 																   const std::vector<ExtractedFeature>& newFeatures,
 																   size_t MAX_MATCHES);
 		};

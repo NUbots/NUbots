@@ -22,7 +22,8 @@
 
 #include <nuclear>
 #include <armadillo>
-#include "utility/localisation/FieldDescription.h"
+#include "messages/support/Configuration.h"
+#include "messages/support/FieldDescription.h"
 
 namespace modules {
 namespace localisation {
@@ -33,38 +34,39 @@ namespace localisation {
 
     class MockRobot : public NUClear::Reactor {
     private:
+        void UpdateConfiguration(
+            const messages::support::Configuration<MockRobotConfig>& config);
+
         arma::vec ball_position_ = { 0, 0 };
         arma::vec ball_velocity_ = { 0, 0 };
         arma::vec robot_position_ = { 0, 0 };
         arma::vec robot_velocity_ = { 0, 0 };
-        arma::vec robot_heading_ = { 1, 0 };
+        arma::vec world_imu_direction = { 0, 1 };
+        arma::vec robot_imu_direction_ = { 0, 1, 0 };
+        // arma::vec robot_heading_ = { 1, 0 };
+        // double robot_heading_ = 3.141;
+        double robot_heading_ = 0;
         arma::vec odom_old_robot_position_ = { 0, 0 };
-        arma::vec odom_old_robot_heading_ = { 1, 0 };
+        // arma::vec odom_old_robot_heading_ = { 1, 0 };
+        double odom_old_robot_heading_ = 0;
 
-        std::shared_ptr<utility::localisation::FieldDescription> field_description_;
+        std::shared_ptr<messages::support::FieldDescription> field_description_;
 
         struct {
-            bool simulate_vision;
-            bool simulate_goal_observations;
-            bool simulate_ball_observations;
-            bool simulate_odometry;
-            bool simulate_robot_movement;
-            bool simulate_ball_movement;
-            bool emit_robot_fieldobjects;
-            bool emit_ball_fieldobjects;
+            bool simulate_vision = true;
+            bool simulate_goal_observations = true;
+            bool simulate_ball_observations = true;
+            bool simulate_odometry = false;
+            bool simulate_robot_movement = true;
+            double robot_movement_path_period = 100;
+            bool simulate_ball_movement = true;
+            bool emit_robot_fieldobjects = true;
+            bool emit_ball_fieldobjects = true;
+            double robot_imu_drift_period = 200;
+            bool observe_left_goal = true;
+            bool observe_right_goal = true;
+            bool distinguish_left_and_right_goals = true;
         } cfg_;
-
-        void UpdateConfiguration(
-            const messages::support::Configuration<MockRobotConfig>& config) {
-            cfg_.simulate_vision = config["SimulateVision"];
-            cfg_.simulate_goal_observations = config["SimulateGoalObservations"];
-            cfg_.simulate_ball_observations = config["SimulateBallObservations"];
-            cfg_.simulate_odometry = config["SimulateOdometry"];
-            cfg_.simulate_robot_movement = config["SimulateRobotMovement"];
-            cfg_.simulate_ball_movement = config["SimulateBallMovement"];
-            cfg_.emit_robot_fieldobjects = config["EmitRobotFieldobjects"];
-            cfg_.emit_ball_fieldobjects = config["EmitBallFieldobjects"];
-        };
 
     public:
         /// @brief Called by the powerplant to build and setup the MockRobot reactor.

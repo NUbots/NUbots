@@ -22,12 +22,18 @@
 
 #include <nuclear>
 #include <armadillo>
+#include <yaml-cpp/yaml.h>
 
 namespace messages {
     namespace behaviour {
 
         struct FixedWalkFinished{};
-
+        struct WalkOptimiserCommand{
+            YAML::Node walkConfig;
+            static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
+        };
+        struct WalkConfigSaved{};
+        struct CancelFixedWalk{};
         class FixedWalkCommand{
         public:
             FixedWalkCommand(){}

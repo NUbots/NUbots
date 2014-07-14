@@ -44,6 +44,40 @@ namespace modules {
             using utility::motion::kinematics::Side;
             using utility::math::matrix::orthonormal44Inverse;
             using utility::math::matrix::quaternionToRotationMatrix;
+            using utility::math::kalman::IMUModel;
+
+
+            std::string makeErrorString(const std::string& src, uint errorCode) {
+                std::stringstream s;
+
+                s << "Error on ";
+                s << src;
+                s << ":";
+
+                if(errorCode & DarwinSensors::Error::INPUT_VOLTAGE) {
+                    s << " Input Voltage ";
+                }
+                if(errorCode & DarwinSensors::Error::ANGLE_LIMIT) {
+                    s << " Angle Limit ";
+                }
+                if(errorCode & DarwinSensors::Error::OVERHEATING) {
+                    s << " Overheating ";
+                }
+                if(errorCode & DarwinSensors::Error::OVERLOAD) {
+                    s << " Overloaded ";
+                }
+                if(errorCode & DarwinSensors::Error::INSTRUCTION) {
+                    s << " Bad Instruction ";
+                }
+                if(errorCode & DarwinSensors::Error::CORRUPT_DATA) {
+                    s << " Corrupt Data ";
+                }
+                if(errorCode & DarwinSensors::Error::TIMEOUT) {
+                    s << " Timeout ";
+                }
+
+                return s.str();
+            }
 
             SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -70,10 +104,8 @@ namespace modules {
 
                 on< Trigger<DarwinSensors>
                   , With<Optional<Sensors>>
-                  , With<CameraParameters>
                   , Options<Single>>([this](const DarwinSensors& input,
-                                            const std::shared_ptr<const Sensors>& previousSensors,
-                                            const CameraParameters& cameraParameters) {
+                                            const std::shared_ptr<const Sensors>& previousSensors) {
 
                     auto sensors = std::make_unique<Sensors>();
 
@@ -82,91 +114,16 @@ namespace modules {
 
                     // This checks for an error on the CM730 and reports it
                     if (input.cm730ErrorFlags != DarwinSensors::Error::OK) {
-                        std::stringstream s;
-                        s << "Error on CM730:";
-
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::INPUT_VOLTAGE) {
-                            s << " Input Voltage ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::ANGLE_LIMIT) {
-                            s << " Angle Limit ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERHEATING) {
-                            s << " Overheating ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERLOAD) {
-                            s << " Overloaded ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::INSTRUCTION) {
-                            s << " Bad Instruction ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::CORRUPT_DATA) {
-                            s << " Corrupt Data ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::TIMEOUT) {
-                            s << " Timeout ";
-                        }
-
-                        NUClear::log<NUClear::WARN>(s.str());
+                        NUClear::log<NUClear::WARN>(makeErrorString("CM730", input.cm730ErrorFlags));
                     }
 
                     // Output errors on the FSRs
                     if (input.fsr.left.errorFlags != DarwinSensors::Error::OK) {
-                        std::stringstream s;
-                        s << "Error on Left FSR:";
-
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::INPUT_VOLTAGE) {
-                            s << " Input Voltage ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::ANGLE_LIMIT) {
-                            s << " Angle Limit ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERHEATING) {
-                            s << " Overheating ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERLOAD) {
-                            s << " Overloaded ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::INSTRUCTION) {
-                            s << " Bad Instruction ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::CORRUPT_DATA) {
-                            s << " Corrupt Data ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::TIMEOUT) {
-                            s << " Timeout ";
-                        }
-
-                        NUClear::log<NUClear::WARN>(s.str());
+                        NUClear::log<NUClear::WARN>(makeErrorString("Left FSR", input.fsr.left.errorFlags));
                     }
 
                     if (input.fsr.right.errorFlags != DarwinSensors::Error::OK) {
-                        std::stringstream s;
-                        s << "Error on Right FSR:";
-
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::INPUT_VOLTAGE) {
-                            s << " Input Voltage ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::ANGLE_LIMIT) {
-                            s << " Angle Limit ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERHEATING) {
-                            s << " Overheating ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::OVERLOAD) {
-                            s << " Overloaded ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::INSTRUCTION) {
-                            s << " Bad Instruction ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::CORRUPT_DATA) {
-                            s << " Corrupt Data ";
-                        }
-                        if(input.cm730ErrorFlags & DarwinSensors::Error::TIMEOUT) {
-                            s << " Timeout ";
-                        }
-
-                        NUClear::log<NUClear::WARN>(s.str());
+                        NUClear::log<NUClear::WARN>(makeErrorString("Right FSR", input.fsr.right.errorFlags));
                     }
 
                     // Read through all of our sensors
@@ -250,8 +207,8 @@ namespace modules {
 
                     orientationFilter.timeUpdate(deltaT);
 
-                    orientationFilter.measurementUpdate(sensors->accelerometer, MEASUREMENT_NOISE_ACCELEROMETER, float(0));
-                    orientationFilter.measurementUpdate(sensors->gyroscope,     MEASUREMENT_NOISE_GYROSCOPE, int(1));
+                    orientationFilter.measurementUpdate(sensors->accelerometer, MEASUREMENT_NOISE_ACCELEROMETER, IMUModel::MeasurementType::ACCELEROMETER());
+                    orientationFilter.measurementUpdate(sensors->gyroscope,     MEASUREMENT_NOISE_GYROSCOPE, IMUModel::MeasurementType::GYROSCOPE());
 
                     // Gives us the quaternion representation
                     arma::vec o = orientationFilter.get();
@@ -341,12 +298,14 @@ namespace modules {
                     }
 
                     if(sensors->leftFootDown){
-                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::L_ANKLE_PITCH](3,2);
+                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::L_ANKLE_ROLL](2,3);
                     } else if(sensors->rightFootDown){
-                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::R_ANKLE_PITCH](3,2);
+                        sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::R_ANKLE_ROLL](2,3);
                     } else {
                         sensors->bodyCentreHeight = 0;
                     }
+
+
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
@@ -359,23 +318,21 @@ namespace modules {
                     /************************************************
                      *                  Kinematics Horizon          *
                      ************************************************/
-
-                    sensors->orientationHorizon = utility::motion::kinematics::calculateHorizon<DarwinModel>(
-                        (sensors->orientation * sensors->forwardKinematics[ServoID::HEAD_PITCH].submat(0,0,2,2)).t(),
-                        cameraParameters.effectiveScreenDistancePixels);
-
+                    sensors->orientationBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->orientation.submat(0,2,2,2), sensors->bodyCentreHeight);
+                    sensors->orientationCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
                     if(sensors->leftFootDown) {
-                        sensors->kinematicsHorizon = utility::motion::kinematics::calculateHorizon<DarwinModel>(
-                        sensors->forwardKinematics[ServoID::HEAD_PITCH].submat(0,0,2,2).t() * sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,0,2,2),
-                        cameraParameters.effectiveScreenDistancePixels);
+                        sensors->kinematicsBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,2,2,2),sensors->bodyCentreHeight);
                     } else if (sensors->rightFootDown) {
-                        sensors->kinematicsHorizon = utility::motion::kinematics::calculateHorizon<DarwinModel>(
-                        sensors->forwardKinematics[ServoID::HEAD_PITCH].submat(0,0,2,2).t() * sensors->forwardKinematics[ServoID::R_ANKLE_ROLL].submat(0,0,2,2),
-                        cameraParameters.effectiveScreenDistancePixels);
+                        sensors->kinematicsBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->forwardKinematics[ServoID::R_ANKLE_ROLL].submat(0,2,2,2),sensors->bodyCentreHeight);
                     }
                     else {
-                        sensors->kinematicsHorizon = { sensors->orientationHorizon[0], sensors->orientationHorizon[1] };
+                        sensors->kinematicsBodyToGround = sensors->orientationCamToGround;
                     }
+                    sensors->kinematicsCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
+
+                    // std::cout << "sensors->kinematicsCamToGround\n" << sensors->kinematicsCamToGround << std::endl;
+                    // std::cout << "sensors->orientationCamToGround\n" << sensors->orientationCamToGround << std::endl;
+                    // std::cout << "sensors->bodyCentreHeight\n" << sensors->bodyCentreHeight << std::endl;
 
                     /*emit(graph("Filtered Gravity Vector",
                             float(orientation[0]*9.807),
@@ -396,7 +353,7 @@ namespace modules {
 
                         integratedOdometry += sensors->odometry.submat(0,3,1,3);
 
-                    emit(graph("LFoot Down", sensors->leftFootDown
+                    /*emit(graph("LFoot Down", sensors->leftFootDown
                         ));
                     emit(graph("RFoot Down", sensors->rightFootDown
                         ));
@@ -405,7 +362,7 @@ namespace modules {
                     emit(graph("Integrated Odometry", integratedOdometry[0], integratedOdometry[1]
                         ));
                     emit(graph("COM", sensors->centreOfMass[0], sensors->centreOfMass[1], sensors->centreOfMass[2], sensors->centreOfMass[3]
-                        ));
+                        ));*/
 
                     emit(std::move(sensors));
                 });

@@ -23,9 +23,10 @@
 #include <nuclear>
 #include <chrono>
 #include "utility/localisation/LocalisationFieldObject.h"
-#include "utility/localisation/FieldDescription.h"
 #include "messages/support/Configuration.h"
+#include "messages/support/FieldDescription.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/input/Sensors.h"
 #include "MultiModalRobotModel.h"
 
 namespace modules {
@@ -37,7 +38,7 @@ namespace localisation {
     class MMKFRobotLocalisationEngine {
         public:
 
-        MMKFRobotLocalisationEngine() : cfg_({true, true, false}) {
+        MMKFRobotLocalisationEngine() : cfg_({true, true, false, true}) {
             last_time_update_time_ = NUClear::clock::now();
         }
 
@@ -60,38 +61,40 @@ namespace localisation {
             float time_increment);
 
         void ProcessObjects(const std::vector<messages::vision::Goal>& goals);
+        
+        // void SensorsUpdate(const messages::input::Sensors& sensors);
 
-        std::shared_ptr<utility::localisation::FieldDescription> field_description() {
-            return field_description_;
-        };
-        void set_field_description(std::shared_ptr<utility::localisation::FieldDescription> desc) {
-            field_description_ = desc;
-        };
+        std::shared_ptr<messages::support::FieldDescription> field_description();
 
-        void UpdateConfiguration(
-            const messages::support::Configuration<MultiModalRobotModelConfig>& config) {
-            robot_models_.UpdateConfiguration(config);
-        };
+        void set_field_description(std::shared_ptr<messages::support::FieldDescription> desc);
 
         void UpdateConfiguration(
-            const messages::support::Configuration<MMKFRobotLocalisationEngineConfig>& config) {
-            cfg_.angle_between_goals_observation_enabled = config["AngleBetweenGoalsObservationEnabled"];
-            cfg_.goal_pair_observation_enabled = config["GoalPairObservationEnabled"];
-            cfg_.all_goals_are_blue = config["AllGoalsAreBlue"];
-        };
+            const messages::support::Configuration<MultiModalRobotModelConfig>& config);
+
+        void UpdateConfiguration(
+            const messages::support::Configuration<MMKFRobotLocalisationEngineConfig>& config);
+
+        bool CanEmitFieldObjects();
 
     // private:
-        /// Contains the dimensions of the field
-        std::shared_ptr<utility::localisation::FieldDescription> field_description_;
-
         MultiModalRobotModel robot_models_;
+
+        std::shared_ptr<messages::support::FieldDescription> field_description_;
 
     private:
         struct {
             bool angle_between_goals_observation_enabled;
             bool goal_pair_observation_enabled;
             bool all_goals_are_blue;
+            bool emit_robot_fieldobjects;
         } cfg_;
+
+        struct {
+            utility::localisation::LocalisationFieldObject bl;
+            utility::localisation::LocalisationFieldObject br;
+            utility::localisation::LocalisationFieldObject yl;
+            utility::localisation::LocalisationFieldObject yr;
+        } goalpost_lfos_;
 
         std::chrono::system_clock::time_point last_time_update_time_;
     };

@@ -23,6 +23,9 @@
 #include <map>
 #include <armadillo>
 
+#include "messages/input/Sensors.h"
+#include "utility/math/geometry/Line.h"
+
 namespace messages {
     namespace vision {
 
@@ -53,20 +56,55 @@ namespace messages {
                 uint length;
                 uint subsample;
 
-                arma::uvec2 start;
-                arma::uvec2 end;
-                arma::uvec2 midpoint;
+                arma::ivec2 start;
+                arma::ivec2 end;
+                arma::ivec2 midpoint;
 
                 Segment* previous;
                 Segment* next;
             };
 
-            arma::vec2 horizon;
+            // The sensor frame that happened with this image
+            std::shared_ptr<const messages::input::Sensors> sensors;
 
-            std::vector<arma::vec> visualHorizon;
+            // Our images dimensions
+            arma::uvec2 dimensions;
 
+            // Our horizon
+            utility::math::geometry::Line horizon;
+
+            // The points of the visual horizon
+            std::vector<arma::ivec2> visualHorizon;
+            std::vector<arma::ivec2>::iterator maxVisualHorizon;
+            std::vector<arma::ivec2>::iterator minVisualHorizon;
+
+            // Our segments, split into vertical and horizontal components
             std::multimap<TClass, Segment> horizontalSegments;
             std::multimap<TClass, Segment> verticalSegments;
+
+            int visualHorizonAtPoint(int x) const {
+
+                struct {
+                    bool operator()(const int& k, const arma::ivec& v) {
+                        return k < v[0];
+                    }
+
+                    bool operator()(const arma::ivec& v, const int& k) {
+                        return v[0] < k;
+                    }
+                } comparator;
+
+                // Find the point such that pt1 < x < pt2
+
+                auto p2 = std::upper_bound(visualHorizon.begin(), visualHorizon.end(), x, comparator);
+                p2 -= p2 == visualHorizon.end() ? 1 : 0;
+                auto p1 = p2 - 1;
+
+                utility::math::geometry::Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
+
+                return int(lround(l.y(x)));
+            }
+
         };
 
     }  // vision

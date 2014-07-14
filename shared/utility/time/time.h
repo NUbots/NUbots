@@ -39,6 +39,11 @@ namespace time {
         return std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now().time_since_epoch()).count();
     }
 
+    template <class T = std::chrono::milliseconds, typename TClock>
+    inline uint64_t getUtcTimestamp(const TClock& timePoint) {
+        return std::chrono::duration_cast<T>(timePoint.time_since_epoch()).count();
+    }
+
 }
 }
 #endif

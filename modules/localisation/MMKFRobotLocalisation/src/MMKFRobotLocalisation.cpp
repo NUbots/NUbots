@@ -23,29 +23,35 @@
 
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
+#include "utility/math/matrix.h"
 #include "utility/nubugger/NUgraph.h"
-#include "utility/localisation/FieldDescription.h"
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
+#include "messages/support/FieldDescription.h"
 #include "messages/localisation/FieldObject.h"
 #include "MMKFRobotLocalisationEngine.h"
 #include "RobotModel.h"
 
+using utility::math::angle::bearingToUnitVector;
+using utility::math::matrix::zRotationMatrix;
 using utility::nubugger::graph;
-using messages::support::Configuration;
 using utility::localisation::LocalisationFieldObject;
+using messages::support::Configuration;
+using messages::support::FieldDescription;
 using messages::localisation::FakeOdometry;
-using modules::localisation::MultiModalRobotModelConfig;
-using utility::localisation::FieldDescriptionConfig;
 using messages::input::Sensors;
+using modules::localisation::MultiModalRobotModelConfig;
+using messages::localisation::Mock;
+using messages::localisation::Self;
+using messages::vision::Goal;
 
 namespace modules {
 namespace localisation {
     MMKFRobotLocalisation::MMKFRobotLocalisation(std::unique_ptr<NUClear::Environment> environment)
-        : engine_(std::make_unique<MMKFRobotLocalisationEngine>()),
-          Reactor(std::move(environment)) {
+        : Reactor(std::move(environment)),
+          engine_(std::make_unique<MMKFRobotLocalisationEngine>()) {
 
         on<Trigger<Configuration<MultiModalRobotModelConfig>>>(
             "MultiModalRobotModelConfig Update",
@@ -60,59 +66,104 @@ namespace localisation {
             engine_->UpdateConfiguration(config);
         });
 
-        on<Trigger<Configuration<FieldDescriptionConfig>>>(
-            "FieldDescriptionConfig Update",
-            [this](const Configuration<FieldDescriptionConfig>& config) {
-            auto fd = std::make_shared<utility::localisation::FieldDescription>(config);
+        on<Trigger<Startup>,
+           With<Optional<FieldDescription>>>("FieldDescription Update",
+           [this](const Startup&, const std::shared_ptr<const FieldDescription>& desc) {
+            if (desc == nullptr) {
+                NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: SoccerConfig module might not be installed.");
+                throw std::runtime_error("FieldDescription Update: SoccerConfig module might not be installed");
+            }
+
+            auto fd = std::make_shared<FieldDescription>(*desc);
             engine_->set_field_description(fd);
-            NUClear::log("Localisation config finished successfully!");
         });
 
         // Emit to NUbugger
         on<Trigger<Every<100, std::chrono::milliseconds>>,
+           With<Sensors>,
            Options<Sync<MMKFRobotLocalisation>>
-           >("NUbugger Output", [this](const time_t&) {
-            auto robot_msg = std::make_unique<std::vector<messages::localisation::Self>>();
+           >("NUbugger Output", [this](const time_t&, const Sensors& sensors) {
 
-            for (auto& model : engine_->robot_models_.hypotheses()) {
+            auto& hypotheses = engine_->robot_models_.hypotheses();
+            if (hypotheses.size() == 0) {
+                NUClear::log<NUClear::ERROR>("MMKFRobotLocalisation has no robot hypotheses.");
+                return;
+            }
+
+            auto robots = std::vector<Self>();
+
+            for (auto& model : hypotheses) {
                 arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
                 auto model_cov = model->GetCovariance();
 
-                messages::localisation::Self robot_model;
-                robot_model.position = model_state.rows(0, 1);
-                robot_model.heading = model_state.rows(2, 3);
+                Self robot_model;
+                robot_model.position = model_state.rows(robot::kX, robot::kY);
+                arma::mat33 imuRotation = zRotationMatrix(model_state(robot::kImuOffset));
+                arma::vec3 world_heading = imuRotation * arma::mat(sensors.orientation.t()).col(0);
+                robot_model.heading = world_heading.rows(0, 1);
                 robot_model.sr_xx = model_cov(0, 0);
                 robot_model.sr_xy = model_cov(0, 1);
                 robot_model.sr_yy = model_cov(1, 1);
-                robot_msg->push_back(robot_model);
+                robots.push_back(robot_model);
             }
-            emit(std::move(robot_msg));
+
+            if (engine_->CanEmitFieldObjects()) {
+                auto robot_msg = std::make_unique<std::vector<Self>>(robots);
+                emit(std::move(robot_msg));
+            } else {
+                auto mock_robots = Mock<std::vector<Self>>(robots);
+                auto mock_robot_msg = std::make_unique<Mock<std::vector<Self>>>(mock_robots);
+                emit(std::move(mock_robot_msg));
+            }
         });
 
-        on<Trigger<FakeOdometry>,
-           Options<Sync<MMKFRobotLocalisation>>
-          >("MMKFRobotLocalisation Odometry", [this](const FakeOdometry& odom) {
-            auto curr_time = NUClear::clock::now();
-            engine_->TimeUpdate(curr_time, odom);
-        });
-        // on<Trigger<Every<100, Per<std::chrono::seconds>>>,
+        // on<Trigger<FakeOdometry>,
         //    Options<Sync<MMKFRobotLocalisation>>
-        //   >("MMKFRobotLocalisation Time", [this](const time_t&) {
+        //   >("MMKFRobotLocalisation Odometry", [this](const FakeOdometry& odom) {
+        //     auto curr_time = NUClear::clock::now();
+        //     engine_->TimeUpdate(curr_time, odom);
+        // });
+        // on<Trigger<Sensors>,
+        //    Options<Sync<MMKFRobotLocalisation>>
+        //   >("MMKFRobotLocalisation Sensors", [this](const Sensors& sensors) {
         //     auto curr_time = NUClear::clock::now();
         //     engine_->TimeUpdate(curr_time);
+        //     // engine_->SensorsUpdate(sensors);
         // });
-
-        on<Trigger<Sensors>,
+        on<Trigger<Every<100, Per<std::chrono::seconds>>>,
            Options<Sync<MMKFRobotLocalisation>>
-          >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
+          >("MMKFRobotLocalisation Time", [this](const time_t&) {
             auto curr_time = NUClear::clock::now();
-            engine_->TimeUpdate(curr_time, sensors);
+            engine_->TimeUpdate(curr_time);
         });
 
         on<Trigger<std::vector<messages::vision::Goal>>,
            Options<Sync<MMKFRobotLocalisation>>
           >("MMKFRobotLocalisation Step",
             [this](const std::vector<messages::vision::Goal>& goals) {
+            // if (goals.size() < 2)
+            //     return;
+
+            // // std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
+            // for (auto& goal : goals) {
+            //     // std::cout << __FILE__ << ", " << __LINE__ << ":" << std::endl;
+            //     // std::cout << "  side:";
+            //     // std::cout << ((goal.side == Goal::Side::LEFT) ? "LEFT" :
+            //     //               (goal.side == Goal::Side::RIGHT) ? "RIGHT" : "UNKNOWN")
+            //     //           << std::endl;
+
+            //     for(uint i = 0; i < goal.measurements.size(); ++i) {
+            //         std::stringstream msg;
+            //         msg << ((goal.side == Goal::Side::LEFT) ? "LGoal Pos" :
+            //                (goal.side == Goal::Side::RIGHT) ? "RGoal Pos" : "UGoal Pos") <<
+            //          " " << i;
+            //         emit(graph(msg.str(), goal.measurements[i].position[0], goal.measurements[i].position[1], goal.measurements[i].position[2]));
+            //         // std::cout << "  measurement: " << num++ << std::endl;
+            //         // std::cout << "    position:" << measurement.position.t() << std::endl;
+            //         // std::cout << "    error:" << measurement.error << std::endl;
+            //     }
+            // }
+
             auto curr_time = NUClear::clock::now();
             engine_->TimeUpdate(curr_time);
             engine_->ProcessObjects(goals);

@@ -19,8 +19,17 @@
 
 package messages.input.proto;
 
+import "messages/Vector.proto";
+
 message Image {
-    required uint32 width = 1;
-    required uint32 height = 2;
+
+    enum Format {
+        YCbCr422 = 1;
+        YCbCr444 = 2;
+        JPEG = 3;
+    };
+
+    required Format format = 1;
+    required uvec2 dimensions = 2;
     required bytes data = 3;
 }

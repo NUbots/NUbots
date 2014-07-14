@@ -23,7 +23,7 @@
 #include <nuclear>
 #include <armadillo>
 
-#include "messages/input/Sensors.h"  
+#include "messages/input/Sensors.h"
 #include "messages/motion/GetupCommand.h"
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/FixedWalkCommand.h"
@@ -36,13 +36,12 @@ namespace modules {
             struct OptimiseWalkCommand{};
             struct OptimisationComplete{};
 
-            struct WalkEngineConfig{
-                static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
-            };
+
 
             class FitnessData {
             public:
-                int numberOfGetups = 0;
+                uint numberOfGetups = 0;
+                arma::running_stat<double> tilt;
                 bool recording;
                 double popFitness();
                 void update(const messages::input::Sensors& sensors);
@@ -57,21 +56,23 @@ namespace modules {
                 arma::vec parameter_sigmas;
                 arma::vec fitnesses;
 
-                int currentSample;
+                unsigned int currentSample;
                 arma::mat samples;
                 int number_of_samples;
 
-                int getup_cancel_trial_threshold;
+                unsigned int getup_cancel_trial_threshold;
 
-                messages::support::Configuration<WalkEngineConfig> initialConfig;
+                int configuration_wait_milliseconds = 2000;
+
+                messages::support::Configuration<messages::behaviour::WalkOptimiserCommand> initialConfig;
 
                 static constexpr const char* backupLocation = "WalkEngine_Optimised.yaml";
-                
+
                 void printState(const arma::vec& state);
-                arma::vec getState(const messages::support::Configuration<WalkEngineConfig>& walkConfig);
-                messages::support::Configuration<WalkEngineConfig> getWalkConfig(const arma::vec& state);
-                void saveConfig(const messages::support::Configuration<WalkEngineConfig>& config);
-                void saveGoodConfigBackup(const messages::support::Configuration<WalkEngineConfig>& config);
+                arma::vec getState(const messages::support::Configuration<messages::behaviour::WalkOptimiserCommand>& walkConfig);
+                YAML::Node getWalkConfig(const arma::vec& state);
+                void saveConfig(const YAML::Node& config);
+                void setWalkParameters(const YAML::Node& config);
 
                 FitnessData data;
             public:
