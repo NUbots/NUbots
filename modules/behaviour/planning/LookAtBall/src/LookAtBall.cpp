@@ -55,18 +55,14 @@ namespace modules {
                 });
 
 		on<Trigger<LookAtBallStart>>([this](const LookAtBallStart&) {
-			if (!handle.enabled()) {
 std::cerr << "LookAtBall - enabled" << std::endl;
 				handle.enable();
-			}
 		});
 
 
 		on<Trigger<LookAtBallStop>>([this](const LookAtBallStop&) {
-			if (handle.enabled()) {
 std::cerr << "LookAtBall - disabled" << std::endl;
-				handle.disable();
-			}
+			handle.disable();
 		});
 
                 //this reaction focuses on the ball - pan'n'scan if not visible and focus on as many objects as possible if visible
@@ -99,6 +95,8 @@ std::cerr << "LookAtBall - disabled" << std::endl;
             
             //if balls are seen, then place those and everything else that's useful into the look at list
 			if (balls.size() > 0) {
+std::cerr << "WE HAVE VISION BALL!!!!" << std::endl;
+
 			    framesSinceSeen = 0;
 				timeLastSeen = NUClear::clock::now();
 				std::vector<LookAtAngle> angles;
@@ -143,6 +141,8 @@ std::cerr << "LookAtBall - disabled" << std::endl;
 */
 				emit(std::make_unique<std::vector<LookAtAngle>>(angles));
 			} else if (BALL_SEEN_COUNT_THRESHOLD > framesSinceSeen) {
+std::cerr << "DELAYING THE BLIND SCAN!!!!" << std::endl;
+			    
 			    //don't activate other options because we could still have the ball on screen
 			}
 			// if the ball isn't seen this frame, but we're certain of where it is, look there
@@ -186,6 +186,8 @@ std::cerr << "LookAtBall - disabled" << std::endl;
 //	} 
 
 			else if(ballIsLost){
+std::cerr << "BALL IS LOST -------- BLIND PAN AND SCAN TIME!!!!!" << std::endl;
+
 				//do a blind scan'n'pan
 				std::vector<LookAtPosition> angles;
 

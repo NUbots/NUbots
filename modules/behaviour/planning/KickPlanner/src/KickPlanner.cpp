@@ -89,7 +89,7 @@ namespace planning {
                std::fabs(ball.position[1]) < KICK_CORRIDOR_WIDTH / 2){
 
                 float targetBearing = std::atan2(kickTarget[1],kickTarget[0]);
-                //NUClear::log("targetBearing = ", targetBearing);
+                NUClear::log("targetBearing = ", std::fabs(targetBearing));
 
                 if( std::fabs(targetBearing) < KICK_FORWARD_ANGLE_LIMIT){
                     if(ball.position[1] < 0){

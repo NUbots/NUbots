@@ -51,15 +51,13 @@ namespace modules {
 			});
 
 			on<Trigger<LookAtGoalStart>>([this](const LookAtGoalStart&) {
-				if (!handle.enabled()) {
-					handle.enable();
-				}
+std::cerr << "LookAtGoal - enabled" << std::endl;
+				handle.enable();
 			});
 
 			on<Trigger<LookAtGoalStop>>([this](const LookAtGoalStop&) {
-				if (handle.enabled()) {
-					handle.disable();
-				}
+std::cerr << "LookAtGoal - disabled" << std::endl;
+				handle.disable();
 			});
 
 			handle = on<Trigger<std::vector<Goal>>, With<std::vector<Ball>>, With<Sensors>, With<Optional<messages::localisation::Ball>>>
@@ -68,6 +66,8 @@ namespace modules {
 					const Sensors& sensors, 
 					const std::shared_ptr<const messages::localisation::Ball>& ball
 				) {
+
+				(void)ball;
 
 				if (goals.size() > 0) {
 					timeSinceLastSeen = sensors.timestamp;
@@ -97,48 +97,67 @@ namespace modules {
 						angles.emplace_back(LookAtPosition {balls[0].screenAngular[0], -balls[0].screenAngular[1]});
 					}
 
-					else if ((ball != NULL) && ((ball->sr_xx > BALL_UNCERNTAINTY_THRESHOLD) || (ball->sr_yy > BALL_UNCERNTAINTY_THRESHOLD))) {
-						double xFactor = X_FACTOR * std::sqrt(ball->sr_xx);
-						double yFactor = Y_FACTOR * std::sqrt(ball->sr_yy);
-			
-						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
-						angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
-
-						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0] + xFactor, ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
-						angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
-
-						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0] - xFactor, ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
-						angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
-
-						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1] + yFactor, 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
-						angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
-
-						screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1] - yFactor, 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
-						angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
-					} 
-					
-					emit(std::make_unique<std::vector<LookAtPosition>>(angles));
-				} 
+//					else if ((ball != NULL) && ((ball->sr_xx > BALL_UNCERNTAINTY_THRESHOLD) || (ball->sr_yy > BALL_UNCERNTAINTY_THRESHOLD))) {
+//					double xFactor = X_FACTOR * std::sqrt(ball->sr_xx);
+//					double yFactor = Y_FACTOR * std::sqrt(ball->sr_yy);
+//		
+//					screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+//					angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
+//
+//					screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0] + xFactor, ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+//					angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
+//
+//					screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0] - xFactor, ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+//					angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
+//
+//					screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1] + yFactor, 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+//					angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
+//
+//					screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1] - yFactor, 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+//					angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
+//				} 
+//				
+//				emit(std::make_unique<std::vector<LookAtPosition>>(angles));
+			} 
 
 				else if(std::chrono::duration<float, std::ratio<1,1000>>(sensors.timestamp - timeSinceLastSeen).count() > BALL_SEARCH_TIMEOUT_MILLISECONDS) {
 					//do a blind scan'n'pan
 					//XXX: this needs to be a look at sequence rather than a look at point
 					std::vector<LookAtPosition> angles;
 
-					const double scanYaw = 1.5;
-					const double scanPitch = 0.8;
+				angles.emplace_back(LookAtPosition {-M_PI / 2, -M_PI / 4});
+				angles.emplace_back(LookAtPosition {0, -M_PI / 4});
+				angles.emplace_back(LookAtPosition {M_PI / 2, -M_PI / 4});
+				angles.emplace_back(LookAtPosition {M_PI / 2, 0});
+				angles.emplace_back(LookAtPosition {0, 0});
+				angles.emplace_back(LookAtPosition {-M_PI / 2, 0});
+				angles.emplace_back(LookAtPosition {-M_PI / 2, M_PI / 4});
+				angles.emplace_back(LookAtPosition {0, M_PI / 4});
+				angles.emplace_back(LookAtPosition {M_PI / 2, M_PI / 4});
 
-					const size_t panPoints = 4;
-
-					for (size_t i = 0; i < panPoints+1; ++i) {
-						angles.emplace_back(LookAtPosition {i * scanYaw / panPoints - scanYaw / 2.0, -scanPitch * (i % 2) + scanPitch});
-					}
-
-					for (size_t i = 0; i < panPoints+1; ++i) {
-						angles.emplace_back(LookAtPosition {-(i * scanYaw / panPoints - scanYaw / 2.0), -scanPitch * ((i + 1) % 2) + scanPitch});
-					}
-
-					emit(std::make_unique<std::vector<LookAtPosition>>(angles));
+				angles.emplace_back(LookAtPosition {M_PI / 2, -M_PI / 4});
+				angles.emplace_back(LookAtPosition {0, -M_PI / 4});
+				angles.emplace_back(LookAtPosition {-M_PI / 2, -M_PI / 4});
+				angles.emplace_back(LookAtPosition {-M_PI / 2, 0});
+				angles.emplace_back(LookAtPosition {0, 0});
+				angles.emplace_back(LookAtPosition {M_PI / 2, 0});
+				angles.emplace_back(LookAtPosition {M_PI / 2, M_PI / 4});
+				angles.emplace_back(LookAtPosition {0, M_PI / 4});
+				angles.emplace_back(LookAtPosition {-M_PI / 2, M_PI / 4});
+//					const double scanYaw = 1.5;
+//				const double scanPitch = 0.8;
+//
+//				const size_t panPoints = 4;
+//
+//				for (size_t i = 0; i < panPoints+1; ++i) {
+//					angles.emplace_back(LookAtPosition {i * scanYaw / panPoints - scanYaw / 2.0, -scanPitch * (i % 2) + scanPitch});
+//				}
+//
+//				for (size_t i = 0; i < panPoints+1; ++i) {
+//					angles.emplace_back(LookAtPosition {-(i * scanYaw / panPoints - scanYaw / 2.0), -scanPitch * ((i + 1) % 2) + scanPitch});
+//				}
+//
+//				emit(std::make_unique<std::vector<LookAtPosition>>(angles));
 				}
 			});
 		}

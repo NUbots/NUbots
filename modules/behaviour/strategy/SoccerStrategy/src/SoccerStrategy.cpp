@@ -675,7 +675,7 @@ namespace modules {
 			}
 
 			void SoccerStrategy::playSoccer(const arma::vec2& localisationBall, const VisionBall& visionBall, const messages::localisation::Self& self, const std::shared_ptr<const messages::input::gameevents::GameState>& gameState){
-std::cerr << __func__ << std::endl;
+//std::cerr << __func__ << std::endl;
 				// TODO: What are these for?
 				(void)visionBall;
 				(void)self;
@@ -714,7 +714,7 @@ std::cerr << __func__ << std::endl;
 			}
 
 			void SoccerStrategy::searchForBall(const messages::localisation::Ball& localisationBall, const Self& self, const std::shared_ptr<const messages::input::gameevents::GameState>& gameState){
-std::cerr << __func__ << std::endl;
+//std::cerr << __func__ << std::endl;
 				(void)localisationBall;
 				(void)gameState;
 
@@ -763,7 +763,7 @@ std::cerr << __func__ << std::endl;
 			//TODO figure out what these should do
 
 			void SoccerStrategy::findSelfAndBall(){
-std::cerr << __func__ << std::endl;
+//std::cerr << __func__ << std::endl;
 				// If we haven't seen the ball for some time now, look for the ball.
 				// Otherwise look for the goal.
 				// Try to mix these two actions nicely so we can get good localisation as well as adequate knowledge of the ball location.
@@ -794,7 +794,7 @@ std::cerr << __func__ << std::endl;
 			}
 
 			void SoccerStrategy::findSelf() {
-std::cerr << __func__ << std::endl;
+//std::cerr << __func__ << std::endl;
 				// We can't be looking at both the ball and goal simulatenously.
 				if (lookingAtBall) {
 					emit(std::make_unique<LookAtBallStop>());
@@ -808,7 +808,7 @@ std::cerr << __func__ << std::endl;
 			}
 
 			void SoccerStrategy::findBall() {
-std::cerr << __func__ << std::endl;
+//std::cerr << __func__ << std::endl;
 				// We can't be looking at both the ball and goal simulatenously.
 				if (lookingAtGoal) {
 					emit(std::make_unique<LookAtGoalStop>());
@@ -821,7 +821,7 @@ std::cerr << __func__ << std::endl;
 			}
 
 			void SoccerStrategy::spin(){
-std::cerr << __func__ << std::endl;
+//std::cerr << __func__ << std::endl;
 				auto command = std::make_unique<WalkStrategy>();
 				command->walkMovementType = messages::behaviour::WalkApproach::DirectCommand;
 				command->target = {0,0};
