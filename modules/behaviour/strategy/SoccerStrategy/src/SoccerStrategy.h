@@ -177,8 +177,6 @@ namespace modules {
 			float BALL_MOVEMENT_THRESHOLD;
 			float BALL_TIMEOUT_THRESHOLD;
 			bool IS_GOALIE;
-			arma::vec2 BALL_LOOK_ERROR;
-			arma::vec2 GOAL_LOOK_ERROR;
 			float ANGLE_THRESHOLD;
 			float POSITION_THRESHOLD_TIGHT;
 			float POSITION_THRESHOLD_LOOSE;
@@ -201,21 +199,17 @@ namespace modules {
 			bool lookingAtGoal;
 
 			arma::vec2 findOptimalPosition(const utility::math::geometry::Polygon& zone, const arma::vec2& point);
-			void stopMoving();
 			void findSelf();
 			void findBall();
 			void goToPoint(const arma::vec2& positioni, const arma::vec2& heading);
 			void sideStepToPoint(const arma::vec2& position);
-			void watchBall();
 			void kickBall(const arma::vec2& direction);
 			void diveForBall(const arma::vec2& target);
 			void approachBall(const arma::vec2& haading);
-
+			
 			void updateGameState(const messages::input::gameevents::GameState& gameController);
 
-
 			//NEW
-
 			bool penalised(const messages::input::gameevents::GameState& gameState);
 			void playSoccer(const arma::vec2& localisationBall, const arma::vec2& visionBall, const messages::localisation::Self& self, const messages::input::gameevents::GameState& gameState);
 			void playGoalie(const arma::vec2& localisationBall);

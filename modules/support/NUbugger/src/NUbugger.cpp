@@ -108,6 +108,7 @@ namespace support {
         on<Trigger<Every<5, std::chrono::seconds>>>([this] (const time_t&) {
             Message message;
             message.set_type(Message::PING);
+            message.set_filter_id(0);
             message.set_utc_timestamp(getUtcTimestamp());
             send(message);
         });
@@ -164,11 +165,19 @@ namespace support {
         std::string command = message.command().command();
         log("Received command:", command);
         if (command == "download_lut") {
-            auto lut = powerplant.get<LookUpTable>();
+            std::shared_ptr<LookUpTable> lut;
+            try {
+                lut = powerplant.get<LookUpTable>();
+            }
+            catch (NUClear::metaprogramming::NoDataException err) {
+                log("There is no LUT loaded");
+                return;
+            }
 
             Message message;
 
             message.set_type(Message::LOOKUP_TABLE);
+            message.set_filter_id(0);
             message.set_utc_timestamp(getUtcTimestamp());
 
             auto* api_lookup_table = message.mutable_lookup_table();
@@ -229,10 +238,11 @@ namespace support {
 
     void NUbugger::send(Message message) {
         size_t messageSize = message.ByteSize();
-        zmq::message_t packet(messageSize + 1);
+        zmq::message_t packet(messageSize + 2);
         char* dataPtr = static_cast<char*>(packet.data());
-        message.SerializeToArray(dataPtr + 1, messageSize);
-        dataPtr[0] = message.type();
+        message.SerializeToArray(dataPtr + 2, messageSize);
+        dataPtr[0] = uint8_t(message.type());
+        dataPtr[1] = uint8_t(message.filter_id());
         send(packet);
     }
 

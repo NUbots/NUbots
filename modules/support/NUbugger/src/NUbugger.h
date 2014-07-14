@@ -49,6 +49,9 @@ namespace modules {
             // Reaction Handles
             std::map<std::string, std::vector<ReactionHandle>> handles;
 
+            std::map<std::string, uint> dataPointFilterIds;
+            uint dataPointFilterId = 1;
+
             std::mutex mutex;
 
             void provideDataPoints();

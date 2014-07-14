@@ -49,6 +49,14 @@ namespace geometry {
         return arma::dot(point, normal) - distance;
     }
 
+    double Line::tangentialDistanceToPoint(const arma::vec2& x) const {
+        return arma::dot(arma::vec2({ -normal[1], normal[0] }), x);
+    }
+
+    arma::vec2 Line::pointFromTangentialDistance(const double& x) const {
+        return normal * distance + arma::vec2({ -normal[1], normal[0] }) * x;
+    }
+
     bool Line::isHorizontal() const {
         return normal[0] == 0;
     }
@@ -57,11 +65,12 @@ namespace geometry {
         return normal[1] == 0;
     }
 
-    arma::vec2 Line::orthogonalProjection(const arma::vec2& x) {
+    arma::vec2 Line::orthogonalProjection(const arma::vec2& x) const {
         return x - (arma::dot(x, normal) - distance) * normal;
     }
 
-    Line Line::getParallelLineThrough(const arma::vec2& x){
+
+    Line Line::getParallelLineThrough(const arma::vec2& x) const {
         Line result;
         result.normal = normal;
         result.distance = arma::dot(x, normal);

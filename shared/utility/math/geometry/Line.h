@@ -45,13 +45,15 @@ namespace geometry {
         double y(const double& x) const;
 
         double distanceToPoint(const arma::vec2& point) const;
+        double tangentialDistanceToPoint(const arma::vec2& x) const;
+        arma::vec2 pointFromTangentialDistance(const double& x) const;
 
         bool isHorizontal() const;
         bool isVertical() const;
 
-        arma::vec2 orthogonalProjection(const arma::vec2& x);
+        arma::vec2 orthogonalProjection(const arma::vec2& x) const;
 
-        Line getParallelLineThrough(const arma::vec2& x);
+        Line getParallelLineThrough(const arma::vec2& x) const;
 
         //Perform a least squares fit on a line, optionally using a distance
         //squared threshold away from the current model to filter candidates
@@ -72,7 +74,7 @@ namespace geometry {
                     ++ctr;
                 }
             }
-            
+
             if (ctr > 1) {
                 //normalise the average to save some divides later and make code clearer
                 average /= (ctr);
@@ -88,9 +90,9 @@ namespace geometry {
                     //make a unit vector at right angles to the direction of slope
                     normal = arma::normalise(
                                 arma::vec2({ 1.0, -m / (covmat[3] - average[1] * average[1]) }));
-                    
+
                 }
-                
+
                 //find distance the usual way
                 distance = arma::dot(average,normal);
             }

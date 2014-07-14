@@ -24,7 +24,7 @@
 #include "messages/behaviour/LookStrategy.h"
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
-
+#include "utility/time/time.h"
 #include "utility/motion/InverseKinematics.h"
 
 namespace modules {
@@ -41,14 +41,15 @@ namespace modules {
             using messages::behaviour::HeadBehaviourConfig;
             using messages::input::Sensors;
             using messages::support::Configuration;
+            
 
             LookAtBall::LookAtBall(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
                 on<Trigger<Configuration<HeadBehaviourConfig>>>([this](const Configuration<HeadBehaviourConfig>& config) {
-			BALL_SEARCH_TIMEOUT_MILLISECONDS = config["BALL_SEARCH_TIMEOUT_MILLISECONDS"].as<float>();
-			X_FACTOR = config["X_FACTOR"].as<float>();	
-			Y_FACTOR = config["Y_FACTOR"].as<float>();	
-			BALL_UNCERNTAINTY_THRESHOLD = config["BALL_UNCERTAINTY_THRESHOLD"].as<float>();	
+			        BALL_SEARCH_TIMEOUT_MILLISECONDS = config["BALL_SEARCH_TIMEOUT_MILLISECONDS"].as<float>();
+			        X_FACTOR = config["X_FACTOR"].as<float>();	
+			        Y_FACTOR = config["Y_FACTOR"].as<float>();	
+			        BALL_UNCERNTAINTY_THRESHOLD = config["BALL_UNCERTAINTY_THRESHOLD"].as<float>();	
                 });
 
 		on<Trigger<LookAtBallStart>>([this](const LookAtBallStart&) {
@@ -73,9 +74,13 @@ namespace modules {
 					const std::vector<Goal>& goals,
 					const Sensors& sensors,
 					const std::shared_ptr<const messages::localisation::Ball>& ball) {
-
+            
+            const bool ballIsLost = utility::time::TimeDifferenceSeconds(NUClear::clock::now(),timeLastSeen) > BALL_SEARCH_TIMEOUT_MILLISECONDS;
+            const bool ballIsUncertain = ((ball->sr_xx > BALL_UNCERNTAINTY_THRESHOLD) || (ball->sr_yy > BALL_UNCERNTAINTY_THRESHOLD));
+            
+            //if balls are seen, then place those and everything else that's useful into the look at list
 			if (balls.size() > 0) {
-				timeSinceLastSeen = sensors.timestamp;
+				timeLastSeen = NUClear::clock::now();
 				std::vector<LookAtAngle> angles;
 				angles.reserve(4);
 
@@ -87,38 +92,50 @@ namespace modules {
 
 				emit(std::make_unique<std::vector<LookAtAngle>>(angles));
 			} 
-
-			else if ((ball != NULL) && ((ball->sr_xx > BALL_UNCERNTAINTY_THRESHOLD) || (ball->sr_yy > BALL_UNCERNTAINTY_THRESHOLD))) {
+			// if the ball isn't seen this frame, but we're certain of where it is, look there
+			else if ((ball != NULL) && !ballIsUncertain) {
+			    std::vector<LookAtAngle> angles;
+			    arma::vec2 screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt(
+			                                            {ball->position[0], ball->position[1], 0}, 
+			                                            sensors.orientationCamToGround, 
+			                                            sensors.orientationBodyToGround);
+			    
+				angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
+			    emit(std::make_unique<std::vector<LookAtAngle>>(angles));
+            }
+            //if the ball is lost, do a scan using uncertainties to try to find it
+			else if (ball != NULL) {
 				double xFactor = X_FACTOR * std::sqrt(ball->sr_xx);
 				double yFactor = Y_FACTOR * std::sqrt(ball->sr_yy);
 
 				std::vector<LookAtPosition> angles;
 				arma::vec2 screenAngular;
-				angles.reserve(10);
-
-				screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
-				angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
-
-				screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0] + xFactor, ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
-				angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
-
-				screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0] - xFactor, ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
-				angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
-
-				screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1] + yFactor, 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
-				angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
-
-				screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1] - yFactor, 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
-				angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
-
-				for (const auto& g : goals) {
-					angles.emplace_back(LookAtPosition {g.screenAngular[0], -g.screenAngular[1]});
+				
+				//load the offset path from where we think the ball is
+				arma::mat offsets(5,3);
+				offsets  << 0.0 << 0.0 << 0.0 << arma::endr
+                         << -xFactor << 0.0 << 0.0 << arma::endr
+                         //<< -xFactor << yFactor << 0.0 << arma::endr
+                         << 0.0 << yFactor << 0.0 << arma::endr
+                         //<< 0.0 << -yFactor << 0.0 << arma::endr
+                         //<< xFactor << -yFactor << 0.0 << arma::endr
+                         << xFactor << 0.0 << 0.0 << arma::endr
+                         << 0.0 << -yFactor << 0.0;
+				
+				angles.reserve(5);
+				arma::vec ballPos = arma::vec({ball->position[0], ball->position[1], 0.0});
+				for (size_t i = 0; i < offsets.n_rows; ++i) {
+				    arma::vec2 screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt(
+				                                        ballPos + offsets.row(i).t(),
+				                                        sensors.orientationCamToGround,
+				                                        sensors.orientationBodyToGround);
+				    angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});
 				}
 	
 				emit(std::make_unique<std::vector<LookAtPosition>>(angles));
 			} 
 
-			else if(std::chrono::duration<float, std::ratio<1,1000>>(sensors.timestamp - timeSinceLastSeen).count() > BALL_SEARCH_TIMEOUT_MILLISECONDS){
+			else if(ballIsLost > BALL_SEARCH_TIMEOUT_MILLISECONDS){
 				//do a blind scan'n'pan
 				//XXX: this needs to be a look at sequence rather than a look at point
 				std::vector<LookAtPosition> angles;

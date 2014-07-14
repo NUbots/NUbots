@@ -41,92 +41,16 @@ namespace modules {
                classify the mostly empty green below.
              */
 
-            auto& visualHorizon = classifiedImage.visualHorizon;
-            auto& maxPoint = classifiedImage.maxVisualHorizon;
-            auto& minPoint = classifiedImage.minVisualHorizon;
-
-            auto hLeft = visualHorizon.begin();
-            auto hRight = visualHorizon.end() - 1;
-
             // Cast lines upward to find the goals
-            for(int y = maxPoint->at(1); y >= 0; y -= GOAL_LINE_SPACING) {
+            for(int y = 0; y < int(image.height() - 1); y += GOAL_LINE_SPACING) {
 
-                // If our left hand side is in range, or we are over the top
-                if(hLeft->at(1) >= y) {
+                arma::ivec2 start = { 0, y };
+                arma::ivec2 end = { int(image.width() - 1), y };
 
-                    arma::ivec2 start = { 0, y };
-                    arma::ivec2 end = { int(image.width() - 1), y };
-
-                    // Clip the point to be outside the visual horizon
-                    while(hLeft < minPoint) {
-
-                        auto p1 = hLeft;
-                        auto p2 = hLeft + 1;
-
-                        if(y <= p1->at(1) && y >= p2->at(1)) {
-
-                            // Make a line from the two points and find our x
-                            Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
-
-                            if(l.isHorizontal()) {
-                                end[0] = p1->at(0);
-                            }
-                            else {
-                                end[0] = round(l.x(y));
-                            }
-
-                            break;
-                        }
-                        // Try our previous point
-                        else {
-                            ++hLeft;
-                        }
-                    }
-
-                    // Insert our segments
-                    auto segments = quex->classify(image, lut, start, end, GOAL_SUBSAMPLING);
-                    insertSegments(classifiedImage, segments, false);
-                }
-
-                // If our right hand side is in range and has not gone out of scope
-                if(hRight->at(1) >= y && hRight > minPoint) {
-
-                    arma::ivec2 start = { 0, y };
-                    arma::ivec2 end = { int(image.width() - 1), y };
-
-                    // Clip the point to be outside the visual horizon
-                    while(hRight > minPoint) {
-
-                        auto p1 = hRight - 1;
-                        auto p2 = hRight;
-
-                        if(y >= p1->at(1) && y <= p2->at(1)) {
-
-                            // Make a line from the two points and find our x
-                            Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
-
-                            if(l.isHorizontal()) {
-                                start[0] = p2->at(0);
-                            }
-                            else {
-                                start[0] = round(l.x(y));
-                            }
-
-                            break;
-                        }
-                        // Try our previous point
-                        else {
-                            --hRight;
-                        }
-                    }
-
-                    // Insert our segments
-                    auto segments = quex->classify(image, lut, start, end, GOAL_SUBSAMPLING);
-                    insertSegments(classifiedImage, segments, false);
-
-                }
+                // Insert our segments
+                auto segments = quex->classify(image, lut, start, end, GOAL_SUBSAMPLING);
+                insertSegments(classifiedImage, segments, false);
             }
-
         }
 
     }  // vision

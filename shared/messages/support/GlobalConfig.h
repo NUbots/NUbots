@@ -17,44 +17,17 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_SUPPORT_FIELDDESCRIPTION_H
-#define MESSAGES_SUPPORT_FIELDDESCRIPTION_H
-
-#include <armadillo>
+#ifndef MESSAGES_SUPPORT_GLOBALCONFIG_H
+#define MESSAGES_SUPPORT_GLOBALCONFIG_H
 
 namespace messages {
 namespace support {
 
-class FieldDescription {
-public:
-
     // Field dimensions as defined in the Robocup rules:
-    struct FieldDimensions {
-        double line_width;
-        double mark_width;
-        double field_length;
-        double field_width;
-        double goal_depth;
-        double goal_width;
-        double goal_area_length;
-        double goal_area_width;
-        double goal_crossbar_height;
-        double goalpost_diameter;
-        double goal_net_height;
-        double penalty_mark_distance;
-        double center_circle_diameter;
-        double border_strip_min_width;
-    } dimensions;
-
-    double ball_radius;
-
-    // Coordinates of goalpost centers calculated from the FieldDimensions:
-    // (arma::vec2)
-    arma::vec2 goalpost_bl;
-    arma::vec2 goalpost_br;
-    arma::vec2 goalpost_yl;
-    arma::vec2 goalpost_yr;
-};
+    struct GlobalConfig {
+        uint playerId;
+        uint teamId;
+    };
 
 }
 }

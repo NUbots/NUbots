@@ -32,7 +32,7 @@ namespace debug {
     NUcap::NUcap(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        //on<Trigger<Network<MotionCapture>>>([this](const Network<MotionCapture>& net) {
+        /*on<Trigger<Network<MotionCapture>>>([this](const Network<MotionCapture>& net) {
             // log("NUcap: Network<MotionCapture> received!");
             //auto& mocap = net.data;
             //for (auto& rigidBody : mocap->rigid_bodies()) {
@@ -47,8 +47,7 @@ namespace debug {
                 // TODO: transform from head to field
             //}
 
-        //});
-
+        });*/
     }
 
 }
