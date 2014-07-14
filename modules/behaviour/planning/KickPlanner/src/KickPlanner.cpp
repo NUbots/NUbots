@@ -57,7 +57,13 @@ namespace planning {
             const std::vector<Self>& selfs, 
             const std::vector<messages::vision::Ball>& vision_balls,
             const KickPlan& kickPlan) {
-
+            
+            if (vision_balls.size() > 0) {
+                framesNotSeen++;
+            } else {
+                framesNotSeen = 0;
+            }   
+            
             auto self = selfs[0];
 
             arma::vec3 goalPosition = arma::vec3({kickPlan.target[0],kickPlan.target[1],1});
@@ -67,15 +73,16 @@ namespace planning {
                                                                  -normed_heading[1],  normed_heading[0],         0,
                                                                                   0,                 0,         1};
 
-            worldToRobotTransform.submat(0,2,1,2) = worldToRobotTransform.submat(0,0,1,1).t() * self.position;
+            worldToRobotTransform.submat(0,2,1,2) = -worldToRobotTransform.submat(0,0,1,1) * self.position;
 
             arma::vec3 homogeneousKickTarget = worldToRobotTransform * goalPosition;
             arma::vec2 kickTarget = homogeneousKickTarget.rows(0,1);    //In robot coords
+            
 
             // NUClear::log("kickTarget = ", kickTarget);
             // NUClear::log("ball position = ", ball.position);
 
-            if(vision_balls.size() > 0 &&
+            if(framesNotSeen < 5 and
                ball.position[0] < MAX_BALL_DISTANCE &&
                std::fabs(ball.position[1]) < KICK_CORRIDOR_WIDTH / 2){
 

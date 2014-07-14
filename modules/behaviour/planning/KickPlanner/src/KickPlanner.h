@@ -34,6 +34,7 @@ namespace planning {
         static constexpr const char* CONFIGURATION_PATH = "KickPlanner.yaml";
 
     private:
+        size_t framesNotSeen = 0;
        	float MAX_BALL_DISTANCE;
        	float KICK_CORRIDOR_WIDTH;
        	float KICK_FORWARD_ANGLE_LIMIT;
