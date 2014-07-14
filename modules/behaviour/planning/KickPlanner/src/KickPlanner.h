@@ -39,6 +39,7 @@ namespace planning {
        	float KICK_CORRIDOR_WIDTH;
        	float KICK_FORWARD_ANGLE_LIMIT;
        	float KICK_SIDE_ANGLE_LIMIT;
+        float FRAMES_NOT_SEEN_LIMIT;
     };
 
 }
