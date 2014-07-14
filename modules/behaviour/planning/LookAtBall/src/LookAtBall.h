@@ -34,12 +34,12 @@ namespace modules {
             class LookAtBall : public NUClear::Reactor {
             private:
                 //const size_t id;
-                NUClear::clock::time_point timeSinceLastSeen;
+                std::chrono::system_clock::time_point timeLastSeen;
 
-                float BALL_SEARCH_TIMEOUT_MILLISECONDS;
-		float X_FACTOR;
-		float Y_FACTOR;
-		float BALL_UNCERNTAINTY_THRESHOLD;
+                double BALL_SEARCH_TIMEOUT_MILLISECONDS;
+		        double X_FACTOR;
+		        double Y_FACTOR;
+		        double BALL_UNCERNTAINTY_THRESHOLD;
 		
 		ReactionHandle handle;
 
