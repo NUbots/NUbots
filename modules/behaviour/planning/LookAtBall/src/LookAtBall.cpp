@@ -82,8 +82,12 @@ std::cerr << "LookAtBall - disabled" << std::endl;
 					const std::shared_ptr<const messages::support::FieldDescription>& fieldDesc,
 					const std::shared_ptr<const std::vector<messages::localisation::Self>>& selfs,
 					const std::shared_ptr<const messages::localisation::Ball>& ball) {
-            
+
+			// TODO If not doing Josiah's fancy code, remove optional withs
+            (void)fieldDesc;
+            (void)selfs;
             (void)ball;
+
             const bool ballIsLost = utility::time::TimeDifferenceSeconds(NUClear::clock::now(),timeLastSeen) > BALL_SEARCH_TIMEOUT_MILLISECONDS;
 //            const bool ballIsUncertain = ((ball->sr_xx > BALL_UNCERNTAINTY_THRESHOLD) || (ball->sr_yy > BALL_UNCERNTAINTY_THRESHOLD));
             ++framesSinceSeen;
@@ -107,7 +111,8 @@ std::cerr << "LookAtBall - disabled" << std::endl;
 				    for (const auto& g : goals) {
 					    angles.emplace_back(LookAtAngle {g.screenAngular[0], -g.screenAngular[1]});
 				    }
-				} else if (fieldDesc != NULL && selfs != NULL) {
+				}
+/*				} else if (fieldDesc != NULL && selfs != NULL) {
 				    arma::vec2 screenAngular;
 				    std::vector<arma::vec2> fieldGoalPos;
 				    
@@ -134,8 +139,8 @@ std::cerr << "LookAtBall - disabled" << std::endl;
                             angles.emplace_back(LookAtAngle {screenAngular[0], screenAngular[1]});
                         }
 			        }
-			        
 				}
+*/
 				emit(std::make_unique<std::vector<LookAtAngle>>(angles));
 			} else if (BALL_SEEN_COUNT_THRESHOLD > framesSinceSeen) {
 			    //don't activate other options because we could still have the ball on screen
