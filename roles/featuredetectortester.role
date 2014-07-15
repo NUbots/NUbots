@@ -11,5 +11,7 @@ ADD_ROLE(
         support::logging::ConsoleLogHandler
         platform::darwin::HardwareIO
         platform::darwin::SensorFilter
+
+        support::configuration::SoccerConfig
 )
 

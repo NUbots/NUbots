@@ -3,6 +3,7 @@ ADD_ROLE(
     MODULES
         support::configuration::ConfigSystem
         platform::darwin::HardwareIO
+        support::configuration::SoccerConfig
         platform::darwin::SensorFilter
         support::NUbugger
         debug::NUbugger

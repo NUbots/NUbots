@@ -8,6 +8,7 @@ ADD_ROLE(
         support::configuration::ConfigSystem
         support::configuration::NetworkingConfiguration
         support::NUbugger
+        support::configuration::SoccerConfig
 
         # Hardware Interface
         platform::darwin::HardwareIO

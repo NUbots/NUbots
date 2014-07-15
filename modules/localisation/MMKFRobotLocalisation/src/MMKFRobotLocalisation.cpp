@@ -70,8 +70,8 @@ namespace localisation {
            With<Optional<FieldDescription>>>("FieldDescription Update",
            [this](const Startup&, const std::shared_ptr<const FieldDescription>& desc) {
             if (desc == nullptr) {
-                NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: SoccerConfig module might not be installed.");
-                throw std::runtime_error("FieldDescription Update: SoccerConfig module might not be installed");
+                NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");
+                throw std::runtime_error("FieldDescription Update: support::configuration::SoccerConfig module might not be installed");
             }
 
             auto fd = std::make_shared<FieldDescription>(*desc);

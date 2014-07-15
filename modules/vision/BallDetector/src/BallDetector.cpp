@@ -75,9 +75,11 @@ namespace vision {
             MAXIMUM_FITTED_MODELS = config["ransac"]["maximum_fitted_models"].as<uint>();
         });
 
-
-        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters>, With<FieldDescription>, Options<Single>>("Ball Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const FieldDescription& field) {
-
+        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters>, With<Optional<FieldDescription>>, Options<Single>>("Ball Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field) {
+            if (field == nullptr) {
+                NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");
+                throw std::runtime_error("FieldDescription Update: support::configuration::SoccerConfig module might not be installed");
+            }
             // This holds our points that may be a part of the ball
             std::vector<arma::vec2> ballPoints;
             const auto& sensors = *image.sensors;
@@ -141,13 +143,13 @@ namespace vision {
                 arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay, cam.focalLengthPixels);
 
                 // Get our width based distance to the ball
-                double widthDistance = widthBasedDistanceToCircle(field.ball_radius * 2, top, base, cam.focalLengthPixels);
+                double widthDistance = widthBasedDistanceToCircle(field->ball_radius * 2, top, base, cam.focalLengthPixels);
                 arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
 
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), arma::diagmat(arma::vec({0.003505351, 0.001961638, 1.68276E-05})) });
 
                 // Project this vector to a plane midway through the ball
-                Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, field.ball_radius });
+                Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, field->ball_radius });
                 arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, sensors.orientationCamToGround, ballBisectorPlane);
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), arma::diagmat(arma::vec({0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
 

@@ -7,6 +7,7 @@ ADD_ROLE(
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
         support::configuration::NetworkingConfiguration
+        support::configuration::SoccerConfig
 
         # NUcap
         support::NUcap
