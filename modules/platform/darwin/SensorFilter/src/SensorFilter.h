@@ -49,6 +49,7 @@ namespace modules {
                 double HIGH_NOISE_THRESHOLD;
                 double HIGH_NOISE_GAIN;
                 double LOW_NOISE_THRESHOLD;
+                int DEBOUNCE_THRESHOLD;
 
                 double SUPPORT_FOOT_FSR_THRESHOLD;
                 int REQUIRED_NUMBER_OF_FSRS;
@@ -60,8 +61,6 @@ namespace modules {
 
                 static constexpr const char* CONFIGURATION_PATH = "DarwinSensorFilter.yaml";
             private:
-                static constexpr const uint DEBOUNCE_THRESHOLD = 7;
-
                 arma::mat44 calculateOdometryMatrix(
                     const messages::input::Sensors& sensors,
                     const messages::input::Sensors& previousSensors,

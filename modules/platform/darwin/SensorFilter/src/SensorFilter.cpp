@@ -93,6 +93,8 @@ namespace modules {
                     HIGH_NOISE_THRESHOLD = file.config["HIGH_NOISE_THRESHOLD"].as<double>();
                     HIGH_NOISE_GAIN = file.config["HIGH_NOISE_GAIN"].as<double>();
                     LOW_NOISE_THRESHOLD = file.config["LOW_NOISE_THRESHOLD"].as<double>();
+                    DEBOUNCE_THRESHOLD = file.config["DEBOUNCE_THRESHOLD"].as<int>();
+
 
                     SUPPORT_FOOT_FSR_THRESHOLD = file.config["SUPPORT_FOOT_FSR_THRESHOLD"].as<double>();
                     REQUIRED_NUMBER_OF_FSRS = file.config["REQUIRED_NUMBER_OF_FSRS"].as<int>();
