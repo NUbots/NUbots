@@ -139,12 +139,18 @@ namespace vision {
                 // Get a unit vector pointing to the centre of the ball
                 arma::vec3 ballCentreRay = arma::normalise(arma::normalise(getCamFromScreen(top, cam.focalLengthPixels))
                                                            + arma::normalise(getCamFromScreen(base, cam.focalLengthPixels)));
+                std::cerr <<  "ballCentreRay" << ballCentreRay.t() << std::endl;
+                
                 // Get the centre of our ball ins creen space
                 arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay, cam.focalLengthPixels);
+                std::cerr <<  "centre" << centre.t() << std::endl;
+                std::cerr <<  "adjusted ballCentreScreen" << ballCentreScreen.t() << std::endl;
 
                 // Get our width based distance to the ball
                 double widthDistance = widthBasedDistanceToCircle(field->ball_radius * 2, top, base, cam.focalLengthPixels);
+                std::cerr <<  "widthDistance" << widthDistance << std::endl;                
                 arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
+                std::cerr <<  "ballCentreGroundWidth" << ballCentreGroundWidth.t() << std::endl;
 
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), arma::diagmat(arma::vec({0.003505351, 0.001961638, 1.68276E-05})) });
 
