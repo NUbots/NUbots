@@ -702,10 +702,10 @@ namespace modules {
 				} */
 
 				if(isWalking && arma::norm(self.position - ZONES.at(MY_ZONE).defaultPosition) < POSITION_THRESHOLD_TIGHT
-							 && std::fabs(heading - std::atan2(currentState.heading[0])) < ANGLE_THRESHOLD) {
+							 && std::fabs(heading - std::atan2(currentState.heading[1], currentState.heading[0])) < ANGLE_THRESHOLD) {
 					stopWalking();
 				} else if(arma::norm(self.position - ZONES.at(MY_ZONE).defaultPosition) > POSITION_THRESHOLD_LOOSE
-						|| std::fabs(heading - std::atan2(currentState.heading[0]) > ANGLE_THRESHOLD)) {
+						|| std::fabs(heading - std::atan2(currentState.heading[1], currentState.heading[0]) > ANGLE_THRESHOLD)) {
 					sideStepToPoint(ZONES.at(MY_ZONE).defaultPosition);
 				}
 				
