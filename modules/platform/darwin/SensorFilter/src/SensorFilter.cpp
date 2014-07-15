@@ -109,8 +109,8 @@ namespace modules {
                 });
 
                 on<Trigger<Last<10, messages::platform::darwin::DarwinSensors>>>([this](const std::vector<std::shared_ptr<const messages::platform::darwin::DarwinSensors>>& sensors) {
-                    uint buttonLeftCount = 0;
-                    uint buttonMiddleCount = 0;
+                    int buttonLeftCount = 0;
+                    int buttonMiddleCount = 0;
 
                     for (auto& sensor : sensors) {
                         if (sensor->buttons.left) {
@@ -121,10 +121,10 @@ namespace modules {
                         }
                     }
 
-std::cerr << "leftCount - " << buttonLeftCount << std::endl;
-std::cerr << "middleCount - " << buttonMiddleCount << std::endl;
-std::cerr << "leftDown - " << ((leftDown) ? "Yes" : "No") << std::endl;
-std::cerr << "middleDown - " << ((middleDown) ? "Yes" : "No") << std::endl;
+//std::cerr << "leftCount - " << buttonLeftCount << std::endl;
+//std::cerr << "middleCount - " << buttonMiddleCount << std::endl;
+//std::cerr << "leftDown - " << ((leftDown) ? "Yes" : "No") << std::endl;
+//std::cerr << "middleDown - " << ((middleDown) ? "Yes" : "No") << std::endl;
 
                     if (!leftDown && buttonLeftCount >= DEBOUNCE_THRESHOLD) {
                         emit(std::make_unique<ButtonLeftDown>());
