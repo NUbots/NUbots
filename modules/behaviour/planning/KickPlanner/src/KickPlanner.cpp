@@ -66,18 +66,23 @@ namespace planning {
 
             // If we're not seeing any vision balls, count frames not seen
             if (vision_balls.empty()) {
+
                 ballPosition = ball.position;
+
                 framesNotSeen++;
             } else {
-                ballPosition = sphericalToCartesian(vision_balls.at(0).measurements.at(0).position.rows(0,1));
+
+                ballPosition = sphericalToCartesian(vision_balls.at(0).measurements.at(0).position).rows(0,1);
+
                 framesNotSeen = 0;
             }   
-            
+
             auto self = selfs[0];
 
             arma::vec3 goalPosition = arma::vec3({kickPlan.target[0],kickPlan.target[1],1});
 
             arma::vec2 normed_heading = arma::normalise(self.heading);
+
             arma::mat33 worldToRobotTransform = arma::mat33{      normed_heading[0],  normed_heading[1],         0,
                                                                  -normed_heading[1],  normed_heading[0],         0,
                                                                                   0,                 0,         1};
@@ -86,7 +91,7 @@ namespace planning {
 
             arma::vec3 homogeneousKickTarget = worldToRobotTransform * goalPosition;
             arma::vec2 kickTarget = homogeneousKickTarget.rows(0,1);    //In robot coords
-            
+
 
             // NUClear::log("kickTarget = ", kickTarget);
             // NUClear::log("ball position = ", ball.position);
