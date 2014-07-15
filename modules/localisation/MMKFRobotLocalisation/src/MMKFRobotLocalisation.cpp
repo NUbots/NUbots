@@ -141,8 +141,10 @@ namespace localisation {
            Options<Sync<MMKFRobotLocalisation>>
           >("MMKFRobotLocalisation Step",
             [this](const std::vector<messages::vision::Goal>& goals) {
-            // if (goals.size() < 2)
-            //     return;
+            
+            // Ignore empty vectors of goals.
+            if (goals.size() == 0)
+                return;
 
             // // std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
             // for (auto& goal : goals) {
