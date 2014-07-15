@@ -7,7 +7,7 @@ ADD_ROLE(
         support::configuration::ConfigSystem
         support::configuration::NetworkingConfiguration
         support::NUbugger
-	support::configuration::SoccerConfig
+	   support::configuration::SoccerConfig
 
 	#input
 	input::GameController

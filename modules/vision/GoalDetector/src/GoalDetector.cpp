@@ -90,14 +90,17 @@ namespace vision {
         on<Trigger<CameraParameters>, With<Configuration<GoalDetector>>>(setParams);
         on<With<CameraParameters>, Trigger<Configuration<GoalDetector>>>(setParams);
 
-        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters>, With<FieldDescription>, Options<Single>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const FieldDescription& field) {
-
+        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters>, With<Optional<FieldDescription>>, Options<Single>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field) {
+            if (field == nullptr) {
+                NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");
+                throw std::runtime_error("FieldDescription Update: support::configuration::SoccerConfig module might not be installed");
+            }
             auto& sensors = *image.sensors;
             // Our segments that may be a part of a goal
             std::vector<RansacGoalModel::GoalSegment> segments;
             auto goals = std::make_unique<std::vector<Goal>>();
-            const double& GOAL_HEIGHT = field.dimensions.goal_crossbar_height;
-            const double& GOAL_DIAMETER = field.dimensions.goalpost_diameter;
+            const double& GOAL_HEIGHT = field->dimensions.goal_crossbar_height;
+            const double& GOAL_DIAMETER = field->dimensions.goalpost_diameter;
 
             // Get our goal segments
             auto hSegments = image.horizontalSegments.equal_range(ObjectClass::GOAL);

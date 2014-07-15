@@ -8,4 +8,5 @@ ADD_ROLE(
         platform::darwin::SensorFilter
         vision::LUTClassifier
         support::NUbugger
+        support::configuration::SoccerConfig
 )
