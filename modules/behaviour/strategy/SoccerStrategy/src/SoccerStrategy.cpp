@@ -122,22 +122,6 @@ namespace modules {
 				arma::vec2 initial_goal_heading = config["INITIAL_GOAL_HEADING"].as<arma::vec2>(); //this is not used yet
 			});
 
-			// Set defaults on start up
-			on<Trigger<Startup>>([this](const Startup&) {
-				// TODO should these be moved to config?
-				penalisedButtonStatus = false;
-				feetOffGround = true;
-				isKicking = false;
-				isWalking = false;
-				lookingAtBall = false;
-				lookingAtGoal = false;
-
-				currentState.primaryGameState = GameStatePrimary::INITIAL;
-				currentState.secondaryGameState = GameStateSecondary::NORMAL;
-
-				stopWalking();
-			});
-
 			// Get the field description on start up
 			on<Trigger<Startup>,
 				With<Optional<FieldDescription>>>("FieldDescription Update",
@@ -150,6 +134,19 @@ namespace modules {
 
 				FIELD_DESCRIPTION = *desc;
 				enemyGoal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
+				
+				// TODO should these be moved to config?
+				penalisedButtonStatus = false;
+				feetOffGround = true;
+				isKicking = false;
+				isWalking = false;
+				lookingAtBall = false;
+				lookingAtGoal = false;
+
+				currentState.primaryGameState = GameStatePrimary::INITIAL;
+				currentState.secondaryGameState = GameStateSecondary::NORMAL;
+
+				stopWalking();
 			});
 
 			// Manually cycle through game phases - left button push

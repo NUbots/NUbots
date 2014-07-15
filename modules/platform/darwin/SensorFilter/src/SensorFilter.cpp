@@ -119,6 +119,11 @@ namespace modules {
                         }
                     }
 
+std::cerr << "leftCount - " << buttonLeftCount << std::endl;
+std::cerr << "middleCount - " << buttonMiddleCount << std::endl;
+std::cerr << "leftDown - " << ((leftDown) ? "Yes" : "No") << std::endl;
+std::cerr << "middleDown - " << ((middleDown) ? "Yes" : "No") << std::endl;
+
                     if (!leftDown && buttonLeftCount >= DEBOUNCE_THRESHOLD) {
                         emit(std::make_unique<ButtonLeftDown>());
                         leftDown = true;
