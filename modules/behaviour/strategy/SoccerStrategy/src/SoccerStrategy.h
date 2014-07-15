@@ -60,11 +60,11 @@ namespace modules {
 		GameStatePrimary& operator++(GameStatePrimary& gameState) {
 			switch (gameState) {
 				case GameStatePrimary::INITIAL:
-					return(gameState = GameStatePrimary::SET);
-				case GameStatePrimary::READY:
-					return(gameState = GameStatePrimary::PLAYING);
-				case GameStatePrimary::SET:
 					return(gameState = GameStatePrimary::READY);
+				case GameStatePrimary::READY:
+					return(gameState = GameStatePrimary::SET);
+				case GameStatePrimary::SET:
+					return(gameState = GameStatePrimary::PLAYING);
 				case GameStatePrimary::PLAYING:
 					return(gameState = GameStatePrimary::TIMEOUT);
 				case GameStatePrimary::TIMEOUT:

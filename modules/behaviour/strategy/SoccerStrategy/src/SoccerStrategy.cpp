@@ -158,41 +158,31 @@ namespace modules {
 				currentState.primaryGameState++;
 
 				switch (currentState.primaryGameState) {
-					case GameStatePrimary::INITIAL: {
-						emit(std::move(std::make_unique<messages::output::Say>("Initial")));
-						std::cerr << "initial" << std::endl;
-						break;
-					}
-
-					case GameStatePrimary::READY: {
+					case GameStatePrimary::READY:
 						emit(std::move(std::make_unique<messages::output::Say>("Ready")));
 						std::cerr << "ready" << std::endl;
 						break;
-					}
 
-					case GameStatePrimary::SET: {
+					case GameStatePrimary::SET:
 						emit(std::move(std::make_unique<messages::output::Say>("Set")));
 						std::cerr << "set" << std::endl;
 						break;
-					}
 
-					case GameStatePrimary::PLAYING: {
+					case GameStatePrimary::PLAYING:
 						emit(std::move(std::make_unique<messages::output::Say>("Playing")));
 						std::cerr << "playing" << std::endl;
 						break;
-					}
 
-					case GameStatePrimary::FINISHED: {
+					case GameStatePrimary::FINISHED:
 						emit(std::move(std::make_unique<messages::output::Say>("Finished")));
 						std::cerr << "finished" << std::endl;
 						break;
-					}
 
-					default: {
-						emit(std::move(std::make_unique<messages::output::Say>("Undefined State. Something broke")));
-						std::cerr << "Undefined State. Something broke" << std::endl;
+					case GameStatePrimary::INITIAL:
+					default:
+						emit(std::move(std::make_unique<messages::output::Say>("Initial")));
+						std::cerr << "initial" << std::endl;
 						break;
-					}
 				}
 			});
 
@@ -203,9 +193,7 @@ namespace modules {
 				if (!currentState.penalised) {
 					currentState.penalised = true;
 					emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
-				}
-
-				else {
+				} else {
 					currentState.penalised = false;
 					emit(std::move(std::make_unique<messages::output::Say>("Unpenalised")));
 				}
@@ -459,8 +447,6 @@ namespace modules {
 								stopWalking();
 								findSelfAndBall();
 							} else {
-								kickBall(enemyGoal);
-
 								if(IS_GOALIE) {
 									// TODO - fix goalie logic
 									// At some stage he'll have to move to a default position (or possibly optimal?)
@@ -470,10 +456,15 @@ namespace modules {
 										stopWalking();
 										findSelfAndBall();
 									}
-								} else if(visionBalls.size() > 0) {
-									playSoccer(ball.position, visionBalls.at(0), selfs[0], gameState);
 								} else {
-									searchForBall(ball, selfs[0], gameState);
+									// Not goalie (normal player)
+									kickBall(enemyGoal);
+
+									if(visionBalls.size() > 0) {
+										playSoccer(ball.position, visionBalls.at(0), selfs[0], gameState);
+									} else {
+										searchForBall(ball, selfs[0], gameState);
+									}	
 								}
 							}
 							break;
