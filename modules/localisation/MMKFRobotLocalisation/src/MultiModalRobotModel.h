@@ -36,7 +36,8 @@ namespace localisation {
     };
 
     class RobotHypothesis {
-    private:
+    // private:
+    public: // for unit testing.
         utility::math::kalman::UKF<robot::RobotModel> filter_;
 
         double weight_;
@@ -53,7 +54,6 @@ namespace localisation {
                 arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 1, // cov
                 1), // alpha
             weight_(1),
-            // obs_trail_(""),
             obs_count_(0) { }
 
         // bool active() const { return active_; }
@@ -175,15 +175,14 @@ namespace localisation {
         //     AmbiguousObject &ambiguous_object,
         //     const std::vector<StationaryObject*>& possible_objects);
 
-    public: // temporary - debugging 09/07/2014
+    public: // For unit testing
         std::vector<std::unique_ptr<RobotHypothesis>> robot_models_;
 
         struct {
-            bool merging_enabled;
-            int max_models_after_merge;
-            float merge_min_translation_dist;
-            float merge_min_heading_dist;
-            float process_noise_factor;
+            bool merging_enabled = true;
+            int max_models_after_merge = 2;
+            float merge_min_translation_dist = 0.05;
+            float merge_min_heading_dist = 0.01;
         } cfg_;
     };
 }

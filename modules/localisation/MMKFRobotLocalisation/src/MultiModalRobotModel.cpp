@@ -44,11 +44,11 @@ std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
         << "weight: "
             << std::setw(7) << h.weight_ << ", "
         << "estimate: ["
-            << std::setw(7) << est[robot::kX] << ", "
-            << std::setw(7) << est[robot::kY] << ", "
-            // << std::setw(7) << est[robot::kHeadingX] << ", "
-            // << std::setw(7) << est[robot::kHeadingY] << "]"
-            << std::setw(7) << est[robot::kImuOffset] << "]"
+            << std::setw(7) << est(robot::kX) << ", "
+            << std::setw(7) << est(robot::kY) << ", "
+            // << std::setw(7) << est(robot::kHeadingX) << ", "
+            // << std::setw(7) << est(robot::kHeadingY) << "]"
+            << std::setw(7) << est(robot::kImuOffset) << "]"
         // << ", observation trail: [" << h.obs_trail_ << "]"
         // << ", covariance:\n" << h.GetCovariance()
         << ", observation count: " << h.obs_count_
@@ -349,8 +349,9 @@ void MultiModalRobotModel::MergeSimilarModels() {
             auto& model_a = robot_models_[ma];
             auto& model_b = robot_models_[mb];
 
-            if (!ModelsAreSimilar(model_a, model_b))
+            if (!ModelsAreSimilar(model_a, model_b)) {
                 continue;
+            }
 
             float wa = model_a->GetFilterWeight();
             float wb = model_b->GetFilterWeight();

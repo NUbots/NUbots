@@ -93,17 +93,20 @@ namespace localisation {
         : Reactor(std::move(environment)) {
 
         on<Trigger<FieldDescription>>("FieldDescription Update", [this](const FieldDescription& desc) {
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
             field_description_ = std::make_shared<FieldDescription>(desc);
         });
 
         on<Trigger<Configuration<MockRobotConfig>>>(
             "MockRobotConfig Update",
             [this](const Configuration<MockRobotConfig>& config) {
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
             UpdateConfiguration(config);
         });
 
         // Update robot position
         on<Trigger<Every<10, std::chrono::milliseconds>>>("Mock Robot motion", [this](const time_t&){
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
             if (!cfg_.simulate_robot_movement) {
                 robot_velocity_ = { 0, 0 };
                 return;
@@ -135,6 +138,7 @@ namespace localisation {
 
         // Update ball position
         on<Trigger<Every<10, std::chrono::milliseconds>>>("Mock Ball motion", [this](const time_t&){
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
 
             if (!cfg_.simulate_ball_movement) {
                 ball_velocity_ = { 0, 0 };
@@ -148,10 +152,12 @@ namespace localisation {
 
             auto triangle1 = triangle_wave(t, period);
             auto triangle2 = triangle_wave(t + (period / 4.0), period);
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
             ball_position_ = { triangle1 * x_amp, triangle2 * y_amp };
 
             auto velocity_x = -square_wave(t, period) * ((x_amp * 4) / period);
             auto velocity_y = -square_wave(t + (period / 4.0), period) * ((y_amp * 4) / period);
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
             ball_velocity_ = { velocity_x, velocity_y };
         });
 
@@ -185,6 +191,7 @@ namespace localisation {
         // Simulate Vision
         on<Trigger<Every<30, Per<std::chrono::seconds>>>,
            Options<Sync<MockRobot>>>("Mock Vision Simulation", [this](const time_t&) {
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
             if (!cfg_.simulate_vision)
                 return;
 
@@ -198,8 +205,11 @@ namespace localisation {
 
             // orientation
             arma::vec2 robot_imu_dir_ = WorldToRobotTransform(arma::vec2({0, 0}), robot_heading_, world_imu_direction);
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
             arma::mat orientation = arma::eye(3, 3);
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
             orientation.submat(0, 0, 1, 0) = robot_imu_dir_;
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
             orientation.submat(0, 1, 1, 1) = arma::vec2({ -robot_imu_dir_(1), robot_imu_dir_(0) });
             sensors->orientation = orientation;
 
@@ -211,6 +221,7 @@ namespace localisation {
 
             // Goal observation
             if (cfg_.simulate_goal_observations) {
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
                 auto goals = std::make_unique<std::vector<messages::vision::Goal>>();
 
                 // Only observe goals that are in front of the robot
@@ -224,6 +235,7 @@ namespace localisation {
                 }
 
                 if (cfg_.observe_left_goal) {
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
                     messages::vision::Goal goal1;
                     messages::vision::VisionObject::Measurement g1_m;
                     g1_m.position = SphericalRobotObservation(robot_position_, robot_heading_, goal_r_pos);
@@ -241,6 +253,7 @@ namespace localisation {
                 }
 
                 if (cfg_.observe_right_goal) {
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
                     messages::vision::Goal goal2;
                     messages::vision::VisionObject::Measurement g2_m;
                     g2_m.position = SphericalRobotObservation(robot_position_, robot_heading_, goal_l_pos);
@@ -262,6 +275,7 @@ namespace localisation {
 
             // Ball observation
             if (cfg_.simulate_ball_observations) {
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
                 auto ball_vec = std::make_unique<std::vector<messages::vision::Ball>>();
 
                 messages::vision::Ball ball;
@@ -286,6 +300,7 @@ namespace localisation {
            Options<Sync<MockRobot>>>("NUbugger Output",
             [this](const time_t&,
                    const Mock<std::vector<messages::localisation::Self>>& mock_robots) {
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
 
             auto& robots = mock_robots.data;
 
@@ -309,6 +324,7 @@ namespace localisation {
                 robots_msg->push_back(model);
             }
 
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
             messages::localisation::Self self_marker;
             self_marker.position = robot_position_;
             self_marker.heading = bearingToUnitVector(robot_heading_);
@@ -328,6 +344,7 @@ namespace localisation {
             [this](const time_t&,
                    const Mock<messages::localisation::Ball>& mock_ball,
                    const Mock<std::vector<messages::localisation::Self>>& mock_robots) {
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
             auto& ball = mock_ball.data;
             auto& robots = mock_robots.data;
 

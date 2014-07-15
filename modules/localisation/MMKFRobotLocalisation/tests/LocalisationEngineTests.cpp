@@ -19,12 +19,18 @@
 
 #include <catch.hpp>
 
+#include <nuclear>
 #include "utility/math/angle.h"
 #include "utility/localisation/transform.h"
+#include "MultiModalRobotModel.h"
 
 using utility::localisation::transform::WorldToRobotTransform;
 using utility::localisation::transform::RobotToWorldTransform;
 using utility::math::angle::normalizeAngle;
+using modules::localisation::MultiModalRobotModel;
+using modules::localisation::RobotHypothesis;
+using utility::math::kalman::UKF;
+using modules::localisation::robot::RobotModel;
 
 TEST_CASE("Angle convinience functions should handle corner cases", "[math][angle]") {
 
@@ -62,4 +68,47 @@ TEST_CASE("RobotToWorldTransform should be inverse of WorldToRobotTransform") {
 
     REQUIRE(field_ball(0) == Approx(result_ball(0)));
     REQUIRE(field_ball(1) == Approx(result_ball(1)));
+}
+
+TEST_CASE("MultiModalRobotModel::MergeSimilarModels tests") {
+    {
+        INFO("Test merge with single input model");
+        MultiModalRobotModel mmrm;
+        REQUIRE(mmrm.robot_models_.size() == 1);
+        mmrm.MergeSimilarModels();
+        REQUIRE(mmrm.robot_models_.size() == 1);
+    }
+
+    {
+        INFO("Test merge with two identical input models");
+        MultiModalRobotModel mmrm;
+        std::cout << *mmrm.robot_models_.back() << std::endl;
+        mmrm.robot_models_.push_back(std::make_unique<RobotHypothesis>());
+        std::cout << *mmrm.robot_models_.back() << std::endl;
+        REQUIRE(mmrm.robot_models_.size() == 2);
+        mmrm.MergeSimilarModels();
+        REQUIRE(mmrm.robot_models_.size() == 1);
+    }
+
+    {
+        INFO("Test merge with three identical input models");
+        MultiModalRobotModel mmrm;
+        mmrm.robot_models_.push_back(std::make_unique<RobotHypothesis>());
+        mmrm.robot_models_.push_back(std::make_unique<RobotHypothesis>());
+        REQUIRE(mmrm.robot_models_.size() == 3);
+        mmrm.MergeSimilarModels();
+        REQUIRE(mmrm.robot_models_.size() == 1);
+    }
+
+    {
+        INFO("Test merge with two identical and one different input models");
+        MultiModalRobotModel mmrm;
+        auto hyp = std::make_unique<RobotHypothesis>();
+        hyp->filter_ = UKF<RobotModel>(arma::vec({10, 20, 30}));
+        mmrm.robot_models_.push_back(std::move(hyp));
+        mmrm.robot_models_.push_back(std::make_unique<RobotHypothesis>());
+        REQUIRE(mmrm.robot_models_.size() == 3);
+        mmrm.MergeSimilarModels();
+        REQUIRE(mmrm.robot_models_.size() == 2);
+    }
 }
