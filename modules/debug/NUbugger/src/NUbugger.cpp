@@ -19,19 +19,24 @@
 
 #include "NUbugger.h"
 
+#include <random>
+
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/Sensors.h"
 #include "utility/nubugger/NUgraph.h"
+#include "messages/support/nubugger/proto/Message.pb.h"
 
 namespace modules {
 namespace debug {
 
     using NUClear::DEBUG;
     using utility::nubugger::graph;
+    using utility::nubugger::drawArrow;
     using messages::platform::darwin::DarwinSensors;
     using std::chrono::milliseconds;
     using messages::input::Sensors;
     using messages::input::ServoID;
+    using messages::support::nubugger::proto::DrawObjects;
 
     NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -70,11 +75,34 @@ namespace debug {
 
         on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
 
-            for(const auto& s : sensors.servos) {
-                if(s.id == ServoID::L_HIP_ROLL){
+            for (const auto& s : sensors.servos) {
+                if (s.id == ServoID::L_HIP_ROLL){
                     emit(graph("Servo " + messages::input::stringFromId(s.id), s.presentPosition));
                 }
             }
+
+        });
+
+        on<Trigger<Every<5, std::chrono::seconds>>>([this] (const time_t&) {
+            /*std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<> dis(-2, 2);
+            double x = dis(gen);
+            double y = dis(gen);
+            double z = dis(gen);
+
+            double period = 10;
+            double freq = 1 / period;
+            double t = NUClear::clock::now().time_since_epoch().count() / double(NUClear::clock::period::den);
+            float sine = sin(2 * M_PI * freq * t);
+            float cosine = cos(2 * M_PI * freq * t);
+
+            for (uint i = 0; i < 3; i++) {
+                emit(drawArrow("test", {x, y, z}, {sine, cosine, 0}, sine));
+            }*/
+
+            emit(drawArrow("test", {1, 1, 1}, {1, 0, -1}, 1));
+            emit(drawArrow("mytest", {0, -1, 3}, {-1, -1, 1}));
 
         });
 

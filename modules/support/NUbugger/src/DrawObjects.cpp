@@ -28,22 +28,31 @@ namespace support {
     using messages::support::nubugger::proto::Message;
     using utility::time::getUtcTimestamp;
 
-    using messages::support::nubugger::proto::DataPoint;
+    using messages::support::nubugger::proto::DrawObjects;
+    using messages::support::nubugger::proto::DrawObject;
 
-    void NUbugger::provideDataPoints() {
+    void NUbugger::provideDrawObjects() {
 
-        handles["data_points"].push_back(on<Trigger<DataPoint>>([this](const DataPoint& dataPoint) {
-
-            uint filterId = dataPointFilterIds.find(dataPoint.label()) == dataPointFilterIds.end()
-                ? dataPointFilterIds.insert(std::make_pair(dataPoint.label(), dataPointFilterId++)).first->second
-                : dataPointFilterIds[dataPoint.label()];
+        handles["draw_objects"].push_back(on<Trigger<DrawObjects>>([this](const DrawObjects& drawObjects) {
 
             Message message;
-            message.set_type(Message::DATA_POINT);
-            message.set_filter_id(filterId);
+            message.set_type(Message::DRAW_OBJECTS);
+            message.set_filter_id(1); // TODO: potentially bad
             message.set_utc_timestamp(getUtcTimestamp());
 
-            *(message.mutable_data_point()) = dataPoint;
+            *(message.mutable_draw_objects()) = drawObjects;
+
+            send(message);
+        }));
+
+        handles["draw_objects"].push_back(on<Trigger<DrawObject>>([this](const DrawObject& drawObject) {
+
+            Message message;
+            message.set_type(Message::DRAW_OBJECTS);
+            message.set_filter_id(1); // TODO: potentially bad
+            message.set_utc_timestamp(getUtcTimestamp());
+
+            *(message.mutable_draw_objects()->add_objects()) = drawObject;
 
             send(message);
         }));

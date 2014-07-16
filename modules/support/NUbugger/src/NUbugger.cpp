@@ -114,6 +114,7 @@ namespace support {
         });
 
         provideDataPoints();
+        provideDrawObjects();
         provideBehaviour();
         provideGameController();
         provideLocalisation();
