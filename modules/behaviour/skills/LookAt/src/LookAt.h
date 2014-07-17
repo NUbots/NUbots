@@ -41,6 +41,8 @@ namespace modules {
                 double HEAD_YAW_MAX;
                 double HEAD_YAW_MIN;
                 double SCREEN_EDGE_PADDING;
+                
+                arma::vec2 currentPoint;
 
             public:
                 explicit LookAt(std::unique_ptr<NUClear::Environment> environment);
