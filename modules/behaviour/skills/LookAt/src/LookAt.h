@@ -17,44 +17,39 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_PLANNERS_LOOKATGOAL_H
-#define MODULES_BEHAVIOUR_PLANNERS_LOOKATGOAL_H
+#ifndef MODULES_BEHAVIOUR_SKILLS_LOOKAT_H
+#define MODULES_BEHAVIOUR_SKILLS_LOOKAT_H
 
 #include <nuclear>
-#include <armadillo>
-
-#include "messages/vision/VisionObjects.h"
 
 namespace modules {
     namespace behaviour {
-        namespace planning {
+        namespace skills {
 
             /**
-             * Executes a getup script if the robot falls over.
+             * Executes a look action.
              *
              * @author Josiah Walker
              */
-            class LookAtGoal : public NUClear::Reactor {
+            class LookAt : public NUClear::Reactor {
             private:
-                NUClear::clock::time_point timeSinceLastSeen;
-
-		float BALL_SEARCH_TIMEOUT_MILLISECONDS;
-		float X_FACTOR;
-		float Y_FACTOR;
-		float BALL_UNCERNTAINTY_THRESHOLD;
-
-		ReactionHandle handle;
-
-		bool compareGoals(const messages::vision::Goal& i, const messages::vision::Goal& j);
+                const size_t id;
+                double FAST_SPEED;
+                double SLOW_SPEED;
+                double HEAD_PITCH_MAX;
+                double HEAD_PITCH_MIN;
+                double HEAD_YAW_MAX;
+                double HEAD_YAW_MIN;
+                double SCREEN_EDGE_PADDING;
 
             public:
-                explicit LookAtGoal(std::unique_ptr<NUClear::Environment> environment);
-                //static constexpr const char* CONFIGURATION_PATH = "Stand.yaml";
+                explicit LookAt(std::unique_ptr<NUClear::Environment> environment);
+                static constexpr const char* CONFIGURATION_PATH = "LookAt.yaml";
             };
 
-        }  // planning
+        }  // reflexes
     }  // behaviours
 }  // modules
 
-#endif  // MODULES_BEHAVIOUR_PLANNERS_LOOKATGOAL_H
+#endif  // MODULES_BEHAVIOURS_REFLEX_LOOK_H
 

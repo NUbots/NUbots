@@ -17,5 +17,32 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-#include <catch.hpp>
+#ifndef MESSAGES_BEHAVIOUR_LOOKTARGET_H
+#define MESSAGES_BEHAVIOUR_LOOKTARGET_H
+
+
+namespace messages {
+namespace behaviour {
+    struct Look {
+
+        struct Fixation {
+            arma::vec2 angle;
+            arma::vec2 arcSize;
+        };
+
+        struct Saccade {
+            NUClear::clock::duration dwellTime;
+            arma::vec2 angle;
+            arma::vec2 arcSize;
+        };
+
+        struct Pan {
+            arma::vec2 angle;
+            arma::vec2 arcSize;
+        };
+    };
+
+}
+}
+
+#endif
