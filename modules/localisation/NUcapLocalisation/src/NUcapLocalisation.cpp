@@ -18,7 +18,7 @@
  */
 
 #include "NUcapLocalisation.h"
-#include "utility/nubugger/NUgraph.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "messages/input/proto/MotionCapture.pb.h"
 #include "messages/input/Sensors.h"
 #include "utility/math/geometry/UnitQuaternion.h"
@@ -37,14 +37,14 @@ namespace localisation {
     using messages::support::Configuration;
 
     NUcapLocalisation::NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-        
+
         on<Trigger<Configuration<NUcapLocalisation>>>([this](const Configuration<NUcapLocalisation>& config){
             robot_id = config["robot_id"].as<int>();
             NUClear::log("NUcapLocalisation::robot_id = ", robot_id, ". If incorrect change config/NUcapLocalisation.yaml");
         });
 
         on<Trigger<Network<MotionCapture>>, With<Sensors> >([this](const Network<MotionCapture>& net, const Sensors&) {
-            
+
             auto& mocap = net.data;
             for (auto& rigidBody : mocap->rigid_bodies()) {
 

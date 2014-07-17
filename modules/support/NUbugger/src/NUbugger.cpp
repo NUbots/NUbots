@@ -24,7 +24,7 @@
 #include "messages/vision/LookUpTable.h"
 #include "messages/support/Configuration.h"
 
-#include "utility/nubugger/NUgraph.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/time/time.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"

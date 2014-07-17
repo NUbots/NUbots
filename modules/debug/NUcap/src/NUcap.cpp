@@ -20,7 +20,7 @@
 #include "NUcap.h"
 #include <nuclear>
 
-#include "utility/nubugger/NUgraph.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "messages/input/proto/MotionCapture.pb.h"
 
 namespace modules {

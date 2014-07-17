@@ -24,7 +24,7 @@
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/matrix.h"
-#include "utility/nubugger/NUgraph.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/Sensors.h"
@@ -141,7 +141,7 @@ namespace localisation {
            Options<Sync<MMKFRobotLocalisation>>
           >("MMKFRobotLocalisation Step",
             [this](const std::vector<messages::vision::Goal>& goals) {
-            
+
             // Ignore empty vectors of goals.
             if (goals.size() == 0)
                 return;

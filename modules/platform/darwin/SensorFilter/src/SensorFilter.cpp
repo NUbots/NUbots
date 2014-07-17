@@ -23,7 +23,7 @@
 #include "messages/input/Sensors.h"
 #include "messages/input/CameraParameters.h"
 #include "messages/support/Configuration.h"
-#include "utility/nubugger/NUgraph.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/math/matrix.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/RobotModels.h"

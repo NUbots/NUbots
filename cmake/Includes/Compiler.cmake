@@ -1,5 +1,5 @@
 # Common C++ Flags
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -Wpedantic -Werror -Wextra -g -march=atom -mtune=atom -fnon-call-exceptions")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -Wpedantic -Wextra -g -march=atom -mtune=atom -fnon-call-exceptions")
 SET(CMAKE_C_FLAGS "-O3 -DNDEBUG")
 
 # XCode support

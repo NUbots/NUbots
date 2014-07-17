@@ -23,7 +23,7 @@
 
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
-#include "utility/nubugger/NUgraph.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"

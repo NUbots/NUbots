@@ -23,7 +23,7 @@
 
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/Sensors.h"
-#include "utility/nubugger/NUgraph.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "messages/support/nubugger/proto/Message.pb.h"
 
 namespace modules {
@@ -32,6 +32,7 @@ namespace debug {
     using NUClear::DEBUG;
     using utility::nubugger::graph;
     using utility::nubugger::drawArrow;
+    using utility::nubugger::drawSphere;
     using messages::platform::darwin::DarwinSensors;
     using std::chrono::milliseconds;
     using messages::input::Sensors;
@@ -83,8 +84,8 @@ namespace debug {
 
         });
 
-        on<Trigger<Every<5, std::chrono::seconds>>>([this] (const time_t&) {
-            /*std::random_device rd;
+        on<Trigger<Every<1, std::chrono::seconds>>>([this] (const time_t&) {
+            std::random_device rd;
             std::mt19937 gen(rd());
             std::uniform_real_distribution<> dis(-2, 2);
             double x = dis(gen);
@@ -97,12 +98,8 @@ namespace debug {
             float sine = sin(2 * M_PI * freq * t);
             float cosine = cos(2 * M_PI * freq * t);
 
-            for (uint i = 0; i < 3; i++) {
-                emit(drawArrow("test", {x, y, z}, {sine, cosine, 0}, sine));
-            }*/
-
-            emit(drawArrow("test", {1, 1, 1}, {1, 0, -1}, 1));
-            emit(drawArrow("mytest", {0, -1, 3}, {-1, -1, 1}));
+            emit(drawArrow("arrow", {x, y, std::abs(z)}, {sine, cosine, 0}, sine));
+            emit(drawSphere("sphere", {x, z, std::abs(z)}, std::abs(sine)));
 
         });
 

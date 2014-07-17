@@ -22,7 +22,7 @@
 #include "utility/math/angle.h"
 #include "utility/math/matrix.h"
 #include "utility/math/coordinates.h"
-#include "utility/nubugger/NUgraph.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/transform.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/support/Configuration.h"
@@ -319,7 +319,7 @@ namespace localisation {
                 return;
 
             auto robots_msg = std::make_unique<std::vector<messages::localisation::Self>>();
-            
+
             for (auto& model : robots) {
                 robots_msg->push_back(model);
             }
@@ -363,7 +363,7 @@ namespace localisation {
             // Ball message
             if (!cfg_.emit_ball_fieldobjects)
                 return;
-            
+
             auto balls_msg = std::make_unique<std::vector<messages::localisation::Ball>>();
 
             messages::localisation::Ball ball_model;

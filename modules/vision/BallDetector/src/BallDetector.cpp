@@ -30,7 +30,7 @@
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacCircleModel.h"
 #include "utility/math/vision.h"
-#include "utility/nubugger/NUgraph.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/math/coordinates.h"
 
 namespace modules {
@@ -139,7 +139,7 @@ namespace vision {
                 // Get a unit vector pointing to the centre of the ball
                 arma::vec3 ballCentreRay = arma::normalise(arma::normalise(getCamFromScreen(top, cam.focalLengthPixels))
                                                            + arma::normalise(getCamFromScreen(base, cam.focalLengthPixels)));
-                
+
                 // Get the centre of our ball ins creen space
                 arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay, cam.focalLengthPixels);
 
