@@ -54,25 +54,25 @@ namespace configuration {
         Configuration<FieldDescriptionConfig> config) {
         FieldDescription desc;
 
-        desc.ball_radius = config.config["BallRadius"].as<double>();
+        desc.ball_radius = config["BallRadius"].as<double>();
 
         FieldDescription::FieldDimensions& d = desc.dimensions;
-        d.line_width = config.config["LineWidth"].as<double>();
-        d.mark_width = config.config["MarkWidth"].as<double>();
-        d.field_length = config.config["FieldLength"].as<double>();
-        d.field_width = config.config["FieldWidth"].as<double>();
-        d.goal_depth = config.config["GoalDepth"].as<double>();
-        d.goal_width = config.config["GoalWidth"].as<double>();
-        d.goal_area_length = config.config["GoalAreaLength"].as<double>();
-        d.goal_area_width = config.config["GoalAreaWidth"].as<double>();
-        d.goal_crossbar_height = config.config["GoalCrossbarHeight"].as<double>();
-        d.goalpost_diameter = config.config["GoalpostDiameter"].as<double>();
-        d.goal_crossbar_diameter = config.config["GoalCrossbarDiameter"].as<double>();
-        d.goal_net_height = config.config["GoalNetHeight"].as<double>();
-        d.penalty_mark_distance = config.config["PenaltyMarkDistance"].as<double>();
-        d.center_circle_diameter = config.config["CenterCircleDiameter"].as<double>();
-        d.border_strip_min_width = config.config["BorderStripMinWidth"].as<double>();
-        d.border_strip_min_width = config.config["BorderStripMinWidth"].as<double>();
+        d.line_width = config["LineWidth"].as<double>();
+        d.mark_width = config["MarkWidth"].as<double>();
+        d.field_length = config["FieldLength"].as<double>();
+        d.field_width = config["FieldWidth"].as<double>();
+        d.goal_depth = config["GoalDepth"].as<double>();
+        d.goal_width = config["GoalWidth"].as<double>();
+        d.goal_area_length = config["GoalAreaLength"].as<double>();
+        d.goal_area_width = config["GoalAreaWidth"].as<double>();
+        d.goal_crossbar_height = config["GoalCrossbarHeight"].as<double>();
+        d.goalpost_diameter = config["GoalpostDiameter"].as<double>();
+        d.goal_crossbar_diameter = config["GoalCrossbarDiameter"].as<double>();
+        d.goal_net_height = config["GoalNetHeight"].as<double>();
+        d.penalty_mark_distance = config["PenaltyMarkDistance"].as<double>();
+        d.center_circle_diameter = config["CenterCircleDiameter"].as<double>();
+        d.border_strip_min_width = config["BorderStripMinWidth"].as<double>();
+        d.border_strip_min_width = config["BorderStripMinWidth"].as<double>();
 
         desc.goalpost_top_height = d.goal_crossbar_height + d.goal_crossbar_diameter;
 

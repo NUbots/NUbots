@@ -53,8 +53,8 @@ namespace modules {
                     std::cerr << "Starting up walk optimiser" << std::endl;
 
                     number_of_samples = config["number_of_samples"].as<int>();
-                    parameter_sigmas.resize( config.config["parameters_and_sigmas"].size());
-                    parameter_names.resize( config.config["parameters_and_sigmas"].size());
+                    parameter_sigmas.resize( config["parameters_and_sigmas"].size());
+                    parameter_names.resize( config["parameters_and_sigmas"].size());
                     int i = 0;
 
                     for(const auto& parameter : config["parameters_and_sigmas"]) {
@@ -123,7 +123,7 @@ namespace modules {
                 });
 
                 on<Trigger<KillGetup>>("Getup Recording", [this](const KillGetup&){
-                    data.getupFinished(); 
+                    data.getupFinished();
                     // //If this set of parameters is very bad, stop the trial and send cancel fixed walk command
                     if(data.numberOfGetups >= getup_cancel_trial_threshold){
                         emit(std::make_unique<CancelFixedWalk>());
@@ -131,7 +131,7 @@ namespace modules {
                 });
 
                 on<Trigger<FixedWalkFinished>, Options<Sync<WalkOptimiser>> > ("Walk Routine Finised", [this](const FixedWalkFinished&){
-                    //Get and reset data 
+                    //Get and reset data
                     fitnesses[currentSample] = data.popFitness();
                     std::cerr << "Sample Done! Fitness: " << fitnesses[currentSample] << std::endl;
                     if(currentSample >= samples.n_rows-1){
@@ -184,7 +184,7 @@ namespace modules {
 
             YAML::Node WalkOptimiser::getWalkConfig(const arma::vec& state){
                 YAML::Node config(initialConfig.config);
-                for(uint i = 0; i < state.size(); ++i){  
+                for(uint i = 0; i < state.size(); ++i){
                     config[parameter_names[i]] = state[i];
                 }
                 printState(state);
