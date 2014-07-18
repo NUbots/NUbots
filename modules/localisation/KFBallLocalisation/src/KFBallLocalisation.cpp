@@ -62,9 +62,7 @@ namespace localisation {
             messages::localisation::Ball ball;
             ball.position = model_state.rows(0, 1);
             ball.velocity = model_state.rows(2, 3);
-            ball.sr_xx = model_cov(0, 0);
-            ball.sr_xy = model_cov(0, 1);
-            ball.sr_yy = model_cov(1, 1);
+            ball.position_cov = model_cov.submat(0,0,1,1);
             ball.world_space = false;
 
             if (engine_.CanEmitFieldObjects()) {

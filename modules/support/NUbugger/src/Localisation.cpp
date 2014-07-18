@@ -61,9 +61,9 @@ namespace support {
                     robot_model.heading = std::atan2(model.heading[1], model.heading[0]);
                     robot_model.sd_x = 1;
                     robot_model.sd_y = 0.25;
-                    robot_model.sr_xx = model.sr_xx; // * 100;
-                    robot_model.sr_xy = model.sr_xy; // * 100;
-                    robot_model.sr_yy = model.sr_yy; // * 100;
+                    robot_model.sr_xx = model.position_cov(0,0);
+                    robot_model.sr_xy = model.position_cov(1,0);
+                    robot_model.sr_yy = model.position_cov(1,1);
                     robot_model.lost = false;
                     robot_msg_models.push_back(robot_model);
 
@@ -77,17 +77,17 @@ namespace support {
                 const auto& balls = *opt_balls;
                 const auto& robots = *opt_robots;
 
-                arma::vec2 ball_pos = balls[0].position;
-
-                if (!balls[0].world_space) {
-                    ball_pos = utility::localisation::transform::RobotToWorldTransform(
-                    robots[0].position, robots[0].heading, balls[0].position);
-                }
-
                 // Ball message
                 std::vector<FieldObject::Model> ball_msg_models;
 
                 for (auto& model : balls) {
+                    arma::vec2 ball_pos = model.position;
+
+                    if (!model.world_space) {
+                        ball_pos = utility::localisation::transform::RobotToWorldTransform(
+                            robots[0].position, robots[0].heading, model.position);
+                    }
+
                     FieldObject::Model ball_model;
                     ball_msg->name = "ball";
                     ball_model.wm_x = ball_pos[0];
@@ -97,9 +97,9 @@ namespace support {
                     ball_model.sd_y = 0.1;
 
                     //Do we need to rotate the variances?
-                    ball_model.sr_xx = model.sr_xx;
-                    ball_model.sr_xy = model.sr_xy;
-                    ball_model.sr_yy = model.sr_yy;
+                    ball_model.sr_xx = model.position_cov(0,0);
+                    ball_model.sr_xy = model.position_cov(1,0);
+                    ball_model.sr_yy = model.position_cov(1,1);
                     ball_model.lost = false;
                     ball_msg_models.push_back(ball_model);
 

@@ -341,7 +341,9 @@ std::cerr << "NOT LOOKING AT GOAL" << std::endl;
 					}
 
 					// Can I see the ball?
-					currentState.ballSeen = ((currentState.ball.sr_xx < BALL_CERTAINTY_THRESHOLD) && (currentState.ball.sr_xy < BALL_CERTAINTY_THRESHOLD) && (currentState.ball.sr_yy < BALL_CERTAINTY_THRESHOLD));
+					currentState.ballSeen = ((currentState.ball.position_cov(0,0) < BALL_CERTAINTY_THRESHOLD) &&
+						                     (currentState.ball.position_cov(0,1) < BALL_CERTAINTY_THRESHOLD) &&
+						                     (currentState.ball.position_cov(1,1) < BALL_CERTAINTY_THRESHOLD));
 					// Is the ball lost?
 					currentState.ballLost = !currentState.ballSeen;
 

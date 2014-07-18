@@ -76,7 +76,8 @@ namespace modules {
 					const std::shared_ptr<const messages::localisation::Ball>& ball) {
             
             const bool ballIsLost = utility::time::TimeDifferenceSeconds(NUClear::clock::now(),timeLastSeen) > BALL_SEARCH_TIMEOUT_MILLISECONDS;
-            const bool ballIsUncertain = ((ball->sr_xx > BALL_UNCERNTAINTY_THRESHOLD) || (ball->sr_yy > BALL_UNCERNTAINTY_THRESHOLD));
+            const bool ballIsUncertain = ((ball->position_cov(0,0) > BALL_UNCERNTAINTY_THRESHOLD) ||
+            	                          (ball->position_cov(1,1) > BALL_UNCERNTAINTY_THRESHOLD));
             
             //if balls are seen, then place those and everything else that's useful into the look at list
 			if (balls.size() > 0) {
@@ -106,8 +107,8 @@ namespace modules {
             }
             //if the ball is lost, do a scan using uncertainties to try to find it
 			else if (ball != NULL) {
-				double xFactor = X_FACTOR * std::sqrt(ball->sr_xx);
-				double yFactor = Y_FACTOR * std::sqrt(ball->sr_yy);
+				double xFactor = X_FACTOR * std::sqrt(ball->position_cov(0,0));
+				double yFactor = Y_FACTOR * std::sqrt(ball->position_cov(1,1));
 
 				std::vector<LookAtPosition> angles;
 				arma::vec2 screenAngular;

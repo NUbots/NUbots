@@ -95,9 +95,9 @@ std::cerr << "LookAtGoal - disabled" << std::endl;
 						angles.emplace_back(LookAtPosition {balls[0].screenAngular[0], -balls[0].screenAngular[1]});
 					}
 
-					else if ((ball != NULL) && ((ball->sr_xx > BALL_UNCERNTAINTY_THRESHOLD) || (ball->sr_yy > BALL_UNCERNTAINTY_THRESHOLD))) {
-					double xFactor = X_FACTOR * std::sqrt(ball->sr_xx);
-					double yFactor = Y_FACTOR * std::sqrt(ball->sr_yy);
+					else if ((ball != NULL) && ((ball->position_cov(0,0) > BALL_UNCERNTAINTY_THRESHOLD) || (ball->position_cov(1,1) > BALL_UNCERNTAINTY_THRESHOLD))) {
+					double xFactor = X_FACTOR * std::sqrt(ball->position_cov(0,0));
+					double yFactor = Y_FACTOR * std::sqrt(ball->position_cov(1,1));
 		
 					screenAngular = utility::motion::kinematics::calculateHeadJointsToLookAt({ball->position[0], ball->position[1], 0}, sensors.orientationCamToGround, sensors.orientationBodyToGround);
 					angles.emplace_back(LookAtPosition {screenAngular[0], screenAngular[1]});

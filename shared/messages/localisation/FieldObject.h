@@ -25,7 +25,7 @@
 namespace messages {
     namespace localisation {
 
-        // The FieldObject message that the NUbugger reactor listens for
+        // Sent to NUbugger
         struct FieldObject {
             std::string name;
 
@@ -50,9 +50,7 @@ namespace messages {
             LocalisationObject() {}
 
             arma::vec2 position;
-            double sr_xx;
-            double sr_xy;
-            double sr_yy;
+            arma::mat22 position_cov;
         };
 
         class Ball : public LocalisationObject {

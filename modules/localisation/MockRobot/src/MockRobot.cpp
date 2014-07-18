@@ -288,9 +288,7 @@ namespace localisation {
             messages::localisation::Self self_marker;
             self_marker.position = robot_position_;
             self_marker.heading = bearingToUnitVector(robot_heading_);
-            self_marker.sr_xx = 0.01;
-            self_marker.sr_xy = 0;
-            self_marker.sr_yy = 0.01;
+            self_marker.position_cov = arma::eye(2,2) * 0.1;
             robots_msg->push_back(self_marker);
 
             emit(std::move(robots_msg));
@@ -328,27 +326,21 @@ namespace localisation {
             messages::localisation::Ball ball_model;
             ball_model.position = ball_pos;
             ball_model.velocity = ball_velocity_;
-            ball_model.sr_xx = ball.sr_xx;
-            ball_model.sr_xy = ball.sr_xy;
-            ball_model.sr_yy = ball.sr_yy;
+            ball_model.position_cov = ball.position_cov;
             ball_model.world_space = true;
             balls_msg->push_back(ball_model);
 
             messages::localisation::Ball ball_marker;
             ball_marker.position = ball_position_;
             ball_marker.velocity = ball_velocity_;
-            ball_marker.sr_xx = 0.01;
-            ball_marker.sr_xy = 0;
-            ball_marker.sr_yy = 0.01;
+            ball_marker.position_cov = arma::eye(2,2) * 0.1;
             ball_marker.world_space = true;
             balls_msg->push_back(ball_marker);
 
             messages::localisation::Ball robot_ball;
             robot_ball.position = robot_ball_pos;
             robot_ball.velocity = ball_velocity_;
-            robot_ball.sr_xx = 0.01;
-            robot_ball.sr_xy = 0;
-            robot_ball.sr_yy = 0.01;
+            robot_ball.position_cov = arma::eye(2,2) * 0.1;
             robot_ball.world_space = true;
             balls_msg->push_back(robot_ball);
 
