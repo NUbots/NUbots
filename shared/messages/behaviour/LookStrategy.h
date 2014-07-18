@@ -23,7 +23,7 @@
 namespace messages {
 namespace behaviour {
     struct LookStrategy {
-
+        std::vector<std::type_index> priorities;
     };
 
 }

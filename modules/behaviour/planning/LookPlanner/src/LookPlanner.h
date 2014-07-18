@@ -17,13 +17,14 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_LOOKPLANNER_H
-#define MODULES_BEHAVIOUR_LOOKPLANNER_H
+#ifndef MODULES_BEHAVIOUR_PLANNING_LOOKPLANNER_H
+#define MODULES_BEHAVIOUR_PLANNING_LOOKPLANNER_H
 
 #include <nuclear>
 
 namespace modules {
 namespace behaviour {
+namespace planning {
 
     class LookPlanner : public NUClear::Reactor {
     public:
@@ -31,6 +32,7 @@ namespace behaviour {
         explicit LookPlanner(std::unique_ptr<NUClear::Environment> environment);
     };
 
+}
 }
 }
 

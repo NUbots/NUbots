@@ -19,11 +19,15 @@
 
 #include "LookPlanner.h"
 
+#include "messages/behaviour/LookStrategy.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/localisation/FieldObject.h"
 
 namespace modules {
 namespace behaviour {
+namespace planning {
+
+    using messages::behaviour::LookStrategy;
 
     using VisionBall = messages::vision::Ball;
     using VisionGoal = messages::vision::Goal;
@@ -34,15 +38,25 @@ namespace behaviour {
     LookPlanner::LookPlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<Last<5, std::vector<VisionBall>>>, With<Optional<LocalisationBall>>, With<LookStrategy>>([this] (const LastList<std::vector<VisionBall>>& v, const LocalisationBall& l, const LookStrategy& strat) {
+        on<Trigger<Last<5, std::vector<VisionBall>>>, With<Optional<LocalisationBall>>, With<LookStrategy>>([this] (const LastList<std::vector<VisionBall>>& v, const std::shared_ptr<const LocalisationBall>& l, const LookStrategy& strat) {
             //
+
+            const auto& vision = **std::find_if(v.rbegin(), v.rend(), [] (const std::shared_ptr<const std::vector<VisionBall>>& a) {
+                return a->empty();
+            });
+
+            (void)v;
+            (void)l;
+            (void)strat;
         });
 
-        on<Trigger<Last<5, std::vector<VisionGoal>>>, With<Optional<Self>>, With<LookStrategy>>([this] (const LastList<std::vector<VisionGoal>>& v, const Self& self, const LookStrategy& strat) {
-            //
+        on<Trigger<Last<5, std::vector<VisionGoal>>>, With<Optional<Self>>, With<LookStrategy>>([this] (const LastList<std::vector<VisionGoal>>& v, const std::shared_ptr<const Self>& self, const LookStrategy& strat) {
+            (void)v;
+            (void)self;
+            (void)strat;
         });
     }
 
 }
 }
-
+}
