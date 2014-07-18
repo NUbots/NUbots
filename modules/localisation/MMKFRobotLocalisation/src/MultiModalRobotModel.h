@@ -54,9 +54,7 @@ namespace localisation {
                 arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 1, // cov
                 1) // alpha
             , weight_(1)
-            , obs_count_(0) {
-            filter_.model.odometryReferenceState = filter_.get();
-        }
+            , obs_count_(0) {}
 
         RobotHypothesis(const messages::localisation::ResetRobotHypotheses::Self& reset_self)
             : RobotHypothesis() {
@@ -65,7 +63,6 @@ namespace localisation {
             cov.submat(0,0,1,1) = reset_self.position_cov;
             cov(3,3) = reset_self.heading_var;
             filter_.setState(mean, cov);
-            filter_.model.odometryReferenceState = filter_.get();
         }
 
         void SetConfig(const robot::RobotModel::Config& cfg) {

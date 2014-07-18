@@ -56,7 +56,6 @@ namespace robot {
         static constexpr size_t size = 5;
 
         RobotModel() {
-            odometryReferenceState.zeros();
             currentImuOrientation.zeros();
         } // empty constructor
 
@@ -95,7 +94,6 @@ namespace robot {
         } cfg_;
 
         arma::mat33 currentImuOrientation;
-        arma::vec::fixed<RobotModel::size> odometryReferenceState;
 
         // arma::mat33 getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state);
         // arma::mat33 getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state);
