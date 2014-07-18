@@ -59,10 +59,10 @@ message Sensors {
         optional float d_gain = 6;
 
         optional float goal_position = 7;
-        optional float goal_speed = 8;
+        optional float goal_velocity = 8;
 
         optional float present_position = 9;
-        optional float present_speed = 10;
+        optional float present_velocity = 10;
 
         optional float load = 11;
         optional float voltage = 12;

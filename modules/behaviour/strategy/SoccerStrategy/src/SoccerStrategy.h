@@ -196,8 +196,6 @@ namespace modules {
 			bool isDiving;
 			bool isGettingUp;
 			bool isWalking;
-			bool lookingAtBall;
-			bool lookingAtGoal;
 
 			arma::vec2 findOptimalPosition(const utility::math::geometry::Polygon& zone, const arma::vec2& point);
 			void findSelf();
@@ -207,7 +205,7 @@ namespace modules {
 			void kickBall(const arma::vec2& direction);
 			void diveForBall(const arma::vec2& target);
 			void approachBall(const arma::vec2& haading);
-			
+
 			void updateGameState(const std::shared_ptr<const messages::input::gameevents::GameState>& gameController);
 
 			//NEW

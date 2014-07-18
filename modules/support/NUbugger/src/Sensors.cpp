@@ -62,10 +62,10 @@ namespace support {
                 servo->set_d_gain(s.dGain);
 
                 servo->set_goal_position(s.goalPosition);
-                servo->set_goal_speed(s.goalSpeed);
+                servo->set_goal_velocity(s.goalVelocity);
 
                 servo->set_present_position(s.presentPosition);
-                servo->set_present_speed(s.presentSpeed);
+                servo->set_present_velocity(s.presentVelocity);
 
                 servo->set_load(s.load);
                 servo->set_voltage(s.voltage);

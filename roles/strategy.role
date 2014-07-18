@@ -1,17 +1,17 @@
 ADD_ROLE(
-    NAME strategy 
+    NAME strategy
     MODULES
         #Support
 #       support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
-	    support::configuration::GlobalConfig
+        support::configuration::GlobalConfig
         support::configuration::NetworkingConfiguration
         support::NUbugger
-	    support::configuration::SoccerConfig
+        support::configuration::SoccerConfig
 
-	#input
-	input::GameController
+    #input
+    input::GameController
 
         #Sensors
         input::LinuxCamera
@@ -33,20 +33,19 @@ ADD_ROLE(
         behaviour::skills::Stand
         behaviour::skills::FallingRelax
         behaviour::skills::Getup
-        behaviour::skills::Look
+        behaviour::skills::LookAt
         behaviour::skills::KickScript
         behaviour::skills::GoalSaver
-        behaviour::planning::LookAtBall
-        behaviour::planning::LookAtGoal
         behaviour::planning::KickPlanner
         behaviour::planning::DivePlanner
         behaviour::planning::WalkPathPlanner
-	behaviour::strategy::SoccerStrategy
+        behaviour::planning::LookPlanner
+        behaviour::strategy::SoccerStrategy
 
         #Motion
         motion::ScriptEngine
         motion::WalkEngine
-	
-	#Output
-	output::eSpeak
+
+        #Output
+        output::eSpeak
 )
