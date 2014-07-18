@@ -106,6 +106,8 @@ namespace modules {
 
                     MEASUREMENT_NOISE_ACCELEROMETER = arma::eye(3,3) * file["MEASUREMENT_NOISE_ACCELEROMETER"].as<double>();
                     MEASUREMENT_NOISE_GYROSCOPE = arma::eye(3,3) * file["MEASUREMENT_NOISE_GYROSCOPE"].as<double>();
+
+                    odometry_covariance_factor = config["odometry_covariance_factor"].as<double>();
                 });
 
                 on<Trigger<Last<10, messages::platform::darwin::DarwinSensors>>>([this](const LastList<messages::platform::darwin::DarwinSensors>& sensors) {
@@ -333,12 +335,14 @@ namespace modules {
                             arma::vec3 torsoVelFromRightFoot =  -(measuredTorsoFromRightFoot - previousMeasuredTorsoFromRightFoot);
 
                             arma::vec3 averageVelocity = (torsoVelFromLeftFoot * static_cast<int>(sensors->leftFootDown) + torsoVelFromRightFoot * static_cast<int>(sensors->rightFootDown))/(static_cast<int>(sensors->rightFootDown) + static_cast<int>(sensors->leftFootDown));
-                            sensors->odometry.submat(0,3,2,3) = averageVelocity;
+                            sensors->odometry = averageVelocity.rows(0,1) / deltaT;
                         }
 
                         // Gyro based odometry for orientation
-                        sensors->odometry.submat(0,0,2,2) =  previousSensors->orientation.t() * sensors->orientation;
+                    } else {
+                        sensors->odometry.zeros();
                     }
+                    sensors->odometryCovariance = arma::eye(2,2) * odometry_covariance_factor;
 
                     if(sensors->leftFootDown){
                         sensors->bodyCentreHeight = -sensors->forwardKinematics[ServoID::L_ANKLE_ROLL](2,3);
@@ -394,7 +398,7 @@ namespace modules {
                     emit(graph("Gyro Filtered", sensors->gyroscope[0],sensors->gyroscope[1], sensors->gyroscope[2]
                         ));*/
 
-                        integratedOdometry += sensors->odometry.submat(0,3,1,3);
+                        integratedOdometry += sensors->odometry;
 
                     /*emit(graph("LFoot Down", sensors->leftFootDown
                         ));
