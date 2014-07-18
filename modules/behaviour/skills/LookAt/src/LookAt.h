@@ -21,6 +21,7 @@
 #define MODULES_BEHAVIOUR_SKILLS_LOOKAT_H
 
 #include <nuclear>
+#include <armadillo>
 
 namespace modules {
     namespace behaviour {
@@ -41,7 +42,7 @@ namespace modules {
                 double HEAD_YAW_MAX;
                 double HEAD_YAW_MIN;
                 double SCREEN_EDGE_PADDING;
-                
+
                 std::vector<arma::vec2> currentPoints;
                 bool saccading = false;
 
