@@ -107,7 +107,7 @@ void MultiModalRobotModel::MeasurementUpdate(const Sensors& sensors){
 
 double RobotHypothesis::MeasurementUpdate(const Sensors& sensors){
     auto quality = filter_.measurementUpdate(sensors.odometry, sensors.odometryCovariance, sensors);
-    filter_.model.odometryReferenceState = filter_.get().rows(robot::kX, robot::kY);
+    filter_.model.odometryReferenceState = filter_.get();
     return quality;
 }
 

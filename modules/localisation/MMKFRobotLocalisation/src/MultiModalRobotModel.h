@@ -55,7 +55,7 @@ namespace localisation {
                 1) // alpha
             , weight_(1)
             , obs_count_(0) {
-            filter_.model.odometryReferenceState = filter_.get().rows(robot::kX,robot::kY);
+            filter_.model.odometryReferenceState = filter_.get();
         }
 
         RobotHypothesis(const messages::localisation::ResetRobotHypotheses::Self& reset_self)
@@ -65,7 +65,7 @@ namespace localisation {
             cov.submat(0,0,1,1) = reset_self.position_cov;
             cov(3,3) = reset_self.heading_var;
             filter_.setState(mean, cov);
-            filter_.model.odometryReferenceState = reset_self.position;
+            filter_.model.odometryReferenceState = filter_.get();
         }
 
         void SetConfig(const robot::RobotModel::Config& cfg) {
@@ -115,6 +115,7 @@ namespace localisation {
             robot::RobotModel::Config rm_cfg;
             rm_cfg.processNoisePositionFactor = config["ProcessNoisePositionFactor"].as<double>();
             rm_cfg.processNoiseHeadingFactor = config["ProcessNoiseHeadingFactor"].as<double>();
+            rm_cfg.processNoiseVelocityFactor = config["ProcessNoiseVelocityFactor"].as<double>();
             rm_cfg.observationDifferenceBearingFactor = config["ObservationDifferenceBearingFactor"].as<double>();
             rm_cfg.observationDifferenceElevationFactor = config["ObservationDifferenceElevationFactor"].as<double>();
 

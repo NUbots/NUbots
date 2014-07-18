@@ -53,7 +53,7 @@ namespace robot {
 
     class RobotModel {
     public:
-        static constexpr size_t size = 3;
+        static constexpr size_t size = 5;
 
         RobotModel() {
             odometryReferenceState.zeros();
@@ -89,6 +89,7 @@ namespace robot {
         struct Config {
             double processNoisePositionFactor = 1e-3;
             double processNoiseHeadingFactor = 1e-3;
+            double processNoiseVelocityFactor = 1e-3;
             double observationDifferenceBearingFactor = 0.2;
             double observationDifferenceElevationFactor = 0.2;
         } cfg_;

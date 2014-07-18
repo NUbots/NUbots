@@ -94,6 +94,8 @@ arma::vec RobotModel::observationDifference(const arma::vec& a,
                                             const arma::vec& b) {
     if (a.n_elem == 1) {
         return a - b;
+    } if (a.n_elem == 2) {
+        return a - b;
     } else {
         // Spherical coordinates
         arma::vec3 result = a - b;
@@ -113,6 +115,8 @@ arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() 
     arma::mat noise = arma::eye(RobotModel::size, RobotModel::size);
     noise(kX, kX) *= cfg_.processNoisePositionFactor;
     noise(kY, kY) *= cfg_.processNoisePositionFactor;
+    noise(kVX, kVX) *= cfg_.processNoiseVelocityFactor;
+    noise(kVY, kVY) *= cfg_.processNoiseVelocityFactor;
     noise(kImuOffset, kImuOffset) *= cfg_.processNoiseHeadingFactor;
     return noise;
 }

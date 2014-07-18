@@ -32,7 +32,6 @@ namespace support {
         uint TEAM_ID;
         uint PLAYER_ID;
         std::string CLIENT_IP;
-        sockaddr_in socketAddress;
     public:
         static constexpr const char* CONFIGURATION_PATH = "NUbuggerLite.yaml";
 
