@@ -21,6 +21,8 @@
 #define MODULES_BEHAVIOUR_PLANNING_LOOKPLANNER_H
 
 #include <nuclear>
+#include <armadillo>
+#include "messages/behaviour/LookStrategy.h"
 
 namespace modules {
 namespace behaviour {
@@ -30,6 +32,26 @@ namespace planning {
     public:
         /// @brief Called by the powerplant to build and setup the LookPlanner reactor.
         explicit LookPlanner(std::unique_ptr<NUClear::Environment> environment);
+        static constexpr const char* CONFIGURATION_PATH = "LookAt.yaml";
+        
+    private:
+        //configurable timeouts
+        double VISUAL_TRACKING_TIMEOUT;
+        double LOCALISATION_TRACKING_TIMEOUT;
+        
+        //storage for intermediate positions
+        std::vector<std::pair<arma::vec2,arma::vec2>> ballObjects;
+        std::vector<arma::vec2> ballPanPoints;
+        std::vector<std::pair<arma::vec2,arma::vec2>> goalObjects;
+        std::vector<arma::vec2> goalPanPoints;
+        
+        std::vector<arma::vec2> lostPanPoints;
+        
+        //timer for when we last saw the object
+        std::chrono::system_clock::time_point timeBallSeen;
+        std::chrono::system_clock::time_point timeGoalSeen;
+        
+        void updateLookPlan(const messages::behaviour::LookStrategy& strat);
     };
 
 }

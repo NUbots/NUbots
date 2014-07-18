@@ -113,7 +113,7 @@ namespace modules {
                     }
 
                     //get the approximate distance of movement
-                    const double panDist = arma::norm(targetPoint - lastPosition);
+                    const double panDist = arma::norm(targetPoint - lastPosition) + std::numeric_limits<double>::epsilon();
 
                     //calculate how long the movement should take
                     double panTime = panDist/FAST_SPEED;
