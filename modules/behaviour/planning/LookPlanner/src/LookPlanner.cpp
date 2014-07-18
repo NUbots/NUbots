@@ -195,20 +195,20 @@ namespace planning {
                     rightGoal = fieldDesc.goalpost_yr;
                     
                     //push 4 surrounding pan points
-                    goalPanPoints.push_back(leftGoal + arma::vec2({worldSTD[0],0.0}));
-                    goalPanPoints.push_back((leftGoal+rightGoal)*0.5 + arma::vec2({0.0,worldSTD[1]}));
-                    goalPanPoints.push_back(rightGoal + arma::vec2({-worldSTD[0],0.0}));
-                    goalPanPoints.push_back((leftGoal+rightGoal)*0.5 + arma::vec2({0.0,-worldSTD[1]}));
+                    goalPanPoints.push_back((leftGoal+rightGoal)*0.5 + arma::vec2({worldSTD[0],0.0}));
+                    goalPanPoints.push_back(leftGoal + arma::vec2({0.0,worldSTD[1]}));
+                    goalPanPoints.push_back((leftGoal+rightGoal)*0.5 + arma::vec2({-worldSTD[0],0.0}));
+                    goalPanPoints.push_back(rightGoal + arma::vec2({0.0,-worldSTD[1]}));
                 
                 } else {
                     leftGoal = fieldDesc.goalpost_bl;
                     rightGoal = fieldDesc.goalpost_br;
                     
                     //push 4 surrounding pan points
-                    goalPanPoints.push_back(rightGoal + arma::vec2({worldSTD[0],0.0}));
-                    goalPanPoints.push_back((leftGoal+rightGoal)*0.5 + arma::vec2({0.0,worldSTD[1]}));
-                    goalPanPoints.push_back(leftGoal + arma::vec2({-worldSTD[0],0.0}));
-                    goalPanPoints.push_back((leftGoal+rightGoal)*0.5 + arma::vec2({0.0,-worldSTD[1]}));
+                    goalPanPoints.push_back((leftGoal+rightGoal)*0.5 + arma::vec2({worldSTD[0],0.0}));
+                    goalPanPoints.push_back(rightGoal + arma::vec2({0.0,worldSTD[1]}));
+                    goalPanPoints.push_back((leftGoal+rightGoal)*0.5 + arma::vec2({-worldSTD[0],0.0}));
+                    goalPanPoints.push_back(leftGoal + arma::vec2({0.0,-worldSTD[1]}));
                 
                 }
                 
