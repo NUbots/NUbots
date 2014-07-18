@@ -9,5 +9,6 @@
     "IMU_VELOCITY_PROCESS_NOISE" : 1e-8,
     "MEASUREMENT_NOISE_ACCELEROMETER" : 1e-4,
     "MEASUREMENT_NOISE_GYROSCOPE" : 1e-8,
-    "DEBOUNCE_THRESHOLD" : 7
+    "DEBOUNCE_THRESHOLD" : 7,
+    "odometry_covariance_factor" : 0.05
 }

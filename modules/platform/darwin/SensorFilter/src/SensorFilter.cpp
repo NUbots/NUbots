@@ -107,7 +107,7 @@ namespace modules {
                     MEASUREMENT_NOISE_ACCELEROMETER = arma::eye(3,3) * file["MEASUREMENT_NOISE_ACCELEROMETER"].as<double>();
                     MEASUREMENT_NOISE_GYROSCOPE = arma::eye(3,3) * file["MEASUREMENT_NOISE_GYROSCOPE"].as<double>();
 
-                    odometry_covariance_factor = config["odometry_covariance_factor"].as<double>();
+                    odometry_covariance_factor = file.config["odometry_covariance_factor"].as<double>();
                 });
 
                 on<Trigger<Last<10, messages::platform::darwin::DarwinSensors>>>([this](const LastList<messages::platform::darwin::DarwinSensors>& sensors) {
