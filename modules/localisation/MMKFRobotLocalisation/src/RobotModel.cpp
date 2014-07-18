@@ -66,12 +66,13 @@ arma::vec RobotModel::predictedObservation(
 
 //Odometry
 arma::vec RobotModel::predictedObservation(
-    const arma::vec::fixed<RobotModel::size>& state, 
-    const Sensors& sensors){
+    const arma::vec::fixed<RobotModel::size>& state, const Sensors& sensors) {
+    arma::vec diff = state - odometryReferenceState;
+    
     //Returns robot relative velocity
     arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
     arma::vec3 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).col(0);
-    return WorldToRobotTransform(arma::vec2{0,0}, robotHeading_world.rows(0,1), state.rows(kVX, kVY));
+    return WorldToRobotTransform(arma::vec2{0,0}, robotHeading_world.rows(0,1), diff.rows(kX, kY));
 }
 
 // Angle between goals
@@ -88,7 +89,6 @@ arma::vec RobotModel::predictedObservation(
 
     return { std::abs(angle_diff) };
 }
-
 
 arma::vec RobotModel::observationDifference(const arma::vec& a,
                                             const arma::vec& b) {

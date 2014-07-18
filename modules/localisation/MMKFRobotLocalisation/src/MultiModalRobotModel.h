@@ -50,12 +50,13 @@ namespace localisation {
 
         RobotHypothesis()
             : filter_(
-                // {0, 0, 0}, // mean
-                {0, 0, 3.141},
+                {0, 0, 3.141}, // mean
                 arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 1, // cov
                 1) // alpha
             , weight_(1)
-            , obs_count_(0) { }
+            , obs_count_(0) {
+            filter_.model.odometryReferenceState = filter_.get().rows(robot::kX,robot::kY);
+        }
 
         RobotHypothesis(const messages::localisation::ResetRobotHypotheses::Self& reset_self)
             : RobotHypothesis() {
@@ -64,18 +65,12 @@ namespace localisation {
             cov.submat(0,0,1,1) = reset_self.position_cov;
             cov(3,3) = reset_self.heading_var;
             filter_.setState(mean, cov);
+            filter_.model.odometryReferenceState = reset_self.position;
         }
-
-        // bool active() const { return active_; }
-        // void set_active(bool active) { active_ = active; }
 
         void SetConfig(const robot::RobotModel::Config& cfg) {
             filter_.model.cfg_ = cfg;
         };
-
-        // void SetSensorsData(const messages::input::Sensors& sensors) {
-        //     filter_.model.currentImuOrientation = sensors.orientation;
-        // };
 
         float GetFilterWeight() const { return weight_; }
         void SetFilterWeight(float weight) { weight_ = weight; }
@@ -177,7 +172,6 @@ namespace localisation {
         const std::vector<std::unique_ptr<RobotHypothesis>>& hypotheses() {
             return robot_models_;
         }
-
 
     private:
         void PruneViterbi(unsigned int order);
