@@ -122,13 +122,14 @@ namespace localisation {
             }
         });
 
-        // on<Trigger<Sensors>,
-        //    Options<Sync<MMKFRobotLocalisation>>
-        //   >("MMKFRobotLocalisation Sensors", [this](const Sensors& sensors) {
-        //     auto curr_time = NUClear::clock::now();
-        //     engine_->TimeUpdate(curr_time);
-        //     // engine_->SensorsUpdate(sensors);
-        // });
+        on<Trigger<Sensors>,
+           Options<Sync<MMKFRobotLocalisation>>
+          >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
+            auto curr_time = NUClear::clock::now();
+            engine_->TimeUpdate(curr_time);
+            engine_->OdometryMeasurementUpdate(sensors);
+        });
+
         on<Trigger<Every<100, Per<std::chrono::seconds>>>,
            Options<Sync<MMKFRobotLocalisation>>
           >("MMKFRobotLocalisation Time", [this](const time_t&) {

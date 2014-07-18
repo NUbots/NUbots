@@ -66,7 +66,9 @@ namespace messages {
 
             std::map<messages::input::ServoID, arma::mat44> forwardKinematics;
 
-            arma::mat44 odometry;
+            // arma::mat44 odometry;
+            arma::vec2 odometry;
+            arma::mat22 odometryCovariance;
 
             float bodyCentreHeight;
 

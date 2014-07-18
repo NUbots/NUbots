@@ -26,6 +26,7 @@
 #include "messages/input/Sensors.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/localisation/ResetRobotHypotheses.h"
+#include "messages/input/Sensors.h"
 
 using utility::localisation::LFOId;
 using utility::localisation::LocalisationFieldObject;
@@ -193,6 +194,10 @@ namespace localisation {
 
     void MMKFRobotLocalisationEngine::Reset(const ResetRobotHypotheses& reset) {
         
+    }
+
+    void MMKFRobotLocalisationEngine::OdometryMeasurementUpdate(const Sensors& sensors){
+        robot_models_.MeasurementUpdate(sensors);
     }
 }
 }

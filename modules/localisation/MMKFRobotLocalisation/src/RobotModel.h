@@ -69,7 +69,9 @@ namespace robot {
             const arma::vec3& actual_position,
             const messages::input::Sensors& sensors);
 
-        arma::vec predictedObservation(const arma::vec::fixed<RobotModel::size>& state);
+        arma::vec predictedObservation(
+            const arma::vec::fixed<RobotModel::size>& state,
+            const messages::input::Sensors& sensors);
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,

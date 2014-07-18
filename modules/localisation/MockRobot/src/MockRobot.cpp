@@ -125,7 +125,7 @@ namespace localisation {
             arma::vec2 diff = robot_position_ - old_pos;
 
             robot_heading_ = vectorToBearing(arma::vec2(diff));
-            robot_velocity_ = bearingToUnitVector(robot_heading_ / 100.0);
+            robot_velocity_ = arma::vec2({arma::norm(diff_) / 100.0, 0});       //Robot coordinates 
 
 
             double imu_period = cfg_.robot_imu_drift_period;
@@ -184,6 +184,8 @@ namespace localisation {
 
             // forwardKinematics
             sensors->forwardKinematics[ServoID::HEAD_PITCH] = arma::eye(4, 4);
+
+            //Odometry simulation
 
 
             // Goal observation
