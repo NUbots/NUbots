@@ -140,10 +140,10 @@ namespace support {
                 auto fRotation = fRigidBody.orientation();
 
                 auto* rotation = rigidBody->mutable_rotation();
-                rotation->set_w(fRotation.qw);
-                rotation->set_x(-fRotation.qz);
-                rotation->set_y(-fRotation.qx);
-                rotation->set_z(fRotation.qy);
+                rotation->set_x(fRotation.qw);
+                rotation->set_y(-fRotation.qz);
+                rotation->set_z(-fRotation.qx);
+                rotation->set_t(fRotation.qy);
 
                 for (auto point : fRigidBody.markers()) {
                     auto* markerPoint = rigidBody->add_points();

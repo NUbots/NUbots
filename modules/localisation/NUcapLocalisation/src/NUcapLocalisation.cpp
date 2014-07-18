@@ -54,10 +54,10 @@ namespace localisation {
                     float x = rigidBody.position().x();
                     float y = rigidBody.position().y();
                     float z = rigidBody.position().z();
-                    UnitQuaternion q(arma::vec4{rigidBody.rotation().w(),
-                                                rigidBody.rotation().x(),
+                    UnitQuaternion q(arma::vec4{rigidBody.rotation().x(),
                                                 rigidBody.rotation().y(),
-                                                rigidBody.rotation().z()});
+                                                rigidBody.rotation().z(),
+                                                rigidBody.rotation().t()});
 
                     arma::mat33 groundToWorldRotation = q.getMatrix();// * sensors.orientationCamToGround.submat(0,0,2,2).t();
 
