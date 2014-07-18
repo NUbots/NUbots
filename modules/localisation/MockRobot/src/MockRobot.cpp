@@ -126,7 +126,7 @@ namespace localisation {
 
             robot_heading_ = vectorToBearing(arma::vec2(diff));
             // robot_velocity_ = arma::vec2({arma::norm(diff) / 100.0, 0}); //Robot coordinates 
-            robot_odometry_ = arma::vec2({arma::norm(diff), 0}); //Robot coordinates 
+            robot_odometry_ = arma::vec2({arma::norm(diff)*100, 0}); //Robot coordinates 
 
             double imu_period = cfg_.robot_imu_drift_period;
             world_imu_direction_ = arma::vec2({ std::cos(2 * M_PI * t / imu_period), std::sin(2 * M_PI * t / imu_period) });
@@ -186,7 +186,7 @@ namespace localisation {
 
             //Odometry simulation
             sensors->odometry = robot_odometry_;
-            sensors->odometryCovariance = arma::eye(2,2) * 0.1;
+            sensors->odometryCovariance = arma::eye(2,2) * 0.05;
 
 
             // Goal observation
