@@ -115,7 +115,6 @@ namespace support {
     }
 
     void NUbugger::EmitLocalisationModels(const std::unique_ptr<FieldObject>& robot_model, const std::unique_ptr<FieldObject>& ball_model) {
-
         Message message;
 
         message.set_type(Message::LOCALISATION);

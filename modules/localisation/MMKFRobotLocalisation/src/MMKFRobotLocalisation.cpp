@@ -56,6 +56,7 @@ namespace localisation {
         on<Trigger<Configuration<MultiModalRobotModelConfig>>>(
             "MultiModalRobotModelConfig Update",
             [this](const Configuration<MultiModalRobotModelConfig>& config) {
+            
             engine_->UpdateConfiguration(config);
             NUClear::log("Localisation config finished successfully!");
         });
@@ -83,7 +84,6 @@ namespace localisation {
            With<Sensors>,
            Options<Sync<MMKFRobotLocalisation>>
            >("NUbugger Output", [this](const time_t&, const Sensors& sensors) {
-
             auto& hypotheses = engine_->robot_models_.hypotheses();
             if (hypotheses.size() == 0) {
                 NUClear::log<NUClear::ERROR>("MMKFRobotLocalisation has no robot hypotheses.");
@@ -169,6 +169,7 @@ namespace localisation {
             auto curr_time = NUClear::clock::now();
             engine_->TimeUpdate(curr_time);
             engine_->ProcessObjects(goals);
+            
         });
     }
 }

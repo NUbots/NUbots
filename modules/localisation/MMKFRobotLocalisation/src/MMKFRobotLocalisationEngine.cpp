@@ -69,7 +69,6 @@ namespace localisation {
     }
 
     void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time) {
-
         double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
         last_time_update_time_ = current_time;
         robot_models_.TimeUpdate(seconds);
@@ -138,8 +137,6 @@ namespace localisation {
 
     void MMKFRobotLocalisationEngine::ProcessAmbiguousObjects(
         const std::vector<messages::vision::Goal>& ambiguous_objects) {
-
-
         bool pair_observations_enabled =
             cfg_.goal_pair_observation_enabled ||
             cfg_.angle_between_goals_observation_enabled;
@@ -174,7 +171,6 @@ namespace localisation {
         }
 
         robot_models_.PruneModels();
-
     }
 
     void MMKFRobotLocalisationEngine::IndividualStationaryObjectUpdate(

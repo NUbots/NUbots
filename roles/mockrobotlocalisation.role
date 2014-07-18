@@ -10,7 +10,7 @@ ADD_ROLE(
 
         #Localisation
         localisation::MMKFRobotLocalisation
-        localisation::MockRobot;
+        localisation::MockRobot
         # localisation::KFBallLocalisation
 )
 
