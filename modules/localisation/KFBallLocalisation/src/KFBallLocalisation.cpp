@@ -31,7 +31,7 @@
 
 using utility::nubugger::graph;
 using messages::support::Configuration;
-using messages::localisation::FakeOdometry;
+// using messages::localisation::FakeOdometry;
 using messages::localisation::Mock;
 using messages::localisation::Ball;
 
@@ -79,12 +79,12 @@ namespace localisation {
             emit(graph("Ball (robot-space)", model_state(0), model_state(1)));
         });
 
-       on<Trigger<FakeOdometry>,
-           Options<Sync<KFBallLocalisation>>
-           >("KFBallLocalisation Odometry", [this](const FakeOdometry& odom) {
-            auto curr_time = NUClear::clock::now();
-            engine_.TimeUpdate(curr_time, odom);
-        });
+       // on<Trigger<FakeOdometry>,
+       //     Options<Sync<KFBallLocalisation>>
+       //     >("KFBallLocalisation Odometry", [this](const FakeOdometry& odom) {
+       //      auto curr_time = NUClear::clock::now();
+       //      engine_.TimeUpdate(curr_time, odom);
+       //  });
 
        on<Trigger<Every<100, Per<std::chrono::seconds>>>,
            Options<Sync<KFBallLocalisation>>

@@ -32,7 +32,6 @@ using utility::localisation::LocalisationFieldObject;
 using utility::time::TimeDifferenceSeconds;
 using messages::input::Sensors;
 using messages::vision::VisionObject;
-using messages::localisation::FakeOdometry;
 using messages::localisation::ResetRobotHypotheses;
 
 namespace modules {
@@ -74,22 +73,6 @@ namespace localisation {
         double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
         last_time_update_time_ = current_time;
         robot_models_.TimeUpdate(seconds);
-    }
-
-    void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
-                                              const FakeOdometry& odom) {
-
-        double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
-        last_time_update_time_ = current_time;
-        robot_models_.TimeUpdate(seconds, odom);
-    }
-
-    void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
-                                              const Sensors& sensors) {
-
-        double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
-        last_time_update_time_ = current_time;
-        robot_models_.TimeUpdate(seconds, sensors);
     }
 
     std::vector<LocalisationFieldObject> MMKFRobotLocalisationEngine::GetPossibleObjects(
@@ -207,10 +190,6 @@ namespace localisation {
 
         ProcessAmbiguousObjects(goals);
     }
-
-    // void MMKFRobotLocalisationEngine::SensorsUpdate(const messages::input::Sensors& sensors) {
-    //     robot_models_.SensorsUpdate(sensors);
-    // }
 
     void MMKFRobotLocalisationEngine::Reset(const ResetRobotHypotheses& reset) {
         

@@ -46,9 +46,6 @@ namespace localisation {
         void TimeUpdate(std::chrono::system_clock::time_point current_time);
 
         void TimeUpdate(std::chrono::system_clock::time_point current_time,
-                        const messages::localisation::FakeOdometry& odom);
-
-        void TimeUpdate(std::chrono::system_clock::time_point current_time,
                                               const messages::input::Sensors& sensors);
 
         std::vector<utility::localisation::LocalisationFieldObject> GetPossibleObjects(

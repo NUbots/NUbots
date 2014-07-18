@@ -26,7 +26,7 @@
 #include "utility/math/coordinates.h"
 #include "messages/localisation/FieldObject.h"
 
-using messages::localisation::FakeOdometry;
+// using messages::localisation::FakeOdometry;
 using utility::math::matrix::rotationMatrix;
 
 namespace modules {
@@ -52,22 +52,22 @@ arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
     return ApplyVelocity(state, deltaT);
 }
 
-arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
-    const arma::vec::fixed<BallModel::size>& state, double deltaT,
-    const FakeOdometry& odom) {
+// arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
+//     const arma::vec::fixed<BallModel::size>& state, double deltaT,
+//     const FakeOdometry& odom) {
 
-    auto result = ApplyVelocity(state, deltaT);
+//     auto result = ApplyVelocity(state, deltaT);
 
-    // Apply robot odometry / robot position change
-    result.rows(kX, kY) -= odom.torso_displacement;
+//     // Apply robot odometry / robot position change
+//     result.rows(kX, kY) -= odom.torso_displacement;
 
-    // Rotate ball_pos by -torso_rotation.
-    arma::mat22 rot = rotationMatrix(-odom.torso_rotation);
-    result.rows(kX, kY) = rot * result.rows(kX, kY);
-    result.rows(kVx, kVy) = rot * result.rows(kVx, kVy);
+//     // Rotate ball_pos by -torso_rotation.
+//     arma::mat22 rot = rotationMatrix(-odom.torso_rotation);
+//     result.rows(kX, kY) = rot * result.rows(kX, kY);
+//     result.rows(kVx, kVy) = rot * result.rows(kVx, kVy);
 
-    return result;
-}
+//     return result;
+// }
 
 /// Return the predicted observation of an object at the given position
 arma::vec BallModel::predictedObservation(

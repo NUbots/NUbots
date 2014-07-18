@@ -34,7 +34,6 @@ using messages::input::Sensors;
 using messages::input::ServoID;
 using utility::localisation::transform::SphericalRobotObservation;
 using utility::localisation::transform::WorldToRobotTransform;
-using messages::localisation::FakeOdometry;
 using utility::math::matrix::rotationMatrix;
 using utility::math::matrix::zRotationMatrix;
 using utility::math::coordinates::cartesianToRadial;
@@ -44,35 +43,9 @@ namespace modules {
 namespace localisation {
 namespace robot {
 
-// arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
-//     const arma::vec::fixed<RobotModel::size>& state, double deltaT) {
-    // auto result = state;
-
-    // // Apply robot odometry / robot position change
-    // arma::mat22 rot_heading = rotationMatrix(std::atan2(state[kHeadingY], state[kHeadingX]));
-    // result.rows(kX, kY) += rot_heading * odom.torso_displacement;
-
-    // // Rotate heading by torso_rotation.
-    // arma::mat22 rot = rotationMatrix(odom.torso_rotation);
-    // result.rows(kHeadingX, kHeadingY) = rot * result.rows(kHeadingX, kHeadingY);
-
-    // return result;
-// }
-
 arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     const arma::vec::fixed<RobotModel::size>& state, double) {
     return state;
-    // auto result = state;
-    // arma::mat44 odom = sensors.odometry;
-    // arma::vec3 updated_heading3 = odom.submat(0,0,2,2).t() * arma::vec3({state[kHeadingX], state[kHeadingY],0});
-    // arma::vec2 updated_heading = arma::normalise(updated_heading3.rows(0,1));
-    // arma::vec4 updated_position = arma::vec4({state[kX], state[kY], 0, 1}) + odom * arma::vec4({0, 0, 0, 1});
-
-    // if(arma::norm(updated_heading) > 0){
-    //     return {updated_position[0], updated_position[1], updated_heading[0], updated_heading[1]};
-    // } else {
-    //     return {updated_position[0], updated_position[1], state[kHeadingX], state[kHeadingY]};
-    // }
 }
 
 /// Return the predicted observation of an object at the given position
@@ -80,27 +53,12 @@ arma::vec RobotModel::predictedObservation(
     const arma::vec::fixed<RobotModel::size>& state,
     const arma::vec3& actual_position,
     const Sensors& sensors) {
-    //First Attempt:
-    // auto& orientation = sensors.orientation;
-    // auto& camToGround = sensors.orientationCamToGround;
-    // auto camToBody = sensors.forwardKinematics.at(ServoID::HEAD_PITCH).submat(0,0,2,2);
-    // arma::mat33 bodyToGround = camToGround.submat(0,0,2,2) * camToBody.submat(0,0,2,2).t();
-    // arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
-    // arma::vec3 robotPos3d = arma::vec3({state(kX), state(kY), 0});
-    // arma::vec3 actualPositionRelative = actual_position - robotPos3d;
-
-    // arma::mat33 tmp2 = bodyToGround * orientation;
-    // arma::vec3 tmp1 = imuRotation * actualPositionRelative;
-    // arma::vec3 obs_cartesian = arma::vec3(tmp2 * tmp1);
-    // auto obs = cartesianToSpherical(obs_cartesian);
-
     //Rewrite:
     arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
     arma::vec3 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).col(0);
     auto obs = SphericalRobotObservation(state.rows(kX, kY),
                                          robotHeading_world.rows(0,1),
                                          actual_position);
-
     return obs;
 }
 

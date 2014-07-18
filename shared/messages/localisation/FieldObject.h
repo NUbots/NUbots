@@ -45,12 +45,6 @@ namespace messages {
             std::vector<Model> models;
         };
 
-        // Temporary test input for localisation
-        struct FakeOdometry {
-            arma::vec2 torso_displacement;
-            double torso_rotation;
-        };
-
         class LocalisationObject {
         public:
             LocalisationObject() {}

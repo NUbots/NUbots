@@ -47,9 +47,9 @@ namespace ball {
 
         BallModel() {} // empty constructor
 
-        arma::vec::fixed<size> timeUpdate(
-            const arma::vec::fixed<size>& state, double deltaT,
-            const messages::localisation::FakeOdometry& odom);
+        // arma::vec::fixed<size> timeUpdate(
+        //     const arma::vec::fixed<size>& state, double deltaT,
+        //     const messages::localisation::FakeOdometry& odom);
 
         arma::vec::fixed<size> timeUpdate(
             const arma::vec::fixed<size>& state, double deltaT);

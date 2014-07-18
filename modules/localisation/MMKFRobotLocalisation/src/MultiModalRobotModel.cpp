@@ -29,7 +29,6 @@
 
 using messages::input::Sensors;
 using utility::localisation::LocalisationFieldObject;
-using messages::localisation::FakeOdometry;
 using utility::math::coordinates::spherical2Radial;
 using utility::localisation::transform::SphericalRobotObservation;
 
@@ -59,26 +58,9 @@ void MultiModalRobotModel::TimeUpdate(double seconds) {
     for (auto& model : robot_models_)
         model->TimeUpdate(seconds);
 }
-void MultiModalRobotModel::TimeUpdate(double seconds, const FakeOdometry&) {
-    for (auto& model : robot_models_)
-        model->TimeUpdate(seconds); // TODO re add in odometry
-}
-
-void MultiModalRobotModel::TimeUpdate(double seconds, const Sensors&) {
-    for (auto& model : robot_models_)
-        model->TimeUpdate(seconds); // TODO re add in odometry
-}
-
 void RobotHypothesis::TimeUpdate(double seconds) {
     filter_.timeUpdate(seconds);
 }
-void RobotHypothesis::TimeUpdate(double seconds, const FakeOdometry&) {
-    filter_.timeUpdate(seconds); // TODO re add in odometry
-}
-void RobotHypothesis::TimeUpdate(double seconds, const Sensors&) {
-    filter_.timeUpdate(seconds); // TODO re add in odometry sensors
-}
-
 
 void MultiModalRobotModel::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object,

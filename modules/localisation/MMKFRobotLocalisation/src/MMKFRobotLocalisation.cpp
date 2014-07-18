@@ -46,7 +46,6 @@ using messages::input::Sensors;
 using messages::vision::Goal;
 using messages::localisation::Mock;
 using messages::localisation::Self;
-using messages::localisation::FakeOdometry;
 using messages::localisation::ResetRobotHypotheses;
 
 namespace modules {
@@ -125,12 +124,6 @@ namespace localisation {
             }
         });
 
-        // on<Trigger<FakeOdometry>,
-        //    Options<Sync<MMKFRobotLocalisation>>
-        //   >("MMKFRobotLocalisation Odometry", [this](const FakeOdometry& odom) {
-        //     auto curr_time = NUClear::clock::now();
-        //     engine_->TimeUpdate(curr_time, odom);
-        // });
         // on<Trigger<Sensors>,
         //    Options<Sync<MMKFRobotLocalisation>>
         //   >("MMKFRobotLocalisation Sensors", [this](const Sensors& sensors) {
