@@ -37,6 +37,8 @@ namespace robot {
         kX = 0,
         kY = 1,
         kImuOffset = 2,
+        kVX = 3,
+        kVY = 4
         // kHeading = 2,
         // kHeadingX = 2,
         // kHeadingY = 3,
@@ -51,9 +53,12 @@ namespace robot {
 
     class RobotModel {
     public:
-        static constexpr size_t size = 3;
+        static constexpr size_t size = 5;
 
-        RobotModel() {} // empty constructor
+        RobotModel() {
+            odometryReferenceState.zeros();
+            currentImuOrientation.zeros();
+        } // empty constructor
 
         arma::vec::fixed<RobotModel::size> timeUpdate(
             const arma::vec::fixed<RobotModel::size>& state, double deltaT);
@@ -69,6 +74,10 @@ namespace robot {
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
+            const messages::input::Sensors& sensors);
+
+        arma::vec predictedObservation(
+            const arma::vec::fixed<RobotModel::size>& state,
             const std::vector<arma::vec>& actual_positions);
 
         arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
@@ -80,11 +89,13 @@ namespace robot {
         struct Config {
             double processNoisePositionFactor = 1e-3;
             double processNoiseHeadingFactor = 1e-3;
+            double processNoiseVelocityFactor = 1e-3;
             double observationDifferenceBearingFactor = 0.2;
             double observationDifferenceElevationFactor = 0.2;
         } cfg_;
 
         arma::mat33 currentImuOrientation;
+        arma::vec::fixed<RobotModel::size> odometryReferenceState;
 
         // arma::mat33 getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state);
         // arma::mat33 getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state);

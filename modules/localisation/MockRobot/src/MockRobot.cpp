@@ -103,7 +103,7 @@ namespace localisation {
         });
 
         // Update robot position
-        on<Trigger<Every<10, std::chrono::milliseconds>>>("Mock Robot motion", [this](const time_t&){
+        on<Trigger<Every<10, std::chrono::milliseconds>>>("Mock Robot motion", [this](const time_t&) {
             if (!cfg_.simulate_robot_movement) {
                 robot_velocity_ = arma::vec2({ 0, 0 });
                 return;
@@ -125,12 +125,11 @@ namespace localisation {
             arma::vec2 diff = robot_position_ - old_pos;
 
             robot_heading_ = vectorToBearing(arma::vec2(diff));
-            robot_velocity_ = bearingToUnitVector(robot_heading_ / 100.0);
-
+            // robot_velocity_ = arma::vec2({arma::norm(diff) / 100.0, 0}); //Robot coordinates 
+            robot_odometry_ = arma::vec2({arma::norm(diff), 0}); //Robot coordinates 
 
             double imu_period = cfg_.robot_imu_drift_period;
-            world_imu_direction_ = arma::vec2({ std::cos(2 * M_PI * t / imu_period),
-                                    std::sin(2 * M_PI * t / imu_period) });
+            world_imu_direction_ = arma::vec2({ std::cos(2 * M_PI * t / imu_period), std::sin(2 * M_PI * t / imu_period) });
         });
 
         // Update ball position
@@ -184,6 +183,10 @@ namespace localisation {
 
             // forwardKinematics
             sensors->forwardKinematics[ServoID::HEAD_PITCH] = arma::eye(4, 4);
+
+            //Odometry simulation
+            sensors->odometry = robot_odometry_;
+            sensors->odometryCovariance = arma::eye(2,2) * 0.1;
 
 
             // Goal observation

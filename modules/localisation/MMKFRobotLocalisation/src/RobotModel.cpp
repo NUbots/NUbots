@@ -44,8 +44,10 @@ namespace localisation {
 namespace robot {
 
 arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
-    const arma::vec::fixed<RobotModel::size>& state, double) {
-    return state;
+    const arma::vec::fixed<RobotModel::size>& state, double deltaT) {
+    arma::vec::fixed<RobotModel::size> state_ = state;
+    state_.rows(kX,kY) += deltaT * state.rows(kVX,kVY);
+    return state_;
 }
 
 /// Return the predicted observation of an object at the given position
@@ -60,6 +62,17 @@ arma::vec RobotModel::predictedObservation(
                                          robotHeading_world.rows(0,1),
                                          actual_position);
     return obs;
+}
+
+//Odometry
+arma::vec RobotModel::predictedObservation(
+    const arma::vec::fixed<RobotModel::size>& state, const Sensors& sensors) {
+    arma::vec diff = state - odometryReferenceState;
+    
+    //Returns robot relative velocity
+    arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
+    arma::vec3 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).col(0);
+    return WorldToRobotTransform(arma::vec2{0,0}, robotHeading_world.rows(0,1), diff.rows(kX, kY));
 }
 
 // Angle between goals
@@ -81,6 +94,8 @@ arma::vec RobotModel::observationDifference(const arma::vec& a,
                                             const arma::vec& b) {
     if (a.n_elem == 1) {
         return a - b;
+    } if (a.n_elem == 2) {
+        return a - b;
     } else {
         // Spherical coordinates
         arma::vec3 result = a - b;
@@ -100,6 +115,8 @@ arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() 
     arma::mat noise = arma::eye(RobotModel::size, RobotModel::size);
     noise(kX, kX) *= cfg_.processNoisePositionFactor;
     noise(kY, kY) *= cfg_.processNoisePositionFactor;
+    noise(kVX, kVX) *= cfg_.processNoiseVelocityFactor;
+    noise(kVY, kVY) *= cfg_.processNoiseVelocityFactor;
     noise(kImuOffset, kImuOffset) *= cfg_.processNoiseHeadingFactor;
     return noise;
 }

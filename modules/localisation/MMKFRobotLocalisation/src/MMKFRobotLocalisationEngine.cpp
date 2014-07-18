@@ -26,6 +26,7 @@
 #include "messages/input/Sensors.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/localisation/ResetRobotHypotheses.h"
+#include "messages/input/Sensors.h"
 
 using utility::localisation::LFOId;
 using utility::localisation::LocalisationFieldObject;
@@ -197,6 +198,10 @@ namespace localisation {
             auto hyp = std::make_unique<RobotHypothesis>(reset_hyp);
             robot_models_.robot_models_.push_back(std::move(hyp));
         }
+    }
+
+    void MMKFRobotLocalisationEngine::OdometryMeasurementUpdate(const Sensors& sensors) {
+        robot_models_.MeasurementUpdate(sensors);
     }
 }
 }

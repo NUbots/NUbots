@@ -29,6 +29,7 @@
 #include "messages/input/Sensors.h"
 #include "messages/localisation/ResetRobotHypotheses.h"
 #include "MultiModalRobotModel.h"
+#include "messages/input/Sensors.h"
 
 namespace modules {
 namespace localisation {
@@ -76,6 +77,7 @@ namespace localisation {
 
         void Reset(const messages::localisation::ResetRobotHypotheses& reset);
 
+        void OdometryMeasurementUpdate(const messages::input::Sensors& sensors);
     // private:
         MultiModalRobotModel robot_models_;
 
