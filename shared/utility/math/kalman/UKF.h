@@ -129,14 +129,11 @@ namespace utility {
                     reset(initialMean, initialCovariance, alpha, kappa, beta);
                 }
 
-                void reset(StateVec initialMean, StateMat initialCovariance, double alpha, double kappa, double beta) {
-
+                void reset(StateVec initialMean, StateMat initialCovariance,
+                           double alpha, double kappa, double beta) {
                     double lambda = pow(alpha, 2) * (Model::size + kappa) - Model::size;
 
                     covarianceSigmaWeights = Model::size + lambda;
-
-                    mean = initialMean;
-                    covariance = initialCovariance;
 
                     meanWeights.fill(1.0 / (2.0 * (Model::size + lambda)));
                     meanWeights[0] = lambda / (Model::size + lambda);
@@ -145,6 +142,13 @@ namespace utility {
                     covarianceWeights[0] = lambda / (Model::size + lambda) + (1.0 - pow(alpha,2) + beta);
 
                     defaultCovarianceUpdate = arma::diagmat(covarianceWeights);
+
+                    setState(initialMean, initialCovariance);
+                }
+
+                void setState(StateVec initialMean, StateMat initialCovariance) {
+                    mean = initialMean;
+                    covariance = initialCovariance;
 
                     // Calculate our sigma points
                     sigmaMean = mean;
@@ -168,7 +172,8 @@ namespace utility {
 
 
                     // Calculate the new mean and covariance values.
-                    mean = meanFromSigmas(sigmaPoints);                    mean = model.limitState(mean);
+                    mean = meanFromSigmas(sigmaPoints);
+                    mean = model.limitState(mean);
                     covariance = covarianceFromSigmas(sigmaPoints, mean) + model.processNoise();
 
                     // Re calculate our sigma points

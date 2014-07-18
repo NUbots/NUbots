@@ -193,7 +193,11 @@ namespace localisation {
     }
 
     void MMKFRobotLocalisationEngine::Reset(const ResetRobotHypotheses& reset) {
-        
+        robot_models_.robot_models_ = std::vector<std::unique_ptr<RobotHypothesis>>();
+        for (const auto& reset_hyp : reset.hypotheses) {
+            auto hyp = std::make_unique<RobotHypothesis>(reset_hyp);
+            robot_models_.robot_models_.push_back(std::move(hyp));
+        }
     }
 
     void MMKFRobotLocalisationEngine::OdometryMeasurementUpdate(const Sensors& sensors){
