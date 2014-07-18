@@ -2,6 +2,7 @@ ADD_ROLE(
     NAME scriptrunner
     MODULES
         support::configuration::ConfigSystem
+        support::configuration::GlobalConfig
         platform::darwin::HardwareIO
         behaviour::Controller
         platform::darwin::SensorFilter

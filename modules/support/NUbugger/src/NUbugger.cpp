@@ -105,7 +105,7 @@ namespace support {
             }
         });
 
-        on<Trigger<Every<5, std::chrono::seconds>>>([this] (const time_t&) {
+        on<Trigger<Every<1, std::chrono::seconds>>>([this] (const time_t&) {
             Message message;
             message.set_type(Message::PING);
             message.set_filter_id(0);

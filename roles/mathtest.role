@@ -3,6 +3,7 @@ ADD_ROLE(
     MODULES
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
+        support::configuration::GlobalConfig
         support::configuration::SoccerConfig
         support::NUbugger
         debug::NUbugger

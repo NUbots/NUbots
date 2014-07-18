@@ -1,10 +1,11 @@
 ADD_ROLE(
-    NAME nucapgoalie 
+    NAME nucapgoalie
     MODULES
         #Support
         support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
+        support::configuration::GlobalConfig
         support::configuration::NetworkingConfiguration
         support::NUbugger
 	   support::configuration::SoccerConfig
@@ -43,7 +44,7 @@ ADD_ROLE(
         #Motion
         motion::ScriptEngine
         motion::WalkEngine
-	
+
 	#Output
 	output::eSpeak
 )
