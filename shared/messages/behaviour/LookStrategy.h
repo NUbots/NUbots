@@ -17,29 +17,13 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_LOOKTARGET_H
-#define MESSAGES_BEHAVIOUR_LOOKTARGET_H
-
+#ifndef MESSAGES_BEHAVIOUR_LOOKSTRATEGY_H
+#define MESSAGES_BEHAVIOUR_LOOKSTRATEGY_H
 
 namespace messages {
 namespace behaviour {
-    struct Look {
+    struct LookStrategy {
 
-        struct Fixation {
-            arma::vec2 angle;
-            arma::vec2 arcSize;
-        };
-
-        struct Saccade {
-            NUClear::clock::duration dwellTime;
-            arma::vec2 angle;
-            arma::vec2 arcSize;
-        };
-
-        struct Pan {
-            arma::vec2 angle;
-            arma::vec2 arcSize;
-        };
     };
 
 }

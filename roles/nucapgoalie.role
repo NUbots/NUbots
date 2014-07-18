@@ -1,5 +1,5 @@
 ADD_ROLE(
-    NAME nucapgoalie 
+    NAME nucapgoalie
     MODULES
         #Support
         support::SignalCatcher
@@ -32,18 +32,15 @@ ADD_ROLE(
         behaviour::skills::Stand
         behaviour::skills::FallingRelax
         behaviour::skills::Getup
-        behaviour::skills::Look
+        behaviour::skills::LookAt
         behaviour::skills::KickScript
-        behaviour::planning::LookAtBall
-        behaviour::planning::LookAtGoal
         behaviour::planning::KickPlanner
         behaviour::planning::WalkPathPlanner
-	behaviour::strategy::GoalieStrategy
 
         #Motion
         motion::ScriptEngine
         motion::WalkEngine
-	
+
 	#Output
 	output::eSpeak
 )

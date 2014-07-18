@@ -19,12 +19,28 @@
 
 #include "LookPlanner.h"
 
+#include "messages/vision/VisionObjects.h"
+#include "messages/localisation/FieldObject.h"
+
 namespace modules {
 namespace behaviour {
+
+    using VisionBall = messages::vision::Ball;
+    using VisionGoal = messages::vision::Goal;
+
+    using LocalisationBall = messages::localisation::Ball;
+    using messages::localisation::Self;
 
     LookPlanner::LookPlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
+        on<Trigger<Last<5, std::vector<VisionBall>>>, With<Optional<LocalisationBall>>, With<LookStrategy>>([this] (const LastList<std::vector<VisionBall>>& v, const LocalisationBall& l, const LookStrategy& strat) {
+            //
+        });
+
+        on<Trigger<Last<5, std::vector<VisionGoal>>>, With<Optional<Self>>, With<LookStrategy>>([this] (const LastList<std::vector<VisionGoal>>& v, const Self& self, const LookStrategy& strat) {
+            //
+        });
     }
 
 }

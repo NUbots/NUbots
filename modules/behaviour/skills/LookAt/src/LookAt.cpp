@@ -17,10 +17,10 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "Look.h"
+#include "LookAt.h"
 
 #include "messages/input/ServoID.h"
-#include "messages/behaviour/LookStrategy.h"
+#include "messages/behaviour/Look.h"
 #include "messages/behaviour/Action.h"
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
@@ -43,10 +43,7 @@ namespace modules {
             LookAt::LookAt(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
 
                 //do a little configurating
-                on<Trigger<Configuration<Look>>>([this] (const Configuration<Look>& config){
-
-                    lastPanEnd = NUClear::clock::now();
-                    //load fast and slow panspeed settings
+                on<Trigger<Configuration<LookAt>>>([this] (const Configuration<LookAt>& config){
 
                     //pan speeds
                     FAST_SPEED = config["speed"]["fast"].as<double>();
