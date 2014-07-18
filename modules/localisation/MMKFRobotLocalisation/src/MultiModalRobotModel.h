@@ -81,6 +81,8 @@ namespace localisation {
         double MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,
             const utility::localisation::LocalisationFieldObject& actual_object);
+        //Odometry
+        double MeasurementUpdate(const arma::vec2& odometry);
 
         double MeasurementUpdate(
             const std::vector<messages::vision::VisionObject>& observed_objects,
@@ -134,6 +136,8 @@ namespace localisation {
         void MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,
             const utility::localisation::LocalisationFieldObject& actual_object);
+
+        void MeasurementUpdate(const Sensors& sensors);
 
         void MeasurementUpdate(
             const std::vector<messages::vision::VisionObject>& observed_objects,

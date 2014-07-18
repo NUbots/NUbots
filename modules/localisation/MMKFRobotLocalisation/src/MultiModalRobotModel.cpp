@@ -69,6 +69,7 @@ void MultiModalRobotModel::MeasurementUpdate(
     for (auto& model : robot_models_)
         model->MeasurementUpdate(observed_object, actual_object);
 }
+        
 
 void MultiModalRobotModel::MeasurementUpdate(
     const std::vector<messages::vision::VisionObject>& observed_objects,
@@ -96,6 +97,15 @@ double RobotHypothesis::MeasurementUpdate(
     }
 
     return quality;
+}
+
+void MultiModalRobotModel::MeasurementUpdate(const Sensors& sensors){
+    for (auto& model : robot_models_)
+        model->MeasurementUpdate(sensors);
+}
+
+double RobotHypothesis::MeasurementUpdate(const Sensors& sensors){
+    return filter_.measurementUpdate(sensors.odometry, sensors.odometryCovariance);
 }
 
 double RobotHypothesis::MeasurementUpdate(

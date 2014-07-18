@@ -37,6 +37,8 @@ namespace robot {
         kX = 0,
         kY = 1,
         kImuOffset = 2,
+        kVX = 3,
+        kVY = 4
         // kHeading = 2,
         // kHeadingX = 2,
         // kHeadingY = 3,
@@ -66,6 +68,8 @@ namespace robot {
             const arma::vec::fixed<RobotModel::size>& state,
             const arma::vec3& actual_position,
             const messages::input::Sensors& sensors);
+
+        arma::vec predictedObservation(const arma::vec::fixed<RobotModel::size>& state);
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,

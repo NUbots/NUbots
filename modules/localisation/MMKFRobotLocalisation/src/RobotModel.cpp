@@ -44,8 +44,10 @@ namespace localisation {
 namespace robot {
 
 arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
-    const arma::vec::fixed<RobotModel::size>& state, double) {
-    return state;
+    const arma::vec::fixed<RobotModel::size>& state, double deltaT) {
+    arma::vec::fixed<RobotModel::size>& state_ = state;
+    state_.rows(kX,kY) += deltaT * state.rows(kVX,kVY);
+    return state_;
 }
 
 /// Return the predicted observation of an object at the given position
@@ -61,7 +63,10 @@ arma::vec RobotModel::predictedObservation(
                                          actual_position);
     return obs;
 }
-
+//Odometry
+arma::vec RobotModel::predictedObservation(const arma::vec::fixed<RobotModel::size>& state){
+    return state.rows(kVX, kVY);
+}
 // Angle between goals
 arma::vec RobotModel::predictedObservation(
     const arma::vec::fixed<RobotModel::size>& state,
@@ -76,6 +81,7 @@ arma::vec RobotModel::predictedObservation(
 
     return { std::abs(angle_diff) };
 }
+
 
 arma::vec RobotModel::observationDifference(const arma::vec& a,
                                             const arma::vec& b) {
