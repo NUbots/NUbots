@@ -6,6 +6,7 @@ ADD_ROLE(
         support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
+        support::configuration::GlobalConfig
         support::configuration::NetworkingConfiguration
         support::configuration::SoccerConfig
 

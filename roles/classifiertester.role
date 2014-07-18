@@ -3,6 +3,7 @@ ADD_ROLE(
     MODULES
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
+        support::configuration::GlobalConfig
         input::LinuxCamera
         platform::darwin::HardwareIO
         platform::darwin::SensorFilter

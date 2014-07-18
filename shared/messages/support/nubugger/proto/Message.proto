@@ -80,3 +80,8 @@ message Message {
         repeated Handle handles = 1;
     }
 }
+
+message MessageLite {
+    required uint64 utc_timestamp = 1;
+    required string test = 2;
+}
