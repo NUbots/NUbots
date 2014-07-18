@@ -58,10 +58,86 @@ namespace modules {
                     HEAD_YAW_MIN   = config["limits"]["yaw"][1].as<double>();
                     SCREEN_EDGE_PADDING = config["screen_edge_padding"].as<double>();
                 });
+                
+                
+                on<Trigger<Every<30,per,second>>>,
+                   With<Last<5,Sensors>>,
+                   With<CameraParameters>>([this](const std::vector<Look::Fixation>& fixations,
+                                                  const LastList<Sensors>& sensors,
+                                                  const CameraParameters& cameraParams) {
+                    //find the most recent valid sensors frame
+                    size_t sensorsRef;
+                    for (sensorsRef = 4; sensorsRef < 5; --sensorsRef) {
+                        if (!sensors[sensorsRef]->isCorrupt) {
+                            break;
+                        }
+                    }
+                    
+                    arma::vec2 lastVelocity = arma::vec2({sensors[sensorsRef]->servos[size_t(ServoID::HEAD_YAW)].presentVelocity,
+                                                          sensors[sensorsRef]->servos[size_t(ServoID::HEAD_YAW)].presentVelocity});
+                    arma::vec2 lastPosition = arma::vec2({sensors[sensorsRef]->servos[size_t(ServoID::HEAD_YAW)].presentPosition,
+                                                          sensors[sensorsRef]->servos[size_t(ServoID::HEAD_YAW)].presentPosition});
+                    
+                    //emit the servo positions
+                    time_t time = NUClear::clock::now() + std::chrono::nanoseconds(size_t(std::nano::den*panTime));
+                    auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+                    waypoints->reserve(4);
+                    
+                    //push back some fake waypoints to clear our commands
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW, lastPosition[0], 0.f});
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH, lastPosition[1], 0.f});
+                    
+                    arma::vec2 targetPoint;
+                    
+                    //update appropriately for the current movement
+                    if (currentPoints.size() == 1) {
+                        
+                        //clip the head angles
+                        const arma::vec2 targetPoint = arma::vec2({
+                                                            std::fmin(std::fmax(currentPoints[0][0],HEAD_YAW_MIN),HEAD_YAW_MAX),
+                                                            std::fmin(std::fmax(currentPoints[0][1],HEAD_PITCH_MIN),HEAD_PITCH_MAX)});
+                        
+                        
+                    } else if (currentPoints.size() > 0 and saccading) { //do saccades
+                        
+                    } else if (currentPoints.size() > 0 and not saccading) { //do pans
+                        
+                        size_t currentSelection = currentPoints.size() - 1;
+                        double currentGoodness = arma::norm(currentPosition-currentPoints.back()) + 
+                                                 arma::dot(currentVelocity,currentPoints.front()-currentPoints.back());
+                        for (size_t i = 0; i < currentPoints.size()-1; ++i) {
+                            double newGoodness = arma::norm(currentPosition-currentPoints[i]) + 
+                                                 arma::dot(currentVelocity,currentPoints[i+1]-currentPoints[i]);
+                            if (newGoodness < currentGoodness) {
+                                currentGoodness = newGoodness;
+                                currentSelection = i;
+                            }
+                        }
+                        
+                        targetPoint = (currentSelection + 1) % currentPoints.size();
+                    }
+                    
+                    //get the approximate distance of movement
+                    const double panDist = arma::norm(targetPoint - lastPosition);
+                    
+                    //calculate how long the movement should take
+                    double panTime = panDist/FAST_SPEED;
+                    if (panDist < 0.15) { //XXX: configurate the slow to fast switch distance
+                        panTime = panDist/SLOW_SPEED;
+                    }
+                    
+                    //push back the new points
+                    waypoints->push_back({id, panTime, ServoID::HEAD_YAW,     targetPoint[0],  30.f});
+                    waypoints->push_back({id, panTime, ServoID::HEAD_PITCH,    targetPoint[1], 30.f});
+                    
+                    emit(std::move(waypoints));
+                });
+                
 
                 on<Trigger<std::vector<Look::Fixation>>,
                    With<Sensors>,
-                   With<CameraParameters>>([this](const std::vector<Look::Fixation>& fixations,
+                   With<CameraParameters>,
+                   Sync<LookAt>>([this](const std::vector<Look::Fixation>& fixations,
                                                   const Sensors& sensors,
                                                   const CameraParameters& cameraParams) {
                     
@@ -85,50 +161,22 @@ namespace modules {
                     }
                     
                     //get the centre of the current focus
-                    currentPoint = (angleMin+angleMax)*0.5;
+                    currentPoints.clear()
+                    currentPoints.push_back( (angleMin+angleMax)*0.5 );
                     
-                    
-                    //HEAD MOVEMENT EMIT - MAY BE MOVED TO ANOTHER TRIGGER FOR IMU SPACE TRACKING -----------------------------------------------------------------
-                    
-                    //clip the head angles
-                    const arma::vec2 headPosition = arma::vec2({
-                                                        std::fmin(std::fmax(currentPoint[0],HEAD_YAW_MIN),HEAD_YAW_MAX),
-                                                        std::fmin(std::fmax(currentPoint[1],HEAD_PITCH_MIN),HEAD_PITCH_MAX)});
-                    
-                    
-                    //get the approximate distance of movement
-                    const double panDist = arma::norm(currentPoint - 
-                                            arma::vec2({sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition,
-                                                        sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition}));
-                    
-                    //calculate how long the movement should take
-                    double panTime = panDist/FAST_SPEED;
-                    if (panDist < 0.15) { //XXX: configurate the slow to fast switch distance
-                        panTime = panDist/SLOW_SPEED;
+                });
+
+                on<Trigger<std::vector<Look::Pan>>, Sync<LookAt>>([this](const std::vector<Look::Pan>& pan) {
+                    //copy the pan into the currentpoints
+                    //XXX: actually we can simplify this a lot later on using angular sizes
+                    saccading = false;
+                    currentPoints.clear();
+                    for (size_t i = 0; i < currentPoints.size(); ++i) {
+                        currentPoints[i].push_back(pan[i].angle);
                     }
-                    
-                    //emit the servo positions
-                    time_t time = NUClear::clock::now() + std::chrono::nanoseconds(size_t(std::nano::den*panTime));
-                    auto waypoints = std::make_unique<std::vector<ServoCommand>>();
-                    waypoints->reserve(4);
-                    
-                    //push back some fake waypoints to clear our commands
-                    //XXX: what if the sensor data is broken?
-                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW,     float(sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition),  0.f});
-                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH,    float(sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition), 0.f});
-                    
-                    //push back the new points
-                    waypoints->push_back({id, time, ServoID::HEAD_YAW,     headPosition[0],  30.f});
-                    waypoints->push_back({id, time, ServoID::HEAD_PITCH,    headPosition[1], 30.f});
-                    emit(std::move(waypoints));
-                    
                 });
 
-                on<Trigger<std::vector<Look::Pan>>>([this](const std::vector<Look::Pan>& pan) {
-
-                });
-
-                on<Trigger<std::vector<Look::Saccade>>>([this](const std::vector<Look::Saccade>& saccade) {
+                on<Trigger<std::vector<Look::Saccade>>, Sync<LookAt>>([this](const std::vector<Look::Saccade>& saccade) {
 
                 });
 
