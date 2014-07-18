@@ -31,6 +31,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/support/FieldDescription.h"
 #include "messages/localisation/FieldObject.h"
+#include "messages/localisation/ResetRobotHypotheses.h"
 #include "MMKFRobotLocalisationEngine.h"
 #include "RobotModel.h"
 
@@ -38,14 +39,15 @@ using utility::math::angle::bearingToUnitVector;
 using utility::math::matrix::zRotationMatrix;
 using utility::nubugger::graph;
 using utility::localisation::LocalisationFieldObject;
+using modules::localisation::MultiModalRobotModelConfig;
 using messages::support::Configuration;
 using messages::support::FieldDescription;
-using messages::localisation::FakeOdometry;
 using messages::input::Sensors;
-using modules::localisation::MultiModalRobotModelConfig;
+using messages::vision::Goal;
 using messages::localisation::Mock;
 using messages::localisation::Self;
-using messages::vision::Goal;
+using messages::localisation::FakeOdometry;
+using messages::localisation::ResetRobotHypotheses;
 
 namespace modules {
 namespace localisation {
@@ -79,11 +81,17 @@ namespace localisation {
             engine_->set_field_description(fd);
         });
 
+        on<Trigger<ResetRobotHypotheses>,
+           Options<Sync<MMKFRobotLocalisation>>
+          >("Localisation ResetRobotHypotheses", [this](const ResetRobotHypotheses& reset) {
+            engine_->Reset(reset);
+        });
+
         // Emit to NUbugger
         on<Trigger<Every<100, std::chrono::milliseconds>>,
            With<Sensors>,
            Options<Sync<MMKFRobotLocalisation>>
-           >("NUbugger Output", [this](const time_t&, const Sensors& sensors) {
+           >("Localisation NUbugger Output", [this](const time_t&, const Sensors& sensors) {
             auto& hypotheses = engine_->robot_models_.hypotheses();
             if (hypotheses.size() == 0) {
                 NUClear::log<NUClear::ERROR>("MMKFRobotLocalisation has no robot hypotheses.");

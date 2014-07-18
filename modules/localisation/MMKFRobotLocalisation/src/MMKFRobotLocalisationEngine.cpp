@@ -25,13 +25,15 @@
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/Sensors.h"
 #include "messages/localisation/FieldObject.h"
+#include "messages/localisation/ResetRobotHypotheses.h"
 
-using messages::input::Sensors;
 using utility::localisation::LFOId;
 using utility::localisation::LocalisationFieldObject;
 using utility::time::TimeDifferenceSeconds;
+using messages::input::Sensors;
 using messages::vision::VisionObject;
 using messages::localisation::FakeOdometry;
+using messages::localisation::ResetRobotHypotheses;
 
 namespace modules {
 namespace localisation {
@@ -209,5 +211,9 @@ namespace localisation {
     // void MMKFRobotLocalisationEngine::SensorsUpdate(const messages::input::Sensors& sensors) {
     //     robot_models_.SensorsUpdate(sensors);
     // }
+
+    void MMKFRobotLocalisationEngine::Reset(const ResetRobotHypotheses& reset) {
+        
+    }
 }
 }

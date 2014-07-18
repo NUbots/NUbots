@@ -27,6 +27,7 @@
 #include "messages/support/FieldDescription.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/Sensors.h"
+#include "messages/localisation/ResetRobotHypotheses.h"
 #include "MultiModalRobotModel.h"
 
 namespace modules {
@@ -75,6 +76,8 @@ namespace localisation {
             const messages::support::Configuration<MMKFRobotLocalisationEngineConfig>& config);
 
         bool CanEmitFieldObjects();
+
+        void Reset(const messages::localisation::ResetRobotHypotheses& reset);
 
     // private:
         MultiModalRobotModel robot_models_;
