@@ -56,7 +56,7 @@ namespace utility{
                 public:
                     static constexpr float NECK_BASE_POS_FROM_ORIGIN[3] = {0.013, 0, 0.11};
                     static constexpr float NECK_LENGTH = 0.0305;
-                    static constexpr float NECK_TO_CAMERA[3] = {0.033,0,0.033};
+                    static constexpr float NECK_TO_CAMERA[3] = {0.050,0,0.052};
                     static constexpr float CAMERA_DECLINATION_ANGLE_OFFSET = 0;
                 };
 

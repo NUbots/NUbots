@@ -69,7 +69,7 @@ namespace darwin {
         0.0,           // [16] R_ANKLE_ROLL
         0.0,           // [17] L_ANKLE_ROLL
         0.0,           // [18] HEAD_YAW
-        -0.631,         // [19] HEAD_PITCH
+        0.0,         // [19] HEAD_PITCH
     };
 
     double Convert::SPEED_CONVERSION_FACTOR[] = {
