@@ -147,20 +147,12 @@ namespace vision {
                 double widthDistance = widthBasedDistanceToCircle(field->ball_radius * 2, top, base, cam.focalLengthPixels);
                 arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
 
-                measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), arma::diagmat(arma::vec({0.003505351, 0.001961638, 1.68276E-05})) });
+                measurements.push_back({ /*cartesianToSpherical*/(ballCentreGroundWidth), arma::diagmat(arma::vec({0.003505351, 0.001961638, 1.68276E-05})) });
 
                 // Project this vector to a plane midway through the ball
                 Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, field->ball_radius });
                 arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, sensors.orientationCamToGround, ballBisectorPlane);
-                measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), arma::diagmat(arma::vec({0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
-
-                // std::cerr << measurements[0].position[0]
-                //    << "," << measurements[0].position[1]
-                //    << "," << measurements[0].position[2]
-                //    << "," << measurements[1].position[0]
-                //    << "," << measurements[1].position[1]
-                //    << "," << measurements[1].position[2]
-                //    << std::endl;
+                measurements.push_back({ /*cartesianToSpherical*/(ballCentreGroundProj), arma::diagmat(arma::vec({0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
 
                 emit(graph("Ball Width", measurements[0].position[0], measurements[0].position[1], measurements[0].position[2]));
                 emit(graph("Ball D2P", measurements[1].position[0], measurements[1].position[1], measurements[1].position[2]));

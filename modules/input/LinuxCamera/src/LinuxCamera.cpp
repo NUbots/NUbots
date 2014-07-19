@@ -65,6 +65,7 @@ namespace modules {
                 cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
                 cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
 
+
                 emit<Scope::DIRECT>(std::move(cameraParameters));
 
                 try {
