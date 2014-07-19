@@ -302,7 +302,6 @@ namespace modules {
                     //     sensors->rightFootDown = previousSensors->rightFootDown;
                     // }
 
-                    sensors->odometry = arma::eye(4,4);
                     // // Kinematics odometry
                     // arma::mat44 odometryRightFoot = arma::eye(4,4);
                     // arma::mat44 odometryLeftFoot = arma::eye(4,4);

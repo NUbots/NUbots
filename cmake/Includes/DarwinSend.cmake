@@ -9,7 +9,7 @@ FOREACH(robot 1 2 3 4 5 6 7)
 
         # Make our installer
         ADD_CUSTOM_TARGET("d${robot}${config}"
-                          COMMAND python "${CMAKE_SOURCE_DIR}/cmake/Scripts/install.py" "--robot_ip=10.0.1.5${robot}" "--config=${config}" "--username=darwin"
+                          COMMAND python "${CMAKE_SOURCE_DIR}/cmake/Scripts/install.py" "--robot_ip=10.0.1.4${robot}" "--config=${config}" "--username=darwin"
                           DEPENDS ${roles} "${CMAKE_SOURCE_DIR}/cmake/Scripts/install.py")
 
 
