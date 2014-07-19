@@ -20,43 +20,13 @@
 #ifndef MESSAGES_BEHAVIOUR_LOOKSTRATEGY_H
 #define MESSAGES_BEHAVIOUR_LOOKSTRATEGY_H
 
-
 namespace messages {
-    namespace behaviour {
-        struct HeadBehaviourConfig{
-            static constexpr const char* CONFIGURATION_PATH = "HeadBehaviour.yaml";
-        };
+namespace behaviour {
+    struct LookStrategy {
+        std::vector<std::type_index> priorities;
+    };
 
-	struct LookAtBallStart {
-	};
-
-	struct LookAtBallStop {
-	};
-
-	struct LookAtGoalStart {
-	};
-
-	struct LookAtGoalStop {
-	};
-
-        struct LookAtAngle {
-            double yaw;
-            double pitch;
-            //double width;
-        };
-
-        struct LookAtPosition {
-            double yaw;
-            double pitch;
-        };
-
-        struct LookAtPoint {
-            double x;
-            double y;
-            double xError;
-            double yError;
-        };
-    }
+}
 }
 
 #endif

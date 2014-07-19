@@ -43,10 +43,10 @@ namespace messages {
                 float dGain;
 
                 float goalPosition;
-                float goalSpeed;
+                float goalVelocity;
 
                 float presentPosition;
-                float presentSpeed;
+                float presentVelocity;
 
                 float load;
                 float voltage;

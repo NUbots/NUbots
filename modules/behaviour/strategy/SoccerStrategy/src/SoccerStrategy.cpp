@@ -44,19 +44,11 @@ namespace modules {
 		using LocalisationBall = messages::localisation::Ball;
 		using VisionBall = messages::vision::Ball; // replace messages::vision::Ball with arma::vec2
 		using messages::localisation::Self;
-		using messages::behaviour::LookAtBallStart;
-		using messages::behaviour::LookAtBallStop;
-		using messages::behaviour::LookAtGoalStart;
-		using messages::behaviour::LookAtGoalStop;
-		using messages::behaviour::LookAtAngle;
-		using messages::behaviour::LookAtPoint;
-		using messages::behaviour::LookAtPosition;
 		using messages::behaviour::WalkStrategy;
 		using messages::behaviour::WalkTarget;
 		using messages::behaviour::WalkApproach;
 		using messages::behaviour::KickPlan;
 		using messages::behaviour::DivePlan;
-		using messages::behaviour::HeadBehaviourConfig;
 		using messages::platform::darwin::DarwinSensors;
 		using messages::platform::darwin::ButtonLeftDown;
 		using messages::platform::darwin::ButtonMiddleDown;
@@ -134,14 +126,12 @@ namespace modules {
 
 				FIELD_DESCRIPTION = *desc;
 				enemyGoal = {FIELD_DESCRIPTION.dimensions.field_length / 2, 0};
-				
+
 				// TODO should these be moved to config?
 				penalisedButtonStatus = false;
 				feetOffGround = true;
 				isKicking = false;
 				isWalking = false;
-				lookingAtBall = false;
-				lookingAtGoal = false;
 
 				currentState.primaryGameState = GameStatePrimary::INITIAL;
 				currentState.secondaryGameState = GameStateSecondary::NORMAL;
@@ -243,30 +233,6 @@ namespace modules {
 				isWalking = false;
 			});
 
-			// Check to see if we are looking at the ball.
-			on<Trigger<LookAtBallStart>>([this](const LookAtBallStart&) {
-				lookingAtBall = true;
-//				std::cerr << "LOOKING AT BALL" << std::endl;
-			});
-
-			// Check to see if we are no longer looking at the ball.
-			on<Trigger<LookAtBallStop>>([this](const LookAtBallStop&) {
-				lookingAtBall = false;
-//				std::cerr << "NOT LOOKING AT BALL" << std::endl;
-			});
-
-			// Check to see if we are looking at the goals.
-			on<Trigger<LookAtGoalStart>>([this](const LookAtGoalStart&) {
-				lookingAtGoal = true;
-//				std::cerr << "LOOKING AT GOAL" << std::endl;
-			});
-
-			// Check to see if we are no longer looking at the goals.
-			on<Trigger<LookAtGoalStop>>([this](const LookAtGoalStop&) {
-				lookingAtGoal = false;
-//				std::cerr << "NOT LOOKING AT GOAL" << std::endl;
-			});
-
 			// Main Loop
 			on<Trigger<Every<30, Per<std::chrono::seconds>>>,
 				With<LocalisationBall>,
@@ -282,7 +248,7 @@ namespace modules {
 
 					// Update game state from game controller
 					updateGameState(gameState);
-					
+
 					// Make a copy of the previous state.
 					memcpy(&previousState, &currentState, sizeof(State));
 
@@ -302,7 +268,7 @@ namespace modules {
 					arma::vec2 globalBallPosition = utility::localisation::transform::RobotToWorldTransform(currentState.position, currentState.heading, currentState.ball.position);
 
 					// Are we kicking off?
-					if (gameState != NULL) { 
+					if (gameState != NULL) {
 						currentState.kickOff = gameState->ourKickOff;
 					}
 
@@ -314,7 +280,7 @@ namespace modules {
 					currentState.pickedUp = feetOffGround && !isGettingUp && !isDiving;
 
 					// Have I been penalised or unpenalised?
-					if (gameState != NULL) { 
+					if (gameState != NULL) {
 						if (gameState->team.players.at(0).penaltyReason != PenaltyReason::UNPENALISED && !previousState.penalised) {
 							currentState.penalised = true;
 							emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
@@ -385,12 +351,12 @@ namespace modules {
 						planeGoalie.setFromNormal(xaxis, goaliePoint);
 						planeSelf.setFromNormal(currentState.ball.position, currentState.position);
 
-						line.setFromDirection(utility::localisation::transform::RobotToWorldTransform(arma::vec2{0,0}, currentState.heading, currentState.ball.velocity), 
+						line.setFromDirection(utility::localisation::transform::RobotToWorldTransform(arma::vec2{0,0}, currentState.heading, currentState.ball.velocity),
 							                  globalBallPosition,
 							                  arma::vec2{0,std::numeric_limits<double>::infinity()});	//Check forward along line only
 
 						goalie_line.setFromTwoPoints(centreOfOurGoal, globalBallPosition);
-						
+
 						// Is the ball approaching our goals?
 						try {
 							// Throws std::domain_error if there is no intersection.
@@ -461,7 +427,7 @@ namespace modules {
 										playSoccer(ball.position, visionBalls.at(0), selfs[0], gameState);
 									} else {
 										searchForBall(ball, selfs[0], gameState);
-									}	
+									}
 								}
 							}
 							break;
@@ -705,7 +671,7 @@ namespace modules {
 						|| std::fabs(heading - std::atan2(currentState.heading[1], currentState.heading[0]) > ANGLE_THRESHOLD)) {
 					sideStepToPoint(ZONES.at(MY_ZONE).defaultPosition);
 				}
-				
+
 				diveForBall(localisationBall);
 			}
 
@@ -715,7 +681,7 @@ namespace modules {
 				(void)gameState;
 
 				//TODO enhance this behaviour
-				if (isWalking && arma::norm(self.position - ZONES.at(MY_ZONE).defaultPosition) < POSITION_THRESHOLD_TIGHT) 
+				if (isWalking && arma::norm(self.position - ZONES.at(MY_ZONE).defaultPosition) < POSITION_THRESHOLD_TIGHT)
 				{
 
 					if (utility::time::TimeDifferenceSeconds(NUClear::clock::now(), currentState.timeBallLastSeen) > BALL_TIMEOUT_THRESHOLD) {
@@ -734,7 +700,7 @@ namespace modules {
 
 				if(!currentState.kickOff && currentState.kicker){
 					startPosition = ZONES.at(MY_ZONE).startPosition - arma::vec2{-FIELD_DESCRIPTION.dimensions.center_circle_diameter * 1.5, 0};
-				} else { 
+				} else {
 					startPosition = ZONES.at(MY_ZONE).startPosition;
 				}
 
@@ -744,7 +710,7 @@ namespace modules {
 							  && std::fabs(heading - std::atan2(currentState.heading[1], currentState.heading[0])) < ANGLE_THRESHOLD) {
 					stopWalking();
 				} else if(arma::norm(self.position - ZONES.at(MY_ZONE).startPosition) > POSITION_THRESHOLD_LOOSE
-						||std::fabs(heading - std::atan2(currentState.heading[1], currentState.heading[0])) > ANGLE_THRESHOLD) 
+						||std::fabs(heading - std::atan2(currentState.heading[1], currentState.heading[0])) > ANGLE_THRESHOLD)
 				{
 					goToPoint(ZONES.at(MY_ZONE).startPosition, arma::vec2{std::cos(heading), std::sin(heading)});
 				}
@@ -758,62 +724,16 @@ namespace modules {
 
 			//TODO figure out what these should do
 
-			void SoccerStrategy::findSelfAndBall(){
-//std::cerr << __func__ << std::endl;
-				// If we haven't seen the ball for some time now, look for the ball.
-				// Otherwise look for the goal.
-				// Try to mix these two actions nicely so we can get good localisation as well as adequate knowledge of the ball location.
-				if (!lookingAtBall && (utility::time::TimeDifferenceSeconds(NUClear::clock::now(), currentState.timeBallLastSeen) > BALL_TIMEOUT_THRESHOLD)) {
-					// We can't be looking at both the ball and goal simulatenously.
-					if (lookingAtGoal) {
-						emit(std::make_unique<LookAtGoalStop>());
-					}
-
-					// Prevent spamming.
-					if (!lookingAtGoal) {
-						emit(std::make_unique<LookAtGoalStart>());
-					}
-				}
-
-				else {
-					// We can't be looking at both the ball and goal simulatenously.
-					if (lookingAtBall) {
-						emit(std::make_unique<LookAtBallStop>());
-					}
-
-					// Looking for the goals should help localisation to converge on our position.
-					// Prevent spamming.
-					if (!lookingAtGoal) {
-						emit(std::make_unique<LookAtGoalStart>());
-					}
-				}
+			void SoccerStrategy::findSelfAndBall() {
+				// TODO emit a strategy that prioirites self and ball
 			}
 
 			void SoccerStrategy::findSelf() {
-//std::cerr << __func__ << std::endl;
-				// We can't be looking at both the ball and goal simulatenously.
-				if (lookingAtBall) {
-					emit(std::make_unique<LookAtBallStop>());
-				}
-
-				// Looking for the goals should help localisation to converge on our position.
-				// Prevent spamming.
-				if (!lookingAtGoal) {
-					emit(std::make_unique<LookAtGoalStart>());
-				}
+				// TODO emit a strategy that priorities self
 			}
 
 			void SoccerStrategy::findBall() {
-//std::cerr << __func__ << std::endl;
-				// We can't be looking at both the ball and goal simulatenously.
-				if (lookingAtGoal) {
-					emit(std::make_unique<LookAtGoalStop>());
-				}
-
-				// Prevent spamming.
-				if (!lookingAtBall) {
-					emit(std::make_unique<LookAtBallStart>());
-				}
+				// TODO emit a strategy to prioirties ball
 			}
 
 			void SoccerStrategy::spin(){

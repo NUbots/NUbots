@@ -29,8 +29,7 @@ ADD_ROLE(
         behaviour::skills::Stand
         behaviour::skills::FallingRelax
         behaviour::skills::Getup
-        behaviour::skills::Look
-        behaviour::planning::LookAtBall
+        behaviour::skills::LookAt
 
         #Motion
         motion::ScriptEngine

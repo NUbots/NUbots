@@ -36,8 +36,7 @@ ADD_ROLE(
         behaviour::skills::KickScript
 
         # Lookat ball
-        behaviour::skills::Look
-        behaviour::planning::LookAtBall
+        behaviour::skills::LookAt
 
         # Localisation
         #localisation::MMKFRobotLocalisation
