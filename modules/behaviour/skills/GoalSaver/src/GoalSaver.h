@@ -34,8 +34,6 @@ namespace skills {
         static constexpr const char* CONFIGURATION_PATH = "GoalSaver.yaml";
 
     private:
-       	float SPEED_THRESHOLD;
-        float DISTANCE_THRESHOLD;
         const size_t id;
         float DIVE_PRIORITY;
         float EXECUTION_PRIORITY;

@@ -105,8 +105,8 @@ namespace modules {
                     //-----------internal fns--------------
                     arma::vec generateWalk(const arma::vec& move, bool omniPositioning);
                     arma::vec approachFromDirection(const messages::localisation::Self& self,
-                                                   const arma::vec& target,
-                                                   const arma::vec& direction);
+                                                   const arma::vec2& target,
+                                                   const arma::vec2& direction);
                     arma::vec goToPoint(const messages::localisation::Self& self,
                                          const arma::vec2& target,
                                          const arma::vec2& direction);

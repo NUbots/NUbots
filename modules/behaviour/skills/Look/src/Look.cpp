@@ -63,7 +63,7 @@ namespace modules {
 
                 on<Trigger<ExecuteLook>>([this] (const ExecuteLook&) {
                     //we are active!
-
+                    lastPanEnd = NUClear::clock::now();
                 });
 
                 //look at a single visible object using the angular offsets in the image

@@ -49,7 +49,7 @@ Vagrant.configure("2") do |config|
     nuclearport.vm.network :forwarded_port, guest: 12001, host: 12001
 
     # Add hostname here if running NUbugger on the VM
-    if ['Ne', 'jordan-XPS13'].include?(Socket.gethostname) # NUbugger Port
+    if ['Ne', 'jordan-XPS13', 'taylor-ubuntu'].include?(Socket.gethostname) # NUbugger Port
       nuclearport.vm.network :forwarded_port, guest: 9090, host: 9090
     end
 

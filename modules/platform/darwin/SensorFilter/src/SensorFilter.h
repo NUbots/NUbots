@@ -49,6 +49,7 @@ namespace modules {
                 double HIGH_NOISE_THRESHOLD;
                 double HIGH_NOISE_GAIN;
                 double LOW_NOISE_THRESHOLD;
+                int DEBOUNCE_THRESHOLD;
 
                 double SUPPORT_FOOT_FSR_THRESHOLD;
                 int REQUIRED_NUMBER_OF_FSRS;
@@ -64,6 +65,10 @@ namespace modules {
                     const messages::input::Sensors& sensors,
                     const messages::input::Sensors& previousSensors,
                     utility::motion::kinematics::Side side);
+
+                // used to debounce button presses
+                bool leftDown = false;
+                bool middleDown = false;
             };
         }
     }

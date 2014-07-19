@@ -34,9 +34,16 @@ namespace modules {
             class LookAtBall : public NUClear::Reactor {
             private:
                 //const size_t id;
-                NUClear::clock::time_point timeSinceLastSeen;
+                std::chrono::system_clock::time_point timeLastSeen;
+                size_t BALL_SEEN_COUNT_THRESHOLD = 4;
+                size_t framesSinceSeen = 0;
+                double BALL_SEARCH_TIMEOUT_MILLISECONDS;
+		        double X_FACTOR;
+		        double Y_FACTOR;
+		        double BALL_UNCERNTAINTY_THRESHOLD;
+		
+		ReactionHandle handle;
 
-                float BALL_SEARCH_TIMEOUT_MILLISECONDS;
             public:
                 explicit LookAtBall(std::unique_ptr<NUClear::Environment> environment);
 

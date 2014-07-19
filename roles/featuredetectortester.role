@@ -2,6 +2,7 @@ ADD_ROLE(
     NAME featuredetectortester
     MODULES
         support::configuration::ConfigSystem
+        support::configuration::GlobalConfig
         input::LinuxCamera
         vision::LUTClassifier
         vision::GoalDetector
@@ -11,5 +12,7 @@ ADD_ROLE(
         support::logging::ConsoleLogHandler
         platform::darwin::HardwareIO
         platform::darwin::SensorFilter
+
+        support::configuration::SoccerConfig
 )
 

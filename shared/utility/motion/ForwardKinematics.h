@@ -371,7 +371,6 @@ namespace kinematics {
         groundToBody.submat(0,1,2,1) = groundMatrixY;
         groundToBody.submat(0,2,2,2) = groundNormal_body;
         groundToBody.submat(0,3,2,3) = arma::vec{0, 0, -bodyHeight};
-
         return utility::math::matrix::orthonormal44Inverse(groundToBody);
     }
 

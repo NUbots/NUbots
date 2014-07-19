@@ -21,8 +21,9 @@
 #define MODULES_BEHAVIOUR_PLANNERS_LOOKATGOAL_H
 
 #include <nuclear>
+#include <armadillo>
 
-
+#include "messages/vision/VisionObjects.h"
 
 namespace modules {
     namespace behaviour {
@@ -35,7 +36,16 @@ namespace modules {
              */
             class LookAtGoal : public NUClear::Reactor {
             private:
-                //const size_t id;
+                NUClear::clock::time_point timeSinceLastSeen;
+
+		float BALL_SEARCH_TIMEOUT_MILLISECONDS;
+		float X_FACTOR;
+		float Y_FACTOR;
+		float BALL_UNCERNTAINTY_THRESHOLD;
+
+		ReactionHandle handle;
+
+		bool compareGoals(const messages::vision::Goal& i, const messages::vision::Goal& j);
 
             public:
                 explicit LookAtGoal(std::unique_ptr<NUClear::Environment> environment);

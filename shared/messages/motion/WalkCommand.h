@@ -42,8 +42,7 @@ namespace messages {
         struct WalkStopCommand {
         };
         
-        struct WalkStopped{
-            
+        struct WalkStopped{            
         };
     }  // motion
 }  // messages

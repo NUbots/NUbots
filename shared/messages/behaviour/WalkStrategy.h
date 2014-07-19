@@ -38,6 +38,7 @@ namespace messages {
             ApproachFromDirection = 1,
             WalkToPoint = 2,
             OmnidirectionalReposition = 3,
+            DirectCommand = 4
         };
 
         struct WalkStrategy {

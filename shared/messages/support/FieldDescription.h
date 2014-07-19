@@ -40,6 +40,7 @@ public:
         double goal_area_width;
         double goal_crossbar_height;
         double goalpost_diameter;
+        double goal_crossbar_diameter;
         double goal_net_height;
         double penalty_mark_distance;
         double center_circle_diameter;
@@ -47,6 +48,7 @@ public:
     } dimensions;
 
     double ball_radius;
+    double goalpost_top_height;
 
     // Coordinates of goalpost centers calculated from the FieldDimensions:
     // (arma::vec2)

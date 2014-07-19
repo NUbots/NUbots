@@ -18,7 +18,7 @@
  */
 
 #include "DisplayTest.h"
-#include "utility/nubugger/NUgraph.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "messages/input/proto/MotionCapture.pb.h"
 
 using utility::nubugger::graph;

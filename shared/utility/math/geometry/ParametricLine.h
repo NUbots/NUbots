@@ -84,7 +84,7 @@ namespace geometry {
                 throw std::domain_error("Line::intersect - Lines in more than two dimensions rarely meet! Feature to be added later.");
             }
             //Setup linear equations:
-            arma::mat22 Ainverse;
+            arma::mat Ainverse;
             //Check extended lines intersect at all
             double determinant = - direction[0] * l.direction[1] + direction[1] * l.direction[0];
             if(determinant == 0){
@@ -95,7 +95,7 @@ namespace geometry {
                 Ainverse *= 1 / determinant;
             }
 
-            arma::vec/*2*/ tValues = Ainverse * arma::vec(l.point - point);  //arma::meat 
+            arma::vec/*2*/ tValues = Ainverse * (arma::vec(l.point) - arma::vec(point));  //arma::meat 
 
             //Check bounds of line segments
             if(tValues[0] < tLimits[0] || tValues[0] > tLimits[1] //ie outside range of first line

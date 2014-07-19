@@ -1,0 +1,18 @@
+ADD_ROLE(
+    NAME speakTest
+    MODULES
+        #Support
+        support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem
+        support::configuration::GlobalConfig
+        support::configuration::NetworkingConfiguration
+        support::NUbugger
+
+        #Sensors
+        platform::darwin::HardwareIO
+
+	#Output
+	output::eSpeak
+	output::SpeakTest
+)

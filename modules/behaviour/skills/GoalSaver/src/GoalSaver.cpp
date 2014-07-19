@@ -57,36 +57,10 @@ namespace skills {
         : Reactor(std::move(environment))
         , id(size_t(this) * size_t(this) - size_t(this)) {
 
-        on<Trigger<Ball>, With<std::vector<messages::vision::Ball>>>([this] (const Ball& ball, const std::vector<messages::vision::Ball>& vision_balls) {
-            if(vision_balls.size()>0 && ball.position[0] > 0){
-                NUClear::log("Ball Vel:", -ball.velocity[0] , ball.position[0]);
-                if(-ball.velocity[0] > SPEED_THRESHOLD && ball.position[0] < DISTANCE_THRESHOLD){
-                    if(ball.position[1]>0){
-                        //Dive left
-                        auto x = std::make_unique<DiveCommand>();
-                        x->direction[0] = 0;
-                        x->direction[1] = 1;
-                        emit(std::move(x));
-                    } else {
-                        //Dive right
-                        auto x = std::make_unique<DiveCommand>();
-                        x->direction[0] = 0;
-                        x->direction[1] = -1;
-                        emit(std::move(x));
-                    }
-                }
-            }
-
-
-        });
-
         // do a little configurating
         on<Trigger<Configuration<GoalSaver>>>([this] (const Configuration<GoalSaver>& config){
             DIVE_PRIORITY = config["DIVE_PRIORITY"].as<float>();
             EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
-
-            SPEED_THRESHOLD = config["SPEED_THRESHOLD"].as<float>();
-            DISTANCE_THRESHOLD = config["DISTANCE_THRESHOLD"].as<float>();
         });
 
         on<Trigger<DiveCommand>>([this] (const DiveCommand& diveCommand) {
@@ -103,10 +77,10 @@ namespace skills {
             // assume valid at this point as this is checked on the walkcommand trigger
             if (quadrant == 1) {
                 // side
-                emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"BlockLeft.yaml"})));
+                emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"DiveLeft.yaml"})));
             } else if (quadrant == 3) {
                 // side
-                emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"BlockRight.yaml"})));
+                emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"DiveRight.yaml"})));
             }
 
 

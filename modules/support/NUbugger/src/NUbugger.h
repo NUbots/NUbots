@@ -55,6 +55,7 @@ namespace modules {
             std::mutex mutex;
 
             void provideDataPoints();
+            void provideDrawObjects();
             void provideBehaviour();
             void provideGameController();
             void provideLocalisation();

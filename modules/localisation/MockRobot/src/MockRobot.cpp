@@ -22,7 +22,7 @@
 #include "utility/math/angle.h"
 #include "utility/math/matrix.h"
 #include "utility/math/coordinates.h"
-#include "utility/nubugger/NUgraph.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/transform.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/support/Configuration.h"
@@ -103,9 +103,9 @@ namespace localisation {
         });
 
         // Update robot position
-        on<Trigger<Every<10, std::chrono::milliseconds>>>("Mock Robot motion", [this](const time_t&){
+        on<Trigger<Every<10, std::chrono::milliseconds>>>("Mock Robot motion", [this](const time_t&) {
             if (!cfg_.simulate_robot_movement) {
-                robot_velocity_ = { 0, 0 };
+                robot_velocity_ = arma::vec2({ 0, 0 });
                 return;
             }
 
@@ -114,28 +114,26 @@ namespace localisation {
             double x_amp = 3;
             double y_amp = 2;
 
-            arma::vec old_pos = robot_position_;
+            arma::vec2 old_pos = arma::vec2(robot_position_);
 
             auto wave1 = triangle_wave(t, period);
             auto wave2 = triangle_wave(t + (period / 4.0), period);
             // auto wave1 = sine_wave(t, period);
             // auto wave2 = sine_wave(t + (period / 4.0), period);
-            robot_position_ = { wave1 * x_amp, wave2 * y_amp };
+            robot_position_ = arma::vec2({ wave1 * x_amp, wave2 * y_amp });
 
-            arma::vec diff = robot_position_ - old_pos;
+            arma::vec2 diff = robot_position_ - old_pos;
 
-            robot_heading_ = vectorToBearing(diff);
-            robot_velocity_ = robot_heading_ / 100.0;
-
+            robot_heading_ = vectorToBearing(arma::vec2(diff));
+            // robot_velocity_ = arma::vec2({arma::norm(diff) / 100.0, 0}); //Robot coordinates 
+            robot_odometry_ = arma::vec2({arma::norm(diff), 0}); //Robot coordinates 
 
             double imu_period = cfg_.robot_imu_drift_period;
-            world_imu_direction = { std::cos(2 * M_PI * t / imu_period),
-                                    std::sin(2 * M_PI * t / imu_period) };
+            world_imu_direction_ = arma::vec2({ std::cos(2 * M_PI * t / imu_period), std::sin(2 * M_PI * t / imu_period) });
         });
 
         // Update ball position
         on<Trigger<Every<10, std::chrono::milliseconds>>>("Mock Ball motion", [this](const time_t&){
-
             if (!cfg_.simulate_ball_movement) {
                 ball_velocity_ = { 0, 0 };
                 return;
@@ -155,33 +153,6 @@ namespace localisation {
             ball_velocity_ = { velocity_x, velocity_y };
         });
 
-        // // Simulate Odometry
-        // on<Trigger<Every<100, std::chrono::milliseconds>>>("Mock Odometry Simulation",
-        //     [this](const time_t&) {
-        //     if (!cfg_.simulate_odometry)
-        //         return;
-
-        //     auto odom = std::make_unique<messages::localisation::FakeOdometry>();
-
-        //     double heading_diff = robot_heading_ - odom_old_robot_heading_;
-        //     odom->torso_rotation = normalizeAngle(heading_diff);
-
-        //     // Calculate torso displacement in robot-space:
-        //     arma::vec2 position_diff = robot_position_ - odom_old_robot_position_;
-        //     arma::mat22 rot = rotationMatrix(robot_heading_);
-        //     odom->torso_displacement = rot * position_diff;
-
-        //     odom_old_robot_position_ = robot_position_;
-        //     odom_old_robot_heading_ = robot_heading_;
-
-        //     emit(graph("Odometry torso_displacement",
-        //         odom->torso_displacement[0],
-        //         odom->torso_displacement[1]));
-        //     emit(graph("Odometry torso_rotation", odom->torso_rotation));
-
-        //     emit(std::move(odom));
-        // });
-
         // Simulate Vision
         on<Trigger<Every<30, Per<std::chrono::seconds>>>,
            Options<Sync<MockRobot>>>("Mock Vision Simulation", [this](const time_t&) {
@@ -193,14 +164,18 @@ namespace localisation {
                 return;
             }
 
-            // Sensors:
             auto sensors = std::make_shared<messages::input::Sensors>();
 
+
+            // Sensors:
+
             // orientation
-            arma::vec2 robot_imu_dir_ = WorldToRobotTransform(arma::vec2({0, 0}), robot_heading_, world_imu_direction);
+            arma::vec2 robot_imu_dir_ = WorldToRobotTransform(arma::vec2({0, 0}), robot_heading_, world_imu_direction_);
             arma::mat orientation = arma::eye(3, 3);
-            orientation.submat(0, 0, 1, 0) = robot_imu_dir_;
-            orientation.submat(0, 1, 1, 1) = arma::vec2({ -robot_imu_dir_(1), robot_imu_dir_(0) });
+
+                orientation.submat(0, 0, 1, 0) = robot_imu_dir_;
+                orientation.submat(0, 1, 1, 1) = arma::vec2({ -robot_imu_dir_(1), robot_imu_dir_(0) });
+
             sensors->orientation = orientation;
 
             // orientationCamToGround
@@ -208,6 +183,11 @@ namespace localisation {
 
             // forwardKinematics
             sensors->forwardKinematics[ServoID::HEAD_PITCH] = arma::eye(4, 4);
+
+            //Odometry simulation
+            sensors->odometry = robot_odometry_;
+            sensors->odometryCovariance = arma::eye(2,2) * 0.1;
+
 
             // Goal observation
             if (cfg_.simulate_goal_observations) {
@@ -286,7 +266,6 @@ namespace localisation {
            Options<Sync<MockRobot>>>("NUbugger Output",
             [this](const time_t&,
                    const Mock<std::vector<messages::localisation::Self>>& mock_robots) {
-
             auto& robots = mock_robots.data;
 
             emit(graph("Actual robot position", robot_position_[0], robot_position_[1]));
@@ -304,7 +283,7 @@ namespace localisation {
                 return;
 
             auto robots_msg = std::make_unique<std::vector<messages::localisation::Self>>();
-            
+
             for (auto& model : robots) {
                 robots_msg->push_back(model);
             }
@@ -312,9 +291,7 @@ namespace localisation {
             messages::localisation::Self self_marker;
             self_marker.position = robot_position_;
             self_marker.heading = bearingToUnitVector(robot_heading_);
-            self_marker.sr_xx = 0.01;
-            self_marker.sr_xy = 0;
-            self_marker.sr_yy = 0.01;
+            self_marker.position_cov = arma::eye(2,2) * 0.1;
             robots_msg->push_back(self_marker);
 
             emit(std::move(robots_msg));
@@ -346,33 +323,27 @@ namespace localisation {
             // Ball message
             if (!cfg_.emit_ball_fieldobjects)
                 return;
-            
+
             auto balls_msg = std::make_unique<std::vector<messages::localisation::Ball>>();
 
             messages::localisation::Ball ball_model;
             ball_model.position = ball_pos;
             ball_model.velocity = ball_velocity_;
-            ball_model.sr_xx = ball.sr_xx;
-            ball_model.sr_xy = ball.sr_xy;
-            ball_model.sr_yy = ball.sr_yy;
+            ball_model.position_cov = ball.position_cov;
             ball_model.world_space = true;
             balls_msg->push_back(ball_model);
 
             messages::localisation::Ball ball_marker;
             ball_marker.position = ball_position_;
             ball_marker.velocity = ball_velocity_;
-            ball_marker.sr_xx = 0.01;
-            ball_marker.sr_xy = 0;
-            ball_marker.sr_yy = 0.01;
+            ball_marker.position_cov = arma::eye(2,2) * 0.1;
             ball_marker.world_space = true;
             balls_msg->push_back(ball_marker);
 
             messages::localisation::Ball robot_ball;
             robot_ball.position = robot_ball_pos;
             robot_ball.velocity = ball_velocity_;
-            robot_ball.sr_xx = 0.01;
-            robot_ball.sr_xy = 0;
-            robot_ball.sr_yy = 0.01;
+            robot_ball.position_cov = arma::eye(2,2) * 0.1;
             robot_ball.world_space = true;
             balls_msg->push_back(robot_ball);
 

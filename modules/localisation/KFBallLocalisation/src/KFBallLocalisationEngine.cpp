@@ -24,7 +24,7 @@
 #include "messages/localisation/FieldObject.h"
 
 using messages::vision::VisionObject;
-using messages::localisation::FakeOdometry;
+// using messages::localisation::FakeOdometry;
 using utility::time::TimeDifferenceSeconds;
 
 namespace modules {
@@ -37,12 +37,12 @@ void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point 
     ball_filter_.timeUpdate(seconds);
 }
 
-void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
-                                          const FakeOdometry&) {
-    double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
-    last_time_update_time_ = current_time;
-    ball_filter_.timeUpdate(seconds); // TODO odometry was removed from here odom
-}
+// void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
+//                                           const FakeOdometry&) {
+//     double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
+//     last_time_update_time_ = current_time;
+//     ball_filter_.timeUpdate(seconds); // TODO odometry was removed from here odom
+// }
 
 double KFBallLocalisationEngine::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object) {

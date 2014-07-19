@@ -37,16 +37,17 @@ namespace localisation {
         void UpdateConfiguration(
             const messages::support::Configuration<MockRobotConfig>& config);
 
-        arma::vec ball_position_ = { 0, 0 };
-        arma::vec ball_velocity_ = { 0, 0 };
-        arma::vec robot_position_ = { 0, 0 };
-        arma::vec robot_velocity_ = { 0, 0 };
-        arma::vec world_imu_direction = { 0, 1 };
-        arma::vec robot_imu_direction_ = { 0, 1, 0 };
+        arma::vec2 ball_position_ = { 0, 0 };
+        arma::vec2 ball_velocity_ = { 0, 0 };
+        arma::vec2 robot_position_ = { 0, 0 };
+        arma::vec2 robot_velocity_ = { 0, 0 };
+        arma::vec2 world_imu_direction_ = { 0, 1 };
+        arma::vec3 robot_imu_direction_ = { 0, 1, 0 };
+        arma::vec2 robot_odometry_ = { 0, 0 };
         // arma::vec robot_heading_ = { 1, 0 };
         // double robot_heading_ = 3.141;
         double robot_heading_ = 0;
-        arma::vec odom_old_robot_position_ = { 0, 0 };
+        arma::vec2 odom_old_robot_position_ = { 0, 0 };
         // arma::vec odom_old_robot_heading_ = { 1, 0 };
         double odom_old_robot_heading_ = 0;
 

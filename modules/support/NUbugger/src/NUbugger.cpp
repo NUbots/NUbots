@@ -24,7 +24,7 @@
 #include "messages/vision/LookUpTable.h"
 #include "messages/support/Configuration.h"
 
-#include "utility/nubugger/NUgraph.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/time/time.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
@@ -105,7 +105,7 @@ namespace support {
             }
         });
 
-        on<Trigger<Every<5, std::chrono::seconds>>>([this] (const time_t&) {
+        on<Trigger<Every<1, std::chrono::seconds>>>([this] (const time_t&) {
             Message message;
             message.set_type(Message::PING);
             message.set_filter_id(0);
@@ -114,6 +114,7 @@ namespace support {
         });
 
         provideDataPoints();
+        provideDrawObjects();
         provideBehaviour();
         provideGameController();
         provideLocalisation();

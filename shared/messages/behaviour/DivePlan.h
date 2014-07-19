@@ -17,28 +17,16 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef NUGRAPH_H
-#define NUGRAPH_H
+#ifndef MESSAGES_BEHAVIOUR_DIVEPLAN_H
+#define MESSAGES_BEHAVIOUR_DIVEPLAN_H
 
-#include <nuclear>
-#include "messages/support/nubugger/proto/DataPoint.pb.h"
+namespace messages {
+namespace behaviour {
 
-namespace utility {
-namespace nubugger{
-
-    template<typename... Values>
-    inline std::unique_ptr<messages::support::nubugger::proto::DataPoint> graph(std::string label, Values... values) {
-
-
-    	auto dataPoint = std::make_unique<messages::support::nubugger::proto::DataPoint>();
-    	dataPoint->set_label(label);
-    	for(const auto& value : { float(values)... }) {
-    		dataPoint->add_value(value);
-    	}
-    	return std::move(dataPoint);
-    }
+	struct DivePlan { 
+		arma::vec2 target;
+	};
 
 }
 }
-
 #endif

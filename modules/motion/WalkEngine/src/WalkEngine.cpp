@@ -31,7 +31,7 @@
 #include "utility/motion/RobotModels.h"
 #include "utility/math/matrix.h"
 #include "OPKinematics.h"
-#include "utility/nubugger/NUgraph.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/support/armayamlconversions.h"
 #include "messages/motion/WalkCommand.h"
 #include "messages/motion/ServoTarget.h"
@@ -124,10 +124,10 @@ namespace modules {
             on<Trigger<WalkOptimiserCommand> >([this](const WalkOptimiserCommand& command) {
                 configureWalk(command.walkConfig);
                 emit(std::make_unique<WalkConfigSaved>());
-            });            
+            });
 
             on<Trigger<Startup>>([this](const Startup&) {
-                
+
                 reset();
                 stopRequest = 2;
                 //start();
@@ -228,7 +228,7 @@ namespace modules {
             toeTipCompensation = config["toeTipCompensation"].as<float>();
 
             useAlternativeTrajectory = config["useAlternativeTrajectory"].as<bool>();
-            
+
             STAND_SCRIPT_DURATION_MILLISECONDS = config["STAND_SCRIPT_DURATION_MILLISECONDS"].as<int>();
         }
 
@@ -261,7 +261,7 @@ namespace modules {
             // g--------------------------------------------------------
                 // g Walk state variables
                 // g--------------------------------------------------------
-                
+
 
                 uTorso = {supportX, 0, 0};
                 uLeft = {0, footY, 0};

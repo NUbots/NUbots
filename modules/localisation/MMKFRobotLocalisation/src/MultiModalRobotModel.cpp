@@ -29,7 +29,6 @@
 
 using messages::input::Sensors;
 using utility::localisation::LocalisationFieldObject;
-using messages::localisation::FakeOdometry;
 using utility::math::coordinates::spherical2Radial;
 using utility::localisation::transform::SphericalRobotObservation;
 
@@ -44,11 +43,11 @@ std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
         << "weight: "
             << std::setw(7) << h.weight_ << ", "
         << "estimate: ["
-            << std::setw(7) << est[robot::kX] << ", "
-            << std::setw(7) << est[robot::kY] << ", "
-            // << std::setw(7) << est[robot::kHeadingX] << ", "
-            // << std::setw(7) << est[robot::kHeadingY] << "]"
-            << std::setw(7) << est[robot::kImuOffset] << "]"
+            << std::setw(7) << est(robot::kX) << ", "
+            << std::setw(7) << est(robot::kY) << ", "
+            // << std::setw(7) << est(robot::kHeadingX) << ", "
+            // << std::setw(7) << est(robot::kHeadingY) << "]"
+            << std::setw(7) << est(robot::kImuOffset) << "]"
         // << ", observation trail: [" << h.obs_trail_ << "]"
         // << ", covariance:\n" << h.GetCovariance()
         << ", observation count: " << h.obs_count_
@@ -59,26 +58,9 @@ void MultiModalRobotModel::TimeUpdate(double seconds) {
     for (auto& model : robot_models_)
         model->TimeUpdate(seconds);
 }
-void MultiModalRobotModel::TimeUpdate(double seconds, const FakeOdometry&) {
-    for (auto& model : robot_models_)
-        model->TimeUpdate(seconds); // TODO re add in odometry
-}
-
-void MultiModalRobotModel::TimeUpdate(double seconds, const Sensors&) {
-    for (auto& model : robot_models_)
-        model->TimeUpdate(seconds); // TODO re add in odometry
-}
-
 void RobotHypothesis::TimeUpdate(double seconds) {
     filter_.timeUpdate(seconds);
 }
-void RobotHypothesis::TimeUpdate(double seconds, const FakeOdometry&) {
-    filter_.timeUpdate(seconds); // TODO re add in odometry
-}
-void RobotHypothesis::TimeUpdate(double seconds, const Sensors&) {
-    filter_.timeUpdate(seconds); // TODO re add in odometry sensors
-}
-
 
 void MultiModalRobotModel::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object,
@@ -87,6 +69,7 @@ void MultiModalRobotModel::MeasurementUpdate(
     for (auto& model : robot_models_)
         model->MeasurementUpdate(observed_object, actual_object);
 }
+        
 
 void MultiModalRobotModel::MeasurementUpdate(
     const std::vector<messages::vision::VisionObject>& observed_objects,
@@ -113,6 +96,17 @@ double RobotHypothesis::MeasurementUpdate(
         quality *= filter_.measurementUpdate(measured_pos, cov, actual_pos, *(observed_object.sensors));
     }
 
+    return quality;
+}
+
+//Odometry
+void MultiModalRobotModel::MeasurementUpdate(const Sensors& sensors){
+    for (auto& model : robot_models_)
+        model->MeasurementUpdate(sensors);
+}
+
+double RobotHypothesis::MeasurementUpdate(const Sensors& sensors){
+    auto quality = filter_.measurementUpdate(sensors.odometry, sensors.odometryCovariance, sensors);
     return quality;
 }
 
@@ -349,8 +343,9 @@ void MultiModalRobotModel::MergeSimilarModels() {
             auto& model_a = robot_models_[ma];
             auto& model_b = robot_models_[mb];
 
-            if (!ModelsAreSimilar(model_a, model_b))
+            if (!ModelsAreSimilar(model_a, model_b)) {
                 continue;
+            }
 
             float wa = model_a->GetFilterWeight();
             float wb = model_b->GetFilterWeight();

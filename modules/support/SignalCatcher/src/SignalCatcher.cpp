@@ -39,6 +39,9 @@ namespace modules {
 
             // On a segfault run the sigsev handler
             std::signal(SIGSEGV, &SignalCatcher::segfaultConverter);
+
+            // On a segfault run the sigsev handler
+            std::signal(SIGABRT, &SignalCatcher::segfaultConverter);
         }
 
         void SignalCatcher::sigintHandler(int) {

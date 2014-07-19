@@ -31,7 +31,10 @@ namespace geometry {
     private:
     	std::vector<ParametricLine<2>> edges;
     public:
+    	Polygon() {}
     	Polygon(const std::vector<arma::vec2>& vertices);
+
+    	void set(const std::vector<arma::vec2>& vertices);
 
     	/*! @brief Checks if the point lies within the boundary of the polygon
     	*/

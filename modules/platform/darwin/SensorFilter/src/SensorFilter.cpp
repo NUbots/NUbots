@@ -23,7 +23,7 @@
 #include "messages/input/Sensors.h"
 #include "messages/input/CameraParameters.h"
 #include "messages/support/Configuration.h"
-#include "utility/nubugger/NUgraph.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/math/matrix.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/RobotModels.h"
@@ -34,6 +34,10 @@ namespace modules {
 
             using messages::support::Configuration;
             using messages::platform::darwin::DarwinSensors;
+            using messages::platform::darwin::ButtonLeftDown;
+            using messages::platform::darwin::ButtonLeftUp;
+            using messages::platform::darwin::ButtonMiddleDown;
+            using messages::platform::darwin::ButtonMiddleUp;
             using messages::input::Sensors;
             using messages::input::CameraParameters;
             using utility::nubugger::graph;
@@ -89,6 +93,8 @@ namespace modules {
                     HIGH_NOISE_THRESHOLD = file.config["HIGH_NOISE_THRESHOLD"].as<double>();
                     HIGH_NOISE_GAIN = file.config["HIGH_NOISE_GAIN"].as<double>();
                     LOW_NOISE_THRESHOLD = file.config["LOW_NOISE_THRESHOLD"].as<double>();
+                    DEBOUNCE_THRESHOLD = file.config["DEBOUNCE_THRESHOLD"].as<int>();
+
 
                     SUPPORT_FOOT_FSR_THRESHOLD = file.config["SUPPORT_FOOT_FSR_THRESHOLD"].as<double>();
                     REQUIRED_NUMBER_OF_FSRS = file.config["REQUIRED_NUMBER_OF_FSRS"].as<int>();
@@ -100,6 +106,43 @@ namespace modules {
 
                     MEASUREMENT_NOISE_ACCELEROMETER = arma::eye(3,3) * file["MEASUREMENT_NOISE_ACCELEROMETER"].as<double>();
                     MEASUREMENT_NOISE_GYROSCOPE = arma::eye(3,3) * file["MEASUREMENT_NOISE_GYROSCOPE"].as<double>();
+                });
+
+                on<Trigger<Last<10, messages::platform::darwin::DarwinSensors>>>([this](const LastList<messages::platform::darwin::DarwinSensors>& sensors) {
+                    int buttonLeftCount = 0;
+                    int buttonMiddleCount = 0;
+
+                    for (auto& sensor : sensors) {
+                        if (sensor->buttons.left) {
+                            buttonLeftCount++;
+                        }
+                        if (sensor->buttons.middle) {
+                            buttonMiddleCount++;
+                        }
+                    }
+
+//std::cerr << "leftCount - " << buttonLeftCount << std::endl;
+//std::cerr << "middleCount - " << buttonMiddleCount << std::endl;
+//std::cerr << "leftDown - " << ((leftDown) ? "Yes" : "No") << std::endl;
+//std::cerr << "middleDown - " << ((middleDown) ? "Yes" : "No") << std::endl;
+
+                    if (!leftDown && buttonLeftCount >= DEBOUNCE_THRESHOLD) {
+                        emit(std::make_unique<ButtonLeftDown>());
+                        leftDown = true;
+                    }
+                    else if (leftDown && buttonLeftCount < DEBOUNCE_THRESHOLD) {
+                        emit(std::make_unique<ButtonLeftUp>());
+                        leftDown = false;
+                    }
+
+                    if (!middleDown && buttonMiddleCount > DEBOUNCE_THRESHOLD) {
+                        emit(std::make_unique<ButtonMiddleDown>());
+                        middleDown = true;
+                    }
+                    else if (middleDown && buttonMiddleCount < DEBOUNCE_THRESHOLD) {
+                        emit(std::make_unique<ButtonMiddleUp>());
+                        middleDown = false;
+                    }
                 });
 
                 on< Trigger<DarwinSensors>

@@ -15,10 +15,9 @@
     "turnDeviation" : 0.1,
 
     "ballLineupDistance" : 0.2,
-    "ApproachCurveFactor" : 0.2,
     "closeApproachSpeed" : 0.45,
     "closeApproachDistance" : 0.30,
-	"turnSpeed" : 0.4,
+	"turnSpeed" : 1,
 
     "distanceHysteresis" : 0.10,
     "turningHysteresis" : 0.1,

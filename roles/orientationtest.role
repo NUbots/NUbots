@@ -2,7 +2,9 @@ ADD_ROLE(
     NAME orientationtest
     MODULES
         support::configuration::ConfigSystem
+        support::configuration::GlobalConfig
         platform::darwin::HardwareIO
+        support::configuration::SoccerConfig
         platform::darwin::SensorFilter
         support::NUbugger
         debug::NUbugger

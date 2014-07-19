@@ -20,7 +20,7 @@
 #include "eSpeak.h"
 
 #include <espeak/speak_lib.h>
-#include "messages/Say.h"
+#include "messages/output/Say.h"
 
 namespace modules {
     namespace output {
@@ -33,7 +33,7 @@ namespace modules {
             espeak_SetParameter(espeakVOLUME, 100, 0);
             espeak_SetParameter(espeakCAPITALS, 6, 0);
 
-            on<Trigger<messages::Say>, Options<Sync<eSpeak>>>([](const messages::Say& message) {
+            on<Trigger<messages::output::Say>, Options<Sync<eSpeak>>>([](const messages::output::Say& message) {
                 // Wait to finish the current message (if any)
                 // By waiting here this reaction can finish and return to the pool
                 // if it does not have to wait for another say message

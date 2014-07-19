@@ -57,7 +57,7 @@ namespace darwin {
         sensors.eyeLED = cm730State.eyeLED;
 
         // Buttons
-        sensors.buttons.left = Convert::getBit<1>(data.cm730.buttons);
+        sensors.buttons.left = Convert::getBit<0>(data.cm730.buttons);
         sensors.buttons.middle = Convert::getBit<1>(data.cm730.buttons);
 
         // Voltage (in volts)

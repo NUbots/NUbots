@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_WALKSTRATEGY_H
-#define MESSAGES_BEHAVIOUR_WALKSTRATEGY_H
+#ifndef MESSAGES_BEHAVIOUR_LOOKSTRATEGY_H
+#define MESSAGES_BEHAVIOUR_LOOKSTRATEGY_H
 
 
 namespace messages {
@@ -27,6 +27,17 @@ namespace messages {
             static constexpr const char* CONFIGURATION_PATH = "HeadBehaviour.yaml";
         };
 
+	struct LookAtBallStart {
+	};
+
+	struct LookAtBallStop {
+	};
+
+	struct LookAtGoalStart {
+	};
+
+	struct LookAtGoalStop {
+	};
 
         struct LookAtAngle {
             double yaw;

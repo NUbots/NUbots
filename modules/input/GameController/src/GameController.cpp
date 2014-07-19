@@ -420,6 +420,7 @@ namespace input {
                     break;
                 default:
                     throw std::runtime_error("Invalid mode change");
+                emit(std::make_unique<Mode>(state->mode));
             }
         }
 
@@ -469,7 +470,7 @@ namespace input {
                 }
                 case gamecontroller::State::SET: {
 
-                    state->phase = Phase::READY;
+                    state->phase = Phase::SET;
 
                     stateChanges.push_back([this] {
                         emit(std::make_unique<GamePhase<Phase::SET>>());
@@ -502,6 +503,8 @@ namespace input {
                     break;
                 }
             }
+
+            emit(std::make_unique<Phase>(state->phase));
 
         }
 
