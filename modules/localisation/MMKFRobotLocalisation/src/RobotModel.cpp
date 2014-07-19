@@ -34,6 +34,7 @@ using messages::input::Sensors;
 using messages::input::ServoID;
 using utility::localisation::transform::SphericalRobotObservation;
 using utility::localisation::transform::WorldToRobotTransform;
+using utility::localisation::transform::RobotToWorldTransform;
 using utility::math::matrix::rotationMatrix;
 using utility::math::matrix::zRotationMatrix;
 using utility::math::coordinates::cartesianToRadial;
@@ -45,9 +46,18 @@ namespace robot {
 
 arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     const arma::vec::fixed<RobotModel::size>& state, double deltaT, const Sensors& sensors) {
-    arma::vec::fixed<RobotModel::size> state_ = state;
-    state_.rows(kX,kY) += deltaT * state.rows(kVX,kVY);
-    return state_;
+    arma::vec::fixed<RobotModel::size> new_state = state;
+
+    // // Velocity in world space:
+    // new_state.rows(kX,kY) += deltaT * state.rows(kVX,kVY);
+
+    // Velocity in robot space:
+    arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
+    arma::vec3 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).col(0);
+    arma::vec2 world_velocity = RobotToWorldTransform(arma::vec2{0,0}, robotHeading_world.rows(0,1), state.rows(kVX, kVY));
+    new_state.rows(kX,kY) += world_velocity * deltaT;
+
+    return new_state;
 }
 
 /// Return the predicted observation of an object at the given position
@@ -67,10 +77,14 @@ arma::vec RobotModel::predictedObservation(
 //Odometry
 arma::vec RobotModel::predictedObservation(
     const arma::vec::fixed<RobotModel::size>& state, const Sensors& sensors) {    
-    //Returns robot relative velocity
-    arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
-    arma::vec3 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).col(0);
-    return WorldToRobotTransform(arma::vec2{0,0}, robotHeading_world.rows(0,1), state.rows(kVX, kVY));
+    
+    // // Velocity in world space:
+    // arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
+    // arma::vec3 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).col(0);
+    // return WorldToRobotTransform(arma::vec2{0,0}, robotHeading_world.rows(0,1), state.rows(kVX, kVY));
+
+    // Velocity in robot space:
+    return state.rows(kVX, kVY);
 }
 
 // Angle between goals
