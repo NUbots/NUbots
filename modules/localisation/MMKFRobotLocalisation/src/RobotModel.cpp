@@ -44,7 +44,7 @@ namespace localisation {
 namespace robot {
 
 arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
-    const arma::vec::fixed<RobotModel::size>& state, double deltaT) {
+    const arma::vec::fixed<RobotModel::size>& state, double deltaT, const Sensors& sensors) {
     arma::vec::fixed<RobotModel::size> state_ = state;
     state_.rows(kX,kY) += deltaT * state.rows(kVX,kVY);
     return state_;

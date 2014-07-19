@@ -91,7 +91,7 @@ namespace localisation {
             const std::vector<messages::vision::VisionObject>& observed_objects,
             const std::vector<utility::localisation::LocalisationFieldObject>& actual_objects);
 
-        void TimeUpdate(double seconds);
+        void TimeUpdate(double seconds, const messages::input::Sensors& sensors);
 
         friend std::ostream& operator<<(std::ostream &os, const RobotHypothesis& h);
     };
@@ -135,7 +135,7 @@ namespace localisation {
         bool ModelsAreSimilar(const std::unique_ptr<RobotHypothesis>& model_a,
                               const std::unique_ptr<RobotHypothesis>& model_b);
 
-        void TimeUpdate(double seconds);
+        void TimeUpdate(double seconds, const messages::input::Sensors& sensors);
 
         void MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,

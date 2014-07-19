@@ -126,21 +126,23 @@ namespace localisation {
            Options<Sync<MMKFRobotLocalisation>>
           >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
             auto curr_time = NUClear::clock::now();
-            engine_->TimeUpdate(curr_time);
+            engine_->TimeUpdate(curr_time, sensors);
             engine_->OdometryMeasurementUpdate(sensors);
         });
 
         on<Trigger<Every<100, Per<std::chrono::seconds>>>,
+           With<Sensors>,
            Options<Sync<MMKFRobotLocalisation>>
-          >("MMKFRobotLocalisation Time", [this](const time_t&) {
+          >("MMKFRobotLocalisation Time", [this](const time_t&, const Sensors& sensors) {
             auto curr_time = NUClear::clock::now();
-            engine_->TimeUpdate(curr_time);
+            engine_->TimeUpdate(curr_time, sensors);
         });
 
         on<Trigger<std::vector<messages::vision::Goal>>,
+           With<Sensors>,
            Options<Sync<MMKFRobotLocalisation>>
           >("MMKFRobotLocalisation Step",
-            [this](const std::vector<messages::vision::Goal>& goals) {
+            [this](const std::vector<messages::vision::Goal>& goals, const Sensors& sensors) {
 
             // Ignore empty vectors of goals.
             if (goals.size() == 0)
@@ -167,7 +169,7 @@ namespace localisation {
             // }
 
             auto curr_time = NUClear::clock::now();
-            engine_->TimeUpdate(curr_time);
+            engine_->TimeUpdate(curr_time, sensors);
             engine_->ProcessObjects(goals);
             
         });

@@ -60,7 +60,8 @@ namespace robot {
         } // empty constructor
 
         arma::vec::fixed<RobotModel::size> timeUpdate(
-            const arma::vec::fixed<RobotModel::size>& state, double deltaT);
+            const arma::vec::fixed<RobotModel::size>& state, double deltaT,
+            const messages::input::Sensors& sensors);
 
         // arma::vec predictedObservation(
         //     const arma::vec::fixed<RobotModel::size>& state,

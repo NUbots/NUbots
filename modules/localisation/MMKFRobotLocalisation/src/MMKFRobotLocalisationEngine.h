@@ -44,10 +44,8 @@ namespace localisation {
             last_time_update_time_ = NUClear::clock::now();
         }
 
-        void TimeUpdate(std::chrono::system_clock::time_point current_time);
-
         void TimeUpdate(std::chrono::system_clock::time_point current_time,
-                                              const messages::input::Sensors& sensors);
+                        const messages::input::Sensors& sensors);
 
         std::vector<utility::localisation::LocalisationFieldObject> GetPossibleObjects(
             const messages::vision::Goal& ambiguous_object);

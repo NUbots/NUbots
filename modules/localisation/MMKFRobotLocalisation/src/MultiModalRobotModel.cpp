@@ -54,12 +54,12 @@ std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
         << " }";
 }
 
-void MultiModalRobotModel::TimeUpdate(double seconds) {
+void MultiModalRobotModel::TimeUpdate(double seconds, const Sensors& sensors) {
     for (auto& model : robot_models_)
-        model->TimeUpdate(seconds);
+        model->TimeUpdate(seconds, sensors);
 }
-void RobotHypothesis::TimeUpdate(double seconds) {
-    filter_.timeUpdate(seconds);
+void RobotHypothesis::TimeUpdate(double seconds, const Sensors& sensors) {
+    filter_.timeUpdate(seconds, sensors);
 }
 
 void MultiModalRobotModel::MeasurementUpdate(

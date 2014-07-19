@@ -70,10 +70,11 @@ namespace localisation {
         cfg_.emit_robot_fieldobjects = config["EmitRobotFieldobjects"].as<bool>();
     }
 
-    void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time) {
+    void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
+                                                 const Sensors& sensors) {
         double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
         last_time_update_time_ = current_time;
-        robot_models_.TimeUpdate(seconds);
+        robot_models_.TimeUpdate(seconds, sensors);
     }
 
     std::vector<LocalisationFieldObject> MMKFRobotLocalisationEngine::GetPossibleObjects(

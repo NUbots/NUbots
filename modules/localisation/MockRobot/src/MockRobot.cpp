@@ -116,10 +116,10 @@ namespace localisation {
 
             arma::vec2 old_pos = arma::vec2(robot_position_);
 
-            auto wave1 = triangle_wave(t, period);
-            auto wave2 = triangle_wave(t + (period / 4.0), period);
-            // auto wave1 = sine_wave(t, period);
-            // auto wave2 = sine_wave(t + (period / 4.0), period);
+            // auto wave1 = triangle_wave(t, period);
+            // auto wave2 = triangle_wave(t + (period / 4.0), period);
+            auto wave1 = sine_wave(t, period);
+            auto wave2 = sine_wave(t + (period / 4.0), period);
             robot_position_ = arma::vec2({ wave1 * x_amp, wave2 * y_amp });
 
             arma::vec2 diff = robot_position_ - old_pos;

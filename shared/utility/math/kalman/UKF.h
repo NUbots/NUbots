@@ -160,16 +160,15 @@ namespace utility {
                     centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
                 }
 
-                void timeUpdate(double deltaT) {
+                template <typename... TAdditionalParameters>
+                void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters) {
                     // Generate our sigma points
                     sigmaPoints = generateSigmaPoints(mean, covariance);
 
-
                     // Write the propagated version of the sigma point
                     for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
-                        sigmaPoints.col(i) = model.timeUpdate(sigmaPoints.col(i), deltaT);
+                        sigmaPoints.col(i) = model.timeUpdate(sigmaPoints.col(i), deltaT, additionalParameters...);
                     }
-
 
                     // Calculate the new mean and covariance values.
                     mean = meanFromSigmas(sigmaPoints);
