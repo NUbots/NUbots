@@ -92,21 +92,31 @@ namespace vision {
 
                 for(auto it = segments.first; it != segments.second; ++it) {
 
-                    auto& start = it->second.start;
-                    auto& end = it->second.end;
+                    auto& segment = it->second;
+                    auto& start = segment.start;
+                    auto& end = segment.end;
+
+                    bool belowHorizon = image.visualHorizonAtPoint(end[0]) < end[1] || image.visualHorizonAtPoint(start[0]) < start[1];
 
                     // We throw out points if they are:
                     // Less the full quality (subsampled)
                     // Do not have a transition on either side (are on an edge)
+                    // Go from an orange to other to orange segment (are interior)
 
-                    if(it->second.subsample == 1 && it->second.next && image.visualHorizonAtPoint(end[0]) < end[1]) {
+                    if(belowHorizon
+                        && segment.subsample == 1
+                        && segment.next
+                        && (!segment.next->next || segment.next->next->colour != ObjectClass::BALL)) {
 
-                        ballPoints.push_back({ double(it->second.end[0]), double(it->second.end[1]) });
+                        ballPoints.push_back({ double(end[0]), double(end[1]) });
                     }
 
-                    if(it->second.subsample == 1 && it->second.previous && image.visualHorizonAtPoint(start[0]) < start[1]) {
+                    if(belowHorizon
+                        && segment.subsample == 1
+                        && segment.previous
+                        && (!segment.previous->previous || segment.previous->previous->colour != ObjectClass::BALL)) {
 
-                        ballPoints.push_back({ double(it->second.start[0]), double(it->second.start[1]) });
+                        ballPoints.push_back({ double(start[0]), double(start[1]) });
                     }
                 }
             }
@@ -154,35 +164,35 @@ namespace vision {
                 arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, sensors.orientationCamToGround, ballBisectorPlane);
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), arma::diagmat(arma::vec({0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
 
-                // std::cerr << measurements[0].position[0]
-                //    << "," << measurements[0].position[1]
-                //    << "," << measurements[0].position[2]
-                //    << "," << measurements[1].position[0]
-                //    << "," << measurements[1].position[1]
-                //    << "," << measurements[1].position[2]
-                //    << std::endl;
-
-                emit(graph("Ball Width", measurements[0].position[0], measurements[0].position[1], measurements[0].position[2]));
-                emit(graph("Ball D2P", measurements[1].position[0], measurements[1].position[1], measurements[1].position[2]));
-
                 /*
-                 *  BUILD OUR BALL
+                 *  IF VALID BUILD OUR BALL
                  */
-                Ball b;
+                if(widthDistance > 0 && std::abs((ballCentreGroundWidth[0] - ballCentreGroundProj[0]) / ballCentreGroundProj[0]) > 0.5) {
+                    Ball b;
 
-                // On screen visual shape
-                b.circle.radius = result.model.radius;
-                b.circle.centre = result.model.centre;
+                    // On screen visual shape
+                    b.circle.radius = result.model.radius;
+                    b.circle.centre = result.model.centre;
 
-                // Angular positions from the camera
-                b.screenAngular = arma::atan(cam.pixelsToTanThetaFactor % ballCentreScreen);
-                b.angularSize = { getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels) };
+                    // Angular positions from the camera
+                    b.screenAngular = arma::atan(cam.pixelsToTanThetaFactor % ballCentreScreen);
+                    b.angularSize = { getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels) };
 
-                // Move our measurements
-                b.measurements = std::move(measurements);
+                    // Move our measurements
+                    b.measurements = std::move(measurements);
 
-                b.sensors = image.sensors;
-                balls->push_back(std::move(b));
+                    b.sensors = image.sensors;
+                    balls->push_back(std::move(b));
+                }
+            }
+
+            for(auto a = balls->begin(); a != balls->end();) {
+                for(auto b = a; b != balls->end();) {
+
+                    // TODO If the balls overlap
+                    // TODO Pick the better ball
+                    // TODO Delete the other ball
+                }
             }
 
             emit(std::move(balls));
