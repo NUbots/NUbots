@@ -62,9 +62,6 @@ namespace vision {
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacCircleModel;
 
-    // TODO the ball detector can detect multiple balls in the same ball due to classification errors, merge or throwout
-    // TODO the ball detector can see balls that are far too big or too small to be reasonable, throw those out too
-
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
@@ -73,6 +70,7 @@ namespace vision {
             CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<double>();
             MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
             MAXIMUM_FITTED_MODELS = config["ransac"]["maximum_fitted_models"].as<uint>();
+            MAXIMUM_DISAGREEMENT_RATIO = config["maximum_disagreement_ratio"].as<double>();
         });
 
         on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters>, With<Optional<FieldDescription>>, Options<Single>>("Ball Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field) {
@@ -146,6 +144,8 @@ namespace vision {
                 auto left  = centre + arma::vec2({  result.model.radius, 0 });
                 auto right = centre + arma::vec2({ -result.model.radius, 0 });
 
+                double cameraHeight = sensors.orientationCamToGround(2, 3);
+
                 // Get a unit vector pointing to the centre of the ball
                 arma::vec3 ballCentreRay = arma::normalise(arma::normalise(getCamFromScreen(top, cam.focalLengthPixels))
                                                            + arma::normalise(getCamFromScreen(base, cam.focalLengthPixels)));
@@ -155,7 +155,7 @@ namespace vision {
 
                 // Get our width based distance to the ball
                 double widthDistance = widthBasedDistanceToCircle(field->ball_radius * 2, top, base, cam.focalLengthPixels);
-                arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
+                arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + cameraHeight;
 
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), arma::diagmat(arma::vec({0.003505351, 0.001961638, 1.68276E-05})) });
 
@@ -167,7 +167,7 @@ namespace vision {
                 /*
                  *  IF VALID BUILD OUR BALL
                  */
-                if(widthDistance > 0 && std::abs((ballCentreGroundWidth[0] - ballCentreGroundProj[0]) / ballCentreGroundProj[0]) > 0.5) {
+                if(widthDistance > cameraHeight / 2.0 && std::abs((ballCentreGroundWidth[0] - ballCentreGroundProj[0]) / ballCentreGroundProj[0]) > MAXIMUM_DISAGREEMENT_RATIO) {
                     Ball b;
 
                     // On screen visual shape
@@ -186,12 +186,27 @@ namespace vision {
                 }
             }
 
-            for(auto a = balls->begin(); a != balls->end();) {
-                for(auto b = a; b != balls->end();) {
+            for(auto a = balls->begin(); a != balls->end(); ++a) {
+                for(auto b = a + 1; b != balls->end();) {
 
-                    // TODO If the balls overlap
-                    // TODO Pick the better ball
-                    // TODO Delete the other ball
+                    // If our balls overlap
+                    if(a->circle.distanceToPoint(b->circle.centre) < b->circle.radius) {
+                        // Pick the better ball
+                        if(a->circle.radius < b->circle.radius) {
+                            // Throwout b
+                            b = balls->erase(b);
+                        }
+                        else {
+                            a = balls->erase(a);
+
+                            if(a == b) {
+                                ++b;
+                            }
+                        }
+                    }
+                    else {
+                        ++b;
+                    }
                 }
             }
 
