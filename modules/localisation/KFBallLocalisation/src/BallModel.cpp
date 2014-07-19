@@ -24,10 +24,13 @@
 #include "utility/math/angle.h"
 #include "utility/math/matrix.h"
 #include "utility/math/coordinates.h"
+#include "utility/localisation/transform.h"
 #include "messages/localisation/FieldObject.h"
+
 
 // using messages::localisation::FakeOdometry;
 using utility::math::matrix::rotationMatrix;
+using utility::localisation::transform::SphericalRobotObservation;
 
 namespace modules {
 namespace localisation {
@@ -40,8 +43,8 @@ arma::vec::fixed<BallModel::size> BallModel::ApplyVelocity(
     // Apply ball velocity
     result(kX) += state(kVx) * deltaT;
     result(kY) += state(kVy) * deltaT;
-    result(kVx) -= result(kVx) * ballDragCoefficient * deltaT;
-    result(kVy) -= result(kVy) * ballDragCoefficient * deltaT;
+    result(kVx) -= result(kVx) * cfg_.ballDragCoefficient * deltaT;
+    result(kVy) -= result(kVy) * cfg_.ballDragCoefficient * deltaT;
 
     return result;
 }
@@ -74,7 +77,7 @@ arma::vec BallModel::predictedObservation(
     const arma::vec::fixed<BallModel::size>& state) {
 
     // // Robot-relative cartesian
-    return { state(kX), state(kY) };
+    // return { state(kX), state(kY) };
 
     // Distance and unit vector heading
     // arma::vec2 radial = utility::math::coordinates::Cartesian2Radial(state.rows(0, 1));
@@ -82,6 +85,10 @@ arma::vec BallModel::predictedObservation(
     // auto heading_x = std::cos(heading_angle);
     // auto heading_y = std::sin(heading_angle);
     // return {radial[0], heading_x, heading_y};
+
+    arma::vec3 ball_pos = arma::vec3({state(kX), state(kY), cfg_.ballHeight});
+    auto obs = SphericalRobotObservation({0, 0}, 0, ball_pos);
+    return obs;
 }
 
 arma::vec BallModel::observationDifference(const arma::vec& a,
@@ -93,22 +100,16 @@ arma::vec BallModel::observationDifference(const arma::vec& a,
 arma::vec::fixed<BallModel::size> BallModel::limitState(
     const arma::vec::fixed<BallModel::size>& state) {
 
-    return { state(kX), state(kY), state(kVx), state(kVy) };
-
-
-    // // Radial coordinates
-    // return { state[kX],
-    //     utility::math::angle::normalizeAngle(state[kY]),
-    //     state[kVx], state[kVy] };
+    return state;
 }
 
 arma::mat::fixed<BallModel::size, BallModel::size> BallModel::processNoise() {
-    arma::mat noise = arma::eye(BallModel::size, BallModel::size) * processNoiseFactor;
-
-    // noise(kX, kX) = processNoiseFactor * 100;
-    // noise(kY, kY) = processNoiseFactor * 100;
-    noise(kVx, kVx) = processNoiseFactor * 10;
-    noise(kVy, kVy) = processNoiseFactor * 10;
+    arma::mat noise = arma::eye(BallModel::size, BallModel::size);
+    
+    noise(kX, kX) *= cfg_.processNoisePositionFactor;
+    noise(kY, kY) *= cfg_.processNoisePositionFactor;
+    noise(kVx, kVx) *= cfg_.processNoiseVelocityFactor;
+    noise(kVy, kVy) *= cfg_.processNoiseVelocityFactor;
 
     return noise;
 }

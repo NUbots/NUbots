@@ -24,16 +24,17 @@
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
+#include "utility/nubugger/NUhelpers.h"
+
+using utility::nubugger::graph;
+using utility::time::getUtcTimestamp;
+using messages::support::nubugger::proto::Message;
+using messages::localisation::FieldObject;
+using messages::localisation::Ball;
+using messages::localisation::Self;
 
 namespace modules {
 namespace support {
-    using messages::support::nubugger::proto::Message;
-    using utility::time::getUtcTimestamp;
-
-    using messages::localisation::FieldObject;
-    using messages::localisation::Ball;
-    using messages::localisation::Self;
-
     void NUbugger::provideLocalisation() {
         handles["localisation"].push_back(on<Trigger<Every<100, std::chrono::milliseconds>>,
            With<Optional<std::vector<Ball>>>,
@@ -102,6 +103,8 @@ namespace support {
                     ball_model.sr_yy = model.position_cov(1,1);
                     ball_model.lost = false;
                     ball_msg_models.push_back(ball_model);
+
+                    emit(graph("NUbugger Localisation ball", ball_pos[0], ball_pos[1]));
 
                     // break; // Only output a single model
                 }

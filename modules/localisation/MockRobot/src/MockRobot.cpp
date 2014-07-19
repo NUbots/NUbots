@@ -326,13 +326,7 @@ namespace localisation {
 
             auto balls_msg = std::make_unique<std::vector<messages::localisation::Ball>>();
 
-            messages::localisation::Ball ball_model;
-            ball_model.position = ball_pos;
-            ball_model.velocity = ball_velocity_;
-            ball_model.position_cov = ball.position_cov;
-            ball_model.world_space = true;
-            balls_msg->push_back(ball_model);
-
+            // True ball position:
             messages::localisation::Ball ball_marker;
             ball_marker.position = ball_position_;
             ball_marker.velocity = ball_velocity_;
@@ -340,12 +334,19 @@ namespace localisation {
             ball_marker.world_space = true;
             balls_msg->push_back(ball_marker);
 
-            messages::localisation::Ball robot_ball;
-            robot_ball.position = robot_ball_pos;
-            robot_ball.velocity = ball_velocity_;
-            robot_ball.position_cov = arma::eye(2,2) * 0.1;
-            robot_ball.world_space = true;
-            balls_msg->push_back(robot_ball);
+            messages::localisation::Ball ball_model;
+            ball_model.position = ball_pos;
+            ball_model.velocity = ball_velocity_;
+            ball_model.position_cov = ball.position_cov;
+            ball_model.world_space = true;
+            balls_msg->push_back(ball_model);
+
+            // messages::localisation::Ball robot_ball;
+            // robot_ball.position = robot_ball_pos;
+            // robot_ball.velocity = ball_velocity_;
+            // robot_ball.position_cov = arma::eye(2,2) * 0.1;
+            // robot_ball.world_space = true;
+            // balls_msg->push_back(robot_ball);
 
             emit(std::move(balls_msg));
         });

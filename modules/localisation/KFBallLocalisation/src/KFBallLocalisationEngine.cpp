@@ -61,9 +61,9 @@ double KFBallLocalisationEngine::MeasurementUpdate(
     //                     0, observed_object.sphericalError[1], 0,
     //                     0, 0, observed_object.sphericalError[1] };
 
-    // // Robot relative cartesian coordinates
-    arma::vec2 measurement = observed_object.measurements[0].position.rows(0, 1);
-    arma::mat22 cov = observed_object.measurements[0].error.submat(0, 0, 1, 1);
+    // Spherical observation:
+    arma::vec3 measurement = observed_object.measurements[0].position;
+    arma::mat33 cov = observed_object.measurements[0].error;
 
     double quality = ball_filter_.measurementUpdate(measurement, cov);
 
@@ -72,12 +72,18 @@ double KFBallLocalisationEngine::MeasurementUpdate(
 
 void KFBallLocalisationEngine::UpdateConfiguration(
     const messages::support::Configuration<KFBallLocalisationEngineConfig>& config) {
-    ball_filter_.model.ballDragCoefficient = config["BallDragCoefficient"].as<double>();
-    cfg_.emit_ball_fieldobjects = config["EmitBallFieldobjects"].as<bool>();
+    cfg_.emitBallFieldobjects = config["EmitBallFieldobjects"].as<bool>();
+
+    ball::BallModel::Config ball_cfg;
+    ball_cfg.ballDragCoefficient = config["BallDragCoefficient"].as<double>();
+    ball_cfg.processNoisePositionFactor = config["ProcessNoisePositionFactor"].as<double>();
+    ball_cfg.processNoiseVelocityFactor = config["ProcessNoiseVelocityFactor"].as<double>();
+    ball_cfg.ballHeight = config["BallHeight"].as<double>();
+    ball_filter_.model.cfg_ = ball_cfg;
 }
 
 bool KFBallLocalisationEngine::CanEmitFieldObjects() {
-    return cfg_.emit_ball_fieldobjects;
+    return cfg_.emitBallFieldobjects;
 }
 
 }

@@ -65,7 +65,7 @@ namespace localisation {
 
     private:
         struct {
-            bool emit_ball_fieldobjects;
+            bool emitBallFieldobjects;
         } cfg_;
 
         double SecondsSinceLastTimeUpdate(std::chrono::system_clock::time_point current_time);
