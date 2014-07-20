@@ -150,6 +150,11 @@ namespace localisation {
             if (goals.size() == 0)
                 return;
 
+            // Ignore measurements when both of the robots feet are off the ground.
+            if (!goals[0].sensors->leftFootDown && !goals[0].sensors->rightFootDown) {
+                return;
+            }
+
             // // std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
             // for (auto& goal : goals) {
             //     // std::cout << __FILE__ << ", " << __LINE__ << ":" << std::endl;

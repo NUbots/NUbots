@@ -23,7 +23,7 @@ ADD_ROLE(
 
         #Localisation
         localisation::MMKFRobotLocalisation
-        # localisation::KFBallLocalisation
+        localisation::KFBallLocalisation
 
         #Behaviour
         behaviour::Controller
