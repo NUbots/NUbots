@@ -65,6 +65,7 @@ namespace messages {
         public:
             Self() : LocalisationObject() {}
             arma::vec2 heading;
+            arma::vec2 velocity;
             arma::mat22 robot_to_world_rotation;
         };
 

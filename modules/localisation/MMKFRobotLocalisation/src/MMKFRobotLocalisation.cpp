@@ -108,6 +108,7 @@ namespace localisation {
                 arma::mat33 imuRotation = zRotationMatrix(model_state(robot::kImuOffset));
                 arma::vec3 world_heading = imuRotation * arma::mat(sensors.orientation.t()).col(0);
                 robot_model.heading = world_heading.rows(0, 1);
+                robot_model.velocity = model_state.rows(robot::kVX, robot::kVY);
                 robot_model.position_cov = model_cov.submat(0,0,1,1);
                 robots.push_back(robot_model);
             }

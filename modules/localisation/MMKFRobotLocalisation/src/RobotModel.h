@@ -34,11 +34,11 @@ namespace robot {
     //    2. The y position on the field
     //    3. The robot's heading (in radians)
     enum RobotModelStateComponents : int {
-        kX = 0,
-        kY = 1,
+        kX = 0, // world space
+        kY = 1, // world space
         kImuOffset = 2,
-        kVX = 3,
-        kVY = 4
+        kVX = 3, // robot space
+        kVY = 4  // robot space
         // kHeading = 2,
         // kHeadingX = 2,
         // kHeadingY = 3,

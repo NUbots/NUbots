@@ -30,6 +30,7 @@
 #include "messages/localisation/FieldObject.h"
 #include "BallModel.h"
 
+using messages::localisation::Self;
 using utility::nubugger::graph;
 using messages::input::Sensors;
 using messages::support::Configuration;
@@ -58,8 +59,9 @@ namespace localisation {
         // Emit to NUbugger
         on<Trigger<Every<100, std::chrono::milliseconds>>,
            With<Sensors>,
+           With<std::vector<Self>>,
            Options<Sync<KFBallLocalisation>>>("NUbugger Output",
-                [this](const time_t&, const Sensors& sensors) {
+                [this](const time_t&, const Sensors& sensors, const std::vector<Self>& robots) {
             
             auto model_state = engine_.ball_filter_.get();
             auto model_cov = engine_.ball_filter_.getCovariance();
@@ -69,7 +71,7 @@ namespace localisation {
 
             messages::localisation::Ball ball;
             ball.position = robot_space_ball_pos;
-            ball.velocity = imu_to_robot * model_state.rows(2, 3);
+            ball.velocity = imu_to_robot * model_state.rows(2, 3) + robots[0].velocity;
             ball.position_cov = model_cov.submat(0,0,1,1);
             ball.world_space = false;
 
