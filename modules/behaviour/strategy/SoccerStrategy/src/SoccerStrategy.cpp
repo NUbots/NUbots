@@ -18,11 +18,11 @@
  */
 
 #include "SoccerStrategy.h"
+
 #include "messages/input/gameevents/GameEvents.h"
-#include "messages/input/gameevents/GameEvents.h"
-#include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/behaviour/LookStrategy.h"
 #include "messages/behaviour/WalkStrategy.h"
+#include "messages/support/FieldDescription.h"
 
 namespace modules {
 namespace behaviour {
@@ -31,15 +31,12 @@ namespace strategy {
     using messages::input::gameevents::GameState;
     using messages::input::gameevents::Mode;
     using messages::input::gameevents::Phase;
-
     using VisionBall = messages::vision::Ball;
-
-    using messages::platform::darwin::ButtonLeftDown;
-    using messages::platform::darwin::ButtonMiddleDown;
-
     using messages::behaviour::WalkStrategy;
     using messages::behaviour::WalkApproach;
+    using messages::behaviour::WalkTarget;
     using messages::behaviour::FieldTarget;
+    using messages::support::FieldDescription;
 
     SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -143,11 +140,41 @@ namespace strategy {
 
     void SoccerStrategy::walkTo(const FieldTarget& object) {
         // TODO: find object position and call other walkTo method
+        WalkTarget walkTarget;
+        arma::vec2 heading;
+
+        switch (object) {
+            case FieldTarget::BALL: {
+                walkTarget = WalkTarget::Ball;
+                auto desc = powerplant.get<FieldDescription>();
+                arma::vec enemyGoal = {desc->dimensions.field_length / 2, 0};
+                heading = enemyGoal;
+                break;
+            }
+            default:
+                throw "unsupported walk target";
+        }
+
+        auto approach = std::make_unique<WalkStrategy>();
+        approach->targetPositionType = walkTarget;
+        approach->targetHeadingType = WalkTarget::WayPoint;
+        approach->walkMovementType = WalkApproach::WalkToPoint;
+        approach->heading = heading;
+
+        emit(std::move(approach));
     }
 
     void SoccerStrategy::walkTo(arma::vec position) {
-        // TODO: Get the position of the target
-        // Send this to the walk planner
+        auto desc = powerplant.get<FieldDescription>();
+        arma::vec enemyGoal = {desc->dimensions.field_length / 2, 0};
+        auto approach = std::make_unique<WalkStrategy>();
+        approach->targetPositionType = WalkTarget::WayPoint;
+        approach->targetHeadingType = WalkTarget::WayPoint;
+        approach->walkMovementType = WalkApproach::WalkToPoint;
+        approach->heading = enemyGoal;
+        approach->target = position;
+
+        emit(std::move(approach));
     }
 
     bool SoccerStrategy::pickedUp() {

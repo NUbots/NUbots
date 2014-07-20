@@ -45,6 +45,7 @@ namespace messages {
         struct WalkStrategy {
 
             //the target waypoint in x/y field coordinates if applicable
+            // note: this is optional if a target type is not a waypoint
             arma::vec2 target;
 
             //the point to face in x/y field coordinates at the destination if applicable

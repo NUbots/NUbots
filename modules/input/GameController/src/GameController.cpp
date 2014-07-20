@@ -21,6 +21,7 @@
 #include "GameController.h"
 #include "messages/support/Configuration.h"
 #include "messages/support/GlobalConfig.h"
+#include "messages/platform/darwin/DarwinSensors.h"
 
 extern "C" {
     #include <sys/socket.h>
@@ -38,6 +39,8 @@ namespace input {
     using gamecontroller::Team;
     using namespace messages::input::gameevents;
     using TeamColourEvent = messages::input::gameevents::TeamColour;
+    using messages::platform::darwin::ButtonLeftDown;
+    using messages::platform::darwin::ButtonMiddleDown;
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), socket(0) {
 
@@ -127,6 +130,26 @@ namespace input {
         on<Trigger<Every<2, Per<std::chrono::seconds>>>>("GameController Reply", [this](const time_t&) {
             sendReplyPacket(ReplyMessage::ALIVE);
         });
+
+        on<Trigger<ButtonLeftDown>>([this](const ButtonLeftDown&) {
+            // TODO: aggressive mode, chase ball and kick towards goal (basically disable strategy)
+        });
+
+        on<Trigger<ButtonMiddleDown>>([this](const ButtonMiddleDown&) {
+            // TODO: fix this
+            auto time = NUClear::clock::now();
+            if (!selfPenalised) {
+                // penalise
+                selfPenalised = true;
+                emit(std::make_unique<Penalisation<SELF>>(Penalisation<SELF>{PLAYER_ID, time, PenaltyReason::MANUAL}));
+            } else {
+                // unpenalised
+                selfPenalised = false;
+                emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{PLAYER_ID}));
+            }
+            penaltyOverride = true;
+        });
+
     }
 
     void GameController::sendReplyPacket(const ReplyMessage& replyMessage) const {
@@ -253,6 +276,8 @@ namespace input {
                         // self penalised :@
                         emit(std::make_unique<Penalisation<SELF>>(Penalisation<SELF>{playerId, unpenalisedTime, reason}));
                         sendReplyPacket(ReplyMessage::PENALISED);
+                        selfPenalised = true;
+                        penaltyOverride = false;
                     }
                     else {
                         // team mate penalised :'(
@@ -267,6 +292,8 @@ namespace input {
                         // self unpenalised :)
                         emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{playerId}));
                         sendReplyPacket(ReplyMessage::UNPENALISED);
+                        selfPenalised = false;
+                        penaltyOverride = false;
                     }
                     else {
                         // team mate unpenalised :)
@@ -299,7 +326,7 @@ namespace input {
          ******************************************************************************************/
         if (oldOwnTeam.coachMessage != newOwnTeam.coachMessage) {
 
-            // Update thhe coach message in the state
+            // Update the coach message in the state
             state->team.coachMessage = newOwnTeam.coachMessage.data();
 
             // listen to the coach? o_O

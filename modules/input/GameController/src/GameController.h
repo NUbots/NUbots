@@ -49,6 +49,9 @@ namespace modules {
                 uint PLAYER_ID;
                 std::string BROADCAST_IP;
 
+                bool penaltyOverride = false;
+                bool selfPenalised = false;
+
                 gamecontroller::GameControllerPacket packet;
                 gamecontroller::Mode mode;
 
