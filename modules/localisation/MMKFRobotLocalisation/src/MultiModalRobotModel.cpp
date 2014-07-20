@@ -65,22 +65,18 @@ void RobotHypothesis::TimeUpdate(double seconds, const Sensors& sensors) {
 void MultiModalRobotModel::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object,
     const LocalisationFieldObject& actual_object) {
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
 
     for (auto& model : robot_models_)
         model->MeasurementUpdate(observed_object, actual_object);
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
 }
-        
+
 
 void MultiModalRobotModel::MeasurementUpdate(
     const std::vector<messages::vision::VisionObject>& observed_objects,
     const std::vector<LocalisationFieldObject>& actual_objects) {
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
 
     for (auto& model : robot_models_)
         model->MeasurementUpdate(observed_objects, actual_objects);
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
 }
 
 double RobotHypothesis::MeasurementUpdate(
@@ -154,7 +150,6 @@ double RobotHypothesis::MeasurementUpdate(
 void MultiModalRobotModel::AmbiguousMeasurementUpdate(
     const messages::vision::VisionObject& ambiguous_object,
     const std::vector<LocalisationFieldObject>& possible_objects) {
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
 
     std::vector<std::unique_ptr<RobotHypothesis>> new_models;
     new_models.reserve(possible_objects.size() * robot_models_.size());
@@ -186,7 +181,6 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
     }
 
     robot_models_ = std::move(new_models);
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
 }
 
 
@@ -199,7 +193,6 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
 void MultiModalRobotModel::AmbiguousMeasurementUpdate(
     const std::vector<messages::vision::VisionObject>& ambiguous_objects,
     const std::vector<std::vector<LocalisationFieldObject>>& possible_object_sets) {
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
 
     std::vector<std::unique_ptr<RobotHypothesis>> new_models;
     new_models.reserve(possible_object_sets.size() * robot_models_.size());
@@ -230,7 +223,6 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
     }
 
     robot_models_ = std::move(new_models);
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
 
 }
 
@@ -243,7 +235,6 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
 void MultiModalRobotModel::AmbiguousMultipleMeasurementUpdate(
     const std::vector<messages::vision::VisionObject>& ambiguous_objects,
     const std::vector<std::vector<LocalisationFieldObject>>& possible_object_sets) {
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
 
     std::vector<std::unique_ptr<RobotHypothesis>> new_models;
     new_models.reserve(possible_object_sets.size() * robot_models_.size());
@@ -273,7 +264,6 @@ void MultiModalRobotModel::AmbiguousMultipleMeasurementUpdate(
     }
 
     robot_models_ = std::move(new_models);
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
 }
 
 void MultiModalRobotModel::RemoveOldModels() {
@@ -295,15 +285,12 @@ void MultiModalRobotModel::RemoveOldModels() {
 }
 
 void MultiModalRobotModel::PruneModels() {
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
     if (cfg_.merging_enabled)
         MergeSimilarModels();
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
 
     PruneViterbi(cfg_.max_models_after_merge);
 
     NormaliseAlphas();
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
 }
 
 bool MultiModalRobotModel::ModelsAreSimilar(
@@ -327,7 +314,6 @@ bool MultiModalRobotModel::ModelsAreSimilar(
 /// Reduces the number of active models by merging similar models together
 // TODO: Find a neater, yet performant way of writing this method
 void MultiModalRobotModel::MergeSimilarModels() {
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
 
     // Sort models by weight from smallest to largest.
     std::sort(robot_models_.begin(), robot_models_.end(),
@@ -385,7 +371,6 @@ void MultiModalRobotModel::MergeSimilarModels() {
 
     // Replace the old models with the new list of merged models
     robot_models_ = std::move(new_models);
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
 }
 
 /* @brief Prunes the models using the Viterbi method. This removes lower
@@ -393,7 +378,6 @@ void MultiModalRobotModel::MergeSimilarModels() {
  * @param order The maximum number of models to remain after pruning.
  */
 void MultiModalRobotModel::PruneViterbi(unsigned int order) {
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
     // No pruning required if not above maximum.
     if(robot_models_.size() <= order)
         return;
@@ -407,7 +391,6 @@ void MultiModalRobotModel::PruneViterbi(unsigned int order) {
 
     // Keep only the desired number of elements.
     robot_models_.resize(order);
-    std::cout << __FILE__ << " " << __LINE__ << " " << robot_models_.size() << std::endl;
 }
 
 /*! @brief Normalises the alphas of all exisiting models.

@@ -101,9 +101,6 @@ namespace localisation {
             NUClear::log<NUClear::ERROR>(__FILE__, ",", __LINE__, ": The ambiguous_object (messages::vision::Goal) has an invalid messages::vision::Goal::Side");
         }
 
-        std::cout << __FILE__ << " " << __LINE__ << " possible.size() = " << possible.size() << std::endl;
-        std::cout << __FILE__ << " " << __LINE__ << " side = " << (int)ambiguous_object.side << std::endl;
-
         return std::move(possible);
     }
 
@@ -164,7 +161,7 @@ namespace localisation {
     void MMKFRobotLocalisationEngine::IndividualStationaryObjectUpdate(
         const std::vector<messages::vision::Goal>& goals,
         float) {
-        
+
         for (auto& observed_object : goals) {
 
             LocalisationFieldObject actual_object;

@@ -112,11 +112,6 @@ namespace modules {
                     emit(std::move(std::make_unique<WalkStartCommand>()));
                 });
 
-
-                on<Trigger<Startup>>([this](const Startup&) {
-                    emit(std::make_unique<WalkStartCommand>());
-                });
-
                 on<Trigger<Every<20, Per<std::chrono::seconds>>>,
                     With<messages::localisation::Ball>,
                     With<std::vector<messages::localisation::Self>>,

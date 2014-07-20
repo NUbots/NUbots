@@ -132,10 +132,12 @@ namespace strategy {
         on<Trigger<Every<30, Per<std::chrono::seconds>>>, With<GameState>, // TODO: ensure a reasonable state is emitted even if gamecontroller is not running
             Options<Single>>([this](const time_t&, const GameState& gameState) {
 
+
             try {
 
                 auto& mode = gameState.mode;
-                auto& phase = gameState.phase;
+                //auto& phase = gameState.phase;
+                auto phase = *powerplant.get<Phase>();
 
                 if (pickedUp()) {
                     // TODO: stand, no moving

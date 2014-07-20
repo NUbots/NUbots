@@ -85,7 +85,6 @@ arma::vec BallModel::predictedObservation(
 arma::vec BallModel::observationDifference(const arma::vec& a,
                                            const arma::vec& b){
     arma::vec3 result = a - b;
-    std::cout<<__FILE__<<", "<<__LINE__<<": "<< result.t() << std::endl;
     // result(1) = utility::math::angle::normalizeAngle(result(1));
     // result(2) = utility::math::angle::normalizeAngle(result(2));
     return result;
@@ -99,7 +98,7 @@ arma::vec::fixed<BallModel::size> BallModel::limitState(
 
 arma::mat::fixed<BallModel::size, BallModel::size> BallModel::processNoise() {
     arma::mat noise = arma::eye(BallModel::size, BallModel::size);
-    
+
     noise(kX, kX) *= cfg_.processNoisePositionFactor;
     noise(kY, kY) *= cfg_.processNoisePositionFactor;
     noise(kVx, kVx) *= cfg_.processNoiseVelocityFactor;

@@ -57,7 +57,7 @@ namespace localisation {
         on<Trigger<Configuration<MultiModalRobotModelConfig>>>(
             "MultiModalRobotModelConfig Update",
             [this](const Configuration<MultiModalRobotModelConfig>& config) {
-            
+
             engine_->UpdateConfiguration(config);
             NUClear::log("Localisation config finished successfully!");
         });
@@ -72,7 +72,6 @@ namespace localisation {
            With<Optional<FieldDescription>>>("FieldDescription Update",
            [this](const Startup&, const std::shared_ptr<const FieldDescription>& desc) {
             if (desc == nullptr) {
-                NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");
                 throw std::runtime_error("FieldDescription Update: support::configuration::SoccerConfig module might not be installed");
             }
 
@@ -92,7 +91,6 @@ namespace localisation {
            Options<Sync<MMKFRobotLocalisation>>
            >("Localisation NUbugger Output", [this](const time_t&, const Sensors& sensors) {
             auto& hypotheses = engine_->robot_models_.hypotheses();
-            NUClear::log(__FILE__,__LINE__,hypotheses.size());
             if (hypotheses.size() == 0) {
                 NUClear::log<NUClear::ERROR>("MMKFRobotLocalisation has no robot hypotheses.");
                 return;
@@ -155,9 +153,7 @@ namespace localisation {
                 return;
             }
 
-            // // std::cout << __FILE__ << ", " << __LINE__ << ": " << __func__ << std::endl;
             // for (auto& goal : goals) {
-            //     // std::cout << __FILE__ << ", " << __LINE__ << ":" << std::endl;
             //     // std::cout << "  side:";
             //     // std::cout << ((goal.side == Goal::Side::LEFT) ? "LEFT" :
             //     //               (goal.side == Goal::Side::RIGHT) ? "RIGHT" : "UNKNOWN")
@@ -174,15 +170,11 @@ namespace localisation {
             //         // std::cout << "    error:" << measurement.error << std::endl;
             //     }
             // }
-            std::cout << __FILE__ << " " << __LINE__ << " " << engine_->robot_models_.hypotheses().size() << std::endl;
 
             auto curr_time = NUClear::clock::now();
-            std::cout << __FILE__ << " " << __LINE__ << " " << engine_->robot_models_.hypotheses().size() << std::endl;
             engine_->TimeUpdate(curr_time, sensors);
-            std::cout << __FILE__ << " " << __LINE__ << " " << engine_->robot_models_.hypotheses().size() << std::endl;
             engine_->ProcessObjects(goals);
-            
-            std::cout << __FILE__ << " " << __LINE__ << " " << engine_->robot_models_.hypotheses().size() << std::endl;
+
         });
     }
 }

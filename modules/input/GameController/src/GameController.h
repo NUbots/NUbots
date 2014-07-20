@@ -50,7 +50,7 @@ namespace modules {
                 std::string BROADCAST_IP;
 
                 bool penaltyOverride = false;
-                bool selfPenalised = false;
+                bool selfPenalised = true;
 
                 gamecontroller::GameControllerPacket packet;
                 gamecontroller::Mode mode;

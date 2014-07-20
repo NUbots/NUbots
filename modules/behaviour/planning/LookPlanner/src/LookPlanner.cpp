@@ -28,6 +28,7 @@
 #include "utility/localisation/transform.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/time/time.h"
+#include "utility/support/armayamlconversions.h"
 
 namespace modules {
 namespace behaviour {
@@ -55,6 +56,10 @@ namespace planning {
             //pan speeds
             VISUAL_TRACKING_TIMEOUT = config["visual_tracking_timeout"].as<double>();
             LOCALISATION_TRACKING_TIMEOUT = config["localisation_tracking_timeout"].as<double>();
+            lostPanPoints.clear();
+            for (uint i = 0; i < config["lost_pan_points"].size(); i++) {
+                lostPanPoints.push_back(config["lost_pan_points"][i].as<arma::vec>());
+            }
         });
 
 
