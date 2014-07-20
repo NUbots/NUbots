@@ -22,32 +22,29 @@
 
 #include <nuclear>
 
+#include "messages/behaviour/FieldTarget.h"
+
 namespace modules {
 namespace behaviour {
 namespace strategy {
 
-    enum class FieldObject { // TODO: definitely would be already defined elsewhere
-        SELF,
-        BALL,
-        GOAL
-    };
-
     class SoccerStrategy : public NUClear::Reactor {
     private:
+        messages::behaviour::FieldTarget walkTarget;
+        std::vector<messages::behaviour::FieldTarget> lookTarget;
+
         void standStill();
         void searchWalk();
-        void walkTo(const FieldObject& object);
+        void walkTo(const messages::behaviour::FieldTarget& object);
         void walkTo(arma::vec position);
-        void lookAt(const FieldObject& object);
-        void find(const std::vector<FieldObject>& objects);
+        void find(const std::vector<messages::behaviour::FieldTarget>& objects);
         void spinWalk();
         bool pickedUp();
         bool penalised();
-        bool recentlyVisible(const FieldObject& object);
-        bool visible(const FieldObject& object);
+        bool recentlyVisible(const messages::behaviour::FieldTarget& object);
         bool isGoalie();
-        bool inZone(const FieldObject& object);
-        bool isClose(const FieldObject& object);
+        bool inZone(const messages::behaviour::FieldTarget& object);
+        bool isClose(const messages::behaviour::FieldTarget& object);
         bool timePassed();
     public:
         static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";

@@ -33,18 +33,9 @@ namespace strategy {
     using messages::platform::darwin::ButtonMiddleDown;
     using messages::behaviour::WalkStrategy;
     using messages::behaviour::WalkApproach;
+    using messages::behaviour::FieldTarget;
 
     SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-
-        on<Trigger<ButtonLeftDown>>([this](const ButtonLeftDown&) {
-            // TODO: aggressive mode, chase ball and kick towards goal (basically disable strategy)
-        });
-
-        on<Trigger<ButtonMiddleDown>>([this](const ButtonMiddleDown&) {
-            // TODO: toggle penalised (override gamecontroller?)
-            // TODO Send output to game controller
-        });
-
         // Main Loop
         on<Trigger<Every<30, Per<std::chrono::seconds>>>, With<GameState>, // TODO: ensure a reasonable state is emitted even if gamecontroller is not running
             Options<Single>>([this](const time_t&, const GameState& gameState) {
@@ -59,59 +50,59 @@ namespace strategy {
                 if (mode == Mode::NORMAL || mode == Mode::OVERTIME) {
                     if (phase == Phase::INITIAL) {
                         standStill();
-                        find({FieldObject::SELF});
+                        find({FieldTarget::SELF});
                     }
                     else if (phase == Phase::READY) {
                         // TODO: walkTo(myZone.startPosition);
-                        find({FieldObject::SELF});
+                        find({FieldTarget::SELF});
                     }
                     else if (phase == Phase::SET) {
                         standStill();
-                        find({FieldObject::BALL});
+                        find({FieldTarget::BALL});
                     }
                     else if (phase == Phase::TIMEOUT) {
                         standStill();
-                        find({FieldObject::SELF});
+                        find({FieldTarget::SELF});
                     }
                     else if (phase == Phase::FINISHED) {
                         standStill();
-                        find({FieldObject::SELF});
+                        find({FieldTarget::SELF});
                     }
                     else if (phase == Phase::PLAYING) {
                         if (penalised()) { // penalised
                             standStill();
-                            find({FieldObject::SELF});
+                            find({FieldTarget::SELF});
                         }
                         else { // not penalised
-                            if (recentlyVisible(FieldObject::BALL)) { // ball has been seen recently
-                                if (inZone(FieldObject::BALL) || isClose(FieldObject::BALL)) { // in zone and close to ball
-                                    // TODO: walkTo(FieldObject::BALL);
-                                    find({FieldObject::BALL});
+                            if (recentlyVisible(FieldTarget::BALL)) { // ball has been seen recently
+                                if (inZone(FieldTarget::BALL) || isClose(FieldTarget::BALL)) { // in zone and close to ball
+                                    // TODO: walkTo(FieldTarget::BALL);
+                                    find({FieldTarget::BALL});
                                 }
                                 else { // not in zone and not close to ball
                                     if (isGoalie()) { // goalie
-                                        // TODO: walkTo(myZone.defaultPosition, Align::OPPOSITION_GOAL);
-                                        lookAt(FieldObject::BALL);
+                                        // TODO: walkTo(myZone.defaultPosition, Align::OPPOSITION_GOAL});
+                                        find({FieldTarget::BALL});
                                     }
                                     else { // not goalie
                                         // TODO: walkTo(myZone.defaultPosition);
-                                        lookAt(FieldObject::BALL);
+                                        find({FieldTarget::BALL});
                                     }
                                 }
                             }
                             else { // ball has not been seen recently
-                                if (inZone(FieldObject::SELF)) { // in own zone
+                                if (inZone(FieldTarget::SELF)) { // in own zone
                                     // TODO: walkTo(myZone.defaultPosition);
-                                    find({FieldObject::SELF, FieldObject::BALL});
+                                    find({FieldTarget::SELF, FieldTarget::BALL});
                                 }
                                 else { // not in zone
                                     if (!timePassed()) {
                                         spinWalk();
-                                        find({FieldObject::BALL});
+                                        find({FieldTarget::BALL});
                                     }
                                     else { // time passed since ball seen
                                         // TODO: walkTo(myZone.defaultPosition);
-                                        find({FieldObject::SELF, FieldObject::BALL});
+                                        find({FieldTarget::SELF, FieldTarget::BALL});
                                     }
 
                                 }
@@ -136,63 +127,60 @@ namespace strategy {
         emit(std::move(command));
     }
 
-    void SoccerStrategy::walkTo(const FieldObject& object) {
+    void SoccerStrategy::walkTo(const FieldTarget& object) {
         // TODO: find object position and call other walkTo method
     }
 
     void SoccerStrategy::walkTo(arma::vec position) {
-        // Get the position of the target
+        // TODO: Get the position of the target
         // Send this to the walk planner
     }
 
     bool SoccerStrategy::pickedUp() {
+        // TODO: currentState.pickedUp = feetOffGround && !isGettingUp && !isDiving;
         return false; // TODO
     }
 
     bool SoccerStrategy::penalised() {
-        // Get our game state packet and return if we are penalised
+        // TODO: Get our game state packet and return if we are penalised
         return false; // TODO
     }
 
-    bool SoccerStrategy::recentlyVisible(const FieldObject& object) {
-        // Get the last
-        return true; // TODO
-    }
-
-    bool SoccerStrategy::visible(const FieldObject& object) {
+    bool SoccerStrategy::recentlyVisible(const FieldTarget& object) {
+        // TODO: Look at the last timestamp of the seen object (using triggers for caching the timestamps)
         return true; // TODO
     }
 
     bool SoccerStrategy::isGoalie() {
+        // TODO: checking myzone.isgoalie true
         return false; // TODO
     }
 
     // template <typename T>
     // bool SoccerStrategy::isClose() {
-    bool SoccerStrategy::isClose(const FieldObject& object) {
+    bool SoccerStrategy::isClose(const FieldTarget& object) {
         // auto fieldObject = powerplant.get<T>();
         // obj.position LFiajfoijsafoisje
+        // TODO: use old behaviour code
         return true; // TODO
     }
 
-    bool SoccerStrategy::inZone(const FieldObject& object) {
+    bool SoccerStrategy::inZone(const FieldTarget& object) {
+        // TODO: check that object is in bounding box
         return true; // TODO
     }
 
-    void SoccerStrategy::lookAt(const FieldObject& object) {
-
-    }
-
-    void SoccerStrategy::find(const std::vector<FieldObject>& fieldObjects) {
-
+    void SoccerStrategy::find(const std::vector<FieldTarget>& fieldObjects) {
+        // TODO:
     }
 
     bool SoccerStrategy::timePassed() {
+        // TODO: use recently seen instead of this
         return false;
     }
 
     void SoccerStrategy::spinWalk() {
-
+        // TODO: undefined, maybe send a custom walk command?
     }
 
 
