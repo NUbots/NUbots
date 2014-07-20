@@ -3,11 +3,11 @@ visual_horizon:
   # The spacing in radians between vertical lines
   spacing: 0.1
   # The spacing in radians between sampled pixels vertically
-  subsampling: 0.04
+  subsampling: 0.02
   # The distance in radians above the horizon to begin scanning
   horizon_buffer: 0.01
   # The size in radians of the smallest segment to consider for the horizon
-  minimum_segment_size: 0.01
+  minimum_segment_size: 0.04
 
 # Settings related to the ball finder
 ball:
@@ -16,7 +16,7 @@ ball:
   # The number of lines that will pass through the ball when enhancing
   intersections_fine: 10
   # The multiplier for the search for the ball
-  search_circle_scale: 2
+  search_circle_scale: 5
   # When clustering goals on the X axis, if a gap of at least this amount is detected it will be a new cluster
   maximum_vertical_cluster_spacing: 0.1
   # A multiplier for spacing between ball finder lines (based on the closeness)
@@ -25,7 +25,7 @@ ball:
 # Settings related to the goal finder
 goals:
   # The spacing in radians between horizontal lines
-  spacing: 0.04
+  spacing: 0.02
   # The spacing in radians between sampled pixels (for finding)
   subsampling: 0.01
   # The density of extra lines to generate (as well as their range) calcluated as n lines per line separated by n/(2n + 1) jumps
