@@ -22,6 +22,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/support/GlobalConfig.h"
 #include "messages/platform/darwin/DarwinSensors.h"
+#include "messages/output/Say.h"
 
 extern "C" {
     #include <sys/socket.h>
@@ -141,10 +142,12 @@ namespace input {
             if (!selfPenalised) {
                 // penalise
                 selfPenalised = true;
+                emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
                 emit(std::make_unique<Penalisation<SELF>>(Penalisation<SELF>{PLAYER_ID, time, PenaltyReason::MANUAL}));
             } else {
                 // unpenalised
                 selfPenalised = false;
+                emit(std::move(std::make_unique<messages::output::Say>("Unpenalised")));
                 emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{PLAYER_ID}));
             }
             penaltyOverride = true;

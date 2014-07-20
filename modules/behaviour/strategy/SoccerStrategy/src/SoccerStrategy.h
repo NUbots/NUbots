@@ -34,6 +34,15 @@ namespace strategy {
         messages::behaviour::FieldTarget walkTarget;
         std::vector<messages::behaviour::FieldTarget> lookTarget;
 
+        double BALL_CLOSE_DISTANCE;
+        NUClear::clock::duration BALL_LAST_SEEN_MAX_TIME;
+        NUClear::clock::duration GOAL_LAST_SEEN_MAX_TIME;
+
+        // TODO: remove horrible
+        bool isGettingUp = false;
+        bool isDiving = false;
+        bool selfPenalised = false;
+
         // TODO: initalize
         struct Zone {
             NUClear::clock::duration ballActiveTimeout;
@@ -45,6 +54,7 @@ namespace strategy {
         } zone;
 
         time_t ballLastSeen;
+        time_t goalLastSeen;
 
         void standStill();
         void searchWalk();
@@ -56,7 +66,7 @@ namespace strategy {
         bool penalised();
         bool isGoalie();
         bool inZone(const messages::behaviour::FieldTarget& object);
-        bool isClose(const messages::behaviour::FieldTarget& object);
+        bool ballDistance();
     public:
         static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";
 

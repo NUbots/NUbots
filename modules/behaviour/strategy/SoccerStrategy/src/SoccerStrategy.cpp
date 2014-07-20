@@ -24,28 +24,90 @@
 #include "messages/behaviour/WalkStrategy.h"
 #include "messages/support/FieldDescription.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/input/Sensors.h"
+#include "messages/motion/GetupCommand.h"
+#include "messages/motion/DiveCommand.h"
+#include "messages/localisation/FieldObject.h"
+#include "messages/support/Configuration.h"
+
+#include "utility/localisation/transform.h"
 
 namespace modules {
 namespace behaviour {
 namespace strategy {
 
+    using messages::support::Configuration;
+    using messages::input::Sensors;
     using messages::input::gameevents::GameState;
     using messages::input::gameevents::Mode;
     using messages::input::gameevents::Phase;
     using VisionBall = messages::vision::Ball;
+    using VisionGoal = messages::vision::Goal;
+    using LocalisationBall = messages::localisation::Ball;
+    using messages::localisation::Self;
     using messages::behaviour::WalkStrategy;
+    using messages::behaviour::LookStrategy;
     using messages::behaviour::WalkApproach;
     using messages::behaviour::WalkTarget;
     using messages::behaviour::FieldTarget;
     using messages::support::FieldDescription;
+    using messages::motion::ExecuteGetup;
+    using messages::motion::KillGetup;
+    using messages::motion::DiveCommand;
+    using messages::motion::DiveFinished;
+    using SelfPenalisation = messages::input::gameevents::Penalisation<messages::input::gameevents::SELF>;
+    using SelfUnpenalisation = messages::input::gameevents::Unpenalisation<messages::input::gameevents::SELF>;
+    using utility::localisation::transform::RobotToWorldTransform;
 
     SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+
+        on<Trigger<Configuration<SoccerStrategy>>>([this](const Configuration<SoccerStrategy>& config) {
+            BALL_CLOSE_DISTANCE = config["ball_close_distance"].as<double>();
+            BALL_LAST_SEEN_MAX_TIME = NUClear::clock::duration(std::lround(NUClear::clock::period::den * config["ball_last_seen_max_time"].as<double>()));
+            GOAL_LAST_SEEN_MAX_TIME = NUClear::clock::duration(std::lround(NUClear::clock::period::den * config["goal_last_seen_max_time"].as<double>()));
+
+        });
 
         // For checking last seen times
         on<Trigger<std::vector<VisionBall>>>([this] (const std::vector<VisionBall>& balls) {
             if(!balls.empty()) {
                 ballLastSeen = NUClear::clock::now();
             }
+        });
+
+        on<Trigger<std::vector<VisionGoal>>>([this] (const std::vector<VisionGoal>& goals) {
+            if(!goals.empty()) {
+                goalLastSeen = NUClear::clock::now();
+            }
+        });
+
+        // TODO: remove this horrible code
+        // Check to see if we are currently in the process of getting up.
+        on<Trigger<ExecuteGetup>>([this](const ExecuteGetup&) {
+            isGettingUp = true;
+        });
+
+        // Check to see if we have finished getting up.
+        on<Trigger<KillGetup>>([this](const KillGetup&) {
+            isGettingUp = false;
+        });
+
+        // Check to see if we are currently in the process of diving.
+        on<Trigger<DiveCommand>>([this](const DiveCommand&) {
+            isDiving = true;
+        });
+
+        // Check to see if we have finished diving.
+        on<Trigger<DiveFinished>>([this](const DiveFinished&) {
+            isDiving = false;
+        });
+
+        on<Trigger<SelfPenalisation>>([this](const SelfPenalisation&) {
+            selfPenalised = true;
+        });
+
+        on<Trigger<SelfUnpenalisation>>([this](const SelfUnpenalisation&) {
+            selfPenalised = false;
         });
 
         // Main Loop
@@ -57,6 +119,7 @@ namespace strategy {
 
             if (pickedUp()) {
                 // TODO: stand, no moving
+                standStill();
             }
             else {
                 if (mode == Mode::NORMAL || mode == Mode::OVERTIME) {
@@ -65,7 +128,7 @@ namespace strategy {
                         find({FieldTarget::SELF});
                     }
                     else if (phase == Phase::READY) {
-                        // TODO: walkTo(myZone.startPosition);
+                        walkTo(zone.startPosition);
                         find({FieldTarget::SELF});
                     }
                     else if (phase == Phase::SET) {
@@ -87,24 +150,25 @@ namespace strategy {
                         }
                         else { // not penalised
                             if (NUClear::clock::now() - ballLastSeen < zone.ballActiveTimeout) { // ball has been seen recently
-                                if (inZone(FieldTarget::BALL) || isClose(FieldTarget::BALL)) { // in zone and close to ball
-                                    // TODO: walkTo(FieldTarget::BALL);
+                                if (inZone(FieldTarget::BALL) || ballDistance() <= BALL_CLOSE_DISTANCE) { // in zone and close to ball
+                                    walkTo(FieldTarget::BALL);
                                     find({FieldTarget::BALL});
                                 }
                                 else { // not in zone and not close to ball
                                     if (isGoalie()) { // goalie
-                                        // TODO: walkTo(myZone.defaultPosition, Align::OPPOSITION_GOAL});
+                                        // TODO: walkTo(zone.defaultPosition, Align::OPPOSITION_GOAL});
+                                        walkTo(zone.defaultPosition);
                                         find({FieldTarget::BALL});
                                     }
                                     else { // not goalie
-                                        // TODO: walkTo(myZone.defaultPosition);
+                                        walkTo(zone.defaultPosition);
                                         find({FieldTarget::BALL});
                                     }
                                 }
                             }
                             else { // ball has not been seen recently
                                 if (inZone(FieldTarget::SELF)) { // in own zone
-                                    // TODO: walkTo(myZone.defaultPosition);
+                                    walkTo(zone.defaultPosition);
                                     find({FieldTarget::SELF, FieldTarget::BALL});
                                 }
                                 else { // not in zone
@@ -113,7 +177,7 @@ namespace strategy {
                                         find({FieldTarget::BALL});
                                     }
                                     else { // time passed since ball seen
-                                        // TODO: walkTo(myZone.defaultPosition);
+                                        walkTo(zone.defaultPosition);
                                         find({FieldTarget::SELF, FieldTarget::BALL});
                                     }
 
@@ -179,40 +243,92 @@ namespace strategy {
     }
 
     bool SoccerStrategy::pickedUp() {
-        // TODO: currentState.pickedUp = feetOffGround && !isGettingUp && !isDiving;
-        return false; // TODO
+        auto sensors = powerplant.get<Sensors>();
+        bool feetOffGround = (!sensors->leftFootDown && !sensors->rightFootDown);
+        return feetOffGround && !isGettingUp && !isDiving;
     }
 
     bool SoccerStrategy::penalised() {
-        // TODO: Get our game state packet and return if we are penalised
-        return false; // TODO
+        return selfPenalised;
     }
 
     bool SoccerStrategy::isGoalie() {
-        // TODO: checking myzone.isgoalie true
-        return false; // TODO
+        return zone.goalie;
     }
 
-    // template <typename T>
-    // bool SoccerStrategy::isClose() {
-    bool SoccerStrategy::isClose(const FieldTarget& object) {
-        // auto fieldObject = powerplant.get<T>();
-        // obj.position LFiajfoijsafoisje
-        // TODO: use old behaviour code
-        return true; // TODO
+    bool SoccerStrategy::ballDistance() {
+        auto ball = powerplant.get<LocalisationBall>();
+        return arma::norm(ball->position);
     }
 
     bool SoccerStrategy::inZone(const FieldTarget& object) {
         // TODO: check that object is in bounding box
-        return true; // TODO
+        switch (object) {
+            case FieldTarget::BALL: {
+                auto self = powerplant.get<Self>();
+                auto ball = powerplant.get<LocalisationBall>();
+                auto position = RobotToWorldTransform(self->position, self->heading, ball->position);
+                return (position[0] > zone.zone(0, 0) && position[0] < zone.zone(1, 0)
+                     && position[1] < zone.zone(0, 1) && position[1] > zone.zone(1, 1));
+
+            }
+            case FieldTarget::SELF: {
+                auto self = powerplant.get<Self>();
+                auto position = self->position;
+                return (position[0] > zone.zone(0, 0) && position[0] < zone.zone(1, 0)
+                     && position[1] < zone.zone(0, 1) && position[1] > zone.zone(1, 1));
+            }
+            default:
+                throw std::runtime_error("Soccer strategy attempted to check if an invalid object was in zone");
+        }
     }
 
     void SoccerStrategy::find(const std::vector<FieldTarget>& fieldObjects) {
-        // TODO:
+        // TODO: stop hackig this madness
+        if(fieldObjects.size() == 1) {
+            auto& object = fieldObjects[0];
+            switch (object) {
+                case FieldTarget::BALL: {
+                    // Prioritise balls
+                    auto strategy = std::make_unique<LookStrategy>();
+                    strategy->priorities = {typeid(VisionBall)};
+                    emit(std::move(strategy));
+                }
+                case FieldTarget::SELF: {
+                    // Prioritise goals
+                    auto strategy = std::make_unique<LookStrategy>();
+                    strategy->priorities = {typeid(VisionGoal)};
+                    emit(std::move(strategy));
+                }
+                default:
+                    throw std::runtime_error("Soccer strategy attempted to find a bad object");
+            }
+        }
+        else if(fieldObjects.size() == 2) {
+            // Balls come first
+            if(NUClear::clock::now() - ballLastSeen > BALL_LAST_SEEN_MAX_TIME
+                || NUClear::clock::now() - goalLastSeen < GOAL_LAST_SEEN_MAX_TIME) {
+                // Prioritise balls
+                auto strategy = std::make_unique<LookStrategy>();
+                strategy->priorities = {typeid(VisionBall)};
+                emit(std::move(strategy));
+            }
+            else {
+                // Prioritise goals
+                auto strategy = std::make_unique<LookStrategy>();
+                strategy->priorities = {typeid(VisionGoal)};
+                emit(std::move(strategy));
+            }
+        }
     }
 
     void SoccerStrategy::spinWalk() {
-        // TODO: undefined, maybe send a custom walk command?
+        // TODO: does this work?
+        auto command = std::make_unique<WalkStrategy>();
+        command->walkMovementType = WalkApproach::DirectCommand;
+        command->target = {0,0};
+        command->heading = {1,0};
+        emit(std::move(command));
     }
 
 

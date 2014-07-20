@@ -1,4 +1,6 @@
-
+ball_close_distance: 2
+ball_last_seen_max_time: 2
+goal_last_seen_max_time: 4
 zones:
   forward:
     active_ball_timeout: 10
