@@ -31,7 +31,7 @@
 
 using utility::nubugger::graph;
 using messages::support::Configuration;
-using messages::localisation::FakeOdometry;
+// using messages::localisation::FakeOdometry;
 using messages::localisation::Mock;
 using messages::localisation::Ball;
 
@@ -62,9 +62,7 @@ namespace localisation {
             messages::localisation::Ball ball;
             ball.position = model_state.rows(0, 1);
             ball.velocity = model_state.rows(2, 3);
-            ball.sr_xx = model_cov(0, 0);
-            ball.sr_xy = model_cov(0, 1);
-            ball.sr_yy = model_cov(1, 1);
+            ball.position_cov = model_cov.submat(0,0,1,1);
             ball.world_space = false;
 
             if (engine_.CanEmitFieldObjects()) {
@@ -79,12 +77,12 @@ namespace localisation {
             emit(graph("Ball (robot-space)", model_state(0), model_state(1)));
         });
 
-       on<Trigger<FakeOdometry>,
-           Options<Sync<KFBallLocalisation>>
-           >("KFBallLocalisation Odometry", [this](const FakeOdometry& odom) {
-            auto curr_time = NUClear::clock::now();
-            engine_.TimeUpdate(curr_time, odom);
-        });
+       // on<Trigger<FakeOdometry>,
+       //     Options<Sync<KFBallLocalisation>>
+       //     >("KFBallLocalisation Odometry", [this](const FakeOdometry& odom) {
+       //      auto curr_time = NUClear::clock::now();
+       //      engine_.TimeUpdate(curr_time, odom);
+       //  });
 
        on<Trigger<Every<100, Per<std::chrono::seconds>>>,
            Options<Sync<KFBallLocalisation>>

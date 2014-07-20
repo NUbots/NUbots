@@ -25,13 +25,15 @@
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/Sensors.h"
 #include "messages/localisation/FieldObject.h"
+#include "messages/localisation/ResetRobotHypotheses.h"
+#include "messages/input/Sensors.h"
 
-using messages::input::Sensors;
 using utility::localisation::LFOId;
 using utility::localisation::LocalisationFieldObject;
 using utility::time::TimeDifferenceSeconds;
+using messages::input::Sensors;
 using messages::vision::VisionObject;
-using messages::localisation::FakeOdometry;
+using messages::localisation::ResetRobotHypotheses;
 
 namespace modules {
 namespace localisation {
@@ -68,23 +70,8 @@ namespace localisation {
         cfg_.emit_robot_fieldobjects = config["EmitRobotFieldobjects"].as<bool>();
     }
 
-    void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time) {
-        double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
-        last_time_update_time_ = current_time;
-        robot_models_.TimeUpdate(seconds);
-    }
-
     void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
-                                              const FakeOdometry& odom) {
-
-        double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
-        last_time_update_time_ = current_time;
-        robot_models_.TimeUpdate(seconds, odom);
-    }
-
-    void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
-                                              const Sensors& sensors) {
-
+                                                 const Sensors& sensors) {
         double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
         last_time_update_time_ = current_time;
         robot_models_.TimeUpdate(seconds, sensors);
@@ -206,8 +193,16 @@ namespace localisation {
         ProcessAmbiguousObjects(goals);
     }
 
-    // void MMKFRobotLocalisationEngine::SensorsUpdate(const messages::input::Sensors& sensors) {
-    //     robot_models_.SensorsUpdate(sensors);
-    // }
+    void MMKFRobotLocalisationEngine::Reset(const ResetRobotHypotheses& reset) {
+        robot_models_.robot_models_ = std::vector<std::unique_ptr<RobotHypothesis>>();
+        for (const auto& reset_hyp : reset.hypotheses) {
+            auto hyp = std::make_unique<RobotHypothesis>(reset_hyp);
+            robot_models_.robot_models_.push_back(std::move(hyp));
+        }
+    }
+
+    void MMKFRobotLocalisationEngine::OdometryMeasurementUpdate(const Sensors& sensors) {
+        robot_models_.MeasurementUpdate(sensors);
+    }
 }
 }

@@ -5,6 +5,7 @@ ADD_ROLE(
         support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
+        support::configuration::GlobalConfig
         support::NUbugger
 
         #Sensors
@@ -19,7 +20,7 @@ ADD_ROLE(
         #Localisation
         localisation::MMKFRobotLocalisation
         localisation::KFBallLocalisation
-        
+
         support::configuration::SoccerConfig
         )
 

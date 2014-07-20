@@ -43,13 +43,12 @@ namespace ball {
     public:
         static constexpr size_t size = 4;
 
-        double ballDragCoefficient = 0.9;
 
         BallModel() {} // empty constructor
 
-        arma::vec::fixed<size> timeUpdate(
-            const arma::vec::fixed<size>& state, double deltaT,
-            const messages::localisation::FakeOdometry& odom);
+        // arma::vec::fixed<size> timeUpdate(
+        //     const arma::vec::fixed<size>& state, double deltaT,
+        //     const messages::localisation::FakeOdometry& odom);
 
         arma::vec::fixed<size> timeUpdate(
             const arma::vec::fixed<size>& state, double deltaT);
@@ -66,9 +65,12 @@ namespace ball {
             const arma::vec::fixed<BallModel::size>& state,
             double deltaT);
 
-        // TODO: Add to config system?
-        // static constexpr double processNoiseFactor = 1e-6;
-        static constexpr double processNoiseFactor = 1e-3;
+        struct Config {
+            double ballDragCoefficient = 0.1;
+            double processNoisePositionFactor = 1e-3;
+            double processNoiseVelocityFactor = 1e-3;
+            double ballHeight = 0.05;
+        } cfg_;
     };
 }
 }

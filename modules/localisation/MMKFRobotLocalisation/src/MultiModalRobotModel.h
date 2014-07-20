@@ -28,6 +28,7 @@
 #include "messages/vision/VisionObjects.h"
 #include "RobotModel.h"
 #include "messages/input/Sensors.h"
+#include "messages/localisation/ResetRobotHypotheses.h"
 
 namespace modules {
 namespace localisation {
@@ -47,25 +48,26 @@ namespace localisation {
         // std::string obs_trail_;
         int obs_count_;
 
-        RobotHypothesis() :
-            filter_(
-                // {0, 0, 0}, // mean
-                {0, 0, 3.141},
+        RobotHypothesis()
+            : filter_(
+                {0, 0, 3.141}, // mean
                 arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 1, // cov
-                1), // alpha
-            weight_(1),
-            obs_count_(0) { }
+                1) // alpha
+            , weight_(1)
+            , obs_count_(0) {}
 
-        // bool active() const { return active_; }
-        // void set_active(bool active) { active_ = active; }
+        RobotHypothesis(const messages::localisation::ResetRobotHypotheses::Self& reset_self)
+            : RobotHypothesis() {
+            arma::vec3 mean = arma::join_rows(reset_self.position, arma::vec(reset_self.heading));
+            arma::mat33 cov = arma::eye(3,3);
+            cov.submat(0,0,1,1) = reset_self.position_cov;
+            cov(3,3) = reset_self.heading_var;
+            filter_.setState(mean, cov);
+        }
 
         void SetConfig(const robot::RobotModel::Config& cfg) {
             filter_.model.cfg_ = cfg;
         };
-
-        // void SetSensorsData(const messages::input::Sensors& sensors) {
-        //     filter_.model.currentImuOrientation = sensors.orientation;
-        // };
 
         float GetFilterWeight() const { return weight_; }
         void SetFilterWeight(float weight) { weight_ = weight; }
@@ -82,14 +84,14 @@ namespace localisation {
             const messages::vision::VisionObject& observed_object,
             const utility::localisation::LocalisationFieldObject& actual_object);
 
+        //Odometry
+        double MeasurementUpdate(const messages::input::Sensors& sensors);
+
         double MeasurementUpdate(
             const std::vector<messages::vision::VisionObject>& observed_objects,
             const std::vector<utility::localisation::LocalisationFieldObject>& actual_objects);
 
-        void TimeUpdate(double seconds);
-        void TimeUpdate(double seconds, const messages::localisation::FakeOdometry& odom);
         void TimeUpdate(double seconds, const messages::input::Sensors& sensors);
-
 
         friend std::ostream& operator<<(std::ostream &os, const RobotHypothesis& h);
     };
@@ -110,6 +112,7 @@ namespace localisation {
             robot::RobotModel::Config rm_cfg;
             rm_cfg.processNoisePositionFactor = config["ProcessNoisePositionFactor"].as<double>();
             rm_cfg.processNoiseHeadingFactor = config["ProcessNoiseHeadingFactor"].as<double>();
+            rm_cfg.processNoiseVelocityFactor = config["ProcessNoiseVelocityFactor"].as<double>();
             rm_cfg.observationDifferenceBearingFactor = config["ObservationDifferenceBearingFactor"].as<double>();
             rm_cfg.observationDifferenceElevationFactor = config["ObservationDifferenceElevationFactor"].as<double>();
 
@@ -132,13 +135,13 @@ namespace localisation {
         bool ModelsAreSimilar(const std::unique_ptr<RobotHypothesis>& model_a,
                               const std::unique_ptr<RobotHypothesis>& model_b);
 
-        void TimeUpdate(double seconds);
-        void TimeUpdate(double seconds, const messages::localisation::FakeOdometry& odom);
         void TimeUpdate(double seconds, const messages::input::Sensors& sensors);
 
         void MeasurementUpdate(
             const messages::vision::VisionObject& observed_object,
             const utility::localisation::LocalisationFieldObject& actual_object);
+
+        void MeasurementUpdate(const messages::input::Sensors& sensors);
 
         void MeasurementUpdate(
             const std::vector<messages::vision::VisionObject>& observed_objects,
@@ -167,7 +170,6 @@ namespace localisation {
         const std::vector<std::unique_ptr<RobotHypothesis>>& hypotheses() {
             return robot_models_;
         }
-
 
     private:
         void PruneViterbi(unsigned int order);

@@ -51,8 +51,8 @@ namespace localisation {
 
         void TimeUpdate(std::chrono::system_clock::time_point current_time);
 
-        void TimeUpdate(std::chrono::system_clock::time_point current_time,
-                        const messages::localisation::FakeOdometry& odom);
+        // void TimeUpdate(std::chrono::system_clock::time_point current_time,
+        //                 const messages::localisation::FakeOdometry& odom);
 
         double MeasurementUpdate(const messages::vision::VisionObject& observed_object);
 
@@ -65,7 +65,7 @@ namespace localisation {
 
     private:
         struct {
-            bool emit_ball_fieldobjects;
+            bool emitBallFieldobjects;
         } cfg_;
 
         double SecondsSinceLastTimeUpdate(std::chrono::system_clock::time_point current_time);

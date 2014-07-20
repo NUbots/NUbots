@@ -29,7 +29,6 @@
 
 using messages::input::Sensors;
 using utility::localisation::LocalisationFieldObject;
-using messages::localisation::FakeOdometry;
 using utility::math::coordinates::spherical2Radial;
 using utility::localisation::transform::SphericalRobotObservation;
 
@@ -55,30 +54,13 @@ std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
         << " }";
 }
 
-void MultiModalRobotModel::TimeUpdate(double seconds) {
+void MultiModalRobotModel::TimeUpdate(double seconds, const Sensors& sensors) {
     for (auto& model : robot_models_)
-        model->TimeUpdate(seconds);
+        model->TimeUpdate(seconds, sensors);
 }
-void MultiModalRobotModel::TimeUpdate(double seconds, const FakeOdometry&) {
-    for (auto& model : robot_models_)
-        model->TimeUpdate(seconds); // TODO re add in odometry
+void RobotHypothesis::TimeUpdate(double seconds, const Sensors& sensors) {
+    filter_.timeUpdate(seconds, sensors);
 }
-
-void MultiModalRobotModel::TimeUpdate(double seconds, const Sensors&) {
-    for (auto& model : robot_models_)
-        model->TimeUpdate(seconds); // TODO re add in odometry
-}
-
-void RobotHypothesis::TimeUpdate(double seconds) {
-    filter_.timeUpdate(seconds);
-}
-void RobotHypothesis::TimeUpdate(double seconds, const FakeOdometry&) {
-    filter_.timeUpdate(seconds); // TODO re add in odometry
-}
-void RobotHypothesis::TimeUpdate(double seconds, const Sensors&) {
-    filter_.timeUpdate(seconds); // TODO re add in odometry sensors
-}
-
 
 void MultiModalRobotModel::MeasurementUpdate(
     const messages::vision::VisionObject& observed_object,
@@ -87,6 +69,7 @@ void MultiModalRobotModel::MeasurementUpdate(
     for (auto& model : robot_models_)
         model->MeasurementUpdate(observed_object, actual_object);
 }
+        
 
 void MultiModalRobotModel::MeasurementUpdate(
     const std::vector<messages::vision::VisionObject>& observed_objects,
@@ -113,6 +96,17 @@ double RobotHypothesis::MeasurementUpdate(
         quality *= filter_.measurementUpdate(measured_pos, cov, actual_pos, *(observed_object.sensors));
     }
 
+    return quality;
+}
+
+//Odometry
+void MultiModalRobotModel::MeasurementUpdate(const Sensors& sensors){
+    for (auto& model : robot_models_)
+        model->MeasurementUpdate(sensors);
+}
+
+double RobotHypothesis::MeasurementUpdate(const Sensors& sensors){
+    auto quality = filter_.measurementUpdate(sensors.odometry, sensors.odometryCovariance, sensors);
     return quality;
 }
 

@@ -2,6 +2,7 @@ ADD_ROLE(
     NAME featuredetectortester
     MODULES
         support::configuration::ConfigSystem
+        support::configuration::GlobalConfig
         input::LinuxCamera
         vision::LUTClassifier
         vision::GoalDetector

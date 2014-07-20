@@ -31,6 +31,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/support/FieldDescription.h"
 #include "messages/localisation/FieldObject.h"
+#include "messages/localisation/ResetRobotHypotheses.h"
 #include "MMKFRobotLocalisationEngine.h"
 #include "RobotModel.h"
 
@@ -38,14 +39,14 @@ using utility::math::angle::bearingToUnitVector;
 using utility::math::matrix::zRotationMatrix;
 using utility::nubugger::graph;
 using utility::localisation::LocalisationFieldObject;
+using modules::localisation::MultiModalRobotModelConfig;
 using messages::support::Configuration;
 using messages::support::FieldDescription;
-using messages::localisation::FakeOdometry;
 using messages::input::Sensors;
-using modules::localisation::MultiModalRobotModelConfig;
+using messages::vision::Goal;
 using messages::localisation::Mock;
 using messages::localisation::Self;
-using messages::vision::Goal;
+using messages::localisation::ResetRobotHypotheses;
 
 namespace modules {
 namespace localisation {
@@ -79,11 +80,17 @@ namespace localisation {
             engine_->set_field_description(fd);
         });
 
+        on<Trigger<ResetRobotHypotheses>,
+           Options<Sync<MMKFRobotLocalisation>>
+          >("Localisation ResetRobotHypotheses", [this](const ResetRobotHypotheses& reset) {
+            engine_->Reset(reset);
+        });
+
         // Emit to NUbugger
         on<Trigger<Every<100, std::chrono::milliseconds>>,
            With<Sensors>,
            Options<Sync<MMKFRobotLocalisation>>
-           >("NUbugger Output", [this](const time_t&, const Sensors& sensors) {
+           >("Localisation NUbugger Output", [this](const time_t&, const Sensors& sensors) {
             auto& hypotheses = engine_->robot_models_.hypotheses();
             if (hypotheses.size() == 0) {
                 NUClear::log<NUClear::ERROR>("MMKFRobotLocalisation has no robot hypotheses.");
@@ -101,9 +108,7 @@ namespace localisation {
                 arma::mat33 imuRotation = zRotationMatrix(model_state(robot::kImuOffset));
                 arma::vec3 world_heading = imuRotation * arma::mat(sensors.orientation.t()).col(0);
                 robot_model.heading = world_heading.rows(0, 1);
-                robot_model.sr_xx = model_cov(0, 0);
-                robot_model.sr_xy = model_cov(0, 1);
-                robot_model.sr_yy = model_cov(1, 1);
+                robot_model.position_cov = model_cov.submat(0,0,1,1);
                 robots.push_back(robot_model);
             }
 
@@ -117,30 +122,27 @@ namespace localisation {
             }
         });
 
-        // on<Trigger<FakeOdometry>,
-        //    Options<Sync<MMKFRobotLocalisation>>
-        //   >("MMKFRobotLocalisation Odometry", [this](const FakeOdometry& odom) {
-        //     auto curr_time = NUClear::clock::now();
-        //     engine_->TimeUpdate(curr_time, odom);
-        // });
-        // on<Trigger<Sensors>,
-        //    Options<Sync<MMKFRobotLocalisation>>
-        //   >("MMKFRobotLocalisation Sensors", [this](const Sensors& sensors) {
-        //     auto curr_time = NUClear::clock::now();
-        //     engine_->TimeUpdate(curr_time);
-        //     // engine_->SensorsUpdate(sensors);
-        // });
-        on<Trigger<Every<100, Per<std::chrono::seconds>>>,
+        on<Trigger<Sensors>,
            Options<Sync<MMKFRobotLocalisation>>
-          >("MMKFRobotLocalisation Time", [this](const time_t&) {
+          >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
             auto curr_time = NUClear::clock::now();
-            engine_->TimeUpdate(curr_time);
+            engine_->TimeUpdate(curr_time, sensors);
+            engine_->OdometryMeasurementUpdate(sensors);
+        });
+
+        on<Trigger<Every<100, Per<std::chrono::seconds>>>,
+           With<Sensors>,
+           Options<Sync<MMKFRobotLocalisation>>
+          >("MMKFRobotLocalisation Time", [this](const time_t&, const Sensors& sensors) {
+            auto curr_time = NUClear::clock::now();
+            engine_->TimeUpdate(curr_time, sensors);
         });
 
         on<Trigger<std::vector<messages::vision::Goal>>,
+           With<Sensors>,
            Options<Sync<MMKFRobotLocalisation>>
           >("MMKFRobotLocalisation Step",
-            [this](const std::vector<messages::vision::Goal>& goals) {
+            [this](const std::vector<messages::vision::Goal>& goals, const Sensors& sensors) {
 
             // Ignore empty vectors of goals.
             if (goals.size() == 0)
@@ -167,7 +169,7 @@ namespace localisation {
             // }
 
             auto curr_time = NUClear::clock::now();
-            engine_->TimeUpdate(curr_time);
+            engine_->TimeUpdate(curr_time, sensors);
             engine_->ProcessObjects(goals);
             
         });

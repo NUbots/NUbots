@@ -25,7 +25,7 @@
 namespace messages {
     namespace localisation {
 
-        // The FieldObject message that the NUbugger reactor listens for
+        // Sent to NUbugger
         struct FieldObject {
             std::string name;
 
@@ -45,20 +45,12 @@ namespace messages {
             std::vector<Model> models;
         };
 
-        // Temporary test input for localisation
-        struct FakeOdometry {
-            arma::vec2 torso_displacement;
-            double torso_rotation;
-        };
-
         class LocalisationObject {
         public:
             LocalisationObject() {}
 
             arma::vec2 position;
-            double sr_xx;
-            double sr_xy;
-            double sr_yy;
+            arma::mat22 position_cov;
         };
 
         class Ball : public LocalisationObject {

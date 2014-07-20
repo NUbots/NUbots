@@ -27,7 +27,9 @@
 #include "messages/support/FieldDescription.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/Sensors.h"
+#include "messages/localisation/ResetRobotHypotheses.h"
 #include "MultiModalRobotModel.h"
+#include "messages/input/Sensors.h"
 
 namespace modules {
 namespace localisation {
@@ -42,13 +44,8 @@ namespace localisation {
             last_time_update_time_ = NUClear::clock::now();
         }
 
-        void TimeUpdate(std::chrono::system_clock::time_point current_time);
-
         void TimeUpdate(std::chrono::system_clock::time_point current_time,
-                        const messages::localisation::FakeOdometry& odom);
-
-        void TimeUpdate(std::chrono::system_clock::time_point current_time,
-                                              const messages::input::Sensors& sensors);
+                        const messages::input::Sensors& sensors);
 
         std::vector<utility::localisation::LocalisationFieldObject> GetPossibleObjects(
             const messages::vision::Goal& ambiguous_object);
@@ -76,6 +73,9 @@ namespace localisation {
 
         bool CanEmitFieldObjects();
 
+        void Reset(const messages::localisation::ResetRobotHypotheses& reset);
+
+        void OdometryMeasurementUpdate(const messages::input::Sensors& sensors);
     // private:
         MultiModalRobotModel robot_models_;
 

@@ -57,6 +57,8 @@ namespace modules {
                 arma::mat MEASUREMENT_NOISE_ACCELEROMETER;
                 arma::mat MEASUREMENT_NOISE_GYROSCOPE;
 
+                double odometry_covariance_factor = 0.05;
+
                 arma::vec2 integratedOdometry;
 
                 static constexpr const char* CONFIGURATION_PATH = "DarwinSensorFilter.yaml";

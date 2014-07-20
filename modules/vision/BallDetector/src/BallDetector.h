@@ -31,6 +31,7 @@ namespace vision {
         uint MAXIMUM_ITERATIONS_PER_FITTING;
         uint MAXIMUM_FITTED_MODELS;
         double CONSENSUS_ERROR_THRESHOLD;
+        double MAXIMUM_DISAGREEMENT_RATIO;
     public:
 
         static constexpr const char* CONFIGURATION_PATH = "BallDetector.yaml";

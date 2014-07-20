@@ -4,8 +4,10 @@ ADD_ROLE(
         support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
+        support::configuration::GlobalConfig
         support::configuration::SoccerConfig
         support::NUbugger
+        support::NUbuggerLite
         debug::NUbugger
 )
 

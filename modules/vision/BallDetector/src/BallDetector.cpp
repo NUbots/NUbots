@@ -62,9 +62,6 @@ namespace vision {
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacCircleModel;
 
-    // TODO the ball detector can detect multiple balls in the same ball due to classification errors, merge or throwout
-    // TODO the ball detector can see balls that are far too big or too small to be reasonable, throw those out too
-
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
@@ -73,6 +70,7 @@ namespace vision {
             CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<double>();
             MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
             MAXIMUM_FITTED_MODELS = config["ransac"]["maximum_fitted_models"].as<uint>();
+            MAXIMUM_DISAGREEMENT_RATIO = config["maximum_disagreement_ratio"].as<double>();
         });
 
         on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters>, With<Optional<FieldDescription>>, Options<Single>>("Ball Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field) {
@@ -92,21 +90,31 @@ namespace vision {
 
                 for(auto it = segments.first; it != segments.second; ++it) {
 
-                    auto& start = it->second.start;
-                    auto& end = it->second.end;
+                    auto& segment = it->second;
+                    auto& start = segment.start;
+                    auto& end = segment.end;
+
+                    bool belowHorizon = image.visualHorizonAtPoint(end[0]) < end[1] || image.visualHorizonAtPoint(start[0]) < start[1];
 
                     // We throw out points if they are:
                     // Less the full quality (subsampled)
                     // Do not have a transition on either side (are on an edge)
+                    // Go from an orange to other to orange segment (are interior)
 
-                    if(it->second.subsample == 1 && it->second.next && image.visualHorizonAtPoint(end[0]) < end[1]) {
+                    if(belowHorizon
+                        && segment.subsample == 1
+                        && segment.next
+                        && (!segment.next->next || segment.next->next->colour != ObjectClass::BALL)) {
 
-                        ballPoints.push_back({ double(it->second.end[0]), double(it->second.end[1]) });
+                        ballPoints.push_back({ double(end[0]), double(end[1]) });
                     }
 
-                    if(it->second.subsample == 1 && it->second.previous && image.visualHorizonAtPoint(start[0]) < start[1]) {
+                    if(belowHorizon
+                        && segment.subsample == 1
+                        && segment.previous
+                        && (!segment.previous->previous || segment.previous->previous->colour != ObjectClass::BALL)) {
 
-                        ballPoints.push_back({ double(it->second.start[0]), double(it->second.start[1]) });
+                        ballPoints.push_back({ double(start[0]), double(start[1]) });
                     }
                 }
             }
@@ -136,6 +144,8 @@ namespace vision {
                 auto left  = centre + arma::vec2({  result.model.radius, 0 });
                 auto right = centre + arma::vec2({ -result.model.radius, 0 });
 
+                double cameraHeight = sensors.orientationCamToGround(2, 3);
+
                 // Get a unit vector pointing to the centre of the ball
                 arma::vec3 ballCentreRay = arma::normalise(arma::normalise(getCamFromScreen(top, cam.focalLengthPixels))
                                                            + arma::normalise(getCamFromScreen(base, cam.focalLengthPixels)));
@@ -145,44 +155,59 @@ namespace vision {
 
                 // Get our width based distance to the ball
                 double widthDistance = widthBasedDistanceToCircle(field->ball_radius * 2, top, base, cam.focalLengthPixels);
-                arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + sensors.orientationCamToGround.submat(0,3,2,3);
+                arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + cameraHeight;
 
-                measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), arma::diagmat(arma::vec({0.003505351, 0.001961638, 1.68276E-05})) });
+                measurements.push_back({ /*cartesianToSpherical*/(ballCentreGroundWidth), arma::diagmat(arma::vec({0.003505351, 0.001961638, 1.68276E-05})) });
 
                 // Project this vector to a plane midway through the ball
                 Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, field->ball_radius });
                 arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, sensors.orientationCamToGround, ballBisectorPlane);
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), arma::diagmat(arma::vec({0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2 })) });
 
-                // std::cerr << measurements[0].position[0]
-                //    << "," << measurements[0].position[1]
-                //    << "," << measurements[0].position[2]
-                //    << "," << measurements[1].position[0]
-                //    << "," << measurements[1].position[1]
-                //    << "," << measurements[1].position[2]
-                //    << std::endl;
-
-                emit(graph("Ball Width", measurements[0].position[0], measurements[0].position[1], measurements[0].position[2]));
-                emit(graph("Ball D2P", measurements[1].position[0], measurements[1].position[1], measurements[1].position[2]));
-
                 /*
-                 *  BUILD OUR BALL
+                 *  IF VALID BUILD OUR BALL
                  */
-                Ball b;
+                if(widthDistance > cameraHeight / 2.0 && std::abs((ballCentreGroundWidth[0] - ballCentreGroundProj[0]) / ballCentreGroundProj[0]) > MAXIMUM_DISAGREEMENT_RATIO) {
+                    Ball b;
 
-                // On screen visual shape
-                b.circle.radius = result.model.radius;
-                b.circle.centre = result.model.centre;
+                    // On screen visual shape
+                    b.circle.radius = result.model.radius;
+                    b.circle.centre = result.model.centre;
 
-                // Angular positions from the camera
-                b.screenAngular = arma::atan(cam.pixelsToTanThetaFactor % ballCentreScreen);
-                b.angularSize = { getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels) };
+                    // Angular positions from the camera
+                    b.screenAngular = arma::atan(cam.pixelsToTanThetaFactor % ballCentreScreen);
+                    b.angularSize = { getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels) };
 
-                // Move our measurements
-                b.measurements = std::move(measurements);
+                    // Move our measurements
+                    b.measurements = std::move(measurements);
 
-                b.sensors = image.sensors;
-                balls->push_back(std::move(b));
+                    b.sensors = image.sensors;
+                    balls->push_back(std::move(b));
+                }
+            }
+
+            for(auto a = balls->begin(); a != balls->end(); ++a) {
+                for(auto b = a + 1; b != balls->end();) {
+
+                    // If our balls overlap
+                    if(a->circle.distanceToPoint(b->circle.centre) < b->circle.radius) {
+                        // Pick the better ball
+                        if(a->circle.radius < b->circle.radius) {
+                            // Throwout b
+                            b = balls->erase(b);
+                        }
+                        else {
+                            a = balls->erase(a);
+
+                            if(a == b) {
+                                ++b;
+                            }
+                        }
+                    }
+                    else {
+                        ++b;
+                    }
+                }
             }
 
             emit(std::move(balls));

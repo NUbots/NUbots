@@ -36,8 +36,8 @@ ADD_CUSTOM_COMMAND(
          --no-string-accumulator
          --single-mode-analyzer
          --no-mode-transition-check
-         --path-compression
-         --template-compression
+         # --path-compression
+         # --template-compression
 
     DEPENDS ${abs_file}
     COMMENT "Generating Quex lexer for vision"

@@ -65,6 +65,7 @@ namespace modules {
                 cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
                 cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
 
+
                 emit<Scope::DIRECT>(std::move(cameraParameters));
 
                 try {
@@ -93,6 +94,18 @@ namespace modules {
                     camera.startStreaming();
                 } catch(const std::exception& e) {
                     NUClear::log<NUClear::DEBUG>(std::string("Exception while setting camera configuration: ") + e.what());
+                }
+            });
+
+            on<Trigger<Every<1, std::chrono::seconds>>, With<Configuration<LinuxCamera>>>("Camera Setting Applicator", [this] (const time_t&, const Configuration<LinuxCamera>& config) {
+                if(camera.isStreaming()) {
+                    // Set all other camera settings
+                    for(auto& setting : camera.getSettings()) {
+                        int value = config[setting.first].as<int>();
+                        if(setting.second.set(value) == false) {
+                            NUClear::log<NUClear::DEBUG>("Failed to set " + setting.first + " on camera");
+                        }
+                    }
                 }
             });
         }

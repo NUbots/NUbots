@@ -4,6 +4,7 @@ ADD_ROLE(
         #support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
+        support::configuration::GlobalConfig
         support::configuration::NetworkingConfiguration
         support::DisplayTest
         platform::darwin::HardwareIO
@@ -14,6 +15,6 @@ ADD_ROLE(
 
         vision::LUTClassifier
         #vision::FeatureDetector
- 
+
         support::configuration::SoccerConfig
 )

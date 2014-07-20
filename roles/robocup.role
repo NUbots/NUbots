@@ -3,6 +3,7 @@ ADD_ROLE(
     MODULES
         # Support and Configuration
         #support::configuration::ConfigSystem
+        #support::configuration::GlobalConfig
         support::configuration::SoccerConfig
 
         # Hardware Interface

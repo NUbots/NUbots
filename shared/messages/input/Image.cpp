@@ -37,11 +37,11 @@ namespace messages {
         }
 
         Image::Pixel& Image::operator ()(size_t x, size_t y) {
-            return data[(imgHeight - y - 1) * imgWidth + (imgWidth - x - 1)];
+            return data[y * imgWidth + x];
         }
 
         const Image::Pixel& Image::operator ()(size_t x, size_t y) const {
-            return data[(imgHeight - y - 1) * imgWidth + (imgWidth - x - 1)];
+            return data[y * imgWidth + x];
         }
 
         size_t Image::width() const {

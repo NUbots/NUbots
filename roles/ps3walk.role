@@ -6,7 +6,8 @@ ADD_ROLE(
         #support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
-        support::configuration::NetworkingConfiguration
+        support::configuration::GlobalConfig
+        # support::configuration::NetworkingConfiguration
         support::NUbugger
         support::configuration::SoccerConfig
 
@@ -43,5 +44,5 @@ ADD_ROLE(
         localisation::NUcapLocalisation
 
         # Debug
-        debug::NUcap
+        # debug::NUcap
 )
