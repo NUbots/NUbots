@@ -36,6 +36,14 @@ namespace strategy {
     using messages::behaviour::FieldTarget;
 
     SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+
+        // For checking last seen times
+        on<Trigger<std::vector<VisionBall>>>([this] (const std::vector<VisionBall>& balls) {
+            if(!balls.empty()) {
+                ballLastSeen = NUClear::clock::now();
+            }
+        });
+
         // Main Loop
         on<Trigger<Every<30, Per<std::chrono::seconds>>>, With<GameState>, // TODO: ensure a reasonable state is emitted even if gamecontroller is not running
             Options<Single>>([this](const time_t&, const GameState& gameState) {
@@ -74,7 +82,7 @@ namespace strategy {
                             find({FieldTarget::SELF});
                         }
                         else { // not penalised
-                            if (recentlyVisible(FieldTarget::BALL)) { // ball has been seen recently
+                            if (NUClear::clock::now() - ballLastSeen < zone.ballActiveTimeout) { // ball has been seen recently
                                 if (inZone(FieldTarget::BALL) || isClose(FieldTarget::BALL)) { // in zone and close to ball
                                     // TODO: walkTo(FieldTarget::BALL);
                                     find({FieldTarget::BALL});
@@ -96,7 +104,7 @@ namespace strategy {
                                     find({FieldTarget::SELF, FieldTarget::BALL});
                                 }
                                 else { // not in zone
-                                    if (!timePassed()) {
+                                    if (NUClear::clock::now() - ballLastSeen < zone.zoneReturnTimeout) {
                                         spinWalk();
                                         find({FieldTarget::BALL});
                                     }

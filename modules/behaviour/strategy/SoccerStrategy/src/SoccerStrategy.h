@@ -33,6 +33,17 @@ namespace strategy {
         messages::behaviour::FieldTarget walkTarget;
         std::vector<messages::behaviour::FieldTarget> lookTarget;
 
+        struct Zone {
+            NUClear::clock::duration activeBallTimeout;
+            NUClear::clock::duration zoneReturnTimeout;
+            arma::mat22 zone;
+            arma::vec2 defaultPosition;
+            arma::vec2 startPosition;
+            bool goalie;
+        } zone;
+
+        time_t ballLastSeen;
+
         void standStill();
         void searchWalk();
         void walkTo(const messages::behaviour::FieldTarget& object);
