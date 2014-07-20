@@ -1,41 +1,35 @@
-MAX_BALL_DISTANCE: 0.25 
-KICK_DISTANCE_THRESHOLD: 0.3
-BALL_CERTAINTY_THRESHOLD: 6
-BALL_SELF_INTERSECTION_REGION: 1.0
-BALL_MOVEMENT_THRESHOLD: 0.1
-BALL_TIMEOUT_THRESHOLD: 5
-ANGLE_THRESHOLD: 0.4
-POSITION_THRESHOLD_TIGHT: 0.3
-POSITION_THRESHOLD_LOOSE: 0.6
-GOALIE: false
-MY_ZONE: 0
-#TODO fix zone config
-ZONE_0_DEFAULT_POSITION: [1.5, 0]
-ZONE_0_START_POSITION: [-0.75, -1]
-ZONE_0:
-  - [0,2]
-  - [3,2]
-  - [3,-2]
-  - [0,-2]
-ZONE_1_DEFAULT_POSITION: [0, 0]
-ZONE_1_START_POSITION: [-0.75, 1]
-ZONE_1:
-  - [-1.5,2]
-  - [1.5,2]
-  - [1.5,-2]
-  - [-1.5,-2]
-ZONE_2_DEFAULT_POSITION: [-1.5, 0]
-ZONE_2_START_POSITION: [-1.5, 0]
-ZONE_2:
-  - [-3,2]
-  - [0,2]
-  - [0,-2]
-  - [-3,-2]
-ZONE_3_DEFAULT_POSITION: [-2.75, 0]
-ZONE_3_START_POSITION: [-2.75, 0]
-ZONE_3:
-  - [-3,2]
-  - [-2.5,2]
-  - [-2.5,-2]
-  - [-3,-2]
-INITIAL_GOAL_HEADING: [0, 0]
+ball_close_distance: 2
+ball_last_seen_max_time: 2
+goal_last_seen_max_time: 4
+zones:
+  forward:
+    active_ball_timeout: 10
+    zone_return_timeout: 20
+    zone: [[x, y], [x, y]]
+    start_position: [x,y]
+    default_position: [x,y]
+    goalie: false
+
+  centre:
+    active_ball_timeout: 10
+    zone_return_timeout: 20
+    zone: [[x, y], [x, y]]
+    start_position: [x,y]
+    default_position: [x,y]
+    goalie: false
+
+  guard:
+    active_ball_timeout: 10
+    zone_return_timeout: 20
+    zone: [[x, y], [x, y]]
+    start_position: [x,y]
+    default_position: [x,y]
+    goalie: false
+
+  goalie:
+    active_ball_timeout: 10
+    zone_return_timeout: 20
+    zone: [[x, y], [x, y]]
+    start_position: [x,y]
+    default_position: [x,y]
+    goalie: true

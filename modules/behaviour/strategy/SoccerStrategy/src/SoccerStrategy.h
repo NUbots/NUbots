@@ -23,211 +23,58 @@
 #include <nuclear>
 #include <armadillo>
 
-#include "messages/localisation/FieldObject.h"
-#include "messages/support/FieldDescription.h"
-#include "messages/motion/KickCommand.h"
-#include "messages/motion/WalkCommand.h"
-#include "messages/input/gameevents/GameEvents.h"
-#include "messages/vision/VisionObjects.h"
-
-#include "utility/math/geometry/Polygon.h"
+#include "messages/behaviour/FieldTarget.h"
 
 namespace modules {
-    namespace behaviour {
-        namespace strategy {
+namespace behaviour {
+namespace strategy {
 
-		enum class GameStatePrimary : char {
-			INITIAL,
-			READY,
-			SET,
-			PLAYING,
-			TIMEOUT,
-			FINISHED
-		};
+    class SoccerStrategy : public NUClear::Reactor {
+    private:
+        messages::behaviour::FieldTarget walkTarget;
+        std::vector<messages::behaviour::FieldTarget> lookTarget;
 
-		enum class GameStateSecondary : char {
-			NORMAL,
-			PENALTY_SHOOTOUT,
-			OVERTIME,
-			PENALTY_KICK,
-			FREE_KICK,
-			GOAL_KICK,
-			CORNER_KICK,
-			THROW_IN,
-			PAUSED
-		};
+        double BALL_CLOSE_DISTANCE;
+        NUClear::clock::duration BALL_LAST_SEEN_MAX_TIME;
+        NUClear::clock::duration GOAL_LAST_SEEN_MAX_TIME;
 
-		GameStatePrimary& operator++(GameStatePrimary& gameState) {
-			switch (gameState) {
-				case GameStatePrimary::INITIAL:
-					return(gameState = GameStatePrimary::READY);
-				case GameStatePrimary::READY:
-					return(gameState = GameStatePrimary::SET);
-				case GameStatePrimary::SET:
-					return(gameState = GameStatePrimary::PLAYING);
-				case GameStatePrimary::PLAYING:
-					return(gameState = GameStatePrimary::TIMEOUT);
-				case GameStatePrimary::TIMEOUT:
-					return(gameState = GameStatePrimary::FINISHED);
-				case GameStatePrimary::FINISHED:
-				default:
-					return(gameState = GameStatePrimary::INITIAL);
-			}
-		}
+        // TODO: remove horrible
+        bool isGettingUp = false;
+        bool isDiving = false;
+        bool selfPenalised = false;
 
-		GameStatePrimary operator++(GameStatePrimary& gameState, int) {
-			GameStatePrimary tmp(gameState);
-			++gameState;
-			return(tmp);
-		}
+        // TODO: initalize
+        struct Zone {
+            NUClear::clock::duration ballActiveTimeout;
+            NUClear::clock::duration zoneReturnTimeout;
+            arma::mat22 zone;
+            arma::vec2 defaultPosition;
+            arma::vec2 startPosition;
+            bool goalie;
+        } zone;
 
-		GameStateSecondary& operator++(GameStateSecondary& gameState) {
-			switch (gameState) {
-				case GameStateSecondary::NORMAL:
-					return(gameState = GameStateSecondary::PENALTY_SHOOTOUT);
-				case GameStateSecondary::PENALTY_SHOOTOUT:
-					return(gameState = GameStateSecondary::OVERTIME);
-				case GameStateSecondary::OVERTIME:
-					return(gameState = GameStateSecondary::PENALTY_KICK);
-				case GameStateSecondary::PENALTY_KICK:
-					return(gameState = GameStateSecondary::FREE_KICK);
-				case GameStateSecondary::FREE_KICK:
-					return(gameState = GameStateSecondary::GOAL_KICK);
-				case GameStateSecondary::GOAL_KICK:
-					return(gameState = GameStateSecondary::CORNER_KICK);
-				case GameStateSecondary::CORNER_KICK:
-					return(gameState = GameStateSecondary::THROW_IN);
-				case GameStateSecondary::THROW_IN:
-					return(gameState = GameStateSecondary::PAUSED);
-				case GameStateSecondary::PAUSED:
-				default:
-					return(gameState = GameStateSecondary::NORMAL);
-			}
-		}
+        time_t ballLastSeen;
+        time_t goalLastSeen;
 
-		GameStateSecondary operator++(GameStateSecondary& gameState, int) {
-			GameStateSecondary tmp(gameState);
-			++gameState;
-			return(tmp);
-		}
+        void standStill();
+        void searchWalk();
+        void walkTo(const messages::behaviour::FieldTarget& object);
+        void walkTo(arma::vec position);
+        void find(const std::vector<messages::behaviour::FieldTarget>& objects);
+        void spinWalk();
+        bool pickedUp();
+        bool penalised();
+        bool isGoalie();
+        bool inZone(const messages::behaviour::FieldTarget& object);
+        bool ballDistance();
+    public:
+        static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";
 
-		typedef struct {
-			GameStatePrimary primaryGameState;
-			GameStateSecondary secondaryGameState;
+        explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
+    };
 
-			bool selfInZone;
-			bool ballInZone;
-			bool goalInRange;
-			bool kicker;
-			bool pickedUp;
-			bool penalised;
-			bool kickOff;
-			bool ballSeen;
-			bool ballLost;
-			bool teamBallSeen;
-			bool ballApproaching;
-			bool ballApproachingGoal;
-			bool ballHasMoved;
-			bool kickPosition;
-
-			arma::vec2 ballGoalIntersection;
-			arma::vec2 ballGoalieIntersection;
-			arma::vec2 ballSelfIntersection;
-			messages::localisation::Ball ball;
-
-			arma::mat22 transform;
-			arma::vec2 position;
-			arma::vec2 heading;
-			arma::vec2 targetPosition;
-			arma::vec2 targetHeading;
-
-			bool inPosition;
-			bool outOfPosition;
-			bool correctHeading;
-
-			std::chrono::system_clock::time_point timeBallLastSeen;
-		} State;
-
-		struct Zone {
-			arma::vec2 defaultPosition;
-			arma::vec2 startPosition;
-			utility::math::geometry::Polygon zone;
-
-			Zone() {}
-		};
-
-		struct SoccerStrategyConfig {
-			static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";
-		};
-
-		/**
-		* High level behaviour for robot soccer.
-		*
-		* @author Alex Biddulph
-		*/
-		class SoccerStrategy : public NUClear::Reactor {
-		private:
-			NUClear::clock::time_point timeSinceLastSeen;
-
-			std::vector<Zone> ZONES;
-			int MY_ZONE;
-			float MAX_BALL_DISTANCE;
-			float KICK_DISTANCE_THRESHOLD;
-			float BALL_CERTAINTY_THRESHOLD;
-			float BALL_SELF_INTERSECTION_REGION;
-			float BALL_MOVEMENT_THRESHOLD;
-			float BALL_TIMEOUT_THRESHOLD;
-			bool IS_GOALIE;
-			float ANGLE_THRESHOLD;
-			float POSITION_THRESHOLD_TIGHT;
-			float POSITION_THRESHOLD_LOOSE;
-
-			messages::support::FieldDescription FIELD_DESCRIPTION;
-
-			State currentState, previousState;
-
-			bool gameStateButtonStatus;
-			bool gameStateButtonStatusPrev;
-			bool penalisedButtonStatus;
-			bool penalisedButtonStatusPrev;
-
-			bool feetOffGround;
-			bool isKicking;
-			bool isDiving;
-			bool isGettingUp;
-			bool isWalking;
-
-			arma::vec2 findOptimalPosition(const utility::math::geometry::Polygon& zone, const arma::vec2& point);
-			void findSelf();
-			void findBall();
-			void goToPoint(const arma::vec2& position, const arma::vec2& heading);
-			void sideStepToPoint(const arma::vec2& position);
-			void kickBall(const arma::vec2& direction);
-			void diveForBall(const arma::vec2& target);
-			void approachBall(const arma::vec2& haading);
-
-			void updateGameState(const std::shared_ptr<const messages::input::gameevents::GameState>& gameController);
-
-			//NEW
-			bool penalised(const std::shared_ptr<const messages::input::gameevents::GameState>& gameState);
-			void playSoccer(const arma::vec2& localisationBall, const messages::vision::Ball& visionBall, const messages::localisation::Self& self, const std::shared_ptr<const messages::input::gameevents::GameState>& gameState);
-			void playGoalie(const arma::vec2& localisationBall, const messages::localisation::Self& self);
-			void searchForBall(const messages::localisation::Ball& localisationBall, const messages::localisation::Self& self, const std::shared_ptr<const messages::input::gameevents::GameState>& gameState);
-
-			void walkToStartPosition(const messages::localisation::Self& self);
-			void stopWalking();
-			void findSelfAndBall();
-			void spin();
-
-
-			arma::vec2 enemyGoal;
-
-		public:
-			explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
-		};
-
-		}  // strategy
-	}  // behaviours
+}  // strategy
+}  // behaviours
 }  // modules
 
 #endif  // MODULES_BEHAVIOUR_STRATEGY_SOCCERSTRATEGGY_H
