@@ -34,8 +34,9 @@ namespace strategy {
         messages::behaviour::FieldTarget walkTarget;
         std::vector<messages::behaviour::FieldTarget> lookTarget;
 
+        // TODO: initalize
         struct Zone {
-            NUClear::clock::duration activeBallTimeout;
+            NUClear::clock::duration ballActiveTimeout;
             NUClear::clock::duration zoneReturnTimeout;
             arma::mat22 zone;
             arma::vec2 defaultPosition;

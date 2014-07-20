@@ -23,6 +23,7 @@
 #include "messages/behaviour/LookStrategy.h"
 #include "messages/behaviour/WalkStrategy.h"
 #include "messages/support/FieldDescription.h"
+#include "messages/vision/VisionObjects.h"
 
 namespace modules {
 namespace behaviour {
