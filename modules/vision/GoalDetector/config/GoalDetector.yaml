@@ -8,3 +8,6 @@ visual_horizon_buffer: 0.02
 minimum_goal_horizon_angle: 1.3
 maximum_angle_between_goals: 0.3
 maximum_vertical_goal_perspective_angle: 0.1
+measurement_distance_covariance_factor: 0.1
+measurement_bearing_variance: 0.05
+measurement_elevation_variance: 0.01

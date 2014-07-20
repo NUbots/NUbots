@@ -38,6 +38,9 @@ namespace vision {
         double MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE;
         double MAXIMUM_ANGLE_BETWEEN_GOALS;
         double MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
+        double measurement_distance_covariance_factor;
+        double measurement_bearing_variance;
+        double measurement_elevation_variance;
 
     public:
 
