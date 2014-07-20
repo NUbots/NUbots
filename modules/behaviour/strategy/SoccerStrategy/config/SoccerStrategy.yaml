@@ -2,34 +2,39 @@ ball_close_distance: 2
 ball_last_seen_max_time: 2
 goal_last_seen_max_time: 4
 zones:
-  forward:
-    active_ball_timeout: 10
-    zone_return_timeout: 20
-    zone: [[x, y], [x, y]]
-    start_position: [x,y]
-    default_position: [x,y]
+  forward: &forward
+    ball_active_timeout: 5
+    zone_return_timeout: 10
+    zone: [[0, 3], [4.5, -3]]
+    start_position_offensive: [-0.2, 1]
+    start_position_defensive: [1.5, 1]
+    default_position: [2, 0.5]
     goalie: false
 
-  centre:
-    active_ball_timeout: 10
-    zone_return_timeout: 20
-    zone: [[x, y], [x, y]]
-    start_position: [x,y]
-    default_position: [x,y]
+  centre: &centre
+    ball_active_timeout: 5
+    zone_return_timeout: 10
+    zone: [[-2, 3], [3, -3]]
+    start_position_offensive: [-0.2, 0]
+    start_position_defensive: [-1, 0]
+    default_position: [0, 0]
     goalie: false
 
-  guard:
-    active_ball_timeout: 10
-    zone_return_timeout: 20
-    zone: [[x, y], [x, y]]
-    start_position: [x,y]
-    default_position: [x,y]
+  guard: &guard
+    ball_active_timeout: 5
+    zone_return_timeout: 10
+    zone: [[-4.5, 3], [0, -3]]
+    start_position_offensive: [-2, -1]
+    start_position_defensive: [-2, -0.7]
+    default_position: [-2, -0.5]
     goalie: false
 
-  goalie:
-    active_ball_timeout: 10
-    zone_return_timeout: 20
-    zone: [[x, y], [x, y]]
-    start_position: [x,y]
-    default_position: [x,y]
+  goalie: &goalie
+    ball_active_timeout: 5
+    zone_return_timeout: 10
+    zone: [[-4.5, -1.725], [-3.5, 1.725]]
+    start_position_offensive: [-4.3, 0]
+    start_position_defensive: [-4.3, 0]
+    default_position: [-4.3, 0]
     goalie: true
+my_zone: *centre

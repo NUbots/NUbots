@@ -85,7 +85,7 @@ namespace modules {
 
             SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
-            , orientationFilter(arma::vec({0,0,0,1,0,0,0}))
+            , orientationFilter(arma::vec({0, 0, 0, std::cos(M_PI_2), 0, std::sin(M_PI_2), 0}))
             , velocityFilter(arma::vec3({0,0,0})) {
 
                 on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){

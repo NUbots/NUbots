@@ -44,6 +44,10 @@ namespace time {
         return std::chrono::duration_cast<T>(timePoint.time_since_epoch()).count();
     }
 
+    inline NUClear::clock::duration durationFromSeconds(double seconds) {
+        return NUClear::clock::duration(std::lround(NUClear::clock::period::den * seconds));
+    }
+
 }
 }
 #endif

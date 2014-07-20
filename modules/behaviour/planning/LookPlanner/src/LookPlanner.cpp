@@ -38,6 +38,7 @@ namespace planning {
     using VisionBall = messages::vision::Ball;
     using VisionGoal = messages::vision::Goal;
 
+    using messages::input::Sensors;
     using LocalisationBall = messages::localisation::Ball;
     using messages::localisation::Self;
     using messages::support::FieldDescription;
@@ -60,12 +61,14 @@ namespace planning {
         on<Trigger<Last<5, std::vector<VisionBall>>>,
             With<Optional<LocalisationBall>>,
             With<Optional<std::vector<Self>>>,
+            With<Sensors>,
             With<LookStrategy>,
             With<FieldDescription>,
             Options<Sync<LookPlanner>>>
             ([this] (const LastList<std::vector<VisionBall>>& v,
                     const std::shared_ptr<const LocalisationBall>& l,
                     const std::shared_ptr<const std::vector<Self>>& selfs,
+                    const Sensors& sensors,
                     const LookStrategy& strat,
                     const FieldDescription fieldDesc) {
 
@@ -79,7 +82,6 @@ namespace planning {
                 return a->empty();
             });
 
-
             ballObjects.clear();
             //check if the ball is visible
             if (vball != v.rend() and !(*vball)->empty()) {
@@ -92,8 +94,8 @@ namespace planning {
 
                     ballObjects.push_back({utility::motion::kinematics::calculateHeadJointsToLookAt(
                                                                 {l->position[0], l->position[1], 0},
-                                                                (*vball)->at(0).sensors->orientationCamToGround,
-                                                                (*vball)->at(0).sensors->orientationBodyToGround),
+                                                                sensors.orientationCamToGround,
+                                                                sensors.orientationBodyToGround),
                                            arma::vec2({ballDiameter,ballDiameter}) });
 
                     //update the pan configuration for the lost ball pan (stored in global/field coordinates at this point)
@@ -133,11 +135,13 @@ namespace planning {
 
         on<Trigger<Last<5, std::vector<VisionGoal>>>,
             With<Optional<std::vector<Self>>>,
+            With<Sensors>,
             With<LookStrategy>,
             With<FieldDescription>,
             Options<Sync<LookPlanner>>>
             ([this] (const LastList<std::vector<VisionGoal>>& v,
                      const std::shared_ptr<const std::vector<Self>>& selfs,
+                     const Sensors& sensors,
                      const LookStrategy& strat,
                      const FieldDescription fieldDesc) {
 
@@ -177,8 +181,8 @@ namespace planning {
                 double goalDiameter = 2.0*atan2(fieldDesc.dimensions.goalpost_diameter,arma::norm(g));
                 goalObjects.push_back({utility::motion::kinematics::calculateHeadJointsToLookAt(
                                                             {g[0], g[1], 0},
-                                                            (*vgoal)->at(0).sensors->orientationCamToGround,
-                                                            (*vgoal)->at(0).sensors->orientationBodyToGround),
+                                                            sensors.orientationCamToGround,
+                                                            sensors.orientationBodyToGround),
                                        arma::vec2({goalDiameter,goalDiameter})});
                 }
 

@@ -48,8 +48,9 @@ namespace strategy {
             NUClear::clock::duration ballActiveTimeout;
             NUClear::clock::duration zoneReturnTimeout;
             arma::mat22 zone;
+            arma::vec2 startPositionOffensive;
+            arma::vec2 startPositionDefensive;
             arma::vec2 defaultPosition;
-            arma::vec2 startPosition;
             bool goalie;
         } zone;
 
