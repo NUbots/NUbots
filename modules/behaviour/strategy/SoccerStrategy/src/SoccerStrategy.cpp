@@ -19,6 +19,7 @@
 
 #include "SoccerStrategy.h"
 #include "messages/input/gameevents/GameEvents.h"
+#include "messages/input/gameevents/GameEvents.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/behaviour/LookStrategy.h"
 #include "messages/behaviour/WalkStrategy.h"
@@ -26,11 +27,16 @@
 namespace modules {
 namespace behaviour {
 namespace strategy {
+
     using messages::input::gameevents::GameState;
     using messages::input::gameevents::Mode;
     using messages::input::gameevents::Phase;
+
+    using VisionBall = messages::vision::Ball;
+
     using messages::platform::darwin::ButtonLeftDown;
     using messages::platform::darwin::ButtonMiddleDown;
+
     using messages::behaviour::WalkStrategy;
     using messages::behaviour::WalkApproach;
     using messages::behaviour::FieldTarget;
@@ -154,11 +160,6 @@ namespace strategy {
         return false; // TODO
     }
 
-    bool SoccerStrategy::recentlyVisible(const FieldTarget& object) {
-        // TODO: Look at the last timestamp of the seen object (using triggers for caching the timestamps)
-        return true; // TODO
-    }
-
     bool SoccerStrategy::isGoalie() {
         // TODO: checking myzone.isgoalie true
         return false; // TODO
@@ -180,11 +181,6 @@ namespace strategy {
 
     void SoccerStrategy::find(const std::vector<FieldTarget>& fieldObjects) {
         // TODO:
-    }
-
-    bool SoccerStrategy::timePassed() {
-        // TODO: use recently seen instead of this
-        return false;
     }
 
     void SoccerStrategy::spinWalk() {

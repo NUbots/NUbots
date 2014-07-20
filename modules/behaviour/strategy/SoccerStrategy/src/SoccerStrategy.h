@@ -21,6 +21,7 @@
 #define MODULES_BEHAVIOUR_STRATEGY_SOCCERSTRATEGGY_H
 
 #include <nuclear>
+#include <armadillo>
 
 #include "messages/behaviour/FieldTarget.h"
 
@@ -52,11 +53,9 @@ namespace strategy {
         void spinWalk();
         bool pickedUp();
         bool penalised();
-        bool recentlyVisible(const messages::behaviour::FieldTarget& object);
         bool isGoalie();
         bool inZone(const messages::behaviour::FieldTarget& object);
         bool isClose(const messages::behaviour::FieldTarget& object);
-        bool timePassed();
     public:
         static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";
 
