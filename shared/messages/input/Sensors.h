@@ -61,6 +61,8 @@ namespace messages {
             arma::vec3 leftFSR;
             arma::vec3 rightFSR;
 
+            arma::mat22 robotToIMU;
+
             bool leftFootDown;
             bool rightFootDown;
 

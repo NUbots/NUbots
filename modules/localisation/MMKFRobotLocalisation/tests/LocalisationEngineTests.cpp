@@ -51,6 +51,8 @@ TEST_CASE("Angle convinience functions should handle corner cases", "[math][angl
     REQUIRE(normalizeAngle(-M_PI) == Approx(M_PI));
     REQUIRE(normalizeAngle( M_PI * 2) == Approx(0.0));
     REQUIRE(normalizeAngle(-M_PI * 2) == Approx(0.0));
+    REQUIRE(normalizeAngle( M_PI * 2 - 0.1) == Approx(-0.1));
+    REQUIRE(normalizeAngle(-M_PI * 2 + 0.1) == Approx( 0.1));
     REQUIRE(normalizeAngle( M_PI * 77 - 0.1) == Approx(M_PI - 0.1));
     REQUIRE(normalizeAngle(-M_PI * 77 + 0.1) == Approx(-M_PI + 0.1));
 }

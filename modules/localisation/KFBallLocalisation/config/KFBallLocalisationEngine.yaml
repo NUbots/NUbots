@@ -3,6 +3,6 @@ EmitBallFieldobjects: false
 
 # BallModel
 BallDragCoefficient: 0.1
-ProcessNoisePositionFactor: 1e-4
-ProcessNoiseVelocityFactor: 1e-3
+ProcessNoisePositionFactor: 1e-3
+ProcessNoiseVelocityFactor: 1e-2
 BallHeight: 0.05

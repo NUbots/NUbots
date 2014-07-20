@@ -20,8 +20,13 @@
 #include "KFBallLocalisationEngine.h"
 #include <chrono>
 #include "utility/time/time.h"
+#include "utility/math/coordinates.h"
+#include "utility/motion/ForwardKinematics.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/localisation/FieldObject.h"
+
+using utility::math::coordinates::cartesianToSpherical;
+using utility::math::coordinates::sphericalToCartesian;
 
 using messages::vision::VisionObject;
 // using messages::localisation::FakeOdometry;
@@ -44,28 +49,29 @@ void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point 
 //     ball_filter_.timeUpdate(seconds); // TODO odometry was removed from here odom
 // }
 
-double KFBallLocalisationEngine::MeasurementUpdate(
-    const messages::vision::VisionObject& observed_object) {
+double KFBallLocalisationEngine::MeasurementUpdate(const VisionObject& observed_object) {
+    double quality = 1.0;
 
-    // // Radial coordinates
-    // arma::vec2 measurement = { observed_object.sphericalFromNeck[0],
-    //                            observed_object.sphericalFromNeck[1] };
-    // arma::mat22 cov = { observed_object.sphericalError[0], 0,
-    //                     0, observed_object.sphericalError[1] };
+    for (auto& measurement : observed_object.measurements) {
+        // Spherical from ground:
+        auto currentState = ball_filter_.get();
+        
+        double ballAngle = 0;
+        if (0 != currentState(1) || 0 != currentState(0)) {
+            ballAngle = std::atan2(currentState(1), currentState(0));
+        }
 
-    // Distance and unit vector heading
-    // arma::vec3 measurement = { groundDist,
-    //                            std::cos(observed_object.sphericalFromNeck[1]),
-    //                            std::sin(observed_object.sphericalFromNeck[1]) };
-    // arma::mat33 cov = { observed_object.sphericalError[0], 0, 0,
-    //                     0, observed_object.sphericalError[1], 0,
-    //                     0, 0, observed_object.sphericalError[1] };
+        arma::vec3 measuredPosCartesian = sphericalToCartesian(measurement.position);
+        arma::vec2 cartesianImuObservation2d = observed_object.sensors->robotToIMU * measuredPosCartesian.rows(0,1);
+        arma::vec3 cartesianImuObservation = arma::vec3({cartesianImuObservation2d(0),
+                                                         cartesianImuObservation2d(1),
+                                                         measuredPosCartesian(2)});
+        arma::vec3 sphericalImuObservation = cartesianToSpherical(cartesianImuObservation);
+        sphericalImuObservation(1) -= ballAngle;
+        arma::mat33 cov = measurement.error;
 
-    // Spherical observation:
-    arma::vec3 measurement = observed_object.measurements[0].position;
-    arma::mat33 cov = observed_object.measurements[0].error;
-
-    double quality = ball_filter_.measurementUpdate(measurement, cov);
+        quality *= ball_filter_.measurementUpdate(sphericalImuObservation, cov, ballAngle);
+    }
 
     return quality;
 }

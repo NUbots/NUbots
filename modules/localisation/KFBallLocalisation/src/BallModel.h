@@ -53,7 +53,7 @@ namespace ball {
         arma::vec::fixed<size> timeUpdate(
             const arma::vec::fixed<size>& state, double deltaT);
 
-        arma::vec predictedObservation(const arma::vec::fixed<size>& state);
+        arma::vec predictedObservation(const arma::vec::fixed<size>& state, double ballAngle);
 
         arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 

@@ -24,10 +24,10 @@
 #include "utility/math/coordinates.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/transform.h"
+#include "utility/motion/ForwardKinematics.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
-#include "utility/localisation/transform.h"
 #include "messages/input/Sensors.h"
 #include "messages/input/ServoID.h"
 
@@ -38,6 +38,7 @@ using utility::math::angle::normalizeAngle;
 using utility::math::angle::vectorToBearing;
 using utility::math::angle::bearingToUnitVector;
 using utility::math::coordinates::cartesianToSpherical;
+using utility::motion::kinematics::calculateRobotToIMU;
 using utility::localisation::transform::SphericalRobotObservation;
 using utility::localisation::transform::WorldToRobotTransform;
 using utility::localisation::transform::RobotToWorldTransform;
@@ -177,6 +178,7 @@ namespace localisation {
                 orientation.submat(0, 1, 1, 1) = arma::vec2({ -robot_imu_dir_(1), robot_imu_dir_(0) });
 
             sensors->orientation = orientation;
+            sensors->robotToIMU = calculateRobotToIMU(sensors->orientation);
 
             // orientationCamToGround
             sensors->orientationCamToGround = arma::eye(4, 4);

@@ -43,7 +43,7 @@ namespace math {
 
             double angle = std::fmod(value, 2 * M_PI);
             
-            if (angle < 0)
+            if (angle <= -M_PI)
                 angle += M_PI * 2;
 
             if (angle > M_PI)

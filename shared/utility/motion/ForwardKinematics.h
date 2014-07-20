@@ -374,6 +374,18 @@ namespace kinematics {
         return utility::math::matrix::orthonormal44Inverse(groundToBody);
     }
 
+    inline arma::mat22 calculateRobotToIMU(arma::mat33 orientation) {
+        arma::vec3 xRobotImu = arma::mat33(orientation.t()).col(0);
+        arma::vec2 projXRobot = arma::normalise(xRobotImu.rows(0,1));
+        arma::vec2 projYRobot = arma::vec2({-projXRobot(1), projXRobot(0)});
+        
+        arma::mat22 robotToImu;
+        robotToImu.col(0) = projXRobot;
+        robotToImu.col(1) = projYRobot;
+
+        return robotToImu;
+    }
+
 } // kinematics
 }  // motion
 }  // utility

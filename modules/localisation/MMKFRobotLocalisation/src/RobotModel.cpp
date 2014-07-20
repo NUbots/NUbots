@@ -35,6 +35,7 @@ using messages::input::ServoID;
 using utility::localisation::transform::SphericalRobotObservation;
 using utility::localisation::transform::WorldToRobotTransform;
 using utility::localisation::transform::RobotToWorldTransform;
+using utility::localisation::transform::ImuToWorldHeadingTransform;
 using utility::math::matrix::rotationMatrix;
 using utility::math::matrix::zRotationMatrix;
 using utility::math::coordinates::cartesianToRadial;
@@ -52,10 +53,10 @@ arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
     // new_state.rows(kX,kY) += deltaT * state.rows(kVX,kVY);
 
     // Velocity in robot space:
-    arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
-    arma::vec3 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).col(0);
-    arma::vec2 world_velocity = RobotToWorldTransform(arma::vec2{0,0}, robotHeading_world.rows(0,1), state.rows(kVX, kVY));
-    new_state.rows(kX,kY) += world_velocity * deltaT;
+    // arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.robotToIMU);
+    arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.orientation);
+    arma::vec2 worldVelocity = RobotToWorldTransform(arma::vec2{0,0}, worldRobotHeading, state.rows(kVX, kVY));
+    new_state.rows(kX,kY) += worldVelocity * deltaT;
 
     return new_state;
 }
@@ -66,10 +67,10 @@ arma::vec RobotModel::predictedObservation(
     const arma::vec3& actual_position,
     const Sensors& sensors) {
     //Rewrite:
-    arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
-    arma::vec3 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).col(0);
+    // arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.robotToIMU);
+    arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.orientation);
     auto obs = SphericalRobotObservation(state.rows(kX, kY),
-                                         robotHeading_world.rows(0,1),
+                                         worldRobotHeading,
                                          actual_position);
     return obs;
 }

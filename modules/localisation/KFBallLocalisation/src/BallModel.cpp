@@ -74,27 +74,21 @@ arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
 
 /// Return the predicted observation of an object at the given position
 arma::vec BallModel::predictedObservation(
-    const arma::vec::fixed<BallModel::size>& state) {
-
-    // // Robot-relative cartesian
-    // return { state(kX), state(kY) };
-
-    // Distance and unit vector heading
-    // arma::vec2 radial = utility::math::coordinates::Cartesian2Radial(state.rows(0, 1));
-    // auto heading_angle = radial[1];
-    // auto heading_x = std::cos(heading_angle);
-    // auto heading_y = std::sin(heading_angle);
-    // return {radial[0], heading_x, heading_y};
+    const arma::vec::fixed<BallModel::size>& state, double ballAngle) {
 
     arma::vec3 ball_pos = arma::vec3({state(kX), state(kY), cfg_.ballHeight});
     auto obs = SphericalRobotObservation({0, 0}, 0, ball_pos);
+    obs(1) -= ballAngle;
     return obs;
 }
 
 arma::vec BallModel::observationDifference(const arma::vec& a,
-                                            const arma::vec& b){
-    // Distance and unit vector heading
-    return a - b;
+                                           const arma::vec& b){
+    arma::vec3 result = a - b;
+    std::cout<<__FILE__<<", "<<__LINE__<<": "<< result.t() << std::endl;
+    // result(1) = utility::math::angle::normalizeAngle(result(1));
+    // result(2) = utility::math::angle::normalizeAngle(result(2));
+    return result;
 }
 
 arma::vec::fixed<BallModel::size> BallModel::limitState(

@@ -82,6 +82,15 @@ namespace transform {
         return obs;
     }
 
+    // inline arma::vec ImuToWorldHeadingTransform(double imuOffset, arma::mat22 robotToImu) {
+    inline arma::vec2 ImuToWorldHeadingTransform(double imuOffset, arma::mat33 orientation) {
+        // arma::mat22 imuRotation = utility::math::matrix::zRotationMatrix(imuOffset, 2);
+        // arma::vec2 worldRobotHeading = imuRotation * robotToImu.col(0);
+        arma::mat33 imuRotation = utility::math::matrix::zRotationMatrix(imuOffset);
+        arma::vec3 worldRobotHeading = imuRotation * arma::mat(orientation.t()).col(0);
+        return arma::normalise(worldRobotHeading.rows(0,1));
+    }
+
     inline arma::vec SphericalRobotObservation(
             const arma::vec& robot_pos,
             const arma::vec2& robot_heading,

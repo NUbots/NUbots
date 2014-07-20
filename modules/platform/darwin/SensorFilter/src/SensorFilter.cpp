@@ -46,10 +46,10 @@ namespace modules {
             using utility::motion::kinematics::DarwinModel;
             using utility::motion::kinematics::calculateCentreOfMass;
             using utility::motion::kinematics::Side;
+            using utility::motion::kinematics::calculateRobotToIMU;
             using utility::math::matrix::orthonormal44Inverse;
             using utility::math::matrix::quaternionToRotationMatrix;
             using utility::math::kalman::IMUModel;
-
 
             std::string makeErrorString(const std::string& src, uint errorCode) {
                 std::stringstream s;
@@ -263,6 +263,8 @@ namespace modules {
                     // sensors->orientation.col(2) = -orientation.rows(0,2);
                     // sensors->orientation.col(0) = orientation.rows(3,5);
                     // sensors->orientation.col(1) = arma::cross(sensors->orientation.col(2), sensors->orientation.col(0));
+
+                    sensors->robotToIMU = calculateRobotToIMU(sensors->orientation);
 
                     /************************************************
                      *                  Kinematics                  *
