@@ -53,9 +53,9 @@ Vagrant.configure("2") do |config|
       nuclearport.vm.network :forwarded_port, guest: 9090, host: 9090
     end
 
-    if ['s24'].include?(Socket.gethostname) # NUbugger Port
-      nuclearport.vm.network :public_network, bridge: "WiFi"
-    end
+    #if ['s24'].include?(Socket.gethostname) # NUbugger Port
+    #  nuclearport.vm.network :public_network, bridge: "WiFi"
+    #end
 
     # Syntax: "path/on/host", "/path/on/guest"
     # nuclearport.vm.synced_folder ".", "/home/vagrant/nubots/NUClearPort"

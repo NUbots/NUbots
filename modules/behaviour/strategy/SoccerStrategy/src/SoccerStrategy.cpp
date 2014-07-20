@@ -327,12 +327,14 @@ namespace strategy {
                     auto strategy = std::make_unique<LookStrategy>();
                     strategy->priorities = {typeid(VisionBall)};
                     emit(std::move(strategy));
+                    break;
                 }
                 case FieldTarget::SELF: {
                     // Prioritise goals
                     auto strategy = std::make_unique<LookStrategy>();
                     strategy->priorities = {typeid(VisionGoal)};
                     emit(std::move(strategy));
+                    break;
                 }
                 default:
                     throw std::runtime_error("Soccer strategy attempted to find a bad object");
