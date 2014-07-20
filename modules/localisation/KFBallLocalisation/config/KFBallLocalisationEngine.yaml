@@ -1,5 +1,5 @@
 # KFBallLocalisationEngine
-EmitBallFieldobjects: false
+EmitBallFieldobjects: true
 
 # BallModel
 BallDragCoefficient: 0.1

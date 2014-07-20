@@ -92,6 +92,7 @@ namespace localisation {
            Options<Sync<MMKFRobotLocalisation>>
            >("Localisation NUbugger Output", [this](const time_t&, const Sensors& sensors) {
             auto& hypotheses = engine_->robot_models_.hypotheses();
+            NUClear::log(__FILE__,__LINE__,hypotheses.size());
             if (hypotheses.size() == 0) {
                 NUClear::log<NUClear::ERROR>("MMKFRobotLocalisation has no robot hypotheses.");
                 return;
@@ -168,11 +169,15 @@ namespace localisation {
             //         // std::cout << "    error:" << measurement.error << std::endl;
             //     }
             // }
+            std::cout << __FILE__ << " " << __LINE__ << " " << engine_->robot_models_.hypotheses().size() << std::endl;
 
             auto curr_time = NUClear::clock::now();
+            std::cout << __FILE__ << " " << __LINE__ << " " << engine_->robot_models_.hypotheses().size() << std::endl;
             engine_->TimeUpdate(curr_time, sensors);
+            std::cout << __FILE__ << " " << __LINE__ << " " << engine_->robot_models_.hypotheses().size() << std::endl;
             engine_->ProcessObjects(goals);
             
+            std::cout << __FILE__ << " " << __LINE__ << " " << engine_->robot_models_.hypotheses().size() << std::endl;
         });
     }
 }

@@ -188,6 +188,7 @@ namespace vision {
 
                 // Make a quad
                 Goal g;
+                g.side = Goal::Side::UNKNOWN;
 
                 // Seperate tl and bl
                 arma::vec2 tl = p1[1] > p2[1] ? p2 : p1;

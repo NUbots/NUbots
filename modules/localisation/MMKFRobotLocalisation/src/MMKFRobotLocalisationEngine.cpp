@@ -86,22 +86,23 @@ namespace localisation {
             possible.push_back(goalpost_lfos_.bl);
             if (!cfg_.all_goals_are_blue)
                 possible.push_back(goalpost_lfos_.yl);
-        }
-
-        if (ambiguous_object.side == messages::vision::Goal::Side::RIGHT) {
+        } else if (ambiguous_object.side == messages::vision::Goal::Side::RIGHT) {
             possible.push_back(goalpost_lfos_.br);
             if (!cfg_.all_goals_are_blue)
                 possible.push_back(goalpost_lfos_.yr);
-        }
-
-        if (ambiguous_object.side == messages::vision::Goal::Side::UNKNOWN) {
+        } else if (ambiguous_object.side == messages::vision::Goal::Side::UNKNOWN) {
             possible.push_back(goalpost_lfos_.bl);
             possible.push_back(goalpost_lfos_.br);
             if (!cfg_.all_goals_are_blue) {
                 possible.push_back(goalpost_lfos_.yl);
                 possible.push_back(goalpost_lfos_.yr);
             }
+        } else {
+            NUClear::log<NUClear::ERROR>(__FILE__, ",", __LINE__, ": The ambiguous_object (messages::vision::Goal) has an invalid messages::vision::Goal::Side");
         }
+
+        std::cout << __FILE__ << " " << __LINE__ << " possible.size() = " << possible.size() << std::endl;
+        std::cout << __FILE__ << " " << __LINE__ << " side = " << (int)ambiguous_object.side << std::endl;
 
         return std::move(possible);
     }
