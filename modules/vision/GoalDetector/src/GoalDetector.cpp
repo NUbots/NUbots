@@ -274,11 +274,14 @@ namespace vision {
                 arma::vec2 bl = imageToScreen(it->quad.getBottomLeft(), image.dimensions);
                 arma::vec2 br = imageToScreen(it->quad.getBottomRight(), image.dimensions);
 
+                arma::vec2 screenGoalCentre = (tl + tr + bl + br) * 0.25;
+
                 // Projection rays ray
                 arma::vec3 topRay = arma::normalise(arma::normalise(getCamFromScreen(tl, cam.focalLengthPixels))
                                                            + arma::normalise(getCamFromScreen(tr, cam.focalLengthPixels)));
                 arma::vec3 baseRay = arma::normalise(arma::normalise(getCamFromScreen(bl, cam.focalLengthPixels))
                                                            + arma::normalise(getCamFromScreen(br, cam.focalLengthPixels)));
+                arma::vec3 centreRay = arma::normalise((topRay + baseRay) * 0.5);
 
                 // Measure the distance to the top of the goals
                 Plane topOfGoalPlane({ 0, 0, 1 }, { 0, 0, GOAL_HEIGHT });
@@ -333,6 +336,10 @@ namespace vision {
                 // Add our variables
                 it->measurements = measurements;
                 it->sensors = image.sensors;
+
+                // Angular positions from the camera
+                it->screenAngular = arma::atan(cam.pixelsToTanThetaFactor % screenGoalCentre);
+                it->angularSize = { 0, 0 };
             }
 
             // Do some extra throwouts for goals based on kinematics

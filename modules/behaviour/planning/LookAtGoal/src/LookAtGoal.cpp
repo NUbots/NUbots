@@ -57,17 +57,17 @@ namespace planning {
             (const std::vector<Goal>& goals,
              const std::vector<Ball>& balls,
              const Sensors& sensors) {
-
-            if (balls.size() > 0) {
+            if (goals.size() > 0) {
                 timeSinceLastSeen = sensors.timestamp;
                 std::vector<LookAtAngle> angles;
                 angles.reserve(4);
 
-                angles.emplace_back(LookAtAngle {goals[0].screenAngular[0],-goals[0].screenAngular[1]});
-
+                for (const auto& g : goals) {
+                    angles.emplace_back(LookAtAngle {g.screenAngular[0], -g.screenAngular[1]});
+                }
 
                 for (const auto& b : balls) {
-                    angles.emplace_back(LookAtAngle {b.screenAngular[0],-b.screenAngular[1]});
+                    angles.emplace_back(LookAtAngle {b.screenAngular[0], -b.screenAngular[1]});
                 }
 
                 //XXX: add looking at robots as well
@@ -116,10 +116,12 @@ namespace planning {
                 const double scanPitch = SCAN_PITCH(1);
                 const size_t panPoints = 6;
                 for (size_t i = 0; i < panPoints+1; ++i) {
-                    angles.emplace_back(LookAtPosition {i*scanYaw/panPoints-scanYaw/2.0,-scanPitch*(i%2)+scanPitch-0.4091});
+                    double t = i/double(panPoints);
+                    angles.emplace_back(LookAtPosition {t * scanYaw - scanYaw / 2.0, -scanPitch*(i%2)+scanPitch-0.4091});
                 }
                 for (size_t i = 0; i < panPoints+1; ++i) {
-                    angles.emplace_back(LookAtPosition {-(i*scanYaw/panPoints-scanYaw/2.0),-scanPitch*((i+1)%2)+scanPitch-0.4091});
+                    double t = i/double(panPoints);
+                    angles.emplace_back(LookAtPosition {-(t * scanYaw - scanYaw / 2.0), -scanPitch*((i+1)%2)+scanPitch-0.4091});
                 }
 
                 emit(std::make_unique<std::vector<LookAtPosition>>(angles));
