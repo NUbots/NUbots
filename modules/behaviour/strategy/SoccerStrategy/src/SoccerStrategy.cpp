@@ -284,21 +284,21 @@ namespace strategy {
         selfSideLeft.position = {-desc.penalty_robot_start, desc.dimensions.field_width * 0.5};
         selfSideLeft.position_cov = arma::eye(2, 2) * 0.1;
         selfSideLeft.heading = -M_PI_2;
-        selfSideLeft.heading_var = 0.01;
+        selfSideLeft.heading_var = 0.05;
         reset->hypotheses.push_back(selfSideLeft);
 
         ResetRobotHypotheses::Self selfSideRight;
         selfSideRight.position = {-desc.penalty_robot_start, -desc.dimensions.field_width * 0.5};
         selfSideRight.position_cov = arma::eye(2, 2) * 0.1;
         selfSideRight.heading = M_PI_2;
-        selfSideRight.heading_var = 0.01;
+        selfSideRight.heading_var = 0.05;
         reset->hypotheses.push_back(selfSideRight);
 
         ResetRobotHypotheses::Self selfSideBaseLine;
         selfSideBaseLine.position = {-desc.dimensions.field_length * 0.5 + desc.dimensions.goal_area_length, 0};
         selfSideBaseLine.position_cov = arma::eye(2, 2) * 0.1;
         selfSideBaseLine.heading = 0;
-        selfSideBaseLine.heading_var = 0.01;
+        selfSideBaseLine.heading_var = 0.05;
         reset->hypotheses.push_back(selfSideBaseLine);
 
         emit(std::move(reset));
