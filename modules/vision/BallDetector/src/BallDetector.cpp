@@ -166,6 +166,7 @@ namespace vision {
                     measurement_elevation_variance }));
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), ballCentreGroundWidthCov});
                 // 0.003505351, 0.001961638, 1.68276E-05
+                emit(graph("ballCentreGroundWidth measurement", measurements.back().position(0), measurements.back().position(1), measurements.back().position(2)));
 
                 // Project this vector to a plane midway through the ball
                 Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, field->ball_radius });
@@ -177,7 +178,7 @@ namespace vision {
                     measurement_elevation_variance }));
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), ballCentreGroundProjCov});
                 // 0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2,
-                emit(graph("ballCentreGroundWidthMeasurement", ballCentreGroundWidth[0], ballCentreGroundWidth[1], ballCentreGroundWidth[2]));
+                emit(graph("ballCentreGroundProj measurement", measurements.back().position(0), measurements.back().position(1), measurements.back().position(2)));
 
                 /*
                  *  IF VALID BUILD OUR BALL
