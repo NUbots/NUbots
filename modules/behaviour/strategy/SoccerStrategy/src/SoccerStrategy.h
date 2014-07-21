@@ -56,6 +56,7 @@ namespace strategy {
 
         time_t ballLastSeen;
         time_t goalLastSeen;
+        std::string leaf = "";
 
         void standStill();
         void searchWalk();
