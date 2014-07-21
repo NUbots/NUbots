@@ -586,6 +586,7 @@ namespace input {
     const Team& GameController::getOwnTeam(const GameControllerPacket& state) const {
 
         for (auto& team : state.teams) {
+            // std::cout << uint(team.teamId) << ", " << uint(TEAM_ID) << std::endl;
             if (team.teamId == TEAM_ID) {
                 return team;
             }

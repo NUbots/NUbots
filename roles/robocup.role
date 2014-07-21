@@ -42,6 +42,7 @@ ADD_ROLE(
         behaviour::planning::WalkPathPlanner
         #behaviour::planning::LookPlanner
         behaviour::planning::LookAtBall
+        behaviour::planning::LookAtGoal
         behaviour::strategy::SoccerStrategy
 
         #Motion

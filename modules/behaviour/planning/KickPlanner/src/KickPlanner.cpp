@@ -67,7 +67,7 @@ namespace planning {
             const std::vector<Self>& selfs,
             const std::vector<messages::vision::Ball>& vision_balls,
             const KickPlan& kickPlan) {
-            std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
+            // std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
 
             arma::vec2 ballPosition;
 
