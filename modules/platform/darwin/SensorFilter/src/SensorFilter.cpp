@@ -113,35 +113,45 @@ namespace modules {
 
                 on<Trigger<Last<20, DarwinSensors>>>([this](const LastList<DarwinSensors>& sensors) {
 
-                    bool newLeftDown = false;
-                    bool newMiddleDown = false;
-
+                    int leftCount = 0;
+                    int middleCount = 0;
 
                     // If we have any downs in the last 20 frames then we are button pushed
                     for (const auto& s : sensors) {
-                        newLeftDown |= s->buttons.left;
-                        newMiddleDown |= s->buttons.middle;
+                        if(s->buttons.left) {
+                            ++leftCount;
+                        }
+                        if(s->buttons.middle) {
+                            ++middleCount;
+                        }
                     }
+
+                    bool newLeftDown = leftCount > DEBOUNCE_THRESHOLD;
+                    bool newMiddleDown = middleCount > DEBOUNCE_THRESHOLD;
 
                     if(newLeftDown != leftDown) {
 
                         leftDown = newLeftDown;
 
                         if(newLeftDown) {
+                            std::cout << "Left Button Down" << std::endl;
                             emit(std::make_unique<ButtonLeftDown>());
                         }
                         else {
+                            std::cout << "Left Button Up" << std::endl;
                             emit(std::make_unique<ButtonLeftUp>());
                         }
                     }
                     if(newMiddleDown != middleDown) {
 
                         middleDown = newMiddleDown;
-                        
+
                         if(newMiddleDown) {
+                            std::cout << "Right Button Down" << std::endl;
                             emit(std::make_unique<ButtonMiddleDown>());
                         }
                         else {
+                            std::cout << "Right Button Up" << std::endl;
                             emit(std::make_unique<ButtonMiddleUp>());
                         }
                     }
