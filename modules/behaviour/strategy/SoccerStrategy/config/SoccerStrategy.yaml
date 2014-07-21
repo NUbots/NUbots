@@ -1,4 +1,4 @@
-ball_close_distance: 2
+ball_close_distance: 0.5
 ball_last_seen_max_time: 2
 goal_last_seen_max_time: 4
 zones:

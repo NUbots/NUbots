@@ -462,6 +462,12 @@ namespace strategy {
             }
         }
         else if(fieldObjects.size() == 2) {
+            // std::cout<<__FILE__<<__LINE__<<" ballLastSeen = "<<std::duration_cast<std::chrono::seconds>(ballLastSeen).count()<<std::endl;
+            // std::cout<<__FILE__<<__LINE__<<" BALL_LAST_SEEN_MAX_TIME = "<<std::duration_cast<std::chrono::seconds>(BALL_LAST_SEEN_MAX_TIME).count()<<std::endl;
+            // std::cout<<__FILE__<<__LINE__<<" goalLastSeen = "<<std::duration_cast<std::chrono::seconds>(goalLastSeen).count()<<std::endl;
+            // std::cout<<__FILE__<<__LINE__<<" GOAL_LAST_SEEN_MAX_TIME = "<< std::duration_cast<std::chrono::seconds>(GOAL_LAST_SEEN_MAX_TIME).count() <<std::endl;
+            // std::cout<<std::endl;
+
             // Balls come first
             if(NUClear::clock::now() - ballLastSeen > BALL_LAST_SEEN_MAX_TIME
                 || NUClear::clock::now() - goalLastSeen < GOAL_LAST_SEEN_MAX_TIME) {
