@@ -21,6 +21,7 @@
 
 #include "messages/input/gameevents/GameEvents.h"
 #include "messages/behaviour/LookStrategy.h"
+#include "messages/behaviour/Look.h"
 #include "messages/behaviour/WalkStrategy.h"
 #include "messages/behaviour/KickPlan.h"
 #include "messages/support/FieldDescription.h"
@@ -50,6 +51,7 @@ namespace strategy {
     using messages::localisation::Self;
     using messages::behaviour::WalkStrategy;
     using messages::behaviour::LookStrategy;
+    using messages::behaviour::Look;
     using messages::behaviour::WalkApproach;
     using messages::behaviour::WalkTarget;
     using messages::behaviour::FieldTarget;
@@ -435,17 +437,24 @@ namespace strategy {
             switch (object) {
                 case FieldTarget::BALL: {
                     // Prioritise balls
+                    // auto strategy = std::make_unique<LookStrategy>();
+                    // strategy->priorities = {typeid(VisionBall)};
+                    // emit(std::move(strategy));
 
-                    auto strategy = std::make_unique<LookStrategy>();
-                    strategy->priorities = {typeid(VisionBall)};
-                    emit(std::move(strategy));
+                    auto panSelection = std::make_unique<Look::PanSelection>();
+                    panSelection->lookAtGoalInsteadOfBall = false;
+                    emit(std::move(panSelection));
                     break;
                 }
                 case FieldTarget::SELF: {
-                    // Prioritise goals
-                    auto strategy = std::make_unique<LookStrategy>();
-                    strategy->priorities = {typeid(VisionGoal)};
-                    emit(std::move(strategy));
+                    // // Prioritise goals
+                    // auto strategy = std::make_unique<LookStrategy>();
+                    // strategy->priorities = {typeid(VisionGoal)};
+                    // emit(std::move(strategy));
+
+                    auto panSelection = std::make_unique<Look::PanSelection>();
+                    panSelection->lookAtGoalInsteadOfBall = true;
+                    emit(std::move(panSelection));
                     break;
                 }
                 default:
@@ -456,16 +465,24 @@ namespace strategy {
             // Balls come first
             if(NUClear::clock::now() - ballLastSeen > BALL_LAST_SEEN_MAX_TIME
                 || NUClear::clock::now() - goalLastSeen < GOAL_LAST_SEEN_MAX_TIME) {
-                // Prioritise balls
-                auto strategy = std::make_unique<LookStrategy>();
-                strategy->priorities = {typeid(VisionBall)};
-                emit(std::move(strategy));
+                // // Prioritise balls
+                // auto strategy = std::make_unique<LookStrategy>();
+                // strategy->priorities = {typeid(VisionBall)};
+                // emit(std::move(strategy));
+
+                auto panSelection = std::make_unique<Look::PanSelection>();
+                panSelection->lookAtGoalInsteadOfBall = false;
+                emit(std::move(panSelection));
             }
             else {
-                // Prioritise goals
-                auto strategy = std::make_unique<LookStrategy>();
-                strategy->priorities = {typeid(VisionGoal)};
-                emit(std::move(strategy));
+                // // Prioritise goals
+                // auto strategy = std::make_unique<LookStrategy>();
+                // strategy->priorities = {typeid(VisionGoal)};
+                // emit(std::move(strategy));
+
+                auto panSelection = std::make_unique<Look::PanSelection>();
+                panSelection->lookAtGoalInsteadOfBall = true;
+                emit(std::move(panSelection));
             }
         }
     }

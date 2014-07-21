@@ -41,6 +41,10 @@ namespace behaviour {
             arma::vec2 angle;
             arma::vec2 arcSize;
         };
+
+        struct PanSelection {
+            bool lookAtGoalInsteadOfBall;
+        };
     };
 
 }

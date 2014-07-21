@@ -40,6 +40,8 @@ namespace modules {
                 float GOAL_SEARCH_TIMEOUT_MILLISECONDS;
                 arma::vec2 SCAN_YAW;
                 arma::vec2 SCAN_PITCH;
+                
+                ReactionHandle lookAtReactionHandler;
             public:
                 explicit LookAtGoal(std::unique_ptr<NUClear::Environment> environment);
 
