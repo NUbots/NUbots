@@ -177,6 +177,7 @@ namespace vision {
                     measurement_elevation_variance }));
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), ballCentreGroundProjCov});
                 // 0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2,
+                emit(graph("ballCentreGroundWidthMeasurement", ballCentreGroundWidth[0], ballCentreGroundWidth[1], ballCentreGroundWidth[2]));
 
                 /*
                  *  IF VALID BUILD OUR BALL

@@ -63,7 +63,7 @@ namespace modules {
                         std::vector<LookAtAngle> angles;
                         angles.reserve(4);
 
-                        angles.emplace_back(LookAtAngle {balls[0].screenAngular[0],-balls[0].screenAngular[1]});
+                        angles.emplace_back(LookAtAngle {balls[0].screenAngular[0]*0.8,-balls[0].screenAngular[1]*0.8});
 
 
                         for (const auto& g : goals) {

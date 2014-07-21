@@ -45,7 +45,6 @@ namespace modules {
 
                 //do a little configurating
                 on<Trigger<Configuration<Look>>>([this] (const Configuration<Look>& file){
-
                     lastPanEnd = NUClear::clock::now();
                     //load fast and slow panspeed settings
 
@@ -68,6 +67,7 @@ namespace modules {
 
                 //look at a single visible object using the angular offsets in the image
                 on<Trigger<LookAtAngle>, With<Sensors>>([this] (const LookAtAngle& look, const Sensors& sensors) {
+                    std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
                     lastPanEnd = NUClear::clock::now();
                     //speeds should take into account the angle delta
                     double distance = sqrt(look.pitch*look.pitch+look.yaw*look.yaw);
@@ -79,6 +79,7 @@ namespace modules {
                     headYaw = std::fmin(std::fmax(look.yaw+sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition,minYaw),maxYaw);
                     headPitch = std::fmin(std::fmax(look.pitch+sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition,minPitch),maxPitch);
 
+                    std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
 
                     //this might find a better location eventually - it is the generic "gotopoint" code
                     time_t time = NUClear::clock::now() + std::chrono::nanoseconds(size_t(std::nano::den*panTime));
@@ -89,10 +90,12 @@ namespace modules {
                     waypoints->push_back({id, time, ServoID::HEAD_YAW,     float(std::fmin(std::fmax(headYaw,minYaw),maxYaw)),  30.f});
                     waypoints->push_back({id, time, ServoID::HEAD_PITCH,    float(std::fmin(std::fmax(headPitch,minPitch),maxPitch)), 30.f});
                     emit(std::move(waypoints));
+                    std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
                 });
 
                 //look at multiple visible objects using the angular offsets in the image
                 on<Trigger<std::vector<LookAtAngle>>, With<Sensors>>([this] (const std::vector<LookAtAngle>& look, const Sensors& sensors) {
+                    std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
                     lastPanEnd = NUClear::clock::now();
                     double pitchLow = 0.0,
                            pitchHigh = 0.0,
@@ -112,6 +115,7 @@ namespace modules {
                         yawRight = fmax(yawRight,l.yaw+offset);
                         offset = 0.0;
                     }
+                    std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
 
                     double pitch = (pitchLow+pitchHigh)/2.0;
                     double yaw = (yawLeft+yawRight)/2.0;
@@ -127,6 +131,7 @@ namespace modules {
                     } else {
                         panTime = distance/fastSpeed;
                     }
+                    std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
 
                     headYaw = std::fmin(std::fmax(yaw+sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition,minYaw),maxYaw);
                     headPitch = std::fmin(std::fmax(pitch+sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition,minPitch),maxPitch);
@@ -142,17 +147,20 @@ namespace modules {
                     waypoints->push_back({id, time, ServoID::HEAD_YAW,     float(std::fmin(std::fmax(headYaw,minYaw),maxYaw)),  30.f});
                     waypoints->push_back({id, time, ServoID::HEAD_PITCH,    float(std::fmin(std::fmax(headPitch,minPitch),maxPitch)), 30.f});
                     emit(std::move(waypoints));
+                    std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
                 });
 
 
                 //look at multiple visible objects using the angular offsets in the image
                 on<Trigger<std::vector<LookAtPosition>>, With<Sensors>>([this] (const std::vector<LookAtPosition>& look, const Sensors& sensors) {
+                    std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
 
                     if (NUClear::clock::now() >= lastPanEnd) {
                         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
                         waypoints->reserve(2+2*look.size());
                         waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW,     float(sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition),  30.f});
                         waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH,    float(sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition), 30.f});
+                    std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
 
                         //this might find a better location eventually - it is the generic "gotopoint" code
                         time_t time = NUClear::clock::now();
@@ -171,6 +179,7 @@ namespace modules {
                         }
                         lastPanEnd = time;
                         emit(std::move(waypoints));
+                    std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
                     }
                 });
 

@@ -22,6 +22,7 @@
 #include "messages/input/gameevents/GameEvents.h"
 #include "messages/behaviour/LookStrategy.h"
 #include "messages/behaviour/WalkStrategy.h"
+#include "messages/behaviour/KickPlan.h"
 #include "messages/support/FieldDescription.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/Sensors.h"
@@ -52,6 +53,7 @@ namespace strategy {
     using messages::behaviour::WalkApproach;
     using messages::behaviour::WalkTarget;
     using messages::behaviour::FieldTarget;
+    using messages::behaviour::KickPlan;
     using messages::support::FieldDescription;
     using messages::motion::ExecuteGetup;
     using messages::motion::KillGetup;
@@ -88,6 +90,9 @@ namespace strategy {
             zone.goalie = config["my_zone"]["goalie"].as<bool>();
 
         });
+
+        // TODO: unhack
+        emit(std::make_unique<KickPlan>(KickPlan{{4.5, 0}}));
 
         // For checking last seen times
         on<Trigger<std::vector<VisionBall>>>([this] (const std::vector<VisionBall>& balls) {
@@ -196,6 +201,10 @@ namespace strategy {
                                 leaf = "Playing Penalised";
                             }
                             else { // not penalised
+
+                                // log("time since ball seen:",
+                                //     std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now() - ballLastSeen).count(),
+                                //     ",", std::chrono::duration_cast<std::chrono::milliseconds>(zone.ballActiveTimeout).count());
                                 if (NUClear::clock::now() - ballLastSeen < zone.ballActiveTimeout) { // ball has been seen recently
                                     if (inZone(FieldTarget::BALL) || ballDistance() <= BALL_CLOSE_DISTANCE) { // in zone or close to ball
                                         walkTo(FieldTarget::BALL);
@@ -427,7 +436,6 @@ namespace strategy {
                 case FieldTarget::BALL: {
                     // Prioritise balls
 
-                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                     auto strategy = std::make_unique<LookStrategy>();
                     strategy->priorities = {typeid(VisionBall)};
                     emit(std::move(strategy));
@@ -435,7 +443,6 @@ namespace strategy {
                 }
                 case FieldTarget::SELF: {
                     // Prioritise goals
-                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                     auto strategy = std::make_unique<LookStrategy>();
                     strategy->priorities = {typeid(VisionGoal)};
                     emit(std::move(strategy));
@@ -450,14 +457,12 @@ namespace strategy {
             if(NUClear::clock::now() - ballLastSeen > BALL_LAST_SEEN_MAX_TIME
                 || NUClear::clock::now() - goalLastSeen < GOAL_LAST_SEEN_MAX_TIME) {
                 // Prioritise balls
-                std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                 auto strategy = std::make_unique<LookStrategy>();
                 strategy->priorities = {typeid(VisionBall)};
                 emit(std::move(strategy));
             }
             else {
                 // Prioritise goals
-                std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                 auto strategy = std::make_unique<LookStrategy>();
                 strategy->priorities = {typeid(VisionGoal)};
                 emit(std::move(strategy));

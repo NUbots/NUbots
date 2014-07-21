@@ -15,5 +15,4 @@ GoalNetHeight: 1
 PenaltyMarkDistance: 1.80 # Measured from the goal line.
 CenterCircleDiameter: 1.50
 BorderStripMinWidth: 0.7
-
-PenaltyRobotStart: 1
+PenaltyRobotStart: 1.0
