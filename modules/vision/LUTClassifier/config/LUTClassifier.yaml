@@ -7,7 +7,7 @@ visual_horizon:
   # The distance in radians above the horizon to begin scanning
   horizon_buffer: 0.01
   # The size in radians of the smallest segment to consider for the horizon
-  minimum_segment_size: 0.04
+  minimum_segment_size: 0.06
 
 # Settings related to the ball finder
 ball:
@@ -16,7 +16,7 @@ ball:
   # The number of lines that will pass through the ball when enhancing
   intersections_fine: 10
   # The multiplier for the search for the ball
-  search_circle_scale: 5
+  search_circle_scale: 3
   # When clustering goals on the X axis, if a gap of at least this amount is detected it will be a new cluster
   maximum_vertical_cluster_spacing: 0.1
   # A multiplier for spacing between ball finder lines (based on the closeness)
