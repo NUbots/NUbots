@@ -28,6 +28,7 @@
 #include "messages/motion/GetupCommand.h"
 #include "messages/motion/DiveCommand.h"
 #include "messages/localisation/FieldObject.h"
+#include "messages/localisation/ResetRobotHypotheses.h"
 #include "messages/support/Configuration.h"
 
 #include "utility/time/time.h"
@@ -58,6 +59,8 @@ namespace strategy {
     using messages::motion::DiveFinished;
     using SelfPenalisation = messages::input::gameevents::Penalisation<messages::input::gameevents::SELF>;
     using SelfUnpenalisation = messages::input::gameevents::Unpenalisation<messages::input::gameevents::SELF>;
+    using messages::localisation::ResetRobotHypotheses;
+
     using utility::localisation::transform::RobotToWorldTransform;
     using utility::time::durationFromSeconds;
 
@@ -126,6 +129,8 @@ namespace strategy {
 
         on<Trigger<SelfUnpenalisation>>([this](const SelfUnpenalisation&) {
             selfPenalised = false;
+            // TODO: only do this once put down
+            ResetRobotHypotheses();
         });
 
         // Main Loop
@@ -253,6 +258,41 @@ namespace strategy {
         });
     }
 
+    void SoccerStrategy::resetRobotHypotheses() {
+        FieldDescription desc;
+
+        try {
+            desc = *powerplant.get<FieldDescription>();
+        }
+        catch (NUClear::metaprogramming::NoDataException) {
+            throw std::runtime_error("field description get failed asdlfkj");
+        }
+
+        auto reset = std::make_unique<ResetRobotHypotheses>();
+        ResetRobotHypotheses::Self selfSideLeft;
+        selfSideLeft.position = {-desc.penalty_robot_start, desc.dimensions.field_width * 0.5};
+        selfSideLeft.position_cov = arma::eye(2, 2) * 0.1;
+        selfSideLeft.heading = -M_PI_2;
+        selfSideLeft.heading_var = 0.01;
+        reset->hypotheses.push_back(selfSideLeft);
+
+        ResetRobotHypotheses::Self selfSideRight;
+        selfSideRight.position = {-desc.penalty_robot_start, -desc.dimensions.field_width * 0.5};
+        selfSideRight.position_cov = arma::eye(2, 2) * 0.1;
+        selfSideRight.heading = M_PI_2;
+        selfSideRight.heading_var = 0.01;
+        reset->hypotheses.push_back(selfSideRight);
+
+        ResetRobotHypotheses::Self selfSideBaseLine;
+        selfSideBaseLine.position = {-desc.dimensions.field_length * 0.5 + desc.dimensions.goal_area_length, 0};
+        selfSideBaseLine.position_cov = arma::eye(2, 2) * 0.1;
+        selfSideBaseLine.heading = 0;
+        selfSideBaseLine.heading_var = 0.01;
+        reset->hypotheses.push_back(selfSideBaseLine);
+
+        emit(std::move(reset));
+    }
+
     void SoccerStrategy::searchWalk() {
 
     }
@@ -329,7 +369,7 @@ namespace strategy {
             return feetOffGround && !isGettingUp && !isDiving;
         }
         catch (NUClear::metaprogramming::NoDataException) {
-            throw std::runtime_error("field description get failed 2");
+            throw std::runtime_error("sensors get failed");
         }
     }
 
@@ -357,18 +397,16 @@ namespace strategy {
         try {
             switch (object) {
                 case FieldTarget::BALL: {
-                    std::cout << "Get Self" << std::endl;
-                    auto self = powerplant.get<Self>();
-                    std::cout << "Get Ball" << std::endl;
-                    auto ball = powerplant.get<LocalisationBall>();
-                    auto position = RobotToWorldTransform(self->position, self->heading, ball->position);
+                    auto& self = powerplant.get<std::vector<Self>>()->at(0);
+                    auto& ball = *powerplant.get<LocalisationBall>();
+                    auto position = RobotToWorldTransform(self.position, self.heading, ball.position);
                     return (position[0] > zone.zone(0, 0) && position[0] < zone.zone(1, 0)
                          && position[1] < zone.zone(0, 1) && position[1] > zone.zone(1, 1));
 
                 }
                 case FieldTarget::SELF: {
-                    auto self = powerplant.get<Self>();
-                    auto position = self->position;
+                    auto& self = powerplant.get<std::vector<Self>>()->at(0);
+                    auto& position = self.position;
                     return (position[0] > zone.zone(0, 0) && position[0] < zone.zone(1, 0)
                          && position[1] < zone.zone(0, 1) && position[1] > zone.zone(1, 1));
                 }
@@ -388,6 +426,8 @@ namespace strategy {
             switch (object) {
                 case FieldTarget::BALL: {
                     // Prioritise balls
+
+                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                     auto strategy = std::make_unique<LookStrategy>();
                     strategy->priorities = {typeid(VisionBall)};
                     emit(std::move(strategy));
@@ -395,6 +435,7 @@ namespace strategy {
                 }
                 case FieldTarget::SELF: {
                     // Prioritise goals
+                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                     auto strategy = std::make_unique<LookStrategy>();
                     strategy->priorities = {typeid(VisionGoal)};
                     emit(std::move(strategy));
@@ -409,12 +450,14 @@ namespace strategy {
             if(NUClear::clock::now() - ballLastSeen > BALL_LAST_SEEN_MAX_TIME
                 || NUClear::clock::now() - goalLastSeen < GOAL_LAST_SEEN_MAX_TIME) {
                 // Prioritise balls
+                std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                 auto strategy = std::make_unique<LookStrategy>();
                 strategy->priorities = {typeid(VisionBall)};
                 emit(std::move(strategy));
             }
             else {
                 // Prioritise goals
+                std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                 auto strategy = std::make_unique<LookStrategy>();
                 strategy->priorities = {typeid(VisionGoal)};
                 emit(std::move(strategy));

@@ -17,43 +17,5 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_LOOKSTRATEGY_H
-#define MESSAGES_BEHAVIOUR_LOOKSTRATEGY_H
-
-namespace messages {
-namespace behaviour {
-
-    struct HeadBehaviourConfig{
-        static constexpr const char* CONFIGURATION_PATH = "HeadBehaviour.yaml";
-    };
-
-    struct GoalHeadBehaviourConfig{
-        static constexpr const char* CONFIGURATION_PATH = "GoalHeadBehaviour.yaml";
-    };
-
-    struct LookStrategy {
-        std::vector<std::type_index> priorities;
-    };
-
-    struct LookAtAngle {
-        double yaw;
-        double pitch;
-        //double width;
-    };
-
-    struct LookAtPosition {
-        double yaw;
-        double pitch;
-    };
-
-    struct LookAtPoint {
-        double x;
-        double y;
-        double xError;
-        double yError;
-    };
-
-}
-}
-
-#endif
+#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#include <catch.hpp>

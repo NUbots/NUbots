@@ -49,6 +49,7 @@ public:
 
     double ball_radius;
     double goalpost_top_height;
+    double penalty_robot_start;
 
     // Coordinates of goalpost centers calculated from the FieldDimensions:
     // (arma::vec2)

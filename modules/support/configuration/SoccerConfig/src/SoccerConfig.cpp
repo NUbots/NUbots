@@ -72,8 +72,8 @@ namespace configuration {
         d.penalty_mark_distance = config["PenaltyMarkDistance"].as<double>();
         d.center_circle_diameter = config["CenterCircleDiameter"].as<double>();
         d.border_strip_min_width = config["BorderStripMinWidth"].as<double>();
-        d.border_strip_min_width = config["BorderStripMinWidth"].as<double>();
 
+        desc.penalty_robot_start = config["PenaltyRobotStart"].as<double>();
         desc.goalpost_top_height = d.goal_crossbar_height + d.goal_crossbar_diameter;
 
         SetGoalpostPositions(desc);

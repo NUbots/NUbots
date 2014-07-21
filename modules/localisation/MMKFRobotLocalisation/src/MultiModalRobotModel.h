@@ -56,9 +56,13 @@ namespace localisation {
             , weight_(1)
             , obs_count_(0) {}
 
-        RobotHypothesis(const messages::localisation::ResetRobotHypotheses::Self& reset_self)
+        RobotHypothesis(const messages::localisation::ResetRobotHypotheses::Self& reset_self, const messages::input::Sensors& sensors)
             : RobotHypothesis() {
-            arma::vec3 mean = arma::join_rows(reset_self.position, arma::vec(reset_self.heading));
+            arma::vec2 imuDirection = arma::normalise(sensors.orientation.col(0).rows(0,1));
+            double imuHeading = std::atan2(imuDirection[1], imuDirection[0]);
+            double imuOffset = reset_self.heading + imuHeading;
+
+            arma::vec3 mean = arma::join_rows(reset_self.position, arma::vec(imuOffset));
             arma::mat33 cov = arma::eye(3,3);
             cov.submat(0,0,1,1) = reset_self.position_cov;
             cov(3,3) = reset_self.heading_var;
@@ -108,7 +112,7 @@ namespace localisation {
             cfg_.max_models_after_merge = config["MaxModelsAfterMerge"].as<int>();
             cfg_.merge_min_translation_dist = config["MergeMinTranslationDist"].as<float>();
             cfg_.merge_min_heading_dist = config["MergeMinHeadingDist"].as<float>();
-            
+
             robot::RobotModel::Config rm_cfg;
             rm_cfg.processNoisePositionFactor = config["ProcessNoisePositionFactor"].as<double>();
             rm_cfg.processNoiseHeadingFactor = config["ProcessNoiseHeadingFactor"].as<double>();

@@ -191,10 +191,11 @@ namespace localisation {
         ProcessAmbiguousObjects(goals);
     }
 
-    void MMKFRobotLocalisationEngine::Reset(const ResetRobotHypotheses& reset) {
+    void MMKFRobotLocalisationEngine::Reset(const ResetRobotHypotheses& reset, const Sensors& sensors) {
         robot_models_.robot_models_ = std::vector<std::unique_ptr<RobotHypothesis>>();
         for (const auto& reset_hyp : reset.hypotheses) {
-            auto hyp = std::make_unique<RobotHypothesis>(reset_hyp);
+            auto hyp = std::make_unique<RobotHypothesis>(reset_hyp, sensors);
+            hyp->weight_ = 1 / double(reset.hypotheses.size());
             robot_models_.robot_models_.push_back(std::move(hyp));
         }
     }

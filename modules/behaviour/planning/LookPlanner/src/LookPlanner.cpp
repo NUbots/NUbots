@@ -77,6 +77,8 @@ namespace planning {
                     const LookStrategy& strat,
                     const FieldDescription fieldDesc) {
 
+            std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
+
             //update the time last seen
             if (!v.back()->empty()) {
                 timeBallSeen = NUClear::clock::now();
@@ -136,6 +138,8 @@ namespace planning {
             (void)v;
             (void)l;
             (void)strat;
+
+            std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
         });
 
         on<Trigger<Last<5, std::vector<VisionGoal>>>,
@@ -149,6 +153,8 @@ namespace planning {
                      const Sensors& sensors,
                      const LookStrategy& strat,
                      const FieldDescription fieldDesc) {
+
+            std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
 
             //update the time last seen
             if (!v.back()->empty()) {
@@ -183,8 +189,8 @@ namespace planning {
                                                            selfs->front().heading,
                                                            fieldDesc.goalpost_yr));
                 for (const auto& g : robotGoals) {
-                double goalDiameter = 2.0*atan2(fieldDesc.dimensions.goalpost_diameter,arma::norm(g));
-                goalObjects.push_back({utility::motion::kinematics::calculateHeadJointsToLookAt(
+                    double goalDiameter = 2.0*atan2(fieldDesc.dimensions.goalpost_diameter,arma::norm(g));
+                    goalObjects.push_back({utility::motion::kinematics::calculateHeadJointsToLookAt(
                                                             {g[0], g[1], 0},
                                                             sensors.orientationCamToGround,
                                                             sensors.orientationBodyToGround),
@@ -224,7 +230,9 @@ namespace planning {
                 //XXX: use other robots' detected players if enabled
             }
 
+            std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
             updateLookPlan(strat);
+            std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
         });
     }
 

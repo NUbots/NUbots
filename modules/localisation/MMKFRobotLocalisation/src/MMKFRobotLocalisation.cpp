@@ -80,9 +80,10 @@ namespace localisation {
         });
 
         on<Trigger<ResetRobotHypotheses>,
-           Options<Sync<MMKFRobotLocalisation>>
-          >("Localisation ResetRobotHypotheses", [this](const ResetRobotHypotheses& reset) {
-            engine_->Reset(reset);
+           Options<Sync<MMKFRobotLocalisation>>,
+           With<Sensors>
+          >("Localisation ResetRobotHypotheses", [this](const ResetRobotHypotheses& reset, const Sensors& sensors) {
+            engine_->Reset(reset, sensors);
         });
 
         // Emit to NUbugger

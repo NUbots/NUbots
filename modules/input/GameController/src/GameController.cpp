@@ -151,7 +151,8 @@ namespace input {
                 emit(std::move(std::make_unique<messages::output::Say>("Unpenalised")));
                 emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{PLAYER_ID}));
                 emit(std::make_unique<Penalisation<SELF>>(Penalisation<SELF>{PLAYER_ID, time, PenaltyReason::MANUAL}));
-                emit(std::make_unique<GamePhase<Phase::PLAYING>>(GamePhase<Phase::PLAYING>{time}));
+                // TODO: fix timers
+                emit(std::make_unique<GamePhase<Phase::PLAYING>>(GamePhase<Phase::PLAYING>{time, time}));
                 emit(std::make_unique<Phase>(Phase::PLAYING));
             }
             penaltyOverride = true;

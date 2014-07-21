@@ -80,7 +80,7 @@ namespace utility {
                     arma::mat chol;
                     try {
                         chol = arma::chol(covarianceSigmaWeights * covariance);
-                    } catch (const std::runtime_error& e) {
+                    } catch (std::exception& e) {
                         if (Model::size == 3) std::cerr << __FILE__ << " " << __LINE__ << " : covarianceSigmaWeights * covariance was NOT positive-definite and the cholskey "
                                   << "decomposition failed.\ncovarianceSigmaWeights * covariance = \n" << std::endl
                                   << covarianceSigmaWeights * covariance << std::endl;
