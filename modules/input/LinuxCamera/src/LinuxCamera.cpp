@@ -94,6 +94,7 @@ namespace modules {
                     camera.startStreaming();
                 } catch(const std::exception& e) {
                     NUClear::log<NUClear::DEBUG>(std::string("Exception while setting camera configuration: ") + e.what());
+                    throw e;
                 }
             });
 

@@ -174,7 +174,6 @@ namespace localisation {
             auto curr_time = NUClear::clock::now();
             engine_->TimeUpdate(curr_time, sensors);
             engine_->ProcessObjects(goals);
-
         });
     }
 }

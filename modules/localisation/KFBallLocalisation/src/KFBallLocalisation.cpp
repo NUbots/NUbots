@@ -77,14 +77,18 @@ namespace localisation {
 
             if (engine_.CanEmitFieldObjects()) {
                 auto ball_msg = std::make_unique<Ball>(ball);
+                auto ball_vec_msg = std::make_unique<std::vector<Ball>>();
+                ball_vec_msg->push_back(ball);
                 emit(std::move(ball_msg));
+                emit(std::move(ball_vec_msg));
             } else {
                 Mock<Ball> mock_ball = Mock<Ball>(ball);
                 auto mock_ball_msg = std::make_unique<Mock<Ball>>(mock_ball);
                 emit(std::move(mock_ball_msg));
             }
 
-            emit(graph("Ball (robot-space)", model_state(0), model_state(1)));
+            emit(graph("Localisation Ball", model_state(0), model_state(1)));
+            emit(graph("Localisation Ball Velocity", model_state(2), model_state(3)));
         });
 
         // on<Trigger<FakeOdometry>,
@@ -106,11 +110,11 @@ namespace localisation {
              >("KFBallLocalisation Step",
                 [this](const std::vector<messages::vision::Ball>& balls) {
 
-            if(balls.size() > 0){
-                    auto curr_time = NUClear::clock::now();
-                    engine_.TimeUpdate(curr_time);
+            if(balls.size() > 0) {
+                auto curr_time = NUClear::clock::now();
+                engine_.TimeUpdate(curr_time);
 
-                    engine_.MeasurementUpdate(balls[0]);
+                engine_.MeasurementUpdate(balls[0]);
             }
         });
     }
