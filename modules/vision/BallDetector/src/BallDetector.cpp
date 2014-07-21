@@ -158,7 +158,8 @@ namespace vision {
 
                 // Get our width based distance to the ball
                 double widthDistance = widthBasedDistanceToCircle(field->ball_radius * 2, top, base, cam.focalLengthPixels);
-                arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + cameraHeight;
+                arma::vec3 cameraPosition = sensors.orientationCamToGround.submat(0,3,2,3);
+                arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + cameraPosition;
                 double ballCentreGroundWidthDistance = arma::norm(ballCentreGroundWidth);
                 arma::mat ballCentreGroundWidthCov = arma::diagmat(arma::vec({
                     measurement_distance_variance_factor * ballCentreGroundWidthDistance,
@@ -166,7 +167,8 @@ namespace vision {
                     measurement_elevation_variance }));
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), ballCentreGroundWidthCov});
                 // 0.003505351, 0.001961638, 1.68276E-05
-                emit(graph("ballCentreGroundWidth measurement", measurements.back().position(0), measurements.back().position(1), measurements.back().position(2)));
+                emit(graph("ballCentreGroundWidth measurement", ballCentreGroundWidth(0), ballCentreGroundWidth(1), ballCentreGroundWidth(2)));
+                emit(graph("ballCentreGroundWidth measurement (spherical)", measurements.back().position(0), measurements.back().position(1), measurements.back().position(2)));
 
                 // Project this vector to a plane midway through the ball
                 Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, field->ball_radius });
@@ -178,7 +180,8 @@ namespace vision {
                     measurement_elevation_variance }));
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), ballCentreGroundProjCov});
                 // 0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2,
-                emit(graph("ballCentreGroundProj measurement", measurements.back().position(0), measurements.back().position(1), measurements.back().position(2)));
+                emit(graph("ballCentreGroundProj measurement", ballCentreGroundProj(0), ballCentreGroundProj(1), ballCentreGroundProj(2)));
+                emit(graph("ballCentreGroundProj measurement (spherical)", measurements.back().position(0), measurements.back().position(1), measurements.back().position(2)));
 
                 /*
                  *  IF VALID BUILD OUR BALL

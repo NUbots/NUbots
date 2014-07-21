@@ -51,10 +51,14 @@ namespace localisation {
         RobotHypothesis()
             : filter_(
                 {-4.5, 0, 0}, // mean
-                arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 1, // cov
+                arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 0.01, // cov
                 1) // alpha
             , weight_(1)
-            , obs_count_(0) {}
+            , obs_count_(0) {
+                arma::mat cov = arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 0.1;
+                cov(2,2) = 1;
+                filter_.setState(arma::vec::fixed<robot::RobotModel::size>({-4.5, 0, 0}), cov);
+            }
 
         RobotHypothesis(const messages::localisation::ResetRobotHypotheses::Self& reset_self, const messages::input::Sensors& sensors)
             : RobotHypothesis() {
