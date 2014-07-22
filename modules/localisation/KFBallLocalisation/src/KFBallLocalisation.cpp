@@ -63,15 +63,16 @@ namespace localisation {
            Options<Sync<KFBallLocalisation>>>("NUbugger Output",
                 [this](const time_t&, const Sensors& sensors, const std::vector<Self>& robots) {
             
-            auto model_state = engine_.ball_filter_.get();
-            auto model_cov = engine_.ball_filter_.getCovariance();
+            arma::vec model_state = engine_.ball_filter_.get();
+            arma::mat model_cov = engine_.ball_filter_.getCovariance();
 
             arma::mat22 imu_to_robot = sensors.robotToIMU.t();
             arma::vec2 robot_space_ball_pos = imu_to_robot * model_state.rows(0, 1);
+            arma::vec2 robot_space_ball_vel = imu_to_robot * model_state.rows(2, 3);
 
             messages::localisation::Ball ball;
             ball.position = robot_space_ball_pos;
-            ball.velocity = imu_to_robot * model_state.rows(2, 3) + robots[0].velocity;
+            ball.velocity = robot_space_ball_vel + robots[0].velocity;
             ball.position_cov = model_cov.submat(0,0,1,1);
             ball.world_space = false;
 
