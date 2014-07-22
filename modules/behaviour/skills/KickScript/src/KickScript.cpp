@@ -92,7 +92,7 @@ namespace skills {
             if (leg == LimbID::RIGHT_LEG) {
                 if (quadrant == 0) {
                     // front
-                    emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"RightFootKickForward.yaml", "Stand.yaml"})));
+                    emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"RightFootKickForward3.yaml", "Stand.yaml"})));
                 } else if (quadrant == 1) {
                     // side
                     emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"RightFootKickLeft.yaml", "Stand.yaml"})));
@@ -100,7 +100,7 @@ namespace skills {
             } else if (leg == LimbID::LEFT_LEG) {
                 if (quadrant == 0) {
                     // front
-                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"LeftFootKickForward.yaml", "Stand.yaml"})));
+                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"LeftFootKickForward3.yaml", "Stand.yaml"})));
                 } else if (quadrant == 3) {
                     // side
                     emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"LeftFootKickRight.yaml", "Stand.yaml"})));

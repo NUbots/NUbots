@@ -361,7 +361,7 @@ namespace modules {
                     // std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
 
         		// Disable sideways approaches.
-        		// selected = 0;
+        		selected = 0;
 
                 return arma::vec({distances[selected], bearings[selected], headings[selected]});
             }
