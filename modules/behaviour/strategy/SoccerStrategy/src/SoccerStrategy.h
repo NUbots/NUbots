@@ -57,7 +57,8 @@ namespace strategy {
         time_t ballLastSeen;
         time_t goalLastSeen;
         std::string leaf = "";
-        void resetRobotHypotheses();
+        void initialLocalisationReset();
+        void unpenalisedLocalisationReset();
 
         void standStill();
         void searchWalk();

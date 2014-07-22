@@ -137,7 +137,7 @@ namespace strategy {
         on<Trigger<SelfUnpenalisation>>([this](const SelfUnpenalisation&) {
             selfPenalised = false;
             // TODO: only do this once put down
-            ResetRobotHypotheses();
+            unpenalisedLocalisationReset();
         });
 
         // Main Loop
@@ -169,9 +169,10 @@ namespace strategy {
                         if (phase == Phase::INITIAL) {
                             standStill();
                             find({FieldTarget::SELF});
+                            initialLocalisationReset();
                             leaf = "Initial";
                         }
-                        else if (phase == Phase::READY) {
+                        else if (false) { // phase == Phase::READY
                             if (gameState.ourKickOff) {
                                 walkTo(zone.startPositionOffensive);
                             }
@@ -181,9 +182,10 @@ namespace strategy {
                             find({FieldTarget::SELF});
                             leaf = "Ready";
                         }
-                        else if (phase == Phase::SET) {
+                        else if (phase == Phase::SET || phase == Phase::READY) {
                             standStill();
                             find({FieldTarget::BALL});
+                            initialLocalisationReset();
                             leaf = "Set";
                         }
                         else if (phase == Phase::TIMEOUT) {
@@ -269,7 +271,42 @@ namespace strategy {
         });
     }
 
-    void SoccerStrategy::resetRobotHypotheses() {
+    void SoccerStrategy::initialLocalisationReset() {
+        FieldDescription desc;
+
+        try {
+            desc = *powerplant.get<FieldDescription>();
+        }
+        catch (NUClear::metaprogramming::NoDataException) {
+            throw std::runtime_error("field description get failed asdlfkj");
+        }
+
+        auto reset = std::make_unique<ResetRobotHypotheses>();
+        // ResetRobotHypotheses::Self selfSideLeft;
+        // selfSideLeft.position = arma::vec2({-desc.penalty_robot_start, desc.dimensions.field_width * 0.5});
+        // selfSideLeft.position_cov = arma::eye(2, 2) * 0.1;
+        // selfSideLeft.heading = -M_PI_2;
+        // selfSideLeft.heading_var = 0.05;
+        // reset->hypotheses.push_back(selfSideLeft);
+
+        // ResetRobotHypotheses::Self selfSideRight;
+        // selfSideRight.position = arma::vec2({-desc.penalty_robot_start, -desc.dimensions.field_width * 0.5});
+        // selfSideRight.position_cov = arma::eye(2, 2) * 0.1;
+        // selfSideRight.heading = M_PI_2;
+        // selfSideRight.heading_var = 0.05;
+        // reset->hypotheses.push_back(selfSideRight);
+
+        ResetRobotHypotheses::Self selfSideBaseLine;
+        selfSideBaseLine.position = arma::vec2({-desc.dimensions.field_length * 0.5 + desc.dimensions.goal_area_length, 0});
+        selfSideBaseLine.position_cov = arma::eye(2, 2) * 0.1;
+        selfSideBaseLine.heading = 0;
+        selfSideBaseLine.heading_var = 0.05;
+        reset->hypotheses.push_back(selfSideBaseLine);
+
+        emit(std::move(reset));
+    }
+
+    void SoccerStrategy::unpenalisedLocalisationReset() {
         FieldDescription desc;
 
         try {
@@ -281,21 +318,21 @@ namespace strategy {
 
         auto reset = std::make_unique<ResetRobotHypotheses>();
         ResetRobotHypotheses::Self selfSideLeft;
-        selfSideLeft.position = {-desc.penalty_robot_start, desc.dimensions.field_width * 0.5};
+        selfSideLeft.position = arma::vec2({-desc.penalty_robot_start, desc.dimensions.field_width * 0.5});
         selfSideLeft.position_cov = arma::eye(2, 2) * 0.1;
         selfSideLeft.heading = -M_PI_2;
         selfSideLeft.heading_var = 0.05;
         reset->hypotheses.push_back(selfSideLeft);
 
         ResetRobotHypotheses::Self selfSideRight;
-        selfSideRight.position = {-desc.penalty_robot_start, -desc.dimensions.field_width * 0.5};
+        selfSideRight.position = arma::vec2({-desc.penalty_robot_start, -desc.dimensions.field_width * 0.5});
         selfSideRight.position_cov = arma::eye(2, 2) * 0.1;
         selfSideRight.heading = M_PI_2;
         selfSideRight.heading_var = 0.05;
         reset->hypotheses.push_back(selfSideRight);
 
         ResetRobotHypotheses::Self selfSideBaseLine;
-        selfSideBaseLine.position = {-desc.dimensions.field_length * 0.5 + desc.dimensions.goal_area_length, 0};
+        selfSideBaseLine.position = arma::vec2({-desc.dimensions.field_length * 0.5 + desc.dimensions.goal_area_length, 0});
         selfSideBaseLine.position_cov = arma::eye(2, 2) * 0.1;
         selfSideBaseLine.heading = 0;
         selfSideBaseLine.heading_var = 0.05;

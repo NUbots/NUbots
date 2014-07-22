@@ -84,6 +84,11 @@ namespace localisation {
            With<Sensors>
           >("Localisation ResetRobotHypotheses", [this](const ResetRobotHypotheses& reset, const Sensors& sensors) {
             engine_->Reset(reset, sensors);
+            auto& hypotheses = engine_->robot_models_.hypotheses();
+
+            // for (auto& model : hypotheses) {
+            //     NUClear::log(__FILE__,__LINE__,"Reset",*model);
+            // }
         });
 
         // Emit to NUbugger

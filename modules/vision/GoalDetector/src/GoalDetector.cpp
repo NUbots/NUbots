@@ -323,15 +323,15 @@ namespace vision {
                         measurement_elevation_variance }));
                 measurements.push_back({ cartesianToSpherical(topGoalWidth), topGoalWidthDistCov});
 
-                // Measure the height based distance
-                double heightDistance = distanceToVerticalObject((tl + tr) * 0.5, (bl + br) * 0.5, GOAL_HEIGHT, sensors.orientationCamToGround(2,3), cam.focalLengthPixels);
-                arma::vec3 goalHeight = heightDistance * sensors.orientationCamToGround.submat(0,0,2,2) * baseRay + sensors.orientationCamToGround.submat(0,3,2,3) + arma::vec({ 0, 0, GOAL_HEIGHT / 2 });
-                double goalHeightDist = arma::norm(goalHeight);
-                arma::mat goalHeightDistCov = arma::diagmat(arma::vec({ 
-                        goalHeightDist * measurement_distance_covariance_factor, 
-                        measurement_bearing_variance, 
-                        measurement_elevation_variance }));
-                measurements.push_back({ cartesianToSpherical(goalHeight), goalHeightDistCov});
+                // // Measure the height based distance
+                // double heightDistance = distanceToVerticalObject((tl + tr) * 0.5, (bl + br) * 0.5, GOAL_HEIGHT, sensors.orientationCamToGround(2,3), cam.focalLengthPixels);
+                // arma::vec3 goalHeight = heightDistance * sensors.orientationCamToGround.submat(0,0,2,2) * baseRay + sensors.orientationCamToGround.submat(0,3,2,3) + arma::vec({ 0, 0, GOAL_HEIGHT / 2 });
+                // double goalHeightDist = arma::norm(goalHeight);
+                // arma::mat goalHeightDistCov = arma::diagmat(arma::vec({ 
+                //         goalHeightDist * measurement_distance_covariance_factor, 
+                //         measurement_bearing_variance, 
+                //         measurement_elevation_variance }));
+                // measurements.push_back({ cartesianToSpherical(goalHeight), goalHeightDistCov});
 
                 // Add our variables
                 it->measurements = measurements;

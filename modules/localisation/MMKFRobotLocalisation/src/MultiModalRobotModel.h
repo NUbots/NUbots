@@ -63,13 +63,14 @@ namespace localisation {
         RobotHypothesis(const messages::localisation::ResetRobotHypotheses::Self& reset_self, const messages::input::Sensors& sensors)
             : RobotHypothesis() {
             arma::vec2 imuDirection = arma::normalise(sensors.orientation.col(0).rows(0,1));
-            double imuHeading = std::atan2(imuDirection[1], imuDirection[0]);
+            double imuHeading = std::atan2(imuDirection(1), imuDirection(0));
             double imuOffset = reset_self.heading + imuHeading;
 
-            arma::vec3 mean = arma::join_rows(reset_self.position, arma::vec(imuOffset));
-            arma::mat33 cov = arma::eye(3,3);
+            // arma::vec3 mean = arma::join_rows(reset_self.position, arma::vec(imuOffset));
+            arma::vec::fixed<robot::RobotModel::size> mean = arma::vec::fixed<robot::RobotModel::size>({reset_self.position(0), reset_self.position(1), imuOffset, 0, 0 });
+            arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> cov = arma::eye(5,5) * 0.1;
             cov.submat(0,0,1,1) = reset_self.position_cov;
-            cov(3,3) = reset_self.heading_var;
+            cov(2,2) = reset_self.heading_var;
             filter_.setState(mean, cov);
         }
 
