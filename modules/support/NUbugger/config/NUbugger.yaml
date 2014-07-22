@@ -4,3 +4,12 @@ network:
   high_water_mark: 50
 reaction_handles:
   reaction_statistics: false
+  data_points: false
+  game_controller: false
+  behaviour: false
+  sensors: false
+  image: false
+  classified_image: false
+  goals: false
+  balls: false
+  localisation: false
