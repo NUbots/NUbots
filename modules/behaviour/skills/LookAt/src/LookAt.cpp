@@ -63,32 +63,26 @@ namespace modules {
                    Options<Sync<LookAt>>>([this](const time_t&,
                                                   const LastList<Sensors>& sensors) {
 
-                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
 
                     // Find our most recent frame without errors
                     const auto& sensor = **std::find_if(sensors.rbegin(), sensors.rend(), [] (const std::shared_ptr<const Sensors>& a) {
                         return a->servos[uint(ServoID::HEAD_YAW)].errorFlags == 0 && a->servos[uint(ServoID::HEAD_PITCH)].errorFlags == 0;
                     });
-                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
 
 
                     arma::fvec2 lastVelocity = arma::fvec2({sensor.servos[uint(ServoID::HEAD_YAW)].presentVelocity,
                                                           sensor.servos[uint(ServoID::HEAD_PITCH)].presentVelocity});
-                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                     arma::fvec2 lastPosition = arma::fvec2({sensor.servos[uint(ServoID::HEAD_YAW)].presentPosition,
                                                           sensor.servos[uint(ServoID::HEAD_PITCH)].presentPosition});
 
-                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                     //emit the servo positions
                     auto waypoints = std::make_unique<std::vector<ServoCommand>>();
                     waypoints->reserve(4);
 
-                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                     //push back some fake waypoints to clear our commands
                     waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW, lastPosition[0], 0.f});
                     waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH, lastPosition[1], 0.f});
 
-                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                     arma::fvec2 targetPoint;
 
                     //update appropriately for the current movement
@@ -98,13 +92,11 @@ namespace modules {
                         const arma::vec2 targetPoint = arma::vec2({
                                                             std::fmin(std::fmax(currentPoints[0][0],HEAD_YAW_MIN),HEAD_YAW_MAX),
                                                             std::fmin(std::fmax(currentPoints[0][1],HEAD_PITCH_MIN),HEAD_PITCH_MAX)});
-                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
 
 
                     } else if (currentPoints.size() > 0 and saccading) { //do saccades
 
                     } else if (currentPoints.size() > 0 and not saccading) { //do pans
-                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
 
                         size_t currentSelection = currentPoints.size() - 1;
                         double currentGoodness = arma::norm(lastPosition-currentPoints.back()) +
@@ -118,10 +110,8 @@ namespace modules {
                             }
                         }
 
-                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                         targetPoint = (currentSelection + 1) % currentPoints.size();
                     }
-                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
 
                     //get the approximate distance of movement
                     const double panDist = arma::norm(targetPoint - lastPosition) + std::numeric_limits<double>::epsilon();
@@ -133,18 +123,15 @@ namespace modules {
                     }
                     time_t time = NUClear::clock::now() + std::chrono::nanoseconds(uint(std::nano::den * panTime));
 
-                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                     //push back the new points
                     waypoints->push_back({id, time, ServoID::HEAD_YAW,      targetPoint[0],  30.f});
                     waypoints->push_back({id, time, ServoID::HEAD_PITCH,    targetPoint[1], 30.f});
-                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                     for (auto& waypoint : *waypoints) {
                         std::cout << static_cast<uint>(waypoint.id) << ", " << waypoint.position << std::endl;
                     }
 
 
                     emit(std::move(waypoints));
-                    std::cout<<__FILE__<<", "<<__LINE__<<": "<< std::endl;
                 });
 
 

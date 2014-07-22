@@ -1,5 +1,5 @@
 {
-    "forwardSpeed" : 0.8,
+    "forwardSpeed" : 1.6, # 0.8,
     "footSeparation" : 0.140,
     "footSize" : 0.10,
 
@@ -9,13 +9,13 @@
     "accelerationTime" : 0.2,
     "accelerationFraction" : 0.5,
 
-    "midApproachSpeed" : 1.0,
+    "midApproachSpeed" : 2.0, # 1.0,
     "midApproachDistance" : 0.60,
 
     "turnDeviation" : 0.1,
 
     "ballLineupDistance" : 0.2,
-    "closeApproachSpeed" : 0.45,
+    "closeApproachSpeed" : 0.7, # 0.45,
     "closeApproachDistance" : 0.30,
 	"turnSpeed" : 1,
 

@@ -119,7 +119,6 @@ namespace modules {
 
             on<Trigger<Configuration<WalkEngine>> >([this](const Configuration<WalkEngine>& config) {
                 configureWalk(config.config);
-                generateAndSaveStandScript();
             });
             on<Trigger<WalkOptimiserCommand> >([this](const WalkOptimiserCommand& command) {
                 configureWalk(command.walkConfig);
@@ -127,7 +126,7 @@ namespace modules {
             });
 
             on<Trigger<Startup>>([this](const Startup&) {
-
+                generateAndSaveStandScript();
                 reset();
                 stopRequest = 2;
                 //start();
