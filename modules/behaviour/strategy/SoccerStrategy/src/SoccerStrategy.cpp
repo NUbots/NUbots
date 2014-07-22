@@ -165,7 +165,7 @@ namespace strategy {
                     leaf = "Picked Up";
                 }
                 else {
-                    if (mode == Mode::NORMAL || mode == Mode::OVERTIME) {
+                    if (mode == Mode::NORMAL || mode == Mode::OVERTIME || mode == Mode::PENALTY_SHOOTOUT) {
                         if (phase == Phase::INITIAL) {
                             standStill();
                             find({FieldTarget::SELF});
@@ -185,7 +185,12 @@ namespace strategy {
                         else if (phase == Phase::SET || phase == Phase::READY) {
                             standStill();
                             find({FieldTarget::BALL});
-                            initialLocalisationReset();
+                            if(mode == Mode::PENALTY_SHOOTOUT) {
+                                penaltyLocalisationReset();
+                            }
+                            else {
+                                initialLocalisationReset();
+                            }
                             leaf = "Set";
                         }
                         else if (phase == Phase::TIMEOUT) {
@@ -252,8 +257,6 @@ namespace strategy {
                             }
                         }
                     }
-                    else if (mode == Mode::PENALTY_SHOOTOUT) {
-                    }
                 }
                 if (leaf != oldLeaf) {
                     log("Behaviour Transition:", leaf);
@@ -282,22 +285,31 @@ namespace strategy {
         }
 
         auto reset = std::make_unique<ResetRobotHypotheses>();
-        // ResetRobotHypotheses::Self selfSideLeft;
-        // selfSideLeft.position = arma::vec2({-desc.penalty_robot_start, desc.dimensions.field_width * 0.5});
-        // selfSideLeft.position_cov = arma::eye(2, 2) * 0.1;
-        // selfSideLeft.heading = -M_PI_2;
-        // selfSideLeft.heading_var = 0.05;
-        // reset->hypotheses.push_back(selfSideLeft);
-
-        // ResetRobotHypotheses::Self selfSideRight;
-        // selfSideRight.position = arma::vec2({-desc.penalty_robot_start, -desc.dimensions.field_width * 0.5});
-        // selfSideRight.position_cov = arma::eye(2, 2) * 0.1;
-        // selfSideRight.heading = M_PI_2;
-        // selfSideRight.heading_var = 0.05;
-        // reset->hypotheses.push_back(selfSideRight);
 
         ResetRobotHypotheses::Self selfSideBaseLine;
         selfSideBaseLine.position = arma::vec2({-desc.dimensions.field_length * 0.5 + desc.dimensions.goal_area_length, 0});
+        selfSideBaseLine.position_cov = arma::eye(2, 2) * 0.1;
+        selfSideBaseLine.heading = 0;
+        selfSideBaseLine.heading_var = 0.05;
+        reset->hypotheses.push_back(selfSideBaseLine);
+
+        emit(std::move(reset));
+    }
+
+    void SoccerStrategy::penaltyLocalisationReset() {
+        FieldDescription desc;
+
+        try {
+            desc = *powerplant.get<FieldDescription>();
+        }
+        catch (NUClear::metaprogramming::NoDataException) {
+            throw std::runtime_error("field description get failed asdlfkj");
+        }
+
+        auto reset = std::make_unique<ResetRobotHypotheses>();
+
+        ResetRobotHypotheses::Self selfSideBaseLine;
+        selfSideBaseLine.position = arma::vec2({1, 0});
         selfSideBaseLine.position_cov = arma::eye(2, 2) * 0.1;
         selfSideBaseLine.heading = 0;
         selfSideBaseLine.heading_var = 0.05;

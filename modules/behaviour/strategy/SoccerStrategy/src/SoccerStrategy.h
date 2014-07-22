@@ -58,6 +58,7 @@ namespace strategy {
         time_t goalLastSeen;
         std::string leaf = "";
         void initialLocalisationReset();
+        void penaltyLocalisationReset();
         void unpenalisedLocalisationReset();
 
         void standStill();
