@@ -62,6 +62,7 @@ namespace modules {
 
                 on<Trigger<ExecuteLook>>([this] (const ExecuteLook& e) {
                     //we are active!
+                    lastPanEnd = NUClear::clock::now() - std::chrono::seconds(1);
 
                 });
 

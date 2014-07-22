@@ -329,7 +329,7 @@ namespace strategy {
                 catch (NUClear::metaprogramming::NoDataException) {
                     throw std::runtime_error("field description get failed");
                 }
-                arma::vec enemyGoal = {desc.dimensions.field_length / 2, 0};
+                arma::vec2 enemyGoal({desc.dimensions.field_length * 0.5, 0});
                 heading = enemyGoal;
                 break;
             }
@@ -354,7 +354,7 @@ namespace strategy {
         catch (NUClear::metaprogramming::NoDataException) {
             throw std::runtime_error("field description get failed 2");
         }
-        arma::vec enemyGoal = {desc.dimensions.field_length / 2, 0};
+        arma::vec2 enemyGoal({desc.dimensions.field_length * 0.5, 0});
         auto approach = std::make_unique<WalkStrategy>();
         approach->targetPositionType = WalkTarget::WayPoint;
         approach->targetHeadingType = WalkTarget::WayPoint;
@@ -377,7 +377,12 @@ namespace strategy {
             bool feetOffGround = count > 7;*/
             auto sensors = powerplant.get<Sensors>();
             bool feetOffGround = !sensors->leftFootDown && !sensors->rightFootDown;
-            return feetOffGround && !isGettingUp && !isDiving;
+            return false
+            && feetOffGround
+            && !isGettingUp
+            && !isDiving
+            && sensors->orientation(2,2) < 0.92
+            && sensors->orientation(2,2) > 0.88;
         }
         catch (NUClear::metaprogramming::NoDataException) {
             throw std::runtime_error("sensors get failed");
@@ -410,6 +415,7 @@ namespace strategy {
                 case FieldTarget::BALL: {
                     auto& self = powerplant.get<std::vector<Self>>()->at(0);
                     auto& ball = *powerplant.get<LocalisationBall>();
+
                     auto position = RobotToWorldTransform(self.position, self.heading, ball.position);
                     return (position[0] > zone.zone(0, 0) && position[0] < zone.zone(1, 0)
                          && position[1] < zone.zone(0, 1) && position[1] > zone.zone(1, 1));

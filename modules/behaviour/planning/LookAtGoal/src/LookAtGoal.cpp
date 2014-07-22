@@ -58,7 +58,6 @@ namespace planning {
              const std::vector<Ball>& balls,
              const Sensors& sensors) {
             if (goals.size() > 0) {
-                std::cout<<__FILE__<<" "<<__LINE__<<": "<<__func__<<std::endl;
                 timeSinceLastSeen = sensors.timestamp;
                 std::vector<LookAtAngle> angles;
                 angles.reserve(4);
@@ -90,7 +89,6 @@ namespace planning {
 
 
             } else if(std::chrono::duration<float, std::ratio<1,1000>>(sensors.timestamp - timeSinceLastSeen).count() > GOAL_SEARCH_TIMEOUT_MILLISECONDS){
-                std::cout<<__FILE__<<" "<<__LINE__<<": "<<__func__<<std::endl;
                 //do a blind scan'n'pan
                 //XXX: this needs to be a look at sequence rather than a look at point
                 std::vector<LookAtPosition> angles;

@@ -67,7 +67,12 @@ namespace modules {
             double cameraHeight = sensors.orientationCamToGround(2,3);
 
             // This describes the direction of travel
-            auto direction = arma::normalise(xb);
+            arma::vec3 direction = arma::normalise(xb);
+
+            // Don't bother drawing lines if we know it's going to fail
+            if(direction[0] < 0) {
+                return;
+            }
 
             // Our start and end points
             double xStart = arma::norm(xb);

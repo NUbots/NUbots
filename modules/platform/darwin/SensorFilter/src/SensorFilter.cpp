@@ -118,10 +118,10 @@ namespace modules {
 
                     // If we have any downs in the last 20 frames then we are button pushed
                     for (const auto& s : sensors) {
-                        if(s->buttons.left) {
+                        if(s->buttons.left && !s->cm730ErrorFlags) {
                             ++leftCount;
                         }
-                        if(s->buttons.middle) {
+                        if(s->buttons.middle && !s->cm730ErrorFlags) {
                             ++middleCount;
                         }
                     }
