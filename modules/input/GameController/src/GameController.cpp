@@ -148,7 +148,7 @@ namespace input {
             } else {
                 // unpenalised
                 selfPenalised = false;
-                emit(std::move(std::make_unique<messages::output::Say>("Unpenalised")));
+                emit(std::move(std::make_unique<messages::output::Say>("Playing")));
                 emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{PLAYER_ID}));
                 // TODO: fix timers
                 emit(std::make_unique<GamePhase<Phase::PLAYING>>(GamePhase<Phase::PLAYING>{time, time}));

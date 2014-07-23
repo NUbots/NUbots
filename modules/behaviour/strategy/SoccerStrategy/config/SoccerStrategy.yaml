@@ -12,8 +12,8 @@ zones:
     goalie: false
 
   centre: &centre
-    ball_active_timeout: 5
-    zone_return_timeout: 10
+    ball_active_timeout: 60
+    zone_return_timeout: 120
     zone: [[-4.5, 3], [4.5, -3]]
     start_position_offensive: [-0.2, 0]
     start_position_defensive: [-1, 0]
