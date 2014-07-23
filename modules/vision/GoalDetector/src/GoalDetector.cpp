@@ -276,6 +276,9 @@ namespace vision {
 
                 arma::vec2 screenGoalCentre = (tl + tr + bl + br) * 0.25;
 
+
+
+
                 // Projection rays ray
                 arma::vec3 topRay = arma::normalise(arma::normalise(getCamFromScreen(tl, cam.focalLengthPixels))
                                                            + arma::normalise(getCamFromScreen(tr, cam.focalLengthPixels)));
@@ -287,29 +290,29 @@ namespace vision {
                 Plane topOfGoalPlane({ 0, 0, 1 }, { 0, 0, GOAL_HEIGHT });
                 arma::vec3 goalTopProj = projectCamToPlane(topRay, sensors.orientationCamToGround, topOfGoalPlane) - arma::vec({ 0, 0, GOAL_HEIGHT / 2 });
                 double goalTopProjDist = arma::norm(goalTopProj);
-                arma::mat goalTopProjDistCov = arma::diagmat(arma::vec({ 
-                        goalTopProjDist * measurement_distance_covariance_factor, 
-                        measurement_bearing_variance, 
+                arma::mat goalTopProjDistCov = arma::diagmat(arma::vec({
+                        goalTopProjDist * measurement_distance_covariance_factor,
+                        measurement_bearing_variance,
                         measurement_elevation_variance }));
-                measurements.push_back({ cartesianToSpherical(goalTopProj), goalTopProjDistCov});
+                // measurements.push_back({ cartesianToSpherical(goalTopProj), goalTopProjDistCov});
 
                 // Measure the distance to the base of the goals
                 Plane groundPlane({ 0, 0, 1 }, { 0, 0, 0 });
                 arma::vec3 goalBaseProj = projectCamToPlane(baseRay, sensors.orientationCamToGround, groundPlane) + arma::vec({ 0, 0, GOAL_HEIGHT / 2 });
                 double goalBaseProjDist = arma::norm(goalBaseProj);
-                arma::mat goalBaseProjDistCov = arma::diagmat(arma::vec({ 
-                        goalBaseProjDist * measurement_distance_covariance_factor, 
-                        measurement_bearing_variance, 
+                arma::mat goalBaseProjDistCov = arma::diagmat(arma::vec({
+                        goalBaseProjDist * measurement_distance_covariance_factor,
+                        measurement_bearing_variance,
                         measurement_elevation_variance }));
-                measurements.push_back({ cartesianToSpherical(goalBaseProj), goalBaseProjDistCov});
+                //measurements.push_back({ cartesianToSpherical(goalBaseProj), goalBaseProjDistCov});
 
                 // Measure the width based distance to the bottom
                 double baseWidthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, bl, br, cam.focalLengthPixels);
                 arma::vec3 baseGoalWidth = baseWidthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * baseRay + sensors.orientationCamToGround.submat(0,3,2,3) + arma::vec({ 0, 0, GOAL_HEIGHT / 2 });
                 double baseGoalWidthDist = arma::norm(baseGoalWidth);
-                arma::mat baseGoalWidthDistCov = arma::diagmat(arma::vec({ 
-                        baseGoalWidthDist * measurement_distance_covariance_factor, 
-                        measurement_bearing_variance, 
+                arma::mat baseGoalWidthDistCov = arma::diagmat(arma::vec({
+                        baseGoalWidthDist * measurement_distance_covariance_factor,
+                        measurement_bearing_variance,
                         measurement_elevation_variance }));
                 measurements.push_back({ cartesianToSpherical(baseGoalWidth), baseGoalWidthDistCov});
 
@@ -317,21 +320,38 @@ namespace vision {
                 double topWidthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, tl, tr, cam.focalLengthPixels);
                 arma::vec3 topGoalWidth = topWidthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * topRay + sensors.orientationCamToGround.submat(0,3,2,3) - arma::vec({ 0, 0, GOAL_HEIGHT / 2 });
                 double topGoalWidthDist = arma::norm(topGoalWidth);
-                arma::mat topGoalWidthDistCov = arma::diagmat(arma::vec({ 
-                        topGoalWidthDist * measurement_distance_covariance_factor, 
-                        measurement_bearing_variance, 
+                arma::mat topGoalWidthDistCov = arma::diagmat(arma::vec({
+                        topGoalWidthDist * measurement_distance_covariance_factor,
+                        measurement_bearing_variance,
                         measurement_elevation_variance }));
                 measurements.push_back({ cartesianToSpherical(topGoalWidth), topGoalWidthDistCov});
 
-                // // Measure the height based distance
-                // double heightDistance = distanceToVerticalObject((tl + tr) * 0.5, (bl + br) * 0.5, GOAL_HEIGHT, sensors.orientationCamToGround(2,3), cam.focalLengthPixels);
-                // arma::vec3 goalHeight = heightDistance * sensors.orientationCamToGround.submat(0,0,2,2) * baseRay + sensors.orientationCamToGround.submat(0,3,2,3) + arma::vec({ 0, 0, GOAL_HEIGHT / 2 });
-                // double goalHeightDist = arma::norm(goalHeight);
-                // arma::mat goalHeightDistCov = arma::diagmat(arma::vec({ 
-                //         goalHeightDist * measurement_distance_covariance_factor, 
-                //         measurement_bearing_variance, 
-                //         measurement_elevation_variance }));
+                // Measure the height based distance
+                double heightDistance = distanceToVerticalObject((tl + tr) * 0.5, (bl + br) * 0.5, GOAL_HEIGHT, sensors.orientationCamToGround(2,3), cam.focalLengthPixels);
+                arma::vec3 goalHeight = heightDistance * sensors.orientationCamToGround.submat(0,0,2,2) * baseRay + sensors.orientationCamToGround.submat(0,3,2,3) + arma::vec({ 0, 0, GOAL_HEIGHT / 2 });
+                double goalHeightDist = arma::norm(goalHeight);
+                arma::mat goalHeightDistCov = arma::diagmat(arma::vec({
+                        goalHeightDist * measurement_distance_covariance_factor,
+                        measurement_bearing_variance,
+                        measurement_elevation_variance }));
                 // measurements.push_back({ cartesianToSpherical(goalHeight), goalHeightDistCov});
+
+
+                // Ignore invalid measurements:
+                arma::vec2 topMidGoal =(tl + tr) * 0.5;
+                arma::vec2 bottomMidGoal = (bl + br) * 0.5;
+
+                if (topMidGoal(1) < image.dimensions[1] / 2 - 10) {
+                    measurements.push_back({ cartesianToSpherical(goalTopProj), goalTopProjDistCov});
+                    if (bottomMidGoal(1) > -image.dimensions[1] / 2 + 10) {
+                        measurements.push_back({ cartesianToSpherical(goalHeight), goalHeightDistCov});
+                    }
+                }
+
+                if (bottomMidGoal(1) > -image.dimensions[1] / 2 + 10) {
+                    measurements.push_back({ cartesianToSpherical(goalBaseProj), goalBaseProjDistCov});
+                }
+
 
                 // Add our variables
                 it->measurements = measurements;
