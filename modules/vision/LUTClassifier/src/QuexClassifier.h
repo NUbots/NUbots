@@ -38,7 +38,7 @@ namespace modules {
             static constexpr size_t BUFFER_SIZE = 2000;
             uint8_t buffer[BUFFER_SIZE]; // This should be big enough for now
             quex::Lexer lexer;
-            uint32_t& tknNumber;
+            size_t& tknNumber;
 
         public:
             QuexClassifier();
