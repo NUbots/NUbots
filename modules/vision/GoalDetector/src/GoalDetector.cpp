@@ -93,11 +93,13 @@ namespace vision {
         on<Trigger<CameraParameters>, With<Configuration<GoalDetector>>>(setParams);
         on<With<CameraParameters>, Trigger<Configuration<GoalDetector>>>(setParams);
 
-        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters>, With<Optional<FieldDescription>>, Options<Single>>("Goal Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field) {
+        on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<Optional<FieldDescription>>, Options<Single>>("Goal Detector", [this](
+            const std::shared_ptr<const ClassifiedImage<ObjectClass>>& rawImage, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field) {
             if (field == nullptr) {
                 NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");
                 throw std::runtime_error("FieldDescription Update: support::configuration::SoccerConfig module might not be installed");
             }
+            const auto& image = *rawImage;
             auto& sensors = *image.sensors;
             // Our segments that may be a part of a goal
             std::vector<RansacGoalModel::GoalSegment> segments;
@@ -201,6 +203,8 @@ namespace vision {
 
                 g.quad.set(bl, tl, tr, br);
 
+                g.sensors = image.sensors;
+                g.classifiedImage = rawImage;
                 goals->push_back(std::move(g));
             }
 

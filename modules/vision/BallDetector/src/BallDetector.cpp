@@ -76,11 +76,13 @@ namespace vision {
             measurement_elevation_variance = config["measurement_elevation_variance"].as<double>();
         });
 
-        on<Trigger<ClassifiedImage<ObjectClass>>, With<CameraParameters>, With<Optional<FieldDescription>>, Options<Single>>("Ball Detector", [this](const ClassifiedImage<ObjectClass>& image, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field) {
+        on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<Optional<FieldDescription>>, Options<Single>>("Ball Detector", [this](
+            const std::shared_ptr<const ClassifiedImage<ObjectClass>>& rawImage, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field) {
             if (field == nullptr) {
                 NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");
                 throw std::runtime_error("FieldDescription Update: support::configuration::SoccerConfig module might not be installed");
             }
+            const auto& image = *rawImage;
             // This holds our points that may be a part of the ball
             std::vector<arma::vec2> ballPoints;
             const auto& sensors = *image.sensors;
@@ -201,6 +203,7 @@ namespace vision {
                     b.measurements = std::move(measurements);
 
                     b.sensors = image.sensors;
+                    b.classifiedImage = rawImage;
                     balls->push_back(std::move(b));
                 }
             }

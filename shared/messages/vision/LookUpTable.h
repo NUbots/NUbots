@@ -64,6 +64,7 @@ namespace messages {
             LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::vector<char>&& data);
 
             std::string getData() const;
+            const std::vector<char>& getRawData() const;
 
             /*!
                 @brief Classifies a pixel
@@ -71,12 +72,6 @@ namespace messages {
                 @return Returns the colour classification of this pixel
              */
             messages::vision::Colour classify(const messages::input::Image::Pixel& p) const;
-        private:
-
-            uint8_t BITS_Y_REMOVED;
-            uint8_t BITS_CB_REMOVED;
-            uint8_t BITS_CR_REMOVED;
-            uint8_t BITS_CB_CR;
 
             /*!
              *   @brief Gets the index of the pixel in the LUT
@@ -84,6 +79,18 @@ namespace messages {
              *   @return Returns the colour index for the given pixel.
              */
             uint getLUTIndex(const messages::input::Image::Pixel& colour) const;
+
+            /*!
+             *   @brief The inverse of getLUTIndex
+             *   NOTE: This inverse is NOT injective (e.g. not 1-to-1)
+             */
+            messages::input::Image::Pixel getPixelFromIndex(uint index);
+        private:
+
+            uint8_t BITS_Y_REMOVED;
+            uint8_t BITS_CB_REMOVED;
+            uint8_t BITS_CR_REMOVED;
+            uint8_t BITS_CB_CR;
             std::vector<char> data;
         };
 

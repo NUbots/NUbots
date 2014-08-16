@@ -48,7 +48,11 @@ namespace messages {
             const Pixel& operator()(size_t x, size_t y) const;
             size_t width() const;
             size_t height() const;
+
+            // raw pixel data row-by-row
             const std::vector<Pixel>& raw() const;
+
+            // apparently often empty (MJPG goes here)
             const std::vector<uint8_t>& source() const;
 
         private:

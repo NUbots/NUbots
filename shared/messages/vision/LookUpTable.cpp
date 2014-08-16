@@ -48,6 +48,10 @@ namespace messages {
             return std::string(data.begin(), data.end());
         }
 
+        const std::vector<char>& LookUpTable::getRawData() const {
+            return data;
+        }
+
         uint LookUpTable::getLUTIndex(const messages::input::Image::Pixel& colour) const {
             unsigned int index = 0;
 
@@ -56,6 +60,14 @@ namespace messages {
             index += (colour.cr >> BITS_CR_REMOVED);
 
             return index;
+        }
+
+        messages::input::Image::Pixel LookUpTable::getPixelFromIndex(uint index) {
+            uint8_t y = index >> BITS_CB_CR;
+            uint8_t cb = (index >> BITS_CR) & BITS_CB;
+            uint8_t cr = index & BITS_CR;
+
+            return messages::input::Image::Pixel{y, cb, cr};
         }
 
     } //vision
