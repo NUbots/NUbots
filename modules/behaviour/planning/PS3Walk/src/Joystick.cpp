@@ -2,12 +2,12 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 
@@ -21,31 +21,25 @@
 #include <sstream>
 #include "unistd.h"
 
-Joystick::Joystick()
+Joystick::Joystick() : path("/dev/input/js0")
 {
-  openPath("/dev/input/js0");
+  openPath(path);
 }
 
-Joystick::Joystick(int joystickNumber)
+Joystick::Joystick(std::string path) : path(path)
 {
-  std::stringstream sstm;
-  sstm << "/dev/input/js" << joystickNumber;
-  openPath(sstm.str());
-}
-
-Joystick::Joystick(std::string devicePath)
-{
-  openPath(devicePath);
+  openPath(path);
 }
 
 void Joystick::openPath(std::string devicePath)
 {
+  std::cout << "Connecting to " << devicePath << std::endl;
   _fd = open(devicePath.c_str(), O_RDONLY | O_NONBLOCK);
 }
 
 bool Joystick::sample(JoystickEvent* event)
 {
-  int bytes = read(_fd, event, sizeof(*event)); 
+  int bytes = read(_fd, event, sizeof(*event));
 
   if (bytes == -1)
     return false;
@@ -58,6 +52,16 @@ bool Joystick::sample(JoystickEvent* event)
 bool Joystick::isFound()
 {
   return _fd >= 0;
+}
+
+bool Joystick::isValid() {
+  // Check if we can get the stats
+  return !(fcntl(_fd, F_GETFL) < 0 && errno == EBADF);
+}
+
+void Joystick::reconnect() {
+  close(_fd);
+  openPath(path);
 }
 
 Joystick::~Joystick()

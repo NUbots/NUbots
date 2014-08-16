@@ -63,7 +63,7 @@ namespace planning {
         /// @brief Called by the powerplant to build and setup the PS3Walk reactor.
         explicit PS3Walk(std::unique_ptr<NUClear::Environment> environment);
     private:
-        Joystick joystick{"/dev/input/js0"}; // TODO: make configurable
+        Joystick joystick; // TODO: make configurable
         arma::vec strafe{0, 0};
         float rotationalSpeed = 0;
         bool moving = false;
