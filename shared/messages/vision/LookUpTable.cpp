@@ -25,7 +25,7 @@
 namespace messages {
     namespace vision {
 
-        LookUpTable::LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::vector<char>&& data)
+        LookUpTable::LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::vector<Colour>&& data)
             : BITS_Y(bitsY)
             , BITS_CB(bitsCb)
             , BITS_CR(bitsCr)
@@ -40,15 +40,19 @@ namespace messages {
         LookUpTable::LookUpTable() {
         }
 
-        messages::vision::Colour LookUpTable::classify(const messages::input::Image::Pixel& p) const {
-            return messages::vision::Colour(data[getLUTIndex(p)]); // 7bit LUT
+        const Colour& LookUpTable::operator()(const messages::input::Image::Pixel& p) const {
+            return data[getLUTIndex(p)];
+        }
+
+        Colour& LookUpTable::operator()(const messages::input::Image::Pixel& p) {
+            return data[getLUTIndex(p)];
         }
 
         std::string LookUpTable::getData() const {
             return std::string(data.begin(), data.end());
         }
 
-        const std::vector<char>& LookUpTable::getRawData() const {
+        const std::vector<Colour>& LookUpTable::getRawData() const {
             return data;
         }
 
@@ -62,7 +66,7 @@ namespace messages {
             return index;
         }
 
-        messages::input::Image::Pixel LookUpTable::getPixelFromIndex(uint index) {
+        messages::input::Image::Pixel LookUpTable::getPixelFromIndex(const uint& index) const {
             uint8_t y = index >> BITS_CB_CR;
             uint8_t cb = (index >> BITS_CR) & BITS_CB;
             uint8_t cr = index & BITS_CR;

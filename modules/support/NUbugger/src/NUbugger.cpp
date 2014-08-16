@@ -40,6 +40,7 @@ namespace support {
 
     using messages::vision::LookUpTable;
     using messages::vision::SaveLookUpTable;
+    using messages::vision::Colour;
 
     using utility::time::getUtcTimestamp;
 
@@ -194,7 +195,11 @@ namespace support {
         const std::string& lutData = lookuptable.table();
 
         log("Loading LUT");
-        auto data = std::vector<char>(lutData.begin(), lutData.end());
+        std::vector<messages::vision::Colour> data;
+        data.reserve(lutData.size());
+        for (auto& s : lutData) {
+            data.push_back(messages::vision::Colour(s));
+        }
         auto lut = std::make_unique<LookUpTable>(lookuptable.bits_y(), lookuptable.bits_cb(), lookuptable.bits_cr(), std::move(data));
         emit<Scope::DIRECT>(std::move(lut));
 

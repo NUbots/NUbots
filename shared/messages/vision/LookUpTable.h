@@ -61,17 +61,18 @@ namespace messages {
             size_t LUT_SIZE; //!< The size of a lookup table in bytes.
 
             LookUpTable();
-            LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::vector<char>&& data);
+            LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::vector<Colour>&& data);
 
             std::string getData() const;
-            const std::vector<char>& getRawData() const;
+            const std::vector<Colour>& getRawData() const;
 
             /*!
                 @brief Classifies a pixel
                 @param p the pixel
                 @return Returns the colour classification of this pixel
              */
-            messages::vision::Colour classify(const messages::input::Image::Pixel& p) const;
+            const messages::vision::Colour& operator()(const messages::input::Image::Pixel& p) const;
+            messages::vision::Colour& operator()(const messages::input::Image::Pixel& p);
 
             /*!
              *   @brief Gets the index of the pixel in the LUT
@@ -84,14 +85,14 @@ namespace messages {
              *   @brief The inverse of getLUTIndex
              *   NOTE: This inverse is NOT injective (e.g. not 1-to-1)
              */
-            messages::input::Image::Pixel getPixelFromIndex(uint index);
+            messages::input::Image::Pixel getPixelFromIndex(const uint& index) const;
         private:
 
             uint8_t BITS_Y_REMOVED;
             uint8_t BITS_CB_REMOVED;
             uint8_t BITS_CR_REMOVED;
             uint8_t BITS_CB_CR;
-            std::vector<char> data;
+            std::vector<Colour> data;
         };
 
         struct SaveLookUpTable {
@@ -124,7 +125,12 @@ namespace YAML {
             uint8_t bitsCr = node["bits"]["cr"].as<uint>();
 
             std::string dataString = node["lut"].as<std::string>();
-            std::vector<char> data(dataString.begin(), dataString.end());
+            std::vector<messages::vision::Colour> data;
+
+            data.reserve(dataString.size());
+            for (auto& s : dataString) {
+                data.push_back(messages::vision::Colour(s));
+            }
 
             rhs = messages::vision::LookUpTable(bitsY, bitsCb, bitsCr, std::move(data));
 

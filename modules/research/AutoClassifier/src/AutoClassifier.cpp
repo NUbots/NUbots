@@ -18,6 +18,7 @@
  */
 
 #include "AutoClassifier.h"
+#include <armadillo>
 
 #include "messages/vision/VisionObjects.h"
 #include "messages/vision/LookUpTable.h"
@@ -36,19 +37,22 @@ namespace research {
         on<Trigger<std::vector<Ball>>, With<LookUpTable>>("Auto Classifier Balls", [this](
             const std::vector<Ball>& balls, const LookUpTable& lut) {
 
+            // create a new lookup table
+            auto newLut = std::make_unique<LookUpTable>(lut);
+
             for (auto& ball : balls) {
                 auto& image = *ball.classifiedImage->image;
 
                 uint radius = ball.circle.radius;
-                uint centre = ball.circle.centre;
+                arma::vec2 centre = ball.circle.centre;
 
                 // find bounding box around circle
-                uint minX = std::max(centre[0] - radius, 0);
-                uint maxX = std::min(centre[0] + radius, image.width() - 1);
-                uint minY = std::max(centre[1] - radius, 0);
-                uint maxY = std::min(centre[1] + radius, image.height() - 1);
+                uint minX = std::max(centre[0] - radius, 0.0);
+                uint maxX = std::min(centre[0] + radius, double(image.width() - 1));
+                uint minY = std::max(centre[1] - radius, 0.0);
+                uint maxY = std::min(centre[1] + radius, double(image.height() - 1));
 
-                uint rangeSqr = Math.pow(30, 2); // TODO: config
+                uint rangeSqr = std::pow(30, 2); // TODO: config
 
                 // loop through pixels on the image in bounding box
                 for (uint y = minY; y <= maxY; y++) {
@@ -56,17 +60,19 @@ namespace research {
                         // get the pixel
                         auto& pixel = image(x, y);
                         // check if pixel is in the detected circle
-                        if (Math.pow(x - centre[0], 2) + Math.pow(y - centre[1], 2) <= Math.pow(radius, 2)) {
+                        if (std::pow(x - centre[0], 2) + std::pow(y - centre[1], 2) <= std::pow(radius, 2)) {
                             // TODO: if pixel is unclassfied and close to 'ball' coloured, classify it
                             uint i = 0;
-                            for (char& colour : lut.getRawData()) {
+                            for (auto& colour : newLut->getRawData()) {
                                 if (colour == Colour::ORANGE) {
-                                    auto matchedPixel = lut.getPixelFromIndex(i);
-                                    uint distSqr = Math.pow(pixel.y - matchedPixel.y, 2)
-                                              + Math.pow(pixel.cb - matchedPixel.cb, 2)
-                                              + Math.pow(pixel.cr - matchedPixel.cr, 2)
+                                    auto matchedPixel = newLut->getPixelFromIndex(i);
+                                    uint distSqr = std::pow(pixel.y - matchedPixel.y, 2)
+                                              + std::pow(pixel.cb - matchedPixel.cb, 2)
+                                              + std::pow(pixel.cr - matchedPixel.cr, 2);
                                     if (distSqr <= rangeSqr) {
                                         // classify!
+                                        (*newLut)(pixel) = colour;
+                                        break;
                                     }
                                 }
                                 i++;
@@ -77,6 +83,8 @@ namespace research {
                 }
 
             }
+
+            emit(std::move(newLut));
 
         });
 
