@@ -34,6 +34,8 @@ namespace messages {
             , BITS_CB_REMOVED(sizeof(uint8_t) * 8 - BITS_CB)
             , BITS_CR_REMOVED(sizeof(uint8_t) * 8 - BITS_CR)
             , BITS_CB_CR(BITS_CB + BITS_CR)
+            , BITS_CB_MASK(std::pow(2, BITS_CB) - 1)
+            , BITS_CR_MASK(std::pow(2, BITS_CR) - 1)
             , data(std::move(data)) {
         }
 
@@ -67,9 +69,9 @@ namespace messages {
         }
 
         messages::input::Image::Pixel LookUpTable::getPixelFromIndex(const uint& index) const {
-            uint8_t y = index >> BITS_CB_CR;
-            uint8_t cb = (index >> BITS_CR) & BITS_CB;
-            uint8_t cr = index & BITS_CR;
+            uint8_t y = (index >> BITS_CB_CR) << BITS_Y_REMOVED;
+            uint8_t cb = ((index >> BITS_CR) & BITS_CB_MASK) << BITS_CB_REMOVED;
+            uint8_t cr = (index & BITS_CR_MASK) << BITS_CR_REMOVED;
 
             return messages::input::Image::Pixel{y, cb, cr};
         }

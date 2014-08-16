@@ -34,7 +34,7 @@ namespace research {
     AutoClassifier::AutoClassifier(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<std::vector<Ball>>, With<LookUpTable>>("Auto Classifier Balls", [this](
+        on<Trigger<std::vector<Ball>>, With<LookUpTable>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Balls", [this](
             const std::vector<Ball>& balls, const LookUpTable& lut) {
 
             // create a new lookup table

@@ -92,6 +92,8 @@ namespace messages {
             uint8_t BITS_CB_REMOVED;
             uint8_t BITS_CR_REMOVED;
             uint8_t BITS_CB_CR;
+            uint8_t BITS_CB_MASK;
+            uint8_t BITS_CR_MASK;
             std::vector<Colour> data;
         };
 
