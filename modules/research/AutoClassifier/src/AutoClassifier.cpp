@@ -46,29 +46,37 @@ namespace research {
                 uint radius = ball.circle.radius;
                 arma::vec2 centre = ball.circle.centre;
 
-                // find bounding box around circle
-                uint minX = std::max(centre[0] - radius, 0.0);
-                uint maxX = std::min(centre[0] + radius, double(image.width() - 1));
-                uint minY = std::max(centre[1] - radius, 0.0);
-                uint maxY = std::min(centre[1] + radius, double(image.height() - 1));
+                // find the min and max y points on the circle
+                // capped at the bounds of the image
+                uint minY = std::max(std::round(centre[1] - radius), 0.0);
+                uint maxY = std::min(std::round(centre[1] + radius), double(image.height() - 1));
 
                 uint rangeSqr = std::pow(30, 2); // TODO: config
 
                 // loop through pixels on the image in bounding box
                 for (uint y = minY; y <= maxY; y++) {
+                    // find the min and max x points on the circle for each given y
+                    // uses the general equation of a circle and solves for x
+                    // capped at the bounds of the image
+                    double a = y - centre[1];
+                    double b = std::sqrt(radius * radius - a * a);
+                    uint minX = std::max(std::round(centre[0] - b), 0.0);
+                    uint maxX = std::min(std::round(centre[0] + b), double(image.width() - 1));
+
                     for (uint x = minX; x <= maxX; x++) {
                         // get the pixel
                         auto& pixel = image(x, y);
-                        // check if pixel is in the detected circle
-                        if (std::pow(x - centre[0], 2) + std::pow(y - centre[1], 2) <= std::pow(radius, 2)) {
-                            // TODO: if pixel is unclassfied and close to 'ball' coloured, classify it
-                            uint i = 0;
+                        uint i = 0;
+                        // if pixel is unclassfied and close to 'ball' coloured, classify it
+                        if ((*newLut)(pixel) == Colour::UNCLASSIFIED) {
                             for (auto& colour : newLut->getRawData()) {
                                 if (colour == Colour::ORANGE) {
                                     auto matchedPixel = newLut->getPixelFromIndex(i);
+                                    // find euclidean distance between the two pixels
                                     uint distSqr = std::pow(pixel.y - matchedPixel.y, 2)
                                               + std::pow(pixel.cb - matchedPixel.cb, 2)
                                               + std::pow(pixel.cr - matchedPixel.cr, 2);
+                                    // check its within the given range
                                     if (distSqr <= rangeSqr) {
                                         // classify!
                                         (*newLut)(pixel) = colour;
@@ -77,7 +85,6 @@ namespace research {
                                 }
                                 i++;
                             }
-
                         }
                     }
                 }
