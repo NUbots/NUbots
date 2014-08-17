@@ -21,7 +21,6 @@
 #include <armadillo>
 
 #include "messages/vision/VisionObjects.h"
-#include "messages/vision/LookUpTable.h"
 
 namespace modules {
 namespace research {
@@ -38,7 +37,11 @@ namespace research {
             const std::vector<Ball>& balls, const LookUpTable& lut) {
 
             // create a new lookup table
-            auto newLut = std::make_unique<LookUpTable>(lut);
+            auto newLut = lut;
+            if (!reference) {
+                reference = std::make_unique<LookUpTable>(lut);
+            }
+
 
             for (auto& ball : balls) {
                 auto& image = *ball.classifiedImage->image;
@@ -68,10 +71,10 @@ namespace research {
                         auto& pixel = image(x, y);
                         uint i = 0;
                         // if pixel is unclassfied and close to 'ball' coloured, classify it
-                        if ((*newLut)(pixel) == Colour::UNCLASSIFIED) {
-                            for (auto& colour : newLut->getRawData()) {
+                        if (newLut(pixel) == Colour::UNCLASSIFIED) {
+                            for (auto& colour : reference->getRawData()) {
                                 if (colour == Colour::ORANGE) {
-                                    auto matchedPixel = newLut->getPixelFromIndex(i);
+                                    auto matchedPixel = reference->getPixelFromIndex(i);
                                     // find euclidean distance between the two pixels
                                     uint distSqr = std::pow(pixel.y - matchedPixel.y, 2)
                                               + std::pow(pixel.cb - matchedPixel.cb, 2)
@@ -79,7 +82,7 @@ namespace research {
                                     // check its within the given range
                                     if (distSqr <= rangeSqr) {
                                         // classify!
-                                        (*newLut)(pixel) = colour;
+                                        newLut(pixel) = colour;
                                         break;
                                     }
                                 }
@@ -91,7 +94,7 @@ namespace research {
 
             }
 
-            emit(std::move(newLut));
+            emit(std::move(std::make_unique<LookUpTable>(newLut)));
 
         });
 

@@ -21,6 +21,7 @@
 #define MODULES_RESEARCH_AUTOCLASSIFIER_H
 
 #include <nuclear>
+#include "messages/vision/LookUpTable.h"
 
 namespace modules {
 namespace research {
@@ -29,6 +30,9 @@ namespace research {
     public:
         /// @brief Called by the powerplant to build and setup the AutoClassifier reactor.
         explicit AutoClassifier(std::unique_ptr<NUClear::Environment> environment);
+
+    private:
+        std::unique_ptr<messages::vision::LookUpTable> reference;
     };
 
 }
