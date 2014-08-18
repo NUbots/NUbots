@@ -22,17 +22,32 @@
 
 #include <nuclear>
 #include "messages/vision/LookUpTable.h"
+#include "messages/input/Image.h"
 
 namespace modules {
 namespace research {
 
     class AutoClassifier : public NUClear::Reactor {
     public:
+        static constexpr const char* CONFIGURATION_PATH = "AutoClassifier.yaml";
         /// @brief Called by the powerplant to build and setup the AutoClassifier reactor.
         explicit AutoClassifier(std::unique_ptr<NUClear::Environment> environment);
 
     private:
         std::unique_ptr<messages::vision::LookUpTable> reference;
+        std::vector<messages::input::Image::Pixel> orangePixels;
+        std::vector<messages::input::Image::Pixel> yellowPixels;
+        std::vector<messages::input::Image::Pixel> greenPixels;
+
+        ReactionHandle orangeClassifier;
+        ReactionHandle yellowClassifier;
+        ReactionHandle greenClassifier;
+
+        double orangeRange;
+        double yellowRange;
+        double greenRange;
+
+        void cacheColours(const messages::vision::LookUpTable& lut);
     };
 
 }

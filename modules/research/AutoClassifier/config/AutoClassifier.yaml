@@ -1,4 +1,10 @@
-range: 30
-autoClassify:
-    balls: true
-    goals: true
+colours:
+    orange:
+        enabled: true
+        range: 15
+    yellow:
+        enabled: true
+        range: 15
+    green:
+        enabled: true
+        range: 10

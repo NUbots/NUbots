@@ -21,6 +21,9 @@
 #include <armadillo>
 
 #include "messages/vision/VisionObjects.h"
+#include "messages/vision/ClassifiedImage.h"
+#include "messages/support/Configuration.h"
+#include "utility/math/geometry/ParametricLine.h"
 
 namespace modules {
 namespace research {
@@ -29,19 +32,39 @@ namespace research {
     using messages::vision::Goal;
     using messages::vision::Colour;
     using messages::vision::LookUpTable;
+    using messages::vision::ClassifiedImage;
+    using messages::vision::ObjectClass;
+    using messages::support::Configuration;
+    using utility::math::geometry::ParametricLine;
 
     AutoClassifier::AutoClassifier(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<std::vector<Ball>>, With<LookUpTable>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Balls", [this](
+        on<Trigger<Configuration<AutoClassifier>>>([this] (const Configuration<AutoClassifier>& config) {
+            auto& orange = config["colours"]["orange"];
+            orangeClassifier.enable(orange["enabled"].as<bool>());
+            orangeRange = orange["range"].as<double>();
+
+            auto& yellow = config["colours"]["yellow"];
+            yellowClassifier.enable(yellow["enabled"].as<bool>());
+            yellowRange = yellow["range"].as<double>();
+
+            auto& green = config["colours"]["green"];
+            greenClassifier.enable(green["enabled"].as<bool>());
+            greenRange = green["range"].as<double>();
+        });
+
+        orangeClassifier = on<Trigger<std::vector<Ball>>, With<LookUpTable>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Balls", [this](
             const std::vector<Ball>& balls, const LookUpTable& lut) {
 
             // create a new lookup table
-            auto newLut = lut;
+            auto newLutObj = std::make_unique<LookUpTable>(lut);
+            auto& newLut = *newLutObj;
+
             if (!reference) {
                 reference = std::make_unique<LookUpTable>(lut);
+                cacheColours(*reference);
             }
-
 
             for (auto& ball : balls) {
                 auto& image = *ball.classifiedImage->image;
@@ -54,7 +77,7 @@ namespace research {
                 uint minY = std::max(std::round(centre[1] - radius), 0.0);
                 uint maxY = std::min(std::round(centre[1] + radius), double(image.height() - 1));
 
-                uint rangeSqr = std::pow(30, 2); // TODO: config
+                uint rangeSqr = std::pow(orangeRange, 2);
 
                 // loop through pixels on the image in bounding box
                 for (uint y = minY; y <= maxY; y++) {
@@ -69,24 +92,19 @@ namespace research {
                     for (uint x = minX; x <= maxX; x++) {
                         // get the pixel
                         auto& pixel = image(x, y);
-                        uint i = 0;
-                        // if pixel is unclassfied and close to 'ball' coloured, classify it
+                        // if pixel is unclassfied and close to 'orange' coloured, classify it
                         if (newLut(pixel) == Colour::UNCLASSIFIED) {
-                            for (auto& colour : reference->getRawData()) {
-                                if (colour == Colour::ORANGE) {
-                                    auto matchedPixel = reference->getPixelFromIndex(i);
-                                    // find euclidean distance between the two pixels
-                                    uint distSqr = std::pow(pixel.y - matchedPixel.y, 2)
-                                              + std::pow(pixel.cb - matchedPixel.cb, 2)
-                                              + std::pow(pixel.cr - matchedPixel.cr, 2);
-                                    // check its within the given range
-                                    if (distSqr <= rangeSqr) {
-                                        // classify!
-                                        newLut(pixel) = colour;
-                                        break;
-                                    }
+                            for (auto& matchedPixel : orangePixels) {
+                                // find euclidean distance between the two pixels
+                                uint distSqr = std::pow(pixel.y - matchedPixel.y, 2)
+                                          + std::pow(pixel.cb - matchedPixel.cb, 2)
+                                          + std::pow(pixel.cr - matchedPixel.cr, 2);
+                                // check its within the given range
+                                if (distSqr <= rangeSqr) {
+                                    // classify!
+                                    newLut(pixel) = Colour::ORANGE;
+                                    break;
                                 }
-                                i++;
                             }
                         }
                     }
@@ -94,18 +112,165 @@ namespace research {
 
             }
 
-            emit(std::move(std::make_unique<LookUpTable>(newLut)));
+            emit(std::move(newLutObj));
 
         });
 
-        /*on<Trigger<std::vector<Goal>>>("Auto Classifier Goals", [this](const std::vector<Goal>& goals) {
+        yellowClassifier = on<Trigger<std::vector<Goal>>, With<LookUpTable>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Goals", [this](
+            const std::vector<Goal>& goals, const LookUpTable& lut) {
 
-            for (auto& goal : goals) {
-                // TODO:
+            // create a new lookup table
+            auto newLutObj = std::make_unique<LookUpTable>(lut);
+            auto& newLut = *newLutObj;
+
+            if (!reference) {
+                reference = std::make_unique<LookUpTable>(lut);
+                cacheColours(*reference);
             }
 
-        });*/
+            for (auto& goal : goals) {
+                auto& image = *goal.classifiedImage->image;
 
+                arma::vec2 topLeft = goal.quad.getTopLeft();
+                arma::vec2 bottomLeft = goal.quad.getBottomLeft();
+                arma::vec2 topRight = goal.quad.getTopRight();
+                arma::vec2 bottomRight = goal.quad.getBottomRight();
+
+                ParametricLine<2> topLine(topLeft, topRight, true);
+                ParametricLine<2> rightLine(topRight, bottomRight, true);
+                ParametricLine<2> bottomLine(bottomLeft, bottomRight, true);
+                ParametricLine<2> leftLine(bottomLeft, topLeft, true);
+
+                // find the min and max y points on the circle
+                // capped at the bounds of the image
+                uint minY = std::min(topLeft[1], topRight[1]);
+                uint maxY = std::min(bottomLeft[1], bottomRight[1]);
+
+                uint rangeSqr = std::pow(yellowRange, 2);
+
+                // loop through pixels on the image in bounding box
+                for (uint y = minY; y <= maxY; y++) {
+                    // find the min and max x points on the circle for each given y
+                    // uses the general equation of a circle and solves for x
+                    // capped at the bounds of the image
+                    ParametricLine<2> scanLine;
+                    scanLine.setFromDirection({1, 0}, {0, double(y)});
+
+                    std::vector<int> values;
+                    std::vector<ParametricLine<2>> lines = {
+                        topLine,
+                        rightLine,
+                        bottomLine,
+                        leftLine
+                    };
+
+                    for (auto& line : lines) {
+                        try {
+                            values.push_back(scanLine.intersect(line)[0]);
+                        } catch (std::domain_error&) { }
+                    }
+
+                    if (values.size() != 2) {
+                        continue; // something went wrong!
+                    }
+
+                    uint minX = std::max(std::min(values[0], values[1]), 0);
+                    uint maxX = std::min(std::max(values[0], values[1]), int(image.width() - 1));
+
+                    for (uint x = minX; x <= maxX; x++) {
+                        // get the pixel
+                        auto& pixel = image(x, y);
+                        // if pixel is unclassfied and close to 'yellow' coloured, classify it
+                        if (newLut(pixel) == Colour::UNCLASSIFIED) {
+                            for (auto& matchedPixel : yellowPixels) {
+                                // find euclidean distance between the two pixels
+                                uint distSqr = std::pow(pixel.y - matchedPixel.y, 2)
+                                          + std::pow(pixel.cb - matchedPixel.cb, 2)
+                                          + std::pow(pixel.cr - matchedPixel.cr, 2);
+                                // check its within the given range
+                                if (distSqr <= rangeSqr) {
+                                    // classify!
+                                    newLut(pixel) = Colour::YELLOW;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            emit(std::move(newLutObj));
+
+        });
+
+        greenClassifier = on<Trigger<ClassifiedImage<ObjectClass>>, With<LookUpTable>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Field", [this](
+            const ClassifiedImage<ObjectClass>& classifiedImage, const LookUpTable& lut) {
+
+            // create a new lookup table
+            auto newLutObj = std::make_unique<LookUpTable>(lut);
+            auto& newLut = *newLutObj;
+
+            if (!reference) {
+                reference = std::make_unique<LookUpTable>(lut);
+                cacheColours(*reference);
+            }
+
+            auto& image = *classifiedImage.image;
+
+            uint rangeSqr = std::pow(greenRange, 2);
+
+            for (uint x = 0; x < classifiedImage.dimensions[0]; x++) {
+                for (uint y = classifiedImage.visualHorizonAtPoint(x); y < classifiedImage.dimensions[1]; y++) {
+                    auto& pixel = image(x, y);
+                    // if pixel is unclassfied and close to 'green' coloured, classify it
+                    if (newLut(pixel) == Colour::UNCLASSIFIED) {
+                        for (auto& matchedPixel : greenPixels) {
+                            // find euclidean distance between the two pixels
+                            uint distSqr = std::pow(pixel.y - matchedPixel.y, 2)
+                                      + std::pow(pixel.cb - matchedPixel.cb, 2)
+                                      + std::pow(pixel.cr - matchedPixel.cr, 2);
+                            // check its within the given range
+                            if (distSqr <= rangeSqr) {
+                                // classify!
+                                newLut(pixel) = Colour::GREEN;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            emit(std::move(newLutObj));
+
+        });
+
+    }
+
+    void AutoClassifier::cacheColours(const messages::vision::LookUpTable& lut) {
+        uint i = 0;
+        for (auto& colour : lut.getRawData()) {
+            switch (colour) {
+                case Colour::ORANGE: {
+                    auto pixel = lut.getPixelFromIndex(i);
+                    orangePixels.push_back(pixel);
+                    break;
+                }
+                case Colour::YELLOW: {
+                    auto pixel = lut.getPixelFromIndex(i);
+                    yellowPixels.push_back(pixel);
+                    break;
+                }
+                case Colour::GREEN: {
+                    auto pixel = lut.getPixelFromIndex(i);
+                    greenPixels.push_back(pixel);
+                    break;
+                }
+                default:
+                    break; // -Wswitch
+            }
+            i++;
+        }
     }
 
 }
