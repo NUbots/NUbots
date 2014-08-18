@@ -88,6 +88,20 @@ namespace geometry {
 
         bool checkCornersValid() const;
 
+        /**
+         * Finds and returns the two rounded intersections points on x given a y
+         * @param y The horizonal line to solve the 2 x-axis intersections with
+         * @return The minX and maxX rounded that intersect given y
+         */
+        arma::vec2 getEdgePoints(uint y) const;
+
+        /**
+         * Finds and returns the two intersections points on x given a y
+         * @param y The horizonal line to solve the 2 x-axis intersections with
+         * @return The minX and maxX that intersect given y
+         */
+        arma::vec2 getEdgePoints(double y) const;
+
     private:
         arma::vec2 bl;                                                  //! @variable The bottom-left of the Quad.
         arma::vec2 br;                                                  //! @variable The bottom-right of the Quad.

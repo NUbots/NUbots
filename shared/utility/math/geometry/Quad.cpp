@@ -18,6 +18,7 @@
  */
 
 #include "Quad.h"
+#include "utility/math/geometry/ParametricLine.h"
 
 namespace utility {
 namespace math {
@@ -160,7 +161,7 @@ namespace geometry {
         return output;
     }
 
-    std::vector<arma::vec2> Quad::getVertices() const{
+    std::vector<arma::vec2> Quad::getVertices() const {
         std::vector<arma::vec2> vert(4);
 
         vert[0] = tr;
@@ -171,9 +172,52 @@ namespace geometry {
         return vert;
     }
 
-    bool Quad::checkCornersValid() const{
+    bool Quad::checkCornersValid() const {
         return br.size()==2  && bl.size()==2 && tr.size()==2 && tl.size()==2;
     }
+
+    arma::vec2 Quad::getEdgePoints(uint y) const {
+        auto edgePoints = getEdgePoints(double(y));
+        return {
+            std::round(edgePoints[0]),
+            std::round(edgePoints[1])
+        };
+    }
+
+    arma::vec2 Quad::getEdgePoints(double y) const {
+        // create the horizontal intersection line
+        ParametricLine<> scanLine;
+        scanLine.setFromDirection({1, 0}, {0, y});
+
+        // create a line-segment for each side of the quad
+        std::vector<ParametricLine<2>> lines = {
+            ParametricLine<>(tl, tr, true),
+            ParametricLine<>(tr, br, true),
+            ParametricLine<>(bl, br, true),
+            ParametricLine<>(bl, tl, true)
+        };
+
+        // loop through lines and intersect it with the horizontal scan line
+        std::vector<double> values;
+        for (auto& line : lines) {
+            try {
+                values.push_back(scanLine.intersect(line)[0]);
+            } catch (std::domain_error&) { }
+        }
+
+        // only two should intersect if there is a solution
+        if (values.size() != 2) {
+            throw std::domain_error("Could not find the edges points");
+        }
+
+        // return the minX and maxX
+        return {
+            std::min(values[0], values[1]),
+            std::max(values[0], values[1])
+        };
+
+    }
+
 
 }
 }

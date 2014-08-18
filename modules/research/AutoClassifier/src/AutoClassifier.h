@@ -48,6 +48,15 @@ namespace research {
         double greenRange;
 
         void cacheColours(const messages::vision::LookUpTable& lut);
+        void classifyNear(
+            const uint x,
+            const uint y,
+            const messages::input::Image& image,
+            messages::vision::LookUpTable& lut,
+            const std::vector<messages::input::Image::Pixel>& pixels,
+            const messages::vision::Colour& colour,
+            const double rangeSqr
+        );
     };
 
 }

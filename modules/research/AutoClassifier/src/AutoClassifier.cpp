@@ -28,6 +28,7 @@
 namespace modules {
 namespace research {
 
+    using messages::input::Image;
     using messages::vision::Ball;
     using messages::vision::Goal;
     using messages::vision::Colour;
@@ -66,47 +67,28 @@ namespace research {
                 cacheColours(*reference);
             }
 
+            uint rangeSqr = std::pow(orangeRange, 2);
+
             for (auto& ball : balls) {
                 auto& image = *ball.classifiedImage->image;
+                auto& circle = ball.circle;
 
-                uint radius = ball.circle.radius;
-                arma::vec2 centre = ball.circle.centre;
+                double radius = circle.radius;
+                arma::vec2 centre = circle.centre;
 
                 // find the min and max y points on the circle
                 // capped at the bounds of the image
-                uint minY = std::max(std::round(centre[1] - radius), 0.0);
-                uint maxY = std::min(std::round(centre[1] + radius), double(image.height() - 1));
-
-                uint rangeSqr = std::pow(orangeRange, 2);
+                uint minY = std::max(std::ceil(centre[1] - radius), 0.0);
+                uint maxY = std::min(std::floor(centre[1] + radius), double(image.height() - 1));
 
                 // loop through pixels on the image in bounding box
                 for (uint y = minY; y <= maxY; y++) {
-                    // find the min and max x points on the circle for each given y
-                    // uses the general equation of a circle and solves for x
-                    // capped at the bounds of the image
-                    double a = y - centre[1];
-                    double b = std::sqrt(radius * radius - a * a);
-                    uint minX = std::max(std::round(centre[0] - b), 0.0);
-                    uint maxX = std::min(std::round(centre[0] + b), double(image.width() - 1));
+                    auto edgePoints = circle.getEdgePoints(y);
+                    uint minX = std::max(edgePoints[0], 0.0);
+                    uint maxX = std::min(edgePoints[1], double(image.width() - 1));
 
                     for (uint x = minX; x <= maxX; x++) {
-                        // get the pixel
-                        auto& pixel = image(x, y);
-                        // if pixel is unclassfied and close to 'orange' coloured, classify it
-                        if (newLut(pixel) == Colour::UNCLASSIFIED) {
-                            for (auto& matchedPixel : orangePixels) {
-                                // find euclidean distance between the two pixels
-                                uint distSqr = std::pow(pixel.y - matchedPixel.y, 2)
-                                          + std::pow(pixel.cb - matchedPixel.cb, 2)
-                                          + std::pow(pixel.cr - matchedPixel.cr, 2);
-                                // check its within the given range
-                                if (distSqr <= rangeSqr) {
-                                    // classify!
-                                    newLut(pixel) = Colour::ORANGE;
-                                    break;
-                                }
-                            }
-                        }
+                        classifyNear(x, y, image, newLut, orangePixels, Colour::ORANGE, rangeSqr);
                     }
                 }
 
@@ -128,73 +110,24 @@ namespace research {
                 cacheColours(*reference);
             }
 
+            uint rangeSqr = std::pow(yellowRange, 2);
+
             for (auto& goal : goals) {
                 auto& image = *goal.classifiedImage->image;
+                auto& quad = goal.quad;
 
-                arma::vec2 topLeft = goal.quad.getTopLeft();
-                arma::vec2 bottomLeft = goal.quad.getBottomLeft();
-                arma::vec2 topRight = goal.quad.getTopRight();
-                arma::vec2 bottomRight = goal.quad.getBottomRight();
-
-                ParametricLine<2> topLine(topLeft, topRight, true);
-                ParametricLine<2> rightLine(topRight, bottomRight, true);
-                ParametricLine<2> bottomLine(bottomLeft, bottomRight, true);
-                ParametricLine<2> leftLine(bottomLeft, topLeft, true);
-
-                // find the min and max y points on the circle
+                // find the min and max y points on the quad
                 // capped at the bounds of the image
-                uint minY = std::min(topLeft[1], topRight[1]);
-                uint maxY = std::min(bottomLeft[1], bottomRight[1]);
+                uint minY = std::max(std::min(quad.getTopLeft()[1], quad.getTopRight()[1]), 0.0);
+                uint maxY = std::min(std::max(quad.getBottomLeft()[1], quad.getBottomRight()[1]), double(image.height() - 1));
 
-                uint rangeSqr = std::pow(yellowRange, 2);
-
-                // loop through pixels on the image in bounding box
                 for (uint y = minY; y <= maxY; y++) {
-                    // find the min and max x points on the circle for each given y
-                    // uses the general equation of a circle and solves for x
-                    // capped at the bounds of the image
-                    ParametricLine<2> scanLine;
-                    scanLine.setFromDirection({1, 0}, {0, double(y)});
-
-                    std::vector<int> values;
-                    std::vector<ParametricLine<2>> lines = {
-                        topLine,
-                        rightLine,
-                        bottomLine,
-                        leftLine
-                    };
-
-                    for (auto& line : lines) {
-                        try {
-                            values.push_back(scanLine.intersect(line)[0]);
-                        } catch (std::domain_error&) { }
-                    }
-
-                    if (values.size() != 2) {
-                        continue; // something went wrong!
-                    }
-
-                    uint minX = std::max(std::min(values[0], values[1]), 0);
-                    uint maxX = std::min(std::max(values[0], values[1]), int(image.width() - 1));
+                    auto edgePoints = quad.getEdgePoints(y);
+                    uint minX = std::max(edgePoints[0], 0.0);
+                    uint maxX = std::min(edgePoints[1], double(image.width() - 1));
 
                     for (uint x = minX; x <= maxX; x++) {
-                        // get the pixel
-                        auto& pixel = image(x, y);
-                        // if pixel is unclassfied and close to 'yellow' coloured, classify it
-                        if (newLut(pixel) == Colour::UNCLASSIFIED) {
-                            for (auto& matchedPixel : yellowPixels) {
-                                // find euclidean distance between the two pixels
-                                uint distSqr = std::pow(pixel.y - matchedPixel.y, 2)
-                                          + std::pow(pixel.cb - matchedPixel.cb, 2)
-                                          + std::pow(pixel.cr - matchedPixel.cr, 2);
-                                // check its within the given range
-                                if (distSqr <= rangeSqr) {
-                                    // classify!
-                                    newLut(pixel) = Colour::YELLOW;
-                                    break;
-                                }
-                            }
-                        }
+                        classifyNear(x, y, image, newLut, yellowPixels, Colour::YELLOW, rangeSqr);
                     }
                 }
 
@@ -222,22 +155,7 @@ namespace research {
 
             for (uint x = 0; x < classifiedImage.dimensions[0]; x++) {
                 for (uint y = classifiedImage.visualHorizonAtPoint(x); y < classifiedImage.dimensions[1]; y++) {
-                    auto& pixel = image(x, y);
-                    // if pixel is unclassfied and close to 'green' coloured, classify it
-                    if (newLut(pixel) == Colour::UNCLASSIFIED) {
-                        for (auto& matchedPixel : greenPixels) {
-                            // find euclidean distance between the two pixels
-                            uint distSqr = std::pow(pixel.y - matchedPixel.y, 2)
-                                      + std::pow(pixel.cb - matchedPixel.cb, 2)
-                                      + std::pow(pixel.cr - matchedPixel.cr, 2);
-                            // check its within the given range
-                            if (distSqr <= rangeSqr) {
-                                // classify!
-                                newLut(pixel) = Colour::GREEN;
-                                break;
-                            }
-                        }
-                    }
+                    classifyNear(x, y, image, newLut, greenPixels, Colour::GREEN, rangeSqr);
                 }
             }
 
@@ -245,6 +163,33 @@ namespace research {
 
         });
 
+    }
+
+    void AutoClassifier::classifyNear(
+        const uint x,
+        const uint y,
+        const Image& image,
+        LookUpTable& lut,
+        const std::vector<Image::Pixel>& pixels,
+        const Colour& colour,
+        const double rangeSqr
+    ) {
+        auto& pixel = image(x, y);
+        // if pixel is unclassfied and close to 'green' coloured, classify it
+        if (lut(pixel) == Colour::UNCLASSIFIED) {
+            for (auto& matchedPixel : pixels) {
+                // find euclidean distance between the two pixels
+                uint distSqr = std::pow(pixel.y - matchedPixel.y, 2)
+                          + std::pow(pixel.cb - matchedPixel.cb, 2)
+                          + std::pow(pixel.cr - matchedPixel.cr, 2);
+                // check its within the given range
+                if (distSqr <= rangeSqr) {
+                    // classify!
+                    lut(pixel) = colour;
+                    break;
+                }
+            }
+        }
     }
 
     void AutoClassifier::cacheColours(const messages::vision::LookUpTable& lut) {
