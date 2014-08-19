@@ -1,0 +1,13 @@
+colours:
+    orange:
+        enabled: true
+        range: 15
+    yellow:
+        enabled: true
+        range: 15
+    green:
+        enabled: true
+        range: 10
+    white:
+        enabled: true
+        range: 5

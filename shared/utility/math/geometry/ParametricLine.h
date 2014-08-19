@@ -25,7 +25,7 @@ namespace utility {
 namespace math {
 namespace geometry {
 
-    template<int n>
+    template<int n=2>
     class ParametricLine {
     private:
         using Vector = arma::vec::fixed<n>;
@@ -35,6 +35,10 @@ namespace geometry {
         Vector point;
         arma::vec2 tLimits = {-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()};
         ParametricLine(){}
+        ParametricLine(const Vector& p1, const Vector& p2, bool segment = false) {
+            setFromTwoPoints(p1, p2, segment);
+        };
+
 
         arma::vec2 start() const{
             return point + tLimits[0] * direction;

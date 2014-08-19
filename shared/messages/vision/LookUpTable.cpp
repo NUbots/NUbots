@@ -25,7 +25,7 @@
 namespace messages {
     namespace vision {
 
-        LookUpTable::LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::vector<char>&& data)
+        LookUpTable::LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::vector<Colour>&& data)
             : BITS_Y(bitsY)
             , BITS_CB(bitsCb)
             , BITS_CR(bitsCr)
@@ -34,18 +34,28 @@ namespace messages {
             , BITS_CB_REMOVED(sizeof(uint8_t) * 8 - BITS_CB)
             , BITS_CR_REMOVED(sizeof(uint8_t) * 8 - BITS_CR)
             , BITS_CB_CR(BITS_CB + BITS_CR)
+            , BITS_CB_MASK(std::pow(2, BITS_CB) - 1)
+            , BITS_CR_MASK(std::pow(2, BITS_CR) - 1)
             , data(std::move(data)) {
         }
 
         LookUpTable::LookUpTable() {
         }
 
-        messages::vision::Colour LookUpTable::classify(const messages::input::Image::Pixel& p) const {
-            return messages::vision::Colour(data[getLUTIndex(p)]); // 7bit LUT
+        const Colour& LookUpTable::operator()(const messages::input::Image::Pixel& p) const {
+            return data[getLUTIndex(p)];
+        }
+
+        Colour& LookUpTable::operator()(const messages::input::Image::Pixel& p) {
+            return data[getLUTIndex(p)];
         }
 
         std::string LookUpTable::getData() const {
             return std::string(data.begin(), data.end());
+        }
+
+        const std::vector<Colour>& LookUpTable::getRawData() const {
+            return data;
         }
 
         uint LookUpTable::getLUTIndex(const messages::input::Image::Pixel& colour) const {
@@ -56,6 +66,14 @@ namespace messages {
             index += (colour.cr >> BITS_CR_REMOVED);
 
             return index;
+        }
+
+        messages::input::Image::Pixel LookUpTable::getPixelFromIndex(const uint& index) const {
+            uint8_t y = (index >> BITS_CB_CR) << BITS_Y_REMOVED;
+            uint8_t cb = ((index >> BITS_CR) & BITS_CB_MASK) << BITS_CB_REMOVED;
+            uint8_t cr = (index & BITS_CR_MASK) << BITS_CR_REMOVED;
+
+            return messages::input::Image::Pixel{y, cb, cr};
         }
 
     } //vision

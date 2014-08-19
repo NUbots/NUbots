@@ -49,12 +49,12 @@ bool Joystick::sample(JoystickEvent* event)
   return bytes == sizeof(*event);
 }
 
-bool Joystick::isFound()
+bool Joystick::found()
 {
   return _fd >= 0;
 }
 
-bool Joystick::isValid() {
+bool Joystick::valid() {
   // Check if we can get the stats
   return !(fcntl(_fd, F_GETFL) < 0 && errno == EBADF);
 }

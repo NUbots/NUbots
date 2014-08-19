@@ -60,7 +60,7 @@ namespace modules {
                     screenPadding = file.config["screenPadding"].as<double>();
                 });
 
-                on<Trigger<ExecuteLook>>([this] (const ExecuteLook& e) {
+                on<Trigger<ExecuteLook>>([this] (const ExecuteLook&) {
                     //we are active!
                     lastPanEnd = NUClear::clock::now() - std::chrono::seconds(1);
 

@@ -56,7 +56,7 @@ namespace planning {
             With<Sensors> >([this]
             (const std::vector<Ball>& balls,
              const std::vector<Goal>& goals,
-             const std::shared_ptr<const messages::localisation::Ball>& ball,
+             const std::shared_ptr<const messages::localisation::Ball>&,
              const Sensors& sensors) {
 
             if (balls.size() > 0) {

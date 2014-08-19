@@ -43,7 +43,7 @@ namespace modules {
                 size_t length = end[1] - start[1] + 1;
 
                 for(uint i = 0; i < length / subsample; ++i) {
-                    buffer[i + 1] = lut.classify(image(start[0], start[1] + (i * subsample)));
+                    buffer[i + 1] = lut(image(start[0], start[1] + (i * subsample)));
                 }
 
                 lexer.buffer_fill_region_finish(length / subsample);
@@ -55,7 +55,7 @@ namespace modules {
                 size_t length = end[0] - start[0] + 1;
 
                 for(uint i = 0; i < length / subsample; ++i) {
-                    buffer[i + 1] = lut.classify(image(start[0] + (i * subsample), start[1]));
+                    buffer[i + 1] = lut(image(start[0] + (i * subsample), start[1]));
                 }
 
                 lexer.buffer_fill_region_finish(length / subsample);

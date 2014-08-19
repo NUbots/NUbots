@@ -105,7 +105,10 @@ namespace modules {
             on<Trigger<CameraParameters>, With<Configuration<LUTClassifier>>>(setParams);
             on<With<CameraParameters>, Trigger<Configuration<LUTClassifier>>>(setParams);
 
-            on<Trigger<Image>, With<LookUpTable>, With<Raw<Sensors>>, Options<Single>>("Classify Image", [this](const Image& image, const LookUpTable& lut, const std::shared_ptr<const Sensors>& sensors) {
+            on<Trigger<Raw<Image>>, With<LookUpTable>, With<Raw<Sensors>>, Options<Single>>("Classify Image", [this](
+                const std::shared_ptr<const Image>& rawImage, const LookUpTable& lut, const std::shared_ptr<const Sensors>& sensors) {
+
+                const auto& image = *rawImage;
 
                 // Our classified image
                 auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
@@ -115,6 +118,9 @@ namespace modules {
 
                 // Attach our sensors
                 classifiedImage->sensors = sensors;
+
+                // Attach the image
+                classifiedImage->image = rawImage;
 
                 // Find our horizon
                 findHorizon(image, lut, *classifiedImage);

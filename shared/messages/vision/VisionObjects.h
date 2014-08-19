@@ -26,6 +26,7 @@
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/geometry/Polygon.h"
 #include "messages/input/Sensors.h"
+#include "messages/vision/ClassifiedImage.h"
 
 namespace messages {
     namespace vision {
@@ -45,14 +46,19 @@ namespace messages {
             // Time the image was taken
             NUClear::clock::time_point timestamp;
 
+
             // Position of object relative to ground to centre of object in spherical coordinates
             std::vector<Measurement> measurements;
 
             // The angular position and size from the perspective of the camera
             arma::vec2 screenAngular;
             arma::vec2 angularSize;
-            
+
+            // The sensor frame that was used to detect this object
             std::shared_ptr<const messages::input::Sensors> sensors;
+
+            // The classified image that was used to detect this object
+            std::shared_ptr<const messages::vision::ClassifiedImage<messages::vision::ObjectClass>> classifiedImage;
         };
 
         struct Ball : public VisionObject {

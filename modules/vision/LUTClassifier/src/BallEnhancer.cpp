@@ -101,6 +101,8 @@ namespace modules {
 
                         double radius = arma::norm(screenEdge - kinematicsCentre);
 
+                        // solve for the two solutions of x given the equation of a circle (x - x0)^2 + (y - y0)^2 = r^2
+                        // the circle is centered on the point (x0, y0) and the points are those which intersect the horizontal line given by y
                         auto getX = [] (double r, double x0, double y0, double y) {
 
                             double a = y - y0;

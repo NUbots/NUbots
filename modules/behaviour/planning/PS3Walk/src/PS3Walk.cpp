@@ -36,7 +36,7 @@ namespace planning {
     PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<Every<1, std::chrono::milliseconds>>, Options<Single>>([this](const time_t& now) {
+        on<Trigger<Every<1, std::chrono::milliseconds>>, Options<Single>>([this](const time_t&) {
 
             JoystickEvent event;
             // read from joystick
@@ -112,7 +112,7 @@ namespace planning {
                 }
             }
             // If it's closed then we should try to reconnect
-            else if (!joystick.isValid()) {
+            else if (!joystick.valid()) {
 
                 joystick.reconnect();
             }

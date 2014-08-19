@@ -107,12 +107,12 @@ public:
   /**
    * Returns true if the joystick was found and may be used, otherwise false.
    */
-  bool isFound();
+  bool found();
 
   /**
    * Returns true if the joystick file descriptor is valid, otherwise false
    */
-  bool isValid();
+  bool valid();
 
   /**
    * Reconnect to the joystick
