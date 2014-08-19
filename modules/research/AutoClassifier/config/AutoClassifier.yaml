@@ -8,3 +8,6 @@ colours:
     green:
         enabled: true
         range: 10
+    white:
+        enabled: true
+        range: 5

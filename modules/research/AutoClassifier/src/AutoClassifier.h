@@ -29,23 +29,26 @@ namespace research {
 
     class AutoClassifier : public NUClear::Reactor {
     public:
+        struct ColourData {
+            bool enabled;
+            double range;
+            std::vector<messages::input::Image::Pixel> pixels;
+        };
         static constexpr const char* CONFIGURATION_PATH = "AutoClassifier.yaml";
         /// @brief Called by the powerplant to build and setup the AutoClassifier reactor.
         explicit AutoClassifier(std::unique_ptr<NUClear::Environment> environment);
 
     private:
         std::unique_ptr<messages::vision::LookUpTable> reference;
-        std::vector<messages::input::Image::Pixel> orangePixels;
-        std::vector<messages::input::Image::Pixel> yellowPixels;
-        std::vector<messages::input::Image::Pixel> greenPixels;
 
-        ReactionHandle orangeClassifier;
-        ReactionHandle yellowClassifier;
-        ReactionHandle greenClassifier;
+        ColourData orangeData;
+        ColourData yellowData;
+        ColourData greenData;
+        ColourData whiteData;
 
-        double orangeRange;
-        double yellowRange;
-        double greenRange;
+        ReactionHandle ballClassifier;
+        ReactionHandle goalClassifier;
+        ReactionHandle fieldClassifier;
 
         void cacheColours(const messages::vision::LookUpTable& lut);
         void classifyNear(

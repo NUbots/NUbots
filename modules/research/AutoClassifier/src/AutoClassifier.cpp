@@ -43,19 +43,27 @@ namespace research {
 
         on<Trigger<Configuration<AutoClassifier>>>([this] (const Configuration<AutoClassifier>& config) {
             auto& orange = config["colours"]["orange"];
-            orangeClassifier.enable(orange["enabled"].as<bool>());
-            orangeRange = orange["range"].as<double>();
+            orangeData.enabled = orange["enabled"].as<bool>();
+            orangeData.range = orange["range"].as<double>();
 
             auto& yellow = config["colours"]["yellow"];
-            yellowClassifier.enable(yellow["enabled"].as<bool>());
-            yellowRange = yellow["range"].as<double>();
+            yellowData.enabled = yellow["enabled"].as<bool>();
+            yellowData.range = yellow["range"].as<double>();
 
             auto& green = config["colours"]["green"];
-            greenClassifier.enable(green["enabled"].as<bool>());
-            greenRange = green["range"].as<double>();
+            greenData.enabled = green["enabled"].as<bool>();
+            greenData.range = green["range"].as<double>();
+
+            auto& white = config["colours"]["white"];
+            whiteData.enabled = white["enabled"].as<bool>();
+            whiteData.range = white["range"].as<double>();
+
+            ballClassifier.enable(orangeData.enabled);
+            goalClassifier.enable(yellowData.enabled);
+            fieldClassifier.enable(greenData.enabled || whiteData.enabled);
         });
 
-        orangeClassifier = on<Trigger<std::vector<Ball>>, With<LookUpTable>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Balls", [this](
+        ballClassifier = on<Trigger<std::vector<Ball>>, With<LookUpTable>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Balls", [this](
             const std::vector<Ball>& balls, const LookUpTable& lut) {
 
             // create a new lookup table
@@ -67,7 +75,7 @@ namespace research {
                 cacheColours(*reference);
             }
 
-            uint rangeSqr = std::pow(orangeRange, 2);
+            uint rangeSqr = std::pow(orangeData.range, 2);
 
             for (auto& ball : balls) {
                 auto& image = *ball.classifiedImage->image;
@@ -88,7 +96,7 @@ namespace research {
                     uint maxX = std::min(edgePoints[1], double(image.width() - 1));
 
                     for (uint x = minX; x <= maxX; x++) {
-                        classifyNear(x, y, image, newLut, orangePixels, Colour::ORANGE, rangeSqr);
+                        classifyNear(x, y, image, newLut, orangeData.pixels, Colour::ORANGE, rangeSqr);
                     }
                 }
 
@@ -98,7 +106,7 @@ namespace research {
 
         });
 
-        yellowClassifier = on<Trigger<std::vector<Goal>>, With<LookUpTable>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Goals", [this](
+        goalClassifier = on<Trigger<std::vector<Goal>>, With<LookUpTable>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Goals", [this](
             const std::vector<Goal>& goals, const LookUpTable& lut) {
 
             // create a new lookup table
@@ -110,7 +118,7 @@ namespace research {
                 cacheColours(*reference);
             }
 
-            uint rangeSqr = std::pow(yellowRange, 2);
+            uint rangeSqr = std::pow(yellowData.range, 2);
 
             for (auto& goal : goals) {
                 auto& image = *goal.classifiedImage->image;
@@ -127,7 +135,7 @@ namespace research {
                     uint maxX = std::min(edgePoints[1], double(image.width() - 1));
 
                     for (uint x = minX; x <= maxX; x++) {
-                        classifyNear(x, y, image, newLut, yellowPixels, Colour::YELLOW, rangeSqr);
+                        classifyNear(x, y, image, newLut, yellowData.pixels, Colour::YELLOW, rangeSqr);
                     }
                 }
 
@@ -137,7 +145,7 @@ namespace research {
 
         });
 
-        greenClassifier = on<Trigger<ClassifiedImage<ObjectClass>>, With<LookUpTable>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Field", [this](
+        fieldClassifier = on<Trigger<ClassifiedImage<ObjectClass>>, With<LookUpTable>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Field", [this](
             const ClassifiedImage<ObjectClass>& classifiedImage, const LookUpTable& lut) {
 
             // create a new lookup table
@@ -151,11 +159,17 @@ namespace research {
 
             auto& image = *classifiedImage.image;
 
-            uint rangeSqr = std::pow(greenRange, 2);
+            uint greenRangeSqr = std::pow(greenData.range, 2);
+            uint whiteRangeSqr = std::pow(whiteData.range, 2);
 
             for (uint x = 0; x < classifiedImage.dimensions[0]; x++) {
                 for (uint y = classifiedImage.visualHorizonAtPoint(x); y < classifiedImage.dimensions[1]; y++) {
-                    classifyNear(x, y, image, newLut, greenPixels, Colour::GREEN, rangeSqr);
+                    if (greenData.enabled) {
+                        classifyNear(x, y, image, newLut, greenData.pixels, Colour::GREEN, greenRangeSqr);
+                    }
+                    if (whiteData.enabled) {
+                        classifyNear(x, y, image, newLut, whiteData.pixels, Colour::WHITE, whiteRangeSqr);
+                    }
                 }
             }
 
@@ -198,17 +212,17 @@ namespace research {
             switch (colour) {
                 case Colour::ORANGE: {
                     auto pixel = lut.getPixelFromIndex(i);
-                    orangePixels.push_back(pixel);
+                    orangeData.pixels.push_back(pixel);
                     break;
                 }
                 case Colour::YELLOW: {
                     auto pixel = lut.getPixelFromIndex(i);
-                    yellowPixels.push_back(pixel);
+                    yellowData.pixels.push_back(pixel);
                     break;
                 }
                 case Colour::GREEN: {
                     auto pixel = lut.getPixelFromIndex(i);
-                    greenPixels.push_back(pixel);
+                    greenData.pixels.push_back(pixel);
                     break;
                 }
                 default:
