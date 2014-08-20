@@ -190,7 +190,7 @@ namespace geometry {
         scanLine.setFromDirection({1, 0}, {0, y});
 
         // create a line-segment for each side of the quad
-        std::vector<ParametricLine<2>> lines = {
+        std::vector<ParametricLine<>> lines = {
             ParametricLine<>(tl, tr, true),
             ParametricLine<>(tr, br, true),
             ParametricLine<>(bl, br, true),
@@ -202,7 +202,9 @@ namespace geometry {
         for (auto& line : lines) {
             try {
                 values.push_back(scanLine.intersect(line)[0]);
-            } catch (std::domain_error&) { }
+            } catch (std::domain_error&) {
+                // did not intersect, ignore
+            }
         }
 
         // only two should intersect if there is a solution

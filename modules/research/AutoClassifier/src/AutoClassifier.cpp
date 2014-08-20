@@ -130,7 +130,12 @@ namespace research {
                 uint maxY = std::min(std::max(quad.getBottomLeft()[1], quad.getBottomRight()[1]), double(image.height() - 1));
 
                 for (uint y = minY; y <= maxY; y++) {
-                    auto edgePoints = quad.getEdgePoints(y);
+                    arma::vec2 edgePoints;
+                    try {
+                        edgePoints = quad.getEdgePoints(y);
+                    } catch (std::domain_error&) {
+                        continue; // no intersection
+                    }
                     uint minX = std::max(edgePoints[0], 0.0);
                     uint maxX = std::min(edgePoints[1], double(image.width() - 1));
 
@@ -211,18 +216,19 @@ namespace research {
         for (auto& colour : lut.getRawData()) {
             switch (colour) {
                 case Colour::ORANGE: {
-                    auto pixel = lut.getPixelFromIndex(i);
-                    orangeData.pixels.push_back(pixel);
+                    orangeData.pixels.push_back(lut.getPixelFromIndex(i));
                     break;
                 }
                 case Colour::YELLOW: {
-                    auto pixel = lut.getPixelFromIndex(i);
-                    yellowData.pixels.push_back(pixel);
+                    yellowData.pixels.push_back(lut.getPixelFromIndex(i));
                     break;
                 }
                 case Colour::GREEN: {
-                    auto pixel = lut.getPixelFromIndex(i);
-                    greenData.pixels.push_back(pixel);
+                    greenData.pixels.push_back(lut.getPixelFromIndex(i));
+                    break;
+                }
+                case Colour::WHITE: {
+                    whiteData.pixels.push_back(lut.getPixelFromIndex(i));
                     break;
                 }
                 default:
