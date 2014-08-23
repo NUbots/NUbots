@@ -42,7 +42,6 @@ namespace modules {
 
             uint pubPort = 0;
             uint subPort = 0;
-            bool connected = false;
 
             bool listening = true;
 
@@ -53,8 +52,8 @@ namespace modules {
             uint dataPointFilterId = 1;
 
             // Send control
-            networkSending = true;
-            fileSending = false;
+            bool networkEnabled = false;
+            bool fileEnabled = false;
 
             std::ofstream outputFile;
 
