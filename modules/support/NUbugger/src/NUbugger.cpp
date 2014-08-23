@@ -52,9 +52,15 @@ namespace support {
         powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&NUbugger::run), this), std::bind(std::mem_fn(&NUbugger::kill), this)));
 
         on<Trigger<Configuration<NUbugger>>>([this] (const Configuration<NUbugger>& config) {
-            // TODO: unbind old port
-            uint newPubPort = config["network"]["pub_port"].as<uint>();
-            uint newSubPort = config["network"]["sub_port"].as<uint>();
+
+            // TODO if network disables then we should unbind
+
+            // TODO if the file disables we should close the file
+
+            // TODO if the file location is different, close the file and open a new one
+
+            uint newPubPort = config["output"]["network"]["pub_port"].as<uint>();
+            uint newSubPort = config["output"]["network"]["sub_port"].as<uint>();
 
             if (newPubPort != pubPort) {
                 if (connected) {
@@ -123,9 +129,12 @@ namespace support {
         provideSensors();
         provideVision();
 
-        // When we shutdown, close our publisher
+        // When we shutdown, close our publisher and our file if we have one
         on<Trigger<Shutdown>>([this](const Shutdown&) {
             pub.close();
+
+            // Close the file if it exists
+            // TODO DO THIS
         });
     }
 
@@ -243,13 +252,24 @@ namespace support {
     }
 
     void NUbugger::send(Message message) {
-        size_t messageSize = message.ByteSize();
-        zmq::message_t packet(messageSize + 2);
-        char* dataPtr = static_cast<char*>(packet.data());
-        message.SerializeToArray(dataPtr + 2, messageSize);
-        dataPtr[0] = uint8_t(message.type());
-        dataPtr[1] = uint8_t(message.filter_id());
-        send(packet);
+
+        if(networkSending) {
+            // Make a ZMQ packet and send it
+            size_t messageSize = message.ByteSize();
+            zmq::message_t packet(messageSize + 2);
+            char* dataPtr = static_cast<char*>(packet.data());
+            message.SerializeToArray(dataPtr + 2, messageSize);
+            dataPtr[0] = uint8_t(message.type());
+            dataPtr[1] = uint8_t(message.filter_id());
+            send(packet);
+        }
+        if(fileSending && outputFile) {
+            // Append the number of bytes to the file (so we can re-read it)
+            outputFile << message.ByteSize();
+            // Append the protocol buffer to the file
+            message.SerializeToOstream(&outputFile);
+        }
+
     }
 
 } // support

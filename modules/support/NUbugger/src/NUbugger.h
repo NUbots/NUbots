@@ -52,7 +52,14 @@ namespace modules {
             std::map<std::string, uint> dataPointFilterIds;
             uint dataPointFilterId = 1;
 
-            std::mutex mutex;
+            // Send control
+            networkSending = true;
+            fileSending = false;
+
+            std::ofstream outputFile;
+
+            std::mutex networkMutex;
+            std::mutex fileMutex;
 
             void provideDataPoints();
             void provideDrawObjects();
