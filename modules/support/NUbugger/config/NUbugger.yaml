@@ -1,9 +1,9 @@
 output:
   file:
     enabled: true
-    output_path: ~/DataStream/
+    path: DataStream/
   network:
-    enabled: true;
+    enabled: true
     pub_port: 12000
     sub_port: 12001
     high_water_mark: 50

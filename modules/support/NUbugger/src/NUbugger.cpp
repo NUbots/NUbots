@@ -60,7 +60,7 @@ namespace support {
             // TODO if the file location is different, close the file and open a new one
 
             // If we are using the network
-            if(config["network"]["enabled"].as<bool>()) {
+            if(config["output"]["network"]["enabled"].as<bool>()) {
 
                 uint newPubPort = config["output"]["network"]["pub_port"].as<uint>();
                 uint newSubPort = config["output"]["network"]["sub_port"].as<uint>();
@@ -82,14 +82,14 @@ namespace support {
                 }
 
                 // Set our high water mark
-                int hwm = config["network"]["high_water_mark"].as<int>();
+                int hwm = config["output"]["network"]["high_water_mark"].as<int>();
                 pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
                 sub.setsockopt(ZMQ_SUBSCRIBE, 0, 0);
 
                 networkEnabled = true;
             }
             // If we were enabled and now we are not
-            else if(networkEnabled && !config["network"]["enabled"].as<bool>()) {
+            else if(networkEnabled && !config["output"]["network"]["enabled"].as<bool>()) {
                 // Unbind the network when we disable
                 pub.unbind(("tcp://*:" + std::to_string(pubPort)).c_str());
                 sub.unbind(("tcp://*:" + std::to_string(subPort)).c_str());
@@ -98,7 +98,7 @@ namespace support {
             }
 
             // If we are using files and haven't set one up yet
-            if(!fileEnabled && config["file"]["enabled"].as<bool>()) {
+            if(!fileEnabled && config["output"]["file"]["enabled"].as<bool>()) {
 
                 // Lock the file
                 std::lock_guard<std::mutex> lock(fileMutex);
@@ -109,14 +109,14 @@ namespace support {
                 // Open a file using the file name and timestamp
                 outputFile.close();
                 outputFile.clear();
-                outputFile.open(config["file"]["path"].as<std::string>()
+                outputFile.open(config["output"]["file"]["path"].as<std::string>()
                                 + "/"
                                 + timestamp
                                 + ".nbs", std::ios::binary);
 
                 fileEnabled = true;
             }
-            else if(fileEnabled && !config["file"]["enabled"].as<bool>()) {
+            else if(fileEnabled && !config["output"]["file"]["enabled"].as<bool>()) {
 
                 // Lock the file
                 std::lock_guard<std::mutex> lock(fileMutex);
@@ -175,6 +175,8 @@ namespace support {
             pub.close();
 
             // Close the file if it exists
+            fileEnabled = false;
+            outputFile.close();
             // TODO DO THIS
         });
     }
