@@ -42,7 +42,6 @@ namespace modules {
 
             uint pubPort = 0;
             uint subPort = 0;
-            bool connected = false;
 
             bool listening = true;
 
@@ -52,7 +51,14 @@ namespace modules {
             std::map<std::string, uint> dataPointFilterIds;
             uint dataPointFilterId = 1;
 
-            std::mutex mutex;
+            // Send control
+            bool networkEnabled = false;
+            bool fileEnabled = false;
+
+            std::ofstream outputFile;
+
+            std::mutex networkMutex;
+            std::mutex fileMutex;
 
             void provideDataPoints();
             void provideDrawObjects();

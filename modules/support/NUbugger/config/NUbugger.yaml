@@ -1,7 +1,12 @@
-network:
-  pub_port: 12000
-  sub_port: 12001
-  high_water_mark: 50
+output:
+  file:
+    enabled: true
+    path: DataStream/
+  network:
+    enabled: true
+    pub_port: 12000
+    sub_port: 12001
+    high_water_mark: 50
 reaction_handles:
   reaction_statistics: false
   data_points: false

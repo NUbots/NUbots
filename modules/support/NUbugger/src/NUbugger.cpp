@@ -52,32 +52,79 @@ namespace support {
         powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&NUbugger::run), this), std::bind(std::mem_fn(&NUbugger::kill), this)));
 
         on<Trigger<Configuration<NUbugger>>>([this] (const Configuration<NUbugger>& config) {
-            // TODO: unbind old port
-            uint newPubPort = config["network"]["pub_port"].as<uint>();
-            uint newSubPort = config["network"]["sub_port"].as<uint>();
 
-            if (newPubPort != pubPort) {
-                if (connected) {
-                    pub.unbind(("tcp://*:" + std::to_string(pubPort)).c_str());
+            // TODO if network disables then we should unbind
+
+            // TODO if the file disables we should close the file
+
+            // TODO if the file location is different, close the file and open a new one
+
+            // If we are using the network
+            if(config["output"]["network"]["enabled"].as<bool>()) {
+
+                uint newPubPort = config["output"]["network"]["pub_port"].as<uint>();
+                uint newSubPort = config["output"]["network"]["sub_port"].as<uint>();
+
+                if (newPubPort != pubPort) {
+                    if (networkEnabled) {
+                        pub.unbind(("tcp://*:" + std::to_string(pubPort)).c_str());
+                    }
+                    pubPort = newPubPort;
+                    pub.bind(("tcp://*:" + std::to_string(pubPort)).c_str());
                 }
-                pubPort = newPubPort;
-                pub.bind(("tcp://*:" + std::to_string(pubPort)).c_str());
+
+                if (newSubPort != subPort) {
+                    if (networkEnabled) {
+                        sub.unbind(("tcp://*:" + std::to_string(subPort)).c_str());
+                    }
+                    subPort = newSubPort;
+                    sub.bind(("tcp://*:" + std::to_string(subPort)).c_str());
+                }
+
+                // Set our high water mark
+                int hwm = config["output"]["network"]["high_water_mark"].as<int>();
+                pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
+                sub.setsockopt(ZMQ_SUBSCRIBE, 0, 0);
+
+                networkEnabled = true;
+            }
+            // If we were enabled and now we are not
+            else if(networkEnabled && !config["output"]["network"]["enabled"].as<bool>()) {
+                // Unbind the network when we disable
+                pub.unbind(("tcp://*:" + std::to_string(pubPort)).c_str());
+                sub.unbind(("tcp://*:" + std::to_string(subPort)).c_str());
+
+                networkEnabled = false;
             }
 
-            if (newSubPort != subPort) {
-                if (connected) {
-                    sub.unbind(("tcp://*:" + std::to_string(subPort)).c_str());
-                }
-                subPort = newSubPort;
-                sub.bind(("tcp://*:" + std::to_string(subPort)).c_str());
+            // If we are using files and haven't set one up yet
+            if(!fileEnabled && config["output"]["file"]["enabled"].as<bool>()) {
+
+                // Lock the file
+                std::lock_guard<std::mutex> lock(fileMutex);
+
+                // Get our timestamp
+                std::string timestamp = std::to_string(std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now().time_since_epoch()).count());
+
+                // Open a file using the file name and timestamp
+                outputFile.close();
+                outputFile.clear();
+                outputFile.open(config["output"]["file"]["path"].as<std::string>()
+                                + "/"
+                                + timestamp
+                                + ".nbs", std::ios::binary);
+
+                fileEnabled = true;
             }
+            else if(fileEnabled && !config["output"]["file"]["enabled"].as<bool>()) {
 
-            // Set our high water mark
-            int hwm = config["network"]["high_water_mark"].as<int>();
-            pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
-            sub.setsockopt(ZMQ_SUBSCRIBE, 0, 0);
+                // Lock the file
+                std::lock_guard<std::mutex> lock(fileMutex);
 
-            connected = true;
+                // Close the file
+                outputFile.close();
+                fileEnabled = false;
+            }
 
             for (auto& setting : config["reaction_handles"]) {
                 std::string name = setting.first.as<std::string>();
@@ -123,9 +170,14 @@ namespace support {
         provideSensors();
         provideVision();
 
-        // When we shutdown, close our publisher
+        // When we shutdown, close our publisher and our file if we have one
         on<Trigger<Shutdown>>([this](const Shutdown&) {
             pub.close();
+
+            // Close the file if it exists
+            fileEnabled = false;
+            outputFile.close();
+            // TODO DO THIS
         });
     }
 
@@ -238,18 +290,29 @@ namespace support {
      * (such as a mutex)
      */
     void NUbugger::send(zmq::message_t& packet) {
-        std::lock_guard<std::mutex> lock(mutex);
+        std::lock_guard<std::mutex> lock(networkMutex);
         pub.send(packet);
     }
 
     void NUbugger::send(Message message) {
-        size_t messageSize = message.ByteSize();
-        zmq::message_t packet(messageSize + 2);
-        char* dataPtr = static_cast<char*>(packet.data());
-        message.SerializeToArray(dataPtr + 2, messageSize);
-        dataPtr[0] = uint8_t(message.type());
-        dataPtr[1] = uint8_t(message.filter_id());
-        send(packet);
+
+        if(networkEnabled) {
+            // Make a ZMQ packet and send it
+            size_t messageSize = message.ByteSize();
+            zmq::message_t packet(messageSize + 2);
+            char* dataPtr = static_cast<char*>(packet.data());
+            message.SerializeToArray(dataPtr + 2, messageSize);
+            dataPtr[0] = uint8_t(message.type());
+            dataPtr[1] = uint8_t(message.filter_id());
+            send(packet);
+        }
+        if(fileEnabled && outputFile) {
+            // Append the number of bytes to the file (so we can re-read it)
+            outputFile << message.ByteSize();
+            // Append the protocol buffer to the file
+            message.SerializeToOstream(&outputFile);
+        }
+
     }
 
 } // support
