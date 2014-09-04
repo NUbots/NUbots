@@ -1,89 +1,70 @@
-# .gitignore for NUbot
-
-# Don't include compiled framework libraries in the repo
-/Framework/darwin/Linux/lib/darwin.a
-
-# Ignore Sublime Text project/workspace files
-*.sublime-project
-*.sublime-workspace
-
-# Ignore test output files
-/ConfigSystem/ConfigurationFiles/newConfig.json
-/ConfigSystem/ConfigurationFiles/testSaveLoadConfig.json
-
-# We don't want build files in the repo
-/Build/*
-*.xcodeproj
-*.build
-.*
-
-# We don't oxygen files in the repp
-/Documentation
-/Doc
-/html
-/latex
-Doxyfile
-Doxyfile.bak
-/ConfigSystem/doc
-
-# Python Ignores:
-#we don't want to include .pyc files
-*.pyc
-
-# Common Ignores
-*.*~
+# Compiled Object files
+*.slo
+*.lo
 *.o
-*.orig
-*.tmp
 
-Autoconfig/*
-*.old*
-*debug.log
-*error.log
-*parameters.wp
+# Compiled Dynamic libraries
+*.so
+*.dylib
 
-# ignore Qt builds
-Vision*-build*/*
-/Vision/Vision.pro.user
-/Vision/Makefile
-/Vision/*.app
-/Vision/moc_*
-/Vision/ui_*
-NUView-build*/*
-/NUView/debug/*
-/NUView/release/*
-*.Debug
-*.Release
-/NUView/Makefile
-/NUView/NUView.pro.user
-/NUView/NU*.app
-/NUView/moc_*
-/NUView/autosave.lut
-/NUView/qrc_icons.cpp
-/NUView/qrc_textures.cpp
-/NUView/diagona/*.*
-/NUView/NUView
-/*-build-desktop*/*
-/Extracted/*
-/NUView/debug/*
-/NUView/release/*
-/NUView/Makefile
-/NUView/NUView.pro.user*
+# Compiled Static libraries
+*.lai
+*.la
+*.a
 
-/Vision-build-desktop*/*
-*.pro.user*
-/BWalkMaker-build*/*
-/BWalkMaker/BWalkMaker.pro.user
+# Build & CMake files
+build/
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
 
-# Ignore our data file formats
-#*.lut
-*.nif
-*.nul
-*.strm
+# Vagrant & Packer
+.vagrant/
+*.box
+*.iso
+*.deb
+packer/build.hwm
+packer/build.pwd
+packer/build.pwi
 
-# Other ignored formats
-*.komodoproject
-*.kpf
+# LaTeX stuff
+*.aux
+*.pdf
+*.out
+*.glo
+*.idx
+*.log
+*.nav
+*.toc
+*.ist
+*.acn
+*.acr
+*.alg
+*.bbl
+*.blg
+*.dvi
+*.glg
+*.gls
+*.ilg
+*.ind
+*.lof
+*.lot
+*.maf
+*.mtc
+*.mtc1
+*.snm
+*.synctex.gz
+*.synctex
+*.vrb
+*.tdo
+*TSWLatexianTemp*
 
-# NetBeans
-nbproject
+# Misc
+*.exe
+tags
+*.swp
+/nbproject/
+*~
+.DS_Store

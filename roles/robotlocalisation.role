@@ -1,0 +1,37 @@
+ADD_ROLE(
+    NAME robotlocalisation
+    MODULES
+        #Support
+        # support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem
+        support::configuration::GlobalConfig
+        support::configuration::SoccerConfig
+        support::NUbugger
+
+        #Sensors
+        input::LinuxCamera
+        platform::darwin::HardwareIO
+        platform::darwin::SensorFilter
+
+        #Vision
+        #vision::FeatureDetector
+        vision::LUTClassifier
+        vision::BallDetector
+        vision::GoalDetector
+        vision::ObstacleDetector
+
+        #Localisation
+        localisation::MMKFRobotLocalisation
+        localisation::KFBallLocalisation
+
+        #Behaviour
+        behaviour::Controller
+        behaviour::skills::Stand
+        # behaviour::skills::FallingRelax
+        # behaviour::skills::Getup
+
+		#Motion
+        motion::ScriptEngine
+)
+

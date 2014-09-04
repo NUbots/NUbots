@@ -1,0 +1,9 @@
+MergingEnabled: Yes
+MaxModelsAfterMerge: 2
+MergeMinTranslationDist: 0.05
+MergeMinHeadingDist: 0.01
+ProcessNoisePositionFactor: 5e-6
+ProcessNoiseHeadingFactor: 1e-7
+ProcessNoiseVelocityFactor: 1e-5
+ObservationDifferenceBearingFactor: 1
+ObservationDifferenceElevationFactor: 1

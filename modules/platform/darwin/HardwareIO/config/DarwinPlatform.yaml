@@ -1,0 +1,5 @@
+{
+	"PACKET_WAIT" : 100000,
+	"BYTE_WAIT" : 1200,
+	"BUS_RESET_WAIT_TIME_uS" : 0
+}

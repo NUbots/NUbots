@@ -1,0 +1,15 @@
+ADD_ROLE(
+    NAME nucap
+    MODULES
+
+        # Support and Configuration
+        support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem
+        support::configuration::GlobalConfig
+        support::configuration::NetworkingConfiguration
+        support::configuration::SoccerConfig
+
+        # NUcap
+        support::NUcap
+)

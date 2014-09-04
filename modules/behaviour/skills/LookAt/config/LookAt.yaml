@@ -1,0 +1,7 @@
+speed:
+  fast: 1.2
+  slow: 0.6
+limits:
+  yaw: [ -1.5, 1.5 ]
+  pitch: [ -1.2, 1.2 ]
+screen_edge_padding: 0.15

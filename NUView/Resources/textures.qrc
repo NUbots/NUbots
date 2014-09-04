@@ -1,9 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>textures/FieldLines.png</file>
-        <file>textures/grass_texture.jpg</file>
-        <file>textures/PlaceholderRobot.png</file>
-        <file>textures/PlaceholderRobotBack.png</file>
-        <file>textures/robotAura.png</file>
-    </qresource>
-</RCC>

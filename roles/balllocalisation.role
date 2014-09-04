@@ -1,0 +1,26 @@
+ADD_ROLE(
+    NAME balllocalisation
+    MODULES
+        #Support
+        support::SignalCatcher
+        support::logging::ConsoleLogHandler
+        support::configuration::ConfigSystem
+        support::configuration::GlobalConfig
+        support::NUbugger
+
+        #Sensors
+        input::LinuxCamera
+        platform::darwin::HardwareIO
+        platform::darwin::SensorFilter
+
+        #Vision
+        vision::LUTClassifier
+        #vision::FeatureDetector
+
+        #Localisation
+        localisation::MMKFRobotLocalisation
+        localisation::KFBallLocalisation
+
+        support::configuration::SoccerConfig
+        )
+

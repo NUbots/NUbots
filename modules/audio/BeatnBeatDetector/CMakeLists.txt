@@ -1,0 +1,6 @@
+# Find the FFTW Library
+FIND_PACKAGE(FFTW REQUIRED)
+
+# Build our NUClear module
+NUCLEAR_MODULE(INCLUDES ${FFTW_INCLUDE_DIRS}
+               LIBRARIES ${FFTW_LIBRARIES})

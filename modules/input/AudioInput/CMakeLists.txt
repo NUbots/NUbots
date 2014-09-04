@@ -1,0 +1,7 @@
+# Find the RtAudio Library
+FIND_PACKAGE(RtAudio REQUIRED)
+
+# Build our NUClear module
+NUCLEAR_MODULE(INCLUDES ${RTAUDIO_INCLUDE_DIR}
+               LIBRARIES ${RTAUDIO_LIBRARY})
+

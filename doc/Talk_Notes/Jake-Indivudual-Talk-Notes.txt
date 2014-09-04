@@ -1,0 +1,31 @@
+== Intro ==
+- Topic is Overcoming Limits of Event Driven Architectures
+- Directly relates to NUClear as NUClear is an event driven system
+
+== What is ==
+- Event/message is blob of data with known format
+    - Often but not always implemented using language type-systems
+- Event/Messaging systems are often interchangable concepts
+- Sometimes modules are producers/consumers
+
+== Tradeoffs ==
+- Looking at existing event driven systems I identified common tradeoffs:
+    - Language-Specific/Agnostic. In-Memory vs. Serialized
+    - Human/Machine: XML/JSON vs. Binary/protobuf
+
+    - Garunteed and Assumed typically are both offered. Some optimizations possible if all messages are assumed. 
+    - Central solves orchestration where distributed needs other mechanism. (Predfined list, etc...)
+    - Central often used for message inpsection. Slows things downs.
+    - Inter-Process much slower but very useful.
+
+== ROS and Corba ==
+Goal: Collaboration and Sharing
+
+- Both very traditional event architectures. Following XML-RPC styles
+
+== NUClear ==
+Goal: Speed and Ease-of-Use
+
+- Looked at the ways event systems have been tackled in the past and at the tradeoffs those systems made and why they made them.
+- Some systems can overcome them for free (runtime, like nuclear)
+    - Free in terms of runtime complexity but costs in code complexity.
