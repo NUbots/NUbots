@@ -19,11 +19,12 @@
  along with NUbot.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iomanip>
+
 #include "DarwinActionators.h"
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 #include "DarwinJointMapping.h"
 #include "DarwinPlatform.h"
-
 #include <cmath>
 
 #include "debug.h"
@@ -31,34 +32,25 @@
 #include <limits>
 
 
-/*! @brief Constructs a nubot actionator class with a Darwin backend
-            
-           The Darwin backend takes aspects from both the NAO and the Robotis backends; the Darwin
-           has a secondary board to perform all the communication with hardware, like the NAO. However,
-           it also uses Robotis motors, like the Cycloid/Bear.
- 
-           This backend is also the most recent, and probably should serve as a template for future platforms.
- */ 
-
-static string temp_chestled_names[] = { "Chest/Led/"};
-vector<string> DarwinActionators::m_chestled_names(temp_chestled_names, temp_chestled_names + sizeof(temp_chestled_names)/sizeof(*temp_chestled_names));
+static std::string temp_chestled_names[] = { "Chest/Led/"};
+std::vector<std::string> DarwinActionators::m_chestled_names(temp_chestled_names, temp_chestled_names + sizeof(temp_chestled_names)/sizeof(*temp_chestled_names));
 unsigned int DarwinActionators::m_num_chestleds = DarwinActionators::m_chestled_names.size();
 
-static string temp_footled_names[] = {  "LFoot Led", "RFoot Led"};
-vector<string> DarwinActionators::m_footled_names(temp_footled_names, temp_footled_names + sizeof(temp_footled_names)/sizeof(*temp_footled_names));
+static std::string temp_footled_names[] = {  "LFoot Led", "RFoot Led"};
+std::vector<std::string> DarwinActionators::m_footled_names(temp_footled_names, temp_footled_names + sizeof(temp_footled_names)/sizeof(*temp_footled_names));
 unsigned int DarwinActionators::m_num_footleds = DarwinActionators::m_footled_names.size();
 
-DarwinActionators::DarwinActionators(DarwinPlatform* darwin,Robot::CM730* subboard)
+DarwinActionators::DarwinActionators(DarwinPlatform* darwin, Robot::CM730* subboard)
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
-        debug << "DarwinActionators::DarwinActionators()" <<endl;
+        debug << "DarwinActionators::DarwinActionators()" <<std::endl;
     #endif
     m_current_time = 0;
     platform = darwin;
     cm730 = subboard;
     count = 0;
-    vector<string> sound(1, "Sound");
-    vector<string> names;
+    std::vector<std::string> sound(1, "Sound");
+    std::vector<std::string> names;
     names.insert(names.end(), platform->m_servo_names.begin(), platform->m_servo_names.end());
     names.insert(names.end(), m_chestled_names.begin(), m_chestled_names.end());
     names.insert(names.end(), m_footled_names.begin(), m_footled_names.end());
@@ -66,12 +58,14 @@ DarwinActionators::DarwinActionators(DarwinPlatform* darwin,Robot::CM730* subboa
     m_data->addActionators(names);
     
     #if DEBUG_NUACTIONATORS_VERBOSITY > 0
-        debug << "DarwinActionators::DarwinActionators(). Avaliable Actionators: " << endl;
+        debug << "DarwinActionators::DarwinActionators(). Avaliable Actionators: " << std::endl;
         m_data->summaryTo(debug);
     #endif
 
     InitialiseMotors();
     m_joint_mapping = &DarwinJointMapping::Instance();
+
+    // sensor_read_manager_ = subboard->sensor_read_manager();
 }
 
 DarwinActionators::~DarwinActionators()
@@ -89,7 +83,7 @@ void DarwinActionators::InitialiseMotors()
 void DarwinActionators::copyToHardwareCommunications()
 {
     #if DEBUG_NUACTIONATORS_VERBOSITY > 3
-        debug << "DarwinActionators::copyToHardwareCommunications()" << endl;
+        debug << "DarwinActionators::copyToHardwareCommunications()" << std::endl;
     #endif
     #if DEBUG_NUACTIONATORS_VERBOSITY > 4
         m_data->summaryTo(debug);
@@ -99,71 +93,81 @@ void DarwinActionators::copyToHardwareCommunications()
     copyToSound();
 }
 
+
+
 void DarwinActionators::copyToServos()
 {
-    static vector<float> positions;
-    static vector<float> gains;
+    static std::vector<float> positions;
+    static std::vector<float> p_gains;
     
-    m_data->getNextServos(positions, gains);
+    // Get the values that must be written to the servos
+    m_data->getNextServos(positions, p_gains);
 
     //Data for Sync Write:
-    int param[platform->m_servo_IDs.size() * (Robot::MX28::PARAM_BYTES)];
+    int sync_write_tx_packet[platform->m_servo_IDs.size() * (Robot::MX28::PARAM_BYTES)];
     int n = 0;
-    int joint_num = 0;
+    int num_joints = 0;
 
     //Defaults from data sheet:
     // int P_GAIN = 64;
     int I_GAIN = 0;
     int D_GAIN = 0;
-	
-    for (size_t i=0; i < platform->m_servo_IDs.size(); i++)
+
+    // Build sync_write_tx_packet:
+    for (size_t i = 0; i < platform->m_servo_IDs.size(); i++)
     {
-        platform->setMotorGoalPosition(i,positions[i]);
-        platform->setMotorStiffness(i,gains[i]);
-		
-	//Old code, above functions (setMotorStiffness and setMotorGoalPosition) complete these tasks separately.
-	//Check before deleting!
-        //cm730->WriteByte(m_servo_IDs[i],Robot::MX28::P_P_GAIN, 1, 0);
-    	//cm730->WriteWord(m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
-        /*
-        if(gains[i] > 0)
-        {
-            int value = Radian2Value(positions[i]-platform->m_servo_Offsets[i]);
-            //int value = Radian2Value(0-platform->m_servo_Offsets[i]);
-            cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 1, 0);
-            cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_GOAL_POSITION_L,value,0);
-        }
-        else
-        {
-            //cm730->WriteWord(platform->m_servo_IDs[i],Robot::MX28::P_TORQUE_ENABLE, 0, 0);
-        }
-        */
+        int sensor_index = i;
+        int sensor_id = platform->m_servo_IDs[sensor_index];
+    // std::vector<Robot::SensorReadDescriptor*> &sorted_descriptors = sensor_read_manager_->descriptor_heap_;
+    // for (std::vector<Robot::SensorReadDescriptor*>::iterator it = sorted_descriptors.begin();
+    //      it != sorted_descriptors.end(); ++it)
+    // {
+    //     Robot::SensorReadDescriptor* sensor_read = *it;
+    //     int sensor_id = sensor_read->sensor_id();
 
-        if(gains[i] > 0)
-        {
-            int value = m_joint_mapping->joint2rawClipped(i, positions[i]);
-            param[n++] = platform->m_servo_IDs[i];
-            //param[n++] = P_GAIN;
-            
-            //OLD FIRMWARE
-            //param[n++] = gains[i] / 128 * 100;
-            //param[n++] = I_GAIN;
-            //param[n++] = D_GAIN;
+    //     if(sensor_id > 20) continue;
+    //     int sensor_index = MapSensorIdToServoIndex(sensor_id); // i; //
+    //     if(sensor_index == -1) continue;
 
-	    param[n++] = D_GAIN;
-            param[n++] = I_GAIN;
-            param[n++] = gains[i] / 128 * 100;
+        // std::cout   << "Writing: "
+        //             << std::setw(16) << Robot::SensorReadManager::SensorNameForId(sensor_id) 
+        //             << " ("
+        //             << std::setw(3) << sensor_id
+        //             << "): index="
+        //             << std::setw(3) << sensor_index
+        //             << ", consecutive_errors:"
+        //             // << std::setw(3) << sensor_read->consecutive_errors()
+        //             << ";"
+        //             << std::endl;
+
+        platform->setMotorGoalPosition(sensor_index, positions[sensor_index]);
+        // Note: 'setMotorStiffness' writes directly to the CM730 board,
+        //       which is costly.
+        //       Doing this for each motor sequentially is questionable.
+        //       This code should be reviewed. -MM (2013-05-07)
+        platform->setMotorStiffness(sensor_index, p_gains[sensor_index]);
+
+        if(p_gains[sensor_index] > 0)
+        {
+            int value = m_joint_mapping->joint2rawClipped(sensor_index, positions[sensor_index]);
+            sync_write_tx_packet[n++] = sensor_id;
+
+            sync_write_tx_packet[n++] = D_GAIN;
+            sync_write_tx_packet[n++] = I_GAIN;
+            sync_write_tx_packet[n++] = (p_gains[sensor_index] * 100) / 128; // P_GAIN
             
-            param[n++] = 0;
-            param[n++] = Robot::CM730::GetLowByte(value);
-            param[n++] = Robot::CM730::GetHighByte(value);
-            joint_num++;
+            sync_write_tx_packet[n++] = 0;
+            sync_write_tx_packet[n++] = Robot::CM730::GetLowByte(value);
+            sync_write_tx_packet[n++] = Robot::CM730::GetHighByte(value);
+            num_joints++;
         }
     }
-    int result = cm730->SyncWrite(Robot::MX28::P_D_GAIN, Robot::MX28::PARAM_BYTES, joint_num, param);
-    
-    //OLD FIRMWARE
-    //int result = cm730->SyncWrite(Robot::MX28::P_P_GAIN, Robot::MX28::PARAM_BYTES, joint_num, param);
+
+    // Send new servo data to all motors at once:
+    int error_code = cm730->SyncWrite(Robot::MX28::P_D_GAIN,
+                                      Robot::MX28::PARAM_BYTES,
+                                      num_joints,
+                                      sync_write_tx_packet);
 }
 
 void DarwinActionators::copyToLeds()
@@ -178,7 +182,7 @@ void DarwinActionators::copyToLeds()
 	
     if(count % 10 == 0)
     {
-        static vector<  vector < vector < float > > > ledvalues;
+        static std::vector<  std::vector < std::vector < float > > > ledvalues;
         m_data->getNextLeds(ledvalues);
         int value = (int(ledvalues[0][0][0]*31) << 0) + (int(ledvalues[0][0][1]*31) << 5) + (int(ledvalues[0][0][2]*31) << 10);
         cm730->WriteWord(Robot::CM730::P_LED_HEAD_L, value, 0);

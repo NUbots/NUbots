@@ -5,6 +5,7 @@
  *
  */
 
+#include <unistd.h>
 #include <stdio.h>
 #include <math.h>
 #include "FSR.h"
@@ -185,10 +186,10 @@ void MotionManager::Process()
 
         if(buf_idx < GYRO_WINDOW_SIZE)
         {
-            if(m_CM730->m_BulkReadData[CM730::ID_CM].error == 0)
+            if(m_CM730->bulk_read_data_[CM730::ID_CM].error == 0)
             {
-                fb_gyro_array[buf_idx] = m_CM730->m_BulkReadData[CM730::ID_CM].ReadWord(CM730::P_GYRO_Y_L);
-                rl_gyro_array[buf_idx] = m_CM730->m_BulkReadData[CM730::ID_CM].ReadWord(CM730::P_GYRO_X_L);
+                fb_gyro_array[buf_idx] = m_CM730->bulk_read_data_[CM730::ID_CM].ReadWord(CM730::P_GYRO_Y_L);
+                rl_gyro_array[buf_idx] = m_CM730->bulk_read_data_[CM730::ID_CM].ReadWord(CM730::P_GYRO_X_L);
                 buf_idx++;
             }
         }
@@ -241,12 +242,12 @@ void MotionManager::Process()
     {
         static int fb_array[ACCEL_WINDOW_SIZE] = {512,};
         static int buf_idx = 0;
-        if(m_CM730->m_BulkReadData[CM730::ID_CM].error == 0)
+        if(m_CM730->bulk_read_data_[CM730::ID_CM].error == 0)
         {
-            MotionStatus::FB_GYRO = m_CM730->m_BulkReadData[CM730::ID_CM].ReadWord(CM730::P_GYRO_Y_L) - m_FBGyroCenter;
-            MotionStatus::RL_GYRO = m_CM730->m_BulkReadData[CM730::ID_CM].ReadWord(CM730::P_GYRO_X_L) - m_RLGyroCenter;
-            MotionStatus::RL_ACCEL = m_CM730->m_BulkReadData[CM730::ID_CM].ReadWord(CM730::P_ACCEL_X_L);
-            MotionStatus::FB_ACCEL = m_CM730->m_BulkReadData[CM730::ID_CM].ReadWord(CM730::P_ACCEL_Y_L);
+            MotionStatus::FB_GYRO = m_CM730->bulk_read_data_[CM730::ID_CM].ReadWord(CM730::P_GYRO_Y_L) - m_FBGyroCenter;
+            MotionStatus::RL_GYRO = m_CM730->bulk_read_data_[CM730::ID_CM].ReadWord(CM730::P_GYRO_X_L) - m_RLGyroCenter;
+            MotionStatus::RL_ACCEL = m_CM730->bulk_read_data_[CM730::ID_CM].ReadWord(CM730::P_ACCEL_X_L);
+            MotionStatus::FB_ACCEL = m_CM730->bulk_read_data_[CM730::ID_CM].ReadWord(CM730::P_ACCEL_Y_L);
             fb_array[buf_idx] = MotionStatus::FB_ACCEL;
             if(++buf_idx >= ACCEL_WINDOW_SIZE) buf_idx = 0;
         }
@@ -317,26 +318,26 @@ void MotionManager::Process()
 #endif
     }
 
-    m_CM730->BulkRead();
+    m_CM730->BulkRead(NULL);
 
     if(m_IsLogging)
     {
         for(int id = 1; id < JointData::NUMBER_OF_JOINTS; id++)
-            m_LogFileStream << MotionStatus::m_CurrentJoints.GetValue(id) << "," << m_CM730->m_BulkReadData[id].ReadWord(MX28::P_PRESENT_POSITION_L) << ",";
+            m_LogFileStream << MotionStatus::m_CurrentJoints.GetValue(id) << "," << m_CM730->bulk_read_data_[id].ReadWord(MX28::P_PRESENT_POSITION_L) << ",";
 
-        m_LogFileStream << m_CM730->m_BulkReadData[CM730::ID_CM].ReadWord(CM730::P_GYRO_Y_L) << ",";
-        m_LogFileStream << m_CM730->m_BulkReadData[CM730::ID_CM].ReadWord(CM730::P_GYRO_X_L) << ",";
-        m_LogFileStream << m_CM730->m_BulkReadData[CM730::ID_CM].ReadWord(CM730::P_ACCEL_Y_L) << ",";
-        m_LogFileStream << m_CM730->m_BulkReadData[CM730::ID_CM].ReadWord(CM730::P_ACCEL_X_L) << ",";
-        m_LogFileStream << m_CM730->m_BulkReadData[FSR::ID_L_FSR].ReadByte(FSR::P_FSR_X) << ",";
-        m_LogFileStream << m_CM730->m_BulkReadData[FSR::ID_L_FSR].ReadByte(FSR::P_FSR_Y) << ",";
-        m_LogFileStream << m_CM730->m_BulkReadData[FSR::ID_R_FSR].ReadByte(FSR::P_FSR_X) << ",";
-        m_LogFileStream << m_CM730->m_BulkReadData[FSR::ID_R_FSR].ReadByte(FSR::P_FSR_Y) << ",";
+        m_LogFileStream << m_CM730->bulk_read_data_[CM730::ID_CM].ReadWord(CM730::P_GYRO_Y_L) << ",";
+        m_LogFileStream << m_CM730->bulk_read_data_[CM730::ID_CM].ReadWord(CM730::P_GYRO_X_L) << ",";
+        m_LogFileStream << m_CM730->bulk_read_data_[CM730::ID_CM].ReadWord(CM730::P_ACCEL_Y_L) << ",";
+        m_LogFileStream << m_CM730->bulk_read_data_[CM730::ID_CM].ReadWord(CM730::P_ACCEL_X_L) << ",";
+        m_LogFileStream << m_CM730->bulk_read_data_[FSR::ID_L_FSR].ReadByte(FSR::P_FSR_X) << ",";
+        m_LogFileStream << m_CM730->bulk_read_data_[FSR::ID_L_FSR].ReadByte(FSR::P_FSR_Y) << ",";
+        m_LogFileStream << m_CM730->bulk_read_data_[FSR::ID_R_FSR].ReadByte(FSR::P_FSR_X) << ",";
+        m_LogFileStream << m_CM730->bulk_read_data_[FSR::ID_R_FSR].ReadByte(FSR::P_FSR_Y) << ",";
         m_LogFileStream << std::endl;
     }
 
-    if(m_CM730->m_BulkReadData[CM730::ID_CM].error == 0)
-        MotionStatus::BUTTON = m_CM730->m_BulkReadData[CM730::ID_CM].ReadByte(CM730::P_BUTTON);
+    if(m_CM730->bulk_read_data_[CM730::ID_CM].error == 0)
+        MotionStatus::BUTTON = m_CM730->bulk_read_data_[CM730::ID_CM].ReadByte(CM730::P_BUTTON);
 
     m_IsRunning = false;
 }

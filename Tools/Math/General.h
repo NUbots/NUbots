@@ -12,7 +12,7 @@
 #include <iostream>
 #include "Matrix.h"
 #include "Vector3.h"
-using namespace std;
+
 
 namespace mathGeneral
 {
@@ -157,7 +157,7 @@ inline Matrix Cartesian2Spherical(const Matrix& cartesianCoordinates)
     @param values the data to compare to zero
  */
 template <typename T>
-inline bool allZeros(const vector<T>& values) 
+inline bool allZeros(const std::vector<T>& values) 
 {
     bool result = true;
     for (size_t i=0; i<values.size(); i++)
@@ -172,9 +172,9 @@ inline bool allZeros(const vector<T>& values)
     @param eps the maximum difference allowed before elements are not equal
  */
 template <typename T>
-inline bool allEqual(const vector<T>& left, const vector<T>& right, T eps = 0.01)
+inline bool allEqual(const std::vector<T>& left, const std::vector<T>& right, T eps = 0.01)
 {
-    size_t n = min(left.size(), right.size());
+    size_t n = std::min(left.size(), right.size());
     for (size_t i=0; i<n; i++)
         if (fabs(left[i] - right[i]) > eps)
             return false;
@@ -186,9 +186,9 @@ inline bool allEqual(const vector<T>& left, const vector<T>& right, T eps = 0.01
     @param right
  */
 template <typename T>
-inline float maxDifference(const vector<T>& left, const vector<T>& right)
+inline float maxDifference(const std::vector<T>& left, const std::vector<T>& right)
 {
-    size_t n = min(left.size(), right.size());
+    size_t n = std::min(left.size(), right.size());
     float max = 0;
     for (size_t i=0; i<n; i++)
         if (fabs(left[i] - right[i]) > max)

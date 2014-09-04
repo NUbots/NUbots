@@ -19,16 +19,16 @@ class Histogram1D
 {
 public:
     Histogram1D(size_t num_bins, double bin_width);
-    Histogram1D(vector<double> bin_widths);
+    Histogram1D(std::vector<double> bin_widths);
 
     static Bin emptyBin(double start, double width);
 
     //accessors
     Bin getBin(double pos);
     size_t getBinIndex(double pos);
-    vector<Bin> getLargestBins(size_t n);
-    vector<Bin>::const_iterator begin() const {return m_bins.begin();}
-    vector<Bin>::const_iterator end() const {return m_bins.end();}
+    std::vector<Bin> getLargestBins(size_t n);
+    std::vector<Bin>::const_iterator begin() const {return m_bins.begin();}
+    std::vector<Bin>::const_iterator end() const {return m_bins.end();}
 
     //mutators
     void addToBin(double pos, double val);
@@ -38,7 +38,7 @@ public:
 
 
 private:
-    vector<Bin> m_bins;
+    std::vector<Bin> m_bins;
     double m_end;
 };
 

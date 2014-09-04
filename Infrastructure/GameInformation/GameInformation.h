@@ -31,7 +31,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
-using namespace std;
+
 
 class NUSensorsData;
 class NUActionatorsData;
@@ -63,6 +63,7 @@ public:
     int getPlayerNumber() const;
     int getTeamNumber() const;
     TeamColour getTeamColour() const;
+    TeamColour getPlayerUniformColour() const;
     RobotState getCurrentState() const;
     int getPenaltyReason() const;
     bool amIASubstitute() const;
@@ -78,7 +79,7 @@ public:
     int ourScore() const;      
     int opponentScore() const;   
     int getNumberOfPlayersPenalised() const;
-    vector<vector<int> > getPenaltyReasons() const;
+    std::vector<std::vector<int> > getPenaltyReasons() const;
     
     // GameController packets
     void addNetworkPort(GameControllerPort* port);
@@ -138,7 +139,7 @@ private:
     GameControllerPort* m_port;
     RoboCupGameControlReturnData* m_currentReturnData;   //!< The current return packet
     
-    vector<float> m_led_red;
+    std::vector<float> m_led_red;
 };
 
 #endif

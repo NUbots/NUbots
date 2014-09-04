@@ -30,14 +30,14 @@
 #include "debugverbositynumotion.h"
 
 #include <cmath>
-using namespace std;
+
 
 /*! @brief Constructor for NUSave module
  */
 NUSave::NUSave(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("NUSave", data, actions), m_BLOCK_TRIGGER(1800.0f), m_BLOCK_WIDTH(55.0f)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "NUSave::NUSave()" << endl;
+        debug << "NUSave::NUSave()" << std::endl;
     #endif
     m_walk = walk;
     m_data = data;
@@ -53,7 +53,7 @@ NUSave::NUSave(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : 
     m_block_timestamp = 0;
     
     m_block_time = 0;
-    m_block_position = vector<float>(2,0);
+    m_block_position = std::vector<float>(2,0);
 }
 
 /*! @brief Destructor for FallProtection module
@@ -93,8 +93,8 @@ void NUSave::kill()
     {   // if the save is currently running, the only way to kill it is to set the stiffnesses to 0
         m_completion_time = 0;
         
-        vector<float> sensor_larm, sensor_rarm;
-        vector<float> sensor_lleg, sensor_rleg;
+        std::vector<float> sensor_larm, sensor_rarm;
+        std::vector<float> sensor_lleg, sensor_rleg;
         m_data->getPosition(NUSensorsData::LArm, sensor_larm);
         m_data->getPosition(NUSensorsData::RArm, sensor_rarm);
         m_data->getPosition(NUSensorsData::LLeg, sensor_lleg);
@@ -155,7 +155,7 @@ void NUSave::process(NUSensorsData* data, NUActionatorsData* actions)
     m_data = data;
     m_actions = actions;
 #if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NUSave::process()" << endl;
+    debug << "NUSave::process()" << std::endl;
 #endif
     if (not isActive() and m_block_time > m_data->CurrentTime)
         playSave();

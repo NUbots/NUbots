@@ -11,7 +11,12 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
 #
-# Targets: NAO, NAOWebots, Cycloid, Bear, NUView
+# Targets: NAO, NAOWebots, Cycloid, Bear, Darwin, DarwinWebots, NUView
+
+# Helpful tips:
+# 1. Makefile uses actual tabs as separators, so you'll get a missing separator
+#    with editors that use spaces instead
+# 2. Make sure there is no white space after the \
 
 CUR_DIR = $(shell pwd)
 
@@ -24,7 +29,9 @@ NAOWEBOTS_BUILD_DIR = Build/NAOWebots
 CYCLOID_BUILD_DIR = Build/Cycloid
 BEAR_BUILD_DIR = Build/Bear
 DARWIN_BUILD_DIR = Build/Darwin
+DARWINWEBOTS_BUILD_DIR = Build/DarwinWebots
 NUVIEW_BUILD_DIR = Build/NUView
+DARWIN_FRAMEWORK_BUILD_DIR = Framework/darwin/Linux/build
 
 # Aldebaran build tools
 ALD_CTC = $(AL_DIR)/crosstoolchain/toolchain-geode.cmake
@@ -40,8 +47,9 @@ BEAR_EXT_DIR = projects/robocup
 .PHONY: Cycloid CycloidConfig CycloidConfigInstall CycloidClean CycloidVeryClean
 .PHONY: Bear BearConfig BearConfigInstall BearClean BearVeryClean
 .PHONY: BearExternal
-.PHONY: Darwin DarwinConfig DarwinConfigInstall DarwinClean DarwinVeryClean
+.PHONY: Darwin DarwinConfig DarwinConfigInstall DarwinClean DarwinVeryClean DarwinFramework DarwinFrameworkClean
 .PHONY: DarwinExternal
+.PHONY: DarwinWebots DarwinWebotsConfig DarwinWebotsClean DarwinWebotsVeryClean
 .PHONY: NUView NUViewConfig NUViewClean NUViewVeryClean
 .PHONY: clean veryclean
 
@@ -58,6 +66,8 @@ Cycloid: TARGET_ROBOT=CYCLOID
 CycloidConfig: TARGET_ROBOT=CYCLOID
 Darwin: TARGET_ROBOT=DARWIN
 DarwinConfig: TARGET_ROBOT=DARWIN
+DarwinWebots: TARGET_ROBOT=DARWINWEBOTS
+DarwinWebotsConfig: TARGET_ROBOT=DARWINWEBOTS
 NUView: TARGET_ROBOT=NUVIEW
 NUViewConfig: TARGET_ROBOT=NUVIEW
 export TARGET_ROBOT
@@ -96,9 +106,9 @@ endif
 MAKE_OPTIONS = --no-print-directory -j $(NPROCS) --quiet
 
 
-default_target: NAOWebots
+default_target: Darwin
 
-all: NAO NAOWebots Cycloid Bear Darwin NUView
+all: NAO NAOWebots Cycloid Bear Darwin DarwinWebots NUView
 
 ################ NAO ################
 NAO:
@@ -390,7 +400,7 @@ else
 endif
 
 ################ Darwin ################
-Darwin:
+Darwin: DarwinFramework
 ifeq ($(VM_IP), )							## if we have not given a virtual machine IP then use this machine to compile
 	@echo "Compiling for Darwin"
         ifeq ($(findstring Makefile, $(wildcard $(CUR_DIR)/$(DARWIN_BUILD_DIR)/*)), )		## check if the project has already been configured
@@ -449,7 +459,7 @@ else
 	@ssh $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make DarwinClean;"
 endif
 
-DarwinVeryClean:
+DarwinVeryClean: DarwinFrameworkClean
 ifeq ($(VM_IP), )
 	@set -e; \
 		echo "Hosing Darwin Build"; \
@@ -459,6 +469,60 @@ else
 	@ssh $(LOGNAME)@$(VM_IP) "cd $(BEAR_EXT_DIR); make DarwinVeryClean;"
 endif
 
+################ DarwinWebots ################
+
+DarwinWebots:
+	@echo "Targetting DarwinWebots";
+	@echo "Number of Processes: ${NPROCS}"
+    ifeq ($(findstring Makefile, $(wildcard $(CUR_DIR)/$(DARWINWEBOTS_BUILD_DIR)/*)), )		## check if the project has already been configured
+		@set -e; \
+			echo "Configuring for first use"; \
+			mkdir -p $(DARWINWEBOTS_BUILD_DIR); \
+			cd $(DARWINWEBOTS_BUILD_DIR); \
+			cmake $(MAKE_DIR); \
+			$(CCMAKE) .; \
+			make $(MAKE_OPTIONS);
+    else
+		@set -e; \
+			cd $(DARWINWEBOTS_BUILD_DIR); \
+			make $(MAKE_OPTIONS);
+    endif
+
+DarwinWebotsConfig:
+    ifeq ($(SYSTEM),Darwin)
+		@set -e; \
+			mkdir -p $(DARWINWEBOTS_BUILD_DIR)/Xcode; \
+			cd $(DARWINWEBOTS_BUILD_DIR)/Xcode; \
+			cmake -G Xcode -D CMAKE_BUILD_TYPE=Debug $(MAKE_DIR); \
+			mkdir -p ../Eclipse; \
+			cd ../Eclipse; \
+			cmake -G"Eclipse CDT4 - Unix Makefiles" -D CMAKE_BUILD_TYPE=Debug $(MAKE_DIR); 
+    endif
+	#@set -e; \
+		cd $(DARWINWEBOTS_BUILD_DIR); \
+		cmake $(MAKE_DIR); \
+		$(CCMAKE) .;
+
+DarwinWebotsClean:
+	@echo "Cleaning DarwinWebots Build";
+	@set -e; \
+		cd $(DARWINWEBOTS_BUILD_DIR); \
+		make $(MAKE_OPTIONS) clean;
+
+DarwinWebotsVeryClean:
+	@echo "Hosing DarwinWebots Build";
+	@set -e; \
+		rm -rf $(DARWINWEBOTS_BUILD_DIR)/*; \
+		rm -rf Autoconfig/*;
+
+DarwinFramework:
+	mkdir -p $(DARWIN_FRAMEWORK_BUILD_DIR)/../lib; \
+	cd $(DARWIN_FRAMEWORK_BUILD_DIR); \
+	make;
+
+DarwinFrameworkClean:
+	cd $(DARWIN_FRAMEWORK_BUILD_DIR); \
+	make clean;
 	
 ################ NUView ################
 NUView:
@@ -490,12 +554,18 @@ NUViewVeryClean:
 
 ########################################
 
-clean: NAOClean NAOWebotsClean CycloidClean NUViewClean
+clean: \
+	DarwinClean          \
+	NUViewClean          \
+	NAOWebotsClean       \
+	NAOClean             \
+	CycloidClean         \
+	BearClean            \
 
-veryclean: NAOVeryClean NAOWebotsVeryClean CycloidVeryClean NUViewVeryClean
-
-
-# Helpful tips:
-# 1. Makefile uses actual tabs as separators, so you'll get a missing separator
-#    with editors that use spaces instead
-# 2. Make sure there is no white space after the \
+veryclean: \
+	DarwinVeryClean      \
+	NUViewVeryClean      \
+	NAOWebotsVeryClean   \
+	NAOVeryClean         \
+	CycloidVeryClean     \
+	BearVeryClean        \

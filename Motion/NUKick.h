@@ -84,7 +84,7 @@ public:
 
 
 protected:
-    virtual void kickToPoint(const vector<float>& position, const vector<float>& target);
+    virtual void kickToPoint(const std::vector<float>& position, const std::vector<float>& target);
     NUWalk* m_walk;                     //!< local pointer to the walk engine
     
     float m_ball_x;                    //!< the current ball x position relative to robot in cm
@@ -96,10 +96,10 @@ protected:
     float m_defaultMotorGain;
     float m_defaultArmMotorGain;
 
-    vector<float> m_initial_larm;
-    vector<float> m_initial_rarm;
-    vector<float> m_initial_lleg;
-    vector<float> m_initial_rleg;
+    std::vector<float> m_initial_larm;
+    std::vector<float> m_initial_rarm;
+    std::vector<float> m_initial_lleg;
+    std::vector<float> m_initial_rleg;
 
     KickingLeg m_kicking_leg;
 
@@ -112,7 +112,7 @@ protected:
     double m_currentTimestamp;
     double m_previousTimestamp;
 
-    vector<Rectangle> m_kick_regions;
+    std::vector<Rectangle> m_kick_regions;
 
 };
 

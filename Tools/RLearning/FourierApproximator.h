@@ -34,7 +34,7 @@
 #include <iostream>
 #include "ApproximatorInterface.h"
 #include "FourierFunction.h"
-using namespace std;
+
 
 class FourierApproximator : public ApproximatorInterface
 {
@@ -43,13 +43,13 @@ public:
 
     virtual void initialiseApproximator(int numberOfInputs, int numberOfOutputs, int numberOfHiddens, float max_parameter_range=10);
 
-    virtual void doLearningEpisode(vector< vector<float> > const& observations, vector< vector<float> > const& values, float stepSize=0.1, int iterations=1);
+    virtual void doLearningEpisode(std::vector< std::vector<float> > const& observations, std::vector< std::vector<float> > const& values, float stepSize=0.1, int iterations=1);
 
-    virtual vector<float> getValues(vector<float> const& observations);
+    virtual std::vector<float> getValues(std::vector<float> const& observations);
 
-    virtual void saveApproximator(string agentName);
+    virtual void saveApproximator(std::string agentName);
 
-    virtual void loadApproximator(string agentName);
+    virtual void loadApproximator(std::string agentName);
 
 protected:
 
@@ -58,7 +58,7 @@ protected:
     bool fully_coupled;
     float learning_rate;
 
-    vector<FourierFunction> value_action_functions;
+    std::vector<FourierFunction> value_action_functions;
 
 };
 

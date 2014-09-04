@@ -56,9 +56,9 @@ int NUbotImage::calculateImageLength(imageFrameType type, int imageWidth, int im
 int NUbotImage::openFile(std::string filename, bool overwrite)
 {
     closeFile();
-    ios_base::openmode mode = ios::in | ios::out | ios::binary | ios::ate;
+    std::ios_base::openmode mode = std::ios::in | std::ios::out | std::ios::binary | std::ios::ate;
     if(overwrite){
-        mode = mode | ios::trunc;
+        mode = mode | std::ios::trunc;
     }
     if(!currentFile.is_open()) {
         currentFile.open(filename.c_str(), mode);
@@ -70,7 +70,7 @@ int NUbotImage::openFile(std::string filename, bool overwrite)
     currentFileLengthInBytes = currentFile.tellg();
 
     // Move reading pointer back to the beginning of the file.
-    currentFile.seekg (0, ios::beg);
+    currentFile.seekg (0, std::ios::beg);
 
     int headerLength = sizeof(imageFileHeader);
     if(currentFileLengthInBytes > headerLength){
@@ -78,22 +78,22 @@ int NUbotImage::openFile(std::string filename, bool overwrite)
         currentFile.read ((char*)&header, headerLength);
         int predictedLength = headerLength + header.imageFrameLength * header.numberOfFrames;
         if(predictedLength != currentFileLengthInBytes){
-            cout << "ERROR: Invalid file structure." << endl;
-	    cout << "File Length = " << currentFileLengthInBytes << endl;
-	    cout << "File Should have " << header.numberOfFrames << " frames for a total size of " << predictedLength << " bytes." << endl;
-	    cout << "Image Frame Length = " << header.imageFrameLength << endl;
+            std::cout << "ERROR: Invalid file structure." << std::endl;
+	    std::cout << "File Length = " << currentFileLengthInBytes << std::endl;
+	    std::cout << "File Should have " << header.numberOfFrames << " frames for a total size of " << predictedLength << " bytes." << std::endl;
+	    std::cout << "Image Frame Length = " << header.imageFrameLength << std::endl;
             closeFile();
             return -1;
         }
         currentFileHeader = header;
     } 
     else {
-	    currentFile.seekp (0, ios::beg);
+	    currentFile.seekp (0, std::ios::beg);
         currentFileHeader = defaultFileHeader;
         currentFile.write ((char*)&currentFileHeader, headerLength);
         currentFile.flush();
     }
-    cout << "Image Recording File opened: " << filename << endl;
+    std::cout << "Image Recording File opened: " << filename << std::endl;
     return currentFileHeader.numberOfFrames;
 }
 
@@ -115,54 +115,54 @@ bool NUbotImage::closeFile()
 int NUbotImage::appendImageFrame(int robotFrameNumber, NaoCamera camera, uint8* image, float* jointSensors, float* balanceSensors, float* touchSensors)
 {
     if(currentFile.is_open() == false){
-	cout << "Error no open file." << endl;
+	std::cout << "Error no open file." << std::endl;
         return -1;
     }
-    currentFile.seekp(0, ios::end); // seek to the end of the file.
+    currentFile.seekp(0, std::ios::end); // seek to the end of the file.
     imageFrameHeader header;
     header.robotFrameNumber = robotFrameNumber;
     header.cameraID = camera;
 
-    //cout << "Appending Image Frame..." << endl;
+    //std::cout << "Appending Image Frame..." << std::endl;
 
-    //cout << "Writing frame header" << endl;
+    //std::cout << "Writing frame header" << std::endl;
 
     // Write the header
     currentFile.write((char*)&header, sizeof(imageFrameHeader));
 
-    //cout << "Writing image" << endl;
+    //std::cout << "Writing image" << std::endl;
 
     // Write the image
     int imageLength = calculateImageLength(currentFileHeader.imageType, currentFileHeader.imageWidth, currentFileHeader.imageHeight);
     currentFile.write((char*)image, imageLength);
 
-    //cout << "Writing joint positions" << endl;
+    //std::cout << "Writing joint positions" << std::endl;
     
     // Write the joint sensors 
     currentFile.write((char*)jointSensors, currentFileHeader.numJointSensors * sizeof(float));
 
-    //cout << "Writing balance values" << endl;
+    //std::cout << "Writing balance values" << std::endl;
 
     // Write balance sensors
     currentFile.write((char*)balanceSensors, currentFileHeader.numBalanceSensors * sizeof(float));
         
-    //cout << "Writing touch values" << endl;
+    //std::cout << "Writing touch values" << std::endl;
 
     // Write touch sensors
     currentFile.write((char*)touchSensors, currentFileHeader.numTouchSensors * sizeof(float));
 
-    //cout << "Writing joint positions" << endl;
+    //std::cout << "Writing joint positions" << std::endl;
 
     currentFileHeader.numberOfFrames++;
 
-    currentFile.seekp(0, ios::beg); // seek to the start of the file.
-    //cout << "Updating file header" << endl;
+    currentFile.seekp(0, std::ios::beg); // seek to the start of the file.
+    //std::cout << "Updating file header" << std::endl;
     currentFile.write ((char*)&currentFileHeader, sizeof(imageFileHeader));
 
-    currentFile.seekp(0, ios::end); // seek to the end of the file.
+    currentFile.seekp(0, std::ios::end); // seek to the end of the file.
     currentFileLengthInBytes = currentFile.tellp();
     currentFile.flush();
-    //cout << "Finished!" << endl;
+    //std::cout << "Finished!" << std::endl;
     return currentFileHeader.numberOfFrames;
 }
 
@@ -181,7 +181,7 @@ bool NUbotImage::getImageFrame(  int frameId, int& robotFrameNumber, NaoCamera& 
 
     int fileSeekPosition = getFrameStartPosition(frameId);
    
-    currentFile.seekg(fileSeekPosition, ios::beg); // seek to the frame we are interested in.
+    currentFile.seekg(fileSeekPosition, std::ios::beg); // seek to the frame we are interested in.
 
     imageFrameHeader header;
 
@@ -194,7 +194,7 @@ bool NUbotImage::getImageFrame(  int frameId, int& robotFrameNumber, NaoCamera& 
     // Read the image
     int imageLength = calculateImageLength(currentFileHeader.imageType, currentFileHeader.imageWidth, currentFileHeader.imageHeight);
     
-//    currentFile.seekg(fileSeekPosition, ios::beg); // seek to the frame we are interested in.
+//    currentFile.seekg(fileSeekPosition, std::ios::beg); // seek to the frame we are interested in.
     currentFile.read((char*)image, imageLength);
     
     // Read the joint sensorbs 
@@ -206,7 +206,7 @@ bool NUbotImage::getImageFrame(  int frameId, int& robotFrameNumber, NaoCamera& 
     // Read touch sensors
     currentFile.read((char*)touchSensors, currentFileHeader.numTouchSensors * sizeof(float));
 
-//    currentFile.seekg(0,ios::end); // seek to the end of the file.
+//    currentFile.seekg(0, std::ios::end); // seek to the end of the file.
     return true;
 }
 
@@ -255,7 +255,7 @@ bool NUbotImage::readFromBuffer(    char* buffer, int& robotFrameNumber, NaoCame
                                 uint8* image, float* jointSensors, float* balanceSensors, float* touchSensors)
 {
     imageFrameHeader header;
-    //cout << "Reading from Header" << sizeof(imageFrameHeader) << endl;
+    //std::cout << "Reading from Header" << sizeof(imageFrameHeader) << std::endl;
     // Read the header
     memcpy((char*)&header, buffer, sizeof(imageFrameHeader));
     buffer += sizeof(imageFrameHeader);
@@ -264,20 +264,20 @@ bool NUbotImage::readFromBuffer(    char* buffer, int& robotFrameNumber, NaoCame
 
     // Read the image
     int imageLength = calculateImageLength(defaultFileHeader.imageType, defaultFileHeader.imageWidth, defaultFileHeader.imageHeight);
-	 //cout << "Reading from Image" << imageLength <<endl;
+	 //std::cout << "Reading from Image" << imageLength <<std::endl;
     memcpy((char*)image, buffer, imageLength);
     buffer += imageLength;
 
-    //cout << "Reading from Joints" << endl;
+    //std::cout << "Reading from Joints" << std::endl;
     // Read the joint sensorbs 
     memcpy((char*)jointSensors, buffer, defaultFileHeader.numJointSensors * sizeof(float));
     buffer += defaultFileHeader.numJointSensors * sizeof(float);
 
-	//cout << "Reading from Balance" << endl;
+	//std::cout << "Reading from Balance" << std::endl;
     // Read balance sensors
     memcpy((char*)balanceSensors, buffer, defaultFileHeader.numBalanceSensors * sizeof(float));
     buffer += defaultFileHeader.numBalanceSensors * sizeof(float);
-        //cout << "Reading from Touch" << endl;
+        //std::cout << "Reading from Touch" << std::endl;
     // Read touch sensors
     memcpy((char*)touchSensors, buffer, defaultFileHeader.numTouchSensors * sizeof(float));
     buffer += defaultFileHeader.numTouchSensors * sizeof(float);

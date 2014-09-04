@@ -3,33 +3,24 @@
 #include "debug.h"
 #include "debugverbosityvision.h"
 
-CornerPoint::CornerPoint(TYPE type, GroundPoint location)
+CornerPoint::CornerPoint(TYPE type, NUPoint location)
 {
     m_size_on_screen = Vector2<double>(3,3);
     m_type = type;
     m_location = location;
-    const Transformer& t = VisionBlackboard::getInstance()->getTransformer();
 
-    // calculate bearing and elevation
-    t.screenToRadial2D(m_location);
-    valid = t.isDistanceToPointValid();
-    if(valid) {
-        // find distance
-        double distance = t.distanceToPoint(m_location.angular.x, m_location.angular.y);
-        // calculate foot relative 3D location
-        t.radial2DToRadial3D(m_location, distance);
-    }
+    valid = m_location.neckRelativeRadial.x > 0;
 }
 
 bool CornerPoint::addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const
 {
 #if VISION_FIELDPOINT_VERBOSITY > 1
-    debug << "CornerPoint::addToExternalFieldObjects - m_id: " << VFOName(m_id) << endl;
-    debug << "    " << *this << endl;
+    debug << "CornerPoint::addToExternalFieldObjects - m_id: " << VFOName(m_id) << std::endl;
+    debug << "    " << *this << std::endl;
 #endif
     if(valid) {
         #if VISION_FIELDPOINT_VERBOSITY > 1
-            debug << "CornerPoint::addToExternalFieldObjects - valid" << endl;
+            debug << "CornerPoint::addToExternalFieldObjects - valid" << std::endl;
         #endif
         AmbiguousObject newAmbObj;
 
@@ -66,18 +57,18 @@ bool CornerPoint::addToExternalFieldObjects(FieldObjects* fieldobjects, float ti
             return false;
         default:
             //invalid object - do not push to fieldobjects
-            errorlog << "CornerPoint::addToExternalFieldObjects - attempt to add invalid CornerPoint object id: " << VFOName(m_id) << endl;
+            errorlog << "CornerPoint::addToExternalFieldObjects - attempt to add invalid CornerPoint object id: " << VFOName(m_id) << std::endl;
             #if VISION_FIELDPOINT_VERBOSITY > 1
-                debug << "CornerPoint::addToExternalFieldObjects - attempt to add invalid CornerPoint object id: " << VFOName(m_id) << endl;
+                debug << "CornerPoint::addToExternalFieldObjects - attempt to add invalid CornerPoint object id: " << VFOName(m_id) << std::endl;
             #endif
             return false;
         }
 
         //update ambiguous corner and add it to ambiguousFieldObjects
-        newAmbObj.UpdateVisualObject(Vector3<float>(m_location.relativeRadial.x, m_location.relativeRadial.y, m_location.relativeRadial.z),
+        newAmbObj.UpdateVisualObject(Vector3<float>(m_location.neckRelativeRadial.x, m_location.neckRelativeRadial.y, m_location.neckRelativeRadial.z),
                                      Vector3<float>(m_spherical_error.x, m_spherical_error.y, m_spherical_error.z),
-                                     Vector2<float>(m_location.angular.x, m_location.angular.y),
-                                     Vector2<int>(m_location.screen.x,m_location.screen.y),
+                                     Vector2<float>(m_location.screenAngular.x, m_location.screenAngular.y),
+                                     Vector2<int>(m_location.screenCartesian.x,m_location.screenCartesian.y),
                                      Vector2<int>(m_size_on_screen.x,m_size_on_screen.y),
                                      timestamp);
         fieldobjects->ambiguousFieldObjects.push_back(newAmbObj);
@@ -86,34 +77,34 @@ bool CornerPoint::addToExternalFieldObjects(FieldObjects* fieldobjects, float ti
     }
     else {
         #if VISION_FIELDPOINT_VERBOSITY > 1
-            debug << "CornerPoint::addToExternalFieldObjects - invalid" << endl;
+            debug << "CornerPoint::addToExternalFieldObjects - invalid" << std::endl;
         #endif
         return false;
     }
 }
 
 //! @brief Stream output for labelling purposes
-void CornerPoint::printLabel(ostream& out) const
+void CornerPoint::printLabel(std::ostream& out) const
 {
-    out << m_location;
+    out << VFOName(CORNER) << " " << m_location;
 }
 
 //! @brief Calculation of error for optimisation
 double CornerPoint::findScreenError(VisionFieldObject* other) const
 {
     CornerPoint* c = dynamic_cast<CornerPoint*>(other);
-    return ( m_location.screen - c->m_location.screen ).abs();
+    return ( m_location.screenCartesian - c->m_location.screenCartesian ).abs();
 }
 
 double CornerPoint::findGroundError(VisionFieldObject *other) const
 {
     CornerPoint* c = dynamic_cast<CornerPoint*>(other);
-    return ( m_location.ground - c->m_location.ground ).abs();
+    return ( m_location.groundCartesian - c->m_location.groundCartesian ).abs();
 }
 
-ostream& operator<< (ostream& output, const CornerPoint& c)
+std::ostream& operator<< (std::ostream& output, const CornerPoint& c)
 {
-    string nm;
+    std::string nm;
     switch(c.m_type) {
     case CornerPoint::L:
         nm = "L";
@@ -129,18 +120,18 @@ ostream& operator<< (ostream& output, const CornerPoint& c)
         break;
     }
 
-    output << "CornerPoint - " << nm << endl;
-    output << "\tpixelloc: " << c.m_location.screen << endl;
-    output << "\tangularloc: " << c.m_location.angular << endl;
-    output << "\trelative field coords: " << c.m_location.relativeRadial << endl;
-    output << "\tspherical error: [" << c.m_spherical_error << "]" << endl;
+    output << "CornerPoint - " << nm << std::endl;
+    output << "\tpixelloc: " << c.m_location.screenCartesian << std::endl;
+    output << "\tangularloc: " << c.m_location.screenAngular << std::endl;
+    output << "\trelative field coords: " << c.m_location.neckRelativeRadial << std::endl;
+    output << "\tspherical error: [" << c.m_spherical_error << "]" << std::endl;
     output << "\tsize on screen: [" << c.m_size_on_screen << "]";
     return output;
 }
 
-ostream& operator<< (ostream& output, const vector<CornerPoint>& c)
+std::ostream& operator<< (std::ostream& output, const std::vector<CornerPoint>& c)
 {
     for (size_t i=0; i<c.size(); i++)
-        output << c[i] << endl;
+        output << c[i] << std::endl;
     return output;
 }

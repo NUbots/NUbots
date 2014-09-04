@@ -26,18 +26,18 @@
 //    void setUnknown();
     
 //    //! @brief Stream output for labelling purposes
-//    void printLabel(ostream& out) const {out << VFOName(m_id) << " " << m_location_pixels << " " << m_size_on_screen;}
+//    void printLabel(std::ostream& out) const {out << VFOName(m_id) << " " << m_location_pixels << " " << m_size_on_screen;}
 //    //! @brief Brief stream output for labelling purposes
-//    //void printLabelBrief(ostream& out) const {out << VFOName(m_id) << " " << m_location_pixels;}
+//    //void printLabelBrief(std::ostream& out) const {out << VFOName(m_id) << " " << m_location_pixels;}
 
 //    double findError(const Vector2<double>& measured) const {return sqrt( pow(m_location_pixels.x - measured.x,2) + pow(m_location_pixels.y - measured.y,2));}
 
 //    void render(cv::Mat& mat) const;
 
 //    //! @brief output stream operator
-//    friend ostream& operator<< (ostream& output, const Beacon& b);
+//    friend std::ostream& operator<< (std::ostream& output, const Beacon& b);
 //    //! @brief output stream operator for a vector of beacons
-//    friend ostream& operator<< (ostream& output, const vector<Beacon>& b);
+//    friend std::ostream& operator<< (std::ostream& output, const std::vector<Beacon>& b);
     
 //private:
 //    /*!

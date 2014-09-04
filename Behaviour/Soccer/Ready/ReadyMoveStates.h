@@ -41,7 +41,7 @@
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
-using namespace std;
+
 
 class ReadyMoveSubState : public SoccerState
 {
@@ -71,7 +71,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "ReadyMoveWalk" << endl;
+            debug << "ReadyMoveWalk" << std::endl;
         #endif
         // keep track of the time in this state
         if (m_parent->stateChanged())
@@ -101,10 +101,10 @@ protected:
 //        else if (yellow_left.TimeSinceLastSeen() > 1000 and yellow_right.TimeSinceLastSeen() > 1000 and blue_left.TimeSinceLastSeen() > 1000 and blue_right.TimeSinceLastSeen() > 1000)
             m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
         
-        vector<float> position = getReadyFieldPositions();
-        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, position, 0, 50, 100);
+        std::vector<float> position = getReadyFieldPositions();
+        std::vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, position, 0, 50, 100);
         
-        vector<float> result;
+        std::vector<float> result;
         if (m_team_info->getPlayerNumber() != 1)
             result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 50, 100);
         else
@@ -112,9 +112,9 @@ protected:
         m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
     }
 private:
-    vector<float> getReadyFieldPositions()
+    std::vector<float> getReadyFieldPositions()
     {
-        vector<float> position(3,0);
+        std::vector<float> position(3,0);
         if(m_team_info->getPlayerNumber() == 1)
         {
             position[0] = 290.0;

@@ -39,9 +39,10 @@ class EndEffectorTouch;
 class Kinematics;
 class OrientationUKF;
 class OdometryEstimator;
+class IKalmanFilter;
 
 #include <vector>
-using namespace std;
+
 
 /*! @brief Base sensor storage class
  */
@@ -80,8 +81,8 @@ protected:
     double m_current_time;
     double m_previous_time;
     
-    vector<float> m_previous_joint_positions;
-    vector<float> m_previous_joint_velocities;
+    std::vector<float> m_previous_joint_positions;
+    std::vector<float> m_previous_joint_velocities;
     
     EndEffectorTouch* m_touch;
     Kinematics* m_kinematicModel;
@@ -96,10 +97,10 @@ protected:
         unsigned int index;
     };
     std::vector<KinematicMap> m_kinematics_map;
-//    vector< vector<const NUData::id_t*> > m_kinematics_joint_map;   //!< Vector matching the joint ordering in the Kinematics model to the joint is used by NUSensorData for each effector.
-//    vector<const NUData::id_t*> m_kinematics_transform_ids;         //!< Vector matching the transform of the above effectors to the ids used bu NUSensorsData.
-//    vector<const NUData::id_t*> m_kinematics_effector_ids;          //!< Vector matching the above effectors to the ids used bu NUSensorsData.
-
+//    std::vector< std::vector<const NUData::id_t*> > m_kinematics_joint_map;   //!< Vector matching the joint ordering in the Kinematics model to the joint is used by NUSensorData for each effector.
+//    std::vector<const NUData::id_t*> m_kinematics_transform_ids;         //!< Vector matching the transform of the above effectors to the ids used bu NUSensorsData.
+//    std::vector<const NUData::id_t*> m_kinematics_effector_ids;          //!< Vector matching the above effectors to the ids used bu NUSensorsData.
+    IKalmanFilter* m_orientation_filter;
 private:
 };
 

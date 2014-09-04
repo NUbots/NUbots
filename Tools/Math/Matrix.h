@@ -1,9 +1,10 @@
-#ifndef _Matrix_h_DEFINED
-#define _Matrix_h_DEFINED
+#pragma once
 
 #include <vector>
 #include <math.h>
 #include <iomanip>
+#include "Vector2.h"
+#include "Vector3.h"
 
 using std::ostream;
 
@@ -23,6 +24,12 @@ public:
 	Matrix(int m, int n, bool I=false);
 	~Matrix();
 	Matrix(const Matrix& a);
+
+    Matrix(const Vector2<float>& vector);
+    Matrix(const Vector2<double>& vector);
+    Matrix(const Vector3<float>& vector);
+    Matrix(const Vector3<double>& vector);
+
 	
     Matrix transp() const; // Matrix Transpose
     Matrix getRow(int index) const; // Get Row
@@ -62,6 +69,8 @@ Matrix vertcat(Matrix a, Matrix b);
 Matrix diagcat(Matrix a, Matrix b);
 Matrix cholesky(Matrix P);
 Matrix HT(Matrix A);
+Matrix QR_Householder(const Matrix& A);
+Matrix diag(const Matrix& A);
 
 inline double convDble(const Matrix& a) { return a[0][0]; } // Convert 1x1 matrix to Double
 
@@ -76,6 +85,16 @@ Matrix InverseMatrix(const Matrix& mat);
 Matrix CramersRuleInverse(const Matrix& mat);
 Matrix GaussJordanInverse(const Matrix& mat);
 
+/*!
+  @brief Performs an update on the cholesky composition. If S is the original Cholesky fac-
+    tor of P = AA^T, then the Cholesky factor of the rank-1 update (or downdate) cholupdate
+    P = P +- sqrt(v) *UU^T, where a positive v performs an update, while a negative v performs a downdate.
+    @param S The original Cholesky decomposition.
+    @param U The update factor as shown above.
+    @param v The signed update factor as shown above.
+  */
+
+Matrix CholeskyUpdate(Matrix S, Matrix U, float v);
 
 std::ostream& operator <<(std::ostream& out, const Matrix &mat);
 
@@ -84,6 +103,8 @@ double dot(const Matrix& mat1, const Matrix& mat2);
 void WriteMatrix(std::ostream& out, const Matrix &mat);
 Matrix ReadMatrix(std::istream& in);
 
-#endif
+Matrix xRotMatrix(double angle);
+Matrix yRotMatrix(double angle);
+Matrix zRotMatrix(double angle);
 
 

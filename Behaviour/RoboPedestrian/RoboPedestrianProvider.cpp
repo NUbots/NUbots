@@ -39,7 +39,7 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-using namespace std;
+
 
 RoboPedestrianProvider::RoboPedestrianProvider(Behaviour* manager) : BehaviourFSMProvider(manager)
 {

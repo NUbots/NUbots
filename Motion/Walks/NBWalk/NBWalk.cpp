@@ -48,19 +48,19 @@ inline T NORMALISE(T theta){
 NBWalk::NBWalk(NUSensorsData* data, NUActionatorsData* actions) :  NUWalk(data, actions),
                                                                    nb_sensors(new Sensors()),     // Because we have our own way of storing sensors, I will keep a copy of NB's sensors class in here and copy over the data on each iteration
                                                                    walkProvider(nb_sensors),
-                                                                   nextJoints(vector<float>(Kinematics::NUM_JOINTS,0.0f))
+                                                                   nextJoints(std::vector<float>(Kinematics::NUM_JOINTS,0.0f))
 {
     //Allow safe access to the next joints
     pthread_mutex_init(&next_joints_mutex, NULL);
     
     float larm[] = {0.1, 1.57, 0.15, -1.57};
     float rarm[] = {-0.1, 1.57, 0.15, 1.57};
-    m_initial_larm = vector<float>(larm, larm + sizeof(larm)/sizeof(*larm));
-    m_initial_rarm = vector<float>(rarm, rarm + sizeof(rarm)/sizeof(*rarm));
+    m_initial_larm = std::vector<float>(larm, larm + sizeof(larm)/sizeof(*larm));
+    m_initial_rarm = std::vector<float>(rarm, rarm + sizeof(rarm)/sizeof(*rarm));
     
     float lleg[] = {0, -0.44, 0, 0.92, 0, -0.52};
-    m_initial_lleg = vector<float>(lleg, lleg + sizeof(lleg)/sizeof(*lleg));
-    m_initial_rleg = vector<float>(lleg, lleg + sizeof(lleg)/sizeof(*lleg));
+    m_initial_lleg = std::vector<float>(lleg, lleg + sizeof(lleg)/sizeof(*lleg));
+    m_initial_rleg = std::vector<float>(lleg, lleg + sizeof(lleg)/sizeof(*lleg));
     
     // Set the gait to the default one
     m_walk_parameters.load("NBWalkDefault");
@@ -86,7 +86,7 @@ void NBWalk::kill()
 void NBWalk::doWalk()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "NBWalk::doWalk()" << endl;
+        debug << "NBWalk::doWalk()" << std::endl;
     #endif
     updateNBSensors();
     sendWalkCommand();
@@ -104,7 +104,7 @@ void NBWalk::sendWalkCommand()
     command->theta_rads = m_speed_yaw;
 
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "NBWalk::sendWalkCommand() command: " << *command << endl;
+        debug << "NBWalk::sendWalkCommand() command: " << *command << std::endl;
     #endif
     
     walkProvider.setCommand(command);
@@ -113,17 +113,17 @@ void NBWalk::sendWalkCommand()
 void NBWalk::processJoints()
 {
 #if DEBUG_NUMOTION_VERBOSITY > 4
-    debug << "NBWalk::processJoints()" << endl;
+    debug << "NBWalk::processJoints()" << std::endl;
 #endif
     if (walkProvider.isActive())
     {
 		// Request new joints
 		walkProvider.calculateNextJointsAndStiffnesses();
-		const vector <float > llegJoints = walkProvider.getChainJoints(LLEG_CHAIN);
-		const vector <float > rlegJoints = walkProvider.getChainJoints(RLEG_CHAIN);
-		const vector <float > rarmJoints = walkProvider.getChainJoints(RARM_CHAIN);
+		const std::vector <float > llegJoints = walkProvider.getChainJoints(LLEG_CHAIN);
+		const std::vector <float > rlegJoints = walkProvider.getChainJoints(RLEG_CHAIN);
+		const std::vector <float > rarmJoints = walkProvider.getChainJoints(RARM_CHAIN);
         
-		const vector <float > larmJoints = walkProvider.getChainJoints(LARM_CHAIN);
+		const std::vector <float > larmJoints = walkProvider.getChainJoints(LARM_CHAIN);
         
 		// Copy the new values into place, and wait to be signaled.
 		pthread_mutex_lock(&next_joints_mutex);
@@ -150,29 +150,29 @@ void NBWalk::processJoints()
 void NBWalk::updateNBSensors()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "NBWalk::updateNBSensors()" << endl;
+        debug << "NBWalk::updateNBSensors()" << std::endl;
     #endif
     
     // I'll to the joints first. All I need to do is get the order right
     // Positions
-    vector<float> nu_jointpositions;
+    std::vector<float> nu_jointpositions;
     m_data->getPosition(NUSensorsData::All, nu_jointpositions);
-    vector<float> nb_jointpositions(nu_jointpositions.size(), 0);
+    std::vector<float> nb_jointpositions(nu_jointpositions.size(), 0);
     nuToNBJointOrder(nu_jointpositions, nb_jointpositions);
     nb_sensors->setBodyAngles(nb_jointpositions);
     // Temperatures
-    vector<float> nu_jointtemperatures;
+    std::vector<float> nu_jointtemperatures;
     m_data->getTemperature(NUSensorsData::All, nu_jointtemperatures);
-    vector<float> nb_jointtemperatures(nu_jointtemperatures.size(), 0);
+    std::vector<float> nb_jointtemperatures(nu_jointtemperatures.size(), 0);
     nuToNBJointOrder(nu_jointtemperatures, nb_jointtemperatures);
     nb_sensors->setBodyTemperatures(nb_jointtemperatures);
     
     // Now to the other sensors!
-    static vector<float> accelvalues(3,0);
-    static vector<float> gyrovalues(2,0);
-    static vector<float> orientation(2,0);
-    static vector<float> lfootvalues(4,0);
-    static vector<float> rfootvalues(4,0);
+    static std::vector<float> accelvalues(3,0);
+    static std::vector<float> gyrovalues(2,0);
+    static std::vector<float> orientation(2,0);
+    static std::vector<float> lfootvalues(4,0);
+    static std::vector<float> rfootvalues(4,0);
     m_data->getAccelerometer(accelvalues);
     m_data->getGyro(gyrovalues);
     m_data->getOrientation(orientation);
@@ -199,7 +199,7 @@ void NBWalk::setWalkParameters(const WalkParameters& walkparameters)
 void NBWalk::setGait()
 {
     // copy the parameters from m_walk_parameters into m_gait
-    vector<Parameter>& parameters = m_walk_parameters.getParameters();
+    std::vector<Parameter>& parameters = m_walk_parameters.getParameters();
     m_gait->step[0] = 1/parameters[0].get();        // step frequency
     m_gait->step[2] = 10*parameters[1].get();       // step height
     m_gait->zmp[1] = parameters[2].get();           // zmp static fraction
@@ -216,13 +216,13 @@ void NBWalk::setGait()
     m_gait->stance[3] = parameters[11].get();        // forward lean
     m_gait->stance[0] = 10*parameters[12].get();     // torso height
     
-    vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
+    std::vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     m_gait->step[4] = 10*maxspeeds[0];
     m_gait->step[5] = -10*maxspeeds[0];
     m_gait->step[6] = 10*maxspeeds[1];
     m_gait->step[7] = 2*maxspeeds[2];
     
-    vector<float>& maxaccelerations = m_walk_parameters.getMaxAccelerations();
+    std::vector<float>& maxaccelerations = m_walk_parameters.getMaxAccelerations();
     m_gait->step[8] = 10*maxaccelerations[0];
     m_gait->step[9] = 10*maxaccelerations[1];
     m_gait->step[10] = 2*maxaccelerations[2];
@@ -230,7 +230,7 @@ void NBWalk::setGait()
     walkProvider.setCommand(m_gait);
 }
 
-void NBWalk::nuToNBJointOrder(const vector<float>& nujoints, vector<float>& nbjoints)
+void NBWalk::nuToNBJointOrder(const std::vector<float>& nujoints, std::vector<float>& nbjoints)
 {
     // NB order: HeadYaw, HeadPitch, LShoulderPitch, LShoulderRoll, LElbowYaw, LElbowRoll, LHipYawPitch, LHipRoll, LHipPitch, LKneePitch, LAnklePitch, LAnkleRoll, LHipYawPitch, RHipRoll, RHipPitch, RKneePitch, RAnklePitch, RAnkleRoll, RShoulderPitch, RShoulderRoll, RElbowYaw, RElbowRoll 
     // NU order: 0.HeadPitch, 1.HeadYaw, 2.LShoulderRoll, 3.LShoulderPitch, 4.LElbowRoll, 5.LElbowYaw, 6.RShoulderRoll, 7.RShoulderPitch, 8.RElbowRoll, 9.RElbowYaw, 10.LHipRoll, 11.LHipPitch, 12.LHipYawPitch, 13.LKneePitch, 14.LAnkleRoll, 15.LAnklePitch, 16.RHipRoll, 17.RHipPitch, 18.RHipYawPitch, 19.RKneePitch, 20.RAnkleRoll, 21.RAnklePitch
@@ -261,7 +261,7 @@ void NBWalk::nuToNBJointOrder(const vector<float>& nujoints, vector<float>& nbjo
     nbjoints[21] = nujoints[8];     // RElbowRoll
 }
 
-void NBWalk::nbToNUJointOrder(const vector<float>& nbjoints, vector<float>& nujoints)
+void NBWalk::nbToNUJointOrder(const std::vector<float>& nbjoints, std::vector<float>& nujoints)
 {
     // NB order: 0.HeadYaw, 1.HeadPitch, 2.LShoulderPitch, 3.LShoulderRoll, 4.LElbowYaw, 5.LElbowRoll, 6.LHipYawPitch, 7.LHipRoll, 8.LHipPitch, 9.LKneePitch, 10.LAnklePitch, 11.LAnkleRoll, 12.RHipYawPitch, 13.RHipRoll, 14.RHipPitch, 15.RKneePitch, 16.RAnklePitch, 17.RAnkleRoll, 18.RShoulderPitch, 19.RShoulderRoll, 20.RElbowYaw, 21.RElbowRoll 
     // NU order: 0.HeadPitch, 1.HeadYaw, 2.LShoulderRoll, 3.LShoulderPitch, 4.LElbowRoll, 5.LElbowYaw, 6.RShoulderRoll, 7.RShoulderPitch, 8.RElbowRoll, 9.RElbowYaw, 10.LHipRoll, 11.LHipPitch, 12.LHipYawPitch, 13.LKneePitch, 14.LAnkleRoll, 15.LAnklePitch, 16.RHipRoll, 17.RHipPitch, 18.RHipYawPitch, 19.RKneePitch, 20.RAnkleRoll, 21.RAnklePitch
@@ -292,7 +292,7 @@ void NBWalk::nbToNUJointOrder(const vector<float>& nbjoints, vector<float>& nujo
     nujoints[21] = nbjoints[16];    // RAnklePitch
 }
 
-void NBWalk::nbToNULeftLegJointOrder(const vector<float>& nbjoints, vector<float>& nuleftlegjoints)
+void NBWalk::nbToNULeftLegJointOrder(const std::vector<float>& nbjoints, std::vector<float>& nuleftlegjoints)
 {
     if (nbjoints.size() < 22 || nuleftlegjoints.size() < 6)
         return;
@@ -304,7 +304,7 @@ void NBWalk::nbToNULeftLegJointOrder(const vector<float>& nbjoints, vector<float
     nuleftlegjoints[5] = nbjoints[10];    // LAnklePitch
 }
 
-void NBWalk::nbToNURightLegJointOrder(const vector<float>& nbjoints, vector<float>& nurightlegjoints)
+void NBWalk::nbToNURightLegJointOrder(const std::vector<float>& nbjoints, std::vector<float>& nurightlegjoints)
 {
     if (nbjoints.size() < 22 || nurightlegjoints.size() < 6)
         return;
@@ -316,7 +316,7 @@ void NBWalk::nbToNURightLegJointOrder(const vector<float>& nbjoints, vector<floa
     nurightlegjoints[5] = nbjoints[16];    // RAnklePitch
 }
 
-void NBWalk::nbToNULeftArmJointOrder(const vector<float>& nbjoints, vector<float>& nuleftarmjoints)
+void NBWalk::nbToNULeftArmJointOrder(const std::vector<float>& nbjoints, std::vector<float>& nuleftarmjoints)
 {
     if (nbjoints.size() < 22 || nuleftarmjoints.size() < 4)
         return;
@@ -326,7 +326,7 @@ void NBWalk::nbToNULeftArmJointOrder(const vector<float>& nbjoints, vector<float
     nuleftarmjoints[3] = nbjoints[4];      // LElbowYaw       
 }
 
-void NBWalk::nbToNURightArmJointOrder(const vector<float>& nbjoints, vector<float>& nurightarmjoints)
+void NBWalk::nbToNURightArmJointOrder(const std::vector<float>& nbjoints, std::vector<float>& nurightarmjoints)
 {
     if (nbjoints.size() < 22 || nurightarmjoints.size() < 4)
         return;
@@ -340,13 +340,13 @@ void NBWalk::nbToNURightArmJointOrder(const vector<float>& nbjoints, vector<floa
  */
 void NBWalk::updateActionatorsData()
 {
-    static vector<float> nu_nextLeftLegJoints(m_actions->getSize(NUActionatorsData::LLeg), 0);
-    static vector<float> nu_nextRightLegJoints(m_actions->getSize(NUActionatorsData::RLeg), 0);
-    static vector<float> nu_nextLeftArmJoints(m_actions->getSize(NUActionatorsData::LArm), 0);
-    static vector<float> nu_nextRightArmJoints(m_actions->getSize(NUActionatorsData::RArm), 0);
+    static std::vector<float> nu_nextLeftLegJoints(m_actions->getSize(NUActionatorsData::LLeg), 0);
+    static std::vector<float> nu_nextRightLegJoints(m_actions->getSize(NUActionatorsData::RLeg), 0);
+    static std::vector<float> nu_nextLeftArmJoints(m_actions->getSize(NUActionatorsData::LArm), 0);
+    static std::vector<float> nu_nextRightArmJoints(m_actions->getSize(NUActionatorsData::RArm), 0);
     
-    vector<vector<float> >& armgains = m_walk_parameters.getArmGains();
-    vector<vector<float> >& leggains = m_walk_parameters.getLegGains();
+    std::vector<std::vector<float> >& armgains = m_walk_parameters.getArmGains();
+    std::vector<std::vector<float> >& leggains = m_walk_parameters.getLegGains();
     
     nbToNULeftLegJointOrder(nextJoints, nu_nextLeftLegJoints);
     nbToNURightLegJointOrder(nextJoints, nu_nextRightLegJoints);

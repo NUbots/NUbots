@@ -150,7 +150,7 @@ timeStamp(0),
 storedTimeStamp(Platform->getTime())
 {
 #if DEBUG_NUCAMERA_VERBOSITY > 4
-    debug << "NAOCamera::NAOCamera()" << endl;
+    debug << "NAOCamera::NAOCamera()" << std::endl;
 #endif
 
     // Set current camera to unknown.
@@ -158,7 +158,7 @@ storedTimeStamp(Platform->getTime())
 
     //Read camera settings from file.
     CameraSettings fileSettings;
-    fileSettings.LoadFromFile(CONFIG_DIR + string("Camera.cfg"));
+    fileSettings.LoadFromFile(CONFIG_DIR + std::string("Camera.cfg"));
 
     // Open device
     openCameraDevice("/dev/video0");
@@ -190,7 +190,7 @@ storedTimeStamp(Platform->getTime())
 NAOCamera::~NAOCamera()
 {
 #if DEBUG_NUCAMERA_VERBOSITY > 4
-    debug << "NAOCamera::~NAOCamera()" << endl;
+    debug << "NAOCamera::~NAOCamera()" << std::endl;
 #endif
   // disable streaming
   setStreaming(false);
@@ -211,10 +211,10 @@ void NAOCamera::openCameraDevice(std::string device_name)
     #if DEBUG_NUCAMERA_VERBOSITY > 4
     if(fd != -1)
     {
-        debug << "NAOCamera::NAOCamera(): " << device_name << " Opened Successfully." << endl;
+        debug << "NAOCamera::NAOCamera(): " << device_name << " Opened Successfully." << std::endl;
     }
     else {
-        debug << "NAOCamera::NAOCamera(): " << device_name << " Could Not Be Opened: " << strerror(errno) << endl;
+        debug << "NAOCamera::NAOCamera(): " << device_name << " Could Not Be Opened: " << strerror(errno) << std::endl;
     }
     #endif
 }
@@ -224,7 +224,7 @@ void NAOCamera::setStreaming(bool streaming_on)
     int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     int instruction = streaming_on ? VIDIOC_STREAMON: VIDIOC_STREAMOFF;
     VERIFY(ioctl(fd, instruction, &type) != -1);
-    debug << "NAOCamera: streaming - " << streaming_on << endl;
+    debug << "NAOCamera: streaming - " << streaming_on << std::endl;
 }
 
 void NAOCamera::initialiseCamera()
@@ -243,11 +243,11 @@ void NAOCamera::initialiseCamera()
     #if DEBUG_NUCAMERA_VERBOSITY > 4
     if(returnValue)
     {
-        debug << "NAOCamera::NAOCamera(): Error Setting Video Mode: " << strerror(errno) << endl;
+        debug << "NAOCamera::NAOCamera(): Error Setting Video Mode: " << strerror(errno) << std::endl;
     }
     else
     {
-        debug << "NAOCamera::NAOCamera(): Video Mode set to " << (WIDTH == 320 ? "QVGA" : "VGA") << endl;
+        debug << "NAOCamera::NAOCamera(): Video Mode set to " << (WIDTH == 320 ? "QVGA" : "VGA") << std::endl;
     }
     #else
     VERIFY(!returnValue);
@@ -266,11 +266,11 @@ void NAOCamera::initialiseCamera()
     #if DEBUG_NUCAMERA_VERBOSITY > 4
     if(returnValue)
     {
-        debug << "NAOCamera::NAOCamera(): Error Setting Format: " << strerror(errno) << endl;
+        debug << "NAOCamera::NAOCamera(): Error Setting Format: " << strerror(errno) << std::endl;
     }
     else
     {
-        debug << "NAOCamera::NAOCamera(): Format set" << endl;
+        debug << "NAOCamera::NAOCamera(): Format set" << std::endl;
     }
     #else
     VERIFY(!returnValue);
@@ -411,7 +411,7 @@ CameraSettings::Camera NAOCamera::setActiveCamera(CameraSettings::Camera newCame
 #if DEBUG_NUCAMERA_VERBOSITY > 4
     // Display debug message.
     debug << "NAOCamera: Active camera changed: " << CameraSettings::cameraName(previous_camera);
-    debug << " --> " << CameraSettings::cameraName(newCamera) << endl;
+    debug << " --> " << CameraSettings::cameraName(newCamera) << std::endl;
 #endif
 
     int horzontal_flip, vertical_flip;
@@ -594,18 +594,18 @@ void NAOCamera::forceApplySettings(const CameraSettings& newset)
 
 void NAOCamera::loadCameraOffset()
 {
-    ifstream file((CONFIG_DIR + string("CameraOffsets.cfg")).c_str());
+    ifstream file((CONFIG_DIR + std::string("CameraOffsets.cfg")).c_str());
     if (file.is_open())
     {
-        string macaddress = Platform->getMacAddress();
+        std::string macaddress = Platform->getMacAddress();
         while (not file.eof())
         {
-            string buffer;
-            string addr_buffer;
+            std::string buffer;
+            std::string addr_buffer;
             float offset_buffer;
             
             getline(file, buffer);
-            stringstream ss(buffer);
+            std::stringstream ss(buffer);
             getline(ss, addr_buffer, ':');
             ss >> offset_buffer;
             
@@ -618,7 +618,7 @@ void NAOCamera::loadCameraOffset()
     }
     else
     {
-        errorlog << "NAOCamera::loadCameraOffset(). Unable to load camera offset." << endl;
+        errorlog << "NAOCamera::loadCameraOffset(). Unable to load camera offset." << std::endl;
     }
 }
 

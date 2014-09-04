@@ -23,7 +23,7 @@ all: $(TARGET)
 darwin.a:
 	make -C ../../build
 
-$(TARGET): darwin.a $(OBJS)
+$(TARGET): $(OBJS) darwin.a
 	$(CXX) -o $(TARGET) $(OBJS) ../../lib/darwin.a $(LIBS)
 	
 clean:
@@ -31,10 +31,3 @@ clean:
 
 libclean:
 	make -C ../../build clean
-
-distclean: clean libclean
-
-# useful to make a backup "make tgz"
-tgz: clean
-	mkdir -p backups
-	tar czvf ./backups/firmware_installer_`date +"%Y_%m_%d_%H.%M.%S"`.tgz --exclude backups *

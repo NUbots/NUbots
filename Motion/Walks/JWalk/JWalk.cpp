@@ -70,14 +70,14 @@ JWalk::JWalk() : NUWalk(Blackboard->Sensors, Blackboard->Actions)
     
     
     // Initialise the leg values
-    m_initial_lleg = vector<float>(Blackboard->Actions->getSize(NUActionatorsData::LLeg), 0);
-    m_initial_rleg = vector<float>(Blackboard->Actions->getSize(NUActionatorsData::RLeg), 0);
+    m_initial_lleg = std::vector<float>(Blackboard->Actions->getSize(NUActionatorsData::LLeg), 0);
+    m_initial_rleg = std::vector<float>(Blackboard->Actions->getSize(NUActionatorsData::RLeg), 0);
     
     // Initialise the arm values
     float larm[] = {0.1, 1.57, 0.15, -1.57};
     float rarm[] = {-0.1, 1.57, 0.15, 1.57};
-    m_initial_larm = vector<float>(larm, larm + sizeof(larm)/sizeof(*larm));
-    m_initial_rarm = vector<float>(rarm, rarm + sizeof(rarm)/sizeof(*rarm));
+    m_initial_larm = std::vector<float>(larm, larm + sizeof(larm)/sizeof(*larm));
+    m_initial_rarm = std::vector<float>(rarm, rarm + sizeof(rarm)/sizeof(*rarm));
 }
 
 /*! @brief Destructor for motion module
@@ -108,7 +108,7 @@ void JWalk::doWalk()
     RightState = next_r;
     
     #if DEBUG_NUMOTION_VERBOSITY > 0
-        debug << "JWalk::doWalk(). CurrentTime: " << CurrentTime << " Phase: " << GaitPhase << " Left: " << LeftState->getName() << " Right: " << RightState->getName() << endl;
+        debug << "JWalk::doWalk(). CurrentTime: " << CurrentTime << " Phase: " << GaitPhase << " Left: " << LeftState->getName() << " Right: " << RightState->getName() << std::endl;
     #endif
     
     LeftState->doIt();

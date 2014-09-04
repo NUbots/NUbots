@@ -39,7 +39,7 @@
     @param output the stream to put the job in
     @param job the job to put in the stream
  */
-ostream& operator<< (ostream& output, const MotionJob& job)
+std::ostream& operator<< (std::ostream& output, const MotionJob& job)
 {
     job.toStream(output);
     return output;

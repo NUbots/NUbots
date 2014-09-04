@@ -33,7 +33,7 @@
 FallProtection::FallProtection(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions) : NUMotionProvider("FallProtection", data, actions)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "FallProtection::FallProtection()" << endl;
+        debug << "FallProtection::FallProtection()" << std::endl;
     #endif
     m_walk = walk;
     #ifdef USE_FALL_PROTECTION
@@ -145,12 +145,12 @@ void FallProtection::process(NUSensorsData* data, NUActionatorsData* actions)
     m_data = data;
     m_actions = actions;
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "FallProtection::process()" << endl;
+        debug << "FallProtection::process()" << std::endl;
     #endif
     if (m_data->isFalling())
     {
-        vector<float> sensor_larm, sensor_rarm;
-        vector<float> sensor_lleg, sensor_rleg;
+        std::vector<float> sensor_larm, sensor_rarm;
+        std::vector<float> sensor_lleg, sensor_rleg;
         m_data->getPosition(NUSensorsData::LArm, sensor_larm);
         m_data->getPosition(NUSensorsData::RArm, sensor_rarm);
         m_data->getPosition(NUSensorsData::LLeg, sensor_lleg);
@@ -161,9 +161,9 @@ void FallProtection::process(NUSensorsData* data, NUActionatorsData* actions)
         m_actions->add(NUActionatorsData::LArm, 0, sensor_larm, 0);
         m_actions->add(NUActionatorsData::RArm, 0, sensor_rarm, 0);
         
-        vector<float> head_position(2,0);
-        vector<float> head_velocity(2,0);
-        vector<float> falling;
+        std::vector<float> head_position(2,0);
+        std::vector<float> head_velocity(2,0);
+        std::vector<float> falling;
         m_data->getFalling(falling);
         if (falling[3])         // forward
             head_position[0] = -0.67;

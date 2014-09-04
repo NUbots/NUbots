@@ -14,8 +14,6 @@
 #define MOTION_FILE_PATH    "../../../Data/motion_4096.bin"
 #endif
 
-#define INI_FILE_PATH       "../../../Data/config.ini"
-
 using namespace Robot;
 
 LinuxCM730 linux_cm730("/dev/ttyUSB0");
@@ -49,8 +47,6 @@ int main(int argc, char *argv[])
     int ch;
     char filename[128];
 
-    minIni* ini = new minIni(INI_FILE_PATH);
-
     change_current_dir();
     if(argc < 2)
         strcpy(filename, MOTION_FILE_PATH); // Set default motion file path
@@ -83,7 +79,6 @@ int main(int argc, char *argv[])
         printf("Initializing Motion Manager failed!\n");
         return 0;
     }
-    MotionManager::GetInstance()->LoadINISettings(ini);
     MotionManager::GetInstance()->AddModule((MotionModule*)Action::GetInstance());	
     LinuxMotionTimer *motion_timer = new LinuxMotionTimer(MotionManager::GetInstance());
     motion_timer->Stop();

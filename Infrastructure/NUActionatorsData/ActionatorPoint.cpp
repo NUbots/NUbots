@@ -33,57 +33,57 @@ using namespace boost;
 ActionatorPoint::ActionatorPoint(const double& time, const float& data)
 {
     Time = time;
-    FloatData = shared_ptr<float>(new float(data));
+    FloatData = boost::shared_ptr<float>(new float(data));
 }
 
-/*! @brief Constructs an ActionatorPoint that holds a vector of data values
+/*! @brief Constructs an ActionatorPoint that holds a std::vector of data values
     @param time the time the data will be applied
     @param data the actionator data
  */
-ActionatorPoint::ActionatorPoint(const double& time, const vector<float>& data)
+ActionatorPoint::ActionatorPoint(const double& time, const std::vector<float>& data)
 {
     Time = time;
-    VectorData = shared_ptr<vector<float> >(new vector<float>(data));
+    VectorData = boost::shared_ptr<std::vector<float> >(new std::vector<float>(data));
 }
 
 /*! @brief Constructs an ActionatorPoint that holds a matrix of data values
     @param time the time the data will be applied
     @param data the actionator data
  */
-ActionatorPoint::ActionatorPoint(const double& time, const vector<vector<float> >& data)
+ActionatorPoint::ActionatorPoint(const double& time, const std::vector<std::vector<float> >& data)
 {
     Time = time;
-    MatrixData = shared_ptr<vector<vector<float> > >(new vector<vector<float> >(data));
+    MatrixData = boost::shared_ptr<std::vector<std::vector<float> > >(new std::vector<std::vector<float> >(data));
 }
 
 /*! @brief Constructs an ActionatorPoint that holds a three dimensional matrix of data values
     @param time the time the data will be applied
     @param data the actionator data
  */
-ActionatorPoint::ActionatorPoint(const double& time, const vector<vector<vector<float> > >& data)
+ActionatorPoint::ActionatorPoint(const double& time, const std::vector<std::vector<std::vector<float> > >& data)
 {
     Time = time;
-    ThreeDimData = shared_ptr<vector<vector<vector<float> > > >(new vector<vector<vector<float> > >(data));
+    ThreeDimData = boost::shared_ptr<std::vector<std::vector<std::vector<float> > > >(new std::vector<std::vector<std::vector<float> > >(data));
 }
 
-/*! @brief Constructs an ActionatorPoint that holds a string
+/*! @brief Constructs an ActionatorPoint that holds a std::string
     @param time the time the data will be applied
     @param data the actionator data
  */
-ActionatorPoint::ActionatorPoint(const double& time, const string& data)
+ActionatorPoint::ActionatorPoint(const double& time, const std::string& data)
 {
     Time = time;
-    StringData = shared_ptr<string>(new string(data));
+    StringData = boost::shared_ptr<std::string>(new std::string(data));
 }
 
-/*! @brief Constructs an ActionatorPoint that holds a vector of strings
+/*! @brief Constructs an ActionatorPoint that holds a std::vector of std::strings
     @param time the time the data will be applied
     @param data the actionator data
  */
-ActionatorPoint::ActionatorPoint(const double& time, const vector<string>& data)
+ActionatorPoint::ActionatorPoint(const double& time, const std::vector<std::string>& data)
 {
     Time = time;
-    VectorStringData = shared_ptr<vector<string> >(new vector<string>(data));
+    VectorStringData = boost::shared_ptr<std::vector<std::string> >(new std::vector<std::string>(data));
 }
 
 /*! @brief Copy constructor for an ActionatorPoint. 
@@ -113,7 +113,7 @@ bool ActionatorPoint::operator< (const ActionatorPoint& other) const
 }
 
 /*! @brief operator<< for outputing the contents of an actionator_point */
-ostream& operator<< (ostream& output, const ActionatorPoint& p)
+std::ostream& operator<< (std::ostream& output, const ActionatorPoint& p)
 {
     output << p.Time << ": ";
     if (p.FloatData)

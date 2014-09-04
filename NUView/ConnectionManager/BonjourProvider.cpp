@@ -28,7 +28,7 @@
 /*! @brief Constructs a BonjourProvider over the specified services.
  	@param servicetypes the name of each of the services we want to monitor (eg. _workstation._tcp)
  */
-BonjourProvider::BonjourProvider(const vector<string>& servicetypes)
+BonjourProvider::BonjourProvider(const std::vector<std::string>& servicetypes)
 {
     m_service_names = servicetypes;
     m_services.reserve(servicetypes.size());
@@ -47,7 +47,7 @@ BonjourProvider::~BonjourProvider()
 }
 
 /* @brief Returns the names of the services we are monitoring */
-vector<string>& BonjourProvider::getServices()
+std::vector<std::string>& BonjourProvider::getServices()
 {
     return m_service_names;
 }
@@ -57,9 +57,9 @@ vector<string>& BonjourProvider::getServices()
  		   The hosts will be formatted as [serviceA, serviceB, .... , serviceN]
            where each serviceI is a list [host0, host1, ...., hostM]
  */
-vector<list<NUHostInfo> > BonjourProvider::getHosts()
+std::vector<std::list<NUHostInfo> > BonjourProvider::getHosts()
 {
-    vector<list<NUHostInfo> > hosts;
+    std::vector<std::list<NUHostInfo> > hosts;
     hosts.reserve(m_services.size());
     for (size_t i=0; i<m_services.size(); i++)
         hosts.push_back(m_services[i]->getHosts());
@@ -72,12 +72,12 @@ vector<list<NUHostInfo> > BonjourProvider::getHosts()
  	@return a NUHostInfo containing both the full hostname, and its ip address. If the hostname can
  	        not be resolved an empty NUHostInfo will be returned
  */
-NUHostInfo BonjourProvider::lookupHostName(string& name)
+NUHostInfo BonjourProvider::lookupHostName(std::string& name)
 {
-    vector<list<NUHostInfo> > hosts = getHosts();
+    std::vector<std::list<NUHostInfo> > hosts = getHosts();
     for (size_t i=0; i<hosts.size(); i++)
     {
-        for (list<NUHostInfo>::iterator it = hosts[i].begin(); it != hosts[i].end(); ++it)
+        for (std::list<NUHostInfo>::iterator it = hosts[i].begin(); it != hosts[i].end(); ++it)
         {
             if ((*it) == name)
                 return *it;

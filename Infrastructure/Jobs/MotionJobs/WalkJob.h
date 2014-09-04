@@ -27,26 +27,26 @@
 
 #include "../MotionJob.h"
 #include <vector>
-using namespace std;
+
 
 class WalkJob : public MotionJob
 {
 public:
     WalkJob(float x, float y, float yaw);
-    WalkJob(istream& input);
+    WalkJob(std::istream& input);
     ~WalkJob();
     
     float getTranslationSpeed();
     float getDirection();
     float getRotationSpeed();
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
     
-    friend ostream& operator<<(ostream& output, const WalkJob& job);
-    friend ostream& operator<<(ostream& output, const WalkJob* job);
+    friend std::ostream& operator<<(std::ostream& output, const WalkJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const WalkJob* job);
 protected:
-    virtual void toStream(ostream& output) const;
+    virtual void toStream(std::ostream& output) const;
 private:
     float m_translation_speed;          //!< the translational speed between 0 and 1
     float m_direction;                  //!< the translational direction of the walk    

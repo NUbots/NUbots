@@ -31,7 +31,7 @@ OdometryEstimator::OdometryEstimator()
 
     // Tuning variables
     m_minimum_support_foot_pressure = 1.0; // in Newtons. 0.75 initial (robot 214)
-    m_turn_multiplier = 1.2f;   // Turn Gripping factor
+    m_turn_multiplier = 1.0f;   // Turn Gripping factor
     m_x_multiplier = 1.0f;      // X Gripping factor
     m_y_multiplier = 1.0f;      // Y Gripping factor
 

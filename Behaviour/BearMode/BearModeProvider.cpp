@@ -27,11 +27,11 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-using namespace std;
+
 
 BearModeProvider::BearModeProvider(Behaviour* manager) : BehaviourProvider(manager)
 {
-    cout << "Bear Mode Engaged!" << endl;
+    std::cout << "Bear Mode Engaged!" << std::endl;
 }
 
 

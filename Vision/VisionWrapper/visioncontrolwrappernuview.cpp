@@ -24,18 +24,18 @@ int VisionControlWrapper::runFrame()
     static unsigned int frame = 0;
     int status;
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "VisionControlWrapper::runFrame(): - frame " << frame << endl;
+        debug << "VisionControlWrapper::runFrame(): - frame " << frame << std::endl;
     #endif
     frame = (frame + 1) % 10000;
     
     if(!wrapper->updateFrame()) {
         #if VISION_WRAPPER_VERBOSITY > 1
-            debug << "VisionControlWrapper::runFrame() - updateFrame() failed" << endl;
+            debug << "VisionControlWrapper::runFrame() - updateFrame() failed" << std::endl;
         #endif
         return -1;  //failure - do not run vision
     }
 
-    status = controller.runFrame(Blackboard->lookForBall, Blackboard->lookForGoals, Blackboard->lookForFieldPoints, true); //run vision on the frame
+    status = controller.runFrame(Blackboard->lookForBall, Blackboard->lookForGoals, Blackboard->lookForFieldPoints, Blackboard->lookForObstacles); //run vision on the frame
 
     wrapper->postProcess();
 
@@ -45,7 +45,7 @@ int VisionControlWrapper::runFrame()
 void VisionControlWrapper::saveAnImage() const
 {
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "VisionControlWrapper::saveAnImage():" << endl;
+        debug << "VisionControlWrapper::saveAnImage():" << std::endl;
     #endif
     wrapper->saveAnImage();
 }

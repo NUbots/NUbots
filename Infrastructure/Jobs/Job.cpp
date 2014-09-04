@@ -77,10 +77,10 @@ double Job::getTime()
  
     @param output the stream to write the job to
  */
-void Job::toStream(ostream& output) const
+void Job::toStream(std::ostream& output) const
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "Job::toStream()" << endl;
+        debug << "Job::toStream()" << std::endl;
     #endif
     
     output << static_cast<unsigned int>(m_job_type) << " " << static_cast<unsigned int>(m_job_id) << " ";
@@ -98,7 +98,7 @@ void Job::toStream(ostream& output) const
     @param output the stream to put the job in
     @param job the job to put in the stream
  */
-ostream& operator<<(ostream& output, const Job& job)
+std::ostream& operator<<(std::ostream& output, const Job& job)
 {
     job.toStream(output);
     return output;
@@ -113,7 +113,7 @@ ostream& operator<<(ostream& output, const Job& job)
     @param output the stream to put the job in
     @param job the pointer to the job to put in the stream
  */
-ostream& operator<<(ostream& output, const Job* job)
+std::ostream& operator<<(std::ostream& output, const Job* job)
 {
     if (job != NULL)
         job->toStream(output);
@@ -138,10 +138,10 @@ ostream& operator<<(ostream& output, const Job* job)
                     @endcode
                there isn't a way around this (yet).
  */
-istream& operator>>(istream& input, Job** job)
+std::istream& operator>>(std::istream& input, Job** job)
 {
 #if DEBUG_JOBS_VERBOSITY > 4
-    debug << ">>Job**" << endl;
+    debug << ">>Job**" << std::endl;
 #endif
     
     unsigned int tempuint = 0;
@@ -214,7 +214,7 @@ istream& operator>>(istream& input, Job** job)
             *job = new SaveImagesJob(input);
             break;
         default:
-            errorlog << "Job::operator>>. UNKNOWN JOBID: " << jobid << ". Your stream might never recover :(" << endl;
+            errorlog << "Job::operator>>. UNKNOWN JOBID: " << jobid << ". Your stream might never recover :(" << std::endl;
             break;
     }    
 #if DEBUG_JOBS_VERBOSITY > 4

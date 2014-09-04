@@ -67,7 +67,7 @@ private:
     void moveTo(const std::vector<double>& times, const std::vector<std::vector<float> >& positions);
     void doHead();
     
-    void calculateHeadTarget(float elevation, float bearing, float centreelevation, float centrebearing, vector<double>& times, vector<vector<float> >& positions);
+    void calculateHeadTarget(float elevation, float bearing, float centreelevation, float centrebearing, std::vector<double>& times, std::vector<std::vector<float> >& positions);
     
     void calculatePan();
     void calculateBallPan();
@@ -77,10 +77,10 @@ private:
     
     void getSensorValues();
     void calculateMinAndMaxPitch(float mindistance, float maxdistance, float& minpitch, float& maxpitch);
-    vector<float> calculatePanLevels(float minpitch, float maxpitch);
-    vector<vector<float> > calculatePanPoints(const vector<float>& levels, float minyaw, float maxyaw);
-    void generateScan(float pitch, float previouspitch, float minyaw, float maxyaw, bool& onleft, vector<vector<float> >& scan);
-    vector<double> calculatePanTimes(const vector<vector<float> >& points, float panspeed);
+    std::vector<float> calculatePanLevels(float minpitch, float maxpitch);
+    std::vector<std::vector<float> > calculatePanPoints(const std::vector<float>& levels, float minyaw, float maxyaw);
+    void generateScan(float pitch, float previouspitch, float minyaw, float maxyaw, bool& onleft, std::vector<std::vector<float> >& scan);
+    std::vector<double> calculatePanTimes(const std::vector<std::vector<float> >& points, float panspeed);
     int getPanLimitIndex(float pitch);
     bool panYawLimitsChange(float pitch_a, float pitch_b);
     
@@ -89,8 +89,8 @@ private:
     void calculateBallAndLocalisationNod();
     void calculateLocalisationNod();
     void calculateGenericNod(float mindistance, float maxdistance, float nodspeed);
-    vector<vector<float> > calculateNodPoints(float minpitch, float maxpitch);
-    vector<double> calculateNodTimes(const vector<vector<float> >& points, float nodspeed);
+    std::vector<std::vector<float> > calculateNodPoints(float minpitch, float maxpitch);
+    std::vector<double> calculateNodTimes(const std::vector<std::vector<float> >& points, float nodspeed);
     
     void load();
     void loadConfig();
@@ -114,8 +114,8 @@ private:
     bool m_pan_default_values;                  //!< true if the pan should use the default values for the pantype
     float m_pan_ball_speed;                     //!< the speed of pans looking for the ball (Loaded from HeadPan.cfg)
     float m_pan_localisation_speed;             //!< the speed of pans looking for field objects that aren't the ball (Loaded from HeadPan.cfg)
-    vector<float> m_pan_limits_pitch;           //!< the corresponding pitch values for the yaw limits (Loaded from HeadPan.cfg)
-    vector<vector<float> > m_pan_limits_yaw;    //!< the yaw limits of the pan (Loaded from HeadPan.cfg)
+    std::vector<float> m_pan_limits_pitch;           //!< the corresponding pitch values for the yaw limits (Loaded from HeadPan.cfg)
+    std::vector<std::vector<float> > m_pan_limits_yaw;    //!< the yaw limits of the pan (Loaded from HeadPan.cfg)
     float m_x_min, m_x_max;                     //!< the minimum and maximum distances to use for a pan when m_pan_default_values is false
     float m_yaw_min, m_yaw_max;                 //!< the minimum and maximum distances to use for a pan when m_pan_default_values is false
     
@@ -124,15 +124,15 @@ private:
     float m_nod_centre;                         //!< the centre yaw angle for the nod
     
     double m_move_end_time;                     //!< the time at which we need to resend the calculated curves to the actionators
-    vector<vector<double> > m_curve_times;      //!< the motion curve times in ms
-    vector<vector<float> > m_curve_positions;   //!< the motion curve positions in radians
-    vector<vector<float> > m_curve_velocities;  //!< the motion curve velocities in radians
+    std::vector<std::vector<double> > m_curve_times;      //!< the motion curve times in ms
+    std::vector<std::vector<float> > m_curve_positions;   //!< the motion curve positions in radians
+    std::vector<std::vector<float> > m_curve_velocities;  //!< the motion curve velocities in radians
     
-    vector<float> m_max_speeds;                 //!< the maximum speeds in rad/s (Loaded from Head.cfg. It is very important that head can move at these maximum speeds!
-    vector<float> m_max_accelerations;          //!< the maximum accelerations in rad/s/s (Loaded from Head.cfg)
-    vector<float> m_default_gains;              //!< the default gains (Loaded from Head.cfg)
-    vector<float> m_pitch_limits;               //!< the pitch min and max (Loaded from Head.cfg)
-    vector<float> m_yaw_limits;                 //!< the yaw min and max (Loaded from Head.cfg)
+    std::vector<float> m_max_speeds;                 //!< the maximum speeds in rad/s (Loaded from Head.cfg. It is very important that head can move at these maximum speeds!
+    std::vector<float> m_max_accelerations;          //!< the maximum accelerations in rad/s/s (Loaded from Head.cfg)
+    std::vector<float> m_default_gains;              //!< the default gains (Loaded from Head.cfg)
+    std::vector<float> m_pitch_limits;               //!< the pitch min and max (Loaded from Head.cfg)
+    std::vector<float> m_yaw_limits;                 //!< the yaw min and max (Loaded from Head.cfg)
 };
 
 #endif

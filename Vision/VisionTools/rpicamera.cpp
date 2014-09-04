@@ -152,7 +152,7 @@ timeStamp(0),
 storedTimeStamp(Platform->getTime())
 {
 #if DEBUG_NUCAMERA_VERBOSITY > 4
-    debug << "RPiCamera::RPiCamera()" << endl;
+    debug << "RPiCamera::RPiCamera()" << std::endl;
 #endif
 
     // Set current camera to unknown.
@@ -160,8 +160,8 @@ storedTimeStamp(Platform->getTime())
 
     //Read camera settings from file.
     CameraSettings fileSettings;
-    fileSettings.LoadFromFile(CONFIG_DIR + string("Camera.cfg"));
-    debug << "Loading settings from " << CONFIG_DIR + string("Camera.cfg") << endl;
+    fileSettings.LoadFromFile(CONFIG_DIR + std::string("Camera.cfg"));
+    debug << "Loading settings from " << CONFIG_DIR + std::string("Camera.cfg") << std::endl;
 
     // Open device
     openCameraDevice("/dev/video0");
@@ -182,7 +182,7 @@ storedTimeStamp(Platform->getTime())
 RPiCamera::~RPiCamera()
 {
 #if DEBUG_NUCAMERA_VERBOSITY > 4
-    debug << "RPiCamera::~RPiCamera()" << endl;
+    debug << "RPiCamera::~RPiCamera()" << std::endl;
 #endif
   // disable streaming
   setStreaming(false);
@@ -203,10 +203,10 @@ void RPiCamera::openCameraDevice(std::string device_name)
     #if DEBUG_NUCAMERA_VERBOSITY > 4
     if(fd != -1)
     {
-        debug << "RPiCamera::RPiCamera(): " << device_name << " Opened Successfully." << endl;
+        debug << "RPiCamera::RPiCamera(): " << device_name << " Opened Successfully." << std::endl;
     }
     else {
-        debug << "RPiCamera::RPiCamera(): " << device_name << " Could Not Be Opened: " << strerror(errno) << endl;
+        debug << "RPiCamera::RPiCamera(): " << device_name << " Could Not Be Opened: " << strerror(errno) << std::endl;
     }
     #endif
 }
@@ -216,7 +216,7 @@ void RPiCamera::setStreaming(bool streaming_on)
     int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     int instruction = streaming_on ? VIDIOC_STREAMON: VIDIOC_STREAMOFF;
     VERIFY(ioctl(fd, instruction, &type) != -1);
-    debug << "RPiCamera: streaming - " << streaming_on << endl;
+    debug << "RPiCamera: streaming - " << streaming_on << std::endl;
 }
 
 void RPiCamera::initialiseCamera()
@@ -235,11 +235,11 @@ void RPiCamera::initialiseCamera()
     #if DEBUG_NUCAMERA_VERBOSITY > 4
     if(returnValue)
     {
-        debug << "RPiCamera::RPiCamera(): Error Setting Video Mode: " << strerror(errno) << endl;
+        debug << "RPiCamera::RPiCamera(): Error Setting Video Mode: " << strerror(errno) << std::endl;
     }
     else
     {
-        debug << "RPiCamera::RPiCamera(): Video Mode set to " << (WIDTH == 320 ? "QVGA" : "VGA") << endl;
+        debug << "RPiCamera::RPiCamera(): Video Mode set to " << (WIDTH == 320 ? "QVGA" : "VGA") << std::endl;
     }
     #else
     VERIFY(!returnValue);
@@ -258,11 +258,11 @@ void RPiCamera::initialiseCamera()
     #if DEBUG_NUCAMERA_VERBOSITY > 4
     if(returnValue)
     {
-        debug << "RPiCamera::RPiCamera(): Error Setting Format: " << strerror(errno) << endl;
+        debug << "RPiCamera::RPiCamera(): Error Setting Format: " << strerror(errno) << std::endl;
     }
     else
     {
-        debug << "RPiCamera::RPiCamera(): Format set" << endl;
+        debug << "RPiCamera::RPiCamera(): Format set" << std::endl;
     }
     #else
     VERIFY(!returnValue);
@@ -374,18 +374,18 @@ void RPiCamera::readCameraSettings()
     m_settings.p_sharpness.set(m_settings.sharpness);
 
 #if DEBUG_NUCAMERA_VERBOSITY > 1
-    debug << "RPiCamera::readCameraSettings()" << endl;
-    debug << "\texposureAuto " << m_settings.exposureAuto  << endl;
-    debug << "autoWhiteBalance " << m_settings.autoWhiteBalance  << endl;
-    debug << "whiteBalanceTemperature " << m_settings.whiteBalanceTemperature  << endl;
-    debug << "exposureAutoPriority " << m_settings.exposureAutoPriority  << endl;
-    debug << "brightness " << m_settings.brightness  << endl;
-    debug << "contrast " << m_settings.contrast  << endl;
-    debug << "saturation " << m_settings.saturation  << endl;
-    debug << "gain " << m_settings.gain  << endl;
-    debug << "exposureAbsolute " << m_settings.exposureAbsolute  << endl;
-    debug << "powerLineFrequency " << m_settings.powerLineFrequency  << endl;
-    debug << "sharpness " << m_settings.sharpness  << endl;
+    debug << "RPiCamera::readCameraSettings()" << std::endl;
+    debug << "\texposureAuto " << m_settings.exposureAuto  << std::endl;
+    debug << "autoWhiteBalance " << m_settings.autoWhiteBalance  << std::endl;
+    debug << "whiteBalanceTemperature " << m_settings.whiteBalanceTemperature  << std::endl;
+    debug << "exposureAutoPriority " << m_settings.exposureAutoPriority  << std::endl;
+    debug << "brightness " << m_settings.brightness  << std::endl;
+    debug << "contrast " << m_settings.contrast  << std::endl;
+    debug << "saturation " << m_settings.saturation  << std::endl;
+    debug << "gain " << m_settings.gain  << std::endl;
+    debug << "exposureAbsolute " << m_settings.exposureAbsolute  << std::endl;
+    debug << "powerLineFrequency " << m_settings.powerLineFrequency  << std::endl;
+    debug << "sharpness " << m_settings.sharpness  << std::endl;
 #endif
 }
 
@@ -505,17 +505,17 @@ void RPiCamera::forceApplySettings(const CameraSettings& newset)
 {
 #if DEBUG_NUCAMERA_VERBOSITY > 1
     //Copying the new Paramters into m_settings
-    debug << "p_exposureAuto" << newset.p_exposureAuto.get() << endl;
-    debug << "p_autoWhiteBalance" << newset.p_autoWhiteBalance.get() << endl;
-    debug << "p_whiteBalanceTemperature" << newset.p_whiteBalanceTemperature.get() << endl;
-    debug << "p_exposureAutoPriority" << newset.p_exposureAutoPriority.get() << endl;
-    debug << "p_brightness" << newset.p_brightness.get() << endl;
-    debug << "p_contrast" << newset.p_contrast.get() << endl;
-    debug << "p_saturation" << newset.p_saturation.get() << endl;
-    debug << "p_gain" << newset.p_gain.get() << endl;
-    debug << "p_exposureAbsolute" << newset.p_exposureAbsolute.get() << endl;
-    debug << "p_powerLineFrequency" << newset.p_powerLineFrequency.get() << endl;
-    debug << "p_sharpness" << newset.p_sharpness.get() << endl;
+    debug << "p_exposureAuto" << newset.p_exposureAuto.get() << std::endl;
+    debug << "p_autoWhiteBalance" << newset.p_autoWhiteBalance.get() << std::endl;
+    debug << "p_whiteBalanceTemperature" << newset.p_whiteBalanceTemperature.get() << std::endl;
+    debug << "p_exposureAutoPriority" << newset.p_exposureAutoPriority.get() << std::endl;
+    debug << "p_brightness" << newset.p_brightness.get() << std::endl;
+    debug << "p_contrast" << newset.p_contrast.get() << std::endl;
+    debug << "p_saturation" << newset.p_saturation.get() << std::endl;
+    debug << "p_gain" << newset.p_gain.get() << std::endl;
+    debug << "p_exposureAbsolute" << newset.p_exposureAbsolute.get() << std::endl;
+    debug << "p_powerLineFrequency" << newset.p_powerLineFrequency.get() << std::endl;
+    debug << "p_sharpness" << newset.p_sharpness.get() << std::endl;
 #endif
     //Copying the new Paramters into m_settings
     m_settings = newset;
@@ -540,18 +540,18 @@ void RPiCamera::forceApplySettings(const CameraSettings& newset)
 
 void RPiCamera::loadCameraOffset()
 {
-    ifstream file((CONFIG_DIR + string("CameraOffsets.cfg")).c_str());
+    ifstream file((CONFIG_DIR + std::string("CameraOffsets.cfg")).c_str());
     if (file.is_open())
     {
-        string macaddress = Platform->getMacAddress();
+        std::string macaddress = Platform->getMacAddress();
         while (not file.eof())
         {
-            string buffer;
-            string addr_buffer;
+            std::string buffer;
+            std::string addr_buffer;
             float offset_buffer;
 
             getline(file, buffer);
-            stringstream ss(buffer);
+            std::stringstream ss(buffer);
             getline(ss, addr_buffer, ':');
             ss >> offset_buffer;
 
@@ -564,6 +564,6 @@ void RPiCamera::loadCameraOffset()
     }
     else
     {
-        errorlog << "RPiCamera::loadCameraOffset(). Unable to load camera offset." << endl;
+        errorlog << "RPiCamera::loadCameraOffset(). Unable to load camera offset." << std::endl;
     }
 }

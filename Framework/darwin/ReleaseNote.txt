@@ -2,28 +2,6 @@ You can get the latest version at below link.
 https://sourceforge.net/projects/darwinop/
 
 =====================================
-          DARwIn-OP v1.5.1
-=====================================
->>> Date: 20 Feb 2013
-
->>> New functionality/features
-
-    * None.
-
-
->>> Changes
-    
-    * Apply offset to walk_tuner, action_editor, roboplus, tutorial/action_script, tutorial/ball_following, tutorial/fsr, tutorial/head_tracking
-    * [Bug ID : #3542648] fixed the uninitialized value error.
-    
-
->>> Bug fixes
-    
-    * None.
-
-
-
-=====================================
           DARwIn-OP v1.5.0
 =====================================
 >>> Date: 19 Mar 2012

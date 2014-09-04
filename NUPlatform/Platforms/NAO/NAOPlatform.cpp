@@ -38,7 +38,7 @@
 NAOPlatform::NAOPlatform()
 {
     #if DEBUG_NUPLATFORM_VERBOSITY > 1
-        debug << "NAOPlatform::NAOPlatform()" << endl;
+        debug << "NAOPlatform::NAOPlatform()" << std::endl;
     #endif
     init();
     m_camera = new NAOCamera();
@@ -52,7 +52,7 @@ NAOPlatform::NAOPlatform()
     m_bad_ultrasonic_count = 0;
     m_heat_count = 0;
     
-    m_eye_indices = vector<vector<float> >(4, vector<float>(2,0));
+    m_eye_indices = std::vector<std::vector<float> >(4, std::vector<float>(2,0));
     m_eye_indices[0][0] = 0;
     m_eye_indices[0][1] = 7;
     m_eye_indices[1][0] = 1;
@@ -62,14 +62,14 @@ NAOPlatform::NAOPlatform()
     m_eye_indices[3][0] = 5;
     m_eye_indices[3][1] = 6;
     
-    m_leye = vector<vector<float> >(8, vector<float>(3,0));
-    m_reye = vector<vector<float> >(8, vector<float>(3,0));
+    m_leye = std::vector<std::vector<float> >(8, std::vector<float>(3,0));
+    m_reye = std::vector<std::vector<float> >(8, std::vector<float>(3,0));
 }
 
 NAOPlatform::~NAOPlatform()
 {
     #if DEBUG_NUPLATFORM_VERBOSITY > 0
-        debug << "NAOPlatform::~NAOPlatform()" << endl;
+        debug << "NAOPlatform::~NAOPlatform()" << std::endl;
     #endif
 }
 
@@ -86,7 +86,7 @@ bool NAOPlatform::displayBatteryState()
     Blackboard->Sensors->getBatteryCurrent(current);
     int numleds = 10;
     
-    vector<float> leds(numleds, 0);
+    std::vector<float> leds(numleds, 0);
     // calculate the number of lights to turn on in the ears based on the battery charge
     int numon = (int) (charge*numleds + 0.5);
     for (int i=0; i<numon; i++)
@@ -104,7 +104,7 @@ bool NAOPlatform::displayBatteryState()
         {
             for (int i=numon; i<numleds; i++)
             {
-                vector<float> chargeleds = leds;
+                std::vector<float> chargeleds = leds;
                 chargeleds[i] = 1;
                 Blackboard->Actions->add(NUActionatorsData::LEarLed, currenttime + slope*(i+1 - numon) + l*timeperloop, chargeleds);
                 Blackboard->Actions->add(NUActionatorsData::REarLed, currenttime + slope*(i+1 - numon) + l*timeperloop, chargeleds);
@@ -120,7 +120,7 @@ bool NAOPlatform::displayBatteryState()
         {
             for (int i=0; i<numon; i++)
             {
-                vector<float> chargeleds = leds;
+                std::vector<float> chargeleds = leds;
                 chargeleds[(numon-1) - i] = 0;
                 Blackboard->Actions->add(NUActionatorsData::LEarLed, currenttime + slope*(i+1) + l*timeperloop, chargeleds);
                 Blackboard->Actions->add(NUActionatorsData::REarLed, currenttime + slope*(i+1) + l*timeperloop, chargeleds);
@@ -169,7 +169,7 @@ bool NAOPlatform::verifySensors()
     }
     
     // check ultrasonics for invalid readings
-    vector<float> lu,ru;
+    std::vector<float> lu,ru;
     bool u_valid = Blackboard->Sensors->getDistance(NUSensorsData::LDistance, lu);
     u_valid = Blackboard->Sensors->getDistance(NUSensorsData::RDistance, ru);
     
@@ -192,9 +192,9 @@ bool NAOPlatform::verifySensors()
 
 /*! @brief Sets one of the eight eye quarters to the given (time,value)
  */
-void NAOPlatform::add(const LedIndices& led, double time, const vector<float>& value)
+void NAOPlatform::add(const LedIndices& led, double time, const std::vector<float>& value)
 {
-    vector<float> indices = m_eye_indices[led%4];
+    std::vector<float> indices = m_eye_indices[led%4];
     if (led < 4)
     {
         m_leye[indices[0]] = value;
@@ -211,15 +211,15 @@ void NAOPlatform::add(const LedIndices& led, double time, const vector<float>& v
 
 /*! @brief Toggles one of the eight eye quarters to the given (time,value)
  */
-void NAOPlatform::toggle(const LedIndices& led, double time, const vector<float>& value)
+void NAOPlatform::toggle(const LedIndices& led, double time, const std::vector<float>& value)
 {
-    vector<float> indices = m_eye_indices[led%4];
+    std::vector<float> indices = m_eye_indices[led%4];
     if (led < 4)
     {
         if (m_leye[indices[0]] == value or m_leye[indices[1]] == value)
         {
-            m_leye[indices[0]] = vector<float>(3,0);
-            m_leye[indices[1]] = vector<float>(3,0);
+            m_leye[indices[0]] = std::vector<float>(3,0);
+            m_leye[indices[1]] = std::vector<float>(3,0);
         }
         else 
         {
@@ -232,8 +232,8 @@ void NAOPlatform::toggle(const LedIndices& led, double time, const vector<float>
     {
         if (m_reye[indices[0]] == value or m_reye[indices[1]] == value)
         {
-            m_reye[indices[0]] = vector<float>(3,0);
-            m_reye[indices[1]] = vector<float>(3,0);
+            m_reye[indices[0]] = std::vector<float>(3,0);
+            m_reye[indices[1]] = std::vector<float>(3,0);
         }
         else 
         {

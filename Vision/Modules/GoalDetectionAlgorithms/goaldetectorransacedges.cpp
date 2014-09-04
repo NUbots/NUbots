@@ -9,7 +9,6 @@
 
 #include <limits>
 #include <stdlib.h>
-#include <boost/foreach.hpp>
 
 GoalDetectorRANSACEdges::GoalDetectorRANSACEdges()
 {
@@ -19,40 +18,40 @@ GoalDetectorRANSACEdges::GoalDetectorRANSACEdges()
     m_max_iterations = 3;   //hard limit on number of fitting attempts
 }
 
-vector<Goal> GoalDetectorRANSACEdges::run()
+std::vector<Goal> GoalDetectorRANSACEdges::run()
 {
     //use ransac model with largest number of points, rather than best fitting
     const RANSAC::SELECTION_METHOD ransac_method = RANSAC::LargestConsensus;
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const Horizon& khorizon = vbb->getKinematicsHorizon();
     //get transitions associated with goals
-    vector<ColourSegment> hsegments = vbb->getHorizontalTransitions(GOAL_COLOUR),
+    std::vector<ColourSegment> hsegments = vbb->getHorizontalTransitions(GOAL_COLOUR),
                           vsegments = vbb->getVerticalTransitions(GOAL_COLOUR);
-    list<Quad> quads,
+    std::list<Quad> quads,
                post_candidates;
-    pair<bool, Quad> crossbar(false, Quad());
-    vector<Goal> posts;
+    std::pair<bool, Quad> crossbar(false, Quad());
+    std::vector<Goal> posts;
 
-    vector<Point> start_points, end_points;
-    vector<pair<RANSACLine<Point>, vector<Point> > > ransac_results;
-    vector<LSFittedLine> start_lines, end_lines;
+    std::vector<Point> start_points, end_points;
+    std::vector<pair<RANSACLine<Point>, std::vector<Point> > > ransac_results;
+    std::vector<LSFittedLine> start_lines, end_lines;
 
     //get edge points
-    BOOST_FOREACH(ColourSegment s, hsegments) {
+    for(ColourSegment s : hsegments) {
         start_points.push_back(s.getStart());
         end_points.push_back(s.getEnd());
     }
 
     //use generic ransac implementation to find start lines (left edges)
     ransac_results = RANSAC::findMultipleModels<RANSACLine<Point>, Point>(start_points, m_e, m_n, m_k, m_max_iterations, ransac_method);
-    for(size_t i=0; i<ransac_results.size(); i++) {
-        start_lines.push_back(LSFittedLine(ransac_results.at(i).second));
+    for(auto l : ransac_results) {
+        start_lines.push_back(LSFittedLine(l.second));
     }
 
     //use generic ransac implementation to find end lines (right edges)
     ransac_results = RANSAC::findMultipleModels<RANSACLine<Point>, Point>(end_points, m_e, m_n, m_k, m_max_iterations, ransac_method);
-    for(size_t i=0; i<ransac_results.size(); i++) {
-        end_lines.push_back(LSFittedLine(ransac_results.at(i).second));
+    for(auto l : ransac_results) {
+        end_lines.push_back(LSFittedLine(l.second));
     }
 
     //publish these lines for debugging
@@ -68,8 +67,9 @@ vector<Goal> GoalDetectorRANSACEdges::run()
     // sort out potential crossbars and vertical posts (posts on too large of a lean will be removed)
     // edit ANGLE_MARGIN to affect this
     const double ANGLE_MARGIN = 0.25;
-    BOOST_FOREACH(Quad& q, quads) {
+    for(Quad q : quads) {
         double angle = khorizon.getAngleBetween(Line(q.getTopCentre(), q.getBottomCentre()));
+
         if( angle  >= (1-ANGLE_MARGIN)*mathGeneral::PI*0.5 ) {
             post_candidates.push_back(q);
         }
@@ -99,11 +99,13 @@ vector<Goal> GoalDetectorRANSACEdges::run()
     }
 
     //Improves bottom centre estimate using vertical transitions
-    BOOST_FOREACH(ColourSegment v, vsegments) {
+    for(ColourSegment v : vsegments) {
         const Point& p = v.getEnd();
-        BOOST_FOREACH(Goal g, posts) {
+        for(Goal& g : posts) {
             if(p.x <= g.getQuad().getRight() && p.x >= g.getQuad().getLeft() && p.y > g.getLocationPixels().y)
+            {
                 g.setBase(p);
+            }
         }
     }
 
@@ -113,28 +115,28 @@ vector<Goal> GoalDetectorRANSACEdges::run()
     return posts;
 }
 
-list<Quad> GoalDetectorRANSACEdges::buildQuadsFromLines(const vector<LSFittedLine>& start_lines, const vector<LSFittedLine>& end_lines, double tolerance)
+std::list<Quad> GoalDetectorRANSACEdges::buildQuadsFromLines(const std::vector<LSFittedLine>& start_lines, const std::vector<LSFittedLine>& end_lines, double tolerance)
 {
     // (must match exactly) 0 <= tolerance <= 1 (any pair will be accepted)
     //
-    // LSFittedLine objects contain lists of points and can be quite large,
+    // LSFittedLine objects contain std::lists of points and can be quite large,
     // therefore it is more efficient to pass by const reference and maintain
-    // a list of matched end lines than to pass by copy so that the end lines
-    // list can be shrunk.
+    // a std::list of matched end lines than to pass by copy so that the end lines
+    // std::list can be shrunk.
 
     if( tolerance < 0 or tolerance > 1)
         throw "GoalDetectorRANSACEdges::buildQuadsFromLines - tolerance must be in [0, 1]";
 
-    list<Quad> quads;
-    vector<bool> used(end_lines.size(), false);
+    std::list<Quad> quads;
+    std::vector<bool> used(end_lines.size(), false);
 
 #if VISION_GOAL_VERBOSITY > 2
     debug << "GoalDetectorRANSACEdges::buildQuadsFromLines - ";
 #endif
 
     BOOST_FOREACH(const LSFittedLine& s, start_lines) {
-        vector<bool> tried(used);   // consider all used lines tried
-        vector<LSFittedLine>::const_iterator e_it;
+        std::vector<bool> tried(used);   // consider all used lines tried
+        std::vector<LSFittedLine>::const_iterator e_it;
         bool matched = false;
 
         // try end lines in order of closeness
@@ -146,7 +148,7 @@ list<Quad> GoalDetectorRANSACEdges::buildQuadsFromLines(const vector<LSFittedLin
 
             // check angles
             if(s.getAngleBetween(e) <= tolerance*mathGeneral::PI*0.5) { // dodgy way (linear with angle between)
-            //if(min(a1/a2, a2/a1) <= (1-tolerance)) {
+            //if(std::min(a1/a2, a2/a1) <= (1-tolerance)) {
                 // get the end points of each line
                 Point sp1, sp2,
                       ep1, ep2;
@@ -155,11 +157,11 @@ list<Quad> GoalDetectorRANSACEdges::buildQuadsFromLines(const vector<LSFittedLin
                     double l1 = (sp1 - sp2).abs(),
                            l2 = (ep1 - ep2).abs();
                     // check lengths
-                    if(min(l1/l2, l2/l1) >= (1-tolerance)) {
+                    if(std::min(l1/l2, l2/l1) >= (1-tolerance)) {
                         // get num points
                         double n1 = s.getNumPoints(),
                                n2 = e.getNumPoints();
-                        if(min(n1/n2, n2/n1) >= (1-tolerance)) {
+                        if(std::min(n1/n2, n2/n1) >= (1-tolerance)) {
                             // check start is to left of end
                             if(0.5*(sp1.x + sp2.x) < 0.5*(ep1.x + ep2.x)) {
                                 // success
@@ -174,22 +176,22 @@ list<Quad> GoalDetectorRANSACEdges::buildQuadsFromLines(const vector<LSFittedLin
                                 used.at(i) = true;  //remove end line from consideration
                                 matched = true;
 #if VISION_GOAL_VERBOSITY > 2
-                                debug << "\tsuccess " << sp1 << " " << sp2 << " , " << ep2 << " " << ep1 << endl;
+                                debug << "\tsuccess " << sp1 << " " << sp2 << " , " << ep2 << " " << ep1 << std::endl;
                             }
                             else
-                                debug << "\tline ordering fail: " << 0.5*(sp1.x + sp2.x) << " " << 0.5*(ep1.x + ep2.x) << endl;
+                                debug << "\tline ordering fail: " << 0.5*(sp1.x + sp2.x) << " " << 0.5*(ep1.x + ep2.x) << std::endl;
                         }
                         else
-                            debug << "\tnum points fail: " << n1 << " " << n2 << endl;
+                            debug << "\tnum points fail: " << n1 << " " << n2 << std::endl;
                     }
                     else
-                        debug << "\tlength fail: " << l1 << " " << l2 << endl;
+                        debug << "\tlength fail: " << l1 << " " << l2 << std::endl;
                 }
                 else
-                    debug << "\tno endpoints" << endl;
+                    debug << "\tno endpoints" << std::endl;
             }
             else
-                debug << "angle fail: " << s.getAngleBetween(e) << " > " << tolerance*mathGeneral::PI*0.5 << endl;
+                debug << "angle fail: " << s.getAngleBetween(e) << " > " << tolerance*mathGeneral::PI*0.5 << std::endl;
 #else
                             }
                         }
@@ -203,7 +205,7 @@ list<Quad> GoalDetectorRANSACEdges::buildQuadsFromLines(const vector<LSFittedLin
     return quads;
 }
 
-unsigned int GoalDetectorRANSACEdges::getClosestUntriedLine(const LSFittedLine& start, const vector<LSFittedLine>& end_lines, vector<bool>& tried)
+unsigned int GoalDetectorRANSACEdges::getClosestUntriedLine(const LSFittedLine& start, const std::vector<LSFittedLine>& end_lines, std::vector<bool>& tried)
 {
     if(end_lines.size() != tried.size())
         throw "GoalDetectorRANSACEdges::getClosestUntriedLine - 'end_lines' must match 'tried' in size";
@@ -229,14 +231,14 @@ unsigned int GoalDetectorRANSACEdges::getClosestUntriedLine(const LSFittedLine& 
     return best;
 }
 
-vector<Goal> GoalDetectorRANSACEdges::assignGoals(const list<Quad>& candidates, const Quad& crossbar) const
+std::vector<Goal> GoalDetectorRANSACEdges::assignGoals(const std::list<Quad>& candidates, const Quad& crossbar) const
 {
     if(candidates.size() == 1) {
         if(crossbar.getCentre().x < candidates.front().getCentre().x) {
-            return vector<Goal>(1, Goal(GOAL_R, candidates.front()));
+            return std::vector<Goal>(1, Goal(GOAL_R, candidates.front()));
         }
         else {
-            return vector<Goal>(1, Goal(GOAL_L, candidates.front()));
+            return std::vector<Goal>(1, Goal(GOAL_L, candidates.front()));
         }
     }
     else {
@@ -244,9 +246,9 @@ vector<Goal> GoalDetectorRANSACEdges::assignGoals(const list<Quad>& candidates, 
     }
 }
 
-vector<Point> GoalDetectorRANSACEdges::getEdgePointsFromSegments(const vector<ColourSegment> &segments)
+std::vector<Point> GoalDetectorRANSACEdges::getEdgePointsFromSegments(const std::vector<ColourSegment> &segments)
 {
-    vector<Point> points;
+    std::vector<Point> points;
     BOOST_FOREACH(ColourSegment s, segments) {
         points.push_back(Point(s.getStart().x, s.getStart().y));
         points.push_back(Point(s.getEnd().x, s.getEnd().y));

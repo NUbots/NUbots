@@ -33,18 +33,18 @@ public:
                           1 if updated but not winner
                           2 if winner
     */
-    vector<int> propagate(vector<double> percept){
+    std::vector<int> propagate(std::vector<double> percept){
         if (percept.size()!= PERCEPT_SIZE){
-            cout << "Improper percept size." << endl;
+            std::cout << "Improper percept size." << std::endl;
             return NULL;
         }
 
-        vector<int> winners = findWinners(percept);
+        std::vector<int> winners = findWinners(percept);
         for (int i = 0; i<winners.size();i++){
             update(winners[i], percept);
         }
 
-        vector<int> output = new vector<int>[NUM_NODES];
+        std::vector<int> output = new std::vector<int>[NUM_NODES];
         for (int i = 0; i<NUM_NODES; i++){
             output[i] = 0;
         }
@@ -57,7 +57,7 @@ public:
     }
 
 private:
-    vector<vector<double> > weights;
+    std::vector<std::vector<double> > weights;
     int winningIndex;
     //Number of neurons to update inside the neighbourhood of the winning neuron.
     static int NEIGHBOURHOOD_POP;
@@ -66,17 +66,17 @@ private:
     //Expected percept size:
     static int PERCEPT_SIZE;
     //Persistant distances from percept to nodes. Saves mulitple computations.
-    //vector<double> distances;
+    //std::vector<double> distances;
 
     //Metric to measure topology of neurons: takes two weight vectors and measures their seperation.
-    double d(vector<double> x,vector<double> y){
+    double d(std::vector<double> x,std::vector<double> y){
         double sum_squares = 0;
         try{
             for (int i = 0; i<x.size();i++){
                 sum_squares += (x[i]-y[i])*(x[i]-y[i]);
             }
         }catch(Exception e){
-            cout<< "Distance between vectors cannot be measured."<<endl;
+            std::cout<< "Distance between vectors cannot be measured."<<std::endl;
             return -1;
         }
         return sqrt(sum_squares);
@@ -84,20 +84,20 @@ private:
     }
 
     //Compares tuples of distances and weight indices.
-    bool sortFunction(vector<double> x, vector<double> y){
+    bool sortFunction(std::vector<double> x, std::vector<double> y){
         return x[0]<y[0];
     }
 
     //Update rule for weights: takes in single neuron's weights pointer and environment percept input.
-    void update(int index,vector<double> percept){
+    void update(int index,std::vector<double> percept){
         for (int i = 0; i<percept.size(); i++){
             weights[index][i] += learning_rate*(percept[i]-weights[index][i]);
         }
     }
 
     //Returns indices of winning neurons in winning neighbourhood
-    vector<int> findWinners(vector<double> percept){
-        vector<vector<double> > indexedDistances = new vector<vector<double> >[NUM_NODES,2];//indexedDistances=[[d1,index1],...,[dn,indexn]]
+    std::vector<int> findWinners(std::vector<double> percept){
+        std::vector<std::vector<double> > indexedDistances = new std::vector<std::vector<double> >[NUM_NODES,2];//indexedDistances=[[d1,index1],...,[dn,indexn]]
         for (int i = 0; i<indexedDistances.size();i++){
             indexedDistances[i][0] = d(percept,weights[i]);
             indexedDistances[i][1] = i;//Store the index of each node associated with distance.
@@ -106,7 +106,7 @@ private:
         sort(indexedDistances.begin(),indexedDistances.end(),sortFunction);
 
 
-        vector<int> winners = new vector<int>[NEIGHBOURHOOD_POP];
+        std::vector<int> winners = new std::vector<int>[NEIGHBOURHOOD_POP];
         for (int i = 0; i<winners.size();i++){
             winners[i] = (int)indexedDistances[i][2];
         }

@@ -29,29 +29,29 @@
 #include "Motion/Tools/MotionScript.h"
 #include <vector>
 #include <string>
-using namespace std;
+#include "Motion/Kicks/MotionScript2013.h"
 
 class ScriptJob : public MotionJob
 {
 public:
-    ScriptJob(double time, const MotionScript& script);
-    ScriptJob(double time, const string& name);
-    ScriptJob(double time, istream& input);
+    ScriptJob(double time, const MotionScript2013* script);
+    ScriptJob(double time, const std::string& name);
+    ScriptJob(double time, std::istream& input);
     ~ScriptJob();
     
-    void getScript(double& time, MotionScript& script);
-    string& getName();
+    void getScript(double& time, MotionScript2013* script);
+    std::string& getName();
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
     
-    friend ostream& operator<<(ostream& output, const ScriptJob& job);
-    friend ostream& operator<<(ostream& output, const ScriptJob* job);
+    friend std::ostream& operator<<(std::ostream& output, const ScriptJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const ScriptJob* job);
 protected:
-    virtual void toStream(ostream& output) const;
+    virtual void toStream(std::ostream& output) const;
 private:
-    string m_name;
-    MotionScript m_script;                  // the motion script attached to the job
+    std::string m_name;
+    MotionScript2013* m_script;                  // the motion script attached to the job
 };
 
 #endif

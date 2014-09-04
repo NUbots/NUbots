@@ -1,0 +1,53 @@
+fieldnoise_v_small:
+before: (3, -1) [green]                 //3 pix min
+middle: (0 , 1) [unclassified]    //1 pix max
+after: (3, -1) [green]                  //3 pix min
+replacement: before                         //before, after, split
+
+fieldnoise_v_med:
+before: (6, -1) [green]                  //6 pix min
+middle: (0 , 2) [unclassified]    //2 pix max
+after: (6, -1) [green]                   //6 pix min
+replacement: before                         //before, after, split
+
+fieldnoise_v_large:
+before: (12, -1) [green]                   //12 pix min
+middle: (0 , 4) [unclassified]    //4 pix max
+after: (12, -1) [green]                    //12 pix min
+replacement: before                         //before, after, split
+
+fieldnoise_v_oneway:
+before: (1, -1) [green]                      //1 pix min
+middle: (0 , 4) [unclassified]    //4 pix max
+after: (12, -1) [green]                    //12 pix min
+replacement: before                         //before, after, split
+
+fieldnoise_v_oneway:
+before: (3, -1) [green]                      //1 pix min
+middle: (0 , 10) [unclassified]    //4 pix max
+after: (20, -1) [green]                    //12 pix min
+replacement: before                         //before, after, split
+
+yellowgoal1:
+before: (1, -1) [yellow]                   // pix min
+middle: (0 , 1) [orange]     //1 pix max
+after: (5, -1) [yellow]       //5 pix min
+replacement: after                 //before, after, split
+
+yellowgoal2:
+before: (5, -1) [yellow]                   // pix min
+middle: (0 , 3) [unclassified]     //1 pix max
+after: (1, -1) [yellow]       //5 pix min
+replacement: after                 //before, after, split
+
+ball1:
+before: (5, -1) [orange]       //3 pix min
+middle: (0 , 3) [unclassified]     //1 pix max
+after: (1,-1) [orange]
+replacement: before                 //before, after, split
+
+line1:
+before: (1, -1) [white]       //3 pix min
+middle: (0 , 3) [unclassified]     //1 pix max
+after: (5,-1) [white]
+replacement: before                 //before, after, split

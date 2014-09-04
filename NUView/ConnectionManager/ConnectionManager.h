@@ -30,7 +30,7 @@ class BonjourProvider;
 
 #include <QtGui>
 #include <vector>
-using namespace std;
+
 
 class ConnectionManager : public QWidget
 {
@@ -40,7 +40,7 @@ public:
     ~ConnectionManager();
 
 signals:
-    void newHosts(vector<NUHostInfo> hosts);
+    void newHosts(std::vector<NUHostInfo> hosts);
 private slots:
     void onListButton();
     void onInputFinished();
@@ -50,7 +50,7 @@ private:
     QLineEdit* m_user_ip_input;
     
     BonjourProvider* m_bonjour;
-    vector<NUHostInfo> m_current_hosts;
+    std::vector<NUHostInfo> m_current_hosts;
 };
 
 extern ConnectionManager* ConnectionMan;

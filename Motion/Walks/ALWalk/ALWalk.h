@@ -49,8 +49,8 @@ protected:
     void initALConfig();
     void setALConfig();
     
-    vector<float> convertToNUArmOrder(const vector<float>& data);
-    vector<float> convertToNULegOrder(const vector<float>& data);
+    std::vector<float> convertToNUArmOrder(const std::vector<float>& data);
+    std::vector<float> convertToNULegOrder(const std::vector<float>& data);
 private:
 public:
 protected:

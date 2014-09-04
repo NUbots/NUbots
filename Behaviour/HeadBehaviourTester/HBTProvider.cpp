@@ -37,7 +37,7 @@
 #include <iostream>
 #include "debugverbositybehaviour.h"
 
-using namespace std;
+
 
 HBTProvider::HBTProvider(Behaviour* manager, bool pauseable) : BehaviourFSMProvider(manager)
 {

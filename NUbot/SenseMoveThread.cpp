@@ -47,7 +47,7 @@
 
 #include <string>
 #include <errno.h>
-using namespace std;
+
 
 #if DEBUG_NUBOT_VERBOSITY > DEBUG_THREADING_VERBOSITY
     #define DEBUG_VERBOSITY DEBUG_NUBOT_VERBOSITY
@@ -58,10 +58,10 @@ using namespace std;
 /*! @brief Constructs the sense->move thread
  */
 
-SenseMoveThread::SenseMoveThread(NUbot* nubot) : ConditionalThread(string("SenseMoveThread"), THREAD_SENSEMOVE_PRIORITY)
+SenseMoveThread::SenseMoveThread(NUbot* nubot) : ConditionalThread(std::string("SenseMoveThread"), THREAD_SENSEMOVE_PRIORITY)
 {
     #if DEBUG_VERBOSITY > 0
-        debug << "SenseMoveThread::SenseMoveThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << endl;
+        debug << "SenseMoveThread::SenseMoveThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << std::endl;
     #endif
     m_nubot = nubot;
 }
@@ -69,7 +69,7 @@ SenseMoveThread::SenseMoveThread(NUbot* nubot) : ConditionalThread(string("Sense
 SenseMoveThread::~SenseMoveThread()
 {
     #if DEBUG_VERBOSITY > 0
-        debug << "SenseMoveThread::~SenseMoveThread()" << endl;
+        debug << "SenseMoveThread::~SenseMoveThread()" << std::endl;
     #endif
     stop();
 }
@@ -87,7 +87,7 @@ SenseMoveThread::~SenseMoveThread()
 void SenseMoveThread::run()
 {
     #if DEBUG_VERBOSITY > 0
-        debug << "SenseMoveThread::run()" << endl;
+        debug << "SenseMoveThread::run()" << std::endl;
     #endif
     
     #ifdef THREAD_SENSEMOVE_PROFILE
@@ -147,5 +147,5 @@ void SenseMoveThread::run()
             m_nubot->unhandledExceptionHandler(e);
         }
     }
-    errorlog << "SenseMoveThread is exiting. err: " << err << " errno: " << errno << endl;
+    errorlog << "SenseMoveThread is exiting. err: " << err << " errno: " << errno << std::endl;
 }

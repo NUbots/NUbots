@@ -64,17 +64,19 @@ public slots:
     *  @param datagram The classified image packet that is recieved, and to be processed by program for visualisation and further vision processing
     */
     void ProcessPacket(QByteArray* packet);
-    //void updateLookupTable(unsigned char* packetBuffer){return;}
+
+    //void updateLookupTable(unsigned char* packetBuffer){(void)(packetBuffer);return;}
     void updateSelection(Vision::Colour colour, std::vector<Pixel> indexs);
     void UpdateLUT(Vision::Colour colour, std::vector<Pixel> indexs);
+
     void UndoLUT();
     void saveLookupTableFile(QString fileName);
     void loadLookupTableFile(QString fileName);
 
     void setRawImage(const NUImage* image);
     void setSensorData(NUSensorsData* NUSensorsData);
-    void setCamera(int newCamera){cameraNumber = newCamera;};
-    void setAutoSoftColour(bool isEnabled){autoSoftColour = isEnabled;};
+    void setCamera(int newCamera){cameraNumber = newCamera;}
+    void setAutoSoftColour(bool isEnabled){autoSoftColour = isEnabled;}
     void processVisionFrame();
 
 signals:

@@ -26,7 +26,7 @@
 
 #include <cmath>
 #include <iostream>
-using namespace std;
+
 
 /*! @brief Create a generic PID Controller
  

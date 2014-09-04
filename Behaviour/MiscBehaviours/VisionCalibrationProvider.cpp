@@ -38,13 +38,13 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-using namespace std;
+
 
 VisionCalibrationProvider::VisionCalibrationProvider(Behaviour* manager) : BehaviourProvider(manager)
 {
     LUTBuffer = new unsigned char[LUTTools::LUT_SIZE];
     currentLookupTable = LUTBuffer;
-    loadLUTFromFile(string(DATA_DIR) + string("default.lut"));
+    loadLUTFromFile(std::string(DATA_DIR) + std::string("default.lut"));
     
     m_selection_index = 0;
     m_num_motions = 5;
@@ -99,7 +99,7 @@ void VisionCalibrationProvider::doSelectedMotion()
 {
     if (m_selection_index == 0)
     {   // start with no stiffness
-        vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
+        std::vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
         m_actions->add(NUActionatorsData::Head, m_current_time, zero, 0);
         m_jobs->addMotionJob(new WalkJob(0,0,0));
         if(m_current_time - lastSpoken > 10000)
@@ -137,7 +137,7 @@ void VisionCalibrationProvider::doSelectedMotion()
     }
     else if (m_selection_index == 3)
     {
-        vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
+        std::vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
         m_actions->add(NUActionatorsData::Head, m_current_time, zero, 50.0);
     }
     else if (m_selection_index == 4)
@@ -153,9 +153,9 @@ void VisionCalibrationProvider::sayPercentageClassified(float percentage)
 	int tens = int(floor(fabs(percentage) /10.0));
 	int units = int(fabs(percentage) - tens*10);
 	
-	string unit_numbers[] = {"0","1","2","3","4","5","6","7","8","9","10"};
-	string teen_numbers[] = {"10","11","12","13","14","15","16","17","18","19"};
-	string ten_numbers[] ={"0","10","20","30","40","50","60","70","80","90","100","110","120"};
+	std::string unit_numbers[] = {"0","1","2","3","4","5","6","7","8","9","10"};
+	std::string teen_numbers[] = {"10","11","12","13","14","15","16","17","18","19"};
+	std::string ten_numbers[] ={"0","10","20","30","40","50","60","70","80","90","100","110","120"};
 	if(tens == 1)
 	{
 		m_actions->add(NUActionatorsData::Sound, m_current_time, teen_numbers[units]  + ".wav");
@@ -176,7 +176,7 @@ void VisionCalibrationProvider::sayPercentageClassified(float percentage)
 		m_actions->add(NUActionatorsData::Sound, m_current_time, unit_numbers[units] + ".wav");
 		return;
 	}
-	vector<string> sounds (2);
+	std::vector<std::string> sounds (2);
 	sounds[0] = ten_numbers[tens] + ".wav";
 	sounds[1] = unit_numbers[units] + ".wav";
 	m_actions->add(NUActionatorsData::Sound, m_current_time, sounds);
@@ -190,7 +190,7 @@ void VisionCalibrationProvider::loadLUTFromFile(const std::string& fileName)
     if (lutLoader.LoadLUT(LUTBuffer, LUTTools::LUT_SIZE,fileName.c_str()) == true)
         currentLookupTable = LUTBuffer;
     else
-        errorlog << "Behaviour::VisionCalibration::loadLUTFromFile(" << fileName << "). Failed to load lut." << endl;
+        errorlog << "Behaviour::VisionCalibration::loadLUTFromFile(" << fileName << "). Failed to load lut." << std::endl;
 }
 
 int VisionCalibrationProvider::classifyImage()

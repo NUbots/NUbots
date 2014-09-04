@@ -156,11 +156,6 @@ class Line
       */
     double getSignedLinePointDistance(Vector2<double> point) const;
     /*!
-      @brief retreive the normaliser for the coefficients of the line equation - sqrt(A^2 + B^2).
-      @return sqrt(A^2 + B^2).
-      */
-    double getNormaliser() const;
-    /*!
       @brief Find the smallest angle between this and the given line.
       @param other The other line.
       @return The acute angle between the lines.
@@ -193,7 +188,7 @@ class Line
       @param pts A vector of points to project.
       @return The vector of projected points.
       */
-    vector< Vector2<double> > projectOnto(const vector< Vector2<double> >& pts) const;
+    std::vector< Vector2<double> > projectOnto(const std::vector< Vector2<double> >& pts) const;
     /*!
       @brief Finds the intersection of the two lines.
       @param other The other line.
@@ -231,7 +226,7 @@ class Line
     double m_C; //! The lines C value.
     double m_rho;
     double m_phi;
-    double m_normaliser;
+    double m_inv_normaliser;
     Vector2<double> v, a;   ///! Vector representation
     /*!
       @brief Determine if the line represented by the given equation is valid.

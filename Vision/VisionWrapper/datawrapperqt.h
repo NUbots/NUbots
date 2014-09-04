@@ -6,7 +6,10 @@
 
 #include "Kinematics/Horizon.h"
 
-#ifdef TARGET_OS_IS_WINDOWS
+
+#ifdef TARGET_IS_MAC
+#include "NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h"
+#elif TARGET_OS_IS_WINDOWS
 #include "NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h"
 #else
 #include "Vision/VisionTools/pccamera.h"
@@ -26,6 +29,7 @@
 #include "Vision/VisionTypes/RANSACTypes/ransacgoal.h"
 
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
+#include "Infrastructure/SensorCalibration.h"
 #include "NUPlatform/NUCamera/NUCameraData.h"
 
 #include "mainwindow.h"
@@ -61,51 +65,51 @@ public:
     //! RETRIEVAL METHODS
     NUImage* getFrame();
 
-    bool getCTGVector(vector<float>& ctgvector);    //for transforms
-    bool getCTVector(vector<float>& ctvector);    //for transforms
-    bool getCameraHeight(float& height);            //for transforms
-    bool getCameraPitch(float& pitch);              //for transforms
-    bool getCameraYaw(float& yaw);                  //for transforms
-    bool getBodyPitch(float& pitch);
+    float getCameraHeight() const;            //for transforms
+    float getHeadPitch() const;              //for transforms
+    float getHeadYaw() const;                  //for transforms
+    Vector3<float> getOrientation() const;
+    Vector3<double> getNeckPosition() const;
     Vector2<double> getCameraFOV() const;
 
     //! @brief Generates spoofed horizon line.
-    const Horizon& getKinematicsHorizon();
+    const Horizon& getKinematicsHorizon() const;
 
-    CameraSettings getCameraSettings();
+    CameraSettings getCameraSettings() const;
+    SensorCalibration getSensorCalibration() const;
 
     const LookUpTable& getLUT() const;
 
     //! PUBLISH METHODS
-    void publish(const vector<const VisionFieldObject*> &visual_objects);
+    void publish(const std::vector<const VisionFieldObject*> &visual_objects);
     void publish(const VisionFieldObject* visual_object);
 
-    void debugPublish(const vector<Ball>& data);
-//    bool debugPublish(const vector<Beacon>& data);
-    void debugPublish(const vector<Goal>& data);
-    //void debugPublish(int i, const vector<Goal>& d);
-    void debugPublish(const vector<Obstacle>& data);
-    void debugPublish(const vector<FieldLine>& data);
-    void debugPublish(const vector<CentreCircle>& data);
-    void debugPublish(const vector<CornerPoint>& data);
-    void debugPublish(DEBUG_ID id, const vector<Point>& data_points);
-    void debugPublish(DEBUG_ID id, const vector<GroundPoint>& data_points);
+    void debugPublish(const std::vector<Ball>& data);
+//    bool debugPublish(const std::vector<Beacon>& data);
+    void debugPublish(const std::vector<Goal>& data);
+    //void debugPublish(int i, const std::vector<Goal>& d);
+    void debugPublish(const std::vector<Obstacle>& data);
+    void debugPublish(const std::vector<FieldLine>& data);
+    void debugPublish(const std::vector<CentreCircle>& data);
+    void debugPublish(const std::vector<CornerPoint>& data);
+    void debugPublish(DEBUG_ID id, const std::vector<Point>& data_points);
+    void debugPublish(DEBUG_ID id, const std::vector<NUPoint>& data_points);
     void debugPublish(DEBUG_ID id, const SegmentedRegion& region);
     void debugPublish(DEBUG_ID id);
     void debugPublish(DEBUG_ID id, const NUImage *const img);
-    void debugPublish(DEBUG_ID id, const vector<LSFittedLine>& data);
-    void debugPublish(DEBUG_ID id, const vector<Goal>& data);
+    void debugPublish(DEBUG_ID id, const std::vector<LSFittedLine>& data);
+    void debugPublish(DEBUG_ID id, const std::vector<Goal>& data);
 
-    void plotCurve(string name, vector< Point > pts);
-    void plotLineSegments(string name, vector< Point > pts);
-    void plotHistogram(string name, const Histogram1D& hist, Colour colour = yellow);
+    void plotCurve(std::string name, std::vector< Point > pts);
+    void plotLineSegments(std::string name, std::vector< Point > pts);
+    void plotHistogram(std::string name, const Histogram1D& hist, Colour colour = yellow);
 
 
 private:
-    DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, string istrm, string sstrm, string cfg, string lname);
+    DataWrapper(MainWindow* ui, bool ok, INPUT_METHOD method, std::string istrm, std::string sstrm, std::string cfg, std::string lname);
     ~DataWrapper();
-    bool updateFrame();
-    bool loadLUTFromFile(const string& fileName);
+    bool updateFrame(bool forward = true, int frame_no = 0);
+    bool loadLUTFromFile(const std::string& fileName);
     int getNumFramesDropped() const {return numFramesDropped;}      //! @brief Returns the number of dropped frames since start.
     int getNumFramesProcessed() const {return numFramesProcessed;}  //! @brief Returns the number of processed frames since start.
 
@@ -125,10 +129,17 @@ private:
 
     NUImage m_current_image;
     NUSensorsData m_sensor_data;
+    SensorCalibration m_sensor_calibration;
 
-    string configname;
+    float m_camera_height;
+    float m_head_pitch;
+    float m_head_yaw;
+    Vector3<float> m_orientation;
+    Vector3<double> m_neck_position;
 
-    string LUTname;
+    std::string configname;
+
+    std::string LUTname;
     LookUpTable LUT;
 
     Horizon kinematics_horizon;
@@ -137,11 +148,11 @@ private:
     NUCameraData m_camspecs;
 
     //! Used when reading from strm
-    string streamname;
-    ifstream imagestrm;
+    std::string streamname;
+    std::ifstream imagestrm;
     bool using_sensors;
-    string sensorstreamname;
-    ifstream sensorstrm;
+    std::string sensorstreamname;
+    std::ifstream sensorstrm;
 
     //! Frame info
     int numFramesDropped;

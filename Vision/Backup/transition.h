@@ -38,8 +38,8 @@ public:
     
     bool operator< (const Transition& rhs) const;   //! GT operator for a pair of transitions.
     
-    friend ostream& operator<< (ostream& output, const Transition& c);          //! output stream operator
-    friend ostream& operator<< (ostream& output, const vector<Transition>& c);  //! output stream operator for a vector of transitions
+    friend std::ostream& operator<< (std::ostream& output, const Transition& c);          //! output stream operator
+    friend std::ostream& operator<< (std::ostream& output, const std::vector<Transition>& c);  //! output stream operator for a std::vector of transitions
     
 private:
     Point m_location;   //! @variable The pixel location of the transition.

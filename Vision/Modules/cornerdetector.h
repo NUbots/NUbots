@@ -9,12 +9,12 @@ class CornerDetector
 public:
     CornerDetector(double tolerance);
 
-    vector<CornerPoint> run(const vector<FieldLine>& lines) const;
+    std::vector<CornerPoint> run(const std::vector<FieldLine>& lines) const;
 
     void setTolerance(double tolerance);
 
 private:
-    CornerPoint::TYPE findCorner(Vector2<GroundPoint> ep1, Vector2<GroundPoint> ep2, GroundPoint intersection, double tolerance) const;
+    CornerPoint::TYPE findCorner(Vector2<NUPoint> ep1, Vector2<NUPoint> ep2, NUPoint intersection, double tolerance) const;
 
     double m_tolerance;
 };

@@ -34,7 +34,7 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-using namespace std;
+
 
 ScriptedPoseProvider::ScriptedPoseProvider(Behaviour* manager) : BehaviourProvider(manager)
 {
@@ -83,7 +83,7 @@ void ScriptedPoseProvider::doSelectedMotion()
     //Initialisation: First 50 Frames, will be used to stand up
     if (isStart < 10)
     {
-        vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
+        std::vector<float> zero(m_actions->getSize(NUActionatorsData::Head), 0);
         m_actions->add(NUActionatorsData::Head, m_current_time, zero, 50);
         m_jobs->addMotionJob(new WalkJob(0.001,0.001,0.001));
 		isStart++;

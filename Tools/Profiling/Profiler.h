@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
-using namespace std;
+
 
 class Profiler
 {
@@ -41,7 +41,7 @@ public:
     void split(std::string name);
     void reset();
     
-    friend ostream& operator<<(ostream& output, Profiler& profiler);
+    friend std::ostream& operator<<(std::ostream& output, Profiler& profiler);
 private:
     std::string m_name;
     
@@ -49,15 +49,15 @@ private:
     double m_start_process_time;
     double m_start_real_time;
     
-    vector<double> m_split_thread_times;
-    vector<double> m_diff_thread_times;
-    vector<double> m_split_process_times;
-    vector<double> m_diff_process_times;
-    vector<double> m_split_real_times;
-    vector<double> m_diff_real_times;
+    std::vector<double> m_split_thread_times;
+    std::vector<double> m_diff_thread_times;
+    std::vector<double> m_split_process_times;
+    std::vector<double> m_diff_process_times;
+    std::vector<double> m_split_real_times;
+    std::vector<double> m_diff_real_times;
     
     
-    vector<std::string> m_split_names;
+    std::vector<std::string> m_split_names;
 };
 
 #endif

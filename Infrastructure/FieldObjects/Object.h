@@ -28,6 +28,10 @@ protected:
     bool isVisible;                     // true if the object was seen in this image, false otherwise
 
 public:
+    
+    //! width of an obstacle in angular terms
+    float arc_width;
+    
     Object(int initID = -1, const std::string& initName = "Unknown");
     ~Object();
 

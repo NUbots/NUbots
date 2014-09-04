@@ -24,6 +24,11 @@ SET (YOUR_SRCS  HeadBehaviour.h
 		HeadBehaviour.cpp
 		HeadLogic.h
 		HeadLogic.cpp
+		BehaviourStateLogic.h
+		BehaviourStateLogic.cpp
+		NavigationLogic.h
+		Navigation.h
+		Navigation.cpp
                  
                 
 )

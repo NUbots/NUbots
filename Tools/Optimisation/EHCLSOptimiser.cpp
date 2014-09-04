@@ -28,10 +28,10 @@
 
 /*!
  */
-EHCLSOptimiser::EHCLSOptimiser(std::string name, vector<Parameter> parameters) : Optimiser(name, parameters)
+EHCLSOptimiser::EHCLSOptimiser(std::string name, std::vector<Parameter> parameters) : Optimiser(name, parameters)
 {
     m_best_parameters = parameters;
-    m_best_delta_parameters = vector<float>(m_best_parameters.size(),0);
+    m_best_delta_parameters = std::vector<float>(m_best_parameters.size(),0);
 
     m_current_parameters = parameters;
     m_previous_parameters = parameters;
@@ -62,7 +62,7 @@ EHCLSOptimiser::~EHCLSOptimiser()
 {
 }
 
-vector<float> EHCLSOptimiser::getNextParameters()
+std::vector<float> EHCLSOptimiser::getNextParameters()
 {
     m_previous_parameters = m_current_parameters;
     mutateBestParameters(m_current_parameters);
@@ -84,7 +84,7 @@ void EHCLSOptimiser::setParametersResult(float fitness)
         m_best_performance = m_current_performance;
         m_count_since_last_improvement = 0;
         
-        debug << "Improvement: " << m_improvement << " alpha: " << m_alpha << endl;
+        debug << "Improvement: " << m_improvement << " alpha: " << m_alpha << std::endl;
     }
     else
         m_count_since_last_improvement++;
@@ -106,32 +106,32 @@ void EHCLSOptimiser::setParametersResult(float fitness)
 /*! @brief Gets a new set of parameters to test based on the current best parameters
  @param walkparameters will be updated to contain the new paramters that we want to test
  */
-void EHCLSOptimiser::mutateBestParameters(vector<Parameter>& parameters)
+void EHCLSOptimiser::mutateBestParameters(std::vector<Parameter>& parameters)
 {
     mutateParameters(m_best_parameters, m_best_delta_parameters, parameters);
 }
 
 /*! @brief Generates a new set of parameters to be tested based on base_parameters and basedelta_parameters
  */
-void EHCLSOptimiser::mutateParameters(vector<Parameter>& base_parameters, vector<float>& basedelta_parameters, vector<Parameter>& parameters)
+void EHCLSOptimiser::mutateParameters(std::vector<Parameter>& base_parameters, std::vector<float>& basedelta_parameters, std::vector<Parameter>& parameters)
 {
     // generate phi to mutate the BestParameters
     float sigma = m_neta*exp(m_count_since_last_improvement/m_reset_limit - 1);			// 0.04
-    vector<float> phi(base_parameters.size(), 0);
+    std::vector<float> phi(base_parameters.size(), 0);
     for (size_t i=0; i<base_parameters.size(); i++)
         phi[i] = normalDistribution(0, sigma);
     
     // mutate the BestParameters
-    vector<float> mutant;
+    std::vector<float> mutant;
     mutant.reserve(base_parameters.size());
     for (size_t i=0; i<base_parameters.size(); i++)
         mutant.push_back(base_parameters[i] + phi[i]*(base_parameters[i].max() - base_parameters[i].min()));
     
     // calculate the difference between the mutated state and the best one
-    vector<float> deltamutant = mutant - base_parameters;
+    std::vector<float> deltamutant = mutant - base_parameters;
     
     // calculate the desired change in parameters
-    vector<float> deltaparameters = m_alpha*basedelta_parameters + (1-m_alpha)*deltamutant;
+    std::vector<float> deltaparameters = m_alpha*basedelta_parameters + (1-m_alpha)*deltamutant;
     
     // now calculate the new parameters themselves
     parameters.resize(base_parameters.size());
@@ -139,25 +139,25 @@ void EHCLSOptimiser::mutateParameters(vector<Parameter>& base_parameters, vector
         parameters[i].set(base_parameters[i] + deltaparameters[i]);
 }
 
-void EHCLSOptimiser::summaryTo(ostream& stream)
+void EHCLSOptimiser::summaryTo(std::ostream& stream)
 {
-    debug << "EHCLSOptimiserSummary" << endl;
+    debug << "EHCLSOptimiserSummary" << std::endl;
 }
 
 
-void EHCLSOptimiser::toStream(ostream& o) const
+void EHCLSOptimiser::toStream(std::ostream& o) const
 {
-    o << m_best_parameters << endl;
-    o << m_best_delta_parameters << endl;
-    o << m_current_parameters << endl;
-    o << m_previous_parameters << endl;
-    o << m_real_best_parameters << endl;
+    o << m_best_parameters << std::endl;
+    o << m_best_delta_parameters << std::endl;
+    o << m_current_parameters << std::endl;
+    o << m_previous_parameters << std::endl;
+    o << m_real_best_parameters << std::endl;
     
-    o << m_iteration_count << " " << m_count_since_last_improvement << " " << m_alpha << " " << m_improvement << " " << m_previous_improvement << " " << m_neta << " " << m_reset_limit << " " << m_reset_fraction << endl;
-    o << m_current_performance << " " << m_best_performance << endl;
+    o << m_iteration_count << " " << m_count_since_last_improvement << " " << m_alpha << " " << m_improvement << " " << m_previous_improvement << " " << m_neta << " " << m_reset_limit << " " << m_reset_fraction << std::endl;
+    o << m_current_performance << " " << m_best_performance << std::endl;
 }
 
-void EHCLSOptimiser::fromStream(istream& i)
+void EHCLSOptimiser::fromStream(std::istream& i)
 {
     i >> m_best_parameters;
     i >> m_best_delta_parameters;

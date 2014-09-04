@@ -74,7 +74,7 @@ DarwinWalk::DarwinWalk(NUSensorsData* data, NUActionatorsData* actions) :  NUWal
         Robot::JointData::ID_R_ANKLE_ROLL,
         Robot::JointData::ID_R_ANKLE_PITCH
     };
-    m_darwin_ids = vector<int>(temp_ids, temp_ids + sizeof(temp_ids)/sizeof(*temp_ids));
+    m_darwin_ids = std::vector<int>(temp_ids, temp_ids + sizeof(temp_ids)/sizeof(*temp_ids));
 
 
 
@@ -123,12 +123,12 @@ void DarwinWalk::doWalk()
     else
         Robot::Walking::GetInstance()->Start();
 
-    vector<float> speeds = m_walk_parameters.getMaxSpeeds();
+    std::vector<float> speeds = m_walk_parameters.getMaxSpeeds();
     Robot::Walking::GetInstance()->X_MOVE_AMPLITUDE = m_speed_x/speeds[0]*15;
     Robot::Walking::GetInstance()->Y_MOVE_AMPLITUDE = m_speed_y/speeds[1]*30;
     Robot::Walking::GetInstance()->A_MOVE_AMPLITUDE = m_speed_yaw/speeds[2]*25;
 
-    //cout << "Walk Commands: " << Robot::Walking::GetInstance()->X_MOVE_AMPLITUDE << " " << Robot::Walking::GetInstance()->Y_MOVE_AMPLITUDE << " " << Robot::Walking::GetInstance()->A_MOVE_AMPLITUDE << endl;
+    //std::cout << "Walk Commands: " << Robot::Walking::GetInstance()->X_MOVE_AMPLITUDE << " " << Robot::Walking::GetInstance()->Y_MOVE_AMPLITUDE << " " << Robot::Walking::GetInstance()->A_MOVE_AMPLITUDE << std::endl;
     Robot::Walking::GetInstance()->Process();
 
     //GET THE NEW TARGET POSITIONS FROM THE WALK ENGINE
@@ -151,14 +151,14 @@ void DarwinWalk::setWalkParameters(const WalkParameters& walkparameters)
 void DarwinWalk::writeParameters()
 {
 #if DEBUG_NUMOTION_VERBOSITY > 0
-    debug << "DarwinWalk::writeParameters: " << endl;
+    debug << "DarwinWalk::writeParameters: " << std::endl;
 #endif
-    vector<Parameter>& params = m_walk_parameters.getParameters();
+    std::vector<Parameter>& params = m_walk_parameters.getParameters();
     for(unsigned int i=0; i<params.size(); i++) {
-        string& nm = params.at(i).name();
+        std::string& nm = params.at(i).name();
         float value = params.at(i).get();
 #if DEBUG_NUMOTION_VERBOSITY > 0
-    debug << nm << " <- " << value << endl;
+    debug << nm << " <- " << value << std::endl;
 #endif
         if(nm.compare("x_offset") == 0)
             Robot::Walking::GetInstance()->X_OFFSET = value;
@@ -205,7 +205,7 @@ void DarwinWalk::writeParameters()
         else if(nm.compare("d_gain") == 0)
             Robot::Walking::GetInstance()->D_GAIN = (int)value;
         else
-            debug << "DarwinWalk::setWalkParameters(): No matching parameter found: " << nm << endl;
+            debug << "DarwinWalk::setWalkParameters(): No matching parameter found: " << nm << std::endl;
     }
 }
 
@@ -214,7 +214,7 @@ void DarwinWalk::writeParameters()
 void DarwinWalk::updateWalkEngineSensorData()
 {
     //Joint Order is same as platform
-    static vector<float> nu_jointpositions;
+    static std::vector<float> nu_jointpositions;
     m_data->getPosition(NUSensorsData::All, nu_jointpositions);
 
     for(unsigned int id = 0; id < nu_jointpositions.size(); ++id)
@@ -225,13 +225,13 @@ void DarwinWalk::updateWalkEngineSensorData()
     //Update walk engine gyro:
     float VALUETORPS_RATIO = 18.3348;//512/27.925
     float VALUETOACCEL_RATIO = 0.1304; //512/4*981
-    vector<float> gyro_data(3,0);
+    std::vector<float> gyro_data(3,0);
     m_data->get(NUSensorsData::Gyro,gyro_data);
     Robot::MotionStatus::FB_GYRO = gyro_data[1]*VALUETORPS_RATIO;
     Robot::MotionStatus::RL_GYRO = gyro_data[0]*VALUETORPS_RATIO;
 	
     //Updata WalkEngines Accel Data:
-    vector<float> accel_data(3,0);
+    std::vector<float> accel_data(3,0);
     m_data->get(NUSensorsData::Accelerometer,accel_data);
     Robot::MotionStatus::FB_ACCEL = accel_data[0]*VALUETOACCEL_RATIO;
     Robot::MotionStatus::RL_ACCEL = accel_data[1]*VALUETOACCEL_RATIO;
@@ -267,10 +267,10 @@ void DarwinWalk::updateActionatorsData()
 {
     // the vectors are all static since they are used often and we wish to reduce memory operations.
     static std::vector<float> joints(20, 0.0f);            // All joints
-    static vector<float> nu_nextLeftArmJoints(m_actions->getSize(NUActionatorsData::LArm), 0.0f);   // Left Arm
-    static vector<float> nu_nextRightArmJoints(m_actions->getSize(NUActionatorsData::RArm), 0.0f);  // Right Arm
-    static vector<float> nu_nextLeftLegJoints(m_actions->getSize(NUActionatorsData::LLeg), 0.0f);   // Left Leg
-    static vector<float> nu_nextRightLegJoints(m_actions->getSize(NUActionatorsData::RLeg), 0.0f);  // Right Leg
+    static std::vector<float> nu_nextLeftArmJoints(m_actions->getSize(NUActionatorsData::LArm), 0.0f);   // Left Arm
+    static std::vector<float> nu_nextRightArmJoints(m_actions->getSize(NUActionatorsData::RArm), 0.0f);  // Right Arm
+    static std::vector<float> nu_nextLeftLegJoints(m_actions->getSize(NUActionatorsData::LLeg), 0.0f);   // Left Leg
+    static std::vector<float> nu_nextRightLegJoints(m_actions->getSize(NUActionatorsData::RLeg), 0.0f);  // Right Leg
 
     // Retreive all of the joint values
     for(unsigned int id = 0; id < joints.size(); ++id)
@@ -285,12 +285,12 @@ void DarwinWalk::updateActionatorsData()
     nu_nextRightLegJoints.assign(joints.begin()+14, joints.begin()+20);
 
     //UPDATE ARMS:
-    static vector<vector<float> >& armgains = m_walk_parameters.getArmGains();
+    static std::vector<std::vector<float> >& armgains = m_walk_parameters.getArmGains();
     m_actions->add(NUActionatorsData::RArm, Platform->getTime(), nu_nextRightArmJoints, armgains[0]);
     m_actions->add(NUActionatorsData::LArm, Platform->getTime(), nu_nextLeftArmJoints, armgains[0]);
 
     //UPDATE LEGS:
-    static vector<vector<float> >& leggains = m_walk_parameters.getLegGains();
+    static std::vector<std::vector<float> >& leggains = m_walk_parameters.getLegGains();
     m_actions->add(NUActionatorsData::RLeg, Platform->getTime(), nu_nextRightLegJoints, leggains[0]);
     m_actions->add(NUActionatorsData::LLeg, Platform->getTime(), nu_nextLeftLegJoints, leggains[0]);
     return;

@@ -47,7 +47,7 @@ void Self::updateLocationOfSelf(float wmX, float wmY, float heading, float sdX, 
 
 std::vector<float> Self::wmState()
 {
-	vector<float> state(3,0);
+	std::vector<float> state(3,0);
 	state[0] = WorldModelLocation[0];
 	state[1] = WorldModelLocation[1];
 	state[2] = WorldModelLocation[2];
@@ -234,7 +234,7 @@ std::vector<float> Self::CalculateClosestInterceptToMobileObject(const MobileObj
     float b_y = b_r*sin(b_b);
     
     // Now I am going to calculate the point on the velocity vector which is closest to me
-    vector<float> intercept(3,0);
+    std::vector<float> intercept(3,0);
     if (((v_x > 0 and b_x < 0) or (v_x < 0 and b_x > 0)) or ((v_y > 0 and b_y < 0) or (v_y < 0 and b_y > 0)))
     {   // if the ball is moving towards us then time can be calculated
         intercept[1] = (b_x*v_y*v_y - b_y*v_x*v_y)/(v_x*v_x + v_y*v_y);                                       // intercept x
@@ -311,7 +311,7 @@ std::vector<float> Self::CalculatePositionBetweenMobileObjectAndGoal(const Mobil
     float b_y = b_r*sin(b_b);
     
     // get the relative x,y of the goal
-    vector<float> goallocation = CalculateDifferenceFromGoal(goalpost);
+    std::vector<float> goallocation = CalculateDifferenceFromGoal(goalpost);
     float g_x = goallocation[0]*cos(goallocation[1]);
     float g_y = goallocation[0]*sin(goallocation[1]);
     
@@ -322,7 +322,7 @@ std::vector<float> Self::CalculatePositionBetweenMobileObjectAndGoal(const Mobil
     float p_x = b_x - distancefrommobile*cos(atan2(diffY, diffX));
     float p_y = b_y + (diffY/diffX)*(p_x - b_x);
     
-    vector<float> result(2,0);
+    std::vector<float> result(2,0);
     result[0] = p_x;
     result[1] = p_y;
     return result;
@@ -333,15 +333,15 @@ std::vector<float> Self::CalculatePositionBetweenMobileObjectAndGoal(const Mobil
  */
 std::vector<float> Self::CalculatePositionToProtectGoalFromMobileObject(const MobileObject& mobileobject, const StationaryObject& goalpost, float blockingwidth)
 {
-    vector<float> prediction = CalculateClosestInterceptToMobileObject(mobileobject);
+    std::vector<float> prediction = CalculateClosestInterceptToMobileObject(mobileobject);
     if (prediction[0] < 4 and mobileobject.estimatedDistance() > 30)
     {   // if the ball is moving go to where the ball will be!
-        vector<float> prediction_position(2,0);
+        std::vector<float> prediction_position(2,0);
         prediction_position[0] = prediction[1];
         prediction_position[1] = prediction[2];
 
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "protectGoal Predicated x:" << prediction_position[0] << " y: " << prediction_position[1] << " ballx: " << ball.estimatedDistance()*cos(heading) << " bally: " << ball.estimatedDistance()*sin(heading) << endl;
+            debug << "protectGoal Predicated x:" << prediction_position[0] << " y: " << prediction_position[1] << " ballx: " << ball.estimatedDistance()*cos(heading) << " bally: " << ball.estimatedDistance()*sin(heading) << std::endl;
         #endif
         return prediction_position;
     }
@@ -353,7 +353,7 @@ std::vector<float> Self::CalculatePositionToProtectGoalFromMobileObject(const Mo
         float distancebetween = sqrt(pow(mobileobject.X() - goalpost.X(), 2) + pow(mobileobject.Y(),2));
         float distancefrommobile = (0.5*blockingwidth)/tan(0.5*goal_angular_width);
         
-        vector<float> position(2,0);
+        std::vector<float> position(2,0);
         if (distancebetween < 0.7*goal_width)
         {   // if the mobile object is inside the goal then the calculation will break --- just go to the mobile object
             float b_r = mobileobject.estimatedDistance()*cos(mobileobject.estimatedElevation());          // get the flat distance!

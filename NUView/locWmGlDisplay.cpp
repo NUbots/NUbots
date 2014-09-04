@@ -4,11 +4,14 @@
 #include <qclipboard.h>
 #include <QApplication>
 #include "Tools/Math/General.h"
-#include "Localisation/Localisation.h"
 #include "Localisation/SelfLocalisation.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 #include "Infrastructure/NUSensorsData/NUSensorsData.h"
 #include "Tools/Math/Limit.h"
+
+#include "Localisation/Filters/MobileObjectModel.h"
+#include "Localisation/Filters/IWeightedKalmanFilter.h"
+#include "Localisation/Filters/RobotModel.h"
 
 // Apple has to be different...
 #if defined(__APPLE__) || defined(MACOSX)
@@ -17,7 +20,7 @@
   #include <GL/glu.h>
 #endif
 
-locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(QGLFormat(QGL::SampleBuffers), parent), currentLocalisation(0)
+locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
 {
     setWindowTitle("World Model Visualisation");
     viewTranslation[0] = 0.0f;
@@ -31,12 +34,11 @@ locWmGlDisplay::locWmGlDisplay(QWidget *parent): QGLWidget(QGLFormat(QGL::Sample
     perspective = true;
     drawRobotModel = false;
     drawSigmaPoints = false;
-    drawBestModelOnly = false;
+    drawBestModelOnly = true;
     m_showBall = true;
+    m_displayEnabled = true;
     setFont(QFont("Helvetica",12,QFont::Bold,false));
-    currentLocalisation = 0;
     currentObjects = 0;
-    localLocalisation = 0;
     currentSensorData = 0;
     m_self_loc = 0;
 
@@ -105,11 +107,14 @@ void locWmGlDisplay::setZRotation(int angle)
 
 void locWmGlDisplay::restoreState(const QByteArray & state)
 {
+    // Todo: implement restore.
+    (void)(state); // To stop compiler warnings.
     return;
 }
 
 QByteArray locWmGlDisplay::saveState() const
 {
+    // Todo implement save.
     return QByteArray();
 }
 
@@ -154,7 +159,7 @@ void locWmGlDisplay::keyPressEvent( QKeyEvent * e )
         case Qt::Key_R:
             viewTranslation[0] = 0.0f;
             viewTranslation[1] = 0.0f;
-            viewTranslation[2] = -700.0f;
+            viewTranslation[2] = -800.0f;
             xRot = 0;
             yRot = 0;
             zRot = 0;
@@ -241,6 +246,7 @@ void locWmGlDisplay::initializeGL()
 
 void locWmGlDisplay::paintEvent(QPaintEvent *event)
 {
+    (void)(event); // To stop compiler warnings.
     makeCurrent();
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -276,10 +282,19 @@ void locWmGlDisplay::paintEvent(QPaintEvent *event)
     glLightfv(GL_LIGHT0, GL_POSITION, lightPosition0);
 
     drawField();        // Draw the Standard Field Layout.
-    drawMarkers();
-    drawObjects();
+
+    if(m_displayEnabled)
+    {
+        drawMarkers();
+        drawObjects();
+    }
+
     drawFieldObjects();
-    drawOverlays();
+
+    if(m_displayEnabled)
+    {
+        drawOverlays();
+    }
 
     glShadeModel(GL_FLAT);
     //glDisable(GL_CULL_FACE);
@@ -291,7 +306,10 @@ void locWmGlDisplay::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    drawLegend(&painter);
+    if(m_displayEnabled)
+    {
+        drawLegend(&painter);
+    }
     painter.end();
     return;
 }
@@ -328,19 +346,9 @@ void locWmGlDisplay::drawMarkers()
         }
 
     }
-
     if(currentObjects)
     {
         drawRobotMarker(m_fieldObjColour, currentObjects->self.wmX(), currentObjects->self.wmY(),currentObjects->self.Heading());
-    }
-
-    if(currentLocalisation)
-    {
-        DrawLocalisationMarkers(*currentLocalisation, m_currentColour);
-    }
-    if(localLocalisation)
-    {
-        DrawLocalisationMarkers(*localLocalisation, m_localColour);
     }
     if(m_self_loc)
     {
@@ -359,15 +367,6 @@ void locWmGlDisplay::drawObjects()
             if(!currentSensorData->getCompass(compassHeading)) compassHeading = 3.14;
             drawRobot(m_sensorColour, gpsPosition[0], gpsPosition[1],compassHeading);
         }
-
-    }
-    if(currentLocalisation)
-    {
-        DrawLocalisationObjects(*currentLocalisation, m_currentColour);
-    }
-    if(localLocalisation)
-    {
-        DrawLocalisationObjects(*localLocalisation, m_localColour);
     }
     if(m_self_loc)
     {
@@ -377,17 +376,9 @@ void locWmGlDisplay::drawObjects()
 
 void locWmGlDisplay::drawOverlays()
 {
-    if(currentLocalisation)
-    {
-        DrawLocalisationOverlay(*currentLocalisation, m_currentColour);
-    }
     if(currentObjects)
     {
         drawFieldObjectLabels(*currentObjects);
-    }
-    if(localLocalisation)
-    {
-        DrawLocalisationOverlay(*localLocalisation, m_localColour);
     }
 }
 
@@ -782,30 +773,11 @@ void locWmGlDisplay::DrawBallSigma(QColor colour, float x, float y)
     return;
 }
 
-void locWmGlDisplay::DrawModelObjects(const KF& model, const QColor& modelColor)
+void locWmGlDisplay::DrawModelObjects(const MultivariateGaussian& model, const MultivariateGaussian& ball_model, const QColor& modelColor)
 {
     QColor drawColor(modelColor);
     int alpha = drawColor.alpha();
-    drawRobot(drawColor, model.state(KF::selfX), model.state(KF::selfY), model.state(KF::selfTheta));
-    if(drawSigmaPoints)
-    {
-        Matrix sigmaPoints = model.CalculateSigmaPoints();
-        for (int i=1; i < sigmaPoints.getn(); i++)
-        {
-            DrawSigmaPoint(drawColor, sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
-        }
-    }
-    if(m_showBall)
-    {
-        drawBall(QColor(255,165,0,alpha), model.state(KF::ballX), model.state(KF::ballY));
-    }
-}
-
-void locWmGlDisplay::DrawModelObjects(const SelfModel& model, const MobileObjectUKF& ball_model, const QColor& modelColor)
-{
-    QColor drawColor(modelColor);
-    int alpha = drawColor.alpha();
-    drawRobot(drawColor, model.mean(SelfModel::states_x), model.mean(SelfModel::states_y), model.mean(SelfModel::states_heading));
+    drawRobot(drawColor, model.mean(RobotModel::kstates_x), model.mean(RobotModel::kstates_y), model.mean(RobotModel::kstates_heading));
 
     if(m_showBall)
     {
@@ -814,155 +786,69 @@ void locWmGlDisplay::DrawModelObjects(const SelfModel& model, const MobileObject
     }
 }
 
-void locWmGlDisplay::DrawLocalisationObjects(const Localisation& localisation, const QColor& modelColor)
-{   
-    if(drawBestModelOnly)
-    {
-        const KF model = localisation.getBestModel();
-        DrawModelObjects(model, modelColor);
-    }
-    else
-    {
-        for(int modelID = 0; modelID < Localisation::c_MAX_MODELS; modelID++)
-        {
-            const KF model = localisation.getModel(modelID);
-            if(model.active())
-            {
-                QColor drawColor(modelColor);
-                int alpha = 255*model.alpha();
-                if(alpha < 25) alpha = 25;
-                drawColor.setAlpha(alpha);
-                DrawModelObjects(model, drawColor);
-            }
-        }
-    }
-}
-
 void locWmGlDisplay::DrawLocalisationObjects(const SelfLocalisation& localisation, const QColor& modelColor)
 {
-    const MobileObjectUKF* ball_model = localisation.getBallModel();
+    const IWeightedKalmanFilter* ball_model = localisation.getBallModel();
     if(drawBestModelOnly)
     {
-        const SelfModel* model = localisation.getBestModel();
-        DrawModelObjects(*model, *ball_model, modelColor);
+        const IWeightedKalmanFilter* model = localisation.getBestModel();
+        DrawModelObjects(model->estimate(), ball_model->estimate(), modelColor);
+        std::cout << model->getFilterWeight() << std::endl;
     }
     else
     {
-        ModelContainer models = localisation.allModels();
+        std::list<IWeightedKalmanFilter*> models = localisation.allModels();
 
-        for(ModelContainer::iterator model = models.begin(); model != models.end(); ++model)
+        for(std::list<IWeightedKalmanFilter*>::iterator model = models.begin(); model != models.end(); ++model)
         {
-            const SelfModel* currModel = (*model);
+            const IWeightedKalmanFilter* currModel = (*model);
             if(currModel->active())
             {
                 QColor drawColor(modelColor);
-                int alpha = 255*currModel->alpha();
+                int alpha = 255*currModel->getFilterWeight();
                 if(alpha < 25) alpha = 25;
                 drawColor.setAlpha(alpha);
-                DrawModelObjects(*currModel, *ball_model, drawColor);
+                DrawModelObjects(currModel->estimate(), ball_model->estimate(), drawColor);
             }
         }
     }
 }
 
-void locWmGlDisplay::DrawModelMarkers(const KF& model, const QColor& modelColor)
+void locWmGlDisplay::DrawModelMarkers(const MultivariateGaussian& model, const QColor& modelColor)
 {
     const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
-    float mean_x = model.state(KF::selfX);
-    float mean_y = model.state(KF::selfY);
-    float mean_angle = model.state(KF::selfTheta);
-    drawRobotMarker(modelColor, mean_x, mean_y, mean_angle);
+    float mean_x = model.mean(RobotModel::kstates_x);
+    float mean_y = model.mean(RobotModel::kstates_y);
+    float mean_angle = model.mean(RobotModel::kstates_heading);
 
-    // Need to multiply by its transpose to do conversion: standard deviation -> variance.
-    Matrix cov = model.stateStandardDeviations * model.stateStandardDeviations.transp();
-    float xx = cov[KF::selfX][KF::selfX];
-    float xy = cov[KF::selfX][KF::selfY];
-    float yy = cov[KF::selfY][KF::selfY];
-    FieldPose pose = CalculateErrorElipse(xx,xy,yy);
+    QColor marker_colour(modelColor);
+    drawRobotMarker(marker_colour, mean_x, mean_y, mean_angle);
 
-    QColor outline(modelColor);
-    outline.setAlphaF(std::max((float)model.alpha(), c_min_display_alpha / 255.0f));
-    QColor fill(modelColor);
-    fill.setAlpha(std::max((int)(100 * model.alpha()), c_min_display_alpha));
-    DrawElipse(QPoint(mean_x,mean_y), QPoint(pose.x,pose.y), mathGeneral::rad2deg(pose.angle), outline, fill);
-
-    if(drawSigmaPoints)
-    {
-        Matrix sigmaPoints = model.CalculateSigmaPoints();
-        for (int i=1; i < sigmaPoints.getn(); i++)
-        {
-            if(m_showBall)
-            {
-                DrawBallSigma(modelColor, sigmaPoints[KF::ballX][i], sigmaPoints[KF::ballY][i]);
-            }
-            DrawSigmaPoint(modelColor, sigmaPoints[KF::selfX][i], sigmaPoints[KF::selfY][i], sigmaPoints[KF::selfTheta][i]);
-        }
-    }
-    if(m_showBall)
-    {
-        drawBallMarker(modelColor, model.state(KF::ballX), model.state(KF::ballY));
-    }
-}
-
-void locWmGlDisplay::DrawModelMarkers(const SelfModel* model, const QColor& modelColor)
-{
-    const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
-    float mean_x = model->mean(Model::states_x);
-    float mean_y = model->mean(Model::states_y);
-    float mean_angle = model->mean(Model::states_heading);
-    drawRobotMarker(modelColor, mean_x, mean_y, mean_angle);
-
-    Matrix cov = model->covariance();
-    float xx = cov[Model::states_x][Model::states_x];
-    float xy = cov[Model::states_x][Model::states_y];
-    float yy = cov[Model::states_y][Model::states_y];
+    Matrix cov = model.covariance();
+    float xx = cov[RobotModel::kstates_x][RobotModel::kstates_x];
+    float xy = cov[RobotModel::kstates_x][RobotModel::kstates_y];
+    float yy = cov[RobotModel::kstates_y][RobotModel::kstates_y];
     FieldPose pose = CalculateErrorElipse(xx,xy,yy);
 
     QColor outline(modelColor);
     float model_draw_alpha = modelColor.alphaF();
-    outline.setAlphaF(std::max(model_draw_alpha, c_min_display_alpha / 255.0f));
+    //outline.setAlphaF(std::max(model_draw_alpha, c_min_display_alpha / 255.0f));
     QColor fill(modelColor);
     fill.setAlpha(std::max((int)(100 * model_draw_alpha), c_min_display_alpha));
     DrawElipse(QPoint(mean_x,mean_y), QPoint(pose.x,pose.y), mathGeneral::rad2deg(pose.angle), outline, fill);
 }
-
-void locWmGlDisplay::DrawLocalisationMarkers(const Localisation& localisation, const QColor& modelColor)
-{
-    QColor drawColor(modelColor);
-    const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
-    if(drawBestModelOnly)
-    {
-        drawColor.setAlpha(255);
-        const KF model = localisation.getBestModel();
-        DrawModelMarkers(model, drawColor);
-    }
-    else
-    {
-        QString displayString("Model %1 (%2%)");
-        for(int modelID = 0; modelID < Localisation::c_MAX_MODELS; modelID++)
-        {
-            const KF model = localisation.getModel(modelID);
-            if(model.active())
-            {
-                int alpha = std::max(c_min_display_alpha, (int)(255*model.alpha()));
-                drawColor.setAlpha(alpha);
-                DrawModelMarkers(model, drawColor);
-            }
-        }
-    }
-}
-
 void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisation, const QColor& modelColor)
 {
     QColor drawColor(modelColor);
     const int c_min_display_alpha = 50; // Minimum alpha to use when drawing a model.
 
-    const MobileObjectUKF* ball_model = localisation.getBallModel();
+    const IWeightedKalmanFilter* ball_model = localisation.getBallModel();
+    MultivariateGaussian ball_estimate = ball_model->estimate();
 
-    Matrix cov = ball_model->covariance();
-    float xx = cov[MobileObjectUKF::x_pos][MobileObjectUKF::x_pos];
-    float xy = cov[MobileObjectUKF::x_pos][MobileObjectUKF::y_pos];
-    float yy = cov[MobileObjectUKF::y_pos][MobileObjectUKF::y_pos];
+    Matrix cov = ball_estimate.covariance();
+    float xx = cov[MobileObjectModel::kstates_x_pos][MobileObjectModel::kstates_x_pos];
+    float xy = cov[MobileObjectModel::kstates_x_pos][MobileObjectModel::kstates_y_pos];
+    float yy = cov[MobileObjectModel::kstates_y_pos][MobileObjectModel::kstates_y_pos];
     FieldPose ball_ellipse = CalculateErrorElipse(xx,xy,yy);
 
     QColor fill(modelColor);
@@ -970,9 +856,9 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
     if(drawBestModelOnly)
     {
         drawColor.setAlpha(255);
-        const SelfModel* model = localisation.getBestModel();
-        DrawModelMarkers(model, drawColor);
-        FieldPose ball_pose = calculateBallPosition(*model, *ball_model);
+        const IWeightedKalmanFilter* model = localisation.getBestModel();
+        DrawModelMarkers(model->estimate(), drawColor);
+        FieldPose ball_pose = calculateBallPosition(model->estimate(), ball_estimate);
         if(m_showBall)
         {
             drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
@@ -983,17 +869,30 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
     else
     {
         QString displayString("Model %1 (%2%)");
-        ModelContainer models = localisation.allModels();
-        for(ModelContainer::const_iterator model_it = models.begin(); model_it != models.end(); ++model_it)
+        std::list<IWeightedKalmanFilter*> models = localisation.allModels();
+
+        // find the maximum weighting so that we can normalise.
+        float max_weight = 0.f;
+        for(std::list<IWeightedKalmanFilter*>::const_iterator model_it = models.begin(); model_it != models.end(); ++model_it)
         {
             if((*model_it)->active())
             {
-                int alpha = std::max(c_min_display_alpha, (int)(255*(*model_it)->alpha()));
+                float weight = (*model_it)->getFilterWeight();
+                if(weight > max_weight)
+                    max_weight = weight;
+            }
+        }
+
+        for(std::list<IWeightedKalmanFilter*>::const_iterator model_it = models.begin(); model_it != models.end(); ++model_it)
+        {
+            if((*model_it)->active())
+            {
+                int alpha = std::max(c_min_display_alpha, (int)(255.f * (*model_it)->getFilterWeight() / max_weight));
                 drawColor.setAlpha(alpha);
-                DrawModelMarkers((*model_it), drawColor);
+                DrawModelMarkers((*model_it)->estimate(), drawColor);
                 if(m_showBall)
                 {
-                    FieldPose ball_pose = calculateBallPosition(*(*model_it), *ball_model);
+                    FieldPose ball_pose = calculateBallPosition((*model_it)->estimate(), ball_estimate);
                     drawBallMarker(drawColor, ball_pose.x, ball_pose.y);
                     fill.setAlpha(std::max((int)(100), c_min_display_alpha));
                     DrawElipse(QPoint(ball_pose.x,ball_pose.y), QPoint(ball_ellipse.x,ball_ellipse.y), mathGeneral::rad2deg(ball_ellipse.angle), drawColor, fill);
@@ -1004,19 +903,19 @@ void locWmGlDisplay::drawLocalisationMarkers(const SelfLocalisation& localisatio
 
 }
 
-FieldPose locWmGlDisplay::calculateBallPosition(const SelfModel& robot_model, const MobileObjectUKF& ball_model)
+FieldPose locWmGlDisplay::calculateBallPosition(const MultivariateGaussian &robot_estimate, const MultivariateGaussian &ball_estimate)
 {
     FieldPose result;
-    float selfX = robot_model.mean(SelfModel::states_x);
-    float selfY = robot_model.mean(SelfModel::states_y);
-    float selfHeading = robot_model.mean(SelfModel::states_heading);
+    float selfX = robot_estimate.mean(RobotModel::kstates_x);
+    float selfY = robot_estimate.mean(RobotModel::kstates_y);
+    float selfHeading = robot_estimate.mean(RobotModel::kstates_heading);
 
     // pre-calculate the trig.
     float hcos = cos(selfHeading);
     float hsin = sin(selfHeading);
 
-    float relBallX = ball_model.mean(MobileObjectUKF::x_pos);
-    float relBallY = ball_model.mean(MobileObjectUKF::y_pos);
+    float relBallX = ball_estimate.mean(MobileObjectModel::kstates_x_pos);
+    float relBallY = ball_estimate.mean(MobileObjectModel::kstates_y_pos);
     // Rotate the relative ball postion to alight with the forward looking robot on the field.
     float rotatedX = relBallX * hcos - relBallY * hsin;
     float rotatedY = relBallX * hsin + relBallY * hcos;
@@ -1103,27 +1002,6 @@ void locWmGlDisplay::DrawElipse(const QPoint& location, const QPoint& size, floa
     glEnable(GL_LIGHTING);      // Enable Global Lighting
 }
 
-void locWmGlDisplay::DrawLocalisationOverlay(const Localisation& localisation, const QColor& modelColor)
-{
-    if(!drawBestModelOnly)
-    {
-        QString displayString("Model %1 (%2%)");
-        for(int modelID = 0; modelID < Localisation::c_MAX_MODELS; modelID++)
-        {
-            const KF model = localisation.getModel(modelID);
-            if(model.active())
-            {
-                glDisable(GL_LIGHTING);      // Enable Global Lighting
-                glDisable(GL_DEPTH_TEST);		// Turn Z Buffer testing Off
-                glColor4ub(255,255,255,255);
-                renderText(model.state(KF::selfX), model.state(KF::selfY),1,displayString.arg(modelID).arg(model.alpha()*100,0,'f',1));
-                glEnable(GL_DEPTH_TEST);		// Turn Z Buffer testing On
-                glEnable(GL_LIGHTING);      // Enable Global Lighting
-            }
-        }
-    }
-}
-
 void locWmGlDisplay::drawStationaryObjectLabel(const StationaryObject& object)
 {
     QString displayString("(%1,%2)");
@@ -1147,15 +1025,15 @@ void locWmGlDisplay::drawLegend(QPainter* painter)
     const QPoint legendOrigin(20, 20);
 
     std::vector<QColor> colours;
-    colours.push_back(m_currentColour);
-    colours.push_back(m_localColour);
+//    colours.push_back(m_currentColour);
+//    colours.push_back(m_localColour);
     colours.push_back(m_selfColour);
     colours.push_back(m_fieldObjColour);
     colours.push_back(m_sensorColour);
 
     std::vector<QString> legendLabel;
-    legendLabel.push_back("Localisation log");
-    legendLabel.push_back("Original localisation");
+//    legendLabel.push_back("Localisation log");
+//    legendLabel.push_back("Original localisation");
     legendLabel.push_back("New localisation");
     legendLabel.push_back("Field Object Self");
     legendLabel.push_back("Measured Position");
@@ -1163,8 +1041,6 @@ void locWmGlDisplay::drawLegend(QPainter* painter)
 
     std::vector<float> temp(3,0);
     std::vector<bool> valid;
-    valid.push_back(currentLocalisation != NULL);
-    valid.push_back(localLocalisation != NULL);
     valid.push_back(m_self_loc != NULL);
     valid.push_back(currentObjects != NULL);
     valid.push_back((currentSensorData != NULL) and currentSensorData->getGps(temp));

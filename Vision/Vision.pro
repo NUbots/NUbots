@@ -5,6 +5,8 @@ CONFIG += qwt
 
 DEFINES += QT_NO_DEBUG_STREAM
 
+QMAKE_CXXFLAGS += -std=c++0x
+
 win32{
     INCLUDEPATH += 'C:\Program Files\Boost\boost_1_52_0'
     INCLUDEPATH += 'C:\Qwt\qwt-6.0.2\src'
@@ -18,6 +20,15 @@ win32{
     }
 }
 
+macx {
+    # Mac Specific Includes
+    QMAKE_LFLAGS += -F/System/Library/Frameworks/CoreFoundation.framework/
+    LIBS += -framework CoreFoundation -lz
+    #Macports include directory
+    INCLUDEPATH += '/opt/local/include'
+    INCLUDEPATH += '/opt/local/include/boost/'
+}
+
 
 
 INCLUDEPATH += ../
@@ -25,8 +36,13 @@ INCLUDEPATH += ../
 win32 {
     PLATFORM = win
 }
+macx {
+    PLATFORM = mac
+}
 !win32 {
-    PLATFORM = pc
+    !macx {
+        PLATFORM = pc
+    }
 }
 
 contains(PLATFORM, "darwin") {
@@ -36,7 +52,7 @@ contains(PLATFORM, "darwin") {
     INCLUDEPATH += ../Autoconfig/
 
     HEADERS += \
-        NUPlatform/Platforms/Darwin/DarwinCamera.h \
+        ../NUPlatform/Platforms/Darwin/DarwinCamera.h \
         VisionWrapper/datawrapperdarwin.h \
         ../Autoconfig/debug.h \
         ../Autoconfig/nubotdataconfig.h \
@@ -52,16 +68,16 @@ contains(PLATFORM, "pc") {
      message("Compiling for PC")
     DEFINES += TARGET_IS_PC
 
-    INCLUDEPATH += ../Vision/Debug/
+    INCLUDEPATH += ../Vision/NUDebug/
 
     HEADERS += \
         #VisionWrapper/datawrapperpc.h \
         VisionWrapper/datawrapperqt.h \
         #VisionWrapper/visioncontrolwrapperpc.h\
         VisionWrapper/visioncontrolwrapperqt.h\
-        ../Vision/Debug/debugverbosityvision.h \
-        ../Vision/Debug/debug.h \
-        ../Vision/Debug/nubotdataconfig.h \
+        ../Vision//NUDebug/debugverbosityvision.h \
+        ../Vision/NUDebug/debug.h \
+        ../Vision/NUDebug/nubotdataconfig.h \
 
     SOURCES += \
         #VisionWrapper/datawrapperpc.cpp \
@@ -78,38 +94,64 @@ contains(PLATFORM, "pc") {
 contains(PLATFORM, "win") {
      message("Compiling for Windows")
 #    DEFINES += TARGET_IS_PC
+    DEFINES += TARGET_IS_WINDOWS
 
-    INCLUDEPATH += ../Vision/Debug/
+    INCLUDEPATH += ../Vision/NUDebug/
 
     HEADERS += \
         VisionWrapper/datawrapperqt.h \
-        ../Vision/Debug/debugverbosityvision.h \
-        ../Vision/Debug/debug.h \
-        ../Vision/Debug/nubotdataconfig.h \
+        VisionWrapper/visioncontrolwrapperqt.h\
+        ../Vision/NUDebug/debugverbosityvision.h \
+        ../Vision/NUDebug/debug.h \
+        ../Vision/NUDebug/nubotdataconfig.h \
 
     SOURCES += \
         VisionWrapper/datawrapperqt.cpp \
+        VisionWrapper/visioncontrolwrapperqt.cpp\
 
     HEADERS += \
-        NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h
+        ../NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h
     SOURCES += \
-        NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.cpp
+        ../NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.cpp
 }
 
+contains(PLATFORM, "mac") {
+     message("Compiling for Mac")
+    DEFINES += TARGET_IS_MAC
+
+    INCLUDEPATH += ../Vision/NUDebug/
+
+    HEADERS += \
+        VisionWrapper/datawrapperqt.h \
+        VisionWrapper/visioncontrolwrapperqt.h\
+        ../Vision/NUDebug/debugverbosityvision.h \
+        ../Vision/NUDebug/debug.h \
+        ../Vision/NUDebug/nubotdataconfig.h \
+        ../NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.h \
+
+    SOURCES += \
+        VisionWrapper/datawrapperqt.cpp \
+        VisionWrapper/visioncontrolwrapperqt.cpp\
+        ../NUPlatform/Platforms/Generic/Cameras/NUOpenCVCamera.cpp \
+
+
+    LIBS += -lopencv_core -lopencv_highgui
+
+}
 
 contains(PLATFORM, "rpi") {
      message("Compiling for RPi")
     DEFINES += TARGET_IS_RPI
 
-    INCLUDEPATH += ../Vision/Debug/
+    INCLUDEPATH += ../Vision/NUDebug/
 
     HEADERS += \
         VisionTools/pccamera.h \
         VisionWrapper/datawrapperrpi.h \
         VisionWrapper/visioncontrolwrapperrpi.h \
-        ../Vision/Debug/debugverbosityvision.h \
-        ../Vision/Debug/debug.h \
-        ../Vision/Debug/nubotdataconfig.h \
+        ../Vision/NUDebug/debugverbosityvision.h \
+        ../Vision/NUDebug/debug.h \
+        ../Vision/NUDebug/nubotdataconfig.h \
 
     SOURCES += \
         VisionTools/pccamera.cpp \
@@ -131,6 +173,7 @@ HEADERS += \
     VisionTools/transformer.h \
     ../Vision/Modules/*.h \
     ../Vision/Modules/LineDetectionAlgorithms/*.h \
+    ../Vision/Modules/BallDetectionAlgorithms/*.h \
     basicvisiontypes.h \
     valgorithm.h \
     visionblackboard.h \
@@ -144,30 +187,57 @@ HEADERS += \
     ../Tools/Math/Circle.h \
     linesegmentscurve.h \
     Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.h \
-    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.h
+    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.h \
+    VisionWrapper/startoptionsdialog.h
 
 SOURCES += \
-    ../Vision/VisionTypes/*.cpp \
-    ../Vision/VisionTypes/RANSACTypes/*.cpp \
-    ../Vision/VisionTypes/VisionFieldObjects/*.cpp \
+    Modules/balldetector.cpp \
+    Modules/circledetector.cpp \
+    Modules/cornerdetector.cpp \
+    Modules/fieldpointdetector.cpp \
+    Modules/goaldetector.cpp \
+    Modules/greenhorizonch.cpp \
+    Modules/linedetector.cpp \
+    Modules/scanlines.cpp \
+    Modules/segmentfilter.cpp \
+    Modules/LineDetectionAlgorithms/linedetectorransac.cpp \
+    Modules/LineDetectionAlgorithms/linedetectorsam.cpp \
+    Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
+    Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.cpp \
+    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.cpp \
+    Modules/BallDetectionAlgorithms/balldetectordave.cpp \
+    Modules/BallDetectionAlgorithms/balldetectorshannon.cpp \
+    VisionTypes/colourreplacementrule.cpp \
+    VisionTypes/coloursegment.cpp \
+    VisionTypes/colourtransitionrule.cpp \
+    VisionTypes/greenhorizon.cpp \
+    VisionTypes/nupoint.cpp \
+    VisionTypes/histogram1d.cpp \
+    VisionTypes/quad.cpp \
+    VisionTypes/segmentedregion.cpp \
+    VisionTypes/RANSACTypes/ransacgoal.cpp \
+    VisionTypes/VisionFieldObjects/ball.cpp \
+    VisionTypes/VisionFieldObjects/centrecircle.cpp \
+    VisionTypes/VisionFieldObjects/cornerpoint.cpp \
+    VisionTypes/VisionFieldObjects/fieldline.cpp \
+    VisionTypes/VisionFieldObjects/goal.cpp \
+    VisionTypes/VisionFieldObjects/obstacle.cpp \
+    VisionTypes/VisionFieldObjects/visionfieldobject.cpp\
     VisionTools/lookuptable.cpp \
-    ../Vision/Modules/*.cpp \
     VisionTools/transformer.cpp \
     VisionTools/classificationcolours.cpp \
-    ../Vision/Modules/LineDetectionAlgorithms/*.cpp \
     visionblackboard.cpp \
     visioncontroller.cpp \
     visionconstants.cpp \
     main.cpp \
-    Modules/GoalDetectionAlgorithms/goaldetectorhistogram.cpp \
     basicvisiontypes.cpp \
     GenericAlgorithms/ransac.template \
     VisionWrapper/mainwindow.cpp \
     #../Tools/Math/Circle.cpp
     #Threads/SaveImagesThread.cpp
     linesegmentscurve.cpp \
-    Modules/GoalDetectionAlgorithms/goaldetectorransaccentres.cpp \
-    Modules/GoalDetectionAlgorithms/goaldetectorransacedges.cpp
+    VisionWrapper/startoptionsdialog.cpp \
+    Modules/obstacledetectionch.cpp
 
 ##robocup
 HEADERS += \
@@ -222,4 +292,5 @@ SOURCES += \
     ../Infrastructure/FieldObjects/StationaryObject.cpp \
 
 FORMS += \
-    VisionWrapper/mainwindow.ui
+    VisionWrapper/mainwindow.ui \
+    VisionWrapper/startoptionsdialog.ui

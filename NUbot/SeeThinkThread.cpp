@@ -29,7 +29,6 @@
 #include "NUPlatform/NUIO.h"
 #include "NUbot.h"
 #include "SeeThinkThread.h"
-#include "Localisation/LocWmFrame.h"
 #include "nubotdataconfig.h"
 
 //#define LOGGING_ENABLED 1
@@ -72,10 +71,10 @@
 /*! @brief Constructs the sense->move thread
  */
 
-SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(string("SeeThinkThread"), THREAD_SEETHINK_PRIORITY)
+SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(std::string("SeeThinkThread"), THREAD_SEETHINK_PRIORITY)
 {
     #if DEBUG_VERBOSITY > 0
-        debug << "SeeThinkThread::SeeThinkThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << endl;
+        debug << "SeeThinkThread::SeeThinkThread(" << nubot << ") with priority " << static_cast<int>(m_priority) << std::endl;
     #endif
     m_nubot = nubot;
     m_logrecorder = new LogRecorder(m_nubot->m_blackboard->GameInfo->getPlayerNumber());
@@ -84,13 +83,14 @@ SeeThinkThread::SeeThinkThread(NUbot* nubot) : ConditionalThread(string("SeeThin
     m_logrecorder->SetLogging("gameinfo",true);
     m_logrecorder->SetLogging("teaminfo",true);
     m_logrecorder->SetLogging("object",true);
+    m_logrecorder->SetLogging("image",true);
 #endif
 }
 
 SeeThinkThread::~SeeThinkThread()
 {
     #if DEBUG_VERBOSITY > 0
-        debug << "SeeThinkThread::~SeeThinkThread()" << endl;
+        debug << "SeeThinkThread::~SeeThinkThread()" << std::endl;
     #endif
     stop();
 }
@@ -108,20 +108,20 @@ SeeThinkThread::~SeeThinkThread()
 void SeeThinkThread::run()
 {
     #if DEBUG_VERBOSITY > 0
-        debug << "SeeThinkThread::run()" << endl;
+        debug << "SeeThinkThread::run()" << std::endl;
     #endif
     #ifdef THREAD_SEETHINK_PROFILE
         Profiler prof = Profiler("SeeThinkThread");
     #endif
 #ifdef LOGGING_ENABLED
-    ofstream locfile((string(DATA_DIR) + string("selflocwm.strm")).c_str(), ios_base::trunc);
+    ofstream locfile((std::string(DATA_DIR) + std::string("selflocwm.strm")).c_str(), ios_base::trunc);
 #endif
     int err = 0;
     while (err == 0 && errno != EINTR)
     {
         try
         {
-            #if defined(TARGET_IS_NAOWEBOTS) or (not defined(USE_VISION))
+            #if defined(TARGET_IS_NAOWEBOTS) or defined(TARGET_IS_DARWINWEBOTS) or (not defined(USE_VISION))
                 wait();
             #endif
             
@@ -134,8 +134,7 @@ void SeeThinkThread::run()
             // else 
             //     std::cout << "SeeThinkThread::run(): autoUpdateTest FAIL!" << std::endl;
             // // #endif
-            
-            Blackboard->Config->updateConfiguration();
+            Blackboard->Config->UpdateConfiguration();
             // -----------------------------------------
 
             #ifdef THREAD_SEETHINK_PROFILE
@@ -203,7 +202,7 @@ void SeeThinkThread::run()
             #endif
 
 					
-			//std::cout << m_nubot->m_platform->getRealTime() << std::endl << Blackboard->Image->GetTimestamp() << std::endl << std::endl;
+            //std::cout << m_nubot->m_platform->getRealTime() << std::endl << Blackboard->Image->GetTimestamp() << std::endl << std::endl;
             m_nubot->m_api->sendAll();
 			
 #ifdef LOGGING_ENABLED
@@ -220,5 +219,5 @@ void SeeThinkThread::run()
             m_nubot->unhandledExceptionHandler(e);
         }
     } 
-    errorlog << "SeeThinkThread is exiting. err: " << err << " errno: " << errno << endl;
+    errorlog << "SeeThinkThread is exiting. err: " << err << " errno: " << errno << std::endl;
 }

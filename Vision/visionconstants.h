@@ -10,6 +10,12 @@ using namespace Vision;
 class VisionConstants
 {
 public:
+    // HACK FOR RC2013
+    static int WHITE_SIDE_IS_BLUE;  // 1=yes    0=no   -1=don't use
+    static bool NON_WHITE_SIDE_CHECK;  // 1=yes    0=no   -1=don't use
+    static int UPPER_WHITE_THRESHOLD;
+    static int LOWER_WHITE_THRESHOLD;
+
     //! Distortion Correction
     static bool DO_RADIAL_CORRECTION;           //! Whether to perform radial distortion correction.
     static float RADIAL_CORRECTION_COEFFICIENT; //! The radial distortion correction coefficient.
@@ -55,7 +61,6 @@ public:
 
     //! Distance calculation options
     static bool D2P_INCLUDE_BODY_PITCH;      //! If this is true then the d2p for the ball is calculated from its base, else from its centre
-    static float D2P_ANGLE_CORRECTION;      //! If this is true then the d2p for the ball is calculated from its base, else from its centre
     static bool BALL_DISTANCE_POSITION_BOTTOM;      //! If this is true then the d2p for the ball is calculated from its base, else from its centre
 
     //! Distance method options
@@ -64,14 +69,13 @@ public:
 //    static DistanceMethod BEACON_DISTANCE_METHOD;   //! The preferred method for calculating the distance to the beacons
     
     static LineDetectionMethod LINE_METHOD;
+    static GoalDetectionMethod GOAL_METHOD;
     //! Field-object detection constants
     static int BALL_EDGE_THRESHOLD;         //! Dave?
     static int BALL_ORANGE_TOLERANCE;       //! Dave?
     static float BALL_MIN_PERCENT_ORANGE;   //! Dave?
     static float GOAL_MIN_PERCENT_YELLOW;   //! Dave?
     static float GOAL_MIN_PERCENT_BLUE;     //! Dave?
-//    static float BEACON_MIN_PERCENT_YELLOW; //! Dave?
-//    static float BEACON_MIN_PERCENT_BLUE;   //! Dave?
     static int MIN_GOAL_SEPARATION;
 
     //! Obstacle detection constants
@@ -80,7 +84,7 @@ public:
 
     //! Field dimension constants
     static float GOAL_WIDTH;                //! The physical width of the goal posts in cm
-    static float GOAL_HEIGHT_INTERNAL;
+    static float GOAL_HEIGHT;
     static float DISTANCE_BETWEEN_POSTS;    //! The physical distance between the posts in cm
     static float BALL_WIDTH;                //! The physical width of the ball in cm
     static float CENTRE_CIRCLE_RADIUS;
@@ -90,7 +94,6 @@ public:
     static unsigned int VERTICAL_SCANLINE_SPACING;      //! The spacing between vertical scans.
     static unsigned int GREEN_HORIZON_SCAN_SPACING;     //! The spacing between scans used to locate the GH.
     static unsigned int GREEN_HORIZON_MIN_GREEN_PIXELS; //! Dave?
-    static float GREEN_HORIZON_LOWER_THRESHOLD_MULT;    //! Dave?
     static float GREEN_HORIZON_UPPER_THRESHOLD_MULT;    //! Dave?
 
     //! Split and Merge constants
@@ -116,30 +119,30 @@ public:
     static float RANSAC_MAX_DISTANCE_TO_MERGE; //
 
     static void loadFromFile(std::string filename); //! Loads the constants from a file
-    static void print(ostream& out);
+    static void print(std::ostream& out);
 
-    static bool setParameter(string name, bool val);
-    static bool setParameter(string name, int val);
-    static bool setParameter(string name, unsigned int val);
-    static bool setParameter(string name, float val);
-    static bool setParameter(string name, DistanceMethod val);
+    static bool setParameter(std::string name, bool val);
+    static bool setParameter(std::string name, int val);
+    static bool setParameter(std::string name, unsigned int val);
+    static bool setParameter(std::string name, float val);
+    static bool setParameter(std::string name, DistanceMethod val);
 
     static void setFlags(bool val=true);
 
-    static vector<Parameter> getAllOptimisable();
-    static vector<Parameter> getBallParams();
-    static vector<Parameter> getGoalParams();
-    static vector<Parameter> getObstacleParams();
-    static vector<Parameter> getLineParams();
-    static vector<Parameter> getGeneralParams();
+    static std::vector<Parameter> getAllOptimisable();
+    static std::vector<Parameter> getBallParams();
+    static std::vector<Parameter> getGoalParams();
+    static std::vector<Parameter> getObstacleParams();
+    static std::vector<Parameter> getLineParams();
+    static std::vector<Parameter> getGeneralParams();
 
 
-    static bool setAllOptimisable(const vector<float>& params);
-    static bool setBallParams(const vector<float>& params);
-    static bool setGoalParams(const vector<float>& params);
-    static bool setObstacleParams(const vector<float>& params);
-    static bool setLineParams(const vector<float>& params);
-    static bool setGeneralParams(const vector<float>& params);
+    static bool setAllOptimisable(const std::vector<float>& params);
+    static bool setBallParams(const std::vector<float>& params);
+    static bool setGoalParams(const std::vector<float>& params);
+    static bool setObstacleParams(const std::vector<float>& params);
+    static bool setLineParams(const std::vector<float>& params);
+    static bool setGeneralParams(const std::vector<float>& params);
     
 private:
     VisionConstants();  //so noone can make an object of this type

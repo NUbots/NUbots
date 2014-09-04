@@ -9,7 +9,7 @@
 #define MAX_KEYLENGTH 64
 #define MAX_VALLENGTH 64
 
-using namespace std;
+
 
 struct Pair {
   char* key; // note max lengths above
@@ -39,7 +39,7 @@ class Parse {
     bool IsLF(const char c);
     bool IsSpace(const char c);
 
-    vector<Pair> keyValuePairs;
+    std::vector<Pair> keyValuePairs;
 };
 
 #endif

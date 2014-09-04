@@ -21,18 +21,14 @@ ENDIF()
 
 ########## List your source files here! ############################################
 SET (YOUR_SRCS  pose2d.h
-               probabilityUtils.cpp probabilityUtils.h
-               odometryMotionModel.cpp odometryMotionModel.h
-               KF.cpp KF.h
-               Localisation.cpp Localisation.h
 		SelfLocalisation.cpp SelfLocalisation.h
 		MeasurementError.cpp MeasurementError.h
 		LocalisationSettings.cpp LocalisationSettings.h
-		LocWmFrame
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS Models
+SET (YOUR_DIRS
+Filters
 )
 ####################################################################################
 

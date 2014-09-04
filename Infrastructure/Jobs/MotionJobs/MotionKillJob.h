@@ -29,7 +29,7 @@
 
 #include "../MotionJob.h"
 #include <vector>
-using namespace std;
+
 
 class MotionKillJob : public MotionJob
 {
@@ -37,13 +37,13 @@ public:
     MotionKillJob();
     ~MotionKillJob();
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
     
-    friend ostream& operator<<(ostream& output, const MotionKillJob& job);
-    friend ostream& operator<<(ostream& output, const MotionKillJob* job);
+    friend std::ostream& operator<<(std::ostream& output, const MotionKillJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const MotionKillJob* job);
 protected:
-    virtual void toStream(ostream& output) const;
+    virtual void toStream(std::ostream& output) const;
 };
 
 #endif

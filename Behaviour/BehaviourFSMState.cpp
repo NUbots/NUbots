@@ -25,7 +25,7 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-using namespace std;
+
 
 void BehaviourFSMState::doState()
 {

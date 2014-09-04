@@ -28,7 +28,7 @@
 #include "debug.h"
 #include "nubotdataconfig.h"			// need this to set the default position for the filedialog
 
-MotionFileEditor::MotionFileEditor(const string& filepath, QWidget *parent): QWidget(parent)
+MotionFileEditor::MotionFileEditor(const std::string& filepath, QWidget *parent): QWidget(parent)
 {
     m_filepath = filepath;
     
@@ -78,10 +78,10 @@ MotionFileEditor::~MotionFileEditor()
 
 void MotionFileEditor::save()
 {
-    ofstream file(m_filepath.c_str());
+    std::ofstream file(m_filepath.c_str());
     if (file.is_open())
     {
-        string buffer = m_editor->toPlainText().toStdString();
+        std::string buffer = m_editor->toPlainText().toStdString();
         file.write(buffer.c_str(), buffer.size());
         file.close();
     }
@@ -94,13 +94,13 @@ void MotionFileEditor::send()
 
 void MotionFileEditor::load()
 {
-    ifstream file(m_filepath.c_str(), ios::in|ios::binary|ios::ate);
+    std::ifstream file(m_filepath.c_str(), std::ios::in|std::ios::binary|std::ios::ate);
     if (file.is_open())
     {	// if the file opens successfully, just do a simple binary read of the entire contents
         int size = (int)file.tellg();
         char* buffer = new char[size+1];
         buffer[size] = '\0';				// make it a nice cstring by adding a null termination character
-		file.seekg(0, ios::beg);
+        file.seekg(0, std::ios::beg);
         file.read(buffer, size);
         file.close();
         m_editor->setText(buffer);		// set the contents of the editor to be the contents of the buffer
@@ -109,19 +109,19 @@ void MotionFileEditor::load()
 
 void MotionFileEditor::checkSyntax()
 {
-    stringstream text(m_editor->toPlainText().toStdString());
-    string line;
+    std::stringstream text(m_editor->toPlainText().toStdString());
+    std::string line;
     while (text.good())
     {
     	getline(text, line);
         if (not bracketsOK(line))
-            debug << "syntax broken" << endl;
+            debug << "syntax broken" << std::endl;
     }
     // for each line check that there are an equal number of ([]) in each line
     
 }
 
-bool MotionFileEditor::bracketsOK(const string& line)
+bool MotionFileEditor::bracketsOK(const std::string& line)
 {
     int brackets = 0;
     for (size_t i=0; i<line.size(); i++)

@@ -30,7 +30,7 @@
 #include "Infrastructure/NUActionatorsData/NUActionatorsData.h"
 
 #include <fstream>
-using namespace std;
+
 
 class BlankWalk : public NUWalk
 {

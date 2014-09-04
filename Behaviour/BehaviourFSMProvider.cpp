@@ -30,7 +30,7 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-using namespace std;
+
 
 /*! @brief Construct a behaviour provider with the given manager
  */

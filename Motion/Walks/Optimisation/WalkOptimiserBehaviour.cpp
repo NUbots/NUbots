@@ -31,7 +31,7 @@
 #include <sstream>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics.hpp>
-using namespace std;
+
 
 //! @todo TODO: put M_PI and NORMALISE somewhere else
 #ifndef M_PI
@@ -61,20 +61,20 @@ WalkOptimiserBehaviour::WalkOptimiserBehaviour(NUPlatform* p_platform, NUWalk* p
     p_platform->getNumber(playernum);
     p_platform->getTeamNumber(teamnum);
     // firstly we look to see if there are any sets of parameters that need assessing!
-    stringstream assessparameters_filenamestream;
+    std::stringstream assessparameters_filenamestream;
     assessparameters_filenamestream << "../assess_this" << teamnum << playernum << ".log";
     m_assessparameters_filename = assessparameters_filenamestream.str();
     loadAssessor();
     // check to see if there is an existing saved optimiser. I do this by trying to open it
-    stringstream savedoptimiser_filenamestream;
+    std::stringstream savedoptimiser_filenamestream;
     savedoptimiser_filenamestream << "../previous_optimiser" << teamnum << playernum << ".log";
     m_saved_optimiser_filename = savedoptimiser_filenamestream.str();
     loadOptimiser();
     // init log files. I always want to write, and I always want to append to the files
-    stringstream parameter_filenamestream;
+    std::stringstream parameter_filenamestream;
     parameter_filenamestream << "../parameters" << teamnum << playernum << ".log";
     m_parameter_log.open(parameter_filenamestream.str().c_str(), ios_base::out | ios_base::app);
-    stringstream performance_filenamestream;
+    std::stringstream performance_filenamestream;
     performance_filenamestream << "../performance" << teamnum << playernum << ".log";
     m_performance_log.open(performance_filenamestream.str().c_str(), ios_base::out | ios_base::app);
     
@@ -145,7 +145,7 @@ void WalkOptimiserBehaviour::process(NUSensorsData* data, NUActionatorsData* act
 void WalkOptimiserBehaviour::process(JobList& joblist)
 {
     static int fallencount = 0;
-    static vector<float> speed(3,0);
+    static std::vector<float> speed(3,0);
     static WalkJob* job = new WalkJob(speed);
     
     if (m_data == NULL || m_actions == NULL)
@@ -171,7 +171,7 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
         m_target_speed = 0;
         
         // wait until the robot comes to rest
-        static vector<float> speed(3,0);
+        static std::vector<float> speed(3,0);
         static double stoppedtime = 0;
         static bool stopped = false;
         m_walk->getCurrentSpeed(speed);
@@ -227,7 +227,7 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
         m_target_speed = m_walk_parameters[0];
         
         // look for terminating distances while measuring walk performance
-        static vector<float> gps(3,0);
+        static std::vector<float> gps(3,0);
         m_data->getGPSValues(gps);
         float totaldistance = sqrt(pow(gps[0] - m_respawn_x,2) + pow(gps[1] - m_respawn_y,2));
         if (m_state == MeasureCost)
@@ -235,7 +235,7 @@ void WalkOptimiserBehaviour::process(JobList& joblist)
             if (totaldistance > 300.0)      // if walked more than 300cm begin to stop the robot
             {
                 m_target_speed = 0;
-                static vector<float> speeds(3,0);
+                static std::vector<float> speeds(3,0);
                 m_walk->getCurrentSpeed(speeds);
                 if (speeds[0] == 0)         // once the robot has stopped finish the cost measurement
                     finishMeasureCost();
@@ -296,9 +296,9 @@ void WalkOptimiserBehaviour::startRobustTrial()
  */
 void WalkOptimiserBehaviour::measureCost()
 {
-    static vector<float> previouspositions;
-    static vector<float> positions;
-    static vector<float> torques;
+    static std::vector<float> previouspositions;
+    static std::vector<float> positions;
+    static std::vector<float> torques;
     static double previoustime = 0;
     m_data->getJointPositions(NUSensorsData::BodyJoints, positions);
     m_data->getJointTorques(NUSensorsData::BodyJoints, torques);
@@ -318,7 +318,7 @@ void WalkOptimiserBehaviour::measureCost()
  */
 void WalkOptimiserBehaviour::finishMeasureCost()
 {
-    static vector<float> gps(3,0);
+    static std::vector<float> gps(3,0);
     m_data->getGPSValues(gps);
     float distance = fabs(gps[0] - m_respawn_x);                                // only count the forward distance travelled
     float totaldistance = sqrt(pow(gps[0] - m_respawn_x,2) + pow(gps[1] - m_respawn_y,2));
@@ -334,7 +334,7 @@ void WalkOptimiserBehaviour::finishMeasureCost()
     m_measured_speed = distance/time;
     m_measured_cost = m_trial_energy_used*100/(9.81*4.8*distance);          
     
-    //cout << "finishMeasureCost(). m_trial_energy_used: " << m_trial_energy_used << " time: " << time << " totaldistance:" << totaldistance << endl;
+    //std::cout << "finishMeasureCost(). m_trial_energy_used: " << m_trial_energy_used << " time: " << time << " totaldistance:" << totaldistance << std::endl;
     
     m_state = MeasureRobust;
     teleport();
@@ -502,7 +502,7 @@ void WalkOptimiserBehaviour::pushJoint(NUSensorsData::id_t id, float offset)
  */
 void WalkOptimiserBehaviour::tickOptimiser(float metric)
 {
-    //cout << "Ticking Optimiser" << endl;
+    //std::cout << "Ticking Optimiser" << std::endl;
     m_optimiser->tick(metric, m_walk_parameters);
     m_walk->setWalkParameters(m_walk_parameters);
     
@@ -518,11 +518,11 @@ void WalkOptimiserBehaviour::loadOptimiser()
     ifstream savedoptimiser(m_saved_optimiser_filename.c_str(), ios_base::in);
     if (savedoptimiser.is_open())
     {   // if it exists start from where we left off
-        cout << "WalkOptimiserBehaviour::WalkOptimiserBehaviour. Loading previous WalkOptimiser from file." << endl;
+        std::cout << "WalkOptimiserBehaviour::WalkOptimiserBehaviour. Loading previous WalkOptimiser from file." << std::endl;
         savedoptimiser >> (*m_optimiser);
         m_optimiser->getNewParameters(m_walk_parameters);
         m_walk->setWalkParameters(m_walk_parameters);
-        m_optimiser->summaryTo(cout);
+        m_optimiser->summaryTo(std::cout);
     }
 }
 
@@ -548,9 +548,9 @@ void WalkOptimiserBehaviour::tickAssessor()
     cost_accumulator(m_measured_cost);
     robust_accumulator(m_measured_robustness);
     
-    cout << "Speed: " << mean(speed_accumulator) << " sd:" << sqrt(variance(speed_accumulator)) << endl;
-    cout << "Cost: " << mean(cost_accumulator) << " sd:" << sqrt(variance(cost_accumulator)) << endl;
-    cout << "Robustness: " << mean(robust_accumulator) << " sd:" << sqrt(variance(robust_accumulator)) << endl;
+    std::cout << "Speed: " << mean(speed_accumulator) << " sd:" << sqrt(variance(speed_accumulator)) << std::endl;
+    std::cout << "Cost: " << mean(cost_accumulator) << " sd:" << sqrt(variance(cost_accumulator)) << std::endl;
+    std::cout << "Robustness: " << mean(robust_accumulator) << " sd:" << sqrt(variance(robust_accumulator)) << std::endl;
 }
 
 void WalkOptimiserBehaviour::loadAssessor()
@@ -562,8 +562,8 @@ void WalkOptimiserBehaviour::loadAssessor()
         m_walk_parameters.csvFrom(assess_parameters_log);
         m_walk->setWalkParameters(m_walk_parameters);
         m_assessor_running = true;
-        cout << "Loading walk parameters for assessment: " << endl;
-        m_walk_parameters.summaryTo(cout);
+        std::cout << "Loading walk parameters for assessment: " << std::endl;
+        m_walk_parameters.summaryTo(std::cout);
     }
     else
         m_assessor_running = false;
@@ -571,23 +571,23 @@ void WalkOptimiserBehaviour::loadAssessor()
 
 /*! @brief Prints a human readable summary of the walk behaviour's state
  */
-void WalkOptimiserBehaviour::summaryTo(ostream& output)
+void WalkOptimiserBehaviour::summaryTo(std::ostream& output)
 {
     output << "WalkOptimiserBehaviour: Optimising: ";
     if (m_metric_type == Speed)
-        output << "Speed" << endl;
+        output << "Speed" << std::endl;
     else if (m_metric_type == Cost)
-        output << "Cost" << endl;
+        output << "Cost" << std::endl;
     else if (m_metric_type == SpeedAndPushes)
-        output << "SpeedAndPushes" << endl;
+        output << "SpeedAndPushes" << std::endl;
     else if (m_metric_type == CostAndPushes)
-        output << "CostAndPushes" << endl;
-    output << "Measured Speed: " << m_measured_speed << " Cost: " << m_measured_cost << "Robustness: " << m_measured_robustness << endl;
+        output << "CostAndPushes" << std::endl;
+    output << "Measured Speed: " << m_measured_speed << " Cost: " << m_measured_cost << "Robustness: " << m_measured_robustness << std::endl;
 }
 
-void WalkOptimiserBehaviour::csvTo(ostream& output)
+void WalkOptimiserBehaviour::csvTo(std::ostream& output)
 {
-    output << m_optimiser->getIterationCount() << ", " << m_optimiser->getBestPerformance() << ", " << m_measured_metric << ", " << m_measured_speed << ", " << m_measured_cost << ", " << m_measured_robustness << endl;
+    output << m_optimiser->getIterationCount() << ", " << m_optimiser->getBestPerformance() << ", " << m_measured_metric << ", " << m_measured_speed << ", " << m_measured_cost << ", " << m_measured_robustness << std::endl;
 }
 
 

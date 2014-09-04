@@ -29,7 +29,7 @@
 #include <QtGui>
 #include <string>
 #include <vector>
-using namespace std;
+
 
 class MotionFileSyntaxHighlighter : public QSyntaxHighlighter
 {
@@ -41,7 +41,7 @@ public:
 private:
     void highlightBlock(const QString& text);
     void checkSyntax();
-    bool bracketsOK(const string& line);
+    bool bracketsOK(const std::string& line);
 };
 
 #endif

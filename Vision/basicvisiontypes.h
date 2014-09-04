@@ -1,9 +1,9 @@
 #ifndef BASICVISIONTYPES_H
 #define BASICVISIONTYPES_H
 
-#include "Tools/Math/Vector2.h"
+#include "../Tools/Math/Vector2.h"
 
-//#include "Vision/VisionTypes/groundpoint.h"
+//#include "Vision/VisionTypes/nupoint.h"
 typedef Vector2<double> Point;
 
 namespace Vision {
@@ -18,32 +18,28 @@ namespace Vision {
 //        GOAL_Y_COLOUR,
 //        GOAL_B_COLOUR,
         LINE_COLOUR,
+        TEAM_CYAN_COLOUR,
+        TEAM_MAGENTA_COLOUR,
         UNKNOWN_COLOUR
     };
 
-    //! VFO_ID enum and associated string conversion methods
+    //! VFO_ID enum and associated std::string conversion methods
     enum VFO_ID {
         BALL            = 0,
-        GOAL_L          = 1,
-        GOAL_R          = 2,
-        GOAL_U          = 3,
-        FIELDLINE       = 4,
-        CORNER          = 5,
-        CENTRE_CIRCLE   = 6,
-        OBSTACLE        = 7,
-        INVALID         = 8
-//        GOAL_Y_L=1,
-//        GOAL_Y_R=2,
-//        GOAL_Y_U=3,
-//        GOAL_B_L=4,
-//        GOAL_B_R=5,
-//        GOAL_B_U=6,
-//        BEACON_Y=7,
-//        BEACON_B=8,
-//        BEACON_U=9,
-//        FIELDLINE=10,
-//        OBSTACLE=11,
-//        INVALID=12
+        FIELDLINE       = 1,
+        CORNER          = 2,
+        CENTRE_CIRCLE   = 3,
+        OBSTACLE        = 4,
+        GOAL_L          = 5,
+        GOAL_R          = 6,
+        GOAL_U          = 7,
+        GOAL_Y_L        = 8,
+        GOAL_Y_R        = 9,
+        GOAL_Y_U        = 10,
+        GOAL_B_L        = 11,
+        GOAL_B_R        = 12,
+        GOAL_B_U        = 13,
+        INVALID         = 14
     };
 
     enum DEBUG_ID {
@@ -88,6 +84,11 @@ namespace Vision {
         D2P,
         Average,
         Least
+    };
+
+    enum GoalDetectionMethod {
+        HIST,
+        RANSAC_G
     };
 
     enum LineDetectionMethod {
@@ -136,6 +137,10 @@ namespace Vision {
     LineDetectionMethod getLineMethodFromName(std::string name);
 
     std::string getLineMethodName(LineDetectionMethod method);
+
+    GoalDetectionMethod getGoalMethodFromName(std::string name);
+
+    std::string getGoalMethodName(GoalDetectionMethod method);
 }
 
 #endif // BASICVISIONTYPES_H

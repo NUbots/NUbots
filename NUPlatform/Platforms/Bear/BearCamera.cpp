@@ -29,7 +29,7 @@
 BearCamera::BearCamera()
 {
 #if DEBUG_NUCAMERA_VERBOSITY > 0
-    debug << "BearCamera::BearCamera(" << platform << ")" << endl;
+    debug << "BearCamera::BearCamera(" << platform << ")" << std::endl;
 #endif
 }
 

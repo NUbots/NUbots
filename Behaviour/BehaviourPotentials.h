@@ -35,7 +35,7 @@
 
 #include <vector>
 #include <string>
-using namespace std;
+
 
 class BehaviourPotentials 
 {
@@ -50,7 +50,7 @@ public:
         @param stoppingdistance the distance in cm from the target the robot will start to slow
         @param turningdistance the distance in cm from the target the robot will start to turn to face the desired heading
      */
-    static vector<float> goToPointBackwards(float distance, float bearing, float heading, float stoppeddistance = 10.f, float stoppingdistance = 50, float turningdistance = 70)
+    static std::vector<float> goToPointBackwards(float distance, float bearing, float heading, float stoppeddistance = 10.f, float stoppingdistance = 50, float turningdistance = 70)
     {
         static const float m_HYSTERESIS = 0.15;      // the fraction of hysteresis in the turning point toward the desired heading
         static double m_previous_time = 0;          // the previous time in ms
@@ -58,7 +58,7 @@ public:
         static bool m_turning_left = false; 
         //bearing = mathGeneral::normaliseAngle(bearing+3.1416);
         Self self = Blackboard->Objects->self;
-        vector<float> result(3,0);
+        std::vector<float> result(3,0);
         
         
     
@@ -97,8 +97,8 @@ public:
                 }*/
         }
         
-        //cout << result[0] << ", " << result[1] << ", " << result[2] << endl;
-        //cout << distance << ", " << bearing << ", " << heading << endl;
+        //std::cout << result[0] << ", " << result[1] << ", " << result[2] << std::endl;
+        //std::cout << distance << ", " << bearing << ", " << heading << std::endl;
        /* if (Blackboard->Sensors->CurrentTime - m_previous_time > 500)
         {
             m_previous_turning = false;
@@ -141,9 +141,9 @@ public:
         @param stoppingdistance the distance in cm from the target the robot will start to slow
         @param turningdistance the distance in cm from the target the robot will start to turn to face the desired heading
      */
-    static vector<float> goToFieldState(Self& self, const vector<float>& fieldstate, float stoppeddistance = 4.f, float stoppingdistance = 30, float turningdistance = 70)
+    static std::vector<float> goToFieldState(Self& self, const std::vector<float>& fieldstate, float stoppeddistance = 4.f, float stoppingdistance = 30, float turningdistance = 70)
     {
-        vector<float> relativestate = self.CalculateDifferenceFromFieldState(fieldstate);
+        std::vector<float> relativestate = self.CalculateDifferenceFromFieldState(fieldstate);
         return goToPoint(relativestate[0], relativestate[1], relativestate[2], stoppeddistance, stoppingdistance, turningdistance);
     }
     
@@ -155,7 +155,7 @@ public:
         @param stoppingdistance the distance in cm from the target the robot will start to slow
         @param turningdistance the distance in cm from the target the robot will start to turn to face the desired heading
      */
-    static vector<float> goToPoint(float distance, float bearing, float heading, float stoppeddistance = 4.f, float stoppingdistance = 50, float turningdistance = 70)
+    static std::vector<float> goToPoint(float distance, float bearing, float heading, float stoppeddistance = 4.f, float stoppingdistance = 50, float turningdistance = 70)
     {
         static const float m_HYSTERESIS = 0.1;      // the fraction of hysteresis in the turning point toward the desired heading
         static double m_previous_time = 0;          // the previous time in ms
@@ -163,10 +163,10 @@ public:
         static bool m_turning_left = false; 
         
         Self self = Blackboard->Objects->self;
-        vector<float> result(3,0);
+        std::vector<float> result(3,0);
         
         //Modify bearing based on objects in the way
-        vector<AmbiguousObject> objects = Blackboard->Objects->ambiguousFieldObjects;
+        std::vector<AmbiguousObject> objects = Blackboard->Objects->ambiguousFieldObjects;
         float goaldistance = 80.f;
 
         for(unsigned int i=0; i<objects.size(); i++) { //for each object
@@ -212,8 +212,8 @@ public:
             }
         }
         
-        //cout << result[0] << ", " << result[1] << ", " << result[2] << endl;
-        //cout << distance << ", " << bearing << ", " << heading << endl;
+        //std::cout << result[0] << ", " << result[1] << ", " << result[2] << std::endl;
+        //std::cout << distance << ", " << bearing << ", " << heading << std::endl;
        /* if (Blackboard->Sensors->CurrentTime - m_previous_time > 500)
         {
             m_previous_turning = false;
@@ -255,12 +255,12 @@ public:
         @param objectsize the radius in cm of the object to avoid
         @param dontcaredistance the distance in cm at which I make no attempt to avoid the object
      */
-    static vector<float> avoidFieldState(Self& self, vector<float>& fieldstate, float objectsize = 25, float dontcaredistance = 100)
+    static std::vector<float> avoidFieldState(Self& self, std::vector<float>& fieldstate, float objectsize = 25, float dontcaredistance = 100)
     {
-        vector<float> result(3,0);
+        std::vector<float> result(3,0);
         if (fieldstate.size() < 3)
             fieldstate.push_back(0);
-        vector<float> relativestate = self.CalculateDifferenceFromFieldState(fieldstate);
+        std::vector<float> relativestate = self.CalculateDifferenceFromFieldState(fieldstate);
         
         float distance = relativestate[0];
         float bearing = relativestate[1];
@@ -295,7 +295,7 @@ public:
 
     /*! @brief Returns a vector to go to a ball
      */
-    static vector<float> goToBallDirectWithSidewardsKick(MobileObject& ball, Self& self, float heading, float kickingdistance = 15.0, float stoppingdistance = 65)
+    static std::vector<float> goToBallDirectWithSidewardsKick(MobileObject& ball, Self& self, float heading, float kickingdistance = 15.0, float stoppingdistance = 65)
     {
         std::vector<float> speed(3, 0.0f);  // [Magnitude, Direction, Rotation]
 
@@ -414,17 +414,17 @@ public:
         float dist_to_kick_pos = sqrt(pow(x_diff,2) + pow(y_diff, 2));
         float angle_to_kick_pos = mathGeneral::normaliseAngle(atan2(y_diff, x_diff) - my_heading);
         float angle_to_aim_pos = mathGeneral::normaliseAngle(best_kicking_orientation - my_heading);
-        //cout << "Approach angle: " << angle_to_kick_pos << "\tKick angle: " << angle_to_aim_pos << "\tHeading: " << my_heading << endl;
-        //cout << "Ball RelX: " << x_diff << "\tBall RelY: " << y_diff << "\tBall Heading: " << atan2(y_diff, x_diff) << endl;
-        //cout << "Ball Goal Bearing: " << fwd_angle << "\tkick orientation: " << best_kicking_orientation << endl;
-        //cout << "Goal RelX: " << goalx-my_x << "\tGoal RelY: " << goaly-my_y << "\tBall Distance: " << ball_distance << endl;
+        //std::cout << "Approach angle: " << angle_to_kick_pos << "\tKick angle: " << angle_to_aim_pos << "\tHeading: " << my_heading << std::endl;
+        //std::cout << "Ball RelX: " << x_diff << "\tBall RelY: " << y_diff << "\tBall Heading: " << atan2(y_diff, x_diff) << std::endl;
+        //std::cout << "Ball Goal Bearing: " << fwd_angle << "\tkick orientation: " << best_kicking_orientation << std::endl;
+        //std::cout << "Goal RelX: " << goalx-my_x << "\tGoal RelY: " << goaly-my_y << "\tBall Distance: " << ball_distance << std::endl;
 
         static bool turning = false;
         static bool turningLeft = false;
         float target_heading = (ball_distance > stoppingdistance) ? angle_to_kick_pos : ball_bearing; //angle_to_aim_pos;
         
         //Bearing Alteration
-        vector<AmbiguousObject> objects = Blackboard->Objects->ambiguousFieldObjects;
+        std::vector<AmbiguousObject> objects = Blackboard->Objects->ambiguousFieldObjects;
 
         for(unsigned int i=0; i<objects.size(); i++) { //for each object
             if (objects[i].isObjectAPossibility(FieldObjects::FO_OBSTACLE) and objects[i].measuredDistance() > ball_distance) { //if we are an obstacle
@@ -438,7 +438,7 @@ public:
         
         //change bearing to align to ball
         if (fabs(ball_bearing) < 0.3) {
-            vector<float> goalPosition(3,0);
+            std::vector<float> goalPosition(3,0);
             float bearingLineUpSide = 0.4;
             float bearingLineUpFront = 0.45;
             goalPosition = self.CalculateDifferenceFromGoal(getOpponentGoal(Blackboard->Objects, Blackboard->GameInfo));
@@ -503,15 +503,15 @@ public:
         } else {
             speed[2] = 0.2*ball_bearing;
         }
-        //cout << speed[0] << ", " << speed[1] << ", " << speed[2] << endl;
+        //std::cout << speed[0] << ", " << speed[1] << ", " << speed[2] << std::endl;
         return speed;
     }
 
     /*! @brief Returns a vector to go to a ball
      */
-    static vector<float> goToBall(MobileObject& ball, Self& self, float heading, float kickingdistance = 15.0, float stoppingdistance = 65)
+    static std::vector<float> goToBall(MobileObject& ball, Self& self, float heading, float kickingdistance = 15.0, float stoppingdistance = 65)
     {
-        vector<float> ball_prediction = self.CalculateClosestInterceptToMobileObject(ball);
+        std::vector<float> ball_prediction = self.CalculateClosestInterceptToMobileObject(ball);
         if (false)//ball_prediction[0] < 4 and ball.estimatedDistance() > 30)
         {   // if the ball is moving go to where the ball will be!
 
@@ -522,10 +522,10 @@ public:
             float distance = sqrt(x*x + y*y);
             float bearing = atan2(y,x);
             
-            vector<float> speed = goToPoint(distance, bearing, 0, 0, 0, distance+9000);
+            std::vector<float> speed = goToPoint(distance, bearing, 0, 0, 0, distance+9000);
             
             #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-                debug << "goToBall Predicated x:" << x << " y: " << y << " ballx: " << ball.estimatedDistance()*cos(heading) << " bally: " << ball.estimatedDistance()*sin(heading) << endl;
+                debug << "goToBall Predicated x:" << x << " y: " << y << " ballx: " << ball.estimatedDistance()*cos(heading) << " bally: " << ball.estimatedDistance()*sin(heading) << std::endl;
             #endif
             return speed;
         }
@@ -638,7 +638,7 @@ public:
             }
             
             // calculate the component to go around the ball to face the heading
-            vector<float> speed(3,0);
+            std::vector<float> speed(3,0);
             float around_speed;
             float around_direction;
             float around_rotation;
@@ -667,21 +667,21 @@ public:
                 around_rotation = 0;
             }
             
-            //vector<float> speed(3,0);
+            //std::vector<float> speed(3,0);
             
             
-            speed[0] = max(position_speed, around_speed);
+            speed[0] = std::max(position_speed, around_speed);
             //float xsum = position_speed*cos(position_direction) + around_speed*cos(around_direction);
             //float ysum = position_speed*sin(position_direction) + around_speed*sin(around_direction);
-            speed[1] = (position_speed*position_direction + around_speed*around_direction)/(max(position_speed,0.3f)+around_speed);//atan2(ysum, xsum);
+            speed[1] = (position_speed*position_direction + around_speed*around_direction)/(std::max(position_speed,0.3f)+around_speed);//atan2(ysum, xsum);
             speed[2] = (position_speed*position_rotation + around_speed*around_rotation)/(position_speed+around_speed);
-            speed[2] = min(fabs(speed[2]),.3f)*mathGeneral::sign(speed[2]);
+            speed[2] = std::min(fabs(speed[2]), 0.3) * mathGeneral::sign(speed[2]);
             
-            /*cout << endl;
-            cout << "Goal Heading: " << heading << "\tBall Distance: " << distance << endl;
-            cout << "Goto Speed:   " << position_speed << "\t" << position_direction << "\t" << position_rotation << "\t" << endl;
-            cout << "Around Speed: " << around_speed << "\t" << around_direction << "\t" << around_rotation << "\t" << endl;
-            cout << "Final Speed:  " << speed[0] << "\t" << speed[1] << "\t" << speed[2] << "\t" << endl;*/
+            /*std::cout << std::endl;
+            std::cout << "Goal Heading: " << heading << "\tBall Distance: " << distance << std::endl;
+            std::cout << "Goto Speed:   " << position_speed << "\t" << position_direction << "\t" << position_rotation << "\t" << std::endl;
+            std::cout << "Around Speed: " << around_speed << "\t" << around_direction << "\t" << around_rotation << "\t" << std::endl;
+            std::cout << "Final Speed:  " << speed[0] << "\t" << speed[1] << "\t" << speed[2] << "\t" << std::endl;*/
             return speed;
         }
     }
@@ -689,7 +689,7 @@ public:
     /*! @brief Returns a the vector sum of the potentials
         @param potentials a list of [trans_speed, trans_direction, rot_speed] vectors
      */
-    static vector<float> sumPotentials(const vector<vector<float> >& potentials)
+    static std::vector<float> sumPotentials(const std::vector<std::vector<float> >& potentials)
     {
         float xsum = 0;
         float ysum = 0;
@@ -703,7 +703,7 @@ public:
             ysum += potentials[i][0]*sin(potentials[i][1]);
             yawsum += potentials[i][2];
         }
-        vector<float> result(3,0);
+        std::vector<float> result(3,0);
         result[0] = maxspeed;
         result[1] = atan2(ysum,xsum);
         result[2] = yawsum;
@@ -713,13 +713,13 @@ public:
     /*! @brief Returns a vector of the left and right obstacles using either the ultrasonics
                 on the NAOs or the Darwin Vision obstacles
      */
-    static vector<float> getObstacleDistances(NUSensorsData* sensors)
+    static std::vector<float> getObstacleDistances(NUSensorsData* sensors)
     {
         float VIEW_ANGLE_RANGE = mathGeneral::PI/6;
         float OVERLAP_ANGLE = mathGeneral::PI/24;
-        vector<float> result;
-        vector<float> temp_l;
-        vector<float> temp_r;
+        std::vector<float> result;
+        std::vector<float> temp_l;
+        std::vector<float> temp_r;
         float leftobstacle = 255;
         float rightobstacle = 255;
 
@@ -735,7 +735,7 @@ public:
         else
         {
             //DARWIN
-            vector<AmbiguousObject> objects = Blackboard->Objects->ambiguousFieldObjects;
+            std::vector<AmbiguousObject> objects = Blackboard->Objects->ambiguousFieldObjects;
             AmbiguousObject tempobj;
             Vector3<float> temploc;
 
@@ -782,13 +782,13 @@ public:
         return result;
     }
     
-    /*! @brief Returns a vector as close to the original as possible without hitting obstacles detected by the sensors
+    /*! @brief Returns a std::vector as close to the original as possible without hitting obstacles detected by the sensors
         @param speed the desired speed as [trans_speed, trans_direction, rot_speed]
      */
-    static vector<float> sensorAvoidObjects(const vector<float>& speed, NUSensorsData* sensors, float objectsize = 40, float dontcaredistance = 75)
+    static std::vector<float> sensorAvoidObjects(const std::vector<float>& speed, NUSensorsData* sensors, float objectsize = 40, float dontcaredistance = 75)
     {
         // Get obstacle distances from the sensors
-        vector<float> obstacles = getObstacleDistances(sensors);
+        std::vector<float> obstacles = getObstacleDistances(sensors);
         float leftobstacle = obstacles.at(0);
         float rightobstacle = obstacles.at(1);
         
@@ -802,8 +802,8 @@ public:
         }
         else
         {   // an obstacle needs to be dodged
-            vector<float> newspeed = speed;
-            float obstacle = min(leftobstacle, rightobstacle);
+            std::vector<float> newspeed = speed;
+            float obstacle = std::min(leftobstacle, rightobstacle);
             float dodgeangle;
             if (obstacle < objectsize)          // if we are 'inside' the object
                 dodgeangle = mathGeneral::PI/2 + asin((objectsize - obstacle)/objectsize);
@@ -828,7 +828,7 @@ public:
                 with provided obstacles - does not calculate its own obstacles
         @param speed the desired speed as [trans_speed, trans_direction, rot_speed]
      */
-    static vector<float> sensorAvoidObjects(const vector<float>& speed, NUSensorsData* sensors, vector<float> obstacles, float objectsize = 40, float dontcaredistance = 75)
+    static std::vector<float> sensorAvoidObjects(const std::vector<float>& speed, NUSensorsData* sensors, std::vector<float> obstacles, float objectsize = 40, float dontcaredistance = 75)
     {
         float leftobstacle = obstacles.at(0);
         float rightobstacle = obstacles.at(1);
@@ -843,8 +843,8 @@ public:
         }
         else
         {   // an obstacle needs to be dodged
-            vector<float> newspeed = speed;
-            float obstacle = min(leftobstacle, rightobstacle);
+            std::vector<float> newspeed = speed;
+            float obstacle = std::min(leftobstacle, rightobstacle);
             float dodgeangle;
             if (obstacle < objectsize)          // if we are 'inside' the object
                 dodgeangle = mathGeneral::PI/2 + asin((objectsize - obstacle)/objectsize);
@@ -877,7 +877,7 @@ public:
     }
     
     /*! @brief Returns the relative position of the opponent's goal [distance, bearing] */
-    static vector<float> getOpponentGoalPosition(FieldObjects* fieldobjects, GameInformation* gameinfo)
+    static std::vector<float> getOpponentGoalPosition(FieldObjects* fieldobjects, GameInformation* gameinfo)
     {
         StationaryObject& opponentgoal = getOpponentGoal(fieldobjects, gameinfo);
         return fieldobjects->self.CalculateDifferenceFromGoal(opponentgoal);
@@ -886,7 +886,7 @@ public:
     /*! @brief Returns the bearing to the opponent's goal */
     static float getBearingToOpponentGoal(FieldObjects* fieldobjects, GameInformation* gameinfo)
     {
-        vector<float> position = getOpponentGoalPosition(fieldobjects, gameinfo);
+        std::vector<float> position = getOpponentGoalPosition(fieldobjects, gameinfo);
         
         return position[1];
     }
@@ -903,7 +903,7 @@ public:
     }
     
     /*! @brief Return the relative position of your own goal [distance, bearing] */
-    static vector<float> getOwnGoalPosition(FieldObjects* fieldobjects, GameInformation* gameinfo)
+    static std::vector<float> getOwnGoalPosition(FieldObjects* fieldobjects, GameInformation* gameinfo)
     {
         StationaryObject& owngoal = getOwnGoal(fieldobjects, gameinfo);
         return fieldobjects->self.CalculateDifferenceFromGoal(owngoal);
@@ -912,15 +912,15 @@ public:
     /*! @brief Returns the bearing to your own goal */
     static float getBearingToOwnGoal(FieldObjects* fieldobjects, GameInformation* gameinfo)
     {
-        vector<float> position = getOwnGoalPosition(fieldobjects, gameinfo);
+        std::vector<float> position = getOwnGoalPosition(fieldobjects, gameinfo);
         return position[1];
     }
 
     /*! @brief Returns the [x,y] of the support player position */
-    static vector<float> CalculateSupportPlayerPosition(MobileObject& ball, Self& self, float distancefromball = 140)
+    static std::vector<float> CalculateSupportPlayerPosition(MobileObject& ball, Self& self, float distancefromball = 140)
     {
         // we calculate the position in field coordinates, then convert to local cartesian
-        vector<float> targetposition(3,0);
+        std::vector<float> targetposition(3,0);
         targetposition[0] = ball.X();
         if (fabs(targetposition[0]) > 180)          // clip the target position to 1.2m from the goal
             targetposition[0] = mathGeneral::sign(targetposition[0])*180;
@@ -937,10 +937,10 @@ public:
             targetposition[1] = b_y + distancefromball;
         
         // convert to relative coords
-        vector<float> polar = self.CalculateDifferenceFromFieldLocation(targetposition);
+        std::vector<float> polar = self.CalculateDifferenceFromFieldLocation(targetposition);
         
         // convert to cartesian
-        vector<float> cartesian(2,0);
+        std::vector<float> cartesian(2,0);
         cartesian[0] = polar[0]*cos(polar[1]);
         cartesian[1] = polar[0]*sin(polar[1]);
         return cartesian;

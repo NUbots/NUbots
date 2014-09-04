@@ -12,7 +12,7 @@ public:
     ScriptKick(NUWalk* walk, NUSensorsData* data, NUActionatorsData* actions);
     ~ScriptKick();
     void doKick();
-    void kickToPoint(const vector<float>& position, const vector<float>& target);
+    void kickToPoint(const std::vector<float>& position, const std::vector<float>& target);
     
     virtual void stop();
     virtual void kill();
@@ -37,8 +37,8 @@ protected:
     unsigned int m_current_index;
     double m_script_end_time;
     MotionScript* m_current_script;
-    vector<vector<float> > m_joints;
-    vector<vector<float> > m_gains;
+    std::vector<std::vector<float> > m_joints;
+    std::vector<std::vector<float> > m_gains;
     Rectangle m_left_kick_area;
     Rectangle m_right_kick_area;
     Rectangle m_side_left_kick_area;

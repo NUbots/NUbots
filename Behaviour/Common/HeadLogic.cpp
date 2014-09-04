@@ -22,6 +22,7 @@
 
 
 #include "HeadLogic.h"
+#include "Autoconfig/nubotdataconfig.h"
 
 #include <cmath>
 #include <vector>
@@ -36,7 +37,7 @@ HeadLogic* HeadLogic::getInstance(){
 
 HeadLogic::HeadLogic(){
     //cout<<"Head logic constructor start"<<endl;
-    NUCameraData cameraSpecs(string(/*CONFIG_DIR*/ "Config/Darwin") + "CameraSpecs.cfg");
+    NUCameraData cameraSpecs(std::string(CONFIG_DIR) + "CameraSpecs.cfg");
     m_CAMERA_FOV_X = cameraSpecs.m_horizontalFov;
     m_CAMERA_FOV_Y = cameraSpecs.m_verticalFov;
 
@@ -134,6 +135,22 @@ int HeadLogic::getObjectType(int index){
 
 
 }
+
+/*! @brief
+     * Gets the index of the object in the list of interesting objects.
+     * */
+int HeadLogic::getObjectIndex(int object_type, int object_enum_value){
+    int stationary = (object_type==HeadLogic::STATIONARY_OBJECT ? 1:0);
+    int mobile = (object_type==HeadLogic::MOBILE_OBJECT ? 1:0);
+    int ambiguous = (object_type==HeadLogic::AMBIGUOUS_OBJECT ? 1:0);
+
+    return relevantObjects[HeadLogic::STATIONARY_OBJECT].size()*(mobile+ambiguous)+//If mobile or ambiguous add the length of the stationary list
+            relevantObjects[HeadLogic::MOBILE_OBJECT].size()*ambiguous+//
+            object_enum_value;
+
+}
+
+
 
 /*! @brief
      * Gets the ith object from the list of interesting objects. Self not gettable.
@@ -600,7 +617,7 @@ std::vector<int> HeadLogic::getValidObjectsToLookAt()
     vector<int> validities;
 
     for(int i = 0;i<bearings.size();i++){
-        if(bearings[i]*bearings[i] <= 2.46/*(pi/2)^2*/)
+        if(bearings[i]*bearings[i] <= 2.46/*==(pi/2)^2*/)
             validities.push_back(1);
         else
             validities.push_back(0);
@@ -612,7 +629,60 @@ std::vector<int> HeadLogic::getValidObjectsToLookAt()
 
 
 
+bool HeadLogic::objectIsLost(int object_index){    
+    Object* object = getObject(object_index);
+    bool should_be_visible = objectShouldBeVisible(object_index);
+    bool result = !(object->isObjectVisible()) && should_be_visible;
+    //std::cout<<__PRETTY_FUNCTION__<< " should_be_visible = "<<should_be_visible<<std::endl;
+    return result;
+}
+
+
+bool HeadLogic::objectShouldBeVisible(int object_index){
+    Object* object = getObject(object_index);
+    NUSensorsData* sensors_data = Blackboard->Sensors;
+    //float diff = getRequiredHeadMovementAngle(getSelfLocation(), getObjectType(object_index), object->getID(), 1, 1);
+    std::vector<float> object_position(3,0);
+    float camera_height = 38.;
+    if(getObjectType(object_index) == STATIONARY_OBJECT){
+        StationaryObject* stat_object = (StationaryObject*)object;
+        object_position[0] = stat_object->X();
+        object_position[1] = stat_object->Y();
+        object_position[2] = atan2(object_position[1],object_position[0]);
+    } else {        
+        object_position = NavigationLogic::getObjectPosition(*object);
+    }
+    
+    std::vector<float> self_position = NavigationLogic::getSelfPosition();
+    std::vector<float> self_to_ball = NavigationLogic::getPositionDifference(self_position,object_position);
+    float abs_bearing = std::atan2(self_to_ball[1],self_to_ball[0]);
+
+    float rel_bearing = mathGeneral::normaliseAngle(abs_bearing-self_position[2]);
+
+    float distance = std::sqrt(self_to_ball[0]*self_to_ball[0]+self_to_ball[1]*self_to_ball[1]);
+
+    float elevation = -(std::atan2(camera_height,distance));
+
+    float headYaw;
+    sensors_data->getPosition(NUData::HeadYaw, headYaw);
+
+    float headPitch;
+    sensors_data->getPosition(NUData::HeadPitch, headPitch);
+
+    float pitch_to_head = std::fabs(headPitch+elevation);
+    float bearing_to_head = std::fabs(headYaw+rel_bearing);
+
+    // std::cout<<__PRETTY_FUNCTION__<< " Head angle difference: Pitch " <<
+    //             pitch_to_head<<" Bearing "<<bearing_to_head<<
+    //              "Field of view "<< m_CAMERA_FOV_X<<" " << m_CAMERA_FOV_Y<<std::endl;
+
+    return ((pitch_to_head)<m_CAMERA_FOV_Y) && ((bearing_to_head)<m_CAMERA_FOV_X);
 
 
 
+    
+
+
+
+}
 

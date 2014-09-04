@@ -27,7 +27,7 @@ Line::Line() : v(0,0), a(0,0){
   m_C = 0.0;
   m_rho = 0.0;
   m_phi = 0.0;
-  m_normaliser = 0.0;
+  m_inv_normaliser = 1.0;
 }
 
 // Constructor
@@ -56,9 +56,9 @@ bool Line::setLine(double A, double B, double C)
       m_A = A/B;
       m_B = 1;
       m_C = C/B;
-      m_normaliser = sqrt(m_A*m_A + m_B*m_B);
-      m_phi = acos(m_A/m_normaliser);
-      m_rho = m_C/m_normaliser;
+      m_inv_normaliser = 1.0 / sqrt(m_A*m_A + m_B*m_B);
+      m_phi = acos(m_A * m_inv_normaliser);
+      m_rho = m_C * m_inv_normaliser;
       a = Vector2<double>(0, m_C);
   }
   else {
@@ -68,7 +68,7 @@ bool Line::setLine(double A, double B, double C)
       m_C = C/A;
       m_phi = 0.0;
       m_rho = m_C;
-      m_normaliser = m_A;
+      m_inv_normaliser = 1.0 / m_A;
       a = Vector2<double>(m_C, 0);
   }
 
@@ -86,7 +86,7 @@ bool Line::setLine(double rho, double phi)
     m_A = cos(phi);
     m_B = sin(phi);
     m_C = rho;
-    m_normaliser = sqrt(m_A*m_A + m_B*m_B);
+    m_inv_normaliser = 1.0 / sqrt(m_A*m_A + m_B*m_B);
     if(m_B == 0)
         a = Vector2<double>(m_C, 0);
     else
@@ -215,26 +215,20 @@ double Line::getYIntercept() const
 
 double Line::getLinePointDistance(Vector2<double> point) const
 {
-  if(!isValid()) return 0.0;
-  return abs(m_A * point.x + m_B * point.y - m_C) / m_normaliser;
+    double d = (m_A * point.x + m_B * point.y - m_C) * m_inv_normaliser;
+    long b = *((long*)&d) & 0x7FFFFFFFFFFFFFFF;
+    d = *( (double*) &b );
+    return std::abs(m_A * point.x + m_B * point.y - m_C) * m_inv_normaliser;
 }
 
 double Line::getSignedLinePointDistance(Vector2<double> point) const
 {
-  double distance;
-  if(isValid() == false) return 0.0;
-  distance = (m_A * point.x + m_B * point.y - m_C) / m_normaliser;
-  return distance;
-}
-
-double Line::getNormaliser() const
-{
-    return m_normaliser;
+  return (m_A * point.x + m_B * point.y - m_C) * m_inv_normaliser;
 }
 
 double Line::getAngleBetween(Line other) const
 {
-    double angle = abs(getAngle() - other.getAngle());
+    double angle = std::abs(getAngle() - other.getAngle());
 
     if(angle > mathGeneral::PI*0.5)
         angle = mathGeneral::PI - angle;
@@ -254,7 +248,7 @@ double Line::getPhi() const
 
 double Line::scalarProjection(Vector2<double> pt) const
 {
-    return abs((pt-a)*v);
+    return std::abs((pt-a)*v);
 }
 
 Vector2<double> Line::projectOnto(Vector2<double> pt) const
@@ -262,9 +256,9 @@ Vector2<double> Line::projectOnto(Vector2<double> pt) const
     return v*((pt-a)*v) + a;
 }
 
-vector< Vector2<double> > Line::projectOnto(const vector< Vector2<double> >& pts) const
+std::vector< Vector2<double> > Line::projectOnto(const std::vector< Vector2<double> >& pts) const
 {
-    vector< Vector2<double> > result;
+    std::vector< Vector2<double> > result;
     BOOST_FOREACH(const Vector2<double>& pt, pts) {
         result.push_back(v*((pt-a)*v) + a);
     }
@@ -309,5 +303,6 @@ std::ostream& operator<< (std::ostream& output, const Line& l)
 // isValid(float A, float B, float C): Check if the given values create a valid line.
 bool Line::isValid(double A, double B, double C) const
 {
-  return (A != 0.0) || (B != 0.0); // If A = 0.0 and B = 0.0 line is not valid, as equation becomes 0.0 = C
+    (void)(C); // To stop compiler warnings.
+    return (A != 0.0) || (B != 0.0); // If A = 0.0 and B = 0.0 line is not valid, as equation becomes 0.0 = C
 }

@@ -83,8 +83,8 @@ public:
     std::string toString(swingDirection_t theSwingDirection);
     std::string toString(poseType_t thePose);
 private:
-    vector<float> bestKickingPosition(const vector<float>& ballPosition,const vector<float>& targetPositon);
-    void kickToPoint(const vector<float>& position, const vector<float>& target);
+    std::vector<float> bestKickingPosition(const std::vector<float>& ballPosition,const std::vector<float>& targetPositon);
+    void kickToPoint(const std::vector<float>& position, const std::vector<float>& target);
     void preKick();
     void doKick();
     bool doPreKick();
@@ -102,21 +102,21 @@ private:
     bool AlignXposition(KickingLeg kickingLeg, float speed, float xPos);
     bool LowerLeg(KickingLeg kickingLeg, float speed);
     bool BalanceCoP(KickingLeg supportLeg, float targetX = 0.0f, float targetY = 0.0f);
-    void BalanceCoPLevelTorso(KickingLeg theLeg, vector<float>& jointAngles, float CoPx, float CoPy, float targetX = 0.0f, float targetY = 0.0f);
-    void BalanceCoPHipAndAnkle(vector<float>& jointAngles, float CoPx, float CoPy, float targetX = 0.0f, float targetY = 0.0f);
-    void BalanceCoPHip(vector<float>& jointAngles, float CoPx, float CoPy = 0.0f);
-    void BalanceCoPAnkle(vector<float>& jointAngles, float CoPx, float CoPy = 0.0f);
-    void FlattenFoot(vector<float>& jointAngles);
+    void BalanceCoPLevelTorso(KickingLeg theLeg, std::vector<float>& jointAngles, float CoPx, float CoPy, float targetX = 0.0f, float targetY = 0.0f);
+    void BalanceCoPHipAndAnkle(std::vector<float>& jointAngles, float CoPx, float CoPy, float targetX = 0.0f, float targetY = 0.0f);
+    void BalanceCoPHip(std::vector<float>& jointAngles, float CoPx, float CoPy = 0.0f);
+    void BalanceCoPAnkle(std::vector<float>& jointAngles, float CoPx, float CoPy = 0.0f);
+    void FlattenFoot(std::vector<float>& jointAngles);
     float FlatFootAnklePitch(float hipPitch, float kneePitch);
     float FlatFootAnkleRoll(float hipRoll);
     bool IsPastTime(float time);
-    void MaintainSwingHeight(KickingLeg supportLeg, vector<float>& supportLegJoints, KickingLeg swingLeg, vector<float>& swingLegJoints, float swingHeight);
+    void MaintainSwingHeight(KickingLeg supportLeg, std::vector<float>& supportLegJoints, KickingLeg swingLeg, std::vector<float>& swingLegJoints, float swingHeight);
     double TimeBetweenFrames();
     float perSec2perFrame(float value);
     float SpeedMultiplier();
     float GainMultiplier();
-    double MoveLimbToPositionWithSpeed(NUActionatorsData::id_t limbId, vector<float> currentPosition, vector<float> targetPosition, float maxSpeed , float gain, float smoothness = 0.5);
-    double MoveLegsToPositionWithSpeed(const vector<float>& targetPosition, float maxSpeed , float gain, float smoothness = 0.5);
+    double MoveLimbToPositionWithSpeed(NUActionatorsData::id_t limbId, std::vector<float> currentPosition, std::vector<float> targetPosition, float maxSpeed , float gain, float smoothness = 0.5);
+    double MoveLegsToPositionWithSpeed(const std::vector<float>& targetPosition, float maxSpeed , float gain, float smoothness = 0.5);
 
     float CalculateForwardSwingSpeed(float kickDistance);
     float CalculateSidewardSwingSpeed(float kickDistance);
@@ -129,8 +129,8 @@ private:
 
     float m_defaultMotorGain;
     float m_defaultArmMotorGain;
-    vector<float> m_leftLegInitialPose;
-    vector<float> m_rightLegInitialPose;
+    std::vector<float> m_leftLegInitialPose;
+    std::vector<float> m_rightLegInitialPose;
 
     KickingLeg m_kickingLeg;
     swingDirection_t m_swingDirection;
@@ -147,9 +147,9 @@ private:
         float max;
     };
 
-    bool LimitJoints(KickingLeg leg, vector<float> jointPositions);
-    vector<jointLimit> m_leftLegLimits;
-    vector<jointLimit> m_rightLegLimits;
+    bool LimitJoints(KickingLeg leg, std::vector<float> jointPositions);
+    std::vector<jointLimit> m_leftLegLimits;
+    std::vector<jointLimit> m_rightLegLimits;
     Rectangle LeftFootForwardKickableArea;
     Rectangle RightFootForwardKickableArea;
     Rectangle LeftFootLeftKickableArea;

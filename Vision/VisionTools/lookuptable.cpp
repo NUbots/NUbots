@@ -25,7 +25,7 @@ void LookUpTable::set(unsigned char *vals)
     LUT = LUTbuffer;
 }
 
-bool LookUpTable::loadLUTFromFile(const string& fileName)
+bool LookUpTable::loadLUTFromFile(const std::string& fileName)
 {
     LUTTools loader;
     bool load_success;
@@ -34,7 +34,7 @@ bool LookUpTable::loadLUTFromFile(const string& fileName)
         LUT = LUTbuffer;
     }
     else {
-        errorlog << "Vision::loadLUTFromFile(" << fileName << "). Failed to load lut." << endl;
+        errorlog << "Vision::loadLUTFromFile(" << fileName << "). Failed to load lut." << std::endl;
     }
 
 #ifdef DEBUG_VISION_VERBOSITY_ON

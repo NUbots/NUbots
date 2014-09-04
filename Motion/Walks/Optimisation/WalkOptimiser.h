@@ -27,7 +27,7 @@
 
 #include "../WalkParameters.h"
 #include <iostream>
-using namespace std;
+
 
 class WalkOptimiser
 {
@@ -41,11 +41,11 @@ class WalkOptimiser
         int getIterationCount();
         float getBestPerformance();
     
-        void summaryTo(ostream& output);
-        void csvTo(ostream& output);
+        void summaryTo(std::ostream& output);
+        void csvTo(std::ostream& output);
         
-        friend ostream& operator<< (ostream& output, const WalkOptimiser& p);
-        friend istream& operator>> (istream& input, WalkOptimiser& p);
+        friend std::ostream& operator<< (std::ostream& output, const WalkOptimiser& p);
+        friend std::istream& operator>> (std::istream& input, WalkOptimiser& p);
     private:
         void mutateBestParameters(WalkParameters& walkparameters);
         void mutateParameters(WalkParameters& base_parameters, WalkParameters& basedelta_parameters, WalkParameters& walkparameters);

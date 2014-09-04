@@ -30,19 +30,19 @@
 #include <string>
 #include <vector>
 #include <iostream>
-using namespace std;
+
 class FourierFunction
 {
 public:
     FourierFunction();
     void initialiseFunction(int order_k_, int num_inputs_m_, bool fully_coupled_, float learning_rate_alpha_, float max_period_);
-    float evaluate(vector<float> const& input);
+    float evaluate(std::vector<float> const& input);
 
-    void learn(vector<float> input, float value, int iterations = 1);
+    void learn(std::vector<float> input, float value, int iterations = 1);
 
-    string getSaveData();
-    void loadSaveData(string save_data);
-    float dotProd(vector<float> x, vector<float> y);
+    std::string getSaveData();
+    void loadSaveData(std::string save_data);
+    float dotProd(std::vector<float> x, std::vector<float> y);
 
 
 private:
@@ -56,12 +56,12 @@ private:
 
     float learning_rate_alpha;
 
-    vector<float> weights_w;
-    vector<vector<float> > basis_constants_c;
+    std::vector<float> weights_w;
+    std::vector<std::vector<float> > basis_constants_c;
 
     float PI;
     void generateConstants();
-    void getNextConstant(vector<float> &c);
+    void getNextConstant(std::vector<float> &c);
 };
 
 #endif // FOURIERFUNCTION_H

@@ -1,8 +1,9 @@
 #include "colourreplacementrule.h"
+#include <algorithm>
 
 ColourSegment ColourReplacementRule::nomatch(Point(0,0), Point(0,0), invalid);
 
-string ColourReplacementRule::getMethodName(ReplacementMethod method)
+std::string ColourReplacementRule::getMethodName(ReplacementMethod method)
 {
     switch(method)
     {
@@ -18,7 +19,7 @@ string ColourReplacementRule::getMethodName(ReplacementMethod method)
   @param name String name of the method.
   @return The method desired.
   */
-ColourReplacementRule::ReplacementMethod ColourReplacementRule::getMethodFromName(const string& name)
+ColourReplacementRule::ReplacementMethod ColourReplacementRule::getMethodFromName(const std::string& name)
 {
     if(name.compare("before") == 0)
         return BEFORE;
@@ -34,25 +35,14 @@ ColourReplacementRule::ColourReplacementRule()
 {
 }
 
-bool ColourReplacementRule::match(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const
+bool ColourReplacementRule::match(const ColourSegment &before, const ColourSegment& middle, const ColourSegment &after) const
 {
-//    int multiplier;
-//    switch(dir) {
-//    case HORIZONTAL:
-//        multiplier = VisionBlackboard::getInstance()->getImageWidth();
-//        break;
-//    case VERTICAL:
-//        multiplier = VisionBlackboard::getInstance()->getImageHeight();
-//        break;
-//    }
-//    if(!(m_middle_min*multiplier <= middle.getLengthPixels() && m_middle_max*multiplier >= middle.getLengthPixels() &&
-//         m_before_min*multiplier <= before.getLengthPixels() && m_before_max*multiplier >= before.getLengthPixels() &&
-//         m_after_min*multiplier <= after.getLengthPixels() && m_after_max*multiplier >= after.getLengthPixels()))
-//    {
-//        return false;   //did not match size requirements
-//    }
+    return oneWayMatch(before, middle, after) || oneWayMatch(after, middle, before); //test both directions
+}
 
-//check lengths first to save iterating over colour vectors pointlessly as this method is majority false
+bool ColourReplacementRule::oneWayMatch(const ColourSegment& before, const ColourSegment& middle, const ColourSegment& after) const
+{
+    //check lengths first to save iterating over colour vectors pointlessly as this method is majority false
     if(!(m_middle_min <= middle.getLength() && m_middle_max >= middle.getLength() &&
          m_before_min <= before.getLength() && m_before_max >= before.getLength() &&
          m_after_min <= after.getLength() && m_after_max >= after.getLength())) {
@@ -61,7 +51,7 @@ bool ColourReplacementRule::match(const ColourSegment& before, const ColourSegme
     }
 
     bool valid;
-    vector<Colour>::const_iterator it;
+    std::vector<Colour>::const_iterator it;
     if(!m_middle.empty()) {
         valid = false;
         for(it = m_middle.begin(); it != m_middle.end(); it++) {
@@ -108,35 +98,35 @@ ColourReplacementRule::ReplacementMethod ColourReplacementRule::getMethod() cons
 
 /*! @brief Stream insertion operator for a single ColourReplacementRule
  */
-ostream& operator<< (ostream& output, const ColourReplacementRule& c)
+std::ostream& operator<< (std::ostream& output, const ColourReplacementRule& c)
 {
-    vector<Colour>::const_iterator it;
+    std::vector<Colour>::const_iterator it;
 
-    output << c.m_name << ":" << endl;
+    output << c.m_name << ":" << std::endl;
 
     //before
     output << "\tbefore: (" << c.m_before_min << ", " << c.m_before_max << ") [";
     for(it = c.m_before.begin(); it != c.m_before.end(); it++) {
         output << getColourName(*it) << ", ";
     }
-    output << "]\t\t// (min, max) [colourlist]" << endl;
+    output << "]\t\t// (min, max) [colourlist]" << std::endl;
 
     //middle
     output << "\tmiddle: (" << c.m_middle_min << ", " << c.m_middle_max << ") [";
     for(it = c.m_middle.begin(); it != c.m_middle.end(); it++) {
         output << getColourName(*it) << ", ";
     }
-    output << "]\t\t// (min, max) [colourlist]" << endl;
+    output << "]\t\t// (min, max) [colourlist]" << std::endl;
 
     //after
     output << "\tafter(" << c.m_after_min << ", " << c.m_after_max << ") [";
     for(it = c.m_after.begin(); it != c.m_after.end(); it++) {
         output << getColourName(*it) << ", ";
     }
-    output << "]\t\t// (min, max) [colourlist]" << endl;
+    output << "]\t\t// (min, max) [colourlist]" << std::endl;
 
     //replacement method
-    output << "\treplacement: " << ColourReplacementRule::getMethodName(c.m_method) << "\t\t// [colourlist]" << endl;
+    output << "\treplacement: " << ColourReplacementRule::getMethodName(c.m_method) << "\t\t// [colourlist]" << std::endl;
 
     return output;
 }
@@ -144,7 +134,7 @@ ostream& operator<< (ostream& output, const ColourReplacementRule& c)
 /*! @brief Stream insertion operator for a vector of ColourReplacementRule.
  *  @relates ColourReplacementRule
  */
-ostream& operator<< (ostream& output, const vector<ColourReplacementRule>& v)
+std::ostream& operator<< (std::ostream& output, const std::vector<ColourReplacementRule>& v)
 {
     for (size_t i=0; i<v.size(); i++)
         output << v.at(i);
@@ -154,10 +144,10 @@ ostream& operator<< (ostream& output, const vector<ColourReplacementRule>& v)
 /*! @brief Stream extraction operator for a ColourReplacementRule.
  *  @relates ColourReplacementRule
  */
-istream& operator>> (istream& input, ColourReplacementRule& c)
+std::istream& operator>> (std::istream& input, ColourReplacementRule& c)
 {
-    stringstream colour_stream;
-    string next, colour_str;
+    std::stringstream colour_stream;
+    std::string next, colour_str;
 
     // read in the rule name
     getline(input, c.m_name, ':');
@@ -261,7 +251,7 @@ istream& operator>> (istream& input, ColourReplacementRule& c)
 /*! @brief Stream extraction operator for a vector of ColourReplacementRules.
  *  @relates ColourReplacementRule
  */
-istream& operator>> (istream& input, vector<ColourReplacementRule>& v)
+std::istream& operator>> (std::istream& input, std::vector<ColourReplacementRule>& v)
 {
     ColourReplacementRule temp;
     v.clear();

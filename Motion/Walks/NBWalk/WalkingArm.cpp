@@ -2,7 +2,7 @@
 
 using namespace Kinematics;
 using boost::shared_ptr;
-using namespace std;
+
 
 WalkingArm::WalkingArm(const MetaGait * _gait,ChainID id)
     :state(SUPPORTING),
@@ -27,14 +27,14 @@ ArmJointStiffTuple WalkingArm::tick(shared_ptr<Step> supportStep){
     singleSupportFrames = supportStep->singleSupportFrames;
     doubleSupportFrames = supportStep->doubleSupportFrames;
 
-    vector<float> armJoints = (chainID == LARM_CHAIN ?
-                               vector<float>(LARM_WALK_ANGLES,
+    std::vector<float> armJoints = (chainID == LARM_CHAIN ?
+                               std::vector<float>(LARM_WALK_ANGLES,
                                              &LARM_WALK_ANGLES[ARM_JOINTS]):
-                               vector<float>(RARM_WALK_ANGLES,
+                               std::vector<float>(RARM_WALK_ANGLES,
                                              &RARM_WALK_ANGLES[ARM_JOINTS]));
 
     armJoints[0] += getShoulderPitchAddition(supportStep);
-    vector<float> armStiffnesses(ARM_JOINTS,gait->stiffness[WP::ARM]);
+    std::vector<float> armStiffnesses(ARM_JOINTS,gait->stiffness[WP::ARM]);
 	armStiffnesses[0] = gait->stiffness[WP::ARM_PITCH];
 
     frameCounter++;

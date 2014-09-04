@@ -6,6 +6,7 @@
 
 #include "Vision/VisionTypes/quad.h"
 #include "Vision/VisionTypes/VisionFieldObjects/goal.h"
+#include "Vision/VisionTypes/VisionFieldObjects/obstacle.h"
 #include "Vision/VisionTools/lookuptable.h"
 #include "Vision/VisionTypes/coloursegment.h"
 #include <list>
@@ -19,17 +20,19 @@ class GoalDetector
 public:
     GoalDetector();
     virtual ~GoalDetector();
-    virtual vector<Goal> run() = 0;
+    virtual std::vector<Goal> run() = 0;
+
+    virtual void relabel(std::vector<Goal>& goals) const;
 
 protected:
     //checks
-    void removeInvalid(list<Quad> &posts);
-    void mergeClose(list<Quad> &posts, double width_multiple_to_merge);
+    void removeInvalid(std::list<Quad> &posts);
+    void mergeClose(std::list<Quad> &posts, double width_multiple_to_merge);
 
     //generic
-    Vector2<double> calculateSegmentLengthStatistics(const vector<ColourSegment> segments);
+    Vector2<double> calculateSegmentLengthStatistics(const std::vector<ColourSegment> segments);
 
-    vector<Goal> assignGoals(const list<Quad>& candidates) const;
+    std::vector<Goal> assignGoals(const std::list<Quad>& candidates) const;
 };
 
 #endif // GOALDETECTOR_H

@@ -33,12 +33,12 @@ FourierApproximator::FourierApproximator(bool fully_coupled, float learning_rate
 
 /*! @brief Saves approximator to config folder.
 */
-void FourierApproximator::saveApproximator(string agentName)
+void FourierApproximator::saveApproximator(std::string agentName)
 {
-    ofstream save_file;
-    stringstream file_name;
+    std::ofstream save_file;
+    std::stringstream file_name;
     file_name<<save_location<<agentName;
-    save_file.open(file_name.str().c_str(),fstream::out);
+    save_file.open(file_name.str().c_str(),std::fstream::out);
 
     save_file << num_inputs << "\n";
     save_file << num_outputs << "\n";
@@ -54,15 +54,15 @@ void FourierApproximator::saveApproximator(string agentName)
 }
 /*! @brief loads approximator from nubot folder
 */
-void FourierApproximator::loadApproximator(string agentName)
+void FourierApproximator::loadApproximator(std::string agentName)
 {
 
-    ifstream save_file;
-    stringstream file_name;
+    std::ifstream save_file;
+    std::stringstream file_name;
     file_name<<save_location<<agentName;
-    save_file.open(file_name.str().c_str(),fstream::in);
+    save_file.open(file_name.str().c_str(),std::fstream::in);
     if(!save_file.good()) {
-        throw string("FourierApproximator::loadApproximator - file not found: ") + file_name.str();
+        throw std::string("FourierApproximator::loadApproximator - file not found: ") + file_name.str();
     }
     save_file>>num_inputs;
     save_file>>num_outputs;
@@ -73,18 +73,18 @@ void FourierApproximator::loadApproximator(string agentName)
     if (fc == 1) fully_coupled = true;
 
     value_action_functions.clear();
-    string data = "a";
-    string marker = "$";
+    std::string data = "a";
+    std::string marker = "$";
     for(int i = 0;i<num_outputs;i++){
         save_file >> data;
-        stringstream function_data;
+        std::stringstream function_data;
         while (data!=marker){
             function_data << data << " ";
             save_file >> data;
 
             if(!save_file.good()) {
-                throw string("FourierApproximator::loadApproximator - file corrupt ") + file_name.str();
-              //cout<<"FourierApproximator::loadApproximator - file corrupt " << file_name.str()<<endl;
+                throw std::string("FourierApproximator::loadApproximator - file corrupt ") + file_name.str();
+              //std::cout<<"FourierApproximator::loadApproximator - file corrupt " << file_name.str()<<std::endl;
             }
         }
         FourierFunction f;
@@ -112,7 +112,7 @@ void FourierApproximator::initialiseApproximator(int numberOfInputs, int numberO
 }
 /*! @brief Does learning for each output fourier function
 */
-void FourierApproximator::doLearningEpisode(vector<vector<float> > const& observations, vector< vector<float> > const& values, float stepSize, int iterations)
+void FourierApproximator::doLearningEpisode(std::vector<std::vector<float> > const& observations, std::vector< std::vector<float> > const& values, float stepSize, int iterations)
 {
 
     for(int obs = 0; obs<observations.size();obs++){
@@ -124,9 +124,9 @@ void FourierApproximator::doLearningEpisode(vector<vector<float> > const& observ
 }
 /*! @brief Evaluates each output function
 */
-vector<float> FourierApproximator::getValues(vector<float> const& observations)
+std::vector<float> FourierApproximator::getValues(std::vector<float> const& observations)
 {
-    vector<float> result;
+    std::vector<float> result;
     for(int i = 0; i<num_outputs;i++){
         result.push_back(value_action_functions[i].evaluate(observations));
     }

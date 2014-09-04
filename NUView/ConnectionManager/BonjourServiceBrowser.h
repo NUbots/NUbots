@@ -33,17 +33,17 @@ class NUHostInfo;
 #include <dns_sd.h>
 #include <pthread.h>
 #include <string>
-using namespace std;
+
 
 class BonjourServiceBrowser : public QObject
 {
     Q_OBJECT
 public:
-    BonjourServiceBrowser(const string& servicetype);
+    BonjourServiceBrowser(const std::string& servicetype);
     ~BonjourServiceBrowser();
     
-    string& getServiceType();
-    list<NUHostInfo>& getHosts();
+    std::string& getServiceType();
+    std::list<NUHostInfo>& getHosts();
 signals:
     void newBrowserInformation();
 private:
@@ -58,13 +58,13 @@ private slots:
 	void onSocketRead();   
     void onResolveCompleted(BonjourServiceResolver* resolver);
 private:
-    string m_service_type;				//!< The name of the service (eg. '_workstation._tcp')
+    std::string m_service_type;				//!< The name of the service (eg. '_workstation._tcp')
     DNSServiceRef m_ref;				//!< A service ref to use for browsing
     int m_sockfd;						//!< The file descriptor for the socket used by m_browse_service
     QSocketNotifier* m_notifier;		//!< A socket notifier for monitoring m_browse_sockfd
     
     pthread_mutex_t m_hosts_mutex;		//!< We need to protect the hosts list with a mutex
-    list<NUHostInfo> m_hosts;			//!< A list of all of the servers that provide this service 
+    std::list<NUHostInfo> m_hosts;			//!< A list of all of the servers that provide this service 
 };
 
 #endif

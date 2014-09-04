@@ -27,7 +27,7 @@ GLDisplay::GLDisplay(QWidget *parent, const OpenglManager * shareWidget):
 
     // Setup connections.
     connect(shareWidget,SIGNAL(updatedDisplay(int,GLuint,int,int)),this, SLOT(updatedDisplay(int, GLuint, int, int)));
-    connect(this, SIGNAL(selectPixel(int,int)), parent ,SLOT(SelectColourAtPixel(int,int)));
+    connect(this, SIGNAL(selectPixel(int,int)), parent ,SLOT(SelectPixel(int,int)));
     connect(this, SIGNAL(rightSelectPixel(int,int)), parent,SLOT(ClassifySelectedColour()));
     connect(this, SIGNAL(ctrlSelectPixel(int,int)), parent,SLOT(SelectAndClassifySelectedPixel(int,int)));
     return;
@@ -273,7 +273,7 @@ void GLDisplay::snapshotToFile()
     paintGL(); // Redraw the scene in case it needs to be updated.
     QImage tempPicture(this->grabFrameBuffer(false)); // grab current image
     //save image to file
-    stringstream fileName (stringstream::in|stringstream::out);
+    std::stringstream fileName (std::stringstream::in|std::stringstream::out);
     fileName << "camera_image" << imageCount << ".png";
     imageCount++;
     tempPicture.save(fileName.str().c_str());

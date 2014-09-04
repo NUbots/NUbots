@@ -42,16 +42,16 @@ SSLVisionPort::SSLVisionPort(NUSensorsData *nubotsensors, TeamInformation* teami
     m_sensor_data = nubotsensors;
     m_team_info = teaminfo;
     m_packet = new SSLVisionPacket();
-    ifstream idfile((string(CONFIG_DIR) + string("SslId.cfg")).c_str());      // the ssl id is stored in a config file
+    std::ifstream idfile((std::string(CONFIG_DIR) + std::string("SslId.cfg")).c_str());      // the ssl id is stored in a config file
     if (idfile.is_open())                                                     // Use that if it exists, otherwise use the player number
     {
         m_ssl_id = static_cast<int>(MotionFileTools::toFloat(idfile));
-        debug << "SslId.cfg found. Using (" << m_ssl_id << ")" << endl;
+        debug << "SslId.cfg found. Using (" << m_ssl_id << ")" << std::endl;
     }
     else
     {
         m_ssl_id = m_team_info->getPlayerNumber();
-        debug << "SslId.cfg not found. Using player number instead (" << m_ssl_id << ")" << endl;
+        debug << "SslId.cfg not found. Using player number instead (" << m_ssl_id << ")" << std::endl;
     }
     idfile.close();
 	storage.open("/var/volatile/storage.log");	
@@ -72,10 +72,10 @@ void SSLVisionPort::handleNewData(std::stringstream& buffer)
     #if DEBUG_NETWORK_VERBOSITY > 0
         debug << "SSLVisionPort::handleNewData()." << std::endl;
     #endif
-    string s_buffer = buffer.str();
+    std::string s_buffer = buffer.str();
     buffer >> (*m_packet);
     writePacketToSensors(m_packet, m_sensor_data);
-    vector<float> led_red(3,0);
+    std::vector<float> led_red(3,0);
     led_red[0] = 1;
     Platform->toggle(NUPlatform::Led0, m_sensor_data->CurrentTime, led_red);
 
@@ -118,7 +118,7 @@ void SSLVisionPort::writePacketToSensors(SSLVisionPacket* packet, NUSensorsData*
             else
             {
                 #if DEBUG_NETWORK_VERBOSITY > 0
-                    debug << "SSLVisionPort. Data For Player " << packet->robots[i].id << " received." << endl;
+                    debug << "SSLVisionPort. Data For Player " << packet->robots[i].id << " received." << std::endl;
                 #endif
             }
         }

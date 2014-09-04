@@ -1,6 +1,6 @@
 #include "SRUKF.h"
 #include "debug.h"
-using namespace std;
+
 
 
 SRUKF::SRUKF(): m_numStates(0)
@@ -46,15 +46,15 @@ Matrix SRUKF::CalculateCovarianceFromSigmas(const Matrix& sigmaPoints, const Mat
     unsigned int numPoints = sigmaPoints.getn();
     Matrix diff;
     Matrix temp(m_numStates, numPoints, false);
-    //debug << "mean" << endl << mean << endl;
+    //debug << "mean" << std::endl << mean << std::endl;
     for(unsigned int i = 0; i < numPoints; i++)
     {
-        //debug << "sigma" << endl << sigmaPoints.getCol(i) << endl;
+        //debug << "sigma" << std::endl << sigmaPoints.getCol(i) << std::endl;
         diff = sigmaPoints.getCol(i) - mean;
-        //debug << "diff" << endl << diff << endl;
+        //debug << "diff" << std::endl << diff << std::endl;
         temp.setCol(i, m_sqrtSigmaWeights[0][i] * diff);
     }
-    debug << "temp" << endl << temp << endl;
+    debug << "temp" << std::endl << temp << std::endl;
     return HT(temp);
 }
 
@@ -129,7 +129,7 @@ bool SRUKF::measurementUpdate(const Matrix& measurement, const Matrix& measureme
 {
 
     int numberOfSigmaPoints = stateEstimateSigmas.getn();
-    debug << "Predicted measurement sigmas:" << endl << predictedMeasurementSigmas;
+    debug << "Predicted measurement sigmas:" << std::endl << predictedMeasurementSigmas;
 
     Matrix predictedMeasurement = CalculateMeanFromSigmas(predictedMeasurementSigmas);
 
@@ -146,7 +146,7 @@ bool SRUKF::measurementUpdate(const Matrix& measurement, const Matrix& measureme
     Matrix Pxz = Mx*Mz.transp();
     Matrix K = Pxz * Invert22(Sz*Sz.transp());
 
-    debug << "K:" << endl << K;
+    debug << "K:" << std::endl << K;
     m_mean  = m_mean + K * (measurement - predictedMeasurement);
 
     m_sqrtCovariance = HT(horzcat(Mx-K*Mz,K*measurementNoise));

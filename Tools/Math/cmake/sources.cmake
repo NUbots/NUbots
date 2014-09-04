@@ -33,11 +33,11 @@ FIRFilter.cpp
 Sampling.h
 Statistics.h
 Statistics.cpp
-Moment.cpp Moment.h
+MultivariateGaussian.cpp MultivariateGaussian.h
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################
-SET (YOUR_DIRS Filters
+SET (YOUR_DIRS
 )
 ####################################################################################
 

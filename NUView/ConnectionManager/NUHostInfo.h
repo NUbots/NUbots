@@ -32,7 +32,7 @@
 #include <string>
 #include <ostream>
 
-using namespace std;
+
 
 class NUHostInfo
 {
@@ -44,14 +44,14 @@ public:
         if (not qinfo.addresses().isEmpty())
             m_address = qinfo.addresses().last().toString().toStdString();
     }
-    NUHostInfo(const string& hostname, const string& address)
+    NUHostInfo(const std::string& hostname, const std::string& address)
     {
         m_hostname = hostname;
         m_address = address;
     }
     
-    string& getHostName() {return m_hostname;};
-    string& getAddress() {return m_address;};
+    std::string& getHostName() {return m_hostname;};
+    std::string& getAddress() {return m_address;};
     bool empty() {return m_hostname.empty() and m_address.empty();};
     
     bool operator==(const NUHostInfo& other)
@@ -59,7 +59,7 @@ public:
         return (m_hostname.compare(other.m_hostname) == 0) and (m_address.compare(other.m_address) == 0);
     }
     
-    bool operator==(const string& name)
+    bool operator==(const std::string& name)
     {
         if (not name.empty())
         {
@@ -67,8 +67,8 @@ public:
                 return m_address.compare(name) == 0;
             else
             {
-                string hostname(name);
-                if (hostname.find(".local") == string::npos)
+                std::string hostname(name);
+                if (hostname.find(".local") == std::string::npos)
                     hostname += ".local.";
                 if (hostname[hostname.size()-1] != '.')
                     hostname += '.';
@@ -85,14 +85,14 @@ public:
         return m_hostname.compare(other.m_hostname) < 0;
     }
     
-    friend ostream& operator<<(ostream& o, const NUHostInfo& i)
+    friend std::ostream& operator<<(std::ostream& o, const NUHostInfo& i)
     {
         o << "[" << i.m_hostname << ", " << i.m_address << "]";
         return o;
     }
 private:
-    string m_hostname;
-    string m_address;
+    std::string m_hostname;
+    std::string m_address;
 };
 
 Q_DECLARE_METATYPE(NUHostInfo)

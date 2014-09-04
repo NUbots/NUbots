@@ -27,32 +27,32 @@
 
 #include "../MotionJob.h"
 #include <vector>
-using namespace std;
+
 
 class KickJob : public MotionJob
 {
 public:
-    KickJob(double time, const vector<float>& kickposition, const vector<float>& kicktarget);
-    KickJob(double time, istream& input);
+    KickJob(double time, const std::vector<float>& kickposition, const std::vector<float>& kicktarget);
+    KickJob(double time, std::istream& input);
     ~KickJob();
     
-    void setKick(double time, const vector<float>& kickposition, const vector<float>& kicktarget);
-    void setKickPosition(double time, const vector<float>& kickposition);
-    void setKickTarget(const vector<float>& kicktarget);
-    void getKick(double& time, vector<float>& kickposition, vector<float>& kicktarget);
-    void getKickPosition(double& time, vector<float>& kickposition);
-    void getKickTarget(vector<float>& kicktarget);
+    void setKick(double time, const std::vector<float>& kickposition, const std::vector<float>& kicktarget);
+    void setKickPosition(double time, const std::vector<float>& kickposition);
+    void setKickTarget(const std::vector<float>& kicktarget);
+    void getKick(double& time, std::vector<float>& kickposition, std::vector<float>& kicktarget);
+    void getKickPosition(double& time, std::vector<float>& kickposition);
+    void getKickTarget(std::vector<float>& kicktarget);
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
     
-    friend ostream& operator<<(ostream& output, const KickJob& job);
-    friend ostream& operator<<(ostream& output, const KickJob* job);
+    friend std::ostream& operator<<(std::ostream& output, const KickJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const KickJob* job);
 protected:
-    virtual void toStream(ostream& output) const;
+    virtual void toStream(std::ostream& output) const;
 private:
-    vector<float> m_kick_position;                 //!< the kick position [x(cm), y(cm)]
-    vector<float> m_kick_target;                   //!< the kick target relative from the *current* position [x(cm) y(cm)]
+    std::vector<float> m_kick_position;                 //!< the kick position [x(cm), y(cm)]
+    std::vector<float> m_kick_target;                   //!< the kick target relative from the *current* position [x(cm) y(cm)]
 };
 
 #endif

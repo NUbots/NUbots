@@ -37,7 +37,7 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-using namespace std;
+
 
 DribblingChallengeProvider::DribblingChallengeProvider(Behaviour* manager) : BehaviourFSMProvider(manager)
 {

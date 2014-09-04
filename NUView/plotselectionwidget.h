@@ -48,7 +48,7 @@ public:
     int getDisplayHistoryIndex(PlotDisplay *display);
 
 public slots:
-    void curveNamesUpdated(vector<QString> curveNames);
+    void curveNamesUpdated(std::vector<QString> curveNames);
     /*!
       @brief Set the currently selected colour.
       @param newColour The new colour.

@@ -29,7 +29,7 @@
 
 #include <vector>
 #include <iostream>
-using namespace std;
+
 
 class Job
 {
@@ -89,14 +89,14 @@ public:
     job_id_t getID();
     double getTime();
     
-    virtual void summaryTo(ostream& output) = 0;
-    virtual void csvTo(ostream& output) = 0;
+    virtual void summaryTo(std::ostream& output) = 0;
+    virtual void csvTo(std::ostream& output) = 0;
     
-    friend ostream& operator<<(ostream& output, const Job& job);
-    friend ostream& operator<<(ostream& output, const Job* job);
-    friend istream& operator>>(istream& input, Job** job);
+    friend std::ostream& operator<<(std::ostream& output, const Job& job);
+    friend std::ostream& operator<<(std::ostream& output, const Job* job);
+    friend std::istream& operator>>(std::istream& input, Job** job);
 protected:
-    virtual void toStream(ostream& output) const;
+    virtual void toStream(std::ostream& output) const;
 
 protected:
     // Properties that *every* job has

@@ -14,7 +14,7 @@
 
 #include <fstream>
 
-using namespace std;
+
 
 class MassCalibration
 {
@@ -62,7 +62,7 @@ public:
     MassInfo() : mass(0), offset() {}
     
     //! @brief Stream extraction operator for a mass.
-    friend istream& operator>> (istream& input, MassInfo& m)
+    friend std::istream& operator>> (std::istream& input, MassInfo& m)
     {
         char name[25];
         // read in the part name
@@ -74,7 +74,7 @@ public:
         input >> m.offset.z;
         
         debug << "MassInfo: " << name << ": mass: " << m.mass << 
-                 " offset [" << m.offset.x << ", " << m.offset.y << ", " << m.offset.z << "]" << endl;
+                 " offset [" << m.offset.x << ", " << m.offset.y << ", " << m.offset.z << "]" << std::endl;
         
         // read in the rest of the line as it is a comment
         input.ignore(128, '\n');
@@ -84,12 +84,12 @@ public:
 
   MassCalibration()
   {
-      LoadFromFile(string(CONFIG_DIR) + string("Model/masses.cfg"));
+      LoadFromFile(std::string(CONFIG_DIR) + std::string("Model/masses.cfg"));
   }
   
 void LoadFromFile(const std::string& configFileName)
 {
-    fstream myStream(configFileName.c_str());
+    std::fstream myStream(configFileName.c_str());
     
     if (myStream.is_open())
     {
@@ -101,7 +101,7 @@ void LoadFromFile(const std::string& configFileName)
         }
     }
     else
-        debug << "MassCalibration::LoadFromFile() Failed to load masses from " << configFileName << endl;
+        debug << "MassCalibration::LoadFromFile() Failed to load masses from " << configFileName << std::endl;
     }
   
     MassInfo masses[numOfLimbs]; /**< Information on the mass distribution of all joints. */

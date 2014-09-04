@@ -40,7 +40,7 @@
 
 #include <sstream>
 #include <string>
-using namespace std;
+
 
 #include "debug.h"
 #include "debugverbositynetwork.h"
@@ -53,7 +53,7 @@ using namespace std;
 NUIO::NUIO(NUbot* nubot)
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NUIO::NUIO(" << nubot << ")" << endl;
+    debug << "NUIO::NUIO(" << nubot << ")" << std::endl;
 #endif
     
     m_nubot = nubot;            // we need the nubot so that we can access the public store
@@ -86,7 +86,7 @@ NUIO::NUIO(NUbot* nubot)
 NUIO::NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs)
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NUIO::NUIO(" << static_cast<void*>(gameinfo) << ", " << static_cast<void*>(teaminfo) << ", " << static_cast<void*>(jobs) << ")" << endl;
+    debug << "NUIO::NUIO(" << static_cast<void*>(gameinfo) << ", " << static_cast<void*>(teaminfo) << ", " << static_cast<void*>(jobs) << ")" << std::endl;
 #endif
     m_nubot = NULL;
     #ifdef USE_NETWORK_GAMECONTROLLER
@@ -112,7 +112,7 @@ NUIO::NUIO(GameInformation* gameinfo, TeamInformation* teaminfo, JobList* jobs)
 NUIO::~NUIO()
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NUIO::~NUIO()" << endl;
+    debug << "NUIO::~NUIO()" << std::endl;
 #endif
     if (m_gamecontroller_port != NULL)
         delete m_gamecontroller_port;
@@ -155,12 +155,12 @@ NUIO& operator<<(NUIO& io, JobList* jobs)
 /*! @brief Sets the target ip address for the job port
     @param ipaddress the new target ip address.
  */
-void NUIO::setJobAddress(string ipaddress)
+void NUIO::setJobAddress(std::string ipaddress)
 {
     if (m_jobs_port != NULL)
         m_jobs_port->setTargetAddress(ipaddress);
     else
-        errorlog << "NUIO::setJobAddress(). Network jobs are OFF" << endl;
+        errorlog << "NUIO::setJobAddress(). Network jobs are OFF" << std::endl;
 }
 
 /*! @brief Sets the job port to broadcast to all robots
@@ -170,7 +170,7 @@ void NUIO::setJobToBroadcast()
     if (m_jobs_port != NULL)
         m_jobs_port->setBroadcast();
     else
-        errorlog << "NUIO::setJobToBroadcast(). Network jobs are OFF" << endl;
+        errorlog << "NUIO::setJobToBroadcast(). Network jobs are OFF" << std::endl;
 }
 
 /*! @brief Stream insertion operator for NUImage

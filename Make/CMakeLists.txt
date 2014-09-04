@@ -54,6 +54,8 @@ ELSEIF(${TARGET_ROBOT} STREQUAL BEAR)
     SET(TARGET_ROBOT_NAME Bear)
 ELSEIF(${TARGET_ROBOT} STREQUAL DARWIN)
     SET(TARGET_ROBOT_NAME Darwin)
+ELSEIF(${TARGET_ROBOT} STREQUAL DARWINWEBOTS)
+    SET(TARGET_ROBOT_NAME DarwinWebots)
 ELSEIF(${TARGET_ROBOT} STREQUAL NUVIEW)
     SET(TARGET_ROBOT_NAME NUview)
 ENDIF()
@@ -67,7 +69,7 @@ ENDIF()
 SET(NUBOT_CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../Config/${TARGET_ROBOT_NAME} CACHE STRING "Directory for nubot configuration files, i.e. where the Config directory for the target platform is on your computer")
 
 SET(HOME_ENV_VAR "HOME") 
-IF(${TARGET_ROBOT} STREQUAL NAOWEBOTS OR ${TARGET_ROBOT} STREQUAL NUVIEW)
+IF(${TARGET_ROBOT} STREQUAL NAOWEBOTS OR ${TARGET_ROBOT} STREQUAL DARWINWEBOTS OR ${TARGET_ROBOT} STREQUAL NUVIEW)
     IF(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
 	SET(HOME_ENV_VAR "HOMEPATH") 
     ENDIF()
@@ -100,7 +102,12 @@ ELSE (${TARGET_ROBOT} STREQUAL NAOWEBOTS)
                     MESSAGE(STATUS "Cmake for Darwin")
                     INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/darwin.cmake)
                 ELSE()
-                    MESSAGE(STATUS "Target robot unknown: ${TARGET_ROBOT}")
+					IF (${TARGET_ROBOT} STREQUAL DARWINWEBOTS)
+						MESSAGE(STATUS "Cmake for Darwin in Webots")
+						INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/wedarwin.cmake)
+        	        ELSE()
+						MESSAGE(STATUS "Target robot unknown: ${TARGET_ROBOT}")
+	                ENDIF()
                 ENDIF()
             ENDIF()
         ENDIF (${TARGET_ROBOT} STREQUAL CYCLOID)
@@ -127,8 +134,12 @@ SET( CMAKE_COLOR_MAKEFILE TRUE )
 ############################ FIND PACKAGES
 
 FIND_PACKAGE( PTHREAD REQUIRED )
-FIND_PACKAGE( BOOST REQUIRED )
+set(Boost_USE_STATIC_LIBS   ON)
+FIND_PACKAGE( Boost COMPONENTS filesystem system iostreams REQUIRED)
 FIND_PACKAGE( RT )
+FIND_PACKAGE( ZMQ REQUIRED)
+FIND_PACKAGE( Protobuf REQUIRED)
+
 
 ############################ targetconfig.h GENERATION
 CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/targetconfig.in"
@@ -204,7 +215,19 @@ ADD_DEFINITIONS( ${PTHREAD_DEFINITIONS}
 INCLUDE_DIRECTORIES( ${PTHREAD_INCLUDE_DIR}
                      ${Boost_INCLUDE_DIR}
                      ${LIBRT_INCLUDE_DIR}
+		     ${ZMQ_INCLUDE_DIR}
+	             ${PROTOBUF_INCLUDE_DIRS}
 )
+
+############################ Build Proto files
+# Build protocol buffer classes
+file(GLOB ProtoFiles_rel RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "../NUPlatform/NUAPI/proto/*.proto")
+
+get_filename_component(ProtoFiles ${ProtoFiles_rel} REALPATH)
+MESSAGE(STATUS "Proto Files: ${ProtoFiles}")
+PROTOBUF_GENERATE_CPP(ProtoSources ProtoHeaders ${ProtoFiles})
+LIST(APPEND NUBOT_SRCS ${ProtoSources} ${ProtoHeaders})
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${ProtoSources}")
 
 IF (DEBUG)
     MESSAGE(STATUS "Source files:")
@@ -232,12 +255,17 @@ TARGET_LINK_LIBRARIES( nubot
                        ${PTHREAD_LIBRARIES}
                        ${Boost_LIBRARIES}
                        ${LIBRT_LIBRARIES}
+		       ${ZMQ_LIBRARIES}
+			${PROTOBUF_LIBRARIES}
 )
+
+LIST(APPEND NUBOT_LINK_LIBRARIES TARGET_LINK_LIBRARIES)
+
 
 ############################ BINARY COPY
 # copy binaries in the output folder automatically
 GET_TARGET_PROPERTY( NUBOT_LOCATION nubot LOCATION)
-IF (${TARGET_ROBOT} STREQUAL NAOWEBOTS)
+IF (${TARGET_ROBOT} STREQUAL NAOWEBOTS OR ${TARGET_ROBOT} STREQUAL DARWINWEBOTS)
     ADD_CUSTOM_COMMAND(TARGET nubot
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${NUBOT_LOCATION} ${OUTPUT_ROOT_DIR_1})

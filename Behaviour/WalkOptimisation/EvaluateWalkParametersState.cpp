@@ -39,7 +39,7 @@
 EvaluateWalkParametersState::EvaluateWalkParametersState(WalkOptimisationProvider* parent) : WalkOptimisationState(parent)
 {
 	#if DEBUG_BEHAVIOUR_VERBOSITY > 3
-        debug << "EvaluateWalkParametersState::EvaluateWalkParametersState" << endl;
+        debug << "EvaluateWalkParametersState::EvaluateWalkParametersState" << std::endl;
     #endif
 }
 
@@ -68,7 +68,7 @@ BehaviourState* EvaluateWalkParametersState::nextState()
 void EvaluateWalkParametersState::doState()
 {
     #if DEBUG_BEHAVIOUR_VERBOSITY > 3
-        debug << "EvaluateWalkParametersState::doState() target: " << m_current_target_state << endl;
+        debug << "EvaluateWalkParametersState::doState() target: " << m_current_target_state << std::endl;
     #endif
     if (m_parent->stateChanged())
         start();
@@ -80,12 +80,12 @@ void EvaluateWalkParametersState::doState()
     if (pointReached())
         m_current_target_state = getNextPoint();
 
-    vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_target_state, 0, 20, 5000);
+    std::vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_target_state, 0, 20, 5000);
     m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
 }
 
 /*! @brief Returns the starting point for the evaluation of the speed */
-vector<float> EvaluateWalkParametersState::getStartPoint()
+std::vector<float> EvaluateWalkParametersState::getStartPoint()
 {
     float distance_from_forward = m_field_objects->self.CalculateDifferenceFromFieldState(m_way_points.front())[0];
     float distance_from_reverse = m_field_objects->self.CalculateDifferenceFromFieldState(m_way_points.back())[0];
@@ -105,15 +105,15 @@ vector<float> EvaluateWalkParametersState::getStartPoint()
 /*! @brief Returns true if the current point has been reached */
 bool EvaluateWalkParametersState::pointReached()
 {
-    vector<float> difference = m_field_objects->self.CalculateDifferenceFromFieldState(m_current_target_state);
+    std::vector<float> difference = m_field_objects->self.CalculateDifferenceFromFieldState(m_current_target_state);
     if (difference[0] < 35 and fabs(difference[2]) < 0.4)
         return true;
     else
         return false;
 }
 
-/*! @brief Returns the next point in the list of way points in the predefined path */
-vector<float> EvaluateWalkParametersState::getNextPoint()
+/*! @brief Returns the next point in the std::list of way points in the predefined path */
+std::vector<float> EvaluateWalkParametersState::getNextPoint()
 {
     if (m_current_point_index < m_way_points.size()-1)
         m_current_point_index++;
@@ -139,9 +139,9 @@ bool EvaluateWalkParametersState::allPointsReached()
 }
 
 /*! @brief Returns the equivalent point on the reverse path */
-vector<float> EvaluateWalkParametersState::reversePoint(const vector<float>& point)
+std::vector<float> EvaluateWalkParametersState::reversePoint(const std::vector<float>& point)
 {
-    vector<float> reverse = m_way_points[(m_way_points.size()-1) - m_current_point_index];
+    std::vector<float> reverse = m_way_points[(m_way_points.size()-1) - m_current_point_index];
     if (m_current_point_index == 0 or m_current_point_index == m_way_points.size()-1)
     {
         m_previous_reverse = reverse;

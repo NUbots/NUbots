@@ -26,44 +26,44 @@
 #define NUSOUNDS_H
 
 #include <string>
-using namespace std;
+
 
 class NUSounds 
 {
 public:
-    static string PRE_INITIAL;
-    static string INITIAL;
-    static string READY;
-    static string SET;
-    static string PLAYING;
-    static string FINISHED;
-    static string PENALISED;
-    static string REQUEST_PICK_UP;
-    static string SUBSTITUTE;
-    static string RED_TEAM;
-    static string BLUE_TEAM;
-    static string NUBOT1;
-    static string NUBOT2;
-    static string NUBOT3;
-    static string NUBOT4;
-    static string NUBOT5;
-    static string NUBOT6;
-    static string NUBOT7;
-    static string NUBOT8;
-    static string NUBOT9;
-    static string NUBOT10;
-    static string MY_IP_IS;
+    static std::string PRE_INITIAL;
+    static std::string INITIAL;
+    static std::string READY;
+    static std::string SET;
+    static std::string PLAYING;
+    static std::string FINISHED;
+    static std::string PENALISED;
+    static std::string REQUEST_PICK_UP;
+    static std::string SUBSTITUTE;
+    static std::string RED_TEAM;
+    static std::string BLUE_TEAM;
+    static std::string NUBOT1;
+    static std::string NUBOT2;
+    static std::string NUBOT3;
+    static std::string NUBOT4;
+    static std::string NUBOT5;
+    static std::string NUBOT6;
+    static std::string NUBOT7;
+    static std::string NUBOT8;
+    static std::string NUBOT9;
+    static std::string NUBOT10;
+    static std::string MY_IP_IS;
     
-    static string ILLEGAL_INSTRUCTION;
-    static string SEG_FAULT;
-    static string BUS_ERROR;
-    static string ABORT;
-    static string UNHANDLED_EXCEPTION;
-    static string LOW_BATTERY;
+    static std::string ILLEGAL_INSTRUCTION;
+    static std::string SEG_FAULT;
+    static std::string BUS_ERROR;
+    static std::string ABORT;
+    static std::string UNHANDLED_EXCEPTION;
+    static std::string LOW_BATTERY;
     
-    static string START_SAVING_IMAGES;
-    static string STOP_SAVING_IMAGES;
-    static string LOADING_LUT;
+    static std::string START_SAVING_IMAGES;
+    static std::string STOP_SAVING_IMAGES;
+    static std::string LOADING_LUT;
 };
 
 #endif

@@ -8,10 +8,8 @@
 #include "debug.h"
 #include "nubotdataconfig.h"
 
-using namespace std;
-
-ofstream debug;
-ofstream errorlog;
+std::ofstream debug;
+std::ofstream errorlog;
 
 int main(int argc, const char *argv[]) 
 {
@@ -21,7 +19,7 @@ int main(int argc, const char *argv[])
     errorlog.open((DATA_DIR + "error.log").c_str());
                   
     NUbot* nubot = new NUbot(argc, argv);
-    PeriodicSignalerThread* helperthread = new PeriodicSignalerThread(string("DarwinSensorSignaler"), (ConditionalThread*) nubot->m_sensemove_thread, 10);
+    PeriodicSignalerThread* helperthread = new PeriodicSignalerThread(std::string("DarwinSensorSignaler"), (ConditionalThread*) nubot->m_sensemove_thread, 10);
     helperthread->start();
     nubot->run();
     delete nubot;

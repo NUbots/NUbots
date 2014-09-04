@@ -34,7 +34,7 @@
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
-using namespace std;
+
 
 class ReadyLostSubState : public SoccerState
 {
@@ -68,7 +68,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "ReadyLostPan" << endl;
+            debug << "ReadyLostPan" << std::endl;
         #endif
         if (m_parent_machine->stateChanged())
             reset();
@@ -97,7 +97,7 @@ private:
     void reset()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "ReadyLostPan. Resetting" << endl;
+            debug << "ReadyLostPan. Resetting" << std::endl;
         #endif
         m_time_in_state = 0;
         m_pan_started = false;
@@ -133,7 +133,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "ReadyLostSpin" << endl;
+            debug << "ReadyLostSpin" << std::endl;
         #endif
         if (m_parent_machine->stateChanged())
             m_time_in_state = 0;

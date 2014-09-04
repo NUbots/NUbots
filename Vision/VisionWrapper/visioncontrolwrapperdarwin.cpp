@@ -25,36 +25,34 @@ int VisionControlWrapper::runFrame()
 {
     static unsigned int frame = 0;
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "VisionControlWrapper::runFrame(): - frame " << frame << endl;
+        debug << "VisionControlWrapper::runFrame(): - frame " << frame << std::endl;
     #endif
     frame = (frame + 1) % 10000;
     //force data wrapper to update
     if(!data_wrapper->updateFrame()) {
         #if VISION_WRAPPER_VERBOSITY > 1
-            debug << "VisionControlWrapper::runFrame() - updateFrame() failed" << endl;
+            debug << "VisionControlWrapper::runFrame() - updateFrame() failed" << std::endl;
         #endif
         return -1;  //failure - do not run vision
     }
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "VisionControlWrapper::runFrame() - updateFrame() succeeded" << endl;
+        debug << "VisionControlWrapper::runFrame() - updateFrame() succeeded" << std::endl;
     #endif
 
     if(data_wrapper->isSavingImages)
     {
         #if DEBUG_VISION_VERBOSITY > 1
-            debug << "Vision::starting the save images loop." << endl;
+            debug << "Vision::starting the save images loop." << std::endl;
         #endif
         m_saveimages_thread->signal();
     }
-        
-    //int result = controller.runFrame(Blackboard->lookForBall, Blackboard->lookForGoals, Blackboard->lookForFieldPoints, true); //run vision on the frame
 
-    int result = controller.runFrame(Blackboard->lookForBall, false, false, false); //run vision on the frame
+    int result = controller.runFrame(Blackboard->lookForBall, Blackboard->lookForGoals, Blackboard->lookForFieldPoints, Blackboard->lookForObstacles); //run vision on the frame
     
     data_wrapper->postProcess();    //post process all the field objects
     
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "VisionControlWrapper::runFrame() - Finish" << endl;
+        debug << "VisionControlWrapper::runFrame() - Finish" << std::endl;
     #endif
     return result;
 }
@@ -62,7 +60,7 @@ int VisionControlWrapper::runFrame()
 void VisionControlWrapper::process(JobList* jobs)
 {
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "VisionControlWrapper::process():" << endl;
+        debug << "VisionControlWrapper::process():" << std::endl;
     #endif
     data_wrapper->process(jobs);
 }
@@ -70,7 +68,7 @@ void VisionControlWrapper::process(JobList* jobs)
 void VisionControlWrapper::saveAnImage() const
 {
     #if VISION_WRAPPER_VERBOSITY > 1
-        debug << "VisionControlWrapper::saveAnImage():" << endl;
+        debug << "VisionControlWrapper::saveAnImage():" << std::endl;
     #endif
     data_wrapper->saveAnImage();
 }

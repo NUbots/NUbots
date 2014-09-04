@@ -45,7 +45,9 @@ SET (YOUR_DIRS  Soccer
                 GoalKeeperTest
                 FootSlipTest
                 Common
+                NUSoccer
                 HeadBehaviourTester
+                ScriptTuner
 )
 IF(${TARGET_ROBOT} STREQUAL BEAR)
     LIST(APPEND YOUR_DIRS BearMode)

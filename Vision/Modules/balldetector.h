@@ -1,16 +1,16 @@
-#ifndef BALLDETECTION_H
-#define BALLDETECTION_H
+#ifndef BALLDETECTOR_H
+#define BALLDETECTOR_H
 
 #include <stdio.h>
 #include <iostream>
 
 //#include "Tools/Math/Line.h"
+#include <list>
+#include <vector>
 #include "Vision/basicvisiontypes.h"
-#include "Vision/visionblackboard.h"
+#include "Vision/VisionTypes/coloursegment.h"
 #include "Vision/VisionTools/classificationcolours.h"
-#include "Vision/VisionTypes/quad.h"
-
-using namespace std;
+#include "Vision/VisionTypes/VisionFieldObjects/ball.h"
 
 class BallDetector
 {
@@ -20,10 +20,7 @@ public:
     /*! @brief Detects a single ball from orange transitions using a geometric mean for general location
       and close classification at the pixel level combined with occlusion detection for refinement.
     */
-    virtual vector<Ball> run();
-
-protected:
-    void appendEdgesFromSegments(const vector<ColourSegment>& segments, vector<Point> &pointlist);
+    virtual std::vector<Ball> run() = 0;
 };
 
 #endif // BALLDETECTION_H

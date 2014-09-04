@@ -25,7 +25,7 @@ private:
     void OrientationFromAcceleration(const std::vector<float>& accelerations, std::vector<float>& orientation);
 
 private:
-    static const float g = 980.7;                //!< Standard gravity
+    static constexpr float g = 980.7;                //!< Standard gravity
     double m_timeOfLastUpdate;
     Matrix m_updateSigmaPoints;
     Matrix m_processNoise;

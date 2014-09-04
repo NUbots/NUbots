@@ -9,7 +9,7 @@
 #include "visionoptimiser.h"
 #include "visioncomparitor.h"
 
-using namespace std;
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -52,7 +52,7 @@ void MainWindow::generateLabels()
 {
     LabelGenerator lg(this);
     lg.show();
-    lg.run(ui->dirEdit->text().toStdString() + string("/"));
+    lg.run(ui->dirEdit->text().toStdString() + std::string("/"));
     setFocus();
 }
 

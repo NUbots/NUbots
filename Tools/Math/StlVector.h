@@ -1,5 +1,5 @@
 /*! @file NUbot.h
-    @brief Serialisation and math for the standard template library vector.
+    @brief Serialisation and math for the standard template library std::vector.
  
     @author Jason Kulk
  
@@ -26,7 +26,7 @@
 #include <sstream>
 #include <cmath>
 #include <vector>
-using namespace std;
+
 
 // ----------------------------------------------------------------------------------------------------------------------------- Serialisation
 /*! @brief Overloaded stream insertion operator for an stl vector. 
@@ -37,7 +37,7 @@ using namespace std;
     @param output the stream the stl will be written to
     @param v the vector to write
  */
-template<typename T> ostream& operator<<(ostream& output, const vector<T>& v)
+template<typename T> std::ostream& operator<<(std::ostream& output, const std::vector<T>& v)
 {
     output << "[";
     if (not v.empty())
@@ -54,9 +54,9 @@ template<typename T> ostream& operator<<(ostream& output, const vector<T>& v)
     @param input the stream the vector will be read from
     @param v the vector from the stream will be placed here
  */
-template<typename T> istream& operator>>(istream& input, vector<T>& v)
+template<typename T> std::istream& operator>>(std::istream& input, std::vector<T>& v)
 {
-    stringstream wholevector;
+    std::stringstream wholevector;
     v.clear();
     // get all of the data between [ ... ]
     input.ignore(128, '[');
@@ -87,9 +87,9 @@ template<typename T> istream& operator>>(istream& input, vector<T>& v)
     @param input the stream the vector will be read from
     @param v the vector from the stream will be placed here
  */
-template<typename T> istream& operator>>(istream& input, vector<vector<T> >& v)
+template<typename T> std::istream& operator>>(std::istream& input, std::vector<std::vector<T> >& v)
 {
-    stringstream wholematrix;
+    std::stringstream wholematrix;
     v.clear();
     
     // read everything between '[' and the matching ']'
@@ -106,7 +106,7 @@ template<typename T> istream& operator>>(istream& input, vector<vector<T> >& v)
             brackets--;
     }
 
-    vector<T> buffer;
+    std::vector<T> buffer;
     while (wholematrix.peek() != ']' and wholematrix.good())
     {
         wholematrix >> buffer;
@@ -115,23 +115,23 @@ template<typename T> istream& operator>>(istream& input, vector<vector<T> >& v)
     return input;
 }
 
-inline vector<float> operator+(const float& f, const vector<float>& v)
+inline std::vector<float> operator+(const float& f, const std::vector<float>& v)
 {
-    vector<float> result;
+    std::vector<float> result;
     result.reserve(v.size());
     for (size_t i=0; i<v.size(); i++)
         result.push_back(f + v[i]);
     return result;
 }
 
-inline vector<float> operator+(const vector<float>& v, const float& f)
+inline std::vector<float> operator+(const std::vector<float>& v, const float& f)
 {
     return f + v;
 }
 
-inline vector<float> operator+(const vector<float>& v1, const vector<float>& v2)
+inline std::vector<float> operator+(const std::vector<float>& v1, const std::vector<float>& v2)
 {
-    vector<float> result;
+    std::vector<float> result;
     if (v1.size() != v2.size())
         return result;
     else
@@ -143,27 +143,27 @@ inline vector<float> operator+(const vector<float>& v1, const vector<float>& v2)
     }
 }
 
-inline vector<float> operator-(const float& f, const vector<float>& v)
+inline std::vector<float> operator-(const float& f, const std::vector<float>& v)
 {
-    vector<float> result;
+    std::vector<float> result;
     result.reserve(v.size());
     for (size_t i=0; i<v.size(); i++)
         result.push_back(f - v[i]);
     return result;
 }
 
-inline vector<float> operator-(const vector<float>& v, const float& f)
+inline std::vector<float> operator-(const std::vector<float>& v, const float& f)
 {
-    vector<float> result;
+    std::vector<float> result;
     result.reserve(v.size());
     for (size_t i=0; i<v.size(); i++)
         result.push_back(v[i] - f);
     return result;
 }
 
-inline vector<float> operator-(const vector<float>& v1, const vector<float>& v2)
+inline std::vector<float> operator-(const std::vector<float>& v1, const std::vector<float>& v2)
 {
-    vector<float> result;
+    std::vector<float> result;
     if (v1.size() != v2.size())
         return result;
     else
@@ -175,23 +175,23 @@ inline vector<float> operator-(const vector<float>& v1, const vector<float>& v2)
     }
 }
 
-inline vector<float> operator*(const float& f, const vector<float>& v)
+inline std::vector<float> operator*(const float& f, const std::vector<float>& v)
 {
-    vector<float> result;
+    std::vector<float> result;
     result.reserve(v.size());
     for (size_t i=0; i<v.size(); i++)
         result.push_back(f*v[i]);
     return result;
 }
 
-inline vector<float> operator*(const vector<float>& v, const float& f)
+inline std::vector<float> operator*(const std::vector<float>& v, const float& f)
 {
     return f*v;
 }
 
-inline vector<float> operator*(const vector<float>& v1, const vector<float>& v2)
+inline std::vector<float> operator*(const std::vector<float>& v1, const std::vector<float>& v2)
 {
-    vector<float> result;
+    std::vector<float> result;
     if (v1.size() != v2.size())
         return result;
     else
@@ -203,7 +203,7 @@ inline vector<float> operator*(const vector<float>& v1, const vector<float>& v2)
     }
 }
 
-inline float norm(const vector<float>& v)
+inline float norm(const std::vector<float>& v)
 {
     float sum = 0;
     for (size_t i=0; i<v.size(); i++)

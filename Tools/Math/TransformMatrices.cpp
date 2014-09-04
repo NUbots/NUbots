@@ -62,7 +62,7 @@ Matrix TransformMatrices::ModifiedDH(double alpha, double a, double theta, doubl
 //[ cos(alpha)*sin(theta), cos(alpha)*cos(theta), -sin(alpha), -d*sin(alpha)]
 //[ sin(alpha)*sin(theta), sin(alpha)*cos(theta),  cos(alpha),  d*cos(alpha)]
 //[                     0,                     0,           0,             1]
-  using namespace std;
+  
   double st = sin(theta);
   double ct = cos(theta);
   double sa = sin(alpha);

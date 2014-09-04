@@ -40,7 +40,7 @@ class NUIO;
 #include <ctime>
 #include <string>
 #include <vector>
-using namespace std;
+
 #ifdef __USE_POSIX199309                // Check if clock_gettime is avaliable
     #define __NU_SYSTEM_CLOCK_GETTIME 
     #define __NU_PERIODIC_CLOCK_NANOSLEEP
@@ -97,8 +97,8 @@ public:
     virtual bool displayBatteryState();
     virtual bool verifySensors();
     virtual bool verifyVision(int framesdropped, int framesprocessed);
-    virtual void add(const LedIndices& led, double time, const vector<float>& value);
-    virtual void toggle(const LedIndices& led, double time, const vector<float>& value);
+    virtual void add(const LedIndices& led, double time, const std::vector<float>& value);
+    virtual void toggle(const LedIndices& led, double time, const std::vector<float>& value);
     
     void kill();
 protected:

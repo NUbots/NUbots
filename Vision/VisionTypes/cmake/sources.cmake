@@ -28,7 +28,8 @@ colourtransitionrule.cpp
 segmentedregion.cpp
 quad.cpp
 histogram1d.cpp
-groundpoint.cpp
+nupoint.cpp
+##groundpoint.cpp no longer exists
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

@@ -517,7 +517,7 @@ void cameraSettingsWidget::readPendingData()
 
      //(*nuio) >> m_job_list;
 
-        static list<Job*>::iterator it;     // the iterator over the motion jobs
+        static std::list<Job*>::iterator it;     // the iterator over the motion jobs
         for (it = Blackboard->Jobs->camera_begin(); it !=Blackboard->Jobs->camera_end(); ++it)
         {
             qDebug()  << "CameraSettings - Processing Recieved Job" << endl;
@@ -532,7 +532,7 @@ void cameraSettingsWidget::readPendingData()
                 {
                     stopStreamCameraSetting();
                     //*settings = tempsettings;
-                    debug << "Job Processed: " << endl;
+                    debug << "Job Processed: " << std::endl;
                     shiftExposureSlider->setValue(round(tempsettings.p_exposure.get()));
                     shiftGainSlider->setValue(round(tempsettings.p_gain.get()));
                     shiftBlueChromaSlider->setValue(round(tempsettings.p_blueChroma.get()));

@@ -24,7 +24,7 @@
 #include "Infrastructure/TeamInformation/TeamInformation.h"
 
 #include <string>
-using namespace std;
+
 
 #include "debug.h"
 #include "debugverbositynetwork.h"
@@ -32,10 +32,10 @@ using namespace std;
 /*! @brief Constructs the team packet transmission thread
  */
 
-TeamTransmissionThread::TeamTransmissionThread(TeamPort* port, int period) : PeriodicThread(string("TeamTransmissionThread"), period, 0)
+TeamTransmissionThread::TeamTransmissionThread(TeamPort* port, int period) : PeriodicThread(std::string("TeamTransmissionThread"), period, 0)
 {
     #if DEBUG_VERBOSITY > 0
-        debug << "TeamTransmissionThread::TeamTransmissionThread(" << period << ") with priority " << static_cast<int>(m_priority) << endl;
+        debug << "TeamTransmissionThread::TeamTransmissionThread(" << period << ") with priority " << static_cast<int>(m_priority) << std::endl;
     #endif
     m_port = port;
 }
@@ -43,7 +43,7 @@ TeamTransmissionThread::TeamTransmissionThread(TeamPort* port, int period) : Per
 TeamTransmissionThread::~TeamTransmissionThread()
 {
     #if DEBUG_VERBOSITY > 0
-        debug << "TeamTransmissionThread::~TeamTransmissionThread()" << endl;
+        debug << "TeamTransmissionThread::~TeamTransmissionThread()" << std::endl;
     #endif
 }
 
@@ -51,7 +51,7 @@ void TeamTransmissionThread::periodicFunction()
 {
     if (m_port->m_team_information->getPlayerNumber() > 0)
     {
-        stringstream buffer;
+        std::stringstream buffer;
         buffer << m_port->m_team_information->generateTeamTransmissionPacket();
         m_port->sendData(buffer);
     }

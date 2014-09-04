@@ -3,7 +3,7 @@
 
 #ifdef TARGET_IS_RPI
     #include "Vision/VisionWrapper/datawrapperrpi.h"
-#elif TARGET_IS_PC
+#elif TARGET_IS_PC || TARGET_IS_MAC || TARGET_IS_WINDOWS
     //#include "Vision/VisionWrapper/datawrapperpc.h"
     #include "Vision/VisionWrapper/datawrapperqt.h"
 #elif TARGET_IS_NUVIEW

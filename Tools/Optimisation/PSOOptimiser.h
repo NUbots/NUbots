@@ -31,37 +31,37 @@
 #include <vector>
 #include <iostream>
 
-using namespace std;
+
 
 class PSOOptimiser : public Optimiser
 {
 public:
-    PSOOptimiser(string name, vector<Parameter> parameters);
+    PSOOptimiser(std::string name, std::vector<Parameter> parameters);
     ~PSOOptimiser();
     
-    vector<float> getNextParameters();
+    std::vector<float> getNextParameters();
     void setParametersResult(float fitness);
     
-    void summaryTo(ostream& stream);
+    void summaryTo(std::ostream& stream);
 
-    vector<Parameter> getBest() const { return m_best;}
+    std::vector<Parameter> getBest() const { return m_best;}
 
 private:
     void initSwarm();
     void updateSwarm();
     
     
-    void toStream(ostream& o) const;
-    void fromStream(istream& i);
+    void toStream(std::ostream& o) const;
+    void fromStream(std::istream& i);
 private:
-    vector<vector<Parameter> > m_swarm_position;
-    vector<vector<float> > m_swarm_velocity;
-    vector<float> m_swarm_fitness;
+    std::vector<std::vector<Parameter> > m_swarm_position;
+    std::vector<std::vector<float> > m_swarm_velocity;
+    std::vector<float> m_swarm_fitness;
     
-    vector<vector<Parameter> > m_swarm_best;
-    vector<float> m_swarm_best_fitness;
-    vector<float> m_swarm_failures;
-    vector<Parameter> m_best;
+    std::vector<std::vector<Parameter> > m_swarm_best;
+    std::vector<float> m_swarm_best_fitness;
+    std::vector<float> m_swarm_failures;
+    std::vector<Parameter> m_best;
     float m_best_fitness;
 
     float m_inertia;

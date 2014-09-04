@@ -31,19 +31,19 @@ class SaveImagesJob : public VisionJob
 {
 public:
     SaveImagesJob(bool saveimages, bool varycamerasettings = false);
-    SaveImagesJob(istream& input);
+    SaveImagesJob(std::istream& input);
     virtual ~SaveImagesJob();
     
     bool saving();
     bool varyCameraSettings();
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
     
-    friend ostream& operator<<(ostream& output, const SaveImagesJob& job);
-    friend ostream& operator<<(ostream& output, const SaveImagesJob* job);
+    friend std::ostream& operator<<(std::ostream& output, const SaveImagesJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const SaveImagesJob* job);
 protected:
-    virtual void toStream(ostream& output) const;
+    virtual void toStream(std::ostream& output) const;
 private:
     bool m_save_images;         //!< true if the job is to start saving images, false if the job is to stop saving images
     bool m_vary_settings;       //!< true if the job is to saving images with varying camera settings

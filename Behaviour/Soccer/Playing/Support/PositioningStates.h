@@ -37,7 +37,7 @@ class SoccerFSMState;       // PositioningState is a SoccerFSMState
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
-using namespace std;
+
 
 class GoToPosition : public SoccerState
 {
@@ -52,7 +52,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "GoToPosition" << endl;
+            debug << "GoToPosition" << std::endl;
         #endif
         static bool m_close_approach = false;
         if (m_previous_time < m_data->CurrentTime-2000.) {
@@ -65,7 +65,7 @@ protected:
         StationaryObject& opponentgoal = BehaviourPotentials::getOpponentGoal(m_field_objects, m_game_info);
         
         
-        vector<float> position;
+        std::vector<float> position;
         if (m_team_info->getPlayerNumber() == 1)
             position = self.CalculatePositionToProtectGoalFromMobileObject(ball, owngoal, 120);
         else if (m_team_info->getPlayerNumber() == 4)
@@ -77,7 +77,7 @@ protected:
         float bearing = atan2(position[1], position[0]);
         
         
-        vector<float> speed;
+        std::vector<float> speed;
         /*if (m_team_info->getPlayerNumber() == 1 and (distance < 30. or m_close_approach and distance < 120.)
             or m_team_info->getPlayerNumber() != 1 and ( distance < 20. or m_close_approach and distance < 60. )) {
             speed = BehaviourPotentials::goToPointBackwards(distance, bearing, ball.estimatedBearing(), 10, 100, 200);
@@ -86,7 +86,7 @@ protected:
             speed = BehaviourPotentials::goToPoint(distance, bearing, ball.estimatedBearing(), 20, 100, 200);
             m_close_approach = false;
         //}
-        //vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 50, 100);
+        //std::vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 50, 100);
         m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
         
         if (ball.TimeSinceLastSeen() > 15000)

@@ -9,7 +9,7 @@ void runTests()
     SelfLocalisation* testLoc = new SelfLocalisation(2);
     testLoc->doInitialReset(GameInformation::RedTeam);
 
-    std::ofstream outFile(filename.c_str(), ios_base::out | ios_base::trunc);
+    std::ofstream outFile(filename.c_str(), std::ios_base::out | std::ios_base::trunc);
     testLoc->writeStreamBinary(outFile);
     outFile.close();
 

@@ -45,7 +45,7 @@
 #include "debugverbositybehaviour.h"
 
 #include <vector>
-using namespace std;
+
 
 class GenerateWalkParametersState : public WalkOptimisationState
 {
@@ -53,7 +53,7 @@ public:
     GenerateWalkParametersState(WalkOptimisationProvider* parent) : WalkOptimisationState(parent)
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 3
-            debug << "GenerateWalkParametersState::GenerateWalkParametersState" << endl;
+            debug << "GenerateWalkParametersState::GenerateWalkParametersState" << std::endl;
         #endif
         m_getting_up = false;
         m_previously_getting_up = false;
@@ -63,7 +63,7 @@ public:
     ~GenerateWalkParametersState() {};
     BehaviourState* nextState()
     {   // progress to the evaluation state when we are in position AND lined up AND stopped
-        vector<float> difference = m_field_objects->self.CalculateDifferenceFromFieldState(m_current_target_state);
+        std::vector<float> difference = m_field_objects->self.CalculateDifferenceFromFieldState(m_current_target_state);
         bool gettingup = false;
         m_data->get(NUSensorsData::MotionGetupActive, gettingup);
 
@@ -79,7 +79,7 @@ public:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 3
-            debug << "GenerateWalkParametersState::doState" << endl;
+            debug << "GenerateWalkParametersState::doState" << std::endl;
         #endif
         m_previously_getting_up = m_getting_up;
         m_data->get(NUSensorsData::MotionGetupActive, m_getting_up);
@@ -90,7 +90,7 @@ public:
             m_parent->tickOptimiser();
             start();
             #if DEBUG_BEHAVIOUR_VERBOSITY > 2
-                debug << "GenerateWalkParametersState::doState(). Start Position: " << m_current_target_state << endl;
+                debug << "GenerateWalkParametersState::doState(). Start Position: " << m_current_target_state << std::endl;
             #endif
         }
         else
@@ -102,10 +102,10 @@ public:
             m_time_not_getting_up += m_data->CurrentTime - m_data->PreviousTime;
 
         lookAtGoals();
-        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_target_state, 0, 2*m_parent->stoppingDistance(), 9000);
+        std::vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_current_target_state, 0, 2*m_parent->stoppingDistance(), 9000);
         m_jobs->addMotionJob(new WalkJob(speed[0], speed[1], speed[2]));
 		#if DEBUG_BEHAVIOUR_VERBOSITY > 4
-            debug << "GenerateWalkParametersState::doState() - Completed." << endl;
+            debug << "GenerateWalkParametersState::doState() - Completed." << std::endl;
         #endif
     }
 private:

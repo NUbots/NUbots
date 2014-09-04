@@ -46,7 +46,7 @@ class ImLostState;
 class GoalKeeperState;
 
 #include <vector>
-using namespace std;
+
 
 class PlayingState : public SoccerFSMState
 {
@@ -63,11 +63,11 @@ protected:
     ImLostState* m_im_lost_state;
     GoalKeeperState* m_goalkeeper_state;
 private:
-    vector<float> m_led_on;
-    vector<float> m_led_off;
-    vector<float> m_led_red;
-    vector<float> m_led_green;
-    vector<float> m_led_yellow;
+    std::vector<float> m_led_on;
+    std::vector<float> m_led_off;
+    std::vector<float> m_led_red;
+    std::vector<float> m_led_green;
+    std::vector<float> m_led_yellow;
 };
 
 

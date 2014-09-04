@@ -51,15 +51,15 @@
 class Vision;
 class LineDetection;
 
-using namespace std;
+
 
 class SAM
 {
 public:
 
-    static vector<LinePoint*> noisePoints;
-    static vector<LinePoint*> noisePoints1;
-    static vector<LinePoint*> noisePoints2;
+    static std::vector<LinePoint*> noisePoints;
+    static std::vector<LinePoint*> noisePoints1;
+    static std::vector<LinePoint*> noisePoints2;
     static unsigned int noFieldLines;
 
     //GENERIC
@@ -67,9 +67,9 @@ public:
     static void initRules(double SD, unsigned int MPO, unsigned int MPTL, unsigned int MPTLF, double MEPD, double MLRF);
 
     //LEAST-SQUARES FITTING
-    static void splitAndMergeLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points, bool clearsmall=true, bool cleardirty=true, bool noise=true);
+    static void splitAndMergeLS(std::vector<LSFittedLine*>& lines, std::vector<LinePoint*>& points, bool clearsmall=true, bool cleardirty=true, bool noise=true);
     //CLUSTERS
-    static void splitAndMergeLSClusters(vector<LSFittedLine*>& lines, vector< vector<LinePoint*> >& clusters, vector<LinePoint*> leftover, Vision* vision, LineDetection* linedetector, bool clearsmall=true, bool cleardirty=true, bool noise=true);
+    static void splitAndMergeLSClusters(std::vector<LSFittedLine*>& lines, std::vector< std::vector<LinePoint*> >& clusters, std::vector<LinePoint*> leftover, Vision* vision, LineDetection* linedetector, bool clearsmall=true, bool cleardirty=true, bool noise=true);
 
 private:
     //RULES
@@ -92,22 +92,22 @@ private:
     /*
     static ofstream* debug_out;
 
-    static void debugPrint(const string& s);
+    static void debugPrint(const std::string& s);
     static void debugPrint(const Line& l);
     static void debugPrint(const LinePoint& p);
-    static void debugPrint(const vector<LSFittedLine*>& lines);
-    static void debugPrint(const vector<LinePoint*>& points);
+    static void debugPrint(const std::vector<LSFittedLine*>& lines);
+    static void debugPrint(const std::vector<LinePoint*>& points);
     */
 
     //LEAST-SQUARES FITTING
-    static void splitLS(vector<LSFittedLine*>& lines, vector<LinePoint*>& points);
-    static void splitLSIterative(vector<LSFittedLine*>& lines, vector<LinePoint*>& points);
-    static void splitNoiseLS(vector<LSFittedLine*>& lines);
-    static void splitNoiseLS12(vector<LSFittedLine*>& lines);
-    static void mergeLS(vector<LSFittedLine*>& lines, LineDetection* lineDetector, Vision* vision);
-    static void generateLSLine(LSFittedLine& line, vector<LinePoint*>& points);
-    static bool separateLS(vector<LinePoint*>& left, vector<LinePoint*>& right, vector<LinePoint*>& below, vector<LinePoint*>& above, vector<LinePoint*>& centre, LinePoint* split_point, LSFittedLine& line, bool& useTriple);
-    //static void sortLinesLS(vector<LSFittedLine*>& lines);
+    static void splitLS(std::vector<LSFittedLine*>& lines, std::vector<LinePoint*>& points);
+    static void splitLSIterative(std::vector<LSFittedLine*>& lines, std::vector<LinePoint*>& points);
+    static void splitNoiseLS(std::vector<LSFittedLine*>& lines);
+    static void splitNoiseLS12(std::vector<LSFittedLine*>& lines);
+    static void mergeLS(std::vector<LSFittedLine*>& lines, LineDetection* lineDetector, Vision* vision);
+    static void generateLSLine(LSFittedLine& line, std::vector<LinePoint*>& points);
+    static bool separateLS(std::vector<LinePoint*>& left, std::vector<LinePoint*>& right, std::vector<LinePoint*>& below, std::vector<LinePoint*>& above, std::vector<LinePoint*>& centre, LinePoint* split_point, LSFittedLine& line, bool& useTriple);
+    //static void sortLinesLS(std::vector<LSFittedLine*>& lines);
 
 
     //GENERIC
@@ -115,10 +115,10 @@ private:
     static void addToNoise(LinePoint* point);
     static void addToNoise1(LinePoint* point);
     static void addToNoise2(LinePoint* point);
-    static void clearSmallLines(vector<LSFittedLine*>& lines);
-    static void clearDirtyLines(vector<LSFittedLine*>& lines);
+    static void clearSmallLines(std::vector<LSFittedLine*>& lines);
+    static void clearDirtyLines(std::vector<LSFittedLine*>& lines);
     static bool shouldMergeLines(const LSFittedLine& line1, const LSFittedLine& line2, LineDetection* lineDetector, Vision* vision);
-    static bool convertLinesEndPoints(vector<LSFittedLine*>& lines, Vision* vision, LineDetection* linedetector);
+    static bool convertLinesEndPoints(std::vector<LSFittedLine*>& lines, Vision* vision, LineDetection* linedetector);
 
 };
 

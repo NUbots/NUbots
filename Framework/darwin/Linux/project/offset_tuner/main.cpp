@@ -83,8 +83,9 @@ int main(int argc, char *argv[])
         printf("Initializing Motion Manager failed!\n");
         return 0;
     }
-    MotionManager::GetInstance()->LoadINISettings(ini);
     /////////////////////////////////////////////////////////////////////
+
+    MotionManager::GetInstance()->LoadINISettings(ini);
 
     DrawIntro(&cm730);
 

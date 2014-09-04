@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
-using namespace std;
+
 AbstractGait::AbstractGait(){}
 AbstractGait::~AbstractGait(){}
 
@@ -114,16 +114,16 @@ void AbstractGait::combineSubComponents(float target[length],
     const float source1Contribution = 1.0f - percentSwitched;
     const float source2Contribution = percentSwitched;
 
-    // cout << " *** New recombination ** sC1,sC2 ="<<source1Contribution
-    //      <<","<<source2Contribution<<endl;
-    // cout << "Source1 is:"<<endl<<"   [";
+    // std::cout << " *** New recombination ** sC1,sC2 ="<<source1Contribution
+    //      <<","<<source2Contribution<<std::endl;
+    // std::cout << "Source1 is:"<<std::endl<<"   [";
     // for(unsigned int  i = 0; i <  length; i++){
-    //     cout << source1[i]<<",";
-    // }cout<<"]"<<endl;
-    // cout << "Source2 is:"<<endl<<"   [";
+    //     std::cout << source1[i]<<",";
+    // }std::cout<<"]"<<std::endl;
+    // std::cout << "Source2 is:"<<std::endl<<"   [";
     // for(unsigned int  i = 0; i <  length; i++){
-    //     cout << source2[i]<<",";
-    // }cout<<"]"<<endl;
+    //     std::cout << source2[i]<<",";
+    // }std::cout<<"]"<<std::endl;
 
     if(percentSwitched == 0.0f){
         memcpy(target,source1,sizeof(float)*length);
@@ -136,49 +136,49 @@ void AbstractGait::combineSubComponents(float target[length],
     multiplySubComponent<length>(temp1,source1, source1Contribution);
     multiplySubComponent<length>(temp2,source2, source2Contribution);
     addSubComponent<length>(target, temp1, temp2);
-    //     cout << "Result is:"<<endl<<"   [";
+    //     std::cout << "Result is:"<<std::endl<<"   [";
     // for(unsigned int  i = 0; i <  length; i++){
-    //     cout << target[i]<<",";
-    // }cout<<"]"<<endl<<endl;
+    //     std::cout << target[i]<<",";
+    // }std::cout<<"]"<<std::endl<<std::endl;
 }
 
 using namespace WP;
 std::string AbstractGait::toString() const {
 
-    string out;
+    std::string out;
     char temp[200];
 
     out+="#### STANCE #####\n";
     for(int i =0; i < LEN_STIFF_CONFIG; i++){
-        sprintf(temp,"%f,",stance[i]);out+=string(temp);
+        sprintf(temp,"%f,",stance[i]);out+=std::string(temp);
     }out+="\n#### STEP #####\n";
 
     for(int i =0; i < LEN_STEP_CONFIG; i++){
-        sprintf(temp,"%f,",step[i]);out+=string(temp);
+        sprintf(temp,"%f,",step[i]);out+=std::string(temp);
     }out+="\n#### ZMP #####\n";
 
     for(int i =0; i < LEN_ZMP_CONFIG; i++){
-        sprintf(temp,"%f,",zmp[i]);out+=string(temp);
+        sprintf(temp,"%f,",zmp[i]);out+=std::string(temp);
     }out+="\n#### HACK #####\n";
 
     for(int i =0; i < LEN_HACK_CONFIG; i++){
-        sprintf(temp,"%f,",hack[i]);out+=string(temp);
+        sprintf(temp,"%f,",hack[i]);out+=std::string(temp);
     }out+="\n#### SENSOR #####\n";
 
     for(int i =0; i < LEN_SENSOR_CONFIG; i++){
-        sprintf(temp,"%f,",sensor[i]);out+=string(temp);
+        sprintf(temp,"%f,",sensor[i]);out+=std::string(temp);
     }out+="\n#### STIFF #####\n";
 
     for(int i =0; i < LEN_STIFF_CONFIG; i++){
-        sprintf(temp,"%f,",stiffness[i]);out+=string(temp);
+        sprintf(temp,"%f,",stiffness[i]);out+=std::string(temp);
     }out+="\n#### ODO #####\n";
 
     for(int i =0; i < LEN_ODO_CONFIG; i++){
-        sprintf(temp,"%f,",odo[i]);out+=string(temp);
+        sprintf(temp,"%f,",odo[i]);out+=std::string(temp);
     }out+="\n#### ARM #####\n";
 
     for(int i =0; i < LEN_ARM_CONFIG; i++){
-        sprintf(temp,"%f,",arm[i]);out+=string(temp);
+        sprintf(temp,"%f,",arm[i]);out+=std::string(temp);
     }out+="\n#########\n";
     return out;
 }

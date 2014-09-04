@@ -38,12 +38,11 @@
 #include "Tools/Threading/Thread.h"
 class NUImage;
 class NUSensorsData;
-class Localisation;
 class SelfLocalisation;
 class FieldObjects;
 
 #include <sstream>
-using namespace std;
+
 
 typedef unsigned char byte;
 #ifndef NETDATA
@@ -63,7 +62,6 @@ public:
     void sendData(network_data_t netData);
     void sendData(const NUImage& p_image, const NUSensorsData& p_sensors);
     #if defined(USE_LOCALISATION)
-        void sendData(const Localisation& p_locwm, const FieldObjects& p_objects);
         void sendData(const SelfLocalisation& p_locwm, const FieldObjects& p_objects);
     #endif
     network_data_t receiveData();

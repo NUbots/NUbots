@@ -8,14 +8,12 @@
 #include <cstring>
 #include <QHostAddress>
 #include <sstream>
-#include "Localisation/Localisation.h"
 #include "Localisation/SelfLocalisation.h"
 #include "Infrastructure/FieldObjects/FieldObjects.h"
 
 locwmStreamWidget::locwmStreamWidget(QWidget *parent): QWidget(parent)
 {
 
-    locwm = new Localisation();
     selfLoc = new SelfLocalisation();
     objects = new FieldObjects();
     robotName = QString("");

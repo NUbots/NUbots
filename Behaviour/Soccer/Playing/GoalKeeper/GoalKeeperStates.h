@@ -41,7 +41,7 @@
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
-using namespace std;
+
 
 class GoalKeeperSubState : public SoccerState
 {
@@ -100,7 +100,7 @@ protected:
             Vector2<float> ballVelocityError = ball.getEstimatedVelocityError();
             Vector2<float> ballPosition = ball.getEstimatedFieldLocation(); 
             Vector2<float> ballPositionError = ball.getEstimatedFieldLocationError();
-            //cout << "Ball Position: " << self.wmX() << ", " << self.wmY() << endl;
+            //std::cout << "Ball Position: " << self.wmX() << ", " << self.wmY() << std::endl;
             
             float velocityErrorMagnitude = sqrt(ballVelocityError.x*ballVelocityError.x+ballVelocityError.y*ballVelocityError.y);
             float velocityMagnitude = sqrt(ballVelocity.x*ballVelocityError.x+ballVelocityError.y*ballVelocityError.y);
@@ -116,8 +116,8 @@ protected:
             relativeBallVelocity.x = ballVelocity.x*cos(self.Heading())-ballVelocity.y*sin(self.Heading());
             relativeBallVelocity.y = ballVelocity.x*sin(self.Heading())+ballVelocity.y*cos(self.Heading());
             
-            cout << "Relative X pos: " << relativeBallPosition.x << ", Relative X vel: " << relativeBallVelocity.x << endl;
-            //cout << velocityErrorMagnitude << " position:" << positionErrorMagnitude << endl;
+            std::cout << "Relative X pos: " << relativeBallPosition.x << ", Relative X vel: " << relativeBallVelocity.x << std::endl;
+            //std::cout << velocityErrorMagnitude << " position:" << positionErrorMagnitude << std::endl;
             
             
             //check the ball is heading towards us
@@ -129,9 +129,9 @@ protected:
                 //calculate the Y intercept
                 float interceptY = interceptTime*relativeBallVelocity.y+relativeBallPosition.y;
                 
-                //cout << "Intercept Time: " << interceptTime << ", Intercept Y: " << interceptY << endl;
+                //std::cout << "Intercept Time: " << interceptTime << ", Intercept Y: " << interceptY << std::endl;
                 
-                //cout << "Intercept Time: " << interceptTime << ", Intercept Y: " << interceptY << endl;
+                //std::cout << "Intercept Time: " << interceptTime << ", Intercept Y: " << interceptY << std::endl;
                 
                 //XXX: parameterize defensive area size - this is set to goalsize (*errorFraction for uncertainty)
                 float defensiveArea = 150.;
@@ -141,18 +141,18 @@ protected:
                     float standingBlockHalfSize = 12.5; //width of the robot on the half it is defending
                     float standingSideBlockHalfSize = 18.; //width of the robot on the half it is defending
 
-                    cout << "Intercept Time: " << interceptTime << ", Intercept Y: " << interceptY << endl;
-                    cout << "Relative X pos: " << relativeBallPosition.x << ", Relative X vel: " << relativeBallVelocity.x << endl;
-                    cout << velocityErrorMagnitude << " position:" << positionErrorMagnitude << " time ball seen: " << ball.TimeSeen() << endl;
+                    std::cout << "Intercept Time: " << interceptTime << ", Intercept Y: " << interceptY << std::endl;
+                    std::cout << "Relative X pos: " << relativeBallPosition.x << ", Relative X vel: " << relativeBallVelocity.x << std::endl;
+                    std::cout << velocityErrorMagnitude << " position:" << positionErrorMagnitude << " time ball seen: " << ball.TimeSeen() << std::endl;
                     
-                    string blockSide;
+                    std::string blockSide;
                     if (interceptY > 0) {
                         blockSide = "Left";
                     } else {
                         blockSide = "Right";
                     }
 
-                    string blockType;
+                    std::string blockType;
                     if (fabs(interceptY) < standingBlockHalfSize) {
                         blockType = "StandingBlock";
                     } else if (fabs(interceptY) < standingBlockHalfSize) {
@@ -161,7 +161,7 @@ protected:
                         blockType = "DiveBlock";
                     }
                     
-                    cout << "Saving!" << endl;
+                    std::cout << "Saving!" << std::endl;
                     ScriptJob* currentSave = new ScriptJob(m_data->CurrentTime+10, "Save"+blockSide); //blockType+blockSide);
                     //m_script.play(m_data,m_actions);
                     m_jobs->addMotionJob(currentSave);

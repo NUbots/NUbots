@@ -80,11 +80,11 @@ Circle CircleFitting::FitCircleLMA(std::vector < Vector2<int> > points)
         if (algebraicCircle.isDefined) 
         {
             #if TARGET_OS_IS_WINDOWS
-                qDebug() << "Algebraic Fit Result: "<< "Circle found " << algebraicCircle.isDefined<<": (" << algebraicCircle.centreX << "," << algebraicCircle.centreY << ") Radius: "<< algebraicCircle.radius << " Fitting: " << algebraicCircle.sd<< endl;;
+                qDebug() << "Algebraic Fit Result: "<< "Circle found " << algebraicCircle.isDefined<<": (" << algebraicCircle.centreX << "," << algebraicCircle.centreY << ") Radius: "<< algebraicCircle.radius << " Fitting: " << algebraicCircle.sd<< std::endl;;
             #endif
             Circle geometricCircle = GeometricCircleFitLMA(algebraicCircle); //! Uses the algebraic approximation to generate a more accurate centre and radius using geometric fitting
             #if TARGET_OS_IS_WINDOWS
-                qDebug() << "Tried Geometric Fit Result: "<< "Circle found " << geometricCircle.isDefined<<": (" << geometricCircle.centreX << "," << geometricCircle.centreY << ") Radius: "<< geometricCircle.radius << " Fitting: " << geometricCircle.sd<< endl;;
+                qDebug() << "Tried Geometric Fit Result: "<< "Circle found " << geometricCircle.isDefined<<": (" << geometricCircle.centreX << "," << geometricCircle.centreY << ") Radius: "<< geometricCircle.radius << " Fitting: " << geometricCircle.sd<< std::endl;;
             #endif
             if(geometricCircle.isDefined == true)
             {
@@ -117,12 +117,12 @@ Circle CircleFitting::FitCircleLMF(std::vector < Vector2<int> > points)
         if (algebraicCircle.isDefined)
         {
             #if TARGET_OS_IS_WINDOWS
-                qDebug() << "Algebraic Fit Result: "<< "Circle found " << algebraicCircle.isDefined<<": (" << algebraicCircle.centreX << "," << algebraicCircle.centreY << ") Radius: "<< algebraicCircle.radius << " Fitting: " << algebraicCircle.sd<< endl;;
+                qDebug() << "Algebraic Fit Result: "<< "Circle found " << algebraicCircle.isDefined<<": (" << algebraicCircle.centreX << "," << algebraicCircle.centreY << ") Radius: "<< algebraicCircle.radius << " Fitting: " << algebraicCircle.sd<< std::endl;;
             #endif
 
             Circle geometricCircle = GeometricCircleFitLMF(algebraicCircle); // Uses the algebraic approximation to generate a more accurate centre and radius using geometric fitting
             #if TARGET_OS_IS_WINDOWS
-                qDebug() << "Tried Geometric Fit Result: "<< "Circle found " << geometricCircle.isDefined<<": (" << geometricCircle.centreX << "," << geometricCircle.centreY << ") Radius: "<< geometricCircle.radius << " Fitting: " << geometricCircle.sd<< endl;;
+                qDebug() << "Tried Geometric Fit Result: "<< "Circle found " << geometricCircle.isDefined<<": (" << geometricCircle.centreX << "," << geometricCircle.centreY << ") Radius: "<< geometricCircle.radius << " Fitting: " << geometricCircle.sd<< std::endl;;
             #endif
 
             return geometricCircle;

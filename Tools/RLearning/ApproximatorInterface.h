@@ -24,7 +24,7 @@
 
 #include <vector>
 #include<string>
-using namespace std;
+
 
 class ApproximatorInterface {
     
@@ -33,16 +33,16 @@ public:
 
     virtual void initialiseApproximator(int numberOfInputs, int numberOfOutputs, int numberOfHiddens, float max_parameter_range = 1)=0;
     
-    virtual void doLearningEpisode(vector<vector<float> > const& observations, vector< vector<float> > const& values, float stepSize=0.1, int iterations=1)=0;
+    virtual void doLearningEpisode(std::vector<std::vector<float> > const& observations, std::vector< std::vector<float> > const& values, float stepSize=0.1, int iterations=1)=0;
     
-    virtual vector<float> getValues(vector<float> const& observations)=0;
+    virtual std::vector<float> getValues(std::vector<float> const& observations)=0;
     
-    virtual void saveApproximator(string agentName)=0;
+    virtual void saveApproximator(std::string agentName)=0;
     
-    virtual void loadApproximator(string agentName)=0;
+    virtual void loadApproximator(std::string agentName)=0;
     
 protected:
-    string save_location;
+    std::string save_location;
 
 };
 

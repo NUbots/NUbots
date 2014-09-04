@@ -9,8 +9,9 @@
 class Goal : public VisionFieldObject
 {
 public:
+    friend class GoalDetector;  // Hack, remove after RC2013
        
-    Goal(VFO_ID id=INVALID, const Quad& corners=Quad());
+    Goal(VFO_ID id=INVALID, const Quad& corners=Quad(), bool known=false);
 
     void setBase(Point base);
 
@@ -28,15 +29,15 @@ public:
     bool check() const;
         
     //! @brief Stream output for labelling purposes
-    void printLabel(ostream& out) const {out << VFOName(m_id) << " " << m_location.screen << " " << m_size_on_screen;}
+    void printLabel(std::ostream& out) const {out << VFOName(m_id) << " " << m_location << " " << m_size_on_screen;}
 
     virtual double findScreenError(VisionFieldObject* other) const;
     virtual double findGroundError(VisionFieldObject* other) const;
 
     //! @brief output stream operator.
-    friend ostream& operator<< (ostream& output, const Goal& g);
+    friend std::ostream& operator<< (std::ostream& output, const Goal& g);
     //! @brief output stream operator for a vector of goals.
-    friend ostream& operator<< (ostream& output, const vector<Goal>& g);    
+    friend std::ostream& operator<< (std::ostream& output, const std::vector<Goal>& g);    
     
 private:
     /*!
@@ -50,14 +51,20 @@ private:
       @param elevation the angle between the goal and the image centre in the xz plane.
       @return the distance to the goal in cm.
       */
-    double distanceToGoal(double bearing, double elevation);
-    
-private:
-    Quad m_corners;                 //! @variable pixel locations of the corners
+//    double distanceToGoal(double bearing, double elevation);
 
 public:
-    double width_dist,
-           d2p;
+    bool m_known;
+
+private:
+    Quad m_corners;                 //! @variable pixel locations of the corners
+    NUPoint d2p_loc, width_loc, height_loc;
+    double width_dist, height_dist;
+    bool off_top, off_bottom, off_side;
+
+//public:
+//    double width_dist,
+//           d2p;
 };
 
 #endif // GOAL_H

@@ -41,9 +41,12 @@
 #include "debugverbositynusensors.h"
 #include "nubotdataconfig.h"
 
+#include "../Localisation/Filters/SeqUKF.h"
+#include "../Localisation/Filters/IMUModel.h"
+
 #include <math.h>
 #include <limits>
-using namespace std;
+
 
 /*! @brief Default constructor for parent NUSensors class, this will/should be called by children
  
@@ -52,7 +55,7 @@ using namespace std;
 NUSensors::NUSensors(): m_initialised(false)
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 0
-    debug << "NUSensors::NUSensors" << endl;
+    debug << "NUSensors::NUSensors" << std::endl;
 #endif
     m_current_time = Platform->getTime();
     m_previous_time = -1000;
@@ -62,6 +65,21 @@ NUSensors::NUSensors(): m_initialised(false)
     m_kinematicModel->LoadModel();
     m_orientationFilter = new OrientationUKF();
     m_odometry = new OdometryEstimator();
+
+    IMUModel* imu_model = new IMUModel();
+    m_orientation_filter = new SeqUKF(imu_model);
+    Matrix init_imu_mean(IMUModel::kstates_total, 1, false);
+    init_imu_mean[IMUModel::kstates_gyro_offset_x][0] = 0.0;
+    init_imu_mean[IMUModel::kstates_gyro_offset_y][0] = 0.0;
+    init_imu_mean[IMUModel::kstates_body_angle_x][0] = 0.0;
+    init_imu_mean[IMUModel::kstates_body_angle_y][0] = 0.0;
+    Matrix init_imu_cov(IMUModel::kstates_total, IMUModel::kstates_total, false);
+    init_imu_cov[IMUModel::kstates_gyro_offset_x][IMUModel::kstates_gyro_offset_x] = 0.0001;
+    init_imu_cov[IMUModel::kstates_gyro_offset_y][IMUModel::kstates_gyro_offset_y] = 0.0001;
+    init_imu_cov[IMUModel::kstates_body_angle_x][IMUModel::kstates_body_angle_x] = 9.0;
+    init_imu_cov[IMUModel::kstates_body_angle_y][IMUModel::kstates_body_angle_y] = 9.0;
+    MultivariateGaussian init_imu_est(init_imu_mean, init_imu_cov);
+    m_orientation_filter->initialiseEstimate(init_imu_est);
 }
 
 /*! @brief Destructor for parent NUSensors class.
@@ -71,7 +89,7 @@ NUSensors::NUSensors(): m_initialised(false)
 NUSensors::~NUSensors()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 0
-    debug << "NUSensors::~NUSensors" << endl;
+    debug << "NUSensors::~NUSensors" << std::endl;
 #endif
     delete m_kinematicModel;
     m_kinematicModel = 0;
@@ -79,6 +97,8 @@ NUSensors::~NUSensors()
     m_orientationFilter = 0;
     delete m_odometry;
     m_odometry = 0;
+    if(m_orientation_filter)
+        delete m_orientation_filter;
 }
 
 /*! @brief Updates and returns the fresh NUSensorsData. Call this function everytime there is new data.
@@ -87,7 +107,7 @@ NUSensors::~NUSensors()
 void NUSensors::update()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 0
-    debug << "NUSensors::update()" << endl;
+    debug << "NUSensors::update()" << std::endl;
 #endif
     m_data->PreviousTime = m_data->CurrentTime;
     m_current_time = Platform->getTime();
@@ -113,7 +133,7 @@ NUSensorsData* NUSensors::getNUSensorsData()
 void NUSensors::copyFromHardwareCommunications()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NUSensors::copyFromHardwareCommunications()" << endl;
+    debug << "NUSensors::copyFromHardwareCommunications()" << std::endl;
 #endif
     // Implementation in Platforms!
 }
@@ -229,54 +249,116 @@ void NUSensors::initialise()
  */
 void NUSensors::calculateOrientation()
 {
+    static double prev_time = 0.0;
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NUSensors::calculateOrientation()" << endl;
+    debug << "NUSensors::calculateOrientation()" << std::endl;
 #endif
-    static vector<float> orientation(3, 0.0f);
-    static vector<float> orientationhardware(3, 0.0f);
-    static vector<float> acceleration(3, 0.0f);
-    static vector<float> gyros(3, 0.0f);
-    static vector<float> gyroOffset(3, 0.0f);
+    static std::vector<float> orientation(3, 0.0f);
+    static std::vector<float> orientationhardware(3, 0.0f);
+    static std::vector<float> acceleration(3, 0.0f);
+    static std::vector<float> gyros(3, 0.0f);
+    static std::vector<float> gyroOffset(3, 0.0f);
     
     if (m_data->get(NUSensorsData::OrientationHardware, orientationhardware))
     {
-        cout << "NUSensors::calculateOrientation() NUSensorsData failed orientation hardware "<<endl;
+        std::cout << "NUSensors::calculateOrientation() NUSensorsData failed orientation hardware "<<std::endl;
         m_data->set(NUSensorsData::Orientation, m_current_time, orientationhardware);
     }
     else if (m_data->get(NUSensorsData::Gyro, gyros) && m_data->get(NUSensorsData::Accelerometer, acceleration))
     {
-        vector<float> supportLegTransformFlat;
-        bool validKinematics = m_data->get(NUSensorsData::SupportLegTransform, supportLegTransformFlat);
-        Matrix supportLegTransform = Matrix4x4fromVector(supportLegTransformFlat);
-        if(validKinematics)
-            orientation = Kinematics::OrientationFromTransform(supportLegTransform);
+//        std::vector<float> supportLegTransformFlat;
+//        bool validKinematics = m_data->get(NUSensorsData::SupportLegTransform, supportLegTransformFlat);
+//        Matrix supportLegTransform = Matrix4x4fromVector(supportLegTransformFlat);
+//        if(validKinematics)
+//            orientation = Kinematics::OrientationFromTransform(supportLegTransform);
 
-        validKinematics = validKinematics && (fabs(acceleration[2]) > 2*fabs(acceleration[1]) && fabs(acceleration[2]) > 2*fabs(acceleration[0]));
+//        validKinematics = validKinematics && (fabs(acceleration[2]) > 2*fabs(acceleration[1]) && fabs(acceleration[2]) > 2*fabs(acceleration[0]));
 
-        if(!m_orientationFilter->Initialised()){
-            #if DEBUG_NUSENSORS_VERBOSITY > 4
-                debug << "NUSensors::calculateOrientation() NUSensorsData failed to initialise." << endl;
-            #endif
-            m_orientationFilter->initialise(m_current_time,gyros,acceleration,validKinematics,orientation);
+//        if(!m_orientationFilter->Initialised()){
+//            #if DEBUG_NUSENSORS_VERBOSITY > 4
+//                debug << "NUSensors::calculateOrientation() NUSensorsData failed to initialise." << std::endl;
+//            #endif
+//            m_orientationFilter->initialise(m_current_time,gyros,acceleration,validKinematics,orientation);
 
-        } else
-        {
-            m_orientationFilter->TimeUpdate(gyros, m_current_time);
-            m_orientationFilter->MeasurementUpdate(acceleration, validKinematics, orientation);
-            // Set orientation
-            orientation[0] = m_orientationFilter->getMean(OrientationUKF::rollAngle);
-            orientation[1] = m_orientationFilter->getMean(OrientationUKF::pitchAngle);
-            orientation[2] = 0.0f;
+//        } else
+//        {
+//            m_orientationFilter->TimeUpdate(gyros, m_current_time);
+//            m_orientationFilter->MeasurementUpdate(acceleration, validKinematics, orientation);
+//            // Set orientation
+//            orientation[0] = m_orientationFilter->getMean(OrientationUKF::rollAngle);
+//            orientation[1] = m_orientationFilter->getMean(OrientationUKF::pitchAngle);
+//            orientation[2] = 0.0f;
 
-            m_data->set(NUSensorsData::Orientation, m_current_time, orientation);
+//            m_data->set(NUSensorsData::Orientation, m_current_time, orientation);
 
-            // Set gyro offset values
-            gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
-            gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
-            gyroOffset[2] = 0.0f;
-            m_data->set(NUSensorsData::GyroOffset, m_current_time, gyroOffset);
-        }
+//            // Set gyro offset values
+//            gyroOffset[0] = m_orientationFilter->getMean(OrientationUKF::rollGyroOffset);
+//            gyroOffset[1] = m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset);
+//            gyroOffset[2] = 0.0f;
+//            m_data->set(NUSensorsData::GyroOffset, m_current_time, gyroOffset);
+//        }
+
+        Matrix gyro_matrix(2,1,false);
+        gyro_matrix[0][0] = gyros[0];
+        gyro_matrix[1][0] = gyros[1];
+
+        Matrix accel_matrix(3,1,false);
+        accel_matrix[0][0] = acceleration[0];
+        accel_matrix[1][0] = acceleration[1];
+        accel_matrix[2][0] = acceleration[2];
+
+        const double delta_t_ms = m_current_time - prev_time;
+        const double delta_t_s = delta_t_ms / 1000.0;
+
+        Matrix process_noise(4,4,false);
+        process_noise[0][0] = 1e-6;
+        process_noise[1][1] = 1e-6;
+        process_noise[2][2] = 1e-6;
+        process_noise[3][3] = 1e-6;
+
+        Matrix gyro_measurement_noise(2,2,false);
+        gyro_measurement_noise[0][0] = 0.25;
+        gyro_measurement_noise[1][1] = 0.25;
+
+        Matrix accel_measurement_noise(3,3,false);
+        accel_measurement_noise[0][0] = 10.0;
+        accel_measurement_noise[1][1] = 10.0;
+        accel_measurement_noise[2][2] = 10.0;
+
+        m_orientation_filter->timeUpdate(delta_t_s, gyro_matrix, process_noise*delta_t_s, gyro_measurement_noise);
+        m_orientation_filter->measurementUpdate(accel_matrix, accel_measurement_noise, Matrix(), IMUModel::kmeasurement_accelerometer);
+
+        MultivariateGaussian estimate = m_orientation_filter->estimate();
+//        std::cout << "## Sensor Values:" << std::endl;
+//        std::cout << "Gyros:\n" << gyro_matrix << std::endl;
+//        std::cout << "Accelerometers:\n" << accel_matrix << std::endl;
+
+//        std::cout << "## Old filter results:" << std::endl;
+//        std::cout << "X offset: " << m_orientationFilter->getMean(OrientationUKF::rollGyroOffset) << std::endl;
+//        std::cout << "Y offset: " << m_orientationFilter->getMean(OrientationUKF::pitchGyroOffset) << std::endl;
+//        std::cout << "X angle: " << m_orientationFilter->getMean(OrientationUKF::rollAngle) << std::endl;
+//        std::cout << "Y angle: " << m_orientationFilter->getMean(OrientationUKF::pitchAngle) << std::endl;
+
+//        std::cout << "## New filter results:" << std::endl;
+//        std::cout << "X offset: " << estimate.mean(IMUModel::kstates_gyro_offset_x) << std::endl;
+//        std::cout << "Y offset: " << estimate.mean(IMUModel::kstates_gyro_offset_y) << std::endl;
+//        std::cout << "X angle: " << estimate.mean(IMUModel::kstates_body_angle_x) << std::endl;
+//        std::cout << "Y angle: " << estimate.mean(IMUModel::kstates_body_angle_y) << std::endl;
+
+        // Set orientation
+        orientation[0] = estimate.mean(IMUModel::kstates_body_angle_x);
+        orientation[1] = estimate.mean(IMUModel::kstates_body_angle_y);
+        orientation[2] = 0.0f;
+
+        m_data->set(NUSensorsData::Orientation, m_current_time, orientation);
+
+        // Set gyro offset values
+        gyroOffset[0] = estimate.mean(IMUModel::kstates_gyro_offset_x);
+        gyroOffset[1] = estimate.mean(IMUModel::kstates_gyro_offset_y);
+        gyroOffset[2] = 0.0f;
+        m_data->set(NUSensorsData::GyroOffset, m_current_time, gyroOffset);
     }
+    prev_time = m_current_time;
 }
 
 /*! @brief Updates the Horizon Line using the current sensor data
@@ -285,10 +367,10 @@ void NUSensors::calculateOrientation()
 void NUSensors::calculateHorizon()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NUSensors::calculateHorizon()" << endl;
+    debug << "NUSensors::calculateHorizon()" << std::endl;
 #endif
     Horizon HorizonLine;
-    vector<float> cameraToGroundTransformFlat;
+    std::vector<float> cameraToGroundTransformFlat;
 
     bool validKinematics = m_data->get(NUSensorsData::CameraToGroundTransform, cameraToGroundTransformFlat);
     Matrix cameraToGroundTransform = Matrix4x4fromVector(cameraToGroundTransformFlat);
@@ -302,7 +384,7 @@ void NUSensors::calculateHorizon()
     if(validKinematics)
     {
         HorizonLine.Calculate(cameraToGroundTransform, camFOV, imgDims);
-        vector<float> line;
+        std::vector<float> line;
         line.reserve(3);
         line.push_back(HorizonLine.getA());
         line.push_back(HorizonLine.getB());
@@ -315,13 +397,13 @@ void NUSensors::calculateHorizon()
 //void NUSensors::calculateHorizon()
 //{
 //#if DEBUG_NUSENSORS_VERBOSITY > 4
-//    debug << "NUSensors::calculateHorizon()" << endl;
+//    debug << "NUSensors::calculateHorizon()" << std::endl;
 //#endif
 //    Horizon HorizonLine;
-//    vector<float> orientation;
+//    std::vector<float> orientation;
 //    float headYaw, headPitch;
 
-//    vector<float> supportLegTransformFlat;
+//    std::vector<float> supportLegTransformFlat;
 //    bool validKinematics = m_data->get(NUSensorsData::SupportLegTransform, supportLegTransformFlat);
 //    Matrix supportLegTransform = Matrix4x4fromVector(supportLegTransformFlat);
 //    if(validKinematics)
@@ -335,7 +417,7 @@ void NUSensors::calculateHorizon()
 //    if (validKinematics)
 //    {
 //        HorizonLine.Calculate(orientation[1], orientation[0], headYaw, headPitch, camera);
-//        vector<float> line;
+//        std::vector<float> line;
 //        line.reserve(3);
 //        line.push_back(HorizonLine.getA());
 //        line.push_back(HorizonLine.getB());
@@ -400,7 +482,7 @@ void NUSensors::calculateButtonDurations()
 void NUSensors::calculateZMP()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NUSensors::calculateZMP()" << endl;
+    debug << "NUSensors::calculateZMP()" << std::endl;
 #endif
 }
 
@@ -417,24 +499,26 @@ void NUSensors::calculateFallSense()
 {
     static const float Fallen = 1.0;
     static const float Falling = 1.0;
-    static const float FallenThreshold = 1.1;  
+    static const float FallenThreshold = 1.4;  //1.1;
     static const float RollFallingThreshold = 0.55;
     static const float ForwardFallingThreshold = 0.55;
     static const float BackwardFallingThreshold = 0.45;
     static float fallen_time = 0;
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NUSensors::calculateFallingSense()" << endl;
+    debug << "NUSensors::calculateFallingSense()" << std::endl;
 #endif
     
-    vector<float> acceleration;
-    vector<float> orientation;
+    std::vector<float> acceleration;
+    std::vector<float> orientation;
     
     if (m_data->getAccelerometer(acceleration) and m_data->getOrientation(orientation))
     {
         float acceleration_mag = sqrt(pow(acceleration[0],2) + pow(acceleration[1],2) + pow(acceleration[2],2));
         // check if the robot has fallen over
-        vector<float> fallen(5,0);
-        if (fabs(acceleration_mag - 981) < 0.2*981 and (fabs(orientation[0]) > FallenThreshold or fabs(orientation[1]) > FallenThreshold))
+        std::vector<float> fallen(5,0);
+        //std::cout << acceleration_mag << "," << fabs(orientation[0]) << "," << fabs(orientation[1]) << std::endl;
+        //if (fabs(acceleration_mag - 981) < 0.2*981 and (fabs(orientation[0]) > FallenThreshold or fabs(orientation[1]) > FallenThreshold))
+        if (fabs(acceleration_mag - 981) < 0.5*981 and (fabs(orientation[0]) > FallenThreshold or fabs(orientation[1]) > FallenThreshold))
             fallen_time += m_current_time - m_previous_time;
         else
             fallen_time = 0;
@@ -469,7 +553,7 @@ void NUSensors::calculateFallSense()
         m_data->set(NUSensorsData::Fallen, m_current_time, fallen);
     
         // check if the robot is falling over
-        vector<float> falling(5,0);
+        std::vector<float> falling(5,0);
         if (not fallen[0])
         {
             if (orientation[0] < -RollFallingThreshold)
@@ -499,13 +583,13 @@ void NUSensors::calculateFallSense()
 void NUSensors::calculateOdometry()
 {
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NUSensors::calculateOdometry()" << endl;
+    debug << "NUSensors::calculateOdometry()" << std::endl;
 #endif
 
     // Retrieve the current odometry data.
-    vector<float> odometeryData;
+    std::vector<float> odometeryData;
     m_data->getOdometry(odometeryData);
-    if(odometeryData.size() < 3) odometeryData.resize(3,0.0); // Make sure the data vector is of the correct size.
+    if(odometeryData.size() < 3) odometeryData.resize(3,0.0); // Make sure the data std::vector is of the correct size.
 
     // Retrieve the foot pressures.
 
@@ -529,12 +613,12 @@ void NUSensors::calculateOdometry()
     if(!validFootPosition)
         return; // If the leg transforms cannot be obtained, then no calculations can be done.
 
-    vector<float> gpsData;
+    std::vector<float> gpsData;
     float compassData;
     m_data->getGps(gpsData);
     m_data->getCompass(compassData);
 
-    vector<float> odom = m_odometry->CalculateNextStep(leftPosition,rightPosition,leftForce,rightForce,gpsData,compassData);
+    std::vector<float> odom = m_odometry->CalculateNextStep(leftPosition,rightPosition,leftForce,rightForce,gpsData,compassData);
 
     // Calculate differences in the position of the support leg.
     float deltaX = odom[0];
@@ -546,7 +630,7 @@ void NUSensors::calculateOdometry()
     odometeryData[2] += deltaTheta;
 
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "Odometry This Frame: (" << deltaX << "," << deltaY << "," << deltaTheta << ")" << endl;
+    debug << "Odometry This Frame: (" << deltaX << "," << deltaY << "," << deltaTheta << ")" << std::endl;
 #endif        
     m_data->set(NUSensorsData::Odometry,m_data->GetTimestamp(),odometeryData);
     return;
@@ -568,14 +652,14 @@ void NUSensors::calculateKinematics()
         // There is no doubt this is messy, however, meh
 
     // First get the joint data in the order required by the kinematic model. And find the resulting transform
-    for (vector<KinematicMap>::iterator eff_it = m_kinematics_map.begin(); eff_it != m_kinematics_map.end(); ++eff_it)
+    for (std::vector<KinematicMap>::iterator eff_it = m_kinematics_map.begin(); eff_it != m_kinematics_map.end(); ++eff_it)
     {
         // For each actuator, get the joint values
         std::vector<float> joint_positions;
         joint_positions.clear();
         float temp;
         Matrix result(4,4,false);
-        for(vector<const NUData::id_t*>::iterator joint_it = eff_it->joints.begin(); joint_it != eff_it->joints.end(); ++joint_it)
+        for(std::vector<const NUData::id_t*>::iterator joint_it = eff_it->joints.begin(); joint_it != eff_it->joints.end(); ++joint_it)
         {
             if(m_data->getPosition(*(*joint_it),temp))
             {
@@ -583,8 +667,8 @@ void NUSensors::calculateKinematics()
             }
             else
             {
-                debug << "NUSensors::calculateKinematics(). WARNING: Unable to get position of joint: " << (*joint_it) << endl;
-                errorlog << "NUSensors::calculateKinematics(). WARNING: Unable to get position of joint: " << (*joint_it) << endl;
+                debug << "NUSensors::calculateKinematics(). WARNING: Unable to get position of joint: " << (*joint_it) << std::endl;
+                errorlog << "NUSensors::calculateKinematics(). WARNING: Unable to get position of joint: " << (*joint_it) << std::endl;
                 break;  // no use going further with this effector.
             }
         }
@@ -605,8 +689,8 @@ void NUSensors::calculateKinematics()
         else
         {
             m_data->setAsInvalid(*eff_it->transform_id);
-            debug << "NUSensors::calculateKinematics(). WARNING: Incorrect number of joints: " << eff_it->transform_id << ": " << eff_it->joints.size() << " Required, " << joint_positions.size() << " Found." << endl;
-            errorlog << "NUSensors::calculateKinematics(). WARNING: Incorrect number of joints: " << eff_it->transform_id << ": " << eff_it->joints.size() << " Required, " << joint_positions.size() << " Found." << endl;
+            debug << "NUSensors::calculateKinematics(). WARNING: Incorrect number of joints: " << eff_it->transform_id << ": " << eff_it->joints.size() << " Required, " << joint_positions.size() << " Found." << std::endl;
+            errorlog << "NUSensors::calculateKinematics(). WARNING: Incorrect number of joints: " << eff_it->transform_id << ": " << eff_it->joints.size() << " Required, " << joint_positions.size() << " Found." << std::endl;
         }
     }
 
@@ -614,7 +698,7 @@ void NUSensors::calculateKinematics()
     // This next part calculates the more complex transform requried.
     Matrix supportLegTransform;     // transform from torso to leg.
     bool legTransform = false;      // flag used to indicate the required leg transfrom was available.
-    std::vector<float> temp;        // temp buffer used to store the vectorised matrices.
+    std::vector<float> temp;        // temp buffer used to store the std::vectorised matrices.
 
     bool leftFootSupport = false, rightFootSupport = false;     // flags to indicate if each foot is providing support.
 
@@ -696,9 +780,9 @@ void NUSensors::calculateCameraHeight()
 {
 //! TODO: most cases where camera height is used should really use head height at the pivot point
 #if DEBUG_NUSENSORS_VERBOSITY > 4
-    debug << "NUSensors::calculateCameraHeight()" << endl;
+    debug << "NUSensors::calculateCameraHeight()" << std::endl;
 #endif
-    vector<float> cgtvector;
+    std::vector<float> cgtvector;
     if (m_data->get(NUSensorsData::CameraToGroundTransform, cgtvector))
     {
         Matrix cameraGroundTransform = Matrix4x4fromVector(cgtvector);

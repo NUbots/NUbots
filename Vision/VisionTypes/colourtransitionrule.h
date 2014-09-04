@@ -19,7 +19,7 @@
 #include "Vision/VisionTypes/coloursegment.h"
 #include "Vision/VisionTypes/VisionFieldObjects/visionfieldobject.h"
 
-using namespace std;
+
 using namespace Vision;
 
 class ColourTransitionRule
@@ -40,20 +40,20 @@ public:
     COLOUR_CLASS getColourClass() const;
 
     //! output stream operator.
-    friend ostream& operator<< (ostream& output, const ColourTransitionRule& c);
+    friend std::ostream& operator<< (std::ostream& output, const ColourTransitionRule& c);
     //! output stream operator for a vector of rules.
-    friend ostream& operator<< (ostream& output, const vector<ColourTransitionRule>& v);
+    friend std::ostream& operator<< (std::ostream& output, const std::vector<ColourTransitionRule>& v);
 
     //! input stream operator.
-    friend istream& operator>> (istream& input, ColourTransitionRule& c);
+    friend std::istream& operator>> (std::istream& input, ColourTransitionRule& c);
     //! input stream operator for a vector of rules.
-    friend istream& operator>> (istream& input, vector<ColourTransitionRule>& v);
+    friend std::istream& operator>> (std::istream& input, std::vector<ColourTransitionRule>& v);
 
 private:
-    //vector<COLOUR_CLASS> m_potential_vfo_list;
+    //std::vector<COLOUR_CLASS> m_potential_vfo_list;
     COLOUR_CLASS m_colour_class;     //! @variable The ID of the field object that this rule is for.
 
-    vector<Colour>  m_before,   //! @variable The colour that the previous segment must be.
+    std::vector<Colour>  m_before,   //! @variable The colour that the previous segment must be.
                     m_middle,   //! @variable The colour that this segment must be
                     m_after;    //! @variable The colour that the following segment must be.
 

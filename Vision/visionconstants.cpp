@@ -11,6 +11,11 @@
 #include <fstream>
 #include <boost/algorithm/string.hpp>
 
+//HACK FOR RC2013
+int VisionConstants::WHITE_SIDE_IS_BLUE;
+bool VisionConstants::NON_WHITE_SIDE_CHECK;
+int VisionConstants::UPPER_WHITE_THRESHOLD;
+int VisionConstants::LOWER_WHITE_THRESHOLD;
 //! Distortion Correction
 bool VisionConstants::DO_RADIAL_CORRECTION;
 float VisionConstants::RADIAL_CORRECTION_COEFFICIENT;
@@ -52,13 +57,13 @@ bool VisionConstants::THROWOUT_DISTANT_BALLS;
 float VisionConstants::MAX_BALL_DISTANCE;
 //! Distance calculation options
 bool VisionConstants::D2P_INCLUDE_BODY_PITCH;
-float VisionConstants::D2P_ANGLE_CORRECTION;
 bool VisionConstants::BALL_DISTANCE_POSITION_BOTTOM;
 //! Distance method options
 DistanceMethod VisionConstants::BALL_DISTANCE_METHOD;
 DistanceMethod VisionConstants::GOAL_DISTANCE_METHOD;
 //DistanceMethod VisionConstants::BEACON_DISTANCE_METHOD;
 LineDetectionMethod VisionConstants::LINE_METHOD;
+GoalDetectionMethod VisionConstants::GOAL_METHOD;
 //! Field-object detection constants
 int VisionConstants::BALL_EDGE_THRESHOLD;
 int VisionConstants::BALL_ORANGE_TOLERANCE;
@@ -73,7 +78,7 @@ int VisionConstants::MIN_DISTANCE_FROM_HORIZON;
 int VisionConstants::MIN_CONSECUTIVE_POINTS;
 //! Field dimension constants
 float VisionConstants::GOAL_WIDTH;
-float VisionConstants::GOAL_HEIGHT_INTERNAL;
+float VisionConstants::GOAL_HEIGHT;
 float VisionConstants::DISTANCE_BETWEEN_POSTS;
 float VisionConstants::BALL_WIDTH;
 float VisionConstants::CENTRE_CIRCLE_RADIUS;
@@ -83,7 +88,6 @@ unsigned int VisionConstants::HORIZONTAL_SCANLINE_SPACING;
 unsigned int VisionConstants::VERTICAL_SCANLINE_SPACING;
 unsigned int VisionConstants::GREEN_HORIZON_SCAN_SPACING;
 unsigned int VisionConstants::GREEN_HORIZON_MIN_GREEN_PIXELS;
-float VisionConstants::GREEN_HORIZON_LOWER_THRESHOLD_MULT;
 float VisionConstants::GREEN_HORIZON_UPPER_THRESHOLD_MULT;
 //! Split and Merge constants
 unsigned int VisionConstants::SAM_MAX_LINES;
@@ -110,9 +114,13 @@ VisionConstants::VisionConstants()
   */
 void VisionConstants::loadFromFile(std::string filename) 
 {
+    WHITE_SIDE_IS_BLUE = -1;
+    NON_WHITE_SIDE_CHECK = false;
+    UPPER_WHITE_THRESHOLD = 1000;
+    LOWER_WHITE_THRESHOLD = 100;
     GOAL_WIDTH = 10;
-    GOAL_HEIGHT_INTERNAL = 80;
-    DISTANCE_BETWEEN_POSTS = 150;
+    GOAL_HEIGHT = 90;
+    DISTANCE_BETWEEN_POSTS = 160;
     BALL_WIDTH = 6.5;
     CENTRE_CIRCLE_RADIUS = 60;
 
@@ -120,8 +128,7 @@ void VisionConstants::loadFromFile(std::string filename)
     VERTICAL_SCANLINE_SPACING = 5;
     GREEN_HORIZON_SCAN_SPACING = 11;
     GREEN_HORIZON_MIN_GREEN_PIXELS = 5;
-    GREEN_HORIZON_LOWER_THRESHOLD_MULT = 1;
-    GREEN_HORIZON_UPPER_THRESHOLD_MULT = 2.5;
+    GREEN_HORIZON_UPPER_THRESHOLD_MULT = 2.0;
     GOAL_HEIGHT_TO_WIDTH_RATIO_MIN = 1.5,
     MIN_GOAL_SEPARATION = 20;
     SAM_MAX_LINES = 100;
@@ -136,6 +143,7 @@ void VisionConstants::loadFromFile(std::string filename)
     SAM_CLEAR_SMALL = true;
     SAM_CLEAR_DIRTY = true;
     LINE_METHOD = RANSAC;
+    GOAL_METHOD = RANSAC_G;
     GOAL_MAX_OBJECTS = 8;
     GOAL_BINS = 20;
     GOAL_MIN_THRESHOLD = 1;
@@ -146,15 +154,27 @@ void VisionConstants::loadFromFile(std::string filename)
 
     std::ifstream in(filename.c_str());
     if(!in.is_open())
-        errorlog << "VisionConstants::loadFromFile failed to load: " << filename << endl;
+        errorlog << "VisionConstants::loadFromFile failed to load: " << filename << std::endl;
     std::string name;
     std::string sval;
     while(in.good()) {
         getline(in, name, ':');
         boost::trim(name);
         boost::to_upper(name);
-        if(name.compare("DO_RADIAL_CORRECTION") == 0) {
+        if(name.compare("WHITE_SIDE_IS_BLUE") == 0) {
+            in >> WHITE_SIDE_IS_BLUE;
+        }
+        else if(name.compare("NON_WHITE_SIDE_CHECK") == 0) {
+            in >> NON_WHITE_SIDE_CHECK;
+        }
+        else if(name.compare("DO_RADIAL_CORRECTION") == 0) {
             in >> DO_RADIAL_CORRECTION;
+        }
+        else if(name.compare("UPPER_WHITE_THRESHOLD") == 0) {
+            in >> UPPER_WHITE_THRESHOLD;
+        }
+        else if(name.compare("LOWER_WHITE_THRESHOLD") == 0) {
+            in >> LOWER_WHITE_THRESHOLD;
         }
         else if(name.compare("RADIAL_CORRECTION_COEFFICIENT") == 0) {
             in >> RADIAL_CORRECTION_COEFFICIENT;
@@ -174,21 +194,6 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("MAX_GOAL_DISTANCE") == 0) {
             in >> MAX_GOAL_DISTANCE;
         }
-//        else if(name.compare("THROWOUT_ON_ABOVE_KIN_HOR_BEACONS") == 0) {
-//            in >> THROWOUT_ON_ABOVE_KIN_HOR_BEACONS;
-//        }
-//        else if(name.compare("THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS") == 0) {
-//            in >> THROWOUT_ON_DISTANCE_METHOD_DISCREPENCY_BEACONS;
-//        }
-//        else if(name.compare("THROWOUT_DISTANT_BEACONS") == 0) {
-//            in >> THROWOUT_DISTANT_BEACONS;
-//        }
-//        else if(name.compare("MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS") == 0) {
-//            in >> MAX_DISTANCE_METHOD_DISCREPENCY_BEACONS;
-//        }
-//        else if(name.compare("MAX_BEACON_DISTANCE") == 0) {
-//            in >> MAX_BEACON_DISTANCE;
-//        }
         else if(name.compare("THROWOUT_ON_ABOVE_KIN_HOR_BALL") == 0) {
             in >> THROWOUT_ON_ABOVE_KIN_HOR_BALL;
         }
@@ -213,18 +218,6 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("D2P_INCLUDE_BODY_PITCH") == 0) {
             in >> D2P_INCLUDE_BODY_PITCH;
         }
-        else if(name.compare("D2P_ANGLE_CORRECTION") == 0) {
-            #if (defined TARGET_IS_PC || defined TARGET_IS_TRAINING || defined TARGET_IS_RPI)
-                in >> D2P_ANGLE_CORRECTION;
-                D2P_ANGLE_CORRECTION = 0;   //discard the value
-            #else
-                int config_player;
-                in >> config_player;
-                if(config_player == Blackboard->GameInfo->getPlayerNumber()) {
-                    in >> D2P_ANGLE_CORRECTION;
-                }
-            #endif
-        }
         else if(name.compare("BALL_DISTANCE_POSITION_BOTTOM") == 0) {
             in >> BALL_DISTANCE_POSITION_BOTTOM;
         }
@@ -240,17 +233,17 @@ void VisionConstants::loadFromFile(std::string filename)
             boost::to_upper(sval);
             GOAL_DISTANCE_METHOD = getDistanceMethodFromName(sval);
         }
-//        else if(name.compare("BEACON_DISTANCE_METHOD") == 0) {
-//            in >> sval;
-//            boost::trim(sval);
-//            boost::to_upper(sval);
-//            BEACON_DISTANCE_METHOD = getDistanceMethodFromName(sval);
-//        }
         else if(name.compare("LINE_METHOD") == 0) {
             in >> sval;
             boost::trim(sval);
             boost::to_upper(sval);
             LINE_METHOD = getLineMethodFromName(sval);
+        }
+        else if(name.compare("GOAL_METHOD") == 0) {
+            in >> sval;
+            boost::trim(sval);
+            boost::to_upper(sval);
+            GOAL_METHOD = getGoalMethodFromName(sval);
         }
         else if(name.compare("BALL_EDGE_THRESHOLD") == 0) {
             in >> BALL_EDGE_THRESHOLD;
@@ -267,12 +260,6 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("GOAL_MIN_PERCENT_BLUE") == 0) {
             in >> GOAL_MIN_PERCENT_BLUE;
         }
-//        else if(name.compare("BEACON_MIN_PERCENT_YELLOW") == 0) {
-//            in >> BEACON_MIN_PERCENT_YELLOW;
-//        }
-//        else if(name.compare("BEACON_MIN_PERCENT_BLUE") == 0) {
-//            in >> BEACON_MIN_PERCENT_BLUE;
-//        }
         else if(name.compare("MIN_DISTANCE_FROM_HORIZON") == 0) {
             in >> MIN_DISTANCE_FROM_HORIZON;
         }
@@ -282,8 +269,8 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("GOAL_WIDTH") == 0) {
             in >> GOAL_WIDTH;
         }
-        else if(name.compare("GOAL_HEIGHT_INTERNAL") == 0) {
-            in >> GOAL_HEIGHT_INTERNAL;
+        else if(name.compare("GOAL_HEIGHT") == 0) {
+            in >> GOAL_HEIGHT;
         }
         else if(name.compare("DISTANCE_BETWEEN_POSTS") == 0) {
             in >> DISTANCE_BETWEEN_POSTS;
@@ -294,21 +281,12 @@ void VisionConstants::loadFromFile(std::string filename)
         else if(name.compare("CENTRE_CIRCLE_RADIUS") == 0) {
             in >> CENTRE_CIRCLE_RADIUS;
         }
-//        else if(name.compare("BEACON_WIDTH") == 0) {
-//            in >> BEACON_WIDTH;
-//        }
         else if(name.compare("THROWOUT_INSIGNIFICANT_GOALS") == 0) {
             in >> THROWOUT_INSIGNIFICANT_GOALS;
         }
         else if(name.compare("MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS") == 0) {
             in >> MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS;
         }
-//        else if(name.compare("THROWOUT_INSIGNIFICANT_BEACONS") == 0) {
-//            in >> THROWOUT_INSIGNIFICANT_BEACONS;
-//        }
-//        else if(name.compare("MIN_TRANSITIONS_FOR_SIGNIFICANCE_BEACONS") == 0) {
-//            in >> MIN_TRANSITIONS_FOR_SIGNIFICANCE_BEACONS;
-//        }
         else if(name.compare("THROWOUT_INSIGNIFICANT_BALLS") == 0) {
             in >> THROWOUT_INSIGNIFICANT_BALLS;
         }
@@ -326,9 +304,6 @@ void VisionConstants::loadFromFile(std::string filename)
         }
         else if(name.compare("GREEN_HORIZON_MIN_GREEN_PIXELS") == 0) {
             in >> GREEN_HORIZON_MIN_GREEN_PIXELS;
-        }
-        else if(name.compare("GREEN_HORIZON_LOWER_THRESHOLD_MULT") == 0) {
-            in >> GREEN_HORIZON_LOWER_THRESHOLD_MULT;
         }
         else if(name.compare("GREEN_HORIZON_UPPER_THRESHOLD_MULT") == 0) {
             in >> GREEN_HORIZON_UPPER_THRESHOLD_MULT;
@@ -415,12 +390,12 @@ void VisionConstants::loadFromFile(std::string filename)
         in.peek();
     }
     in.close();
-    
+
     //debug << "VisionConstants::loadFromFile-" << std::endl;
     //print(debug);
 }
 
-bool VisionConstants::setParameter(string name, bool val)
+bool VisionConstants::setParameter(std::string name, bool val)
 {
     if(name.compare("DO_RADIAL_CORRECTION") == 0) {
         DO_RADIAL_CORRECTION = val;
@@ -488,7 +463,7 @@ bool VisionConstants::setParameter(string name, bool val)
     return true;
 }
 
-bool VisionConstants::setParameter(string name, int val)
+bool VisionConstants::setParameter(std::string name, int val)
 {
     if(name.compare("BALL_EDGE_THRESHOLD") == 0) {
         BALL_EDGE_THRESHOLD = val;
@@ -536,7 +511,7 @@ bool VisionConstants::setParameter(string name, int val)
 }
 
 
-bool VisionConstants::setParameter(string name, unsigned int val)
+bool VisionConstants::setParameter(std::string name, unsigned int val)
 {
     if(name.compare("HORIZONTAL_SCANLINE_SPACING") == 0) {
         HORIZONTAL_SCANLINE_SPACING = val;
@@ -568,7 +543,7 @@ bool VisionConstants::setParameter(string name, unsigned int val)
     return true;
 }
 
-bool VisionConstants::setParameter(string name, float val)
+bool VisionConstants::setParameter(std::string name, float val)
 {
     if(name.compare("RADIAL_CORRECTION_COEFFICIENT") == 0) {
         RADIAL_CORRECTION_COEFFICIENT = val;
@@ -594,9 +569,6 @@ bool VisionConstants::setParameter(string name, float val)
     else if(name.compare("MAX_BALL_DISTANCE") == 0) {
         MAX_BALL_DISTANCE = val;
     }
-    else if(name.compare("D2P_ANGLE_CORRECTION") == 0) {
-        D2P_ANGLE_CORRECTION = val;
-    }
     else if(name.compare("BALL_MIN_PERCENT_ORANGE") == 0) {
         BALL_MIN_PERCENT_ORANGE = val;
     }
@@ -615,8 +587,8 @@ bool VisionConstants::setParameter(string name, float val)
     else if(name.compare("GOAL_WIDTH") == 0) {
         GOAL_WIDTH = val;
     }
-    else if(name.compare("GOAL_HEIGHT_INTERNAL") == 0) {
-        GOAL_HEIGHT_INTERNAL = val;
+    else if(name.compare("GOAL_HEIGHT") == 0) {
+        GOAL_HEIGHT = val;
     }
     else if(name.compare("BALL_WIDTH") == 0) {
         BALL_WIDTH = val;
@@ -629,9 +601,6 @@ bool VisionConstants::setParameter(string name, float val)
 //    }
     else if(name.compare("DISTANCE_BETWEEN_POSTS") == 0) {
         DISTANCE_BETWEEN_POSTS = val;
-    }
-    else if(name.compare("GREEN_HORIZON_LOWER_THRESHOLD_MULT") == 0) {
-        GREEN_HORIZON_LOWER_THRESHOLD_MULT = val;
     }
     else if(name.compare("GREEN_HORIZON_UPPER_THRESHOLD_MULT") == 0) {
         GREEN_HORIZON_UPPER_THRESHOLD_MULT = val;
@@ -672,7 +641,7 @@ bool VisionConstants::setParameter(string name, float val)
     return true;
 }
 
-bool VisionConstants::setParameter(string name, DistanceMethod val)
+bool VisionConstants::setParameter(std::string name, DistanceMethod val)
 {
     if(name.compare("BALL_DISTANCE_METHOD") == 0) {
         BALL_DISTANCE_METHOD = val;
@@ -689,8 +658,13 @@ bool VisionConstants::setParameter(string name, DistanceMethod val)
     return true;
 }
 
-void VisionConstants::print(ostream& out)
+void VisionConstants::print(std::ostream& out)
 {
+    out << "WHITE_SIDE_IS_BLUE: " << WHITE_SIDE_IS_BLUE << std::endl;
+    out << "NON_WHITE_SIDE_CHECK: " << NON_WHITE_SIDE_CHECK << std::endl;
+    out << "UPPER_WHITE_THRESHOLD: " << UPPER_WHITE_THRESHOLD << std::endl;
+    out << "LOWER_WHITE_THRESHOLD: " << LOWER_WHITE_THRESHOLD << std::endl;
+
     out << "DO_RADIAL_CORRECTION: " << DO_RADIAL_CORRECTION << std::endl;
     out << "RADIAL_CORRECTION_COEFFICIENT: " << RADIAL_CORRECTION_COEFFICIENT << std::endl;
 
@@ -722,7 +696,6 @@ void VisionConstants::print(ostream& out)
     out << "MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL: " << MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL << std::endl;
 
     out << "D2P_INCLUDE_BODY_PITCH: " << D2P_INCLUDE_BODY_PITCH << std::endl;
-    out << "D2P_ANGLE_CORRECTION: " << D2P_ANGLE_CORRECTION << std::endl;
     out << "BALL_DISTANCE_POSITION_BOTTOM: " << BALL_DISTANCE_POSITION_BOTTOM << std::endl;
 
     out << "BALL_DISTANCE_METHOD: " << getDistanceMethodName(BALL_DISTANCE_METHOD) << std::endl;
@@ -739,7 +712,7 @@ void VisionConstants::print(ostream& out)
     out << "MIN_CONSECUTIVE_POINTS: " << MIN_CONSECUTIVE_POINTS << std::endl;
 
     out << "GOAL_WIDTH: " << GOAL_WIDTH << std::endl;
-    out << "GOAL_HEIGHT_INTERNAL: " << GOAL_HEIGHT_INTERNAL << std::endl;
+    out << "GOAL_HEIGHT: " << GOAL_HEIGHT << std::endl;
     out << "DISTANCE_BETWEEN_POSTS: " << DISTANCE_BETWEEN_POSTS << std::endl;
     out << "BALL_WIDTH: " << BALL_WIDTH << std::endl;
     out << "CENTRE_CIRCLE_RADIUS: " << CENTRE_CIRCLE_RADIUS << std::endl;
@@ -748,7 +721,6 @@ void VisionConstants::print(ostream& out)
     out << "VERTICAL_SCANLINE_SPACING: " << VERTICAL_SCANLINE_SPACING << std::endl;
     out << "GREEN_HORIZON_SCAN_SPACING: " << GREEN_HORIZON_SCAN_SPACING << std::endl;
     out << "GREEN_HORIZON_MIN_GREEN_PIXELS: " << GREEN_HORIZON_MIN_GREEN_PIXELS << std::endl;
-    out << "GREEN_HORIZON_LOWER_THRESHOLD_MULT: " << GREEN_HORIZON_LOWER_THRESHOLD_MULT << std::endl;
     out << "GREEN_HORIZON_UPPER_THRESHOLD_MULT: " << GREEN_HORIZON_UPPER_THRESHOLD_MULT << std::endl;
 
     out << "SAM_MAX_LINES: " << SAM_MAX_LINES << std::endl;
@@ -766,6 +738,8 @@ void VisionConstants::print(ostream& out)
     out << "RANSAC_MAX_ANGLE_DIFF_TO_MERGE: " << RANSAC_MAX_ANGLE_DIFF_TO_MERGE << std::endl;
     out << "RANSAC_MAX_DISTANCE_TO_MERGE: " << RANSAC_MAX_DISTANCE_TO_MERGE << std::endl;
 
+    out << "LINE_METHOD: " << getLineMethodName(LINE_METHOD) << std::endl;
+    out << "GOAL_METHOD: " << getGoalMethodName(GOAL_METHOD) << std::endl;
 }
 
 void VisionConstants::setFlags(bool val)
@@ -791,9 +765,9 @@ void VisionConstants::setFlags(bool val)
 
 }
 
-vector<Parameter> VisionConstants::getAllOptimisable()
+std::vector<Parameter> VisionConstants::getAllOptimisable()
 {
-    vector<Parameter> params;
+    std::vector<Parameter> params;
     //! Goal filtering constants
     params.push_back(Parameter("MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS", MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS, 1, 500));
     params.push_back(Parameter("MIN_GOAL_WIDTH", MIN_GOAL_WIDTH, 0, 320));
@@ -820,7 +794,6 @@ vector<Parameter> VisionConstants::getAllOptimisable()
     params.push_back(Parameter("MIN_DISTANCE_FROM_HORIZON", MIN_DISTANCE_FROM_HORIZON, 0, 240));
     params.push_back(Parameter("MIN_CONSECUTIVE_POINTS", MIN_CONSECUTIVE_POINTS, 0, 50));
     params.push_back(Parameter("GREEN_HORIZON_MIN_GREEN_PIXELS", GREEN_HORIZON_MIN_GREEN_PIXELS, 1, 50));
-    params.push_back(Parameter("GREEN_HORIZON_LOWER_THRESHOLD_MULT", GREEN_HORIZON_LOWER_THRESHOLD_MULT, 0, 20));
     params.push_back(Parameter("GREEN_HORIZON_UPPER_THRESHOLD_MULT", GREEN_HORIZON_UPPER_THRESHOLD_MULT, 0, 20));
     //! Split and Merge constants
     params.push_back(Parameter("SAM_SPLIT_DISTANCE", SAM_SPLIT_DISTANCE, 0, 320));
@@ -839,9 +812,9 @@ vector<Parameter> VisionConstants::getAllOptimisable()
     return params;
 }
 
-vector<Parameter> VisionConstants::getBallParams()
+std::vector<Parameter> VisionConstants::getBallParams()
 {
-    vector<Parameter> params;
+    std::vector<Parameter> params;
     params.push_back(Parameter("MIN_BALL_DIAMETER_PIXELS", MIN_BALL_DIAMETER_PIXELS, 1, 100));
     params.push_back(Parameter("MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL", MIN_TRANSITIONS_FOR_SIGNIFICANCE_BALL, 1, 500));
     params.push_back(Parameter("BALL_EDGE_THRESHOLD", BALL_EDGE_THRESHOLD, 0, 50));
@@ -851,9 +824,9 @@ vector<Parameter> VisionConstants::getBallParams()
     return params;
 }
 
-vector<Parameter> VisionConstants::getGoalParams()
+std::vector<Parameter> VisionConstants::getGoalParams()
 {
-    vector<Parameter> params;
+    std::vector<Parameter> params;
     //! Goal filtering constants
     params.push_back(Parameter("MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS", MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS, 1, 500));
     params.push_back(Parameter("MIN_GOAL_WIDTH", MIN_GOAL_WIDTH, 0, 320));
@@ -875,18 +848,18 @@ vector<Parameter> VisionConstants::getGoalParams()
     return params;
 }
 
-vector<Parameter> VisionConstants::getObstacleParams()
+std::vector<Parameter> VisionConstants::getObstacleParams()
 {
-    vector<Parameter> params;
+    std::vector<Parameter> params;
     //! Obstacle detection constants
     params.push_back(Parameter("MIN_DISTANCE_FROM_HORIZON", MIN_DISTANCE_FROM_HORIZON, 0, 240));
     params.push_back(Parameter("MIN_CONSECUTIVE_POINTS", MIN_CONSECUTIVE_POINTS, 0, 50));
     return params;
 }
 
-vector<Parameter> VisionConstants::getLineParams()
+std::vector<Parameter> VisionConstants::getLineParams()
 {
-    vector<Parameter> params;
+    std::vector<Parameter> params;
     //! Split and Merge constants
     params.push_back(Parameter("SAM_SPLIT_DISTANCE", SAM_SPLIT_DISTANCE, 0, 320));
     params.push_back(Parameter("SAM_MIN_POINTS_OVER", SAM_MIN_POINTS_OVER, 1, 500));
@@ -899,11 +872,10 @@ vector<Parameter> VisionConstants::getLineParams()
     return params;
 }
 
-vector<Parameter> VisionConstants::getGeneralParams()
+std::vector<Parameter> VisionConstants::getGeneralParams()
 {
-    vector<Parameter> params;
+    std::vector<Parameter> params;
     params.push_back(Parameter("GREEN_HORIZON_MIN_GREEN_PIXELS", GREEN_HORIZON_MIN_GREEN_PIXELS, 1, 50));
-    params.push_back(Parameter("GREEN_HORIZON_LOWER_THRESHOLD_MULT", GREEN_HORIZON_LOWER_THRESHOLD_MULT, 0, 20));
     params.push_back(Parameter("GREEN_HORIZON_UPPER_THRESHOLD_MULT", GREEN_HORIZON_UPPER_THRESHOLD_MULT, 0, 20));
 
     //! ScanLine options
@@ -913,9 +885,9 @@ vector<Parameter> VisionConstants::getGeneralParams()
     return params;
 }
 
-bool VisionConstants::setAllOptimisable(const vector<float>& params)
+bool VisionConstants::setAllOptimisable(const std::vector<float>& params)
 {
-    if(params.size() != 30) {
+    if(params.size() != 29) {
         return false; //not a valid size
     }
     MIN_TRANSITIONS_FOR_SIGNIFICANCE_GOALS = params.at(0);
@@ -937,23 +909,22 @@ bool VisionConstants::setAllOptimisable(const vector<float>& params)
     MIN_DISTANCE_FROM_HORIZON = params.at(14);
     MIN_CONSECUTIVE_POINTS = params.at(15);
     GREEN_HORIZON_MIN_GREEN_PIXELS = params.at(16);
-    GREEN_HORIZON_LOWER_THRESHOLD_MULT = params.at(17);
-    GREEN_HORIZON_UPPER_THRESHOLD_MULT = params.at(18);
-    SAM_SPLIT_DISTANCE = params.at(19);
-    SAM_MIN_POINTS_OVER = params.at(20);
-    SAM_MIN_POINTS_TO_LINE = params.at(21);
-    SAM_MAX_ANGLE_DIFF_TO_MERGE = params.at(22);
-    SAM_MAX_DISTANCE_TO_MERGE = params.at(23);
-    SAM_MIN_POINTS_TO_LINE_FINAL = params.at(24);
-    SAM_MIN_LINE_R2_FIT = params.at(25);
-    SAM_MAX_LINE_MSD = params.at(26);
-    HORIZONTAL_SCANLINE_SPACING = params.at(27);
-    VERTICAL_SCANLINE_SPACING = params.at(28);
-    GREEN_HORIZON_SCAN_SPACING = params.at(29);
+    GREEN_HORIZON_UPPER_THRESHOLD_MULT = params.at(17);
+    SAM_SPLIT_DISTANCE = params.at(18);
+    SAM_MIN_POINTS_OVER = params.at(19);
+    SAM_MIN_POINTS_TO_LINE = params.at(20);
+    SAM_MAX_ANGLE_DIFF_TO_MERGE = params.at(21);
+    SAM_MAX_DISTANCE_TO_MERGE = params.at(22);
+    SAM_MIN_POINTS_TO_LINE_FINAL = params.at(23);
+    SAM_MIN_LINE_R2_FIT = params.at(24);
+    SAM_MAX_LINE_MSD = params.at(25);
+    HORIZONTAL_SCANLINE_SPACING = params.at(26);
+    VERTICAL_SCANLINE_SPACING = params.at(27);
+    GREEN_HORIZON_SCAN_SPACING = params.at(28);
     return true;
 }
 
-bool VisionConstants::setBallParams(const vector<float>& params)
+bool VisionConstants::setBallParams(const std::vector<float>& params)
 {
     if(params.size() != 5) {
         return false; //not a valid size
@@ -966,7 +937,7 @@ bool VisionConstants::setBallParams(const vector<float>& params)
     return true;
 }
 
-bool VisionConstants::setGoalParams(const vector<float>& params)
+bool VisionConstants::setGoalParams(const std::vector<float>& params)
 {
     if(params.size() != 11) {
         return false; //not a valid size
@@ -987,7 +958,7 @@ bool VisionConstants::setGoalParams(const vector<float>& params)
     return true;
 }
 
-bool VisionConstants::setObstacleParams(const vector<float>& params)
+bool VisionConstants::setObstacleParams(const std::vector<float>& params)
 {
     if(params.size() != 2) {
         return false; //not a valid size
@@ -997,7 +968,7 @@ bool VisionConstants::setObstacleParams(const vector<float>& params)
     return true;
 }
 
-bool VisionConstants::setLineParams(const vector<float>& params)
+bool VisionConstants::setLineParams(const std::vector<float>& params)
 {
     if(params.size() != 8) {
         return false; //not a valid size
@@ -1013,17 +984,16 @@ bool VisionConstants::setLineParams(const vector<float>& params)
     return true;
 }
 
-bool VisionConstants::setGeneralParams(const vector<float>& params)
+bool VisionConstants::setGeneralParams(const std::vector<float>& params)
 {
-    if(params.size() != 6) {
+    if(params.size() != 5) {
         return false; //not a valid size
     }
     GREEN_HORIZON_MIN_GREEN_PIXELS = params.at(0);
-    GREEN_HORIZON_LOWER_THRESHOLD_MULT = params.at(1);
-    GREEN_HORIZON_UPPER_THRESHOLD_MULT = params.at(2);
+    GREEN_HORIZON_UPPER_THRESHOLD_MULT = params.at(1);
     //! ScanLine options
-    HORIZONTAL_SCANLINE_SPACING = params.at(3);
-    VERTICAL_SCANLINE_SPACING = params.at(4);
-    GREEN_HORIZON_SCAN_SPACING = params.at(5);
+    HORIZONTAL_SCANLINE_SPACING = params.at(2);
+    VERTICAL_SCANLINE_SPACING = params.at(3);
+    GREEN_HORIZON_SCAN_SPACING = params.at(4);
     return true;
 }

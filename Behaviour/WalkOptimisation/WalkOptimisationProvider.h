@@ -33,7 +33,7 @@ class Optimiser;
 #include <vector>
 #include <string>
 #include <fstream>
-using namespace std;
+
 
 class WalkOptimisationProvider : public BehaviourFSMProvider
 {
@@ -49,7 +49,7 @@ protected:
 private:
     void loadWayPoints();
     void loadId();
-    void loadParameters(const string& name);
+    void loadParameters(const std::string& name);
     void initOptimiser();
     float normalDistribution(float mean, float sigma);
 public:
@@ -57,18 +57,18 @@ public:
     WalkOptimisationState* m_evaluate;                 //!< the state in which the parameter evaluation is done
     WalkOptimisationState* m_paused;                   //!< the optimisation process is paused in this state.
     
-    vector<vector<float> > m_way_points;        //!< the way points over which to evaluate to speed and efficiency of the walk parameters
+    std::vector<std::vector<float> > m_way_points;        //!< the way points over which to evaluate to speed and efficiency of the walk parameters
 private:
     WalkParameters m_parameters;                //!< the current set of walk parameters
-    string m_id;								//!< the id of the optimiser
+    std::string m_id;								//!< the id of the optimiser
     Optimiser* m_optimiser;                     //!< the optimiser itself
     
     float calculateFitness();					//!< calculates the fitness of the current parameters using the information from the two walk states
-    vector<float> calculateFitnesses();			//!< calculates all of the fitnesses of the current parameters, so we can do multi-objective optimisation
+    std::vector<float> calculateFitnesses();			//!< calculates all of the fitnesses of the current parameters, so we can do multi-objective optimisation
     int m_iteration_count;						//!< the number of times the optimiser has been ticked
     int m_fall_count;                           //!< the number of times the optimiser has fallen
     
-    ofstream m_log;
+    std::ofstream m_log;
 };
 
 

@@ -20,7 +20,7 @@ IF(DEBUG)
 ENDIF()
 
 ########## List your source files here! ############################################
-SET (YOUR_SRCS  NUAPI.pb.cc NUAPI.pb.h
+SET (YOUR_SRCS
 )
 ####################################################################################
 ########## List your subdirectories here! ##########################################

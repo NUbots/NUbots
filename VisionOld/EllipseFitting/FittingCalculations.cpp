@@ -21,7 +21,7 @@ void FittingCalculations::SolveEllipse(Array1D<double> a)
     T[0][1] = a[1]/2;
     T[1][0] = a[1]/2;
     T[1][1] = a[2];
-    //cout << "T: " << T << endl;
+    //std::cout << "T: " << T << std::endl;
     Array2D<double> temp (2,1,0.0);
     temp[0][0] = a[3];
     temp[1][0] = a[4]; 
@@ -32,35 +32,35 @@ void FittingCalculations::SolveEllipse(Array1D<double> a)
 
     cx = t[0][0];
     cy = t[1][0];
-    //cout << "X: "<<cx << "  Y: " <<cy<< endl;
-    //cout << "t: " << t << "T: " <<T<< endl;
+    //std::cout << "X: "<<cx << "  Y: " <<cy<< std::endl;
+    //std::cout << "t: " << t << "T: " <<T<< std::endl;
     temp = matmult(T,t);
-    //cout << temp<<endl;
+    //std::cout << temp<<std::endl;
     Array2D<double> val = matmult(transp(t),temp);
-    //cout << val <<endl;
+    //std::cout << val <<std::endl;
     double scale = 1/(val[0][0] - a[5]);
     r1 = 1/sqrt(scale * ap);
     r2 = 1/sqrt(scale * cp);
 
-    //cout << r1 << endl;
-    //cout<< r2 <<endl;
-    //cout << theta << endl;
+    //std::cout << r1 << std::endl;
+    //std::cout<< r2 <<std::endl;
+    //std::cout << theta << std::endl;
 }
 
 
 
 Array2D<double> FittingCalculations::Eig(Array2D<double> a)
 {
-    //cout << "Start EigenVector Decomposition.." << endl; 
-    //cout << "M2 Matrix: " << a << endl;
+    //std::cout << "Start EigenVector Decomposition.." << std::endl; 
+    //std::cout << "M2 Matrix: " << a << std::endl;
 
     JAMA::Eigenvalue<double> Eigen(a);
     Array2D<double> evec (a.dim1(),a.dim2(),0.0);
     Array1D<double> evalR (a.dim1(),0.0);
     Eigen.getRealEigenvalues(evalR);
     Eigen.getV(evec);
-    //cout << "EigenVectors: " <<evec<< endl;
-    //cout << "EigenValues: " <<evalR<< endl;
+    //std::cout << "EigenVectors: " <<evec<< std::endl;
+    //std::cout << "EigenValues: " <<evalR<< std::endl;
     return evec;
 }
 
@@ -96,30 +96,30 @@ Array2D<double> FittingCalculations::Inverse33(Array2D<double> A)
 
         //A.print();
      
-     //cout<<"=====================================================================\n"<<endl;
-     //cout<<"The determinant of matrix A is "<<n<<endl<<endl;
-     //cout<<"====================================================================="<<endl;
+     //std::cout<<"=====================================================================\n"<<std::endl;
+     //std::cout<<"The determinant of matrix A is "<<n<<std::endl<<std::endl;
+     //std::cout<<"====================================================================="<<std::endl;
      
      if(n!=0) x=1.0/n;
      else 
      {
-          cout<<"Division by 0, not good!\n";
-          cout<<"=====================================================================\n"<<endl;
+          std::cout<<"Division by 0, not good!\n";
+          std::cout<<"=====================================================================\n"<<std::endl;
           return X;
      }
-     //cout<<"\n========== The transpose of a matrix A ==============================\n";     
+     //std::cout<<"\n========== The transpose of a matrix A ==============================\n";     
      for(i=0;i<3;i++)
      {
-          //cout<<endl;
+          //std::cout<<std::endl;
           for(j=0;j<3;j++)
           {     
                     
                B[i][j]=A[j][i];
-               //cout<<" B["<<i<<"]["<<j<<"]= "<<B[i][j];
+               //std::cout<<" B["<<i<<"]["<<j<<"]= "<<B[i][j];
                
           }
      }
-     //cout<<endl<<endl;
+     //std::cout<<std::endl<<std::endl;
 
 
      C[0][0]=B[1][1]*B[2][2]-(B[2][1]*B[1][2]);
@@ -135,7 +135,7 @@ Array2D<double> FittingCalculations::Inverse33(Array2D<double> A)
      C[2][2]=B[0][0]*B[1][1]-B[1][0]*B[0][1];
 
 
-     //cout<<"\n========== The adjunct matrix of transpose of the matrix A ==========\n";     
+     //std::cout<<"\n========== The adjunct matrix of transpose of the matrix A ==========\n";     
      //C.print();
 
      
@@ -147,7 +147,7 @@ Array2D<double> FittingCalculations::Inverse33(Array2D<double> A)
                
           }
      }
-     //cout<<"\n========== The inverse matrix of the matrix you entered!!! ==========\n";
+     //std::cout<<"\n========== The inverse matrix of the matrix you entered!!! ==========\n";
      //X.print();
     return X;
 }

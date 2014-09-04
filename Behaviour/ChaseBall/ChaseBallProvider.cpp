@@ -36,7 +36,7 @@
 #include "debug.h"
 #include "debugverbositybehaviour.h"
 
-using namespace std;
+
 
 ChaseBallProvider::ChaseBallProvider(Behaviour* manager, bool pauseable) : BehaviourFSMProvider(manager)
 {

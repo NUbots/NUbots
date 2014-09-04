@@ -28,10 +28,10 @@ namespace Robot
 #else
 		static const int CENTER_VALUE = 2048;
 		static const int MAX_VALUE = 4095;
-		static const double MIN_ANGLE = -180.0; // degree
-		static const double MAX_ANGLE = 180.0; // degree
-		static const double RATIO_VALUE2ANGLE = 0.088; // 360 / 4096
-		static const double RATIO_ANGLE2VALUE = 11.378; // 4096 / 360
+		static constexpr double MIN_ANGLE = -180.0; // degree
+		static constexpr double MAX_ANGLE = 180.0; // degree
+		static constexpr double RATIO_VALUE2ANGLE = 0.088; // 360 / 4096
+		static constexpr double RATIO_ANGLE2VALUE = 11.378; // 4096 / 360
 
 		static const int PARAM_BYTES = 7;
 #endif

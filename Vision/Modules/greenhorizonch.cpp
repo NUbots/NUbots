@@ -25,43 +25,41 @@ using namespace boost::accumulators;
 void GreenHorizonCH::calculateHorizon()
 {
     #if VISION_HORIZON_VERBOSITY > 1
-        debug << "GreenHorizonCH::calculateHorizon() - Begin" << endl;
+        debug << "GreenHorizonCH::calculateHorizon() - Begin" << std::endl;
     #endif
     // get blackboard instance
     VisionBlackboard* vbb = VisionBlackboard::getInstance();
     const NUImage& img = vbb->getOriginalImage();
-    int width = img.getWidth(),
-        height = img.getHeight();
+    const Horizon& kin_hor = vbb->getKinematicsHorizon();
+    int width = img.getWidth();
+    int height = img.getHeight();
 
     //makes this fail-safe in the event of improper parameters
-    const int SPACING = max(VisionConstants::GREEN_HORIZON_SCAN_SPACING, 1U);
+    const int SPACING = std::max(VisionConstants::GREEN_HORIZON_SCAN_SPACING, 1U);
     
     // variable declarations    
-    vector< Vector2<double> > horizon_points,
-                              thrown_points;
+    std::vector<Point> horizon_points;
+    std::vector<Point> thrown_points;
 
-    const Horizon& kin_hor = vbb->getKinematicsHorizon();
 #if VISION_HORIZON_VERBOSITY > 2
-    debug<<"GreenHorizonCH::calculateHorizon(): kinematics horizon line eq: "<<kin_hor.getA()<<"x + "<< kin_hor.getB()<< "y = "<<kin_hor.getC()<<endl;
+    debug<<"GreenHorizonCH::calculateHorizon(): kinematics horizon line eq: "<<kin_hor.getA()<<"x + "<< kin_hor.getB()<< "y = "<<kin_hor.getC()<<std::endl;
 #endif
     int kin_hor_y;
 
 #if VISION_HORIZON_VERBOSITY > 2
-    debug << "GreenHorizonCH::calculateHorizon() - Starting" << endl;
-    debug << "GreenHorizonCH::calculateHorizon() - (if seg fault occurs camera or camera cable may be faulty)" << endl;
+    debug << "GreenHorizonCH::calculateHorizon() - Starting" << std::endl;
+    debug << "GreenHorizonCH::calculateHorizon() - (if seg fault occurs camera or camera cable may be faulty)" << std::endl;
 #endif
 
-    for (int x = 0; x < width; x+=SPACING) {
-
+    for (int x = 0; x < width; x+=SPACING)
+    {
         unsigned int green_top = 0;
         unsigned int green_count = 0;
 
-
         kin_hor_y = kin_hor.findYFromX(x);
         //clamp green horizon values
-        kin_hor_y = max(0, kin_hor_y);
-        kin_hor_y = min(height-1, kin_hor_y);
-
+        kin_hor_y = std::max(0, kin_hor_y);
+        kin_hor_y = std::min(height-1, kin_hor_y);
 
         for (int y = kin_hor_y; y < height; y++) {
 
@@ -72,7 +70,7 @@ void GreenHorizonCH::calculateHorizon()
                 green_count++;
                 // if VER_THRESHOLD green pixels found, add point
                 if (green_count == VisionConstants::GREEN_HORIZON_MIN_GREEN_PIXELS) {
-                    horizon_points.push_back(Vector2<double>(x, green_top));
+                    horizon_points.push_back(Point(x, green_top));
                     break;
                 }
             }
@@ -81,15 +79,45 @@ void GreenHorizonCH::calculateHorizon()
                 green_count = 0;
             }
             // if no green found, add bottom pixel
-            if (y == height-1) {
-                horizon_points.push_back(Vector2<double>(x, height-1));
-            }
+//            if (y == height-1) {
+//                horizon_points.push_back(Point(x, height-1));
+//            }
         }
-
     }
+    static int num_no_green = 0;
+    if(horizon_points.size() < 2) {
+        if(num_no_green < 150) {
+            num_no_green++;
+        }
+        else {
+            num_no_green = 0;
+            std::cout << "150 FRAMES OF NO GREEN HORIZON FOUND - VERY POOR LUT" << std::endl;
+        }
+        horizon_points.clear();
+        horizon_points.push_back(Point(0, height-1));
+        horizon_points.push_back(Point(width-1, height-1));
+        vbb->setGreenHullPoints(horizon_points);
+        return;
+    }
+//    if(horizon_points.empty()) {
+//        horizon_points.push_back(Point(0, 0));
+//        horizon_points.push_back(Point(width-1, 0));
+//    }
+//    else if(horizon_points.size() == 1) {
+//        if(horizon_points.front() == Point(0, 0)) {
+//            horizon_points.push_back(Point(width-1, 0));
+//        }
+//        else if(horizon_points.front() == Point(width-1, 0)) {
+//            horizon_points.insert(horizon_points.begin(), 1, Point(0,0));
+//        }
+//        else {
+//            horizon_points.insert(horizon_points.begin(), 1, Point(0, 0));
+//            horizon_points.push_back(Point(width-1, 0));
+//        }
+//    }
 
 #if VISION_HORIZON_VERBOSITY > 2
-    debug << "GreenHorizonCH::calculateHorizon() - Green scans done" << endl;
+    debug << "GreenHorizonCH::calculateHorizon() - Green scans done" << std::endl;
 #endif
 
     // provide blackboard the original set of scan points
@@ -99,7 +127,7 @@ void GreenHorizonCH::calculateHorizon()
     double mean_y, std_dev_y;
     accumulator_set<double, stats<tag::mean, tag::variance> > acc;
 
-    BOOST_FOREACH(Vector2<double>& p, horizon_points) {
+    BOOST_FOREACH(Point& p, horizon_points) {
         if (p.y < height-1)     // if not at bottom of image
             acc(p.y);
     }
@@ -108,15 +136,11 @@ void GreenHorizonCH::calculateHorizon()
     std_dev_y = sqrt(variance(acc));
     
 #if VISION_HORIZON_VERBOSITY > 2
-    debug << "GreenHorizonCH::calculateHorizon() - Statistical filter prep done. Mean: " << mean_y << " Standard Dev: " << std_dev_y << endl;
+    debug << "GreenHorizonCH::calculateHorizon() - Statistical filter prep done. Mean: " << mean_y << " Standard Dev: " << std_dev_y << std::endl;
 #endif
 
-    vector< Vector2<double> >::iterator p = horizon_points.begin();
+    std::vector<Point>::iterator p = horizon_points.begin();
     while(p < horizon_points.end()) {
-        //changing - I don't see any reason to remove pts that are too low if we are
-        //           doing a convex hull anyway.
-//        if (p->y < mean_y - VisionConstants::GREEN_HORIZON_UPPER_THRESHOLD_MULT*std_dev_y ||
-//            p->y > mean_y + VisionConstants::GREEN_HORIZON_LOWER_THRESHOLD_MULT*std_dev_y) {
         if (p->y < mean_y - VisionConstants::GREEN_HORIZON_UPPER_THRESHOLD_MULT*std_dev_y) {
             thrown_points.push_back(*p);
             p = horizon_points.erase(p);
@@ -129,13 +153,13 @@ void GreenHorizonCH::calculateHorizon()
     DataWrapper::getInstance()->debugPublish(DBID_GREENHORIZON_THROWN, thrown_points);
 
 #if VISION_HORIZON_VERBOSITY > 2
-    debug << "GreenHorizonCH::calculateHorizon() - Statistical filter done" << endl;
+    debug << "GreenHorizonCH::calculateHorizon() - Statistical filter done" << std::endl;
 #endif
 
     horizon_points = upperConvexHull(horizon_points);
 
 #if VISION_HORIZON_VERBOSITY > 2
-    debug << "GreenHorizonCH::calculateHorizon() - Convex hull done" << endl;
+    debug << "GreenHorizonCH::calculateHorizon() - Convex hull done" << std::endl;
 #endif
 
     // set hull points
@@ -149,13 +173,13 @@ bool GreenHorizonCH::isPixelGreen(const NUImage& img, int x, int y)
     return getColourFromIndex(LUT.classifyPixel(img(x,y))) == green;
 }
 
-// Returns a list of points on the upper convex hull in clockwise order.
+// Returns a std::list of points on the upper convex hull in clockwise order.
 // Note: Assumes the points are sorted in the x direction.
-vector< Vector2<double> > GreenHorizonCH::upperConvexHull(const vector< Vector2<double> >& P)
+std::vector<Point> GreenHorizonCH::upperConvexHull(const std::vector<Point>& P)
 {
         int n = P.size(),
             k = 0;
-        vector< Vector2<double> > H(n);
+        std::vector<Point> H(n);
 
         // Build upper hull
         for (int i = 0; i < n; i++) {

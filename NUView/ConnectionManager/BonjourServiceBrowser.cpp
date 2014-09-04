@@ -29,7 +29,7 @@
 /*! @brief Constructs a browser for a single service type
  	@param servicetype the type of service (eg. '_workstation._tcp')
  */
-BonjourServiceBrowser::BonjourServiceBrowser(const string& servicetype)
+BonjourServiceBrowser::BonjourServiceBrowser(const std::string& servicetype)
 {
     m_service_type = servicetype;
     initServiceBrowse();
@@ -43,13 +43,13 @@ BonjourServiceBrowser::~BonjourServiceBrowser()
 }
 
 /*! @brief Returns the service type for this browser */
-string& BonjourServiceBrowser::getServiceType()
+std::string& BonjourServiceBrowser::getServiceType()
 {
     return m_service_type;
 }
 
-/*! @brief Returns the list of hosts that provide m_service_type */
-list<NUHostInfo>& BonjourServiceBrowser::getHosts()
+/*! @brief Returns the std::list of hosts that provide m_service_type */
+std::list<NUHostInfo>& BonjourServiceBrowser::getHosts()
 {
     return m_hosts;
 }
@@ -74,7 +74,7 @@ void BonjourServiceBrowser::startServiceBrowse()
 {
     DNSServiceErrorType err = DNSServiceBrowse(&m_ref, kDNSServiceFlagsBrowseDomains, 0, m_service_type.c_str(), 0, onBrowseResults, this);
     if (err != kDNSServiceErr_NoError)
-        debug << "BonjourServiceBrowser::BonjourServiceBrowser. DNSServiceBrowse failed for " << m_service_type << ": " << err << endl;
+        debug << "BonjourServiceBrowser::BonjourServiceBrowser. DNSServiceBrowse failed for " << m_service_type << ": " << err << std::endl;
     else
     {
         m_sockfd = DNSServiceRefSockFD(m_ref);
@@ -108,7 +108,7 @@ void BonjourServiceBrowser::onSocketRead()
     m_notifier->setEnabled(true);
 }
 
-/*! @brief The callback for the DNSServiceBrowse. This is the function where new services need to be added to the list. */
+/*! @brief The callback for the DNSServiceBrowse. This is the function where new services need to be added to the std::list. */
 void BonjourServiceBrowser::onBrowseResults(DNSServiceRef, DNSServiceFlags flags, uint32_t iface, DNSServiceErrorType, const char* name, const char* type, const char* domain, void* context)
 {
     BonjourServiceBrowser* browser = static_cast<BonjourServiceBrowser*>(context);

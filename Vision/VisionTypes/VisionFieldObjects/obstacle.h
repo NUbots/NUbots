@@ -8,7 +8,8 @@
 class Obstacle : public VisionFieldObject
 {
 public:
-    Obstacle(Point position=Point(0,0), double width=0, double height=0);
+
+    Obstacle(Point position=Point(0,0), double width=0, double height=0, COLOUR_CLASS colour=UNKNOWN_COLOUR);
 
     /*!
       @brief pushes the obstacle to the external field objects.
@@ -21,15 +22,15 @@ public:
     bool check() const;
     
     //! @brief Stream output for labelling purposes
-    void printLabel(ostream& out) const {out << VFOName(OBSTACLE) << " " << m_location << " " << m_size_on_screen;}
+    void printLabel(std::ostream& out) const {out << VFOName(OBSTACLE) << " " << m_location << " " << m_size_on_screen;}
 
     virtual double findScreenError(VisionFieldObject* other) const;
     virtual double findGroundError(VisionFieldObject* other) const;
 
     //! @brief output stream operator.
-    friend ostream& operator<< (ostream& output, const Obstacle& o);
+    friend std::ostream& operator<< (std::ostream& output, const Obstacle& o);
     //! @brief output stream operator for a vector of obstacles.
-    friend ostream& operator<< (ostream& output, const vector<Obstacle>& o);
+    friend std::ostream& operator<< (std::ostream& output, const std::vector<Obstacle>& o);
     
 private:
     /*!
@@ -38,8 +39,11 @@ private:
       */
     bool calculatePositions();
     
+public:
+    COLOUR_CLASS m_colour;
+
 private:
-    float d2p;                      //! @variable the distance of the obstacle in cm as found by the distance to point method
+//    float d2p;                      //! @variable the distance of the obstacle in cm as found by the distance to point method
     double m_arc_width;               //! @variable the angle subtended by the obstacle (based on the screen width)
 };
 

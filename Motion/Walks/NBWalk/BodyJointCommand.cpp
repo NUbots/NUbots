@@ -19,14 +19,14 @@
 // <http://www.gnu.org/licenses/>.
 
 #include "BodyJointCommand.h"
-using namespace std;
+
 using namespace MotionConstants;
 using namespace Kinematics;
 
 BodyJointCommand::BodyJointCommand
 (const float time,
- const vector<float> *bodyJoints,
- const vector<float> *body_stiffness,
+ const std::vector<float> *bodyJoints,
+ const std::vector<float> *body_stiffness,
  const InterpolationType _type)
 	: JointCommand(BODY_JOINT, time, _type, body_stiffness),
 	  larm_joints(0), lleg_joints(0), rleg_joints(0), rarm_joints(0)
@@ -35,8 +35,8 @@ BodyJointCommand::BodyJointCommand
   // bodyJoints must contain joints for the _entire_ body
   // @JGM Throw Exception when wrong?
 
-  vector<float> *joints;
-  vector<float>::const_iterator firstMark, endMark;
+  std::vector<float> *joints;
+  std::vector<float>::const_iterator firstMark, endMark;
 
   // Both iterators start at the beginning
   // then bump them to the end of the head_chain,
@@ -46,7 +46,7 @@ BodyJointCommand::BodyJointCommand
   // Build joint vectors for each chain
   // from the bodyJoint vector
   for (unsigned int chainID = LARM_CHAIN ; chainID<NUM_CHAINS ; chainID++ ) {
-    joints = new vector<float>(chain_lengths[chainID]);
+    joints = new std::vector<float>(chain_lengths[chainID]);
 
     // Position the end iterator and assign the new vector
     // then move the beginning iterator up to meet the end
@@ -76,8 +76,8 @@ BodyJointCommand::BodyJointCommand
 
 BodyJointCommand::BodyJointCommand(const float time,
 								   ChainID chainID,
-								   const vector<float> *joints,
-								   const vector<float> *body_stiffness,
+								   const std::vector<float> *joints,
+								   const std::vector<float> *body_stiffness,
 								   const InterpolationType _type)
 	: JointCommand(BODY_JOINT, time, _type, body_stiffness), larm_joints(0),
 	  lleg_joints(0), rleg_joints(0), rarm_joints(0)
@@ -101,11 +101,11 @@ BodyJointCommand::BodyJointCommand(const float time,
   }
 }
 
-BodyJointCommand::BodyJointCommand(const float time, const vector<float> *larm,
-								   const vector<float> *lleg,
-								   const vector<float> *rleg,
-								   const vector<float> *rarm,
-								   const vector<float> *body_stiffness,
+BodyJointCommand::BodyJointCommand(const float time, const std::vector<float> *larm,
+								   const std::vector<float> *lleg,
+								   const std::vector<float> *rleg,
+								   const std::vector<float> *rarm,
+								   const std::vector<float> *body_stiffness,
 								   const InterpolationType _type)
 	: JointCommand(BODY_JOINT, time, _type, body_stiffness), larm_joints(larm),
 	  lleg_joints(lleg), rleg_joints(rleg), rarm_joints(rarm)
@@ -122,13 +122,13 @@ BodyJointCommand::BodyJointCommand(const BodyJointCommand &other)
 {
   setChainList();
   if (other.larm_joints)
-    larm_joints = new vector<float>(*other.larm_joints);
+    larm_joints = new std::vector<float>(*other.larm_joints);
   if (other.lleg_joints)
-    lleg_joints = new vector<float>(*other.lleg_joints);
+    lleg_joints = new std::vector<float>(*other.lleg_joints);
   if (other.rleg_joints)
-    rleg_joints = new vector<float>(*other.rleg_joints);
+    rleg_joints = new std::vector<float>(*other.rleg_joints);
   if (other.rarm_joints)
-    rarm_joints = new vector<float>(*other.rarm_joints);
+    rarm_joints = new std::vector<float>(*other.rarm_joints);
 }
 
 BodyJointCommand::~BodyJointCommand (void)
@@ -143,7 +143,7 @@ BodyJointCommand::~BodyJointCommand (void)
     delete rarm_joints;
 }
 
-const vector<float>*
+const std::vector<float>*
 BodyJointCommand::getJoints (ChainID chainID) const
 {
   switch (chainID) {

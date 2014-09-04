@@ -33,7 +33,7 @@ void Transition::set(const ColourSegment& before, const ColourSegment& after, Sc
     
     #if VISION_SCAN_VERBOSITY > 0
         if(before.getEnd() != after.getStart())
-            debug << "Transition::set(): segments not adjacent" << endl;
+            debug << "Transition::set(): segments not adjacent" << std::endl;
     #endif
     set(before.getEnd(), before.getColour(), after.getColour(), direction);
 //    m_location = before.getEnd();
@@ -86,7 +86,7 @@ bool Transition::operator< (const Transition& rhs) const
 /*! @brief Stream insertion operator for a single Transition
  *  @relates Transition
  */
-ostream& operator<< (ostream& output, const Transition& t)
+std::ostream& operator<< (std::ostream& output, const Transition& t)
 {
     output << t.m_location << "[";
     switch(t.m_direction) {
@@ -98,15 +98,15 @@ ostream& operator<< (ostream& output, const Transition& t)
         break;
     }
 
-    output << ClassIndex::getColourName(t.m_before_colour) << " -> " << ClassIndex::getColourName(t.m_after_colour) << endl;
+    output << ClassIndex::getColourName(t.m_before_colour) << " -> " << ClassIndex::getColourName(t.m_after_colour) << std::endl;
 
     return output;
 }
 
-/*! @brief Stream insertion operator for a vector of Transitions.
+/*! @brief Stream insertion operator for a std::vector of Transitions.
  *  @relates Transition
  */
-ostream& operator<< (ostream& output, const vector<Transition>& c)
+std::ostream& operator<< (std::ostream& output, const std::vector<Transition>& c)
 {
     for (size_t i=0; i<c.size(); i++)
         output << c[i];

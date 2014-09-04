@@ -27,27 +27,27 @@
 
 #include "../MotionJob.h"
 #include <vector>
-using namespace std;
+
 
 class SaveJob : public MotionJob
 {
 public:
-    SaveJob(double time, const vector<float>& position);
-    SaveJob(double time, istream& input);
+    SaveJob(double time, const std::vector<float>& position);
+    SaveJob(double time, std::istream& input);
     ~SaveJob();
     
-    void setPosition(double time, const vector<float>& newposition);
-    void getPosition(double& time, vector<float>& position);
+    void setPosition(double time, const std::vector<float>& newposition);
+    void getPosition(double& time, std::vector<float>& position);
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
     
-    friend ostream& operator<<(ostream& output, const SaveJob& job);
-    friend ostream& operator<<(ostream& output, const SaveJob* job);
+    friend std::ostream& operator<<(std::ostream& output, const SaveJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const SaveJob* job);
 protected:
-    virtual void toStream(ostream& output) const;
+    virtual void toStream(std::ostream& output) const;
 private:
-    vector<float> m_save_position;                 //!< the save position [x (cm), y (cm), theta (rad)]
+    std::vector<float> m_save_position;                 //!< the save position [x (cm), y (cm), theta (rad)]
 };
 
 #endif

@@ -9,18 +9,18 @@ SegmentedRegion::SegmentedRegion(const SegmentedRegion& other)
     SegmentedRegion(other.m_segmented_scans, other.m_direction);
 }
 
-SegmentedRegion::SegmentedRegion(const vector<vector<ColourSegment> >& segmented_scans, ScanDirection direction)
+SegmentedRegion::SegmentedRegion(const std::vector<std::vector<ColourSegment> >& segmented_scans, ScanDirection direction)
 {
     set(segmented_scans, direction);
 }
 
-void SegmentedRegion::set(const vector<vector<ColourSegment> >& segmented_scans, ScanDirection direction)
+void SegmentedRegion::set(const std::vector<std::vector<ColourSegment> >& segmented_scans, ScanDirection direction)
 {
     m_segmented_scans = segmented_scans; //vector assignment operator copies elements
     m_direction = direction;
 }
 
-const vector<vector<ColourSegment> >& SegmentedRegion::getSegments() const 
+const std::vector<std::vector<ColourSegment> >& SegmentedRegion::getSegments() const 
 {
     return m_segmented_scans;
 } 

@@ -3,6 +3,7 @@
 
 #include "../../Tools/Math/Vector3.h"
 #include "../../Tools/Math/Vector2.h"
+#include "Tools/Math/Matrix.h"
 #include <vector>
 #include <iostream>
 class StationaryObject;
@@ -61,6 +62,8 @@ class Self {
         @param p_kf The destination localisation data to be streamed to.
         */
         friend std::istream& operator>> (std::istream& input, Self& p_self);
+        
+        Matrix covariance;
 };
 
 #endif

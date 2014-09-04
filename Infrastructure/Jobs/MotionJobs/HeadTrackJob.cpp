@@ -65,7 +65,7 @@ HeadTrackJob::HeadTrackJob(float elevation, float bearing, float centreelevation
 
 /*! @brief Constructs a HeadTrackJob from stream data
  */
-HeadTrackJob::HeadTrackJob(istream& input) : MotionJob(MOTION_TRACK)
+HeadTrackJob::HeadTrackJob(std::istream& input) : MotionJob(MOTION_TRACK)
 {
     m_job_time = 0;
 
@@ -103,21 +103,21 @@ void HeadTrackJob::getData(float& elevation, float& bearing, float& centreelevat
 /*! @brief Prints a human-readable summary to the stream
  @param output the stream to be written to
  */
-void HeadTrackJob::summaryTo(ostream& output)
+void HeadTrackJob::summaryTo(std::ostream& output)
 {
     output << "HeadTrackJob: " << m_job_time << " ";
-    output << m_elevation << " " << m_bearing << " " << m_centre_elevation << " " << m_centre_bearing << endl;
-    output << endl;
+    output << m_elevation << " " << m_bearing << " " << m_centre_elevation << " " << m_centre_bearing << std::endl;
+    output << std::endl;
 }
 
 /*! @brief Prints a csv version to the stream
  @param output the stream to be written to
  */
-void HeadTrackJob::csvTo(ostream& output)
+void HeadTrackJob::csvTo(std::ostream& output)
 {
     output << "HeadTrackJob: " << m_job_time << ", ";
-    output << m_elevation << ", " << m_bearing << ", " << m_centre_elevation << ", " << m_centre_bearing << endl;
-    output << endl;
+    output << m_elevation << ", " << m_bearing << ", " << m_centre_elevation << ", " << m_centre_bearing << std::endl;
+    output << std::endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -127,10 +127,10 @@ void HeadTrackJob::csvTo(ostream& output)
 
     @param output the stream to write the job to
  */
-void HeadTrackJob::toStream(ostream& output) const
+void HeadTrackJob::toStream(std::ostream& output) const
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "HeadTrackJob::toStream" << endl;
+        debug << "HeadTrackJob::toStream" << std::endl;
     #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
@@ -147,10 +147,10 @@ void HeadTrackJob::toStream(ostream& output) const
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const HeadTrackJob& job)
+std::ostream& operator<<(std::ostream& output, const HeadTrackJob& job)
 {
     #if DEBUG_JOBS_VERBOSITY > 0
-        debug << "<<HeadTrackJob" << endl;
+        debug << "<<HeadTrackJob" << std::endl;
     #endif
     job.toStream(output);
     return output;
@@ -162,10 +162,10 @@ ostream& operator<<(ostream& output, const HeadTrackJob& job)
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const HeadTrackJob* job)
+std::ostream& operator<<(std::ostream& output, const HeadTrackJob* job)
 {
     #if DEBUG_JOBS_VERBOSITY > 0
-        debug << "<<HeadTrackJob" << endl;
+        debug << "<<HeadTrackJob" << std::endl;
     #endif
     if (job != NULL)
         job->toStream(output);

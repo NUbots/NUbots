@@ -27,7 +27,7 @@
     @param time the time in ms to reach the position
     @param position the position for the walk job [x(cm), y(cm), theta(rad)]
  */
-WalkToPointJob::WalkToPointJob(double time, const vector<float>& position) : MotionJob(Job::MOTION_WALK_TO_POINT)
+WalkToPointJob::WalkToPointJob(double time, const std::vector<float>& position) : MotionJob(Job::MOTION_WALK_TO_POINT)
 {
     m_job_time = time;     
     m_walk_position = position;
@@ -37,7 +37,7 @@ WalkToPointJob::WalkToPointJob(double time, const vector<float>& position) : Mot
     @param time the time in ms to reach the position
     @param input the stream from which to read the job specific data
  */
-WalkToPointJob::WalkToPointJob(double time, istream& input) : MotionJob(Job::MOTION_WALK_TO_POINT)
+WalkToPointJob::WalkToPointJob(double time, std::istream& input) : MotionJob(Job::MOTION_WALK_TO_POINT)
 {
     m_job_time = time;
 
@@ -49,8 +49,8 @@ WalkToPointJob::WalkToPointJob(double time, istream& input) : MotionJob(Job::MOT
     input.read(reinterpret_cast<char*>(&uintBuffer), sizeof(unsigned int));
     unsigned int m_walk_position_size = uintBuffer;
     
-    // read in the m_walk_position vector
-    m_walk_position = vector<float>(m_walk_position_size, 0);
+    // read in the m_walk_position std::vector
+    m_walk_position = std::vector<float>(m_walk_position_size, 0);
     for (unsigned int i=0; i<m_walk_position_size; i++)
     {
         input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
@@ -72,7 +72,7 @@ WalkToPointJob::~WalkToPointJob()
     
     @param newposition the new position for the walk job [x(cm), y(cm), theta(rad)]
  */
-void WalkToPointJob::setPosition(double time, const vector<float>& newposition)
+void WalkToPointJob::setPosition(double time, const std::vector<float>& newposition)
 {
     m_job_time = time;
     m_walk_position = newposition;
@@ -81,7 +81,7 @@ void WalkToPointJob::setPosition(double time, const vector<float>& newposition)
 /*! @brief Gets the position of the walk job
     @param position parameter that will be updated with the point we want to walk to
  */
-void WalkToPointJob::getPosition(double& time, vector<float>& position)
+void WalkToPointJob::getPosition(double& time, std::vector<float>& position)
 {
     time = m_job_time;
     position = m_walk_position;
@@ -90,23 +90,23 @@ void WalkToPointJob::getPosition(double& time, vector<float>& position)
 /*! @brief Prints a human-readable summary to the stream
  @param output the stream to be written to
  */
-void WalkToPointJob::summaryTo(ostream& output)
+void WalkToPointJob::summaryTo(std::ostream& output)
 {
     output << "WalkToPointJob: " << m_job_time << " ";
     for (unsigned int i=0; i<m_walk_position.size(); i++)
         output << m_walk_position[i] << ",";
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief Prints a csv version to the stream
  @param output the stream to be written to
  */
-void WalkToPointJob::csvTo(ostream& output)
+void WalkToPointJob::csvTo(std::ostream& output)
 {
     output << "WalkToPointJob, " << m_job_time << ", "; 
     for (unsigned int i=0; i<m_walk_position.size(); i++)
         output << m_walk_position[i] << ", ";
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -116,10 +116,10 @@ void WalkToPointJob::csvTo(ostream& output)
 
     @param output the stream to write the job to
  */
-void WalkToPointJob::toStream(ostream& output) const
+void WalkToPointJob::toStream(std::ostream& output) const
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "WalkToPointJob::toStream" << endl;
+        debug << "WalkToPointJob::toStream" << std::endl;
     #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
@@ -136,10 +136,10 @@ void WalkToPointJob::toStream(ostream& output) const
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const WalkToPointJob& job)
+std::ostream& operator<<(std::ostream& output, const WalkToPointJob& job)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "<<WalkToPointJob" << endl;
+        debug << "<<WalkToPointJob" << std::endl;
     #endif
     job.toStream(output);
     return output;
@@ -151,9 +151,9 @@ ostream& operator<<(ostream& output, const WalkToPointJob& job)
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const WalkToPointJob* job)
+std::ostream& operator<<(std::ostream& output, const WalkToPointJob* job)
 {
-    debug << "<<WalkToPointJob" << endl;
+    debug << "<<WalkToPointJob" << std::endl;
     if (job != NULL)
         job->toStream(output);
     return output;

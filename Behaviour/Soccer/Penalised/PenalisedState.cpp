@@ -35,7 +35,7 @@
 #include "debug.h"
 
 #include <sstream>
-using namespace std;
+
 
 PenalisedState::PenalisedState(SoccerProvider* provider) : SoccerState(provider)
 {
@@ -59,11 +59,11 @@ void PenalisedState::doState()
             m_actions->add(NUActionatorsData::Sound, m_data->CurrentTime, NUSounds::SUBSTITUTE);
         else
             m_actions->add(NUActionatorsData::Sound, m_data->CurrentTime, NUSounds::PENALISED);
-        m_jobs->addMotionJob(new HeadJob(m_data->CurrentTime + 1000, vector<float>(2,0)));
+        m_jobs->addMotionJob(new HeadJob(m_data->CurrentTime + 1000, std::vector<float>(2,0)));
     }
     
     // In penalty the chest led should be red, or purple in sub
-    vector<float> colour(3,0);
+    std::vector<float> colour(3,0);
     colour[0] = 1;
     if (m_game_info->amIASubstitute())
         colour[2] = 1;
@@ -83,7 +83,7 @@ void PenalisedState::doState()
         if (newposition < 0 or newposition > m_game_info->getNumberOfPlayers())
             newposition = m_game_info->getPlayerNumber();
         
-        stringstream sound;
+        std::stringstream sound;
         sound << newposition << ".wav";
         m_actions->add(NUActionatorsData::Sound, m_data->CurrentTime + 3000, sound.str());
         m_team_info->setPlayerNumber(newposition);

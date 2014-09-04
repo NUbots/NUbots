@@ -28,7 +28,7 @@
 class NUSensorsData;
 class NUActionatorsData;
 class NUWalk;
-class MotionScript;
+class MotionScript2013;
 #include "Motion/NUMotionProvider.h"
 
 class Getup : public NUMotionProvider
@@ -63,10 +63,10 @@ private:
     NUWalk* m_walk;
     
     bool m_enabled;
-    MotionScript* m_on_back;
-    MotionScript* m_on_front;
-    MotionScript* m_on_left;
-    MotionScript* m_on_right;
+    MotionScript2013* getup_back_script_;
+    MotionScript2013* getup_front_script_;
+    MotionScript2013* getup_left_script_;
+    MotionScript2013* getup_right_script_;
 
     double m_head_completion_time;
     double m_arm_completion_time;

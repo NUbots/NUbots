@@ -56,7 +56,7 @@ Parameter::Parameter(float value, float min, float max)
     @param min the minimum possible value of the parameter
     @param max the maximum possible value of the parameter
  */
-Parameter::Parameter(string name, float value, float min, float max) 
+Parameter::Parameter(std::string name, float value, float min, float max) 
 {
     Name = name; 
     Description = "None"; 
@@ -72,7 +72,7 @@ Parameter::Parameter(string name, float value, float min, float max)
     @param max the maximum possible value of the parameter
     @param desc a short description of the parameters purpose and/or effect
  */
-Parameter::Parameter(string name, float value, float min, float max, string desc) 
+Parameter::Parameter(std::string name, float value, float min, float max, std::string desc) 
 {
     Name = name; 
     Description = desc; 
@@ -112,7 +112,7 @@ float Parameter::max() const
 /*! @brief Gets the parameter's name 
  	@return the name
  */
-string& Parameter::name()
+std::string& Parameter::name()
 {
     return Name;
 }
@@ -120,7 +120,7 @@ string& Parameter::name()
 /*! @brief Returns whether this parameters name matches n
     @return whether Name matches n
  */
-bool Parameter::compareName(const string n) const
+bool Parameter::compareName(const std::string n) const
 {
     return Name.compare(n) == 0;
 }
@@ -128,7 +128,7 @@ bool Parameter::compareName(const string n) const
 /*! @brief Gets the description of the parameter
  	@return the description
  */
-string& Parameter::desc()
+std::string& Parameter::desc()
 {
     return Description;
 }
@@ -146,7 +146,7 @@ void Parameter::set(float value)
         Value = value;
 }
 
-void Parameter::set(float value, float min, float max, string desc)
+void Parameter::set(float value, float min, float max, std::string desc)
 {
     if (value < min) 
         Value = min;
@@ -162,13 +162,13 @@ void Parameter::set(float value, float min, float max, string desc)
 }
 
 /*! @brief Prints a human-readble version of the walk parameter */
-void Parameter::summaryTo(ostream& output) 
+void Parameter::summaryTo(std::ostream& output) 
 {
     output << Value;
 }
 
 /*! @brief Prints comma separated parameter */
-void Parameter::csvTo(ostream& output)
+void Parameter::csvTo(std::ostream& output)
 {
     output << Value << ", ";
 }
@@ -233,9 +233,9 @@ float operator*(const Parameter& p1, const Parameter& p2)
     return p1.Value*p2.Value;
 }
 
-vector<float> operator-(const vector<float>& f, const vector<Parameter>& p)
+std::vector<float> operator-(const std::vector<float>& f, const std::vector<Parameter>& p)
 {
-    vector<float> result;
+    std::vector<float> result;
     if (f.size() != p.size())
         return result;
     else
@@ -247,9 +247,9 @@ vector<float> operator-(const vector<float>& f, const vector<Parameter>& p)
     }
 }
 
-vector<float> operator-(const vector<Parameter>& p, const vector<float>& f)
+std::vector<float> operator-(const std::vector<Parameter>& p, const std::vector<float>& f)
 {
-    vector<float> result;
+    std::vector<float> result;
     if (f.size() != p.size())
         return result;
     else
@@ -261,9 +261,9 @@ vector<float> operator-(const vector<Parameter>& p, const vector<float>& f)
     } 
 }
 
-vector<float> operator-(const vector<Parameter>& p1, const vector<Parameter>& p2)
+std::vector<float> operator-(const std::vector<Parameter>& p1, const std::vector<Parameter>& p2)
 {
-    vector<float> result;
+    std::vector<float> result;
     if (p1.size() != p2.size())
         return result;
     else
@@ -275,9 +275,9 @@ vector<float> operator-(const vector<Parameter>& p1, const vector<Parameter>& p2
     }
 }
 
-vector<float> operator+(const vector<float>& f, const vector<Parameter>& p)
+std::vector<float> operator+(const std::vector<float>& f, const std::vector<Parameter>& p)
 {
-    vector<float> result;
+    std::vector<float> result;
     if (f.size() != p.size())
         return result;
     else
@@ -289,14 +289,14 @@ vector<float> operator+(const vector<float>& f, const vector<Parameter>& p)
     }
 }
 
-vector<float> operator+(const vector<Parameter>& p, const vector<float>& f)
+std::vector<float> operator+(const std::vector<Parameter>& p, const std::vector<float>& f)
 {
 	return f + p;    
 }
 
-vector<float> operator+(const vector<Parameter>& p1, const vector<Parameter>& p2)
+std::vector<float> operator+(const std::vector<Parameter>& p1, const std::vector<Parameter>& p2)
 {
-    vector<float> result;
+    std::vector<float> result;
     if (p1.size() != p2.size())
         return result;
     else
@@ -308,7 +308,7 @@ vector<float> operator+(const vector<Parameter>& p1, const vector<Parameter>& p2
     }
 }
 
-void operator+=(vector<Parameter>& p, const vector<float>& f)
+void operator+=(std::vector<Parameter>& p, const std::vector<float>& f)
 {
     if (p.size() == f.size())
     {
@@ -317,9 +317,9 @@ void operator+=(vector<Parameter>& p, const vector<float>& f)
     }
 }
 
-vector<float> operator*(const vector<float>& f, const vector<Parameter>& p)
+std::vector<float> operator*(const std::vector<float>& f, const std::vector<Parameter>& p)
 {
-    vector<float> result;
+    std::vector<float> result;
     if (f.size() != p.size())
         return result;
     else
@@ -331,21 +331,21 @@ vector<float> operator*(const vector<float>& f, const vector<Parameter>& p)
     }
 }
 
-vector<float> operator*(const vector<Parameter>& p, const vector<float>& f)
+std::vector<float> operator*(const std::vector<Parameter>& p, const std::vector<float>& f)
 {
     return f*p;
 }
 
-vector<float> operator*(const float& f, const vector<Parameter>& p)
+std::vector<float> operator*(const float& f, const std::vector<Parameter>& p)
 {
-    vector<float> result;
+    std::vector<float> result;
     result.reserve(p.size());
     for (size_t i=0; i<p.size(); i++)
         result.push_back(f*p[i]);
     return result;
 }
 
-vector<float> operator*(const vector<Parameter>& p, const float& f)
+std::vector<float> operator*(const std::vector<Parameter>& p, const float& f)
 {
     return f*p;
 }
@@ -353,9 +353,9 @@ vector<float> operator*(const vector<Parameter>& p, const float& f)
 /*! @brief Returns the vector of Parameters back as a vector<float> containing only the values
  * 	@return a vector<float> containing the current value of each parameter
  */
-vector<float> Parameter::getAsVector(const vector<Parameter>& p)
+std::vector<float> Parameter::getAsVector(const std::vector<Parameter>& p)
 {
-    vector<float> result;
+    std::vector<float> result;
     result.reserve(p.size());
     for (size_t i=0; i<p.size(); i++)
         result.push_back(p[i].get());
@@ -365,9 +365,9 @@ vector<float> Parameter::getAsVector(const vector<Parameter>& p)
 /*! @brief Stream insertion operator for a single Parameters
 		   The description and Parameter itself are terminated by a newline character.
  */
-ostream& operator<< (ostream& output, const Parameter& p) 
+std::ostream& operator<< (std::ostream& output, const Parameter& p) 
 {   
-    output << p.Name << ": " << p.Value << " [" << p.Min << ", " << p.Max << "] " << p.Description << endl;
+    output << p.Name << ": " << p.Value << " [" << p.Min << ", " << p.Max << "] " << p.Description << std::endl;
     return output;
 }
 
@@ -376,7 +376,7 @@ ostream& operator<< (ostream& output, const Parameter& p)
  *         as the terminating character for the Parameter's description.
  *  @relates Parameter
  */
-ostream& operator<< (ostream& output, const vector<Parameter>& p)
+std::ostream& operator<< (std::ostream& output, const std::vector<Parameter>& p)
 {
     output << "[";
 	for (size_t i=0; i<p.size(); i++)
@@ -390,7 +390,7 @@ ostream& operator<< (ostream& output, const vector<Parameter>& p)
  *		   This has implications when puting parameters in vectors.
  *  @relates Parameter
  */
-istream& operator>> (istream& input, Parameter& p)
+std::istream& operator>> (std::istream& input, Parameter& p)
 {
     // read in the parameter name
     getline(input, p.Name, ':');
@@ -409,7 +409,7 @@ istream& operator>> (istream& input, Parameter& p)
     input.ignore(128, ' ');
     char charbuffer[500];
     input.getline(charbuffer, 500);
-    p.Description = string(charbuffer);
+    p.Description = std::string(charbuffer);
     
     return input;
 }
@@ -419,9 +419,9 @@ istream& operator>> (istream& input, Parameter& p)
  * 		   as is the case with other vectors.
  *  @relates Parameter
  */
-istream& operator>> (istream& input, vector<Parameter>& p)
+std::istream& operator>> (std::istream& input, std::vector<Parameter>& p)
 {
-    stringstream wholevector;
+    std::stringstream wholevector;
     p.clear();
     // get all of the data between [ ... ]
     input.ignore(128, '[');

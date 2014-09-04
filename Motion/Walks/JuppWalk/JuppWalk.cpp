@@ -28,7 +28,7 @@
 
 #include <math.h>
 #include <boost/circular_buffer.hpp>
-using namespace std;
+
 
 //! @todo TODO: put M_PI and NORMALISE somewhere else
 #ifndef M_PI
@@ -58,23 +58,23 @@ JuppWalk::JuppWalk(NUSensorsData* data, NUActionatorsData* actions) : NUWalk(dat
     
     // Initialise the leg values
     //! @todo Get the lengths of these angles and gains from m_actions
-    m_left_leg_angles = vector<float> (6, 0);
+    m_left_leg_angles = std::vector<float> (6, 0);
     m_initial_lleg = m_left_leg_angles;
-    m_left_leg_gains = vector<float> (6, 0);
-    m_right_leg_angles = vector<float> (6, 0);
+    m_left_leg_gains = std::vector<float> (6, 0);
+    m_right_leg_angles = std::vector<float> (6, 0);
     m_initial_rleg = m_right_leg_angles;
-    m_right_leg_gains = vector<float> (6, 0);
+    m_right_leg_gains = std::vector<float> (6, 0);
     
     // Initialise the arm values
     float larm[] = {0.1, 1.57, 0.15, 0};
     float rarm[] = {-0.1, 1.57, 0.15, 0};
-    m_initial_larm = vector<float>(larm, larm + sizeof(larm)/sizeof(*larm));
-    m_initial_rarm = vector<float>(rarm, rarm + sizeof(rarm)/sizeof(*rarm));
+    m_initial_larm = std::vector<float>(larm, larm + sizeof(larm)/sizeof(*larm));
+    m_initial_rarm = std::vector<float>(rarm, rarm + sizeof(rarm)/sizeof(*rarm));
     
     m_left_arm_angles = m_initial_larm;
-    m_left_arm_gains = vector<float> (4, 0);
+    m_left_arm_gains = std::vector<float> (4, 0);
     m_right_arm_angles = m_initial_rarm;
-    m_right_arm_gains = vector<float> (4, 0);
+    m_right_arm_gains = std::vector<float> (4, 0);
 }
 
 void JuppWalk::initWalkParameters()
@@ -102,17 +102,17 @@ void JuppWalk::initWalkParameters()
     m_param_phase_reset_offset = 0.24;
     
     // Create the default set of walk parameters
-    vector<float> maxspeeds;
+    std::vector<float> maxspeeds;
     maxspeeds.push_back(7.0);
     maxspeeds.push_back(2.5);
     maxspeeds.push_back(0.4);
     
-    vector<float> maxaccels;
+    std::vector<float> maxaccels;
     maxaccels.push_back(3.5);
     maxaccels.push_back(1.25);
     maxaccels.push_back(0.2);
     
-    vector<Parameter> parameters;
+    std::vector<Parameter> parameters;
     parameters.push_back(Parameter("StepFrequency", m_step_frequency, 0.1, 3.0, "The step frequency in Hz"));
     parameters.push_back(Parameter("PhaseOffset", m_param_phase_offset, -M_PI/2.0, M_PI/2.0, "The phase offset in radians for the shortening, swing and loading phases"));
     parameters.push_back(Parameter("ShiftAmplitude", m_param_shift_c, 0.0, 0.4, "The amplitude of the left-right shifting motion"));
@@ -128,17 +128,17 @@ void JuppWalk::initWalkParameters()
     parameters.push_back(Parameter("GyroPitchGain", m_param_gyro_pitch, 0.0, 1.0, "The gain of the pitch controller"));
     parameters.push_back(Parameter("PhaseReset", m_param_phase_reset_offset, -1.0, 1.0, "The phase reset offset triggered upon impact with the ground"));
     
-    vector<vector<float> > armgains;
-    armgains.push_back(vector<float>());
+    std::vector<std::vector<float> > armgains;
+    armgains.push_back(std::vector<float>());
     armgains[0].push_back(50);
     armgains[0].push_back(50);
     armgains[0].push_back(25);
     armgains[0].push_back(25);
     
-    vector<vector<float> > torsogains;
+    std::vector<std::vector<float> > torsogains;
     
-    vector<vector<float> > leggains;
-    leggains.push_back(vector<float>());
+    std::vector<std::vector<float> > leggains;
+    leggains.push_back(std::vector<float>());
     leggains[0].push_back(65);
     leggains[0].push_back(65);
     leggains[0].push_back(100);
@@ -154,7 +154,7 @@ void JuppWalk::initWalkParameters()
  */
 void JuppWalk::getParameters()
 {
-    vector<Parameter>& parameters = m_walk_parameters.getParameters();
+    std::vector<Parameter>& parameters = m_walk_parameters.getParameters();
     m_step_frequency = parameters[0].get(); 
     m_param_phase_offset = parameters[1].get();
     m_param_shift_c = parameters[2].get();
@@ -180,7 +180,7 @@ JuppWalk::~JuppWalk()
 void JuppWalk::doWalk()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "JuppWalk::doWalk()" << endl;
+        debug << "JuppWalk::doWalk()" << std::endl;
     #endif
     getParameters();
     // Convert speed vector into swing leg amplitudes (ar, ap, ay)
@@ -202,14 +202,14 @@ void JuppWalk::doWalk()
     updateActionatorsData();
     
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "JuppWalk::doWalk(). Completed" << endl;
+        debug << "JuppWalk::doWalk(). Completed" << std::endl;
     #endif
 }
 
 void JuppWalk::calculateGaitPhase()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "JuppWalk::calculateGaitPhase()" << endl;
+        debug << "JuppWalk::calculateGaitPhase()" << std::endl;
     #endif
     m_gait_phase = NORMALISE(m_gait_phase + 2*M_PI*m_step_frequency*(m_current_time - m_previous_time)/1000.0);
 }
@@ -219,7 +219,7 @@ void JuppWalk::calculateGaitPhase()
 void JuppWalk::calculateLeftLeg()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "JuppWalk::calculateLeftLeg()" << endl;
+        debug << "JuppWalk::calculateLeftLeg()" << std::endl;
     #endif
     calculateLegAngles(m_left_leg_phase, -1, m_left_leg_angles);
     calculateLegGains(m_left_leg_phase, m_left_leg_gains);
@@ -230,7 +230,7 @@ void JuppWalk::calculateLeftLeg()
 void JuppWalk::calculateRightLeg()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "JuppWalk::calculateRightLeg()" << endl;
+        debug << "JuppWalk::calculateRightLeg()" << std::endl;
     #endif
     calculateLegAngles(m_right_leg_phase, 1, m_right_leg_angles);
     calculateLegGains(m_right_leg_phase, m_right_leg_gains);
@@ -240,10 +240,10 @@ void JuppWalk::calculateRightLeg()
     @param legphase the phase of the leg you want angles for (+/- M_PI)
     @param legsign 1 for the right leg, -1 for the left leg
  */
-void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& angles)
+void JuppWalk::calculateLegAngles(float legphase, float legsign, std::vector<float>& angles)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "JuppWalk::calculateLegAngles()" << endl;
+        debug << "JuppWalk::calculateLegAngles()" << std::endl;
     #endif
     /* Jason's guide to this to walk:
      Step 1. Tune shift_amp such that it looks like the weight is being shifted between the feet
@@ -362,10 +362,10 @@ void JuppWalk::calculateLegAngles(float legphase, float legsign, vector<float>& 
     @param legphase the phase of the leg
     @param gains the parameter to be updated with the new gains
  */
-void JuppWalk::calculateLegGains(float legphase, vector<float>& gains)
+void JuppWalk::calculateLegGains(float legphase, std::vector<float>& gains)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "JuppWalk::calculateLegGains()" << endl;
+        debug << "JuppWalk::calculateLegGains()" << std::endl;
     #endif
     gains = m_walk_parameters.getLegGains()[0];
 }
@@ -375,7 +375,7 @@ void JuppWalk::calculateLegGains(float legphase, vector<float>& gains)
 void JuppWalk::calculateLeftArm()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "JuppWalk::calculateLeftArm()" << endl;
+        debug << "JuppWalk::calculateLeftArm()" << std::endl;
     #endif
     calculateArmAngles(m_left_leg_phase, -1, m_left_arm_angles);
     calculateArmGains(m_left_leg_phase, m_left_arm_gains);
@@ -386,7 +386,7 @@ void JuppWalk::calculateLeftArm()
 void JuppWalk::calculateRightArm()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "JuppWalk::calculateRightArm()" << endl;
+        debug << "JuppWalk::calculateRightArm()" << std::endl;
     #endif
     calculateArmAngles(m_right_leg_phase, 1, m_right_arm_angles);
     calculateArmGains(m_right_leg_phase, m_right_arm_gains);
@@ -396,7 +396,7 @@ void JuppWalk::calculateRightArm()
     @param legphase the phase for the arm
     @param armsign as with the leg; -1 for left and 1 for right
  */
-void JuppWalk::calculateArmAngles(float legphase, float armsign, vector<float>& angles)
+void JuppWalk::calculateArmAngles(float legphase, float armsign, std::vector<float>& angles)
 {
     angles[0] = -0.15*armsign;                          // ShoulderRoll
     angles[1] = 0.4*sin(legphase + M_PI) + M_PI/2.0;    // ShoulderPitch
@@ -408,7 +408,7 @@ void JuppWalk::calculateArmAngles(float legphase, float armsign, vector<float>& 
     @param legphase the phase for the arm
     @param angles the parameter to get the new gains
  */
-void JuppWalk::calculateArmGains(float legphase, vector<float>& gains)
+void JuppWalk::calculateArmGains(float legphase, std::vector<float>& gains)
 {
     gains = m_walk_parameters.getArmGains()[0];
 }
@@ -420,7 +420,7 @@ void JuppWalk::calculateArmGains(float legphase, vector<float>& gains)
  */
 void JuppWalk::calculateGyroFeedback()
 {
-    static vector<float> values;        // [vx, vy, vz]
+    static std::vector<float> values;        // [vx, vy, vz]
     if (m_data->get(NUSensorsData::Gyro, values))
     {
         static const float roll_threshold = 0.10;
@@ -454,7 +454,7 @@ void JuppWalk::calculateGyroFeedback()
 void JuppWalk::updateActionatorsData()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "JuppWalk::updateActionatorsData()" << endl;
+        debug << "JuppWalk::updateActionatorsData()" << std::endl;
     #endif
     
     m_actions->add(NUActionatorsData::LLeg, m_current_time, m_left_leg_angles, m_left_leg_gains);
@@ -464,7 +464,7 @@ void JuppWalk::updateActionatorsData()
     if (m_rarm_enabled)
         m_actions->add(NUActionatorsData::RArm, m_current_time, m_right_arm_angles, m_right_arm_gains);
 
-    vector<float> sensor_lleg, target_lleg;
+    std::vector<float> sensor_lleg, target_lleg;
     Blackboard->Sensors->getPosition(NUSensorsData::LLeg, sensor_lleg);
     Blackboard->Sensors->getTarget(NUSensorsData::LLeg, target_lleg);
 }

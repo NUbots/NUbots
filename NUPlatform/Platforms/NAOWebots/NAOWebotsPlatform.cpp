@@ -33,14 +33,14 @@
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
-using namespace std;
+
 
 /*! @brief Constructor for NAO in Webots robotic platform
  */
 NAOWebotsPlatform::NAOWebotsPlatform(int argc, const char *argv[]) : m_argc(argc), m_argv(argv)
 {
     #if DEBUG_NUPLATFORM_VERBOSITY > 1
-        debug << "NAOWebotsPlatform::NAOWebotsPlatform()" << endl;
+        debug << "NAOWebotsPlatform::NAOWebotsPlatform()" << std::endl;
     #endif
     init();
     
@@ -73,7 +73,7 @@ void NAOWebotsPlatform::initName()
     if (m_argc >= 2)
         player_number = atoi(m_argv[1]) + 1;
     
-    stringstream ss;
+    std::stringstream ss;
     ss << "nubot" << player_number;
     m_name = ss.str();
 }
@@ -104,7 +104,7 @@ void NAOWebotsPlatform::initTeam()
 void NAOWebotsPlatform::initMAC()
 {
     // In webots we manufacture a mac addresss that is all zero except for the last digit, which is the robot number
-    stringstream ss;
+    std::stringstream ss;
     ss << "00-00-00-00-0" << m_robot_number;
     m_mac_address = ss.str();
 }

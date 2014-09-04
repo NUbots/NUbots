@@ -44,7 +44,7 @@ private:
     bool m_return_to_start;
     double m_run_start;
     int samplePointIndex;
-    vector<float> hist_odomX,hist_odomY,hist_odomB,hist_gpsX,hist_gpsY,hist_gpsB;
+    std::vector<float> hist_odomX,hist_odomY,hist_odomB,hist_gpsX,hist_gpsY,hist_gpsB;
 };
 
 

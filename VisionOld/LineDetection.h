@@ -40,7 +40,7 @@ class LineDetection{
 
 	public:
 	//VARIABLES:
-        vector<LinePoint*> centreCirclePoints;
+        std::vector<LinePoint*> centreCirclePoints;
         std::vector<LinePoint> linePoints;
         std::vector<LSFittedLine> fieldLines;
         std::vector<LSFittedLine> transformedFieldLines;
@@ -63,8 +63,8 @@ class LineDetection{
         void FormLines(FieldObjects* AllObjects,
                        Vision* vision,
                        NUSensorsData* data,
-                       vector< ObjectCandidate >& candidates,
-                       vector< TransitionSegment>& leftover);
+                       std::vector< ObjectCandidate >& candidates,
+                       std::vector< TransitionSegment>& leftover);
         bool GetDistanceToPoint(Point point,  Vector3<float> &result, Vision* vision);
         bool CheckGreenBetweenTwoPoints(int x0,int y0,int x1,int y1, Vision* vision);
 	
@@ -84,7 +84,7 @@ class LineDetection{
         bool DetectWhitePixels(int checkX, int checkY, int searchRadius,Vision* vision);
 
 
-        void FindPenaltySpot(vector< ObjectCandidate >& candidates, Vision* vision);
+        void FindPenaltySpot(std::vector< ObjectCandidate >& candidates, Vision* vision);
         void DecodePenaltySpot(FieldObjects* AllObjects, double timestamp);
 
         void FindCornerPoints(int image_width,int image_height, Vision* vision);

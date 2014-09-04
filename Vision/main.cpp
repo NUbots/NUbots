@@ -2,7 +2,7 @@
 
 #ifdef TARGET_IS_RPI
     #include "VisionWrapper/visioncontrolwrapperrpi.h"
-#elif TARGET_IS_PC
+#elif TARGET_IS_PC || TARGET_IS_MAC || TARGET_IS_WINDOWS
     //#include "VisionWrapper/visioncontrolwrapperpc.h"
     #include "VisionWrapper/visioncontrolwrapperqt.h"
 #elif TARGET_IS_NUVIEW
@@ -22,7 +22,7 @@
 class MyApplication : public QApplication {
 public:
     MyApplication(int& argc, char ** argv) : QApplication(argc, argv) { }
-    MyApplication(Display* dpy, Qt::HANDLE visual = 0, Qt::HANDLE cmap = 0, int flags = ApplicationFlags) : QApplication(dpy, visual, cmap, flags) { }
+    //MyApplication(Display* dpy, Qt::HANDLE visual = 0, Qt::HANDLE cmap = 0, int flags = ApplicationFlags) : QApplication(dpy, visual, cmap, flags) { }
     virtual ~MyApplication() { }
 
     // reimplemented from QApplication so we can throw exceptions in slots
@@ -47,65 +47,30 @@ public:
 };
 #endif
 
-using namespace std;
+
 
 int qt();
 int pc();
 int rpi(bool disp_on, bool cam);
 
-//#include "Infrastructure/NUSensorsData/NUSensorsData.h"
-//#include "Infrastructure/NUImage/NUImage.h"
-//#include <vector>
 int main(int argc, char** argv)
 {
-//    vector<NUImage> imgs;
-//    vector<NUSensorsData> sensors;
-//    ifstream i((string(getenv("HOME")) + "/nubot/image.strm").c_str()),
-//            s((string(getenv("HOME")) + "/nubot/sensor.strm").c_str());
-
-//    while(i.good()) {
-//        NUImage im;
-//        try {
-//            i >> im;
-//        }
-//        catch(exception e) {
-//            break;
-//        }
-//        imgs.push_back(im);
-//    }
-
-//    while(s.good()) {
-//        NUSensorsData sd;
-//        try {
-//            s >> sd;
-//        }
-//        catch(exception e) {
-//            break;
-//        }
-
-//        sensors.push_back(sd);
-//    }
-
-//    cout << imgs.size() << " " << sensors.size() << endl;
-
-//    return 0;
-
     #ifdef TARGET_IS_RPI
     //run with user option if given or display off by default
     switch(argc) {
     case 2:
-        return rpi(string(argv[1]).compare("1") == 0, true);
+        return rpi(std::string(argv[1]).compare("1") == 0, true);
     case 3:
-        return rpi(string(argv[1]).compare("1") == 0, string(argv[2]).compare("1"));
+        return rpi(std::string(argv[1]).compare("1") == 0, std::string(argv[2]).compare("1"));
     default:
         return rpi(false, true);
     }
 
-    #elif TARGET_IS_PC
+    #elif TARGET_IS_PC || TARGET_IS_MAC || TARGET_IS_WINDOWS
     //return pc();
     return qt();
     #else
-    cout << "Error not a valid define! Must be TARGET_IS_RPI or TARGET_IS_PC" << endl;
+    std::cout << "Error not a valid define! Must be TARGET_IS_RPI or TARGET_IS_PC" << std::endl;
     return 0;
     #endif
 }
@@ -120,7 +85,7 @@ int rpi(bool disp_on, bool cam)
     VisionControlWrapper* vision = VisionControlWrapper::getInstance(disp_on, cam);
 
     if(disp_on)
-        cout << "Running with display on" << endl;
+        std::cout << "Running with display on" << std::endl;
 
     char c=0;
     int error=0;
@@ -142,7 +107,7 @@ int rpi(bool disp_on, bool cam)
         }
     }
     if(error != 0)
-        cout << "Error: " << error << endl;
+        std::cout << "Error: " << error << std::endl;
 #endif
     return 0;
 }
@@ -164,7 +129,7 @@ int rpi(bool disp_on, bool cam)
 //    int frame = 0;
 //    while(c!=ESC_KEY && error==0) {
 //        //visiondata->updateFrame();
-//        cout << "frame: " << ++frame << endl;
+//        std::cout << "frame: " << ++frame << std::endl;
 //        error = vision->runFrame();
 //        if(stepping) {
 //            c=0;
@@ -180,19 +145,21 @@ int rpi(bool disp_on, bool cam)
 //        }
 //    }
 //    if(error != 0)
-//        cout << "Error: " << error << endl;
+//        std::cout << "Error: " << error << std::endl;
 //    return 0;
 //}
 
 int qt()
 {
 #ifndef TARGET_IS_RPI
-    MyApplication app(NULL);
+    int argc = 0;
+    char** argv = NULL;
+    MyApplication app(argc, argv);
 #endif
     VisionControlWrapper* vision = VisionControlWrapper::getInstance();
 
     int error = vision->run();
     if(error != 0)
-        cout << "Error: " << error << endl;
+        std::cout << "Error: " << error << std::endl;
     return 0;
 }

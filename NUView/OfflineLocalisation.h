@@ -14,7 +14,6 @@ class FieldObjects;
 class NUSensorsData;
 class TeamInformation;
 class GameInformation;
-class Localisation;
 class SelfLocalisation;
 
 class OfflineLocalisation : public QThread
@@ -24,18 +23,16 @@ public:
     explicit OfflineLocalisation(LogFileReader* reader, QObject *parent = 0);
     ~OfflineLocalisation();
 //    OfflineLocalisation(const Localisation& intialState, const std::string& initialLogPath);
-    void Initialise(const Localisation& intialState);
+    void Initialise();
     bool OpenLogs(const std::string& intialLogPath);
     bool Run();
     bool Running() {return m_running;}
-    bool WriteLog(const std::string& logPath);
+    bool WriteLog(const std::string& logPath){(void)(logPath);return false;}
     bool WriteReport(const std::string& reportPath);
     bool WriteXML(const std::string& xmlPath);
     int NumberOfLogFrames();
     int NumberOfFrames();
-    const Localisation* GetFrame(int frameNumber);
     const SelfLocalisation* GetSelfFrame(int frameNumber);
-    QString GetFrameInfo(int frameNumber);
     QString GetSelfFrameInfo(int frameNumber);
     bool IsInitialised();
     void run();
@@ -49,12 +46,9 @@ public:
 private:
     void AddFrame(const NUSensorsData* sensorData, FieldObjects* objectData, const TeamInformation* teamInfo=NULL, const GameInformation* gameInfo=NULL);
     void ClearBuffer();
-    std::vector<Localisation*> m_localisation_frame_buffer;
     std::vector<SelfLocalisation*> m_self_loc_frame_buffer;
-    std::vector<QString> m_frame_info;
     std::vector<QString> m_self_frame_info;
     std::vector<LocalisationPerformanceMeasure> m_performance;
-    Localisation* m_workingLoc;
     SelfLocalisation* m_workingSelfLoc;
     LogFileReader* m_log_reader;
     bool m_stop_called;
@@ -63,7 +57,6 @@ private:
     unsigned int m_num_models_created;
     float m_experiment_run_time;
     bool m_running;
-    bool m_use_old_localisation;
 
 signals:
     void SimDataChanged(bool);

@@ -1,5 +1,16 @@
 # .gitignore for NUbot
 
+# Don't include compiled framework libraries in the repo
+/Framework/darwin/Linux/lib/darwin.a
+
+# Ignore Sublime Text project/workspace files
+*.sublime-project
+*.sublime-workspace
+
+# Ignore test output files
+/ConfigSystem/ConfigurationFiles/newConfig.json
+/ConfigSystem/ConfigurationFiles/testSaveLoadConfig.json
+
 # We don't want build files in the repo
 /Build/*
 *.xcodeproj
@@ -13,6 +24,7 @@
 /latex
 Doxyfile
 Doxyfile.bak
+/ConfigSystem/doc
 
 # Python Ignores:
 #we don't want to include .pyc files
@@ -33,6 +45,10 @@ Autoconfig/*
 # ignore Qt builds
 Vision*-build*/*
 /Vision/Vision.pro.user
+/Vision/Makefile
+/Vision/*.app
+/Vision/moc_*
+/Vision/ui_*
 NUView-build*/*
 /NUView/debug/*
 /NUView/release/*
@@ -52,7 +68,7 @@ NUView-build*/*
 /NUView/debug/*
 /NUView/release/*
 /NUView/Makefile
-/NUView/NUView.pro.user
+/NUView/NUView.pro.user*
 
 /Vision-build-desktop*/*
 *.pro.user*
@@ -60,7 +76,7 @@ NUView-build*/*
 /BWalkMaker/BWalkMaker.pro.user
 
 # Ignore our data file formats
-*.lut
+#*.lut
 *.nif
 *.nul
 *.strm

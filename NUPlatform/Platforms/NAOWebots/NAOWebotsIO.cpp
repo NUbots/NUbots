@@ -33,7 +33,7 @@
 #include "debugverbositynetwork.h"
 #include "ioconfig.h"
 
-using namespace std;
+
 
 #include "NUbot.h"
 
@@ -43,7 +43,7 @@ using namespace std;
 NAOWebotsIO::NAOWebotsIO(NUbot* nubot, NAOWebotsPlatform* platform)
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NAOWebotsIO::NAOWebotsIO()" << endl;
+    debug << "NAOWebotsIO::NAOWebotsIO()" << std::endl;
 #endif
     m_nubot = nubot;
     #if defined(USE_NETWORK_GAMECONTROLLER) or defined(USE_NETWORK_TEAMINFO)
@@ -63,7 +63,7 @@ NAOWebotsIO::NAOWebotsIO(NUbot* nubot, NAOWebotsPlatform* platform)
 NAOWebotsIO::~NAOWebotsIO()
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "NAOWebotsIO::~NAOWebotsIO()" << endl;
+    debug << "NAOWebotsIO::~NAOWebotsIO()" << std::endl;
 #endif
     delete m_network;
 }

@@ -41,7 +41,7 @@
 #include "debugverbositybehaviour.h"
 #include "Tools/Math/StlVector.h"
 
-using namespace std;
+
 
 GoalKeeperProvider::GoalKeeperProvider(Behaviour* manager) : BehaviourProvider(manager)
 {
@@ -80,11 +80,11 @@ void GoalKeeperProvider::doBehaviour()
         else
             m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::BallAndLocalisation));
         
-        vector<float> ball_prediction = self.CalculateClosestInterceptToMobileObject(ball);
+        std::vector<float> ball_prediction = self.CalculateClosestInterceptToMobileObject(ball);
         
         m_block_time.push_back(ball_prediction[0]);
         float time = accumulate(m_block_time.begin(), m_block_time.end(), 0.0f)/m_block_time.size();
-        //debug << "Predicted intercept: " << ball_prediction << " " << ball.velX() << " " << ball.velY() << endl;
+        //debug << "Predicted intercept: " << ball_prediction << " " << ball.velX() << " " << ball.velY() << std::endl;
         
         if (ball.TimeSeen() > 2000 and time > 300 and time < 3000)
         {

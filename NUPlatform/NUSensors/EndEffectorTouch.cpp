@@ -38,31 +38,31 @@
 EndEffectorTouch::EndEffectorTouch()
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 0
-        debug << "EndEffectorTouch::EndEffectorTouch()" << endl;
+        debug << "EndEffectorTouch::EndEffectorTouch()" << std::std::endl;
     #endif
     
     // Init the min and max force tracking
     m_id_offset = NUSensorsData::LArmEndEffector.Id;
-    m_min_forces = vector<float>(4, numeric_limits<float>::infinity());
-    m_max_forces = vector<float>(4, 0);
+    m_min_forces = std::vector<float>(4, std::numeric_limits<float>::infinity());
+    m_max_forces = std::vector<float>(4, 0);
     
     // Load the support hulls for the end effectors
-    ifstream file((CONFIG_DIR + string("Motion/SupportHull") + ".cfg").c_str());
+    std::ifstream file((CONFIG_DIR + std::string("Motion/SupportHull") + ".cfg").c_str());
     if (file.is_open())
     {
-        vector<vector<float> > left_foot_hull;
-        vector<vector<float> > right_foot_hull;
-        vector<vector<float> > left_hand_hull;
-        vector<vector<float> > right_hand_hull;
+        std::vector<std::vector<float> > left_foot_hull;
+        std::vector<std::vector<float> > right_foot_hull;
+        std::vector<std::vector<float> > left_hand_hull;
+        std::vector<std::vector<float> > right_hand_hull;
         file >> left_foot_hull;
         file >> right_foot_hull;
         file >> left_hand_hull;
         file >> right_hand_hull;
         #if DEBUG_NUSENSORS_VERBOSITY > 1
-        	debug << "left_foot_hull: " << left_foot_hull << endl;
-            debug << "right_foot_hull: " << right_foot_hull << endl;
-            debug << "left_hand_hull: " << left_hand_hull << endl;
-            debug << "right_hand_hull: " << right_hand_hull << endl;
+        	debug << "left_foot_hull: " << left_foot_hull << std::endl;
+            debug << "right_foot_hull: " << right_foot_hull << std::endl;
+            debug << "left_hand_hull: " << left_hand_hull << std::endl;
+            debug << "right_hand_hull: " << right_hand_hull << std::endl;
         #endif
         m_hulls.push_back(left_hand_hull);
         m_hulls.push_back(right_hand_hull);
@@ -71,13 +71,13 @@ EndEffectorTouch::EndEffectorTouch()
     }
     else
     {
-        debug << "EndEffectorTouch::EndEffectorTouch(). WARNING: Unable to load SupportHull.cfg. This means you will have no centre of pressure and support sensors" << endl;
-        errorlog << "EndEffectorTouch::EndEffectorTouch(). WARNING: Unable to load SupportHull.cfg. This means you will have no centre of pressure and support sensors" << endl;
+        debug << "EndEffectorTouch::EndEffectorTouch(). WARNING: Unable to load SupportHull.cfg. This means you will have no centre of pressure and support sensors" << std::endl;
+        errorlog << "EndEffectorTouch::EndEffectorTouch(). WARNING: Unable to load SupportHull.cfg. This means you will have no centre of pressure and support sensors" << std::endl;
     }
     file.close();
     
-    m_Nan = numeric_limits<float>::quiet_NaN();
-    m_Nan_all = vector<float>(NUSensorsData::CoPYId - NUSensorsData::ForceId, m_Nan);
+    m_Nan = std::numeric_limits<float>::quiet_NaN();
+    m_Nan_all = std::vector<float>(NUSensorsData::CoPYId - NUSensorsData::ForceId, m_Nan);
 }
 
 /*! @brief Destructor
@@ -85,7 +85,7 @@ EndEffectorTouch::EndEffectorTouch()
 EndEffectorTouch::~EndEffectorTouch()
 {
     #if DEBUG_NUSENSORS_VERBOSITY > 0
-        debug << "EndEffectorTouch::~EndEffectorTouch" << endl;
+        debug << "EndEffectorTouch::~EndEffectorTouch" << std::endl;
     #endif
 }
 
@@ -181,7 +181,7 @@ void EndEffectorTouch::calculateCentreOfPressure(const NUData::id_t& endeffector
     float copy = m_Nan;
     if (Blackboard->Sensors->getContact(endeffector, contact) and contact)
     {	// centre of pressure calculation is only valid if we are in contact with an object
-    	vector<vector<float> >& hull = m_hulls[endeffector.Id - m_id_offset];
+    	std::vector<std::vector<float> >& hull = m_hulls[endeffector.Id - m_id_offset];
     	if (hull.size() == m_touch_data.size())
         {	// centre of pressure calculation is only possible if the size of the hull specification matches that of the touch data
             float sum = 0;
@@ -214,7 +214,7 @@ void EndEffectorTouch::calculateSupport(const NUData::id_t& endeffector)
 	bool support = false;
     if (Blackboard->Sensors->getContact(endeffector, contact) and contact)
     {	// we can only be supporting if there is contact on the end effector
-        vector<float> cop;
+        std::vector<float> cop;
         if (Blackboard->Sensors->getCoP(endeffector, cop))		// if there is valid centre of pressure measurement
             if (mathGeneral::PointInsideConvexHull(cop[0], cop[1], m_hulls[endeffector.Id - m_id_offset], 0.2))		// if the cop is inside the convex hull
         		support = true;

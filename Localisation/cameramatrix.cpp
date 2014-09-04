@@ -172,7 +172,7 @@ Matrix CameraMatrix::Trans(double x, double y, double z)
         vector[2][0] = z;
         vector[3][0] = 1;
         Matrix TranslationMatrix = Matrix(4,4,true);
-        TranslationMatrix.setCol(3,vector);
+        TranslationMatrix.setCol(3, vector);
         return TranslationMatrix;
 
 }

@@ -50,8 +50,24 @@
 #include <ctime>
 
 class HeadBehaviour {
-
+public:
+    enum VisionPolicyID{
+        //Better Head Behaviours (are functions of basic ones)
+        PrioritiseLocalisationPolicy,
+        PrioritiseBallPolicy,
+        LookAtBallPolicy,
+        LookForBallPolicy,
+        LookForFieldObjectsPolicy,
+        //Basic Behaviours
+        TimeVSCostPriority,//See above
+        RLAgentTrainingPolicy,
+        MRLAgentTrainingPolicy,//See above
+        RLAgentPolicy,
+        MRLAgentPolicy,
+        CheckAgentPolicy //Checks the Agent's (both RL and MRL) policy without learning.
+    };
 private:
+
     int MAX_PERCEPT_RANGESIZE;
 
     /*MRLAgent:*/
@@ -87,15 +103,29 @@ private:
     float time_since_last_localisation;
     //holds the last vision policy used
     int lastVisionPolicy;
+    VisionPolicyID current_policy;
 
     //variables for training
     int ACTIONS_PER_STATE;
     int actions_taken_this_state;
-    string rewards_log_pathname;
-    string agent_filename;
+    std::string rewards_log_pathname;
+    std::string agent_filename;
 
     float last_reward;
+    bool give_rew_to_mot;
     
+    //Policy Parameters
+    float prioritise_localisation_policy_bias;
+    float prioritise_ball_policy_bias;
+
+    //NEWER JOB SYSTEM VARIABLES
+    std::vector<Object*> m_objects_to_view;
+    int m_current_action;
+
+    double time_last_tracked;
+    bool last_job_was_trackjob;
+    double time_last_quick_panned;
+
 
     /*! @brief
     */
@@ -114,8 +144,12 @@ private:
     */
     void doTimeVSCostPriorityPolicy();
 
-    /*! @brief Use the motivated reinforcement learning agent to make policy decisions.
+    /*! @brief Use the combined reinforcement learning agent to make policy decisions.
+      @param
     */
+    void doAgentBasedPolicy(vector<int> object_selection_vector);
+
+    /*Tertiary methods for experimentation and testing.*/
     void doMRLAgentPolicy();
     void doRLAgentPolicy();
     void doCheckAgentPolicy();
@@ -124,23 +158,13 @@ private:
     */
     void recordReward(float r);
 
+    /*! @brief Gives a vector of ones which acts as a basis for indicating available objects to look at  */
+
+    void takeAction(int action);
 
 public:
 
-    enum VisionPolicyID{
-        BallFarVisionPolicy = 0,
-        BallNearVisionPolicy = 1,
-        BallLostVisionPolicy = 2,
-        RobotLostVisionPolicy = 3,
-        BallOnlyVisionPolicy = 4,
-        LandmarkOnlyVisionPolicy = 5,
-        TimeVSCostPriority = 6,//See above
-        RLAgentTrainingPolicy = 7,
-        MRLAgentTrainingPolicy = 8,//See above
-        RLAgentPolicy = 9,
-        MRLAgentPolicy = 10,
-        CheckAgentPolicy = 11 //Checks the Agent's (both RL and MRL) policy without learning.
-    };
+
     
     static HeadBehaviour* getInstance();
 
@@ -148,7 +172,15 @@ public:
     */
     void makeVisionChoice(VisionPolicyID fieldVisionPolicy);
 
+    void prioritiseLocalisation();
+    void prioritiseBall();
+    void lookAtBall();
+    void lookForBall();
+    void lookForFieldObjects();
+    void update();
+
     /*! @brief dispatchHeadJob methods. There are three, one for each object type.
+    These are old. Pending deletion.
     */
     void dispatchHeadJob(MobileObject *ObjectToTrack);
     
@@ -160,8 +192,11 @@ public:
     /*void fieldXYToHeadingElevation(Vector2<float>* fieldposition, Vector2<float>* cameraposition) {
         
     }*/
+
     
-    
+    /*! @brief Performs a quick scan of the area near the expected location of the object.
+    */
+    void performQuickScan();
 
 };
 

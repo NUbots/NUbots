@@ -41,7 +41,7 @@ public:
         updateTarget();
         if (m_target.TimeSinceLastSeen() > 5000)
         {
-            debug << "ChaseBlueGoal -> SearchBlueGoal. Goal lost" << endl;
+            debug << "ChaseBlueGoal -> SearchBlueGoal. Goal lost" << std::endl;
             m_goal_reached_count = 0;
             return m_parent->m_search_blue_goal;
         }
@@ -50,7 +50,7 @@ public:
             m_goal_reached_count++;
             if (m_goal_reached_count > 10)
             {
-                debug << "ChaseYellowGoal -> SearchYellowGoal. Goal Reached" << endl;
+                debug << "ChaseYellowGoal -> SearchYellowGoal. Goal Reached" << std::endl;
                 m_goal_reached_count = 0;
                 return m_parent->m_search_yellow_goal;
             }

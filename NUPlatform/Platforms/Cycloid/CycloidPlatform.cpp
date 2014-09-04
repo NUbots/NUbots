@@ -29,14 +29,14 @@
 #include "debugverbositynuplatform.h"
 #include "nubotconfig.h"
 
-using namespace std;
+
 
 /*! @brief Constructor for Bear robotic platform
  */
 CycloidPlatform::CycloidPlatform()
 {
 #if DEBUG_NUPLATFORM_VERBOSITY > 4
-    debug << "CycloidPlatform::CycloidPlatform" << endl;
+    debug << "CycloidPlatform::CycloidPlatform" << std::endl;
 #endif
     init();
     #ifdef USE_VISION

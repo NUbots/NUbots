@@ -30,17 +30,17 @@ class MotionFileSyntaxHighlighter;
 
 #include <QtGui>
 #include <string>
-using namespace std;
+
 
 class MotionFileEditor : public QWidget
 {
     Q_OBJECT
 public:
-    MotionFileEditor(const string& filepath, QWidget *parent = 0);
+    MotionFileEditor(const std::string& filepath, QWidget *parent = 0);
     ~MotionFileEditor();
     
 signals:
-    void sendRequested(string text);
+    void sendRequested(std::string text);
     
 private slots:
     void send();
@@ -49,10 +49,10 @@ private slots:
     
 private:
     void checkSyntax();
-    bool bracketsOK(const string& line);
+    bool bracketsOK(const std::string& line);
     
 private:
-    string m_filepath;
+    std::string m_filepath;
     
     QVBoxLayout* m_layout;
     QHBoxLayout* m_button_layout;

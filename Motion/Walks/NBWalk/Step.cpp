@@ -3,7 +3,7 @@
 #include "MotionConstants.h"
 #include "Observer.h"
 
-using namespace std;
+
 
 //#define DEBUG_STEP
 
@@ -174,10 +174,10 @@ const WalkVector Step::elipseClipVelocities(const WalkVector & source){
 										 stepConfig[WP::MAX_VEL_X]
 										 *std::cos(theta),2));
   const float rad_to_mm = max_xy_mag / stepConfig[WP::MAX_VEL_THETA];
-  // cout << "xy_mag = " << xy_mag << " converted theta = " << source.theta*rad_to_mm<<endl;
+  // std::cout << "xy_mag = " << xy_mag << " converted theta = " << source.theta*rad_to_mm<<std::endl;
   const float phi = NBMath::safe_atan2(xy_mag,source.theta*rad_to_mm);
 
-  // cout << "Ellipsoid vel. clipping: theta = "<<theta<<", phi="<<phi<<endl;
+  // std::cout << "Ellipsoid vel. clipping: theta = "<<theta<<", phi="<<phi<<std::endl;
 
   float forward_max =0.0f;
   if(source.x > 0)
@@ -197,11 +197,11 @@ const WalkVector Step::elipseClipVelocities(const WalkVector & source){
   const float turning_max =
     std::abs(stepConfig[WP::MAX_VEL_THETA]
 			 *std::cos(phi));
-  // cout << "Clipping y="<<source.y<<" according to"<<horizontal_max<<endl;
+  // std::cout << "Clipping y="<<source.y<<" according to"<<horizontal_max<<std::endl;
   const float new_y_vel = NBMath::clip(source.y,horizontal_max);
-  // cout << "Clipping x="<<source.x<<" according to"<<forward_max<<endl;
+  // std::cout << "Clipping x="<<source.x<<" according to"<<forward_max<<std::endl;
   const float new_x_vel = NBMath::clip(source.x,forward_max);
-  // cout << "Clipping theta="<<source.theta<<" according to"<<turning_max<<endl;
+  // std::cout << "Clipping theta="<<source.theta<<" according to"<<turning_max<<std::endl;
   const float new_theta_vel = NBMath::clip(source.theta,turning_max);
 
 

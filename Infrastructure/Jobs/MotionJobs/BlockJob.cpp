@@ -40,7 +40,7 @@ BlockJob::BlockJob(double time, float x, float y) : MotionJob(Job::MOTION_BLOCK)
     @param time the time in ms to perform the save
     @param position the position at which to perform the block
  */
-BlockJob::BlockJob(double time, const vector<float>& position) : MotionJob(Job::MOTION_BLOCK)
+BlockJob::BlockJob(double time, const std::vector<float>& position) : MotionJob(Job::MOTION_BLOCK)
 {
     m_job_time = time;     
     m_block_position = position;
@@ -50,7 +50,7 @@ BlockJob::BlockJob(double time, const vector<float>& position) : MotionJob(Job::
     @param time the time in ms to perform the save
     @param input the stream from which to read the job specific data
  */
-BlockJob::BlockJob(double time, istream& input) : MotionJob(Job::MOTION_BLOCK)
+BlockJob::BlockJob(double time, std::istream& input) : MotionJob(Job::MOTION_BLOCK)
 {
     m_job_time = time;
 
@@ -63,7 +63,7 @@ BlockJob::BlockJob(double time, istream& input) : MotionJob(Job::MOTION_BLOCK)
     unsigned int m_block_position_size = uintBuffer;
     
     // read in the save position vector
-    m_block_position = vector<float>(m_block_position_size, 0);
+    m_block_position = std::vector<float>(m_block_position_size, 0);
     for (unsigned int i=0; i<m_block_position_size; i++)
     {
         input.read(reinterpret_cast<char*>(&floatBuffer), sizeof(float));
@@ -85,7 +85,7 @@ BlockJob::~BlockJob()
     
     @param newposition the new position for the block job [x(cm), y(cm), theta(rad)]
  */
-void BlockJob::setPosition(double time, const vector<float>& newposition)
+void BlockJob::setPosition(double time, const std::vector<float>& newposition)
 {
     m_job_time = time;
     m_block_position = newposition;
@@ -94,7 +94,7 @@ void BlockJob::setPosition(double time, const vector<float>& newposition)
 /*! @brief Gets the position of the block job
     @param position parameter that will be updated with the point we want to block
  */
-void BlockJob::getPosition(double& time, vector<float>& position)
+void BlockJob::getPosition(double& time, std::vector<float>& position)
 {
     time = m_job_time;
     position = m_block_position;
@@ -103,23 +103,23 @@ void BlockJob::getPosition(double& time, vector<float>& position)
 /*! @brief Prints a human-readable summary to the stream
     @param output the stream to be written to
  */
-void BlockJob::summaryTo(ostream& output)
+void BlockJob::summaryTo(std::ostream& output)
 {
     output << "BlockJob: " << m_job_time << " (";
     for (unsigned int i=0; i<m_block_position.size(); i++)
         output << m_block_position[i] << ",";
-    output << ")" << endl;
+    output << ")" << std::endl;
 }
 
 /*! @brief Prints a csv version to the stream
     @param output the stream to be written to
  */
-void BlockJob::csvTo(ostream& output)
+void BlockJob::csvTo(std::ostream& output)
 {
     output << "BlockJob, " << m_job_time << ", ";
     for (unsigned int i=0; i<m_block_position.size(); i++)
         output << m_block_position[i] << ", ";
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -129,10 +129,10 @@ void BlockJob::csvTo(ostream& output)
 
     @param output the stream to write the job to
  */
-void BlockJob::toStream(ostream& output) const
+void BlockJob::toStream(std::ostream& output) const
 {
     #if DEBUG_JOBS_VERBOSITY > 2
-        debug << "BlockJob::toStream" << endl;
+        debug << "BlockJob::toStream" << std::endl;
     #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
@@ -149,10 +149,10 @@ void BlockJob::toStream(ostream& output) const
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const BlockJob& job)
+std::ostream& operator<<(std::ostream& output, const BlockJob& job)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "<<BlockJob" << endl;
+        debug << "<<BlockJob" << std::endl;
     #endif
     job.toStream(output);
     return output;
@@ -164,10 +164,10 @@ ostream& operator<<(ostream& output, const BlockJob& job)
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const BlockJob* job)
+std::ostream& operator<<(std::ostream& output, const BlockJob* job)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "<<BlockJob" << endl;
+        debug << "<<BlockJob" << std::endl;
     #endif
     if (job != NULL)
         job->toStream(output);

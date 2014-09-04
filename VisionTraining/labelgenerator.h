@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <string>
 
-using namespace std;
+
 
 namespace Ui {
     class LabelGenerator;
@@ -18,7 +18,7 @@ public:
     explicit LabelGenerator(QWidget *parent = 0);
     ~LabelGenerator();
     
-    bool run(const string& dir);
+    bool run(const std::string& dir);
     
 private slots:
     void cancel() {cancelled = true;}

@@ -15,7 +15,7 @@
 #include "Vision/visionblackboard.h"
 //#include "../VisionTools/classificationcolours.h"
 
-using namespace std;
+
 
 class ScanLines
 {
@@ -40,11 +40,11 @@ private:
     /**
     *   @brief  classifies a single horizontal scanline.
     */
-    static vector<ColourSegment> classifyHorizontalScan(const LookUpTable& lut, const NUImage& img, unsigned int y);
+    static std::vector<ColourSegment> classifyHorizontalScan(const LookUpTable& lut, const NUImage& img, unsigned int y);
     /**
     *   @brief  classifies a single vertical scanline.
     */
-    static vector<ColourSegment> classifyVerticalScan(const LookUpTable& lut, const NUImage& img, const Vector2<double>& start);
+    static std::vector<ColourSegment> classifyVerticalScan(const LookUpTable& lut, const NUImage& img, const Vector2<double>& start);
     
     
 };

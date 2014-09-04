@@ -18,7 +18,7 @@
 // <http://www.gnu.org/licenses/>.
 
 #include <iostream>
-using namespace std;
+
 
 #include <boost/shared_ptr.hpp>
 #include <boost/assign/std/vector.hpp>
@@ -145,17 +145,17 @@ zmp_xy_tuple StepGenerator::generate_zmp_ref() {
 
         }
 #ifdef DEBUG_ZMP
-        cout << "generate_zmp_ref()\n";
-        list<float>::iterator it;
-        cout << "zmp_ref_x: " << zmp_ref_x.size();
+        std::cout << "generate_zmp_ref()\n";
+        std::list<float>::iterator it;
+        std::cout << "zmp_ref_x: " << zmp_ref_x.size();
         for (it=zmp_ref_x.begin(); it!=zmp_ref_x.end(); ++it)
-            cout << " " << *it;
-        cout << "\n";
+            std::cout << " " << *it;
+        std::cout << "\n";
 
-        cout << " zmp_ref_y: " << zmp_ref_y.size();
+        std::cout << " zmp_ref_y: " << zmp_ref_y.size();
         for (it=zmp_ref_y.begin(); it!=zmp_ref_y.end(); ++it)
-            cout << " " << *it;
-        cout << "\n";
+            std::cout << " " << *it;
+        std::cout << "\n";
 #endif
     }
 
@@ -196,10 +196,10 @@ void StepGenerator::findSensorZMP(){
     accInWorldFrame = prod(bodyToWorldTransform,
                            accInBodyFrame);
 
-     //cout << endl<< "########################"<<endl;
-     //cout << "Accel in body  frame: "<< accInBodyFrame <<endl;
-     //cout << "Accel in world frame: "<< accInWorldFrame <<endl;
-     //cout << "Angle X is "<< inertial.angleX << " Y is" <<inertial.angleY<<endl;
+     //std::cout << std::endl<< "########################"<<std::endl;
+     //std::cout << "Accel in body  frame: "<< accInBodyFrame <<std::endl;
+     //std::cout << "Accel in world frame: "<< accInWorldFrame <<std::endl;
+     //std::cout << "Angle X is "<< inertial.angleX << " Y is" <<inertial.angleY<<std::endl;
 
     //Rotate from the local C to the global I frame
     const ufvector3 accel_c = CoordFrame3D::vector3D(accInWorldFrame(0),
@@ -226,10 +226,10 @@ void StepGenerator::findSensorZMP(){
     zmp_filter.update(tUp,pMeasure);
 
 #ifdef DEBUG_COM_TRANSFORMS
-    cout << "controller_x com: " << controller_x->getPosition();
-    cout << "com_c -> com_i (x): " << joint_com_i_x << endl;
-    cout << " controller_y com: " << controller_y->getPosition();
-    cout << "com_c -> com_i (y): " << joint_com_i_y + COM_I_Y_OFFSET << endl;
+    std::cout << "controller_x com: " << controller_x->getPosition();
+    std::cout << "com_c -> com_i (x): " << joint_com_i_x << std::endl;
+    std::cout << " controller_y com: " << controller_y->getPosition();
+    std::cout << "com_c -> com_i (y): " << joint_com_i_y + COM_I_Y_OFFSET << std::endl;
 #endif
 }
 
@@ -246,7 +246,7 @@ float StepGenerator::scaleSensors(const float sensorZMP,
  */
 void StepGenerator::tick_controller(){
 #ifdef DEBUG_STEPGENERATOR
-    cout << "StepGenerator::tick_controller" << endl;
+    std::cout << "StepGenerator::tick_controller" << std::endl;
 #endif
 
     // update the acc/gyro based ZMP (in (ZmpEKF)zmp_filter)
@@ -255,7 +255,7 @@ void StepGenerator::tick_controller(){
     zmp_xy_tuple zmp_ref = generate_zmp_ref();
 
 #ifdef DEBUG_ZMP
-    cout << "StepGenerator::generate_zmp_ref() finished\n";
+    std::cout << "StepGenerator::generate_zmp_ref() finished\n";
 #endif
 
     //The observer needs to know the current reference zmp
@@ -294,7 +294,7 @@ void StepGenerator::tick_controller(){
 
 WalkLegsTuple StepGenerator::tick_legs(){
 #ifdef DEBUG_STEPGENERATOR
-    cout << "StepGenerator::tick_legs" << endl;
+    std::cout << "StepGenerator::tick_legs" << std::endl;
 #endif
     sensorAngles.tick_sensors();
     //Decide if this is the first frame into any double support phase
@@ -303,7 +303,7 @@ WalkLegsTuple StepGenerator::tick_legs(){
         swapSupportLegs();
     }
 
-    //cout << "Support step is " << *supportStep_f <<endl;
+    //std::cout << "Support step is " << *supportStep_f <<std::endl;
     //hack-ish for now to do hyp pitch crap
     leftLeg.setSteps(swingingStepSource_f, swingingStep_f,supportStep_f);
     rightLeg.setSteps(swingingStepSource_f, swingingStep_f,supportStep_f);
@@ -357,13 +357,13 @@ WalkLegsTuple StepGenerator::tick_legs(){
        && lastStep_s->type == END_STEP &&
        // Check that the walk vector is currently all 0s
        x == 0.0f && y == 0.0f && theta == 0.0f) {
-        //cout << "step generator done = true" << endl;
+        //std::cout << "step generator done = true" << std::endl;
         done = true;
     }
 
     debugLogging();
 #ifdef DEBUG_STEPGENERATOR
-    cout << "StepGenerator::tick_legs DONE" << endl;
+    std::cout << "StepGenerator::tick_legs DONE" << std::endl;
 #endif
 
     return WalkLegsTuple(left,right);
@@ -633,16 +633,16 @@ void StepGenerator::setSpeed(const float _x, const float _y,
     theta = _theta;
 
 #ifdef DEBUG_STEPGENERATOR
-    cout << "New Walk Vector is:" << endl
-         << "    x: " << x << " y: " << y << " theta: " << theta << endl;
-    cout << "Are we done? " << (done ? "Yes" : "No") << endl;
+    std::cout << "New Walk vector is:" << std::endl
+         << "    x: " << x << " y: " << y << " theta: " << theta << std::endl;
+    std::cout << "Are we done? " << (done ? "Yes" : "No") << std::endl;
 #endif
 
     if(done){
 
 #ifdef DEBUG_STEPGENERATOR
-        cout << "The walk engine was previously inactive, so we need to do extra"
-            " work in stepGen::setSpeed()"<<endl;
+        std::cout << "The walk engine was previously inactive, so we need to do extra"
+            " work in stepGen::setSpeed()"<<std::endl;
 #endif
 
         //we are starting fresh from a stopped state, so we need to clear all remaining
@@ -679,15 +679,15 @@ void StepGenerator::takeSteps(const float _x, const float _y, const float _theta
                               const int _numSteps){
 
 #ifdef DEBUG_STEPGENERATOR
-    cout << "takeSteps called with (" << _x << "," << _y<<","<<_theta
-         <<") and with nsteps = "<<_numSteps<<endl;
+    std::cout << "takeSteps called with (" << _x << "," << _y<<","<<_theta
+         <<") and with nsteps = "<<_numSteps<<std::endl;
 #endif
 
     //Ensure that we are currently stopped -- if not, throw warning
     if(!done){
-        cout<< "Warning!!! Step Command with (" << _x << "," << _y<<","<<_theta
+        std::cout<< "Warning!!! Step Command with (" << _x << "," << _y<<","<<_theta
             <<") and with "<<_numSteps<<" Steps were APPENDED because"
-            "StepGenerator is already active!!" <<endl;
+            "StepGenerator is already active!!" <<std::endl;
     }else{
        //we are starting fresh from a stopped state, so we need to clear all remaining
         //steps and zmp values.
@@ -743,7 +743,7 @@ void StepGenerator::resetSteps(const bool startLeft){
     float supportSign = 1.0f;
     if(startLeft){
         #ifdef DEBUG_STEPGENERATOR
-        cout << "StepGenerator::startLeft"<<endl;
+        std::cout << "StepGenerator::startLeft"<<std::endl;
         #endif
 
         //start off in a double support phase where the right leg swings first
@@ -763,7 +763,7 @@ void StepGenerator::resetSteps(const bool startLeft){
 
     }else{ //startRight
         #ifdef DEBUG_STEPGENERATOR
-        cout << "StepGenerator::startRight"<<endl;
+        std::cout << "StepGenerator::startRight"<<std::endl;
         #endif
 
         //start off in a double support phase where the left leg swings first
@@ -899,7 +899,7 @@ void StepGenerator::generateStep( float _x,
                                    type));
 
 #ifdef DEBUG_STEPGENERATOR
-    cout << "Generated a new step: "<<*step<<endl;
+    std::cout << "Generated a new step: "<<*step<<std::endl;
 #endif
     futureSteps.push_back(step);
     lastQueuedStep = step;
@@ -911,7 +911,7 @@ void StepGenerator::generateStep( float _x,
  * Method to return the default stance of the robot (including arms)
  *
  */
-vector<float>*
+std::vector<float>*
 StepGenerator::getDefaultStance(const Gait& wp){
     const ufvector3 lleg_goal =
         CoordFrame3D::vector3D(-wp.stance[WP::BODY_OFF_X],
@@ -922,17 +922,17 @@ StepGenerator::getDefaultStance(const Gait& wp){
                                -wp.stance[WP::LEG_SEPARATION_Y]*0.5f,
                                -wp.stance[WP::BODY_HEIGHT]);
 
-    const vector<float> lleg = WalkingLeg::getAnglesFromGoal(LLEG_CHAIN,
+    const std::vector<float> lleg = WalkingLeg::getAnglesFromGoal(LLEG_CHAIN,
                                                              lleg_goal,
                                                              wp.stance);
-    const vector<float> rleg = WalkingLeg::getAnglesFromGoal(RLEG_CHAIN,
+    const std::vector<float> rleg = WalkingLeg::getAnglesFromGoal(RLEG_CHAIN,
                                                              rleg_goal,
                                                              wp.stance);
 
-    const vector<float> larm(LARM_WALK_ANGLES,&LARM_WALK_ANGLES[ARM_JOINTS]);
-    const vector<float> rarm(RARM_WALK_ANGLES,&RARM_WALK_ANGLES[ARM_JOINTS]);
+    const std::vector<float> larm(LARM_WALK_ANGLES,&LARM_WALK_ANGLES[ARM_JOINTS]);
+    const std::vector<float> rarm(RARM_WALK_ANGLES,&RARM_WALK_ANGLES[ARM_JOINTS]);
 
-    vector<float> *allJoints = new vector<float>();
+    std::vector<float> *allJoints = new std::vector<float>();
 
     //now combine all the vectors together
     allJoints->insert(allJoints->end(),larm.begin(),larm.end());
@@ -1053,13 +1053,13 @@ void StepGenerator::resetQueues(){
  * it is vital to call 'resetOdometry()' in order to make sure any movement
  * since the last call to getOdometryUpdate doesnt get lost
  */
-vector<float> StepGenerator::getOdometryUpdate(){
+std::vector<float> StepGenerator::getOdometryUpdate(){
     const float rotation = -safe_asin(cc_Transform(1,0));
     const ufvector3 odo = prod(cc_Transform,CoordFrame3D::vector3D(0.0f,0.0f));
     const float odoArray[3] = {odo(0),odo(1),rotation};
     //printf("Odometry update is (%g,%g,%g)\n",odoArray[0],odoArray[1],odoArray[2]);
     cc_Transform = CoordFrame3D::translation3D(0.0f,0.0f);
-    return vector<float>(odoArray,&odoArray[3]);
+    return std::vector<float>(odoArray,&odoArray[3]);
 }
 
 /**
@@ -1077,7 +1077,7 @@ void StepGenerator::resetOdometry(const float initX, const float initY){
  *  rather than the C frame, which is what we are actually returning.
  */
 
-void StepGenerator::updateOdometry(const vector<float> &deltaOdo){
+void StepGenerator::updateOdometry(const std::vector<float> &deltaOdo){
     const ufmatrix3 odoUpdate = prod(CoordFrame3D::translation3D(deltaOdo[0],
                                                                  deltaOdo[1]),
                                      CoordFrame3D::rotation3D(CoordFrame3D::Z_AXIS,
@@ -1142,7 +1142,7 @@ void StepGenerator::debugLogging(){
     float zmp_x = controller_x->getZMP();
     float zmp_y = controller_y->getZMP();
 
-    vector<float> bodyAngles = sensors->getBodyAngles();
+    std::vector<float> bodyAngles = sensors->getBodyAngles();
     float lleg_angles[LEG_JOINTS],rleg_angles[LEG_JOINTS];
     int bi = HEAD_JOINTS+ARM_JOINTS;
     for(unsigned int i = 0; i < LEG_JOINTS; i++, bi++)

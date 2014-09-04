@@ -114,7 +114,8 @@ public:
         GoalEdgeLinesStart      = 21,
         GoalEdgeLinesEnd        = 22,
         Plot                    = 23,
-        numDisplays             = 24
+        ExpectedProjection      = 24,
+        numDisplays             = 25
     };
 
     //! Returns the minimum desired size for the window
@@ -189,6 +190,8 @@ public:
             return QString("Goal Edge Lines: End");
         case Plot:
             return QString("Plot");
+        case ExpectedProjection:
+            return QString("Expected Field Projection");
         default:
             return QString("Unknown");
         }

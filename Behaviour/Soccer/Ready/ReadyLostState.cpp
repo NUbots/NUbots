@@ -48,7 +48,7 @@ ReadyLostState::~ReadyLostState()
 void ReadyLostState::doStateCommons()
 {   // do behaviour that is common to all ready lost states
     #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-        debug << "ReadyLostState" << endl;
+        debug << "ReadyLostState" << std::endl;
     #endif
     if (m_parent->stateChanged() or m_data->CurrentTime - m_previous_time > 200)
     {

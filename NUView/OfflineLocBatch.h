@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <QStringList>
-#include <vector>
 #include <QThread>
+#include <vector>
 #include <iterator>
 class OfflineLocalisation;
 class LogFileReader;
@@ -59,7 +59,7 @@ signals:
     void ProgressChanged(int, int);
     
 public slots:
-    void ProcessFiles(const QStringList& files);
+    void ProcessFiles(const QStringList& source_files, const QString& report_path, const QString& batch_type);
     void writeReport();
     void StopProcessing();
 
@@ -69,10 +69,18 @@ protected slots:
 
 protected:
     QString ReportName(const LocalisationSettings& settings, const QString& log_name);
-    void GenerateSettings();
+    std::vector<LocalisationSettings*> GenerateBranchMergeBatchSettings() const;
+    std::vector<LocalisationSettings*> GenerateFilterExperimentBatchSettings() const;
+    std::vector<LocalisationSettings*> GenerateStandardExperimentBatchSettings() const;
+
+    QString FindCommonPath(const QStringList& paths);
+
     void LoadLog(const QString& path);
     OfflineLocalisation* m_offline_loc;
     LogFileReader* m_log_reader;
+    QString m_current_batch_type;
+    QString m_common_source_path;
+    QString m_result_path;
     QStringList m_file_list;
     QStringList::Iterator m_current_file;
     std::vector<LocalisationSettings*> m_simulation_settings;
@@ -82,6 +90,5 @@ protected:
     ReportWriterThread* m_report_writer;
 
 };
-
 
 #endif // OFFLINELOCBATCH_H

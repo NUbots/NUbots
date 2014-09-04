@@ -42,7 +42,7 @@
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
-using namespace std;
+
 
 class BallIsLostSubState : public SoccerState
 {
@@ -81,7 +81,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << m_data->CurrentTime << ": BallIsLostPan" << endl;
+            debug << m_data->CurrentTime << ": BallIsLostPan" << std::endl;
         #endif
         // keep track of the time in this state
         bool kickIsActive, walkIsActive = false;
@@ -91,7 +91,7 @@ protected:
         kickIsActive = kickIsActive and not walkIsActive;
         
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "Kick Active: " << kickIsActive << " State Changed: " << m_parent->stateChanged() << " Time delta: " << m_data->CurrentTime - m_previous_time << endl;
+            debug << "Kick Active: " << kickIsActive << " State Changed: " << m_parent->stateChanged() << " Time delta: " << m_data->CurrentTime - m_previous_time << std::endl;
         #endif
         if (m_parent->stateChanged() or kickIsActive or m_data->CurrentTime - m_previous_time > 200)
             reset();
@@ -108,7 +108,7 @@ protected:
         }
         
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "Time in state: " << m_time_in_state << endl;
+            debug << "Time in state: " << m_time_in_state << std::endl;
         #endif
         
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
@@ -161,13 +161,13 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << m_data->CurrentTime << ": BallIsLostSpin" << endl;
+            debug << m_data->CurrentTime << ": BallIsLostSpin" << std::endl;
         #endif
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
         if (m_parent->stateChanged())
         {   // decided which direction to spin based on the estimated bearing when we enter this state or the current walk speed if we are still walking
             m_time_in_state = 0;
-            vector<float> walkspeed;
+            std::vector<float> walkspeed;
             //if (m_data->get(NUSensorsData::MotionWalkSpeed, walkspeed) and walkspeed[2] != 0)        
             //    m_spin_speed = mathGeneral::sign(walkspeed[2])*m_ROTATIONAL_SPEED;
             //else
@@ -199,14 +199,14 @@ class BallIsLostMove : public BallIsLostSubState
 public:
     BallIsLostMove(BallIsLostState* parent) : BallIsLostSubState(parent) 
     {
-        m_position = vector<float>(3,0);
+        m_position = std::vector<float>(3,0);
     }
     ~BallIsLostMove() {};
 protected:
     BehaviourState* nextState()
     {   // do state transitions in the ball is lost state machine
         Self& self = m_field_objects->self;
-        vector<float> distance = self.CalculateDifferenceFromFieldState(m_position);
+        std::vector<float> distance = self.CalculateDifferenceFromFieldState(m_position);
         if (distance[0] < 30)
             return m_lost_machine->m_lost_spin;
         else
@@ -215,7 +215,7 @@ protected:
     void doState()
     {
 #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-        debug << m_data->CurrentTime << ": BallIsLostMove" << endl;
+        debug << m_data->CurrentTime << ": BallIsLostMove" << std::endl;
 #endif
         Self& self = m_field_objects->self;
         MobileObject& ball = m_field_objects->mobileFieldObjects[FieldObjects::FO_BALL];
@@ -243,8 +243,8 @@ protected:
                 m_position[2] = 0;
             }
         }
-        vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_position, 0, 55, 0);
-        vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 50, 100);
+        std::vector<float> speed = BehaviourPotentials::goToFieldState(m_field_objects->self, m_position, 0, 55, 0);
+        std::vector<float> result = BehaviourPotentials::sensorAvoidObjects(speed, m_data, 50, 100);
         m_jobs->addMotionJob(new WalkJob(result[0], result[1], result[2]));
         
         float pan_width = 1.5;
@@ -254,7 +254,7 @@ protected:
             m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Ball, 50, 9000, -pan_width, pan_width));
     }
 private:
-    vector<float> m_position;       // the target location in field coordinates
+    std::vector<float> m_position;       // the target location in field coordinates
 };
 
 #endif

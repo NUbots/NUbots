@@ -28,25 +28,25 @@
 #include "../MotionJob.h"
 
 #include <vector>
-using namespace std;
+
 
 class WalkPerturbationJob : public MotionJob
 {
 public:
     WalkPerturbationJob(float magnitude, float direction);
-    WalkPerturbationJob(istream& input);
+    WalkPerturbationJob(std::istream& input);
     ~WalkPerturbationJob();
     
     float getMagnitude();
     float getDirection();
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
     
-    friend ostream& operator<<(ostream& output, const WalkPerturbationJob& job);
-    friend ostream& operator<<(ostream& output, const WalkPerturbationJob* job);
+    friend std::ostream& operator<<(std::ostream& output, const WalkPerturbationJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const WalkPerturbationJob* job);
 protected:
-    virtual void toStream(ostream& output) const;
+    virtual void toStream(std::ostream& output) const;
 private:
     float m_magnitude;                  //!< the magnitude of the perturbation (0 to 100)
     float m_direction;                  //!< the direction to perturbed the robot in radians

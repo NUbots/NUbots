@@ -19,7 +19,6 @@ class QPushButton;
 class QWidget;
 class QVBoxLayout;
 class QHBoxLayout;
-using namespace std;
 
 #define Byte unsigned char
 

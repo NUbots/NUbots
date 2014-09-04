@@ -30,10 +30,10 @@
 /*! @brief Constructs the network thread
  */
 
-SaveImagesThread::SaveImagesThread(Vision* vision) : ConditionalThread(string("SaveImagesThread"), 0)
+SaveImagesThread::SaveImagesThread(Vision* vision) : ConditionalThread(std::string("SaveImagesThread"), 0)
 {
     #if DEBUG_VISION_VERBOSITY > 0
-        debug << "SaveImagesThread::SaveImagesThread(" << vision << ") with priority " << static_cast<int>(m_priority) << endl;
+        debug << "SaveImagesThread::SaveImagesThread(" << vision << ") with priority " << static_cast<int>(m_priority) << std::endl;
     #endif
     m_vision = vision;
     start();
@@ -42,7 +42,7 @@ SaveImagesThread::SaveImagesThread(Vision* vision) : ConditionalThread(string("S
 SaveImagesThread::~SaveImagesThread()
 {
     #if DEBUG_VISION_VERBOSITY > 0
-        debug << "SaveImagesThread::~SaveImagesThread()" << endl;
+        debug << "SaveImagesThread::~SaveImagesThread()" << std::endl;
     #endif
 }
 
@@ -52,7 +52,7 @@ SaveImagesThread::~SaveImagesThread()
 void SaveImagesThread::run()
 {
     #if DEBUG_VISION_VERBOSITY > 0
-        debug << "SaveImagesThread::run()" << endl;
+        debug << "SaveImagesThread::run()" << std::endl;
     #endif
     
     int err = 0;
@@ -64,5 +64,5 @@ void SaveImagesThread::run()
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------
         
     } 
-    errorlog << "SaveImagesThread is exiting. err: " << err << " errno: " << errno << endl;
+    errorlog << "SaveImagesThread is exiting. err: " << err << " errno: " << errno << std::endl;
 }

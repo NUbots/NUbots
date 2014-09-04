@@ -91,92 +91,92 @@ namespace ConfigSystem
     ConfigParameter::ConfigParameter(bool                                            value)
     {
         _val_type = vt_bool;
+        _val_bool = new bool(value);
+        _range_long = new ConfigRange<long>();
         _desc = "";
         _modified = false;
         _locked   = false;
-        _val_bool = new bool(value);
-        _range_long = new ConfigRange<long>();
     }
     ConfigParameter::ConfigParameter(long                                            value)
     {
         _val_type = vt_long;
+        _val_long = new long(value);
+        _range_long = new ConfigRange<long>();
         _desc = "";
         _modified = false;
         _locked   = false;
-        _val_long = new long(value);
-        _range_long = new ConfigRange<long>();
     }
     ConfigParameter::ConfigParameter(double                                          value)
     {
         _val_type = vt_double;
+        _val_double = new double(value);
+        _range_double = new ConfigRange<double>();
         _desc = "";
         _modified = false;
         _locked   = false;
-        _val_double = new double(value);
-        _range_double = new ConfigRange<double>();
     }
     ConfigParameter::ConfigParameter(std::string                                     value)
     {
         _val_type = vt_string;
+        _val_string = new std::string(value);
+        _range_long = NULL;
         _desc = "";
         _modified = false;
         _locked   = false;
-        _val_string = new std::string(value);
-        _range_long = NULL;
     }
     ConfigParameter::ConfigParameter(std::vector<long>                               value)
     {
         _val_type = vt_1dvector_long;
+        _val_1dvector_long = new std::vector<long>(value);
+        _range_long = new ConfigRange<long>();
         _desc = "";
         _modified = false;
         _locked   = false;
-        _val_1dvector_long = new std::vector<long>(value);
-        _range_long = new ConfigRange<long>();
     }
     ConfigParameter::ConfigParameter(std::vector<std::vector<long> >                 value)
     {
         _val_type = vt_2dvector_long;
+        _val_2dvector_long = new std::vector<std::vector<long> >(value);
+        _range_long = new ConfigRange<long>();
         _desc = "";
         _modified = false;
         _locked   = false;
-        _val_2dvector_long = new std::vector<std::vector<long> >(value);
-        _range_long = new ConfigRange<long>();
     }
     ConfigParameter::ConfigParameter(std::vector<std::vector<std::vector<long> > >   value)
     {
         _val_type = vt_3dvector_long;
+        _val_3dvector_long = new std::vector<std::vector<std::vector<long> > >(value);
+        _range_long = new ConfigRange<long>();
         _desc = "";
         _modified = false;
         _locked   = false;
-        _val_3dvector_long = new std::vector<std::vector<std::vector<long> > >(value);
-        _range_long = new ConfigRange<long>();
     }
     ConfigParameter::ConfigParameter(std::vector<double>                             value)
     {
         _val_type = vt_1dvector_double;
+        _val_1dvector_double = new std::vector<double>(value);
+        _range_double = new ConfigRange<double>();
         _desc = "";
         _modified = false;
         _locked   = false;
-        _val_1dvector_double = new std::vector<double>(value);
-        _range_double = new ConfigRange<double>();
     }
     ConfigParameter::ConfigParameter(std::vector<std::vector<double> >               value)
     {
         _val_type = vt_2dvector_double;
+        _val_2dvector_double = new std::vector<std::vector<double> >(value);
+        _range_double = new ConfigRange<double>();
         _desc = "";
         _modified = false;
         _locked   = false;
-        _val_2dvector_double = new std::vector<std::vector<double> >(value);
-        _range_double = new ConfigRange<double>();
     }
     ConfigParameter::ConfigParameter(std::vector<std::vector<std::vector<double> > > value)
     {
         _val_type = vt_3dvector_double;
+        _val_3dvector_double = new std::vector<std::vector<std::vector<double> > >(value);
+        _range_double = new ConfigRange<double>();
         _desc = "";
         _modified = false;
         _locked   = false;
-        _val_3dvector_double = new std::vector<std::vector<std::vector<double> > >(value);
-        _range_double = new ConfigRange<double>();
     }
     
     // Would be safer/better to remove this?
@@ -312,7 +312,7 @@ namespace ConfigSystem
 
 	//Getting/setting general value stuff
 	
-    bool ConfigParameter::getRange_long(ConfigRange<long> &range)
+    bool ConfigParameter::getRange_long(ConfigRange<long>* range)
     {
     	value_type vt = _val_type;
     	
@@ -328,11 +328,11 @@ namespace ConfigSystem
             return false;
         }
 
-        range = *(_range_long);
+        *(range) = *(_range_long);
         return true;
     }
     
-    bool ConfigParameter::getRange_double(ConfigRange<double> &range)
+    bool ConfigParameter::getRange_double(ConfigRange<double>* range)
     {
     	value_type vt = _val_type;
     
@@ -348,7 +348,7 @@ namespace ConfigSystem
             return false;
         }
 
-        range = *(_range_double);
+        *(range) = *(_range_double);
         return true;
     }
 
@@ -388,7 +388,7 @@ namespace ConfigSystem
 
 
 
-    bool ConfigParameter::getValue_bool(bool &value)
+    bool ConfigParameter::getValue_bool(bool* value)
     {
         if(_val_type != vt_bool) return false;
         if(_val_bool == NULL)
@@ -396,11 +396,11 @@ namespace ConfigSystem
             std::cout << __PRETTY_FUNCTION__ << ": " << "_val_bool is NULL." << std::endl;
             return false;
         }
-        value = *(_val_bool);
+        *value = *(_val_bool);
         return true;
     }
     
-    bool ConfigParameter::getValue_long(long &value)
+    bool ConfigParameter::getValue_long(long* value)
     {
         if(_val_type != vt_long) return false;
         if(_val_long == NULL)
@@ -408,11 +408,11 @@ namespace ConfigSystem
             std::cout << __PRETTY_FUNCTION__ << ": " << "_val_long is NULL." << std::endl;
             return false;
         }
-        value = *(_val_long);
+        *value = *(_val_long);
         return true;
     }
 
-    bool ConfigParameter::getValue_double(double &value)
+    bool ConfigParameter::getValue_double(double* value)
     {
         if(_val_type != vt_double) return false;
         if(_val_double == NULL)
@@ -420,11 +420,11 @@ namespace ConfigSystem
             std::cout << __PRETTY_FUNCTION__ << ": " << "_val_double is NULL." << std::endl;
             return false;
         }
-        value = *(_val_double);
+        *value = *(_val_double);
         return true;
     }
 
-    bool ConfigParameter::getValue_string(std::string &value)
+    bool ConfigParameter::getValue_string(std::string* value)
     {
         if(_val_type != vt_string) return false;
         if(_val_string == NULL)
@@ -432,11 +432,11 @@ namespace ConfigSystem
             std::cout << __PRETTY_FUNCTION__ << ": " << "_val_string is NULL." << std::endl;
             return false;
         }
-        value = *(_val_string);
+        *value = *(_val_string);
         return true;
     }
 
-    bool ConfigParameter::getValue_vector1d_long(std::vector<long> &value)
+    bool ConfigParameter::getValue_vector1d_long(std::vector<long>* value)
     {
         if(_val_type != vt_1dvector_long) return false;
         if(_val_1dvector_long == NULL)
@@ -444,10 +444,10 @@ namespace ConfigSystem
             std::cout << __PRETTY_FUNCTION__ << ": " << "_val_1dvector_long is NULL." << std::endl;
             return false;
         }
-        value = *(_val_1dvector_long);
+        *value = *(_val_1dvector_long);
         return true;
     }
-    bool ConfigParameter::getValue_vector2d_long(std::vector<std::vector<long> > &value)
+    bool ConfigParameter::getValue_vector2d_long(std::vector<std::vector<long> >* value)
     {
         if(_val_type != vt_2dvector_long) return false;
         if(_val_2dvector_long == NULL)
@@ -455,10 +455,10 @@ namespace ConfigSystem
             std::cout << __PRETTY_FUNCTION__ << ": " << "_val_2dvector_long is NULL." << std::endl;
             return false;
         }
-        value = *(_val_2dvector_long);
+        *value = *(_val_2dvector_long);
         return true;
     }
-    bool ConfigParameter::getValue_vector3d_long(std::vector<std::vector<std::vector<long> > > &value)
+    bool ConfigParameter::getValue_vector3d_long(std::vector<std::vector<std::vector<long> > >* value)
     {
         if(_val_type != vt_3dvector_long) return false;
         if(_val_3dvector_long == NULL)
@@ -466,11 +466,11 @@ namespace ConfigSystem
             std::cout << __PRETTY_FUNCTION__ << ": " << "_val_3dvector_long is NULL." << std::endl;
             return false;
         }
-        value = *(_val_3dvector_long);
+        *value = *(_val_3dvector_long);
         return true;
     }
 
-    bool ConfigParameter::getValue_vector1d_double(std::vector<double> &value)
+    bool ConfigParameter::getValue_vector1d_double(std::vector<double>* value)
     {
         if(_val_type != vt_1dvector_double) return false;
         if(_val_1dvector_double == NULL)
@@ -478,10 +478,10 @@ namespace ConfigSystem
             std::cout << __PRETTY_FUNCTION__ << ": " << "_val_1dvector_double is NULL." << std::endl;
             return false;
         }
-        value = *(_val_1dvector_double);
+        *value = *(_val_1dvector_double);
         return true;
     }
-    bool ConfigParameter::getValue_vector2d_double(std::vector<std::vector<double> > &value)
+    bool ConfigParameter::getValue_vector2d_double(std::vector<std::vector<double> >* value)
     {
         if(_val_type != vt_2dvector_double) return false;
         if(_val_2dvector_double == NULL)
@@ -489,10 +489,10 @@ namespace ConfigSystem
             std::cout << __PRETTY_FUNCTION__ << ": " << "_val_2dvector_double is NULL." << std::endl;
             return false;
         }
-        value = *(_val_2dvector_double);
+        *value = *(_val_2dvector_double);
         return true;
     }
-    bool ConfigParameter::getValue_vector3d_double(std::vector<std::vector<std::vector<double> > > &value)
+    bool ConfigParameter::getValue_vector3d_double(std::vector<std::vector<std::vector<double> > >* value)
     {
         if(_val_type != vt_3dvector_double) return false;
         if(_val_3dvector_double == NULL)
@@ -500,7 +500,7 @@ namespace ConfigSystem
             std::cout << __PRETTY_FUNCTION__ << ": " << "_val_3dvector_double is NULL." << std::endl;
             return false;
         }
-        value = *(_val_3dvector_double);
+        *value = *(_val_3dvector_double);
         return true;
     }
 
@@ -662,52 +662,52 @@ namespace ConfigSystem
         return setValue_vector3d_double(value);
     }
 
-    bool ConfigParameter::getValue(bool                &value)
+    bool ConfigParameter::getValue(bool               * value)
     { 
         return getValue_bool         (value);
     }
-    bool ConfigParameter::getValue(long                &value)
+    bool ConfigParameter::getValue(long               * value)
     { 
         return getValue_long         (value);
     }
-    bool ConfigParameter::getValue(double              &value)
+    bool ConfigParameter::getValue(double             * value)
     { 
         return getValue_double       (value);
     }
-    bool ConfigParameter::getValue(std::string         &value)
+    bool ConfigParameter::getValue(std::string        * value)
     { 
         return getValue_string       (value);
     }
-    bool ConfigParameter::getValue(std::vector<long>   &value)
+    bool ConfigParameter::getValue(std::vector<long>  * value)
     { 
         return getValue_vector1d_long  (value);
     }
-    bool ConfigParameter::getValue(std::vector<std::vector<long> >   &value)
+    bool ConfigParameter::getValue(std::vector<std::vector<long> >  * value)
     { 
         return getValue_vector2d_long  (value);
     }
-    bool ConfigParameter::getValue(std::vector<std::vector<std::vector<long> > >   &value)
+    bool ConfigParameter::getValue(std::vector<std::vector<std::vector<long> > >  * value)
     { 
         return getValue_vector3d_long  (value);
     }
-    bool ConfigParameter::getValue(std::vector<double> &value)
+    bool ConfigParameter::getValue(std::vector<double>* value)
     {
         return getValue_vector1d_double(value);
     }
-    bool ConfigParameter::getValue(std::vector<std::vector<double> > &value)
+    bool ConfigParameter::getValue(std::vector<std::vector<double> >* value)
     {
         return getValue_vector2d_double(value);
     }
-    bool ConfigParameter::getValue(std::vector<std::vector<std::vector<double> > > &value)
+    bool ConfigParameter::getValue(std::vector<std::vector<std::vector<double> > >* value)
     {
         return getValue_vector3d_double(value);
     }
 
-    bool ConfigParameter::getRange(ConfigRange<long>   &range)
+    bool ConfigParameter::getRange(ConfigRange<long>*   range)
     {
         return getRange_long  (range);
     }
-    bool ConfigParameter::getRange(ConfigRange<double> &range)
+    bool ConfigParameter::getRange(ConfigRange<double>* range)
     {
         return getRange_double(range);
     }

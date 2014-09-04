@@ -31,7 +31,7 @@
  	@param name the name of the optimiser. The name is used in debug logs, and is used for load/save filenames by default
  	@param parameters the initial seed for the optimisation
  */
-Optimiser::Optimiser(std::string name, vector<Parameter> parameters)
+Optimiser::Optimiser(std::string name, std::vector<Parameter> parameters)
 {
     m_name = name;
     m_initial_parameters = parameters;
@@ -49,9 +49,9 @@ Optimiser::~Optimiser()
 }
 
 /*! @brief A dummy implementation of a the multi-objective optimiser interface
- * 	@param fitness a vector of fitnesses, one entry for each of the objectives. The higher the fitness the better the parameters.
+ * 	@param fitness a std::vector of fitnesses, one entry for each of the objectives. The higher the fitness the better the parameters.
  */
-void Optimiser::setParametersResult(const vector<float>& fitness)
+void Optimiser::setParametersResult(const std::vector<float>& fitness)
 {
 	if (not fitness.empty())
 		setParametersResult(fitness[0]);
@@ -60,7 +60,7 @@ void Optimiser::setParametersResult(const vector<float>& fitness)
 /*! @brief Returns the optimiser's name
     @return the optimiser's name
 */
-string& Optimiser::getName()
+std::string& Optimiser::getName()
 {
     return m_name;
 }
@@ -69,7 +69,7 @@ string& Optimiser::getName()
     @param o the output stream to save the optimiser to
    	@param optimiser the optimiser to save
 */
-ostream& operator<<(ostream& o, const Optimiser& optimiser)
+std::ostream& operator<<(std::ostream& o, const Optimiser& optimiser)
 {
     optimiser.toStream(o);
     return o;
@@ -79,7 +79,7 @@ ostream& operator<<(ostream& o, const Optimiser& optimiser)
     @param o the output stream to save the optimiser to
     @param optimiser the optimiser to save
  */
-ostream& operator<<(ostream& o, const Optimiser* optimiser)
+std::ostream& operator<<(std::ostream& o, const Optimiser* optimiser)
 {
     if (optimiser != 0)
         o << *optimiser;
@@ -90,7 +90,7 @@ ostream& operator<<(ostream& o, const Optimiser* optimiser)
     @param i the input stream to load the optimiser from
     @param optimiser the optimiser to load
  */
-istream& operator>>(istream& i, Optimiser& optimiser)
+std::istream& operator>>(std::istream& i, Optimiser& optimiser)
 {
     optimiser.fromStream(i);
     return i;
@@ -100,7 +100,7 @@ istream& operator>>(istream& i, Optimiser& optimiser)
     @param i the input stream to load the optimiser from
     @param optimiser the optimiser to load
  */
-istream& operator>>(istream& i, Optimiser* optimiser)
+std::istream& operator>>(std::istream& i, Optimiser* optimiser)
 {
     if (optimiser != 0)
         i >> *optimiser;
@@ -114,24 +114,24 @@ void Optimiser::save()
 }
 
 /*! @brief Saves the optimiser to a file called "name.log" */
-void Optimiser::saveAs(string name)
+void Optimiser::saveAs(std::string name)
 {
-    ofstream file((DATA_DIR + string("Optimisation/") + name + ".log").c_str());
+    std::ofstream file((DATA_DIR + std::string("Optimisation/") + name + ".log").c_str());
     if (file.is_open())
     {
         file << this;
         file.close();
     }
     else {
-        //debug << "Optimiser::saveAs(): Failed to open file " << name + ".log" << endl;
+        //debug << "Optimiser::saveAs(): Failed to open file " << name + ".log" << std::endl;
     }
 }
 
 /*! @brief Loads the optimiser from a file called "m_name.log". If no file is found, the optimiser continues to use the current configuration. */
 void Optimiser::load()
 {
-    string filepath = DATA_DIR + string("Optimisation/") + m_name + ".log";
-    ifstream file(filepath.c_str());
+    std::string filepath = DATA_DIR + std::string("Optimisation/") + m_name + ".log";
+    std::ifstream file(filepath.c_str());
     if (file.is_open())
     {
         file >> this;

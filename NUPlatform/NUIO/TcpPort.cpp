@@ -31,7 +31,6 @@
 #include <string.h>
 #include <errno.h>
 #if defined(USE_LOCALISATION)
-    #include "Localisation/Localisation.h"
     #include "Localisation/SelfLocalisation.h"
 #endif
 #include "Infrastructure/FieldObjects/FieldObjects.h"
@@ -41,22 +40,22 @@
 
     @param portnumber the port number the data will be sent and received on
  */
-TcpPort::TcpPort(int portnumber): Thread(string("Tcp Thread"), 0)
+TcpPort::TcpPort(int portnumber): Thread(std::string("Tcp Thread"), 0)
 {
 #ifdef WIN32
     WSADATA wsa_Data;
     int wsa_ReturnCode = WSAStartup(0x101,&wsa_Data);
     if (wsa_ReturnCode != 0)
     {
-        debug <<  "WSA ERROR CODE: "<< wsa_ReturnCode << endl;
+        debug <<  "WSA ERROR CODE: "<< wsa_ReturnCode << std::endl;
     }
 #endif
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "TcpPort::TcpPort(" << portnumber << ")" << endl;
+    debug << "TcpPort::TcpPort(" << portnumber << ")" << std::endl;
 #endif
     m_port_number = portnumber;
     if ((m_sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) 
-        errorlog << "TcpPort::TcpPort(" << m_port_number << "). Failed to create socket file descriptor." << endl;
+        errorlog << "TcpPort::TcpPort(" << m_port_number << "). Failed to create socket file descriptor." << std::endl;
 
     // Set the reuse address flag
     #ifdef WIN32
@@ -65,7 +64,7 @@ TcpPort::TcpPort(int portnumber): Thread(string("Tcp Thread"), 0)
         int reuseflag = 1;
     #endif
     if (setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEADDR, &reuseflag, sizeof(reuseflag)) == -1)
-        errorlog << "TcpPort::TcpPort(). Failed to set reuseaddr socket options, errno: " << errno << endl;
+        errorlog << "TcpPort::TcpPort(). Failed to set reuseaddr socket options, errno: " << errno << std::endl;
       
     m_address.sin_family = AF_INET;                             // host byte order
     m_address.sin_port = htons(m_port_number);                  // short, network byte order
@@ -78,10 +77,10 @@ TcpPort::TcpPort(int portnumber): Thread(string("Tcp Thread"), 0)
     memset(m_broadcast_address.sin_zero, '\0', sizeof m_broadcast_address.sin_zero);
     
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "TcpPort::TcpPort(). Binding socket." << endl;
+    debug << "TcpPort::TcpPort(). Binding socket." << std::endl;
 #endif
-    if (bind(m_sockfd, (struct sockaddr *)&m_address, sizeof m_address) == -1)
-        errorlog << "TcpPort::TcpPort(" << portnumber << "). Failed to bind socket." << endl;
+    if (::bind(m_sockfd, (struct sockaddr *)&m_address, sizeof m_address) == -1)
+        errorlog << "TcpPort::TcpPort(" << portnumber << "). Failed to bind socket." << std::endl;
     
     m_time_last_receive = 0;           //!< @todo TODO: change the initial value for this to something -3000ms!
     
@@ -115,13 +114,13 @@ TcpPort::~TcpPort()
 void TcpPort::run()
 {
 #if DEBUG_NETWORK_VERBOSITY > 4
-    debug << "TcpPort::run(). Starting udpport:" << m_port_number << "'s mainloop" << endl;
+    debug << "TcpPort::run(). Starting udpport:" << m_port_number << "'s mainloop" << std::endl;
 #endif
     struct sockaddr_in local_their_addr; // connector's address information
     socklen_t local_addr_len = sizeof(local_their_addr);
     char localdata[10*1024];
     int localnumBytes = 0;
-    listen(m_sockfd,5);     //Start Listening for Clients
+    ::listen(m_sockfd,5);     //Start Listening for Clients
 	
 	// a horrible hack to close the last connection.
 	// idealy should be rewritten to properly support multiple
@@ -155,13 +154,13 @@ void TcpPort::run()
         if ( localnumBytes != -1 && local_their_addr.sin_addr.s_addr != m_address.sin_addr.s_addr && local_their_addr.sin_addr.s_addr != m_broadcast_address.sin_addr.s_addr)
         {   //!< @todo TODO: This doesn't work. You need to discard packets that you have sent yourself
             #if DEBUG_NETWORK_VERBOSITY > 3
-                debug << "TcpPort::run()." << m_port_number <<" Received " << localnumBytes << " bytes from " << inet_ntoa(local_their_addr.sin_addr) << endl;
+                debug << "TcpPort::run()." << m_port_number <<" Received " << localnumBytes << " bytes from " << inet_ntoa(local_their_addr.sin_addr) << std::endl;
             #endif
             #if DEBUG_NETWORK_VERBOSITY > 4
                 debug << "TcpPort::run(). Received ";
                 for (int i=0; i<localnumBytes; i++)
                     debug << localdata[i];
-                debug << endl;
+                debug << std::endl;
             #endif
 
             pthread_mutex_lock(&m_socket_mutex);
@@ -208,12 +207,12 @@ void TcpPort::sendData(network_data_t netdata)
     if (m_clientSockfd == -1)
     {   
         #if DEBUG_NETWORK_VERBOSITY > 4
-        debug << "TcpPort::sendData(). No connected client "<< endl;
+        debug << "TcpPort::sendData(). No connected client "<< std::endl;
         #endif
         return;
     }
     #if DEBUG_NETWORK_VERBOSITY > 4
-        debug << "TcpPort::sendData(). Sending " << netdata.size << " bytes to Requested"  << endl;
+        debug << "TcpPort::sendData(). Sending " << netdata.size << " bytes to Requested"  << std::endl;
 
         //debug << "DATA 1st 4 bytes: "<< (int)netdata.data[0] << ","<<(int)netdata.data[1] << "," << (int)netdata.data[2] << "," << (int)netdata.data[3];
     #endif
@@ -225,7 +224,7 @@ void TcpPort::sendData(network_data_t netdata)
     #endif
     #if DEBUG_NETWORK_VERBOSITY > 4
         if(localnumBytes < 0)
-            debug << "TcpPort::sendData(). Sending Error "<< endl;
+            debug << "TcpPort::sendData(). Sending Error "<< std::endl;
     #endif
 		
     pthread_mutex_unlock(&m_socket_mutex);
@@ -235,11 +234,11 @@ void TcpPort::sendData(network_data_t netdata)
 void TcpPort::sendData(const NUImage& p_image, const NUSensorsData &p_sensors)
 {
     network_data_t netdata;
-    stringstream buffer;
+    std::stringstream buffer;
     network_data_t sensordata;
-    stringstream sensorsbuffer;
+    std::stringstream sensorsbuffer;
     sensorsbuffer << p_sensors;
-    string sensorsString = sensorsbuffer.str();
+    std::string sensorsString = sensorsbuffer.str();
     sensordata.data = (char*) sensorsString.c_str();
     sensordata.size = sensorsString.size();
     
@@ -256,7 +255,7 @@ void TcpPort::sendData(const NUImage& p_image, const NUSensorsData &p_sensors)
     buffer.write(reinterpret_cast<char*>(&timeStamp), sizeof(timeStamp));
     buffer.write(reinterpret_cast<char*>(&flipped), sizeof(flipped));
     
-    string s = buffer.str();
+    std::string s = buffer.str();
     netdata.data = (char*) s.c_str();
     netdata.size = s.size();
     
@@ -275,37 +274,14 @@ void TcpPort::sendData(const NUImage& p_image, const NUSensorsData &p_sensors)
 }
 
 #if defined(USE_LOCALISATION)
-    void TcpPort::sendData(const Localisation& p_locwm, const FieldObjects& p_objects)
-    {
-        #if DEBUG_NETWORK_VERBOSITY > 4
-            debug << "Sending worldmodel packet" << endl;
-        #endif
-        network_data_t netdata;
-        network_data_t sizedata;
-        stringstream buffer;
-        buffer << p_locwm;
-        buffer << p_objects;
-
-        std::string string = buffer.str();
-        netdata.data = (char*) string.c_str();
-        netdata.size = string.size();
-
-        int totalsize = netdata.size;
-        sizedata.data = reinterpret_cast<char*>(&totalsize);
-        sizedata.size = sizeof(totalsize);
-
-        sendData(sizedata);
-        sendData(netdata);
-    }
-
     void TcpPort::sendData(const SelfLocalisation& p_locwm, const FieldObjects& p_objects)
     {
         #if DEBUG_NETWORK_VERBOSITY > 4
-            debug << "Sending worldmodel packet" << endl;
+            debug << "Sending worldmodel packet" << std::endl;
         #endif
         network_data_t netdata;
         network_data_t sizedata;
-        stringstream buffer;
+        std::stringstream buffer;
         p_locwm.writeStreamBinary(buffer);
         buffer << p_objects;
 

@@ -14,7 +14,7 @@
 #ifndef uint8
 typedef unsigned char uint8;
 #endif
-using namespace std;
+
 
 #define CLASSIFIED_BYTES_PER_PIXEL 1
 #define YUV_BYTES_PER_PIXEL 2
@@ -55,7 +55,7 @@ class NUbotImage {
         //! Destructor.
         ~NUbotImage();
     
-        fstream currentFile;    //!< The file used to read / write to.
+        std::fstream currentFile;    //!< The file used to read / write to.
         int currentFileLengthInBytes; //!< The length of the current file.
         imageFileHeader currentFileHeader; //!< the heder information for the current file.
     
@@ -92,14 +92,14 @@ class NUbotImage {
           @param jointSensors Buffer to write the joint sensor data to.
           @param balanceSensors Buffer to write the balance sensor data to.
           @param touchSensors Buffer to write the touch sensor data to.
-          @return Returns True if the file was read succesfully.
+          @return Returns True if the file was read successfully.
           */
         bool getImageFrame(  int frameId, int& robotFrameNumber, NaoCamera& camera, 
                             uint8* image, float* jointSensors, float* balanceSensors, float* touchSensors);
 
         /*!
           @brief Writes image and sensor data provided to the provided buffer.
-          @param buffer Th buffer where the data will be writen.
+          @param buffer Th buffer where the data will be written.
           @param robotFrameNumber The number of the frame to be written.
           @param camera The camera data to be written to file.
           @param image The image to be written to file.
@@ -121,13 +121,13 @@ class NUbotImage {
           @param jointSensors Buffer to write the joint sensor data to.
           @param balanceSensors Buffer to write the balance sensor data to.
           @param touchSensors Buffer to write the touch sensor data to.
-          @return Returns True if the file was read succesfully.
+          @return Returns True if the file was read successfully.
           */
         bool readFromBuffer(    char* buffer, int& robotFrameNumber, NaoCamera& camera, 
                                 uint8* image, float* jointSensors, float* balanceSensors, float* touchSensors);
         /*!
           @brief Get the header data for a particular frame.
-          @param frameID the id of the frame whos header data is required.
+          @param frameID the id of the frame who's header data is required.
           @return Returns the requested frame header.
           */
         imageFrameHeader getImageFrameHeader(int frameID);
@@ -136,7 +136,7 @@ class NUbotImage {
           @brief Calculate the frame length given the dimensions of the data to be stored.
           @param type The type of image to be stored.
           @param imageWidth The width of the image.
-          @param imageHeight The hieght of the image.
+          @param imageHeight The height of the image.
           @param numJointSensors the number of joint sensors.
           @param numBalanceSensors The number of balance sensors.
           @param numTouchSensors The number of touch sensors.
@@ -145,10 +145,10 @@ class NUbotImage {
         static int calculateFrameLength(imageFrameType type, int imageWidth, int imageHeight, 
                                         int numJointSensors, int numBalanceSensors, int numTouchSensors);
         /*!
-          @brief Calculate the lenght of an image buffer.
+          @brief Calculate the length of an image buffer.
           @param type The type of image to be stored.
           @param imageWidth The width of the image.
-          @param imageHeight The hieght of the image.
+          @param imageHeight The height of the image.
           @return Returns the length of the image buffer described.
           */
         static int calculateImageLength(imageFrameType type, int imageWidth, int imageHeight);

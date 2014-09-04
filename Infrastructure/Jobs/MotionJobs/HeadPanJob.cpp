@@ -34,7 +34,7 @@
 HeadPanJob::HeadPanJob(head_pan_t pantype) : MotionJob(Job::MOTION_PAN)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "HeadPanJob::HeadPanJob()" << endl;
+        debug << "HeadPanJob::HeadPanJob()" << std::endl;
     #endif
     m_job_time = 0;
     m_pan_type = pantype;
@@ -74,7 +74,7 @@ HeadPanJob::HeadPanJob(const MobileObject& object, float hackfactor) : MotionJob
     m_use_default = false;
     float d = object.estimatedDistance()*cos(object.estimatedElevation());
     float t = object.estimatedBearing();
-    float sd = hackfactor*max(object.sdX(), object.sdY());
+    float sd = hackfactor*std::max(object.sdX(), object.sdY());
     
     m_x_min = d - sd -3.25;
     m_x_max = d + sd;
@@ -93,7 +93,7 @@ HeadPanJob::HeadPanJob(const StationaryObject& object, float hackfactor) : Motio
     m_use_default = false;
     float d = Blackboard->Objects->self.CalculateDistanceToStationaryObject(object);
     float t = Blackboard->Objects->self.CalculateBearingToStationaryObject(object);
-    float sd = max(Blackboard->Objects->self.sdX(), Blackboard->Objects->self.sdY());
+    float sd = std::max(Blackboard->Objects->self.sdX(), Blackboard->Objects->self.sdY());
     float sd_t = hackfactor*2.0*Blackboard->Objects->self.sdHeading();
     
     m_x_min = d - sd;
@@ -105,7 +105,7 @@ HeadPanJob::HeadPanJob(const StationaryObject& object, float hackfactor) : Motio
 /*! @brief Constructs a PanJob to 'find' a given mobile field object, aka the ball
     @param object the mobile field object you are looking for
  */
-HeadPanJob::HeadPanJob(const vector<StationaryObject>& objects, float hackfactor) : MotionJob(Job::MOTION_PAN)
+HeadPanJob::HeadPanJob(const std::vector<StationaryObject>& objects, float hackfactor) : MotionJob(Job::MOTION_PAN)
 {
     m_job_time = 0;
     m_pan_type = BallAndLocalisation;
@@ -119,7 +119,7 @@ HeadPanJob::HeadPanJob(const vector<StationaryObject>& objects, float hackfactor
     {
         float d = Blackboard->Objects->self.CalculateDistanceToStationaryObject(objects[i]);
         float t = Blackboard->Objects->self.CalculateBearingToStationaryObject(objects[i]);
-        float sd = max(Blackboard->Objects->self.sdX(), Blackboard->Objects->self.sdY());
+        float sd = std::max(Blackboard->Objects->self.sdX(), Blackboard->Objects->self.sdY());
         float sd_t = hackfactor*4.0*Blackboard->Objects->self.sdHeading();
         
         float x_min = d - sd;
@@ -138,7 +138,7 @@ HeadPanJob::HeadPanJob(const vector<StationaryObject>& objects, float hackfactor
 /*! @brief Constructs a HeadPanJob from stream data
     @param input the stream from which to read the job specific data
  */
-HeadPanJob::HeadPanJob(istream& input) : MotionJob(Job::MOTION_PAN)
+HeadPanJob::HeadPanJob(std::istream& input) : MotionJob(Job::MOTION_PAN)
 {
     m_job_time = 0;
     // Temporary read buffers
@@ -169,7 +169,7 @@ HeadPanJob::HeadPanJob(istream& input) : MotionJob(Job::MOTION_PAN)
 HeadPanJob::~HeadPanJob()
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "HeadPanJob::~HeadPanJob()" << endl;
+        debug << "HeadPanJob::~HeadPanJob()" << std::endl;
     #endif
 }
 
@@ -204,7 +204,7 @@ void HeadPanJob::getYaw(float& yawmin, float& yawmax)
 /*! @brief Prints a human-readable summary to the stream
  @param output the stream to be written to
  */
-void HeadPanJob::summaryTo(ostream& output)
+void HeadPanJob::summaryTo(std::ostream& output)
 {
     output << "HeadPanJob: ";
     if (m_pan_type == Ball)
@@ -215,14 +215,14 @@ void HeadPanJob::summaryTo(ostream& output)
         output << "Localisation";
     if (not m_use_default)
         output << " [" << m_x_min << "," << m_x_max << "] [" << m_yaw_min << "," << m_yaw_max << "]";
-    output << endl;
+    output << std::endl;
     
 }
 
 /*! @brief Prints a csv version to the stream
  @param output the stream to be written to
  */
-void HeadPanJob::csvTo(ostream& output)
+void HeadPanJob::csvTo(std::ostream& output)
 {
     output << "HeadPanJob: ";
     if (m_pan_type == Ball)
@@ -231,7 +231,7 @@ void HeadPanJob::csvTo(ostream& output)
         output << "BallAndLocalisation";
     else
         output << "Localisation";
-    output << endl;
+    output << std::endl;
 }
 
 /*! @brief A helper function to ease writing Job objects to classes
@@ -241,10 +241,10 @@ void HeadPanJob::csvTo(ostream& output)
  
  @param output the stream to write the job to
  */
-void HeadPanJob::toStream(ostream& output) const
+void HeadPanJob::toStream(std::ostream& output) const
 {
 #if DEBUG_JOBS_VERBOSITY > 1
-    debug << "HeadPanJob::toStream" << endl;
+    debug << "HeadPanJob::toStream" << std::endl;
 #endif
     Job::toStream(output);                  // This writes data introduced at the base level
     MotionJob::toStream(output);            // This writes data introduced at the motion level
@@ -263,10 +263,10 @@ void HeadPanJob::toStream(ostream& output) const
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const HeadPanJob& job)
+std::ostream& operator<<(std::ostream& output, const HeadPanJob& job)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "HeadPanJob::operator<<" << endl;
+        debug << "HeadPanJob::operator<<" << std::endl;
     #endif
     job.toStream(output);
     return output;
@@ -278,10 +278,10 @@ ostream& operator<<(ostream& output, const HeadPanJob& job)
     @param output the stream to write to
     @param job the job to be written to the stream
  */
-ostream& operator<<(ostream& output, const HeadPanJob* job)
+std::ostream& operator<<(std::ostream& output, const HeadPanJob* job)
 {
     #if DEBUG_JOBS_VERBOSITY > 1
-        debug << "HeadPanJob::operator<<" << endl;
+        debug << "HeadPanJob::operator<<" << std::endl;
     #endif
     if (job != NULL)
         job->toStream(output);

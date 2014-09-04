@@ -32,7 +32,7 @@ class NUHostInfo;
 #include <QHostInfo>
 #include <string>
 #include <list>
-using namespace std;
+
 
 class QDialogButtonBox;
 class QPushButton;
@@ -47,18 +47,18 @@ public:
     RobotSelectDialog(QWidget* parent = 0, BonjourProvider* provider = 0);
     ~RobotSelectDialog();
     
-    vector<NUHostInfo>& getSelectedHosts();
+    std::vector<NUHostInfo>& getSelectedHosts();
     
 private slots:
     void populateTree();
     void saveSelected();
 private:
-    void addService(const string& service, list<NUHostInfo>& hosts);
+    void addService(const std::string& service, std::list<NUHostInfo>& hosts);
     
     void enableConnectButton();
 private:
     BonjourProvider* m_bonjour;					//!< a pointer to the bonjour provider
-    vector<NUHostInfo> m_selected_hosts;		//!< a list of the currently selected hosts
+    std::vector<NUHostInfo> m_selected_hosts;		//!< a list of the currently selected hosts
     
     QPushButton* m_connect_button;
     QPushButton* m_cancel_button;

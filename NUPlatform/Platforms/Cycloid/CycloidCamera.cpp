@@ -29,7 +29,7 @@
 CycloidCamera::CycloidCamera()
 {
 #if DEBUG_NUCAMERA_VERBOSITY > 0
-    debug << "CycloidCamera::CycloidCamera(" << platform << ")" << endl;
+    debug << "CycloidCamera::CycloidCamera(" << platform << ")" << std::endl;
 #endif
 }
 

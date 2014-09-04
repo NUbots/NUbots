@@ -39,7 +39,8 @@ private:
     VisionBlackboard* m_blackboard;     //! @variable Reference to singleton Blackboard for vision system
     SegmentFilter m_segment_filter;       //! @variable Segment filter object for pre-classification filtering
 
-    BallDetector m_ball_detector;
+    BallDetector* m_ball_detector_shannon;
+    BallDetector* m_ball_detector_dave;
 
     FieldPointDetector* m_field_point_detector;
 
@@ -53,7 +54,7 @@ private:
 
 
 #ifdef VISION_PROFILER_ON
-    ofstream m_profiling_stream;
+    std::ofstream m_profiling_stream;
 #endif
 };
 

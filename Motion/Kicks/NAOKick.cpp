@@ -246,7 +246,7 @@ std::string NAOKick::toString(poseType_t thePose)
 void NAOKick::kill()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 3
-    debug << "Kick kill called." << endl;
+    debug << "Kick kill called." << std::endl;
     #endif
     pose = DO_NOTHING;
     m_stateCommandGiven = false;
@@ -258,7 +258,7 @@ void NAOKick::kill()
 void NAOKick::stopLegs()
 {   // if another module wants to use the legs, then we should stop
     #if DEBUG_NUMOTION_VERBOSITY > 3
-    debug << "Kick stop called." << endl;
+    debug << "Kick stop called." << std::endl;
     #endif
     // Chose the state that can be transitioned to allowing kick to finish as soon as possible.
     switch(pose)
@@ -285,7 +285,7 @@ void NAOKick::stopLegs()
     }
 }
 
-void NAOKick::kickToPoint(const vector<float>& position, const vector<float>& target)
+void NAOKick::kickToPoint(const std::vector<float>& position, const std::vector<float>& target)
 {
     // Evaluate the kicking target to start a new kick, or change a kick in progress.
 	m_ball_x = position[0];
@@ -295,14 +295,14 @@ void NAOKick::kickToPoint(const vector<float>& position, const vector<float>& ta
 	m_target_y = target[1];
 
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "void NAOKick::kickToPoint( (" << position[0] << "," << position[1] << "),(" << target[0] << "," << target[1] << ") )" << endl;
-        debug << "current pose = " << toString(pose) << endl;
+        debug << "void NAOKick::kickToPoint( (" << position[0] << "," << position[1] << "),(" << target[0] << "," << target[1] << ") )" << std::endl;
+        debug << "current pose = " << toString(pose) << std::endl;
     #endif
 
     if(!isActive())
     {
         #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "NAOKick::Choosing leg." << endl;
+        debug << "NAOKick::Choosing leg." << std::endl;
         #endif
         m_kick_ready = chooseLeg();
 
@@ -312,7 +312,7 @@ void NAOKick::kickToPoint(const vector<float>& position, const vector<float>& ta
         if(kickAbortCondition())
         {
             #if DEBUG_NUMOTION_VERBOSITY > 4
-            debug << "NAOKick::Aborting kick." << endl;
+            debug << "NAOKick::Aborting kick." << std::endl;
             stop();
             #endif
         }
@@ -322,7 +322,7 @@ void NAOKick::kickToPoint(const vector<float>& position, const vector<float>& ta
 void NAOKick::doKick()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "NAOKick::doKick()" << endl;
+        debug << "NAOKick::doKick()" << std::endl;
     #endif
     bool done = false;
     float balanceYoffset = 0.0f;
@@ -357,8 +357,8 @@ void NAOKick::doKick()
             if(done && !m_pauseState)
             {
                 #if DEBUG_NUMOTION_VERBOSITY > 3
-                cout << "Pre kick complete!" << endl;
-                debug << "Pre kick complete!" << endl;
+                std::cout << "Pre kick complete!" << std::endl;
+                debug << "Pre kick complete!" << std::endl;
                 #endif
                 pose = TRANSFER_TO_SUPPORT;
             }
@@ -370,8 +370,8 @@ void NAOKick::doKick()
             if(done && !m_pauseState)
             {
                 #if DEBUG_NUMOTION_VERBOSITY > 3
-                cout << "Post kick complete!" << endl;
-                debug << "Post kick complete!" << endl;
+                std::cout << "Post kick complete!" << std::endl;
+                debug << "Post kick complete!" << std::endl;
                 #endif
                 pose = DO_NOTHING;
             }
@@ -385,8 +385,8 @@ void NAOKick::doKick()
             if(done && !m_pauseState)
             {
                 #if DEBUG_NUMOTION_VERBOSITY > 3
-                cout << "Weight now on support foot!" << endl;
-                debug << "Weight now on support foot!" << endl;
+                std::cout << "Weight now on support foot!" << std::endl;
+                debug << "Weight now on support foot!" << std::endl;
                 #endif
                 pose = LIFT_LEG;
             }
@@ -408,8 +408,8 @@ void NAOKick::doKick()
             if(done && !m_pauseState)
             {
                 #if DEBUG_NUMOTION_VERBOSITY > 3
-                cout << "Leg is now lifted!" << endl;
-                debug << "Leg is now lifted!" << endl;
+                std::cout << "Leg is now lifted!" << std::endl;
+                debug << "Leg is now lifted!" << std::endl;
                 #endif
                 if(m_swingDirection == ForwardSwing)
                 {
@@ -449,8 +449,8 @@ void NAOKick::doKick()
             if(done && !m_pauseState)
             {
                 #if DEBUG_NUMOTION_VERBOSITY > 3
-                cout << "Leg is now poised!" << endl;
-                debug << "Leg is now poised!" << endl;
+                std::cout << "Leg is now poised!" << std::endl;
+                debug << "Leg is now poised!" << std::endl;
                 #endif
                 pose = SWING;
             }
@@ -464,8 +464,8 @@ void NAOKick::doKick()
             if(done && !m_pauseState)
             {
                 #if DEBUG_NUMOTION_VERBOSITY > 3
-                cout << "Ball is now aligned!" << endl;
-                debug << "Ball is now aligned!" << endl;
+                std::cout << "Ball is now aligned!" << std::endl;
+                debug << "Ball is now aligned!" << std::endl;
                 #endif
                 pose = SWING;
             }
@@ -488,8 +488,8 @@ void NAOKick::doKick()
             if(done && !m_pauseState)
             {
                 #if DEBUG_NUMOTION_VERBOSITY > 3
-                cout << "Kicking width is now aligned!" << endl;
-                debug << "Kicking width is now aligned!" << endl;
+                std::cout << "Kicking width is now aligned!" << std::endl;
+                debug << "Kicking width is now aligned!" << std::endl;
                 #endif
                 pose = EXTEND_SIDE;
             }
@@ -503,8 +503,8 @@ void NAOKick::doKick()
             if(done && !m_pauseState)
             {
                 #if DEBUG_NUMOTION_VERBOSITY > 3
-                cout << "Kicking depth is now aligned!" << endl;
-                debug << "Kicking depth is now aligned!" << endl;
+                std::cout << "Kicking depth is now aligned!" << std::endl;
+                debug << "Kicking depth is now aligned!" << std::endl;
                 #endif
                 pose = SWING;
             }
@@ -518,8 +518,8 @@ void NAOKick::doKick()
                 {
                     float kickSpeed = CalculateForwardSwingSpeed(kickDistance);
                     #if DEBUG_NUMOTION_VERBOSITY > 4
-                    debug << "Kicking Distance: " << kickDistance << endl;
-                    debug << "Swinging at speed: " << kickSpeed << endl;
+                    debug << "Kicking Distance: " << kickDistance << std::endl;
+                    debug << "Swinging at speed: " << kickSpeed << std::endl;
                     #endif
                     done = SwingLegForward(m_kicking_leg, kickSpeed);
                     if(!m_armCommandSent)
@@ -538,8 +538,8 @@ void NAOKick::doKick()
                 {
                     m_armCommandSent = false;
                     #if DEBUG_NUMOTION_VERBOSITY > 3
-                    cout << "Swing completed!" << endl;
-                    debug << "Swing completed!" << endl;
+                    std::cout << "Swing completed!" << std::endl;
+                    debug << "Swing completed!" << std::endl;
                     #endif
                     pose = RETRACT;
                 }
@@ -552,8 +552,8 @@ void NAOKick::doKick()
                 if(done && !m_pauseState)
                 {
                     #if DEBUG_NUMOTION_VERBOSITY > 3
-                    cout << "Leg Retracted!" << endl;
-                    debug << "Leg Retracted!" << endl;
+                    std::cout << "Leg Retracted!" << std::endl;
+                    debug << "Leg Retracted!" << std::endl;
                     #endif
                     pose = REALIGN_LEGS;
                 }
@@ -566,8 +566,8 @@ void NAOKick::doKick()
                 if(done && !m_pauseState)
                 {
                     #if DEBUG_NUMOTION_VERBOSITY > 3
-                    cout << "Legs Aligned!" << endl;
-                    debug << "Legs Aligned!" << endl;
+                    std::cout << "Legs Aligned!" << std::endl;
+                    debug << "Legs Aligned!" << std::endl;
                     #endif
                     pose = UNSHIFT_LEG;
                 }
@@ -580,8 +580,8 @@ void NAOKick::doKick()
                 if(done && !m_pauseState)
                 {
                     #if DEBUG_NUMOTION_VERBOSITY > 3
-                    cout << "Weight Unshifted!" << endl;
-                    debug << "Weight Unshifted!" << endl;
+                    std::cout << "Weight Unshifted!" << std::endl;
+                    debug << "Weight Unshifted!" << std::endl;
                     #endif
                     pose = POST_KICK;
                 }
@@ -609,17 +609,17 @@ void NAOKick::doKick()
 bool NAOKick::doPreKick()
 {
     #if DEBUG_NUMOTION_VERBOSITY > 3
-    debug << "Pre - Kick" << endl;
+    debug << "Pre - Kick" << std::endl;
     #endif
     bool validData = true;
-    vector<float>leftJoints;
-    vector<float>rightJoints;
+    std::vector<float>leftJoints;
+    std::vector<float>rightJoints;
     validData = validData && m_data->getPosition(NUSensorsData::LLeg,leftJoints);
     validData = validData && m_data->getPosition(NUSensorsData::RLeg,rightJoints);
     validData = validData && (leftJoints.size() >= 6) && (rightJoints.size() >= 6);
 
-    vector<float> leftArmJoints;
-    vector<float> rightArmJoints;
+    std::vector<float> leftArmJoints;
+    std::vector<float> rightArmJoints;
     validData = validData && m_data->getPosition(NUSensorsData::LArm,leftArmJoints);
     validData = validData && m_data->getPosition(NUSensorsData::RArm,rightArmJoints);
     
@@ -631,12 +631,12 @@ bool NAOKick::doPreKick()
     {
         endWaitTime = m_data->CurrentTime + 1200;
         m_kickWait = false;
-        debug << "Pre - Kick. Updated endWaitTime: " << endWaitTime << endl;
+        debug << "Pre - Kick. Updated endWaitTime: " << endWaitTime << std::endl;
     }
 
     if(!m_stateCommandGiven and m_data->CurrentTime - endWaitTime > 0)
     {
-        vector<float> armpos (4, 0.0f);
+        std::vector<float> armpos (4, 0.0f);
         armpos[1] = PI/2.0f;
         float maxSpeed = 0.7;
         double leftTime,rightTime;
@@ -649,8 +649,8 @@ bool NAOKick::doPreKick()
         armpos[3] = PI/2.0f;
         MoveLimbToPositionWithSpeed(NUActionatorsData::RArm, rightArmJoints, armpos, 2*maxSpeed , m_defaultArmMotorGain);
         m_stateCommandGiven = true;
-        m_estimatedStateCompleteTime = max(rightTime,leftTime);
-        debug << "Moving to Initial Position: Estimated Completion Time = " << m_estimatedStateCompleteTime << endl;
+        m_estimatedStateCompleteTime = std::max(rightTime,leftTime);
+        debug << "Moving to Initial Position: Estimated Completion Time = " << m_estimatedStateCompleteTime << std::endl;
     }
     
     if(m_stateCommandGiven)
@@ -673,7 +673,7 @@ bool NAOKick::doPostKick()
     {
         #if DEBUG_NUMOTION_VERBOSITY > 4
         debug << "- Waiting for action to complete: ";
-        debug << m_data->CurrentTime << " / " << m_estimatedStateCompleteTime << endl;
+        debug << m_data->CurrentTime << " / " << m_estimatedStateCompleteTime << std::endl;
         #endif
     }
     bool done;
@@ -699,7 +699,7 @@ bool NAOKick::ShiftWeightToFoot(KickingLeg targetLeg, float targetWeightPercenta
     validData = validData && m_data->getContact(NUSensorsData::LLeg, leftContact);
     validData = validData && m_data->getContact(NUSensorsData::RLeg, rightContact);
     if(!validData) return false;
-    vector<float> lcop, rcop;
+    std::vector<float> lcop, rcop;
     float lcopx(0.0f),lcopy(0.0f),rcopx(0.0f),rcopy(0.0f);
     float lforce(0.0f),rforce(0.0f);
 
@@ -716,8 +716,8 @@ bool NAOKick::ShiftWeightToFoot(KickingLeg targetLeg, float targetWeightPercenta
 
 
 
-    vector<float>leftJoints;
-    vector<float>rightJoints;
+    std::vector<float>leftJoints;
+    std::vector<float>rightJoints;
     validData = validData && m_data->getTarget(NUSensorsData::LLeg,leftJoints);
     validData = validData && m_data->getTarget(NUSensorsData::RLeg,rightJoints);
     validData = validData && (leftJoints.size() >= 6) && (rightJoints.size() >= 6);
@@ -789,14 +789,14 @@ bool NAOKick::ShiftWeightToFootClosedLoop(KickingLeg p_targetLeg, float targetWe
     }
     else return true;
 
-    vector<float> targetLegPositions;
-    vector<float> otherLegPositions;
+    std::vector<float> targetLegPositions;
+    std::vector<float> otherLegPositions;
     validData = validData && m_data->getTarget(targetLeg, targetLegPositions);
     validData = validData && m_data->getTarget(otherLeg, otherLegPositions);
 
     validData = validData && (targetLegPositions.size() >= 6) && (otherLegPositions.size() >= 6);
 
-    static vector<float> legPositionTargets;
+    static std::vector<float> legPositionTargets;
 
     if(validData)
     {
@@ -818,10 +818,10 @@ bool NAOKick::ShiftWeightToFootClosedLoop(KickingLeg p_targetLeg, float targetWe
                 legPositionTargets = otherLegPositions;
             }
 
-            debug << "targetDisplacement = " << targetDisplacement << endl;
-            debug << "targetLength = " << targetLength << endl;
+            debug << "targetDisplacement = " << targetDisplacement << std::endl;
+            debug << "targetLength = " << targetLength << std::endl;
             float targetAnkleRoll = asin(targetDisplacement / targetLength);
-            debug << "targetAnkleRoll = " << targetAnkleRoll << endl;
+            debug << "targetAnkleRoll = " << targetAnkleRoll << std::endl;
             legPositionTargets[0] = -targetAnkleRoll;
             legPositionTargets[4] = targetAnkleRoll;
             m_estimatedStateCompleteTime = MoveLegsToPositionWithSpeed(legPositionTargets,speed,m_defaultMotorGain,1.0);
@@ -829,7 +829,7 @@ bool NAOKick::ShiftWeightToFootClosedLoop(KickingLeg p_targetLeg, float targetWe
             m_stateCommandGiven = true;
             #if DEBUG_NUMOTION_VERBOSITY > 4
                 debug << "NAOKick::ShiftWeightToFootClosedLoop - Sending move command ";
-                debug << "Estimated completion time = " << m_estimatedStateCompleteTime << endl;
+                debug << "Estimated completion time = " << m_estimatedStateCompleteTime << std::endl;
             #endif
         }
 
@@ -838,14 +838,14 @@ bool NAOKick::ShiftWeightToFootClosedLoop(KickingLeg p_targetLeg, float targetWe
             #if DEBUG_NUMOTION_VERBOSITY > 4
             if((m_data->CurrentTime - m_estimatedStateCompleteTime > 200.0))
             {
-                debug << "State timed out" << endl;
+                debug << "State timed out" << std::endl;
             }
             else
             {
-                debug << "targetLegPositions[4] = " << targetLegPositions[4] << endl;
-                debug << "otherLegPositions[4] = " << otherLegPositions[4] << endl;
-                debug << "legPositionTargets[4] = " << legPositionTargets[4] << endl;
-                debug << "Targets Reached" << endl;
+                debug << "targetLegPositions[4] = " << targetLegPositions[4] << std::endl;
+                debug << "otherLegPositions[4] = " << otherLegPositions[4] << std::endl;
+                debug << "legPositionTargets[4] = " << legPositionTargets[4] << std::endl;
+                debug << "Targets Reached" << std::endl;
             }
             #endif
             m_stateCommandGiven = false;
@@ -877,12 +877,12 @@ bool NAOKick::LiftKickingLeg(KickingLeg p_kickingLeg, float speed)
     validData = validData && m_data->getContact(kickingLeg, kickContact);
     if(!validData) return false;
 
-    vector<float> kickLegPositions, supportLegPositions;
+    std::vector<float> kickLegPositions, supportLegPositions;
     validData = validData && m_data->getTarget(kickingLeg,kickLegPositions);
     validData = validData && m_data->getTarget(supportLeg,supportLegPositions);
 
     validData = validData && (kickLegPositions.size() >= 6);
-    static vector<float>kickLegTargets;
+    static std::vector<float>kickLegTargets;
     if(validData)
     {
         if(!m_stateCommandGiven)
@@ -896,7 +896,7 @@ bool NAOKick::LiftKickingLeg(KickingLeg p_kickingLeg, float speed)
             m_stateCommandGiven = true;
             #if DEBUG_NUMOTION_VERBOSITY > 4
             debug << "NAOKick::LiftKickingLeg - Motion Command Given.";
-            debug << " Estimated Completion Time = " << m_estimatedStateCompleteTime << endl;
+            debug << " Estimated Completion Time = " << m_estimatedStateCompleteTime << std::endl;
             #endif
         }
 
@@ -923,11 +923,11 @@ bool NAOKick::doPoise(KickingLeg poiseLeg, float angleChange, float speed)
     validData = validData && m_data->getContact(kickingLeg, kickContact);
     if(!validData) return false;
 
-    vector<float>kickLegPositions;
+    std::vector<float>kickLegPositions;
     validData = validData && m_data->getTarget(kickingLeg,kickLegPositions);
     validData = validData && (kickLegPositions.size() >= 6);
 
-    static vector<float>kickLegTargets;
+    static std::vector<float>kickLegTargets;
 
     if(validData)
     {
@@ -943,7 +943,7 @@ bool NAOKick::doPoise(KickingLeg poiseLeg, float angleChange, float speed)
             m_stateCommandGiven = true;
             #if DEBUG_NUMOTION_VERBOSITY > 4
             debug << "NAOKick::doPoise - Motion Command Given.";
-            debug << " Estimated completion time = " << m_estimatedStateCompleteTime << endl;
+            debug << " Estimated completion time = " << m_estimatedStateCompleteTime << std::endl;
             #endif
         }
         if(allEqual(kickLegTargets, kickLegPositions, 0.05f) || (m_data->CurrentTime - m_estimatedStateCompleteTime > 200.0))
@@ -975,7 +975,7 @@ float NAOKick::GainMultiplier()
     return TimeBetweenFrames() / 20.0f;
 }
 
-bool NAOKick::LimitJoints(KickingLeg leg, vector<float> jointPositions)
+bool NAOKick::LimitJoints(KickingLeg leg, std::vector<float> jointPositions)
 {
     bool changed = false;
     float previousValue;
@@ -1021,10 +1021,10 @@ bool NAOKick::BalanceCoP(KickingLeg p_supportLeg, float targetX, float targetY)
     validData = validData && m_data->getSupport(supportLeg, isSupport);
     if(validData && supportFootContact)
     {
-        vector<float>supportLegJoints;
+        std::vector<float>supportLegJoints;
         validData = validData && m_data->getTarget(supportLeg, supportLegJoints);
         validData = validData && (supportLegJoints.size() >= 6);
-		vector<float> cop;
+		std::vector<float> cop;
         float force(0.0f);
         validData = validData && m_data->getCoP(supportLeg, cop);
         validData = validData && m_data->getForce(supportLeg,force);
@@ -1033,8 +1033,8 @@ bool NAOKick::BalanceCoP(KickingLeg p_supportLeg, float targetX, float targetY)
             BalanceCoPLevelTorso(p_supportLeg, supportLegJoints, cop[0], cop[1], targetX, targetY);
             //BalanceCoPHipAndAnkle(supportLegJoints, copx, copy);
             LimitJoints(p_supportLeg,supportLegJoints);
-            vector<float> vel (6, 0);
-            vector<float> gain (6, m_defaultMotorGain);
+            std::vector<float> vel (6, 0);
+            std::vector<float> gain (6, m_defaultMotorGain);
             m_actions->add(supportLeg, m_data->CurrentTime, supportLegJoints, gain);
             return true;
         }
@@ -1042,7 +1042,7 @@ bool NAOKick::BalanceCoP(KickingLeg p_supportLeg, float targetX, float targetY)
     return false;
 }
 
-void NAOKick::BalanceCoPLevelTorso(KickingLeg theLeg, vector<float>& jointAngles, float CoPx, float CoPy, float targetX, float targetY)
+void NAOKick::BalanceCoPLevelTorso(KickingLeg theLeg, std::vector<float>& jointAngles, float CoPx, float CoPy, float targetX, float targetY)
 {
     // Linear controller to centre CoP
     const float gainx = -0.01 * GainMultiplier();
@@ -1088,7 +1088,7 @@ void NAOKick::BalanceCoPLevelTorso(KickingLeg theLeg, vector<float>& jointAngles
     return;
 }
 
-void NAOKick::BalanceCoPHipAndAnkle(vector<float>& jointAngles, float CoPx, float CoPy, float targetX, float targetY)
+void NAOKick::BalanceCoPHipAndAnkle(std::vector<float>& jointAngles, float CoPx, float CoPy, float targetX, float targetY)
 {
     // Linear controller to centre CoP
 //    const float gainx = 0.008 * GainMultiplier();
@@ -1120,7 +1120,7 @@ bool NAOKick::AlignXposition(KickingLeg p_kickingLeg, float speed, float xPos)
     jointLimit kneePitchJointLimits;
     jointLimit anklePitchJointLimits;
 
-    vector<float> sltransform, kltransform;
+    std::vector<float> sltransform, kltransform;
     Matrix supportLegTransform, kickingLegTransform;
     m_data->get(NUSensorsData::SupportLegTransform, sltransform);
     supportLegTransform = Matrix4x4fromVector(sltransform);
@@ -1150,12 +1150,12 @@ bool NAOKick::AlignXposition(KickingLeg p_kickingLeg, float speed, float xPos)
     }
     else return true;
 
-    vector<float>kickLegJoints;
-    vector<float>kickLegPositions;
+    std::vector<float>kickLegJoints;
+    std::vector<float>kickLegPositions;
     validData = validData && m_data->getTarget(kickingLeg,kickLegJoints);
     validData = validData && m_data->getPosition(kickingLeg,kickLegPositions);
     validData = validData && (kickLegJoints.size() >= 6);
-    vector<float> footPosition = Kinematics::PositionFromTransform(kickingLegTransform);
+    std::vector<float> footPosition = Kinematics::PositionFromTransform(kickingLegTransform);
     float deltaX = xPos - footPosition[0];
     bool jointLimitReached = false;
     if(validData)
@@ -1164,8 +1164,8 @@ bool NAOKick::AlignXposition(KickingLeg p_kickingLeg, float speed, float xPos)
 
         float currentHeightOffGround = m_kinematicModel->CalculateRelativeFootHeight(supportLegTransform,kickingLegTransform);
         #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "X Position = " << xPos << "foot Position = (" << footPosition[0] << "," << footPosition[1] << "," << footPosition[2] << ")" << endl;
-        debug << "Calculated height of foot from ground  = " << currentHeightOffGround << endl;
+        debug << "X Position = " << xPos << "foot Position = (" << footPosition[0] << "," << footPosition[1] << "," << footPosition[2] << ")" << std::endl;
+        debug << "Calculated height of foot from ground  = " << currentHeightOffGround << std::endl;
         #endif
         float deltaTheta = crop(gain*deltaX,-speed,speed);
         float calcKneePitchAngle = kickLegJoints[3] - 2*deltaTheta;
@@ -1190,7 +1190,7 @@ bool NAOKick::AlignYposition(KickingLeg p_kickingLeg, float speed, float yPos)
     bool validData = true;
     NUData::id_t kickingLeg;
     NUActionatorsData::id_t kickingHipRoll;
-    vector<float> kltransform;
+    std::vector<float> kltransform;
     Matrix kickingLegTransform;
     jointLimit hipJointLimits;
     if(p_kickingLeg == rightLeg)
@@ -1211,12 +1211,12 @@ bool NAOKick::AlignYposition(KickingLeg p_kickingLeg, float speed, float yPos)
     }
     else return true;
 
-    vector<float>kickLegJoints;
-    vector<float>kickLegPositions;
+    std::vector<float>kickLegJoints;
+    std::vector<float>kickLegPositions;
     validData = validData && m_data->getTarget(kickingLeg,kickLegJoints);
     validData = validData && m_data->getPosition(kickingLeg,kickLegPositions);
     validData = validData && (kickLegJoints.size() >= 6);
-    vector<float> footPosition = Kinematics::PositionFromTransform(kickingLegTransform);
+    std::vector<float> footPosition = Kinematics::PositionFromTransform(kickingLegTransform);
     float deltaY = yPos - footPosition[1];
     #if DEBUG_NUMOTION_VERBOSITY > 4
     debug << "Delta Y = " << deltaY;
@@ -1225,7 +1225,7 @@ bool NAOKick::AlignYposition(KickingLeg p_kickingLeg, float speed, float yPos)
     if(validData)
     {
         #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "Y Position = " << yPos << "foot Position = (" << footPosition[0] << "," << footPosition[1] << "," << footPosition[2] << ")" << endl;
+        debug << "Y Position = " << yPos << "foot Position = (" << footPosition[0] << "," << footPosition[1] << "," << footPosition[2] << ")" << std::endl;
         #endif
         float deltaTheta = crop(gain*deltaY,-speed,speed);
         float calcHipRollAngle = kickLegJoints[0] + deltaTheta;
@@ -1236,7 +1236,7 @@ bool NAOKick::AlignYposition(KickingLeg p_kickingLeg, float speed, float yPos)
     return (fabs(deltaY) < 0.5) || jointLimitReached;
 }
 
-void NAOKick::FlattenFoot(vector<float>& jointAngles)
+void NAOKick::FlattenFoot(std::vector<float>& jointAngles)
 {
     jointAngles[5] = FlatFootAnklePitch(jointAngles[1], jointAngles[3]);
     jointAngles[4] = FlatFootAnkleRoll(jointAngles[0]);
@@ -1253,7 +1253,7 @@ float NAOKick::FlatFootAnkleRoll(float hipRoll)
     return -(hipRoll);
 }
 
-void NAOKick::MaintainSwingHeight(KickingLeg supportLeg, vector<float>& supportLegJoints, KickingLeg swingLeg, vector<float>& swingLegJoints, float swingHeight)
+void NAOKick::MaintainSwingHeight(KickingLeg supportLeg, std::vector<float>& supportLegJoints, KickingLeg swingLeg, std::vector<float>& swingLegJoints, float swingHeight)
 {
     return;
 }
@@ -1278,13 +1278,13 @@ void NAOKick::MoveArmsToKickPose(KickingLeg leadingArmleg, float speed)
     else return;
 
     bool validData = true;
-    vector<float> leadingArmPositions,trailingArmPositions;
+    std::vector<float> leadingArmPositions,trailingArmPositions;
     validData = validData && m_data->getPosition(leadingArm,leadingArmPositions);
     validData = validData && m_data->getPosition(trailingArm,trailingArmPositions);
 
     if(validData)
     {
-        vector<float> leadingArmTargets(leadingArmPositions),trailingArmTargets(trailingArmPositions);
+        std::vector<float> leadingArmTargets(leadingArmPositions),trailingArmTargets(trailingArmPositions);
         // Shoulder Yaw
         leadingArmTargets[0] = -deg2rad(35.0) * mirroredJointMultiplier;
         trailingArmTargets[0] = deg2rad(35.0) * mirroredJointMultiplier;
@@ -1335,7 +1335,7 @@ bool NAOKick::SwingLegForward(KickingLeg p_kickingLeg, float speed)
 
     if(!validData) return false;
 
-    vector<float>kickingLegJoints;
+    std::vector<float>kickingLegJoints;
     validData = validData && m_data->getTarget(kickingLeg,kickingLegJoints);
     validData = validData && (kickingLegJoints.size() >= 6);
 
@@ -1369,9 +1369,9 @@ bool NAOKick::SwingLegForward(KickingLeg p_kickingLeg, float speed)
             endKneeAngle = targetKneePitch;//startKneeAngle - PI/4;
             endAnkleAngle = -(endHipAngle + endKneeAngle);
 
-            //vector<double> hipTimes, kneeTimes, ankleTimes;
-            //vector<float> hipPositions, hipVelocities, kneePositions, kneeVelocities, anklePositions, ankleVelocities;
-            vector<float> kickingTargets(kickingLegJoints);
+            //std::vector<double> hipTimes, kneeTimes, ankleTimes;
+            //std::vector<float> hipPositions, hipVelocities, kneePositions, kneeVelocities, anklePositions, ankleVelocities;
+            std::vector<float> kickingTargets(kickingLegJoints);
             kickingTargets[1] = endHipAngle;
             kickingTargets[3] = endKneeAngle;
             FlattenFoot(kickingTargets);
@@ -1381,7 +1381,7 @@ bool NAOKick::SwingLegForward(KickingLeg p_kickingLeg, float speed)
 
             #if DEBUG_NUMOTION_VERBOSITY > 4
             debug << "NAOKick::SwingLegForward - Move Command Given. Estimated Completion Time = ";
-            debug << m_estimatedStateCompleteTime << endl;
+            debug << m_estimatedStateCompleteTime << std::endl;
             #endif
         }
     }
@@ -1409,12 +1409,12 @@ bool NAOKick::SwingLegSideward(KickingLeg p_kickingLeg, float speed)
 
     if(!validData) return false;
 
-    vector<float>kickingLegJoints, supportLegJoints;
+    std::vector<float>kickingLegJoints, supportLegJoints;
     validData = validData && m_data->getPosition(kickingLeg,kickingLegJoints);
     validData = validData && m_data->getPosition(supportLeg,supportLegJoints);
     validData = validData && (kickingLegJoints.size() >= 6);
 
-    static vector<float> swingTargets;
+    static std::vector<float> swingTargets;
 
     if(validData)
     {
@@ -1430,7 +1430,7 @@ bool NAOKick::SwingLegSideward(KickingLeg p_kickingLeg, float speed)
             m_stateCommandGiven = true;
             #if DEBUG_NUMOTION_VERBOSITY > 4
             debug << "NAOKick::SwingLegSideward - Move Command Given. Estimated Completion Time = ";
-            debug << m_estimatedStateCompleteTime << endl;
+            debug << m_estimatedStateCompleteTime << std::endl;
             #endif
         }
         if(allEqual(swingTargets, kickingLegJoints, 0.05f) || (m_data->CurrentTime - m_estimatedStateCompleteTime > 200.0))
@@ -1463,7 +1463,7 @@ bool NAOKick::LowerLeg(KickingLeg p_kickingLeg, float speed)
     validData = validData && m_data->getContact(kickingLeg, kickContact);
     if(!validData) return false;
 
-    vector<float>kickLegPositions, supportLegPositions;
+    std::vector<float>kickLegPositions, supportLegPositions;
     bool kickingLegContact;
     validData = validData && m_data->getTarget(kickingLeg,kickLegPositions);
     validData = validData && m_data->getTarget(supportLeg,supportLegPositions);
@@ -1471,7 +1471,7 @@ bool NAOKick::LowerLeg(KickingLeg p_kickingLeg, float speed)
 
     validData = validData && (kickLegPositions.size() >= 6);
 
-    static vector<float>kickLegTargets;
+    static std::vector<float>kickLegTargets;
 
     if(validData)
     {
@@ -1481,9 +1481,9 @@ bool NAOKick::LowerLeg(KickingLeg p_kickingLeg, float speed)
             m_estimatedStateCompleteTime = MoveLimbToPositionWithSpeed(kickingLeg, kickLegPositions, kickLegTargets, speed, 50.0, 1.0f);
             m_stateCommandGiven = true;
             #if DEBUG_NUMOTION_VERBOSITY > 4
-            debug << "Motion Command Given." << endl;
+            debug << "Motion Command Given." << std::endl;
             debug << "NAOKick::LowerLeg - Move Command Given. Estimated Completion Time = ";
-            debug << m_estimatedStateCompleteTime << endl;
+            debug << m_estimatedStateCompleteTime << std::endl;
             #endif
         }
 
@@ -1521,16 +1521,16 @@ bool NAOKick::chooseLeg()
 	double ytrans = m_ball_y*cos(theta) - m_ball_x*sin(theta);
 
         #if DEBUG_NUMOTION_VERBOSITY > 1
-        debug << "bool NAOKick::chooseLeg()" << endl;
-        debug << "theta - " << theta << endl;
-        debug << "xtrans - " << xtrans << endl;
-        debug << "ytrans - " << ytrans << endl;
+        debug << "bool NAOKick::chooseLeg()" << std::endl;
+        debug << "theta - " << theta << std::endl;
+        debug << "xtrans - " << xtrans << std::endl;
+        debug << "ytrans - " << ytrans << std::endl;
         #endif
 
         Vector2<float> ballLocation(m_ball_x, m_ball_y), leftFootRelativeBallLocation, rightFootRelativeBallLocation;
 
         Matrix leftFootTransform, rightFootTransform;
-        vector<float> lftransform, rftransform;
+        std::vector<float> lftransform, rftransform;
         m_data->get(NUSensorsData::LLegTransform, lftransform);
     	leftFootTransform = Matrix4x4fromVector(lftransform);
     	m_data->get(NUSensorsData::RLegTransform, rftransform);
@@ -1538,17 +1538,17 @@ bool NAOKick::chooseLeg()
         leftFootRelativeBallLocation = m_kinematicModel->TransformPositionToFoot(leftFootTransform, ballLocation);
         rightFootRelativeBallLocation = m_kinematicModel->TransformPositionToFoot(rightFootTransform, ballLocation);
 
-        vector<float> leftPos = Kinematics::PositionFromTransform(leftFootTransform);
-        vector<float> rightPos = Kinematics::PositionFromTransform(rightFootTransform);
+        std::vector<float> leftPos = Kinematics::PositionFromTransform(leftFootTransform);
+        std::vector<float> rightPos = Kinematics::PositionFromTransform(rightFootTransform);
 
         #if DEBUG_NUMOTION_VERBOSITY > 1
-            debug << "Right Pos = (" << rightPos[0] << "," << rightPos[1] << "," << rightPos[2] << ")" << endl;
-            debug << "Left Pos = (" << leftPos[0] << "," << leftPos[1] << "," << leftPos[2] << ")" << endl;
+            debug << "Right Pos = (" << rightPos[0] << "," << rightPos[1] << "," << rightPos[2] << ")" << std::endl;
+            debug << "Left Pos = (" << leftPos[0] << "," << leftPos[1] << "," << leftPos[2] << ")" << std::endl;
 
-            debug << "Ball Position - " << endl;
-            debug << "Origin Relative: (" << ballLocation.x << "," << ballLocation.y << ")" << endl;
-            debug << "Right Foot Relative: (" << rightFootRelativeBallLocation.x << "," << rightFootRelativeBallLocation.y << ")" << endl;
-            debug << "Left Foot Relative: (" << leftFootRelativeBallLocation.x << "," << leftFootRelativeBallLocation.y << ")" << endl;
+            debug << "Ball Position - " << std::endl;
+            debug << "Origin Relative: (" << ballLocation.x << "," << ballLocation.y << ")" << std::endl;
+            debug << "Right Foot Relative: (" << rightFootRelativeBallLocation.x << "," << rightFootRelativeBallLocation.y << ")" << std::endl;
+            debug << "Left Foot Relative: (" << leftFootRelativeBallLocation.x << "," << leftFootRelativeBallLocation.y << ")" << std::endl;
         #endif
 
         const float fwdAngleRange = PI/4.0f;
@@ -1560,10 +1560,10 @@ bool NAOKick::chooseLeg()
         if(fabs(theta) < fwdAngleRange)
         {
             #if DEBUG_NUMOTION_VERBOSITY > 1
-            debug << "Right foot: " << endl << RightFootForwardKickableArea.MinX() << " < " << leftFootRelativeBallLocation.x << " < " << RightFootForwardKickableArea.MaxX() << endl;
-            debug << RightFootForwardKickableArea.MinY() << " < " << leftFootRelativeBallLocation.y << " < " << RightFootForwardKickableArea.MaxY() << endl;
-            debug << "Left foot: " << endl << LeftFootForwardKickableArea.MinX() << " < " << rightFootRelativeBallLocation.x << " < " << LeftFootForwardKickableArea.MaxX() << endl;
-            debug << LeftFootForwardKickableArea.MinY() << " < " << rightFootRelativeBallLocation.y << " < " << LeftFootForwardKickableArea.MaxY() << endl;
+            debug << "Right foot: " << std::endl << RightFootForwardKickableArea.MinX() << " < " << leftFootRelativeBallLocation.x << " < " << RightFootForwardKickableArea.MaxX() << std::endl;
+            debug << RightFootForwardKickableArea.MinY() << " < " << leftFootRelativeBallLocation.y << " < " << RightFootForwardKickableArea.MaxY() << std::endl;
+            debug << "Left foot: " << std::endl << LeftFootForwardKickableArea.MinX() << " < " << rightFootRelativeBallLocation.x << " < " << LeftFootForwardKickableArea.MaxX() << std::endl;
+            debug << LeftFootForwardKickableArea.MinY() << " < " << rightFootRelativeBallLocation.y << " < " << LeftFootForwardKickableArea.MaxY() << std::endl;
             #endif
             if(RightFootForwardKickableArea.PointInside(leftFootRelativeBallLocation.x,leftFootRelativeBallLocation.y))
             {
@@ -1624,22 +1624,22 @@ bool NAOKick::chooseLeg()
             m_kick_enabled = true; // Set the kick to active now, we are doing stuff!
             m_kickWait = true;
             #if DEBUG_NUMOTION_VERBOSITY > 3
-                debug << "Kick Selected - Kicking Foot: " << NUKick::toString(m_kicking_leg) << ", Swing Direction: " << toString(m_swingDirection) << endl;
+                debug << "Kick Selected - Kicking Foot: " << NUKick::toString(m_kicking_leg) << ", Swing Direction: " << toString(m_swingDirection) << std::endl;
             #endif
         }
         return kickSelected;
 }
 
-double NAOKick::MoveLimbToPositionWithSpeed(NUActionatorsData::id_t limbId, vector<float> currentPosition, vector<float> targetPosition, float maxSpeed , float gain, float smoothness)
+double NAOKick::MoveLimbToPositionWithSpeed(NUActionatorsData::id_t limbId, std::vector<float> currentPosition, std::vector<float> targetPosition, float maxSpeed , float gain, float smoothness)
 {
     #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "NAOKick::MoveLimbToPositionWithSpeed(" << limbId.Name << "," << currentPosition << "," << targetPosition << "," << maxSpeed << "," << gain << "," << smoothness << endl;
+        debug << "NAOKick::MoveLimbToPositionWithSpeed(" << limbId.Name << "," << currentPosition << "," << targetPosition << "," << maxSpeed << "," << gain << "," << smoothness << std::endl;
     #endif
     
     const float movespeed = maxSpeed;
-    vector< vector<float> > positions;
-    vector< vector<float> > velocities;
-    vector< vector<double> > times;
+    std::vector< std::vector<float> > positions;
+    std::vector< std::vector<float> > velocities;
+    std::vector< std::vector<double> > times;
 
     // compute the time required to move into the initial pose for each limb
     double moveTime = 1000*(maxDifference(currentPosition, targetPosition)/movespeed);
@@ -1647,11 +1647,11 @@ double NAOKick::MoveLimbToPositionWithSpeed(NUActionatorsData::id_t limbId, vect
     float endTime = startTime + moveTime;
     
     #if DEBUG_NUMOTION_VERBOSITY > 3
-        debug << "NAOKick::MoveLimbToPositionWithSpeed: moveTime: " << moveTime << " startTime: " << startTime << " endTime: " << endTime << endl;
+        debug << "NAOKick::MoveLimbToPositionWithSpeed: moveTime: " << moveTime << " startTime: " << startTime << " endTime: " << endTime << std::endl;
     #endif
 
-    vector<double> endTimes(1,endTime);
-    vector< vector<float> > endPositions(1,targetPosition);
+    std::vector<double> endTimes(1,endTime);
+    std::vector< std::vector<float> > endPositions(1,targetPosition);
 
     MotionCurves::calculate(startTime,endTimes,currentPosition,endPositions,smoothness,10,times,positions,velocities);
 
@@ -1659,27 +1659,27 @@ double NAOKick::MoveLimbToPositionWithSpeed(NUActionatorsData::id_t limbId, vect
     return endTime;
 }
 
-double NAOKick::MoveLegsToPositionWithSpeed(const vector<float>& targetPosition, float maxSpeed , float gain, float smoothness)
+double NAOKick::MoveLegsToPositionWithSpeed(const std::vector<float>& targetPosition, float maxSpeed , float gain, float smoothness)
 {
-    vector<float> left_currentPosition, right_currentPosition;
+    std::vector<float> left_currentPosition, right_currentPosition;
     m_data->getPosition(NUSensorsData::LLeg, left_currentPosition);
     m_data->getPosition(NUSensorsData::RLeg, right_currentPosition);
     
     const float movespeed = maxSpeed;
-    vector< vector<float> > positions;
-    vector< vector<float> > velocities;
-    vector< vector<double> > times;
+    std::vector< std::vector<float> > positions;
+    std::vector< std::vector<float> > velocities;
+    std::vector< std::vector<double> > times;
     
     // compute the time required to move into the initial pose for each limb
     double left_moveTime = 1000*(maxDifference(left_currentPosition, targetPosition)/movespeed);
     double right_moveTime = 1000*(maxDifference(right_currentPosition, targetPosition)/movespeed);
-    double moveTime = max(left_moveTime, right_moveTime);
+    double moveTime = std::max(left_moveTime, right_moveTime);
     
     float startTime = m_data->CurrentTime;
     float endTime = startTime + moveTime;
     
-    vector<double> endTimes(1,endTime);
-    vector< vector<float> > endPositions(1, targetPosition);
+    std::vector<double> endTimes(1,endTime);
+    std::vector< std::vector<float> > endPositions(1, targetPosition);
     
     MotionCurves::calculate(startTime,endTimes,left_currentPosition,endPositions,smoothness,10,times,positions,velocities);
     m_actions->add(NUActionatorsData::LLeg, times, positions, gain);

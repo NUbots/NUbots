@@ -2,7 +2,7 @@
 #include  "MotionConstants.h"
 
 //#define DEBUG_META_GAIT
-using namespace std;
+
 
 MetaGait::MetaGait():
     curGait(DEFAULT_GAIT),
@@ -17,18 +17,18 @@ MetaGait::~MetaGait(){}
 
 void MetaGait::tick_gait(){
 #ifdef DEBUG_META_GAIT
-//    cout << "MetaGait::tick_gait()"<<endl;
+//    std::cout << "MetaGait::tick_gait()"<<std::endl;
 #endif
     if(updateGaits()){
 #ifdef DEBUG_META_GAIT
-        cout << "Interpolating Gaits percent = "<<getPercentComplete()<<endl;
+        std::cout << "Interpolating Gaits percent = "<<getPercentComplete()<<std::endl;
 #endif
         interpolateGaits(*this,curGait,nextGait,getPercentComplete());
 
 #ifdef DEBUG_META_GAIT
-        cout<< "Gait 1 is "<<endl<<curGait.toString()<<endl;
-        cout<< "Gait 2 is "<<endl<<nextGait.toString()<<endl;
-        cout<< "result is"<<endl<<toString()<<endl;
+        std::cout<< "Gait 1 is "<<std::endl<<curGait.toString()<<std::endl;
+        std::cout<< "Gait 2 is "<<std::endl<<nextGait.toString()<<std::endl;
+        std::cout<< "result is"<<std::endl<<toString()<<std::endl;
 #endif
     }
     //interpolateGaits(*this,DEFAULT_GAIT,DEFAULT_GAIT,1.0f);
@@ -37,7 +37,7 @@ void MetaGait::tick_gait(){
 
 void MetaGait::setNewGaitTarget(Gait &nextTarget){
 #ifdef DEBUG_META_GAIT
-        cout << "MetaGait got a new target "<<endl;
+        std::cout << "MetaGait got a new target "<<std::endl;
 #endif
     newGait = nextTarget;
     newGaitSent = true;
@@ -84,8 +84,8 @@ bool MetaGait::updateGaits(){
         newGaitSent = false;
     }else{
         transitionCounter = std::min(transitionCounter + 1, transitionFrames+1);
-        // cout << "Updated transition counter to "<<transitionCounter
-        //      << "  Transition frames is "<< transitionFrames<<endl;
+        // std::cout << "Updated transition counter to "<<transitionCounter
+        //      << "  Transition frames is "<< transitionFrames<<std::endl;
     }
 
     //we still need more processing,

@@ -27,28 +27,28 @@
 
 #include "../MotionJob.h"
 #include <vector>
-using namespace std;
+
 
 class BlockJob : public MotionJob
 {
 public:
     BlockJob(double time, float x, float y);
-    BlockJob(double time, const vector<float>& position);
-    BlockJob(double time, istream& input);
+    BlockJob(double time, const std::vector<float>& position);
+    BlockJob(double time, std::istream& input);
     ~BlockJob();
     
-    void setPosition(double time, const vector<float>& newposition);
-    void getPosition(double& time, vector<float>& position);
+    void setPosition(double time, const std::vector<float>& newposition);
+    void getPosition(double& time, std::vector<float>& position);
     
-    virtual void summaryTo(ostream& output);
-    virtual void csvTo(ostream& output);
+    virtual void summaryTo(std::ostream& output);
+    virtual void csvTo(std::ostream& output);
     
-    friend ostream& operator<<(ostream& output, const BlockJob& job);
-    friend ostream& operator<<(ostream& output, const BlockJob* job);
+    friend std::ostream& operator<<(std::ostream& output, const BlockJob& job);
+    friend std::ostream& operator<<(std::ostream& output, const BlockJob* job);
 protected:
-    virtual void toStream(ostream& output) const;
+    virtual void toStream(std::ostream& output) const;
 private:
-    vector<float> m_block_position;                 //!< the block position [x (cm), y (cm), theta (rad)]
+    std::vector<float> m_block_position;                 //!< the block position [x (cm), y (cm), theta (rad)]
 };
 
 #endif

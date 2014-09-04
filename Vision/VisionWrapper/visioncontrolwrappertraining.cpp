@@ -43,7 +43,7 @@ int VisionControlWrapper::runFrame(NUImage& img, NUSensorsData& sensors)
   * @param filename The file to load the LUT from
   * @return success.
   */
-bool VisionControlWrapper::setLUT(const string& filename)
+bool VisionControlWrapper::setLUT(const std::string& filename)
 {
     return data_wrapper->loadLUTFromFile(filename);
 }
@@ -53,7 +53,7 @@ bool VisionControlWrapper::setLUT(const string& filename)
   * @param filename The file to load the images from
   * @return success.
   */
-bool VisionControlWrapper::setImageStream(const string& filename)
+bool VisionControlWrapper::setImageStream(const std::string& filename)
 {
     return data_wrapper->setImageStream(filename);
 }
@@ -63,7 +63,7 @@ bool VisionControlWrapper::setImageStream(const string& filename)
   * @param filename The file to load the sensor data from
   * @return success.
   */
-bool VisionControlWrapper::setSensorStream(const string& filename)
+bool VisionControlWrapper::setSensorStream(const std::string& filename)
 {
     return data_wrapper->setSensorStream(filename);
 }
@@ -80,7 +80,7 @@ void VisionControlWrapper::restartStream()
   * @brief prints labels to stream
   * @param out The stream to print to.
   */
-void VisionControlWrapper::printLabels(ostream& out) const
+void VisionControlWrapper::printLabels(std::ostream& out) const
 {
     data_wrapper->printLabels(out);
 }
@@ -90,7 +90,7 @@ void VisionControlWrapper::printLabels(ostream& out) const
   * @param in The stream to read from.
   * @param labels The resulting labels (output parameter)
   */
-bool VisionControlWrapper::readLabels(istream &in, vector<vector<VisionFieldObject *> > &labels) const
+bool VisionControlWrapper::readLabels(std::istream &in, std::vector<std::vector<VisionFieldObject *> > &labels) const
 {
     return data_wrapper->readLabels(in, labels);
 }
@@ -100,7 +100,7 @@ bool VisionControlWrapper::readLabels(istream &in, vector<vector<VisionFieldObje
 //  * @param in The stream to read from.
 //  * @param labels The resulting labels (output parameter)
 //  */
-//bool VisionControlWrapper::readLabels(istream& in, vector< vector< pair<VFO_ID, Vector2<double> > > >& labels) const
+//bool VisionControlWrapper::readLabels(std::istream& in, std::vector< std::vector< pair<VFO_ID, Vector2<double> > > >& labels) const
 //{
 //    return data_wrapper->readLabels(in, labels);
 //}
@@ -112,12 +112,12 @@ bool VisionControlWrapper::readLabels(istream &in, vector<vector<VisionFieldObje
   * @param false_neg_costs A map between field object IDs and false negative costs
   * @return a map between field object IDs and total cost|incident number
   */
-map<VFO_ID, pair<float, int> > VisionControlWrapper::evaluateFrame(const vector<VisionFieldObject *>& ground_truth,
+map<VFO_ID, pair<float, int> > VisionControlWrapper::evaluateFrame(const std::vector<VisionFieldObject *>& ground_truth,
                                                                    const map<VFO_ID, float>& false_pos_costs,
                                                                    const map<VFO_ID, float>& false_neg_costs,
                                                                    bool use_ground_errors)
 {
-    vector<bool> matched_detections(data_wrapper->detections.size(), false);    //tracks what detections have been matched
+    std::vector<bool> matched_detections(data_wrapper->detections.size(), false);    //tracks what detections have been matched
     //initi
     map<VFO_ID, pair<float, int> > errors;                   //the current erors and incidence counts
 
@@ -128,7 +128,7 @@ map<VFO_ID, pair<float, int> > VisionControlWrapper::evaluateFrame(const vector<
     //for each label
     BOOST_FOREACH(VisionFieldObject* gt, ground_truth) {
         int d_num = 0;
-        pair<int,float> best_match = pair<int,float>(-1,numeric_limits<float>::max());
+        pair<int,float> best_match = pair<int,float>(-1,std::numeric_limits<float>::max());
         //look for the best matching detection
         BOOST_FOREACH(const VisionFieldObject* d_vfo, data_wrapper->detections) {
             //if the object is a match and the detection has not already been matched
@@ -185,10 +185,10 @@ map<VFO_ID, pair<float, int> > VisionControlWrapper::evaluateFrame(const vector<
   * @param ground_truth The labels to compare with.
   * @return a map between field object IDs and total detections | false_pos | false_neg
   */
-map<VFO_ID, Vector3<double> > VisionControlWrapper::precisionRecall(const vector<VisionFieldObject *> &ground_truth, bool use_ground_errors)
+map<VFO_ID, Vector3<double> > VisionControlWrapper::precisionRecall(const std::vector<VisionFieldObject *> &ground_truth, bool use_ground_errors)
 {
     //average distance error 3D for now
-    vector<bool> matched_detections(data_wrapper->detections.size(), false);
+    std::vector<bool> matched_detections(data_wrapper->detections.size(), false);
     map<VFO_ID, Vector3<double> > result;    //final result
     map<VFO_ID, double> matches;             //accumulator for detections
     map<VFO_ID, double> false_pos;           //accumulator for false positives
@@ -205,7 +205,7 @@ map<VFO_ID, Vector3<double> > VisionControlWrapper::precisionRecall(const vector
     //for each label
     BOOST_FOREACH(VisionFieldObject* gt, ground_truth) {
         int d_num = 0;
-        pair<int,float> best_match = pair<int,float>(-1,numeric_limits<float>::max());
+        pair<int,float> best_match = pair<int,float>(-1,std::numeric_limits<float>::max());
         //find the best match
         BOOST_FOREACH(const VisionFieldObject* d_vfo, data_wrapper->detections) {
             //if the object is a match and the detection has not already been matched
@@ -272,7 +272,7 @@ bool VisionControlWrapper::objectTypesMatch(VFO_ID id0, VFO_ID id1) const
     case GOAL_U:
         return isGoal(id1);  //can match any post
     default:
-        errorlog << "VisionControlWrapper::objectTypesMatch - invalid id" << endl;
+        errorlog << "VisionControlWrapper::objectTypesMatch - invalid id" << std::endl;
         return false;
     }
 }

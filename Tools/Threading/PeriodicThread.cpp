@@ -32,17 +32,17 @@
 #endif
 #include <errno.h>
 
-using namespace std;
+
 
 /*! @brief Creates a thread
     @param name the name of the thread (used entirely for debug purposes)
     @param period the time in ms between each main loop execution
     @param priority the priority of the thread. If non-zero the thread will be a bona fide real-time thread.
  */
-PeriodicThread::PeriodicThread(string name, int period, unsigned char priority) : Thread(name, priority), m_period(period)
+PeriodicThread::PeriodicThread(std::string name, int period, unsigned char priority) : Thread(name, priority), m_period(period)
 {
     #if DEBUG_THREADING_VERBOSITY > 1
-        debug << "PeriodicThread::PeriodicThread(" << m_name << ", " << m_period << ", " << static_cast<int>(m_priority) << ")" << endl;
+        debug << "PeriodicThread::PeriodicThread(" << m_name << ", " << m_period << ", " << static_cast<int>(m_priority) << ")" << std::endl;
     #endif
     m_start_time = 0;
 }
@@ -52,7 +52,7 @@ PeriodicThread::PeriodicThread(string name, int period, unsigned char priority) 
 PeriodicThread::~PeriodicThread()
 {
     #if DEBUG_THREADING_VERBOSITY > 1
-        debug << "PeriodicThread::~PeriodicThread() " << m_name << endl;
+        debug << "PeriodicThread::~PeriodicThread() " << m_name << std::endl;
     #endif
     stop();
 }
@@ -84,7 +84,7 @@ void PeriodicThread::run()
         }
         catch (std::exception& e)
         {
-            debug << "PeriodicThread::run(): " << m_name << " Unhandled exception: " << e.what() << endl;
+            debug << "PeriodicThread::run(): " << m_name << " Unhandled exception: " << e.what() << std::endl;
         }
     }
 }

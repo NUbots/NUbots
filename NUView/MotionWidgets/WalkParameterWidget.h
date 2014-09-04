@@ -31,7 +31,7 @@ class MotionFileEditor;
 
 #include <QtGui>
 #include <string>
-using namespace std;
+
 
 class WalkParameterWidget : public QWidget
 {
@@ -41,10 +41,10 @@ public:
     ~WalkParameterWidget();
     
 private slots:
-    void onNewHost(vector<NUHostInfo> hosts);
+    void onNewHost(std::vector<NUHostInfo> hosts);
     
     void onSelectButtonPressed();
-    void onSendRequested(string text);
+    void onSendRequested(std::string text);
     
 private:
     QHBoxLayout* m_layout;

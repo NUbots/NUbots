@@ -23,11 +23,6 @@ all: $(TARGET)
 clean:
 	rm -f *.a *.o $(TARGET) core *~ *.so *.lo
 
-libclean:
-	make -C ../../../build clean
-
-distclean: clean libclean
-
 darwin.a:
 	make -C ../../../build
 

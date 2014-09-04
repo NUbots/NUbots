@@ -15,7 +15,7 @@ TARGET = darwin.a
 
 INCLUDE_DIRS = -I../include -I../../Framework/include
 
-CXXFLAGS += -O2 -DLINUX -Wall -shared $(INCLUDE_DIRS)
+CXXFLAGS += -O2 -DLINUX -Wall -shared $(INCLUDE_DIRS) -std=c++0x
 #CXXFLAGS += -O2 -DDEBUG -DLINUX -Wall -shared $(INCLUDE_DIRS)
 LFLAGS += -lpthread -ldl
 
@@ -37,6 +37,9 @@ OBJS =  ../../Framework/src/CM730.o     	\
         ../../Framework/src/vision/Image.o  		\
         ../../Framework/src/vision/ImgProcess.o 	\
         ../../Framework/src/minIni/minIni.o	\
+        ../../Framework/src/SensorReadDescriptor.o	       \
+        ../../Framework/src/CompareSensorReadDescriptors.o \
+        ../../Framework/src/SensorReadManager.o	           \
         streamer/httpd.o           \
         streamer/jpeg_utils.o      \
         streamer/mjpg_streamer.o   \

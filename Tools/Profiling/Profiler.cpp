@@ -99,7 +99,7 @@ void Profiler::reset()
 /*! @brief Prints the results of the profiler to the output stream, and also resets the profiler.
     @relates Profiler
  */
-ostream& operator<<(ostream& output, Profiler& profiler)
+std::ostream& operator<<(std::ostream& output, Profiler& profiler)
 {
     if (not profiler.m_split_names.empty())
     {
@@ -108,7 +108,7 @@ ostream& operator<<(ostream& output, Profiler& profiler)
         {
             output << profiler.m_split_names[i] << ": [t:" << profiler.m_diff_thread_times[i] << " p:" << profiler.m_diff_process_times[i] << "] ";
         }
-        output << " other processes: " << (profiler.m_split_real_times.back() - profiler.m_start_real_time) - (profiler.m_split_process_times.back() - profiler.m_start_process_time) << endl;
+        output << " other processes: " << (profiler.m_split_real_times.back() - profiler.m_start_real_time) - (profiler.m_split_process_times.back() - profiler.m_start_process_time) << std::endl;
         profiler.reset();
     }
     return output;

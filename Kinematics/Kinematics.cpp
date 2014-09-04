@@ -7,13 +7,14 @@
 #include "debug.h"
 
 #include <cstdlib>
+#include <fstream>
 
 
 using namespace TransformMatrices;
 
 bool Kinematics::LoadModel()
 {
-    const std::string default_file = (CONFIG_DIR + string("Motion/kinematics") + ".cfg");
+    const std::string default_file = (CONFIG_DIR + std::string("Motion/kinematics") + ".cfg");
     std::ifstream file(default_file.c_str());
     bool worked = false;
     if(file.is_open())
@@ -23,8 +24,8 @@ bool Kinematics::LoadModel()
     else
     {
         // File was not opened correctly. Send out a warning/error message.
-        debug << "Kinematics::Kinematics(). WARNING: Unable to load file: " << default_file << endl;
-        errorlog << "Kinematics::Kinematics(). WARNING: Unable to load file: " << default_file << endl;
+        debug << "Kinematics::Kinematics(). WARNING: Unable to load file: " << default_file << std::endl;
+        errorlog << "Kinematics::Kinematics(). WARNING: Unable to load file: " << default_file << std::endl;
     }
     file.close();
     return worked;
@@ -300,7 +301,7 @@ Vector3<double> Kinematics::DistanceToPoint(const Matrix& Camera2GroundTransform
     resultCartesian.y = nearResult[1][0] + (farResult[1][0] - nearResult[1][0]) * zScaleFactor;
     resultCartesian.z = 0.0;
 
-    cout << nearResult << endl << farResult << endl << resultCartesian << endl;
+    std::cout << nearResult << std::endl << farResult << std::endl << resultCartesian << std::endl;
 
     // Convert back to polar coodinates.
     Vector3<double> resultSpherical(mathGeneral::Cartesian2Spherical(resultCartesian));
@@ -345,9 +346,9 @@ Vector3<double> Kinematics::TransformPosition(const Matrix& Camera2GroundTransfo
 
     // Construct the result
     Vector3<double> result;
-    result[0] = resultMatrix[0][0];
-    result[1] = resultMatrix[1][0];
-    result[2] = resultMatrix[2][0];
+    result.x = resultMatrix[0][0];
+    result.y = resultMatrix[1][0];
+    result.z = resultMatrix[2][0];
 
     return result;
 }
@@ -399,4 +400,14 @@ Vector2<float> Kinematics::TransformPositionToFoot(const Matrix& FootTransformMa
     returnResult.x = result[0][0];
     returnResult.y = result[1][0];
     return returnResult;
+}
+
+Vector3<double> Kinematics::CalculateNeckPosition(const Matrix& LeftFootTransform, const Matrix& RightFootTransform, Vector3<double> neckOffset)
+{
+    Matrix translation = TransformMatrices::Translation(neckOffset.x, neckOffset.y, neckOffset.z);
+    double leftHeight = (InverseMatrix(LeftFootTransform) * translation)[2][3];
+    double rightHeight = (InverseMatrix(RightFootTransform) * translation)[2][3];
+    double height = std::max(leftHeight, rightHeight);
+
+    return Vector3<double>(0.0, 0.0, height);
 }

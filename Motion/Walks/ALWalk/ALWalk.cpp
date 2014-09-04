@@ -97,9 +97,9 @@ void ALWalk::enableWalk()
 void ALWalk::doWalk()
 {      
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "ALWalk::doWalk()" << endl;
+        debug << "ALWalk::doWalk()" << std::endl;
     #endif
-    vector<float> leggains = m_walk_parameters.getLegGains()[0];
+    std::vector<float> leggains = m_walk_parameters.getLegGains()[0];
     if (m_current_time - m_last_enabled_time < 1500)
     {
         float killfactor = (m_current_time - m_last_enabled_time)/1500;
@@ -111,10 +111,10 @@ void ALWalk::doWalk()
     }
     
     #if DEBUG_NUMOTION_VERBOSITY > 4
-        debug << "ALWalk::doWalk() m_al_motion->setWalkTargetVelocity(" << m_speed_x << ", " << m_speed_x << ", " << m_speed_yaw << ")" << endl;
+        debug << "ALWalk::doWalk() m_al_motion->setWalkTargetVelocity(" << m_speed_x << ", " << m_speed_x << ", " << m_speed_yaw << ")" << std::endl;
     #endif
     // give the target speed to the walk engine
-    vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
+    std::vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     
     float x = m_speed_x/maxspeeds[0];
     if (x > 1)
@@ -137,8 +137,8 @@ void ALWalk::doWalk()
     m_al_motion->setWalkTargetVelocity(x, y, yaw, 1);
     
     // handle the joint stiffnesses
-    static vector<float> legnan(m_actions->getSize(NUActionatorsData::LLeg), NAN);
-    static vector<float> armnan(m_actions->getSize(NUActionatorsData::LArm), NAN);
+    static std::vector<float> legnan(m_actions->getSize(NUActionatorsData::LLeg), NAN);
+    static std::vector<float> armnan(m_actions->getSize(NUActionatorsData::LArm), NAN);
     
     // voltage stablise the gains for the legs
     float voltage;
@@ -189,16 +189,16 @@ void ALWalk::initALConfig()
     m_al_param[0] = "WALK_TORSO_HEIGHT";
     m_al_config.arrayPush(m_al_param);
     
-    vector<Parameter>& parameters = m_walk_parameters.getParameters();
+    std::vector<Parameter>& parameters = m_walk_parameters.getParameters();
     if (m_al_config.getSize() != parameters.size() + 3)
-        errorlog << "ALConfig and WalkParameter size mismatch detected. ALConfig: " << m_al_config.getSize() << " parameters: " << parameters.size() << endl;
+        errorlog << "ALConfig and WalkParameter size mismatch detected. ALConfig: " << m_al_config.getSize() << " parameters: " << parameters.size() << std::endl;
     setWalkParameters(m_walk_parameters);
 }
 
 void ALWalk::setALConfig()
 {
-    vector<Parameter>& parameters = m_walk_parameters.getParameters();
-    vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
+    std::vector<Parameter>& parameters = m_walk_parameters.getParameters();
+    std::vector<float>& maxspeeds = m_walk_parameters.getMaxSpeeds();
     
     m_al_config[0][1] = static_cast<int>(1000/(20*parameters[0].get()));      // "WALK_STEP_MIN_PERIOD";
     
@@ -224,12 +224,12 @@ void ALWalk::setWalkParameters(const WalkParameters& walkparameters)
     @param data the Aldebaran ordered arm joint data
     @return the NUPlatform ordered arm data
  */
-vector<float> ALWalk::convertToNUArmOrder(const vector<float>& data)
+std::vector<float> ALWalk::convertToNUArmOrder(const std::vector<float>& data)
 {
     // Aldebaran's order: [LShoulderPitch, LShoulderRoll, LElbowYaw, LElbowRoll]
     // NUPlatform's order:[LShoulderRoll, LShoulderPitch, LElbowRoll, LElbowYaw]
     
-    vector<float> reordered;
+    std::vector<float> reordered;
     if (data.size() < 4)
         return reordered;
     else
@@ -243,12 +243,12 @@ vector<float> ALWalk::convertToNUArmOrder(const vector<float>& data)
     }
 }
 
-vector<float> ALWalk::convertToNULegOrder(const vector<float>& data)
+std::vector<float> ALWalk::convertToNULegOrder(const std::vector<float>& data)
 {
     // Aldebaran's order: [LHipYawPitch, LHipRoll, LHipPitch, LKneePitch, LAnklePitch, LAnkleRoll]
     // NUPlatform's order:[LHipRoll, LHipPitch, LHipYawPitch, LKneePitch, LAnkleRoll, LAnklePitch]
     
-    vector<float> reordered;
+    std::vector<float> reordered;
     if (data.size() < 6)
         return reordered;
     else

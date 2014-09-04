@@ -36,7 +36,7 @@ using namespace boost::accumulators;
  	@param name the name of the optimiser. The name is used in debug logs, and is used for load/save filenames by default
  	@param parameters the initial seed for the optimisation
  */
-PGRLOptimiser::PGRLOptimiser(std::string name, vector<Parameter> parameters) : Optimiser(name, parameters)
+PGRLOptimiser::PGRLOptimiser(std::string name, std::vector<Parameter> parameters) : Optimiser(name, parameters)
 {
     m_step_size = 0.01;        	   // Tune this
     m_epsilon = 0.03;              // Tune this
@@ -61,7 +61,7 @@ PGRLOptimiser::~PGRLOptimiser()
 {
 }
 
-void PGRLOptimiser::setParametersResult(const vector<float>& fitness)
+void PGRLOptimiser::setParametersResult(const std::vector<float>& fitness)
 {
 	float selectedfitness = fitness[m_selected_fitness];
 	setParametersResult(selectedfitness);
@@ -80,7 +80,7 @@ void PGRLOptimiser::setParametersResult(const vector<float>& fitness)
 		m_stall_count = 0;
 		m_selected_fitness = (m_selected_fitness+1)%fitness.size();
 	}
-	debug << "PGRLOptimiser::setParametersResult(" << fitness << "). Using fitness " << m_selected_fitness << ". Stalled for " << m_stall_count << endl;
+	debug << "PGRLOptimiser::setParametersResult(" << fitness << "). Using fitness " << m_selected_fitness << ". Stalled for " << m_stall_count << std::endl;
 }
 
 void PGRLOptimiser::setParametersResult(float fitness)
@@ -92,10 +92,10 @@ void PGRLOptimiser::setParametersResult(float fitness)
         m_current_parameters += calculateStep();
         generatePolicies();
     }
-    debug << "PGRLOptimiser::setParametersResult fitness: " << fitness << endl;
+    debug << "PGRLOptimiser::setParametersResult fitness: " << fitness << std::endl;
 }
 
-vector<float> PGRLOptimiser::getNextParameters()
+std::vector<float> PGRLOptimiser::getNextParameters()
 {
     return m_random_policies[m_random_policies_index];
 }
@@ -111,10 +111,10 @@ void PGRLOptimiser::generatePolicies()
 /*! @brief Calculates a step in the direction of the gradient estimated through the polices selected
  *	@return the step (ie. the new parameters should be parameters += step)
  */
-vector<float> PGRLOptimiser::calculateStep()
+std::vector<float> PGRLOptimiser::calculateStep()
 {
     int num_dim = m_current_parameters.size();
-    vector<float> A(num_dim);
+    std::vector<float> A(num_dim);
 
     // calculate the averages for negative, zero, and positive epsilons
     for (int i=0; i<num_dim; i++)
@@ -159,7 +159,7 @@ vector<float> PGRLOptimiser::calculateStep()
 /*! @brief Generates m_num_particles random policies from the seed.
  	@param seed the seed set of parameters used to generate the random policies
  */
-void PGRLOptimiser::generateRandomPolices(const vector<Parameter>& seed)
+void PGRLOptimiser::generateRandomPolices(const std::vector<Parameter>& seed)
 {
     m_random_policies_index = 0;
     m_fitnesses.clear();
@@ -168,15 +168,15 @@ void PGRLOptimiser::generateRandomPolices(const vector<Parameter>& seed)
         m_random_policies.push_back(generateRandomPolicy(seed));
 
     for (size_t i=0; i<m_random_policies.size(); i++)
-        debug << m_random_policies[i] << endl;
+        debug << m_random_policies[i] << std::endl;
 }
 
 /*! @brief Generates a single random policy from the seed, and returns it
  	@param seed the random policy seed
  */
-vector<float> PGRLOptimiser::generateRandomPolicy(const vector<Parameter>& seed)
+std::vector<float> PGRLOptimiser::generateRandomPolicy(const std::vector<Parameter>& seed)
 {
-    vector<float> newpolicy;
+    std::vector<float> newpolicy;
     newpolicy.reserve(seed.size());
     for (size_t i=0; i<seed.size(); i++)
     {
@@ -203,19 +203,19 @@ int PGRLOptimiser::getRandomDirection()
 /*! @brief Generates a set of random policies from the seed
  *	@param seed the set of parameters which is used as a base to generate the random policies
  */
-void PGRLOptimiser::generateShuffledPolices(const vector<Parameter>& seed)
+void PGRLOptimiser::generateShuffledPolices(const std::vector<Parameter>& seed)
 {
 	m_random_policies_index = 0;
 	m_fitnesses.clear();
 
-	vector<float> floatseed(seed.size());
+	std::vector<float> floatseed(seed.size());
 	for (size_t i=0; i<seed.size(); i++)
 		floatseed[i] = seed[i].get();
-	m_random_policies = vector<vector<float> >(3*(m_num_particles/3), floatseed);
+	m_random_policies = std::vector<std::vector<float> >(3*(m_num_particles/3), floatseed);
 
 	for (size_t i=0; i<seed.size(); i++)
 	{
-		vector<float> temp = generateSigns();
+		std::vector<float> temp = generateSigns();
 		float epsilon = m_epsilon*(seed[i].max() - seed[i].min());
         for (size_t j=0; j<temp.size(); j++) {
              //m_random_policies[j][i] += epsilon*temp[j];
@@ -230,21 +230,21 @@ void PGRLOptimiser::generateShuffledPolices(const vector<Parameter>& seed)
 	}
 
 	for (size_t i=0; i<m_random_policies.size(); i++)
-		debug << m_random_policies[i] << endl;
+		debug << m_random_policies[i] << std::endl;
 }
 
-/*! @brief Generates a vector of signs to be used when generating the random policies.
+/*! @brief Generates a std::vector of signs to be used when generating the random policies.
  *
- *         The vector will have a length that is a multiple of 3, and contain an equal number of (+1,-1,0).
+ *         The std::vector will have a length that is a multiple of 3, and contain an equal number of (+1,-1,0).
  *         The place of the (+1,-1,0) will be random. The idea being to try an avoid the case where few particles
  *         are given epsilon's with one of the signs.
- *  @return the vector
+ *  @return the std::vector
  */
-vector<float> PGRLOptimiser::generateSigns()
+std::vector<float> PGRLOptimiser::generateSigns()
 {
 	int num_of_each = m_num_particles/3;
 	size_t size = 3*num_of_each;				// round the number of particles to multiple of 3
-	vector<float> signs(size);
+	std::vector<float> signs(size);
 	for (size_t i=0; i<num_of_each; i++)
 	{
 		signs[3*i] = 1;
@@ -260,13 +260,13 @@ vector<float> PGRLOptimiser::generateSigns()
 /*! @brief Generates m_num_particles random policies from the seed.
  	@param seed the seed set of parameters used to generate the random policies
  */
-void PGRLOptimiser::generateOpponentPolicies(const vector<Parameter>& seed)
+void PGRLOptimiser::generateOpponentPolicies(const std::vector<Parameter>& seed)
 {
     m_random_policies_index = 0;
     m_fitnesses.clear();
     m_random_policies.clear();
 
-    vector<float> policy, opponent;
+    std::vector<float> policy, opponent;
     for (int i=0; i<m_num_particles/2; i++)
     {
     	generateOpponents(seed, policy, opponent);
@@ -275,7 +275,7 @@ void PGRLOptimiser::generateOpponentPolicies(const vector<Parameter>& seed)
     }
 
     for (size_t i=0; i<m_random_policies.size(); i++)
-        debug << m_random_policies[i] << endl;
+        debug << m_random_policies[i] << std::endl;
 }
 
 /*! @brief Generates a pair of policies (policy, opponent) near seed to estimate the gradient
@@ -283,7 +283,7 @@ void PGRLOptimiser::generateOpponentPolicies(const vector<Parameter>& seed)
  * 	@param policy the first policy near seed
  * 	@param opponent the 'opposite' policy near seed (ie this has the epsilon of opposite sign to policy)
  */
-void PGRLOptimiser::generateOpponents(const vector<Parameter>& seed, vector<float>& policy, vector<float>& opponent)
+void PGRLOptimiser::generateOpponents(const std::vector<Parameter>& seed, std::vector<float>& policy, std::vector<float>& opponent)
 {
 	policy.clear();
 	opponent.clear();
@@ -296,23 +296,23 @@ void PGRLOptimiser::generateOpponents(const vector<Parameter>& seed, vector<floa
 	}
 }
 
-void PGRLOptimiser::summaryTo(ostream& stream)
+void PGRLOptimiser::summaryTo(std::ostream& stream)
 {
 }
 
-void PGRLOptimiser::toStream(ostream& o) const
+void PGRLOptimiser::toStream(std::ostream& o) const
 {
-    o << m_step_size << " " << m_epsilon << " " << m_num_particles << " " << m_stalled_threshold << endl;
+    o << m_step_size << " " << m_epsilon << " " << m_num_particles << " " << m_stalled_threshold << std::endl;
     
-    o << m_random_policies_index << endl;
-    o << m_current_parameters << endl;
-    o << m_random_policies << endl;
-    o << m_fitnesses << endl;
+    o << m_random_policies_index << std::endl;
+    o << m_current_parameters << std::endl;
+    o << m_random_policies << std::endl;
+    o << m_fitnesses << std::endl;
 
-    o << m_selected_fitness << " " << m_best_fitness << " " << m_stall_count << endl;
+    o << m_selected_fitness << " " << m_best_fitness << " " << m_stall_count << std::endl;
 }
 
-void PGRLOptimiser::fromStream(istream& i)
+void PGRLOptimiser::fromStream(std::istream& i)
 {
     i >> m_step_size;
     i >> m_epsilon;

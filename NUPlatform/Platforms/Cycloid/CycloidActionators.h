@@ -43,7 +43,7 @@ private:
     
 private:
     // Actionators
-    static vector<string> m_servo_names;            //!< the names of the available joints (eg HeadYaw, AnklePitch etc)
+    static std::vector<std::string> m_servo_names;            //!< the names of the available joints (eg HeadYaw, AnklePitch etc)
     
     Motors* m_motors;
 };

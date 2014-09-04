@@ -3,16 +3,16 @@
 #include <iostream>
 #include <cstdlib>
 #include <limits>
-using namespace std;
+
 
 LSFittedLine::LSFittedLine(){
 	clearPoints();
 }
 
 
-LSFittedLine::LSFittedLine(const vector<Vector2<double> > &pointlist) {
+LSFittedLine::LSFittedLine(const std::vector<Vector2<double> > &pointList) {
     clearPoints();
-    addPoints(pointlist);
+    addPoints(pointList);
 }
 
 LSFittedLine::~LSFittedLine(){
@@ -48,7 +48,7 @@ void LSFittedLine::addPoint(const Vector2<double> &point){
         calcLine();
 }
 
-void LSFittedLine::addPoints(const vector< Vector2<double> >& pointlist){
+void LSFittedLine::addPoints(const std::vector< Vector2<double> >& pointlist){
     if(!pointlist.empty()) {
         for(size_t i=0; i<pointlist.size(); i++) {
             const Vector2<double>& p = pointlist[i];
@@ -118,7 +118,7 @@ void LSFittedLine::calcLine(){
     syy = sumY2 - sumY*sumY/numPoints;
     sxy = sumXY - sumX*sumY/numPoints;
     Sigma = (sxx+syy-sqrt((sxx-syy)*(sxx-syy)+4*sxy*sxy))/2;
-    //cout << "Sigma: "<< Sigma << endl;
+    //std::cout << "Sigma: "<< Sigma << std::endl;
     MSD = Sigma/numPoints;
     r2tls = 1.0-(4.0*Sigma*Sigma/((sxx+syy)*(sxx+syy)+(sxx-syy)*(sxx-syy)+4.0*sxy*sxy));
 
@@ -143,7 +143,7 @@ bool LSFittedLine::getEndPoints(Vector2<double>& p1, Vector2<double>& p2) const
 
     float min = std::numeric_limits<float>::max();
     float max = -std::numeric_limits<float>::max();
-    vector< Vector2<double> >::const_iterator p, p_min, p_max;
+    std::vector< Vector2<double> >::const_iterator p, p_min, p_max;
     for(p = points.begin(), p_min = p_max = p; p!=points.end(); p++) {
         float trans_x = -m_B*p->x - m_A*p->y;
         if(trans_x < min) {
@@ -167,7 +167,7 @@ bool LSFittedLine::getOriginalEndPoints(Vector2<double>& p1, Vector2<double>& p2
 
     float min = std::numeric_limits<float>::max();
     float max = -std::numeric_limits<float>::max();
-    vector< Vector2<double> >::const_iterator p, p_min, p_max;
+    std::vector< Vector2<double> >::const_iterator p, p_min, p_max;
     for(p = points.begin(), p_min = p_max = p; p!=points.end(); p++) {
         float trans_x = -m_B*p->x - m_A*p->y;
         if(trans_x < min) {
@@ -196,7 +196,7 @@ double LSFittedLine::averageDistanceBetween(const LSFittedLine &other) const
         //determine distances from the two possible pairings
         double d1 = 0.5*( (ep1-other_ep1).abs() + (ep2-other_ep2).abs() ),
                d2 = 0.5*( (ep2-other_ep1).abs() + (ep1-other_ep2).abs() );
-        return min(d1, d2); //best pairing results in minimum distance
+        return std::min(d1, d2); //best pairing results in minimum distance
     }
     return -1.0;    //test for this - distances should always be positive
 }

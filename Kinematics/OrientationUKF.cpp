@@ -25,7 +25,7 @@ OrientationUKF::OrientationUKF(): depUKF(numStates), m_initialised(false)
     #endif
     m_initialised_count = 0;
     m_scale = 0;
-    m_offset = vector<float>(3,0);
+    m_offset = std::vector<float>(3,0);
 }
 
 void OrientationUKF::initialise(double time, const std::vector<float>& gyroReadings, const std::vector<float>& accelerations, bool validkinematics, const std::vector<float> kinematicorientation)
@@ -38,7 +38,7 @@ void OrientationUKF::initialise(double time, const std::vector<float>& gyroReadi
     {
         m_timeOfLastUpdate = time;
         
-        vector<float> k_pred(3,0);
+        std::vector<float> k_pred(3,0);
         float k_mag = OrientationUKF::g;
         float k_roll = kinematicorientation[0];
         float k_pitch = kinematicorientation[1];
@@ -77,10 +77,10 @@ void OrientationUKF::initialise(double time, const std::vector<float>& gyroReadi
             #ifdef DEBUG_ME
                 std::fstream file;
                 file.open("/var/volatile/OrientationUKF.log",ios_base::app | ios_base::out);
-                file << "-- Initialise --" << endl;
+                file << "-- Initialise --" << std::endl;
                 file << "Mean:" << std::endl;
                 file << m_mean;
-                file << "Offsets: " << m_offset << endl;
+                file << "Offsets: " << m_offset << std::endl;
                 file.close();
             #endif
         }
@@ -171,7 +171,7 @@ void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, 
     Matrix sigmaPoints = GenerateSigmaPoints();
     int numberOfSigmaPoints = sigmaPoints.getn();
 
-    // List of predicted observation for each sigma point.
+    // std::list of predicted observation for each sigma point.
     Matrix predictedObservationSigmas(numMeasurements, numberOfSigmaPoints, false);
 
     // Put observation into matrix form so we can use if for doing math
@@ -264,9 +264,9 @@ void OrientationUKF::MeasurementUpdate(const std::vector<float>& accelerations, 
         else
             logfile << "0, 0";
         logfile << "," << a_roll << "," << a_pitch << ",";
-        vector<float> alorientation;
+        std::vector<float> alorientation;
         Blackboard->Sensors->get(NUSensorsData::OrientationHardware, alorientation);
-        logfile << alorientation[0] << "," << alorientation[1] << endl;
+        logfile << alorientation[0] << "," << alorientation[1] << std::endl;
         logfile.close();
     #endif
 }

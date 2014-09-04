@@ -31,47 +31,47 @@
 
 #include <vector>
 #include <string>
-using namespace std;
+
 
 class Sensor 
 {
 public:
-    Sensor(string sensorname);
+    Sensor(std::string sensorname);
     Sensor(const Sensor& source);
 
     bool get(float& data) const;
-    bool get(vector<float>& data) const;
-    bool get(vector<vector<float> >& data) const;
-    bool get(string& data) const;
+    bool get(std::vector<float>& data) const;
+    bool get(std::vector<std::vector<float> >& data) const;
+    bool get(std::string& data) const;
     
     void set(double time, const float& data);
-    void set(double time, const vector<float>& data);
-    void set(double time, const vector<vector<float> >& data);
-    void set(double time, const string& data);
+    void set(double time, const std::vector<float>& data);
+    void set(double time, const std::vector<std::vector<float> >& data);
+    void set(double time, const std::string& data);
     void setAsInvalid();
     
     void modify(double time, unsigned int start, const float& data);
-    void modify(double time, unsigned int start, const vector<float>& data);
+    void modify(double time, unsigned int start, const std::vector<float>& data);
     
-    void summaryTo(ostream& output) const;
+    void summaryTo(std::ostream& output) const;
     
-    friend ostream& operator<< (ostream& output, const Sensor& p_sensor);
-    friend istream& operator>> (istream& input, Sensor& p_sensor);
+    friend std::ostream& operator<< (std::ostream& output, const Sensor& p_sensor);
+    friend std::istream& operator>> (std::istream& input, Sensor& p_sensor);
     Sensor& operator= (const Sensor & source);
 public:
-    string Name;                        //!< the sensor's name
+    std::string Name;                        //!< the sensor's name
     double Time;                        //!< the timestamp associated with the data
 private:
     // only a single type of data is used at one time
     // the Valid flags are used to tell which type is the valid one
     float FloatData;                    //!< the float data
     bool ValidFloat;                    //!< a flag to indicate whether the float data is valid
-    vector<float> VectorData;           //!< the vector data
-    bool ValidVector;                   //!< a flag to indicate whether the vector data is valid
-    vector<vector<float> > MatrixData;  //!< the matrix data
+    std::vector<float> VectorData;           //!< the std::vector data
+    bool ValidVector;                   //!< a flag to indicate whether the std::vector data is valid
+    std::vector<std::vector<float> > MatrixData;  //!< the matrix data
     bool ValidMatrix;                   //!< a flag to indicate whether the matrix data is valid
-    string StringData;                  //!< the string data
-    bool ValidString;                   //!< a flag to indicate whether the string data is valid
+    std::string StringData;                  //!< the std::string data
+    bool ValidString;                   //!< a flag to indicate whether the std::string data is valid
 };
 
 #endif

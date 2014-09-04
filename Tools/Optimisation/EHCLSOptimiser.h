@@ -30,27 +30,27 @@
 class EHCLSOptimiser : public Optimiser
 {
 public:
-    EHCLSOptimiser(string name, vector<Parameter> parameters);
+    EHCLSOptimiser(std::string name, std::vector<Parameter> parameters);
     ~EHCLSOptimiser();
     
-    vector<float> getNextParameters();
+    std::vector<float> getNextParameters();
     void setParametersResult(float fitness);
     
-    void summaryTo(ostream& stream);
+    void summaryTo(std::ostream& stream);
 
-    vector<Parameter> getBest() const { return m_real_best_parameters;}
+    std::vector<Parameter> getBest() const { return m_real_best_parameters;}
 private:
-    void mutateBestParameters(vector<Parameter>& parameters);
-    void mutateParameters(vector<Parameter>& base_parameters, vector<float>& basedelta_parameters, vector<Parameter>& parameters);
+    void mutateBestParameters(std::vector<Parameter>& parameters);
+    void mutateParameters(std::vector<Parameter>& base_parameters, std::vector<float>& basedelta_parameters, std::vector<Parameter>& parameters);
     
-    void toStream(ostream& o) const;
-    void fromStream(istream& i);
+    void toStream(std::ostream& o) const;
+    void fromStream(std::istream& i);
 private:
-    vector<Parameter> m_best_parameters;              //!< the best set of parameters
-    vector<float> m_best_delta_parameters;        	  //!< the difference between the current best and the previous best (this 'gradient' is used by the line search part of the EHCLS)
-    vector<Parameter> m_current_parameters;           //!< the current parameters under test
-    vector<Parameter> m_previous_parameters;          //!< the previous parameters under test
-    vector<Parameter> m_real_best_parameters;         //!< the actual best set of parameters ever seen
+    std::vector<Parameter> m_best_parameters;              //!< the best set of parameters
+    std::vector<float> m_best_delta_parameters;        	  //!< the difference between the current best and the previous best (this 'gradient' is used by the line search part of the EHCLS)
+    std::vector<Parameter> m_current_parameters;           //!< the current parameters under test
+    std::vector<Parameter> m_previous_parameters;          //!< the previous parameters under test
+    std::vector<Parameter> m_real_best_parameters;         //!< the actual best set of parameters ever seen
     
     int m_iteration_count;
     float m_current_performance;

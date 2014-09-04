@@ -35,7 +35,7 @@
  	@param name the name of the optimiser. The name is used in debug logs, and is used for load/save filenames by default
  	@param parameters the initial seed for the optimisation
  */
-PSOOptimiser::PSOOptimiser(std::string name, vector<Parameter> parameters) : Optimiser(name, parameters)
+PSOOptimiser::PSOOptimiser(std::string name, std::vector<Parameter> parameters) : Optimiser(name, parameters)
 {
     //doesn't do anything
     m_inertia = 0.60;       // tune this: this must be less than 1, and can be used to control how long it takes for the algorithm to converge (0.7 converges after about 2000)
@@ -62,15 +62,15 @@ PSOOptimiser::PSOOptimiser(std::string name, vector<Parameter> parameters) : Opt
 void PSOOptimiser::initSwarm()
 {
     // we want to start the swarm around initial_parameters
-    //debug << "Initial Swarm: " << endl;
+    //debug << "Initial Swarm: " << std::endl;
     for (int i=0; i<m_num_particles; i++)
     {
     	m_swarm_best.push_back(m_initial_parameters);
         m_swarm_best_fitness.push_back(0);
         m_swarm_failures.push_back(0);
         
-        vector<Parameter> particle = m_initial_parameters;
-        vector<float> velocity = vector<float>(m_num_dimensions, 0);
+        std::vector<Parameter> particle = m_initial_parameters;
+        std::vector<float> velocity = std::vector<float>(m_num_dimensions, 0);
         for (int j=0; j<m_num_dimensions; j++)
         {
         	float min = m_initial_parameters[j].min();
@@ -78,8 +78,8 @@ void PSOOptimiser::initSwarm()
 			particle[j].set(uniformDistribution(min, max));
 			velocity[j] = normalDistribution(0, (max-min)/8);        // initial velocity between +/- range
         }
-        //debug << i << ": " << Parameter::getAsVector(particle) << endl;
-        //debug << i << ": " << velocity << endl;
+        //debug << i << ": " << Parameter::getAsVector(particle) << std::endl;
+        //debug << i << ": " << velocity << std::endl;
         m_swarm_position.push_back(particle);
         m_swarm_velocity.push_back(velocity);
     }
@@ -94,20 +94,20 @@ PSOOptimiser::~PSOOptimiser()
 
 void PSOOptimiser::setParametersResult(float fitness)
 {
-    debug << "PSOOptimiser::setParametersResult fitness: " << fitness << endl;
+    debug << "PSOOptimiser::setParametersResult fitness: " << fitness << std::endl;
 	m_swarm_fitness.push_back(fitness);
     if (m_swarm_fitness.size() == (unsigned int) m_num_particles)
         updateSwarm();
 }
 
-vector<float> PSOOptimiser::getNextParameters()
+std::vector<float> PSOOptimiser::getNextParameters()
 {
     return Parameter::getAsVector(m_swarm_position[m_swarm_fitness.size()]);
 }
 
 void PSOOptimiser::updateSwarm()
 {
-    debug << "Fitnesses: " << m_swarm_fitness << endl;
+    debug << "Fitnesses: " << m_swarm_fitness << std::endl;
     // update the personal and global bests
     for (int i=0; i<m_num_particles; i++)
     {
@@ -127,10 +127,10 @@ void PSOOptimiser::updateSwarm()
         }
     }
     
-    debug << "Personal bests: " << m_swarm_best_fitness << endl;
-    debug << "Global best: " << m_best_fitness << " " << Parameter::getAsVector(m_best) << endl;
+    debug << "Personal bests: " << m_swarm_best_fitness << std::endl;
+    debug << "Global best: " << m_best_fitness << " " << Parameter::getAsVector(m_best) << std::endl;
     
-    debug << "Current Swarm:" << endl;
+    debug << "Current Swarm:" << std::endl;
     // update the positions and velocities of the particles
     for (int i=0; i<m_num_particles; i++)
     {
@@ -160,7 +160,7 @@ void PSOOptimiser::updateSwarm()
     	}
     	else
     	{
-    		debug << "reset " << i << endl;
+    		debug << "reset " << i << std::endl;
     		m_swarm_failures[i] = 0;
     		for (int j=0; j<m_num_dimensions; j++)
     		{
@@ -169,34 +169,34 @@ void PSOOptimiser::updateSwarm()
     		}
     	}
         
-        debug << "pos " << i << ": " << Parameter::getAsVector(m_swarm_position[i]) << endl;
-        debug << "vel" << i << ": " << m_swarm_velocity[i] << endl;
+        debug << "pos " << i << ": " << Parameter::getAsVector(m_swarm_position[i]) << std::endl;
+        debug << "vel" << i << ": " << m_swarm_velocity[i] << std::endl;
     }
     
     // clear the fitnesses
     m_swarm_fitness.clear();
 }
 
-void PSOOptimiser::summaryTo(ostream& stream)
+void PSOOptimiser::summaryTo(std::ostream& stream)
 {
 }
 
-void PSOOptimiser::toStream(ostream& o) const
+void PSOOptimiser::toStream(std::ostream& o) const
 {
-    o << m_inertia << " " << m_reset_limit << " " << m_reset_fraction << " " << m_num_particles << " " << m_num_dimensions << endl;
+    o << m_inertia << " " << m_reset_limit << " " << m_reset_fraction << " " << m_num_particles << " " << m_num_dimensions << std::endl;
     
-    o << m_swarm_position << endl;
-    o << m_swarm_velocity << endl;
-    o << m_swarm_fitness << endl;
+    o << m_swarm_position << std::endl;
+    o << m_swarm_velocity << std::endl;
+    o << m_swarm_fitness << std::endl;
     
-    o << m_swarm_best << endl;
-    o << m_swarm_best_fitness << endl;
-    o << m_swarm_failures << endl;
-    o << m_best << endl;
-    o << m_best_fitness << endl;
+    o << m_swarm_best << std::endl;
+    o << m_swarm_best_fitness << std::endl;
+    o << m_swarm_failures << std::endl;
+    o << m_best << std::endl;
+    o << m_best_fitness << std::endl;
 }
 
-void PSOOptimiser::fromStream(istream& i)
+void PSOOptimiser::fromStream(std::istream& i)
 {
     i >> m_inertia >> m_reset_limit >> m_reset_fraction >> m_num_particles >> m_num_dimensions;
     

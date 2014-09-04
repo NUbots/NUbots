@@ -34,7 +34,7 @@
 
 #include "debug.h"
 #include "debugverbositybehaviour.h"
-using namespace std;
+
 
 class ImLostSubState : public SoccerState
 {
@@ -72,7 +72,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "ImLostPan" << endl;
+            debug << "ImLostPan" << std::endl;
         #endif
         m_jobs->addMotionJob(new WalkJob(0, 0, 0));
         m_jobs->addMotionJob(new HeadPanJob(HeadPanJob::Localisation));
@@ -128,7 +128,7 @@ protected:
     void doState()
     {
         #if DEBUG_BEHAVIOUR_VERBOSITY > 1
-            debug << "ImLostSpin" << endl;
+            debug << "ImLostSpin" << std::endl;
         #endif
         if (m_parent_machine->stateChanged())
             m_time_in_state = 0;

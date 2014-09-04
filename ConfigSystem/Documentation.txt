@@ -1,0 +1,281 @@
+# THE CONFIGURATION SYSTEM
+The NUbots' Configuration System (The Config System) is a persistent, strongly-typed, key-value store primarily intended for the consolidation and centralization of the NUBots' configuration data.
+
+## INTERFACE
+A single `ConfigManager` instance resides on the `NUBlackboard`.
+It is through this instance that any other system component is intended to access/modify its configuration.
+`ConfigManager` is the interface class to the Config System.
+The Blackboard contains a single `ConfigManager` instance named `Config`, through which all other modules should access the config system.
+
+#### Note: 
+Creating more that one `ConfigManager` will cause errors in the config system's persistant store (i.e. not all changes to config parameters would be saved).
+There is no need for you to create your own `ConfigManager` instance.
+
+#### Note: 
+Most methods and class declarations in header files (particularly those in the main interface, 'ConfigManager.h') are adorned with doxygen comments describing their purpose. These comments are likely to stay
+more up to date than this wiki page as the Config System evolves.
+Make sure to check them in addition to reading this guide.
+
+The test suite for the Config System is in 'Testing_MM.cpp' (ConfigSystem/Testing_MM.cpp).
+You could check that file for usage examples of most functions - although admittedly, it's not that pretty.
+
+***
+
+## QUICK START GUIDE:
+
+### CREATING PARAMETERS
+To create a parameter, simply call the `CreateParam` method.
+
+    // Create the parameter 'motion.walks.bwalk.speedMaxRot':
+    bool success = Blackboard->Config->CreateParam("motion.walks.bwalk",
+                                                   "speedMaxRot", 0.451298);
+
+You can provide the type as a template parameter if you want to be explicit.
+i.e. The following statement...
+
+    bool success = Blackboard->Config->CreateParam("motion.walks.bwalk",
+                                                   "speedMaxRot", 1);
+could be written as:
+
+    bool success = Blackboard->Config->CreateParam<double>("motion.walks.bwalk",
+                                                           "speedMaxRot", 1);
+
+The entire Config System is strongly typed, so parameter types are important.
+Attempting to read parameters as a different type to which they were stored will cause the Config System to report an error.
+
+#### Note:
+An initial value must be provided when creating a parameter.
+
+Only parameters of the following types can be created:
+* `long`
+* `double`
+* `std::string`
+* 1d vector of `long` (`std::vector<long>`)
+* 2d vector of `long` (`std::vector<std::vector<long> >`)
+* 3d vector of `long` (`std::vector<std::vector<std::vector<long> > >`)
+* 1d vector of `double` (`std::vector<double>`)
+* 2d vector of `double` (`std::vector<std::vector<double> >`)
+* 3d vector of `double` (`std::vector<std::vector<std::vector<double> > >`)
+
+#### Note:
+While the files in which config system parameters are stored on disk
+are intended to be human-readable/editable, creation or deletion
+of parameters through other means than the `CreateParam` and
+`DeleteParam` methods is discouraged.
+
+#### Note:
+The `ConfigParameter` class is only used internally by the Config System, however, none of `ConfigManager`'s methods accept `ConfigParameter`s.
+You should not create your own instances of `ConfigParameter`.
+
+***
+
+### SETTING A PARAMETER'S DESCRIPTION
+Once a parameter has been created, other operations may be performed on it.
+Giving each parameter a meaningful description is an important form of documentation, and is strongly recommended.
+
+To set a parameter's description, just call `SetDescription`:
+
+    // Create a parameter
+    bool success = false;
+    success |= Blackboard->Config->CreateParam("motion.walks.bwalk", 
+                                               "speedMaxX", 58.7386);
+    
+    // Set its description
+    success |= Blackboard->Config->SetDescription("motion.walks.bwalk", "speedMaxX",
+        "The maximum speed (in cm/s) at which the robot may attempt to walk in"
+        + " the X direction. (i.e. the direction in which the robot is facing)");
+
+***
+
+### READING PARAMETER VALUES
+To retrieve the parameter's value, just call `ReadValue`:
+
+    // Read the parameter's value
+    double out_value;
+    bool success = Blackboard->Config->ReadValue("motion.walks.bwalk", 
+                                                 "speedMaxX", &out_value);
+    if(success)
+        std::cout << "The value of motion.walks.bwalk.speedMaxX is: " << out_value
+                  << ";" << std::endl;
+
+Note:
+The type read can be explicitly specified in the same way as `CreateParam` (e.g. `ReadValue<double>(...)`).
+
+***
+
+### SETTING PARAMETER VALUES
+Parameters can be given a new value with `SetValue`:
+
+    // Store a new value
+    bool success = Blackboard->Config->SetValue("motion.walks.bwalk", 
+                                                "speedMaxX", 800);
+
+    // Read the the new value
+    double out_value;
+    bool success = Blackboard->Config->ReadValue("motion.walks.bwalk", 
+                                                 "speedMaxX", &out_value);
+    
+    if(success)
+        std::cout << "The value of motion.walks.bwalk.speedMaxX is: " << out_value
+                  << ";" << std::endl;
+    // Prints: 'The value of motion.walks.bwalk.speedMaxX is: 800;'
+
+Note:
+The type read can be explicitly specified in the same way as `CreateParam` (e.g. `SetValue<double>(...)`).
+
+***
+
+### SAVING A CONFIGURATION
+Configurations are stored in memory while the program is running.
+For changes made to a configuration to persist between runs of the program binary (e.g. 'nubotbin'), the configuration must be 'saved'.
+To save the current configuration state, call `SaveConfiguration`:
+
+    // Save the current configuration:
+    // Note: The string given is the name of the configuration.
+    //       The mapping of this name to the way a configuration is stored
+    //       on the filesystem has deliberately been abstracted away,
+    //       and is likely to change in future releases of the Config System.
+    //       The name given should, however, only contain characters that
+    //       would be safe for a file/directory name (e.g. [a-zA-Z0-9_\- ]+).
+    bool success = Blackboard->Config->SaveConfiguration("default");
+
+***
+
+### LOADING A CONFIGURATION
+To load a saved configuration state, just call `LoadConfiguration`.
+Unsaved changes to the currently loaded configuration will be lost.
+
+    // Load a named configuration:
+    bool success = Blackboard->Config->LoadConfiguration("walk-training");
+    
+    // Note: 'Blackboard->Config->LoadConfiguration("default");' is called
+    //       at startup (in the ConfigManager's constructor).
+
+***
+
+### DELETING A PARAMETER
+To permanently delete a parameter call `DeleteParam`:
+
+    // Delete 'motion.walks.bwalk.speedMaxX':
+    bool success = Blackboard->Config->DeleteParam("motion.walks.bwalk", "speedMaxX");
+    if(success)
+        std::cout << "The parameter 'motion.walks.bwalk' has been deleted."
+                  << std::endl;
+    
+Note:
+Once a parameter has been deleted, any attempts to access/modify it will fail.
+
+***
+
+### LOCKED PARAMETERS
+Parameters can be locked and unlocked.
+Any attempt to modify or delete a locked parameter will fail.
+
+    bool success = false;
+    // Lock the parameter
+    success = Blackboard->Config->LockParam("motion.walks.bwalk", "speedMaxX");
+    
+    // Attempt to delete the parameter
+    success = Blackboard->Config->DeleteParam("motion.walks.bwalk", "speedMaxX");
+    
+    if(!success) 
+        std::cout << "Not deleted." << std::endl;
+    // Prints "Not Deleted."
+    
+    // Unlock the parameter
+    success = Blackboard->Config->UnlockParam("motion.walks.bwalk", "speedMaxX");
+    
+    if (success)
+    {
+        // The parameter could be deleted here
+    }
+
+***
+
+### RANGES
+Each parameter may have an associated range.
+Whenever the parameter value is set, the given value is checked against the range and either the value is clipped (silently), or an error is reported (and the value not set), depending on the range's settings.
+
+    // To set a range, just create a range object...
+    ConfigSystem::ConfigRange<double> speedMaxX_range(
+        10.0,  // Min value;
+        800.0, // Max value;
+        false, // Indicates that allowed values fall between min and max;
+        true,  // Indicates that if a value is set that falls outside the range,
+               // it should be clipped to the nearest bound;
+        ConfigSystem::bt_closed, // Indicates that the lower bound is an allowed value;
+        ConfigSystem::bt_none);  // Indicates that the upper bound should be ignored
+                                 // (i.e. this range doesn't actually have an upper bound);
+    
+    // Then set it on a parameter:
+    bool success = Blackboard->Config->SetRange("motion.walks.bwalk",
+                                                "speedMaxX", speedMaxX_range);
+    
+    // Now setting a value outside of the range will cause it to be clipped:
+    success |= Blackboard->Config->SetValue("motion.walks.bwalk",
+                                            "speedMaxX", 5.0);
+    // Read the the new value
+    double out_value;
+    bool success = Blackboard->Config->ReadValue("motion.walks.bwalk", 
+                                                 "speedMaxX", &out_value);
+    if(success)
+        std::cout << "The value of motion.walks.bwalk.speedMaxX is: " << out_value
+                  << ";" << std::endl;
+    // Prints: 'The value of motion.walks.bwalk.speedMaxX is: 10;'
+
+If you want to get the range that is currently applied to a parameter, just call `ReadRange`:
+
+    ConfigSystem::ConfigRange<double> current_speedMaxX_range
+    bool success = Blackboard->Config->ReadRange("motion.walks.bwalk",
+                                                 "speedMaxX",
+                                                 &current_speedMaxX_range);
+
+#### Note:
+The simpler constructor for `ConfigRange` will suit just fine for most purposes.
+
+    //       e.g. The range [10, 800].
+    ConfigSystem::ConfigRange<double> speedMaxX_range(10.0, 800.0);
+
+#### Note:
+Ranges on vector-valued parameters apply to every value the vector contains.
+
+***
+
+### AUTO-UPDATING PARAMETERS
+
+#### Note:
+This section will be completed soon!
+
+    bool success = Blackboard->Config->SetConfigObjects(std::vector<Configurable*> configObjects);
+    bool success = Blackboard->Config->AddConfigObject(Configurable* configObject);
+
+Any object can access the config system, but if an object is to be notified of changes made to parameters in the config system that could affect its configuration, it should inherit from `ConfigSystem::Configurable`
+(see https://github.com/nubots/robocup/blob/develop/ConfigSystem/Configurable.h).
+Use `Configurable::setConfigBasePath(std::string configBasePath)` to set the path in the config tree that the object should receive updates from (by default, this is the root path, meaning `updateConfig()` will be called whenever any configuration at all is changed - no matter how irrelevant the change may be), and use `ConfigManager::AddConfigObject(Configurable*)` to add itself to the list of objects that the `ConfigManager` 'manages'.
+Once these things are done, the object will be notified of changes on it's `configBasePath` through its `Configurable::updateConfig` method.
+
+The `ConfigManager` updates the objects it manages on every iteration of the see-think thread (updating only those that need updating).
+
+#### Note:
+I plan to extend the Configurable to allow a list of `configBasePath`s, rather than just a single path.
+
+
+
+## Notes:
+The system is currently missing a few of the less trivial validation checks.
+It's still very useable - you just have to be slightly more careful.
+I'm planning to add these checks in soon.
+
+Examples of missing checks are:
+* Creating parameters that aren't leaf nodes of the tree,
+* Creating parameters whose paths contain the names of existing parameters.
+* Reading interim paths as parameters (although this will almost always fail anyway).
+* Storing/Reading parameter names containing dots.
+
+These checks would all attempt to enforce the requirement that all parameters should always be leaf nodes of the config tree (this isn't an essential requirement in the long run, however it's currently very unsafe to not meet this requirement).
+
+***
+
+Please let me know if anything is unclear or doesn't work (via a Git issue).
+
+Mitchell Metcalfe (2012-05-19)

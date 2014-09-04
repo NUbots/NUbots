@@ -80,7 +80,7 @@ RobotSelectDialog::~RobotSelectDialog()
 }
 
 /*! @brief Returns all of the currently selected hosts */
-vector<NUHostInfo>& RobotSelectDialog::getSelectedHosts()
+std::vector<NUHostInfo>& RobotSelectDialog::getSelectedHosts()
 {
     return m_selected_hosts;
 }
@@ -90,8 +90,8 @@ void RobotSelectDialog::populateTree()
 {
     m_tree->clear();
     
-    vector<string> services = m_bonjour->getServices();
-    vector<list<NUHostInfo> > hosts = m_bonjour->getHosts();
+    std::vector<std::string> services = m_bonjour->getServices();
+    std::vector<std::list<NUHostInfo> > hosts = m_bonjour->getHosts();
     for (size_t i=0; i<services.size(); i++)
     	addService(services[i], hosts[i]);
     
@@ -103,10 +103,10 @@ void RobotSelectDialog::populateTree()
  	@param service the name of the service
  	@param hosts the list of hosts
  */
-void RobotSelectDialog::addService(const string& service, list<NUHostInfo>& hosts)
+void RobotSelectDialog::addService(const std::string& service, std::list<NUHostInfo>& hosts)
 {
     QTreeWidgetItem* node = new QTreeWidgetItem(m_tree, QStringList() << service.c_str());
-    for (list<NUHostInfo>::iterator it = hosts.begin(); it != hosts.end(); ++it)
+    for (std::list<NUHostInfo>::iterator it = hosts.begin(); it != hosts.end(); ++it)
     {
         NUHostInfo info = *it;
         QStringList text;			// a list of strings to display in the gui (name, address)

@@ -30,28 +30,26 @@
 #include <iostream>
 #include "Tools/Math/StlVector.h"
 
-using namespace std;
-
 class Parameter 
 {
 public:
     Parameter();
     Parameter(float value, float min, float max);
-    Parameter(string name, float value, float min, float max);
-    Parameter(string name, float value, float min, float max, string desc);
+    Parameter(std::string name, float value, float min, float max);
+    Parameter(std::string name, float value, float min, float max, std::string desc);
     ~Parameter();
     
     float get() const;
     float min() const;
     float max() const;
-    string& name();
-    bool compareName(const string n) const;
-    string& desc();
+    std::string& name();
+    bool compareName(const std::string n) const;
+    std::string& desc();
     void set(float value);
-    void set(float value, float min, float max, string desc);
+    void set(float value, float min, float max, std::string desc);
     
-    void summaryTo(ostream& output);
-    void csvTo(ostream& output);
+    void summaryTo(std::ostream& output);
+    void csvTo(std::ostream& output);
     
     friend float operator-(const Parameter& p, const float& f);
     friend float operator-(const float& f, const Parameter& p);
@@ -64,32 +62,32 @@ public:
     friend float operator*(const Parameter& p, const float& f);
     friend float operator*(const Parameter& p1, const Parameter& p2);
     
-    friend vector<float> operator-(const vector<float>& f, const vector<Parameter>& p);
-    friend vector<float> operator-(const vector<Parameter>& p, const vector<float>& f);
-    friend vector<float> operator-(const vector<Parameter>& p1, const vector<Parameter>& p2);
-    friend vector<float> operator+(const vector<float>& f, const vector<Parameter>& p);
-    friend vector<float> operator+(const vector<Parameter>& p, const vector<float>& f);
-    friend vector<float> operator+(const vector<Parameter>& p1, const vector<Parameter>& p2);
-    friend void operator+=(vector<Parameter>& p, const vector<float>& f);
-    friend vector<float> operator*(const vector<float>& f, const vector<Parameter>& p);
-    friend vector<float> operator*(const vector<Parameter>& p, const vector<float>& f);
-    friend vector<float> operator*(const float& f, const vector<Parameter>& p);
-    friend vector<float> operator*(const vector<Parameter>& p, const float& f);
+    friend std::vector<float> operator-(const std::vector<float>& f, const std::vector<Parameter>& p);
+    friend std::vector<float> operator-(const std::vector<Parameter>& p, const std::vector<float>& f);
+    friend std::vector<float> operator-(const std::vector<Parameter>& p1, const std::vector<Parameter>& p2);
+    friend std::vector<float> operator+(const std::vector<float>& f, const std::vector<Parameter>& p);
+    friend std::vector<float> operator+(const std::vector<Parameter>& p, const std::vector<float>& f);
+    friend std::vector<float> operator+(const std::vector<Parameter>& p1, const std::vector<Parameter>& p2);
+    friend void operator+=(std::vector<Parameter>& p, const std::vector<float>& f);
+    friend std::vector<float> operator*(const std::vector<float>& f, const std::vector<Parameter>& p);
+    friend std::vector<float> operator*(const std::vector<Parameter>& p, const std::vector<float>& f);
+    friend std::vector<float> operator*(const float& f, const std::vector<Parameter>& p);
+    friend std::vector<float> operator*(const std::vector<Parameter>& p, const float& f);
 
-    static vector<float> getAsVector(const vector<Parameter>& p);
+    static std::vector<float> getAsVector(const std::vector<Parameter>& p);
     
-    friend ostream& operator<< (ostream& output, const Parameter& p);
-    friend ostream& operator<< (ostream& output, const vector<Parameter>& p);
+    friend std::ostream& operator<< (std::ostream& output, const Parameter& p);
+    friend std::ostream& operator<< (std::ostream& output, const std::vector<Parameter>& p);
     
-    friend istream& operator>> (istream& input, Parameter& p);
-    friend istream& operator>> (istream& input, vector<Parameter>& p);
+    friend std::istream& operator>> (std::istream& input, Parameter& p);
+    friend std::istream& operator>> (std::istream& input, std::vector<Parameter>& p);
 
 private:
-    string Name;
+    std::string Name;
     float Value;
     float Min;
     float Max;
-    string Description;
+    std::string Description;
 };
 
 #endif

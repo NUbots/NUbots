@@ -14,21 +14,21 @@ public:
     };
 
 public:
-    CornerPoint(TYPE type, GroundPoint location);
+    CornerPoint(TYPE type, NUPoint location);
 
     virtual bool addToExternalFieldObjects(FieldObjects* fieldobjects, float timestamp) const;
 
     //! @brief Stream output for labelling purposes
-    virtual void printLabel(ostream& out) const;
+    virtual void printLabel(std::ostream& out) const;
 
     //! @brief Calculation of error for optimisation
     virtual double findScreenError(VisionFieldObject* other) const;
     virtual double findGroundError(VisionFieldObject* other) const;
 
     //! @brief output stream operator.
-    friend ostream& operator<< (ostream& output, const CornerPoint& c);
+    friend std::ostream& operator<< (std::ostream& output, const CornerPoint& c);
     //! @brief output stream operator for a vector of corner points.
-    friend ostream& operator<< (ostream& output, const vector<CornerPoint>& c);
+    friend std::ostream& operator<< (std::ostream& output, const std::vector<CornerPoint>& c);
 
 private:
     TYPE m_type;
