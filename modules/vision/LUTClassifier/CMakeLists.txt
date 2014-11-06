@@ -30,7 +30,7 @@ ADD_CUSTOM_COMMAND(
     ARGS -i ${abs_file}
          --file-extension-scheme pp
          --output-directory ${outputpath}
-         --engine Lexer
+         --analyzer-class Lexer
          --language C++
          --token-policy single
          --no-string-accumulator
