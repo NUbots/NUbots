@@ -18,7 +18,7 @@ class developer_tools {
   # package { 'curl': ensure => latest, }
 }
 
-node nuclearportvm {
+node nubotsvm {
   include initial_apt_update
 
   # define variables for this node
