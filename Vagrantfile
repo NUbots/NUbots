@@ -31,43 +31,43 @@ Vagrant.configure("2") do |config|
   config.vm.provision :puppet do |puppet|
     puppet.manifests_path = "puppet/manifests"
     puppet.module_path = "puppet/modules"
-    puppet.manifest_file  = "site.pp"
+    puppet.manifest_file  = "nodes.pp"
   end
 
   # config.vm.provider "virtualbox" do |v|
   #   v.gui = true
   # end
 
-  # Define the NUClearPort development VM, snd make it the primary VM
+  # Define the NUbots development VM, and make it the primary VM
   # (meaning that a plain `vagrant up` will only create this machine)
-  config.vm.define "nuclearportvm", primary: true do |nuclearport|
-    nuclearport.vm.hostname = "nuclearportvm.nubots.net"
+  config.vm.define "nubotsvm", primary: true do |nubots|
+    nubots.vm.hostname = "nubotsvm.nubots.net"
 
-    nuclearport.vm.network :private_network, ip: "192.168.33.77"
+    nubots.vm.network :private_network, ip: "192.168.33.77"
 
-    nuclearport.vm.network :forwarded_port, guest: 12000, host: 12000
-    nuclearport.vm.network :forwarded_port, guest: 12001, host: 12001
+    nubots.vm.network :forwarded_port, guest: 12000, host: 12000
+    nubots.vm.network :forwarded_port, guest: 12001, host: 12001
 
     # Add hostname here if running NUbugger on the VM
     if ['Ne', 'jordan-XPS13', 'taylor-ubuntu'].include?(Socket.gethostname) # NUbugger Port
-      nuclearport.vm.network :forwarded_port, guest: 9090, host: 9090
+      nubots.vm.network :forwarded_port, guest: 9090, host: 9090
     end
 
     #if ['s24'].include?(Socket.gethostname) # NUbugger Port
-    #  nuclearport.vm.network :public_network, bridge: "WiFi"
+    #  nubots.vm.network :public_network, bridge: "WiFi"
     #end
 
     # Syntax: "path/on/host", "/path/on/guest"
-    # nuclearport.vm.synced_folder ".", "/home/vagrant/nubots/NUClearPort"
+    # nubots.vm.synced_folder ".", "/home/vagrant/nubots/NUbots"
 
     # Note: Use NFS for more predictable shared folder support.
     #   The guest must have 'apt-get install nfs-common'
-    nuclearport.vm.synced_folder ".", "/home/vagrant/nubots/NUClearPort"
+    nubots.vm.synced_folder ".", "/home/vagrant/nubots/NUbots"
 
     # Share NUbugger repository with the VM if it has been placed in the same
-    # directory as the NUClearPort repository
+    # directory as the NUbots repository
     if File.directory?("../NUbugger")
-      nuclearport.vm.synced_folder "../NUbugger", "/home/vagrant/nubots/NUbugger"
+      nubots.vm.synced_folder "../NUbugger", "/home/vagrant/nubots/NUbugger"
     end
   end
 end

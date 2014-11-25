@@ -15,6 +15,7 @@ class developer_tools {
   package { 'linux-headers-generic': ensure => latest, }
   package { 'dos2unix': ensure => latest, }
   package { 'rsync': ensure => latest, }
+  # package { 'curl': ensure => latest, }
 }
 
 node nuclearportvm {
@@ -48,8 +49,8 @@ node packer-virtualbox-iso, packer-vmware-iso {
 
   $username = 'vagrant'
 
-  # nuclear::build_dep
-  include catch
+  # # nuclear::build_dep
+  # include catch
 
   # nuclearport::build_dep
   package { 'build-essential': ensure => latest }

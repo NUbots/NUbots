@@ -28,7 +28,7 @@
     },
     {
       "type": "puppet-masterless",
-      "manifest_file": "../puppet/manifests/site.pp",
+      "manifest_file": "../puppet/manifests/nodes.pp",
       "manifest_dir": "../puppet/manifests",
       "module_paths": ["../puppet/modules"]
     }
@@ -73,8 +73,8 @@
       "ssh_wait_timeout": "10000s",
       "shutdown_command": "echo 'shutdown -P now' > /tmp/shutdown.sh; echo 'vagrant'|sudo -S sh '/tmp/shutdown.sh'",
       "vboxmanage": [
-        [ "modifyvm", "{{.Name}}", "--memory", "2048" ],
-        [ "modifyvm", "{{.Name}}", "--cpus", "2" ]
+        [ "modifyvm", "{{.Name}}", "--memory", "4096" ],
+        [ "modifyvm", "{{.Name}}", "--cpus", "4" ]
       ]
     },
     {
@@ -104,9 +104,12 @@
       "ssh_wait_timeout": "10000s",
       "shutdown_command": "echo 'shutdown -P now' > /tmp/shutdown.sh; echo 'vagrant'|sudo -S sh '/tmp/shutdown.sh'",
       "vmx_data": {
-        "memsize": "2048",
-        "numvcpus": "2",
-        "cpuid.coresPerSocket": "2"
+        "memsize": "4096",
+        "numvcpus": "4",
+        "cpuid.coresPerSocket": "4"
+      },
+      "vmx_data_post": {
+        "ethernet0.virtualDev": "vmxnet3"
       }
     }
   ]
