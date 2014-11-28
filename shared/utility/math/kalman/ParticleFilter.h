@@ -81,14 +81,21 @@ namespace utility {
                                          const TMeasurementType&... measurementArgs) {
                     //TODO
                     arma::vec weights = arma::zeros(particles.size());
+
                     for (int i = 0; i < particles.size(); i++){
                         arma::vec predictedObservation = model.predictedObservation(particles[i], measurementArgs...));
                         assert(predictedObservation.size() == measurement.size());
                         double difference = arma::norm(predictedObservation-measurement)
                         weights[i] = std::exp(- difference * difference / sigma_sq);
                     }
+                    
                     std::discrete_distribution multinomial(weights.begin(),weights.end());//class incorrectly named by cpp devs
-
+                    std::vec resample = zeros(particles.size());
+                    //TODO: RESAMPLE
+                    arma::vec<StateVec> candidateParticles = particles;
+                    for (int i = 0; i < particles.size(); i++){
+                        particles[i] = candidateParticles[resample[i]];
+                    }
 
                 }
 
