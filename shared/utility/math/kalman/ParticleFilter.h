@@ -61,7 +61,8 @@ namespace utility {
                     reset(initialMean, initialCovariance, number_of_particles_);
                 }
 
-                void reset(StateVec initialMean, StateMat initialCovariance, int number_of_particles_) {
+                void reset(StateVec initialMean, StateMat initialCovariance, int number_of_particles_) 
+                {
                     particles.clear()
                     for(int i = 0; i < number_of_particles_; i++){
                         particles.push_back(sampleParticle(initialMean, initialCovariance));
@@ -69,7 +70,8 @@ namespace utility {
                 }
 
                 template <typename... TAdditionalParameters>
-                void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters) {
+                void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters) 
+                {
                     for(uint i = 0; i < particles.size(); ++i) {
                         particles[i] = model.timeUpdate(particles[i], deltaT, additionalParameters...);
                     }
@@ -78,8 +80,8 @@ namespace utility {
                 template <typename TMeasurement, typename... TMeasurementType>
                 double measurementUpdate(const TMeasurement& measurement,
                                          const arma::mat& measurement_variance,
-                                         const TMeasurementType&... measurementArgs) {
-                    //TODO
+                                         const TMeasurementType&... measurementArgs) 
+                {
                     arma::vec weights = arma::zeros(particles.size());
 
                     for (int i = 0; i < particles.size(); i++){
@@ -99,14 +101,14 @@ namespace utility {
 
                 }
 
-                StateVec get() const {
-                    return StateVec();
-                    // return arma::mean(particles);
+                StateVec get() const 
+                {
+                    return arma::mean(particles);
                 }
 
-                StateMat getCovariance() const {
-                    return StateMat();
-                    // return arma::covariance(particles);
+                StateMat getCovariance() const 
+                {
+                    return arma::var(particles);
                 }
             };
         }
