@@ -145,15 +145,15 @@ namespace modules {
             // end_config_params
 
             // walk state
-            arma::vec3 uTorso;
-            arma::vec3 uTorso1;
-            arma::vec3 uTorso2;
-            arma::vec3 uLeft;
-            arma::vec3 uLeft1;
-            arma::vec3 uLeft2;
-            arma::vec3 uRight;
-            arma::vec3 uRight1;
-            arma::vec3 uRight2;
+            arma::vec3 uTorso = arma::zeros(3);
+            arma::vec3 uTorso1 = arma::zeros(3);
+            arma::vec3 uTorso2 = arma::zeros(3);
+            arma::vec3 uLeft = arma::zeros(3);
+            arma::vec3 uLeft1 = arma::zeros(3);
+            arma::vec3 uLeft2 = arma::zeros(3);
+            arma::vec3 uRight = arma::zeros(3);
+            arma::vec3 uRight1 = arma::zeros(3);
+            arma::vec3 uRight2 = arma::zeros(3);
 
             arma::vec6 pLLeg;
             arma::vec6 pRLeg;

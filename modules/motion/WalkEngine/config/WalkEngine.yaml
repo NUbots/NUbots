@@ -1,66 +1,57 @@
-{
-    "stanceLimitX": [-0.10, 0.10],
-    "stanceLimitY": [0.07, 0.20],
-    "stanceLimitA": [0, 0.5236],
-    "velLimitX": [-0.03, 0.035], # [-0.03, 0.03],
-    "velLimitY": [-0.03, 0.03],
-    "velLimitA": [-0.4, 0.4],
-    "velDelta": [0.02, 0.02, 0.15],
-    "vaFactor": 0.6,
-
-    "gyroFactor" : 0.18,
-
-    "velXHigh": 0.06,
-    "velDeltaXHigh": 0.01,
-
-    "footSizeX": [-0.05, 0.05],
-    "stanceLimitMarginY": 0.015,
-    "stanceLimitY2": 0.02,
-
-    "bodyHeight": 0.285,
-    "bodyTilt": 0.4091,
-    "footX": 0.0,
-    "footY": 0.035,
-    "supportX": 0.02,
-    "supportY": 0.01,
-
-    "hardnessSupport": 0.3,
-    "hardnessSwing": 0.3,
-
-    "hardnessArm0": 0.3,
-    "hardnessArm": 0.3,
-
-    "tStep": 0.25,
-    "tZmp": 0.165,
-    "stepHeight": 0.015,
-    "phSingle": [0.1, 0.9],
-
-    "spreadComp": 0.015,
-    "turnCompThreshold": 0,
-    "turnComp": 0,
-
-    "velFastForward": 0.05,
-    "velFastTurn": 0.15,
-    "supportFront": 0.03,
-    "supportFront2": 0.03,
-    "supportBack": -0.02,
-    "supportSideX": -0.01,
-    "supportSideY": -0.005,
-    "supportTurn": 0.02,
-
-    "frontComp": 0.0,
-    "AccelComp": 0.1,
-
-    "supportModYInitial": 0,
-
-    "toeTipCompensation": 0,
-
-    "useAlternativeTrajectory": false,
-
-    "velCommandX" : 0.035,
-    "velCommandY" : 0.0,
-    "velCommandAngular" : 0.0,
-    "balanceWeight" : 0.7,
-
-    "STAND_SCRIPT_DURATION_MILLISECONDS" : 1000
-}
+stanceLimitX: [-0.1, 0.1]
+stanceLimitY: [0.07, 0.2]
+stanceLimitA: [0, 0.5236]
+velLimitX: [-0.03, 0.035]
+velLimitY: [-0.03, 0.03]
+velLimitA: [-0.4, 0.4]
+velDelta: [0.02, 0.02, 0.15]
+vaFactor: 0.6
+# Ratio to normalize gyro gains into units of degree/second
+gyroFactor: 0.18
+velXHigh: 0.06
+velDeltaXHigh: 0.01
+footSizeX: [-0.05, 0.05]
+stanceLimitMarginY: 0.015
+stanceLimitY2: 0.02
+# The body height of the robot, in meters; changing this will alter how high the robot's natural stance is.
+bodyHeight: 0.285
+bodyTilt: 0.4091
+footX: 0
+# The width of the robot's rest stance in meters.
+footY: 0.035
+# The distance the ankles rest behind the torso, in meters.
+supportX: 0.02
+# How far from the center of the foot the center of mass is placed during each step.
+supportY: 0.01
+hardnessSupport: 0.3
+hardnessSwing: 0.3
+hardnessArm0: 0.3
+hardnessArm: 0.3
+# The tStep defines how long it will take for a robot to take its next step, in seconds.
+tStep: 0.25
+tZmp: 0.165
+# The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
+stepHeight: 0.015
+# The ratio of double support time: single support time (standing on two feet vs. balancing on one foot).
+phSingle: [0.1, 0.9]
+spreadComp: 0.015
+turnCompThreshold: 0
+turnComp: 0
+velFastForward: 0.05
+velFastTurn: 0.15
+supportFront: 0.03
+supportFront2: 0.03
+supportBack: -0.02
+supportSideX: -0.01
+supportSideY: -0.005
+supportTurn: 0.02
+frontComp: 0
+AccelComp: 0.1
+supportModYInitial: 0
+toeTipCompensation: 0
+useAlternativeTrajectory: false
+velCommandX: 0.035
+velCommandY: 0
+velCommandAngular: 0
+balanceWeight: 0.7
+STAND_SCRIPT_DURATION_MILLISECONDS: 1000

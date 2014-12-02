@@ -290,7 +290,7 @@ namespace kinematics {
     */
     template <typename RobotKinematicModel>
     inline arma::vec4 calculateCentreOfMass(const std::map<messages::input::ServoID, arma::mat44>& jointPositions, bool includeTorso){
-        arma::vec4 totalMassVector;
+        arma::vec4 totalMassVector = arma::zeros(4);
 
         for(auto& joint : jointPositions){
             arma::vec4 massVector;
@@ -378,7 +378,7 @@ namespace kinematics {
         arma::vec3 xRobotImu = arma::mat33(orientation.t()).col(0);
         arma::vec2 projXRobot = arma::normalise(xRobotImu.rows(0,1));
         arma::vec2 projYRobot = arma::vec2({-projXRobot(1), projXRobot(0)});
-        
+
         arma::mat22 robotToImu;
         robotToImu.col(0) = projXRobot;
         robotToImu.col(1) = projYRobot;
