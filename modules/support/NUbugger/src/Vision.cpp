@@ -49,6 +49,7 @@ namespace support {
 
             auto* imageData = message.mutable_image();
 
+            imageData->set_camera_id(0);
             imageData->mutable_dimensions()->set_x(image.width());
             imageData->mutable_dimensions()->set_y(image.height());
 

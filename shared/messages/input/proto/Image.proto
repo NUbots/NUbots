@@ -29,6 +29,7 @@ message Image {
         JPEG = 3;
     };
 
+    required uint32 camera_id = 4;
     required Format format = 1;
     required uvec2 dimensions = 2;
     required bytes data = 3;
