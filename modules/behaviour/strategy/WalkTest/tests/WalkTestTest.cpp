@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,34 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_MOTION_WALKCOMMAND_H
-#define MESSAGES_MOTION_WALKCOMMAND_H
 
-#include <armadillo>
 
-namespace messages {
-    namespace motion {
-
-        /**
-         * TODO document
-         *
-         * @author Trent Houliston
-         * @author Brendan Annable
-         */
-        struct WalkCommand {
-            arma::vec2 velocity; // in m/s
-            float rotationalSpeed; // in rads/s
-        };
-
-        struct WalkStartCommand {
-        };
-
-        struct WalkStopCommand {
-        };
-
-        struct WalkStopped{
-        };
-    }  // motion
-}  // messages
-
-#endif  // MESSAGES_MOTION_WALKCOMMAND_H
+#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#include <catch.hpp>

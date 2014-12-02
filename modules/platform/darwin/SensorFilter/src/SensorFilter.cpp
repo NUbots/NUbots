@@ -409,7 +409,8 @@ namespace modules {
                     emit(graph("Gyro Filtered", sensors->gyroscope[0],sensors->gyroscope[1], sensors->gyroscope[2]
                         ));*/
 
-                        integratedOdometry += sensors->odometry * deltaT;
+                    // TODO: crashes binary
+                        //integratedOdometry += sensors->odometry * deltaT;
 
                     // emit(graph("LFoot Down", sensors->leftFootDown
                     //     ));
@@ -417,8 +418,8 @@ namespace modules {
                     //     ));
                     // emit(graph("Torso Velocity (vx,vy,vz)", sensors->odometry(0,3), sensors->odometry(1,3), sensors->odometry(2,3)
                     //     ));
-                    emit(graph("Integrated Odometry", integratedOdometry[0], integratedOdometry[1]
-                        ));
+                    //emit(graph("Integrated Odometry", integratedOdometry[0], integratedOdometry[1]
+                    //    ));
                     // emit(graph("COM", sensors->centreOfMass[0], sensors->centreOfMass[1], sensors->centreOfMass[2], sensors->centreOfMass[3]
                     //     ));
 

@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,34 +17,30 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_MOTION_WALKCOMMAND_H
-#define MESSAGES_MOTION_WALKCOMMAND_H
+#include "WalkTest.h"
+#include "messages/motion/WalkCommand.h"
 
-#include <armadillo>
+namespace modules {
+namespace behaviour {
+namespace strategy {
 
-namespace messages {
-    namespace motion {
+    using messages::motion::WalkCommand;
+    using messages::motion::WalkStartCommand;
 
-        /**
-         * TODO document
-         *
-         * @author Trent Houliston
-         * @author Brendan Annable
-         */
-        struct WalkCommand {
-            arma::vec2 velocity; // in m/s
-            float rotationalSpeed; // in rads/s
-        };
+    WalkTest::WalkTest(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment)) {
 
-        struct WalkStartCommand {
-        };
+        // go forward
+        auto walk = std::make_unique<WalkCommand>();
+        walk->velocity = arma::vec({1, 0});
+        walk->rotationalSpeed = 0;
+        emit(std::move(walk));
 
-        struct WalkStopCommand {
-        };
+        emit(std::make_unique<WalkStartCommand>());
 
-        struct WalkStopped{
-        };
-    }  // motion
-}  // messages
+    }
 
-#endif  // MESSAGES_MOTION_WALKCOMMAND_H
+}
+}
+}
+
