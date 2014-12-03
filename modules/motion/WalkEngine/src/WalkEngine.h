@@ -148,13 +148,14 @@ namespace modules {
             arma::vec3 uTorso = arma::zeros(3);
             arma::vec3 uTorsoSource = arma::zeros(3);
             arma::vec3 uTorsoDestination = arma::zeros(3);
-            arma::vec3 uLeft = arma::zeros(3);
-            arma::vec3 uLeftSource = arma::zeros(3);
-            arma::vec3 uLeftDestination = arma::zeros(3);
-            arma::vec3 uRight = arma::zeros(3);
-            arma::vec3 uRightSource = arma::zeros(3);
-            arma::vec3 uRightDestination = arma::zeros(3);
+            arma::vec3 uLeftFoot = arma::zeros(3);
+            arma::vec3 uLeftFootSource = arma::zeros(3);
+            arma::vec3 uLeftFootDestination = arma::zeros(3);
+            arma::vec3 uRightFoot = arma::zeros(3);
+            arma::vec3 uRightFootSource = arma::zeros(3);
+            arma::vec3 uRightFootDestination = arma::zeros(3);
 
+            // these vec6's contain x,y,z translation and x,y,z rotation
             arma::vec6 pLLeg;
             arma::vec6 pRLeg;
             arma::vec6 pTorso;
@@ -164,10 +165,10 @@ namespace modules {
             arma::vec3 velDiff;
 
             // zmp expoential coefficients
-            float aXP;
-            float aXN;
-            float aYP;
-            float aYN;
+            arma::vec4 zmpCoefficients = arma::zeros(4);
+            // TODO: do these need to be global?
+            // zmp params m1X, m2X, m1Y, m2Y
+            arma::vec4 zmpParams = arma::zeros(4);
 
             // gyro stabilization variables
             arma::vec2 ankleShift;
@@ -214,8 +215,8 @@ namespace modules {
             arma::vec3 uLRFootOffset;
 
             // walking/stepping transition variables
-            arma::vec3 uLeftI;
-            arma::vec3 uRightI;
+            arma::vec3 uLeftFootI;
+            arma::vec3 uRightFootI;
             arma::vec3 uTorsoI;
             Leg supportI;
             bool startFromStep;
@@ -229,12 +230,6 @@ namespace modules {
             // TODO: link to actuator
             float leftLegHardness;
             float rightLegHardness;
-
-            // TODO: do these need to be global?
-            float m1X;
-            float m2X;
-            float m1Y;
-            float m2Y;
 
             arma::vec3 uSupport;
             arma::vec3 uTorsoActual;
@@ -259,11 +254,10 @@ namespace modules {
             std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionLegs(std::vector<double> qLegs, bool gyroOff, const messages::input::Sensors& sensors);
             std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionArms();
 
-            void exit();
             void reset();
-            arma::vec3 stepLeftDestination(arma::vec3 vel, arma::vec3 uLeft, arma::vec3 uRight);
-            arma::vec3 stepRightDestination(arma::vec3 vel, arma::vec3 uLeft, arma::vec3 uRight);
-            arma::vec3 stepTorso(arma::vec3 uLeft, arma::vec3 uRight, float shiftFactor);
+            arma::vec3 stepLeftFootDestination(arma::vec3 vel, arma::vec3 uLeftFoot, arma::vec3 uRightFoot);
+            arma::vec3 stepRightFootDestination(arma::vec3 vel, arma::vec3 uLeftFoot, arma::vec3 uRightFoot);
+            arma::vec3 stepTorso(arma::vec3 uLeftFoot, arma::vec3 uRightFoot, float shiftFactor);
             void setVelocity(double vx, double vy, double va);
             void updateVelocity();
             arma::vec3 getVelocity();
@@ -271,8 +265,8 @@ namespace modules {
             void stop();
             void setInitialStance(arma::vec3 uL, arma::vec3 uR, arma::vec3 uT, Leg support);
             void stanceReset();
-            std::pair<float, float> zmpSolve(float zs, float z1, float z2, float x1, float x2);
-            arma::vec3 zmpCom(float phase);
+            arma::vec2 zmpSolve(float zs, float z1, float z2, float x1, float x2);
+            arma::vec3 zmpCom(float phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, float tStep, float tZmp, float phase1Zmp, float phase2Zmp);
             std::pair<float, float> footPhase(float phase);
 
             double getTime(); // TODO: remove
