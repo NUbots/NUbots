@@ -170,9 +170,7 @@ namespace modules {
 
             // gHardness parameters
             hardnessSupport = config["hardnessSupport"].as<float>();
-
             hardnessSwing = config["hardnessSwing"].as<float>();
-
             hardnessArm0 = config["hardnessArm0"].as<float>();
             hardnessArm = config["hardnessArm"].as<float>();
 
@@ -183,10 +181,10 @@ namespace modules {
             tZmp = config["tZmp"].as<float>();
             stepHeight = config["stepHeight"].as<float>();
             stepHeight0 = stepHeight;
-            ph1Single = config["phSingle"][0].as<float>();
-            ph2Single = config["phSingle"][1].as<float>();
-            ph1Zmp = ph1Single;
-            ph2Zmp = ph2Single;
+            phase1Single = config["phaseSingle"][0].as<float>();
+            phase2Single = config["phaseSingle"][1].as<float>();
+            phase1Zmp = phase1Single;
+            phase2Zmp = phase2Single;
 
             // gCompensation parameters
             hipRollCompensation = 4 * M_PI / 180;
@@ -292,8 +290,8 @@ namespace modules {
                 iStep = 0;
                 t0 = getTime();
                 tLastStep = getTime();
-                ph0=0;
-                ph=0;
+                phase0=0;
+                phase=0;
                 currentStepType = 0;
 
                 initialStep = 2;
@@ -310,7 +308,7 @@ namespace modules {
                 qRArmOR1 = {0, 0, 0};
                 bodyRot1 = {0, 0, 0};
 
-                phSingle = 0;
+                phaseSingle = 0;
 
                 // gCurrent arm pose
                 qLArm = M_PI / 180 * arma::vec3{90, 40, -160};
@@ -328,8 +326,6 @@ namespace modules {
                 uTorsoI = {0, 0, 0};
                 supportI = LEFT;
                 startFromStep = false;
-
-                comdot = {0, 0};
 
                 stanceReset();
         }
@@ -372,14 +368,15 @@ namespace modules {
                 tLastStep = time;
             }
 
-            ph0 = ph;
+            phase0 = phase;
             moving = true;
 
-            ph = (time - tLastStep) / tStep;
+            // phase of step
+            phase = (time - tLastStep) / tStep;
 
-            if (ph > 1) {
+            if (phase > 1) {
                 iStep++;
-                ph = ph - std::floor(ph);
+                phase = phase - std::floor(phase);
                 tLastStep += tStep;
             }
 
@@ -398,9 +395,9 @@ namespace modules {
                 updateVelocity();
                 iStep0 = iStep;
                 supportLeg = (iStep % 2 == 0 ? LEFT : RIGHT); // 0 for left support, 1 for right support
-                uLeft1 = uLeft2;
-                uRight1 = uRight2;
-                uTorso1 = uTorso2;
+                uLeftSource = uLeftDestination;
+                uRightSource = uRightDestination;
+                uTorsoSource = uTorsoDestination;
 
                 supportMod = {0, 0}; // support point modulation for wallkick
                 shiftFactor = 0.5; // how much should we shift final torso pose?
@@ -411,17 +408,17 @@ namespace modules {
                     velCurrent = {0, 0, 0};
                     velCommand = {0, 0, 0};
                     if (supportLeg == LEFT) {
-                        uRight2 = poseGlobal(-2 * uLRFootOffset, uLeft1);
+                        uRightDestination = poseGlobal(-2 * uLRFootOffset, uLeftSource);
                     } else {
-                        uLeft2 = poseGlobal(2 * uLRFootOffset, uRight1);
+                        uLeftDestination = poseGlobal(2 * uLRFootOffset, uRightSource);
                     }
                 } else {
                     // normal walk, advance steps
                     tStep = tStep0;
                     if (supportLeg == LEFT) {
-                        uRight2 = stepRightDestination(velCurrent, uLeft1, uRight1);
+                        uRightDestination = stepRightDestination(velCurrent, uLeftSource, uRightSource);
                     } else {
-                        uLeft2 = stepLeftDestination(velCurrent, uLeft1, uRight1);
+                        uLeftDestination = stepLeftDestination(velCurrent, uLeftSource, uRightSource);
                     }
 
                     // velocity-based support point modulation
@@ -447,7 +444,7 @@ namespace modules {
                     }
                 }
 
-                uTorso2 = stepTorso(uLeft2, uRight2, shiftFactor);
+                uTorsoDestination = stepTorso(uLeftDestination, uRightDestination, shiftFactor);
 
                 // adjustable initial step body swing
                 if (initialStep > 0) {
@@ -459,14 +456,14 @@ namespace modules {
 
                 // apply velocity-based support point modulation for uSupport
                 if (supportLeg == LEFT) {
-                    arma::vec3 uLeftTorso = poseRelative(uLeft1, uTorso1);
+                    arma::vec3 uLeftTorso = poseRelative(uLeftSource, uTorsoSource);
                     arma::vec3 uTorsoModded = poseGlobal({supportMod[0], supportMod[1], 0}, uTorso);
                     arma::vec3 uLeftModded = poseGlobal(uLeftTorso, uTorsoModded);
                     uSupport = poseGlobal({supportX, supportY, 0}, uLeftModded);
                     leftLegHardness = hardnessSupport;
                     rightLegHardness = hardnessSwing;
                 } else {
-                    arma::vec3 uRightTorso = poseRelative(uRight1, uTorso);
+                    arma::vec3 uRightTorso = poseRelative(uRightSource, uTorso);
                     arma::vec3 uTorsoModded = poseGlobal({supportMod[0], supportMod[1], 0}, uTorso);
                     arma::vec3 uRightModded = poseGlobal(uRightTorso, uTorsoModded);
                     uSupport = poseGlobal({supportX, -supportY, 0}, uRightModded);
@@ -475,44 +472,32 @@ namespace modules {
                 }
 
                 // compute ZMP coefficients
-                m1X = (uSupport[0] - uTorso[0]) / (tStep * ph1Zmp);
-                m2X = (uTorso2[0] - uSupport[0]) / (tStep * (1 - ph2Zmp));
-                m1Y = (uSupport[1] - uTorso[1]) / (tStep * ph1Zmp);
-                m2Y = (uTorso2[1] - uSupport[1]) / (tStep * (1 - ph2Zmp));
-                std::tie(aXP, aXN) = zmpSolve(uSupport[0], uTorso1[0], uTorso2[0], uTorso1[0], uTorso2[0]);
-                std::tie(aYP, aYN) = zmpSolve(uSupport[1], uTorso1[1], uTorso2[1], uTorso1[1], uTorso2[1]);
-
-                // compute COM speed at the boundary
-
-//                dx0 = (aXP - aXN) / tZmp + m1X * (1 - std::cosh(ph1Zmp * tStep / tZmp));
-//                dy0 = (aYP - aYN) / tZmp + m1Y * (1 - std::cosh(ph1Zmp * tStep / tZmp));
-
-                float dx1 = (aXP * std::exp(tStep / tZmp) - aXN * std::exp(-tStep / tZmp)) / tZmp
-                        + m2X * (1 - std::cosh((1 - ph2Zmp) * tStep / tZmp));
-                float dy1 = (aYP * std::exp(tStep / tZmp) - aYN * std::exp(-tStep / tZmp)) / tZmp
-                        + m2Y * (1 - std::cosh((1 - ph2Zmp) * tStep / tZmp));
-
-                comdot = {dx1, dy1};
+                m1X = (uSupport[0] - uTorso[0]) / (tStep * phase1Zmp);
+                m2X = (uTorsoDestination[0] - uSupport[0]) / (tStep * (1 - phase2Zmp));
+                m1Y = (uSupport[1] - uTorso[1]) / (tStep * phase1Zmp);
+                m2Y = (uTorsoDestination[1] - uSupport[1]) / (tStep * (1 - phase2Zmp));
+                std::tie(aXP, aXN) = zmpSolve(uSupport[0], uTorsoSource[0], uTorsoDestination[0], uTorsoSource[0], uTorsoDestination[0]);
+                std::tie(aYP, aYN) = zmpSolve(uSupport[1], uTorsoSource[1], uTorsoDestination[1], uTorsoSource[1], uTorsoDestination[1]);
             }
 
             float xFoot, zFoot;
-            std::tie(xFoot, zFoot) = footPhase(ph);
+            std::tie(xFoot, zFoot) = footPhase(phase);
             if (initialStep > 0) {
                 zFoot = 0; // don't lift foot at initial step
             }
             pLLeg[2] = 0;
             pRLeg[2] = 0;
             if (supportLeg == LEFT) {
-                uRight = se2Interpolate(xFoot, uRight1, uRight2);
+                uRight = se2Interpolate(xFoot, uRightSource, uRightDestination);
                 pRLeg[2] = stepHeight * zFoot;
             } else {
-                uLeft = se2Interpolate(xFoot, uLeft1, uLeft2);
+                uLeft = se2Interpolate(xFoot, uLeftSource, uLeftDestination);
                 pLLeg[2] = stepHeight * zFoot;
             }
 
             // unused: uTorsoOld = uTorso;
 
-            uTorso = zmpCom(ph);
+            uTorso = zmpCom(phase);
 
             // turning
             float turnCompX = 0;
@@ -611,7 +596,7 @@ namespace modules {
             float gyroRoll0 = 0;
             float gyroPitch0 = 0;
 
-            float phComp = std::min({1.0, phSingle / 0.1, (1 - phSingle) / 0.1});
+            float phaseComp = std::min({1.0, phaseSingle / 0.1, (1 - phaseSingle) / 0.1});
             if (!gyroOff) {
                 ServoID supportLegID = (supportLeg == LEFT) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
                 arma::mat33 ankleRotation = sensors.forwardKinematics.find(supportLegID)->second.submat(0,0,2,2);
@@ -675,8 +660,8 @@ namespace modules {
                 qLegs[4] += ankleShift[0]; // Ankle pitch stabilization
                 qLegs[5] += ankleShift[1]; // Ankle roll stabilization
 
-                qLegs[10] += toeTipCompensation * phComp; // Lifting toetip
-                qLegs[1] += hipRollCompensation * phComp; // Hip roll compensation
+                qLegs[10] += toeTipCompensation * phaseComp; // Lifting toetip
+                qLegs[1] += hipRollCompensation * phaseComp; // Hip roll compensation
 
             } else {
                 qLegs[7] += hipShift[1]; // Hip roll stabilization
@@ -684,8 +669,8 @@ namespace modules {
                 qLegs[10] += ankleShift[0]; // Ankle pitch stabilization
                 qLegs[11] += ankleShift[1]; // Ankle roll stabilization
 
-                qLegs[4] += toeTipCompensation * phComp; // Lifting toetip
-                qLegs[7] -= hipRollCompensation * phComp; // Hip roll compensation
+                qLegs[4] += toeTipCompensation * phaseComp; // Lifting toetip
+                qLegs[7] -= hipRollCompensation * phaseComp; // Hip roll compensation
 
             }
 
@@ -914,11 +899,11 @@ namespace modules {
                 iStep = 0;
             }
 
-            uLeft1 = uLeft;
-            uLeft2 = uLeft;
+            uLeftSource = uLeft;
+            uLeftDestination = uLeft;
 
-            uRight1 = uRight;
-            uRight2 = uRight;
+            uRightSource = uRight;
+            uRightDestination = uRight;
 
             uSupport = uTorso;
             tLastStep = getTime();
@@ -927,6 +912,10 @@ namespace modules {
             startFromStep = false;
         }
 
+        /**
+        * Global variables used:
+        * tStep, phase1Zmp, phase2Zmp, tZmp
+        */
         std::pair<float, float> WalkEngine::zmpSolve(float zs, float z1, float z2, float x1, float x2) {
             /*
             Solves ZMP equation:
@@ -934,8 +923,8 @@ namespace modules {
             where the ZMP point is piecewise linear:
             z(0) = z1, z(T1 < t < T2) = zs, z(tStep) = z2
             */
-            float T1 = tStep * ph1Zmp;
-            float T2 = tStep * ph2Zmp;
+            float T1 = tStep * phase1Zmp;
+            float T2 = tStep * phase2Zmp;
             float m1 = (zs - z1) / T1;
             float m2 = -(zs - z2) / (tStep - T2);
 
@@ -947,35 +936,40 @@ namespace modules {
             return std::make_pair(aP, aN);
         }
 
-        arma::vec3 WalkEngine::zmpCom(float ph) {
+        /**
+        * Global variables used:
+        * aXP, aXN, aYP, aYN, m1X, m1Y, m2X, m2Y, tStep, tZmp, phase1Zmp, phase2Zmp
+        * uSupport, uLeftDestination, uLeftSource, uRightDestination, uRightSource
+        */
+        arma::vec3 WalkEngine::zmpCom(float phase) {
             arma::vec3 com = {0, 0, 0};
-            float expT = std::exp(tStep * ph / tZmp);
+            float expT = std::exp(tStep * phase / tZmp);
             com[0] = uSupport[0] + aXP * expT + aXN / expT;
             com[1] = uSupport[1] + aYP * expT + aYN / expT;
-            if (ph < ph1Zmp) {
-                com[0] = com[0] + m1X * tStep * (ph - ph1Zmp)
-                -tZmp * m1X * std::sinh(tStep * (ph - ph1Zmp) / tZmp);
-                com[1] = com[1] + m1Y * tStep * (ph - ph1Zmp)
-                -tZmp * m1Y * std::sinh(tStep * (ph - ph1Zmp) / tZmp);
-            } else if (ph > ph2Zmp) {
-                com[0] = com[0] + m2X * tStep * (ph - ph2Zmp)
-                -tZmp * m2X * std::sinh(tStep * (ph - ph2Zmp) / tZmp);
-                com[1] = com[1] + m2Y * tStep * (ph - ph2Zmp)
-                -tZmp * m2Y * std::sinh(tStep * (ph - ph2Zmp) / tZmp);
+            if (phase < phase1Zmp) {
+                com[0] = com[0] + m1X * tStep * (phase - phase1Zmp) -tZmp * m1X * std::sinh(tStep * (phase - phase1Zmp) / tZmp);
+                com[1] = com[1] + m1Y * tStep * (phase - phase1Zmp) -tZmp * m1Y * std::sinh(tStep * (phase - phase1Zmp) / tZmp);
+            } else if (phase > phase2Zmp) {
+                com[0] = com[0] + m2X * tStep * (phase - phase2Zmp) -tZmp * m2X * std::sinh(tStep * (phase - phase2Zmp) / tZmp);
+                com[1] = com[1] + m2Y * tStep * (phase - phase2Zmp) -tZmp * m2Y * std::sinh(tStep * (phase - phase2Zmp) / tZmp);
             }
             // com[2] = .5 * (uLeft[2] + uRight[2]);
             // Linear speed turning
-            com[2] = ph* (uLeft2[2] + uRight2[2]) / 2 + (1 - ph) * (uLeft1[2] + uRight1[2]) / 2;
+            com[2] = phase * (uLeftDestination[2] + uRightDestination[2]) / 2 + (1 - phase) * (uLeftSource[2] + uRightSource[2]) / 2;
             return com;
         }
 
-        std::pair<float, float> WalkEngine::footPhase(float ph) {
+        /**
+        * Global variables used:
+        * phase1Single, phase2Single
+        */
+        std::pair<float, float> WalkEngine::footPhase(float phase) {
             // Computes relative x,z motion of foot during single support phase
             // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
-            phSingle = std::min(std::max(ph - ph1Single, 0.0f) / (ph2Single - ph1Single), 1.0f);
-            float phSingleSkew = std::pow(phSingle, 0.8) - 0.17 * phSingle * (1 - phSingle);
-            float xf = 0.5 * (1 - std::cos(M_PI * phSingleSkew));
-            float zf = 0.5 * (1 - std::cos(2 * M_PI * phSingleSkew));
+            phaseSingle = std::min(std::max(phase - phase1Single, 0.0f) / (phase2Single - phase1Single), 1.0f);
+            float phaseSingleSkew = std::pow(phaseSingle, 0.8) - 0.17 * phaseSingle * (1 - phaseSingle);
+            float xf = 0.5 * (1 - std::cos(M_PI * phaseSingleSkew));
+            float zf = 0.5 * (1 - std::cos(2 * M_PI * phaseSingleSkew));
 
             return std::make_pair(xf, zf);
         }

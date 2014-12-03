@@ -101,10 +101,10 @@ namespace modules {
             float tZmp;
             float stepHeight0;
             float stepHeight;
-            float ph1Single;
-            float ph2Single;
-            float ph1Zmp;
-            float ph2Zmp;
+            float phase1Single;
+            float phase2Single;
+            float phase1Zmp;
+            float phase2Zmp;
 
             // Compensation parameters
             float hipRollCompensation;
@@ -146,14 +146,14 @@ namespace modules {
 
             // walk state
             arma::vec3 uTorso = arma::zeros(3);
-            arma::vec3 uTorso1 = arma::zeros(3);
-            arma::vec3 uTorso2 = arma::zeros(3);
+            arma::vec3 uTorsoSource = arma::zeros(3);
+            arma::vec3 uTorsoDestination = arma::zeros(3);
             arma::vec3 uLeft = arma::zeros(3);
-            arma::vec3 uLeft1 = arma::zeros(3);
-            arma::vec3 uLeft2 = arma::zeros(3);
+            arma::vec3 uLeftSource = arma::zeros(3);
+            arma::vec3 uLeftDestination = arma::zeros(3);
             arma::vec3 uRight = arma::zeros(3);
-            arma::vec3 uRight1 = arma::zeros(3);
-            arma::vec3 uRight2 = arma::zeros(3);
+            arma::vec3 uRightSource = arma::zeros(3);
+            arma::vec3 uRightDestination = arma::zeros(3);
 
             arma::vec6 pLLeg;
             arma::vec6 pRLeg;
@@ -182,8 +182,8 @@ namespace modules {
             int iStep;
             double t0;
             double tLastStep;
-            float ph0;
-            float ph;
+            float phase0;
+            float phase;
 
             int stopRequest;
             int currentStepType;
@@ -204,7 +204,7 @@ namespace modules {
             arma::vec3 bodyRot0;
             arma::vec3 bodyRot1;
 
-            float phSingle;
+            float phaseSingle;
 
             // current arm pose
             arma::vec3 qLArm;
@@ -272,8 +272,8 @@ namespace modules {
             void setInitialStance(arma::vec3 uL, arma::vec3 uR, arma::vec3 uT, Leg support);
             void stanceReset();
             std::pair<float, float> zmpSolve(float zs, float z1, float z2, float x1, float x2);
-            arma::vec3 zmpCom(float ph);
-            std::pair<float, float> footPhase(float ph);
+            arma::vec3 zmpCom(float phase);
+            std::pair<float, float> footPhase(float phase);
 
             double getTime(); // TODO: remove
             double procFunc(double a, double deadband, double maxvalue); //TODO: move documentation from .cpp to .h file
