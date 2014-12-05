@@ -14,7 +14,7 @@ const double SQRT2 = sqrt(2);
 const double neckOffsetZ = .026+.0505;//OP, calculated from spec // From CoM to neck
 const double neckOffsetX = .013;//OP, calculated from spec
 const double shoulderOffsetX = 0;//.013;//OP, calculated from spec
-const double shoulderOffsetY = .082; //op, spec 
+const double shoulderOffsetY = .082; //op, spec
 const double shoulderOffsetZ = .026; //OP, calculated from spec
 const double handOffsetX = .058;
 const double handOffsetZ = 0;//.0159;
@@ -55,15 +55,13 @@ std::vector<double>
 darwinop_kinematics_inverse_legs(
                 const double *pLLeg,
                 const double *pRLeg,
-                const double *pTorso,
-                int legSupport=0);
+                const double *pTorso);
 
 std::vector<double>
 darwinop_kinematics_inverse_legs_nubots(
                 const double *pLLeg,
                 const double *pRLeg,
-                const double *pTorso,
-                int legSupport=0);
+                const double *pTorso);
 
 
 std::vector<double> darwinop_kinematics_inverse_larm(

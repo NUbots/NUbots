@@ -191,8 +191,7 @@ std::vector<double>
 darwinop_kinematics_inverse_legs_nubots (
                 const double *pLLeg,
                 const double *pRLeg,
-                const double *pTorso,
-                int)
+                const double *pTorso)
 {
   std::vector<double> qLLeg(12), qRLeg;
   Transform trLLeg = transform6D(pLLeg);
