@@ -148,6 +148,7 @@ Transform operator* (const Transform &t1, const Transform &t2) {
 }
 
 Transform inv (const Transform &t1) {
+  // Assumes matrix is a othonormal basis.
   Transform t;
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
