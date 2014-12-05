@@ -178,7 +178,6 @@ namespace motion {
         tStep0 = tStep;
         tZmp = config["tZmp"].as<float>();
         stepHeight = config["stepHeight"].as<float>();
-        stepHeight0 = stepHeight;
         phase1Single = config["phaseSingle"][0].as<float>();
         phase2Single = config["phaseSingle"][1].as<float>();
         phase1Zmp = phase1Single;
@@ -187,7 +186,6 @@ namespace motion {
         // gCompensation parameters
         hipRollCompensation = 4 * M_PI / 180;
         ankleMod = arma::vec2{-config["toeTipCompensation"].as<double>(), 0} * 1 * M_PI / 180;
-        spreadComp = config["spreadComp"].as<float>();
         turnCompThreshold = config["turnCompThreshold"].as<float>();
         turnComp = config["turnComp"].as<float>();
 
@@ -212,7 +210,7 @@ namespace motion {
         supportTurn = config["supportTurn"].as<float>();
 
         frontComp = config["frontComp"].as<float>();
-        AccelComp = config["AccelComp"].as<float>();
+        accelComp = config["accelComp"].as<float>();
 
         balanceWeight = config["balanceWeight"].as<float>();
 
@@ -221,8 +219,6 @@ namespace motion {
 
         //XXX: this isn't a real config variable - it derives from akleMod[0]
         toeTipCompensation = config["toeTipCompensation"].as<float>();
-
-        useAlternativeTrajectory = config["useAlternativeTrajectory"].as<bool>();
 
         STAND_SCRIPT_DURATION_MILLISECONDS = config["STAND_SCRIPT_DURATION_MILLISECONDS"].as<int>();
     }
@@ -283,24 +279,11 @@ namespace motion {
             active = false;
             started = false;
             swingLeg = Leg::LEFT;
-            t0 = getTime();
             tLastStep = getTime();
             phase=0;
             currentStepType = 0;
 
             initialStep = 2;
-
-            qLArmOR0 = qLArm0;
-            qRArmOR0 = qRArm0;
-            bodyRot0 = {0, bodyTilt, 0};
-
-            qLArmOR = qLArm0;
-            qRArmOR = qRArm0;
-            bodyRot = {0, bodyTilt, 0};
-
-            qLArmOR1 = {0, 0, 0};
-            qRArmOR1 = {0, 0, 0};
-            bodyRot1 = {0, 0, 0};
 
             phaseSingle = 0;
 
@@ -332,7 +315,6 @@ namespace motion {
             active = true;
             started = false;
             swingLeg = Leg::LEFT;
-            t0 = now;
             tLastStep = now;
             initialStep = 2;
         }
@@ -510,7 +492,7 @@ namespace motion {
             frontCompX = frontComp;
         }
         if (velDiff[0] > 0.02) {
-            frontCompX = frontCompX + AccelComp;
+            frontCompX = frontCompX + accelComp;
         }
 
         float armPosCompX, armPosCompY;

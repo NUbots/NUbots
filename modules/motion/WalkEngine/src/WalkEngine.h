@@ -63,51 +63,65 @@ namespace motion {
 
         // start_config_params
         // Walk Parameters
-        // Stance and velocity limit values
+
+        // These limit the distance a footstep will take
         arma::vec2 stanceLimitX;
         arma::vec2 stanceLimitY;
         arma::vec2 stanceLimitA;
+        float stanceLimitMarginY;
+        float stanceLimitY2;
+
+        // Velocity limits for the walk
         arma::vec2 velLimitX;
         arma::vec2 velLimitY;
         arma::vec2 velLimitA;
         arma::vec3 velDelta;
-        float vaFactor;
-
         double velXHigh;
         double velDeltaXHigh;
+        // Factor to slow down walk when turning
+        float vaFactor;
 
         // Toe/heel overlap checking values
         arma::vec2 footSizeX;
-        float stanceLimitMarginY;
-        float stanceLimitY2;
 
         // OP default stance width: 0.0375*2 = 0.075
         // Heel overlap At radian 0.15 at each foot = 0.05*sin(0.15)*2=0.015
         // Heel overlap At radian 0.30 at each foot = 0.05*sin(0.15)*2=0.030
 
         // Stance parameters
+
+        // The body height of the robot, in meters; changing this will alter how high the robot's natural stance is.
         float bodyHeight;
+        // Torso Y rotation
         float bodyTilt;
+        // The length of the robot's foot
         float footX;
+        // The width of the robot's rest stance in meters.
         float footY;
+        // The distance the ankles rest behind the torso, in meters.
         float supportX;
+        // How far from the center of the foot the center of mass is placed during each step.
         float supportY;
+
+        // Current arm pose
         arma::vec3 qLArm0;
         arma::vec3 qRArm0;
 
-        // Hardness parameters
+        // Servo gains used for the legs during walk
         float hardnessSupport;
         float hardnessSwing;
-
+        // Servo gains used for the arms during walk
         float hardnessArm0;
         float hardnessArm;
 
         // Gait parameters
         float tStep0;
+        // The tStep defines how long it will take for a robot to take its next step, in seconds.
         float tStep;
         float tZmp;
-        float stepHeight0;
+        // The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
         float stepHeight;
+
         float phase1Single;
         float phase2Single;
         float phase1Zmp;
@@ -116,7 +130,6 @@ namespace motion {
         // Compensation parameters
         float hipRollCompensation;
         arma::vec2 ankleMod;
-        float spreadComp;
         float turnCompThreshold;
         float turnComp;
 
@@ -140,14 +153,11 @@ namespace motion {
         float supportTurn;
 
         float frontComp;
-        float AccelComp;
+        float accelComp;
 
         // Initial body swing
         float supportModYInitial;
-
         float toeTipCompensation;
-
-        bool useAlternativeTrajectory;
 
         // end_config_params
 
@@ -167,13 +177,15 @@ namespace motion {
         arma::vec6 pRLeg;
         arma::vec6 pTorso;
 
+        // Current robot velocity
         arma::vec3 velCurrent;
+        // Current velocity command
         arma::vec3 velCommand;
+        // Difference between current velocity and commanded velocity
         arma::vec3 velDiff;
 
-        // zmp expoential coefficients
+        // zmp expoential coefficients aXP aXN aYP aYN
         arma::vec4 zmpCoefficients = arma::zeros(4);
-        // TODO: do these need to be global?
         // zmp params m1X, m2X, m1Y, m2Y
         arma::vec4 zmpParams = arma::zeros(4);
 
@@ -185,30 +197,17 @@ namespace motion {
 
         bool active;
         bool started;
-        double t0;
         double tLastStep;
-        float phase0;
         float phase;
 
         StopRequest stopRequest;
         int currentStepType;
 
+        // How to begin initial step, unsure of affect
+        // Should be an enum
         int initialStep;
 
-        // TODO:
-        arma::vec3 qLArmOR;
-        arma::vec3 qRArmOR;
-
-        arma::vec3 qLArmOR0;
-        arma::vec3 qRArmOR0;
-
-        arma::vec3 qLArmOR1;
-        arma::vec3 qRArmOR1;
-
-        arma::vec3 bodyRot;
-        arma::vec3 bodyRot0;
-        arma::vec3 bodyRot1;
-
+        // The ratio of double support time: single support time (standing on two feet vs. balancing on one foot).
         float phaseSingle;
 
         // current arm pose
@@ -224,8 +223,6 @@ namespace motion {
         arma::vec3 uTorsoI;
         bool startFromStep;
 
-        arma::vec2 comdot;
-
         Leg supportInitial = Leg::LEFT;
         Leg swingLeg = Leg::RIGHT;
         Leg supportLeg = Leg::LEFT;
@@ -238,11 +235,6 @@ namespace motion {
 
         arma::vec3 uSupport;
         arma::vec3 uTorsoActual;
-
-        // TODO: default 0
-        int stepCheckCount;
-        int motionIndex;
-        float motionStartTime;
 
         int STAND_SCRIPT_DURATION_MILLISECONDS;
 

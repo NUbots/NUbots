@@ -33,10 +33,11 @@ tZmp: 0.165
 # The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
 stepHeight: 0.015
 # The ratio of double support time: single support time (standing on two feet vs. balancing on one foot).
-phSingle: [0.1, 0.9]
-spreadComp: 0.015
+phaseSingle: [0.1, 0.9]
 turnCompThreshold: 0
 turnComp: 0
+
+# Support bias parameters to reduce backlash-based instability
 velFastForward: 0.05
 velFastTurn: 0.15
 supportFront: 0.03
@@ -45,11 +46,11 @@ supportBack: -0.02
 supportSideX: -0.01
 supportSideY: -0.005
 supportTurn: 0.02
+
 frontComp: 0
-AccelComp: 0.1
+accelComp: 0.1
 supportModYInitial: 0
 toeTipCompensation: 0
-useAlternativeTrajectory: false
 velCommandX: 0.035
 velCommandY: 0
 velCommandAngular: 0
