@@ -18,15 +18,14 @@
 
 #include "FrameListener.h"
 
-FrameListener::FrameListener(int sd, unsigned char nnMajor, unsigned char nnMinor, size_t bufferSize) :
-    _thread(0),
-    _sd(sd),
-    _nnMajor(nnMajor),
-    _nnMinor(nnMinor),
-    _framesMutex(),
-    _frames(bufferSize),
-    _run(false) {
-}
+FrameListener::FrameListener(int sd, unsigned char nnMajor, unsigned char nnMinor, size_t bufferSize)
+  : _thread(0)
+  , _sd(sd)
+  , _nnMajor(nnMajor)
+  , _nnMinor(nnMinor)
+  , _framesMutex()
+  , _frames(bufferSize)
+  , _run(false) {}
 
 FrameListener::~FrameListener()
 {

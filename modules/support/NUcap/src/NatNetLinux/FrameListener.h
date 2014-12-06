@@ -22,10 +22,10 @@
 #include <thread>
 #include <mutex>
 
-
 #include <boost/circular_buffer.hpp>
 
 #include "NatNet.h"
+#include "MocapFrame.h"
 #include "NatNetPacket.h"
 #include "NatNetSender.h"
 

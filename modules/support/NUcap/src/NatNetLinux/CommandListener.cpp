@@ -18,12 +18,12 @@
 
 #include "CommandListener.h"
 
-CommandListener::CommandListener(int sd) :
-  _run(false),
-  _thread(0),
-  _sd(sd),
-  _nnMajor(0),
-  _nnMinor(0) {
+CommandListener::CommandListener(int sd)
+  : _run(false)
+  , _thread(0)
+  , _sd(sd)
+  , _nnMajor(0)
+  , _nnMinor(0) {
     _nnVersionMutex.lock();
 }
 
@@ -63,7 +63,7 @@ void CommandListener::getNatNetVersion(unsigned char& major, unsigned char& mino
 
 void CommandListener::_work(int sd) {
 
-    char const* response;
+    const char* response;
     ssize_t len;
     NatNetPacket nnp;
     struct sockaddr_in senderAddress;
@@ -74,8 +74,6 @@ void CommandListener::_work(int sd) {
     struct timeval timeout;
 
     while(_run) {
-        // Give other threads an opportunity to interrupt this thread.
-        //boost::this_thread::interruption_point();
 
         // Wait for at most 1 second until the socket has data (recvfrom()
         // will not block). Otherwise, continue. This gives outside threads
@@ -100,33 +98,33 @@ void CommandListener::_work(int sd) {
 
         switch(nnp.iMessage()) {
             case NatNetPacket::NAT_MODELDEF:
-               //Unpack(nnp.rawPtr());
-               break;
+                //Unpack(nnp.rawPtr());
+                break;
             case NatNetPacket::NAT_FRAMEOFDATA:
-               //Unpack(nnp.rawPtr());
-               break;
+                //Unpack(nnp.rawPtr());
+                break;
             case NatNetPacket::NAT_PINGRESPONSE:
-               sender.unpack(nnp.read<char>(0));
-               _nnMajor = sender.natNetVersion()[0];
-               _nnMinor = sender.natNetVersion()[1];
-               _nnVersionMutex.unlock();
-               std::cout << "[Client] Server Software: " << sender.name() << std::endl;
-               printf("[Client] NatNetVersion: %d.%d\n",sender.natNetVersion()[0],sender.natNetVersion()[1]);
-               printf("[Client] ServerVersion: %d.%d\n",sender.version()[0],sender.version()[1]);
-               break;
+                sender.unpack(nnp.read<char>(0));
+                _nnMajor = sender.natNetVersion()[0];
+                _nnMinor = sender.natNetVersion()[1];
+                _nnVersionMutex.unlock();
+                std::cout << "[Client] Server Software: " << sender.name() << std::endl;
+                printf("[Client] NatNetVersion: %d.%d\n",sender.natNetVersion()[0],sender.natNetVersion()[1]);
+                printf("[Client] ServerVersion: %d.%d\n",sender.version()[0],sender.version()[1]);
+                break;
             case NatNetPacket::NAT_RESPONSE:
-               response = nnp.read<char>(0);
-               printf("Response : %s", response);
-               break;
+                response = nnp.read<char>(0);
+                printf("Response : %s", response);
+                break;
             case NatNetPacket::NAT_UNRECOGNIZED_REQUEST:
-               printf("[Client] received 'unrecognized request'\n");
-               break;
+                printf("[Client] received 'unrecognized request'\n");
+                break;
             case NatNetPacket::NAT_MESSAGESTRING:
-               response = nnp.read<char>(0);
-               printf("[Client] Received message: %s\n", response);
-               break;
+                response = nnp.read<char>(0);
+                printf("[Client] Received message: %s\n", response);
+                break;
             default:
-               break;
+                break;
         } // end switch(nnp.iMessage)
     }
 }

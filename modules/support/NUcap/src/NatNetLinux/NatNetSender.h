@@ -36,24 +36,24 @@ public:
     NatNetSender();
 
     //! \brief Copy constructor
-    NatNetSender(NatNetSender const& other);
+    NatNetSender(const NatNetSender& other);
 
     ~NatNetSender();
 
     //! \brief Assignment operator
-    NatNetSender& operator=(NatNetSender const& other);
+    NatNetSender& operator=(const NatNetSender& other);
 
     //! \brief Name of sending application.
     std::string name() const;
 
     //! \brief Length 4 array version number of sending application (major.minor.build.revision)
-    unsigned char const* version() const;
+    const unsigned char* version() const;
 
     //! \brief Length 4 array version number of sending application's NatNet version (major.minor.build.revision)
-    unsigned char const* natNetVersion() const;
+    const unsigned char* natNetVersion() const;
 
     //! \brief Unpack the class from raw pointer.
-    void unpack(char const* data);
+    void unpack(const char* data);
 
 private:
 

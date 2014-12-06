@@ -26,7 +26,7 @@ NatNetPacket::NatNetPacket()
   , _dataLen(MAX_PACKETSIZE + 4) {
 }
 
-NatNetPacket::NatNetPacket( NatNetPacket const& other )
+NatNetPacket::NatNetPacket( const NatNetPacket& other )
   : _data(new char[other._dataLen])
   , _dataLen(other._dataLen) {
 
@@ -37,7 +37,7 @@ NatNetPacket::~NatNetPacket() {
     delete[] _data;
 }
 
-NatNetPacket& NatNetPacket::operator=(NatNetPacket const& other) {
+NatNetPacket& NatNetPacket::operator=(const NatNetPacket& other) {
     // Careful with self-assignment
     if(_dataLen < other._dataLen) {
         delete[] _data;

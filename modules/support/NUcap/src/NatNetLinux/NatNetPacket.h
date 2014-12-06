@@ -48,12 +48,12 @@ public:
     NatNetPacket();
 
     //! \brief Copy constructor.
-    NatNetPacket(NatNetPacket const& other);
+    NatNetPacket(const NatNetPacket& other);
 
     ~NatNetPacket();
 
     //! \brief Assignment operator. Does deep copy.
-    NatNetPacket& operator=(NatNetPacket const& other);
+    NatNetPacket& operator=(const NatNetPacket& other);
 
     //! \brief Construct a "ping" packet.
     static NatNetPacket pingPacket();
@@ -95,7 +95,7 @@ public:
      * \param offset payload byte offset
      */
     template<typename T>
-    T const* read(size_t offset) const {
+    const T* read(size_t offset) const {
 
         // NOTE: need to worry about network byte order?
         return reinterpret_cast<T*>(_data + 4 + offset);

@@ -28,7 +28,7 @@ NatNetSender::NatNetSender() {
 }
 
 //! \brief Copy constructor
-NatNetSender::NatNetSender(NatNetSender const& other) {
+NatNetSender::NatNetSender(const NatNetSender& other) {
     memcpy(_name, other._name, MAX_NAMELENGTH);
     memcpy(_version, other._version, 4);
     memcpy(_natNetVersion, other._natNetVersion, 4);
@@ -37,7 +37,7 @@ NatNetSender::NatNetSender(NatNetSender const& other) {
 NatNetSender::~NatNetSender(){}
 
 //! \brief Assignment operator
-NatNetSender& NatNetSender::operator=(NatNetSender const& other) {
+NatNetSender& NatNetSender::operator=(const NatNetSender& other) {
     memmove(_name, other._name, MAX_NAMELENGTH);
     memmove(_version, other._version, 4);
     memmove(_natNetVersion, other._natNetVersion, 4);
@@ -50,17 +50,17 @@ std::string NatNetSender::name() const {
 }
 
 //! \brief Length 4 array version number of sending application (major.minor.build.revision)
-unsigned char const* NatNetSender::version() const {
+const unsigned char* NatNetSender::version() const {
     return _version;
 }
 
 //! \brief Length 4 array version number of sending application's NatNet version (major.minor.build.revision)
-unsigned char const* NatNetSender::natNetVersion() const {
+const unsigned char* NatNetSender::natNetVersion() const {
     return _natNetVersion;
 }
 
 //! \brief Unpack the class from raw pointer.
-void NatNetSender::unpack(char const* data) {
+void NatNetSender::unpack(const char* data) {
     // NOTE: do we have to worry about network order data? I.e. ntohs() and stuff?
     strncpy( _name, data, MAX_NAMELENGTH );
     data += MAX_NAMELENGTH;
