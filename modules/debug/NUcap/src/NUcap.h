@@ -20,8 +20,8 @@
 #ifndef MODULES_DEBUG_NUCAP_H
 #define MODULES_DEBUG_NUCAP_H
 
-
 #include <nuclear>
+
 namespace modules {
 namespace debug {
 

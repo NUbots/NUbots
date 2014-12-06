@@ -21,27 +21,13 @@
 #include <nuclear>
 
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <signal.h>
-
-#include <unistd.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <netdb.h>
-
-#include <NatNetLinux/NatNet.h>
-#include <NatNetLinux/CommandListener.h>
-#include <NatNetLinux/FrameListener.h>
-
-#include <time.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "messages/support/Configuration.h"
+#include "NatNetLinux/NatNet.h"
+#include "NatNetLinux/CommandListener.h"
+#include "NatNetLinux/FrameListener.h"
 
+#include "messages/support/Configuration.h"
 #include "messages/input/proto/MotionCapture.pb.h"
 
 namespace modules {
@@ -67,7 +53,7 @@ namespace support {
             unsigned char natNetMinor;
 
             // Use this socket address to send commands to the server.
-            struct sockaddr_in serverCommands = NatNet::createAddress(serverIP, NatNet::commandPort);
+            struct sockaddr_in serverCommands = NatNet::createAddress(serverIP, NatNet::COMMAND_PORT);
 
             // Create sockets
             sdCommand = NatNet::createCommandSocket( clientIP );
