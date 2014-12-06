@@ -22,8 +22,8 @@
 
 #include <nuclear>
 
-#include <NatNetLinux/CommandListener.h>
-#include <NatNetLinux/FrameListener.h>
+#include "NatNetLinux/CommandListener.h"
+#include "NatNetLinux/FrameListener.h"
 
 namespace modules {
 namespace support {

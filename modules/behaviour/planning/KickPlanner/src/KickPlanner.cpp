@@ -19,7 +19,7 @@
 
 #include "KickPlanner.h"
 
-#include "utility/support/armayamlconversions.h"
+#include "utility/support/YamlArmadillo.h"
 #include "utility/math/coordinates.h"
 #include "utility/localisation/transform.h"
 #include "messages/motion/KickCommand.h"

@@ -31,12 +31,9 @@ node nubotsvm {
   # ps3 controller tools
   package { 'software-properties-common': ensure => latest, }
 
-  # natnet motion capture streaming
-  class { 'natnet':  username => $username, }
-
   # Non-essential developer tools:
   include developer_tools
-  
+
   # sharing fix, see http://superuser.com/questions/736024/cannot-share-host-directory-with-virtualbox-guest-mint-16-64-bit
   file { '/sbin/mount.vboxsf':
     ensure => 'link',
@@ -74,9 +71,6 @@ node packer-virtualbox-iso, packer-vmware-iso {
   package { 'nodejs': ensure => latest, }
   package { 'nodejs-legacy': ensure => latest, }
   package { 'npm': ensure => latest, }
-
-  # natnet motion capture streaming
-  # class { 'natnet':  username => $username, }
 
   # Non-essential developer tools:
   include developer_tools

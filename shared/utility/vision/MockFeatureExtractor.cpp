@@ -20,7 +20,7 @@
 #include "utility/math/matrix.h"
 #include "messages/input/ServoID.h"
 #include "utility/math/vision.h"
-#include "utility/support/armayamlconversions.h"
+#include "utility/support/YamlArmadillo.h"
 #include <cstdlib>
 #include <ctime>
 #include <iostream>

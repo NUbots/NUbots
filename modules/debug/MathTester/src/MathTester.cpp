@@ -19,17 +19,17 @@
 
 #include "MathTester.h"
 #include "messages/support/Configuration.h"
-#include "utility/support/armayamlconversions.h"
+#include "utility/support/YamlArmadillo.h"
 #include "utility/math/geometry/Polygon.h"
 
 namespace modules {
-    namespace debug {            
+    namespace debug {
         using utility::math::geometry::Polygon;
         using messages::support::Configuration;
 
         MathTester::MathTester(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
             on< Trigger<Configuration<MathTester>> >([this](const Configuration<MathTester>& tests) {
-                
+
                 testPolygon(true, tests.config);
                 // if(tests["test_polygon"]){
                 //     bool polygonPass = true;
@@ -42,13 +42,13 @@ namespace modules {
                 //         testPolygon(true,tests.config);
                 //     }
                 // }
-            });                    
+            });
         }
 
         bool MathTester::testPolygon(bool verbose,const YAML::Node&){
 
             if(verbose) {}
-            std::cerr << "Beginning polygon test.===============" << std::endl;            
+            std::cerr << "Beginning polygon test.===============" << std::endl;
             std::vector<arma::vec2> vertices;//config["polygon_vertices"].as<std::vector<arma::vec2>>()
             // for(auto& v : config["polygon_vertices"].as<std::vector<std::vector<double>>>()){
             //     vertices.push_back(arma::vec2{v[0],v[1]});
@@ -58,13 +58,13 @@ namespace modules {
             vertices.push_back(arma::vec2{0,0});
             vertices.push_back(arma::vec2{1,-1});
             Polygon poly(vertices);
-            std::cerr << "Generated polygon with vertices:" << std::endl;                
+            std::cerr << "Generated polygon with vertices:" << std::endl;
             for(auto& v : vertices){
                 std::cerr << v.t();
             }
-            
 
-            std::cerr << "Creating sample points:" << std::endl;            
+
+            std::cerr << "Creating sample points:" << std::endl;
             std::vector<arma::vec2> samples;
             int number_of_samples = 50;//config["number_of_samples"].as<int>()
             float r = 1.2;//config["sample_radius"].as<double>();
@@ -72,10 +72,10 @@ namespace modules {
                 float theta = 2 * M_PI * i / float(number_of_samples) ;
                 arma::vec2 p = {r * std::cos(theta), r * std::sin(theta)};
                 samples.push_back(p);
-                std::cerr << i << " " << p.t();                
+                std::cerr << i << " " << p.t();
             }
 
-            
+
             //Test point contained
             std::cerr << "Testing containment:" << std::endl;
             int i = 0;
