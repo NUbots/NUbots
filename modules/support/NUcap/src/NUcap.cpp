@@ -31,9 +31,9 @@
 #include <sys/types.h>
 #include <netdb.h>
 
-#include <NatNetLinux/NatNet.h>
-#include <NatNetLinux/CommandListener.h>
-#include <NatNetLinux/FrameListener.h>
+#include "NatNetLinux/NatNet.h"
+#include "NatNetLinux/CommandListener.h"
+#include "NatNetLinux/FrameListener.h"
 
 #include <time.h>
 #include <sys/socket.h>
