@@ -21,8 +21,7 @@
 
 #include <thread>
 #include <mutex>
-
-#include <boost/circular_buffer.hpp>
+#include <deque>
 
 #include "NatNet.h"
 #include "MocapFrame.h"
@@ -117,7 +116,7 @@ private:
     unsigned char _nnMajor;
     unsigned char _nnMinor;
     mutable std::mutex _framesMutex;
-    boost::circular_buffer< std::pair<MocapFrame, struct timespec> > _frames;
+    std::deque<std::pair<MocapFrame, struct timespec>> _frames;
     bool _run;
 
     void _work(int sd);\

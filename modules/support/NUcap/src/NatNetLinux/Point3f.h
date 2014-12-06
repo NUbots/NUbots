@@ -25,16 +25,7 @@
  * \brief Simple 3D point
  * \author Philip G. Lee
  */
-class Point3f {
-public:
-    Point3f(float xx = 0.f, float yy = 0.f, float zz = 0.f);
-
-    ~Point3f();
-
-    Point3f(const Point3f& other);
-
-    Point3f& operator=(const Point3f& other);
-
+struct Point3f {
     float x;
     float y;
     float z;

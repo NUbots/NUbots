@@ -122,7 +122,7 @@ const char* MocapFrame::unpack(const char* data)
         memcpy(&x,data,4); data += 4;
         memcpy(&y,data,4); data += 4;
         memcpy(&z,data,4); data += 4;
-        _uidMarker.push_back(Point3f(x,y,z));
+        _uidMarker.push_back(Point3f{x, y, z});
     }
 
     // Get rigid bodies

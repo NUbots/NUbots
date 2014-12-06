@@ -20,25 +20,6 @@
 
 #include <iomanip>
 
-Point3f::Point3f(float xx, float yy, float zz)
-  : x(xx), y(yy), z(zz) {}
-
-Point3f::Point3f(const Point3f& other)
-  : x(other.x)
-  , y(other.y)
-  , z(other.z) {}
-
-Point3f::~Point3f() {}
-
-Point3f& Point3f::operator=(const Point3f& other) {
-    // Self-assignment no problem
-    x = other.x;
-    y = other.y;
-    z = other.z;
-
-    return *this;
-}
-
 std::ostream& operator<<(std::ostream& s, const Point3f& point) {
     std::ios::fmtflags f(s.flags());
 

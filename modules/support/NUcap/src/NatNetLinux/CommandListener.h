@@ -19,10 +19,9 @@
 #ifndef COMMANDLISTENER_H
 #define COMMANDLISTENER_H
 
+#include <iostream>
 #include <thread>
 #include <mutex>
-
-#include <boost/circular_buffer.hpp>
 
 #include "NatNet.h"
 #include "NatNetPacket.h"

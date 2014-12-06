@@ -61,7 +61,7 @@ const char* MarkerSet::unpack(const char* data) {
         memcpy(&x, data, 4); data += 4;
         memcpy(&y, data, 4); data += 4;
         memcpy(&z, data, 4); data += 4;
-        _markers.push_back(Point3f(x, y, z));
+        _markers.push_back(Point3f{x, y, z});
     }
 
     return data;

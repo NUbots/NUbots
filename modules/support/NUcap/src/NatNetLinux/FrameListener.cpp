@@ -18,6 +18,8 @@
 
 #include "FrameListener.h"
 
+#include <unistd.h>
+
 FrameListener::FrameListener(int sd, unsigned char nnMajor, unsigned char nnMinor, size_t bufferSize)
   : _thread(0)
   , _sd(sd)
