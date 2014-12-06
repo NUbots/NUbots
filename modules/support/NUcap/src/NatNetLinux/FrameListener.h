@@ -19,10 +19,10 @@
 #ifndef FRAMELISTENER_H
 #define FRAMELISTENER_H
 
-#include <utility>
-#include <ctime>
+#include <thread>
+#include <mutex>
 
-#include <boost/thread.hpp>
+
 #include <boost/circular_buffer.hpp>
 
 #include "NatNet.h"
@@ -112,11 +112,11 @@ public:
 
 private:
 
-    boost::thread* _thread;
+    std::thread* _thread;
     int _sd;
     unsigned char _nnMajor;
     unsigned char _nnMinor;
-    mutable boost::mutex _framesMutex;
+    mutable std::mutex _framesMutex;
     boost::circular_buffer< std::pair<MocapFrame, struct timespec> > _frames;
     bool _run;
 

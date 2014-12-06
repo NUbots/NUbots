@@ -1,5 +1,5 @@
 # Find the BOOST Library
-FIND_PACKAGE(Boost COMPONENTS system thread REQUIRED)
+FIND_PACKAGE(Boost COMPONENTS system REQUIRED)
 
 # Build our NUClear module
 NUCLEAR_MODULE(INCLUDES ${Boost_INCLUDE_DIRS}

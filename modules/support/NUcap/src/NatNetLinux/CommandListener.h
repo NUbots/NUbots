@@ -19,7 +19,9 @@
 #ifndef COMMANDLISTENER_H
 #define COMMANDLISTENER_H
 
-#include <boost/thread.hpp>
+#include <thread>
+#include <mutex>
+
 #include <boost/circular_buffer.hpp>
 
 #include "NatNet.h"
@@ -74,11 +76,11 @@ public:
 
 private:
     bool _run;
-    boost::thread* _thread;
+    std::thread* _thread;
     int _sd;
     unsigned char _nnMajor;
     unsigned char _nnMinor;
-    boost::mutex _nnVersionMutex;
+    std::mutex _nnVersionMutex;
 
     void _work(int sd);
 };

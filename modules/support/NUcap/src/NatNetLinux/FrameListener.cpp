@@ -41,7 +41,7 @@ FrameListener::~FrameListener()
 //! \brief Begin the listening in new thread. Non-blocking.
 void FrameListener::start() {
     _run = true;
-    _thread = new boost::thread( &FrameListener::_work, this, _sd);
+    _thread = new std::thread( &FrameListener::_work, this, _sd);
 }
 
 //! \brief Cause the thread to stop. Non-blocking.
@@ -60,11 +60,11 @@ void FrameListener::join() {
         _thread->join();
     }
 }
- 
+
 std::pair<MocapFrame, struct timespec> FrameListener::pop(bool* success) {
     std::pair<MocapFrame, struct timespec> ret;
     bool retSuccess = false;
-    
+
     _framesMutex.lock();
 
     if(!_frames.empty()) {
@@ -74,7 +74,7 @@ std::pair<MocapFrame, struct timespec> FrameListener::pop(bool* success) {
     }
 
     _framesMutex.unlock();
-    
+
     if(success)
         *success = retSuccess;
     return ret;
@@ -83,7 +83,7 @@ std::pair<MocapFrame, struct timespec> FrameListener::pop(bool* success) {
 std::pair<MocapFrame, struct timespec> FrameListener::tryPop(bool* success) {
     std::pair<MocapFrame, struct timespec> ret;
     bool retSuccess = false;
-    
+
     if(_framesMutex.try_lock()) {
         if(!_frames.empty()) {
             retSuccess = true;
@@ -93,7 +93,7 @@ std::pair<MocapFrame, struct timespec> FrameListener::tryPop(bool* success) {
 
         _framesMutex.unlock();
     }
-    
+
     if(success) {
        *success = retSuccess;
     }
@@ -105,10 +105,10 @@ void FrameListener::_work(int sd) {
     NatNetPacket nnp;
     struct timespec ts;
     size_t dataBytes;
-    
+
     fd_set rfds;
     struct timeval timeout;
-    
+
     while(_run) {
         // Wait for at most 1 second until the socket has data (read()
         // will not block). Otherwise, continue. This gives outside threads
@@ -119,10 +119,10 @@ void FrameListener::_work(int sd) {
         if(!select(sd+1, &rfds, 0, 0, &timeout)) {
             continue;
         }
-        
+
         clock_gettime(CLOCK_REALTIME, &ts);
         dataBytes = read( sd, nnp.rawPtr(), nnp.maxLength() );
-        
+
         if(dataBytes > 0 && nnp.iMessage() == NatNetPacket::NAT_FRAMEOFDATA) {
 
             MocapFrame mFrame(_nnMajor,_nnMinor);

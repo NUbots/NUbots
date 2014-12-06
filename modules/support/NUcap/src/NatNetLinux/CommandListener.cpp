@@ -26,7 +26,7 @@ CommandListener::CommandListener(int sd) :
   _nnMinor(0) {
     _nnVersionMutex.lock();
 }
-   
+
 CommandListener::~CommandListener() {
     if(running()) {
         stop();
@@ -34,10 +34,10 @@ CommandListener::~CommandListener() {
 
     delete _thread;
 }
-   
+
 void CommandListener::start() {
     _run = true;
-    _thread = new boost::thread(&CommandListener::_work, this, _sd);
+    _thread = new std::thread(&CommandListener::_work, this, _sd);
 }
 
 void CommandListener::stop() {
@@ -85,7 +85,7 @@ void CommandListener::_work(int sd) {
         if(!select(sd+1, &rfds, 0, 0, &timeout)) {
             continue;
         }
-     
+
         // blocking
         len = recvfrom(sd,
                        nnp.rawPtr(),
