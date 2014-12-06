@@ -19,13 +19,12 @@
 #ifndef NATNETSENDER_H
 #define NATNETSENDER_H
 
-#include <string.h>
 #include <string>
 
 /*!
  * \brief Encapsulates NatNet Sender packet data.
  * \author Philip G. Lee
- * 
+ *
  * NatNet requires that servers respond with some basic information about
  * themselves. This class encapsulates that information.
  */
@@ -35,29 +34,29 @@ private:
 public:
     //! \brief Default constructor
     NatNetSender();
-    
+
     //! \brief Copy constructor
     NatNetSender(NatNetSender const& other);
-    
+
     ~NatNetSender();
-    
+
     //! \brief Assignment operator
     NatNetSender& operator=(NatNetSender const& other);
-    
+
     //! \brief Name of sending application.
     std::string name() const;
-    
+
     //! \brief Length 4 array version number of sending application (major.minor.build.revision)
     unsigned char const* version() const;
-    
+
     //! \brief Length 4 array version number of sending application's NatNet version (major.minor.build.revision)
     unsigned char const* natNetVersion() const;
-    
+
     //! \brief Unpack the class from raw pointer.
     void unpack(char const* data);
-   
+
 private:
-   
+
     char _name[MAX_NAMELENGTH];
     unsigned char _version[4];
     unsigned char _natNetVersion[4];

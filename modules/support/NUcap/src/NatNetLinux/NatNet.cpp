@@ -18,6 +18,13 @@
 
 #include "NatNet.h"
 
+#include <iomanip>
+#include <cmath>
+#include <cstring>
+
+#include <unistd.h>
+#include <arpa/inet.h>
+
 struct sockaddr_in NatNet::createAddress(uint32_t inAddr, uint16_t port) {
     struct sockaddr_in ret;
     memset(&ret, 0, sizeof(ret));
@@ -100,6 +107,11 @@ int NatNet::createDataSocket(uint32_t inAddr, uint16_t port, uint32_t multicastA
     }
 
     return sd;
+}
+
+int NatNet::createDataSocket(uint32_t inAddr, uint16_t port) {
+
+    return createDataSocket(std::forward<uint32_t>(inAddr), std::forward<uint16_t>(port), inet_addr("239.255.42.99"));
 }
 
 Point3f::Point3f(float xx, float yy, float zz)

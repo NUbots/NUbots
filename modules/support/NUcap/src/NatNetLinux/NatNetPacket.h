@@ -19,20 +19,17 @@
 #ifndef NATNETPACKET_H
 #define NATNETPACKET_H
 
-#include <stdint.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <string.h>
 #include <netinet/in.h>
 
 /*!
  * \brief Encapsulates NatNet packets.
  * \author Philip G. Lee
  */
-class NatNetPacket
-{
+class NatNetPacket {
 public:
-   
+
+    static const int MAX_PACKETSIZE = 100000;
+
     //! \brief Message types
     enum NatNetMessageID {
         NAT_PING                 = 0,
@@ -46,53 +43,53 @@ public:
         NAT_MESSAGESTRING        = 8,
         NAT_UNRECOGNIZED_REQUEST = 100
     };
-    
+
     //! \brief Default constructor.
     NatNetPacket();
-    
+
     //! \brief Copy constructor.
     NatNetPacket(NatNetPacket const& other);
-    
+
     ~NatNetPacket();
-    
+
     //! \brief Assignment operator. Does deep copy.
     NatNetPacket& operator=(NatNetPacket const& other);
-    
+
     //! \brief Construct a "ping" packet.
     static NatNetPacket pingPacket();
-    
+
     /*!
      * \brief Send packet over the series of tubes.
      * \param sd Socket to use (already bound to an address)
      */
     int send(int sd) const;
-    
+
     /*! \brief Send packet over the series of tubes.
      * \param sd Socket to use
      * \param destAddr Address to which to send the packet
      */
-    int send(int sd, struct sockaddr_in destAddr) const;
-    
+    int send(int sd, sockaddr_in destAddr) const;
+
     //! \brief Return a raw pointer to the packet data. Careful.
     char* rawPtr();
-    
+
     const char* rawPtr() const;
-    
+
     const char* rawPayloadPtr() const;
-    
+
     /*!
      * \brief Maximum length of the underlying packet data.
-     * 
+     *
      * \c rawPtr()[\c maxLength()-1] should be a good dereference.
      */
     size_t maxLength() const;
-    
+
     //! \brief Get the message type.
     NatNetMessageID iMessage() const;
-    
+
     //! \brief Get the number of bytes in the payload.
     unsigned short nDataBytes() const;
-    
+
     /*!
      * \brief Read payload data. Const version.
      * \param offset payload byte offset
@@ -103,7 +100,7 @@ public:
         // NOTE: need to worry about network byte order?
         return reinterpret_cast<T*>(_data + 4 + offset);
     }
-    
+
     /*!
      * \brief Read payload data.
      * \param offset payload byte offset
@@ -114,9 +111,9 @@ public:
         // NOTE: need to worry about network byte order?
         return reinterpret_cast<T*>(_data + 4 + offset);
     }
-   
+
 private:
-   
+
     char* _data;
     size_t _dataLen;
 };

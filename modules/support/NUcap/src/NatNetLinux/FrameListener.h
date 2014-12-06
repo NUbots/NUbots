@@ -20,7 +20,7 @@
 #define FRAMELISTENER_H
 
 #include <utility>
-#include <time.h>
+#include <ctime>
 
 #include <boost/thread.hpp>
 #include <boost/circular_buffer.hpp>

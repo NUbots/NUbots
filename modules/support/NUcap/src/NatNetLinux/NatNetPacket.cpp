@@ -18,8 +18,9 @@
 
 #include "NatNetPacket.h"
 
-#define MAX_PACKETSIZE 100000
-   
+#include <cstdint>
+#include <cstring>
+
 NatNetPacket::NatNetPacket()
   : _data(new char[MAX_PACKETSIZE + 4])
   , _dataLen(MAX_PACKETSIZE + 4) {
@@ -48,25 +49,25 @@ NatNetPacket& NatNetPacket::operator=(NatNetPacket const& other) {
     else {
         memmove(_data, other._data, _dataLen);
     }
-    
+
     return *this;
 }
 
 //! \brief Construct a "ping" packet.
 NatNetPacket NatNetPacket::pingPacket() {
     NatNetPacket packet;
-    
+
     uint16_t m = NAT_PING;
     uint16_t len = 0;
-    
+
     *reinterpret_cast<uint16_t*>(packet._data)   = m;
     *reinterpret_cast<uint16_t*>(packet._data+2) = len;
-    
+
     return packet;
 }
 
 int NatNetPacket::send(int sd) const {
-   
+
     // Have to prepend '::' to avoid conflicting with NatNetPacket::send().
     return ::send(sd, _data, 4 + nDataBytes(), 0);
 }

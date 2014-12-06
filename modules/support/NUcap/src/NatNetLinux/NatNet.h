@@ -19,22 +19,9 @@
 #ifndef NATNET_H
 #define NATNET_H
 
+#include <cstdint>
 #include <iostream>
-#include <iomanip>
-#include <ios>
 #include <vector>
-#include <cmath>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <unistd.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 
 /*!
  * \brief Encapsulates basic NatNet communication functionality
@@ -44,9 +31,9 @@ class NatNet {
 public:
 
     //! \brief Default NatNet command port
-    static const uint16_t commandPort=1510;
+    static const uint16_t COMMAND_PORT = 1510;
     //! \brief Default NatNet data port
-    static const uint16_t dataPort=1511;
+    static const uint16_t DATA_PORT = 1511;
 
     /*!
      * \brief Create a socket IPv4 address structure.
@@ -59,7 +46,7 @@ public:
      *    an IPv4 socket address structure that describes a given address and
      *    port
      */
-    static struct sockaddr_in createAddress(uint32_t inAddr, uint16_t port = commandPort);
+    static struct sockaddr_in createAddress(uint32_t inAddr, uint16_t port = COMMAND_PORT);
 
     /*!
      * \brief Creates a socket for receiving commands.
@@ -71,7 +58,7 @@ public:
      * \param port command port, defaults to 1510
      * \returns socket descriptor bound to \c port and \c inAddr
      */
-    static int createCommandSocket(uint32_t inAddr, uint16_t port = commandPort);
+    static int createCommandSocket(uint32_t inAddr, uint16_t port = COMMAND_PORT);
 
     /*!
      * \brief Creates a socket to read data from the server.
@@ -85,7 +72,21 @@ public:
      * \param multicastAddr multicast address to subscribe to. Defaults to 239.255.42.99.
      * \returns socket bound as described above
      */
-    static int createDataSocket(uint32_t inAddr, uint16_t port=dataPort, uint32_t multicastAddr=inet_addr("239.255.42.99"));
+    static int createDataSocket(uint32_t inAddr, uint16_t port = DATA_PORT);
+
+    /*!
+     * \brief Creates a socket to read data from the server.
+     *
+     * The socket returned from this function is bound to \c port and
+     * \c INADDR_ANY, and is added to the multicast group given by
+     * \c multicastAddr.
+     *
+     * \param inAddr our local address
+     * \param port port to bind to, defaults to 1511
+     * \param multicastAddr multicast address to subscribe to. Defaults to 239.255.42.99.
+     * \returns socket bound as described above
+     */
+    static int createDataSocket(uint32_t inAddr, uint16_t port, uint32_t multicastAddr);
 };
 
 /*!

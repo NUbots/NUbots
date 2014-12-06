@@ -18,6 +18,8 @@
 
 #include "NatNetSender.h"
 
+#include <cstring>
+
 //! \brief Default constructor
 NatNetSender::NatNetSender() {
     memset(_name, 0, MAX_NAMELENGTH);
