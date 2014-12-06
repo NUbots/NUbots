@@ -25,7 +25,7 @@
 #include "messages/behaviour/Look.h"
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
-#include "utility/support/armayamlconversions.h"
+#include "utility/support/YamlArmadillo.h"
 
 
 namespace modules {

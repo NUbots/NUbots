@@ -32,7 +32,7 @@
 #include "utility/math/matrix.h"
 #include "OPKinematics.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/armayamlconversions.h"
+#include "utility/support/YamlArmadillo.h"
 #include "messages/motion/WalkCommand.h"
 #include "messages/motion/ServoTarget.h"
 #include "messages/behaviour/Action.h"

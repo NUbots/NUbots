@@ -20,7 +20,7 @@
 #include "WalkOptimiser.h"
 
 
-#include "utility/support/armayamlconversions.h"
+#include "utility/support/YamlArmadillo.h"
 #include "utility/math/optimisation/PGAoptimiser.h"
 #include "messages/input/ServoID.h"
 

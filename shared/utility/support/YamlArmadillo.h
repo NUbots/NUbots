@@ -17,11 +17,11 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_SUPPORT_ARMAYAMLCONVERSION_H
-#define UTILITY_SUPPORT_ARMAYAMLCONVERSION_H
+#ifndef UTILITY_SUPPORT_YAMLARMADILLO_H
+#define UTILITY_SUPPORT_YAMLARMADILLO_H
 
 #include <armadillo>
-#include <iostream> 
+#include <iostream>
 #include <yaml-cpp/yaml.h>
 
 
@@ -77,4 +77,4 @@ namespace YAML {
     };
 }
 
-#endif
+#endif // UTILITY_SUPPORT_YAMLARMADILLO_H
