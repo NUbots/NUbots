@@ -29,78 +29,38 @@
  * NatNet requires that servers respond with some basic information about
  * themselves. This class encapsulates that information.
  */
-class NatNetSender
-{
-#define MAX_NAMELENGTH 256
+class NatNetSender {
+private:
+    static const unsigned int MAX_NAMELENGTH = 256;
 public:
-   //! \brief Default constructor
-   NatNetSender()
-   {
-      memset(_name, 0, MAX_NAMELENGTH);
-      memset(_version, 0, 4);
-      memset(_natNetVersion, 0, 4);
-   }
-   
-   //! \brief Copy constructor
-   NatNetSender( NatNetSender const& other )
-   {
-      memcpy( _name, other._name, MAX_NAMELENGTH );
-      memcpy( _version, other._version, 4 );
-      memcpy( _natNetVersion, other._natNetVersion, 4 );
-   }
-   
-   ~NatNetSender(){}
-   
-   //! \brief Assignment operator
-   NatNetSender& operator=( NatNetSender const& other )
-   {
-      memmove( _name, other._name, MAX_NAMELENGTH );
-      memmove( _version, other._version, 4 );
-      memmove( _natNetVersion, other._natNetVersion, 4 );
-      return *this;
-   }
-   
-   //! \brief Name of sending application.
-   std::string name() const
-   {
-      return _name;
-   }
-   
-   //! \brief Length 4 array version number of sending application (major.minor.build.revision)
-   unsigned char const* version() const
-   {
-      return _version;
-   }
-   
-   //! \brief Length 4 array version number of sending application's NatNet version (major.minor.build.revision)
-   unsigned char const* natNetVersion() const
-   {
-      return _natNetVersion;
-   }
-   
-   //! \brief Unpack the class from raw pointer.
-   void unpack(char const* data)
-   {
-      // NOTE: do we have to worry about network order data? I.e. ntohs() and stuff?
-      strncpy( _name, data, MAX_NAMELENGTH );
-      data += MAX_NAMELENGTH;
-      _version[0]       = data[0];
-      _version[1]       = data[1];
-      _version[2]       = data[2];
-      _version[3]       = data[3];
-      _natNetVersion[0] = data[4];
-      _natNetVersion[1] = data[5];
-      _natNetVersion[2] = data[6];
-      _natNetVersion[3] = data[7];
-   }
+    //! \brief Default constructor
+    NatNetSender();
+    
+    //! \brief Copy constructor
+    NatNetSender(NatNetSender const& other);
+    
+    ~NatNetSender();
+    
+    //! \brief Assignment operator
+    NatNetSender& operator=(NatNetSender const& other);
+    
+    //! \brief Name of sending application.
+    std::string name() const;
+    
+    //! \brief Length 4 array version number of sending application (major.minor.build.revision)
+    unsigned char const* version() const;
+    
+    //! \brief Length 4 array version number of sending application's NatNet version (major.minor.build.revision)
+    unsigned char const* natNetVersion() const;
+    
+    //! \brief Unpack the class from raw pointer.
+    void unpack(char const* data);
    
 private:
    
-   char _name[MAX_NAMELENGTH];
-   unsigned char _version[4];
-   unsigned char _natNetVersion[4];
-   
-#undef MAX_NAMELENGTH
+    char _name[MAX_NAMELENGTH];
+    unsigned char _version[4];
+    unsigned char _natNetVersion[4];
 };
 
 #endif /*NATNETSENDER_H*/
