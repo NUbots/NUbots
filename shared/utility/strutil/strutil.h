@@ -29,9 +29,22 @@ namespace utility {
      * TODO document
      *
      * @author Trent Houliston
-     * @note Alex Biddulph added trimLeft, trimRight, trim, and removeAll functions 10-12-2012
+     * @author Alex Biddulph: added trimLeft, trimRight, trim, and removeAll functions 10-12-2012
+     * @author Brendan Annable
      */
     namespace strutil {
+
+        // see: http://en.wikipedia.org/wiki/ANSI_escape_code#Colors
+        // see: http://stackoverflow.com/a/3219471/868679
+        struct Colour {
+            static constexpr const char* RESET   = "\x1b[0m";
+            static constexpr const char* RED     = "\x1b[31m";
+            static constexpr const char* GREEN   = "\x1b[32m";
+            static constexpr const char* YELLOW  = "\x1b[33m";
+            static constexpr const char* BLUE    = "\x1b[34m";
+            static constexpr const char* MAGENTA = "\x1b[35m";
+            static constexpr const char* CYAN    = "\x1b[36m";
+        };
 
         // http://stackoverflow.com/a/874160/1387006
         inline bool endsWith(const std::string& str, const std::string& ending) {

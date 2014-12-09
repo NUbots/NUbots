@@ -23,6 +23,7 @@
 #include <armadillo>
 #include <iostream>
 #include <yaml-cpp/yaml.h>
+#include "utility/support/YamlExpression.h"
 
 
 namespace YAML {
@@ -42,7 +43,7 @@ namespace YAML {
         static bool decode(const Node& node, arma::vec& rhs) {
             rhs.resize(node.size());
             for (uint i = 0; i < node.size(); ++i) {
-                rhs[i] = node[i].as<double>();
+                rhs[i] = node[i].as<utility::support::Expression>();
             }
 
             return true;
@@ -65,7 +66,7 @@ namespace YAML {
             if(node.size() == size) {
 
                 for(uint i = 0; i < size; ++i) {
-                    rhs[i] = node[i].as<double>();
+                    rhs[i] = node[i].as<utility::support::Expression>();
                 }
 
                 return true;

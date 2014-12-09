@@ -126,9 +126,9 @@ namespace modules {
                     //push back the new points
                     waypoints->push_back({id, time, ServoID::HEAD_YAW,      targetPoint[0],  30.f});
                     waypoints->push_back({id, time, ServoID::HEAD_PITCH,    targetPoint[1], 30.f});
-                    for (auto& waypoint : *waypoints) {
+                    /*for (auto& waypoint : *waypoints) {
                         std::cout << static_cast<uint>(waypoint.id) << ", " << waypoint.position << std::endl;
-                    }
+                    }*/
 
 
                     emit(std::move(waypoints));

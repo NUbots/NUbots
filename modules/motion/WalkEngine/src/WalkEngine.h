@@ -67,7 +67,7 @@ namespace motion {
         // These limit the distance a footstep will take
         arma::vec2 stanceLimitX;
         arma::vec2 stanceLimitY;
-        arma::vec2 stanceLimitA;
+        arma::vec2 stanceLimitAngle;
         float stanceLimitMarginY;
         float stanceLimitY2;
 
@@ -238,11 +238,6 @@ namespace motion {
 
         int STAND_SCRIPT_DURATION_MILLISECONDS;
 
-        // TODO: sort it out
-//            arma::vec3 leftArmCommand;
-//            arma::vec3 rightArmCommand;
-//            arma::vec3 leftLegCommand;
-//            arma::vec3 rightLegCommand;
         void generateAndSaveStandScript();
         void configureWalk(const YAML::Node& config);
 
@@ -253,16 +248,18 @@ namespace motion {
         void balance(std::vector<double>& qLegs, const messages::input::Sensors& sensors);
 
         void reset();
-        arma::vec3 stepLeftFootDestination(arma::vec3 vel, arma::vec3 uLeftFoot, arma::vec3 uRightFoot);
-        arma::vec3 stepRightFootDestination(arma::vec3 vel, arma::vec3 uLeftFoot, arma::vec3 uRightFoot);
-        arma::vec3 stepTorso(arma::vec3 uLeftFoot, arma::vec3 uRightFoot, float shiftFactor);
-        void setVelocity(double vx, double vy, double va);
-        void updateVelocity();
-        arma::vec3 getVelocity();
         void start();
         void stop();
-        void setInitialStance(arma::vec3 uL, arma::vec3 uR, arma::vec3 uT, Leg support);
         void stanceReset();
+        void setVelocity(double vx, double vy, double va);
+        void updateVelocity();
+        arma::vec3 stepLeftFootDestination(arma::vec3 vel, arma::vec3 uLeftFoot, arma::vec3 uRightFoot);
+        arma::vec3 stepRightFootDestination(arma::vec3 vel, arma::vec3 uLeftFoot, arma::vec3 uRightFoot);
+        /**
+         *
+         */
+        arma::vec3 stepTorso(arma::vec3 uLeftFoot, arma::vec3 uRightFoot, float shiftFactor);
+        arma::vec3 getVelocity();
         arma::vec2 zmpSolve(float zs, float z1, float z2, float x1, float x2);
         arma::vec3 zmpCom(float phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, float tStep, float tZmp, float phase1Zmp, float phase2Zmp);
         std::pair<float, float> footPhase(float phase);
@@ -270,8 +267,26 @@ namespace motion {
         double getTime(); // TODO: remove
         double procFunc(double a, double deadband, double maxvalue); //TODO: move documentation from .cpp to .h file
         double modAngle(double value);
-        arma::vec3 poseGlobal(arma::vec3 pRelative, arma::vec3 pose);
-        arma::vec3 poseRelative(arma::vec3 pGlobal, arma::vec3 pose);
+        /**
+         * Local to world transform
+         *
+         * Transforms pose from worldToLocal space to world/global space
+         * Note: Assumes vec3 are of the form {x, y, angle}
+         */
+        arma::vec3 localToWorld(arma::vec3 poseRelative, arma::vec3 pose);
+        /**
+         * World to local transform
+         *
+         * Transforms pose from world/global space to be relative to pGlobal
+         * Note: Assumes vec3 are of the form {x, y, angle}
+         */
+        arma::vec3 worldToLocal(arma::vec3 poseGlobal, arma::vec3 pose);
+        /**
+         * Interpolate between two given vectors
+         * Note: Assumes vec3 are of the form {x, y, angle}
+         * See: Special Euclidean group SE(2).
+         * http://en.wikipedia.org/wiki/Euclidean_group
+         */
         arma::vec3 se2Interpolate(double t, arma::vec3 u1, arma::vec3 u2);
     };
 

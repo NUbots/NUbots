@@ -1,5 +1,5 @@
 ADD_ROLE(
-    NAME fakewalk
+    NAME walktestfake
     MODULES
 
         # Support and Configuration

@@ -33,6 +33,7 @@
 #include "OPKinematics.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/YamlArmadillo.h"
+#include "utility/support/YamlExpression.h"
 #include "messages/motion/WalkCommand.h"
 #include "messages/motion/ServoTarget.h"
 #include "messages/behaviour/Action.h"
@@ -78,7 +79,7 @@ namespace motion {
             [this] (const std::set<LimbID>& givenLimbs) {
                 if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
                     // legs are available, start
-                    stanceReset();
+                    //stanceReset();
                     //updateHandle.enable();
                 }
             },
@@ -137,7 +138,7 @@ namespace motion {
         // g Stance and velocity limit values
         stanceLimitX = config["stanceLimitX"].as<arma::vec>();
         stanceLimitY = config["stanceLimitY"].as<arma::vec>();
-        stanceLimitA = config["stanceLimitA"].as<arma::vec>();
+        stanceLimitAngle = config["stanceLimitAngle"].as<arma::vec>();
         velLimitX = config["velLimitX"].as<arma::vec>();
         velLimitY = config["velLimitY"].as<arma::vec>();
         velLimitA = config["velLimitA"].as<arma::vec>();
@@ -169,7 +170,6 @@ namespace motion {
         // gHardness parameters
         hardnessSupport = config["hardnessSupport"].as<float>();
         hardnessSwing = config["hardnessSwing"].as<float>();
-        hardnessArm0 = config["hardnessArm0"].as<float>();
         hardnessArm = config["hardnessArm"].as<float>();
 
         // gGait parameters
@@ -184,20 +184,21 @@ namespace motion {
         phase2Zmp = phase2Single;
 
         // gCompensation parameters
-        hipRollCompensation = 4 * M_PI / 180;
-        ankleMod = arma::vec2{-config["toeTipCompensation"].as<double>(), 0} * 1 * M_PI / 180;
+        hipRollCompensation = config["hipRollCompensation"].as<utility::support::Expression>();
+        toeTipCompensation = config["toeTipCompensation"].as<utility::support::Expression>();
+        ankleMod = {-toeTipCompensation, 0};
+
         turnCompThreshold = config["turnCompThreshold"].as<float>();
         turnComp = config["turnComp"].as<float>();
 
-        float gyroFactor = config["gyroFactor"].as<float>() * 0.273 * M_PI / 180 * 300 / 1024; //dps to rad/s conversion
-
+        float gyroFactor = config["gyroFactor"].as<utility::support::Expression>();
         // gGyro stabilization parameters
-        ankleImuParamX = {0.5, 0.3 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
-        ankleImuParamY = {0.5, 1.2 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
-        kneeImuParamX = {0.5, 0.7 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
-        hipImuParamY = {0.5, 0.3 * gyroFactor, 1 * M_PI / 180, 25 * M_PI / 180};
-        armImuParamX = {0.5, 10.0 * gyroFactor, 20 * M_PI / 180, 45 * M_PI / 180};
-        armImuParamY = {0.5, 0.0 * gyroFactor, 20 * M_PI / 180, 45 * M_PI / 180};
+        ankleImuParamX = config["ankleImuParamX"].as<arma::vec>();
+        ankleImuParamY = config["ankleImuParamY"].as<arma::vec>();
+        kneeImuParamX = config["kneeImuParamX"].as<arma::vec>();
+        hipImuParamY = config["hipImuParamY"].as<arma::vec>();
+        armImuParamX = config["armImuParamX"].as<arma::vec>();
+        armImuParamY = config["armImuParamY"].as<arma::vec>();
 
         // gSupport bias parameters to reduce backlash-based instability
         velFastForward = config["velFastForward"].as<float>();
@@ -216,9 +217,6 @@ namespace motion {
 
         // gInitial body swing
         supportModYInitial = config["supportModYInitial"].as<float>();
-
-        //XXX: this isn't a real config variable - it derives from akleMod[0]
-        toeTipCompensation = config["toeTipCompensation"].as<float>();
 
         STAND_SCRIPT_DURATION_MILLISECONDS = config["STAND_SCRIPT_DURATION_MILLISECONDS"].as<int>();
     }
@@ -249,10 +247,7 @@ namespace motion {
     }
 
     void WalkEngine::reset(){
-        // g--------------------------------------------------------
-            // g Walk state variables
-            // g--------------------------------------------------------
-
+            // Global walk state variables
 
             uTorso = {supportX, 0, 0};
             uLeftFoot = {0, footY, 0};
@@ -386,9 +381,9 @@ namespace motion {
                 velCurrent = {0, 0, 0};
                 velCommand = {0, 0, 0};
                 if (supportLeg == Leg::LEFT) {
-                    uRightFootDestination = poseGlobal(-2 * uLRFootOffset, uLeftFootSource);
+                    uRightFootDestination = localToWorld(-2 * uLRFootOffset, uLeftFootSource);
                 } else {
-                    uLeftFootDestination = poseGlobal(2 * uLRFootOffset, uRightFootSource);
+                    uLeftFootDestination = localToWorld(2 * uLRFootOffset, uRightFootSource);
                 }
             } else {
                 // normal walk, advance steps
@@ -434,17 +429,17 @@ namespace motion {
 
             // apply velocity-based support point modulation for uSupport
             if (supportLeg == Leg::LEFT) {
-                arma::vec3 uLeftFootTorso = poseRelative(uLeftFootSource, uTorsoSource);
-                arma::vec3 uTorsoModded = poseGlobal({supportMod[0], supportMod[1], 0}, uTorso);
-                arma::vec3 uLeftFootModded = poseGlobal(uLeftFootTorso, uTorsoModded);
-                uSupport = poseGlobal({supportX, supportY, 0}, uLeftFootModded);
+                arma::vec3 uLeftFootTorso = worldToLocal(uLeftFootSource, uTorsoSource);
+                arma::vec3 uTorsoModded = localToWorld({supportMod[0], supportMod[1], 0}, uTorso);
+                arma::vec3 uLeftFootModded = localToWorld(uLeftFootTorso, uTorsoModded);
+                uSupport = localToWorld({supportX, supportY, 0}, uLeftFootModded);
                 leftLegHardness = hardnessSupport;
                 rightLegHardness = hardnessSwing;
             } else {
-                arma::vec3 uRightFootTorso = poseRelative(uRightFootSource, uTorso);
-                arma::vec3 uTorsoModded = poseGlobal({supportMod[0], supportMod[1], 0}, uTorso);
-                arma::vec3 uRightFootModded = poseGlobal(uRightFootTorso, uTorsoModded);
-                uSupport = poseGlobal({supportX, -supportY, 0}, uRightFootModded);
+                arma::vec3 uRightFootTorso = worldToLocal(uRightFootSource, uTorso);
+                arma::vec3 uTorsoModded = localToWorld({supportMod[0], supportMod[1], 0}, uTorso);
+                arma::vec3 uRightFootModded = localToWorld(uRightFootTorso, uTorsoModded);
+                uSupport = localToWorld({supportX, -supportY, 0}, uRightFootModded);
                 leftLegHardness = hardnessSwing;
                 rightLegHardness = hardnessSupport;
             }
@@ -509,7 +504,7 @@ namespace motion {
         // NUClear::log("uTorso Motion\n", uTorso);
         // NUClear::log("uRightFoot Motion\n", uRightFoot);
 
-        arma::vec3 uTorsoActual = poseGlobal({-footX + frontCompX + turnCompX + armPosCompX, armPosCompY, 0}, uTorso);
+        arma::vec3 uTorsoActual = localToWorld({-footX + frontCompX + turnCompX + armPosCompX, armPosCompY, 0}, uTorso);
         // NUClear::log("uTorsoActual Motion\n", uTorsoActual);
         pTorso[0] = uTorsoActual[0];
         pTorso[1] = uTorsoActual[1];
@@ -551,7 +546,7 @@ namespace motion {
         // NUClear::log("uLeftFoot Still\n", uLeftFoot);
         // NUClear::log("uRightFoot Still\n", uRightFoot);
         // NUClear::log("uTorso Still\n", uTorso);
-        uTorsoActual = poseGlobal({-footX + armPosCompX, armPosCompY, 0}, uTorso);
+        uTorsoActual = localToWorld({-footX + armPosCompX, armPosCompY, 0}, uTorso);
         // NUClear::log("uTorsoActual Still\n", uTorsoActual);
         pTorso[0] = uTorsoActual[0];
         pTorso[1] = uTorsoActual[1];
@@ -626,8 +621,8 @@ namespace motion {
         float rotLeftA = modAngle(uLeftFoot[2] - uTorso[2]);
         float rotRightA = modAngle(uTorso[2] - uRightFoot[2]);
 
-        arma::vec3 leftLegTorso = poseRelative(uLeftFoot, uTorso);
-        arma::vec3 rightLegTorso = poseRelative(uRightFoot, uTorso);
+        arma::vec3 leftLegTorso = worldToLocal(uLeftFoot, uTorso);
+        arma::vec3 rightLegTorso = worldToLocal(uRightFoot, uTorso);
 
         qLArmActual[1] = std::max(
                 5 * M_PI / 180 + std::max(0.0f, rotLeftA) / 2
@@ -709,6 +704,12 @@ namespace motion {
 
         // TODO: toe/heel lifting
 
+        emit(graph("kneeShift", kneeShift));
+        emit(graph("ankleShift", ankleShift[0], ankleShift[1]));
+        emit(graph("hipShift", hipShift[0], hipShift[1]));
+        emit(graph("armShift", armShift[0], armShift[1]));
+        emit(graph("phaseComp", phaseComp));
+
         if (!active) {
             // Double support, standing still
             // qLegs[1] += hipShift[1]; // Hip roll stabilization
@@ -741,9 +742,8 @@ namespace motion {
     }
 
     arma::vec3 WalkEngine::stepTorso(arma::vec3 uLeftFoot, arma::vec3 uRightFoot, float shiftFactor) {
-        arma::vec3 u0 = se2Interpolate(0.5, uLeftFoot, uRightFoot);
-        arma::vec3 uLeftFootSupport = poseGlobal({supportX, supportY, 0}, uLeftFoot);
-        arma::vec3 uRightFootSupport = poseGlobal({supportX, -supportY, 0}, uRightFoot);
+        arma::vec3 uLeftFootSupport = localToWorld({supportX, supportY, 0}, uLeftFoot);
+        arma::vec3 uRightFootSupport = localToWorld({supportX, -supportY, 0}, uRightFoot);
         return se2Interpolate(shiftFactor, uLeftFootSupport, uRightFootSupport);
     }
 
@@ -797,14 +797,6 @@ namespace motion {
         return velCurrent;
     }
 
-    void WalkEngine::setInitialStance(arma::vec3 uL, arma::vec3 uR, arma::vec3 uT, Leg support) {
-        uLeftFootI = uL;
-        uRightFootI = uR;
-        uTorso = uT;
-        supportInitial = support;
-        startFromStep = true;
-    }
-
     void WalkEngine::stanceReset() {
         // standup/sitdown/falldown handling
         if (startFromStep) {
@@ -822,8 +814,8 @@ namespace motion {
             initialStep = 1;
         } else {
             // stance resetted
-            uLeftFoot = poseGlobal({-supportX, footY, 0}, uTorso);
-            uRightFoot = poseGlobal({-supportX, -footY, 0}, uTorso);
+            uLeftFoot = localToWorld({-supportX, footY, 0}, uTorso);
+            uRightFoot = localToWorld({-supportX, -footY, 0}, uTorso);
             swingLeg = Leg::LEFT;
         }
 
@@ -887,15 +879,15 @@ namespace motion {
     }
 
     /**
-     * Globals: uLRFootOffset, footSizeX, stanceLimitY, stanceLimitY2, stanceLimitA
+     * Globals: uLRFootOffset, footSizeX, stanceLimitY, stanceLimitY2, stanceLimitAngle
      */
     arma::vec3 WalkEngine::stepLeftFootDestination(arma::vec3 velocity, arma::vec3 uLeftFoot, arma::vec3 uRightFoot) {
         arma::vec3 u0 = se2Interpolate(0.5, uLeftFoot, uRightFoot);
         // Determine nominal midpoint position 1.5 steps in future
-        arma::vec3 u1 = poseGlobal(velocity, u0);
-        arma::vec3 u2 = poseGlobal(0.5 * velocity, u1);
-        arma::vec3 uLeftFootPredict = poseGlobal(uLRFootOffset, u2);
-        arma::vec3 uLeftFootRight = poseRelative(uLeftFootPredict, uRightFoot);
+        arma::vec3 u1 = localToWorld(velocity, u0);
+        arma::vec3 u2 = localToWorld(0.5 * velocity, u1);
+        arma::vec3 uLeftFootPredict = localToWorld(uLRFootOffset, u2);
+        arma::vec3 uLeftFootRight = worldToLocal(uLeftFootPredict, uRightFoot);
         // Do not pidgeon toe, cross feet:
 
         // Check toe and heel overlap
@@ -907,18 +899,18 @@ namespace motion {
 
         uLeftFootRight[0] = std::min(std::max(uLeftFootRight[0], stanceLimitX[0]), stanceLimitX[1]);
         uLeftFootRight[1] = std::min(std::max(uLeftFootRight[1], limitY), stanceLimitY[1]);
-        uLeftFootRight[2] = std::min(std::max(uLeftFootRight[2], stanceLimitA[0]), stanceLimitA[1]);
+        uLeftFootRight[2] = std::min(std::max(uLeftFootRight[2], stanceLimitAngle[0]), stanceLimitAngle[1]);
 
-        return poseGlobal(uLeftFootRight, uRightFoot);
+        return localToWorld(uLeftFootRight, uRightFoot);
     }
 
     arma::vec3 WalkEngine::stepRightFootDestination(arma::vec3 velocity, arma::vec3 uLeftFoot, arma::vec3 uRightFoot) {
         arma::vec3 u0 = se2Interpolate(.5, uLeftFoot, uRightFoot);
         // Determine nominal midpoint position 1.5 steps in future
-        arma::vec3 u1 = poseGlobal(velocity, u0);
-        arma::vec3 u2 = poseGlobal(0.5 * velocity, u1);
-        arma::vec3 uRightFootPredict = poseGlobal(-1 * uLRFootOffset, u2);
-        arma::vec3 uRightFootLeft = poseRelative(uRightFootPredict, uLeftFoot);
+        arma::vec3 u1 = localToWorld(velocity, u0);
+        arma::vec3 u2 = localToWorld(0.5 * velocity, u1);
+        arma::vec3 uRightFootPredict = localToWorld(-1 * uLRFootOffset, u2);
+        arma::vec3 uRightFootLeft = worldToLocal(uRightFootPredict, uLeftFoot);
         // Do not pidgeon toe, cross feet:
 
         // Check toe and heel overlap
@@ -930,9 +922,9 @@ namespace motion {
 
         uRightFootLeft[0] = std::min(std::max(uRightFootLeft[0], stanceLimitX[0]), stanceLimitX[1]);
         uRightFootLeft[1] = std::min(std::max(uRightFootLeft[1], -stanceLimitY[1]), -limitY);
-        uRightFootLeft[2] = std::min(std::max(uRightFootLeft[2], -stanceLimitA[1]), -stanceLimitA[0]);
+        uRightFootLeft[2] = std::min(std::max(uRightFootLeft[2], -stanceLimitAngle[1]), -stanceLimitAngle[0]);
 
-        return poseGlobal(uRightFootLeft, uLeftFoot);
+        return localToWorld(uRightFootLeft, uLeftFoot);
     }
 
     /**
@@ -970,22 +962,24 @@ namespace motion {
         return angle;
     }
 
-    arma::vec3 WalkEngine::poseGlobal(arma::vec3 pRelative, arma::vec3 pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!
+    arma::vec3 WalkEngine::localToWorld(arma::vec3 poseRelative, arma::vec3 pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!
         double ca = std::cos(pose[2]);
         double sa = std::sin(pose[2]);
+        // translates to pose + rot(pos.angle) * worldToLocal
         return {
-            pose[0] + ca * pRelative[0] - sa * pRelative[1],
-            pose[1] + sa * pRelative[0] + ca * pRelative[1],
-            pose[2] + pRelative[2]
+            pose[0] + ca * poseRelative[0] - sa * poseRelative[1],
+            pose[1] + sa * poseRelative[0] + ca * poseRelative[1],
+            modAngle(pose[2] + poseRelative[2])
         };
     }
 
-    arma::vec3 WalkEngine::poseRelative(arma::vec3 pGlobal, arma::vec3 pose) {
+    arma::vec3 WalkEngine::worldToLocal(arma::vec3 poseGlobal, arma::vec3 pose) {
         double ca = std::cos(pose[2]);
         double sa = std::sin(pose[2]);
-        double px = pGlobal[0] - pose[0];
-        double py = pGlobal[1] - pose[1];
-        double pa = pGlobal[2] - pose[2];
+        double px = poseGlobal[0] - pose[0];
+        double py = poseGlobal[1] - pose[1];
+        double pa = poseGlobal[2] - pose[2];
+        // translates to rot(pose.angle) * (localToWorld - pose)
         return {
             ca * px + sa * py,
             -sa * px + ca * py,
@@ -993,8 +987,8 @@ namespace motion {
         };
     }
 
-    //should t be an integer???
-    arma::vec3 WalkEngine::se2Interpolate(double t, arma::vec3 u1, arma::vec3 u2) { //helps smooth out the motions using a weighted average
+    arma::vec3 WalkEngine::se2Interpolate(double t, arma::vec3 u1, arma::vec3 u2) {
+        // helps smooth out the motions using a weighted average
         return {
             u1[0] + t * (u2[0] - u1[0]),
             u1[1] + t * (u2[1] - u1[1]),

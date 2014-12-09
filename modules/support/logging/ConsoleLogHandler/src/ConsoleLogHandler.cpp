@@ -19,9 +19,13 @@
 
 #include "ConsoleLogHandler.h"
 
+#include "utility/strutil/strutil.h"
+
 namespace modules {
     namespace support {
         namespace logging {
+
+            using utility::strutil::Colour;
 
             ConsoleLogHandler::ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
                 on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics & stats) {
@@ -50,19 +54,19 @@ namespace modules {
                             std::cout << "TRACE: ";
                             break;
                         case NUClear::DEBUG:
-                            std::cout << "DEBUG: ";
+                            std::cout << Colour::GREEN << "DEBUG: " << Colour::RESET;
                             break;
                         case NUClear::INFO:
-                            std::cout << "INFO: ";
+                            std::cout << Colour::BLUE << "INFO: " << Colour::RESET;
                             break;
                         case NUClear::WARN:
-                            std::cout << "WARN: ";
+                            std::cout << Colour::YELLOW << "WARN: " << Colour::RESET;
                             break;
                         case NUClear::ERROR:
-                            std::cout << "ERROR: ";
+                            std::cout << Colour::RED << "ERROR: " << Colour::RESET;
                             break;
                         case NUClear::FATAL:
-                            std::cout << "FATAL: ";
+                            std::cout << Colour::RED << "FATAL: " << Colour::RESET;
                             break;
                     }
 
