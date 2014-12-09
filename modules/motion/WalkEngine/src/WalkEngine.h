@@ -270,14 +270,14 @@ namespace motion {
         /**
          * Local to world transform
          *
-         * Transforms pose from worldToLocal space to world/global space
+         * Transforms the givenpose from local space to world/global space
          * Note: Assumes vec3 are of the form {x, y, angle}
          */
         arma::vec3 localToWorld(arma::vec3 poseRelative, arma::vec3 pose);
         /**
          * World to local transform
          *
-         * Transforms pose from world/global space to be relative to pGlobal
+         * Transforms the given pose from world/global space to be relative to poseGlobal
          * Note: Assumes vec3 are of the form {x, y, angle}
          */
         arma::vec3 worldToLocal(arma::vec3 poseGlobal, arma::vec3 pose);
@@ -286,6 +286,12 @@ namespace motion {
          * Note: Assumes vec3 are of the form {x, y, angle}
          * See: Special Euclidean group SE(2).
          * http://en.wikipedia.org/wiki/Euclidean_group
+         *
+         * @param t A value between 0-1 to interpolate between the two,
+         * outside these bounds will extrapolate
+         * @param u1 the first vector
+         * @param u2 the second vector
+         * @return The interpolated vector
          */
         arma::vec3 se2Interpolate(double t, arma::vec3 u1, arma::vec3 u2);
     };

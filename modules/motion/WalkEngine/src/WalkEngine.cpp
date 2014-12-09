@@ -771,17 +771,13 @@ namespace motion {
     void WalkEngine::updateVelocity() {
         if (velCurrent[0] > velXHigh) {
             // Slower acceleration at high speed
-            velDiff[0] = std::min(std::max(velCommand[0] - velCurrent[0],
-                    -velDelta[0]), velDeltaXHigh);
+            velDiff[0] = std::min(std::max(velCommand[0] - velCurrent[0], -velDelta[0]), velDeltaXHigh);
         } else {
-            velDiff[0] = std::min(std::max(velCommand[0] - velCurrent[0],
-                    -velDelta[0]), velDelta[0]);
+            velDiff[0] = std::min(std::max(velCommand[0] - velCurrent[0], -velDelta[0]), velDelta[0]);
         }
 
-        velDiff[1] = std::min(std::max(velCommand[1] - velCurrent[1],
-                -velDelta[1]), velDelta[1]);
-        velDiff[2] = std::min(std::max(velCommand[2] - velCurrent[2],
-                -velDelta[2]), velDelta[2]);
+        velDiff[1] = std::min(std::max(velCommand[1] - velCurrent[1], -velDelta[1]), velDelta[1]);
+        velDiff[2] = std::min(std::max(velCommand[2] - velCurrent[2], -velDelta[2]), velDelta[2]);
 
         velCurrent[0] += velDiff[0];
         velCurrent[1] += velDiff[1];
@@ -882,49 +878,51 @@ namespace motion {
      * Globals: uLRFootOffset, footSizeX, stanceLimitY, stanceLimitY2, stanceLimitAngle
      */
     arma::vec3 WalkEngine::stepLeftFootDestination(arma::vec3 velocity, arma::vec3 uLeftFoot, arma::vec3 uRightFoot) {
-        arma::vec3 u0 = se2Interpolate(0.5, uLeftFoot, uRightFoot);
-        // Determine nominal midpoint position 1.5 steps in future
-        arma::vec3 u1 = localToWorld(velocity, u0);
-        arma::vec3 u2 = localToWorld(0.5 * velocity, u1);
-        arma::vec3 uLeftFootPredict = localToWorld(uLRFootOffset, u2);
-        arma::vec3 uLeftFootRight = worldToLocal(uLeftFootPredict, uRightFoot);
-        // Do not pidgeon toe, cross feet:
+        // Get midpoint between the two feet
+        arma::vec3 midPoint = se2Interpolate(0.5, uLeftFoot, uRightFoot);
+        // Get midpoint 1.5 steps in future
+        arma::vec3 forwardPoint = localToWorld(1.5 * velocity, midPoint);
+        // Offset to towards the foot in use to get the target location
+        arma::vec3 leftFootTarget = localToWorld(uLRFootOffset, forwardPoint);
 
+        // Start foot collision detection/prevention
+        arma::vec3 uLeftFootRight = worldToLocal(leftFootTarget, uRightFoot);
+        // Do not pidgeon toe, cross feet:
         // Check toe and heel overlap
         double toeOverlap = -footSizeX[0] * uLeftFootRight[2];
         double heelOverlap = -footSizeX[1] * uLeftFootRight[2];
         double limitY = std::max(stanceLimitY[0], stanceLimitY2 + std::max(toeOverlap, heelOverlap));
-
-        // print("Toeoverlap Heeloverlap",toeOverlap,heelOverlap,limitY)
-
         uLeftFootRight[0] = std::min(std::max(uLeftFootRight[0], stanceLimitX[0]), stanceLimitX[1]);
         uLeftFootRight[1] = std::min(std::max(uLeftFootRight[1], limitY), stanceLimitY[1]);
         uLeftFootRight[2] = std::min(std::max(uLeftFootRight[2], stanceLimitAngle[0]), stanceLimitAngle[1]);
+        leftFootTarget = localToWorld(uLeftFootRight, uRightFoot);
+        // End foot collision detection/prevention
 
-        return localToWorld(uLeftFootRight, uRightFoot);
+        return leftFootTarget;
     }
 
     arma::vec3 WalkEngine::stepRightFootDestination(arma::vec3 velocity, arma::vec3 uLeftFoot, arma::vec3 uRightFoot) {
-        arma::vec3 u0 = se2Interpolate(.5, uLeftFoot, uRightFoot);
-        // Determine nominal midpoint position 1.5 steps in future
-        arma::vec3 u1 = localToWorld(velocity, u0);
-        arma::vec3 u2 = localToWorld(0.5 * velocity, u1);
-        arma::vec3 uRightFootPredict = localToWorld(-1 * uLRFootOffset, u2);
-        arma::vec3 uRightFootLeft = worldToLocal(uRightFootPredict, uLeftFoot);
-        // Do not pidgeon toe, cross feet:
+        // Get midpoint between the two feet
+        arma::vec3 midPoint = se2Interpolate(0.5, uLeftFoot, uRightFoot);
+        // Get midpoint 1.5 steps in future
+        arma::vec3 forwardPoint = localToWorld(1.5 * velocity, midPoint);
+        // Offset to towards the foot in use to get the target location
+        arma::vec3 rightFootTarget = localToWorld(-uLRFootOffset, forwardPoint);
 
+        // Start foot collision detection/prevention
+        arma::vec3 uRightFootLeft = worldToLocal(rightFootTarget, uLeftFoot);
+        // Do not pidgeon toe, cross feet:
         // Check toe and heel overlap
         double toeOverlap = footSizeX[0] * uRightFootLeft[2];
         double heelOverlap = footSizeX[1] * uRightFootLeft[2];
         double limitY = std::max(stanceLimitY[0], stanceLimitY2 + std::max(toeOverlap, heelOverlap));
-
-        // print("Toeoverlap Heeloverlap",toeOverlap,heelOverlap,limitY)
-
         uRightFootLeft[0] = std::min(std::max(uRightFootLeft[0], stanceLimitX[0]), stanceLimitX[1]);
         uRightFootLeft[1] = std::min(std::max(uRightFootLeft[1], -stanceLimitY[1]), -limitY);
         uRightFootLeft[2] = std::min(std::max(uRightFootLeft[2], -stanceLimitAngle[1]), -stanceLimitAngle[0]);
+        rightFootTarget = localToWorld(uRightFootLeft, uLeftFoot);
+        // End foot collision detection/prevention
 
-        return localToWorld(uRightFootLeft, uLeftFoot);
+        return rightFootTarget;
     }
 
     /**
@@ -969,7 +967,7 @@ namespace motion {
         return {
             pose[0] + ca * poseRelative[0] - sa * poseRelative[1],
             pose[1] + sa * poseRelative[0] + ca * poseRelative[1],
-            modAngle(pose[2] + poseRelative[2])
+            pose[2] + poseRelative[2] // do not use modAngle here, causes bad things when turning!
         };
     }
 

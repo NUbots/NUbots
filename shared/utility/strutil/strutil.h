@@ -34,9 +34,6 @@ namespace utility {
      */
     namespace strutil {
 
-        // see: http://en.wikipedia.org/wiki/ANSI_escape_code#Colors
-        // see: http://stackoverflow.com/a/3219471/868679
-
         // http://stackoverflow.com/a/874160/1387006
         inline bool endsWith(const std::string& str, const std::string& ending) {
 

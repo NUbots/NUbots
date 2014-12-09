@@ -1,3 +1,4 @@
+# Ratio to normalize gyro gains into units of degree/second
 gyroFactor: 0.18 * 0.273 * pi / 180 * 300 / 1024 # dps to rad/s conversion
 ankleImuParamX: [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
 ankleImuParamY: [0.5, 1.2 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
@@ -19,10 +20,11 @@ velLimitA: [-0.4, 0.4]
 velDelta: [0.02, 0.02, 0.15]
 # Factor to slow down walk when turning
 vaFactor: 0.6
-# Ratio to normalize gyro gains into units of degree/second
+# This defines a 'fast' speed in the x direction
 velXHigh: 0.06
-# ??
+# When at 'velXHigh' or above, do not accelerate faster than this value
 velDeltaXHigh: 0.01
+# ??
 footSizeX: [-0.05, 0.05]
 # ??
 stanceLimitMarginY: 0.015
@@ -32,7 +34,7 @@ stanceLimitY2: 0.02
 bodyHeight: 0.285
 # The angle of the torso when walking
 bodyTilt: 0.4091
-#
+# The x offset of both feet from the torso in meters.
 footX: 0
 # The width of the robot's rest stance in meters.
 footY: 0.035
@@ -40,17 +42,21 @@ footY: 0.035
 supportX: 0.02
 # How far from the center of the foot the center of mass is placed during each step.
 supportY: 0.01
+# gains for the servos during the walk
 hardnessSupport: 0.3
 hardnessSwing: 0.3
 hardnessArm: 0.3
 # The tStep defines how long it will take for a robot to take its next step, in seconds.
 tStep: 0.25
+# ??
 tZmp: 0.165
 # The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
 stepHeight: 0.015
 # The ratio of double support time: single support time (standing on two feet vs. balancing on one foot).
 phaseSingle: [0.1, 0.9]
+# ??
 turnCompThreshold: 0
+# ??
 turnComp: 0
 
 # Support bias parameters to reduce backlash-based instability

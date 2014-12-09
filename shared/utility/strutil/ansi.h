@@ -27,7 +27,6 @@ namespace utility {
 
     namespace strutil {
 
-
         enum class ANSICode : int {
             RESET     = 0,
             BRIGHT    = 1,
@@ -57,6 +56,10 @@ namespace utility {
 
         /**
          * TODO document
+         *
+         * See: http://en.wikipedia.org/wiki/ANSI_escape_code#Colors
+         * See: http://stackoverflow.com/a/3219471/868679
+         *
          *
          * @author Trent Houliston
          * @author Brendan Annable
