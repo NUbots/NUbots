@@ -26,6 +26,7 @@ extern "C" {
 
 #include <sstream>
 #include <system_error>
+#include <stack>
 
 namespace utility {
 namespace file {
@@ -92,6 +93,40 @@ namespace file {
         }
 
         return result;
+    }
+
+    std::vector<std::string> listFiles(const std::string& directory, bool recursive) {
+        // create a vector to store the files
+        std::vector<std::string> files;
+        // create a vector to store the directories
+        std::stack<std::string> directories;
+        // adds the specified directory to the vector
+        directories.push(directory);
+        // loop through all the directories using a depth-first search
+        while (!directories.empty()) {
+            // retrieve the last directory in the vector, beginning with the initial directory
+            auto directory = directories.top();
+            // immediately remove the directory that was found
+            directories.pop();
+            // loop through every file within the directory
+            for (auto&& file : listDir(directory)) {
+                // specify the correct path within the directory
+                auto path = directory + "/" + file;
+                // check if the given path is a directory
+                if (isDir(path)) {
+                    // check if the function is recursive
+                    if (recursive) {
+                        // append the path to the directories vector
+                        directories.push(path);
+                    }
+                } else {
+                    // append the path to the paths vector
+                    files.push_back(path);
+                }
+            }
+        }
+        // return the list of files
+        return files;
     }
 }
 }

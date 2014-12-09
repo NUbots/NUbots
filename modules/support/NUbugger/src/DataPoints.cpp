@@ -33,22 +33,18 @@ namespace support {
     void NUbugger::provideDataPoints() {
 
         handles["data_points"].push_back(on<Trigger<DataPoint>>([this](const DataPoint& dataPoint) {
-            
-            try{
-                uint filterId = dataPointFilterIds.find(dataPoint.label()) == dataPointFilterIds.end()
-                    ? dataPointFilterIds.insert(std::make_pair(dataPoint.label(), dataPointFilterId++)).first->second
-                    : dataPointFilterIds[dataPoint.label()];
-                Message message;
-                message.set_type(Message::DATA_POINT);
-                message.set_filter_id(filterId);
-                message.set_utc_timestamp(getUtcTimestamp());
 
-                *(message.mutable_data_point()) = dataPoint;
+            uint filterId = dataPointFilterIds.find(dataPoint.label()) == dataPointFilterIds.end()
+                ? dataPointFilterIds.insert(std::make_pair(dataPoint.label(), dataPointFilterId++)).first->second
+                : dataPointFilterIds[dataPoint.label()];
+            Message message;
+            message.set_type(Message::DATA_POINT);
+            message.set_filter_id(filterId);
+            message.set_utc_timestamp(getUtcTimestamp());
 
-                send(message);
-            } catch (...) {
-                NUClear::log<NUClear::ERROR>("EXCEPTION: Occasional crash from", __FILE__, __LINE__, __func__," TODO: FIX THIS!!");
-            }
+            *(message.mutable_data_point()) = dataPoint;
+
+            send(message);
         }));
     }
 }

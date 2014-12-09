@@ -14,28 +14,35 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2014 NUbots <nubots@nubots.net>
  */
 
-#include "NUbugger.h"
+package messages.support.nubugger.proto;
 
-#include <yaml-cpp/yaml.h>
-#include "utility/file/fileutil.h"
+message ConfigurationState {
 
-namespace modules {
-namespace support {
-    using utility::file::listFiles;
-
-    void NUbugger::sendConfigurationState() {
-        std::vector<std::string> paths = listFiles("config", true);
-        for (auto&& path : paths) {
-            log(path);
-            YAML::Node node = YAML::LoadFile(path);
-            log(node);
-        }
-        // TICK: search through config directory -> config/*.yaml accounting for sub-directories
-        // parse yaml (load using yaml.cpp)
-        // make protocol buffer tree and send over network to nubugger
+    message KeyPair {
+        required string name = 1;
+        required Node value = 2;
     }
-}
+
+    message Node {
+        enum Type {
+            DIRECTORY = 1;
+            NULL_VALUE = 2;
+            STRING = 3;
+            SCALAR = 4;
+            SEQUENCE = 5;
+            MAP = 6;
+        }
+
+        required Type type = 1;
+        optional string tag = 2;
+        optional double scalar_value = 3;
+        optional string string_value = 4;
+        repeated Node sequence_value = 5;
+        repeated KeyPair map_value = 6;
+    }
+
+    required Node root = 1;
 }

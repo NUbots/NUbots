@@ -37,7 +37,7 @@ namespace support {
 
             Message message;
             message.set_type(Message::DRAW_OBJECTS);
-            message.set_filter_id(1); // TODO: potentially bad
+            message.set_filter_id( ); // TODO: potentially bad
             message.set_utc_timestamp(getUtcTimestamp());
 
             *(message.mutable_draw_objects()) = drawObjects;
