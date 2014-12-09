@@ -239,6 +239,8 @@ namespace support {
             api_lookup_table->set_table(lut->getData());
 
             send(message);
+        } else if (command == "get_configuration_state") {
+            sendConfigurationState();
         }
     }
 

@@ -74,6 +74,8 @@ namespace modules {
             messages::input::proto::GameState::Data::Mode getMode(const messages::input::gameevents::Mode& phase);
             messages::input::proto::GameState::Data::PenaltyReason getPenaltyReason(const messages::input::gameevents::PenaltyReason& penaltyReason);
 
+            void sendConfigurationState();
+
             void send(zmq::message_t& packet);
             void send(messages::support::nubugger::proto::Message message);
 
