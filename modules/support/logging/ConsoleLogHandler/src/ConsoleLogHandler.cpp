@@ -19,7 +19,7 @@
 
 #include "ConsoleLogHandler.h"
 
-#include "utility/strutil/strutil.h"
+#include "utility/strutil/ansi.h"
 
 namespace modules {
     namespace support {
@@ -54,19 +54,19 @@ namespace modules {
                             std::cout << "TRACE: ";
                             break;
                         case NUClear::DEBUG:
-                            std::cout << Colour::GREEN << "DEBUG: " << Colour::RESET;
+                            std::cout << Colour::green << "DEBUG: ";
                             break;
                         case NUClear::INFO:
-                            std::cout << Colour::BLUE << "INFO: " << Colour::RESET;
+                            std::cout << Colour::blue << "INFO: ";
                             break;
                         case NUClear::WARN:
-                            std::cout << Colour::YELLOW << "WARN: " << Colour::RESET;
+                            std::cout << Colour::yellow << "WARN: ";
                             break;
                         case NUClear::ERROR:
-                            std::cout << Colour::RED << "ERROR: " << Colour::RESET;
+                            std::cout << Colour::red << "ERROR: ";
                             break;
                         case NUClear::FATAL:
-                            std::cout << Colour::RED << "FATAL: " << Colour::RESET;
+                            std::cout << Colour::red << "FATAL: ";
                             break;
                     }
 
