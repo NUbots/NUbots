@@ -65,9 +65,7 @@ namespace motion {
         // Walk Parameters
 
         // These limit the distance a footstep will take
-        arma::vec2 stanceLimitX;
-        arma::vec2 stanceLimitY;
-        arma::vec2 stanceLimitAngle;
+        arma::mat::fixed<3,2> stanceLimits;
         float stanceLimitMarginY;
         float stanceLimitY2;
 

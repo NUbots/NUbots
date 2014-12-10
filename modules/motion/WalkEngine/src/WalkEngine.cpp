@@ -136,9 +136,8 @@ namespace motion {
     void WalkEngine::configureWalk(const YAML::Node& config){
         // g Walk Parameters
         // g Stance and velocity limit values
-        stanceLimitX = config["stanceLimitX"].as<arma::vec>();
-        stanceLimitY = config["stanceLimitY"].as<arma::vec>();
-        stanceLimitAngle = config["stanceLimitAngle"].as<arma::vec>();
+        stanceLimits = config["stanceLimits"].as<arma::mat::fixed<3,2>>();
+
         velLimitX = config["velLimitX"].as<arma::vec>();
         velLimitY = config["velLimitY"].as<arma::vec>();
         velLimitA = config["velLimitA"].as<arma::vec>();
@@ -191,7 +190,6 @@ namespace motion {
         turnCompThreshold = config["turnCompThreshold"].as<float>();
         turnComp = config["turnComp"].as<float>();
 
-        float gyroFactor = config["gyroFactor"].as<utility::support::Expression>();
         // gGyro stabilization parameters
         ankleImuParamX = config["ankleImuParamX"].as<arma::vec>();
         ankleImuParamY = config["ankleImuParamY"].as<arma::vec>();
@@ -891,10 +889,10 @@ namespace motion {
         // Check toe and heel overlap
         double toeOverlap = -footSizeX[0] * uLeftFootRight[2];
         double heelOverlap = -footSizeX[1] * uLeftFootRight[2];
-        double limitY = std::max(stanceLimitY[0], stanceLimitY2 + std::max(toeOverlap, heelOverlap));
-        uLeftFootRight[0] = std::min(std::max(uLeftFootRight[0], stanceLimitX[0]), stanceLimitX[1]);
-        uLeftFootRight[1] = std::min(std::max(uLeftFootRight[1], limitY), stanceLimitY[1]);
-        uLeftFootRight[2] = std::min(std::max(uLeftFootRight[2], stanceLimitAngle[0]), stanceLimitAngle[1]);
+        double limitY = std::max(stanceLimits(1,0), stanceLimitY2 + std::max(toeOverlap, heelOverlap));
+        uLeftFootRight[0] = std::min(std::max(uLeftFootRight[0], stanceLimits(0,0)), stanceLimits(0,1));
+        uLeftFootRight[1] = std::min(std::max(uLeftFootRight[1], limitY), stanceLimits(1,1));
+        uLeftFootRight[2] = std::min(std::max(uLeftFootRight[2], stanceLimits(2,0)), stanceLimits(2,1));
         leftFootTarget = localToWorld(uLeftFootRight, uRightFoot);
         // End foot collision detection/prevention
 
@@ -915,10 +913,10 @@ namespace motion {
         // Check toe and heel overlap
         double toeOverlap = footSizeX[0] * uRightFootLeft[2];
         double heelOverlap = footSizeX[1] * uRightFootLeft[2];
-        double limitY = std::max(stanceLimitY[0], stanceLimitY2 + std::max(toeOverlap, heelOverlap));
-        uRightFootLeft[0] = std::min(std::max(uRightFootLeft[0], stanceLimitX[0]), stanceLimitX[1]);
-        uRightFootLeft[1] = std::min(std::max(uRightFootLeft[1], -stanceLimitY[1]), -limitY);
-        uRightFootLeft[2] = std::min(std::max(uRightFootLeft[2], -stanceLimitAngle[1]), -stanceLimitAngle[0]);
+        double limitY = std::max(stanceLimits(1,0), stanceLimitY2 + std::max(toeOverlap, heelOverlap));
+        uRightFootLeft[0] = std::min(std::max(uRightFootLeft[0], stanceLimits(0,0)), stanceLimits(0,1));
+        uRightFootLeft[1] = std::min(std::max(uRightFootLeft[1], -stanceLimits(1,1)), -limitY);
+        uRightFootLeft[2] = std::min(std::max(uRightFootLeft[2], -stanceLimits(2,1)), -stanceLimits(2,0));
         rightFootTarget = localToWorld(uRightFootLeft, uLeftFoot);
         // End foot collision detection/prevention
 
@@ -963,7 +961,7 @@ namespace motion {
     arma::vec3 WalkEngine::localToWorld(arma::vec3 poseRelative, arma::vec3 pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!
         double ca = std::cos(pose[2]);
         double sa = std::sin(pose[2]);
-        // translates to pose + rot(pos.angle) * worldToLocal
+        // translates to pose + rotZ(pose.angle) * poseRelative
         return {
             pose[0] + ca * poseRelative[0] - sa * poseRelative[1],
             pose[1] + sa * poseRelative[0] + ca * poseRelative[1],
@@ -977,7 +975,7 @@ namespace motion {
         double px = poseGlobal[0] - pose[0];
         double py = poseGlobal[1] - pose[1];
         double pa = poseGlobal[2] - pose[2];
-        // translates to rot(pose.angle) * (localToWorld - pose)
+        // translates to rotZ(pose.angle) * (poseGlobal - pose)
         return {
             ca * px + sa * py,
             -sa * px + ca * py,

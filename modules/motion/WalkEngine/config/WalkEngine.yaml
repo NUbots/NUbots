@@ -8,9 +8,11 @@ armImuParamX: [0.5, 10.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]
 armImuParamY: [0.5, 0.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]
 
 # These limit the distance a footstep will take
-stanceLimitX: [-0.1, 0.1]
-stanceLimitY: [0.07, 0.2]
-stanceLimitAngle: [0, 0.5236]
+stanceLimits: [
+    [-0.1, 0.1], # [min_x, max_x]
+    [0.07, 0.2], # [min_y, max_y]
+    [0, 30 * pi / 180] # [min_angle, max_angle]
+]
 
 # Velocity limits for the walk
 velLimitX: [-0.03, 0.035]

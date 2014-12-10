@@ -33,7 +33,7 @@ namespace YAML {
         static Node encode(const arma::vec& rhs) {
             Node node;
 
-            for(const double& d : rhs) {
+            for (const double& d : rhs) {
                 node.push_back(d);
             }
 
@@ -63,10 +63,44 @@ namespace YAML {
         }
 
         static bool decode(const Node& node, arma::vec::fixed<size>& rhs) {
-            if(node.size() == size) {
+            if (node.size() == size) {
 
-                for(uint i = 0; i < size; ++i) {
+                for (uint i = 0; i < size; ++i) {
                     rhs[i] = node[i].as<utility::support::Expression>();
+                }
+
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    };
+
+    template<uint rows, uint cols>
+    struct convert<arma::mat::fixed<rows, cols>> {
+        // TODO: use arma::vec decoding for each row?
+        static Node encode(const arma::mat::fixed<rows, cols>& rhs) {
+            Node node;
+
+            for (uint i = 0; i < rows; ++i) {
+                Node row;
+                for (uint j = 0; j < cols; ++j) {
+                    row.push_back(rhs(i,j));
+                }
+                node.push_back(row);
+            }
+
+            return node;
+        }
+
+        static bool decode(const Node& node, arma::mat::fixed<rows, cols>& rhs) {
+            if (node.size() == rows) { // TODO: check cols
+
+                for (uint i = 0; i < rows; ++i) {
+                    for (uint j = 0; j < cols; ++j) {
+                        rhs(i,j) = node[i][j].as<utility::support::Expression>();
+                    }
                 }
 
                 return true;
