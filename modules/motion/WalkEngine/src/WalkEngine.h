@@ -261,7 +261,6 @@ namespace motion {
 
         double getTime(); // TODO: remove
         double procFunc(double a, double deadband, double maxvalue); //TODO: move documentation from .cpp to .h file
-        double modAngle(double value);
         /**
          * Local to world transform
          *

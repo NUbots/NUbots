@@ -25,7 +25,7 @@
 
 namespace modules {
 namespace behaviour {
-namespace planning {
+namespace strategy {
 
     using messages::motion::KickCommand;
     using messages::motion::WalkCommand;

@@ -24,21 +24,24 @@
 #include <chrono>
 #include <cmath>
 
+#include "OPKinematics.h"
+
 #include "messages/behaviour/Action.h"
 #include "messages/support/Configuration.h"
-#include "utility/motion/InverseKinematics.h"
-#include "utility/motion/ForwardKinematics.h"
-#include "utility/motion/RobotModels.h"
-#include "utility/math/matrix.h"
-#include "OPKinematics.h"
-#include "utility/nubugger/NUhelpers.h"
-#include "utility/support/YamlArmadillo.h"
-#include "utility/support/YamlExpression.h"
 #include "messages/motion/WalkCommand.h"
 #include "messages/motion/ServoTarget.h"
 #include "messages/behaviour/Action.h"
 #include "messages/motion/Script.h"
 #include "messages/behaviour/FixedWalkCommand.h"
+
+#include "utility/nubugger/NUhelpers.h"
+#include "utility/support/YamlArmadillo.h"
+#include "utility/support/YamlExpression.h"
+#include "utility/motion/InverseKinematics.h"
+#include "utility/motion/ForwardKinematics.h"
+#include "utility/motion/RobotModels.h"
+#include "utility/math/matrix.h"
+#include "utility/math/angle.h"
 
 namespace modules {
 namespace motion {
@@ -48,10 +51,6 @@ namespace motion {
     using messages::behaviour::WalkOptimiserCommand;
     using messages::behaviour::WalkConfigSaved;
     using messages::support::Configuration;
-    using utility::motion::kinematics::DarwinModel;
-    using utility::nubugger::graph;
-    using NUClear::log;
-    using NUClear::DEBUG;
     using messages::input::Sensors;
     using messages::motion::WalkCommand;
     using messages::motion::WalkStartCommand;
@@ -63,6 +62,9 @@ namespace motion {
     using messages::behaviour::LimbID;
     using messages::motion::Script;
     using messages::support::SaveConfiguration;
+    using utility::motion::kinematics::DarwinModel;
+    using utility::nubugger::graph;
+    using utility::math::angle::normalizeAngle;
 
 
     WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment)
@@ -317,8 +319,8 @@ namespace motion {
 
         // TODO: bodyHeightCurrent = vcm.get_camera_bodyHeight();
 
-//            log<DEBUG>("velocityCurrent: ", velocityCurrent);
-//            log<DEBUG>("velocityCommand: ", velocityCommand);
+//            log("velocityCurrent: ", velocityCurrent);
+//            log("velocityCommand: ", velocityCommand);
         if (!active) {
             return updateStill(sensors);
         }
@@ -343,7 +345,7 @@ namespace motion {
             stopRequest = StopRequest::NONE;
             active = false;
             emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 0, 0 }})); // TODO: config
-            std::cout << "Walk Engine:: stop request complete" << std::endl;
+            log<NUClear::TRACE>("Walk Engine:: Stop request complete");
             emit(std::make_unique<WalkStopped>());
 
             return std::make_unique<std::vector<ServoCommand>>(); // TODO: return "stop"
@@ -362,10 +364,9 @@ namespace motion {
             uTorsoSource = uTorsoDestination;
 
             supportMod = {0, 0}; // support point modulation for wallkick
-            shiftFactor = 0.5; // how much should we shift final torso pose?
 
             if (stopRequest == StopRequest::REQUESTED) {
-                log<DEBUG>("stop request 1");
+                log<NUClear::TRACE>("Walk Engine:: Stop requested");
                 stopRequest = StopRequest::LAST_STEP;
                 velocityCurrent = {0, 0, 0};
                 velocityCommand = {0, 0, 0};
@@ -406,7 +407,7 @@ namespace motion {
                 }
             }
 
-            uTorsoDestination = stepTorso(uLeftFootDestination, uRightFootDestination, shiftFactor);
+            uTorsoDestination = stepTorso(uLeftFootDestination, uRightFootDestination, 0.5);
 
             // adjustable initial step body swing
             if (initialStep > 0) {
@@ -589,8 +590,8 @@ namespace motion {
         qRArmActual.rows(0,1) += armShift;
 
         // Start arm/leg collision/prevention
-        double rotLeftA = modAngle(uLeftFoot[2] - uTorso[2]);
-        double rotRightA = modAngle(uTorso[2] - uRightFoot[2]);
+        double rotLeftA = normalizeAngle(uLeftFoot[2] - uTorso[2]);
+        double rotRightA = normalizeAngle(uTorso[2] - uRightFoot[2]);
         arma::vec3 leftLegTorso = worldToLocal(uLeftFoot, uTorso);
         arma::vec3 rightLegTorso = worldToLocal(uRightFoot, uTorso);
         double leftMinValue = 5 * M_PI / 180 + std::max(0.0, rotLeftA) / 2 + std::max(0.0, leftLegTorso[1] - 0.04) / 0.02 * (6 * M_PI / 180);
@@ -910,14 +911,6 @@ namespace motion {
         return std::abs(std::min(std::max(0.0, std::abs(value) - deadband), maxvalue));
     }
 
-    double WalkEngine::modAngle(double value) { // reduce an angle to [-pi, pi)
-        double angle = std::fmod(value, 2 * M_PI);
-        if (angle <= -M_PI) angle += 2 * M_PI;
-        else if (angle > M_PI) angle -= 2 * M_PI;
-
-        return angle;
-    }
-
     arma::vec3 WalkEngine::localToWorld(arma::vec3 poseRelative, arma::vec3 pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!
         double ca = std::cos(pose[2]);
         double sa = std::sin(pose[2]);
@@ -925,7 +918,7 @@ namespace motion {
         return {
             pose[0] + ca * poseRelative[0] - sa * poseRelative[1],
             pose[1] + sa * poseRelative[0] + ca * poseRelative[1],
-            pose[2] + poseRelative[2] // do not use modAngle here, causes bad things when turning!
+            pose[2] + poseRelative[2] // do not use normalizeAngle here, causes bad things when turning!
         };
     }
 
@@ -939,7 +932,7 @@ namespace motion {
         return {
             ca * px + sa * py,
             -sa * px + ca * py,
-            modAngle(pa)
+            normalizeAngle(pa)
         };
     }
 
@@ -948,7 +941,7 @@ namespace motion {
         return {
             u1[0] + t * (u2[0] - u1[0]),
             u1[1] + t * (u2[1] - u1[1]),
-            u1[2] + t * modAngle(u2[2] - u1[2])
+            u1[2] + t * normalizeAngle(u2[2] - u1[2])
         };
     }
 

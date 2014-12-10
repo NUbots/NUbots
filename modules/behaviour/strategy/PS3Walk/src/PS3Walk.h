@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_PLANNING_PS3WALK_H
-#define MODULES_BEHAVIOUR_PLANNING_PS3WALK_H
+#ifndef MODULES_BEHAVIOUR_STRATEGY_PS3WALK_H
+#define MODULES_BEHAVIOUR_STRATEGY_PS3WALK_H
 
 
 #include <nuclear>
@@ -27,7 +27,7 @@
 
 namespace modules {
 namespace behaviour {
-namespace planning {
+namespace strategy {
 
     class PS3Walk : public NUClear::Reactor {
     public:

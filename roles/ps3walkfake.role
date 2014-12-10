@@ -1,26 +1,18 @@
 ADD_ROLE(
-    NAME nucaplookatball
+    NAME fakeps3walk
     MODULES
+
         # Support and Configuration
-        #support::SignalCatcher
+        support::SignalCatcher
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
         support::configuration::GlobalConfig
-        support::configuration::NetworkingConfiguration
-        support::NUbugger
         support::configuration::SoccerConfig
+        support::NUbugger
 
         # Hardware Interface
-        platform::darwin::HardwareIO
-        #platform::fakedarwin::HardwareIO
+        platform::fakedarwin::HardwareIO
         platform::darwin::SensorFilter
-        input::LinuxCamera
-
-        # Vision
-        vision::LUTClassifier
-        vision::GoalDetector
-        vision::BallDetector
-        vision::ObstacleDetector
 
         # Motion
         motion::WalkEngine
@@ -34,12 +26,7 @@ ADD_ROLE(
         behaviour::skills::KickScript
         behaviour::strategy::PS3Walk
 
-        # Lookat ball
-        behaviour::skills::LookAt
-
         # Localisation
-        localisation::NUcapLocalisation
-
-        # Debug
-        debug::NUcap
+        localisation::MMKFRobotLocalisation
+        localisation::KFBallLocalisation
 )

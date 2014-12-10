@@ -1,10 +1,9 @@
 ADD_ROLE(
-    NAME fakeps3walk
+    NAME keyboardwalk
     MODULES
 
         # Support and Configuration
-        #support::SignalCatcher
-        support::logging::ConsoleLogHandler
+        support::SignalCatcher
         support::configuration::ConfigSystem
         support::configuration::GlobalConfig
         support::configuration::SoccerConfig
@@ -16,12 +15,10 @@ ADD_ROLE(
 
         # Motion
         motion::WalkEngine
+        motion::ScriptEngine
 
         # Behaviour
         behaviour::Controller
-        behaviour::planning::PS3Walk
-
-        #Localisation
-        localisation::MMKFRobotLocalisation
-        localisation::KFBallLocalisation
+        behaviour::skills::KickScript
+        behaviour::strategy::KeyboardWalk
 )

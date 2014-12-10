@@ -7,8 +7,8 @@ ADD_ROLE(
         support::logging::ConsoleLogHandler
         support::configuration::ConfigSystem
         support::configuration::GlobalConfig
-        support::NUbugger
         support::configuration::SoccerConfig
+        support::NUbugger
 
         # Hardware Interface
         platform::darwin::HardwareIO
@@ -20,11 +20,11 @@ ADD_ROLE(
 
         # Behaviour
         behaviour::Controller
-        behaviour::planning::PS3Walk
         behaviour::skills::Stand
         behaviour::skills::FallingRelax
         behaviour::skills::Getup
         behaviour::skills::KickScript
+        behaviour::strategy::PS3Walk
 
         # Lookat ball
         behaviour::skills::LookAt
