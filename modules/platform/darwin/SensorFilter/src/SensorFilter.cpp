@@ -103,7 +103,7 @@ namespace modules {
                     orientationFilter.model.processNoiseDiagonal = arma::ones(orientationFilter.model.size);
                     orientationFilter.model.processNoiseDiagonal.rows(orientationFilter.model.QW,orientationFilter.model.QZ) *= file["IMU_POSITION_PROCESS_NOISE"].as<double>();
                     orientationFilter.model.processNoiseDiagonal.rows(orientationFilter.model.VX,orientationFilter.model.VZ) *= file["IMU_VELOCITY_PROCESS_NOISE"].as<double>();
-                    NUClear::log("ProcessNoise Set: \n", orientationFilter.model.processNoiseDiagonal.t());
+                    // NUClear::log("ProcessNoise Set: \n", orientationFilter.model.processNoiseDiagonal.t());
 
                     MEASUREMENT_NOISE_ACCELEROMETER = arma::eye(3,3) * file["MEASUREMENT_NOISE_ACCELEROMETER"].as<double>();
                     MEASUREMENT_NOISE_GYROSCOPE = arma::eye(3,3) * file["MEASUREMENT_NOISE_GYROSCOPE"].as<double>();

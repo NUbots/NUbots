@@ -7,6 +7,11 @@ hipImuParamY: [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
 armImuParamX: [0.5, 10.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]
 armImuParamY: [0.5, 0.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]
 
+armPose: [
+    [90 * pi / 180, 45 * pi / 180, -140 * pi / 180], # [shoulder_roll_angle, shoulder_pitch_angle, elbow_angle]
+    [90 * pi / 180, -45 * pi / 180, -140 * pi / 180] # [shoulder_roll_angle, shoulder_pitch_angle, elbow_angle]
+]
+
 # These limit the distance a footstep will take
 stanceLimits: [
     [-0.1, 0.1], # [min_x, max_x]

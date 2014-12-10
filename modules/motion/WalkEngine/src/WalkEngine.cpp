@@ -160,8 +160,9 @@ namespace motion {
         footY = config["footY"].as<float>();
         supportX = config["supportX"].as<float>();
         supportY = config["supportY"].as<float>();
-        qLArm0 = M_PI / 180.0 * arma::vec3{90, 2, -20};
-        qRArm0 = M_PI / 180.0 * arma::vec3{90, -2, -20};
+
+        qLArm = config["armPose"][0].as<arma::vec>();
+        qRArm = config["armPose"][1].as<arma::vec>();
 
         // gHardness parameters
         hardnessSupport = config["hardnessSupport"].as<float>();
@@ -252,9 +253,9 @@ namespace motion {
             pRLeg = {0, -footY, 0, 0, 0, 0};
             pTorso = {supportX, 0, bodyHeight, 0, bodyTilt, 0};
 
-            velCurrent = {0, 0, 0};
+            velocityCurrent = {0, 0, 0};
             velocityCommand = {0, 0, 0};
-            velDiff = {0, 0, 0};
+            velocityDifference = {0, 0, 0};
 
             // gZMP exponential coefficients:
             zmpCoefficients = arma::zeros(4);
@@ -276,13 +277,6 @@ namespace motion {
             initialStep = 2;
 
             phaseSingle = 0;
-
-            // gCurrent arm pose
-            qLArm = M_PI / 180 * arma::vec3{90, 45, -140};
-            qRArm = M_PI / 180 * arma::vec3{90, -40, -140};
-
-            qLArm0 = qLArm;
-            qRArm0 = qRArm;
 
             // gStandard offset
             uLRFootOffset = {0, footY + supportY, 0};
@@ -323,7 +317,7 @@ namespace motion {
 
         // TODO: bodyHeightCurrent = vcm.get_camera_bodyHeight();
 
-//            log<DEBUG>("velCurrent: ", velCurrent);
+//            log<DEBUG>("velocityCurrent: ", velocityCurrent);
 //            log<DEBUG>("velocityCommand: ", velocityCommand);
         if (!active) {
             return updateStill(sensors);
@@ -373,7 +367,7 @@ namespace motion {
             if (stopRequest == StopRequest::REQUESTED) {
                 log<DEBUG>("stop request 1");
                 stopRequest = StopRequest::LAST_STEP;
-                velCurrent = {0, 0, 0};
+                velocityCurrent = {0, 0, 0};
                 velocityCommand = {0, 0, 0};
                 if (supportLeg == Leg::LEFT) {
                     uRightFootDestination = localToWorld(-2 * uLRFootOffset, uLeftFootSource);
@@ -384,28 +378,28 @@ namespace motion {
                 // normal walk, advance steps
                 tStep = tStep0;
                 if (supportLeg == Leg::LEFT) {
-                    uRightFootDestination = stepRightFootDestination(velCurrent, uLeftFootSource, uRightFootSource);
+                    uRightFootDestination = stepRightFootDestination(velocityCurrent, uLeftFootSource, uRightFootSource);
                 } else {
-                    uLeftFootDestination = stepLeftFootDestination(velCurrent, uLeftFootSource, uRightFootSource);
+                    uLeftFootDestination = stepLeftFootDestination(velocityCurrent, uLeftFootSource, uRightFootSource);
                 }
 
                 // velocity-based support point modulation
                 toeTipCompensation = 0;
-                if (velDiff[0] > 0) {
+                if (velocityDifference[0] > 0) {
                     // accelerating to front
                     supportMod[0] = supportFront2;
-                } else if (velCurrent[0] > velFastForward) {
+                } else if (velocityCurrent[0] > velFastForward) {
                     supportMod[0] = supportFront;
                     toeTipCompensation = ankleMod[0];
-                } else if (velCurrent[0] < 0) {
+                } else if (velocityCurrent[0] < 0) {
                     supportMod[0] = supportBack;
-                } else if (std::abs(velCurrent[2]) > velFastTurn) {
+                } else if (std::abs(velocityCurrent[2]) > velFastTurn) {
                     supportMod[0] = supportTurn;
                 } else {
-                    if (velCurrent[1] > 0.015) {
+                    if (velocityCurrent[1] > 0.015) {
                         supportMod[0] = supportSideX;
                         supportMod[1] = supportSideY;
-                    } else if (velCurrent[1] < -0.015) {
+                    } else if (velocityCurrent[1] < -0.015) {
                         supportMod[0] = supportSideX;
                         supportMod[1] = -supportSideY;
                     }
@@ -472,16 +466,16 @@ namespace motion {
 
         // turning
         float turnCompX = 0;
-        if (std::abs(velCurrent[2]) > turnCompThreshold && velCurrent[0] > -0.01) {
+        if (std::abs(velocityCurrent[2]) > turnCompThreshold && velocityCurrent[0] > -0.01) {
             turnCompX = turnComp;
         }
 
         // walking front
         float frontCompX = 0;
-        if (velCurrent[0] > 0.04) {
+        if (velocityCurrent[0] > 0.04) {
             frontCompX = frontComp;
         }
-        if (velDiff[0] > 0.02) {
+        if (velocityDifference[0] > 0.02) {
             frontCompX = frontCompX + accelComp;
         }
 
@@ -537,12 +531,8 @@ namespace motion {
         pTorso[4] = bodyTilt;
         pTorso[5] = 0;
 
-
-        // NUClear::log("uLeftFoot Still\n", uLeftFoot);
-        // NUClear::log("uRightFoot Still\n", uRightFoot);
-        // NUClear::log("uTorso Still\n", uTorso);
         uTorsoActual = localToWorld({-footX + armPosCompX, armPosCompY, 0}, uTorso);
-        // NUClear::log("uTorsoActual Still\n", uTorsoActual);
+
         pTorso[0] = uTorsoActual[0];
         pTorso[1] = uTorsoActual[1];
         pTorso[5] += uTorsoActual[2];
@@ -571,20 +561,6 @@ namespace motion {
 
         // balance(qLegs, sensors);
 
-        /*
-        0 = lefthipyaw // Hip pitch or yaw YAW
-        1 = lefthiproll
-        2 = lefthippitch // Hip pitch or yaw
-        3 = leftknee
-        4 = leftanklepitch
-        5 = leftankleroll
-        6 = righthipyaw
-        7 = rightHipRoll
-        8 = righthipitch
-        9 = rightKnee
-        10 = rightAnklePitch
-        11 = rightAnkleRoll*/
-
         time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
 
         waypoints->push_back({id, time, ServoID::L_HIP_YAW,     float(qLegs[0]),  float(leftLegHardness * 100)});
@@ -606,47 +582,34 @@ namespace motion {
 
     std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> WalkEngine::motionArms() {
 
-        arma::vec3 qLArmActual = qLArm0;
-        arma::vec3 qRArmActual = qRArm0;
+        arma::vec3 qLArmActual = qLArm;
+        arma::vec3 qRArmActual = qRArm;
 
         qLArmActual.rows(0,1) += armShift;
         qRArmActual.rows(0,1) += armShift;
 
-        // check leg hitting
-        float rotLeftA = modAngle(uLeftFoot[2] - uTorso[2]);
-        float rotRightA = modAngle(uTorso[2] - uRightFoot[2]);
-
+        // Start arm/leg collision/prevention
+        double rotLeftA = modAngle(uLeftFoot[2] - uTorso[2]);
+        double rotRightA = modAngle(uTorso[2] - uRightFoot[2]);
         arma::vec3 leftLegTorso = worldToLocal(uLeftFoot, uTorso);
         arma::vec3 rightLegTorso = worldToLocal(uRightFoot, uTorso);
-
-        qLArmActual[1] = std::max(
-                5 * M_PI / 180 + std::max(0.0f, rotLeftA) / 2
-                + std::max(0.0, leftLegTorso[1] - 0.04) / 0.02 * (6 * M_PI / 180)
-                , qLArmActual[1]);
-
-        qRArmActual[1] = std::min(
-                -5 * M_PI / 180 + std::max(0.0f, rotRightA) / 2
-                - std::max(0.0, -rightLegTorso[1] - 0.04) / 0.02 * (6 * M_PI / 180)
-                , qRArmActual[1]);
+        double leftMinValue = 5 * M_PI / 180 + std::max(0.0, rotLeftA) / 2 + std::max(0.0, leftLegTorso[1] - 0.04) / 0.02 * (6 * M_PI / 180);
+        double rightMinValue = -5 * M_PI / 180 - std::max(0.0, rotRightA) / 2 - std::max(0.0, -rightLegTorso[1] - 0.04) / 0.02 * (6 * M_PI / 180);
+        // update shoulder pitch to move arm away from body
+        qLArmActual[1] = std::max(leftMinValue, qLArmActual[1]);
+        qRArmActual[1] = std::min(rightMinValue, qRArmActual[1]);
+        // End arm/leg collision/prevention
 
         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
         waypoints->reserve(6);
+
         time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
-
-        waypoints->push_back({id, time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]),  float(hardnessArm * 100)});
-        waypoints->push_back({id, time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]),  float(hardnessArm * 100)});
-        waypoints->push_back({id, time, ServoID::R_ELBOW,          float(qRArmActual[2]),  float(hardnessArm * 100)});
-        waypoints->push_back({id, time, ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]),  float(hardnessArm * 100)});
-        waypoints->push_back({id, time, ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]),  float(hardnessArm * 100)});
-        waypoints->push_back({id, time, ServoID::L_ELBOW,          float(qLArmActual[2]),  float(hardnessArm * 100)});
-
-        /*emit(graph("L Shoulder Pitch", qLArmActual[0]));
-        emit(graph("L Shoulder Roll", qLArmActual[1]));
-        emit(graph("L Elbow", qLArmActual[2]));
-
-        emit(graph("R Shoulder Pitch", qRArmActual[0]));
-        emit(graph("R Shoulder Roll", qRArmActual[1]));
-        emit(graph("R Elbow", qRArmActual[2]));*/
+        waypoints->push_back({id, time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]), float(hardnessArm * 100)});
+        waypoints->push_back({id, time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]), float(hardnessArm * 100)});
+        waypoints->push_back({id, time, ServoID::R_ELBOW,          float(qRArmActual[2]), float(hardnessArm * 100)});
+        waypoints->push_back({id, time, ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]), float(hardnessArm * 100)});
+        waypoints->push_back({id, time, ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]), float(hardnessArm * 100)});
+        waypoints->push_back({id, time, ServoID::L_ELBOW,          float(qLArmActual[2]), float(hardnessArm * 100)});
 
         return std::move(waypoints);
     }
@@ -764,28 +727,28 @@ namespace motion {
     }
 
     void WalkEngine::updateVelocity() {
-        if (velCurrent[0] > velocityXHigh) {
+        if (velocityCurrent[0] > velocityXHigh) {
             // Slower acceleration at high speed
-            velDiff[0] = std::min(std::max(velocityCommand[0] - velCurrent[0], -velocityDelta[0]), velocityDeltaXHigh);
+            velocityDifference[0] = std::min(std::max(velocityCommand[0] - velocityCurrent[0], -velocityDelta[0]), velocityDeltaXHigh);
         } else {
-            velDiff[0] = std::min(std::max(velocityCommand[0] - velCurrent[0], -velocityDelta[0]), velocityDelta[0]);
+            velocityDifference[0] = std::min(std::max(velocityCommand[0] - velocityCurrent[0], -velocityDelta[0]), velocityDelta[0]);
         }
 
-        velDiff[1] = std::min(std::max(velocityCommand[1] - velCurrent[1], -velocityDelta[1]), velocityDelta[1]);
-        velDiff[2] = std::min(std::max(velocityCommand[2] - velCurrent[2], -velocityDelta[2]), velocityDelta[2]);
+        velocityDifference[1] = std::min(std::max(velocityCommand[1] - velocityCurrent[1], -velocityDelta[1]), velocityDelta[1]);
+        velocityDifference[2] = std::min(std::max(velocityCommand[2] - velocityCurrent[2], -velocityDelta[2]), velocityDelta[2]);
 
-        velCurrent[0] += velDiff[0];
-        velCurrent[1] += velDiff[1];
-        velCurrent[2] += velDiff[2];
+        velocityCurrent[0] += velocityDifference[0];
+        velocityCurrent[1] += velocityDifference[1];
+        velocityCurrent[2] += velocityDifference[2];
 
         if (initialStep > 0) {
-            velCurrent = arma::vec3{0, 0, 0};
+            velocityCurrent = arma::vec3{0, 0, 0};
             initialStep--;
         }
     }
 
     arma::vec3 WalkEngine::getVelocity() {
-        return velCurrent;
+        return velocityCurrent;
     }
 
     void WalkEngine::stanceReset() {

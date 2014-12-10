@@ -39,6 +39,9 @@ namespace motion {
      */
     class WalkEngine : public NUClear::Reactor {
     public:
+        /**
+         * The number of servo updates performnced per second
+         */
         static constexpr size_t UPDATE_FREQUENCY = 60;
 
         static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
@@ -51,9 +54,9 @@ namespace motion {
         };
 
         enum class StopRequest {
-            NONE,
-            REQUESTED,
-            LAST_STEP
+            NONE, // no stop requested, either robot is walking or already still
+            REQUESTED, // the robot has been requested to stop
+            LAST_STEP // the robot is taking its last step so it can stop with its feet together
         };
 
         ReactionHandle updateHandle;
@@ -98,10 +101,6 @@ namespace motion {
         float supportX;
         // How far from the center of the foot the center of mass is placed during each step.
         float supportY;
-
-        // Current arm pose
-        arma::vec3 qLArm0;
-        arma::vec3 qRArm0;
 
         // Servo gains used for the legs during walk
         float hardnessSupport;
@@ -174,11 +173,11 @@ namespace motion {
         arma::vec6 pTorso;
 
         // Current robot velocity
-        arma::vec3 velCurrent;
+        arma::vec3 velocityCurrent;
         // Current velocity command
         arma::vec3 velocityCommand;
         // Difference between current velocity and commanded velocity
-        arma::vec3 velDiff;
+        arma::vec3 velocityDifference;
 
         // zmp expoential coefficients aXP aXN aYP aYN
         arma::vec4 zmpCoefficients = arma::zeros(4);
