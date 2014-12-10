@@ -101,9 +101,9 @@ namespace motion {
         //updateHandle.disable();
 
         on<Trigger<WalkCommand>>([this](const WalkCommand& walkCommand) {
-            setVelocity(walkCommand.velocity[0] * (walkCommand.velocity[0] > 0 ? velLimitX[1] : -velLimitX[0]),
-                        walkCommand.velocity[1] * (walkCommand.velocity[1] > 0 ? velLimitY[1] : -velLimitY[0]),
-                        walkCommand.rotationalSpeed * (walkCommand.rotationalSpeed > 0 ? velLimitA[1] : -velLimitA[0]));
+            setVelocity(walkCommand.velocity[0] * (walkCommand.velocity[0] > 0 ? velocityLimits(0,1) : -velocityLimits(0,0)),
+                        walkCommand.velocity[1] * (walkCommand.velocity[1] > 0 ? velocityLimits(1,1) : -velocityLimits(1,0)),
+                        walkCommand.rotationalSpeed * (walkCommand.rotationalSpeed > 0 ? velocityLimits(2,1) : -velocityLimits(2,0)));
         });
 
         on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
@@ -137,15 +137,12 @@ namespace motion {
         // g Walk Parameters
         // g Stance and velocity limit values
         stanceLimits = config["stanceLimits"].as<arma::mat::fixed<3,2>>();
+        velocityLimits = config["velocityLimits"].as<arma::mat::fixed<3,2>>();
+        velocityDelta = config["velocityDelta"].as<arma::vec>();
+        velocityAngleFactor = config["velocityAngleFactor"].as<float>();
 
-        velLimitX = config["velLimitX"].as<arma::vec>();
-        velLimitY = config["velLimitY"].as<arma::vec>();
-        velLimitA = config["velLimitA"].as<arma::vec>();
-        velDelta = config["velDelta"].as<arma::vec>();
-        vaFactor = config["vaFactor"].as<float>();
-
-        velXHigh = config["velXHigh"].as<double>();
-        velDeltaXHigh = config["velDeltaXHigh"].as<double>();
+        velocityXHigh = config["velocityXHigh"].as<double>();
+        velocityDeltaXHigh = config["velocityDeltaXHigh"].as<double>();
 
         // gToe/heel overlap checking values
         footSizeX = config["footSizeX"].as<arma::vec>();
@@ -256,7 +253,7 @@ namespace motion {
             pTorso = {supportX, 0, bodyHeight, 0, bodyTilt, 0};
 
             velCurrent = {0, 0, 0};
-            velCommand = {0, 0, 0};
+            velocityCommand = {0, 0, 0};
             velDiff = {0, 0, 0};
 
             // gZMP exponential coefficients:
@@ -327,7 +324,7 @@ namespace motion {
         // TODO: bodyHeightCurrent = vcm.get_camera_bodyHeight();
 
 //            log<DEBUG>("velCurrent: ", velCurrent);
-//            log<DEBUG>("velCommand: ", velCommand);
+//            log<DEBUG>("velocityCommand: ", velocityCommand);
         if (!active) {
             return updateStill(sensors);
         }
@@ -377,7 +374,7 @@ namespace motion {
                 log<DEBUG>("stop request 1");
                 stopRequest = StopRequest::LAST_STEP;
                 velCurrent = {0, 0, 0};
-                velCommand = {0, 0, 0};
+                velocityCommand = {0, 0, 0};
                 if (supportLeg == Leg::LEFT) {
                     uRightFootDestination = localToWorld(-2 * uLRFootOffset, uLeftFootSource);
                 } else {
@@ -747,35 +744,35 @@ namespace motion {
 
     void WalkEngine::setVelocity(double vx, double vy, double va) {
         // filter the commanded speed
-        vx = std::min(std::max(vx, velLimitX[0]), velLimitX[1]);
-        vy = std::min(std::max(vy, velLimitY[0]), velLimitY[1]);
-        va = std::min(std::max(va, velLimitA[0]), velLimitA[1]);
+        vx = std::min(std::max(vx, velocityLimits(0,0)), velocityLimits(0,1));
+        vy = std::min(std::max(vy, velocityLimits(1,0)), velocityLimits(1,1));
+        va = std::min(std::max(va, velocityLimits(2,0)), velocityLimits(2,1));
 
         // slow down when turning
-        double vFactor = 1 - std::abs(va) / vaFactor;
+        double vFactor = 1 - std::abs(va) / velocityAngleFactor;
 
         double stepMag = std::sqrt(vx * vx + vy * vy);
-        double magFactor = std::min(velLimitX[1] * vFactor, stepMag) / (stepMag + 0.000001);
+        double magFactor = std::min(velocityLimits(0,1) * vFactor, stepMag) / (stepMag + 0.000001);
 
-        velCommand[0] = vx * magFactor;
-        velCommand[1] = vy * magFactor;
-        velCommand[2] = va;
+        velocityCommand[0] = vx * magFactor;
+        velocityCommand[1] = vy * magFactor;
+        velocityCommand[2] = va;
 
-        velCommand[0] = std::min(std::max(velCommand[0], velLimitX[0]), velLimitX[1]);
-        velCommand[1] = std::min(std::max(velCommand[1], velLimitY[0]), velLimitY[1]);
-        velCommand[2] = std::min(std::max(velCommand[2], velLimitA[0]), velLimitA[1]);
+        velocityCommand[0] = std::min(std::max(velocityCommand[0], velocityLimits(0,0)), velocityLimits(0,1));
+        velocityCommand[1] = std::min(std::max(velocityCommand[1], velocityLimits(1,0)), velocityLimits(1,1));
+        velocityCommand[2] = std::min(std::max(velocityCommand[2], velocityLimits(2,0)), velocityLimits(2,1));
     }
 
     void WalkEngine::updateVelocity() {
-        if (velCurrent[0] > velXHigh) {
+        if (velCurrent[0] > velocityXHigh) {
             // Slower acceleration at high speed
-            velDiff[0] = std::min(std::max(velCommand[0] - velCurrent[0], -velDelta[0]), velDeltaXHigh);
+            velDiff[0] = std::min(std::max(velocityCommand[0] - velCurrent[0], -velocityDelta[0]), velocityDeltaXHigh);
         } else {
-            velDiff[0] = std::min(std::max(velCommand[0] - velCurrent[0], -velDelta[0]), velDelta[0]);
+            velDiff[0] = std::min(std::max(velocityCommand[0] - velCurrent[0], -velocityDelta[0]), velocityDelta[0]);
         }
 
-        velDiff[1] = std::min(std::max(velCommand[1] - velCurrent[1], -velDelta[1]), velDelta[1]);
-        velDiff[2] = std::min(std::max(velCommand[2] - velCurrent[2], -velDelta[2]), velDelta[2]);
+        velDiff[1] = std::min(std::max(velocityCommand[1] - velCurrent[1], -velocityDelta[1]), velocityDelta[1]);
+        velDiff[2] = std::min(std::max(velocityCommand[2] - velCurrent[2], -velocityDelta[2]), velocityDelta[2]);
 
         velCurrent[0] += velDiff[0];
         velCurrent[1] += velDiff[1];

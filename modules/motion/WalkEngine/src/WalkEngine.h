@@ -70,14 +70,12 @@ namespace motion {
         float stanceLimitY2;
 
         // Velocity limits for the walk
-        arma::vec2 velLimitX;
-        arma::vec2 velLimitY;
-        arma::vec2 velLimitA;
-        arma::vec3 velDelta;
-        double velXHigh;
-        double velDeltaXHigh;
+        arma::mat::fixed<3,2> velocityLimits;
+        arma::vec3 velocityDelta;
+        double velocityXHigh;
+        double velocityDeltaXHigh;
         // Factor to slow down walk when turning
-        float vaFactor;
+        float velocityAngleFactor;
 
         // Toe/heel overlap checking values
         arma::vec2 footSizeX;
@@ -178,7 +176,7 @@ namespace motion {
         // Current robot velocity
         arma::vec3 velCurrent;
         // Current velocity command
-        arma::vec3 velCommand;
+        arma::vec3 velocityCommand;
         // Difference between current velocity and commanded velocity
         arma::vec3 velDiff;
 

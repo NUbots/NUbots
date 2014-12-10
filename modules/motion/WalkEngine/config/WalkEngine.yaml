@@ -15,17 +15,20 @@ stanceLimits: [
 ]
 
 # Velocity limits for the walk
-velLimitX: [-0.03, 0.035]
-velLimitY: [-0.03, 0.03]
-velLimitA: [-0.4, 0.4]
+velocityLimits: [
+    [-0.03, 0.035], # [min_x, max_x]
+    [-0.03, 0.03], # [min_y, max_y]
+    [-0.4, 0.4], # [min_angle, max_angle]
+]
+
 # ??
-velDelta: [0.02, 0.02, 0.15]
+velocityDelta: [0.02, 0.02, 0.15]
 # Factor to slow down walk when turning
-vaFactor: 0.6
+velocityAngleFactor: 0.6
 # This defines a 'fast' speed in the x direction
-velXHigh: 0.06
-# When at 'velXHigh' or above, do not accelerate faster than this value
-velDeltaXHigh: 0.01
+velocityXHigh: 0.06
+# When at 'velocityXHigh' or above, do not accelerate faster than this value
+velocityDeltaXHigh: 0.01
 # ??
 footSizeX: [-0.05, 0.05]
 # ??
@@ -76,8 +79,8 @@ accelComp: 0.1
 supportModYInitial: 0
 hipRollCompensation: 4 * pi / 180
 toeTipCompensation: 0 * pi / 180
-velCommandX: 0.035
-velCommandY: 0
-velCommandAngular: 0
+velocityCommandX: 0.035
+velocityCommandY: 0
+velocityCommandAngular: 0
 balanceWeight: 0.7
 STAND_SCRIPT_DURATION_MILLISECONDS: 1000
