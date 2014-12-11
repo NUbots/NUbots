@@ -60,7 +60,8 @@ namespace support {
         if (YAML::convert<bool>::decode(yaml, bValue)) {
             // set the type of the protocol node to the BOOLEAN Node Type and escape the case
             proto.set_type(ConfigurationState::Node::BOOLEAN);
-            // TODO set value!!!!!!
+            // set the value of the protocol node to the boolean
+            proto.set_boolean_value(bValue);
             return;
         }
         long lValue;
@@ -68,6 +69,8 @@ namespace support {
         if (YAML::convert<long>::decode(yaml, lValue)) {
             // set the type of the protocol node to the LONG Node Type and escape the case
             proto.set_type(ConfigurationState::Node::LONG);
+            // set the value of the protocol node to the long
+            proto.set_long_value(lValue);
             return;
         }
         double dValue;
@@ -75,10 +78,17 @@ namespace support {
         if (YAML::convert<double>::decode(yaml, dValue)) {
             // set the type of the protocol node to the DOUBLE Node Type and escape the case
             proto.set_type(ConfigurationState::Node::DOUBLE);
+            // set the value of the protocol node to the double
+            proto.set_double_value(dValue);
             return;
         }
+        // declare a string and then decode it
+        std::string sValue;
+        YAML::convert<std::string>::decode(yaml, sValue);
         // set the type of the protocol node to the STRING Node Type and escape the case
         proto.set_type(ConfigurationState::Node::STRING);
+        // set the value of the protocol node to the string
+        proto.set_string_value(sValue);
     }
 
     /**
@@ -175,10 +185,6 @@ namespace support {
         }
 
         send(message);
-
-        // TICK: search through config directory -> config/*.yaml accounting for sub-directories
-        // parse yaml (load using yaml.cpp)
-        // make protocol buffer tree and send over network to nubugger
     }
 }
 }
