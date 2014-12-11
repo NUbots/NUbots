@@ -31,17 +31,21 @@ message ConfigurationState {
             DIRECTORY = 1;
             NULL_VALUE = 2;
             STRING = 3;
-            SCALAR = 4;
-            SEQUENCE = 5;
-            MAP = 6;
+            BOOLEAN = 4;
+            LONG = 5;
+            DOUBLE = 6;
+            SEQUENCE = 7;
+            MAP = 8;
         }
 
         required Type type = 1;
         optional string tag = 2;
-        optional double scalar_value = 3;
-        optional string string_value = 4;
-        repeated Node sequence_value = 5;
-        repeated KeyPair map_value = 6;
+        optional string string_value = 3;
+        optional double boolean_value = 4;
+        optional double long_value = 5;
+        optional double double_value = 6;
+        repeated Node sequence_value = 7;
+        repeated KeyPair map_value = 8;
     }
 
     required Node root = 1;
