@@ -166,11 +166,6 @@ namespace motion {
         arma::vec3 uRightFootSource = arma::zeros(3);
         arma::vec3 uRightFootDestination = arma::zeros(3);
 
-        // these vec6's contain x,y,z translation and x,y,z rotation
-        arma::vec6 pLLeg;
-        arma::vec6 pRLeg;
-        arma::vec6 pTorso;
-
         // Current robot velocity
         arma::vec3 velocityCurrent;
         // Current velocity command
@@ -216,7 +211,6 @@ namespace motion {
 
         Leg swingLegInitial = Leg::LEFT;
         Leg swingLeg = swingLegInitial;
-        arma::vec2 supportMod;
         double shiftFactor;
 
         // TODO: link to actuator

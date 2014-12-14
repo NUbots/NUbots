@@ -250,10 +250,6 @@ namespace motion {
             uLeftFoot = {0, footY, 0};
             uRightFoot = {0, -footY, 0};
 
-            pLLeg = {0, footY, 0, 0, 0, 0};
-            pRLeg = {0, -footY, 0, 0, 0, 0};
-            pTorso = {supportX, 0, bodyHeight, 0, bodyTilt, 0};
-
             velocityCurrent = {0, 0, 0};
             velocityCommand = {0, 0, 0};
             velocityDifference = {0, 0, 0};
@@ -317,13 +313,8 @@ namespace motion {
     }
 
     std::unique_ptr<std::vector<ServoCommand>> WalkEngine::update(const Sensors& sensors) {
-        //advanceMotion();
         double time = getTime();
 
-        // TODO: bodyHeightCurrent = vcm.get_camera_bodyHeight();
-
-//            log("velocityCurrent: ", velocityCurrent);
-//            log("velocityCommand: ", velocityCommand);
         if (!active) {
             return updateStill(sensors);
         }
@@ -348,7 +339,6 @@ namespace motion {
             return stop();
         }
 
-        // new step
         if (newStep) {
             calculateNewStep();
         }
@@ -361,17 +351,11 @@ namespace motion {
         if (initialStep > 0) {
             foot[2] = 0; // don't lift foot at initial step
         }
-        pLLeg[2] = 0;
-        pRLeg[2] = 0;
         if (swingLeg == Leg::RIGHT) {
             uRightFoot = se2Interpolate(foot[0], uRightFootSource, uRightFootDestination);
-            pRLeg[2] = stepHeight * foot[2];
         } else {
             uLeftFoot = se2Interpolate(foot[0], uLeftFootSource, uLeftFootDestination);
-            pLLeg[2] = stepHeight * foot[2];
         }
-
-        // unused: uTorsoOld = uTorso;
 
         uTorso = zmpCom(phase, zmpCoefficients, zmpParams, tStep, tZmp, phase1Zmp, phase2Zmp);
 
@@ -390,34 +374,21 @@ namespace motion {
             frontCompX = frontCompX + accelComp;
         }
 
-        double armPosCompX, armPosCompY;
+        arma::vec3 uTorsoActual = localToWorld({-footX + frontCompX + turnCompX, 0, 0}, uTorso);
+        arma::vec6 pTorso = {uTorsoActual[0], uTorsoActual[1], bodyHeight, 0, bodyTilt, uTorsoActual[2]};
+        arma::vec6 pLeftFoot = {uLeftFoot[0], uLeftFoot[1], 0, 0, 0, uLeftFoot[2]};
+        arma::vec6 pRightFoot = {uRightFoot[0], uRightFoot[1], 0, 0, 0, uRightFoot[2]};
 
-        // arm movement compensation
-
-        armPosCompX = 0;
-        armPosCompY = 0;
-
-        pTorso[3] = 0;
-        pTorso[4] = bodyTilt;
-        pTorso[5] = 0;
-
-        arma::vec3 uTorsoActual = localToWorld({-footX + frontCompX + turnCompX + armPosCompX, armPosCompY, 0}, uTorso);
-        pTorso[0] = uTorsoActual[0];
-        pTorso[1] = uTorsoActual[1];
-        pTorso[5] += uTorsoActual[2];
-
-        pLLeg[0] = uLeftFoot[0];
-        pLLeg[1] = uLeftFoot[1];
-        pLLeg[5] = uLeftFoot[2];
-
-        pRLeg[0] = uRightFoot[0];
-        pRLeg[1] = uRightFoot[1];
-        pRLeg[5] = uRightFoot[2];
+        if (swingLeg == Leg::RIGHT) {
+            pRightFoot[2] = stepHeight * foot[2];
+        } else {
+            pLeftFoot[2] = stepHeight * foot[2];
+        }
 
         arma::mat44 torso = vec6ToMatrix(pTorso);
         arma::mat44 torsoInv = orthonormal44Inverse(torso);
-        arma::mat44 leftFoot = torsoInv * vec6ToMatrix(pLLeg);
-        arma::mat44 rightFoot = torsoInv * vec6ToMatrix(pRLeg);
+        arma::mat44 leftFoot = torsoInv * vec6ToMatrix(pLeftFoot);
+        arma::mat44 rightFoot = torsoInv * vec6ToMatrix(pRightFoot);
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFoot, rightFoot);
         auto waypoints = motionLegs(joints, sensors);
@@ -434,34 +405,15 @@ namespace motion {
         rightLegHardness = hardnessSupport;
 
         uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
-
-        double armPosCompX, armPosCompY;
-
-        armPosCompX = 0;
-        armPosCompY = 0;
-
-        pTorso[3] = 0;
-        pTorso[4] = bodyTilt;
-        pTorso[5] = 0;
-
-        uTorsoActual = localToWorld({-footX + armPosCompX, armPosCompY, 0}, uTorso);
-
-        pTorso[0] = uTorsoActual[0];
-        pTorso[1] = uTorsoActual[1];
-        pTorso[5] += uTorsoActual[2];
-
-        pLLeg[0] = uLeftFoot[0];
-        pLLeg[1] = uLeftFoot[1];
-        pLLeg[5] = uLeftFoot[2];
-
-        pRLeg[0] = uRightFoot[0];
-        pRLeg[1] = uRightFoot[1];
-        pRLeg[5] = uRightFoot[2];
+        uTorsoActual = localToWorld({-footX, 0, 0}, uTorso);
+        arma::vec6 pTorso = {uTorsoActual[0], uTorsoActual[1], bodyHeight, 0, bodyTilt, uTorsoActual[2]};
+        arma::vec6 pLeftFoot = {uLeftFoot[0], uLeftFoot[1], 0, 0, 0, uLeftFoot[2]};
+        arma::vec6 pRightFoot = {uRightFoot[0], uRightFoot[1], 0, 0, 0, uRightFoot[2]};
 
         arma::mat44 torso = vec6ToMatrix(pTorso);
         arma::mat44 torsoInv = orthonormal44Inverse(torso);
-        arma::mat44 leftFoot = torsoInv * vec6ToMatrix(pLLeg);
-        arma::mat44 rightFoot = torsoInv * vec6ToMatrix(pRLeg);
+        arma::mat44 leftFoot = torsoInv * vec6ToMatrix(pLeftFoot);
+        arma::mat44 rightFoot = torsoInv * vec6ToMatrix(pRightFoot);
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFoot, rightFoot);
         auto waypoints = motionLegs(joints, sensors);
@@ -482,7 +434,7 @@ namespace motion {
         uRightFootSource = uRightFootDestination;
         uTorsoSource = uTorsoDestination;
 
-        supportMod = {0, 0}; // support point modulation for wallkick
+        arma::vec2 supportMod = {0, 0}; // support point modulation for wallkick
 
         if (stopRequest == StopRequest::REQUESTED) {
             log<NUClear::TRACE>("Walk Engine:: Stop requested");
@@ -573,7 +525,7 @@ namespace motion {
         time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
 
         for (auto& joint : joints) {
-            waypoints->push_back({id, time, joint.first, joint.second, float(leftLegHardness * 100)});
+            waypoints->push_back({id, time, joint.first, joint.second, float(leftLegHardness * 100)}); // TODO: support separate gains for each legs
         }
 
         return std::move(waypoints);
