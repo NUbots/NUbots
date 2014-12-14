@@ -1,5 +1,5 @@
 ADD_ROLE(
-    NAME keyboardwalk
+    NAME keyboardwalkfake
     MODULES
 
         # Support and Configuration
@@ -10,7 +10,7 @@ ADD_ROLE(
         support::NUbugger
 
         # Hardware Interface
-        platform::darwin::HardwareIO
+        platform::fakedarwin::HardwareIO
         platform::darwin::SensorFilter
 
         # Motion
