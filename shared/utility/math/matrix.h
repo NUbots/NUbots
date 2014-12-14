@@ -194,9 +194,9 @@ namespace utility {
             inline arma::mat44 vec6ToMatrix(const arma::vec6& in) {
                 arma::mat44 out = arma::eye(4,4);
                 out *= translationMatrix({in[0], in[1], in[2]});
-                out *= xRotationMatrix(in[3], 4);
-                out *= yRotationMatrix(in[4], 4);
                 out *= zRotationMatrix(in[5], 4);
+                out *= yRotationMatrix(in[4], 4);
+                out *= xRotationMatrix(in[3], 4);
                 return out;
             }
 

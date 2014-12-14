@@ -525,7 +525,7 @@ namespace motion {
         time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
 
         for (auto& joint : joints) {
-            waypoints->push_back({id, time, joint.first, joint.second, float(leftLegHardness * 100)}); // TODO: support separate gains for each legs
+            waypoints->push_back({id, time, joint.first, joint.second, float(leftLegHardness * 100)}); // TODO: support separate gains for each leg
         }
 
         return std::move(waypoints);
