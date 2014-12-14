@@ -51,7 +51,7 @@ namespace kinematics {
         @param RobotKinematicModel The class containing the leg model of the robot.
     */
     template <typename RobotKinematicModel>
-    std::vector< std::pair<messages::input::ServoID, float> > calculateLegJoints(arma::mat44 target, Side isLeft) {
+    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints(arma::mat44 target, Side isLeft) {
         const float LENGTH_BETWEEN_LEGS = RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS;
         const float DISTANCE_FROM_BODY_TO_HIP_JOINT = RobotKinematicModel::Leg::HIP_OFFSET_Z;
         const float HIP_OFFSET_X = RobotKinematicModel::Leg::HIP_OFFSET_X;
@@ -188,21 +188,17 @@ namespace kinematics {
     }
 
     template <typename RobotKinematicModel>
-    std::vector<double> calculateLegJointsTeamDarwin(arma::mat44 target, bool isLeft) {
-        std::vector<double> joints(6);
-        //NUClear::log<NUClear::DEBUG>(isLeft ? "Left Leg" : "Right Leg");
-        //NUClear::log<NUClear::DEBUG>("calculateLegJointsTeamDarwin\n", target);
+    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJointsTeamDarwin(arma::mat44 target, bool isLeft) {
         target(2,3) += RobotKinematicModel::TEAMDARWINCHEST_TO_ORIGIN;
         target *= utility::math::matrix::translationMatrix(arma::vec3({0,0,RobotKinematicModel::Leg::FOOT_HEIGHT}));
-        auto legJoints = calculateLegJoints<RobotKinematicModel>(target, Side(isLeft));
+        return calculateLegJoints<RobotKinematicModel>(target, Side(isLeft));
+    }
 
-        joints[0] = legJoints[0].second;
-        joints[1] = legJoints[1].second;
-        joints[2] = legJoints[2].second;
-        joints[3] = legJoints[3].second;
-        joints[4] = legJoints[4].second;
-        joints[5] = legJoints[5].second;
-
+    template <typename RobotKinematicModel>
+    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJointsTeamDarwin(arma::mat44 leftTarget, arma::mat44 rightTarget) {
+        auto joints = calculateLegJointsTeamDarwin<RobotKinematicModel>(leftTarget, true);
+        auto joints2 = calculateLegJointsTeamDarwin<RobotKinematicModel>(rightTarget, false);
+        joints.insert(joints.end(), joints2.begin(), joints2.end());
         return joints;
     }
 

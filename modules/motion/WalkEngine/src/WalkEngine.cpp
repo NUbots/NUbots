@@ -24,8 +24,6 @@
 #include <chrono>
 #include <cmath>
 
-#include "OPKinematics.h"
-
 #include "messages/behaviour/Action.h"
 #include "messages/support/Configuration.h"
 #include "messages/motion/WalkCommand.h"
@@ -62,10 +60,12 @@ namespace motion {
     using messages::behaviour::LimbID;
     using messages::motion::Script;
     using messages::support::SaveConfiguration;
-    using utility::motion::kinematics::DarwinModel;
     using utility::nubugger::graph;
+    using utility::motion::kinematics::calculateLegJointsTeamDarwin;
+    using utility::motion::kinematics::DarwinModel;
     using utility::math::angle::normalizeAngle;
-
+    using utility::math::matrix::vec6ToMatrix;
+    using utility::math::matrix::orthonormal44Inverse;
 
     WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -313,7 +313,7 @@ namespace motion {
         }
     }
 
-    std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> WalkEngine::update(const Sensors& sensors) {
+    std::unique_ptr<std::vector<ServoCommand>> WalkEngine::update(const Sensors& sensors) {
         //advanceMotion();
         double time = getTime();
 
@@ -508,8 +508,14 @@ namespace motion {
         pRLeg[1] = uRightFoot[1];
         pRLeg[5] = uRightFoot[2];
 
-        std::vector<double> qLegs = darwinop_kinematics_inverse_legs_nubots(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr());
-        auto waypoints = motionLegs(qLegs, sensors);
+        arma::mat44 torso = vec6ToMatrix(pTorso);
+        arma::mat44 torsoInv = orthonormal44Inverse(torso);
+        arma::mat44 leftFoot = torsoInv * vec6ToMatrix(pLLeg);
+        arma::mat44 rightFoot = torsoInv * vec6ToMatrix(pRLeg);
+
+        auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFoot, rightFoot);
+        auto waypoints = motionLegs(joints, sensors);
+        //std::vector<std::pair<messages::input::ServoID, float>>
 
         auto arms = motionArms();
         waypoints->insert(waypoints->end(), arms->begin(), arms->end());
@@ -517,7 +523,7 @@ namespace motion {
         return waypoints;
     }
 
-    std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> WalkEngine::updateStill(const Sensors& sensors) {
+    std::unique_ptr<std::vector<ServoCommand>> WalkEngine::updateStill(const Sensors& sensors) {
         leftLegHardness = hardnessSupport;
         rightLegHardness = hardnessSupport;
 
@@ -546,9 +552,13 @@ namespace motion {
         pRLeg[1] = uRightFoot[1];
         pRLeg[5] = uRightFoot[2];
 
-        std::vector<double> qLegs = darwinop_kinematics_inverse_legs_nubots(pLLeg.memptr(), pRLeg.memptr(), pTorso.memptr());
+        arma::mat44 torso = vec6ToMatrix(pTorso);
+        arma::mat44 torsoInv = orthonormal44Inverse(torso);
+        arma::mat44 leftFoot = torsoInv * vec6ToMatrix(pLLeg);
+        arma::mat44 rightFoot = torsoInv * vec6ToMatrix(pRLeg);
 
-        auto waypoints = motionLegs(qLegs, sensors);
+        auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFoot, rightFoot);
+        auto waypoints = motionLegs(joints, sensors);
 
         auto arms = motionArms();
         waypoints->insert(waypoints->end(), arms->begin(), arms->end());
@@ -556,7 +566,7 @@ namespace motion {
         return waypoints;
     }
 
-    std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> WalkEngine::motionLegs(std::vector<double> qLegs, const Sensors& sensors) {
+    std::unique_ptr<std::vector<ServoCommand>> WalkEngine::motionLegs(std::vector<std::pair<ServoID, float>> joints, const Sensors& sensors) {
         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
         waypoints->reserve(16);
 
@@ -564,24 +574,14 @@ namespace motion {
 
         time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
 
-        waypoints->push_back({id, time, ServoID::L_HIP_YAW,     float(qLegs[0]),  float(leftLegHardness * 100)});
-        waypoints->push_back({id, time, ServoID::L_HIP_ROLL,    float(qLegs[1]),  float(leftLegHardness * 100)});
-        waypoints->push_back({id, time, ServoID::L_HIP_PITCH,   float(qLegs[2]),  float(leftLegHardness * 100)});
-        waypoints->push_back({id, time, ServoID::L_KNEE,        float(qLegs[3]),  float(leftLegHardness * 100)});
-        waypoints->push_back({id, time, ServoID::L_ANKLE_PITCH, float(qLegs[4]),  float(leftLegHardness * 100)});
-        waypoints->push_back({id, time, ServoID::L_ANKLE_ROLL,  float(qLegs[5]),  float(leftLegHardness * 100)});
-
-        waypoints->push_back({id, time, ServoID::R_HIP_YAW,     float(qLegs[6]),  float(rightLegHardness * 100)});
-        waypoints->push_back({id, time, ServoID::R_HIP_ROLL,    float(qLegs[7]),  float(rightLegHardness * 100)});
-        waypoints->push_back({id, time, ServoID::R_HIP_PITCH,   float(qLegs[8]),  float(rightLegHardness * 100)});
-        waypoints->push_back({id, time, ServoID::R_KNEE,        float(qLegs[9]),  float(rightLegHardness * 100)});
-        waypoints->push_back({id, time, ServoID::R_ANKLE_PITCH, float(qLegs[10]), float(rightLegHardness * 100)});
-        waypoints->push_back({id, time, ServoID::R_ANKLE_ROLL,  float(qLegs[11]), float(rightLegHardness * 100)});
+        for (auto& joint : joints) {
+            waypoints->push_back({id, time, joint.first, joint.second,  float(leftLegHardness * 100)});
+        }
 
         return std::move(waypoints);
     }
 
-    std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> WalkEngine::motionArms() {
+    std::unique_ptr<std::vector<ServoCommand>> WalkEngine::motionArms() {
 
         arma::vec3 qLArmActual = qLArm;
         arma::vec3 qRArmActual = qRArm;
