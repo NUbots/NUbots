@@ -69,8 +69,8 @@ namespace motion {
 
         // These limit the distance a footstep will take
         arma::mat::fixed<3,2> stanceLimits;
-        float stanceLimitMarginY;
-        float stanceLimitY2;
+        double stanceLimitMarginY;
+        double stanceLimitY2;
 
         // Velocity limits for the walk
         arma::mat::fixed<3,2> velocityLimits;
@@ -78,7 +78,7 @@ namespace motion {
         double velocityXHigh;
         double velocityDeltaXHigh;
         // Factor to slow down walk when turning
-        float velocityAngleFactor;
+        double velocityAngleFactor;
 
         // Toe/heel overlap checking values
         arma::vec2 footSizeX;
@@ -90,43 +90,42 @@ namespace motion {
         // Stance parameters
 
         // The body height of the robot, in meters; changing this will alter how high the robot's natural stance is.
-        float bodyHeight;
+        double bodyHeight;
         // Torso Y rotation
-        float bodyTilt;
+        double bodyTilt;
         // The length of the robot's foot
-        float footX;
+        double footX;
         // The width of the robot's rest stance in meters.
-        float footY;
+        double footY;
         // The distance the ankles rest behind the torso, in meters.
-        float supportX;
+        double supportX;
         // How far from the center of the foot the center of mass is placed during each step.
-        float supportY;
+        double supportY;
 
         // Servo gains used for the legs during walk
-        float hardnessSupport;
-        float hardnessSwing;
+        double hardnessSupport;
+        double hardnessSwing;
         // Servo gains used for the arms during walk
-        float hardnessArm0;
-        float hardnessArm;
+        double hardnessArm0;
+        double hardnessArm;
 
         // Gait parameters
-        float tStep0;
         // The tStep defines how long it will take for a robot to take its next step, in seconds.
-        float tStep;
-        float tZmp;
+        double tStep;
+        double tZmp;
         // The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
-        float stepHeight;
+        double stepHeight;
 
-        float phase1Single;
-        float phase2Single;
-        float phase1Zmp;
-        float phase2Zmp;
+        double phase1Single;
+        double phase2Single;
+        double phase1Zmp;
+        double phase2Zmp;
 
         // Compensation parameters
-        float hipRollCompensation;
+        double hipRollCompensation;
         arma::vec2 ankleMod;
-        float turnCompThreshold;
-        float turnComp;
+        double turnCompThreshold;
+        double turnComp;
 
         // Gyro stabilization parameters
         arma::vec4 ankleImuParamX;
@@ -138,21 +137,21 @@ namespace motion {
         double balanceWeight;
 
         // Support bias parameters to reduce backlash-based instability
-        float velFastForward;
-        float velFastTurn;
-        float supportFront;
-        float supportFront2;
-        float supportBack;
-        float supportSideX;
-        float supportSideY;
-        float supportTurn;
+        double velFastForward;
+        double velFastTurn;
+        double supportFront;
+        double supportFront2;
+        double supportBack;
+        double supportSideX;
+        double supportSideY;
+        double supportTurn;
 
-        float frontComp;
-        float accelComp;
+        double frontComp;
+        double accelComp;
 
         // Initial body swing
-        float supportModYInitial;
-        float toeTipCompensation;
+        double supportModYInitial;
+        double toeTipCompensation;
 
         // end_config_params
 
@@ -186,14 +185,14 @@ namespace motion {
 
         // gyro stabilization variables
         arma::vec2 ankleShift;
-        float kneeShift;
+        double kneeShift;
         arma::vec2 hipShift;
         arma::vec2 armShift;
 
         bool active;
         bool started;
-        double tLastStep;
-        float phase;
+        double beginStepTime;
+        double phase;
 
         StopRequest stopRequest;
         int currentStepType;
@@ -203,7 +202,7 @@ namespace motion {
         int initialStep;
 
         // The ratio of double support time: single support time (standing on two feet vs. balancing on one foot).
-        float phaseSingle;
+        double phaseSingle;
 
         // current arm pose
         arma::vec3 qLArm;
@@ -213,20 +212,16 @@ namespace motion {
         arma::vec3 uLRFootOffset;
 
         // walking/stepping transition variables
-        arma::vec3 uLeftFootI;
-        arma::vec3 uRightFootI;
-        arma::vec3 uTorsoI;
         bool startFromStep;
 
-        Leg supportInitial = Leg::LEFT;
-        Leg swingLeg = Leg::RIGHT;
-        Leg supportLeg = Leg::LEFT;
+        Leg swingLegInitial = Leg::LEFT;
+        Leg swingLeg = swingLegInitial;
         arma::vec2 supportMod;
-        float shiftFactor;
+        double shiftFactor;
 
         // TODO: link to actuator
-        float leftLegHardness;
-        float rightLegHardness;
+        double leftLegHardness;
+        double rightLegHardness;
 
         arma::vec3 uSupport;
         arma::vec3 uTorsoActual;
@@ -237,6 +232,7 @@ namespace motion {
         void configureWalk(const YAML::Node& config);
 
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> update(const messages::input::Sensors& sensors);
+        std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> updateStep(const messages::input::Sensors& sensors);
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> updateStill(const messages::input::Sensors& sensors = messages::input::Sensors());
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionLegs(std::vector<std::pair<messages::input::ServoID, float>> qLegs, const messages::input::Sensors& sensors);
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionArms();
@@ -244,7 +240,9 @@ namespace motion {
 
         void reset();
         void start();
-        void stop();
+        std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> stop();
+        void requestStop();
+        void calculateNewStep();
         void stanceReset();
         void setVelocity(double vx, double vy, double va);
         void updateVelocity();
@@ -253,11 +251,11 @@ namespace motion {
         /**
          *
          */
-        arma::vec3 stepTorso(arma::vec3 uLeftFoot, arma::vec3 uRightFoot, float shiftFactor);
+        arma::vec3 stepTorso(arma::vec3 uLeftFoot, arma::vec3 uRightFoot, double shiftFactor);
         arma::vec3 getVelocity();
-        arma::vec2 zmpSolve(float zs, float z1, float z2, float x1, float x2);
-        arma::vec3 zmpCom(float phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, float tStep, float tZmp, float phase1Zmp, float phase2Zmp);
-        std::pair<float, float> footPhase(float phase);
+        arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2);
+        arma::vec3 zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double tStep, double tZmp, double phase1Zmp, double phase2Zmp);
+        arma::vec3 footPhase(double phase);
 
         double getTime(); // TODO: remove
         double procFunc(double a, double deadband, double maxvalue); //TODO: move documentation from .cpp to .h file
