@@ -48,16 +48,15 @@ namespace motion {
         explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
     private:
 
-        enum class Leg {
-            LEFT,
-            RIGHT
+        enum State {
+            STOPPED,
+            STOP_REQUEST,
+            LAST_STEP,
+            WALKING
         };
 
-        enum class StopRequest {
-            NONE, // no stop requested, either robot is walking or already still
-            REQUESTED, // the robot has been requested to stop
-            LAST_STEP // the robot is taking its last step so it can stop with its feet together
-        };
+        State state;
+        bool interrupted;
 
         ReactionHandle updateHandle;
 
@@ -68,7 +67,7 @@ namespace motion {
         // Walk Parameters
 
         // These limit the distance a footstep will take
-        arma::mat::fixed<3,2> stanceLimits;
+        arma::mat::fixed<3,2> stepLimits;
         double stanceLimitMarginY;
         double stanceLimitY2;
 
@@ -189,7 +188,6 @@ namespace motion {
         double beginStepTime;
         double phase;
 
-        StopRequest stopRequest;
         int currentStepType;
 
         // How to begin initial step, unsure of affect
@@ -209,8 +207,8 @@ namespace motion {
         // walking/stepping transition variables
         bool startFromStep;
 
-        Leg swingLegInitial = Leg::LEFT;
-        Leg swingLeg = swingLegInitial;
+        messages::behaviour::LimbID swingLegInitial = messages::behaviour::LimbID::LEFT_LEG;
+        messages::behaviour::LimbID swingLeg = swingLegInitial;
         double shiftFactor;
 
         // TODO: link to actuator

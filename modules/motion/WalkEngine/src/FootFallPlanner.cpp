@@ -22,11 +22,13 @@
 namespace modules {
 namespace motion {
 
+    using messages::behaviour::LimbID;
+
     void WalkEngine::calculateNewStep() {
         updateVelocity();
 
         // swap swing and support legs
-        swingLeg = swingLeg == Leg::LEFT ? Leg::RIGHT : Leg::LEFT;
+        swingLeg = swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG;
 
         uLeftFootSource = uLeftFootDestination;
         uRightFootSource = uRightFootDestination;
@@ -34,19 +36,19 @@ namespace motion {
 
         arma::vec2 supportMod = {0, 0}; // support point modulation for wallkick
 
-        if (stopRequest == StopRequest::REQUESTED) {
+        if (state == State::STOP_REQUEST) {
             log<NUClear::TRACE>("Walk Engine:: Stop requested");
-            stopRequest = StopRequest::LAST_STEP;
+            state = State::LAST_STEP;
             velocityCurrent = {0, 0, 0};
             velocityCommand = {0, 0, 0};
-            if (swingLeg == Leg::RIGHT) {
+            if (swingLeg == LimbID::RIGHT_LEG) {
                 uRightFootDestination = localToWorld(-2 * uLRFootOffset, uLeftFootSource);
             } else {
                 uLeftFootDestination = localToWorld(2 * uLRFootOffset, uRightFootSource);
             }
         } else {
             // normal walk, advance steps
-            if (swingLeg == Leg::RIGHT) {
+            if (swingLeg == LimbID::RIGHT_LEG) {
                 uRightFootDestination = stepRightFootDestination(velocityCurrent, uLeftFootSource, uRightFootSource);
             } else {
                 uLeftFootDestination = stepLeftFootDestination(velocityCurrent, uLeftFootSource, uRightFootSource);
@@ -80,13 +82,13 @@ namespace motion {
         // adjustable initial step body swing
         if (initialStep > 0) {
             supportMod[1] = supportModYInitial;
-            if (swingLeg == Leg::LEFT) {
+            if (swingLeg == LimbID::LEFT_LEG) {
                 supportMod[1] *= -1;
             }
         }
 
         // apply velocity-based support point modulation for uSupport
-        if (swingLeg == Leg::RIGHT) {
+        if (swingLeg == LimbID::RIGHT_LEG) {
             arma::vec3 uLeftFootTorso = worldToLocal(uLeftFootSource, uTorsoSource);
             arma::vec3 uTorsoModded = localToWorld({supportMod[0], supportMod[1], 0}, uTorso);
             arma::vec3 uLeftFootModded = localToWorld(uLeftFootTorso, uTorsoModded);
@@ -154,10 +156,10 @@ namespace motion {
         // Check toe and heel overlap
         double toeOverlap = -footSizeX[0] * uLeftFootRight[2];
         double heelOverlap = -footSizeX[1] * uLeftFootRight[2];
-        double limitY = std::max(stanceLimits(1,0), stanceLimitY2 + std::max(toeOverlap, heelOverlap));
-        uLeftFootRight[0] = std::min(std::max(uLeftFootRight[0], stanceLimits(0,0)), stanceLimits(0,1));
-        uLeftFootRight[1] = std::min(std::max(uLeftFootRight[1], limitY), stanceLimits(1,1));
-        uLeftFootRight[2] = std::min(std::max(uLeftFootRight[2], stanceLimits(2,0)), stanceLimits(2,1));
+        double limitY = std::max(stepLimits(1,0), stanceLimitY2 + std::max(toeOverlap, heelOverlap));
+        uLeftFootRight[0] = std::min(std::max(uLeftFootRight[0], stepLimits(0,0)), stepLimits(0,1));
+        uLeftFootRight[1] = std::min(std::max(uLeftFootRight[1], limitY), stepLimits(1,1));
+        uLeftFootRight[2] = std::min(std::max(uLeftFootRight[2], stepLimits(2,0)), stepLimits(2,1));
         leftFootTarget = localToWorld(uLeftFootRight, uRightFoot);
         // End foot collision detection/prevention
 
@@ -178,10 +180,10 @@ namespace motion {
         // Check toe and heel overlap
         double toeOverlap = footSizeX[0] * uRightFootLeft[2];
         double heelOverlap = footSizeX[1] * uRightFootLeft[2];
-        double limitY = std::max(stanceLimits(1,0), stanceLimitY2 + std::max(toeOverlap, heelOverlap));
-        uRightFootLeft[0] = std::min(std::max(uRightFootLeft[0], stanceLimits(0,0)), stanceLimits(0,1));
-        uRightFootLeft[1] = std::min(std::max(uRightFootLeft[1], -stanceLimits(1,1)), -limitY);
-        uRightFootLeft[2] = std::min(std::max(uRightFootLeft[2], -stanceLimits(2,1)), -stanceLimits(2,0));
+        double limitY = std::max(stepLimits(1,0), stanceLimitY2 + std::max(toeOverlap, heelOverlap));
+        uRightFootLeft[0] = std::min(std::max(uRightFootLeft[0], stepLimits(0,0)), stepLimits(0,1));
+        uRightFootLeft[1] = std::min(std::max(uRightFootLeft[1], -stepLimits(1,1)), -limitY);
+        uRightFootLeft[2] = std::min(std::max(uRightFootLeft[2], -stepLimits(2,1)), -stepLimits(2,0));
         rightFootTarget = localToWorld(uRightFootLeft, uLeftFoot);
         // End foot collision detection/prevention
 

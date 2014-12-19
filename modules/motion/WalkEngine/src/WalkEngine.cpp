@@ -24,11 +24,9 @@
 #include <chrono>
 #include <cmath>
 
-#include "messages/behaviour/Action.h"
 #include "messages/support/Configuration.h"
 #include "messages/motion/WalkCommand.h"
 #include "messages/motion/ServoTarget.h"
-#include "messages/behaviour/Action.h"
 #include "messages/motion/Script.h"
 #include "messages/behaviour/FixedWalkCommand.h"
 
@@ -45,27 +43,30 @@ namespace modules {
 namespace motion {
 
     using messages::input::ServoID;
+    using messages::input::Sensors;
+    using messages::behaviour::LimbID;
     using messages::behaviour::ServoCommand;
     using messages::behaviour::WalkOptimiserCommand;
     using messages::behaviour::WalkConfigSaved;
-    using messages::support::Configuration;
-    using messages::input::Sensors;
+    using messages::behaviour::RegisterAction;
+    using messages::behaviour::ActionPriorites;
+    using messages::behaviour::LimbID;
     using messages::motion::WalkCommand;
     using messages::motion::WalkStartCommand;
     using messages::motion::WalkStopCommand;
     using messages::motion::WalkStopped;
     using messages::motion::ServoTarget;
-    using messages::behaviour::RegisterAction;
-    using messages::behaviour::ActionPriorites;
-    using messages::behaviour::LimbID;
     using messages::motion::Script;
     using messages::support::SaveConfiguration;
-    using utility::nubugger::graph;
+    using messages::support::Configuration;
+
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::motion::kinematics::DarwinModel;
     using utility::math::angle::normalizeAngle;
     using utility::math::matrix::vec6ToMatrix;
     using utility::math::matrix::orthonormal44Inverse;
+    using utility::nubugger::graph;
+    using utility::support::Expression;
 
     WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -128,65 +129,67 @@ namespace motion {
         on<Trigger<Startup>>([this](const Startup&) {
             generateAndSaveStandScript();
             reset();
-            stopRequest = StopRequest::LAST_STEP;
+            state = State::LAST_STEP;
             //start();
         });
 
     }
-    // TODO: add others
-    void WalkEngine::configureWalk(const YAML::Node& config){
-        // g Walk Parameters
-        // g Stance and velocity limit values
-        stanceLimits = config["stanceLimits"].as<arma::mat::fixed<3,2>>();
-        velocityLimits = config["velocityLimits"].as<arma::mat::fixed<3,2>>();
-        velocityDelta = config["velocityDelta"].as<arma::vec>();
-        velocityAngleFactor = config["velocityAngleFactor"].as<double>();
 
-        velocityXHigh = config["velocityXHigh"].as<double>();
-        velocityDeltaXHigh = config["velocityDeltaXHigh"].as<double>();
+    void WalkEngine::configureWalk(const YAML::Node& config){
+
+        auto& stance = config["stance"];
+        bodyHeight = stance["body_height"].as<Expression>();
+        bodyTilt = stance["body_tilt"].as<Expression>();
+        qLArm = stance["arms"]["left"].as<arma::vec>();
+        qRArm = stance["arms"]["right"].as<arma::vec>();
+
+        auto& walkCycle = config["walk_cycle"];
+        tStep = walkCycle["step_time"].as<Expression>();
+        tZmp = walkCycle["zmp_time"].as<Expression>();
+        stepHeight = walkCycle["step_height"].as<Expression>();
+        stepLimits = walkCycle["step_limits"].as<arma::mat::fixed<3,2>>();
+        velocityLimits = walkCycle["velocity_limits"].as<arma::mat::fixed<3,2>>();
+
+        velocityDelta = config["velocityDelta"].as<arma::vec>();
+        velocityAngleFactor = config["velocityAngleFactor"].as<Expression>();
+
+        velocityXHigh = config["velocityXHigh"].as<Expression>();
+        velocityDeltaXHigh = config["velocityDeltaXHigh"].as<Expression>();
 
         // gToe/heel overlap checking values
         footSizeX = config["footSizeX"].as<arma::vec>();
-        stanceLimitMarginY = config["stanceLimitMarginY"].as<double>();
-        stanceLimitY2 = 2 * config["footY"].as<double>() - config["stanceLimitMarginY"].as<double>();
+        stanceLimitMarginY = config["stanceLimitMarginY"].as<Expression>();
+        stanceLimitY2 = 2 * config["footY"].as<Expression>() - config["stanceLimitMarginY"].as<Expression>();
 
         // gOP default stance width: 0.0375*2 = 0.075
         // gHeel overlap At radian 0.15 at each foot = 0.05*sin(0.15)*2=0.015
         // gHeel overlap At radian 0.30 at each foot = 0.05*sin(0.15)*2=0.030
 
         // gStance parameters
-        bodyHeight = config["bodyHeight"].as<double>();
-        bodyTilt = config["bodyTilt"].as<double>();
-        footX = config["footX"].as<double>();
-        footY = config["footY"].as<double>();
-        supportX = config["supportX"].as<double>();
-        supportY = config["supportY"].as<double>();
-
-        qLArm = config["armPose"][0].as<arma::vec>();
-        qRArm = config["armPose"][1].as<arma::vec>();
+        footX = config["footX"].as<Expression>();
+        footY = config["footY"].as<Expression>();
+        supportX = config["supportX"].as<Expression>();
+        supportY = config["supportY"].as<Expression>();
 
         // gHardness parameters
-        hardnessSupport = config["hardnessSupport"].as<double>();
-        hardnessSwing = config["hardnessSwing"].as<double>();
-        hardnessArm = config["hardnessArm"].as<double>();
+        hardnessSupport = config["hardnessSupport"].as<Expression>();
+        hardnessSwing = config["hardnessSwing"].as<Expression>();
+        hardnessArm = config["hardnessArm"].as<Expression>();
 
         // gGait parameters
 
-        tStep = config["tStep"].as<double>();
-        tZmp = config["tZmp"].as<double>();
-        stepHeight = config["stepHeight"].as<double>();
-        phase1Single = config["phaseSingle"][0].as<double>();
-        phase2Single = config["phaseSingle"][1].as<double>();
+        phase1Single = config["phaseSingle"][0].as<Expression>();
+        phase2Single = config["phaseSingle"][1].as<Expression>();
         phase1Zmp = phase1Single;
         phase2Zmp = phase2Single;
 
         // gCompensation parameters
-        hipRollCompensation = config["hipRollCompensation"].as<utility::support::Expression>();
-        toeTipCompensation = config["toeTipCompensation"].as<utility::support::Expression>();
+        hipRollCompensation = config["hipRollCompensation"].as<Expression>();
+        toeTipCompensation = config["toeTipCompensation"].as<Expression>();
         ankleMod = {-toeTipCompensation, 0};
 
-        turnCompThreshold = config["turnCompThreshold"].as<double>();
-        turnComp = config["turnComp"].as<double>();
+        turnCompThreshold = config["turnCompThreshold"].as<Expression>();
+        turnComp = config["turnComp"].as<Expression>();
 
         // gGyro stabilization parameters
         ankleImuParamX = config["ankleImuParamX"].as<arma::vec>();
@@ -197,22 +200,22 @@ namespace motion {
         armImuParamY = config["armImuParamY"].as<arma::vec>();
 
         // gSupport bias parameters to reduce backlash-based instability
-        velFastForward = config["velFastForward"].as<double>();
-        velFastTurn = config["velFastTurn"].as<double>();
-        supportFront = config["supportFront"].as<double>();
-        supportFront2 = config["supportFront2"].as<double>();
-        supportBack = config["supportBack"].as<double>();
-        supportSideX = config["supportSideX"].as<double>();
-        supportSideY = config["supportSideY"].as<double>();
-        supportTurn = config["supportTurn"].as<double>();
+        velFastForward = config["velFastForward"].as<Expression>();
+        velFastTurn = config["velFastTurn"].as<Expression>();
+        supportFront = config["supportFront"].as<Expression>();
+        supportFront2 = config["supportFront2"].as<Expression>();
+        supportBack = config["supportBack"].as<Expression>();
+        supportSideX = config["supportSideX"].as<Expression>();
+        supportSideY = config["supportSideY"].as<Expression>();
+        supportTurn = config["supportTurn"].as<Expression>();
 
-        frontComp = config["frontComp"].as<double>();
-        accelComp = config["accelComp"].as<double>();
+        frontComp = config["frontComp"].as<Expression>();
+        accelComp = config["accelComp"].as<Expression>();
 
-        balanceWeight = config["balanceWeight"].as<double>();
+        balanceWeight = config["balanceWeight"].as<Expression>();
 
         // gInitial body swing
-        supportModYInitial = config["supportModYInitial"].as<double>();
+        supportModYInitial = config["supportModYInitial"].as<Expression>();
 
         STAND_SCRIPT_DURATION_MILLISECONDS = config["STAND_SCRIPT_DURATION_MILLISECONDS"].as<int>();
     }
@@ -242,7 +245,7 @@ namespace motion {
         stanceReset();
     }
 
-    void WalkEngine::reset(){
+    void WalkEngine::reset() {
             // Global walk state variables
 
             uTorso = {supportX, 0, 0};
@@ -280,29 +283,31 @@ namespace motion {
             // gWalking/Stepping transition variables
             startFromStep = false;
 
+            state = State::STOPPED;
+
             stanceReset();
     }
 
     void WalkEngine::start() {
-        stopRequest = StopRequest::NONE;
-        if (!active) {
+        if (state != State::WALKING) {
             active = true;
             started = false;
             swingLeg = swingLegInitial;
             beginStepTime = getTime();
             initialStep = 2;
+            state = State::WALKING;
         }
     }
 
     void WalkEngine::requestStop() {
         // always stops with feet together (which helps transition)
-        if (stopRequest == StopRequest::NONE) {
-            stopRequest = StopRequest::REQUESTED;
+        if (state == State::WALKING) {
+            state = State::STOP_REQUEST;
         }
     }
 
     std::unique_ptr<std::vector<ServoCommand>> WalkEngine::stop() {
-        stopRequest = StopRequest::NONE;
+        state = State::STOPPED;
         active = false;
         emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 0, 0 }})); // TODO: config
         log<NUClear::TRACE>("Walk Engine:: Stop request complete");
@@ -334,7 +339,7 @@ namespace motion {
             newStep = true;
         }
 
-        if (newStep && stopRequest == StopRequest::LAST_STEP) {
+        if (newStep && state == State::LAST_STEP) {
             return stop();
         }
 
@@ -350,7 +355,7 @@ namespace motion {
         if (initialStep > 0) {
             foot[2] = 0; // don't lift foot at initial step
         }
-        if (swingLeg == Leg::RIGHT) {
+        if (swingLeg == LimbID::RIGHT_LEG) {
             uRightFoot = se2Interpolate(foot[0], uRightFootSource, uRightFootDestination);
         } else {
             uLeftFoot = se2Interpolate(foot[0], uLeftFootSource, uLeftFootDestination);
@@ -378,7 +383,7 @@ namespace motion {
         arma::vec6 pLeftFoot = {uLeftFoot[0], uLeftFoot[1], 0, 0, 0, uLeftFoot[2]};
         arma::vec6 pRightFoot = {uRightFoot[0], uRightFoot[1], 0, 0, 0, uRightFoot[2]};
 
-        if (swingLeg == Leg::RIGHT) {
+        if (swingLeg == LimbID::RIGHT_LEG) {
             pRightFoot[2] = stepHeight * foot[2];
         } else {
             pLeftFoot[2] = stepHeight * foot[2];
@@ -428,7 +433,7 @@ namespace motion {
 
         // balance(qLegs, sensors);
 
-        time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
+        time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
 
         for (auto& joint : joints) {
             waypoints->push_back({id, time, joint.first, joint.second, float(leftLegHardness * 100)}); // TODO: support separate gains for each leg
@@ -470,6 +475,7 @@ namespace motion {
 
         return std::move(waypoints);
     }
+
     arma::vec3 WalkEngine::stepTorso(arma::vec3 uLeftFoot, arma::vec3 uRightFoot, double shiftFactor) {
         arma::vec3 uLeftFootSupport = localToWorld({supportX, supportY, 0}, uLeftFoot);
         arma::vec3 uRightFootSupport = localToWorld({supportX, -supportY, 0}, uRightFoot);
@@ -582,13 +588,14 @@ namespace motion {
           return t.tv_sec + 1E-6 * t.tv_usec;
     }
 
-    double WalkEngine::procFunc(double value, double deadband, double maxvalue) { //a function for IMU feedback (originally from teamdarwin2013release/player/util/util.lua)
+    double WalkEngine::procFunc(double value, double deadband, double maxvalue) {
+        // a function for IMU feedback (originally from teamdarwin2013release/player/util/util.lua)
         // clamp between 0 and maxvalue
         // offset using deadband
         return std::abs(std::min(std::max(0.0, std::abs(value) - deadband), maxvalue));
     }
 
-    arma::vec3 WalkEngine::localToWorld(arma::vec3 poseRelative, arma::vec3 pose) { //TEAMDARWIN LUA VECs START INDEXING @ 1 not 0 !!
+    arma::vec3 WalkEngine::localToWorld(arma::vec3 poseRelative, arma::vec3 pose) {
         double ca = std::cos(pose[2]);
         double sa = std::sin(pose[2]);
         // translates to pose + rotZ(pose.angle) * poseRelative

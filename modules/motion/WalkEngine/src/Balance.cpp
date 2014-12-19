@@ -22,6 +22,7 @@
 namespace modules {
 namespace motion {
 
+    using messages::behaviour::LimbID;
     using messages::input::Sensors;
 
     void WalkEngine::balance(std::vector<double>& qLegs, const Sensors& sensors) {
@@ -31,7 +32,7 @@ namespace motion {
         double phaseComp = std::min({1.0, phaseSingle / 0.1, (1 - phaseSingle) / 0.1});
 
         /* TODO: crashes
-        ServoID supportLegID = (swingLeg == Leg::RIGHT) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
+        ServoID supportLegID = (swingLeg == LimbID::RIGHT_LEG) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
         arma::mat33 ankleRotation = sensors.forwardKinematics.find(supportLegID)->second.submat(0,0,2,2);
         // get effective gyro angle considering body angle offset
         arma::mat33 kinematicGyroSORAMatrix = sensors.orientation * ankleRotation;   //DOUBLE TRANSPOSE
@@ -47,7 +48,7 @@ namespace motion {
             // double support
             yawAngle = (uLeftFoot[2] + uRightFoot[2]) / 2 - uTorsoActual[2];
         }
-        else if (swingLeg == Leg::RIGHT) {
+        else if (swingLeg == LimbID::RIGHT_LEG) {
             yawAngle = uLeftFoot[2] - uTorsoActual[2];
         }
         else {
@@ -85,7 +86,7 @@ namespace motion {
             qLegs[9] += kneeShift; // Knee pitch stabilization
             qLegs[10] += ankleShift[0]; // Ankle pitch stabilization
             // qLegs[11] += ankleShift[1]; // Ankle roll stabilization
-        } else if (swingLeg == Leg::RIGHT) {
+        } else if (swingLeg == LimbID::RIGHT_LEG) {
             qLegs[1] += hipShift[1]; // Hip roll stabilization
             qLegs[3] += kneeShift; // Knee pitch stabilization
             qLegs[4] += ankleShift[0]; // Ankle pitch stabilization

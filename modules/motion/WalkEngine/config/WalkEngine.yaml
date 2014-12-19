@@ -1,30 +1,39 @@
-# Ratio to normalize gyro gains into units of degree/second
-gyroFactor: 0.18 * 0.273 * pi / 180 * 300 / 1024 # dps to rad/s conversion
-ankleImuParamX: [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
-ankleImuParamY: [0.5, 1.2 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
-kneeImuParamX: [0.5, 0.7 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
-hipImuParamY: [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
-armImuParamX: [0.5, 10.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]
-armImuParamY: [0.5, 0.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]
+stance:
+  # The body height of the robot, in meters; changing this will alter how high the robot's natural stance is.
+  body_height: 0.285
+  # The angle of the torso when walking
+  body_tilt: 25 * pi / 180
+  # Default arm positions while walking
+  arms:
+    left:
+      -   90 * pi / 180 # Shoulder Roll
+      -   45 * pi / 180 # Shoulder Pitch
+      - -140 * pi / 180 # Elbow
+    right:
+      -   90 * pi / 180 # Shoulder Roll
+      -  -45 * pi / 180 # Shoulder Pitch
+      - -140 * pi / 180 # Elbow
 
-armPose: [
-    [90 * pi / 180, 45 * pi / 180, -140 * pi / 180], # [shoulder_roll_angle, shoulder_pitch_angle, elbow_angle]
-    [90 * pi / 180, -45 * pi / 180, -140 * pi / 180] # [shoulder_roll_angle, shoulder_pitch_angle, elbow_angle]
-]
+walk_cycle:
+  # Defines how long it will take for the robot to take its next step, in seconds.
+  step_time: 0.25
+  # ???
+  zmp_time: 0.165
+  # The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
+  step_height: 0.015
+  # These limit the distance a footstep will take
+  step_limits:
+    - [-0.1, 0.1] # [min_x, max_x]
+    - [0.07, 0.2] # [min_y, max_y]
+    - [0, 30 * pi / 180] # [min_angle, max_angle]
+  # Velocity limits for the walk
+  velocity_limits:
+    - [-0.03, 0.035] # [min_x, max_x]
+    - [-0.03, 0.03] # [min_y, max_y]
+    - [-0.4, 0.4] # [min_angle, max_angle]
 
-# These limit the distance a footstep will take
-stanceLimits: [
-    [-0.1, 0.1], # [min_x, max_x]
-    [0.07, 0.2], # [min_y, max_y]
-    [0, 30 * pi / 180] # [min_angle, max_angle]
-]
 
-# Velocity limits for the walk
-velocityLimits: [
-    [-0.03, 0.035], # [min_x, max_x]
-    [-0.03, 0.03], # [min_y, max_y]
-    [-0.4, 0.4], # [min_angle, max_angle]
-]
+### TODO ###
 
 # ??
 velocityDelta: [0.02, 0.02, 0.15]
@@ -40,10 +49,6 @@ footSizeX: [-0.05, 0.05]
 stanceLimitMarginY: 0.015
 # ??
 stanceLimitY2: 0.02
-# The body height of the robot, in meters; changing this will alter how high the robot's natural stance is.
-bodyHeight: 0.285
-# The angle of the torso when walking
-bodyTilt: 0.4091
 # The x offset of both feet from the torso in meters.
 footX: 0
 # The width of the robot's rest stance in meters.
@@ -56,12 +61,6 @@ supportY: 0.01
 hardnessSupport: 0.3
 hardnessSwing: 0.3
 hardnessArm: 0.3
-# The tStep defines how long it will take for a robot to take its next step, in seconds.
-tStep: 0.25
-# ??
-tZmp: 0.165
-# The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
-stepHeight: 0.015
 # The ratio of double support time: single support time (standing on two feet vs. balancing on one foot).
 phaseSingle: [0.1, 0.9]
 # ??
@@ -84,8 +83,14 @@ accelComp: 0.1
 supportModYInitial: 0
 hipRollCompensation: 4 * pi / 180
 toeTipCompensation: 0 * pi / 180
-velocityCommandX: 0.035
-velocityCommandY: 0
-velocityCommandAngular: 0
 balanceWeight: 0.7
 STAND_SCRIPT_DURATION_MILLISECONDS: 1000
+
+# Ratio to normalize gyro gains into units of degree/second
+gyroFactor: 0.18 * 0.273 * pi / 180 * 300 / 1024 # dps to rad/s conversion
+ankleImuParamX: [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
+ankleImuParamY: [0.5, 1.2 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
+kneeImuParamX: [0.5, 0.7 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
+hipImuParamY: [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
+armImuParamX: [0.5, 10.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]
+armImuParamY: [0.5, 0.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]
