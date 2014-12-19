@@ -62,6 +62,7 @@ namespace motion {
 
         /// Subsumption ID key to access motors
         const size_t id;
+        arma::vec2 footOffset;
 
         // start_config_params
         // Walk Parameters
@@ -73,14 +74,11 @@ namespace motion {
 
         // Velocity limits for the walk
         arma::mat::fixed<3,2> velocityLimits;
-        arma::vec3 velocityDelta;
-        double velocityXHigh;
-        double velocityDeltaXHigh;
+        arma::vec3 accelerationLimits;
+        arma::vec3 accelerationLimitsHigh;
+        double velocityHigh;
         // Factor to slow down walk when turning
-        double velocityAngleFactor;
-
-        // Toe/heel overlap checking values
-        arma::vec2 footSizeX;
+        double accelerationTurningFactor;
 
         // OP default stance width: 0.0375*2 = 0.075
         // Heel overlap At radian 0.15 at each foot = 0.05*sin(0.15)*2=0.015
@@ -92,14 +90,6 @@ namespace motion {
         double bodyHeight;
         // Torso Y rotation
         double bodyTilt;
-        // The length of the robot's foot
-        double footX;
-        // The width of the robot's rest stance in meters.
-        double footY;
-        // The distance the ankles rest behind the torso, in meters.
-        double supportX;
-        // How far from the center of the foot the center of mass is placed during each step.
-        double supportY;
 
         // Servo gains used for the legs during walk
         double hardnessSupport;
@@ -117,8 +107,6 @@ namespace motion {
 
         double phase1Single;
         double phase2Single;
-        double phase1Zmp;
-        double phase2Zmp;
 
         // Compensation parameters
         double hipRollCompensation;

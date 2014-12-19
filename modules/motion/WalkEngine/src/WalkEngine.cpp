@@ -142,46 +142,34 @@ namespace motion {
         bodyTilt = stance["body_tilt"].as<Expression>();
         qLArm = stance["arms"]["left"].as<arma::vec>();
         qRArm = stance["arms"]["right"].as<arma::vec>();
+        footOffset = stance["foot_offset"].as<arma::vec>();
 
         auto& walkCycle = config["walk_cycle"];
         tStep = walkCycle["step_time"].as<Expression>();
         tZmp = walkCycle["zmp_time"].as<Expression>();
-        stepHeight = walkCycle["step_height"].as<Expression>();
-        stepLimits = walkCycle["step_limits"].as<arma::mat::fixed<3,2>>();
-        velocityLimits = walkCycle["velocity_limits"].as<arma::mat::fixed<3,2>>();
+        stepHeight = walkCycle["step"]["height"].as<Expression>();
+        stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
 
-        velocityDelta = config["velocityDelta"].as<arma::vec>();
-        velocityAngleFactor = config["velocityAngleFactor"].as<Expression>();
+        auto& velocity = walkCycle["velocity"];
+        velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
+        velocityHigh = velocity["high_speed"].as<Expression>();
 
-        velocityXHigh = config["velocityXHigh"].as<Expression>();
-        velocityDeltaXHigh = config["velocityDeltaXHigh"].as<Expression>();
+        auto& acceleration = walkCycle["acceleration"];
+        accelerationLimits = acceleration["limits"].as<arma::vec>();
+        accelerationLimitsHigh = acceleration["limits_high"].as<arma::vec>();
+        accelerationTurningFactor = acceleration["turning_factor"].as<Expression>();
+
+        phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
+        phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();
 
         // gToe/heel overlap checking values
-        footSizeX = config["footSizeX"].as<arma::vec>();
         stanceLimitMarginY = config["stanceLimitMarginY"].as<Expression>();
-        stanceLimitY2 = 2 * config["footY"].as<Expression>() - config["stanceLimitMarginY"].as<Expression>();
-
-        // gOP default stance width: 0.0375*2 = 0.075
-        // gHeel overlap At radian 0.15 at each foot = 0.05*sin(0.15)*2=0.015
-        // gHeel overlap At radian 0.30 at each foot = 0.05*sin(0.15)*2=0.030
-
-        // gStance parameters
-        footX = config["footX"].as<Expression>();
-        footY = config["footY"].as<Expression>();
-        supportX = config["supportX"].as<Expression>();
-        supportY = config["supportY"].as<Expression>();
+        stanceLimitY2 = 2 * DarwinModel::Leg::HIP_OFFSET_Y - config["stanceLimitMarginY"].as<Expression>();
 
         // gHardness parameters
         hardnessSupport = config["hardnessSupport"].as<Expression>();
         hardnessSwing = config["hardnessSwing"].as<Expression>();
         hardnessArm = config["hardnessArm"].as<Expression>();
-
-        // gGait parameters
-
-        phase1Single = config["phaseSingle"][0].as<Expression>();
-        phase2Single = config["phaseSingle"][1].as<Expression>();
-        phase1Zmp = phase1Single;
-        phase2Zmp = phase2Single;
 
         // gCompensation parameters
         hipRollCompensation = config["hipRollCompensation"].as<Expression>();
@@ -248,9 +236,9 @@ namespace motion {
     void WalkEngine::reset() {
             // Global walk state variables
 
-            uTorso = {supportX, 0, 0};
-            uLeftFoot = {0, footY, 0};
-            uRightFoot = {0, -footY, 0};
+            uTorso = {-footOffset[0], 0, 0};
+            uLeftFoot = {0, DarwinModel::Leg::HIP_OFFSET_Y, 0};
+            uRightFoot = {0, -DarwinModel::Leg::HIP_OFFSET_Y, 0};
 
             velocityCurrent = {0, 0, 0};
             velocityCommand = {0, 0, 0};
@@ -278,7 +266,7 @@ namespace motion {
             phaseSingle = 0;
 
             // gStandard offset
-            uLRFootOffset = {0, footY + supportY, 0};
+            uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0};
 
             // gWalking/Stepping transition variables
             startFromStep = false;
@@ -361,7 +349,7 @@ namespace motion {
             uLeftFoot = se2Interpolate(foot[0], uLeftFootSource, uLeftFootDestination);
         }
 
-        uTorso = zmpCom(phase, zmpCoefficients, zmpParams, tStep, tZmp, phase1Zmp, phase2Zmp);
+        uTorso = zmpCom(phase, zmpCoefficients, zmpParams, tStep, tZmp, phase1Single, phase2Single);
 
         // turning
         double turnCompX = 0;
@@ -378,7 +366,7 @@ namespace motion {
             frontCompX = frontCompX + accelComp;
         }
 
-        arma::vec3 uTorsoActual = localToWorld({-footX + frontCompX + turnCompX, 0, 0}, uTorso);
+        arma::vec3 uTorsoActual = localToWorld({-DarwinModel::Leg::HIP_OFFSET_X + frontCompX + turnCompX, 0, 0}, uTorso);
         arma::vec6 pTorso = {uTorsoActual[0], uTorsoActual[1], bodyHeight, 0, bodyTilt, uTorsoActual[2]};
         arma::vec6 pLeftFoot = {uLeftFoot[0], uLeftFoot[1], 0, 0, 0, uLeftFoot[2]};
         arma::vec6 pRightFoot = {uRightFoot[0], uRightFoot[1], 0, 0, 0, uRightFoot[2]};
@@ -409,7 +397,7 @@ namespace motion {
         rightLegHardness = hardnessSupport;
 
         uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
-        uTorsoActual = localToWorld({-footX, 0, 0}, uTorso);
+        uTorsoActual = localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0}, uTorso);
         arma::vec6 pTorso = {uTorsoActual[0], uTorsoActual[1], bodyHeight, 0, bodyTilt, uTorsoActual[2]};
         arma::vec6 pLeftFoot = {uLeftFoot[0], uLeftFoot[1], 0, 0, 0, uLeftFoot[2]};
         arma::vec6 pRightFoot = {uRightFoot[0], uRightFoot[1], 0, 0, 0, uRightFoot[2]};
@@ -477,8 +465,8 @@ namespace motion {
     }
 
     arma::vec3 WalkEngine::stepTorso(arma::vec3 uLeftFoot, arma::vec3 uRightFoot, double shiftFactor) {
-        arma::vec3 uLeftFootSupport = localToWorld({supportX, supportY, 0}, uLeftFoot);
-        arma::vec3 uRightFootSupport = localToWorld({supportX, -supportY, 0}, uRightFoot);
+        arma::vec3 uLeftFootSupport = localToWorld({-footOffset[0], -footOffset[1], 0}, uLeftFoot);
+        arma::vec3 uRightFootSupport = localToWorld({-footOffset[0], footOffset[1], 0}, uRightFoot);
         return se2Interpolate(shiftFactor, uLeftFootSupport, uRightFootSupport);
     }
 
@@ -489,7 +477,7 @@ namespace motion {
         va = std::min(std::max(va, velocityLimits(2,0)), velocityLimits(2,1));
 
         // slow down when turning
-        double vFactor = 1 - std::abs(va) / velocityAngleFactor;
+        double vFactor = 1 - std::abs(va) / accelerationTurningFactor;
 
         double stepMag = std::sqrt(vx * vx + vy * vy);
         double magFactor = std::min(velocityLimits(0,1) * vFactor, stepMag) / (stepMag + 0.000001);
@@ -518,8 +506,8 @@ namespace motion {
             initialStep = 1;
         } else {
             // stance resetted
-            uLeftFoot = localToWorld({-supportX, footY, 0}, uTorso);
-            uRightFoot = localToWorld({-supportX, -footY, 0}, uTorso);
+            uLeftFoot = localToWorld({footOffset[0], DarwinModel::Leg::HIP_OFFSET_Y, 0}, uTorso);
+            uRightFoot = localToWorld({footOffset[0], -DarwinModel::Leg::HIP_OFFSET_Y, 0}, uTorso);
         }
         swingLeg = swingLegInitial;
 
@@ -532,13 +520,13 @@ namespace motion {
         uSupport = uTorso;
         beginStepTime = getTime();
         currentStepType = 0;
-        uLRFootOffset = {0, footY, 0};
+        uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y, 0};
         startFromStep = false;
     }
 
     /**
     * Global variables used:
-    * tStep, phase1Zmp, phase2Zmp, tZmp
+    * tStep, phase1Single, phase2Single, tZmp
     */
     arma::vec2 WalkEngine::zmpSolve(double zs, double z1, double z2, double x1, double x2) {
         /*
@@ -547,8 +535,8 @@ namespace motion {
         where the ZMP point is piecewise linear:
         z(0) = z1, z(T1 < t < T2) = zs, z(tStep) = z2
         */
-        double T1 = tStep * phase1Zmp;
-        double T2 = tStep * phase2Zmp;
+        double T1 = tStep * phase1Single;
+        double T2 = tStep * phase2Single;
         double m1 = (zs - z1) / T1;
         double m2 = -(zs - z2) / (tStep - T2);
 
@@ -564,17 +552,17 @@ namespace motion {
     * Global variables used:
     * uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource
     */
-    arma::vec3 WalkEngine::zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double tStep, double tZmp, double phase1Zmp, double phase2Zmp) {
+    arma::vec3 WalkEngine::zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double tStep, double tZmp, double phase1Single, double phase2Single) {
         arma::vec3 com = {0, 0, 0};
         double expT = std::exp(tStep * phase / tZmp);
         com[0] = uSupport[0] + zmpCoefficients[0] * expT + zmpCoefficients[1] / expT;
         com[1] = uSupport[1] + zmpCoefficients[2] * expT + zmpCoefficients[3] / expT;
-        if (phase < phase1Zmp) {
-            com[0] = com[0] + zmpParams[0] * tStep * (phase - phase1Zmp) -tZmp * zmpParams[0] * std::sinh(tStep * (phase - phase1Zmp) / tZmp);
-            com[1] = com[1] + zmpParams[1] * tStep * (phase - phase1Zmp) -tZmp * zmpParams[1] * std::sinh(tStep * (phase - phase1Zmp) / tZmp);
-        } else if (phase > phase2Zmp) {
-            com[0] = com[0] + zmpParams[2] * tStep * (phase - phase2Zmp) -tZmp * zmpParams[2] * std::sinh(tStep * (phase - phase2Zmp) / tZmp);
-            com[1] = com[1] + zmpParams[3] * tStep * (phase - phase2Zmp) -tZmp * zmpParams[3] * std::sinh(tStep * (phase - phase2Zmp) / tZmp);
+        if (phase < phase1Single) {
+            com[0] = com[0] + zmpParams[0] * tStep * (phase - phase1Single) -tZmp * zmpParams[0] * std::sinh(tStep * (phase - phase1Single) / tZmp);
+            com[1] = com[1] + zmpParams[1] * tStep * (phase - phase1Single) -tZmp * zmpParams[1] * std::sinh(tStep * (phase - phase1Single) / tZmp);
+        } else if (phase > phase2Single) {
+            com[0] = com[0] + zmpParams[2] * tStep * (phase - phase2Single) -tZmp * zmpParams[2] * std::sinh(tStep * (phase - phase2Single) / tZmp);
+            com[1] = com[1] + zmpParams[3] * tStep * (phase - phase2Single) -tZmp * zmpParams[3] * std::sinh(tStep * (phase - phase2Single) / tZmp);
         }
         // com[2] = .5 * (uLeftFoot[2] + uRightFoot[2]);
         // Linear speed turning

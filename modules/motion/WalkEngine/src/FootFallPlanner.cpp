@@ -19,10 +19,13 @@
 
 #include "WalkEngine.h"
 
+#include "utility/motion/RobotModels.h"
+
 namespace modules {
 namespace motion {
 
     using messages::behaviour::LimbID;
+    using utility::motion::kinematics::DarwinModel;
 
     void WalkEngine::calculateNewStep() {
         updateVelocity();
@@ -92,24 +95,24 @@ namespace motion {
             arma::vec3 uLeftFootTorso = worldToLocal(uLeftFootSource, uTorsoSource);
             arma::vec3 uTorsoModded = localToWorld({supportMod[0], supportMod[1], 0}, uTorso);
             arma::vec3 uLeftFootModded = localToWorld(uLeftFootTorso, uTorsoModded);
-            uSupport = localToWorld({supportX, supportY, 0}, uLeftFootModded);
+            uSupport = localToWorld({-footOffset[0], -footOffset[1], 0}, uLeftFootModded);
             leftLegHardness = hardnessSupport;
             rightLegHardness = hardnessSwing;
         } else {
             arma::vec3 uRightFootTorso = worldToLocal(uRightFootSource, uTorso);
             arma::vec3 uTorsoModded = localToWorld({supportMod[0], supportMod[1], 0}, uTorso);
             arma::vec3 uRightFootModded = localToWorld(uRightFootTorso, uTorsoModded);
-            uSupport = localToWorld({supportX, -supportY, 0}, uRightFootModded);
+            uSupport = localToWorld({-footOffset[0], footOffset[1], 0}, uRightFootModded);
             leftLegHardness = hardnessSwing;
             rightLegHardness = hardnessSupport;
         }
 
         // compute ZMP coefficients
         zmpParams = {
-            (uSupport[0] - uTorso[0]) / (tStep * phase1Zmp),
-            (uTorsoDestination[0] - uSupport[0]) / (tStep * (1 - phase2Zmp)),
-            (uSupport[1] - uTorso[1]) / (tStep * phase1Zmp),
-            (uTorsoDestination[1] - uSupport[1]) / (tStep * (1 - phase2Zmp)),
+            (uSupport[0] - uTorso[0]) / (tStep * phase1Single),
+            (uTorsoDestination[0] - uSupport[0]) / (tStep * (1 - phase2Single)),
+            (uSupport[1] - uTorso[1]) / (tStep * phase1Single),
+            (uTorsoDestination[1] - uSupport[1]) / (tStep * (1 - phase2Single)),
         };
 
         zmpCoefficients.rows(0,1) = zmpSolve(uSupport[0], uTorsoSource[0], uTorsoDestination[0], uTorsoSource[0], uTorsoDestination[0]);
@@ -117,15 +120,12 @@ namespace motion {
     }
 
     void WalkEngine::updateVelocity() {
-        if (velocityCurrent[0] > velocityXHigh) {
-            // Slower acceleration at high speed
-            velocityDifference[0] = std::min(std::max(velocityCommand[0] - velocityCurrent[0], -velocityDelta[0]), velocityDeltaXHigh);
-        } else {
-            velocityDifference[0] = std::min(std::max(velocityCommand[0] - velocityCurrent[0], -velocityDelta[0]), velocityDelta[0]);
-        }
+        // slow accelerations at high speed
+        auto& limit = (velocityCurrent[0] > velocityHigh ? accelerationLimitsHigh : accelerationLimits); // TODO: use a function instead
 
-        velocityDifference[1] = std::min(std::max(velocityCommand[1] - velocityCurrent[1], -velocityDelta[1]), velocityDelta[1]);
-        velocityDifference[2] = std::min(std::max(velocityCommand[2] - velocityCurrent[2], -velocityDelta[2]), velocityDelta[2]);
+        velocityDifference[0] = std::min(std::max(velocityCommand[0] - velocityCurrent[0], -limit[0]), limit[0]);
+        velocityDifference[1] = std::min(std::max(velocityCommand[1] - velocityCurrent[1], -limit[1]), limit[1]);
+        velocityDifference[2] = std::min(std::max(velocityCommand[2] - velocityCurrent[2], -limit[2]), limit[2]);
 
         velocityCurrent[0] += velocityDifference[0];
         velocityCurrent[1] += velocityDifference[1];
@@ -154,8 +154,8 @@ namespace motion {
         arma::vec3 uLeftFootRight = worldToLocal(leftFootTarget, uRightFoot);
         // Do not pidgeon toe, cross feet:
         // Check toe and heel overlap
-        double toeOverlap = -footSizeX[0] * uLeftFootRight[2];
-        double heelOverlap = -footSizeX[1] * uLeftFootRight[2];
+        double toeOverlap = -DarwinModel::Leg::FOOT_LENGTH / 2.0 * uLeftFootRight[2];
+        double heelOverlap = DarwinModel::Leg::FOOT_LENGTH / 2.0 * uLeftFootRight[2];
         double limitY = std::max(stepLimits(1,0), stanceLimitY2 + std::max(toeOverlap, heelOverlap));
         uLeftFootRight[0] = std::min(std::max(uLeftFootRight[0], stepLimits(0,0)), stepLimits(0,1));
         uLeftFootRight[1] = std::min(std::max(uLeftFootRight[1], limitY), stepLimits(1,1));
@@ -178,8 +178,8 @@ namespace motion {
         arma::vec3 uRightFootLeft = worldToLocal(rightFootTarget, uLeftFoot);
         // Do not pidgeon toe, cross feet:
         // Check toe and heel overlap
-        double toeOverlap = footSizeX[0] * uRightFootLeft[2];
-        double heelOverlap = footSizeX[1] * uRightFootLeft[2];
+        double toeOverlap = DarwinModel::Leg::FOOT_LENGTH / 2.0 * uRightFootLeft[2];
+        double heelOverlap = -DarwinModel::Leg::FOOT_LENGTH / 2.0 * uRightFootLeft[2];
         double limitY = std::max(stepLimits(1,0), stanceLimitY2 + std::max(toeOverlap, heelOverlap));
         uRightFootLeft[0] = std::min(std::max(uRightFootLeft[0], stepLimits(0,0)), stepLimits(0,1));
         uRightFootLeft[1] = std::min(std::max(uRightFootLeft[1], -stepLimits(1,1)), -limitY);
