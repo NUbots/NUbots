@@ -31,7 +31,7 @@ namespace utility{
                 RIGHT = false
             };
 
-            class DarwinModel{
+            class DarwinModel {
             public:
 
                 class Leg {

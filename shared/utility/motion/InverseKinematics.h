@@ -31,6 +31,7 @@
 #include "utility/motion/RobotModels.h"
 #include "messages/input/ServoID.h"
 #include "messages/input/Sensors.h"
+#include "messages/behaviour/Action.h"
 
 namespace utility {
 namespace motion {
@@ -51,7 +52,7 @@ namespace kinematics {
         @param RobotKinematicModel The class containing the leg model of the robot.
     */
     template <typename RobotKinematicModel>
-    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints(arma::mat44 target, Side isLeft) {
+    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints(arma::mat44 target, messages::behaviour::LimbID limb) {
         const float LENGTH_BETWEEN_LEGS = RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS;
         const float DISTANCE_FROM_BODY_TO_HIP_JOINT = RobotKinematicModel::Leg::HIP_OFFSET_Z;
         const float HIP_OFFSET_X = RobotKinematicModel::Leg::HIP_OFFSET_X;
@@ -80,7 +81,7 @@ namespace kinematics {
         target.col(3) = fourthColumn;
         //NUClear::log<NUClear::DEBUG>("Target Final\n", target);
 
-        if(!static_cast<bool>(isLeft)) {
+        if (limb != messages::behaviour::LimbID::LEFT_LEG) {
             target.submat(0,0,2,2) = arma::mat33{-1,0,0, 0,1,0, 0,0,1} * target.submat(0,0,2,2);
             target.submat(0,0,2,0) *= -1;
             target(0,3) *= -1;
@@ -97,7 +98,7 @@ namespace kinematics {
         arma::vec3 targetLeg = anklePos - hipOffset;
 
         float length = arma::norm(targetLeg, 2);
-        if(length > UPPER_LEG_LENGTH+LOWER_LEG_LENGTH){
+        if (length > UPPER_LEG_LENGTH+LOWER_LEG_LENGTH){
             NUClear::log<NUClear::WARN>("InverseKinematics::calculateLegJoints : !!! WARNING !!! Requested position beyond leg reach. Scaling back requested vector.");
             targetLeg *= (UPPER_LEG_LENGTH+LOWER_LEG_LENGTH)/length;
             length = UPPER_LEG_LENGTH+LOWER_LEG_LENGTH;
@@ -124,9 +125,10 @@ namespace kinematics {
 
         arma::vec3 hipX = arma::cross(ankleY, unitTargetLeg);
         float hipXLength = arma::norm(hipX,2);
-        if(hipXLength>0){
+        if (hipXLength>0){
             hipX /= hipXLength;
-        } else {
+        }
+        else {
             NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints : targetLeg and ankleY parrallel. This is unhandled at the moment.");
             return positions;
         }
@@ -144,7 +146,7 @@ namespace kinematics {
         bool hipRollPositive = cosZandHipX <= 0;
         arma::vec3 legPlaneGlobalZ = (isAnkleAboveWaist ? -1 : 1 ) * (globalZ - ( cosZandHipX * hipX));
         float legPlaneGlobalZLength = arma::norm(legPlaneGlobalZ, 2);
-        if(legPlaneGlobalZLength>0){
+        if (legPlaneGlobalZLength>0){
            legPlaneGlobalZ /= legPlaneGlobalZLength;
         }
 
@@ -168,14 +170,15 @@ namespace kinematics {
 
         hipYaw = (isHipYawPositive ? 1 : -1) * acos(arma::dot( hipXProjected,globalX));
 
-        if (static_cast<bool>(isLeft)) {
+        if (limb == messages::behaviour::LimbID::LEFT_LEG) {
             positions.push_back(std::make_pair(messages::input::ServoID::L_HIP_YAW, -hipYaw));
             positions.push_back(std::make_pair(messages::input::ServoID::L_HIP_ROLL, hipRoll));
             positions.push_back(std::make_pair(messages::input::ServoID::L_HIP_PITCH, -hipPitch));
             positions.push_back(std::make_pair(messages::input::ServoID::L_KNEE, M_PI - knee));
             positions.push_back(std::make_pair(messages::input::ServoID::L_ANKLE_PITCH, -anklePitch));
             positions.push_back(std::make_pair(messages::input::ServoID::L_ANKLE_ROLL, ankleRoll));
-        } else {
+        }
+        else {
             positions.push_back(std::make_pair(messages::input::ServoID::R_HIP_YAW, (RobotKinematicModel::Leg::LEFT_TO_RIGHT_HIP_YAW) * -hipYaw));
             positions.push_back(std::make_pair(messages::input::ServoID::R_HIP_ROLL, (RobotKinematicModel::Leg::LEFT_TO_RIGHT_HIP_ROLL) * hipRoll));
             positions.push_back(std::make_pair(messages::input::ServoID::R_HIP_PITCH, (RobotKinematicModel::Leg::LEFT_TO_RIGHT_HIP_PITCH) * -hipPitch));
@@ -188,16 +191,16 @@ namespace kinematics {
     }
 
     template <typename RobotKinematicModel>
-    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJointsTeamDarwin(arma::mat44 target, bool isLeft) {
+    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJointsTeamDarwin(arma::mat44 target, messages::behaviour::LimbID limb) {
         target(2,3) += RobotKinematicModel::TEAMDARWINCHEST_TO_ORIGIN;
         target *= utility::math::matrix::translationMatrix(arma::vec3({0,0,RobotKinematicModel::Leg::FOOT_HEIGHT}));
-        return calculateLegJoints<RobotKinematicModel>(target, Side(isLeft));
+        return calculateLegJoints<RobotKinematicModel>(target, limb);
     }
 
     template <typename RobotKinematicModel>
     std::vector<std::pair<messages::input::ServoID, float>> calculateLegJointsTeamDarwin(arma::mat44 leftTarget, arma::mat44 rightTarget) {
-        auto joints = calculateLegJointsTeamDarwin<RobotKinematicModel>(leftTarget, true);
-        auto joints2 = calculateLegJointsTeamDarwin<RobotKinematicModel>(rightTarget, false);
+        auto joints = calculateLegJointsTeamDarwin<RobotKinematicModel>(leftTarget, messages::behaviour::LimbID::LEFT_LEG);
+        auto joints2 = calculateLegJointsTeamDarwin<RobotKinematicModel>(rightTarget, messages::behaviour::LimbID::RIGHT_LEG);
         joints.insert(joints.end(), joints2.begin(), joints2.end());
         return joints;
     }

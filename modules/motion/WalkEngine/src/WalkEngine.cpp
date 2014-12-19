@@ -84,12 +84,14 @@ namespace motion {
                     // legs are available, start
                     //stanceReset();
                     //updateHandle.enable();
+                    interrupted = false;
                 }
             },
             [this] (const std::set<LimbID>& takenLimbs) {
                 if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
                     // legs are no longer available, reset walking (too late to stop walking)
                     //updateHandle.disable();
+                    interrupted = true;
                 }
             },
             [this] (const std::set<ServoID>&) {
@@ -144,6 +146,10 @@ namespace motion {
         qRArm = stance["arms"]["right"].as<arma::vec>();
         footOffset = stance["foot_offset"].as<arma::vec>();
 
+        auto& gains = stance["gains"];
+        gainArms = gains["arms"].as<Expression>();
+        gainLegs = gains["legs"].as<Expression>();
+
         auto& walkCycle = config["walk_cycle"];
         tStep = walkCycle["step_time"].as<Expression>();
         tZmp = walkCycle["zmp_time"].as<Expression>();
@@ -163,13 +169,7 @@ namespace motion {
         phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();
 
         // gToe/heel overlap checking values
-        stanceLimitMarginY = config["stanceLimitMarginY"].as<Expression>();
-        stanceLimitY2 = 2 * DarwinModel::Leg::HIP_OFFSET_Y - config["stanceLimitMarginY"].as<Expression>();
-
-        // gHardness parameters
-        hardnessSupport = config["hardnessSupport"].as<Expression>();
-        hardnessSwing = config["hardnessSwing"].as<Expression>();
-        hardnessArm = config["hardnessArm"].as<Expression>();
+        stanceLimitY2 = DarwinModel::Leg::LENGTH_BETWEEN_LEGS - config["stanceLimitMarginY"].as<Expression>();
 
         // gCompensation parameters
         hipRollCompensation = config["hipRollCompensation"].as<Expression>();
@@ -272,6 +272,8 @@ namespace motion {
             startFromStep = false;
 
             state = State::STOPPED;
+
+            interrupted = false;
 
             stanceReset();
     }
@@ -393,9 +395,6 @@ namespace motion {
     }
 
     std::unique_ptr<std::vector<ServoCommand>> WalkEngine::updateStill(const Sensors& sensors) {
-        leftLegHardness = hardnessSupport;
-        rightLegHardness = hardnessSupport;
-
         uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
         uTorsoActual = localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0}, uTorso);
         arma::vec6 pTorso = {uTorsoActual[0], uTorsoActual[1], bodyHeight, 0, bodyTilt, uTorsoActual[2]};
@@ -424,7 +423,7 @@ namespace motion {
         time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
 
         for (auto& joint : joints) {
-            waypoints->push_back({id, time, joint.first, joint.second, float(leftLegHardness * 100)}); // TODO: support separate gains for each leg
+            waypoints->push_back({id, time, joint.first, joint.second, gainLegs}); // TODO: support separate gains for each leg
         }
 
         return std::move(waypoints);
@@ -454,12 +453,12 @@ namespace motion {
         waypoints->reserve(6);
 
         time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
-        waypoints->push_back({id, time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]), float(hardnessArm * 100)});
-        waypoints->push_back({id, time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]), float(hardnessArm * 100)});
-        waypoints->push_back({id, time, ServoID::R_ELBOW,          float(qRArmActual[2]), float(hardnessArm * 100)});
-        waypoints->push_back({id, time, ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]), float(hardnessArm * 100)});
-        waypoints->push_back({id, time, ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]), float(hardnessArm * 100)});
-        waypoints->push_back({id, time, ServoID::L_ELBOW,          float(qLArmActual[2]), float(hardnessArm * 100)});
+        waypoints->push_back({id, time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]), gainArms});
+        waypoints->push_back({id, time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]), gainArms});
+        waypoints->push_back({id, time, ServoID::R_ELBOW,          float(qRArmActual[2]), gainArms});
+        waypoints->push_back({id, time, ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]), gainArms});
+        waypoints->push_back({id, time, ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]), gainArms});
+        waypoints->push_back({id, time, ServoID::L_ELBOW,          float(qLArmActual[2]), gainArms});
 
         return std::move(waypoints);
     }

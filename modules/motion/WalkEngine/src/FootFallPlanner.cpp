@@ -96,15 +96,11 @@ namespace motion {
             arma::vec3 uTorsoModded = localToWorld({supportMod[0], supportMod[1], 0}, uTorso);
             arma::vec3 uLeftFootModded = localToWorld(uLeftFootTorso, uTorsoModded);
             uSupport = localToWorld({-footOffset[0], -footOffset[1], 0}, uLeftFootModded);
-            leftLegHardness = hardnessSupport;
-            rightLegHardness = hardnessSwing;
         } else {
             arma::vec3 uRightFootTorso = worldToLocal(uRightFootSource, uTorso);
             arma::vec3 uTorsoModded = localToWorld({supportMod[0], supportMod[1], 0}, uTorso);
             arma::vec3 uRightFootModded = localToWorld(uRightFootTorso, uTorsoModded);
             uSupport = localToWorld({-footOffset[0], footOffset[1], 0}, uRightFootModded);
-            leftLegHardness = hardnessSwing;
-            rightLegHardness = hardnessSupport;
         }
 
         // compute ZMP coefficients

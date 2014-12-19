@@ -19,6 +19,7 @@
 
 #include "KinematicsDebug.h"
 
+#include "messages/behaviour/Action.h"
 #include "messages/support/Configuration.h"
 #include "messages/input/ServoID.h"
 #include "messages/input/Sensors.h"
@@ -32,6 +33,7 @@
 
 namespace modules {
     namespace debug {
+            using messages::behaviour::LimbID;
             using messages::support::Configuration;
             using messages::motion::ServoTarget;
             using messages::input::ServoID;
@@ -63,7 +65,7 @@ namespace modules {
                         auto waypoints = std::make_unique<std::vector<ServoTarget> >();
 
                         if (left) {
-                            std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(target, Side::LEFT);
+                            std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(target, LimbID::LEFT_LEG);
                             for (auto& legJoint : legJoints) {
                                 ServoTarget waypoint;
 
@@ -82,7 +84,7 @@ namespace modules {
                         }
 
                         if (right) {
-                            std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(target, Side::RIGHT);
+                            std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(target, LimbID::RIGHT_LEG);
                             for (auto& legJoint : legJoints) {
                                 ServoTarget waypoint;
 
@@ -138,7 +140,7 @@ namespace modules {
                             sensors->servos = std::vector<Sensors::Servo>(20);
 
                             if (left) {
-                                std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(ikRequest, Side::LEFT);
+                                std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(ikRequest, LimbID::LEFT_LEG);
                                 for (auto& legJoint : legJoints) {
                                     ServoID servoID;
                                     float position;
@@ -150,7 +152,7 @@ namespace modules {
                             }
 
                             if (right) {
-                                std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(ikRequest, Side::RIGHT);
+                                std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(ikRequest, LimbID::RIGHT_LEG);
                                 for (auto& legJoint : legJoints) {
                                     ServoID servoID;
                                     float position;

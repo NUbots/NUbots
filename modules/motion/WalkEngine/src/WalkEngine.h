@@ -69,7 +69,6 @@ namespace motion {
 
         // These limit the distance a footstep will take
         arma::mat::fixed<3,2> stepLimits;
-        double stanceLimitMarginY;
         double stanceLimitY2;
 
         // Velocity limits for the walk
@@ -91,12 +90,9 @@ namespace motion {
         // Torso Y rotation
         double bodyTilt;
 
-        // Servo gains used for the legs during walk
-        double hardnessSupport;
-        double hardnessSwing;
-        // Servo gains used for the arms during walk
-        double hardnessArm0;
-        double hardnessArm;
+        // Servo gains during walk
+        float gainArms;
+        float gainLegs;
 
         // Gait parameters
         // The tStep defines how long it will take for a robot to take its next step, in seconds.
@@ -198,10 +194,6 @@ namespace motion {
         messages::behaviour::LimbID swingLegInitial = messages::behaviour::LimbID::LEFT_LEG;
         messages::behaviour::LimbID swingLeg = swingLegInitial;
         double shiftFactor;
-
-        // TODO: link to actuator
-        double leftLegHardness;
-        double rightLegHardness;
 
         arma::vec3 uSupport;
         arma::vec3 uTorsoActual;

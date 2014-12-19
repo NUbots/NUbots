@@ -16,6 +16,10 @@ stance:
   foot_offset:
     - -0.02 # The distance the ankles are offset from the torso, in meters.
     - -0.01 # How far from the center of the foot the center of mass is placed during each step.
+  # The gains to use for the servos during the walk
+  gains:
+    arms: 30
+    legs: 30
 
 walk_cycle:
   # Defines how long it will take for the robot to take its next step, in seconds.
@@ -55,12 +59,6 @@ walk_cycle:
 
 # ??
 stanceLimitMarginY: 0.015
-# ??
-stanceLimitY2: 0.02
-# gains for the servos during the walk
-hardnessSupport: 0.3
-hardnessSwing: 0.3
-hardnessArm: 0.3
 # ??
 turnCompThreshold: 0
 # ??
