@@ -48,8 +48,7 @@ namespace strategy {
             moving = false;
         });
 
-        emit(std::make_unique<WalkStartCommand>());
-
+        emit<Scope::INITIALIZE>(std::make_unique<WalkStartCommand>());
     }
 
     void KeyboardWalk::run() {
@@ -180,7 +179,10 @@ namespace strategy {
     }
 
     void KeyboardWalk::updateCommand() {
-        emit(std::make_unique<WalkCommand>(WalkCommand{velocity, rotation}));
+        auto walkCommand = std::make_unique<WalkCommand>();
+        walkCommand->velocity = velocity;
+        walkCommand->rotationalSpeed = rotation;
+        emit(std::move(walkCommand));
     }
 
     void KeyboardWalk::printStatus() {

@@ -115,7 +115,6 @@ namespace motion {
 
         on<Trigger<WalkStopCommand>>([this](const WalkStopCommand&) {
             requestStop();
-            // TODO: set priorities to 0 when stopped - somehow
         });
 
         on<Trigger<Configuration<WalkEngine>> >([this](const Configuration<WalkEngine>& config) {
@@ -423,99 +422,6 @@ namespace motion {
 
         return waypoints;
     }
-
-    void WalkEngine::calculateNewStep() {
-        updateVelocity();
-
-        // swap swing and support legs
-        swingLeg = swingLeg == Leg::LEFT ? Leg::RIGHT : Leg::LEFT;
-
-        uLeftFootSource = uLeftFootDestination;
-        uRightFootSource = uRightFootDestination;
-        uTorsoSource = uTorsoDestination;
-
-        arma::vec2 supportMod = {0, 0}; // support point modulation for wallkick
-
-        if (stopRequest == StopRequest::REQUESTED) {
-            log<NUClear::TRACE>("Walk Engine:: Stop requested");
-            stopRequest = StopRequest::LAST_STEP;
-            velocityCurrent = {0, 0, 0};
-            velocityCommand = {0, 0, 0};
-            if (swingLeg == Leg::RIGHT) {
-                uRightFootDestination = localToWorld(-2 * uLRFootOffset, uLeftFootSource);
-            } else {
-                uLeftFootDestination = localToWorld(2 * uLRFootOffset, uRightFootSource);
-            }
-        } else {
-            // normal walk, advance steps
-            if (swingLeg == Leg::RIGHT) {
-                uRightFootDestination = stepRightFootDestination(velocityCurrent, uLeftFootSource, uRightFootSource);
-            } else {
-                uLeftFootDestination = stepLeftFootDestination(velocityCurrent, uLeftFootSource, uRightFootSource);
-            }
-
-            // velocity-based support point modulation
-            toeTipCompensation = 0;
-            if (velocityDifference[0] > 0) {
-                // accelerating to front
-                supportMod[0] = supportFront2;
-            } else if (velocityCurrent[0] > velFastForward) {
-                supportMod[0] = supportFront;
-                toeTipCompensation = ankleMod[0];
-            } else if (velocityCurrent[0] < 0) {
-                supportMod[0] = supportBack;
-            } else if (std::abs(velocityCurrent[2]) > velFastTurn) {
-                supportMod[0] = supportTurn;
-            } else {
-                if (velocityCurrent[1] > 0.015) {
-                    supportMod[0] = supportSideX;
-                    supportMod[1] = supportSideY;
-                } else if (velocityCurrent[1] < -0.015) {
-                    supportMod[0] = supportSideX;
-                    supportMod[1] = -supportSideY;
-                }
-            }
-        }
-
-        uTorsoDestination = stepTorso(uLeftFootDestination, uRightFootDestination, 0.5);
-
-        // adjustable initial step body swing
-        if (initialStep > 0) {
-            supportMod[1] = supportModYInitial;
-            if (swingLeg == Leg::LEFT) {
-                supportMod[1] *= -1;
-            }
-        }
-
-        // apply velocity-based support point modulation for uSupport
-        if (swingLeg == Leg::RIGHT) {
-            arma::vec3 uLeftFootTorso = worldToLocal(uLeftFootSource, uTorsoSource);
-            arma::vec3 uTorsoModded = localToWorld({supportMod[0], supportMod[1], 0}, uTorso);
-            arma::vec3 uLeftFootModded = localToWorld(uLeftFootTorso, uTorsoModded);
-            uSupport = localToWorld({supportX, supportY, 0}, uLeftFootModded);
-            leftLegHardness = hardnessSupport;
-            rightLegHardness = hardnessSwing;
-        } else {
-            arma::vec3 uRightFootTorso = worldToLocal(uRightFootSource, uTorso);
-            arma::vec3 uTorsoModded = localToWorld({supportMod[0], supportMod[1], 0}, uTorso);
-            arma::vec3 uRightFootModded = localToWorld(uRightFootTorso, uTorsoModded);
-            uSupport = localToWorld({supportX, -supportY, 0}, uRightFootModded);
-            leftLegHardness = hardnessSwing;
-            rightLegHardness = hardnessSupport;
-        }
-
-        // compute ZMP coefficients
-        zmpParams = {
-            (uSupport[0] - uTorso[0]) / (tStep * phase1Zmp),
-            (uTorsoDestination[0] - uSupport[0]) / (tStep * (1 - phase2Zmp)),
-            (uSupport[1] - uTorso[1]) / (tStep * phase1Zmp),
-            (uTorsoDestination[1] - uSupport[1]) / (tStep * (1 - phase2Zmp)),
-        };
-
-        zmpCoefficients.rows(0,1) = zmpSolve(uSupport[0], uTorsoSource[0], uTorsoDestination[0], uTorsoSource[0], uTorsoDestination[0]);
-        zmpCoefficients.rows(2,3) = zmpSolve(uSupport[1], uTorsoSource[1], uTorsoDestination[1], uTorsoSource[1], uTorsoDestination[1]);
-    }
-
     std::unique_ptr<std::vector<ServoCommand>> WalkEngine::motionLegs(std::vector<std::pair<ServoID, float>> joints, const Sensors& sensors) {
         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
         waypoints->reserve(16);
@@ -564,88 +470,6 @@ namespace motion {
 
         return std::move(waypoints);
     }
-
-    void WalkEngine::balance(std::vector<double>& qLegs, const Sensors& sensors) {
-        double gyroRoll0 = 0;
-        double gyroPitch0 = 0;
-
-        double phaseComp = std::min({1.0, phaseSingle / 0.1, (1 - phaseSingle) / 0.1});
-
-        /* TODO: crashes
-        ServoID supportLegID = (swingLeg == Leg::RIGHT) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
-        arma::mat33 ankleRotation = sensors.forwardKinematics.find(supportLegID)->second.submat(0,0,2,2);
-        // get effective gyro angle considering body angle offset
-        arma::mat33 kinematicGyroSORAMatrix = sensors.orientation * ankleRotation;   //DOUBLE TRANSPOSE
-        std::pair<arma::vec3, double> axisAngle = utility::math::matrix::axisAngleFromRotationMatrix(kinematicGyroSORAMatrix);
-        arma::vec3 kinematicsGyro = axisAngle.first * (axisAngle.second / balanceWeight);
-
-        gyroRoll0 = -kinematicsGyro[0]*180.0/M_PI;
-        gyroPitch0 = -kinematicsGyro[1]*180.0/M_PI;
-        */
-
-        double yawAngle = 0;
-        if (!active) {
-            // double support
-            yawAngle = (uLeftFoot[2] + uRightFoot[2]) / 2 - uTorsoActual[2];
-        }
-        else if (swingLeg == Leg::RIGHT) {
-            yawAngle = uLeftFoot[2] - uTorsoActual[2];
-        }
-        else {
-            yawAngle = uRightFoot[2] - uTorsoActual[2];
-        }
-
-        double gyroRoll = gyroRoll0 * std::cos(yawAngle) - gyroPitch0 * std::sin(yawAngle);
-        double gyroPitch = gyroPitch0 * std::cos(yawAngle) - gyroRoll0 * std::sin(yawAngle);
-
-        double armShiftX = procFunc(gyroPitch * armImuParamY[1], armImuParamY[2], armImuParamY[3]);
-        double armShiftY = procFunc(gyroRoll * armImuParamY[1], armImuParamY[2], armImuParamY[3]);
-
-        double ankleShiftX = procFunc(gyroPitch * ankleImuParamX[1], ankleImuParamX[2], ankleImuParamX[3]);
-        double ankleShiftY = procFunc(gyroRoll * ankleImuParamY[1], ankleImuParamY[2], ankleImuParamY[3]);
-        double kneeShiftX = procFunc(gyroPitch * kneeImuParamX[1], kneeImuParamX[2], kneeImuParamX[3]);
-        double hipShiftY = procFunc(gyroRoll * hipImuParamY[1], hipImuParamY[2], hipImuParamY[3]);
-
-        ankleShift[0] += ankleImuParamX[0] * (ankleShiftX - ankleShift[0]);
-        ankleShift[1] += ankleImuParamY[0] * (ankleShiftY - ankleShift[1]);
-        kneeShift += kneeImuParamX[0] * (kneeShiftX - kneeShift);
-        hipShift[1] += hipImuParamY[0] * (hipShiftY - hipShift[1]);
-        armShift[0] += armImuParamX[0] * (armShiftX - armShift[0]);
-        armShift[1] += armImuParamY[0] * (armShiftY - armShift[1]);
-
-        // TODO: toe/heel lifting
-
-        if (!active) {
-            // Double support, standing still
-            // qLegs[1] += hipShift[1]; // Hip roll stabilization
-            qLegs[3] += kneeShift; // Knee pitch stabilization
-            qLegs[4] += ankleShift[0]; // Ankle pitch stabilization
-            // qLegs[5] += ankleShift[1]; // Ankle roll stabilization
-
-            // qLegs[7] += hipShift[1]; // Hip roll stabilization
-            qLegs[9] += kneeShift; // Knee pitch stabilization
-            qLegs[10] += ankleShift[0]; // Ankle pitch stabilization
-            // qLegs[11] += ankleShift[1]; // Ankle roll stabilization
-        } else if (swingLeg == Leg::RIGHT) {
-            qLegs[1] += hipShift[1]; // Hip roll stabilization
-            qLegs[3] += kneeShift; // Knee pitch stabilization
-            qLegs[4] += ankleShift[0]; // Ankle pitch stabilization
-            qLegs[5] += ankleShift[1]; // Ankle roll stabilization
-
-            qLegs[10] += toeTipCompensation * phaseComp; // Lifting toetip
-            qLegs[1] += hipRollCompensation * phaseComp; // Hip roll compensation
-
-        } else {
-            qLegs[7] += hipShift[1]; // Hip roll stabilization
-            qLegs[9] += kneeShift; // Knee pitch stabilization
-            qLegs[10] += ankleShift[0]; // Ankle pitch stabilization
-            qLegs[11] += ankleShift[1]; // Ankle roll stabilization
-
-            qLegs[4] += toeTipCompensation * phaseComp; // Lifting toetip
-            qLegs[7] -= hipRollCompensation * phaseComp; // Hip roll compensation
-        }
-    }
-
     arma::vec3 WalkEngine::stepTorso(arma::vec3 uLeftFoot, arma::vec3 uRightFoot, double shiftFactor) {
         arma::vec3 uLeftFootSupport = localToWorld({supportX, supportY, 0}, uLeftFoot);
         arma::vec3 uRightFootSupport = localToWorld({supportX, -supportY, 0}, uRightFoot);
@@ -671,27 +495,6 @@ namespace motion {
         velocityCommand[0] = std::min(std::max(velocityCommand[0], velocityLimits(0,0)), velocityLimits(0,1));
         velocityCommand[1] = std::min(std::max(velocityCommand[1], velocityLimits(1,0)), velocityLimits(1,1));
         velocityCommand[2] = std::min(std::max(velocityCommand[2], velocityLimits(2,0)), velocityLimits(2,1));
-    }
-
-    void WalkEngine::updateVelocity() {
-        if (velocityCurrent[0] > velocityXHigh) {
-            // Slower acceleration at high speed
-            velocityDifference[0] = std::min(std::max(velocityCommand[0] - velocityCurrent[0], -velocityDelta[0]), velocityDeltaXHigh);
-        } else {
-            velocityDifference[0] = std::min(std::max(velocityCommand[0] - velocityCurrent[0], -velocityDelta[0]), velocityDelta[0]);
-        }
-
-        velocityDifference[1] = std::min(std::max(velocityCommand[1] - velocityCurrent[1], -velocityDelta[1]), velocityDelta[1]);
-        velocityDifference[2] = std::min(std::max(velocityCommand[2] - velocityCurrent[2], -velocityDelta[2]), velocityDelta[2]);
-
-        velocityCurrent[0] += velocityDifference[0];
-        velocityCurrent[1] += velocityDifference[1];
-        velocityCurrent[2] += velocityDifference[2];
-
-        if (initialStep > 0) {
-            velocityCurrent = arma::vec3{0, 0, 0};
-            initialStep--;
-        }
     }
 
     arma::vec3 WalkEngine::getVelocity() {
@@ -771,72 +574,6 @@ namespace motion {
         // Linear speed turning
         com[2] = phase * (uLeftFootDestination[2] + uRightFootDestination[2]) / 2 + (1 - phase) * (uLeftFootSource[2] + uRightFootSource[2]) / 2;
         return com;
-    }
-
-    /**
-     * Globals: uLRFootOffset, footSizeX, stanceLimitY, stanceLimitY2, stanceLimitAngle
-     */
-    arma::vec3 WalkEngine::stepLeftFootDestination(arma::vec3 velocity, arma::vec3 uLeftFoot, arma::vec3 uRightFoot) {
-        // Get midpoint between the two feet
-        arma::vec3 midPoint = se2Interpolate(0.5, uLeftFoot, uRightFoot);
-        // Get midpoint 1.5 steps in future
-        arma::vec3 forwardPoint = localToWorld(1.5 * velocity, midPoint);
-        // Offset to towards the foot in use to get the target location
-        arma::vec3 leftFootTarget = localToWorld(uLRFootOffset, forwardPoint);
-
-        // Start foot collision detection/prevention
-        arma::vec3 uLeftFootRight = worldToLocal(leftFootTarget, uRightFoot);
-        // Do not pidgeon toe, cross feet:
-        // Check toe and heel overlap
-        double toeOverlap = -footSizeX[0] * uLeftFootRight[2];
-        double heelOverlap = -footSizeX[1] * uLeftFootRight[2];
-        double limitY = std::max(stanceLimits(1,0), stanceLimitY2 + std::max(toeOverlap, heelOverlap));
-        uLeftFootRight[0] = std::min(std::max(uLeftFootRight[0], stanceLimits(0,0)), stanceLimits(0,1));
-        uLeftFootRight[1] = std::min(std::max(uLeftFootRight[1], limitY), stanceLimits(1,1));
-        uLeftFootRight[2] = std::min(std::max(uLeftFootRight[2], stanceLimits(2,0)), stanceLimits(2,1));
-        leftFootTarget = localToWorld(uLeftFootRight, uRightFoot);
-        // End foot collision detection/prevention
-
-        return leftFootTarget;
-    }
-
-    arma::vec3 WalkEngine::stepRightFootDestination(arma::vec3 velocity, arma::vec3 uLeftFoot, arma::vec3 uRightFoot) {
-        // Get midpoint between the two feet
-        arma::vec3 midPoint = se2Interpolate(0.5, uLeftFoot, uRightFoot);
-        // Get midpoint 1.5 steps in future
-        arma::vec3 forwardPoint = localToWorld(1.5 * velocity, midPoint);
-        // Offset to towards the foot in use to get the target location
-        arma::vec3 rightFootTarget = localToWorld(-uLRFootOffset, forwardPoint);
-
-        // Start foot collision detection/prevention
-        arma::vec3 uRightFootLeft = worldToLocal(rightFootTarget, uLeftFoot);
-        // Do not pidgeon toe, cross feet:
-        // Check toe and heel overlap
-        double toeOverlap = footSizeX[0] * uRightFootLeft[2];
-        double heelOverlap = footSizeX[1] * uRightFootLeft[2];
-        double limitY = std::max(stanceLimits(1,0), stanceLimitY2 + std::max(toeOverlap, heelOverlap));
-        uRightFootLeft[0] = std::min(std::max(uRightFootLeft[0], stanceLimits(0,0)), stanceLimits(0,1));
-        uRightFootLeft[1] = std::min(std::max(uRightFootLeft[1], -stanceLimits(1,1)), -limitY);
-        uRightFootLeft[2] = std::min(std::max(uRightFootLeft[2], -stanceLimits(2,1)), -stanceLimits(2,0));
-        rightFootTarget = localToWorld(uRightFootLeft, uLeftFoot);
-        // End foot collision detection/prevention
-
-        return rightFootTarget;
-    }
-
-    /**
-    * Global variables used:
-    * phase1Single, phase2Single
-    */
-    arma::vec3 WalkEngine::footPhase(double phase) {
-        // Computes relative x,z motion of foot during single support phase
-        // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
-        phaseSingle = std::min(std::max(phase - phase1Single, 0.0) / (phase2Single - phase1Single), 1.0);
-        double phaseSingleSkew = std::pow(phaseSingle, 0.8) - 0.17 * phaseSingle * (1 - phaseSingle);
-        double xf = 0.5 * (1 - std::cos(M_PI * phaseSingleSkew));
-        double zf = 0.5 * (1 - std::cos(2 * M_PI * phaseSingleSkew));
-
-        return {xf, 0, zf};
     }
 
     double WalkEngine::getTime() {

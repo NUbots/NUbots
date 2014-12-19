@@ -128,10 +128,10 @@ namespace strategy {
 
             auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
 
-            emit(std::make_unique<WalkCommand>(WalkCommand{
-                strafeNorm,
-                rotationalSpeedNorm
-            }));
+            auto walkCommand = std::make_unique<WalkCommand>();
+            walkCommand->velocity = strafeNorm;
+            walkCommand->rotationalSpeed = rotationalSpeedNorm;
+            emit(std::move(walkCommand));
         });
     }
 
