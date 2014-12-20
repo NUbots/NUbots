@@ -95,9 +95,9 @@ namespace motion {
         float gainLegs;
 
         // Gait parameters
-        // The tStep defines how long it will take for a robot to take its next step, in seconds.
-        double tStep;
-        double tZmp;
+        // The stepTime defines how long it will take for a robot to take its next step, in seconds.
+        double stepTime;
+        double zmpTime;
         // The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
         double stepHeight;
 
@@ -105,12 +105,10 @@ namespace motion {
         double phase2Single;
 
         // Compensation parameters
-        double hipRollCompensation;
-        arma::vec2 ankleMod;
-        double turnCompThreshold;
-        double turnComp;
+        // double hipRollCompensation;
+        // arma::vec2 ankleMod;
 
-        // Gyro stabilization parameters
+        /*// Gyro stabilization parameters
         arma::vec4 ankleImuParamX;
         arma::vec4 ankleImuParamY;
         arma::vec4 kneeImuParamX;
@@ -127,14 +125,10 @@ namespace motion {
         double supportBack;
         double supportSideX;
         double supportSideY;
-        double supportTurn;
-
-        double frontComp;
-        double accelComp;
+        double supportTurn;*/
 
         // Initial body swing
-        double supportModYInitial;
-        double toeTipCompensation;
+        // double toeTipCompensation;
 
         // end_config_params
 
@@ -172,7 +166,7 @@ namespace motion {
         double beginStepTime;
         double phase;
 
-        int currentStepType;
+        int currenstepTimeType;
 
         // How to begin initial step, unsure of affect
         // Should be an enum
@@ -198,7 +192,7 @@ namespace motion {
         arma::vec3 uSupport;
         arma::vec3 uTorsoActual;
 
-        int STAND_SCRIPT_DURATION_MILLISECONDS;
+        double STAND_SCRIPT_DURATION;
 
         void generateAndSaveStandScript();
         void configureWalk(const YAML::Node& config);
@@ -206,7 +200,7 @@ namespace motion {
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> update(const messages::input::Sensors& sensors);
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> updateStep(const messages::input::Sensors& sensors);
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> updateStill(const messages::input::Sensors& sensors = messages::input::Sensors());
-        std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionLegs(std::vector<std::pair<messages::input::ServoID, float>> qLegs, const messages::input::Sensors& sensors);
+        std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionLegs(std::vector<std::pair<messages::input::ServoID, float>> joints);
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionArms();
         void balance(std::vector<double>& qLegs, const messages::input::Sensors& sensors);
 
@@ -225,8 +219,8 @@ namespace motion {
          */
         arma::vec3 stepTorso(arma::vec3 uLeftFoot, arma::vec3 uRightFoot, double shiftFactor);
         arma::vec3 getVelocity();
-        arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2);
-        arma::vec3 zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double tStep, double tZmp, double phase1Zmp, double phase2Zmp);
+        arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
+        arma::vec3 zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, arma::vec3 uSupport, arma::vec3 uLeftFootDestination, arma::vec3 uLeftFootSource, arma::vec3 uRightFootDestination, arma::vec3 uRightFootSource);
         arma::vec3 footPhase(double phase);
 
         double getTime(); // TODO: remove

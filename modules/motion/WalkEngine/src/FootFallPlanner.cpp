@@ -58,7 +58,7 @@ namespace motion {
             }
 
             // velocity-based support point modulation
-            toeTipCompensation = 0;
+            /*toeTipCompensation = 0;
             if (velocityDifference[0] > 0) {
                 // accelerating to front
                 supportMod[0] = supportFront2;
@@ -77,18 +77,10 @@ namespace motion {
                     supportMod[0] = supportSideX;
                     supportMod[1] = -supportSideY;
                 }
-            }
+            }*/
         }
 
         uTorsoDestination = stepTorso(uLeftFootDestination, uRightFootDestination, 0.5);
-
-        // adjustable initial step body swing
-        if (initialStep > 0) {
-            supportMod[1] = supportModYInitial;
-            if (swingLeg == LimbID::LEFT_LEG) {
-                supportMod[1] *= -1;
-            }
-        }
 
         // apply velocity-based support point modulation for uSupport
         if (swingLeg == LimbID::RIGHT_LEG) {
@@ -105,14 +97,14 @@ namespace motion {
 
         // compute ZMP coefficients
         zmpParams = {
-            (uSupport[0] - uTorso[0]) / (tStep * phase1Single),
-            (uTorsoDestination[0] - uSupport[0]) / (tStep * (1 - phase2Single)),
-            (uSupport[1] - uTorso[1]) / (tStep * phase1Single),
-            (uTorsoDestination[1] - uSupport[1]) / (tStep * (1 - phase2Single)),
+            (uSupport[0] - uTorso[0]) / (stepTime * phase1Single),
+            (uTorsoDestination[0] - uSupport[0]) / (stepTime * (1 - phase2Single)),
+            (uSupport[1] - uTorso[1]) / (stepTime * phase1Single),
+            (uTorsoDestination[1] - uSupport[1]) / (stepTime * (1 - phase2Single)),
         };
 
-        zmpCoefficients.rows(0,1) = zmpSolve(uSupport[0], uTorsoSource[0], uTorsoDestination[0], uTorsoSource[0], uTorsoDestination[0]);
-        zmpCoefficients.rows(2,3) = zmpSolve(uSupport[1], uTorsoSource[1], uTorsoDestination[1], uTorsoSource[1], uTorsoDestination[1]);
+        zmpCoefficients.rows(0,1) = zmpSolve(uSupport[0], uTorsoSource[0], uTorsoDestination[0], uTorsoSource[0], uTorsoDestination[0], phase1Single, phase2Single, stepTime, zmpTime);
+        zmpCoefficients.rows(2,3) = zmpSolve(uSupport[1], uTorsoSource[1], uTorsoDestination[1], uTorsoSource[1], uTorsoDestination[1], phase1Single, phase2Single, stepTime, zmpTime);
     }
 
     void WalkEngine::updateVelocity() {

@@ -25,13 +25,14 @@ namespace motion {
     using messages::behaviour::LimbID;
     using messages::input::Sensors;
 
-    void WalkEngine::balance(std::vector<double>& qLegs, const Sensors& sensors) {
+    void WalkEngine::balance(std::vector<double>&/* qLegs*/, const Sensors&/* sensors*/) {
+        /* TODO: Review
         double gyroRoll0 = 0;
         double gyroPitch0 = 0;
 
         double phaseComp = std::min({1.0, phaseSingle / 0.1, (1 - phaseSingle) / 0.1});
 
-        /* TODO: crashes
+        //TODO: crashes
         ServoID supportLegID = (swingLeg == LimbID::RIGHT_LEG) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
         arma::mat33 ankleRotation = sensors.forwardKinematics.find(supportLegID)->second.submat(0,0,2,2);
         // get effective gyro angle considering body angle offset
@@ -41,7 +42,6 @@ namespace motion {
 
         gyroRoll0 = -kinematicsGyro[0]*180.0/M_PI;
         gyroPitch0 = -kinematicsGyro[1]*180.0/M_PI;
-        */
 
         double yawAngle = 0;
         if (!active) {
@@ -103,7 +103,7 @@ namespace motion {
 
             qLegs[4] += toeTipCompensation * phaseComp; // Lifting toetip
             qLegs[7] -= hipRollCompensation * phaseComp; // Hip roll compensation
-        }
+        }*/
     }
 
 }

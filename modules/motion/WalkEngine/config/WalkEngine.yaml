@@ -20,6 +20,8 @@ stance:
   gains:
     arms: 30
     legs: 30
+  # ???
+  limit_margin_y: 0.015
 
 walk_cycle:
   # Defines how long it will take for the robot to take its next step, in seconds.
@@ -53,40 +55,30 @@ walk_cycle:
   single_support_phase:
     start: 0.1
     end: 0.9
+  balance:
+    # balanceWeight: 0.7
+    # Support bias parameters to reduce backlash-based instability
+    # velFastForward: 0.05
+    # velFastTurn: 0.15
+    # supportFront: 0.03
+    # supportFront2: 0.03
+    # supportBack: -0.02
+    # supportSideX: -0.01
+    # supportSideY: -0.005
+    # hipRollCompensation: 4 * pi / 180
+    # toeTipCompensation: 0 * pi / 180
+    gyro:
+      # Ratio to normalize gyro gains into units of degree/second
+      # gyroFactor: 0.18 * 0.273 * pi / 180 * 300 / 1024 # dps to rad/s conversion
+      # ankleImuParamX: [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
+      # ankleImuParamY: [0.5, 1.2 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
+      # kneeImuParamX: [0.5, 0.7 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
+      # hipImuParamY: [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
+      # armImuParamX: [0.5, 10.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]
+      # armImuParamY: [0.5, 0.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]   # supportTurn: 0.02
 
 
 ### TODO ###
 
-# ??
-stanceLimitMarginY: 0.015
-# ??
-turnCompThreshold: 0
-# ??
-turnComp: 0
+STAND_SCRIPT_DURATION: 1
 
-# Support bias parameters to reduce backlash-based instability
-velFastForward: 0.05
-velFastTurn: 0.15
-supportFront: 0.03
-supportFront2: 0.03
-supportBack: -0.02
-supportSideX: -0.01
-supportSideY: -0.005
-supportTurn: 0.02
-
-frontComp: 0
-accelComp: 0.1
-supportModYInitial: 0
-hipRollCompensation: 4 * pi / 180
-toeTipCompensation: 0 * pi / 180
-balanceWeight: 0.7
-STAND_SCRIPT_DURATION_MILLISECONDS: 1000
-
-# Ratio to normalize gyro gains into units of degree/second
-gyroFactor: 0.18 * 0.273 * pi / 180 * 300 / 1024 # dps to rad/s conversion
-ankleImuParamX: [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
-ankleImuParamY: [0.5, 1.2 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
-kneeImuParamX: [0.5, 0.7 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
-hipImuParamY: [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
-armImuParamX: [0.5, 10.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]
-armImuParamY: [0.5, 0.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]
