@@ -24,6 +24,7 @@
 #include "messages/support/nubugger/proto/Message.pb.h"
 #include "utility/time/time.h"
 #include "utility/file/fileutil.h"
+#include "utility/strutil/strutil.h"
 
 /**
 * @author Monica Olejniczak
@@ -31,8 +32,9 @@
 namespace modules {
 namespace support {
     using utility::file::listFiles;
-    using messages::support::nubugger::proto::Message;
     using utility::time::getUtcTimestamp;
+    using utility::strutil::split;
+    using messages::support::nubugger::proto::Message;
     using messages::support::nubugger::proto::ConfigurationState;
 
     void processNode(ConfigurationState::Node& proto, YAML::Node& yaml);
@@ -139,8 +141,10 @@ namespace support {
      * @param yaml A YAML node.
      */
     void processNode(ConfigurationState::Node& proto, YAML::Node& yaml) {
-        // set the tag of the protocol buffer
-        proto.set_tag(yaml.Tag());
+        // set the tag of the protocol buffer if it exists
+        if (yaml.Tag() != "?") {
+            proto.set_tag(yaml.Tag());
+        }
         switch (yaml.Type()) {
             case YAML::NodeType::Undefined:
                 // TODO Handle it somehow?
@@ -148,42 +152,86 @@ namespace support {
             case YAML::NodeType::Null:
                 processNullNode(proto);
                 break;
-            // strings and numbers
+                // strings and numbers
             case YAML::NodeType::Scalar:
                 processScalarNode(proto, yaml);
                 break;
-            // arrays and lists
+                // arrays and lists
             case YAML::NodeType::Sequence:
                 processSequenceNode(proto, yaml);
                 break;
-            // hashes and dictionaries
+                // hashes and dictionaries
             case YAML::NodeType::Map:
                 processMapNode(proto, yaml);
                 break;
         }
     }
 
+    /**
+     * Processes a configuration file path recursively by checking against the full path and the current path. The
+     * current path is adjusted when entering a new directory.
+     *
+     * @param path The path of the configuration file.
+     * @param currentPath The current path to use for recursion.
+     * @param proto The protocol node.
+     */
+    void processPath(std::string path, std::string currentPath, ConfigurationState::Node& proto) {
+        // get every node within the current path using the '/' delimeter
+        auto nodes = split(currentPath, '/');
+        // create a new map value from the current protocol node
+        auto* map = proto.add_map_value();
+        // set the name of the map to the first node
+        map->set_name(nodes.front());
+        // check if we are at a file
+        if (nodes.size() == 1) {
+            // set the Node Type of the map
+            proto.set_type(ConfigurationState::Node::MAP);
+            // load the YAML file using the current iteration
+            YAML::Node yaml = YAML::LoadFile(path);
+            // processes the yaml node into a protocol node
+            processNode(*map->mutable_value(), yaml);
+        } else {
+            // set the Node Type of the directory
+            proto.set_type(ConfigurationState::Node::DIRECTORY);
+            // get the new path by removing the first node from the current path string
+            std::string newPath = currentPath.substr(nodes.front().length() + 1, currentPath.length());
+            // processes the new path
+            processPath(path, newPath, *map->mutable_value());
+        }
+    }
+
+    /**
+     * Process a configuration file path by calling its recursive function.
+     *
+     * @param path The path of the configuration file.
+     * @param proto The protocol node.
+     */
+    void processPath(std::string path, ConfigurationState::Node& proto) {
+        processPath(path, path, proto);
+    }
+
+    /**
+     * A command sent when the network requests the configuration state data. It retrieves all of the configuration
+     * files and converts them into readable messages to send back over the network.
+     */
     void NUbugger::sendConfigurationState() {
+        // specify the base directory
+        std::string directory = "config";
         // get the list of file paths in the shared config directory and ensure it is recursive
-        std::vector<std::string> paths = listFiles("config", true);
+        std::vector<std::string> paths = listFiles(directory, true);
         // create a new message
         Message message;
-        message.set_type(Message::CONFIGURATION_STATE);         // set the message type to the configuration state
-        message.set_filter_id(0);                               // ensure the message is not filtered
-        message.set_utc_timestamp(getUtcTimestamp());           // set the timestamp of the message
+        message.set_type(Message::CONFIGURATION_STATE);             // set the message type to the configuration state
+        message.set_filter_id(0);                                   // ensure the message is not filtered
+        message.set_utc_timestamp(getUtcTimestamp());               // set the timestamp of the message
 
-        auto* state = message.mutable_configuration_state();    // create the configuration state from the message
-        auto* root = state->mutable_root();                     // retrieve the root node from the state
-        root->set_type(ConfigurationState::Node::DIRECTORY);    // set the Node Type of the root to a DIRECTORY
-
-        // TODO: handle directories w/o root
-        for (auto&& path : paths) {                             // iterate through every file path in the config directory
-            YAML::Node yaml = YAML::LoadFile(path);             // load the YAML file using the current iteration
-            auto* keymap = root->add_map_value();               // add a new map from the root node
-            keymap->set_name(path);                             // set the name of the root to the path name
-            processNode(*keymap->mutable_value(), yaml);        // processes the yaml node into a protocol node
+        auto* state = message.mutable_configuration_state();        // create the configuration state from the message
+        auto* root = state->mutable_root();                         // retrieve the root node from the state
+        root->set_type(ConfigurationState::Node::DIRECTORY);        // process the root directory
+        for (auto&& path : paths) {                                 // iterate through every file path in the config directory
+            processPath(path, *root);                               // process the path using the root node
         }
-
+        // send the message over the network
         send(message);
     }
 }
