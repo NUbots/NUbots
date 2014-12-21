@@ -168,35 +168,72 @@ namespace support {
     }
 
     /**
-     * Processes a configuration file path recursively by checking against the full path and the current path. The
-     * current path is adjusted when entering a new directory.
+     * Processes a configuration file by setting the type of the protocol node, loading the file through its path and
+     * then processing the information within that file.
+     *
+     * @param path The path to the configuration file.
+     * @param name The name of the configuration file.
+     * @param proto The protocol node.
+     * @param directories The list of known directory nodes.
+     */
+    void processFile(std::string path, std::string name, ConfigurationState::Node& proto, std::map<std::string,
+    ConfigurationState::KeyPair>& directories, std::string directoryPath) {
+        // create a new map value from the current protocol node
+        auto* map = proto.add_map_value();
+        // set the name of the map
+        map->set_name(name);
+        // set the Node Type of the map
+        proto.set_type(ConfigurationState::Node::FILE);
+        // load the YAML file using the current iteration
+        YAML::Node yaml = YAML::LoadFile(path);
+        // processes the yaml node into a protocol node
+        processNode(*map->mutable_value(), yaml);
+    }
+
+    /**
+     * Processes a configuration file path recursively. The current path is split into nodes, where each node is either
+     * a directory or a file name. If the there is only one node, then it can be assumed that the current path is a
+     * configuration file and is able to be read and processed. Otherwise, it is a directory and the current path
+     * needs to be adjusted such that it does not contain the current working directory.
      *
      * @param path The path of the configuration file.
      * @param currentPath The current path to use for recursion.
      * @param proto The protocol node.
+     * @param directories The list of known directory nodes.
      */
-    void processPath(std::string path, std::string currentPath, ConfigurationState::Node& proto) {
+    void processPath(std::string path, std::string currentPath, ConfigurationState::Node& proto, std::map<std::string,
+    ConfigurationState::KeyPair>& directories) {
         // get every node within the current path using the '/' delimeter
         auto nodes = split(currentPath, '/');
-        // create a new map value from the current protocol node
-        auto* map = proto.add_map_value();
-        // set the name of the map to the first node
-        map->set_name(nodes.front());
-        // check if we are at a file
+        // get the name of the current file or directory
+        std::string name = nodes.front();
+        // calculate the path to the directory
+        std::string directoryPath = path.substr(0, path.find(currentPath) + name.length());
+        // check if we are at a file and assume that it is not an empty directory
         if (nodes.size() == 1) {
-            // set the Node Type of the map
-            proto.set_type(ConfigurationState::Node::MAP);
-            // load the YAML file using the current iteration
-            YAML::Node yaml = YAML::LoadFile(path);
-            // processes the yaml node into a protocol node
-            processNode(*map->mutable_value(), yaml);
+            processFile(path, name, proto, directories, directoryPath);
         } else {
-            // set the Node Type of the directory
-            proto.set_type(ConfigurationState::Node::DIRECTORY);
+            // retrieve the directory protocol node given the path to the directory
+            auto iterator = directories.find(directoryPath);
             // get the new path by removing the first node from the current path string
             std::string newPath = currentPath.substr(nodes.front().length() + 1, currentPath.length());
-            // processes the new path
-            processPath(path, newPath, *map->mutable_value());
+            // check if the directory does not exist
+            if (iterator == directories.end()) {
+                auto* map = proto.add_map_value();      // create a new map value from the current protocol node
+                map->set_name(name);                    // set the name of the map
+                // set the Node Type of the directory
+                proto.set_type(ConfigurationState::Node::DIRECTORY);
+                // add the directory to the map
+                directories[directoryPath] = *map;
+                // processes the new path
+                processPath(path, newPath, *map->mutable_value(), directories);
+            } else {
+                // get the directory from the iterator
+                ConfigurationState::KeyPair directory = iterator->second;
+                // processes the new path using the directory that was found
+                std::cout << "current " << currentPath << std::endl << "directory name " << directory.name() << std::endl;
+                processPath(path, newPath, *directory.mutable_value(), directories);
+            }
         }
     }
 
@@ -205,9 +242,11 @@ namespace support {
      *
      * @param path The path of the configuration file.
      * @param proto The protocol node.
+     * @param directories The list of known directory nodes.
      */
-    void processPath(std::string path, ConfigurationState::Node& proto) {
-        processPath(path, path, proto);
+    void processPath(std::string path, ConfigurationState::Node& proto, std::map<std::string,
+    ConfigurationState::KeyPair>& directories) {
+        processPath(path, path, proto, directories);
     }
 
     /**
@@ -219,6 +258,9 @@ namespace support {
         std::string directory = "config";
         // get the list of file paths in the shared config directory and ensure it is recursive
         std::vector<std::string> paths = listFiles(directory, true);
+        // create the list of directories
+        std::map<std::string, ConfigurationState::KeyPair> directories;
+
         // create a new message
         Message message;
         message.set_type(Message::CONFIGURATION_STATE);             // set the message type to the configuration state
@@ -228,8 +270,9 @@ namespace support {
         auto* state = message.mutable_configuration_state();        // create the configuration state from the message
         auto* root = state->mutable_root();                         // retrieve the root node from the state
         root->set_type(ConfigurationState::Node::DIRECTORY);        // process the root directory
+
         for (auto&& path : paths) {                                 // iterate through every file path in the config directory
-            processPath(path, *root);                               // process the path using the root node
+            processPath(path, *root, directories);                  // process the path using the root node
         }
         // send the message over the network
         send(message);
