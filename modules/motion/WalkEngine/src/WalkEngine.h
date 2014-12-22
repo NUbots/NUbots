@@ -214,11 +214,8 @@ namespace motion {
         void stanceReset();
         void setVelocity(double vx, double vy, double va);
         void updateVelocity();
-        arma::vec3 stepLeftFootDestination(arma::vec3 vel, arma::vec3 uLeftFoot, arma::vec3 uRightFoot);
-        arma::vec3 stepRightFootDestination(arma::vec3 vel, arma::vec3 uLeftFoot, arma::vec3 uRightFoot);
-        /**
-         *
-         */
+        arma::vec3 getNewFootTarget(const arma::vec3& velocity, const arma::vec3& leftFoot, const arma::vec3& rightFoot, const messages::behaviour::LimbID& swingLeg);
+        arma::vec3 feetCollisionDetection(const arma::vec3& footTarget, const arma::vec3& leftFoot, const arma::vec3& rightFoot, const messages::behaviour::LimbID& swingLeg);
         arma::vec3 stepTorso(arma::vec3 uLeftFoot, arma::vec3 uRightFoot, double shiftFactor);
         arma::vec3 getVelocity();
         arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);

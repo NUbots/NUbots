@@ -52,9 +52,9 @@ namespace motion {
         } else {
             // normal walk, advance steps
             if (swingLeg == LimbID::RIGHT_LEG) {
-                uRightFootDestination = stepRightFootDestination(velocityCurrent, uLeftFootSource, uRightFootSource);
+                uRightFootDestination = getNewFootTarget(velocityCurrent, uLeftFootSource, uRightFootSource, swingLeg);
             } else {
-                uLeftFootDestination = stepLeftFootDestination(velocityCurrent, uLeftFootSource, uRightFootSource);
+                uLeftFootDestination = getNewFootTarget(velocityCurrent, uLeftFootSource, uRightFootSource, swingLeg);
             }
 
             // velocity-based support point modulation
@@ -125,57 +125,38 @@ namespace motion {
         }
     }
 
-
-
-    /**
-     * Globals: uLRFootOffset, footSizeX, stanceLimitY, stanceLimitY2, stanceLimitAngle
-     */
-    arma::vec3 WalkEngine::stepLeftFootDestination(arma::vec3 velocity, arma::vec3 uLeftFoot, arma::vec3 uRightFoot) {
+    arma::vec3 WalkEngine::getNewFootTarget(const arma::vec3& velocity, const arma::vec3& leftFoot, const arma::vec3& rightFoot, const LimbID& swingLeg) {
+        // Negative if right leg to account for the mirroring of the foot target
+        int8_t sign = swingLeg == LimbID::LEFT_LEG ? 1 : -1;
         // Get midpoint between the two feet
-        arma::vec3 midPoint = se2Interpolate(0.5, uLeftFoot, uRightFoot);
+        arma::vec3 midPoint = se2Interpolate(0.5, leftFoot, rightFoot);
         // Get midpoint 1.5 steps in future
+        // Note: The reason for 1.5 rather than 1 is because it takes an extra 0.5 steps
+        // for the torso to reach a given position when you want both feet together
         arma::vec3 forwardPoint = localToWorld(1.5 * velocity, midPoint);
         // Offset to towards the foot in use to get the target location
-        arma::vec3 leftFootTarget = localToWorld(uLRFootOffset, forwardPoint);
+        arma::vec3 footTarget = localToWorld(sign * uLRFootOffset, forwardPoint);
 
-        // Start foot collision detection/prevention
-        arma::vec3 uLeftFootRight = worldToLocal(leftFootTarget, uRightFoot);
-        // Do not pidgeon toe, cross feet:
-        // Check toe and heel overlap
-        double toeOverlap = -DarwinModel::Leg::FOOT_LENGTH / 2.0 * uLeftFootRight[2];
-        double heelOverlap = DarwinModel::Leg::FOOT_LENGTH / 2.0 * uLeftFootRight[2];
-        double limitY = std::max(stepLimits(1,0), stanceLimitY2 + std::max(toeOverlap, heelOverlap));
-        uLeftFootRight[0] = std::min(std::max(uLeftFootRight[0], stepLimits(0,0)), stepLimits(0,1));
-        uLeftFootRight[1] = std::min(std::max(uLeftFootRight[1], limitY), stepLimits(1,1));
-        uLeftFootRight[2] = std::min(std::max(uLeftFootRight[2], stepLimits(2,0)), stepLimits(2,1));
-        leftFootTarget = localToWorld(uLeftFootRight, uRightFoot);
-        // End foot collision detection/prevention
+        // Start applying step limits:
+        // Get the vector between the feet and clamp the components between the min and max step limits
+        arma::vec3 supportFoot = swingLeg == LimbID::LEFT_LEG ? rightFoot : leftFoot;
+        arma::vec3 feetDifference = worldToLocal(footTarget, supportFoot);
+        feetDifference[0] = std::min(std::max(feetDifference[0],        stepLimits(0,0)), stepLimits(0,1));
+        feetDifference[1] = std::min(std::max(feetDifference[1] * sign, stepLimits(1,0)), stepLimits(1,1)) * sign;
+        feetDifference[2] = std::min(std::max(feetDifference[2] * sign, stepLimits(2,0)), stepLimits(2,1)) * sign;
+        // end applying step limits
 
-        return leftFootTarget;
-    }
+        // Start feet collision detection:
+        // Uses a rough measure to detection collision and moves feet apart if too close
+        double overlap = DarwinModel::Leg::FOOT_LENGTH / 2.0 * std::abs(feetDifference[2]);
+        feetDifference[1] = std::max(feetDifference[1] * sign, stanceLimitY2 + overlap) * sign;
+        // End feet collision detection
 
-    arma::vec3 WalkEngine::stepRightFootDestination(arma::vec3 velocity, arma::vec3 uLeftFoot, arma::vec3 uRightFoot) {
-        // Get midpoint between the two feet
-        arma::vec3 midPoint = se2Interpolate(0.5, uLeftFoot, uRightFoot);
-        // Get midpoint 1.5 steps in future
-        arma::vec3 forwardPoint = localToWorld(1.5 * velocity, midPoint);
-        // Offset to towards the foot in use to get the target location
-        arma::vec3 rightFootTarget = localToWorld(-uLRFootOffset, forwardPoint);
+        // Update foot target to be 'feetDistance' away from the support foot
+        footTarget = localToWorld(feetDifference, supportFoot);
 
-        // Start foot collision detection/prevention
-        arma::vec3 uRightFootLeft = worldToLocal(rightFootTarget, uLeftFoot);
-        // Do not pidgeon toe, cross feet:
-        // Check toe and heel overlap
-        double toeOverlap = DarwinModel::Leg::FOOT_LENGTH / 2.0 * uRightFootLeft[2];
-        double heelOverlap = -DarwinModel::Leg::FOOT_LENGTH / 2.0 * uRightFootLeft[2];
-        double limitY = std::max(stepLimits(1,0), stanceLimitY2 + std::max(toeOverlap, heelOverlap));
-        uRightFootLeft[0] = std::min(std::max(uRightFootLeft[0], stepLimits(0,0)), stepLimits(0,1));
-        uRightFootLeft[1] = std::min(std::max(uRightFootLeft[1], -stepLimits(1,1)), -limitY);
-        uRightFootLeft[2] = std::min(std::max(uRightFootLeft[2], -stepLimits(2,1)), -stepLimits(2,0));
-        rightFootTarget = localToWorld(uRightFootLeft, uLeftFoot);
-        // End foot collision detection/prevention
-
-        return rightFootTarget;
+        return footTarget;
+        // return feetCollisionDetection(footTarget, leftFoot, rightFoot, swingLeg);
     }
 
     /**
