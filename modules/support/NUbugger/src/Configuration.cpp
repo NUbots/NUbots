@@ -27,8 +27,8 @@
 #include "utility/strutil/strutil.h"
 
 /**
-* @author Monica Olejniczak
-*/
+ * @author Monica Olejniczak
+ */
 namespace modules {
 namespace support {
     using utility::file::listFiles;
@@ -107,9 +107,12 @@ namespace support {
         proto.set_type(ConfigurationState::Node::SEQUENCE);
         // iterate through every yaml node in the sequence
         for (auto&& yamlNode : yaml) {
-            // recursively call this function where the protocol node is a new sequence value and the yaml
-            // node is the current iteration within the list
-            processNode(*proto.add_sequence_value(), yamlNode);
+            // check if the node should be processed
+            if (yamlNode.Tag() != NUbugger::IGNORE_TAG) {
+                // recursively call this function where the protocol node is a new sequence value and the yaml
+                // node is the current iteration within the list
+                processNode(*proto.add_sequence_value(), yamlNode);
+            }
         }
     }
 
@@ -125,13 +128,16 @@ namespace support {
         proto.set_type(ConfigurationState::Node::MAP);
         // iterate through every yaml node in the map
         for (auto&& yamlNode : yaml) {
-            // create a new map value from the protocol node
-            auto* map = proto.add_map_value();
-            // set the name of this new node to the key of the yaml node and convert it to a string
-            map->set_name(yamlNode.first.as<std::string>());
-            // recursively call this function with a pointer to the object that is a part of the protocol
-            // buffer as its first parameter and use the value of the yaml node for the second parameter
-            processNode(*map->mutable_value(), yamlNode.second);
+            // check if the node should be processed
+            if (yamlNode.second.Tag() != NUbugger::IGNORE_TAG) { 
+                // create a new map value from the protocol node
+                auto* map = proto.add_map_value();
+                // set the name of this new node to the key of the yaml node and convert it to a string
+                map->set_name(yamlNode.first.as<std::string>());
+                // recursively call this function with a pointer to the object that is a part of the protocol
+                // buffer as its first parameter and use the value of the yaml node for the second parameter
+                processNode(*map->mutable_value(), yamlNode.second);
+            }
         }
     }
 

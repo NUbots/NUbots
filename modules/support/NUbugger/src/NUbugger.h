@@ -92,6 +92,7 @@ namespace modules {
             void kill();
         public:
             static constexpr const char* CONFIGURATION_PATH = "NUbugger.yaml";
+            static constexpr const char* IGNORE_TAG = "IGNORE";
             explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);
         };
 
