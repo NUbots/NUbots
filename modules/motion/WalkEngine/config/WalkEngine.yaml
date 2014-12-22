@@ -82,3 +82,6 @@ walk_cycle:
 
 STAND_SCRIPT_DURATION: 1
 
+# Use this to emit fake localisation Self objects based on the walk engine's blind belief
+# Note: This is really only useful as a debugging tool
+emit_localisation: false

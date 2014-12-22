@@ -65,6 +65,7 @@ namespace motion {
         arma::vec2 footOffset;
 
         // start_config_params
+        bool emitLocalisation;
         // Walk Parameters
 
         // These limit the distance a footstep will take
@@ -203,6 +204,7 @@ namespace motion {
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionLegs(std::vector<std::pair<messages::input::ServoID, float>> joints);
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionArms();
         void balance(std::vector<double>& qLegs, const messages::input::Sensors& sensors);
+        void localise(arma::vec3 position);
 
         void reset();
         void start();

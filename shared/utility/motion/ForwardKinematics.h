@@ -166,7 +166,7 @@ namespace kinematics {
 
         //Rotate to face down foot (roll)
         runningTransform *= utility::math::matrix::zRotationMatrix(sensors.servos[static_cast<int>(ANKLE_ROLL)].presentPosition , 4);
-        //Rotate so x faces towar toes
+        //Rotate so x faces toward toes
         runningTransform *= utility::math::matrix::yRotationMatrix(-M_PI_2, 4);
         //Translate to ground
         runningTransform *= utility::math::matrix::translationMatrix(arma::vec3({0, 0, -RobotKinematicModel::Leg::FOOT_HEIGHT}));

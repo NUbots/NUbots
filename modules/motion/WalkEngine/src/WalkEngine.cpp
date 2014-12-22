@@ -29,6 +29,7 @@
 #include "messages/motion/ServoTarget.h"
 #include "messages/motion/Script.h"
 #include "messages/behaviour/FixedWalkCommand.h"
+#include "messages/localisation/FieldObject.h"
 
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/YamlArmadillo.h"
@@ -138,6 +139,7 @@ namespace motion {
     }
 
     void WalkEngine::configureWalk(const YAML::Node& config){
+        emitLocalisation = config["emit_localisation"].as<bool>();
 
         auto& stance = config["stance"];
         bodyHeight = stance["body_height"].as<Expression>();
@@ -245,7 +247,7 @@ namespace motion {
             started = false;
             swingLeg = swingLegInitial;
             beginStepTime = getTime();
-            phase=0;
+            phase = 0;
             currenstepTimeType = 0;
 
             initialStep = 2;
@@ -291,6 +293,19 @@ namespace motion {
         emit(std::make_unique<WalkStopped>());
 
         return std::make_unique<std::vector<ServoCommand>>();
+    }
+
+    void WalkEngine::localise(arma::vec3 position) {
+        // emit position as a fake localisation
+        auto localisation = std::make_unique<std::vector<messages::localisation::Self>>();
+        messages::localisation::Self self;
+        self.position = {position[0], position[1]};
+        self.position_cov = arma::eye(2,2) * 0.1; // made up
+        self.heading = {std::cos(position[2]), std::sin(position[2])}; // convert to cartesian coordinates
+        self.velocity = arma::zeros(2); // not used
+        self.robot_to_world_rotation = arma::zeros(2,2); // not used
+        localisation->push_back(self);
+        emit(std::move(localisation));
     }
 
     std::unique_ptr<std::vector<ServoCommand>> WalkEngine::update(const Sensors& sensors) {
@@ -356,10 +371,13 @@ namespace motion {
         arma::mat44 leftFoot = torsoInv * vec6ToMatrix(pLeftFoot);
         arma::mat44 rightFoot = torsoInv * vec6ToMatrix(pRightFoot);
 
+        if (emitLocalisation) {
+            localise(uTorsoActual);
+        }
+
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFoot, rightFoot);
         // TODO: balance(joints, sensors);
         auto waypoints = motionLegs(joints);
-        //std::vector<std::pair<messages::input::ServoID, double>>
 
         auto arms = motionArms();
         waypoints->insert(waypoints->end(), arms->begin(), arms->end());
@@ -378,6 +396,10 @@ namespace motion {
         arma::mat44 torsoInv = orthonormal44Inverse(torso);
         arma::mat44 leftFoot = torsoInv * vec6ToMatrix(pLeftFoot);
         arma::mat44 rightFoot = torsoInv * vec6ToMatrix(pRightFoot);
+
+        if (emitLocalisation) {
+            localise(uTorsoActual);
+        }
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFoot, rightFoot);
         // TODO: balance(joints, sensors);
