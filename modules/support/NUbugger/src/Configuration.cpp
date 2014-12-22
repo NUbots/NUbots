@@ -174,10 +174,8 @@ namespace support {
      * @param path The path to the configuration file.
      * @param name The name of the configuration file.
      * @param proto The protocol node.
-     * @param directories The list of known directory nodes.
      */
-    void processFile(std::string path, std::string name, ConfigurationState::Node& proto, std::map<std::string,
-    ConfigurationState::KeyPair>& directories, std::string directoryPath) {
+    void processFile(std::string path, std::string name, ConfigurationState::Node& proto) {
         // create a new map value from the current protocol node
         auto* map = proto.add_map_value();
         // set the name of the map
@@ -202,21 +200,21 @@ namespace support {
      * @param directories The list of known directory nodes.
      */
     void processPath(std::string path, std::string currentPath, ConfigurationState::Node& proto, std::map<std::string,
-    ConfigurationState::KeyPair>& directories) {
-        // get every node within the current path using the '/' delimeter
-        auto nodes = split(currentPath, '/');
+    ConfigurationState::KeyPair*>& directories) {
+        // get the index of where the name ends
+        auto index = currentPath.find('/');
         // get the name of the current file or directory
-        std::string name = nodes.front();
-        // calculate the path to the directory
-        std::string directoryPath = path.substr(0, path.find(currentPath) + name.length());
+        std::string name = currentPath.substr(0, index);
         // check if we are at a file and assume that it is not an empty directory
-        if (nodes.size() == 1) {
-            processFile(path, name, proto, directories, directoryPath);
+        if (index == std::string::npos) {
+            processFile(path, name, proto);
         } else {
+            // calculate the path to the directory
+            std::string directoryPath = path.substr(0, path.find(currentPath) + name.length());
             // retrieve the directory protocol node given the path to the directory
             auto iterator = directories.find(directoryPath);
             // get the new path by removing the first node from the current path string
-            std::string newPath = currentPath.substr(nodes.front().length() + 1, currentPath.length());
+            std::string newPath = currentPath.substr(name.length() + 1, currentPath.length());
             // check if the directory does not exist
             if (iterator == directories.end()) {
                 auto* map = proto.add_map_value();      // create a new map value from the current protocol node
@@ -224,15 +222,14 @@ namespace support {
                 // set the Node Type of the directory
                 proto.set_type(ConfigurationState::Node::DIRECTORY);
                 // add the directory to the map
-                directories[directoryPath] = *map;
+                directories[directoryPath] = map;
                 // processes the new path
                 processPath(path, newPath, *map->mutable_value(), directories);
             } else {
                 // get the directory from the iterator
-                ConfigurationState::KeyPair directory = iterator->second;
+                ConfigurationState::KeyPair* directory = iterator->second;
                 // processes the new path using the directory that was found
-                std::cout << "current " << currentPath << std::endl << "directory name " << directory.name() << std::endl;
-                processPath(path, newPath, *directory.mutable_value(), directories);
+                processPath(path, newPath, *directory->mutable_value(), directories);
             }
         }
     }
@@ -245,7 +242,7 @@ namespace support {
      * @param directories The list of known directory nodes.
      */
     void processPath(std::string path, ConfigurationState::Node& proto, std::map<std::string,
-    ConfigurationState::KeyPair>& directories) {
+    ConfigurationState::KeyPair*>& directories) {
         processPath(path, path, proto, directories);
     }
 
@@ -259,7 +256,7 @@ namespace support {
         // get the list of file paths in the shared config directory and ensure it is recursive
         std::vector<std::string> paths = listFiles(directory, true);
         // create the list of directories
-        std::map<std::string, ConfigurationState::KeyPair> directories;
+        std::map<std::string, ConfigurationState::KeyPair*> directories;
 
         // create a new message
         Message message;
