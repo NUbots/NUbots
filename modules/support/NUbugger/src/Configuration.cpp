@@ -37,81 +37,81 @@ namespace support {
     using messages::support::nubugger::proto::Message;
     using messages::support::nubugger::proto::ConfigurationState;
 
-    void processNode(ConfigurationState::Node& proto, YAML::Node& yaml);
-    void processPath(std::string path, int currentIndex, ConfigurationState::Node& proto, std::map<std::string,
+    void processNode(ConfigurationState::Node& node, YAML::Node& yaml);
+    void processPath(std::string path, int currentIndex, ConfigurationState::Node& node, std::map<std::string,
             ConfigurationState::KeyPair*>& directories);
 
     /**
      * Processes a null YAML node by setting its respective type on the protocol node.
      *
-     * @param proto The protocol node.
+     * @param node The protocol node.
      */
-    void processNullNode(ConfigurationState::Node& proto) {
+    void processNullNode(ConfigurationState::Node& node) {
         // set the type of the protocol node to the NULL_VALUE Node Type
-        proto.set_type(ConfigurationState::Node::NULL_VALUE);
+        node.set_type(ConfigurationState::Node::NULL_VALUE);
     }
 
     /**
      * Processes a scalar YAML node by setting its respective type on the protocol node. A scalar node may comprise a
      * boolean, number or string.
      *
-     * @param proto The protocol node.
+     * @param node The protocol node.
      * @param yaml A scalar YAML node.
      */
-    void processScalarNode(ConfigurationState::Node& proto, YAML::Node& yaml) {
+    void processScalarNode(ConfigurationState::Node& node, YAML::Node& yaml) {
         bool bValue;
         // check if the yaml node is a boolean
         if (YAML::convert<bool>::decode(yaml, bValue)) {
             // set the type of the protocol node to the BOOLEAN Node Type and escape the case
-            proto.set_type(ConfigurationState::Node::BOOLEAN);
+            node.set_type(ConfigurationState::Node::BOOLEAN);
             // set the value of the protocol node to the boolean
-            proto.set_boolean_value(bValue);
+            node.set_boolean_value(bValue);
             return;
         }
         long lValue;
         // check if the yaml node is a long
         if (YAML::convert<long>::decode(yaml, lValue)) {
             // set the type of the protocol node to the LONG Node Type and escape the case
-            proto.set_type(ConfigurationState::Node::LONG);
+            node.set_type(ConfigurationState::Node::LONG);
             // set the value of the protocol node to the long
-            proto.set_long_value(lValue);
+            node.set_long_value(lValue);
             return;
         }
         double dValue;
         // check if the yaml node is a double
         if (YAML::convert<double>::decode(yaml, dValue)) {
             // set the type of the protocol node to the DOUBLE Node Type and escape the case
-            proto.set_type(ConfigurationState::Node::DOUBLE);
+            node.set_type(ConfigurationState::Node::DOUBLE);
             // set the value of the protocol node to the double
-            proto.set_double_value(dValue);
+            node.set_double_value(dValue);
             return;
         }
         // declare a string and then decode it
         std::string sValue;
         YAML::convert<std::string>::decode(yaml, sValue);
         // set the type of the protocol node to the STRING Node Type and escape the case
-        proto.set_type(ConfigurationState::Node::STRING);
+        node.set_type(ConfigurationState::Node::STRING);
         // set the value of the protocol node to the string
-        proto.set_string_value(sValue);
+        node.set_string_value(sValue);
     }
 
     /**
      * Processes a sequence YAML node by settings its respective type on the protocol node. It then iterates through
      * all the nodes in this sequence and processes each node.
      *
-     * @param proto The protocol node.
+     * @param node The protocol node.
      * @param yaml A sequence YAML node.
      */
-    void processSequenceNode(ConfigurationState::Node& proto, YAML::Node& yaml) {
+    void processSequenceNode(ConfigurationState::Node& node, YAML::Node& yaml) {
         // set the type of the protocol node to the SEQUENCE Node Type
-        proto.set_type(ConfigurationState::Node::SEQUENCE);
+        node.set_type(ConfigurationState::Node::SEQUENCE);
         // iterate through every yaml node in the sequence
         for (auto&& yamlNode : yaml) {
             // check if the node should be processed
             if (yamlNode.Tag() != NUbugger::IGNORE_TAG) {
                 // recursively call this function where the protocol node is a new sequence value and the yaml
                 // node is the current iteration within the list
-                processNode(*proto.add_sequence_value(), yamlNode);
+                processNode(*node.add_sequence_value(), yamlNode);
             }
         }
     }
@@ -120,18 +120,18 @@ namespace support {
      * Processes a map YAML node by setting its respective type on the protocol node. It then iterates through all the
      * nodes in this map and processes each node.
      *
-     * @param proto The protocol node.
+     * @param node The protocol node.
      * @param yaml A map YAML node.
      */
-    void processMapNode(ConfigurationState::Node& proto, YAML::Node& yaml) {
+    void processMapNode(ConfigurationState::Node& node, YAML::Node& yaml) {
         // set the type of the protocol node to the MAP Node Type
-        proto.set_type(ConfigurationState::Node::MAP);
+        node.set_type(ConfigurationState::Node::MAP);
         // iterate through every yaml node in the map
         for (auto&& yamlNode : yaml) {
             // check if the node should be processed
             if (yamlNode.second.Tag() != NUbugger::IGNORE_TAG) { 
                 // create a new map value from the protocol node
-                auto* map = proto.add_map_value();
+                auto* map = node.add_map_value();
                 // set the name of this new node to the key of the yaml node and convert it to a string
                 map->set_name(yamlNode.first.as<std::string>());
                 // recursively call this function with a pointer to the object that is a part of the protocol
@@ -145,32 +145,32 @@ namespace support {
      * Processes a particular YAML node into its equivalent protocol node. The tag is initially set and the type of the
      * YAML node is then evaluated.
      *
-     * @param proto The protocol node.
+     * @param node The protocol node.
      * @param yaml A YAML node.
      */
-    void processNode(ConfigurationState::Node& proto, YAML::Node& yaml) {
+    void processNode(ConfigurationState::Node& node, YAML::Node& yaml) {
         // set the tag of the protocol buffer if it exists
         if (yaml.Tag() != "?") {
-            proto.set_tag(yaml.Tag());
+            node.set_tag(yaml.Tag());
         }
         switch (yaml.Type()) {
             case YAML::NodeType::Undefined:
                 // TODO Handle it somehow?
                 break;
             case YAML::NodeType::Null:
-                processNullNode(proto);
+                processNullNode(node);
                 break;
                 // strings and numbers
             case YAML::NodeType::Scalar:
-                processScalarNode(proto, yaml);
+                processScalarNode(node, yaml);
                 break;
                 // arrays and lists
             case YAML::NodeType::Sequence:
-                processSequenceNode(proto, yaml);
+                processSequenceNode(node, yaml);
                 break;
                 // hashes and dictionaries
             case YAML::NodeType::Map:
-                processMapNode(proto, yaml);
+                processMapNode(node, yaml);
                 break;
         }
     }
@@ -181,15 +181,15 @@ namespace support {
      *
      * @param path The path to the configuration file.
      * @param name The name of the configuration file.
-     * @param proto The protocol node.
+     * @param node The protocol node.
      */
-    void processFile(std::string path, std::string name, ConfigurationState::Node& proto) {
+    void processFile(std::string path, std::string name, ConfigurationState::Node& node) {
         // create a new map value from the current protocol node
-        auto* map = proto.add_map_value();
+        auto* map = node.add_map_value();
         // set the name of the map
         map->set_name(name);
         // set the Node Type of the map
-        proto.set_type(ConfigurationState::Node::FILE);
+        node.set_type(ConfigurationState::Node::FILE);
         // load the YAML file using the current iteration
         YAML::Node yaml = YAML::LoadFile(path);
         // processes the yaml node into a protocol node
@@ -203,11 +203,11 @@ namespace support {
      *
      * @param path The path of the configuration file.
      * @param name The name of the directory.
-     * @param proto The protocol node.
+     * @param node The protocol node.
      * @param index The index within the path that specifies where the name of the current directory ends.
      * @param directories The list of known directory nodes.
      */
-    void processDirectory(std::string path, std::string name, ConfigurationState::Node& proto, int index,
+    void processDirectory(std::string path, std::string name, ConfigurationState::Node& node, int index,
     std::map<std::string, ConfigurationState::KeyPair*>& directories) {
         // calculate the path to the directory
         std::string directoryPath = path.substr(0, index);
@@ -215,10 +215,10 @@ namespace support {
         auto iterator = directories.find(directoryPath);
         ConfigurationState::KeyPair* map;                   // create the map key pair
         if (iterator == directories.end()) {                // check if the directory does not exist
-            map = proto.add_map_value();                    // create a new map value from the current protocol node
+            map = node.add_map_value();                     // create a new map value from the current protocol node
             map->set_name(name);                            // set the name of the map
             // set the Node Type of the directory
-            proto.set_type(ConfigurationState::Node::DIRECTORY);
+            node.set_type(ConfigurationState::Node::DIRECTORY);
             // add the directory to the map
             directories[directoryPath] = map;
         } else {
@@ -228,17 +228,16 @@ namespace support {
         // process the new path
         processPath(path, index + 1, *map->mutable_value(), directories);
     }
-
     /**
      * Processes a configuration file path recursively. The name of the file or directory is retrieved by using the
      * index of the first known '/'. This index determines whether a file or directory needs to be processed.
      *
      * @param path The path of the configuration file.
      * @param currentIndex The current index to use when searching the path.
-     * @param proto The protocol node.
+     * @param node The protocol node.
      * @param directories The list of known directory nodes.
      */
-    void processPath(std::string path, int currentIndex, ConfigurationState::Node& proto, std::map<std::string,
+    void processPath(std::string path, int currentIndex, ConfigurationState::Node& node, std::map<std::string,
     ConfigurationState::KeyPair*>& directories) {
         // get the index of where the name of the file or directory ends
         auto index = path.find('/', currentIndex);
@@ -247,10 +246,10 @@ namespace support {
         // check if we are at a file
         if (index == std::string::npos) {
             // process the file
-            processFile(path, name, proto);
+            processFile(path, name, node);
         } else {
             // process the directory
-            processDirectory(path, name, proto, index, directories);
+            processDirectory(path, name, node, index, directories);
         }
     }
 
@@ -258,12 +257,12 @@ namespace support {
      * Process a configuration file path by calling its recursive function.
      *
      * @param path The path of the configuration file.
-     * @param proto The protocol node.
+     * @param node The protocol node.
      * @param directories The list of known directory nodes.
      */
-    void processPath(std::string path, ConfigurationState::Node& proto, std::map<std::string,
+    void processPath(std::string path, ConfigurationState::Node& node, std::map<std::string,
     ConfigurationState::KeyPair*>& directories) {
-        processPath(path, 0, proto, directories);
+        processPath(path, 0, node, directories);
     }
 
     /**
