@@ -220,7 +220,18 @@ namespace motion {
         arma::vec3 getVelocity();
         arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
         arma::vec3 zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, arma::vec3 uSupport, arma::vec3 uLeftFootDestination, arma::vec3 uLeftFootSource, arma::vec3 uRightFootDestination, arma::vec3 uRightFootSource);
-        arma::vec3 footPhase(double phase);
+        /**
+         * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
+         * This is used to 'ease' the foot path through its trajectory.
+         * The params phase1Single and phase2Single are used to tune the amount of time the robot spends on two feet
+         * Note: Only x/z are used currently and y is always 0
+         * See: http://easings.net/ to reference common easing functions
+         *
+         * @param phase The input to the easing function, with a range of [0,1].
+         * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not start until phase is >= 0.1
+         * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when phase >= 0.9
+         */
+        arma::vec3 footPhase(double phase, double phase1Single, double phase2Single);
 
         double getTime(); // TODO: remove
         double procFunc(double a, double deadband, double maxvalue); //TODO: move documentation from .cpp to .h file

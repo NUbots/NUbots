@@ -343,7 +343,7 @@ namespace motion {
     }
 
     std::unique_ptr<std::vector<ServoCommand>> WalkEngine::updateStep(const Sensors&/* sensors*/) {
-        arma::vec3 foot = footPhase(phase);
+        arma::vec3 foot = footPhase(phase, phase1Single, phase2Single);
         if (initialStep > 0) {
             foot[2] = 0; // don't lift foot at initial step, TODO: review
         }

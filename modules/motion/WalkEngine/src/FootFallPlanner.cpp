@@ -147,7 +147,7 @@ namespace motion {
         // end applying step limits
 
         // Start feet collision detection:
-        // Uses a rough measure to detection collision and moves feet apart if too close
+        // Uses a rough measure to detect collision and move feet apart if too close
         double overlap = DarwinModel::Leg::FOOT_LENGTH / 2.0 * std::abs(feetDifference[2]);
         feetDifference[1] = std::max(feetDifference[1] * sign, stanceLimitY2 + overlap) * sign;
         // End feet collision detection
@@ -156,14 +156,13 @@ namespace motion {
         footTarget = localToWorld(feetDifference, supportFoot);
 
         return footTarget;
-        // return feetCollisionDetection(footTarget, leftFoot, rightFoot, swingLeg);
     }
 
     /**
     * Global variables used:
-    * phase1Single, phase2Single
+    * phaseSingle
     */
-    arma::vec3 WalkEngine::footPhase(double phase) {
+    arma::vec3 WalkEngine::footPhase(double phase, double phase1Single, double phase2Single) {
         // Computes relative x,z motion of foot during single support phase
         // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
         phaseSingle = std::min(std::max(phase - phase1Single, 0.0) / (phase2Single - phase1Single), 1.0);
