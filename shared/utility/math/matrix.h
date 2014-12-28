@@ -200,6 +200,13 @@ namespace utility {
                 return out;
             }
 
+            inline arma::mat44 se2ToMatrix(const arma::vec3& in) {
+                arma::mat44 out = arma::eye(4,4);
+                out *= translationMatrix({in[0], in[1], 0});
+                out *= zRotationMatrix(in[2], 4);
+                return out;
+            }
+
         }
     }
 }

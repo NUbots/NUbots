@@ -65,7 +65,9 @@ namespace motion {
     using utility::motion::kinematics::DarwinModel;
     using utility::math::angle::normalizeAngle;
     using utility::math::matrix::vec6ToMatrix;
+    using utility::math::matrix::se2ToMatrix;
     using utility::math::matrix::orthonormal44Inverse;
+    using utility::math::matrix::translationMatrix;
     using utility::nubugger::graph;
     using utility::support::Expression;
 
@@ -101,7 +103,7 @@ namespace motion {
         }));
 
         updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, With<Sensors>, Options< Single, Priority<NUClear::HIGH>> >([this](const time_t&, const Sensors& sensors) {
-            emit(update(sensors));
+            update(sensors);
         });
 
         //updateHandle.disable();
@@ -124,17 +126,20 @@ namespace motion {
         on<Trigger<Configuration<WalkEngine>> >([this](const Configuration<WalkEngine>& config) {
             configureWalk(config.config);
         });
+
         on<Trigger<WalkOptimiserCommand> >([this](const WalkOptimiserCommand& command) {
             configureWalk(command.walkConfig);
             emit(std::make_unique<WalkConfigSaved>());
         });
 
         on<Trigger<Startup>>([this](const Startup&) {
-            generateAndSaveStandScript();
-            reset();
-            state = State::LAST_STEP;
+            //generateAndSaveStandScript();
+            //reset();
+            //state = State::LAST_STEP;
             //start();
         });
+
+        reset();
 
     }
 
@@ -198,10 +203,10 @@ namespace motion {
 
         balanceWeight = config["balanceWeight"].as<Expression>();*/
 
-        STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();
+        // STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();
     }
 
-    void WalkEngine::generateAndSaveStandScript(){
+    /*void WalkEngine::generateAndSaveStandScript(){
         reset();
         stanceReset();
         auto waypoints = updateStill();
@@ -220,7 +225,7 @@ namespace motion {
         //Try update(); ?
         reset();
         stanceReset();
-    }
+    }*/
 
     void WalkEngine::reset() {
             // Global walk state variables
@@ -251,8 +256,6 @@ namespace motion {
             currenstepTimeType = 0;
 
             initialStep = 2;
-
-            phaseSingle = 0;
 
             // gStandard offset
             uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0};
@@ -285,14 +288,14 @@ namespace motion {
         }
     }
 
-    std::unique_ptr<std::vector<ServoCommand>> WalkEngine::stop() {
+    void WalkEngine::stop() {
         state = State::STOPPED;
         active = false;
         emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 0, 0 }})); // TODO: config
         log<NUClear::TRACE>("Walk Engine:: Stop request complete");
         emit(std::make_unique<WalkStopped>());
 
-        return std::make_unique<std::vector<ServoCommand>>();
+        emit(std::make_unique<std::vector<ServoCommand>>());
     }
 
     void WalkEngine::localise(arma::vec3 position) {
@@ -308,20 +311,21 @@ namespace motion {
         emit(std::move(localisation));
     }
 
-    std::unique_ptr<std::vector<ServoCommand>> WalkEngine::update(const Sensors& sensors) {
-        double time = getTime();
+    void WalkEngine::update(const Sensors& sensors) {
+        double now = getTime();
 
         if (!active) {
-            return updateStill(sensors);
+            updateStill(sensors);
+            return;
         }
 
         if (!started) {
             started = true;
-            beginStepTime = time;
+            beginStepTime = now;
         }
 
         // phase of step
-        phase = (time - beginStepTime) / stepTime;
+        phase = (now - beginStepTime) / stepTime;
 
         bool newStep = false;
 
@@ -332,17 +336,18 @@ namespace motion {
         }
 
         if (newStep && state == State::LAST_STEP) {
-            return stop();
+            stop();
+            return;
         }
 
         if (newStep) {
             calculateNewStep();
         }
 
-        return updateStep(sensors);
+        updateStep(sensors);
     }
 
-    std::unique_ptr<std::vector<ServoCommand>> WalkEngine::updateStep(const Sensors&/* sensors*/) {
+    void WalkEngine::updateStep(const Sensors&/* sensors*/) {
         arma::vec3 foot = footPhase(phase, phase1Single, phase2Single);
         if (initialStep > 0) {
             foot[2] = 0; // don't lift foot at initial step, TODO: review
@@ -355,61 +360,62 @@ namespace motion {
 
         uTorso = zmpCom(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
 
-        arma::vec3 uTorsoActual = localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0}, uTorso);
-        arma::vec6 pTorso = {uTorsoActual[0], uTorsoActual[1], bodyHeight, 0, bodyTilt, uTorsoActual[2]};
-        arma::vec6 pLeftFoot = {uLeftFoot[0], uLeftFoot[1], 0, 0, 0, uLeftFoot[2]};
-        arma::vec6 pRightFoot = {uRightFoot[0], uRightFoot[1], 0, 0, 0, uRightFoot[2]};
+        arma::mat44 leftFoot = se2ToMatrix(uLeftFoot);
+        arma::mat44 rightFoot = se2ToMatrix(uRightFoot);
 
         if (swingLeg == LimbID::RIGHT_LEG) {
-            pRightFoot[2] = stepHeight * foot[2];
+            rightFoot *= translationMatrix({0, 0, stepHeight * foot[2]});
         } else {
-            pLeftFoot[2] = stepHeight * foot[2];
+            leftFoot *= translationMatrix({0, 0, stepHeight * foot[2]});
         }
 
-        arma::mat44 torso = vec6ToMatrix(pTorso);
+        arma::vec3 uTorsoActual = localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0}, uTorso);
+        arma::mat44 torso = vec6ToMatrix({uTorsoActual[0], uTorsoActual[1], bodyHeight, 0, bodyTilt, uTorsoActual[2]});
         arma::mat44 torsoInv = orthonormal44Inverse(torso);
-        arma::mat44 leftFoot = torsoInv * vec6ToMatrix(pLeftFoot);
-        arma::mat44 rightFoot = torsoInv * vec6ToMatrix(pRightFoot);
+
+        // Transform feet targets to be relative to the torso
+        arma::mat44 leftFootTorso = torsoInv * leftFoot;
+        arma::mat44 rightFootTorso = torsoInv * rightFoot;
 
         if (emitLocalisation) {
             localise(uTorsoActual);
         }
 
-        auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFoot, rightFoot);
+        auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
         // TODO: balance(joints, sensors);
         auto waypoints = motionLegs(joints);
 
         auto arms = motionArms();
         waypoints->insert(waypoints->end(), arms->begin(), arms->end());
 
-        return waypoints;
+        emit(std::move(waypoints));
     }
 
-    std::unique_ptr<std::vector<ServoCommand>> WalkEngine::updateStill(const Sensors&/* sensors*/) {
+    void WalkEngine::updateStill(const Sensors&/* sensors*/) {
         uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
-        uTorsoActual = localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0}, uTorso);
-        arma::vec6 pTorso = {uTorsoActual[0], uTorsoActual[1], bodyHeight, 0, bodyTilt, uTorsoActual[2]};
-        arma::vec6 pLeftFoot = {uLeftFoot[0], uLeftFoot[1], 0, 0, 0, uLeftFoot[2]};
-        arma::vec6 pRightFoot = {uRightFoot[0], uRightFoot[1], 0, 0, 0, uRightFoot[2]};
+        arma::vec3 uTorsoActual = localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0}, uTorso);
 
-        arma::mat44 torso = vec6ToMatrix(pTorso);
+        arma::mat44 torso = vec6ToMatrix({uTorsoActual[0], uTorsoActual[1], bodyHeight, 0, bodyTilt, uTorsoActual[2]});
         arma::mat44 torsoInv = orthonormal44Inverse(torso);
-        arma::mat44 leftFoot = torsoInv * vec6ToMatrix(pLeftFoot);
-        arma::mat44 rightFoot = torsoInv * vec6ToMatrix(pRightFoot);
+
+        // Transform feet targets to be relative to the torso
+        arma::mat44 leftFootTorso = torsoInv * se2ToMatrix(uLeftFoot);
+        arma::mat44 rightFootTorso = torsoInv * se2ToMatrix(uRightFoot);
 
         if (emitLocalisation) {
             localise(uTorsoActual);
         }
 
-        auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFoot, rightFoot);
+        auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
         // TODO: balance(joints, sensors);
         auto waypoints = motionLegs(joints);
 
         auto arms = motionArms();
         waypoints->insert(waypoints->end(), arms->begin(), arms->end());
 
-        return waypoints;
+        emit(std::move(waypoints));
     }
+
     std::unique_ptr<std::vector<ServoCommand>> WalkEngine::motionLegs(std::vector<std::pair<ServoID, float>> joints) {
         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
         waypoints->reserve(16);
@@ -556,15 +562,10 @@ namespace motion {
     }
 
     double WalkEngine::getTime() {
-          struct timeval t;
-          gettimeofday(&t, NULL);
-          return t.tv_sec + 1E-6 * t.tv_usec;
+        return std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count() * 1E-6;
     }
 
     double WalkEngine::procFunc(double value, double deadband, double maxvalue) {
-        // a function for IMU feedback (originally from teamdarwin2013release/player/util/util.lua)
-        // clamp between 0 and maxvalue
-        // offset using deadband
         return std::abs(std::min(std::max(0.0, std::abs(value) - deadband), maxvalue));
     }
 

@@ -173,9 +173,6 @@ namespace motion {
         // Should be an enum
         int initialStep;
 
-        // The ratio of double support time: single support time (standing on two feet vs. balancing on one foot).
-        double phaseSingle;
-
         // current arm pose
         arma::vec3 qLArm;
         arma::vec3 qRArm;
@@ -191,16 +188,15 @@ namespace motion {
         double shiftFactor;
 
         arma::vec3 uSupport;
-        arma::vec3 uTorsoActual;
 
-        double STAND_SCRIPT_DURATION;
+        // double STAND_SCRIPT_DURATION;
 
-        void generateAndSaveStandScript();
+        //void generateAndSaveStandScript();
         void configureWalk(const YAML::Node& config);
 
-        std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> update(const messages::input::Sensors& sensors);
-        std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> updateStep(const messages::input::Sensors& sensors);
-        std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> updateStill(const messages::input::Sensors& sensors = messages::input::Sensors());
+        void update(const messages::input::Sensors& sensors);
+        void updateStep(const messages::input::Sensors& sensors);
+        void updateStill(const messages::input::Sensors& sensors = messages::input::Sensors());
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionLegs(std::vector<std::pair<messages::input::ServoID, float>> joints);
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionArms();
         void balance(std::vector<double>& qLegs, const messages::input::Sensors& sensors);
@@ -208,18 +204,36 @@ namespace motion {
 
         void reset();
         void start();
-        std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> stop();
+        void stop();
         void requestStop();
         void calculateNewStep();
         void stanceReset();
         void setVelocity(double vx, double vy, double va);
         void updateVelocity();
         arma::vec3 getNewFootTarget(const arma::vec3& velocity, const arma::vec3& leftFoot, const arma::vec3& rightFoot, const messages::behaviour::LimbID& swingLeg);
-        arma::vec3 feetCollisionDetection(const arma::vec3& footTarget, const arma::vec3& leftFoot, const arma::vec3& rightFoot, const messages::behaviour::LimbID& swingLeg);
+
+        /**
+         * Get the next torso position
+         */
         arma::vec3 stepTorso(arma::vec3 uLeftFoot, arma::vec3 uRightFoot, double shiftFactor);
+
+        /**
+         * @return The current velocity
+         */
         arma::vec3 getVelocity();
+
+        /**
+         * Solve the ZMP equation
+         */
         arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
+
+        /**
+         * Uses ZMP to determine the torso position
+         *
+         * @return The torso position in SE2
+         */
         arma::vec3 zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, arma::vec3 uSupport, arma::vec3 uLeftFootDestination, arma::vec3 uLeftFootSource, arma::vec3 uRightFootDestination, arma::vec3 uRightFootSource);
+
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
          * This is used to 'ease' the foot path through its trajectory.
@@ -233,8 +247,16 @@ namespace motion {
          */
         arma::vec3 footPhase(double phase, double phase1Single, double phase2Single);
 
-        double getTime(); // TODO: remove
-        double procFunc(double a, double deadband, double maxvalue); //TODO: move documentation from .cpp to .h file
+        /**
+         * @return get a unix timestamp (in decimal seconds that are accurate to the microsecond)
+         */
+        double getTime();
+
+        /**
+         * @return A clamped between 0 and maxvalue, offset by deadband
+         */
+        double procFunc(double a, double deadband, double maxvalue);
+
         /**
          * Local to world transform
          *
@@ -242,6 +264,7 @@ namespace motion {
          * Note: Assumes vec3 are of the form {x, y, angle}
          */
         arma::vec3 localToWorld(arma::vec3 poseRelative, arma::vec3 pose);
+
         /**
          * World to local transform
          *
@@ -249,6 +272,7 @@ namespace motion {
          * Note: Assumes vec3 are of the form {x, y, angle}
          */
         arma::vec3 worldToLocal(arma::vec3 poseGlobal, arma::vec3 pose);
+
         /**
          * Interpolate between two given vectors
          * Note: Assumes vec3 are of the form {x, y, angle}

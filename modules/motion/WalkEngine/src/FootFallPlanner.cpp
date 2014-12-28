@@ -158,14 +158,10 @@ namespace motion {
         return footTarget;
     }
 
-    /**
-    * Global variables used:
-    * phaseSingle
-    */
     arma::vec3 WalkEngine::footPhase(double phase, double phase1Single, double phase2Single) {
         // Computes relative x,z motion of foot during single support phase
         // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
-        phaseSingle = std::min(std::max(phase - phase1Single, 0.0) / (phase2Single - phase1Single), 1.0);
+        double phaseSingle = std::min(std::max(phase - phase1Single, 0.0) / (phase2Single - phase1Single), 1.0);
         double phaseSingleSkew = std::pow(phaseSingle, 0.8) - 0.17 * phaseSingle * (1 - phaseSingle);
         double xf = 0.5 * (1 - std::cos(M_PI * phaseSingleSkew));
         double zf = 0.5 * (1 - std::cos(2 * M_PI * phaseSingleSkew));
