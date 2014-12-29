@@ -498,9 +498,9 @@ namespace motion {
     void WalkEngine::stanceReset() {
         // standup/sitdown/falldown handling
         if (startFromStep) {
-            uLeftFoot = SE2(arma::zeros(3));
-            uRightFoot = SE2(arma::zeros(3));
-            uTorso = SE2(arma::zeros(3));
+            uLeftFoot = arma::zeros(3);
+            uRightFoot = arma::zeros(3);
+            uTorso = arma::zeros(3);
 
             // start walking asap
             initialStep = 1;

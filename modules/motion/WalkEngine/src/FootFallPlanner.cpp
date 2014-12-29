@@ -48,9 +48,9 @@ namespace motion {
 
             // Stop with feet together by targetting swing leg next to support leg
             if (swingLeg == LimbID::RIGHT_LEG) {
-                uRightFootDestination = uLeftFootSource.localToWorld(SE2(-2 * uLRFootOffset));
+                uRightFootDestination = uLeftFootSource.localToWorld(-2 * uLRFootOffset);
             } else {
-                uLeftFootDestination = uRightFootSource.localToWorld(SE2(2 * uLRFootOffset));
+                uLeftFootDestination = uRightFootSource.localToWorld(2 * uLRFootOffset);
             }
         } else {
             // normal walk, advance steps
@@ -123,7 +123,7 @@ namespace motion {
         velocityCurrent[2] += velocityDifference.angle();
 
         if (initialStep > 0) {
-            velocityCurrent = SE2(arma::zeros(3));
+            velocityCurrent = arma::zeros(3);
             initialStep--;
         }
     }
@@ -136,9 +136,9 @@ namespace motion {
         // Get midpoint 1.5 steps in future
         // Note: The reason for 1.5 rather than 1 is because it takes an extra 0.5 steps
         // for the torso to reach a given position when you want both feet together
-        SE2 forwardPoint = midPoint.localToWorld(SE2(1.5 * velocity));
+        SE2 forwardPoint = midPoint.localToWorld(1.5 * velocity);
         // Offset to towards the foot in use to get the target location
-        SE2 footTarget = forwardPoint.localToWorld(SE2(sign * uLRFootOffset));
+        SE2 footTarget = forwardPoint.localToWorld(sign * uLRFootOffset);
 
         // Start applying step limits:
         // Get the vector between the feet and clamp the components between the min and max step limits

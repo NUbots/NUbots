@@ -24,17 +24,6 @@
 namespace utility {
 namespace math {
 
-    SE2::SE2() : SE2(arma::zeros(3)) {
-    }
-
-    SE2::SE2(arma::vec3 value) : arma::vec3(value) {
-
-    }
-
-    SE2::SE2(std::initializer_list<double> value) : arma::vec3(value) {
-
-    }
-
     SE2 SE2::localToWorld(const SE2& poseRelative) const {
         double cosAngle = std::cos(x());
         double sinAngle = std::sin(y());

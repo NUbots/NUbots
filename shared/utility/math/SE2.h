@@ -34,10 +34,9 @@ namespace math {
      * @author Brendan Annable
      */
     class SE2 : public arma::vec3 {
+        using arma::vec3::vec3; // inherit constructors
+
         public:
-            SE2();
-            SE2(arma::vec3 value);
-            SE2(std::initializer_list<double> value);
             /**
              * Local to world transform
              *
@@ -62,9 +61,9 @@ namespace math {
              */
             SE2 se2Interpolate(double t, const SE2& target) const;
 
-            double x()     const { return at(0); }
-            double y()     const { return at(1); }
-            double angle() const { return at(2); }
+            inline double x()     const { return at(0); }
+            inline double y()     const { return at(1); }
+            inline double angle() const { return at(2); }
     };
 
 }  // math

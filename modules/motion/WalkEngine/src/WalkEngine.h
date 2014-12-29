@@ -139,15 +139,15 @@ namespace motion {
 
         // walk state
         // TODO: initializaton needed here?
-        utility::math::SE2 uTorso = utility::math::SE2(arma::zeros(3));
-        utility::math::SE2 uTorsoSource = utility::math::SE2(arma::zeros(3));
-        utility::math::SE2 uTorsoDestination = utility::math::SE2(arma::zeros(3));
-        utility::math::SE2 uLeftFoot = utility::math::SE2(arma::zeros(3));
-        utility::math::SE2 uLeftFootSource = utility::math::SE2(arma::zeros(3));
-        utility::math::SE2 uLeftFootDestination = utility::math::SE2(arma::zeros(3));
-        utility::math::SE2 uRightFoot = utility::math::SE2(arma::zeros(3));
-        utility::math::SE2 uRightFootSource = utility::math::SE2(arma::zeros(3));
-        utility::math::SE2 uRightFootDestination = utility::math::SE2(arma::zeros(3));
+        utility::math::SE2 uTorso = arma::zeros(3);
+        utility::math::SE2 uTorsoSource = arma::zeros(3);
+        utility::math::SE2 uTorsoDestination = arma::zeros(3);
+        utility::math::SE2 uLeftFoot = arma::zeros(3);
+        utility::math::SE2 uLeftFootSource = arma::zeros(3);
+        utility::math::SE2 uLeftFootDestination = arma::zeros(3);
+        utility::math::SE2 uRightFoot = arma::zeros(3);
+        utility::math::SE2 uRightFootSource = arma::zeros(3);
+        utility::math::SE2 uRightFootDestination = arma::zeros(3);
 
         // Current robot velocity
         utility::math::SE2 velocityCurrent;
