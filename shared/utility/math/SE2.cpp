@@ -25,8 +25,8 @@ namespace utility {
 namespace math {
 
     SE2 SE2::localToWorld(const SE2& poseRelative) const {
-        double cosAngle = std::cos(x());
-        double sinAngle = std::sin(y());
+        double cosAngle = std::cos(angle());
+        double sinAngle = std::sin(angle());
         // translates to this + rotZ(this.angle) * poseRelative
         return {
             x() + cosAngle * poseRelative[0] - sinAngle * poseRelative[1],

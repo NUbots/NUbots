@@ -92,7 +92,7 @@ namespace motion {
             SE2 uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
             uSupport = uLeftFootModded.localToWorld({-footOffset[0], -footOffset[1], 0});
         } else {
-            SE2 uRightFootTorso = uTorso.worldToLocal(uRightFootSource);
+            SE2 uRightFootTorso = uTorsoSource.worldToLocal(uRightFootSource);
             SE2 uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
             SE2 uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             uSupport = uRightFootModded.localToWorld({-footOffset[0], footOffset[1], 0});
@@ -102,7 +102,7 @@ namespace motion {
         zmpParams = {
             (uSupport.x() - uTorso.x()) / (stepTime * phase1Single),
             (uTorsoDestination.x() - uSupport.x()) / (stepTime * (1 - phase2Single)),
-            (uSupport.x() - uTorso.y()) / (stepTime * phase1Single),
+            (uSupport.y() - uTorso.y()) / (stepTime * phase1Single),
             (uTorsoDestination.y() - uSupport.y()) / (stepTime * (1 - phase2Single)),
         };
 
