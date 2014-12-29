@@ -26,6 +26,7 @@ namespace motion {
 
     using messages::behaviour::LimbID;
     using utility::motion::kinematics::DarwinModel;
+    using utility::math::SE2;
 
     void WalkEngine::calculateNewStep() {
         updateVelocity();
@@ -44,10 +45,12 @@ namespace motion {
             state = State::LAST_STEP;
             velocityCurrent = {0, 0, 0};
             velocityCommand = {0, 0, 0};
+
+            // Stop with feet together by targetting swing leg next to support leg
             if (swingLeg == LimbID::RIGHT_LEG) {
-                uRightFootDestination = localToWorld(-2 * uLRFootOffset, uLeftFootSource);
+                uRightFootDestination = uLeftFootSource.localToWorld(SE2(-2 * uLRFootOffset));
             } else {
-                uLeftFootDestination = localToWorld(2 * uLRFootOffset, uRightFootSource);
+                uLeftFootDestination = uRightFootSource.localToWorld(SE2(2 * uLRFootOffset));
             }
         } else {
             // normal walk, advance steps
@@ -84,76 +87,76 @@ namespace motion {
 
         // apply velocity-based support point modulation for uSupport
         if (swingLeg == LimbID::RIGHT_LEG) {
-            arma::vec3 uLeftFootTorso = worldToLocal(uLeftFootSource, uTorsoSource);
-            arma::vec3 uTorsoModded = localToWorld({supportMod[0], supportMod[1], 0}, uTorso);
-            arma::vec3 uLeftFootModded = localToWorld(uLeftFootTorso, uTorsoModded);
-            uSupport = localToWorld({-footOffset[0], -footOffset[1], 0}, uLeftFootModded);
+            SE2 uLeftFootTorso = uTorsoSource.worldToLocal(uLeftFootSource);
+            SE2 uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
+            SE2 uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
+            uSupport = uLeftFootModded.localToWorld({-footOffset[0], -footOffset[1], 0});
         } else {
-            arma::vec3 uRightFootTorso = worldToLocal(uRightFootSource, uTorso);
-            arma::vec3 uTorsoModded = localToWorld({supportMod[0], supportMod[1], 0}, uTorso);
-            arma::vec3 uRightFootModded = localToWorld(uRightFootTorso, uTorsoModded);
-            uSupport = localToWorld({-footOffset[0], footOffset[1], 0}, uRightFootModded);
+            SE2 uRightFootTorso = uTorso.worldToLocal(uRightFootSource);
+            SE2 uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
+            SE2 uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
+            uSupport = uRightFootModded.localToWorld({-footOffset[0], footOffset[1], 0});
         }
 
         // compute ZMP coefficients
         zmpParams = {
-            (uSupport[0] - uTorso[0]) / (stepTime * phase1Single),
-            (uTorsoDestination[0] - uSupport[0]) / (stepTime * (1 - phase2Single)),
-            (uSupport[1] - uTorso[1]) / (stepTime * phase1Single),
-            (uTorsoDestination[1] - uSupport[1]) / (stepTime * (1 - phase2Single)),
+            (uSupport.x() - uTorso.x()) / (stepTime * phase1Single),
+            (uTorsoDestination.x() - uSupport.x()) / (stepTime * (1 - phase2Single)),
+            (uSupport.x() - uTorso.y()) / (stepTime * phase1Single),
+            (uTorsoDestination.y() - uSupport.y()) / (stepTime * (1 - phase2Single)),
         };
 
-        zmpCoefficients.rows(0,1) = zmpSolve(uSupport[0], uTorsoSource[0], uTorsoDestination[0], uTorsoSource[0], uTorsoDestination[0], phase1Single, phase2Single, stepTime, zmpTime);
-        zmpCoefficients.rows(2,3) = zmpSolve(uSupport[1], uTorsoSource[1], uTorsoDestination[1], uTorsoSource[1], uTorsoDestination[1], phase1Single, phase2Single, stepTime, zmpTime);
+        zmpCoefficients.rows(0,1) = zmpSolve(uSupport.x(), uTorsoSource.x(), uTorsoDestination.x(), uTorsoSource.x(), uTorsoDestination.x(), phase1Single, phase2Single, stepTime, zmpTime);
+        zmpCoefficients.rows(2,3) = zmpSolve(uSupport.y(), uTorsoSource.y(), uTorsoDestination.y(), uTorsoSource.y(), uTorsoDestination.y(), phase1Single, phase2Single, stepTime, zmpTime);
     }
 
     void WalkEngine::updateVelocity() {
         // slow accelerations at high speed
-        auto& limit = (velocityCurrent[0] > velocityHigh ? accelerationLimitsHigh : accelerationLimits); // TODO: use a function instead
+        auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits); // TODO: use a function instead
 
-        velocityDifference[0] = std::min(std::max(velocityCommand[0] - velocityCurrent[0], -limit[0]), limit[0]);
-        velocityDifference[1] = std::min(std::max(velocityCommand[1] - velocityCurrent[1], -limit[1]), limit[1]);
-        velocityDifference[2] = std::min(std::max(velocityCommand[2] - velocityCurrent[2], -limit[2]), limit[2]);
+        velocityDifference[0] = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
+        velocityDifference[1] = std::min(std::max(velocityCommand.y()     - velocityCurrent.y(),     -limit[1]), limit[1]);
+        velocityDifference[2] = std::min(std::max(velocityCommand.angle() - velocityCurrent.angle(), -limit[2]), limit[2]);
 
-        velocityCurrent[0] += velocityDifference[0];
-        velocityCurrent[1] += velocityDifference[1];
-        velocityCurrent[2] += velocityDifference[2];
+        velocityCurrent[0] += velocityDifference.x();
+        velocityCurrent[1] += velocityDifference.y();
+        velocityCurrent[2] += velocityDifference.angle();
 
         if (initialStep > 0) {
-            velocityCurrent = arma::vec3{0, 0, 0};
+            velocityCurrent = SE2(arma::zeros(3));
             initialStep--;
         }
     }
 
-    arma::vec3 WalkEngine::getNewFootTarget(const arma::vec3& velocity, const arma::vec3& leftFoot, const arma::vec3& rightFoot, const LimbID& swingLeg) {
+    SE2 WalkEngine::getNewFootTarget(const SE2& velocity, const SE2& leftFoot, const SE2& rightFoot, const LimbID& swingLeg) {
         // Negative if right leg to account for the mirroring of the foot target
         int8_t sign = swingLeg == LimbID::LEFT_LEG ? 1 : -1;
         // Get midpoint between the two feet
-        arma::vec3 midPoint = se2Interpolate(0.5, leftFoot, rightFoot);
+        SE2 midPoint = leftFoot.se2Interpolate(0.5, rightFoot);
         // Get midpoint 1.5 steps in future
         // Note: The reason for 1.5 rather than 1 is because it takes an extra 0.5 steps
         // for the torso to reach a given position when you want both feet together
-        arma::vec3 forwardPoint = localToWorld(1.5 * velocity, midPoint);
+        SE2 forwardPoint = midPoint.localToWorld(SE2(1.5 * velocity));
         // Offset to towards the foot in use to get the target location
-        arma::vec3 footTarget = localToWorld(sign * uLRFootOffset, forwardPoint);
+        SE2 footTarget = forwardPoint.localToWorld(SE2(sign * uLRFootOffset));
 
         // Start applying step limits:
         // Get the vector between the feet and clamp the components between the min and max step limits
-        arma::vec3 supportFoot = swingLeg == LimbID::LEFT_LEG ? rightFoot : leftFoot;
-        arma::vec3 feetDifference = worldToLocal(footTarget, supportFoot);
-        feetDifference[0] = std::min(std::max(feetDifference[0],        stepLimits(0,0)), stepLimits(0,1));
-        feetDifference[1] = std::min(std::max(feetDifference[1] * sign, stepLimits(1,0)), stepLimits(1,1)) * sign;
-        feetDifference[2] = std::min(std::max(feetDifference[2] * sign, stepLimits(2,0)), stepLimits(2,1)) * sign;
+        SE2 supportFoot = swingLeg == LimbID::LEFT_LEG ? rightFoot : leftFoot;
+        SE2 feetDifference = supportFoot.worldToLocal(footTarget);
+        feetDifference[0] = std::min(std::max(feetDifference.x(),            stepLimits(0,0)), stepLimits(0,1));
+        feetDifference[1] = std::min(std::max(feetDifference.y()     * sign, stepLimits(1,0)), stepLimits(1,1)) * sign;
+        feetDifference[2] = std::min(std::max(feetDifference.angle() * sign, stepLimits(2,0)), stepLimits(2,1)) * sign;
         // end applying step limits
 
         // Start feet collision detection:
         // Uses a rough measure to detect collision and move feet apart if too close
-        double overlap = DarwinModel::Leg::FOOT_LENGTH / 2.0 * std::abs(feetDifference[2]);
-        feetDifference[1] = std::max(feetDifference[1] * sign, stanceLimitY2 + overlap) * sign;
+        double overlap = DarwinModel::Leg::FOOT_LENGTH / 2.0 * std::abs(feetDifference.angle());
+        feetDifference[1] = std::max(feetDifference.y() * sign, stanceLimitY2 + overlap) * sign;
         // End feet collision detection
 
         // Update foot target to be 'feetDistance' away from the support foot
-        footTarget = localToWorld(feetDifference, supportFoot);
+        footTarget = supportFoot.localToWorld(feetDifference);
 
         return footTarget;
     }

@@ -63,6 +63,7 @@ namespace motion {
 
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::motion::kinematics::DarwinModel;
+    using utility::math::SE2;
     using utility::math::angle::normalizeAngle;
     using utility::math::matrix::vec6ToMatrix;
     using utility::math::matrix::se2ToMatrix;
@@ -298,13 +299,13 @@ namespace motion {
         emit(std::make_unique<std::vector<ServoCommand>>());
     }
 
-    void WalkEngine::localise(arma::vec3 position) {
+    void WalkEngine::localise(SE2 position) {
         // emit position as a fake localisation
         auto localisation = std::make_unique<std::vector<messages::localisation::Self>>();
         messages::localisation::Self self;
-        self.position = {position[0], position[1]};
+        self.position = {position.x(), position.y()};
         self.position_cov = arma::eye(2,2) * 0.1; // made up
-        self.heading = {std::cos(position[2]), std::sin(position[2])}; // convert to cartesian coordinates
+        self.heading = {std::cos(position.angle()), std::sin(position.angle())}; // convert to cartesian coordinates
         self.velocity = arma::zeros(2); // not used
         self.robot_to_world_rotation = arma::zeros(2,2); // not used
         localisation->push_back(self);
@@ -353,9 +354,9 @@ namespace motion {
             foot[2] = 0; // don't lift foot at initial step, TODO: review
         }
         if (swingLeg == LimbID::RIGHT_LEG) {
-            uRightFoot = se2Interpolate(foot[0], uRightFootSource, uRightFootDestination);
+            uRightFoot = uRightFootSource.se2Interpolate(foot[0], uRightFootDestination);
         } else {
-            uLeftFoot = se2Interpolate(foot[0], uLeftFootSource, uLeftFootDestination);
+            uLeftFoot = uLeftFootSource.se2Interpolate(foot[0], uLeftFootDestination);
         }
 
         uTorso = zmpCom(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
@@ -369,8 +370,8 @@ namespace motion {
             leftFoot *= translationMatrix({0, 0, stepHeight * foot[2]});
         }
 
-        arma::vec3 uTorsoActual = localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0}, uTorso);
-        arma::mat44 torso = vec6ToMatrix({uTorsoActual[0], uTorsoActual[1], bodyHeight, 0, bodyTilt, uTorsoActual[2]});
+        SE2 uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
+        arma::mat44 torso = vec6ToMatrix({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
         arma::mat44 torsoInv = orthonormal44Inverse(torso);
 
         // Transform feet targets to be relative to the torso
@@ -393,9 +394,9 @@ namespace motion {
 
     void WalkEngine::updateStill(const Sensors&/* sensors*/) {
         uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
-        arma::vec3 uTorsoActual = localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0}, uTorso);
+        SE2 uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
 
-        arma::mat44 torso = vec6ToMatrix({uTorsoActual[0], uTorsoActual[1], bodyHeight, 0, bodyTilt, uTorsoActual[2]});
+        arma::mat44 torso = vec6ToMatrix({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
         arma::mat44 torsoInv = orthonormal44Inverse(torso);
 
         // Transform feet targets to be relative to the torso
@@ -431,19 +432,19 @@ namespace motion {
 
     std::unique_ptr<std::vector<ServoCommand>> WalkEngine::motionArms() {
 
-        arma::vec3 qLArmActual = qLArm;
-        arma::vec3 qRArmActual = qRArm;
+        auto qLArmActual = qLArm;
+        auto qRArmActual = qRArm;
 
         qLArmActual.rows(0,1) += armShift;
         qRArmActual.rows(0,1) += armShift;
 
         // Start arm/leg collision/prevention
-        double rotLeftA = normalizeAngle(uLeftFoot[2] - uTorso[2]);
-        double rotRightA = normalizeAngle(uTorso[2] - uRightFoot[2]);
-        arma::vec3 leftLegTorso = worldToLocal(uLeftFoot, uTorso);
-        arma::vec3 rightLegTorso = worldToLocal(uRightFoot, uTorso);
-        double leftMinValue = 5 * M_PI / 180 + std::max(0.0, rotLeftA) / 2 + std::max(0.0, leftLegTorso[1] - 0.04) / 0.02 * (6 * M_PI / 180);
-        double rightMinValue = -5 * M_PI / 180 - std::max(0.0, rotRightA) / 2 - std::max(0.0, -rightLegTorso[1] - 0.04) / 0.02 * (6 * M_PI / 180);
+        double rotLeftA = normalizeAngle(uLeftFoot.angle() - uTorso.angle());
+        double rotRightA = normalizeAngle(uTorso.angle() - uRightFoot.angle());
+        SE2 leftLegTorso = uTorso.worldToLocal(uLeftFoot);
+        SE2 rightLegTorso = uTorso.worldToLocal(uRightFoot);
+        double leftMinValue = 5 * M_PI / 180 + std::max(0.0, rotLeftA) / 2 + std::max(0.0, leftLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
+        double rightMinValue = -5 * M_PI / 180 - std::max(0.0, rotRightA) / 2 - std::max(0.0, -rightLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
         // update shoulder pitch to move arm away from body
         qLArmActual[1] = std::max(leftMinValue, qLArmActual[1]);
         qRArmActual[1] = std::min(rightMinValue, qRArmActual[1]);
@@ -463,10 +464,10 @@ namespace motion {
         return std::move(waypoints);
     }
 
-    arma::vec3 WalkEngine::stepTorso(arma::vec3 uLeftFoot, arma::vec3 uRightFoot, double shiftFactor) {
-        arma::vec3 uLeftFootSupport = localToWorld({-footOffset[0], -footOffset[1], 0}, uLeftFoot);
-        arma::vec3 uRightFootSupport = localToWorld({-footOffset[0], footOffset[1], 0}, uRightFoot);
-        return se2Interpolate(shiftFactor, uLeftFootSupport, uRightFootSupport);
+    SE2 WalkEngine::stepTorso(SE2 uLeftFoot, SE2 uRightFoot, double shiftFactor) {
+        SE2 uLeftFootSupport = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
+        SE2 uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
+        return uLeftFootSupport.se2Interpolate(shiftFactor, uRightFootSupport);
     }
 
     void WalkEngine::setVelocity(double vx, double vy, double va) {
@@ -485,28 +486,28 @@ namespace motion {
         velocityCommand[1] = vy * magFactor;
         velocityCommand[2] = va;
 
-        velocityCommand[0] = std::min(std::max(velocityCommand[0], velocityLimits(0,0)), velocityLimits(0,1));
-        velocityCommand[1] = std::min(std::max(velocityCommand[1], velocityLimits(1,0)), velocityLimits(1,1));
-        velocityCommand[2] = std::min(std::max(velocityCommand[2], velocityLimits(2,0)), velocityLimits(2,1));
+        velocityCommand[0] = std::min(std::max(velocityCommand.x(),     velocityLimits(0,0)), velocityLimits(0,1));
+        velocityCommand[1] = std::min(std::max(velocityCommand.y(),     velocityLimits(1,0)), velocityLimits(1,1));
+        velocityCommand[2] = std::min(std::max(velocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
     }
 
-    arma::vec3 WalkEngine::getVelocity() {
+    SE2 WalkEngine::getVelocity() {
         return velocityCurrent;
     }
 
     void WalkEngine::stanceReset() {
         // standup/sitdown/falldown handling
         if (startFromStep) {
-            uLeftFoot = arma::zeros(3);
-            uRightFoot = arma::zeros(3);
-            uTorso = arma::zeros(3);
+            uLeftFoot = SE2(arma::zeros(3));
+            uRightFoot = SE2(arma::zeros(3));
+            uTorso = SE2(arma::zeros(3));
 
             // start walking asap
             initialStep = 1;
         } else {
             // stance resetted
-            uLeftFoot = localToWorld({footOffset[0], DarwinModel::Leg::HIP_OFFSET_Y, 0}, uTorso);
-            uRightFoot = localToWorld({footOffset[0], -DarwinModel::Leg::HIP_OFFSET_Y, 0}, uTorso);
+            uLeftFoot = uTorso.localToWorld({footOffset[0], DarwinModel::Leg::HIP_OFFSET_Y, 0});
+            uRightFoot = uTorso.localToWorld({footOffset[0], -DarwinModel::Leg::HIP_OFFSET_Y, 0});
         }
         swingLeg = swingLegInitial;
 
@@ -519,7 +520,7 @@ namespace motion {
         uSupport = uTorso;
         beginStepTime = getTime();
         currenstepTimeType = 0;
-        uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y, 0};
+        uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0};
         startFromStep = false;
     }
 
@@ -543,21 +544,21 @@ namespace motion {
         return {aP, aN};
     }
 
-    arma::vec3 WalkEngine::zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, arma::vec3 uSupport, arma::vec3 uLeftFootDestination, arma::vec3 uLeftFootSource, arma::vec3 uRightFootDestination, arma::vec3 uRightFootSource) {
-        arma::vec3 com = {0, 0, 0};
+    SE2 WalkEngine::zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, SE2 uSupport, SE2 uLeftFootDestination, SE2 uLeftFootSource, SE2 uRightFootDestination, SE2 uRightFootSource) {
+        SE2 com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
-        com[0] = uSupport[0] + zmpCoefficients[0] * expT + zmpCoefficients[1] / expT;
-        com[1] = uSupport[1] + zmpCoefficients[2] * expT + zmpCoefficients[3] / expT;
+        com[0] = uSupport.x() + zmpCoefficients[0] * expT + zmpCoefficients[1] / expT;
+        com[1] = uSupport.y() + zmpCoefficients[2] * expT + zmpCoefficients[3] / expT;
         if (phase < phase1Single) {
-            com[0] = com[0] + zmpParams[0] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[0] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
-            com[1] = com[1] + zmpParams[1] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[1] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
+            com[0] = com.x() + zmpParams[0] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[0] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
+            com[1] = com.y() + zmpParams[1] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[1] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
         } else if (phase > phase2Single) {
-            com[0] = com[0] + zmpParams[2] * stepTime * (phase - phase2Single) -zmpTime * zmpParams[2] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
-            com[1] = com[1] + zmpParams[3] * stepTime * (phase - phase2Single) -zmpTime * zmpParams[3] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
+            com[0] = com.x() + zmpParams[2] * stepTime * (phase - phase2Single) -zmpTime * zmpParams[2] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
+            com[1] = com.y() + zmpParams[3] * stepTime * (phase - phase2Single) -zmpTime * zmpParams[3] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
         }
         // com[2] = .5 * (uLeftFoot[2] + uRightFoot[2]);
         // Linear speed turning
-        com[2] = phase * (uLeftFootDestination[2] + uRightFootDestination[2]) / 2 + (1 - phase) * (uLeftFootSource[2] + uRightFootSource[2]) / 2;
+        com[2] = phase * (uLeftFootDestination.angle() + uRightFootDestination.angle()) / 2 + (1 - phase) * (uLeftFootSource.angle() + uRightFootSource.angle()) / 2;
         return com;
     }
 
@@ -567,40 +568,6 @@ namespace motion {
 
     double WalkEngine::procFunc(double value, double deadband, double maxvalue) {
         return std::abs(std::min(std::max(0.0, std::abs(value) - deadband), maxvalue));
-    }
-
-    arma::vec3 WalkEngine::localToWorld(arma::vec3 poseRelative, arma::vec3 pose) {
-        double ca = std::cos(pose[2]);
-        double sa = std::sin(pose[2]);
-        // translates to pose + rotZ(pose.angle) * poseRelative
-        return {
-            pose[0] + ca * poseRelative[0] - sa * poseRelative[1],
-            pose[1] + sa * poseRelative[0] + ca * poseRelative[1],
-            pose[2] + poseRelative[2] // do not use normalizeAngle here, causes bad things when turning!
-        };
-    }
-
-    arma::vec3 WalkEngine::worldToLocal(arma::vec3 poseGlobal, arma::vec3 pose) {
-        double ca = std::cos(pose[2]);
-        double sa = std::sin(pose[2]);
-        double px = poseGlobal[0] - pose[0];
-        double py = poseGlobal[1] - pose[1];
-        double pa = poseGlobal[2] - pose[2];
-        // translates to rotZ(pose.angle) * (poseGlobal - pose)
-        return {
-            ca * px + sa * py,
-            -sa * px + ca * py,
-            normalizeAngle(pa)
-        };
-    }
-
-    arma::vec3 WalkEngine::se2Interpolate(double t, arma::vec3 u1, arma::vec3 u2) {
-        // helps smooth out the motions using a weighted average
-        return {
-            u1[0] + t * (u2[0] - u1[0]),
-            u1[1] + t * (u2[1] - u1[1]),
-            u1[2] + t * normalizeAngle(u2[2] - u1[2])
-        };
     }
 
 }  // motion

@@ -23,10 +23,14 @@
 #include <nuclear>
 #include <armadillo>
 
+#include <yaml-cpp/yaml.h>
+
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/Action.h"
 #include "messages/input/Sensors.h"
-#include <yaml-cpp/yaml.h>
+
+#include "utility/math/SE2.h"
+
 
 namespace modules {
 namespace motion {
@@ -134,22 +138,23 @@ namespace motion {
         // end_config_params
 
         // walk state
-        arma::vec3 uTorso = arma::zeros(3);
-        arma::vec3 uTorsoSource = arma::zeros(3);
-        arma::vec3 uTorsoDestination = arma::zeros(3);
-        arma::vec3 uLeftFoot = arma::zeros(3);
-        arma::vec3 uLeftFootSource = arma::zeros(3);
-        arma::vec3 uLeftFootDestination = arma::zeros(3);
-        arma::vec3 uRightFoot = arma::zeros(3);
-        arma::vec3 uRightFootSource = arma::zeros(3);
-        arma::vec3 uRightFootDestination = arma::zeros(3);
+        // TODO: initializaton needed here?
+        utility::math::SE2 uTorso = utility::math::SE2(arma::zeros(3));
+        utility::math::SE2 uTorsoSource = utility::math::SE2(arma::zeros(3));
+        utility::math::SE2 uTorsoDestination = utility::math::SE2(arma::zeros(3));
+        utility::math::SE2 uLeftFoot = utility::math::SE2(arma::zeros(3));
+        utility::math::SE2 uLeftFootSource = utility::math::SE2(arma::zeros(3));
+        utility::math::SE2 uLeftFootDestination = utility::math::SE2(arma::zeros(3));
+        utility::math::SE2 uRightFoot = utility::math::SE2(arma::zeros(3));
+        utility::math::SE2 uRightFootSource = utility::math::SE2(arma::zeros(3));
+        utility::math::SE2 uRightFootDestination = utility::math::SE2(arma::zeros(3));
 
         // Current robot velocity
-        arma::vec3 velocityCurrent;
+        utility::math::SE2 velocityCurrent;
         // Current velocity command
-        arma::vec3 velocityCommand;
+        utility::math::SE2 velocityCommand;
         // Difference between current velocity and commanded velocity
-        arma::vec3 velocityDifference;
+        utility::math::SE2 velocityDifference;
 
         // zmp expoential coefficients aXP aXN aYP aYN
         arma::vec4 zmpCoefficients = arma::zeros(4);
@@ -178,7 +183,7 @@ namespace motion {
         arma::vec3 qRArm;
 
         // standard offset
-        arma::vec3 uLRFootOffset;
+        utility::math::SE2 uLRFootOffset;
 
         // walking/stepping transition variables
         bool startFromStep;
@@ -187,7 +192,7 @@ namespace motion {
         messages::behaviour::LimbID swingLeg = swingLegInitial;
         double shiftFactor;
 
-        arma::vec3 uSupport;
+        utility::math::SE2 uSupport;
 
         // double STAND_SCRIPT_DURATION;
 
@@ -200,7 +205,7 @@ namespace motion {
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionLegs(std::vector<std::pair<messages::input::ServoID, float>> joints);
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionArms();
         void balance(std::vector<double>& qLegs, const messages::input::Sensors& sensors);
-        void localise(arma::vec3 position);
+        void localise(utility::math::SE2 position);
 
         void reset();
         void start();
@@ -210,17 +215,17 @@ namespace motion {
         void stanceReset();
         void setVelocity(double vx, double vy, double va);
         void updateVelocity();
-        arma::vec3 getNewFootTarget(const arma::vec3& velocity, const arma::vec3& leftFoot, const arma::vec3& rightFoot, const messages::behaviour::LimbID& swingLeg);
+        utility::math::SE2 getNewFootTarget(const utility::math::SE2& velocity, const utility::math::SE2& leftFoot, const utility::math::SE2& rightFoot, const messages::behaviour::LimbID& swingLeg);
 
         /**
          * Get the next torso position
          */
-        arma::vec3 stepTorso(arma::vec3 uLeftFoot, arma::vec3 uRightFoot, double shiftFactor);
+        utility::math::SE2 stepTorso(utility::math::SE2 uLeftFoot, utility::math::SE2 uRightFoot, double shiftFactor);
 
         /**
          * @return The current velocity
          */
-        arma::vec3 getVelocity();
+        utility::math::SE2 getVelocity();
 
         /**
          * Solve the ZMP equation
@@ -232,7 +237,7 @@ namespace motion {
          *
          * @return The torso position in SE2
          */
-        arma::vec3 zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, arma::vec3 uSupport, arma::vec3 uLeftFootDestination, arma::vec3 uLeftFootSource, arma::vec3 uRightFootDestination, arma::vec3 uRightFootSource);
+        utility::math::SE2 zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, utility::math::SE2 uSupport, utility::math::SE2 uLeftFootDestination, utility::math::SE2 uLeftFootSource, utility::math::SE2 uRightFootDestination, utility::math::SE2 uRightFootSource);
 
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
@@ -256,36 +261,6 @@ namespace motion {
          * @return A clamped between 0 and maxvalue, offset by deadband
          */
         double procFunc(double a, double deadband, double maxvalue);
-
-        /**
-         * Local to world transform
-         *
-         * Transforms the givenpose from local space to world/global space
-         * Note: Assumes vec3 are of the form {x, y, angle}
-         */
-        arma::vec3 localToWorld(arma::vec3 poseRelative, arma::vec3 pose);
-
-        /**
-         * World to local transform
-         *
-         * Transforms the given pose from world/global space to be relative to poseGlobal
-         * Note: Assumes vec3 are of the form {x, y, angle}
-         */
-        arma::vec3 worldToLocal(arma::vec3 poseGlobal, arma::vec3 pose);
-
-        /**
-         * Interpolate between two given vectors
-         * Note: Assumes vec3 are of the form {x, y, angle}
-         * See: Special Euclidean group SE(2).
-         * http://en.wikipedia.org/wiki/Euclidean_group
-         *
-         * @param t A value between 0-1 to interpolate between the two,
-         * outside these bounds will extrapolate
-         * @param u1 the first vector
-         * @param u2 the second vector
-         * @return The interpolated vector
-         */
-        arma::vec3 se2Interpolate(double t, arma::vec3 u1, arma::vec3 u2);
     };
 
 }  // motion
