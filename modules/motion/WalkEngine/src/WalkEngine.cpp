@@ -509,6 +509,7 @@ namespace motion {
             uLeftFoot = uTorso.localToWorld({footOffset[0], DarwinModel::Leg::HIP_OFFSET_Y, 0});
             uRightFoot = uTorso.localToWorld({footOffset[0], -DarwinModel::Leg::HIP_OFFSET_Y, 0});
         }
+
         swingLeg = swingLegInitial;
 
         uLeftFootSource = uLeftFoot;

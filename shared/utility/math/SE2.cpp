@@ -19,6 +19,8 @@
 
 #include "SE2.h"
 
+#include <nuclear>
+
 #include "utility/math/angle.h"
 
 namespace utility {
@@ -29,27 +31,27 @@ namespace math {
         double sinAngle = std::sin(angle());
         // translates to this + rotZ(this.angle) * poseRelative
         return {
-            x() + cosAngle * poseRelative[0] - sinAngle * poseRelative[1],
-            y() + sinAngle * poseRelative[0] + cosAngle * poseRelative[1],
-            angle() + poseRelative[2] // do not use normalizeAngle here, causes bad things when turning!
+            x() + cosAngle * poseRelative.x() - sinAngle * poseRelative.y(),
+            y() + sinAngle * poseRelative.x() + cosAngle * poseRelative.y(),
+            angle() + poseRelative.angle() // do not use normalizeAngle here, causes bad things when turning! TODO: unsure on cause
         };
     }
 
     SE2 SE2::worldToLocal(const SE2& poseGlobal) const {
         double cosAngle = std::cos(angle());
         double sinAngle = std::sin(angle());
-        auto diff = poseGlobal - *this;
+        SE2 diff = poseGlobal - *this;
         // translates to rotZ(this.angle) * (poseGlobal - this)
         return {
-            cosAngle * diff[0] + sinAngle * diff[1],
-            -sinAngle * diff[0] + cosAngle * diff[1],
-            utility::math::angle::normalizeAngle(diff[2])
+            cosAngle * diff.x() + sinAngle * diff.y(),
+            -sinAngle * diff.x() + cosAngle * diff.y(),
+            utility::math::angle::normalizeAngle(diff.angle())
         };
     }
 
     SE2 SE2::se2Interpolate(double t, const SE2& target) const {
         SE2 result = SE2(*this + t * (target - *this));
-        result[2] = utility::math::angle::normalizeAngle(result[2]);
+        result[2] = utility::math::angle::normalizeAngle(result.angle());
         return result;
     }
 
