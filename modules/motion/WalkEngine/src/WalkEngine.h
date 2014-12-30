@@ -148,6 +148,7 @@ namespace motion {
         utility::math::SE2 uRightFoot = arma::zeros(3);
         utility::math::SE2 uRightFootSource = arma::zeros(3);
         utility::math::SE2 uRightFootDestination = arma::zeros(3);
+        utility::math::SE2 uSupport;
 
         // Current robot velocity
         utility::math::SE2 velocityCurrent;
@@ -163,20 +164,22 @@ namespace motion {
 
         // gyro stabilization variables
         arma::vec2 ankleShift;
-        double kneeShift;
         arma::vec2 hipShift;
         arma::vec2 armShift;
+        double kneeShift;
 
         bool active;
         bool started;
+        // walking/stepping transition variables
+        bool startFromStep;
         double beginStepTime;
         double phase;
-
-        int currenstepTimeType;
+        double shiftFactor;
 
         // How to begin initial step, unsure of affect
-        // Should be an enum
+        // TODO: Should be an enum?
         int initialStep;
+        int currenstepTimeType;
 
         // current arm pose
         arma::vec3 qLArm;
@@ -185,14 +188,8 @@ namespace motion {
         // standard offset
         utility::math::SE2 uLRFootOffset;
 
-        // walking/stepping transition variables
-        bool startFromStep;
-
         messages::behaviour::LimbID swingLegInitial = messages::behaviour::LimbID::LEFT_LEG;
         messages::behaviour::LimbID swingLeg = swingLegInitial;
-        double shiftFactor;
-
-        utility::math::SE2 uSupport;
 
         // double STAND_SCRIPT_DURATION;
 

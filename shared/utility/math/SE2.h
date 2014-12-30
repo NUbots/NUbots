@@ -68,16 +68,16 @@ namespace math {
             arma::mat44 toMatrix() const;
 
             inline double x() const { return at(0); }
-            inline auto x() -> decltype(std::declval<arma::vec3>().at(0)) { return at(0); }
+            inline double& x() { return at(0); }
 
             inline double y() const { return at(1); }
-            inline auto y() -> decltype(std::declval<arma::vec3>().at(1)) { return at(1); }
+            inline double& y() { return at(1); }
 
             inline double angle() const { return at(2); }
-            inline auto angle() -> decltype(std::declval<arma::vec3>().at(2)) { return at(2); }
+            inline double& angle() { return at(2); }
 
             inline const arma::subview_col<double> xy() const { return rows(0,1); }
-            inline auto xy() -> decltype(std::declval<arma::vec3>().rows(0,1)) { return rows(0,1); }
+            inline arma::subview_col<double> xy() { return rows(0,1); }
     };
 
 }  // math
