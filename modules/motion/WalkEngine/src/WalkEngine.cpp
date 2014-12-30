@@ -66,7 +66,6 @@ namespace motion {
     using utility::math::SE2;
     using utility::math::angle::normalizeAngle;
     using utility::math::matrix::vec6ToMatrix;
-    using utility::math::matrix::se2ToMatrix;
     using utility::math::matrix::orthonormal44Inverse;
     using utility::math::matrix::translationMatrix;
     using utility::nubugger::graph;
@@ -361,8 +360,8 @@ namespace motion {
 
         uTorso = zmpCom(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
 
-        arma::mat44 leftFoot = se2ToMatrix(uLeftFoot);
-        arma::mat44 rightFoot = se2ToMatrix(uRightFoot);
+        arma::mat44 leftFoot = uLeftFoot.toMatrix();
+        arma::mat44 rightFoot = uRightFoot.toMatrix();
 
         if (swingLeg == LimbID::RIGHT_LEG) {
             rightFoot *= translationMatrix({0, 0, stepHeight * foot[2]});
@@ -400,8 +399,8 @@ namespace motion {
         arma::mat44 torsoInv = orthonormal44Inverse(torso);
 
         // Transform feet targets to be relative to the torso
-        arma::mat44 leftFootTorso = torsoInv * se2ToMatrix(uLeftFoot);
-        arma::mat44 rightFootTorso = torsoInv * se2ToMatrix(uRightFoot);
+        arma::mat44 leftFootTorso = torsoInv * uLeftFoot.toMatrix();
+        arma::mat44 rightFootTorso = torsoInv * uRightFoot.toMatrix();
 
         if (emitLocalisation) {
             localise(uTorsoActual);

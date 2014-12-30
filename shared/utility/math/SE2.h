@@ -61,6 +61,12 @@ namespace math {
              */
             SE2 se2Interpolate(double t, const SE2& target) const;
 
+            /**
+             * Convert the vector into a 4x4 basis matrix
+             * @return A 4v4 basis matrix
+             */
+            arma::mat44 toMatrix() const;
+
             inline double x()     const { return at(0); }
             inline double y()     const { return at(1); }
             inline double angle() const { return at(2); }
