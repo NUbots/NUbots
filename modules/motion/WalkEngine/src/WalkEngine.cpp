@@ -85,15 +85,17 @@ namespace motion {
             [this] (const std::set<LimbID>& givenLimbs) {
                 if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
                     // legs are available, start
-                    //stanceReset();
-                    //updateHandle.enable();
+                    stanceReset(); // reset stance as we don't know where our limbs are
                     interrupted = false;
+                    if (state == State::WALKING) {
+                        updateHandle.enable();
+                    }
                 }
             },
             [this] (const std::set<LimbID>& takenLimbs) {
                 if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
                     // legs are no longer available, reset walking (too late to stop walking)
-                    //updateHandle.disable();
+                    updateHandle.disable();
                     interrupted = true;
                 }
             },
@@ -102,16 +104,18 @@ namespace motion {
             }
         }));
 
-        updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds> > >, With<Sensors>, Options< Single, Priority<NUClear::HIGH>> >([this](const time_t&, const Sensors& sensors) {
+        updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, Options<Single, Priority<NUClear::HIGH>>>([this](const time_t&, const Sensors& sensors) {
             update(sensors);
-        });
-
-        //updateHandle.disable();
+        }).disable();
 
         on<Trigger<WalkCommand>>([this](const WalkCommand& walkCommand) {
-            setVelocity(walkCommand.velocity[0] * (walkCommand.velocity[0] > 0 ? velocityLimits(0,1) : -velocityLimits(0,0)),
-                        walkCommand.velocity[1] * (walkCommand.velocity[1] > 0 ? velocityLimits(1,1) : -velocityLimits(1,0)),
-                        walkCommand.rotationalSpeed * (walkCommand.rotationalSpeed > 0 ? velocityLimits(2,1) : -velocityLimits(2,0)));
+            auto velocity = walkCommand.command;
+
+            velocity[0] = velocity.x()     * (velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0)),
+            velocity[1] = velocity.y()     * (velocity.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0)),
+            velocity[2] = velocity.angle() * (velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0));
+
+            setVelocity(velocity);
         });
 
         on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
@@ -278,6 +282,7 @@ namespace motion {
             beginStepTime = getTime();
             initialStep = 2;
             state = State::WALKING;
+            updateHandle.enable();
         }
     }
 
@@ -292,9 +297,9 @@ namespace motion {
         state = State::STOPPED;
         active = false;
         emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 0, 0 }})); // TODO: config
+        updateHandle.disable();
         log<NUClear::TRACE>("Walk Engine:: Stop request complete");
         emit(std::make_unique<WalkStopped>());
-
         emit(std::make_unique<std::vector<ServoCommand>>());
     }
 
@@ -469,21 +474,21 @@ namespace motion {
         return uLeftFootSupport.se2Interpolate(shiftFactor, uRightFootSupport);
     }
 
-    void WalkEngine::setVelocity(double vx, double vy, double va) {
+    void WalkEngine::setVelocity(SE2 velocity) {
         // filter the commanded speed
-        vx = std::min(std::max(vx, velocityLimits(0,0)), velocityLimits(0,1));
-        vy = std::min(std::max(vy, velocityLimits(1,0)), velocityLimits(1,1));
-        va = std::min(std::max(va, velocityLimits(2,0)), velocityLimits(2,1));
+        velocity[0] = std::min(std::max(velocity.x(),     velocityLimits(0,0)), velocityLimits(0,1));
+        velocity[1] = std::min(std::max(velocity.y(),     velocityLimits(1,0)), velocityLimits(1,1));
+        velocity[2] = std::min(std::max(velocity.angle(), velocityLimits(2,0)), velocityLimits(2,1));
 
         // slow down when turning
-        double vFactor = 1 - std::abs(va) / accelerationTurningFactor;
+        double vFactor = 1 - std::abs(velocity.angle()) / accelerationTurningFactor;
 
-        double stepMag = std::sqrt(vx * vx + vy * vy);
+        double stepMag = std::sqrt(velocity.x() * velocity.x() + velocity.y() * velocity.y());
         double magFactor = std::min(velocityLimits(0,1) * vFactor, stepMag) / (stepMag + 0.000001);
 
-        velocityCommand[0] = vx * magFactor;
-        velocityCommand[1] = vy * magFactor;
-        velocityCommand[2] = va;
+        velocityCommand[0] = velocity.x() * magFactor;
+        velocityCommand[1] = velocity.y() * magFactor;
+        velocityCommand[2] = velocity.angle();
 
         velocityCommand[0] = std::min(std::max(velocityCommand.x(),     velocityLimits(0,0)), velocityLimits(0,1));
         velocityCommand[1] = std::min(std::max(velocityCommand.y(),     velocityLimits(1,0)), velocityLimits(1,1));

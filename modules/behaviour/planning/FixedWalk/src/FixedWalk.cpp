@@ -57,7 +57,7 @@ namespace modules {
                 on< Trigger< Every<30, Per<std::chrono::seconds>>> , Options<Sync<FixedWalk>>, With<Sensors>>("Fixed Walk Manager", [this]( const time_t& t, const Sensors& sensors){
                     if(active && t > segmentStart + walkSegments.front().duration && !fallen){
                         //Move to next segment
-                        segmentStart += walkSegments.front().duration;                        
+                        segmentStart += walkSegments.front().duration;
                         walkSegments.pop_front();
 
                         if(walkSegments.empty()){
@@ -73,7 +73,7 @@ namespace modules {
                 		emit(getWalkCommand(walkSegments.front(), t-segmentStart, sensors));
                 	}
                 });
-                
+
                 on<Trigger<CancelFixedWalk>, Options<Sync<FixedWalk>> >([this](const CancelFixedWalk&){
                     emit(std::make_unique<WalkStopCommand>());
                     // emit(std::make_unique<WalkCommand>());
@@ -101,7 +101,7 @@ namespace modules {
 	        		}
                     std::cerr << "FixedWalk::FixedWalkCommand - Total walk segments pushed back:" << walkSegments.size() << " " << command.segments.size() <<std::endl;
 
-				}); 
+				});
 
             }
 
@@ -110,8 +110,8 @@ namespace modules {
             	arma::vec2 directionInOriginalCoords = (segment.curvePeriod != 0 ? utility::math::matrix::zRotationMatrix(2 * M_PI * timeSeconds / segment.curvePeriod, 2) : arma::eye(2,2) ) * segment.direction;
             	arma::vec2 direction =  arma::normalise(directionInOriginalCoords);
             	auto result = std::make_unique<WalkCommand>();
-            	result->rotationalSpeed = segment.normalisedAngularVelocity;
-            	result->velocity = segment.normalisedVelocity * direction;
+                result->command.rows(0,1) = segment.normalisedVelocity * direction;
+            	result->command.at(2) = segment.normalisedAngularVelocity;
             	return std::move(result);
             }
 

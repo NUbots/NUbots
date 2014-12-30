@@ -180,8 +180,8 @@ namespace strategy {
 
     void KeyboardWalk::updateCommand() {
         auto walkCommand = std::make_unique<WalkCommand>();
-        walkCommand->velocity = velocity;
-        walkCommand->rotationalSpeed = rotation;
+        walkCommand->command.rows(0,1) = velocity;
+        walkCommand->command.at(2) = rotation;
         emit(std::move(walkCommand));
     }
 

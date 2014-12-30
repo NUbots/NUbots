@@ -70,6 +70,7 @@ namespace math {
             inline double x()     const { return at(0); }
             inline double y()     const { return at(1); }
             inline double angle() const { return at(2); }
+            inline const arma::subview_col<double> xy() const { return rows(0,1); }
     };
 
 }  // math

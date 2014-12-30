@@ -213,7 +213,7 @@ namespace motion {
         void requestStop();
         void calculateNewStep();
         void stanceReset();
-        void setVelocity(double vx, double vy, double va);
+        void setVelocity(utility::math::SE2 velocity);
         void updateVelocity();
         utility::math::SE2 getNewFootTarget(const utility::math::SE2& velocity, const utility::math::SE2& leftFoot, const utility::math::SE2& rightFoot, const messages::behaviour::LimbID& swingLeg);
 
