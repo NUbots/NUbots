@@ -110,8 +110,8 @@ namespace modules {
             	arma::vec2 directionInOriginalCoords = (segment.curvePeriod != 0 ? utility::math::matrix::zRotationMatrix(2 * M_PI * timeSeconds / segment.curvePeriod, 2) : arma::eye(2,2) ) * segment.direction;
             	arma::vec2 direction =  arma::normalise(directionInOriginalCoords);
             	auto result = std::make_unique<WalkCommand>();
-                result->command.rows(0,1) = segment.normalisedVelocity * direction;
-            	result->command.at(2) = segment.normalisedAngularVelocity;
+                result->command.xy() = segment.normalisedVelocity * direction;
+            	result->command.angle() = segment.normalisedAngularVelocity;
             	return std::move(result);
             }
 

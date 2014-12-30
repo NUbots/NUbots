@@ -111,9 +111,9 @@ namespace motion {
         on<Trigger<WalkCommand>>([this](const WalkCommand& walkCommand) {
             auto velocity = walkCommand.command;
 
-            velocity[0] = velocity.x()     * (velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0)),
-            velocity[1] = velocity.y()     * (velocity.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0)),
-            velocity[2] = velocity.angle() * (velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0));
+            velocity.x()     = velocity.x()     * (velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0)),
+            velocity.y()     = velocity.y()     * (velocity.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0)),
+            velocity.angle() = velocity.angle() * (velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0));
 
             setVelocity(velocity);
         });
@@ -476,9 +476,9 @@ namespace motion {
 
     void WalkEngine::setVelocity(SE2 velocity) {
         // filter the commanded speed
-        velocity[0] = std::min(std::max(velocity.x(),     velocityLimits(0,0)), velocityLimits(0,1));
-        velocity[1] = std::min(std::max(velocity.y(),     velocityLimits(1,0)), velocityLimits(1,1));
-        velocity[2] = std::min(std::max(velocity.angle(), velocityLimits(2,0)), velocityLimits(2,1));
+        velocity.x()     = std::min(std::max(velocity.x(),     velocityLimits(0,0)), velocityLimits(0,1));
+        velocity.y()     = std::min(std::max(velocity.y(),     velocityLimits(1,0)), velocityLimits(1,1));
+        velocity.angle() = std::min(std::max(velocity.angle(), velocityLimits(2,0)), velocityLimits(2,1));
 
         // slow down when turning
         double vFactor = 1 - std::abs(velocity.angle()) / accelerationTurningFactor;
@@ -486,13 +486,13 @@ namespace motion {
         double stepMag = std::sqrt(velocity.x() * velocity.x() + velocity.y() * velocity.y());
         double magFactor = std::min(velocityLimits(0,1) * vFactor, stepMag) / (stepMag + 0.000001);
 
-        velocityCommand[0] = velocity.x() * magFactor;
-        velocityCommand[1] = velocity.y() * magFactor;
-        velocityCommand[2] = velocity.angle();
+        velocityCommand.x()     = velocity.x() * magFactor;
+        velocityCommand.y()     = velocity.y() * magFactor;
+        velocityCommand.angle() = velocity.angle();
 
-        velocityCommand[0] = std::min(std::max(velocityCommand.x(),     velocityLimits(0,0)), velocityLimits(0,1));
-        velocityCommand[1] = std::min(std::max(velocityCommand.y(),     velocityLimits(1,0)), velocityLimits(1,1));
-        velocityCommand[2] = std::min(std::max(velocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
+        velocityCommand.x()     = std::min(std::max(velocityCommand.x(),     velocityLimits(0,0)), velocityLimits(0,1));
+        velocityCommand.y()     = std::min(std::max(velocityCommand.y(),     velocityLimits(1,0)), velocityLimits(1,1));
+        velocityCommand.angle() = std::min(std::max(velocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
     }
 
     SE2 WalkEngine::getVelocity() {
@@ -552,18 +552,18 @@ namespace motion {
     SE2 WalkEngine::zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, SE2 uSupport, SE2 uLeftFootDestination, SE2 uLeftFootSource, SE2 uRightFootDestination, SE2 uRightFootSource) {
         SE2 com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
-        com[0] = uSupport.x() + zmpCoefficients[0] * expT + zmpCoefficients[1] / expT;
-        com[1] = uSupport.y() + zmpCoefficients[2] * expT + zmpCoefficients[3] / expT;
+        com.x() = uSupport.x() + zmpCoefficients[0] * expT + zmpCoefficients[1] / expT;
+        com.y() = uSupport.y() + zmpCoefficients[2] * expT + zmpCoefficients[3] / expT;
         if (phase < phase1Single) {
-            com[0] = com.x() + zmpParams[0] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[0] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
-            com[1] = com.y() + zmpParams[1] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[1] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
+            com.x() = com.x() + zmpParams[0] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[0] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
+            com.y() = com.y() + zmpParams[1] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[1] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
         } else if (phase > phase2Single) {
-            com[0] = com.x() + zmpParams[2] * stepTime * (phase - phase2Single) -zmpTime * zmpParams[2] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
-            com[1] = com.y() + zmpParams[3] * stepTime * (phase - phase2Single) -zmpTime * zmpParams[3] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
+            com.x() = com.x() + zmpParams[2] * stepTime * (phase - phase2Single) -zmpTime * zmpParams[2] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
+            com.y() = com.y() + zmpParams[3] * stepTime * (phase - phase2Single) -zmpTime * zmpParams[3] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
         }
         // com[2] = .5 * (uLeftFoot[2] + uRightFoot[2]);
         // Linear speed turning
-        com[2] = phase * (uLeftFootDestination.angle() + uRightFootDestination.angle()) / 2 + (1 - phase) * (uLeftFootSource.angle() + uRightFootSource.angle()) / 2;
+        com.angle() = phase * (uLeftFootDestination.angle() + uRightFootDestination.angle()) / 2 + (1 - phase) * (uLeftFootSource.angle() + uRightFootSource.angle()) / 2;
         return com;
     }
 

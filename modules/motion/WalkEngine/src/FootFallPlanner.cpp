@@ -38,13 +38,13 @@ namespace motion {
         uRightFootSource = uRightFootDestination;
         uTorsoSource = uTorsoDestination;
 
-        arma::vec2 supportMod = {0, 0}; // support point modulation for wallkick
+        arma::vec2 supportMod = arma::zeros(2); // support point modulation for wallkick
 
         if (state == State::STOP_REQUEST) {
             log<NUClear::TRACE>("Walk Engine:: Stop requested");
             state = State::LAST_STEP;
-            velocityCurrent = {0, 0, 0};
-            velocityCommand = {0, 0, 0};
+            velocityCurrent = arma::zeros(3);
+            velocityCommand = arma::zeros(3);
 
             // Stop with feet together by targetting swing leg next to support leg
             if (swingLeg == LimbID::RIGHT_LEG) {
@@ -114,13 +114,13 @@ namespace motion {
         // slow accelerations at high speed
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits); // TODO: use a function instead
 
-        velocityDifference[0] = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
-        velocityDifference[1] = std::min(std::max(velocityCommand.y()     - velocityCurrent.y(),     -limit[1]), limit[1]);
-        velocityDifference[2] = std::min(std::max(velocityCommand.angle() - velocityCurrent.angle(), -limit[2]), limit[2]);
+        velocityDifference.x()     = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
+        velocityDifference.y()     = std::min(std::max(velocityCommand.y()     - velocityCurrent.y(),     -limit[1]), limit[1]);
+        velocityDifference.angle() = std::min(std::max(velocityCommand.angle() - velocityCurrent.angle(), -limit[2]), limit[2]);
 
-        velocityCurrent[0] += velocityDifference.x();
-        velocityCurrent[1] += velocityDifference.y();
-        velocityCurrent[2] += velocityDifference.angle();
+        velocityCurrent.x()     += velocityDifference.x();
+        velocityCurrent.y()     += velocityDifference.y();
+        velocityCurrent.angle() += velocityDifference.angle();
 
         if (initialStep > 0) {
             velocityCurrent = arma::zeros(3);
@@ -144,15 +144,15 @@ namespace motion {
         // Get the vector between the feet and clamp the components between the min and max step limits
         SE2 supportFoot = swingLeg == LimbID::LEFT_LEG ? rightFoot : leftFoot;
         SE2 feetDifference = supportFoot.worldToLocal(footTarget);
-        feetDifference[0] = std::min(std::max(feetDifference.x(),            stepLimits(0,0)), stepLimits(0,1));
-        feetDifference[1] = std::min(std::max(feetDifference.y()     * sign, stepLimits(1,0)), stepLimits(1,1)) * sign;
-        feetDifference[2] = std::min(std::max(feetDifference.angle() * sign, stepLimits(2,0)), stepLimits(2,1)) * sign;
+        feetDifference.x()     = std::min(std::max(feetDifference.x(),            stepLimits(0,0)), stepLimits(0,1));
+        feetDifference.y()     = std::min(std::max(feetDifference.y()     * sign, stepLimits(1,0)), stepLimits(1,1)) * sign;
+        feetDifference.angle() = std::min(std::max(feetDifference.angle() * sign, stepLimits(2,0)), stepLimits(2,1)) * sign;
         // end applying step limits
 
         // Start feet collision detection:
         // Uses a rough measure to detect collision and move feet apart if too close
         double overlap = DarwinModel::Leg::FOOT_LENGTH / 2.0 * std::abs(feetDifference.angle());
-        feetDifference[1] = std::max(feetDifference.y() * sign, stanceLimitY2 + overlap) * sign;
+        feetDifference.y() = std::max(feetDifference.y() * sign, stanceLimitY2 + overlap) * sign;
         // End feet collision detection
 
         // Update foot target to be 'feetDistance' away from the support foot

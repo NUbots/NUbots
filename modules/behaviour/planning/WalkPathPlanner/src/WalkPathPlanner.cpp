@@ -134,8 +134,8 @@ namespace modules {
                         return;
                      } else if(planType == messages::behaviour::WalkApproach::DirectCommand){
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
-                        command->command.rows(0,1) = currentTargetPosition;
-                        command->command.at(2) = currentTargetHeading[0];
+                        command->command.xy()    = currentTargetPosition;
+                        command->command.angle() = currentTargetHeading[0];
                         emit(std::move(command));
                         emit(std::move(std::make_unique<WalkStartCommand>()));
                         return;
