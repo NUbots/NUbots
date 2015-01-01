@@ -64,8 +64,9 @@ namespace motion {
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::motion::kinematics::DarwinModel;
     using utility::math::SE2;
+    using utility::math::Transform;
     using utility::math::angle::normalizeAngle;
-    using utility::math::matrix::vec6ToMatrix;
+    using utility::math::matrix::vec6ToTransform;
     using utility::math::matrix::orthonormal44Inverse;
     using utility::math::matrix::translationMatrix;
     using utility::nubugger::graph;
@@ -365,22 +366,21 @@ namespace motion {
 
         uTorso = zmpCom(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
 
-        arma::mat44 leftFoot = uLeftFoot.toMatrix();
-        arma::mat44 rightFoot = uRightFoot.toMatrix();
+        Transform leftFoot = uLeftFoot.toTransform();
+        Transform rightFoot = uRightFoot.toTransform();
 
         if (swingLeg == LimbID::RIGHT_LEG) {
-            rightFoot *= translationMatrix({0, 0, stepHeight * foot[2]});
+            rightFoot.translateZ(stepHeight * foot[2]);
         } else {
-            leftFoot *= translationMatrix({0, 0, stepHeight * foot[2]});
+            leftFoot.translateZ(stepHeight * foot[2]);
         }
 
         SE2 uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
-        arma::mat44 torso = vec6ToMatrix({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
-        arma::mat44 torsoInv = orthonormal44Inverse(torso);
+        Transform torso = vec6ToTransform({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
 
         // Transform feet targets to be relative to the torso
-        arma::mat44 leftFootTorso = torsoInv * leftFoot;
-        arma::mat44 rightFootTorso = torsoInv * rightFoot;
+        Transform leftFootTorso = leftFoot.worldToLocal(torso);
+        Transform rightFootTorso = rightFoot.worldToLocal(torso);
 
         if (emitLocalisation) {
             localise(uTorsoActual);
@@ -400,12 +400,11 @@ namespace motion {
         uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
         SE2 uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
 
-        arma::mat44 torso = vec6ToMatrix({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
-        arma::mat44 torsoInv = orthonormal44Inverse(torso);
+        Transform torso = vec6ToTransform({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
 
         // Transform feet targets to be relative to the torso
-        arma::mat44 leftFootTorso = torsoInv * uLeftFoot.toMatrix();
-        arma::mat44 rightFootTorso = torsoInv * uRightFoot.toMatrix();
+        Transform leftFootTorso = uLeftFoot.toTransform().worldToLocal(torso);
+        Transform rightFootTorso = uRightFoot.toTransform().worldToLocal(torso);
 
         if (emitLocalisation) {
             localise(uTorsoActual);

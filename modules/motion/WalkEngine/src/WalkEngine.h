@@ -30,6 +30,7 @@
 #include "messages/input/Sensors.h"
 
 #include "utility/math/SE2.h"
+#include "utility/math/Transform.h"
 
 
 namespace modules {

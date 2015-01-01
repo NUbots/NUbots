@@ -22,7 +22,6 @@
 #include <nuclear>
 
 #include "utility/math/angle.h"
-#include "utility/math/matrix.h"
 
 namespace utility {
 namespace math {
@@ -56,11 +55,8 @@ namespace math {
         return result;
     }
 
-    arma::mat44 SE2::toMatrix() const {
-        arma::mat44 out = arma::eye(4,4);
-        out *= utility::math::matrix::translationMatrix({x(), y(), 0});
-        out *= utility::math::matrix::zRotationMatrix(angle(), 4);
-        return out;
+    Transform SE2::toTransform() const {
+        return Transform().translate({x(), y(), 0}).rotateZ(angle());
     }
 
 }

@@ -22,6 +22,8 @@
 
 #include <armadillo>
 
+#include "utility/math/Transform.h"
+
 namespace utility {
 namespace math {
 
@@ -65,7 +67,7 @@ namespace math {
              * Convert the vector into a 4x4 basis matrix
              * @return A 4v4 basis matrix
              */
-            arma::mat44 toMatrix() const;
+            Transform toTransform() const;
 
             inline double x() const { return at(0); }
             inline double& x() { return at(0); }
