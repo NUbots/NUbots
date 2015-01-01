@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_SUPPORT_YAMLEXPRESSION_H
-#define UTILITY_SUPPORT_YAMLEXPRESSION_H
+#ifndef UTILITY_SUPPORT_yaml_expression_H
+#define UTILITY_SUPPORT_yaml_expression_H
 
 #include <iostream>
 #include <yaml-cpp/yaml.h>

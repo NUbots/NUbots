@@ -17,13 +17,13 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_SUPPORT_YAMLARMADILLO_H
-#define UTILITY_SUPPORT_YAMLARMADILLO_H
+#ifndef UTILITY_SUPPORT_yaml_armadillo_H
+#define UTILITY_SUPPORT_yaml_armadillo_H
 
 #include <armadillo>
 #include <iostream>
 #include <yaml-cpp/yaml.h>
-#include "utility/support/YamlExpression.h"
+#include "utility/support/yaml_expression.h"
 
 
 namespace YAML {
@@ -112,4 +112,4 @@ namespace YAML {
     };
 }
 
-#endif // UTILITY_SUPPORT_YAMLARMADILLO_H
+#endif // UTILITY_SUPPORT_yaml_armadillo_H
