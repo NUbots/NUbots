@@ -20,13 +20,12 @@
 #include "SensorFilter.h"
 
 #include "messages/platform/darwin/DarwinSensors.h"
-#include "messages/input/Sensors.h"
 #include "messages/input/CameraParameters.h"
 #include "messages/support/Configuration.h"
-#include "utility/nubugger/NUhelpers.h"
+
 #include "utility/math/matrix.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/motion/RobotModels.h"
 
 namespace modules {
     namespace platform {
@@ -47,7 +46,7 @@ namespace modules {
             using utility::motion::kinematics::calculateCentreOfMass;
             using utility::motion::kinematics::Side;
             using utility::motion::kinematics::calculateRobotToIMU;
-            using utility::math::matrix::orthonormal44Inverse;
+            using utility::math::Transform;
             using utility::math::matrix::quaternionToRotationMatrix;
             using utility::math::kalman::IMUModel;
 
@@ -315,8 +314,8 @@ namespace modules {
                     // }
 
                     // // Kinematics odometry
-                    // arma::mat44 odometryRightFoot = arma::eye(4,4);
-                    // arma::mat44 odometryLeftFoot = arma::eye(4,4);
+                    // Transform odometryRightFoot = arma::eye(4,4);
+                    // Transform odometryLeftFoot = arma::eye(4,4);
                     // if(previousSensors){
                     //     //NOTE: calculateOdometryMatrix requires sensors->forwardKinematics to be calculated before calling
                     //     odometryLeftFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::LEFT);
@@ -427,17 +426,17 @@ namespace modules {
                 });
             }
 
-            arma::mat44 SensorFilter::calculateOdometryMatrix(
+            Transform SensorFilter::calculateOdometryMatrix(
                 const messages::input::Sensors& sensors,
                 const messages::input::Sensors& previousSensors,
                 utility::motion::kinematics::Side side) {
-                    arma::mat44 bodyFromAnkleInitialInverse, bodyFromAnkleFinal;
+                    Transform bodyFromAnkleInitialInverse, bodyFromAnkleFinal;
                     if(side == Side::LEFT){
                         bodyFromAnkleInitialInverse = previousSensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL);   //Double Inverse
-                        bodyFromAnkleFinal = orthonormal44Inverse(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL));
+                        bodyFromAnkleFinal = sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL).i();
                     } else {
                         bodyFromAnkleInitialInverse = previousSensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL);   //Double Inverse
-                        bodyFromAnkleFinal = orthonormal44Inverse(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL));
+                        bodyFromAnkleFinal = sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL).i();
                     }
                     return  bodyFromAnkleInitialInverse * bodyFromAnkleFinal;
             }

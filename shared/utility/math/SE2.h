@@ -63,12 +63,6 @@ namespace math {
              */
             SE2 se2Interpolate(double t, const SE2& target) const;
 
-            /**
-             * Convert the vector into a 4x4 basis matrix
-             * @return A 4v4 basis matrix
-             */
-            Transform toTransform() const;
-
             inline double x() const { return at(0); }
             inline double& x() { return at(0); }
 
@@ -80,6 +74,11 @@ namespace math {
 
             inline const arma::subview_col<double> xy() const { return rows(0,1); }
             inline arma::subview_col<double> xy() { return rows(0,1); }
+
+            /**
+             * Convert the vector into a 4x4 basis matrix
+             */
+            operator Transform() const;
     };
 
 }  // math

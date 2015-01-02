@@ -366,8 +366,8 @@ namespace motion {
 
         uTorso = zmpCom(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
 
-        Transform leftFoot = uLeftFoot.toTransform();
-        Transform rightFoot = uRightFoot.toTransform();
+        Transform leftFoot = uLeftFoot;
+        Transform rightFoot = uRightFoot;
 
         if (swingLeg == LimbID::RIGHT_LEG) {
             rightFoot.translateZ(stepHeight * foot[2]);
@@ -403,8 +403,8 @@ namespace motion {
         Transform torso = vec6ToTransform({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
 
         // Transform feet targets to be relative to the torso
-        Transform leftFootTorso = uLeftFoot.toTransform().worldToLocal(torso);
-        Transform rightFootTorso = uRightFoot.toTransform().worldToLocal(torso);
+        Transform leftFootTorso = static_cast<Transform>(uLeftFoot).worldToLocal(torso);
+        Transform rightFootTorso = static_cast<Transform>(uRightFoot).worldToLocal(torso);
 
         if (emitLocalisation) {
             localise(uTorsoActual);

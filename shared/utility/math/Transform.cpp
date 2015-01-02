@@ -31,8 +31,17 @@ namespace math {
         eye(); // identity matrix by default
     }
 
+    Transform::Transform(arma::vec4 q) {
+        // quaternion to rotation conversion
+        // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/
+        *this <<  1 - 2 * q[2] * q[2] - 2 * q[3] * q[3] << 2     * q[1] * q[2] - 2 * q[3] * q[0] << 2     * q[1] * q[3] + 2 * q[2] * q[0] << 0 << arma::endr
+              <<  2     * q[1] * q[2] + 2 * q[3] * q[0] << 1 - 2 * q[1] * q[1] - 2 * q[3] * q[3] << 2     * q[2] * q[3] - 2 * q[1] * q[0] << 0 << arma::endr
+              <<  2     * q[1] * q[3] - 2 * q[2] * q[0] << 2     * q[2] * q[3] + 2 * q[1] * q[0] << 1 - 2 * q[1] * q[1] - 2 * q[2] * q[2] << 0 << arma::endr
+              <<  0                                     << 0                                     << 0                                     << 1;
+    }
+
     Transform& Transform::translate(const arma::vec3& translation) {
-        arma::mat44 transform = arma::eye(4,4);
+        Transform transform;
         transform.col(3).rows(0,2) = translation;
         *this *= transform;
         return *this;
@@ -56,30 +65,30 @@ namespace math {
     Transform& Transform::rotateX(double radians) {
         double c = cos(radians);
         double s = sin(radians);
-        *this *= arma::mat44{1,  0, 0, 0,
-                             0,  c, s, 0,
-                             0, -s, c, 0,
-                             0,  0, 0, 1};
+        *this *= Transform{1,  0, 0, 0,
+                           0,  c, s, 0,
+                           0, -s, c, 0,
+                           0,  0, 0, 1};
         return *this;
     }
 
     Transform& Transform::rotateY(double radians) {
         double c = cos(radians);
         double s = sin(radians);
-        *this *= arma::mat44{c, 0, -s, 0,
-                             0, 1,  0, 0,
-                             s, 0,  c, 0,
-                             0, 0,  0, 1};
+        *this *= Transform{c, 0, -s, 0,
+                           0, 1,  0, 0,
+                           s, 0,  c, 0,
+                           0, 0,  0, 1};
         return *this;
     }
 
     Transform& Transform::rotateZ(double radians) {
         double c = cos(radians);
         double s = sin(radians);
-        *this *= arma::mat44{ c, s, 0, 0,
-                             -s, c, 0, 0,
-                              0, 0, 1, 0,
-                              0, 0, 0, 1};
+        *this *= Transform{ c, s, 0, 0,
+                           -s, c, 0, 0,
+                            0, 0, 1, 0,
+                            0, 0, 0, 1};
         return *this;
     }
 

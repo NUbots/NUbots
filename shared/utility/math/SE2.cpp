@@ -55,7 +55,7 @@ namespace math {
         return result;
     }
 
-    Transform SE2::toTransform() const {
+    SE2::operator Transform() const {
         return Transform().translate({x(), y(), 0}).rotateZ(angle());
     }
 

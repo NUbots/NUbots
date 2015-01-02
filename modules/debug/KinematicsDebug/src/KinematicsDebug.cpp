@@ -19,17 +19,18 @@
 
 #include "KinematicsDebug.h"
 
+#include <cstdlib>
+
 #include "messages/behaviour/Action.h"
 #include "messages/support/Configuration.h"
 #include "messages/input/ServoID.h"
 #include "messages/input/Sensors.h"
 #include "messages/motion/ServoTarget.h"
+
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/math/matrix.h"
+#include "utility/math/Transform.h"
 #include "utility/motion/RobotModels.h"
-#include <cstdlib>
-
 
 namespace modules {
     namespace debug {
@@ -38,21 +39,20 @@ namespace modules {
             using messages::motion::ServoTarget;
             using messages::input::ServoID;
             using messages::input::Sensors;
+            using utility::math::Transform;
             using utility::motion::kinematics::calculateLegJoints;
             using utility::motion::kinematics::calculatePosition;
             using utility::motion::kinematics::Side;
-            using utility::math::matrix::xRotationMatrix;
-            using utility::math::matrix::yRotationMatrix;
-            using utility::math::matrix::zRotationMatrix;
             using utility::motion::kinematics::DarwinModel;
             using utility::motion::kinematics::calculateHeadJoints;
 
             KinematicsDebug::KinematicsDebug(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
                     on< Trigger<Configuration<InverseKinematicsRequest>> >([this](const Configuration<InverseKinematicsRequest>& request) {
                         return;
-                        arma::mat44 target = yRotationMatrix(request.config["yAngle"].as<double>(), 4);
-                        target *= xRotationMatrix(request.config["xAngle"].as<double>(), 4);
-                        target *= zRotationMatrix(request.config["zAngle"].as<double>(), 4);
+                        Transform target;
+                        target.rotateY(request.config["yAngle"].as<double>());
+                        target.rotateX(request.config["xAngle"].as<double>());
+                        target.rotateZ(request.config["zAngle"].as<double>());
 
                         // translation
                         target(0,3) = request.config["x"].as<double>(); // down/up
@@ -115,9 +115,10 @@ namespace modules {
                         }
 
                         for(int i = 0; i<iterations; i++){
-                            arma::mat44 ikRequest = yRotationMatrix(request.config["yAngle"].as<double>(), 4);
-                            ikRequest *= xRotationMatrix(request.config["xAngle"].as<double>(), 4);
-                            ikRequest *= zRotationMatrix(request.config["zAngle"].as<double>(), 4);
+                            Transform ikRequest;
+                            ikRequest.rotateY(request.config["yAngle"].as<double>());
+                            ikRequest.rotateX(request.config["xAngle"].as<double>());
+                            ikRequest.rotateZ(request.config["zAngle"].as<double>());
 
                             // translation
                             ikRequest(0,3) = request.config["x"].as<double>();
@@ -125,9 +126,10 @@ namespace modules {
                             ikRequest(2,3) = request.config["z"].as<double>();
 
                             if(request.config["RANDOMIZE"].as<bool>()){
-                                ikRequest = yRotationMatrix(2*M_PI*rand()/static_cast<double>(RAND_MAX), 4);
-                                ikRequest *= xRotationMatrix(2*M_PI*rand()/static_cast<double>(RAND_MAX), 4);
-                                ikRequest *= zRotationMatrix(2*M_PI*rand()/static_cast<double>(RAND_MAX), 4);
+                                ikRequest.eye();
+                                ikRequest.rotateY(2*M_PI*rand()/static_cast<double>(RAND_MAX));
+                                ikRequest.rotateX(2*M_PI*rand()/static_cast<double>(RAND_MAX));
+                                ikRequest.rotateZ(2*M_PI*rand()/static_cast<double>(RAND_MAX));
                                 ikRequest(0,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);
                                 ikRequest(1,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);
                                 ikRequest(2,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);
@@ -163,8 +165,8 @@ namespace modules {
                                 }
                             }
                             std::cout<< "KinematicsNULLTest -calculating forward kinematics." <<std::endl;
-                            arma::mat44 lFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
-                            arma::mat44 rFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
+                            Transform lFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
+                            Transform rFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
                             NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts left foot: \n",lFootPosition);
                             NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts right foot: \n",rFootPosition);
                             std::cout << "Compared to request: \n" << ikRequest << std::endl;
@@ -233,7 +235,7 @@ namespace modules {
                                     sensors.servos[static_cast<int>(servoID)].presentPosition = position;
                             }
 
-                            arma::mat44 fKin = calculatePosition<DarwinModel>(sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
+                            Transform fKin = calculatePosition<DarwinModel>(sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
 
                             float max_error = 0;
                             for(int i = 0; i < 3 ; i++){

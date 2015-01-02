@@ -22,11 +22,13 @@
 
 #include <nuclear>
 
+#include "messages/input/Sensors.h"
+
+#include "utility/math/Transform.h"
 #include "utility/math/kalman/UKF.h"
 #include "utility/math/kalman/IMUModel.h"
 #include "utility/math/kalman/LinearVec3Model.h"
 #include "utility/motion/RobotModels.h"
-#include "messages/input/Sensors.h"
 
 namespace modules {
     namespace platform {
@@ -63,7 +65,7 @@ namespace modules {
 
                 static constexpr const char* CONFIGURATION_PATH = "DarwinSensorFilter.yaml";
             private:
-                arma::mat44 calculateOdometryMatrix(
+                utility::math::Transform calculateOdometryMatrix(
                     const messages::input::Sensors& sensors,
                     const messages::input::Sensors& previousSensors,
                     utility::motion::kinematics::Side side);

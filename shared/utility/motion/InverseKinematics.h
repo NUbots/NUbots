@@ -26,7 +26,7 @@
 #include <cmath>
 #include <nuclear>
 
-#include "utility/math/matrix.h"
+#include "utility/math/Transform.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/RobotModels.h"
 #include "messages/input/ServoID.h"
@@ -52,7 +52,7 @@ namespace kinematics {
         @param RobotKinematicModel The class containing the leg model of the robot.
     */
     template <typename RobotKinematicModel>
-    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints(arma::mat44 target, messages::behaviour::LimbID limb) {
+    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints(utility::math::Transform target, messages::behaviour::LimbID limb) {
         const float LENGTH_BETWEEN_LEGS = RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS;
         const float DISTANCE_FROM_BODY_TO_HIP_JOINT = RobotKinematicModel::Leg::HIP_OFFSET_Z;
         const float HIP_OFFSET_X = RobotKinematicModel::Leg::HIP_OFFSET_X;
@@ -69,7 +69,7 @@ namespace kinematics {
         float ankleRoll = 0;
 
         //TODO remove this. It was due to wrong convention use
-        arma::mat44 inputCoordinatesToCalcCoordinates;
+        utility::math::Transform inputCoordinatesToCalcCoordinates;
         inputCoordinatesToCalcCoordinates << 0<< 1<< 0<< 0<< arma::endr
                                           << 1<< 0<< 0<< 0<< arma::endr
                                           << 0<< 0<<-1<< 0<< arma::endr
@@ -191,14 +191,14 @@ namespace kinematics {
     }
 
     template <typename RobotKinematicModel>
-    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJointsTeamDarwin(arma::mat44 target, messages::behaviour::LimbID limb) {
-        target(2,3) += RobotKinematicModel::TEAMDARWINCHEST_TO_ORIGIN;
-        target *= utility::math::matrix::translationMatrix(arma::vec3({0,0,RobotKinematicModel::Leg::FOOT_HEIGHT}));
+    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJointsTeamDarwin(utility::math::Transform target, messages::behaviour::LimbID limb) {
+        target(2,3) += RobotKinematicModel::TEAMDARWINCHEST_TO_ORIGIN; // translate without regard to rotation
+        target.translateZ(RobotKinematicModel::Leg::FOOT_HEIGHT);
         return calculateLegJoints<RobotKinematicModel>(target, limb);
     }
 
     template <typename RobotKinematicModel>
-    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJointsTeamDarwin(arma::mat44 leftTarget, arma::mat44 rightTarget) {
+    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJointsTeamDarwin(utility::math::Transform leftTarget, utility::math::Transform rightTarget) {
         auto joints = calculateLegJointsTeamDarwin<RobotKinematicModel>(leftTarget, messages::behaviour::LimbID::LEFT_LEG);
         auto joints2 = calculateLegJointsTeamDarwin<RobotKinematicModel>(rightTarget, messages::behaviour::LimbID::RIGHT_LEG);
         joints.insert(joints.end(), joints2.begin(), joints2.end());
@@ -213,7 +213,7 @@ namespace kinematics {
         return positions;
     }
 
-    inline arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint, const arma::mat44& orientationCamToGround, const arma::mat44& orientationBodyToGround){
+    inline arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint, const utility::math::Transform orientationCamToGround, const utility::math::Transform orientationBodyToGround){
 	// TODO: Find point that is invariant under head position.
         arma::vec3 cameraPosition = orientationCamToGround.submat(0,3,2,3);
         arma::vec3 groundSpaceLookVector = groundPoint - cameraPosition;

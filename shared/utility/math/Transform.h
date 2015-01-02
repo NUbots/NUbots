@@ -35,6 +35,7 @@ namespace math {
 
         public:
             Transform();
+            Transform(arma::vec4 q);
             Transform& translate(const arma::vec3& translation);
             Transform& translateX(double translation);
             Transform& translateY(double translation);

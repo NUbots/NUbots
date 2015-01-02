@@ -23,7 +23,10 @@
 #include <nuclear>
 #include <armadillo>
 #include <nuclear>
+
 #include "ServoID.h"
+
+#include "utility/math/Transform.h"
 #include "utility/math/geometry/Line.h"
 
 namespace messages {
@@ -66,9 +69,9 @@ namespace messages {
             bool leftFootDown;
             bool rightFootDown;
 
-            std::map<messages::input::ServoID, arma::mat44> forwardKinematics;
+            std::map<messages::input::ServoID, utility::math::Transform> forwardKinematics;
 
-            // arma::mat44 odometry;
+            // utility::math::Transform odometry;
             arma::vec2 odometry;
             arma::mat22 odometryCovariance;
 
@@ -76,10 +79,10 @@ namespace messages {
 
             arma::vec4 centreOfMass;
 
-            arma::mat44 orientationBodyToGround;
-            arma::mat44 orientationCamToGround;
-            arma::mat44 kinematicsBodyToGround;
-            arma::mat44 kinematicsCamToGround;
+            utility::math::Transform orientationBodyToGround;
+            utility::math::Transform orientationCamToGround;
+            utility::math::Transform kinematicsBodyToGround;
+            utility::math::Transform kinematicsCamToGround;
 
             std::vector<Servo> servos;
         };
