@@ -112,9 +112,9 @@ namespace motion {
         on<Trigger<WalkCommand>>([this](const WalkCommand& walkCommand) {
             auto velocity = walkCommand.command;
 
-            velocity.x()     = velocity.x()     * (velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0)),
-            velocity.y()     = velocity.y()     * (velocity.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0)),
-            velocity.angle() = velocity.angle() * (velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0));
+            velocity.x()     *= velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
+            velocity.y()     *= velocity.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0);
+            velocity.angle() *= velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
 
             setVelocity(velocity);
         });
@@ -359,9 +359,9 @@ namespace motion {
             foot[2] = 0; // don't lift foot at initial step, TODO: review
         }
         if (swingLeg == LimbID::RIGHT_LEG) {
-            uRightFoot = uRightFootSource.se2Interpolate(foot[0], uRightFootDestination);
+            uRightFoot = uRightFootSource.interpolate(foot[0], uRightFootDestination);
         } else {
-            uLeftFoot = uLeftFootSource.se2Interpolate(foot[0], uLeftFootDestination);
+            uLeftFoot = uLeftFootSource.interpolate(foot[0], uLeftFootDestination);
         }
 
         uTorso = zmpCom(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
@@ -470,7 +470,7 @@ namespace motion {
     SE2 WalkEngine::stepTorso(SE2 uLeftFoot, SE2 uRightFoot, double shiftFactor) {
         SE2 uLeftFootSupport = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
         SE2 uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
-        return uLeftFootSupport.se2Interpolate(shiftFactor, uRightFootSupport);
+        return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
     }
 
     void WalkEngine::setVelocity(SE2 velocity) {
@@ -554,11 +554,11 @@ namespace motion {
         com.x() = uSupport.x() + zmpCoefficients[0] * expT + zmpCoefficients[1] / expT;
         com.y() = uSupport.y() + zmpCoefficients[2] * expT + zmpCoefficients[3] / expT;
         if (phase < phase1Single) {
-            com.x() = com.x() + zmpParams[0] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[0] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
-            com.y() = com.y() + zmpParams[1] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[1] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
+            com.x() += zmpParams[0] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[0] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
+            com.y() += zmpParams[1] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[1] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
         } else if (phase > phase2Single) {
-            com.x() = com.x() + zmpParams[2] * stepTime * (phase - phase2Single) -zmpTime * zmpParams[2] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
-            com.y() = com.y() + zmpParams[3] * stepTime * (phase - phase2Single) -zmpTime * zmpParams[3] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
+            com.x() += zmpParams[2] * stepTime * (phase - phase2Single) -zmpTime * zmpParams[2] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
+            com.y() += zmpParams[3] * stepTime * (phase - phase2Single) -zmpTime * zmpParams[3] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
         }
         // com[2] = .5 * (uLeftFoot[2] + uRightFoot[2]);
         // Linear speed turning

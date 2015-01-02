@@ -61,7 +61,7 @@ namespace math {
              * @param target The target vector
              * @return The interpolated vector
              */
-            SE2 se2Interpolate(double t, const SE2& target) const;
+            SE2 interpolate(double t, const SE2& target) const;
 
             inline double x() const { return at(0); }
             inline double& x() { return at(0); }

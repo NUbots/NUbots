@@ -49,7 +49,7 @@ namespace math {
         };
     }
 
-    SE2 SE2::se2Interpolate(double t, const SE2& target) const {
+    SE2 SE2::interpolate(double t, const SE2& target) const {
         SE2 result = SE2(*this + t * (target - *this));
         result[2] = utility::math::angle::normalizeAngle(result.angle());
         return result;

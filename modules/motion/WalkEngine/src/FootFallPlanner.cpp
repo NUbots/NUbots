@@ -132,7 +132,7 @@ namespace motion {
         // Negative if right leg to account for the mirroring of the foot target
         int8_t sign = swingLeg == LimbID::LEFT_LEG ? 1 : -1;
         // Get midpoint between the two feet
-        SE2 midPoint = leftFoot.se2Interpolate(0.5, rightFoot);
+        SE2 midPoint = leftFoot.interpolate(0.5, rightFoot);
         // Get midpoint 1.5 steps in future
         // Note: The reason for 1.5 rather than 1 is because it takes an extra 0.5 steps
         // for the torso to reach a given position when you want both feet together
