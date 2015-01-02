@@ -45,6 +45,7 @@ namespace math {
             Transform& rotateZ(double radians);
             Transform& worldToLocal(const Transform& local);
             Transform& localToWorld(const Transform& local);
+            Transform i() const;
     };
 
 }  // math

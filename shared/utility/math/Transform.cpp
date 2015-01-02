@@ -102,5 +102,18 @@ namespace math {
         return *this;
     }
 
+    Transform Transform::i() const {
+        // The faster othornomal basis inverse
+        Transform inverseTransform;
+        // Transpose the rotation submatrix (top-left 3x3)
+        inverseTransform.submat(0,0,2,2) = (*this).submat(0,0,2,2).t();
+        // Multiply translation vector (top-right column vector) by the negated rotation matrix
+        inverseTransform.submat(0,3,2,3) = -inverseTransform.submat(0,0,2,2) * (*this).submat(0,3,2,3);
+        /*if (arma::norm(inverseTransform * (*this) - arma::eye(4,4)) > 1e-10){
+            NUClear::log<NUClear::WARN>("Inverse failed! Matrix is singular");
+        }*/
+        return inverseTransform;
+    }
+
 }
 }
