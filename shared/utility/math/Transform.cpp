@@ -34,10 +34,11 @@ namespace math {
     Transform::Transform(arma::vec4 q) {
         // quaternion to rotation conversion
         // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/
-        *this <<  1 - 2 * q[2] * q[2] - 2 * q[3] * q[3] << 2     * q[1] * q[2] - 2 * q[3] * q[0] << 2     * q[1] * q[3] + 2 * q[2] * q[0] << 0 << arma::endr
-              <<  2     * q[1] * q[2] + 2 * q[3] * q[0] << 1 - 2 * q[1] * q[1] - 2 * q[3] * q[3] << 2     * q[2] * q[3] - 2 * q[1] * q[0] << 0 << arma::endr
-              <<  2     * q[1] * q[3] - 2 * q[2] * q[0] << 2     * q[2] * q[3] + 2 * q[1] * q[0] << 1 - 2 * q[1] * q[1] - 2 * q[2] * q[2] << 0 << arma::endr
-              <<  0                                     << 0                                     << 0                                     << 1;
+        // http://en.wikipedia.org/wiki/Rotation_group_SO(3)#Quaternions_of_unit_norm
+        *this << 1 - 2 * q[2] * q[2] - 2 * q[3] * q[3] << 2     * q[1] * q[2] - 2 * q[3] * q[0] << 2     * q[1] * q[3] + 2 * q[2] * q[0] << 0 << arma::endr
+              << 2     * q[1] * q[2] + 2 * q[3] * q[0] << 1 - 2 * q[1] * q[1] - 2 * q[3] * q[3] << 2     * q[2] * q[3] - 2 * q[1] * q[0] << 0 << arma::endr
+              << 2     * q[1] * q[3] - 2 * q[2] * q[0] << 2     * q[2] * q[3] + 2 * q[1] * q[0] << 1 - 2 * q[1] * q[1] - 2 * q[2] * q[2] << 0 << arma::endr
+              << 0                                     << 0                                     << 0                                     << 1;
     }
 
     Transform& Transform::translate(const arma::vec3& translation) {
@@ -65,50 +66,61 @@ namespace math {
     Transform& Transform::rotateX(double radians) {
         double c = cos(radians);
         double s = sin(radians);
-        *this *= Transform{1,  0, 0, 0,
-                           0,  c, s, 0,
-                           0, -s, c, 0,
-                           0,  0, 0, 1};
+        Transform transform;
+        // http://en.wikipedia.org/wiki/Rotation_matrix#Basic_rotations
+        transform << 1 << 0 <<  0 << 0 << arma::endr
+                  << 0 << c << -s << 0 << arma::endr
+                  << 0 << s <<  c << 0 << arma::endr
+                  << 0 << 0 <<  0 << 1;
+        *this *= transform;
         return *this;
     }
 
     Transform& Transform::rotateY(double radians) {
         double c = cos(radians);
         double s = sin(radians);
-        *this *= Transform{c, 0, -s, 0,
-                           0, 1,  0, 0,
-                           s, 0,  c, 0,
-                           0, 0,  0, 1};
+        Transform transform;
+        // http://en.wikipedia.org/wiki/Rotation_matrix#Basic_rotations
+        transform <<  c << 0 << s << 0 << arma::endr
+                  <<  0 << 1 << 0 << 0 << arma::endr
+                  << -s << 0 << c << 0 << arma::endr
+                  <<  0 << 0 << 0 << 1;
+        *this *= transform;
         return *this;
     }
 
     Transform& Transform::rotateZ(double radians) {
         double c = cos(radians);
         double s = sin(radians);
-        *this *= Transform{ c, s, 0, 0,
-                           -s, c, 0, 0,
-                            0, 0, 1, 0,
-                            0, 0, 0, 1};
+        Transform transform;
+        // http://en.wikipedia.org/wiki/Rotation_matrix#Basic_rotations
+        transform << c << -s << 0 << 0 << arma::endr
+                  << s <<  c << 0 << 0 << arma::endr
+                  << 0 <<  0 << 1 << 0 << arma::endr
+                  << 0 <<  0 << 0 << 1;
+        *this *= transform;
         return *this;
     }
 
-    Transform& Transform::worldToLocal(const Transform& local) {
-        *this = local.i() * (*this);
+    Transform& Transform::worldToLocal(const Transform& reference) {
+        // http://en.wikipedia.org/wiki/Change_of_basis
+        *this = reference.i() * (*this);
         return *this;
     }
 
-    Transform& Transform::localToWorld(const Transform& local) {
-        *this = local * (*this);
+    Transform& Transform::localToWorld(const Transform& reference) {
+        // http://en.wikipedia.org/wiki/Change_of_basis
+        *this = reference * (*this);
         return *this;
     }
 
     Transform Transform::i() const {
-        // The faster othornomal basis inverse
+        // Create a new transform
         Transform inverseTransform;
-        // Transpose the rotation submatrix (top-left 3x3)
-        inverseTransform.submat(0,0,2,2) = (*this).submat(0,0,2,2).t();
-        // Multiply translation vector (top-right column vector) by the negated rotation matrix
-        inverseTransform.submat(0,3,2,3) = -inverseTransform.submat(0,0,2,2) * (*this).submat(0,3,2,3);
+        // Transpose the rotation submatrix (top-left 3x3), this is equivalent to taking the inverse of the rotation matrix
+        inverseTransform.submat(0,0,2,2) = submat(0,0,2,2).t();
+        // Multiply translation vector (top-right column vector) by the negated inverse rotation matrix
+        inverseTransform.submat(0,3,2,3) = -inverseTransform.submat(0,0,2,2) * submat(0,3,2,3);
         /*if (arma::norm(inverseTransform * (*this) - arma::eye(4,4)) > 1e-10){
             NUClear::log<NUClear::WARN>("Inverse failed! Matrix is singular");
         }*/
