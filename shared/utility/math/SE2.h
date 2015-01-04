@@ -40,18 +40,20 @@ namespace math {
 
         public:
             /**
-             * Local to world transform
+             * @brief Transforms position from local coordinates relative to 'reference', to world coordinates
              *
-             * Transforms the current vector from local space relative to poseRelative, to world/global space
+             * @param reference A position to become relatively local to
+             * @return The new position
              */
-            SE2 localToWorld(const SE2& poseRelative) const;
+            SE2 localToWorld(const SE2& reference) const;
 
             /**
-             * World to local transform
+             * @brief Transforms position from world coordinates to be local to 'reference'
              *
-             * Transforms the current vector from world/global space to be relative to poseGlobal
+             * @param reference The position that the current position is relative to
+             * @return The new position
              */
-            SE2 worldToLocal(const SE2& poseGlobal) const;
+            SE2 worldToLocal(const SE2& reference) const;
 
             /**
              * Interpolate between itself and given target vector

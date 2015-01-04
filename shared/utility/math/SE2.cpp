@@ -26,32 +26,34 @@
 namespace utility {
 namespace math {
 
-    SE2 SE2::localToWorld(const SE2& poseRelative) const {
+    using utility::math::angle::normalizeAngle;
+
+    SE2 SE2::localToWorld(const SE2& reference) const {
         double cosAngle = std::cos(angle());
         double sinAngle = std::sin(angle());
-        // translates to this + rotZ(this.angle) * poseRelative
+        // translates to this + rotZ(this.angle) * reference
         return {
-            x() + cosAngle * poseRelative.x() - sinAngle * poseRelative.y(),
-            y() + sinAngle * poseRelative.x() + cosAngle * poseRelative.y(),
-            angle() + poseRelative.angle() // do not use normalizeAngle here, causes bad things when turning! TODO: unsure on cause
+            x() + cosAngle * reference.x() - sinAngle * reference.y(),
+            y() + sinAngle * reference.x() + cosAngle * reference.y(),
+            angle() + reference.angle() // do not use normalizeAngle here, causes bad things when turning! TODO: unsure on cause
         };
     }
 
-    SE2 SE2::worldToLocal(const SE2& poseGlobal) const {
+    SE2 SE2::worldToLocal(const SE2& reference) const {
         double cosAngle = std::cos(angle());
         double sinAngle = std::sin(angle());
-        SE2 diff = poseGlobal - *this;
-        // translates to rotZ(this.angle) * (poseGlobal - this)
+        SE2 diff = reference - *this;
+        // translates to rotZ(this.angle) * (reference - this)
         return {
             cosAngle * diff.x() + sinAngle * diff.y(),
             -sinAngle * diff.x() + cosAngle * diff.y(),
-            utility::math::angle::normalizeAngle(diff.angle())
+            normalizeAngle(diff.angle())
         };
     }
 
     SE2 SE2::interpolate(double t, const SE2& target) const {
-        SE2 result = SE2(*this + t * (target - *this));
-        result[2] = utility::math::angle::normalizeAngle(result.angle());
+        SE2 result = *this + t * (target - *this);
+        result[2] = normalizeAngle(result.angle());
         return result;
     }
 

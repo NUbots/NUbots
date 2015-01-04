@@ -117,7 +117,7 @@ namespace math {
              *
              * Pseudocode: this = reference * this
              *
-             * @param reference A basis matrix to become relatively local to
+             * @param reference The basis matrix that the current basis is relative to
              * @return A reference to *this, to be used for chaining
              */
             Transform& localToWorld(const Transform& reference);
