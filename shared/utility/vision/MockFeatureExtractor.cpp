@@ -17,7 +17,6 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 #include "MockFeatureExtractor.h"
-#include "utility/math/matrix.h"
 #include "messages/input/ServoID.h"
 #include "utility/math/vision.h"
 #include "utility/support/yaml_armadillo.h"

@@ -79,6 +79,10 @@ namespace matrix {
              * @brief Convert from a quaternions vec4
              */
             Rotation(arma::vec4 q);
+            /**
+             * @brief Create a rotation matrix based on a vec3 and an angle
+             */
+            Rotation(arma::vec3 axis, double angle);
 
             /**
              * @brief Rotates matrix around the local X axis
@@ -111,6 +115,11 @@ namespace matrix {
              * @return The inverse transform
              */
             Rotation i() const;
+
+            /**
+             * @return Pair containing the axis of the rotation as a unit vector followed by the rotation angle.
+             */
+            std::pair<arma::vec3, double> axisAngle() const;
 
             /**
              * @brief Creates a rotation matrix around the X axis by the given radians

@@ -20,7 +20,6 @@
 #include "MockRobot.h"
 #include <nuclear>
 #include "utility/math/angle.h"
-#include "utility/math/matrix.h"
 #include "utility/math/coordinates.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/transform.h"
