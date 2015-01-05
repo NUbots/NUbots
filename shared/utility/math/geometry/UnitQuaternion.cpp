@@ -18,17 +18,18 @@
  */
 
 #include "UnitQuaternion.h"
-#include "utility/math/matrix.h"
 
 
 namespace utility {
 namespace math {
 namespace geometry {
 
-     constexpr uint kW = 0;   //real part
-     constexpr uint kX = 1;
-     constexpr uint kY = 2;
-     constexpr uint kZ = 3;
+    using matrix::Rotation3D;
+
+    constexpr uint kW = 0;   //real part
+    constexpr uint kX = 1;
+    constexpr uint kY = 2;
+    constexpr uint kZ = 3;
 
     UnitQuaternion::UnitQuaternion(const arma::vec4& q_){
     	q = q_;
@@ -64,19 +65,6 @@ namespace geometry {
     	return 2 * std::acos(q[kW]);
     }
 
-    arma::mat33 UnitQuaternion::getMatrix(){
-    	// Jake's method. Does it work? Nobody knows!!
-    	// arma::mat33 m;
-    	// arma::vec3 X = {1,0,0};
-    	// arma::vec3 Y = {0,1,0};
-    	// arma::vec3 Z = {0,0,1};
-    	// m.col(0) = rotateVector(X);
-    	// m.col(1) = rotateVector(Y);
-    	// m.col(2) = rotateVector(Z);
-    	// return m;
-    	return utility::math::matrix::quaternionToRotationMatrix(q);
-    }
-
     arma::vec UnitQuaternion::rows(const uint& i, const uint& j) const{
         return q.rows(i,j);
     }
@@ -100,6 +88,10 @@ namespace geometry {
 		qCrossP.rows(kX,kZ) = arma::cross(q.rows(kX,kZ), p.rows(kX,kZ));
 		return UnitQuaternion(arma::vec4(qsps - qDotP + qspv + qvps + qCrossP));
 	}
+
+    UnitQuaternion::operator Rotation3D() const {
+        return Rotation3D(q);
+    }
 
 }
 }

@@ -26,6 +26,7 @@
 namespace utility {
 namespace math {
 
+    using matrix::Transform;
     using utility::math::angle::normalizeAngle;
 
     SE2 SE2::localToWorld(const SE2& reference) const {

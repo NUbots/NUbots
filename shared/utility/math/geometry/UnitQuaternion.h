@@ -22,6 +22,8 @@
 
 #include <armadillo>
 
+#include "utility/math/matrix/Rotation.h"
+
 namespace utility {
 namespace math {
 namespace geometry {
@@ -57,11 +59,6 @@ namespace geometry {
 
         double getAngle();
 
-        /*! @brief Returns the matrix which performs the same rotation as the rotateVector method.
-        When representing a basis, this transform maps points written in basis coords to points in world coords (i.e x,y,z) : B -> W
-        */
-        arma::mat33 getMatrix();
-
         /*! @brief Calls corresponding function on stored q vector
         Note: ACCESS ONLY (NO WRITING)
         */
@@ -70,6 +67,11 @@ namespace geometry {
         Note: ACCESS ONLY (NO WRITING)
         */
         double operator [] (const uint& i) const;
+
+        /*! @brief Returns the matrix which performs the same rotation as the rotateVector method.
+        When representing a basis, this transform maps points written in basis coords to points in world coords (i.e x,y,z) : B -> W
+        */
+        operator matrix::Rotation3D() const;
 
     };
 

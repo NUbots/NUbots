@@ -23,13 +23,14 @@
 #include "messages/input/CameraParameters.h"
 #include "messages/support/Configuration.h"
 
-#include "utility/math/matrix.h"
+#include "utility/math/matrix/Rotation.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/motion/ForwardKinematics.h"
 
 namespace modules {
     namespace platform {
         namespace darwin {
+
 
             using messages::support::Configuration;
             using messages::platform::darwin::DarwinSensors;
@@ -39,16 +40,16 @@ namespace modules {
             using messages::platform::darwin::ButtonMiddleUp;
             using messages::input::Sensors;
             using messages::input::CameraParameters;
-            using utility::nubugger::graph;
             using messages::input::ServoID;
+            using utility::nubugger::graph;
             using utility::motion::kinematics::calculateAllPositions;
             using utility::motion::kinematics::DarwinModel;
             using utility::motion::kinematics::calculateCentreOfMass;
             using utility::motion::kinematics::Side;
             using utility::motion::kinematics::calculateRobotToIMU;
-            using utility::math::Transform;
-            using utility::math::matrix::quaternionToRotationMatrix;
+            using utility::math::matrix::Transform;
             using utility::math::kalman::IMUModel;
+            using utility::math::matrix::Rotation3D;
 
             std::string makeErrorString(const std::string& src, uint errorCode) {
                 std::stringstream s;
@@ -267,7 +268,7 @@ namespace modules {
                     // Gives us the quaternion representation
                     arma::vec o = orientationFilter.get();
                     //Map from robot to world coordinates
-                    sensors->orientation = quaternionToRotationMatrix(o.rows(orientationFilter.model.QW, orientationFilter.model.QZ));
+                    sensors->orientation = Rotation3D(arma::vec4(o.rows(orientationFilter.model.QW, orientationFilter.model.QZ)));
 
                     // sensors->orientation.col(2) = -orientation.rows(0,2);
                     // sensors->orientation.col(0) = orientation.rows(3,5);

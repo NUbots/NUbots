@@ -29,7 +29,7 @@
 
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/math/Transform.h"
+#include "utility/math/matrix/Transform.h"
 #include "utility/motion/RobotModels.h"
 
 namespace modules {
@@ -39,7 +39,7 @@ namespace modules {
             using messages::motion::ServoTarget;
             using messages::input::ServoID;
             using messages::input::Sensors;
-            using utility::math::Transform;
+            using utility::math::matrix::Transform;
             using utility::motion::kinematics::calculateLegJoints;
             using utility::motion::kinematics::calculatePosition;
             using utility::motion::kinematics::Side;

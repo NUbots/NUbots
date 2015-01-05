@@ -23,10 +23,7 @@
 #include "utility/motion/ForwardKinematics.h"
 #include "messages/input/ServoID.h"
 #include "utility/math/vision.h"
-#include "utility/math/matrix.h"
-
-
-#include <iostream>
+#include "utility/math/matrix/Transform.h"
 
 namespace utility {
     namespace math {
@@ -54,7 +51,7 @@ namespace utility {
                 // NUClear::log("State = ",state);
                 // NUClear::log("worldToCamera_camera", worldToCamera_camera);
                 arma::vec initialObservedDirection = utility::math::vision::directionVectorFromScreenAngular({state[kTHETA], state[kPHI]});
-                arma::mat cameraToWorld_world = utility::math::matrix::orthonormal44Inverse(worldToCamera_camera);
+                arma::mat cameraToWorld_world = matrix::Transform(worldToCamera_camera).i();
                 // NUClear::log("World Coordinate of feature direction\n", (arma::vec4({state[kX],state[kY],state[kZ],0}) - cameraToWorld_world.submat(0,3,3,3) + arma::vec{0,0,0,1}) * state[kRHO] + initialObservedDirection);
                 arma::vec cameraToFeatureVector_cam =  worldToCamera_camera * ((arma::vec4({state[kX],state[kY],state[kZ],0}) - cameraToWorld_world.submat(0,3,3,3) + arma::vec{0,0,0,1}) * state[kRHO] + initialObservedDirection);
                 //OLD ANGLE METHOD

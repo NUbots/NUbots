@@ -24,7 +24,8 @@
 #include <armadillo>
 #include <cmath>
 
-#include "utility/math/Transform.h"
+#include "utility/math/matrix/Transform.h"
+#include "utility/math/matrix/Rotation.h"
 
 namespace utility {
 namespace math {
@@ -38,89 +39,9 @@ namespace math {
  */
 namespace matrix {
 
-    inline arma::mat22 rotationMatrix(double angle) {
-        double cosAngle = std::cos(angle);
-        double sinAngle = std::sin(angle);
-        arma::mat22 result;
-        result << cosAngle    << -sinAngle   <<  arma::endr
-               << sinAngle    << cosAngle;
-        return result;
-    }
-
-    inline arma::mat33 xRotationMatrix(double angle) {
-        double cosAngle = cos(angle);
-        double sinAngle = sin(angle);
-        arma::mat33 result;
-        result << 1           << 0           << 0           <<  arma::endr
-               << 0           << cosAngle    << -sinAngle   <<  arma::endr
-               << 0           << sinAngle    << cosAngle;
-        return result;
-    }
-    inline arma::mat33 yRotationMatrix(double angle) {
-        double cosAngle = cos(angle);
-        double sinAngle = sin(angle);
-        arma::mat33 result;
-        result << cosAngle    << 0           << sinAngle    <<  arma::endr
-               << 0           << 1           << 0           << arma::endr
-               << -sinAngle   << 0           << cosAngle;
-        return result;
-    }
-
-    inline arma::mat33 zRotationMatrix(double angle) {
-        double cosAngle = cos(angle);
-        double sinAngle = sin(angle);
-        arma::mat33 result;
-        result << cosAngle    << -sinAngle   << 0           <<  arma::endr
-               << sinAngle    << cosAngle    << 0           <<  arma::endr
-               << 0           << 0           << 1;
-        return result;
-    }
-
-    inline arma::mat xRotationMatrix(double angle, int size) {
-        if (size <= 2) {
-            throw std::runtime_error("Rotations in two dimensions cannot be done about the x-axis. Use the z-axis.");
-        }
-        arma::mat rot(size, size, arma::fill::eye);
-        rot.submat(0,0,2,2) = xRotationMatrix(angle);
-        return rot;
-    }
-
-    inline arma::mat yRotationMatrix(double angle, int size) {
-        if (size <= 2) {
-            throw std::runtime_error("Rotations in two dimensions cannot be done about the y-axis. Use the z-axis.");
-        }
-        arma::mat rot(size, size, arma::fill::eye);
-        rot.submat(0,0,2,2) = yRotationMatrix(angle);
-        return rot;
-    }
-
-    inline arma::mat zRotationMatrix(double angle, int size) {
-        if (size <= 2) {
-            return zRotationMatrix(angle).submat(0,0,1,1);
-        }
-        arma::mat rot(size, size, arma::fill::eye);
-        rot.submat(0,0,2,2) = zRotationMatrix(angle);
-        return rot;
-    }
-
-    inline arma::mat44 translationMatrix(arma::vec3 v){
-        arma::mat44 result = arma::eye(4,4);
-        result.col(3).rows(0,2) = v;
-        return result;
-    }
-
-    inline arma::mat33 quaternionToRotationMatrix(arma::vec4 q) {//TODO document! How does this map? ...
-        arma::mat33 result;
-
-        result <<  1 - 2 * q[2] * q[2] - 2 * q[3] * q[3] << 2 * q[1] * q[2] - 2 * q[3] * q[0] << 2 * q[1] * q[3] + 2 * q[2] * q[0] << arma::endr
-               <<  2 * q[1] * q[2] + 2 * q[3] * q[0] << 1 - 2 * q[1] * q[1] - 2 * q[3] * q[3] << 2 * q[2] * q[3] - 2 * q[1] * q[0] << arma::endr
-               <<  2 * q[1] * q[3] - 2 * q[2] * q[0] << 2 * q[2] * q[3] + 2 * q[1] * q[0] << 1 - 2 * q[1] * q[1] - 2 * q[2] * q[2];
-        return result;
-    }
-
-    inline arma::mat33 axisAngleRotationMatrix(arma::vec3 axis, double angle){
+    inline Rotation<3> axisAngleRotationMatrix(arma::vec3 axis, double angle){
         //Construct appropriate ONB:
-        arma::mat33 B;
+        Rotation<3> B;
         //Check axis not zero
         double normAxis = arma::norm(axis,2);
         if(normAxis != 0){
@@ -143,7 +64,7 @@ namespace matrix {
         //Get second orthogonal vector
         B.col(2) = arma::cross(B.col(0),B.col(1));
 
-        return B * xRotationMatrix(angle) * B.t();
+        return B * Rotation<3>::createRotationX(angle) * B.t();
     }
     /*! @return Pair containing the axis of the rotation as a unit vector followed by the rotation angle.*/
     inline std::pair<arma::vec3, double> axisAngleFromRotationMatrix(arma::mat33 matrix){
@@ -180,17 +101,6 @@ namespace matrix {
         result.second = atan2(arma::dot(Rs,t),arma::dot(Rs,s)); //Set angle of rotation for return
 
         return result;  //returns axis as vec3 and angle as double
-    }
-
-    inline arma::mat44 orthonormal44Inverse(const arma::mat44& m){
-        arma::mat44 minverse = arma::eye(4,4);
-        minverse.submat(0,0,2,2) = m.submat(0,0,2,2).t();
-        minverse.submat(0,3,2,3) = -minverse.submat(0,0,2,2) * m.submat(0,3,2,3);
-        if(arma::norm(minverse*m - arma::eye(4,4)) > 1e-10){
-            NUClear::log("\n\n\n\n\n\nInverse failed!\n\n\n\n\n\nResult=");
-            NUClear::log(m, minverse, minverse*m);
-        }
-        return minverse;
     }
 
 }

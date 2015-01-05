@@ -29,7 +29,6 @@
 
 
 // using messages::localisation::FakeOdometry;
-using utility::math::matrix::rotationMatrix;
 using utility::localisation::transform::SphericalRobotObservation;
 
 namespace modules {

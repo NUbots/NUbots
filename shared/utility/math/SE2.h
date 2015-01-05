@@ -22,7 +22,7 @@
 
 #include <armadillo>
 
-#include "utility/math/Transform.h"
+#include "utility/math/matrix/Transform.h"
 
 namespace utility {
 namespace math {
@@ -80,7 +80,7 @@ namespace math {
             /**
              * Convert the vector into a 4x4 basis matrix
              */
-            operator Transform() const;
+            operator matrix::Transform() const;
     };
 
 }  // math

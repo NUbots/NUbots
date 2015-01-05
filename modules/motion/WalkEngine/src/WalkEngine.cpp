@@ -37,6 +37,7 @@
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/RobotModels.h"
+#include "utility/math/matrix/Transform.h"
 #include "utility/math/angle.h"
 
 namespace modules {
@@ -63,7 +64,7 @@ namespace motion {
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::motion::kinematics::DarwinModel;
     using utility::math::SE2;
-    using utility::math::Transform;
+    using utility::math::matrix::Transform;
     using utility::math::angle::normalizeAngle;
     using utility::nubugger::graph;
     using utility::support::Expression;

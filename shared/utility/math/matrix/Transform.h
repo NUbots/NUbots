@@ -24,6 +24,7 @@
 
 namespace utility {
 namespace math {
+namespace matrix {
 
     /**
      * @brief A 4x4 homogeneous orthonormal basis matrix class for representing 3D transformations
@@ -175,6 +176,7 @@ namespace math {
             static Transform createRotationZ(double radians);
     };
 
+}  // matrix
 }  // math
 }  // utility
 

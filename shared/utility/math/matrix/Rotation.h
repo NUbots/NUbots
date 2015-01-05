@@ -24,16 +24,49 @@
 
 namespace utility {
 namespace math {
+namespace matrix {
 
-    /**
-     * @brief A 3x3 rotation matrix class for representing 3D rotations
-     *
-     * See:
-     * http://en.wikipedia.org/wiki/Rotation_matrix#Basic_rotations
-     *
-     * @author Brendan Annable
-     */
-    class Rotation : public arma::mat33 {
+
+    template <int Dimensions = 3>
+    class Rotation;
+
+    template <>
+    class Rotation<2> : public arma::mat22 {
+        using arma::mat22::mat22; // inherit constructors
+
+        public:
+            /**
+             * @brief Default constructor creates an identity matrix
+             */
+            Rotation();
+
+            /**
+             * @brief Rotates matrix around the local Z axis
+             *
+             * @param radians The amount to radians to rotate by
+             * @return The rotation matrix
+             */
+            Rotation rotate(double radians) const;
+
+            /**
+             * @brief Performs an inverse and returns a new copy
+             * Note: Assumes current transform is orthonormal and invertible (which it should be given normal use)
+             *
+             * @return The inverse transform
+             */
+            Rotation i() const;
+
+            /**
+             * @brief Creates a rotation matrix around the Z axis by the given radians
+             *
+             * @param radians The amount to radians to rotate by
+             * @return The rotation matrix
+             */
+            static Rotation createRotation(double radians);
+    };
+
+    template <>
+    class Rotation<3> : public arma::mat33 {
         using arma::mat33::mat33; // inherit constructors
 
         public:
@@ -104,7 +137,11 @@ namespace math {
             static Rotation createRotationZ(double radians);
     };
 
+    using Rotation2D = Rotation<2>;
+    using Rotation3D = Rotation<3>;
+
+}  // matrix
 }  // math
 }  // utility
 
-#endif  // UTILITY_MATH_TRANSFORM_H
+#endif  // UTILITY_MATH_ROTATION_H

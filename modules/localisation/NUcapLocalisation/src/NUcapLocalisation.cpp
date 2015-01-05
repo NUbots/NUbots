@@ -19,6 +19,7 @@
 
 #include "NUcapLocalisation.h"
 #include "utility/nubugger/NUhelpers.h"
+#include "utility/math/matrix/Rotation.h"
 #include "messages/input/proto/MotionCapture.pb.h"
 #include "messages/input/Sensors.h"
 #include "utility/math/geometry/UnitQuaternion.h"
@@ -29,12 +30,13 @@
 namespace modules {
 namespace localisation {
 
-    using utility::nubugger::graph;
     using messages::input::proto::MotionCapture;
     using messages::input::Sensors;
-    using utility::math::geometry::UnitQuaternion;
     using messages::localisation::Self;
     using messages::support::Configuration;
+    using utility::math::geometry::UnitQuaternion;
+    using utility::math::matrix::Rotation3D;
+    using utility::nubugger::graph;
 
     NUcapLocalisation::NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -59,7 +61,7 @@ namespace localisation {
                                                 rigidBody.rotation().z(),
                                                 rigidBody.rotation().t()});
 
-                    arma::mat33 groundToWorldRotation = q.getMatrix();// * sensors.orientationCamToGround.submat(0,0,2,2).t();
+                    Rotation3D groundToWorldRotation = q;// * sensors.orientationCamToGround.submat(0,0,2,2).t();
 
                     double heading = std::acos(groundToWorldRotation(0,0));
 

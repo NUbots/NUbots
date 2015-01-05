@@ -19,7 +19,7 @@
 
 #include "WalkEngine.h"
 
-#include "utility/math/Rotation.h"
+#include "utility/math/matrix/Rotation.h"
 
 namespace modules {
 namespace motion {

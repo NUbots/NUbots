@@ -21,10 +21,11 @@
 
 #include <nuclear>
 
-#include "utility/math/Rotation.h"
+#include "utility/math/matrix/Rotation.h"
 
 namespace utility {
 namespace math {
+namespace matrix {
 
     Transform::Transform() {
         eye(); // identity matrix by default
@@ -34,7 +35,7 @@ namespace math {
         // quaternion to rotation conversion
         // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/
         // http://en.wikipedia.org/wiki/Rotation_group_SO(3)#Quaternions_of_unit_norm
-        submat(0,0,2,2) = Rotation(q);
+        submat(0,0,2,2) = Rotation<3>(q);
     }
 
     Transform::Transform(arma::vec6 in) : Transform(Transform().translate(in.rows(0,2)).rotateZ(in[5]).rotateY(in[4]).rotateX(in[3])) {
@@ -100,21 +101,22 @@ namespace math {
 
     Transform Transform::createRotationX(double radians) {
         Transform transform;
-        transform.submat(0,0,2,2) = Rotation::createRotationX(radians);
+        transform.submat(0,0,2,2) = Rotation<3>::createRotationX(radians);
         return transform;
     }
 
     Transform Transform::createRotationY(double radians) {
         Transform transform;
-        transform.submat(0,0,2,2) = Rotation::createRotationY(radians);
+        transform.submat(0,0,2,2) = Rotation<3>::createRotationY(radians);
         return transform;
     }
 
     Transform Transform::createRotationZ(double radians) {
         Transform transform;
-        transform.submat(0,0,2,2) = Rotation::createRotationZ(radians);
+        transform.submat(0,0,2,2) = Rotation<3>::createRotationZ(radians);
         return transform;
     }
 
+}
 }
 }

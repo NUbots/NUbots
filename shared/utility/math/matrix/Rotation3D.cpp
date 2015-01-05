@@ -19,18 +19,15 @@
 
 #include "Rotation.h"
 
-#include <nuclear>
-
-#include "utility/math/angle.h"
-
 namespace utility {
 namespace math {
+namespace matrix {
 
-    Rotation::Rotation() {
+    Rotation<3>::Rotation() {
         eye(); // identity matrix by default
     }
 
-    Rotation::Rotation(arma::vec4 q) {
+    Rotation<3>::Rotation(arma::vec4 q) {
         // quaternion to rotation conversion
         // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/
         // http://en.wikipedia.org/wiki/Rotation_group_SO(3)#Quaternions_of_unit_norm
@@ -39,25 +36,25 @@ namespace math {
               << 2     * q[1] * q[3] - 2 * q[2] * q[0] << 2     * q[2] * q[3] + 2 * q[1] * q[0] << 1 - 2 * q[1] * q[1] - 2 * q[2] * q[2];
     }
 
-    Rotation Rotation::rotateX(double radians) const {
+    Rotation<3> Rotation<3>::rotateX(double radians) const {
         return *this * createRotationX(radians);
     }
 
-    Rotation Rotation::rotateY(double radians) const {
+    Rotation<3> Rotation<3>::rotateY(double radians) const {
         return *this * createRotationY(radians);
     }
 
-    Rotation Rotation::rotateZ(double radians) const {
+    Rotation<3> Rotation<3>::rotateZ(double radians) const {
         return *this * createRotationZ(radians);
     }
 
-    Rotation Rotation::i() const {
+    Rotation<3> Rotation<3>::i() const {
         // http://en.wikipedia.org/wiki/Rotation_matrix#Multiplication
         // The inverse of a rotation matrix is its transpose, which is also a rotation matrix.
         return t();
     }
 
-    Rotation Rotation::createRotationX(double radians) {
+    Rotation<3> Rotation<3>::createRotationX(double radians) {
         double c = cos(radians);
         double s = sin(radians);
         Rotation rotation;
@@ -68,7 +65,7 @@ namespace math {
         return rotation;
     }
 
-    Rotation Rotation::createRotationY(double radians) {
+    Rotation<3> Rotation<3>::createRotationY(double radians) {
         double c = cos(radians);
         double s = sin(radians);
         Rotation rotation;
@@ -79,7 +76,7 @@ namespace math {
         return rotation;
     }
 
-    Rotation Rotation::createRotationZ(double radians) {
+    Rotation<3> Rotation<3>::createRotationZ(double radians) {
         double c = cos(radians);
         double s = sin(radians);
         Rotation rotation;
@@ -90,5 +87,6 @@ namespace math {
         return rotation;
     }
 
+}
 }
 }
