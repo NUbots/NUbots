@@ -196,66 +196,6 @@ namespace modules {
                         std::cout<< "IK Leg NULL Test : "<< numberOfFails << " Total Failures " <<std::endl;
 
                     });
-
-                    on< Trigger<Configuration<HeadKinematicsNULLTest>> >([this](const Configuration<HeadKinematicsNULLTest>& request) {
-                        int iterations = 1;
-                        int numberOfFails = 0;
-                        float ERROR_THRESHOLD = request.config["ERROR_THRESHOLD"].as<float>();
-                        float yaw = request.config["yaw"].as<float>();
-                        float pitch = request.config["pitch"].as<float>();
-                        bool RANDOMIZE = request.config["RANDOMIZE"].as<bool>();
-
-                        arma::vec3 cameraVec = {cos(yaw)*cos(pitch), sin(yaw)*cos(pitch), -sin(pitch)};
-                        if(RANDOMIZE){
-                            iterations = request.config["RANDOM_ITERATIONS"].as<int>();
-                        }
-
-                        for(int i = 0; i<iterations; i++){
-                            if(RANDOMIZE){
-                                cameraVec[0] = rand()/static_cast<double>(RAND_MAX);
-                                cameraVec[1] = rand()/static_cast<double>(RAND_MAX);
-                                cameraVec[2] = rand()/static_cast<double>(RAND_MAX);
-                                cameraVec *= 1/arma::norm(cameraVec,2);
-                            }
-
-                            std::vector< std::pair<messages::input::ServoID, float> > angles = calculateHeadJoints<DarwinModel>(cameraVec);
-                            Sensors sensors;
-                            sensors.servos = std::vector<Sensors::Servo>(20);
-
-                            for (auto& angle : angles) {
-                                    ServoID servoID;
-                                    float position;
-
-                                    std::tie(servoID, position) = angle;
-
-                                    sensors.servos[static_cast<int>(servoID)].presentPosition = position;
-                            }
-
-                            arma::mat44 fKin = calculatePosition<DarwinModel>(sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
-
-                            float max_error = 0;
-                            for(int i = 0; i < 3 ; i++){
-                                float error = std::abs(fKin(i, 0) - cameraVec[i]);
-                                if (error>max_error) {
-                                    max_error = error;
-                                }
-                            }
-                            if(max_error >= ERROR_THRESHOLD){
-                                    numberOfFails++;
-                            }
-
-                            NUClear::log<NUClear::DEBUG>("++++++++++++++++++++++++++++++++++++++++++++++++++");
-                            NUClear::log<NUClear::DEBUG>("Request = \n", cameraVec);
-                            NUClear::log<NUClear::DEBUG>("Angles = \n", angles[0].second, angles[1].second);
-                            NUClear::log<NUClear::DEBUG>("Final FKin = \n", fKin);
-                            NUClear::log<NUClear::DEBUG>(max_error >= ERROR_THRESHOLD ?  "FAIL" : "PASS", "Max Error =",max_error, ", ERROR_THRESHOLD", ERROR_THRESHOLD);
-                            NUClear::log<NUClear::DEBUG>("++++++++++++++++++++++++++++++++++++++++++++++++++");
-
-                        }
-                        std::cout<< "IK Head NULL Test : "<< numberOfFails << " Total Failures out of " << iterations <<std::endl;
-
-
-                    });
             }
     } // debug
 } // modules

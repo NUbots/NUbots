@@ -22,7 +22,6 @@
 
 #include <vector>
 #include <armadillo>
-#include <nuclear_bits/LogLevel.h>
 #include <cmath>
 #include <nuclear>
 
@@ -378,7 +377,7 @@ namespace kinematics {
         arma::vec3 xRobotImu = arma::mat33(orientation.t()).col(0);
         arma::vec2 projXRobot = arma::normalise(xRobotImu.rows(0,1));
         arma::vec2 projYRobot = arma::vec2({-projXRobot(1), projXRobot(0)});
-        
+
         arma::mat22 robotToImu;
         robotToImu.col(0) = projXRobot;
         robotToImu.col(1) = projYRobot;
