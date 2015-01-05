@@ -59,7 +59,7 @@ FUNCTION(NUCLEAR_MODULE)
     ENDFOREACH()
 
     # Find all our files
-    FILE(GLOB_RECURSE src "${CMAKE_CURRENT_SOURCE_DIR}/src/**.cpp" , "${CMAKE_CURRENT_SOURCE_DIR}/src/**.h")
+    FILE(GLOB_RECURSE src "${CMAKE_CURRENT_SOURCE_DIR}/src/**.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/**.h")
 
     # Get our configuration files
     FILE(GLOB_RECURSE config_files "config/**")
@@ -113,7 +113,7 @@ FUNCTION(NUCLEAR_MODULE)
         SET(test_module_name "Test${module_name}")
 
         # Rebuild our sources using the test module
-        FILE(GLOB_RECURSE test_src "tests/**.cpp" , "tests/**.h")
+        FILE(GLOB_RECURSE test_src "tests/**.cpp" "tests/**.h")
         ADD_EXECUTABLE(${test_module_name} ${test_src})
         TARGET_LINK_LIBRARIES(${test_module_name} ${module_name} ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
 
