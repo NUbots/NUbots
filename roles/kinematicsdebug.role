@@ -7,6 +7,5 @@ ADD_ROLE(
         support::configuration::GlobalConfig
         support::configuration::SoccerConfig
         support::NUbugger
-        debug::NUbugger
         debug::KinematicsDebug
 )

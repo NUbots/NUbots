@@ -193,14 +193,6 @@ namespace matrix {
         return minverse;
     }
 
-    /**
-     * Convert a vec6 in the form of {position_x, position_y, position_z, rotation_x, rotation_y, rotation_z}
-     * into a 4x4 basis matrix
-     */
-    inline Transform vec6ToTransform(const arma::vec6& in) {
-        return Transform().translate(in.rows(0,2)).rotateZ(in[5]).rotateY(in[4]).rotateX(in[3]);
-    }
-
 }
 }
 }

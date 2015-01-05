@@ -50,9 +50,9 @@ namespace modules {
                     on< Trigger<Configuration<InverseKinematicsRequest>> >([this](const Configuration<InverseKinematicsRequest>& request) {
                         return;
                         Transform target;
-                        target.rotateY(request.config["yAngle"].as<double>());
-                        target.rotateX(request.config["xAngle"].as<double>());
-                        target.rotateZ(request.config["zAngle"].as<double>());
+                        target = target.rotateY(request.config["yAngle"].as<double>());
+                        target = target.rotateX(request.config["xAngle"].as<double>());
+                        target = target.rotateZ(request.config["zAngle"].as<double>());
 
                         // translation
                         target(0,3) = request.config["x"].as<double>(); // down/up
@@ -116,9 +116,9 @@ namespace modules {
 
                         for(int i = 0; i<iterations; i++){
                             Transform ikRequest;
-                            ikRequest.rotateY(request.config["yAngle"].as<double>());
-                            ikRequest.rotateX(request.config["xAngle"].as<double>());
-                            ikRequest.rotateZ(request.config["zAngle"].as<double>());
+                            ikRequest = ikRequest.rotateY(request.config["yAngle"].as<double>());
+                            ikRequest = ikRequest.rotateX(request.config["xAngle"].as<double>());
+                            ikRequest = ikRequest.rotateZ(request.config["zAngle"].as<double>());
 
                             // translation
                             ikRequest(0,3) = request.config["x"].as<double>();
@@ -127,9 +127,9 @@ namespace modules {
 
                             if(request.config["RANDOMIZE"].as<bool>()){
                                 ikRequest.eye();
-                                ikRequest.rotateY(2*M_PI*rand()/static_cast<double>(RAND_MAX));
-                                ikRequest.rotateX(2*M_PI*rand()/static_cast<double>(RAND_MAX));
-                                ikRequest.rotateZ(2*M_PI*rand()/static_cast<double>(RAND_MAX));
+                                ikRequest = ikRequest.rotateY(2*M_PI*rand()/static_cast<double>(RAND_MAX));
+                                ikRequest = ikRequest.rotateX(2*M_PI*rand()/static_cast<double>(RAND_MAX));
+                                ikRequest = ikRequest.rotateZ(2*M_PI*rand()/static_cast<double>(RAND_MAX));
                                 ikRequest(0,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);
                                 ikRequest(1,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);
                                 ikRequest(2,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);

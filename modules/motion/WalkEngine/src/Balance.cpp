@@ -19,21 +19,23 @@
 
 #include "WalkEngine.h"
 
+#include "utility/math/Rotation.h"
+
 namespace modules {
 namespace motion {
 
     using messages::behaviour::LimbID;
+    using messages::input::ServoID;
     using messages::input::Sensors;
 
-    void WalkEngine::balance(std::vector<double>&/* qLegs*/, const Sensors&/* sensors*/) {
-        /* TODO: Review
+    void WalkEngine::balance(std::vector<double>& qLegs, const Sensors& sensors) {
         double gyroRoll0 = 0;
         double gyroPitch0 = 0;
 
-        double phaseComp = std::min({1.0, phaseSingle / 0.1, (1 - phaseSingle) / 0.1});
+        // double phaseComp = std::min({1.0, phaseSingle / 0.1, (1 - phaseSingle) / 0.1});
 
         //TODO: crashes
-        ServoID supportLegID = (swingLeg == LimbID::RIGHT_LEG) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
+        /*ServoID supportLegID = (swingLeg == LimbID::RIGHT_LEG) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
         arma::mat33 ankleRotation = sensors.forwardKinematics.find(supportLegID)->second.submat(0,0,2,2);
         // get effective gyro angle considering body angle offset
         arma::mat33 kinematicGyroSORAMatrix = sensors.orientation * ankleRotation;   //DOUBLE TRANSPOSE
@@ -43,7 +45,10 @@ namespace motion {
         gyroRoll0 = -kinematicsGyro[0]*180.0/M_PI;
         gyroPitch0 = -kinematicsGyro[1]*180.0/M_PI;
 
-        double yawAngle = 0;
+        emit(graph("roll", gyroRoll0));
+        emit(graph("pitch", gyroPitch0));*/
+
+        /*double yawAngle = 0;
         if (!active) {
             // double support
             yawAngle = (uLeftFoot[2] + uRightFoot[2]) / 2 - uTorsoActual[2];

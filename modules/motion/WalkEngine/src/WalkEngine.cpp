@@ -37,7 +37,6 @@
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/RobotModels.h"
-#include "utility/math/matrix.h"
 #include "utility/math/angle.h"
 
 namespace modules {
@@ -66,9 +65,6 @@ namespace motion {
     using utility::math::SE2;
     using utility::math::Transform;
     using utility::math::angle::normalizeAngle;
-    using utility::math::matrix::vec6ToTransform;
-    using utility::math::matrix::orthonormal44Inverse;
-    using utility::math::matrix::translationMatrix;
     using utility::nubugger::graph;
     using utility::support::Expression;
 
@@ -370,13 +366,13 @@ namespace motion {
         Transform rightFoot = uRightFoot;
 
         if (swingLeg == LimbID::RIGHT_LEG) {
-            rightFoot.translateZ(stepHeight * foot[2]);
+            rightFoot = rightFoot.translateZ(stepHeight * foot[2]);
         } else {
-            leftFoot.translateZ(stepHeight * foot[2]);
+            leftFoot = leftFoot.translateZ(stepHeight * foot[2]);
         }
 
         SE2 uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
-        Transform torso = vec6ToTransform({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
+        Transform torso = arma::vec6{uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()};
 
         // Transform feet targets to be relative to the torso
         Transform leftFootTorso = leftFoot.worldToLocal(torso);
@@ -400,7 +396,7 @@ namespace motion {
         uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
         SE2 uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
 
-        Transform torso = vec6ToTransform({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
+        Transform torso = arma::vec6{uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()};
 
         // Transform feet targets to be relative to the torso
         Transform leftFootTorso = static_cast<Transform>(uLeftFoot).worldToLocal(torso);

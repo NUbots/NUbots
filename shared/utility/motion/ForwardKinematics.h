@@ -55,13 +55,13 @@ namespace kinematics {
                                RobotKinematicModel::Head::NECK_TO_CAMERA[2]};
 
         //Translate to base of neck from origin
-        runningTransform.translate(NECK_POS);
+        runningTransform = runningTransform.translate(NECK_POS);
         //Rotate to face out of base of neck
-        runningTransform.rotateY(-M_PI_2);
+        runningTransform = runningTransform.rotateY(-M_PI_2);
         //Rotate head in yaw axis
-        runningTransform.rotateX(HEAD_YAW);
+        runningTransform = runningTransform.rotateX(HEAD_YAW);
         //Translate to top of neck (i.e. next motor axle)
-        runningTransform.translateX(NECK_LENGTH);
+        runningTransform = runningTransform.translateX(NECK_LENGTH);
         //YAW
         //Return the basis pointing out of the top of the torso with z pointing out the back of the neck. Pos is top of neck (at hip pitch motor)
         positions[messages::input::ServoID::HEAD_YAW] = runningTransform;
@@ -70,13 +70,13 @@ namespace kinematics {
         }
 
         //Rotate to face forward direction of neck
-        runningTransform.rotateY(M_PI_2);
+        runningTransform = runningTransform.rotateY(M_PI_2);
         //Rotate pitch
-        runningTransform.rotateY(HEAD_PITCH);
+        runningTransform = runningTransform.rotateY(HEAD_PITCH);
         //Translate to camera
-        runningTransform.translate(NECK_TO_CAMERA);
+        runningTransform = runningTransform.translate(NECK_TO_CAMERA);
         //Rotate to set x to camera vector
-        runningTransform.rotateY(RobotKinematicModel::Head::CAMERA_DECLINATION_ANGLE_OFFSET);
+        runningTransform = runningTransform.rotateY(RobotKinematicModel::Head::CAMERA_DECLINATION_ANGLE_OFFSET);
         //PITCH
         //Return basis pointing along camera vector (ie x is camera vector, z out of top of head). Pos at camera position
         positions[messages::input::ServoID::HEAD_PITCH] = runningTransform;
@@ -115,22 +115,22 @@ namespace kinematics {
         }
 
         //Hip pitch
-        runningTransform.translate({
+        runningTransform = runningTransform.translate({
             RobotKinematicModel::Leg::HIP_OFFSET_X,
             negativeIfRight * RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS/2,
             -RobotKinematicModel::Leg::HIP_OFFSET_Z
         });
         //Rotate to face down the leg (see above for definitions of terms, including 'facing')
-        runningTransform.rotateY(M_PI_2);
+        runningTransform = runningTransform.rotateY(M_PI_2);
         //Using right hand rule along global z gives positive direction of yaw:
-        runningTransform.rotateX(-sensors.servos[static_cast<int>(HIP_YAW)].presentPosition);
+        runningTransform = runningTransform.rotateX(-sensors.servos[static_cast<int>(HIP_YAW)].presentPosition);
         //Return basis facing from body to hip centre (down) with z aligned with the axis of the hip roll motor axis. Position at hip joint
         positions[HIP_YAW] = runningTransform;
         if(servoID == HIP_YAW) {
             return positions;
         }
 
-        runningTransform.rotateZ(sensors.servos[static_cast<int>(HIP_ROLL)].presentPosition);
+        runningTransform = runningTransform.rotateZ(sensors.servos[static_cast<int>(HIP_ROLL)].presentPosition);
         //Return basis facing down leg plane, with z oriented through axis of roll motor. Position still hip joint
         positions[HIP_ROLL] = runningTransform;
         if(servoID == HIP_ROLL) {
@@ -138,9 +138,9 @@ namespace kinematics {
         }
 
         //Rotate to face down upper leg
-        runningTransform.rotateY(sensors.servos[static_cast<int>(HIP_PITCH)].presentPosition);
+        runningTransform = runningTransform.rotateY(sensors.servos[static_cast<int>(HIP_PITCH)].presentPosition);
         //Translate down upper leg
-        runningTransform.translateX(RobotKinematicModel::Leg::UPPER_LEG_LENGTH);
+        runningTransform = runningTransform.translateX(RobotKinematicModel::Leg::UPPER_LEG_LENGTH);
         //Return basis faces down upper leg, with z out of front of thigh. Pos = knee axis centre
         positions[HIP_PITCH] = runningTransform;
         if(servoID == HIP_PITCH) {
@@ -149,9 +149,9 @@ namespace kinematics {
 
 
         //Rotate to face down lower leg
-        runningTransform.rotateY(sensors.servos[static_cast<int>(KNEE)].presentPosition);
+        runningTransform = runningTransform.rotateY(sensors.servos[static_cast<int>(KNEE)].presentPosition);
         //Translate down lower leg
-        runningTransform.translateX(RobotKinematicModel::Leg::UPPER_LEG_LENGTH);
+        runningTransform = runningTransform.translateX(RobotKinematicModel::Leg::UPPER_LEG_LENGTH);
         //Return basis facing down lower leg, with z out of front of shin. Pos = ankle axis centre
         positions[KNEE] = runningTransform;
         if(servoID == KNEE) {
@@ -160,7 +160,7 @@ namespace kinematics {
 
 
         //Rotate to face down foot (pitch)
-        runningTransform.rotateY(sensors.servos[static_cast<int>(ANKLE_PITCH)].presentPosition);
+        runningTransform = runningTransform.rotateY(sensors.servos[static_cast<int>(ANKLE_PITCH)].presentPosition);
         //Return basis facing pitch down to foot with z out the front of the foot. Pos = ankle axis centre
         positions[ANKLE_PITCH] = runningTransform;
         if(servoID == ANKLE_PITCH) {
@@ -168,11 +168,11 @@ namespace kinematics {
         }
 
         //Rotate to face down foot (roll)
-        runningTransform.rotateZ(sensors.servos[static_cast<int>(ANKLE_ROLL)].presentPosition);
+        runningTransform = runningTransform.rotateZ(sensors.servos[static_cast<int>(ANKLE_ROLL)].presentPosition);
         //Rotate so x faces toward toes
-        runningTransform.rotateY(-M_PI_2);
+        runningTransform = runningTransform.rotateY(-M_PI_2);
         //Translate to ground
-        runningTransform.translateZ(-RobotKinematicModel::Leg::FOOT_HEIGHT);
+        runningTransform = runningTransform.translateZ(-RobotKinematicModel::Leg::FOOT_HEIGHT);
         //Return basis with x out of the front of the toe and z out the top of foot. Pos = ankle axis centre projected to ground
         positions[ANKLE_ROLL] = runningTransform;
         return positions;
@@ -204,15 +204,15 @@ namespace kinematics {
         }
 
         //Translate to shoulder
-        runningTransform.translate({
+        runningTransform = runningTransform.translate({
             RobotKinematicModel::Arm::SHOULDER_X_OFFSET,
              negativeIfRight * RobotKinematicModel::Arm::DISTANCE_BETWEEN_SHOULDERS / 2.0,
              RobotKinematicModel::Arm::SHOULDER_Z_OFFSET
          });
         //Rotate about shoulder pitch
-        runningTransform.rotateY(sensors.servos[static_cast<int>(SHOULDER_PITCH)].presentPosition);
+        runningTransform = runningTransform.rotateY(sensors.servos[static_cast<int>(SHOULDER_PITCH)].presentPosition);
         //Translate to end of shoulder part
-        runningTransform.translate({
+        runningTransform = runningTransform.translate({
             RobotKinematicModel::Arm::SHOULDER_LENGTH,
             negativeIfRight * RobotKinematicModel::Arm::SHOULDER_WIDTH,
             RobotKinematicModel::Arm::SHOULDER_HEIGHT
@@ -224,9 +224,9 @@ namespace kinematics {
         }
 
         //Rotate by the shoulder roll
-        runningTransform.rotateZ(sensors.servos[static_cast<int>(SHOULDER_ROLL)].presentPosition);
+        runningTransform = runningTransform.rotateZ(sensors.servos[static_cast<int>(SHOULDER_ROLL)].presentPosition);
         //Translate to centre of next joint
-        runningTransform.translate({
+        runningTransform = runningTransform.translate({
             RobotKinematicModel::Arm::UPPER_ARM_LENGTH,
             negativeIfRight * RobotKinematicModel::Arm::UPPER_ARM_Y_OFFSET,
             RobotKinematicModel::Arm::UPPER_ARM_Z_OFFSET
@@ -237,9 +237,9 @@ namespace kinematics {
         }
 
         //Rotate by the elbow angle
-        runningTransform.rotateY(sensors.servos[static_cast<int>(ELBOW)].presentPosition);
+        runningTransform = runningTransform.rotateY(sensors.servos[static_cast<int>(ELBOW)].presentPosition);
         //Translate to centre of end of arm, in line with joint
-        runningTransform.translate({
+        runningTransform = runningTransform.translate({
             RobotKinematicModel::Arm::LOWER_ARM_LENGTH,
             negativeIfRight * RobotKinematicModel::Arm::LOWER_ARM_Y_OFFSET,
             RobotKinematicModel::Arm::LOWER_ARM_Z_OFFSET
@@ -332,8 +332,7 @@ namespace kinematics {
         utility::math::Transform normaliser;
         if(totalMassVector[3] > 0){
             normaliser.submat(0,0,2,2) *= 1 / totalMassVector[3];
-            arma::vec4 result = normaliser * totalMassVector;
-            return result;
+            return normaliser * totalMassVector;
         } else {
             NUClear::log<NUClear::ERROR>("ForwardKinematics::calculateCentreOfMass - Empty centre of mass request or no mass in mass model.");
             return arma::vec4();

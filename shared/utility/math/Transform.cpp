@@ -21,8 +21,7 @@
 
 #include <nuclear>
 
-#include "utility/math/angle.h"
-#include "utility/math/matrix.h"
+#include "utility/math/Rotation.h"
 
 namespace utility {
 namespace math {
@@ -31,87 +30,53 @@ namespace math {
         eye(); // identity matrix by default
     }
 
-    Transform::Transform(arma::vec4 q) {
+    Transform::Transform(arma::vec4 q) : Transform() {
         // quaternion to rotation conversion
         // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/
         // http://en.wikipedia.org/wiki/Rotation_group_SO(3)#Quaternions_of_unit_norm
-        *this << 1 - 2 * q[2] * q[2] - 2 * q[3] * q[3] << 2     * q[1] * q[2] - 2 * q[3] * q[0] << 2     * q[1] * q[3] + 2 * q[2] * q[0] << 0 << arma::endr
-              << 2     * q[1] * q[2] + 2 * q[3] * q[0] << 1 - 2 * q[1] * q[1] - 2 * q[3] * q[3] << 2     * q[2] * q[3] - 2 * q[1] * q[0] << 0 << arma::endr
-              << 2     * q[1] * q[3] - 2 * q[2] * q[0] << 2     * q[2] * q[3] + 2 * q[1] * q[0] << 1 - 2 * q[1] * q[1] - 2 * q[2] * q[2] << 0 << arma::endr
-              << 0                                     << 0                                     << 0                                     << 1;
+        submat(0,0,2,2) = Rotation(q);
     }
 
-    Transform& Transform::translate(const arma::vec3& translation) {
-        Transform transform;
-        transform.col(3).rows(0,2) = translation;
-        *this *= transform;
-        return *this;
+    Transform::Transform(arma::vec6 in) : Transform(Transform().translate(in.rows(0,2)).rotateZ(in[5]).rotateY(in[4]).rotateX(in[3])) {
+
     }
 
-    Transform& Transform::translateX(double translation) {
-        translate({translation, 0, 0});
-        return *this;
+    Transform Transform::translate(const arma::vec3& translation) const {
+        return *this * createTranslation(translation);
     }
 
-    Transform& Transform::translateY(double translation) {
-        translate({0, translation, 0});
-        return *this;
+    Transform Transform::translateX(double translation) const {
+        return translate({translation, 0, 0});
     }
 
-    Transform& Transform::translateZ(double translation) {
-        translate({0, 0, translation});
-        return *this;
+    Transform Transform::translateY(double translation) const {
+        return translate({0, translation, 0});
     }
 
-    Transform& Transform::rotateX(double radians) {
-        double c = cos(radians);
-        double s = sin(radians);
-        Transform transform;
-        // http://en.wikipedia.org/wiki/Rotation_matrix#Basic_rotations
-        transform << 1 << 0 <<  0 << 0 << arma::endr
-                  << 0 << c << -s << 0 << arma::endr
-                  << 0 << s <<  c << 0 << arma::endr
-                  << 0 << 0 <<  0 << 1;
-        *this *= transform;
-        return *this;
+    Transform Transform::translateZ(double translation) const {
+        return translate({0, 0, translation});
     }
 
-    Transform& Transform::rotateY(double radians) {
-        double c = cos(radians);
-        double s = sin(radians);
-        Transform transform;
-        // http://en.wikipedia.org/wiki/Rotation_matrix#Basic_rotations
-        transform <<  c << 0 << s << 0 << arma::endr
-                  <<  0 << 1 << 0 << 0 << arma::endr
-                  << -s << 0 << c << 0 << arma::endr
-                  <<  0 << 0 << 0 << 1;
-        *this *= transform;
-        return *this;
+    Transform Transform::rotateX(double radians) const {
+        return *this * createRotationX(radians);
     }
 
-    Transform& Transform::rotateZ(double radians) {
-        double c = cos(radians);
-        double s = sin(radians);
-        Transform transform;
-        // http://en.wikipedia.org/wiki/Rotation_matrix#Basic_rotations
-        transform << c << -s << 0 << 0 << arma::endr
-                  << s <<  c << 0 << 0 << arma::endr
-                  << 0 <<  0 << 1 << 0 << arma::endr
-                  << 0 <<  0 << 0 << 1;
-        *this *= transform;
-        return *this;
+    Transform Transform::rotateY(double radians) const {
+        return *this * createRotationY(radians);
     }
 
-    Transform& Transform::worldToLocal(const Transform& reference) {
+    Transform Transform::rotateZ(double radians) const {
+        return *this * createRotationZ(radians);
+    }
+
+    Transform Transform::worldToLocal(const Transform& reference) const {
         // http://en.wikipedia.org/wiki/Change_of_basis
-        *this = reference.i() * (*this);
-        return *this;
+        return reference.i() * (*this);
     }
 
-    Transform& Transform::localToWorld(const Transform& reference) {
+    Transform Transform::localToWorld(const Transform& reference) const {
         // http://en.wikipedia.org/wiki/Change_of_basis
-        *this = reference * (*this);
-        return *this;
+        return reference * (*this);
     }
 
     Transform Transform::i() const {
@@ -125,6 +90,30 @@ namespace math {
             NUClear::log<NUClear::WARN>("Inverse failed! Matrix is singular");
         }*/
         return inverseTransform;
+    }
+
+    Transform Transform::createTranslation(const arma::vec3& translation) {
+        Transform transform;
+        transform.col(3).rows(0,2) = translation;
+        return transform;
+    }
+
+    Transform Transform::createRotationX(double radians) {
+        Transform transform;
+        transform.submat(0,0,2,2) = Rotation::createRotationX(radians);
+        return transform;
+    }
+
+    Transform Transform::createRotationY(double radians) {
+        Transform transform;
+        transform.submat(0,0,2,2) = Rotation::createRotationY(radians);
+        return transform;
+    }
+
+    Transform Transform::createRotationZ(double radians) {
+        Transform transform;
+        transform.submat(0,0,2,2) = Rotation::createRotationZ(radians);
+        return transform;
     }
 
 }

@@ -44,83 +44,95 @@ namespace math {
              * @brief Default constructor creates an identity matrix
              */
             Transform();
+
             /**
              * @brief Convert from a quaternions vec4
              */
             Transform(arma::vec4 q);
+
+            /**
+             * @brief Convert from a vec6 representing [position_x, position_y, position_z, rotation_x, rotation_y, rotation_z]
+             */
+            Transform(arma::vec6 in);
+
             /**
              * @brief Translate the current basis by the given 3D vector
              *
              * @param translation The 3D translation vector to translate by
-             * @return A reference to *this, to be used for chaining
+             * @return The transformed basis matrix
              */
-            Transform& translate(const arma::vec3& translation);
+            Transform translate(const arma::vec3& translation) const;
+
             /*
              * @brief Translate the current basis along the local X axis
              *
              * This translates along the column vector submatrix(0,0,2,0)
              *
              * @param translation The amount to translate by
-             * @return A reference to *this, to be used for chaining
+             * @return The transformed basis matrix
              */
-            Transform& translateX(double translation);
+            Transform translateX(double translation) const;
+
             /**
              * @brief Translate the current basis along the local Y axis
              *
              * This translates along the column vector submatrix(0,1,2,1)
              *
              * @param translation The amount to translate by
-             * @return A reference to *this, to be used for chaining
+             * @return The transformed basis matrix
              */
-            Transform& translateY(double translation);
+            Transform translateY(double translation) const;
+
             /**
              * @brief Translate the current basis along the local Z axis
              *
              * This translates along the column vector submatrix(0,2,2,2)
              *
              * @param translation The amount to translate by
-             * @return A reference to *this, to be used for chaining
+             * @return The transformed basis matrix
              */
-            Transform& translateZ(double translation);
+            Transform translateZ(double translation) const;
+
             /**
              * @brief Rotates basis matrix around the local X axis
              *
              * @param radians The amount to radians to rotate by
-             * @return A reference to *this, to be used for chaining
+             * @return The transformed basis matrix
              */
-            Transform& rotateX(double radians);
+            Transform rotateX(double radians) const;
+
             /**
              * @brief Rotates basis matrix around the local Y axis
              *
              * @param radians The amount to radians to rotate by
-             * @return A reference to *this, to be used for chaining
+             * @return The transformed basis matrix
              */
-            Transform& rotateY(double radians);
+            Transform rotateY(double radians) const;
+
             /**
              * @brief Rotates basis matrix around the local Z axis
              *
              * @param radians The amount to radians to rotate by
-             * @return A reference to *this, to be used for chaining
+             * @return The transformed basis matrix
              */
-            Transform& rotateZ(double radians);
+            Transform rotateZ(double radians) const;
+
             /**
              * @brief Transforms current basis from world coordinates (i.e. standard basis) to be local to 'reference'
              *
-             * Pseudocode: this = reference.inverse() * this
-             *
              * @param reference A basis matrix to become relatively local to
-             * @return A reference to *this, to be used for chaining
+             * @return The transformed basis matrix
              */
-            Transform& worldToLocal(const Transform& reference);
+            Transform worldToLocal(const Transform& reference) const;
+
             /**
              * @brief Transforms current basis from local coordinates relative to 'reference', to world coordinates (i.e. standard basis)
              *
-             * Pseudocode: this = reference * this
-             *
              * @param reference The basis matrix that the current basis is relative to
-             * @return A reference to *this, to be used for chaining
+             * @return The transformed basis matrix
              */
-            Transform& localToWorld(const Transform& reference);
+            Transform localToWorld(const Transform& reference) const;
+
             /**
              * @brief Performs an orthonormal inverse and returns a new copy
              * Note: Assumes current transform is orthonormal and invertible (which it should be given normal use)
@@ -129,6 +141,38 @@ namespace math {
              * @return The inverse transform
              */
             Transform i() const;
+
+            /**
+             * @brief Creates a translation transform by the given 3D vector
+             *
+             * @param translation The 3D translation vector to translate by
+             * @return The translation transform
+             */
+            static Transform createTranslation(const arma::vec3& translation);
+
+            /**
+             * @brief Creates a rotation transform around the X axis by the given radians
+             *
+             * @param radians The amount to radians to rotate by
+             * @return The rotation transform
+             */
+            static Transform createRotationX(double radians);
+
+            /**
+             * @brief Creates a rotation transform around the Y axis by the given radians
+             *
+             * @param radians The amount to radians to rotate by
+             * @return The rotation transform
+             */
+            static Transform createRotationY(double radians);
+
+            /**
+             * @brief Creates a rotation transform around the Z axis by the given radians
+             *
+             * @param radians The amount to radians to rotate by
+             * @return The rotation transform
+             */
+            static Transform createRotationZ(double radians);
     };
 
 }  // math

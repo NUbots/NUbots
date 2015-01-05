@@ -193,7 +193,7 @@ namespace kinematics {
     template <typename RobotKinematicModel>
     std::vector<std::pair<messages::input::ServoID, float>> calculateLegJointsTeamDarwin(utility::math::Transform target, messages::behaviour::LimbID limb) {
         target(2,3) += RobotKinematicModel::TEAMDARWINCHEST_TO_ORIGIN; // translate without regard to rotation
-        target.translateZ(RobotKinematicModel::Leg::FOOT_HEIGHT);
+        target = target.translateZ(RobotKinematicModel::Leg::FOOT_HEIGHT);
         return calculateLegJoints<RobotKinematicModel>(target, limb);
     }
 
