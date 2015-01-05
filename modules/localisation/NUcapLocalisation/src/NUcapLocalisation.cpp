@@ -19,7 +19,7 @@
 
 #include "NUcapLocalisation.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/math/matrix/Rotation.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "messages/input/proto/MotionCapture.pb.h"
 #include "messages/input/Sensors.h"
 #include "utility/math/geometry/UnitQuaternion.h"

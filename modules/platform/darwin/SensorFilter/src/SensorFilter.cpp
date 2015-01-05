@@ -23,7 +23,7 @@
 #include "messages/input/CameraParameters.h"
 #include "messages/support/Configuration.h"
 
-#include "utility/math/matrix/Rotation.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/motion/ForwardKinematics.h"
 
@@ -47,7 +47,7 @@ namespace modules {
             using utility::motion::kinematics::calculateCentreOfMass;
             using utility::motion::kinematics::Side;
             using utility::motion::kinematics::calculateRobotToIMU;
-            using utility::math::matrix::Transform;
+            using utility::math::matrix::Transform3D;
             using utility::math::kalman::IMUModel;
             using utility::math::matrix::Rotation3D;
 
@@ -315,8 +315,8 @@ namespace modules {
                     // }
 
                     // // Kinematics odometry
-                    // Transform odometryRightFoot = arma::eye(4,4);
-                    // Transform odometryLeftFoot = arma::eye(4,4);
+                    // Transform3D odometryRightFoot = arma::eye(4,4);
+                    // Transform3D odometryLeftFoot = arma::eye(4,4);
                     // if(previousSensors){
                     //     //NOTE: calculateOdometryMatrix requires sensors->forwardKinematics to be calculated before calling
                     //     odometryLeftFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::LEFT);
@@ -427,11 +427,11 @@ namespace modules {
                 });
             }
 
-            Transform SensorFilter::calculateOdometryMatrix(
+            Transform3D SensorFilter::calculateOdometryMatrix(
                 const messages::input::Sensors& sensors,
                 const messages::input::Sensors& previousSensors,
                 utility::motion::kinematics::Side side) {
-                    Transform bodyFromAnkleInitialInverse, bodyFromAnkleFinal;
+                    Transform3D bodyFromAnkleInitialInverse, bodyFromAnkleFinal;
                     if(side == Side::LEFT){
                         bodyFromAnkleInitialInverse = previousSensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL);   //Double Inverse
                         bodyFromAnkleFinal = sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL).i();

@@ -37,8 +37,8 @@
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/RobotModels.h"
-#include "utility/math/matrix/Transform.h"
 #include "utility/math/angle.h"
+#include "utility/math/matrix/Transform3D.h"
 
 namespace modules {
 namespace motion {
@@ -63,8 +63,8 @@ namespace motion {
 
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::motion::kinematics::DarwinModel;
-    using utility::math::SE2;
-    using utility::math::matrix::Transform;
+    using utility::math::matrix::Transform2D;
+    using utility::math::matrix::Transform3D;
     using utility::math::angle::normalizeAngle;
     using utility::nubugger::graph;
     using utility::support::Expression;
@@ -301,7 +301,7 @@ namespace motion {
         emit(std::make_unique<std::vector<ServoCommand>>());
     }
 
-    void WalkEngine::localise(SE2 position) {
+    void WalkEngine::localise(Transform2D position) {
         // emit position as a fake localisation
         auto localisation = std::make_unique<std::vector<messages::localisation::Self>>();
         messages::localisation::Self self;
@@ -363,8 +363,8 @@ namespace motion {
 
         uTorso = zmpCom(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
 
-        Transform leftFoot = uLeftFoot;
-        Transform rightFoot = uRightFoot;
+        Transform3D leftFoot = uLeftFoot;
+        Transform3D rightFoot = uRightFoot;
 
         if (swingLeg == LimbID::RIGHT_LEG) {
             rightFoot = rightFoot.translateZ(stepHeight * foot[2]);
@@ -372,12 +372,12 @@ namespace motion {
             leftFoot = leftFoot.translateZ(stepHeight * foot[2]);
         }
 
-        SE2 uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
-        Transform torso = arma::vec6{uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()};
+        Transform2D uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
+        Transform3D torso = arma::vec6{uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()};
 
         // Transform feet targets to be relative to the torso
-        Transform leftFootTorso = leftFoot.worldToLocal(torso);
-        Transform rightFootTorso = rightFoot.worldToLocal(torso);
+        Transform3D leftFootTorso = leftFoot.worldToLocal(torso);
+        Transform3D rightFootTorso = rightFoot.worldToLocal(torso);
 
         if (emitLocalisation) {
             localise(uTorsoActual);
@@ -395,13 +395,13 @@ namespace motion {
 
     void WalkEngine::updateStill(const Sensors&/* sensors*/) {
         uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
-        SE2 uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
+        Transform2D uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
 
-        Transform torso = arma::vec6{uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()};
+        Transform3D torso = arma::vec6{uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()};
 
         // Transform feet targets to be relative to the torso
-        Transform leftFootTorso = static_cast<Transform>(uLeftFoot).worldToLocal(torso);
-        Transform rightFootTorso = static_cast<Transform>(uRightFoot).worldToLocal(torso);
+        Transform3D leftFootTorso = static_cast<Transform3D>(uLeftFoot).worldToLocal(torso);
+        Transform3D rightFootTorso = static_cast<Transform3D>(uRightFoot).worldToLocal(torso);
 
         if (emitLocalisation) {
             localise(uTorsoActual);
@@ -441,8 +441,8 @@ namespace motion {
         // Start arm/leg collision/prevention
         double rotLeftA = normalizeAngle(uLeftFoot.angle() - uTorso.angle());
         double rotRightA = normalizeAngle(uTorso.angle() - uRightFoot.angle());
-        SE2 leftLegTorso = uTorso.worldToLocal(uLeftFoot);
-        SE2 rightLegTorso = uTorso.worldToLocal(uRightFoot);
+        Transform2D leftLegTorso = uTorso.worldToLocal(uLeftFoot);
+        Transform2D rightLegTorso = uTorso.worldToLocal(uRightFoot);
         double leftMinValue = 5 * M_PI / 180 + std::max(0.0, rotLeftA) / 2 + std::max(0.0, leftLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
         double rightMinValue = -5 * M_PI / 180 - std::max(0.0, rotRightA) / 2 - std::max(0.0, -rightLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
         // update shoulder pitch to move arm away from body
@@ -464,13 +464,13 @@ namespace motion {
         return std::move(waypoints);
     }
 
-    SE2 WalkEngine::stepTorso(SE2 uLeftFoot, SE2 uRightFoot, double shiftFactor) {
-        SE2 uLeftFootSupport = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
-        SE2 uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
+    Transform2D WalkEngine::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) {
+        Transform2D uLeftFootSupport = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
+        Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
         return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
     }
 
-    void WalkEngine::setVelocity(SE2 velocity) {
+    void WalkEngine::setVelocity(Transform2D velocity) {
         // filter the commanded speed
         velocity.x()     = std::min(std::max(velocity.x(),     velocityLimits(0,0)), velocityLimits(0,1));
         velocity.y()     = std::min(std::max(velocity.y(),     velocityLimits(1,0)), velocityLimits(1,1));
@@ -491,7 +491,7 @@ namespace motion {
         velocityCommand.angle() = std::min(std::max(velocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
     }
 
-    SE2 WalkEngine::getVelocity() {
+    Transform2D WalkEngine::getVelocity() {
         return velocityCurrent;
     }
 
@@ -545,8 +545,8 @@ namespace motion {
         return {aP, aN};
     }
 
-    SE2 WalkEngine::zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, SE2 uSupport, SE2 uLeftFootDestination, SE2 uLeftFootSource, SE2 uRightFootDestination, SE2 uRightFootSource) {
-        SE2 com = {0, 0, 0};
+    Transform2D WalkEngine::zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) {
+        Transform2D com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
         com.x() = uSupport.x() + zmpCoefficients[0] * expT + zmpCoefficients[1] / expT;
         com.y() = uSupport.y() + zmpCoefficients[2] * expT + zmpCoefficients[3] / expT;

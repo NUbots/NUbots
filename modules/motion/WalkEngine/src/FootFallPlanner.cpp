@@ -26,7 +26,7 @@ namespace motion {
 
     using messages::behaviour::LimbID;
     using utility::motion::kinematics::DarwinModel;
-    using utility::math::SE2;
+    using utility::math::matrix::Transform2D;
 
     void WalkEngine::calculateNewStep() {
         updateVelocity();
@@ -87,14 +87,14 @@ namespace motion {
 
         // apply velocity-based support point modulation for uSupport
         if (swingLeg == LimbID::RIGHT_LEG) {
-            SE2 uLeftFootTorso = uTorsoSource.worldToLocal(uLeftFootSource);
-            SE2 uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
-            SE2 uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
+            Transform2D uLeftFootTorso = uTorsoSource.worldToLocal(uLeftFootSource);
+            Transform2D uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
+            Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
             uSupport = uLeftFootModded.localToWorld({-footOffset[0], -footOffset[1], 0});
         } else {
-            SE2 uRightFootTorso = uTorsoSource.worldToLocal(uRightFootSource);
-            SE2 uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
-            SE2 uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
+            Transform2D uRightFootTorso = uTorsoSource.worldToLocal(uRightFootSource);
+            Transform2D uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
+            Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             uSupport = uRightFootModded.localToWorld({-footOffset[0], footOffset[1], 0});
         }
 
@@ -128,22 +128,22 @@ namespace motion {
         }
     }
 
-    SE2 WalkEngine::getNewFootTarget(const SE2& velocity, const SE2& leftFoot, const SE2& rightFoot, const LimbID& swingLeg) {
+    Transform2D WalkEngine::getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg) {
         // Negative if right leg to account for the mirroring of the foot target
         int8_t sign = swingLeg == LimbID::LEFT_LEG ? 1 : -1;
         // Get midpoint between the two feet
-        SE2 midPoint = leftFoot.interpolate(0.5, rightFoot);
+        Transform2D midPoint = leftFoot.interpolate(0.5, rightFoot);
         // Get midpoint 1.5 steps in future
         // Note: The reason for 1.5 rather than 1 is because it takes an extra 0.5 steps
         // for the torso to reach a given position when you want both feet together
-        SE2 forwardPoint = midPoint.localToWorld(1.5 * velocity);
+        Transform2D forwardPoint = midPoint.localToWorld(1.5 * velocity);
         // Offset to towards the foot in use to get the target location
-        SE2 footTarget = forwardPoint.localToWorld(sign * uLRFootOffset);
+        Transform2D footTarget = forwardPoint.localToWorld(sign * uLRFootOffset);
 
         // Start applying step limits:
         // Get the vector between the feet and clamp the components between the min and max step limits
-        SE2 supportFoot = swingLeg == LimbID::LEFT_LEG ? rightFoot : leftFoot;
-        SE2 feetDifference = supportFoot.worldToLocal(footTarget);
+        Transform2D supportFoot = swingLeg == LimbID::LEFT_LEG ? rightFoot : leftFoot;
+        Transform2D feetDifference = supportFoot.worldToLocal(footTarget);
         feetDifference.x()     = std::min(std::max(feetDifference.x(),            stepLimits(0,0)), stepLimits(0,1));
         feetDifference.y()     = std::min(std::max(feetDifference.y()     * sign, stepLimits(1,0)), stepLimits(1,1)) * sign;
         feetDifference.angle() = std::min(std::max(feetDifference.angle() * sign, stepLimits(2,0)), stepLimits(2,1)) * sign;

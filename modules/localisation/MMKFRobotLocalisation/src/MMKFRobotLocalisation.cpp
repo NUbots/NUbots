@@ -23,7 +23,7 @@
 
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
-#include "utility/math/matrix/Rotation.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "messages/vision/VisionObjects.h"
@@ -111,7 +111,7 @@ namespace localisation {
 
                 Self robot_model;
                 robot_model.position = model_state.rows(robot::kX, robot::kY);
-                arma::mat33 imuRotation = Rotation3D::createRotationZ(model_state(robot::kImuOffset));
+                Rotation3D imuRotation = Rotation3D::createRotationZ(model_state(robot::kImuOffset));
                 arma::vec3 world_heading = imuRotation * arma::mat(sensors.orientation.t()).col(0);
                 robot_model.heading = world_heading.rows(0, 1);
                 robot_model.velocity = model_state.rows(robot::kVX, robot::kVY);

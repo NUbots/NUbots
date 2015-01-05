@@ -26,7 +26,8 @@
 
 #include "ServoID.h"
 
-#include "utility/math/matrix/Transform.h"
+#include "utility/math/matrix/Transform3D.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/Line.h"
 
 namespace messages {
@@ -60,7 +61,7 @@ namespace messages {
 
             arma::vec3 accelerometer;
             arma::vec3 gyroscope;
-            arma::mat33 orientation;
+            utility::math::matrix::Rotation3D orientation;
             arma::vec3 leftFSR;
             arma::vec3 rightFSR;
 
@@ -69,9 +70,9 @@ namespace messages {
             bool leftFootDown;
             bool rightFootDown;
 
-            std::map<messages::input::ServoID, utility::math::matrix::Transform> forwardKinematics;
+            std::map<messages::input::ServoID, utility::math::matrix::Transform3D> forwardKinematics;
 
-            // utility::math::Transform odometry;
+            // utility::math::Transform3D odometry;
             arma::vec2 odometry;
             arma::mat22 odometryCovariance;
 
@@ -79,10 +80,10 @@ namespace messages {
 
             arma::vec4 centreOfMass;
 
-            utility::math::matrix::Transform orientationBodyToGround;
-            utility::math::matrix::Transform orientationCamToGround;
-            utility::math::matrix::Transform kinematicsBodyToGround;
-            utility::math::matrix::Transform kinematicsCamToGround;
+            utility::math::matrix::Transform3D orientationBodyToGround;
+            utility::math::matrix::Transform3D orientationCamToGround;
+            utility::math::matrix::Transform3D kinematicsBodyToGround;
+            utility::math::matrix::Transform3D kinematicsCamToGround;
 
             std::vector<Servo> servos;
         };

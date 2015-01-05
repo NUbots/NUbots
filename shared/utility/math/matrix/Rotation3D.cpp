@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "Rotation.h"
+#include "Rotation3D.h"
 
 #include <nuclear>
 
@@ -29,7 +29,7 @@ namespace matrix {
         eye(); // identity matrix by default
     }
 
-    Rotation3D::Rotation(arma::vec4 q) {
+    Rotation3D::Rotation(const arma::vec4& q) {
         // quaternion to rotation conversion
         // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/
         // http://en.wikipedia.org/wiki/Rotation_group_SO(3)#Quaternions_of_unit_norm
@@ -38,7 +38,7 @@ namespace matrix {
               << 2     * q[1] * q[3] - 2 * q[2] * q[0] << 2     * q[2] * q[3] + 2 * q[1] * q[0] << 1 - 2 * q[1] * q[1] - 2 * q[2] * q[2];
     }
 
-    Rotation3D::Rotation(arma::vec3 axis, double angle) {
+    Rotation3D::Rotation(const arma::vec3& axis, double angle) {
         //Construct appropriate ONB:
 
         //Check axis not zero

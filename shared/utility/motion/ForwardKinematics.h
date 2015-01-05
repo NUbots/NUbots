@@ -28,7 +28,8 @@
 
 #include "InverseKinematics.h"
 
-#include "utility/math/matrix/Transform.h"
+#include "utility/math/matrix/Transform3D.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "utility/motion/RobotModels.h"
 
 #include "messages/input/Sensors.h"
@@ -40,10 +41,10 @@ namespace kinematics {
 
 
     template <typename RobotKinematicModel>
-    inline std::map<messages::input::ServoID, utility::math::matrix::Transform> calculateHeadJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID){
-        std::map<messages::input::ServoID, utility::math::matrix::Transform> positions;
+    inline std::map<messages::input::ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID){
+        std::map<messages::input::ServoID, utility::math::matrix::Transform3D> positions;
 
-        utility::math::matrix::Transform runningTransform;
+        utility::math::matrix::Transform3D runningTransform;
         float HEAD_PITCH = sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_PITCH)].presentPosition;
         float HEAD_YAW =  sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_YAW)].presentPosition;
         arma::vec3 NECK_POS = {RobotKinematicModel::Head::NECK_BASE_POS_FROM_ORIGIN[0],
@@ -90,9 +91,9 @@ namespace kinematics {
         The basis 'faces' down its x axis.
     */
     template <typename RobotKinematicModel>
-    inline std::map<messages::input::ServoID, utility::math::matrix::Transform> calculateLegJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID, Side isLeft){
-        std::map<messages::input::ServoID, utility::math::matrix::Transform> positions;
-        utility::math::matrix::Transform runningTransform;
+    inline std::map<messages::input::ServoID, utility::math::matrix::Transform3D> calculateLegJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID, Side isLeft){
+        std::map<messages::input::ServoID, utility::math::matrix::Transform3D> positions;
+        utility::math::matrix::Transform3D runningTransform;
         //Variables to mask left and right leg differences:
         messages::input::ServoID HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL;
         int negativeIfRight = 1;
@@ -185,9 +186,9 @@ namespace kinematics {
         The basis 'faces' down its x axis.
     */
     template <typename RobotKinematicModel>
-    inline std::map<messages::input::ServoID, utility::math::matrix::Transform> calculateArmJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID, Side isLeft){
-        std::map<messages::input::ServoID, utility::math::matrix::Transform> positions;
-        utility::math::matrix::Transform runningTransform;
+    inline std::map<messages::input::ServoID, utility::math::matrix::Transform3D> calculateArmJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID, Side isLeft){
+        std::map<messages::input::ServoID, utility::math::matrix::Transform3D> positions;
+        utility::math::matrix::Transform3D runningTransform;
         //Variables to mask left and right leg differences:
         messages::input::ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
         int negativeIfRight = 1;
@@ -251,7 +252,7 @@ namespace kinematics {
     /*! @brief
     */
     template <typename RobotKinematicModel>
-    inline std::map<messages::input::ServoID, utility::math::matrix::Transform> calculatePosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID) {
+    inline std::map<messages::input::ServoID, utility::math::matrix::Transform3D> calculatePosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID) {
         switch(servoID) {
             case messages::input::ServoID::HEAD_YAW:
             case messages::input::ServoID::HEAD_PITCH:
@@ -279,17 +280,17 @@ namespace kinematics {
             case messages::input::ServoID::L_ANKLE_ROLL:
                 return calculateLegJointPosition<RobotKinematicModel>(sensors, servoID, Side::LEFT);
         }
-        return std::map<messages::input::ServoID, utility::math::matrix::Transform>();
+        return std::map<messages::input::ServoID, utility::math::matrix::Transform3D>();
     }
 
 
     template <typename RobotKinematicModel>
-    inline std::map<messages::input::ServoID, utility::math::matrix::Transform> calculateAllPositions(const messages::input::Sensors& sensors) {
-        std::map<messages::input::ServoID, utility::math::matrix::Transform> result = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::L_ANKLE_ROLL);
-        std::map<messages::input::ServoID, utility::math::matrix::Transform> rightLegPositions = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::R_ANKLE_ROLL);
-        std::map<messages::input::ServoID, utility::math::matrix::Transform> headPositions = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::HEAD_PITCH);
-        std::map<messages::input::ServoID, utility::math::matrix::Transform> leftArm = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::L_ELBOW);
-        std::map<messages::input::ServoID, utility::math::matrix::Transform> rightArm = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::R_ELBOW);
+    inline std::map<messages::input::ServoID, utility::math::matrix::Transform3D> calculateAllPositions(const messages::input::Sensors& sensors) {
+        std::map<messages::input::ServoID, utility::math::matrix::Transform3D> result = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::L_ANKLE_ROLL);
+        std::map<messages::input::ServoID, utility::math::matrix::Transform3D> rightLegPositions = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::R_ANKLE_ROLL);
+        std::map<messages::input::ServoID, utility::math::matrix::Transform3D> headPositions = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::HEAD_PITCH);
+        std::map<messages::input::ServoID, utility::math::matrix::Transform3D> leftArm = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::L_ELBOW);
+        std::map<messages::input::ServoID, utility::math::matrix::Transform3D> rightArm = calculatePosition<RobotKinematicModel>(sensors, messages::input::ServoID::R_ELBOW);
         result.insert(leftArm.begin(), leftArm.end());
         result.insert(rightArm.begin(), rightArm.end());
         result.insert(rightLegPositions.begin(), rightLegPositions.end());
@@ -300,7 +301,7 @@ namespace kinematics {
         @return [x_com, y_com, z_com, total_mass] relative to the torso basis
     */
     template <typename RobotKinematicModel>
-    inline arma::vec4 calculateCentreOfMass(const std::map<messages::input::ServoID, utility::math::matrix::Transform>& jointPositions, bool includeTorso){
+    inline arma::vec4 calculateCentreOfMass(const std::map<messages::input::ServoID, utility::math::matrix::Transform3D>& jointPositions, bool includeTorso){
         arma::vec4 totalMassVector = arma::zeros(4);
 
         for(auto& joint : jointPositions){
@@ -311,7 +312,7 @@ namespace kinematics {
             //NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass ", messages::input::stringFromId(joint.first), massVector);
             double jointMass = massVector[3];
 
-            utility::math::matrix::Transform massScaler;
+            utility::math::matrix::Transform3D massScaler;
             massScaler.submat(0,0,2,2) *= jointMass;
 
             totalMassVector +=  joint.second * massScaler * massVector; // = m * local centre of mass in global robot coords
@@ -324,12 +325,12 @@ namespace kinematics {
             }
             //NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass Torso", massVector);
             double jointMass = massVector[3];
-            utility::math::matrix::Transform massScaler;
+            utility::math::matrix::Transform3D massScaler;
             massScaler.submat(0,0,2,2) *= jointMass;
             totalMassVector +=  massScaler * massVector; // = m * local centre of mass in global robot coords
         }
 
-        utility::math::matrix::Transform normaliser;
+        utility::math::matrix::Transform3D normaliser;
         if(totalMassVector[3] > 0){
             normaliser.submat(0,0,2,2) *= 1 / totalMassVector[3];
             return normaliser * totalMassVector;
@@ -339,7 +340,7 @@ namespace kinematics {
         }
     }
 
-    inline utility::math::geometry::Line calculateHorizon(const arma::mat33 groundToCamRotation, double cameraDistancePixels){
+    inline utility::math::geometry::Line calculateHorizon(const math::matrix::Rotation3D groundToCamRotation, double cameraDistancePixels){
         arma::vec3 zGround = {0,0,1};
         arma::vec3 normal = groundToCamRotation * zGround;
 
@@ -357,7 +358,7 @@ namespace kinematics {
         return utility::math::geometry::Line(arma::vec2({ 0, b }), arma::vec2({ 1, m + b }));
     }
 
-    inline utility::math::matrix::Transform calculateBodyToGround(arma::vec3 groundNormal_body, double bodyHeight){
+    inline utility::math::matrix::Transform3D calculateBodyToGround(arma::vec3 groundNormal_body, double bodyHeight){
         arma::vec3 X = arma::vec{1,0,0};
         double projectXOnNormal = groundNormal_body[0];
 
@@ -376,7 +377,7 @@ namespace kinematics {
             groundMatrixY = arma::cross(groundNormal_body, groundMatrixX);
         }
 
-        utility::math::matrix::Transform groundToBody;
+        utility::math::matrix::Transform3D groundToBody;
         groundToBody.submat(0,0,2,0) = groundMatrixX;
         groundToBody.submat(0,1,2,1) = groundMatrixY;
         groundToBody.submat(0,2,2,2) = groundNormal_body;
@@ -384,8 +385,8 @@ namespace kinematics {
         return groundToBody.i();
     }
 
-    inline arma::mat22 calculateRobotToIMU(arma::mat33 orientation) {
-        arma::vec3 xRobotImu = arma::mat33(orientation.t()).col(0);
+    inline arma::mat22 calculateRobotToIMU(math::matrix::Rotation3D orientation) {
+        arma::vec3 xRobotImu = orientation.i().col(0);
         arma::vec2 projXRobot = arma::normalise(xRobotImu.rows(0,1));
         arma::vec2 projYRobot = arma::vec2({-projXRobot(1), projXRobot(0)});
 

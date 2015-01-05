@@ -29,7 +29,7 @@
 
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/math/matrix/Transform.h"
+#include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/RobotModels.h"
 
 namespace modules {
@@ -39,7 +39,7 @@ namespace modules {
             using messages::motion::ServoTarget;
             using messages::input::ServoID;
             using messages::input::Sensors;
-            using utility::math::matrix::Transform;
+            using utility::math::matrix::Transform3D;
             using utility::motion::kinematics::calculateLegJoints;
             using utility::motion::kinematics::calculatePosition;
             using utility::motion::kinematics::Side;
@@ -49,7 +49,7 @@ namespace modules {
             KinematicsDebug::KinematicsDebug(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
                     on< Trigger<Configuration<InverseKinematicsRequest>> >([this](const Configuration<InverseKinematicsRequest>& request) {
                         return;
-                        Transform target;
+                        Transform3D target;
                         target = target.rotateY(request.config["yAngle"].as<double>());
                         target = target.rotateX(request.config["xAngle"].as<double>());
                         target = target.rotateZ(request.config["zAngle"].as<double>());
@@ -115,7 +115,7 @@ namespace modules {
                         }
 
                         for(int i = 0; i<iterations; i++){
-                            Transform ikRequest;
+                            Transform3D ikRequest;
                             ikRequest = ikRequest.rotateY(request.config["yAngle"].as<double>());
                             ikRequest = ikRequest.rotateX(request.config["xAngle"].as<double>());
                             ikRequest = ikRequest.rotateZ(request.config["zAngle"].as<double>());
@@ -165,8 +165,8 @@ namespace modules {
                                 }
                             }
                             std::cout<< "KinematicsNULLTest -calculating forward kinematics." <<std::endl;
-                            Transform lFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
-                            Transform rFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
+                            Transform3D lFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
+                            Transform3D rFootPosition = calculatePosition<DarwinModel>(*sensors, ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
                             NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts left foot: \n",lFootPosition);
                             NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts right foot: \n",rFootPosition);
                             std::cout << "Compared to request: \n" << ikRequest << std::endl;
@@ -235,7 +235,7 @@ namespace modules {
                                     sensors.servos[static_cast<int>(servoID)].presentPosition = position;
                             }
 
-                            Transform fKin = calculatePosition<DarwinModel>(sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
+                            Transform3D fKin = calculatePosition<DarwinModel>(sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
 
                             float max_error = 0;
                             for(int i = 0; i < 3 ; i++){

@@ -24,7 +24,7 @@
 
 #include "messages/input/Sensors.h"
 
-#include "utility/math/matrix/Transform.h"
+#include "utility/math/matrix/Transform3D.h"
 #include "utility/math/kalman/UKF.h"
 #include "utility/math/kalman/IMUModel.h"
 #include "utility/math/kalman/LinearVec3Model.h"
@@ -65,7 +65,7 @@ namespace modules {
 
                 static constexpr const char* CONFIGURATION_PATH = "DarwinSensorFilter.yaml";
             private:
-                utility::math::matrix::Transform calculateOdometryMatrix(
+                utility::math::matrix::Transform3D calculateOdometryMatrix(
                     const messages::input::Sensors& sensors,
                     const messages::input::Sensors& previousSensors,
                     utility::motion::kinematics::Side side);

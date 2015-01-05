@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "Rotation.h"
+#include "Rotation2D.h"
 
 namespace utility {
 namespace math {

@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MATH_ROTATION_H
-#define UTILITY_MATH_ROTATION_H
+#ifndef UTILITY_MATH_MATRIX_ROTATION3D_H
+#define UTILITY_MATH_MATRIX_ROTATION3D_H
 
 #include <armadillo>
 
@@ -26,44 +26,10 @@ namespace utility {
 namespace math {
 namespace matrix {
 
-
-    template <int Dimensions = 3>
+    template <int Dimensions>
     class Rotation;
 
-    template <>
-    class Rotation<2> : public arma::mat22 {
-        using arma::mat22::mat22; // inherit constructors
-
-        public:
-            /**
-             * @brief Default constructor creates an identity matrix
-             */
-            Rotation();
-
-            /**
-             * @brief Rotates matrix around the local Z axis
-             *
-             * @param radians The amount to radians to rotate by
-             * @return The rotation matrix
-             */
-            Rotation rotate(double radians) const;
-
-            /**
-             * @brief Performs an inverse and returns a new copy
-             * Note: Assumes current transform is orthonormal and invertible (which it should be given normal use)
-             *
-             * @return The inverse transform
-             */
-            Rotation i() const;
-
-            /**
-             * @brief Creates a rotation matrix around the Z axis by the given radians
-             *
-             * @param radians The amount to radians to rotate by
-             * @return The rotation matrix
-             */
-            static Rotation createRotation(double radians);
-    };
+    using Rotation3D = Rotation<3>;
 
     template <>
     class Rotation<3> : public arma::mat33 {
@@ -78,11 +44,11 @@ namespace matrix {
             /**
              * @brief Convert from a quaternions vec4
              */
-            Rotation(arma::vec4 q);
+            Rotation(const arma::vec4& q);
             /**
              * @brief Create a rotation matrix based on a vec3 and an angle
              */
-            Rotation(arma::vec3 axis, double angle);
+            Rotation(const arma::vec3& axis, double angle);
 
             /**
              * @brief Rotates matrix around the local X axis
@@ -90,7 +56,7 @@ namespace matrix {
              * @param radians The amount to radians to rotate by
              * @return The rotation matrix
              */
-            Rotation rotateX(double radians) const;
+            Rotation3D rotateX(double radians) const;
 
             /**
              * @brief Rotates matrix around the local Y axis
@@ -98,7 +64,7 @@ namespace matrix {
              * @param radians The amount to radians to rotate by
              * @return The rotation matrix
              */
-            Rotation rotateY(double radians) const;
+            Rotation3D rotateY(double radians) const;
 
             /**
              * @brief Rotates matrix around the local Z axis
@@ -106,7 +72,7 @@ namespace matrix {
              * @param radians The amount to radians to rotate by
              * @return The rotation matrix
              */
-            Rotation rotateZ(double radians) const;
+            Rotation3D rotateZ(double radians) const;
 
             /**
              * @brief Performs an inverse and returns a new copy
@@ -114,7 +80,7 @@ namespace matrix {
              *
              * @return The inverse transform
              */
-            Rotation i() const;
+            Rotation3D i() const;
 
             /**
              * @return Pair containing the axis of the rotation as a unit vector followed by the rotation angle.
@@ -127,7 +93,7 @@ namespace matrix {
              * @param radians The amount to radians to rotate by
              * @return The rotation matrix
              */
-            static Rotation createRotationX(double radians);
+            static Rotation3D createRotationX(double radians);
 
             /**
              * @brief Creates a rotation matrix around the Y axis by the given radians
@@ -135,7 +101,7 @@ namespace matrix {
              * @param radians The amount to radians to rotate by
              * @return The rotation matrix
              */
-            static Rotation createRotationY(double radians);
+            static Rotation3D createRotationY(double radians);
 
             /**
              * @brief Creates a rotation matrix around the Z axis by the given radians
@@ -143,14 +109,11 @@ namespace matrix {
              * @param radians The amount to radians to rotate by
              * @return The rotation matrix
              */
-            static Rotation createRotationZ(double radians);
+            static Rotation3D createRotationZ(double radians);
     };
-
-    using Rotation2D = Rotation<2>;
-    using Rotation3D = Rotation<3>;
 
 }  // matrix
 }  // math
 }  // utility
 
-#endif  // UTILITY_MATH_ROTATION_H
+#endif  // UTILITY_MATH_MATRIX_ROTATION3D_H

@@ -22,7 +22,7 @@
 
 #include <armadillo>
 
-#include "utility/math/SE2.h"
+#include "utility/math/matrix/Transform2D.h"
 
 namespace messages {
 namespace motion {
@@ -35,7 +35,7 @@ namespace motion {
      */
     struct WalkCommand {
         // x and y are velocity in m/s and angle is in rads/s
-        utility::math::SE2 command;
+        utility::math::matrix::Transform2D command;
     };
 
     struct WalkStartCommand {
@@ -44,7 +44,7 @@ namespace motion {
     struct WalkStopCommand {
     };
 
-    struct WalkStopped{
+    struct WalkStopped {
     };
 }  // motion
 }  // messages

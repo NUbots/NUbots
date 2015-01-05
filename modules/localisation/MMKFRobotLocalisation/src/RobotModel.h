@@ -23,6 +23,7 @@
 #include <armadillo>
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/Sensors.h"
+#include "utility/math/matrix/Rotation3D.h"
 
 
 namespace modules {
@@ -94,7 +95,7 @@ namespace robot {
             double observationDifferenceElevationFactor = 0.2;
         } cfg_;
 
-        arma::mat33 currentImuOrientation;
+        utility::math::matrix::Rotation3D currentImuOrientation;
 
         // arma::mat33 getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state);
         // arma::mat33 getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state);

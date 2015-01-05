@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "SE2.h"
+#include "Transform2D.h"
 
 #include <nuclear>
 
@@ -25,11 +25,16 @@
 
 namespace utility {
 namespace math {
+namespace matrix {
 
-    using matrix::Transform;
+    using matrix::Transform3D;
     using utility::math::angle::normalizeAngle;
 
-    SE2 SE2::localToWorld(const SE2& reference) const {
+    Transform2D::Transform() {
+        zeros();
+    }
+
+    Transform2D Transform2D::localToWorld(const Transform2D& reference) const {
         double cosAngle = std::cos(angle());
         double sinAngle = std::sin(angle());
         // translates to this + rotZ(this.angle) * reference
@@ -40,10 +45,10 @@ namespace math {
         };
     }
 
-    SE2 SE2::worldToLocal(const SE2& reference) const {
+    Transform2D Transform2D::worldToLocal(const Transform2D& reference) const {
         double cosAngle = std::cos(angle());
         double sinAngle = std::sin(angle());
-        SE2 diff = reference - *this;
+        Transform2D diff = reference - *this;
         // translates to rotZ(this.angle) * (reference - this)
         return {
             cosAngle * diff.x() + sinAngle * diff.y(),
@@ -52,15 +57,16 @@ namespace math {
         };
     }
 
-    SE2 SE2::interpolate(double t, const SE2& target) const {
-        SE2 result = *this + t * (target - *this);
+    Transform2D Transform2D::interpolate(double t, const Transform2D& target) const {
+        Transform2D result = *this + t * (target - *this);
         result[2] = normalizeAngle(result.angle());
         return result;
     }
 
-    SE2::operator Transform() const {
-        return Transform().translate({x(), y(), 0}).rotateZ(angle());
+    Transform2D::operator Transform3D() const {
+        return Transform3D().translate({x(), y(), 0}).rotateZ(angle());
     }
 
+}
 }
 }

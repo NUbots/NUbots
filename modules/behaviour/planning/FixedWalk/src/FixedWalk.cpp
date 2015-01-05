@@ -19,7 +19,7 @@
 
 #include "FixedWalk.h"
 
-#include "utility/math/matrix/Rotation.h"
+#include "utility/math/matrix/Rotation2D.h"
 #include "messages/motion/GetupCommand.h"
 
 namespace modules {

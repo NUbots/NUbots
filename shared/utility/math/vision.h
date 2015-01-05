@@ -24,7 +24,7 @@
 #include <nuclear>
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/Sensors.h"
-#include "utility/math/matrix/Transform.h"
+#include "utility/math/matrix/Transform3D.h"
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/ParametricLine.h"
 
@@ -127,11 +127,11 @@ namespace vision {
         return {camFocalLengthPixels * point[1] / point[0], camFocalLengthPixels * point[2] / point[0]};
     }
 
-    inline arma::vec2 projectWorldPointToScreen(const arma::vec4& point, const utility::math::matrix::Transform& camToGround, const double& camFocalLengthPixels){
+    inline arma::vec2 projectWorldPointToScreen(const arma::vec4& point, const utility::math::matrix::Transform3D& camToGround, const double& camFocalLengthPixels){
         arma::vec4 camSpacePoint = camToGround.i() * point;
         return projectCamSpaceToScreen(camSpacePoint.rows(0,2), camFocalLengthPixels);
     }
-    inline arma::vec2 projectWorldPointToScreen(const arma::vec3& point, const utility::math::matrix::Transform& camToGround, const double& camFocalLengthPixels){
+    inline arma::vec2 projectWorldPointToScreen(const arma::vec3& point, const utility::math::matrix::Transform3D& camToGround, const double& camFocalLengthPixels){
         arma::vec4 point_ = arma::ones(4);
         point_.rows(0,2) = point;
         return projectWorldPointToScreen(point_, camToGround, camFocalLengthPixels);
@@ -141,7 +141,7 @@ namespace vision {
         return arma::vec3{camFocalLengthPixels, screen[0], screen[1]};
     }
 
-    inline arma::vec3 projectCamToPlane(const arma::vec3& cam, const utility::math::matrix::Transform& camToGround, const utility::math::geometry::Plane<3>& plane){
+    inline arma::vec3 projectCamToPlane(const arma::vec3& cam, const utility::math::matrix::Transform3D& camToGround, const utility::math::geometry::Plane<3>& plane){
         arma::vec3 lineDirection = camToGround.submat(0,0,2,2) * cam;
         arma::vec3 linePosition = camToGround.submat(0,3,2,3);
 
@@ -151,7 +151,7 @@ namespace vision {
         return plane.intersect(line);
     }
 
-    inline arma::vec3 getGroundPointFromScreen(const arma::vec2& screenPos, const utility::math::matrix::Transform& camToGround, const double& camFocalLengthPixels){
+    inline arma::vec3 getGroundPointFromScreen(const arma::vec2& screenPos, const utility::math::matrix::Transform3D& camToGround, const double& camFocalLengthPixels){
         return projectCamToPlane(getCamFromScreen(screenPos, camFocalLengthPixels), camToGround, utility::math::geometry::Plane<3>({ 0, 0, 1 }, { 0, 0, 0 }));
     }
 

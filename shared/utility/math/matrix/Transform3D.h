@@ -17,14 +17,21 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MATH_TRANSFORM_H
-#define UTILITY_MATH_TRANSFORM_H
+#ifndef UTILITY_MATH_MATRIX_TRANSFORM3D_H
+#define UTILITY_MATH_MATRIX_TRANSFORM3D_H
 
 #include <armadillo>
+
+#include "utility/math/matrix/Rotation3D.h"
 
 namespace utility {
 namespace math {
 namespace matrix {
+
+    template <int Dimensions>
+    class Transform;
+
+    using Transform3D = Transform<3>;
 
     /**
      * @brief A 4x4 homogeneous orthonormal basis matrix class for representing 3D transformations
@@ -37,7 +44,8 @@ namespace matrix {
      *
      * @author Brendan Annable
      */
-    class Transform : public arma::mat44 {
+    template <>
+    class Transform<3> : public arma::mat44 {
         using arma::mat44::mat44; // inherit constructors
 
         public:
@@ -62,7 +70,7 @@ namespace matrix {
              * @param translation The 3D translation vector to translate by
              * @return The transformed basis matrix
              */
-            Transform translate(const arma::vec3& translation) const;
+            Transform3D translate(const arma::vec3& translation) const;
 
             /*
              * @brief Translate the current basis along the local X axis
@@ -72,7 +80,7 @@ namespace matrix {
              * @param translation The amount to translate by
              * @return The transformed basis matrix
              */
-            Transform translateX(double translation) const;
+            Transform3D translateX(double translation) const;
 
             /**
              * @brief Translate the current basis along the local Y axis
@@ -82,7 +90,7 @@ namespace matrix {
              * @param translation The amount to translate by
              * @return The transformed basis matrix
              */
-            Transform translateY(double translation) const;
+            Transform3D translateY(double translation) const;
 
             /**
              * @brief Translate the current basis along the local Z axis
@@ -92,7 +100,7 @@ namespace matrix {
              * @param translation The amount to translate by
              * @return The transformed basis matrix
              */
-            Transform translateZ(double translation) const;
+            Transform3D translateZ(double translation) const;
 
             /**
              * @brief Rotates basis matrix around the local X axis
@@ -100,7 +108,7 @@ namespace matrix {
              * @param radians The amount to radians to rotate by
              * @return The transformed basis matrix
              */
-            Transform rotateX(double radians) const;
+            Transform3D rotateX(double radians) const;
 
             /**
              * @brief Rotates basis matrix around the local Y axis
@@ -108,7 +116,7 @@ namespace matrix {
              * @param radians The amount to radians to rotate by
              * @return The transformed basis matrix
              */
-            Transform rotateY(double radians) const;
+            Transform3D rotateY(double radians) const;
 
             /**
              * @brief Rotates basis matrix around the local Z axis
@@ -116,7 +124,7 @@ namespace matrix {
              * @param radians The amount to radians to rotate by
              * @return The transformed basis matrix
              */
-            Transform rotateZ(double radians) const;
+            Transform3D rotateZ(double radians) const;
 
             /**
              * @brief Transforms current basis from world coordinates (i.e. standard basis) to be local to 'reference'
@@ -124,7 +132,7 @@ namespace matrix {
              * @param reference A basis matrix to become relatively local to
              * @return The transformed basis matrix
              */
-            Transform worldToLocal(const Transform& reference) const;
+            Transform3D worldToLocal(const Transform3D& reference) const;
 
             /**
              * @brief Transforms current basis from local coordinates relative to 'reference', to world coordinates (i.e. standard basis)
@@ -132,7 +140,7 @@ namespace matrix {
              * @param reference The basis matrix that the current basis is relative to
              * @return The transformed basis matrix
              */
-            Transform localToWorld(const Transform& reference) const;
+            Transform3D localToWorld(const Transform3D& reference) const;
 
             /**
              * @brief Performs an orthonormal inverse and returns a new copy
@@ -141,7 +149,12 @@ namespace matrix {
              *
              * @return The inverse transform
              */
-            Transform i() const;
+            Transform3D i() const;
+
+            /**
+             * @return The 3x3 rotation matrix
+             */
+            Rotation3D rotation() const;
 
             /**
              * @brief Creates a translation transform by the given 3D vector
@@ -149,7 +162,7 @@ namespace matrix {
              * @param translation The 3D translation vector to translate by
              * @return The translation transform
              */
-            static Transform createTranslation(const arma::vec3& translation);
+            static Transform3D createTranslation(const arma::vec3& translation);
 
             /**
              * @brief Creates a rotation transform around the X axis by the given radians
@@ -157,7 +170,7 @@ namespace matrix {
              * @param radians The amount to radians to rotate by
              * @return The rotation transform
              */
-            static Transform createRotationX(double radians);
+            static Transform3D createRotationX(double radians);
 
             /**
              * @brief Creates a rotation transform around the Y axis by the given radians
@@ -165,7 +178,7 @@ namespace matrix {
              * @param radians The amount to radians to rotate by
              * @return The rotation transform
              */
-            static Transform createRotationY(double radians);
+            static Transform3D createRotationY(double radians);
 
             /**
              * @brief Creates a rotation transform around the Z axis by the given radians
@@ -173,12 +186,11 @@ namespace matrix {
              * @param radians The amount to radians to rotate by
              * @return The rotation transform
              */
-            static Transform createRotationZ(double radians);
+            static Transform3D createRotationZ(double radians);
     };
 
 }  // matrix
 }  // math
 }  // utility
 
-#endif  // UTILITY_MATH_TRANSFORM_H
-
+#endif  // UTILITY_MATH_MATRIX_TRANSFORM3D_H

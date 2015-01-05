@@ -29,7 +29,7 @@
 #include "messages/behaviour/Action.h"
 #include "messages/input/Sensors.h"
 
-#include "utility/math/SE2.h"
+#include "utility/math/matrix/Transform2D.h"
 
 
 namespace modules {
@@ -139,23 +139,23 @@ namespace motion {
 
         // walk state
         // TODO: initializaton needed here?
-        utility::math::SE2 uTorso = arma::zeros(3);
-        utility::math::SE2 uTorsoSource = arma::zeros(3);
-        utility::math::SE2 uTorsoDestination = arma::zeros(3);
-        utility::math::SE2 uLeftFoot = arma::zeros(3);
-        utility::math::SE2 uLeftFootSource = arma::zeros(3);
-        utility::math::SE2 uLeftFootDestination = arma::zeros(3);
-        utility::math::SE2 uRightFoot = arma::zeros(3);
-        utility::math::SE2 uRightFootSource = arma::zeros(3);
-        utility::math::SE2 uRightFootDestination = arma::zeros(3);
-        utility::math::SE2 uSupport;
+        utility::math::matrix::Transform2D uTorso = arma::zeros(3);
+        utility::math::matrix::Transform2D uTorsoSource = arma::zeros(3);
+        utility::math::matrix::Transform2D uTorsoDestination = arma::zeros(3);
+        utility::math::matrix::Transform2D uLeftFoot = arma::zeros(3);
+        utility::math::matrix::Transform2D uLeftFootSource = arma::zeros(3);
+        utility::math::matrix::Transform2D uLeftFootDestination = arma::zeros(3);
+        utility::math::matrix::Transform2D uRightFoot = arma::zeros(3);
+        utility::math::matrix::Transform2D uRightFootSource = arma::zeros(3);
+        utility::math::matrix::Transform2D uRightFootDestination = arma::zeros(3);
+        utility::math::matrix::Transform2D uSupport;
 
         // Current robot velocity
-        utility::math::SE2 velocityCurrent;
+        utility::math::matrix::Transform2D velocityCurrent;
         // Current velocity command
-        utility::math::SE2 velocityCommand;
+        utility::math::matrix::Transform2D velocityCommand;
         // Difference between current velocity and commanded velocity
-        utility::math::SE2 velocityDifference;
+        utility::math::matrix::Transform2D velocityDifference;
 
         // zmp expoential coefficients aXP aXN aYP aYN
         arma::vec4 zmpCoefficients = arma::zeros(4);
@@ -186,7 +186,7 @@ namespace motion {
         arma::vec3 qRArm;
 
         // standard offset
-        utility::math::SE2 uLRFootOffset;
+        utility::math::matrix::Transform2D uLRFootOffset;
 
         messages::behaviour::LimbID swingLegInitial = messages::behaviour::LimbID::LEFT_LEG;
         messages::behaviour::LimbID swingLeg = swingLegInitial;
@@ -202,7 +202,7 @@ namespace motion {
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionLegs(std::vector<std::pair<messages::input::ServoID, float>> joints);
         std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionArms();
         void balance(std::vector<double>& qLegs, const messages::input::Sensors& sensors);
-        void localise(utility::math::SE2 position);
+        void localise(utility::math::matrix::Transform2D position);
 
         void reset();
         void start();
@@ -210,19 +210,19 @@ namespace motion {
         void requestStop();
         void calculateNewStep();
         void stanceReset();
-        void setVelocity(utility::math::SE2 velocity);
+        void setVelocity(utility::math::matrix::Transform2D velocity);
         void updateVelocity();
-        utility::math::SE2 getNewFootTarget(const utility::math::SE2& velocity, const utility::math::SE2& leftFoot, const utility::math::SE2& rightFoot, const messages::behaviour::LimbID& swingLeg);
+        utility::math::matrix::Transform2D getNewFootTarget(const utility::math::matrix::Transform2D& velocity, const utility::math::matrix::Transform2D& leftFoot, const utility::math::matrix::Transform2D& rightFoot, const messages::behaviour::LimbID& swingLeg);
 
         /**
          * Get the next torso position
          */
-        utility::math::SE2 stepTorso(utility::math::SE2 uLeftFoot, utility::math::SE2 uRightFoot, double shiftFactor);
+        utility::math::matrix::Transform2D stepTorso(utility::math::matrix::Transform2D uLeftFoot, utility::math::matrix::Transform2D uRightFoot, double shiftFactor);
 
         /**
          * @return The current velocity
          */
-        utility::math::SE2 getVelocity();
+        utility::math::matrix::Transform2D getVelocity();
 
         /**
          * Solve the ZMP equation
@@ -232,9 +232,9 @@ namespace motion {
         /**
          * Uses ZMP to determine the torso position
          *
-         * @return The torso position in SE2
+         * @return The torso position in Transform2D
          */
-        utility::math::SE2 zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, utility::math::SE2 uSupport, utility::math::SE2 uLeftFootDestination, utility::math::SE2 uLeftFootSource, utility::math::SE2 uRightFootDestination, utility::math::SE2 uRightFootSource);
+        utility::math::matrix::Transform2D zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, utility::math::matrix::Transform2D uSupport, utility::math::matrix::Transform2D uLeftFootDestination, utility::math::matrix::Transform2D uLeftFootSource, utility::math::matrix::Transform2D uRightFootDestination, utility::math::matrix::Transform2D uRightFootSource);
 
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]

@@ -17,35 +17,47 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MATH_SE2_H
-#define UTILITY_MATH_SE2_H
+#ifndef UTILITY_MATH_MATRIX_TRANSFORM2D_H
+#define UTILITY_MATH_MATRIX_TRANSFORM2D_H
 
 #include <armadillo>
 
-#include "utility/math/matrix/Transform.h"
+#include "utility/math/matrix/Transform3D.h"
 
 namespace utility {
 namespace math {
+namespace matrix {
+
+    template <int Dimensions>
+    class Transform;
+
+    using Transform2D = Transform<2>;
 
     /**
-     * Holds a vec3 assuming it is on the form {x, y, angle}
+     * Represents a 2D point including its rotation. Uses a vec3 of the form {x, y, angle}.
      *
      * See: Special Euclidean group SE(2).
      * http://en.wikipedia.org/wiki/Euclidean_group
      *
      * @author Brendan Annable
      */
-    class SE2 : public arma::vec3 {
+    template <>
+    class Transform<2> : public arma::vec3 {
         using arma::vec3::vec3; // inherit constructors
 
         public:
+            /**
+             * @brief Default constructor initialises values to zero
+             */
+            Transform();
+
             /**
              * @brief Transforms position from local coordinates relative to 'reference', to world coordinates
              *
              * @param reference A position to become relatively local to
              * @return The new position
              */
-            SE2 localToWorld(const SE2& reference) const;
+            Transform2D localToWorld(const Transform2D& reference) const;
 
             /**
              * @brief Transforms position from world coordinates to be local to 'reference'
@@ -53,7 +65,7 @@ namespace math {
              * @param reference The position that the current position is relative to
              * @return The new position
              */
-            SE2 worldToLocal(const SE2& reference) const;
+            Transform2D worldToLocal(const Transform2D& reference) const;
 
             /**
              * Interpolate between itself and given target vector
@@ -63,7 +75,7 @@ namespace math {
              * @param target The target vector
              * @return The interpolated vector
              */
-            SE2 interpolate(double t, const SE2& target) const;
+            Transform2D interpolate(double t, const Transform2D& target) const;
 
             inline double x() const { return at(0); }
             inline double& x() { return at(0); }
@@ -80,11 +92,11 @@ namespace math {
             /**
              * Convert the vector into a 4x4 basis matrix
              */
-            operator matrix::Transform() const;
+            operator Transform3D() const;
     };
 
+}  // matrix
 }  // math
 }  // utility
 
-#endif  // UTILITY_MATH_SE2_H
-
+#endif  // UTILITY_MATH_MATRIX_TRANSFORM2D_H

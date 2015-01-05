@@ -17,103 +17,105 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "Transform.h"
+#include "Transform3D.h"
 
 #include <nuclear>
-
-#include "utility/math/matrix/Rotation.h"
 
 namespace utility {
 namespace math {
 namespace matrix {
 
-    Transform::Transform() {
+    Transform3D::Transform() {
         eye(); // identity matrix by default
     }
 
-    Transform::Transform(arma::vec4 q) : Transform() {
+    Transform3D::Transform(arma::vec4 q) : Transform() {
         // quaternion to rotation conversion
         // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/
         // http://en.wikipedia.org/wiki/Rotation_group_SO(3)#Quaternions_of_unit_norm
         submat(0,0,2,2) = Rotation<3>(q);
     }
 
-    Transform::Transform(arma::vec6 in) : Transform(Transform().translate(in.rows(0,2)).rotateZ(in[5]).rotateY(in[4]).rotateX(in[3])) {
+    Transform3D::Transform(arma::vec6 in) : Transform(Transform3D().translate(in.rows(0,2)).rotateZ(in[5]).rotateY(in[4]).rotateX(in[3])) {
 
     }
 
-    Transform Transform::translate(const arma::vec3& translation) const {
+    Transform3D Transform3D::translate(const arma::vec3& translation) const {
         return *this * createTranslation(translation);
     }
 
-    Transform Transform::translateX(double translation) const {
+    Transform3D Transform3D::translateX(double translation) const {
         return translate({translation, 0, 0});
     }
 
-    Transform Transform::translateY(double translation) const {
+    Transform3D Transform3D::translateY(double translation) const {
         return translate({0, translation, 0});
     }
 
-    Transform Transform::translateZ(double translation) const {
+    Transform3D Transform3D::translateZ(double translation) const {
         return translate({0, 0, translation});
     }
 
-    Transform Transform::rotateX(double radians) const {
+    Transform3D Transform3D::rotateX(double radians) const {
         return *this * createRotationX(radians);
     }
 
-    Transform Transform::rotateY(double radians) const {
+    Transform3D Transform3D::rotateY(double radians) const {
         return *this * createRotationY(radians);
     }
 
-    Transform Transform::rotateZ(double radians) const {
+    Transform3D Transform3D::rotateZ(double radians) const {
         return *this * createRotationZ(radians);
     }
 
-    Transform Transform::worldToLocal(const Transform& reference) const {
+    Transform3D Transform3D::worldToLocal(const Transform3D& reference) const {
         // http://en.wikipedia.org/wiki/Change_of_basis
         return reference.i() * (*this);
     }
 
-    Transform Transform::localToWorld(const Transform& reference) const {
+    Transform3D Transform3D::localToWorld(const Transform3D& reference) const {
         // http://en.wikipedia.org/wiki/Change_of_basis
         return reference * (*this);
     }
 
-    Transform Transform::i() const {
+    Transform3D Transform3D::i() const {
         // Create a new transform
-        Transform inverseTransform;
+        Transform3D inverseTransform3D;
         // Transpose the rotation submatrix (top-left 3x3), this is equivalent to taking the inverse of the rotation matrix
-        inverseTransform.submat(0,0,2,2) = submat(0,0,2,2).t();
+        inverseTransform3D.submat(0,0,2,2) = submat(0,0,2,2).t();
         // Multiply translation vector (top-right column vector) by the negated inverse rotation matrix
-        inverseTransform.submat(0,3,2,3) = -inverseTransform.submat(0,0,2,2) * submat(0,3,2,3);
-        /*if (arma::norm(inverseTransform * (*this) - arma::eye(4,4)) > 1e-10){
+        inverseTransform3D.submat(0,3,2,3) = -inverseTransform3D.submat(0,0,2,2) * submat(0,3,2,3);
+        /*if (arma::norm(inverseTransform3D * (*this) - arma::eye(4,4)) > 1e-10){
             NUClear::log<NUClear::WARN>("Inverse failed! Matrix is singular");
         }*/
-        return inverseTransform;
+        return inverseTransform3D;
     }
 
-    Transform Transform::createTranslation(const arma::vec3& translation) {
-        Transform transform;
+    Rotation3D Transform3D::rotation() const {
+        return submat(0,0,2,2);
+    }
+
+    Transform3D Transform3D::createTranslation(const arma::vec3& translation) {
+        Transform3D transform;
         transform.col(3).rows(0,2) = translation;
         return transform;
     }
 
-    Transform Transform::createRotationX(double radians) {
-        Transform transform;
-        transform.submat(0,0,2,2) = Rotation<3>::createRotationX(radians);
+    Transform3D Transform3D::createRotationX(double radians) {
+        Transform3D transform;
+        transform.submat(0,0,2,2) = Rotation3D::createRotationX(radians);
         return transform;
     }
 
-    Transform Transform::createRotationY(double radians) {
-        Transform transform;
-        transform.submat(0,0,2,2) = Rotation<3>::createRotationY(radians);
+    Transform3D Transform3D::createRotationY(double radians) {
+        Transform3D transform;
+        transform.submat(0,0,2,2) = Rotation3D::createRotationY(radians);
         return transform;
     }
 
-    Transform Transform::createRotationZ(double radians) {
-        Transform transform;
-        transform.submat(0,0,2,2) = Rotation<3>::createRotationZ(radians);
+    Transform3D Transform3D::createRotationZ(double radians) {
+        Transform3D transform;
+        transform.submat(0,0,2,2) = Rotation3D::createRotationZ(radians);
         return transform;
     }
 
