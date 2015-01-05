@@ -117,8 +117,10 @@ FUNCTION(NUCLEAR_MODULE)
         ADD_EXECUTABLE(${test_module_name} ${test_src})
         TARGET_LINK_LIBRARIES(${test_module_name} ${module_name} ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
 
-
         SET_PROPERTY(TARGET ${test_module_name} PROPERTY FOLDER "modules/tests")
+
+        # Add the test
+        ADD_TEST(${test_module_name} ${test_module_name})
 
     ENDIF()
 

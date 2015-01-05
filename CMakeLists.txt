@@ -30,6 +30,9 @@ INCLUDE_DIRECTORIES("${CMAKE_BINARY_DIR}/shared")
 # Build tests in test mode
 IF(BUILD_TESTS)
     ENABLE_TESTING()
+
+    # Add the tests subdirectories
+    ADD_SUBDIRECTORY("tests/shared/utility")
 ENDIF()
 
 # This will generate any .proto files in the messages folder
@@ -53,8 +56,6 @@ FOREACH(module ${modules})
 
     # Add the subdirectories
     ADD_SUBDIRECTORY(modules/${modulepath})
-    # Add the test
-    ADD_TEST(Test${modulename} modules/${modulepath}/Test${modulename})
 ENDFOREACH()
 
 # Include our scp darwin sender
