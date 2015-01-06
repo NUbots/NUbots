@@ -28,23 +28,19 @@ namespace utility {
 namespace math {
 namespace geometry {
 
-    class UnitQuaternion {
+    class UnitQuaternion : public arma::vec4 {
     private:
+        UnitQuaternion();
+
         /* @brief Constructor for non-unit quaternion for purpose of point representation
         */
         UnitQuaternion(const arma::vec3& v);
 
     public:
-        //q stores the components of the quaternion, with real part first
-        arma::vec4 q;
+        using arma::vec4::vec4; // inherit constructors
 
         UnitQuaternion operator * (const UnitQuaternion& p) const;
 
-        /*! @brief Instantiates quat directly
-        WARNING: FOR EFFICIENCY THIS ASSUMES q_ IS A UNIT QUATERNION
-        @param q_ UNIT quaternion in real, imaginary order
-        */
-        UnitQuaternion(const arma::vec4& q_);
         /*! @brief Creates quaternion which rotates about 3D axis by angle radians
         */
         UnitQuaternion(const double& angle, const arma::vec3& axis);
@@ -59,14 +55,24 @@ namespace geometry {
 
         double getAngle();
 
-        /*! @brief Calls corresponding function on stored q vector
-        Note: ACCESS ONLY (NO WRITING)
-        */
-        arma::vec rows(const uint& i, const uint& j) const;
-        /*! @brief Calls corresponding function on stored q vector
-        Note: ACCESS ONLY (NO WRITING)
-        */
-        double operator [] (const uint& i) const;
+        // real part
+        inline double kW() const { return at(0); };
+        inline double& kW() { return at(0); };
+
+        inline double kX() const { return at(1); };
+        inline double& kX() { return at(1); };
+
+        inline double kY() const { return at(2); };
+        inline double& kY() { return at(2); };
+
+        inline double kZ() const { return at(3); };
+        inline double& kZ() { return at(3); };
+
+        inline double real() const { return at(0); };
+        inline double& real() { return at(0); };
+
+        inline const arma::subview_col<double> imaginary() const { return rows(1,3); }
+        inline arma::subview_col<double> imaginary() { return rows(1,3); }
 
         /*! @brief Returns the matrix which performs the same rotation as the rotateVector method.
         When representing a basis, this transform maps points written in basis coords to points in world coords (i.e x,y,z) : B -> W
