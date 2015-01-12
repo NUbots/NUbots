@@ -34,7 +34,7 @@ namespace strategy {
 
         bool running = true;
 
-        bool moving = true;
+        bool moving = false;
         arma::vec2 velocity;
         float rotation = 0;
 

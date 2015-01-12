@@ -20,6 +20,8 @@
 #include "WalkEngine.h"
 
 #include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/geometry/UnitQuaternion.h"
+#include "utility/nubugger/NUhelpers.h"
 
 namespace modules {
 namespace motion {
@@ -27,26 +29,54 @@ namespace motion {
     using messages::behaviour::LimbID;
     using messages::input::ServoID;
     using messages::input::Sensors;
+    using utility::math::matrix::Rotation3D;
+    using utility::math::matrix::Transform3D;
+    using utility::math::matrix::AxisAngle;
+    using utility::math::geometry::UnitQuaternion;
+    using utility::nubugger::graph;
 
-    void WalkEngine::balance(std::vector<double>& qLegs, const Sensors& sensors) {
-        double gyroRoll0 = 0;
-        double gyroPitch0 = 0;
+    void WalkEngine::balance(Transform3D& leftFootTarget, Transform3D& rightFootTarget, const Sensors& sensors) {
+        // Get current orientation, offset by body tilt
+        /*Rotation3D tiltedOrientation = sensors.orientation.i().rotateY(-bodyTilt);
+        // Removes any yaw component
+        Rotation3D yawlessOrientation = Rotation3D::createRotationZ(-tiltedOrientation.yaw()) * tiltedOrientation;
+
+        footOrientation =  p * (footOrientation - yawlessOrientation);
+
+        UnitQuaternion offsetQ(footOrientation);
+
+        double angle = offsetQ.getAngle();
+        angle *= balanceAmplitude * std::abs(std::tanh(balanceWeight * angle) * std::tanh(2 * balanceWeight * angle));
+        offsetQ.setAngle(angle);
+        offsetQ.normalise();
+
+        Transform3D offsetT = offsetQ;
+
+        leftFootTarget *= offsetT;
+        rightFootTarget *= offsetT;
+
+        emit(graph("offset", Rotation3D(offsetQ)));*/
 
         // double phaseComp = std::min({1.0, phaseSingle / 0.1, (1 - phaseSingle) / 0.1});
 
         //TODO: crashes
         /*ServoID supportLegID = (swingLeg == LimbID::RIGHT_LEG) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
-        arma::mat33 ankleRotation = sensors.forwardKinematics.find(supportLegID)->second.submat(0,0,2,2);
+        Rotation3D ankleRotation = sensors.forwardKinematics.find(supportLegID)->second.rotation();
+        emit(graph("ankleRotation", ankleRotation));
+        // emit(graph("orientation", sensors.orientation));
         // get effective gyro angle considering body angle offset
-        arma::mat33 kinematicGyroSORAMatrix = sensors.orientation * ankleRotation;   //DOUBLE TRANSPOSE
-        std::pair<arma::vec3, double> axisAngle = utility::math::matrix::axisAngleFromRotationMatrix(kinematicGyroSORAMatrix);
-        arma::vec3 kinematicsGyro = axisAngle.first * (axisAngle.second / balanceWeight);
+        Rotation3D kinematicGyroSORAMatrix = sensors.orientation * ankleRotation; // DOUBLE TRANSPOSE
 
-        gyroRoll0 = -kinematicsGyro[0]*180.0/M_PI;
-        gyroPitch0 = -kinematicsGyro[1]*180.0/M_PI;
+        AxisAngle axisAngle = kinematicGyroSORAMatrix.axisAngle();
+        arma::vec3 gyro = axisAngle.first * (axisAngle.second / balanceWeight);
 
-        emit(graph("roll", gyroRoll0));
-        emit(graph("pitch", gyroPitch0));*/
+        // TODO: why convert rad to degrees? :/ must use degrees as how much to offset joints?
+        // TODO: why negate? axis change?
+        double gyroRoll = -gyro[0] * 180.0 / M_PI;
+        double gyroPitch = -gyro[1] * 180.0 / M_PI;
+
+        emit(graph("roll", gyroRoll));
+        emit(graph("pitch", gyroPitch));*/
 
         /*double yawAngle = 0;
         if (!active) {

@@ -24,6 +24,7 @@
 #include "messages/support/Configuration.h"
 
 #include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/motion/ForwardKinematics.h"
 
@@ -47,9 +48,10 @@ namespace modules {
             using utility::motion::kinematics::calculateCentreOfMass;
             using utility::motion::kinematics::Side;
             using utility::motion::kinematics::calculateRobotToIMU;
-            using utility::math::matrix::Transform3D;
             using utility::math::kalman::IMUModel;
+            using utility::math::matrix::Transform3D;
             using utility::math::matrix::Rotation3D;
+            using utility::math::geometry::UnitQuaternion;
 
             std::string makeErrorString(const std::string& src, uint errorCode) {
                 std::stringstream s;
@@ -268,7 +270,7 @@ namespace modules {
                     // Gives us the quaternion representation
                     arma::vec o = orientationFilter.get();
                     //Map from robot to world coordinates
-                    sensors->orientation = Rotation3D(arma::vec4(o.rows(orientationFilter.model.QW, orientationFilter.model.QZ)));
+                    sensors->orientation = Rotation3D(UnitQuaternion(o.rows(orientationFilter.model.QW, orientationFilter.model.QZ)));
 
                     // sensors->orientation.col(2) = -orientation.rows(0,2);
                     // sensors->orientation.col(0) = orientation.rows(3,5);

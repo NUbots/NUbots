@@ -7,7 +7,7 @@ ADD_ROLE(
         support::configuration::GlobalConfig
         support::configuration::SoccerConfig
         support::NUbugger
-        support::NUbuggerLite
+        #support::NUbuggerLite
         debug::NUbugger
 )
 

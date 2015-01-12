@@ -38,7 +38,6 @@
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/RobotModels.h"
 #include "utility/math/angle.h"
-#include "utility/math/matrix/Transform3D.h"
 
 namespace modules {
 namespace motion {
@@ -85,9 +84,7 @@ namespace motion {
                     // legs are available, start
                     stanceReset(); // reset stance as we don't know where our limbs are
                     interrupted = false;
-                    if (state == State::WALKING) {
-                        updateHandle.enable();
-                    }
+                    updateHandle.enable();
                 }
             },
             [this] (const std::set<LimbID>& takenLimbs) {
@@ -125,12 +122,12 @@ namespace motion {
             requestStop();
         });
 
-        on<Trigger<Configuration<WalkEngine>> >([this](const Configuration<WalkEngine>& config) {
-            configureWalk(config.config);
+        on<Trigger<Configuration<WalkEngine>>>([this](const Configuration<WalkEngine>& config) {
+            configure(config.config);
         });
 
         on<Trigger<WalkOptimiserCommand> >([this](const WalkOptimiserCommand& command) {
-            configureWalk(command.walkConfig);
+            configure(command.walkConfig);
             emit(std::make_unique<WalkConfigSaved>());
         });
 
@@ -145,7 +142,7 @@ namespace motion {
 
     }
 
-    void WalkEngine::configureWalk(const YAML::Node& config){
+    void WalkEngine::configure(const YAML::Node& config){
         emitLocalisation = config["emit_localisation"].as<bool>();
 
         auto& stance = config["stance"];
@@ -179,13 +176,19 @@ namespace motion {
         phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
         phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();
 
+        auto& balance = walkCycle["balance"];
+        balanceEnabled = balance["enabled"].as<bool>();
+        balanceAmplitude = balance["amplitude"].as<Expression>();
+        balanceWeight = balance["weight"].as<Expression>();
+        balanceOffset = balance["offset"].as<Expression>();
 
+        /* TODO
         // gCompensation parameters
-        // hipRollCompensation = config["hipRollCompensation"].as<Expression>();
-        // toeTipCompensation = config["toeTipCompensation"].as<Expression>();
-        // ankleMod = {-toeTipCompensation, 0};
+        hipRollCompensation = config["hipRollCompensation"].as<Expression>();
+        toeTipCompensation = config["toeTipCompensation"].as<Expression>();
+        ankleMod = {-toeTipCompensation, 0};
 
-        /*// gGyro stabilization parameters
+        // gGyro stabilization parameters
         ankleImuParamX = config["ankleImuParamX"].as<arma::vec>();
         ankleImuParamY = config["ankleImuParamY"].as<arma::vec>();
         kneeImuParamX = config["kneeImuParamX"].as<arma::vec>();
@@ -203,12 +206,12 @@ namespace motion {
         supportSideY = config["supportSideY"].as<Expression>();
         supportTurn = config["supportTurn"].as<Expression>();
 
-        balanceWeight = config["balanceWeight"].as<Expression>();*/
-
         // STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();
+        */
     }
 
-    /*void WalkEngine::generateAndSaveStandScript(){
+    /* TODO
+    void WalkEngine::generateAndSaveStandScript(){
         reset();
         stanceReset();
         auto waypoints = updateStill();
@@ -230,57 +233,47 @@ namespace motion {
     }*/
 
     void WalkEngine::reset() {
-            // Global walk state variables
+        uTorso = {-footOffset[0], 0, 0};
+        uLeftFoot = {0, DarwinModel::Leg::HIP_OFFSET_Y, 0};
+        uRightFoot = {0, -DarwinModel::Leg::HIP_OFFSET_Y, 0};
 
-            uTorso = {-footOffset[0], 0, 0};
-            uLeftFoot = {0, DarwinModel::Leg::HIP_OFFSET_Y, 0};
-            uRightFoot = {0, -DarwinModel::Leg::HIP_OFFSET_Y, 0};
+        uTorsoSource = arma::zeros(3);
+        uTorsoDestination = arma::zeros(3);
+        uLeftFootSource = arma::zeros(3);
+        uLeftFootDestination = arma::zeros(3);
+        uRightFootSource = arma::zeros(3);
+        uRightFootDestination = arma::zeros(3);
 
-            velocityCurrent = {0, 0, 0};
-            velocityCommand = {0, 0, 0};
-            velocityDifference = {0, 0, 0};
+        velocityCurrent = arma::zeros(3);
+        velocityCommand = arma::zeros(3);
+        velocityDifference = arma::zeros(3);
 
-            // gZMP exponential coefficients:
-            zmpCoefficients = arma::zeros(4);
-            zmpParams = arma::zeros(4);
+        // gZMP exponential coefficients:
+        zmpCoefficients = arma::zeros(4);
+        zmpParams = arma::zeros(4);
 
-            // gGyro stabilization variables
-            ankleShift = {0, 0};
-            kneeShift = 0;
-            hipShift = {0, 0};
-            armShift = {0, 0};
+        // gGyro stabilization variables
+        swingLeg = swingLegInitial;
+        beginStepTime = getTime();
+        initialStep = 2;
 
-            active = false;
-            started = false;
-            swingLeg = swingLegInitial;
-            beginStepTime = getTime();
-            phase = 0;
-            currenstepTimeType = 0;
+        // gStandard offset
+        uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0};
 
-            initialStep = 2;
+        // gWalking/Stepping transition variables
+        startFromStep = false;
 
-            // gStandard offset
-            uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0};
+        state = State::STOPPED;
 
-            // gWalking/Stepping transition variables
-            startFromStep = false;
-
-            state = State::STOPPED;
-
-            interrupted = false;
-
-            stanceReset();
+        interrupted = false;
     }
 
     void WalkEngine::start() {
         if (state != State::WALKING) {
-            active = true;
-            started = false;
             swingLeg = swingLegInitial;
             beginStepTime = getTime();
             initialStep = 2;
             state = State::WALKING;
-            updateHandle.enable();
         }
     }
 
@@ -293,9 +286,7 @@ namespace motion {
 
     void WalkEngine::stop() {
         state = State::STOPPED;
-        active = false;
         emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 0, 0 }})); // TODO: config
-        updateHandle.disable();
         log<NUClear::TRACE>("Walk Engine:: Stop request complete");
         emit(std::make_unique<WalkStopped>());
         emit(std::make_unique<std::vector<ServoCommand>>());
@@ -317,18 +308,13 @@ namespace motion {
     void WalkEngine::update(const Sensors& sensors) {
         double now = getTime();
 
-        if (!active) {
+        if (state == State::STOPPED) {
             updateStill(sensors);
             return;
         }
 
-        if (!started) {
-            started = true;
-            beginStepTime = now;
-        }
-
-        // phase of step
-        phase = (now - beginStepTime) / stepTime;
+        // The phase of the current step, range: [0,1]
+        double phase = (now - beginStepTime) / stepTime;
 
         bool newStep = false;
 
@@ -347,10 +333,10 @@ namespace motion {
             calculateNewStep();
         }
 
-        updateStep(sensors);
+        updateStep(phase, sensors);
     }
 
-    void WalkEngine::updateStep(const Sensors&/* sensors*/) {
+    void WalkEngine::updateStep(double phase, const Sensors& sensors) {
         arma::vec3 foot = footPhase(phase, phase1Single, phase2Single);
         if (initialStep > 0) {
             foot[2] = 0; // don't lift foot at initial step, TODO: review
@@ -373,7 +359,7 @@ namespace motion {
         }
 
         Transform2D uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
-        Transform3D torso = arma::vec6{uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()};
+        Transform3D torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
 
         // Transform feet targets to be relative to the torso
         Transform3D leftFootTorso = leftFoot.worldToLocal(torso);
@@ -383,8 +369,11 @@ namespace motion {
             localise(uTorsoActual);
         }
 
+        if (balanceEnabled) {
+            balance(leftFootTorso, rightFootTorso, sensors);
+        }
+
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
-        // TODO: balance(joints, sensors);
         auto waypoints = motionLegs(joints);
 
         auto arms = motionArms();
@@ -393,22 +382,25 @@ namespace motion {
         emit(std::move(waypoints));
     }
 
-    void WalkEngine::updateStill(const Sensors&/* sensors*/) {
+    void WalkEngine::updateStill(const Sensors& sensors) {
         uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
         Transform2D uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
 
-        Transform3D torso = arma::vec6{uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()};
+        Transform3D torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
 
         // Transform feet targets to be relative to the torso
-        Transform3D leftFootTorso = static_cast<Transform3D>(uLeftFoot).worldToLocal(torso);
-        Transform3D rightFootTorso = static_cast<Transform3D>(uRightFoot).worldToLocal(torso);
+        Transform3D leftFootTorso = Transform3D(uLeftFoot).worldToLocal(torso);
+        Transform3D rightFootTorso = Transform3D(uRightFoot).worldToLocal(torso);
 
         if (emitLocalisation) {
             localise(uTorsoActual);
         }
 
+        if (balanceEnabled) {
+            balance(leftFootTorso, rightFootTorso, sensors);
+        }
+
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
-        // TODO: balance(joints, sensors);
         auto waypoints = motionLegs(joints);
 
         auto arms = motionArms();
@@ -434,9 +426,6 @@ namespace motion {
 
         auto qLArmActual = qLArm;
         auto qRArmActual = qRArm;
-
-        qLArmActual.rows(0,1) += armShift;
-        qRArmActual.rows(0,1) += armShift;
 
         // Start arm/leg collision/prevention
         double rotLeftA = normalizeAngle(uLeftFoot.angle() - uTorso.angle());
@@ -520,7 +509,6 @@ namespace motion {
 
         uSupport = uTorso;
         beginStepTime = getTime();
-        currenstepTimeType = 0;
         uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0};
         startFromStep = false;
     }

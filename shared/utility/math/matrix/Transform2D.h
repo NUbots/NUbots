@@ -22,8 +22,6 @@
 
 #include <armadillo>
 
-#include "utility/math/matrix/Transform3D.h"
-
 namespace utility {
 namespace math {
 namespace matrix {
@@ -88,11 +86,6 @@ namespace matrix {
 
             inline const arma::subview_col<double> xy() const { return rows(0,1); }
             inline arma::subview_col<double> xy() { return rows(0,1); }
-
-            /**
-             * Convert the vector into a 4x4 basis matrix
-             */
-            operator Transform3D() const;
     };
 
 }  // matrix

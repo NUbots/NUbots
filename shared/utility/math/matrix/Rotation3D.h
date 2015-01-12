@@ -22,19 +22,26 @@
 
 #include <armadillo>
 
+#include "utility/math/geometry/UnitQuaternion.h"
+
 namespace utility {
 namespace math {
+namespace geometry {
+    class UnitQuaternion;
+}
 namespace matrix {
+
 
     template <int Dimensions>
     class Rotation;
 
     using Rotation3D = Rotation<3>;
+    using Axis = arma::vec3;
+    using AxisAngle = std::pair<Axis, double>;
 
     template <>
     class Rotation<3> : public arma::mat33 {
         using arma::mat33::mat33; // inherit constructors
-
         public:
             /**
              * @brief Default constructor creates an identity matrix
@@ -44,9 +51,15 @@ namespace matrix {
             /**
              * @brief Convert from a quaternions vec4
              */
-            Rotation(const arma::vec4& q);
+            Rotation(const geometry::UnitQuaternion& q);
+
             /**
-             * @brief Create a rotation matrix based on a vec3 and an angle
+             * @brief Construct an ONB using a vec3 as the X axis
+             */
+            Rotation(const arma::vec3& axis);
+
+            /**
+             * @brief Create a rotation matrix based on a vec3 as the X axis and an angle
              */
             Rotation(const arma::vec3& axis, double angle);
 
@@ -85,7 +98,27 @@ namespace matrix {
             /**
              * @return Pair containing the axis of the rotation as a unit vector followed by the rotation angle.
              */
-            std::pair<arma::vec3, double> axisAngle() const;
+            AxisAngle axisAngle() const;
+
+            /**
+             * @return Retrieve the euler angles (xyz) from the matrix
+             */
+            arma::vec3 eulerAngles() const;
+
+            /**
+             * @return The roll (x-axis) of the rotation matrix
+             */
+            inline double roll() const { return eulerAngles()[0]; }
+
+            /**
+             * @return The pitch (y-axis) of the rotation matrix
+             */
+            inline double pitch() const { return eulerAngles()[1]; }
+
+            /**
+             * @return The yaw (z-axis) of the rotation matrix
+             */
+            inline double yaw() const { return eulerAngles()[2]; }
 
             /**
              * @brief Creates a rotation matrix around the X axis by the given radians

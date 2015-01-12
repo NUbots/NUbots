@@ -19,7 +19,6 @@
 
 #include "UnitQuaternion.h"
 
-
 namespace utility {
 namespace math {
 namespace geometry {
@@ -27,62 +26,76 @@ namespace geometry {
     using matrix::Rotation3D;
 
     UnitQuaternion::UnitQuaternion() {
-        zeros();
+        real() = 1;
+        imaginary().zeros();
+    }
+
+    UnitQuaternion::UnitQuaternion(const Rotation3D& rotation) {
+        real() = std::sqrt(1.0 + rotation(0,0) + rotation(1,1) + rotation(2,2)) / 2;
+        double w4 = 4.0 * real();
+        imaginary() = arma::vec3({
+            (rotation(2,1) - rotation(1,2)) / w4,
+            (rotation(0,2) - rotation(2,0)) / w4,
+            (rotation(1,0) - rotation(0,1)) / w4
+        });
+    }
+
+    UnitQuaternion::UnitQuaternion(double realPart, const arma::vec3& imaginaryPart) {
+        real() = realPart;
+        imaginary() = imaginaryPart;
     }
 
     UnitQuaternion::UnitQuaternion(const arma::vec3& v) {
+        real() = 0;
     	imaginary() = v;
     }
 
-    UnitQuaternion::UnitQuaternion(const double& angle, const arma::vec3& axis) {
+    UnitQuaternion::UnitQuaternion(const arma::vec3& axis, double angle) {
     	real() = std::cos(angle / 2.0);
     	imaginary() = std::sin(angle / 2.0) * arma::normalise(axis);
     }
 
-    UnitQuaternion UnitQuaternion::i() {
+    UnitQuaternion UnitQuaternion::i() const {
     	UnitQuaternion qi = *this;
+        // take the congugate, as it is equal to the inverse when a unit vector
     	qi.imaginary() *= -1;
     	return qi;
     }
 
-    arma::vec3 UnitQuaternion::rotateVector(const arma::vec3& v) {
+    arma::vec3 UnitQuaternion::rotateVector(const arma::vec3& v) const {
     	UnitQuaternion vRotated = *this * UnitQuaternion(v) * i();
         return vRotated.imaginary();
     }
 
-    arma::vec3 UnitQuaternion::getAxis() {
+    arma::vec3 UnitQuaternion::getAxis() const {
     	double angle = getAngle();
     	double sinThetaOnTwo = std::sin(angle / 2.0);
     	return imaginary() / sinThetaOnTwo;
     }
 
-    double UnitQuaternion::getAngle() {
+    double UnitQuaternion::getAngle() const {
     	return 2 * std::acos(real());
+    }
+
+    void UnitQuaternion::setAngle(double angle) {
+        real() = std::cos(angle / 2.0);
+        imaginary() = std::sin(angle / 2.0) * arma::normalise(imaginary());
+    }
+
+    void UnitQuaternion::normalise() {
+        *this = arma::normalise(*this);
     }
 
 	UnitQuaternion UnitQuaternion::operator * (const UnitQuaternion& p) const {
 		//From http://en.wikipedia.org/wiki/Quaternion#Quaternions_and_the_geometry_of_R3
-		UnitQuaternion qDotP;
-		qDotP[0] = arma::dot(imaginary(), p.imaginary());
+        double realPart = real() * p.real() - arma::dot(imaginary(), p.imaginary());
 
-		UnitQuaternion qsps;
-		qsps[0] = real() * p.real();
+        arma::vec3 imaginaryPart = arma::cross(imaginary(), p.imaginary())
+                                 + p.real() *   imaginary()
+                                 +   real() * p.imaginary();
 
-		UnitQuaternion qspv;
-		qspv.imaginary() = real() * p.imaginary();
-
-		UnitQuaternion qvps;
-		qvps.imaginary() = imaginary() * p.real();
-
-		UnitQuaternion qCrossP;
-		qCrossP.imaginary() = arma::cross(imaginary(), p.imaginary());
-
-		return qsps - qDotP + qspv + qvps + qCrossP;
+        return UnitQuaternion(realPart, imaginaryPart);
 	}
-
-    UnitQuaternion::operator Rotation3D() const {
-        return Rotation3D(*this);
-    }
 
 }
 }

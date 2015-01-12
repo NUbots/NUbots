@@ -30,6 +30,7 @@
 #include "messages/input/Sensors.h"
 
 #include "utility/math/matrix/Transform2D.h"
+#include "utility/math/matrix/Transform3D.h"
 
 
 namespace modules {
@@ -45,84 +46,133 @@ namespace motion {
     public:
         /**
          * The number of servo updates performnced per second
+         * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Trigger<Every>> arguments
          */
         static constexpr size_t UPDATE_FREQUENCY = 60;
 
         static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
         explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
     private:
+        using LimbID       = messages::behaviour::LimbID;
+        using ServoCommand = messages::behaviour::ServoCommand;
+        using Sensors      = messages::input::Sensors;
+        using ServoID      = messages::input::ServoID;
+        using Transform2D  = utility::math::matrix::Transform2D;
+        using Transform3D  = utility::math::matrix::Transform3D;
 
         enum State {
+            /**
+             * Walk engine has completely stopped and standing still
+             */
             STOPPED,
+
+            /**
+             * A stop request has been made but not received
+             */
             STOP_REQUEST,
+
+            /**
+             * Stop request has been made and now taking the last step before stopping
+             */
             LAST_STEP,
+
+            /**
+             * Walk engine is walking as normal
+             */
             WALKING
         };
 
-        State state;
-        bool interrupted;
-
-        ReactionHandle updateHandle;
-
         /// Subsumption ID key to access motors
         const size_t id;
-        arma::vec2 footOffset;
+        // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
+        ReactionHandle updateHandle;
 
-        // start_config_params
+        // start state
+
+        // The state of the current walk
+        State state;
+        // Whether subsumption has currently interrupted the walk engine
+        bool interrupted;
+        // TODO: ???
+        bool startFromStep;
+        // The time when the current step begun
+        double beginStepTime;
+        // How to many 'steps' to take before lifting a foot when starting to walk
+        int initialStep;
+        // Current torso position
+        Transform2D uTorso;
+        // Pre-step torso position
+        Transform2D uTorsoSource;
+        // Torso step target position
+        Transform2D uTorsoDestination;
+        // Current left foot position
+        Transform2D uLeftFoot;
+        // Pre-step left foot position
+        Transform2D uLeftFootSource;
+        // Left foot step target position
+        Transform2D uLeftFootDestination;
+        // Current right foot position
+        Transform2D uRightFoot;
+        // Pre-step right foot position
+        Transform2D uRightFootSource;
+        // Right foot step target position
+        Transform2D uRightFootDestination;
+        // TODO: ??? Appears to be support foot pre-step position
+        Transform2D uSupport;
+        // Current robot velocity
+        Transform2D velocityCurrent;
+        // Current velocity command
+        Transform2D velocityCommand;
+        // Difference between current velocity and commanded velocity
+        Transform2D velocityDifference;
+        // zmp expoential coefficients aXP aXN aYP aYN
+        arma::vec4 zmpCoefficients;
+        // zmp params m1X, m2X, m1Y, m2Y
+        arma::vec4 zmpParams;
+        // The leg that is 'swinging' in the step, opposite of the support foot
+        LimbID swingLeg;
+
+        // end state
+
+        // start config, see config file for documentation
+
         bool emitLocalisation;
-        // Walk Parameters
 
-        // These limit the distance a footstep will take
-        arma::mat::fixed<3,2> stepLimits;
         double stanceLimitY2;
-
-        // Velocity limits for the walk
+        arma::mat::fixed<3,2> stepLimits;
         arma::mat::fixed<3,2> velocityLimits;
         arma::vec3 accelerationLimits;
         arma::vec3 accelerationLimitsHigh;
         double velocityHigh;
-        // Factor to slow down walk when turning
         double accelerationTurningFactor;
-
-        // OP default stance width: 0.0375*2 = 0.075
-        // Heel overlap At radian 0.15 at each foot = 0.05*sin(0.15)*2=0.015
-        // Heel overlap At radian 0.30 at each foot = 0.05*sin(0.15)*2=0.030
-
-        // Stance parameters
-
-        // The body height of the robot, in meters; changing this will alter how high the robot's natural stance is.
         double bodyHeight;
-        // Torso Y rotation
         double bodyTilt;
-
-        // Servo gains during walk
         float gainArms;
         float gainLegs;
-
-        // Gait parameters
-        // The stepTime defines how long it will take for a robot to take its next step, in seconds.
         double stepTime;
         double zmpTime;
-        // The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
         double stepHeight;
-
         double phase1Single;
         double phase2Single;
+        arma::vec2 footOffset;
+        // standard offset
+        Transform2D uLRFootOffset;
+        // arm poses
+        arma::vec3 qLArm;
+        arma::vec3 qRArm;
+        LimbID swingLegInitial = LimbID::LEFT_LEG;
 
-        // Compensation parameters
-        // double hipRollCompensation;
-        // arma::vec2 ankleMod;
-
-        /*// Gyro stabilization parameters
-        arma::vec4 ankleImuParamX;
+        double balanceEnabled;
+        double balanceAmplitude;
+        double balanceWeight;
+        double balanceOffset;
+        /*arma::vec4 ankleImuParamX;
         arma::vec4 ankleImuParamY;
         arma::vec4 kneeImuParamX;
         arma::vec4 hipImuParamY;
         arma::vec4 armImuParamX;
         arma::vec4 armImuParamY;
-        double balanceWeight;
 
-        // Support bias parameters to reduce backlash-based instability
         double velFastForward;
         double velFastTurn;
         double supportFront;
@@ -135,94 +185,44 @@ namespace motion {
         // Initial body swing
         // double toeTipCompensation;
 
-        // end_config_params
+        // end config
 
-        // walk state
-        // TODO: initializaton needed here?
-        utility::math::matrix::Transform2D uTorso = arma::zeros(3);
-        utility::math::matrix::Transform2D uTorsoSource = arma::zeros(3);
-        utility::math::matrix::Transform2D uTorsoDestination = arma::zeros(3);
-        utility::math::matrix::Transform2D uLeftFoot = arma::zeros(3);
-        utility::math::matrix::Transform2D uLeftFootSource = arma::zeros(3);
-        utility::math::matrix::Transform2D uLeftFootDestination = arma::zeros(3);
-        utility::math::matrix::Transform2D uRightFoot = arma::zeros(3);
-        utility::math::matrix::Transform2D uRightFootSource = arma::zeros(3);
-        utility::math::matrix::Transform2D uRightFootDestination = arma::zeros(3);
-        utility::math::matrix::Transform2D uSupport;
-
-        // Current robot velocity
-        utility::math::matrix::Transform2D velocityCurrent;
-        // Current velocity command
-        utility::math::matrix::Transform2D velocityCommand;
-        // Difference between current velocity and commanded velocity
-        utility::math::matrix::Transform2D velocityDifference;
-
-        // zmp expoential coefficients aXP aXN aYP aYN
-        arma::vec4 zmpCoefficients = arma::zeros(4);
-        // zmp params m1X, m2X, m1Y, m2Y
-        arma::vec4 zmpParams = arma::zeros(4);
-
-        // gyro stabilization variables
-        arma::vec2 ankleShift;
-        arma::vec2 hipShift;
-        arma::vec2 armShift;
-        double kneeShift;
-
-        bool active;
-        bool started;
-        // walking/stepping transition variables
-        bool startFromStep;
-        double beginStepTime;
-        double phase;
-        double shiftFactor;
-
-        // How to begin initial step, unsure of affect
-        // TODO: Should be an enum?
-        int initialStep;
-        int currenstepTimeType;
-
-        // current arm pose
-        arma::vec3 qLArm;
-        arma::vec3 qRArm;
-
-        // standard offset
-        utility::math::matrix::Transform2D uLRFootOffset;
-
-        messages::behaviour::LimbID swingLegInitial = messages::behaviour::LimbID::LEFT_LEG;
-        messages::behaviour::LimbID swingLeg = swingLegInitial;
-
-        // double STAND_SCRIPT_DURATION;
+        // TODO: double STAND_SCRIPT_DURATION;
 
         //void generateAndSaveStandScript();
-        void configureWalk(const YAML::Node& config);
-
-        void update(const messages::input::Sensors& sensors);
-        void updateStep(const messages::input::Sensors& sensors);
-        void updateStill(const messages::input::Sensors& sensors = messages::input::Sensors());
-        std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionLegs(std::vector<std::pair<messages::input::ServoID, float>> joints);
-        std::unique_ptr<std::vector<messages::behaviour::ServoCommand>> motionArms();
-        void balance(std::vector<double>& qLegs, const messages::input::Sensors& sensors);
-        void localise(utility::math::matrix::Transform2D position);
+        void configure(const YAML::Node& config);
 
         void reset();
         void start();
-        void stop();
         void requestStop();
+        void stop();
+
+        void update(const Sensors& sensors);
+        void updateStep(double phase, const Sensors& sensors);
+        void updateStill(const Sensors& sensors = Sensors());
+        void balance(Transform3D& leftFootTarget, Transform3D& rightFootTarget, const Sensors& sensors);
+
         void calculateNewStep();
-        void stanceReset();
-        void setVelocity(utility::math::matrix::Transform2D velocity);
+        void setVelocity(Transform2D velocity);
         void updateVelocity();
-        utility::math::matrix::Transform2D getNewFootTarget(const utility::math::matrix::Transform2D& velocity, const utility::math::matrix::Transform2D& leftFoot, const utility::math::matrix::Transform2D& rightFoot, const messages::behaviour::LimbID& swingLeg);
+        void stanceReset();
+
+        void localise(Transform2D position);
+
+        std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints);
+        std::unique_ptr<std::vector<ServoCommand>> motionArms();
+
+        Transform2D getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg);
 
         /**
          * Get the next torso position
          */
-        utility::math::matrix::Transform2D stepTorso(utility::math::matrix::Transform2D uLeftFoot, utility::math::matrix::Transform2D uRightFoot, double shiftFactor);
+        Transform2D stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor);
 
         /**
          * @return The current velocity
          */
-        utility::math::matrix::Transform2D getVelocity();
+        Transform2D getVelocity();
 
         /**
          * Solve the ZMP equation
@@ -234,7 +234,7 @@ namespace motion {
          *
          * @return The torso position in Transform2D
          */
-        utility::math::matrix::Transform2D zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, utility::math::matrix::Transform2D uSupport, utility::math::matrix::Transform2D uLeftFootDestination, utility::math::matrix::Transform2D uLeftFootSource, utility::math::matrix::Transform2D uRightFootDestination, utility::math::matrix::Transform2D uRightFootSource);
+        Transform2D zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource);
 
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]

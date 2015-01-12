@@ -174,6 +174,7 @@ namespace modules {
                 printState(state);
                 return state;
             }
+
             void WalkOptimiser::printState(const arma::vec& state){
                 std::cerr << "[";
                 for(uint i = 0; i < parameter_names.size(); ++i){

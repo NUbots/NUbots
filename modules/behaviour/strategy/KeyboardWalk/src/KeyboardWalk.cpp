@@ -48,7 +48,8 @@ namespace strategy {
             moving = false;
         });
 
-        emit<Scope::INITIALIZE>(std::make_unique<WalkStartCommand>());
+        // emit<Scope::INITIALIZE>(std::make_unique<WalkStartCommand>());
+        // moving = true;
     }
 
     void KeyboardWalk::run() {

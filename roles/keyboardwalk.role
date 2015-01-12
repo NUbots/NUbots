@@ -3,7 +3,7 @@ ADD_ROLE(
     MODULES
 
         # Support and Configuration
-        support::SignalCatcher
+        #support::SignalCatcher
         support::configuration::ConfigSystem
         support::configuration::GlobalConfig
         support::configuration::SoccerConfig

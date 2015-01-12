@@ -24,12 +24,14 @@
 #include <armadillo>
 #include "messages/support/nubugger/proto/DataPoint.pb.h"
 #include "messages/support/nubugger/proto/DrawObjects.pb.h"
+#include "utility/math/matrix/Rotation3D.h"
 
 namespace utility {
 namespace nubugger {
     namespace {
 
         using messages::support::nubugger::proto::DataPoint;
+        using utility::math::matrix::Rotation3D;
 
         template<typename T>
         struct is_iterable {
@@ -69,8 +71,19 @@ namespace nubugger {
     inline std::unique_ptr<messages::support::nubugger::proto::DataPoint> graph(std::string label, Values... values) {
         auto dataPoint = std::make_unique<DataPoint>();
         dataPoint->set_label(label);
+        dataPoint->set_type(DataPoint::FLOAT_LIST);
         buildGraph(*dataPoint, values...);
-        return std::move(dataPoint);
+        return dataPoint;
+    }
+
+    inline std::unique_ptr<messages::support::nubugger::proto::DataPoint> graph(std::string label, Rotation3D rotation) {
+        auto dataPoint = std::make_unique<DataPoint>();
+        dataPoint->set_label(label);
+        dataPoint->set_type(DataPoint::ROTATION_3D);
+        for (const auto& value : rotation) {
+            dataPoint->add_value(value);
+        }
+        return dataPoint;
     }
 
     inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawArrow(std::string name, arma::vec position, arma::vec direction, float length) {

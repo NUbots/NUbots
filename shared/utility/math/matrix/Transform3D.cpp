@@ -25,18 +25,28 @@ namespace utility {
 namespace math {
 namespace matrix {
 
+    using geometry::UnitQuaternion;
+
     Transform3D::Transform() {
         eye(); // identity matrix by default
     }
 
-    Transform3D::Transform(arma::vec4 q) : Transform() {
+    Transform3D::Transform(const UnitQuaternion& q) : Transform() {
         // quaternion to rotation conversion
         // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/
         // http://en.wikipedia.org/wiki/Rotation_group_SO(3)#Quaternions_of_unit_norm
-        submat(0,0,2,2) = Rotation<3>(q);
+        submat(0,0,2,2) = Rotation3D(q);
     }
 
-    Transform3D::Transform(arma::vec6 in) : Transform(Transform3D().translate(in.rows(0,2)).rotateZ(in[5]).rotateY(in[4]).rotateX(in[3])) {
+    Transform3D::Transform(const Rotation3D& rotation) : Transform() {
+        submat(0,0,2,2) = rotation;
+    }
+
+    Transform3D::Transform(const Transform2D& transform) : Transform(Transform3D().translate({transform.x(), transform.y(), 0}).rotateZ(transform.angle())) {
+
+    }
+
+    Transform3D::Transform(const arma::vec6& in) : Transform(Transform3D().translate(in.rows(0,2)).rotateZ(in[5]).rotateY(in[4]).rotateX(in[3])) {
 
     }
 

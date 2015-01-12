@@ -20,6 +20,7 @@
 #include "DisplayTest.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "messages/input/proto/MotionCapture.pb.h"
+#include "messages/input/Sensors.h"
 
 using utility::nubugger::graph;
 
@@ -27,6 +28,7 @@ namespace modules {
 namespace support {
 
     using messages::input::proto::MotionCapture;
+    using messages::input::Sensors;
 
     DisplayTest::DisplayTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -41,6 +43,10 @@ namespace support {
         on<Trigger<Network<MotionCapture>>>([this](const Network<MotionCapture>& net) {
 //            auto mocap = net.data;
             NUClear::log("I got things from", net.sender);
+        });
+
+        on<Trigger<Sensors>, Options<Single, Priority<NUClear::HIGH>>>([this](const Sensors& sensors) {
+            emit(graph("orientation", sensors.orientation));
         });
     }
 }

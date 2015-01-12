@@ -22,7 +22,9 @@
 
 #include <armadillo>
 
+#include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/geometry/UnitQuaternion.h"
 
 namespace utility {
 namespace math {
@@ -57,12 +59,22 @@ namespace matrix {
             /**
              * @brief Convert from a quaternions vec4
              */
-            Transform(arma::vec4 q);
+            Transform(const geometry::UnitQuaternion& q);
+
+            /**
+             * @brief Convert from a Transform2D matrix
+             */
+            Transform(const Transform2D& transform);
+
+            /**
+             * @brief Convert from a Rotation3D matrix
+             */
+            Transform(const Rotation3D& rotation);
 
             /**
              * @brief Convert from a vec6 representing [position_x, position_y, position_z, rotation_x, rotation_y, rotation_z]
              */
-            Transform(arma::vec6 in);
+            Transform(const arma::vec6& in);
 
             /**
              * @brief Translate the current basis by the given 3D vector
@@ -155,6 +167,10 @@ namespace matrix {
              * @return The 3x3 rotation matrix
              */
             Rotation3D rotation() const;
+
+            arma::vec3 eulerAngles() const {
+                return rotation().eulerAngles();
+            }
 
             /**
              * @brief Creates a translation transform by the given 3D vector

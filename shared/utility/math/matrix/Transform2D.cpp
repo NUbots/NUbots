@@ -27,7 +27,6 @@ namespace utility {
 namespace math {
 namespace matrix {
 
-    using matrix::Transform3D;
     using utility::math::angle::normalizeAngle;
 
     Transform2D::Transform() {
@@ -59,12 +58,8 @@ namespace matrix {
 
     Transform2D Transform2D::interpolate(double t, const Transform2D& target) const {
         Transform2D result = *this + t * (target - *this);
-        result[2] = normalizeAngle(result.angle());
+        result.angle() = normalizeAngle(result.angle());
         return result;
-    }
-
-    Transform2D::operator Transform3D() const {
-        return Transform3D().translate({x(), y(), 0}).rotateZ(angle());
     }
 
 }

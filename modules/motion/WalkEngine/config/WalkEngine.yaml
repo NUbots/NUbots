@@ -57,7 +57,10 @@ walk_cycle:
     end: 0.9
   # TODO: balance params disabled until they are futher understood
   balance:
-    # balanceWeight: 0.7
+    enabled: true
+    amplitude: 1.0
+    weight: 0.7
+    offset: 0 * pi / 180
     # Support bias parameters to reduce backlash-based instability
     # velFastForward: 0.05
     # velFastTurn: 0.15

@@ -26,58 +26,67 @@
 
 namespace utility {
 namespace math {
+namespace matrix {
+    template <int Dimensions>
+    class Rotation;
+    using Rotation3D = Rotation<3>;
+}
 namespace geometry {
 
     class UnitQuaternion : public arma::vec4 {
-    private:
-        UnitQuaternion();
-
-        /* @brief Constructor for non-unit quaternion for purpose of point representation
-        */
-        UnitQuaternion(const arma::vec3& v);
-
-    public:
         using arma::vec4::vec4; // inherit constructors
 
-        UnitQuaternion operator * (const UnitQuaternion& p) const;
+        private:
 
-        /*! @brief Creates quaternion which rotates about 3D axis by angle radians
-        */
-        UnitQuaternion(const double& angle, const arma::vec3& axis);
+            /* @brief Constructor for non-unit quaternion for purpose of point representation
+            */
+            UnitQuaternion(const arma::vec3& v);
 
-        /*! @brief Gets the inverse of the quaternion
-        */
-        UnitQuaternion i();
+        public:
+            UnitQuaternion();
 
-        arma::vec3 rotateVector(const arma::vec3& v);
+            UnitQuaternion(const matrix::Rotation3D& rotation);
 
-        arma::vec3 getAxis();
+            UnitQuaternion operator * (const UnitQuaternion& p) const;
 
-        double getAngle();
+            UnitQuaternion(double realPart, const arma::vec3& imaginaryPart);
 
-        // real part
-        inline double kW() const { return at(0); };
-        inline double& kW() { return at(0); };
+            /*! @brief Creates quaternion which rotates about 3D axis by angle radians
+            */
+            UnitQuaternion(const arma::vec3& axis, double angle);
 
-        inline double kX() const { return at(1); };
-        inline double& kX() { return at(1); };
+            /*! @brief Gets the inverse of the quaternion
+            */
+            UnitQuaternion i() const;
 
-        inline double kY() const { return at(2); };
-        inline double& kY() { return at(2); };
+            arma::vec3 rotateVector(const arma::vec3& v) const;
 
-        inline double kZ() const { return at(3); };
-        inline double& kZ() { return at(3); };
+            arma::vec3 getAxis() const;
 
-        inline double real() const { return at(0); };
-        inline double& real() { return at(0); };
+            double getAngle() const;
 
-        inline const arma::subview_col<double> imaginary() const { return rows(1,3); }
-        inline arma::subview_col<double> imaginary() { return rows(1,3); }
+            void setAngle(double angle);
 
-        /*! @brief Returns the matrix which performs the same rotation as the rotateVector method.
-        When representing a basis, this transform maps points written in basis coords to points in world coords (i.e x,y,z) : B -> W
-        */
-        operator matrix::Rotation3D() const;
+            void normalise();
+
+            // real part
+            inline double kW() const { return at(0); };
+            inline double& kW() { return at(0); };
+
+            inline double kX() const { return at(1); };
+            inline double& kX() { return at(1); };
+
+            inline double kY() const { return at(2); };
+            inline double& kY() { return at(2); };
+
+            inline double kZ() const { return at(3); };
+            inline double& kZ() { return at(3); };
+
+            inline double real() const { return at(0); };
+            inline double& real() { return at(0); };
+
+            inline const arma::subview_col<double> imaginary() const { return rows(1,3); }
+            inline arma::subview_col<double> imaginary() { return rows(1,3); }
 
     };
 
