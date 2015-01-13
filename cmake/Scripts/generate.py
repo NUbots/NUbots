@@ -45,7 +45,49 @@ with open(role_name, 'w') as file:
 
     # Add our main function.
     main = """
+#include "utility/strutil/ansi.h"
+
 int main(int argc, char** argv) {
+
+    auto white = utility::strutil::ANSISGR<
+                   utility::strutil::ANSICode::BRIGHT,
+                   utility::strutil::ANSICode::GRAY,
+                   utility::strutil::ANSICode::BLACK_BACKGROUND>();
+    auto yellow = utility::strutil::ANSISGR<
+                    utility::strutil::ANSICode::BRIGHT,
+                    utility::strutil::ANSICode::YELLOW,
+                    utility::strutil::ANSICode::BLACK_BACKGROUND>();
+
+    std::cout << std::endl << std::endl;
+    std::cout << white << "######                    ######  ######           ######  " << yellow << "####################" << std::endl;
+    std::cout << white << "#######                   ######  ######           ######  " << yellow << "####################" << std::endl;
+    std::cout << white << "########                  ######  ######           ######  " << yellow << "###     ####     ###" << std::endl;
+    std::cout << white << "#########                 ######  ######           ######  " << yellow << "###     ####     ###" << std::endl;
+    std::cout << white << "##########                ######  ######           ######  " << yellow << " ########  ######## " << std::endl;
+    std::cout << white << "###########               ######  ######           ######  " << yellow << "  ######    ######  " << std::endl;
+    std::cout << white << "############              ######  ######           ######  " << yellow << "                    " << std::endl;
+    std::cout << white << "###### ######             ######  ######           ######  " << yellow << "  ################  " << std::endl;
+    std::cout << white << "######  ######            ######  ######           ######  " << yellow << " ################## " << std::endl;
+    std::cout << white << "######   ######           ######  ######           ######  " << yellow << "###              ###" << std::endl;
+    std::cout << white << "######    ######          ######  ######           ######  " << yellow << "###              ###" << std::endl;
+    std::cout << white << "######     ######         ######  ######           ######  " << yellow << " ################## " << std::endl;
+    std::cout << white << "######      ######        ######  ######           ######  " << yellow << "  ################  " << std::endl;
+    std::cout << white << "######       ######       ######  ######           ######  " << yellow << "                    " << std::endl;
+    std::cout << white << "######        ######      ######  ######           ######  " << yellow << "                 ###" << std::endl;
+    std::cout << white << "######         ######     ######  ######           ######  " << yellow << "                 ###" << std::endl;
+    std::cout << white << "######          ######    ######  ######           ######  " << yellow << "####################" << std::endl;
+    std::cout << white << "######           ######   ######  ######           ######  " << yellow << "####################" << std::endl;
+    std::cout << white << "######            ######  ######  ######           ######  " << yellow << "                 ###" << std::endl;
+    std::cout << white << "######             ###### ######  ######           ######  " << yellow << "                 ###" << std::endl;
+    std::cout << white << "######              ############  ######           ######  " << yellow << "                    " << std::endl;
+    std::cout << white << "######               ###########  ######           ######  " << yellow << "  ###      #######  " << std::endl;
+    std::cout << white << "######                ##########  ######           ######  " << yellow << " ###      ######### " << std::endl;
+    std::cout << white << "######                 #########  ######           ######  " << yellow << "###      ###     ###" << std::endl;
+    std::cout << white << "######                  ########   #####################   " << yellow << "###     ###      ###" << std::endl;
+    std::cout << white << "######                   #######     #################     " << yellow << " #########      ### " << std::endl;
+    std::cout << white << "######                    ######       #############       " << yellow << "  #######      ###  " << std::endl;
+    std::cout << std::endl << std::endl;
+
     NUClear::PowerPlant::Configuration config;
     config.threadCount = 8;
 
