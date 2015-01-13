@@ -82,12 +82,20 @@ namespace geometry {
         imaginary() = std::sin(angle / 2.0) * arma::normalise(imaginary());
     }
 
+    void UnitQuaternion::scaleAngle(double scale) {
+        setAngle(getAngle() * scale);
+    }
+
     void UnitQuaternion::normalise() {
         *this = arma::normalise(*this);
     }
 
     double UnitQuaternion::norm() {
         return kW() * kW() + kX() * kX() + kY() * kY() + kZ() * kZ();
+    }
+
+    UnitQuaternion UnitQuaternion::operator - (const UnitQuaternion& p) const {
+        return *this * p.i();
     }
 
 	UnitQuaternion UnitQuaternion::operator * (const UnitQuaternion& p) const {

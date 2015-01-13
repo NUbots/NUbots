@@ -28,6 +28,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/Action.h"
 #include "messages/input/Sensors.h"
+#include "utility/math/geometry/UnitQuaternion.h"
 
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
@@ -53,12 +54,13 @@ namespace motion {
         static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
         explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
     private:
-        using LimbID       = messages::behaviour::LimbID;
-        using ServoCommand = messages::behaviour::ServoCommand;
-        using Sensors      = messages::input::Sensors;
-        using ServoID      = messages::input::ServoID;
-        using Transform2D  = utility::math::matrix::Transform2D;
-        using Transform3D  = utility::math::matrix::Transform3D;
+        using LimbID         = messages::behaviour::LimbID;
+        using ServoCommand   = messages::behaviour::ServoCommand;
+        using Sensors        = messages::input::Sensors;
+        using ServoID        = messages::input::ServoID;
+        using Transform2D    = utility::math::matrix::Transform2D;
+        using Transform3D    = utility::math::matrix::Transform3D;
+        using UnitQuaternion = utility::math::geometry::UnitQuaternion;
 
         enum State {
             /**
@@ -131,6 +133,8 @@ namespace motion {
         arma::vec4 zmpParams;
         // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID swingLeg;
+        // The last foot goal rotation
+        UnitQuaternion lastFootGoalRotation;
 
         // end state
 

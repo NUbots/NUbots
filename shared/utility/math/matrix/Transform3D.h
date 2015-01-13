@@ -76,6 +76,8 @@ namespace matrix {
              */
             Transform(const arma::vec6& in);
 
+            Transform(const arma::vec3& in);
+
             /**
              * @brief Translate the current basis by the given 3D vector
              *
@@ -138,6 +140,7 @@ namespace matrix {
              */
             Transform3D rotateZ(double radians) const;
 
+            Transform3D rotateLocal(const Rotation3D& rotation, const Transform3D& local) const;
             Transform3D rotateXLocal(double radians, const Transform3D& local) const;
             Transform3D rotateYLocal(double radians, const Transform3D& local) const;
             Transform3D rotateZLocal(double radians, const Transform3D& local) const;

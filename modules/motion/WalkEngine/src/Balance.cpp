@@ -20,7 +20,6 @@
 #include "WalkEngine.h"
 
 #include "utility/math/matrix/Rotation3D.h"
-#include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/motion/RobotModels.h"
 #include "utility/nubugger/NUhelpers.h"
 
@@ -58,19 +57,45 @@ namespace motion {
         Rotation3D leftFootWorld = leftAnkle.rotation();
         Rotation3D rightFootWorld = rightAnkle.rotation();
 
-
         UnitQuaternion goalQuaternion(goalOrientation);
         UnitQuaternion leftFootQuaternion(leftFootWorld);
         UnitQuaternion rightFootQuaternion(rightFootWorld);
 
-        leftFootTarget.rotation() = Rotation3D(leftFootQuaternion.slerp(goalQuaternion, balancePGain));
-        rightFootTarget.rotation() = Rotation3D(rightFootQuaternion.slerp(goalQuaternion, balancePGain));
+        UnitQuaternion diff = goalQuaternion - lastFootGoalRotation;
+
+        emit(graph("dRot", Rotation3D(diff)));
+
+        UnitQuaternion leftRotation = leftFootQuaternion.slerp(goalQuaternion, balancePGain) * leftFootQuaternion.slerp(diff, balanceDGain).i();
+        UnitQuaternion rightRotation = rightFootQuaternion.slerp(goalQuaternion, balancePGain) * leftFootQuaternion.slerp(diff, balanceDGain).i();
+        leftRotation.scaleAngle(0.5);
+        rightRotation.scaleAngle(0.5);
+
+
+        leftFootTarget.rotation() = Rotation3D(leftRotation);
+        rightFootTarget.rotation() = Rotation3D(rightRotation);
+
+        Transform3D leftHip = Transform3D(arma::vec3({
+            DarwinModel::Leg::HIP_OFFSET_X,
+            DarwinModel::Leg::HIP_OFFSET_Y,
+            -DarwinModel::Leg::HIP_OFFSET_Z
+        }));
+
+        Transform3D rightHip = Transform3D(arma::vec3({
+            DarwinModel::Leg::HIP_OFFSET_X,
+            -DarwinModel::Leg::HIP_OFFSET_Y,
+            -DarwinModel::Leg::HIP_OFFSET_Z
+        }));
+
+        leftFootTarget = leftFootTarget.rotateLocal(Rotation3D(leftRotation), leftHip);
+        rightFootTarget = rightFootTarget.rotateLocal(Rotation3D(rightRotation), rightHip);
 
         // leftFootTarget.rotation() = Rotation3D(goalQuaternion);
         // rightFootTarget.rotation() = Rotation3D(goalQuaternion);
         // emit(graph("leftFootTargetRotation", leftFootTarget.rotation()));
-        emit(graph("leftFootTargetRotation", Rotation3D(goalQuaternion)));
+        // emit(graph("leftFootTargetRotation", Rotation3D(goalQuaternion)));
         emit(graph("quat", goalQuaternion));
+
+        lastFootGoalRotation = goalQuaternion;
 
         /*arma::vec3 leftAnkleTranslation = leftAnkle.translation();
         leftAnkleTranslation[2] -= DarwinModel::TEAMDARWINCHEST_TO_ORIGIN;

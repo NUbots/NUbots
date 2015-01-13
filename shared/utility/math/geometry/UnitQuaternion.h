@@ -47,6 +47,8 @@ namespace geometry {
 
             UnitQuaternion(const matrix::Rotation3D& rotation);
 
+            UnitQuaternion operator - (const UnitQuaternion& p) const;
+
             UnitQuaternion operator * (const UnitQuaternion& p) const;
 
             UnitQuaternion(double realPart, const arma::vec3& imaginaryPart);
@@ -66,6 +68,8 @@ namespace geometry {
             double getAngle() const;
 
             void setAngle(double angle);
+
+            void scaleAngle(double scale);
 
             void normalise();
 

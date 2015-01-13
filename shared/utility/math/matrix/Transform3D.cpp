@@ -47,6 +47,10 @@ namespace matrix {
 
     }
 
+    Transform3D::Transform(const arma::vec3& in) : Transform(Transform3D().translate(in)) {
+
+    }
+
     Transform3D Transform3D::translate(const arma::vec3& translation) const {
         return *this * createTranslation(translation);
     }
@@ -73,6 +77,10 @@ namespace matrix {
 
     Transform3D Transform3D::rotateZ(double radians) const {
         return *this * createRotationZ(radians);
+    }
+
+    Transform3D Transform3D::rotateLocal(const Rotation3D& rotation, const Transform3D& local) const {
+        return Transform3D(Transform3D(rotation) * worldToLocal(local)).localToWorld(local);
     }
 
     Transform3D Transform3D::rotateXLocal(double radians, const Transform3D& local) const {
