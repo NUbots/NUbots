@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_STRUTIL_H
-#define UTILITY_STRUTIL_H
+#ifndef UTILITY_STRUTIL_ANSI_H
+#define UTILITY_STRUTIL_ANSI_H
 
 #include <string>
 #include <algorithm>
