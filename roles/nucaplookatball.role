@@ -1,45 +1,43 @@
 ADD_ROLE(
-    NAME nucaplookatball
-    MODULES
-        # Support and Configuration
-        #support::SignalCatcher
-        support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem
-        support::configuration::GlobalConfig
-        support::configuration::NetworkingConfiguration
-        support::NUbugger
-        support::configuration::SoccerConfig
+    # Support and Configuration
+    #support::SignalCatcher
+    support::logging::ConsoleLogHandler
+    support::configuration::ConfigSystem
+    support::configuration::GlobalConfig
+    support::configuration::NetworkingConfiguration
+    support::NUbugger
+    support::configuration::SoccerConfig
 
-        # Hardware Interface
-        platform::darwin::HardwareIO
-        #platform::fakedarwin::HardwareIO
-        platform::darwin::SensorFilter
-        input::LinuxCamera
+    # Hardware Interface
+    platform::darwin::HardwareIO
+    #platform::fakedarwin::HardwareIO
+    platform::darwin::SensorFilter
+    input::LinuxCamera
 
-        # Vision
-        vision::LUTClassifier
-        vision::GoalDetector
-        vision::BallDetector
-        vision::ObstacleDetector
+    # Vision
+    vision::LUTClassifier
+    vision::GoalDetector
+    vision::BallDetector
+    vision::ObstacleDetector
 
-        # Motion
-        motion::WalkEngine
-        motion::ScriptEngine
+    # Motion
+    motion::WalkEngine
+    motion::ScriptEngine
 
-        # Behaviour
-        behaviour::Controller
-        behaviour::skills::Stand
-        behaviour::skills::FallingRelax
-        behaviour::skills::Getup
-        behaviour::skills::KickScript
-        behaviour::strategy::PS3Walk
+    # Behaviour
+    behaviour::Controller
+    behaviour::skills::Stand
+    behaviour::skills::FallingRelax
+    behaviour::skills::Getup
+    behaviour::skills::KickScript
+    behaviour::strategy::PS3Walk
 
-        # Lookat ball
-        behaviour::skills::LookAt
+    # Lookat ball
+    behaviour::skills::LookAt
 
-        # Localisation
-        localisation::NUcapLocalisation
+    # Localisation
+    localisation::NUcapLocalisation
 
-        # Debug
-        debug::NUcap
+    # Debug
+    debug::NUcap
 )

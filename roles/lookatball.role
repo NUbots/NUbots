@@ -1,38 +1,36 @@
 ADD_ROLE(
-    NAME lookatball
-    MODULES
-        #Support
-        support::SignalCatcher
-        support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem
-        support::configuration::GlobalConfig
-        support::configuration::SoccerConfig
-        support::NUbugger
+    #Support
+    support::SignalCatcher
+    support::logging::ConsoleLogHandler
+    support::configuration::ConfigSystem
+    support::configuration::GlobalConfig
+    support::configuration::SoccerConfig
+    support::NUbugger
 
-        #Sensors
-        input::LinuxCamera
-        platform::darwin::HardwareIO
-        platform::darwin::SensorFilter
+    #Sensors
+    input::LinuxCamera
+    platform::darwin::HardwareIO
+    platform::darwin::SensorFilter
 
-        #Vision
-        vision::LUTClassifier
-        vision::BallDetector
-        vision::GoalDetector
-        vision::ObstacleDetector
+    #Vision
+    vision::LUTClassifier
+    vision::BallDetector
+    vision::GoalDetector
+    vision::ObstacleDetector
 
-        #Localisation
-        localisation::MMKFRobotLocalisation
-        #localisation::KFBallLocalisation
+    #Localisation
+    localisation::MMKFRobotLocalisation
+    #localisation::KFBallLocalisation
 
-        #Behaviour
-        behaviour::Controller
-        behaviour::skills::Stand
-        behaviour::skills::FallingRelax
-        behaviour::skills::Getup
-        #behaviour::skills::LookAt
-        behaviour::skills::Look
-        behaviour::planning::LookAtBall
+    #Behaviour
+    behaviour::Controller
+    behaviour::skills::Stand
+    behaviour::skills::FallingRelax
+    behaviour::skills::Getup
+    #behaviour::skills::LookAt
+    behaviour::skills::Look
+    behaviour::planning::LookAtBall
 
-        #Motion
-        motion::ScriptEngine
+    #Motion
+    motion::ScriptEngine
 )

@@ -1,13 +1,10 @@
 ADD_ROLE(
-    NAME nubuggertest
-    MODULES
-        support::SignalCatcher
-        support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem
-        support::configuration::GlobalConfig
-        support::configuration::SoccerConfig
-        support::NUbugger
-        #support::NUbuggerLite
-        debug::NUbugger
+    support::SignalCatcher
+    support::logging::ConsoleLogHandler
+    support::configuration::ConfigSystem
+    support::configuration::GlobalConfig
+    support::configuration::SoccerConfig
+    support::NUbugger
+    #support::NUbuggerLite
+    debug::NUbugger
 )
-

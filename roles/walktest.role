@@ -1,24 +1,21 @@
 ADD_ROLE(
-    NAME walktest
-    MODULES
+    # Support and Configuration
+    #support::SignalCatcher
+    support::logging::ConsoleLogHandler
+    support::configuration::ConfigSystem
+    #support::configuration::GlobalConfig
+    #support::configuration::SoccerConfig
+    support::NUbugger
+    #support::GrimReaper
 
-        # Support and Configuration
-        #support::SignalCatcher
-        support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem
-        #support::configuration::GlobalConfig
-        #support::configuration::SoccerConfig
-        support::NUbugger
-        #support::GrimReaper
+    # Hardware Interface
+    platform::darwin::HardwareIO
+    platform::darwin::SensorFilter
 
-        # Hardware Interface
-        platform::darwin::HardwareIO
-        platform::darwin::SensorFilter
+    # Motion
+    motion::WalkEngine
 
-        # Motion
-        motion::WalkEngine
-
-        # Behaviour
-        behaviour::Controller
-        behaviour::strategy::WalkTest
+    # Behaviour
+    behaviour::Controller
+    behaviour::strategy::WalkTest
 )

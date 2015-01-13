@@ -1,13 +1,11 @@
 ADD_ROLE(
-    NAME cameratest
-    MODULES
-        support::SignalCatcher
-        support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem
-        support::configuration::GlobalConfig
-        #platform::darwin::HardwareIO
-        input::LinuxCamera
-        support::NUbugger
+    support::SignalCatcher
+    support::logging::ConsoleLogHandler
+    support::configuration::ConfigSystem
+    support::configuration::GlobalConfig
+    #platform::darwin::HardwareIO
+    input::LinuxCamera
+    support::NUbugger
 
-        support::configuration::SoccerConfig
+    support::configuration::SoccerConfig
 )
