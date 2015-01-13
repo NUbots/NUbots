@@ -21,6 +21,7 @@
 
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
+#include "utility/motion/RobotModels.h"
 #include "utility/nubugger/NUhelpers.h"
 
 namespace modules {
@@ -34,28 +35,67 @@ namespace motion {
     using utility::math::matrix::AxisAngle;
     using utility::math::geometry::UnitQuaternion;
     using utility::nubugger::graph;
+    using utility::motion::kinematics::DarwinModel;
 
     void WalkEngine::balance(Transform3D& leftFootTarget, Transform3D& rightFootTarget, const Sensors& sensors) {
-        // Get current orientation, offset by body tilt
-        /*Rotation3D tiltedOrientation = sensors.orientation.i().rotateY(-bodyTilt);
+        // Negative if right leg to account for the mirroring of the foot target
+        int8_t sign = swingLeg == LimbID::LEFT_LEG ? 1 : -1;
+
+        // Get current orientation, offset by body tilt. Maps world to robot space.
+        Rotation3D tiltedOrientation = sensors.orientation.i().rotateY(-bodyTilt);
         // Removes any yaw component
-        Rotation3D yawlessOrientation = Rotation3D::createRotationZ(-tiltedOrientation.yaw()) * tiltedOrientation;
+        Rotation3D goalOrientation = Rotation3D::createRotationZ(-tiltedOrientation.yaw()) * tiltedOrientation;
+        // Maps robot to world space.
+        Rotation3D yawlessOrientation = goalOrientation.i();
 
-        footOrientation =  p * (footOrientation - yawlessOrientation);
+        // ServoID supportLegID = (swingLeg == LimbID::RIGHT_LEG) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
+        // Rotation3D ankleRotation = sensors.forwardKinematics.find(supportLegID)->second.rotation();
 
-        UnitQuaternion offsetQ(footOrientation);
+        // footOrientation =  p * (footOrientation - yawlessOrientation);
+        Transform3D leftAnkle = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
+        Transform3D rightAnkle = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
 
-        double angle = offsetQ.getAngle();
-        angle *= balanceAmplitude * std::abs(std::tanh(balanceWeight * angle) * std::tanh(2 * balanceWeight * angle));
-        offsetQ.setAngle(angle);
-        offsetQ.normalise();
+        Rotation3D leftFootWorld = leftAnkle.rotation();
+        Rotation3D rightFootWorld = rightAnkle.rotation();
 
-        Transform3D offsetT = offsetQ;
 
-        leftFootTarget *= offsetT;
-        rightFootTarget *= offsetT;
+        UnitQuaternion goalQuaternion(goalOrientation);
+        UnitQuaternion leftFootQuaternion(leftFootWorld);
+        UnitQuaternion rightFootQuaternion(rightFootWorld);
 
-        emit(graph("offset", Rotation3D(offsetQ)));*/
+        leftFootTarget.rotation() = Rotation3D(leftFootQuaternion.slerp(goalQuaternion, balancePGain));
+        rightFootTarget.rotation() = Rotation3D(rightFootQuaternion.slerp(goalQuaternion, balancePGain));
+
+        // leftFootTarget.rotation() = Rotation3D(goalQuaternion);
+        // rightFootTarget.rotation() = Rotation3D(goalQuaternion);
+        // emit(graph("leftFootTargetRotation", leftFootTarget.rotation()));
+        emit(graph("leftFootTargetRotation", Rotation3D(goalQuaternion)));
+        emit(graph("quat", goalQuaternion));
+
+        /*arma::vec3 leftAnkleTranslation = leftAnkle.translation();
+        leftAnkleTranslation[2] -= DarwinModel::TEAMDARWINCHEST_TO_ORIGIN;
+        leftFootTarget.translation() = leftAnkleTranslation;
+        // emit(graph("leftFoot", leftFootTarget.rotation()));
+        // leftFootTarget(2,3) -= DarwinModel::TEAMDARWINCHEST_TO_ORIGIN;
+        arma::vec3 rightAnkleTranslation = leftAnkle.translation();
+        rightAnkleTranslation[2] -= DarwinModel::TEAMDARWINCHEST_TO_ORIGIN;
+        rightFootTarget.translation() = rightAnkleTranslation;*/
+
+        // rightFootTarget.translation() = leftAnkle.translation();
+        // rightFootTarget(2,3) -= DarwinModel::TEAMDARWINCHEST_TO_ORIGIN;
+
+
+        // offsetQ.normalise(
+
+        // double phaseSingle = std::min(std::max(phase - phase1Single, 0.0) / (phase2Single - phase1Single), 1.0);
+        // double phaseComp = std::min({1.0, phaseSingle / 0.1, (1 - phaseSingle) / 0.1});
+
+        // Transform3D offsetT = yawlessOrientation;// offsetQ;
+
+        // leftFootTarget *= offsetT;
+        // rightFootTarget *= offsetT;
+
+        // emit(graph("offset", Rotation3D(offsetQ)));
 
         // double phaseComp = std::min({1.0, phaseSingle / 0.1, (1 - phaseSingle) / 0.1});
 
@@ -76,7 +116,7 @@ namespace motion {
         double gyroPitch = -gyro[1] * 180.0 / M_PI;
 
         emit(graph("roll", gyroRoll));
-        emit(graph("pitch", gyroPitch));*/
+        emit(graph("pitch", gyroPitch));
 
         /*double yawAngle = 0;
         if (!active) {

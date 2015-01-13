@@ -161,6 +161,7 @@ namespace motion {
         auto& walkCycle = config["walk_cycle"];
         stepTime = walkCycle["step_time"].as<Expression>();
         zmpTime = walkCycle["zmp_time"].as<Expression>();
+        hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
         stepHeight = walkCycle["step"]["height"].as<Expression>();
         stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
 
@@ -182,9 +183,11 @@ namespace motion {
         balanceWeight = balance["weight"].as<Expression>();
         balanceOffset = balance["offset"].as<Expression>();
 
+        balancePGain = balance["gain"]["p"].as<Expression>();
+        balanceDGain = balance["gain"]["d"].as<Expression>();
+
         /* TODO
         // gCompensation parameters
-        hipRollCompensation = config["hipRollCompensation"].as<Expression>();
         toeTipCompensation = config["toeTipCompensation"].as<Expression>();
         ankleMod = {-toeTipCompensation, 0};
 
@@ -364,6 +367,16 @@ namespace motion {
         // Transform feet targets to be relative to the torso
         Transform3D leftFootTorso = leftFoot.worldToLocal(torso);
         Transform3D rightFootTorso = rightFoot.worldToLocal(torso);
+
+
+        double phaseComp = std::min({1.0, foot[1] / 0.1, (1 - foot[1]) / 0.1});
+        // Rotate foot around hip by the given hip roll compensation
+        if (swingLeg == LimbID::RIGHT_LEG) {
+            rightFootTorso = rightFootTorso.rotateZLocal(-hipRollCompensation * phaseComp, sensors.forwardKinematics.find(ServoID::R_HIP_ROLL)->second);
+        }
+        else {
+            leftFootTorso = leftFootTorso.rotateZLocal(hipRollCompensation * phaseComp, sensors.forwardKinematics.find(ServoID::L_HIP_ROLL)->second);
+        }
 
         if (emitLocalisation) {
             localise(uTorsoActual);

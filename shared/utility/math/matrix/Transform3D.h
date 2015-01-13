@@ -138,6 +138,10 @@ namespace matrix {
              */
             Transform3D rotateZ(double radians) const;
 
+            Transform3D rotateXLocal(double radians, const Transform3D& local) const;
+            Transform3D rotateYLocal(double radians, const Transform3D& local) const;
+            Transform3D rotateZLocal(double radians, const Transform3D& local) const;
+
             /**
              * @brief Transforms current basis from world coordinates (i.e. standard basis) to be local to 'reference'
              *
@@ -166,7 +170,11 @@ namespace matrix {
             /**
              * @return The 3x3 rotation matrix
              */
-            Rotation3D rotation() const;
+            inline const Rotation3D rotation() const { return submat(0,0,2,2); }
+            inline arma::subview<double> rotation() { return submat(0,0,2,2); }
+
+            inline const arma::vec3 translation() const { return submat(0,3,2,3); }
+            inline arma::vec3 translation() { return submat(0,3,2,3); }
 
             arma::vec3 eulerAngles() const {
                 return rotation().eulerAngles();

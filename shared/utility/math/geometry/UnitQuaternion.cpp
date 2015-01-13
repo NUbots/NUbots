@@ -86,6 +86,10 @@ namespace geometry {
         *this = arma::normalise(*this);
     }
 
+    double UnitQuaternion::norm() {
+        return kW() * kW() + kX() * kX() + kY() * kY() + kZ() * kZ();
+    }
+
 	UnitQuaternion UnitQuaternion::operator * (const UnitQuaternion& p) const {
 		//From http://en.wikipedia.org/wiki/Quaternion#Quaternions_and_the_geometry_of_R3
         double realPart = real() * p.real() - arma::dot(imaginary(), p.imaginary());
@@ -96,6 +100,33 @@ namespace geometry {
 
         return UnitQuaternion(realPart, imaginaryPart);
 	}
+
+    UnitQuaternion UnitQuaternion::slerp(const UnitQuaternion& p, const double& t) {
+        // See http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/slerp/
+        // Where qa = *this and qb = p
+
+        double cosHalfTheta = kW() * p.kW() + kX() * p.kX() + kY() * p.kY() + kZ() * p.kZ();
+
+        // If qa=qb or qa=-qb then theta = 0 and we can return qa
+        if (std::abs(cosHalfTheta) >= 1.0) {
+            return *this;
+        }
+
+        double halfTheta = std::acos(cosHalfTheta);
+        double sinHalfTheta = sqrt(1.0 - cosHalfTheta * cosHalfTheta);
+
+        // If theta = 180 degrees then result is not fully defined
+        // We could rotate around any axis normal to qa or qb
+        if (std::abs(sinHalfTheta) < 0.001) {
+            return *this * 0.5 + p * 0.5;
+        }
+
+        // Interpolate
+        double ratioA = std::sin((1 - t) * halfTheta) / sinHalfTheta;
+        double ratioB = std::sin(t * halfTheta) / sinHalfTheta;
+
+        return *this * ratioA + p * ratioB;
+    }
 
 }
 }

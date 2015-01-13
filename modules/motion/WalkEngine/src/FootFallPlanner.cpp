@@ -169,7 +169,7 @@ namespace motion {
         double xf = 0.5 * (1 - std::cos(M_PI * phaseSingleSkew));
         double zf = 0.5 * (1 - std::cos(2 * M_PI * phaseSingleSkew));
 
-        return {xf, 0, zf};
+        return {xf, phaseSingle, zf};
     }
 
 }

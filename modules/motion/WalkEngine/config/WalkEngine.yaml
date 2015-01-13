@@ -28,6 +28,7 @@ walk_cycle:
   step_time: 0.25
   # ???
   zmp_time: 0.165
+  hip_roll_compensation: 4 * pi / 180
   step:
     # The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
     height: 0.015
@@ -61,6 +62,9 @@ walk_cycle:
     amplitude: 1.0
     weight: 0.7
     offset: 0 * pi / 180
+    gain:
+      p: 0.1
+      d: 0.1
     # Support bias parameters to reduce backlash-based instability
     # velFastForward: 0.05
     # velFastTurn: 0.15
@@ -69,7 +73,6 @@ walk_cycle:
     # supportBack: -0.02
     # supportSideX: -0.01
     # supportSideY: -0.005
-    # hipRollCompensation: 4 * pi / 180
     # toeTipCompensation: 0 * pi / 180
     gyro:
       # Ratio to normalize gyro gains into units of degree/second

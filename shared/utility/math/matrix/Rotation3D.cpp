@@ -77,6 +77,16 @@ namespace matrix {
         return *this * createRotationZ(radians);
     }
 
+    Rotation3D Rotation3D::worldToLocal(const Rotation3D& reference) const {
+        // http://en.wikipedia.org/wiki/Change_of_basis
+        return reference.i() * (*this);
+    }
+
+    Rotation3D Rotation3D::localToWorld(const Rotation3D& reference) const {
+        // http://en.wikipedia.org/wiki/Change_of_basis
+        return reference * (*this);
+    }
+
     Rotation3D Rotation3D::i() const {
         // http://en.wikipedia.org/wiki/Rotation_matrix#Multiplication
         // The inverse of a rotation matrix is its transpose, which is also a rotation matrix.

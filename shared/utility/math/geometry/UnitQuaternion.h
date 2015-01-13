@@ -69,6 +69,8 @@ namespace geometry {
 
             void normalise();
 
+            double norm();
+
             // real part
             inline double kW() const { return at(0); };
             inline double& kW() { return at(0); };
@@ -87,6 +89,8 @@ namespace geometry {
 
             inline const arma::subview_col<double> imaginary() const { return rows(1,3); }
             inline arma::subview_col<double> imaginary() { return rows(1,3); }
+
+            UnitQuaternion slerp(const UnitQuaternion& p, const double& t);
 
     };
 

@@ -31,11 +31,8 @@ namespace matrix {
         eye(); // identity matrix by default
     }
 
-    Transform3D::Transform(const UnitQuaternion& q) : Transform() {
-        // quaternion to rotation conversion
-        // http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToMatrix/
-        // http://en.wikipedia.org/wiki/Rotation_group_SO(3)#Quaternions_of_unit_norm
-        submat(0,0,2,2) = Rotation3D(q);
+    Transform3D::Transform(const UnitQuaternion& q) : Transform(Rotation3D(q)) {
+
     }
 
     Transform3D::Transform(const Rotation3D& rotation) : Transform() {
@@ -78,6 +75,18 @@ namespace matrix {
         return *this * createRotationZ(radians);
     }
 
+    Transform3D Transform3D::rotateXLocal(double radians, const Transform3D& local) const {
+        return Transform3D(createRotationX(radians) * worldToLocal(local)).localToWorld(local);
+    }
+
+    Transform3D Transform3D::rotateYLocal(double radians, const Transform3D& local) const {
+        return Transform3D(createRotationY(radians) * worldToLocal(local)).localToWorld(local);
+    }
+
+    Transform3D Transform3D::rotateZLocal(double radians, const Transform3D& local) const {
+        return Transform3D(createRotationZ(radians) * worldToLocal(local)).localToWorld(local);
+    }
+
     Transform3D Transform3D::worldToLocal(const Transform3D& reference) const {
         // http://en.wikipedia.org/wiki/Change_of_basis
         return reference.i() * (*this);
@@ -99,10 +108,6 @@ namespace matrix {
             NUClear::log<NUClear::WARN>("Inverse failed! Matrix is singular");
         }*/
         return inverseTransform3D;
-    }
-
-    Rotation3D Transform3D::rotation() const {
-        return submat(0,0,2,2);
     }
 
     Transform3D Transform3D::createTranslation(const arma::vec3& translation) {

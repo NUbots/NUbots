@@ -31,6 +31,10 @@ namespace geometry {
 }
 namespace matrix {
 
+    template <int Dimensions>
+    class Transform;
+
+    using Transform3D = Transform<3>;
 
     template <int Dimensions>
     class Rotation;
@@ -57,6 +61,8 @@ namespace matrix {
              * @brief Construct an ONB using a vec3 as the X axis
              */
             Rotation(const arma::vec3& axis);
+
+            Rotation(const Transform3D&) = delete;
 
             /**
              * @brief Create a rotation matrix based on a vec3 as the X axis and an angle
@@ -86,6 +92,22 @@ namespace matrix {
              * @return The rotation matrix
              */
             Rotation3D rotateZ(double radians) const;
+
+            /**
+             * @brief Transforms current rotation from world coordinates (i.e. standard basis) to be local to 'reference'
+             *
+             * @param reference A rotation matrix to become relatively local to
+             * @return The transformed rotation matrix
+             */
+            Rotation3D worldToLocal(const Rotation3D& reference) const;
+
+            /**
+             * @brief Rotations current rotation from local coordinates relative to 'reference', to world coordinates (i.e. standard rotation)
+             *
+             * @param reference The rotation matrix that the current rotation is relative to
+             * @return The transformed rotation matrix
+             */
+            Rotation3D localToWorld(const Rotation3D& reference) const;
 
             /**
              * @brief Performs an inverse and returns a new copy

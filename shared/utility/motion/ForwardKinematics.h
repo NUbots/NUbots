@@ -118,7 +118,7 @@ namespace kinematics {
         //Hip pitch
         runningTransform = runningTransform.translate({
             RobotKinematicModel::Leg::HIP_OFFSET_X,
-            negativeIfRight * RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS/2,
+            negativeIfRight * RobotKinematicModel::Leg::HIP_OFFSET_Y,
             -RobotKinematicModel::Leg::HIP_OFFSET_Z
         });
         //Rotate to face down the leg (see above for definitions of terms, including 'facing')

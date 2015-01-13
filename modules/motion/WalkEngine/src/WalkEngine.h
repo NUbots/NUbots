@@ -166,6 +166,8 @@ namespace motion {
         double balanceAmplitude;
         double balanceWeight;
         double balanceOffset;
+        double balancePGain;
+        double balanceDGain;
         /*arma::vec4 ankleImuParamX;
         arma::vec4 ankleImuParamY;
         arma::vec4 kneeImuParamX;
@@ -184,6 +186,7 @@ namespace motion {
 
         // Initial body swing
         // double toeTipCompensation;
+        double hipRollCompensation;
 
         // end config
 
