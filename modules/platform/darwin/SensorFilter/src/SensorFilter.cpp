@@ -220,22 +220,43 @@ namespace modules {
                             break;
                         }
 
-                        // Add the sensor values to the system properly
-                        sensors->servos.push_back({
-                            original.errorFlags,
-                            static_cast<ServoID>(i),
-                            original.torqueEnabled,
-                            original.pGain,
-                            original.iGain,
-                            original.dGain,
-                            original.goalPosition,
-                            original.movingSpeed,
-                            original.presentPosition,
-                            original.presentSpeed,
-                            original.load,
-                            original.voltage,
-                            float(original.temperature)
-                        });
+                        if(previousSensors && error != DarwinSensors::Error::OK) {
+                            // Add the sensor values to the system properly
+                            sensors->servos.push_back({
+                                original.errorFlags,
+                                static_cast<ServoID>(i),
+                                original.torqueEnabled,
+                                original.pGain,
+                                original.iGain,
+                                original.dGain,
+                                original.goalPosition,
+                                original.movingSpeed,
+                                previousSensors->servos[i].presentPosition,
+                                previousSensors->servos[i].presentVelocity,
+                                previousSensors->servos[i].load,
+                                previousSensors->servos[i].voltage,
+                                previousSensors->servos[i].temperature
+                            });
+                        }
+                        else {
+                            // Add the sensor values to the system properly
+                            sensors->servos.push_back({
+                                original.errorFlags,
+                                static_cast<ServoID>(i),
+                                original.torqueEnabled,
+                                original.pGain,
+                                original.iGain,
+                                original.dGain,
+                                original.goalPosition,
+                                original.movingSpeed,
+                                original.presentPosition,
+                                original.presentSpeed,
+                                original.load,
+                                original.voltage,
+                                float(original.temperature)
+                            });
+                        }
+
                     }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
