@@ -22,7 +22,6 @@
 
 #include <vector>
 #include <armadillo>
-#include <nuclear_bits/LogLevel.h>
 #include <cmath>
 #include <nuclear>
 
