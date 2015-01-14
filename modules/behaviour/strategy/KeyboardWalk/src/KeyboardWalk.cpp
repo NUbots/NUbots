@@ -167,6 +167,7 @@ namespace strategy {
         }
         else {
             emit(std::make_unique<WalkStartCommand>());
+            updateCommand();
         }
         printStatus();
     }
