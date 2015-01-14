@@ -22,14 +22,12 @@
 #include <armadillo>
 
 #include "utility/math/angle.h"
-#include "utility/math/matrix.h"
 #include "utility/math/coordinates.h"
 #include "utility/localisation/transform.h"
 #include "messages/localisation/FieldObject.h"
 
 
 // using messages::localisation::FakeOdometry;
-using utility::math::matrix::rotationMatrix;
 using utility::localisation::transform::SphericalRobotObservation;
 
 namespace modules {

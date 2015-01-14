@@ -17,12 +17,13 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_SUPPORT_YAMLARMADILLO_H
-#define UTILITY_SUPPORT_YAMLARMADILLO_H
+#ifndef UTILITY_SUPPORT_yaml_armadillo_H
+#define UTILITY_SUPPORT_yaml_armadillo_H
 
 #include <armadillo>
 #include <iostream>
 #include <yaml-cpp/yaml.h>
+#include "utility/support/yaml_expression.h"
 
 
 namespace YAML {
@@ -32,7 +33,7 @@ namespace YAML {
         static Node encode(const arma::vec& rhs) {
             Node node;
 
-            for(const double& d : rhs) {
+            for (const double& d : rhs) {
                 node.push_back(d);
             }
 
@@ -42,7 +43,7 @@ namespace YAML {
         static bool decode(const Node& node, arma::vec& rhs) {
             rhs.resize(node.size());
             for (uint i = 0; i < node.size(); ++i) {
-                rhs[i] = node[i].as<double>();
+                rhs[i] = node[i].as<utility::support::Expression>();
             }
 
             return true;
@@ -62,10 +63,44 @@ namespace YAML {
         }
 
         static bool decode(const Node& node, arma::vec::fixed<size>& rhs) {
-            if(node.size() == size) {
+            if (node.size() == size) {
 
-                for(uint i = 0; i < size; ++i) {
-                    rhs[i] = node[i].as<double>();
+                for (uint i = 0; i < size; ++i) {
+                    rhs[i] = node[i].as<utility::support::Expression>();
+                }
+
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    };
+
+    template<uint rows, uint cols>
+    struct convert<arma::mat::fixed<rows, cols>> {
+        // TODO: use arma::vec decoding for each row?
+        static Node encode(const arma::mat::fixed<rows, cols>& rhs) {
+            Node node;
+
+            for (uint i = 0; i < rows; ++i) {
+                Node row;
+                for (uint j = 0; j < cols; ++j) {
+                    row.push_back(rhs(i,j));
+                }
+                node.push_back(row);
+            }
+
+            return node;
+        }
+
+        static bool decode(const Node& node, arma::mat::fixed<rows, cols>& rhs) {
+            if (node.size() == rows) { // TODO: check cols
+
+                for (uint i = 0; i < rows; ++i) {
+                    for (uint j = 0; j < cols; ++j) {
+                        rhs(i,j) = node[i][j].as<utility::support::Expression>();
+                    }
                 }
 
                 return true;
@@ -77,4 +112,4 @@ namespace YAML {
     };
 }
 
-#endif // UTILITY_SUPPORT_YAMLARMADILLO_H
+#endif // UTILITY_SUPPORT_yaml_armadillo_H

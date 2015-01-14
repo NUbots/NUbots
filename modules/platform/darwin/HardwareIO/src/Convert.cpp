@@ -121,9 +121,11 @@ namespace darwin {
         // On the left foot, the X is flipped and the Y is the correct way around
         // Because of this, we can implement the resulting logic using an xor
         else if(left ^ x) {
+            // This normalises the value between -1 and 1
             return double(value - 127) / 127.0;
         }
         else {
+            // This normalises the value between -1 and 1
             return double(127 - value) / 127.0;
         }
     }

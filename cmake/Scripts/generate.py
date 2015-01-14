@@ -8,6 +8,7 @@
 #
 import sys
 import re
+import os
 
 # Ensure we have specified a name
 if sys.argv[1]:
@@ -45,18 +46,71 @@ with open(role_name, 'w') as file:
 
     # Add our main function.
     main = """
+#include "utility/strutil/ansi.h"
+#include "utility/strutil/banner.h"
+
 int main(int argc, char** argv) {
+
+    auto white = utility::strutil::ANSISGR<
+                   utility::strutil::ANSICode::BRIGHT,
+                   utility::strutil::ANSICode::GRAY,
+                   utility::strutil::ANSICode::BLACK_BACKGROUND>();
+    auto yellow = utility::strutil::ANSISGR<
+                    utility::strutil::ANSICode::BRIGHT,
+                    utility::strutil::ANSICode::YELLOW,
+                    utility::strutil::ANSICode::BLACK_BACKGROUND>();
+
+    std::cout << std::endl << std::endl;
+    std::cout << white << "######                    ######  ######           ######  " << yellow << "####################" << std::endl;
+    std::cout << white << "#######                   ######  ######           ######  " << yellow << "####################" << std::endl;
+    std::cout << white << "########                  ######  ######           ######  " << yellow << "###     ####     ###" << std::endl;
+    std::cout << white << "#########                 ######  ######           ######  " << yellow << "###     ####     ###" << std::endl;
+    std::cout << white << "##########                ######  ######           ######  " << yellow << " ########  ######## " << std::endl;
+    std::cout << white << "###########               ######  ######           ######  " << yellow << "  ######    ######  " << std::endl;
+    std::cout << white << "############              ######  ######           ######  " << yellow << "                    " << std::endl;
+    std::cout << white << "###### ######             ######  ######           ######  " << yellow << "  ################  " << std::endl;
+    std::cout << white << "######  ######            ######  ######           ######  " << yellow << " ################## " << std::endl;
+    std::cout << white << "######   ######           ######  ######           ######  " << yellow << "###              ###" << std::endl;
+    std::cout << white << "######    ######          ######  ######           ######  " << yellow << "###              ###" << std::endl;
+    std::cout << white << "######     ######         ######  ######           ######  " << yellow << " ################## " << std::endl;
+    std::cout << white << "######      ######        ######  ######           ######  " << yellow << "  ################  " << std::endl;
+    std::cout << white << "######       ######       ######  ######           ######  " << yellow << "                    " << std::endl;
+    std::cout << white << "######        ######      ######  ######           ######  " << yellow << "                 ###" << std::endl;
+    std::cout << white << "######         ######     ######  ######           ######  " << yellow << "                 ###" << std::endl;
+    std::cout << white << "######          ######    ######  ######           ######  " << yellow << "####################" << std::endl;
+    std::cout << white << "######           ######   ######  ######           ######  " << yellow << "####################" << std::endl;
+    std::cout << white << "######            ######  ######  ######           ######  " << yellow << "                 ###" << std::endl;
+    std::cout << white << "######             ###### ######  ######           ######  " << yellow << "                 ###" << std::endl;
+    std::cout << white << "######              ############  ######           ######  " << yellow << "                    " << std::endl;
+    std::cout << white << "######               ###########  ######           ######  " << yellow << "  ###      #######  " << std::endl;
+    std::cout << white << "######                ##########  ######           ######  " << yellow << " ###      ######### " << std::endl;
+    std::cout << white << "######                 #########  ######           ######  " << yellow << "###      ###     ###" << std::endl;
+    std::cout << white << "######                  ########   #####################   " << yellow << "###     ###      ###" << std::endl;
+    std::cout << white << "######                   #######     #################     " << yellow << " #########      ### " << std::endl;
+    std::cout << white << "######                    ######       #############       " << yellow << "  #######      ###  " << std::endl;
+    std::cout << std::endl;
+
+"""
+    file.write(main)
+
+
+
+    rolebanner = '    std::cout << utility::strutil::banner("{0}");\n    std::cout << std::endl;\n'.format(os.path.splitext(os.path.basename(role_name))[0])
+    file.write(rolebanner)
+
+    start = """
+
     NUClear::PowerPlant::Configuration config;
     config.threadCount = 8;
 
     NUClear::PowerPlant plant(config, argc, const_cast<const char**>(argv));
 """
 
-    file.write(main)
+    file.write(start)
 
     for module in sys.argv[2:]:
-        file.write('\tstd::cout << "Installing " << "{0}" << std::endl;\n'.format(module))
-        file.write('\tplant.install<modules::{0}>();\n'.format(module))
+        file.write('    std::cout << "Installing " << "{0}" << std::endl;\n'.format(module))
+        file.write('    plant.install<modules::{0}>();\n'.format(module))
 
     end = """
     plant.start();

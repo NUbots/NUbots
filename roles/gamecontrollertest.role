@@ -1,19 +1,15 @@
 ADD_ROLE(
-    NAME gamecontrollertest
-    MODULES
+    # Hardware for button testing
+    platform::darwin::HardwareIO
+    platform::darwin::SensorFilter
 
-        # Hardware for button testing
-        platform::darwin::HardwareIO
-        platform::darwin::SensorFilter
+    # Support and Configuration
+    support::SignalCatcher
+    support::logging::ConsoleLogHandler
+    support::configuration::ConfigSystem
+    support::configuration::GlobalConfig
+    support::configuration::SoccerConfig
+    support::NUbugger
 
-        # Support and Configuration
-        support::SignalCatcher
-        support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem
-        support::configuration::GlobalConfig
-        support::configuration::SoccerConfig
-        support::NUbugger
-
-        input::GameController
-
+    input::GameController
 )

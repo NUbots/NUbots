@@ -29,7 +29,8 @@ namespace utility {
      * TODO document
      *
      * @author Trent Houliston
-     * @note Alex Biddulph added trimLeft, trimRight, trim, and removeAll functions 10-12-2012
+     * @author Alex Biddulph: added trimLeft, trimRight, trim, and removeAll functions 10-12-2012
+     * @author Brendan Annable
      */
     namespace strutil {
 

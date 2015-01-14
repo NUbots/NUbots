@@ -19,10 +19,16 @@
 
 #include "Darwin.h"
 
+#include <nuclear>
 #include <thread>
 #include <algorithm>
 
+#include "messages/input/ServoID.h"
+
 namespace Darwin {
+    using messages::input::ServoID;
+    using messages::input::stringFromId;
+
     // Initialize all of the sensor handler objects using the passed uart
     Darwin::Darwin(const char* name) : uart(name)
     , cm730(uart, ID::CM730)
@@ -74,7 +80,11 @@ namespace Darwin {
 
         // Ping all our servos
         for (int i = 0; i < 20; ++i) {
-            results.push_back(std::make_pair(i + 1, (&rShoulderPitch)[i].ping()));
+            auto result = std::make_pair(i + 1, (&rShoulderPitch)[i].ping());
+            if (!result.second) {
+                NUClear::log<NUClear::WARN>("Servo failed self test:", stringFromId(static_cast<ServoID>(i)));
+            }
+            results.push_back(result);
         }
 
         // Ping our two FSRs

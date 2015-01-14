@@ -28,7 +28,7 @@
 #include "utility/localisation/transform.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/time/time.h"
-#include "utility/support/YamlArmadillo.h"
+#include "utility/support/yaml_armadillo.h"
 
 namespace modules {
 namespace behaviour {

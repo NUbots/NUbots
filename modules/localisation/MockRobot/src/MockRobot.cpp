@@ -20,7 +20,6 @@
 #include "MockRobot.h"
 #include <nuclear>
 #include "utility/math/angle.h"
-#include "utility/math/matrix.h"
 #include "utility/math/coordinates.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/transform.h"
@@ -31,25 +30,24 @@
 #include "messages/input/Sensors.h"
 #include "messages/input/ServoID.h"
 
-using messages::input::Sensors;
-using messages::input::ServoID;
-using utility::math::matrix::rotationMatrix;
-using utility::math::angle::normalizeAngle;
-using utility::math::angle::vectorToBearing;
-using utility::math::angle::bearingToUnitVector;
-using utility::math::coordinates::cartesianToSpherical;
-using utility::motion::kinematics::calculateRobotToIMU;
-using utility::localisation::transform::SphericalRobotObservation;
-using utility::localisation::transform::WorldToRobotTransform;
-using utility::localisation::transform::RobotToWorldTransform;
-using utility::nubugger::graph;
-using messages::support::Configuration;
-using messages::support::FieldDescription;
-using modules::localisation::MockRobotConfig;
-using messages::localisation::Mock;
-
 namespace modules {
 namespace localisation {
+
+    using messages::input::Sensors;
+    using messages::input::ServoID;
+    using utility::math::angle::normalizeAngle;
+    using utility::math::angle::vectorToBearing;
+    using utility::math::angle::bearingToUnitVector;
+    using utility::math::coordinates::cartesianToSpherical;
+    using utility::motion::kinematics::calculateRobotToIMU;
+    using utility::localisation::transform::SphericalRobotObservation;
+    using utility::localisation::transform::WorldToRobotTransform;
+    using utility::localisation::transform::RobotToWorldTransform;
+    using utility::nubugger::graph;
+    using messages::support::Configuration;
+    using messages::support::FieldDescription;
+    using modules::localisation::MockRobotConfig;
+    using messages::localisation::Mock;
 
     double triangle_wave(double t, double period) {
         auto a = period; // / 2.0;
@@ -126,8 +124,8 @@ namespace localisation {
             arma::vec2 diff = robot_position_ - old_pos;
 
             robot_heading_ = vectorToBearing(arma::vec2(diff));
-            // robot_velocity_ = arma::vec2({arma::norm(diff) / 100.0, 0}); //Robot coordinates 
-            robot_odometry_ = arma::vec2({arma::norm(diff)*100, 0}); //Robot coordinates 
+            // robot_velocity_ = arma::vec2({arma::norm(diff) / 100.0, 0}); //Robot coordinates
+            robot_odometry_ = arma::vec2({arma::norm(diff)*100, 0}); //Robot coordinates
 
             double imu_period = cfg_.robot_imu_drift_period;
             world_imu_direction_ = arma::vec2({ std::cos(2 * M_PI * t / imu_period), std::sin(2 * M_PI * t / imu_period) });

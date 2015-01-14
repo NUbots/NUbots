@@ -1,12 +1,10 @@
 ADD_ROLE(
-    NAME sensortest
-    MODULES
-        #support::SignalCatcher
-        support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem
-        support::configuration::GlobalConfig
-        platform::darwin::HardwareIO
-        platform::darwin::SensorFilter
-        support::NUbugger
-        debug::NUbugger
+    #support::SignalCatcher
+    support::logging::ConsoleLogHandler
+    support::configuration::ConfigSystem
+    support::configuration::GlobalConfig
+    platform::darwin::HardwareIO
+    platform::darwin::SensorFilter
+    support::NUbugger
+    debug::NUbugger
 )

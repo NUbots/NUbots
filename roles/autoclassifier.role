@@ -1,28 +1,25 @@
 ADD_ROLE(
-    NAME autoclassifier
-    MODULES
+    # Support and Configuration
+    #support::SignalCatcher
+    support::logging::ConsoleLogHandler
+    support::configuration::ConfigSystem
+    support::configuration::GlobalConfig
+    # support::configuration::NetworkingConfiguration
+    support::configuration::SoccerConfig
+    support::NUbugger
 
-        # Support and Configuration
-        #support::SignalCatcher
-        support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem
-        support::configuration::GlobalConfig
-        # support::configuration::NetworkingConfiguration
-        support::configuration::SoccerConfig
-        support::NUbugger
+    # Hardware Interface
+    platform::darwin::HardwareIO
+    #platform::fakedarwin::HardwareIO
+    platform::darwin::SensorFilter
+    input::LinuxCamera
 
-        # Hardware Interface
-        platform::darwin::HardwareIO
-        #platform::fakedarwin::HardwareIO
-        platform::darwin::SensorFilter
-        input::LinuxCamera
+    # Vision
+    vision::LUTClassifier
+    vision::GoalDetector
+    vision::BallDetector
+    vision::ObstacleDetector
 
-        # Vision
-        vision::LUTClassifier
-        vision::GoalDetector
-        vision::BallDetector
-        vision::ObstacleDetector
-
-        # Research
-        research::AutoClassifier
+    # Research
+    research::AutoClassifier
 )

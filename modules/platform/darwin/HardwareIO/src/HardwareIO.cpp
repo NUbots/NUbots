@@ -238,7 +238,13 @@ namespace darwin {
                     float diff = utility::math::angle::difference(command.position, sensors.servo[command.id].presentPosition);
                     NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                    float speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                    float speed;
+                    if(duration.count() > 0) {
+                        speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                    }
+                    else {
+                        speed = 0;
+                    }
 
 
                     // Update our internal state

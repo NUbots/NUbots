@@ -25,7 +25,7 @@
 
 namespace modules {
 namespace behaviour {
-namespace planning {
+namespace strategy {
 
     using messages::motion::KickCommand;
     using messages::motion::WalkCommand;
@@ -128,10 +128,10 @@ namespace planning {
 
             auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
 
-            emit(std::make_unique<WalkCommand>(WalkCommand{
-                strafeNorm,
-                rotationalSpeedNorm
-            }));
+            auto walkCommand = std::make_unique<WalkCommand>();
+            walkCommand->command.xy() = strafeNorm;
+            walkCommand->command.angle() = rotationalSpeedNorm;
+            emit(std::move(walkCommand));
         });
     }
 
