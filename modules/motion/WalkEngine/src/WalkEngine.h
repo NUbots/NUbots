@@ -135,6 +135,7 @@ namespace motion {
         LimbID swingLeg;
         // The last foot goal rotation
         UnitQuaternion lastFootGoalRotation;
+        UnitQuaternion footGoalErrorSum;
 
         // end state
 
@@ -171,6 +172,7 @@ namespace motion {
         double balanceWeight;
         double balanceOffset;
         double balancePGain;
+        double balanceIGain;
         double balanceDGain;
         /*arma::vec4 ankleImuParamX;
         arma::vec4 ankleImuParamY;

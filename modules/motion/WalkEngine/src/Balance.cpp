@@ -37,8 +37,6 @@ namespace motion {
     using utility::motion::kinematics::DarwinModel;
 
     void WalkEngine::balance(Transform3D& leftFootTarget, Transform3D& rightFootTarget, const Sensors& sensors) {
-        // Negative if right leg to account for the mirroring of the foot target
-        int8_t sign = swingLeg == LimbID::LEFT_LEG ? 1 : -1;
 
         // Get current orientation, offset by body tilt. Maps world to robot space.
         Rotation3D tiltedOrientation = sensors.orientation.i().rotateY(-bodyTilt);
@@ -61,12 +59,16 @@ namespace motion {
         UnitQuaternion leftFootQuaternion(leftFootWorld);
         UnitQuaternion rightFootQuaternion(rightFootWorld);
 
-        UnitQuaternion diff = goalQuaternion - lastFootGoalRotation;
+        UnitQuaternion error = goalQuaternion * lastFootGoalRotation.i();
+        footGoalErrorSum = error * footGoalErrorSum;
 
-        emit(graph("dRot", Rotation3D(diff)));
+        UnitQuaternion leftRotation  = leftFootQuaternion.slerp(goalQuaternion, balancePGain)
+                                     * leftFootQuaternion.slerp(footGoalErrorSum, balanceIGain)
+                                     * leftFootQuaternion.slerp(error, balanceDGain).i();
 
-        UnitQuaternion leftRotation = leftFootQuaternion.slerp(goalQuaternion, balancePGain) * leftFootQuaternion.slerp(diff, balanceDGain).i();
-        UnitQuaternion rightRotation = rightFootQuaternion.slerp(goalQuaternion, balancePGain) * leftFootQuaternion.slerp(diff, balanceDGain).i();
+        UnitQuaternion rightRotation = rightFootQuaternion.slerp(goalQuaternion, balancePGain)
+                                     * rightFootQuaternion.slerp(footGoalErrorSum, balanceIGain)
+                                     * rightFootQuaternion.slerp(error, balanceDGain).i();
         leftRotation.scaleAngle(0.5);
         rightRotation.scaleAngle(0.5);
 
@@ -89,40 +91,7 @@ namespace motion {
         leftFootTarget = leftFootTarget.rotateLocal(Rotation3D(leftRotation), leftHip);
         rightFootTarget = rightFootTarget.rotateLocal(Rotation3D(rightRotation), rightHip);
 
-        // leftFootTarget.rotation() = Rotation3D(goalQuaternion);
-        // rightFootTarget.rotation() = Rotation3D(goalQuaternion);
-        // emit(graph("leftFootTargetRotation", leftFootTarget.rotation()));
-        // emit(graph("leftFootTargetRotation", Rotation3D(goalQuaternion)));
-        emit(graph("quat", goalQuaternion));
-
         lastFootGoalRotation = goalQuaternion;
-
-        /*arma::vec3 leftAnkleTranslation = leftAnkle.translation();
-        leftAnkleTranslation[2] -= DarwinModel::TEAMDARWINCHEST_TO_ORIGIN;
-        leftFootTarget.translation() = leftAnkleTranslation;
-        // emit(graph("leftFoot", leftFootTarget.rotation()));
-        // leftFootTarget(2,3) -= DarwinModel::TEAMDARWINCHEST_TO_ORIGIN;
-        arma::vec3 rightAnkleTranslation = leftAnkle.translation();
-        rightAnkleTranslation[2] -= DarwinModel::TEAMDARWINCHEST_TO_ORIGIN;
-        rightFootTarget.translation() = rightAnkleTranslation;*/
-
-        // rightFootTarget.translation() = leftAnkle.translation();
-        // rightFootTarget(2,3) -= DarwinModel::TEAMDARWINCHEST_TO_ORIGIN;
-
-
-        // offsetQ.normalise(
-
-        // double phaseSingle = std::min(std::max(phase - phase1Single, 0.0) / (phase2Single - phase1Single), 1.0);
-        // double phaseComp = std::min({1.0, phaseSingle / 0.1, (1 - phaseSingle) / 0.1});
-
-        // Transform3D offsetT = yawlessOrientation;// offsetQ;
-
-        // leftFootTarget *= offsetT;
-        // rightFootTarget *= offsetT;
-
-        // emit(graph("offset", Rotation3D(offsetQ)));
-
-        // double phaseComp = std::min({1.0, phaseSingle / 0.1, (1 - phaseSingle) / 0.1});
 
         //TODO: crashes
         /*ServoID supportLegID = (swingLeg == LimbID::RIGHT_LEG) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
@@ -143,7 +112,7 @@ namespace motion {
         emit(graph("roll", gyroRoll));
         emit(graph("pitch", gyroPitch));
 
-        /*double yawAngle = 0;
+        double yawAngle = 0;
         if (!active) {
             // double support
             yawAngle = (uLeftFoot[2] + uRightFoot[2]) / 2 - uTorsoActual[2];

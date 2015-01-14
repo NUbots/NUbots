@@ -184,6 +184,7 @@ namespace motion {
         balanceOffset = balance["offset"].as<Expression>();
 
         balancePGain = balance["gain"]["p"].as<Expression>();
+        balanceIGain = balance["gain"]["i"].as<Expression>();
         balanceDGain = balance["gain"]["d"].as<Expression>();
 
         /* TODO

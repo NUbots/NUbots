@@ -64,6 +64,7 @@ walk_cycle:
     offset: 0 * pi / 180
     gain:
       p: 0.1
+      i: 0.1
       d: 0.1
     # Support bias parameters to reduce backlash-based instability
     # velFastForward: 0.05
