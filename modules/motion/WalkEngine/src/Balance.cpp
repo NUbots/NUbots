@@ -63,11 +63,11 @@ namespace motion {
         footGoalErrorSum = error * footGoalErrorSum;
 
         UnitQuaternion leftRotation  = leftFootQuaternion.slerp(goalQuaternion, balancePGain)
-                                     * leftFootQuaternion.slerp(footGoalErrorSum, balanceIGain)
+                                     // * leftFootQuaternion.slerp(footGoalErrorSum, balanceIGain)
                                      * leftFootQuaternion.slerp(error, balanceDGain).i();
 
         UnitQuaternion rightRotation = rightFootQuaternion.slerp(goalQuaternion, balancePGain)
-                                     * rightFootQuaternion.slerp(footGoalErrorSum, balanceIGain)
+                                     // * rightFootQuaternion.slerp(footGoalErrorSum, balanceIGain)
                                      * rightFootQuaternion.slerp(error, balanceDGain).i();
         leftRotation.scaleAngle(0.5);
         rightRotation.scaleAngle(0.5);

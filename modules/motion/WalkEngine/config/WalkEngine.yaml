@@ -63,9 +63,9 @@ walk_cycle:
     weight: 0.7
     offset: 0 * pi / 180
     gain:
-      p: 0.1
-      i: 0.1
-      d: 0.1
+      p: 0.132
+      i: 0.203
+      d: 0.021
     # Support bias parameters to reduce backlash-based instability
     # velFastForward: 0.05
     # velFastTurn: 0.15
