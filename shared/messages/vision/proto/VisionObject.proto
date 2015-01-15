@@ -51,6 +51,7 @@ message VisionObject {
         OBSTACLE = 2;
     }
 
+    required uint32 camera_id = 5;
     required ObjectType type = 1;
 
     repeated Goal goal = 2;

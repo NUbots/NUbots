@@ -31,6 +31,7 @@ message ClassifiedImage {
         required ivec2 end = 4;
     }
 
+    required uint32 camera_id = 6;
     required uvec2 dimensions = 1;
     required Line horizon = 2;
     repeated uvec2 visual_horizon = 3;

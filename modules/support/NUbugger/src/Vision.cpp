@@ -82,6 +82,7 @@ namespace support {
 
             auto* imageData = message.mutable_classified_image();
 
+            imageData->set_camera_id(0);
             imageData->mutable_dimensions()->set_x(image.dimensions[0]);
             imageData->mutable_dimensions()->set_y(image.dimensions[1]);
 
@@ -142,6 +143,7 @@ namespace support {
 
             auto* object = message.mutable_vision_object();
             object->set_type(VisionObject::BALL);
+            object->set_camera_id(0);
 
             for(const auto& b : balls) {
 
@@ -167,6 +169,7 @@ namespace support {
             auto* object = message.mutable_vision_object();
 
             object->set_type(VisionObject::GOAL);
+            object->set_camera_id(0);
 
             for(const auto& g : goals) {
                 auto* goal = object->add_goal();

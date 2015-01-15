@@ -1,6 +1,6 @@
 # Common C++ Flags
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3 -fPIC -Wall -Wpedantic -Wextra -g -march=atom -mtune=atom -fnon-call-exceptions")
-SET(CMAKE_C_FLAGS "-O3 -DNDEBUG")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -m32 -O3 -fPIC -Wall -Wpedantic -Wextra -g -march=atom -mtune=atom -fnon-call-exceptions")
+SET(CMAKE_C_FLAGS "-m32 -O3 -DNDEBUG")
 
 # XCode support
 IF("${CMAKE_GENERATOR}" MATCHES "Xcode")
