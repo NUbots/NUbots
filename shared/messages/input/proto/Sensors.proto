@@ -69,12 +69,24 @@ message Sensors {
         optional float temperature = 13;
     }
 
+    message Button {
+        required uint32 id = 1;
+        required bool value = 2;
+    }
+
+    message LED {
+        required uint32 id = 1;
+        optional uint32 colour = 2;
+    }
+
     required int64 timestamp = 1;
-    optional vec3 accelerometer = 2;
-    optional vec3 gyroscope = 3;
+    optional fvec3 accelerometer = 2;
+    optional fvec3 gyroscope = 3;
     optional mat33 orientation = 4;
     optional vec3 left_FSR = 5;
     optional vec3 right_FSR = 6;
     repeated Servo servo = 7;
+    repeated Button button = 8;
+    repeated LED led = 9;
 }
 

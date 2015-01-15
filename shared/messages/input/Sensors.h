@@ -57,11 +57,26 @@ namespace messages {
                 float temperature;
             };
 
+            struct Button {
+                uint id;
+                bool value;
+            };
+
+            struct LED {
+                uint id;
+                uint32_t colour;
+            };
+
             NUClear::clock::time_point timestamp;
 
             arma::vec3 accelerometer;
             arma::vec3 gyroscope;
             utility::math::matrix::Rotation3D orientation;
+
+            std::vector<Servo> servos;
+            std::vector<Button> buttons;
+            std::vector<LED> leds;
+
             arma::vec3 leftFSR;
             arma::vec3 rightFSR;
 
@@ -85,7 +100,6 @@ namespace messages {
             utility::math::matrix::Transform3D kinematicsBodyToGround;
             utility::math::matrix::Transform3D kinematicsCamToGround;
 
-            std::vector<Servo> servos;
         };
     }
 }

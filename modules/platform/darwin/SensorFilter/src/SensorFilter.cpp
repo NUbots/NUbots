@@ -275,6 +275,16 @@ namespace modules {
                     else {
                         sensors->gyroscope = {-input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
                     }
+                    /************************************************
+                     *               Buttons and LEDs               *
+                     ************************************************/
+                    sensors->buttons.push_back({ 0, input.buttons.left });
+                    sensors->buttons.push_back({ 1, input.buttons.middle });
+                    sensors->leds.push_back({ 0, uint32_t(input.ledPanel.led2 ? 0xFF0000 : 0) });
+                    sensors->leds.push_back({ 1, uint32_t(input.ledPanel.led3 ? 0xFF0000 : 0) });
+                    sensors->leds.push_back({ 2, uint32_t(input.ledPanel.led4 ? 0xFF0000 : 0) });
+                    sensors->leds.push_back({ 3, uint32_t((input.headLED.r << 16) | (input.headLED.g << 8) | (input.headLED.b)) }); // Head
+                    sensors->leds.push_back({ 4, uint32_t((input.eyeLED.r  << 16) | (input.eyeLED.g  << 8) | (input.eyeLED.b))  }); // Eye
 
                     /************************************************
                      *                 Orientation                  *

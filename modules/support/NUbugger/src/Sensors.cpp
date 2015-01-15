@@ -108,6 +108,20 @@ namespace support {
             rfsr->set_y(sensors.rightFSR[1]);
             rfsr->set_z(sensors.rightFSR[2]);
 
+            // The LEDs
+            for(auto& l : sensors.leds) {
+                auto* led = sensorData->add_led();
+                led->set_id(l.id);
+                led->set_colour(l.colour);
+            }
+
+            // The Buttons
+            for(auto& b : sensors.buttons) {
+                auto* button = sensorData->add_button();
+                button->set_id(b.id);
+                button->set_value(b.value);
+            }
+
             send(message);
 
         }));
