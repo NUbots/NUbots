@@ -145,9 +145,9 @@ namespace support {
 
                 if (found) {
                     if (enabled) {
-                        log("Enabled:", name);
+                        log<NUClear::INFO>("Enabled:", name);
                     } else {
-                        log("Disabled:", name);
+                        log<NUClear::INFO>("Disabled:", name);
                     }
                 }
             }
@@ -199,7 +199,7 @@ namespace support {
     }
 
     void NUbugger::recvMessage(const Message& message) {
-        log("Received message of type:", message.type());
+        log<NUClear::DEBUG>("Received message of type:", message.type());
         switch (message.type()) {
             case Message::COMMAND:
                 recvCommand(message);
@@ -217,14 +217,14 @@ namespace support {
 
     void NUbugger::recvCommand(const Message& message) {
         std::string command = message.command().command();
-        log("Received command:", command);
+        log<NUClear::INFO>("Received command:", command);
         if (command == "download_lut") {
             std::shared_ptr<LookUpTable> lut;
             try {
                 lut = powerplant.get<LookUpTable>();
             }
             catch (NUClear::metaprogramming::NoDataException err) {
-                log("There is no LUT loaded");
+                log<NUClear::ERROR>("There is no LUT loaded");
                 return;
             }
 
@@ -246,7 +246,7 @@ namespace support {
         auto lookuptable = message.lookup_table();
         const std::string& lutData = lookuptable.table();
 
-        log("Loading LUT");
+        log<NUClear::INFO>("Loading LUT");
         std::vector<messages::vision::Colour> data;
         data.reserve(lutData.size());
         for (auto& s : lutData) {
@@ -256,7 +256,7 @@ namespace support {
         emit<Scope::DIRECT>(std::move(lut));
 
         if (lookuptable.save()) {
-            log("Saving LUT to file");
+            log<NUClear::INFO>("Saving LUT to file");
             emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
         }
     }
