@@ -30,6 +30,7 @@ namespace support {
     private:
         NUClear::clock::duration offset;
         std::ifstream input;
+        bool replay = false;
     public:
         static constexpr const char* CONFIGURATION_PATH = "NBZPlayer.yaml";
         /// @brief Called by the powerplant to build and setup the NBZPlayer reactor.

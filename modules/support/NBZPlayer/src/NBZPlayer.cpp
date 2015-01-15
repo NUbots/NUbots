@@ -37,6 +37,7 @@ namespace support {
             on<Trigger<Configuration<NBZPlayer>>>([this](const Configuration<NBZPlayer>& config) {
 
                 std::string path = config["file"].as<std::string>();
+                replay = config["replay"].as<bool>();
 
                 // Setup the file
                 // input.push(boost::iostreams::gzip_decompressor());
@@ -49,8 +50,6 @@ namespace support {
                 uint32_t size;
                 input.read(reinterpret_cast<char*>(&size), sizeof(uint32_t));
 
-                log("Size:", size);
-
                 // Read that much into a string
                 std::vector<char> data(size);
                 input.read(data.data(), size);
@@ -58,7 +57,6 @@ namespace support {
                 // Read the message
                 Message message;
                 message.ParsePartialFromArray(data.data(), data.size());
-                log("Type:", message.type());
                 offset = NUClear::clock::now() - time_t(std::chrono::milliseconds(message.utc_timestamp()));
             });
 
@@ -73,6 +71,12 @@ namespace support {
                     // Read that much into a string
                     std::vector<char> data(size);
                     input.read(data.data(), size);
+
+                    // If we are going to replay then reset the stream
+                    if(input.eof() && replay) {
+                        input.clear();
+                        input.seekg(0, std::ios::beg);
+                    }
 
                     // Read the message
                     Message message;
@@ -95,7 +99,7 @@ namespace support {
                         std::memcpy(pixels.data(), source.data(), source.size());
 
                         // Build the image
-                        auto image = std::make_unique<Image>(message.image().dimensions().x(), message.image().dimensions().y(), std::move(pixels));
+                        auto image = std::make_unique<Image>(width, height, std::move(pixels));
 
                         // Wait until it's time to display it
                         std::this_thread::sleep_until(timeToRun);
