@@ -19,7 +19,7 @@
 
 #include "DivePlanner.h"
 
-#include "utility/support/YamlArmadillo.h"
+#include "utility/support/yaml_armadillo.h"
 #include "messages/motion/DiveCommand.h"
 #include "messages/motion/WalkCommand.h"
 #include "messages/localisation/FieldObject.h"

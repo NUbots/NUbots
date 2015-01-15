@@ -24,19 +24,66 @@
 #include <armadillo>
 #include "messages/support/nubugger/proto/DataPoint.pb.h"
 #include "messages/support/nubugger/proto/DrawObjects.pb.h"
+#include "utility/math/matrix/Rotation3D.h"
 
 namespace utility {
 namespace nubugger {
+    namespace {
+
+        using messages::support::nubugger::proto::DataPoint;
+        using utility::math::matrix::Rotation3D;
+
+        template<typename T>
+        struct is_iterable {
+            private:
+                typedef std::true_type yes;
+                typedef std::false_type no;
+
+                template<typename U> static auto test_begin(int) -> decltype(std::declval<U>().begin(), yes());
+                template<typename> static no test_begin(...);
+
+                template<typename U> static auto test_end(int) -> decltype(std::declval<U>().end(), yes());
+                template<typename> static no test_end(...);
+            public:
+                static constexpr bool value = std::is_same<decltype(test_begin<T>(0)), yes>::value
+                                              && std::is_same<decltype(test_end<T>(0)), yes>::value;
+        };
+
+        inline void buildGraph(DataPoint&) {
+        }
+
+        template<typename First, typename... Remainder>
+        typename std::enable_if<!is_iterable<First>::value>::type buildGraph(DataPoint& dataPoint, First first, Remainder... remainder) {
+            dataPoint.add_value(first);
+            buildGraph(dataPoint, remainder...);
+        }
+
+        template<typename First, typename... Remainder>
+        typename std::enable_if<is_iterable<First>::value>::type buildGraph(DataPoint& dataPoint, First first, Remainder... remainder) {
+            for (const auto& value : first) {
+                dataPoint.add_value(value);
+            }
+            buildGraph(dataPoint, remainder...);
+        }
+    }
 
     template<typename... Values>
     inline std::unique_ptr<messages::support::nubugger::proto::DataPoint> graph(std::string label, Values... values) {
+        auto dataPoint = std::make_unique<DataPoint>();
+        dataPoint->set_label(label);
+        dataPoint->set_type(DataPoint::FLOAT_LIST);
+        buildGraph(*dataPoint, values...);
+        return dataPoint;
+    }
 
-    	auto dataPoint = std::make_unique<messages::support::nubugger::proto::DataPoint>();
-    	dataPoint->set_label(label);
-    	for(const auto& value : { float(values)... }) {
-    		dataPoint->add_value(value);
-    	}
-    	return std::move(dataPoint);
+    inline std::unique_ptr<messages::support::nubugger::proto::DataPoint> graph(std::string label, Rotation3D rotation) {
+        auto dataPoint = std::make_unique<DataPoint>();
+        dataPoint->set_label(label);
+        dataPoint->set_type(DataPoint::ROTATION_3D);
+        for (const auto& value : rotation) {
+            dataPoint->add_value(value);
+        }
+        return dataPoint;
     }
 
     inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawArrow(std::string name, arma::vec position, arma::vec direction, float length) {

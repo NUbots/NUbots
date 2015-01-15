@@ -111,7 +111,7 @@ namespace fakedarwin {
          Servos
          */
 
-        for(int i = 0; i < 20; ++i) {
+        for (int i = 0; i < 20; ++i) {
             // Get a reference to the servo we are populating
             DarwinSensors::Servo& servo = sensors.servo[i];
 
@@ -140,8 +140,7 @@ namespace fakedarwin {
             servo.temperature = 0;
         }
 
-        // This trigger gets the sensor data from the CM730
-        on<Trigger<Every<60, Per<std::chrono::seconds> > >, Options<Single> >([this](const time_t&) {
+        on<Trigger<Every<60, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
 
             for (int i = 0; i < 20; ++i) {
 
@@ -186,7 +185,7 @@ namespace fakedarwin {
         });*/
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<std::vector<ServoTarget> > >([this](const std::vector<ServoTarget>& commands) {
+        on<Trigger<std::vector<ServoTarget>>>([this](const std::vector<ServoTarget>& commands) {
             for (auto& command : commands) {
 
                 // Calculate our moving speed
@@ -194,7 +193,7 @@ namespace fakedarwin {
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                 float speed;
-                if(duration.count() > 0) {
+                if (duration.count() > 0) {
                     speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
                 }
                 else {
@@ -211,7 +210,7 @@ namespace fakedarwin {
             emit(std::make_unique<DarwinSensors>(sensors));
         });
 
-        on<Trigger<ServoTarget> >([this](const ServoTarget command) {
+        on<Trigger<ServoTarget>>([this](const ServoTarget command) {
             auto commandList = std::make_unique<std::vector<ServoTarget>>();
             commandList->push_back(command);
 

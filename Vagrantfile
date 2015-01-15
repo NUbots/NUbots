@@ -5,16 +5,9 @@ require 'socket'
 
 Vagrant.configure("2") do |config|
 
-# Determine the base box to use by checking the hostname.
-# Add your hostname to the list to opt-out of nubots-14.04.
-# # 'precise32' was used prior to 2014-04-30.
-# config.vm.box = "precise32"
-# config.vm.box_url = "http://files.vagrantup.com/precise32.box"
-
-# The NUbots changed to 'trusty32' on 2014-04-30.
-config.vm.box = "trusty32"
-config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-i386-vagrant-disk1.box"
-
+  # Use trusty32 as our base image
+  config.vm.box = "trusty32"
+  config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-i386-vagrant-disk1.box"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on

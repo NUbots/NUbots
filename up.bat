@@ -1,1 +1,1 @@
-vagrant up
+vagrant up nubotsvm

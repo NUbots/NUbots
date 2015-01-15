@@ -27,7 +27,6 @@
 #include "messages/support/Configuration.h"
 #include "utility/math/kalman/UKF.h"
 #include "utility/math/vision.h"
-#include "utility/math/matrix.h"
 #include "utility/math/angle.h"
 #include "utility/math/kalman/InverseDepthPointModel.h"
 #include <algorithm>

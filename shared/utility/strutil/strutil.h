@@ -29,8 +29,9 @@ namespace utility {
  * TODO document
  *
  * @author Trent Houliston
- * @note Alex Biddulph added trimLeft, trimRight, trim, and removeAll functions 10-12-2012
- * @note Monica Olejniczak added split functions
+ * @author Alex Biddulph: added trimLeft, trimRight, trim, and removeAll functions 10-12-2012
+ * @author Monica Olejniczak added split functions
+ * @author Brendan Annable
  */
 namespace strutil {
 
@@ -69,7 +70,7 @@ namespace strutil {
     }
 
     // http://stackoverflow.com/a/237280
-    std::vector<std::string> &split(const std::string &str, char delimeter, std::vector<std::string> &elements) {
+    std::vector<std::string>& split(const std::string& str, char delimeter, std::vector<std::string>& elements) {
         std::stringstream ss(str);
         std::string item;
         while (std::getline(ss, item, delimeter)) {
@@ -78,7 +79,7 @@ namespace strutil {
         return elements;
     }
 
-    std::vector<std::string> split(const std::string &string, char delimeter) {
+    std::vector<std::string> split(const std::string& string, char delimeter) {
         std::vector<std::string> elements;
         split(string, delimeter, elements);
         return elements;

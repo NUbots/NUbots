@@ -18,88 +18,123 @@
  */
 
 #include "UnitQuaternion.h"
-#include "utility/math/matrix.h"
-
 
 namespace utility {
 namespace math {
 namespace geometry {
 
-     constexpr uint kW = 0;   //real part
-     constexpr uint kX = 1;
-     constexpr uint kY = 2;
-     constexpr uint kZ = 3;
+    using matrix::Rotation3D;
 
-    UnitQuaternion::UnitQuaternion(const arma::vec4& q_){
-    	q = q_;
+    UnitQuaternion::UnitQuaternion() {
+        real() = 1;
+        imaginary().zeros();
     }
 
-    UnitQuaternion::UnitQuaternion(const arma::vec3& v){
-    	q.rows(kX,kZ) = v;
+    UnitQuaternion::UnitQuaternion(const Rotation3D& rotation) {
+        real() = std::sqrt(1.0 + rotation(0,0) + rotation(1,1) + rotation(2,2)) / 2;
+        double w4 = 4.0 * real();
+        imaginary() = arma::vec3({
+            (rotation(2,1) - rotation(1,2)) / w4,
+            (rotation(0,2) - rotation(2,0)) / w4,
+            (rotation(1,0) - rotation(0,1)) / w4
+        });
     }
 
-    UnitQuaternion::UnitQuaternion(const double& angle, const arma::vec3& axis){
-    	q[kW] = std::cos(angle / 2.0);
-    	q.rows(kX,kZ) = std::sin(angle / 2.0) * arma::normalise(axis);
+    UnitQuaternion::UnitQuaternion(double realPart, const arma::vec3& imaginaryPart) {
+        real() = realPart;
+        imaginary() = imaginaryPart;
     }
 
-    UnitQuaternion UnitQuaternion::i(){
-    	arma::vec4 qi = q;
-    	qi.rows(kX,kZ) *= -1;
-    	return UnitQuaternion(qi);
+    UnitQuaternion::UnitQuaternion(const arma::vec3& v) {
+        real() = 0;
+    	imaginary() = v;
     }
 
-    arma::vec3 UnitQuaternion::rotateVector(const arma::vec3& v){
-    	UnitQuaternion vRotated = UnitQuaternion(q) * UnitQuaternion(v) * i();
-        return vRotated.q.rows(kX,kZ);
+    UnitQuaternion::UnitQuaternion(const arma::vec3& axis, double angle) {
+    	real() = std::cos(angle / 2.0);
+    	imaginary() = std::sin(angle / 2.0) * arma::normalise(axis);
     }
 
-    arma::vec3 UnitQuaternion::getAxis(){
+    UnitQuaternion UnitQuaternion::i() const {
+    	UnitQuaternion qi = *this;
+        // take the congugate, as it is equal to the inverse when a unit vector
+    	qi.imaginary() *= -1;
+    	return qi;
+    }
+
+    arma::vec3 UnitQuaternion::rotateVector(const arma::vec3& v) const {
+    	UnitQuaternion vRotated = *this * UnitQuaternion(v) * i();
+        return vRotated.imaginary();
+    }
+
+    arma::vec3 UnitQuaternion::getAxis() const {
     	double angle = getAngle();
     	double sinThetaOnTwo = std::sin(angle / 2.0);
-    	return q.rows(kX,kZ) / sinThetaOnTwo;
+    	return imaginary() / sinThetaOnTwo;
     }
 
-    double UnitQuaternion::getAngle(){
-    	return 2 * std::acos(q[kW]);
+    double UnitQuaternion::getAngle() const {
+    	return 2 * std::acos(real());
     }
 
-    arma::mat33 UnitQuaternion::getMatrix(){
-    	// Jake's method. Does it work? Nobody knows!!
-    	// arma::mat33 m;
-    	// arma::vec3 X = {1,0,0};
-    	// arma::vec3 Y = {0,1,0};
-    	// arma::vec3 Z = {0,0,1};
-    	// m.col(0) = rotateVector(X);
-    	// m.col(1) = rotateVector(Y);
-    	// m.col(2) = rotateVector(Z);
-    	// return m;
-    	return utility::math::matrix::quaternionToRotationMatrix(q);
+    void UnitQuaternion::setAngle(double angle) {
+        real() = std::cos(angle / 2.0);
+        imaginary() = std::sin(angle / 2.0) * arma::normalise(imaginary());
     }
 
-    arma::vec UnitQuaternion::rows(const uint& i, const uint& j) const{
-        return q.rows(i,j);
+    void UnitQuaternion::scaleAngle(double scale) {
+        setAngle(getAngle() * scale);
     }
 
-    double UnitQuaternion::operator [] (const uint& i) const{
-        return q[i];
+    void UnitQuaternion::normalise() {
+        *this = arma::normalise(*this);
     }
 
+    double UnitQuaternion::norm() {
+        return kW() * kW() + kX() * kX() + kY() * kY() + kZ() * kZ();
+    }
 
-	UnitQuaternion UnitQuaternion::operator * (const UnitQuaternion& p) const{
+    UnitQuaternion UnitQuaternion::operator - (const UnitQuaternion& p) const {
+        return *this * p.i();
+    }
+
+	UnitQuaternion UnitQuaternion::operator * (const UnitQuaternion& p) const {
 		//From http://en.wikipedia.org/wiki/Quaternion#Quaternions_and_the_geometry_of_R3
-		arma::vec4 qDotP;
-		qDotP[0] = arma::dot(q.rows(kX,kZ), p.rows(kX,kZ));
-		arma::vec4 qsps;
-		qsps[0] = q[kW] * p[kW];
-		arma::vec4 qspv;
-		qspv.rows(kX,kZ) = q[kW] * p.rows(kX,kZ);
-		arma::vec4 qvps;
-		qvps.rows(kX,kZ) = q.rows(kX,kZ) * p[kW];
-		arma::vec4 qCrossP;
-		qCrossP.rows(kX,kZ) = arma::cross(q.rows(kX,kZ), p.rows(kX,kZ));
-		return UnitQuaternion(arma::vec4(qsps - qDotP + qspv + qvps + qCrossP));
+        double realPart = real() * p.real() - arma::dot(imaginary(), p.imaginary());
+
+        arma::vec3 imaginaryPart = arma::cross(imaginary(), p.imaginary())
+                                 + p.real() *   imaginary()
+                                 +   real() * p.imaginary();
+
+        return UnitQuaternion(realPart, imaginaryPart);
 	}
+
+    UnitQuaternion UnitQuaternion::slerp(const UnitQuaternion& p, const double& t) {
+        // See http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/slerp/
+        // Where qa = *this and qb = p
+
+        double cosHalfTheta = kW() * p.kW() + kX() * p.kX() + kY() * p.kY() + kZ() * p.kZ();
+
+        // If qa=qb or qa=-qb then theta = 0 and we can return qa
+        if (std::abs(cosHalfTheta) >= 1.0) {
+            return *this;
+        }
+
+        double halfTheta = std::acos(cosHalfTheta);
+        double sinHalfTheta = sqrt(1.0 - cosHalfTheta * cosHalfTheta);
+
+        // If theta = 180 degrees then result is not fully defined
+        // We could rotate around any axis normal to qa or qb
+        if (std::abs(sinHalfTheta) < 0.001) {
+            return *this * 0.5 + p * 0.5;
+        }
+
+        // Interpolate
+        double ratioA = std::sin((1 - t) * halfTheta) / sinHalfTheta;
+        double ratioB = std::sin(t * halfTheta) / sinHalfTheta;
+
+        return *this * ratioA + p * ratioB;
+    }
 
 }
 }

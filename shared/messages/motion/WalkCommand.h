@@ -22,29 +22,31 @@
 
 #include <armadillo>
 
+#include "utility/math/matrix/Transform2D.h"
+
 namespace messages {
-    namespace motion {
+namespace motion {
 
-        /**
-         * TODO document
-         *
-         * @author Trent Houliston
-         * @author Brendan Annable
-         */
-        struct WalkCommand {
-            arma::vec2 velocity; // in m/s
-            float rotationalSpeed; // in rads/s
-        };
+    /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     * @author Brendan Annable
+     */
+    struct WalkCommand {
+        // x and y are velocity in m/s and angle is in rads/s
+        utility::math::matrix::Transform2D command;
+    };
 
-        struct WalkStartCommand {
-        };
+    struct WalkStartCommand {
+    };
 
-        struct WalkStopCommand {
-        };
+    struct WalkStopCommand {
+    };
 
-        struct WalkStopped{
-        };
-    }  // motion
+    struct WalkStopped {
+    };
+}  // motion
 }  // messages
 
 #endif  // MESSAGES_MOTION_WALKCOMMAND_H

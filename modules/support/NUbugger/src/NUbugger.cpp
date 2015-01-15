@@ -153,7 +153,7 @@ namespace support {
             }
         });
 
-        on<Trigger<Every<1, std::chrono::seconds>>>([this] (const time_t&) {
+        on<Trigger<Every<1, std::chrono::seconds>>, Options<Single, Priority<NUClear::LOW>>>([this] (const time_t&) {
             Message message;
             message.set_type(Message::PING);
             message.set_filter_id(0);
@@ -309,8 +309,15 @@ namespace support {
             send(packet);
         }
         if(fileEnabled && outputFile) {
-            // Append the number of bytes to the file (so we can re-read it)
-            outputFile << message.ByteSize();
+            // Lock the file mutex
+            std::lock_guard<std::mutex> lock(fileMutex);
+
+            // Get the number of bytes
+            uint32_t size = message.ByteSize();
+
+            // Write it to the stream
+            outputFile.write(reinterpret_cast<char*>(&size), sizeof(uint32_t));
+
             // Append the protocol buffer to the file
             message.SerializeToOstream(&outputFile);
         }

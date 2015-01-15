@@ -20,7 +20,7 @@
 #include "WalkOptimiser.h"
 
 
-#include "utility/support/YamlArmadillo.h"
+#include "utility/support/yaml_armadillo.h"
 #include "utility/math/optimisation/PGAoptimiser.h"
 #include "messages/input/ServoID.h"
 
@@ -174,6 +174,7 @@ namespace modules {
                 printState(state);
                 return state;
             }
+
             void WalkOptimiser::printState(const arma::vec& state){
                 std::cerr << "[";
                 for(uint i = 0; i < parameter_names.size(); ++i){

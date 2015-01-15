@@ -20,17 +20,18 @@
 #include "SensorFilter.h"
 
 #include "messages/platform/darwin/DarwinSensors.h"
-#include "messages/input/Sensors.h"
 #include "messages/input/CameraParameters.h"
 #include "messages/support/Configuration.h"
+
+#include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/math/matrix.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/motion/RobotModels.h"
 
 namespace modules {
     namespace platform {
         namespace darwin {
+
 
             using messages::support::Configuration;
             using messages::platform::darwin::DarwinSensors;
@@ -40,16 +41,17 @@ namespace modules {
             using messages::platform::darwin::ButtonMiddleUp;
             using messages::input::Sensors;
             using messages::input::CameraParameters;
-            using utility::nubugger::graph;
             using messages::input::ServoID;
+            using utility::nubugger::graph;
             using utility::motion::kinematics::calculateAllPositions;
             using utility::motion::kinematics::DarwinModel;
             using utility::motion::kinematics::calculateCentreOfMass;
             using utility::motion::kinematics::Side;
             using utility::motion::kinematics::calculateRobotToIMU;
-            using utility::math::matrix::orthonormal44Inverse;
-            using utility::math::matrix::quaternionToRotationMatrix;
             using utility::math::kalman::IMUModel;
+            using utility::math::matrix::Transform3D;
+            using utility::math::matrix::Rotation3D;
+            using utility::math::geometry::UnitQuaternion;
 
             std::string makeErrorString(const std::string& src, uint errorCode) {
                 std::stringstream s;
@@ -103,7 +105,7 @@ namespace modules {
                     orientationFilter.model.processNoiseDiagonal = arma::ones(orientationFilter.model.size);
                     orientationFilter.model.processNoiseDiagonal.rows(orientationFilter.model.QW,orientationFilter.model.QZ) *= file["IMU_POSITION_PROCESS_NOISE"].as<double>();
                     orientationFilter.model.processNoiseDiagonal.rows(orientationFilter.model.VX,orientationFilter.model.VZ) *= file["IMU_VELOCITY_PROCESS_NOISE"].as<double>();
-                    NUClear::log("ProcessNoise Set: \n", orientationFilter.model.processNoiseDiagonal.t());
+                    // NUClear::log("ProcessNoise Set: \n", orientationFilter.model.processNoiseDiagonal.t());
 
                     MEASUREMENT_NOISE_ACCELEROMETER = arma::eye(3,3) * file["MEASUREMENT_NOISE_ACCELEROMETER"].as<double>();
                     MEASUREMENT_NOISE_GYROSCOPE = arma::eye(3,3) * file["MEASUREMENT_NOISE_GYROSCOPE"].as<double>();
@@ -218,22 +220,43 @@ namespace modules {
                             break;
                         }
 
-                        // Add the sensor values to the system properly
-                        sensors->servos.push_back({
-                            original.errorFlags,
-                            static_cast<ServoID>(i),
-                            original.torqueEnabled,
-                            original.pGain,
-                            original.iGain,
-                            original.dGain,
-                            original.goalPosition,
-                            original.movingSpeed,
-                            original.presentPosition,
-                            original.presentSpeed,
-                            original.load,
-                            original.voltage,
-                            float(original.temperature)
-                        });
+                        if(previousSensors && error != DarwinSensors::Error::OK) {
+                            // Add the sensor values to the system properly
+                            sensors->servos.push_back({
+                                original.errorFlags,
+                                static_cast<ServoID>(i),
+                                original.torqueEnabled,
+                                original.pGain,
+                                original.iGain,
+                                original.dGain,
+                                original.goalPosition,
+                                original.movingSpeed,
+                                previousSensors->servos[i].presentPosition,
+                                previousSensors->servos[i].presentVelocity,
+                                previousSensors->servos[i].load,
+                                previousSensors->servos[i].voltage,
+                                previousSensors->servos[i].temperature
+                            });
+                        }
+                        else {
+                            // Add the sensor values to the system properly
+                            sensors->servos.push_back({
+                                original.errorFlags,
+                                static_cast<ServoID>(i),
+                                original.torqueEnabled,
+                                original.pGain,
+                                original.iGain,
+                                original.dGain,
+                                original.goalPosition,
+                                original.movingSpeed,
+                                original.presentPosition,
+                                original.presentSpeed,
+                                original.load,
+                                original.voltage,
+                                float(original.temperature)
+                            });
+                        }
+
                     }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
@@ -268,7 +291,7 @@ namespace modules {
                     // Gives us the quaternion representation
                     arma::vec o = orientationFilter.get();
                     //Map from robot to world coordinates
-                    sensors->orientation = quaternionToRotationMatrix(o.rows(orientationFilter.model.QW, orientationFilter.model.QZ));
+                    sensors->orientation = Rotation3D(UnitQuaternion(o.rows(orientationFilter.model.QW, orientationFilter.model.QZ)));
 
                     // sensors->orientation.col(2) = -orientation.rows(0,2);
                     // sensors->orientation.col(0) = orientation.rows(3,5);
@@ -315,8 +338,8 @@ namespace modules {
                     // }
 
                     // // Kinematics odometry
-                    // arma::mat44 odometryRightFoot = arma::eye(4,4);
-                    // arma::mat44 odometryLeftFoot = arma::eye(4,4);
+                    // Transform3D odometryRightFoot = arma::eye(4,4);
+                    // Transform3D odometryLeftFoot = arma::eye(4,4);
                     // if(previousSensors){
                     //     //NOTE: calculateOdometryMatrix requires sensors->forwardKinematics to be calculated before calling
                     //     odometryLeftFoot = calculateOdometryMatrix(*sensors, *previousSensors, Side::LEFT);
@@ -427,17 +450,17 @@ namespace modules {
                 });
             }
 
-            arma::mat44 SensorFilter::calculateOdometryMatrix(
+            Transform3D SensorFilter::calculateOdometryMatrix(
                 const messages::input::Sensors& sensors,
                 const messages::input::Sensors& previousSensors,
                 utility::motion::kinematics::Side side) {
-                    arma::mat44 bodyFromAnkleInitialInverse, bodyFromAnkleFinal;
+                    Transform3D bodyFromAnkleInitialInverse, bodyFromAnkleFinal;
                     if(side == Side::LEFT){
                         bodyFromAnkleInitialInverse = previousSensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL);   //Double Inverse
-                        bodyFromAnkleFinal = orthonormal44Inverse(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL));
+                        bodyFromAnkleFinal = sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL).i();
                     } else {
                         bodyFromAnkleInitialInverse = previousSensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL);   //Double Inverse
-                        bodyFromAnkleFinal = orthonormal44Inverse(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL));
+                        bodyFromAnkleFinal = sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL).i();
                     }
                     return  bodyFromAnkleInitialInverse * bodyFromAnkleFinal;
             }

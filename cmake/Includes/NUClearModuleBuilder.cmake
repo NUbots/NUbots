@@ -20,46 +20,13 @@ FUNCTION(NUCLEAR_MODULE)
 
     STRING(REPLACE "/" "" module_name "${module_name}")
 
-    # Set our variables initial values
-    SET(INCLUDES "")
-    SET(LIBRARIES "")
-    SET(ISLIBS "FALSE")
-    SET(ISINCS "FALSE")
-    SET(ISSRCS "FALSE")
-
-    # Loop through all our args
-    FOREACH(arg ${ARGV})
-        # Work out if we are in an INCLUDES or LIBRARIES section
-        IF(${arg} STREQUAL "INCLUDES")
-            SET(ISLIBS "FALSE")
-            SET(ISINCS "TRUE")
-            SET(ISSRCS "FALSE")
-        ELSEIF(${arg} STREQUAL "LIBRARIES")
-            SET(ISLIBS "TRUE")
-            SET(ISINCS "FALSE")
-            SET(ISSRCS "FALSE")
-
-        ELSEIF(${arg} STREQUAL "SOURCES")
-            SET(ISLIBS "FALSE")
-            SET(ISINCS "FALSE")
-            SET(ISSRCS "TRUE")
-
-        # Store this argument in the correct list
-        ELSE()
-            IF(ISLIBS)
-                SET(LIBRARIES ${LIBRARIES} ${arg})
-            ELSEIF(ISINCS)
-                SET(INCLUDES ${INCLUDES} ${arg})
-            ELSEIF(ISSRCS)
-                SET(SOURCES ${SOURCES} ${arg})
-            ELSE()
-                MESSAGE(FATAL_ERROR "Modules take LIBRARIES, INCLUDES and SOURCES only")
-            ENDIF()
-        ENDIF()
-    ENDFOREACH()
+    SET(options, "")
+    SET(oneValueArgs "NAME")
+    SET(multiValueArgs "INCLUDES" "LIBRARIES" "SOURCES")
+    CMAKE_PARSE_ARGUMENTS(MODULE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     # Find all our files
-    FILE(GLOB_RECURSE src "${CMAKE_CURRENT_SOURCE_DIR}/src/**.cpp" , "${CMAKE_CURRENT_SOURCE_DIR}/src/**.h")
+    FILE(GLOB_RECURSE src "${CMAKE_CURRENT_SOURCE_DIR}/src/**.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/**.h")
 
     # Get our configuration files
     FILE(GLOB_RECURSE config_files "config/**")
@@ -90,17 +57,17 @@ FUNCTION(NUCLEAR_MODULE)
     INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/shared)
 
     # Include any directories passed into the function
-    INCLUDE_DIRECTORIES(${INCLUDES})
+    INCLUDE_DIRECTORIES(${MODULE_INCLUDES})
 
     # Add all our code to a library
     IF(SHARED_BUILD)
-        ADD_LIBRARY(${module_name} SHARED ${src} ${SOURCES} ${configuration})
+        ADD_LIBRARY(${module_name} SHARED ${src} ${MODULE_SOURCES} ${configuration})
         SET_PROPERTY(TARGET ${module_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/lib")
     ELSE()
-        ADD_LIBRARY(${module_name} STATIC ${src} ${SOURCES} ${configuration})
+        ADD_LIBRARY(${module_name} STATIC ${src} ${MODULE_SOURCES} ${configuration})
     ENDIF()
 
-    TARGET_LINK_LIBRARIES(${module_name} ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
+    TARGET_LINK_LIBRARIES(${module_name} ${NUBOTS_SHARED_LIBRARIES} ${MODULE_LIBRARIES})
 
     SET_PROPERTY(TARGET ${module_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/lib")
 
@@ -113,12 +80,14 @@ FUNCTION(NUCLEAR_MODULE)
         SET(test_module_name "Test${module_name}")
 
         # Rebuild our sources using the test module
-        FILE(GLOB_RECURSE test_src "tests/**.cpp" , "tests/**.h")
+        FILE(GLOB_RECURSE test_src "tests/**.cpp" "tests/**.h")
         ADD_EXECUTABLE(${test_module_name} ${test_src})
         TARGET_LINK_LIBRARIES(${test_module_name} ${module_name} ${NUBOTS_SHARED_LIBRARIES} ${LIBRARIES})
 
-
         SET_PROPERTY(TARGET ${test_module_name} PROPERTY FOLDER "modules/tests")
+
+        # Add the test
+        ADD_TEST(${test_module_name} ${test_module_name})
 
     ENDIF()
 

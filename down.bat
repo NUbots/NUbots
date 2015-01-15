@@ -1,1 +1,1 @@
-vagrant halt
+vagrant halt nubotsvm
