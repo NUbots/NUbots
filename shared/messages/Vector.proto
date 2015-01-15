@@ -20,6 +20,11 @@
 package messages;
 
 message vec2 {
+    required double x = 1;
+    required double y = 2;
+}
+
+message fvec2 {
     required float x = 1;
     required float y = 2;
 }
@@ -35,6 +40,12 @@ message uvec2 {
 }
 
 message vec3 {
+    required double x = 1;
+    required double y = 2;
+    required double z = 3;
+}
+
+message fvec3 {
     required float x = 1;
     required float y = 2;
     required float z = 3;
@@ -53,6 +64,13 @@ message uvec3 {
 }
 
 message vec4 {
+    required double x = 1;
+    required double y = 2;
+    required double z = 3;
+    required double t = 4;
+}
+
+message fvec4 {
     required float x = 1;
     required float y = 2;
     required float z = 3;

@@ -29,7 +29,7 @@ message Line {
 
 message Circle {
 	required double radius = 1;
-	required ivec2 centre = 2;
+	required vec2 centre = 2;
 }
 
 message Ellipse {
@@ -38,12 +38,12 @@ message Ellipse {
 }
 
 message Quad {
-    required ivec2 tl = 1;
-    required ivec2 tr = 2;
-    required ivec2 bl = 3;
-    required ivec2 br = 4;
+    required vec2 tl = 1;
+    required vec2 tr = 2;
+    required vec2 bl = 3;
+    required vec2 br = 4;
 }
 
 message Polygon {
-    repeated ivec2 point = 1;
+    repeated vec2 point = 1;
 }

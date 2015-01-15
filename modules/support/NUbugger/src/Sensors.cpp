@@ -86,15 +86,15 @@ namespace support {
 
             // The orientation matrix
             auto* orient = sensorData->mutable_orientation();
-            orient->set_xx(sensors.orientation(0,0));
-            orient->set_yx(sensors.orientation(1,0));
-            orient->set_zx(sensors.orientation(2,0));
-            orient->set_xy(sensors.orientation(0,1));
-            orient->set_yy(sensors.orientation(1,1));
-            orient->set_zy(sensors.orientation(2,1));
-            orient->set_xz(sensors.orientation(0,2));
-            orient->set_yz(sensors.orientation(1,2));
-            orient->set_zz(sensors.orientation(2,2));
+            orient->mutable_x()->set_x(sensors.orientation(0,0));
+            orient->mutable_y()->set_x(sensors.orientation(1,0));
+            orient->mutable_z()->set_x(sensors.orientation(2,0));
+            orient->mutable_x()->set_y(sensors.orientation(0,1));
+            orient->mutable_y()->set_y(sensors.orientation(1,1));
+            orient->mutable_z()->set_y(sensors.orientation(2,1));
+            orient->mutable_x()->set_z(sensors.orientation(0,2));
+            orient->mutable_y()->set_z(sensors.orientation(1,2));
+            orient->mutable_z()->set_z(sensors.orientation(2,2));
 
             // The left FSR values
             auto* lfsr = sensorData->mutable_left_fsr();
