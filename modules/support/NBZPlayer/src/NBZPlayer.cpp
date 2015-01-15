@@ -47,7 +47,9 @@ namespace support {
 
                 // Read the first 32 bit int to work out the size
                 uint32_t size;
-                input >> size;
+                input.read(reinterpret_cast<char*>(&size), sizeof(uint32_t));
+
+                log("Size:", size);
 
                 // Read that much into a string
                 std::vector<char> data(size);
@@ -56,7 +58,7 @@ namespace support {
                 // Read the message
                 Message message;
                 message.ParsePartialFromArray(data.data(), data.size());
-
+                log("Type:", message.type());
                 offset = NUClear::clock::now() - time_t(std::chrono::milliseconds(message.utc_timestamp()));
             });
 
@@ -66,7 +68,7 @@ namespace support {
 
                     // Read the first 32 bit int to work out the size
                     uint32_t size;
-                    input >> size;
+                    input.read(reinterpret_cast<char*>(&size), sizeof(uint32_t));
 
                     // Read that much into a string
                     std::vector<char> data(size);
@@ -88,12 +90,12 @@ namespace support {
                         const std::string& source = message.image().data();
 
                         // Get the image data
-                        std::vector<Image::Pixel> data(source.size() / 3);
+                        std::vector<Image::Pixel> pixels(source.size() / 3);
 
-                        std::memcpy(data.data(), source.data(), source.size());
+                        std::memcpy(pixels.data(), source.data(), source.size());
 
                         // Build the image
-                        auto image = std::make_unique<Image>(message.image().dimensions().x(), message.image().dimensions().y(), std::move(data));
+                        auto image = std::make_unique<Image>(message.image().dimensions().x(), message.image().dimensions().y(), std::move(pixels));
 
                         // Wait until it's time to display it
                         std::this_thread::sleep_until(timeToRun);
