@@ -1,0 +1,7 @@
+ADD_ROLE(
+    support::logging::ConsoleLogHandler
+    support::configuration::ConfigSystem
+
+    support::NBZPlayer
+    support::NUbugger
+)
