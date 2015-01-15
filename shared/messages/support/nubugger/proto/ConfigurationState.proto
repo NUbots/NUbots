@@ -24,6 +24,7 @@ message ConfigurationState {
     message KeyPair {
         required string name = 1;
         required Node value = 2;
+        optional string path = 3;
     }
 
     message Node {
@@ -39,15 +40,14 @@ message ConfigurationState {
             MAP = 9;
         }
 
-        required string path = 1;
-        required Type type = 2;
-        optional string tag = 3;
-        optional string string_value = 4;
-        optional double boolean_value = 5;
-        optional double long_value = 6;
-        optional double double_value = 7;
-        repeated Node sequence_value = 8;
-        repeated KeyPair map_value = 9;
+        required Type type = 1;
+        optional string tag = 2;
+        optional string string_value = 3;
+        optional double boolean_value = 4;
+        optional double long_value = 5;
+        optional double double_value = 6;
+        repeated Node sequence_value = 7;
+        repeated KeyPair map_value = 8;
     }
 
     required Node root = 1;

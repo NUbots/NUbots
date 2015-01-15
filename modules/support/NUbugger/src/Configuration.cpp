@@ -37,7 +37,7 @@ namespace support {
     using messages::support::nubugger::proto::Message;
     using messages::support::nubugger::proto::ConfigurationState;
 
-    void processNode(std::string path, ConfigurationState::Node& node, YAML::Node& yaml);
+    void processNode(ConfigurationState::Node& node, YAML::Node& yaml);
     void processPath(std::string path, int currentIndex, ConfigurationState::Node& node, std::map<std::string,
             ConfigurationState::KeyPair*>& directories);
 
@@ -99,11 +99,10 @@ namespace support {
      * Processes a sequence YAML node by settings its respective type on the protocol node. It then iterates through
      * all the nodes in this sequence and processes each node.
      *
-     * @param path The path to the configuration file.
      * @param node The protocol node.
      * @param yaml A sequence YAML node.
      */
-    void processSequenceNode(std::string path, ConfigurationState::Node& node, YAML::Node& yaml) {
+    void processSequenceNode(ConfigurationState::Node& node, YAML::Node& yaml) {
         // set the type of the protocol node to the SEQUENCE Node Type
         node.set_type(ConfigurationState::Node::SEQUENCE);
         // iterate through every yaml node in the sequence
@@ -111,7 +110,7 @@ namespace support {
             // check if the node should be processed
             if (yamlNode.Tag() != NUbugger::IGNORE_TAG) {
                 // recursively calls the function with a new map value
-                processNode(path, *node.add_sequence_value(), yamlNode);
+                processNode(*node.add_sequence_value(), yamlNode);
             }
         }
     }
@@ -120,11 +119,10 @@ namespace support {
      * Processes a map YAML node by setting its respective type on the protocol node. It then iterates through all the
      * nodes in this map and processes each node.
      *
-     * @param path The path to the configuration file.
      * @param node The protocol node.
      * @param yaml A map YAML node.
      */
-    void processMapNode(std::string path, ConfigurationState::Node& node, YAML::Node& yaml) {
+    void processMapNode(ConfigurationState::Node& node, YAML::Node& yaml) {
         // set the type of the protocol node to the MAP Node Type
         node.set_type(ConfigurationState::Node::MAP);
         // iterate through every yaml node in the map
@@ -136,7 +134,7 @@ namespace support {
                 // set the name of this new node to the key of the yaml node and convert it to a string
                 map->set_name(yamlNode.first.as<std::string>());
                 // recursively calls the function with a new map value
-                processNode(path, *map->mutable_value(), yamlNode.second);
+                processNode(*map->mutable_value(), yamlNode.second);
             }
         }
     }
@@ -145,13 +143,10 @@ namespace support {
      * Processes a particular YAML node into its equivalent protocol node. The tag is initially set and the type of the
      * YAML node is then evaluated.
      *
-     * @param path The path to the configuration file.
      * @param node The protocol node.
      * @param yaml A YAML node.
      */
-    void processNode(std::string path, ConfigurationState::Node& node, YAML::Node& yaml) {
-        // set the path of the node
-        node.set_path(path);
+    void processNode(ConfigurationState::Node& node, YAML::Node& yaml) {
         // set the tag of the protocol buffer if it exists
         if (yaml.Tag() != "?") {
             node.set_tag(yaml.Tag());
@@ -163,17 +158,17 @@ namespace support {
             case YAML::NodeType::Null:
                 processNullNode(node);
                 break;
-                // strings and numbers
+            // strings and numbers
             case YAML::NodeType::Scalar:
                 processScalarNode(node, yaml);
                 break;
-                // arrays and lists
+            // arrays and lists
             case YAML::NodeType::Sequence:
-                processSequenceNode(path, node, yaml);
+                processSequenceNode(node, yaml);
                 break;
-                // hashes and dictionaries
+            // hashes and dictionaries
             case YAML::NodeType::Map:
-                processMapNode(path, node, yaml);
+                processMapNode(node, yaml);
                 break;
         }
     }
@@ -190,10 +185,10 @@ namespace support {
         // create a new map value from the current protocol node
         auto* map = node.add_map_value();
         map->set_name(name);                                // set the name of the map
-        node.set_path(path);                                // set the path of the node
+        map->set_path(path);                                // set the path of the map
         node.set_type(ConfigurationState::Node::FILE);      // set the Node Type of the map
         YAML::Node yaml = YAML::LoadFile(path);             // load the YAML file using the current iteration
-        processNode(path, *map->mutable_value(), yaml);     // processes the yaml node into a protocol node
+        processNode(*map->mutable_value(), yaml);           // processes the yaml node into a protocol node
     }
 
     /**
@@ -217,7 +212,7 @@ namespace support {
         if (iterator == directories.end()) {                // check if the directory does not exist
             map = node.add_map_value();                     // create a new map value from the current protocol node
             map->set_name(name);                            // set the name of the map
-            node.set_path(path);                            // set the path of the node
+            map->set_path(directoryPath);                   // set the path of the map
             // set the Node Type of the directory
             node.set_type(ConfigurationState::Node::DIRECTORY);
             // add the directory to the map
@@ -285,7 +280,6 @@ namespace support {
 
         auto* state = message.mutable_configuration_state();    // create the configuration state from the message
         auto* root = state->mutable_root();                     // retrieve the root node from the state
-        root->set_path("root");                                 // set the path of the root node
         root->set_type(ConfigurationState::Node::DIRECTORY);    // set the type of the root node to a directory
 
         for (auto&& path : paths) {                             // iterate through every file path in the config directory
