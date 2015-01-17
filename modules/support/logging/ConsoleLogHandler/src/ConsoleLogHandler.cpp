@@ -57,7 +57,7 @@ namespace modules {
                             std::cout << Colour::green << "DEBUG: ";
                             break;
                         case NUClear::INFO:
-                            std::cout << Colour::blue << "INFO: ";
+                            std::cout << Colour::brightblue << "INFO: ";
                             break;
                         case NUClear::WARN:
                             std::cout << Colour::yellow << "WARN: ";

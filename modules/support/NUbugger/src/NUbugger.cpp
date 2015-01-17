@@ -237,6 +237,9 @@ namespace support {
             auto* api_lookup_table = message.mutable_lookup_table();
 
             api_lookup_table->set_table(lut->getData());
+            api_lookup_table->set_bits_y(lut->BITS_Y);
+            api_lookup_table->set_bits_cb(lut->BITS_CB);
+            api_lookup_table->set_bits_cr(lut->BITS_CR);
 
             send(message);
         }

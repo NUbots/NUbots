@@ -102,15 +102,22 @@ namespace utility {
         }
 
         struct Colour {
-
-            static constexpr ANSISGR<ANSICode::BLACK>   black   = ANSISGR<ANSICode::BLACK>();
-            static constexpr ANSISGR<ANSICode::RED>     red     = ANSISGR<ANSICode::RED>();
-            static constexpr ANSISGR<ANSICode::GREEN>   green   = ANSISGR<ANSICode::GREEN>();
-            static constexpr ANSISGR<ANSICode::YELLOW>  yellow  = ANSISGR<ANSICode::YELLOW>();
-            static constexpr ANSISGR<ANSICode::BLUE>    blue    = ANSISGR<ANSICode::BLUE>();
-            static constexpr ANSISGR<ANSICode::MAGENTA> magenta = ANSISGR<ANSICode::MAGENTA>();
-            static constexpr ANSISGR<ANSICode::CYAN>    cyan    = ANSISGR<ANSICode::CYAN>();
-            static constexpr ANSISGR<ANSICode::GRAY>    gray    = ANSISGR<ANSICode::GRAY>();
+            static constexpr ANSISGR<ANSICode::BLACK>                     black         = ANSISGR<ANSICode::BLACK>();
+            static constexpr ANSISGR<ANSICode::RED>                       red           = ANSISGR<ANSICode::RED>();
+            static constexpr ANSISGR<ANSICode::GREEN>                     green         = ANSISGR<ANSICode::GREEN>();
+            static constexpr ANSISGR<ANSICode::YELLOW>                    yellow        = ANSISGR<ANSICode::YELLOW>();
+            static constexpr ANSISGR<ANSICode::BLUE>                      blue          = ANSISGR<ANSICode::BLUE>();
+            static constexpr ANSISGR<ANSICode::MAGENTA>                   magenta       = ANSISGR<ANSICode::MAGENTA>();
+            static constexpr ANSISGR<ANSICode::CYAN>                      cyan          = ANSISGR<ANSICode::CYAN>();
+            static constexpr ANSISGR<ANSICode::GRAY>                      gray          = ANSISGR<ANSICode::GRAY>();
+            static constexpr ANSISGR<ANSICode::BRIGHT, ANSICode::BLACK>   brightblack   = ANSISGR<ANSICode::BRIGHT, ANSICode::BLACK>();
+            static constexpr ANSISGR<ANSICode::BRIGHT, ANSICode::RED>     brightred     = ANSISGR<ANSICode::BRIGHT, ANSICode::RED>();
+            static constexpr ANSISGR<ANSICode::BRIGHT, ANSICode::GREEN>   brightgreen   = ANSISGR<ANSICode::BRIGHT, ANSICode::GREEN>();
+            static constexpr ANSISGR<ANSICode::BRIGHT, ANSICode::YELLOW>  brightyellow  = ANSISGR<ANSICode::BRIGHT, ANSICode::YELLOW>();
+            static constexpr ANSISGR<ANSICode::BRIGHT, ANSICode::BLUE>    brightblue    = ANSISGR<ANSICode::BRIGHT, ANSICode::BLUE>();
+            static constexpr ANSISGR<ANSICode::BRIGHT, ANSICode::MAGENTA> brightmagenta = ANSISGR<ANSICode::BRIGHT, ANSICode::MAGENTA>();
+            static constexpr ANSISGR<ANSICode::BRIGHT, ANSICode::CYAN>    brightcyan    = ANSISGR<ANSICode::BRIGHT, ANSICode::CYAN>();
+            static constexpr ANSISGR<ANSICode::BRIGHT, ANSICode::GRAY>    brightgray    = ANSISGR<ANSICode::BRIGHT, ANSICode::GRAY>();
         };
     }
 }

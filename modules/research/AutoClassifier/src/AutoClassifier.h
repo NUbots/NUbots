@@ -22,6 +22,7 @@
 
 #include <nuclear>
 #include "messages/vision/LookUpTable.h"
+#include "messages/vision/proto/LookUpTable.pb.h"
 #include "messages/input/Image.h"
 
 namespace modules {
@@ -58,7 +59,8 @@ namespace research {
             messages::vision::LookUpTable& lut,
             const std::vector<messages::input::Image::Pixel>& pixels,
             const messages::vision::Colour& colour,
-            const double rangeSqr
+            const double rangeSqr,
+            messages::vision::proto::LookUpTableDiff& tableDiff
         );
     };
 

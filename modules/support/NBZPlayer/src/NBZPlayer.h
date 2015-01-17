@@ -28,6 +28,7 @@ namespace support {
 
     class NBZPlayer : public NUClear::Reactor {
     private:
+        NUClear::clock::time_point initialTime;
         NUClear::clock::duration offset;
         std::ifstream input;
         bool replay = false;

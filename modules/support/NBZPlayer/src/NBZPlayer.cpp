@@ -22,6 +22,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/support/nubugger/proto/Message.pb.h"
 #include "messages/input/Image.h"
+#include "messages/input/CameraParameters.h"
 
 namespace modules {
 namespace support {
@@ -29,6 +30,7 @@ namespace support {
     using messages::support::Configuration;
     using messages::input::Image;
     using messages::support::nubugger::proto::Message;
+    using messages::input::CameraParameters;
 
     NBZPlayer::NBZPlayer(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -44,7 +46,12 @@ namespace support {
                 // Open a file using the file name and timestamp
                 input.close();
                 input.clear();
-                input.open(config["file"].as<std::string>(), std::ios::binary);
+                std::string filename = config["file"].as<std::string>();
+                input.open(filename, std::ios::binary);
+                if (input.fail()) {
+                    log<NUClear::FATAL>("NBZPlayer could not read from file:", filename);
+                    return;
+                }
 
                 // Read the first 32 bit int to work out the size
                 uint32_t size;
@@ -57,7 +64,24 @@ namespace support {
                 // Read the message
                 Message message;
                 message.ParsePartialFromArray(data.data(), data.size());
-                offset = NUClear::clock::now() - time_t(std::chrono::milliseconds(message.utc_timestamp()));
+                initialTime = NUClear::clock::now();
+                offset = initialTime - time_t(std::chrono::milliseconds(message.utc_timestamp()));
+
+                auto cameraParameters = std::make_unique<CameraParameters>();
+
+                cameraParameters->imageSizePixels = { 640, 480 };
+                cameraParameters->FOV = { 1.0472 , 0.785398 };
+                cameraParameters->distortionFactor = -0.000018;
+                arma::vec2 tanHalfFOV;
+                tanHalfFOV << std::tan(cameraParameters->FOV[0] * 0.5) << std::tan(cameraParameters->FOV[1] * 0.5);
+                arma::vec2 imageCentre;
+                imageCentre << cameraParameters->imageSizePixels[0] * 0.5 << cameraParameters->imageSizePixels[1] * 0.5;
+                cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
+                cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
+
+
+                emit<Scope::DIRECT>(std::move(cameraParameters));
+
             });
 
 
@@ -73,9 +97,20 @@ namespace support {
                     input.read(data.data(), size);
 
                     // If we are going to replay then reset the stream
-                    if(input.eof() && replay) {
+                    if(input.eof()) {
+                        if (!replay) {
+                            log<NUClear::INFO>("Reached end of log file, quitting");
+                            break;
+                        }
+
+                        // replay, go back to beginning of file
                         input.clear();
                         input.seekg(0, std::ios::beg);
+                        auto now = NUClear::clock::now();
+                        offset += now - initialTime;
+                        initialTime = now;
+                        log<NUClear::INFO>("Reached end of log file, replaying");
+                        continue;
                     }
 
                     // Read the message
@@ -89,8 +124,8 @@ namespace support {
                         time_t timeToRun = time_t(std::chrono::milliseconds(message.utc_timestamp())) + offset;
 
                         // Get the width and height
-                        int width = message.image().dimensions().y();
-                        int height = message.image().dimensions().x();
+                        int width = message.image().dimensions().x();
+                        int height = message.image().dimensions().y();
                         const std::string& source = message.image().data();
 
                         // Get the image data

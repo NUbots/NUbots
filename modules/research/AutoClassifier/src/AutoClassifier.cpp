@@ -35,6 +35,7 @@ namespace research {
     using messages::vision::LookUpTable;
     using messages::vision::ClassifiedImage;
     using messages::vision::ObjectClass;
+    using messages::vision::proto::LookUpTableDiff;
     using messages::support::Configuration;
     using utility::math::geometry::ParametricLine;
 
@@ -77,6 +78,8 @@ namespace research {
 
             uint rangeSqr = std::pow(orangeData.range, 2);
 
+            auto tableDiff = std::make_unique<LookUpTableDiff>();
+
             for (auto& ball : balls) {
                 auto& image = *ball.classifiedImage->image;
                 auto& circle = ball.circle;
@@ -96,13 +99,16 @@ namespace research {
                     uint maxX = std::min(edgePoints[1], double(image.width() - 1));
 
                     for (uint x = minX; x <= maxX; x++) {
-                        classifyNear(x, y, image, newLut, orangeData.pixels, Colour::ORANGE, rangeSqr);
+                        classifyNear(x, y, image, newLut, orangeData.pixels, Colour::ORANGE, rangeSqr, *tableDiff);
                     }
                 }
 
             }
 
-            emit(std::move(newLutObj));
+            if (tableDiff->diff_size() > 0) {
+                emit(std::move(newLutObj));
+                emit(std::move(tableDiff));
+            }
 
         });
 
@@ -119,6 +125,8 @@ namespace research {
             }
 
             uint rangeSqr = std::pow(yellowData.range, 2);
+
+            auto tableDiff = std::make_unique<LookUpTableDiff>();
 
             for (auto& goal : goals) {
                 auto& image = *goal.classifiedImage->image;
@@ -140,13 +148,16 @@ namespace research {
                     uint maxX = std::min(edgePoints[1], double(image.width() - 1));
 
                     for (uint x = minX; x <= maxX; x++) {
-                        classifyNear(x, y, image, newLut, yellowData.pixels, Colour::YELLOW, rangeSqr);
+                        classifyNear(x, y, image, newLut, yellowData.pixels, Colour::YELLOW, rangeSqr, *tableDiff);
                     }
                 }
 
             }
 
-            emit(std::move(newLutObj));
+            if (tableDiff->diff_size() > 0) {
+                emit(std::move(newLutObj));
+                emit(std::move(tableDiff));
+            }
 
         });
 
@@ -167,18 +178,23 @@ namespace research {
             uint greenRangeSqr = std::pow(greenData.range, 2);
             uint whiteRangeSqr = std::pow(whiteData.range, 2);
 
+            auto tableDiff = std::make_unique<LookUpTableDiff>();
+
             for (uint x = 0; x < classifiedImage.dimensions[0]; x++) {
                 for (uint y = classifiedImage.visualHorizonAtPoint(x); y < classifiedImage.dimensions[1]; y++) {
                     if (greenData.enabled) {
-                        classifyNear(x, y, image, newLut, greenData.pixels, Colour::GREEN, greenRangeSqr);
+                        classifyNear(x, y, image, newLut, greenData.pixels, Colour::GREEN, greenRangeSqr, *tableDiff);
                     }
                     if (whiteData.enabled) {
-                        classifyNear(x, y, image, newLut, whiteData.pixels, Colour::WHITE, whiteRangeSqr);
+                        classifyNear(x, y, image, newLut, whiteData.pixels, Colour::WHITE, whiteRangeSqr, *tableDiff);
                     }
                 }
             }
 
-            emit(std::move(newLutObj));
+            if (tableDiff->diff_size() > 0) {
+                emit(std::move(newLutObj));
+                emit(std::move(tableDiff));
+            }
 
         });
 
@@ -191,7 +207,8 @@ namespace research {
         LookUpTable& lut,
         const std::vector<Image::Pixel>& pixels,
         const Colour& colour,
-        const double rangeSqr
+        const double rangeSqr,
+        LookUpTableDiff& tableDiff
     ) {
         auto& pixel = image(x, y);
         // if pixel is unclassfied and close to 'green' coloured, classify it
@@ -205,6 +222,9 @@ namespace research {
                 if (distSqr <= rangeSqr) {
                     // classify!
                     lut(pixel) = colour;
+                    auto& diff = *tableDiff.add_diff();
+                    diff.set_lut_index(lut.getLUTIndex(pixel));
+                    diff.set_classification(colour);
                     break;
                 }
             }

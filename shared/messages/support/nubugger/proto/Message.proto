@@ -43,6 +43,7 @@ message Message {
         DRAW_OBJECTS = 8;
         REACTION_STATISTICS = 9;
         LOOKUP_TABLE = 10;
+        LOOKUP_TABLE_DIFF = 15;
         BEHAVIOUR = 11;
         COMMAND = 12;
         REACTION_HANDLES = 13;
@@ -62,6 +63,7 @@ message Message {
     optional messages.support.nubugger.proto.DrawObjects draw_objects = 11;
     optional messages.support.nuclear.proto.ReactionStatistics reaction_statistics = 12;
     optional messages.vision.proto.LookUpTable lookup_table = 13;
+    optional messages.vision.proto.LookUpTableDiff lookup_table_diff = 18;
     optional messages.behaviour.proto.Behaviour behaviour = 14;
     optional messages.input.proto.GameState game_state = 15;
     optional Command command = 16;

@@ -20,6 +20,7 @@
 #include "NUbugger.h"
 
 #include "messages/support/nubugger/proto/Message.pb.h"
+#include "messages/vision/proto/LookUpTable.pb.h"
 #include "messages/input/Image.h"
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/vision/VisionObjects.h"
@@ -33,6 +34,7 @@ namespace support {
 
     using messages::input::Sensors;
     using messages::vision::proto::VisionObject;
+    using messages::vision::proto::LookUpTableDiff;
     using messages::vision::ObjectClass;
     using messages::vision::ClassifiedImage;
     using messages::vision::Goal;
@@ -188,6 +190,16 @@ namespace support {
                 quad->mutable_br()->set_x(g.quad.getBottomRight()[0]);
                 quad->mutable_br()->set_y(g.quad.getBottomRight()[1]);
             }
+
+            send(message);
+        }));
+
+        handles["lookuptable"].push_back(on<Trigger<LookUpTableDiff>, Options<Single, Priority<NUClear::LOW>>>([this] (const LookUpTableDiff& tableDiff) {
+            Message message;
+            message.set_type(Message::LOOKUP_TABLE_DIFF);
+            message.set_filter_id(0);
+            message.set_utc_timestamp(getUtcTimestamp());
+            *message.mutable_lookup_table_diff() = tableDiff;
 
             send(message);
         }));

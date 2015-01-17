@@ -20,9 +20,18 @@
 package messages.vision.proto;
 
 message LookUpTable {
-    optional bytes table = 1;
-    optional uint32 bits_y = 2;
-    optional uint32 bits_cb = 3;
-    optional uint32 bits_cr = 4;
+    required bytes table = 1;
+    required uint32 bits_y = 2;
+    required uint32 bits_cb = 3;
+    required uint32 bits_cr = 4;
     optional bool save = 5;
+}
+
+message LookUpTableDiff {
+    message Diff {
+        required uint32 lut_index = 1;
+        required uint32 classification = 2;
+    }
+    // format is a repeated 4 bytes of [y, cb, cr, classification]
+    repeated Diff diff = 1;
 }
