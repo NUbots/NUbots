@@ -38,8 +38,10 @@ namespace research {
 
         on<Trigger<Configuration<AutoClassifierProvider>>>([this] (const Configuration<AutoClassifierProvider>& config) {
 
-            ballProvider.enable(config["ball"].as<bool>());
-            goalProvider.enable(config["goal"].as<bool>());
+            ballProvider.enable(config["ball"]["enabled"].as<bool>());
+            ballEdgeBuffer = config["ball"]["edge_buffer"].as<int>();
+            goalProvider.enable(config["goal"]["enabled"].as<bool>());
+            goalEdgeBuffer = config["goal"]["edge_buffer"].as<int>();
             // fieldProvider.enable(config["field"].as<bool>());
             // lineProvider.enable(config["line"].as<bool>());
         });
@@ -63,12 +65,12 @@ namespace research {
                 uint maxY = std::min(std::floor(centre[1] + radius), double(image.height() - 1));
 
                 // loop through pixels on the image in bounding box
-                for (uint y = minY; y <= maxY; y++) {
+                for (uint y = minY + ballEdgeBuffer; y <= maxY - ballEdgeBuffer; y++) {
                     auto edgePoints = circle.getEdgePoints(y);
                     uint minX = std::max(edgePoints[0], 0.0);
                     uint maxX = std::min(edgePoints[1], double(image.width() - 1));
 
-                    for (uint x = minX; x <= maxX; x++) {
+                    for (uint x = minX + ballEdgeBuffer; x <= maxX - ballEdgeBuffer; x++) {
                         pixels->pixels.push_back(image(x, y));
                     }
                 }
@@ -92,7 +94,7 @@ namespace research {
                 uint minY = std::max(std::min(quad.getTopLeft()[1], quad.getTopRight()[1]), 0.0);
                 uint maxY = std::min(std::max(quad.getBottomLeft()[1], quad.getBottomRight()[1]), double(image.height() - 1));
 
-                for (uint y = minY; y <= maxY; y++) {
+                for (uint y = minY + goalEdgeBuffer; y <= maxY - goalEdgeBuffer; y++) {
                     arma::vec2 edgePoints;
                     try {
                         edgePoints = quad.getEdgePoints(y);
@@ -102,7 +104,7 @@ namespace research {
                     uint minX = std::max(edgePoints[0], 0.0);
                     uint maxX = std::min(edgePoints[1], double(image.width() - 1));
 
-                    for (uint x = minX; x <= maxX; x++) {
+                    for (uint x = minX + goalEdgeBuffer; x <= maxX - goalEdgeBuffer; x++) {
                         pixels->pixels.push_back(image(x, y));
                     }
                 }

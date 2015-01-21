@@ -35,6 +35,10 @@ namespace research {
         explicit AutoClassifierProvider(std::unique_ptr<NUClear::Environment> environment);
 
     private:
+        int ballEdgeBuffer  = 0;
+        int goalEdgeBuffer  = 0;
+        int fieldEdgeBuffer = 0;
+        int lineEdgeBuffer  = 0;
 
         ReactionHandle ballProvider;
         ReactionHandle goalProvider;

@@ -123,6 +123,7 @@ namespace research {
             //Loop through each classification char
             for(auto& c : config["limits"]) {
                 maxVolume[static_cast<Colour>(c.first.as<char>())] = c.second["max_volume"].as<int>();
+                maxSurfaceArea[static_cast<Colour>(c.first.as<char>())] = c.second["surface_area_volume_ratio"].as<double>() * maxVolume[static_cast<Colour>(c.first.as<char>())];
             }
         });
 
@@ -176,6 +177,7 @@ namespace research {
             auto& vol     = volume[c];
             auto& maxVol  = maxVolume[c];
             auto& sa      = surfaceArea[c];
+            auto& maxSA   = maxSurfaceArea[c];
 
             // Build up our differences in the look up table
             auto tableDiff = std::make_unique<LookUpTableDiff>();
@@ -238,6 +240,19 @@ namespace research {
                             auto& diff = *tableDiff->add_diff();
                             diff.set_lut_index(lut.getLUTIndex(pixel));
                             diff.set_classification(c);
+
+                            // If we exceeded our SA constraint then shed
+                            if(sa.size() >= maxSA) {
+                                // Emit the diff of the voxels we are about to remove
+                                for(auto& s : sa) {
+                                    // Add our diff for displaying
+                                    auto& diff = *tableDiff->add_diff();
+                                    diff.set_lut_index(getIndex(lut, s[0], s[1], s[2]));
+                                    diff.set_classification(Colour::UNCLASSIFIED);
+                                }
+
+                                shed(mLut, c, sa, vol);
+                            }
                         }
                     }
                 }
