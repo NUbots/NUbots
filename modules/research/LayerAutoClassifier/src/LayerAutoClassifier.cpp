@@ -20,6 +20,7 @@
 #include "LayerAutoClassifier.h"
 
 #include "messages/research/AutoClassifierPixels.h"
+#include "messages/support/Configuration.h"
 #include "messages/vision/LookUpTable.h"
 #include "messages/vision/proto/LookUpTable.pb.h"
 
@@ -28,6 +29,7 @@ namespace research {
 
     using messages::input::Image;
     using messages::research::AutoClassifierPixels;
+    using messages::support::Configuration;
     using messages::vision::LookUpTable;
     using messages::vision::proto::LookUpTableDiff;
     using messages::vision::Colour;
@@ -116,8 +118,13 @@ namespace research {
     LayerAutoClassifier::LayerAutoClassifier(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        maxVolume[Colour::YELLOW] = 100;
-        maxVolume[Colour::ORANGE] = 100;
+        on<Trigger<Configuration<LayerAutoClassifier>>>([this](const Configuration<LayerAutoClassifier>& config) {
+
+            //Loop through each classification char
+            for(auto& c : config["limits"]) {
+                maxVolume[static_cast<Colour>(c.first.as<char>())] = c.second["max_volume"].as<int>();
+            }
+        });
 
         // When we get a look up table then it was uploaded or emitted by someone else
         // We need to set it up for our datastructure

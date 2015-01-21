@@ -1,0 +1,7 @@
+limits:
+  y:
+    max_volume: 150
+  o:
+    max_volume: 100
+  g:
+    max_volume: 100
