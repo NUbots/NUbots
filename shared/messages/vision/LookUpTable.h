@@ -65,6 +65,7 @@ namespace messages {
 
             std::string getData() const;
             const std::vector<Colour>& getRawData() const;
+            std::vector<Colour>& getRawData();
 
             /*!
                 @brief Classifies a pixel

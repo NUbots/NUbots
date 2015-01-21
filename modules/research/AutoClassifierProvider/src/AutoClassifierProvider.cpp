@@ -47,6 +47,7 @@ namespace research {
         ballProvider = on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Provider Balls", [this](const std::vector<Ball>& balls) {
 
             auto pixels = std::make_unique<AutoClassifierPixels>();
+            pixels->classification = Colour::ORANGE;
 
             // Loop through our balls
             for (auto& ball : balls) {
@@ -80,6 +81,7 @@ namespace research {
         goalProvider = on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Goals", [this](const std::vector<Goal>& goals) {
 
             auto pixels = std::make_unique<AutoClassifierPixels>();
+            pixels->classification = Colour::YELLOW;
 
             for (auto& goal : goals) {
                 auto& image = *goal.classifiedImage->image;
