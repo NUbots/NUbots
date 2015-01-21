@@ -20,4 +20,5 @@ ADD_ROLE(
 
     # Research
     research::AutoClassifierProvider
+    research::LayerAutoClassifier
 )
