@@ -23,12 +23,14 @@
 #include "messages/support/nubugger/proto/Message.pb.h"
 #include "messages/input/Image.h"
 #include "messages/input/CameraParameters.h"
+#include "messages/platform/darwin/DarwinSensors.h"
 
 namespace modules {
 namespace support {
 
     using messages::support::Configuration;
     using messages::input::Image;
+    using messages::platform::darwin::DarwinSensors;
     using messages::support::nubugger::proto::Message;
     using messages::input::CameraParameters;
 
@@ -141,6 +143,85 @@ namespace support {
 
                         // Send it!
                         emit(std::move(image));
+                    }
+                    else if(message.type() == Message::SENSOR_DATA) {
+
+                        // Make a darwin sensors
+                        auto sensors = std::make_unique<DarwinSensors>();
+
+                        sensors->accelerometer = {
+                            -message.sensor_data().accelerometer().y(),
+                             message.sensor_data().accelerometer().x(),
+                            -message.sensor_data().accelerometer().z()
+                        };
+
+                        sensors->gyroscope = {
+                            -message.sensor_data().gyroscope().x(),
+                            -message.sensor_data().gyroscope().y(),
+                             message.sensor_data().gyroscope().z()
+                        };
+
+                        for(const auto& s : message.sensor_data().servo()) {
+
+                            auto& servo = sensors->servo[s.id()];
+
+                            servo.errorFlags = s.error_flags();
+                            servo.torqueEnabled = s.enabled();
+
+                            servo.pGain = s.p_gain();
+                            servo.iGain = s.i_gain();
+                            servo.dGain = s.d_gain();
+
+                            servo.goalPosition = s.goal_position();
+                            servo.movingSpeed = s.goal_velocity();
+
+                            servo.presentPosition = s.present_position();
+                            servo.presentSpeed = s.present_velocity();
+
+                            servo.load = s.load();
+                            servo.voltage = s.voltage();
+                            servo.temperature = s.temperature();
+
+                        }
+
+                        for(const auto& l : message.sensor_data().led()) {
+                            switch(l.id()) {
+                                case 0: {
+                                    sensors->ledPanel.led2 = l.colour() == 0xFF0000;
+                                } break;
+                                case 1:{
+                                    sensors->ledPanel.led3 = l.colour() == 0xFF0000;
+                                } break;
+                                case 2:{
+                                    sensors->ledPanel.led4 = l.colour() == 0xFF0000;
+                                } break;
+                                case 3:{
+                                    sensors->eyeLED.r = (l.colour() & 0xFF0000) << 16;
+                                    sensors->eyeLED.g = (l.colour() & 0x00FF00) << 8;
+                                    sensors->eyeLED.b = (l.colour() & 0x0000FF) << 0;
+                                } break;
+                                case 4:{
+                                    sensors->headLED.r = (l.colour() & 0xFF0000) << 16;
+                                    sensors->headLED.g = (l.colour() & 0x00FF00) << 8;
+                                    sensors->headLED.b = (l.colour() & 0x0000FF) << 0;
+                                } break;
+                            }
+
+                        }
+
+                        for(const auto& l : message.sensor_data().button()) {
+
+                            switch(l.id()) {
+                                case 0: {
+                                    sensors->buttons.left = l.value();
+                                } break;
+                                case 1: {
+                                    sensors->buttons.middle = l.value();
+                                } break;
+                            }
+                        }
+
+                        emit(std::move(sensors));
                     }
                 }
             },

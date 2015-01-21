@@ -10,7 +10,6 @@ ADD_ROLE(
 
     # Hardware Interface
     support::NBZPlayer
-    platform::fakedarwin::HardwareIO
     platform::darwin::SensorFilter
 
     # Vision

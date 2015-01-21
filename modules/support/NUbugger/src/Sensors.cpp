@@ -40,7 +40,7 @@ namespace support {
 
             message.set_type(Message::SENSOR_DATA);
             message.set_filter_id(1);
-            message.set_utc_timestamp(getUtcTimestamp());
+            message.set_utc_timestamp(std::chrono::duration_cast<std::chrono::milliseconds>(sensors.timestamp.time_since_epoch()).count());
 
             auto* sensorData = message.mutable_sensor_data();
 
