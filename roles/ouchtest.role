@@ -1,0 +1,14 @@
+ADD_ROLE(
+    #Support
+    support::SignalCatcher
+    support::logging::ConsoleLogHandler
+    support::configuration::ConfigSystem
+    support::NUbugger
+
+    #Sensors
+    platform::darwin::HardwareIO
+    platform::darwin::SensorFilter
+
+    behaviour::skills::OuchTest
+    output::eSpeak
+)

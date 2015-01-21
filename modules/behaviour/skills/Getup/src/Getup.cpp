@@ -52,12 +52,12 @@ namespace modules {
                 on<Trigger<Configuration<Getup>>>([this] (const Configuration<Getup>& file){
 
                     //encode fallen angle as a cosine so we can compare it directly to the z axis value
-                    double fallenAngleConfig = file.config["FALLEN_ANGLE"].as<double>();
+                    double fallenAngleConfig = file["FALLEN_ANGLE"].as<double>();
                     FALLEN_ANGLE = cos(fallenAngleConfig);
 
                     //load priorities for the getup
-                    GETUP_PRIORITY = file.config["GETUP_PRIORITY"].as<float>();
-                    EXECUTION_PRIORITY = file.config["EXECUTION_PRIORITY"].as<float>();
+                    GETUP_PRIORITY = file["GETUP_PRIORITY"].as<float>();
+                    EXECUTION_PRIORITY = file["EXECUTION_PRIORITY"].as<float>();
                 });
 
                 fallenCheck = on<Trigger<Sensors>, Options<Single>>([this] (const Sensors& sensors) {
