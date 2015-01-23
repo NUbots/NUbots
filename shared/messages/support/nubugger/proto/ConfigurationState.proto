@@ -43,8 +43,8 @@ message ConfigurationState {
         required Type type = 1;
         optional string tag = 2;
         optional string string_value = 3;
-        optional double boolean_value = 4;
-        optional double long_value = 5;
+        optional bool boolean_value = 4;
+        optional sint64 long_value = 5;
         optional double double_value = 6;
         repeated Node sequence_value = 7;
         repeated KeyPair map_value = 8;
