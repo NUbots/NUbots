@@ -210,6 +210,9 @@ namespace support {
             case Message::REACTION_HANDLES:
                 recvReactionHandles(message);
                 break;
+            case Message::CONFIGURATION_STATE:
+                recvConfigurationState(message);
+                break;
             default:
                 return;
         }

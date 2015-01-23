@@ -40,9 +40,10 @@ namespace support {
     void processNode(ConfigurationState::Node& node, YAML::Node& yaml);
     void processPath(std::string path, int currentIndex, ConfigurationState::Node& node, std::map<std::string,
             ConfigurationState::KeyPair*>& directories);
+    void processConfiguration(std::string path, YAML::Node& root, YAML::Node& yaml, ConfigurationState::Node node);
 
     /**
-     * Processes a null YAML node by setting its respective type on the protocol node.
+     * @brief Processes a null YAML node by setting its respective type on the protocol node.
      *
      * @param node The protocol node.
      */
@@ -52,8 +53,8 @@ namespace support {
     }
 
     /**
-     * Processes a scalar YAML node by setting its respective type on the protocol node. A scalar node may comprise a
-     * boolean, number or string.
+     * @brief Processes a scalar YAML node by setting its respective type on the protocol node. A scalar node may 
+     * comprise a boolean, number or string.
      *
      * @param node The protocol node.
      * @param yaml A scalar YAML node.
@@ -96,8 +97,8 @@ namespace support {
     }
 
     /**
-     * Processes a sequence YAML node by settings its respective type on the protocol node. It then iterates through
-     * all the nodes in this sequence and processes each node.
+     * @brief Processes a sequence YAML node by settings its respective type on the protocol node. It then iterates 
+     * through all the nodes in this sequence and processes each node.
      *
      * @param node The protocol node.
      * @param yaml A sequence YAML node.
@@ -116,8 +117,8 @@ namespace support {
     }
 
     /**
-     * Processes a map YAML node by setting its respective type on the protocol node. It then iterates through all the
-     * nodes in this map and processes each node.
+     * @brief Processes a map YAML node by setting its respective type on the protocol node. It then iterates through 
+     * all the nodes in this map and processes each node.
      *
      * @param node The protocol node.
      * @param yaml A map YAML node.
@@ -140,8 +141,8 @@ namespace support {
     }
 
     /**
-     * Processes a particular YAML node into its equivalent protocol node. The tag is initially set and the type of the
-     * YAML node is then evaluated.
+     * @brief Processes a particular YAML node into its equivalent protocol node. The tag is initially set and the type of
+     * the YAML node is then evaluated.
      *
      * @param node The protocol node.
      * @param yaml A YAML node.
@@ -174,8 +175,8 @@ namespace support {
     }
 
     /**
-     * Processes a configuration file by setting the type of the protocol node, loading the file through its path and
-     * then processing the information within that file.
+     * @brief Processes a configuration file by setting the type of the protocol node, loading the file through its path
+     * and then processing the information within that file.
      *
      * @param path The path to the configuration file.
      * @param name The name of the configuration file.
@@ -192,8 +193,8 @@ namespace support {
     }
 
     /**
-     * A directory is processed by first retrieving the path to it and determining if it exists in the directories map.
-     * If the directory is not found within this map, then a new directory node is created and added to it. Otherwise,
+     * @brief A directory is processed by first retrieving the path to it and determining if it exists in the directories 
+     * map. If the directory is not found within this map, then a new directory node is created and added to it. Otherwise,
      * the directory node is accessed. Finally, the next section of the path is processed.
      *
      * @param path The path of the configuration file.
@@ -225,8 +226,8 @@ namespace support {
         processPath(path, index + 1, *map->mutable_value(), directories);
     }
     /**
-     * Processes a configuration file path recursively. The name of the file or directory is retrieved by using the
-     * index of the first known '/'. This index determines whether a file or directory needs to be processed.
+     * @brief Processes a configuration file path recursively. The name of the file or directory is retrieved by 
+     * using the index of the first known '/'. This index determines whether a file or directory needs to be processed.
      *
      * @param path The path of the configuration file.
      * @param currentIndex The current index to use when searching the path.
@@ -250,7 +251,7 @@ namespace support {
     }
 
     /**
-     * Process a configuration file path by calling its recursive function.
+     * @brief Process a configuration file path by calling its recursive function.
      *
      * @param path The path of the configuration file.
      * @param node The protocol node.
@@ -262,7 +263,7 @@ namespace support {
     }
 
     /**
-     * A command sent when the network requests the configuration state data. It retrieves all of the configuration
+     * @brief A command sent when the network requests the configuration state data. It retrieves all of the configuration
      * files and converts them into readable messages to send back over the network.
      */
     void NUbugger::sendConfigurationState() {
@@ -286,6 +287,94 @@ namespace support {
             processPath(path, *root, directories);              // process the path using the root node
         }
         send(message);                                          // send the message over the network
+    }
+
+    void saveConfigurationFile(std::string path, YAML::Node& root) {
+        YAML::Emitter emitter;
+        emitter << root;
+        std::ofstream fout(path);
+        fout << emitter.c_str();
+    }
+
+    void processNullConfiguration(std::string path, YAML::Node& root, YAML::Node& yaml, ConfigurationState::Node node) { 
+        std::cout << "Null " << yaml.Type() << std::endl;
+    }
+
+    void processScalarConfiguration(std::string path, YAML::Node& root, YAML::Node& yaml, ConfigurationState::Node node) { 
+        if (node.has_double_value()) {
+            double value = node.double_value();
+            yaml = std::to_string(value);
+        } else if (node.has_boolean_value()) {
+            bool value = node.boolean_value();
+            yaml = std::to_string(value);
+        } else if (node.has_long_value()) {
+            long value = node.long_value();
+            yaml = std::to_string(value);
+        } else if (node.has_long_value()) {
+            long value = node.long_value();
+            yaml = std::to_string(value);
+        } else {
+            yaml = node.string_value();    
+        }
+        saveConfigurationFile(path, root);
+    }
+
+    void processSequenceConfiguration(std::string path, YAML::Node& root, YAML::Node& yaml, ConfigurationState::Node node) { 
+        std::cout << "Sequence " << yaml.Type() << std::endl;
+    }
+
+    void processMapConfiguration(std::string path, YAML::Node& root, YAML::Node& yaml, ConfigurationState::Node node) {
+        // get the map from the node
+        ConfigurationState::KeyPair map = node.map_value(0);
+        // get the name of the current map node
+        std::string name = map.name();
+        // iterate through every yaml node in the map
+        for (auto&& yamlNode : yaml) {
+            // check if the key is the same as the name of the node
+            if (yamlNode.first.as<std::string>() == name) {
+                // process the value of both the map and yaml node
+                processConfiguration(path, root, yamlNode.second, map.value());
+                // escape any more processing
+                return;
+            }
+        }
+
+    }
+
+    void processConfiguration(std::string path, YAML::Node& root, YAML::Node& yaml, ConfigurationState::Node node) {
+        switch (yaml.Type()) {
+            case YAML::NodeType::Undefined:
+                // TODO Handle it somehow?
+                break;
+            case YAML::NodeType::Null:
+                processNullConfiguration(path, root, yaml, node);
+                break;
+            // strings and numbers
+            case YAML::NodeType::Scalar:
+                processScalarConfiguration(path, root, yaml, node);
+                break;
+            // arrays and lists
+            case YAML::NodeType::Sequence:
+                processSequenceConfiguration(path, root, yaml, node);
+                break;
+            // hashes and dictionaries
+            case YAML::NodeType::Map:
+                processMapConfiguration(path, root, yaml, node);
+                break;    
+        }
+    }
+
+    void NUbugger::recvConfigurationState(const Message& message) {
+        // get the root node from the message
+        auto root = message.configuration_state().root();
+        // get the map that contains the configuration file details
+        ConfigurationState::KeyPair file = root.map_value(0);
+        // get the path from the file
+        std::string path = file.path();
+        // load the YAML file given the path
+        YAML::Node yaml = YAML::LoadFile(path);
+        // process the file given the value of the file and the yaml file
+        processConfiguration(path, yaml, yaml, file.value());
     }
 }
 }
