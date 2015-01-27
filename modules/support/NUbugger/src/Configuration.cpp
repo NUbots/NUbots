@@ -329,51 +329,44 @@ namespace support {
 
     /**
      * @brief Processes a sequence configuration node.
-     * @details Processes a sequence configuration node by retrieving the index of the sequence item from the tag in the current
-     * sequence node. This index is then used to access the correct YAML node which is then passed into for processing with the 
-     * first sequence value of the sequence node.
+     * @details Processes a sequence configuration node by iterating through every sequence protocol node and retrieving its index using its
+     * tag. This index is then used to access the correct YAML node which is then passed into for processing.
      * 
      * @param node The current ConfigurationState node.
      * @param yaml Thee current YAML node.
      */
     void processSequenceConfiguration(ConfigurationState::Node node, YAML::Node& yaml) {
-        // get the index of the sequence item
-        int index = std::stoi(node.tag());
-        // get the yaml node at the specified index
-        auto&& yamlNode = yaml[index];
-        std::cout << "yaml " << std::endl << yaml << std::endl;
-        std::cout << "index " << index << std::endl;
-        std::cout << "yaml node " << yamlNode << std::endl;
-        // process the value of both the map and yaml node
-        processConfiguration(node.sequence_value(0), yamlNode);
+        // iterate through every sequence protocol node
+        for (int i = 0; i < node.sequence_value_size(); i++) {
+            // get the current sequence value from the protocol node
+            ConfigurationState::Node sequence = node.sequence_value(i);
+            // get the index of the sequence item
+            int index = std::stoi(sequence.tag());
+            // get the yaml node at the specified index
+            auto&& yamlNode = yaml[index];
+            // process the value of both the map and yaml node
+            processConfiguration(sequence, yamlNode);
+        }
     }
 
     /**
      * @brief Processes a map configuration node.
-     * @details Processes a map configuration node by iterating through each of the YAML nodes in the map, comparing whether the
-     * YAML node key is equivalent to the name of the configuration node's map value. If they are equivalent, then the current
-     * YAML node in the loop is at the correct configuration as the node. The value's of both the YAML node and map value are
-     * then processed. 
+     * @details Processes a map configuration node by iterating through each map value in the protocol node, and processes its configuration
+     * by passing in the value of the map and respective YAML Node.
      * 
      * @param node The current ConfigurationState node.
      * @param yaml Thee current YAML node.
      */
     void processMapConfiguration(ConfigurationState::Node node, YAML::Node& yaml) {
-        // get the map from the node
-        ConfigurationState::KeyPair map = node.map_value(0);
-        // get the name of the current map node
-        std::string name = map.name();
-        // iterate through every yaml node in the map
-        for (auto&& yamlNode : yaml) {
-            // check if the key is the same as the name of the node
-            if (yamlNode.first.as<std::string>() == name) {
-                // process the value of both the map and yaml node
-                processConfiguration(map.value(), yamlNode.second);
-                // escape any more processing
-                return;
-            }
+        // iterate through every map protocol node
+        for (int i = 0; i < node.map_value_size(); i++) {
+            // get the current map from the protocol node
+            ConfigurationState::KeyPair map = node.map_value(i);
+            // get the yaml node with the specified name as its key
+            auto&& yamlNode = yaml[map.name()];
+            // process the map value and respective yaml node
+            processConfiguration(map.value(), yamlNode);
         }
-
     }
 
     /**
@@ -407,23 +400,26 @@ namespace support {
     }
 
     /**
-     * @brief Receives the ConfigurationState message over the network, processes it, and updates the relevant configuration file.
+     * @brief Receives the ConfigurationState message over the network, processes it, and updates the relevant configuration files.
      * 
      * @param message The message sent over the network by NUbugger.
      */
     void NUbugger::recvConfigurationState(const Message& message) {
         // get the root node from the message
         auto root = message.configuration_state().root();
-        // get the map that contains the configuration file details
-        ConfigurationState::KeyPair file = root.map_value(0);
-        // get the path from the file
-        std::string path = file.path();
-        // load the YAML file given the path
-        YAML::Node yaml = YAML::LoadFile(path);
-        // process the file given the value of the file and the yaml file
-        processConfiguration(file.value(), yaml);
-        // save the configuration file by passing in the path and root yaml node
-        saveConfigurationFile(path, yaml);
+        // iterate through every file within the message
+        for (int i = 0; i < root.map_value_size(); i++) {
+            // get the map that contains the configuration file details
+            ConfigurationState::KeyPair file = root.map_value(i);
+            // get the path from the file
+            std::string path = file.path();
+            // load the YAML file given the path
+            YAML::Node yaml = YAML::LoadFile(path);
+            // process the file given the value of the file and the yaml file
+            processConfiguration(file.value(), yaml);
+            // save the configuration file by passing in the path and root yaml node
+            saveConfigurationFile(path, yaml);
+        }
     }
 }
 }
