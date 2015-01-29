@@ -1,4 +1,12 @@
-ball: true
-goal: true
-field: true
-line: true
+ball: 
+  enabled: false
+  edge_buffer: 2
+goal: 
+  enabled: true
+  edge_buffer: 2
+field: 
+  enabled: false
+  edge_buffer: 2
+line: 
+  enabled: false
+  edge_buffer: 2
