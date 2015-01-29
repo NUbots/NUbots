@@ -97,7 +97,7 @@ namespace utility {
         };
 
         template <enum ANSICode... Codes>
-        typename ANSISGR<Codes...>::Apply operator << (std::ostream& out, const ANSISGR<Codes...>&) {
+        typename ANSISGR<Codes...>::Apply operator << (std::ostream& out, const ANSISGR<Codes...>) {
             return typename ANSISGR<Codes...>::Apply(out);
         }
 
