@@ -32,7 +32,7 @@ namespace research {
         std::map<messages::vision::Colour, int> maxSurfaceArea;
         std::map<messages::vision::Colour, int> maxVolume;
         std::map<messages::vision::Colour, int> volume;
-        std::map<messages::vision::Colour, std::set<std::array<int, 3>>> surfaceArea;
+        std::map<messages::vision::Colour, std::set<int>> surfaceArea;
 
     public:
         /// @brief Called by the powerplant to build and setup the LayerAutoClassifier reactor.

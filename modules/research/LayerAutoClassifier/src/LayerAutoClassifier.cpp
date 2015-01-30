@@ -35,59 +35,133 @@ namespace research {
     using messages::vision::Colour;
 
 
-    inline int getIndex(const LookUpTable& lut, uint8_t x, uint8_t y, uint8_t z) {
+    inline int getIndex(const LookUpTable& lut, const uint8_t& x, const uint8_t& y, const uint8_t& z) {
         return (((x << lut.BITS_Y) | y) << lut.BITS_CB) | z;
     }
 
-    inline Colour getAt(const LookUpTable& lut, uint8_t x, uint8_t y, uint8_t z) {
-        return lut.getRawData()[getIndex(lut, x, y, z)];
+    inline int getIndex(const LookUpTable& lut, const Image::Pixel& p) {
+        int x = p.y  >> (8 - lut.BITS_Y);
+        int y = p.cb >> (8 - lut.BITS_CB);
+        int z = p.cr >> (8 - lut.BITS_CR);
+
+        return getIndex(lut, x, y, z);
     }
 
-    inline std::array<Colour, 6> getSurrounding(const LookUpTable& lut, uint8_t x, uint8_t y, uint8_t z) {
-        return {
-            getAt(lut, x + 1, y, z),
-            getAt(lut, x - 1, y, z),
-            getAt(lut, x, y + 1, z),
-            getAt(lut, x, y - 1, z),
-            getAt(lut, x, y, z + 1),
-            getAt(lut, x, y, z - 1)
-        };
+    inline const Colour& getAt(const LookUpTable& lut, const int& index) {
+        return lut.getRawData()[index];
     }
 
-    inline bool isSA(const LookUpTable& lut, uint8_t x, uint8_t y, uint8_t z) {
-
-        // Get our colour
-        Colour us = getAt(lut, x, y, z);
-        // Get surrounding colours
-        auto surrounds = getSurrounding(lut, x, y, z);
-
-        // If we are a surface area voxel (two adjacent voxels)
-        return !((us == surrounds[0] && surrounds[0] == surrounds[1])
-                || (us == surrounds[2] && surrounds[2] == surrounds[3])
-                || (us == surrounds[4] && surrounds[4] == surrounds[5]));
-
+    inline Colour& getAt(LookUpTable& lut, const int& index) {
+        return lut.getRawData()[index];
     }
 
-    void shed(LookUpTable& lut, Colour c, std::set<std::array<int, 3>>& sa, int& vol) {
+    inline bool isTouching(const LookUpTable& lut, const int& index, const Colour& c) {
+
+        // Loop through each axis and check any are filled
+        for(int i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
+            if(getAt(lut, index + i) == c
+            || getAt(lut, index - i) == c) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    inline bool isInternal(const LookUpTable& lut, const int& index) {
+
+        // Get the classification for this pixel
+        Colour c = getAt(lut, index);
+
+        // Will be true if this voxel is internal
+        bool internal = true;
+
+        // Loop through each axis and check they are all filled
+        for(int i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
+            internal &= getAt(lut, index + i) == c;
+            internal &= getAt(lut, index - i) == c;
+        }
+
+        return internal;
+    }
+
+    inline bool isRemoveable(const LookUpTable& lut, const int& index) {
+
+        // Get the classification for this pixel
+        Colour c = getAt(lut, index);
+
+        // Internal is never removeable
+        if(isInternal(lut, index)) {
+            return false;
+        }
+
+        // Will be true if this voxel is removeable
+        bool removeable = false;
+
+        // Loop through each axis
+        for(int i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
+
+            // Check if we have a filled cell opposite to a non filled cell
+            if(!(getAt(lut, index + i) == c && getAt(lut, index - i) == c)) {
+
+                // Check if we have a 3 long segment (only) in this axis
+                if((getAt(lut, index - (2 * i)) == c && getAt(lut, index + i != c))
+                || (getAt(lut, index + (2 * i)) == c && getAt(lut, index - i != c))) {
+                    // This could be a surface removeable (provided the else doesn't fire)
+                    removeable = true;
+                }
+            }
+            else {
+                // Break! this isn't surface by this criteria!
+                removeable = false;
+                break;
+            }
+        }
+
+        // If we are not removeable yet
+        if(!removeable) {
+
+            // The number of internal voxels
+            int internal = 0;
+            // The number of voxels that are internal and not opposite another internal
+            int nonOppositeInternal = 0;
+
+            // Loop through each axis again
+            for(int i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
+
+                // Check if either side is internal
+                bool a = getAt(lut, index + i) == c && isInternal(lut, index + 1);
+                bool b = getAt(lut, index - i) == c && isInternal(lut, index - 1);
+
+                // Add to our internal counts
+                internal += a + b;
+                nonOppositeInternal += a != b;
+
+                if(internal >= 3 || nonOppositeInternal >= 2) {
+                    // We are now removeable
+                    removeable = true;
+                    break;
+                }
+            }
+        }
+
+        return removeable;
+    }
+
+    void shed(LookUpTable& lut, Colour c, std::set<int>& sa, int& vol) {
         // Holds our new surface voxels
-        std::set<std::array<int, 3>> newSA;
+        std::set<int> newSA;
 
         // Go through the surface area for this colour
         for(auto& s : sa) {
 
-            // Get the surrounds as they may be new SA voxels
-            auto surrounds = getSurrounding(lut, s[0], s[1], s[2]);
-
-            // Insert these into our potential new SA points
-            if(surrounds[0] == c) newSA.insert({ s[0] + 1, s[1], s[2] });
-            if(surrounds[1] == c) newSA.insert({ s[0] - 1, s[1], s[2] });
-            if(surrounds[2] == c) newSA.insert({ s[0], s[1] + 1, s[2] });
-            if(surrounds[3] == c) newSA.insert({ s[0], s[1] - 1, s[2] });
-            if(surrounds[4] == c) newSA.insert({ s[0], s[1], s[2] + 1 });
-            if(surrounds[5] == c) newSA.insert({ s[0], s[1], s[2] - 1 });
+            // Loop through each axis and insert the points as they may be SA now
+            for(int i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
+                newSA.insert(s + i);
+                newSA.insert(s - i);
+            }
 
             // Set this voxel to unclassified and remove it from the volume
-            lut.getRawData()[getIndex(lut, s[0], s[1], s[2])] = Colour::UNCLASSIFIED;
+            getAt(lut, s) = Colour::UNCLASSIFIED;
             --vol;
         }
 
@@ -96,15 +170,10 @@ namespace research {
             auto& p = *it;
 
             // Remove if it's not the correct colour (it was also an SA voxel and was removed)
-            if(getAt(lut, p[0], p[1], p[2]) != c) {
-                it = newSA.erase(it);
-            }
-
             // Remove if it's not an SA voxel now
-            else if(!isSA(lut, p[0], p[1], p[2])) {
+            if(getAt(lut, p) != c || !isRemoveable(lut, p)) {
                 it = newSA.erase(it);
             }
-
             // Otherwise move on
             else {
                 ++it;
@@ -131,25 +200,26 @@ namespace research {
         // We need to set it up for our datastructure
         on<Trigger<LookUpTable>>([this] (const LookUpTable& lut) {
 
-            std::map<Colour, std::set<std::array<int, 3>>> newSA;
+            std::map<Colour, std::set<int>> newSA;
             std::map<Colour, int> newVol;
 
             for(int x = 0; x < (1 << lut.BITS_Y); ++x) {
                 for (int y = 0; y < (1 << lut.BITS_CB); ++y) {
                     for (int z = 0; z < (1 << lut.BITS_CR); ++z) {
 
-                        // Get our classification
-                        Colour us = lut.getRawData()[(((x << lut.BITS_Y) | y) << lut.BITS_CB) | z];
+                        // Get our index and classification
+                        int index = getIndex(lut, x, y, z);
+                        Colour c = getAt(lut, index);
 
                         // Ignore unclassified pixels
-                        if(us != Colour::UNCLASSIFIED) {
+                        if(c != Colour::UNCLASSIFIED) {
 
                             // Increase our volume
-                            ++newVol[us];
+                            ++newVol[c];
 
-                            // If this is a surface area pixel add it to the list
-                            if(isSA(lut, x, y, z)) {
-                                newSA[us].insert({x, y, z});
+                            // If this removeable surface then add it to our list
+                            if(isRemoveable(lut, index)) {
+                                newSA[c].insert(index);
                             }
                         }
                     }
@@ -163,14 +233,28 @@ namespace research {
                 log("Volume:", char(v.first), v.second);
             }
 
+
+            // For visualization we are flagging surface voxels
+            auto tableDiff = std::make_unique<LookUpTableDiff>();
+
             for(auto& p : surfaceArea) {
+                log("SA: ", char(p.first), p.second.size());
                 for(auto& i : p.second) {
-                    log("SA:", char(p.first), i[0], i[1], i[2]);
+                    log("    ", char(p.first), i);
+
+
+                    // Add our diff for displaying
+                    auto& diff = *tableDiff->add_diff();
+                    diff.set_lut_index(i);
+                    diff.set_classification(Colour::UNCLASSIFIED);
+
                 }
             }
+
+            // emit(std::move(tableDiff));
         });
 
-        on<Trigger<AutoClassifierPixels>, With<LookUpTable>>([this] (const AutoClassifierPixels& pixels, const LookUpTable& lut) {
+        on<Trigger<AutoClassifierPixels>, With<LookUpTable>, Options<Single>>([this] (const AutoClassifierPixels& pixels, const LookUpTable& lut) {
 
             // Some aliases
             const auto& c = pixels.classification;
@@ -182,27 +266,21 @@ namespace research {
             // Build up our differences in the look up table
             auto tableDiff = std::make_unique<LookUpTableDiff>();
 
-            for(auto& pixel : pixels.pixels) {
+            for(auto& p : pixels.pixels) {
 
                 // Lookup the pixel
-                auto colour = lut(pixel);
+                auto colour = lut(p);
 
                 // If it's an unclassified pixel then we can do something
                 if(colour == Colour::UNCLASSIFIED) {
 
                     // Get our voxel coordinates for this pixel
-                    int x = pixel.y  >> (8 - lut.BITS_Y);
-                    int y = pixel.cb >> (8 - lut.BITS_CB);
-                    int z = pixel.cr >> (8 - lut.BITS_CR);
+                    int index = getIndex(lut, p);
 
-                    // Get our surrounding voxels
-                    auto surrounds = getSurrounding(lut, x, y, z);
+                    // Check if we are touching a filled voxel
+                    if(isTouching(lut, index, c)) {
 
-                    // Check if we are touching a filled voxel of our colour
-                    bool touching = std::find(std::begin(surrounds), std::end(surrounds), c) != std::end(surrounds);
-
-                    if(touching) {
-                        // We need a mutable lut
+                        // We are going to need a mutable lut
                         LookUpTable& mLut = *const_cast<LookUpTable*>(&lut);
 
                         // If we have exceeded max volume then shed
@@ -211,34 +289,50 @@ namespace research {
                             for(auto& s : sa) {
                                 // Add our diff for displaying
                                 auto& diff = *tableDiff->add_diff();
-                                diff.set_lut_index(getIndex(lut, s[0], s[1], s[2]));
+                                diff.set_lut_index(s);
                                 diff.set_classification(Colour::UNCLASSIFIED);
                             }
 
+                            // Shed our voxel layer
                             shed(mLut, c, sa, vol);
                         }
-                        // Otherwise we proceed
+                        // Otherwise we can classify this
                         else {
-                            // Classify this new point
-                            mLut.getRawData()[getIndex(lut, x, y, z)] = c;
+                            // Classify
+                            getAt(mLut, index) = c;
 
-                            // Our volume increases
+                            // Volume increase
                             ++vol;
 
-                            // If we are an SA pixel add us
-                            if(isSA(lut, x, y, z)) sa.insert({ x, y, z });
+                            // If the new voxel is SA add it to the SA list
+                            if(isRemoveable(lut, index)) {
+                                sa.insert(index);
 
-                            // Check if we made any of our neighbours internal
-                            if(surrounds[0] == c && !isSA(lut, x + 1, y, z) && sa.find({ x + 1, y, z }) != std::end(sa)) sa.erase(sa.find({ x + 1, y, z })); // Remove this from the SA list if it is there
-                            if(surrounds[1] == c && !isSA(lut, x - 1, y, z) && sa.find({ x - 1, y, z }) != std::end(sa)) sa.erase(sa.find({ x - 1, y, z })); // Remove this from the SA list if it is there
-                            if(surrounds[2] == c && !isSA(lut, x, y + 1, z) && sa.find({ x, y + 1, z }) != std::end(sa)) sa.erase(sa.find({ x, y + 1, z })); // Remove this from the SA list if it is there
-                            if(surrounds[3] == c && !isSA(lut, x, y - 1, z) && sa.find({ x, y - 1, z }) != std::end(sa)) sa.erase(sa.find({ x, y - 1, z })); // Remove this from the SA list if it is there
-                            if(surrounds[4] == c && !isSA(lut, x, y, z + 1) && sa.find({ x, y, z + 1 }) != std::end(sa)) sa.erase(sa.find({ x, y, z + 1 })); // Remove this from the SA list if it is there
-                            if(surrounds[5] == c && !isSA(lut, x, y, z - 1) && sa.find({ x, y, z - 1 }) != std::end(sa)) sa.erase(sa.find({ x, y, z - 1 })); // Remove this from the SA list if it is there
+                                // Loop through each axis and insert the points as they may be SA now
+                                for(int i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
+
+                                    // Add or remove as necessary
+                                    if(isRemoveable(lut, index + i)) {
+                                        sa.insert(index + i);
+                                    }
+                                    else if(sa.find(index + i) != std::end(sa)) {
+                                        sa.erase(sa.find(index + i));
+                                    }
+                                    if(isRemoveable(lut, index - i)) {
+                                        sa.insert(index - i);
+                                    }
+                                    else if(sa.find(index - i) != std::end(sa)) {
+
+                                        sa.erase(sa.find(index - i));
+                                    }
+                                }
+
+                                // TODO check if we can remove any from the list
+                            }
 
                             // Add our diff for displaying
                             auto& diff = *tableDiff->add_diff();
-                            diff.set_lut_index(lut.getLUTIndex(pixel));
+                            diff.set_lut_index(index);
                             diff.set_classification(c);
 
                             // If we exceeded our SA constraint then shed
@@ -247,7 +341,7 @@ namespace research {
                                 for(auto& s : sa) {
                                     // Add our diff for displaying
                                     auto& diff = *tableDiff->add_diff();
-                                    diff.set_lut_index(getIndex(lut, s[0], s[1], s[2]));
+                                    diff.set_lut_index(s);
                                     diff.set_classification(Colour::UNCLASSIFIED);
                                 }
 
