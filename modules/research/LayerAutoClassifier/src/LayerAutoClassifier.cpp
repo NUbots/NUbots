@@ -36,7 +36,7 @@ namespace research {
 
 
     inline int getIndex(const LookUpTable& lut, const uint8_t& x, const uint8_t& y, const uint8_t& z) {
-        return (((x << lut.BITS_Y) | y) << lut.BITS_CB) | z;
+        return (((x << lut.BITS_CR) | y) << lut.BITS_CB) | z;
     }
 
     inline int getIndex(const LookUpTable& lut, const Image::Pixel& p) {
@@ -190,9 +190,10 @@ namespace research {
         on<Trigger<Configuration<LayerAutoClassifier>>>([this](const Configuration<LayerAutoClassifier>& config) {
 
             //Loop through each classification char
-            for(auto& c : config["limits"]) {
-                maxVolume[static_cast<Colour>(c.first.as<char>())] = c.second["max_volume"].as<int>();
-                maxSurfaceArea[static_cast<Colour>(c.first.as<char>())] = c.second["surface_area_volume_ratio"].as<double>() * maxVolume[static_cast<Colour>(c.first.as<char>())];
+            for(auto& limit : config["limits"]) {
+                Colour c          = static_cast<Colour>(limit.first.as<char>());
+                maxVolume[c]      = limit.second["max_volume"].as<int>();
+                maxSurfaceArea[c] = limit.second["surface_area_volume_ratio"].as<double>() * maxVolume[c];
             }
         });
 
@@ -267,6 +268,7 @@ namespace research {
             auto tableDiff = std::make_unique<LookUpTableDiff>();
 
             for(auto& p : pixels.pixels) {
+
 
                 // Lookup the pixel
                 auto colour = lut(p);
