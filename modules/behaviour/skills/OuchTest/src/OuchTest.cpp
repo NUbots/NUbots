@@ -40,7 +40,7 @@ namespace modules {
                         emit(std::make_unique<Say>("Ouch!"));
                         fallen = true;
                     }
-                    else if(fabs(sensors.orientation(2,2)) >= 0.6) {
+                    else if(fabs(sensors.orientation(2,2)) >= 0.7) {
                         fallen = false;
                     }
                 });

@@ -29,6 +29,7 @@
 #include <list>
 
 #include "messages/behaviour/Action.h"
+#include "messages/behaviour/ServoCommand.h"
 #include "messages/input/ServoID.h"
 
 namespace modules {

@@ -124,6 +124,8 @@ namespace darwin {
             float goalPosition;
             float movingSpeed;
 
+            float torque;
+
             float presentPosition;
             float presentSpeed;
 

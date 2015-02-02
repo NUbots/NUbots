@@ -205,6 +205,7 @@ namespace modules {
                         , target.id
                         , target.position
                         , target.gain
+                        , target.torque
                     });
                 }
 
@@ -631,64 +632,64 @@ namespace modules {
 
                         switch(target.id) {
                             case ServoID::HEAD_YAW:
-                                newFrame.targets.push_back({ ServoID::HEAD_YAW, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::HEAD_YAW, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::HEAD_PITCH:
-                                newFrame.targets.push_back({ ServoID::HEAD_PITCH, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::HEAD_PITCH, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_SHOULDER_PITCH:
-                                newFrame.targets.push_back({ ServoID::L_SHOULDER_PITCH, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_SHOULDER_PITCH, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_SHOULDER_PITCH:
-                                newFrame.targets.push_back({ ServoID::R_SHOULDER_PITCH, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_SHOULDER_PITCH, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_ELBOW:
-                                newFrame.targets.push_back({ ServoID::L_ELBOW, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_ELBOW, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_ELBOW:
-                                newFrame.targets.push_back({ ServoID::R_ELBOW, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_ELBOW, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_HIP_PITCH:
-                                newFrame.targets.push_back({ ServoID::L_HIP_PITCH, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_HIP_PITCH, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_HIP_PITCH:
-                                newFrame.targets.push_back({ ServoID::R_HIP_PITCH, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_HIP_PITCH, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_KNEE:
-                                newFrame.targets.push_back({ ServoID::L_KNEE, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_KNEE, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_KNEE:
-                                newFrame.targets.push_back({ ServoID::R_KNEE,  target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_KNEE,  target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_ANKLE_PITCH:
-                                newFrame.targets.push_back({ ServoID::L_ANKLE_PITCH, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_ANKLE_PITCH, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_ANKLE_PITCH:
-                                newFrame.targets.push_back({ ServoID::R_ANKLE_PITCH, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_ANKLE_PITCH, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_SHOULDER_ROLL:
-                                newFrame.targets.push_back({ ServoID::L_SHOULDER_ROLL, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_SHOULDER_ROLL, -target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_SHOULDER_ROLL:
-                                newFrame.targets.push_back({ ServoID::R_SHOULDER_ROLL, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_SHOULDER_ROLL, -target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_HIP_ROLL:
-                                newFrame.targets.push_back({ ServoID::L_HIP_ROLL, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_HIP_ROLL, -target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_HIP_ROLL:
-                                newFrame.targets.push_back({ ServoID::R_HIP_ROLL, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_HIP_ROLL, -target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_ANKLE_ROLL:
-                                newFrame.targets.push_back({ ServoID::L_ANKLE_ROLL, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_ANKLE_ROLL, -target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_ANKLE_ROLL:
-                                newFrame.targets.push_back({ ServoID::R_ANKLE_ROLL, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_ANKLE_ROLL, -target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_HIP_YAW:
-                                newFrame.targets.push_back({ ServoID::L_HIP_YAW, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_HIP_YAW, -target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_HIP_YAW:
-                                newFrame.targets.push_back({ ServoID::R_HIP_YAW, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_HIP_YAW, -target.position, target.gain, target.torque});
                                 break;
                         }//end switch(target.id)
                     }

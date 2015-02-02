@@ -75,7 +75,8 @@ namespace modules {
                                 time,
                                 target.id,
                                 target.position,
-                                target.gain
+                                target.gain,
+                                target.torque
                             });
                         }
                     }

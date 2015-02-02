@@ -27,6 +27,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/input/ServoID.h"
 #include "messages/behaviour/Action.h"
+#include "messages/behaviour/ServoCommand.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/motion/Script.h"
 

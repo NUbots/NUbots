@@ -12,7 +12,6 @@ ADD_ROLE(
 
     # Motion
     motion::WalkEngine
-    motion::ScriptEngine
 
     # Behaviour
     behaviour::Controller

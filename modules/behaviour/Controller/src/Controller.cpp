@@ -185,7 +185,7 @@ namespace modules {
                         }
 
                         // Add to our waypoints
-                        waypoints->push_back({ command.time, command.id, command.position, command.gain });
+                        waypoints->push_back({ command.time, command.id, command.position, command.gain, command.torque});
 
                         // Dirty hack the waypoint
                         command.source = 0;

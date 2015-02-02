@@ -23,6 +23,7 @@
 #include "messages/input/ServoID.h"
 #include "messages/motion/Script.h"
 #include "messages/behaviour/Action.h"
+#include "messages/behaviour/ServoCommand.h"
 #include "messages/support/Configuration.h"
 #include "messages/motion/WalkCommand.h"
 

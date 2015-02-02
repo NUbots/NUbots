@@ -117,12 +117,15 @@ namespace darwin {
             servo.errorFlags = data.servoErrorCodes[i] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.servoErrorCodes[i]);
 
             // Booleans
-            servo.torqueEnabled = servoState[i].torqueEnabled;
+            //servo.torqueEnabled = servoState[i].torqueEnabled;
 
             // Gain
             servo.pGain = servoState[i].pGain;
             servo.iGain = servoState[i].iGain;
             servo.dGain = servoState[i].dGain;
+
+            // Torque
+            servo.torque = servoState[i].torque;
 
             // Targets
             servo.goalPosition = servoState[i].goalPosition;
@@ -160,40 +163,37 @@ namespace darwin {
                 0x00, // The size, fill this in later
                 Darwin::DarwinDevice::Instruction::SYNC_WRITE,
                 Darwin::MX28::Address::D_GAIN,
-                0x08
+                0x0A
             };
 
             for(uint i = 0; i < servoState.size(); ++i) {
 
                 if(servoState[i].dirty) {
 
-                    if(!servoState[i].torqueEnabled) {
-                        servoState[i].dirty = false;
+                    // Clear our dirty flag
+                    servoState[i].dirty = false;
 
-                        darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
-                    }
-                    else {
-                        // Clear our dirty flag
-                        servoState[i].dirty = false;
+                    // Get our goal position and speed
+                    uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
+                    uint16_t movingSpeed = Convert::servoSpeedInverse(i, servoState[i].movingSpeed);
+                    uint16_t torque = Convert::torqueLimitInverse(servoState[i].torque);
 
-                        // Get our goal position and speed
-                        uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
-                        uint16_t movingSpeed = Convert::servoSpeedInverse(i, servoState[i].movingSpeed);
-
-                        // Add to our sync write command
-                        command.insert(command.end(), {
-                            uint8_t(i + 1),
-                            Convert::gainInverse(servoState[i].dGain), // D Gain
-                            Convert::gainInverse(servoState[i].iGain), // I Gain
-                            Convert::gainInverse(servoState[i].pGain), // P Gain
-                            0,                                         // Reserved
-                            uint8_t(0xFF & goalPosition),              // Goal Position L
-                            uint8_t(0xFF & (goalPosition >> 8)),       // Goal Position H
-                            uint8_t(0xFF & movingSpeed),               // Goal Speed L
-                            uint8_t(0xFF & (movingSpeed >> 8))         // Goal Speed H
-                        });
-                    }
+                    // Add to our sync write command
+                    command.insert(command.end(), {
+                        uint8_t(i + 1),
+                        Convert::gainInverse(servoState[i].dGain), // D Gain
+                        Convert::gainInverse(servoState[i].iGain), // I Gain
+                        Convert::gainInverse(servoState[i].pGain), // P Gain
+                        0,                                         // Reserved
+                        uint8_t(0xFF & goalPosition),              // Goal Position L
+                        uint8_t(0xFF & (goalPosition >> 8)),       // Goal Position H
+                        uint8_t(0xFF & movingSpeed),               // Goal Speed L
+                        uint8_t(0xFF & (movingSpeed >> 8)),         // Goal Speed H
+                        uint8_t(0xFF & torque),                     // Torque Limit L
+                        uint8_t(0xFF & (torque >> 8))              // Torque Limit H
+                    });
                 }
+                
             }
 
             // Write our data (if we need to)
@@ -224,47 +224,39 @@ namespace darwin {
             // Loop through each of our commands
             for (const auto& command : commands) {
 
-                // If gain is 0, do a normal write to disable torque (syncwrite won't write to torqueEnable)
-                if(isnan(command.gain)) {
-                    // Update our internal state
-                    if(servoState[uint(command.id)].torqueEnabled) {
-                        servoState[uint(command.id)].dirty = true;
-                        servoState[uint(command.id)].torqueEnabled = false;
-                    }
+                float diff = utility::math::angle::difference(command.position, sensors.servo[command.id].presentPosition);
+                NUClear::clock::duration duration = command.time - NUClear::clock::now();
+
+                float speed;
+                if(duration.count() > 0) {
+                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                }
+                else {
+                    speed = 0;
                 }
 
-                // Otherwise write the command using sync write
-                else {
-                    float diff = utility::math::angle::difference(command.position, sensors.servo[command.id].presentPosition);
-                    NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                    float speed;
-                    if(duration.count() > 0) {
-                        speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
-                    }
-                    else {
-                        speed = 0;
-                    }
+                // Update our internal state
+                
 
+                if(servoState[uint(command.id)].pGain != command.gain
+                || servoState[uint(command.id)].iGain != command.gain * 0
+                || servoState[uint(command.id)].dGain != command.gain * 0
+                || servoState[uint(command.id)].movingSpeed != speed
+                || servoState[uint(command.id)].goalPosition != command.position
+                || servoState[uint(command.id)].torque != command.torque) {
 
-                    // Update our internal state
-                    servoState[uint(command.id)].torqueEnabled = true;
+                    servoState[uint(command.id)].dirty = true;
 
-                    if(servoState[uint(command.id)].pGain != command.gain
-                    || servoState[uint(command.id)].iGain != command.gain * 0
-                    || servoState[uint(command.id)].dGain != command.gain * 0
-                    || servoState[uint(command.id)].movingSpeed != speed
-                    || servoState[uint(command.id)].goalPosition != command.position) {
+                    servoState[uint(command.id)].pGain = command.gain;
+                    servoState[uint(command.id)].iGain = command.gain * 0;
+                    servoState[uint(command.id)].dGain = command.gain * 0;
 
-                        servoState[uint(command.id)].dirty = true;
+                    servoState[uint(command.id)].movingSpeed = speed;
+                    servoState[uint(command.id)].goalPosition = command.position;
 
-                        servoState[uint(command.id)].pGain = command.gain;
-                        servoState[uint(command.id)].iGain = command.gain * 0;
-                        servoState[uint(command.id)].dGain = command.gain * 0;
+                    servoState[uint(command.id)].torque = command.torque;
 
-                        servoState[uint(command.id)].movingSpeed = speed;
-                        servoState[uint(command.id)].goalPosition = command.position;
-                    }
                 }
             }
         });

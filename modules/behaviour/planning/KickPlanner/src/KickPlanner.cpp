@@ -27,6 +27,7 @@
 #include "messages/localisation/FieldObject.h"
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/Action.h"
+#include "messages/behaviour/ServoCommand.h"
 #include "messages/behaviour/KickPlan.h"
 #include "messages/vision/VisionObjects.h"
 #include "utility/nubugger/NUhelpers.h"

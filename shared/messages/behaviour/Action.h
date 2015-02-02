@@ -59,7 +59,10 @@ namespace messages {
             input::ServoID id;
             float position;
             float gain;
+            float torque;
         };
+    
+
 
         struct ActionStart {
             size_t id;

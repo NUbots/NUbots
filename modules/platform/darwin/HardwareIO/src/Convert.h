@@ -105,6 +105,7 @@ namespace darwin {
         static uint16_t servoSpeedInverse(const uint8_t id, const float value);
 
         static float torqueLimit(const uint16_t value);
+        static uint16_t torqueLimitInverse(const float value);
 
         static float servoLoad(const uint8_t id, const uint16_t value);
 

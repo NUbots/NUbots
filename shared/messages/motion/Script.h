@@ -40,6 +40,8 @@ namespace messages {
                     input::ServoID id;
                     float position;
                     float gain;
+                    float torque;
+
                 };
                 NUClear::clock::duration duration;
                 std::vector<Target> targets;
@@ -92,6 +94,7 @@ namespace YAML {
             node["id"] = messages::input::stringFromId(rhs.id);
             node["position"] = rhs.position;
             node["gain"] = rhs.gain;
+            node["torque"] = rhs.torque;
 
             return node;
         }
@@ -99,7 +102,9 @@ namespace YAML {
         static bool decode(const Node& node, messages::motion::Script::Frame::Target& rhs) {
 
             rhs = { messages::input::idFromString(node["id"].as<std::string>())
-                  , node["position"].as<float>(), node["gain"].as<float>() };
+                  , node["position"].as<float>(), node["gain"].as<float>()
+                  , node["torque"].as<float>()
+                   };
             return true;
         }
     };
