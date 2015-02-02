@@ -373,7 +373,7 @@ namespace motion {
 
         double phaseComp = std::min({1.0, foot[1] / 0.1, (1 - foot[1]) / 0.1});
         // Rotate foot around hip by the given hip roll compensation
-        if (swingLeg == LimbID::RIGHT_LEG) {
+        if (swingLeg == LimbID::LEFT_LEG) {
             rightFootTorso = rightFootTorso.rotateZLocal(-hipRollCompensation * phaseComp, sensors.forwardKinematics.find(ServoID::R_HIP_ROLL)->second);
         }
         else {
