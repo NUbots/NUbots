@@ -73,8 +73,8 @@ namespace motion {
         rightRotation.scaleAngle(0.5);
 
 
-        leftFootTarget.rotation() = Rotation3D(leftRotation);
-        rightFootTarget.rotation() = Rotation3D(rightRotation);
+        leftFootTarget.rotation()  = leftFootTarget.rotation() * Rotation3D(leftRotation);
+        rightFootTarget.rotation() = rightFootTarget.rotation() * Rotation3D(rightRotation);
 
         Transform3D leftHip = Transform3D(arma::vec3({
             DarwinModel::Leg::HIP_OFFSET_X,
@@ -88,8 +88,8 @@ namespace motion {
             -DarwinModel::Leg::HIP_OFFSET_Z
         }));
 
-        leftFootTarget = leftFootTarget.rotateLocal(Rotation3D(leftRotation), leftHip);
-        rightFootTarget = rightFootTarget.rotateLocal(Rotation3D(rightRotation), rightHip);
+        leftFootTarget = leftFootTarget.rotateLocal(Rotation3D(leftRotation).i(), leftHip);
+        rightFootTarget = rightFootTarget.rotateLocal(Rotation3D(rightRotation).i(), rightHip);
 
         lastFootGoalRotation = goalQuaternion;
 
