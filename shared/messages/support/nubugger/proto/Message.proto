@@ -49,7 +49,7 @@ message Message {
         COMMAND = 12;
         REACTION_HANDLES = 13;
         GAME_STATE = 14;
-        CONFIGURATION_STATE = 15;
+        CONFIGURATION_STATE = 16;
     }
 
     required Type type = 1;
@@ -70,7 +70,7 @@ message Message {
     optional messages.input.proto.GameState game_state = 15;
     optional Command command = 16;
     optional ReactionHandles reaction_handles = 17;
-    optional ConfigurationState configuration_state = 18;
+    optional ConfigurationState configuration_state = 19;
 
     message Command {
         optional string command = 1;
