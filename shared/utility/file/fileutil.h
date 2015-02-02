@@ -48,6 +48,19 @@ namespace utility {
         bool isDir(const std::string& path);
 
         std::vector<std::string> listDir(const std::string& path);
+
+        /**
+         * @author Monica Olejniczak
+         * @author Trent Houliston
+         *
+         * Finds and returns a list of file paths given a specified directory. This function is able to include any
+         * sub-directories and their file paths if recursive is set to true.
+         *
+         * @param directory The directory to base the search off.
+         * @param recursive Whether the directories within the specified directory is searched or not.
+         * @return The list of file paths within a specified directory.
+         */
+        std::vector<std::string> listFiles(const std::string& directory, bool recursive = false);
     }
 }
 #endif
