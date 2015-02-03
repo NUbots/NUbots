@@ -48,7 +48,7 @@ namespace planning {
     using messages::motion::KickCommand;
     using messages::support::Configuration;
     using messages::motion::WalkStopCommand;
-    using messages::behaviour::LimbID;
+    using messages::input::LimbID;
     using messages::behaviour::KickPlan;
 
     KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)

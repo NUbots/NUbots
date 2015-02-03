@@ -29,7 +29,7 @@ namespace modules {
         using messages::behaviour::RegisterAction;
         using messages::behaviour::ActionPriorites;
         using messages::behaviour::ServoCommand;
-        using messages::behaviour::LimbID;
+        using messages::input::LimbID;
         using messages::behaviour::ActionStart;
         using messages::behaviour::ActionKill;
 
@@ -138,7 +138,7 @@ namespace modules {
                 for (auto& command : commands) {
 
                     // Check if we have access
-                    if (this->limbAccess[uint(messages::behaviour::limbForServo(command.id))] == command.source) {
+                    if (this->limbAccess[uint(messages::input::limbForServo(command.id))] == command.source) {
 
                         // Get our queue
                         auto& queue = commandQueues[uint(command.id)];
@@ -205,7 +205,7 @@ namespace modules {
                     for (auto& servo : emptiedQueues) {
 
                         // Get the lease holder on the limb this servo belongs to
-                        auto id = limbAccess[uint(messages::behaviour::limbForServo(servo))];
+                        auto id = limbAccess[uint(messages::input::limbForServo(servo))];
                         completeMap[id].insert(servo);
                     }
 
@@ -393,7 +393,7 @@ namespace modules {
 
                 // Clear our queues for this limb
                 for(const auto& limb : k.second) {
-                    for (const auto& servo : messages::behaviour::servosForLimb(limb)) {
+                    for (const auto& servo : messages::input::servosForLimb(limb)) {
                         commandQueues[uint(servo)].clear();
                     }
                 }

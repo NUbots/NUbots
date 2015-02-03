@@ -35,7 +35,7 @@ namespace modules {
             using messages::behaviour::LookAtAngle;
             using messages::behaviour::LookAtPosition;
             using messages::behaviour::RegisterAction;
-            using messages::behaviour::LimbID;
+            using messages::input::LimbID;
             using messages::support::Configuration;
             using messages::behaviour::ServoCommand;
 

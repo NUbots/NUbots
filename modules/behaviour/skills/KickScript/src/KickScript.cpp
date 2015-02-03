@@ -40,7 +40,7 @@ namespace skills {
     using messages::behaviour::RegisterAction;
     using messages::behaviour::ActionPriorites;
     using messages::motion::WalkStartCommand;
-    using messages::behaviour::LimbID;
+    using messages::input::LimbID;
     using messages::motion::KickCommand;
     using messages::motion::KickFinished;
 

@@ -32,7 +32,7 @@ namespace strategy {
     using messages::motion::WalkCommand;
     using messages::motion::WalkStartCommand;
     using messages::motion::WalkStopCommand;
-    using messages::behaviour::LimbID;
+    using messages::input::LimbID;
 
     PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {

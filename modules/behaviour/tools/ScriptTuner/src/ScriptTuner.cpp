@@ -37,7 +37,7 @@ namespace modules {
             using messages::input::ServoID;
             using messages::motion::ServoTarget;
             using messages::behaviour::RegisterAction;
-            using messages::behaviour::LimbID;
+            using messages::input::LimbID;
 
             struct LockServo {};
 
@@ -697,7 +697,7 @@ namespace modules {
                     refreshView();
                 }
             }//end mirrorScript()
-            
+
             //change scriptPath and then call saveScript to Save As
             void ScriptTuner::saveScriptAs() {
                 move(5,2);
@@ -710,7 +710,7 @@ namespace modules {
                         mvprintw(7,2, "Press Enter to overwrite, or X to return to script.");
                         switch(getch()) {
                             case '\n':
-                            case KEY_ENTER: 
+                            case KEY_ENTER:
                                 move(5,2);
                                 curs_set(false);
                                 print = false;
@@ -732,7 +732,7 @@ namespace modules {
                     saveScript();
                     move(5,2);
                     curs_set(false);
-                    refreshView(); 
+                    refreshView();
                 }
             }
 

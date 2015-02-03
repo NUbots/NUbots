@@ -193,7 +193,7 @@ namespace darwin {
                         uint8_t(0xFF & (torque >> 8))              // Torque Limit H
                     });
                 }
-                
+
             }
 
             // Write our data (if we need to)
@@ -237,7 +237,7 @@ namespace darwin {
 
 
                 // Update our internal state
-                
+
 
                 if(servoState[uint(command.id)].pGain != command.gain
                 || servoState[uint(command.id)].iGain != command.gain * 0

@@ -17,46 +17,25 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_ACTIONS_H
-#define MESSAGES_BEHAVIOUR_ACTIONS_H
+#ifndef MESSAGES_BEHAVIOUR_SERVOID_H
+#define MESSAGES_BEHAVIOUR_SERVOID_H
 
 #include <nuclear>
-#include "messages/input/LimbID.h"
+#include "messages/input/ServoID.h"
 
 namespace messages {
     namespace behaviour {
 
-        struct RegisterAction {
+        struct ServoCommand {
+            size_t source;
 
-            size_t id;
-            std::string name;
-
-            std::vector<std::pair<float, std::set<input::LimbID>>> limbSet;
-
-            std::function<void (std::set<input::LimbID>)> start;
-            std::function<void (std::set<input::LimbID>)> kill;
-            std::function<void (std::set<input::ServoID>)> completed;
+            NUClear::clock::time_point time;
+            input::ServoID id;
+            float position;
+            float gain;
+            float torque;
         };
 
-        struct ActionPriorites {
-            size_t id;
-
-            std::vector<float> priorities;
-        };
-
-        struct ActionStart {
-            size_t id;
-            std::string name;
-
-            std::set<input::LimbID> limbs;
-        };
-
-        struct ActionKill {
-            size_t id;
-            std::string name;
-
-            std::set<input::LimbID> limbs;
-        };
     }
 }
 

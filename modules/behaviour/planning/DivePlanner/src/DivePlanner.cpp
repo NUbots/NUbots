@@ -38,7 +38,7 @@ namespace planning {
     using messages::motion::DiveCommand;
     using messages::support::Configuration;
     using messages::motion::WalkStopCommand;
-    using messages::behaviour::LimbID;
+    using messages::input::LimbID;
     using messages::behaviour::DivePlan;
 
     DivePlanner::DivePlanner(std::unique_ptr<NUClear::Environment> environment)

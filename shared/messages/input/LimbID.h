@@ -17,14 +17,23 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "Action.h"
+#ifndef MESSAGES_INPUT_LIMBID_H
+#define MESSAGES_INPUT_LIMBID_H
+
+#include "messages/input/ServoID.h"
 
 namespace messages {
-    namespace behaviour {
+    namespace input {
 
-        using messages::input::ServoID;
+        enum class LimbID {
+            LEFT_LEG = 0,
+            RIGHT_LEG = 1,
+            LEFT_ARM = 2,
+            RIGHT_ARM = 3,
+            HEAD = 4
+        };
 
-        std::set<ServoID> servosForLimb(const LimbID& limb) {
+        inline std::set<ServoID> servosForLimb(const LimbID& limb) {
             switch(limb) {
                 case LimbID::HEAD:
                     return {
@@ -72,7 +81,7 @@ namespace messages {
             }
         }
 
-        LimbID limbForServo(const ServoID& servo) {
+        inline LimbID limbForServo(const ServoID& servo) {
             switch(servo) {
                 case ServoID::HEAD_PITCH:
                 case ServoID::HEAD_YAW:
@@ -110,4 +119,6 @@ namespace messages {
         }
     }
 }
+
+#endif
 

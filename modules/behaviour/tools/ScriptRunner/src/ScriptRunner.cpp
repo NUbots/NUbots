@@ -29,7 +29,7 @@ namespace modules {
 
             using messages::motion::ExecuteScriptByName;
             using messages::behaviour::RegisterAction;
-            using messages::behaviour::LimbID;
+            using messages::input::LimbID;
             using messages::input::ServoID;
 
             struct ExecuteNextScript {};

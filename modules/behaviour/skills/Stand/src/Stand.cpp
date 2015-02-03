@@ -31,7 +31,7 @@ namespace modules {
             using messages::input::ServoID;
             using messages::motion::ExecuteScriptByName;
             using messages::behaviour::RegisterAction;
-            using messages::behaviour::LimbID;
+            using messages::input::LimbID;
 
             //internal only callback messages to start and stop our action
             struct ExecuteStand {};

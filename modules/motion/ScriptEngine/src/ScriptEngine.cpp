@@ -20,7 +20,7 @@
 #include "ScriptEngine.h"
 
 #include "messages/support/Configuration.h"
-#include "messages/behaviour/Action.h"
+#include "messages/behaviour/ServoCommand.h"
 
 namespace modules {
     namespace motion {

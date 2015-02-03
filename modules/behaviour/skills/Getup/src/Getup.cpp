@@ -40,7 +40,7 @@ namespace modules {
             using messages::motion::ExecuteScriptByName;
             using messages::behaviour::RegisterAction;
             using messages::behaviour::ActionPriorites;
-            using messages::behaviour::LimbID;
+            using messages::input::LimbID;
             using messages::motion::ExecuteGetup;
             using messages::motion::KillGetup;
 

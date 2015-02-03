@@ -35,7 +35,7 @@ namespace modules {
             using messages::input::Sensors;
             using messages::behaviour::Look;
             using messages::behaviour::RegisterAction;
-            using messages::behaviour::LimbID;
+            using messages::input::LimbID;
             using messages::support::Configuration;
             using messages::behaviour::ServoCommand;
 

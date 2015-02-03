@@ -41,7 +41,7 @@ namespace modules {
             using messages::motion::ExecuteScriptByName;
             using messages::behaviour::RegisterAction;
             using messages::behaviour::ActionPriorites;
-            using messages::behaviour::LimbID;
+            using messages::input::LimbID;
 
             FallingRelax::FallingRelax(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)), falling(false) {
 

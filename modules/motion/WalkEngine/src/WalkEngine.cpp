@@ -45,13 +45,13 @@ namespace motion {
 
     using messages::input::ServoID;
     using messages::input::Sensors;
-    using messages::behaviour::LimbID;
+    using messages::input::LimbID;
     using messages::behaviour::ServoCommand;
     using messages::behaviour::WalkOptimiserCommand;
     using messages::behaviour::WalkConfigSaved;
     using messages::behaviour::RegisterAction;
     using messages::behaviour::ActionPriorites;
-    using messages::behaviour::LimbID;
+    using messages::input::LimbID;
     using messages::motion::WalkCommand;
     using messages::motion::WalkStartCommand;
     using messages::motion::WalkStopCommand;
