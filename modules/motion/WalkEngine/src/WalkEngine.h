@@ -50,7 +50,7 @@ namespace motion {
          * The number of servo updates performnced per second
          * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Trigger<Every>> arguments
          */
-        static constexpr size_t UPDATE_FREQUENCY = 60;
+        static constexpr size_t UPDATE_FREQUENCY = 90;
 
         static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
         explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
