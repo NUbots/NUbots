@@ -72,30 +72,6 @@ namespace darwin {
         0.0,         // [19] HEAD_PITCH
     };
 
-    double Convert::SPEED_CONVERSION_FACTOR[] = {
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [0]  R_SHOULDER_PITCH
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [1]  L_SHOULDER_PITCH
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [2]  R_SHOULDER_ROLL
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [3]  L_SHOULDER_ROLL
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [4]  R_ELBOW
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [5]  L_ELBOW
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [6]  R_HIP_YAW
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [7]  L_HIP_YAW
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [8]  R_HIP_ROLL
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [9]  L_HIP_ROLL
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [10] R_HIP_PITCH
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [11] L_HIP_PITCH
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [12] R_KNEE
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [13] L_KNEE
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [14] R_ANKLE_PITCH
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [15] L_ANKLE_PITCH
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [16] R_ANKLE_ROLL
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [17] L_ANKLE_ROLL
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [18] HEAD_YAW
-        Convert::MX28_SPEED_CONVERSION_FACTOR,   // [19] HEAD_PITCH
-    };
-
-
     float Convert::accelerometer(uint16_t value) {
         return (value - 512) * ACCELEROMETER_CONVERSION_FACTOR;
     }
@@ -174,7 +150,7 @@ namespace darwin {
     float Convert::servoSpeed(const uint8_t id, const uint16_t value) {
 
         // We only care about the lower bits
-        float raw = (value & 0x3FF) * SPEED_CONVERSION_FACTOR[id];
+        float raw = (value & 0x3FF) * SPEED_CONVERSION_FACTOR;
 
         // If bit 10 is set we are moving Clockwise
         raw *= value & 0x400 ? -1 : 1;
@@ -184,11 +160,9 @@ namespace darwin {
 
         return raw;
     }
-    uint16_t Convert::servoSpeedInverse(const uint8_t id, const float value) {
-        uint16_t raw = round(value / SPEED_CONVERSION_FACTOR[id]);
-
+    uint16_t Convert::servoSpeedInverse(const float value) {
         // If the value is greater then 1023, then set to max speed (0)
-        return raw > 1023 ? 0 : raw;
+        return value > 100 ? 0 : uint16_t(round(value / SPEED_CONVERSION_FACTOR));
     }
 
     float Convert::torqueLimit(const uint16_t value) {
@@ -196,8 +170,7 @@ namespace darwin {
     }
 
     uint16_t Convert::torqueLimitInverse(const float value){
-        return value >= 1 ? 1023.0
-                : std::round(value / TORQUE_LIMIT_CONVERSION_FACTOR);
+        return value >= 100 ? 1023.0 : std::round(value / TORQUE_LIMIT_CONVERSION_FACTOR);
     }
 
     float Convert::servoLoad(const uint8_t id, const uint16_t value) {

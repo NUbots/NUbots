@@ -175,7 +175,7 @@ namespace darwin {
 
                     // Get our goal position and speed
                     uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
-                    uint16_t movingSpeed = Convert::servoSpeedInverse(i, servoState[i].movingSpeed);
+                    uint16_t movingSpeed = Convert::servoSpeedInverse(servoState[i].movingSpeed);
                     uint16_t torque = Convert::torqueLimitInverse(servoState[i].torque);
 
                     // Add to our sync write command

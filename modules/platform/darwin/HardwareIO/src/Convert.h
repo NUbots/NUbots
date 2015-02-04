@@ -64,22 +64,13 @@ namespace darwin {
         static constexpr double TEMPERATURE_CONVERSION_FACTOR = 1.0;
 
         /// The MX28 measures its speed between 0 and 1023 where 1023 means a speed of 117.07rpm
-        static constexpr double MX28_SPEED_CONVERSION_FACTOR = (117.07 * 2.0 * M_PI) / (1023.0 * 60);
-        /// The RX28 measures its speed between 0 and 1023 where 1023 means a speed of 54rpm
-        static constexpr double RX28_SPEED_CONVERSION_FACTOR = (54 * 2.0 * M_PI) / (1023.0 * 60);
+        static constexpr double SPEED_CONVERSION_FACTOR = (117.07 * 2.0 * M_PI) / (1023.0 * 60);
 
         /// Picks which direction a motor should be measured in (forward or reverse)
         static const int8_t SERVO_DIRECTION[];
 
         /// Offsets the radian angles of motors to change their 0 position
         static const double SERVO_OFFSET[];
-
-        /**
-         * The speed conversion factor cannot be const, as at startup we have to work out if each motor is an
-         * RX28 or an MX28. Both motors have different speed conversion factors, although we default them all
-         * to the MX28 as that is the most common motor (and what old motors will be replaced with)
-         */
-        static double SPEED_CONVERSION_FACTOR[];
 
         template <int bit>
         static bool getBit(const uint16_t value) {
@@ -102,7 +93,7 @@ namespace darwin {
         static uint16_t servoPositionInverse(const uint8_t id, const float value);
 
         static float servoSpeed(const uint8_t id, const uint16_t value);
-        static uint16_t servoSpeedInverse(const uint8_t id, const float value);
+        static uint16_t servoSpeedInverse(const float value);
 
         static float torqueLimit(const uint16_t value);
         static uint16_t torqueLimitInverse(const float value);
