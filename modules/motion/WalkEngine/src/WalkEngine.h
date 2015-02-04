@@ -27,6 +27,7 @@
 
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/Action.h"
+#include "messages/behaviour/ServoCommand.h"
 #include "messages/input/Sensors.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 
@@ -54,7 +55,7 @@ namespace motion {
         static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
         explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
     private:
-        using LimbID         = messages::behaviour::LimbID;
+        using LimbID         = messages::input::LimbID;
         using ServoCommand   = messages::behaviour::ServoCommand;
         using Sensors        = messages::input::Sensors;
         using ServoID        = messages::input::ServoID;

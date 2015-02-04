@@ -29,6 +29,7 @@
 #include <list>
 
 #include "messages/behaviour/Action.h"
+#include "messages/behaviour/ServoCommand.h"
 #include "messages/input/ServoID.h"
 
 namespace modules {
@@ -37,7 +38,7 @@ namespace modules {
         struct RequestItem;
 
         struct Request {
-            using callback = std::function<void (std::set<messages::behaviour::LimbID>)>;
+            using callback = std::function<void (std::set<messages::input::LimbID>)>;
 
             Request(size_t id, std::string name, callback start, callback kill, std::function<void (std::set<messages::input::ServoID>)> completed)
             : id(id)
@@ -74,7 +75,7 @@ namespace modules {
 
         struct RequestItem {
 
-            RequestItem(Request& group, size_t index, float priority, const std::set<messages::behaviour::LimbID>& limbSet)
+            RequestItem(Request& group, size_t index, float priority, const std::set<messages::input::LimbID>& limbSet)
             : group(group)
             , index(index)
             , active(false)
@@ -88,7 +89,7 @@ namespace modules {
             bool active;
 
             float priority;
-            std::set<messages::behaviour::LimbID> limbSet;
+            std::set<messages::input::LimbID> limbSet;
         };
 
         /**

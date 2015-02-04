@@ -1,4 +1,4 @@
-/*i
+/*
  * This file is part of the NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
@@ -17,32 +17,27 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_REFLEX_STAND_H
-#define MODULES_BEHAVIOUR_REFLEX_STAND_H
+#ifndef MESSAGES_BEHAVIOUR_SERVOID_H
+#define MESSAGES_BEHAVIOUR_SERVOID_H
 
 #include <nuclear>
+#include "messages/input/ServoID.h"
 
-namespace modules {
+namespace messages {
     namespace behaviour {
-        namespace skills {
 
-            /**
-             * Executes a getup script if the robot falls over.
-             *
-             * @author Josiah Walker
-             */
-            class Stand : public NUClear::Reactor {
-            private:
-                const size_t id;
+        struct ServoCommand {
+            size_t source;
 
-            public:
-                explicit Stand(std::unique_ptr<NUClear::Environment> environment);
-                static constexpr const char* CONFIGURATION_PATH = "Stand.yaml";
-            };
+            NUClear::clock::time_point time;
+            input::ServoID id;
+            float position;
+            float gain;
+            float torque;
+        };
 
-        }  // reflexes
-    }  // behaviours
-}  // modules
+    }
+}
 
-#endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_H
+#endif
 

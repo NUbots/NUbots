@@ -23,6 +23,7 @@
 #include "messages/input/ServoID.h"
 #include "messages/motion/Script.h"
 #include "messages/behaviour/Action.h"
+#include "messages/behaviour/ServoCommand.h"
 #include "messages/support/Configuration.h"
 #include "messages/motion/WalkCommand.h"
 
@@ -39,7 +40,7 @@ namespace skills {
     using messages::behaviour::RegisterAction;
     using messages::behaviour::ActionPriorites;
     using messages::motion::WalkStartCommand;
-    using messages::behaviour::LimbID;
+    using messages::input::LimbID;
     using messages::motion::KickCommand;
     using messages::motion::KickFinished;
 

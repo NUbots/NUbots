@@ -34,7 +34,7 @@
 
 namespace modules {
     namespace debug {
-            using messages::behaviour::LimbID;
+            using messages::input::LimbID;
             using messages::support::Configuration;
             using messages::motion::ServoTarget;
             using messages::input::ServoID;

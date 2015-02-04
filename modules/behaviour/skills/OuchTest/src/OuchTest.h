@@ -1,5 +1,5 @@
-/*i
- * This file is part of the NUbots Codebase.
+/*
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,32 +17,27 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_REFLEX_STAND_H
-#define MODULES_BEHAVIOUR_REFLEX_STAND_H
+#ifndef MODULES_OUCHTEST_H
+#define MODULES_OUCHTEST_H
 
 #include <nuclear>
 
 namespace modules {
-    namespace behaviour {
+	namespace behaviour {
         namespace skills {
 
-            /**
-             * Executes a getup script if the robot falls over.
-             *
-             * @author Josiah Walker
-             */
-            class Stand : public NUClear::Reactor {
-            private:
-                const size_t id;
 
-            public:
-                explicit Stand(std::unique_ptr<NUClear::Environment> environment);
-                static constexpr const char* CONFIGURATION_PATH = "Stand.yaml";
-            };
+    		class OuchTest : public NUClear::Reactor {
+    		private:
+    			bool fallen = false;
+    		public:
+        		/// @brief Called by the powerplant to build and setup the OuchTest reactor.
+       			explicit OuchTest(std::unique_ptr<NUClear::Environment> environment);
+    		};
+    	}
+    }
 
-        }  // reflexes
-    }  // behaviours
-}  // modules
+}
 
-#endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_H
 
+#endif

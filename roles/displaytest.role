@@ -5,9 +5,9 @@ ADD_ROLE(
     support::configuration::GlobalConfig
     #support::configuration::NetworkingConfiguration
     support::DisplayTest
-    platform::darwin::HardwareIO
-    platform::darwin::SensorFilter
-    input::LinuxCamera
+    #platform::darwin::HardwareIO
+    #platform::darwin::SensorFilter
+    #input::LinuxCamera
     support::NUbugger
     debug::NUbugger
 

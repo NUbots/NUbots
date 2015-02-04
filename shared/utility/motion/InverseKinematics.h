@@ -52,7 +52,7 @@ namespace kinematics {
         @param RobotKinematicModel The class containing the leg model of the robot.
     */
     template <typename RobotKinematicModel>
-    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints(utility::math::matrix::Transform3D target, messages::behaviour::LimbID limb) {
+    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints(utility::math::matrix::Transform3D target, messages::input::LimbID limb) {
         const float LENGTH_BETWEEN_LEGS = RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS;
         const float DISTANCE_FROM_BODY_TO_HIP_JOINT = RobotKinematicModel::Leg::HIP_OFFSET_Z;
         const float HIP_OFFSET_X = RobotKinematicModel::Leg::HIP_OFFSET_X;
@@ -81,7 +81,7 @@ namespace kinematics {
         target.col(3) = fourthColumn;
         //NUClear::log<NUClear::DEBUG>("Target Final\n", target);
 
-        if (limb != messages::behaviour::LimbID::LEFT_LEG) {
+        if (limb != messages::input::LimbID::LEFT_LEG) {
             target.submat(0,0,2,2) = arma::mat33{-1,0,0, 0,1,0, 0,0,1} * target.submat(0,0,2,2);
             target.submat(0,0,2,0) *= -1;
             target(0,3) *= -1;
@@ -170,7 +170,7 @@ namespace kinematics {
 
         hipYaw = (isHipYawPositive ? 1 : -1) * acos(arma::dot( hipXProjected,globalX));
 
-        if (limb == messages::behaviour::LimbID::LEFT_LEG) {
+        if (limb == messages::input::LimbID::LEFT_LEG) {
             positions.push_back(std::make_pair(messages::input::ServoID::L_HIP_YAW, -hipYaw));
             positions.push_back(std::make_pair(messages::input::ServoID::L_HIP_ROLL, hipRoll));
             positions.push_back(std::make_pair(messages::input::ServoID::L_HIP_PITCH, -hipPitch));
@@ -191,7 +191,7 @@ namespace kinematics {
     }
 
     template <typename RobotKinematicModel>
-    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJointsTeamDarwin(utility::math::matrix::Transform3D target, messages::behaviour::LimbID limb) {
+    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJointsTeamDarwin(utility::math::matrix::Transform3D target, messages::input::LimbID limb) {
         target(2,3) += RobotKinematicModel::TEAMDARWINCHEST_TO_ORIGIN; // translate without regard to rotation
         target = target.translateZ(RobotKinematicModel::Leg::FOOT_HEIGHT);
         return calculateLegJoints<RobotKinematicModel>(target, limb);
@@ -199,8 +199,8 @@ namespace kinematics {
 
     template <typename RobotKinematicModel>
     std::vector<std::pair<messages::input::ServoID, float>> calculateLegJointsTeamDarwin(utility::math::matrix::Transform3D leftTarget, utility::math::matrix::Transform3D rightTarget) {
-        auto joints = calculateLegJointsTeamDarwin<RobotKinematicModel>(leftTarget, messages::behaviour::LimbID::LEFT_LEG);
-        auto joints2 = calculateLegJointsTeamDarwin<RobotKinematicModel>(rightTarget, messages::behaviour::LimbID::RIGHT_LEG);
+        auto joints = calculateLegJointsTeamDarwin<RobotKinematicModel>(leftTarget, messages::input::LimbID::LEFT_LEG);
+        auto joints2 = calculateLegJointsTeamDarwin<RobotKinematicModel>(rightTarget, messages::input::LimbID::RIGHT_LEG);
         joints.insert(joints.end(), joints2.begin(), joints2.end());
         return joints;
     }

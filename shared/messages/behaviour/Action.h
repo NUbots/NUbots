@@ -21,29 +21,21 @@
 #define MESSAGES_BEHAVIOUR_ACTIONS_H
 
 #include <nuclear>
-#include "messages/input/ServoID.h"
+#include "messages/input/LimbID.h"
 
 namespace messages {
     namespace behaviour {
-
-        enum class LimbID {
-            LEFT_LEG = 0,
-            RIGHT_LEG = 1,
-            LEFT_ARM = 2,
-            RIGHT_ARM = 3,
-            HEAD = 4
-        };
 
         struct RegisterAction {
 
             size_t id;
             std::string name;
 
-            std::vector<std::pair<float, std::set<LimbID>>> limbSet;
+            std::vector<std::pair<float, std::set<input::LimbID>>> limbSet;
 
-            std::function<void (std::set<LimbID>)> start;
-            std::function<void (std::set<LimbID>)> kill;
-            std::function<void (std::set<messages::input::ServoID>)> completed;
+            std::function<void (std::set<input::LimbID>)> start;
+            std::function<void (std::set<input::LimbID>)> kill;
+            std::function<void (std::set<input::ServoID>)> completed;
         };
 
         struct ActionPriorites {
@@ -52,31 +44,19 @@ namespace messages {
             std::vector<float> priorities;
         };
 
-        struct ServoCommand {
-            size_t source;
-
-            NUClear::clock::time_point time;
-            input::ServoID id;
-            float position;
-            float gain;
-        };
-
         struct ActionStart {
             size_t id;
             std::string name;
 
-            std::set<LimbID> limbs;
+            std::set<input::LimbID> limbs;
         };
 
         struct ActionKill {
             size_t id;
             std::string name;
 
-            std::set<LimbID> limbs;
+            std::set<input::LimbID> limbs;
         };
-
-        std::set<messages::input::ServoID> servosForLimb(const LimbID& limb);
-        LimbID limbForServo(const messages::input::ServoID& servo);
     }
 }
 

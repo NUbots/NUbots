@@ -21,6 +21,7 @@
 
 #include "messages/motion/Script.h"
 #include "messages/behaviour/Action.h"
+#include "messages/behaviour/ServoCommand.h"
 
 namespace modules {
     namespace behaviour {
@@ -28,7 +29,7 @@ namespace modules {
 
             using messages::motion::ExecuteScriptByName;
             using messages::behaviour::RegisterAction;
-            using messages::behaviour::LimbID;
+            using messages::input::LimbID;
             using messages::input::ServoID;
 
             struct ExecuteNextScript {};

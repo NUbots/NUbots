@@ -22,6 +22,7 @@
 #include "messages/input/ServoID.h"
 #include "messages/motion/Script.h"
 #include "messages/behaviour/Action.h"
+#include "messages/behaviour/ServoCommand.h"
 
 namespace modules {
     namespace behaviour {
@@ -30,7 +31,7 @@ namespace modules {
             using messages::input::ServoID;
             using messages::motion::ExecuteScriptByName;
             using messages::behaviour::RegisterAction;
-            using messages::behaviour::LimbID;
+            using messages::input::LimbID;
 
             //internal only callback messages to start and stop our action
             struct ExecuteStand {};

@@ -24,7 +24,7 @@
 namespace modules {
 namespace motion {
 
-    using messages::behaviour::LimbID;
+    using messages::input::LimbID;
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
 

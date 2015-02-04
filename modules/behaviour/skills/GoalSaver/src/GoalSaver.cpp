@@ -27,6 +27,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/input/ServoID.h"
 #include "messages/behaviour/Action.h"
+#include "messages/behaviour/ServoCommand.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/motion/Script.h"
 
@@ -51,7 +52,7 @@ namespace skills {
     using messages::motion::DiveFinished;
     using messages::support::Configuration;
     using messages::motion::WalkStopCommand;
-    using messages::behaviour::LimbID;
+    using messages::input::LimbID;
 
     GoalSaver::GoalSaver(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))

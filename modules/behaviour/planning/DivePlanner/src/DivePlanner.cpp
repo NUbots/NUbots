@@ -25,6 +25,7 @@
 #include "messages/localisation/FieldObject.h"
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/Action.h"
+#include "messages/behaviour/ServoCommand.h"
 #include "messages/behaviour/DivePlan.h"
 #include "messages/vision/VisionObjects.h"
 
@@ -37,7 +38,7 @@ namespace planning {
     using messages::motion::DiveCommand;
     using messages::support::Configuration;
     using messages::motion::WalkStopCommand;
-    using messages::behaviour::LimbID;
+    using messages::input::LimbID;
     using messages::behaviour::DivePlan;
 
     DivePlanner::DivePlanner(std::unique_ptr<NUClear::Environment> environment)

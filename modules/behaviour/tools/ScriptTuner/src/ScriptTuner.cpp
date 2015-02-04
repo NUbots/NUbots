@@ -37,7 +37,7 @@ namespace modules {
             using messages::input::ServoID;
             using messages::motion::ServoTarget;
             using messages::behaviour::RegisterAction;
-            using messages::behaviour::LimbID;
+            using messages::input::LimbID;
 
             struct LockServo {};
 
@@ -205,6 +205,7 @@ namespace modules {
                         , target.id
                         , target.position
                         , target.gain
+                        , target.torque
                     });
                 }
 
@@ -631,64 +632,64 @@ namespace modules {
 
                         switch(target.id) {
                             case ServoID::HEAD_YAW:
-                                newFrame.targets.push_back({ ServoID::HEAD_YAW, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::HEAD_YAW, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::HEAD_PITCH:
-                                newFrame.targets.push_back({ ServoID::HEAD_PITCH, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::HEAD_PITCH, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_SHOULDER_PITCH:
-                                newFrame.targets.push_back({ ServoID::L_SHOULDER_PITCH, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_SHOULDER_PITCH, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_SHOULDER_PITCH:
-                                newFrame.targets.push_back({ ServoID::R_SHOULDER_PITCH, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_SHOULDER_PITCH, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_ELBOW:
-                                newFrame.targets.push_back({ ServoID::L_ELBOW, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_ELBOW, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_ELBOW:
-                                newFrame.targets.push_back({ ServoID::R_ELBOW, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_ELBOW, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_HIP_PITCH:
-                                newFrame.targets.push_back({ ServoID::L_HIP_PITCH, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_HIP_PITCH, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_HIP_PITCH:
-                                newFrame.targets.push_back({ ServoID::R_HIP_PITCH, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_HIP_PITCH, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_KNEE:
-                                newFrame.targets.push_back({ ServoID::L_KNEE, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_KNEE, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_KNEE:
-                                newFrame.targets.push_back({ ServoID::R_KNEE,  target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_KNEE,  target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_ANKLE_PITCH:
-                                newFrame.targets.push_back({ ServoID::L_ANKLE_PITCH, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_ANKLE_PITCH, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_ANKLE_PITCH:
-                                newFrame.targets.push_back({ ServoID::R_ANKLE_PITCH, target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_ANKLE_PITCH, target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_SHOULDER_ROLL:
-                                newFrame.targets.push_back({ ServoID::L_SHOULDER_ROLL, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_SHOULDER_ROLL, -target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_SHOULDER_ROLL:
-                                newFrame.targets.push_back({ ServoID::R_SHOULDER_ROLL, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_SHOULDER_ROLL, -target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_HIP_ROLL:
-                                newFrame.targets.push_back({ ServoID::L_HIP_ROLL, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_HIP_ROLL, -target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_HIP_ROLL:
-                                newFrame.targets.push_back({ ServoID::R_HIP_ROLL, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_HIP_ROLL, -target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_ANKLE_ROLL:
-                                newFrame.targets.push_back({ ServoID::L_ANKLE_ROLL, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_ANKLE_ROLL, -target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_ANKLE_ROLL:
-                                newFrame.targets.push_back({ ServoID::R_ANKLE_ROLL, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_ANKLE_ROLL, -target.position, target.gain, target.torque});
                                 break;
                             case ServoID::R_HIP_YAW:
-                                newFrame.targets.push_back({ ServoID::L_HIP_YAW, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::L_HIP_YAW, -target.position, target.gain, target.torque});
                                 break;
                             case ServoID::L_HIP_YAW:
-                                newFrame.targets.push_back({ ServoID::R_HIP_YAW, -target.position, target.gain});
+                                newFrame.targets.push_back({ ServoID::R_HIP_YAW, -target.position, target.gain, target.torque});
                                 break;
                         }//end switch(target.id)
                     }
@@ -696,7 +697,7 @@ namespace modules {
                     refreshView();
                 }
             }//end mirrorScript()
-            
+
             //change scriptPath and then call saveScript to Save As
             void ScriptTuner::saveScriptAs() {
                 move(5,2);
@@ -709,7 +710,7 @@ namespace modules {
                         mvprintw(7,2, "Press Enter to overwrite, or X to return to script.");
                         switch(getch()) {
                             case '\n':
-                            case KEY_ENTER: 
+                            case KEY_ENTER:
                                 move(5,2);
                                 curs_set(false);
                                 print = false;
@@ -731,7 +732,7 @@ namespace modules {
                     saveScript();
                     move(5,2);
                     curs_set(false);
-                    refreshView(); 
+                    refreshView();
                 }
             }
 

@@ -195,6 +195,11 @@ namespace darwin {
         return value * TORQUE_LIMIT_CONVERSION_FACTOR;
     }
 
+    uint16_t Convert::torqueLimitInverse(const float value){
+        return value >= 1 ? 1023.0
+                : std::round(value / TORQUE_LIMIT_CONVERSION_FACTOR);
+    }
+
     float Convert::servoLoad(const uint8_t id, const uint16_t value) {
          // We only care about the lower bits if bit 10 is set then we are moving clockwise
         float raw = (value & 0x3FF) * (value & 0x400 ? -1 : 1);

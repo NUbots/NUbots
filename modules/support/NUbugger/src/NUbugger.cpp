@@ -210,6 +210,9 @@ namespace support {
             case Message::REACTION_HANDLES:
                 recvReactionHandles(message);
                 break;
+            case Message::CONFIGURATION_STATE:
+                recvConfigurationState(message);
+                break;
             default:
                 return;
         }
@@ -242,6 +245,8 @@ namespace support {
             api_lookup_table->set_bits_cr(lut->BITS_CR);
 
             send(message);
+        } else if (command == "get_configuration_state") {
+            sendConfigurationState();
         }
     }
 

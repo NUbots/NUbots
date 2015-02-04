@@ -22,6 +22,7 @@
 #include "messages/input/ServoID.h"
 #include "messages/behaviour/Look.h"
 #include "messages/behaviour/Action.h"
+#include "messages/behaviour/ServoCommand.h"
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
 #include "messages/input/CameraParameters.h"
@@ -34,7 +35,7 @@ namespace modules {
             using messages::input::Sensors;
             using messages::behaviour::Look;
             using messages::behaviour::RegisterAction;
-            using messages::behaviour::LimbID;
+            using messages::input::LimbID;
             using messages::support::Configuration;
             using messages::behaviour::ServoCommand;
 
@@ -80,8 +81,8 @@ namespace modules {
                     waypoints->reserve(4);
 
                     //push back some fake waypoints to clear our commands
-                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW, lastPosition[0], 0.f});
-                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH, lastPosition[1], 0.f});
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW, lastPosition[0], 0.f, 0});
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH, lastPosition[1], 0.f, 0});
 
                     arma::fvec2 targetPoint;
 
@@ -124,8 +125,8 @@ namespace modules {
                     time_t time = NUClear::clock::now() + std::chrono::nanoseconds(uint(std::nano::den * panTime));
 
                     //push back the new points
-                    waypoints->push_back({id, time, ServoID::HEAD_YAW,      targetPoint[0],  30.f});
-                    waypoints->push_back({id, time, ServoID::HEAD_PITCH,    targetPoint[1], 30.f});
+                    waypoints->push_back({id, time, ServoID::HEAD_YAW,      targetPoint[0],  30.f, 1});
+                    waypoints->push_back({id, time, ServoID::HEAD_PITCH,    targetPoint[1], 30.f, 1});
                     /*for (auto& waypoint : *waypoints) {
                         std::cout << static_cast<uint>(waypoint.id) << ", " << waypoint.position << std::endl;
                     }*/

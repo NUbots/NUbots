@@ -27,6 +27,7 @@
 #include "messages/localisation/FieldObject.h"
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/Action.h"
+#include "messages/behaviour/ServoCommand.h"
 #include "messages/behaviour/KickPlan.h"
 #include "messages/vision/VisionObjects.h"
 #include "utility/nubugger/NUhelpers.h"
@@ -47,7 +48,7 @@ namespace planning {
     using messages::motion::KickCommand;
     using messages::support::Configuration;
     using messages::motion::WalkStopCommand;
-    using messages::behaviour::LimbID;
+    using messages::input::LimbID;
     using messages::behaviour::KickPlan;
 
     KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
