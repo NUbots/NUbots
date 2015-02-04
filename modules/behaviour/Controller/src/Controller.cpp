@@ -154,7 +154,7 @@ namespace modules {
                 }
             });
 
-            on<Trigger<Every<60, Per<std::chrono::seconds>>>, Options<Sync<Controller>>>([this] (const time_t& now) {
+            on<Trigger<Every<90, Per<std::chrono::seconds>>>, Options<Sync<Controller>>>([this] (const time_t& now) {
 
                 std::list<ServoID> emptiedQueues;
                 std::unique_ptr<std::vector<ServoTarget>> waypoints;

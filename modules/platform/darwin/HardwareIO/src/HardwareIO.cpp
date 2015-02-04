@@ -151,7 +151,7 @@ namespace darwin {
         });
 
         // This trigger gets the sensor data from the CM730
-        on<Trigger<Every<60, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
+        on<Trigger<Every<90, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
 
             // Our final sensor output
             auto sensors = std::make_unique<DarwinSensors>();
@@ -175,7 +175,7 @@ namespace darwin {
 
                     // Get our goal position and speed
                     uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
-                    uint16_t movingSpeed = Convert::servoSpeedInverse(i, servoState[i].movingSpeed);
+                    uint16_t movingSpeed = Convert::servoSpeedInverse(servoState[i].movingSpeed);
                     uint16_t torque = Convert::torqueLimitInverse(servoState[i].torque);
 
                     // Add to our sync write command

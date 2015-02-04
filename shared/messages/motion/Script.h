@@ -41,7 +41,6 @@ namespace messages {
                     float position;
                     float gain;
                     float torque;
-
                 };
                 NUClear::clock::duration duration;
                 std::vector<Target> targets;
@@ -103,7 +102,7 @@ namespace YAML {
 
             rhs = { messages::input::idFromString(node["id"].as<std::string>())
                   , node["position"].as<float>(), node["gain"].as<float>()
-                  , node["torque"].as<float>()
+                  , node["torque"] ? node["torque"].as<float>() : 100
                    };
             return true;
         }
@@ -116,7 +115,7 @@ namespace YAML {
 
             node["duration"] = std::chrono::duration_cast<std::chrono::milliseconds>(rhs.duration).count();
             node["targets"] = rhs.targets;
-            
+
             return node;
         }
 
