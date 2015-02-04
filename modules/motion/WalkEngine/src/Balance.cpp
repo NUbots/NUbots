@@ -26,7 +26,7 @@
 namespace modules {
 namespace motion {
 
-    using messages::behaviour::LimbID;
+    using messages::input::LimbID;
     using messages::input::ServoID;
     using messages::input::Sensors;
     using utility::math::matrix::Rotation3D;
@@ -36,7 +36,7 @@ namespace motion {
     using utility::nubugger::graph;
     using utility::motion::kinematics::DarwinModel;
 
-    void WalkEngine::balance(Transform3D& leftFootTarget, Transform3D& rightFootTarget, const Sensors& sensors) {
+    void WalkEngine::balance(Transform3D& target, const LimbID& leg, const Sensors& sensors) {
 
         // Get current orientation, offset by body tilt. Maps world to robot space.
         Rotation3D tiltedOrientation = sensors.orientation.i().rotateY(-bodyTilt);
@@ -45,135 +45,44 @@ namespace motion {
         // Maps robot to world space.
         Rotation3D yawlessOrientation = goalOrientation.i();
 
-        // ServoID supportLegID = (swingLeg == LimbID::RIGHT_LEG) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
-        // Rotation3D ankleRotation = sensors.forwardKinematics.find(supportLegID)->second.rotation();
+        // Work out the servo ID for kinematics of our leg
+        ServoID supportLegID = (leg == LimbID::RIGHT_LEG) ? ServoID::R_ANKLE_PITCH : ServoID::L_ANKLE_PITCH;
 
-        // footOrientation =  p * (footOrientation - yawlessOrientation);
-        Transform3D leftAnkle = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
-        Transform3D rightAnkle = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
+        // Find our ankle information
+        Transform3D ankle = sensors.forwardKinematics.find(supportLegID)->second;
+        Rotation3D footWorld = ankle.rotation();
 
-        Rotation3D leftFootWorld = leftAnkle.rotation();
-        Rotation3D rightFootWorld = rightAnkle.rotation();
-
+        // Our goal and current positions as quaternions
         UnitQuaternion goalQuaternion(goalOrientation);
-        UnitQuaternion leftFootQuaternion(leftFootWorld);
-        UnitQuaternion rightFootQuaternion(rightFootWorld);
+        UnitQuaternion footQuaternion(footWorld);
 
+        // Calculate our D error and I error
         UnitQuaternion error = goalQuaternion * lastFootGoalRotation.i();
         footGoalErrorSum = error * footGoalErrorSum;
 
-        UnitQuaternion leftRotation  = leftFootQuaternion.slerp(goalQuaternion, balancePGain)
+        // Apply our P and I gain
+        UnitQuaternion rotation  = footQuaternion.slerp(goalQuaternion, balancePGain)
                                      // * leftFootQuaternion.slerp(footGoalErrorSum, balanceIGain)
-                                     * leftFootQuaternion.slerp(error, balanceDGain).i();
+                                     * footQuaternion.slerp(error, balanceDGain).i();
 
-        UnitQuaternion rightRotation = rightFootQuaternion.slerp(goalQuaternion, balancePGain)
-                                     // * rightFootQuaternion.slerp(footGoalErrorSum, balanceIGain)
-                                     * rightFootQuaternion.slerp(error, balanceDGain).i();
-        leftRotation.scaleAngle(0.5);
-        rightRotation.scaleAngle(0.5);
+        // Halve our correction (so the other half is applied at the hip)
+        rotation.scaleAngle(0.5);
 
+        // Apply this rotation goal to our position
+        target.rotation()  = target.rotation() * Rotation3D(rotation);
 
-        leftFootTarget.rotation()  = leftFootTarget.rotation() * Rotation3D(leftRotation);
-        rightFootTarget.rotation() = rightFootTarget.rotation() * Rotation3D(rightRotation);
-
-        Transform3D leftHip = Transform3D(arma::vec3({
+        // Get the position of our hip to rotate around
+        Transform3D hip = Transform3D(arma::vec3({
             DarwinModel::Leg::HIP_OFFSET_X,
-            DarwinModel::Leg::HIP_OFFSET_Y,
+            DarwinModel::Leg::HIP_OFFSET_Y * (leg == LimbID::RIGHT_LEG ? -1 : 1),
             -DarwinModel::Leg::HIP_OFFSET_Z
         }));
 
-        Transform3D rightHip = Transform3D(arma::vec3({
-            DarwinModel::Leg::HIP_OFFSET_X,
-            -DarwinModel::Leg::HIP_OFFSET_Y,
-            -DarwinModel::Leg::HIP_OFFSET_Z
-        }));
+        // Rotate around our hip to apply a balance
+        target = target.rotateLocal(Rotation3D(rotation).i(), hip);
 
-        leftFootTarget = leftFootTarget.rotateLocal(Rotation3D(leftRotation).i(), leftHip);
-        rightFootTarget = rightFootTarget.rotateLocal(Rotation3D(rightRotation).i(), rightHip);
-
+        // Store our current target for D calculations
         lastFootGoalRotation = goalQuaternion;
-
-        //TODO: crashes
-        /*ServoID supportLegID = (swingLeg == LimbID::RIGHT_LEG) ? ServoID::L_ANKLE_PITCH : ServoID::R_ANKLE_PITCH;
-        Rotation3D ankleRotation = sensors.forwardKinematics.find(supportLegID)->second.rotation();
-        emit(graph("ankleRotation", ankleRotation));
-        // emit(graph("orientation", sensors.orientation));
-        // get effective gyro angle considering body angle offset
-        Rotation3D kinematicGyroSORAMatrix = sensors.orientation * ankleRotation; // DOUBLE TRANSPOSE
-
-        AxisAngle axisAngle = kinematicGyroSORAMatrix.axisAngle();
-        arma::vec3 gyro = axisAngle.first * (axisAngle.second / balanceWeight);
-
-        // TODO: why convert rad to degrees? :/ must use degrees as how much to offset joints?
-        // TODO: why negate? axis change?
-        double gyroRoll = -gyro[0] * 180.0 / M_PI;
-        double gyroPitch = -gyro[1] * 180.0 / M_PI;
-
-        emit(graph("roll", gyroRoll));
-        emit(graph("pitch", gyroPitch));
-
-        double yawAngle = 0;
-        if (!active) {
-            // double support
-            yawAngle = (uLeftFoot[2] + uRightFoot[2]) / 2 - uTorsoActual[2];
-        }
-        else if (swingLeg == LimbID::RIGHT_LEG) {
-            yawAngle = uLeftFoot[2] - uTorsoActual[2];
-        }
-        else {
-            yawAngle = uRightFoot[2] - uTorsoActual[2];
-        }
-
-        double gyroRoll = gyroRoll0 * std::cos(yawAngle) - gyroPitch0 * std::sin(yawAngle);
-        double gyroPitch = gyroPitch0 * std::cos(yawAngle) - gyroRoll0 * std::sin(yawAngle);
-
-        double armShiftX = procFunc(gyroPitch * armImuParamY[1], armImuParamY[2], armImuParamY[3]);
-        double armShiftY = procFunc(gyroRoll * armImuParamY[1], armImuParamY[2], armImuParamY[3]);
-
-        double ankleShiftX = procFunc(gyroPitch * ankleImuParamX[1], ankleImuParamX[2], ankleImuParamX[3]);
-        double ankleShiftY = procFunc(gyroRoll * ankleImuParamY[1], ankleImuParamY[2], ankleImuParamY[3]);
-        double kneeShiftX = procFunc(gyroPitch * kneeImuParamX[1], kneeImuParamX[2], kneeImuParamX[3]);
-        double hipShiftY = procFunc(gyroRoll * hipImuParamY[1], hipImuParamY[2], hipImuParamY[3]);
-
-        ankleShift[0] += ankleImuParamX[0] * (ankleShiftX - ankleShift[0]);
-        ankleShift[1] += ankleImuParamY[0] * (ankleShiftY - ankleShift[1]);
-        kneeShift += kneeImuParamX[0] * (kneeShiftX - kneeShift);
-        hipShift[1] += hipImuParamY[0] * (hipShiftY - hipShift[1]);
-        armShift[0] += armImuParamX[0] * (armShiftX - armShift[0]);
-        armShift[1] += armImuParamY[0] * (armShiftY - armShift[1]);
-
-        // TODO: toe/heel lifting
-
-        if (!active) {
-            // Double support, standing still
-            // qLegs[1] += hipShift[1]; // Hip roll stabilization
-            qLegs[3] += kneeShift; // Knee pitch stabilization
-            qLegs[4] += ankleShift[0]; // Ankle pitch stabilization
-            // qLegs[5] += ankleShift[1]; // Ankle roll stabilization
-
-            // qLegs[7] += hipShift[1]; // Hip roll stabilization
-            qLegs[9] += kneeShift; // Knee pitch stabilization
-            qLegs[10] += ankleShift[0]; // Ankle pitch stabilization
-            // qLegs[11] += ankleShift[1]; // Ankle roll stabilization
-        } else if (swingLeg == LimbID::RIGHT_LEG) {
-            qLegs[1] += hipShift[1]; // Hip roll stabilization
-            qLegs[3] += kneeShift; // Knee pitch stabilization
-            qLegs[4] += ankleShift[0]; // Ankle pitch stabilization
-            qLegs[5] += ankleShift[1]; // Ankle roll stabilization
-
-            qLegs[10] += toeTipCompensation * phaseComp; // Lifting toetip
-            qLegs[1] += hipRollCompensation * phaseComp; // Hip roll compensation
-
-        } else {
-            qLegs[7] += hipShift[1]; // Hip roll stabilization
-            qLegs[9] += kneeShift; // Knee pitch stabilization
-            qLegs[10] += ankleShift[0]; // Ankle pitch stabilization
-            qLegs[11] += ankleShift[1]; // Ankle roll stabilization
-
-            qLegs[4] += toeTipCompensation * phaseComp; // Lifting toetip
-            qLegs[7] -= hipRollCompensation * phaseComp; // Hip roll compensation
-        }*/
     }
-
 }
 }

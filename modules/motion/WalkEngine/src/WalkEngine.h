@@ -210,7 +210,7 @@ namespace motion {
         void update(const Sensors& sensors);
         void updateStep(double phase, const Sensors& sensors);
         void updateStill(const Sensors& sensors = Sensors());
-        void balance(Transform3D& leftFootTarget, Transform3D& rightFootTarget, const Sensors& sensors);
+        void balance(Transform3D& target, const LimbID& leg, const Sensors& sensors);
 
         void calculateNewStep();
         void setVelocity(Transform2D velocity);

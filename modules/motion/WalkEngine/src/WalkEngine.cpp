@@ -385,7 +385,11 @@ namespace motion {
         }
 
         if (balanceEnabled) {
-            balance(leftFootTorso, rightFootTorso, sensors);
+
+            // Apply balance to our support foot
+            balance(swingLeg == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso
+                , swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG
+                , sensors);
         }
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
@@ -412,7 +416,9 @@ namespace motion {
         }
 
         if (balanceEnabled) {
-            balance(leftFootTorso, rightFootTorso, sensors);
+            // Apply balance to both legs when standing still
+            balance(leftFootTorso, LimbID::LEFT_LEG, sensors);
+            balance(rightFootTorso, LimbID::RIGHT_LEG, sensors);
         }
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
