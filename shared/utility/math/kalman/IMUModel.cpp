@@ -59,6 +59,15 @@ namespace utility {
 
             }
 
+            // Up vector
+            arma::vec3 IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::UP&) {
+
+                arma::vec3 up = { 2 * state[QX] * state[QZ] + 2 * state[QY] * state[QW]
+                                  , 2 * state[QY] * state[QZ] - 2 * state[QX] * state[QW]
+                                  , 1 - 2 * state[QX] * state[QX] - 2 * state[QY] * state[QY] };
+
+                return up;
+            }
 
             // Accelerometer
             arma::vec3 IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&) {
