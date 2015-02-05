@@ -29,10 +29,10 @@ namespace research {
 
     class LayerAutoClassifier : public NUClear::Reactor {
     private:
-        std::map<messages::vision::Colour, int> maxSurfaceArea;
-        std::map<messages::vision::Colour, int> maxVolume;
-        std::map<messages::vision::Colour, int> volume;
-        std::map<messages::vision::Colour, std::set<int>> surfaceArea;
+        std::map<messages::vision::Colour, uint> maxSurfaceArea;
+        std::map<messages::vision::Colour, uint> maxVolume;
+        std::map<messages::vision::Colour, uint> volume;
+        std::map<messages::vision::Colour, std::set<uint>> surfaceArea;
 
     public:
         /// @brief Called by the powerplant to build and setup the LayerAutoClassifier reactor.

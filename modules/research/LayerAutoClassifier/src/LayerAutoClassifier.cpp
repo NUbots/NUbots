@@ -35,30 +35,30 @@ namespace research {
     using messages::vision::Colour;
 
 
-    inline int getIndex(const LookUpTable& lut, const uint8_t& x, const uint8_t& y, const uint8_t& z) {
+    inline uint getIndex(const LookUpTable& lut, const uint8_t& x, const uint8_t& y, const uint8_t& z) {
         return (((x << lut.BITS_CR) | y) << lut.BITS_CB) | z;
     }
 
-    inline int getIndex(const LookUpTable& lut, const Image::Pixel& p) {
-        int x = p.y  >> (8 - lut.BITS_Y);
-        int y = p.cb >> (8 - lut.BITS_CB);
-        int z = p.cr >> (8 - lut.BITS_CR);
+    inline uint getIndex(const LookUpTable& lut, const Image::Pixel& p) {
+        uint x = p.y  >> (8 - lut.BITS_Y);
+        uint y = p.cb >> (8 - lut.BITS_CB);
+        uint z = p.cr >> (8 - lut.BITS_CR);
 
         return getIndex(lut, x, y, z);
     }
 
-    inline const Colour& getAt(const LookUpTable& lut, const int& index) {
+    inline const Colour& getAt(const LookUpTable& lut, const uint& index) {
         return lut.getRawData()[index];
     }
 
-    inline Colour& getAt(LookUpTable& lut, const int& index) {
+    inline Colour& getAt(LookUpTable& lut, const uint& index) {
         return lut.getRawData()[index];
     }
 
-    inline bool isTouching(const LookUpTable& lut, const int& index, const Colour& c) {
+    inline bool isTouching(const LookUpTable& lut, const uint& index, const Colour& c) {
 
         // Loop through each axis and check any are filled
-        for(int i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
+        for(uint i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
             if(getAt(lut, index + i) == c
             || getAt(lut, index - i) == c) {
                 return true;
@@ -67,7 +67,7 @@ namespace research {
         return false;
     }
 
-    inline bool isInternal(const LookUpTable& lut, const int& index) {
+    inline bool isInternal(const LookUpTable& lut, const uint& index) {
 
         // Get the classification for this pixel
         Colour c = getAt(lut, index);
@@ -76,7 +76,7 @@ namespace research {
         bool internal = true;
 
         // Loop through each axis and check they are all filled
-        for(int i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
+        for(uint i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
             internal &= getAt(lut, index + i) == c;
             internal &= getAt(lut, index - i) == c;
         }
@@ -84,7 +84,7 @@ namespace research {
         return internal;
     }
 
-    inline bool isRemoveable(const LookUpTable& lut, const int& index) {
+    inline bool isRemoveable(const LookUpTable& lut, const uint& index) {
 
         // Get the classification for this pixel
         Colour c = getAt(lut, index);
@@ -98,7 +98,7 @@ namespace research {
         bool removeable = false;
 
         // Loop through each axis
-        for(int i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
+        for(uint i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
 
             // Check if we have a filled cell opposite to a non filled cell
             if(!(getAt(lut, index + i) == c && getAt(lut, index - i) == c)) {
@@ -121,9 +121,9 @@ namespace research {
         if(!removeable) {
 
             // The number of internal voxels
-            int internal = 0;
+            uint internal = 0;
             // The number of voxels that are internal and not opposite another internal
-            int nonOppositeInternal = 0;
+            uint nonOppositeInternal = 0;
 
             // Loop through each axis again
             for(int i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
@@ -147,9 +147,9 @@ namespace research {
         return removeable;
     }
 
-    void shed(LookUpTable& lut, Colour c, std::set<int>& sa, int& vol) {
+    void shed(LookUpTable& lut, Colour c, std::set<uint>& sa, uint& vol) {
         // Holds our new surface voxels
-        std::set<int> newSA;
+        std::set<uint> newSA;
 
         // Go through the surface area for this colour
         for(auto& s : sa) {
@@ -192,7 +192,7 @@ namespace research {
             //Loop through each classification char
             for(auto& limit : config["limits"]) {
                 Colour c          = static_cast<Colour>(limit.first.as<char>());
-                maxVolume[c]      = limit.second["max_volume"].as<int>();
+                maxVolume[c]      = limit.second["max_volume"].as<uint>();
                 maxSurfaceArea[c] = limit.second["surface_area_volume_ratio"].as<double>() * maxVolume[c];
             }
         });
@@ -201,12 +201,12 @@ namespace research {
         // We need to set it up for our datastructure
         on<Trigger<LookUpTable>>([this] (const LookUpTable& lut) {
 
-            std::map<Colour, std::set<int>> newSA;
-            std::map<Colour, int> newVol;
+            std::map<Colour, std::set<uint>> newSA;
+            std::map<Colour, uint> newVol;
 
-            for(int x = 0; x < (1 << lut.BITS_Y); ++x) {
-                for (int y = 0; y < (1 << lut.BITS_CB); ++y) {
-                    for (int z = 0; z < (1 << lut.BITS_CR); ++z) {
+            for(uint x = 0; x < uint(1 << lut.BITS_Y); ++x) {
+                for (uint y = 0; y < uint(1 << lut.BITS_CB); ++y) {
+                    for (uint z = 0; z < uint(1 << lut.BITS_CR); ++z) {
 
                         // Get our index and classification
                         int index = getIndex(lut, x, y, z);
@@ -269,7 +269,6 @@ namespace research {
 
             for(auto& p : pixels.pixels) {
 
-
                 // Lookup the pixel
                 auto colour = lut(p);
 
@@ -277,7 +276,7 @@ namespace research {
                 if(colour == Colour::UNCLASSIFIED) {
 
                     // Get our voxel coordinates for this pixel
-                    int index = getIndex(lut, p);
+                    uint index = getIndex(lut, p);
 
                     // Check if we are touching a filled voxel
                     if(isTouching(lut, index, c)) {
@@ -309,27 +308,24 @@ namespace research {
                             // If the new voxel is SA add it to the SA list
                             if(isRemoveable(lut, index)) {
                                 sa.insert(index);
+                            }
 
-                                // Loop through each axis and insert the points as they may be SA now
-                                for(int i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
+                            // Loop through each axis and update if each voxel is SA
+                            for(uint i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
 
-                                    // Add or remove as necessary
-                                    if(isRemoveable(lut, index + i)) {
-                                        sa.insert(index + i);
-                                    }
-                                    else if(sa.find(index + i) != std::end(sa)) {
-                                        sa.erase(sa.find(index + i));
-                                    }
-                                    if(isRemoveable(lut, index - i)) {
-                                        sa.insert(index - i);
-                                    }
-                                    else if(sa.find(index - i) != std::end(sa)) {
-
-                                        sa.erase(sa.find(index - i));
-                                    }
+                                // Add or remove as necessary
+                                if(isRemoveable(lut, index + i)) {
+                                    sa.insert(index + i);
                                 }
-
-                                // TODO check if we can remove any from the list
+                                else if(sa.find(index + i) != std::end(sa)) {
+                                    sa.erase(sa.find(index + i));
+                                }
+                                if(isRemoveable(lut, index - i)) {
+                                    sa.insert(index - i);
+                                }
+                                else if(sa.find(index - i) != std::end(sa)) {
+                                    sa.erase(sa.find(index - i));
+                                }
                             }
 
                             // Add our diff for displaying

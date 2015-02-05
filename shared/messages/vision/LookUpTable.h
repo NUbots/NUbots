@@ -39,7 +39,7 @@
 namespace messages {
     namespace vision {
 
-        enum Colour : char {
+        enum Colour : unsigned char {
             // Main classifications
             UNCLASSIFIED = 'u',
             WHITE        = 'w',
