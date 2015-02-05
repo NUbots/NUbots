@@ -48,7 +48,7 @@ namespace messages {
             std::vector<Frame> frames;
         };
 
-        Script operator +(const Script& s1, const Script& s2){
+        inline Script operator +(const Script& s1, const Script& s2){
             Script s;
             s.frames.insert(s.frames.end(), s1.frames.begin(), s1.frames.end());
             s.frames.insert(s.frames.end(), s2.frames.begin(), s2.frames.end());
@@ -87,7 +87,7 @@ namespace messages {
 namespace YAML {
     template<>
     struct convert<messages::motion::Script::Frame::Target> {
-        static Node encode(const messages::motion::Script::Frame::Target& rhs) {
+        static inline Node encode(const messages::motion::Script::Frame::Target& rhs) {
             Node node;
 
             node["id"] = messages::input::stringFromId(rhs.id);
@@ -98,7 +98,7 @@ namespace YAML {
             return node;
         }
 
-        static bool decode(const Node& node, messages::motion::Script::Frame::Target& rhs) {
+        static inline bool decode(const Node& node, messages::motion::Script::Frame::Target& rhs) {
 
             rhs = { messages::input::idFromString(node["id"].as<std::string>())
                   , node["position"].as<float>(), node["gain"].as<float>()
@@ -110,7 +110,7 @@ namespace YAML {
 
     template<>
     struct convert<messages::motion::Script::Frame> {
-        static Node encode(const messages::motion::Script::Frame& rhs) {
+        static inline Node encode(const messages::motion::Script::Frame& rhs) {
             Node node;
 
             node["duration"] = std::chrono::duration_cast<std::chrono::milliseconds>(rhs.duration).count();
@@ -119,7 +119,7 @@ namespace YAML {
             return node;
         }
 
-        static bool decode(const Node& node, messages::motion::Script::Frame& rhs) {
+        static inline bool decode(const Node& node, messages::motion::Script::Frame& rhs) {
 
             int millis = node["duration"].as<int>();
             std::chrono::milliseconds duration(millis);
@@ -133,7 +133,7 @@ namespace YAML {
 
     template<>
     struct convert<messages::motion::Script> {
-        static Node encode(const messages::motion::Script& rhs) {
+        static inline Node encode(const messages::motion::Script& rhs) {
             Node node;
 
             node = rhs.frames;
@@ -141,7 +141,7 @@ namespace YAML {
             return node;
         }
 
-        static bool decode(const Node& node, messages::motion::Script& rhs) {
+        static inline bool decode(const Node& node, messages::motion::Script& rhs) {
             std::vector<messages::motion::Script::Frame> frames = node.as<std::vector<messages::motion::Script::Frame>>();
             rhs = { std::move(frames) };
             return true;
