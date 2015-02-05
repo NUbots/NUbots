@@ -20,6 +20,7 @@
 #include "AutoClassifierProvider.h"
 
 #include "messages/vision/VisionObjects.h"
+#include "messages/vision/ClassifiedImage.h"
 #include "messages/support/Configuration.h"
 #include "messages/research/AutoClassifierPixels.h"
 
@@ -29,6 +30,8 @@ namespace research {
     using messages::input::Image;
     using messages::vision::Ball;
     using messages::vision::Goal;
+    using messages::vision::ObjectClass;
+    using messages::vision::ClassifiedImage;
     using messages::vision::Colour;
     using messages::support::Configuration;
     using messages::research::AutoClassifierPixels;
@@ -42,7 +45,11 @@ namespace research {
             ballEdgeBuffer = config["ball"]["edge_buffer"].as<int>();
             goalProvider.enable(config["goal"]["enabled"].as<bool>());
             goalEdgeBuffer = config["goal"]["edge_buffer"].as<int>();
-            // fieldProvider.enable(config["field"].as<bool>());
+            fieldProvider.enable(config["field"]["enabled"].as<bool>());
+            fieldEdgeBuffer = config["field"]["edge_buffer"].as<int>();
+            // lineProvider.enable(config["field"]["enabled"].as<bool>());
+            // lineEdgeBuffer = config["field"]["edge_buffer"].as<int>();
+
             // lineProvider.enable(config["line"].as<bool>());
         });
 
@@ -65,12 +72,12 @@ namespace research {
                 uint maxY = std::min(std::floor(centre[1] + radius), double(image.height() - 1));
 
                 // loop through pixels on the image in bounding box
-                for (uint y = minY + ballEdgeBuffer; y <= maxY - ballEdgeBuffer; y++) {
+                for (uint y = minY + ballEdgeBuffer; y <= maxY - ballEdgeBuffer; ++y) {
                     auto edgePoints = circle.getEdgePoints(y);
                     uint minX = std::max(edgePoints[0], 0.0);
                     uint maxX = std::min(edgePoints[1], double(image.width() - 1));
 
-                    for (uint x = minX + ballEdgeBuffer; x <= maxX - ballEdgeBuffer; x++) {
+                    for (uint x = minX + ballEdgeBuffer; x <= maxX - ballEdgeBuffer; ++x) {
                         pixels->pixels.push_back(image(x, y));
                     }
                 }
@@ -80,7 +87,7 @@ namespace research {
             emit(std::move(pixels));
         });
 
-        goalProvider = on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Goals", [this](const std::vector<Goal>& goals) {
+         goalProvider = on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Goals", [this](const std::vector<Goal>& goals) {
 
             auto pixels = std::make_unique<AutoClassifierPixels>();
             pixels->classification = Colour::YELLOW;
@@ -94,7 +101,7 @@ namespace research {
                 uint minY = std::max(std::min(quad.getTopLeft()[1], quad.getTopRight()[1]), 0.0);
                 uint maxY = std::min(std::max(quad.getBottomLeft()[1], quad.getBottomRight()[1]), double(image.height() - 1));
 
-                for (uint y = minY + goalEdgeBuffer; y <= maxY - goalEdgeBuffer; y++) {
+                for (uint y = minY + goalEdgeBuffer; y <= maxY - goalEdgeBuffer; ++y) {
                     arma::vec2 edgePoints;
                     try {
                         edgePoints = quad.getEdgePoints(y);
@@ -104,9 +111,26 @@ namespace research {
                     uint minX = std::max(edgePoints[0], 0.0);
                     uint maxX = std::min(edgePoints[1], double(image.width() - 1));
 
-                    for (uint x = minX + goalEdgeBuffer; x <= maxX - goalEdgeBuffer; x++) {
+                    for (uint x = minX + goalEdgeBuffer; x <= maxX - goalEdgeBuffer; ++x) {
                         pixels->pixels.push_back(image(x, y));
                     }
+                }
+            }
+
+            emit(std::move(pixels));
+        });
+
+        fieldProvider = on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Field", [this](const ClassifiedImage<ObjectClass>& classifiedImage) {
+
+            auto pixels = std::make_unique<AutoClassifierPixels>();
+            pixels->classification = Colour::GREEN;
+
+            auto& image = *classifiedImage.image;
+
+            for (uint x = fieldEdgeBuffer; x < classifiedImage.dimensions[0] - fieldEdgeBuffer; ++x) {
+
+                for (uint y = classifiedImage.visualHorizonAtPoint(x) + fieldEdgeBuffer; y < classifiedImage.dimensions[1] - fieldEdgeBuffer; ++y) {
+                    pixels->pixels.push_back(image(x, y));
                 }
             }
 
