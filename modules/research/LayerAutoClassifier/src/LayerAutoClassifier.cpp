@@ -35,30 +35,79 @@ namespace research {
     using messages::vision::Colour;
 
 
+    /**
+     * @brief Gets the index int the LUT given an x, y and z coordinate for it
+     *
+     * @param lut the lookup table that we want an index for
+     * @param x the x coordinate we are using
+     * @param y the y coordinate we are using
+     * @param z the z coordinate we are using
+     *
+     * @return the array index that represents these coordinates in the lut
+     */
     inline uint getIndex(const LookUpTable& lut, const uint8_t& x, const uint8_t& y, const uint8_t& z) {
         return (((x << lut.BITS_CR) | y) << lut.BITS_CB) | z;
     }
 
-    inline uint getIndex(const LookUpTable& lut, const Image::Pixel& p) {
-        uint x = p.y  >> (8 - lut.BITS_Y);
-        uint y = p.cb >> (8 - lut.BITS_CB);
-        uint z = p.cr >> (8 - lut.BITS_CR);
+    /**
+     * @brief Given a lut and an index to an array element in the lut, Exctracts the x, y and z coordinates for this index
+     *
+     * @param lut the lookup table that we want an index for
+     * @param index the array index that represents these coordinates in the lut
+     *
+     * @return the x, y and z coordinates that this index represents
+     */
+    inline std::array<uint, 3> getCoordinates(const LookUpTable& lut, const uint& index) {
 
-        return getIndex(lut, x, y, z);
+        uint x = (index >> (lut.BITS_CB + lut.BITS_CR)) & ((1 << lut.BITS_Y) - 1);
+        uint y = (index >> lut.BITS_CR) & ((1 << lut.BITS_CB) - 1);
+        uint z = index & ((1 << lut.BITS_CR) - 1);
+
+        return { x, y, z };
     }
 
+    /**
+     * @brief Gets the Colour that is at this position in the lookup table
+     *
+     * @param lut the lookup table that we are searching in
+     * @param index the array index that represents these coordinates in the lut
+     *
+     * @return the colour that is located at this index in the lut
+     */
     inline const Colour& getAt(const LookUpTable& lut, const uint& index) {
         return lut.getRawData()[index];
     }
 
+    /**
+     * @brief Gets the Colour that is at this position in the lookup table
+     *
+     * @param lut the lookup table that we are searching in
+     * @param index the array index that represents these coordinates in the lut
+     *
+     * @return the colour that is located at this index in the lut
+     */
     inline Colour& getAt(LookUpTable& lut, const uint& index) {
         return lut.getRawData()[index];
     }
 
+    /**
+     * @brief Checks if the passed index is touching the passed colour on any of its faces.
+     *
+     * @details A voxel is considered touching the colour if any of its faces touch a cell
+     *      that is that colour. This makes for 6 possible cells to check against.
+     *
+     * @param lut the lookup table that we are searching in
+     * @param index the array index that represents these coordinates in the lut
+     * @param c the colour that we are looking for
+     *
+     * @return true if the index is touching the colour c, false otherwise
+     */
     inline bool isTouching(const LookUpTable& lut, const uint& index, const Colour& c) {
 
         // Loop through each axis and check any are filled
-        for(uint i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
+        for(uint i : { 1, 1 << lut.BITS_CR, 1 << (lut.BITS_CB + lut.BITS_CR) }) {
+
+            // If either direction is the colour we are looking for we are touching
             if(getAt(lut, index + i) == c
             || getAt(lut, index - i) == c) {
                 return true;
@@ -67,16 +116,27 @@ namespace research {
         return false;
     }
 
+    /**
+     * @brief Checks if the passed index is an internal voxel
+     *
+     * @details A voxel is considered internal if all of it's faces are touching voxels
+     *          that are the same colour as itself
+     *
+     * @param lut the lookup table that we are searching in
+     * @param index the array index that represents these coordinates in the lut
+     *
+     * @return true if the index is internal, false otherwise
+     */
     inline bool isInternal(const LookUpTable& lut, const uint& index) {
 
-        // Get the classification for this pixel
+        // Get the classification for this voxel
         Colour c = getAt(lut, index);
 
         // Will be true if this voxel is internal
         bool internal = true;
 
         // Loop through each axis and check they are all filled
-        for(uint i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
+        for(uint i : { 1, 1 << lut.BITS_CR, 1 << (lut.BITS_CB + lut.BITS_CR) }) {
             internal &= getAt(lut, index + i) == c;
             internal &= getAt(lut, index - i) == c;
         }
@@ -84,6 +144,54 @@ namespace research {
         return internal;
     }
 
+    /**
+     * @brief Returns the list of voxels which the passed voxel could influence
+     *
+     * @details This function will get all of the voxels that the passed index could influence.
+     *          This includes all of the voxels it is touching plus the sideways diagonals.
+     *
+     * @param lut lut the lookup table that we are searching in
+     * @param index the array index that represents these coordinates in the lut
+     *
+     * @return a list of all the voxels that this index could influence
+     */
+    inline std::set<uint> influence(const LookUpTable& lut, const uint& index) {
+
+        std::set<uint> inf;
+
+        // Each of our touchign faces
+        for(uint i : { 1, 1 << lut.BITS_CR, 1 << (lut.BITS_CB + lut.BITS_CR) }) {
+            inf.insert(index + i);
+            inf.insert(index - i);
+        }
+
+        // Insert our side diagonals
+        for(uint i : {1 << lut.BITS_CR, 1 << (lut.BITS_CB + lut.BITS_CR) }) {
+
+            inf.insert(index + i + 1);
+            inf.insert(index - i + 1);
+            inf.insert(index + i - 1);
+            inf.insert(index - i - 1);
+        }
+
+        return inf;
+    }
+
+    /**
+     * @brief Checks if the passed index is removeable from the LUT as a surface removeable voxel.
+     *
+     * @details This will check if the voxel at index can be safely removed from the LUT as the surface.
+     *          This will be true if any of the following are true:
+     *            1. the voxel does not have two opposite classified voxels.
+     *            2. the voxel has two non oppisite internal voxels (internal voxels are voxels with all faces filled)
+     *            3. the voxel has at least 3 voxels
+     *
+     *
+     * @param lut [descr iption]
+     * @param index [description]
+     *
+     * @return
+     */
     inline bool isRemoveable(const LookUpTable& lut, const uint& index) {
 
         // Get the classification for this pixel
@@ -98,17 +206,11 @@ namespace research {
         bool removeable = false;
 
         // Loop through each axis
-        for(uint i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
+        for(uint i : { 1, 1 << lut.BITS_CR, 1 << (lut.BITS_CB + lut.BITS_CR) }) {
 
             // Check if we have a filled cell opposite to a non filled cell
             if(!(getAt(lut, index + i) == c && getAt(lut, index - i) == c)) {
-
-                // Check if we have a 3 long segment (only) in this axis
-                if((getAt(lut, index - (2 * i)) == c && getAt(lut, index + i != c))
-                || (getAt(lut, index + (2 * i)) == c && getAt(lut, index - i != c))) {
-                    // This could be a surface removeable (provided the else doesn't fire)
-                    removeable = true;
-                }
+                removeable = true;
             }
             else {
                 // Break! this isn't surface by this criteria!
@@ -126,7 +228,7 @@ namespace research {
             uint nonOppositeInternal = 0;
 
             // Loop through each axis again
-            for(int i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
+            for(uint i : { 1, 1 << lut.BITS_CR, 1 << (lut.BITS_CB + lut.BITS_CR) }) {
 
                 // Check if either side is internal
                 bool a = getAt(lut, index + i) == c && isInternal(lut, index + 1);
@@ -147,6 +249,17 @@ namespace research {
         return removeable;
     }
 
+    /**
+     * @brief Shed the outer layer of the lookup table
+     *
+     * @details Takes all of the voxels that make up the "surface" of the LUT (as defined by isRemoveable)
+     *          and removes them from the LUT.
+     *
+     * @param lut our lut that we are shedding layers from
+     * @param c the colour that we are shedding for
+     * @param sa the set of surface area removeable voxels we are removing (and refilling with the new surface)
+     * @param vol The volume of this colour (to be modified when removing)
+     */
     void shed(LookUpTable& lut, Colour c, std::set<uint>& sa, uint& vol) {
         // Holds our new surface voxels
         std::set<uint> newSA;
@@ -154,11 +267,9 @@ namespace research {
         // Go through the surface area for this colour
         for(auto& s : sa) {
 
-            // Loop through each axis and insert the points as they may be SA now
-            for(int i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
-                newSA.insert(s + i);
-                newSA.insert(s - i);
-            }
+            // Everything we were influencing is potential SA
+            std::set<uint> inf = influence(lut, s);
+            newSA.insert(std::begin(inf), std::end(inf));
 
             // Set this voxel to unclassified and remove it from the volume
             getAt(lut, s) = Colour::UNCLASSIFIED;
@@ -204,12 +315,13 @@ namespace research {
             std::map<Colour, std::set<uint>> newSA;
             std::map<Colour, uint> newVol;
 
+            // Loop through every voxel in the lut
             for(uint x = 0; x < uint(1 << lut.BITS_Y); ++x) {
                 for (uint y = 0; y < uint(1 << lut.BITS_CB); ++y) {
                     for (uint z = 0; z < uint(1 << lut.BITS_CR); ++z) {
 
                         // Get our index and classification
-                        int index = getIndex(lut, x, y, z);
+                        uint index = getIndex(lut, x, y, z);
                         Colour c = getAt(lut, index);
 
                         // Ignore unclassified pixels
@@ -229,31 +341,88 @@ namespace research {
 
             surfaceArea = std::move(newSA);
             volume = std::move(newVol);
+        });
 
-            for(auto& v : volume) {
-                log("Volume:", char(v.first), v.second);
-            }
+        // Show our Internal, Removeable, and Nonremoveable voxels
+        on<Trigger<Every<1, std::chrono::seconds>>, With<LookUpTable>>([this](const time_t&, const LookUpTable& lut) {
+            static int i = 0;
 
 
             // For visualization we are flagging surface voxels
             auto tableDiff = std::make_unique<LookUpTableDiff>();
 
-            for(auto& p : surfaceArea) {
-                log("SA: ", char(p.first), p.second.size());
-                for(auto& i : p.second) {
-                    log("    ", char(p.first), i);
+            // Show the removeable surface
+            if(i % 3 == 0) {
+                for(uint x = 0; x < uint(1 << lut.BITS_Y); ++x) {
+                    for (uint y = 0; y < uint(1 << lut.BITS_CB); ++y) {
+                        for (uint z = 0; z < uint(1 << lut.BITS_CR); ++z) {
 
+                            // Get our relevant information
+                            uint index = getIndex(lut, x, y, z);
+                            Colour c = getAt(lut, index);
 
-                    // Add our diff for displaying
-                    auto& diff = *tableDiff->add_diff();
-                    diff.set_lut_index(i);
-                    diff.set_classification(Colour::UNCLASSIFIED);
-
+                            // Now time to choose the colour
+                            if(c == Colour::YELLOW && isRemoveable(lut, index)) {
+                                auto& diff = *tableDiff->add_diff();
+                                diff.set_lut_index(index);
+                                diff.set_classification(Colour::CYAN);
+                            }
+                        }
+                    }
                 }
             }
 
-            // emit(std::move(tableDiff));
-        });
+            // Show the internal voxels
+            else if(i % 3 == 1) {
+
+                for(uint x = 0; x < uint(1 << lut.BITS_Y); ++x) {
+                    for (uint y = 0; y < uint(1 << lut.BITS_CB); ++y) {
+                        for (uint z = 0; z < uint(1 << lut.BITS_CR); ++z) {
+
+                            // Get our relevant information
+                            uint index = getIndex(lut, x, y, z);
+                            Colour c = getAt(lut, index);
+
+                            // Now time to choose the colour
+                            if(c == Colour::YELLOW && isInternal(lut, index)) {
+                                auto& diff = *tableDiff->add_diff();
+                                diff.set_lut_index(index);
+                                diff.set_classification(Colour::YELLOW);
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            // Show the other voxels
+            if(i % 3 == 2) {
+
+                for(uint x = 0; x < uint(1 << lut.BITS_Y); ++x) {
+                    for (uint y = 0; y < uint(1 << lut.BITS_CB); ++y) {
+                        for (uint z = 0; z < uint(1 << lut.BITS_CR); ++z) {
+
+                            // Get our relevant information
+                            uint index = getIndex(lut, x, y, z);
+                            Colour c = getAt(lut, index);
+
+                            // Now time to choose the colour
+                            if(c == Colour::YELLOW && !isRemoveable(lut, index) && !isInternal(lut, index)) {
+                                auto& diff = *tableDiff->add_diff();
+                                diff.set_lut_index(index);
+                                diff.set_classification(Colour::MAGENTA);
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            emit(std::move(tableDiff));
+
+            // Next time show the next set
+            ++i;
+        }).disable();
 
         on<Trigger<AutoClassifierPixels>, With<LookUpTable>, Options<Single>>([this] (const AutoClassifierPixels& pixels, const LookUpTable& lut) {
 
@@ -276,7 +445,7 @@ namespace research {
                 if(colour == Colour::UNCLASSIFIED) {
 
                     // Get our voxel coordinates for this pixel
-                    uint index = getIndex(lut, p);
+                    uint index = lut.getLUTIndex(p);
 
                     // Check if we are touching a filled voxel
                     if(isTouching(lut, index, c)) {
@@ -310,21 +479,17 @@ namespace research {
                                 sa.insert(index);
                             }
 
-                            // Loop through each axis and update if each voxel is SA
-                            for(uint i : { 1, 1 << lut.BITS_CB, 1 << (lut.BITS_Y + lut.BITS_CB) }) {
+                            // Loop through our influenced voxels and update their status
+                            for(uint i : influence(lut, index)) {
 
-                                // Add or remove as necessary
-                                if(isRemoveable(lut, index + i)) {
-                                    sa.insert(index + i);
-                                }
-                                else if(sa.find(index + i) != std::end(sa)) {
-                                    sa.erase(sa.find(index + i));
-                                }
-                                if(isRemoveable(lut, index - i)) {
-                                    sa.insert(index - i);
-                                }
-                                else if(sa.find(index - i) != std::end(sa)) {
-                                    sa.erase(sa.find(index - i));
+                                // We only care about our own colour
+                                if(getAt(lut, i) == c) {
+                                    if(isRemoveable(lut, i)) {
+                                        sa.insert(i);
+                                    }
+                                    else if(sa.find(i) != std::end(sa)) {
+                                        sa.erase(sa.find(i));
+                                    }
                                 }
                             }
 
