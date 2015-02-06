@@ -6,13 +6,23 @@ stance:
   # Default arm positions while walking
   arms:
     left:
-      -   90 * pi / 180 # Shoulder Roll
-      -   45 * pi / 180 # Shoulder Pitch
-      - -140 * pi / 180 # Elbow
+      start:
+        -   90 * pi / 180 # Shoulder Pitch
+        -   25 * pi / 180 # Shoulder Roll
+        - -140 * pi / 180 # Elbow
+      end:
+        -   125 * pi / 180 # Shoulder Pitch
+        -   55 * pi / 180 # Shoulder Roll
+        - -140 * pi / 180 # Elbow
     right:
-      -   90 * pi / 180 # Shoulder Roll
-      -  -45 * pi / 180 # Shoulder Pitch
-      - -140 * pi / 180 # Elbow
+      start:
+        -   90 * pi / 180 # Shoulder Pitch
+        -  -25 * pi / 180 # Shoulder Roll
+        - -140 * pi / 180 # Elbow
+      end:
+        -   125 * pi / 180 # Shoulder Pitch
+        -  -55 * pi / 180 # Shoulder Roll
+        - -140 * pi / 180 # Elbow
   foot_offset:
     - -0.02 # The distance the ankles are offset from the torso, in meters.
     - -0.01 # How far from the center of the foot the center of mass is placed during each step.
@@ -64,7 +74,7 @@ walk_cycle:
     offset: 0 * pi / 180
     gain:
       p: 0.132
-      i: 0.203
+      i: 0.0
       d: 0.021
     # Support bias parameters to reduce backlash-based instability
     # velFastForward: 0.05

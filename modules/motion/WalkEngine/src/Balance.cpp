@@ -42,34 +42,26 @@ namespace motion {
         Rotation3D tiltedOrientation = sensors.orientation.i().rotateY(-bodyTilt);
         // Removes any yaw component
         Rotation3D goalOrientation = Rotation3D::createRotationZ(-tiltedOrientation.yaw()) * tiltedOrientation;
-        // Maps robot to world space.
-        Rotation3D yawlessOrientation = goalOrientation.i();
 
-        // Work out the servo ID for kinematics of our leg
-        ServoID supportLegID = (leg == LimbID::RIGHT_LEG) ? ServoID::R_ANKLE_PITCH : ServoID::L_ANKLE_PITCH;
-
-        // Find our ankle information
-        Transform3D ankle = sensors.forwardKinematics.find(supportLegID)->second;
-        Rotation3D footWorld = ankle.rotation();
-
-        // Our goal and current positions as quaternions
+        // Our goal position as a quaternions
         UnitQuaternion goalQuaternion(goalOrientation);
-        UnitQuaternion footQuaternion(footWorld);
 
         // Calculate our D error and I error
-        UnitQuaternion error = goalQuaternion * lastFootGoalRotation.i();
-        footGoalErrorSum = error * footGoalErrorSum;
+        UnitQuaternion error = lastFootGoalRotation.i() * goalQuaternion;
+        // footGoalErrorSum = footGoalErrorSum.slerp(goalQuaternion * footGoalErrorSum, 1.0/90.0);
 
-        // Apply our P and I gain
-        UnitQuaternion rotation  = footQuaternion.slerp(goalQuaternion, balancePGain)
-                                     // * leftFootQuaternion.slerp(footGoalErrorSum, balanceIGain)
-                                     * footQuaternion.slerp(error, balanceDGain).i();
+        // emit(graph("pid", Rotation3D(goalQuaternion).pitch(), /*Rotation3D(footGoalErrorSum).pitch(), */Rotation3D(error).pitch()));
+
+        // Apply the PID gains
+        UnitQuaternion rotation = UnitQuaternion().slerp(goalQuaternion, balancePGain)
+                                // * UnitQuaternion().slerp(footGoalErrorSum, balanceIGain)
+                                * UnitQuaternion().slerp(error, balanceDGain).i();
 
         // Halve our correction (so the other half is applied at the hip)
         rotation.scaleAngle(0.5);
 
         // Apply this rotation goal to our position
-        target.rotation()  = target.rotation() * Rotation3D(rotation);
+        target.rotation() = Rotation3D(rotation) * target.rotation();
 
         // Get the position of our hip to rotate around
         Transform3D hip = Transform3D(arma::vec3({

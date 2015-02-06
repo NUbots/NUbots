@@ -91,26 +91,28 @@ namespace modules {
             , orientationFilter(arma::vec({0, 0, 0, -9.6525e-01, -2.4957e-02, 1.8088e-01, 1.8696e-01}))
             , velocityFilter(arma::vec3({0,0,0})) {
 
-                on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& file){
-                    DEFAULT_NOISE_GAIN = file.config["DEFAULT_NOISE_GAIN"].as<double>();
-                    HIGH_NOISE_THRESHOLD = file.config["HIGH_NOISE_THRESHOLD"].as<double>();
-                    HIGH_NOISE_GAIN = file.config["HIGH_NOISE_GAIN"].as<double>();
-                    LOW_NOISE_THRESHOLD = file.config["LOW_NOISE_THRESHOLD"].as<double>();
-                    DEBOUNCE_THRESHOLD = file.config["DEBOUNCE_THRESHOLD"].as<int>();
+                on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& config){
+                    DEFAULT_NOISE_GAIN = config["default_noise_gain"].as<double>();
+                    HIGH_NOISE_THRESHOLD = config["high_noise_threshold"].as<double>();
+                    HIGH_NOISE_GAIN = config["high_noise_gain"].as<double>();
+                    LOW_NOISE_THRESHOLD = config["low_noise_threshold"].as<double>();
+                    DEBOUNCE_THRESHOLD = config["debounce_threshold"].as<int>();
 
 
-                    SUPPORT_FOOT_FSR_THRESHOLD = file.config["SUPPORT_FOOT_FSR_THRESHOLD"].as<double>();
-                    REQUIRED_NUMBER_OF_FSRS = file.config["REQUIRED_NUMBER_OF_FSRS"].as<int>();
+                    SUPPORT_FOOT_FSR_THRESHOLD = config["support_foot_fsr_threshold"].as<double>();
+                    REQUIRED_NUMBER_OF_FSRS = config["required_number_of_fsrs"].as<int>();
 
                     orientationFilter.model.processNoiseDiagonal = arma::ones(orientationFilter.model.size);
-                    orientationFilter.model.processNoiseDiagonal.rows(orientationFilter.model.QW,orientationFilter.model.QZ) *= file["IMU_POSITION_PROCESS_NOISE"].as<double>();
-                    orientationFilter.model.processNoiseDiagonal.rows(orientationFilter.model.VX,orientationFilter.model.VZ) *= file["IMU_VELOCITY_PROCESS_NOISE"].as<double>();
+                    orientationFilter.model.processNoiseDiagonal.rows(orientationFilter.model.QW,orientationFilter.model.QZ) *= config["imu_position_process_noise"].as<double>();
+                    orientationFilter.model.processNoiseDiagonal.rows(orientationFilter.model.VX,orientationFilter.model.VZ) *= config["imu_velocity_process_noise"].as<double>();
                     // NUClear::log("ProcessNoise Set: \n", orientationFilter.model.processNoiseDiagonal.t());
 
-                    MEASUREMENT_NOISE_ACCELEROMETER = arma::eye(3,3) * file["MEASUREMENT_NOISE_ACCELEROMETER"].as<double>();
-                    MEASUREMENT_NOISE_GYROSCOPE = arma::eye(3,3) * file["MEASUREMENT_NOISE_GYROSCOPE"].as<double>();
+                    MEASUREMENT_NOISE_ACCELEROMETER = arma::eye(3,3) * config["measurement_noise_accelerometer"].as<double>();
+                    MEASUREMENT_NOISE_GYROSCOPE = arma::eye(3,3) * config["measurement_noise_gyroscope"].as<double>();
+                    MEASUREMENT_NOISE_FOOT_UP = arma::eye(3,3) * config["measurement_noise_foot_up"].as<double>();
+                    FOOT_UP_SAFE_ZONE = config["foot_up_safe_zone"].as<double>();
 
-                    odometry_covariance_factor = file.config["odometry_covariance_factor"].as<double>();
+                    odometry_covariance_factor = config["odometry_covariance_factor"].as<double>();
                 });
 
                 on<Trigger<Last<20, DarwinSensors>>>([this](const LastList<DarwinSensors>& sensors) {
@@ -287,6 +289,11 @@ namespace modules {
                     sensors->leds.push_back({ 4, uint32_t((input.eyeLED.r  << 16) | (input.eyeLED.g  << 8) | (input.eyeLED.b))  }); // Eye
 
                     /************************************************
+                     *                  Kinematics                  *
+                     ************************************************/
+                    sensors->forwardKinematics = calculateAllPositions<DarwinModel>(*sensors);
+
+                    /************************************************
                      *                 Orientation                  *
                      ************************************************/
 
@@ -298,6 +305,16 @@ namespace modules {
                     orientationFilter.measurementUpdate(sensors->accelerometer, MEASUREMENT_NOISE_ACCELEROMETER, IMUModel::MeasurementType::ACCELEROMETER());
                     orientationFilter.measurementUpdate(sensors->gyroscope,     MEASUREMENT_NOISE_GYROSCOPE, IMUModel::MeasurementType::GYROSCOPE());
 
+                    // If we assume the feet are flat on the ground, we can use forward kinematics to feed a measurement update to the orientation filter.
+                    if (std::abs(input.fsr.left.centreX) < FOOT_UP_SAFE_ZONE && std::abs(input.fsr.left.centreY) < FOOT_UP_SAFE_ZONE) {
+                        auto footUp = sensors->forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second.rotation().col(2);
+                        orientationFilter.measurementUpdate(footUp, MEASUREMENT_NOISE_FOOT_UP, IMUModel::MeasurementType::UP());
+                    }
+                    if (std::abs(input.fsr.right.centreX) < FOOT_UP_SAFE_ZONE && std::abs(input.fsr.right.centreY) < FOOT_UP_SAFE_ZONE) {
+                        auto footUp = sensors->forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second.rotation().col(2);
+                        orientationFilter.measurementUpdate(footUp, MEASUREMENT_NOISE_FOOT_UP, IMUModel::MeasurementType::UP());
+                    }
+
                     // Gives us the quaternion representation
                     arma::vec o = orientationFilter.get();
                     //Map from robot to world coordinates
@@ -308,11 +325,6 @@ namespace modules {
                     // sensors->orientation.col(1) = arma::cross(sensors->orientation.col(2), sensors->orientation.col(0));
 
                     sensors->robotToIMU = calculateRobotToIMU(sensors->orientation);
-
-                    /************************************************
-                     *                  Kinematics                  *
-                     ************************************************/
-                    sensors->forwardKinematics = calculateAllPositions<DarwinModel>(*sensors);
 
                     /************************************************
                      *                   Odometry                   *

@@ -1,14 +1,14 @@
-{
-    "DEFAULT_NOISE_GAIN" : 1e-6,
-    "HIGH_NOISE_THRESHOLD" : 3,
-    "HIGH_NOISE_GAIN" : 100,
-    "LOW_NOISE_THRESHOLD" : 1,
-    "SUPPORT_FOOT_FSR_THRESHOLD" : 1,
-    "REQUIRED_NUMBER_OF_FSRS" : 1,
-    "IMU_POSITION_PROCESS_NOISE" : 1e-10,
-    "IMU_VELOCITY_PROCESS_NOISE" : 1e-8,
-    "MEASUREMENT_NOISE_ACCELEROMETER" : 1e-4,
-    "MEASUREMENT_NOISE_GYROSCOPE" : 1e-8,
-    "DEBOUNCE_THRESHOLD" : 7,
-    "odometry_covariance_factor" : 0.05
-}
+default_noise_gain : 1e-6
+high_noise_threshold : 3
+high_noise_gain : 100
+low_noise_threshold : 1
+support_foot_fsr_threshold : 1
+required_number_of_fsrs : 1
+imu_position_process_noise : 1e-10
+imu_velocity_process_noise : 1e-8
+measurement_noise_accelerometer : 1e-4
+measurement_noise_gyroscope : 1e-8
+measurement_noise_foot_up : 1e-8
+foot_up_safe_zone: 0.7
+debounce_threshold : 7
+odometry_covariance_factor : 0.05

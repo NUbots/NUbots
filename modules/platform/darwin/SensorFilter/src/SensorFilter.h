@@ -56,8 +56,10 @@ namespace modules {
                 double SUPPORT_FOOT_FSR_THRESHOLD;
                 int REQUIRED_NUMBER_OF_FSRS;
 
-                arma::mat MEASUREMENT_NOISE_ACCELEROMETER;
-                arma::mat MEASUREMENT_NOISE_GYROSCOPE;
+                arma::mat33 MEASUREMENT_NOISE_ACCELEROMETER;
+                arma::mat33 MEASUREMENT_NOISE_GYROSCOPE;
+                arma::mat33 MEASUREMENT_NOISE_FOOT_UP;
+                double FOOT_UP_SAFE_ZONE;
 
                 double odometry_covariance_factor = 0.05;
 

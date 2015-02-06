@@ -45,6 +45,7 @@ namespace utility {
                     struct GYROSCOPE {};
                     struct ACCELEROMETER {};
                     struct FORWARD {};
+                    struct UP {};
                 };
 
                 arma::vec processNoiseDiagonal;
@@ -56,6 +57,7 @@ namespace utility {
                 arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 
                 arma::vec3 predictedObservation(const arma::vec::fixed<size>& state);
+                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::UP&);
                 arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&);
                 arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&);
 
