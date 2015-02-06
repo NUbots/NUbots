@@ -149,8 +149,10 @@ namespace motion {
         auto& stance = config["stance"];
         bodyHeight = stance["body_height"].as<Expression>();
         bodyTilt = stance["body_tilt"].as<Expression>();
-        qLArm = stance["arms"]["left"].as<arma::vec>();
-        qRArm = stance["arms"]["right"].as<arma::vec>();
+        qLArmStart = stance["arms"]["left"]["start"].as<arma::vec>();
+        qLArmEnd = stance["arms"]["left"]["end"].as<arma::vec>();
+        qRArmStart = stance["arms"]["right"]["start"].as<arma::vec>();
+        qRArmEnd = stance["arms"]["right"]["end"].as<arma::vec>();
         footOffset = stance["foot_offset"].as<arma::vec>();
         // gToe/heel overlap checking values
         stanceLimitY2 = DarwinModel::Leg::LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
@@ -395,7 +397,7 @@ namespace motion {
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
         auto waypoints = motionLegs(joints);
 
-        auto arms = motionArms();
+        auto arms = motionArms(phase);
         waypoints->insert(waypoints->end(), arms->begin(), arms->end());
 
         emit(std::move(waypoints));
@@ -424,7 +426,7 @@ namespace motion {
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
         auto waypoints = motionLegs(joints);
 
-        auto arms = motionArms();
+        auto arms = motionArms(0.5);
         waypoints->insert(waypoints->end(), arms->begin(), arms->end());
 
         emit(std::move(waypoints));
@@ -443,10 +445,22 @@ namespace motion {
         return std::move(waypoints);
     }
 
-    std::unique_ptr<std::vector<ServoCommand>> WalkEngine::motionArms() {
+    std::unique_ptr<std::vector<ServoCommand>> WalkEngine::motionArms(double phase) {
 
-        auto qLArmActual = qLArm;
-        auto qRArmActual = qRArm;
+        arma::vec3 qLArmActual;
+        arma::vec3 qRArmActual;
+
+        double easing = std::sin(M_PI * phase - M_PI / 2.0) / 2.0 + 0.5;
+
+        if (swingLeg == LimbID::LEFT_LEG) {
+            easing = -easing + 1.0;
+            qLArmActual = easing * qLArmStart + (1.0 - easing) * qLArmEnd;
+            qRArmActual = (1.0 - easing) * qRArmStart + easing * qRArmEnd;
+        }
+        else {
+            qLArmActual = easing * qLArmStart + (1.0 - easing) * qLArmEnd;
+            qRArmActual = (1.0 - easing) * qRArmStart + easing * qRArmEnd;
+        }
 
         // Start arm/leg collision/prevention
         double rotLeftA = normalizeAngle(uLeftFoot.angle() - uTorso.angle());

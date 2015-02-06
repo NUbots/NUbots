@@ -164,8 +164,10 @@ namespace motion {
         // standard offset
         Transform2D uLRFootOffset;
         // arm poses
-        arma::vec3 qLArm;
-        arma::vec3 qRArm;
+        arma::vec3 qLArmStart;
+        arma::vec3 qLArmEnd;
+        arma::vec3 qRArmStart;
+        arma::vec3 qRArmEnd;
         LimbID swingLegInitial = LimbID::LEFT_LEG;
 
         double balanceEnabled;
@@ -220,7 +222,7 @@ namespace motion {
         void localise(Transform2D position);
 
         std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints);
-        std::unique_ptr<std::vector<ServoCommand>> motionArms();
+        std::unique_ptr<std::vector<ServoCommand>> motionArms(double phase);
 
         Transform2D getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg);
 
