@@ -1,0 +1,15 @@
+ADD_ROLE(
+    #Support
+    support::logging::ConsoleLogHandler
+    support::configuration::ConfigSystem
+    support::NUbugger
+
+    #Sensors
+    platform::fakedarwin::HardwareIO
+    platform::darwin::SensorFilter
+
+    #Behaviour
+    behaviour::Controller
+    behaviour::skills::Stand
+    motion::IKKick
+)

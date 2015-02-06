@@ -26,7 +26,21 @@ namespace modules {
 namespace motion {
 
     class IKKick : public NUClear::Reactor {
+
+    private:
+        /// Subsumption ID key to access motors
+        const size_t id;
+        
+    	float KICK_PRIORITY;
+    	float EXECUTION_PRIORITY;
+    	void updatePriority(const float& priority);
+
+    	static constexpr uint UPDATE_FREQUENCY = 90;
+
+        ReactionHandle updater;
+
     public:
+        static constexpr const char* CONFIGURATION_PATH = "IKKick.yaml";
         /// @brief Called by the powerplant to build and setup the IKKick reactor.
         explicit IKKick(std::unique_ptr<NUClear::Environment> environment);
     };

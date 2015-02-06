@@ -34,8 +34,8 @@ namespace messages {
          * @author Brendan Annable
          */
         struct KickCommand {
+            arma::vec3 target; // The point to kick
             arma::vec3 direction; // force is the magnitude
-            input::LimbID leg;
         };
 
         struct KickFinished{
