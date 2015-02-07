@@ -72,8 +72,8 @@ The NUbots are a cross-disciplinary Robocup team from The University of Newcastl
 %
 The NUbots team, from the University of Newcastle, Australia, competed in the Four Legged League from 2002-2007, within the Standard Platform League from 2008-2011 and subsequently within the Kid-Size Humanoid league since 2012. The NUbots have had a strong record of successes, twice achieving a first place; in 2006 in Bremen, Germany, and, again in 2008 as part of the NUManoid team in Suzhou, China.
 
-The central goal of the NUbots is to compete in Robocup at a high level by applying current research. The research projects associated with the NUbots team provide unique research and learning opportunities for bot undergraduate and postgraduate students in areas related to autonomy and human interaction. Our mission is to contribute to a responsible development and application of robotics. The NUbots also align with the Newcastle Robotics Laboratory which aims to develop and program robots that can support humans not only for routine, challenging, or dangerous tasks, but also to improve quality of life through personal assistance, companionship, and coaching. Some of our projects therefore emphasise anthropocentric and biocybernetic
-aspects in robotics research~\cite{ChalupOstwald2009}.
+The central goal of the NUbots is to compete in Robocup at a high level by applying current research. The research projects associated with the NUbots team provide unique research and learning opportunities for both undergraduate and postgraduate students in areas related to autonomy and human interaction. Our mission is to contribute to a responsible development and application of robotics. The NUbots also align with the Newcastle Robotics Laboratory which aims to develop and program robots that can support humans not only for routine, challenging, or dangerous tasks, but also to improve quality of life through personal assistance, companionship, and coaching. Some of our projects therefore emphasise anthropocentric and biocybernetic
+aspects in robotics research~\cite{ChalupOstwald2009,walker2015adaptivemusic}.
 %The central goal of the NUbots is to be a high performance competitive robot soccer team at RoboCup. The vision of the research projects associated with the NUbots team is to develop and program robots that can support humans not only for routine, challenging, or dangerous tasks, but also to improve quality of life through personal assistance, companionship, and coaching.   This includes new aspects of human robot interaction and perception. The Newcastle Robotics Laboratory hosts several postgraduate and undergraduate research projects that are associated with the NUbots.
 
 %The following sections describe the history of the team, the roles and research of the team members and addresses associated research projects and relevant aspects of the study and research environment of the University of Newcastle, Australia.
@@ -93,13 +93,14 @@ The NUbots joined the Kid-size league in 2012 with the DARwIn-OP robots, and por
 
 \section{Background of the NUbots Team Members}
 \begin{itemize}
-\item \emph{Josiah Walker} is studying for a Doctorate of Philosophy in Computer Science in Similarity Search and Robotics. He works on robot behaviour and machine learning for various NUbot systems. He is the NUbots team leader for 2013-2014.
 
 \item \emph{Trent Houliston} is studying for a Doctorate of Philosophy in Software Engineering in Software Architecture for Robotics and Artificial Intelligence. He designed and implemented the new architecture for the robots, and aided in the development of many of the components.
 
-\item \emph{Jake Fountain} is studying for a Doctorate of Philosophy in Computer Science. Jake has undergraduate degrees in mathematics and science, majoring in physics, with Honours in Computer Science. His main interests lie in virtual reality and robotics.
+\item \emph{Jake Fountain} is studying for a Doctorate of Philosophy in Computer Science. Jake has undergraduate degrees in mathematics and science, majoring in physics, with Honours in Computer Science~\cite{fountain2015pointofregard}. His main interests lie in virtual reality and robotics.
 
 \item \emph{Brendan Annable} is a 4th year undergraduate honours student studying Software Engineering. His interests include developing the team's real-time visual debugging systems and other research areas in machine intelligence, distributing computing and GPU computing.
+
+\item \emph{Josiah Walker} is studying for a Doctorate of Philosophy in Computer Science in Large Scale Search and Robotics. He works on robot behaviour and machine learning for various NUbot systems. He has been the NUbots team leader for 2013-2014.
 
 \item \emph{Mitchell Metcalfe} is an honours year student studying Computer Science. Mitchell completed undergraduate degrees in Mathematics and Computer Science in 2014. He contributes to the NUbots' localisation system, and is interested in SLAM methods.
 
@@ -156,8 +157,10 @@ Following development of a new software system in 2014, the NUbots are now focus
 \section{Acknowledgement of Use of Code}
 The NUbots DARwIn-OP robots use a walk engine based on the 2013 Team Darwin code release. We acknowledge the source of this code. The NUBots have ported this code to C++ and restructured the logic, making numerous structural and technical changes since. %The source for this module can be found in \cite{nubotsGit2}.
 
-\section{Enhancements since RoboCup 2014}
-add stuff about the fixed heads, and plans for kontron (acknowledge kontron)
+\section{Hardware Enhancements since RoboCup 2014}
+At Robocup 2014 we trialled rapid prototyping for a new head design for the Darwin-OP robots to fit upgraded Logitech C920 cameras. Since this time we have been improving designs and readying for an open source release once remaining issues are resolved. We field these otherwise standard Darwin-OP robots under the name NU-Darwin.
+
+We have been partnering with Kontron Australia to develop more powerful embedded pc boards in order to upgrade our capabilities and deploy new robotics platforms. This upgrade will see higher quality accelerometers and gyroscopes and more hardware communications channels added to the robots, as well as an upgrade to a quad-core celeron platform with access to OpenCL compute abilities.
 
 %Since Robocup 2013, improvements have been made in the area of software architecture and hardware. As the league moves to more realistic game conditions, we are trialling a hardware control platform composed of the following:
 
@@ -177,12 +180,10 @@ add stuff about the fixed heads, and plans for kontron (acknowledge kontron)
 %\end{figure}
 
 %The above enhancements will not be implemented on all of the DARwIn-OP robots.
-The remaining robots will have the standard DARwIn-OP configuration of a Logitech C905, fit-PC2i and CM730.
 
 \section{Research Areas}
 
-\noindent\textbf{Robot Vision:} Vision is one of the major research areas associated with the Newcastle Robotics Laboratory. Several subtopics have been investigated including object recognition, horizon determination, edge detection, model fitting and colour classification using ellipse fitting, convex optimisation and kernel machines. Recent work has resulted in a fully-autonomous method of colour look-up table adaptation for changing lighting conditions, allowing us to overcome one of the major limitations of the colour look-up table system. Publications are available e.g. from~\cite{budden2012colour,budden2012ball,henderson_2007,nickin_2007,NUBOT2006,Henderson2008,flannery2013ransac,budden2013salient}.
-\\
+\noindent\textbf{Robot Vision:} Vision is one of the major research areas associated with the Newcastle Robotics Laboratory. Several subtopics have been investigated including object recognition, horizon determination, edge detection, model fitting and colour classification using ellipse fitting, convex optimisation and kernel machines. Recent work has resulted in a fully-autonomous method of colour look-up table adaptation for changing lighting conditions, allowing us to overcome one of the major limitations of the colour look-up table system. Publications are available e.g. from~\cite{budden2012colour,budden2012ball,henderson_2007,nickin_2007,NUBOT2006,Henderson2008,flannery2013ransac,budden2013salient,chalup2014flfc,renton2014robotx}.
 
 \noindent\textbf{Localisation and Kalman Filters:} Research on the
 topic of localisation focused on Bayesian approaches to robot
