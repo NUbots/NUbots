@@ -4,6 +4,13 @@ FIND_PACKAGE(PythonInterp REQUIRED)
 # We need latex!
 FIND_PACKAGE(LATEX REQUIRED)
 
+# Make our arguments!
+UNSET(report_rel_paths)
+FOREACH(report_file ${report_files})
+	FILE(RELATIVE_PATH rel_path ${CMAKE_SOURCE_DIR} ${report_file})
+	SET(report_rel_paths ${report_rel_paths} ${rel_path})
+ENDFOREACH(report_file)
+
 # Build our main tex file that includes the others
 ADD_CUSTOM_COMMAND(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/main.tex"
@@ -13,6 +20,7 @@ ADD_CUSTOM_COMMAND(
             ${CMAKE_CURRENT_SOURCE_DIR}/header.tex
             ${CMAKE_CURRENT_SOURCE_DIR}/footer.tex
             ${report_files}
+            ${report_rel_paths}
     DEPENDS ${CMAKE_SOURCE_DIR}/cmake/Scripts/generate_report_tex.py
             ${CMAKE_CURRENT_SOURCE_DIR}/header.tex
             ${CMAKE_CURRENT_SOURCE_DIR}/footer.tex

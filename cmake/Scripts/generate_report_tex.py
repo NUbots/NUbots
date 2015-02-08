@@ -1,6 +1,57 @@
 #!/usr/bin/python
 
 import sys
+import os
+import re
+
+def pathComponents(path):
+    path = os.path.dirname(path);
+    folders = [];
+    while 1:
+        path,folder=os.path.split(path);
+
+        if folder != "":
+            folders.append(folder);
+        else:
+            if path != "":
+                folders.append(path);
+
+            break;
+    folders.reverse();
+    return folders;
+
+def fixName(name, leaf):
+    # If it's a leaf node, camelcase to words
+    if leaf:
+        # Split up based on caps runs
+        words = filter(None, re.split("([A-Z]+[a-z]+)", name));
+        return ' '.join(words);
+    else:
+        words = [item.capitalize() for item in name.split("_")]
+        return ' '.join(words);
+
+    # Otherwise underscore to words
+
+def addModuleContent(file, tree, depth):
+
+    # Print our tex content if we have any
+    if tree[1] != "":
+        file.write(tree[1]);
+        file.write("\n");
+
+    # Loop through each of this level sorted so that subsections come after
+    for elem in sorted(tree[0], key=lambda item: (len(item[1][0]) == 0, item[0])):
+        # Fix our name to be wordy
+        name = fixName(elem, len(tree[0][elem][0]) == 0);
+
+        # Write our section level
+        file.write({ 0: "\chapter",
+          1: "\section",
+          2: "\subsection",
+          3: "\subsubsection" }[depth]);
+        file.write("{" + name + "}\n")
+        addModuleContent(file, tree[0][elem], depth + 1);
+
 
 if sys.argv[1]:
     output_file = sys.argv[1];
@@ -11,17 +62,18 @@ else:
 if sys.argv[2]:
     header = sys.argv[2];
 else:
-    print 'You must specify an output file\n';
+    print 'You must specify a document header\n';
     sys.exit(1);
 
 if sys.argv[3]:
     footer = sys.argv[3];
 else:
-    print 'You must specify an output file\n';
+    print 'You must specify a document footer\n';
     sys.exit(1);
 
-if sys.argv[3:]:
-    tex_sources = sys.argv[3:];
+if sys.argv[4:]:
+    modules = sys.argv[4:];
+    modules = zip(modules[:(len(modules)/2)], modules[(len(modules)/2):])
 else:
     print 'You must specify some report modules\n';
     sys.exit(1);
@@ -35,16 +87,28 @@ with open(output_file, 'w') as file:
         file.write(data);
         file.write("\n");
 
-    # Sort out our modules for inclusion order
+    tree = [ dict(), "" ];
 
-    # Loop through our modules sources
-    for src in tex_sources:
-        with open(src, 'r') as tex:
-            data = tex.read();
-            file.write(data);
-            file.write("\n");
+    # Look through all of our source files
+    for module in modules:
 
+        path = tree;
 
+        folders = pathComponents(module[1]);
+        for folder in folders[:-1]:
+            # Create the element if it doesn't exist
+            if folder not in path[0]:
+                path[0][folder] = [ dict(), "" ];
+
+            # Move to our new path in the tree
+            path = path[0][folder];
+
+        # Add our tex content to the path
+        with open(module[0], 'r') as tex:
+            path[1] += tex.read();
+
+    # Add the content from the modules to the file
+    addModuleContent(file, tree, 0);
 
     # Put our footer into the output file
     with open(footer, 'r') as footer:
