@@ -29,7 +29,6 @@ ADD_CUSTOM_COMMAND(
 )
 
 ADD_CUSTOM_TARGET(report
-                  COMMAND echo "Hi"
                   DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/main.tex")
 
 

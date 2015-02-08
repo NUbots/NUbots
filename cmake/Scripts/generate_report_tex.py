@@ -46,10 +46,12 @@ def addModuleContent(file, tree, depth):
         name = fixName(elem, len(tree[0][elem][0]) == 0);
 
         # Write our section level
-        file.write({ 0: "\chapter",
-                     1: "\t\section",
-                     2: "\t\t\subsection",
-                     3: "\t\t\t\subsubsection" }[depth]);
+        file.write({ 0: "\part",
+                     1: "\t\chapter",
+                     2: "\t\t\section",
+                     3: "\t\t\t\subsection",
+                     4: "\t\t\t\t\subsection",
+                     5: "\t\t\t\t\t\subsubsection" }[depth]);
         file.write("{" + name + "}\n")
         addModuleContent(file, tree[0][elem], depth + 1);
 
