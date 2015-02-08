@@ -36,7 +36,8 @@ def addModuleContent(file, tree, depth):
 
     # Print our tex content if we have any
     if tree[1] != "":
-        file.write(tree[1]);
+
+        file.write(re.sub("^(.*)$", (("\t") * depth) + "\\1", tree[1], flags=re.MULTILINE));
         file.write("\n");
 
     # Loop through each of this level sorted so that subsections come after
@@ -46,9 +47,9 @@ def addModuleContent(file, tree, depth):
 
         # Write our section level
         file.write({ 0: "\chapter",
-          1: "\section",
-          2: "\subsection",
-          3: "\subsubsection" }[depth]);
+                     1: "\t\section",
+                     2: "\t\t\subsection",
+                     3: "\t\t\t\subsubsection" }[depth]);
         file.write("{" + name + "}\n")
         addModuleContent(file, tree[0][elem], depth + 1);
 
