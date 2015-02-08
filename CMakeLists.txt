@@ -49,6 +49,9 @@ ADD_SUBDIRECTORY(roles)
 # Remove any duplicate modules (used in more then one role)
 LIST(REMOVE_DUPLICATES modules)
 
+# Clear our report files before readding (cmake scopes suck... could be fixed one day but who cares!)
+SET(report_files "" CACHE INTERNAL "List of report files" FORCE)
+
 # Build each of our modules and their corresponding tests
 FOREACH(module ${modules})
     STRING(REPLACE "::" "/" modulepath "${module}")
@@ -57,6 +60,8 @@ FOREACH(module ${modules})
     # Add the subdirectories
     ADD_SUBDIRECTORY(modules/${modulepath})
 ENDFOREACH()
+
+ADD_SUBDIRECTORY(report)
 
 # Include our scp darwin sender
 INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/DarwinSend.cmake")

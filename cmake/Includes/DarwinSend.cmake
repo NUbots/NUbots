@@ -1,6 +1,9 @@
+# We need python!
+FIND_PACKAGE(PythonInterp REQUIRED)
+
 # Custom target to copy and install configuration files and binarys to the robot
 ADD_CUSTOM_TARGET(send
-                  COMMAND python "${CMAKE_SOURCE_DIR}/cmake/Scripts/send.py" "--robot_ip=\${robot}" "--config=\${config}" "--username=\${username}"
+                  COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/cmake/Scripts/send.py" "--robot_ip=\${robot}" "--config=\${config}" "--username=\${username}"
                   DEPENDS ${roles} "${CMAKE_SOURCE_DIR}/cmake/Scripts/send.py")
 
 # Put it in an IDE group for shared
@@ -18,7 +21,7 @@ FOREACH(robot 1 2 3 4 5 6 7)
 
             # Make our installer
             ADD_CUSTOM_TARGET("d${robot}${ethernet}${config}"
-                COMMAND python "${CMAKE_SOURCE_DIR}/cmake/Scripts/send.py" "--robot_ip=${address}" "--config=${config}" "--username=darwin"
+                COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/cmake/Scripts/send.py" "--robot_ip=${address}" "--config=${config}" "--username=darwin"
                 DEPENDS ${roles} "${CMAKE_SOURCE_DIR}/cmake/Scripts/send.py")
 
 
@@ -30,5 +33,5 @@ FOREACH(robot 1 2 3 4 5 6 7)
 ENDFOREACH(robot)
 
 ADD_CUSTOM_TARGET("nc"
-          COMMAND python "${CMAKE_SOURCE_DIR}/cmake/Scripts/send.py" "--robot_ip=10.0.1.120" "--username=nubots"
+          COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/cmake/Scripts/send.py" "--robot_ip=10.0.1.120" "--username=nubots"
           DEPENDS ${roles} "${CMAKE_SOURCE_DIR}/cmake/Scripts/send.py")

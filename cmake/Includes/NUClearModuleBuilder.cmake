@@ -28,9 +28,14 @@ FUNCTION(NUCLEAR_MODULE)
     # Find all our files
     FILE(GLOB_RECURSE src "${CMAKE_CURRENT_SOURCE_DIR}/src/**.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/**.h")
 
-    # Get our configuration files
-    FILE(GLOB_RECURSE config_files "config/**")
+    # Get all of our report files and put them into global scope
+    FILE(GLOB_RECURSE local_report_files "${CMAKE_CURRENT_SOURCE_DIR}/report/**.tex")
+    SET(report_files ${report_files} ${local_report_files} CACHE INTERNAL "List of report files" FORCE)
 
+    # Get our configuration files
+    FILE(GLOB_RECURSE config_files "${CMAKE_CURRENT_SOURCE_DIR}/config/**.yaml")
+
+    # Process the configuration files
     FOREACH(config_file ${config_files})
 
         # Calculate the Output Directory
