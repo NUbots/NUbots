@@ -46,12 +46,12 @@ def addModuleContent(file, tree, depth):
         name = fixName(elem, len(tree[0][elem][0]) == 0);
 
         # Write our section level
-        file.write({ 0: "\part",
-                     1: "\t\chapter",
-                     2: "\t\t\section",
-                     3: "\t\t\t\subsection",
-                     4: "\t\t\t\t\subsection",
-                     5: "\t\t\t\t\t\subsubsection" }[depth]);
+        file.write({ 0: "\n\part",
+                     1: "\n\t\chapter",
+                     2: "\n\t\t\section",
+                     3: "\n\t\t\t\subsection",
+                     4: "\n\t\t\t\t\subsection",
+                     5: "\n\t\t\t\t\t\subsubsection" }[depth]);
         file.write("{" + name + "}\n")
         addModuleContent(file, tree[0][elem], depth + 1);
 
@@ -68,14 +68,8 @@ else:
     print 'You must specify a document header\n';
     sys.exit(1);
 
-if sys.argv[3]:
-    footer = sys.argv[3];
-else:
-    print 'You must specify a document footer\n';
-    sys.exit(1);
-
-if sys.argv[4:]:
-    modules = sys.argv[4:];
+if sys.argv[3:]:
+    modules = sys.argv[3:];
     modules = zip(modules[:(len(modules)/2)], modules[(len(modules)/2):])
 else:
     print 'You must specify some report modules\n';
@@ -84,12 +78,7 @@ else:
 # Open our output file for writing
 with open(output_file, 'w') as file:
 
-    # Put our header into the output file
-    with open(header, 'r') as header:
-        data = header.read();
-        file.write(data);
-        file.write("\n");
-
+    # Make our tree
     tree = [ dict(), "" ];
 
     # Look through all of our source files
@@ -113,8 +102,6 @@ with open(output_file, 'w') as file:
     # Add the content from the modules to the file
     addModuleContent(file, tree, 0);
 
-    # Put our footer into the output file
-    with open(footer, 'r') as footer:
-        data = footer.read();
-        file.write(data);
-        file.write("\n");
+    # Write the end document
+    file.write("\\end{document}\n")
+

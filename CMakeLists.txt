@@ -50,7 +50,8 @@ ADD_SUBDIRECTORY(roles)
 LIST(REMOVE_DUPLICATES modules)
 
 # Clear our report files before readding (cmake scopes suck... could be fixed one day but who cares!)
-SET(report_files "" CACHE INTERNAL "List of report files" FORCE)
+SET(report_tex_files "" CACHE INTERNAL "List of report tex files" FORCE)
+SET(report_bib_files "" CACHE INTERNAL "List of report bib files" FORCE)
 
 # Build each of our modules and their corresponding tests
 FOREACH(module ${modules})
