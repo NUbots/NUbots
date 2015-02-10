@@ -87,10 +87,10 @@ namespace modules {
                     time_t time = NUClear::clock::now() + std::chrono::nanoseconds(size_t(std::nano::den*panTime));
                     auto waypoints = std::make_unique<std::vector<ServoCommand>>();
                     waypoints->reserve(4);
-                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW,     float(sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition),  30.f,0});
-                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH,    float(sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition), 30.f,0});
-                    waypoints->push_back({id, time, ServoID::HEAD_YAW,     float(std::fmin(std::fmax(headYaw,minYaw),maxYaw)),  30.f,0});
-                    waypoints->push_back({id, time, ServoID::HEAD_PITCH,    float(std::fmin(std::fmax(headPitch,minPitch),maxPitch)), 30.f,0});
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW,     float(sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition),  30.f, 100});
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH,    float(sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition), 30.f, 100});
+                    waypoints->push_back({id, time, ServoID::HEAD_YAW,     float(std::fmin(std::fmax(headYaw,minYaw),maxYaw)),  30.f, 100});
+                    waypoints->push_back({id, time, ServoID::HEAD_PITCH,    float(std::fmin(std::fmax(headPitch,minPitch),maxPitch)), 30.f, 100});
                     emit(std::move(waypoints));
                     // std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
                 });
@@ -143,11 +143,11 @@ namespace modules {
                     time_t time = NUClear::clock::now() + std::chrono::nanoseconds(size_t(std::nano::den*panTime));
                     auto waypoints = std::make_unique<std::vector<ServoCommand>>();
                     waypoints->reserve(4);
-                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW,     float(sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition),  30.f, 0});
-                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH,    float(sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition), 30.f, 0});
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW,     float(sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition),  30.f, 100});
+                    waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH,    float(sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition), 30.f, 100});
 
-                    waypoints->push_back({id, time, ServoID::HEAD_YAW,     float(std::fmin(std::fmax(headYaw,minYaw),maxYaw)),  30.f, 0});
-                    waypoints->push_back({id, time, ServoID::HEAD_PITCH,    float(std::fmin(std::fmax(headPitch,minPitch),maxPitch)), 30.f, 0});
+                    waypoints->push_back({id, time, ServoID::HEAD_YAW,     float(std::fmin(std::fmax(headYaw,minYaw),maxYaw)),  30.f, 100});
+                    waypoints->push_back({id, time, ServoID::HEAD_PITCH,    float(std::fmin(std::fmax(headPitch,minPitch),maxPitch)), 30.f, 100});
                     emit(std::move(waypoints));
                     // std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
                 });
@@ -160,8 +160,8 @@ namespace modules {
                     if (NUClear::clock::now() >= lastPanEnd) {
                         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
                         waypoints->reserve(2+2*look.size());
-                        waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW,     float(sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition),  30.f, 0});
-                        waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH,    float(sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition), 30.f, 0});
+                        waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_YAW,     float(sensors.servos[size_t(ServoID::HEAD_YAW)].presentPosition),  30.f, 100});
+                        waypoints->push_back({id, NUClear::clock::now(), ServoID::HEAD_PITCH,    float(sensors.servos[size_t(ServoID::HEAD_PITCH)].presentPosition), 30.f, 100});
                     // std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
 
                         //this might find a better location eventually - it is the generic "gotopoint" code
@@ -175,8 +175,8 @@ namespace modules {
                             time += std::chrono::nanoseconds(size_t(std::nano::den*panTime));
                             headYaw = std::fmin(std::fmax(yaw,minYaw),maxYaw);
                             headPitch = std::fmin(std::fmax(pitch,minPitch),maxPitch);
-                            waypoints->push_back({id, time, ServoID::HEAD_YAW,     float(std::fmin(std::fmax(headYaw,minYaw),maxYaw)),  30.f, 0});
-                            waypoints->push_back({id, time, ServoID::HEAD_PITCH,    float(std::fmin(std::fmax(headPitch,minPitch),maxPitch)), 30.f, 0});
+                            waypoints->push_back({id, time, ServoID::HEAD_YAW,     float(std::fmin(std::fmax(headYaw,minYaw),maxYaw)),  30.f, 100});
+                            waypoints->push_back({id, time, ServoID::HEAD_PITCH,    float(std::fmin(std::fmax(headPitch,minPitch),maxPitch)), 30.f, 100});
 
                         }
                         lastPanEnd = time;
