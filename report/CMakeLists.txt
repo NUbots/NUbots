@@ -61,9 +61,60 @@ ADD_CUSTOM_COMMAND(
     COMMENT "Generating bibliography file for the report"
 )
 
-ADD_CUSTOM_TARGET(report
-                  DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/main.tex"
-                          "${CMAKE_CURRENT_BINARY_DIR}/references.bib")
+# Build our first latex run
+ADD_CUSTOM_COMMAND(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/main.aux"
+           "${CMAKE_CURRENT_BINARY_DIR}/main.log"
+           "${CMAKE_CURRENT_BINARY_DIR}/main.idx"
+           "${CMAKE_CURRENT_BINARY_DIR}/main.toc"
+    COMMAND "${PDFLATEX_COMPILER}"
+            "-interaction=batchmode"
+            "--shell-escape"
+            "--file-line-error"
+            "main.tex"
+    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/main.tex"
+    COMMENT "Running the first pass of the latex compiler"
+)
+
+# Build our bibliographies
+ADD_CUSTOM_COMMAND(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/main.bbl"
+           "${CMAKE_CURRENT_BINARY_DIR}/main.blg"
+    COMMAND "${BIBTEX_COMPILER}"
+            "-terse"
+            "main"
+    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/references.bib"
+            "${CMAKE_CURRENT_BINARY_DIR}/main.aux"
+    COMMENT "Running the bibtex bibliography compiler"
+)
+
+# Build our indicies
+ADD_CUSTOM_COMMAND(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/main.ilg"
+           "${CMAKE_CURRENT_BINARY_DIR}/main.ind"
+    COMMAND "${MAKEINDEX_COMPILER}"
+            "-q"
+            "main.idx"
+    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/main.idx"
+    COMMENT "Running the makeindex index generator"
+)
+
+# Do our final latex run
+ADD_CUSTOM_COMMAND(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/main.pdf"
+    COMMAND "${PDFLATEX_COMPILER}"
+            "-interaction=batchmode"
+            "--shell-escape"
+            "--file-line-error"
+            "${CMAKE_CURRENT_BINARY_DIR}/main.tex"
+
+    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/main.tex"
+            "${CMAKE_CURRENT_BINARY_DIR}/main.ind"
+            "${CMAKE_CURRENT_BINARY_DIR}/main.bbl"
+    COMMENT "Running the final pass of the latex compiler"
+)
+
+ADD_CUSTOM_TARGET(report DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/main.pdf")
 
 
  # Make our installer

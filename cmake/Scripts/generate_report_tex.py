@@ -103,5 +103,6 @@ with open(output_file, 'w') as file:
     addModuleContent(file, tree, 0);
 
     # Write the end document
+    file.write("\\bibliography{references}\n")
+    file.write("\\bibliographystyle{plain}\n")
     file.write("\\end{document}\n")
-
