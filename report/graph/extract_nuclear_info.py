@@ -34,43 +34,60 @@ with open(output_file, 'w') as file:
 
     # Regexes to extract the On<> related information
     on_regex = [
+        # Seems to include NUClear's On<>s as well as ours
         re.compile(r'^\d+ V typeinfo name for std::tuple<(.+)>$'),
+        # Seems to be only On<>s in this module
         re.compile(r'^\d+ V typeinfo for std::tuple<(.+)>$')
     ];
 
     # Regexes to extract the emit information
     emit_regex = [
-        re.compile(r'^\d+ W NUClear::PowerPlant::Emit<(.+)>::emit\(.+\)$'),
-        re.compile(r'^\d+ W void NUClear::PowerPlant::ReactorMaster::directEmit<(.+)>\(.+\)$'),
-        re.compile(r'^\d+ W void NUClear::PowerPlant::ReactorMaster::emitOnStart<(.+)>\(.+\)$'),
-        re.compile(r'^\d+ W void NUClear::PowerPlant::ReactorMaster::emit<(.+)>\(.+\)$'),
-        re.compile(r'^\d+ W void NUClear::PowerPlant::emit<(.+)>\(.+\)$'),
-        re.compile(r'^\d+ W void NUClear::Reactor::emit<(.+)>\(.+\)$')
+        # Emits that have generated a type
+        re.compile(r'^\d+ W NUClear::PowerPlant::Emit<([^{]+)>::emit\(.+?\)$'),
+        # Direct emits only
+        re.compile(r'^\d+ W void NUClear::PowerPlant::ReactorMaster::directEmit<([^{]+)>\(.+?\)$'),
+        # Initialize emits only
+        re.compile(r'^\d+ W void NUClear::PowerPlant::ReactorMaster::emitOnStart<([^{]+)>\(.+?\)$'),
+        # Regular emits only
+        re.compile(r'^\d+ W void NUClear::PowerPlant::ReactorMaster::emit<(.+)>\(.+?\)$'),
+        # Emits that come through powerplant
+        re.compile(r'^\d+ W void NUClear::PowerPlant::emit<([^{]+)>\(.+?\)$'),
+        # Emits that come through a reactor
+        re.compile(r'^\d+ W void NUClear::Reactor::emit<([^{]+)>\(.+?\)$')
     ];
 
     # Regexes to exctract the cache information
     cache_regex = [
-        re.compile(r'^\d+ W void NUClear::PowerPlant::CacheMaster::cache<(.+)>\(.+\)$'),
-        re.compile(r'^\d+ W NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::get\(\)$'),
-        re.compile(r'^\d+ W NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::set\(.+\)$'),
-        re.compile(r'^\d+ u NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::data$'),
-        re.compile(r'^\d+ u NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::mutex$')
+        # Caches that have a cache function called from the CacheMaster
+        re.compile(r'^\d+ W void NUClear::PowerPlant::CacheMaster::cache<([^{]+)>\(.+?\)$'),
+        # Caches that have a get function called (things that are gotten)
+        re.compile(r'^\d+ W NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,[^{]+)>::get\(\)$'),
+        # Caches that have a set function called (things that are emitted)
+        re.compile(r'^\d+ W NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,[^{]+)>::set\(.+?\)$'),
+        # Caches that have data but are unused
+        re.compile(r'^\d+ u NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,[^{]+)>::data$'),
+        # Caches that have a mutex but are unused
+        re.compile(r'^\d+ u NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,[^{]+)>::mutex$')
     ];
 
     # Regexes to extract the TypeList <Trigger> information
     trigger_list_regex = [
-        re.compile(r'^\d+ W NUClear::metaprogramming::TypeList<(NUClear::Reactor,.+)>::get\(\)$'),
-        re.compile(r'^\d+ u NUClear::metaprogramming::TypeList<(NUClear::Reactor,.+)>::data$')
+        # Triggers that are executed by this module (triggers that used and emitted by this module?)
+        re.compile(r'^\d+ W NUClear::metaprogramming::TypeList<(NUClear::Reactor,[^{]+)>::get\(\)$'),
+        # Triggers that are executed external to this module (triggers that are not handled internally)
+        re.compile(r'^\d+ u NUClear::metaprogramming::TypeList<(NUClear::Reactor,[^{]+)>::data$')
     ];
 
     # Regexes to extract the exists information
     exists_regex = [
-        re.compile(r'^\d+ W void NUClear::Reactor::Exists<(.+)>::exists\(.+\)$')
+        # Types that fire an exists handler (triggers and withs)
+        re.compile(r'^\d+ W NUClear::Reactor::Exists<([^{]+)>::exists\(.+?\)$')
     ];
 
     # Regexes to extract the Get<> information
     get_regex = [
-        re.compile(r'^\d+ W NUClear::PowerPlant::CacheMaster::Get<(.+)>::get\(.+\)$')
+        # Types that use a Get<> handler (types in trigger and with)
+        re.compile(r'^\d+ W NUClear::PowerPlant::CacheMaster::Get<([^{]+)>::get\(.+?\)$')
     ];
 
     # Declare our lists
