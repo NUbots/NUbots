@@ -1,6 +1,9 @@
 # We need python!
 FIND_PACKAGE(PythonInterp REQUIRED)
 
+# We need a demangler that doesn't suck (compiled with the same code as us)
+ADD_EXECUTABLE(cxx_demangle ${CMAKE_CURRENT_SOURCE_DIR}/demangle.cpp)
+
 # For all the modules run our information extraction script
 FOREACH(module ${NUCLEAR_MODULES})
 
@@ -14,8 +17,10 @@ FOREACH(module ${NUCLEAR_MODULES})
                 ${CMAKE_CURRENT_SOURCE_DIR}/extract_nuclear_info.py
                 $<TARGET_FILE:${module_name}>
                 ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.json
+                $<TARGET_FILE:cxx_demangle>
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/extract_nuclear_info.py
                 ${module_name}
+                cxx_demangle
         COMMENT "Extracting the NUClear information from ${module}"
     )
 
