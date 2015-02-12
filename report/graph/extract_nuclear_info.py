@@ -34,72 +34,55 @@ with open(output_file, 'w') as file:
 
     # Regexes to extract the On<> related information
     on_regex = [
-        r'^\d+ V typeinfo name for std::tuple<(.+)>$',
-        r'^\d+ V typeinfo for std::tuple<(.+)>$'
+        re.compile(r'^\d+ V typeinfo name for std::tuple<(.+)>$'),
+        re.compile(r'^\d+ V typeinfo for std::tuple<(.+)>$')
     ];
 
     # Regexes to extract the emit information
     emit_regex = [
-        r'^\d+ W NUClear::PowerPlant::Emit<(.+)>::emit\(.+\)$',
-        r'^\d+ W void NUClear::PowerPlant::ReactorMaster::directEmit<(.+)>\(.+\)$',
-        r'^\d+ W void NUClear::PowerPlant::ReactorMaster::emitOnStart<(.+)>\(.+\)$',
-        r'^\d+ W void NUClear::PowerPlant::ReactorMaster::emit<(.+)>\(.+\)$',
-        r'^\d+ W void NUClear::PowerPlant::emit<(.+)>\(.+\)$',
-        r'^\d+ W void NUClear::Reactor::emit<(.+)>\(.+\)$'
+        re.compile(r'^\d+ W NUClear::PowerPlant::Emit<(.+)>::emit\(.+\)$'),
+        re.compile(r'^\d+ W void NUClear::PowerPlant::ReactorMaster::directEmit<(.+)>\(.+\)$'),
+        re.compile(r'^\d+ W void NUClear::PowerPlant::ReactorMaster::emitOnStart<(.+)>\(.+\)$'),
+        re.compile(r'^\d+ W void NUClear::PowerPlant::ReactorMaster::emit<(.+)>\(.+\)$'),
+        re.compile(r'^\d+ W void NUClear::PowerPlant::emit<(.+)>\(.+\)$'),
+        re.compile(r'^\d+ W void NUClear::Reactor::emit<(.+)>\(.+\)$')
     ];
 
     # Regexes to exctract the cache information
     cache_regex = [
-        r'^\d+ W void NUClear::PowerPlant::CacheMaster::cache<(.+)>\(.+\)$',
-        r'^\d+ W NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::get\(\)$',
-        r'^\d+ W NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::set\(.+\)$',
-        r'^\d+ u NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::data$',
-        r'^\d+ u NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::mutex$'
+        re.compile(r'^\d+ W void NUClear::PowerPlant::CacheMaster::cache<(.+)>\(.+\)$'),
+        re.compile(r'^\d+ W NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::get\(\)$'),
+        re.compile(r'^\d+ W NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::set\(.+\)$'),
+        re.compile(r'^\d+ u NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::data$'),
+        re.compile(r'^\d+ u NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::mutex$')
     ];
 
     # Regexes to extract the TypeList <Trigger> information
     trigger_list_regex = [
-        r'^\d+ W NUClear::metaprogramming::TypeList<(NUClear::Reactor,.+)>::get\(\)$',
-        r'^\d+ u NUClear::metaprogramming::TypeList<(NUClear::Reactor,.+)>::data$'
+        re.compile(r'^\d+ W NUClear::metaprogramming::TypeList<(NUClear::Reactor,.+)>::get\(\)$'),
+        re.compile(r'^\d+ u NUClear::metaprogramming::TypeList<(NUClear::Reactor,.+)>::data$')
     ];
 
     # Regexes to extract the exists information
     exists_regex = [
-        r'^\d+ W void NUClear::Reactor::Exists<(.+)>::exists\(.+\)$'
+        re.compile(r'^\d+ W void NUClear::Reactor::Exists<(.+)>::exists\(.+\)$')
     ];
 
     # Regexes to extract the Get<> information
     get_regex = [
-        r'^\d+ W NUClear::PowerPlant::CacheMaster::Get<(.+)>::get\(.+\)$'
+        re.compile(r'^\d+ W NUClear::PowerPlant::CacheMaster::Get<(.+)>::get\(.+\)$')
     ];
 
     # Declare our lists
-    raw_on = [for r in on_regex];
-    raw_emit = [];
-    raw_cache = [];
-    raw_trigger_list = [];
-    raw_exists = [];
-    raw_get = [];
+    raw_on           = [[r.sub(r'\1', x) for x in lines if r.match(x)] for r in on_regex];
+    raw_emit         = [[r.sub(r'\1', x) for x in lines if r.match(x)] for r in emit_regex];
+    raw_cache        = [[r.sub(r'\1', x) for x in lines if r.match(x)] for r in cache_regex];
+    raw_trigger_list = [[r.sub(r'\1', x) for x in lines if r.match(x)] for r in trigger_list_regex];
+    raw_exists       = [[r.sub(r'\1', x) for x in lines if r.match(x)] for r in exists_regex];
+    raw_get          = [[r.sub(r'\1', x) for x in lines if r.match(x)] for r in get_regex];
 
-    for r in on_regex:
-        raw_on.append([re.sub(r, r'\1', x) for x in lines if re.match(r, x)]);
-
-    for r in emit_regex:
-        raw_emit.append([re.sub(r, r'\1', x) for x in lines if re.match(r, x)]);
-
-    for r in cache_regex:
-        raw_cache.append([re.sub(r, r'\1', x) for x in lines if re.match(r, x)]);
-
-    for r in trigger_list_regex:
-        raw_trigger_list.append([re.sub(r, r'\1', x) for x in lines if re.match(r, x)]);
-
-    for r in exists_regex:
-        raw_exists.append([re.sub(r, r'\1', x) for x in lines if re.match(r, x)]);
-
-    for r in get_regex:
-        raw_get.append([re.sub(r, r'\1', x) for x in lines if re.match(r, x)]);
-
-
+    # TODO a lot of this information is redundant and should be merged together
+    # TODO however existing in different regex groups means different things
     # TODO do some processing to make a json file of the interaces on this file
     for i, val in enumerate(raw_on):
         file.write("\n\nOn<> Statements " + str(i) + " \n\t");
@@ -124,13 +107,3 @@ with open(output_file, 'w') as file:
     for i, val in enumerate(raw_get):
         file.write("\n\nGet<> Statements " + str(i) + " \n\t");
         file.write('\n\t'.join(val));
-
-    # file.write("On<> Statements\n\t");
-    # file.write('\n\t'.join(raw_on));
-
-    # file.write("\n\nEmit<> Statements\n\t");
-    # file.write('\n\t'.join(raw_emit));
-
-    # file.write("\n\nGet<> Statements\n\t");
-    # file.write('\n\t'.join(raw_get));
-    # file.write(output)
