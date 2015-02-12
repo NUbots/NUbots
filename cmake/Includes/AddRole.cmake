@@ -24,6 +24,5 @@ FUNCTION(ADD_ROLE)
 
     SET_PROPERTY(TARGET ${role} PROPERTY FOLDER "roles/")
 
-    SET(roles ${roles} ${role} PARENT_SCOPE)
-    SET(modules ${modules} ${role_modules} PARENT_SCOPE)
+    SET(NUCLEAR_MODULES ${NUCLEAR_MODULES} ${role_modules} CACHE INTERNAL "A list of the modules in use by the system" FORCE)
 ENDFUNCTION(ADD_ROLE)
