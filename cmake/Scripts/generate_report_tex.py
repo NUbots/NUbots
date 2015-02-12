@@ -68,8 +68,14 @@ else:
     print 'You must specify a document header\n';
     sys.exit(1);
 
-if sys.argv[3:]:
-    modules = sys.argv[3:];
+if sys.argv[3]:
+    footer = sys.argv[3];
+else:
+    print 'You must specify a document footer\n';
+    sys.exit(1);
+
+if sys.argv[4:]:
+    modules = sys.argv[4:];
     modules = zip(modules[:(len(modules)/2)], modules[(len(modules)/2):])
 else:
     print 'You must specify some report modules\n';
@@ -77,6 +83,10 @@ else:
 
 # Open our output file for writing
 with open(output_file, 'w') as file:
+
+    # Open and write the header
+    with open(header, 'r') as h:
+        file.write(h.read() + "\n");
 
     # Make our tree
     tree = [ dict(), "" ];
@@ -102,7 +112,8 @@ with open(output_file, 'w') as file:
     # Add the content from the modules to the file
     addModuleContent(file, tree, 0);
 
-    # Write the end document
-    file.write("\\bibliography{references}\n")
-    file.write("\\bibliographystyle{plain}\n")
-    file.write("\\end{document}\n")
+    # Open and write the footer
+    with open(footer, 'r') as f:
+        file.write("\n" + f.read());
+
+

@@ -15,14 +15,14 @@ FOREACH(report_file ${report_tex_files})
 ENDFOREACH(report_file)
 
 # Get all our standalone report files
-FILE(GLOB_RECURSE standalone_files "${CMAKE_CURRENT_SOURCE_DIR}/**.tex")
+FILE(GLOB_RECURSE standalone_files "${CMAKE_CURRENT_SOURCE_DIR}/src/**.tex")
 # Add those onto the report_files
 SET(report_tex_files ${report_tex_files} ${standalone_files})
 
 # Get their relative paths for the standalone files
 UNSET(standalone_report_rel_paths)
 FOREACH(report_file ${standalone_files})
-    FILE(RELATIVE_PATH rel_path ${CMAKE_CURRENT_SOURCE_DIR} ${report_file})
+    FILE(RELATIVE_PATH rel_path ${CMAKE_CURRENT_SOURCE_DIR}/src/ ${report_file})
     SET(standalone_report_rel_paths ${standalone_report_rel_paths} ${rel_path})
 ENDFOREACH(report_file)
 
@@ -36,6 +36,7 @@ ADD_CUSTOM_COMMAND(
             ${CMAKE_SOURCE_DIR}/cmake/scripts/generate_report_tex.py
             ${CMAKE_CURRENT_BINARY_DIR}/main.tex
             ${CMAKE_CURRENT_SOURCE_DIR}/header.tex
+            ${CMAKE_CURRENT_SOURCE_DIR}/footer.tex
             ${report_tex_files}
             ${report_rel_paths}
     DEPENDS ${CMAKE_SOURCE_DIR}/cmake/Scripts/generate_report_tex.py
@@ -107,7 +108,11 @@ ADD_CUSTOM_COMMAND(
             "--shell-escape"
             "--file-line-error"
             "${CMAKE_CURRENT_BINARY_DIR}/main.tex"
-
+    COMMAND "${PDFLATEX_COMPILER}"
+            "-interaction=batchmode"
+            "--shell-escape"
+            "--file-line-error"
+            "${CMAKE_CURRENT_BINARY_DIR}/main.tex"
     DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/main.tex"
             "${CMAKE_CURRENT_BINARY_DIR}/main.ind"
             "${CMAKE_CURRENT_BINARY_DIR}/main.bbl"
