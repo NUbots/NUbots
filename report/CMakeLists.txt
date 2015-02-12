@@ -7,6 +7,9 @@ FIND_PACKAGE(LATEX REQUIRED)
 # We need bibtool!
 FIND_PACKAGE(Bibtool REQUIRED)
 
+# Build the graphs!
+ADD_SUBDIRECTORY(graph)
+
 # Make our arguments for our module files
 UNSET(report_rel_paths)
 FOREACH(report_file ${report_tex_files})
