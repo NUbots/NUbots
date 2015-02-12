@@ -4,22 +4,6 @@ import sys
 import re
 from subprocess import Popen, PIPE
 
-def demangle(demangler, symbol):
-
-    # Demangle our symbol
-    process = Popen([demangler, symbol], stdout=PIPE, stdin=PIPE);
-
-    # Read our result
-    (output, err) = process.communicate();
-    exit_code = process.wait();
-
-    # If our nm command failed then exit with the error
-    if(exit_code != 0):
-        print err;
-        exit(exit_code);
-
-    return str(output);
-
 
 if sys.argv[1]:
     input_file = sys.argv[1];
@@ -43,7 +27,6 @@ else:
     sys.exit(1);
 
 
-
 # Open our output file for writing
 with open(output_file, 'w') as file:
 
@@ -62,16 +45,24 @@ with open(output_file, 'w') as file:
     lines = str(output).split('\n');
 
     # Regular expressions to get both symbols and calls to symbols
-    symbol_regex = re.compile(r'^([0-9A-Fa-f]+)\s+<([0-9-A-Z-a-z_]+).*?>:$');
-    call_regex = re.compile(r'^\s+([0-9A-Fa-f]+):\s+(?:[0-9A-Fa-f]+\s+){5}call\s+([0-9A-Fa-f]+)\s+<([0-9-A-Z-a-z_]+).*?>$');
+    symbol_table_regex = re.compile(r'^([0-9A-Fa-f]+)\s+([A-Za-z])\s+([A-Za-z])\s+(\S+)\s+([0-9A-Fa-f]+)\s+([0-9-A-Z-a-z_]+).*$');
+    symbol_regex       = re.compile(r'^([0-9A-Fa-f]+)\s+<([0-9-A-Z-a-z_]+).*?>:$');
+    call_regex         = re.compile(r'^\s+([0-9A-Fa-f]+):\s+(?:[0-9A-Fa-f]+\s+){5}call\s+([0-9A-Fa-f]+)\s+<([0-9-A-Z-a-z_]+).*?>$');
 
+    symbol_table = [];
     symbols = [];
     calls = [];
 
     # Loop through our lines looking for useful symbols
     for line in lines:
-        symbol = symbol_regex.match(line);
-        call = call_regex.match(line);
+        symbol_t = symbol_table_regex.match(line);
+        symbol   = symbol_regex.match(line);
+        call     = call_regex.match(line);
+
+        if symbol_t != None:
+            demangler.stdin.write(symbol_t.group(6) + '\n');
+            dm = demangler.stdout.readline();
+            symbol_table.append( (symbol_t.group(1), symbol_t.group(2), symbol_t.group(3), symbol_t.group(4), symbol_t.group(5), dm) );
 
         if symbol != None:
             demangler.stdin.write(symbol.group(2) + '\n');
