@@ -3,206 +3,229 @@
 import sys
 import re
 import ctypes
+import pyparsing as pp
 from subprocess import Popen, PIPE
 
 
 if sys.argv[1]:
-    input_file = sys.argv[1];
+    input_file = sys.argv[1]
 else:
-    print 'You must specify an input file\n';
-    sys.exit(1);
+    print 'You must specify an input file\n'
+    sys.exit(1)
 
 if sys.argv[2]:
-    output_file = sys.argv[2];
+    output_file = sys.argv[2]
 else:
-    print 'You must specify an output file\n';
-    sys.exit(1);
+    print 'You must specify an output file\n'
+    sys.exit(1)
 
 if sys.argv[3]:
-    demangler = sys.argv[3];
+    demangler = sys.argv[3]
 
     # Start up our demangler
-    demangler = ctypes.cdll.LoadLibrary(demangler);
-    demangler.demangle.argtypes = [ctypes.c_char_p];
-    demangler.demangle.restype = ctypes.c_char_p;
+    demangler = ctypes.cdll.LoadLibrary(demangler)
+    demangler.demangle.argtypes = [ctypes.c_char_p]
+    demangler.demangle.restype = ctypes.c_char_p
 else:
-    print 'You must provide a demangler\n';
-    sys.exit(1);
+    print 'You must provide a demangler\n'
+    sys.exit(1)
 
+# Our namespaced type (potentially containing templates) e.g. `a::b::c<x::y>`
+nsType = pp.Forward()
 
+# An enum type e.g. `(a::b::c)1`
+enumType = pp.Suppress('(') + nsType + pp.Suppress(')') + pp.Word(pp.nums)
+
+# The things that can be in a template argument (types enums numbers and c++ primative types with spaces)
+templateOption = nsType | enumType
+
+# For a list of 2 or more elements (that may contain blanks)
+templateTypeList = pp.OneOrMore(pp.Group(templateOption) + pp.Suppress(',')) + pp.Group(templateOption)
+
+# Match a template
+templateType = pp.Group(pp.Suppress('<') + pp.Optional(templateTypeList | pp.Group(templateOption)) + pp.Suppress('>'))
+
+# Match a cType (text then maybe a template)
+cType = pp.Word(pp.alphanums) + pp.Optional(templateType)
+
+# Fill our ns type (which is made up of several cTypes separated by ::)
+nsType << (pp.ZeroOrMore(cType + pp.Suppress('::')) + cType)
+
+enclosed = nsType
 # Open our output file for writing
 with open(output_file, 'w') as file:
 
     # Attempting a disassembing version
     process = Popen(["objdump", "-t", "-d", input_file], stdout=PIPE);
 
-    (output, err) = process.communicate();
-    exit_code = process.wait();
+    (output, err) = process.communicate()
+    exit_code = process.wait()
 
     # If our nm command failed then exit with the error
     if(exit_code != 0):
-        print err;
-        exit(exit_code);
+        print err
+        exit(exit_code)
 
     # Get all the lines
-    lines = str(output).split('\n');
+    lines = str(output).split('\n')
 
     # Regular expressions to get both symbols and calls to symbols
-    symbol_table_regex = re.compile(r'^([0-9A-Fa-f]+)\s+([A-Za-z])\s+([A-Za-z])\s+(\S+)\s+([0-9A-Fa-f]+)\s+([0-9-A-Z-a-z_]+).*$');
-    symbol_regex       = re.compile(r'^([0-9A-Fa-f]+)\s+<([0-9-A-Z-a-z_]+).*?>:$');
-    call_regex         = re.compile(r'^\s+([0-9A-Fa-f]+):\s+(?:[0-9A-Fa-f]+\s+){5}call\s+([0-9A-Fa-f]+)\s+<([0-9-A-Z-a-z_]+).*?>$');
+    symbol_table_regex = re.compile(r'^([0-9A-Fa-f]+)\s+([A-Za-z])\s+([A-Za-z])\s+(\S+)\s+([0-9A-Fa-f]+)\s+([0-9-A-Z-a-z_]+).*$')
+    symbol_regex       = re.compile(r'^([0-9A-Fa-f]+)\s+<([0-9-A-Z-a-z_]+).*?>:$')
+    call_regex         = re.compile(r'^\s+([0-9A-Fa-f]+):\s+(?:[0-9A-Fa-f]+\s+){5}call\s+([0-9A-Fa-f]+)\s+<.*>$')
 
-    symbol_table = [];
-    symbols = [];
-    calls = [];
+    symbol_table = []
+    symbols = []
+    calls = []
 
     # Loop through our lines looking for useful symbols
     for line in lines:
-        symbol_t = symbol_table_regex.match(line);
-        symbol   = symbol_regex.match(line);
-        call     = call_regex.match(line);
 
-        if symbol_t != None:
-            dm = str(demangler.demangle(symbol_t.group(6)));
-            symbol_table.append( (symbol_t.group(1), symbol_t.group(2), symbol_t.group(3), symbol_t.group(4), symbol_t.group(5), dm) );
+        # See if it's a call line
+        if call_regex.match(line):
+            # We only need the indicies
+            call = call_regex.match(line)
+            calls.append( (int(call.group(1), 16), int(call.group(2), 16)) )
 
-        if symbol != None:
-            dm = str(demangler.demangle(symbol.group(2)));
-            symbols.append( (symbol.group(1), dm) );
+        # See if it's a symbol line
+        elif symbol_regex.match(line):
+            # Demangle the symbol
+            symbol = symbol_regex.match(line)
+            dm = demangler.demangle(symbol.group(2))
+            if dm != None:
+                symbols.append( (int(symbol.group(1), 16), dm) )
 
-        if call != None:
-            dm = str(demangler.demangle(call.group(3)));
-            calls.append( (call.group(1), call.group(2), dm) );
+        # See if it's a symbol table line
+        elif symbol_table_regex.match(line):
+            # Demangle the symbol
+            table = symbol_table_regex.match(line)
+            dm = demangler.demangle(table.group(6))
+            if dm != None:
+                symbol_table.append( (int(table.group(1), 16), table.group(2), table.group(3), table.group(4), int(table.group(5), 16), dm) )
 
-    # Find the symbols we are looking for
-    emit_regex = re.compile(r'^NUClear::PowerPlant::Emit<(.+)>::emit\(.+\)$');
+    # Build our call map
+    callmap = dict()
+    namemap = dict()
 
-    emits = [emit_regex.sub(r'\1', x[1]) for x in symbols if emit_regex.match(x[1])];
+    # Attach our calls to the symbols that called them
+    elem = 0
+    for a in range(0, len(symbols) - 1):
+        us = symbols[a]
+        ne = symbols[a + 1]
 
-    for s in symbols:
-        file.write(s[1] + '\n');
+        namemap[us[0]] = us[1];
 
-# Symbol table
+        # If we don't have an entry in the call map add one
+        if not us[0] in callmap:
+            callmap[us[0]] = []
 
-# .data.rel.ro = typeinfo for
+        # Insert all the calls into the map
+        while calls[elem][0] < ne[0]:
+            callmap[us[0]].append(calls[elem][1])
+            elem += 1
 
-# TODO find a way to find the lambdas/functions that are being used in NUClear so you can track the emits from them
+    # Parse all of our emit symbols
 
-# Disassembled code
+    # Emit types (should cover most cases)
+    r = re.compile(r'^NUClear::PowerPlant::Emit<(.+)>::emit\(.+\)$')
+    for id in [i for i in namemap if r.match(namemap[i])]:
+        p = enclosed.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
+        file.write('{} {}\n'.format(id, namemap[id]))
 
-# 0008fce0 NUClear::Reactor::Exists<NUClear::dsl::Raw<messages::vision::ClassifiedImage<messages::vision::ObjectClass> > >::exists(NUClear::Reactor&)
-# 00091930 void NUClear::Reactor::emit<, std::vector<messages::vision::Ball, std::allocator<messages::vision::Ball> > >(std::unique_ptr<std::vector<messages::vision::Ball, std::allocator<messages::vision::Ball> >, std::default_delete<std::vector<messages::vision::Ball, std::allocator<messages::vision::Ball> > > >&&)
-# 00091df0 void NUClear::PowerPlant::emit<, messages::support::Configuration<modules::vision::BallDetector> >(std::unique_ptr<messages::support::Configuration<modules::vision::BallDetector>, std::default_delete<messages::support::Configuration<modules::vision::BallDetector> > >&&)
-# 000926c0 std::_Function_base::_Base_manager<void NUClear::PowerPlant::ReactorMaster::emitOnStart<messages::support::ConfigurationConfiguration>(std::shared_ptr<messages::support::ConfigurationConfiguration>)::{lambda()#1}>::_M_init_functor(std::_Any_data&, {lambda()#1}&&, std::integral_constant<bool, false>)
-# 00092e00 void NUClear::PowerPlant::ReactorMaster::directEmit<NUClear::ReactionStatistics>(std::shared_ptr<NUClear::ReactionStatistics>)
-# 00092ee0 bool std::_Function_base::_Base_manager<void NUClear::PowerPlant::ReactorMaster::emitOnStart<messages::support::ConfigurationConfiguration>(std::shared_ptr<messages::support::ConfigurationConfiguration>)::{lambda()#1}>::_M_not_empty_function<{lambda()#1}>({lambda()#1} const&)
-# 000b9492 void NUClear::PowerPlant::ReactorMaster::emit<messages::support::nubugger::proto::DataPoint>(std::shared_ptr<messages::support::nubugger::proto::DataPoint>)
+    # Direct emits
+    r = re.compile(r'^void NUClear::PowerPlant::ReactorMaster::directEmit<.+>\(.+\)$')
+    for id in [i for i in namemap if r.match(namemap[i])]:
+        p = enclosed.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
+        file.write('{} {}\n'.format(id, namemap[id]))
 
-# 000b9f0d NUClear::PowerPlant::CacheMaster::Get<NUClear::dsl::Raw<messages::vision::ClassifiedImage<messages::vision::ObjectClass> > >::get(NUClear::PowerPlant&)
+    # Initialize emits
+    r = re.compile(r'^void NUClear::PowerPlant::ReactorMaster::emitOnStart<.+>\(.+\)$')
+    for id in [i for i in namemap if r.match(namemap[i])]:
+        p = enclosed.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
+        file.write('{} {}\n'.format(id, namemap[id]))
 
-# 000bd707 NUClear::metaprogramming::TypeMap<NUClear::PowerPlant::CacheMaster, messages::vision::ClassifiedImage<messages::vision::ObjectClass>, messages::vision::ClassifiedImage<messages::vision::ObjectClass> >::get()
-# 000bbf92 void NUClear::PowerPlant::CacheMaster::cache<NUClear::LogMessage>(std::shared_ptr<NUClear::LogMessage>)
-# 000c4f6d NUClear::metaprogramming::TypeList<NUClear::Reactor, messages::support::ConfigurationConfiguration, std::unique_ptr<NUClear::threading::Reaction, std::default_delete<NUClear::threading::Reaction> > >::get()
+    # Powerplant emits
+    r = re.compile(r'^void NUClear::PowerPlant::ReactorMaster::emit<.+>\(.+\)$')
+    for id in [i for i in namemap if r.match(namemap[i])]:
+        p = enclosed.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
+        file.write('{} {}\n'.format(id, namemap[id]))
 
-# 9caf9 95ea0 NUClear::Reactor::Exists<NUClear::dsl::Optional<messages::support::FieldDescription> >::exists(NUClear::Reactor&)
-# 9cb04 946d0 NUClear::Reactor::Exists<messages::input::CameraParameters>::exists(NUClear::Reactor&)
-# 9cb0f 8fce0 NUClear::Reactor::Exists<NUClear::dsl::Raw<messages::vision::ClassifiedImage<messages::vision::ObjectClass> > >::exists(NUClear::Reactor&)
-# 0008ed70 NUClear::Reactor::Exists<messages::support::Configuration<modules::vision::BallDetector> >::exists(NUClear::Reactor&)::{lambda(NUClear::Reactor*, std::string const&, YAML::Node const&)#2}*& std::_Any_data::_M_access<NUClear::Reactor::Exists<messages::support::Configuration<modules::vision::BallDetector> >::exists(NUClear::Reactor&)::{lambda(NUClear::Reactor*, std::string const&, YAML::Node const&)#2}*>()
-# 0008fe00 decltype (NUClear::PowerPlant::CacheMaster::Get<NUClear::dsl::Optional<messages::support::FieldDescription> >::get((*this).parent)) NUClear::PowerPlant::CacheMaster::get<NUClear::dsl::Optional<messages::support::FieldDescription> >()
+    # Reactor Emits
+    r = re.compile(r'^void NUClear::Reactor::emit<.+>\(.+\)$')
+    for id in [i for i in namemap if r.match(namemap[i])]:
+        p = enclosed.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
+        file.write('{} {}\n'.format(id, namemap[id]))
 
 
+    # Parse all of our cache symbols
+    r = re.compile(r'^void NUClear::PowerPlant::CacheMaster::cache<.+>\(.+\)$')
+    for id in [i for i in namemap if r.match(namemap[i])]:
+        p = enclosed.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
+        file.write('{} {}\n'.format(id, namemap[id]))
 
+    r = re.compile(r'^NUClear::metaprogramming::TypeMap<NUClear::PowerPlant::CacheMaster,.+>::get\(\)$')
+    for id in [i for i in namemap if r.match(namemap[i])]:
+        p = enclosed.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
+        file.write('{} {}\n'.format(id, namemap[id]))
 
-    # # Regexes to extract the On<> related information
-    # on_regex = [
-    #     # Seems to include NUClear's On<>s as well as ours
-    #     re.compile(r'^\d+ V typeinfo name for std::tuple<(.+)>$'),
-    #     # Seems to be only On<>s in this module
-    #     re.compile(r'^\d+ V typeinfo for std::tuple<(.+)>$')
-    # ];
+    r = re.compile(r'^NUClear::metaprogramming::TypeMap<NUClear::PowerPlant::CacheMaster,.+>::set\(.+\)$')
+    for id in [i for i in namemap if r.match(namemap[i])]:
+        p = enclosed.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
+        file.write('{} {}\n'.format(id, namemap[id]))
 
-    # # Regexes to extract the emit information
-    # emit_regex = [
-    #     # Emits that have generated a type
-    #     re.compile(r'^\d+ W NUClear::PowerPlant::Emit<([^{]+)>::emit\(.+?\)$'),
-    #     # Direct emits only
-    #     re.compile(r'^\d+ W void NUClear::PowerPlant::ReactorMaster::directEmit<([^{]+)>\(.+?\)$'),
-    #     # Initialize emits only
-    #     re.compile(r'^\d+ W void NUClear::PowerPlant::ReactorMaster::emitOnStart<([^{]+)>\(.+?\)$'),
-    #     # Regular emits only
-    #     re.compile(r'^\d+ W void NUClear::PowerPlant::ReactorMaster::emit<(.+)>\(.+?\)$'),
-    #     # Emits that come through powerplant
-    #     re.compile(r'^\d+ W void NUClear::PowerPlant::emit<([^{]+)>\(.+?\)$'),
-    #     # Emits that come through a reactor
-    #     re.compile(r'^\d+ W void NUClear::Reactor::emit<([^{]+)>\(.+?\)$')
-    # ];
+    # THESE ONLY EXIST IN THE SYMBOL TABLE!!!
+    # r = re.compile(r'^NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::data$')
+    # for id in [i for i in namemap if r.match(namemap[i])]:
+    #     file.write('{} {}\n'.format(id, namemap[id]))
 
-    # # Regexes to exctract the cache information
-    # cache_regex = [
-    #     # Caches that have a cache function called from the CacheMaster
-    #     re.compile(r'^\d+ W void NUClear::PowerPlant::CacheMaster::cache<([^{]+)>\(.+?\)$'),
-    #     # Caches that have a get function called (things that are gotten)
-    #     re.compile(r'^\d+ W NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,[^{]+)>::get\(\)$'),
-    #     # Caches that have a set function called (things that are emitted)
-    #     re.compile(r'^\d+ W NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,[^{]+)>::set\(.+?\)$'),
-    #     # Caches that have data but are unused
-    #     re.compile(r'^\d+ u NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,[^{]+)>::data$'),
-    #     # Caches that have a mutex but are unused
-    #     re.compile(r'^\d+ u NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,[^{]+)>::mutex$')
-    # ];
+    # r = re.compile(r'^NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::mutex$')
+    # for id in [i for i in namemap if r.match(namemap[i])]:
+    #     file.write('{} {}\n'.format(id, namemap[id]))
 
-    # # Regexes to extract the TypeList <Trigger> information
-    # trigger_list_regex = [
-    #     # Triggers that are executed by this module (triggers that used and emitted by this module?)
-    #     re.compile(r'^\d+ W NUClear::metaprogramming::TypeList<(NUClear::Reactor,[^{]+)>::get\(\)$'),
-    #     # Triggers that are executed external to this module (triggers that are not handled internally)
-    #     re.compile(r'^\d+ u NUClear::metaprogramming::TypeList<(NUClear::Reactor,[^{]+)>::data$')
-    # ];
+    # Parse all of our typelist symbols
+    r = re.compile(r'^NUClear::metaprogramming::TypeList<NUClear::Reactor,.+>::get\(\)$')
+    for id in [i for i in namemap if r.match(namemap[i])]:
+        p = enclosed.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
+        file.write('{} {}\n'.format(id, namemap[id]))
 
-    # # Regexes to extract the exists information
-    # exists_regex = [
-    #     # Types that fire an exists handler (triggers and withs)
-    #     re.compile(r'^\d+ W NUClear::Reactor::Exists<([^{]+)>::exists\(.+?\)$')
-    # ];
+    # THESE ONLY EXIST IN THE SYMBOL TABLE!!!
+    # r = re.compile(r'^\d+ u NUClear::metaprogramming::TypeList<(NUClear::Reactor,[^{]+)>::data$')
+    # for id in [i for i in namemap if r.match(namemap[i])]:
+    #     file.write('{} {}\n'.format(id, namemap[id]))
 
-    # # Regexes to extract the Get<> information
-    # get_regex = [
-    #     # Types that use a Get<> handler (types in trigger and with)
-    #     re.compile(r'^\d+ W NUClear::PowerPlant::CacheMaster::Get<([^{]+)>::get\(.+?\)$')
-    # ];
+    # Parse our Exists symbols
+    r = re.compile(r'^NUClear::Reactor::Exists<.+>::exists\(.+\)$')
+    for id in [i for i in namemap if r.match(namemap[i])]:
+        p = enclosed.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
+        file.write('{} {}\n'.format(id, namemap[id]))
 
-    # # Declare our lists
-    # raw_on           = [[r.sub(r'\1', x) for x in lines if r.match(x)] for r in on_regex];
-    # raw_emit         = [[r.sub(r'\1', x) for x in lines if r.match(x)] for r in emit_regex];
-    # raw_cache        = [[r.sub(r'\1', x) for x in lines if r.match(x)] for r in cache_regex];
-    # raw_trigger_list = [[r.sub(r'\1', x) for x in lines if r.match(x)] for r in trigger_list_regex];
-    # raw_exists       = [[r.sub(r'\1', x) for x in lines if r.match(x)] for r in exists_regex];
-    # raw_get          = [[r.sub(r'\1', x) for x in lines if r.match(x)] for r in get_regex];
+    # Parse our Get symbols
+    r = re.compile(r'^NUClear::PowerPlant::CacheMaster::Get<.+>::get\(.+\)$')
+    for id in [i for i in namemap if r.match(namemap[i])]:
+        p = enclosed.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
+        file.write('{} {}\n'.format(id, namemap[id]))
 
-    # # TODO a lot of this information is redundant and should be merged together
-    # # TODO however existing in different regex groups means different things
-    # # TODO do some processing to make a json file of the interaces on this file
-    # for i, val in enumerate(raw_on):
-    #     file.write("\n\nOn<> Statements " + str(i) + " \n\t");
-    #     file.write('\n\t'.join(val));
+    # Parse our On symbols
+    r = re.compile(r'^NUClear::Reactor::On<.+>::on\(.+\)$')
+    for id in [i for i in namemap if r.match(namemap[i])]:
+        p = enclosed.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
+        file.write('{} {}\n'.format(id, namemap[id]))
 
-    # for i, val in enumerate(raw_emit):
-    #     file.write("\n\nEmit<> Statements " + str(i) + " \n\t");
-    #     file.write('\n\t'.join(val));
-
-    # for i, val in enumerate(raw_cache):
-    #     file.write("\n\nCache<> Statements " + str(i) + " \n\t");
-    #     file.write('\n\t'.join(val));
-
-    # for i, val in enumerate(raw_trigger_list):
-    #     file.write("\n\nTrigger<> Statements " + str(i) + " \n\t");
-    #     file.write('\n\t'.join(val));
-
-    # for i, val in enumerate(raw_exists):
-    #     file.write("\n\nExists<> Statements " + str(i) + " \n\t");
-    #     file.write('\n\t'.join(val));
-
-    # for i, val in enumerate(raw_get):
-    #     file.write("\n\nGet<> Statements " + str(i) + " \n\t");
-    #     file.write('\n\t'.join(val));
+    r = re.compile(r'^NUClear::threading::ReactionHandle NUClear::Reactor::on<.+>\(.+\)$')
+    for id in [i for i in namemap if r.match(namemap[i])]:
+        p = enclosed.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
+        file.write('{} {}\n'.format(id, namemap[id]))
 
