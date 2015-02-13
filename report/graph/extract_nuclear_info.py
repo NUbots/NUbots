@@ -2,6 +2,7 @@
 
 import sys
 import re
+import ctypes
 from subprocess import Popen, PIPE
 
 
@@ -21,7 +22,9 @@ if sys.argv[3]:
     demangler = sys.argv[3];
 
     # Start up our demangler
-    demangler = Popen([demangler], stdout=PIPE, stdin=PIPE);
+    demangler = ctypes.cdll.LoadLibrary(demangler);
+    demangler.demangle.argtypes = [ctypes.c_char_p];
+    demangler.demangle.restype = ctypes.c_char_p;
 else:
     print 'You must provide a demangler\n';
     sys.exit(1);
@@ -60,18 +63,15 @@ with open(output_file, 'w') as file:
         call     = call_regex.match(line);
 
         if symbol_t != None:
-            demangler.stdin.write(symbol_t.group(6) + '\n');
-            dm = demangler.stdout.readline();
+            dm = str(demangler.demangle(symbol_t.group(6)));
             symbol_table.append( (symbol_t.group(1), symbol_t.group(2), symbol_t.group(3), symbol_t.group(4), symbol_t.group(5), dm) );
 
         if symbol != None:
-            demangler.stdin.write(symbol.group(2) + '\n');
-            dm = demangler.stdout.readline();
+            dm = str(demangler.demangle(symbol.group(2)));
             symbols.append( (symbol.group(1), dm) );
 
         if call != None:
-            demangler.stdin.write(call.group(3) + '\n');
-            dm = demangler.stdout.readline().strip();
+            dm = str(demangler.demangle(call.group(3)));
             calls.append( (call.group(1), call.group(2), dm) );
 
     # Find the symbols we are looking for
@@ -79,7 +79,16 @@ with open(output_file, 'w') as file:
 
     emits = [emit_regex.sub(r'\1', x[1]) for x in symbols if emit_regex.match(x[1])];
 
-    file.write('\n'.join(emits));
+    for s in symbols:
+        file.write(s[1] + '\n');
+
+# Symbol table
+
+# .data.rel.ro = typeinfo for
+
+# TODO find a way to find the lambdas/functions that are being used in NUClear so you can track the emits from them
+
+# Disassembled code
 
 # 0008fce0 NUClear::Reactor::Exists<NUClear::dsl::Raw<messages::vision::ClassifiedImage<messages::vision::ObjectClass> > >::exists(NUClear::Reactor&)
 # 00091930 void NUClear::Reactor::emit<, std::vector<messages::vision::Ball, std::allocator<messages::vision::Ball> > >(std::unique_ptr<std::vector<messages::vision::Ball, std::allocator<messages::vision::Ball> >, std::default_delete<std::vector<messages::vision::Ball, std::allocator<messages::vision::Ball> > > >&&)

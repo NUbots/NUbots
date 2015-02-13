@@ -2,7 +2,7 @@
 FIND_PACKAGE(PythonInterp REQUIRED)
 
 # We need a demangler that doesn't suck (compiled with the same code as us)
-ADD_EXECUTABLE(cxx_demangle ${CMAKE_CURRENT_SOURCE_DIR}/demangle.cpp)
+ADD_LIBRARY(cxx_demangle SHARED ${CMAKE_CURRENT_SOURCE_DIR}/cxx_demangle.cpp)
 
 # For all the modules run our information extraction script
 FOREACH(module ${NUCLEAR_MODULES})
