@@ -33,6 +33,7 @@ else:
 # Our namespaced type (potentially containing templates) e.g. `a::b::c<x::y>`
 nsType = pp.Forward()
 
+# Fundamental types (types built into c++)
 fundamentalType = (pp.Literal('bool')
                  | pp.Literal('unsigned char')
                  | pp.Literal('signed char')
@@ -61,28 +62,27 @@ fundamentalType = (pp.Literal('bool')
                  | pp.Literal('unsigned long int')
                  | pp.Literal('unsigned long'))
 
-
 # An enum type e.g. `(a::b::c)1`
 enumType = pp.Suppress('(') + nsType + pp.Suppress(')') + pp.Word(pp.nums)
 
-# The things that can be in a template argument (types enums numbers and c++ primative types with spaces)
-templateOption = nsType | enumType | pp.Empty()
-
-# For a list of 2 or more elements (that may contain blanks)
-templateTypeList = pp.OneOrMore(pp.Group(templateOption) + pp.Suppress(',')) + pp.Group(templateOption)
-
 # Match a template
-templateType = pp.Group(pp.Suppress('<') + pp.Optional(templateTypeList | pp.Group(templateOption)) + pp.Suppress('>'))
+templateType = pp.Group(pp.Suppress('<') + pp.Optional(pp.delimitedList(pp.Group(nsType | enumType | pp.Empty()))) + pp.Suppress('>'))
 
 # Match a cType (text then maybe a template)
 cType = pp.Word(pp.alphanums + '_') + pp.Optional(templateType)
 
-# Fill our ns type (which is made up of several cTypes separated by ::)
-nsType << (fundamentalType | (pp.ZeroOrMore(cType + pp.Suppress('::')) + cType))
+# A function type (type followed by function arguments)
+funcType = cType + pp.Suppress('(') + pp.Optional(pp.delimitedList(pp.Group(nsType))) + pp.Suppress(')')
 
+# A lambda type (looks like) {lambda(a,b,c)#1}
+lambdaType = pp.Suppress('{') + funcType + pp.Suppress('#') + pp.Word(pp.nums) + pp.Suppress('}')
+
+# Fill our ns type (which is made up of several cTypes separated by ::)
+nsType << pp.delimitedList(fundamentalType | funcType | lambdaType | cType, '::') + pp.ZeroOrMore(pp.Literal('const') | pp.Word('*&'))
+
+noRetFuncParser = pp.Group(nsType)
 funcParser = pp.Group(nsType) + pp.Group(nsType)
 
-enclosed = nsType
 # Open our output file for writing
 with open(output_file, 'w') as file:
 
@@ -160,57 +160,57 @@ with open(output_file, 'w') as file:
     # Emit types (should cover most cases)
     r = re.compile(r'^NUClear::PowerPlant::Emit<(.+)>::emit\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
-        p = enclosed.parseString(namemap[id]).asList()
-        file.write('{} {}\n'.format(id, str(p)))
         file.write('{} {}\n'.format(id, namemap[id]))
+        p = noRetFuncParser.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
 
     # Direct emits
     r = re.compile(r'^void NUClear::PowerPlant::ReactorMaster::directEmit<.+>\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
+        file.write('{} {}\n'.format(id, namemap[id]))
         p = funcParser.parseString(namemap[id]).asList()
         file.write('{} {}\n'.format(id, str(p)))
-        file.write('{} {}\n'.format(id, namemap[id]))
 
     # Initialize emits
     r = re.compile(r'^void NUClear::PowerPlant::ReactorMaster::emitOnStart<.+>\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
+        file.write('{} {}\n'.format(id, namemap[id]))
         p = funcParser.parseString(namemap[id]).asList()
         file.write('{} {}\n'.format(id, str(p)))
-        file.write('{} {}\n'.format(id, namemap[id]))
 
     # Powerplant emits
     r = re.compile(r'^void NUClear::PowerPlant::ReactorMaster::emit<.+>\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
+        file.write('{} {}\n'.format(id, namemap[id]))
         p = funcParser.parseString(namemap[id]).asList()
         file.write('{} {}\n'.format(id, str(p)))
-        file.write('{} {}\n'.format(id, namemap[id]))
 
     # Reactor Emits
     r = re.compile(r'^void NUClear::Reactor::emit<.+>\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
+        file.write('{} {}\n'.format(id, namemap[id]))
         p = funcParser.parseString(namemap[id]).asList()
         file.write('{} {}\n'.format(id, str(p)))
-        file.write('{} {}\n'.format(id, namemap[id]))
 
 
     # Parse all of our cache symbols
     r = re.compile(r'^void NUClear::PowerPlant::CacheMaster::cache<.+>\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
+        file.write('{} {}\n'.format(id, namemap[id]))
         p = funcParser.parseString(namemap[id]).asList()
         file.write('{} {}\n'.format(id, str(p)))
-        file.write('{} {}\n'.format(id, namemap[id]))
 
     r = re.compile(r'^NUClear::metaprogramming::TypeMap<NUClear::PowerPlant::CacheMaster,.+>::get\(\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
-        p = enclosed.parseString(namemap[id]).asList()
-        file.write('{} {}\n'.format(id, str(p)))
         file.write('{} {}\n'.format(id, namemap[id]))
+        p = noRetFuncParser.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
 
     r = re.compile(r'^NUClear::metaprogramming::TypeMap<NUClear::PowerPlant::CacheMaster,.+>::set\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
-        p = enclosed.parseString(namemap[id]).asList()
-        file.write('{} {}\n'.format(id, str(p)))
         file.write('{} {}\n'.format(id, namemap[id]))
+        p = noRetFuncParser.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
 
     # THESE ONLY EXIST IN THE SYMBOL TABLE!!!
     # r = re.compile(r'^NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::data$')
@@ -224,9 +224,9 @@ with open(output_file, 'w') as file:
     # Parse all of our typelist symbols
     r = re.compile(r'^NUClear::metaprogramming::TypeList<NUClear::Reactor,.+>::get\(\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
-        p = enclosed.parseString(namemap[id]).asList()
-        file.write('{} {}\n'.format(id, str(p)))
         file.write('{} {}\n'.format(id, namemap[id]))
+        p = noRetFuncParser.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
 
     # THESE ONLY EXIST IN THE SYMBOL TABLE!!!
     # r = re.compile(r'^\d+ u NUClear::metaprogramming::TypeList<(NUClear::Reactor,[^{]+)>::data$')
@@ -236,27 +236,27 @@ with open(output_file, 'w') as file:
     # Parse our Exists symbols
     r = re.compile(r'^NUClear::Reactor::Exists<.+>::exists\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
-        p = enclosed.parseString(namemap[id]).asList()
-        file.write('{} {}\n'.format(id, str(p)))
         file.write('{} {}\n'.format(id, namemap[id]))
+        p = noRetFuncParser.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
 
     # Parse our Get symbols
     r = re.compile(r'^NUClear::PowerPlant::CacheMaster::Get<.+>::get\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
-        p = enclosed.parseString(namemap[id]).asList()
-        file.write('{} {}\n'.format(id, str(p)))
         file.write('{} {}\n'.format(id, namemap[id]))
+        p = noRetFuncParser.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
 
     # Parse our On symbols
     r = re.compile(r'^NUClear::Reactor::On<.+>::on\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
-        p = enclosed.parseString(namemap[id]).asList()
-        file.write('{} {}\n'.format(id, str(p)))
         file.write('{} {}\n'.format(id, namemap[id]))
+        p = noRetFuncParser.parseString(namemap[id]).asList()
+        file.write('{} {}\n'.format(id, str(p)))
 
     r = re.compile(r'^NUClear::threading::ReactionHandle NUClear::Reactor::on<.+>\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
+        file.write('{} {}\n'.format(id, namemap[id]))
         p = funcParser.parseString(namemap[id]).asList()
         file.write('{} {}\n'.format(id, str(p)))
-        file.write('{} {}\n'.format(id, namemap[id]))
 
