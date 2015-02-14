@@ -33,11 +33,40 @@ else:
 # Our namespaced type (potentially containing templates) e.g. `a::b::c<x::y>`
 nsType = pp.Forward()
 
+fundamentalType = (pp.Literal('bool')
+                 | pp.Literal('unsigned char')
+                 | pp.Literal('signed char')
+                 | pp.Literal('char')
+                 | pp.Literal('short int')
+                 | pp.Literal('short')
+                 | pp.Literal('int')
+                 | pp.Literal('signed short int')
+                 | pp.Literal('signed short')
+                 | pp.Literal('signed int')
+                 | pp.Literal('signed')
+                 | pp.Literal('unsigned short int')
+                 | pp.Literal('unsigned short')
+                 | pp.Literal('unsigned int')
+                 | pp.Literal('unsigned')
+                 | pp.Literal('long long int')
+                 | pp.Literal('long long')
+                 | pp.Literal('long int')
+                 | pp.Literal('long')
+                 | pp.Literal('signed long long int')
+                 | pp.Literal('signed long long')
+                 | pp.Literal('signed long int')
+                 | pp.Literal('signed long')
+                 | pp.Literal('unsigned long long int')
+                 | pp.Literal('unsigned long long')
+                 | pp.Literal('unsigned long int')
+                 | pp.Literal('unsigned long'))
+
+
 # An enum type e.g. `(a::b::c)1`
 enumType = pp.Suppress('(') + nsType + pp.Suppress(')') + pp.Word(pp.nums)
 
 # The things that can be in a template argument (types enums numbers and c++ primative types with spaces)
-templateOption = nsType | enumType
+templateOption = nsType | enumType | pp.Empty()
 
 # For a list of 2 or more elements (that may contain blanks)
 templateTypeList = pp.OneOrMore(pp.Group(templateOption) + pp.Suppress(',')) + pp.Group(templateOption)
@@ -46,10 +75,12 @@ templateTypeList = pp.OneOrMore(pp.Group(templateOption) + pp.Suppress(',')) + p
 templateType = pp.Group(pp.Suppress('<') + pp.Optional(templateTypeList | pp.Group(templateOption)) + pp.Suppress('>'))
 
 # Match a cType (text then maybe a template)
-cType = pp.Word(pp.alphanums) + pp.Optional(templateType)
+cType = pp.Word(pp.alphanums + '_') + pp.Optional(templateType)
 
 # Fill our ns type (which is made up of several cTypes separated by ::)
-nsType << (pp.ZeroOrMore(cType + pp.Suppress('::')) + cType)
+nsType << (fundamentalType | (pp.ZeroOrMore(cType + pp.Suppress('::')) + cType))
+
+funcParser = pp.Group(nsType) + pp.Group(nsType)
 
 enclosed = nsType
 # Open our output file for writing
@@ -136,28 +167,28 @@ with open(output_file, 'w') as file:
     # Direct emits
     r = re.compile(r'^void NUClear::PowerPlant::ReactorMaster::directEmit<.+>\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
-        p = enclosed.parseString(namemap[id]).asList()
+        p = funcParser.parseString(namemap[id]).asList()
         file.write('{} {}\n'.format(id, str(p)))
         file.write('{} {}\n'.format(id, namemap[id]))
 
     # Initialize emits
     r = re.compile(r'^void NUClear::PowerPlant::ReactorMaster::emitOnStart<.+>\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
-        p = enclosed.parseString(namemap[id]).asList()
+        p = funcParser.parseString(namemap[id]).asList()
         file.write('{} {}\n'.format(id, str(p)))
         file.write('{} {}\n'.format(id, namemap[id]))
 
     # Powerplant emits
     r = re.compile(r'^void NUClear::PowerPlant::ReactorMaster::emit<.+>\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
-        p = enclosed.parseString(namemap[id]).asList()
+        p = funcParser.parseString(namemap[id]).asList()
         file.write('{} {}\n'.format(id, str(p)))
         file.write('{} {}\n'.format(id, namemap[id]))
 
     # Reactor Emits
     r = re.compile(r'^void NUClear::Reactor::emit<.+>\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
-        p = enclosed.parseString(namemap[id]).asList()
+        p = funcParser.parseString(namemap[id]).asList()
         file.write('{} {}\n'.format(id, str(p)))
         file.write('{} {}\n'.format(id, namemap[id]))
 
@@ -165,7 +196,7 @@ with open(output_file, 'w') as file:
     # Parse all of our cache symbols
     r = re.compile(r'^void NUClear::PowerPlant::CacheMaster::cache<.+>\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
-        p = enclosed.parseString(namemap[id]).asList()
+        p = funcParser.parseString(namemap[id]).asList()
         file.write('{} {}\n'.format(id, str(p)))
         file.write('{} {}\n'.format(id, namemap[id]))
 
@@ -225,7 +256,7 @@ with open(output_file, 'w') as file:
 
     r = re.compile(r'^NUClear::threading::ReactionHandle NUClear::Reactor::on<.+>\(.+\)$')
     for id in [i for i in namemap if r.match(namemap[i])]:
-        p = enclosed.parseString(namemap[id]).asList()
+        p = funcParser.parseString(namemap[id]).asList()
         file.write('{} {}\n'.format(id, str(p)))
         file.write('{} {}\n'.format(id, namemap[id]))
 
