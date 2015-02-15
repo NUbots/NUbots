@@ -48,16 +48,13 @@ Produces graph: "Vision" --(message::input::ClassifiedImage)--> "ClassifiedImage
 
 class JsonToDot:
     def __init__(self):
-        self.graph = None
+        self.graph = Dot(graph_name='Emit Graph', graph_type='digraph', suppress_disconnected=True, ratio="compress", splines=False)
         self.half_edges = {}
 
     def parse(self, filename):
 
         with open(filename, 'r') as file:
             data = json.load(file)
-
-            self.graph = Dot(graph_name='Emit Graph', graph_type='digraph', suppress_disconnected=True, ratio="compress", splines=False)
-
             module_name = data['module_name']
 
             if module_name == 'NUbugger':
