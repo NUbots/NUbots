@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import json
 import sys
 import re
 import ctypes
@@ -233,6 +234,7 @@ with open(output_file, 'w') as file:
     ]
 
     outputs = []
+    isolated_outputs = []
     inputs = []
 
     # Look through all our symbols and parse them
@@ -354,11 +356,82 @@ with open(output_file, 'w') as file:
             parsed = funcParser.parseString(namemap[id]).asList()
             inputs.append({
                 'address': candidates,
-                'types': parsed[1][3][:-1]
+                'types': parsed[1][3][:-1],
+                'outputs': []
             })
 
+    # For each of our outputs, trace it back to an input
+    for output in outputs:
+        searched = set()
+        search = [output['address']]
+        joined = False
 
-    print inputs
-    print outputs
+        # While something is in our search list
+        while search:
+            # Get our search vector
+            top = search.pop(0)
+
+            # Find our input if we can
+            input = [i for i in inputs if i['address'] == top]
+
+            if input:
+                joined = True
+                for i in input:
+                    i['outputs'].append(output)
+            elif top in calledbymap:
+                for c in calledbymap[top]:
+                    if c not in searched:
+                        search.append(c)
+                        searched.add(c)
+
+        if not joined:
+            isolated_outputs.append(output)
+
+
+
+    # Now make our json output
+    jsonOutput = {
+        'module_name': '',
+        'reactions': [],
+        'outputs': []
+    }
+
+    for input in inputs:
+        jsonOutput['reactions'].append({
+            'name': '',
+            'inputs': [],
+            'outputs': []
+        })
+
+        elem = jsonOutput['reactions'][-1]
+
+        for type in input['types']:
+            if type[2] == 'Trigger':
+                elem['inputs'].append({
+                    'type': type[3][0],
+                    'scope': 'TRIGGER'
+                })
+
+            elif type[2] == 'With':
+                for t in type[3]:
+                    elem['inputs'].append({
+                        'type': t,
+                        'scope': 'WITH'
+                    })
+            # Option
+
+        for output in input['outputs']:
+            elem['outputs'].append({
+                'type': output['type'],
+                'scopes': output['scopes']
+            })
+
+    for output in isolated_outputs:
+        jsonOutput['outputs'].append({
+            'type': output['type'],
+            'scopes': output['scopes']
+        })
+
+    json.dump(jsonOutput, file, sort_keys=True, indent=4, separators=(',', ': '))
 
 
