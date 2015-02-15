@@ -7,21 +7,26 @@ import ctypes
 import pyparsing as pp
 from subprocess import Popen, PIPE
 
-
 if sys.argv[1]:
-    input_file = sys.argv[1]
+    module_name = sys.argv[1]
+else:
+    print 'You must specify a module name\n'
+    sys.exit(1)
+
+if sys.argv[2]:
+    input_file = sys.argv[2]
 else:
     print 'You must specify an input file\n'
     sys.exit(1)
 
-if sys.argv[2]:
-    output_file = sys.argv[2]
+if sys.argv[3]:
+    output_file = sys.argv[3]
 else:
     print 'You must specify an output file\n'
     sys.exit(1)
 
-if sys.argv[3]:
-    demangler = sys.argv[3]
+if sys.argv[4]:
+    demangler = sys.argv[4]
 
     # Start up our demangler
     demangler = ctypes.cdll.LoadLibrary(demangler)
@@ -425,7 +430,7 @@ with open(output_file, 'w') as file:
 
     # Now make our json output
     jsonOutput = {
-        'module_name': '',
+        'module_name': module_name,
         'reactions': [],
         'outputs': []
     }

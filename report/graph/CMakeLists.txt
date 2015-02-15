@@ -15,6 +15,7 @@ FOREACH(module ${NUCLEAR_MODULES})
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.json
         COMMAND ${PYTHON_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/extract_nuclear_info.py
+                ${module}
                 $<TARGET_FILE:${module_name}>
                 ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.json
                 $<TARGET_FILE:cxx_demangle>
