@@ -129,10 +129,9 @@ with open(output_file, 'w') as file:
             symbol = symbol_regex.match(line)
             raw_symbols.append( (int(symbol.group(1), 16), symbol.group(2)) )
 
-    symbols = []
     calls = []
 
-    # Process our calls
+    # Relink our raw calls that are not properly linked
     for call in raw_calls:
         # If our call is a plt call (dynamic library)
         if call[2].endswith('@plt'):
@@ -146,42 +145,37 @@ with open(output_file, 'w') as file:
             # Our call is ok as is
             calls.append( (call[0], call[1]) )
 
+    # Our callmap, holds a map of functions to functions they call
+    callmap = {}
+    # Our inverse callmap holds a map of functions to functions they are called by
+    callmapi = {}
+
+    # Map our symbols to the functions they call
+    elem = 0
+    for i1, i2 in zip(raw_symbols, raw_symbols[1:]):
+        if not i1 in callmap:
+            callmap[i1[0]] = []
+
+        while calls[elem][0] < i2[0]:
+            callmap[i1[0]].append(calls[elem][1])
+            elem += 1
+
+    # Build our inverse lookup map
+    for caller in callmap:
+        for callee in callmap[caller]:
+            if callee not in callmapi:
+                callmapi[callee] = []
+
+            callmapi[callee].append(caller)
+
+    # Our map that maps function calls to their name
+    symbols = {}
+
     # Process our symbols (demangle the token)
     for symbol in raw_symbols:
         dm = demangler.demangle(symbol[1])
         if dm != None:
-            symbols.append( (symbol[0], str(dm)) )
-
-    # Our callmap, holds a map of functions to functions they call
-    callmap = {}
-    # Our inverse callmap holds a map of functions to functions they are called by
-    calledbymap = {}
-    # Our map that maps function calls to their name
-    namemap = {}
-
-    # Attach our calls to the symbols that called them (build our callmap)
-    elem = 0
-    # Loop through every element pair
-    for us, ne in zip(symbols, symbols[1:]):
-
-        namemap[us[0]] = us[1];
-
-        # If we don't have an entry in the call map add one
-        if not us[0] in callmap:
-            callmap[us[0]] = []
-
-        # Insert all the calls into the map
-        while calls[elem][0] < ne[0]:
-            callmap[us[0]].append(calls[elem][1])
-            elem += 1
-
-    # Build our inverse lookup list (find usages)
-    for caller in callmap:
-        for callee in callmap[caller]:
-            if callee not in calledbymap:
-                calledbymap[callee] = []
-
-            calledbymap[callee].append(caller)
+            symbols[symbol[0]] = str(dm)
 
     emit_re = [
         # Emit types (should cover most cases)
@@ -238,12 +232,13 @@ with open(output_file, 'w') as file:
     inputs = []
 
     # Look through all our symbols and parse them
-    for id in namemap:
+    for id in symbols:
+        symbol = symbols[id]
         parsed = None
 
         # Emit types
-        if emit_re[0].match(namemap[id]):
-            parsed = noRetFuncParser.parseString(namemap[id]).asList()
+        if emit_re[0].match(symbol):
+            parsed = noRetFuncParser.parseString(symbol).asList()
             outputs.append({
                 'address': id,
                 'type': parsed[3][-1],
@@ -252,8 +247,8 @@ with open(output_file, 'w') as file:
             })
 
         # Direct emits
-        elif emit_re[1].match(namemap[id]):
-            parsed = funcParser.parseString(namemap[id]).asList()
+        elif emit_re[1].match(symbol):
+            parsed = funcParser.parseString(symbol).asList()
             outputs.append({
                 'address': id,
                 'type': parsed[1][4][-1],
@@ -262,8 +257,8 @@ with open(output_file, 'w') as file:
             })
 
         # Initialize emits
-        elif emit_re[2].match(namemap[id]):
-            parsed = funcParser.parseString(namemap[id]).asList()
+        elif emit_re[2].match(symbol):
+            parsed = funcParser.parseString(symbol).asList()
             outputs.append({
                 'address': id,
                 'type': parsed[1][4][-1],
@@ -272,8 +267,8 @@ with open(output_file, 'w') as file:
             })
 
         # Local emits
-        elif emit_re[3].match(namemap[id]):
-            parsed = funcParser.parseString(namemap[id]).asList()
+        elif emit_re[3].match(symbol):
+            parsed = funcParser.parseString(symbol).asList()
             outputs.append({
                 'address': id,
                 'type': parsed[1][4][-1],
@@ -282,8 +277,8 @@ with open(output_file, 'w') as file:
             })
 
         # Reactor Emits
-        elif emit_re[4].match(namemap[id]):
-            parsed = funcParser.parseString(namemap[id]).asList()
+        elif emit_re[4].match(symbol):
+            parsed = funcParser.parseString(symbol).asList()
             outputs.append({
                 'address': id,
                 'type': parsed[1][3][-1],
@@ -292,8 +287,8 @@ with open(output_file, 'w') as file:
             })
 
         # Happens when a cache function is called (is a set) this is an output
-        elif cache_re[0].match(namemap[id]):
-            parsed = funcParser.parseString(namemap[id]).asList()
+        elif cache_re[0].match(symbol):
+            parsed = funcParser.parseString(symbol).asList()
             outputs.append({
                 'address': id,
                 'type': parsed[1][4][-1],
@@ -301,53 +296,53 @@ with open(output_file, 'w') as file:
                 'redundant': True
             })
 
-        elif cache_re[1].match(namemap[id]):
+        elif cache_re[1].match(symbol):
             # Happens when something is retrived from the cache (a get)
-            parsed = noRetFuncParser.parseString(namemap[id]).asList()
+            parsed = noRetFuncParser.parseString(symbol).asList()
             # outputs.append({
             #     'address': id,
             #     'type': parsed[3][2],
             #     'scopes': []
             # })
 
-        elif cache_re[2].match(namemap[id]):
+        elif cache_re[2].match(symbol):
             # Happens when something is put into the cache (a set)
-            parsed = noRetFuncParser.parseString(namemap[id]).asList()
+            parsed = noRetFuncParser.parseString(symbol).asList()
 
-        elif typelist_re[0].match(namemap[id]):
+        elif typelist_re[0].match(symbol):
             # Happens when a type list is gotten from the TypeList (a Trigger being set or triggered)
-            parsed = noRetFuncParser.parseString(namemap[id]).asList()
+            parsed = noRetFuncParser.parseString(symbol).asList()
 
-        elif exists_re[0].match(namemap[id]):
+        elif exists_re[0].match(symbol):
             # Is called when a type exists (in a trigger or with)
-            parsed = noRetFuncParser.parseString(namemap[id]).asList()
+            parsed = noRetFuncParser.parseString(symbol).asList()
 
-        elif get_re[0].match(namemap[id]):
+        elif get_re[0].match(symbol):
             # Is called when a reaction wants to get a type
-            parsed = noRetFuncParser.parseString(namemap[id]).asList()
+            parsed = noRetFuncParser.parseString(symbol).asList()
 
-        elif on_re[0].match(namemap[id]):
+        elif on_re[0].match(symbol):
             # Is the result of the On<> metaprogram (contains lots of information)
-            parsed = noRetFuncParser.parseString(namemap[id]).asList()
+            parsed = noRetFuncParser.parseString(symbol).asList()
 
         # Is the call of the On<> metaprogramm (contains the dsl used)
-        elif on_re[1].match(namemap[id]):
+        elif on_re[1].match(symbol):
 
             # Enable our locator tags so we can access the original function type
             locate = True
-            parsed = funcParser.parseString(namemap[id]).asList()
+            parsed = funcParser.parseString(symbol).asList()
             # Disable our locator tags
             locate = False
 
             # Extract our function name
             start = parsed[1][-2][-1][0]
             end = parsed[1][-2][-1][-1]
-            func = namemap[id][start:end]
+            func = symbol[start:end]
 
             # Work out which function is probably ours
             candidates = [
-                [x[0] for x in symbols if x[1].startswith(func + '::operator()')],
-                [x[0] for x in symbols if x[1].startswith(func)]
+                [x for x in symbols if symbols[x].startswith(func + '::operator()')],
+                [x for x in symbols if symbols[x].startswith(func)]
             ]
 
             if len(candidates[0]) == 1:
@@ -358,7 +353,7 @@ with open(output_file, 'w') as file:
                 candidates = None
 
             # Reparse without our locator tags
-            parsed = funcParser.parseString(namemap[id]).asList()
+            parsed = funcParser.parseString(symbol).asList()
             inputs.append({
                 'address': candidates,
                 'types': parsed[1][3][:-1],
@@ -369,7 +364,7 @@ with open(output_file, 'w') as file:
     for output in outputs:
         searched = set()
         search = []
-        search += calledbymap[output['address']]
+        search += callmapi[output['address']]
         joined = False
 
         while search:
@@ -392,8 +387,8 @@ with open(output_file, 'w') as file:
                         if s not in a['scopes']:
                             a['scopes'].append(s)
 
-            if top in calledbymap:
-                for c in calledbymap[top]:
+            if top in callmapi:
+                for c in callmapi[top]:
                     if c not in searched:
                         search.append(c)
                         searched.add(c)
@@ -417,8 +412,8 @@ with open(output_file, 'w') as file:
                 joined = True
                 for i in input:
                     i['outputs'].append(output)
-            elif top in calledbymap:
-                for c in calledbymap[top]:
+            elif top in callmapi:
+                for c in callmapi[top]:
                     if c not in searched:
                         search.append(c)
                         searched.add(c)
