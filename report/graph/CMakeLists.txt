@@ -27,6 +27,8 @@ FOREACH(module ${NUCLEAR_MODULES})
 
 ENDFOREACH(module)
 
+UNSET(svg_graphs)
+
 # For all the roles run our graph generation script
 FOREACH(role ${NUCLEAR_ROLES})
 
@@ -64,10 +66,11 @@ FOREACH(role ${NUCLEAR_ROLES})
         COMMENT "Generating the svg emit graph for the role ${role}"
     )
 
+    SET(svg_graphs ${svg_graphs} ${CMAKE_CURRENT_BINARY_DIR}/${role}.svg)
+
 ENDFOREACH(role)
 
-ADD_CUSTOM_TARGET(gt1
-                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/robocup.svg)
+ADD_CUSTOM_TARGET(graphs DEPENDS ${svg_graphs})
 
 # TODO find all of our modules targets
 

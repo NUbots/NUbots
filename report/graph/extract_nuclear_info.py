@@ -301,34 +301,29 @@ with open(output_file, 'w') as file:
                 'redundant': True
             })
 
-        elif cache_re[1].match(symbol):
-            # Happens when something is retrived from the cache (a get)
-            parsed = noRetFuncParser.parseString(symbol).asList()
-            # outputs.append({
-            #     'address': id,
-            #     'type': parsed[3][2],
-            #     'scopes': []
-            # })
+        # Happens when something is retrived from the cache (a get)
+        # elif cache_re[1].match(symbol):
+        #     parsed = noRetFuncParser.parseString(symbol).asList()
 
-        elif cache_re[2].match(symbol):
-            # Happens when something is put into the cache (a set)
-            parsed = noRetFuncParser.parseString(symbol).asList()
+        # Happens when something is put into the cache (a set)
+        # elif cache_re[2].match(symbol):
+        #     parsed = noRetFuncParser.parseString(symbol).asList()
 
-        elif typelist_re[0].match(symbol):
-            # Happens when a type list is gotten from the TypeList (a Trigger being set or triggered)
-            parsed = noRetFuncParser.parseString(symbol).asList()
+        # Happens when a type list is gotten from the TypeList (a Trigger being set or triggered)
+        # elif typelist_re[0].match(symbol):
+        #     parsed = noRetFuncParser.parseString(symbol).asList()
 
-        elif exists_re[0].match(symbol):
-            # Is called when a type exists (in a trigger or with)
-            parsed = noRetFuncParser.parseString(symbol).asList()
+        # Is called when a type exists (in a trigger or with)
+        # elif exists_re[0].match(symbol):
+        #     parsed = noRetFuncParser.parseString(symbol).asList()
 
-        elif get_re[0].match(symbol):
-            # Is called when a reaction wants to get a type
-            parsed = noRetFuncParser.parseString(symbol).asList()
+        # Is called when a reaction wants to get a type
+        # elif get_re[0].match(symbol):
+        #     parsed = noRetFuncParser.parseString(symbol).asList()
 
-        elif on_re[0].match(symbol):
-            # Is the result of the On<> metaprogram (contains lots of information)
-            parsed = noRetFuncParser.parseString(symbol).asList()
+        # Is the result of the On<> metaprogram (contains lots of information)
+        # elif on_re[0].match(symbol):
+        #     parsed = noRetFuncParser.parseString(symbol).asList()
 
         # Is the call of the On<> metaprogramm (contains the dsl used)
         elif on_re[1].match(symbol):
@@ -386,7 +381,10 @@ with open(output_file, 'w') as file:
                 for a in ancestor:
                     if a['type'] != output['type']:
                         # OSNAP!
-                        raise "Oh Snap!"
+                        # TODO I don't actually know if this is a problem
+                        # it can happen with custom emits where the type
+                        # changes as we go down
+                        pass
 
                     for s in output['scopes']:
                         if s not in a['scopes']:
