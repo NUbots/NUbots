@@ -66,6 +66,11 @@ class JsonToDot:
             node = Node(name=module_name, shape='box')
             self.graph.add_node(node)
 
+            for reaction_output in data['outputs']:
+                output_name = self.type_to_str(reaction_output['type'])
+                edge = self._add_output(module_name, output_name)
+                self._check_edge(output_name, edge)
+
             for reaction in data['reactions']:
 
                 for reaction_input in reaction['inputs']:
