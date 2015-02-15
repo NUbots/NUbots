@@ -243,12 +243,12 @@ with open(output_file, 'w') as file:
 
         # Emit types
         if emit_re[0].match(namemap[id]):
-
             parsed = noRetFuncParser.parseString(namemap[id]).asList()
             outputs.append({
                 'address': id,
                 'type': parsed[3][-1],
-                'scopes': parsed[3][:-1]
+                'scopes': parsed[3][:-1],
+                'redundant': False
             })
 
         # Direct emits
@@ -256,8 +256,9 @@ with open(output_file, 'w') as file:
             parsed = funcParser.parseString(namemap[id]).asList()
             outputs.append({
                 'address': id,
-                'type': parsed[1][4],
-                'scopes': [['NUClear', 'dsl', 'Scope', 'DIRECT']]
+                'type': parsed[1][4][-1],
+                'scopes': [['NUClear', 'dsl', 'Scope', 'DIRECT']],
+                'redundant': False
             })
 
         # Initialize emits
@@ -265,8 +266,9 @@ with open(output_file, 'w') as file:
             parsed = funcParser.parseString(namemap[id]).asList()
             outputs.append({
                 'address': id,
-                'type': parsed[1][4],
-                'scopes': [['NUClear', 'dsl', 'Scope', 'INITIALIZE']]
+                'type': parsed[1][4][-1],
+                'scopes': [['NUClear', 'dsl', 'Scope', 'INITIALIZE']],
+                'redundant': False
             })
 
         # Local emits
@@ -274,8 +276,9 @@ with open(output_file, 'w') as file:
             parsed = funcParser.parseString(namemap[id]).asList()
             outputs.append({
                 'address': id,
-                'type': parsed[1][4],
-                'scopes': [['NUClear', 'dsl', 'Scope', 'LOCAL']]
+                'type': parsed[1][4][-1],
+                'scopes': [['NUClear', 'dsl', 'Scope', 'LOCAL']],
+                'redundant': False
             })
 
         # Reactor Emits
@@ -284,7 +287,8 @@ with open(output_file, 'w') as file:
             outputs.append({
                 'address': id,
                 'type': parsed[1][3][-1],
-                'scopes': parsed[1][3][:-1] if len(parsed[1][3][0:-1][0]) > 0 else [['NUClear', 'dsl', 'Scope', 'LOCAL']]
+                'scopes': parsed[1][3][:-1] if len(parsed[1][3][0:-1][0]) > 0 else [['NUClear', 'dsl', 'Scope', 'LOCAL']],
+                'redundant': False
             })
 
         # Happens when a cache function is called (is a set) this is an output
@@ -292,18 +296,19 @@ with open(output_file, 'w') as file:
             parsed = funcParser.parseString(namemap[id]).asList()
             outputs.append({
                 'address': id,
-                'type': parsed[1][4],
-                'scopes': []
+                'type': parsed[1][4][-1],
+                'scopes': [],
+                'redundant': True
             })
 
         elif cache_re[1].match(namemap[id]):
             # Happens when something is retrived from the cache (a get)
             parsed = noRetFuncParser.parseString(namemap[id]).asList()
-            outputs.append({
-                'address': id,
-                'type': parsed[3][2],
-                'scopes': []
-            })
+            # outputs.append({
+            #     'address': id,
+            #     'type': parsed[3][2],
+            #     'scopes': []
+            # })
 
         elif cache_re[2].match(namemap[id]):
             # Happens when something is put into the cache (a set)
@@ -360,12 +365,47 @@ with open(output_file, 'w') as file:
                 'outputs': []
             })
 
+    # Flatten our outputs graph to remove duplicate information
+    for output in outputs:
+        searched = set()
+        search = []
+        search += calledbymap[output['address']]
+        joined = False
+
+        while search:
+            top = search.pop(0)
+
+            # See if we found an ancestor
+            ancestor = [i for i in outputs if i['address'] == top]
+
+            # Fuse our information into this ancestor
+            if ancestor:
+                # We are now redundant
+                output['redundant'] = True
+
+                for a in ancestor:
+                    if a['type'] != output['type']:
+                        # OSNAP!
+                        raise "Oh Snap!"
+
+                    for s in output['scopes']:
+                        if s not in a['scopes']:
+                            a['scopes'].append(s)
+
+            if top in calledbymap:
+                for c in calledbymap[top]:
+                    if c not in searched:
+                        search.append(c)
+                        searched.add(c)
+
+    # Remove our redundant outputs
+    outputs = [o for o in outputs if not o['redundant']]
+
     # For each of our outputs, trace it back to an input
     for output in outputs:
         searched = set()
         search = [output['address']]
         joined = False
-
         # While something is in our search list
         while search:
             # Get our search vector
@@ -373,7 +413,6 @@ with open(output_file, 'w') as file:
 
             # Find our input if we can
             input = [i for i in inputs if i['address'] == top]
-
             if input:
                 joined = True
                 for i in input:
@@ -384,9 +423,9 @@ with open(output_file, 'w') as file:
                         search.append(c)
                         searched.add(c)
 
+        # If we couldn't find somwehere to put it then it's isolated
         if not joined:
             isolated_outputs.append(output)
-
 
 
     # Now make our json output
@@ -409,14 +448,14 @@ with open(output_file, 'w') as file:
             if type[2] == 'Trigger':
                 elem['inputs'].append({
                     'type': type[3][0],
-                    'scope': 'TRIGGER'
+                    'scope': type[:3]
                 })
 
             elif type[2] == 'With':
                 for t in type[3]:
                     elem['inputs'].append({
                         'type': t,
-                        'scope': 'WITH'
+                        'scope': type[:3]
                     })
             # Option
 
