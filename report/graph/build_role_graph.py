@@ -57,7 +57,7 @@ class JsonToDot:
             data = json.load(file)
             module_name = data['module_name']
 
-            if module_name == 'NUbugger':
+            if module_name == 'support::NUbugger':
                 return
 
             node = Node(name=module_name, shape='box')
