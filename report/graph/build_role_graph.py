@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import glob
+import sys
 import json
 import re
 from pydotplus.graphviz import Dot, Node, Edge
@@ -67,17 +67,26 @@ class JsonToDot:
             self.graph.add_node(node)
 
             for reaction in data['reactions']:
-                reaction_name = reaction['name']
 
                 for reaction_input in reaction['inputs']:
-                    input_name = reaction_input['name']
+                    input_name = self.type_to_str(reaction_input['type'])
                     edge = self._add_input(module_name, input_name)
                     self._check_edge(input_name, edge)
 
                 for reaction_output in reaction['outputs']:
-                    output_name = reaction_output['name']
+                    output_name = self.type_to_str(reaction_output['type'])
                     edge = self._add_output(module_name, output_name)
                     self._check_edge(output_name, edge)
+
+    def type_to_str(self, type_list):
+        flat_list = []
+        for item in type_list:
+            if isinstance(item, basestring):
+                flat_list.append(item)
+            else:
+                flat_list.append('<{}>'.format(','.join([self.type_to_str(subitem) for subitem in item])))
+
+        return '::'.join(flat_list)
 
     def _add_input(self, module_name, input_name):
         edge = None
@@ -118,8 +127,9 @@ class JsonToDot:
 if __name__ == "__main__":
     converter = JsonToDot()
 
-    filenames = glob.glob('*.json')
+    out = sys.argv[1]
+    filenames = sys.argv[2:]
     for filename in filenames:
         converter.parse(filename)
 
-    converter.save('graph.dot');
+    converter.save(out);
