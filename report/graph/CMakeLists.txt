@@ -3,6 +3,7 @@ FIND_PACKAGE(PythonInterp REQUIRED)
 
 # We need a demangler that doesn't suck (compiled with the same code as us)
 ADD_LIBRARY(cxx_demangle SHARED ${CMAKE_CURRENT_SOURCE_DIR}/cxx_demangle.cpp)
+SET_PROPERTY(TARGET cxx_demangle PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 
 # For all the modules run our information extraction script
 FOREACH(module ${NUCLEAR_MODULES})
@@ -12,12 +13,12 @@ FOREACH(module ${NUCLEAR_MODULES})
 
     # Add our command to build our json output for the information from the file
     ADD_CUSTOM_COMMAND(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.json
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/nuclear_info/${module_name}.json
         COMMAND ${PYTHON_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/extract_nuclear_info.py
                 ${module}
                 $<TARGET_FILE:${module_name}>
-                ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.json
+                ${CMAKE_CURRENT_BINARY_DIR}/nuclear_info/${module_name}.json
                 $<TARGET_FILE:cxx_demangle>
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/extract_nuclear_info.py
                 ${module_name}
@@ -39,15 +40,15 @@ FOREACH(role ${NUCLEAR_ROLES})
     UNSET(module_graph_sources)
     FOREACH(module ${role_modules})
         STRING(REPLACE "::" "" module_name ${module})
-        SET(module_graph_sources ${module_graph_sources} ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.json)
+        SET(module_graph_sources ${module_graph_sources} ${CMAKE_CURRENT_BINARY_DIR}/nuclear_info/${module_name}.json)
     ENDFOREACH(module)
 
     # Build our .dot files from the json files
     ADD_CUSTOM_COMMAND(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${role}.dot
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.dot
         COMMAND ${PYTHON_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/build_role_graph.py
-                ${CMAKE_CURRENT_BINARY_DIR}/${role}.dot
+                ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.dot
                 ${module_graph_sources}
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/build_role_graph.py
                 ${module_graph_sources}
@@ -56,26 +57,18 @@ FOREACH(role ${NUCLEAR_ROLES})
 
     # Build .pdf files from our .dot files
     ADD_CUSTOM_COMMAND(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${role}.svg
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.svg
         COMMAND /usr/bin/dot
                 -Tsvg
-                ${CMAKE_CURRENT_BINARY_DIR}/${role}.dot
+                ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.dot
                 -o
-                ${CMAKE_CURRENT_BINARY_DIR}/${role}.svg
-        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${role}.dot
+                ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.svg
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.dot
         COMMENT "Generating the svg emit graph for the role ${role}"
     )
 
-    SET(svg_graphs ${svg_graphs} ${CMAKE_CURRENT_BINARY_DIR}/${role}.svg)
+    SET(svg_graphs ${svg_graphs} ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.svg)
 
 ENDFOREACH(role)
 
 ADD_CUSTOM_TARGET(graphs DEPENDS ${svg_graphs})
-
-# TODO find all of our modules targets
-
-# TODO for all of those make a custom command that runs the NUClear information extraction script (makes a .yaml or .json for each one)
-
-# TODO for all of the roles make a custom command that takes the generated .yaml or .json files and makes a graph .yaml or .json file
-
-# TODO for all of those .yaml files (the ones from the roles) take the output and make a .dot file for each one that represents the graph
