@@ -39,6 +39,7 @@ FOREACH(role ${NUCLEAR_ROLES})
         SET(module_graph_sources ${module_graph_sources} ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.json)
     ENDFOREACH(module)
 
+    # Build our .dot files from the json files
     ADD_CUSTOM_COMMAND(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${role}.dot
         COMMAND ${PYTHON_EXECUTABLE}
@@ -50,10 +51,22 @@ FOREACH(role ${NUCLEAR_ROLES})
         COMMENT "Generating the emit graph for the role ${role}"
     )
 
+    # Build .pdf files from our .dot files
+    ADD_CUSTOM_COMMAND(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${role}.svg
+        COMMAND /usr/bin/dot
+                -Tsvg
+                ${CMAKE_CURRENT_BINARY_DIR}/${role}.dot
+                -o
+                ${CMAKE_CURRENT_BINARY_DIR}/${role}.svg
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${role}.dot
+        COMMENT "Generating the svg emit graph for the role ${role}"
+    )
+
 ENDFOREACH(role)
 
 ADD_CUSTOM_TARGET(gt1
-                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/robocup.dot)
+                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/robocup.svg)
 
 # TODO find all of our modules targets
 
