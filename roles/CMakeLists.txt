@@ -21,23 +21,12 @@ FOREACH(rolefile ${rolefiles})
     ENDIF()
 ENDFOREACH(rolefile)
 
-# Set the option to build only some of the roles
-SET(BUILD_ROLES "${base_roles}" CACHE STRING "A list of semicolon separated roles that are to be built by the system")
-
-# If we have explicit roles to build build them
-IF(BUILD_ROLES)
-    set(roles ${BUILD_ROLES})
-ELSE()
-    set(roles ${base_roles})
+# If we don't have any roles then default to all roles
+IF(NOT NUCLEAR_ROLES)
+    SET(NUCLEAR_ROLES "${base_roles}" CACHE STRING "A list of semicolon separated roles that are to be built by the system" FORCE)
 ENDIF()
 
-FOREACH(role ${roles})
+# Note that this sets the local role variable that is used in the included role file
+FOREACH(role ${NUCLEAR_ROLES})
     INCLUDE("${role}.role")
 ENDFOREACH(role)
-
-# The ADD_ROLE function appends itself to the ${roles} variable.
-# We need to expose this to our parent scope so the DarwinSend.cmake
-# file knows what binaries it depends on. We do this so that "make install"
-# and "make run" will properly update when binaries are regenerated.
-SET(roles ${roles} PARENT_SCOPE)
-SET(modules ${modules} PARENT_SCOPE)
