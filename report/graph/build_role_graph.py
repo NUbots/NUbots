@@ -89,6 +89,7 @@ class JsonToDot:
                         self._check_edge(input_name, edge)
 
                 for reaction_output in reaction['outputs']:
+                    effective_module_name = module_name
                     # Our output may actually belong to us
                     if reaction_output['type'] and reaction_output['type'][0] == 'NUClear':
                         effective_module_name = 'NUClear'
