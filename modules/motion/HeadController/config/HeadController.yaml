@@ -1,0 +1,10 @@
+FastSpeed: 0.7
+SlowSpeed: 0.6
+gainHead: 30.0
+gainTorque: 30.0
+minYaw: -1.5
+maxYaw: 1.5
+minPitch: -1.2
+maxPitch: 1.2
+screenPadding: 0.15
+testGoal: [0,0]
