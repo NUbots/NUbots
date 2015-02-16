@@ -2,7 +2,7 @@
 FIND_PACKAGE(PythonInterp REQUIRED)
 
 # An option for what format of graph we want
-SET(GRAPH_FILE_TYPE svg CACHE STRING "Choose the file format from graphs (e.g. svg, pdf, png)")
+SET(GRAPH_FILE_TYPE svgz CACHE STRING "Choose the file format from graphs (e.g. svg, pdf, png)")
 # We need a demangler that doesn't suck (compiled with the same code as us)
 ADD_LIBRARY(cxx_demangle SHARED ${CMAKE_CURRENT_SOURCE_DIR}/cxx_demangle.cpp)
 SET_PROPERTY(TARGET cxx_demangle PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
@@ -60,7 +60,7 @@ FOREACH(role ${NUCLEAR_ROLES})
     # Build .pdf files from our .dot files
     ADD_CUSTOM_COMMAND(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.${GRAPH_FILE_TYPE}
-        COMMAND /usr/bin/dot
+        COMMAND /usr/bin/neato
                 -T${GRAPH_FILE_TYPE}
                 ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.dot
                 -o

@@ -435,7 +435,6 @@ with open(output_file, 'w') as file:
 
     for input in inputs:
         jsonOutput['reactions'].append({
-            'name': '',
             'inputs': [],
             'outputs': []
         })
