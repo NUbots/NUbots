@@ -48,32 +48,32 @@ namespace modules {
             HeadController::HeadController(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
 
                 //do a little configurating
-                on<Trigger<Configuration<HeadController>>>([this] (const Configuration<HeadController>& file)
+                on<Trigger<Configuration<HeadController>>>([this] (const Configuration<HeadController>& config)
                 {
                     //pan speeds
-                    fastSpeed = file.config["FastSpeed"].as<double>();
-                    slowSpeed = file.config["SlowSpeed"].as<double>();
+                    fastSpeed = config["fast_speed"].as<double>();
+                    slowSpeed = config["slow_speed"].as<double>();
 
                     //Gains                    
-                    headGain = file.config["headGain"].as<double>();
-                    headTorque = file.config["headTorque"].as<double>();
+                    headGain = config["head_gain"].as<double>();
+                    headTorque = config["head_torque"].as<double>();
 
                     //head limits
-                    minYaw = file.config["minYaw"].as<double>();
-                    maxYaw = file.config["maxYaw"].as<double>();
-                    minPitch = file.config["minPitch"].as<double>();
-                    maxPitch = file.config["maxPitch"].as<double>();
+                    minYaw = config["min_yaw"].as<double>();
+                    maxYaw = config["max_yaw"].as<double>();
+                    minPitch = config["min_pitch"].as<double>();
+                    maxPitch = config["max_pitch"].as<double>();
 
-                    screenPadding = file.config["screenPadding"].as<double>();
+                    screenPadding = config["screen_padding"].as<double>();
 
-                    testGoal = file.config["testGoal"].as<arma::vec2>();
+                    testGoal = config["test_goal"].as<arma::vec2>();
                 });
 
                 on<Trigger<Sensors>>([this] (const Sensors& sensors) {
                     //Get goal vector from angles
                     arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1,testGoal[0],testGoal[1]});
                     //Convert to robot space
-                    arma::vec3 headUnitVector =  sensors.orientation.i() * goalHeadUnitVector_world;
+                    arma::vec3 headUnitVector =  sensors.orientation * goalHeadUnitVector_world;
                     //Compute inverse kinematics for head
                     std::vector< std::pair<messages::input::ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(headUnitVector);
                     //Send commands
@@ -86,6 +86,11 @@ namespace modules {
                     emit(std::move(waypoints));
                 });
 
+
+
+                on<Trigger<ExecuteHeadController>>([this] (const ExecuteHeadController&) {                
+
+                });
 
                 emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                     id,

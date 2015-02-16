@@ -41,7 +41,7 @@ namespace modules {
                 time_t lastPanEnd;
             public:
                 explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
-                static constexpr const char* CONFIGURATION_PATH = "HeadController.json";
+                static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
             };
 
     }  // motion 
