@@ -105,11 +105,11 @@ class JsonToDot:
         edge = None
         try:
             edge = self.half_edges[input_name]
-            edge['src'] = '"{}"'.format(module_name)
+            edge['dst'] = '"{}"'.format(module_name)
         except KeyError:
             edge = self.half_edges[input_name] = {
-                'src': '"{}"'.format(module_name),
-                'dst': None,
+                'dst': '"{}"'.format(module_name),
+                'src': None,
                 'label': '"{}"'.format(input_name)
             }
         return edge
@@ -118,11 +118,11 @@ class JsonToDot:
         edge = None
         try:
             edge = self.half_edges[output_name]
-            edge['dst'] = '"{}"'.format(module_name)
+            edge['src'] = '"{}"'.format(module_name)
         except KeyError:
             edge = self.half_edges[output_name] = {
-                'src': None,
-                'dst': '"{}"'.format(module_name),
+                'dst': None,
+                'src': '"{}"'.format(module_name),
                 'label': '"{}"'.format(output_name)
             }
         return edge
