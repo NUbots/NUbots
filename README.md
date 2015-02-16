@@ -74,7 +74,9 @@ The following is a guide to getting you set up and ready to contribute to the NU
 
 Troubleshooting
 1) Guest additions failing to mount folders. 
+
 	Error message on vagrant up:
+	
 		Failed to mount folders in Linux guest. This is usually beacuse
 		the "vboxsf" file system is not available. Please verify that
 		the guest additions are properly installed in the guest and
@@ -82,26 +84,27 @@ Troubleshooting
 		
 		mount -t vboxsf -o uid=`id -u vagrant`,gid=`getent group vagrant | cut -d: -f3` /vagrant /vagrant
 		mount -t vboxsf -o uid=`id -u vagrant`,gid=`id -g vagrant` /vagrant /vagrant
+		
 	Typically manifests as nubots/NUbots being empty.
 	
 	Solution (from https://github.com/dotless-de/vagrant-vbguest/issues/117):
 	
-		#from NUbots folder:
-		vagrant plugin install vagrant-vbguest
-		vagrant reload
-		vagrant ssh
-		#inside VM:
-		sudo ln -s /opt/VBoxGuestAdditions-4.3.10/lib/VBoxGuestAdditions /usr/lib/VBoxGuestAdditions
-		logout
-		# then, outside the VM:
-		vagrant reload
+		$ #from NUbots folder:
+		$ vagrant plugin install vagrant-vbguest
+		$ vagrant reload
+		$ vagrant ssh
+		$ #inside VM:
+		$ sudo ln -s /opt/VBoxGuestAdditions-4.3.10/lib/VBoxGuestAdditions /usr/lib/VBoxGuestAdditions
+		$ logout
+		$ # then, outside the VM:
+		$ vagrant reload
 		
 	Should now see:
-		Mounting shared folders...
-		[nubotsvm] -- /vagrant
-		[nubotsvm] -- /home/vagrant/nubots/NUbots
-		[nubotsvm] -- /tmp/vagrant-puppet-1/manifests
-		[nubotsvm] -- /tmp/vagrant-puppet-1/modules-0
+		$ Mounting shared folders...
+		$ [nubotsvm] -- /vagrant
+		$ [nubotsvm] -- /home/vagrant/nubots/NUbots
+		$ [nubotsvm] -- /tmp/vagrant-puppet-1/manifests
+		$ [nubotsvm] -- /tmp/vagrant-puppet-1/modules-0
 
 [nuclearport-travis]:     https://travis-ci.org/nubots/NUClearPort                "NUClearPort's Travis Page"
 [travis-develop-image]:   https://travis-ci.org/nubots/NUClearPort.png?branch=develop "Travis-CI build status for the develop branch"
