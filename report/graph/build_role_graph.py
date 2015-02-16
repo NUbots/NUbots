@@ -48,7 +48,8 @@ Produces graph: "Vision" --(message::input::ClassifiedImage)--> "ClassifiedImage
 
 class JsonToDot:
     def __init__(self):
-        self.graph = Dot(graph_name='Emit Graph', graph_type='digraph', suppress_disconnected=True, ratio="compress", splines=False)
+        self.graph = Dot(graph_name='Emit Graph', graph_type='digraph', suppress_disconnected=True, splines=False)
+        self.graph.set_node_defaults(shape='box')
         self.half_edges = {}
 
     def parse(self, filename):
@@ -60,25 +61,35 @@ class JsonToDot:
             if module_name == 'support::NUbugger':
                 return
 
-            node = Node(name=module_name, shape='box')
+            node = Node(name=module_name)
             self.graph.add_node(node)
 
             for reaction_output in data['outputs']:
                 output_name = self.type_to_str(reaction_output['type'])
-                edge = self._add_output(module_name, output_name)
-                self._check_edge(output_name, edge)
+                if self.is_valid_edge(output_name):
+                    edge = self._add_output(module_name, output_name)
+                    self._check_edge(output_name, edge)
 
             for reaction in data['reactions']:
 
                 for reaction_input in reaction['inputs']:
                     input_name = self.type_to_str(reaction_input['type'])
-                    edge = self._add_input(module_name, input_name)
-                    self._check_edge(input_name, edge)
+                    if self.is_valid_edge(input_name):
+                        edge = self._add_input(module_name, input_name)
+                        self._check_edge(input_name, edge)
 
                 for reaction_output in reaction['outputs']:
                     output_name = self.type_to_str(reaction_output['type'])
-                    edge = self._add_output(module_name, output_name)
-                    self._check_edge(output_name, edge)
+                    if self.is_valid_edge(output_name):
+                        edge = self._add_output(module_name, output_name)
+                        self._check_edge(output_name, edge)
+
+    def is_valid_edge(self, name):
+        if 'configuration' in name.lower():
+            return False
+        if 'nuclear' in name.lower():
+            return False
+        return True
 
     def type_to_str(self, type_list):
         flat_list = []
