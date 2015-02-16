@@ -4,7 +4,6 @@ ADD_ROLE(
     support::logging::ConsoleLogHandler
     support::configuration::ConfigSystem
     support::configuration::GlobalConfig
-    #support::configuration::NetworkingConfiguration
     support::configuration::SoccerConfig
     support::NUbugger
 
@@ -15,18 +14,22 @@ ADD_ROLE(
 
     #Vision
     vision::LUTClassifier
-    #vision::FeatureDetector
+    vision::BallDetector
+    vision::GoalDetector
+    vision::ObstacleDetector
 
     #Localisation
     localisation::MMKFRobotLocalisation
-    localisation::KFBallLocalisation
+    #localisation::KFBallLocalisation
 
     #Behaviour
     behaviour::Controller
     behaviour::skills::Stand
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
-    behaviour::skills::LookAt
+    #behaviour::skills::LookAt
+    behaviour::skills::Look
+    behaviour::planning::LookAtBall
 
     #Motion
     motion::ScriptEngine
