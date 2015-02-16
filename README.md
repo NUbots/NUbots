@@ -73,9 +73,10 @@ The following is a guide to getting you set up and ready to contribute to the NU
 		$ git config --global color.ui auto
 
 Troubleshooting
-1) Guest additions failing to mount folders. 
+--------
+1. Guest additions failing to mount folders. 
 
-	Error message on vagrant up:
+	**Error message** on vagrant up:
 	
 		Failed to mount folders in Linux guest. This is usually beacuse
 		the "vboxsf" file system is not available. Please verify that
@@ -87,7 +88,7 @@ Troubleshooting
 		
 	Typically manifests as nubots/NUbots being empty.
 	
-	Solution (from https://github.com/dotless-de/vagrant-vbguest/issues/117):
+	**Solution** (from https://github.com/dotless-de/vagrant-vbguest/issues/117):
 	
 		$ #from NUbots folder:
 		$ vagrant plugin install vagrant-vbguest
@@ -100,6 +101,7 @@ Troubleshooting
 		$ vagrant reload
 		
 	Should now see:
+	
 		$ Mounting shared folders...
 		$ [nubotsvm] -- /vagrant
 		$ [nubotsvm] -- /home/vagrant/nubots/NUbots
