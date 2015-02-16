@@ -1,15 +1,15 @@
 NUbots Codebase
 ==========================
 
-<!-- The [NUClearPort][] project is an effort to port the [NUbots][]' [robocup][] 
+<!-- The [NUbots][] project is an effort to port the [NUbots][]' [robocup][] 
 codebase to use the new [NUClear][] framework. -->
 
 Vagrant
 --------
 
-The NUbots use [Vagrant][] to manage and version the build environment for the NUClearPort project.
+The NUbots use [Vagrant][] to manage and version the build environment for the NUbots project.
 
-The following is a guide to getting you set up and ready to contribute to the NUClearPort project.
+The following is a guide to getting you set up and ready to contribute to the NUbots project.
 
 1. Install the following prerequisites on your machine (packages/installers are available for Windows, OSX, and Linux):
 	* [Git][]
@@ -19,15 +19,15 @@ The following is a guide to getting you set up and ready to contribute to the NU
 2. Clone this git repository onto your machine:
 	e.g.
 
-		$ git clone git@github.com:nubots/NUClearPort.git ~/NUClearPort
+		$ git clone git@github.com:nubots/NUbots.git ~/NUbots
 
-3. Run `vagrant up` from the NUClearPort directory:
+3. Run `vagrant up` from the NUbots directory:
 	e.g.
 
-		$ cd ~/NUClearPort
+		$ cd ~/NUbots
 		$ vagrant up
 
-	The `vagrant up` command tells Vagrant to create and start a VM for the NUClearPort project 
+	The `vagrant up` command tells Vagrant to create and start a VM for the NUbots project 
 	based on the project's `Vagrantfile`.
 
 	**Note:** The very first time `vagrant up` is run on your computer, it will initiate
@@ -50,19 +50,19 @@ The following is a guide to getting you set up and ready to contribute to the NU
 
 4.  Just type `$ vagrant ssh` to ssh into your new VM!
 
-	Vagrant will sync the `~/nubots/NUClearPort` directory on the VM with the root of your NUClearPort repository.
+	Vagrant will sync the `~/nubots/NUbots` directory on the VM with the root of your NUbots repository.
 	This allows for easy editing of code on your machine, and building on the VM.
 
-	To build NUClearPort, just run the following commands on the VM:
+	To build NUbots, just run the following commands on the VM:
   
-		$ mkdir ~/nubots/NUClearPort/build
-		$ cd ~/nubots/NUClearPort/build
-		$ cmake ..
-		$ make -j
+		$ mkdir ~/nubots/NUbots/build
+		$ cd ~/nubots/NUbots/build
+		$ cmake .. -G Ninja
+		$ ninja -j
 
 5. Make robots do awesome stuff!
 
-	<!-- Also, read the steps in the [NUClearPort Startup Guide][nuclearport-startup-guide] about
+	<!-- Also, read the steps in the [NUbots Startup Guide][nuclearport-startup-guide] about
 	additional Vagrant config. -->
 
 	**Important:** Make sure to set your git identity correctly before committing to the project.
