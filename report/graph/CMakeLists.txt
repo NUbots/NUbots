@@ -30,7 +30,7 @@ FOREACH(module ${NUCLEAR_MODULES})
 
 ENDFOREACH(module)
 
-UNSET(svg_graphs)
+UNSET(graph_files)
 
 # For all the roles run our graph generation script
 FOREACH(role ${NUCLEAR_ROLES})
@@ -47,30 +47,44 @@ FOREACH(role ${NUCLEAR_ROLES})
 
     # Build our .dot files from the json files
     ADD_CUSTOM_COMMAND(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.dot
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}_reaction.dot
+               ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}_module.dot
         COMMAND ${PYTHON_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/build_role_graph.py
-                ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.dot
+                ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}
                 ${module_graph_sources}
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/build_role_graph.py
                 ${module_graph_sources}
-        COMMENT "Generating the emit graph for the role ${role}"
+        COMMENT "Generating the emit graphs for the role ${role}"
     )
 
     # Build .pdf files from our .dot files
     ADD_CUSTOM_COMMAND(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.${GRAPH_FILE_TYPE}
-        COMMAND /usr/bin/neato
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}_reaction.${GRAPH_FILE_TYPE}
+        COMMAND /usr/bin/dot
                 -T${GRAPH_FILE_TYPE}
-                ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.dot
+                ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}_reaction.dot
                 -o
-                ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.${GRAPH_FILE_TYPE}
-        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.dot
+                ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}_reaction.${GRAPH_FILE_TYPE}
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}_reaction.dot
         COMMENT "Generating the ${GRAPH_FILE_TYPE} emit graph for the role ${role}"
     )
 
-    SET(svg_graphs ${svg_graphs} ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}.${GRAPH_FILE_TYPE})
+    # Build .pdf files from our .dot files
+    ADD_CUSTOM_COMMAND(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}_module.${GRAPH_FILE_TYPE}
+        COMMAND /usr/bin/dot
+                -T${GRAPH_FILE_TYPE}
+                ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}_module.dot
+                -o
+                ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}_module.${GRAPH_FILE_TYPE}
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}_module.dot
+        COMMENT "Generating the ${GRAPH_FILE_TYPE} emit graph for the role ${role}"
+    )
+
+    SET(graph_files ${graph_files} ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}_module.${GRAPH_FILE_TYPE})
+    SET(graph_files ${graph_files} ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}_reaction.${GRAPH_FILE_TYPE})
 
 ENDFOREACH(role)
 
-ADD_CUSTOM_TARGET(graphs DEPENDS ${svg_graphs})
+ADD_CUSTOM_TARGET(graphs DEPENDS ${graph_files})

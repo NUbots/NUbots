@@ -184,7 +184,7 @@ class NUClearGraphBuilder:
     def build_module_graph(self):
 
         # Our graph
-        graph = Dot(graph_type='digraph', suppress_disconnected=False, splines=True, overlap=False)
+        graph = Dot(graph_type='digraph', suppress_disconnected=False, splines=True, overlap=False, layout='neato')
 
         # Build up a compressed modules list
         graph_modules = {}
@@ -245,4 +245,5 @@ if __name__ == "__main__":
         converter.add_module(filename)
 
     # Build our graph and save
-    converter.build_module_graph().write(out)
+    converter.build_module_graph().write("{}_module.dot".format(out))
+    converter.build_reaction_graph().write("{}_reaction.dot".format(out))
