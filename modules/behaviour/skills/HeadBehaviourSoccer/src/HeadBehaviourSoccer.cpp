@@ -19,7 +19,7 @@
 
 #include "HeadBehaviourSoccer.h"
 #include "messages/localisation/FieldObject.h"
-#include "messages/vision/VisionObects.h"
+#include "messages/vision/VisionObjects.h"
 #include "messages/input/Sensors.h"
 
 namespace modules {
@@ -27,6 +27,7 @@ namespace modules {
 
         using messages::vision::Goal;
         using messages::vision::Ball;
+        using messages::vision::VisionObject;
         using messages::localisation::Ball;
         using messages::localisation::Self;
         using messages::input::Sensors;
@@ -45,18 +46,39 @@ namespace modules {
                     With<Sensors>,
                     With<Optional<std::vector<Ball>>>,
                     With<Optional<std::vector<Goal>>>
-                  >([this] (const Sensors& sensors, const HeadCommand& command) {
+                  >([this] (const Sensors& sensors,
+                            const std::shared_ptr<std::vector<Ball>>>& vballs,
+                            const std::shared_ptr<std::vector<Goal>>>& vgoals,
+                            ) {
 
-                    if(fixatedOnBall){
-                    
-                    } else if(fixatedOnGoal){
+                    std::vector<std::shared_ptr<VisionObject>> fixationObjects;
 
-                    } else if(panning){
+                    bool panForBall = false;
+                    bool panForLandmarks = false;
 
+                    if(prioritiseBall){
+                        if(vballs){
+                            //Fixate on ball
+                            auto& ball = (*vballs)[0];
+                            fixationObjects.push_back(std::make_shared<VisionObject>(ball));
+                        } else {
+                            panForBall = true;
+                        }
+                    } 
+                    if(prioritiseSelf){
+                        if(vgoals){
+                            //Fixate on goals and lines and other landmarks
+                            for (auto& goal : (*vgoals)){
+                                fixationObjects.push_back(std::make_shared<VisionObject>(goal));
+                            }
+                        } else {
+                            panForLandmarks = true;
+                        }
                     }
 
+                    updateHeadState(fixationObjects, panForBalls, panForLandmarks)
                     //Emit result
-                    emit(std::make_unique<HeadCommand>());
+                    emit(std::make_unique<HeadCommand>(getHeadCommand()));
                 });
 
               
