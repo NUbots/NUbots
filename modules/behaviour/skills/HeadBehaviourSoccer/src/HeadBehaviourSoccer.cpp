@@ -56,6 +56,12 @@ namespace modules {
                     bool panForBall = false;
                     bool panForLandmarks = false;
 
+                    int ballPriority = 1;
+                    int goalPriority = 1;
+                    int linePriority = 0;
+
+                    int highestPriority = max(max(ballPriority,goalPriority),linePriority);
+
                     if(prioritiseBall){
                         if(vballs){
                             //Fixate on ball

@@ -24,7 +24,7 @@
 #include "messages/behaviour/ServoCommand.h"
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
-#include "messages/motion/HeadCommand/h"
+#include "messages/motion/HeadCommand.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/RobotModels.h"
@@ -73,8 +73,13 @@ namespace modules {
                     std::vector< std::pair<messages::input::ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(headUnitVector);
 
                     //Clamp head angles
-                    goalAngles[ServoID::HEAD_PITCH].second = arma::clamp(goalAngles[ServoID::HEAD_PITCH].second, min_pitch, max_pitch);
-                    goalAngles[ServoID::HEAD_YAW].second = arma::clamp(goalAngles[ServoID::HEAD_YAW].second, min_yaw, max_yaw);
+                    for(auto& angle : goalAngles){
+                        if(angle.first == ServoID::HEAD_PITCH){
+                            angle.second = std::fmin(std::fmax(angle.second, min_pitch), max_pitch);
+                        } else if(angle.first == ServoID::HEAD_YAW){
+                            angle.second = std::fmin(std::fmax(angle.second, min_yaw), max_yaw);
+                        }
+                    }
 
                     //Create message
                     auto waypoints = std::make_unique<std::vector<ServoCommand>>();
@@ -103,6 +108,8 @@ namespace modules {
                     [this] (const std::set<LimbID>&) { },
                     [this] (const std::set<ServoID>&) { }
                 }));
+
+                emit<Scope::INITIALIZE>(std::make_unique<HeadCommand>(HeadCommand {0,0}));
             }
 
     }  // motion
