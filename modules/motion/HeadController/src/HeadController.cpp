@@ -24,6 +24,7 @@
 #include "messages/behaviour/ServoCommand.h"
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
+#include "messages/motion/HeadCommand/h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/RobotModels.h"
@@ -38,6 +39,7 @@ namespace modules {
             using messages::input::LimbID;
             using messages::support::Configuration;
             using messages::behaviour::ServoCommand;
+            using messages::motion::HeadCommand;
             using utility::math::coordinates::sphericalToCartesian;
             using utility::motion::kinematics::calculateHeadJoints;
             using utility::motion::kinematics::DarwinModel;
@@ -50,39 +52,38 @@ namespace modules {
                 //do a little configurating
                 on<Trigger<Configuration<HeadController>>>([this] (const Configuration<HeadController>& config)
                 {
-                    //pan speeds
-                    fastSpeed = config["fast_speed"].as<double>();
-                    slowSpeed = config["slow_speed"].as<double>();
-
                     //Gains                    
-                    headGain = config["head_gain"].as<double>();
-                    headTorque = config["head_torque"].as<double>();
+                    head_gain = config["head_gain"].as<double>();
+                    head_torque = config["head_torque"].as<double>();
 
                     //head limits
-                    minYaw = config["min_yaw"].as<double>();
-                    maxYaw = config["max_yaw"].as<double>();
-                    minPitch = config["min_pitch"].as<double>();
-                    maxPitch = config["max_pitch"].as<double>();
-
-                    screenPadding = config["screen_padding"].as<double>();
-
-                    testGoal = config["test_goal"].as<arma::vec2>();
+                    min_yaw = config["min_yaw"].as<double>();
+                    max_yaw = config["max_yaw"].as<double>();
+                    min_pitch = config["min_pitch"].as<double>();
+                    max_pitch = config["max_pitch"].as<double>();
                 });
 
-                on<Trigger<Sensors>>([this] (const Sensors& sensors) {
+                on<Trigger<Sensors>, With<HeadCommand>>([this] (const Sensors& sensors, const HeadCommand& command) {
+
                     //Get goal vector from angles
-                    arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1,testGoal[0],testGoal[1]});
+                    arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1,command.yaw,command.pitch});
                     //Convert to robot space
                     arma::vec3 headUnitVector =  sensors.orientation * goalHeadUnitVector_world;
                     //Compute inverse kinematics for head
                     std::vector< std::pair<messages::input::ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(headUnitVector);
-                    //Send commands
+
+                    //Clamp head angles
+                    goalAngles[ServoID::HEAD_PITCH].second = arma::clamp(goalAngles[ServoID::HEAD_PITCH].second, min_pitch, max_pitch);
+                    goalAngles[ServoID::HEAD_YAW].second = arma::clamp(goalAngles[ServoID::HEAD_YAW].second, min_yaw, max_yaw);
+
+                    //Create message
                     auto waypoints = std::make_unique<std::vector<ServoCommand>>();
                     waypoints->reserve(2);
                     auto t = NUClear::clock::now();
                     for (auto& angle : goalAngles) {
-                        waypoints->push_back({ id, t, angle.first, angle.second, float(headGain), float(headTorque) }); // TODO: support separate gains for each leg
+                        waypoints->push_back({ id, t, angle.first, angle.second, float(head_gain), float(head_torque) }); // TODO: support separate gains for each leg
                     }
+                    //Send commands
                     emit(std::move(waypoints));
                 });
 

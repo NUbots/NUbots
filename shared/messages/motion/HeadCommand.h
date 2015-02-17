@@ -17,31 +17,26 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_REFLEX_HeadController_H
-#define MODULES_BEHAVIOUR_REFLEX_HeadController_H
+#ifndef MESSAGES_MOTION_HEADCOMMAND_H
+#define MESSAGES_MOTION_HEADCOMMAND_H
 
-#include <nuclear>
 #include <armadillo>
 
-namespace modules {
+namespace messages {
     namespace motion {
 
-            /**
-             * Executes a HeadController action.
-             *
-             * @author Josiah Walker
-             */
-            class HeadController : public NUClear::Reactor {
-            private:
-                const size_t id;
-                double min_yaw,max_yaw,min_pitch,max_pitch,head_gain,head_torque;
-            public:
-                explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
-                static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
-            };
+        /**
+         * Tell the head where to look in world space.
+         * This command is interpreted such that the robot will use IMU data to fixate at these angles in the world even when rotating.
+         *
+         * @author Jake Fountain
+         */
+        struct HeadCommand {
+            float pitch;
+            float yaw;
+        };
+        
+    }  // motion
+}  // messages
 
-    }  // motion 
-}  // modules
-
-#endif  // MODULES_BEHAVIOURS_REFLEX_HeadController_H
-
+#endif  // MESSAGES_MOTION_HEADCOMMAND_H
