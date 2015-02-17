@@ -1,6 +1,0 @@
-head_gain: 30.0
-head_torque: 100.0
-min_yaw: - pi * 3 / 2
-max_yaw: pi * 3 / 2
-min_pitch: - pi / 2
-max_pitch: pi / 2
