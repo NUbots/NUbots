@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_REFLEX_HEADCONTROLLER_H
-#define MODULES_BEHAVIOUR_REFLEX_HEADCONTROLLER_H
+#ifndef MODULES_BEHAVIOUR_REFLEX_HEADBEHAVIOURSOCCER_H
+#define MODULES_BEHAVIOUR_REFLEX_HEADBEHAVIOURSOCCER_H
 
 #include <nuclear>
 #include <armadillo>
@@ -27,21 +27,19 @@ namespace modules {
     namespace motion {
 
             /**
-             * Executes a HeadController action.
+             * Executes a HeadBehaviourSoccer action.
              *
              * @author Josiah Walker
              */
-            class HeadController : public NUClear::Reactor {
+            class HeadBehaviourSoccer : public NUClear::Reactor {
             private:
-                const size_t id;
-                double min_yaw,max_yaw,min_pitch,max_pitch,head_gain,head_torque;
             public:
-                explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
-                static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
+                explicit HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment);
+                static constexpr const char* CONFIGURATION_PATH = "HeadBehaviourSoccer.yaml";
             };
 
     }  // motion 
 }  // modules
 
-#endif  // MODULES_BEHAVIOURS_REFLEX_HEADCONTROLLER_H
+#endif  // MODULES_BEHAVIOURS_REFLEX_HEADBEHAVIOURSOCCER_H
 
