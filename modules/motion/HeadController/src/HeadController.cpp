@@ -57,10 +57,10 @@ namespace modules {
                     head_torque = config["head_torque"].as<double>();
 
                     //head limits
-                    min_yaw = config["min_yaw"].as<double>();
-                    max_yaw = config["max_yaw"].as<double>();
-                    min_pitch = config["min_pitch"].as<double>();
-                    max_pitch = config["max_pitch"].as<double>();
+                    min_yaw = config["angle_limits"]["yaw"]["min"].as<double>();
+                    max_yaw = config["angle_limits"]["yaw"]["max"].as<double>();
+                    min_pitch = config["angle_limits"]["pitch"]["min"].as<double>();
+                    max_pitch = config["angle_limits"]["pitch"]["max"].as<double>();
                 });
 
                 on<Trigger<Sensors>, With<HeadCommand>>([this] (const Sensors& sensors, const HeadCommand& command) {

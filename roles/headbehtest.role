@@ -8,7 +8,7 @@ ADD_ROLE(
     #support::NUbugger
 
     #Sensors
-    input::LinuxCamera
+    #input::LinuxCamera
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
 
@@ -17,10 +17,10 @@ ADD_ROLE(
     #localisation::KFBallLocalisation
 
     #Behaviour
-    behaviour::Controller
-    behaviour::skills::Stand
-    behaviour::skills::FallingRelax
-    behaviour::skills::Getup
+    #behaviour::Controller
+    #behaviour::skills::Stand
+    #behaviour::skills::FallingRelax
+    #behaviour::skills::Getup
 
     #Motion
     motion::ScriptEngine
