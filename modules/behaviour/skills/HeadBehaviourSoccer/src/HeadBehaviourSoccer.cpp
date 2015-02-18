@@ -19,55 +19,68 @@
 
 #include "HeadBehaviourSoccer.h"
 #include "messages/localisation/FieldObject.h"
-#include "messages/vision/VisionObjects.h"
+#include "messages/support/Configuration.h"
 #include "messages/input/Sensors.h"
+#include "messages/motion/HeadCommand.h"
+
 
 namespace modules {
-    namespace motion {
+    namespace behaviour{
+        namespace skills {
 
         using messages::vision::Goal;
         using messages::vision::Ball;
         using messages::vision::VisionObject;
-        using messages::localisation::Ball;
+        using messages::support::Configuration;
+        // using messages::localisation::Ball;
         using messages::localisation::Self;
         using messages::input::Sensors;
+        using messages::motion::HeadCommand;
 
-            HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
+            HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment) : 
+            Reactor(std::move(environment)){
 
                 //do a little configurating
-                on<Trigger<Configuration<HeadBehaviourSoccer>>>([this] (const Configuration<HeadBehaviourSoccer>& config)
-                {
-                    //Gains                    
-                    //head_gain = config["head_gain"].as<double>();
-                    
-                });
+                // on<Trigger<Configuration<HeadBehaviourSoccer>>>([this] (const Configuration<HeadBehaviourSoccer>& config)
+                // {
+                //     //Gains                    
+                //     //head_gain = config["head_gain"].as<double>();
+                //     
+                // });
 
-                on<Every<30, Per<std::chrono::seconds>>,
+                on<
+                    Trigger<Every<30, Per<std::chrono::seconds>>>,
                     With<Sensors>,
                     With<Optional<std::vector<Ball>>>,
                     With<Optional<std::vector<Goal>>>
-                  >([this] (const Sensors& sensors,
-                            const std::shared_ptr<std::vector<Ball>>>& vballs,
-                            const std::shared_ptr<std::vector<Goal>>>& vgoals,
+                  >([this] (const time_t&,
+                            const Sensors& sensors,
+                            const std::shared_ptr<const std::vector<Ball>>& vballs,
+                            const std::shared_ptr<const std::vector<Goal>>& vgoals
                             ) {
-
-                    std::vector<std::shared_ptr<VisionObject>> fixationObjects;
-
-                    bool search = false;
-
+                    //Input
                     int ballPriority = 1;
                     int goalPriority = 1;
                     int linePriority = 0;
 
-                    int maxPriority = max(max(ballPriority,goalPriority),linePriority);
+                    //Output
+                    std::vector<std::unique_ptr<VisionObject>> fixationObjects;
 
-                    //need to check if things have changed significantly in last ~100ms and if so wipe current plan
+                    bool search = false;
+
+                    int ballsSeenThisUpdate = 0;
+                    int goalPostsSeenThisUpdate = 0;
+                    
+
+                    int maxPriority = std::max(std::max(ballPriority,goalPriority),linePriority);
+
 
                     if(ballPriority == maxPriority){
                         if(vballs){
                             //Fixate on ball
+                            ballsSeenThisUpdate = vballs->size();
                             auto& ball = (*vballs)[0];
-                            fixationObjects.push_back(std::make_shared<VisionObject>(ball));
+                            fixationObjects.push_back(std::make_unique<VisionObject>(ball));
                         } else {
                             search = true;
                         }
@@ -75,25 +88,51 @@ namespace modules {
                     if(goalPriority == maxPriority){
                         if(vgoals){
                             //Fixate on goals and lines and other landmarks
-                            std::vector<Goal::Side> visiblePosts();
+                            goalPostsSeenThisUpdate = vgoals->size();
+                            std::set<Goal::Side> visiblePosts;
                             for (auto& goal : (*vgoals)){
-                                visiblePosts.push_back(goal.side);
-                                fixationObjects.push_back(std::make_shared<VisionObject>(goal));
+                                visiblePosts.insert(goal.side);
+                                fixationObjects.push_back(std::make_unique<VisionObject>(goal));
                             }
-                            search = (visiblePosts.find(Goal::LEFT) == visiblePosts.end() ||//If left post not visible or
-                                      visiblePosts.find(Goal::RIGHT) == visiblePosts.end());//right post not visible, then we need to search for the other goal post
+                            search = (visiblePosts.find(Goal::Side::LEFT) == visiblePosts.end() ||//If left post not visible or
+                                      visiblePosts.find(Goal::Side::RIGHT) == visiblePosts.end());//right post not visible, then we need to search for the other goal post
                         } else {
                             search = true;
                         }
                     }
+                    
+                    //TODO : Check if things have changed enough for update
+                    // if(ballsSeenThisUpdate != ballsSeenLastUpdate ||
+                    //    goalPostsSeenThisUpdate != goalPostsSeenLastUpdate){
 
-                    updateHeadState(fixationObjects, pan);
+                    // } else {
+
+                    // }
+                    
+                    //Update
+                  
+                    updateHeadState(fixationObjects, search);
+                    // ballsSeenLastUpdate = ballsSeenThisUpdate;
+                    // goalPostsSeenLastUpdate = goalPostsSeenThisUpdate;
+                    // lastUpdateTime = NUClear::clock::now();
+                    
                     //Emit result
-                    emit(std::make_unique<HeadCommand>(getHeadCommand()));
+                    emit(getHeadCommand());
                 });
 
               
             }
 
-    }  // motion
+            void HeadBehaviourSoccer::updateHeadState(const std::vector<std::unique_ptr<VisionObject>>& fixationObjects, const bool& search){
+
+            }
+
+            std::unique_ptr<HeadCommand> HeadBehaviourSoccer::getHeadCommand(){
+                return std::move(std::make_unique<HeadCommand>());
+            }
+
+
+
+        }  // motion
+    } //behaviour
 }  // modules

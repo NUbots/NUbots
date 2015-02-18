@@ -21,6 +21,7 @@ ADD_ROLE(
     #behaviour::skills::Stand
     #behaviour::skills::FallingRelax
     #behaviour::skills::Getup
+    behaviour::skills::HeadBehaviourSoccer
 
     #Motion
     motion::ScriptEngine

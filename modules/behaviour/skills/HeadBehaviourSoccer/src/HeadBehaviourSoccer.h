@@ -22,9 +22,14 @@
 
 #include <nuclear>
 #include <armadillo>
+#include <set>
+#include "messages/vision/VisionObjects.h"
+#include "messages/motion/HeadCommand.h"
+
 
 namespace modules {
-    namespace motion {
+    namespace behaviour{
+        namespace skills {
 
             /**
              * Executes a HeadBehaviourSoccer action.
@@ -33,12 +38,19 @@ namespace modules {
              */
             class HeadBehaviourSoccer : public NUClear::Reactor {
             private:
+                void updateHeadState(const std::vector<std::unique_ptr<messages::vision::VisionObject>>& fixationObjects, const bool& search);
+                std::unique_ptr<messages::motion::HeadCommand> getHeadCommand();
+
+                // int ballsSeenLastUpdate;
+                // int goalPostsSeenLastUpdate;
+                // time_t lastUpdateTime;
             public:
                 explicit HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment);
                 static constexpr const char* CONFIGURATION_PATH = "HeadBehaviourSoccer.yaml";
             };
 
-    }  // motion 
+        }  // motion
+    } //behaviour
 }  // modules
 
 #endif  // MODULES_BEHAVIOURS_REFLEX_HEADBEHAVIOURSOCCER_H
