@@ -53,36 +53,41 @@ namespace modules {
 
                     std::vector<std::shared_ptr<VisionObject>> fixationObjects;
 
-                    bool panForBall = false;
-                    bool panForLandmarks = false;
+                    bool search = false;
 
                     int ballPriority = 1;
                     int goalPriority = 1;
                     int linePriority = 0;
 
-                    int highestPriority = max(max(ballPriority,goalPriority),linePriority);
+                    int maxPriority = max(max(ballPriority,goalPriority),linePriority);
 
-                    if(prioritiseBall){
+                    //need to check if things have changed significantly in last ~100ms and if so wipe current plan
+
+                    if(ballPriority == maxPriority){
                         if(vballs){
                             //Fixate on ball
                             auto& ball = (*vballs)[0];
                             fixationObjects.push_back(std::make_shared<VisionObject>(ball));
                         } else {
-                            panForBall = true;
+                            search = true;
                         }
                     } 
-                    if(prioritiseSelf){
+                    if(goalPriority == maxPriority){
                         if(vgoals){
                             //Fixate on goals and lines and other landmarks
+                            std::vector<Goal::Side> visiblePosts();
                             for (auto& goal : (*vgoals)){
+                                visiblePosts.push_back(goal.side);
                                 fixationObjects.push_back(std::make_shared<VisionObject>(goal));
                             }
+                            search = (visiblePosts.find(Goal::LEFT) == visiblePosts.end() ||//If left post not visible or
+                                      visiblePosts.find(Goal::RIGHT) == visiblePosts.end());//right post not visible, then we need to search for the other goal post
                         } else {
-                            panForLandmarks = true;
+                            search = true;
                         }
                     }
 
-                    updateHeadState(fixationObjects, panForBalls, panForLandmarks)
+                    updateHeadState(fixationObjects, pan);
                     //Emit result
                     emit(std::make_unique<HeadCommand>(getHeadCommand()));
                 });

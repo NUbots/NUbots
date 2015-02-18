@@ -28,7 +28,7 @@
 #include "utility/math/coordinates.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/RobotModels.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 
 namespace modules {
     namespace motion {
@@ -43,6 +43,7 @@ namespace modules {
             using utility::math::coordinates::sphericalToCartesian;
             using utility::motion::kinematics::calculateHeadJoints;
             using utility::motion::kinematics::DarwinModel;
+            using utility::support::Expression;
 
             //internal only callback messages to start and stop our action
             struct ExecuteHeadController {};
@@ -57,10 +58,10 @@ namespace modules {
                     head_torque = config["head_torque"].as<double>();
 
                     //head limits
-                    min_yaw = config["angle_limits"]["yaw"]["min"].as<double>();
-                    max_yaw = config["angle_limits"]["yaw"]["max"].as<double>();
-                    min_pitch = config["angle_limits"]["pitch"]["min"].as<double>();
-                    max_pitch = config["angle_limits"]["pitch"]["max"].as<double>();
+                    min_yaw = config["angle_limits"]["yaw"]["min"].as<Expression>();
+                    max_yaw = config["angle_limits"]["yaw"]["max"].as<Expression>();
+                    min_pitch = config["angle_limits"]["pitch"]["min"].as<Expression>();
+                    max_pitch = config["angle_limits"]["pitch"]["max"].as<Expression>();
                 });
 
                 on<Trigger<Sensors>, With<HeadCommand>>([this] (const Sensors& sensors, const HeadCommand& command) {
