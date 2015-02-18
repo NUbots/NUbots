@@ -22,6 +22,8 @@
 #include "messages/support/Configuration.h"
 #include "messages/input/Sensors.h"
 #include "messages/motion/HeadCommand.h"
+#include "utility/math/coordinates.h"
+#include "utility/motion/InverseKinematics.h"
 
 
 namespace modules {
@@ -36,6 +38,10 @@ namespace modules {
         using messages::localisation::Self;
         using messages::input::Sensors;
         using messages::motion::HeadCommand;
+
+        using utility::math::coordinates::sphericalToCartesian;
+        using utility::motion::kinematics::calculateHeadJoints;
+        using utility::motion::kinematics::DarwinModel;
 
             HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment) : 
             Reactor(std::move(environment)){
@@ -111,7 +117,7 @@ namespace modules {
                     
                     //Update
                   
-                    updateHeadState(fixationObjects, search);
+                    updateHeadPlan(fixationObjects, search);
                     // ballsSeenLastUpdate = ballsSeenThisUpdate;
                     // goalPostsSeenLastUpdate = goalPostsSeenThisUpdate;
                     // lastUpdateTime = NUClear::clock::now();
@@ -123,7 +129,19 @@ namespace modules {
               
             }
 
-            void HeadBehaviourSoccer::updateHeadState(const std::vector<std::unique_ptr<VisionObject>>& fixationObjects, const bool& search){
+            void HeadBehaviourSoccer::updateHeadPlan(const std::vector<std::unique_ptr<VisionObject>>& fixationObjects, const bool& search){
+                std::vector<arma::vec2> fixationPoints;
+                std::vector<arma::vec2> fixationSizes;
+                arma::vec2 centroid;
+                for(int i = 0; i < fixationObjects.size(); i++){
+                    fixationPoints.push_back(fixationObjects[i]->screenAngular);
+                    fixationPoints.push_back(fixationObjects[i]->angularSize);
+                    centroid += fixationObjects[i]->screenAngular;
+                }
+                centroid = centroid / float(fixationObjects.size());
+
+                //Test by looking at centroid:
+                //arma::vec3 lookVectorFromHead = sphericalToCartesian();//This is an approximation relying on the robots small FOV
 
             }
 

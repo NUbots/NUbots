@@ -297,6 +297,10 @@ namespace modules {
                      *                 Orientation                  *
                      ************************************************/
 
+                     /*! The orientation matrix is the map from world to robot coordinates, measured by the gyro.
+                      It is the world coordinates in columns relative to the robot.
+                     */
+
                     // Calculate our time offset from the last read
                     double deltaT = ((previousSensors ? previousSensors->timestamp : input.timestamp) - input.timestamp).count() / double(NUClear::clock::period::den);
 

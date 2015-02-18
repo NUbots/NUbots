@@ -58,10 +58,14 @@ namespace modules {
                     head_torque = config["head_torque"].as<double>();
 
                     //head limits
-                    min_yaw = config["angle_limits"]["yaw"]["min"].as<Expression>();
-                    max_yaw = config["angle_limits"]["yaw"]["max"].as<Expression>();
-                    min_pitch = config["angle_limits"]["pitch"]["min"].as<Expression>();
-                    max_pitch = config["angle_limits"]["pitch"]["max"].as<Expression>();
+                    min_yaw = config["angle_limits"]["yaw"]["min"].as<double>();
+                    max_yaw = config["angle_limits"]["yaw"]["max"].as<double>();
+                    min_pitch = config["angle_limits"]["pitch"]["min"].as<double>();
+                    max_pitch = config["angle_limits"]["pitch"]["max"].as<double>();
+
+                    emit(std::make_unique<HeadCommand>( HeadCommand {config["initial"]["pitch"].as<double>(),
+                                                                     config["initial"]["yaw"].as<double>()}));
+
                 });
 
                 on<Trigger<Sensors>, With<HeadCommand>>([this] (const Sensors& sensors, const HeadCommand& command) {
@@ -110,7 +114,6 @@ namespace modules {
                     [this] (const std::set<ServoID>&) { }
                 }));
 
-                emit<Scope::INITIALIZE>(std::make_unique<HeadCommand>(HeadCommand {0,0}));
             }
 
     }  // motion

@@ -38,7 +38,7 @@ namespace modules {
              */
             class HeadBehaviourSoccer : public NUClear::Reactor {
             private:
-                void updateHeadState(const std::vector<std::unique_ptr<messages::vision::VisionObject>>& fixationObjects, const bool& search);
+                void updateHeadPlan(const std::vector<std::unique_ptr<messages::vision::VisionObject>>& fixationObjects, const bool& search);
                 std::unique_ptr<messages::motion::HeadCommand> getHeadCommand();
 
                 // int ballsSeenLastUpdate;

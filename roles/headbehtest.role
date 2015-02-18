@@ -17,11 +17,11 @@ ADD_ROLE(
     #localisation::KFBallLocalisation
 
     #Behaviour
-    #behaviour::Controller
-    #behaviour::skills::Stand
-    #behaviour::skills::FallingRelax
-    #behaviour::skills::Getup
-    behaviour::skills::HeadBehaviourSoccer
+    behaviour::Controller
+    behaviour::skills::Stand
+    behaviour::skills::FallingRelax
+    behaviour::skills::Getup
+    #behaviour::skills::HeadBehaviourSoccer
 
     #Motion
     motion::ScriptEngine
