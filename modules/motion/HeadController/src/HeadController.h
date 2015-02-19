@@ -35,6 +35,9 @@ namespace modules {
             private:
                 const size_t id;
                 double min_yaw,max_yaw,min_pitch,max_pitch,head_gain,head_torque;
+                ReactionHandle updateHandle;
+                //Debug var:
+                time_t lastTime;
             public:
                 explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
                 static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";

@@ -25,6 +25,7 @@
 #include <set>
 #include "messages/vision/VisionObjects.h"
 #include "messages/motion/HeadCommand.h"
+#include "messages/input/Sensors.h"
 
 
 namespace modules {
@@ -38,8 +39,15 @@ namespace modules {
              */
             class HeadBehaviourSoccer : public NUClear::Reactor {
             private:
-                void updateHeadPlan(const std::vector<std::unique_ptr<messages::vision::VisionObject>>& fixationObjects, const bool& search);
+                void updateHeadPlan(const std::vector<messages::vision::VisionObject>& fixationObjects, const bool& search, const messages::input::Sensors& sensors);
                 std::unique_ptr<messages::motion::HeadCommand> getHeadCommand();
+
+                std::vector<arma::vec2> getSearchPoints(std::vector<arma::vec2> fixationPoints, std::vector<arma::vec2> fixationSizes);
+
+                float currentWorldPitch;
+                float currentWorldYaw;
+
+                float p_gain_tracking;
 
                 // int ballsSeenLastUpdate;
                 // int goalPostsSeenLastUpdate;

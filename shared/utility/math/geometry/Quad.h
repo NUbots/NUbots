@@ -102,6 +102,8 @@ namespace geometry {
          */
         arma::vec2 getEdgePoints(double y) const;
 
+        static Quad getBoundingBox(const std::vector<arma::vec2>& points);
+
     private:
         arma::vec2 bl;                                                  //! @variable The bottom-left of the Quad.
         arma::vec2 br;                                                  //! @variable The bottom-right of the Quad.

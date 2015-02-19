@@ -32,8 +32,8 @@ namespace messages {
          * @author Jake Fountain
          */
         struct HeadCommand {
-            float pitch;
             float yaw;
+            float pitch;
         };
         
     }  // motion

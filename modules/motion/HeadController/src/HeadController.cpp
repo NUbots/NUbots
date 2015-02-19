@@ -51,7 +51,7 @@ namespace modules {
             HeadController::HeadController(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
 
                 //do a little configurating
-                on<Trigger<Configuration<HeadController>>>([this] (const Configuration<HeadController>& config)
+                on<Trigger<Configuration<HeadController>>>("Head Controller - Config",[this] (const Configuration<HeadController>& config)
                 {
                     //Gains                    
                     head_gain = config["head_gain"].as<double>();
@@ -63,15 +63,16 @@ namespace modules {
                     min_pitch = config["angle_limits"]["pitch"]["min"].as<double>();
                     max_pitch = config["angle_limits"]["pitch"]["max"].as<double>();
 
-                    emit(std::make_unique<HeadCommand>( HeadCommand {config["initial"]["pitch"].as<double>(),
-                                                                     config["initial"]["yaw"].as<double>()}));
+                    emit(std::make_unique<HeadCommand>( HeadCommand {config["initial"]["yaw"].as<double>(),
+                                                                     config["initial"]["pitch"].as<double>()}));
 
                 });
 
-                on<Trigger<Sensors>, With<HeadCommand>>([this] (const Sensors& sensors, const HeadCommand& command) {
-
+                updateHandle = on<Trigger<Sensors>, With<HeadCommand>, Options<Single>>("Head Controller - Update Head Position",[this] (const Sensors& sensors, const HeadCommand& command) {
+                    
                     //Get goal vector from angles
-                    arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1,command.yaw,command.pitch});
+                    //Pitch is positive when the robot is looking down by Right hand rule, so negate the pitch
+                    arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1,command.yaw,-command.pitch});
                     //Convert to robot space
                     arma::vec3 headUnitVector =  sensors.orientation * goalHeadUnitVector_world;
                     //Compute inverse kinematics for head
@@ -93,25 +94,26 @@ namespace modules {
                     for (auto& angle : goalAngles) {
                         waypoints->push_back({ id, t, angle.first, angle.second, float(head_gain), float(head_torque) }); // TODO: support separate gains for each leg
                     }
+                    time_t thisTime = NUClear::clock::now();
+                    std::cout << "Duration between head command trigger is " << std::chrono::duration_cast<std::chrono::milliseconds>(thisTime - lastTime).count() << " ms " << std::endl;  
+                    lastTime = thisTime;
                     //Send commands
                     emit(std::move(waypoints));
                 });
 
-
-
-                on<Trigger<ExecuteHeadController>>([this] (const ExecuteHeadController&) {                
-
-                });
+                updateHandle.enable();
 
                 emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                     id,
                     "HeadController",
-                    { std::pair<float, std::set<LimbID>>(30.0, { LimbID::HEAD }) },
-                    [this] (const std::set<LimbID>&) {
-                        emit(std::make_unique<ExecuteHeadController>());
+                    { std::pair<float, std::set<LimbID>>(50.0 , { LimbID::HEAD }) },
+                    [this] (const std::set<LimbID>& givenHead) { //Head control gained
+                        updateHandle.enable();
                     },
-                    [this] (const std::set<LimbID>&) { },
-                    [this] (const std::set<ServoID>&) { }
+                    [this] (const std::set<LimbID>& takenHead) { //Head controll lost
+                        updateHandle.disable();
+                    }, 
+                    [this] (const std::set<ServoID>& ) { } //Servos reached target
                 }));
 
             }

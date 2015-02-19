@@ -20,10 +20,13 @@
 #include "HeadBehaviourSoccer.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/support/Configuration.h"
-#include "messages/input/Sensors.h"
 #include "messages/motion/HeadCommand.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/InverseKinematics.h"
+#include "utility/motion/RobotModels.h"
+#include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/matrix/Transform3D.h"
+#include "utility/math/geometry/Quad.h"
 
 
 namespace modules {
@@ -42,35 +45,42 @@ namespace modules {
         using utility::math::coordinates::sphericalToCartesian;
         using utility::motion::kinematics::calculateHeadJoints;
         using utility::motion::kinematics::DarwinModel;
+        using utility::math::matrix::Rotation3D;
+        using utility::math::geometry::Quad;
+
+        using messages::input::ServoID;
 
             HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment) : 
-            Reactor(std::move(environment)){
+            Reactor(std::move(environment)),
+            currentWorldPitch(0),
+            currentWorldYaw(0){
 
                 //do a little configurating
-                // on<Trigger<Configuration<HeadBehaviourSoccer>>>([this] (const Configuration<HeadBehaviourSoccer>& config)
-                // {
-                //     //Gains                    
-                //     //head_gain = config["head_gain"].as<double>();
-                //     
-                // });
+                on<Trigger<Configuration<HeadBehaviourSoccer>>>("Head Behaviour Soccer Config",[this] (const Configuration<HeadBehaviourSoccer>& config)
+                {
+                    //Gains                    
+                    p_gain_tracking = config["p_gain_tracking"].as<double>();                    
+                });
 
+                //TODO: trigger on balls with goals and check number of balls.
                 on<
                     Trigger<Every<30, Per<std::chrono::seconds>>>,
                     With<Sensors>,
                     With<Optional<std::vector<Ball>>>,
-                    With<Optional<std::vector<Goal>>>
-                  >([this] (const time_t&,
-                            const Sensors& sensors,
-                            const std::shared_ptr<const std::vector<Ball>>& vballs,
-                            const std::shared_ptr<const std::vector<Goal>>& vgoals
-                            ) {
+                    With<Optional<std::vector<Goal>>>,
+                    Options<Single>
+                  >("Head Behaviour Main Loop",[this] ( const time_t&,
+                                                        const Sensors& sensors,
+                                                        const std::shared_ptr<const std::vector<Ball>>& vballs,
+                                                        const std::shared_ptr<const std::vector<Goal>>& vgoals
+                                                        ) {
                     //Input
                     int ballPriority = 1;
                     int goalPriority = 1;
                     int linePriority = 0;
 
                     //Output
-                    std::vector<std::unique_ptr<VisionObject>> fixationObjects;
+                    std::vector<VisionObject> fixationObjects;
 
                     bool search = false;
 
@@ -82,11 +92,11 @@ namespace modules {
 
 
                     if(ballPriority == maxPriority){
-                        if(vballs){
+                        if(vballs && vballs->size() > 0){
                             //Fixate on ball
                             ballsSeenThisUpdate = vballs->size();
                             auto& ball = (*vballs)[0];
-                            fixationObjects.push_back(std::make_unique<VisionObject>(ball));
+                            fixationObjects.push_back(VisionObject(ball));
                         } else {
                             search = true;
                         }
@@ -98,7 +108,7 @@ namespace modules {
                             std::set<Goal::Side> visiblePosts;
                             for (auto& goal : (*vgoals)){
                                 visiblePosts.insert(goal.side);
-                                fixationObjects.push_back(std::make_unique<VisionObject>(goal));
+                                fixationObjects.push_back(VisionObject(goal));
                             }
                             search = (visiblePosts.find(Goal::Side::LEFT) == visiblePosts.end() ||//If left post not visible or
                                       visiblePosts.find(Goal::Side::RIGHT) == visiblePosts.end());//right post not visible, then we need to search for the other goal post
@@ -117,7 +127,7 @@ namespace modules {
                     
                     //Update
                   
-                    updateHeadPlan(fixationObjects, search);
+                    updateHeadPlan(fixationObjects, search, sensors);
                     // ballsSeenLastUpdate = ballsSeenThisUpdate;
                     // goalPostsSeenLastUpdate = goalPostsSeenThisUpdate;
                     // lastUpdateTime = NUClear::clock::now();
@@ -129,24 +139,59 @@ namespace modules {
               
             }
 
-            void HeadBehaviourSoccer::updateHeadPlan(const std::vector<std::unique_ptr<VisionObject>>& fixationObjects, const bool& search){
+            void HeadBehaviourSoccer::updateHeadPlan(const std::vector<VisionObject>& fixationObjects, const bool& search, const Sensors& sensors){
                 std::vector<arma::vec2> fixationPoints;
                 std::vector<arma::vec2> fixationSizes;
-                arma::vec2 centroid;
+                arma::vec centroid = {0,0};
                 for(int i = 0; i < fixationObjects.size(); i++){
-                    fixationPoints.push_back(fixationObjects[i]->screenAngular);
-                    fixationPoints.push_back(fixationObjects[i]->angularSize);
-                    centroid += fixationObjects[i]->screenAngular;
+                    //TODO: fix arma meat errors here
+                    //Should be vec2 (yaw,pitch)
+                    fixationPoints.push_back(arma::vec({fixationObjects[i].screenAngular[0],fixationObjects[i].screenAngular[1]}));
+                    fixationPoints.push_back(arma::vec({fixationObjects[i].angularSize[0],fixationObjects[i].angularSize[1]}));
+                    //Average here as it is more elegant than an if statement checking if size==0 at the end
+                    centroid += arma::vec(fixationObjects[i].screenAngular) / (fixationObjects.size());
                 }
-                centroid = centroid / float(fixationObjects.size());
+
+                //Get robot pose
+                Rotation3D orientation, headToBodyRotation;
+                if(fixationObjects.size() > 0){ 
+                    headToBodyRotation = fixationObjects[0].sensors->forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
+                    orientation = fixationObjects[0].sensors->orientation.i();
+                } else{
+                    headToBodyRotation = sensors.forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
+                    orientation = sensors.orientation.i();
+                }
 
                 //Test by looking at centroid:
-                //arma::vec3 lookVectorFromHead = sphericalToCartesian();//This is an approximation relying on the robots small FOV
+                arma::vec3 lookVectorFromHead = sphericalToCartesian({1,centroid[0],centroid[1]});//This is an approximation relying on the robots small FOV
+                //Rotate target angles to World space
+                arma::vec3 lookVector =  orientation * headToBodyRotation * lookVectorFromHead;
+                //Compute inverse kinematics for head direction angles
+                std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(lookVector);
+
+                for(auto& angle : goalAngles){
+                    if(angle.first == ServoID::HEAD_PITCH){
+                        currentWorldPitch = angle.second * (p_gain_tracking) + (1 - p_gain_tracking) * currentWorldPitch;
+                    } else if(angle.first == ServoID::HEAD_YAW){
+                        currentWorldYaw = angle.second * (p_gain_tracking) + (1 - p_gain_tracking) * currentWorldYaw;
+                    }
+                }
 
             }
 
             std::unique_ptr<HeadCommand> HeadBehaviourSoccer::getHeadCommand(){
-                return std::move(std::make_unique<HeadCommand>());
+                return std::move(std::make_unique<HeadCommand>(HeadCommand{currentWorldYaw,currentWorldPitch}));
+            }
+
+            /*! Get search points which keep everything in view.
+            Returns vector of arma::vec2 
+            */
+            std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(std::vector<arma::vec2> fixationPoints, std::vector<arma::vec2> fixationSizes){
+                std::vector<arma::vec2> result;
+
+                Quad boundingBox = Quad::getBoundingBox(fixationPoints);
+
+                return result;
             }
 
 
