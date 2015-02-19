@@ -315,13 +315,13 @@ namespace support {
     void processScalarConfiguration(ConfigurationState::Node node, YAML::Node& yaml) { 
         if (node.has_double_value()) {              // check if the current node contains a double value
             double value = node.double_value();     // get the double value from the node
-            yaml = std::to_string(value);           // replace the current yaml node with the double value converted to a string
+            yaml = value;                           // replace the current yaml node with the double value
         } else if (node.has_long_value()) {         // check if the current node contains a long value
             long value = node.long_value();         // get the long value from the node
-            yaml = std::to_string(value);           // replace the current yaml node with the long value converted to a string
+            yaml = value;                           // replace the current yaml node with the long value
         } else if (node.has_boolean_value()) {      // check if the current node contains a boolean value
             bool value = node.boolean_value();      // get the boolean value from the node
-            yaml = std::to_string(value);           // replace the current yaml node with the boolean value converted to a string
+            yaml = value;                           // replace the current yaml node with the boolean value
         } else {
             yaml = node.string_value();             // replace the current yaml node with the string value
         }
