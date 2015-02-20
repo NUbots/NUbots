@@ -64,7 +64,9 @@ namespace modules {
                     //Gains                    
                     p_gain_tracking = config["p_gain_tracking"].as<double>();
 
-                    view_padding_radians = config["view_padding_radians"].as<double>();                    
+                    view_padding_radians = config["view_padding_radians"].as<double>();      
+
+                    debug_look_index = config["debug_look_index"].as<int>();              
                 });
 
                 on<Trigger<CameraParameters>>("Head Behaviour - Load CameraParameters",[this] (const CameraParameters& cam_){
@@ -178,7 +180,7 @@ namespace modules {
                         headToBodyRotation = sensors.forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
                         orientation = sensors.orientation.i();
                     }
-                    arma::vec2 lookPoint = fixationPoints[0];
+                    arma::vec2 lookPoint = fixationPoints[debug_look_index];
                     //Test by looking at centroid:
                     arma::vec3 lookVectorFromHead = sphericalToCartesian({1,lookPoint[0],lookPoint[1]});//This is an approximation relying on the robots small FOV
                     //Rotate target angles to World space
@@ -225,26 +227,48 @@ namespace modules {
                     if(arma::norm(cam.FOV) == 0){
                         log<NUClear::WARN>("NO CAMERA PARAMETERS LOADED!!");
                     }
+
+                    //Generate search points including padding
+                    //0
+                    int centre = viewPoints.size();
+                    viewPoints.push_back(boundingBox.getCentre());
+                    //1
+                    int tr = viewPoints.size();
+                    arma::vec2 padding = {view_padding_radians,view_padding_radians};
+                    viewPoints.push_back(boundingBox.getBottomLeft() - padding + cam.FOV / 2.0);
+                    //2
+                    int br = viewPoints.size();
+                    padding = {view_padding_radians,-view_padding_radians};
+                    viewPoints.push_back(boundingBox.getTopLeft() - padding + arma::vec({cam.FOV[0],-cam.FOV[1]}) / 2.0);
+                    //3
+                    int bl = viewPoints.size();
+                    padding = {-view_padding_radians,-view_padding_radians};
+                    viewPoints.push_back(boundingBox.getTopRight() - padding - cam.FOV / 2.0);
+                    //4
+                    int tl = viewPoints.size();
+                    padding = {-view_padding_radians,view_padding_radians};
+                    viewPoints.push_back(boundingBox.getBottomRight() - padding + arma::vec({-cam.FOV[0],cam.FOV[1]}) / 2.0);
                     
-                    viewPoints.push_back(boundingBox.getBottomLeft - arma::vec2({view_padding_radians,view_padding_radians}) + cam.FOV);
-                    viewPoints.push_back(boundingBox.getTopLeft - arma::vec2({view_padding_radians,-view_padding_radians}) + arma::vec2({cam.FOV[0],-cam.FOV[1]}));
-                    viewPoints.push_back(boundingBox.getTopRight + arma::vec2({view_padding_radians,view_padding_radians}) - cam.FOV);
-                    viewPoints.push_back(boundingBox.getBottomRight - arma::vec2({-view_padding_radians,view_padding_radians}) + arma::vec2({-cam.FOV[0],cam.FOV[1]}));
                     //Sort according to approach
-                    int perm[4];
+                    int nPoints = viewPoints.size();
+                    int perm[nPoints];
                     switch (sType){
                         case(SearchType::LOW_FIRST):
-                            perm = {3,0,1,2};
-                            // static const int arr[] = {16,2,77,29};
-                            // vector<int> vec (arr, arr + sizeof(arr) / sizeof(arr[0]) );
+                            perm[0] = centre; perm[1] = br; perm[2] = bl; perm[3] = tl; perm[4] = tr;
+                            break;
+                        case(SearchType::HIGH_FIRST):
+                            perm[0] = centre; perm[1] = bl; perm[2] = br; perm[3] = tr; perm[4] = tl;
+                            break;
+                        case(SearchType::CROSS):
+                            perm[0] = centre; perm[1] = br; perm[2] = tl; perm[3] = bl; perm[4] = tr;
                             break;
                     }
-
-                    std::vector<arma::vec2> newViewPoints(4);
-                    for(int i = 0; i < 4; i){
-                        newViewPoints[i] = viewPoints[perm[i]]
+                    std::vector<arma::vec2> sortedViewPoints(nPoints);
+                    for(int i = 0; i < nPoints; i++){
+                        sortedViewPoints[i] = viewPoints[perm[i]];
                     }
-                    return newViewPoints;
+
+                    return sortedViewPoints;
             }
 
 

@@ -60,6 +60,8 @@ namespace modules {
 
                 messages::input::CameraParameters cam;
 
+                int debug_look_index;
+
                 // int ballsSeenLastUpdate;
                 // int goalPostsSeenLastUpdate;
                 // time_t lastUpdateTime;

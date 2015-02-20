@@ -1,1 +1,11 @@
+#The proportional gain for the tracking updates
 p_gain_tracking: 0.5
+#The angular padding to place between an object and the edge of the screen
+view_padding_radians: 0.1
+
+#Debug:
+debug_look_index: 0
+
+lost_searchs:
+  -low_first:
+    search_type: LOW_FIRST
