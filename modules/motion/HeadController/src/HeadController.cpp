@@ -68,7 +68,7 @@ namespace modules {
 
                 });
 
-                updateHandle = on<Trigger<Sensors>, With<HeadCommand>, Options<Single>>("Head Controller - Update Head Position",[this] (const Sensors& sensors, const HeadCommand& command) {
+                updateHandle = on< Trigger<Sensors>, With<HeadCommand>, Options<Single, Priority<NUClear::HIGH>> >("Head Controller - Update Head Position",[this] (const Sensors& sensors, const HeadCommand& command) {
                     
                     //Get goal vector from angles
                     //Pitch is positive when the robot is looking down by Right hand rule, so negate the pitch
@@ -94,9 +94,6 @@ namespace modules {
                     for (auto& angle : goalAngles) {
                         waypoints->push_back({ id, t, angle.first, angle.second, float(head_gain), float(head_torque) }); // TODO: support separate gains for each leg
                     }
-                    time_t thisTime = NUClear::clock::now();
-                    std::cout << "Duration between head command trigger is " << std::chrono::duration_cast<std::chrono::milliseconds>(thisTime - lastTime).count() << " ms " << std::endl;  
-                    lastTime = thisTime;
                     //Send commands
                     emit(std::move(waypoints));
                 });
@@ -107,10 +104,10 @@ namespace modules {
                     id,
                     "HeadController",
                     { std::pair<float, std::set<LimbID>>(50.0 , { LimbID::HEAD }) },
-                    [this] (const std::set<LimbID>& givenHead) { //Head control gained
+                    [this] (const std::set<LimbID>&) { //Head control gained
                         updateHandle.enable();
                     },
-                    [this] (const std::set<LimbID>& takenHead) { //Head controll lost
+                    [this] (const std::set<LimbID>&) { //Head controll lost
                         updateHandle.disable();
                     }, 
                     [this] (const std::set<ServoID>& ) { } //Servos reached target

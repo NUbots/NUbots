@@ -29,6 +29,7 @@
 #include "utility/math/geometry/Quad.h"
 
 
+
 namespace modules {
     namespace behaviour{
         namespace skills {
@@ -41,6 +42,7 @@ namespace modules {
         using messages::localisation::Self;
         using messages::input::Sensors;
         using messages::motion::HeadCommand;
+        using messages::input::CameraParameters;
 
         using utility::math::coordinates::sphericalToCartesian;
         using utility::motion::kinematics::calculateHeadJoints;
@@ -53,13 +55,20 @@ namespace modules {
             HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment) : 
             Reactor(std::move(environment)),
             currentWorldPitch(0),
-            currentWorldYaw(0){
+            currentWorldYaw(0)
+            {
 
                 //do a little configurating
                 on<Trigger<Configuration<HeadBehaviourSoccer>>>("Head Behaviour Soccer Config",[this] (const Configuration<HeadBehaviourSoccer>& config)
                 {
                     //Gains                    
-                    p_gain_tracking = config["p_gain_tracking"].as<double>();                    
+                    p_gain_tracking = config["p_gain_tracking"].as<double>();
+
+                    view_padding_radians = config["view_padding_radians"].as<double>();                    
+                });
+
+                on<Trigger<CameraParameters>>("Head Behaviour - Load CameraParameters",[this] (const CameraParameters& cam_){
+                    cam = cam_;
                 });
 
                 //TODO: trigger on balls with goals and check number of balls.
@@ -126,7 +135,6 @@ namespace modules {
                     // }
                     
                     //Update
-                  
                     updateHeadPlan(fixationObjects, search, sensors);
                     // ballsSeenLastUpdate = ballsSeenThisUpdate;
                     // goalPostsSeenLastUpdate = goalPostsSeenThisUpdate;
@@ -142,71 +150,54 @@ namespace modules {
             void HeadBehaviourSoccer::updateHeadPlan(const std::vector<VisionObject>& fixationObjects, const bool& search, const Sensors& sensors){
                 std::vector<arma::vec2> fixationPoints;
                 std::vector<arma::vec2> fixationSizes;
-                std::cout << __LINE__ << std::endl;
                 arma::vec centroid = {0,0};
-                std::cout << __LINE__ << std::endl;
-                for(int i = 0; i < fixationObjects.size(); i++){
+                for(uint i = 0; i < fixationObjects.size(); i++){
                     //TODO: fix arma meat errors here
                     //Should be vec2 (yaw,pitch)
-                std::cout << __LINE__ << std::endl;
                     fixationPoints.push_back(arma::vec({fixationObjects[i].screenAngular[0],fixationObjects[i].screenAngular[1]}));
-                std::cout << __LINE__ << std::endl;
-                    fixationPoints.push_back(arma::vec({fixationObjects[i].angularSize[0],fixationObjects[i].angularSize[1]}));
+                    fixationSizes.push_back(arma::vec({fixationObjects[i].angularSize[0],fixationObjects[i].angularSize[1]}));
                     //Average here as it is more elegant than an if statement checking if size==0 at the end
-                std::cout << __LINE__ << std::endl;
                     centroid += arma::vec(fixationObjects[i].screenAngular) / (fixationObjects.size());
                 }
 
                 if(search){
-                std::cout << __LINE__ << std::endl;
                     if(fixationPoints.size() > 0){
-                std::cout << __LINE__ << std::endl;
-                        fixationPoints = getSearchPoints(fixationPoints,fixationSizes);
+                        fixationPoints = getSearchPoints(fixationPoints,fixationSizes, SearchType::LOW_FIRST);
                     } //else {
 
-                    // }
+                    //}
                 } 
-                std::cout << __LINE__ << std::endl;
 
-                //Get robot pose
-                std::cout << __LINE__ << std::endl;
-                Rotation3D orientation, headToBodyRotation;
-                std::cout << __LINE__ << std::endl;
-                if(fixationObjects.size() > 0){ 
-                std::cout << __LINE__ << std::endl;
-                    headToBodyRotation = fixationObjects[0].sensors->forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
-                std::cout << __LINE__ << std::endl;
-                    orientation = fixationObjects[0].sensors->orientation.i();
-                } else{
-                std::cout << __LINE__ << std::endl;
-                    headToBodyRotation = sensors.forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
-                std::cout << __LINE__ << std::endl;
-                    orientation = sensors.orientation.i();
-                }
-                std::cout << __LINE__ << std::endl;
-                arma::vec2 lookPoint = fixationPoints[0];
-                //Test by looking at centroid:
-                std::cout << __LINE__ << std::endl;
-                arma::vec3 lookVectorFromHead = sphericalToCartesian({1,lookPoint[0],lookPoint[1]});//This is an approximation relying on the robots small FOV
-                //Rotate target angles to World space
-                std::cout << __LINE__ << std::endl;
-                arma::vec3 lookVector =  orientation * headToBodyRotation * lookVectorFromHead;
-                //Compute inverse kinematics for head direction angles
-                std::cout << __LINE__ << std::endl;
-                std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(lookVector);
-                std::cout << __LINE__ << std::endl;
-
-                for(auto& angle : goalAngles){
-                std::cout << __LINE__ << std::endl;
-                    if(angle.first == ServoID::HEAD_PITCH){
-                std::cout << __LINE__ << std::endl;
-                        currentWorldPitch = angle.second * (p_gain_tracking) + (1 - p_gain_tracking) * currentWorldPitch;
-                std::cout << __LINE__ << std::endl;
-                    } else if(angle.first == ServoID::HEAD_YAW){
-                std::cout << __LINE__ << std::endl;
-                        currentWorldYaw = angle.second * (p_gain_tracking) + (1 - p_gain_tracking) * currentWorldYaw;
+                if(fixationPoints.size() > 0){
+                    //Get robot pose
+                    Rotation3D orientation, headToBodyRotation;
+                    if(fixationObjects.size() > 0){ 
+                        headToBodyRotation = fixationObjects[0].sensors->forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
+                        orientation = fixationObjects[0].sensors->orientation.i();
+                    } else{
+                        headToBodyRotation = sensors.forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
+                        orientation = sensors.orientation.i();
                     }
+                    arma::vec2 lookPoint = fixationPoints[0];
+                    //Test by looking at centroid:
+                    arma::vec3 lookVectorFromHead = sphericalToCartesian({1,lookPoint[0],lookPoint[1]});//This is an approximation relying on the robots small FOV
+                    //Rotate target angles to World space
+                    arma::vec3 lookVector =  orientation * headToBodyRotation * lookVectorFromHead;
+                    //Compute inverse kinematics for head direction angles
+                    std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(lookVector);
+
+                    for(auto& angle : goalAngles){
+                        if(angle.first == ServoID::HEAD_PITCH){
+                            currentWorldPitch = angle.second * (p_gain_tracking) + (1 - p_gain_tracking) * currentWorldPitch;
+                        } else if(angle.first == ServoID::HEAD_YAW){
+                            currentWorldYaw = angle.second * (p_gain_tracking) + (1 - p_gain_tracking) * currentWorldYaw;
+                        }
+                    }
+                } else {
+                    // While incomplete, this error will be thrown too often
+                    // throw std::runtime_error("Head behaviour did not create fixation points.");
                 }
+
 
             }
 
@@ -217,24 +208,43 @@ namespace modules {
             /*! Get search points which keep everything in view.
             Returns vector of arma::vec2 
             */
-            std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(std::vector<arma::vec2> fixationPoints, std::vector<arma::vec2> fixationSizes){
+            std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(std::vector<arma::vec2> fixationPoints, std::vector<arma::vec2> fixationSizes, SearchType sType){
+
+                    //TODO: handle no fixation points case
+                    
                     //TODO: optimise? there is redundant data in these points
-                std::cout << __LINE__ << std::endl;
                     std::vector<arma::vec2> boundingPoints;
-                std::cout << __LINE__ << std::endl;
-                    for(int i = 0; i< fixationPoints.size(); i++){
-                std::cout << __LINE__ << std::endl;
-                        boundingPoints.push_back(fixationPoints[i]+fixationSizes[i]);
-                std::cout << __LINE__ << std::endl;
-                        boundingPoints.push_back(fixationPoints[i]-fixationSizes[i]);
+                    for(uint i = 0; i< fixationPoints.size(); i++){
+                        boundingPoints.push_back(fixationPoints[i]+fixationSizes[i] / 2);
+                        boundingPoints.push_back(fixationPoints[i]-fixationSizes[i] / 2);
                     }
 
-                std::cout << __LINE__ << std::endl;
                     Quad boundingBox = Quad::getBoundingBox(boundingPoints);
-                std::cout << __LINE__ << std::endl;
 
-                    return boundingBox.getVertices();
+                    std::vector<arma::vec2> viewPoints;
+                    if(arma::norm(cam.FOV) == 0){
+                        log<NUClear::WARN>("NO CAMERA PARAMETERS LOADED!!");
+                    }
+                    
+                    viewPoints.push_back(boundingBox.getBottomLeft - arma::vec2({view_padding_radians,view_padding_radians}) + cam.FOV);
+                    viewPoints.push_back(boundingBox.getTopLeft - arma::vec2({view_padding_radians,-view_padding_radians}) + arma::vec2({cam.FOV[0],-cam.FOV[1]}));
+                    viewPoints.push_back(boundingBox.getTopRight + arma::vec2({view_padding_radians,view_padding_radians}) - cam.FOV);
+                    viewPoints.push_back(boundingBox.getBottomRight - arma::vec2({-view_padding_radians,view_padding_radians}) + arma::vec2({-cam.FOV[0],cam.FOV[1]}));
+                    //Sort according to approach
+                    int perm[4];
+                    switch (sType){
+                        case(SearchType::LOW_FIRST):
+                            perm = {3,0,1,2};
+                            // static const int arr[] = {16,2,77,29};
+                            // vector<int> vec (arr, arr + sizeof(arr) / sizeof(arr[0]) );
+                            break;
+                    }
 
+                    std::vector<arma::vec2> newViewPoints(4);
+                    for(int i = 0; i < 4; i){
+                        newViewPoints[i] = viewPoints[perm[i]]
+                    }
+                    return newViewPoints;
             }
 
 

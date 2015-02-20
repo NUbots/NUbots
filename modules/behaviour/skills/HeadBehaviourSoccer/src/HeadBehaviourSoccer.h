@@ -26,6 +26,7 @@
 #include "messages/vision/VisionObjects.h"
 #include "messages/motion/HeadCommand.h"
 #include "messages/input/Sensors.h"
+#include "messages/input/CameraParameters.h"
 
 
 namespace modules {
@@ -38,21 +39,32 @@ namespace modules {
              * @author Josiah Walker
              */
             class HeadBehaviourSoccer : public NUClear::Reactor {
+            public:
+                enum SearchType {
+                    LOW_FIRST = 0,
+                    HIGH_FIRST = 1,
+                    CROSS = 2
+                };
             private:
                 void updateHeadPlan(const std::vector<messages::vision::VisionObject>& fixationObjects, const bool& search, const messages::input::Sensors& sensors);
                 std::unique_ptr<messages::motion::HeadCommand> getHeadCommand();
 
-                std::vector<arma::vec2> getSearchPoints(std::vector<arma::vec2> fixationPoints, std::vector<arma::vec2> fixationSizes);
+                std::vector<arma::vec2> getSearchPoints(std::vector<arma::vec2> fixationPoints, std::vector<arma::vec2> fixationSizes, SearchType sType);
 
                 float currentWorldPitch;
                 float currentWorldYaw;
 
                 float p_gain_tracking;
 
+                double view_padding_radians;
+
+                messages::input::CameraParameters cam;
+
                 // int ballsSeenLastUpdate;
                 // int goalPostsSeenLastUpdate;
                 // time_t lastUpdateTime;
             public:
+
                 explicit HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment);
                 static constexpr const char* CONFIGURATION_PATH = "HeadBehaviourSoccer.yaml";
             };
