@@ -46,7 +46,8 @@ The following is a guide to getting you set up and ready to contribute to the NU
 	entering a number (if in doubt, the first option is likely to be the best choice).
 
 	(While your VM is being created, you might want to learn a little more about Vagrant by 
-	reading the [Getting Started Guide][] or the [Command-Line Interface][] documentation)
+	reading the [Getting Started Guide][] or the [Command-Line Interface][] documentation.
+	Also, see the [Vagrant Configuration Wiki Page][] for some more important Vagrant configuration settings.)
 
 4.  Just type `$ vagrant ssh` to ssh into your new VM!
 
@@ -125,3 +126,4 @@ Troubleshooting
 [Command-Line Interface]: http://docs.vagrantup.com/v2/cli/index.html             "Vagrant Command-Line Interface Documentation"
 [boxes page]:             http://docs.vagrantup.com/v2/getting-started/boxes.html "The Boxes section of Vagrant's Getting Started guide"
 [boxes]:                  http://docs.vagrantup.com/v2/boxes.html                 "Vagrant's Boxes documentation"
+[Vagrant Configuration Wiki Page]: https://github.com/NUbots/NUbots/wiki/Vagrant-Configuration
