@@ -47,16 +47,20 @@ namespace modules {
                     OTHER = 3
                 };
                 SearchType searchTypeFromString(std::string s){
-                    switch(s){
-                        case(s.compare("LOW_FIRST") == 0):
-                            return SearchType::LOW_FIRST;
-                        case(s.compare("HIGH_FIRST") == 0):
-                            return SearchType::HIGH_FIRST;
-                        case(s.compare("CROSS") == 0):
-                            return SearchType::CROSS;
-                        default:
-                            return SearchType::OTHER;
+
+                    if(s.compare("LOW_FIRST") == 0) {
+                        return SearchType::LOW_FIRST;
                     }
+                    else if(s.compare("HIGH_FIRST") == 0) {
+                        return SearchType::HIGH_FIRST;
+                    }
+                    else if(s.compare("CROSS") == 0) {
+                        return SearchType::CROSS;
+                    }
+                    else {
+                        return SearchType::OTHER;
+                    }
+
 
                 }
 
@@ -68,6 +72,11 @@ namespace modules {
 
                 float currentWorldPitch;
                 float currentWorldYaw;
+
+                float max_yaw;
+                float min_yaw;
+                float max_pitch;
+                float min_pitch;
 
                 float p_gain_tracking;
 

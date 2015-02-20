@@ -58,10 +58,10 @@ namespace modules {
                     head_torque = config["head_torque"].as<double>();
 
                     //head limits
-                    min_yaw = config["angle_limits"]["yaw"]["min"].as<double>();
-                    max_yaw = config["angle_limits"]["yaw"]["max"].as<double>();
-                    min_pitch = config["angle_limits"]["pitch"]["min"].as<double>();
-                    max_pitch = config["angle_limits"]["pitch"]["max"].as<double>();
+                    max_yaw = DarwinModel::Head::MAX_YAW;
+                    min_yaw = DarwinModel::Head::MIN_YAW;
+                    max_pitch = DarwinModel::Head::MAX_PITCH;
+                    min_pitch = DarwinModel::Head::MIN_PITCH;
 
                     emit(std::make_unique<HeadCommand>( HeadCommand {config["initial"]["yaw"].as<double>(),
                                                                      config["initial"]["pitch"].as<double>()}));
@@ -103,7 +103,7 @@ namespace modules {
                 emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                     id,
                     "HeadController",
-                    { std::pair<float, std::set<LimbID>>(50.0 , { LimbID::HEAD }) },
+                    { std::pair<float, std::set<LimbID>>(30.0 , { LimbID::HEAD }) },
                     [this] (const std::set<LimbID>&) { //Head control gained
                         updateHandle.enable();
                     },

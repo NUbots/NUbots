@@ -163,7 +163,7 @@ namespace modules {
 
                 on< Trigger<DarwinSensors>
                   , With<Optional<Sensors>>
-                  , Options<Single>>([this](const DarwinSensors& input,
+                  , Options<Single, Priority<NUClear::HIGH>>>([this](const DarwinSensors& input,
                                             const std::shared_ptr<const Sensors>& previousSensors) {
 
                     auto sensors = std::make_unique<Sensors>();

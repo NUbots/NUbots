@@ -27,6 +27,7 @@
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/geometry/Quad.h"
+#include "utility/support/yaml_armadillo.h"
 
 
 
@@ -66,16 +67,22 @@ namespace modules {
 
                     view_padding_radians = config["view_padding_radians"].as<double>();      
 
-                    debug_look_index = config["debug_look_index"].as<int>();  
+                    debug_look_index = config["debug_look_index"].as<int>();
 
                     //Load searches:
                     for(auto& search : config["lost_searches"]){
                         SearchType s = searchTypeFromString(search["search_type"].as<std::string>());
                         lost_searches[s] = std::vector<arma::vec2>();
                         for (auto& p : search["points"]){
-                            lost_searches[s].push_back(p);
+                            lost_searches[s].push_back(p.as<arma::vec2>());
                         }
                     }
+
+                    max_yaw = utility::motion::kinematics::DarwinModel::Head::MAX_YAW;
+                    min_yaw = utility::motion::kinematics::DarwinModel::Head::MIN_YAW;
+                    max_pitch = utility::motion::kinematics::DarwinModel::Head::MAX_PITCH;
+                    min_pitch = utility::motion::kinematics::DarwinModel::Head::MIN_PITCH;                    
+
                 });
 
                 on<Trigger<CameraParameters>>("Head Behaviour - Load CameraParameters",[this] (const CameraParameters& cam_){
@@ -172,21 +179,17 @@ namespace modules {
                 }
 
                 if(search){
-                    if(fixationPoints.size() > 0){
-                        fixationPoints = getSearchPoints(fixationPoints,fixationSizes, SearchType::LOW_FIRST);
-                    } //else {
+                    fixationPoints = getSearchPoints(fixationPoints,fixationSizes, SearchType::LOW_FIRST);
+                }
 
-                    //}
-                } 
-
+                //Get robot pose
                 if(fixationPoints.size() > 0){
-                    //Get robot pose
                     Rotation3D orientation, headToBodyRotation;
                     if(fixationObjects.size() > 0){ 
                         headToBodyRotation = fixationObjects[0].sensors->forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
                         orientation = fixationObjects[0].sensors->orientation.i();
                     } else{
-                        headToBodyRotation = sensors.forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
+                        headToBodyRotation = arma::eye(3,3);
                         orientation = sensors.orientation.i();
                     }
                     arma::vec2 lookPoint = fixationPoints[debug_look_index];
@@ -205,10 +208,8 @@ namespace modules {
                         }
                     }
                 } else {
-                    // While incomplete, this error will be thrown too often
-                    // throw std::runtime_error("Head behaviour did not create fixation points.");
+                    log("FOUND NO POINTS TO LOOK AT! - ARE THE SEARCHES PROPERLY CONFIGURED?");
                 }
-
 
             }
 
@@ -220,10 +221,16 @@ namespace modules {
             Returns vector of arma::vec2 
             */
             std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(std::vector<arma::vec2> fixationPoints, std::vector<arma::vec2> fixationSizes, SearchType sType){
-
                     //TODO: handle no fixation points case
                     if(fixationPoints.size() == 0){
-                        return lost_searches[sType];
+                        //Lost searches are normalised in terms of the FOV
+                        std::vector<arma::vec2> scaledResults;
+                        for(auto& p : lost_searches[sType]){
+                            //Interpolate between max and min allowed angles with -1 = min and 1 = max
+                            scaledResults.push_back(arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
+                                                                ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) / 2}));
+                        }
+                        return scaledResults;
                     }
                     //TODO: optimise? there is redundant data in these points
                     std::vector<arma::vec2> boundingPoints;
@@ -261,7 +268,7 @@ namespace modules {
                     viewPoints.push_back(boundingBox.getBottomRight() - padding + arma::vec({-cam.FOV[0],cam.FOV[1]}) / 2.0);
                     
                     //Sort according to approach
-                    int nPoints = viewPoints.size();
+                    const int nPoints = viewPoints.size();
                     int perm[nPoints];
                     switch (sType){
                         case(SearchType::LOW_FIRST):
