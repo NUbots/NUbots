@@ -8,4 +8,13 @@ debug_look_index: 0
 
 lost_searchs:
   -low_first:
-    search_type: LOW_FIRST
+  	#enum type for search
+    search_type: "LOW_FIRST"
+    #Points in normalised view space. [1,1] corresponds to looking up to the right as far as allowed, relative to the body
+    points:
+      -[-1,-1]
+      -[0,-1]
+      -[1,-1]
+      -[1,0]
+      -[0,0]
+      -[-1,0]

@@ -66,7 +66,16 @@ namespace modules {
 
                     view_padding_radians = config["view_padding_radians"].as<double>();      
 
-                    debug_look_index = config["debug_look_index"].as<int>();              
+                    debug_look_index = config["debug_look_index"].as<int>();  
+
+                    //Load searches:
+                    for(auto& search : config["lost_searches"]){
+                        SearchType s = searchTypeFromString(search["search_type"].as<std::string>());
+                        lost_searches[s] = std::vector<arma::vec2>();
+                        for (auto& p : search["points"]){
+                            lost_searches[s].push_back(p);
+                        }
+                    }
                 });
 
                 on<Trigger<CameraParameters>>("Head Behaviour - Load CameraParameters",[this] (const CameraParameters& cam_){
@@ -213,7 +222,9 @@ namespace modules {
             std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(std::vector<arma::vec2> fixationPoints, std::vector<arma::vec2> fixationSizes, SearchType sType){
 
                     //TODO: handle no fixation points case
-                    
+                    if(fixationPoints.size() == 0){
+                        return lost_searches[sType];
+                    }
                     //TODO: optimise? there is redundant data in these points
                     std::vector<arma::vec2> boundingPoints;
                     for(uint i = 0; i< fixationPoints.size(); i++){
@@ -271,7 +282,7 @@ namespace modules {
                     return sortedViewPoints;
             }
 
-
+            
 
         }  // motion
     } //behaviour

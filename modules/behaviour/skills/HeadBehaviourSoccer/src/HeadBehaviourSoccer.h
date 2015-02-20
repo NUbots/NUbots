@@ -43,8 +43,23 @@ namespace modules {
                 enum SearchType {
                     LOW_FIRST = 0,
                     HIGH_FIRST = 1,
-                    CROSS = 2
+                    CROSS = 2,
+                    OTHER = 3
                 };
+                SearchType searchTypeFromString(std::string s){
+                    switch(s){
+                        case(s.compare("LOW_FIRST") == 0):
+                            return SearchType::LOW_FIRST;
+                        case(s.compare("HIGH_FIRST") == 0):
+                            return SearchType::HIGH_FIRST;
+                        case(s.compare("CROSS") == 0):
+                            return SearchType::CROSS;
+                        default:
+                            return SearchType::OTHER;
+                    }
+
+                }
+
             private:
                 void updateHeadPlan(const std::vector<messages::vision::VisionObject>& fixationObjects, const bool& search, const messages::input::Sensors& sensors);
                 std::unique_ptr<messages::motion::HeadCommand> getHeadCommand();
@@ -59,6 +74,8 @@ namespace modules {
                 double view_padding_radians;
 
                 messages::input::CameraParameters cam;
+
+                std::map<SearchType, std::vector<arma::vec2>> lost_searches;
 
                 int debug_look_index;
 
