@@ -72,6 +72,8 @@ namespace modules {
 
                 float currentWorldPitch;
                 float currentWorldYaw;
+                float currectGoalPitch;
+                float currectGoalYaw;
 
                 float max_yaw;
                 float min_yaw;
@@ -86,7 +88,9 @@ namespace modules {
 
                 std::map<SearchType, std::vector<arma::vec2>> lost_searches;
 
-                int debug_look_index;
+                int lookIndex;
+                time_t lastSaccadeTime;
+                double fixation_time_ms;
 
                 // int ballsSeenLastUpdate;
                 // int goalPostsSeenLastUpdate;

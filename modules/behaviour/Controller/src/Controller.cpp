@@ -150,6 +150,8 @@ namespace modules {
 
                         // Push our command onto the queue
                         queue.push_back(command);
+                    } else {
+                        log<NUClear::ERROR>("Motor command denied access: SERVO ", int(command.id));
                     }
                 }
             });

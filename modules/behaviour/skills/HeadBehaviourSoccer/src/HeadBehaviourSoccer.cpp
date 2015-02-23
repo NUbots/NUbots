@@ -56,8 +56,12 @@ namespace modules {
             HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment) : 
             Reactor(std::move(environment)),
             currentWorldPitch(0),
-            currentWorldYaw(0)
+            currentWorldYaw(0),
+            currectGoalPitch(0),
+            lookIndex(0),  
+            currectGoalYaw(0)
             {
+                lastSaccadeTime = NUClear::clock::now();
 
                 //do a little configurating
                 on<Trigger<Configuration<HeadBehaviourSoccer>>>("Head Behaviour Soccer Config",[this] (const Configuration<HeadBehaviourSoccer>& config)
@@ -66,8 +70,7 @@ namespace modules {
                     p_gain_tracking = config["p_gain_tracking"].as<double>();
 
                     view_padding_radians = config["view_padding_radians"].as<double>();      
-
-                    debug_look_index = config["debug_look_index"].as<int>();
+                    fixation_time_ms = config["fixation_time_ms"].as<double>();      
 
                     //Load searches:
                     for(auto& search : config["lost_searches"]){
@@ -81,7 +84,9 @@ namespace modules {
                     max_yaw = utility::motion::kinematics::DarwinModel::Head::MAX_YAW;
                     min_yaw = utility::motion::kinematics::DarwinModel::Head::MIN_YAW;
                     max_pitch = utility::motion::kinematics::DarwinModel::Head::MAX_PITCH;
-                    min_pitch = utility::motion::kinematics::DarwinModel::Head::MIN_PITCH;                    
+                    min_pitch = utility::motion::kinematics::DarwinModel::Head::MIN_PITCH;      
+                    
+
 
                 });
 
@@ -110,6 +115,7 @@ namespace modules {
                     std::vector<VisionObject> fixationObjects;
 
                     bool search = false;
+                    bool updatePlan = true;
 
                     int ballsSeenThisUpdate = 0;
                     int goalPostsSeenThisUpdate = 0;
@@ -153,13 +159,19 @@ namespace modules {
                     // }
                     
                     //Update
-                    updateHeadPlan(fixationObjects, search, sensors);
+                    /*TODO: if something has changed:
+                        * ball lost or seen
+                        * goals seen or lost 
+                    Debounce will be important
+                        */
+                    if(updatePlan){
+                        updateHeadPlan(fixationObjects, search, sensors);
+                    }
                     // ballsSeenLastUpdate = ballsSeenThisUpdate;
                     // goalPostsSeenLastUpdate = goalPostsSeenThisUpdate;
                     // lastUpdateTime = NUClear::clock::now();
                     
                     //Emit result
-                    emit(getHeadCommand());
                 });
 
               
@@ -182,46 +194,64 @@ namespace modules {
                     fixationPoints = getSearchPoints(fixationPoints,fixationSizes, SearchType::LOW_FIRST);
                 }
 
-                //Get robot pose
+
                 if(fixationPoints.size() > 0){
+                    //Get robot pose
                     Rotation3D orientation, headToBodyRotation;
-                    if(fixationObjects.size() > 0){ 
+                    if(fixationObjects.size() > 0){
+                        //We need to transform our view points to orientation space
                         headToBodyRotation = fixationObjects[0].sensors->forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
                         orientation = fixationObjects[0].sensors->orientation.i();
-                    } else{
+                    } else {
                         headToBodyRotation = arma::eye(3,3);
                         orientation = sensors.orientation.i();
                     }
-                    arma::vec2 lookPoint = fixationPoints[debug_look_index];
-                    //Test by looking at centroid:
-                    arma::vec3 lookVectorFromHead = sphericalToCartesian({1,lookPoint[0],lookPoint[1]});//This is an approximation relying on the robots small FOV
-                    //Rotate target angles to World space
-                    arma::vec3 lookVector =  orientation * headToBodyRotation * lookVectorFromHead;
-                    //Compute inverse kinematics for head direction angles
-                    std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(lookVector);
+                    
+                    time_t now = NUClear::clock::now();
+                    float timeSinceLastSwap = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSaccadeTime).count();
+                    if(timeSinceLastSwap > fixation_time_ms){
+                        lastSaccadeTime = now;
+                        log("lookIndex = ", lookIndex);
+                        log("fixationPoints.size() = ", fixationPoints.size());
 
-                    for(auto& angle : goalAngles){
-                        if(angle.first == ServoID::HEAD_PITCH){
-                            currentWorldPitch = angle.second * (p_gain_tracking) + (1 - p_gain_tracking) * currentWorldPitch;
-                        } else if(angle.first == ServoID::HEAD_YAW){
-                            currentWorldYaw = angle.second * (p_gain_tracking) + (1 - p_gain_tracking) * currentWorldYaw;
+                        arma::vec2 lookPoint = fixationPoints[lookIndex % fixationPoints.size()];
+                        //Test by looking at centroid:
+                        arma::vec3 lookVectorFromHead = sphericalToCartesian({1,lookPoint[0],lookPoint[1]});//This is an approximation relying on the robots small FOV
+                        //Rotate target angles to World space
+                        arma::vec3 lookVector =  orientation * headToBodyRotation * lookVectorFromHead;
+                        //Compute inverse kinematics for head direction angles
+                        std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(lookVector);
+
+                        for(auto& angle : goalAngles){
+                            if(angle.first == ServoID::HEAD_PITCH){
+                                currectGoalPitch = angle.second;
+                            } else if(angle.first == ServoID::HEAD_YAW){
+                                currectGoalYaw = angle.second;
+                            }
                         }
+                        log("currectGoalYaw, currectGoalPitch = ", currectGoalYaw, ", ", currectGoalPitch);
+                        lookIndex = (lookIndex + 1) % fixationPoints.size();
+                        emit(getHeadCommand());
                     }
+
                 } else {
-                    log("FOUND NO POINTS TO LOOK AT! - ARE THE SEARCHES PROPERLY CONFIGURED?");
+                    log("FOUND NO POINTS TO LOOK AT! - ARE THE SEARCHES PROPERLY CONFIGURED IN HeadBehaviourSoccer.yaml?");
                 }
 
             }
 
             std::unique_ptr<HeadCommand> HeadBehaviourSoccer::getHeadCommand(){
-                return std::move(std::make_unique<HeadCommand>(HeadCommand{currentWorldYaw,currentWorldPitch}));
+                currentWorldPitch = currectGoalPitch * (p_gain_tracking) + (1 - p_gain_tracking) * currentWorldPitch;
+                currentWorldYaw = currectGoalYaw * (p_gain_tracking) + (1 - p_gain_tracking) * currentWorldYaw;
+                log("current command: yaw, pitch = ", currentWorldYaw, ", ", currentWorldPitch);
+                return std::make_unique<HeadCommand>(HeadCommand{currentWorldYaw,currentWorldPitch});
             }
 
             /*! Get search points which keep everything in view.
             Returns vector of arma::vec2 
             */
             std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(std::vector<arma::vec2> fixationPoints, std::vector<arma::vec2> fixationSizes, SearchType sType){
-                    //TODO: handle no fixation points case
+                    //If there is nothing of interest, we search fot points of interest
                     if(fixationPoints.size() == 0){
                         //Lost searches are normalised in terms of the FOV
                         std::vector<arma::vec2> scaledResults;

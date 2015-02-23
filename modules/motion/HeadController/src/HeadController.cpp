@@ -93,6 +93,7 @@ namespace modules {
                     auto t = NUClear::clock::now();
                     for (auto& angle : goalAngles) {
                         waypoints->push_back({ id, t, angle.first, angle.second, float(head_gain), float(head_torque) }); // TODO: support separate gains for each leg
+                        log("sending waypoint: SERVO ", int(angle.first), ", position: ", angle.second);
                     }
                     //Send commands
                     emit(std::move(waypoints));
