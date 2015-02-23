@@ -26,7 +26,7 @@ node nubotsvm {
 
   class { 'nuclearport::build_dep': username => $username, }
 
-  class { 'nubugger': username => $username, }
+  class { 'nusight': username => $username, }
 
   # ps3 controller tools
   package { 'software-properties-common': ensure => latest, }
@@ -65,7 +65,7 @@ node packer-virtualbox-iso, packer-vmware-iso {
   package { 'libsndfile-dev': ensure => latest }
   package { 'libtcmalloc-minimal4': ensure => latest }
 
-  # nubugger::build_dep
+  # nusight::build_dep
   package { 'pkg-config': ensure => latest, }
   package { 'uuid-dev': ensure => latest, }
   package { 'nodejs': ensure => latest, }

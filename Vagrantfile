@@ -7,7 +7,8 @@ Vagrant.configure("2") do |config|
 
   # Determine the base box to use by checking the hostname.
   # Add your hostname to the list to opt-in to using the packer-generated box 'nubots-14.04'.
-  if not ['mitchell-laptop.local'].include?(Socket.gethostname)
+  # if not ['mitchell-laptop.local'].include?(Socket.gethostname)
+  if not [].include?(Socket.gethostname)
     # By default, use Ubuntu's official 14.04 Vagrant box for Virtualbox.
     config.vm.box = "trusty32"
     config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-i386-vagrant-disk1.box"
@@ -44,12 +45,12 @@ Vagrant.configure("2") do |config|
     nubots.vm.network :forwarded_port, guest: 12000, host: 12000
     nubots.vm.network :forwarded_port, guest: 12001, host: 12001
 
-    # Add hostname here if running NUbugger on the VM
-    if ['Ne', 'jordan-XPS13', 'taylor-ubuntu'].include?(Socket.gethostname) # NUbugger Port
+    # Add hostname here if running NUsight on the VM
+    if ['Ne', 'jordan-XPS13', 'taylor-ubuntu'].include?(Socket.gethostname) # NUsight Port
       nubots.vm.network :forwarded_port, guest: 9090, host: 9090
     end
 
-    #if ['s24'].include?(Socket.gethostname) # NUbugger Port
+    #if ['s24'].include?(Socket.gethostname) # NUsight Port
     #  nubots.vm.network :public_network, bridge: "WiFi"
     #end
 
@@ -60,10 +61,10 @@ Vagrant.configure("2") do |config|
     #   The guest must have 'apt-get install nfs-common'
     nubots.vm.synced_folder ".", "/home/vagrant/nubots/NUbots"
 
-    # Share NUbugger repository with the VM if it has been placed in the same
+    # Share NUsight repository with the VM if it has been placed in the same
     # directory as the NUbots repository
-    if File.directory?("../NUbugger")
-      nubots.vm.synced_folder "../NUbugger", "/home/vagrant/nubots/NUbugger"
+    if File.directory?("../NUsight")
+      nubots.vm.synced_folder "../NUsight", "/home/vagrant/nubots/NUsight"
     end
   end
 end
