@@ -42,7 +42,9 @@ namespace utility{
                     static constexpr float UPPER_LEG_LENGTH = 0.093;
                     static constexpr float LOWER_LEG_LENGTH = 0.093;
                     static constexpr float FOOT_HEIGHT = 0.0335;
-                    static constexpr float FOOT_LENGTH = 0.105; // rough
+                    static constexpr float FOOT_LENGTH = 0.094; // rough
+                    static constexpr float TOE_LENGTH = 0.0472; //measured
+                    static constexpr float HEEL_LENGTH = 0.0451; //measured
 
                     static constexpr float LENGTH_BETWEEN_LEGS = HIP_OFFSET_Y * 2;
 

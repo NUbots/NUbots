@@ -1,2 +1,5 @@
 kick_priority: 30
 execution_priority: 40
+
+target: [1, 1, 1]
+direction: [2, 2, 2]

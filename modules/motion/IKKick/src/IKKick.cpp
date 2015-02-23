@@ -77,12 +77,33 @@ namespace motion {
         on<Trigger<ExecuteKick>, With<KickCommand>, With<Sensors>>([this] (const ExecuteKick&, const KickCommand& command, const Sensors& sensors) {
 
             // TODO Work out which of our feet are going to be the support foot
+            //leftFoot is support
+
+            //4x4 homogeneous transform matrices for left foot and right foot relative to torso
             Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
             Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
+
+            //converts the direction vector and position of the ball into left foot coordinates by multiplying the inverse of the
+            //homogeneous transforms with the coordinates in torso space. 1 for a point and 0 for a vector.
+            auto position = leftFoot.i() * arma::join_cols(command.target, arma::vec({1}));
+            auto direction = leftFoot.i() * arma::join_cols(command.direction, arma::vec({0}));
+            
+            //add the length from the centre of the foot to the front to get starting position of curve as front of the foot
+            auto rightFootCentre = leftFoot.i() * arma::join_cols((rightfoot*Transform3D::translation(arma::vec({TOE_LENGTH,0,0})))translation(), arma::vec({1}));
+            
+            
+            //find position vector from left foot to torso
+            //leftFoot.translation();
+
+
+
+
 
             log("Got a new kick!");
             log("Target:", "x:", command.target[0], "y:", command.target[1], "z:", command.target[2]);
             log("Direction:", "x:", command.direction[0], "y:", command.direction[1], "z:", command.direction[2]);
+            log("position in support foot:", "x:", position[0], "y:", position[1], "z:", position[2]);
+            log("Direction in support foot:", "x:", direction[0], "y:", direction[1], "z:", direction[2]);
 
             // TODO Store the target kick vector position relative to the support foot
 
