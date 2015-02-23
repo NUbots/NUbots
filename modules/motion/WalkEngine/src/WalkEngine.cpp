@@ -447,20 +447,15 @@ namespace motion {
 
     std::unique_ptr<std::vector<ServoCommand>> WalkEngine::motionArms(double phase) {
 
-        arma::vec3 qLArmActual;
-        arma::vec3 qRArmActual;
-
+        // Converts the phase into a sine wave that oscillates between 0 and 1 with a period of 2 phases
         double easing = std::sin(M_PI * phase - M_PI / 2.0) / 2.0 + 0.5;
-
         if (swingLeg == LimbID::LEFT_LEG) {
-            easing = -easing + 1.0;
-            qLArmActual = easing * qLArmStart + (1.0 - easing) * qLArmEnd;
-            qRArmActual = (1.0 - easing) * qRArmStart + easing * qRArmEnd;
+            easing = -easing + 1.0; // Gets the 2nd half of the sine wave
         }
-        else {
-            qLArmActual = easing * qLArmStart + (1.0 - easing) * qLArmEnd;
-            qRArmActual = (1.0 - easing) * qRArmStart + easing * qRArmEnd;
-        }
+
+        // Linearly interpolate between the start and end positions using the easing parameter
+        arma::vec3 qLArmActual = easing * qLArmStart + (1.0 - easing) * qLArmEnd;
+        arma::vec3 qRArmActual = (1.0 - easing) * qRArmStart + easing * qRArmEnd;
 
         // Start arm/leg collision/prevention
         double rotLeftA = normalizeAngle(uLeftFoot.angle() - uTorso.angle());

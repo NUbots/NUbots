@@ -1,0 +1,10 @@
+fast_speed: 0.7
+slow_speed: 0.6
+head_gain: 30.0
+head_torque: 100.0
+min_yaw: -1.5
+max_yaw: 1.5
+min_pitch: -1.2
+max_pitch: 1.2
+screen_padding: 0.15
+test_goal: [0,0]
