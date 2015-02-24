@@ -211,8 +211,8 @@ namespace modules {
                     float timeSinceLastSwap = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSaccadeTime).count();
                     if(timeSinceLastSwap > fixation_time_ms){
                         lastSaccadeTime = now;
-                        log("lookIndex = ", lookIndex);
-                        log("fixationPoints.size() = ", fixationPoints.size());
+                        // log("lookIndex = ", lookIndex);
+                        // log("fixationPoints.size() = ", fixationPoints.size());
 
                         arma::vec2 lookPoint = fixationPoints[lookIndex % fixationPoints.size()];
                         //Test by looking at centroid:
@@ -229,7 +229,7 @@ namespace modules {
                                 currectGoalYaw = angle.second;
                             }
                         }
-                        log("currectGoalYaw, currectGoalPitch = ", currectGoalYaw, ", ", currectGoalPitch);
+                        // log("currectGoalYaw, currectGoalPitch = ", currectGoalYaw, ", ", currectGoalPitch);
                         lookIndex = (lookIndex + 1) % fixationPoints.size();
                         emit(getHeadCommand());
                     }
@@ -243,7 +243,7 @@ namespace modules {
             std::unique_ptr<HeadCommand> HeadBehaviourSoccer::getHeadCommand(){
                 currentWorldPitch = currectGoalPitch * (p_gain_tracking) + (1 - p_gain_tracking) * currentWorldPitch;
                 currentWorldYaw = currectGoalYaw * (p_gain_tracking) + (1 - p_gain_tracking) * currentWorldYaw;
-                log("current command: yaw, pitch = ", currentWorldYaw, ", ", currentWorldPitch);
+                // log("current command: yaw, pitch = ", currentWorldYaw, ", ", currentWorldPitch);
                 return std::make_unique<HeadCommand>(HeadCommand{currentWorldYaw,currentWorldPitch});
             }
 
