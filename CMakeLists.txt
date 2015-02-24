@@ -44,7 +44,7 @@ IF(BUILD_TESTS)
 ENDIF()
 
 # Clear or NUClear Modules cache variable
-SET(NUCLEAR_MODULES ${NUCLEAR_MODULES} ${role_modules} CACHE INTERNAL "A list of the modules in use by the system" FORCE)
+UNSET(NUCLEAR_MODULES CACHE)
 
 # Find and build all our roles
 ADD_SUBDIRECTORY(roles)
@@ -55,8 +55,8 @@ LIST(REMOVE_DUPLICATES modules)
 SET(NUCLEAR_MODULES ${modules} CACHE INTERNAL "A list of the modules in use by the system" FORCE)
 
 # Clear our report files before reading (cmake scopes suck... could be fixed one day but who cares!)
-SET(report_tex_files "" CACHE INTERNAL "List of report tex files" FORCE)
-SET(report_bib_files "" CACHE INTERNAL "List of report bib files" FORCE)
+UNSET(report_tex_files CACHE)
+UNSET(report_bib_files CACHE)
 
 # Build each of our modules and their corresponding tests
 FOREACH(module ${NUCLEAR_MODULES})
