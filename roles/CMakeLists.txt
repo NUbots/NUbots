@@ -1,4 +1,4 @@
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/AddRole.cmake")
+INCLUDE(AddRole)
 
 # If you're using ConfigSystem then it needs to be the first installed module.
 # It needs to be installed first because other modules are going to try and

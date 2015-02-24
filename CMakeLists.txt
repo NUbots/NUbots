@@ -15,13 +15,13 @@ OPTION(SHARED_BUILD "Build the binaries by linking to shared libraries." ON)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Setup our compiler settings
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/Compiler.cmake")
+INCLUDE(Compiler)
 
 # Setup our shared includes
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/SharedLibraries.cmake")
+INCLUDE(SharedLibraries)
 
 # Include our module builder
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/NUClearModuleBuilder.cmake")
+INCLUDE(NUClearModuleBuilder)
 
 # Include our shared messages etc headers
 INCLUDE_DIRECTORIES("shared")
@@ -70,4 +70,4 @@ ENDFOREACH()
 ADD_SUBDIRECTORY(report)
 
 # Include our scp darwin sender
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/DarwinSend.cmake")
+INCLUDE(DarwinSend)
