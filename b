@@ -44,22 +44,28 @@ def clean():
 def cmake():
     if not os.path.exists('build'):
         os.mkdir('build')
-    call(['cmake', '..'], cwd='build')
+    return call(['cmake', '..'], cwd='build')
 
 def make(args):
+    error = None
     if not os.path.exists('build'):
-        cmake()
-    call(['make'] + args, cwd='build')
+        error = cmake()
+    
+    if error == 0:
+        call(['make'] + args, cwd='build')
 
 def cmake_ninja():
     if not os.path.exists('build'):
         os.mkdir('build')
-    call(['cmake', '..', '-G', 'Ninja'], cwd='build')
+    return call(['cmake', '..', '-G', 'Ninja'], cwd='build')
 
 def ninja(args):
+    error = None
     if not os.path.exists('build'):
-        cmake_ninja()
-    call(['ninja'] + args, cwd='build')
+        error = cmake_ninja()
+
+    if error == 0:
+        call(['ninja'] + args, cwd='build')
 
 def role_exists(role):
     return os.path.isfile("build/bin/{}".format(role))
