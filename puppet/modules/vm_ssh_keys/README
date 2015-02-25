@@ -1,4 +1,0 @@
-vm_ssh_keys
-
-This module installs a public, well-known, non-secure, ssh key-pair to the machine,
-allowing it to ssh into all of the robots.
