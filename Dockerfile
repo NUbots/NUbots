@@ -2,8 +2,9 @@ FROM 32bit/ubuntu:14.04
 MAINTAINER Simon Hartcher "simon@simonhartcher.com"
 ENV HOSTNAME nubotsvm
 ENV TERM linux
+ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update 
+RUN apt-get update
 
 # Build dependencies
 RUN apt-get -y install git-core 
@@ -57,12 +58,13 @@ RUN ninja install
 RUN apt-get -y install libblas-dev
 RUN apt-get -y install liblapack-dev
 RUN apt-get -y install libffi-dev
-
-# armadillo
 RUN add-apt-repository ppa:comp-phys/stable
 RUN apt-get -y install libarmadillo-dev
+RUN apt-get -y install python
+RUN apt-get -y install wget
 
-
+WORKDIR /usr/local/include/
+RUN wget https://raw.github.com/philsquared/Catch/5ecb72b9bb65cd8fed2aec4da23a3bc21bbccd74/single_include/catch.hpp
 
 # You need to mount your local code directory to the container
 # Eg: docker run -t -i -v /local/path/:/nubots/NUbots /bin/bash
