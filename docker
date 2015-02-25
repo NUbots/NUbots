@@ -1,0 +1,37 @@
+#!/bin/bash
+
+help(){
+  echo "Usage: docker <subcommand>"
+  echo "Commands: "
+  echo "  up - Prepares the docker container. Generally only needs to be called when dependencies change."
+  echo "  build - Compiles and links the NUbots codebase into the build directory"
+  echo ""
+}
+
+compile(){
+  mkdir -p build
+  cd build
+  cmake .. -GNinja
+  ninja -j30
+  cd ..
+}
+
+case "$1" in
+  "" | "-h" | "--help")
+    help
+    ;;
+  build)
+    current_path=`eval pwd`
+    docker run -t -P=false -v $current_path:/nubots/NUbots nubots/nubots ./docker compile
+    ;;
+  up)
+    docker build -t="nubots/nubots" .
+    ;;
+  compile)
+    compile
+    ;;
+  *)
+    help
+    exit 1
+esac
+

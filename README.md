@@ -1,9 +1,6 @@
 NUbots Codebase
 ==========================
 
-<!-- The [NUbots][] project is an effort to port the [NUbots][]' [robocup][] 
-codebase to use the new [NUClear][] framework. -->
-
 Docker
 --------
 
@@ -20,31 +17,30 @@ The following is a guide to getting you set up and ready to contribute to the NU
 
 		$ git clone git@github.com:nubots/NUbots.git ~/NUbots
 
-3. Run `docker build -t="nubots/nubots" .` from the NUbots directory:
+3. Run `./docker up` from the NUbots directory:
 	e.g.
 
 		$ cd ~/NUbots
-		$ docker build -t="nubots/nubots" .
+		$ ./docker up
 
-	The `docker build` command tells Docker to build a container for the NUbots project 
+	The `./docker up` command tells Docker to build a container for the NUbots project 
 	based on the project's `Dockerfile`.
 
-	**Note:** The very first time `docker build` is run on your computer, it needs to download a streamlined Ubuntu 14.04 image and install all the required dependencies. This will take around 15 minutes.
+	**Note:** The very first time `./docker up` is run on your computer, it needs to download a streamlined Ubuntu 14.04 image and install all the required dependencies. This will take around 15 minutes.
 
 	(While your container is being built, you might want to learn a little more about Docker by 
 	reading the article [What is Docker][] or the [Command-Line Interface][] documentation.
 
-4.  Type `$ docker run -t -i -v /path/to/NUbots:/nubots/NUbots nubots/nubots /bin/bash` to access the command line for the container!
+  **Note:** The `./docker` command above is a handwritten script to make docker
+  usage easier. The real `docker` command is much more flexible.
+
+4.  Type `$ ./docker build` to compile and link the NUbots codebase!
 
 	Docker will sync the `/nubots/NUbots` directory on the container with the root of your NUbots repository.
 	This allows for easy editing of code on your machine, and building on the container.
 
-	To build NUbots, just run the following commands on the container:
-  
-		$ mkdir /nubots/NUbots/build
-		$ cd /nubots/NUbots/build
-		$ cmake .. -G Ninja
-		$ ninja -j
+  **Note:** If you are on Windows/OSX your code must be in /c/Users/ or /Users/
+  respectively.
 
 5. Make robots do awesome stuff!
 
@@ -58,7 +54,8 @@ The following is a guide to getting you set up and ready to contribute to the NU
 Troubleshooting
 --------
 
-Nothing here yet
+Check out the `docker` file to see the actual commands that are being run if you
+are having issues. 
 
 [nuclearport-travis]:     https://travis-ci.org/nubots/NUClearPort                "NUClearPort's Travis Page"
 [travis-develop-image]:   https://travis-ci.org/nubots/NUClearPort.png?branch=develop "Travis-CI build status for the develop branch"
