@@ -5,6 +5,14 @@ class initial_apt_update {
   } -> Package <| |>
 }
 
+class virtualbox_sharing_fix {
+  # sharing fix, see http://superuser.com/questions/736024/cannot-share-host-directory-with-virtualbox-guest-mint-16-64-bit
+  file { '/sbin/mount.vboxsf':
+    ensure => 'link',
+    target => '/usr/lib/i386-linux-gnu/VBoxGuestAdditions/mount.vboxsf'
+  } -> Package <| |>
+}
+
 class developer_tools {
   include vm_ssh_keys
   class { 'vim':  username => $username, }
@@ -20,6 +28,7 @@ class developer_tools {
 
 node nubotsvm {
   include initial_apt_update
+  include virtualbox_sharing_fix
 
   # define variables for this node
   $username = 'vagrant'
@@ -33,16 +42,11 @@ node nubotsvm {
 
   # Non-essential developer tools:
   include developer_tools
-
-  # sharing fix, see http://superuser.com/questions/736024/cannot-share-host-directory-with-virtualbox-guest-mint-16-64-bit
-  file { '/sbin/mount.vboxsf':
-    ensure => 'link',
-    target => '/usr/lib/i386-linux-gnu/VBoxGuestAdditions/mount.vboxsf'
-  }
 }
 
 node packer-virtualbox-iso, packer-vmware-iso {
   include initial_apt_update
+  include virtualbox_sharing_fix
 
   $username = 'vagrant'
 
@@ -68,19 +72,14 @@ node packer-virtualbox-iso, packer-vmware-iso {
   # nusight::build_dep
   package { 'pkg-config': ensure => latest, }
   package { 'uuid-dev': ensure => latest, }
-  package { 'nodejs': ensure => latest, }
-  package { 'nodejs-legacy': ensure => latest, }
-  package { 'npm': ensure => latest, }
+  class { 'nodejs':
+    version => 'v0.12.0',
+  }
+  -> package { 'nodejs-legacy': ensure => latest, }
 
   # Non-essential developer tools:
   include developer_tools
 
   # NFS for better Vagrant shared folders
   package { 'nfs-common': ensure => latest, }
-
-  # sharing fix, see http://superuser.com/questions/736024/cannot-share-host-directory-with-virtualbox-guest-mint-16-64-bit
-  file { '/sbin/mount.vboxsf':
-  	ensure => 'link',
-  	target => '/usr/lib/i386-linux-gnu/VBoxGuestAdditions/mount.vboxsf'
-  }
 }
