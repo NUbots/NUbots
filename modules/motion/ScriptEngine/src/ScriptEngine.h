@@ -37,6 +37,7 @@ namespace modules {
             std::map<std::string, messages::motion::Script> scripts;
         public:
             explicit ScriptEngine(std::unique_ptr<NUClear::Environment> environment);
+            static constexpr const char* CONFIGURATION_PATH = "";
         };
 
     }  // motion
