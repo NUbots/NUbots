@@ -161,22 +161,14 @@ namespace modules {
                 std::list<ServoID> emptiedQueues;
                 std::unique_ptr<std::vector<ServoTarget>> waypoints;
 
+                std::cout << "commandQueues.size() =" << commandQueues.size() << std::endl;
+
+
                 for(auto& queue : commandQueues) {
 
-                    if (!queue.empty() && queue.front().time < now) {
-
-                        // Store our ID (if we need it)
-                        auto id = queue.front().id;
-
-                        queue.pop_front();
-
-                        if(queue.empty()) {
-                            // Keep track of what we have emptied
-                            emptiedQueues.push_back(id);
-                        }
-                    }
-
                     // Dirty hack, we set source to 0 when it's processed (we ensure nobody else can use 0)
+                    std::cout << "queue.front().source =" << queue.front().source << std::endl;
+
                     if(!queue.empty() && queue.front().source != 0) {
 
                         auto& command = queue.front();
@@ -188,15 +180,30 @@ namespace modules {
 
                         // Add to our waypoints
                         waypoints->push_back({ command.time, command.id, command.position, command.gain, command.torque});
+                        std::cout << "waypoints->push_back(" << " " << int(command.id) << " " << command.position << " " << command.gain << " " << command.torque << std::endl;
 
                         // Dirty hack the waypoint
                         command.source = 0;
 
                     }
+
+                    while (!queue.empty() && queue.front().time < now) {
+
+                        // Store our ID (if we need it)
+                        auto id = queue.front().id;
+
+                        queue.pop_front();
+
+                        if(queue.empty()) {
+                            // Keep track of what we have emptied
+                            emptiedQueues.push_back(id);
+                        }
+                    }
                 }
 
                 // Emit our waypoints
                 if(waypoints) {
+                    std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~EMITTING WAYPOINTS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
                     emit(std::move(waypoints));
                 }
 
