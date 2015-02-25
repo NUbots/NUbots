@@ -63,8 +63,19 @@ RUN apt-get -y install libarmadillo-dev
 RUN apt-get -y install python
 RUN apt-get -y install wget
 
+# Catch
 WORKDIR /usr/local/include/
 RUN wget https://raw.github.com/philsquared/Catch/5ecb72b9bb65cd8fed2aec4da23a3bc21bbccd74/single_include/catch.hpp
+
+# Quex
+WORKDIR /var/tmp
+RUN wget https://downloads.sourceforge.net/project/quex/DOWNLOAD/quex-0.65.2.tar.gz -O quex-0.65.2.tar.gz
+RUN tar -zxf quex-0.65.2.tar.gz
+RUN mv quex-0.65.2/ /usr/local/etc/quex
+RUN ln -s /usr/local/etc/quex/quex/ /usr/local/include/quex
+RUN echo '#!/bin/bash' > /usr/local/bin/quex
+RUN echo 'QUEX_PATH=/usr/local/etc/quex python /usr/local/etc/quex/quex-exe.py "$@"' >> /usr/local/bin/quex
+RUN chmod +x /usr/local/bin/quex
 
 # You need to mount your local code directory to the container
 # Eg: docker run -t -i -v /local/path/:/nubots/NUbots /bin/bash
