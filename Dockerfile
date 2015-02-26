@@ -7,11 +7,11 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update
 
 # Build dependencies
-RUN apt-get -y install git-core 
-RUN apt-get -y install cmake 
-RUN apt-get -y install ninja-build 
-RUN apt-get -y install bibtool 
-RUN apt-get -y install libgoogle-perftools-dev 
+RUN apt-get -y install git-core
+RUN apt-get -y install cmake
+RUN apt-get -y install ninja-build
+RUN apt-get -y install bibtool
+RUN apt-get -y install libgoogle-perftools-dev
 RUN apt-get -y install libmatheval-dev
 RUN apt-get -y install libboost-dev
 RUN apt-get -y install software-properties-common
@@ -30,7 +30,7 @@ ENV PATH /usr/lib/icecc/bin:$PATH
 WORKDIR /tmp
 RUN git clone https://github.com/cppformat/cppformat
 WORKDIR /tmp/cppformat
-RUN cmake . -GNinja 
+RUN cmake . -GNinja
 RUN ninja
 RUN cp libformat.a /usr/local/lib
 RUN cp format.h /usr/local/include
@@ -47,12 +47,12 @@ RUN apt-get -y install libsndfile-dev
 RUN apt-get -y install libyaml-cpp-dev
 RUN apt-get -y install protobuf-compiler
 
-# NUClear 
+# NUClear
 WORKDIR /nubots
 RUN git clone -b OldDSL --single-branch https://github.com/fastcode/nuclear NUClear
 WORKDIR /nubots/NUClear/build
 RUN cmake .. -GNinja -DNUCLEAR_BUILD_TESTS=OFF
-RUN ninja 
+RUN ninja
 RUN ninja install
 
 RUN apt-get -y install libblas-dev
@@ -76,6 +76,9 @@ RUN ln -s /usr/local/etc/quex/quex/ /usr/local/include/quex
 RUN echo '#!/bin/bash' > /usr/local/bin/quex
 RUN echo 'QUEX_PATH=/usr/local/etc/quex python /usr/local/etc/quex/quex-exe.py "$@"' >> /usr/local/bin/quex
 RUN chmod +x /usr/local/bin/quex
+
+# Useful Tools
+RUN apt-get -y install vim
 
 # You need to mount your local code directory to the container
 # Eg: docker run -t -i -v /local/path/:/nubots/NUbots /bin/bash

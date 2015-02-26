@@ -1,10 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 
 help(){
   echo "Usage: docker <subcommand>"
   echo "Commands: "
   echo "  up - Prepares the docker container. Generally only needs to be called when dependencies change."
   echo "  build - Compiles and links the NUbots codebase into the build directory"
+  echo "  ssh - Get an interactive shell with the docker container"
   echo ""
 }
 
@@ -21,8 +22,12 @@ case "$1" in
     help
     ;;
   build)
-    current_path=`eval pwd`
+    current_path="$(pwd)"
     docker run -t -P=false -v $current_path:/nubots/NUbots nubots/nubots ./docker compile
+    ;;
+  ssh)
+    current_path="$(pwd)"
+    docker run -t -i -P=false -v "$current_path:/nubots/NUbots" nubots/nubots /bin/bash
     ;;
   up)
     docker build -t="nubots/nubots" .
