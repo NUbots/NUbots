@@ -156,18 +156,16 @@ namespace modules {
                 }
             });
 
-            on<Trigger<Every<90, Per<std::chrono::seconds>>>, Options<Single, Sync<Controller>, Priority<NUClear::HIGH>>>([this] (const time_t& now) {
+            on<Trigger<Every<90, Per<std::chrono::seconds>>>, Options<Single, Sync<Controller>, Priority<NUClear::HIGH>>>("Controller Update Waypoints",[this] (const time_t& now) {
 
                 std::list<ServoID> emptiedQueues;
                 std::unique_ptr<std::vector<ServoTarget>> waypoints;
 
-                std::cout << "commandQueues.size() =" << commandQueues.size() << std::endl;
 
 
                 for(auto& queue : commandQueues) {
 
                     // Dirty hack, we set source to 0 when it's processed (we ensure nobody else can use 0)
-                    std::cout << "queue.front().source =" << queue.front().source << std::endl;
 
                     if(!queue.empty() && queue.front().source != 0) {
 
@@ -180,7 +178,6 @@ namespace modules {
 
                         // Add to our waypoints
                         waypoints->push_back({ command.time, command.id, command.position, command.gain, command.torque});
-                        std::cout << "waypoints->push_back(" << " " << int(command.id) << " " << command.position << " " << command.gain << " " << command.torque << std::endl;
 
                         // Dirty hack the waypoint
                         command.source = 0;
@@ -203,7 +200,6 @@ namespace modules {
 
                 // Emit our waypoints
                 if(waypoints) {
-                    std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~EMITTING WAYPOINTS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
                     emit(std::move(waypoints));
                 }
 

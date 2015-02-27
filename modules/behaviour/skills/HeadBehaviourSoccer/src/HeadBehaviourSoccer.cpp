@@ -172,6 +172,10 @@ namespace modules {
                     // lastUpdateTime = NUClear::clock::now();
                     
                     //Emit result
+                    // headState.update();
+                    // if(headState.newGoal()){
+                    //     emit(headState.getState());
+                    // }
                 });
 
               
@@ -231,7 +235,6 @@ namespace modules {
                         }
                         // log("currectGoalYaw, currectGoalPitch = ", currectGoalYaw, ", ", currectGoalPitch);
                         lookIndex = (lookIndex + 1) % fixationPoints.size();
-                        emit(getHeadCommand());
                     }
 
                 } else {

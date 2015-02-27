@@ -70,6 +70,15 @@ namespace modules {
 
             updateHandle = on< Trigger<Sensors>, With<HeadCommand>, Options<Single, Priority<NUClear::HIGH>> >("Head Controller - Update Head Position",[this] (const Sensors& sensors, const HeadCommand& command) {
                 
+
+
+
+                //TODO: change head command to a point in 3D space
+
+                
+
+
+
                 //Get goal vector from angles
                 //Pitch is positive when the robot is looking down by Right hand rule, so negate the pitch
                 arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1,command.yaw,-command.pitch});
@@ -93,7 +102,6 @@ namespace modules {
                 auto t = NUClear::clock::now();
                 for (auto& angle : goalAngles) {
                     waypoints->push_back({ id, t, angle.first, angle.second, float(head_gain), float(head_torque) }); // TODO: support separate gains for each leg
-                    log("sending waypoint: SERVO ", int(angle.first), ", position: ", angle.second);
                 }
                 //Send commands
                 emit(std::move(waypoints));
