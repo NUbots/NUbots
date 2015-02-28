@@ -34,7 +34,7 @@ Command summary:
         except subprocess.CalledProcessError:
             return (False, None)
 
-    def check_requirements(self):
+    def check_build_requirements(self):
         # Set current working directory to this script's location
         abspath = os.path.abspath(__file__)
         dname = os.path.dirname(abspath)
@@ -91,21 +91,27 @@ Command summary:
             shutil.rmtree('build')
 
     def build(self, arguments):
-        if not self.check_requirements():
+        if not self.check_build_requirements():
             return False;
 
-        if self.is_docker_native():
-            print(['docker', 'run', '-P=false', 'echo hi'])
+        print('Checking for NUbots image...'),
+        layer = self.execute_docker_command('images', '-q', 'nubots/nubots', get_output=True)
+        if layer:
+            print('yes.')
         else:
-            print('Checking for NUbots image...'),
-            layer = self.execute_docker_command('images', '-q', 'nubots/nubots', get_output=True)
-            if layer:
-                print('yes.')
-            else:
-                print('no.')
-                print('Creating NUbots image...')
-                self.execute_docker_command('build', '-t=nubots/nubots', '.')
-                print('done.'),
+            print('no.')
+            print('Creating NUbots image...')
+            self.execute_docker_command('build', '-t=nubots/nubots', '.')
+            print('done.'),
+        print('Creating build folder...')
+        self.execute_docker_command('run', '-t', '-P=false', '-v', '/nubots:/nubots/NUbots', 'nubots/nubots', 'mkdir build')
+        print('done')
+        print('Running cmake...')
+        self.execute_docker_command('run', '-t', '-P=false', '-v', '/nubots:/nubots/NUbots', 'nubots/nubots', '"cd build && cmake .. -GNinja"')
+        print('done')
+        print('Running ninja...')
+        self.execute_docker_command('run', '-t', '-P=false', '-v', '/nubots:/nubots/NUbots', 'nubots/nubots', '"cd build && ninja"')
+        print('done')
 
 
     def execute_docker_command(self, command, *arguments, **kwargs):
@@ -116,7 +122,7 @@ Command summary:
             subprocess.call(docker_command)
         else:
             boot2docker_command = ['boot2docker', 'ssh', ' '.join(['cd', '/nubots', '&&'] + docker_command)]
-            # return subprocess.check_output(['boot2docker', 'ssh', ' '.join(['cd', '/nubots', '&&'] + docker_command)]).strip()
+
             if kwargs.get('get_output', False):
                 print('Running: {}'.format(boot2docker_command))
                 return subprocess.check_output(boot2docker_command)
