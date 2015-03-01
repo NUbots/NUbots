@@ -25,7 +25,7 @@ Command summary:
 
     def is_docker_native(self):
         # True if docker can be run natively, currently this support is only on Linux
-        return True if platform.system() =='Linux' else False
+        return True if platform.system() == 'Linux' else False
 
     def boot2docker_status(self):
         try:
@@ -77,7 +77,8 @@ Command summary:
             dname = dname.encode('string_escape')
         subprocess.call(['boot2docker', 'up', '--vbox-share={}=nubots'.format(dname)])
         print('Mounting shares...'),
-        subprocess.call(['boot2docker', 'ssh', 'sudo mkdir -p /nubots && sudo mount -t vboxsf nubots /nubots'])
+        subprocess.call(['boot2docker', 'ssh', 'sudo mkdir -p /nubots/NUbots && sudo mount -t vboxsf nubots /nubots/NUbots'])
+        subprocess.call(['boot2docker', 'ssh', 'cp /nubots/NUbots/dockershell /home/docker/dockershell'])
         print('done')
 
     def down(self, arguments):
@@ -103,15 +104,23 @@ Command summary:
             print('Creating NUbots image...')
             self.execute_docker_command('build', '-t=nubots/nubots', '.')
             print('done.'),
-        self.execute_docker_command('run', '-t', '-v', '/nubots:/nubots/NUbots', 'nubots/nubots', './b compile')
+        self.execute_docker_command('run', '-t', '-v', '/nubots/NUbots:/nubots/NUbots', 'nubots/nubots', './b compile')
+
+        if not self.is_docker_native():
+            ip = subprocess.check_output(['boot2docker', 'ip'])
+            print
+            print('To access the built files, you can SSH to docker:tcuser@{} and run ./dockershell'.format(ip))
+            print
 
     def _compile(self, arguments):
-        print('Creating build folder...')
         if not os.path.exists('build'):
+            print('Creating build folder...')
             os.mkdir('build')
-        print('Running cmake...')
-        subprocess.call(['cmake', '..', '-G', 'Ninja'], cwd='build')
-        print('done')
+
+        if not os.path.exists('build/CMakeCache.txt'):
+            print('Running cmake...')
+            subprocess.call(['cmake', '..', '-G', 'Ninja'], cwd='build')
+            print('done')
 
         print('Running ninja...')
         subprocess.call(['ninja'], cwd='build')
@@ -124,10 +133,9 @@ Command summary:
         if self.is_docker_native():
             subprocess.call(docker_command)
         else:
-            boot2docker_command = ['boot2docker', 'ssh', ' '.join(['cd', '/nubots', '&&'] + docker_command)]
+            boot2docker_command = ['boot2docker', 'ssh', ' '.join(['cd', '/nubots/NUbots', '&&'] + docker_command)]
 
             if kwargs.get('get_output', False):
-                print('Running: {}'.format(boot2docker_command))
                 return subprocess.check_output(boot2docker_command)
             else:
                 subprocess.call(boot2docker_command)
