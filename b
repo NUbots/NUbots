@@ -103,16 +103,19 @@ Command summary:
             print('Creating NUbots image...')
             self.execute_docker_command('build', '-t=nubots/nubots', '.')
             print('done.'),
+        self.execute_docker_command('run', '-t', '-v', '/nubots:/nubots/NUbots', 'nubots/nubots', './b compile')
+
+    def _compile(self, arguments):
         print('Creating build folder...')
-        self.execute_docker_command('run', '-t', '-P=false', '-v', '/nubots:/nubots/NUbots', 'nubots/nubots', 'mkdir build')
-        print('done')
+        if not os.path.exists('build'):
+            os.mkdir('build')
         print('Running cmake...')
-        self.execute_docker_command('run', '-t', '-P=false', '-v', '/nubots:/nubots/NUbots', 'nubots/nubots', '"cd build && cmake .. -GNinja"')
-        print('done')
-        print('Running ninja...')
-        self.execute_docker_command('run', '-t', '-P=false', '-v', '/nubots:/nubots/NUbots', 'nubots/nubots', '"cd build && ninja"')
+        subprocess.call(['cmake', '..', '-G', 'Ninja'], cwd='build')
         print('done')
 
+        print('Running ninja...')
+        subprocess.call(['ninja'], cwd='build')
+        print('done')
 
     def execute_docker_command(self, command, *arguments, **kwargs):
 
@@ -164,6 +167,9 @@ Command summary:
 
         elif command == 'build':
             self.build(arguments)
+
+        elif command == 'compile':
+            self._compile(arguments)
         else:
             print 'Unknown Command: {}'.format(command)
 
