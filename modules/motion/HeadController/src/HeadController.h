@@ -29,7 +29,7 @@ namespace modules {
             /**
              * Executes a HeadController action.
              *
-             * @author Josiah Walker
+             * @author Jake Fountain
              */
             class HeadController : public NUClear::Reactor {
             private:

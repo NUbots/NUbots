@@ -2,9 +2,12 @@
 p_gain_tracking: 0.5
 #The angular padding to place between an object and the edge of the screen
 view_padding_radians: 0.1
-
+#Minimum time between plan revisions. acts as debounce
+plan_update_period_ms: 100
+#fraction of the larger FOV which will result in plan updating given this amount of key object displacement
+fractional_angular_update_threshold: 0.1
 #Debug:
-debug_look_index: 0
+fixation_time_ms: 1000
 
 lost_searchs:
   -low_first:

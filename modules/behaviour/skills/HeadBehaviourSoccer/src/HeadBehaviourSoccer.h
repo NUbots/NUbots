@@ -27,7 +27,7 @@
 #include "messages/motion/HeadCommand.h"
 #include "messages/input/Sensors.h"
 #include "messages/input/CameraParameters.h"
-
+#include "Searcher.h"
 
 namespace modules {
     namespace behaviour{
@@ -36,7 +36,7 @@ namespace modules {
             /**
              * Executes a HeadBehaviourSoccer action.
              *
-             * @author Josiah Walker
+             * @author Jake Fountain
              */
             class HeadBehaviourSoccer : public NUClear::Reactor {
             public:
@@ -61,26 +61,19 @@ namespace modules {
                         return SearchType::OTHER;
                     }
 
-
                 }
 
             private:
+
                 void updateHeadPlan(const std::vector<messages::vision::VisionObject>& fixationObjects, const bool& search, const messages::input::Sensors& sensors);
-                std::unique_ptr<messages::motion::HeadCommand> getHeadCommand();
-
+                arma::vec2 getIMUSpaceDirection(const arma::vec2& lookPoint, const utility::math::matrix::Rotation3D& headToIMUSpace);
                 std::vector<arma::vec2> getSearchPoints(std::vector<arma::vec2> fixationPoints, std::vector<arma::vec2> fixationSizes, SearchType sType);
-
-                float currentWorldPitch;
-                float currentWorldYaw;
-                float currectGoalPitch;
-                float currectGoalYaw;
+                std::unique_ptr<messages::motion::HeadCommand> getHeadCommand();
 
                 float max_yaw;
                 float min_yaw;
                 float max_pitch;
                 float min_pitch;
-
-                float p_gain_tracking;
 
                 double view_padding_radians;
 
@@ -88,9 +81,13 @@ namespace modules {
 
                 std::map<SearchType, std::vector<arma::vec2>> lost_searches;
 
-                int lookIndex;
-                time_t lastSaccadeTime;
-                double fixation_time_ms;
+                Searcher<arma::vec2> headSearcher;
+
+                NUClear::clock::time_point lastPlanUpdate;
+                NUClear::clock::time_point timeLastObjectSeen;
+                float plan_update_period;
+                arma::vec2 lastCentroid;
+                float angular_update_threshold;
 
                 // int ballsSeenLastUpdate;
                 // int goalPostsSeenLastUpdate;

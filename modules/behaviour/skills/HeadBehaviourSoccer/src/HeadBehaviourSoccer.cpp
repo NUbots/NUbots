@@ -55,22 +55,15 @@ namespace modules {
 
             HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment) : 
             Reactor(std::move(environment)),
-            currentWorldPitch(0),
-            currentWorldYaw(0),
-            currectGoalPitch(0),
-            lookIndex(0),  
-            currectGoalYaw(0)
+            lastCentroid({0,0})
             {
-                lastSaccadeTime = NUClear::clock::now();
-
                 //do a little configurating
                 on<Trigger<Configuration<HeadBehaviourSoccer>>>("Head Behaviour Soccer Config",[this] (const Configuration<HeadBehaviourSoccer>& config)
                 {
+                    lastPlanUpdate = NUClear::clock::now();
+                    timeLastObjectSeen = NUClear::clock::now();
                     //Gains                    
-                    p_gain_tracking = config["p_gain_tracking"].as<double>();
-
                     view_padding_radians = config["view_padding_radians"].as<double>();      
-                    fixation_time_ms = config["fixation_time_ms"].as<double>();      
 
                     //Load searches:
                     for(auto& search : config["lost_searches"]){
@@ -85,9 +78,11 @@ namespace modules {
                     min_yaw = utility::motion::kinematics::DarwinModel::Head::MIN_YAW;
                     max_pitch = utility::motion::kinematics::DarwinModel::Head::MAX_PITCH;
                     min_pitch = utility::motion::kinematics::DarwinModel::Head::MIN_PITCH;      
-                    
+                    headSearcher.setSwitchTime(config["fixation_time_ms"].as<float>());
 
+                    plan_update_period = config["plan_update_period_ms"].as<float>();
 
+                    angular_update_threshold = config["fractional_angular_update_threshold"].as<float>();
                 });
 
                 on<Trigger<CameraParameters>>("Head Behaviour - Load CameraParameters",[this] (const CameraParameters& cam_){
@@ -112,32 +107,33 @@ namespace modules {
                     int linePriority = 0;
 
                     //Output
-                    std::vector<VisionObject> fixationObjects;
 
+                        std::cout << __LINE__ << std::endl;
                     bool search = false;
-                    bool updatePlan = true;
-
-                    int ballsSeenThisUpdate = 0;
-                    int goalPostsSeenThisUpdate = 0;
-                    
 
                     int maxPriority = std::max(std::max(ballPriority,goalPriority),linePriority);
 
+                    std::vector<VisionObject> fixationObjects;
 
+                        std::cout << __LINE__ << std::endl;
+                    auto now = NUClear::clock::now();
+                    //TODO: make this a loop over a list of objects or something
+                        std::cout << __LINE__ << std::endl;
                     if(ballPriority == maxPriority){
                         if(vballs && vballs->size() > 0){
                             //Fixate on ball
-                            ballsSeenThisUpdate = vballs->size();
+                            timeLastObjectSeen = now;
                             auto& ball = (*vballs)[0];
                             fixationObjects.push_back(VisionObject(ball));
                         } else {
                             search = true;
                         }
                     } 
+                        std::cout << __LINE__ << std::endl;
                     if(goalPriority == maxPriority){
                         if(vgoals && vgoals->size() > 0){
                             //Fixate on goals and lines and other landmarks
-                            goalPostsSeenThisUpdate = vgoals->size();
+                            timeLastObjectSeen = now;
                             std::set<Goal::Side> visiblePosts;
                             for (auto& goal : (*vgoals)){
                                 visiblePosts.insert(goal.side);
@@ -149,33 +145,74 @@ namespace modules {
                             search = true;
                         }
                     }
-                    
-                    //TODO : Check if things have changed enough for update
-                    // if(ballsSeenThisUpdate != ballsSeenLastUpdate ||
-                    //    goalPostsSeenThisUpdate != goalPostsSeenLastUpdate){
+                    //Do we need to update our plan?
+                    bool updatePlan = false;
+                    bool lost = fixationObjects.size() == 0;
 
-                    // } else {
+                        std::cout << __LINE__ << std::endl;
 
-                    // }
-                    
-                    //Update
-                    /*TODO: if something has changed:
-                        * ball lost or seen
-                        * goals seen or lost 
-                    Debounce will be important
-                        */
+                    //Get robot pose
+                    Rotation3D orientation, headToBodyRotation;
+                    if(!lost){
+                        //We need to transform our view points to orientation space
+                        headToBodyRotation = fixationObjects[0].sensors->forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
+                        orientation = fixationObjects[0].sensors->orientation.i();
+                    } else {
+                        headToBodyRotation = arma::eye(3,3);
+                        orientation = sensors.orientation.i();
+                    }
+                    Rotation3D headToIMUSpace = orientation * headToBodyRotation;                    
+                        std::cout << __LINE__ << std::endl;
+
+                    //Check current centroid
+                    if(fixationObjects.size() > 0){
+                        arma::vec2 currentCentroid = arma::vec2({0,0});
+                        std::cout << __LINE__ << std::endl;
+                        for(auto& ob : fixationObjects){
+                        std::cout << __LINE__ << std::endl;
+                            currentCentroid = ob.screenAngular / float(fixationObjects.size());
+                        }
+                        std::cout << __LINE__ << std::endl;
+                        currentCentroid = getIMUSpaceDirection(currentCentroid,headToIMUSpace);
+                        std::cout << __LINE__ << std::endl;
+                        if(arma::norm(currentCentroid - lastCentroid) > angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
+                            updatePlan = true;
+                        std::cout << __LINE__ << std::endl;
+                            lastCentroid = currentCentroid;
+                        std::cout << __LINE__ << std::endl;
+                        }
+                        std::cout << __LINE__ << std::endl;
+                    }
+
+                        std::cout << __LINE__ << std::endl;
+
+                    //If we lost what we are searching for
+                    updatePlan = updatePlan || std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count() > angular_update_threshold;
+
+                        std::cout << __LINE__ << std::endl;
                     if(updatePlan){
+                        std::cout << "UpdatingPlan:" << std::endl;
                         updateHeadPlan(fixationObjects, search, sensors);
                     }
-                    // ballsSeenLastUpdate = ballsSeenThisUpdate;
-                    // goalPostsSeenLastUpdate = goalPostsSeenThisUpdate;
-                    // lastUpdateTime = NUClear::clock::now();
-                    
-                    //Emit result
-                    // headState.update();
-                    // if(headState.newGoal()){
-                    //     emit(headState.getState());
-                    // }
+
+                        std::cout << __LINE__ << std::endl;
+                    //Update state machine
+                    headSearcher.update();
+                    //Emit new result if possible
+                        std::cout << __LINE__ << std::endl;
+                    if(headSearcher.newGoal()){
+                        //Emit result
+                        std::cout << "Emmitting new head command:" << std::endl;                        
+                        arma::vec2 direction = getIMUSpaceDirection(headSearcher.getState(), headToIMUSpace);
+                        std::cout << __LINE__ << std::endl;
+                        std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
+                        std::cout << __LINE__ << std::endl;
+                        command->yaw = direction[0];
+                        std::cout << __LINE__ << std::endl;
+                        command->pitch = direction[1];
+                        std::cout << __LINE__ << std::endl;
+                        emit(std::move(command));
+                    }
                 });
 
               
@@ -195,59 +232,34 @@ namespace modules {
                 }
 
                 if(search){
-                    fixationPoints = getSearchPoints(fixationPoints,fixationSizes, SearchType::LOW_FIRST);
+                    fixationPoints = getSearchPoints(fixationPoints, fixationSizes, SearchType::LOW_FIRST);
                 }
 
-
-                if(fixationPoints.size() > 0){
-                    //Get robot pose
-                    Rotation3D orientation, headToBodyRotation;
-                    if(fixationObjects.size() > 0){
-                        //We need to transform our view points to orientation space
-                        headToBodyRotation = fixationObjects[0].sensors->forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
-                        orientation = fixationObjects[0].sensors->orientation.i();
-                    } else {
-                        headToBodyRotation = arma::eye(3,3);
-                        orientation = sensors.orientation.i();
-                    }
-                    
-                    time_t now = NUClear::clock::now();
-                    float timeSinceLastSwap = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSaccadeTime).count();
-                    if(timeSinceLastSwap > fixation_time_ms){
-                        lastSaccadeTime = now;
-                        // log("lookIndex = ", lookIndex);
-                        // log("fixationPoints.size() = ", fixationPoints.size());
-
-                        arma::vec2 lookPoint = fixationPoints[lookIndex % fixationPoints.size()];
-                        //Test by looking at centroid:
-                        arma::vec3 lookVectorFromHead = sphericalToCartesian({1,lookPoint[0],lookPoint[1]});//This is an approximation relying on the robots small FOV
-                        //Rotate target angles to World space
-                        arma::vec3 lookVector =  orientation * headToBodyRotation * lookVectorFromHead;
-                        //Compute inverse kinematics for head direction angles
-                        std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(lookVector);
-
-                        for(auto& angle : goalAngles){
-                            if(angle.first == ServoID::HEAD_PITCH){
-                                currectGoalPitch = angle.second;
-                            } else if(angle.first == ServoID::HEAD_YAW){
-                                currectGoalYaw = angle.second;
-                            }
-                        }
-                        // log("currectGoalYaw, currectGoalPitch = ", currectGoalYaw, ", ", currectGoalPitch);
-                        lookIndex = (lookIndex + 1) % fixationPoints.size();
-                    }
-
-                } else {
-                    log("FOUND NO POINTS TO LOOK AT! - ARE THE SEARCHES PROPERLY CONFIGURED IN HeadBehaviourSoccer.yaml?");
+                if(fixationPoints.size() <= 0){
+                    log("FOUND NO POINTS TO LOOK AT! - ARE THE SEARCHES PROPERLY CONFIGURED IN HEADBEHAVIOURSOCCER.YAML?");
                 }
-
+                
+                auto currentPos = arma::vec2({sensors.servos.at(int(ServoID::HEAD_YAW)).presentPosition,sensors.servos.at(int(ServoID::HEAD_PITCH)).presentPosition});
+                headSearcher.replaceSearchPoints(fixationPoints, currentPos);
             }
 
-            std::unique_ptr<HeadCommand> HeadBehaviourSoccer::getHeadCommand(){
-                currentWorldPitch = currectGoalPitch * (p_gain_tracking) + (1 - p_gain_tracking) * currentWorldPitch;
-                currentWorldYaw = currectGoalYaw * (p_gain_tracking) + (1 - p_gain_tracking) * currentWorldYaw;
-                // log("current command: yaw, pitch = ", currentWorldYaw, ", ", currentWorldPitch);
-                return std::make_unique<HeadCommand>(HeadCommand{currentWorldYaw,currentWorldPitch});
+            arma::vec2 HeadBehaviourSoccer::getIMUSpaceDirection(const arma::vec2& lookPoint, const Rotation3D& headToIMUSpace){               
+
+                arma::vec3 lookVectorFromHead = sphericalToCartesian({1,lookPoint[0],lookPoint[1]});//This is an approximation relying on the robots small FOV
+                //Rotate target angles to World space
+                arma::vec3 lookVector =  headToIMUSpace * lookVectorFromHead;
+                //Compute inverse kinematics for head direction angles
+                std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(lookVector);
+
+                arma::vec2 result;
+                for(auto& angle : goalAngles){
+                    if(angle.first == ServoID::HEAD_PITCH){
+                        result[1] = angle.second;
+                    } else if(angle.first == ServoID::HEAD_YAW){
+                        result[0] = angle.second;
+                    }
+                }
+                return result;
             }
 
             /*! Get search points which keep everything in view.
