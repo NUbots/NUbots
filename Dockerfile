@@ -1,13 +1,18 @@
 FROM 32bit/ubuntu:14.04
 MAINTAINER Simon Hartcher "simon@simonhartcher.com"
+MAINTAINER Trent Houliston "trent@houliston.me"
 ENV HOSTNAME nubotsvm
 ENV TERM linux
 ENV DEBIAN_FRONTEND noninteractive
+
+# Why do you still need keys for the Ubuntu extras repository
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 437D05B5 3E5C1192
 
 RUN apt-get update
 
 # Build dependencies
 RUN apt-get -y install git-core
+RUN apt-get -y install build-essential
 RUN apt-get -y install cmake
 RUN apt-get -y install ninja-build
 RUN apt-get -y install bibtool
@@ -15,7 +20,6 @@ RUN apt-get -y install libgoogle-perftools-dev
 RUN apt-get -y install libmatheval-dev
 RUN apt-get -y install libboost-dev
 RUN apt-get -y install software-properties-common
-RUN apt-get -y install build-essential
 
 # zeromq
 RUN add-apt-repository ppa:chris-lea/zeromq
