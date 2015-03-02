@@ -6,7 +6,32 @@ import shutil
 import platform
 import subprocess
 
+
+def which(program):
+    import os
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
+
 class Builder():
+    def __init__(self):
+        # Make sure we have docker installed
+        if not which("docker"):
+            print "docker is not installed"
+            sys.exit(1);
+
     def print_command_summary(self):
         print """
 Usage: b <command> [arguments]
@@ -33,6 +58,69 @@ Command summary:
             return (True, status.strip())
         except subprocess.CalledProcessError:
             return (False, None)
+
+    def set_docker_environment(self):
+        # Do we need to find our docker host? (has it already been set externally?)
+        if 'DOCKER_HOST' not in os.environ:
+            # Are we not native? otherwise we don't need to do anything
+            if not self.is_docker_native():
+
+                # Check if docker-machine is installed (prefered)
+                if which('docker-machine'):
+                    pass
+
+                # Check if boot2docker is installed
+                elif which('boot2docker'):
+                    # Get boot2docker's status
+                    (exists, status) = self.boot2docker_status()
+
+                    # If there isn't a boot2docker vm yet
+                    if not exists:
+                        print('Initializing Boot2Docker VM...')
+                        result = subprocess.call(['boot2docker', 'init'])
+
+                        # Check for errors while setting up
+                        if result != 0:
+                            print('There was an error while initializing the boot2docker vm (see error above)')
+                            sys.exit(1)
+
+                        print('Done.')
+
+                        (exists, status) = self.boot2docker_status()
+
+                    # If the boot2docker vm is powered off
+                    if status == 'poweroff':
+                        print('Powering on Boot2Docker VM...')
+                        result = subprocess.call(['boot2docker', 'up'])
+
+                        # Check for errors while booting
+                        if result != 0:
+                            print('There was an error while initializing the boot2docker vm (see error above)')
+                            sys.exit(1)
+
+                        print('Done.')
+
+                    # Now we can get the environment variables we need
+                    process = subprocess.Popen(['boot2docker', 'shellinit'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    exports = process.communicate()[0]
+                    result = process.wait()
+                    exports = [e.strip()[7:].split('=') for e in exports.strip().split('\n')]
+
+                    # Set our enviroment variables
+                    for e in exports:
+                        os.environ[e[0]] = e[1]
+
+                else:
+                    print("There is not a suitable way to run Docker containers, install docker-machine or boot2docker (or use linux as your os)")
+                    sys.exit(1)
+
+    def fun(self):
+        # See if the NUbots image is there
+        image = subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots'])
+
+        if not image:
+            subprocess.call(['docker', 'build', '-t=nubots/nubots', '.'])
+
 
     def check_build_requirements(self):
         # Set current working directory to this script's location
@@ -185,4 +273,6 @@ Command summary:
 if __name__ == "__main__":
 
     b = Builder();
-    b.parse_arguments(sys.argv)
+    b.set_docker_environment()
+    b.fun()
+    # b.parse_arguments(sys.argv)
