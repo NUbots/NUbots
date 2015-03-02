@@ -36,6 +36,14 @@ class Docker():
 
         self.command = getattr(self, docker_command)
 
+    def _share_path(self):
+        abspath = os.path.abspath(__file__)
+        dname = os.path.dirname(abspath)
+        if 'cygwin' in platform.system().lower():
+            dname = subprocess.check_output(['cygpath', '-w', dname]).strip()
+            dname = dname.encode('string_escape')
+        return dname
+
     def _boot2docker_status(self):
         try:
             status = subprocess.check_output(['boot2docker', 'status'], stderr=subprocess.STDOUT)
@@ -74,12 +82,20 @@ class Docker():
                 # If the boot2docker vm is powered off
                 if status == 'poweroff':
                     print('Powering on Boot2Docker VM...')
-                    result = subprocess.call(['boot2docker', 'up'])
+
+                    # Work out the path to our shared folder
+                    path = self._share_path()
+
+                    # Startup our VM
+                    result = subprocess.call(['boot2docker', 'up', '--vbox-share={}=nubots'.format(dname)])
 
                     # Check for errors while booting
                     if result != 0:
                         print('There was an error while initializing the boot2docker vm (see error above)')
                         sys.exit(1)
+
+                    print('Mounting shares...'),
+                    subprocess.call(['boot2docker', 'ssh', 'sudo mkdir -p {0} && sudo mount -t vboxsf nubots {0}'.format(dname)])
 
                     print('Done.')
 
@@ -116,6 +132,20 @@ class Docker():
         self.clean()
         # and rebuild
         self.build()
+
+    def ssh(self):
+        print self._share_path()
+        # Run a docker command that will give us an interactive shell
+        subprocess.call(['docker'
+            , 'run'
+            , '-t'
+            , '-i'
+            , '-P=false'
+            , '-v'
+            , '{}:/nubots/NUbots'.format(self._share_path())
+            , 'nubots/nubots'
+            , '/bin/bash'])
+
 
     def run(self):
         self.command()
@@ -156,6 +186,7 @@ if __name__ == "__main__":
     docker_subcommands.add_parser('build', help='Build the docker image used to build the code and spin up any required Virtual Machines')
     docker_subcommands.add_parser('clean', help='Delete the built docker image so that it will have to be rebuilt')
     docker_subcommands.add_parser('rebuild', help='Delete the built docker image and rebuild it')
+    docker_subcommands.add_parser('ssh', help='Get a non persistant interactive shell on the container')
 
     # Compile subcommand
     compile_command = subcommands.add_parser('compile', help='Compile the NUbots source code')

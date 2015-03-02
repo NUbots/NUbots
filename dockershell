@@ -1,3 +1,0 @@
-#!/bin/sh
-
-docker run -t -i -P=false -v "/nubots/NUbots:/nubots/NUbots" nubots/nubots /bin/bash
