@@ -88,3 +88,6 @@ RUN apt-get -y install cmake-curses-gui
 # Eg: docker run -t -i -v /local/path/:/nubots/NUbots /bin/bash
 VOLUME /nubots/NUbots
 WORKDIR /nubots/NUbots/build
+
+# Expose our NUbugger ports to allow running in the container
+EXPOSE 12000 12001

@@ -7,7 +7,6 @@ import shutil
 import platform
 import subprocess
 
-
 def which(program):
     import os
     def is_exe(fpath):
@@ -48,9 +47,10 @@ class Docker():
     def _docker_run(self, *args):
         subprocess.call(['docker'
             , 'run'
+            , '--publish=12000:12000'
+            , '--publish=12001:12001'
             , '-t'
             , '-i'
-            , '-P=false'
             , '-v'
             , '{}:/nubots/NUbots'.format(self._share_path())
             , 'nubots/nubots'] + list(args))
@@ -173,6 +173,15 @@ class Docker():
         self._docker_run('ccmake', '..', '-GNinja')
         print('done')
 
+    def run_role(self, role):
+        # If we don't have an image, then we need to build one
+        if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
+            self.build()
+
+        print 'Running {} on the container...'.format(role)
+        self._docker_run('bin/{}'.format(role))
+        print('done')
+
     def run(self):
         self.command()
 
@@ -194,8 +203,11 @@ if __name__ == "__main__":
     compile_command = subcommands.add_parser('compile', help='Compile the NUbots source code')
     compile_command.add_argument('-c', '--configure', help='Configure the options for the compilation (ccmake)', action="store_true")
 
-    # Run subcommand
-    run_command = subcommands.add_parser('run', help='Run a compiled role on the docker VM')
+    # Role subcommand
+    role_command = subcommands.add_parser('role', help='Manage roles in the codebase')
+    role_subcommand = role_command.add_subparsers(dest='role_command')
+    run_role = role_subcommand.add_parser('run', help='execute a compiled role in the system')
+    run_role.add_argument('role', metavar='role', help='the name of the role to execute on the container')
 
     # Module subcommand
     module_command = subcommands.add_parser('module', help='Manage NUClear modules in the codebase')
@@ -210,8 +222,11 @@ if __name__ == "__main__":
 
     if args.subcommand == 'docker':
         Docker(**vars(args)).run()
-    if args.subcommand == 'compile':
+    elif args.subcommand == 'compile':
         if args.configure:
             Docker().configure_compile()
         else:
             Docker().compile()
+    elif args.subcommand == 'role':
+        if args.role_command == 'run':
+            Docker().run_role(args.role)
