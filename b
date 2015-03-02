@@ -44,6 +44,16 @@ class Docker():
             dname = dname.encode('string_escape')
         return dname
 
+    def _docker_run(self, *args):
+        subprocess.call(['docker'
+            , 'run'
+            , '-t'
+            , '-i'
+            , '-P=false'
+            , '-v'
+            , '{}:/nubots/NUbots'.format(self._share_path())
+            , 'nubots/nubots'] + list(args))
+
     def _boot2docker_status(self):
         try:
             status = subprocess.check_output(['boot2docker', 'status'], stderr=subprocess.STDOUT)
@@ -136,27 +146,11 @@ class Docker():
     def ssh(self):
         print self._share_path()
         # Run a docker command that will give us an interactive shell
-        subprocess.call(['docker'
-            , 'run'
-            , '-t'
-            , '-i'
-            , '-P=false'
-            , '-v'
-            , '{}:/nubots/NUbots'.format(self._share_path())
-            , 'nubots/nubots'
-            , '/bin/bash'])
+        self._docker_run('/bin/bash')
 
-
-    def run(self):
-        self.command()
-        pass
-
-    def _compile(self, arguments):
-        # See if the NUbots image is there to build with
-        image = subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots'])
-
+    def compile(self):
         # If we don't have an image, then we need to build one
-        if not image:
+        if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
             self.build()
 
         # Make our build folder if it doesn't exist
@@ -167,12 +161,16 @@ class Docker():
         # If we don't have cmake built, run cmake from the docker container
         if not os.path.exists('build/CMakeCache.txt'):
             print 'Running cmake...'
-            subprocess.call(['cmake', '..', '-G', 'Ninja'], cwd='build')
+            self._docker_run('cmake', '..', '-GNinja')
             print('done')
 
         print('Running ninja...')
-        subprocess.call(['ninja'], cwd='build')
+        self._docker_run('ninja')
         print('done')
+
+
+    def run(self):
+        self.command()
 
 if __name__ == "__main__":
 
@@ -207,3 +205,5 @@ if __name__ == "__main__":
 
     if args['subcommand'] == 'docker':
         Docker(**args).run()
+    if args['subcommand'] == 'compile':
+        Docker(docker_command='compile').run()

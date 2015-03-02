@@ -86,4 +86,4 @@ RUN apt-get -y install vim
 # You need to mount your local code directory to the container
 # Eg: docker run -t -i -v /local/path/:/nubots/NUbots /bin/bash
 VOLUME /nubots/NUbots
-WORKDIR /nubots/NUbots
+WORKDIR /nubots/NUbots/build
