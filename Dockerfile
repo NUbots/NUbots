@@ -33,11 +33,10 @@ ENV PATH /usr/lib/icecc/bin:$PATH
 # Download and install cppformat
 WORKDIR /tmp
 RUN git clone https://github.com/cppformat/cppformat
-WORKDIR /tmp/cppformat
-RUN cmake . -GNinja
+WORKDIR /tmp/cppformat/build
+RUN cmake .. -GNinja
 RUN ninja
-RUN cp libformat.a /usr/local/lib
-RUN cp format.h /usr/local/include
+RUN ninja install
 
 # NUClear dependencies
 RUN apt-get -y install libprotobuf-dev
@@ -52,14 +51,14 @@ RUN apt-get -y install libyaml-cpp-dev
 RUN apt-get -y install protobuf-compiler
 
 # NUClear
-WORKDIR /nubots
+WORKDIR /tmp
 RUN git clone -b OldDSL --single-branch https://github.com/fastcode/nuclear NUClear
-WORKDIR /nubots/NUClear/build
+WORKDIR /tmp/NUClear/build
 RUN cmake .. -GNinja -DNUCLEAR_BUILD_TESTS=OFF
 RUN ninja
 RUN ninja install
 
-RUN apt-get -y install libblas-dev
+RUN apt-get -y install libopenblas-dev
 RUN apt-get -y install liblapack-dev
 RUN apt-get -y install libffi-dev
 RUN add-apt-repository ppa:comp-phys/stable
@@ -72,7 +71,7 @@ WORKDIR /usr/local/include/
 RUN wget https://raw.github.com/philsquared/Catch/5ecb72b9bb65cd8fed2aec4da23a3bc21bbccd74/single_include/catch.hpp
 
 # Quex
-WORKDIR /var/tmp
+WORKDIR /tmp
 RUN wget https://downloads.sourceforge.net/project/quex/DOWNLOAD/quex-0.65.2.tar.gz -O quex-0.65.2.tar.gz
 RUN tar -zxf quex-0.65.2.tar.gz
 RUN mv quex-0.65.2/ /usr/local/etc/quex

@@ -105,12 +105,8 @@ class Docker():
             print "You must either be running on linux, or have a Virtual Machine provider for docker (either docker-machine or boot2docker)"
 
     def build(self):
-        # See if the NUbots image is there
-        image = subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots'])
-
-        # If we don't have an image, then build it
-        if not image:
-            subprocess.call(['docker', 'build', '-t=nubots/nubots', '.'])
+        # Get docker to build our vm
+        subprocess.call(['docker', 'build', '-t=nubots/nubots', '.'])
 
     def clean(self):
         print 'TODO CLEAN'
@@ -126,12 +122,21 @@ class Docker():
         pass
 
     def _compile(self, arguments):
+        # See if the NUbots image is there to build with
+        image = subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots'])
+
+        # If we don't have an image, then we need to build one
+        if not image:
+            self.build()
+
+        # Make our build folder if it doesn't exist
         if not os.path.exists('build'):
-            print('Creating build folder...')
+            print 'Creating build folder...'
             os.mkdir('build')
 
+        # If we don't have cmake built, run cmake from the docker container
         if not os.path.exists('build/CMakeCache.txt'):
-            print('Running cmake...')
+            print 'Running cmake...'
             subprocess.call(['cmake', '..', '-G', 'Ninja'], cwd='build')
             print('done')
 
