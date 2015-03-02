@@ -27,14 +27,15 @@ def which(program):
     return None
 
 class Docker():
-    def __init__(self, docker_command, **kwargs):
+    def __init__(self, **kwargs):
         # Check that docker is installed
         self._check_docker()
 
         # Setup our docker environment
         self._setup_docker_environment()
 
-        self.command = getattr(self, docker_command)
+        if 'docker_command' in kwargs:
+            self.command = getattr(self, kwargs['docker_command'])
 
     def _share_path(self):
         abspath = os.path.abspath(__file__)
@@ -153,11 +154,6 @@ class Docker():
         if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
             self.build()
 
-        # Make our build folder if it doesn't exist
-        if not os.path.exists('build'):
-            print 'Creating build folder...'
-            os.mkdir('build')
-
         # If we don't have cmake built, run cmake from the docker container
         if not os.path.exists('build/CMakeCache.txt'):
             print 'Running cmake...'
@@ -168,6 +164,14 @@ class Docker():
         self._docker_run('ninja')
         print('done')
 
+    def configure_compile(self):
+        # If we don't have an image, then we need to build one
+        if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
+            self.build()
+
+        print 'Running ccmake...'
+        self._docker_run('ccmake', '..', '-GNinja')
+        print('done')
 
     def run(self):
         self.command()
@@ -188,6 +192,7 @@ if __name__ == "__main__":
 
     # Compile subcommand
     compile_command = subcommands.add_parser('compile', help='Compile the NUbots source code')
+    compile_command.add_argument('-c', '--configure', help='Configure the options for the compilation (ccmake)', action="store_true")
 
     # Run subcommand
     run_command = subcommands.add_parser('run', help='Run a compiled role on the docker VM')
@@ -201,9 +206,12 @@ if __name__ == "__main__":
     module_generate_command.add_argument('path', metavar='path', help='a path to the new module (from the modules directory)')
 
     # Parse our command line arguments
-    args = vars(command.parse_args())
+    args = command.parse_args()
 
-    if args['subcommand'] == 'docker':
-        Docker(**args).run()
-    if args['subcommand'] == 'compile':
-        Docker(docker_command='compile').run()
+    if args.subcommand == 'docker':
+        Docker(**vars(args)).run()
+    if args.subcommand == 'compile':
+        if args.configure:
+            Docker().configure_compile()
+        else:
+            Docker().compile()
