@@ -8,7 +8,16 @@ ENV DEBIAN_FRONTEND noninteractive
 # Why do you still need keys for the Ubuntu extras repository
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 437D05B5 3E5C1192
 
+RUN dpkg-divert --local --rename --add /sbin/initctl
+RUN ln -s /bin/true /sbin/initctl
+
 RUN apt-get update
+
+# Need this for apt-add-repository
+RUN apt-get -y install software-properties-common
+
+# We use g++4.9
+RUN add-apt-repository ppa:ubuntu-toolchain-r/test
 
 # Build dependencies
 RUN apt-get -y install git-core
@@ -19,7 +28,6 @@ RUN apt-get -y install bibtool
 RUN apt-get -y install libgoogle-perftools-dev
 RUN apt-get -y install libmatheval-dev
 RUN apt-get -y install libboost-dev
-RUN apt-get -y install software-properties-common
 
 # zeromq
 RUN add-apt-repository ppa:chris-lea/zeromq
