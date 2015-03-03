@@ -65,7 +65,7 @@ namespace modules {
 
             private:
 
-                void updateHeadPlan(const std::vector<messages::vision::VisionObject>& fixationObjects, const bool& search, const messages::input::Sensors& sensors);
+                void updateHeadPlan(const std::vector<messages::vision::VisionObject>& fixationObjects, const bool& search, const messages::input::Sensors& sensors, const utility::math::matrix::Rotation3D& headToIMUSpace);
                 arma::vec2 getIMUSpaceDirection(const arma::vec2& lookPoint, const utility::math::matrix::Rotation3D& headToIMUSpace);
                 std::vector<arma::vec2> getSearchPoints(std::vector<arma::vec2> fixationPoints, std::vector<arma::vec2> fixationSizes, SearchType sType);
                 std::unique_ptr<messages::motion::HeadCommand> getHeadCommand();
@@ -74,6 +74,9 @@ namespace modules {
                 float min_yaw;
                 float max_pitch;
                 float min_pitch;
+
+                int ballPriority;
+                int goalPriority;
 
                 double view_padding_radians;
 
@@ -88,6 +91,8 @@ namespace modules {
                 float plan_update_period;
                 arma::vec2 lastCentroid;
                 float angular_update_threshold;
+
+                bool lostAndSearching;
 
                 // int ballsSeenLastUpdate;
                 // int goalPostsSeenLastUpdate;

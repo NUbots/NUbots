@@ -1,23 +1,25 @@
 #The proportional gain for the tracking updates
 p_gain_tracking: 0.5
 #The angular padding to place between an object and the edge of the screen
-view_padding_radians: 0.1
+view_padding_radians: 0.5
 #Minimum time between plan revisions. acts as debounce
-plan_update_period_ms: 100
+plan_update_period_ms: 5000
 #fraction of the larger FOV which will result in plan updating given this amount of key object displacement
-fractional_angular_update_threshold: 0.1
+fractional_angular_update_threshold: 0.05
 #Debug:
 fixation_time_ms: 1000
 
-lost_searchs:
-  -low_first:
-  	#enum type for search
+ballPriority: 1
+goalPriority: 0
+
+lost_searches:
+  -	#enum type for search
     search_type: "LOW_FIRST"
     #Points in normalised view space. [1,1] corresponds to looking up to the right as far as allowed, relative to the body
     points:
-      -[-1,-1]
-      -[0,-1]
-      -[1,-1]
-      -[1,0]
-      -[0,0]
-      -[-1,0]
+      - [-1,-1]
+      - [0,-1]
+      - [1,-1]
+      - [1,0]
+      - [0,0]
+      - [-1,0]

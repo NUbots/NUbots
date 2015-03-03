@@ -55,7 +55,8 @@ namespace modules {
 
             HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment) : 
             Reactor(std::move(environment)),
-            lastCentroid({0,0})
+            lastCentroid({0,0}),
+            lostAndSearching(false)
             {
                 //do a little configurating
                 on<Trigger<Configuration<HeadBehaviourSoccer>>>("Head Behaviour Soccer Config",[this] (const Configuration<HeadBehaviourSoccer>& config)
@@ -77,12 +78,19 @@ namespace modules {
                     max_yaw = utility::motion::kinematics::DarwinModel::Head::MAX_YAW;
                     min_yaw = utility::motion::kinematics::DarwinModel::Head::MIN_YAW;
                     max_pitch = utility::motion::kinematics::DarwinModel::Head::MAX_PITCH;
-                    min_pitch = utility::motion::kinematics::DarwinModel::Head::MIN_PITCH;      
+                    min_pitch = utility::motion::kinematics::DarwinModel::Head::MIN_PITCH;
+
                     headSearcher.setSwitchTime(config["fixation_time_ms"].as<float>());
 
                     plan_update_period = config["plan_update_period_ms"].as<float>();
 
                     angular_update_threshold = config["fractional_angular_update_threshold"].as<float>();
+
+                    //TODO remove these configs
+                    ballPriority = config["ballPriority"].as<int>();
+
+                    goalPriority = config["goalPriority"].as<int>();
+
                 });
 
                 on<Trigger<CameraParameters>>("Head Behaviour - Load CameraParameters",[this] (const CameraParameters& cam_){
@@ -102,23 +110,17 @@ namespace modules {
                                                         const std::shared_ptr<const std::vector<Goal>>& vgoals
                                                         ) {
                     //Input
-                    int ballPriority = 1;
-                    int goalPriority = 1;
-                    int linePriority = 0;
 
                     //Output
 
-                        std::cout << __LINE__ << std::endl;
                     bool search = false;
 
-                    int maxPriority = std::max(std::max(ballPriority,goalPriority),linePriority);
+                    int maxPriority = std::max(std::max(ballPriority,goalPriority),0);
 
                     std::vector<VisionObject> fixationObjects;
 
-                        std::cout << __LINE__ << std::endl;
                     auto now = NUClear::clock::now();
                     //TODO: make this a loop over a list of objects or something
-                        std::cout << __LINE__ << std::endl;
                     if(ballPriority == maxPriority){
                         if(vballs && vballs->size() > 0){
                             //Fixate on ball
@@ -129,7 +131,6 @@ namespace modules {
                             search = true;
                         }
                     } 
-                        std::cout << __LINE__ << std::endl;
                     if(goalPriority == maxPriority){
                         if(vgoals && vgoals->size() > 0){
                             //Fixate on goals and lines and other landmarks
@@ -147,14 +148,14 @@ namespace modules {
                     }
                     //Do we need to update our plan?
                     bool updatePlan = false;
-                    bool lost = fixationObjects.size() == 0;
+                    bool lost = fixationObjects.size() <= 0;
 
-                        std::cout << __LINE__ << std::endl;
 
                     //Get robot pose
                     Rotation3D orientation, headToBodyRotation;
                     if(!lost){
                         //We need to transform our view points to orientation space
+                        lostAndSearching = false;
                         headToBodyRotation = fixationObjects[0].sensors->forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
                         orientation = fixationObjects[0].sensors->orientation.i();
                     } else {
@@ -162,55 +163,39 @@ namespace modules {
                         orientation = sensors.orientation.i();
                     }
                     Rotation3D headToIMUSpace = orientation * headToBodyRotation;                    
-                        std::cout << __LINE__ << std::endl;
 
                     //Check current centroid
-                    if(fixationObjects.size() > 0){
+                    if(!lost){
                         arma::vec2 currentCentroid = arma::vec2({0,0});
-                        std::cout << __LINE__ << std::endl;
                         for(auto& ob : fixationObjects){
-                        std::cout << __LINE__ << std::endl;
                             currentCentroid = ob.screenAngular / float(fixationObjects.size());
                         }
-                        std::cout << __LINE__ << std::endl;
                         currentCentroid = getIMUSpaceDirection(currentCentroid,headToIMUSpace);
-                        std::cout << __LINE__ << std::endl;
                         if(arma::norm(currentCentroid - lastCentroid) > angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
                             updatePlan = true;
-                        std::cout << __LINE__ << std::endl;
                             lastCentroid = currentCentroid;
-                        std::cout << __LINE__ << std::endl;
                         }
-                        std::cout << __LINE__ << std::endl;
                     }
 
-                        std::cout << __LINE__ << std::endl;
+                    //If we lost what we are searching for.
+                    if(!lostAndSearching && std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count() > plan_update_period ){
+                        lostAndSearching = true;
+                        updatePlan = true;
+                    }
 
-                    //If we lost what we are searching for
-                    updatePlan = updatePlan || std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count() > angular_update_threshold;
-
-                        std::cout << __LINE__ << std::endl;
                     if(updatePlan){
-                        std::cout << "UpdatingPlan:" << std::endl;
-                        updateHeadPlan(fixationObjects, search, sensors);
+                        updateHeadPlan(fixationObjects, search, sensors, headToIMUSpace);
                     }
 
-                        std::cout << __LINE__ << std::endl;
                     //Update state machine
                     headSearcher.update();
                     //Emit new result if possible
-                        std::cout << __LINE__ << std::endl;
                     if(headSearcher.newGoal()){
                         //Emit result
-                        std::cout << "Emmitting new head command:" << std::endl;                        
-                        arma::vec2 direction = getIMUSpaceDirection(headSearcher.getState(), headToIMUSpace);
-                        std::cout << __LINE__ << std::endl;
+                        arma::vec2 direction = headSearcher.getState();
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
-                        std::cout << __LINE__ << std::endl;
                         command->yaw = direction[0];
-                        std::cout << __LINE__ << std::endl;
                         command->pitch = direction[1];
-                        std::cout << __LINE__ << std::endl;
                         emit(std::move(command));
                     }
                 });
@@ -218,7 +203,7 @@ namespace modules {
               
             }
 
-            void HeadBehaviourSoccer::updateHeadPlan(const std::vector<VisionObject>& fixationObjects, const bool& search, const Sensors& sensors){
+            void HeadBehaviourSoccer::updateHeadPlan(const std::vector<VisionObject>& fixationObjects, const bool& search, const Sensors& sensors, const Rotation3D& headToIMUSpace){
                 std::vector<arma::vec2> fixationPoints;
                 std::vector<arma::vec2> fixationSizes;
                 arma::vec centroid = {0,0};
@@ -238,6 +223,10 @@ namespace modules {
                 if(fixationPoints.size() <= 0){
                     log("FOUND NO POINTS TO LOOK AT! - ARE THE SEARCHES PROPERLY CONFIGURED IN HEADBEHAVIOURSOCCER.YAML?");
                 }
+
+                for(auto& p : fixationPoints){
+                    p = getIMUSpaceDirection(p,headToIMUSpace);
+                }
                 
                 auto currentPos = arma::vec2({sensors.servos.at(int(ServoID::HEAD_YAW)).presentPosition,sensors.servos.at(int(ServoID::HEAD_PITCH)).presentPosition});
                 headSearcher.replaceSearchPoints(fixationPoints, currentPos);
@@ -247,7 +236,7 @@ namespace modules {
 
                 arma::vec3 lookVectorFromHead = sphericalToCartesian({1,lookPoint[0],lookPoint[1]});//This is an approximation relying on the robots small FOV
                 //Rotate target angles to World space
-                arma::vec3 lookVector =  headToIMUSpace * lookVectorFromHead;
+                arma::vec3 lookVector = headToIMUSpace * lookVectorFromHead;
                 //Compute inverse kinematics for head direction angles
                 std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(lookVector);
 
@@ -270,6 +259,7 @@ namespace modules {
                     if(fixationPoints.size() == 0){
                         //Lost searches are normalised in terms of the FOV
                         std::vector<arma::vec2> scaledResults;
+                        log("Number of search points: ", lost_searches[sType].size());
                         for(auto& p : lost_searches[sType]){
                             //Interpolate between max and min allowed angles with -1 = min and 1 = max
                             scaledResults.push_back(arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
