@@ -154,6 +154,11 @@ class Docker():
         if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
             self.build()
 
+        # Make our build folder if it doesn't exist
+        if not os.path.exists('build'):
+            print 'Creating build folder...'
+            os.mkdir('build')
+
         # If we don't have cmake built, run cmake from the docker container
         if not os.path.exists('build/CMakeCache.txt'):
             print 'Running cmake...'
@@ -168,6 +173,11 @@ class Docker():
         # If we don't have an image, then we need to build one
         if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
             self.build()
+
+        # Make our build folder if it doesn't exist
+        if not os.path.exists('build'):
+            print 'Creating build folder...'
+            os.mkdir('build')
 
         print 'Running ccmake...'
         self._docker_run('ccmake', '..', '-GNinja')
