@@ -73,7 +73,7 @@ namespace modules {
 
 
 
-                //TODO: change head command to a point in 3D space
+                //TODO: change head command to a point in 3D space?
 
                 
 
@@ -86,6 +86,7 @@ namespace modules {
                 arma::vec3 headUnitVector =  sensors.orientation * goalHeadUnitVector_world;
                 //Compute inverse kinematics for head
                 std::vector< std::pair<messages::input::ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(headUnitVector);
+                // arma::vec2 goalAngles = cartesianToSpherical(headUnitVector).rows(1,2);
 
                 //Clamp head angles
                 for(auto& angle : goalAngles){

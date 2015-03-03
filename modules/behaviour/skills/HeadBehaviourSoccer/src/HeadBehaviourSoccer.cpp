@@ -109,9 +109,6 @@ namespace modules {
                                                         const std::shared_ptr<const std::vector<Ball>>& vballs,
                                                         const std::shared_ptr<const std::vector<Goal>>& vgoals
                                                         ) {
-                    //Input
-
-                    //Output
 
                     bool search = false;
 
@@ -259,7 +256,6 @@ namespace modules {
                     if(fixationPoints.size() == 0){
                         //Lost searches are normalised in terms of the FOV
                         std::vector<arma::vec2> scaledResults;
-                        log("Number of search points: ", lost_searches[sType].size());
                         for(auto& p : lost_searches[sType]){
                             //Interpolate between max and min allowed angles with -1 = min and 1 = max
                             scaledResults.push_back(arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
