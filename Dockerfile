@@ -120,13 +120,14 @@ WORKDIR /tmp/NUClear/build
 RUN cmake .. -GNinja \
              -DCMAKE_C_FLAGS='-fuse-linker-plugin -flto -fno-fat-lto-objects' \
              -DCMAKE_CXX_FLAGS='-fuse-linker-plugin -flto -fno-fat-lto-objects' \
-             -DNUCLEAR_BUILD_TESTS=OFF
-RUN ninja -v
+             -DNUCLEAR_BUILD_TESTS=OFF \
+             -DCMAKE_INSTALL_PREFIX=$TOOLCHAIN_PATH
+RUN ninja
 RUN ninja install
 WORKDIR /tmp
 RUN rm -rf NUClear
 
-# OpenBLAS
+# OpenBLAS (includes lapack)
 WORKDIR /tmp
 RUN curl -L https://github.com/xianyi/OpenBLAS/archive/v0.2.13.tar.gz | tar -xz
 WORKDIR OpenBLAS-0.2.13
