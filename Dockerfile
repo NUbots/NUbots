@@ -193,6 +193,20 @@ RUN make
 RUN make install
 WORKDIR /tmp
 RUN rm -rf yaml-cpp-0.5.1
+
+# ncurses
+WORKDIR /tmp
+RUN curl -L http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz | tar -xz
+WORKDIR ncurses-5.9
+RUN CFLAGS="-fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
+    CXXFLAGS="-fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
+    LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
+    ./configure \
+    --without-progs \
+    --without-tests \
+    --prefix=$TOOLCHAIN_PATH
+RUN make
+RUN make install
 # # Build dependencies
 # RUN apt-get -y install git-core
 # RUN apt-get -y install build-essential
