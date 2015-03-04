@@ -161,6 +161,22 @@ RUN rm -rf armadillo-4.650.2
 
 # Catch
 RUN wget https://raw.githubusercontent.com/philsquared/Catch/master/single_include/catch.hpp -O "$TOOLCHAIN_PATH/include/catch.hpp"
+
+# TCMalloc
+WORKDIR /tmp
+RUN curl -L https://googledrive.com/host/0B6NtGsLhIcf7MWxMMF9JdTN3UVk/gperftools-2.4.tar.gz | tar -xz
+WORKDIR gperftools-2.4/build
+RUN CFLAGS="-march=atom -mtune=atom -fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
+    CXXFLAGS="-march=atom -mtune=atom -fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
+    LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
+    ../configure \
+    --with-tcmalloc-pagesize=64 \
+    --enable-minimal \
+    --prefix=$TOOLCHAIN_PATH
+RUN make
+RUN make install
+WORKDIR /tmp
+RUN rm -rf gperftools-2.4
 # # Build dependencies
 # RUN apt-get -y install git-core
 # RUN apt-get -y install build-essential
