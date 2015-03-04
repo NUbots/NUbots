@@ -27,14 +27,18 @@
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/geometry/Quad.h"
+#include "utility/math/vision.h"
 #include "utility/support/yaml_armadillo.h"
 
+#include "utility/nubugger/NUhelpers.h"
 
 
 namespace modules {
     namespace behaviour{
         namespace skills {
 
+        using utility::nubugger::graph;
+        
         using messages::vision::Goal;
         using messages::vision::Ball;
         using messages::vision::VisionObject;
@@ -50,6 +54,8 @@ namespace modules {
         using utility::motion::kinematics::DarwinModel;
         using utility::math::matrix::Rotation3D;
         using utility::math::geometry::Quad;
+        using utility::math::vision::objectDirectionFromScreenAngular;
+        using utility::math::vision::screenAngularFromObjectDirection;
 
         using messages::input::ServoID;
 
@@ -99,7 +105,7 @@ namespace modules {
 
                 //TODO: trigger on balls with goals and check number of balls.
                 on<
-                    Trigger<Every<30, Per<std::chrono::seconds>>>,
+                    Trigger<Every<1, Per<std::chrono::seconds>>>,
                     With<Sensors>,
                     With<Optional<std::vector<Ball>>>,
                     With<Optional<std::vector<Goal>>>,
@@ -217,6 +223,7 @@ namespace modules {
                     fixationPoints = getSearchPoints(fixationPoints, fixationSizes, SearchType::LOW_FIRST);
                 }
 
+                emit(graph("rawfixationPoint",fixationPoints[0][0],fixationPoints[0][1]));
                 if(fixationPoints.size() <= 0){
                     log("FOUND NO POINTS TO LOOK AT! - ARE THE SEARCHES PROPERLY CONFIGURED IN HEADBEHAVIOURSOCCER.YAML?");
                 }
@@ -227,14 +234,20 @@ namespace modules {
                 
                 auto currentPos = arma::vec2({sensors.servos.at(int(ServoID::HEAD_YAW)).presentPosition,sensors.servos.at(int(ServoID::HEAD_PITCH)).presentPosition});
                 headSearcher.replaceSearchPoints(fixationPoints, currentPos);
+
+                //Debugging
+                auto EA = headToIMUSpace.eulerAngles();
+                emit(graph("headToIMUSpace.euler",EA[0],EA[1],EA[2]));
+                emit(graph("finalfixationPoint",fixationPoints[0][0],fixationPoints[0][1]));
             }
 
             arma::vec2 HeadBehaviourSoccer::getIMUSpaceDirection(const arma::vec2& lookPoint, const Rotation3D& headToIMUSpace){               
 
-                arma::vec3 lookVectorFromHead = sphericalToCartesian({1,lookPoint[0],lookPoint[1]});//This is an approximation relying on the robots small FOV
+                arma::vec3 lookVectorFromHead = objectDirectionFromScreenAngular(lookPoint);//This is an approximation relying on the robots small FOV
                 //Rotate target angles to World space
                 arma::vec3 lookVector = headToIMUSpace * lookVectorFromHead;
                 //Compute inverse kinematics for head direction angles
+                //TODO: change this to 
                 std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(lookVector);
 
                 arma::vec2 result;

@@ -180,6 +180,29 @@ namespace vision {
 
     }
 
+    inline arma::vec objectDirectionFromScreenAngular(const arma::vec& screenAngular){
+        double tanTheta = std::tan(screenAngular[0]);
+        double tanPhi = std::tan(screenAngular[1]);
+        double x = 0;
+        double y = 0;
+        double z = 0;
+        double denominator_sqr = 1+tanTheta*tanTheta+tanPhi*tanPhi;
+        if(denominator_sqr == 0){
+            std::cout << "objectDirectionFromScreenAngular - DOMAIN ERROR - denominator_sqr == 0" << std::endl;
+        } else {
+            x = 1 / std::sqrt(denominator_sqr);
+            y = x * tanTheta;
+            z = x * tanPhi;
+        }
+
+        return {x,y,z};
+    }
+
+    inline arma::vec screenAngularFromObjectDirection(const arma::vec& v){
+        return {std::atan2(v[1],v[0]),std::atan2(v[2],v[0])};
+    }
+
+
 }
 }
 }
