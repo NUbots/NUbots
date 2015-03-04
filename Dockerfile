@@ -113,7 +113,7 @@ RUN wget https://raw.githubusercontent.com/zeromq/cppzmq/master/zmq.hpp -O "$TOO
 WORKDIR /tmp
 RUN rm -rf zeromq-4.0.5
 
-# Build NUClear
+# NUClear
 WORKDIR /tmp
 RUN git clone -b OldDSL --depth 1 --single-branch https://github.com/FastCode/NUClear NUClear
 WORKDIR /tmp/NUClear/build
@@ -125,6 +125,21 @@ RUN ninja -v
 RUN ninja install
 WORKDIR /tmp
 RUN rm -rf NUClear
+
+# OpenBLAS
+WORKDIR /tmp
+RUN curl -L https://github.com/xianyi/OpenBLAS/archive/v0.2.13.tar.gz | tar -xz
+WORKDIR OpenBLAS-0.2.13
+RUN TARGET=ATOM \
+    USE_THREAD=1 \
+    BINARY=32 \
+    PREFIX=$TOOLCHAIN_PATH \
+    COMMON_OPT='-fuse-linker-plugin -flto -fno-fat-lto-objects -O3' \
+    FCOMMON_OPT='-fuse-linker-plugin -flto -fno-fat-lto-objects -O3' \
+    make
+RUN make PREFIX=$TOOLCHAIN_PATH install
+WORKDIR /tmp
+RUN rm -rf OpenBLAS-0.2.13
 
 # # Build dependencies
 # RUN apt-get -y install git-core
