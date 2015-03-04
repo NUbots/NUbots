@@ -142,6 +142,25 @@ RUN make PREFIX=$TOOLCHAIN_PATH install
 WORKDIR /tmp
 RUN rm -rf OpenBLAS-0.2.13
 
+# Armadillo
+WORKDIR /tmp
+RUN curl -L http://sourceforge.net/projects/arma/files/armadillo-4.650.2.tar.gz | tar -xz
+WORKDIR armadillo-4.650.2/build
+RUN cmake .. -GNinja \
+             -DCMAKE_CXX_FLAGS='-fuse-linker-plugin -flto -fno-fat-lto-objects' \
+             -DCMAKE_INSTALL_PREFIX=$TOOLCHAIN_PATH
+RUN ninja
+RUN ninja install
+# Fix up our armadillo configuration
+RUN sed -i 's/^\/\* #undef ARMA_USE_LAPACK \*\//#define ARMA_USE_LAPACK/' $TOOLCHAIN_PATH/include/armadillo_bits/config.hpp \
+ && sed -i 's/^#define ARMA_USE_WRAPPER/\/\/ #define ARMA_USE_WRAPPER/'   $TOOLCHAIN_PATH/include/armadillo_bits/config.hpp \
+ && sed -i 's/^\/\/ #define ARMA_USE_CXX11/#define ARMA_USE_CXX11/'       $TOOLCHAIN_PATH/include/armadillo_bits/config.hpp \
+ && sed -i 's/^\/\/ #define ARMA_USE_U64S64/#define ARMA_USE_U64S64/'     $TOOLCHAIN_PATH/include/armadillo_bits/config.hpp
+WORKDIR /tmp
+RUN rm -rf armadillo-4.650.2
+
+# Catch
+RUN wget https://raw.githubusercontent.com/philsquared/Catch/master/single_include/catch.hpp -O "$TOOLCHAIN_PATH/include/catch.hpp"
 # # Build dependencies
 # RUN apt-get -y install git-core
 # RUN apt-get -y install build-essential
