@@ -177,6 +177,22 @@ RUN make
 RUN make install
 WORKDIR /tmp
 RUN rm -rf gperftools-2.4
+
+# Boost (remove when yaml-cpp bumps to 0.6)
+RUN apt-get -y install libboost-dev
+
+# yaml-cpp
+WORKDIR /tmp
+RUN curl -L https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz | tar -xz
+WORKDIR yaml-cpp-0.5.1/build
+RUN cmake .. -DCMAKE_CXX_FLAGS='-fuse-linker-plugin -flto -fno-fat-lto-objects' \
+             -DYAML_CPP_BUILD_CONTRIB=OFF \
+             -DYAML_CPP_BUILD_TOOLS=OFF \
+             -DCMAKE_INSTALL_PREFIX=$TOOLCHAIN_PATH
+RUN make
+RUN make install
+WORKDIR /tmp
+RUN rm -rf yaml-cpp-0.5.1
 # # Build dependencies
 # RUN apt-get -y install git-core
 # RUN apt-get -y install build-essential
