@@ -9,6 +9,9 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV TOOLCHAIN_PATH /nubots/toolchain
 ENV CMAKE_PREFIX_PATH /nubots/toolchain
 
+# Set the extra flags that will be used while compiling
+ENV COMPILER_FLAGS -march=atom -mtune=atom -fuse-linker-plugin -flto -fno-fat-lto-objects
+
 # Since apt-get is using the ubuntu extras repo you need keys or it will error
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 437D05B5 3E5C1192
 
@@ -25,11 +28,12 @@ RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
 RUN apt-get update
 
 # Get common helpful tools
-RUN apt-get -y install vim
-RUN apt-get -y install wget
-RUN apt-get -y install curl
-RUN apt-get -y install git
-RUN apt-get -y install python
+RUN apt-get -y install vim \
+                       wget \
+                       curl \
+                       git \
+                       python \
+                       unzip
 
 # Get our build tools
 RUN apt-get -y install build-essential \
@@ -57,11 +61,11 @@ RUN echo '#/bin/bash'          > /usr/local/bin/nm && \
 WORKDIR /tmp
 RUN curl http://zlib.net/zlib-1.2.8.tar.gz | tar -xz
 WORKDIR zlib-1.2.8
-RUN CFLAGS="-fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
-    CXXFLAGS="-fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
+RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
+    CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
     LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
     ./configure \
-    --prefix=$TOOLCHAIN_PATH
+    --prefix="$TOOLCHAIN_PATH"
 RUN make test
 RUN make install
 WORKDIR /tmp
@@ -71,12 +75,12 @@ RUN rm -rf zlib-1.2.8
 WORKDIR /tmp
 RUN curl -L https://github.com/google/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz | tar -xz
 WORKDIR protobuf-2.6.1/build
-RUN CFLAGS="-fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
-    CXXFLAGS="-fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
+RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
+    CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
     LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
     ../configure \
     --with-zlib \
-    --prefix=$TOOLCHAIN_PATH
+    --prefix="$TOOLCHAIN_PATH"
 RUN make
 RUN make install
 WORKDIR /tmp
@@ -86,11 +90,11 @@ RUN rm -rf protobuf-2.6.1
 WORKDIR /tmp
 RUN curl -L https://openpgm.googlecode.com/files/libpgm-5.2.122.tar.gz | tar -xz
 WORKDIR libpgm-5.2.122/openpgm/pgm/build
-RUN CFLAGS="-fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
-    CXXFLAGS="-fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
+RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
+    CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
     LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
     ../configure \
-    --prefix=$TOOLCHAIN_PATH
+    --prefix="$TOOLCHAIN_PATH"
 RUN make
 RUN make install
 WORKDIR /tmp
@@ -100,13 +104,13 @@ RUN rm -rf libpgm-5.2.122
 WORKDIR /tmp
 RUN curl -L http://download.zeromq.org/zeromq-4.0.5.tar.gz | tar -xz
 WORKDIR zeromq-4.0.5/build
-RUN CFLAGS="-fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
-    CXXFLAGS="-fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
+RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
+    CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
     LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
     OpenPGM_CFLAGS="" \
     OpenPGM_LIBS="" \
     ../configure \
-    --prefix=$TOOLCHAIN_PATH
+    --prefix="$TOOLCHAIN_PATH"
 RUN make
 RUN make install
 RUN wget https://raw.githubusercontent.com/zeromq/cppzmq/master/zmq.hpp -O "$TOOLCHAIN_PATH/include/zmq.hpp"
@@ -118,10 +122,10 @@ WORKDIR /tmp
 RUN git clone -b OldDSL --depth 1 --single-branch https://github.com/FastCode/NUClear NUClear
 WORKDIR /tmp/NUClear/build
 RUN cmake .. -GNinja \
-             -DCMAKE_C_FLAGS='-fuse-linker-plugin -flto -fno-fat-lto-objects' \
-             -DCMAKE_CXX_FLAGS='-fuse-linker-plugin -flto -fno-fat-lto-objects' \
+             -DCMAKE_C_FLAGS="$COMPILER_FLAGS" \
+             -DCMAKE_CXX_FLAGS="$COMPILER_FLAGS" \
              -DNUCLEAR_BUILD_TESTS=OFF \
-             -DCMAKE_INSTALL_PREFIX=$TOOLCHAIN_PATH
+             -DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH"
 RUN ninja
 RUN ninja install
 WORKDIR /tmp
@@ -134,11 +138,10 @@ WORKDIR OpenBLAS-0.2.13
 RUN TARGET=ATOM \
     USE_THREAD=1 \
     BINARY=32 \
-    PREFIX=$TOOLCHAIN_PATH \
-    COMMON_OPT='-fuse-linker-plugin -flto -fno-fat-lto-objects -O3' \
-    FCOMMON_OPT='-fuse-linker-plugin -flto -fno-fat-lto-objects -O3' \
+    COMMON_OPT="$COMPILER_FLAGS -O3" \
+    FCOMMON_OPT="$COMPILER_FLAGS -O3" \
     make
-RUN make PREFIX=$TOOLCHAIN_PATH install
+RUN make PREFIX="$TOOLCHAIN_PATH" install
 WORKDIR /tmp
 RUN rm -rf OpenBLAS-0.2.13
 
@@ -147,8 +150,8 @@ WORKDIR /tmp
 RUN curl -L http://sourceforge.net/projects/arma/files/armadillo-4.650.2.tar.gz | tar -xz
 WORKDIR armadillo-4.650.2/build
 RUN cmake .. -GNinja \
-             -DCMAKE_CXX_FLAGS='-fuse-linker-plugin -flto -fno-fat-lto-objects' \
-             -DCMAKE_INSTALL_PREFIX=$TOOLCHAIN_PATH
+             -DCMAKE_CXX_FLAGS='$COMPILER_FLAGS -O3' \
+             -DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH"
 RUN ninja
 RUN ninja install
 # Fix up our armadillo configuration
@@ -166,13 +169,13 @@ RUN wget https://raw.githubusercontent.com/philsquared/Catch/master/single_inclu
 WORKDIR /tmp
 RUN curl -L https://googledrive.com/host/0B6NtGsLhIcf7MWxMMF9JdTN3UVk/gperftools-2.4.tar.gz | tar -xz
 WORKDIR gperftools-2.4/build
-RUN CFLAGS="-march=atom -mtune=atom -fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
-    CXXFLAGS="-march=atom -mtune=atom -fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
+RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
+    CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
     LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
     ../configure \
     --with-tcmalloc-pagesize=64 \
     --enable-minimal \
-    --prefix=$TOOLCHAIN_PATH
+    --prefix="$TOOLCHAIN_PATH"
 RUN make
 RUN make install
 WORKDIR /tmp
@@ -185,10 +188,10 @@ RUN apt-get -y install libboost-dev
 WORKDIR /tmp
 RUN curl -L https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz | tar -xz
 WORKDIR yaml-cpp-0.5.1/build
-RUN cmake .. -DCMAKE_CXX_FLAGS='-fuse-linker-plugin -flto -fno-fat-lto-objects' \
+RUN cmake .. -DCMAKE_CXX_FLAGS="$COMPILER_FLAGS -O3" \
              -DYAML_CPP_BUILD_CONTRIB=OFF \
              -DYAML_CPP_BUILD_TOOLS=OFF \
-             -DCMAKE_INSTALL_PREFIX=$TOOLCHAIN_PATH
+             -DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH"
 RUN make
 RUN make install
 WORKDIR /tmp
@@ -198,13 +201,13 @@ RUN rm -rf yaml-cpp-0.5.1
 WORKDIR /tmp
 RUN curl -L http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz | tar -xz
 WORKDIR ncurses-5.9
-RUN CFLAGS="-fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
-    CXXFLAGS="-fuse-linker-plugin -flto -fno-fat-lto-objects -I$TOOLCHAIN_PATH/include -O3" \
+RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
+    CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
     LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
     ./configure \
     --without-progs \
     --without-tests \
-    --prefix=$TOOLCHAIN_PATH
+    --prefix="$TOOLCHAIN_PATH"
 RUN make
 RUN make install
 # # Build dependencies
