@@ -145,7 +145,6 @@ class Docker():
         self.build()
 
     def ssh(self):
-        print self._share_path()
         # Run a docker command that will give us an interactive shell
         self._docker_run('/bin/bash')
 
@@ -160,7 +159,7 @@ class Docker():
             os.mkdir('build')
 
         # If we don't have cmake built, run cmake from the docker container
-        if not os.path.exists('build/CMakeCache.txt'):
+        if not os.path.exists('build/build.ninja'):
             print 'Running cmake...'
             self._docker_run('cmake', '..', '-GNinja')
             print('done')
