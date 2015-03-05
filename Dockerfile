@@ -43,268 +43,221 @@ RUN apt-get -y install build-essential \
                        ninja-build
 
 # Change our default linker to gold
-RUN update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10
-RUN update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20
+RUN update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
+ && update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20
 
 # Fix our ar, ranlib and nm tools to use the gcc versions
-RUN echo '#/bin/bash'          > /usr/local/bin/ar && \
-    echo '/usr/bin/ar $@ --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so' >> /usr/local/bin/ar && \
-    chmod +x /usr/local/bin/ar
-RUN echo '#/bin/bash'              > /usr/local/bin/ranlib && \
-    echo '/usr/bin/ranlib $@ --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so' >> /usr/local/bin/ranlib && \
-    chmod +x /usr/local/bin/ranlib
-RUN echo '#/bin/bash'          > /usr/local/bin/nm && \
-    echo '/usr/bin/nm $@ --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so' >> /usr/local/bin/nm && \
-    chmod +x /usr/local/bin/nm
+RUN echo '#/bin/bash'                                                                    > /usr/local/bin/ar \
+ && echo '/usr/bin/ar $@ --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so'     >> /usr/local/bin/ar \
+ && chmod +x /usr/local/bin/ar \
+ && echo '#/bin/bash'                                                                    > /usr/local/bin/ranlib \
+ && echo '/usr/bin/ranlib $@ --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so' >> /usr/local/bin/ranlib \
+ && chmod +x /usr/local/bin/ranlib \
+ && echo '#/bin/bash'                                                                    > /usr/local/bin/nm \
+ && echo '/usr/bin/nm $@ --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so'     >> /usr/local/bin/nm \
+ && chmod +x /usr/local/bin/nm
+
+# build our libraries
+WORKDIR /tmp
+
+# Make our library installation script for autotools and cmake
+RUN echo '#/bin/bash' >> autotools_install \
+ && echo 'set -e' >> autotools_install \
+ && echo 'curl -L $1 | tar xz' >> autotools_install \
+ && echo 'shift 1' >> autotools_install \
+ && echo 'BASE_DIR=$(pwd)' >> autotools_install \
+ && echo 'CODE_DIR=$(ls -d */)' >> autotools_install \
+ && echo 'cd "$CODE_DIR$CODE_PATH"' >> autotools_install \
+ && echo 'CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \\' >> autotools_install \
+ && echo 'CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \\' >> autotools_install \
+ && echo 'LDFLAGS="-L$TOOLCHAIN_PATH/lib" \\' >> autotools_install \
+ && echo './configure $@ \\' >> autotools_install \
+ && echo '--prefix="$TOOLCHAIN_PATH"' >> autotools_install \
+ && echo 'make -j$(nproc)' >> autotools_install \
+ && echo 'make install' >> autotools_install \
+ && echo 'rm -rf "$BASE_DIR/$CODE_DIR"' >> autotools_install \
+ && chmod +x ./autotools_install
+
+RUN echo '#/bin/bash' >> cmake_install \
+ && echo 'set -e' >> cmake_install \
+ && echo 'curl -L $1 | tar xz' >> cmake_install \
+ && echo 'shift 1' >> cmake_install \
+ && echo 'BASE_DIR=$(pwd)' >> cmake_install \
+ && echo 'CODE_DIR=$(ls -d */)' >> cmake_install \
+ && echo 'cd "$CODE_DIR$CODE_PATH"' >> cmake_install \
+ && echo 'cmake \\' >> cmake_install \
+ && echo '-DCMAKE_C_FLAGS="$COMPILER_FLAGS -O3" \\' >> cmake_install \
+ && echo '-DCMAKE_CXX_FLAGS="$COMPILER_FLAGS -O3" \\' >> cmake_install \
+ && echo '-DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH" \\' >> cmake_install \
+ && echo '$@' >> cmake_install \
+ && echo 'make -j$(nproc)' >> cmake_install \
+ && echo 'make install' >> cmake_install \
+ && echo 'rm -rf "$BASE_DIR/$CODE_DIR"' >> cmake_install \
+ && chmod +x ./cmake_install
 
 # zlib
-WORKDIR /tmp
-RUN curl http://zlib.net/zlib-1.2.8.tar.gz | tar -xz
-WORKDIR zlib-1.2.8
-RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-    CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-    LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
-    ./configure \
-    --prefix="$TOOLCHAIN_PATH"
-RUN make test
-RUN make install
-WORKDIR /tmp
-RUN rm -rf zlib-1.2.8
+RUN ./autotools_install http://zlib.net/zlib-1.2.8.tar.gz
 
 # libprotobuf + protobuf-compiler
-WORKDIR /tmp
-RUN curl -L https://github.com/google/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz | tar -xz
-WORKDIR protobuf-2.6.1/build
-RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-    CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-    LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
-    ../configure \
-    --with-zlib \
-    --prefix="$TOOLCHAIN_PATH"
-RUN make
-RUN make install
-WORKDIR /tmp
-RUN rm -rf protobuf-2.6.1
+RUN ./autotools_install https://github.com/google/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz --with-zlib
 
 # openpgm
-WORKDIR /tmp
-RUN curl -L https://openpgm.googlecode.com/files/libpgm-5.2.122.tar.gz | tar -xz
-WORKDIR libpgm-5.2.122/openpgm/pgm/build
-RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-    CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-    LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
-    ../configure \
-    --prefix="$TOOLCHAIN_PATH"
-RUN make
-RUN make install
-WORKDIR /tmp
-RUN rm -rf libpgm-5.2.122
+RUN CODE_PATH="openpgm/pgm" \
+    ./autotools_install https://openpgm.googlecode.com/files/libpgm-5.2.122.tar.gz
 
 # libzmq4
-WORKDIR /tmp
-RUN curl -L http://download.zeromq.org/zeromq-4.0.5.tar.gz | tar -xz
-WORKDIR zeromq-4.0.5/build
-RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-    CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-    LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
-    OpenPGM_CFLAGS="" \
+RUN OpenPGM_CFLAGS="" \
     OpenPGM_LIBS="" \
-    ../configure \
-    --prefix="$TOOLCHAIN_PATH"
-RUN make
-RUN make install
-RUN wget https://raw.githubusercontent.com/zeromq/cppzmq/master/zmq.hpp -O "$TOOLCHAIN_PATH/include/zmq.hpp"
-WORKDIR /tmp
-RUN rm -rf zeromq-4.0.5
+    ./autotools_install http://download.zeromq.org/zeromq-4.0.5.tar.gz \
+ && wget https://raw.githubusercontent.com/zeromq/cppzmq/master/zmq.hpp -O "$TOOLCHAIN_PATH/include/zmq.hpp"
 
 # NUClear
-WORKDIR /tmp
-RUN git clone -b OldDSL --depth 1 --single-branch https://github.com/FastCode/NUClear NUClear
-WORKDIR /tmp/NUClear/build
-RUN cmake .. -GNinja \
-             -DCMAKE_C_FLAGS="$COMPILER_FLAGS" \
-             -DCMAKE_CXX_FLAGS="$COMPILER_FLAGS" \
-             -DNUCLEAR_BUILD_TESTS=OFF \
-             -DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH"
-RUN ninja
-RUN ninja install
-WORKDIR /tmp
-RUN rm -rf NUClear
+RUN git clone -b OldDSL --depth 1 --single-branch https://github.com/FastCode/NUClear NUClear \
+ && cd NUClear \
+ && cmake -GNinja \
+          -DCMAKE_C_FLAGS="$COMPILER_FLAGS" \
+          -DCMAKE_CXX_FLAGS="$COMPILER_FLAGS" \
+          -DNUCLEAR_BUILD_TESTS=OFF \
+          -DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH" \
+ && ninja \
+ && ninja install \
+ && cd .. \
+ && rm -rf NUClear
 
 # OpenBLAS (includes lapack)
-WORKDIR /tmp
-RUN curl -L https://github.com/xianyi/OpenBLAS/archive/v0.2.13.tar.gz | tar -xz
-WORKDIR OpenBLAS-0.2.13
-RUN TARGET=ATOM \
+RUN curl -L https://github.com/xianyi/OpenBLAS/archive/v0.2.13.tar.gz | tar -xz \
+ && cd OpenBLAS-0.2.13 \
+ && TARGET=ATOM \
     USE_THREAD=1 \
     BINARY=32 \
     COMMON_OPT="$COMPILER_FLAGS -O3" \
     FCOMMON_OPT="$COMPILER_FLAGS -O3" \
-    make
-RUN make PREFIX="$TOOLCHAIN_PATH" install
-WORKDIR /tmp
-RUN rm -rf OpenBLAS-0.2.13
+    make \
+ && make PREFIX="$TOOLCHAIN_PATH" install \
+ && cd .. \
+ && rm -rf OpenBLAS-0.2.13
 
 # Armadillo
-WORKDIR /tmp
-RUN curl -L http://sourceforge.net/projects/arma/files/armadillo-4.650.2.tar.gz | tar -xz
-WORKDIR armadillo-4.650.2/build
-RUN cmake .. -GNinja \
-             -DCMAKE_CXX_FLAGS='$COMPILER_FLAGS -O3' \
-             -DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH"
-RUN ninja
-RUN ninja install
-# Fix up our armadillo configuration
-RUN sed -i 's/^\/\* #undef ARMA_USE_LAPACK \*\//#define ARMA_USE_LAPACK/' $TOOLCHAIN_PATH/include/armadillo_bits/config.hpp \
+RUN ./cmake_install http://sourceforge.net/projects/arma/files/armadillo-4.650.2.tar.gz \
+ && sed -i 's/^\/\* #undef ARMA_USE_LAPACK \*\//#define ARMA_USE_LAPACK/' $TOOLCHAIN_PATH/include/armadillo_bits/config.hpp \
  && sed -i 's/^#define ARMA_USE_WRAPPER/\/\/ #define ARMA_USE_WRAPPER/'   $TOOLCHAIN_PATH/include/armadillo_bits/config.hpp \
  && sed -i 's/^\/\/ #define ARMA_USE_CXX11/#define ARMA_USE_CXX11/'       $TOOLCHAIN_PATH/include/armadillo_bits/config.hpp \
  && sed -i 's/^\/\/ #define ARMA_USE_U64S64/#define ARMA_USE_U64S64/'     $TOOLCHAIN_PATH/include/armadillo_bits/config.hpp
-WORKDIR /tmp
-RUN rm -rf armadillo-4.650.2
 
 # Catch
 RUN wget https://raw.githubusercontent.com/philsquared/Catch/master/single_include/catch.hpp -O "$TOOLCHAIN_PATH/include/catch.hpp"
 
 # TCMalloc
-WORKDIR /tmp
-RUN curl -L https://googledrive.com/host/0B6NtGsLhIcf7MWxMMF9JdTN3UVk/gperftools-2.4.tar.gz | tar -xz
-WORKDIR gperftools-2.4/build
-RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-    CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-    LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
-    ../configure \
+RUN ./autotools_install https://googledrive.com/host/0B6NtGsLhIcf7MWxMMF9JdTN3UVk/gperftools-2.4.tar.gz \
     --with-tcmalloc-pagesize=64 \
-    --enable-minimal \
-    --prefix="$TOOLCHAIN_PATH"
-RUN make
-RUN make install
-WORKDIR /tmp
-RUN rm -rf gperftools-2.4
+    --enable-minimal
 
 # Boost (remove when yaml-cpp bumps to 0.6)
 RUN apt-get -y install libboost-dev
 
 # yaml-cpp
-WORKDIR /tmp
-RUN curl -L https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz | tar -xz
-WORKDIR yaml-cpp-0.5.1/build
-RUN cmake .. -DCMAKE_CXX_FLAGS="$COMPILER_FLAGS -O3" \
-             -DYAML_CPP_BUILD_CONTRIB=OFF \
-             -DYAML_CPP_BUILD_TOOLS=OFF \
-             -DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH"
-RUN make
-RUN make install
-WORKDIR /tmp
-RUN rm -rf yaml-cpp-0.5.1
+RUN ./cmake_install https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz \
+    -DYAML_CPP_BUILD_CONTRIB=OFF \
+    -DYAML_CPP_BUILD_TOOLS=OFF
 
 # ncurses
-WORKDIR /tmp
-RUN curl -L http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz | tar -xz
-WORKDIR ncurses-5.9
-RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-    CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-    LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
-    ./configure \
+RUN ./autotools_install http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz \
     --without-progs \
-    --without-tests \
-    --prefix="$TOOLCHAIN_PATH"
-RUN make
-RUN make install
-# # Build dependencies
-# RUN apt-get -y install git-core
-# RUN apt-get -y install build-essential
-# RUN apt-get -y install cmake
-# RUN apt-get -y install ninja-build
-# RUN apt-get -y install bibtool
-# RUN apt-get -y install libgoogle-perftools-dev
-# RUN apt-get -y install libmatheval-dev
-# RUN apt-get -y install libboost-dev
-WORKDIR /tmp
-RUN rm -rf ncurses-5.9
+    --without-tests
 
 # fftw-3
-WORKDIR /tmp
-RUN curl -L http://www.fftw.org/fftw-3.3.4.tar.gz | tar -xz
-WORKDIR fftw-3.3.4
-RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-    CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-    LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
-    ./configure \
+RUN ./autotools_install http://www.fftw.org/fftw-3.3.4.tar.gz \
     --disable-fortran \
-    --enable-shared \
-    --prefix="$TOOLCHAIN_PATH"
-RUN make
-RUN make install
-WORKDIR /tmp
-RUN rm -rf fftw-3.3.4
+    --enable-shared
 
-# # zeromq
-# RUN add-apt-repository ppa:chris-lea/zeromq
-# RUN apt-get -y install libzmq3-dev
+# Quex
+RUN curl -L https://downloads.sourceforge.net/project/quex/DOWNLOAD/quex-0.65.2.tar.gz | tar -xz \
+ && mkdir -p "$TOOLCHAIN_PATH/etc" \
+ && mv quex-0.65.2 "$TOOLCHAIN_PATH/etc/quex" \
+ && ln -s "$TOOLCHAIN_PATH/etc/quex/quex" "$TOOLCHAIN_PATH/include/quex" \
+ && echo '#!/bin/bash' > "$TOOLCHAIN_PATH/bin/quex" \
+ && echo "QUEX_PATH=$TOOLCHAIN_PATH/etc/quex python /usr/local/etc/quex/quex-exe.py \$@" >> "$TOOLCHAIN_PATH/bin/quex" \
+ && chmod +x "$TOOLCHAIN_PATH/bin/quex"
 
-# # Install and configure icecream
-# RUN apt-get -y install icecc
-# RUN sed -i -e '/ICECC_SCHEDULER_HOST=/ s/="[a-zA-Z0-9]+/="10.1.0.80"/' /etc/icecc/icecc.conf
-# ENV PATH /usr/lib/icecc/bin:$PATH
+# # cppformat
+# # WORKDIR /tmp
+# # RUN git clone --depth 1 --single-branch https://github.com/cppformat/cppformat
+# # WORKDIR /tmp/cppformat/build
+# # RUN cmake .. -GNinja \
+# #              -DCMAKE_CXX_FLAGS="$COMPILER_FLAGS -O3" \
+# #              -DCMAKE_C_FLAGS="$COMPILER_FLAGS -O3" \
+# #              -DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH"
+# # RUN ninja
+# # RUN ninja install
+# # WORKDIR /tmp
+# # RUN rm -rf cppformat
 
-# # Download and install cppformat
-# WORKDIR /tmp
-# RUN git clone https://github.com/cppformat/cppformat
-# WORKDIR /tmp/cppformat/build
-# RUN cmake .. -GNinja
-# RUN ninja
-# RUN ninja install
 
-# # NUClear dependencies
-# RUN apt-get -y install libprotobuf-dev
-# RUN apt-get -y install libespeak-dev
-# RUN apt-get -y install librtaudio-dev
-# RUN apt-get -y install libncurses5-dev
-# RUN apt-get -y install libjpeg-turbo8-dev
-# RUN apt-get -y install libfftw3-dev
-# RUN apt-get -y install libaubio-dev
-# RUN apt-get -y install libsndfile-dev
-# RUN apt-get -y install libyaml-cpp-dev
-# RUN apt-get -y install protobuf-compiler
+# # jpeg-turbo
+# # WORKDIR /tmp
+# # RUN curl -L http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.0/libjpeg-turbo-1.4.0.tar.gz | tar -xz
 
-# # NUClear
-# WORKDIR /tmp
-# RUN git clone -b OldDSL --single-branch https://github.com/fastcode/nuclear NUClear
-# WORKDIR /tmp/NUClear/build
-# RUN cmake .. -GNinja -DNUCLEAR_BUILD_TESTS=OFF
-# RUN ninja
-# RUN ninja install
 
-# RUN apt-get -y install libopenblas-dev
-# RUN apt-get -y install liblapack-dev
-# RUN apt-get -y install libffi-dev
-# RUN add-apt-repository ppa:comp-phys/stable
-# RUN apt-get -y install libarmadillo-dev
-# RUN apt-get -y install python
-# RUN apt-get -y install wget
+# # Alsa
+# # WORKDIR /tmp
+# # RUN curl -L ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.9.tar.bz2 | tar -xj
+# # WORKDIR alsa-lib-1.0.9
+# # RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
+# #     CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
+# #     LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
+# #     ./configure \
+# #     --prefix="$TOOLCHAIN_PATH"
+# # RUN make
+# # RUN make install
+# # WORKDIR /tmp
+# # RUN rm -rf alsa-lib-1.0.9
 
-# # Catch
-# WORKDIR /usr/local/include/
-# RUN wget https://raw.github.com/philsquared/Catch/5ecb72b9bb65cd8fed2aec4da23a3bc21bbccd74/single_include/catch.hpp
+# # portaudio
+# # WORKDIR /tmp
+# # RUN curl -L http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz | tar -xz
+# # WORKDIR pa_stable_v19_20140130
 
-# # Quex
-# WORKDIR /tmp
-# RUN wget https://downloads.sourceforge.net/project/quex/DOWNLOAD/quex-0.65.2.tar.gz -O quex-0.65.2.tar.gz
-# RUN tar -zxf quex-0.65.2.tar.gz
-# RUN mv quex-0.65.2/ /usr/local/etc/quex
-# RUN ln -s /usr/local/etc/quex/quex/ /usr/local/include/quex
-# RUN echo '#!/bin/bash' > /usr/local/bin/quex
-# RUN echo 'QUEX_PATH=/usr/local/etc/quex python /usr/local/etc/quex/quex-exe.py "$@"' >> /usr/local/bin/quex
-# RUN chmod +x /usr/local/bin/quex
+# # espeak
+# # WORKDIR /tmp
+# # RUN wget http://sourceforge.net/projects/espeak/files/espeak/espeak-1.48/espeak-1.48.04-source.zip \
+# #  && unzip espeak-1.48.04-source.zip \
+# #  && rm espeak-1.48.04-source.zip
+# # WORKDIR espeak-1.48.04-source/src
 
-# # Useful Tools
-# RUN apt-get -y install vim
-# RUN apt-get -y install cmake-curses-gui
+# # musllibc?
+# # RUN curl -L http://www.musl-libc.org/releases/musl-1.1.6.tar.gz | tar -xz
 
-# You need to mount your local code directory to the container
-# Eg: docker run -t -i -v /local/path/:/nubots/NUbots /bin/bash
-VOLUME /nubots/NUbots
-WORKDIR /nubots/NUbots/build
+# # libmatheval
 
-# Expose our NUbugger ports to allow running in the container
-EXPOSE 12000 12001
+
+# # RUN apt-get -y install libmatheval-dev
+
+# # # Install and configure icecream
+# # RUN apt-get -y install icecc
+# # RUN sed -i -e '/ICECC_SCHEDULER_HOST=/ s/="[a-zA-Z0-9]+/="10.1.0.80"/' /etc/icecc/icecc.conf
+# # ENV PATH /usr/lib/icecc/bin:$PATH
+
+# # # Download and install cppformat
+# # WORKDIR /tmp
+# # RUN git clone https://github.com/cppformat/cppformat
+# # WORKDIR /tmp/cppformat/build
+# # RUN cmake .. -GNinja
+# # RUN ninja
+# # RUN ninja install
+
+# # # NUClear dependencies
+# # RUN apt-get -y install librtaudio-dev
+# # RUN apt-get -y install libaubio-dev
+# # RUN apt-get -y install libsndfile-dev
+
+# # RUN apt-get -y install libffi-dev
+
+
+
+# # You need to mount your local code directory to the container
+# # Eg: docker run -t -i -v /local/path/:/nubots/NUbots /bin/bash
+# VOLUME /nubots/NUbots
+# WORKDIR /nubots/NUbots/build
+
+# # Expose our NUbugger ports to allow running in the container
+# EXPOSE 12000 12001
