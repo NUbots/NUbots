@@ -219,6 +219,24 @@ RUN make install
 # RUN apt-get -y install libgoogle-perftools-dev
 # RUN apt-get -y install libmatheval-dev
 # RUN apt-get -y install libboost-dev
+WORKDIR /tmp
+RUN rm -rf ncurses-5.9
+
+# fftw-3
+WORKDIR /tmp
+RUN curl -L http://www.fftw.org/fftw-3.3.4.tar.gz | tar -xz
+WORKDIR fftw-3.3.4
+RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
+    CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
+    LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
+    ./configure \
+    --disable-fortran \
+    --enable-shared \
+    --prefix="$TOOLCHAIN_PATH"
+RUN make
+RUN make install
+WORKDIR /tmp
+RUN rm -rf fftw-3.3.4
 
 # # zeromq
 # RUN add-apt-repository ppa:chris-lea/zeromq
