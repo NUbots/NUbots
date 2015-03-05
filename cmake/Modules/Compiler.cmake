@@ -1,10 +1,12 @@
 # Default to do a debug build
 IF(NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE Debug CACHE STRING
+    SET(CMAKE_BUILD_TYPE Release CACHE STRING
        "Choose the type of build, options are: None Debug Release RelWithDebInfo
 MinSizeRel."
        FORCE)
 ENDIF()
+
+SET(CMAKE_FIND_LIBRARY_SUFFIXES .a .so)
 
 # Common C++ Flags
 # Enable c++11
@@ -62,20 +64,7 @@ ELSEIF("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 # We don't support other compilers (but if you wanna try then change this line)
 ELSE()
     MESSAGE(FATAL_ERROR "Unsupported compiler!")
-
 ENDIF()
-
-# On release we have to setup for our awesome LTO build
-IF(CMAKE_BUILD_TYPE STREQUAL Release)
-    SET(CMAKE_C_ARCHIVE_CREATE "${CMAKE_C_ARCHIVE_CREATE} --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so")
-    SET(CMAKE_C_ARCHIVE_APPEND "${CMAKE_C_ARCHIVE_APPEND} --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so")
-    SET(CMAKE_C_ARCHIVE_FINISH "${CMAKE_C_ARCHIVE_FINISH} --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so")
-    SET(CMAKE_CXX_ARCHIVE_CREATE ${CMAKE_C_ARCHIVE_CREATE})
-    SET(CMAKE_CXX_ARCHIVE_APPEND ${CMAKE_C_ARCHIVE_APPEND})
-    SET(CMAKE_CXX_ARCHIVE_FINISH ${CMAKE_C_ARCHIVE_FINISH})
-ENDIF()
-
-
 
 # Now build our compiler flags for each release type
 SET(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} ${COMMON_CXX_FLAGS}")
