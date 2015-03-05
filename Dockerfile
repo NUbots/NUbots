@@ -176,88 +176,34 @@ RUN curl -L https://downloads.sourceforge.net/project/quex/DOWNLOAD/quex-0.65.2.
  && mv quex-0.65.2 "$TOOLCHAIN_PATH/etc/quex" \
  && ln -s "$TOOLCHAIN_PATH/etc/quex/quex" "$TOOLCHAIN_PATH/include/quex" \
  && echo '#!/bin/bash' > "$TOOLCHAIN_PATH/bin/quex" \
- && echo "QUEX_PATH=$TOOLCHAIN_PATH/etc/quex python /usr/local/etc/quex/quex-exe.py \$@" >> "$TOOLCHAIN_PATH/bin/quex" \
+ && echo "QUEX_PATH=$TOOLCHAIN_PATH/etc/quex python $TOOLCHAIN_PATH/etc/quex/quex-exe.py \$@" >> "$TOOLCHAIN_PATH/bin/quex" \
  && chmod +x "$TOOLCHAIN_PATH/bin/quex"
 
-# # cppformat
-# # WORKDIR /tmp
-# # RUN git clone --depth 1 --single-branch https://github.com/cppformat/cppformat
-# # WORKDIR /tmp/cppformat/build
-# # RUN cmake .. -GNinja \
-# #              -DCMAKE_CXX_FLAGS="$COMPILER_FLAGS -O3" \
-# #              -DCMAKE_C_FLAGS="$COMPILER_FLAGS -O3" \
-# #              -DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH"
-# # RUN ninja
-# # RUN ninja install
-# # WORKDIR /tmp
-# # RUN rm -rf cppformat
+# jpeg-turbo
+# we need yasm to assemble libjpeg-turbo
+RUN apt-get install yasm
+RUN ./autotools_install http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.0/libjpeg-turbo-1.4.0.tar.gz \
+    --build=i686-linux-gnu \
+    --host=i686-linux-gnu
 
+# Trying to compile this made me sad
+RUN apt-get -y install libmatheval-dev libespeak-dev
 
-# # jpeg-turbo
-# # WORKDIR /tmp
-# # RUN curl -L http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.0/libjpeg-turbo-1.4.0.tar.gz | tar -xz
+# cppformat (TODO for now don't use flto until you get rid of gtest)
+RUN git clone --depth 1 --single-branch https://github.com/cppformat/cppformat \
+ && cd cppformat \
+ && cmake -DCMAKE_CXX_FLAGS="-O3" \
+          -DCMAKE_C_FLAGS="-O3" \
+          -DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH" \
+ && make -j$(nproc) \
+ && make install \
+ && cd .. \
+ && rm -rf cppformat
 
+# You need to mount your local code directory to the container
+# Eg: docker run -t -i -v /local/path/:/nubots/NUbots /bin/bash
+VOLUME /nubots/NUbots
+WORKDIR /nubots/NUbots/build
 
-# # Alsa
-# # WORKDIR /tmp
-# # RUN curl -L ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.9.tar.bz2 | tar -xj
-# # WORKDIR alsa-lib-1.0.9
-# # RUN CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-# #     CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
-# #     LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
-# #     ./configure \
-# #     --prefix="$TOOLCHAIN_PATH"
-# # RUN make
-# # RUN make install
-# # WORKDIR /tmp
-# # RUN rm -rf alsa-lib-1.0.9
-
-# # portaudio
-# # WORKDIR /tmp
-# # RUN curl -L http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz | tar -xz
-# # WORKDIR pa_stable_v19_20140130
-
-# # espeak
-# # WORKDIR /tmp
-# # RUN wget http://sourceforge.net/projects/espeak/files/espeak/espeak-1.48/espeak-1.48.04-source.zip \
-# #  && unzip espeak-1.48.04-source.zip \
-# #  && rm espeak-1.48.04-source.zip
-# # WORKDIR espeak-1.48.04-source/src
-
-# # musllibc?
-# # RUN curl -L http://www.musl-libc.org/releases/musl-1.1.6.tar.gz | tar -xz
-
-# # libmatheval
-
-
-# # RUN apt-get -y install libmatheval-dev
-
-# # # Install and configure icecream
-# # RUN apt-get -y install icecc
-# # RUN sed -i -e '/ICECC_SCHEDULER_HOST=/ s/="[a-zA-Z0-9]+/="10.1.0.80"/' /etc/icecc/icecc.conf
-# # ENV PATH /usr/lib/icecc/bin:$PATH
-
-# # # Download and install cppformat
-# # WORKDIR /tmp
-# # RUN git clone https://github.com/cppformat/cppformat
-# # WORKDIR /tmp/cppformat/build
-# # RUN cmake .. -GNinja
-# # RUN ninja
-# # RUN ninja install
-
-# # # NUClear dependencies
-# # RUN apt-get -y install librtaudio-dev
-# # RUN apt-get -y install libaubio-dev
-# # RUN apt-get -y install libsndfile-dev
-
-# # RUN apt-get -y install libffi-dev
-
-
-
-# # You need to mount your local code directory to the container
-# # Eg: docker run -t -i -v /local/path/:/nubots/NUbots /bin/bash
-# VOLUME /nubots/NUbots
-# WORKDIR /nubots/NUbots/build
-
-# # Expose our NUbugger ports to allow running in the container
-# EXPOSE 12000 12001
+# Expose our NUbugger ports to allow running in the container
+EXPOSE 12000 12001
