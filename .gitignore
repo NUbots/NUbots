@@ -20,15 +20,6 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 
-# Vagrant & Packer
-.vagrant/
-*.box
-*.iso
-*.deb
-packer/build.hwm
-packer/build.pwd
-packer/build.pwi
-
 # LaTeX stuff
 *.aux
 *.pdf

@@ -49,8 +49,7 @@ class Docker():
             , 'run'
             , '--publish=12000:12000'
             , '--publish=12001:12001'
-            , '-t'
-            , '-i'
+
             , '-v'
             , '{}:/nubots/NUbots'.format(self._share_path())
             , 'nubots/nubots'] + list(args))
@@ -146,7 +145,7 @@ class Docker():
 
     def ssh(self):
         # Run a docker command that will give us an interactive shell
-        self._docker_run('/bin/bash')
+        self._docker_run('-t', '-i', '/bin/bash')
 
     def compile(self):
         # If we don't have an image, then we need to build one
