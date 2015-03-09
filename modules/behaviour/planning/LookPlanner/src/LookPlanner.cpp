@@ -99,11 +99,11 @@ namespace planning {
                     //push an object for the localisation ball
                     double ballDiameter = 2.0*atan2(fieldDesc.ball_radius,arma::norm(l->position));
 
-                    ballObjects.push_back({utility::motion::kinematics::calculateHeadJointsToLookAt(
-                                                                {l->position[0], l->position[1], 0},
-                                                                sensors.orientationCamToGround,
-                                                                sensors.orientationBodyToGround),
-                                           arma::vec2({ballDiameter,ballDiameter}) });
+                    // ballObjects.push_back({utility::motion::kinematics::calculateHeadJointsToLookAt(
+                    //                                             {l->position[0], l->position[1], 0},
+                    //                                             sensors.orientationCamToGround,
+                    //                                             sensors.orientationBodyToGround),
+                    //                        arma::vec2({ballDiameter,ballDiameter}) });
 
                     //update the pan configuration for the lost ball pan (stored in global/field coordinates at this point)
                     ballPanPoints.clear();
@@ -190,11 +190,11 @@ namespace planning {
                                                            fieldDesc.goalpost_yr));
                 for (const auto& g : robotGoals) {
                     double goalDiameter = 2.0*atan2(fieldDesc.dimensions.goalpost_diameter,arma::norm(g));
-                    goalObjects.push_back({utility::motion::kinematics::calculateHeadJointsToLookAt(
-                                                            {g[0], g[1], 0},
-                                                            sensors.orientationCamToGround,
-                                                            sensors.orientationBodyToGround),
-                                       arma::vec2({goalDiameter,goalDiameter})});
+                    // goalObjects.push_back({utility::motion::kinematics::calculateHeadJointsToLookAt(
+                    //                                         {g[0], g[1], 0},
+                    //                                         sensors.orientationCamToGround,
+                    //                                         sensors.orientationBodyToGround),
+                    //                    arma::vec2({goalDiameter,goalDiameter})});
                 }
 
                 //update the pan configuration for the lost ball pan (stored in global/field coordinates at this point)

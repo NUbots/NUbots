@@ -79,6 +79,7 @@ namespace modules {
                 int goalPriority;
 
                 double view_padding_radians;
+                float tracking_p_gain;
 
                 messages::input::CameraParameters cam;
 
@@ -93,6 +94,7 @@ namespace modules {
                 float angular_update_threshold;
 
                 bool lostAndSearching;
+                bool lostLastTime;
 
                 // int ballsSeenLastUpdate;
                 // int goalPostsSeenLastUpdate;

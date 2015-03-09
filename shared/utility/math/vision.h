@@ -193,8 +193,7 @@ namespace vision {
         //Assume facing forward st x>0 (which is fine for screen angular)
         x = 1 / std::sqrt(denominator_sqr);
         y = x * tanTheta;
-        z = x * tanPhi;
-        
+        z = x * tanPhi;        
 
         return {x,y,z};
     }

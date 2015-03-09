@@ -213,6 +213,7 @@ namespace kinematics {
         return positions;
     }
 
+    template <typename RobotKinematicModel>
     inline arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint, const utility::math::matrix::Transform3D orientationCamToGround, const utility::math::matrix::Transform3D orientationBodyToGround){
     // TODO: Find point that is invariant under head position.
         arma::vec3 cameraPosition = orientationCamToGround.submat(0,3,2,3);

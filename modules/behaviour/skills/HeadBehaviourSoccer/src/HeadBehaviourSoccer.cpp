@@ -62,7 +62,8 @@ namespace modules {
             HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment) : 
             Reactor(std::move(environment)),
             lastCentroid({0,0}),
-            lostAndSearching(false)
+            lostAndSearching(false),
+            lostLastTime(false)
             {
                 //do a little configurating
                 on<Trigger<Configuration<HeadBehaviourSoccer>>>("Head Behaviour Soccer Config",[this] (const Configuration<HeadBehaviourSoccer>& config)
@@ -71,6 +72,8 @@ namespace modules {
                     timeLastObjectSeen = NUClear::clock::now();
                     //Gains                    
                     view_padding_radians = config["view_padding_radians"].as<double>();      
+
+                    tracking_p_gain = config["tracking_p_gain"].as<float>();
 
                     //Load searches:
                     for(auto& search : config["lost_searches"]){
@@ -152,6 +155,7 @@ namespace modules {
                     //Do we need to update our plan?
                     bool updatePlan = false;
                     bool lost = fixationObjects.size() <= 0;
+                    bool found = !lost && lostLastTime;
 
 
                     //Get robot pose
@@ -175,7 +179,12 @@ namespace modules {
                         }
                         currentCentroid = getIMUSpaceDirection(currentCentroid,headToIMUSpace);
                         if(arma::norm(currentCentroid - lastCentroid) > angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
-                            updatePlan = true;
+                            if (found){
+                                updatePlan = true;
+                            } else {
+                                arma::vec2 diff = currentCentroid - lastCentroid;
+                                headSearcher.translate(tracking_p_gain * diff);                                
+                            }
                             lastCentroid = currentCentroid;
                         }
                     }
@@ -201,6 +210,8 @@ namespace modules {
                         command->pitch = direction[1];
                         emit(std::move(command));
                     }
+
+                    lostLastTime = lost;
                 });
 
               

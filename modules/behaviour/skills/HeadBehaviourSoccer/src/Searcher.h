@@ -100,6 +100,13 @@ namespace modules {
 					new_goal = true;
 				}
 
+				void translate(const T& delta){
+					for(auto& p : points){
+						p += delta;
+					}
+					new_goal = true;
+				}
+
             };
 
         }  // motion

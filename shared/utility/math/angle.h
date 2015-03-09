@@ -54,7 +54,7 @@ namespace math {
 
         /**
          * Calculates the difference between two angles between -pi and pi
-         *
+         * Method: http://math.stackexchange.com/questions/1158223/solve-for-x-where-a-sin-x-b-cos-x-c-where-a-b-and-c-are-kno
          * @param
          */
         inline double difference(const double a, const double b) {
@@ -68,6 +68,30 @@ namespace math {
 
         inline arma::vec2 bearingToUnitVector(double angle) {
             return arma::vec2({std::cos(angle), std::sin(angle)});
+        }
+
+        /*! @brief Solves for x in $a \sin(x) + b \cos(x) = c ; x \in [0,\pi]$
+        */
+        inline float solveLinearTrigEquation(float a, float b, float c){
+            float norm = std::sqrt(a*a+b*b);
+            if (norm == 0){
+                throw std::domain_error("utility::math::angle::solveLinearTrigEquation - std::sqrt(a*a+b*b) == 0 => Any value for x is a solution");
+            }
+
+            //Normalise equation
+            a_ = a / norm;
+            b_ = b / norm;
+            c_ = c / norm;
+
+            if(std::fabs(c_) > 1){
+                throw std::domain_error("utility::math::angle::solveLinearTrigEquation - no solution |c_|>1");
+            }
+
+            //Find alpha such that $\sin(\alpha) = a\_$ and $\cos(\alpha) = b\_$, which is possible because $a\_^2 + b\_^2 = 1$
+            float alpha = atan2(a,b);
+
+            //Hence the equation becomes $\cos(\alpha)\cos(x)+\sin(\alpha)\sin(x) = cos(x-\alpha) = c\_$
+            return alpha + std::acos(c_);
         }
     }
 }
