@@ -120,6 +120,7 @@ namespace modules {
                 classifiedImage->dimensions = { image.width(), image.height() };
 
                 // Attach our sensors
+                // std::cout << "sensor-vision latency = " << std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - sensors->timestamp).count() << std::endl;
                 classifiedImage->sensors = sensors;
 
                 // Attach the image

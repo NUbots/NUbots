@@ -34,13 +34,15 @@ namespace modules {
             class HeadController : public NUClear::Reactor {
             private:
                 const size_t id;
-                double min_yaw,max_yaw,min_pitch,max_pitch,head_gain,head_torque;
+                double min_yaw,max_yaw,min_pitch,max_pitch,head_motor_gain,head_motor_torque, p_gain;
                 ReactionHandle updateHandle;
                 //Debug var:
                 time_t lastTime;
             public:
                 explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
                 static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
+                arma::vec2 currentAngles;
+                arma::vec2 goalAngles;
             };
 
     }  // motion 

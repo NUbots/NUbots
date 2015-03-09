@@ -66,7 +66,7 @@ namespace modules {
             private:
 
                 void updateHeadPlan(const std::vector<messages::vision::VisionObject>& fixationObjects, const bool& search, const messages::input::Sensors& sensors, const utility::math::matrix::Rotation3D& headToIMUSpace);
-                arma::vec2 getIMUSpaceDirection(const arma::vec2& lookPoint, const utility::math::matrix::Rotation3D& headToIMUSpace);
+                arma::vec2 getIMUSpaceDirection(const arma::vec2& screenAngles, const utility::math::matrix::Rotation3D& headToIMUSpace);
                 std::vector<arma::vec2> getSearchPoints(std::vector<arma::vec2> fixationPoints, std::vector<arma::vec2> fixationSizes, SearchType sType);
                 std::unique_ptr<messages::motion::HeadCommand> getHeadCommand();
 

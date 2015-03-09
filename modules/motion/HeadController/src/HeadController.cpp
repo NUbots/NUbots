@@ -54,8 +54,8 @@ namespace modules {
             on<Trigger<Configuration<HeadController>>>("Head Controller - Config",[this] (const Configuration<HeadController>& config)
             {
                 //Gains                    
-                head_gain = config["head_gain"].as<double>();
-                head_torque = config["head_torque"].as<double>();
+                head_motor_gain = config["head_motors"]["gain"].as<double>();
+                head_motor_torque = config["head_motors"]["torque"].as<double>();
 
                 //head limits
                 max_yaw = DarwinModel::Head::MAX_YAW;
@@ -66,22 +66,28 @@ namespace modules {
                 emit(std::make_unique<HeadCommand>( HeadCommand {config["initial"]["yaw"].as<double>(),
                                                                  config["initial"]["pitch"].as<double>()}));
 
+                p_gain = config["p_gain"].as<float>();
+                currentAngles = {0,0};
+
             });
 
-            updateHandle = on< Trigger<Sensors>, With<HeadCommand>, Options<Single, Priority<NUClear::HIGH>> >("Head Controller - Update Head Position",[this] (const Sensors& sensors, const HeadCommand& command) {
-                
+            on< Trigger<HeadCommand>>("Head Controller - Register Head Command", [this](const HeadCommand& command){
+                goalAngles = {command.yaw,-command.pitch};
+            });
+
+            updateHandle = on< Trigger<Sensors>, Options<Single, Priority<NUClear::HIGH>> >("Head Controller - Update Head Position",[this] (const Sensors& sensors) {
 
 
 
                 //TODO: change head command to a point in 3D space?
 
-                
-
-
+                //P controller
+                arma::vec2 diff = goalAngles - currentAngles;
+                currentAngles += p_gain * diff;
 
                 //Get goal vector from angles
                 //Pitch is positive when the robot is looking down by Right hand rule, so negate the pitch
-                arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1,command.yaw,-command.pitch});
+                arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1,currentAngles[0], currentAngles[1]});
                 //Convert to robot space
                 arma::vec3 headUnitVector =  sensors.orientation * goalHeadUnitVector_world;
                 //Compute inverse kinematics for head
@@ -102,7 +108,7 @@ namespace modules {
                 waypoints->reserve(2);
                 auto t = NUClear::clock::now();
                 for (auto& angle : goalAngles) {
-                    waypoints->push_back({ id, t, angle.first, angle.second, float(head_gain), float(head_torque) }); // TODO: support separate gains for each leg
+                    waypoints->push_back({ id, t, angle.first, angle.second, float(head_motor_gain), float(head_motor_torque) }); // TODO: support separate gains for each leg
                 }
                 //Send commands
                 emit(std::move(waypoints));

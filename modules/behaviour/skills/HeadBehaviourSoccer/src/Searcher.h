@@ -90,7 +90,6 @@ namespace modules {
 
 				T getState(){
 					new_goal = false;
-					std::cout << "Getting state[" << current % points.size() << "] : " << points[current % points.size()] << std::endl;
 					return points[current % points.size()];
 				}
 

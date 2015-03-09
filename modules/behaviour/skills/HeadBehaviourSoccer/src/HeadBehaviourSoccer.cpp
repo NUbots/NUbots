@@ -105,7 +105,7 @@ namespace modules {
 
                 //TODO: trigger on balls with goals and check number of balls.
                 on<
-                    Trigger<Every<1, Per<std::chrono::seconds>>>,
+                    Trigger<Every<30, Per<std::chrono::seconds>>>,
                     With<Sensors>,
                     With<Optional<std::vector<Ball>>>,
                     With<Optional<std::vector<Goal>>>,
@@ -241,13 +241,13 @@ namespace modules {
                 emit(graph("finalfixationPoint",fixationPoints[0][0],fixationPoints[0][1]));
             }
 
-            arma::vec2 HeadBehaviourSoccer::getIMUSpaceDirection(const arma::vec2& lookPoint, const Rotation3D& headToIMUSpace){               
+            arma::vec2 HeadBehaviourSoccer::getIMUSpaceDirection(const arma::vec2& screenAngles, const Rotation3D& headToIMUSpace){               
 
-                arma::vec3 lookVectorFromHead = objectDirectionFromScreenAngular(lookPoint);//This is an approximation relying on the robots small FOV
+                arma::vec3 lookVectorFromHead = objectDirectionFromScreenAngular(screenAngles);
+                // arma::vec3 lookVectorFromHead = sphericalToCartesian({1,screenAngles[0],screenAngles[1]});//This is an approximation relying on the robots small FOV
                 //Rotate target angles to World space
                 arma::vec3 lookVector = headToIMUSpace * lookVectorFromHead;
                 //Compute inverse kinematics for head direction angles
-                //TODO: change this to 
                 std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(lookVector);
 
                 arma::vec2 result;
