@@ -79,16 +79,16 @@ namespace math {
             }
 
             //Normalise equation
-            a_ = a / norm;
-            b_ = b / norm;
-            c_ = c / norm;
+            float a_ = a / norm;
+            float b_ = b / norm;
+            float c_ = c / norm;
 
             if(std::fabs(c_) > 1){
                 throw std::domain_error("utility::math::angle::solveLinearTrigEquation - no solution |c_|>1");
             }
 
             //Find alpha such that $\sin(\alpha) = a\_$ and $\cos(\alpha) = b\_$, which is possible because $a\_^2 + b\_^2 = 1$
-            float alpha = atan2(a,b);
+            float alpha = atan2(a_,b_);
 
             //Hence the equation becomes $\cos(\alpha)\cos(x)+\sin(\alpha)\sin(x) = cos(x-\alpha) = c\_$
             return alpha + std::acos(c_);

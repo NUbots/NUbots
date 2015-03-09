@@ -177,15 +177,18 @@ namespace modules {
                         for(auto& ob : fixationObjects){
                             currentCentroid = ob.screenAngular / float(fixationObjects.size());
                         }
-                        currentCentroid = getIMUSpaceDirection(currentCentroid,headToIMUSpace);
-                        if(arma::norm(currentCentroid - lastCentroid) > angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
-                            if (found){
+                        std::cout << "screenAngular \n" << currentCentroid << std::endl;
+                        arma::vec2 currentCentroid_world = getIMUSpaceDirection(currentCentroid,headToIMUSpace);
+                        if(arma::norm(currentCentroid_world - lastCentroid) > angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
+                            // if (found){
                                 updatePlan = true;
-                            } else {
-                                arma::vec2 diff = currentCentroid - lastCentroid;
-                                headSearcher.translate(tracking_p_gain * diff);                                
-                            }
-                            lastCentroid = currentCentroid;
+                            // } else {
+                            //     arma::vec2 diff = {currentCentroid[0],-currentCentroid[1]};
+                            //     headSearcher.translate(tracking_p_gain * diff);                                
+                            // }
+                            lastCentroid = currentCentroid_world;
+
+                            //check for DOUBLE UPDATES!!!
                         }
                     }
 
