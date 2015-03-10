@@ -54,12 +54,23 @@ class Docker():
         return x < y
 
     def _share_path(self):
+        # Get the path to the b script
         abspath = os.path.abspath(__file__)
-        dname = os.path.dirname(abspath)
+        local_name = os.path.dirname(abspath)
+        remote_name = local_name
+
+        # For cygwin we need to convert our path to a windows path
         if 'cygwin' in platform.system().lower():
-            dname = subprocess.check_output(['cygpath', '-w', dname]).strip()
-            dname = dname.encode('string_escape')
-        return dname
+            local_name = subprocess.check_output(['cygpath', '-w', local_name]).strip()
+            local_name = local_name.encode('string_escape')
+
+        # For Windows we need to escape our path
+        elif platform.system() == 'Windows':
+            local_name = local_name.encode('string_escape')
+            remote_name = '/nubots/NUbots'
+
+        # For other platforms the paths are the same
+        return (local_name, remote_name)
 
     def _docker_run(self, *args, **kwargs):
         command = (['docker'
@@ -69,7 +80,7 @@ class Docker():
             + (['-t', '-i'] if kwargs.get('interactive', False) else [])
             + (['-d'] if kwargs.get('detached', False) else [])
             + [ '-v'
-            , '{}:/nubots/NUbots'.format(self._share_path())
+            , '{}:/nubots/NUbots'.format(self._share_path()[1])
             , 'nubots/nubots'] + list(args))
 
         # If we're not detached then run
@@ -123,8 +134,8 @@ class Docker():
                 if status == 'poweroff':
                     print('Powering on Boot2Docker VM...')
 
-                    # Work out the path to our shared folder
-                    path = self._share_path()
+                    # Work out the local path to our shared folder
+                    path = self._share_path()[0]
 
                     # Startup our VM
                     result = subprocess.call(['boot2docker', 'up', '--vbox-share={}=nubots'.format(path)])
