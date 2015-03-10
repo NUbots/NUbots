@@ -10,10 +10,9 @@ import subprocess
 def which(program):
 
     # If we are on windows we might need .exe on the end
-    if system.platform() == 'Windows' and program[-3:] != '.exe':
+    if platform.system() == 'Windows' and program[-3:] != '.exe':
         program += '.exe'
 
-    platform.system()
     def is_executable(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
