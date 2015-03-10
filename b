@@ -8,19 +8,23 @@ import platform
 import subprocess
 
 def which(program):
-    import os
-    def is_exe(fpath):
+
+    # If we are on windows we might need .exe on the end
+    if platform.system() == 'Windows' and program[-3:] != '.exe':
+        program += '.exe'
+
+    def is_executable(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
     fpath, fname = os.path.split(program)
     if fpath:
-        if is_exe(program):
+        if is_executable(program):
             return program
     else:
         for path in os.environ["PATH"].split(os.pathsep):
             path = path.strip('"')
             exe_file = os.path.join(path, program)
-            if is_exe(exe_file):
+            if is_executable(exe_file):
                 return exe_file
 
     return None
@@ -36,24 +40,60 @@ class Docker():
         if 'docker_command' in kwargs:
             self.command = getattr(self, kwargs['docker_command'])
 
-    def _share_path(self):
-        abspath = os.path.abspath(__file__)
-        dname = os.path.dirname(abspath)
-        if 'cygwin' in platform.system().lower():
-            dname = subprocess.check_output(['cygpath', '-w', dname]).strip()
-            dname = dname.encode('string_escape')
-        return dname
+    def _up_to_date(self):
+        # Check we have an image
+        if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
+            return False
 
-    def _docker_run(self, *args):
-        subprocess.call(['docker'
+        # Get our timestamps of our Dockerfile
+        x = os.path.getmtime('Dockerfile')
+        # Get the timestamp of the build
+        y = int(self._docker_run('cat', '/container_built_at'))
+
+        # Make sure the build is newer
+        return x < y
+
+    def _share_path(self):
+        # Get the path to the b script
+        abspath = os.path.abspath(__file__)
+        local_name = os.path.dirname(abspath)
+        remote_name = local_name
+
+        # For cygwin we need to convert our path to a windows path
+        if 'cygwin' in platform.system().lower():
+            local_name = subprocess.check_output(['cygpath', '-w', local_name]).strip()
+            local_name = local_name.encode('string_escape')
+
+        # For Windows we need to escape our path
+        elif platform.system() == 'Windows':
+            local_name = local_name.encode('string_escape')
+            remote_name = '/nubots/NUbots'
+
+        # For other platforms the paths are the same
+        return (local_name, remote_name)
+
+    def _docker_run(self, *args, **kwargs):
+        command = (['docker'
             , 'run'
             , '--publish=12000:12000'
-            , '--publish=12001:12001'
-            , '-t'
-            , '-i'
-            , '-v'
-            , '{}:/nubots/NUbots'.format(self._share_path())
+            , '--publish=12001:12001']
+            + (['-t', '-i'] if kwargs.get('interactive', False) else [])
+            + (['-d'] if kwargs.get('detached', False) else [])
+            + [ '-v'
+            , '{}:/nubots/NUbots'.format(self._share_path()[1])
             , 'nubots/nubots'] + list(args))
+
+        # If we're not detached then run
+        if 'interactive' in kwargs:
+            subprocess.call(command)
+
+        # If we're detached get our argument
+        elif 'detached' in kwargs:
+            return subprocess.check_output(command)
+
+        # Otherwise just run
+        else:
+            return subprocess.check_output(command)
 
     def _boot2docker_status(self):
         try:
@@ -94,11 +134,11 @@ class Docker():
                 if status == 'poweroff':
                     print('Powering on Boot2Docker VM...')
 
-                    # Work out the path to our shared folder
-                    path = self._share_path()
+                    # Work out the local path to our shared folder
+                    share_paths = self._share_path()
 
                     # Startup our VM
-                    result = subprocess.call(['boot2docker', 'up', '--vbox-share={}=nubots'.format(path)])
+                    result = subprocess.call(['boot2docker', 'up', '--vbox-share={}=nubots'.format(share_paths[0])])
 
                     # Check for errors while booting
                     if result != 0:
@@ -106,7 +146,7 @@ class Docker():
                         sys.exit(1)
 
                     print('Mounting shares...'),
-                    subprocess.call(['boot2docker', 'ssh', 'sudo mkdir -p {0} && sudo mount -t vboxsf nubots {0}'.format(path)])
+                    subprocess.call(['boot2docker', 'ssh', 'sudo mkdir -p {0} && sudo mount -t vboxsf nubots {0}'.format(share_paths[1])])
 
                     print('Done.')
 
@@ -135,6 +175,11 @@ class Docker():
         # Get docker to build our vm
         subprocess.call(['docker', 'build', '-t=nubots/nubots', '.'])
 
+        # Run an extra command to timestamp when this was built (for checking with compile)
+        container = self._docker_run('sh', '-c', 'date +"%s" > /container_built_at', detached=True).strip()
+        subprocess.check_output(['docker', 'wait', container])
+        subprocess.check_output(['docker', 'commit', container, 'nubots/nubots'])
+
     def clean(self):
         print 'TODO CLEAN'
 
@@ -144,13 +189,13 @@ class Docker():
         # and rebuild
         self.build()
 
-    def ssh(self):
+    def shell(self):
         # Run a docker command that will give us an interactive shell
-        self._docker_run('/bin/bash')
+        self._docker_run('/bin/bash', interactive=True)
 
     def compile(self):
-        # If we don't have an image, then we need to build one
-        if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
+        # If we don't have an image, or it is out of date then we need to build one
+        if not self._up_to_date():
             self.build()
 
         # Make our build folder if it doesn't exist
@@ -161,16 +206,16 @@ class Docker():
         # If we don't have cmake built, run cmake from the docker container
         if not os.path.exists('build/build.ninja'):
             print 'Running cmake...'
-            self._docker_run('cmake', '..', '-GNinja')
+            self._docker_run('cmake', '..', '-GNinja', interactive=True)
             print('done')
 
         print('Running ninja...')
-        self._docker_run('ninja')
+        self._docker_run('ninja', interactive=True)
         print('done')
 
     def configure_compile(self):
         # If we don't have an image, then we need to build one
-        if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
+        if not self._up_to_date():
             self.build()
 
         # Make our build folder if it doesn't exist
@@ -179,22 +224,25 @@ class Docker():
             os.mkdir('build')
 
         print 'Running ccmake...'
-        self._docker_run('ccmake', '..', '-GNinja')
+        self._docker_run('ccmake', '..', '-GNinja', interactive=True)
         print('done')
 
     def run_role(self, role):
         # If we don't have an image, then we need to build one
-        if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
+        if not self._up_to_date():
             self.build()
 
         print 'Running {} on the container...'.format(role)
-        self._docker_run('bin/{}'.format(role))
+        self._docker_run('bin/{}'.format(role), interactive=True)
         print('done')
 
     def run(self):
         self.command()
 
 if __name__ == "__main__":
+
+    # Add Docker binary to end of PATH (for windows)
+    os.environ["PATH"] = os.environ["PATH"] + os.pathsep + os.path.dirname(os.path.abspath(__file__)) + '/cmake/bin'
 
     # Root parser information
     command = argparse.ArgumentParser(description='This script is an optional helper script for performing common tasks related to building and running the NUbots code and related projects.')
@@ -206,7 +254,7 @@ if __name__ == "__main__":
     docker_subcommands.add_parser('build', help='Build the docker image used to build the code and spin up any required Virtual Machines')
     docker_subcommands.add_parser('clean', help='Delete the built docker image so that it will have to be rebuilt')
     docker_subcommands.add_parser('rebuild', help='Delete the built docker image and rebuild it')
-    docker_subcommands.add_parser('ssh', help='Get a non persistant interactive shell on the container')
+    docker_subcommands.add_parser('shell', help='Get a non persistant interactive shell on the container')
 
     # Compile subcommand
     compile_command = subcommands.add_parser('compile', help='Compile the NUbots source code')
