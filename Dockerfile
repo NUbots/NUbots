@@ -46,16 +46,19 @@ RUN apt-get -y install build-essential \
 RUN update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
  && update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20
 
-# Fix our ar, ranlib and nm tools to use the gcc versions
-RUN echo '#/bin/bash'                                                                    > /usr/local/bin/ar \
- && echo '/usr/bin/ar $@ --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so'     >> /usr/local/bin/ar \
- && chmod +x /usr/local/bin/ar \
- && echo '#/bin/bash'                                                                    > /usr/local/bin/ranlib \
- && echo '/usr/bin/ranlib $@ --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so' >> /usr/local/bin/ranlib \
- && chmod +x /usr/local/bin/ranlib \
- && echo '#/bin/bash'                                                                    > /usr/local/bin/nm \
- && echo '/usr/bin/nm $@ --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so'     >> /usr/local/bin/nm \
- && chmod +x /usr/local/bin/nm
+# Fix our ar, ranlib and nm tools to use the lto plugin
+RUN mv /usr/bin/ar /usr/bin/ar_bin \
+ && echo '#/bin/bash'                                                                    > /usr/bin/ar \
+ && echo '/usr/bin/ar_bin $@ --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so'     >> /usr/bin/ar \
+ && chmod +x /usr/bin/ar \
+ && mv /usr/bin/ranlib /usr/bin/ranlib_bin \
+ && echo '#/bin/bash'                                                                    > /usr/bin/ranlib \
+ && echo '/usr/bin/ranlib_bin $@ --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so' >> /usr/bin/ranlib \
+ && chmod +x /usr/bin/ranlib \
+ && mv /usr/bin/nm /usr/bin/nm_bin \
+ && echo '#/bin/bash'                                                                    > /usr/bin/nm \
+ && echo '/usr/bin/nm_bin $@ --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so'     >> /usr/bin/nm \
+ && chmod +x /usr/bin/nm
 
 # build our libraries
 WORKDIR /tmp
