@@ -9,7 +9,7 @@ SET(VERSION_PATCH 0)
 OPTION(BUILD_TESTS "Builds all of the tests for each module." OFF)
 
 # Set to on to build as shared libraries
-OPTION(SHARED_BUILD "Build the binaries by linking to shared libraries." ON)
+OPTION(SHARED_BUILD "Build the binaries by linking to shared libraries." OFF)
 
 # We use additional modules that cmake needs to know about
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
@@ -33,7 +33,7 @@ ADD_SUBDIRECTORY(shared/messages)
 ADD_SUBDIRECTORY(shared/utility)
 
 # Add these to our shared libraries (started in our shared libraries cmake)
-SET(NUBOTS_SHARED_LIBRARIES ${NUBOTS_SHARED_LIBRARIES} messages utility)
+SET(NUBOTS_SHARED_LIBRARIES messages utility ${NUBOTS_SHARED_LIBRARIES})
 
 # Build tests in test mode
 IF(BUILD_TESTS)

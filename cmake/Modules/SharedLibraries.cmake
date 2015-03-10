@@ -21,6 +21,8 @@ SET(NUBOTS_SHARED_LIBRARIES
     ${TCMALLOC_LIBRARIES}
     ${NUCLEAR_LIBRARIES}
     ${OPENBLAS_LIBRARIES}
+    /usr/lib/gcc/i686-linux-gnu/4.9/libgfortran.a
+    /usr/lib/gcc/i686-linux-gnu/4.9/libquadmath.a
     ${ZMQ_LIBRARIES}
     ${PROTOBUF_LIBRARIES}
     ${YAML_LIBRARIES}
