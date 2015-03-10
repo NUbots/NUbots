@@ -40,6 +40,19 @@ class Docker():
         if 'docker_command' in kwargs:
             self.command = getattr(self, kwargs['docker_command'])
 
+    def _up_to_date(self):
+        # Check we have an image
+        if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
+            return False
+
+        # Get our timestamps of our Dockerfile
+        x = os.path.getmtime('Dockerfile')
+        # Get the timestamp of the build
+        y = int(self._docker_run('cat', '/container_built_at'))
+
+        # Make sure the build is newer
+        return x < y
+
     def _share_path(self):
         abspath = os.path.abspath(__file__)
         dname = os.path.dirname(abspath)
@@ -49,14 +62,27 @@ class Docker():
         return dname
 
     def _docker_run(self, *args, **kwargs):
-        subprocess.call(['docker'
+        command = (['docker'
             , 'run'
             , '--publish=12000:12000'
             , '--publish=12001:12001']
-            + (['-t', '-i'] if kwargs.get('interactive', False) else []) +
-            [ '-v'
+            + (['-t', '-i'] if kwargs.get('interactive', False) else [])
+            + (['-d'] if kwargs.get('detached', False) else [])
+            + [ '-v'
             , '{}:/nubots/NUbots'.format(self._share_path())
             , 'nubots/nubots'] + list(args))
+
+        # If we're not detached then run
+        if 'interactive' in kwargs:
+            subprocess.call(command)
+
+        # If we're detached get our argument
+        elif 'detached' in kwargs:
+            return subprocess.check_output(command)
+
+        # Otherwise just run
+        else:
+            return subprocess.check_output(command)
 
     def _boot2docker_status(self):
         try:
@@ -138,6 +164,11 @@ class Docker():
         # Get docker to build our vm
         subprocess.call(['docker', 'build', '-t=nubots/nubots', '.'])
 
+        # Run an extra command to timestamp when this was built (for checking with compile)
+        container = self._docker_run('sh', '-c', 'date +"%s" > /container_built_at', detached=True).strip()
+        subprocess.check_output(['docker', 'wait', container])
+        subprocess.check_output(['docker', 'commit', container, 'nubots/nubots'])
+
     def clean(self):
         print 'TODO CLEAN'
 
@@ -152,8 +183,8 @@ class Docker():
         self._docker_run('/bin/bash', interactive=True)
 
     def compile(self):
-        # If we don't have an image, then we need to build one
-        if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
+        # If we don't have an image, or it is out of date then we need to build one
+        if not self._up_to_date():
             self.build()
 
         # Make our build folder if it doesn't exist
@@ -164,16 +195,16 @@ class Docker():
         # If we don't have cmake built, run cmake from the docker container
         if not os.path.exists('build/build.ninja'):
             print 'Running cmake...'
-            self._docker_run('cmake', '..', '-GNinja')
+            self._docker_run('cmake', '..', '-GNinja', interactive=True)
             print('done')
 
         print('Running ninja...')
-        self._docker_run('ninja')
+        self._docker_run('ninja', interactive=True)
         print('done')
 
     def configure_compile(self):
         # If we don't have an image, then we need to build one
-        if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
+        if not self._up_to_date():
             self.build()
 
         # Make our build folder if it doesn't exist
@@ -187,7 +218,7 @@ class Docker():
 
     def run_role(self, role):
         # If we don't have an image, then we need to build one
-        if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
+        if not self._up_to_date():
             self.build()
 
         print 'Running {} on the container...'.format(role)
