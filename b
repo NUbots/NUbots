@@ -135,10 +135,10 @@ class Docker():
                     print('Powering on Boot2Docker VM...')
 
                     # Work out the local path to our shared folder
-                    path = self._share_path()[0]
+                    share_paths = self._share_path()
 
                     # Startup our VM
-                    result = subprocess.call(['boot2docker', 'up', '--vbox-share={}=nubots'.format(path)])
+                    result = subprocess.call(['boot2docker', 'up', '--vbox-share={}=nubots'.format(share_paths[0])])
 
                     # Check for errors while booting
                     if result != 0:
@@ -146,7 +146,7 @@ class Docker():
                         sys.exit(1)
 
                     print('Mounting shares...'),
-                    subprocess.call(['boot2docker', 'ssh', 'sudo mkdir -p {0} && sudo mount -t vboxsf nubots {0}'.format(path)])
+                    subprocess.call(['boot2docker', 'ssh', 'sudo mkdir -p {0} && sudo mount -t vboxsf nubots {0}'.format(share_paths[1])])
 
                     print('Done.')
 
