@@ -245,6 +245,9 @@ if __name__ == "__main__":
     command = argparse.ArgumentParser(description='This script is an optional helper script for performing common tasks related to building and running the NUbots code and related projects.')
     subcommands = command.add_subparsers(dest='subcommand')
 
+    # Add Docker binary to end of PATH
+    os.environ["PATH"] = os.environ["PATH"] + os.pathsep + os.path.dirname(os.path.abspath(__file__)) + '/cmake/bin'
+
     # Docker subcommand
     docker_command = subcommands.add_parser('docker', help='Manage the docker container used to build')
     docker_subcommands = docker_command.add_subparsers(dest='docker_command')
