@@ -44,13 +44,13 @@ class Docker():
             dname = dname.encode('string_escape')
         return dname
 
-    def _docker_run(self, *args):
+    def _docker_run(self, *args, **kwargs):
         subprocess.call(['docker'
             , 'run'
             , '--publish=12000:12000'
-            , '--publish=12001:12001'
-
-            , '-v'
+            , '--publish=12001:12001']
+            + (['-t', '-i'] if kwargs.get('interactive', False) else []) +
+            [ '-v'
             , '{}:/nubots/NUbots'.format(self._share_path())
             , 'nubots/nubots'] + list(args))
 
@@ -143,9 +143,9 @@ class Docker():
         # and rebuild
         self.build()
 
-    def ssh(self):
+    def shell(self):
         # Run a docker command that will give us an interactive shell
-        self._docker_run('-t', '-i', '/bin/bash')
+        self._docker_run('/bin/bash', interactive=True)
 
     def compile(self):
         # If we don't have an image, then we need to build one
@@ -178,7 +178,7 @@ class Docker():
             os.mkdir('build')
 
         print 'Running ccmake...'
-        self._docker_run('ccmake', '..', '-GNinja')
+        self._docker_run('ccmake', '..', '-GNinja', interactive=True)
         print('done')
 
     def run_role(self, role):
@@ -187,7 +187,7 @@ class Docker():
             self.build()
 
         print 'Running {} on the container...'.format(role)
-        self._docker_run('bin/{}'.format(role))
+        self._docker_run('bin/{}'.format(role), interactive=True)
         print('done')
 
     def run(self):
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     docker_subcommands.add_parser('build', help='Build the docker image used to build the code and spin up any required Virtual Machines')
     docker_subcommands.add_parser('clean', help='Delete the built docker image so that it will have to be rebuilt')
     docker_subcommands.add_parser('rebuild', help='Delete the built docker image and rebuild it')
-    docker_subcommands.add_parser('ssh', help='Get a non persistant interactive shell on the container')
+    docker_subcommands.add_parser('shell', help='Get a non persistant interactive shell on the container')
 
     # Compile subcommand
     compile_command = subcommands.add_parser('compile', help='Compile the NUbots source code')
