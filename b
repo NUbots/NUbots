@@ -194,14 +194,14 @@ class Docker():
         self._docker_run('/bin/bash', interactive=True)
 
     def compile(self):
-        # If we don't have an image, or it is out of date then we need to build one
-        if not self._up_to_date():
-            self.build()
-
         # Make our build folder if it doesn't exist
         if not os.path.exists('build'):
             print 'Creating build folder...'
             os.mkdir('build')
+
+        # If we don't have an image, or it is out of date then we need to build one
+        if not self._up_to_date():
+            self.build()
 
         # If we don't have cmake built, run cmake from the docker container
         if not os.path.exists('build/build.ninja'):
