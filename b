@@ -8,19 +8,24 @@ import platform
 import subprocess
 
 def which(program):
-    import os
-    def is_exe(fpath):
+
+    # If we are on windows we might need .exe on the end
+    if system.platform() == 'Windows' and program[-3:] != '.exe':
+        program += '.exe'
+
+    platform.system()
+    def is_executable(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
     fpath, fname = os.path.split(program)
     if fpath:
-        if is_exe(program):
+        if is_executable(program):
             return program
     else:
         for path in os.environ["PATH"].split(os.pathsep):
             path = path.strip('"')
             exe_file = os.path.join(path, program)
-            if is_exe(exe_file):
+            if is_executable(exe_file):
                 return exe_file
 
     return None
