@@ -65,6 +65,8 @@ namespace geometry {
         arma::vec2 getTopLeft() const;                                  //! Returns the top left pixel location  of the Quad.
         arma::vec2 getTopRight() const;                                 //! Returns the top right pixel location  of the Quad.
 
+        arma::vec2 getSize() const;                                     //Returns the bounding box width and height
+
         double getLeft() const;
         double getRight() const;
         double getTop() const;

@@ -1,15 +1,8 @@
-head_gain: 30.0
-head_torque: 100.0
-angle_limits:
-  yaw:
-    min: -2 
-    max: 2
-  pitch:
-    min: -1.5
-    max: 1.5
+head_motors:
+  gain: 30.0
+  torque: 100.0
 initial:
   yaw: 0
   pitch: 0
-
-
-
+#Gain for controller to reduce look judder and oscillation
+p_gain: 0.1

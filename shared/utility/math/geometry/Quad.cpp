@@ -121,6 +121,12 @@ namespace geometry {
         return tr;
     }
 
+    arma::vec2 Quad::getSize() const{
+        Quad boundingBox = getBoundingBox(getVertices());
+        return {boundingBox.getAverageWidth(),boundingBox.getAverageHeight()};
+    }
+
+
     double Quad::getLeft() const {
         return (0.5 * (bl[0] + tl[0]));
     }

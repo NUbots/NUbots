@@ -363,7 +363,8 @@ namespace vision {
 
                 // Angular positions from the camera
                 it->screenAngular = arma::atan(cam.pixelsToTanThetaFactor % screenGoalCentre);
-                it->angularSize = { 0, 0 };
+                //TODO: make this exact!..
+                it->angularSize = arma::atan(cam.pixelsToTanThetaFactor % it->quad.getSize());
             }
 
             // Do some extra throwouts for goals based on kinematics

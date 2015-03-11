@@ -50,6 +50,7 @@ namespace modules {
 
         HeadController::HeadController(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
 
+            currentAngles = {0,0};//TODO: set this to current motor positions
             //do a little configurating
             on<Trigger<Configuration<HeadController>>>("Head Controller - Config",[this] (const Configuration<HeadController>& config)
             {
@@ -67,7 +68,6 @@ namespace modules {
                                                                  config["initial"]["pitch"].as<double>()}));
 
                 p_gain = config["p_gain"].as<float>();
-                currentAngles = {0,0};
 
             });
 
@@ -76,11 +76,6 @@ namespace modules {
             });
 
             updateHandle = on< Trigger<Sensors>, Options<Single, Priority<NUClear::HIGH>> >("Head Controller - Update Head Position",[this] (const Sensors& sensors) {
-
-
-
-                //TODO: change head command to a point in 3D space?
-
                 //P controller
                 arma::vec2 diff = goalAngles - currentAngles;
                 currentAngles += p_gain * diff;
