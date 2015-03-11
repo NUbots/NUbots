@@ -202,8 +202,6 @@ namespace fakedarwin {
                 else {
                     speed = 0;
                 }
-                float torqueFeedback = command.torque;
-                log("torque:", torqueFeedback);
 
                 // Set our variables
                 auto& servo = sensors.servo[command.id];

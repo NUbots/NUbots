@@ -1,368 +1,289 @@
 #!/usr/bin/python
 
-import sys
 import os
+import sys
+import argparse
 import shutil
 import platform
-from subprocess import call
-from subprocess import Popen
-from subprocess import PIPE
+import subprocess
 
-def print_command_summary():
-    print """
-Usage: b <command> [arguments]
+def which(program):
 
-NUbots Helper
-----------------------------------------------------------------------
-This script is an optional helper script for performing common tasks
-related to building and running NUClearPort and related projects.
+    # If we are on windows we might need .exe on the end
+    if platform.system() == 'Windows' and program[-3:] != '.exe':
+        program += '.exe'
 
-Command summary:
-  - help              Show this help.
-  - clean             Deletes the build directory.
-  - cmake             Runs cmake in the build directory (creating it if it
-                      doesn't exist).
-  - cmake_ninja       Runs cmake to generate a Ninja build.
-  - make [arg]...     Runs cmake, then make in the build directory (creating it
-                      if it doesn't exist), passing any arguments to the make
-                      command.
-  - makej             Same as make, but runs 'make -j'.
-  - ninja [arg]...    Same as the make command, but runs ninja instead.
-  - run <role>        Runs the binary for the role of the given name.
-  - debug <role>      Runs the binary for the role of the given name under gdb.
-  - create_box <provider> Builds the nubots Vagrant box, for the given
-                          virtualisation provider (vmware, or vitrualbox),
-                          using Packer.
-                          (the box is first deleted if it already exists)
-  - module            Allows management of NUClear modules
-"""
+    def is_executable(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
-def clean():
-    if os.path.exists('build'):
-        shutil.rmtree('build')
-
-def cmake():
-    if not os.path.exists('build'):
-        os.mkdir('build')
-    call(['cmake', '..'], cwd='build')
-
-def make(args):
-    if not os.path.exists('build'):
-        cmake()
-    call(['make'] + args, cwd='build')
-
-def cmake_ninja():
-    if not os.path.exists('build'):
-        os.mkdir('build')
-    call(['cmake', '..', '-G', 'Ninja'], cwd='build')
-
-def ninja(args):
-    if not os.path.exists('build'):
-        cmake_ninja()
-    call(['ninja'] + args, cwd='build')
-
-def role_exists(role):
-    return os.path.isfile("build/bin/{}".format(role))
-
-def run(role):
-    if role == '':
-        print '''
-Usage: b run <role>
-
-Please provide the name of the role to run.
-'''
-    elif role_exists(role):
-        env = os.environ.copy()
-        # env['LD_LIBRARY_PATH'], "bin/lib:{}".format(env["LD_LIBRARY_PATH"]))
-        env['LD_LIBRARY_PATH'] = "bin/lib"
-        call(["./bin/{}".format(role)], cwd='build/', env=env)
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_executable(program):
+            return program
     else:
-        print "The role '{}' does not exist or did not build correctly.".format(role)
-
-def debug(role):
-    if role == '':
-        print '''
-Usage: b debug <role>
-
-Please provide the name of the role to debug.
-'''
-    elif role_exists(role):
-        env = os.environ.copy()
-        # env['LD_LIBRARY_PATH'], "bin/lib:{}".format(env["LD_LIBRARY_PATH"]))
-        env['LD_LIBRARY_PATH'] = "bin/lib"
-        call(["gdb", "./bin/{}".format(role), "-ex", "r"], cwd='build/', env=env)
-    else:
-        print "The role '{}' does not exist or did not build correctly.".format(role)
-
-def box_exists(box_name, provider):
-    p1 = Popen(['vagrant', 'box', 'list'], stdout=PIPE)
-    p2 = Popen(['grep', "'{0}.*({1}'".format(box_name, provider)], stdin=p1.stdout, stdout=PIPE)
-    return p2.communicate()[0] != ''
-
-def box_generated(provider):
-    return os.path.isfile("packer/nubots-ubuntu-14-04-x86-{}.box".format(provider))
-
-def packer_is_installed():
-    cmd = "where" if platform.system() == "Windows" else "which" #which is where on windows
-    return not call([cmd, 'packer'])
-
-def packer(provider):
-    box_name = 'nubots-14.04'
-
-    if box_generated(provider):
-        call(['rm', 'nubots-ubuntu-14-04-x86-{}.box'.format(provider)], cwd='packer')
-
-    call(['packer', 'build', '-only={}-iso'.format(provider), 'template.yaml'], cwd='packer')
-
-    if box_generated(provider):
-        if box_exists(box_name, provider):
-            call(['vagrant', 'box', 'remove', box_name]) # TODO: only remove box for given provider
-
-        call(['vagrant', 'box', 'add', box_name,
-              'nubots-ubuntu-14-04-x86-{}.box'.format(provider)],
-             cwd='packer')
-
-def create_box(provider):
-    if not packer_is_installed():
-        print '''
-The program packer must be installed to generate a box.
-
-Please visit http://www.packer.io/ for information on installing packer.
-'''
-    elif provider == '' or (provider != 'vmware' and provider != 'virtualbox'):
-        print '''
-Usage: b create_box <provider>
-
-Please provide the name of the provider for which to create the Vagrant box.
-Allowable providers are:
-    - vmware
-    - virtualbox
-
-The selected provider must be installed on the system to create a box.
-'''
-    else:
-        packer(provider)
-
-def build_license_string(module_name):
-    return """/*
- * This file is part of NUbots Codebase.
- *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Copyright 2013 NUBots <nubots@nubots.net>
- */
-
-""".format(module_name)
-
-def surround_with_namespaces(code, namespaces):
-    namespace_openings = ''
-    namespace_closings = ''
-    for namespace in namespaces:
-        namespace_openings += 'namespace {} {{\n'.format(namespace)
-        namespace_closings += '}\n'
-
-    return """{0}
-{1}
-{2}""".format(namespace_openings, code, namespace_closings)
-
-def surround_with_include_guard(code, path):
-    guard = '_'.join(path.split('/')).upper()
-
-    return """#ifndef {0}_H
-#define {0}_H
-
-{1}
-
-#endif""".format(guard, code)
-
-def build_module_header(path):
-    module_name = path.split('/')[-1]
-    module_namespaces = path.split('/')[:-1]
-
-    module_class = """    class {0} : public NUClear::Reactor {{
-    public:
-        /// @brief Called by the powerplant to build and setup the {0} reactor.
-        explicit {0}(std::unique_ptr<NUClear::Environment> environment);
-    }};
-""".format(module_name)
-
-    code = surround_with_namespaces(module_class, module_namespaces)
-
-    return surround_with_include_guard("""#include <nuclear>
-
-{}""".format(code), path)
-
-def build_module_implementation(path):
-    module_name = path.split('/')[-1]
-    module_namespaces = path.split('/')[:-1]
-
-    constructor = """    {0}::{0}(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {{
-
-    }}
-""".format(module_name)
-
-    code = surround_with_namespaces(constructor, module_namespaces)
-
-    return """#include "{0}.h"
-
-{1}
-""".format(module_name, code)
-
-def create_nuclear_module(path):
-    src_path = '{}/src'.format(path)
-    tests_path = '{}/tests'.format(path)
-    config_path = '{}/config'.format(path)
-    module_name = path.split('/')[-1]
-
-    os.makedirs(path)
-    os.makedirs(src_path)
-    os.makedirs(tests_path)
-    os.makedirs(config_path)
-
-    with open('{}/CMakeLists.txt'.format(path), "w") as text_file:
-        text_file.write('# Build our NUClear module\nNUCLEAR_MODULE()')
-
-    with open('{}/README.md'.format(path), "w") as text_file:
-        text_file.write('{0}\n{1}\n\n'.format(module_name, len(module_name) * '='))
-        text_file.write('\n\n\n## '.join(['## Description', 'Usage', 'Emits', 'Dependencies']))
-
-    with open('{0}/{1}.h'.format(src_path, module_name), "w") as text_file:
-        text_file.write(build_license_string(module_name))
-        text_file.write(build_module_header(path))
-
-    with open('{0}/{1}.cpp'.format(src_path, module_name), "w") as text_file:
-        text_file.write(build_license_string(module_name))
-        text_file.write(build_module_implementation(path))
-
-    with open('{0}/{1}Test.cpp'.format(tests_path, module_name), "w") as text_file:
-        text_file.write(build_license_string(module_name))
-        text_file.write("""\n
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-#include <catch.hpp>
-""")
-
-
-def module_generate(args):
-    path = ''
-    if len(args) >= 1:
-        path = args[0]
-
-    if path == '':
-        print """
-You need to provide the path to the module to generate.
-Usage: b module generate <module-path>
-
-e.g. The command:
-
-    $ ./b module generate platform/darwin/HardwareIO
-
-would generate a new module 'modules::platform::darwin::HardwareIO' in the
-folder 'modules/platform/darwin/HardwareIO'.
-"""
-    elif os.path.exists('modules/{}'.format(path)):
-        print """
-The path provided already exists.
-Module generation aborted.
-"""
-    else:
-        create_nuclear_module('modules/{}'.format(path))
-
-
-
-def module(command, args):
-    arg0 = ''
-    if len(args) >= 1:
-        arg0 = args[0]
-
-    if command == '':
-        print """
-Module requires a sub-command.
-Usage: b module <sub-command> [arguments]
-
-Available sub-commands are:
-    - generate
-"""
-    elif command == 'generate':
-        module_generate(args)
-    else:
-        print """
-Unknown module sub-command: {}
-Usage: b module <sub-command> [arguments]
-
-Run './b help' for a command summary.
-""".format(command)
-
-def unknown_command(command):
-    print """
-Unknown command: {}
-Usage: b <command> [arguments]
-
-Run './b help' for a command summary.
-""".format(command)
-
-def execute_command(command, args):
-    arg0 = ''
-    if len(args) >= 1:
-        arg0 = args[0]
-
-    if (command == '' or
-        command == 'help' or
-        command == '--help'):
-        print_command_summary()
-
-    elif command == 'clean':
-        clean()
-
-    elif command == 'cmake':
-        cmake()
-    elif command == 'make':
-        cmake()
-        make(arguments)
-    elif command == 'makej':
-        cmake()
-        make(['-j2'])
-
-    elif command == 'cmake_ninja':
-        cmake_ninja()
-    elif command == 'ninja':
-        cmake_ninja()
-        ninja(arguments)
-
-    elif command == 'run':
-        run(arg0)
-    elif command == 'debug':
-        debug(arg0)
-
-    elif command == 'create_box':
-        create_box(arg0)
-    elif command == 'module':
-        module(arg0, args[1:])
-    else:
-        unknown_command(command)
-
-
-# Prepare the command line arguments and perform the user's command:
-command = ''
-arguments = []
-
-if len(sys.argv) >= 2:
-    command = sys.argv[1]
-if len(sys.argv) >= 3:
-    arguments = sys.argv[2:]
-
-try:
-    execute_command(command, arguments)
-except KeyboardInterrupt, e:
-    print "\nThe process was interrupted by the Keyboard."
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, program)
+            if is_executable(exe_file):
+                return exe_file
+
+    return None
+
+class Docker():
+    def __init__(self, **kwargs):
+        # Check that docker is installed
+        self._check_docker()
+
+        # Setup our docker environment
+        self._setup_docker_environment()
+
+        if 'docker_command' in kwargs:
+            self.command = getattr(self, kwargs['docker_command'])
+
+    def _up_to_date(self):
+        # Check we have an image
+        if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
+            return False
+
+        # Get our timestamps of our Dockerfile
+        x = os.path.getmtime('Dockerfile')
+        # Get the timestamp of the build
+        y = int(self._docker_run('cat', '/container_built_at'))
+
+        # Make sure the build is newer
+        return x < y
+
+    def _share_path(self):
+        # Get the path to the b script
+        abspath = os.path.abspath(__file__)
+        local_name = os.path.dirname(abspath)
+        remote_name = local_name
+
+        # For cygwin we need to convert our path to a windows path
+        if 'cygwin' in platform.system().lower():
+            local_name = subprocess.check_output(['cygpath', '-w', local_name]).strip()
+            local_name = local_name.encode('string_escape')
+
+        # For Windows we need to escape our path
+        elif platform.system() == 'Windows':
+            local_name = local_name.encode('string_escape')
+            remote_name = '/nubots/NUbots'
+
+        # For other platforms the paths are the same
+        return (local_name, remote_name)
+
+    def _docker_run(self, *args, **kwargs):
+        command = (['docker'
+            , 'run'
+            , '--publish=12000:12000'
+            , '--publish=12001:12001']
+            + (['-t', '-i'] if kwargs.get('interactive', False) else [])
+            + (['-d'] if kwargs.get('detached', False) else [])
+            + [ '-v'
+            , '{}:/nubots/NUbots'.format(self._share_path()[1])
+            , 'nubots/nubots'] + list(args))
+
+        # If we're not detached then run
+        if 'interactive' in kwargs:
+            subprocess.call(command)
+
+        # If we're detached get our argument
+        elif 'detached' in kwargs:
+            return subprocess.check_output(command)
+
+        # Otherwise just run
+        else:
+            return subprocess.check_output(command)
+
+    def _boot2docker_status(self):
+        try:
+            status = subprocess.check_output(['boot2docker', 'status'], stderr=subprocess.STDOUT)
+            return (True, status.strip())
+        except subprocess.CalledProcessError:
+            return (False, None)
+
+    def _setup_docker_environment(self):
+        # Do we need to do any configuration for our docker environment
+        # If we are linux or have a host hardcoded we don't need to do anything
+        if 'DOCKER_HOST' not in os.environ and platform.system() != 'Linux':
+
+            # Check if docker-machine is installed (prefered)
+            if which('docker-machine'):
+                pass
+
+            # Check if boot2docker is installed
+            elif which('boot2docker'):
+                # Get boot2docker's status
+                (exists, status) = self._boot2docker_status()
+
+                # If there isn't a boot2docker vm yet
+                if not exists:
+                    print('Initializing Boot2Docker VM...')
+                    result = subprocess.call(['boot2docker', 'init'])
+
+                    # Check for errors while setting up
+                    if result != 0:
+                        print('There was an error while initializing the boot2docker vm (see error above)')
+                        sys.exit(1)
+
+                    print('Done.')
+
+                    (exists, status) = self._boot2docker_status()
+
+                # If the boot2docker vm is powered off
+                if status == 'poweroff':
+                    print('Powering on Boot2Docker VM...')
+
+                    # Work out the local path to our shared folder
+                    share_paths = self._share_path()
+
+                    # Startup our VM
+                    result = subprocess.call(['boot2docker', 'up', '--vbox-share={}=nubots'.format(share_paths[0])])
+
+                    # Check for errors while booting
+                    if result != 0:
+                        print('There was an error while initializing the boot2docker vm (see error above)')
+                        sys.exit(1)
+
+                    print('Mounting shares...'),
+                    subprocess.call(['boot2docker', 'ssh', 'sudo mkdir -p {0} && sudo mount -t vboxsf nubots {0}'.format(share_paths[1])])
+
+                    print('Done.')
+
+                # Now we can get the environment variables we need
+                process = subprocess.Popen(['boot2docker', 'shellinit'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                exports = process.communicate()[0]
+                result = process.wait()
+                exports = [e.strip()[7:].split('=') for e in exports.strip().split('\n')]
+
+                # Set our enviroment variables
+                for e in exports:
+                    os.environ[e[0]] = e[1]
+
+    def _check_docker(self):
+        # Check that docker is installed
+        if not which('docker'):
+            print "Docker is not installed, please download and install it"
+            sys.exit(1)
+
+        # Check that either we are native linux, or we have a vm provider (docker machine or boot2docker)
+        if not (platform.system() == 'Linux' or which('docker-machine') or which('boot2docker')):
+            print "The requirements for the docker daemon are not met."
+            print "You must either be running on linux, or have a Virtual Machine provider for docker (either docker-machine or boot2docker)"
+
+    def build(self):
+        # Get docker to build our vm
+        subprocess.call(['docker', 'build', '-t=nubots/nubots', '.'])
+
+        # Run an extra command to timestamp when this was built (for checking with compile)
+        container = self._docker_run('sh', '-c', 'date +"%s" > /container_built_at', detached=True).strip()
+        subprocess.check_output(['docker', 'wait', container])
+        subprocess.check_output(['docker', 'commit', container, 'nubots/nubots'])
+
+    def clean(self):
+        print 'TODO CLEAN'
+
+    def rebuild(self):
+        # Clean
+        self.clean()
+        # and rebuild
+        self.build()
+
+    def shell(self):
+        # Run a docker command that will give us an interactive shell
+        self._docker_run('/bin/bash', interactive=True)
+
+    def compile(self):
+        # If we don't have an image, or it is out of date then we need to build one
+        if not self._up_to_date():
+            self.build()
+
+        # Make our build folder if it doesn't exist
+        if not os.path.exists('build'):
+            print 'Creating build folder...'
+            os.mkdir('build')
+
+        # If we don't have cmake built, run cmake from the docker container
+        if not os.path.exists('build/build.ninja'):
+            print 'Running cmake...'
+            self._docker_run('cmake', '..', '-GNinja', interactive=True)
+            print('done')
+
+        print('Running ninja...')
+        self._docker_run('ninja', interactive=True)
+        print('done')
+
+    def configure_compile(self):
+        # If we don't have an image, then we need to build one
+        if not self._up_to_date():
+            self.build()
+
+        # Make our build folder if it doesn't exist
+        if not os.path.exists('build'):
+            print 'Creating build folder...'
+            os.mkdir('build')
+
+        print 'Running ccmake...'
+        self._docker_run('ccmake', '..', '-GNinja', interactive=True)
+        print('done')
+
+    def run_role(self, role):
+        # If we don't have an image, then we need to build one
+        if not self._up_to_date():
+            self.build()
+
+        print 'Running {} on the container...'.format(role)
+        self._docker_run('bin/{}'.format(role), interactive=True)
+        print('done')
+
+    def run(self):
+        self.command()
+
+if __name__ == "__main__":
+
+    # Add Docker binary to end of PATH (for windows)
+    os.environ["PATH"] = os.environ["PATH"] + os.pathsep + os.path.dirname(os.path.abspath(__file__)) + '/cmake/bin'
+
+    # Root parser information
+    command = argparse.ArgumentParser(description='This script is an optional helper script for performing common tasks related to building and running the NUbots code and related projects.')
+    subcommands = command.add_subparsers(dest='subcommand')
+
+    # Docker subcommand
+    docker_command = subcommands.add_parser('docker', help='Manage the docker container used to build')
+    docker_subcommands = docker_command.add_subparsers(dest='docker_command')
+    docker_subcommands.add_parser('build', help='Build the docker image used to build the code and spin up any required Virtual Machines')
+    docker_subcommands.add_parser('clean', help='Delete the built docker image so that it will have to be rebuilt')
+    docker_subcommands.add_parser('rebuild', help='Delete the built docker image and rebuild it')
+    docker_subcommands.add_parser('shell', help='Get a non persistant interactive shell on the container')
+
+    # Compile subcommand
+    compile_command = subcommands.add_parser('compile', help='Compile the NUbots source code')
+    compile_command.add_argument('-c', '--configure', help='Configure the options for the compilation (ccmake)', action="store_true")
+
+    # Role subcommand
+    role_command = subcommands.add_parser('role', help='Manage roles in the codebase')
+    role_subcommand = role_command.add_subparsers(dest='role_command')
+    run_role = role_subcommand.add_parser('run', help='execute a compiled role in the system')
+    run_role.add_argument('role', metavar='role', help='the name of the role to execute on the container')
+
+    # Module subcommand
+    module_command = subcommands.add_parser('module', help='Manage NUClear modules in the codebase')
+    module_subcommands = module_command.add_subparsers()
+
+    # Generate module subcommand
+    module_generate_command = module_subcommands.add_parser('generate', help='Generate a new NUClear module based on a template')
+    module_generate_command.add_argument('path', metavar='path', help='a path to the new module (from the modules directory)')
+
+    # Parse our command line arguments
+    args = command.parse_args()
+
+    if args.subcommand == 'docker':
+        Docker(**vars(args)).run()
+    elif args.subcommand == 'compile':
+        if args.configure:
+            Docker().configure_compile()
+        else:
+            Docker().compile()
+    elif args.subcommand == 'role':
+        if args.role_command == 'run':
+            Docker().run_role(args.role)

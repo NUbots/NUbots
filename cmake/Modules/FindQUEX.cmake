@@ -27,6 +27,10 @@ else (QUEX_INCLUDE_DIRS)
       /sw/include
   )
 
+  find_program(QUEX_BINARY
+    NAMES
+      quex)
+
   set(QUEX_INCLUDE_DIRS
     ${QUEX_INCLUDE_DIR}
   )

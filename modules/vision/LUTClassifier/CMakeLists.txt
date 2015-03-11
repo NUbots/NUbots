@@ -26,7 +26,7 @@ ADD_CUSTOM_COMMAND(
            "${outputpath}/Lexer.hpp"
            "${outputpath}/Lexer-token.hpp"
            "${outputpath}/Lexer-configuration.hpp"
-    COMMAND "/usr/local/bin/quex"
+    COMMAND ${QUEX_BINARY}
     ARGS -i ${abs_file}
          --file-extension-scheme pp
          --output-directory ${outputpath}
