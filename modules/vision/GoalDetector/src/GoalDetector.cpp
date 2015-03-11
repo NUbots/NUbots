@@ -364,7 +364,12 @@ namespace vision {
                 // Angular positions from the camera
                 it->screenAngular = arma::atan(cam.pixelsToTanThetaFactor % screenGoalCentre);
                 //TODO: make this exact!..
-                it->angularSize = arma::atan(cam.pixelsToTanThetaFactor % it->quad.getSize());
+                arma::vec2 brAngular = arma::atan(cam.pixelsToTanThetaFactor % br);
+                arma::vec2 trAngular = arma::atan(cam.pixelsToTanThetaFactor % tr);
+                arma::vec2 blAngular = arma::atan(cam.pixelsToTanThetaFactor % bl);
+                arma::vec2 tlAngular = arma::atan(cam.pixelsToTanThetaFactor % tl);
+                Quad angularQuad(blAngular,tlAngular,trAngular,brAngular);
+                it->angularSize = angularQuad.getSize();
             }
 
             // Do some extra throwouts for goals based on kinematics

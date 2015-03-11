@@ -11,14 +11,28 @@ tracking_p_gain: 1.0
 fixation_time_ms: 1000
 
 #Debug:
-ballPriority: 1
-goalPriority: 0
+initial:
+  priority: 
+    ball: 1
+    goal: 0
 
-lost_searches:
+searches:
   - #enum type for search
     search_type: "LOW_FIRST"
-    #Points in normalised view space. [1,1] corresponds to looking up to the right as far as allowed, relative to $
+    #Points in normalised view space. [1,1] corresponds to looking up to the right as far as allowed, relative to the allowed head angles
     points:
+      - [-1,-1]
+      - [-0.5,-1]
+      - [0,-1]
+      - [0.5,-1]
+      - [1,-1]
+      - [1,0]
+      - [0.5,0]
+      - [0,0]
+      - [-0.5,0]
+      - [-1,0]
+  - search_type: "FIND_ADDITIONAL_OBJECTS"
+    points: 
       - [-1,-1]
       - [0,-1]
       - [1,-1]

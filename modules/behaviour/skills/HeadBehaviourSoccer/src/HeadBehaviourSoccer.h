@@ -98,6 +98,9 @@ namespace modules {
                 bool lostAndSearching;
                 bool lostLastTime;
 
+                int lastBallPriority;
+                int lastGoalPriority;
+
                 // int ballsSeenLastUpdate;
                 // int goalPostsSeenLastUpdate;
                 // time_t lastUpdateTime;

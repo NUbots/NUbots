@@ -31,6 +31,7 @@
 #include "utility/support/yaml_armadillo.h"
 
 #include "utility/nubugger/NUhelpers.h"
+#include "messages/behaviour/SoccerObjectPriority.h"
 
 
 namespace modules {
@@ -59,11 +60,15 @@ namespace modules {
 
         using messages::input::ServoID;
 
+        using messages::behaviour::SoccerObjectPriority;
+
             HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment) : 
             Reactor(std::move(environment)),
             lastCentroid({0,0}),
             lostAndSearching(false),
-            lostLastTime(false)
+            lostLastTime(false),
+            lastBallPriority(0),
+            lastGoalPriority(0)
             {
                 //do a little configurating
                 on<Trigger<Configuration<HeadBehaviourSoccer>>>("Head Behaviour Soccer Config",[this] (const Configuration<HeadBehaviourSoccer>& config)
@@ -76,7 +81,7 @@ namespace modules {
                     tracking_p_gain = config["tracking_p_gain"].as<float>();
 
                     //Load searches:
-                    for(auto& search : config["lost_searches"]){
+                    for(auto& search : config["searches"]){
                         SearchType s = searchTypeFromString(search["search_type"].as<std::string>());
                         lost_searches[s] = std::vector<arma::vec2>();
                         for (auto& p : search["points"]){
@@ -96,9 +101,8 @@ namespace modules {
                     angular_update_threshold = config["fractional_angular_update_threshold"].as<float>();
 
                     //TODO remove these configs
-                    ballPriority = config["ballPriority"].as<int>();
-
-                    goalPriority = config["goalPriority"].as<int>();
+                    ballPriority = config["initial"]["priority"]["ball"].as<int>();
+                    goalPriority = config["initial"]["priority"]["goal"].as<int>();
 
 
                 });
@@ -107,12 +111,15 @@ namespace modules {
                     cam = cam_;
                 });
 
-                //TODO: trigger on balls with goals and check number of balls.
-                on<
-                    Trigger<std::vector<Ball>>,
+                on<Trigger<SoccerObjectPriority>, Options<Sync<HeadBehaviourSoccer>>>("Head Behaviour Soccer - Set priorities", [this] (const SoccerObjectPriority& p){
+                    ballPriority = p.ball;
+                    goalPriority = p.goal;
+                });
+
+                on< Trigger<std::vector<Ball>>,
                     With<Sensors>,
                     With<std::vector<Goal>>,
-                    Options<Single>
+                    Options<Single, Sync<HeadBehaviourSoccer>>
                   >("Head Behaviour Main Loop",[this] ( const std::vector<Ball> vballs,
                                                         const Sensors& sensors,
                                                         const std::vector<Goal> vgoals
@@ -122,9 +129,11 @@ namespace modules {
 
                     int maxPriority = std::max(std::max(ballPriority,goalPriority),0);
 
+
                     std::vector<VisionObject> fixationObjects;
 
                     auto now = NUClear::clock::now();
+
                     //TODO: make this a loop over a list of objects or something
                     if(ballPriority == maxPriority){
                         if(vballs.size() > 0){
@@ -154,10 +163,10 @@ namespace modules {
                             search = true;
                         }
                     }
-                    //Do we need to update our plan?
                     bool lost = fixationObjects.size() <= 0;
                     bool found = !lost && lostLastTime;
-                    bool updatePlan = found; //bool(Priorities have changed)
+                    //Do we need to update our plan?
+                    bool updatePlan = found || (lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority) ; //bool(Priorities have changed)
 
 
                     //Get robot pose
@@ -184,6 +193,7 @@ namespace modules {
                         if(arma::norm(currentCentroid_world - lastCentroid) >= angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){                           
                             updatePlan = true;
                             lastCentroid = currentCentroid_world;
+                            std::cout << "Replanning due to object movement." << std::endl;
                         }
                     }
 
@@ -207,8 +217,11 @@ namespace modules {
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw = direction[0];
                         command->pitch = direction[1];
-                        emit(std::move(command));
+                        // emit(std::move(command));
                     }
+
+                    lastGoalPriority = goalPriority;
+                    lastBallPriority = ballPriority;
 
                     lostLastTime = lost;
                 });
@@ -282,6 +295,11 @@ namespace modules {
                     }
                    
                     Quad boundingBox = getScreenAngularBoundingBox(fixationObjects);
+
+                    std::cout << "boundingBox" << std::endl;
+                    for (auto& p : boundingBox.getVertices()){
+                        std::cout << p.t();
+                    }
                     
                     //DEBUG
                     for(const auto& p : boundingBox.getVertices()){
@@ -316,7 +334,7 @@ namespace modules {
                     
                     //Sort according to approach
                     const int nPoints = viewPoints.size();
-                    int perm[nPoints];
+                    std::vector<int> perm(nPoints);
                     switch (sType){
                         case(SearchType::LOW_FIRST):
                             perm[0] = centre; perm[1] = br; perm[2] = bl; perm[3] = tl; perm[4] = tr;
@@ -327,10 +345,15 @@ namespace modules {
                         case(SearchType::CROSS):
                             perm[0] = centre; perm[1] = br; perm[2] = tl; perm[3] = bl; perm[4] = tr;
                             break;
+                        default:
+                            perm[0] = centre; perm[1] = br; perm[2] = bl; perm[3] = tl; perm[4] = tr;
+                            break;
                     }
                     std::vector<arma::vec2> sortedViewPoints(nPoints);
+                    std::cout << "searchPoints" << std::endl;
                     for(int i = 0; i < nPoints; i++){
                         sortedViewPoints[i] = viewPoints[perm[i]];
+                        std::cout << sortedViewPoints[i].t();
                     }
 
                     return sortedViewPoints;
@@ -350,9 +373,12 @@ namespace modules {
 
             Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const std::vector<VisionObject>& ob){
                 std::vector<arma::vec2> boundingPoints;
+                std::cout << "pointsToBound" << std::endl;
                 for(uint i = 0; i< ob.size(); i++){
                     boundingPoints.push_back(ob[i].screenAngular+ob[i].angularSize / 2);
+                    std::cout << boundingPoints.back().t();
                     boundingPoints.push_back(ob[i].screenAngular-ob[i].angularSize / 2);
+                    std::cout << boundingPoints.back().t();
                 }
                 return Quad::getBoundingBox(boundingPoints);
             }
