@@ -190,7 +190,7 @@ RUN ./autotools_install http://downloads.sourceforge.net/project/libjpeg-turbo/1
     --host=i686-linux-gnu
 
 # Trying to compile this made me sad
-RUN apt-get -y install libmatheval-dev libespeak-dev
+RUN apt-get -y install libmatheval-dev flex libespeak-dev
 
 # cppformat (TODO for now don't use flto until you get rid of gtest)
 RUN git clone --depth 1 --single-branch https://github.com/cppformat/cppformat \
