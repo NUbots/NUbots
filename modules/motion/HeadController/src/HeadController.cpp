@@ -64,8 +64,8 @@ namespace modules {
                 max_pitch = DarwinModel::Head::MAX_PITCH;
                 min_pitch = DarwinModel::Head::MIN_PITCH;
 
-                emit(std::make_unique<HeadCommand>( HeadCommand {config["initial"]["yaw"].as<double>(),
-                                                                 config["initial"]["pitch"].as<double>()}));
+                emit(std::make_unique<HeadCommand>( HeadCommand {config["initial"]["yaw"].as<float>(),
+                                                                 config["initial"]["pitch"].as<float>()}));
 
                 p_gain = config["p_gain"].as<float>();
 

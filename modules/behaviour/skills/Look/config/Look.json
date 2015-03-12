@@ -1,9 +1,0 @@
-{
-	"FastSpeed" : 0.7,
-	"SlowSpeed" : 0.6,
-	"minYaw" : -1.5,
-	"maxYaw" : 1.5,
-	"minPitch" : -1.2,
-	"maxPitch" : 1.2,
-	"screenPadding" : 0.15
-}
