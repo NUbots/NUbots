@@ -41,59 +41,74 @@ namespace modules {
             class HeadBehaviourSoccer : public NUClear::Reactor {
             public:
                 enum SearchType {
-                    LOW_FIRST = 0,
-                    HIGH_FIRST = 1,
-                    CROSS = 2,
-                    OTHER = 3
+                    LOST = 0,
+                    FIND_ADDITIONAL_OBJECTS = 1,
+                    OTHER = 2
                 };
                 SearchType searchTypeFromString(std::string s){
 
-                    if(s.compare("LOW_FIRST") == 0) {
-                        return SearchType::LOW_FIRST;
+                    if(s.compare("LOST") == 0) {
+                        return SearchType::LOST;
                     }
-                    else if(s.compare("HIGH_FIRST") == 0) {
-                        return SearchType::HIGH_FIRST;
+                    else if(s.compare("FIND_ADDITIONAL_OBJECTS") == 0){
+                        return SearchType::FIND_ADDITIONAL_OBJECTS;
                     }
-                    else if(s.compare("CROSS") == 0) {
-                        return SearchType::CROSS;
-                    }
-                    else {
+                    else if(s.compare("OTHER") == 0){
                         return SearchType::OTHER;
+                    } else {
+                        throw std::domain_error("HeadBehaviourSoccer - searchTypeFromString: NO SEARCH TYPE FOUND!");
                     }
 
                 }
 
             private:
-
+                
+                /*! @brief Updates the search plan when something has changed
+                */
                 void updateHeadPlan(const std::vector<messages::vision::VisionObject>& fixationObjects, const bool& search, const messages::input::Sensors& sensors, const utility::math::matrix::Rotation3D& headToIMUSpace);
+                
+                /*! @brief Converts from camera space direction to IMU space direction
+                */
                 arma::vec2 getIMUSpaceDirection(const arma::vec2& screenAngles, const utility::math::matrix::Rotation3D& headToIMUSpace);
+                
+                /*! @brief Gets points which allow for simultaneous search and viewing of key objects
+                */
                 std::vector<arma::vec2> getSearchPoints(std::vector<messages::vision::VisionObject> fixationObjects, SearchType sType);
-                std::unique_ptr<messages::motion::HeadCommand> getHeadCommand();
+                
+                /*! @brief Combines a collection of vision objects. The screen resulting screen angular region is the bounding box of the objects
+                */
                 messages::vision::VisionObject combineVisionObjects(const std::vector<messages::vision::VisionObject>& obs);
+                
+                /*! @brief Gets a bounding box in screen angular space of a set of vision objects
+                */
                 utility::math::geometry::Quad getScreenAngularBoundingBox(const std::vector<messages::vision::VisionObject>& obs);
 
+
+                //CONFIG - loaded elsewhere
                 float max_yaw;
                 float min_yaw;
                 float max_pitch;
                 float min_pitch;
 
+                messages::input::CameraParameters cam;
+
+                //CONFIG from HeadBehaviourSoccer.yaml
+                double fractional_view_padding;
+                float search_timeout_ms;
+                float fractional_angular_update_threshold;
+
+                std::map<SearchType, std::vector<arma::vec2>> searches;
+
+                //State variables
+                Searcher<arma::vec2> headSearcher;
+
                 int ballPriority;
                 int goalPriority;
 
-                double view_padding_radians;
-                float tracking_p_gain;
-
-                messages::input::CameraParameters cam;
-
-                std::map<SearchType, std::vector<arma::vec2>> lost_searches;
-
-                Searcher<arma::vec2> headSearcher;
-
                 NUClear::clock::time_point lastPlanUpdate;
                 NUClear::clock::time_point timeLastObjectSeen;
-                float plan_update_period;
+                
                 arma::vec2 lastCentroid;
-                float angular_update_threshold;
 
                 bool lostAndSearching;
                 bool lostLastTime;
@@ -101,16 +116,12 @@ namespace modules {
                 int lastBallPriority;
                 int lastGoalPriority;
 
-                // int ballsSeenLastUpdate;
-                // int goalPostsSeenLastUpdate;
-                // time_t lastUpdateTime;
             public:
-
                 explicit HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment);
                 static constexpr const char* CONFIGURATION_PATH = "HeadBehaviourSoccer.yaml";
             };
 
-        }  // motion
+        }  // skills
     } //behaviour
 }  // modules
 

@@ -70,39 +70,36 @@ namespace modules {
             lastBallPriority(0),
             lastGoalPriority(0)
             {
-                //do a little configurating
                 on<Trigger<Configuration<HeadBehaviourSoccer>>>("Head Behaviour Soccer Config",[this] (const Configuration<HeadBehaviourSoccer>& config)
                 {
                     lastPlanUpdate = NUClear::clock::now();
                     timeLastObjectSeen = NUClear::clock::now();
-                    //Gains                    
-                    view_padding_radians = config["view_padding_radians"].as<double>();      
-
-                    tracking_p_gain = config["tracking_p_gain"].as<float>();
-
-                    //Load searches:
-                    for(auto& search : config["searches"]){
-                        SearchType s = searchTypeFromString(search["search_type"].as<std::string>());
-                        lost_searches[s] = std::vector<arma::vec2>();
-                        for (auto& p : search["points"]){
-                            lost_searches[s].push_back(p.as<arma::vec2>());
-                        }
-                    }
-
                     max_yaw = utility::motion::kinematics::DarwinModel::Head::MAX_YAW;
                     min_yaw = utility::motion::kinematics::DarwinModel::Head::MIN_YAW;
                     max_pitch = utility::motion::kinematics::DarwinModel::Head::MAX_PITCH;
                     min_pitch = utility::motion::kinematics::DarwinModel::Head::MIN_PITCH;
 
+                    //Config HeadBehaviourSoccer.yaml
+                    fractional_view_padding = config["fractional_view_padding"].as<double>();
+
+                    search_timeout_ms = config["search_timeout_ms"].as<float>();
+
+                    fractional_angular_update_threshold = config["fractional_angular_update_threshold"].as<float>();
+
                     headSearcher.setSwitchTime(config["fixation_time_ms"].as<float>());
 
-                    plan_update_period = config["plan_update_period_ms"].as<float>();
-
-                    angular_update_threshold = config["fractional_angular_update_threshold"].as<float>();
-
-                    //TODO remove these configs
+                    //Note that these are actually modified later and are hence camelcase
                     ballPriority = config["initial"]["priority"]["ball"].as<int>();
                     goalPriority = config["initial"]["priority"]["goal"].as<int>();
+                    
+                    //Load searches:
+                    for(auto& search : config["searches"]){
+                        SearchType s = searchTypeFromString(search["search_type"].as<std::string>());
+                        searches[s] = std::vector<arma::vec2>();
+                        for (auto& p : search["points"]){
+                            searches[s].push_back(p.as<arma::vec2>());
+                        }
+                    }
 
 
                 });
@@ -190,21 +187,22 @@ namespace modules {
                         }
                         arma::vec2 currentCentroid_world = getIMUSpaceDirection(currentCentroid,headToIMUSpace);
                         //If our objects have moved, we need to replan
-                        if(arma::norm(currentCentroid_world - lastCentroid) >= angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){                           
+                        if(arma::norm(currentCentroid_world - lastCentroid) >= fractional_angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){                           
                             updatePlan = true;
                             lastCentroid = currentCentroid_world;
-                            std::cout << "Replanning due to object movement." << std::endl;
+                            //std::cout << "Replanning due to object movement." << std::endl;
                         }
                     }
 
                     //If we lost what we are searching for.
-                    if(!lostAndSearching && std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count() > plan_update_period ){
+                    if(!lostAndSearching && std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count() > search_timeout_ms ){
                         lostAndSearching = true;
                         updatePlan = true;
                         lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
                     }
 
                     if(updatePlan){
+
                         updateHeadPlan(fixationObjects, search, sensors, headToIMUSpace);
                     }
 
@@ -217,7 +215,7 @@ namespace modules {
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw = direction[0];
                         command->pitch = direction[1];
-                        // emit(std::move(command));
+                        emit(std::move(command));
                     }
 
                     lastGoalPriority = goalPriority;
@@ -243,7 +241,7 @@ namespace modules {
                 }
 
                 if(search){
-                    fixationPoints = getSearchPoints(fixationObjects, SearchType::LOW_FIRST);
+                    fixationPoints = getSearchPoints(fixationObjects, SearchType::LOST);
                 }
 
                 if(fixationPoints.size() <= 0){
@@ -286,7 +284,7 @@ namespace modules {
                     if(fixationObjects.size() == 0){
                         //Lost searches are normalised in terms of the FOV
                         std::vector<arma::vec2> scaledResults;
-                        for(auto& p : lost_searches[sType]){
+                        for(auto& p : searches[sType]){
                             //Interpolate between max and min allowed angles with -1 = min and 1 = max
                             scaledResults.push_back(arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
                                                                 ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) / 2}));
@@ -296,67 +294,38 @@ namespace modules {
                    
                     Quad boundingBox = getScreenAngularBoundingBox(fixationObjects);
 
-                    std::cout << "boundingBox" << std::endl;
-                    for (auto& p : boundingBox.getVertices()){
-                        std::cout << p.t();
-                    }
-                    
-                    //DEBUG
-                    for(const auto& p : boundingBox.getVertices()){
-                    }
-                    
                     std::vector<arma::vec2> viewPoints;
                     if(arma::norm(cam.FOV) == 0){
                         log<NUClear::WARN>("NO CAMERA PARAMETERS LOADED!!");
                     }
-
-                    //Generate search points including padding
-                    //TODO: make this a generic quad method
-                    //0
-                    int centre = viewPoints.size();
-                    viewPoints.push_back(boundingBox.getCentre());
+                    //Get points which keep everything on screen with padding
+                    float view_padding_radians = fractional_view_padding * std::fmax(cam.FOV[0],cam.FOV[1]);
                     //1
-                    int tr = viewPoints.size();
                     arma::vec2 padding = {view_padding_radians,view_padding_radians};
-                    viewPoints.push_back(boundingBox.getBottomLeft() - padding + cam.FOV / 2.0);
+                    arma::vec2 tr = boundingBox.getBottomLeft() - padding + cam.FOV / 2.0;
                     //2
-                    int br = viewPoints.size();
                     padding = {view_padding_radians,-view_padding_radians};
-                    viewPoints.push_back(boundingBox.getTopLeft() - padding + arma::vec({cam.FOV[0],-cam.FOV[1]}) / 2.0);
+                    arma::vec2 br = boundingBox.getTopLeft() - padding + arma::vec({cam.FOV[0],-cam.FOV[1]}) / 2.0;
                     //3
-                    int bl = viewPoints.size();
                     padding = {-view_padding_radians,-view_padding_radians};
-                    viewPoints.push_back(boundingBox.getTopRight() - padding - cam.FOV / 2.0);
+                    arma::vec2 bl = boundingBox.getTopRight() - padding - cam.FOV / 2.0;
                     //4
-                    int tl = viewPoints.size();
                     padding = {-view_padding_radians,view_padding_radians};
-                    viewPoints.push_back(boundingBox.getBottomRight() - padding + arma::vec({-cam.FOV[0],cam.FOV[1]}) / 2.0);
-                    
-                    //Sort according to approach
-                    const int nPoints = viewPoints.size();
-                    std::vector<int> perm(nPoints);
-                    switch (sType){
-                        case(SearchType::LOW_FIRST):
-                            perm[0] = centre; perm[1] = br; perm[2] = bl; perm[3] = tl; perm[4] = tr;
-                            break;
-                        case(SearchType::HIGH_FIRST):
-                            perm[0] = centre; perm[1] = bl; perm[2] = br; perm[3] = tr; perm[4] = tl;
-                            break;
-                        case(SearchType::CROSS):
-                            perm[0] = centre; perm[1] = br; perm[2] = tl; perm[3] = bl; perm[4] = tr;
-                            break;
-                        default:
-                            perm[0] = centre; perm[1] = br; perm[2] = bl; perm[3] = tl; perm[4] = tr;
-                            break;
-                    }
-                    std::vector<arma::vec2> sortedViewPoints(nPoints);
-                    std::cout << "searchPoints" << std::endl;
-                    for(int i = 0; i < nPoints; i++){
-                        sortedViewPoints[i] = viewPoints[perm[i]];
-                        std::cout << sortedViewPoints[i].t();
-                    }
+                    arma::vec2 tl = boundingBox.getBottomRight() - padding + arma::vec({-cam.FOV[0],cam.FOV[1]}) / 2.0;
 
-                    return sortedViewPoints;
+                    //Interpolate between max and min allowed angles with -1 = min and 1 = max
+                    std::vector<arma::vec2> searchPoints;
+                    for(auto& p : searches[SearchType::FIND_ADDITIONAL_OBJECTS]){
+                        float x = p[0];
+                        float y = p[1];
+                        searchPoints.push_back(( (1-x)*(1-y)*bl+
+                                                 (1-x)*(1+y)*tl+
+                                                 (1+x)*(1+y)*tr+
+                                                 (1+x)*(1-y)*br )/4);
+                    }
+                    
+                    return searchPoints;
+                    
             }
 
             VisionObject HeadBehaviourSoccer::combineVisionObjects(const std::vector<VisionObject>& ob){
@@ -373,12 +342,9 @@ namespace modules {
 
             Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const std::vector<VisionObject>& ob){
                 std::vector<arma::vec2> boundingPoints;
-                std::cout << "pointsToBound" << std::endl;
                 for(uint i = 0; i< ob.size(); i++){
                     boundingPoints.push_back(ob[i].screenAngular+ob[i].angularSize / 2);
-                    std::cout << boundingPoints.back().t();
                     boundingPoints.push_back(ob[i].screenAngular-ob[i].angularSize / 2);
-                    std::cout << boundingPoints.back().t();
                 }
                 return Quad::getBoundingBox(boundingPoints);
             }

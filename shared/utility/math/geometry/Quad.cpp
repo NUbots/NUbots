@@ -59,11 +59,11 @@ namespace geometry {
     }
 
     double Quad::getAverageWidth() const {
-        return ((0.5 * (arma::norm(br - bl, 2) + arma::norm(tr - tl, 2))) + 1);
+        return ((0.5 * (arma::norm(br - bl, 2) + arma::norm(tr - tl, 2))));
     }
 
     double Quad::getAverageHeight() const {
-        return ((0.5 * (arma::norm(br - tr, 2) + arma::norm(bl - tl, 2))) + 1);
+        return ((0.5 * (arma::norm(br - tr, 2) + arma::norm(bl - tl, 2))));
     }
 
     double Quad::area() const {

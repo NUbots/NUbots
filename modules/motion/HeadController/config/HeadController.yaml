@@ -1,6 +1,8 @@
+#Servo controller parameters
 head_motors:
   gain: 30.0
   torque: 100.0
+#Initial head position; arbitrary and useful for controlling the head when no headbehavior is installed
 initial:
   yaw: 0
   pitch: 0

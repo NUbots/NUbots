@@ -363,7 +363,6 @@ namespace vision {
 
                 // Angular positions from the camera
                 it->screenAngular = arma::atan(cam.pixelsToTanThetaFactor % screenGoalCentre);
-                //TODO: make this exact!..
                 arma::vec2 brAngular = arma::atan(cam.pixelsToTanThetaFactor % br);
                 arma::vec2 trAngular = arma::atan(cam.pixelsToTanThetaFactor % tr);
                 arma::vec2 blAngular = arma::atan(cam.pixelsToTanThetaFactor % bl);
