@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
     std::cout << white << "######                    ######  ######           ######  " << yellow << "####################" << std::endl;
     std::cout << white << "#######                   ######  ######           ######  " << yellow << "####################" << std::endl;
     std::cout << white << "########                  ######  ######           ######  " << yellow << "###     ####     ###" << std::endl;
-    std::cout << white << "#########                 ######  ######           ######  " << yellow << "###     ####     ###" << std::endl;
+    std::cout << white << "###;)####                 ######  ######           ######  " << yellow << "###     ####     ###" << std::endl;
     std::cout << white << "##########                ######  ######           ######  " << yellow << " ########  ######## " << std::endl;
     std::cout << white << "###########               ######  ######           ######  " << yellow << "  ######    ######  " << std::endl;
     std::cout << white << "############              ######  ######           ######  " << yellow << "                    " << std::endl;
@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
     start = """
 
     NUClear::PowerPlant::Configuration config;
-    config.threadCount = 8;
+    config.threadCount = 4;
 
     NUClear::PowerPlant plant(config, argc, const_cast<const char**>(argv));
 """

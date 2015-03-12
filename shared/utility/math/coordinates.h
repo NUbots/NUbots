@@ -29,7 +29,7 @@ namespace utility {
         /**
          * Functions to convert between coordinate representations.
          *
-         * (r,phi,theta) represent radial distance, bearing (counter-clockwise from x-axis in xy-plane) and declination (measured from the z axis) (in radians)
+         * (r,phi,theta) represent radial distance, bearing (counter-clockwise from x-axis in xy-plane) and elevation (measured from the xy plane) (in radians)
          * @author Alex Biddulph
          */
         namespace coordinates {

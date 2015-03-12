@@ -38,7 +38,7 @@ namespace motion {
 
     void WalkEngine::balance(Transform3D& target, const LimbID& leg, const Sensors& sensors) {
 
-        // Get current orientation, offset by body tilt. Maps world to robot space.
+        // Get current orientation, offset by body tilt. Maps robot to world. 
         Rotation3D tiltedOrientation = sensors.orientation.i().rotateY(-bodyTilt);
         // Removes any yaw component
         Rotation3D goalOrientation = Rotation3D::createRotationZ(-tiltedOrientation.yaw()) * tiltedOrientation;
