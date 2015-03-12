@@ -3,7 +3,8 @@ ADD_ROLE(
     support::logging::ConsoleLogHandler
     support::configuration::ConfigSystem
     support::configuration::GlobalConfig
-    #platform::darwin::HardwareIO
+    platform::darwin::HardwareIO
+    platform::darwin::SensorFilter
     input::LinuxCamera
     support::NUbugger
 
