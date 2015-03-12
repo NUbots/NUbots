@@ -46,11 +46,6 @@ namespace utility {
 
                 double sigma_sq;
 
-                StateVec sampleParticle(const& StateVec mu, const& StateMat sigma){
-                    //TODO
-                    return mu;
-                }
-
             public:
                 ParticleFilter(StateVec initialMean = arma::zeros(Model::size),
                                StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1,
@@ -91,14 +86,14 @@ namespace utility {
                         weights[i] = std::exp(- difference * difference / sigma_sq);
                     }
                     
-                    std::discrete_distribution multinomial(weights.begin(),weights.end());//class incorrectly named by cpp devs
-                    std::vec resample = zeros(particles.size());
-                    //TODO: RESAMPLE
+                    //Resample
+                    std::random_device rd;
+                    std::mt19937 gen(rd());
+                    std::discrete_distribution<> multinomial(weights.begin(),weights.end());//class incorrectly named by cpp devs
                     arma::vec<StateVec> candidateParticles = particles;
                     for (int i = 0; i < particles.size(); i++){
-                        particles[i] = candidateParticles[resample[i]];
+                        particles[i] = candidateParticles[multinomial(gen)];
                     }
-
                 }
 
                 StateVec get() const 
