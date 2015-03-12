@@ -29,7 +29,7 @@
 
 namespace utility {
     namespace math {
-        namespace filter {
+        namespace kalman {
 
             template <typename Model> //model is is a template parameter that Kalman also inherits
             class ParticleFilter {
@@ -42,14 +42,14 @@ namespace utility {
                 using StateVec = arma::vec::fixed<Model::size>;
                 using StateMat = arma::mat::fixed<Model::size, Model::size>;
 
-                arma::vec<StateVec> particles;
+                std::vector<StateVec> particles;
 
                 double sigma_sq;
 
             public:
                 ParticleFilter(StateVec initialMean = arma::zeros(Model::size),
                                StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1,
-                               int number_of_particles_,
+                               int number_of_particles_ = 100,
                                double sigma_sq_ = 10) 
                 {
                     sigma_sq = sigma_sq_;
@@ -58,7 +58,7 @@ namespace utility {
 
                 void reset(StateVec initialMean, StateMat initialCovariance, int number_of_particles_) 
                 {
-                    particles.clear()
+                    particles.clear();
                     for(int i = 0; i < number_of_particles_; i++){
                         particles.push_back(sampleParticle(initialMean, initialCovariance));
                     }
@@ -80,9 +80,9 @@ namespace utility {
                     arma::vec weights = arma::zeros(particles.size());
 
                     for (int i = 0; i < particles.size(); i++){
-                        arma::vec predictedObservation = model.predictedObservation(particles[i], measurementArgs...));
+                        arma::vec predictedObservation = model.predictedObservation(particles[i], measurementArgs...);
                         assert(predictedObservation.size() == measurement.size());
-                        double difference = arma::norm(predictedObservation-measurement)
+                        double difference = arma::norm(predictedObservation-measurement);
                         weights[i] = std::exp(- difference * difference / sigma_sq);
                     }
                     
@@ -90,7 +90,7 @@ namespace utility {
                     std::random_device rd;
                     std::mt19937 gen(rd());
                     std::discrete_distribution<> multinomial(weights.begin(),weights.end());//class incorrectly named by cpp devs
-                    arma::vec<StateVec> candidateParticles = particles;
+                    std::vector<StateVec> candidateParticles = particles;
                     for (int i = 0; i < particles.size(); i++){
                         particles[i] = candidateParticles[multinomial(gen)];
                     }

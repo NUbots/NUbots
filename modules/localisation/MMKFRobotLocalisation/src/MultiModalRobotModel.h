@@ -23,6 +23,7 @@
 #include <armadillo>
 #include <nuclear>
 #include "utility/localisation/LocalisationFieldObject.h"
+#include "utility/math/kalman/ParticleFilter.h"
 #include "utility/math/kalman/UKF.h"
 #include "messages/support/Configuration.h"
 #include "messages/vision/VisionObjects.h"
