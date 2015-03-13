@@ -98,6 +98,7 @@ RUN chmod +x /usr/local/bin/quex
 
 # Useful Tools
 RUN apt-get -y install vim
+RUN apt-get -y install nano
 RUN apt-get -y install cmake-curses-gui
 
 # You need to mount your local code directory to the container
