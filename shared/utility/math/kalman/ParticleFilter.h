@@ -44,13 +44,13 @@ namespace utility {
 
                 std::vector<StateVec> particles;
 
-                double sigma_sq;
+                StateVec sigma_sq;
 
             public:
                 ParticleFilter(StateVec initialMean = arma::zeros(Model::size),
                                StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1,
                                int number_of_particles_ = 100,
-                               double sigma_sq_ = 10) 
+                               StateVec sigma_sq_ = 0.1 * arma::ones(Model::size)) 
                 {
                     sigma_sq = sigma_sq_;
                     reset(initialMean, initialCovariance, number_of_particles_);
@@ -72,6 +72,15 @@ namespace utility {
                     }
                 }
 
+                void setState(StateVec initialMean, StateMat initialCovariance) {
+                    //Sample single gaussian (represented by a gaussian mixture model of size 1)
+                    arma::gmm_diag model;
+                    model.set_params(arma::mat({initialMean}), arma::mat({initialCovariance.diag()}));
+                    for(uint i = 0; i < particles.size(); ++i) {
+                        particles[i] = model.generate();
+                    }                    
+                }
+
                 template <typename TMeasurement, typename... TMeasurementType>
                 double measurementUpdate(const TMeasurement& measurement,
                                          const arma::mat& measurement_variance,
@@ -82,8 +91,8 @@ namespace utility {
                     for (int i = 0; i < particles.size(); i++){
                         arma::vec predictedObservation = model.predictedObservation(particles[i], measurementArgs...);
                         assert(predictedObservation.size() == measurement.size());
-                        double difference = arma::norm(predictedObservation-measurement);
-                        weights[i] = std::exp(- difference * difference / sigma_sq);
+                        double difference = predictedObservation-measurement;
+                        weights[i] = std::exp(- difference.t() * sigma_sq % difference);
                     }
                     
                     //Resample

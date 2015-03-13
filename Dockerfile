@@ -70,9 +70,17 @@ RUN apt-get -y install libopenblas-dev
 RUN apt-get -y install liblapack-dev
 RUN apt-get -y install libffi-dev
 RUN add-apt-repository ppa:comp-phys/stable
-RUN apt-get -y install libarmadillo-dev
-RUN apt-get -y install python
 RUN apt-get -y install wget
+RUN apt-get -y install python
+
+#Armadillo
+WORKDIR /tmp
+RUN wget http://sourceforge.net/projects/arma/files/armadillo-4.650.3.tar.gz
+RUN tar -zxf armadillo-4.650.3.tar.gz
+WORKDIR /tmp/armadillo-4.650.3
+RUN cmake .
+RUN make install
+
 
 # Catch
 WORKDIR /usr/local/include/
