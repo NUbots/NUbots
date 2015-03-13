@@ -12,7 +12,7 @@ OPTION(BUILD_TESTS "Builds all of the tests for each module." OFF)
 OPTION(SHARED_BUILD "Build the binaries by linking to shared libraries." ON)
 
 # We use additional modules that cmake needs to know about
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/tools/cmake/")
 
 # Setup our compiler settings
 INCLUDE(Compiler)

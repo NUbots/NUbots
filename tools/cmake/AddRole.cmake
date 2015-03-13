@@ -9,9 +9,9 @@ FUNCTION(ADD_ROLE)
     # Custom command that specifies how to generate ${role}.cpp
     ADD_CUSTOM_COMMAND(
         OUTPUT "${CMAKE_BINARY_DIR}/roles/${role}.cpp"
-        COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/cmake/Scripts/generate_role.py" "${CMAKE_BINARY_DIR}/roles/${role}.cpp" ${role_modules}
+        COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/tools/scripts/generate_role.py" "${CMAKE_BINARY_DIR}/roles/${role}.cpp" ${role_modules}
         COMMENT "Generating the ${role} role"
-        DEPENDS "${CMAKE_SOURCE_DIR}/cmake/Scripts/generate_role.py")
+        DEPENDS "${CMAKE_SOURCE_DIR}/tools/scripts/generate_role.py")
 
     INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}")
     INCLUDE_DIRECTORIES("${CMAKE_BINARY_DIR}")

@@ -42,7 +42,7 @@ ADD_CUSTOM_COMMAND(
             ${CMAKE_CURRENT_SOURCE_DIR}/footer.tex
             ${report_tex_files}
             ${report_rel_paths}
-    DEPENDS ${CMAKE_SOURCE_DIR}/cmake/Scripts/generate_report_tex.py
+    DEPENDS ${CMAKE_SOURCE_DIR}/tools/scripts/generate_report_tex.py
             ${CMAKE_CURRENT_SOURCE_DIR}/header.tex
             ${report_tex_files}
     COMMENT "Generating main .tex file for the report"
