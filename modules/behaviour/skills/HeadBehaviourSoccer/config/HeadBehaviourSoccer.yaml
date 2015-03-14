@@ -1,0 +1,41 @@
+#The angular padding to place between an object and the edge of the screen as a fraction of the largest field of view
+fractional_view_padding: 0.1
+
+#Minimum time before search starts
+search_timeout_ms: 2000
+
+#fraction of the larger FOV which will result in plan updating given this amount of key object displacement
+fractional_angular_update_threshold: 0.1
+
+#Time between saccades
+fixation_time_ms: 1000
+
+initial:
+  priority: 
+    ball: 1
+    goal: 0
+
+searches:
+  - #enum type for search
+    search_type: "LOST"
+    #Points in normalised view space. [1,1] corresponds to looking up to the right as far as allowed, relative to the allowed head angles
+    points:
+      - [-1,-1]
+      - [-0.5,-1]
+      - [0,-1]
+      - [0.5,-1]
+      - [1,-1]
+      - [1,0]
+      - [0.5,0]
+      - [0,0]
+      - [-0.5,0]
+      - [-1,0]
+  - search_type: "FIND_ADDITIONAL_OBJECTS"
+    #Points for this search are relative to the padded bounding box containing the already visible objects
+    points: 
+      - [-1,-1]
+      - [0,-1]
+      - [1,-1]
+      - [1,0]
+      - [0,0]
+      - [-1,0]

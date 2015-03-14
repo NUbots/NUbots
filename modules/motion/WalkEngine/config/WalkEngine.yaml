@@ -5,24 +5,25 @@ stance:
   body_tilt: 25 * pi / 180
   # Default arm positions while walking
   arms:
-    left:
-      start:
-        -   90 * pi / 180 # Shoulder Pitch
-        -   25 * pi / 180 # Shoulder Roll
-        - -140 * pi / 180 # Elbow
-      end:
-        -   125 * pi / 180 # Shoulder Pitch
-        -   55 * pi / 180 # Shoulder Roll
-        - -140 * pi / 180 # Elbow
-    right:
-      start:
-        -   90 * pi / 180 # Shoulder Pitch
-        -  -25 * pi / 180 # Shoulder Roll
-        - -140 * pi / 180 # Elbow
-      end:
-        -   125 * pi / 180 # Shoulder Pitch
-        -  -55 * pi / 180 # Shoulder Roll
-        - -140 * pi / 180 # Elbow
+      left:
+        start:
+          -  90 * pi / 180 # Shoulder Pitch
+          -   0 * pi / 180 # Shoulder Roll
+          - -140 * pi / 180 # Elbow
+        end:
+          -  135 * pi / 180 # Shoulder Pitch
+          -   0 * pi / 180 # Shoulder Roll
+          - -140 * pi / 180 # Elbow
+      right:
+        start:
+          -   90 * pi / 180 # Shoulder Pitch
+          -   0 * pi / 180 # Shoulder Roll
+          - -140 * pi / 180 # Elbow
+        end:
+          -  135 * pi / 180 # Shoulder Pitch
+          -   0 * pi / 180 # Shoulder Roll
+          - -140 * pi / 180 # Elbow
+
   foot_offset:
     - -0.02 # The distance the ankles are offset from the torso, in meters.
     - -0.01 # How far from the center of the foot the center of mass is placed during each step.

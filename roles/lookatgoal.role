@@ -27,10 +27,11 @@ ADD_ROLE(
     behaviour::skills::Stand
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
-    #behaviour::skills::LookAt
-    behaviour::skills::Look
-    behaviour::planning::LookAtGoal
+    behaviour::skills::HeadBehaviourSoccer
+
+
 
     #Motion
     motion::ScriptEngine
+    motion::HeadController
 )

@@ -37,16 +37,20 @@ class Docker():
         # Setup our docker environment
         self._setup_docker_environment()
 
+        # Get our image if we have one
+        self.image = kwargs.get('docker_image', 'darwin')
+
+        # If we have a command to run then set it up to run
         if 'docker_command' in kwargs:
             self.command = getattr(self, kwargs['docker_command'])
 
     def _up_to_date(self):
         # Check we have an image
-        if not subprocess.check_output(['docker', 'images', '-q', 'nubots/nubots']):
+        if not self.image in subprocess.check_output(['docker', 'images', 'nubots/nubots']):
             return False
 
         # Get our timestamps of our Dockerfile
-        x = os.path.getmtime('Dockerfile')
+        x = os.path.getmtime('tools/images/{}/Dockerfile'.format(self.image))
         # Get the timestamp of the build
         y = int(self._docker_run('cat', '/container_built_at'))
 
@@ -81,7 +85,7 @@ class Docker():
             + (['-d'] if kwargs.get('detached', False) else [])
             + [ '-v'
             , '{}:/nubots/NUbots'.format(self._share_path()[1])
-            , 'nubots/nubots'] + list(args))
+            , 'nubots/nubots:{}'.format(self.image)] + list(args))
 
         # If we're not detached then run
         if 'interactive' in kwargs:
@@ -173,12 +177,12 @@ class Docker():
 
     def build(self):
         # Get docker to build our vm
-        subprocess.call(['docker', 'build', '-t=nubots/nubots', '.'])
+        subprocess.call(['docker', 'build', '-t=nubots/nubots:{}'.format(self.image), 'tools/images/{}/'.format(self.image)])
 
         # Run an extra command to timestamp when this was built (for checking with compile)
         container = self._docker_run('sh', '-c', 'date +"%s" > /container_built_at', detached=True).strip()
         subprocess.check_output(['docker', 'wait', container])
-        subprocess.check_output(['docker', 'commit', container, 'nubots/nubots'])
+        subprocess.check_output(['docker', 'commit', container, 'nubots/nubots:{}'.format(self.image)])
 
     def clean(self):
         print 'TODO CLEAN'
@@ -194,14 +198,14 @@ class Docker():
         self._docker_run('/bin/bash', interactive=True)
 
     def compile(self):
-        # If we don't have an image, or it is out of date then we need to build one
-        if not self._up_to_date():
-            self.build()
-
         # Make our build folder if it doesn't exist
         if not os.path.exists('build'):
             print 'Creating build folder...'
             os.mkdir('build')
+
+        # If we don't have an image, or it is out of date then we need to build one
+        if not self._up_to_date():
+            self.build()
 
         # If we don't have cmake built, run cmake from the docker container
         if not os.path.exists('build/build.ninja'):
@@ -242,7 +246,7 @@ class Docker():
 if __name__ == "__main__":
 
     # Add Docker binary to end of PATH (for windows)
-    os.environ["PATH"] = os.environ["PATH"] + os.pathsep + os.path.dirname(os.path.abspath(__file__)) + '/cmake/bin'
+    os.environ["PATH"] = os.environ["PATH"] + os.pathsep + os.path.dirname(os.path.abspath(__file__)) + '/tools/bin'
 
     # Root parser information
     command = argparse.ArgumentParser(description='This script is an optional helper script for performing common tasks related to building and running the NUbots code and related projects.')
