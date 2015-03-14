@@ -1,12 +1,10 @@
 # Default to do a debug build
 IF(NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE Release CACHE STRING
+    SET(CMAKE_BUILD_TYPE Debug CACHE STRING
        "Choose the type of build, options are: None Debug Release RelWithDebInfo
 MinSizeRel."
        FORCE)
 ENDIF()
-
-SET(CMAKE_FIND_LIBRARY_SUFFIXES .a .so)
 
 # Common C++ Flags
 # Enable c++11
