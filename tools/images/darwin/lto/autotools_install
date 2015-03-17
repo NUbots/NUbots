@@ -1,0 +1,15 @@
+#/bin/bash'
+set -e
+curl -L $1 | tar xz
+shift 1
+BASE_DIR=$(pwd)
+CODE_DIR=$(ls -d */)
+cd "$CODE_DIR$CODE_PATH"
+CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
+CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
+LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
+./configure $@ \
+--prefix="$TOOLCHAIN_PATH"
+make -j$(nproc)
+make install
+rm -rf "$BASE_DIR/$CODE_DIR"

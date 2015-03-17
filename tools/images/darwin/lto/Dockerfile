@@ -63,55 +63,24 @@ RUN mv /usr/bin/ar /usr/bin/ar_bin \
 # build our libraries
 WORKDIR /tmp
 
-# Make our library installation script for autotools and cmake
-RUN echo '#/bin/bash' >> autotools_install \
- && echo 'set -e' >> autotools_install \
- && echo 'curl -L $1 | tar xz' >> autotools_install \
- && echo 'shift 1' >> autotools_install \
- && echo 'BASE_DIR=$(pwd)' >> autotools_install \
- && echo 'CODE_DIR=$(ls -d */)' >> autotools_install \
- && echo 'cd "$CODE_DIR$CODE_PATH"' >> autotools_install \
- && echo 'CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \\' >> autotools_install \
- && echo 'CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \\' >> autotools_install \
- && echo 'LDFLAGS="-L$TOOLCHAIN_PATH/lib" \\' >> autotools_install \
- && echo './configure $@ \\' >> autotools_install \
- && echo '--prefix="$TOOLCHAIN_PATH"' >> autotools_install \
- && echo 'make -j$(nproc)' >> autotools_install \
- && echo 'make install' >> autotools_install \
- && echo 'rm -rf "$BASE_DIR/$CODE_DIR"' >> autotools_install \
- && chmod +x ./autotools_install
-
-RUN echo '#/bin/bash' >> cmake_install \
- && echo 'set -e' >> cmake_install \
- && echo 'curl -L $1 | tar xz' >> cmake_install \
- && echo 'shift 1' >> cmake_install \
- && echo 'BASE_DIR=$(pwd)' >> cmake_install \
- && echo 'CODE_DIR=$(ls -d */)' >> cmake_install \
- && echo 'cd "$CODE_DIR$CODE_PATH"' >> cmake_install \
- && echo 'cmake \\' >> cmake_install \
- && echo '-DCMAKE_C_FLAGS="$COMPILER_FLAGS -O3" \\' >> cmake_install \
- && echo '-DCMAKE_CXX_FLAGS="$COMPILER_FLAGS -O3" \\' >> cmake_install \
- && echo '-DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH" \\' >> cmake_install \
- && echo '$@' >> cmake_install \
- && echo 'make -j$(nproc)' >> cmake_install \
- && echo 'make install' >> cmake_install \
- && echo 'rm -rf "$BASE_DIR/$CODE_DIR"' >> cmake_install \
- && chmod +x ./cmake_install
+# Copy our installer scripts over in our path
+COPY autotools_install /usr/local/bin/autotools_install
+COPY cmake_install /usr/local/bin/cmake_install
 
 # zlib
-RUN ./autotools_install http://zlib.net/zlib-1.2.8.tar.gz
+RUN autotools_install http://zlib.net/zlib-1.2.8.tar.gz
 
 # libprotobuf + protobuf-compiler
-RUN ./autotools_install https://github.com/google/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz --with-zlib
+RUN autotools_install https://github.com/google/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz --with-zlib
 
 # openpgm
 RUN CODE_PATH="openpgm/pgm" \
-    ./autotools_install https://openpgm.googlecode.com/files/libpgm-5.2.122.tar.gz
+    autotools_install https://openpgm.googlecode.com/files/libpgm-5.2.122.tar.gz
 
 # libzmq4
 RUN OpenPGM_CFLAGS="" \
     OpenPGM_LIBS="" \
-    ./autotools_install http://download.zeromq.org/zeromq-4.0.5.tar.gz \
+    autotools_install http://download.zeromq.org/zeromq-4.0.5.tar.gz \
  && wget https://raw.githubusercontent.com/zeromq/cppzmq/master/zmq.hpp -O "$TOOLCHAIN_PATH/include/zmq.hpp"
 
 # NUClear
@@ -141,7 +110,7 @@ RUN curl -L https://github.com/xianyi/OpenBLAS/archive/v0.2.13.tar.gz | tar -xz 
  && rm -rf OpenBLAS-0.2.13
 
 # Armadillo
-RUN ./cmake_install http://sourceforge.net/projects/arma/files/armadillo-4.650.2.tar.gz \
+RUN cmake_install http://sourceforge.net/projects/arma/files/armadillo-4.650.2.tar.gz \
  && sed -i 's/^\/\* #undef ARMA_USE_LAPACK \*\//#define ARMA_USE_LAPACK/' $TOOLCHAIN_PATH/include/armadillo_bits/config.hpp \
  && sed -i 's/^#define ARMA_USE_WRAPPER/\/\/ #define ARMA_USE_WRAPPER/'   $TOOLCHAIN_PATH/include/armadillo_bits/config.hpp \
  && sed -i 's/^\/\/ #define ARMA_USE_CXX11/#define ARMA_USE_CXX11/'       $TOOLCHAIN_PATH/include/armadillo_bits/config.hpp \
@@ -151,7 +120,7 @@ RUN ./cmake_install http://sourceforge.net/projects/arma/files/armadillo-4.650.2
 RUN wget https://raw.githubusercontent.com/philsquared/Catch/master/single_include/catch.hpp -O "$TOOLCHAIN_PATH/include/catch.hpp"
 
 # TCMalloc
-RUN ./autotools_install https://googledrive.com/host/0B6NtGsLhIcf7MWxMMF9JdTN3UVk/gperftools-2.4.tar.gz \
+RUN autotools_install https://googledrive.com/host/0B6NtGsLhIcf7MWxMMF9JdTN3UVk/gperftools-2.4.tar.gz \
     --with-tcmalloc-pagesize=64 \
     --enable-minimal
 
@@ -159,17 +128,17 @@ RUN ./autotools_install https://googledrive.com/host/0B6NtGsLhIcf7MWxMMF9JdTN3UV
 RUN apt-get -y install libboost-dev
 
 # yaml-cpp
-RUN ./cmake_install https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz \
+RUN cmake_install https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz \
     -DYAML_CPP_BUILD_CONTRIB=OFF \
     -DYAML_CPP_BUILD_TOOLS=OFF
 
 # ncurses
-RUN ./autotools_install http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz \
+RUN autotools_install http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz \
     --without-progs \
     --without-tests
 
 # fftw-3
-RUN ./autotools_install http://www.fftw.org/fftw-3.3.4.tar.gz \
+RUN autotools_install http://www.fftw.org/fftw-3.3.4.tar.gz \
     --disable-fortran \
     --enable-shared
 
@@ -185,7 +154,7 @@ RUN curl -L https://downloads.sourceforge.net/project/quex/DOWNLOAD/quex-0.65.2.
 # jpeg-turbo
 # we need yasm to assemble libjpeg-turbo
 RUN apt-get install yasm
-RUN ./autotools_install http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.0/libjpeg-turbo-1.4.0.tar.gz \
+RUN autotools_install http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.0/libjpeg-turbo-1.4.0.tar.gz \
     --build=i686-linux-gnu \
     --host=i686-linux-gnu
 

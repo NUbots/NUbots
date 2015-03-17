@@ -1,0 +1,15 @@
+#/bin/bash
+set -e
+curl -L $1 | tar xz
+shift 1
+BASE_DIR=$(pwd)
+CODE_DIR=$(ls -d */)
+cd "$CODE_DIR$CODE_PATH"
+cmake \
+    -DCMAKE_C_FLAGS="$COMPILER_FLAGS -O3" \
+    -DCMAKE_CXX_FLAGS="$COMPILER_FLAGS -O3" \
+    -DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH" \
+    $@
+make -j$(nproc)
+make install
+rm -rf "$BASE_DIR/$CODE_DIR"

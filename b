@@ -38,7 +38,7 @@ class Docker():
         self._setup_docker_environment()
 
         # Get our image provided to us or use a default
-        docker_image = kwargs.get('docker_image', 'darwin')
+        docker_image = kwargs.get('docker_image', 'darwin/lto')
 
         # Set relevant sections for our docker image
         self.image = {
@@ -77,7 +77,6 @@ class Docker():
 
         # For Windows we need to escape our path
         elif platform.system() == 'Windows':
-            local_name = local_name.encode('string_escape')
             remote_name = '/nubots/NUbots'
 
         # For other platforms the paths are the same
@@ -142,7 +141,7 @@ class Docker():
                     (exists, status) = self._boot2docker_status()
 
                 # If the boot2docker vm is powered off
-                if status == 'poweroff':
+                if status != 'running':
                     print('Powering on Boot2Docker VM...')
 
                     # Work out the local path to our shared folder
