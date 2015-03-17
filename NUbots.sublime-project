@@ -12,7 +12,7 @@
         {
             "name": "Docker",
             "working_dir": "${project_path:${folder}}",
-            "cmd": ["${project_path:${folder}}/b", "compile"]
+            "cmd": ["python","${project_path:${folder}}\\b", "compile"]
         }
     ]
 }
