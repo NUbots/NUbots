@@ -66,7 +66,7 @@ FUNCTION(NUCLEAR_MODULE)
     INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/shared)
 
     # Include any directories passed into the function
-    INCLUDE_DIRECTORIES(${MODULE_INCLUDES})
+    INCLUDE_DIRECTORIES(SYSTEM ${MODULE_INCLUDES})
 
     # Add all our code to a library
     IF(SHARED_BUILD)

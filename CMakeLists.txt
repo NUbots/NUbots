@@ -33,7 +33,8 @@ ADD_SUBDIRECTORY(shared/messages)
 ADD_SUBDIRECTORY(shared/utility)
 
 # Add these to our shared libraries (started in our shared libraries cmake)
-SET(NUBOTS_SHARED_LIBRARIES ${NUBOTS_SHARED_LIBRARIES} messages utility)
+# We include utility again at the end for any "shim" functions that are needed in libraries
+SET(NUBOTS_SHARED_LIBRARIES messages utility ${NUBOTS_SHARED_LIBRARIES} utility)
 
 # Build tests in test mode
 IF(BUILD_TESTS)

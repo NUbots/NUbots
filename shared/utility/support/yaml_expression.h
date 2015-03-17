@@ -22,11 +22,7 @@
 
 #include <iostream>
 #include <yaml-cpp/yaml.h>
-
-extern "C" {
-    #include <matheval.h>
-}
-
+#include <muParser.h>
 
 namespace utility {
 namespace support {
@@ -58,19 +54,17 @@ namespace YAML {
 
         static bool decode(const Node& node, utility::support::Expression& rhs) {
 
-            // Cast the node's value to a non-const C-style string
-            // This is as the evaluator_create function expects this type
-            auto expression_string = const_cast<char*>(node.as<std::string>().c_str());
+            try {
+                // Parse the expression using muParser
+                mu::Parser parser;
+                parser.SetExpr(node.as<std::string>());
+                rhs = parser.Eval();
 
-            // This horrible line constructs an expression from the expression_string
-            // This is so that the evaluator_destroy function will automatically be called on deallocation
-            auto expression = std::unique_ptr<void, std::function<void(void*)>>(evaluator_create(expression_string), evaluator_destroy);
-
-            // Evaluate the expression
-            // TODO: support variables
-            rhs = evaluator_evaluate(expression.get(), 0, nullptr, nullptr);
-
-            return true;
+                return true;
+            }
+            catch(mu::Parser::exception_type& e) {
+                return false;
+            }
         }
     };
 

@@ -19,7 +19,7 @@ else (TCMALLOC_LIBRARIES AND TCMALLOC_INCLUDE_DIRS)
 
   find_path(TCMALLOC_INCLUDE_DIR
     NAMES
-      google/tcmalloc.h NO_DEFAULT_PATH PATHS
+      google/tcmalloc.h
     PATHS
       /usr/include
       /usr/local/include

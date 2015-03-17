@@ -37,8 +37,15 @@ class Docker():
         # Setup our docker environment
         self._setup_docker_environment()
 
-        # Get our image if we have one
-        self.image = kwargs.get('docker_image', 'darwin')
+        # Get our image provided to us or use a default
+        docker_image = kwargs.get('docker_image', 'darwin')
+
+        # Set relevant sections for our docker image
+        self.image = {
+            'path': 'tools/images/{}'.format(docker_image),
+            'tag':  docker_image.replace('/', '_'),
+            'name': 'nubots/nubots:{}'.format(docker_image.replace('/', '_'))
+        }
 
         # If we have a command to run then set it up to run
         if 'docker_command' in kwargs:
@@ -46,11 +53,11 @@ class Docker():
 
     def _up_to_date(self):
         # Check we have an image
-        if not self.image in subprocess.check_output(['docker', 'images', 'nubots/nubots']):
+        if not self.image['tag'] in subprocess.check_output(['docker', 'images', 'nubots/nubots']):
             return False
 
         # Get our timestamps of our Dockerfile
-        x = os.path.getmtime('tools/images/{}/Dockerfile'.format(self.image))
+        x = os.path.getmtime(self.image['path'])
         # Get the timestamp of the build
         y = int(self._docker_run('cat', '/container_built_at'))
 
@@ -84,7 +91,7 @@ class Docker():
             + (['-d'] if kwargs.get('detached', False) else [])
             + [ '-v'
             , '{}:/nubots/NUbots'.format(self._share_path()[1])
-            , 'nubots/nubots:{}'.format(self.image)] + list(args))
+            , self.image['name']] + list(args))
 
         # If we're not detached then run
         if 'interactive' in kwargs:
@@ -134,7 +141,7 @@ class Docker():
                     (exists, status) = self._boot2docker_status()
 
                 # If the boot2docker vm is powered off
-                if status == 'poweroff':
+                if status != 'running':
                     print('Powering on Boot2Docker VM...')
 
                     # Work out the local path to our shared folder
@@ -177,12 +184,12 @@ class Docker():
 
     def build(self):
         # Get docker to build our vm
-        subprocess.call(['docker', 'build', '-t=nubots/nubots:{}'.format(self.image), 'tools/images/{}/'.format(self.image)])
+        subprocess.call(['docker', 'build', '-t={}'.format(self.image['name']), self.image['path']])
 
         # Run an extra command to timestamp when this was built (for checking with compile)
         container = self._docker_run('sh', '-c', 'date +"%s" > /container_built_at', detached=True).strip()
         subprocess.check_output(['docker', 'wait', container])
-        subprocess.check_output(['docker', 'commit', container, 'nubots/nubots:{}'.format(self.image)])
+        subprocess.check_output(['docker', 'commit', container, self.image['name']])
 
     def clean(self):
         print 'TODO CLEAN'
