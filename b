@@ -70,7 +70,6 @@ class Docker():
 
         # For Windows we need to escape our path
         elif platform.system() == 'Windows':
-            local_name = local_name.encode('string_escape')
             remote_name = '/nubots/NUbots'
 
         # For other platforms the paths are the same
@@ -142,6 +141,7 @@ class Docker():
                     share_paths = self._share_path()
 
                     # Startup our VM
+                    print share_paths
                     result = subprocess.call(['boot2docker', 'up', '--vbox-share={}=nubots'.format(share_paths[0])])
 
                     # Check for errors while booting
