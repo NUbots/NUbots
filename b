@@ -21,7 +21,7 @@ def which(program):
         if is_executable(program):
             return program
     else:
-        for path in os.environ["PATH"].split(os.pathsep):
+        for path in os.environ['PATH'].split(os.pathsep):
             path = path.strip('"')
             exe_file = os.path.join(path, program)
             if is_executable(exe_file):
@@ -148,7 +148,6 @@ class Docker():
                     share_paths = self._share_path()
 
                     # Startup our VM
-                    print share_paths
                     result = subprocess.call(['boot2docker', 'up', '--vbox-share={}=nubots'.format(share_paths[0])])
 
                     # Check for errors while booting
@@ -174,13 +173,13 @@ class Docker():
     def _check_docker(self):
         # Check that docker is installed
         if not which('docker'):
-            print "Docker is not installed, please download and install it"
+            print('Docker is not installed, please download and install it')
             sys.exit(1)
 
         # Check that either we are native linux, or we have a vm provider (docker machine or boot2docker)
         if not (platform.system() == 'Linux' or which('docker-machine') or which('boot2docker')):
-            print "The requirements for the docker daemon are not met."
-            print "You must either be running on linux, or have a Virtual Machine provider for docker (either docker-machine or boot2docker)"
+            print('The requirements for the docker daemon are not met.')
+            print('You must either be running on linux, or have a Virtual Machine provider for docker (either docker-machine or boot2docker)')
 
     def build(self):
         # Get docker to build our vm
@@ -192,7 +191,7 @@ class Docker():
         subprocess.check_output(['docker', 'commit', container, self.image['name']])
 
     def clean(self):
-        print 'TODO CLEAN'
+        print('TODO CLEAN')
 
     def rebuild(self):
         # Clean
@@ -207,7 +206,7 @@ class Docker():
     def compile(self):
         # Make our build folder if it doesn't exist
         if not os.path.exists('build'):
-            print 'Creating build folder...'
+            print('Creating build folder...')
             os.mkdir('build')
 
         # If we don't have an image, or it is out of date then we need to build one
@@ -216,7 +215,7 @@ class Docker():
 
         # If we don't have cmake built, run cmake from the docker container
         if not os.path.exists('build/build.ninja'):
-            print 'Running cmake...'
+            print('Running cmake...')
             self._docker_run('cmake', '..', '-GNinja', interactive=True)
             print('done')
 
@@ -231,10 +230,10 @@ class Docker():
 
         # Make our build folder if it doesn't exist
         if not os.path.exists('build'):
-            print 'Creating build folder...'
+            print('Creating build folder...')
             os.mkdir('build')
 
-        print 'Running ccmake...'
+        print('Running ccmake...')
         self._docker_run('ccmake', '..', '-GNinja', interactive=True)
         print('done')
 
@@ -243,17 +242,17 @@ class Docker():
         if not self._up_to_date():
             self.build()
 
-        print 'Running {} on the container...'.format(role)
+        print('Running {} on the container...'.format(role))
         self._docker_run('bin/{}'.format(role), interactive=True)
         print('done')
 
     def run(self):
         self.command()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     # Add Docker binary to end of PATH (for windows)
-    os.environ["PATH"] = os.environ["PATH"] + os.pathsep + os.path.dirname(os.path.abspath(__file__)) + '/tools/bin'
+    os.environ['PATH'] = os.environ['PATH'] + os.pathsep + os.path.dirname(os.path.abspath(__file__)) + '/tools/bin'
 
     # Root parser information
     command = argparse.ArgumentParser(description='This script is an optional helper script for performing common tasks related to building and running the NUbots code and related projects.')
@@ -269,7 +268,7 @@ if __name__ == "__main__":
 
     # Compile subcommand
     compile_command = subcommands.add_parser('compile', help='Compile the NUbots source code')
-    compile_command.add_argument('-c', '--configure', help='Configure the options for the compilation (ccmake)', action="store_true")
+    compile_command.add_argument('-c', '--configure', help='Configure the options for the compilation (ccmake)', action='store_true')
 
     # Role subcommand
     role_command = subcommands.add_parser('role', help='Manage roles in the codebase')
