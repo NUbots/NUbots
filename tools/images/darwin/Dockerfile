@@ -52,7 +52,7 @@ RUN git clone -b OldDSL --depth 1 --single-branch https://github.com/FastCode/NU
 
 # Build dependencies
 RUN apt-get -y install libgoogle-perftools-dev
-RUN apt-get -y install libmatheval-dev
+RUN apt-get -y install libmuparser-dev
 RUN apt-get -y install libboost-dev
 RUN apt-get -y install libespeak-dev
 RUN apt-get -y install librtaudio-dev

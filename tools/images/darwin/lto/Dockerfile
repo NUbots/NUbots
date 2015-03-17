@@ -153,9 +153,40 @@ RUN autotools_install http://downloads.sourceforge.net/project/libjpeg-turbo/1.4
 RUN COMPILER_FLAGS="" \
     cmake_install https://github.com/cppformat/cppformat/archive/1.1.0.tar.gz
 
-# Trying to compile this made me sad
-RUN apt-get -y install libmatheval-dev flex libespeak-dev libportaudio-dev
+# alsa (Advanced Linux Sound Architecture)
+# do a normal build, LTO makes it cry at the moment
+RUN COMPILER_FLAGS="" \
+    autotools_install ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.29.tar.bz2 \
+    --enable-shared=no \
+    --enable-static=yes
 
+# Port audio
+RUN COMPILER_FLAGS="" \
+    autotools_install http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz
+
+# Espeak
+RUN curl -L http://sourceforge.net/projects/espeak/files/espeak/espeak-1.48/espeak-1.48.04-source.zip -o source.zip \
+ && unzip source.zip \
+ && rm -rf source.zip \
+ && cd espeak-1.48.04-source/src \
+ && mv portaudio19.h portaudio.h \
+ && CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
+    LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
+    AUDIO="PORTAUDIO" \
+    make LDFLAGS="-L/nubots/toolchain/lib" \
+ && make PREFIX="$TOOLCHAIN_PATH" install \
+ && cd ../.. \
+ && rm -rf espeak-1.48.04-source
+
+# RT Audio
+# RUN autotools_install http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-4.1.1.tar.gz \
+#     --with-alsa
+
+# muparser
+RUN autotools_install https://downloads.sourceforge.net/project/muparser/muparser/Version%202.2.3/muparser_v2_2_3.zip \
+    --disable-shared \
+    --disable-debug \
+    --disable-samples
 
 # You need to mount your local code directory to the container
 # Eg: docker run -t -i -v /local/path/:/nubots/NUbots /bin/bash
