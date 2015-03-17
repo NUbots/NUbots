@@ -17,6 +17,9 @@ if (ESPEAK_LIBRARIES AND ESPEAK_INCLUDE_DIRS)
   set(ESPEAK_FOUND TRUE)
 else (ESPEAK_LIBRARIES AND ESPEAK_INCLUDE_DIRS)
 
+  # We need portaudio if we are using a static eSpeak library
+  find_package(PortAudio)
+
   find_path(ESPEAK_INCLUDE_DIR
     NAMES
       espeak/speak_lib.h
@@ -45,6 +48,7 @@ else (ESPEAK_LIBRARIES AND ESPEAK_INCLUDE_DIRS)
     set(ESPEAK_LIBRARIES
         ${ESPEAK_LIBRARIES}
         ${ESPEAK_LIBRARY}
+        ${PORTAUDIO_LIBRARIES}
     )
   endif (ESPEAK_LIBRARY)
 

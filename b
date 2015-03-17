@@ -38,7 +38,7 @@ class Docker():
         self._setup_docker_environment()
 
         # Get our image provided to us or use a default
-        docker_image = kwargs.get('docker_image', 'darwin/lto')
+        docker_image = kwargs.get('docker_image', 'darwin')
 
         # Set relevant sections for our docker image
         self.image = {
