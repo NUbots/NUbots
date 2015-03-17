@@ -84,17 +84,8 @@ RUN OpenPGM_CFLAGS="" \
  && wget https://raw.githubusercontent.com/zeromq/cppzmq/master/zmq.hpp -O "$TOOLCHAIN_PATH/include/zmq.hpp"
 
 # NUClear
-RUN git clone -b OldDSL --depth 1 --single-branch https://github.com/FastCode/NUClear NUClear \
- && cd NUClear \
- && cmake -GNinja \
-          -DCMAKE_C_FLAGS="$COMPILER_FLAGS" \
-          -DCMAKE_CXX_FLAGS="$COMPILER_FLAGS" \
-          -DNUCLEAR_BUILD_TESTS=OFF \
-          -DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH" \
- && ninja \
- && ninja install \
- && cd .. \
- && rm -rf NUClear
+RUN cmake_install https://github.com/Fastcode/NUClear/archive/OldDSL.tar.gz \
+    -DNUCLEAR_BUILD_TESTS=OFF
 
 # OpenBLAS (includes lapack)
 RUN curl -L https://github.com/xianyi/OpenBLAS/archive/v0.2.13.tar.gz | tar -xz \
@@ -158,19 +149,13 @@ RUN autotools_install http://downloads.sourceforge.net/project/libjpeg-turbo/1.4
     --build=i686-linux-gnu \
     --host=i686-linux-gnu
 
+# cppformat (TODO for now don't use flto until you get rid of gtest)
+RUN COMPILER_FLAGS="" \
+    cmake_install https://github.com/cppformat/cppformat/archive/1.1.0.tar.gz
+
 # Trying to compile this made me sad
 RUN apt-get -y install libmatheval-dev flex libespeak-dev libportaudio-dev
 
-# cppformat (TODO for now don't use flto until you get rid of gtest)
-RUN git clone --depth 1 --single-branch https://github.com/cppformat/cppformat \
- && cd cppformat \
- && cmake -DCMAKE_CXX_FLAGS="-O3" \
-          -DCMAKE_C_FLAGS="-O3" \
-          -DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH" \
- && make -j$(nproc) \
- && make install \
- && cd .. \
- && rm -rf cppformat
 
 # You need to mount your local code directory to the container
 # Eg: docker run -t -i -v /local/path/:/nubots/NUbots /bin/bash

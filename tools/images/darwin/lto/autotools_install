@@ -1,15 +1,40 @@
-#/bin/bash'
+#!/bin/bash
+
+# Exit immediatly on error
 set -e
-curl -L $1 | tar xz
+
+# Work out what kind of compression the URL uses
+if [[ "$1" == *gz ]]
+then
+    COMPRESSION=z
+
+elif [[ "$1" == *.bz2 ]]
+then
+    COMPRESSION=j
+fi
+
+# Download and extract our code
+curl -L $1 | tar x$COMPRESSION
+
+# Discard our URL argument
 shift 1
+
+# Work out our context
 BASE_DIR=$(pwd)
 CODE_DIR=$(ls -d */)
 cd "$CODE_DIR$CODE_PATH"
+
+# Set our fags and run configure
 CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
 CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
 LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
-./configure $@ \
---prefix="$TOOLCHAIN_PATH"
+./configure \
+    $@ \
+    --prefix="$TOOLCHAIN_PATH"
+
+# Make and install
 make -j$(nproc)
 make install
+
+# Delete our source code
 rm -rf "$BASE_DIR/$CODE_DIR"
