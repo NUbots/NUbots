@@ -37,16 +37,36 @@ else (OPENBLAS_LIBRARIES AND OPENBLAS_INCLUDE_DIRS)
       /sw/lib
   )
 
+  # TODO this should only run if OpenBlas does not have lapack in it
+  find_library(LAPACK_LIBRARY
+    NAMES
+      lapack
+    PATHS
+      /usr/lib
+      /usr/local/lib
+      /opt/local/lib
+      /sw/lib
+  )
+
   set(OPENBLAS_INCLUDE_DIRS
     ${OPENBLAS_INCLUDE_DIR}
   )
 
-  if (OPENBLAS_LIBRARY)
+  if(OPENBLAS_LIBRARY)
+
     set(OPENBLAS_LIBRARIES
         ${OPENBLAS_LIBRARIES}
         ${OPENBLAS_LIBRARY}
     )
-  endif (OPENBLAS_LIBRARY)
+
+    if(LAPACK_LIBRARY)
+      set(OPENBLAS_LIBRARIES
+          ${OPENBLAS_LIBRARIES}
+          ${LAPACK_LIBRARY}
+      )
+    endif(LAPACK_LIBRARY)
+
+  endif(OPENBLAS_LIBRARY)
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(OPENBLAS DEFAULT_MSG OPENBLAS_LIBRARIES OPENBLAS_INCLUDE_DIRS)

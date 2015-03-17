@@ -25,7 +25,7 @@
 #include "utility/file/fileutil.h"
 #include "messages/behaviour/Action.h"
 
-#include <ncurses/ncurses.h>
+#include <ncurses.h>
 #include <sstream>
 
 namespace modules {

@@ -64,7 +64,7 @@ else (LIBGFORTRAN_LIBRARIES)
   find_package_handle_standard_args(LIBGFORTRAN DEFAULT_MSG LIBGFORTRAN_LIBRARIES)
 
   # show the LIBGFORTRAN_LIBRARIES variables only in the advanced view
-  mark_as_advanced(LIBGFORTRAN_LIBRARIES)
+  mark_as_advanced(LIBGFORTRAN_LIBRARIES _GFORTRAN_EXECUTABLE)
 
 endif (LIBGFORTRAN_LIBRARIES)
 

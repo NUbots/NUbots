@@ -1,10 +1,14 @@
 # Default to do a debug build
 IF(NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE Debug CACHE STRING
-       "Choose the type of build, options are: None Debug Release RelWithDebInfo
-MinSizeRel."
+       "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel LTO MinSizeRel."
        FORCE)
 ENDIF()
+
+SET(CMAKE_FIND_LIBRARY_SUFFIXES
+    ${CMAKE_STATIC_LIBRARY_SUFFIX}
+    ${CMAKE_SHARED_LIBRARY_SUFFIX})
+
 
 # Common C++ Flags
 # Enable c++11
@@ -69,8 +73,10 @@ SET(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} ${COMMON_CXX_FLAGS}")
 SET(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} ${COMMON_C_FLAGS}")
 SET(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} ${COMMON_CXX_FLAGS}")
 SET(CMAKE_C_FLAGS_DEBUG            "${CMAKE_C_FLAGS_DEBUG} ${COMMON_C_FLAGS}")
-SET(CMAKE_CXX_FLAGS_RELEASE        "-fuse-linker-plugin -ffast-math -flto -fno-fat-lto-objects ${CMAKE_CXX_FLAGS_RELEASE} ${COMMON_CXX_FLAGS}")
-SET(CMAKE_C_FLAGS_RELEASE          "-fuse-linker-plugin -ffast-math -flto -fno-fat-lto-objects ${CMAKE_C_FLAGS_RELEASE} ${COMMON_C_FLAGS}")
+SET(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} ${COMMON_CXX_FLAGS}")
+SET(CMAKE_C_FLAGS_RELEASE          "${CMAKE_C_FLAGS_RELEASE} ${COMMON_C_FLAGS}")
+SET(CMAKE_CXX_FLAGS_LTO            "-fuse-linker-plugin -ffast-math -flto -fno-fat-lto-objects ${CMAKE_CXX_FLAGS_RELEASE}  ${COMMON_CXX_FLAGS}")
+SET(CMAKE_C_FLAGS_LTO              "-fuse-linker-plugin -ffast-math -flto -fno-fat-lto-objects ${CMAKE_C_FLAGS_RELEASE} ${COMMON_C_FLAGS}")
 SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${COMMON_CXX_FLAGS}")
 SET(CMAKE_C_FLAGS_RELWITHDEBINFO   "${CMAKE_C_FLAGS_RELWITHDEBINFO} ${COMMON_C_FLAGS}")
 SET(CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_CXX_FLAGS_MINSIZEREL} ${COMMON_CXX_FLAGS}")
