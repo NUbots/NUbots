@@ -49,13 +49,23 @@ The following is a guide to getting you set up and ready to contribute to the NU
   **Note:** If you are on Windows/OSX your code must be in /c/Users/ or /Users/
   respectively.
 
-5. Make robots do awesome stuff!
-
-	**Important:** Make sure to set your git identity correctly before committing to the project.
+5. Try running a binary!
 	
-		$ git config --global user.name "Your Name"
-		$ git config --global user.email you@example.com
-		$ git config --global color.ui auto
+	OSX and Linux:
+	
+		$ ./b role run keyboardwalkfake
+	
+	Windows:
+
+		$ python b role run keyboardwalkfake
+		
+	You can see the result of this binary by installing [NUsight][]. You will also have to edit the file config/NUbugger.yaml in the build directory so that sensors is set to `true`.
+
+**Important:** Make sure to set your git identity correctly before committing to the project.
+
+	$ git config --global user.name "Your Name"
+	$ git config --global user.email you@example.com
+	$ git config --global color.ui auto
 
 Troubleshooting
 --------
@@ -68,6 +78,7 @@ are having issues.
 [git]:                    http://git-scm.com/                                     "Git"
 [Python]:                 https://www.python.org/                                 "Python"
 [NUClearPort]:            https://github.com/nubots/NUClearPort                   "NUClearPort Repository"
+[NUsight]:                https://github.com/nubots/NUsight 	                  "NUsight Repository"
 <!-- [nuclearport-startup-guide]: http://confluence.nubots.net/display/NUB/NUClearPort+Startup+Guide -->
 [NUbots]:                 http://nubots.net/                                      "NUbots"
 [robocup]:                https://github.com/nubots/robocup                       "Robocup"
