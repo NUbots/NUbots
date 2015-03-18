@@ -243,8 +243,7 @@ class Docker():
             self.build()
 
         print('Running {} on the container...'.format(role))
-        self._docker_run('bin/{}'.format(role), interactive=True)
-        print('done')
+        self._docker_run('sh', '-c', '"bin/{}"'.format(role), interactive=True)
 
     def run(self):
         self.command()
