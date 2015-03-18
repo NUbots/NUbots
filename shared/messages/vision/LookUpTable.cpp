@@ -58,6 +58,10 @@ namespace messages {
             return data;
         }
 
+        std::vector<Colour>& LookUpTable::getRawData() {
+            return data;
+        }
+
         uint LookUpTable::getLUTIndex(const messages::input::Image::Pixel& colour) const {
             unsigned int index = 0;
 
