@@ -66,8 +66,8 @@ RUN apt-get -y install libopenblas-dev
 RUN apt-get -y install liblapack-dev
 
 # Install and configure icecream
-RUN apt-get -y install icecc
-RUN sed -i -e '/ICECC_SCHEDULER_HOST=/ s/="[a-zA-Z0-9]+/="10.1.0.80"/' /etc/icecc/icecc.conf
+RUN apt-get -y install icecc \
+ && sed -i 's/ICECC_SCHEDULER_HOST=""/ICECC_SCHEDULER_HOST="10.1.0.80"/' /etc/icecc/icecc.conf
 ENV PATH /usr/lib/icecc/bin:$PATH
 
 # Download and install cppformat

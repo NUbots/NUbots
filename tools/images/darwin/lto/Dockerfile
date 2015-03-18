@@ -188,6 +188,11 @@ RUN autotools_install https://downloads.sourceforge.net/project/muparser/muparse
     --disable-debug \
     --disable-samples
 
+# icecc
+RUN apt-get -y install icecc \
+ && sed -i 's/ICECC_SCHEDULER_HOST=""/ICECC_SCHEDULER_HOST="10.1.0.80"/' /etc/icecc/icecc.conf
+ENV PATH /usr/lib/icecc/bin:$PATH
+
 # You need to mount your local code directory to the container
 # Eg: docker run -t -i -v /local/path/:/nubots/NUbots /bin/bash
 VOLUME /nubots/NUbots
