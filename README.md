@@ -4,7 +4,7 @@ NUbots Codebase
 Docker
 --------
 
-The NUbots use [Docker][] to manage and version the build environment for the NUbots project.
+The NUbots use [Docker][] to manage the build environment for the NUbots project.
 
 The following is a guide to getting you set up and ready to contribute to the NUbots project.
 
