@@ -1,11 +1,13 @@
 #!/usr/bin/python
 
-import os
 import sys
+sys.dont_write_bytecode = True
+import os
 import argparse
 import shutil
 import platform
 import subprocess
+import tools.module
 
 def which(program):
 
@@ -207,7 +209,7 @@ class Docker():
         # Make our build folder if it doesn't exist
         if not os.path.exists('build'):
             print('Creating build folder...')
-            os.mkdir('build')
+            os.mkdirs('build')
 
         # If we don't have an image, or it is out of date then we need to build one
         if not self._up_to_date():
@@ -224,14 +226,14 @@ class Docker():
         print('done')
 
     def configure_compile(self):
-        # If we don't have an image, then we need to build one
-        if not self._up_to_date():
-            self.build()
-
         # Make our build folder if it doesn't exist
         if not os.path.exists('build'):
             print('Creating build folder...')
-            os.mkdir('build')
+            os.mkdirs('build')
+
+        # If we don't have an image, then we need to build one
+        if not self._up_to_date():
+            self.build()
 
         print('Running ccmake...')
         self._docker_run('ccmake', '..', '-GNinja', interactive=True)
@@ -277,7 +279,7 @@ if __name__ == '__main__':
 
     # Module subcommand
     module_command = subcommands.add_parser('module', help='Manage NUClear modules in the codebase')
-    module_subcommands = module_command.add_subparsers()
+    module_subcommands = module_command.add_subparsers(dest='module_command')
 
     # Generate module subcommand
     module_generate_command = module_subcommands.add_parser('generate', help='Generate a new NUClear module based on a template')
@@ -285,7 +287,6 @@ if __name__ == '__main__':
 
     # Parse our command line arguments
     args = command.parse_args()
-
     if args.subcommand == 'docker':
         Docker(**vars(args)).run()
     elif args.subcommand == 'compile':
@@ -296,3 +297,7 @@ if __name__ == '__main__':
     elif args.subcommand == 'role':
         if args.role_command == 'run':
             Docker().run_role(args.role)
+    elif args.subcommand == 'module':
+        if args.module_command == 'generate':
+            tools.module.Module(**vars(args)).run()
+            # TODO do module generate
