@@ -7,8 +7,10 @@ ADD_ROLE(
     support::configuration::SoccerConfig
     support::NUbugger
 
+    #Simulation of soccer field
+    support::SoccerSimulator
+
     #Localisation
     localisation::MMKFRobotLocalisation
-    localisation::MockRobot
     localisation::KFBallLocalisation
 )
