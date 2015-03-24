@@ -48,6 +48,7 @@ namespace localisation {
     using messages::support::FieldDescription;
     using modules::localisation::MockRobotConfig;
     using messages::localisation::Mock;
+    
 
     double triangle_wave(double t, double period) {
         auto a = period; // / 2.0;
