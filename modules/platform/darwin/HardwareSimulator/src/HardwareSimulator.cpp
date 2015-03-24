@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "HardwareIO.h"
+#include "HardwareSimulator.h"
 
 #include <armadillo>
 
@@ -32,9 +32,9 @@ using messages::input::ServoID;
 
 namespace modules {
 namespace platform {
-namespace fakedarwin {
+namespace darwin {
 
-    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         /*
          CM730 Data

@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_PLATFORM_FAKEDARWIN_HARDWAREIO_H
-#define MODULES_PLATFORM_FAKEDARWIN_HARDWAREIO_H
+#ifndef MODULES_PLATFORM_DARWIN_HARDWARESIMULATOR_H
+#define MODULES_PLATFORM_DARWIN_HARDWARESIMULATOR_H
 
 #include <nuclear>
 
@@ -26,7 +26,7 @@
 
 namespace modules {
 namespace platform {
-namespace fakedarwin {
+namespace darwin {
 
     /**
      * This NUClear Reactor is responsible for reading in the data for the Darwin Platform and emitting it to the rest
@@ -34,13 +34,13 @@ namespace fakedarwin {
      *
      * @author Trent Houliston
      */
-    class HardwareIO : public NUClear::Reactor {
+    class HardwareSimulator : public NUClear::Reactor {
     private:
         messages::platform::darwin::DarwinSensors sensors;
 
     public:
         /// @brief called by a Powerplant to construct this reactor
-        explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
+        explicit HardwareSimulator(std::unique_ptr<NUClear::Environment> environment);
     };
 }
 }

@@ -174,8 +174,8 @@ namespace localisation {
             arma::vec2 robot_imu_dir_ = WorldToRobotTransform(arma::vec2({0, 0}), robot_heading_, world_imu_direction_);
             arma::mat orientation = arma::eye(3, 3);
 
-                orientation.submat(0, 0, 1, 0) = robot_imu_dir_;
-                orientation.submat(0, 1, 1, 1) = arma::vec2({ -robot_imu_dir_(1), robot_imu_dir_(0) });
+            orientation.submat(0, 0, 1, 0) = robot_imu_dir_;
+            orientation.submat(0, 1, 1, 1) = arma::vec2({ -robot_imu_dir_(1), robot_imu_dir_(0) });
 
             sensors->orientation = orientation;
             sensors->robotToIMU = calculateRobotToIMU(sensors->orientation);
