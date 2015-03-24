@@ -1,0 +1,34 @@
+vision:
+  goal_observations: true
+  observe:
+    left_goal: true
+    right_goal: true
+  distinguish_left_and_right_goals: true
+  ball_observations: true
+
+robot:
+  #If use_motion is true, then the robot will move based on the latest motion commands
+  motion_type: PATH #NONE, PATH or MOTION
+  #If use_motion is false, the following path with be used instead
+  path:
+    period: 100
+    x_amp: 3
+    y_amp: 2
+    type: sin #sin, triangle
+
+ball:
+  #If use_motion is true, then the ball will move based on the latest motion commands
+  motion_type: PATH #NONE, PATH or MOTION
+  path:
+  #If use_motion is false, the following path with be used instead
+    period: 100
+    x_amp: 3
+    y_amp: 2
+    type: sin #sin, triangle
+
+nusight:
+  emit_self: true
+  emit_ball: true
+
+environment_parameters:
+  imu_drift_period: 300
