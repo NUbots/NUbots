@@ -114,7 +114,9 @@ namespace support {
         });
 
         // Update world state
-        on<Trigger<Every<10, std::chrono::milliseconds>>>("Robot motion", [this](const time_t&) {
+        static constexpr float UPDATE_FREQUENCY = 100;
+
+        on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>>("Robot motion", [this](const time_t&) {
 
             FieldPose previousRobotPose = robot_pose;
             
@@ -129,25 +131,15 @@ namespace support {
                     double x_amp = cfg_.robot.path.x_amp;
                     double y_amp = cfg_.robot.path.y_amp;
 
-                    double wave1;
-                    double wave2;
-                    switch(cfg_.robot.path.type){
-                        case PathType::SIN:
-                            wave1 = sine_wave(t, period);
-                            wave2 = sine_wave(t + (period / 4.0), period);                      
-                        case PathType::TRIANGLE:
-                            wave1 = triangle_wave(t, period);
-                            wave2 = triangle_wave(t + (period / 4.0), period);
-                    }
                     
                     arma::vec2 old_pos = arma::vec2(robot_position_);
-                    robot_position_ = arma::vec2({ wave1 * x_amp, wave2 * y_amp });
+                    robot_position_ = getPath(robot.path.type) % arma::vec2({ x_amp, y_amp });
 
                     arma::vec2 diff = robot_position_ - old_pos;
 
                     robot_heading_ = vectorToBearing(arma::vec2(diff));
-                    robot_velocity_ = arma::vec2({arma::norm(diff) / 100.0, 0}); //Robot coordinates
-                    robot_odometry_ = arma::vec2({arma::norm(diff)*100, 0}); //Robot coordinates
+                    robot_velocity_ = arma::vec2({arma::norm(diff) * UPDATE_FREQUENCY, 0}); //Robot coordinates
+                    robot_odometry_ = arma::vec2({arma::norm(diff) * UPDATE_FREQUENCY, 0}); //Robot coordinates
                 }
                 case MotionType::MOTION:
                     break;
@@ -163,10 +155,8 @@ namespace support {
                     double period = cfg_.ball.path.period;
                     double x_amp = cfg_.ball.path.x_amp;
                     double y_amp = cfg_.ball.path.y_amp;
-
-                    auto triangle1 = triangle_wave(t, period);
-                    auto triangle2 = triangle_wave(t + (period / 4.0), period);
-                    ball_position_ = { triangle1 * x_amp, triangle2 * y_amp };
+                    
+                    ball_position_ = getPath(ball.path.type) % arma::vec2({ x_amp, y_amp });
 
                     auto velocity_x = -square_wave(t, period) * ((x_amp * 4) / period);
                     auto velocity_y = -square_wave(t + (period / 4.0), period) * ((y_amp * 4) / period);
@@ -180,37 +170,13 @@ namespace support {
 
         // Simulate Vision
         on<Trigger<Every<30, Per<std::chrono::seconds>>>,
-           Options<Sync<SoccerSimulator>>>("Vision Simulation", [this](const time_t&) {
+            With<Raw<Sensors>>,
+            Options<Sync<SoccerSimulator>>>("Vision Simulation", [this](const time_t&, const std::shared_ptr<Sensors>& sensors) {
 
             if (field_description_ == nullptr) {
                 NUClear::log(__FILE__, __LINE__, ": field_description_ == nullptr");
                 return;
             }
-
-            auto sensors = std::make_shared<messages::input::Sensors>();
-
-            // Sensors:
-
-            // orientation
-            // arma::vec2 robot_imu_dir_ = WorldToRobotTransform(arma::vec2({0, 0}), robot_heading_, world_imu_direction_);
-            // arma::mat orientation = arma::eye(3, 3);
-
-            // orientation.submat(0, 0, 1, 0) = robot_imu_dir_;
-            // orientation.submat(0, 1, 1, 1) = arma::vec2({ -robot_imu_dir_(1), robot_imu_dir_(0) });
-
-            // sensors->orientation = orientation;
-            // sensors->robotToIMU = calculateRobotToIMU(sensors->orientation);
-
-            // // orientationCamToGround
-            // sensors->orientationCamToGround = arma::eye(4, 4);
-
-            // // forwardKinematics
-            // sensors->forwardKinematics[ServoID::HEAD_PITCH] = arma::eye(4, 4);
-
-            // //Odometry simulation
-            // sensors->odometry = robot_odometry_;
-            // sensors->odometryCovariance = arma::eye(2,2) * 0.05;
-
 
             // Goal observation
             if (cfg_.simulate_goal_observations) {
@@ -280,7 +246,6 @@ namespace support {
                 emit(std::move(ball_vec));
             }
 
-            emit(std::make_unique<Sensors>(*sensors));
         });
 
         // Emit robot to NUbugger
@@ -375,12 +340,26 @@ namespace support {
         });
     }
 
-    std::unique_ptr<Gyroscope> computeGyro(float dHeading){
+    std::unique_ptr<Gyroscope> SoccerSimulator::computeGyro(float dHeading){
         std::make_unique<Gyroscope> g();
         g->x = 0;
         g->y = 0;
         g->z = dHeading;
         return std::move(g);
+    }
+
+    arma::vec2 SoccerSimulator::getPath(PathType p){
+        double wave1;
+        double wave2;
+        switch(p){
+            case PathType::SIN:
+                wave1 = sine_wave(t, period);
+                wave2 = sine_wave(t + (period / 4.0), period);                      
+            case PathType::TRIANGLE:
+                wave1 = triangle_wave(t, period);
+                wave2 = triangle_wave(t + (period / 4.0), period);
+        }
+        return arma::vec2({wave1,wave2});
     }
 
 }
