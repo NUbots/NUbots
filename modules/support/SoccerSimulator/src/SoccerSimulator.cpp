@@ -116,7 +116,11 @@ namespace support {
         // Update world state
         static constexpr float UPDATE_FREQUENCY = 100;
 
-        on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>>("Robot motion", [this](const time_t&) {
+        on<
+            Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>,
+            With<WalkCommand>,
+            With<KickCommand>
+        >("Robot motion", [this](const time_t&) {
 
             FieldPose previousRobotPose = robot_pose;
             
@@ -155,7 +159,7 @@ namespace support {
                     double period = cfg_.ball.path.period;
                     double x_amp = cfg_.ball.path.x_amp;
                     double y_amp = cfg_.ball.path.y_amp;
-                    
+
                     ball_position_ = getPath(ball.path.type) % arma::vec2({ x_amp, y_amp });
 
                     auto velocity_x = -square_wave(t, period) * ((x_amp * 4) / period);
