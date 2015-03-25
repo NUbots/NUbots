@@ -73,6 +73,8 @@ namespace support {
         void UpdateConfiguration(
             const messages::support::Configuration<SoccerSimulatorConfig>& config);
 
+        std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float dHeading);
+
         arma::vec2 ball_position_ = { 0, 0 };
         arma::vec2 ball_velocity_ = { 0, 0 };
         arma::vec2 robot_position_ = { 0, 0 };
@@ -112,6 +114,14 @@ namespace support {
 
             double robot_imu_drift_period = 200;
         } cfg_;
+
+        struct FieldPose{
+            arma::vec2 p = arma::vec2({0,0});
+            float heading = 0;
+        };
+
+        FieldPose robotPose;
+        FieldPose ballPose;
 
     public:
         /// @brief Called by the powerplant to build and setup the SoccerSimulator reactor.

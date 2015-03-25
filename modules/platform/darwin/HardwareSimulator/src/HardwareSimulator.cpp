@@ -26,13 +26,13 @@
 #include "messages/input/ServoID.h"
 #include "utility/math/angle.h"
 
-using messages::platform::darwin::DarwinSensors;
-using messages::motion::ServoTarget;
-using messages::input::ServoID;
-
 namespace modules {
 namespace platform {
 namespace darwin {
+
+    using messages::platform::darwin::DarwinSensors;
+    using messages::motion::ServoTarget;
+    using messages::input::ServoID;
 
     HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -143,7 +143,17 @@ namespace darwin {
             servo.temperature = 0;
         }
 
-        on<Trigger<Every<60, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
+        on<Trigger<Configuration<HardwareSimulator>>>("Hardware Simulator Config",[this](const Configuration<HardwareSimulator>& config){
+            imu_drift_rate = config["imu_drift_rate"].as<float>();
+        });
+
+        on<Trigger<DarwinSensors::Gyroscope>>("Receive Simulated Gyroscope", [this](const DarwinSensors::Gyroscope& gyro){
+            gyroQueue.push(gyro);
+        });
+
+        const float UPDATE_FREQUENCY = 60;
+
+        on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
 
             for (int i = 0; i < 20; ++i) {
 
@@ -168,6 +178,18 @@ namespace darwin {
                     }
                 }
             }
+
+            //Gyro
+            arma::vec3 sumGyro;
+            while (!gyroQueue.empty()){
+                auto g = gyroQueue.pop();
+                sumGyro += arma::vec3({g.x,g.y,g.z});
+            }
+            sumGyro = (sumGyro + arma::vec3({0,0,imu_drift_rate}))* UPDATE_FREQUENCY ;
+            sensors.gyroscope.x = sumGyro[0];
+            sensors.gyroscope.y = sumGyro[1];
+            sensors.gyroscope.z = sumGyro[2];
+
 
             // Send our nicely computed sensor data out to the world
             emit(std::make_unique<DarwinSensors>(sensors));

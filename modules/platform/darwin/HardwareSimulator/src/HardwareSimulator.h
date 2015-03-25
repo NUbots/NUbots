@@ -37,10 +37,12 @@ namespace darwin {
     class HardwareSimulator : public NUClear::Reactor {
     private:
         messages::platform::darwin::DarwinSensors sensors;
-
+        std::queue<messages::platform::darwin::DarwinSensors::Gryo> gyro_queue;
+        float imu_drift_rate;
     public:
         /// @brief called by a Powerplant to construct this reactor
         explicit HardwareSimulator(std::unique_ptr<NUClear::Environment> environment);
+        static constexpr const char* CONFIGURATION_PATH = "DarwinHardwareSimulator.yaml";
     };
 }
 }

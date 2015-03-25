@@ -29,6 +29,7 @@
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/Sensors.h"
 #include "messages/input/ServoID.h"
+#include "messages/platform/darwin/DarwinSensors.h"
 
 namespace modules {
 namespace support {
@@ -47,6 +48,8 @@ namespace support {
     using messages::support::Configuration;
     using messages::support::FieldDescription;
     using messages::localisation::Mock;
+    using messages::platform::darwin::DarwinSensors::Gyroscope;
+
     
 
     double triangle_wave(double t, double period) {
@@ -114,6 +117,8 @@ namespace support {
         // Update world state
         on<Trigger<Every<10, std::chrono::milliseconds>>>("Robot motion", [this](const time_t&) {
 
+            FieldPose previousRobotPose = robot_pose;
+            
             switch (cfg_.robot.motion_type){
                 case MotionType::NONE: {
                     robot_velocity_ = arma::vec2({ 0, 0 });
@@ -167,8 +172,9 @@ namespace support {
                     ball_velocity_ = { velocity_x, velocity_y };
 
                 case MotionType::MOTION:
-
                     break;
+
+            emit(computeGyro(robotPose.heading - previousRobotPose.heading));
         });
 
         // Simulate Vision
@@ -182,28 +188,27 @@ namespace support {
 
             auto sensors = std::make_shared<messages::input::Sensors>();
 
-
             // Sensors:
 
             // orientation
-            arma::vec2 robot_imu_dir_ = WorldToRobotTransform(arma::vec2({0, 0}), robot_heading_, world_imu_direction_);
-            arma::mat orientation = arma::eye(3, 3);
+            // arma::vec2 robot_imu_dir_ = WorldToRobotTransform(arma::vec2({0, 0}), robot_heading_, world_imu_direction_);
+            // arma::mat orientation = arma::eye(3, 3);
 
-            orientation.submat(0, 0, 1, 0) = robot_imu_dir_;
-            orientation.submat(0, 1, 1, 1) = arma::vec2({ -robot_imu_dir_(1), robot_imu_dir_(0) });
+            // orientation.submat(0, 0, 1, 0) = robot_imu_dir_;
+            // orientation.submat(0, 1, 1, 1) = arma::vec2({ -robot_imu_dir_(1), robot_imu_dir_(0) });
 
-            sensors->orientation = orientation;
-            sensors->robotToIMU = calculateRobotToIMU(sensors->orientation);
+            // sensors->orientation = orientation;
+            // sensors->robotToIMU = calculateRobotToIMU(sensors->orientation);
 
-            // orientationCamToGround
-            sensors->orientationCamToGround = arma::eye(4, 4);
+            // // orientationCamToGround
+            // sensors->orientationCamToGround = arma::eye(4, 4);
 
-            // forwardKinematics
-            sensors->forwardKinematics[ServoID::HEAD_PITCH] = arma::eye(4, 4);
+            // // forwardKinematics
+            // sensors->forwardKinematics[ServoID::HEAD_PITCH] = arma::eye(4, 4);
 
-            //Odometry simulation
-            sensors->odometry = robot_odometry_;
-            sensors->odometryCovariance = arma::eye(2,2) * 0.05;
+            // //Odometry simulation
+            // sensors->odometry = robot_odometry_;
+            // sensors->odometryCovariance = arma::eye(2,2) * 0.05;
 
 
             // Goal observation
@@ -368,6 +373,15 @@ namespace support {
             emit(std::move(balls_msg));
         });
     }
+
+    std::unique_ptr<Gyroscope> computeGyro(float dHeading){
+        std::make_unique<Gyroscope> g();
+        g->x = 0;
+        g->y = 0;
+        g->z = dHeading;
+        return std::move(g);
+    }
+
 }
 }
 
