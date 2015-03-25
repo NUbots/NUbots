@@ -24,6 +24,8 @@
 #include <armadillo>
 #include "messages/support/Configuration.h"
 #include "messages/support/FieldDescription.h"
+#include "utility/math/matrix/Transform2D.h"
+#include "utility/math/angle.h"
 
 namespace modules {
 namespace support {
@@ -75,13 +77,13 @@ namespace support {
 
         std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float dHeading);
 
-        arma::vec2 ball_position_ = { 0, 0 };
-        arma::vec2 ball_velocity_ = { 0, 0 };
-        arma::vec2 robot_position_ = { 0, 0 };
-        arma::vec2 robot_velocity_ = { 0, 0 };
-        arma::vec2 world_imu_direction_ = { 0, 1 };
-        arma::vec3 robot_imu_direction_ = { 0, 1, 0 };
-        arma::vec2 robot_odometry_ = { 0, 0 };
+        //arma::vec2 ball_position_ = { 0, 0 }; //
+        //arma::vec2 ball_velocity_ = { 0, 0 }; //
+        //arma::vec2 robot_position_ = { 0, 0 }; //
+        //arma::vec2 robot_velocity_ = { 0, 0 }; //
+        //arma::vec2 world_imu_direction_ = { 0, 1 };
+        //arma::vec3 robot_imu_direction_ = { 0, 1, 0 };
+        //arma::vec2 robot_odometry_ = { 0, 0 };
         // arma::vec robot_heading_ = { 1, 0 };
         // double robot_heading_ = 3.141;
         double robot_heading_ = 0;
@@ -114,13 +116,16 @@ namespace support {
 
         } cfg_;
 
-        struct FieldPose{
-            arma::vec2 p = arma::vec2({0,0});
-            float heading = 0;
-        };
+      
 
-        FieldPose robotPose;
-        FieldPose ballPose;
+    
+        utility::math::matrix::Transform2D robotPose;
+        utility::math::matrix::Transform2D ballPose;
+        utility::math::matrix::Transform2D ball_position_;
+        utility::math::matrix::Transform2D ball_velocity_;
+        utility::math::matrix::Transform2D robot_position_;
+        utility::math::matrix::Transform2D robot_velocity_;
+        utility::math::matrix::Transform2D robot_odometry_;
 
     public:
         /// @brief Called by the powerplant to build and setup the SoccerSimulator reactor.
