@@ -98,9 +98,9 @@ RUN wget https://raw.github.com/philsquared/Catch/5ecb72b9bb65cd8fed2aec4da23a3b
 
 # Quex
 WORKDIR /tmp
-RUN wget https://downloads.sourceforge.net/project/quex/DOWNLOAD/quex-0.65.2.tar.gz -O quex-0.65.2.tar.gz
-RUN tar -zxf quex-0.65.2.tar.gz
-RUN mv quex-0.65.2/ /usr/local/etc/quex
+RUN wget https://downloads.sourceforge.net/project/quex/DOWNLOAD/quex-0.65.4.tar.gz -O quex-0.65.4.tar.gz
+RUN tar -zxf quex-0.65.4.tar.gz
+RUN mv quex-0.65.4/ /usr/local/etc/quex
 RUN ln -s /usr/local/etc/quex/quex/ /usr/local/include/quex
 RUN echo '#!/bin/bash' > /usr/local/bin/quex
 RUN echo 'QUEX_PATH=/usr/local/etc/quex python /usr/local/etc/quex/quex-exe.py "$@"' >> /usr/local/bin/quex
