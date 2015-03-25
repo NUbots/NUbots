@@ -4,7 +4,7 @@
 		{
 			"follow_symlinks": true,
 			"path": ".",
-            "folder_exclude_patterns": ["build"]
+            "folder_exclude_patterns": ["/build"]
 		}
 	],
     "build_systems":
@@ -12,7 +12,7 @@
         {
             "name": "Docker",
             "working_dir": "${project_path:${folder}}",
-            "cmd": ["python","${project_path:${folder}}\\b", "compile"]
+            "cmd": ["python", "${project_path:${folder}}/b", "compile"]
         }
     ]
 }

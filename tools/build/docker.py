@@ -77,13 +77,16 @@ class Docker():
         if not self.image['tag'] in subprocess.check_output(['docker', 'images', 'nubots/nubots']):
             return False
 
-        # Get our timestamps of our Dockerfile
-        x = os.path.getmtime(self.image['path'])
-        # Get the timestamp of the build
-        y = int(self._docker_run('cat', '/container_built_at'))
+        try:
+            # Get our timestamps of our Dockerfile
+            x = os.path.getmtime(self.image['path'])
+            # Get the timestamp of the build
+            y = int(self._docker_run('cat', '/container_built_at'))
 
-        # Make sure the build is newer
-        return x < y
+            # Make sure the build is newer
+            return x < y
+        except subprocess.CalledProcessError:
+            return False
 
     def _share_path(self):
         # Get the path to the b script
@@ -177,7 +180,7 @@ class Docker():
                         sys.exit(1)
 
                     print('Mounting shares...'),
-                    subprocess.call(['boot2docker', 'ssh', 'sudo mkdir -p {0} && sudo mount -t vboxsf nubots {0}'.format(share_paths[1])])
+                    subprocess.call(['boot2docker', 'ssh', 'sudo mkdir -p {0} && sudo mount -t vboxsf nubots "{0}"'.format(share_paths[1])])
 
                     print('Done.')
 

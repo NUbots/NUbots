@@ -57,6 +57,7 @@ namespace YAML {
             try {
                 // Parse the expression using muParser
                 mu::Parser parser;
+                parser.DefineConst("pi", double(M_PI));
                 parser.SetExpr(node.as<std::string>());
                 rhs = parser.Eval();
 
