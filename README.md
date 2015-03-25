@@ -13,10 +13,25 @@ The following is a guide to getting you set up and ready to contribute to the NU
 	* [Python][] (Use the 32bit version; stability on 64bit version needs improvement)
 	* Linux: [Docker][docker_download]
 	* Windows/OSX: [Boot2Docker][] (Windows and OSX cannot run the native docker client and must use Boot2Docker. Instructions on how to install Boot2Docker are on the [Docker Installation page][docker_download])
+		 
+	Linux: Installation should be done via the apt-get repositories. Open a console with `Ctrl+Alt+T` and type:
+
+		$ sudo apt-get install git
+		$ sudo apt-get install python
+		$ sudo apt-get install docker
+		$ sudo addgroup $(whoami) docker
+
+	Windows and OSX installation can be done with installers from the program sites above.
 
 2. Clone this git repository onto your machine. First, open a terminal. In Ubuntu, the default shortcut is `Ctrl+Alt+T`. In Windows you will need to open a Git Bash terminal (this is installed when you install Git; search for Git Bash in the Start Menu). (Todo: Terminal in OSX). Then enter the following:
 
 		$ git clone git@github.com:nubots/NUbots.git ~/NUbots
+		
+	**Note** We recommend [Sublime Text 3][] for editing the code. The file 'NUbots.sublime-project' can be opened with Sublime ('Project -> Open Project...', then browse to your NUbots repository). This provides a shortcut to compiling the code from sublime with `Ctrl+B`, but don't try this until you have finished the instructions in this readme. Installers for Windows/OSX can be found on the Sublime site, while ubuntu users will need to use an installer from the command line:
+		
+		$ sudo add-apt-repository ppa:webupd8team/sublime-text-3
+		$ sudo apt-get update
+		$ sudo apt-get install sublime-text-installer
 
 3. Run `docker build` from the b script in the NUbots directory:
 
@@ -24,29 +39,23 @@ The following is a guide to getting you set up and ready to contribute to the NU
 
 	and then, if you are using Linux or OSX:
 
-		$ ./b docker build
+		$ ./b compile
 
 	and if you are using Windows:
 
-		$ python b docker build
+		$ python b compile
 
-	The `./b docker build` command tells Docker to build a container for the NUbots project 
-	based on the project's `Dockerfile`.
+	The `./b compile` command tells Docker to build a container for the NUbots project 
+	based on the project's `Dockerfile`.(While your container is being built, you might want to learn a little more about Docker by reading the article [What is Docker][] or the [Command-Line Interface][] documentation.)
 
 	**Note:** The very first time `./b docker build` is run on your computer, it needs to download a streamlined Ubuntu 14.04 image and install all the required dependencies. This will take around 15 minutes.
 
-	(While your container is being built, you might want to learn a little more about Docker by 
-	reading the article [What is Docker][] or the [Command-Line Interface][] documentation.
-
-  **Note:** The `./b` command above is a collection of python scripts to make docker
+  	**Note:** The `./b` command above is a collection of python scripts to make docker
   usage easier when working with the NUbots codebase.
 
-4.  Type `$ ./b compile` (Windows: `$ python b compile`) to compile and link the NUbots codebase!
+  	**Note** Docker will sync the `/nubots/NUbots` directory on the container with the root of your NUbots repository. This allows for easy editing of code on your machine, and building on the container.
 
-	Docker will sync the `/nubots/NUbots` directory on the container with the root of your NUbots repository.
-	This allows for easy editing of code on your machine, and building on the container.
-
-  **Note:** If you are on Windows/OSX your code must be in /c/Users/ or /Users/
+	**Note:** If you are on Windows/OSX your code must be in /c/Users/ or /Users/
   respectively.
 
 5. Try running a binary!
@@ -85,6 +94,8 @@ are having issues.
 [NUClear]:                https://github.com/Fastcode/NUClear                     "NUClear"
 [Docker]:                 https://www.docker.com/                                 "Docker"
 [Boot2Docker]:            http://boot2docker.io/                                  "Boot2Docker"
+[Sublime Text 3]:         http://www.sublimetext.com/                             "Sublime Text 3"
 [docker_download]:	  https://docs.docker.com/installation/                   "Docker Installation Page"
 [What is Docker]:  	  https://www.docker.com/whatisdocker/ 			  "Docker's Getting Started Guide"
 [Command-Line Interface]: https://docs.docker.com/reference/commandline/cli/	  "Docker Command-Line Interface Documentation"
+[Homebrew]: 	          http://brew.sh/					  "Homebrew"

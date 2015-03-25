@@ -134,7 +134,7 @@ RUN autotools_install http://www.fftw.org/fftw-3.3.4.tar.gz \
     --enable-shared
 
 # Quex
-RUN curl -L https://downloads.sourceforge.net/project/quex/DOWNLOAD/quex-0.65.2.tar.gz | tar -xz \
+RUN curl -L https://downloads.sourceforge.net/project/quex/DOWNLOAD/quex-0.65.4.tar.gz | tar -xz \
  && mkdir -p "$TOOLCHAIN_PATH/etc" \
  && mv quex-0.65.2 "$TOOLCHAIN_PATH/etc/quex" \
  && ln -s "$TOOLCHAIN_PATH/etc/quex/quex" "$TOOLCHAIN_PATH/include/quex" \
