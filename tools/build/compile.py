@@ -6,7 +6,7 @@ from docker import Docker
 def register(command):
 
     # Set our commands help
-    command.help='Compile the NUbots source code'
+    command.help = 'Compile the NUbots source code'
 
     # We have a configure command
     command.add_argument('-c', '--configure', help='Configure the options for the compilation (ccmake)', action='store_true')

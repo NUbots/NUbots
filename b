@@ -45,30 +45,3 @@ if __name__ == '__main__':
 
     # Pass to our tool
     tools[args.command](**vars(args))
-
-    # # Compile subcommand
-    # compile_command = subcommands.add_parser('compile', help='Compile the NUbots source code')
-    # compile_command.add_argument('-c', '--configure', help='Configure the options for the compilation (ccmake)', action='store_true')
-
-    # # Role subcommand
-    # role_command = subcommands.add_parser('role', help='Manage roles in the codebase')
-    # role_subcommand = role_command.add_subparsers(dest='role_command')
-    # run_role = role_subcommand.add_parser('run', help='execute a compiled role in the system')
-    # run_role.add_argument('role', metavar='role', help='the name of the role to execute on the container')
-
-    # # Parse our command line arguments
-    # args = command.parse_args()
-    # if args.subcommand == 'docker':
-    #     Docker(**vars(args)).run()
-    # elif args.subcommand == 'compile':
-    #     if args.configure:
-    #         Docker().configure_compile()
-    #     else:
-    #         Docker().compile()
-    # elif args.subcommand == 'role':
-    #     if args.role_command == 'run':
-    #         Docker().run_role(args.role)
-    # elif args.subcommand == 'module':
-    #     if args.module_command == 'generate':
-    #         tools.module.Module(**vars(args)).run()
-    #         # TODO do module generate

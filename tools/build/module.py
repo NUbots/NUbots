@@ -5,7 +5,7 @@ import os
 def register(command):
 
     # Module help
-    command.help='Manage NUClear modules in the codebase'
+    command.help = 'Manage NUClear modules in the codebase'
 
     # Module subcommands
     subcommands = command.add_subparsers(dest='module_command')
@@ -14,27 +14,12 @@ def register(command):
     generate_command = subcommands.add_parser('generate', help='Generate a new NUClear module based on a template')
     generate_command.add_argument('path', metavar='path', help='a path to the new module (from the modules directory)')
 
-def run(**kwargs):
-    pass
-
-class Module:
-
-    def generate(self):
-
-        # Get our path
-        path = self.args['path']
-
-        # Check if the module already exists
-        if os.path.exists('modules/{}'.format(path)):
-
-            print("The path provided already exists.")
-            print("Module generation aborted.")
-            exit(1)
-
-        # src_path =
-        # config_path =
-        # test_path =
-        # module_name =
+def run(path='', **kwargs):
+    if os.path.exists('modules/{}'.format(path)):
+        print("The path provided already exists.")
+        print("Module generation aborted.")
+    else:
+        create_nuclear_module('modules/{}'.format(path))
 
 def build_license_string(module_name):
     return """/*

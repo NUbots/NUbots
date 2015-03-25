@@ -8,7 +8,7 @@ import subprocess
 def register(command):
 
     # Set our commands help
-    command.help='Manage the docker container used to build'
+    command.help = 'Manage the docker container used to build'
 
     # Docker subcommands
     subcommands = command.add_subparsers(dest='docker_command')
@@ -202,13 +202,13 @@ class Docker():
             print('The requirements for the docker daemon are not met.')
             print('You must either be running on linux, or have a Virtual Machine provider for docker (either docker-machine or boot2docker)')
 
-    def run(self, **kwargs):
+    def run(self, *args, **kwargs):
         # Ensure we are updated
         if not self._up_to_date():
             self.build()
 
         # Pass them on to our internal run
-        self._docker_run(**kwargs)
+        self._docker_run(*args, **kwargs)
 
     def build(self):
         # Get docker to build our vm
