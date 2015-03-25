@@ -112,7 +112,6 @@ namespace support {
             bool emit_robot_fieldobjects = true;
             bool emit_ball_fieldobjects = true;
 
-            double robot_imu_drift_period = 200;
         } cfg_;
 
         struct FieldPose{

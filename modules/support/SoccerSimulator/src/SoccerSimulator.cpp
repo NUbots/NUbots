@@ -98,7 +98,6 @@ namespace support {
         cfg_.emit_robot_fieldobjects = config["nusight"]["emit_self"].as<bool>();
         cfg_.emit_ball_fieldobjects = config["nusight"]["emit_ball"].as<bool>();
 
-        cfg_.robot_imu_drift_period = config["environment_parameters"]["imu_drift_period"].as<double>();
     }
 
     SoccerSimulator::SoccerSimulator(std::unique_ptr<NUClear::Environment> environment)
@@ -124,29 +123,31 @@ namespace support {
                     robot_velocity_ = arma::vec2({ 0, 0 });
                     break;
                 }
-                case MotionType::PATH:{              
-
+                case MotionType::PATH: {
                     auto t = absolute_time();
                     double period = cfg_.robot.path.period;
                     double x_amp = cfg_.robot.path.x_amp;
                     double y_amp = cfg_.robot.path.y_amp;
 
+                    double wave1;
+                    double wave2;
+                    switch(cfg_.robot.path.type){
+                        case PathType::SIN:
+                            wave1 = sine_wave(t, period);
+                            wave2 = sine_wave(t + (period / 4.0), period);                      
+                        case PathType::TRIANGLE:
+                            wave1 = triangle_wave(t, period);
+                            wave2 = triangle_wave(t + (period / 4.0), period);
+                    }
+                    
                     arma::vec2 old_pos = arma::vec2(robot_position_);
-
-                    auto wave1 = triangle_wave(t, period);
-                    auto wave2 = triangle_wave(t + (period / 4.0), period);
-                    // auto wave1 = sine_wave(t, period);
-                    // auto wave2 = sine_wave(t + (period / 4.0), period);
                     robot_position_ = arma::vec2({ wave1 * x_amp, wave2 * y_amp });
 
                     arma::vec2 diff = robot_position_ - old_pos;
 
                     robot_heading_ = vectorToBearing(arma::vec2(diff));
-                    // robot_velocity_ = arma::vec2({arma::norm(diff) / 100.0, 0}); //Robot coordinates
+                    robot_velocity_ = arma::vec2({arma::norm(diff) / 100.0, 0}); //Robot coordinates
                     robot_odometry_ = arma::vec2({arma::norm(diff)*100, 0}); //Robot coordinates
-
-                    double imu_period = cfg_.robot_imu_drift_period;
-                    world_imu_direction_ = arma::vec2({ std::cos(2 * M_PI * t / imu_period), std::sin(2 * M_PI * t / imu_period) });
                 }
                 case MotionType::MOTION:
                     break;

@@ -151,7 +151,7 @@ namespace darwin {
             gyroQueue.push(gyro);
         });
 
-        const float UPDATE_FREQUENCY = 60;
+        static constexpr float UPDATE_FREQUENCY = 60;
 
         on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
 
