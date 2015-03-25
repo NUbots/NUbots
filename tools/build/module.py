@@ -1,37 +1,25 @@
 #!/usr/bin/python
 
-import sys
 import os
-import platform
 
-class Module:
-    def __init__(self, **kwargs):
+def register(command):
 
-        self.args = kwargs;
+    # Module help
+    command.help = 'Manage NUClear modules in the codebase'
 
-        # If we have a command to run then set it up to run
-        if 'module_command' in kwargs:
-            self.command = getattr(self, kwargs['module_command'])
+    # Module subcommands
+    subcommands = command.add_subparsers(dest='module_command')
 
-    def generate(self):
+    # Generate module subcommand
+    generate_command = subcommands.add_parser('generate', help='Generate a new NUClear module based on a template')
+    generate_command.add_argument('path', metavar='path', help='a path to the new module (from the modules directory)')
 
-        # Get our path
-        path = self.args['path']
-
-        # Check if the module already exists
-        if os.path.exists('modules/{}'.format(path)):
-
-            print("The path provided already exists.")
-            print("Module generation aborted.")
-            sys.exit(1)
-
-        src_path =
-        config_path =
-        test_path =
-        module_name =
-
-    def run(self):
-        self.command()
+def run(path='', **kwargs):
+    if os.path.exists('modules/{}'.format(path)):
+        print("The path provided already exists.")
+        print("Module generation aborted.")
+    else:
+        create_nuclear_module('modules/{}'.format(path))
 
 def build_license_string(module_name):
     return """/*
