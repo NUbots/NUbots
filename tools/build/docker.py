@@ -90,8 +90,7 @@ class Docker():
 
     def _share_path(self):
         # Get the path to the b script
-        abspath = os.path.abspath(__file__)
-        local_name = os.path.dirname(abspath)
+        local_name = os.getcwd()
         remote_name = local_name
 
         # For cygwin we need to convert our path to a windows path
