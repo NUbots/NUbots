@@ -60,7 +60,7 @@ class Docker():
         # Ensure we have a build folder
         if not os.path.exists('build'):
             print('Creating build folder...')
-            os.mkdir('build')
+            os.makedirs('build')
 
         # Get our image provided to us or use a default
         docker_image = kwargs.get('docker_image', 'darwin')

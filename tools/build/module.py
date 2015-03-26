@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 import os
+import textwrap
+import datetime
 
 def register(command):
 
@@ -19,140 +21,190 @@ def run(path='', **kwargs):
         print("The path provided already exists.")
         print("Module generation aborted.")
     else:
-        create_nuclear_module('modules/{}'.format(path))
 
-def build_license_string(module_name):
-    return """/*
- * This file is part of NUbots Codebase.
- *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Copyright 2013 NUbots <nubots@nubots.net>
- */
+        # Calculate all of our file paths
+        path = 'modules/{}'.format(path)
+        src_path = '{}/src'.format(path)
+        tests_path = '{}/tests'.format(path)
+        config_path = '{}/config'.format(path)
+        module_name = path.split('/')[-1]
 
-""".format(module_name)
+        # Create the required directories
+        os.makedirs(path)
+        os.makedirs(src_path)
+        os.makedirs(tests_path)
+        os.makedirs(config_path)
 
-def surround_with_namespaces(code, namespaces):
-    namespace_openings = ''
-    namespace_closings = ''
-    for namespace in namespaces:
-        namespace_openings += 'namespace {} {{\n'.format(namespace)
-        namespace_closings += '}\n'
+        # Split our provided path
+        parts = path.split('/')
 
-    return '{0}\n{1}\n{2}'.format(namespace_openings, code, namespace_closings)
+        # Write all of our files
+        with open('{}/CMakeLists.txt'.format(path), "w") as output:
+            output.write(generate_cmake(parts))
+        with open('{}/README.md'.format(path), "w") as output:
+            output.write(generate_readme(parts))
+        with open('{0}/{1}.h'.format(src_path, module_name), "w") as output:
+            output.write(generate_header(parts))
+        with open('{0}/{1}.cpp'.format(src_path, module_name), "w") as output:
+            output.write(generate_cpp(parts))
+        with open('{0}/{1}Test.cpp'.format(tests_path, module_name), "w") as output:
+            output.write(generate_test(parts))
 
-def surround_with_include_guard(code, path):
-    guard = '_'.join(path.split('/')).upper()
-
-    return """#ifndef {0}_H
-#define {0}_H
-
-{1}
-
-#endif""".format(guard, code)
-
-def build_module_header(path):
-    module_name = path.split('/')[-1]
-    module_namespaces = path.split('/')[:-1]
-
-    module_class = """    class {0} : public NUClear::Reactor {{
-    public:
-        /// @brief Called by the powerplant to build and setup the {0} reactor.
-        explicit {0}(std::unique_ptr<NUClear::Environment> environment);
-    }};
-""".format(module_name)
-
-    code = surround_with_namespaces(module_class, module_namespaces)
-
-    return surround_with_include_guard("""#include <nuclear>
-
-{}""".format(code), path)
-
-def build_module_implementation(path):
-    module_name = path.split('/')[-1]
-    module_namespaces = path.split('/')[:-1]
-
-    constructor = """    {0}::{0}(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {{
-
-    }}
-""".format(module_name)
-
-    code = surround_with_namespaces(constructor, module_namespaces)
-
-    return """#include "{0}.h"
-
-{1}
-""".format(module_name, code)
-
-def create_nuclear_module(path):
-    src_path = '{}/src'.format(path)
-    tests_path = '{}/tests'.format(path)
-    config_path = '{}/config'.format(path)
-    module_name = path.split('/')[-1]
-
-    os.makedirs(path)
-    os.makedirs(src_path)
-    os.makedirs(tests_path)
-    os.makedirs(config_path)
-
-    with open('{}/CMakeLists.txt'.format(path), "w") as text_file:
-        text_file.write('# Build our NUClear module\nNUCLEAR_MODULE()')
-
-    with open('{}/README.md'.format(path), "w") as text_file:
-        text_file.write('{0}\n{1}\n\n'.format(module_name, len(module_name) * '='))
-        text_file.write('\n\n\n## '.join(['## Description', 'Usage', 'Emits', 'Dependencies']))
-
-    with open('{0}/{1}.h'.format(src_path, module_name), "w") as text_file:
-        text_file.write(build_license_string(module_name))
-        text_file.write(build_module_header(path))
-
-    with open('{0}/{1}.cpp'.format(src_path, module_name), "w") as text_file:
-        text_file.write(build_license_string(module_name))
-        text_file.write(build_module_implementation(path))
-
-    with open('{0}/{1}Test.cpp'.format(tests_path, module_name), "w") as text_file:
-        text_file.write(build_license_string(module_name))
-        text_file.write("""\n
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-#include <catch.hpp>
-""")
+        with open('{0}/{1}.yaml'.format(config_path, module_name), 'a'):
+            pass
 
 
-def module_generate(args):
-    path = ''
-    if len(args) >= 1:
-        path = args[0]
+def generate_cmake(parts):
+    return textwrap.dedent("""\
+        # Build our NUClear module
+        NUCLEAR_MODULE()
+        """)
 
-    if path == '':
-        print """
-You need to provide the path to the module to generate.
-Usage: b module generate <module-path>
+def generate_header(parts):
+    template = textwrap.dedent("""\
+        /*
+         * This file is part of NUbots Codebase.
+         *
+         * The NUbots Codebase is free software: you can redistribute it and/or modify
+         * it under the terms of the GNU General Public License as published by
+         * the Free Software Foundation, either version 3 of the License, or
+         * (at your option) any later version.
+         *
+         * The NUbots Codebase is distributed in the hope that it will be useful,
+         * but WITHOUT ANY WARRANTY; without even the implied warranty of
+         * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+         * GNU General Public License for more details.
+         *
+         * You should have received a copy of the GNU General Public License
+         * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+         *
+         * Copyright {year} NUbots <nubots@nubots.net>
+         */
 
-e.g. The command:
+        #ifndef {define}
+        #define {define}
 
-    $ ./b module generate platform/darwin/HardwareIO
+        #include <nuclear>
 
-would generate a new module 'modules::platform::darwin::HardwareIO' in the
-folder 'modules/platform/darwin/HardwareIO'.
-"""
-    elif os.path.exists('modules/{}'.format(path)):
-        print """
-The path provided already exists.
-Module generation aborted.
-"""
-    else:
-        create_nuclear_module('modules/{}'.format(path))
+        {openNamespace}
+
+            class {className} : public NUClear::Reactor {{
+
+            public:
+                /// @brief Called by the powerplant to build and setup the {className} reactor.
+                explicit {className}(std::unique_ptr<NUClear::Environment> environment);
+
+                /// @brief the path to the configuration file for {className}
+                static constexpr const char* CONFIGURATION_PATH = "{className}.yaml";
+            }}
+
+        {closeNamespace}
+
+        #endif {define}
+        """)
+
+    return template.format(year=datetime.datetime.now().year
+                         , define='{}_H'.format('_'.join([p.upper() for p in parts]))
+                         , className=parts[-1]
+                         , openNamespace = '\n'.join(['namespace {} {{'.format(x) for x in parts[:-1]])
+                         , closeNamespace = '\n'.join('}' * (len(parts) - 1)))
+
+def generate_cpp(parts):
+    template = textwrap.dedent("""\
+        /*
+         * This file is part of NUbots Codebase.
+         *
+         * The NUbots Codebase is free software: you can redistribute it and/or modify
+         * it under the terms of the GNU General Public License as published by
+         * the Free Software Foundation, either version 3 of the License, or
+         * (at your option) any later version.
+         *
+         * The NUbots Codebase is distributed in the hope that it will be useful,
+         * but WITHOUT ANY WARRANTY; without even the implied warranty of
+         * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+         * GNU General Public License for more details.
+         *
+         * You should have received a copy of the GNU General Public License
+         * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+         *
+         * Copyright {year} NUbots <nubots@nubots.net>
+         */
+
+        #include "{className}.h"
+
+        #include "messages/support/Configuration.h"
+
+        {openNamespace}
+
+            using messages::support::Configuration;
+
+            {className}::{className}(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment)) {{
+
+                on<Trigger<Configuration<{className}>>>([this] (const Configuration<{className}>& config) {{
+                    // Use configuration here from file {className}.yaml
+                }});
+            }}
+        {closeNamespace}
+        """)
+
+    return template.format(year=datetime.datetime.now().year
+                         , className=parts[-1]
+                         , openNamespace = '\n'.join(['namespace {} {{'.format(x) for x in parts[:-1]])
+                         , closeNamespace = '\n'.join(['}' for x in parts[:-1]]))
+
+def generate_readme(parts):
+    template = textwrap.dedent("""\
+        {className}
+        {classNameTitle}
+
+        ## Description
+
+
+        ## Usage
+
+
+        ## Emits
+
+
+        ## Dependencies
+
+        """)
+
+    return template.format(className=parts[-1]
+                         , classNameTitle = len(parts[-1]) * '='
+                         , closeNamespace = '\n'.join(['}' for x in parts[:-1]]))
+    pass
+
+def generate_test(parts):
+    template = textwrap.dedent("""\
+        /*
+         * This file is part of NUbots Codebase.
+         *
+         * The NUbots Codebase is free software: you can redistribute it and/or modify
+         * it under the terms of the GNU General Public License as published by
+         * the Free Software Foundation, either version 3 of the License, or
+         * (at your option) any later version.
+         *
+         * The NUbots Codebase is distributed in the hope that it will be useful,
+         * but WITHOUT ANY WARRANTY; without even the implied warranty of
+         * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+         * GNU General Public License for more details.
+         *
+         * You should have received a copy of the GNU General Public License
+         * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+         *
+         * Copyright {year} NUbots <nubots@nubots.net>
+         */
+
+        // Uncomment this line when other test files are added
+        //#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+        //#include <catch.hpp>
+
+        // Remove this line when test files are added
+        int main() {{ return 0; }}
+        """)
+
+    return template.format(year=datetime.datetime.now().year)
 
 
