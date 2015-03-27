@@ -60,7 +60,7 @@ class Docker():
         # Ensure we have a build folder
         if not os.path.exists('build'):
             print('Creating build folder...')
-            os.mkdir('build')
+            os.makedirs('build')
 
         # Get our image provided to us or use a default
         docker_image = kwargs.get('docker_image', 'darwin')
@@ -90,8 +90,7 @@ class Docker():
 
     def _share_path(self):
         # Get the path to the b script
-        abspath = os.path.abspath(__file__)
-        local_name = os.path.dirname(abspath)
+        local_name = os.getcwd()
         remote_name = local_name
 
         # For cygwin we need to convert our path to a windows path
