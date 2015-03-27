@@ -49,6 +49,7 @@ namespace support {
     using messages::support::FieldDescription;
     using messages::localisation::Mock;
     using messages::platform::darwin::DarwinSensors::Gyroscope;
+    using utility::math::matrix::Transform2D;
 
     
 
@@ -124,11 +125,11 @@ namespace support {
                                  const WalkCommand& walkCommand
                                  const KickCommand& kickCommand) {
 
-            FieldPose previousRobotPose = robot_pose;
+            Transform2D previousRobotPose = robot_pose;
             
             switch (cfg_.robot.motion_type){
                 case MotionType::NONE: {
-                    robot_velocity_ = arma::vec3({ 0, 0 , 0});
+                    robot_velocity_ = Transform2D({ 0, 0 ,0 });
                     break;
                 }
                 case MotionType::PATH: {
@@ -138,13 +139,14 @@ namespace support {
                     double y_amp = cfg_.robot.path.y_amp;
 
                     
-                    arma::vec2 old_pos = arma::vec2(robot_position_);
-                    robot_position_ = getPath(robot.path.type) % arma::vec2({ x_amp, y_amp });
+                    Transform2D old_pos = Transform2D(robot_position_);
+                    robot_position_.rows(0,1) = getPath(robot.path.type) % arma::vec2({ x_amp, y_amp }); //
 
-                    arma::vec2 diff = robot_position_ - old_pos;
+                    Transform2D diff = robot_position_ - old_pos;
 
-                    robot_heading_ = vectorToBearing(arma::vec2(diff));//Robot faces in the direction of movement
-                    robot_velocity_ = arma::vec3({arma::norm(diff) * UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
+                    robot_heading_ = vectorToBearing(arma::vec2(diff));
+                    robot_velocity_ = Transform2D({arma::norm(diff) * UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
+                    //robot_odometry_ = Transform2D({arma::norm(diff) * UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
                 }
                 case MotionType::MOTION:
                     arma::vec2 old_pos = arma::vec2(robot_position_);
@@ -160,7 +162,7 @@ namespace support {
             // Update ball position
             switch (cfg_.robot.motion_type){
                 case MotionType::NONE: {
-                    ball_velocity_ = { 0, 0 };
+                    ball_velocity_ = { 0, 0 , 0};
                     break;
 
                 case MotionType::PATH:{              
@@ -169,7 +171,7 @@ namespace support {
                     double x_amp = cfg_.ball.path.x_amp;
                     double y_amp = cfg_.ball.path.y_amp;
 
-                    ball_position_ = getPath(ball.path.type) % arma::vec2({ x_amp, y_amp });
+                    ball_position_.rows(0,1) = getPath(ball.path.type) % arma::vec2({ x_amp, y_amp });
 
                     auto velocity_x = -square_wave(t, period) * ((x_amp * 4) / period);
                     auto velocity_y = -square_wave(t + (period / 4.0), period) * ((y_amp * 4) / period);
@@ -271,10 +273,10 @@ namespace support {
 
             auto& robots = mock_robots.data;
 
-            emit(graph("Actual robot position", robot_position_[0], robot_position_[1]));
+            emit(graph("Actual robot position", robot_position_[0], robot_position_[1], robot_position_[2]));
             // emit(graph("Actual robot heading", robot_heading_[0], robot_heading_[1]));
             emit(graph("Actual robot heading", robot_heading_));
-            emit(graph("Actual robot velocity", robot_velocity_[0], robot_velocity_[1]));
+            emit(graph("Actual robot velocity", robot_velocity_[0], robot_velocity_[1], robot_velocity_[2]));
 
             if (robots.size() >= 1) {
                 emit(graph("Estimated robot position", robots[0].position[0], robots[0].position[1]));
@@ -319,8 +321,8 @@ namespace support {
                 robot_position_, robot_heading_, ball.position);
             emit(graph("Estimated ball position", ball_pos[0], ball_pos[1]));
             // emit(graph("Estimated ball velocity", state[2], state[3]));
-            emit(graph("Actual ball position", ball_position_[0], ball_position_[1]));
-            emit(graph("Actual ball velocity", ball_velocity_[0], ball_velocity_[1]));
+            emit(graph("Actual ball position", ball_position_[0], ball_position_[1], ball_position_[2]);
+            emit(graph("Actual ball velocity", ball_velocity_[0], ball_velocity_[1], ball_position_[2]));
 
             // Ball message
             if (!cfg_.emit_ball_fieldobjects)
