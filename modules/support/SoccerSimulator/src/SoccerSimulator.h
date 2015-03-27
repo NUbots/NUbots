@@ -78,8 +78,7 @@ namespace support {
         arma::vec2 ball_position_ = { 0, 0 };
         arma::vec2 ball_velocity_ = { 0, 0 };
         arma::vec2 robot_position_ = { 0, 0 };
-        arma::vec2 robot_velocity_ = { 0, 0 };
-        arma::vec2 world_imu_direction_ = { 0, 1 };
+        arma::vec3 robot_velocity_ = { 0, 0, 0 };
         arma::vec3 robot_imu_direction_ = { 0, 1, 0 };
         arma::vec2 robot_odometry_ = { 0, 0 };
         // arma::vec robot_heading_ = { 1, 0 };
@@ -114,7 +113,8 @@ namespace support {
 
         } cfg_;
 
-        struct FieldPose{
+        //TODO change to Transform2D
+        struct FieldPose{ 
             arma::vec2 p = arma::vec2({0,0});
             float heading = 0;
         };

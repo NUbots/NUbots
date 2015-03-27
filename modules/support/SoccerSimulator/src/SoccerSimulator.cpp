@@ -119,14 +119,16 @@ namespace support {
         on<
             Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>,
             With<WalkCommand>,
-            With<KickCommand>
-        >("Robot motion", [this](const time_t&) {
+            With<KickCommand> 
+        >("Robot motion", [this](const time_t&,
+                                 const WalkCommand& walkCommand
+                                 const KickCommand& kickCommand) {
 
             FieldPose previousRobotPose = robot_pose;
             
             switch (cfg_.robot.motion_type){
                 case MotionType::NONE: {
-                    robot_velocity_ = arma::vec2({ 0, 0 });
+                    robot_velocity_ = arma::vec3({ 0, 0 , 0});
                     break;
                 }
                 case MotionType::PATH: {
@@ -141,11 +143,18 @@ namespace support {
 
                     arma::vec2 diff = robot_position_ - old_pos;
 
-                    robot_heading_ = vectorToBearing(arma::vec2(diff));
-                    robot_velocity_ = arma::vec2({arma::norm(diff) * UPDATE_FREQUENCY, 0}); //Robot coordinates
-                    robot_odometry_ = arma::vec2({arma::norm(diff) * UPDATE_FREQUENCY, 0}); //Robot coordinates
+                    robot_heading_ = vectorToBearing(arma::vec2(diff));//Robot faces in the direction of movement
+                    robot_velocity_ = arma::vec3({arma::norm(diff) * UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
                 }
                 case MotionType::MOTION:
+                    arma::vec2 old_pos = arma::vec2(robot_position_);
+                    robot_position_ += walkCommand.rows(0,1);
+                    arma::vec2 diff = robot_position_ - old_pos;
+                    
+                    robot_heading_ += walkCommand[2];
+                    robot_velocity_ = walkCommand; //Robot coordinates
+
+                    robotPose += walkCommand / UPDATE_FREQUENCY;
                     break;
                     
             // Update ball position
@@ -167,6 +176,7 @@ namespace support {
                     ball_velocity_ = { velocity_x, velocity_y };
 
                 case MotionType::MOTION:
+
                     break;
 
             emit(computeGyro(robotPose.heading - previousRobotPose.heading));
