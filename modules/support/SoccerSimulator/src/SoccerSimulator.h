@@ -72,15 +72,13 @@ namespace support {
         }
 
     private:
+        //Methods
         void UpdateConfiguration(
             const messages::support::Configuration<SoccerSimulatorConfig>& config);
 
         std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float dHeading);
 
-        double robot_heading_ = 0;
-        arma::vec2 odom_old_robot_position_ = { 0, 0 };
-        double odom_old_robot_heading_ = 0;
-
+        //Member variables
         std::shared_ptr<messages::support::FieldDescription> field_description_;
 
         struct {
@@ -106,14 +104,16 @@ namespace support {
 
         } cfg_;
 
-    
-        utility::math::matrix::Transform2D robotPose;
-        utility::math::matrix::Transform2D ballPose;
-        utility::math::matrix::Transform2D ball_position_;
-        utility::math::matrix::Transform2D ball_velocity_;
-        utility::math::matrix::Transform2D robot_position_;
-        utility::math::matrix::Transform2D robot_velocity_;
-        utility::math::matrix::Transform2D robot_odometry_;
+        //World State
+        struct WorldState{
+            //Transform2D == (x,y,heading)
+            utility::math::matrix::Transform2D robotPose;
+            utility::math::matrix::Transform2D robotVelocity;
+            utility::math::matrix::Transform2D ballPose;
+            utility::math::matrix::Transform2D ballVelocity;  
+        };
+
+        WorldState world;
 
     public:
         /// @brief Called by the powerplant to build and setup the SoccerSimulator reactor.

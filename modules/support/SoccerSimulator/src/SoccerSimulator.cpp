@@ -129,7 +129,7 @@ namespace support {
             
             switch (cfg_.robot.motion_type){
                 case MotionType::NONE: {
-                    robot_velocity_ = Transform2D({ 0, 0 ,0 });
+                    world.robotVelocity = Transform2D({ 0, 0 ,0 });
                     break;
                 }
                 case MotionType::PATH: {
@@ -139,30 +139,25 @@ namespace support {
                     double y_amp = cfg_.robot.path.y_amp;
 
                     
-                    Transform2D old_pos = Transform2D(robot_position_);
-                    robot_position_.rows(0,1) = getPath(robot.path.type) % arma::vec2({ x_amp, y_amp }); //
+                    Transform2D oldPose = world.robotPose;
+                    
+                    world.robotPose.rows(0,1) = getPath(robot.path.type) % arma::vec2({ x_amp, y_amp }); //
 
-                    Transform2D diff = robot_position_ - old_pos;
+                    Transform2D diff = world.robotPose - oldPose;
 
-                    robot_heading_ = vectorToBearing(arma::vec2(diff));
-                    robot_velocity_ = Transform2D({arma::norm(diff) * UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
-                    //robot_odometry_ = Transform2D({arma::norm(diff) * UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
+                    world.robotPose[2] = vectorToBearing(arma::vec2(diff));
+                    world.robotVelocity = Transform2D({arma::norm(diff) * UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
                 }
                 case MotionType::MOTION:
-                    arma::vec2 old_pos = arma::vec2(robot_position_);
-                    robot_position_ += walkCommand.rows(0,1);
-                    arma::vec2 diff = robot_position_ - old_pos;
-                    
-                    robot_heading_ += walkCommand[2];
-                    robot_velocity_ = walkCommand; //Robot coordinates
-
-                    robotPose += walkCommand / UPDATE_FREQUENCY;
+                //Update based on walk engine
+                    world.robotVelocity = walkCommand; 
+                    world.robotPose += robotVelocity / UPDATE_FREQUENCY;
                     break;
                     
             // Update ball position
             switch (cfg_.robot.motion_type){
                 case MotionType::NONE: {
-                    ball_velocity_ = { 0, 0 , 0};
+                    ballVelocity = { 0, 0 , 0};
                     break;
 
                 case MotionType::PATH:{              
@@ -171,14 +166,14 @@ namespace support {
                     double x_amp = cfg_.ball.path.x_amp;
                     double y_amp = cfg_.ball.path.y_amp;
 
-                    ball_position_.rows(0,1) = getPath(ball.path.type) % arma::vec2({ x_amp, y_amp });
+                    world.ballPose.rows(0,1) = getPath(ball.path.type) % arma::vec2({ x_amp, y_amp });
 
                     auto velocity_x = -square_wave(t, period) * ((x_amp * 4) / period);
                     auto velocity_y = -square_wave(t + (period / 4.0), period) * ((y_amp * 4) / period);
-                    ball_velocity_ = { velocity_x, velocity_y };
+                    ballVelocity = { velocity_x, velocity_y };
 
                 case MotionType::MOTION:
-
+                    
                     break;
 
             emit(computeGyro(robotPose.heading - previousRobotPose.heading));
@@ -203,7 +198,7 @@ namespace support {
                 arma::vec3 goal_r_pos = {0, 0, 0};
                 goal_l_pos.rows(0, 1) = field_description_->goalpost_yl;
                 goal_r_pos.rows(0, 1) = field_description_->goalpost_yr;
-                if (robot_heading_ < -M_PI * 0.5 || robot_heading_ > M_PI * 0.5) {
+                if (world.robotPose[2] < -M_PI * 0.5 || world.robotPose[2] > M_PI * 0.5) {
                     goal_l_pos.rows(0, 1) = field_description_->goalpost_bl;
                     goal_r_pos.rows(0, 1) = field_description_->goalpost_br;
                 }
@@ -211,7 +206,7 @@ namespace support {
                 if (cfg_.observe_left_goal) {
                     messages::vision::Goal goal1;
                     messages::vision::VisionObject::Measurement g1_m;
-                    g1_m.position = SphericalRobotObservation(robot_position_, robot_heading_, goal_r_pos);
+                    g1_m.position = SphericalRobotObservation(world.robotPose, world.robotPose[2], goal_r_pos);
                     g1_m.error = arma::eye(3, 3) * 0.1;
                     goal1.measurements.push_back(g1_m);
                     goal1.measurements.push_back(g1_m);
@@ -228,7 +223,7 @@ namespace support {
                 if (cfg_.observe_right_goal) {
                     messages::vision::Goal goal2;
                     messages::vision::VisionObject::Measurement g2_m;
-                    g2_m.position = SphericalRobotObservation(robot_position_, robot_heading_, goal_l_pos);
+                    g2_m.position = SphericalRobotObservation(world.robotPose, world.robotPose[2], goal_l_pos);
                     g2_m.error = arma::eye(3, 3) * 0.1;
                     goal2.measurements.push_back(g2_m);
                     goal2.measurements.push_back(g2_m);
@@ -252,8 +247,8 @@ namespace support {
                 messages::vision::Ball ball;
                 messages::vision::VisionObject::Measurement b_m;
                 arma::vec3 ball_pos_3d = {0, 0, 0};
-                ball_pos_3d.rows(0, 1) = ball_position_;
-                b_m.position = SphericalRobotObservation(robot_position_, robot_heading_, ball_pos_3d);
+                ball_pos_3d.rows(0, 1) = world.ballPose;
+                b_m.position = SphericalRobotObservation(world.robotPose, world.robotPose[2], ball_pos_3d);
                 b_m.error = arma::eye(3, 3) * 0.1;
                 ball.measurements.push_back(b_m);
                 ball.sensors = sensors;
@@ -273,10 +268,10 @@ namespace support {
 
             auto& robots = mock_robots.data;
 
-            emit(graph("Actual robot position", robot_position_[0], robot_position_[1], robot_position_[2]));
-            // emit(graph("Actual robot heading", robot_heading_[0], robot_heading_[1]));
-            emit(graph("Actual robot heading", robot_heading_));
-            emit(graph("Actual robot velocity", robot_velocity_[0], robot_velocity_[1], robot_velocity_[2]));
+            emit(graph("Actual robot position", world.robotPose[0], world.robotPose[1], world.robotPose[2]));
+            // emit(graph("Actual robot heading", world.robotPose[2][0], world.robotPose[2][1]));
+            emit(graph("Actual robot heading", world.robotPose[2]));
+            emit(graph("Actual robot velocity", world.robotVelocity[0], world.robotVelocity[1], world.robotVelocity[2]));
 
             if (robots.size() >= 1) {
                 emit(graph("Estimated robot position", robots[0].position[0], robots[0].position[1]));
@@ -293,8 +288,8 @@ namespace support {
             }
 
             messages::localisation::Self self_marker;
-            self_marker.position = robot_position_;
-            self_marker.heading = bearingToUnitVector(robot_heading_);
+            self_marker.position = world.robotPose;
+            self_marker.heading = bearingToUnitVector(world.robotPose[2]);
             self_marker.position_cov = arma::eye(2,2) * 0.1;
             robots_msg->push_back(self_marker);
 
@@ -318,11 +313,11 @@ namespace support {
             arma::vec2 robot_ball_pos = RobotToWorldTransform(
                 robots[0].position, robots[0].heading, ball.position);
             arma::vec2 ball_pos = RobotToWorldTransform(
-                robot_position_, robot_heading_, ball.position);
+                world.robotPose, world.robotPose[2], ball.position);
             emit(graph("Estimated ball position", ball_pos[0], ball_pos[1]));
             // emit(graph("Estimated ball velocity", state[2], state[3]));
-            emit(graph("Actual ball position", ball_position_[0], ball_position_[1], ball_position_[2]);
-            emit(graph("Actual ball velocity", ball_velocity_[0], ball_velocity_[1], ball_position_[2]));
+            emit(graph("Actual ball position", world.ballPose[0], world.ballPose[1], world.ballPose[2]);
+            emit(graph("Actual ball velocity", ballVelocity[0], ballVelocity[1], world.ballPose[2]));
 
             // Ball message
             if (!cfg_.emit_ball_fieldobjects)
@@ -332,22 +327,22 @@ namespace support {
 
             // True ball position:
             messages::localisation::Ball ball_marker;
-            ball_marker.position = ball_position_;
-            ball_marker.velocity = ball_velocity_;
+            ball_marker.position = world.ballPose;
+            ball_marker.velocity = ballVelocity;
             ball_marker.position_cov = arma::eye(2,2) * 0.1;
             ball_marker.world_space = true;
             balls_msg->push_back(ball_marker);
 
             messages::localisation::Ball ball_model;
             ball_model.position = ball_pos;
-            ball_model.velocity = ball_velocity_;
+            ball_model.velocity = ballVelocity;
             ball_model.position_cov = ball.position_cov;
             ball_model.world_space = true;
             balls_msg->push_back(ball_model);
 
             // messages::localisation::Ball robot_ball;
             // robot_ball.position = robot_ball_pos;
-            // robot_ball.velocity = ball_velocity_;
+            // robot_ball.velocity = ballVelocity;
             // robot_ball.position_cov = arma::eye(2,2) * 0.1;
             // robot_ball.world_space = true;
             // balls_msg->push_back(robot_ball);
