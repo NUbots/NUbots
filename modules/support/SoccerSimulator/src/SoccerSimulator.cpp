@@ -290,11 +290,10 @@ namespace support {
 
             } else if(cfg_.localisation.simulate_ball){
                 //Emit current ball exactly                
-                auto b = std::make_unique<std::vector<messages::localisation::Ball>>();
-                b->push_back(messages::localisation::Ball());
-                b->back().position = world.ballPose.xy();
-                b->back().velocity = world.ballVelocity.rows(0,1);
-                b->back().position_cov = 0.00001 * arma::eye(2,2);
+                auto b = std::make_unique<messages::localisation::Ball>();
+                b->position = world.ballPose.xy();
+                b->velocity = world.ballVelocity.rows(0,1);
+                b->position_cov = 0.00001 * arma::eye(2,2);
                 emit(std::move(b));
 
             }
