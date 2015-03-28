@@ -90,7 +90,7 @@ namespace modules {
                     float ApproachCurveFactor;
 
 
-                    //-----------non-config variables-----------
+                    //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
 
                     //hysteresis variables
                     int turning;

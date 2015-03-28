@@ -21,26 +21,26 @@
 #include "messages/motion/WalkCommand.h"
 
 namespace modules {
-namespace behaviour {
-namespace strategy {
+    namespace behaviour {
+        namespace strategy {
 
-    using messages::motion::WalkCommand;
-    using messages::motion::WalkStartCommand;
+            using messages::motion::WalkCommand;
+            using messages::motion::WalkStartCommand;
 
-    WalkTest::WalkTest(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+            WalkTest::WalkTest(std::unique_ptr<NUClear::Environment> environment)
+                : Reactor(std::move(environment)) {
 
-        // go forward
-        auto walk = std::make_unique<WalkCommand>();
-        walk->command.xy() = arma::vec({1, 0});
-        walk->command.angle() = 0;
-        emit(std::move(walk));
+                // go forward
+                auto walk = std::make_unique<WalkCommand>();
+                walk->command.xy() = arma::vec({1, 0});
+                walk->command.angle() = 0;
+                emit(std::move(walk));
 
-        emit(std::make_unique<WalkStartCommand>());
+                emit(std::make_unique<WalkStartCommand>());
 
+            }
+
+        }
     }
-
-}
-}
 }
 
