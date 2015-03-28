@@ -22,6 +22,7 @@ RUN apt-get update
 
 # Get common helpful tools
 RUN apt-get -y install vim \
+                       nano \
                        wget \
                        curl \
                        git \
