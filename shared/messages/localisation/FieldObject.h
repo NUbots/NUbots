@@ -30,13 +30,13 @@ namespace messages {
             std::string name;
 
             struct Model {
-                double wm_x;
-                double wm_y;
-                double heading;
-                double sd_heading;
+                double wm_x; //world model x
+                double wm_y; //world model y
+                double heading; //direction
+                double sd_heading;  //stdev
                 double sd_x;
                 double sd_y;
-                double sr_xx;
+                double sr_xx;   //covariance 
                 double sr_xy;
                 double sr_yy;
                 bool lost;
@@ -64,9 +64,9 @@ namespace messages {
         class Self : public LocalisationObject {
         public:
             Self() : LocalisationObject() {}
-            arma::vec2 heading;
-            arma::vec2 velocity;
-            arma::mat22 robot_to_world_rotation;
+            arma::vec2 heading;     //robot face direction (vector 2)                 
+            arma::vec2 velocity;    //robot velocity (vector 2)
+            arma::mat22 robot_to_world_rotation;    //??might not be useful
         };
 
         template<class T> class Mock {
