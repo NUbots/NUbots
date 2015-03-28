@@ -45,6 +45,7 @@ namespace planning {
     using messages::localisation::Ball;
     using messages::localisation::Self;
     using messages::motion::KickCommand;
+    using messages::motion::KickPlannerConfig;
     using messages::support::Configuration;
     using messages::motion::WalkStopCommand;
     using messages::input::LimbID;
