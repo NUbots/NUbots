@@ -302,7 +302,8 @@ namespace modules {
 
                     // Calculate our time offset from the last read
                     double deltaT = ((previousSensors ? previousSensors->timestamp : input.timestamp) - input.timestamp).count() / double(NUClear::clock::period::den);
-
+                    std::cout << "sensors.accelerometer " << sensors->accelerometer.t() << std::endl; 
+                    std::cout << "sensors->gyroscope " << sensors->gyroscope.t() << std::endl; 
                     orientationFilter.timeUpdate(deltaT);
 
                     orientationFilter.measurementUpdate(sensors->accelerometer, MEASUREMENT_NOISE_ACCELEROMETER, IMUModel::MeasurementType::ACCELEROMETER());

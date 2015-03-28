@@ -48,6 +48,7 @@ namespace support {
             auto ball_msg = std::make_unique<FieldObject>();
             bool robot_msg_set = false;
             bool ball_msg_set = false;
+            std::cout << "NUbugger::localisation - emitting" << std::endl;
 
             if(opt_robots != nullptr && opt_robots->size() > 0) {
                 const auto& robots = *opt_robots;

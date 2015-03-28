@@ -44,13 +44,13 @@ namespace support {
             MOTION = 2
         };
         MotionType motionTypeFromString(std::string s){
-            if(s.compare("NONE")){
+            if(s.compare("NONE")==0){
                 return MotionType::NONE;
             } else
-            if(s.compare("PATH")){
+            if(s.compare("PATH")==0){
                 return MotionType::PATH;
             } else
-            if(s.compare("MOTION")){
+            if(s.compare("MOTION")==0){
                 return MotionType::MOTION;
             } else {
                 return MotionType::PATH;
@@ -63,10 +63,10 @@ namespace support {
         };
 
         PathType pathTypeFromString(std::string s){
-            if(s.compare("SIN")){
+            if(s.compare("SIN")==0){
                 return PathType::SIN;
             } else
-            if(s.compare("TRIANGLE")){
+            if(s.compare("TRIANGLE")==0){
                 return PathType::TRIANGLE;
             } else {
                 return PathType::SIN;

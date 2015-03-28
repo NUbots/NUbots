@@ -86,10 +86,10 @@ namespace darwin {
         sensors.fsr.right.errorFlags = 0;
 
         // Sensors
-        sensors.fsr.right.fsr1 = 0;
-        sensors.fsr.right.fsr2 = 0;
-        sensors.fsr.right.fsr3 = 0;
-        sensors.fsr.right.fsr4 = 0;
+        sensors.fsr.right.fsr1 = 1;
+        sensors.fsr.right.fsr2 = 1;
+        sensors.fsr.right.fsr3 = 1;
+        sensors.fsr.right.fsr4 = 1;
 
         // Centre
         sensors.fsr.right.centreX = 0;
@@ -100,10 +100,10 @@ namespace darwin {
         sensors.fsr.left.errorFlags = 0;
 
         // Sensors
-        sensors.fsr.left.fsr1 = 0;
-        sensors.fsr.left.fsr2 = 0;
-        sensors.fsr.left.fsr3 = 0;
-        sensors.fsr.left.fsr4 = 0;
+        sensors.fsr.left.fsr1 = 1;
+        sensors.fsr.left.fsr2 = 1;
+        sensors.fsr.left.fsr3 = 1;
+        sensors.fsr.left.fsr4 = 1;
 
         // Centre
         sensors.fsr.left.centreX = 0;
@@ -181,13 +181,13 @@ namespace darwin {
             }
 
             //Gyro
-            arma::vec3 sumGyro;
+            arma::vec3 sumGyro = {0,0,0};
             while (!gyroQueue.empty()){
                 auto g = gyroQueue.front();
                 sumGyro += arma::vec3({g.x,g.y,g.z});
                 gyroQueue.pop();
             }
-            sumGyro = (sumGyro + arma::vec3({0,0,imu_drift_rate})) * UPDATE_FREQUENCY ;
+            sumGyro = (sumGyro + arma::vec3({0,0,imu_drift_rate})) / UPDATE_FREQUENCY ;
             sensors.gyroscope.x = sumGyro[0];
             sensors.gyroscope.y = sumGyro[1];
             sensors.gyroscope.z = sumGyro[2];

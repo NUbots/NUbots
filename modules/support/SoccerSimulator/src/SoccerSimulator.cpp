@@ -111,6 +111,9 @@ namespace support {
     SoccerSimulator::SoccerSimulator(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
+        world.robotPose = Transform2D({0,0,0});
+        world.ballPose = Transform2D({0,0,0});
+
         on<Trigger<FieldDescription>>("FieldDescription Update", [this](const FieldDescription& desc) {
             field_description_ = std::make_shared<FieldDescription>(desc);
         });
@@ -131,9 +134,9 @@ namespace support {
 
         on<
             Trigger<Every<SIMULATION_UPDATE_FREQUENCY, Per<std::chrono::seconds>>>,
-            With<WalkCommand>
+            With<Optional<WalkCommand>>
         >("Robot motion", [this](const time_t&,
-                                 const WalkCommand& walkCommand) {
+                                 const std::shared_ptr<const WalkCommand>& walkCommand) {
 
             
             Transform2D oldRobotPose = world.robotPose;
@@ -150,14 +153,18 @@ namespace support {
                     world.robotPose.xy() = getPath(cfg_.robot.path);
 
                     diff = world.robotPose - oldRobotPose;
-
-                    world.robotPose.angle() = vectorToBearing(arma::vec2(diff));
+                    //Face along direction of movement
+                    world.robotPose.angle() = vectorToBearing(diff.xy());
                     world.robotVelocity = Transform2D({arma::norm(diff) * SIMULATION_UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
                     break;
 
                 case MotionType::MOTION:
                 //Update based on walk engine
-                    world.robotVelocity = walkCommand.command; 
+                    if(walkCommand){
+                        world.robotVelocity = walkCommand->command; 
+                    } else {
+                        world.robotVelocity = {0,0,0};
+                    }
                     world.robotPose += world.robotVelocity / SIMULATION_UPDATE_FREQUENCY;
                     break;
             }
@@ -173,21 +180,22 @@ namespace support {
 
                     diff = world.ballPose - oldBallPose;
 
-                    world.ballPose[2] = vectorToBearing(arma::vec2(diff));
                     world.ballVelocity = Transform2D({arma::norm(diff) * SIMULATION_UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
                     break;
 
                 case MotionType::MOTION:
-                    //Get last queue
-                    KickCommand lastKickCommand = kickQueue.back();
-                    //Empty queue
-                    std::queue<KickCommand>().swap(kickQueue);
-                    //Check if kick worked:
-                    arma::vec2 ballPosition = world.robotPose.worldToLocal(world.ballPose.xy());
+                    if(!kickQueue.empty()){
+                        //Get last queue
+                        KickCommand lastKickCommand = kickQueue.back();
+                        //Empty queue
+                        std::queue<KickCommand>().swap(kickQueue);
+                        //Check if kick worked:
+                        arma::vec2 ballPosition = world.robotPose.worldToLocal(world.ballPose.xy());
 
-                    if( ballPosition[0] < kick_cfg.MAX_BALL_DISTANCE &&
-                        std::fabs(ballPosition[1]) < kick_cfg.KICK_CORRIDOR_WIDTH / 2){
-                        world.ballPose.xy() = world.robotPose.localToWorld(lastKickCommand.direction.rows(0,1));
+                        if( ballPosition[0] < kick_cfg.MAX_BALL_DISTANCE &&
+                            std::fabs(ballPosition[1]) < kick_cfg.KICK_CORRIDOR_WIDTH / 2){
+                            world.ballPose.xy() = world.robotPose.localToWorld(lastKickCommand.direction.rows(0,1));
+                        }
                     }
                     break;
             }
@@ -252,6 +260,7 @@ namespace support {
 
                 if (goals->size() > 0)
                     emit(std::move(goals));
+
             }else if(cfg_.localisation.simulate_self){
                 //Emit current self exactly
                 auto r = std::make_unique<std::vector<messages::localisation::Self>>();
@@ -260,7 +269,7 @@ namespace support {
                 r->back().heading = bearingToUnitVector(world.robotPose.angle());
                 r->back().velocity = world.robotVelocity.rows(0,1);
                 r->back().position_cov = 0.00001 * arma::eye(2,2);
-                emit(r);
+                emit(std::move(r));
             }
         
 
@@ -278,14 +287,16 @@ namespace support {
                 ball_vec->push_back(ball);
 
                 emit(std::move(ball_vec));
+
             } else if(cfg_.localisation.simulate_ball){
                 //Emit current ball exactly                
                 auto b = std::make_unique<std::vector<messages::localisation::Ball>>();
-                b->.back().push_back(messages::localisation::Ball());
-                b->.back().position = world.ballPose.xy();
-                b->.back().velocity = world.ballVelocity.rows(0,1);
-                b->.back().position_cov = 0.00001 * arma::eye(2,2);
-                emit(r);
+                b->push_back(messages::localisation::Ball());
+                b->back().position = world.ballPose.xy();
+                b->back().velocity = world.ballVelocity.rows(0,1);
+                b->back().position_cov = 0.00001 * arma::eye(2,2);
+                emit(std::move(b));
+
             }
 
         });
