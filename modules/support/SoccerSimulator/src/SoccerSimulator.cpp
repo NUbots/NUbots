@@ -181,6 +181,7 @@ namespace support {
                     std::queue<KickCommand>().swap(kickQueue);
                     //Check if kick worked:
                     arma::vec2 ballPosition = world.robotPose.worldToLocal(world.ballPose.rows(0,1));
+                    
                     if( ballPosition[0] < kick_cfg.MAX_BALL_DISTANCE &&
                         std::fabs(ballPosition[1]) < kick_cfg.KICK_CORRIDOR_WIDTH / 2){
                         world.ballPose.rows(0,1) = world.robotPose.localToWorld(lastKickCommand.direction.rows(0,1));
