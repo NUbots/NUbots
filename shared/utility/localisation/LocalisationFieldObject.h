@@ -24,45 +24,45 @@
 #include <armadillo>
 
 namespace utility {
-namespace localisation {
+    namespace localisation {
 
-enum class LFOId {
-    kInvalid,
-    kBall,
-    kGoalYL,
-    kGoalYR,
-    kGoalBL,
-    kGoalBR,
-};
+    enum class LFOId {
+        kInvalid,
+        kBall,
+        kGoalYL,
+        kGoalYR,
+        kGoalBL,
+        kGoalBR,
+    };
 
-class LocalisationFieldObject {
-private:
-    arma::vec2 location_;
-    LFOId id_;
-    std::string name_;
+    class LocalisationFieldObject {
+        private:
+            arma::vec2 location_;
+            LFOId id_;
+            std::string name_;
 
-public:
-    LocalisationFieldObject() { } // Necessary?
+        public:
+            LocalisationFieldObject() { } // Necessary?
 
-    LocalisationFieldObject(arma::vec2 location, LFOId id, const std::string& name)
-        : location_(location), id_(id), name_(name) { }
+            LocalisationFieldObject(arma::vec2 location, LFOId id, const std::string& name)
+                : location_(location), id_(id), name_(name) { }
 
-    LFOId id() const { return id_; }
-    arma::vec2 location() const { return location_; }
-    std::string name() const { return name_; }
+            LFOId id() const { return id_; }
+            arma::vec2 location() const { return location_; }
+            std::string name() const { return name_; }
 
-    friend std::ostream& operator<<(std::ostream &os, const LocalisationFieldObject& o) {
-        return os
-            << "{ "
-            << "name: " << o.name_ << ", "
-            << "position: ["
-                << std::setw(7) << o.location_(0) << ", "
-                << std::setw(7) << o.location_(1) << "]"
-            << " }";
+            friend std::ostream& operator<<(std::ostream &os, const LocalisationFieldObject& o) {
+                return os
+                    << "{ "
+                    << "name: " << o.name_ << ", "
+                    << "position: ["
+                        << std::setw(7) << o.location_(0) << ", "
+                        << std::setw(7) << o.location_(1) << "]"
+                    << " }";
+            }
+         };
+
     }
-};
-
-}
 }
 
 #endif
