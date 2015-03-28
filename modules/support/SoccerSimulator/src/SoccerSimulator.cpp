@@ -295,7 +295,8 @@ namespace support {
                 b->velocity = world.ballVelocity.rows(0,1);
                 b->position_cov = 0.00001 * arma::eye(2,2);
                 emit(std::move(b));
-
+                //Walk path planner trigger:
+                emit(std::make_unique<std::vector<messages::vision::Ball>>());
             }
 
         });
