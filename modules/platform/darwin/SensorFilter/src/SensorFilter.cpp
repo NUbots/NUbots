@@ -165,7 +165,6 @@ namespace modules {
                   , With<Optional<Sensors>>
                   , Options<Single, Priority<NUClear::HIGH>>>([this](const DarwinSensors& input,
                                             const std::shared_ptr<const Sensors>& previousSensors) {
-
                     auto sensors = std::make_unique<Sensors>();
 
                     // Set our timestamp to when the data was read

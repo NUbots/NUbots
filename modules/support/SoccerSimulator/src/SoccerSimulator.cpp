@@ -82,6 +82,9 @@ namespace support {
     void SoccerSimulator::UpdateConfiguration(
         const messages::support::Configuration<SoccerSimulatorConfig>& config) {
 
+        cfg_.localisation.simulate_ball = config["localisation"]["simulate_ball"].as<bool>();
+        cfg_.localisation.simulate_self = config["localisation"]["simulate_self"].as<bool>();
+
         cfg_.simulate_goal_observations = config["vision"]["goal_observations"].as<bool>();
         cfg_.simulate_ball_observations = config["vision"]["ball_observations"].as<bool>();
         cfg_.observe_left_goal = config["vision"]["observe"]["left_goal"].as<bool>();
@@ -144,11 +147,11 @@ namespace support {
 
                 case MotionType::PATH: 
                     
-                    world.robotPose.rows(0,1) = getPath(cfg_.robot.path);
+                    world.robotPose.xy() = getPath(cfg_.robot.path);
 
                     diff = world.robotPose - oldRobotPose;
 
-                    world.robotPose[2] = vectorToBearing(arma::vec2(diff));
+                    world.robotPose.angle() = vectorToBearing(arma::vec2(diff));
                     world.robotVelocity = Transform2D({arma::norm(diff) * SIMULATION_UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
                     break;
 
@@ -166,7 +169,7 @@ namespace support {
 
                 case MotionType::PATH:
                     
-                    world.ballPose.rows(0,1) = getPath(cfg_.ball.path);
+                    world.ballPose.xy() = getPath(cfg_.ball.path);
 
                     diff = world.ballPose - oldBallPose;
 
@@ -180,11 +183,11 @@ namespace support {
                     //Empty queue
                     std::queue<KickCommand>().swap(kickQueue);
                     //Check if kick worked:
-                    arma::vec2 ballPosition = world.robotPose.worldToLocal(world.ballPose.rows(0,1));
-                    
+                    arma::vec2 ballPosition = world.robotPose.worldToLocal(world.ballPose.xy());
+
                     if( ballPosition[0] < kick_cfg.MAX_BALL_DISTANCE &&
                         std::fabs(ballPosition[1]) < kick_cfg.KICK_CORRIDOR_WIDTH / 2){
-                        world.ballPose.rows(0,1) = world.robotPose.localToWorld(lastKickCommand.direction.rows(0,1));
+                        world.ballPose.xy() = world.robotPose.localToWorld(lastKickCommand.direction.rows(0,1));
                     }
                     break;
             }
@@ -201,7 +204,6 @@ namespace support {
                 return;
             }
 
-            // Goal observation
             if (cfg_.simulate_goal_observations) {
                 auto goals = std::make_unique<std::vector<messages::vision::Goal>>();
 
@@ -210,7 +212,7 @@ namespace support {
                 arma::vec3 goal_r_pos = {0, 0, 0};
                 goal_l_pos.rows(0, 1) = field_description_->goalpost_yl;
                 goal_r_pos.rows(0, 1) = field_description_->goalpost_yr;
-                if (world.robotPose[2] < -M_PI * 0.5 || world.robotPose[2] > M_PI * 0.5) {
+                if (world.robotPose.angle() < -M_PI * 0.5 || world.robotPose.angle() > M_PI * 0.5) {
                     goal_l_pos.rows(0, 1) = field_description_->goalpost_bl;
                     goal_r_pos.rows(0, 1) = field_description_->goalpost_br;
                 }
@@ -218,7 +220,7 @@ namespace support {
                 if (cfg_.observe_left_goal) {
                     messages::vision::Goal goal1;
                     messages::vision::VisionObject::Measurement g1_m;
-                    g1_m.position = SphericalRobotObservation(world.robotPose.rows(0,1), world.robotPose[2], goal_r_pos);
+                    g1_m.position = SphericalRobotObservation(world.robotPose.xy(), world.robotPose.angle(), goal_r_pos);
                     g1_m.error = arma::eye(3, 3) * 0.1;
                     goal1.measurements.push_back(g1_m);
                     goal1.measurements.push_back(g1_m);
@@ -235,7 +237,7 @@ namespace support {
                 if (cfg_.observe_right_goal) {
                     messages::vision::Goal goal2;
                     messages::vision::VisionObject::Measurement g2_m;
-                    g2_m.position = SphericalRobotObservation(world.robotPose.rows(0,1), world.robotPose[2], goal_l_pos);
+                    g2_m.position = SphericalRobotObservation(world.robotPose.xy(), world.robotPose.angle(), goal_l_pos);
                     g2_m.error = arma::eye(3, 3) * 0.1;
                     goal2.measurements.push_back(g2_m);
                     goal2.measurements.push_back(g2_m);
@@ -250,23 +252,40 @@ namespace support {
 
                 if (goals->size() > 0)
                     emit(std::move(goals));
+            }else if(cfg_.localisation.simulate_self){
+                //Emit current self exactly
+                auto r = std::make_unique<std::vector<messages::localisation::Self>>();
+                r->push_back(messages::localisation::Self());
+                r->back().position = world.robotPose.xy();
+                r->back().heading = bearingToUnitVector(world.robotPose.angle());
+                r->back().velocity = world.robotVelocity.rows(0,1);
+                r->back().position_cov = 0.00001 * arma::eye(2,2);
+                emit(r);
             }
+        
 
-            // Ball observation
             if (cfg_.simulate_ball_observations) {
                 auto ball_vec = std::make_unique<std::vector<messages::vision::Ball>>();
 
                 messages::vision::Ball ball;
                 messages::vision::VisionObject::Measurement b_m;
                 arma::vec3 ball_pos_3d = {0, 0, 0};
-                ball_pos_3d.rows(0, 1) = world.ballPose;
-                b_m.position = SphericalRobotObservation(world.robotPose.rows(0,1), world.robotPose[2], ball_pos_3d);
+                ball_pos_3d.rows(0, 1) = world.ballPose.xy();
+                b_m.position = SphericalRobotObservation(world.robotPose.xy(), world.robotPose.angle(), ball_pos_3d);
                 b_m.error = arma::eye(3, 3) * 0.1;
                 ball.measurements.push_back(b_m);
                 ball.sensors = sensors;
                 ball_vec->push_back(ball);
 
                 emit(std::move(ball_vec));
+            } else if(cfg_.localisation.simulate_ball){
+                //Emit current ball exactly                
+                auto b = std::make_unique<std::vector<messages::localisation::Ball>>();
+                b->.back().push_back(messages::localisation::Ball());
+                b->.back().position = world.ballPose.xy();
+                b->.back().velocity = world.ballVelocity.rows(0,1);
+                b->.back().position_cov = 0.00001 * arma::eye(2,2);
+                emit(r);
             }
 
         });
@@ -280,8 +299,8 @@ namespace support {
 
             auto& robots = mock_robots.data;
 
-            emit(graph("Actual robot pose", world.robotPose[0], world.robotPose[1], world.robotPose[2]));
-            // emit(graph("Actual robot heading", world.robotPose[2][0], world.robotPose[2][1]));
+            emit(graph("Actual robot pose", world.robotPose[0], world.robotPose[1], world.robotPose.angle()));
+            // emit(graph("Actual robot heading", world.robotPose.angle()[0], world.robotPose.angle()[1]));
             emit(graph("Actual robot velocity", world.robotVelocity[0], world.robotVelocity[1], world.robotVelocity[2]));
 
             if (robots.size() >= 1) {
@@ -299,8 +318,8 @@ namespace support {
             }
 
             messages::localisation::Self self_marker;
-            self_marker.position = world.robotPose.rows(0,1);
-            self_marker.heading = bearingToUnitVector(world.robotPose[2]);
+            self_marker.position = world.robotPose.xy();
+            self_marker.heading = bearingToUnitVector(world.robotPose.angle());
             self_marker.position_cov = arma::eye(2,2) * 0.1;
             robots_msg->push_back(self_marker);
 
@@ -324,7 +343,7 @@ namespace support {
             arma::vec2 robot_ball_pos = RobotToWorldTransform(
                 robots[0].position, robots[0].heading, ball.position);
             arma::vec2 ball_pos = RobotToWorldTransform(
-                world.robotPose, world.robotPose[2], ball.position);
+                world.robotPose, world.robotPose.angle(), ball.position);
             emit(graph("Estimated ball position", ball_pos[0], ball_pos[1]));
             // emit(graph("Estimated ball velocity", state[2], state[3]));
             emit(graph("Actual ball position", world.ballPose[0], world.ballPose[1], world.ballPose[2]));
@@ -338,7 +357,7 @@ namespace support {
 
             // True ball position:
             messages::localisation::Ball ball_marker;
-            ball_marker.position = world.ballPose.rows(0,1);
+            ball_marker.position = world.ballPose.xy();
             ball_marker.velocity = world.ballVelocity.rows(0,1);
             ball_marker.position_cov = arma::eye(2,2) * 0.1;
             ball_marker.world_space = true;

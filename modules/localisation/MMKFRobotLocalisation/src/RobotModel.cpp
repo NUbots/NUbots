@@ -21,6 +21,7 @@
 
 #include <armadillo>
 #include <nuclear>
+#include <iostream>
 
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
@@ -45,7 +46,6 @@ namespace robot {
     arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
         const arma::vec::fixed<RobotModel::size>& state, double deltaT, const Sensors& sensors) {
         arma::vec::fixed<RobotModel::size> new_state = state;
-
         // // Velocity in world space:
         // new_state.rows(kX,kY) += deltaT * state.rows(kVX,kVY);
 

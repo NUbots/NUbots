@@ -83,6 +83,12 @@ namespace support {
         static constexpr size_t SIMULATION_UPDATE_FREQUENCY = 90;
 
         struct Config{
+            
+            struct {
+                bool simulate_self = true;
+                bool simulate_ball = true;
+            } localisation;
+
             bool simulate_goal_observations = true;
             bool simulate_ball_observations = true;
             bool observe_left_goal = true;

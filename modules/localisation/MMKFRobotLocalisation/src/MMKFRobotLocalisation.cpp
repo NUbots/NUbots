@@ -91,7 +91,7 @@ namespace localisation {
             // }
         });
 
-        // Emit to NUbugger
+        // Emit self
         on<Trigger<Every<100, std::chrono::milliseconds>>,
            With<Sensors>,
            Options<Sync<MMKFRobotLocalisation>>

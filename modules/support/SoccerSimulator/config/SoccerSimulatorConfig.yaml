@@ -1,3 +1,7 @@
+localisation:
+  simulate_self: true
+  simulate_ball: true
+
 vision:
   goal_observations: true
   observe:
@@ -14,7 +18,7 @@ robot:
     period: 100
     x_amp: 3
     y_amp: 2
-    type: sin #sin, triangle
+    type: SIN #SIN, TRIANGLE
 
 ball:
   #If use_motion is true, then the ball will move based on the latest motion commands
@@ -24,7 +28,7 @@ ball:
     period: 100
     x_amp: 3
     y_amp: 2
-    type: sin #sin, triangle
+    type: SIN #SIN, TRIANGLE
 
 nusight:
   emit_self: true
