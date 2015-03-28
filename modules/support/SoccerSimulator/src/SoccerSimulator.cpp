@@ -30,6 +30,8 @@
 #include "messages/input/Sensors.h"
 #include "messages/input/ServoID.h"
 #include "messages/platform/darwin/DarwinSensors.h"
+#include "messages/motion/WalkCommand.h"
+#include "messages/motion/KickCommand.h"
 
 namespace modules {
 namespace support {
@@ -48,7 +50,9 @@ namespace support {
     using messages::support::Configuration;
     using messages::support::FieldDescription;
     using messages::localisation::Mock;
-    using messages::platform::darwin::DarwinSensors::Gyroscope;
+    using messages::motion::WalkCommand;
+    using messages::motion::KickCommand;
+    using messages::platform::darwin::DarwinSensors;
     using utility::math::matrix::Transform2D;
 
     
@@ -114,69 +118,60 @@ namespace support {
             UpdateConfiguration(config);
         });
 
-        // Update world state
-        static constexpr float UPDATE_FREQUENCY = 100;
-
         on<
-            Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>,
+            Trigger<Every<SIMULATION_UPDATE_FREQUENCY, Per<std::chrono::seconds>>>,
             With<WalkCommand>,
             With<KickCommand> 
         >("Robot motion", [this](const time_t&,
-                                 const WalkCommand& walkCommand
+                                 const WalkCommand& walkCommand,
                                  const KickCommand& kickCommand) {
 
-            Transform2D previousRobotPose = robot_pose;
+            
+            Transform2D oldRobotPose = world.robotPose;
+            Transform2D oldBallPose = world.ballPose;
+            Transform2D diff;
             
             switch (cfg_.robot.motion_type){
-                case MotionType::NONE: {
+                case MotionType::NONE: 
                     world.robotVelocity = Transform2D({ 0, 0 ,0 });
                     break;
-                }
-                case MotionType::PATH: {
-                    auto t = absolute_time();
-                    double period = cfg_.robot.path.period;
-                    double x_amp = cfg_.robot.path.x_amp;
-                    double y_amp = cfg_.robot.path.y_amp;
 
+                case MotionType::PATH: 
                     
-                    Transform2D oldPose = world.robotPose;
-                    
-                    world.robotPose.rows(0,1) = getPath(robot.path.type) % arma::vec2({ x_amp, y_amp }); //
+                    world.robotPose.rows(0,1) = getPath(cfg_.robot.path);
 
-                    Transform2D diff = world.robotPose - oldPose;
+                    diff = world.robotPose - oldRobotPose;
 
                     world.robotPose[2] = vectorToBearing(arma::vec2(diff));
-                    world.robotVelocity = Transform2D({arma::norm(diff) * UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
-                }
+                    world.robotVelocity = Transform2D({arma::norm(diff) * SIMULATION_UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
+                    break;
+
                 case MotionType::MOTION:
                 //Update based on walk engine
-                    world.robotVelocity = walkCommand; 
-                    world.robotPose += robotVelocity / UPDATE_FREQUENCY;
+                    world.robotVelocity = walkCommand.command; 
+                    world.robotPose += world.robotVelocity / SIMULATION_UPDATE_FREQUENCY;
                     break;
-                    
+            }
             // Update ball position
             switch (cfg_.robot.motion_type){
-                case MotionType::NONE: {
-                    ballVelocity = { 0, 0 , 0};
+                case MotionType::NONE: 
+                    world.ballVelocity = { 0, 0 , 0};
                     break;
 
-                case MotionType::PATH:{              
-                    auto t = absolute_time();
-                    double period = cfg_.ball.path.period;
-                    double x_amp = cfg_.ball.path.x_amp;
-                    double y_amp = cfg_.ball.path.y_amp;
+                case MotionType::PATH:
+                    
+                    world.ballPose.rows(0,1) = getPath(cfg_.ball.path);
 
-                    world.ballPose.rows(0,1) = getPath(ball.path.type) % arma::vec2({ x_amp, y_amp });
+                    diff = world.ballPose - oldBallPose;
 
-                    auto velocity_x = -square_wave(t, period) * ((x_amp * 4) / period);
-                    auto velocity_y = -square_wave(t + (period / 4.0), period) * ((y_amp * 4) / period);
-                    ballVelocity = { velocity_x, velocity_y };
+                    world.ballPose[2] = vectorToBearing(arma::vec2(diff));
+                    world.ballVelocity = Transform2D({arma::norm(diff) * SIMULATION_UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
+                    break;
 
                 case MotionType::MOTION:
-                    
                     break;
-
-            emit(computeGyro(robotPose.heading - previousRobotPose.heading));
+            }
+            emit(computeGyro(world.robotPose.angle() - oldRobotPose.angle()));
         });
 
         // Simulate Vision
@@ -206,7 +201,7 @@ namespace support {
                 if (cfg_.observe_left_goal) {
                     messages::vision::Goal goal1;
                     messages::vision::VisionObject::Measurement g1_m;
-                    g1_m.position = SphericalRobotObservation(world.robotPose, world.robotPose[2], goal_r_pos);
+                    g1_m.position = SphericalRobotObservation(world.robotPose.rows(0,1), world.robotPose[2], goal_r_pos);
                     g1_m.error = arma::eye(3, 3) * 0.1;
                     goal1.measurements.push_back(g1_m);
                     goal1.measurements.push_back(g1_m);
@@ -223,7 +218,7 @@ namespace support {
                 if (cfg_.observe_right_goal) {
                     messages::vision::Goal goal2;
                     messages::vision::VisionObject::Measurement g2_m;
-                    g2_m.position = SphericalRobotObservation(world.robotPose, world.robotPose[2], goal_l_pos);
+                    g2_m.position = SphericalRobotObservation(world.robotPose.rows(0,1), world.robotPose[2], goal_l_pos);
                     g2_m.error = arma::eye(3, 3) * 0.1;
                     goal2.measurements.push_back(g2_m);
                     goal2.measurements.push_back(g2_m);
@@ -248,7 +243,7 @@ namespace support {
                 messages::vision::VisionObject::Measurement b_m;
                 arma::vec3 ball_pos_3d = {0, 0, 0};
                 ball_pos_3d.rows(0, 1) = world.ballPose;
-                b_m.position = SphericalRobotObservation(world.robotPose, world.robotPose[2], ball_pos_3d);
+                b_m.position = SphericalRobotObservation(world.robotPose.rows(0,1), world.robotPose[2], ball_pos_3d);
                 b_m.error = arma::eye(3, 3) * 0.1;
                 ball.measurements.push_back(b_m);
                 ball.sensors = sensors;
@@ -268,9 +263,8 @@ namespace support {
 
             auto& robots = mock_robots.data;
 
-            emit(graph("Actual robot position", world.robotPose[0], world.robotPose[1], world.robotPose[2]));
+            emit(graph("Actual robot pose", world.robotPose[0], world.robotPose[1], world.robotPose[2]));
             // emit(graph("Actual robot heading", world.robotPose[2][0], world.robotPose[2][1]));
-            emit(graph("Actual robot heading", world.robotPose[2]));
             emit(graph("Actual robot velocity", world.robotVelocity[0], world.robotVelocity[1], world.robotVelocity[2]));
 
             if (robots.size() >= 1) {
@@ -288,7 +282,7 @@ namespace support {
             }
 
             messages::localisation::Self self_marker;
-            self_marker.position = world.robotPose;
+            self_marker.position = world.robotPose.rows(0,1);
             self_marker.heading = bearingToUnitVector(world.robotPose[2]);
             self_marker.position_cov = arma::eye(2,2) * 0.1;
             robots_msg->push_back(self_marker);
@@ -316,8 +310,8 @@ namespace support {
                 world.robotPose, world.robotPose[2], ball.position);
             emit(graph("Estimated ball position", ball_pos[0], ball_pos[1]));
             // emit(graph("Estimated ball velocity", state[2], state[3]));
-            emit(graph("Actual ball position", world.ballPose[0], world.ballPose[1], world.ballPose[2]);
-            emit(graph("Actual ball velocity", ballVelocity[0], ballVelocity[1], world.ballPose[2]));
+            emit(graph("Actual ball position", world.ballPose[0], world.ballPose[1], world.ballPose[2]));
+            emit(graph("Actual ball velocity", world.ballVelocity[0], world.ballVelocity[1], world.ballPose[2]));
 
             // Ball message
             if (!cfg_.emit_ball_fieldobjects)
@@ -327,15 +321,15 @@ namespace support {
 
             // True ball position:
             messages::localisation::Ball ball_marker;
-            ball_marker.position = world.ballPose;
-            ball_marker.velocity = ballVelocity;
+            ball_marker.position = world.ballPose.rows(0,1);
+            ball_marker.velocity = world.ballVelocity.rows(0,1);
             ball_marker.position_cov = arma::eye(2,2) * 0.1;
             ball_marker.world_space = true;
             balls_msg->push_back(ball_marker);
 
             messages::localisation::Ball ball_model;
-            ball_model.position = ball_pos;
-            ball_model.velocity = ballVelocity;
+            ball_model.position = ball.position;
+            ball_model.velocity = ball.velocity;
             ball_model.position_cov = ball.position_cov;
             ball_model.world_space = true;
             balls_msg->push_back(ball_model);
@@ -351,24 +345,24 @@ namespace support {
         });
     }
 
-    std::unique_ptr<Gyroscope> SoccerSimulator::computeGyro(float dHeading){
-        std::make_unique<Gyroscope> g();
+    std::unique_ptr<DarwinSensors::Gyroscope> SoccerSimulator::computeGyro(float dHeading){
+        auto g = std::make_unique<DarwinSensors::Gyroscope>();
         g->x = 0;
         g->y = 0;
         g->z = dHeading;
         return std::move(g);
     }
 
-    arma::vec2 SoccerSimulator::getPath(PathType p){
-        double wave1;
-        double wave2;
-        switch(p){
+    arma::vec2 SoccerSimulator::getPath(SoccerSimulator::Config::Motion::Path p){
+        auto t = absolute_time();
+        float wave1,wave2;
+        switch(p.type){
             case PathType::SIN:
-                wave1 = sine_wave(t, period);
-                wave2 = sine_wave(t + (period / 4.0), period);                      
+                wave1 = p.x_amp * sine_wave(t, p.period);
+                wave2 = p.y_amp * sine_wave(t + (p.period / 4.0), p.period);                      
             case PathType::TRIANGLE:
-                wave1 = triangle_wave(t, period);
-                wave2 = triangle_wave(t + (period / 4.0), period);
+                wave1 = p.x_amp * triangle_wave(t, p.period);
+                wave2 = p.y_amp * triangle_wave(t + (p.period / 4.0), p.period);
         }
         return arma::vec2({wave1,wave2});
     }

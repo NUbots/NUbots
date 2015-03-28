@@ -25,6 +25,7 @@
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/ServoID.h"
 #include "utility/math/angle.h"
+#include "messages/support/Configuration.h" 
 
 namespace modules {
 namespace platform {
@@ -33,6 +34,7 @@ namespace darwin {
     using messages::platform::darwin::DarwinSensors;
     using messages::motion::ServoTarget;
     using messages::input::ServoID;
+    using messages::support::Configuration;
 
     HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -151,7 +153,6 @@ namespace darwin {
             gyroQueue.push(gyro);
         });
 
-        static constexpr float UPDATE_FREQUENCY = 60;
 
         on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
 
@@ -182,10 +183,11 @@ namespace darwin {
             //Gyro
             arma::vec3 sumGyro;
             while (!gyroQueue.empty()){
-                auto g = gyroQueue.pop();
+                auto g = gyroQueue.front();
                 sumGyro += arma::vec3({g.x,g.y,g.z});
+                gyroQueue.pop();
             }
-            sumGyro = (sumGyro + arma::vec3({0,0,imu_drift_rate}))* UPDATE_FREQUENCY ;
+            sumGyro = (sumGyro + arma::vec3({0,0,imu_drift_rate})) * UPDATE_FREQUENCY ;
             sensors.gyroscope.x = sumGyro[0];
             sensors.gyroscope.y = sumGyro[1];
             sensors.gyroscope.z = sumGyro[2];

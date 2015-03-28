@@ -26,6 +26,7 @@
 #include "messages/support/FieldDescription.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
+#include "messages/platform/darwin/DarwinSensors.h"
 
 namespace modules {
 namespace support {
@@ -60,14 +61,14 @@ namespace support {
             TRIANGLE = 1
         };
 
-        MotionType motionTypeFromString(std::string s){
+        PathType pathTypeFromString(std::string s){
             if(s.compare("SIN")){
-                return MotionType::SIN;
+                return PathType::SIN;
             } else
             if(s.compare("TRIANGLE")){
-                return MotionType::TRIANGLE;
+                return PathType::TRIANGLE;
             } else {
-                return MotionType::SIN;
+                return PathType::SIN;
             }
         }
 
@@ -77,32 +78,38 @@ namespace support {
             const messages::support::Configuration<SoccerSimulatorConfig>& config);
 
         std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float dHeading);
+        
 
         //Member variables
         std::shared_ptr<messages::support::FieldDescription> field_description_;
 
-        struct {
+        static constexpr size_t SIMULATION_UPDATE_FREQUENCY = 90;
+
+        struct Config{
             bool simulate_goal_observations = true;
             bool simulate_ball_observations = true;
             bool observe_left_goal = true;
             bool observe_right_goal = true;
             bool distinguish_left_and_right_goals = true;
 
-            struct MotionConfig{
+            struct Motion{
                 MotionType motion_type = MotionType::PATH;
-                struct {
+                struct Path{
                     float period = 1000;
-                    float PathType = PathType::SIN;
+                    PathType type = PathType::SIN;
+                    float x_amp = 3;
+                    float y_amp = 2;
                 } path;
             };
 
-            MotionConfig robot;
-            MotionConfig ball;
+            Motion robot;
+            Motion ball;
 
             bool emit_robot_fieldobjects = true;
             bool emit_ball_fieldobjects = true;
 
         } cfg_;
+        arma::vec2 getPath(Config::Motion::Path p);
 
         //World State
         struct WorldState{
