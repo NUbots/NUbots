@@ -27,6 +27,7 @@
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
 #include "messages/platform/darwin/DarwinSensors.h"
+#include "messages/motion/KickCommand.h"
 
 namespace modules {
 namespace support {
@@ -73,14 +74,10 @@ namespace support {
         }
 
     private:
-        //Methods
-        void UpdateConfiguration(
-            const messages::support::Configuration<SoccerSimulatorConfig>& config);
-
-        std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float dHeading);
-        
-
+      
         //Member variables
+        messages::motion::KickPlannerConfig kick_cfg;
+
         std::shared_ptr<messages::support::FieldDescription> field_description_;
 
         static constexpr size_t SIMULATION_UPDATE_FREQUENCY = 90;
@@ -109,7 +106,6 @@ namespace support {
             bool emit_ball_fieldobjects = true;
 
         } cfg_;
-        arma::vec2 getPath(Config::Motion::Path p);
 
         //World State
         struct WorldState{
@@ -122,6 +118,16 @@ namespace support {
 
         WorldState world;
 
+        std::queue<messages::motion::KickCommand> kickQueue;
+
+        //Methods
+        void UpdateConfiguration(
+            const messages::support::Configuration<SoccerSimulatorConfig>& config);
+
+        std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float dHeading);
+        
+
+        arma::vec2 getPath(Config::Motion::Path p);
     public:
         /// @brief Called by the powerplant to build and setup the SoccerSimulator reactor.
         explicit SoccerSimulator(std::unique_ptr<NUClear::Environment> environment);

@@ -31,7 +31,6 @@
 #include "messages/input/ServoID.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/motion/WalkCommand.h"
-#include "messages/motion/KickCommand.h"
 
 namespace modules {
 namespace support {
@@ -52,6 +51,7 @@ namespace support {
     using messages::localisation::Mock;
     using messages::motion::WalkCommand;
     using messages::motion::KickCommand;
+    using messages::motion::KickPlannerConfig;
     using messages::platform::darwin::DarwinSensors;
     using utility::math::matrix::Transform2D;
 
@@ -118,13 +118,19 @@ namespace support {
             UpdateConfiguration(config);
         });
 
+        on<Trigger<KickPlannerConfig>>("Get Kick Planner Config", [this](const KickPlannerConfig& cfg_){
+            kick_cfg = cfg_;
+        });
+
+        on<Trigger<KickCommand>>("Queue KickCommand",[this](const KickCommand& k){
+            kickQueue.push(k);
+        });
+
         on<
             Trigger<Every<SIMULATION_UPDATE_FREQUENCY, Per<std::chrono::seconds>>>,
-            With<WalkCommand>,
-            With<KickCommand> 
+            With<WalkCommand>
         >("Robot motion", [this](const time_t&,
-                                 const WalkCommand& walkCommand,
-                                 const KickCommand& kickCommand) {
+                                 const WalkCommand& walkCommand) {
 
             
             Transform2D oldRobotPose = world.robotPose;
@@ -169,6 +175,16 @@ namespace support {
                     break;
 
                 case MotionType::MOTION:
+                    //Get last queue
+                    KickCommand lastKickCommand = kickQueue.back();
+                    //Empty queue
+                    std::queue<KickCommand>().swap(kickQueue);
+                    //Check if kick worked:
+                    arma::vec2 ballPosition = world.robotPose.worldToLocal(world.ballPose.rows(0,1));
+                    if( ballPosition[0] < kick_cfg.MAX_BALL_DISTANCE &&
+                        std::fabs(ballPosition[1]) < kick_cfg.KICK_CORRIDOR_WIDTH / 2){
+                        world.ballPose.rows(0,1) = world.robotPose.localToWorld(lastKickCommand.direction.rows(0,1));
+                    }
                     break;
             }
             emit(computeGyro(world.robotPose.angle() - oldRobotPose.angle()));
