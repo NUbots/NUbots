@@ -119,7 +119,7 @@ RUN autotools_install https://googledrive.com/host/0B6NtGsLhIcf7MWxMMF9JdTN3UVk/
 RUN apt-get -y install libboost-dev
 
 # yaml-cpp
-RUN cmake_install https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz \
+RUN cmake_install https://github.com/jbeder/yaml-cpp/archive/release-0.5.2.tar.gz \
     -DYAML_CPP_BUILD_CONTRIB=OFF \
     -DYAML_CPP_BUILD_TOOLS=OFF
 
@@ -136,7 +136,7 @@ RUN autotools_install http://www.fftw.org/fftw-3.3.4.tar.gz \
 # Quex
 RUN curl -L https://downloads.sourceforge.net/project/quex/DOWNLOAD/quex-0.65.4.tar.gz | tar -xz \
  && mkdir -p "$TOOLCHAIN_PATH/etc" \
- && mv quex-0.65.2 "$TOOLCHAIN_PATH/etc/quex" \
+ && mv quex-0.65.4 "$TOOLCHAIN_PATH/etc/quex" \
  && ln -s "$TOOLCHAIN_PATH/etc/quex/quex" "$TOOLCHAIN_PATH/include/quex" \
  && echo '#!/bin/bash' > "$TOOLCHAIN_PATH/bin/quex" \
  && echo "QUEX_PATH=$TOOLCHAIN_PATH/etc/quex python $TOOLCHAIN_PATH/etc/quex/quex-exe.py \$@" >> "$TOOLCHAIN_PATH/bin/quex" \
