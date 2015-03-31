@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import docker
+from docker import Docker
 
 def register(command):
 
@@ -17,4 +17,4 @@ def run(role='', **kwargs):
     docker = Docker()
 
     print('Running {} on the container...'.format(role))
-    self._docker_run('sh', '-c', '"bin/{}"'.format(role), interactive=True)
+    docker.run('sh', '-c', '"bin/{}"'.format(role), interactive=True)
