@@ -1,1 +1,7 @@
 imu_drift_rate: 0.1
+
+noise:
+  accelerometer:
+    x: 0.01
+    y: 0.01
+    z: 0.01

@@ -76,15 +76,15 @@ namespace utility {
                     points.col(0) = mean;
 
                     // Get our cholskey decomposition
-
+                    std::cout << "Performing cholesky" << std::endl;
                     arma::mat chol;
                     try {
                         chol = arma::chol(covarianceSigmaWeights * covariance);
-                    } catch (std::exception& e) {
-                        if (Model::size == 3) std::cerr << __FILE__ << " " << __LINE__ << " : covarianceSigmaWeights * covariance was NOT positive-definite and the cholskey "
+                    } catch (...) {
+                        std::cerr << __FILE__ << " " << __LINE__ << " : covarianceSigmaWeights * covariance was NOT positive-definite and the cholskey "
                                   << "decomposition failed.\ncovarianceSigmaWeights * covariance = \n" << std::endl
                                   << covarianceSigmaWeights * covariance << std::endl;
-                        throw e;
+                        throw std::exception();
                     }
 
                     // Put our values in either end of the matrix

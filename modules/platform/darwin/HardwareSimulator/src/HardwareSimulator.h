@@ -40,6 +40,15 @@ namespace darwin {
         std::queue<messages::platform::darwin::DarwinSensors::Gyroscope> gyroQueue;
         float imu_drift_rate;
         static constexpr size_t UPDATE_FREQUENCY = 60;
+        void addNoise(std::unique_ptr<messages::platform::darwin::DarwinSensors>& sensors);
+        struct NoiseConfig{
+            struct Vec3Noise{
+                float x = 0.001;
+                float y = 0.001;
+                float z = 0.001;
+            };
+            Vec3Noise accelerometer;
+        } noise;
     public:
         /// @brief called by a Powerplant to construct this reactor
         explicit HardwareSimulator(std::unique_ptr<NUClear::Environment> environment);

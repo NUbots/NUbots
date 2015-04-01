@@ -302,8 +302,6 @@ namespace modules {
 
                     // Calculate our time offset from the last read
                     double deltaT = ((previousSensors ? previousSensors->timestamp : input.timestamp) - input.timestamp).count() / double(NUClear::clock::period::den);
-                    std::cout << "sensors.accelerometer " << sensors->accelerometer.t() << std::endl; 
-                    std::cout << "sensors->gyroscope " << sensors->gyroscope.t() << std::endl; 
                     orientationFilter.timeUpdate(deltaT);
 
                     orientationFilter.measurementUpdate(sensors->accelerometer, MEASUREMENT_NOISE_ACCELEROMETER, IMUModel::MeasurementType::ACCELEROMETER());
@@ -395,7 +393,11 @@ namespace modules {
                             arma::vec3 torsoVelFromRightFoot =  -(measuredTorsoFromRightFoot - previousMeasuredTorsoFromRightFoot);
 
                             arma::vec3 averageVelocity = (torsoVelFromLeftFoot * static_cast<int>(sensors->leftFootDown) + torsoVelFromRightFoot * static_cast<int>(sensors->rightFootDown))/(static_cast<int>(sensors->rightFootDown) + static_cast<int>(sensors->leftFootDown));
-                            sensors->odometry = averageVelocity.rows(0,1) / deltaT;
+                            if(deltaT > 0){
+                                sensors->odometry = averageVelocity.rows(0,1) / deltaT;
+                            } else {
+                                sensors->odometry = {0,0};
+                            }
                         }
 
                         // Gyro based odometry for orientation

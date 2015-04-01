@@ -42,7 +42,7 @@ namespace darwin {
          CM730 Data
          */
 
-        // Read our Error code
+        //Read our Error code
         sensors.cm730ErrorFlags = 0;
 
         // LED Panel
@@ -147,6 +147,11 @@ namespace darwin {
 
         on<Trigger<Configuration<HardwareSimulator>>>("Hardware Simulator Config",[this](const Configuration<HardwareSimulator>& config){
             imu_drift_rate = config["imu_drift_rate"].as<float>();
+
+            noise.accelerometer.x = config["noise"]["accelerometer"]["x"].as<float>();
+            noise.accelerometer.y = config["noise"]["accelerometer"]["y"].as<float>();
+            noise.accelerometer.z = config["noise"]["accelerometer"]["z"].as<float>();
+
         });
 
         on<Trigger<DarwinSensors::Gyroscope>>("Receive Simulated Gyroscope", [this](const DarwinSensors::Gyroscope& gyro){
@@ -191,10 +196,11 @@ namespace darwin {
             sensors.gyroscope.x = sumGyro[0];
             sensors.gyroscope.y = sumGyro[1];
             sensors.gyroscope.z = sumGyro[2];
-
-
+            //Add some noise so that sensor fusion doesnt converge to a singularity
+            auto sensors_message = std::make_unique<DarwinSensors>(sensors);
+            addNoise(sensors_message);
             // Send our nicely computed sensor data out to the world
-            emit(std::make_unique<DarwinSensors>(sensors));
+            emit(std::move(sensors_message));
 
         });
 
@@ -244,6 +250,12 @@ namespace darwin {
             // Emit it so it's captured by the reaction above
             emit<Scope::DIRECT>(std::move(commandList));
         });
+    }
+
+    void HardwareSimulator::addNoise(std::unique_ptr<DarwinSensors>& sensors){
+        sensors->accelerometer.x += noise.accelerometer.x * rand() / float(RAND_MAX);
+        sensors->accelerometer.y += noise.accelerometer.y * rand() / float(RAND_MAX);
+        sensors->accelerometer.z += noise.accelerometer.z * rand() / float(RAND_MAX);
     }
 }
 }
