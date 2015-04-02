@@ -424,7 +424,7 @@ namespace research {
             ++i;
         }).disable();
 
-        on<Trigger<AutoClassifierPixels>, With<LookUpTable>, Options<Single>>([this] (const AutoClassifierPixels& pixels, const LookUpTable& lut) {
+        on<Trigger<AutoClassifierPixels>, With<LookUpTable>, Options<Sync<LayerAutoClassifier>>>([this] (const AutoClassifierPixels& pixels, const LookUpTable& lut) {
 
             // Some aliases
             const auto& c = pixels.classification;

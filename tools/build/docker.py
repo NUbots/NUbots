@@ -63,7 +63,7 @@ class Docker():
             os.makedirs('build')
 
         # Get our image provided to us or use a default
-        docker_image = kwargs.get('docker_image', 'darwin')
+        docker_image = kwargs.get('docker_image', 'darwin/lto')
 
         # Set relevant sections for our docker image
         self.image = {

@@ -35,6 +35,7 @@ namespace research {
         explicit AutoClassifierProvider(std::unique_ptr<NUClear::Environment> environment);
 
     private:
+        std::mutex write;
         int ballEdgeBuffer  = 0;
         int goalEdgeBuffer  = 0;
         int fieldEdgeBuffer = 0;

@@ -23,7 +23,11 @@
 #include "messages/support/nubugger/proto/Message.pb.h"
 #include "messages/input/Image.h"
 #include "messages/input/CameraParameters.h"
+#include "messages/vision/LookUpTable.h"
 #include "messages/platform/darwin/DarwinSensors.h"
+#include "utility/nubugger/NUHelpers.h"
+#include "utility/math/geometry/Circle.h"
+#include "utility/math/geometry/Quad.h"
 
 namespace modules {
 namespace support {
@@ -33,6 +37,37 @@ namespace support {
     using messages::platform::darwin::DarwinSensors;
     using messages::support::nubugger::proto::Message;
     using messages::input::CameraParameters;
+    using messages::vision::LookUpTable;
+    using messages::vision::Colour;
+    using utility::nubugger::graph;
+    using messages::support::SaveConfiguration;
+    using utility::math::geometry::Circle;
+    using utility::math::geometry::Quad;
+
+    arma::uvec3 colourForTime(const uint64_t& timestamp) {
+
+        double r, g, b;
+
+        const double h = (sin(2.0 * M_PI * double(timestamp) / 100000.0) + 1.0) / 2.0;
+        const double s = 1.0;
+        const double v = 1.0;
+
+        int i = int(h * 6.0);
+        double f = h * 6.0 - i;
+        double p = v * (1.0 - s);
+        double q = v * (1.0 - f * s);
+        double t = v * (1.0 - (1.0 - f) * s);
+        switch (i % 6) {
+            case 0: r = v, g = t, b = p; break;
+            case 1: r = q, g = v, b = p; break;
+            case 2: r = p, g = v, b = t; break;
+            case 3: r = p, g = q, b = v; break;
+            case 4: r = t, g = p, b = v; break;
+            case 5: r = v, g = p, b = q; break;
+        }
+
+        return { uint(r * 255), uint(g * 255), uint(b * 255) };
+    }
 
     NBZPlayer::NBZPlayer(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -55,23 +90,141 @@ namespace support {
                     return;
                 }
 
-                // Read the first 32 bit int to work out the size
-                uint32_t size;
-                input.read(reinterpret_cast<char*>(&size), sizeof(uint32_t));
+                bool atStartColour = false;
+                uint64_t lastTime = 0;
+                Message imageMessage;
+                while(true) {
 
-                // Read that much into a string
-                std::vector<char> data(size);
-                input.read(data.data(), size);
+                    // Read the first 32 bit int to work out the size
+                    uint32_t size;
+                    input.read(reinterpret_cast<char*>(&size), sizeof(uint32_t));
 
-                // Read the message
-                Message message;
-                message.ParsePartialFromArray(data.data(), data.size());
-                initialTime = NUClear::clock::now();
-                offset = initialTime - time_t(std::chrono::milliseconds(message.utc_timestamp()));
+                    // Read that much into a string
+                    std::vector<char> data(size);
+                    input.read(data.data(), size);
+
+                    // Read the message
+                    Message message;
+                    message.ParsePartialFromArray(data.data(), data.size());
+                    initialTime = NUClear::clock::now();
+                    offset = initialTime - time_t(std::chrono::milliseconds(message.utc_timestamp()));
+                    std::cout << message.type() << std::endl;
+                    if(lastTime != 0) {
+                        const double h1 = (sin(2.0 * M_PI * double(lastTime) / 100000.0) + 1.0) / 2.0;
+                        const double h2 = (sin(2.0 * M_PI * double(message.utc_timestamp()) / 100000.0) + 1.0) / 2.0;
+
+                        const double target = 60.0/360.0;
+
+                        if(h1 <= target && h2 >= target) {
+                            atStartColour = true;
+                        }
+                        if(message.type() == Message::IMAGE) {
+                            imageMessage = message;
+                            break;
+                        }
+                    }
+
+                    lastTime = message.utc_timestamp();
+
+                }
+
+                 // Get the width and height
+                int width = imageMessage.image().dimensions().x();
+                int height = imageMessage.image().dimensions().y();
+                const std::string& source = imageMessage.image().data();
+
+                // Get the image data
+                std::vector<Image::Pixel> pixels(source.size() / 3);
+
+                std::memcpy(pixels.data(), source.data(), source.size());
+
+                // Build the image
+                Image image(width, height, std::move(pixels));
+
+                LookUpTable lut(6, 7, 7, std::vector<Colour>(1 << (6 + 7 + 7), Colour::UNCLASSIFIED));
+
+                // Ball!
+                auto ballCircle = Circle(9.0, arma::vec2({181, 196}));
+                // find the min and max y points on the circle
+                // capped at the bounds of the image
+                uint minY = std::max(std::ceil(ballCircle.centre[1] - ballCircle.radius), 0.0);
+                uint maxY = std::min(std::floor(ballCircle.centre[1] + ballCircle.radius), double(image.height() - 1));
+
+                // loop through pixels on the image in bounding box
+                for (uint y = minY + 1; y <= maxY - 1; ++y) {
+                    auto edgePoints = ballCircle.getEdgePoints(y);
+                    uint minX = std::max(edgePoints[0], 0.0);
+                    uint maxX = std::min(edgePoints[1], double(image.width() - 1));
+
+                    for (uint x = minX + 1; x <= maxX - 1; ++x) {
+                        lut(image(x, y)) = Colour::ORANGE;
+                    }
+                }
+
+                // Do our goals!
+                for(auto quad : std::vector<Quad>({
+                    Quad(arma::vec2({51,58}), arma::vec2({54,195}), arma::vec2({71,194}), arma::vec2({68,57})),
+                    Quad(arma::vec2({269,71}), arma::vec2({271,184}), arma::vec2({285,184}), arma::vec2({286,71}))
+                })) {
+                    uint minY = std::max(std::min(quad.getBottomLeft()[1], quad.getBottomRight()[1]), 0.0);
+                    uint maxY = std::min(std::max(quad.getTopLeft()[1], quad.getTopRight()[1]), double(image.height() - 1));
+
+                    for (uint y = minY + 1; y <= maxY - 1; ++y) {
+                        arma::vec2 edgePoints;
+                        try {
+                            edgePoints = quad.getEdgePoints(y);
+                        } catch (std::domain_error&) {
+                            continue; // no intersection
+                        }
+                        uint minX = std::max(edgePoints[0], 0.0);
+                        uint maxX = std::min(edgePoints[1], double(image.width() - 1));
+
+                        for (uint x = minX + 1; x <= maxX - 1; ++x) {
+                            lut(image(x, y)) = Colour::YELLOW;
+                        }
+                    }
+
+                }
+
+                // Do our field!
+                for(auto quad : std::vector<Quad>({
+                    Quad(arma::vec2({0,160}), arma::vec2({0,192}), arma::vec2({46,186}), arma::vec2({46,159})),
+                    Quad(arma::vec2({77,161}), arma::vec2({76,184}), arma::vec2({233,177}), arma::vec2({222,154})),
+                    Quad(arma::vec2({0,203}), arma::vec2({0,226}), arma::vec2({163,213}), arma::vec2({156,193})),
+                    Quad(arma::vec2({197,191}), arma::vec2({198,210}), arma::vec2({288,205}), arma::vec2({267,189})),
+                    Quad(arma::vec2({0,234}), arma::vec2({0,239}), arma::vec2({257,239}), arma::vec2({257,217}))
+                })) {
+                    uint minY = std::max(std::min(quad.getBottomLeft()[1], quad.getBottomRight()[1]), 0.0);
+                    uint maxY = std::min(std::max(quad.getTopLeft()[1], quad.getTopRight()[1]), double(image.height() - 1));
+
+                    for (uint y = minY + 1; y <= maxY - 1; ++y) {
+                        arma::vec2 edgePoints;
+                        try {
+                            edgePoints = quad.getEdgePoints(y);
+                        } catch (std::domain_error&) {
+                            continue; // no intersection
+                        }
+                        uint minX = std::max(edgePoints[0], 0.0);
+                        uint maxX = std::min(edgePoints[1], double(image.width() - 1));
+
+                        for (uint x = minX + 1; x <= maxX - 1; ++x) {
+                            lut(image(x, y)) = Colour::GREEN;
+                        }
+                    }
+
+                }
+
+                // Save this LUT
+                emit<Scope::DIRECT>(std::make_unique<SaveConfiguration>(SaveConfiguration{ "LookUpTable.yaml", YAML::Node(lut) }));
+
+                // Print our timestamp!
+                emit(std::make_unique<NUClear::clock::duration>(offset));
+
+                // Keep doing this until we pass our "gate" colour
 
                 auto cameraParameters = std::make_unique<CameraParameters>();
 
-                cameraParameters->imageSizePixels = { 640, 480 };
+                cameraParameters->imageSizePixels = { 320, 240 };
                 cameraParameters->FOV = { 1.0472 , 0.785398 };
                 cameraParameters->distortionFactor = -0.000018;
                 arma::vec2 tanHalfFOV;
@@ -102,7 +255,7 @@ namespace support {
                     if(input.eof()) {
                         if (!replay) {
                             log<NUClear::INFO>("Reached end of log file, quitting");
-                            break;
+                            exit(0);
                         }
 
                         // replay, go back to beginning of file
@@ -122,8 +275,11 @@ namespace support {
                     // If it's an image
                     if(message.type() == Message::IMAGE) {
 
+
                         // Work out our time to run
                         time_t timeToRun = time_t(std::chrono::milliseconds(message.utc_timestamp())) + offset;
+
+                        auto colour = colourForTime(message.utc_timestamp());
 
                         // Get the width and height
                         int width = message.image().dimensions().x();
@@ -140,6 +296,9 @@ namespace support {
 
                         // Wait until it's time to display it
                         std::this_thread::sleep_until(timeToRun);
+
+                        // Emit the graph of the colours
+                        emit(graph("colour", colour));
 
                         // Send it!
                         emit(std::move(image));
