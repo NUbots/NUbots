@@ -3,11 +3,12 @@
 import matplotlib.pyplot as plt
 from numpy import linspace, meshgrid
 from matplotlib.mlab import griddata
+import matplotlib.ticker as mtick
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import Normalize
 import random
 
-def grid(x, y, z, resX=1000, resY=1000):
+def grid(x, y, z, resX=100, resY=60):
     "Convert 3 column data to matplotlib grid"
     xi = linspace(min(x), max(x), resX)
     yi = linspace(min(y), max(y), resY)
@@ -86,21 +87,21 @@ for f in xrange(0, 105, 5):
 
     for d in xrange(5, 65, 5):
 
-        with open('newRes2/StaticI{}D{}.csv'.format(intensity, d), 'r') as file:
+        with open('/Users/trent/Code/DatanStuff/newRes/StaticI{}D{}.csv'.format(intensity, d), 'r') as file:
             lines = file.readlines()
             lines = [l.strip() for l in lines]
             g,b = process(f, d, lines, 'STATIC')
             goals += g
             balls += b
 
-        with open('newRes2/LayerI{}D{}.csv'.format(intensity, d), 'r') as file:
+        with open('/Users/trent/Code/DatanStuff/newRes/LayerI{}D{}.csv'.format(intensity, d), 'r') as file:
             lines = file.readlines()
             lines = [l.strip() for l in lines]
             g,b = process(f, d, lines, 'LAYER')
             goals += g
             balls += b
 
-        with open('newRes2/PressureI{}D{}.csv'.format(intensity, d), 'r') as file:
+        with open('/Users/trent/Code/DatanStuff/newRes/PressureI{}D{}.csv'.format(intensity, d), 'r') as file:
             lines = file.readlines()
             lines = [l.strip() for l in lines]
             g,b = process(f, d, lines, 'PRESSURE')
@@ -117,13 +118,13 @@ for i in xrange(0, 105, 5):
 
 # Sum our data in
 for b in balls:
-    if b[3] == 'STATIC':
+    if b[3] == 'LAYER':
         i = b[1]
         d = b[2]
         contour[(i,d)] += 1
 
 for g in goals:
-    if g[3] == 'STATIC':
+    if g[3] == 'LAYER':
         i = g[1]
         d = g[2]
         contour[(i,d)] += 1
@@ -135,13 +136,20 @@ z = []
 for k in contour:
     x.append(k[0])
     y.append(k[1])
-    z.append(float(contour[k]) / float(k[1]))
+    z.append((float(contour[k]) / float(k[1] * 30 * 3)) * 100.0)
+
+# Percentage formatter
+percentTick = mtick.FormatStrFormatter('%.0f%%')
 
 #fig = plt.figure()
 X, Y, Z = grid(x, y, z)
-plt.contourf(X, Y, Z, 10, norm=Normalize(0.0,180.0))
-plt.xlabel("Saturation")
+cs = plt.contourf(X, Y, Z, 10, norm=Normalize(0.0,100))
+plt.xlabel("Saturation (%)")
 plt.ylabel("Hue Cycle Duration (s)")
+
+# Colourbar
+cbar = plt.colorbar(cs)
+cbar.ax.set_ylabel('Detection Rate (%)')
 
 plt.savefig("output.eps", trasparent=True)
 
