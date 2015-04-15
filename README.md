@@ -19,6 +19,7 @@ The following is a guide to getting you set up and ready to contribute to the NU
 		$ sudo apt-get install git
 		$ sudo apt-get install python
 		$ sudo apt-get install docker
+		$ sudo apt-get install docker.io
 		$ sudo addgroup $(whoami) docker
 
 	Windows and OSX installation can be done with installers from the program sites above.
