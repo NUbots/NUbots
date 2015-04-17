@@ -82,6 +82,13 @@ Troubleshooting
 Check out the `docker` file to see the actual commands that are being run if you
 are having issues. 
 
+####1.  Cannot connect to the Docker daemon. Is 'docker -d' running on this host? [Ubuntu]
+	Try to stop docker service and then restart it again.
+	$ sudo service docker stop
+	$ sudo service docker start
+	
+
+
 [nuclearport-travis]:     https://travis-ci.org/nubots/NUClearPort                "NUClearPort's Travis Page"
 [travis-develop-image]:   https://travis-ci.org/nubots/NUClearPort.png?branch=develop "Travis-CI build status for the develop branch"
 [git]:                    http://git-scm.com/                                     "Git"
