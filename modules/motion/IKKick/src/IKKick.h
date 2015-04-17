@@ -33,6 +33,7 @@ namespace motion {
         
     	float KICK_PRIORITY;
     	float EXECUTION_PRIORITY;
+
     	void updatePriority(const float& priority);
 
     	static constexpr uint UPDATE_FREQUENCY = 90;

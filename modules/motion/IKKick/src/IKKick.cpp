@@ -26,11 +26,14 @@
 #include "messages/input/LimbID.h"
 #include "messages/behaviour/ServoCommand.h"
 #include "messages/behaviour/Action.h"
+#include "messages/support/FieldDescription.h"
+
 
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/RobotModels.h"
 #include "utility/support/yaml_armadillo.h"
+
 
 namespace modules {
 namespace motion {
@@ -44,6 +47,7 @@ namespace motion {
     using messages::behaviour::ServoCommand;
     using messages::behaviour::RegisterAction;
     using messages::behaviour::ActionPriorites;
+    using messages::support::FieldDescription;
 
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJoints;
@@ -52,6 +56,17 @@ namespace motion {
 
     struct ExecuteKick{};
     struct FinishKick{};
+
+    struct KickVector{
+        //
+        LimbID supportFoot;
+        //point position of ball
+        arma::vec3 position;
+        //direction we want to kick the ball
+        arma::vec3 direction;
+        //the height we want the torso to move to before kick
+        double torsoDirectionHeight;
+    };
 
     IKKick::IKKick(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -77,26 +92,40 @@ namespace motion {
         on<Trigger<ExecuteKick>, With<KickCommand>, With<Sensors>>([this] (const ExecuteKick&, const KickCommand& command, const Sensors& sensors) {
 
             // TODO Work out which of our feet are going to be the support foot
-            //leftFoot is support
+            // TODO store the support foot
+            //Assume leftFoot is support
 
             //4x4 homogeneous transform matrices for left foot and right foot relative to torso
             Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
             Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
 
-            //converts the direction vector and position of the ball into left foot coordinates by multiplying the inverse of the
+            //Convert the direction vector and position of the ball into left foot coordinates by multiplying the inverse of the
             //homogeneous transforms with the coordinates in torso space. 1 for a point and 0 for a vector.
-            auto position = leftFoot.i() * arma::join_cols(command.target, arma::vec({1}));
-            auto direction = leftFoot.i() * arma::join_cols(command.direction, arma::vec({0}));
-            
-            //add the length from the centre of the foot to the front to get starting position of curve as front of the foot
-            auto rightFootCentre = leftFoot.i() * arma::join_cols((rightfoot*Transform3D::translation(arma::vec({TOE_LENGTH,0,0})))translation(), arma::vec({1}));
-            
-            
-            //find position vector from left foot to torso
-            //leftFoot.translation();
+            position = leftFoot.i() * arma::join_cols(command.target, arma::vec({1}));
+            direction = leftFoot.i() * arma::join_cols(command.direction, arma::vec({0}));
 
+            //Work out the height the torso should be at
+            //TODO Give height bounds for balance or tuning, height = Lower_Leg_Length + Upper Leg Length.
+            torsoDirectionHeight = Upper_Leg_Length + Lower_Leg_Length;
 
+            emit(std::make_unique<KickVector>(KickVector{
+                LimbID::LEFT_LEG,
+                position,
+                direction,
+                torsoDirectionHeight
+            }));
 
+            //Obtains the position of the torso and the direction in which the torso needs to move
+
+            // //Find position vector from left foot to torso in leftFoot coordinates.
+            // auto torsoPosition = leftFoot.i().translation();
+            // //Find the direction vector to move centre of mass (i.e. torso coordinate origin) over the centre of the left foot in leftFoot coordinates.
+            // auto torsoDirection = arma::vec({0, 0, torsoPositionHeight}) - torsoPosition;
+            
+            // //Add the length from the centre of the foot to the front to get starting position of curve as front of the foot.
+            // auto rightFootFront = leftFoot.i() * arma::join_cols((rightfoot*Transform3D::translation(arma::vec({TOE_LENGTH,0,0})))translation(), arma::vec({1}));
+
+            //NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick foot which is rightFootFront
 
 
             log("Got a new kick!");
@@ -105,9 +134,7 @@ namespace motion {
             log("position in support foot:", "x:", position[0], "y:", position[1], "z:", position[2]);
             log("Direction in support foot:", "x:", direction[0], "y:", direction[1], "z:", direction[2]);
 
-            // TODO Store the target kick vector position relative to the support foot
 
-            // TODO store the support foot
 
             // Enable our kick pather
             updater.enable();
@@ -115,7 +142,7 @@ namespace motion {
             updatePriority(EXECUTION_PRIORITY);
         });
 
-        updater = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, Options<Single>>([this](const time_t&, const Sensors& sensors) {
+        updater = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, With<KickVector>, Options<Single>>([this](const time_t&, const Sensors& sensors, const KickVector& kickVector) {
 
             float gain = 80;
             float torque = 100;
@@ -123,17 +150,22 @@ namespace motion {
             // Get our foot positions
             Transform3D leftFootTorso = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
             Transform3D rightFootTorso = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
-
+            //radius of ball
+            
             // TODO We're always finshed kicking because we never start :(
             updatePriority(0);
 
-            // If our feet are at the target then stop
-            // if(feetatposition) {
+            //// If our feet are at the target then stop
+            //// if position is off this won't work
+            // if(position - rightFootFront <= ball_radius) {
                 // emit(std::make_unique<FinishKick>());
             // }
             //else {
-                // Do a series of transforms and whatnot to put leftFootTorso and RightFootTorso where you want them to be in 1/90th of a second!
-                // TODO Move everything towards where it needs to be
+                //// Do a series of transforms and whatnot to put leftFootTorso and RightFootTorso where you want them to be in 1/90th of a second!
+                //// TODO Move everything towards where it needs to be
+                //
+                //
+                //
             // }
 
             // Move our feet towards our target
