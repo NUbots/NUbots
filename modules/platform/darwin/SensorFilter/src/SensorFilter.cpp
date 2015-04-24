@@ -163,8 +163,11 @@ namespace modules {
 
                 on< Trigger<DarwinSensors>
                   , With<Optional<Sensors>>
-                  , Options<Single, Priority<NUClear::HIGH>>>([this](const DarwinSensors& input,
-                                            const std::shared_ptr<const Sensors>& previousSensors) {
+                  , Options<Single, Priority<NUClear::HIGH>>>(
+                            "Main Sensors Loop",
+                            [this](const DarwinSensors& input,
+                                   const std::shared_ptr<const Sensors>& previousSensors) {
+                                
                     auto sensors = std::make_unique<Sensors>();
 
                     // Set our timestamp to when the data was read
@@ -305,7 +308,9 @@ namespace modules {
                     orientationFilter.timeUpdate(deltaT);
 
                     orientationFilter.measurementUpdate(sensors->accelerometer, MEASUREMENT_NOISE_ACCELEROMETER, IMUModel::MeasurementType::ACCELEROMETER());
+                    emit(graph("accelerometer", sensors->accelerometer[0], sensors->accelerometer[1], sensors->accelerometer[2]));
                     orientationFilter.measurementUpdate(sensors->gyroscope,     MEASUREMENT_NOISE_GYROSCOPE, IMUModel::MeasurementType::GYROSCOPE());
+                    emit(graph("gyroscope", sensors->gyroscope[0], sensors->gyroscope[1], sensors->gyroscope[2]));
 
                     // If we assume the feet are flat on the ground, we can use forward kinematics to feed a measurement update to the orientation filter.
                     if (std::abs(input.fsr.left.centreX) < FOOT_UP_SAFE_ZONE && std::abs(input.fsr.left.centreY) < FOOT_UP_SAFE_ZONE) {
@@ -319,6 +324,7 @@ namespace modules {
 
                     // Gives us the quaternion representation
                     arma::vec o = orientationFilter.get();
+                    emit(graph("orientation quat", o[0], o[1], o[2], o[3]));                    
                     //Map from robot to world coordinates
                     sensors->orientation = Rotation3D(UnitQuaternion(o.rows(orientationFilter.model.QW, orientationFilter.model.QZ)));
 

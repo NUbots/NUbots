@@ -152,6 +152,10 @@ namespace darwin {
             noise.accelerometer.y = config["noise"]["accelerometer"]["y"].as<float>();
             noise.accelerometer.z = config["noise"]["accelerometer"]["z"].as<float>();
 
+            noise.gyroscope.x = config["noise"]["gyroscope"]["x"].as<float>();
+            noise.gyroscope.y = config["noise"]["gyroscope"]["y"].as<float>();
+            noise.gyroscope.z = config["noise"]["gyroscope"]["z"].as<float>();
+
         });
 
         on<Trigger<DarwinSensors::Gyroscope>>("Receive Simulated Gyroscope", [this](const DarwinSensors::Gyroscope& gyro){
@@ -239,8 +243,6 @@ namespace darwin {
                 servo.goalPosition = command.position;
             }
 
-            // Send our nicely computed sensor data out to the world
-            emit(std::make_unique<DarwinSensors>(sensors));
         });
 
         on<Trigger<ServoTarget>>([this](const ServoTarget command) {
@@ -252,10 +254,19 @@ namespace darwin {
         });
     }
 
+    float centered_noise() {
+        return rand() / float(RAND_MAX) - 0.5f;
+    }
+
     void HardwareSimulator::addNoise(std::unique_ptr<DarwinSensors>& sensors){
-        sensors->accelerometer.x += noise.accelerometer.x * rand() / float(RAND_MAX);
-        sensors->accelerometer.y += noise.accelerometer.y * rand() / float(RAND_MAX);
-        sensors->accelerometer.z += noise.accelerometer.z * rand() / float(RAND_MAX);
+        // TODO: Use a more standard c++ random generator.
+        sensors->accelerometer.x += noise.accelerometer.x * centered_noise();
+        sensors->accelerometer.y += noise.accelerometer.y * centered_noise();
+        sensors->accelerometer.z += noise.accelerometer.z * centered_noise();
+
+        sensors->gyroscope.x += noise.gyroscope.x * centered_noise();
+        sensors->gyroscope.y += noise.gyroscope.y * centered_noise();
+        sensors->gyroscope.z += noise.gyroscope.z * centered_noise();
     }
 }
 }

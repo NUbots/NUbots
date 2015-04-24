@@ -39,7 +39,7 @@ namespace darwin {
         messages::platform::darwin::DarwinSensors sensors;
         std::queue<messages::platform::darwin::DarwinSensors::Gyroscope> gyroQueue;
         float imu_drift_rate;
-        static constexpr size_t UPDATE_FREQUENCY = 60;
+        static constexpr size_t UPDATE_FREQUENCY = 90;
         void addNoise(std::unique_ptr<messages::platform::darwin::DarwinSensors>& sensors);
         struct NoiseConfig{
             struct Vec3Noise{
@@ -48,6 +48,7 @@ namespace darwin {
                 float z = 0.001;
             };
             Vec3Noise accelerometer;
+            Vec3Noise gyroscope;
         } noise;
     public:
         /// @brief called by a Powerplant to construct this reactor

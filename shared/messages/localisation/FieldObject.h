@@ -68,13 +68,6 @@ namespace messages {
             arma::vec2 velocity;    //robot velocity (vector 2)
             arma::mat22 robot_to_world_rotation;    //??might not be useful
         };
-
-        template<class T> class Mock {
-        public:
-            Mock() : data() {}
-            Mock(T t) : data(t) {}
-            T data;
-        };
     }
 }
 

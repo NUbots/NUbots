@@ -35,7 +35,6 @@ using utility::nubugger::graph;
 using messages::input::Sensors;
 using messages::support::Configuration;
 // using messages::localisation::FakeOdometry;
-using messages::localisation::Mock;
 using messages::localisation::Ball;
 
 namespace modules {
@@ -76,17 +75,11 @@ namespace localisation {
             ball.position_cov = model_cov.submat(0,0,1,1);
             ball.world_space = false;
 
-            if (engine_.CanEmitFieldObjects()) {
-                auto ball_msg = std::make_unique<Ball>(ball);
-                auto ball_vec_msg = std::make_unique<std::vector<Ball>>();
-                ball_vec_msg->push_back(ball);
-                emit(std::move(ball_msg));
-                emit(std::move(ball_vec_msg));
-            } else {
-                Mock<Ball> mock_ball = Mock<Ball>(ball);
-                auto mock_ball_msg = std::make_unique<Mock<Ball>>(mock_ball);
-                emit(std::move(mock_ball_msg));
-            }
+            auto ball_msg = std::make_unique<Ball>(ball);
+            auto ball_vec_msg = std::make_unique<std::vector<Ball>>();
+            ball_vec_msg->push_back(ball);
+            emit(std::move(ball_msg));
+            emit(std::move(ball_vec_msg));
 
             emit(graph("Localisation Ball", model_state(0), model_state(1)));
             emit(graph("Localisation Ball Velocity", model_state(2), model_state(3)));

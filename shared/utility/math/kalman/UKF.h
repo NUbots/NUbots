@@ -76,7 +76,6 @@ namespace utility {
                     points.col(0) = mean;
 
                     // Get our cholskey decomposition
-                    std::cout << "Performing cholesky" << std::endl;
                     arma::mat chol;
                     try {
                         chol = arma::chol(covarianceSigmaWeights * covariance);

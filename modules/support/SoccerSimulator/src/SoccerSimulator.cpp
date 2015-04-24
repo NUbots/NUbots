@@ -19,6 +19,7 @@
 
 #include "SoccerSimulator.h"
 #include <nuclear>
+#include <sstream>
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/nubugger/NUhelpers.h"
@@ -37,6 +38,8 @@ namespace support {
 
     using messages::input::Sensors;
     using messages::input::ServoID;
+    using utility::nubugger::drawArrow;
+    using utility::nubugger::drawSphere;
     using utility::math::angle::normalizeAngle;
     using utility::math::angle::vectorToBearing;
     using utility::math::angle::bearingToUnitVector;
@@ -48,7 +51,6 @@ namespace support {
     using utility::nubugger::graph;
     using messages::support::Configuration;
     using messages::support::FieldDescription;
-    using messages::localisation::Mock;
     using messages::motion::WalkCommand;
     using messages::motion::KickCommand;
     using messages::motion::KickPlannerConfig;
@@ -82,9 +84,6 @@ namespace support {
     void SoccerSimulator::UpdateConfiguration(
         const messages::support::Configuration<SoccerSimulatorConfig>& config) {
 
-        cfg_.localisation.simulate_ball = config["localisation"]["simulate_ball"].as<bool>();
-        cfg_.localisation.simulate_self = config["localisation"]["simulate_self"].as<bool>();
-
         cfg_.simulate_goal_observations = config["vision"]["goal_observations"].as<bool>();
         cfg_.simulate_ball_observations = config["vision"]["ball_observations"].as<bool>();
         cfg_.observe_left_goal = config["vision"]["observe"]["left_goal"].as<bool>();
@@ -93,14 +92,14 @@ namespace support {
 
         cfg_.robot.motion_type = motionTypeFromString(config["robot"]["motion_type"].as<std::string>());
         cfg_.robot.path.period = config["robot"]["path"]["period"].as<float>();
-        cfg_.robot.path.period = config["robot"]["path"]["x_amp"].as<float>();
-        cfg_.robot.path.period = config["robot"]["path"]["y_amp"].as<float>();
+        cfg_.robot.path.x_amp = config["robot"]["path"]["x_amp"].as<float>();
+        cfg_.robot.path.y_amp = config["robot"]["path"]["y_amp"].as<float>();
         cfg_.robot.path.type = pathTypeFromString(config["robot"]["path"]["type"].as<std::string>());
       
         cfg_.ball.motion_type = motionTypeFromString(config["ball"]["motion_type"].as<std::string>());
         cfg_.ball.path.period = config["ball"]["path"]["period"].as<float>();
-        cfg_.ball.path.period = config["ball"]["path"]["x_amp"].as<float>();
-        cfg_.ball.path.period = config["ball"]["path"]["y_amp"].as<float>();
+        cfg_.ball.path.x_amp = config["ball"]["path"]["x_amp"].as<float>();
+        cfg_.ball.path.y_amp = config["ball"]["path"]["y_amp"].as<float>();
         cfg_.ball.path.type = pathTypeFromString(config["ball"]["path"]["type"].as<std::string>());
         
         cfg_.emit_robot_fieldobjects = config["nusight"]["emit_self"].as<bool>();
@@ -124,8 +123,8 @@ namespace support {
             UpdateConfiguration(config);
         });
 
-        on<Trigger<KickPlannerConfig>>("Get Kick Planner Config", [this](const KickPlannerConfig& cfg_){
-            kick_cfg = cfg_;
+        on<Trigger<KickPlannerConfig>>("Get Kick Planner Config", [this](const KickPlannerConfig& cfg){
+            kick_cfg = cfg;
         });
 
         on<Trigger<KickCommand>>("Queue KickCommand",[this](const KickCommand& k){
@@ -163,13 +162,13 @@ namespace support {
                     if(walkCommand){
                         world.robotVelocity = walkCommand->command; 
                     } else {
-                        world.robotVelocity = {0,0,0};
+                        world.robotVelocity = utility::math::matrix::Transform2D({0,0,0});
                     }
-                    world.robotPose += world.robotVelocity / SIMULATION_UPDATE_FREQUENCY;
+                    world.robotPose += world.robotPose.localToWorld(world.robotVelocity) / SIMULATION_UPDATE_FREQUENCY;
                     break;
             }
             // Update ball position
-            switch (cfg_.robot.motion_type){
+            switch (cfg_.ball.motion_type){
                 case MotionType::NONE: 
                     world.ballVelocity = { 0, 0 , 0};
                     break;
@@ -190,11 +189,13 @@ namespace support {
                         //Empty queue
                         std::queue<KickCommand>().swap(kickQueue);
                         //Check if kick worked:
-                        arma::vec2 ballPosition = world.robotPose.worldToLocal(world.ballPose.xy());
+                    std::cout << "Test" << std::endl;
+                        Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ballPose);
+                    std::cout << "Test" << std::endl;
 
-                        if( ballPosition[0] < kick_cfg.MAX_BALL_DISTANCE &&
-                            std::fabs(ballPosition[1]) < kick_cfg.KICK_CORRIDOR_WIDTH / 2){
-                            world.ballPose.xy() = world.robotPose.localToWorld(lastKickCommand.direction.rows(0,1));
+                        if( relativeBallPose[0] < kick_cfg.MAX_BALL_DISTANCE &&
+                            std::fabs(relativeBallPose[1]) < kick_cfg.KICK_CORRIDOR_WIDTH / 2){
+                                world.ballPose.xy() = world.robotPose.localToWorld(lastKickCommand.direction).xy();
                         }
                     }
                     break;
@@ -261,7 +262,7 @@ namespace support {
                 if (goals->size() > 0)
                     emit(std::move(goals));
 
-            }else if(cfg_.localisation.simulate_self){
+            }else{
                 //Emit current self exactly
                 auto r = std::make_unique<std::vector<messages::localisation::Self>>();
                 r->push_back(messages::localisation::Self());
@@ -288,7 +289,7 @@ namespace support {
 
                 emit(std::move(ball_vec));
 
-            } else if(cfg_.localisation.simulate_ball){
+            } else {
                 //Emit current ball exactly                
                 auto b = std::make_unique<messages::localisation::Ball>();
                 b->position = world.ballPose.xy();
@@ -301,94 +302,17 @@ namespace support {
 
         });
 
-        // Emit robot to NUbugger
-        on<Trigger<Every<100, std::chrono::milliseconds>>,
-           With<Mock<std::vector<messages::localisation::Self>>>,
-           Options<Sync<SoccerSimulator>>>("NUbugger Output Self",
-            [this](const time_t&,
-                   const Mock<std::vector<messages::localisation::Self>>& mock_robots) {
+        // Emit exact position to NUbugger
+        on<Trigger<Every<100, std::chrono::milliseconds>>>(
+        "Emit True Robot Position",
+            [this](const time_t&) {
 
-            auto& robots = mock_robots.data;
+            arma::vec2 bearingVector = world.robotPose.rotation() * arma::vec2({1,0});
 
-            emit(graph("Actual robot pose", world.robotPose[0], world.robotPose[1], world.robotPose.angle()));
-            // emit(graph("Actual robot heading", world.robotPose.angle()[0], world.robotPose.angle()[1]));
-            emit(graph("Actual robot velocity", world.robotVelocity[0], world.robotVelocity[1], world.robotVelocity[2]));
+            emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, {bearingVector[0], bearingVector[1], 0}, 1));
 
-            if (robots.size() >= 1) {
-                emit(graph("Estimated robot position", robots[0].position[0], robots[0].position[1]));
-                emit(graph("Estimated robot heading", robots[0].heading[0], robots[0].heading[1]));
-            }
+            emit(drawSphere("ball", {world.ballPose.x(), world.ballPose.y(), 0}, 0.1));            
 
-            // Robot message
-            if (!cfg_.emit_robot_fieldobjects)
-                return;
-
-            auto robots_msg = std::make_unique<std::vector<messages::localisation::Self>>();
-            for (auto& model : robots) {
-                robots_msg->push_back(model);
-            }
-
-            messages::localisation::Self self_marker;
-            self_marker.position = world.robotPose.xy();
-            self_marker.heading = bearingToUnitVector(world.robotPose.angle());
-            self_marker.position_cov = arma::eye(2,2) * 0.1;
-            robots_msg->push_back(self_marker);
-
-            emit(std::move(robots_msg));
-        });
-
-        // Emit ball to Nubugger
-        on<Trigger<Every<100, std::chrono::milliseconds>>,
-           With<Mock<messages::localisation::Ball>>,
-           With<Mock<std::vector<messages::localisation::Self>>>,
-           Options<Sync<SoccerSimulator>>>("NUbugger Output Ball",
-            [this](const time_t&,
-                   const Mock<messages::localisation::Ball>& mock_ball,
-                   const Mock<std::vector<messages::localisation::Self>>& mock_robots) {
-            auto& ball = mock_ball.data;
-            auto& robots = mock_robots.data;
-
-            if (robots.empty())
-                return;
-
-            arma::vec2 robot_ball_pos = RobotToWorldTransform(
-                robots[0].position, robots[0].heading, ball.position);
-            arma::vec2 ball_pos = RobotToWorldTransform(
-                world.robotPose, world.robotPose.angle(), ball.position);
-            emit(graph("Estimated ball position", ball_pos[0], ball_pos[1]));
-            // emit(graph("Estimated ball velocity", state[2], state[3]));
-            emit(graph("Actual ball position", world.ballPose[0], world.ballPose[1], world.ballPose[2]));
-            emit(graph("Actual ball velocity", world.ballVelocity[0], world.ballVelocity[1], world.ballPose[2]));
-
-            // Ball message
-            if (!cfg_.emit_ball_fieldobjects)
-                return;
-
-            auto balls_msg = std::make_unique<std::vector<messages::localisation::Ball>>();
-
-            // True ball position:
-            messages::localisation::Ball ball_marker;
-            ball_marker.position = world.ballPose.xy();
-            ball_marker.velocity = world.ballVelocity.rows(0,1);
-            ball_marker.position_cov = arma::eye(2,2) * 0.1;
-            ball_marker.world_space = true;
-            balls_msg->push_back(ball_marker);
-
-            messages::localisation::Ball ball_model;
-            ball_model.position = ball.position;
-            ball_model.velocity = ball.velocity;
-            ball_model.position_cov = ball.position_cov;
-            ball_model.world_space = true;
-            balls_msg->push_back(ball_model);
-
-            // messages::localisation::Ball robot_ball;
-            // robot_ball.position = robot_ball_pos;
-            // robot_ball.velocity = ballVelocity;
-            // robot_ball.position_cov = arma::eye(2,2) * 0.1;
-            // robot_ball.world_space = true;
-            // balls_msg->push_back(robot_ball);
-
-            emit(std::move(balls_msg));
         });
     }
 
@@ -406,10 +330,16 @@ namespace support {
         switch(p.type){
             case PathType::SIN:
                 wave1 = p.x_amp * sine_wave(t, p.period);
-                wave2 = p.y_amp * sine_wave(t + (p.period / 4.0), p.period);                      
+                wave2 = p.y_amp * sine_wave(t + (p.period / 4.0), p.period);
+                break;
             case PathType::TRIANGLE:
                 wave1 = p.x_amp * triangle_wave(t, p.period);
                 wave2 = p.y_amp * triangle_wave(t + (p.period / 4.0), p.period);
+                break;
+            default:
+                std::stringstream str;
+                str << __FILE__ << ", " << __LINE__ << ": " << __func__ << ": unknown p.type.";
+                throw std::runtime_error(str.str());
         }
         return arma::vec2({wave1,wave2});
     }

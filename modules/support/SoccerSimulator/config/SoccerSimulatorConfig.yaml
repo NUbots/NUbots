@@ -15,7 +15,7 @@ robot:
   motion_type: PATH #NONE, PATH or MOTION
   #If use_motion is false, the following path with be used instead
   path:
-    period: 100
+    period: 10
     x_amp: 3
     y_amp: 2
     type: SIN #SIN, TRIANGLE
@@ -25,7 +25,7 @@ ball:
   motion_type: PATH #NONE, PATH or MOTION
   path:
   #If use_motion is false, the following path with be used instead
-    period: 100
+    period: 5
     x_amp: 3
     y_amp: 2
     type: SIN #SIN, TRIANGLE

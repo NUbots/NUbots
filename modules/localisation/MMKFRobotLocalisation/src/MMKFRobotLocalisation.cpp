@@ -44,7 +44,6 @@ using messages::support::Configuration;
 using messages::support::FieldDescription;
 using messages::input::Sensors;
 using messages::vision::Goal;
-using messages::localisation::Mock;
 using messages::localisation::Self;
 using messages::localisation::ResetRobotHypotheses;
 
@@ -118,14 +117,8 @@ namespace localisation {
                 robots.push_back(robot_model);
             }
 
-            if (engine_->CanEmitFieldObjects()) {
-                auto robot_msg = std::make_unique<std::vector<Self>>(robots);
-                emit(std::move(robot_msg));
-            } else {
-                auto mock_robots = Mock<std::vector<Self>>(robots);
-                auto mock_robot_msg = std::make_unique<Mock<std::vector<Self>>>(mock_robots);
-                emit(std::move(mock_robot_msg));
-            }
+            auto robot_msg = std::make_unique<std::vector<Self>>(robots);
+            emit(std::move(robot_msg));
         });
 
         on<Trigger<Sensors>,
