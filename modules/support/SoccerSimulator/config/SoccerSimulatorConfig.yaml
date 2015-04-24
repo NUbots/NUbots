@@ -1,18 +1,14 @@
-localisation:
-  simulate_self: true
-  simulate_ball: true
-
 vision:
-  goal_observations: true
+  goal_observations: false
   observe:
     left_goal: true
     right_goal: true
   distinguish_left_and_right_goals: true
-  ball_observations: true
+  ball_observations: false
 
 robot:
   #If use_motion is true, then the robot will move based on the latest motion commands
-  motion_type: PATH #NONE, PATH or MOTION
+  motion_type: MOTION #NONE, PATH or MOTION
   #If use_motion is false, the following path with be used instead
   path:
     period: 10
@@ -22,7 +18,7 @@ robot:
 
 ball:
   #If use_motion is true, then the ball will move based on the latest motion commands
-  motion_type: PATH #NONE, PATH or MOTION
+  motion_type: MOTION #NONE, PATH or MOTION
   path:
   #If use_motion is false, the following path with be used instead
     period: 5
@@ -36,3 +32,7 @@ nusight:
 
 environment_parameters:
   imu_drift_period: 300
+
+initial:
+  robot_pose: [-1, -1, 0]
+  ball_pose: [0, 0, 0]

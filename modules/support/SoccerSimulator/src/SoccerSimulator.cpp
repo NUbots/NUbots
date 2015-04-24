@@ -31,11 +31,13 @@
 #include "messages/input/Sensors.h"
 #include "messages/input/ServoID.h"
 #include "messages/platform/darwin/DarwinSensors.h"
+#include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/motion/WalkCommand.h"
 
 namespace modules {
 namespace support {
 
+    using messages::platform::darwin::ButtonMiddleDown;
     using messages::input::Sensors;
     using messages::input::ServoID;
     using utility::nubugger::drawArrow;
@@ -105,13 +107,14 @@ namespace support {
         cfg_.emit_robot_fieldobjects = config["nusight"]["emit_self"].as<bool>();
         cfg_.emit_ball_fieldobjects = config["nusight"]["emit_ball"].as<bool>();
 
+        world.robotPose = config["initial"]["robot_pose"].as<arma::vec3>();
+        world.ballPose = config["initial"]["ball_pose"].as<arma::vec3>();
+
     }
 
     SoccerSimulator::SoccerSimulator(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        world.robotPose = Transform2D({0,0,0});
-        world.ballPose = Transform2D({0,0,0});
 
         on<Trigger<FieldDescription>>("FieldDescription Update", [this](const FieldDescription& desc) {
             field_description_ = std::make_shared<FieldDescription>(desc);
@@ -164,7 +167,8 @@ namespace support {
                     } else {
                         world.robotVelocity = utility::math::matrix::Transform2D({0,0,0});
                     }
-                    world.robotPose += world.robotPose.localToWorld(world.robotVelocity) / SIMULATION_UPDATE_FREQUENCY;
+                    world.robotVelocity.xy() = world.robotPose.rotation() * world.robotVelocity.xy();
+                    world.robotPose += world.robotVelocity / SIMULATION_UPDATE_FREQUENCY;
                     break;
             }
             // Update ball position
@@ -189,13 +193,11 @@ namespace support {
                         //Empty queue
                         std::queue<KickCommand>().swap(kickQueue);
                         //Check if kick worked:
-                    std::cout << "Test" << std::endl;
                         Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ballPose);
-                    std::cout << "Test" << std::endl;
 
                         if( relativeBallPose[0] < kick_cfg.MAX_BALL_DISTANCE &&
                             std::fabs(relativeBallPose[1]) < kick_cfg.KICK_CORRIDOR_WIDTH / 2){
-                                world.ballPose.xy() = world.robotPose.localToWorld(lastKickCommand.direction).xy();
+                                world.ballPose.xy() = world.robotPose.rotation() * lastKickCommand.direction;
                         }
                     }
                     break;
@@ -313,6 +315,11 @@ namespace support {
 
             emit(drawSphere("ball", {world.ballPose.x(), world.ballPose.y(), 0}, 0.1));            
 
+        });
+
+        on<Trigger<Startup>>("Set Robot to Play",[this](const Startup&){
+            emit(std::make_unique<ButtonMiddleDown>());
+            emit(std::make_unique<ButtonMiddleDown>());
         });
     }
 
