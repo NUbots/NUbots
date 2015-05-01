@@ -60,12 +60,12 @@ namespace motion {
     struct KickVector{
         //
         LimbID supportFoot;
-        //point position of ball
+        // NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick foot which is rightFootFront
+        // KickPlanner has to add the radius of the all to get the location of the centre of the ball
+        // point position of ball
         arma::vec3 position;
-        //direction we want to kick the ball
+        // direction we want to kick the ball
         arma::vec3 direction;
-        //the height we want the torso to move to before kick
-        double torsoDirectionHeight;
     };
 
     IKKick::IKKick(std::unique_ptr<NUClear::Environment> environment)
@@ -75,6 +75,7 @@ namespace motion {
         on<Trigger<Configuration<IKKick>>>([this] (const Configuration<IKKick>& config){
             KICK_PRIORITY = config["kick_priority"].as<float>();
             EXECUTION_PRIORITY = config["execution_priority"].as<float>();
+            torsoShiftVelocity = config["torsoShiftVelocity"].as<float>();
 
             emit(std::make_unique<KickCommand>(KickCommand{
                 config["target"].as<arma::vec3>(),
@@ -83,7 +84,7 @@ namespace motion {
         });
 
 
-        on<Trigger<KickCommand>, With<Sensors>>([this] (const KickCommand& kickCommand, const Sensors&) {
+        on<Trigger<KickCommand>>([this] (const KickCommand& kickCommand) {
 
             // We want to kick!
             updatePriority(KICK_PRIORITY);
@@ -93,48 +94,28 @@ namespace motion {
 
             // TODO Work out which of our feet are going to be the support foot
             // TODO store the support foot
-            //Assume leftFoot is support
+            // Assume leftFoot is support
 
-            //4x4 homogeneous transform matrices for left foot and right foot relative to torso
+            // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
             Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
             Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
 
-            //Convert the direction vector and position of the ball into left foot coordinates by multiplying the inverse of the
-            //homogeneous transforms with the coordinates in torso space. 1 for a point and 0 for a vector.
-            position = leftFoot.i() * arma::join_cols(command.target, arma::vec({1}));
-            direction = leftFoot.i() * arma::join_cols(command.direction, arma::vec({0}));
-
-            //Work out the height the torso should be at
-            //TODO Give height bounds for balance or tuning, height = Lower_Leg_Length + Upper Leg Length.
-            torsoDirectionHeight = Upper_Leg_Length + Lower_Leg_Length;
+            // Convert the direction vector and position of the ball into left foot coordinates by multiplying the inverse of the
+            // homogeneous transforms with the coordinates in torso space. 1 for a point and 0 for a vector.
+            arma::vec4 position = leftFoot.i() * arma::join_cols(command.target, arma::vec({1}));
+            arma::vec4 direction = leftFoot.i() * arma::join_cols(command.direction, arma::vec({0}));
 
             emit(std::make_unique<KickVector>(KickVector{
                 LimbID::LEFT_LEG,
-                position,
-                direction,
-                torsoDirectionHeight
+                position.rows(0,2),
+                direction.rows(0,2),
             }));
-
-            //Obtains the position of the torso and the direction in which the torso needs to move
-
-            // //Find position vector from left foot to torso in leftFoot coordinates.
-            // auto torsoPosition = leftFoot.i().translation();
-            // //Find the direction vector to move centre of mass (i.e. torso coordinate origin) over the centre of the left foot in leftFoot coordinates.
-            // auto torsoDirection = arma::vec({0, 0, torsoPositionHeight}) - torsoPosition;
-            
-            // //Add the length from the centre of the foot to the front to get starting position of curve as front of the foot.
-            // auto rightFootFront = leftFoot.i() * arma::join_cols((rightfoot*Transform3D::translation(arma::vec({TOE_LENGTH,0,0})))translation(), arma::vec({1}));
-
-            //NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick foot which is rightFootFront
-
 
             log("Got a new kick!");
             log("Target:", "x:", command.target[0], "y:", command.target[1], "z:", command.target[2]);
             log("Direction:", "x:", command.direction[0], "y:", command.direction[1], "z:", command.direction[2]);
             log("position in support foot:", "x:", position[0], "y:", position[1], "z:", position[2]);
             log("Direction in support foot:", "x:", direction[0], "y:", direction[1], "z:", direction[2]);
-
-
 
             // Enable our kick pather
             updater.enable();
@@ -144,16 +125,49 @@ namespace motion {
 
         updater = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, With<KickVector>, Options<Single>>([this](const time_t&, const Sensors& sensors, const KickVector& kickVector) {
 
+            // TODO use states
+
             float gain = 80;
             float torque = 100;
 
             // Get our foot positions
             Transform3D leftFootTorso = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
             Transform3D rightFootTorso = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
-            //radius of ball
+
+            // Moving the torso to balance on one leg before kick
+
+            // Obtain the position of the torso and the direction in which the torso needs to move
             
-            // TODO We're always finshed kicking because we never start :(
+            // The position that the torso needs to move to in support foot coordinates
+                // Work out the height the torso should be at
+                // TODO Give height bounds for balance or tuning, height = Lower_Leg_Length + Upper Leg Length.
+            auto torsoTarget = arma::vec({0, 0, Upper_Leg_Length + Lower_Leg_Length}); 
+            
+            // Find position vector from support foot to torso in leftFoot coordinates.
+            auto torsoPosition = leftFoot.i().translation();
+            
+            // Find the direction in which we want to shift the torso in support foot coordinates
+            auto torsoDirection = torsoTarget - torsoPosition;
+            
+            // Normalise the direction
+            auto normalTorsoDirection = arma::normalise(torsoDirection);
+
+            // configurable velocity that the torso should move at - torsoShiftVelocity [m/s]
+            
+            // net displacement of torso every UPDATE_FREQUENCY times per second
+            // ((P0-P1))*velocity/updatefrequency
+            auto torsoDisplacement = (torsoShiftVelocity*normalTorsoDirection)/(UPDATE_FREQUENCY);
+
+            // position give to inverse kinematics
+            auto torsoNewPosition = torsoPosition + torsoDisplacement; 
+
+            // TODO give position to inverse kinematics
+
+            // TODO We're always finished kicking because we never start :(
             updatePriority(0);
+
+            // // Add the length from the centre of the foot to the front to get starting position of curve as front of the foot.
+            // auto rightFootFront = leftFoot.i() * arma::join_cols((rightfoot*Transform3D::translation(arma::vec({TOE_LENGTH,0,0})))translation(), arma::vec({1}));
 
             //// If our feet are at the target then stop
             //// if position is off this won't work

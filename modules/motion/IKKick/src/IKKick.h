@@ -33,6 +33,7 @@ namespace motion {
         
     	float KICK_PRIORITY;
     	float EXECUTION_PRIORITY;
+        float torsoShiftVelocity;
 
     	void updatePriority(const float& priority);
 
