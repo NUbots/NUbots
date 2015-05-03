@@ -541,6 +541,8 @@ namespace motion {
         beginStepTime = getTime();
         uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0};
         startFromStep = false;
+
+        calculateNewStep();
     }
 
     arma::vec2 WalkEngine::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) {
