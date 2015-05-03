@@ -49,6 +49,7 @@ namespace strategy {
         void turnRight();
         void getUp();
         void reset();
+        void kickRightForward();
         void walkToggle();
         void quit();
 

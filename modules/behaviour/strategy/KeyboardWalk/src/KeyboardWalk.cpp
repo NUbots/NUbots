@@ -24,6 +24,8 @@
 #include <format.h>
 
 #include "messages/motion/WalkCommand.h"
+#include "messages/motion/KickCommand.h"
+#include "messages/behaviour/Action.h"
 
 namespace modules {
 namespace behaviour {
@@ -32,6 +34,8 @@ namespace strategy {
     using messages::motion::WalkCommand;
     using messages::motion::WalkStartCommand;
     using messages::motion::WalkStopCommand;
+    using messages::motion::KickCommand;
+    using messages::input::LimbID;
 
     KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -104,6 +108,9 @@ namespace strategy {
                 case 'e':
                     walkToggle();
                     break;
+                case ' ':
+                    kickRightForward();
+                    break;
                 case 'q':
                     quit();
                     return;
@@ -115,50 +122,58 @@ namespace strategy {
 
     void KeyboardWalk::forward() {
         velocity[0] += DIFF;
-        log("forward");
         updateCommand();
         printStatus();
+        log("forward");
     }
 
     void KeyboardWalk::left() {
         velocity[1] += DIFF;
-        log("left");
         updateCommand();
         printStatus();
+        log("left");
     }
 
     void KeyboardWalk::back() {
         velocity[0] -= DIFF;
-        log("back");
         updateCommand();
         printStatus();
+        log("back");
     }
 
     void KeyboardWalk::right() {
         velocity[1] -= DIFF;
-        log("right");
         updateCommand();
         printStatus();
+        log("right");
     }
 
     void KeyboardWalk::turnLeft() {
         rotation += ROT_DIFF;
-        log("turn left");
         updateCommand();
         printStatus();
+        log("turn left");
     }
 
     void KeyboardWalk::turnRight() {
         rotation -= ROT_DIFF;
-        log("turn right");
         updateCommand();
         printStatus();
+        log("turn right");
     }
 
     void KeyboardWalk::getUp() {
-        log("getup");
         updateCommand();
         printStatus();
+        log("getup");
+    }
+
+    void KeyboardWalk::kickRightForward() {
+        emit(std::make_unique<KickCommand>(KickCommand{
+            {1, 0, 0}, // vector pointing forward relative to robot
+            LimbID::RIGHT_LEG
+        }));
+        log("right forward kick");
     }
 
     void KeyboardWalk::walkToggle() {
@@ -175,9 +190,9 @@ namespace strategy {
     void KeyboardWalk::reset() {
         velocity = {0, 0};
         rotation = 0;
-        log("reset");
         updateCommand();
         printStatus();
+        log("reset");
     }
 
     void KeyboardWalk::updateCommand() {
