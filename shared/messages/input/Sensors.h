@@ -71,6 +71,8 @@ namespace messages {
 
             arma::vec3 accelerometer;
             arma::vec3 gyroscope;
+
+            /*! The orientation matrix is the map from world to robot coordinates, measured by the gyro. It is the world coordinates in columns relative to the robot.*/
             utility::math::matrix::Rotation3D orientation;
 
             std::vector<Servo> servos;

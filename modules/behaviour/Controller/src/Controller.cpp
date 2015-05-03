@@ -150,31 +150,23 @@ namespace modules {
 
                         // Push our command onto the queue
                         queue.push_back(command);
+                    } else {
+                        log<NUClear::ERROR>("Motor command denied access: SERVO ", int(command.id));
                     }
                 }
             });
 
-            on<Trigger<Every<90, Per<std::chrono::seconds>>>, Options<Sync<Controller>>>([this] (const time_t& now) {
+            on<Trigger<Every<90, Per<std::chrono::seconds>>>, Options<Single, Sync<Controller>, Priority<NUClear::HIGH>>>("Controller Update Waypoints",[this] (const time_t& now) {
 
                 std::list<ServoID> emptiedQueues;
                 std::unique_ptr<std::vector<ServoTarget>> waypoints;
 
+
+
                 for(auto& queue : commandQueues) {
 
-                    if (!queue.empty() && queue.front().time < now) {
-
-                        // Store our ID (if we need it)
-                        auto id = queue.front().id;
-
-                        queue.pop_front();
-
-                        if(queue.empty()) {
-                            // Keep track of what we have emptied
-                            emptiedQueues.push_back(id);
-                        }
-                    }
-
                     // Dirty hack, we set source to 0 when it's processed (we ensure nobody else can use 0)
+
                     if(!queue.empty() && queue.front().source != 0) {
 
                         auto& command = queue.front();
@@ -190,6 +182,19 @@ namespace modules {
                         // Dirty hack the waypoint
                         command.source = 0;
 
+                    }
+
+                    while (!queue.empty() && queue.front().time < now) {
+
+                        // Store our ID (if we need it)
+                        auto id = queue.front().id;
+
+                        queue.pop_front();
+
+                        if(queue.empty()) {
+                            // Keep track of what we have emptied
+                            emptiedQueues.push_back(id);
+                        }
                     }
                 }
 

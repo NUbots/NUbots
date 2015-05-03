@@ -35,7 +35,6 @@
 #include "MMKFRobotLocalisationEngine.h"
 #include "RobotModel.h"
 
-
 using utility::math::matrix::Rotation3D;
 using utility::math::angle::bearingToUnitVector;
 using utility::nubugger::graph;

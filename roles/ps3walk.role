@@ -14,6 +14,7 @@ ADD_ROLE(
     # Motion
     motion::WalkEngine
     motion::ScriptEngine
+    motion::HeadController
 
     # Behaviour
     behaviour::Controller
@@ -22,8 +23,5 @@ ADD_ROLE(
     behaviour::skills::Getup
     behaviour::skills::KickScript
     behaviour::strategy::PS3Walk
-
-    # Lookat ball
-    behaviour::skills::LookAt
-    behaviour::planning::LookAtBall
+    behaviour::skills::HeadBehaviourSoccer
 )

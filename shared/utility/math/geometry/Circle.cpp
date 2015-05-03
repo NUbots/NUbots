@@ -87,7 +87,7 @@ namespace geometry {
         double b = std::sqrt(radius * radius - a * a);
         return {
             centre[0] - b,
-            centre[1] + b
+            centre[0] + b
         };
     }
 }

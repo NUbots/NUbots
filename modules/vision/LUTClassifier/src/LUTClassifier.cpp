@@ -108,6 +108,9 @@ namespace modules {
             on<Trigger<Raw<Image>>, With<LookUpTable>, With<Raw<Sensors>>, Options<Single>>("Classify Image", [this](
                 const std::shared_ptr<const Image>& rawImage, const LookUpTable& lut, const std::shared_ptr<const Sensors>& sensors) {
 
+                //TODO
+                // if(std::fabs(sensors.servo[ServoID::HEAD_PITCH].currentVelocity) + std::fabs(sensors.servo[ServoID::HEAD_YAW].currentVelocity) > threshold)
+
                 const auto& image = *rawImage;
 
                 // Our classified image
@@ -117,6 +120,7 @@ namespace modules {
                 classifiedImage->dimensions = { image.width(), image.height() };
 
                 // Attach our sensors
+                // std::cout << "sensor-vision latency = " << std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - sensors->timestamp).count() << std::endl;
                 classifiedImage->sensors = sensors;
 
                 // Attach the image

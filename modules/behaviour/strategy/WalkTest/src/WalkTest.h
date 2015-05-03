@@ -23,17 +23,17 @@
 #include <nuclear>
 
 namespace modules {
-namespace behaviour {
-namespace strategy {
+	namespace behaviour {
+		namespace strategy {
 
-    class WalkTest : public NUClear::Reactor {
-    public:
-        /// @brief Called by the powerplant to build and setup the WalkTest reactor.
-        explicit WalkTest(std::unique_ptr<NUClear::Environment> environment);
-    };
+		    class WalkTest : public NUClear::Reactor {
+		    public:
+		        /// @brief Called by the powerplant to build and setup the WalkTest reactor.
+		        explicit WalkTest(std::unique_ptr<NUClear::Environment> environment);
+		    };
 
-}
-}
+		}
+	}
 }
 
 

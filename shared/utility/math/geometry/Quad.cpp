@@ -59,11 +59,11 @@ namespace geometry {
     }
 
     double Quad::getAverageWidth() const {
-        return ((0.5 * (arma::norm(br - bl, 2) + arma::norm(tr - tl, 2))) + 1);
+        return ((0.5 * (arma::norm(br - bl, 2) + arma::norm(tr - tl, 2))));
     }
 
     double Quad::getAverageHeight() const {
-        return ((0.5 * (arma::norm(br - tr, 2) + arma::norm(bl - tl, 2))) + 1);
+        return ((0.5 * (arma::norm(br - tr, 2) + arma::norm(bl - tl, 2))));
     }
 
     double Quad::area() const {
@@ -120,6 +120,12 @@ namespace geometry {
     arma::vec2 Quad::getTopRight() const {
         return tr;
     }
+
+    arma::vec2 Quad::getSize() const{
+        Quad boundingBox = getBoundingBox(getVertices());
+        return {boundingBox.getAverageWidth(),boundingBox.getAverageHeight()};
+    }
+
 
     double Quad::getLeft() const {
         return (0.5 * (bl[0] + tl[0]));
@@ -219,6 +225,32 @@ namespace geometry {
         };
 
     }
+
+    Quad Quad::getBoundingBox(const std::vector<arma::vec2>& points){
+        //Check for 
+        if(points.size() <= 0){
+            throw std::domain_error("Request made for bounding box for empty list of points!");
+        }
+
+        float min_x = points[0][0];
+        float max_x = points[0][0];
+        float min_y = points[0][1];
+        float max_y = points[0][1];
+        for(uint i = 1; i < points.size(); i++){
+            auto& p = points[i];
+            max_x = std::fmax(max_x,p[0]);
+            min_x = std::fmin(min_x,p[0]);
+            max_y = std::fmax(max_y,p[1]);
+            min_y = std::fmin(min_y,p[1]);
+        }
+        return Quad(
+                    {min_x,min_y},
+                    {min_x,max_y},
+                    {max_x,max_y},
+                    {max_x,min_y}                    
+                    );
+    }
+
 
 
 }

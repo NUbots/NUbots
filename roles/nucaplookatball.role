@@ -31,12 +31,12 @@ ADD_ROLE(
     behaviour::skills::Getup
     behaviour::skills::KickScript
     behaviour::strategy::PS3Walk
+    behaviour::skills::HeadBehaviourSoccer
 
-    # Lookat ball
-    behaviour::skills::LookAt
 
     # Localisation
     localisation::NUcapLocalisation
+    motion::HeadController
 
     # Debug
     debug::NUcap
