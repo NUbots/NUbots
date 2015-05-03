@@ -64,6 +64,7 @@ RUN apt-get -y install libsndfile-dev
 RUN apt-get -y install libyaml-cpp-dev
 RUN apt-get -y install libopenblas-dev
 RUN apt-get -y install liblapack-dev
+RUN apt-get -y install libtcmalloc-minimal4 -y
 
 # Install and configure icecream
 RUN apt-get -y install icecc \
