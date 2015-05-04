@@ -14,7 +14,12 @@ ADD_ROLE(
     # Motion
     motion::WalkEngine
     motion::ScriptEngine
-    motion::HeadController
+
+    # Vision
+    input::LinuxCamera
+    vision::LUTClassifier
+    vision::GoalDetector
+    vision::BallDetector
 
     # Behaviour
     behaviour::Controller
@@ -22,6 +27,9 @@ ADD_ROLE(
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
     behaviour::skills::KickScript
-    behaviour::strategy::PS3Walk
     behaviour::skills::HeadBehaviourSoccer
+    behaviour::strategy::PS3Walk
+
+    # Motion
+    motion::HeadController
 )

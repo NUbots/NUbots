@@ -24,6 +24,6 @@ ADD_ROLE(
     behaviour::strategy::PS3Walk
 
     # Localisation
-    localisation::MMKFRobotLocalisation
-    localisation::KFBallLocalisation
+    #localisation::MMKFRobotLocalisation
+    #localisation::KFBallLocalisation
 )

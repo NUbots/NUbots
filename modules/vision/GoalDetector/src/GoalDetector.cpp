@@ -310,6 +310,7 @@ namespace vision {
                         measurement_elevation_variance }));
                 //measurements.push_back({ cartesianToSpherical(goalBaseProj), goalBaseProjDistCov});
 
+
                 // Measure the width based distance to the bottom
                 double baseWidthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, bl, br, cam.focalLengthPixels);
                 arma::vec3 baseGoalWidth = baseWidthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * baseRay + sensors.orientationCamToGround.submat(0,3,2,3) + arma::vec({ 0, 0, GOAL_HEIGHT / 2 });
@@ -341,25 +342,29 @@ namespace vision {
                 // measurements.push_back({ cartesianToSpherical(goalHeight), goalHeightDistCov});
 
 
-                // Ignore invalid measurements:
-                arma::vec2 topMidGoal =(tl + tr) * 0.5;
-                arma::vec2 bottomMidGoal = (bl + br) * 0.5;
+                // // Ignore invalid measurements:
+                // arma::vec2 topMidGoal =(tl + tr) * 0.5;
+                // arma::vec2 bottomMidGoal = (bl + br) * 0.5;
 
-                if (topMidGoal(1) < image.dimensions[1] / 2 - 10) {
-                    measurements.push_back({ cartesianToSpherical(goalTopProj), goalTopProjDistCov});
-                    if (bottomMidGoal(1) > -image.dimensions[1] / 2 + 10) {
-                        measurements.push_back({ cartesianToSpherical(goalHeight), goalHeightDistCov});
-                    }
-                }
+                // if (topMidGoal(1) < image.dimensions[1] / 2 - 10) {
+                //     measurements.push_back({ cartesianToSpherical(goalTopProj), goalTopProjDistCov});
+                //     if (bottomMidGoal(1) > -image.dimensions[1] / 2 + 10) {
+                //         measurements.push_back({ cartesianToSpherical(goalHeight), goalHeightDistCov});
+                //     }
+                // }
 
-                if (bottomMidGoal(1) > -image.dimensions[1] / 2 + 10) {
-                    measurements.push_back({ cartesianToSpherical(goalBaseProj), goalBaseProjDistCov});
-                }
+                // if (bottomMidGoal(1) > -image.dimensions[1] / 2 + 10) {
+                //     measurements.push_back({ cartesianToSpherical(goalBaseProj), goalBaseProjDistCov});
+                // }
 
 
                 // Add our variables
                 it->measurements = measurements;
                 it->sensors = image.sensors;
+                /*log("Goal Measurements");
+                for (auto m : it->measurements){
+                    log(m.position);
+                }*/
 
                 // Angular positions from the camera
                 it->screenAngular = arma::atan(cam.pixelsToTanThetaFactor % screenGoalCentre);
