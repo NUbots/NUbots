@@ -27,7 +27,17 @@ namespace behaviour {
 namespace strategy {
 
     class KickAtGoal : public NUClear::Reactor {
+    private:
+        NUClear::clock::duration ballActiveTimeout;
+        time_t ballLastSeen;
+        time_t goalLastSeen;
+
+        void doBehaviour();
+        void walkToBall();
+        void spinToWin();
     public:
+        static constexpr const char* CONFIGURATION_PATH = "KickAtGoal.yaml";
+
         /// @brief Called by the powerplant to build and setup the KickAtGoal reactor.
         explicit KickAtGoal(std::unique_ptr<NUClear::Environment> environment);
     };

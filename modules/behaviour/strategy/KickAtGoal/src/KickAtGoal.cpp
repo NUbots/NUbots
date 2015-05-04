@@ -18,51 +18,91 @@
  */
 
 #include "KickAtGoal.h"
+#include <armadillo>
 
-#include "messages/behaviour/Look.h"
-#include "messages/localisation/ResetRobotHypotheses.h"
-#include "messages/support/FieldDescription.h"
+#include "messages/behaviour/KickPlan.h"
+#include "messages/behaviour/WalkStrategy.h"
+#include "messages/support/Configuration.h"
+#include "messages/vision/VisionObjects.h"
+#include "utility/time/time.h"
+
 namespace modules {
 namespace behaviour {
 namespace strategy {
-    using messages::support::FieldDescription;
-    using messages::behaviour::Look;
-    using messages::localisation::ResetRobotHypotheses;
+
+    using messages::behaviour::WalkApproach;
+    using messages::behaviour::WalkTarget;
+    using messages::behaviour::WalkStrategy;
+    using messages::behaviour::KickPlan;
+    using messages::support::Configuration;
+    using VisionBall = messages::vision::Ball;
+    using VisionGoal = messages::vision::Goal;
+    using utility::time::durationFromSeconds;
 
     KickAtGoal::KickAtGoal(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
+        // TODO: unhack?
+        emit(std::make_unique<KickPlan>(KickPlan{{3, 0}}));
+
         on<Trigger<Every<30, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
 
-            auto panSelection = std::make_unique<Look::PanSelection>();
-            panSelection->lookAtGoalInsteadOfBall = true;
-            emit(std::move(panSelection));
+            doBehaviour();
 
         });
 
-        on<Trigger<Startup>>([this](const Startup&){
-            FieldDescription desc;
-
-            try {
-                desc = *powerplant.get<FieldDescription>();
+        on<Trigger<std::vector<VisionBall>>>([this] (const std::vector<VisionBall>& balls) {
+            if (!balls.empty()) {
+                ballLastSeen = NUClear::clock::now();
             }
-            catch (NUClear::metaprogramming::NoDataException) {
-                throw std::runtime_error("field description get failed asdlfkj");
-            }
-
-            auto reset = std::make_unique<ResetRobotHypotheses>();
-
-            ResetRobotHypotheses::Self selfSideBaseLine;
-            // selfSideBaseLine.position = arma::vec2({-desc.dimensions.field_length * 0.5 + desc.dimensions.goal_area_length, 0});
-            selfSideBaseLine.position = arma::vec2({0, 0});
-            selfSideBaseLine.position_cov = arma::eye(2, 2) * 0.1;
-            selfSideBaseLine.heading = 0;
-            selfSideBaseLine.heading_var = 0.05;
-            reset->hypotheses.push_back(selfSideBaseLine);
-
-            emit(std::move(reset));
         });
 
+        on<Trigger<std::vector<VisionGoal>>>([this] (const std::vector<VisionGoal>& goals) {
+            if (!goals.empty()) {
+                goalLastSeen = NUClear::clock::now();
+            }
+        });
+
+        on<Trigger<Configuration<KickAtGoal>>>([this](const Configuration<KickAtGoal>& config) {
+
+            ballActiveTimeout = durationFromSeconds(config["ball_active_timeout"].as<double>());
+
+        });
+
+    }
+
+    void KickAtGoal::doBehaviour() {
+
+        if (NUClear::clock::now() - ballLastSeen < ballActiveTimeout) { // ball has been seen recently
+
+            walkToBall();
+
+        }
+        else {
+
+            spinToWin();
+
+        }
+
+    }
+
+    void KickAtGoal::walkToBall() {
+        auto approach = std::make_unique<WalkStrategy>();
+        approach->targetPositionType = WalkTarget::Ball;
+        approach->targetHeadingType = WalkTarget::WayPoint;
+        approach->walkMovementType = WalkApproach::WalkToPoint;
+        approach->heading = arma::vec2({3, 0}); // TODO: unhack
+
+        emit(std::move(approach));
+    }
+
+    void KickAtGoal::spinToWin() {
+        // TODO: does this work?
+        auto command = std::make_unique<WalkStrategy>();
+        command->walkMovementType = WalkApproach::DirectCommand;
+        command->target = {0,0};
+        command->heading = {1,0};
+        emit(std::move(command));
     }
 
 }
