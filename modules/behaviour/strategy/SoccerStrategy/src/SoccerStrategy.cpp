@@ -458,8 +458,9 @@ namespace strategy {
     }
 
     bool SoccerStrategy::inZone(const FieldTarget& object) {
+        return true;
         // TODO: check that object is in bounding box
-        try {
+        /*try {
             switch (object) {
                 case FieldTarget::BALL: {
                     auto& self = powerplant.get<std::vector<Self>>()->at(0);
@@ -482,7 +483,7 @@ namespace strategy {
         }
         catch (NUClear::metaprogramming::NoDataException) {
             throw std::runtime_error("zone check failed");
-        }
+        }*/
     }
 
     void SoccerStrategy::find(const std::vector<FieldTarget>& fieldObjects) {

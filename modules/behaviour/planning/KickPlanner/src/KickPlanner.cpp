@@ -73,8 +73,9 @@ namespace planning {
 
             arma::vec2 ballPosition;
 
+            framesNotSeen = 0;
             // If we're not seeing any vision balls, count frames not seen
-            if (vision_balls.empty()) {
+            /*if (vision_balls.empty()) {
 
                 ballPosition = ball.position;
 
@@ -89,16 +90,14 @@ namespace planning {
                 // emit(graph("Kickplanner Ball pos (vision)", ballPosition[0], ballPosition[1]));
 
                 framesNotSeen = 0;
-            }
+            }*/
 
             auto self = selfs[0];
 
             arma::vec2 kickTarget = WorldToRobotTransform(self.position, self.heading, kickPlan.target);
-
             if(framesNotSeen < cfg.FRAMES_NOT_SEEN_LIMIT &&
                ballPosition[0] < cfg.MAX_BALL_DISTANCE &&
                std::fabs(ballPosition[1]) < cfg.KICK_CORRIDOR_WIDTH / 2){
-
                 float targetBearing = std::atan2(kickTarget[1], kickTarget[0]);
 
                 if( std::fabs(targetBearing) < cfg.KICK_FORWARD_ANGLE_LIMIT){
