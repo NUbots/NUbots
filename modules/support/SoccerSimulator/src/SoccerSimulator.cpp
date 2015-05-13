@@ -163,7 +163,7 @@ namespace support {
                 case MotionType::MOTION:
                 //Update based on walk engine
                     if(walkCommand){
-                        world.robotVelocity = walkCommand->command; 
+                        world.robotVelocity = walkCommand->command;
                     } else {
                         world.robotVelocity = utility::math::matrix::Transform2D({0,0,0});
                     }
