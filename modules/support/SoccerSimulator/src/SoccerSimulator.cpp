@@ -28,7 +28,6 @@
 #include "messages/vision/VisionObjects.h"
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
-#include "messages/input/Sensors.h"
 #include "messages/input/ServoID.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/platform/darwin/DarwinSensors.h"
@@ -55,6 +54,7 @@ namespace support {
     using messages::support::FieldDescription;
     using messages::motion::WalkCommand;
     using messages::motion::KickCommand;
+    using messages::motion::KickFinished;
     using messages::motion::KickPlannerConfig;
     using messages::platform::darwin::DarwinSensors;
     using utility::math::matrix::Transform2D;
@@ -110,6 +110,9 @@ namespace support {
         world.robotPose = config["initial"]["robot_pose"].as<arma::vec3>();
         world.ballPose = config["initial"]["ball_pose"].as<arma::vec3>();
 
+        cfg_.ignore_head_pose = config["ignore_head_pose"].as<bool>();
+
+        kicking = false;
     }
 
     SoccerSimulator::SoccerSimulator(std::unique_ptr<NUClear::Environment> environment)
@@ -130,8 +133,12 @@ namespace support {
             kick_cfg = cfg;
         });
 
-        on<Trigger<KickCommand>>("Queue KickCommand",[this](const KickCommand& k){
+        on<Trigger<KickCommand>>("Simulator Queue KickCommand",[this](const KickCommand& k){
             kickQueue.push(k);
+            kicking = true;
+        });
+        on<Trigger<KickFinished>>("Simulator Kick Finished",[this](const KickFinished&){
+            kicking = false;
         });
 
         on<
@@ -162,7 +169,7 @@ namespace support {
 
                 case MotionType::MOTION:
                 //Update based on walk engine
-                    if(walkCommand){
+                    if(walkCommand && !kicking){
                         world.robotVelocity = walkCommand->command;
                     } else {
                         world.robotVelocity = utility::math::matrix::Transform2D({0,0,0});
@@ -188,6 +195,7 @@ namespace support {
 
                 case MotionType::MOTION:
                     if(!kickQueue.empty()){
+                        std::cout << "KICKING!" << std::endl;
                         //Get last queue
                         KickCommand lastKickCommand = kickQueue.back();
                         //Empty queue
@@ -223,12 +231,17 @@ namespace support {
                 arma::vec3 goal_r_pos = {0, 0, 0};
                 goal_l_pos.rows(0, 1) = field_description_->goalpost_yl;
                 goal_r_pos.rows(0, 1) = field_description_->goalpost_yr;
+                //TODO: remove this if statement
                 if (world.robotPose.angle() < -M_PI * 0.5 || world.robotPose.angle() > M_PI * 0.5) {
                     goal_l_pos.rows(0, 1) = field_description_->goalpost_bl;
                     goal_r_pos.rows(0, 1) = field_description_->goalpost_br;
                 }
 
-                if (cfg_.observe_left_goal) {
+                //Check to see if either bottom or top of goal is in view
+                if (cfg_.observe_right_goal && 
+                   (cfg_.ignore_head_pose || objectInView(goal_r_pos, world.robotPose, sensors))
+                   || objectInView(goal_r_pos + arma::vec3({0,0,field_description_->dimensions.goal_crossbar_height}), world.robotPose, sensors)) 
+                {
                     messages::vision::Goal goal1;
                     messages::vision::VisionObject::Measurement g1_m;
                     g1_m.position = SphericalRobotObservation(world.robotPose.xy(), world.robotPose.angle(), goal_r_pos);
@@ -245,7 +258,11 @@ namespace support {
                     goals->push_back(goal1);
                 }
 
-                if (cfg_.observe_right_goal) {
+                //Check to see if either bottom or top of goal is in view
+                if (cfg_.observe_left_goal &&
+                   (cfg_.ignore_head_pose || objectInView(goal_l_pos, world.robotPose, sensors))
+                   || objectInView(goal_l_pos + arma::vec3({0,0,field_description_->dimensions.goal_crossbar_height}), world.robotPose, sensors))
+                {
                     messages::vision::Goal goal2;
                     messages::vision::VisionObject::Measurement g2_m;
                     g2_m.position = SphericalRobotObservation(world.robotPose.xy(), world.robotPose.angle(), goal_l_pos);
@@ -277,29 +294,31 @@ namespace support {
         
 
             if (cfg_.simulate_ball_observations) {
-                auto ball_vec = std::make_unique<std::vector<messages::vision::Ball>>();
+                //Note that world.ballPose represents the ball height in 3rd coord
+                if(cfg_.ignore_head_pose || objectInView(world.ballPose, world.robotPose, sensors)){
+                    auto ball_vec = std::make_unique<std::vector<messages::vision::Ball>>();
 
-                messages::vision::Ball ball;
-                messages::vision::VisionObject::Measurement b_m;
-                arma::vec3 ball_pos_3d = {0, 0, 0};
-                ball_pos_3d.rows(0, 1) = world.ballPose.xy();
-                b_m.position = SphericalRobotObservation(world.robotPose.xy(), world.robotPose.angle(), ball_pos_3d);
-                b_m.error = arma::eye(3, 3) * 0.1;
-                ball.measurements.push_back(b_m);
-                ball.sensors = sensors;
-                ball_vec->push_back(ball);
+                    messages::vision::Ball ball;
+                    messages::vision::VisionObject::Measurement b_m;
+                    arma::vec3 ball_pos_3d = {0, 0, 0};
+                    ball_pos_3d.rows(0, 1) = world.ballPose.xy();
+                    b_m.position = SphericalRobotObservation(world.robotPose.xy(), world.robotPose.angle(), ball_pos_3d);
+                    b_m.error = arma::eye(3, 3) * 0.1;
+                    ball.measurements.push_back(b_m);
+                    ball.sensors = sensors;
+                    ball_vec->push_back(ball);
 
-                emit(std::move(ball_vec));
+                    emit(std::move(ball_vec));                    
+                }
 
             } else {
                 //Emit current ball exactly                
                 auto b = std::make_unique<messages::localisation::Ball>();
-                b->position = world.ballPose.xy();
-                b->velocity = world.ballVelocity.rows(0,1);
+                b->position = world.robotPose.worldToLocal(world.ballPose).xy();
+                b->velocity = world.robotPose.rotation().t() * world.ballVelocity.xy();
                 b->position_cov = 0.00001 * arma::eye(2,2);
                 emit(std::move(b));
                 //Walk path planner trigger:
-                emit(std::make_unique<std::vector<messages::vision::Ball>>());
             }
 
         });
@@ -349,6 +368,10 @@ namespace support {
                 throw std::runtime_error(str.str());
         }
         return arma::vec2({wave1,wave2});
+    }
+
+    bool SoccerSimulator::objectInView(const arma::vec3& objectPosition, const Transform2D& robotPose, const std::shared_ptr<Sensors>& sensors){
+        return true;
     }
 
 }

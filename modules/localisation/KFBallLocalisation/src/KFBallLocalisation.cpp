@@ -56,7 +56,7 @@ namespace localisation {
         });
 
         // Emit to NUbugger
-        on<Trigger<Every<100, std::chrono::milliseconds>>,
+       emit_data_handle = on<Trigger<Every<100, std::chrono::milliseconds>>,
            With<Sensors>,
            With<std::vector<Self>>,
            Options<Sync<KFBallLocalisation>>>("NUbugger Output",
@@ -85,6 +85,9 @@ namespace localisation {
             emit(graph("Localisation Ball Velocity", model_state(2), model_state(3)));
         });
 
+        //Disable until first data
+        emit_data_handle.disable();
+
         // on<Trigger<FakeOdometry>,
         //     Options<Sync<KFBallLocalisation>>
         //     >("KFBallLocalisation Odometry", [this](const FakeOdometry& odom) {
@@ -109,6 +112,11 @@ namespace localisation {
                 engine_.TimeUpdate(curr_time);
 
                 engine_.MeasurementUpdate(balls[0]);
+
+                //Is this check necessary?
+                if(!emit_data_handle.enabled()){
+                    emit_data_handle.enable();
+                }
             }
         });
     }

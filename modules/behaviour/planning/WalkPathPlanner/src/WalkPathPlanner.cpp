@@ -120,14 +120,12 @@ namespace modules {
                     With<messages::localisation::Ball>,
                     With<std::vector<messages::localisation::Self>>,
                     With<Optional<std::vector<messages::vision::Obstacle>>>,
-                    With<std::vector<messages::vision::Ball>>,
                     Options<Sync<WalkPathPlanner>>
                    >([this] (
                      const time_t&,
                      const LocalisationBall& ball,
                      const std::vector<Self>& selfs,
-                     const std::shared_ptr<const std::vector<VisionObstacle>>& robots,
-                     const std::vector<VisionBall>&) {
+                     const std::shared_ptr<const std::vector<VisionObstacle>>& robots) {
 
                     if(planType == messages::behaviour::WalkApproach::StandStill){
                         emit(std::make_unique<WalkStopCommand>());

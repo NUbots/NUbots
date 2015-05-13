@@ -27,6 +27,7 @@
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
 #include "messages/platform/darwin/DarwinSensors.h"
+#include "messages/input/Sensors.h"
 #include "messages/motion/KickCommand.h"
 
 namespace modules {
@@ -106,6 +107,8 @@ namespace support {
             bool emit_robot_fieldobjects = true;
             bool emit_ball_fieldobjects = true;
 
+            bool ignore_head_pose = false;
+
         } cfg_;
 
         //World State
@@ -121,6 +124,8 @@ namespace support {
 
         std::queue<messages::motion::KickCommand> kickQueue;
 
+        bool kicking;
+
         //Methods
         void UpdateConfiguration(
             const messages::support::Configuration<SoccerSimulatorConfig>& config);
@@ -129,6 +134,9 @@ namespace support {
         
 
         arma::vec2 getPath(Config::Motion::Path p);
+
+        bool objectInView(const arma::vec3& objectPosition, const utility::math::matrix::Transform2D& robotPose, const std::shared_ptr<messages::input::Sensors>& sensors);
+
     public:
         /// @brief Called by the powerplant to build and setup the SoccerSimulator reactor.
         explicit SoccerSimulator(std::unique_ptr<NUClear::Environment> environment);

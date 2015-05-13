@@ -36,3 +36,5 @@ environment_parameters:
 initial:
   robot_pose: [-1, -1, 0]
   ball_pose: [0, 0, 0]
+
+ignore_head_pose: true

@@ -91,7 +91,7 @@ namespace localisation {
         });
 
         // Emit self
-        on<Trigger<Every<100, std::chrono::milliseconds>>,
+        emit_data_handle = on<Trigger<Every<100, std::chrono::milliseconds>>,
            With<Sensors>,
            Options<Sync<MMKFRobotLocalisation>>
            >("Localisation NUbugger Output", [this](const time_t&, const Sensors& sensors) {
@@ -120,6 +120,10 @@ namespace localisation {
             auto robot_msg = std::make_unique<std::vector<Self>>(robots);
             emit(std::move(robot_msg));
         });
+
+        //Disable until first data
+        emit_data_handle.disable();
+
 
         on<Trigger<Sensors>,
            Options<Sync<MMKFRobotLocalisation>>
@@ -173,6 +177,12 @@ namespace localisation {
             auto curr_time = NUClear::clock::now();
             engine_->TimeUpdate(curr_time, sensors);
             engine_->ProcessObjects(goals);
+
+            //Is this check necessary?
+            if(!emit_data_handle.enabled()){
+                //Activate when data received
+                emit_data_handle.enable();
+            }
         });
     }
 }
