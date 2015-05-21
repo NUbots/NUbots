@@ -25,7 +25,6 @@
 #include "messages/behaviour/WalkStrategy.h"
 #include "messages/behaviour/KickPlan.h"
 #include "messages/support/FieldDescription.h"
-#include "messages/vision/VisionObjects.h"
 #include "messages/input/Sensors.h"
 #include "messages/motion/GetupCommand.h"
 #include "messages/motion/DiveCommand.h"
@@ -45,9 +44,8 @@ namespace strategy {
     using messages::input::gameevents::GameState;
     using messages::input::gameevents::Mode;
     using messages::input::gameevents::Phase;
-    using VisionBall = messages::vision::Ball;
-    using VisionGoal = messages::vision::Goal;
     using LocalisationBall = messages::localisation::Ball;
+    using LocalisationSelf = messages::localisation::Self;
     using messages::localisation::Self;
     using messages::behaviour::WalkStrategy;
     using messages::behaviour::LookStrategy;
@@ -97,15 +95,15 @@ namespace strategy {
         emit(std::make_unique<KickPlan>(KickPlan{{4.5, 0}}));
 
         // For checking last seen times
-        on<Trigger<std::vector<VisionBall>>>([this] (const std::vector<VisionBall>& balls) {
+        on<Trigger<std::vector<LocalisationBall>>>([this] (const std::vector<LocalisationBall>& balls) {
             if(!balls.empty()) {
-                ballLastSeen = NUClear::clock::now();
+                ballLastMeasured = balls[0].last_measurement_time;
             }
         });
 
-        on<Trigger<std::vector<VisionGoal>>>([this] (const std::vector<VisionGoal>& goals) {
-            if(!goals.empty()) {
-                goalLastSeen = NUClear::clock::now();
+        on<Trigger<std::vector<LocalisationSelf>>>([this] (const std::vector<LocalisationSelf>& selfs) {
+            if(!selfs.empty()) {
+                selfLastMeasured = selfs[0].last_measurement_time;
             }
         });
 
@@ -212,9 +210,9 @@ namespace strategy {
                             else { // not penalised
 
                                 // log("time since ball seen:",
-                                //     std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now() - ballLastSeen).count(),
+                                //     std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now() - ballLastMeasured).count(),
                                 //     ",", std::chrono::duration_cast<std::chrono::milliseconds>(zone.ballActiveTimeout).count());
-                                if (NUClear::clock::now() - ballLastSeen < zone.ballActiveTimeout) { // ball has been seen recently
+                                if (NUClear::clock::now() - ballLastMeasured < zone.ballActiveTimeout) { // ball has been seen recently
                                     if (inZone(FieldTarget::BALL) || ballDistance() <= BALL_CLOSE_DISTANCE) { // in zone or close to ball
                                         walkTo(FieldTarget::BALL);
                                         find({FieldTarget::BALL});
@@ -241,7 +239,7 @@ namespace strategy {
                                         leaf = "Find the ball";
                                     }
                                     else { // not in zone
-                                        if (NUClear::clock::now() - ballLastSeen < zone.zoneReturnTimeout) {
+                                        if (NUClear::clock::now() - ballLastMeasured < zone.zoneReturnTimeout) {
                                             spinWalk();
                                             find({FieldTarget::BALL});
                                             leaf = "Spin to Win!";
@@ -518,15 +516,15 @@ namespace strategy {
             }
         }
         else if(fieldObjects.size() == 2) {
-            // std::cout<<__FILE__<<__LINE__<<" ballLastSeen = "<<std::duration_cast<std::chrono::seconds>(ballLastSeen).count()<<std::endl;
+            // std::cout<<__FILE__<<__LINE__<<" ballLastMeasured = "<<std::duration_cast<std::chrono::seconds>(ballLastMeasured).count()<<std::endl;
             // std::cout<<__FILE__<<__LINE__<<" BALL_LAST_SEEN_MAX_TIME = "<<std::duration_cast<std::chrono::seconds>(BALL_LAST_SEEN_MAX_TIME).count()<<std::endl;
-            // std::cout<<__FILE__<<__LINE__<<" goalLastSeen = "<<std::duration_cast<std::chrono::seconds>(goalLastSeen).count()<<std::endl;
+            // std::cout<<__FILE__<<__LINE__<<" selfLastMeasured = "<<std::duration_cast<std::chrono::seconds>(selfLastMeasured).count()<<std::endl;
             // std::cout<<__FILE__<<__LINE__<<" GOAL_LAST_SEEN_MAX_TIME = "<< std::duration_cast<std::chrono::seconds>(GOAL_LAST_SEEN_MAX_TIME).count() <<std::endl;
             // std::cout<<std::endl;
 
             // Balls come first
-            if(NUClear::clock::now() - ballLastSeen > BALL_LAST_SEEN_MAX_TIME
-                || NUClear::clock::now() - goalLastSeen < GOAL_LAST_SEEN_MAX_TIME) {
+            if(NUClear::clock::now() - ballLastMeasured > BALL_LAST_SEEN_MAX_TIME
+                || NUClear::clock::now() - selfLastMeasured < GOAL_LAST_SEEN_MAX_TIME) {
                 // // Prioritise balls
                 // auto strategy = std::make_unique<LookStrategy>();
                 // strategy->priorities = {typeid(VisionBall)};

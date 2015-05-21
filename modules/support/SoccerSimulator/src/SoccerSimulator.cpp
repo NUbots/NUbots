@@ -289,6 +289,7 @@ namespace support {
                 r->back().heading = bearingToUnitVector(world.robotPose.angle());
                 r->back().velocity = world.robotVelocity.rows(0,1);
                 r->back().position_cov = 0.00001 * arma::eye(2,2);
+                r->back().last_measurement_time = NUClear::clock::now();
                 emit(std::move(r));
             }
         
@@ -312,13 +313,16 @@ namespace support {
                 }
 
             } else {
-                //Emit current ball exactly                
+                //Emit current ball exactly 
                 auto b = std::make_unique<messages::localisation::Ball>();
                 b->position = world.robotPose.worldToLocal(world.ballPose).xy();
                 b->velocity = world.robotPose.rotation().t() * world.ballVelocity.xy();
                 b->position_cov = 0.00001 * arma::eye(2,2);
+                b->last_measurement_time = NUClear::clock::now();
+                emit(std::make_unique<std::vector<messages::localisation::Ball>>(
+                        std::vector<messages::localisation::Ball>(1,*b)
+                    ));
                 emit(std::move(b));
-                //Walk path planner trigger:
             }
 
         });

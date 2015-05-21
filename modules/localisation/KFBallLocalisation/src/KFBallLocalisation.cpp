@@ -51,6 +51,7 @@ namespace localisation {
     KFBallLocalisation::KFBallLocalisation(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)) {
 
+
         on<Trigger<Configuration<KFBallLocalisationEngineConfig>>>([this](const Configuration<KFBallLocalisationEngineConfig>& config) {
             engine_.UpdateConfiguration(config);
         });
@@ -74,6 +75,8 @@ namespace localisation {
             ball.velocity = robot_space_ball_vel + robots[0].velocity;
             ball.position_cov = model_cov.submat(0,0,1,1);
             ball.world_space = false;
+
+            ball.last_measurement_time = last_measurement_time;
 
             auto ball_msg = std::make_unique<Ball>(ball);
             auto ball_vec_msg = std::make_unique<std::vector<Ball>>();
@@ -109,6 +112,7 @@ namespace localisation {
 
             if(balls.size() > 0) {
                 auto curr_time = NUClear::clock::now();
+                last_measurement_time = curr_time;
                 engine_.TimeUpdate(curr_time);
 
                 engine_.MeasurementUpdate(balls[0]);

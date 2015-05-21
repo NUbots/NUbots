@@ -21,6 +21,7 @@
 #define MESSAGES_LOCALISATIONFIELDOBJECT
 
 #include <armadillo>
+#include <nuclear>
 
 namespace messages {
     namespace localisation {
@@ -43,6 +44,7 @@ namespace messages {
             };
 
             std::vector<Model> models;
+
         };
 
         class LocalisationObject {
@@ -51,6 +53,8 @@ namespace messages {
 
             arma::vec2 position;
             arma::mat22 position_cov;
+            
+            NUClear::clock::time_point last_measurement_time;
         };
 
         class Ball : public LocalisationObject {

@@ -53,6 +53,7 @@ namespace localisation {
         : Reactor(std::move(environment)),
           engine_(std::make_unique<MMKFRobotLocalisationEngine>()) {
 
+
         on<Trigger<Configuration<MultiModalRobotModelConfig>>>(
             "MultiModalRobotModelConfig Update",
             [this](const Configuration<MultiModalRobotModelConfig>& config) {
@@ -114,6 +115,7 @@ namespace localisation {
                 robot_model.heading = world_heading.rows(0, 1);
                 robot_model.velocity = model_state.rows(robot::kVX, robot::kVY);
                 robot_model.position_cov = model_cov.submat(0,0,1,1);
+                robot_model.last_measurement_time = last_measurement_time;
                 robots.push_back(robot_model);
             }
 
@@ -175,6 +177,8 @@ namespace localisation {
             // }
 
             auto curr_time = NUClear::clock::now();
+            last_measurement_time = curr_time;
+            
             engine_->TimeUpdate(curr_time, sensors);
             engine_->ProcessObjects(goals);
 
