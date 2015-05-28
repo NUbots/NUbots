@@ -96,7 +96,7 @@ def generate_header(parts):
 
                 /// @brief the path to the configuration file for {className}
                 static constexpr const char* CONFIGURATION_PATH = "{className}.yaml";
-            }}
+            }};
 
         {closeNamespace}
 
