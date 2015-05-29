@@ -382,11 +382,25 @@ namespace support {
         return true;
     }
 
-    // Goal SoccerSimulator::createGoalObservation(){
-        
-    // }
+    messages::vision::Goal SoccerSimulator::createGoalObservation(arma::vec3 goalBottom, arma::vec3 goalTop){
+        //TODO: need to check if goal is visible based on head somewhere
+        messages::vision::Goal goal1;
+        messages::vision::VisionObject::Measurement g1_m;
+        g1_m.position = SphericalRobotObservation(world.robotPose.xy(), world.robotPose.angle(), goal_r_pos);
+        g1_m.error = arma::eye(3, 3) * 0.1;
+        goal1.measurements.push_back(g1_m);
+        goal1.measurements.push_back(g1_m);
+        goal1.side = messages::vision::Goal::Side::RIGHT;
+        if (cfg_.distinguish_left_and_right_goals) {
+            goal1.side = messages::vision::Goal::Side::RIGHT;
+        } else {
+            goal1.side = messages::vision::Goal::Side::UNKNOWN;
+        }
+        goal1.sensors = sensors;
+        return goal1;
+    }
 
-    // Goal SoccerSimulator::()
+    Goal SoccerSimulator::()
 
 }
 }
