@@ -111,6 +111,7 @@ namespace support {
         world.ballPose = config["initial"]["ball_pose"].as<arma::vec3>();
 
         cfg_.ignore_head_pose = config["ignore_head_pose"].as<bool>();
+        cfg_.blind_robot = config["blind_robot"].as<bool>();
 
         kicking = false;
     }
@@ -225,7 +226,10 @@ namespace support {
 
             if (cfg_.simulate_goal_observations) {
                 auto goals = std::make_unique<std::vector<messages::vision::Goal>>();
-
+                if(cfg_.blind_robot){
+                    emit(std::move(goals));
+                    return;
+                }
                 // Only observe goals that are in front of the robot
                 arma::vec3 goal_l_pos = {0, 0, 0};
                 arma::vec3 goal_r_pos = {0, 0, 0};
@@ -278,8 +282,7 @@ namespace support {
                     goals->push_back(goal2);
                 }
 
-                if (goals->size() > 0)
-                    emit(std::move(goals));
+                emit(std::move(goals));
 
             }else{
                 //Emit current self exactly
@@ -295,10 +298,14 @@ namespace support {
         
 
             if (cfg_.simulate_ball_observations) {
+                auto ball_vec = std::make_unique<std::vector<messages::vision::Ball>>();
+                if(cfg_.blind_robot){
+                    emit(std::move(ball_vec));
+                    return;
+                }
                 //Note that world.ballPose represents the ball height in 3rd coord
                 if(cfg_.ignore_head_pose || objectInView(world.ballPose, world.robotPose, sensors)){
-                    auto ball_vec = std::make_unique<std::vector<messages::vision::Ball>>();
-
+                    
                     messages::vision::Ball ball;
                     messages::vision::VisionObject::Measurement b_m;
                     arma::vec3 ball_pos_3d = {0, 0, 0};

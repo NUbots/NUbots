@@ -38,3 +38,5 @@ initial:
   ball_pose: [0, 0, 0]
 
 ignore_head_pose: true
+
+blind_robot: false

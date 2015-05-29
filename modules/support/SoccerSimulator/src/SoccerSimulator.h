@@ -108,6 +108,8 @@ namespace support {
             bool emit_ball_fieldobjects = true;
 
             bool ignore_head_pose = false;
+            
+            bool blind_robot = false;
 
         } cfg_;
 
