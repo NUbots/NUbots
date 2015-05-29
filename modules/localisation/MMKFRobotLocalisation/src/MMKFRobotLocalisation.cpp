@@ -149,6 +149,11 @@ namespace localisation {
           >("MMKFRobotLocalisation Step",
             [this](const std::vector<messages::vision::Goal>& goals, const Sensors& sensors) {
 
+            //Is this check necessary?
+            if(!emit_data_handle.enabled()){
+                //Activate when data received
+                emit_data_handle.enable();
+            }
             // Ignore empty vectors of goals.
             if (goals.size() == 0)
                 return;
@@ -182,11 +187,6 @@ namespace localisation {
             engine_->TimeUpdate(curr_time, sensors);
             engine_->ProcessObjects(goals);
 
-            //Is this check necessary?
-            if(!emit_data_handle.enabled()){
-                //Activate when data received
-                emit_data_handle.enable();
-            }
         });
     }
 }

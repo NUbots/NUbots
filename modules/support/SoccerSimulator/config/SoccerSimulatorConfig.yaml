@@ -1,10 +1,10 @@
 vision:
-  goal_observations: false
+  goal_observations: true
   observe:
     left_goal: true
     right_goal: true
   distinguish_left_and_right_goals: true
-  ball_observations: false
+  ball_observations: true
 
 robot:
   #If use_motion is true, then the robot will move based on the latest motion commands
@@ -31,12 +31,12 @@ nusight:
   emit_ball: true
 
 environment_parameters:
-  imu_drift_period: 300
+  imu_drift_period: 10000000
 
 initial:
   robot_pose: [-1, -1, 0]
   ball_pose: [0, 0, 0]
 
-ignore_head_pose: true
+ignore_head_pose: false
 
 blind_robot: false

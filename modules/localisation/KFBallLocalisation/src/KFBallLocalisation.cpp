@@ -109,6 +109,11 @@ namespace localisation {
              Options<Sync<KFBallLocalisation>>
              >("KFBallLocalisation Step",
                 [this](const std::vector<messages::vision::Ball>& balls) {
+            
+            //Is this check necessary?
+            if(!emit_data_handle.enabled()){
+                emit_data_handle.enable();
+            }
 
             if(balls.size() > 0) {
                 auto curr_time = NUClear::clock::now();
@@ -117,10 +122,6 @@ namespace localisation {
 
                 engine_.MeasurementUpdate(balls[0]);
 
-                //Is this check necessary?
-                if(!emit_data_handle.enabled()){
-                    emit_data_handle.enable();
-                }
             }
         });
     }

@@ -218,6 +218,7 @@ namespace support {
         on<Trigger<Every<30, Per<std::chrono::seconds>>>,
             With<Raw<Sensors>>,
             Options<Sync<SoccerSimulator>>>("Vision Simulation", [this](const time_t&, const std::shared_ptr<Sensors>& sensors) {
+            std::cout << "orientationCamToGround " << sensors->orientationCamToGround << std::endl;
 
             if (field_description_ == nullptr) {
                 NUClear::log(__FILE__, __LINE__, ": field_description_ == nullptr");
@@ -242,9 +243,7 @@ namespace support {
                 }
 
                 //Check to see if either bottom or top of goal is in view
-                if (cfg_.observe_right_goal && 
-                   (cfg_.ignore_head_pose || objectInView(goal_r_pos, world.robotPose, sensors))
-                   || objectInView(goal_r_pos + arma::vec3({0,0,field_description_->dimensions.goal_crossbar_height}), world.robotPose, sensors)) 
+                if (cfg_.observe_right_goal && cfg_.ignore_head_pose)                  
                 {
                     messages::vision::Goal goal1;
                     messages::vision::VisionObject::Measurement g1_m;
@@ -263,9 +262,7 @@ namespace support {
                 }
 
                 //Check to see if either bottom or top of goal is in view
-                if (cfg_.observe_left_goal &&
-                   (cfg_.ignore_head_pose || objectInView(goal_l_pos, world.robotPose, sensors))
-                   || objectInView(goal_l_pos + arma::vec3({0,0,field_description_->dimensions.goal_crossbar_height}), world.robotPose, sensors))
+                if (cfg_.observe_left_goal && cfg_.ignore_head_pose)                  
                 {
                     messages::vision::Goal goal2;
                     messages::vision::VisionObject::Measurement g2_m;
@@ -305,7 +302,7 @@ namespace support {
                 }
                 //Note that world.ballPose represents the ball height in 3rd coord
                 if(cfg_.ignore_head_pose || objectInView(world.ballPose, world.robotPose, sensors)){
-                    
+
                     messages::vision::Ball ball;
                     messages::vision::VisionObject::Measurement b_m;
                     arma::vec3 ball_pos_3d = {0, 0, 0};
@@ -384,6 +381,12 @@ namespace support {
     bool SoccerSimulator::objectInView(const arma::vec3& objectPosition, const Transform2D& robotPose, const std::shared_ptr<Sensors>& sensors){
         return true;
     }
+
+    // Goal SoccerSimulator::createGoalObservation(){
+        
+    // }
+
+    // Goal SoccerSimulator::()
 
 }
 }
