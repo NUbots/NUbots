@@ -333,8 +333,8 @@ namespace support {
             [this](const time_t&) {
 
             arma::vec2 bearingVector = world.robotPose.rotation() * arma::vec2({1,0});
-
-            emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, {bearingVector[0], bearingVector[1], 0}, 1));
+            arma::vec3 robotHeadingVector = {bearingVector[0], bearingVector[1], 0};
+            emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, robotHeadingVector, 1));
 
             emit(drawSphere("ball", {world.ballPose.x(), world.ballPose.y(), 0}, 0.1));            
 

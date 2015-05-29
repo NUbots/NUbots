@@ -28,10 +28,8 @@ ADD_ROLE(
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
     behaviour::skills::KickScript
-    behaviour::skills::GoalSaver
     behaviour::skills::HeadBehaviourSoccer
     behaviour::planning::KickPlanner
-    behaviour::planning::DivePlanner
     behaviour::planning::WalkPathPlanner
     behaviour::strategy::SoccerStrategy
 
