@@ -218,7 +218,6 @@ namespace support {
         on<Trigger<Every<30, Per<std::chrono::seconds>>>,
             With<Raw<Sensors>>,
             Options<Sync<SoccerSimulator>>>("Vision Simulation", [this](const time_t&, const std::shared_ptr<Sensors>& sensors) {
-            std::cout << "orientationCamToGround " << sensors->orientationCamToGround << std::endl;
 
             if (field_description_ == nullptr) {
                 NUClear::log(__FILE__, __LINE__, ": field_description_ == nullptr");
