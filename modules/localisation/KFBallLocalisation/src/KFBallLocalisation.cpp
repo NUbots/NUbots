@@ -72,7 +72,6 @@ namespace localisation {
 
             messages::localisation::Ball ball;
             ball.position = robot_space_ball_pos;
-            log("ball localisation position = ", robot_space_ball_pos.t());
             ball.velocity = robot_space_ball_vel + robots[0].velocity;
             ball.position_cov = model_cov.submat(0,0,1,1);
             ball.world_space = false;

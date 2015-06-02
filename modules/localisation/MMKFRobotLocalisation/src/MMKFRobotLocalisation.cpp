@@ -114,6 +114,7 @@ namespace localisation {
                 arma::vec3 world_heading = imuRotation * arma::mat(sensors.orientation.t()).col(0);
                 robot_model.heading = world_heading.rows(0, 1);
                 robot_model.velocity = model_state.rows(robot::kVX, robot::kVY);
+                log("model_state = ", model_state.t());
                 robot_model.position_cov = model_cov.submat(0,0,1,1);
                 robot_model.last_measurement_time = last_measurement_time;
                 robots.push_back(robot_model);
@@ -127,21 +128,21 @@ namespace localisation {
         emit_data_handle.disable();
 
 
-        on<Trigger<Sensors>,
-           Options<Sync<MMKFRobotLocalisation>>
-          >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
-            auto curr_time = NUClear::clock::now();
-            // engine_->TimeUpdate(curr_time, sensors);
-            // engine_->OdometryMeasurementUpdate(sensors);
-        });
+        // on<Trigger<Sensors>,
+        //    Options<Sync<MMKFRobotLocalisation>>
+        //   >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
+        //     auto curr_time = NUClear::clock::now();
+        //     engine_->TimeUpdate(curr_time, sensors);
+        //     engine_->OdometryMeasurementUpdate(sensors);
+        // });
 
-        on<Trigger<Every<100, Per<std::chrono::seconds>>>,
-           With<Sensors>,
-           Options<Sync<MMKFRobotLocalisation>>
-          >("MMKFRobotLocalisation Time", [this](const time_t&, const Sensors& sensors) {
-            auto curr_time = NUClear::clock::now();
-            // engine_->TimeUpdate(curr_time, sensors);
-        });
+        // on<Trigger<Every<100, Per<std::chrono::seconds>>>,
+        //    With<Sensors>,
+        //    Options<Sync<MMKFRobotLocalisation>>
+        //   >("MMKFRobotLocalisation Time", [this](const time_t&, const Sensors& sensors) {
+        //     auto curr_time = NUClear::clock::now();
+        //     engine_->TimeUpdate(curr_time, sensors);
+        // });
 
         on<Trigger<std::vector<messages::vision::Goal>>,
            With<Sensors>,
@@ -155,8 +156,9 @@ namespace localisation {
                 emit_data_handle.enable();
             }
             // Ignore empty vectors of goals.
-            if (goals.size() == 0)
+            if (goals.size() == 0){
                 return;
+            }
 
             // Ignore measurements when both of the robots feet are off the ground.
             if (!goals[0].sensors->leftFootDown && !goals[0].sensors->rightFootDown) {
@@ -184,8 +186,8 @@ namespace localisation {
             auto curr_time = NUClear::clock::now();
             last_measurement_time = curr_time;
             
-            // engine_->TimeUpdate(curr_time, sensors);
-            // engine_->ProcessObjects(goals);
+            engine_->TimeUpdate(curr_time, sensors);
+            engine_->ProcessObjects(goals);
 
         });
     }

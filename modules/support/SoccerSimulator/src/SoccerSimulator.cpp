@@ -196,7 +196,6 @@ namespace support {
 
                 case MotionType::MOTION:
                     if(!kickQueue.empty()){
-                        std::cout << "KICKING!" << std::endl;
                         //Get last queue
                         KickCommand lastKickCommand = kickQueue.back();
                         //Empty queue
@@ -242,7 +241,7 @@ namespace support {
                 }
 
                 //Check to see if either bottom or top of goal is in view
-                if (cfg_.observe_right_goal && cfg_.ignore_head_pose)                  
+                if (cfg_.observe_right_goal)                  
                 {
                     messages::vision::Goal goal1;
                     messages::vision::VisionObject::Measurement g1_m;
@@ -261,7 +260,7 @@ namespace support {
                 }
 
                 //Check to see if either bottom or top of goal is in view
-                if (cfg_.observe_left_goal && cfg_.ignore_head_pose)                  
+                if (cfg_.observe_left_goal)                  
                 {
                     messages::vision::Goal goal2;
                     messages::vision::VisionObject::Measurement g2_m;
