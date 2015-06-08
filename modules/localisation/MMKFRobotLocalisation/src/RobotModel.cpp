@@ -66,7 +66,8 @@ namespace robot {
         //Rewrite:
         // arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.robotToIMU);
         arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.orientation);
-        // std::cout << "worldRobotHeading = " << worldRobotHeading.t() << std::endl;
+        // auto orientation = sensors.orientation.axisAngle();
+        // std::cout << "worldRobotHeading axis = " << orientation.first.t() << " angle = " << orientation.second << std::endl;
         auto obs = SphericalRobotObservation(state.rows(kX, kY),
                                              worldRobotHeading,
                                              actual_position);
