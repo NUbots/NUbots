@@ -34,6 +34,7 @@
 #include "messages/localisation/ResetRobotHypotheses.h"
 #include "MMKFRobotLocalisationEngine.h"
 #include "RobotModel.h"
+#include "utility/nubugger/NUhelpers.h"
 
 using utility::math::matrix::Rotation3D;
 using utility::math::angle::bearingToUnitVector;
@@ -46,6 +47,7 @@ using messages::input::Sensors;
 using messages::vision::Goal;
 using messages::localisation::Self;
 using messages::localisation::ResetRobotHypotheses;
+using utility::nubugger::graph;
 
 namespace modules {
 namespace localisation {
@@ -108,6 +110,9 @@ namespace localisation {
                 arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
                 auto model_cov = model->GetCovariance();
 
+                std::cout << "model_state = " << model_state.t() << std::endl;
+                std::cout << "model_cov. = " << model_cov << std::endl;
+
                 Self robot_model;
                 robot_model.position = model_state.rows(robot::kX, robot::kY);
                 Rotation3D imuRotation = Rotation3D::createRotationZ(model_state(robot::kImuOffset));
@@ -115,6 +120,7 @@ namespace localisation {
                 robot_model.heading = world_heading.rows(0, 1);
                 robot_model.velocity = model_state.rows(robot::kVX, robot::kVY);
                 log("model_state = ", model_state.t());
+                log("model_cov = \n", model_cov);
                 robot_model.position_cov = model_cov.submat(0,0,1,1);
                 robot_model.last_measurement_time = last_measurement_time;
                 robots.push_back(robot_model);
@@ -132,6 +138,22 @@ namespace localisation {
         //    Options<Sync<MMKFRobotLocalisation>>
         //   >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
         //     auto curr_time = NUClear::clock::now();
+
+           
+
+
+        //     //TODO: REMOVE THIS
+        //     if(!emit_data_handle.enabled()){
+        //         //Activate when data received
+        //         emit_data_handle.enable();
+        //     }
+
+
+
+
+
+        //     emit(graph("Odometry Measurement Update", sensors.odometry[0], sensors.odometry[1]));
+        //     log("Odometry Measurement Update", sensors.odometry.t());
         //     engine_->TimeUpdate(curr_time, sensors);
         //     engine_->OdometryMeasurementUpdate(sensors);
         // });

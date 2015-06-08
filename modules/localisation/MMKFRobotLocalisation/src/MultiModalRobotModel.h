@@ -40,8 +40,8 @@ namespace localisation {
     class RobotHypothesis {
     // private:
     public: // for unit testing.
-        // utility::math::kalman::UKF<robot::RobotModel> filter_;
-        utility::math::kalman::ParticleFilter<robot::RobotModel> filter_;
+        utility::math::kalman::UKF<robot::RobotModel> filter_;
+        // utility::math::kalman::ParticleFilter<robot::RobotModel> filter_;
 
         double weight_;
 
@@ -54,7 +54,7 @@ namespace localisation {
             : filter_(
                 {-4.5, 0, 0}, // mean
                 arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 0.01, // cov
-                100) // alpha
+                0.1) // alpha
             , weight_(1)
             , obs_count_(0) {
                 arma::mat cov = arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 0.1;

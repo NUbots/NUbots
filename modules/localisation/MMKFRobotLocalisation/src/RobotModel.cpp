@@ -66,9 +66,11 @@ namespace robot {
         //Rewrite:
         // arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.robotToIMU);
         arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.orientation);
+        // std::cout << "worldRobotHeading = " << worldRobotHeading.t() << std::endl;
         auto obs = SphericalRobotObservation(state.rows(kX, kY),
                                              worldRobotHeading,
                                              actual_position);
+        // std::cout << "obs = " << obs.t() << std::endl;
         return obs;
     }
 
@@ -121,7 +123,7 @@ namespace robot {
         return state;
     }
 
-    arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() {
+    arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise(){
         arma::mat noise = arma::eye(RobotModel::size, RobotModel::size);
         noise(kX, kX) *= cfg_.processNoisePositionFactor;
         noise(kY, kY) *= cfg_.processNoisePositionFactor;

@@ -172,7 +172,8 @@ namespace utility {
                     // Calculate the new mean and covariance values.
                     mean = meanFromSigmas(sigmaPoints);
                     mean = model.limitState(mean);
-                    covariance = covarianceFromSigmas(sigmaPoints, mean) + model.processNoise();
+                    covariance = covarianceFromSigmas(sigmaPoints, mean);
+                    covariance += model.processNoise();
 
                     // Re calculate our sigma points
                     sigmaMean = mean;
@@ -229,7 +230,7 @@ namespace utility {
                     return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
                 }
 
-                StateVec get() const {
+                StateVec get() const {           
                     return mean;
                 }
 
