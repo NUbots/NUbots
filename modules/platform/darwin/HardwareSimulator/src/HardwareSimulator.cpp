@@ -41,7 +41,6 @@ namespace darwin {
         /*
          CM730 Data
          */
-
         //Read our Error code
         sensors.cm730ErrorFlags = 0;
 
@@ -196,10 +195,16 @@ namespace darwin {
                 sumGyro += arma::vec3({g.x,g.y,g.z});
                 gyroQueue.pop();
             }
-            sumGyro = (sumGyro + arma::vec3({0,0,imu_drift_rate})) / UPDATE_FREQUENCY ;
+            sumGyro = (sumGyro + arma::vec3({0,0,imu_drift_rate})) * UPDATE_FREQUENCY;
             sensors.gyroscope.x = sumGyro[0];
             sensors.gyroscope.y = sumGyro[1];
             sensors.gyroscope.z = sumGyro[2];
+            
+            //Debug:
+            // integrated_gyroscope += sumGyro + arma::vec3({0,0,imu_drift_rate});
+            // std::cout << "HardwareSimulator gyroscope = " << sensors.gyroscope.x << ", " << sensors.gyroscope.y << ", " << sensors.gyroscope.z << std::endl;
+            // std::cout << "HardwareSimulator integrated_gyroscope = " << integrated_gyroscope.t() << std::endl;
+            
             //Add some noise so that sensor fusion doesnt converge to a singularity
             auto sensors_message = std::make_unique<DarwinSensors>(sensors);
             addNoise(sensors_message);

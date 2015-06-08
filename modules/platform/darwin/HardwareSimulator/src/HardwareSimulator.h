@@ -21,6 +21,7 @@
 #define MODULES_PLATFORM_DARWIN_HARDWARESIMULATOR_H
 
 #include <nuclear>
+#include <armadillo>
 
 #include "messages/platform/darwin/DarwinSensors.h"
 
@@ -50,6 +51,7 @@ namespace darwin {
             Vec3Noise accelerometer;
             Vec3Noise gyroscope;
         } noise;
+        arma::vec3 integrated_gyroscope;
     public:
         /// @brief called by a Powerplant to construct this reactor
         explicit HardwareSimulator(std::unique_ptr<NUClear::Environment> environment);
