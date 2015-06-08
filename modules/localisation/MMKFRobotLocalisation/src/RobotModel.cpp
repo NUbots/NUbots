@@ -130,6 +130,7 @@ namespace robot {
         noise(kVX, kVX) *= cfg_.processNoiseVelocityFactor;
         noise(kVY, kVY) *= cfg_.processNoiseVelocityFactor;
         noise(kImuOffset, kImuOffset) *= cfg_.processNoiseHeadingFactor;
+        // std::cout << "process noise = \n" << noise << std::endl;
         return noise;
     }
 

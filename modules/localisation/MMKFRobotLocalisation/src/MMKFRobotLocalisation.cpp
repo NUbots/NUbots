@@ -110,8 +110,8 @@ namespace localisation {
                 arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
                 auto model_cov = model->GetCovariance();
 
-                std::cout << "model_state = " << model_state.t() << std::endl;
-                std::cout << "model_cov. = " << model_cov << std::endl;
+                // std::cout << "model_state = " << model_state.t() << std::endl;
+                // std::cout << "model_cov. = " << model_cov << std::endl;
 
                 Self robot_model;
                 robot_model.position = model_state.rows(robot::kX, robot::kY);
