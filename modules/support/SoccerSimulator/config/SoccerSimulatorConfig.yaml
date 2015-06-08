@@ -1,3 +1,4 @@
+
 vision:
   goal_observations: true
   observe:
@@ -8,12 +9,12 @@ vision:
 
 robot:
   #If use_motion is true, then the robot will move based on the latest motion commands
-  motion_type: MOTION #NONE, PATH or MOTION
+  motion_type: NONE #NONE, PATH or MOTION
   #If use_motion is false, the following path with be used instead
   path:
     period: 10
     x_amp: 3
-    y_amp: 2
+    y_amp: 3
     type: SIN #SIN, TRIANGLE
 
 ball:
@@ -30,13 +31,12 @@ nusight:
   emit_self: true
   emit_ball: true
 
-environment_parameters:
-  imu_drift_period: 10000000
-
 initial:
-  robot_pose: [-1, -1, 0]
-  ball_pose: [0, 0, 0]
+  robot_pose: [0, 2, 0]
+  ball_pose: [2, -1, 0]
 
 ignore_head_pose: false
 
 blind_robot: false
+
+

@@ -162,7 +162,6 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
         // Split the model for each possible object, and observe that object:
         // (TODO: Micro-optimisation: use model as the last split_model)
         for (auto& possible_object : possible_objects) {
-            // std::cout << "possible_object: " << possible_object << std::endl;
 
             auto split_model = std::make_unique<RobotHypothesis>(*model);
 
@@ -332,6 +331,7 @@ void MultiModalRobotModel::MergeSimilarModels() {
 
     // Loop through each pair of merged models
     for (int ma = robot_models_.size() - 1; ma >= 0; ma--) {
+
         if (merged[ma])
             continue;
 
@@ -379,6 +379,7 @@ void MultiModalRobotModel::MergeSimilarModels() {
  */
 void MultiModalRobotModel::PruneViterbi(unsigned int order) {
     // No pruning required if not above maximum.
+
     if(robot_models_.size() <= order)
         return;
 

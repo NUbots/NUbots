@@ -110,17 +110,15 @@ namespace localisation {
                 arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
                 auto model_cov = model->GetCovariance();
 
-                // std::cout << "model_state = " << model_state.t() << std::endl;
-                // std::cout << "model_cov. = " << model_cov << std::endl;
-
+                log("model_state = ", model_state.t());
+                // log("model_cov = \n", model_cov);
+                
                 Self robot_model;
                 robot_model.position = model_state.rows(robot::kX, robot::kY);
                 Rotation3D imuRotation = Rotation3D::createRotationZ(model_state(robot::kImuOffset));
                 arma::vec3 world_heading = imuRotation * arma::mat(sensors.orientation.t()).col(0);
                 robot_model.heading = world_heading.rows(0, 1);
                 robot_model.velocity = model_state.rows(robot::kVX, robot::kVY);
-                log("model_state = ", model_state.t());
-                log("model_cov = \n", model_cov);
                 robot_model.position_cov = model_cov.submat(0,0,1,1);
                 robot_model.last_measurement_time = last_measurement_time;
                 robots.push_back(robot_model);
