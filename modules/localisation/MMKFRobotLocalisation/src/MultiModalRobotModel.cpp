@@ -94,7 +94,7 @@ double RobotHypothesis::MeasurementUpdate(
         arma::vec2 actual_2d = actual_object.location();
         arma::vec3 actual_pos = arma::vec3({actual_2d(0), actual_2d(1), 0});
 
-        std::cout << " cov = " << cov << std::endl;
+        // std::cout << " cov = " << cov << std::endl;
 
 
         quality *= filter_.measurementUpdate(measured_pos, cov, actual_pos, *(observed_object.sensors));
@@ -220,7 +220,7 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
                 auto weight = split_model->GetFilterWeight();
                 split_model->SetFilterWeight(weight * quality);                    
             }
-            std::cout << "split model " << *split_model <<  std::endl;
+            // std::cout << "split model " << *split_model <<  std::endl;
 
             new_models.push_back(std::move(split_model));
         }

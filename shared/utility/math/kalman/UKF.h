@@ -224,6 +224,9 @@ namespace utility {
                     arma::mat innovationCovariance = ((innovation.t() * innovationVariance.i()) * innovation);
 
                     double expTerm = -0.5 * innovationCovariance(0, 0);
+                    if(arma::det(innovationVariance) == 0){
+                        std::cout << "arma::det(innovationVariance) == 0. innovationVariance = \n" << innovationVariance << std::endl;
+                    }
                     double fract = 1 / sqrt(pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance));
                     const float outlierProbability = 0.05;
 
