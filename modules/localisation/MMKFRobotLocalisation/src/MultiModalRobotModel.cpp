@@ -215,7 +215,9 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
                 // just made.
                 auto weight = split_model->GetFilterWeight();
                 split_model->SetFilterWeight(weight * quality);
+
             }
+            std::cout << "split model weight = " << split_model->GetFilterWeight() << " : " << split_model->GetEstimate().t() <<  std::endl;
 
             new_models.push_back(std::move(split_model));
         }
