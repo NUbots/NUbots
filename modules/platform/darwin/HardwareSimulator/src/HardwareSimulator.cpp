@@ -199,6 +199,8 @@ namespace darwin {
             sensors.gyroscope.x = sumGyro[0];
             sensors.gyroscope.y = sumGyro[1];
             sensors.gyroscope.z = sumGyro[2];
+
+            sensors.timestamp = NUClear::clock::now();
             
             //Debug:
             // integrated_gyroscope += sumGyro + arma::vec3({0,0,imu_drift_rate});
@@ -212,19 +214,6 @@ namespace darwin {
             emit(std::move(sensors_message));
 
         });
-
-        // NOTE: dev test, makes random angles between -PI and PI
-        /*on<Trigger<Every<2, std::chrono::seconds> >, Options<Single> >([this](const time_t& time) {
-
-//          sensors.servo[ServoID::R_SHOULDER_PITCH].goalPosition = target;
-//          sensors.servo[ServoID::L_SHOULDER_PITCH].goalPosition = target;
-
-            for (int i = 0; i < 20; ++i) {
-                float target = (float(rand()) / RAND_MAX) * 2 * M_PI - M_PI;
-                sensors.servo[i].goalPosition = target;
-            }
-
-        });*/
 
         // This trigger writes the servo positions to the hardware
         on<Trigger<std::vector<ServoTarget>>>([this](const std::vector<ServoTarget>& commands) {
