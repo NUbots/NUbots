@@ -240,7 +240,6 @@ namespace support {
                     goal_r_pos.rows(0, 1) = field_description_->goalpost_br;
                 }
 
-                //Check to see if either bottom or top of goal is in view
                 if (cfg_.observe_right_goal)                  
                 {
                     messages::vision::Goal goal1;
@@ -259,7 +258,6 @@ namespace support {
                     goals->push_back(goal1);
                 }
 
-                //Check to see if either bottom or top of goal is in view
                 if (cfg_.observe_left_goal)                  
                 {
                     messages::vision::Goal goal2;
@@ -276,6 +274,22 @@ namespace support {
                     goal2.sensors = sensors;
                     goals->push_back(goal2);
                 }
+
+                // Input 
+                // cfg_.observe_right_goal
+                // cfg_.distinguish_left_and_right_goals
+                // cfg_.observe_left_goal
+                // cfg_.distinguish_left_and_right_goals
+
+                if(cfg_.observe_right_goal){
+                    auto observed_goals = observeGoal();
+                    goals->insert(goals->end(),observed_goals.begin(),observed_goals.end());
+                }
+                if(cfg_.observe_left_goal){
+                    auto observed_goals = observeGoal();
+                    goals->insert(goals->end(),observed_goals.begin(),observed_goals.end());
+                }
+
 
                 emit(std::move(goals));
 
@@ -380,23 +394,23 @@ namespace support {
         return true;
     }
 
-    // messages::vision::Goal SoccerSimulator::createGoalObservation(arma::vec3 goalBottom, arma::vec3 goalTop){
-    //     //TODO: need to check if goal is visible based on head somewhere
-    //     messages::vision::Goal goal1;
-    //     messages::vision::VisionObject::Measurement g1_m;
-    //     g1_m.position = SphericalRobotObservation(world.robotPose.xy(), world.robotPose.angle(), goal_r_pos);
-    //     g1_m.error = arma::eye(3, 3) * 0.1;
-    //     goal1.measurements.push_back(g1_m);
-    //     goal1.measurements.push_back(g1_m);
-    //     goal1.side = messages::vision::Goal::Side::RIGHT;
-    //     if (cfg_.distinguish_left_and_right_goals) {
-    //         goal1.side = messages::vision::Goal::Side::RIGHT;
-    //     } else {
-    //         goal1.side = messages::vision::Goal::Side::UNKNOWN;
-    //     }
-    //     goal1.sensors = sensors;
-    //     return goal1;
-    // }
+    messages::vision::Goal SoccerSimulator::observeGoal(arma::vec3 goalBottom, arma::vec3 goalTop){
+        //TODO: need to check if goal is visible based on head somewhere
+        std::vector<messages::vision::Goal> goal1;
+        messages::vision::VisionObject::Measurement g1_m;
+        g1_m.position = SphericalRobotObservation(world.robotPose.xy(), world.robotPose.angle(), goal_r_pos);
+        g1_m.error = arma::eye(3, 3) * 0.1;
+        goal1.measurements.push_back(g1_m);
+        goal1.measurements.push_back(g1_m);
+        goal1.side = messages::vision::Goal::Side::RIGHT;
+        if (cfg_.distinguish_left_and_right_goals) {
+            goal1.side = messages::vision::Goal::Side::RIGHT;
+        } else {
+            goal1.side = messages::vision::Goal::Side::UNKNOWN;
+        }
+        goal1.sensors = sensors;
+        return goal1;
+    }
 
     // Goal SoccerSimulator::()
 
