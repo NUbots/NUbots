@@ -1,0 +1,2 @@
+#!/bin/bash
+QUEX_PATH=/usr/local/etc/quex python /usr/local/etc/quex/quex-exe.py "$@"
