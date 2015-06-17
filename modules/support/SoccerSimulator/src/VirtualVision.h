@@ -50,21 +50,15 @@ namespace support {
 		//Assumes we need to see the bottom or...
 		messages::vision::VisionObject::Measurement measurement;
         measurement.position = SphericalRobotObservation(robotPose.xy(), robotPose.angle(), objPosition);
-		// std::cout << "computeVisible - measurement.position = " << measurement.position.t() << std::endl;
         measurement.error = arma::eye(3, 3) * 0.1;			
 
         arma::vec4 cam_space = sensors->kinematicsCamToGround.i() * sphericalToCartesian4(measurement.position);
-		// std::cout << "computeVisible - cam_space = " << cam_space.t() << std::endl;
         arma::vec2 screenAngular = cartesianToSpherical(cam_space.rows(0,2)).rows(1,2);
 
 		std::vector<messages::vision::VisionObject::Measurement> measurements;
-		// std::cout << "computeVisible - screenAngular = " << screenAngular.t();
         if(std::fabs(screenAngular[0]) < camParams.FOV[0] / 2 && std::fabs(screenAngular[1]) < camParams.FOV[1] / 2){
-			// std::cout << "DETECTED!!!!!!!!!!!!!!!!!!" << std::endl;
         	measurements.push_back(measurement);
         	measurements.push_back(measurement); // TODO: Fix the need for double measurements.
-        }else {
-			// std::cout << std::endl;        	
         }
 
         VisibleMeasurement visibleMeas = {
