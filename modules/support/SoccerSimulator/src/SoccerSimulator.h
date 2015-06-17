@@ -116,6 +116,9 @@ namespace support {
 
         } cfg_;
 
+        //Goal models
+        std::vector<VirtualGoalPost> goalPosts;
+
         //World State
         struct WorldState {
             //Transform2D == (x,y,heading)
@@ -129,6 +132,8 @@ namespace support {
         WorldState world;
 
         std::queue<messages::motion::KickCommand> kickQueue;
+
+
 
         bool kicking;
 

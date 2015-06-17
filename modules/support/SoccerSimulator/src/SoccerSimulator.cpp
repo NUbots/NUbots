@@ -120,7 +120,21 @@ namespace support {
 
 
         on<Trigger<FieldDescription>>("FieldDescription Update", [this](const FieldDescription& desc) {
+            
             field_description_ = std::make_shared<FieldDescription>(desc);
+
+            arma::vec3 goal_yr = {field_description_->goalpost_yr[0],field_description_->goalpost_yr[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_yr, 1.1));
+
+            arma::vec3 goal_yl = {field_description_->goalpost_yl[0],field_description_->goalpost_yl[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_yl, 1.1));
+
+            arma::vec3 goal_br = {field_description_->goalpost_br[0],field_description_->goalpost_br[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_br, 1.1));
+
+            arma::vec3 goal_bl = {field_description_->goalpost_bl[0],field_description_->goalpost_bl[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_bl, 1.1));
+
         });
 
         on<Trigger<Configuration<SoccerSimulatorConfig>>>(
@@ -232,50 +246,30 @@ namespace support {
                     emit(std::move(goals));
                     return;
                 }
-                // Only observe goals that are in front of the robot
-                arma::vec3 goal_l_pos = {0, 0, 0};
-                arma::vec3 goal_r_pos = {0, 0, 0};
-                goal_l_pos.rows(0, 1) = field_description_->goalpost_yl;
-                goal_r_pos.rows(0, 1) = field_description_->goalpost_yr;
-                //TODO: remove this if statement
-                if (world.robotPose.angle() < -M_PI * 0.5 || world.robotPose.angle() > M_PI * 0.5) {
-                    goal_l_pos.rows(0, 1) = field_description_->goalpost_bl;
-                    goal_r_pos.rows(0, 1) = field_description_->goalpost_br;
-                }
+              
+                
+                if (cfg_.observe_right_goal){
+                    for (auto& g : goalPosts){
+                        auto m = g.detect(camParams, world.robotPose, sensors);
 
-                if (cfg_.observe_right_goal)                  
-                {
-                    messages::vision::Goal goal1;
-                    messages::vision::VisionObject::Measurement g1_m;
-                    g1_m.position = SphericalRobotObservation(world.robotPose.xy(), world.robotPose.angle(), goal_r_pos);
-                    g1_m.error = arma::eye(3, 3) * 0.1;
-                    goal1.measurements.push_back(g1_m);
-                    goal1.measurements.push_back(g1_m);
-                    goal1.side = messages::vision::Goal::Side::RIGHT;
-                    if (cfg_.distinguish_left_and_right_goals) {
-                        goal1.side = messages::vision::Goal::Side::RIGHT;
-                    } else {
-                        goal1.side = messages::vision::Goal::Side::UNKNOWN;
-                    }
-                    goal1.sensors = sensors;
-                    goals->push_back(goal1);
-                }
+                        if (!m.measurements.empty()) {
 
-                if (cfg_.observe_left_goal)                  
-                {
-                    messages::vision::Goal goal2;
-                    messages::vision::VisionObject::Measurement g2_m;
-                    g2_m.position = SphericalRobotObservation(world.robotPose.xy(), world.robotPose.angle(), goal_l_pos);
-                    g2_m.error = arma::eye(3, 3) * 0.1;
-                    goal2.measurements.push_back(g2_m);
-                    goal2.measurements.push_back(g2_m);
-                    if (cfg_.distinguish_left_and_right_goals) {
-                        goal2.side = messages::vision::Goal::Side::LEFT;
-                    } else {
-                        goal2.side = messages::vision::Goal::Side::UNKNOWN;
+                            goals->push_back(m);
+
+                        }                        
                     }
-                    goal2.sensors = sensors;
-                    goals->push_back(goal2);
+
+                }
+            
+                // Assign leftness and rightness to goals
+                if (goals->size() == 2) {
+                    if (goals->at(0).quad.getCentre()(0) < goals->at(1).quad.getCentre()(0)) {
+                        goals->at(0).side = messages::vision::Goal::Side::LEFT;
+                        goals->at(1).side = messages::vision::Goal::Side::RIGHT;
+                    } else {
+                        goals->at(0).side = messages::vision::Goal::Side::RIGHT;
+                        goals->at(1).side = messages::vision::Goal::Side::LEFT;
+                    }
                 }
 
                 emit(std::move(goals));

@@ -26,6 +26,7 @@
 #include "messages/input/CameraParameters.h"
 #include "messages/input/Sensors.h"
 #include "utility/math/coordinates.h"
+#include "utility/math/geometry/Quad.h"
 #include "utility/localisation/transform.h"
 
 
@@ -40,6 +41,7 @@ namespace support {
     using messages::input::CameraParameters;
     using utility::math::coordinates::cartesianToSpherical;
     using utility::math::coordinates::sphericalToCartesian4;
+    using utility::math::geometry::Quad;
 
     struct VisibleMeasurement {
 		std::vector<messages::vision::VisionObject::Measurement> measurements;
@@ -83,27 +85,20 @@ namespace support {
 		Goal detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors){
 			Goal result;
 
-			//Assumes we need to see the bottom or...
 			auto visibleMeasurements = computeVisible(position,camParams,robotPose,sensors);
-
-	  //       //...the top, with one measurement each
-			// std::vector<messages::vision::VisionObject::Measurement> top_measurements = computeVisible(position+arma::vec3({0,0,height}),camParams,robotPose,sensors);
-			
-			// //collect
-			// visibleMeasurements.insert(visibleMeasurements.end()
-			// 						   top_measurements.begin(),
-			// 						   top_measurements.end());
 
 			for (auto & m : visibleMeasurements.measurements){
 				result.measurements.push_back(m);
 			}
 			
 			result.screenAngular = visibleMeasurements.screenAngular;
-			result.angularSize = arma::vec2({0, 0});
 			result.sensors = sensors;
 			result.timestamp = sensors->timestamp; // TODO: Eventually allow this to be different to sensors.
-
-			//If no measurements are in the goal, then there it was not observed
+			//Singularity goals
+			result.angularSize = arma::vec2({0, 0});
+			result.quad = Quad(result.screenAngular,result.screenAngular,result.screenAngular,result.screenAngular);
+			result.side = messages::vision::Goal::Side::UNKNOWN;
+			//If no measurements are in the goal, then it was not observed
 			return result;
 		}
 	};
