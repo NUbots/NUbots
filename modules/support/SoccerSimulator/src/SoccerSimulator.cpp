@@ -29,8 +29,6 @@
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/ServoID.h"
-#include "messages/platform/darwin/DarwinSensors.h"
-#include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/motion/WalkCommand.h"
 
 namespace modules {
@@ -293,8 +291,8 @@ namespace support {
 
                 emit(std::move(goals));
 
-            }else{
-                //Emit current self exactly
+            } else {
+                // Emit current self exactly
                 auto r = std::make_unique<std::vector<messages::localisation::Self>>();
                 r->push_back(messages::localisation::Self());
                 r->back().position = world.robotPose.xy();
@@ -308,11 +306,14 @@ namespace support {
 
             if (cfg_.simulate_ball_observations) {
                 auto ball_vec = std::make_unique<std::vector<messages::vision::Ball>>();
-                if(cfg_.blind_robot){
+                if (cfg_.blind_robot) {
                     emit(std::move(ball_vec));
                     return;
                 }
-                //Note that world.ballPose represents the ball height in 3rd coord
+
+                // VirtualBall ball
+
+                // Note that world.ballPose represents the ball height in 3rd coord
                 if(cfg_.ignore_head_pose || objectInView(world.ballPose, world.robotPose, sensors)){
 
                     messages::vision::Ball ball;
@@ -329,7 +330,7 @@ namespace support {
                 }
 
             } else {
-                //Emit current ball exactly 
+                // Emit current ball exactly 
                 auto b = std::make_unique<messages::localisation::Ball>();
                 b->position = world.robotPose.worldToLocal(world.ballPose).xy();
                 b->velocity = world.robotPose.rotation().t() * world.ballVelocity.xy();

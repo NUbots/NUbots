@@ -110,7 +110,7 @@ namespace localisation {
                 arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
                 auto model_cov = model->GetCovariance();
 
-                log("model_state = ", model_state.t());
+                // log("model_state = ", model_state.t());
                 // log("model_cov = \n", model_cov);
                 
                 Self robot_model;
@@ -167,7 +167,7 @@ namespace localisation {
         on<Trigger<std::vector<messages::vision::Goal>>,
            With<Sensors>,
            Options<Sync<MMKFRobotLocalisation>>
-          >("MMKFRobotLocalisation Step",
+          >("MMKFRobotLocalisation Measurement Step",
             [this](const std::vector<messages::vision::Goal>& goals, const Sensors& sensors) {
 
             //Is this check necessary?

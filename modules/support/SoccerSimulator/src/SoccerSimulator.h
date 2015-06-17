@@ -119,6 +119,7 @@ namespace support {
             utility::math::matrix::Transform2D robotPose;
             utility::math::matrix::Transform2D robotVelocity;
             utility::math::matrix::Transform2D ballPose;
+            // VirtualBall ball;
             utility::math::matrix::Transform2D ballVelocity;  
         };
 
