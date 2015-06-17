@@ -106,7 +106,8 @@ namespace support {
         cfg_.emit_ball_fieldobjects = config["nusight"]["emit_ball"].as<bool>();
 
         world.robotPose = config["initial"]["robot_pose"].as<arma::vec3>();
-        world.ballPose = config["initial"]["ball_pose"].as<arma::vec3>();
+        world.ball.position = config["initial"]["ball"]["position"].as<arma::vec3>();
+        world.ball.diameter = config["initial"]["ball"]["diameter"].as<float>();
 
         cfg_.ignore_head_pose = config["ignore_head_pose"].as<bool>();
         cfg_.blind_robot = config["blind_robot"].as<bool>();
@@ -148,7 +149,7 @@ namespace support {
 
             
             Transform2D oldRobotPose = world.robotPose;
-            Transform2D oldBallPose = world.ballPose;
+            Transform2D oldBallPose = world.ball.position;
             Transform2D diff;
             
             switch (cfg_.robot.motion_type){
@@ -180,16 +181,16 @@ namespace support {
             // Update ball position
             switch (cfg_.ball.motion_type){
                 case MotionType::NONE: 
-                    world.ballVelocity = { 0, 0 , 0};
+                    world.ball.velocity = { 0, 0 , 0};
                     break;
 
                 case MotionType::PATH:
                     
-                    world.ballPose.xy() = getPath(cfg_.ball.path);
+                    world.ball.position.rows(0,1) = getPath(cfg_.ball.path);
 
-                    diff = world.ballPose - oldBallPose;
+                    diff = world.ball.position - oldBallPose;
 
-                    world.ballVelocity = Transform2D({arma::norm(diff) * SIMULATION_UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
+                    world.ball.velocity = Transform2D({arma::norm(diff) * SIMULATION_UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
                     break;
 
                 case MotionType::MOTION:
@@ -199,11 +200,11 @@ namespace support {
                         //Empty queue
                         std::queue<KickCommand>().swap(kickQueue);
                         //Check if kick worked:
-                        Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ballPose);
+                        Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ball.position);
 
                         if( relativeBallPose.x() < kick_cfg.MAX_BALL_DISTANCE &&
                             std::fabs(relativeBallPose.y()) < kick_cfg.KICK_CORRIDOR_WIDTH / 2){
-                                world.ballPose.xy() += world.robotPose.rotation() * lastKickCommand.direction.rows(0, 1);
+                                world.ball.position.rows(0,1) += world.robotPose.rotation() * lastKickCommand.direction.rows(0, 1);
                         }
                     }
                     break;
@@ -214,7 +215,11 @@ namespace support {
         // Simulate Vision
         on<Trigger<Every<30, Per<std::chrono::seconds>>>,
             With<Raw<Sensors>>,
-            Options<Sync<SoccerSimulator>>>("Vision Simulation", [this](const time_t&, const std::shared_ptr<Sensors>& sensors) {
+            With<CameraParameters>,
+            Options<Sync<SoccerSimulator>>
+            >("Vision Simulation", [this](const time_t&,
+                const std::shared_ptr<Sensors>& sensors,
+                const CameraParameters& camParams) {
 
             if (field_description_ == nullptr) {
                 NUClear::log(__FILE__, __LINE__, ": field_description_ == nullptr");
@@ -273,22 +278,6 @@ namespace support {
                     goals->push_back(goal2);
                 }
 
-                // Input 
-                // cfg_.observe_right_goal
-                // cfg_.distinguish_left_and_right_goals
-                // cfg_.observe_left_goal
-                // cfg_.distinguish_left_and_right_goals
-
-                if(cfg_.observe_right_goal){
-                    auto observed_goals = observeGoal();
-                    goals->insert(goals->end(),observed_goals.begin(),observed_goals.end());
-                }
-                if(cfg_.observe_left_goal){
-                    auto observed_goals = observeGoal();
-                    goals->insert(goals->end(),observed_goals.begin(),observed_goals.end());
-                }
-
-
                 emit(std::move(goals));
 
             } else {
@@ -311,29 +300,21 @@ namespace support {
                     return;
                 }
 
-                // VirtualBall ball
+                auto ball = world.ball.detect(camParams, world.robotPose, sensors);
 
-                // Note that world.ballPose represents the ball height in 3rd coord
-                if(cfg_.ignore_head_pose || objectInView(world.ballPose, world.robotPose, sensors)){
+                if (!ball.measurements.empty()) {
 
-                    messages::vision::Ball ball;
-                    messages::vision::VisionObject::Measurement b_m;
-                    arma::vec3 ball_pos_3d = {0, 0, 0};
-                    ball_pos_3d.rows(0, 1) = world.ballPose.xy();
-                    b_m.position = SphericalRobotObservation(world.robotPose.xy(), world.robotPose.angle(), ball_pos_3d);
-                    b_m.error = arma::eye(3, 3) * 0.1;
-                    ball.measurements.push_back(b_m);
-                    ball.sensors = sensors;
                     ball_vec->push_back(ball);
 
-                    emit(std::move(ball_vec));                    
                 }
+
+                emit(std::move(ball_vec));
 
             } else {
                 // Emit current ball exactly 
                 auto b = std::make_unique<messages::localisation::Ball>();
-                b->position = world.robotPose.worldToLocal(world.ballPose).xy();
-                b->velocity = world.robotPose.rotation().t() * world.ballVelocity.xy();
+                b->position = world.robotPose.worldToLocal(world.ball.position).xy();
+                b->velocity = world.robotPose.rotation().t() * world.ball.velocity.rows(0,1);
                 b->position_cov = 0.00001 * arma::eye(2,2);
                 b->last_measurement_time = NUClear::clock::now();
                 emit(std::make_unique<std::vector<messages::localisation::Ball>>(
@@ -353,7 +334,7 @@ namespace support {
             arma::vec3 robotHeadingVector = {bearingVector[0], bearingVector[1], 0};
             emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, robotHeadingVector, 1));
 
-            emit(drawSphere("ball", {world.ballPose.x(), world.ballPose.y(), 0}, 0.1));            
+            emit(drawSphere("ball", {world.ball.position(0), world.ball.position(1), 0}, 0.1));            
 
         });
 
@@ -390,30 +371,6 @@ namespace support {
         }
         return arma::vec2({wave1,wave2});
     }
-
-    bool SoccerSimulator::objectInView(const arma::vec3& objectPosition, const Transform2D& robotPose, const std::shared_ptr<Sensors>& sensors){
-        return true;
-    }
-
-    messages::vision::Goal SoccerSimulator::observeGoal(arma::vec3 goalBottom, arma::vec3 goalTop){
-        //TODO: need to check if goal is visible based on head somewhere
-        std::vector<messages::vision::Goal> goal1;
-        messages::vision::VisionObject::Measurement g1_m;
-        g1_m.position = SphericalRobotObservation(world.robotPose.xy(), world.robotPose.angle(), goal_r_pos);
-        g1_m.error = arma::eye(3, 3) * 0.1;
-        goal1.measurements.push_back(g1_m);
-        goal1.measurements.push_back(g1_m);
-        goal1.side = messages::vision::Goal::Side::RIGHT;
-        if (cfg_.distinguish_left_and_right_goals) {
-            goal1.side = messages::vision::Goal::Side::RIGHT;
-        } else {
-            goal1.side = messages::vision::Goal::Side::UNKNOWN;
-        }
-        goal1.sensors = sensors;
-        return goal1;
-    }
-
-    // Goal SoccerSimulator::()
 
 }
 }

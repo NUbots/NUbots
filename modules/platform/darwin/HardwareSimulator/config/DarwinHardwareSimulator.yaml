@@ -1,4 +1,5 @@
-imu_drift_rate: 0.1
+#IMU drift in rad/s
+imu_drift_rate: 0.0
 
 noise:
   accelerometer:

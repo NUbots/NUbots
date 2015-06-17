@@ -28,7 +28,10 @@
 #include "utility/math/angle.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/Sensors.h"
+#include "messages/input/CameraParameters.h"
 #include "messages/motion/KickCommand.h"
+
+#include "VirtualVision.h"
 
 namespace modules {
 namespace support {
@@ -114,13 +117,13 @@ namespace support {
         } cfg_;
 
         //World State
-        struct WorldState{
+        struct WorldState {
             //Transform2D == (x,y,heading)
             utility::math::matrix::Transform2D robotPose;
             utility::math::matrix::Transform2D robotVelocity;
-            utility::math::matrix::Transform2D ballPose;
-            // VirtualBall ball;
-            utility::math::matrix::Transform2D ballVelocity;  
+            // utility::math::matrix::Transform2D ballPose;
+            // utility::math::matrix::Transform2D ballVelocity;  
+            VirtualBall ball;
         };
 
         WorldState world;
@@ -135,10 +138,7 @@ namespace support {
 
         std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float dHeading);
         
-
         arma::vec2 getPath(Config::Motion::Path p);
-
-        bool objectInView(const arma::vec3& objectPosition, const utility::math::matrix::Transform2D& robotPose, const std::shared_ptr<messages::input::Sensors>& sensors);
 
     public:
         /// @brief Called by the powerplant to build and setup the SoccerSimulator reactor.

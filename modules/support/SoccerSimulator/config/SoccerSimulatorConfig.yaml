@@ -33,7 +33,9 @@ nusight:
 
 initial:
   robot_pose: [0, 2, 0]
-  ball_pose: [2, -1, 0]
+  ball:
+    position: [2, -1, 0]
+    diameter: 0.1
 
 ignore_head_pose: false
 
