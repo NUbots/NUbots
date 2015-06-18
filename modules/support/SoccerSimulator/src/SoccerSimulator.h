@@ -90,8 +90,6 @@ namespace support {
 
             bool simulate_goal_observations = true;
             bool simulate_ball_observations = true;
-            bool observe_left_goal = true;
-            bool observe_right_goal = true;
             bool distinguish_left_and_right_goals = true;
 
             struct Motion{
@@ -110,8 +108,6 @@ namespace support {
             bool emit_robot_fieldobjects = true;
             bool emit_ball_fieldobjects = true;
 
-            bool ignore_head_pose = false;
-            
             bool blind_robot = false;
 
         } cfg_;

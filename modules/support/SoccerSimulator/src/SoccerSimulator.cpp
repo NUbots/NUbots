@@ -86,9 +86,6 @@ namespace support {
 
         cfg_.simulate_goal_observations = config["vision"]["goal_observations"].as<bool>();
         cfg_.simulate_ball_observations = config["vision"]["ball_observations"].as<bool>();
-        cfg_.observe_left_goal = config["vision"]["observe"]["left_goal"].as<bool>();
-        cfg_.observe_right_goal = config["vision"]["observe"]["right_goal"].as<bool>();
-        cfg_.distinguish_left_and_right_goals = config["vision"]["distinguish_left_and_right_goals"].as<bool>();
 
         cfg_.robot.motion_type = motionTypeFromString(config["robot"]["motion_type"].as<std::string>());
         cfg_.robot.path.period = config["robot"]["path"]["period"].as<float>();
@@ -101,15 +98,11 @@ namespace support {
         cfg_.ball.path.x_amp = config["ball"]["path"]["x_amp"].as<float>();
         cfg_.ball.path.y_amp = config["ball"]["path"]["y_amp"].as<float>();
         cfg_.ball.path.type = pathTypeFromString(config["ball"]["path"]["type"].as<std::string>());
-        
-        cfg_.emit_robot_fieldobjects = config["nusight"]["emit_self"].as<bool>();
-        cfg_.emit_ball_fieldobjects = config["nusight"]["emit_ball"].as<bool>();
 
         world.robotPose = config["initial"]["robot_pose"].as<arma::vec3>();
         world.ball.position = config["initial"]["ball"]["position"].as<arma::vec3>();
         world.ball.diameter = config["initial"]["ball"]["diameter"].as<float>();
 
-        cfg_.ignore_head_pose = config["ignore_head_pose"].as<bool>();
         cfg_.blind_robot = config["blind_robot"].as<bool>();
 
         kicking = false;

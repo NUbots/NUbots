@@ -1,16 +1,14 @@
 
 vision:
+  # Disabling either of these emits corresponding ground truth simulation results
+  # as localisation result
   goal_observations: true
-  observe:
-    left_goal: true
-    right_goal: true
-  distinguish_left_and_right_goals: true
   ball_observations: true
 
 robot:
-  #If use_motion is true, then the robot will move based on the latest motion commands
-  motion_type: NONE #NONE, PATH or MOTION
-  #If use_motion is false, the following path with be used instead
+  #If use_motion is true, then the robot will move based on the latest behaviour commands
+  motion_type: MOTION #NONE, PATH or MOTION
+  #If motion_type is PATH, the following path with be used
   path:
     period: 10
     x_amp: 3
@@ -18,27 +16,24 @@ robot:
     type: SIN #SIN, TRIANGLE
 
 ball:
-  #If use_motion is true, then the ball will move based on the latest motion commands
+  #If use_motion is true, then the ball will move based on the latest behaviour commands
   motion_type: MOTION #NONE, PATH or MOTION
   path:
-  #If use_motion is false, the following path with be used instead
+  #If motion_type is PATH, the following path with be used
     period: 5
     x_amp: 3
     y_amp: 2
     type: SIN #SIN, TRIANGLE
 
-nusight:
-  emit_self: true
-  emit_ball: true
-
+# Initial pose of the robot, mainly for MOTION type
 initial:
-  robot_pose: [0, 2, 0]
+  robot_pose: [0, 0, 0]
   ball:
-    position: [2, -1, 0]
+    position: [2, 1, 0]
     diameter: 0.1
 
-ignore_head_pose: false
-
+# Turns off vision but leaves localisation running with no observations.
+# Allows for testing of things like odometry
 blind_robot: false
 
 
