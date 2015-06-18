@@ -1,7 +1,7 @@
 ADD_ROLE(
     support::configuration::ConfigSystem
     support::configuration::GlobalConfig
-    platform::fakedarwin::HardwareIO
+    platform::darwin::HardwareSimulator
     platform::darwin::SensorFilter
     behaviour::tools::ScriptTuner
     behaviour::Controller
