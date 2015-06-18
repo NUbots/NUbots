@@ -7,14 +7,23 @@ output:
     pub_port: 12000
     sub_port: 12001
     high_water_mark: 50
+
+# Select which data to send
 reaction_handles:
+  # Statistics about reactions, modules and runtimes
   reaction_statistics: false
+  # Data for Chart tool in NUsight
   data_points: false
+  # Info from the game controller
   game_controller: false
+  # Info about subsumption and behaviour
   behaviour: false
+  # Motor positions, orientation, etc.
   sensors: false
-  image: false
-  classified_image: false
-  goals: false
-  balls: false
+  # Localisation state estimates and uncertainties
   localisation: false
+  # Vision data
+  image: false # Raw image
+  classified_image: false # Colour classified
+  goals: false # Detected goals in vision space
+  balls: false # Detected balls in vision space
