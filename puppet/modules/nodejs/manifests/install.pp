@@ -138,7 +138,7 @@ define nodejs::install (
     ensure_packages([ 'python', $gplusplus_package, 'make' ])
 
     exec { "nodejs-make-install-${node_version}":
-      command => "./configure --prefix=${node_unpack_folder} && make -j && make install",
+      command => "./configure --prefix=${node_unpack_folder} && make && make install",
       path    => "${node_unpack_folder}:/usr/bin:/bin:/usr/sbin:/sbin",
       cwd     => $node_unpack_folder,
       user    => 'root',
