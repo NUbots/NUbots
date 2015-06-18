@@ -17,30 +17,45 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_PLATFORM_FAKEDARWIN_HARDWAREIO_H
-#define MODULES_PLATFORM_FAKEDARWIN_HARDWAREIO_H
+#ifndef MODULES_PLATFORM_DARWIN_HARDWARESIMULATOR_H
+#define MODULES_PLATFORM_DARWIN_HARDWARESIMULATOR_H
 
 #include <nuclear>
+#include <armadillo>
 
 #include "messages/platform/darwin/DarwinSensors.h"
 
 namespace modules {
 namespace platform {
-namespace fakedarwin {
+namespace darwin {
 
     /**
      * This NUClear Reactor is responsible for reading in the data for the Darwin Platform and emitting it to the rest
      * of the system
      *
-     * @author Trent Houliston
+     * @author Jake Fountain
      */
-    class HardwareIO : public NUClear::Reactor {
+    class HardwareSimulator : public NUClear::Reactor {
     private:
         messages::platform::darwin::DarwinSensors sensors;
-
+        std::queue<messages::platform::darwin::DarwinSensors::Gyroscope> gyroQueue;
+        float imu_drift_rate;
+        static constexpr size_t UPDATE_FREQUENCY = 90;
+        void addNoise(std::unique_ptr<messages::platform::darwin::DarwinSensors>& sensors);
+        struct NoiseConfig{
+            struct Vec3Noise{
+                float x = 0.001;
+                float y = 0.001;
+                float z = 0.001;
+            };
+            Vec3Noise accelerometer;
+            Vec3Noise gyroscope;
+        } noise;
+        arma::vec3 integrated_gyroscope;
     public:
         /// @brief called by a Powerplant to construct this reactor
-        explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
+        explicit HardwareSimulator(std::unique_ptr<NUClear::Environment> environment);
+        static constexpr const char* CONFIGURATION_PATH = "DarwinHardwareSimulator.yaml";
     };
 }
 }

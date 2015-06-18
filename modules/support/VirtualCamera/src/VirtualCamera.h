@@ -14,34 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
-#define MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
-
-#include <armadillo>
-#include "messages/motion/KickCommand.h"
+#ifndef MODULES_SUPPORT_VIRTUALCAMERA_H
+#define MODULES_SUPPORT_VIRTUALCAMERA_H
 
 #include <nuclear>
+
 namespace modules {
-namespace behaviour {
-namespace planning {
+namespace support {
 
-    class KickPlanner : public NUClear::Reactor {
+    class VirtualCamera : public NUClear::Reactor {
+
     public:
-        /// @brief Called by the powerplant to build and setup the KickPlanner reactor.
-        explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
-        static constexpr const char* CONFIGURATION_PATH = "KickPlanner.yaml";
+        /// @brief Called by the powerplant to build and setup the VirtualCamera reactor.
+        explicit VirtualCamera(std::unique_ptr<NUClear::Environment> environment);
 
-    private:
-        size_t framesNotSeen = 1000;
-       	messages::motion::KickPlannerConfig cfg;
+        /// @brief the path to the configuration file for VirtualCamera
+        static constexpr const char* CONFIGURATION_PATH = "VirtualCamera.yaml";
     };
 
 }
 }
-}
 
-
-#endif
+#endif MODULES_SUPPORT_VIRTUALCAMERA_H

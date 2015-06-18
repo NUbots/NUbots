@@ -35,7 +35,6 @@ using utility::nubugger::graph;
 using messages::input::Sensors;
 using messages::support::Configuration;
 // using messages::localisation::FakeOdometry;
-using messages::localisation::Mock;
 using messages::localisation::Ball;
 
 namespace modules {
@@ -52,12 +51,13 @@ namespace localisation {
     KFBallLocalisation::KFBallLocalisation(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)) {
 
+
         on<Trigger<Configuration<KFBallLocalisationEngineConfig>>>([this](const Configuration<KFBallLocalisationEngineConfig>& config) {
             engine_.UpdateConfiguration(config);
         });
 
         // Emit to NUbugger
-        on<Trigger<Every<100, std::chrono::milliseconds>>,
+       emit_data_handle = on<Trigger<Every<100, std::chrono::milliseconds>>,
            With<Sensors>,
            With<std::vector<Self>>,
            Options<Sync<KFBallLocalisation>>>("NUbugger Output",
@@ -76,21 +76,20 @@ namespace localisation {
             ball.position_cov = model_cov.submat(0,0,1,1);
             ball.world_space = false;
 
-            if (engine_.CanEmitFieldObjects()) {
-                auto ball_msg = std::make_unique<Ball>(ball);
-                auto ball_vec_msg = std::make_unique<std::vector<Ball>>();
-                ball_vec_msg->push_back(ball);
-                emit(std::move(ball_msg));
-                emit(std::move(ball_vec_msg));
-            } else {
-                Mock<Ball> mock_ball = Mock<Ball>(ball);
-                auto mock_ball_msg = std::make_unique<Mock<Ball>>(mock_ball);
-                emit(std::move(mock_ball_msg));
-            }
+            ball.last_measurement_time = last_measurement_time;
+
+            auto ball_msg = std::make_unique<Ball>(ball);
+            auto ball_vec_msg = std::make_unique<std::vector<Ball>>();
+            ball_vec_msg->push_back(ball);
+            emit(std::move(ball_msg));
+            emit(std::move(ball_vec_msg));
 
             emit(graph("Localisation Ball", model_state(0), model_state(1)));
             emit(graph("Localisation Ball Velocity", model_state(2), model_state(3)));
         });
+
+        //Disable until first data
+        emit_data_handle.disable();
 
         // on<Trigger<FakeOdometry>,
         //     Options<Sync<KFBallLocalisation>>
@@ -110,12 +109,19 @@ namespace localisation {
              Options<Sync<KFBallLocalisation>>
              >("KFBallLocalisation Step",
                 [this](const std::vector<messages::vision::Ball>& balls) {
+            
+            //Is this check necessary?
+            if(!emit_data_handle.enabled()){
+                emit_data_handle.enable();
+            }
 
             if(balls.size() > 0) {
                 auto curr_time = NUClear::clock::now();
+                last_measurement_time = curr_time;
                 engine_.TimeUpdate(curr_time);
 
                 engine_.MeasurementUpdate(balls[0]);
+
             }
         });
     }

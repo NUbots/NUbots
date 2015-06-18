@@ -14,34 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
-#define MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
+// Uncomment this line when other test files are added
+//#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+//#include <catch.hpp>
 
-#include <armadillo>
-#include "messages/motion/KickCommand.h"
-
-#include <nuclear>
-namespace modules {
-namespace behaviour {
-namespace planning {
-
-    class KickPlanner : public NUClear::Reactor {
-    public:
-        /// @brief Called by the powerplant to build and setup the KickPlanner reactor.
-        explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
-        static constexpr const char* CONFIGURATION_PATH = "KickPlanner.yaml";
-
-    private:
-        size_t framesNotSeen = 1000;
-       	messages::motion::KickPlannerConfig cfg;
-    };
-
-}
-}
-}
-
-
-#endif
+// Remove this line when test files are added
+int main() { return 0; }

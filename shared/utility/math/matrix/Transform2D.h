@@ -21,6 +21,7 @@
 #define UTILITY_MATH_MATRIX_TRANSFORM2D_H
 
 #include <armadillo>
+#include "Rotation2D.h"
 
 namespace utility {
 namespace math {
@@ -65,6 +66,7 @@ namespace matrix {
              */
             Transform2D worldToLocal(const Transform2D& reference) const;
 
+
             /**
              * Interpolate between itself and given target vector
              *
@@ -83,6 +85,8 @@ namespace matrix {
 
             inline double angle() const { return at(2); }
             inline double& angle() { return at(2); }
+
+            inline Rotation2D rotation() {return Rotation2D::createRotation(angle());}
 
             inline const arma::subview_col<double> xy() const { return rows(0,1); }
             inline arma::subview_col<double> xy() { return rows(0,1); }

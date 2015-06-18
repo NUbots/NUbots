@@ -31,6 +31,9 @@ namespace localisation {
     private:
         /// The engine that does all of the work
         localisation::KFBallLocalisationEngine engine_;
+        ReactionHandle emit_data_handle;
+
+        time_t last_measurement_time;
 
     public:
         /// @brief Called by the powerplant to build and setup the KFBallLocalisation reactor.

@@ -1,0 +1,5 @@
+imageWidth: 640
+imageHeight: 480
+FOV_X: 1.0472
+FOV_Y: 0.785398
+DISTORTION_FACTOR: -0.000018

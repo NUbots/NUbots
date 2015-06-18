@@ -22,6 +22,8 @@
 
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
+#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 
 namespace messages {
     namespace support {

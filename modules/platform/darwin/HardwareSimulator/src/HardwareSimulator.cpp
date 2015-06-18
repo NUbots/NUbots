@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "HardwareIO.h"
+#include "HardwareSimulator.h"
 
 #include <armadillo>
 
@@ -25,22 +25,23 @@
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/ServoID.h"
 #include "utility/math/angle.h"
-
-using messages::platform::darwin::DarwinSensors;
-using messages::motion::ServoTarget;
-using messages::input::ServoID;
+#include "messages/support/Configuration.h" 
 
 namespace modules {
 namespace platform {
-namespace fakedarwin {
+namespace darwin {
 
-    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    using messages::platform::darwin::DarwinSensors;
+    using messages::motion::ServoTarget;
+    using messages::input::ServoID;
+    using messages::support::Configuration;
+
+    HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         /*
          CM730 Data
          */
-
-        // Read our Error code
+        //Read our Error code
         sensors.cm730ErrorFlags = 0;
 
         // LED Panel
@@ -84,10 +85,10 @@ namespace fakedarwin {
         sensors.fsr.right.errorFlags = 0;
 
         // Sensors
-        sensors.fsr.right.fsr1 = 0;
-        sensors.fsr.right.fsr2 = 0;
-        sensors.fsr.right.fsr3 = 0;
-        sensors.fsr.right.fsr4 = 0;
+        sensors.fsr.right.fsr1 = 1;
+        sensors.fsr.right.fsr2 = 1;
+        sensors.fsr.right.fsr3 = 1;
+        sensors.fsr.right.fsr4 = 1;
 
         // Centre
         sensors.fsr.right.centreX = 0;
@@ -98,10 +99,10 @@ namespace fakedarwin {
         sensors.fsr.left.errorFlags = 0;
 
         // Sensors
-        sensors.fsr.left.fsr1 = 0;
-        sensors.fsr.left.fsr2 = 0;
-        sensors.fsr.left.fsr3 = 0;
-        sensors.fsr.left.fsr4 = 0;
+        sensors.fsr.left.fsr1 = 1;
+        sensors.fsr.left.fsr2 = 1;
+        sensors.fsr.left.fsr3 = 1;
+        sensors.fsr.left.fsr4 = 1;
 
         // Centre
         sensors.fsr.left.centreX = 0;
@@ -143,7 +144,25 @@ namespace fakedarwin {
             servo.temperature = 0;
         }
 
-        on<Trigger<Every<60, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
+        on<Trigger<Configuration<HardwareSimulator>>>("Hardware Simulator Config",[this](const Configuration<HardwareSimulator>& config){
+            imu_drift_rate = config["imu_drift_rate"].as<float>();
+
+            noise.accelerometer.x = config["noise"]["accelerometer"]["x"].as<float>();
+            noise.accelerometer.y = config["noise"]["accelerometer"]["y"].as<float>();
+            noise.accelerometer.z = config["noise"]["accelerometer"]["z"].as<float>();
+
+            noise.gyroscope.x = config["noise"]["gyroscope"]["x"].as<float>();
+            noise.gyroscope.y = config["noise"]["gyroscope"]["y"].as<float>();
+            noise.gyroscope.z = config["noise"]["gyroscope"]["z"].as<float>();
+
+        });
+
+        on<Trigger<DarwinSensors::Gyroscope>>("Receive Simulated Gyroscope", [this](const DarwinSensors::Gyroscope& gyro){
+            gyroQueue.push(gyro);
+        });
+
+
+        on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
 
             for (int i = 0; i < 20; ++i) {
 
@@ -169,23 +188,32 @@ namespace fakedarwin {
                 }
             }
 
+            //Gyro
+            arma::vec3 sumGyro = {0,0,0};
+            while (!gyroQueue.empty()){
+                auto g = gyroQueue.front();
+                sumGyro += arma::vec3({g.x,g.y,g.z});
+                gyroQueue.pop();
+            }
+            sumGyro = (sumGyro * UPDATE_FREQUENCY + arma::vec3({0,0,imu_drift_rate})) ;
+            sensors.gyroscope.x = sumGyro[0];
+            sensors.gyroscope.y = sumGyro[1];
+            sensors.gyroscope.z = sumGyro[2];
+
+            sensors.timestamp = NUClear::clock::now();
+            
+            //Debug:
+            // integrated_gyroscope += sumGyro + arma::vec3({0,0,imu_drift_rate});
+            // std::cout << "HardwareSimulator gyroscope = " << sensors.gyroscope.x << ", " << sensors.gyroscope.y << ", " << sensors.gyroscope.z << std::endl;
+            // std::cout << "HardwareSimulator integrated_gyroscope = " << integrated_gyroscope.t() << std::endl;
+            
+            //Add some noise so that sensor fusion doesnt converge to a singularity
+            auto sensors_message = std::make_unique<DarwinSensors>(sensors);
+            addNoise(sensors_message);
             // Send our nicely computed sensor data out to the world
-            emit(std::make_unique<DarwinSensors>(sensors));
+            emit(std::move(sensors_message));
 
         });
-
-        // NOTE: dev test, makes random angles between -PI and PI
-        /*on<Trigger<Every<2, std::chrono::seconds> >, Options<Single> >([this](const time_t& time) {
-
-//          sensors.servo[ServoID::R_SHOULDER_PITCH].goalPosition = target;
-//          sensors.servo[ServoID::L_SHOULDER_PITCH].goalPosition = target;
-
-            for (int i = 0; i < 20; ++i) {
-                float target = (float(rand()) / RAND_MAX) * 2 * M_PI - M_PI;
-                sensors.servo[i].goalPosition = target;
-            }
-
-        });*/
 
         // This trigger writes the servo positions to the hardware
         on<Trigger<std::vector<ServoTarget>>>([this](const std::vector<ServoTarget>& commands) {
@@ -209,8 +237,6 @@ namespace fakedarwin {
                 servo.goalPosition = command.position;
             }
 
-            // Send our nicely computed sensor data out to the world
-            emit(std::make_unique<DarwinSensors>(sensors));
         });
 
         on<Trigger<ServoTarget>>([this](const ServoTarget command) {
@@ -220,6 +246,21 @@ namespace fakedarwin {
             // Emit it so it's captured by the reaction above
             emit<Scope::DIRECT>(std::move(commandList));
         });
+    }
+
+    float centered_noise() {
+        return rand() / float(RAND_MAX) - 0.5f;
+    }
+
+    void HardwareSimulator::addNoise(std::unique_ptr<DarwinSensors>& sensors){
+        // TODO: Use a more standard c++ random generator.
+        sensors->accelerometer.x += noise.accelerometer.x * centered_noise();
+        sensors->accelerometer.y += noise.accelerometer.y * centered_noise();
+        sensors->accelerometer.z += noise.accelerometer.z * centered_noise();
+
+        sensors->gyroscope.x += noise.gyroscope.x * centered_noise();
+        sensors->gyroscope.y += noise.gyroscope.y * centered_noise();
+        sensors->gyroscope.z += noise.gyroscope.z * centered_noise();
     }
 }
 }

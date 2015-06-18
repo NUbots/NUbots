@@ -34,6 +34,7 @@
 #include "messages/localisation/ResetRobotHypotheses.h"
 #include "MMKFRobotLocalisationEngine.h"
 #include "RobotModel.h"
+#include "utility/nubugger/NUhelpers.h"
 
 using utility::math::matrix::Rotation3D;
 using utility::math::angle::bearingToUnitVector;
@@ -44,15 +45,16 @@ using messages::support::Configuration;
 using messages::support::FieldDescription;
 using messages::input::Sensors;
 using messages::vision::Goal;
-using messages::localisation::Mock;
 using messages::localisation::Self;
 using messages::localisation::ResetRobotHypotheses;
+using utility::nubugger::graph;
 
 namespace modules {
 namespace localisation {
     MMKFRobotLocalisation::MMKFRobotLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)),
           engine_(std::make_unique<MMKFRobotLocalisationEngine>()) {
+
 
         on<Trigger<Configuration<MultiModalRobotModelConfig>>>(
             "MultiModalRobotModelConfig Update",
@@ -91,8 +93,8 @@ namespace localisation {
             // }
         });
 
-        // Emit to NUbugger
-        on<Trigger<Every<100, std::chrono::milliseconds>>,
+        // Emit self
+        emit_data_handle = on<Trigger<Every<100, std::chrono::milliseconds>>,
            With<Sensors>,
            Options<Sync<MMKFRobotLocalisation>>
            >("Localisation NUbugger Output", [this](const time_t&, const Sensors& sensors) {
@@ -108,6 +110,9 @@ namespace localisation {
                 arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
                 auto model_cov = model->GetCovariance();
 
+                // log("model_state = ", model_state.t());
+                // log("model_cov = \n", model_cov);
+                
                 Self robot_model;
                 robot_model.position = model_state.rows(robot::kX, robot::kY);
                 Rotation3D imuRotation = Rotation3D::createRotationZ(model_state(robot::kImuOffset));
@@ -115,44 +120,65 @@ namespace localisation {
                 robot_model.heading = world_heading.rows(0, 1);
                 robot_model.velocity = model_state.rows(robot::kVX, robot::kVY);
                 robot_model.position_cov = model_cov.submat(0,0,1,1);
+                robot_model.last_measurement_time = last_measurement_time;
                 robots.push_back(robot_model);
             }
 
-            if (engine_->CanEmitFieldObjects()) {
-                auto robot_msg = std::make_unique<std::vector<Self>>(robots);
-                emit(std::move(robot_msg));
-            } else {
-                auto mock_robots = Mock<std::vector<Self>>(robots);
-                auto mock_robot_msg = std::make_unique<Mock<std::vector<Self>>>(mock_robots);
-                emit(std::move(mock_robot_msg));
-            }
+            auto robot_msg = std::make_unique<std::vector<Self>>(robots);
+            emit(std::move(robot_msg));
         });
 
-        on<Trigger<Sensors>,
-           Options<Sync<MMKFRobotLocalisation>>
-          >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
-            auto curr_time = NUClear::clock::now();
-            engine_->TimeUpdate(curr_time, sensors);
-            engine_->OdometryMeasurementUpdate(sensors);
-        });
+        //Disable until first data
+        emit_data_handle.disable();
 
-        on<Trigger<Every<100, Per<std::chrono::seconds>>>,
-           With<Sensors>,
-           Options<Sync<MMKFRobotLocalisation>>
-          >("MMKFRobotLocalisation Time", [this](const time_t&, const Sensors& sensors) {
-            auto curr_time = NUClear::clock::now();
-            engine_->TimeUpdate(curr_time, sensors);
-        });
+
+        // on<Trigger<Sensors>,
+        //    Options<Sync<MMKFRobotLocalisation>>
+        //   >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
+        //     auto curr_time = NUClear::clock::now();
+
+           
+
+
+        //     //TODO: REMOVE THIS
+        //     if(!emit_data_handle.enabled()){
+        //         //Activate when data received
+        //         emit_data_handle.enable();
+        //     }
+
+
+
+
+
+        //     emit(graph("Odometry Measurement Update", sensors.odometry[0], sensors.odometry[1]));
+        //     log("Odometry Measurement Update", sensors.odometry.t());
+        //     engine_->TimeUpdate(curr_time, sensors);
+        //     engine_->OdometryMeasurementUpdate(sensors);
+        // });
+
+        // on<Trigger<Every<100, Per<std::chrono::seconds>>>,
+        //    With<Sensors>,
+        //    Options<Sync<MMKFRobotLocalisation>>
+        //   >("MMKFRobotLocalisation Time", [this](const time_t&, const Sensors& sensors) {
+        //     auto curr_time = NUClear::clock::now();
+        //     engine_->TimeUpdate(curr_time, sensors);
+        // });
 
         on<Trigger<std::vector<messages::vision::Goal>>,
            With<Sensors>,
            Options<Sync<MMKFRobotLocalisation>>
-          >("MMKFRobotLocalisation Step",
+          >("MMKFRobotLocalisation Measurement Step",
             [this](const std::vector<messages::vision::Goal>& goals, const Sensors& sensors) {
 
+            //Is this check necessary?
+            if(!emit_data_handle.enabled()){
+                //Activate when data received
+                emit_data_handle.enable();
+            }
             // Ignore empty vectors of goals.
-            if (goals.size() == 0)
+            if (goals.size() == 0){
                 return;
+            }
 
             // Ignore measurements when both of the robots feet are off the ground.
             if (!goals[0].sensors->leftFootDown && !goals[0].sensors->rightFootDown) {
@@ -178,8 +204,11 @@ namespace localisation {
             // }
 
             auto curr_time = NUClear::clock::now();
+            last_measurement_time = curr_time;
+            
             engine_->TimeUpdate(curr_time, sensors);
             engine_->ProcessObjects(goals);
+
         });
     }
 }

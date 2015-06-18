@@ -1,0 +1,13 @@
+#IMU drift in rad/s
+imu_drift_rate: 0.0
+
+noise:
+  accelerometer:
+    x: 0.1
+    y: 0.1
+    z: 0.1
+
+  gyroscope:
+    x: 0.1
+    y: 0.1
+    z: 0.1

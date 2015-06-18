@@ -40,15 +40,17 @@ namespace utility {
                 arma::vec::fixed<IMUModel::size> newState;
 
                 newState = state;
-
+                
                 //make a rotation quaternion
                 const double omega = arma::norm(state.rows(VX, VZ)) + 0.00000000001;
-                const double theta = omega*deltaT*0.5;
+                //Negate to compensate for some later mistake. 
+                //deltaT has been negative for a while and has masked an incorrect hack below
+                const double theta = -omega*deltaT*0.5;
                 const double sinTheta = sin(theta);
                 const double cosTheta = cos(theta);
                 arma::vec vq({cosTheta,state(VX)*sinTheta/omega,state(VY)*sinTheta/omega,state(VZ)*sinTheta/omega});
-
                 //calculate quaternion multiplication
+                //TODO replace with quaternion class
                 arma::vec qcross = arma::cross( vq.rows(1,3), state.rows(QX,QZ) );
                 newState(QW) = vq(0)*state(QW) - arma::dot(vq.rows(1,3), state.rows(QX,QZ));
                 newState(QX) = vq(0)*state(QX) + state(QW)*vq(1) + qcross(0);
