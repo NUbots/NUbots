@@ -241,18 +241,17 @@ namespace support {
                 }
               
                 
-                if (cfg_.observe_right_goal){
-                    for (auto& g : goalPosts){
-                        auto m = g.detect(camParams, world.robotPose, sensors);
+                for (auto& g : goalPosts){
+                    auto m = g.detect(camParams, world.robotPose, sensors);
 
-                        if (!m.measurements.empty()) {
+                    if (!m.measurements.empty()) {
 
-                            goals->push_back(m);
+                        goals->push_back(m);
 
-                        }                        
-                    }
-
+                    }                        
                 }
+
+                
             
                 // Assign leftness and rightness to goals
                 if (goals->size() == 2) {
