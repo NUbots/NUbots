@@ -76,6 +76,44 @@ The following is a guide to getting you set up and ready to contribute to the NU
 	$ git config --global user.email you@example.com
 	$ git config --global color.ui auto
 
+To set up vagrant and simulator
+
+	$ vagrant ssh
+	$ cd nubots/NUbots/build
+	$ cmake .. -G Ninja
+	$ ninja
+
+If quex permission error occurs run
+
+	$ chmod +x /usr/local/bin/quex
+	$ quex
+	$ ninja
+
+Open a second terminal, go to NUsight and run
+
+	$ node app
+
+then in internet browser go to 
+
+localhost:9090 
+
+and then localization window
+go back to the first terminal and run
+
+	$ nano config/NUbugger.yaml
+
+Select which data is to be sent to NUsight (Usually just localization and sensors)
+
+	$ bin/soccersimulator
+	
+and you're done!
+
+Simulation parameters can be found in
+
+	$ nano config/SoccerSimulatorConfig.yaml
+
+
+
 Troubleshooting
 --------
 
