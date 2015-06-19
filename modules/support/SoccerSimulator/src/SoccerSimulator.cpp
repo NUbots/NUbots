@@ -177,7 +177,7 @@ namespace support {
 
                 case MotionType::MOTION:
                 //Update based on walk engine
-                    if(walkCommand && !kicking){
+                    if(walkCommand && !kicking) {
                         world.robotVelocity = walkCommand->command;
                     } else {
                         world.robotVelocity = utility::math::matrix::Transform2D({0,0,0});
@@ -187,7 +187,7 @@ namespace support {
                     break;
             }
             // Update ball position
-            switch (cfg_.ball.motion_type){
+            switch (cfg_.ball.motion_type) {
                 case MotionType::NONE:
                     world.ball.velocity = { 0, 0 , 0};
                     break;
@@ -322,7 +322,6 @@ namespace support {
             emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, robotHeadingVector, 1));
 
             emit(drawSphere("ball", {world.ball.position(0), world.ball.position(1), 0}, 0.1));
-
         });
 
         on<Trigger<Startup>>("SoccerSimulator Startup",[this](const Startup&){
