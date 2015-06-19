@@ -38,4 +38,4 @@ namespace support {
 }
 }
 
-#endif MODULES_SUPPORT_VIRTUALCAMERA_H
+#endif
