@@ -27,6 +27,7 @@
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/motion/ForwardKinematics.h"
+#include "utility/nubugger/NUhelpers.h"
 
 namespace modules {
     namespace platform {
@@ -34,6 +35,8 @@ namespace modules {
 
 
             using messages::support::Configuration;
+            using utility::nubugger::drawArrow;
+            using utility::nubugger::drawSphere;
             using messages::platform::darwin::DarwinSensors;
             using messages::platform::darwin::ButtonLeftDown;
             using messages::platform::darwin::ButtonLeftUp;
@@ -427,6 +430,7 @@ namespace modules {
                     //LOOKOUT!!!! ARRAYOPS_MEAT
                     arma::vec4 COM = calculateCentreOfMass<DarwinModel>(sensors->forwardKinematics, true);
                     sensors->centreOfMass = {COM[0],COM[1], COM[2], COM[3]};
+                    //emit(drawSphere("COM",sensors->centreOfMass.rows(0,2) + arma::vec3({0,0,2 * 0.093 + 0.0335 + 0.034}),0.1)); //Correcting for robot height in nubugger
                     //END MASS MODEL
 
 
