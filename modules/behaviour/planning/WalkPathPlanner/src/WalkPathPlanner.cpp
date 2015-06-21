@@ -61,6 +61,8 @@ namespace modules {
 
                     turnSpeed = file.config["turnSpeed"].as<float>();
                     forwardSpeed = file.config["forwardSpeed"].as<float>();
+                    a = file.config["a"].as<float>();
+                    b = file.config["b"].as<float>();
 
                 });
 
@@ -101,13 +103,22 @@ namespace modules {
 
                     float angle = std::atan2(ball.position[1], ball.position[0]);
                     angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
-                    emit(graph("angle", angle));
-                    emit(graph("ball position", ball.position));
-                    emit(graph("robot position", selfs.front().position));
-                    emit(graph("robot heading", selfs.front().heading));
+                    // emit(graph("angle", angle));
+                    // emit(graph("ball position", ball.position));
+                    // emit(graph("robot position", selfs.front().position));
+                    // emit(graph("robot heading", selfs.front().heading));
+
+                    float distanceToBall = arma::norm(ball.position);
+                    float scale = 2.0 / (1.0 + std::exp(-a * distanceToBall + b)) - 1.0;
+                    float scale2 = angle / M_PI;
+                    float finalForwardSpeed = forwardSpeed * scale * (1.0 - scale2);
+                    // emit(graph("forwardSpeed1", forwardSpeed));
+                    // emit(graph("scale", scale));
+                    // emit(graph("distanceToBall", distanceToBall));
+                    // emit(graph("forwardSpeed2", finalForwardSpeed));
 
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
-                    command->command = Transform2D({forwardSpeed, 0, angle});
+                    command->command = Transform2D({finalForwardSpeed, 0, angle});
 
                     emit(std::move(std::make_unique<WalkStartCommand>()));
                     emit(std::move(command));

@@ -44,6 +44,8 @@ namespace modules {
                 private:
                     float turnSpeed;
                     float forwardSpeed;
+                    float a;
+                    float b;
 
                     //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
 
