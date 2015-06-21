@@ -125,6 +125,44 @@ namespace motion {
         });
 
         updater = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, With<KickVector>, Options<Single>>([this](const time_t&, const Sensors& sensors, const KickVector& kickVector) {
+            //PSEUODCODE
+            //State checker
+            if(balancer.isEnabled()){
+                
+                if(balancer.isBalanced() && !footLifter.isEnabled() && kicker.hasKicked()){
+                    
+                    footLifter.start();
+
+                } else if(footLifter.isLifted() && !kicker.isEnabled()){
+                    kicker.start();
+                }
+
+                if(kicker.hasKicked()){
+                    footLifter.stop();
+                }
+
+                if(footLifter.done()){
+                    balancer.stop();
+                }
+
+            }else{
+                balancer.start()
+            }
+
+            //Do things based on current state
+            
+            if(balancer.isEnabled()){
+                support.kickfoot = balancer.getFootPose();
+            }
+            if(kickLifter.isEnabled()){
+                kickfoot += kickLifter.getFootPose();
+            }
+            if(kicker.isEnabled()){
+                kickfoot += kicker.getFootPose();
+            }
+
+            emit(ServoWaypoints(InverseKinematics(support,kickfoot))); //look up in walk en
+
 
             // TODO use states
 
