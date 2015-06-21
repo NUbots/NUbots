@@ -79,7 +79,7 @@ namespace messages {
             std::vector<Button> buttons;
             std::vector<LED> leds;
 
-            arma::vec2 centreOfPressure;
+            arma::vec3 centreOfPressure;
             arma::vec2 leftFSRCenter;
             arma::vec2 rightFSRCenter;
 

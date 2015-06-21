@@ -356,8 +356,6 @@ namespace modules {
                         // Left foot is on the ground?
                         sensors->leftFootDown = true;
                         sensors->leftFSRCenter = {input.fsr.left.centreX, input.fsr.left.centreY};
-                        arma::vec4 bodyCentre = utility::motion::kinematics::fsrCentreToBody<DarwinModel>(*sensors, sensors->leftFSRCenter, true);
-                        emit(graph("bodyCentre", bodyCentre));
                         // log("bodyCentre", bodyCentre.t());
                         // log("bodyCentre", sensors->leftFSRCenter);
                     }
@@ -366,6 +364,8 @@ namespace modules {
                         sensors->rightFootDown = true;
                         sensors->rightFSRCenter = {input.fsr.right.centreX, input.fsr.right.centreY};
                     }
+
+                        
                     // log("left", sensors->leftFSRCenter.t(), "right", sensors->rightFSRCenter.t());
 
                     // if(previousSensors && (!sensors->leftFootDown && !sensors->rightFootDown )) {
@@ -451,6 +451,16 @@ namespace modules {
                         sensors->kinematicsBodyToGround = sensors->orientationCamToGround;
                     }
                     sensors->kinematicsCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
+
+
+                    /************************************************
+                     *                  CENTRE OF PRESSURE          *
+                     ************************************************/
+
+                    sensors->centreOfPressure = utility::motion::kinematics::calculateCentreOfPressure<DarwinModel>(*sensors);
+                    // emit(graph("sensors->centreOfPressure", sensors->centreOfPressure));
+                    // emit(graph("groundCoM", arma::vec3(sensors->centreOfMass.rows(0,2))));
+                    // log("sensors->centreOfPressure", sensors->centreOfPressure.t());
 
                     // std::cout << "sensors->kinematicsCamToGround\n" << sensors->kinematicsCamToGround << std::endl;
                     // std::cout << "sensors->orientationCamToGround\n" << sensors->orientationCamToGround << std::endl;
