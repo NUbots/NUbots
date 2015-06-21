@@ -161,7 +161,7 @@ namespace motion {
                 kickfoot += kicker.getFootPose();
             }
 
-            emit(InverseKinematics(support,kickfoot));
+            emit(ServoWaypoints(InverseKinematics(support,kickfoot))); //look up in walk en
 
 
             // TODO use states
