@@ -33,7 +33,11 @@ namespace localisation {
         /// The engine that does all of the work
         std::unique_ptr<localisation::MMKFRobotLocalisationEngine> engine_;
 
+        //Disable until first data
+        ReactionHandle emit_data_handle;
 
+        time_t last_measurement_time;
+        
     public:
         /// @brief Called by the powerplant to build and setup the MMKFRobotLocalisation reactor.
         explicit MMKFRobotLocalisation(std::unique_ptr<NUClear::Environment> environment);

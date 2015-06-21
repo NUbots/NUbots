@@ -73,10 +73,20 @@ walk_cycle:
     amplitude: 1.0
     weight: 0.7
     offset: 0 * pi / 180
-    gain:
+    angle_gain:
       p: 0.132
       i: 0.0
       d: 0.021
+    translation_gain:
+      X:
+        p: 0
+        d: 0
+      Y:
+        p: 0
+        d: 0
+      Z:
+        p: 0
+        d: 0
     # Support bias parameters to reduce backlash-based instability
     # velFastForward: 0.05
     # velFastTurn: 0.15

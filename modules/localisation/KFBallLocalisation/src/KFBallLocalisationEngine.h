@@ -25,6 +25,7 @@
 #include <chrono>
 
 #include "utility/math/kalman/UKF.h"
+#include "utility/math/kalman/ParticleFilter.h"
 #include "messages/support/Configuration.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/localisation/FieldObject.h"
@@ -61,6 +62,7 @@ namespace localisation {
 
         bool CanEmitFieldObjects();
 
+        // utility::math::kalman::ParticleFilter<ball::BallModel> ball_filter_;
         utility::math::kalman::UKF<ball::BallModel> ball_filter_;
 
     private:

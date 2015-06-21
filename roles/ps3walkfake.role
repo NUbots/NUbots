@@ -8,7 +8,7 @@ ADD_ROLE(
     support::NUbugger
 
     # Hardware Interface
-    platform::fakedarwin::HardwareIO
+    platform::darwin::HardwareSimulator
     platform::darwin::SensorFilter
 
     # Motion
@@ -24,6 +24,6 @@ ADD_ROLE(
     behaviour::strategy::PS3Walk
 
     # Localisation
-    localisation::MMKFRobotLocalisation
-    localisation::KFBallLocalisation
+    #localisation::MMKFRobotLocalisation
+    #localisation::KFBallLocalisation
 )

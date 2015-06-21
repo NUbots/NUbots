@@ -5,7 +5,6 @@ ADD_ROLE(
     platform::darwin::SensorFilter
     behaviour::tools::ScriptTuner
     behaviour::Controller
-    debug::NUbugger
     support::NUbugger
     motion::ScriptEngine
 )

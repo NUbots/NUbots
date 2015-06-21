@@ -21,6 +21,7 @@
 #define MESSAGES_LOCALISATIONFIELDOBJECT
 
 #include <armadillo>
+#include <nuclear>
 
 namespace messages {
     namespace localisation {
@@ -43,6 +44,7 @@ namespace messages {
             };
 
             std::vector<Model> models;
+
         };
 
         class LocalisationObject {
@@ -51,6 +53,8 @@ namespace messages {
 
             arma::vec2 position;
             arma::mat22 position_cov;
+            
+            NUClear::clock::time_point last_measurement_time;
         };
 
         class Ball : public LocalisationObject {
@@ -64,16 +68,10 @@ namespace messages {
         class Self : public LocalisationObject {
         public:
             Self() : LocalisationObject() {}
-            arma::vec2 heading;     //robot face direction (vector 2)     
-            arma::vec2 velocity;    //robot velocity (vector 2)
-            arma::mat22 robot_to_world_rotation; //?? necessary?  
-        };
 
-        template<class T> class Mock {
-        public:
-            Mock() : data() {}
-            Mock(T t) : data(t) {}
-            T data;
+            arma::vec2 heading;     //robot face direction (vector 2)                 
+            arma::vec2 velocity;    //robot velocity (vector 2)
+            arma::mat22 robot_to_world_rotation;    //??might not be useful
         };
     }
 }

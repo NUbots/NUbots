@@ -22,7 +22,6 @@
 #include "utility/support/yaml_armadillo.h"
 #include "utility/math/coordinates.h"
 #include "utility/localisation/transform.h"
-#include "messages/motion/KickCommand.h"
 #include "messages/motion/WalkCommand.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/support/Configuration.h"
@@ -46,6 +45,7 @@ namespace planning {
     using messages::localisation::Ball;
     using messages::localisation::Self;
     using messages::motion::KickCommand;
+    using messages::motion::KickPlannerConfig;
     using messages::support::Configuration;
     using messages::motion::WalkStopCommand;
     using messages::input::LimbID;
@@ -56,26 +56,30 @@ namespace planning {
 
 
         on<Trigger<Configuration<KickPlanner> > >([this](const Configuration<KickPlanner>& config) {
-            MAX_BALL_DISTANCE = config["MAX_BALL_DISTANCE"].as<float>();
-            KICK_CORRIDOR_WIDTH = config["KICK_CORRIDOR_WIDTH"].as<float>();
-            KICK_FORWARD_ANGLE_LIMIT = config["KICK_FORWARD_ANGLE_LIMIT"].as<float>();
-            KICK_SIDE_ANGLE_LIMIT = config["KICK_SIDE_ANGLE_LIMIT"].as<float>();
-            FRAMES_NOT_SEEN_LIMIT = config["FRAMES_NOT_SEEN_LIMIT"].as<float>();
+            cfg.MAX_BALL_DISTANCE = config["MAX_BALL_DISTANCE"].as<float>();
+            cfg.KICK_CORRIDOR_WIDTH = config["KICK_CORRIDOR_WIDTH"].as<float>();
+            cfg.KICK_FORWARD_ANGLE_LIMIT = config["KICK_FORWARD_ANGLE_LIMIT"].as<float>();
+            cfg.KICK_SIDE_ANGLE_LIMIT = config["KICK_SIDE_ANGLE_LIMIT"].as<float>();
+            cfg.FRAMES_NOT_SEEN_LIMIT = config["FRAMES_NOT_SEEN_LIMIT"].as<float>();
+            emit(std::make_unique<KickPlannerConfig>(cfg));
         });
 
-        on< Trigger<Ball>, With<std::vector<Self>>, With<std::vector<messages::vision::Ball>>, With<KickPlan> >([this] (
+        on< Trigger<Ball>, With<std::vector<Self>>, 
+        // With<std::vector<messages::vision::Ball>>,
+            With<KickPlan> >([this] (
             const Ball& ball,
             const std::vector<Self>& selfs,
-            const std::vector<messages::vision::Ball>& vision_balls,
+            // const std::vector<messages::vision::Ball>& vision_balls,
             const KickPlan& kickPlan) {
             // std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
 
             arma::vec2 ballPosition;
 
+            framesNotSeen = 0;
             // If we're not seeing any vision balls, count frames not seen
-            if (vision_balls.empty()) {
+            ballPosition = ball.position;
+            /*if (vision_balls.empty()) {
 
-                ballPosition = ball.position;
 
                 framesNotSeen++;
             } else {
@@ -88,19 +92,19 @@ namespace planning {
                 // emit(graph("Kickplanner Ball pos (vision)", ballPosition[0], ballPosition[1]));
 
                 framesNotSeen = 0;
-            }
+            }*/
+
 
             auto self = selfs[0];
 
             arma::vec2 kickTarget = WorldToRobotTransform(self.position, self.heading, kickPlan.target);
-
-            if(framesNotSeen < FRAMES_NOT_SEEN_LIMIT &&
-               ballPosition[0] < MAX_BALL_DISTANCE &&
-               std::fabs(ballPosition[1]) < KICK_CORRIDOR_WIDTH / 2){
-
+            if(framesNotSeen < cfg.FRAMES_NOT_SEEN_LIMIT &&
+               ballPosition[0] < cfg.MAX_BALL_DISTANCE &&
+               ballPosition[0] > 0 &&
+               std::fabs(ballPosition[1]) < cfg.KICK_CORRIDOR_WIDTH / 2){
                 float targetBearing = std::atan2(kickTarget[1], kickTarget[0]);
 
-                if( std::fabs(targetBearing) < KICK_FORWARD_ANGLE_LIMIT){
+                if( std::fabs(targetBearing) < cfg.KICK_FORWARD_ANGLE_LIMIT){
                     if(ballPosition[1] < 0){
                         // Right front kick
                         //NUClear::log("Kicking forward with right foot");
@@ -116,7 +120,7 @@ namespace planning {
                         // TODO when the kick finishes, we need to start the walk
                         // Probably need to add something to the KickScript.cpp
                     }
-                } else if (std::fabs(targetBearing) < KICK_SIDE_ANGLE_LIMIT) {
+                } else if (std::fabs(targetBearing) < cfg.KICK_SIDE_ANGLE_LIMIT) {
                     if(targetBearing < 0 && ballPosition[1] < 0){
                         // Left side kick
                         //NUClear::log("Kicking side with left foot");

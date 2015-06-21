@@ -54,8 +54,8 @@ namespace strategy {
             bool goalie;
         } zone;
 
-        time_t ballLastSeen;
-        time_t goalLastSeen;
+        time_t ballLastMeasured;
+        time_t selfLastMeasured;
         std::string leaf = "";
         void initialLocalisationReset();
         void penaltyLocalisationReset();

@@ -58,6 +58,7 @@ namespace messages {
             std::shared_ptr<const messages::input::Sensors> sensors;
 
             // The classified image that was used to detect this object
+            // TODO: Why is this here?
             std::shared_ptr<const messages::vision::ClassifiedImage<messages::vision::ObjectClass>> classifiedImage;
         };
 

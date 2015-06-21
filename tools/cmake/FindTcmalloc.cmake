@@ -29,8 +29,8 @@ else (TCMALLOC_LIBRARIES AND TCMALLOC_INCLUDE_DIRS)
 
   find_library(TCMALLOC_LIBRARY
     NAMES
-      tcmalloc
       tcmalloc_minimal
+      tcmalloc
     PATHS
       /usr/lib
       /usr/local/lib

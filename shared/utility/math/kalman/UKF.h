@@ -76,15 +76,14 @@ namespace utility {
                     points.col(0) = mean;
 
                     // Get our cholskey decomposition
-
                     arma::mat chol;
                     try {
                         chol = arma::chol(covarianceSigmaWeights * covariance);
-                    } catch (std::exception& e) {
-                        if (Model::size == 3) std::cerr << __FILE__ << " " << __LINE__ << " : covarianceSigmaWeights * covariance was NOT positive-definite and the cholskey "
+                    } catch (...) {
+                        std::cerr << __FILE__ << " " << __LINE__ << " : covarianceSigmaWeights * covariance was NOT positive-definite and the cholskey "
                                   << "decomposition failed.\ncovarianceSigmaWeights * covariance = \n" << std::endl
                                   << covarianceSigmaWeights * covariance << std::endl;
-                        throw e;
+                        throw std::exception();
                     }
 
                     // Put our values in either end of the matrix
@@ -173,7 +172,8 @@ namespace utility {
                     // Calculate the new mean and covariance values.
                     mean = meanFromSigmas(sigmaPoints);
                     mean = model.limitState(mean);
-                    covariance = covarianceFromSigmas(sigmaPoints, mean) + model.processNoise();
+                    covariance = covarianceFromSigmas(sigmaPoints, mean);
+                    covariance += model.processNoise();
 
                     // Re calculate our sigma points
                     sigmaMean = mean;
@@ -224,13 +224,16 @@ namespace utility {
                     arma::mat innovationCovariance = ((innovation.t() * innovationVariance.i()) * innovation);
 
                     double expTerm = -0.5 * innovationCovariance(0, 0);
+                    if(arma::det(innovationVariance) == 0){
+                        std::cout << "arma::det(innovationVariance) == 0. innovationVariance = \n" << innovationVariance << std::endl;
+                    }
                     double fract = 1 / sqrt(pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance));
                     const float outlierProbability = 0.05;
 
                     return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
                 }
 
-                StateVec get() const {
+                StateVec get() const {           
                     return mean;
                 }
 

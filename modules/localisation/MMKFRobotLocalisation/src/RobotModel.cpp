@@ -21,6 +21,7 @@
 
 #include <armadillo>
 #include <nuclear>
+#include <iostream>
 
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
@@ -45,7 +46,6 @@ namespace robot {
     arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
         const arma::vec::fixed<RobotModel::size>& state, double deltaT, const Sensors& sensors) {
         arma::vec::fixed<RobotModel::size> new_state = state;
-
         // // Velocity in world space:
         // new_state.rows(kX,kY) += deltaT * state.rows(kVX,kVY);
 
@@ -66,9 +66,12 @@ namespace robot {
         //Rewrite:
         // arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.robotToIMU);
         arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.orientation);
+        // auto orientation = sensors.orientation.axisAngle();
+        // std::cout << "worldRobotHeading axis = " << orientation.first.t() << " angle = " << orientation.second << std::endl;
         auto obs = SphericalRobotObservation(state.rows(kX, kY),
                                              worldRobotHeading,
                                              actual_position);
+        // std::cout << "obs = " << obs.t() << std::endl;
         return obs;
     }
 
@@ -121,13 +124,14 @@ namespace robot {
         return state;
     }
 
-    arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise() {
+    arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise(){
         arma::mat noise = arma::eye(RobotModel::size, RobotModel::size);
         noise(kX, kX) *= cfg_.processNoisePositionFactor;
         noise(kY, kY) *= cfg_.processNoisePositionFactor;
         noise(kVX, kVX) *= cfg_.processNoiseVelocityFactor;
         noise(kVY, kVY) *= cfg_.processNoiseVelocityFactor;
         noise(kImuOffset, kImuOffset) *= cfg_.processNoiseHeadingFactor;
+        // std::cout << "process noise = \n" << noise << std::endl;
         return noise;
     }
 

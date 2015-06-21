@@ -27,6 +27,7 @@
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/motion/ForwardKinematics.h"
+#include "utility/nubugger/NUhelpers.h"
 
 namespace modules {
     namespace platform {
@@ -34,6 +35,8 @@ namespace modules {
 
 
             using messages::support::Configuration;
+            using utility::nubugger::drawArrow;
+            using utility::nubugger::drawSphere;
             using messages::platform::darwin::DarwinSensors;
             using messages::platform::darwin::ButtonLeftDown;
             using messages::platform::darwin::ButtonLeftUp;
@@ -163,9 +166,11 @@ namespace modules {
 
                 on< Trigger<DarwinSensors>
                   , With<Optional<Sensors>>
-                  , Options<Single, Priority<NUClear::HIGH>>>([this](const DarwinSensors& input,
-                                            const std::shared_ptr<const Sensors>& previousSensors) {
-
+                  , Options<Single, Priority<NUClear::HIGH>>>(
+                            "Main Sensors Loop",
+                            [this](const DarwinSensors& input,
+                                   const std::shared_ptr<const Sensors>& previousSensors) {
+                                
                     auto sensors = std::make_unique<Sensors>();
 
                     // Set our timestamp to when the data was read
@@ -271,7 +276,7 @@ namespace modules {
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
                     if(previousSensors && (input.cm730ErrorFlags || arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2) > 4 * M_PI)) {
-                        // NUClear::log("Bad gyroscope value", arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2));
+                        NUClear::log("Bad gyroscope value", arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2));
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
                     else {
@@ -302,12 +307,13 @@ namespace modules {
                      */
 
                     // Calculate our time offset from the last read
-                    double deltaT = ((previousSensors ? previousSensors->timestamp : input.timestamp) - input.timestamp).count() / double(NUClear::clock::period::den);
-
+                    double deltaT = (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count() / double(NUClear::clock::period::den);
                     orientationFilter.timeUpdate(deltaT);
 
                     orientationFilter.measurementUpdate(sensors->accelerometer, MEASUREMENT_NOISE_ACCELEROMETER, IMUModel::MeasurementType::ACCELEROMETER());
+                    emit(graph("accelerometer", sensors->accelerometer[0], sensors->accelerometer[1], sensors->accelerometer[2]));
                     orientationFilter.measurementUpdate(sensors->gyroscope,     MEASUREMENT_NOISE_GYROSCOPE, IMUModel::MeasurementType::GYROSCOPE());
+                    emit(graph("gyroscope", sensors->gyroscope[0], sensors->gyroscope[1], sensors->gyroscope[2]));
 
                     // If we assume the feet are flat on the ground, we can use forward kinematics to feed a measurement update to the orientation filter.
                     if (std::abs(input.fsr.left.centreX) < FOOT_UP_SAFE_ZONE && std::abs(input.fsr.left.centreY) < FOOT_UP_SAFE_ZONE) {
@@ -321,6 +327,7 @@ namespace modules {
 
                     // Gives us the quaternion representation
                     arma::vec o = orientationFilter.get();
+                    emit(graph("orientation quat", o[0], o[1], o[2], o[3]));                    
                     //Map from robot to world coordinates
                     sensors->orientation = Rotation3D(UnitQuaternion(o.rows(orientationFilter.model.QW, orientationFilter.model.QZ)));
 
@@ -395,7 +402,11 @@ namespace modules {
                             arma::vec3 torsoVelFromRightFoot =  -(measuredTorsoFromRightFoot - previousMeasuredTorsoFromRightFoot);
 
                             arma::vec3 averageVelocity = (torsoVelFromLeftFoot * static_cast<int>(sensors->leftFootDown) + torsoVelFromRightFoot * static_cast<int>(sensors->rightFootDown))/(static_cast<int>(sensors->rightFootDown) + static_cast<int>(sensors->leftFootDown));
-                            sensors->odometry = averageVelocity.rows(0,1) / deltaT;
+                            if(deltaT > 0){
+                                sensors->odometry = averageVelocity.rows(0,1) / deltaT;
+                            } else {
+                                sensors->odometry = {0,0};
+                            }
                         }
 
                         // Gyro based odometry for orientation
@@ -419,6 +430,7 @@ namespace modules {
                     //LOOKOUT!!!! ARRAYOPS_MEAT
                     arma::vec4 COM = calculateCentreOfMass<DarwinModel>(sensors->forwardKinematics, true);
                     sensors->centreOfMass = {COM[0],COM[1], COM[2], COM[3]};
+                    //emit(drawSphere("COM",sensors->centreOfMass.rows(0,2) + arma::vec3({0,0,2 * 0.093 + 0.0335 + 0.034}),0.1)); //Correcting for robot height in nubugger
                     //END MASS MODEL
 
 

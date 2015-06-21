@@ -69,7 +69,7 @@ namespace utility {
                 template <typename... TAdditionalParameters>
                 void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters) 
                 {
-                    for(uint i = 0; i < particles.n_rows; ++i) {
+                    for(unsigned int i = 0; i < particles.n_rows; ++i) {
                         auto newpcle = model.timeUpdate(particles.row(i).t(), deltaT, additionalParameters...);
                         particles.row(i) = newpcle.t();
                     }
@@ -79,7 +79,7 @@ namespace utility {
                     //Sample single gaussian (represented by a gaussian mixture model of size 1)
                     arma::gmm_diag gaussian;
                     gaussian.set_params(arma::mat(initialMean), arma::mat(initialCovariance.diag()),arma::ones(1));
-                    for(uint i = 0; i < particles.n_rows; ++i) {
+                    for(unsigned int i = 0; i < particles.n_rows; ++i) {
                         particles.row(i) = gaussian.generate().t();
                     }                    
                 }
@@ -91,7 +91,7 @@ namespace utility {
                 {
                     arma::vec weights = arma::zeros(particles.n_rows);
 
-                    for (int i = 0; i < particles.n_rows; i++){
+                    for (unsigned int i = 0; i < particles.n_rows; i++){
                         arma::vec predictedObservation = model.predictedObservation(particles.row(i).t(), measurementArgs...);
                         assert(predictedObservation.size() == measurement.size());
                         arma::vec difference = predictedObservation-measurement;
@@ -103,7 +103,7 @@ namespace utility {
                     std::mt19937 gen(rd());
                     std::discrete_distribution<> multinomial(weights.begin(),weights.end());//class incorrectly named by cpp devs
                     ParticleList candidateParticles = particles;
-                    for (int i = 0; i < particles.n_rows; i++){
+                    for (unsigned int i = 0; i < particles.n_rows; i++){
                         particles.row(i) = candidateParticles.row(multinomial(gen));
                     }
                     return arma::mean(weights);

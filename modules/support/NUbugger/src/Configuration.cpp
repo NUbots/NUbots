@@ -298,10 +298,14 @@ namespace support {
      * @param root The root YAML node.
      */
     void saveConfigurationFile(std::string path, YAML::Node& root) {
-        YAML::Emitter emitter;          // create a YAML emitter
-        emitter << root;                // send the root node to the emitter's output stream
-        std::ofstream fout(path);       // create an output stream to the specified path 
-        fout << emitter.c_str();        // write to the file
+        std::string tempName = path + ".tmp";
+        utility::file::writeToFile(tempName, root);
+        rename(tempName.c_str(), path.c_str());
+
+        //YAML::Emitter emitter;          // create a YAML emitter
+        //emitter << root;                // send the root node to the emitter's output stream
+        //std::ofstream fout(path);       // create an output stream to the specified path 
+        //fout << emitter.c_str();        // write to the file
     }
 
     /**

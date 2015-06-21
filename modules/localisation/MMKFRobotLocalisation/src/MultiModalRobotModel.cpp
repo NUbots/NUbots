@@ -18,6 +18,7 @@
  */
 
 #include <iomanip>
+#include <math.h>
 
 #include "MultiModalRobotModel.h"
 #include "RobotModel.h"
@@ -93,6 +94,9 @@ double RobotHypothesis::MeasurementUpdate(
         arma::vec2 actual_2d = actual_object.location();
         arma::vec3 actual_pos = arma::vec3({actual_2d(0), actual_2d(1), 0});
 
+        // std::cout << " cov = " << cov << std::endl;
+
+
         quality *= filter_.measurementUpdate(measured_pos, cov, actual_pos, *(observed_object.sensors));
     }
 
@@ -162,7 +166,6 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
         // Split the model for each possible object, and observe that object:
         // (TODO: Micro-optimisation: use model as the last split_model)
         for (auto& possible_object : possible_objects) {
-            // std::cout << "possible_object: " << possible_object << std::endl;
 
             auto split_model = std::make_unique<RobotHypothesis>(*model);
 
@@ -215,8 +218,9 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
                 // Weight the new model based on the 'quality' of the observation
                 // just made.
                 auto weight = split_model->GetFilterWeight();
-                split_model->SetFilterWeight(weight * quality);
+                split_model->SetFilterWeight(weight * quality);                    
             }
+            // std::cout << "split model " << *split_model <<  std::endl;
 
             new_models.push_back(std::move(split_model));
         }
@@ -332,6 +336,7 @@ void MultiModalRobotModel::MergeSimilarModels() {
 
     // Loop through each pair of merged models
     for (int ma = robot_models_.size() - 1; ma >= 0; ma--) {
+
         if (merged[ma])
             continue;
 
@@ -379,6 +384,7 @@ void MultiModalRobotModel::MergeSimilarModels() {
  */
 void MultiModalRobotModel::PruneViterbi(unsigned int order) {
     // No pruning required if not above maximum.
+
     if(robot_models_.size() <= order)
         return;
 

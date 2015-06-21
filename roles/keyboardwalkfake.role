@@ -7,7 +7,7 @@ ADD_ROLE(
     support::NUbugger
 
     # Hardware Interface
-    platform::fakedarwin::HardwareIO
+    platform::darwin::HardwareSimulator
     platform::darwin::SensorFilter
 
     # Motion
