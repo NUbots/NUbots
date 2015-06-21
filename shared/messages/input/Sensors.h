@@ -79,8 +79,9 @@ namespace messages {
             std::vector<Button> buttons;
             std::vector<LED> leds;
 
-            arma::vec3 leftFSR;
-            arma::vec3 rightFSR;
+            arma::vec2 centreOfPressure;
+            arma::vec2 leftFSRCenter;
+            arma::vec2 rightFSRCenter;
 
             arma::mat22 robotToIMU;
 

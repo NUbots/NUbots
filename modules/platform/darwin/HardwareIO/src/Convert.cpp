@@ -88,15 +88,14 @@ namespace darwin {
         return value * FSR_FORCE_CONVERSION_FACTOR;
     }
 
-    float Convert::fsrCentre(const bool left, const bool x, const uint8_t value) {
+    float Convert::fsrCentre(const bool left, const uint8_t value) {
         if(value == 0xFF) {
             // Return NaN if there is no centre
             return std::numeric_limits<float>::quiet_NaN();
         }
-        // On the right foot, the X is the correct way around while the Y is flipped
-        // On the left foot, the X is flipped and the Y is the correct way around
-        // Because of this, we can implement the resulting logic using an xor
-        else if(left ^ x) {
+        // Flips right foot coordinates to match robot coords
+        // See: http://support.robotis.com/en/product/darwin-op/references/reference/hardware_specifications/electronics/optional_components/fsr.htm
+        else if (left) {
             // This normalises the value between -1 and 1
             return double(value - 127) / 127.0;
         }

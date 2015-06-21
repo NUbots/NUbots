@@ -396,6 +396,33 @@ namespace kinematics {
         return robotToImu;
     }
 
+    template <typename RobotKinematicModel>
+    inline arma::vec4 fsrCentreToBody(const messages::input::Sensors& sensors, const arma::vec2& foot, bool left) {
+        //sensors.orientationBodyToGround
+
+        int negativeIfRight = left ? 1 : -1;
+
+        arma::vec2 position = foot % arma::vec2({RobotKinematicModel::Leg::FOOT_LENGTH / 2, RobotKinematicModel::Leg::FOOT_WIDTH / 2});
+        arma::vec4 centerFoot = arma::vec4({position[0], position[1] + negativeIfRight * RobotKinematicModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE, 0, 1});
+
+        return centerFoot;
+        // return sensors.forwardKinematics.find(left ? messages::input::ServoID::L_ANKLE_ROLL : messages::input::ServoID::R_ANKLE_ROLL)->second * centerFoot;
+
+    }
+
+    // template <typename RobotKinematicModel>
+    // inline arma::vec3 calculateCentreOfPressure(const messages::input::Sensors& sensors) {
+
+    //     sensors.leftFSRCenter
+    //     sensors.rightFSRCenter
+
+    //     if (sensors.leftFootDown && sensors.rightFootDown) {
+
+    //     }
+
+
+    // }
+
 }  // kinematics
 }  // motion
 }  // utility

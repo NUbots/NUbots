@@ -167,7 +167,7 @@ namespace modules {
                             "Main Sensors Loop",
                             [this](const DarwinSensors& input,
                                    const std::shared_ptr<const Sensors>& previousSensors) {
-                                
+
                     auto sensors = std::make_unique<Sensors>();
 
                     // Set our timestamp to when the data was read
@@ -324,7 +324,7 @@ namespace modules {
 
                     // Gives us the quaternion representation
                     arma::vec o = orientationFilter.get();
-                    emit(graph("orientation quat", o[0], o[1], o[2], o[3]));                    
+                    emit(graph("orientation quat", o[0], o[1], o[2], o[3]));
                     //Map from robot to world coordinates
                     sensors->orientation = Rotation3D(UnitQuaternion(o.rows(orientationFilter.model.QW, orientationFilter.model.QZ)));
 
@@ -355,11 +355,18 @@ namespace modules {
                     if(!std::isnan(input.fsr.left.centreX) && !std::isnan(input.fsr.left.centreY)) {
                         // Left foot is on the ground?
                         sensors->leftFootDown = true;
+                        sensors->leftFSRCenter = {input.fsr.left.centreX, input.fsr.left.centreY};
+                        arma::vec4 bodyCentre = utility::motion::kinematics::fsrCentreToBody<DarwinModel>(*sensors, sensors->leftFSRCenter, true);
+                        emit(graph("bodyCentre", bodyCentre));
+                        // log("bodyCentre", bodyCentre.t());
+                        // log("bodyCentre", sensors->leftFSRCenter);
                     }
                     if(!std::isnan(input.fsr.right.centreX) && !std::isnan(input.fsr.right.centreY)) {
                         // Right foot is on the ground?
                         sensors->rightFootDown = true;
+                        sensors->rightFSRCenter = {input.fsr.right.centreX, input.fsr.right.centreY};
                     }
+                    // log("left", sensors->leftFSRCenter.t(), "right", sensors->rightFSRCenter.t());
 
                     // if(previousSensors && (!sensors->leftFootDown && !sensors->rightFootDown )) {
                     //     //std::cout << "No feet down!" << std::endl;
