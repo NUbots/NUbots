@@ -63,7 +63,7 @@ namespace motion {
                                 * UnitQuaternion().slerp(error, balanceDGain).i();
 
         // Halve our correction (so the other half is applied at the hip)
-        rotation.scaleAngle(-0.5);
+        rotation.scaleAngle(0.5);
 
         // Apply this rotation goal to our position
         target.rotation() = Rotation3D(rotation) * target.rotation();
@@ -84,22 +84,42 @@ namespace motion {
         //------------------------------------
         // Translation 
         //------------------------------------
-        float pitch = Rotation3D(goalQuaternion).pitch();
-        float roll = Rotation3D(goalQuaternion).roll();
-        float total = std::fabs(pitch) + std::fabs(roll);
+        //Get error signal
+        double pitch = Rotation3D(goalQuaternion).pitch();
+        double roll = Rotation3D(goalQuaternion).roll();
+        double total = std::fabs(pitch) + std::fabs(roll);
 
-        float dPitch = Rotation3D(error).pitch(); //note that this is not a great computation of the diff
-        float dRoll = Rotation3D(error).roll();
-        float dTotal = std::fabs(dPitch) + std::fabs(dRoll);
+        //Differentiate error signal
+        auto now = NUClear::clock::now();
+        double timeSinceLastMeasurement = std::chrono::duration_cast<std::chrono::nanoseconds>(now - lastBalanceTime).count() * 1e-9;
 
+        double newdPitch = (pitch - lastPitch) / timeSinceLastMeasurement; //note that this is not a great computation of the diff
+        double newdRoll = (roll - lastRoll) / timeSinceLastMeasurement;
+
+        //Exponential filter
+        dPitch = newdPitch * 0.25 + dPitch * 0.75;
+        dRoll = newdRoll * 0.25 + dRoll * 0.75;
+
+        double dTotal = std::fabs(dPitch) + std::fabs(dRoll);
+
+        lastPitch = pitch;
+        lastRoll = roll;
+        lastBalanceTime = now;
+
+        //Debug result
+        // emit(graph("pd translation", pitch, dPitch));
+
+        //Compute torso position adjustment
         arma::vec3 torsoAdjustment_world = arma::vec3({- balanceTransPGainX * sensors.bodyCentreHeight * std::sin(pitch) - balanceTransDGainX * sensors.bodyCentreHeight * dPitch,
                                                          balanceTransPGainY * sensors.bodyCentreHeight * std::sin(roll) + balanceTransDGainY * sensors.bodyCentreHeight * dRoll,
                                                        - balanceTransPGainZ * std::sin(total) + balanceTransDGainY * dTotal});
 
+        //Rotate from world space to torso space
         Rotation3D yawLessOrientation = Rotation3D::createRotationZ(-sensors.orientation.yaw()) * sensors.orientation;
 
         arma::vec3 torsoAdjustment_torso = yawLessOrientation * torsoAdjustment_world;
 
+        //Apply opposite translation to the foot position
         target = target.translate(-torsoAdjustment_torso);
 
     }

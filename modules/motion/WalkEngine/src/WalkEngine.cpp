@@ -133,6 +133,8 @@ namespace motion {
         });
 
         on<Trigger<Startup>>([this](const Startup&) {
+            lastBalanceTime = NUClear::clock::now();
+
             //generateAndSaveStandScript();
             //reset();
             //state = State::LAST_STEP;

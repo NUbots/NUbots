@@ -184,6 +184,13 @@ namespace motion {
         double balanceTransDGainX;
         double balanceTransDGainY;
         double balanceTransDGainZ;
+
+        double dPitch = 0;
+        double dRoll = 0;
+        double lastPitch = 0;
+        double lastRoll = 0;
+        time_t lastBalanceTime;
+
         /*arma::vec4 ankleImuParamX;
         arma::vec4 ankleImuParamY;
         arma::vec4 kneeImuParamX;
