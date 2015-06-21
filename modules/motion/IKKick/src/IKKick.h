@@ -28,12 +28,23 @@ namespace motion {
     class IKKick : public NUClear::Reactor {
 
     private:
+
+        enum State {
+            BALANCE,
+            KICK,
+            FOLLOW_THROUGH,
+            STAND
+        };
+
+        State state;
+
         /// Subsumption ID key to access motors
         const size_t id;
         
     	float KICK_PRIORITY;
     	float EXECUTION_PRIORITY;
         float torsoShiftVelocity;
+        //float displacementTolerance;
 
     	void updatePriority(const float& priority);
 

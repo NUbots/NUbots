@@ -134,36 +134,49 @@ namespace motion {
             Transform3D leftFootTorso = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
             Transform3D rightFootTorso = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
 
-            // Moving the torso to balance on one leg before kick
+            // Moving the torso to balance on support foot before kick
 
             // Obtain the position of the torso and the direction in which the torso needs to move
             
-            // The position that the torso needs to move to in support foot coordinates
+                // The position that the torso needs to move to in support foot coordinates
                 // Work out the height the torso should be at
                 // TODO Give height bounds for balance or tuning, height = Lower_Leg_Length + Upper Leg Length.
                 //USE bodyHeight from WalkEngine. find out where this is referenced from.
             auto torsoTarget = arma::vec({0, 0, Upper_Leg_Length + Lower_Leg_Length}); 
             
-            // Find position vector from support foot to torso in leftFoot coordinates.
+                // Find position vector from support foot to torso in leftFoot coordinates.
             auto torsoPosition = leftFoot.i().translation();
             
-            // Find the direction in which we want to shift the torso in support foot coordinates
+                // Find the direction in which we want to shift the torso in support foot coordinates
             auto torsoDirection = torsoTarget - torsoPosition;
             
-            // Normalise the direction
+                // Normalise the direction
             auto normalTorsoDirection = arma::normalise(torsoDirection);
 
-            // torsoShiftVelocity [m/s] is the configurable velocity that the torso should move at
+/*
+            // Finds out when the torso is within tolerance of the target
+            //TODO define displacementTolerance
             
-            // Net displacement of torso UPDATE_FREQUENCY times per second
+            if (arma::abs(torsoTarget - torsoPosition) <= std::abs(torsoShiftVelocity/UPDATE_FREQUENCY)) {    
+                if (arma::abs(torsoTarget - torsoPosition <= diplacementTolerance) {
+                    //TODO Stop!!
+                } else {
+                    auto torsoDisplacement = ((torsoShiftVelocity/UPDATE_FREQUENCY)/2)*normalTorsoDirection;
+                }
+            } else {
+                auto torsoDisplacement = (torsoShiftVelocity/UPDATE_FREQUENCY)*normalTorsoDirection;
+            }
+*/
+            // torsoShiftVelocity [m/s] is the configurable velocity that the torso should move at
+            // Net displacement of torso each 1/UPDATE_FREQUENCY seconds
             // ((P1-P0))*velocity*(1/UPDATE_FREQUENCY)
-            auto torsoDisplacement = (torsoShiftVelocity*normalTorsoDirection)/(UPDATE_FREQUENCY);
+            auto torsoDisplacement = (torsoShiftVelocity/UPDATE_FREQUENCY)*normalTorsoDirection;
 
             // New position to give to inverse kinematics
             auto torsoNewPosition = torsoPosition + torsoDisplacement; 
 
             // Convert the new torso position into torso coordinates
-            auto torsoNewPositionTorso = leftfoot*arma::join_cols(torsoNewPosition, arma::vec({0}));
+            auto torsoNewPositionTorso = leftFoot*arma::join_cols(torsoNewPosition, arma::vec({0}));
             // Find support foot position relative to the torso
             auto supportFootPosition = leftFoot.translation();
             // Moving torso is equivalent to moving foot in the opposite direction
