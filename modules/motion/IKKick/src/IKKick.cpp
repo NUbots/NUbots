@@ -157,7 +157,8 @@ namespace motion {
             
             if (arma::abs(torsoTarget - torsoPosition) <= std::abs(torsoShiftVelocity/UPDATE_FREQUENCY)) {    
                 if (arma::abs(torsoTarget - torsoPosition <= diplacementTolerance) {
-                    //TODO Stop!!
+                    //TODO Run Kick!
+                    state = State::Balance
                 } else {
                     auto torsoDisplacement = ((torsoShiftVelocity/UPDATE_FREQUENCY)/2)*normalTorsoDirection;
                 }
@@ -181,8 +182,11 @@ namespace motion {
             // New support foot position
             auto supportFootNewPosition = supportFootPosition - torsoNewPositionTorso;
 
-            // TODO give position to inverse kinematics            
-
+            // TODO give position to inverse kinematics
+            // Puts together matrix to give to inverse kinemtaics
+            // Is it 4x4 with 0 under translate column
+            auto supportFootNewPose = leftFoot;
+            auto supportFootNewPose.col(3)= (arma::join_cols(supportFootNewPosition, arma::vec({0}))).t();
 
             // TODO We're always finished kicking because we never start :(
             updatePriority(0);
