@@ -17,10 +17,6 @@ ADD_ROLE(
     vision::GoalDetector
     vision::BallDetector
 
-    #Localisation
-   #localisation::MMKFRobotLocalisation
-    #localisation::KFBallLocalisation
-
     #Behaviour
     behaviour::Controller
     behaviour::skills::Stand
