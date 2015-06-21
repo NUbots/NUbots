@@ -39,7 +39,7 @@
 namespace messages {
     namespace vision {
 
-        enum Colour : char {
+        enum Colour : unsigned char {
             // Main classifications
             UNCLASSIFIED = 'u',
             WHITE        = 'w',
@@ -65,6 +65,7 @@ namespace messages {
 
             std::string getData() const;
             const std::vector<Colour>& getRawData() const;
+            std::vector<Colour>& getRawData();
 
             /*!
                 @brief Classifies a pixel

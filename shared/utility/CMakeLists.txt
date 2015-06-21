@@ -2,7 +2,7 @@
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/shared/)
 
 # This gets all of our source files
-FILE(GLOB_RECURSE src "*/**.cpp" "*/**.h")
+FILE(GLOB_RECURSE src "*/**.cpp" "*/**.c" "*/**.h")
 
 # Build a library from these files
 ADD_LIBRARY(utility ${src})

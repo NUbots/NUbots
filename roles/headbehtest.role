@@ -1,16 +1,21 @@
 ADD_ROLE(
     #Support
-    support::SignalCatcher
+    #support::SignalCatcher
     support::logging::ConsoleLogHandler
     support::configuration::ConfigSystem
     support::configuration::GlobalConfig
     support::configuration::SoccerConfig
-    #support::NUbugger
+    support::NUbugger
 
     #Sensors
     input::LinuxCamera
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
+
+    #Vision
+    vision::LUTClassifier
+    vision::GoalDetector
+    vision::BallDetector
 
     #Localisation
    #localisation::MMKFRobotLocalisation
@@ -21,6 +26,7 @@ ADD_ROLE(
     behaviour::skills::Stand
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
+    behaviour::skills::HeadBehaviourSoccer
 
     #Motion
     motion::ScriptEngine

@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_REFLEX_HeadController_H
-#define MODULES_BEHAVIOUR_REFLEX_HeadController_H
+#ifndef MODULES_BEHAVIOUR_REFLEX_HEADCONTROLLER_H
+#define MODULES_BEHAVIOUR_REFLEX_HEADCONTROLLER_H
 
 #include <nuclear>
 #include <armadillo>
@@ -29,23 +29,24 @@ namespace modules {
             /**
              * Executes a HeadController action.
              *
-             * @author Josiah Walker
+             * @author Jake Fountain
              */
             class HeadController : public NUClear::Reactor {
             private:
                 const size_t id;
-                double fastSpeed,slowSpeed,headYaw,headPitch,panTime,minYaw,maxYaw,minPitch,maxPitch,screenPadding,headGain,headTorque;
-                arma::vec2 testGoal;
-
-                double prevPitch,prevYaw;
-                time_t lastPanEnd;
+                double min_yaw,max_yaw,min_pitch,max_pitch,head_motor_gain,head_motor_torque, p_gain;
+                ReactionHandle updateHandle;
+                //Debug var:
+                time_t lastTime;
             public:
                 explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
                 static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
+                arma::vec2 currentAngles;
+                arma::vec2 goalAngles;
             };
 
     }  // motion 
 }  // modules
 
-#endif  // MODULES_BEHAVIOURS_REFLEX_HeadController_H
+#endif  // MODULES_BEHAVIOURS_REFLEX_HEADCONTROLLER_H
 

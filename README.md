@@ -1,129 +1,108 @@
 NUbots Codebase
 ==========================
 
-<!-- The [NUbots][] project is an effort to port the [NUbots][]' [robocup][] 
-codebase to use the new [NUClear][] framework. -->
-
-Vagrant
+Docker
 --------
 
-The NUbots use [Vagrant][] to manage and version the build environment for the NUbots project.
+The NUbots use [Docker][] to manage the build environment for the NUbots project.
 
 The following is a guide to getting you set up and ready to contribute to the NUbots project.
 
 1. Install the following prerequisites on your machine (packages/installers are available for Windows, OSX, and Linux):
 	* [Git][]
-	* [Virtualbox][] (or VMware Fusion)
-	* [Vagrant][vagrant_download] (Note: The version of Vagrant that is available in the Ubuntu 12.04 repositories is an older version that is incompatible with the NUbots' Vagrantfile. If you're using Ubuntu 12.04, please install the latest version of Vagrant via a .deb from the [Vagrant download page][vagrant_download])
+	* [Python][] (Use the 32bit version; stability on 64bit version needs improvement)
+	* Linux: [Docker][docker_download]
+	* Windows/OSX: [Boot2Docker][] (Windows and OSX cannot run the native docker client and must use Boot2Docker. Instructions on how to install Boot2Docker are on the [Docker Installation page][docker_download])
+		 
+	Linux: Installation should be done via the apt-get repositories. Open a console with `Ctrl+Alt+T` and type:
 
-2. Clone this git repository onto your machine:
-	e.g.
+		$ sudo apt-get install git
+		$ sudo apt-get install python
+		$ sudo apt-get install docker.io
+		$ sudo addgroup $(whoami) docker
+
+	Windows and OSX installation can be done with installers from the program sites above.
+
+2. Clone this git repository onto your machine. First, open a terminal. In Ubuntu, the default shortcut is `Ctrl+Alt+T`. In Windows you will need to open a Git Bash terminal (this is installed when you install Git; search for Git Bash in the Start Menu). (Todo: Terminal in OSX). Then enter the following:
 
 		$ git clone git@github.com:nubots/NUbots.git ~/NUbots
+		
+	**Note** We recommend [Sublime Text 3][] for editing the code. The file 'NUbots.sublime-project' can be opened with Sublime ('Project -> Open Project...', then browse to your NUbots repository). This provides a shortcut to compiling the code from sublime with `Ctrl+B`, but don't try this until you have finished the instructions in this readme. Installers for Windows/OSX can be found on the Sublime site, while ubuntu users will need to use an installer from the command line:
+		
+		$ sudo add-apt-repository ppa:webupd8team/sublime-text-3
+		$ sudo apt-get update
+		$ sudo apt-get install sublime-text-installer
 
-3. Run `vagrant up` from the NUbots directory:
-	e.g.
+3. Run `docker build` from the b script in the NUbots directory:
 
 		$ cd ~/NUbots
-		$ vagrant up
 
-	The `vagrant up` command tells Vagrant to create and start a VM for the NUbots project 
-	based on the project's `Vagrantfile`.
+	and then, if you are using Linux or OSX:
 
-	**Note:** The very first time `vagrant up` is run on your computer, it will initiate
-	a 282 MB download ([the base box for the VM][precise_32_box]).
-	Vagrant will store the box locally in a special location, and will not need to download it again
-	(_see the [boxes page][] of Vagrant's Getting Started guide, or Vagrant's [boxes][] documentation
-	if you want to know more about boxes_).
+		$ ./b compile
 
-	When given a choice of network interface, e.g.:
+	and if you are using Windows:
 
-		[default] Available bridged network interfaces:
-		1) en0: Wi-Fi (AirPort)
-		2) p2p0
+		$ python b compile
 
-	Select which adapter the VM will use for its network connection by 
-	entering a number (if in doubt, the first option is likely to be the best choice).
+	The `./b compile` command tells Docker to build a container for the NUbots project 
+	based on the project's `Dockerfile`.(While your container is being built, you might want to learn a little more about Docker by reading the article [What is Docker][] or the [Command-Line Interface][] documentation.)
 
-	(While your VM is being created, you might want to learn a little more about Vagrant by 
-	reading the [Getting Started Guide][] or the [Command-Line Interface][] documentation.
-	Also, see the [Vagrant Configuration Wiki Page][] for some more important Vagrant configuration settings.)
+	**Note:** The very first time `./b docker build` is run on your computer, it needs to download a streamlined Ubuntu 14.04 image and install all the required dependencies. This will take around 15 minutes.
 
-4.  Just type `$ vagrant ssh` to ssh into your new VM!
+  	**Note:** The `./b` command above is a collection of python scripts to make docker
+  usage easier when working with the NUbots codebase.
 
-	Vagrant will sync the `~/nubots/NUbots` directory on the VM with the root of your NUbots repository.
-	This allows for easy editing of code on your machine, and building on the VM.
+  	**Note** Docker will sync the `/nubots/NUbots` directory on the container with the root of your NUbots repository. This allows for easy editing of code on your machine, and building on the container.
 
-	To build NUbots, just run the following commands on the VM:
-  
-		$ mkdir ~/nubots/NUbots/build
-		$ cd ~/nubots/NUbots/build
-		$ cmake .. -G Ninja
-		$ ninja -j
+	**Note:** If you are on Windows/OSX your code must be in /c/Users/ or /Users/
+  respectively.
 
-5. Make robots do awesome stuff!
-
-	<!-- Also, read the steps in the [NUbots Startup Guide][nuclearport-startup-guide] about
-	additional Vagrant config. -->
-
-	**Important:** Make sure to set your git identity correctly before committing to the project.
+5. Try running a binary!
 	
-		$ git config --global user.name "Your Name"
-		$ git config --global user.email you@example.com
+	OSX and Linux:
+	
+		$ ./b role run keyboardwalkfake
+	
+	Windows:
 
-		$ git config --global color.ui auto
+		$ python b role run keyboardwalkfake
+		
+	You can see the result of this binary by installing [NUsight][]. You will also have to edit the file config/NUbugger.yaml in the build directory so that sensors is set to `true`.
+
+**Important:** Make sure to set your git identity correctly before committing to the project.
+
+	$ git config --global user.name "Your Name"
+	$ git config --global user.email you@example.com
+	$ git config --global color.ui auto
 
 Troubleshooting
 --------
-1. Guest additions failing to mount folders. 
 
-	**Error message** on vagrant up:
+Check out the `docker` file to see the actual commands that are being run if you
+are having issues. 
+
+####1.  Cannot connect to the Docker daemon. Is 'docker -d' running on this host? [Ubuntu]
+	Try to stop docker service and then restart it again.
+	$ sudo service docker stop
+	$ sudo service docker start
 	
-		Failed to mount folders in Linux guest. This is usually beacuse
-		the "vboxsf" file system is not available. Please verify that
-		the guest additions are properly installed in the guest and
-		can work properly. The command attempted was:
-		
-		mount -t vboxsf -o uid=`id -u vagrant`,gid=`getent group vagrant | cut -d: -f3` /vagrant /vagrant
-		mount -t vboxsf -o uid=`id -u vagrant`,gid=`id -g vagrant` /vagrant /vagrant
-		
-	Typically manifests as nubots/NUbots being empty.
-	
-	**Solution** (from https://github.com/dotless-de/vagrant-vbguest/issues/117):
-	
-		$ #from NUbots folder:
-		$ vagrant plugin install vagrant-vbguest
-		$ vagrant reload
-		$ vagrant ssh
-		$ #inside VM:
-		$ sudo ln -s /opt/VBoxGuestAdditions-4.3.10/lib/VBoxGuestAdditions /usr/lib/VBoxGuestAdditions
-		$ logout
-		$ # then, outside the VM:
-		$ vagrant reload
-		
-	Should now see:
-	
-		$ Mounting shared folders...
-		$ [nubotsvm] -- /vagrant
-		$ [nubotsvm] -- /home/vagrant/nubots/NUbots
-		$ [nubotsvm] -- /tmp/vagrant-puppet-1/manifests
-		$ [nubotsvm] -- /tmp/vagrant-puppet-1/modules-0
+
 
 [nuclearport-travis]:     https://travis-ci.org/nubots/NUClearPort                "NUClearPort's Travis Page"
 [travis-develop-image]:   https://travis-ci.org/nubots/NUClearPort.png?branch=develop "Travis-CI build status for the develop branch"
 [git]:                    http://git-scm.com/                                     "Git"
+[Python]:                 https://www.python.org/                                 "Python"
 [NUClearPort]:            https://github.com/nubots/NUClearPort                   "NUClearPort Repository"
+[NUsight]:                https://github.com/nubots/NUsight 	                  "NUsight Repository"
 <!-- [nuclearport-startup-guide]: http://confluence.nubots.net/display/NUB/NUClearPort+Startup+Guide -->
 [NUbots]:                 http://nubots.net/                                      "NUbots"
 [robocup]:                https://github.com/nubots/robocup                       "Robocup"
 [NUClear]:                https://github.com/Fastcode/NUClear                     "NUClear"
-[Vagrant]:                http://www.vagrantup.com/                               "Vagrant"
-[Virtualbox]:             https://www.virtualbox.org/wiki/Downloads               "Virtualbox"
-[vagrant_download]:       http://downloads.vagrantup.com/                         "Vagrant Download Page"
-<!-- [Packer]:                 http://www.packer.io/                                   "Packer Website" -->
-[precise_32_box]:         http://files.vagrantup.com/precise32.box                "Ubuntu 12.04 Box for Vagrant"
-[Getting Started Guide]:  http://docs.vagrantup.com/v2/getting-started/index.html "Vagrant's Getting Started Guide"
-[Command-Line Interface]: http://docs.vagrantup.com/v2/cli/index.html             "Vagrant Command-Line Interface Documentation"
-[boxes page]:             http://docs.vagrantup.com/v2/getting-started/boxes.html "The Boxes section of Vagrant's Getting Started guide"
-[boxes]:                  http://docs.vagrantup.com/v2/boxes.html                 "Vagrant's Boxes documentation"
-[Vagrant Configuration Wiki Page]: https://github.com/NUbots/NUbots/wiki/Vagrant-Configuration
+[Docker]:                 https://www.docker.com/                                 "Docker"
+[Boot2Docker]:            http://boot2docker.io/                                  "Boot2Docker"
+[Sublime Text 3]:         http://www.sublimetext.com/                             "Sublime Text 3"
+[docker_download]:	  https://docs.docker.com/installation/                   "Docker Installation Page"
+[What is Docker]:  	  https://www.docker.com/whatisdocker/ 			  "Docker's Getting Started Guide"
+[Command-Line Interface]: https://docs.docker.com/reference/commandline/cli/	  "Docker Command-Line Interface Documentation"
+[Homebrew]: 	          http://brew.sh/					  "Homebrew"

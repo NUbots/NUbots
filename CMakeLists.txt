@@ -12,16 +12,16 @@ OPTION(BUILD_TESTS "Builds all of the tests for each module." OFF)
 OPTION(SHARED_BUILD "Build the binaries by linking to shared libraries." ON)
 
 # We use additional modules that cmake needs to know about
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/tools/cmake/")
 
 # Setup our compiler settings
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/Compiler.cmake")
+INCLUDE(Compiler)
 
 # Setup our shared includes
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/SharedLibraries.cmake")
+INCLUDE(SharedLibraries)
 
 # Include our module builder
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/NUClearModuleBuilder.cmake")
+INCLUDE(NUClearModuleBuilder)
 
 # Include our shared messages etc headers
 INCLUDE_DIRECTORIES("shared")
@@ -33,7 +33,8 @@ ADD_SUBDIRECTORY(shared/messages)
 ADD_SUBDIRECTORY(shared/utility)
 
 # Add these to our shared libraries (started in our shared libraries cmake)
-SET(NUBOTS_SHARED_LIBRARIES ${NUBOTS_SHARED_LIBRARIES} messages utility)
+# We include utility again at the end for any "shim" functions that are needed in libraries
+SET(NUBOTS_SHARED_LIBRARIES messages utility ${NUBOTS_SHARED_LIBRARIES} utility)
 
 # Build tests in test mode
 IF(BUILD_TESTS)
@@ -44,7 +45,7 @@ IF(BUILD_TESTS)
 ENDIF()
 
 # Clear or NUClear Modules cache variable
-SET(NUCLEAR_MODULES ${NUCLEAR_MODULES} ${role_modules} CACHE INTERNAL "A list of the modules in use by the system" FORCE)
+UNSET(NUCLEAR_MODULES CACHE)
 
 # Find and build all our roles
 ADD_SUBDIRECTORY(roles)
@@ -55,8 +56,8 @@ LIST(REMOVE_DUPLICATES modules)
 SET(NUCLEAR_MODULES ${modules} CACHE INTERNAL "A list of the modules in use by the system" FORCE)
 
 # Clear our report files before reading (cmake scopes suck... could be fixed one day but who cares!)
-SET(report_tex_files "" CACHE INTERNAL "List of report tex files" FORCE)
-SET(report_bib_files "" CACHE INTERNAL "List of report bib files" FORCE)
+UNSET(report_tex_files CACHE)
+UNSET(report_bib_files CACHE)
 
 # Build each of our modules and their corresponding tests
 FOREACH(module ${NUCLEAR_MODULES})
@@ -70,4 +71,4 @@ ENDFOREACH()
 ADD_SUBDIRECTORY(report)
 
 # Include our scp darwin sender
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/Includes/DarwinSend.cmake")
+INCLUDE(DarwinSend)

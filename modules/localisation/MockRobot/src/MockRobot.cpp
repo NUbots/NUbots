@@ -155,6 +155,7 @@ namespace localisation {
         // Simulate Vision
         on<Trigger<Every<30, Per<std::chrono::seconds>>>,
            Options<Sync<MockRobot>>>("Mock Vision Simulation", [this](const time_t&) {
+
             if (!cfg_.simulate_vision)
                 return;
 
@@ -263,9 +264,10 @@ namespace localisation {
         // Emit robot to NUbugger
         on<Trigger<Every<100, std::chrono::milliseconds>>,
            With<Mock<std::vector<messages::localisation::Self>>>,
-           Options<Sync<MockRobot>>>("NUbugger Output",
+           Options<Sync<MockRobot>>>("NUbugger Output Self",
             [this](const time_t&,
                    const Mock<std::vector<messages::localisation::Self>>& mock_robots) {
+
             auto& robots = mock_robots.data;
 
             emit(graph("Actual robot position", robot_position_[0], robot_position_[1]));
@@ -283,7 +285,6 @@ namespace localisation {
                 return;
 
             auto robots_msg = std::make_unique<std::vector<messages::localisation::Self>>();
-
             for (auto& model : robots) {
                 robots_msg->push_back(model);
             }
@@ -301,7 +302,7 @@ namespace localisation {
         on<Trigger<Every<100, std::chrono::milliseconds>>,
            With<Mock<messages::localisation::Ball>>,
            With<Mock<std::vector<messages::localisation::Self>>>,
-           Options<Sync<MockRobot>>>("NUbugger Output",
+           Options<Sync<MockRobot>>>("NUbugger Output Ball",
             [this](const time_t&,
                    const Mock<messages::localisation::Ball>& mock_ball,
                    const Mock<std::vector<messages::localisation::Self>>& mock_robots) {

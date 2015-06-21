@@ -13,21 +13,12 @@
 *.a
 
 # Build & CMake files
-build/
+/build/
 CMakeCache.txt
 CMakeFiles
 Makefile
 cmake_install.cmake
 install_manifest.txt
-
-# Vagrant & Packer
-.vagrant/
-*.box
-*.iso
-*.deb
-packer/build.hwm
-packer/build.pwd
-packer/build.pwi
 
 # LaTeX stuff
 *.aux
@@ -62,10 +53,10 @@ packer/build.pwi
 *TSWLatexianTemp*
 
 # Misc
-*.exe
 tags
 *.swp
 /nbproject/
 *~
 .DS_Store
 .idea
+*.sublime-workspace

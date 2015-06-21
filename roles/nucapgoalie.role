@@ -31,7 +31,9 @@ ADD_ROLE(
     behaviour::skills::Stand
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
-    behaviour::skills::LookAt
+    behaviour::skills::HeadBehaviourSoccer
+
+
     behaviour::skills::KickScript
     behaviour::planning::KickPlanner
     behaviour::planning::WalkPathPlanner
@@ -39,6 +41,7 @@ ADD_ROLE(
     #Motion
     motion::ScriptEngine
     motion::WalkEngine
+    motion::HeadController
 
     #Output
     output::eSpeak

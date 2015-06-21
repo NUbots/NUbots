@@ -14,7 +14,7 @@ IF(protobufs)
     FIND_PACKAGE(Protobuf REQUIRED)
 
     # We need our protocol buffer headers if we are using protocol buffers
-    INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS})
+    INCLUDE_DIRECTORIES(SYSTEM ${PROTOBUF_INCLUDE_DIRS})
 
     # This directory contains our generated protocol buffers
     INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/shared/)
