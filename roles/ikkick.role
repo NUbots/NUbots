@@ -5,7 +5,7 @@ ADD_ROLE(
     support::NUbugger
 
     #Sensors
-    platform::fakedarwin::HardwareIO
+    platform::darwin::HardwareSimulator
     platform::darwin::SensorFilter
 
     #Behaviour
