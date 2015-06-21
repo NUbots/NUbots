@@ -87,9 +87,10 @@ namespace darwin {
         sensors.fsr.right.fsr3 = Convert::fsrForce(data.fsr[0].fsr3);
         sensors.fsr.right.fsr4 = Convert::fsrForce(data.fsr[0].fsr4);
 
-        // Centre
-        sensors.fsr.right.centreX = Convert::fsrCentre(false, true, data.fsr[0].centreX);
-        sensors.fsr.right.centreY = Convert::fsrCentre(false, false, data.fsr[0].centreY);
+        // Centre, swaps X and Y coords to robot
+        // see http://support.robotis.com/en/product/darwin-op/references/reference/hardware_specifications/electronics/optional_components/fsr.htm
+        sensors.fsr.right.centreX = Convert::fsrCentre(false, data.fsr[0].centreY);
+        sensors.fsr.right.centreY = Convert::fsrCentre(false, data.fsr[0].centreX);
 
         // Left Sensor
         // Error
@@ -101,9 +102,10 @@ namespace darwin {
         sensors.fsr.left.fsr3 = Convert::fsrForce(data.fsr[1].fsr3);
         sensors.fsr.left.fsr4 = Convert::fsrForce(data.fsr[1].fsr4);
 
-        // Centre
-        sensors.fsr.left.centreX = Convert::fsrCentre(true, true, data.fsr[1].centreX);
-        sensors.fsr.left.centreY = Convert::fsrCentre(true, false, data.fsr[1].centreY);
+        // Centre, swaps X and Y coords to robot
+        // see http://support.robotis.com/en/product/darwin-op/references/reference/hardware_specifications/electronics/optional_components/fsr.htm
+        sensors.fsr.left.centreX = Convert::fsrCentre(true, data.fsr[1].centreY);
+        sensors.fsr.left.centreY = Convert::fsrCentre(true, data.fsr[1].centreX);
 
         /*
          Servos
