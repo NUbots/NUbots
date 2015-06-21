@@ -177,6 +177,13 @@ namespace motion {
         double balancePGain;
         double balanceIGain;
         double balanceDGain;
+
+        double balanceTransPGainX;
+        double balanceTransPGainY;
+        double balanceTransPGainZ;
+        double balanceTransDGainX;
+        double balanceTransDGainY;
+        double balanceTransDGainZ;
         /*arma::vec4 ankleImuParamX;
         arma::vec4 ankleImuParamY;
         arma::vec4 kneeImuParamX;

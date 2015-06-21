@@ -38,6 +38,10 @@ namespace motion {
 
     void WalkEngine::balance(Transform3D& target, const LimbID& leg, const Sensors& sensors) {
 
+        //------------------------------------
+        // Rotation
+        //------------------------------------
+
         // Get current orientation, offset by body tilt. Maps robot to world. 
         Rotation3D tiltedOrientation = sensors.orientation.i().rotateY(-bodyTilt);
         // Removes any yaw component
@@ -48,9 +52,10 @@ namespace motion {
 
         // Calculate our D error and I error
         UnitQuaternion error = lastFootGoalRotation.i() * goalQuaternion;
+        //TODO: LEARN HOW TO COMPUTE THE INTEGRAL TERM CORRECTLY
         // footGoalErrorSum = footGoalErrorSum.slerp(goalQuaternion * footGoalErrorSum, 1.0/90.0);
 
-        // emit(graph("pid", Rotation3D(goalQuaternion).pitch(), /*Rotation3D(footGoalErrorSum).pitch(), */Rotation3D(error).pitch()));
+        // emit(graph("pid", Rotation3D(goalQuaternion).pitch(), Rotation3D(footGoalErrorSum).pitch(), Rotation3D(error).pitch()));
 
         // Apply the PID gains
         UnitQuaternion rotation = UnitQuaternion().slerp(goalQuaternion, balancePGain)
@@ -58,7 +63,7 @@ namespace motion {
                                 * UnitQuaternion().slerp(error, balanceDGain).i();
 
         // Halve our correction (so the other half is applied at the hip)
-        rotation.scaleAngle(0.5);
+        rotation.scaleAngle(-0.5);
 
         // Apply this rotation goal to our position
         target.rotation() = Rotation3D(rotation) * target.rotation();
@@ -75,6 +80,33 @@ namespace motion {
 
         // Store our current target for D calculations
         lastFootGoalRotation = goalQuaternion;
+
+        //------------------------------------
+        // Translation 
+        //------------------------------------
+        float pitch = Rotation3D(goalQuaternion).pitch();
+        float roll = Rotation3D(goalQuaternion).roll();
+        float total = std::fabs(pitch) + std::fabs(roll);
+
+        float dPitch = Rotation3D(error).pitch(); //note that this is not a great computation of the diff
+        float dRoll = Rotation3D(error).roll();
+        float dTotal = std::fabs(dPitch) + std::fabs(dRoll);
+
+        arma::vec3 torsoAdjustment_world = arma::vec3({- balanceTransPGainX * sensors.bodyCentreHeight * std::sin(pitch) - balanceTransDGainX * sensors.bodyCentreHeight * dPitch,
+                                                         balanceTransPGainY * sensors.bodyCentreHeight * std::sin(roll) + balanceTransDGainY * sensors.bodyCentreHeight * dRoll,
+                                                       - balanceTransPGainZ * std::sin(total) + balanceTransDGainY * dTotal});
+
+        Rotation3D yawLessOrientation = Rotation3D::createRotationZ(-sensors.orientation.yaw()) * sensors.orientation;
+
+        arma::vec3 torsoAdjustment_torso = yawLessOrientation * torsoAdjustment_world;
+
+        target = target.translate(-torsoAdjustment_torso);
+
     }
 }
 }
+
+
+
+
+
