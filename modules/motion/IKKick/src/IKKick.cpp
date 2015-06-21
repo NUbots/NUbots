@@ -141,6 +141,7 @@ namespace motion {
             // The position that the torso needs to move to in support foot coordinates
                 // Work out the height the torso should be at
                 // TODO Give height bounds for balance or tuning, height = Lower_Leg_Length + Upper Leg Length.
+                //USE bodyHeight from WalkEngine. find out where this is referenced from.
             auto torsoTarget = arma::vec({0, 0, Upper_Leg_Length + Lower_Leg_Length}); 
             
             // Find position vector from support foot to torso in leftFoot coordinates.
@@ -152,16 +153,25 @@ namespace motion {
             // Normalise the direction
             auto normalTorsoDirection = arma::normalise(torsoDirection);
 
-            // configurable velocity that the torso should move at - torsoShiftVelocity [m/s]
+            // torsoShiftVelocity [m/s] is the configurable velocity that the torso should move at
             
-            // net displacement of torso every UPDATE_FREQUENCY times per second
-            // ((P0-P1))*velocity/updatefrequency
+            // Net displacement of torso UPDATE_FREQUENCY times per second
+            // ((P1-P0))*velocity*(1/UPDATE_FREQUENCY)
             auto torsoDisplacement = (torsoShiftVelocity*normalTorsoDirection)/(UPDATE_FREQUENCY);
 
-            // position give to inverse kinematics
+            // New position to give to inverse kinematics
             auto torsoNewPosition = torsoPosition + torsoDisplacement; 
 
-            // TODO give position to inverse kinematics
+            // Convert the new torso position into torso coordinates
+            auto torsoNewPositionTorso = leftfoot*arma::join_cols(torsoNewPosition, arma::vec({0}));
+            // Find support foot position relative to the torso
+            auto supportFootPosition = leftFoot.translation();
+            // Moving torso is equivalent to moving foot in the opposite direction
+            // New support foot position
+            auto supportFootNewPosition = supportFootPosition - torsoNewPositionTorso;
+
+            // TODO give position to inverse kinematics            
+
 
             // TODO We're always finished kicking because we never start :(
             updatePriority(0);
