@@ -76,6 +76,7 @@ namespace motion {
             KICK_PRIORITY = config["kick_priority"].as<float>();
             EXECUTION_PRIORITY = config["execution_priority"].as<float>();
             torsoShiftVelocity = config["torsoShiftVelocity"].as<float>();
+            standHeight = config["standHeight"].as<float>();
 
             emit(std::make_unique<KickCommand>(KickCommand{
                 config["target"].as<arma::vec3>(),
@@ -139,10 +140,7 @@ namespace motion {
             // Obtain the position of the torso and the direction in which the torso needs to move
             
                 // The position that the torso needs to move to in support foot coordinates
-                // Work out the height the torso should be at
-                // TODO Give height bounds for balance or tuning, height = Lower_Leg_Length + Upper Leg Length.
-                //USE bodyHeight from WalkEngine. find out where this is referenced from.
-            auto torsoTarget = arma::vec({0, 0, Upper_Leg_Length + Lower_Leg_Length}); 
+            auto torsoTarget = arma::vec({0, 0, standHeight}); 
             
                 // Find position vector from support foot to torso in leftFoot coordinates.
             auto torsoPosition = leftFoot.i().translation();
