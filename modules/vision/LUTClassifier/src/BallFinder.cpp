@@ -61,7 +61,7 @@ namespace modules {
             topY[0] = 0;    //Choose centre of screen
 
             // Get the positions of the top of our green horizion, and the bottom of the screen
-            auto xb = getGroundPointFromScreen({ 0, -double(image.height() - 1) / 2}, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
+            auto xb = getGroundPointFromScreen({ 0, -double(image.height - 1) / 2}, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
             auto xt = getGroundPointFromScreen(topY, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
             double dx = 2 * BALL_RADIUS / BALL_MINIMUM_INTERSECTIONS_COARSE;
             double cameraHeight = sensors.orientationCamToGround(2,3);
@@ -100,7 +100,7 @@ namespace modules {
 
                 // Work out our details
                 arma::ivec2 start = { 0, y };
-                arma::ivec2 end = { int(image.width() - 1), y };
+                arma::ivec2 end = { int(image.width - 1), y };
                 int subsample = std::max(1, int(lround((y - nextY) * BALL_HORIZONTAL_SUBSAMPLE_FACTOR)));
 
                 // If our left hand side is in range, or we are over the top

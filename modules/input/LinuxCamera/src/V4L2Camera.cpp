@@ -56,10 +56,15 @@ namespace modules {
             }
 
             // Extract our data and create a new fresh buffer
-            auto timestamp = current.timestamp;
             std::vector<uint8_t> data(buffers[current.index].size());
             std::swap(data, buffers[current.index]);
             data.resize(current.bytesused);
+
+            // Calculate the timestamp in terms of NUClear clock
+            auto monotonicTime = std::chrono::microseconds(current.timestamp.tv_usec) + std::chrono::seconds(current.timestamp.tv_sec);
+            auto mclock = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch());
+            auto nclock = std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch());
+            auto timestamp = NUClear::clock::time_point(monotonicTime + (nclock - mclock));
 
             // Requeue our buffer
             v4l2_buffer requeue;
@@ -122,7 +127,7 @@ namespace modules {
             // }
 
             // Move this data into the image
-            return Image(width, height, std::move(data));
+            return Image(width, height, timestamp, std::move(data));
         }
 
         void V4L2Camera::resetCamera(const std::string& device, const std::string& fmt, size_t w, size_t h) {
