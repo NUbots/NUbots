@@ -79,12 +79,15 @@ namespace support {
 
     private:
       
+        time_t moduleStartupTime;
+        double absolute_time();
+
         //Member variables
         messages::motion::KickPlannerConfig kick_cfg;
 
         std::shared_ptr<messages::support::FieldDescription> field_description_;
 
-        static constexpr size_t SIMULATION_UPDATE_FREQUENCY = 90;
+        static constexpr size_t SIMULATION_UPDATE_FREQUENCY = 180;
 
         struct Config{
 
@@ -137,7 +140,7 @@ namespace support {
         void UpdateConfiguration(
             const messages::support::Configuration<SoccerSimulatorConfig>& config);
 
-        std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float dHeading);
+        std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float heading, float oldHeading);
         
         arma::vec2 getPath(Config::Motion::Path p);
 

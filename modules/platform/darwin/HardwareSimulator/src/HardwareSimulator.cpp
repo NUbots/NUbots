@@ -188,7 +188,10 @@ namespace darwin {
                 }
             }
 
-            //Gyro
+            // Gyro:
+            // Note: This reaction is not (and should not be) synced with the
+            // 'Receive Simulated Gyroscope' reaction above, so we can't
+            // reliably query the size of the gyroQueue.
             arma::vec3 sumGyro = {0,0,0};
             while (!gyroQueue.empty()){
                 auto g = gyroQueue.front();
@@ -202,7 +205,7 @@ namespace darwin {
 
             sensors.timestamp = NUClear::clock::now();
             
-            //Debug:
+            // //Debug:
             // integrated_gyroscope += sumGyro + arma::vec3({0,0,imu_drift_rate});
             // std::cout << "HardwareSimulator gyroscope = " << sensors.gyroscope.x << ", " << sensors.gyroscope.y << ", " << sensors.gyroscope.z << std::endl;
             // std::cout << "HardwareSimulator integrated_gyroscope = " << integrated_gyroscope.t() << std::endl;

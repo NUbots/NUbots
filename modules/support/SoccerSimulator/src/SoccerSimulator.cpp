@@ -73,16 +73,18 @@ namespace support {
     double sine_wave(double t, double period) {
         return std::sin((2.0 * M_PI * t) / period);
     }
-    double absolute_time() {
+    double SoccerSimulator::absolute_time() {
         auto now = NUClear::clock::now();
-        auto ms_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
-        double ms = static_cast<double>(ms_since_epoch - 1393322147502L);
-        double t = ms / 1000.0;
+        auto msSinceStart = std::chrono::duration_cast<std::chrono::microseconds>(now - moduleStartupTime).count();
+        double ms = static_cast<double>(msSinceStart);
+        double t = ms * 1e-6;
         return t;
     }
 
     void SoccerSimulator::UpdateConfiguration(
         const messages::support::Configuration<SoccerSimulatorConfig>& config) {
+
+        moduleStartupTime = NUClear::clock::now();
 
         cfg_.simulate_goal_observations = config["vision"]["goal_observations"].as<bool>();
         cfg_.simulate_ball_observations = config["vision"]["ball_observations"].as<bool>();
@@ -110,7 +112,6 @@ namespace support {
 
     SoccerSimulator::SoccerSimulator(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
-
 
         on<Trigger<FieldDescription>>("FieldDescription Update", [this](const FieldDescription& desc) {
             
@@ -171,6 +172,7 @@ namespace support {
                     diff = world.robotPose - oldRobotPose;
                     //Face along direction of movement
                     world.robotPose.angle() = vectorToBearing(diff.xy());
+
                     world.robotVelocity = Transform2D({arma::norm(diff) * SIMULATION_UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
                     break;
 
@@ -216,7 +218,10 @@ namespace support {
                     }
                     break;
             }
-            emit(computeGyro(world.robotPose.angle() - oldRobotPose.angle()));
+
+            // Emit the change in orientation as a DarwinSensors::Gyroscope,
+            // to be handled by HardwareSimulator.
+            emit(computeGyro(world.robotPose.angle(), oldRobotPose.angle()));
         });
 
         // Simulate Vision
@@ -330,7 +335,9 @@ namespace support {
         });
     }
 
-    std::unique_ptr<DarwinSensors::Gyroscope> SoccerSimulator::computeGyro(float dHeading){
+    std::unique_ptr<DarwinSensors::Gyroscope> SoccerSimulator::computeGyro(float heading, float oldHeading){
+        float dHeading = utility::math::angle::difference(heading, oldHeading);
+
         auto g = std::make_unique<DarwinSensors::Gyroscope>();
         g->x = 0;
         g->y = 0;
