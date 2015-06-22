@@ -75,13 +75,13 @@ namespace research {
                 // find the min and max y points on the circle
                 // capped at the bounds of the image
                 uint minY = std::max(std::ceil(centre[1] - radius), 0.0);
-                uint maxY = std::min(std::floor(centre[1] + radius), double(image.height() - 1));
+                uint maxY = std::min(std::floor(centre[1] + radius), double(image.height - 1));
 
                 // loop through pixels on the image in bounding box
                 for (uint y = minY + ballEdgeBuffer; y <= maxY - ballEdgeBuffer; ++y) {
                     auto edgePoints = circle.getEdgePoints(y);
                     uint minX = std::max(edgePoints[0], 0.0);
-                    uint maxX = std::min(edgePoints[1], double(image.width() - 1));
+                    uint maxX = std::min(edgePoints[1], double(image.width - 1));
 
                     for (uint x = minX + ballEdgeBuffer; x <= maxX - ballEdgeBuffer; ++x) {
                         auto pixel = image(x, y);
@@ -108,7 +108,7 @@ namespace research {
                 // find the min and max y points on the quad
                 // capped at the bounds of the image
                 uint minY = std::max(std::min(quad.getTopLeft()[1], quad.getTopRight()[1]), 0.0);
-                uint maxY = std::min(std::max(quad.getBottomLeft()[1], quad.getBottomRight()[1]), double(image.height() - 1));
+                uint maxY = std::min(std::max(quad.getBottomLeft()[1], quad.getBottomRight()[1]), double(image.height - 1));
 
                 for (uint y = minY + goalEdgeBuffer; y <= maxY - goalEdgeBuffer; ++y) {
                     arma::vec2 edgePoints;
@@ -118,7 +118,7 @@ namespace research {
                         continue; // no intersection
                     }
                     uint minX = std::max(edgePoints[0], 0.0);
-                    uint maxX = std::min(edgePoints[1], double(image.width() - 1));
+                    uint maxX = std::min(edgePoints[1], double(image.width - 1));
 
                     for (uint x = minX + goalEdgeBuffer; x <= maxX - goalEdgeBuffer; ++x) {
                         auto pixel = image(x, y);

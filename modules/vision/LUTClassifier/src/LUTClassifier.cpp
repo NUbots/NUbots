@@ -117,7 +117,7 @@ namespace modules {
                 auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
 
                 // Set our width and height
-                classifiedImage->dimensions = { image.width(), image.height() };
+                classifiedImage->dimensions = { image.width, image.height };
 
                 // Attach our sensors
                 // std::cout << "sensor-vision latency = " << std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - sensors->timestamp).count() << std::endl;

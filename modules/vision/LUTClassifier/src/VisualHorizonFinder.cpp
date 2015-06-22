@@ -37,17 +37,17 @@ namespace modules {
             auto& minVisualHorizon = classifiedImage.minVisualHorizon;
 
             // Cast lines to find our visual horizon
-            for(uint x = 0; x < image.width(); x += VISUAL_HORIZON_SPACING) {
+            for(uint x = 0; x < image.width; x += VISUAL_HORIZON_SPACING) {
 
                 // Find our point to classify from (slightly above the horizon)
                 int top = std::max(int(lround(horizon.y(x)) - VISUAL_HORIZON_BUFFER), int(0));
-                top = std::min(top, int(image.height() - 1));
+                top = std::min(top, int(image.height - 1));
 
                 // Classify our segments
-                auto segments = quex->classify(image, lut, { int(x), top }, { int(x), int(image.height() - 1) }, VISUAL_HORIZON_SUBSAMPLING);
+                auto segments = quex->classify(image, lut, { int(x), top }, { int(x), int(image.height - 1) }, VISUAL_HORIZON_SUBSAMPLING);
 
                 // Our default green point is the bottom of the screen
-                arma::ivec2 greenPoint = { int(x), int(image.height() - 1) };
+                arma::ivec2 greenPoint = { int(x), int(image.height - 1) };
 
                 // Loop through our segments to find our first green segment
                 for (auto it = segments.begin(); it != segments.end(); ++it) {
@@ -71,17 +71,17 @@ namespace modules {
             }
 
             // If we don't have a line on the right of the image, make one
-            if(image.width() - 1 % VISUAL_HORIZON_SPACING != 0) {
+            if(image.width - 1 % VISUAL_HORIZON_SPACING != 0) {
 
                 // Our default green point is the bottom of the screen
-                arma::ivec2 greenPoint = { int(image.width() - 1), int(image.height() - 1) };
+                arma::ivec2 greenPoint = { int(image.width - 1), int(image.height - 1) };
 
                 // Find our point to classify from (slightly above the horizon)
-                int top = std::max(int(lround(horizon.y(image.width() - 1)) - VISUAL_HORIZON_BUFFER), int(0));
-                top = std::min(top, int(image.height() - 1));
+                int top = std::max(int(lround(horizon.y(image.width - 1)) - VISUAL_HORIZON_BUFFER), int(0));
+                top = std::min(top, int(image.height - 1));
 
-                arma::ivec2 start = { int(image.width() - 1), top };
-                arma::ivec2 end = { int(image.width() - 1), int(image.height() - 1) };
+                arma::ivec2 start = { int(image.width - 1), top };
+                arma::ivec2 end = { int(image.width - 1), int(image.height - 1) };
 
                 auto segments = quex->classify(image, lut, start, end, VISUAL_HORIZON_SUBSAMPLING);
 

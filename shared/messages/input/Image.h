@@ -20,6 +20,7 @@
 #ifndef MESSAGES_INPUT_IMAGE_H
 #define MESSAGES_INPUT_IMAGE_H
 
+#include <nuclear>
 #include <cstdint>
 #include <cstddef>
 #include <vector>
@@ -40,22 +41,19 @@ namespace messages {
                 uint8_t cr;
             };
 
-            Image(size_t width, size_t height, std::vector<uint8_t>&& data);
+            Image(size_t width, size_t height, NUClear::clock::time_point, std::vector<uint8_t>&& data);
 
             Pixel operator()(size_t x, size_t y) const;
 
-            size_t width() const;
-            size_t height() const;
+            size_t width;
+            size_t height;
+            NUClear::clock::time_point timestamp;
 
             // Returns the raw data that this is using
             const std::vector<uint8_t>& source() const;
 
         private:
-            size_t imgWidth;
-            size_t imgHeight;
-
             std::vector<uint8_t> data;
-
         };
 
     }  // input
