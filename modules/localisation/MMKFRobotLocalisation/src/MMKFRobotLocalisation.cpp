@@ -133,22 +133,15 @@ namespace localisation {
 
 
         // on<Trigger<Sensors>,
-        //    Options<Sync<MMKFRobotLocalisation>>
+        //    Options<Sync<MMKFRobotLocalisation>,Single>
         //   >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
         //     auto curr_time = NUClear::clock::now();
-
-           
-
 
         //     //TODO: REMOVE THIS
         //     if(!emit_data_handle.enabled()){
         //         //Activate when data received
         //         emit_data_handle.enable();
         //     }
-
-
-
-
 
         //     emit(graph("Odometry Measurement Update", sensors.odometry[0], sensors.odometry[1]));
         //     log("Odometry Measurement Update", sensors.odometry.t());
