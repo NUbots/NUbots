@@ -13,7 +13,7 @@ reaction_handles:
   # Statistics about reactions, modules and runtimes
   reaction_statistics: false
   # Data for Chart tool in NUsight
-  data_points: false
+  data_points: true
   # Info from the game controller
   game_controller: false
   # Info about subsumption and behaviour

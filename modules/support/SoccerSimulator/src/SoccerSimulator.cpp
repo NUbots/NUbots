@@ -133,6 +133,10 @@ namespace support {
             arma::vec3 goal_bl = {field_description_->goalpost_bl[0],field_description_->goalpost_bl[1],0};
             goalPosts.push_back(VirtualGoalPost(goal_bl, 1.1));
 
+            for(auto& g : goalPosts){
+                log("goalPost", g.position.t());
+            }
+
         });
 
         on<With<Configuration<SoccerSimulatorConfig>>, Trigger<GlobalConfig>>("Soccer Simulator Configuration", std::bind(std::mem_fn(&SoccerSimulator::updateConfiguration), this, std::placeholders::_1, std::placeholders::_2));
@@ -248,20 +252,19 @@ namespace support {
 
 
                 for (auto& g : goalPosts){
+                    // log("world.robotPose", world.robotPose.t());
                     auto m = g.detect(camParams, world.robotPose, sensors);
-
                     if (!m.measurements.empty()) {
+                        // emit(graph("sim measurement = ", m.measurements[0].position);
 
                         goals->push_back(m);
-
                     }
                 }
-
-
 
                 // Assign leftness and rightness to goals
                 if (goals->size() == 2) {
                     if (goals->at(0).quad.getCentre()(0) < goals->at(1).quad.getCentre()(0)) {
+
                         goals->at(0).side = messages::vision::Goal::Side::LEFT;
                         goals->at(1).side = messages::vision::Goal::Side::RIGHT;
                     } else {
