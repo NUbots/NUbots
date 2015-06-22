@@ -161,6 +161,14 @@ namespace motion {
         gainArms = gains["arms"].as<Expression>();
         gainLegs = gains["legs"].as<Expression>();
 
+        for(ServoID i = ServoID(0); i < ServoID::NUMBER_OF_SERVOS; i = ServoID(int(i)+1)){
+            if(int(i) < 6){
+                jointGains[i] = gainArms;
+            } else {
+                jointGains[i] = gainLegs;
+            }
+        }
+
         auto& walkCycle = config["walk_cycle"];
         stepTime = walkCycle["step_time"].as<Expression>();
         zmpTime = walkCycle["zmp_time"].as<Expression>();
@@ -190,6 +198,10 @@ namespace motion {
         balanceIGain = balance["gain"]["i"].as<Expression>();
         balanceDGain = balance["gain"]["d"].as<Expression>();
 
+        for(auto& gain : balance["servo_gains"]){
+            ServoID s = messages::input::idFromString(gain["id"].as<std::string>());
+            servoControlPGains[s] = gain["p"].as<Expression>();
+        }
         /* TODO
         // gCompensation parameters
         toeTipCompensation = config["toeTipCompensation"].as<Expression>();
@@ -439,7 +451,7 @@ namespace motion {
         time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
 
         for (auto& joint : joints) {
-            waypoints->push_back({ id, time, joint.first, joint.second, gainLegs, 100 }); // TODO: support separate gains for each leg
+            waypoints->push_back({ id, time, joint.first, joint.second, jointGains[joint.first], 100 }); // TODO: support separate gains for each leg
         }
 
         return std::move(waypoints);
@@ -473,12 +485,12 @@ namespace motion {
         waypoints->reserve(6);
 
         time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
-        waypoints->push_back({ id, time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]), gainArms, 100 });
-        waypoints->push_back({ id, time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]), gainArms, 100 });
-        waypoints->push_back({ id, time, ServoID::R_ELBOW,          float(qRArmActual[2]), gainArms, 100 });
-        waypoints->push_back({ id, time, ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]), gainArms, 100 });
-        waypoints->push_back({ id, time, ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]), gainArms, 100 });
-        waypoints->push_back({ id, time, ServoID::L_ELBOW,          float(qLArmActual[2]), gainArms, 100 });
+        waypoints->push_back({ id, time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]), jointGains[ServoID::R_SHOULDER_PITCH], 100 });
+        waypoints->push_back({ id, time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]), jointGains[ServoID::R_SHOULDER_ROLL], 100 });
+        waypoints->push_back({ id, time, ServoID::R_ELBOW,          float(qRArmActual[2]), jointGains[ServoID::R_ELBOW], 100 });
+        waypoints->push_back({ id, time, ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]), jointGains[ServoID::L_SHOULDER_PITCH], 100 });
+        waypoints->push_back({ id, time, ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]), jointGains[ServoID::L_SHOULDER_ROLL], 100 });
+        waypoints->push_back({ id, time, ServoID::L_ELBOW,          float(qLArmActual[2]), jointGains[ServoID::L_ELBOW], 100 });
 
         return std::move(waypoints);
     }

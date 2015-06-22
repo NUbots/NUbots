@@ -45,7 +45,8 @@ namespace messages {
             R_ANKLE_ROLL        = 16,
             L_ANKLE_ROLL        = 17,
             HEAD_YAW            = 18,
-            HEAD_PITCH          = 19
+            HEAD_PITCH          = 19,
+            NUMBER_OF_SERVOS    = 20
         };
 
         const std::string stringFromId(const ServoID id);
