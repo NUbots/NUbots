@@ -49,6 +49,7 @@ namespace motion {
     using messages::behaviour::ActionPriorites;
     using messages::support::FieldDescription;
 
+    using utility::motion::kinematics::calculateLegJoints;
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJoints;
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
@@ -161,12 +162,12 @@ namespace motion {
                 kickfoot += kicker.getFootPose();
             }
 
-            emit(ServoWaypoints(InverseKinematics(support,kickfoot))); //look up in walk en
+            emit(ServoWaypoints(InverseKinematics(support,kickfoot))); //look up in walk engine
 
 
             // TODO use states
 
-            float gain = 80;
+            float gainLegs = 80;
             float torque = 100;
 
             // Get our foot positions
@@ -225,6 +226,27 @@ namespace motion {
             // Is it 4x4 with 0 under translate column
             auto supportFootNewPose = leftFoot;
             auto supportFootNewPose.col(3)= (arma::join_cols(supportFootNewPosition, arma::vec({0}))).t();
+
+            // Lifted from WalkEngine::updateStep()
+            // Calculate leg joints
+            auto joints = calculateLegJoints<DarwinModel>(supportFootNewPose, rightFoot);
+
+            // Lifted from WalkEngine::motionLegs()
+            // Move leg motors
+            std::unique_ptr<std::vector<ServoCommand>> IKKick::motionLegs(std::vector<std::pair<ServoID, float>> joints) {
+            auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+            waypoints->reserve(16);
+
+            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
+
+            for (auto& joint : joints) {
+                waypoints->push_back({ id, time, joint.first, joint.second, gainLegs, 100 }); // TODO: change 100 to torque, support separate gains for each leg
+            }
+
+            return std::move(waypoints);
+            }
+
+            emit(std::move(waypoints));
 
             // TODO We're always finished kicking because we never start :(
             updatePriority(0);
@@ -295,6 +317,9 @@ namespace motion {
     }
 
 
-}
-}
+
+
+
+} // motion
+} // modules
 

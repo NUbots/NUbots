@@ -48,6 +48,8 @@ namespace motion {
         //float displacementTolerance;
 
     	void updatePriority(const float& priority);
+        std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints)
+
 
     	static constexpr uint UPDATE_FREQUENCY = 90;
 
