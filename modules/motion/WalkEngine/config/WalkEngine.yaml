@@ -79,33 +79,33 @@ walk_cycle:
       d: 0.021
     translation_gain:
       X:
-        p: 0
+        p: 0.25
         d: 0
       Y:
-        p: 0
+        p: 0.25
         d: 0
       Z:
-        p: 0
+        p: 0.025
         d: 0
     servo_gains:
       -
         id: "HIP_YAW"
-        p: 1
+        p: 100
       -
         id: "HIP_ROLL"
-        p: 1
+        p: 100
       -
         id: "HIP_PITCH"
-        p: 1
+        p: 100
       -
         id: "KNEE"
-        p: 1
+        p: 1000
       -
         id: "ANKLE_PITCH"
-        p: 1
+        p: 100
       -
         id: "ANKLE_ROLL"
-        p: 1
+        p: 100
       
     # Support bias parameters to reduce backlash-based instability
     # velFastForward: 0.05

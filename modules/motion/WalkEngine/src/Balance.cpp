@@ -130,7 +130,8 @@ namespace motion {
         for(auto it = servoControlPGains.cbegin(); it != servoControlPGains.cend(); ++it){
             auto id = it->first;
             float gain = it->second;
-            jointGains[id] = std::fabs(total * gain);
+            jointGains[id] = std::fmin(gainLegs, std::fabs(total * gain));
+            emit(graph(messages::input::stringFromId(id), jointGains[id]));
         }
 
 
