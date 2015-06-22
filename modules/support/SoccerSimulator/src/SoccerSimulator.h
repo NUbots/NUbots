@@ -141,13 +141,8 @@ namespace support {
         //Methods
         void updateConfiguration(const messages::support::Configuration<SoccerSimulatorConfig>& config, const messages::support::GlobalConfig& globalConfig);
 
-<<<<<<< HEAD
         std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float heading, float oldHeading);
-        
-=======
-        std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float dHeading);
 
->>>>>>> e592f51a8f8c8132e2dbd5122200becefc288623
         arma::vec2 getPath(Config::Motion::Path p);
 
     public:

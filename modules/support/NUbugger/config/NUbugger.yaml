@@ -19,9 +19,9 @@ reaction_handles:
   # Info about subsumption and behaviour
   behaviour: false
   # Motor positions, orientation, etc.
-  sensors: false
+  sensors: true
   # Localisation state estimates and uncertainties
-  localisation: false
+  localisation: true
   # Vision data
   image: false # Raw image
   classified_image: false # Colour classified
