@@ -205,6 +205,15 @@ namespace utility {
 
                     arma::mat predictedCovariance = covarianceFromSigmas(predictedObservations, predictedMean);
 
+                    //DEBUG: why do we occasionally get negative eigenvalues
+                    // arma::vec eValues = arma::eig_sym(predictedCovariance);
+                    // std::cout << "UKF - eValues = " << eValues.t() << std::endl;
+                    // if(arma::any(eValues < 0*eValues)){
+                    //     std::cout << "UKF - sigma covariance has negative eigenvalues!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+                    //     std::cout << "UKF - predictedObservations = \n" << predictedObservations << std::endl;
+                    //     std::cout << "UKF - predictedMean = " << predictedMean.t() << std::endl;
+                    // }
+
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
 
                     // Update our state
@@ -221,13 +230,15 @@ namespace utility {
 
                     // Magical quality calculation
                     arma::mat innovationVariance = predictedCovariance + measurement_variance;
-                    arma::mat innovationCovariance = ((innovation.t() * innovationVariance.i()) * innovation);
+                    arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
 
-                    double expTerm = -0.5 * innovationCovariance(0, 0);
-                    if(arma::det(innovationVariance) == 0){
-                        std::cout << "arma::det(innovationVariance) == 0. innovationVariance = \n" << innovationVariance << std::endl;
-                    }
-                    double fract = 1 / sqrt(pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance));
+                    double expTerm = -0.5 * scalarlikelihoodExponent(0, 0);
+                    double normalisationFactor = pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance);
+                    // DEBUG
+                    // if(normalisationFactor <= 0){
+                    //     std::cout << "arma::det(innovationVariance) == 0. innovationVariance = \n" << innovationVariance << std::endl;
+                    // }
+                    double fract = 1 / sqrt(normalisationFactor);
                     const float outlierProbability = 0.05;
 
                     return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;

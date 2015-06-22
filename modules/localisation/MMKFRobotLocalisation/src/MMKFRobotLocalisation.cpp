@@ -110,7 +110,7 @@ namespace localisation {
                 arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
                 auto model_cov = model->GetCovariance();
 
-                // log("model_state = ", model_state.t());
+                emit(graph("model_state = ", model_state));
                 // log("model_cov = \n", model_cov);
                 
                 Self robot_model;
@@ -179,24 +179,24 @@ namespace localisation {
             }
 
             //DEBUG
-            for (auto& goal : goals) {
-                // std::cout << "  side:";
-                // std::cout << ((goal.side == Goal::Side::LEFT) ? "LEFT" :
-                //               (goal.side == Goal::Side::RIGHT) ? "RIGHT" : "UNKNOWN")
-                //           << std::endl;
+            // for (auto& goal : goals) {
+            //     // std::cout << "  side:";
+            //     // std::cout << ((goal.side == Goal::Side::LEFT) ? "LEFT" :
+            //     //               (goal.side == Goal::Side::RIGHT) ? "RIGHT" : "UNKNOWN")
+            //     //           << std::endl;
 
-                for(uint i = 0; i < goal.measurements.size(); ++i) {
-                    std::stringstream msg;
-                    msg << ((goal.side == Goal::Side::LEFT) ? "LGoal Pos" :
-                           (goal.side == Goal::Side::RIGHT) ? "RGoal Pos" : "UGoal Pos") <<
-                     " " << i;
-                    emit(graph(msg.str(), goal.measurements[i].position[0], goal.measurements[i].position[1], goal.measurements[i].position[2]));
-                    // std::cout << "  measurement: " << num++ << std::endl;
-                    // std::cout << "    error:" << measurement.error << std::endl;
-                }
-                std::cout << "    position:" << goal.measurements[0].position.t() << std::endl;
+            //     for(uint i = 0; i < goal.measurements.size(); ++i) {
+            //         std::stringstream msg;
+            //         msg << ((goal.side == Goal::Side::LEFT) ? "LGoal Pos" :
+            //                (goal.side == Goal::Side::RIGHT) ? "RGoal Pos" : "UGoal Pos") <<
+            //          " " << i;
+            //         emit(graph(msg.str(), goal.measurements[i].position[0], goal.measurements[i].position[1], goal.measurements[i].position[2]));
+            //         // std::cout << "  measurement: " << num++ << std::endl;
+            //         // std::cout << "    error:" << measurement.error << std::endl;
+            //     }
+            //     std::cout << "    position:" << goal.measurements[0].position.t() << std::endl;
 
-            }
+            // }
 
             auto curr_time = NUClear::clock::now();
             last_measurement_time = curr_time;
