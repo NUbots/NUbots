@@ -164,7 +164,6 @@ namespace motion {
 
             emit(ServoWaypoints(InverseKinematics(support,kickfoot))); //look up in walk engine
 
-
             // TODO use states
 
             float gainLegs = 80;
@@ -173,6 +172,8 @@ namespace motion {
             // Get our foot positions
             Transform3D leftFootTorso = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
             Transform3D rightFootTorso = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
+
+//START BALANCER
 
             // Moving the torso to balance on support foot before kick
 
@@ -222,10 +223,9 @@ namespace motion {
             auto supportFootNewPosition = supportFootPosition - torsoNewPositionTorso;
 
             // TODO give position to inverse kinematics
-            // Puts together matrix to give to inverse kinemtaics
-            // Is it 4x4 with 0 under translate column
+            // Puts together matrix to give to inverse kinematics
             auto supportFootNewPose = leftFoot;
-            auto supportFootNewPose.col(3)= (arma::join_cols(supportFootNewPosition, arma::vec({0}))).t();
+            auto supportFootNewPose.col(3)= (arma::join_cols(supportFootNewPosition, arma::vec({1}))).t();
 
             // Lifted from WalkEngine::updateStep()
             // Calculate leg joints
@@ -233,7 +233,7 @@ namespace motion {
 
             // Lifted from WalkEngine::motionLegs()
             // Move leg motors
-            std::unique_ptr<std::vector<ServoCommand>> IKKick::motionLegs(std::vector<std::pair<ServoID, float>> joints) {
+            //std::unique_ptr<std::vector<ServoCommand>> IKKick::motionLegs(std::vector<std::pair<ServoID, float>> joints) {
             auto waypoints = std::make_unique<std::vector<ServoCommand>>();
             waypoints->reserve(16);
 
@@ -243,10 +243,20 @@ namespace motion {
                 waypoints->push_back({ id, time, joint.first, joint.second, gainLegs, 100 }); // TODO: change 100 to torque, support separate gains for each leg
             }
 
-            return std::move(waypoints);
-            }
+            //return std::move(waypoints);
+            //}
 
             emit(std::move(waypoints));
+
+//END BALANCER
+
+            // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
+            Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
+            Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
+
+                        
+
+//START FOOTLIFTER
 
             // TODO We're always finished kicking because we never start :(
             updatePriority(0);
