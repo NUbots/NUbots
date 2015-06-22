@@ -250,13 +250,35 @@ namespace motion {
 
 //END BALANCER
 
+
+
+//START FOOTLIFTER
             // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
             Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
             Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
+            
+            // Finds the current position of the kick foot in torso coordinates
+            auto liftFootPosition  = leftFoot.translation();
 
-                        
+            // Finds the target position of the kick foot to lift foot
+            auto liftFootTarget = leftFoot.translation();
+            // Raises the foot
+            auto liftFootTarget.col(2) = liftFootTarget.col(2) + liftFootHeight;
+            // Moves the heel backwards
+            auto liftFootTarget.col(0) = liftFootTarget.col(0) + liftFootBack;
 
-//START FOOTLIFTER
+            // Direction in which the foot needs to be lifted
+            auto liftFootDirection = liftFootTarget - liftFootPosition;
+            // Normalise Direction
+            auto normalLiftFootDirection = arma::normalise(liftFoot);
+            // Net Displacement to move kick foot
+            auto liftFootDisplacement = (torsoShiftVelocity/UPDATE_FREQUENCY)*normalLiftFootDirection;
+            auto newLiftFootPosition = liftFootPosition + LiftFootDisplacement;
+            auto newLiftFootPose = leftFoot;
+            auto newLiftFootPose.col(3) = (arma::join_cols(newLiftFootPosition, arma::vec({1}))).t();
+
+//END FOOTLIFTER
+
 
             // TODO We're always finished kicking because we never start :(
             updatePriority(0);

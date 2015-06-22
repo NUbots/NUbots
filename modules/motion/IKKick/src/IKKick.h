@@ -45,13 +45,15 @@ namespace motion {
     	float EXECUTION_PRIORITY;
         float torsoShiftVelocity;
         float standHeight;
+        float liftFootHeight;
+        float liftFootBack;
         //float displacementTolerance;
 
     	void updatePriority(const float& priority);
         std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints)
 
 
-    	static constexpr uint UPDATE_FREQUENCY = 90;
+    	static constexpr size_t UPDATE_FREQUENCY = 90;
 
         ReactionHandle updater;
 
