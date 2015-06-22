@@ -78,6 +78,8 @@ namespace motion {
             EXECUTION_PRIORITY = config["execution_priority"].as<float>();
             torsoShiftVelocity = config["torsoShiftVelocity"].as<float>();
             standHeight = config["standHeight"].as<float>();
+            liftFootHeight = config["liftFootHeight"];
+            liftFootBack = config["liftFootBack"];
 
             emit(std::make_unique<KickCommand>(KickCommand{
                 config["target"].as<arma::vec3>(),
