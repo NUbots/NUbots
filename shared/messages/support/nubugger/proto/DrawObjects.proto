@@ -22,6 +22,7 @@ package messages.support.nubugger.proto;
 import "messages/Vector.proto";
 
 message DrawObject {
+
     enum Shape {
         ARROW = 1;
         BOX = 2;
@@ -33,10 +34,17 @@ message DrawObject {
         SPHERE = 8;
     }
 
+    message Path {
+
+        required vec2 position = 1;
+        required uint32 parentIndex = 2;
+
+    }
+
     required Shape shape = 1;
     optional string name = 2;
 
-    required vec3 position = 3;
+    optional vec3 position = 3;
     optional vec3 direction = 4;
     optional vec3 target = 5;
     optional float width = 6;
@@ -47,13 +55,14 @@ message DrawObject {
     optional float top_radius = 11;
     optional float bottom_radius = 12;
     repeated vec3 vertices = 13;
-    optional uint32 faces = 14;
-    optional float lineWidth = 15;
-    optional float length = 16;
-    optional float depth = 17;
-    optional bool fill = 18;
+    repeated Path path = 14;
+    optional uint32 faces = 15;
+    optional float lineWidth = 16;
+    optional float length = 17;
+    optional float depth = 18;
+    optional bool fill = 19;
 
-    optional float timeOut = 19;
+    optional float timeOut = 20;
 }
 
 message DrawObjects {
