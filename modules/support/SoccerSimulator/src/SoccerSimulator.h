@@ -23,6 +23,7 @@
 #include <nuclear>
 #include <armadillo>
 #include "messages/support/Configuration.h"
+#include "messages/support/GlobalConfig.h"
 #include "messages/support/FieldDescription.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
@@ -37,7 +38,7 @@ namespace modules {
 namespace support {
 
     struct SoccerSimulatorConfig {
-        static constexpr const char* CONFIGURATION_PATH = "SoccerSimulatorConfig.yaml";
+        static constexpr const char* CONFIGURATION_PATH = "SoccerSimulator.yaml";
     };
 
     class SoccerSimulator : public NUClear::Reactor {
@@ -78,7 +79,6 @@ namespace support {
         }
 
     private:
-      
         time_t moduleStartupTime;
         double absolute_time();
 
@@ -112,6 +112,7 @@ namespace support {
             bool emit_ball_fieldobjects = true;
 
             bool blind_robot = false;
+            bool auto_start_behaviour = true;
 
         } cfg_;
 
@@ -124,7 +125,7 @@ namespace support {
             utility::math::matrix::Transform2D robotPose;
             utility::math::matrix::Transform2D robotVelocity;
             // utility::math::matrix::Transform2D ballPose;
-            // utility::math::matrix::Transform2D ballVelocity;  
+            // utility::math::matrix::Transform2D ballVelocity;
             VirtualBall ball;
         };
 
@@ -135,13 +136,18 @@ namespace support {
 
 
         bool kicking;
+        uint PLAYER_ID;
 
         //Methods
-        void UpdateConfiguration(
-            const messages::support::Configuration<SoccerSimulatorConfig>& config);
+        void updateConfiguration(const messages::support::Configuration<SoccerSimulatorConfig>& config, const messages::support::GlobalConfig& globalConfig);
 
+<<<<<<< HEAD
         std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float heading, float oldHeading);
         
+=======
+        std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float dHeading);
+
+>>>>>>> e592f51a8f8c8132e2dbd5122200becefc288623
         arma::vec2 getPath(Config::Motion::Path p);
 
     public:

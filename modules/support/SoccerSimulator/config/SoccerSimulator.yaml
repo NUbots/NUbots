@@ -1,4 +1,4 @@
-
+auto_start_behaviour: true
 vision:
   # Disabling either of these emits corresponding ground truth simulation results
   # as localisation result

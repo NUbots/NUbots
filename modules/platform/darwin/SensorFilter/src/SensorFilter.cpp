@@ -27,6 +27,7 @@
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/motion/ForwardKinematics.h"
+#include "utility/nubugger/NUhelpers.h"
 
 namespace modules {
     namespace platform {
@@ -34,6 +35,8 @@ namespace modules {
 
 
             using messages::support::Configuration;
+            using utility::nubugger::drawArrow;
+            using utility::nubugger::drawSphere;
             using messages::platform::darwin::DarwinSensors;
             using messages::platform::darwin::ButtonLeftDown;
             using messages::platform::darwin::ButtonLeftUp;
@@ -167,7 +170,7 @@ namespace modules {
                             "Main Sensors Loop",
                             [this](const DarwinSensors& input,
                                    const std::shared_ptr<const Sensors>& previousSensors) {
-                                
+
                     auto sensors = std::make_unique<Sensors>();
 
                     // Set our timestamp to when the data was read
@@ -324,7 +327,7 @@ namespace modules {
 
                     // Gives us the quaternion representation
                     arma::vec o = orientationFilter.get();
-                    emit(graph("orientation quat", o[0], o[1], o[2], o[3]));                    
+                    emit(graph("orientation quat", o[0], o[1], o[2], o[3]));
                     //Map from robot to world coordinates
                     sensors->orientation = Rotation3D(UnitQuaternion(o.rows(orientationFilter.model.QW, orientationFilter.model.QZ)));
 
@@ -355,11 +358,18 @@ namespace modules {
                     if(!std::isnan(input.fsr.left.centreX) && !std::isnan(input.fsr.left.centreY)) {
                         // Left foot is on the ground?
                         sensors->leftFootDown = true;
+                        sensors->leftFSRCenter = {input.fsr.left.centreX, input.fsr.left.centreY};
+                        // log("bodyCentre", bodyCentre.t());
+                        // log("bodyCentre", sensors->leftFSRCenter);
                     }
                     if(!std::isnan(input.fsr.right.centreX) && !std::isnan(input.fsr.right.centreY)) {
                         // Right foot is on the ground?
                         sensors->rightFootDown = true;
+                        sensors->rightFSRCenter = {input.fsr.right.centreX, input.fsr.right.centreY};
                     }
+
+                        
+                    // log("left", sensors->leftFSRCenter.t(), "right", sensors->rightFSRCenter.t());
 
                     // if(previousSensors && (!sensors->leftFootDown && !sensors->rightFootDown )) {
                     //     //std::cout << "No feet down!" << std::endl;
@@ -427,6 +437,7 @@ namespace modules {
                     //LOOKOUT!!!! ARRAYOPS_MEAT
                     arma::vec4 COM = calculateCentreOfMass<DarwinModel>(sensors->forwardKinematics, true);
                     sensors->centreOfMass = {COM[0],COM[1], COM[2], COM[3]};
+                    //emit(drawSphere("COM",sensors->centreOfMass.rows(0,2) + arma::vec3({0,0,2 * 0.093 + 0.0335 + 0.034}),0.1)); //Correcting for robot height in nubugger
                     //END MASS MODEL
 
 
@@ -444,6 +455,16 @@ namespace modules {
                         sensors->kinematicsBodyToGround = sensors->orientationCamToGround;
                     }
                     sensors->kinematicsCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
+
+
+                    /************************************************
+                     *                  CENTRE OF PRESSURE          *
+                     ************************************************/
+
+                    sensors->centreOfPressure = utility::motion::kinematics::calculateCentreOfPressure<DarwinModel>(*sensors);
+                    // emit(graph("sensors->centreOfPressure", sensors->centreOfPressure));
+                    // emit(graph("groundCoM", arma::vec3(sensors->centreOfMass.rows(0,2))));
+                    // log("sensors->centreOfPressure", sensors->centreOfPressure.t());
 
                     // std::cout << "sensors->kinematicsCamToGround\n" << sensors->kinematicsCamToGround << std::endl;
                     // std::cout << "sensors->orientationCamToGround\n" << sensors->orientationCamToGround << std::endl;

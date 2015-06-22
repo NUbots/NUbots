@@ -1,18 +1,28 @@
 {
+	"build_systems":
+	[
+		{
+			"cmd":
+			[
+				"python",
+				"${project_path:${folder}}/b",
+				"compile"
+			],
+			"name": "Docker",
+			"working_dir": "${project_path:${folder}}"
+		}
+	],
 	"folders":
 	[
 		{
-			"follow_symlinks": true,
-			"path": ".",
-            "folder_exclude_patterns": ["/build"]
+			"folder_exclude_patterns":
+			[
+				"/build/"
+			],
+			"path": "."
+		},
+		{
+			"path": "tools/build"
 		}
-	],
-    "build_systems":
-    [
-        {
-            "name": "Docker",
-            "working_dir": "${project_path:${folder}}",
-            "cmd": ["python", "${project_path:${folder}}/b", "compile"]
-        }
-    ]
+	]
 }

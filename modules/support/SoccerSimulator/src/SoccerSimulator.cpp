@@ -30,6 +30,7 @@
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/ServoID.h"
 #include "messages/motion/WalkCommand.h"
+#include "messages/input/GameEvents/gameevents.h"
 
 namespace modules {
 namespace support {
@@ -56,8 +57,9 @@ namespace support {
     using messages::motion::KickPlannerConfig;
     using messages::platform::darwin::DarwinSensors;
     using utility::math::matrix::Transform2D;
-
-    
+    using messages::support::Configuration;
+    using messages::support::GlobalConfig;
+    using namespace messages::input::gameevents;
 
     double triangle_wave(double t, double period) {
         auto a = period; // / 2.0;
@@ -81,8 +83,7 @@ namespace support {
         return t;
     }
 
-    void SoccerSimulator::UpdateConfiguration(
-        const messages::support::Configuration<SoccerSimulatorConfig>& config) {
+    void SoccerSimulator::updateConfiguration(const Configuration<SoccerSimulatorConfig>& config, const GlobalConfig& globalConfig) {
 
         moduleStartupTime = NUClear::clock::now();
 
@@ -94,7 +95,7 @@ namespace support {
         cfg_.robot.path.x_amp = config["robot"]["path"]["x_amp"].as<float>();
         cfg_.robot.path.y_amp = config["robot"]["path"]["y_amp"].as<float>();
         cfg_.robot.path.type = pathTypeFromString(config["robot"]["path"]["type"].as<std::string>());
-      
+
         cfg_.ball.motion_type = motionTypeFromString(config["ball"]["motion_type"].as<std::string>());
         cfg_.ball.path.period = config["ball"]["path"]["period"].as<float>();
         cfg_.ball.path.x_amp = config["ball"]["path"]["x_amp"].as<float>();
@@ -108,13 +109,16 @@ namespace support {
         cfg_.blind_robot = config["blind_robot"].as<bool>();
 
         kicking = false;
+        PLAYER_ID = globalConfig.playerId;
+
+        cfg_.auto_start_behaviour = config["auto_start_behaviour"].as<bool>();
     }
 
     SoccerSimulator::SoccerSimulator(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
         on<Trigger<FieldDescription>>("FieldDescription Update", [this](const FieldDescription& desc) {
-            
+
             field_description_ = std::make_shared<FieldDescription>(desc);
 
             arma::vec3 goal_yr = {field_description_->goalpost_yr[0],field_description_->goalpost_yr[1],0};
@@ -131,11 +135,8 @@ namespace support {
 
         });
 
-        on<Trigger<Configuration<SoccerSimulatorConfig>>>(
-            "SoccerSimulatorConfig Update",
-            [this](const Configuration<SoccerSimulatorConfig>& config) {
-            UpdateConfiguration(config);
-        });
+        on<With<Configuration<SoccerSimulatorConfig>>, Trigger<GlobalConfig>>("Soccer Simulator Configuration", std::bind(std::mem_fn(&SoccerSimulator::updateConfiguration), this, std::placeholders::_1, std::placeholders::_2));
+        on<Trigger<Configuration<SoccerSimulatorConfig>>, With<GlobalConfig>>("Soccer Simulator Configuration", std::bind(std::mem_fn(&SoccerSimulator::updateConfiguration), this, std::placeholders::_1, std::placeholders::_2));
 
         on<Trigger<KickPlannerConfig>>("Get Kick Planner Config", [this](const KickPlannerConfig& cfg){
             kick_cfg = cfg;
@@ -155,18 +156,18 @@ namespace support {
         >("Robot motion", [this](const time_t&,
                                  const std::shared_ptr<const WalkCommand>& walkCommand) {
 
-            
+
             Transform2D oldRobotPose = world.robotPose;
             Transform2D oldBallPose = world.ball.position;
             Transform2D diff;
-            
+
             switch (cfg_.robot.motion_type){
-                case MotionType::NONE: 
+                case MotionType::NONE:
                     world.robotVelocity = Transform2D({ 0, 0 ,0 });
                     break;
 
-                case MotionType::PATH: 
-                    
+                case MotionType::PATH:
+
                     world.robotPose.xy() = getPath(cfg_.robot.path);
 
                     diff = world.robotPose - oldRobotPose;
@@ -189,12 +190,12 @@ namespace support {
             }
             // Update ball position
             switch (cfg_.ball.motion_type){
-                case MotionType::NONE: 
+                case MotionType::NONE:
                     world.ball.velocity = { 0, 0 , 0};
                     break;
 
                 case MotionType::PATH:
-                    
+
                     world.ball.position.rows(0,1) = getPath(cfg_.ball.path);
 
                     diff = world.ball.position - oldBallPose;
@@ -244,8 +245,8 @@ namespace support {
                     emit(std::move(goals));
                     return;
                 }
-              
-                
+
+
                 for (auto& g : goalPosts){
                     auto m = g.detect(camParams, world.robotPose, sensors);
 
@@ -253,11 +254,11 @@ namespace support {
 
                         goals->push_back(m);
 
-                    }                        
+                    }
                 }
 
-                
-            
+
+
                 // Assign leftness and rightness to goals
                 if (goals->size() == 2) {
                     if (goals->at(0).quad.getCentre()(0) < goals->at(1).quad.getCentre()(0)) {
@@ -282,7 +283,7 @@ namespace support {
                 r->back().last_measurement_time = NUClear::clock::now();
                 emit(std::move(r));
             }
-        
+
 
             if (cfg_.simulate_ball_observations) {
                 auto ball_vec = std::make_unique<std::vector<messages::vision::Ball>>();
@@ -302,7 +303,7 @@ namespace support {
                 emit(std::move(ball_vec));
 
             } else {
-                // Emit current ball exactly 
+                // Emit current ball exactly
                 auto b = std::make_unique<messages::localisation::Ball>();
                 b->position = world.robotPose.worldToLocal(world.ball.position).xy();
                 b->velocity = world.robotPose.rotation().t() * world.ball.velocity.rows(0,1);
@@ -325,13 +326,18 @@ namespace support {
             arma::vec3 robotHeadingVector = {bearingVector[0], bearingVector[1], 0};
             emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, robotHeadingVector, 1));
 
-            emit(drawSphere("ball", {world.ball.position(0), world.ball.position(1), 0}, 0.1));            
+            emit(drawSphere("ball", {world.ball.position(0), world.ball.position(1), 0}, 0.1));
 
         });
 
-        on<Trigger<Startup>>("Set Robot to Play",[this](const Startup&){
-            emit(std::make_unique<ButtonMiddleDown>());
-            emit(std::make_unique<ButtonMiddleDown>());
+        on<Trigger<Startup>>("SoccerSimulator Startup",[this](const Startup&){
+            if (cfg_.auto_start_behaviour) {
+                auto time = NUClear::clock::now();
+                emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{PLAYER_ID}));
+                emit(std::make_unique<GamePhase<Phase::PLAYING>>(GamePhase<Phase::PLAYING>{time, time}));
+                emit(std::make_unique<Phase>(Phase::PLAYING));
+            }
+
         });
     }
 

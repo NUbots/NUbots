@@ -396,6 +396,40 @@ namespace kinematics {
         return robotToImu;
     }
 
+    template <typename RobotKinematicModel>
+    inline arma::vec4 fsrCentreInBodyCoords(const messages::input::Sensors& sensors, const arma::vec2& foot, bool left) {
+        //sensors.orientationBodyToGround
+
+        int negativeIfRight = left ? 1 : -1;
+
+        arma::vec2 position = foot % arma::vec2({RobotKinematicModel::Leg::FOOT_LENGTH / 2, RobotKinematicModel::Leg::FOOT_WIDTH / 2});
+        arma::vec4 centerFoot = arma::vec4({position[0], position[1] + negativeIfRight * RobotKinematicModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE, 0, 1});
+
+        return sensors.forwardKinematics.find(left ? messages::input::ServoID::L_ANKLE_ROLL : messages::input::ServoID::R_ANKLE_ROLL)->second * centerFoot;
+    }
+
+    template <typename RobotKinematicModel>
+    inline arma::vec3 calculateCentreOfPressure(const messages::input::Sensors& sensors) {
+        arma::vec4 CoP = {0,0,0,1};
+        float number_of_feet_down = 0;
+        if (sensors.leftFootDown) {
+            CoP += fsrCentreInBodyCoords<RobotKinematicModel>(sensors, sensors.leftFSRCenter, true);
+            number_of_feet_down += 1.0f;
+        }
+        if(sensors.rightFootDown){
+            CoP += fsrCentreInBodyCoords<RobotKinematicModel>(sensors, sensors.rightFSRCenter, false);
+            number_of_feet_down  += 1.0f;
+        }
+        if(number_of_feet_down == 2){
+            CoP = CoP / number_of_feet_down;
+        }
+        //reset homogeneous coordinate
+        CoP(3) = 1;
+        arma::vec4 CoP_body = sensors.kinematicsBodyToGround * CoP;
+        return CoP_body.rows(0,2);
+
+    }
+
 }  // kinematics
 }  // motion
 }  // utility

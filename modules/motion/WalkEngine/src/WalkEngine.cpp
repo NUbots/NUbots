@@ -133,6 +133,8 @@ namespace motion {
         });
 
         on<Trigger<Startup>>([this](const Startup&) {
+            lastBalanceTime = NUClear::clock::now();
+
             //generateAndSaveStandScript();
             //reset();
             //state = State::LAST_STEP;
@@ -186,9 +188,16 @@ namespace motion {
         balanceWeight = balance["weight"].as<Expression>();
         balanceOffset = balance["offset"].as<Expression>();
 
-        balancePGain = balance["gain"]["p"].as<Expression>();
-        balanceIGain = balance["gain"]["i"].as<Expression>();
-        balanceDGain = balance["gain"]["d"].as<Expression>();
+        balancePGain = balance["angle_gain"]["p"].as<Expression>();
+        balanceIGain = balance["angle_gain"]["i"].as<Expression>();
+        balanceDGain = balance["angle_gain"]["d"].as<Expression>();
+
+        balanceTransPGainX = balance["translation_gain"]["X"]["p"].as<Expression>();
+        balanceTransDGainX = balance["translation_gain"]["X"]["d"].as<Expression>();
+        balanceTransPGainY = balance["translation_gain"]["Y"]["p"].as<Expression>();
+        balanceTransDGainY = balance["translation_gain"]["Y"]["d"].as<Expression>();
+        balanceTransPGainZ = balance["translation_gain"]["Z"]["p"].as<Expression>();
+        balanceTransDGainZ = balance["translation_gain"]["Z"]["d"].as<Expression>();
 
         /* TODO
         // gCompensation parameters
