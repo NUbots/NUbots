@@ -127,15 +127,11 @@ namespace motion {
         // Gains
         //-------------------------------
 
-        //for()
-
-
-
-
-
-
-
-
+        for(auto it = servoControlPGains.cbegin(); it != servoControlPGains.cend(); ++it){
+            auto id = it->first;
+            float gain = it->second;
+            jointGains[id] = std::fabs(total * gain);
+        }
 
 
     }
