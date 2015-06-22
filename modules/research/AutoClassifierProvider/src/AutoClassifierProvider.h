@@ -36,9 +36,17 @@ namespace research {
 
     private:
         int ballEdgeBuffer  = 0;
+        int ballLightnessMin = 0;
+        int ballLightnessMax = 255;
         int goalEdgeBuffer  = 0;
+        int goalLightnessMin = 0;
+        int goalLightnessMax = 255;
         int fieldEdgeBuffer = 0;
+        int fieldLightnessMin = 0;
+        int fieldLightnessMax = 255;
         int lineEdgeBuffer  = 0;
+        int lineLightnessMin = 0;
+        int lineLightnessMax = 255;
 
         ReactionHandle ballProvider;
         ReactionHandle goalProvider;

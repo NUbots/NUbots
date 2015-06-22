@@ -184,6 +184,18 @@ namespace motion {
         // constants which define the current values of jointGains based on the robot's balance state
         std::map<ServoID, float> servoControlPGains;
         
+        double balanceTransPGainX;
+        double balanceTransPGainY;
+        double balanceTransPGainZ;
+        double balanceTransDGainX;
+        double balanceTransDGainY;
+        double balanceTransDGainZ;
+
+        double dPitch = 0;
+        double dRoll = 0;
+        double lastPitch = 0;
+        double lastRoll = 0;
+        time_t lastBalanceTime;
 
         /*arma::vec4 ankleImuParamX;
         arma::vec4 ankleImuParamY;

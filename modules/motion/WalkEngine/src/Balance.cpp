@@ -38,6 +38,10 @@ namespace motion {
 
     void WalkEngine::balance(Transform3D& target, const LimbID& leg, const Sensors& sensors) {
 
+        //------------------------------------
+        // Rotation
+        //------------------------------------
+
         // Get current orientation, offset by body tilt. Maps robot to world. 
         Rotation3D tiltedOrientation = sensors.orientation.i().rotateY(-bodyTilt);
         // Removes any yaw component
@@ -48,9 +52,10 @@ namespace motion {
 
         // Calculate our D error and I error
         UnitQuaternion error = lastFootGoalRotation.i() * goalQuaternion;
+        //TODO: LEARN HOW TO COMPUTE THE INTEGRAL TERM CORRECTLY
         // footGoalErrorSum = footGoalErrorSum.slerp(goalQuaternion * footGoalErrorSum, 1.0/90.0);
 
-        // emit(graph("pid", Rotation3D(goalQuaternion).pitch(), /*Rotation3D(footGoalErrorSum).pitch(), */Rotation3D(error).pitch()));
+        // emit(graph("pid", Rotation3D(goalQuaternion).pitch(), Rotation3D(footGoalErrorSum).pitch(), Rotation3D(error).pitch()));
 
         // Apply the PID gains
         UnitQuaternion rotation = UnitQuaternion().slerp(goalQuaternion, balancePGain)
@@ -75,6 +80,53 @@ namespace motion {
 
         // Store our current target for D calculations
         lastFootGoalRotation = goalQuaternion;
+
+        //------------------------------------
+        // Translation 
+        //------------------------------------
+        //Get error signal
+        double pitch = Rotation3D(goalQuaternion).pitch();
+        double roll = Rotation3D(goalQuaternion).roll();
+        double total = std::fabs(pitch) + std::fabs(roll);
+
+        //Differentiate error signal
+        auto now = NUClear::clock::now();
+        double timeSinceLastMeasurement = std::chrono::duration_cast<std::chrono::nanoseconds>(now - lastBalanceTime).count() * 1e-9;
+
+        double newdPitch = (pitch - lastPitch) / timeSinceLastMeasurement; //note that this is not a great computation of the diff
+        double newdRoll = (roll - lastRoll) / timeSinceLastMeasurement;
+
+        //Exponential filter
+        dPitch = newdPitch * 0.25 + dPitch * 0.75;
+        dRoll = newdRoll * 0.25 + dRoll * 0.75;
+
+        double dTotal = std::fabs(dPitch) + std::fabs(dRoll);
+
+        lastPitch = pitch;
+        lastRoll = roll;
+        lastBalanceTime = now;
+
+        //Debug result
+        // emit(graph("pd translation", pitch, dPitch));
+
+        //Compute torso position adjustment
+        arma::vec3 torsoAdjustment_world = arma::vec3({- balanceTransPGainX * sensors.bodyCentreHeight * std::sin(pitch) - balanceTransDGainX * sensors.bodyCentreHeight * dPitch,
+                                                         balanceTransPGainY * sensors.bodyCentreHeight * std::sin(roll) + balanceTransDGainY * sensors.bodyCentreHeight * dRoll,
+                                                       - balanceTransPGainZ * std::sin(total) + balanceTransDGainY * dTotal});
+
+        //Rotate from world space to torso space
+        Rotation3D yawLessOrientation = Rotation3D::createRotationZ(-sensors.orientation.yaw()) * sensors.orientation;
+
+        arma::vec3 torsoAdjustment_torso = yawLessOrientation * torsoAdjustment_world;
+
+        //Apply opposite translation to the foot position
+        target = target.translate(-torsoAdjustment_torso);
+
     }
 }
 }
+
+
+
+
+
