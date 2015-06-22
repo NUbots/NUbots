@@ -208,8 +208,11 @@ namespace motion {
         balanceTransDGainZ = balance["translation_gain"]["Z"]["d"].as<Expression>();
 
         for(auto& gain : balance["servo_gains"]){
-            ServoID s = messages::input::idFromString(gain["id"].as<std::string>());
-            servoControlPGains[s] = gain["p"].as<Expression>();
+            float p = gain["p"].as<Expression>();
+            ServoID sr = messages::input::idFromPartialString(gain["id"].as<std::string>(),messages::input::ServoSide::RIGHT);
+            ServoID sl = messages::input::idFromPartialString(gain["id"].as<std::string>(),messages::input::ServoSide::LEFT);
+            servoControlPGains[sr] = p;
+            servoControlPGains[sl] = p;
         }
         /* TODO
         // gCompensation parameters

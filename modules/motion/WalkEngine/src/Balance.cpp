@@ -122,6 +122,22 @@ namespace motion {
         //Apply opposite translation to the foot position
         target = target.translate(-torsoAdjustment_torso);
 
+
+        //-------------------------------
+        // Gains
+        //-------------------------------
+
+        //for()
+
+
+
+
+
+
+
+
+
+
     }
 }
 }

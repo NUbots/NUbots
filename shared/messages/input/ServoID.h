@@ -25,6 +25,11 @@
 namespace messages {
     namespace input {
 
+        enum ServoSide {
+            RIGHT = 0,
+            LEFT = 1
+        };
+
         enum class ServoID {
             R_SHOULDER_PITCH    = 0,
             L_SHOULDER_PITCH    = 1,
@@ -51,6 +56,7 @@ namespace messages {
 
         const std::string stringFromId(const ServoID id);
         ServoID idFromString(const std::string str);
+        ServoID idFromPartialString(const std::string str, ServoSide side);
     }
 }
 
