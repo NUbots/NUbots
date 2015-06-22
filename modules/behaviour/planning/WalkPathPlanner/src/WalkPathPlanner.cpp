@@ -20,6 +20,7 @@
 #include "WalkPathPlanner.h"
 
 #include <cmath>
+#include "messages/behaviour/KickPlan.h"
 #include "messages/support/Configuration.h"
 #include "messages/input/Sensors.h"
 #include "messages/localisation/FieldObject.h"
@@ -40,12 +41,14 @@ namespace modules {
             using messages::motion::WalkCommand;
             using messages::behaviour::WalkTarget;
             using messages::behaviour::WalkApproach;
+            using messages::behaviour::KickPlan;
             using messages::motion::WalkStartCommand;
             using messages::motion::WalkStopCommand;
             using messages::motion::KickFinished;
             using utility::localisation::transform::RobotToWorldTransform;
             using utility::math::matrix::Transform2D;
             using utility::nubugger::graph;
+            using utility::nubugger::drawSphere;
 
             using LocalisationBall = messages::localisation::Ball;
             using Self = messages::localisation::Self;
@@ -120,6 +123,11 @@ namespace modules {
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
                     command->command = Transform2D({finalForwardSpeed, 0, angle});
 
+                    arma::vec2 ball_world_position = RobotToWorldTransform(selfs.front().position, selfs.front().heading, ball.position);
+                    arma::vec2 kick_target = 2 * ball_world_position - selfs.front().position;
+                    emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0})));
+
+                    emit(std::make_unique<KickPlan>(KickPlan{kick_target}));
                     emit(std::move(std::make_unique<WalkStartCommand>()));
                     emit(std::move(command));
 
