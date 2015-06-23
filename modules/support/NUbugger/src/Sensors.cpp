@@ -45,6 +45,10 @@ namespace support {
             auto* sensorData = message.mutable_sensor_data();
 
             sensorData->set_timestamp(sensors.timestamp.time_since_epoch().count());
+            sensorData->set_voltage(sensors.voltage);
+
+            float battery = (sensors.voltage - 10) / 2.9;
+            sensorData->set_battery(battery);
 
             // Add each of the servos into the protocol buffer
             for(const auto& s : sensors.servos) {

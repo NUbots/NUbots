@@ -31,8 +31,7 @@
 #include "messages/input/ServoID.h"
 #include "messages/motion/WalkCommand.h"
 #include "messages/input/GameEvents/gameevents.h"
-#include "utility/support/yaml_expression.h"
-#include "utility/support/yaml_armadillo.h"
+
 
 namespace modules {
 namespace support {
@@ -129,17 +128,19 @@ namespace support {
 
             field_description_ = std::make_shared<FieldDescription>(desc);
 
-            arma::vec3 goal_yr = {field_description_->goalpost_yr[0],field_description_->goalpost_yr[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_yr, 1.1));
+            goalPosts.clear();
 
-            arma::vec3 goal_yl = {field_description_->goalpost_yl[0],field_description_->goalpost_yl[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_yl, 1.1));
+            arma::vec3 goal_opp_r = {field_description_->goalpost_opp_r[0],field_description_->goalpost_opp_r[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_opp_r, 1.1, Goal::Side::RIGHT, Goal::Team::OPPONENT));
 
-            arma::vec3 goal_br = {field_description_->goalpost_br[0],field_description_->goalpost_br[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_br, 1.1));
+            arma::vec3 goal_opp_l = {field_description_->goalpost_opp_l[0],field_description_->goalpost_opp_l[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_opp_l, 1.1, Goal::Side::LEFT, Goal::Team::OPPONENT));
 
-            arma::vec3 goal_bl = {field_description_->goalpost_bl[0],field_description_->goalpost_bl[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_bl, 1.1));
+            arma::vec3 goal_own_r = {field_description_->goalpost_own_r[0],field_description_->goalpost_own_r[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_own_r, 1.1, Goal::Side::RIGHT, Goal::Team::OWN));
+
+            arma::vec3 goal_own_l = {field_description_->goalpost_own_l[0],field_description_->goalpost_own_l[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_own_l, 1.1, Goal::Side::LEFT, Goal::Team::OWN));
 
             for(auto& g : goalPosts){
                 log("goalPost", g.position.t());

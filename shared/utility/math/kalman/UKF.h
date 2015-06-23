@@ -228,7 +228,10 @@ namespace utility {
                     mean = model.limitState(mean);
                     covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
 
-                    // Magical quality calculation
+                    
+                    // Calculate and return the likelihood of the prior mean
+                    // and covariance given the new measurement (i.e. the
+                    // prior probability density of the measurement):
                     arma::mat innovationVariance = predictedCovariance + measurement_variance;
                     arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
 

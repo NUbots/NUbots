@@ -22,8 +22,7 @@
 
 #include <armadillo>
 
-namespace messages {
-namespace support {
+namespace messages {namespace support {
 
 class FieldDescription {
 public:
@@ -53,10 +52,10 @@ public:
 
     // Coordinates of goalpost centers calculated from the FieldDimensions:
     // (arma::vec2)
-    arma::vec2 goalpost_bl;
-    arma::vec2 goalpost_br;
-    arma::vec2 goalpost_yl;
-    arma::vec2 goalpost_yr;
+    arma::vec2 goalpost_own_l;
+    arma::vec2 goalpost_own_r;
+    arma::vec2 goalpost_opp_l;
+    arma::vec2 goalpost_opp_r;
 };
 
 }

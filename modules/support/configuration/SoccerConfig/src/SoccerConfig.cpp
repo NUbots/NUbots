@@ -44,10 +44,10 @@ namespace modules {
                 // auto goal_h = (d.goal_width + d.goalpost_diameter);
                 auto goal_post_x = half_length + goal_post_radius * 0.5;
 
-                desc.goalpost_bl = { -goal_post_x, -goal_y };
-                desc.goalpost_br = { -goal_post_x,  goal_y };
-                desc.goalpost_yl = {  goal_post_x,  goal_y };
-                desc.goalpost_yr = {  goal_post_x, -goal_y };
+                desc.goalpost_own_l = { -goal_post_x, -goal_y };
+                desc.goalpost_own_r = { -goal_post_x,  goal_y };
+                desc.goalpost_opp_l = {  goal_post_x,  goal_y };
+                desc.goalpost_opp_r = {  goal_post_x, -goal_y };
             }
 
             FieldDescription LoadFieldDescription(

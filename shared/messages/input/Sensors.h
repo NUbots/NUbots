@@ -69,6 +69,7 @@ namespace messages {
 
             NUClear::clock::time_point timestamp;
 
+            float voltage;
             arma::vec3 accelerometer;
             arma::vec3 gyroscope;
 
