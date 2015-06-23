@@ -49,10 +49,10 @@ namespace localisation {
     void MMKFRobotLocalisationEngine::set_field_description(std::shared_ptr<messages::support::FieldDescription> desc) {
 
         field_description_ = desc;
-        goalpost_lfos_.bl = {field_description_->goalpost_bl, LFOId::kGoalBL, "goalpost_blue_left"};
-        goalpost_lfos_.br = {field_description_->goalpost_br, LFOId::kGoalBR, "goalpost_blue_right"};
-        goalpost_lfos_.yl = {field_description_->goalpost_yl, LFOId::kGoalYL, "goalpost_yellow_left"};
-        goalpost_lfos_.yr = {field_description_->goalpost_yr, LFOId::kGoalYR, "goalpost_yellow_right"};
+        goalpost_lfos_.own_l = {field_description_->goalpost_own_l, LFOId::kGoalOwnL, "goalpost_own_left"};
+        goalpost_lfos_.own_r = {field_description_->goalpost_own_r, LFOId::kGoalOwnR, "goalpost_own_right"};
+        goalpost_lfos_.opp_l = {field_description_->goalpost_opp_l, LFOId::kGoalOppL, "goalpost_opp_left"};
+        goalpost_lfos_.opp_r = {field_description_->goalpost_opp_r, LFOId::kGoalOppR, "goalpost_opp_right"};
     }
 
     void MMKFRobotLocalisationEngine::UpdateConfiguration(
@@ -66,7 +66,7 @@ namespace localisation {
 
         cfg_.angle_between_goals_observation_enabled = config["AngleBetweenGoalsObservationEnabled"].as<bool>();
         cfg_.goal_pair_observation_enabled = config["GoalPairObservationEnabled"].as<bool>();
-        cfg_.all_goals_are_blue = config["AllGoalsAreBlue"].as<bool>();
+        cfg_.all_goals_are_own = config["AllGoalsAreBlue"].as<bool>();
         cfg_.emit_robot_fieldobjects = config["EmitRobotFieldobjects"].as<bool>();
     }
 
@@ -83,19 +83,19 @@ namespace localisation {
         std::vector<LocalisationFieldObject> possible;
 
         if (ambiguous_object.side == messages::vision::Goal::Side::LEFT) {
-            possible.push_back(goalpost_lfos_.bl);
-            if (!cfg_.all_goals_are_blue)
-                possible.push_back(goalpost_lfos_.yl);
+            possible.push_back(goalpost_lfos_.own_l);
+            if (!cfg_.all_goals_are_own)
+                possible.push_back(goalpost_lfos_.opp_l);
         } else if (ambiguous_object.side == messages::vision::Goal::Side::RIGHT) {
-            possible.push_back(goalpost_lfos_.br);
-            if (!cfg_.all_goals_are_blue)
-                possible.push_back(goalpost_lfos_.yr);
+            possible.push_back(goalpost_lfos_.own_r);
+            if (!cfg_.all_goals_are_own)
+                possible.push_back(goalpost_lfos_.opp_r);
         } else if (ambiguous_object.side == messages::vision::Goal::Side::UNKNOWN) {
-            possible.push_back(goalpost_lfos_.bl);
-            possible.push_back(goalpost_lfos_.br);
-            if (!cfg_.all_goals_are_blue) {
-                possible.push_back(goalpost_lfos_.yl);
-                possible.push_back(goalpost_lfos_.yr);
+            possible.push_back(goalpost_lfos_.own_l);
+            possible.push_back(goalpost_lfos_.own_r);
+            if (!cfg_.all_goals_are_own) {
+                possible.push_back(goalpost_lfos_.opp_l);
+                possible.push_back(goalpost_lfos_.opp_r);
             }
         } else {
             NUClear::log<NUClear::ERROR>(__FILE__, ",", __LINE__, ": The ambiguous_object (messages::vision::Goal) has an invalid messages::vision::Goal::Side");
@@ -136,10 +136,10 @@ namespace localisation {
             }
 
             std::vector<std::vector<LocalisationFieldObject>> objs;
-            objs.push_back({goalpost_lfos_.bl, goalpost_lfos_.br});
+            objs.push_back({goalpost_lfos_.own_l, goalpost_lfos_.own_r});
 
-            if (!cfg_.all_goals_are_blue)
-                objs.push_back({goalpost_lfos_.yl, goalpost_lfos_.yr});
+            if (!cfg_.all_goals_are_own)
+                objs.push_back({goalpost_lfos_.opp_l, goalpost_lfos_.opp_r});
 
             if(cfg_.goal_pair_observation_enabled)
                 robot_models_.AmbiguousMeasurementUpdate(vis_objs, objs);
@@ -167,10 +167,10 @@ namespace localisation {
             LocalisationFieldObject actual_object;
 
             if (observed_object.side == messages::vision::Goal::Side::LEFT)
-                actual_object = goalpost_lfos_.bl;
+                actual_object = goalpost_lfos_.own_l;
 
             if (observed_object.side == messages::vision::Goal::Side::RIGHT)
-                actual_object = goalpost_lfos_.br;
+                actual_object = goalpost_lfos_.own_r;
 
             robot_models_.MeasurementUpdate(observed_object, actual_object);
         }

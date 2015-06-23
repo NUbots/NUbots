@@ -29,7 +29,6 @@
 #include "utility/math/geometry/Quad.h"
 #include "utility/localisation/transform.h"
 
-
 namespace modules {
 namespace support {
 
@@ -73,14 +72,18 @@ namespace support {
 
 	class VirtualGoalPost {
 	public:
-		VirtualGoalPost(arma::vec3 position_, float height_){
+		VirtualGoalPost(arma::vec3 position_, float height_, Goal::Side side_, Goal::Team team_){
 			position = position_;
 			height = height_;
+			side = side_;
+			team = team_;
 		}
 		~VirtualGoalPost(){}
 
 		arma::vec3 position;
 		float height;
+		Goal::Side side; // LEFT, RIGHT, or UNKNOWN
+		Goal::Team team; // OWN, OPPONENT, or UNKNOWN
 
 		Goal detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors){
 			Goal result;
@@ -97,7 +100,8 @@ namespace support {
 			//Singularity goals
 			result.angularSize = arma::vec2({0, 0});
 			result.quad = Quad(result.screenAngular,result.screenAngular,result.screenAngular,result.screenAngular);
-			result.side = messages::vision::Goal::Side::UNKNOWN;
+			result.side = Goal::Side::UNKNOWN;
+			result.team = Goal::Team::UNKNOWN;
 			//If no measurements are in the goal, then it was not observed
 			return result;
 		}

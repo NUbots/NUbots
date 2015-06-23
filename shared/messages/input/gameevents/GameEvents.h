@@ -44,7 +44,8 @@ namespace gameevents {
     enum Context {
         SELF,
         TEAM,
-        OPPONENT
+        OPPONENT,
+        UNKNOWN
     };
 
     enum TeamColour {

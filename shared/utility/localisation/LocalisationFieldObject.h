@@ -29,10 +29,10 @@ namespace utility {
     enum class LFOId {
         kInvalid,
         kBall,
-        kGoalYL,
-        kGoalYR,
-        kGoalBL,
-        kGoalBR,
+        kGoalOppL,
+        kGoalOppR,
+        kGoalOwnL,
+        kGoalOwnR,
     };
 
     class LocalisationFieldObject {
