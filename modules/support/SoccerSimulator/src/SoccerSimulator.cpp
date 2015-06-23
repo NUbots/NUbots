@@ -94,27 +94,27 @@ namespace support {
         cfg_.simulate_ball_observations = config["vision"]["ball_observations"].as<bool>();
 
         cfg_.robot.motion_type = motionTypeFromString(config["robot"]["motion_type"].as<std::string>());
-        cfg_.robot.path.period = config["robot"]["path"]["period"].as<float>();
-        cfg_.robot.path.x_amp = config["robot"]["path"]["x_amp"].as<float>();
-        cfg_.robot.path.y_amp = config["robot"]["path"]["y_amp"].as<float>();
+        cfg_.robot.path.period = config["robot"]["path"]["period"].as<Expression>();
+        cfg_.robot.path.x_amp = config["robot"]["path"]["x_amp"].as<Expression>();
+        cfg_.robot.path.y_amp = config["robot"]["path"]["y_amp"].as<Expression>();
         cfg_.robot.path.type = pathTypeFromString(config["robot"]["path"]["type"].as<std::string>());
 
         cfg_.ball.motion_type = motionTypeFromString(config["ball"]["motion_type"].as<std::string>());
-        cfg_.ball.path.period = config["ball"]["path"]["period"].as<float>();
-        cfg_.ball.path.x_amp = config["ball"]["path"]["x_amp"].as<float>();
-        cfg_.ball.path.y_amp = config["ball"]["path"]["y_amp"].as<float>();
+        cfg_.ball.path.period = config["ball"]["path"]["period"].as<Expression>();
+        cfg_.ball.path.x_amp = config["ball"]["path"]["x_amp"].as<Expression>();
+        cfg_.ball.path.y_amp = config["ball"]["path"]["y_amp"].as<Expression>();
         cfg_.ball.path.type = pathTypeFromString(config["ball"]["path"]["type"].as<std::string>());
 
         world.robotPose = config["initial"]["robot_pose"].as<arma::vec3>();
         world.ball.position = config["initial"]["ball"]["position"].as<arma::vec3>();
-        world.ball.diameter = config["initial"]["ball"]["diameter"].as<float>();
+        world.ball.diameter = config["initial"]["ball"]["diameter"].as<Expression>();
 
         cfg_.blind_robot = config["blind_robot"].as<bool>();
 
-        cfg_.vision_error(0) = config["vision"]["variance"]["fractional_error"].as<float>();
-        cfg_.vision_error(1) = config["vision"]["variance"]["min_error"]["r"].as<float>();
-        cfg_.vision_error(2) = config["vision"]["variance"]["min_error"]["theta"].as<float>();
-        cfg_.vision_error(3) = config["vision"]["variance"]["min_error"]["phi"].as<float>();
+        cfg_.vision_error(0) = config["vision"]["variance"]["r"]["proportional_factor"].as<Expression>();
+        cfg_.vision_error(1) = config["vision"]["variance"]["r"]["min_error"].as<Expression>();
+        cfg_.vision_error(2) = config["vision"]["variance"]["theta"].as<Expression>();
+        cfg_.vision_error(3) = config["vision"]["variance"]["phi"].as<Expression>();
 
         kicking = false;
         PLAYER_ID = globalConfig.playerId;

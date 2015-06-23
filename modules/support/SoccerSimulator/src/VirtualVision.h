@@ -54,7 +54,9 @@ namespace support {
         measurement.position = SphericalRobotObservation(robotPose.xy(), robotPose.angle(), objPosition);
         measurement.error = arma::eye(3, 3);
 
-        measurement.error.diag() = arma::max(error(0) * arma::abs(measurement.position), error.rows(1,3));
+        measurement.error[0] = std::fmax(error(0) * std::fabs(measurement.position(0)), error(1));
+        measurement.error.diag()[1] = error[1];
+        measurement.error.diag()[2] = error[2];
 
         arma::vec4 cam_space = sensors->kinematicsCamToGround.i() * sphericalToCartesian4(measurement.position);
         arma::vec2 screenAngular = cartesianToSpherical(cam_space.rows(0,2)).rows(1,2);
