@@ -113,13 +113,13 @@ namespace modules {
                     goalPriority = p.goal;
                 });
 
-                on< Trigger<std::vector<Ball>>,
-                    With<Sensors>,
-                    With<std::vector<Goal>>,
+                on< Trigger<Sensors>,
+                    With<Optional<std::vector<Ball>>>,
+                    With<Optional<std::vector<Goal>>>,
                     Options<Single, Sync<HeadBehaviourSoccer>>
-                  >("Head Behaviour Main Loop",[this] ( const std::vector<Ball> vballs,
-                                                        const Sensors& sensors,
-                                                        const std::vector<Goal> vgoals
+                  >("Head Behaviour Main Loop",[this] ( const Sensors& sensors,
+                                                        const std::shared_ptr<const std::vector<Ball>>& vballs,
+                                                        const std::shared_ptr<const std::vector<Goal>>& vgoals
                                                         ) {
 
                     bool search = false;
@@ -133,23 +133,23 @@ namespace modules {
 
                     //TODO: make this a loop over a list of objects or something
                     if(ballPriority == maxPriority){
-                        if(vballs.size() > 0){
+                        if(vballs != NULL && vballs->size() > 0){
                             //Fixate on ball
                             timeLastObjectSeen = now;
-                            auto& ball = vballs[0];
+                            auto& ball = vballs->at(0);
                             fixationObjects.push_back(VisionObject(ball));
                         } else {
                             search = true;
                         }
                     } 
                     if(goalPriority == maxPriority){
-                        if(vgoals.size() > 0){
+                        if(vgoals != NULL && vgoals->size() > 0){
                             //Fixate on goals and lines and other landmarks
                             timeLastObjectSeen = now;
                             std::set<Goal::Side> visiblePosts;
                             //TODO treat goals as one object
                             std::vector<VisionObject> goals;
-                            for (auto& goal : vgoals){
+                            for (auto& goal : *vgoals){
                                 visiblePosts.insert(goal.side);
                                 goals.push_back(VisionObject(goal));
                             }
