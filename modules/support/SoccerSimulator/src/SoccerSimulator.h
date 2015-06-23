@@ -93,9 +93,10 @@ namespace support {
 
             bool simulate_goal_observations = true;
             bool simulate_ball_observations = true;
-            bool distinguish_left_and_right_goals = true;
+            bool distinguish_own_and_opponent_goals = false;
+            // bool distinguish_left_and_right_goals = true;
 
-            struct Motion{
+            struct Motion {
                 MotionType motion_type = MotionType::PATH;
                 struct Path{
                     float period = 10;

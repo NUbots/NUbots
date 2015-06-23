@@ -71,13 +71,13 @@ namespace messages {
                 UNKNOWN,
                 LEFT,
                 RIGHT,
-            } side;
+            } side = Side::UNKNOWN;
 
             enum class Team {
                 UNKNOWN,
                 OWN,
                 OPPONENT,
-            } team;
+            } team = Team::UNKNOWN;
 
             utility::math::geometry::Quad quad;
         };
@@ -88,7 +88,7 @@ namespace messages {
                 NONE,
                 MAGENTA,
                 CYAN
-            } team;
+            } team = Team::NONE;
 
             utility::math::geometry::Polygon polygon;
         };

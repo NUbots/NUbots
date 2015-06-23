@@ -89,6 +89,7 @@ namespace support {
 
         cfg_.simulate_goal_observations = config["vision"]["goal_observations"].as<bool>();
         cfg_.simulate_ball_observations = config["vision"]["ball_observations"].as<bool>();
+        cfg_.distinguish_own_and_opponent_goals = config["vision"]["distinguish_own_and_opponent_goals"].as<bool>();
 
         cfg_.robot.motion_type = motionTypeFromString(config["robot"]["motion_type"].as<std::string>());
         cfg_.robot.path.period = config["robot"]["path"]["period"].as<float>();
@@ -247,18 +248,21 @@ namespace support {
 
             if (cfg_.simulate_goal_observations) {
                 auto goals = std::make_unique<std::vector<messages::vision::Goal>>();
-                if(cfg_.blind_robot){
+                if (cfg_.blind_robot) {
                     emit(std::move(goals));
                     return;
                 }
 
+                // for (auto& g : goalPosts) {
+                for (auto g : goalPosts) {
+                    if (cfg_.distinguish_own_and_opponent_goals) {
+                        g.team = Goal::Team::UNKNOWN;
+                    }
 
-                for (auto& g : goalPosts){
-                    // log("world.robotPose", world.robotPose.t());
+                    // Detect the goal:
                     auto m = g.detect(camParams, world.robotPose, sensors);
                     if (!m.measurements.empty()) {
                         // emit(graph("sim measurement = ", m.measurements[0].position);
-
                         goals->push_back(m);
                     }
                 }

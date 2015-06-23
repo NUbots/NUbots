@@ -80,10 +80,10 @@ namespace support {
 		}
 		~VirtualGoalPost(){}
 
-		arma::vec3 position;
-		float height;
-		Goal::Side side; // LEFT, RIGHT, or UNKNOWN
-		Goal::Team team; // OWN, OPPONENT, or UNKNOWN
+		arma::vec3 position = {0, 0, 0};
+		float height = 1.1;
+		Goal::Side side = Goal::Side::UNKNOWN; // LEFT, RIGHT, or UNKNOWN
+		Goal::Team team = Goal::Team::UNKNOWN; // OWN, OPPONENT, or UNKNOWN
 
 		Goal detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors){
 			Goal result;
@@ -100,8 +100,8 @@ namespace support {
 			//Singularity goals
 			result.angularSize = arma::vec2({0, 0});
 			result.quad = Quad(result.screenAngular,result.screenAngular,result.screenAngular,result.screenAngular);
-			result.side = Goal::Side::UNKNOWN;
-			result.team = Goal::Team::UNKNOWN;
+			result.side = side;
+			result.team = team;
 			//If no measurements are in the goal, then it was not observed
 			return result;
 		}
