@@ -32,7 +32,7 @@ namespace motion {
         enum State {
             BALANCE,
             KICK,
-            FOLLOW_THROUGH,
+            RETURN,
             STAND
         };
 
@@ -44,14 +44,15 @@ namespace motion {
     	float KICK_PRIORITY;
     	float EXECUTION_PRIORITY;
         float torsoShiftVelocity;
+        float kickVelocity;
         float standHeight;
         float liftFootHeight;
         float liftFootBack;
         //float displacementTolerance;
 
     	void updatePriority(const float& priority);
-        std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints)
-
+        Transform3D balance(Transform3D leftFoot, Transform3D rightFoot);
+        std::unique_ptr<std::vector<ServoCommand>> motionLegs(Transform3D leftFootNewPose, Transform3D rightFootNewPose);
 
     	static constexpr size_t UPDATE_FREQUENCY = 90;
 

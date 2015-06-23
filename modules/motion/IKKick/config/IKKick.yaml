@@ -5,6 +5,7 @@ target: [1, 1, 1]
 direction: [2, 2, 2]
 
 torsoShiftVelocity: 0.0333
+kickVelocity: 0.0333
 standHeight: 0.180
 liftFootHeight: 0.05
 liftFootBack: 0
