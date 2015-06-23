@@ -31,6 +31,8 @@
 #include "messages/input/ServoID.h"
 #include "messages/motion/WalkCommand.h"
 #include "messages/input/GameEvents/gameevents.h"
+#include "utility/support/yaml_expression.h"
+#include "utility/support/yaml_armadillo.h"
 
 namespace modules {
 namespace support {
@@ -60,6 +62,7 @@ namespace support {
     using messages::support::Configuration;
     using messages::support::GlobalConfig;
     using namespace messages::input::gameevents;
+    using utility::support::Expression;
 
     double triangle_wave(double t, double period) {
         auto a = period; // / 2.0;
@@ -107,6 +110,13 @@ namespace support {
         world.ball.diameter = config["initial"]["ball"]["diameter"].as<float>();
 
         cfg_.blind_robot = config["blind_robot"].as<bool>();
+
+        cfg_.vision_error = arma::vec4({
+            config["variance"]["fractional_error"].as<float>(),
+            config["variance"]["min_error"]["r"].as<float>(),
+            config["variance"]["min_error"]["theta"].as<float>(),
+            config["variance"]["min_error"]["phi"].as<float>()
+        });
 
         kicking = false;
         PLAYER_ID = globalConfig.playerId;
@@ -253,7 +263,7 @@ namespace support {
 
                 for (auto& g : goalPosts){
                     // log("world.robotPose", world.robotPose.t());
-                    auto m = g.detect(camParams, world.robotPose, sensors);
+                    auto m = g.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
                     if (!m.measurements.empty()) {
                         // emit(graph("sim measurement = ", m.measurements[0].position);
 
@@ -295,7 +305,7 @@ namespace support {
                     return;
                 }
 
-                auto ball = world.ball.detect(camParams, world.robotPose, sensors);
+                auto ball = world.ball.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
 
                 if (!ball.measurements.empty()) {
 

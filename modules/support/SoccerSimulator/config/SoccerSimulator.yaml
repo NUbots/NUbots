@@ -4,6 +4,16 @@ vision:
   # as localisation result
   goal_observations: true
   ball_observations: true
+  # Error values which are sent to localisation system representing uncertainty in vision measurements
+  variance:
+    fractional_error: 0.1
+    min_error:
+      # 1cm
+      r: 0.01 
+      # 1deg
+      theta: 0.017
+      # 1deg
+      phi: 0.017
 
 robot:
   #If use_motion is true, then the robot will move based on the latest behaviour commands

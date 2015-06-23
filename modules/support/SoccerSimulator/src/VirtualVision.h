@@ -48,20 +48,13 @@ namespace support {
     	arma::vec2 screenAngular;
     };
 
-	inline static VisibleMeasurement computeVisible(arma::vec3 objPosition, const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors){
+	inline static VisibleMeasurement computeVisible(arma::vec3 objPosition, const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors, arma::vec4 error){
 		//Assumes we need to see the bottom or...
 		messages::vision::VisionObject::Measurement measurement;
         measurement.position = SphericalRobotObservation(robotPose.xy(), robotPose.angle(), objPosition);
         measurement.error = arma::eye(3, 3);
-        //105 measurement noise
-        float min_error_r = 0.01; //1cm error
-        float min_error_theta = 0.01; //00.017 is 1deg error
-        float min_error_phi = 0.01;
-        arma::vec3 min_error = {min_error_r,min_error_theta,min_error_phi};
-        measurement.error.diag() = arma::max(0.001 * arma::abs(measurement.position), min_error);
-        // measurement.error(0,0) = 0.1 * measurement.position(0);
-        // measurement.error(1,1) = 0.1 * measurement.position(1);
-        // measurement.error(2,2) = 0.1 * measurement.position(2);
+
+        measurement.error.diag() = arma::max(error(0) * arma::abs(measurement.position), error.rows(1,3));
 
         arma::vec4 cam_space = sensors->kinematicsCamToGround.i() * sphericalToCartesian4(measurement.position);
         arma::vec2 screenAngular = cartesianToSpherical(cam_space.rows(0,2)).rows(1,2);
@@ -91,10 +84,10 @@ namespace support {
 		arma::vec3 position;
 		float height;
 
-		Goal detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors){
+		Goal detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors, arma::vec4 error){
 			Goal result;
 
-			auto visibleMeasurements = computeVisible(position,camParams,robotPose,sensors);
+			auto visibleMeasurements = computeVisible(position,camParams,robotPose,sensors,error);
 
 			for (auto & m : visibleMeasurements.measurements){
 				result.measurements.push_back(m);
@@ -132,10 +125,10 @@ namespace support {
 		// arma::vec2 position;
 		float diameter;
 
-		Ball detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors){
+		Ball detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors, arma::vec4 error){
 			Ball result;
 
-			auto visibleMeasurements = computeVisible(position, camParams, robotPose, sensors);
+			auto visibleMeasurements = computeVisible(position,camParams,robotPose,sensors,error);
 
 			// TODO: set timestamp, sensors, classifiedImage?
 			for (auto& m : visibleMeasurements.measurements){
