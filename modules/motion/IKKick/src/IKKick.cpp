@@ -213,9 +213,14 @@ namespace motion {
             auto torsoDisplacement = (torsoShiftVelocity/UPDATE_FREQUENCY)*normalTorsoDirection;
 
             // New position to give to inverse kinematics in support foot coordinates
-            auto torsoNewPosition = torsoPosition + torsoDisplacement; 
+            auto torsoNewPosition = torsoPosition + torsoDisplacement;
+            auto supportFootNewPose = leftFoot;
+            // Proof of Line Below
+            //auto supportFootNewPose = leftFoot - arma::join_cols(arma::zeros(4,3), arma::join_cols(-1*torsoDisplacement, arma::vec({0})).t());        
+            // = torsoPosition + torsoDisplacement
+            auto supportFootNewPose.col(3)= (arma::join_cols(torsoNewPosition, arma::vec({1}))).t();  
 /*
-// TODO CHECK THIS!!!!!! Don't need to convert
+// TODO CHECK THIS!!!!!! Don't need to convert DELETE THIS
             // Convert the new torso position into torso coordinates
             auto torsoNewPositionTorso = leftFoot*(arma::join_cols(torsoNewPosition, arma::vec({0})).t());
             // Find support foot position relative to the torso
@@ -230,12 +235,7 @@ namespace motion {
             auto supportFootNewPose.col(3)= (arma::join_cols(supportFootNewPosition, arma::vec({1}))).t();
             auto kickFootNewPose = rightFoot;
 */
-/* ALTERNATIVE
-            auto supportFootNewPose = leftFoot - arma::join_cols(arma::zeros(4,3), arma::join_cols(-1*torsoDisplacement, arma::vec({0})).t());        
-            //auto supportFootNewPose = leftFoot;
-            //auto supportFootNewPose.col(3)= (arma::join_cols(torsoNewPosition, arma::vec({1}))).t(); 
-*/
-            }
+            //}
 
 
             // Lifted from WalkEngine::motionLegs()
@@ -263,8 +263,6 @@ namespace motion {
 
 //END BALANCER
 
-
-
 //START FOOTLIFTER w.r.t Torso, Should be support foot coordinates????
             // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
             Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
@@ -275,8 +273,10 @@ namespace motion {
 
             // Finds the target position of the kick foot to lift foot in support foot coordinates
             auto liftFootTarget = leftFoot.i()*rightFoot.translation();
+            
             // Raises the foot
             auto liftFootTarget.col(2) = liftFootTarget.col(2) + liftFootHeight;
+            
             // Moves the heel backwards
             // Negative taken into account
             auto liftFootTarget.col(0) = liftFootTarget.col(0) - liftFootBack;
@@ -285,17 +285,20 @@ namespace motion {
             auto liftFootDirection = liftFootTarget - liftFootPosition;
             // Normalise Direction
             auto normalLiftFootDirection = arma::normalise(liftFoot);
-            // Net Displacement to move kick foot
+
+            // Net displacement to move kick foot
             auto liftFootDisplacement = (torsoShiftVelocity/UPDATE_FREQUENCY)*normalLiftFootDirection;
-            // Convert new position from support foot coordinates to kick foot coordinates
-            auto newLiftFootDisplacmentKick = rightFoot.i()*leftFoot*arma::join_cols(newLiftDisplacement, arma::vec({0}));
-            auto newLiftFootPositionKick = rightFoot.i().translation() - newLiftFootPositionKick;
+            
+            // Convert displacement from support foot coordinates to kick foot coordinates
+            auto liftFootDisplacmentKick = rightFoot.i()*leftFoot*arma::join_cols(liftFootDisplacement, arma::vec({0}));
+            // Find the new position vector from the right foot to the torso
+            auto newLiftFootPositionKick = rightFoot.i().translation() - liftFootDisplacementKick;
+            
             // New transform matrix to give to inverse kinematics           
             auto newLiftFootPose = rightFoot;
             auto newLiftFootPose.col(3) = (arma::join_cols(newLiftFootPositionKick, arma::vec({1}))).t();
 
 //END FOOTLIFTER
-
 
 //START KICK Assume we want to kick the ball straight ahead, and that the foot will move in a straight line
             
@@ -312,15 +315,16 @@ namespace motion {
             auto normalKickFootDirection = arma::normalise(kickFootDirection);
             // Net displacement we want the foot to move per cycle 
             auto kickFootDisplacement = (kickVelocity/UPDATE_FREQUENCY)*normalKickFootDirection;
+            // Convert to kick foot coordinates
+            auto kickFootDisplacementKick = rightFoot.i()*leftFoot*arma::join_cols(kickFootDisplacement, arma::vec({0}))
             // New position of the foot we want to move to in support foot coordinates
-            auto newKickFootPosition = kickFootPosition + kickFootDisplacement;
-            // TODO CHECK THIS !!!!!
+            auto newKickFootPositionKick = rightFoot.i().translation() - kickFootDisplacementKick;
+
             // New transform matrix to give to inverse kinematics
             auto newKickFootPose = rightFoot;
-            auto newKickFootPose.col(3) = (arma::join_cols(newKickFootPosition, arma::vec({1}))).t()
-*/
-
+            auto newKickFootPose.col(3) = (arma::join_cols(newKickFootPositionKick, arma::vec({1}))).t()
 //END KICK
+
             // TODO We're always finished kicking because we never start :(
             updatePriority(0);
         });
