@@ -101,7 +101,7 @@ namespace utility {
                         arma::vec difference = predictedObservation-measurement;
                         weights[i] = std::exp(- arma::dot(difference, (measurement_variance.i() * difference)));
                     }
-                    
+                    // std::cout << "weights = \n" << weights << std::endl;
                     //Resample
                     std::random_device rd;
                     std::mt19937 gen(rd());
