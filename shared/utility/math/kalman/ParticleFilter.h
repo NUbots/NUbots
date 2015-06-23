@@ -64,13 +64,20 @@ namespace utility {
                 {
                     particles = arma::zeros(number_of_particles_,Model::size);
                     setState(initialMean, initialCovariance);
+                    std::cout << "initial sample: \n" << particles << std::endl;
+                    std::cout << "initialMean: \n" << initialMean.t() << std::endl;
+                    std::cout << "initialCovariance: \n" << initialCovariance << std::endl;
                 }
 
                 template <typename... TAdditionalParameters>
                 void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters) 
                 {
+                    //Sample single zero mean gaussian with process noise (represented by a gaussian mixture model of size 1)
+                    arma::gmm_diag gaussian;
+                    gaussian.set_params(arma::mat(arma::zeros(Model::size)), arma::mat(model.processNoise().diag()),arma::ones(1));
                     for(unsigned int i = 0; i < particles.n_rows; ++i) {
-                        auto newpcle = model.timeUpdate(particles.row(i).t(), deltaT, additionalParameters...);
+                        //TODO: add noise?
+                        auto newpcle = model.timeUpdate(particles.row(i).t(), deltaT, additionalParameters...) + gaussian.generate();
                         particles.row(i) = newpcle.t();
                     }
                 }

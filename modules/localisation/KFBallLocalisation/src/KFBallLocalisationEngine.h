@@ -45,7 +45,7 @@ namespace localisation {
                 {0.1, 0, 0, 0}, // mean
                 // {0, 0, 3.141},
                 arma::eye(ball::BallModel::size, ball::BallModel::size) * 1, // cov
-                1) // alpha
+                100) // particles
                 {
             last_time_update_time_ = NUClear::clock::now();
         }
@@ -62,8 +62,8 @@ namespace localisation {
 
         bool CanEmitFieldObjects();
 
-        // utility::math::kalman::ParticleFilter<ball::BallModel> ball_filter_;
-        utility::math::kalman::UKF<ball::BallModel> ball_filter_;
+        utility::math::kalman::ParticleFilter<ball::BallModel> ball_filter_;
+        // utility::math::kalman::UKF<ball::BallModel> ball_filter_;
 
     private:
         struct {
