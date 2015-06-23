@@ -64,9 +64,6 @@ namespace utility {
                 {
                     particles = arma::zeros(number_of_particles_,Model::size);
                     setState(initialMean, initialCovariance);
-                    std::cout << "initial sample: \n" << particles << std::endl;
-                    std::cout << "initialMean: \n" << initialMean.t() << std::endl;
-                    std::cout << "initialCovariance: \n" << initialCovariance << std::endl;
                 }
 
                 void setState(StateVec initialMean, StateMat initialCovariance) {

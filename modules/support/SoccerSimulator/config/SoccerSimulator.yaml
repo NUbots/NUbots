@@ -17,7 +17,7 @@ vision:
 
 robot:
   #If use_motion is true, then the robot will move based on the latest behaviour commands
-  motion_type: PATH #NONE, PATH or MOTION
+  motion_type: NONE #NONE, PATH or MOTION
   #If motion_type is PATH, the following path with be used
   path:
     period: 10

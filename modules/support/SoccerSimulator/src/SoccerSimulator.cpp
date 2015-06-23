@@ -111,12 +111,10 @@ namespace support {
 
         cfg_.blind_robot = config["blind_robot"].as<bool>();
 
-        cfg_.vision_error = arma::vec4({
-            config["variance"]["fractional_error"].as<float>(),
-            config["variance"]["min_error"]["r"].as<float>(),
-            config["variance"]["min_error"]["theta"].as<float>(),
-            config["variance"]["min_error"]["phi"].as<float>()
-        });
+        cfg_.vision_error(0) = config["vision"]["variance"]["fractional_error"].as<float>();
+        cfg_.vision_error(1) = config["vision"]["variance"]["min_error"]["r"].as<float>();
+        cfg_.vision_error(2) = config["vision"]["variance"]["min_error"]["theta"].as<float>();
+        cfg_.vision_error(3) = config["vision"]["variance"]["min_error"]["phi"].as<float>();
 
         kicking = false;
         PLAYER_ID = globalConfig.playerId;
