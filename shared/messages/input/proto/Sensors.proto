@@ -88,5 +88,9 @@ message Sensors {
     repeated Servo servo = 7;
     repeated Button button = 8;
     repeated LED led = 9;
+    required float voltage = 10;
+    required float battery = 11;
+
+
 }
 

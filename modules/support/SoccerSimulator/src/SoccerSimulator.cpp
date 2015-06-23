@@ -30,7 +30,8 @@
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/ServoID.h"
 #include "messages/motion/WalkCommand.h"
-#include "messages/input/gameevents/GameEvents.h"
+#include "messages/input/GameEvents/gameevents.h"
+
 
 namespace modules {
 namespace support {
@@ -60,6 +61,7 @@ namespace support {
     using messages::support::Configuration;
     using messages::support::GlobalConfig;
     using namespace messages::input::gameevents;
+    using utility::support::Expression;
 
     double triangle_wave(double t, double period) {
         auto a = period; // / 2.0;
@@ -92,22 +94,27 @@ namespace support {
         cfg_.distinguish_own_and_opponent_goals = config["vision"]["distinguish_own_and_opponent_goals"].as<bool>();
 
         cfg_.robot.motion_type = motionTypeFromString(config["robot"]["motion_type"].as<std::string>());
-        cfg_.robot.path.period = config["robot"]["path"]["period"].as<float>();
-        cfg_.robot.path.x_amp = config["robot"]["path"]["x_amp"].as<float>();
-        cfg_.robot.path.y_amp = config["robot"]["path"]["y_amp"].as<float>();
+        cfg_.robot.path.period = config["robot"]["path"]["period"].as<Expression>();
+        cfg_.robot.path.x_amp = config["robot"]["path"]["x_amp"].as<Expression>();
+        cfg_.robot.path.y_amp = config["robot"]["path"]["y_amp"].as<Expression>();
         cfg_.robot.path.type = pathTypeFromString(config["robot"]["path"]["type"].as<std::string>());
 
         cfg_.ball.motion_type = motionTypeFromString(config["ball"]["motion_type"].as<std::string>());
-        cfg_.ball.path.period = config["ball"]["path"]["period"].as<float>();
-        cfg_.ball.path.x_amp = config["ball"]["path"]["x_amp"].as<float>();
-        cfg_.ball.path.y_amp = config["ball"]["path"]["y_amp"].as<float>();
+        cfg_.ball.path.period = config["ball"]["path"]["period"].as<Expression>();
+        cfg_.ball.path.x_amp = config["ball"]["path"]["x_amp"].as<Expression>();
+        cfg_.ball.path.y_amp = config["ball"]["path"]["y_amp"].as<Expression>();
         cfg_.ball.path.type = pathTypeFromString(config["ball"]["path"]["type"].as<std::string>());
 
         world.robotPose = config["initial"]["robot_pose"].as<arma::vec3>();
         world.ball.position = config["initial"]["ball"]["position"].as<arma::vec3>();
-        world.ball.diameter = config["initial"]["ball"]["diameter"].as<float>();
+        world.ball.diameter = config["initial"]["ball"]["diameter"].as<Expression>();
 
         cfg_.blind_robot = config["blind_robot"].as<bool>();
+
+        cfg_.vision_error(0) = config["vision"]["variance"]["r"]["proportional_factor"].as<Expression>();
+        cfg_.vision_error(1) = config["vision"]["variance"]["r"]["min_error"].as<Expression>();
+        cfg_.vision_error(2) = config["vision"]["variance"]["theta"].as<Expression>();
+        cfg_.vision_error(3) = config["vision"]["variance"]["phi"].as<Expression>();
 
         kicking = false;
         PLAYER_ID = globalConfig.playerId;
@@ -260,9 +267,9 @@ namespace support {
                     }
 
                     // Detect the goal:
-                    auto m = g.detect(camParams, world.robotPose, sensors);
+                    auto m = g.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
+
                     if (!m.measurements.empty()) {
-                        // emit(graph("sim measurement = ", m.measurements[0].position);
                         goals->push_back(m);
                     }
                 }
@@ -301,7 +308,7 @@ namespace support {
                     return;
                 }
 
-                auto ball = world.ball.detect(camParams, world.robotPose, sensors);
+                auto ball = world.ball.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
 
                 if (!ball.measurements.empty()) {
 

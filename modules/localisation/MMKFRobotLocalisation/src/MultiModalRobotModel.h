@@ -53,7 +53,7 @@ namespace localisation {
         RobotHypothesis()
             : filter_(
                 {-4.5, 0, 0}, // mean
-                arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 0.01, // cov
+                arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 0.1, // cov
                 0.1) // alpha
             , weight_(1)
             , obs_count_(0) {

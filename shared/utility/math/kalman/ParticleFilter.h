@@ -66,15 +66,6 @@ namespace utility {
                     setState(initialMean, initialCovariance);
                 }
 
-                template <typename... TAdditionalParameters>
-                void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters) 
-                {
-                    for(unsigned int i = 0; i < particles.n_rows; ++i) {
-                        auto newpcle = model.timeUpdate(particles.row(i).t(), deltaT, additionalParameters...);
-                        particles.row(i) = newpcle.t();
-                    }
-                }
-
                 void setState(StateVec initialMean, StateMat initialCovariance) {
                     //Sample single gaussian (represented by a gaussian mixture model of size 1)
                     arma::gmm_diag gaussian;
@@ -82,6 +73,19 @@ namespace utility {
                     for(unsigned int i = 0; i < particles.n_rows; ++i) {
                         particles.row(i) = gaussian.generate().t();
                     }                    
+                }
+
+                template <typename... TAdditionalParameters>
+                void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters) 
+                {   
+                    //Sample single zero mean gaussian with process noise (represented by a gaussian mixture model of size 1)
+                    arma::gmm_diag gaussian;
+                    gaussian.set_params(arma::mat(arma::zeros(Model::size)), arma::mat(model.processNoise().diag()),arma::ones(1));
+                    for(unsigned int i = 0; i < particles.n_rows; ++i) {
+                        //TODO: add noise?
+                        StateVec newpcle = model.timeUpdate(particles.row(i).t(), deltaT, additionalParameters...) + gaussian.generate();
+                        particles.row(i) = newpcle.t();
+                    }
                 }
 
                 template <typename TMeasurement, typename... TMeasurementType>
@@ -95,9 +99,9 @@ namespace utility {
                         arma::vec predictedObservation = model.predictedObservation(particles.row(i).t(), measurementArgs...);
                         assert(predictedObservation.size() == measurement.size());
                         arma::vec difference = predictedObservation-measurement;
-                        weights[i] = std::exp(- arma::dot(difference, (measurement_variance * difference)));
+                        weights[i] = std::exp(- arma::dot(difference, (measurement_variance.i() * difference)));
                     }
-                    
+                    // std::cout << "weights = \n" << weights << std::endl;
                     //Resample
                     std::random_device rd;
                     std::mt19937 gen(rd());

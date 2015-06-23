@@ -175,7 +175,8 @@ namespace modules {
 
                     // Set our timestamp to when the data was read
                     sensors->timestamp = input.timestamp;
-
+                    // Set our voltage
+                    sensors->voltage = input.voltage;
                     // This checks for an error on the CM730 and reports it
                     if (input.cm730ErrorFlags != DarwinSensors::Error::OK) {
                         NUClear::log<NUClear::WARN>(makeErrorString("CM730", input.cm730ErrorFlags));

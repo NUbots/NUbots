@@ -115,6 +115,8 @@ namespace support {
             bool blind_robot = false;
             bool auto_start_behaviour = true;
 
+            arma::vec4 vision_error = {0.01,0.017,0.017};
+
         } cfg_;
 
         //Goal models
