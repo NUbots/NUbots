@@ -52,7 +52,16 @@ namespace support {
 		//Assumes we need to see the bottom or...
 		messages::vision::VisionObject::Measurement measurement;
         measurement.position = SphericalRobotObservation(robotPose.xy(), robotPose.angle(), objPosition);
-        measurement.error = arma::eye(3, 3) * 0.1;			
+        measurement.error = arma::eye(3, 3);
+        //105 measurement noise
+        float min_error_r = 0.01; //1cm error
+        float min_error_theta = 0.01; //00.017 is 1deg error
+        float min_error_phi = 0.01;
+        arma::vec3 min_error = {min_error_r,min_error_theta,min_error_phi};
+        measurement.error.diag() = arma::max(0.001 * arma::abs(measurement.position), min_error);
+        // measurement.error(0,0) = 0.1 * measurement.position(0);
+        // measurement.error(1,1) = 0.1 * measurement.position(1);
+        // measurement.error(2,2) = 0.1 * measurement.position(2);
 
         arma::vec4 cam_space = sensors->kinematicsCamToGround.i() * sphericalToCartesian4(measurement.position);
         arma::vec2 screenAngular = cartesianToSpherical(cam_space.rows(0,2)).rows(1,2);
