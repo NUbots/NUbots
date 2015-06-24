@@ -3,7 +3,7 @@ vision:
   # Disabling either of these emits corresponding ground truth simulation results
   # as localisation result
   goal_observations: false
-  ball_observations: true
+  ball_observations: false
   # Error values which are sent to localisation system representing uncertainty in vision measurements
   variance:
     r: # error in distance scales with distance
@@ -19,7 +19,7 @@ vision:
 
 robot:
   # If use_motion is true, then the robot will move based on the latest behaviour commands
-  motion_type: NONE #NONE, PATH or MOTION
+  motion_type: MOTION #NONE, PATH or MOTION
   # If motion_type is PATH, the following path with be used
   path:
     period: 10
@@ -29,7 +29,7 @@ robot:
 
 ball:
   # If use_motion is true, then the ball will move based on the latest behaviour commands
-  motion_type: PATH #NONE, PATH or MOTION
+  motion_type: MOTION #NONE, PATH or MOTION
   path:
   # If motion_type is PATH, the following path with be used
     period: 20
