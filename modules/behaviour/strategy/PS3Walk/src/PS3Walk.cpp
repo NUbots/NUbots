@@ -73,7 +73,7 @@ namespace strategy {
                                 moving = !moving;
                             }
                             break;
-                        case BUTTON_L1:
+                        /*case BUTTON_L1:
                             if (event.value > 0) { // button down
                                 NUClear::log("Requesting Left Side Kick");
                                 emit(std::make_unique<KickCommand>(KickCommand{
@@ -99,7 +99,7 @@ namespace strategy {
                                     LimbID::RIGHT_LEG
                                 }));
                             }
-                            break;
+                            break;*/
                         case BUTTON_R2:
                             if (event.value > 0) { // button down
                                 NUClear::log("Requesting Right Front Kick");
@@ -123,8 +123,8 @@ namespace strategy {
         // TODO: potential performance gain: ignore if value hasn't changed since last emit?
         on<Trigger<Every<50, std::chrono::milliseconds>>>([this](const time_t&) {
 
-            // Why armadillo why!!!
-            arma::vec s = { strafe[0], strafe[1] };
+            // TODO: hacked to not allow backwards movement for stability
+            arma::vec s = { std::max(strafe[0], 0.0), strafe[1] };
             arma::vec strafeNorm = s / std::numeric_limits<short>::max();
 
             auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();

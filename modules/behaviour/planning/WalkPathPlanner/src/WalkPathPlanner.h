@@ -42,77 +42,18 @@ namespace modules {
                  */
                 class WalkPathPlanner : public NUClear::Reactor {
                 private:
-                    //XXX: load these values from walk config
                     float turnSpeed;
                     float forwardSpeed;
-                    float footSeparation;
-
-                    //XXX: load from robot model
-                    float footSize;
-
-                    //timers for starting turning and walking
-                    double walkStartTime;
-                    double walkTurnTime;
-
-                    //walk accel/deccel controls
-                    double accelerationTime;
-                    float accelerationFraction;
-
-                    //approach speeds
-                    float closeApproachSpeed;
-                    float closeApproachDistance;
-                    float midApproachSpeed;
-                    float midApproachDistance;
-
-                    //turning values
-                    float turnDeviation;
-
-                    //state controls
-                    int approachDistance;
-
-                    //hystereses
-                    float distanceHysteresis;
-                    float turningHysteresis;
-                    float positionHysteresis;
-
-                    //ball lineup
-                    //vector<float> ballApproachAngle;
-                    //vector<int> ballKickFoot;
-                    float ballLineupDistance;
-                    float ballLineupMinDistance;
-
-                    //extra config options
-                    bool useAvoidance;
-                    float assumedObstacleWidth;
-                    float avoidDistance;
-
-                    float bearingSensitivity;
-                    float ApproachCurveFactor;
-
+                    float a;
+                    float b;
 
                     //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
-
-                    //hysteresis variables
-                    int turning;
-                    int distanceIncrement;
 
                     //info for the current walk
                     arma::vec2 currentTargetPosition;
                     arma::vec2 currentTargetHeading;
                     messages::behaviour::WalkApproach planType;
                     messages::behaviour::WalkTarget targetHeading,targetPosition;
-
-                    //-----------internal fns--------------
-                    arma::vec generateWalk(const arma::vec& move, bool omniPositioning);
-                    arma::vec approachFromDirection(const messages::localisation::Self& self,
-                                                   const arma::vec2& target,
-                                                   const arma::vec2& direction);
-                    arma::vec goToPoint(const messages::localisation::Self& self,
-                                         const arma::vec2& target,
-                                         const arma::vec2& direction);
-                    arma::vec avoidObstacles(const std::vector<messages::vision::Obstacle>& robotPosition,
-                                              const arma::vec3& movePlan);
-
 
                 public:
                     explicit WalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
