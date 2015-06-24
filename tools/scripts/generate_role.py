@@ -51,14 +51,17 @@ with open(role_name, 'w') as file:
 
 int main(int argc, char** argv) {
 
-    auto white = utility::strutil::ANSISGR<
-                   utility::strutil::ANSICode::BRIGHT,
-                   utility::strutil::ANSICode::GRAY,
-                   utility::strutil::ANSICode::BLACK_BACKGROUND>();
-    auto yellow = utility::strutil::ANSISGR<
-                    utility::strutil::ANSICode::BRIGHT,
-                    utility::strutil::ANSICode::YELLOW,
-                    utility::strutil::ANSICode::BLACK_BACKGROUND>();
+    // auto white = utility::strutil::ANSISGR<
+    //                utility::strutil::ANSICode::BRIGHT,
+    //                utility::strutil::ANSICode::GRAY,
+    //                utility::strutil::ANSICode::BLACK_BACKGROUND>();
+    // auto yellow = utility::strutil::ANSISGR<
+    //                 utility::strutil::ANSICode::BRIGHT,
+    //                 utility::strutil::ANSICode::YELLOW,
+    //                 utility::strutil::ANSICode::BLACK_BACKGROUND>();
+    auto white = "";
+    auto yellow = "";
+
 
     std::cout << std::endl << std::endl;
     std::cout << white << "######                    ######  ######           ######  " << yellow << "####################" << std::endl;
