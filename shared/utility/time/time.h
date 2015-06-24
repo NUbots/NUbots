@@ -28,8 +28,8 @@ namespace utility {
 namespace time {
 
     inline double TimeDifferenceSeconds(
-        std::chrono::system_clock::time_point end_time,
-        std::chrono::system_clock::time_point start_time) {
+        NUClear::clock::time_point end_time,
+        NUClear::clock::time_point start_time) {
         auto time_diff = end_time - start_time;
         double nano = std::chrono::duration_cast<std::chrono::nanoseconds>(time_diff).count();
         return nano * 1.0e-9;

@@ -92,14 +92,14 @@ namespace localisation {
         }
 
         double MeasurementUpdate(
-            const messages::vision::VisionObject& observed_object,
+            const messages::vision::Goal& observed_object,
             const utility::localisation::LocalisationFieldObject& actual_object);
 
         //Odometry
         double MeasurementUpdate(const messages::input::Sensors& sensors);
 
         double MeasurementUpdate(
-            const std::vector<messages::vision::VisionObject>& observed_objects,
+            const std::vector<messages::vision::Goal>& observed_objects,
             const std::vector<utility::localisation::LocalisationFieldObject>& actual_objects);
 
         void TimeUpdate(double seconds, const messages::input::Sensors& sensors);
@@ -149,25 +149,25 @@ namespace localisation {
         void TimeUpdate(double seconds, const messages::input::Sensors& sensors);
 
         void MeasurementUpdate(
-            const messages::vision::VisionObject& observed_object,
+            const messages::vision::Goal& observed_object,
             const utility::localisation::LocalisationFieldObject& actual_object);
 
         void MeasurementUpdate(const messages::input::Sensors& sensors);
 
         void MeasurementUpdate(
-            const std::vector<messages::vision::VisionObject>& observed_objects,
+            const std::vector<messages::vision::Goal>& observed_objects,
             const std::vector<utility::localisation::LocalisationFieldObject>& actual_objects);
 
         void AmbiguousMeasurementUpdate(
-            const messages::vision::VisionObject& ambiguous_object,
+            const messages::vision::Goal& ambiguous_object,
             const std::vector<utility::localisation::LocalisationFieldObject>& possible_objects);
 
         void AmbiguousMeasurementUpdate(
-            const std::vector<messages::vision::VisionObject>& ambiguous_objects,
+            const std::vector<messages::vision::Goal>& ambiguous_objects,
             const std::vector<std::vector<utility::localisation::LocalisationFieldObject>>& possible_object_sets);
 
         void AmbiguousMultipleMeasurementUpdate(
-            const std::vector<messages::vision::VisionObject>& ambiguous_objects,
+            const std::vector<messages::vision::Goal>& ambiguous_objects,
             const std::vector<std::vector<utility::localisation::LocalisationFieldObject>>& possible_object_sets);
 
         arma::vec::fixed<robot::RobotModel::size> GetEstimate() {

@@ -36,7 +36,7 @@ namespace modules {
 namespace localisation {
 
 /// Integrate time-dependent observations on all objects
-void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time) {
+void KFBallLocalisationEngine::TimeUpdate(NUClear::clock::time_point current_time) {
     double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
     last_time_update_time_ = current_time;
     ball_filter_.timeUpdate(seconds);

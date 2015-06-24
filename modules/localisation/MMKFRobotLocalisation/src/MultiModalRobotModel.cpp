@@ -64,7 +64,7 @@ void RobotHypothesis::TimeUpdate(double seconds, const Sensors& sensors) {
 }
 
 void MultiModalRobotModel::MeasurementUpdate(
-    const messages::vision::VisionObject& observed_object,
+    const messages::vision::Goal& observed_object,
     const LocalisationFieldObject& actual_object) {
 
     for (auto& model : robot_models_)
@@ -73,7 +73,7 @@ void MultiModalRobotModel::MeasurementUpdate(
 
 
 void MultiModalRobotModel::MeasurementUpdate(
-    const std::vector<messages::vision::VisionObject>& observed_objects,
+    const std::vector<messages::vision::Goal>& observed_objects,
     const std::vector<LocalisationFieldObject>& actual_objects) {
 
     for (auto& model : robot_models_)
@@ -81,7 +81,7 @@ void MultiModalRobotModel::MeasurementUpdate(
 }
 
 double RobotHypothesis::MeasurementUpdate(
-    const messages::vision::VisionObject& observed_object,
+    const messages::vision::Goal& observed_object,
     const LocalisationFieldObject& actual_object) {
 
     double quality = 1.0;
@@ -115,8 +115,10 @@ double RobotHypothesis::MeasurementUpdate(const Sensors& sensors){
 }
 
 double RobotHypothesis::MeasurementUpdate(
-    const std::vector<messages::vision::VisionObject>& /*observed_objects (commented for warnings)*/,
+    const std::vector<messages::vision::Goal>& /*observed_objects (commented for warnings)*/,
     const std::vector<LocalisationFieldObject>& /*actual_objects*/) {
+
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     // auto& obv_a = observed_objects[0];
     // auto& obv_b = observed_objects[1];
@@ -152,7 +154,7 @@ double RobotHypothesis::MeasurementUpdate(
  */
 // For a single observation that could be one of several objects.
 void MultiModalRobotModel::AmbiguousMeasurementUpdate(
-    const messages::vision::VisionObject& ambiguous_object,
+    const messages::vision::Goal& ambiguous_object,
     const std::vector<LocalisationFieldObject>& possible_objects) {
 
     std::vector<std::unique_ptr<RobotHypothesis>> new_models;
@@ -187,14 +189,14 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
 }
 
 
-// For an ordered list of observations which is known to be correspond one of
+// For an ordered list of observations which is known to correspond one of
 // several ordered lists of possible objects.
 // Splits for each possible set, then performs a measurment update on each
 // observation against each possible object within a set.
 // (i.e. When two goal posts are seen simultaneously, they are either both on
 // (one side of the field, or both on the other side)
 void MultiModalRobotModel::AmbiguousMeasurementUpdate(
-    const std::vector<messages::vision::VisionObject>& ambiguous_objects,
+    const std::vector<messages::vision::Goal>& ambiguous_objects,
     const std::vector<std::vector<LocalisationFieldObject>>& possible_object_sets) {
 
     std::vector<std::unique_ptr<RobotHypothesis>> new_models;
@@ -237,7 +239,7 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
 // (i.e. When two goal posts are seen simultaneously, they are either both on
 // (one side of the field, or both on the other side)
 void MultiModalRobotModel::AmbiguousMultipleMeasurementUpdate(
-    const std::vector<messages::vision::VisionObject>& ambiguous_objects,
+    const std::vector<messages::vision::Goal>& ambiguous_objects,
     const std::vector<std::vector<LocalisationFieldObject>>& possible_object_sets) {
 
     std::vector<std::unique_ptr<RobotHypothesis>> new_models;

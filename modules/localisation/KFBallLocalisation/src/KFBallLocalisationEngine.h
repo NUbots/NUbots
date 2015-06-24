@@ -72,7 +72,7 @@ namespace localisation {
 
         double SecondsSinceLastTimeUpdate(std::chrono::system_clock::time_point current_time);
 
-        std::chrono::system_clock::time_point last_time_update_time_;
+        NUClear::clock::time_point last_time_update_time_;
     };
 }
 }

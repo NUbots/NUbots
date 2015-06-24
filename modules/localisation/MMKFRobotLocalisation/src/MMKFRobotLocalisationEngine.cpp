@@ -34,6 +34,7 @@ using utility::time::TimeDifferenceSeconds;
 using messages::input::Sensors;
 using messages::vision::VisionObject;
 using messages::localisation::ResetRobotHypotheses;
+using messages::vision::Goal;
 
 namespace modules {
 namespace localisation {
@@ -70,7 +71,7 @@ namespace localisation {
         cfg_.emit_robot_fieldobjects = config["EmitRobotFieldobjects"].as<bool>();
     }
 
-    void MMKFRobotLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
+    void MMKFRobotLocalisationEngine::TimeUpdate(NUClear::clock::time_point current_time,
                                                  const Sensors& sensors) {
         double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
         last_time_update_time_ = current_time;
@@ -78,29 +79,48 @@ namespace localisation {
     }
 
     std::vector<LocalisationFieldObject> MMKFRobotLocalisationEngine::GetPossibleObjects(
-            const messages::vision::Goal& ambiguous_object) {
-
+            const messages::vision::Goal& obj) {
         std::vector<LocalisationFieldObject> possible;
 
-        if (ambiguous_object.side == messages::vision::Goal::Side::LEFT) {
-            possible.push_back(goalpost_lfos_.own_l);
-            if (!cfg_.all_goals_are_own)
-                possible.push_back(goalpost_lfos_.opp_l);
-        } else if (ambiguous_object.side == messages::vision::Goal::Side::RIGHT) {
-            possible.push_back(goalpost_lfos_.own_r);
-            if (!cfg_.all_goals_are_own)
-                possible.push_back(goalpost_lfos_.opp_r);
-        } else if (ambiguous_object.side == messages::vision::Goal::Side::UNKNOWN) {
+        if (obj.side == Goal::Side::UNKNOWN && obj.team == Goal::Team::UNKNOWN ) {
             possible.push_back(goalpost_lfos_.own_l);
             possible.push_back(goalpost_lfos_.own_r);
-            if (!cfg_.all_goals_are_own) {
+            possible.push_back(goalpost_lfos_.opp_l);
+            possible.push_back(goalpost_lfos_.opp_r);
+            return std::move(possible);
+        }
+
+        if (obj.side == Goal::Side::UNKNOWN) {
+            if ( obj.team == Goal::Team::OWN     ) {
+                possible.push_back(goalpost_lfos_.own_l);
+                possible.push_back(goalpost_lfos_.own_r);
+            }
+            if ( obj.team == Goal::Team::OPPONENT) {
                 possible.push_back(goalpost_lfos_.opp_l);
                 possible.push_back(goalpost_lfos_.opp_r);
             }
-        } else {
-            NUClear::log<NUClear::ERROR>(__FILE__, ",", __LINE__, ": The ambiguous_object (messages::vision::Goal) has an invalid messages::vision::Goal::Side");
+            return std::move(possible);
         }
 
+        if (obj.side == Goal::Side::UNKNOWN) {
+            if (obj.side == Goal::Side::LEFT ) {
+                possible.push_back(goalpost_lfos_.own_l);
+                possible.push_back(goalpost_lfos_.opp_l);
+            }
+            if (obj.side == Goal::Side::RIGHT) {
+                possible.push_back(goalpost_lfos_.own_r);
+                possible.push_back(goalpost_lfos_.opp_r);
+            }
+            return std::move(possible);
+        }
+
+        if (obj.side == Goal::Side::LEFT  && obj.team == Goal::Team::OWN     ) { possible.push_back(goalpost_lfos_.own_l); return std::move(possible); }
+        if (obj.side == Goal::Side::RIGHT && obj.team == Goal::Team::OWN     ) { possible.push_back(goalpost_lfos_.own_r); return std::move(possible); }
+        if (obj.side == Goal::Side::LEFT  && obj.team == Goal::Team::OPPONENT) { possible.push_back(goalpost_lfos_.opp_l); return std::move(possible); }
+        if (obj.side == Goal::Side::RIGHT && obj.team == Goal::Team::OPPONENT) { possible.push_back(goalpost_lfos_.opp_r); return std::move(possible); }
+
+
+        NUClear::log<NUClear::ERROR>(__FILE__, ",", __LINE__, ": The ambiguous_object (messages::vision::Goal) has an invalid messages::vision::Goal::Side");
         return std::move(possible);
     }
 
@@ -112,6 +132,11 @@ namespace localisation {
 
         auto& oa = ambiguous_objects[0];
         auto& ob = ambiguous_objects[1];
+
+        if (oa.team == Goal::Team::UNKNOWN ||
+            ob.team == Goal::Team::UNKNOWN ||
+            oa.team != ob.team)
+            return false;
 
         return
             (oa.side == messages::vision::Goal::Side::RIGHT &&
@@ -127,19 +152,27 @@ namespace localisation {
             cfg_.angle_between_goals_observation_enabled;
 
         if (pair_observations_enabled && GoalPairObserved(ambiguous_objects)) {
-            std::vector<messages::vision::VisionObject> vis_objs;
+
+            std::vector<messages::vision::Goal> vis_objs;
             // Ensure left goal is always first.
-            if (ambiguous_objects[0].side == messages::vision::Goal::Side::LEFT){
+            if (ambiguous_objects[0].side == Goal::Side::LEFT){
                 vis_objs = { ambiguous_objects[0], ambiguous_objects[1] };
             } else {
                 vis_objs = { ambiguous_objects[1], ambiguous_objects[0] };
             }
 
             std::vector<std::vector<LocalisationFieldObject>> objs;
-            objs.push_back({goalpost_lfos_.own_l, goalpost_lfos_.own_r});
 
-            if (!cfg_.all_goals_are_own)
-                objs.push_back({goalpost_lfos_.opp_l, goalpost_lfos_.opp_r});
+            auto own_goals = {goalpost_lfos_.own_l, goalpost_lfos_.own_r};
+            auto opp_goals = {goalpost_lfos_.opp_l, goalpost_lfos_.opp_r};
+
+            // Note: If goals are ambigous, negated tests will cause both to be added.
+            if (vis_objs[0].team != Goal::Team::OPPONENT) {
+                objs.push_back(own_goals);
+            }
+            if (vis_objs[0].team != Goal::Team::OWN && !cfg_.all_goals_are_own) {
+                objs.push_back(opp_goals);
+            }
 
             if(cfg_.goal_pair_observation_enabled)
                 robot_models_.AmbiguousMeasurementUpdate(vis_objs, objs);

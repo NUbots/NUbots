@@ -121,6 +121,8 @@ namespace robot {
     arma::vec::fixed<RobotModel::size> RobotModel::limitState(
         const arma::vec::fixed<RobotModel::size>& state) {
 
+        // TODO: Clip robot's state to the field.
+
         return state;
     }
 

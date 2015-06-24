@@ -83,10 +83,7 @@ namespace transform {
         return obs;
     }
 
-    // inline arma::vec ImuToWorldHeadingTransform(double imuOffset, arma::mat22 robotToImu) {
     inline arma::vec2 ImuToWorldHeadingTransform(double imuOffset, math::matrix::Rotation3D orientation) {
-        // arma::mat22 imuRotation = utility::math::matrix::zRotationMatrix(imuOffset, 2);
-        // arma::vec2 worldRobotHeading = imuRotation * robotToImu.col(0);
         math::matrix::Rotation3D imuRotation = math::matrix::Rotation3D::createRotationZ(imuOffset);
         arma::vec3 worldRobotHeading = imuRotation * arma::mat(orientation.i()).col(0);
         return arma::normalise(worldRobotHeading.rows(0,1));
