@@ -105,7 +105,7 @@ namespace localisation {
         }
 
         //TEAM UNKNOWN
-        if (obj.side == Goal::Team::UNKNOWN) {
+        if (obj.team == Goal::Team::UNKNOWN) {
             if (obj.side == Goal::Side::LEFT ) {
                 possible.push_back(goalpost_lfos_.own_l);
                 possible.push_back(goalpost_lfos_.opp_l);
