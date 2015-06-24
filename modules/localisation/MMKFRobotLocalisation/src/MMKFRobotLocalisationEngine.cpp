@@ -82,6 +82,7 @@ namespace localisation {
             const messages::vision::Goal& obj) {
         std::vector<LocalisationFieldObject> possible;
 
+        //BOTH UNKNOWN
         if (obj.side == Goal::Side::UNKNOWN && obj.team == Goal::Team::UNKNOWN ) {
             possible.push_back(goalpost_lfos_.own_l);
             possible.push_back(goalpost_lfos_.own_r);
@@ -90,6 +91,7 @@ namespace localisation {
             return std::move(possible);
         }
 
+        //SIDE UNKNOWN
         if (obj.side == Goal::Side::UNKNOWN) {
             if ( obj.team == Goal::Team::OWN     ) {
                 possible.push_back(goalpost_lfos_.own_l);
@@ -102,7 +104,8 @@ namespace localisation {
             return std::move(possible);
         }
 
-        if (obj.side == Goal::Side::UNKNOWN) {
+        //TEAM UNKNOWN
+        if (obj.side == Goal::Team::UNKNOWN) {
             if (obj.side == Goal::Side::LEFT ) {
                 possible.push_back(goalpost_lfos_.own_l);
                 possible.push_back(goalpost_lfos_.opp_l);
@@ -114,6 +117,7 @@ namespace localisation {
             return std::move(possible);
         }
 
+        //COMPLETE KNOWLEDGE
         if (obj.side == Goal::Side::LEFT  && obj.team == Goal::Team::OWN     ) { possible.push_back(goalpost_lfos_.own_l); return std::move(possible); }
         if (obj.side == Goal::Side::RIGHT && obj.team == Goal::Team::OWN     ) { possible.push_back(goalpost_lfos_.own_r); return std::move(possible); }
         if (obj.side == Goal::Side::LEFT  && obj.team == Goal::Team::OPPONENT) { possible.push_back(goalpost_lfos_.opp_l); return std::move(possible); }
