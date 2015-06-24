@@ -136,7 +136,8 @@ namespace support {
 
         std::queue<messages::motion::KickCommand> kickQueue;
 
-
+        Transform2D oldRobotPose;
+        Transform2D oldBallPose;
 
         bool kicking;
         uint PLAYER_ID;

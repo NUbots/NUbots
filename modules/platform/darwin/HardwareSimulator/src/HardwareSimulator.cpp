@@ -213,7 +213,7 @@ namespace darwin {
                 sumGyro += arma::vec3({g.x,g.y,g.z});
                 gyroQueue.pop();
             }
-            sumGyro = (sumGyro * UPDATE_FREQUENCY + arma::vec3({0,0,imu_drift_rate})) ;
+            sumGyro = (sumGyro * UPDATE_FREQUENCY + arma::vec3({0,0,imu_drift_rate}));
             sensors.gyroscope.x = sumGyro[0];
             sensors.gyroscope.y = sumGyro[1];
             sensors.gyroscope.z = sumGyro[2];

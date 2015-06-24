@@ -170,9 +170,6 @@ namespace support {
         >("Robot motion", [this](const time_t&,
                                  const std::shared_ptr<const WalkCommand>& walkCommand) {
 
-
-            Transform2D oldRobotPose = world.robotPose;
-            Transform2D oldBallPose = world.ball.position;
             Transform2D diff;
 
             switch (cfg_.robot.motion_type){
@@ -237,6 +234,9 @@ namespace support {
             // Emit the change in orientation as a DarwinSensors::Gyroscope,
             // to be handled by HardwareSimulator.
             emit(computeGyro(world.robotPose.angle(), oldRobotPose.angle()));
+
+            oldRobotPose = world.robotPose;
+            oldBallPose = world.ball.position;
         });
 
         // Simulate Vision
@@ -346,7 +346,8 @@ namespace support {
     }
 
     std::unique_ptr<DarwinSensors::Gyroscope> SoccerSimulator::computeGyro(float heading, float oldHeading){
-        float dHeading = utility::math::angle::difference(heading, oldHeading);
+        // float dHeading = utility::math::angle::difference(heading, oldHeading);
+        float dHeading = heading - oldHeading;
 
         auto g = std::make_unique<DarwinSensors::Gyroscope>();
         g->x = 0;
