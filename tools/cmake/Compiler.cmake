@@ -16,13 +16,18 @@ SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -std=c++11")
 # We need noncall exceptions so we can throw exceptions from signal handlers
 SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -fnon-call-exceptions")
 
-# 32 bit builds for darwins
-SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -m32")
-SET(COMMON_C_FLAGS "${COMMON_C_FLAGS} -m32")
+IF(NOT "${CMAKE_GENERATOR}" MATCHES "Xcode")
+    # 32 bit builds for darwins
+    SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -m32")
+    SET(COMMON_C_FLAGS "${COMMON_C_FLAGS} -m32")
+ENDIF()
 
 # If/When we go to 64 bit we need position independent code
 SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -fPIC")
 SET(COMMON_C_FLAGS "${COMMON_C_FLAGS} -fPIC")
+
+# Make armadillo not use the wrapper:
+SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -DARMA_DONT_USE_WRAPPER")
 
 # Enable super strict warnings
 SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -Wall -Wpedantic -Wextra")
