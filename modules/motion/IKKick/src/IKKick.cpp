@@ -74,6 +74,7 @@ namespace motion {
         , goalDirection(goalDirection) {} 
     };
 
+    bool doThings = false;
 
     IKKick::IKKick(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -92,16 +93,26 @@ namespace motion {
                 config["target"].as<arma::vec3>(),
                 config["direction"].as<arma::vec3>()
             ));
+            log("Config");
         });
 
-
-        on<Trigger<KickCommand>>([this] (const KickCommand& kickCommand) {
+        on<Trigger<KickCommand>>([this] (const KickCommand&) {
             // We want to kick!
-            updatePriority(KICK_PRIORITY);
+            log("KickCommand");
+            log("Priority: Kick Priority");
+
+            if(!doThings) {
+                doThings = true;
+            }
+            else {
+                updatePriority(KICK_PRIORITY);
+            }
+
         });
 
         on<Trigger<ExecuteKick>, With<KickCommand>, With<Sensors>>([this] (const ExecuteKick&, const KickCommand& command, const Sensors& sensors) {
 
+            log("aajfoaigiojaga");
             // TODO Work out which of our feet are going to be the support foot
             // TODO store the support foot
             // Assume leftFoot is support
@@ -143,6 +154,7 @@ namespace motion {
         });
 
         updater = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, With<KickVector>, Options<Single>>([this](const time_t&, const Sensors& sensors, const KickVector& kickVector) {
+
             //PSEUODCODE
             //State checker
 /*
@@ -185,6 +197,7 @@ namespace motion {
             // TODO use states
 
             // Get our foot positions
+
 //START BALANCER
             Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
             Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
@@ -199,10 +212,10 @@ namespace motion {
 
                 // Find position vector from support foot to torso in support foot coordinates.
             auto torsoPosition = leftFoot.i().translation();
-            
+           
                 // Find the direction in which we want to shift the torso in support foot coordinates
             auto torsoDirection = torsoTarget - torsoPosition;
-            
+           
                 // Normalise the direction
             auto normalTorsoDirection = arma::normalise(torsoDirection);
 
@@ -221,6 +234,7 @@ namespace motion {
                 auto torsoDisplacement = (torsoShiftVelocity/UPDATE_FREQUENCY)*normalTorsoDirection;
             }
 */
+
             // torsoShiftVelocity [m/s] is the configurable velocity that the torso should move at
             // Net displacement of torso each 1/UPDATE_FREQUENCY seconds
             // ((P1-P0))*velocity*(1/UPDATE_FREQUENCY)
@@ -228,19 +242,20 @@ namespace motion {
 
             // New position to give to inverse kinematics in support foot coordinates
             auto torsoNewPosition = torsoPosition + torsoDisplacement;
-            Transform3D supportFootNewPose = leftFoot;
-            
+
+            Transform3D supportFootNewPose = leftFoot;            
             // Proof of Line Below
             // auto supportFootNewPose = leftFoot - arma::join_cols(arma::zeros(4,3), arma::join_cols(-1*torsoDisplacement, arma::vec({0})).t());        
             // = {deltaRotation, deltaTranslation; 0, 1}
             // = {0, torsoPosition + torsoDisplacement; 0, 1}
 
             // Put new position of the left foot to the torso in left foot coordinates into the transform matrix
-            supportFootNewPose.col(3) = arma::join_cols(torsoNewPosition, arma::vec({1})).t();  
-            
+            supportFootNewPose.col(3) = arma::join_cols(torsoNewPosition, arma::vec({1}));  
+         
             // TODO Need a way around this.
             Transform3D leftFootNewPose = supportFootNewPose;
             Transform3D rightFootNewPose = rightFoot;
+
 /*
 // TODO CHECK THIS!!!!!! Don't need to convert DELETE THIS
             // Convert the new torso position into torso coordinates
@@ -263,12 +278,14 @@ namespace motion {
             // Lifted from WalkEngine::motionLegs()
             // Move torso to target
             //std::unique_ptr<std::vector<ServoCommand>> IKKick::motionLegs(Transform3D leftFootNewPose, Transform3D rightFootNewPose) {
-            
+          
             // Lifted from WalkEngine::updateStep()
             // Calculate leg joints
+
             float gainLegs = 80;
             float torque = 100;
-            auto joints = calculateLegJoints<DarwinModel>(leftFootNewPose, rightFootNewPose);
+            auto joints = calculateLegJoints<DarwinModel>(supportFootNewPose, rightFoot);
+
             auto waypoints = std::make_unique<std::vector<ServoCommand>>();
             waypoints->reserve(16);
 
@@ -363,6 +380,7 @@ namespace motion {
             { std::pair<float, std::set<LimbID>>(0, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM }) },
             [this] (const std::set<LimbID>&) {
                 emit(std::make_unique<ExecuteKick>());
+                log("ExecuteKick");
             },
             [this] (const std::set<LimbID>&) {
                 emit(std::make_unique<FinishKick>());
