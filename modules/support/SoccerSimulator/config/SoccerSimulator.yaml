@@ -1,4 +1,8 @@
-auto_start_behaviour: false
+
+#WARNING: TURNING OFF auto_start_behaviour RESULTS IN LOCALISATION BEING SPAMMED WITH RESET HYPOTHESIS COMMANDS
+auto_start_behaviour: true
+#-----------------------------------------------------------------------------
+
 vision:
   # Disabling either of these emits corresponding ground truth simulation results
   # as localisation result
