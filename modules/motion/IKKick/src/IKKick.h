@@ -51,8 +51,8 @@ namespace motion {
         //float displacementTolerance;
 
     	void updatePriority(const float& priority);
-        Transform3D balance(Transform3D leftFoot, Transform3D rightFoot);
-        std::unique_ptr<std::vector<ServoCommand>> motionLegs(Transform3D leftFootNewPose, Transform3D rightFootNewPose);
+//        Transform3D balance(Transform3D leftFoot, Transform3D rightFoot);
+//        std::unique_ptr<std::vector<ServoCommand>> motionLegs(Transform3D leftFootNewPose, Transform3D rightFootNewPose);
 
     	static constexpr size_t UPDATE_FREQUENCY = 90;
 

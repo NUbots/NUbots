@@ -83,9 +83,11 @@ namespace motion {
             liftFootHeight = config["liftFootHeight"].as<float>();
             liftFootBack = config["liftFootBack"].as<float>();
 
-            emit(std::make_unique<KickCommand>(KickCommand{
+            emit(std::make_unique<KickCommand>(
+                config["target"].as<arma::vec3>(),
                 config["direction"].as<arma::vec3>()
-            }));
+
+            ));
         });
 
 
@@ -107,20 +109,21 @@ namespace motion {
 
             // Convert the direction vector and position of the ball into left foot coordinates by multiplying the inverse of the
             // homogeneous transforms with the coordinates in torso space. 1 for a point and 0 for a vector.
-            arma::vec4 ballposition = leftFoot.i() * arma::join_cols(command.target, arma::vec({1}));
-            arma::vec4 goaldirection = leftFoot.i() * arma::join_cols(command.direction, arma::vec({0}));
+            arma::vec4 ballPosition = leftFoot.i() * arma::join_cols(command.target, arma::vec({1}));
+            arma::vec4 goalDirection = leftFoot.i() * arma::join_cols(command.direction, arma::vec({0}));
 
-            emit(std::make_unique<KickVector>(KickVector{
+            emit(std::make_unique<KickVector>(
                 LimbID::LEFT_LEG,
                 ballPosition.rows(0,2),
-                goalDirection.rows(0,2),
-            }));
+                goalDirection.rows(0,2)
+            ));
 
             log("Got a new kick!");
+            // Should this be kickcommand.target
             log("Target:", "x:", command.target[0], "y:", command.target[1], "z:", command.target[2]);
             log("Direction:", "x:", command.direction[0], "y:", command.direction[1], "z:", command.direction[2]);
-            log("position in support foot:", "x:", position[0], "y:", position[1], "z:", position[2]);
-            log("Direction in support foot:", "x:", direction[0], "y:", direction[1], "z:", direction[2]);
+            log("Ball Position in support foot coordinates:", "x:", ballPosition[0], "y:", ballPosition[1], "z:", ballPosition[2]);
+            log("Goal Direction in support foot coordinates:", "x:", goalDirection[0], "y:", goalDirection[1], "z:", goalDirection[2]);
 
             // Enable our kick pather
             updater.enable();
@@ -214,11 +217,16 @@ namespace motion {
 
             // New position to give to inverse kinematics in support foot coordinates
             auto torsoNewPosition = torsoPosition + torsoDisplacement;
-            auto supportFootNewPose = leftFoot;
+            Transform3D supportFootNewPose = leftFoot;
+            
             // Proof of Line Below
-            //auto supportFootNewPose = leftFoot - arma::join_cols(arma::zeros(4,3), arma::join_cols(-1*torsoDisplacement, arma::vec({0})).t());        
-            // = torsoPosition + torsoDisplacement
-            auto supportFootNewPose.col(3)= (arma::join_cols(torsoNewPosition, arma::vec({1}))).t();  
+            // auto supportFootNewPose = leftFoot - arma::join_cols(arma::zeros(4,3), arma::join_cols(-1*torsoDisplacement, arma::vec({0})).t());        
+            // = {deltaRotation, deltaTranslation; 0, 1}
+            // = {0, torsoPosition + torsoDisplacement; 0, 1}
+
+            // Put new position of the left foot to the torso in left foot coordinates into the transform matrix
+            supportFootNewPose.col(3) = arma::join_cols(torsoNewPosition, arma::vec({1})).t();  
+
 /*
 // TODO CHECK THIS!!!!!! Don't need to convert DELETE THIS
             // Convert the new torso position into torso coordinates
@@ -262,7 +270,7 @@ namespace motion {
             emit(std::move(waypoints));
 
 //END BALANCER
-
+/*
 //START FOOTLIFTER w.r.t Torso, Should be support foot coordinates????
             // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
             Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
@@ -324,7 +332,7 @@ namespace motion {
             auto newKickFootPose = rightFoot;
             auto newKickFootPose.col(3) = (arma::join_cols(newKickFootPositionKick, arma::vec({1}))).t()
 //END KICK
-
+*/
             // TODO We're always finished kicking because we never start :(
             updatePriority(0);
         });
