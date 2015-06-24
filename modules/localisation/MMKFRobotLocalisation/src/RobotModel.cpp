@@ -68,8 +68,6 @@ namespace robot {
         auto obs = SphericalRobotObservation(state.rows(kX, kY),
                                              worldRobotHeading,
                                              actual_position);
-        std::cout << "actual_position = " << actual_position << std::endl;
-        std::cout << "obs = " << obs << std::endl;
         return obs;
     }
 

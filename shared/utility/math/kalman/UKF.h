@@ -196,19 +196,17 @@ namespace utility {
                     // First step is to calculate the expected measurement for each sigma point.
                     for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
                         predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), measurementArgs...);
-                        if(model.size == 5) std::cout << "predictedObservations.col(i) = \n" << predictedObservations.col(i) << std::endl;
                     }
 
-                    if(model.size == 5){
-                        std::cout << "model size = \n" << model.size << std::endl;
-                        std::cout << "sigmaPoints = \n" << sigmaPoints << std::endl;
-                        std::cout << "predicted = \n" << predictedObservations << std::endl;
-                        std::cout << "measured = \n" << measurement << std::endl;
-                    }
+                    //DEBUG
+                    // if(model.size == 5){
+                    //     std::cout << "model size = \n" << model.size << std::endl;
+                    //     std::cout << "sigmaPoints = \n" << sigmaPoints << std::endl;
+                    //     std::cout << "predicted = \n" << predictedObservations << std::endl;
+                    //     std::cout << "measured = \n" << measurement << std::endl;
+                    // }
                     // Now calculate the mean of these measurement sigmas.
                     arma::vec predictedMean = meanFromSigmas(predictedObservations);
-
-
                     
                     auto centredObservations = predictedObservations - arma::repmat(predictedMean, 1, NUM_SIGMA_POINTS);
 
@@ -222,13 +220,16 @@ namespace utility {
 
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
 
-                    if(model.size == 5){
-                        std::cout << "innovation = \n" << innovation << std::endl;
-                        std::cout << "predictedMean = \n" << predictedMean << std::endl;
-                    }
 
                     d += (centredObservations.t()) * measurement_variance.i() * innovation;
 
+                    //DEBUG
+                    // if(model.size == 5){
+                    //     std::cout << "innovation = \n" << innovation << std::endl;
+                    //     std::cout << "predictedMean = \n" << predictedMean << std::endl;
+                    //     std::cout << "centredSigmaPoints * covarianceUpdate * d = \n" << centredSigmaPoints * covarianceUpdate * d << std::endl;
+                    //     std::cout << "mean = \n" << mean << std::endl;
+                    // }
 
                     // Update our mean and covariance
                     mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
