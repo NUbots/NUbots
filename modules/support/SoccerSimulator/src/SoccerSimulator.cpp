@@ -262,30 +262,18 @@ namespace support {
 
                 // for (auto& g : goalPosts) {
                 for (auto g : goalPosts) {
-                    if (cfg_.distinguish_own_and_opponent_goals) {
-                        g.team = Goal::Team::UNKNOWN;
-                    }
 
                     // Detect the goal:
                     auto m = g.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
 
                     if (!m.measurements.empty()) {
+                        if (!cfg_.distinguish_own_and_opponent_goals) {
+                            m.team = messages::vision::Goal::Team::UNKNOWN;
+                        }
                         goals->push_back(m);
                     }
                 }
-
-                // Assign leftness and rightness to goals
-                if (goals->size() == 2) {
-                    if (goals->at(0).quad.getCentre()(0) < goals->at(1).quad.getCentre()(0)) {
-
-                        goals->at(0).side = messages::vision::Goal::Side::LEFT;
-                        goals->at(1).side = messages::vision::Goal::Side::RIGHT;
-                    } else {
-                        goals->at(0).side = messages::vision::Goal::Side::RIGHT;
-                        goals->at(1).side = messages::vision::Goal::Side::LEFT;
-                    }
-                }
-
+                
                 emit(std::move(goals));
 
             } else {

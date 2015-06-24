@@ -173,24 +173,26 @@ namespace localisation {
             }
 
             //DEBUG
-            // for (auto& goal : goals) {
-            //     // std::cout << "  side:";
-            //     // std::cout << ((goal.side == Goal::Side::LEFT) ? "LEFT" :
-            //     //               (goal.side == Goal::Side::RIGHT) ? "RIGHT" : "UNKNOWN")
-            //     //           << std::endl;
+            for (auto& goal : goals) {
+                // std::cout << "  side:";
+                // std::cout << ((goal.side == Goal::Side::LEFT) ? "LEFT" :
+                //               (goal.side == Goal::Side::RIGHT) ? "RIGHT" : "UNKNOWN")
+                //           << std::endl;
 
-            //     for(uint i = 0; i < goal.measurements.size(); ++i) {
-            //         std::stringstream msg;
-            //         msg << ((goal.side == Goal::Side::LEFT) ? "LGoal Pos" :
-            //                (goal.side == Goal::Side::RIGHT) ? "RGoal Pos" : "UGoal Pos") <<
-            //          " " << i;
-            //         emit(graph(msg.str(), goal.measurements[i].position[0], goal.measurements[i].position[1], goal.measurements[i].position[2]));
-            //         // std::cout << "  measurement: " << num++ << std::endl;
-            //         // std::cout << "    error:" << measurement.error << std::endl;
-            //     }
-            //     std::cout << "    position:" << goal.measurements[0].position.t() << std::endl;
+                for(uint i = 0; i < goal.measurements.size(); ++i) {
+                    std::stringstream msg;
+                    msg << ((goal.side == Goal::Side::LEFT) ? "L " :
+                           (goal.side == Goal::Side::RIGHT) ? "R" : "U") <<
+                           ((goal.team == Goal::Team::OWN) ? "OWN Goal Pos" :
+                           (goal.team == Goal::Team::OPPONENT) ? "OPP Goal Pos" : "UGoal Pos") <<
+                     " " << i;
+                    emit(graph(msg.str(), goal.measurements[i].position[0], goal.measurements[i].position[1], goal.measurements[i].position[2]));
+                    // std::cout << "  measurement: " << num++ << std::endl;
+                    // std::cout << "    error:" << measurement.error << std::endl;
+                }
+                //std::cout << "    position:" << goal.measurements[0].position.t() << std::endl;
 
-            // }
+            }
 
             auto curr_time = NUClear::clock::now();
             last_measurement_time = curr_time;
