@@ -142,6 +142,22 @@ namespace matrix {
         return transform;
     }
 
+    Transform3D Transform3D::interpolate(Transform3D T1, Transform3D T2, float alpha){
+        UnitQuaternion q1 = UnitQuaternion(T1.rotation());
+        UnitQuaternion q2 = UnitQuaternion(T2.rotation());
+
+        arma::vec3 t1 = T1.translation();
+        arma::vec3 t2 = T2.translation();
+
+        auto qResult = q1.slerp(q2,alpha);
+        auto tResult = alpha * (t2 - t1) + t1;
+
+        Transform3D TResult = Transform3D(Rotation3D(qResult));
+        TResult.translation() = tResult;
+
+        return TResult;
+    }
+
 }
 }
 }

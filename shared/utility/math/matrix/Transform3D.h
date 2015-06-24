@@ -214,6 +214,14 @@ namespace matrix {
              * @return The rotation transform
              */
             static Transform3D createRotationZ(double radians);
+            
+            /**
+             * @brief Interpolates between two transforms
+             *
+             * @param alpha
+             * @return  alpha * (T2 - T1) + T1;
+             */
+            static Transform3D interpolate(Transform3D T1, Transform3D T2, float alpha);
     };
 
 }  // matrix
