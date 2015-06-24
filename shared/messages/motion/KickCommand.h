@@ -36,7 +36,12 @@ namespace messages {
         struct KickCommand {
             arma::vec3 target; // The point to kick
             arma::vec3 direction; // force is the magnitude
+
+            KickCommand(const arma::vec3& target, const arma::vec3& direction)
+            : target(target)
+            , direction(direction) {}
         };
+
 
         struct KickPlannerConfig{
             float MAX_BALL_DISTANCE;

@@ -41,6 +41,8 @@ namespace motion {
         /// Subsumption ID key to access motors
         const size_t id;
         
+        bool leftFootIsSupport;
+
     	float KICK_PRIORITY;
     	float EXECUTION_PRIORITY;
         float torsoShiftVelocity;

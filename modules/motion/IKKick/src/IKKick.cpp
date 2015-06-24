@@ -59,7 +59,7 @@ namespace motion {
     struct FinishKick{};
 
     struct KickVector{
-        //
+        // ID of support foot
         LimbID supportFoot;
         // NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick foot which is rightFootFront
         // KickPlanner has to add the radius of the all to get the location of the centre of the ball
@@ -67,6 +67,11 @@ namespace motion {
         arma::vec3 ballPosition;
         // direction we want to kick the ball
         arma::vec3 goalDirection;
+
+        KickVector(const LimbID& supportFoot, const arma::vec3& ballPosition, const arma::vec3& goalDirection)
+        : supportFoot(supportFoot)
+        , ballPosition(ballPosition)
+        , goalDirection(goalDirection) {} 
     };
 
 
@@ -86,13 +91,11 @@ namespace motion {
             emit(std::make_unique<KickCommand>(
                 config["target"].as<arma::vec3>(),
                 config["direction"].as<arma::vec3>()
-
             ));
         });
 
 
         on<Trigger<KickCommand>>([this] (const KickCommand& kickCommand) {
-
             // We want to kick!
             updatePriority(KICK_PRIORITY);
         });
@@ -102,10 +105,18 @@ namespace motion {
             // TODO Work out which of our feet are going to be the support foot
             // TODO store the support foot
             // Assume leftFoot is support
+            //leftFootIsSupport = true;
 
             // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
             Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
             Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
+
+            //Transform3D supportFoot
+
+            //if(leftFootIsSupport == true) {
+
+            //}
+
 
             // Convert the direction vector and position of the ball into left foot coordinates by multiplying the inverse of the
             // homogeneous transforms with the coordinates in torso space. 1 for a point and 0 for a vector.
@@ -174,10 +185,10 @@ namespace motion {
             // TODO use states
 
             // Get our foot positions
+//START BALANCER
             Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
             Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
 
-//START BALANCER
 //            Transform3D IKKick::balance(Transform3D leftFoot, Transform3D rightFoot) {
             // Moving the torso to balance on support foot before kick
 
@@ -226,7 +237,10 @@ namespace motion {
 
             // Put new position of the left foot to the torso in left foot coordinates into the transform matrix
             supportFootNewPose.col(3) = arma::join_cols(torsoNewPosition, arma::vec({1})).t();  
-
+            
+            // TODO Need a way around this.
+            Transform3D leftFootNewPose = supportFootNewPose;
+            Transform3D rightFootNewPose = rightFoot;
 /*
 // TODO CHECK THIS!!!!!! Don't need to convert DELETE THIS
             // Convert the new torso position into torso coordinates
@@ -261,7 +275,7 @@ namespace motion {
             time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
 
             for (auto& joint : joints) {
-                waypoints->push_back({ id, time, joint.first, joint.second, gainLegs, torque}); // TODO: change 100 to torque, support separate gains for each leg
+                waypoints->push_back({ id, time, joint.first, joint.second, gainLegs, torque});
             }
 
             //return std::move(waypoints);
@@ -334,7 +348,7 @@ namespace motion {
 //END KICK
 */
             // TODO We're always finished kicking because we never start :(
-            updatePriority(0);
+            // updatePriority(0);
         });
 
         on<Trigger<FinishKick>>([this] (const FinishKick&) {
