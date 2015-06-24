@@ -110,7 +110,7 @@ namespace localisation {
                 arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
                 auto model_cov = model->GetCovariance();
 
-                // log("model_state = ", model_state.t());
+                emit(graph("model_state = ", model_state));
                 // log("model_cov = \n", model_cov);
                 
                 Self robot_model;
@@ -133,22 +133,9 @@ namespace localisation {
 
 
         // on<Trigger<Sensors>,
-        //    Options<Sync<MMKFRobotLocalisation>>
+        //    Options<Sync<MMKFRobotLocalisation>,Single>
         //   >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
         //     auto curr_time = NUClear::clock::now();
-
-           
-
-
-        //     //TODO: REMOVE THIS
-        //     if(!emit_data_handle.enabled()){
-        //         //Activate when data received
-        //         emit_data_handle.enable();
-        //     }
-
-
-
-
 
         //     emit(graph("Odometry Measurement Update", sensors.odometry[0], sensors.odometry[1]));
         //     log("Odometry Measurement Update", sensors.odometry.t());
@@ -166,7 +153,7 @@ namespace localisation {
 
         on<Trigger<std::vector<messages::vision::Goal>>,
            With<Sensors>,
-           Options<Sync<MMKFRobotLocalisation>>
+           Options<Sync<MMKFRobotLocalisation>,Single>
           >("MMKFRobotLocalisation Measurement Step",
             [this](const std::vector<messages::vision::Goal>& goals, const Sensors& sensors) {
 
@@ -185,6 +172,7 @@ namespace localisation {
                 return;
             }
 
+            //DEBUG
             // for (auto& goal : goals) {
             //     // std::cout << "  side:";
             //     // std::cout << ((goal.side == Goal::Side::LEFT) ? "LEFT" :
@@ -198,9 +186,10 @@ namespace localisation {
             //          " " << i;
             //         emit(graph(msg.str(), goal.measurements[i].position[0], goal.measurements[i].position[1], goal.measurements[i].position[2]));
             //         // std::cout << "  measurement: " << num++ << std::endl;
-            //         // std::cout << "    position:" << measurement.position.t() << std::endl;
             //         // std::cout << "    error:" << measurement.error << std::endl;
             //     }
+            //     std::cout << "    position:" << goal.measurements[0].position.t() << std::endl;
+
             // }
 
             auto curr_time = NUClear::clock::now();

@@ -2,13 +2,25 @@ auto_start_behaviour: true
 vision:
   # Disabling either of these emits corresponding ground truth simulation results
   # as localisation result
-  goal_observations: true
-  ball_observations: true
+  goal_observations: false
+  ball_observations: false
+  # Error values which are sent to localisation system representing uncertainty in vision measurements
+  variance:
+    r: # error in distance scales with distance
+      proportional_factor: 0.1
+      # 1cm
+      min_error:  0.01
+    # 1deg
+    theta: 0.1 * pi / 180
+    # 1deg
+    phi: 0.1 * pi / 180
+
+  distinguish_own_and_opponent_goals: false
 
 robot:
-  #If use_motion is true, then the robot will move based on the latest behaviour commands
+  # If use_motion is true, then the robot will move based on the latest behaviour commands
   motion_type: MOTION #NONE, PATH or MOTION
-  #If motion_type is PATH, the following path with be used
+  # If motion_type is PATH, the following path with be used
   path:
     period: 10
     x_amp: 3
@@ -16,11 +28,11 @@ robot:
     type: SIN #SIN, TRIANGLE
 
 ball:
-  #If use_motion is true, then the ball will move based on the latest behaviour commands
+  # If use_motion is true, then the ball will move based on the latest behaviour commands
   motion_type: MOTION #NONE, PATH or MOTION
   path:
-  #If motion_type is PATH, the following path with be used
-    period: 5
+  # If motion_type is PATH, the following path with be used
+    period: 20
     x_amp: 3
     y_amp: 2
     type: SIN #SIN, TRIANGLE
@@ -29,11 +41,9 @@ ball:
 initial:
   robot_pose: [0, 0, 0]
   ball:
-    position: [2, 1, 0]
+    position: [2,-1, 0]
     diameter: 0.1
 
 # Turns off vision but leaves localisation running with no observations.
 # Allows for testing of things like odometry
 blind_robot: false
-
-

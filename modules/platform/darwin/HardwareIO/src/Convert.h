@@ -81,7 +81,7 @@ namespace darwin {
         static float gyroscope(const uint16_t value);
         static float voltage(const uint8_t value);
         static float fsrForce(const uint16_t value);
-        static float fsrCentre(const bool left, const bool x, const uint8_t value);
+        static float fsrCentre(const bool left, const uint8_t value);
 
         static std::tuple<uint8_t, uint8_t, uint8_t> colourLED(uint16_t value);
         static uint16_t colourLEDInverse(uint8_t r, uint8_t g, uint8_t b);

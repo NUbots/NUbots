@@ -131,12 +131,12 @@ namespace support {
                         const std::string& source = message.image().data();
 
                         // Get the image data
-                        std::vector<Image::Pixel> pixels(source.size() / 3);
+                        std::vector<uint8_t> pixels(source.size());
 
                         std::memcpy(pixels.data(), source.data(), source.size());
 
                         // Build the image
-                        auto image = std::make_unique<Image>(width, height, std::move(pixels));
+                        auto image = std::make_unique<Image>(width, height, NUClear::clock::now(), std::move(pixels));
 
                         // Wait until it's time to display it
                         std::this_thread::sleep_until(timeToRun);

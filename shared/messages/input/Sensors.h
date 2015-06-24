@@ -69,6 +69,7 @@ namespace messages {
 
             NUClear::clock::time_point timestamp;
 
+            float voltage;
             arma::vec3 accelerometer;
             arma::vec3 gyroscope;
 
@@ -79,8 +80,9 @@ namespace messages {
             std::vector<Button> buttons;
             std::vector<LED> leds;
 
-            arma::vec3 leftFSR;
-            arma::vec3 rightFSR;
+            arma::vec3 centreOfPressure;
+            arma::vec2 leftFSRCenter;
+            arma::vec2 rightFSRCenter;
 
             arma::mat22 robotToIMU;
 

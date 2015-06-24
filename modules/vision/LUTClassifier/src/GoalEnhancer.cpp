@@ -60,7 +60,7 @@ namespace modules {
                 points(arma::uvec({ 0 }), arma::find(points.row(0) < 0)).fill(0);
 
                 // Our rhs must be at most the image width
-                points(arma::uvec({ 2 }), arma::find(points.row(2) > double(image.width() - 1))).fill(double(image.width() - 1));
+                points(arma::uvec({ 2 }), arma::find(points.row(2) > double(image.width - 1))).fill(double(image.width - 1));
 
                 // Classify each of our points
                 for(uint i = 0; i < points.n_cols; ++i) {
@@ -68,7 +68,7 @@ namespace modules {
                     auto element = points.col(i);
 
                     // Check our Y is within the bounds (no need to check the end since they are the same)
-                    if(element(1) >= 0 && element(1) < int(image.height())) {
+                    if(element(1) >= 0 && element(1) < int(image.height)) {
                         auto segments = quex->classify(image, lut, { int(element(0)), int(element(1)) }, { int(element(2)), int(element(3)) });
                         newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
                     }

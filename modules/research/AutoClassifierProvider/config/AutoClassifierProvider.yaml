@@ -1,12 +1,16 @@
-ball: 
+ball:
   enabled: false
   edge_buffer: 2
-goal: 
+  lightness_range: [0, 255]
+goal:
   enabled: true
   edge_buffer: 2
-field: 
+  lightness_range: [0, 255]
+field:
   enabled: false
   edge_buffer: 2
-line: 
+  lightness_range: [0, 255]
+line:
   enabled: false
   edge_buffer: 2
+  lightness_range: [0, 255]

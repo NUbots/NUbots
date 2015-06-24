@@ -79,21 +79,24 @@ namespace support {
         }
 
     private:
+        time_t moduleStartupTime;
+        double absolute_time();
 
         //Member variables
         messages::motion::KickPlannerConfig kick_cfg;
 
         std::shared_ptr<messages::support::FieldDescription> field_description_;
 
-        static constexpr size_t SIMULATION_UPDATE_FREQUENCY = 90;
+        static constexpr size_t SIMULATION_UPDATE_FREQUENCY = 180;
 
         struct Config{
 
             bool simulate_goal_observations = true;
             bool simulate_ball_observations = true;
-            bool distinguish_left_and_right_goals = true;
+            bool distinguish_own_and_opponent_goals = false;
+            // bool distinguish_left_and_right_goals = true;
 
-            struct Motion{
+            struct Motion {
                 MotionType motion_type = MotionType::PATH;
                 struct Path{
                     float period = 10;
@@ -111,6 +114,8 @@ namespace support {
 
             bool blind_robot = false;
             bool auto_start_behaviour = true;
+
+            arma::vec4 vision_error = {0.01,0.017,0.017};
 
         } cfg_;
 
@@ -139,7 +144,7 @@ namespace support {
         //Methods
         void updateConfiguration(const messages::support::Configuration<SoccerSimulatorConfig>& config, const messages::support::GlobalConfig& globalConfig);
 
-        std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float dHeading);
+        std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float heading, float oldHeading);
 
         arma::vec2 getPath(Config::Motion::Path p);
 

@@ -114,9 +114,9 @@ namespace modules {
                         int jumpSize = std::max(1, int(lround((2 * radius) / double(BALL_MINIMUM_INTERSECTIONS_FINE + 2))));
 
                         int xStart = std::max(int(lround(centre[0] - radius * BALL_SEARCH_CIRCLE_SCALE + jumpSize)), 0);
-                        int xEnd   = std::min(int(lround(centre[0] + radius * BALL_SEARCH_CIRCLE_SCALE - jumpSize)), int(image.width() - 1));
+                        int xEnd   = std::min(int(lround(centre[0] + radius * BALL_SEARCH_CIRCLE_SCALE - jumpSize)), int(image.width - 1));
                         int yStart = std::max(int(lround(centre[1] - radius * BALL_SEARCH_CIRCLE_SCALE + jumpSize)), 0);
-                        int yEnd   = std::min(int(lround(centre[1] + radius * BALL_SEARCH_CIRCLE_SCALE - jumpSize)), int(image.height() - 1));
+                        int yEnd   = std::min(int(lround(centre[1] + radius * BALL_SEARCH_CIRCLE_SCALE - jumpSize)), int(image.height - 1));
 
                         for(int x = xStart; x <= xEnd; x += jumpSize) {
 
@@ -126,7 +126,7 @@ namespace modules {
                             arma::ivec2 end = { x, ends.second };
 
                             start[1] = std::max(start[1], 0);
-                            end[1] = std::min(end[1], int(image.height() - 1));
+                            end[1] = std::min(end[1], int(image.height - 1));
 
                             auto segments = quex->classify(image, lut, start, end);
                             insertSegments(classifiedImage, segments, true);
@@ -140,7 +140,7 @@ namespace modules {
                             arma::ivec2 end = { ends.second, y };
 
                             start[0] = std::max(start[0], 0);
-                            end[0] = std::min(end[0], int(image.width() - 1));
+                            end[0] = std::min(end[0], int(image.width - 1));
 
                             auto segments = quex->classify(image, lut, start, end);
                             insertSegments(classifiedImage, segments, false);

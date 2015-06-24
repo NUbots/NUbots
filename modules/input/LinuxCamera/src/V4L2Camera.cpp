@@ -34,105 +34,100 @@
 namespace modules {
     namespace input {
 
+        constexpr size_t numbuffers = 2;
+
         using messages::input::Image;
 
         V4L2Camera::V4L2Camera() : fd(-1), width(0), height(0), deviceID(""), streaming(false) {
         }
 
-        std::unique_ptr<Image> V4L2Camera::getImage() {
+        Image V4L2Camera::getImage() {
             if (!streaming) {
-                return nullptr;
+                throw std::runtime_error("The camera is currently not streaming");
             }
 
+            // Extract our buffer from the driver
             v4l2_buffer current;
             memset(&current, 0, sizeof(current));
             current.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-            current.memory = V4L2_MEMORY_MMAP;
-
-            // Get our frame buffer with data in it
+            current.memory = V4L2_MEMORY_USERPTR;
             if (ioctl(fd, VIDIOC_DQBUF, &current) == -1) {
                 throw std::system_error(errno, std::system_category(), "There was an error while de-queuing a buffer");
             }
 
-            std::vector<Image::Pixel> data(width * height);
-            std::unique_ptr<Image> image;
+            // Extract our data and create a new fresh buffer
+            std::vector<uint8_t> data(buffers[current.index].size());
+            std::swap(data, buffers[current.index]);
+            data.resize(current.bytesused);
+
+            // Calculate the timestamp in terms of NUClear clock
+            auto monotonicTime = std::chrono::microseconds(current.timestamp.tv_usec) + std::chrono::seconds(current.timestamp.tv_sec);
+            auto mclock = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch());
+            auto nclock = std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch());
+            auto timestamp = NUClear::clock::time_point(monotonicTime + (nclock - mclock));
+
+            // Requeue our buffer
+            v4l2_buffer requeue;
+            memset(&requeue, 0, sizeof(requeue));
+            requeue.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+            requeue.memory = V4L2_MEMORY_USERPTR;
+            requeue.index = current.index;
+            requeue.m.userptr = reinterpret_cast<unsigned long int>(buffers[current.index].data());
+            requeue.length = buffers[current.index].capacity();
+            if (ioctl(fd, VIDIOC_QBUF, &requeue) == -1) {
+                throw std::system_error(errno, std::system_category(), "There was an error while re-queuing a buffer");
+            };
 
             // If it is a MJPG
-            if(format == "MJPG") {
-                struct jpeg_error_mgr err;
-                struct jpeg_decompress_struct cinfo;
-                std::memset(&cinfo, 0, sizeof(jpeg_decompress_struct));
+            // if(format == "MJPG") {
+            //     struct jpeg_error_mgr err;
+            //     struct jpeg_decompress_struct cinfo;
+            //     std::memset(&cinfo, 0, sizeof(jpeg_decompress_struct));
 
-                uint8_t* payload = static_cast<uint8_t*>(buff[current.index].payload);
+            //     uint8_t* payload = static_cast<uint8_t*>(buff[current.index].data());
 
-                // Create a decompressor
-                jpeg_create_decompress(&cinfo);
-                cinfo.err = jpeg_std_error(&err);
+            //     // Create a decompressor
+            //     jpeg_create_decompress(&cinfo);
+            //     cinfo.err = jpeg_std_error(&err);
 
-                std::vector<uint8_t> jpegData(current.bytesused);
+            //     std::vector<uint8_t> jpegData(current.bytesused);
 
-                // Copy our header (the first 195 bytes)
-                std::copy(payload, payload + current.bytesused, std::begin(jpegData));
+            //     // Copy our header (the first 195 bytes)
+            //     std::copy(payload, payload + current.bytesused, std::begin(jpegData));
 
-                // Set our source buffer
-                jpeg_mem_src(&cinfo, jpegData.data(), current.bytesused);
+            //     // Set our source buffer
+            //     jpeg_mem_src(&cinfo, jpegData.data(), current.bytesused);
 
-                // Read our header
-                jpeg_read_header(&cinfo, true);
+            //     // Read our header
+            //     jpeg_read_header(&cinfo, true);
 
-                // Set our options
-                cinfo.do_fancy_upsampling = false;
-                cinfo.out_color_components = 3;
-                cinfo.out_color_space = JCS_YCbCr;
+            //     // Set our options
+            //     cinfo.do_fancy_upsampling = false;
+            //     cinfo.out_color_components = 3;
+            //     cinfo.out_color_space = JCS_YCbCr;
 
-                // Start decompression
-                jpeg_start_decompress(&cinfo);
+            //     // Start decompression
+            //     jpeg_start_decompress(&cinfo);
 
-                // Decompress the JPEG
-                for (Image::Pixel* row = data.data();
-                        cinfo.output_scanline < cinfo.output_height;
-                        row += width) {
+            //     // Decompress the JPEG
+            //     for (Image::Pixel* row = data.data();
+            //             cinfo.output_scanline < cinfo.output_height;
+            //             row += width) {
 
-                    // Read the scanline into place
-                    jpeg_read_scanlines(&cinfo, reinterpret_cast<uint8_t**>(&row), 1);
-                }
+            //         // Read the scanline into place
+            //         jpeg_read_scanlines(&cinfo, reinterpret_cast<uint8_t**>(&row), 1);
+            //     }
 
-                // Clean up
-                jpeg_finish_decompress(&cinfo);
-                jpeg_destroy_decompress(&cinfo);
+            //     // Clean up
+            //     jpeg_finish_decompress(&cinfo);
+            //     jpeg_destroy_decompress(&cinfo);
 
-                // Move this data into the image along with the jpeg source
-                image = std::unique_ptr<Image>(new Image(width, height, std::move(data), std::move(jpegData)));
-            }
+            //     // Move this data into the image along with the jpeg source
+            //     image = std::unique_ptr<Image>(new Image(width, height, std::move(data), std::move(jpegData)));
+            // }
 
-            else {
-                uint8_t* input = static_cast<uint8_t*>(buff[current.index].payload);
-
-                const size_t total = width * height;
-
-                // Fix the colour information to be YUV444 rather then YUV422
-                for(size_t i = 0; i < total; ++++i) {
-
-                    data[i].y  = input[i * 2];
-                    data[i].cb = input[i * 2 + 1];
-                    data[i].cr = input[i * 2 + 3];
-
-                    data[i + 1].y  = input[i * 2 + 2];
-                    data[i + 1].cb = input[i * 2 + 1];
-                    data[i + 1].cr = input[i * 2 + 3];
-                }
-
-                // Move this data into the image
-                image = std::unique_ptr<Image>(new Image(width, height, std::move(data)));
-            }
-
-            // Enqueue our next buffer so it can be written to
-            if (ioctl(fd, VIDIOC_QBUF, &current) == -1) {
-                throw std::system_error(errno, std::system_category(), "There was an error while re-queuing a buffer");
-            }
-
-            // Return our image
-            return image;
+            // Move this data into the image
+            return Image(width, height, timestamp, std::move(data));
         }
 
         void V4L2Camera::resetCamera(const std::string& device, const std::string& fmt, size_t w, size_t h) {
@@ -189,44 +184,21 @@ namespace modules {
                 throw std::system_error(errno, std::system_category(), "We were unable to get the current camera FPS parameters");
             }
 
-            // Request 2 kernel space buffers to read the data from the camera into
+            // Tell V4L2 that we are using 2 userspace buffers
             v4l2_requestbuffers rb;
             memset(&rb, 0, sizeof(rb));
-            rb.count = 2; // 2 buffers, one to queue one to read
+            rb.count = numbuffers;
             rb.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-            rb.memory = V4L2_MEMORY_MMAP;
+            rb.memory = V4L2_MEMORY_USERPTR;
             if (ioctl(fd, VIDIOC_REQBUFS, &rb) == -1) {
-                throw std::system_error(errno, std::system_category(), "There was an error requesting the buffer");
-            }
-
-            // Map those two buffers into our user space so we can access them
-            for (int i = 0; i < 2; ++i) {
-                v4l2_buffer buffer;
-                buffer.index = i;
-                buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-                buffer.memory = V4L2_MEMORY_MMAP;
-                if (ioctl(fd, VIDIOC_QUERYBUF, &buffer) == -1) {
-                    throw std::system_error(errno, std::system_category(), "There was an error mapping the video buffer into user space");
-                }
-
-                buff[i].length = buffer.length;
-                buff[i].payload = mmap(0, buffer.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, buffer.m.offset);
-
-                if (buff[i].payload == MAP_FAILED) {
-                    throw std::runtime_error("There was an error mapping the video buffer into user space");
-                }
-
-                // Enqueue our buffer so that the kernel can write data to it
-                if (ioctl(fd, VIDIOC_QBUF, &buffer) == -1) {
-                    throw std::system_error(errno, std::system_category(), "There was an error queuing buffers for the kernel to write to");
-                }
+                throw std::system_error(errno, std::system_category(), "There was an error configuring user buffers");
             }
 
             settings.insert(std::make_pair("brightness",                 V4L2CameraSetting(fd, V4L2_CID_BRIGHTNESS)));
             settings.insert(std::make_pair("gain",                       V4L2CameraSetting(fd, V4L2_CID_GAIN)));
             settings.insert(std::make_pair("contrast",                   V4L2CameraSetting(fd, V4L2_CID_CONTRAST)));
             settings.insert(std::make_pair("saturation",                 V4L2CameraSetting(fd, V4L2_CID_SATURATION)));
-            settings.insert(std::make_pair("power_line_frequency",        V4L2CameraSetting(fd, V4L2_CID_POWER_LINE_FREQUENCY)));
+            settings.insert(std::make_pair("power_line_frequency",       V4L2CameraSetting(fd, V4L2_CID_POWER_LINE_FREQUENCY)));
             settings.insert(std::make_pair("auto_white_balance",         V4L2CameraSetting(fd, V4L2_CID_AUTO_WHITE_BALANCE)));
             settings.insert(std::make_pair("white_balance_temperature",  V4L2CameraSetting(fd, V4L2_CID_WHITE_BALANCE_TEMPERATURE)));
             settings.insert(std::make_pair("auto_exposure",              V4L2CameraSetting(fd, V4L2_CID_EXPOSURE_AUTO)));
@@ -243,10 +215,32 @@ namespace modules {
 
         void V4L2Camera::startStreaming() {
             if (!streaming) {
+
                 // Start streaming data
                 int command = V4L2_BUF_TYPE_VIDEO_CAPTURE;
                 if (ioctl(fd, VIDIOC_STREAMON, &command) == -1) {
                     throw std::system_error(errno, std::system_category(), "Unable to start camera streaming");
+                }
+
+                // Calculate how big our buffers must be
+                size_t bufferlength = width * height * 2;
+
+                // Enqueue 2 buffers
+               for(uint i = 0; i < numbuffers; ++i) {
+
+                    buffers[i].resize(bufferlength);
+
+                    v4l2_buffer buff;
+                    memset(&buff, 0, sizeof(buff));
+                    buff.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+                    buff.memory = V4L2_MEMORY_USERPTR;
+                    buff.index = i;
+                    buff.m.userptr = reinterpret_cast<unsigned long int>(buffers[i].data());
+                    buff.length = buffers[i].capacity();
+
+                    if (ioctl(fd, VIDIOC_QBUF, &buff) == -1) {
+                        throw std::system_error(errno, std::system_category(), "Unable to queue buffers");
+                    };
                 }
 
                 streaming = true;
@@ -255,8 +249,16 @@ namespace modules {
 
         void V4L2Camera::stopStreaming() {
             if (streaming) {
-                int command = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+                // Dequeue all buffers
+                for(bool done = false; !done;) {
+                    if(ioctl(fd, VIDIOC_DQBUF) == -1) {
+                        done = true;
+                    }
+                }
+
                 // Stop streaming data
+                int command = V4L2_BUF_TYPE_VIDEO_CAPTURE;
                 if (ioctl(fd, VIDIOC_STREAMOFF, &command) == -1) {
                     throw std::system_error(errno, std::system_category(), "Unable to stop camera streaming");
                 }
@@ -292,11 +294,6 @@ namespace modules {
         void V4L2Camera::closeCamera() {
             if (fd != -1) {
                 stopStreaming();
-
-                // unmap buffers
-                for (int i = 0; i < 2; ++i) {
-                    munmap(buff[i].payload, buff[i].length);
-                }
 
                 close(fd);
                 fd = -1;

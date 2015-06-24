@@ -408,14 +408,19 @@ void MultiModalRobotModel::NormaliseAlphas() {
     for (auto& model : robot_models_)
         sumAlpha += model->GetFilterWeight();
 
+
     // if (sumAlpha == 1)
     //     return;
 
     if (sumAlpha == 0)
         sumAlpha = 1e-12;
 
-    for (auto& model : robot_models_)
+    for (auto& model : robot_models_){
         model->SetFilterWeight(model->GetFilterWeight() / sumAlpha);
+        // std::cout << "model->GetFilterWeight() = " << model->GetFilterWeight() << std::endl;
+    }
+    // std::cout << "sumAlpha = " << sumAlpha << std::endl;
+
 }
 
 }

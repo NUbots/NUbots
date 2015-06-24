@@ -24,8 +24,10 @@
 #include "messages/motion/ServoTarget.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/ServoID.h"
+#include "messages/input/Sensors.h"
 #include "utility/math/angle.h"
-#include "messages/support/Configuration.h" 
+#include "messages/support/Configuration.h"
+#include <limits>
 
 namespace modules {
 namespace platform {
@@ -34,6 +36,7 @@ namespace darwin {
     using messages::platform::darwin::DarwinSensors;
     using messages::motion::ServoTarget;
     using messages::input::ServoID;
+    using messages::input::Sensors;
     using messages::support::Configuration;
 
     HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -162,7 +165,19 @@ namespace darwin {
         });
 
 
-        on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
+        on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Optional<Sensors>>, Options<Single>>([this](const time_t&, const std::shared_ptr<const Sensors>& previousSensors) {
+
+            if(previousSensors){
+                auto rightFootPose = previousSensors->forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
+                auto leftFootPose = previousSensors->forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
+                if(arma::norm(rightFootPose.translation()) > arma::norm(leftFootPose.translation())){
+                    setRightFootDown();
+                } else if(arma::norm(rightFootPose.translation()) < arma::norm(leftFootPose.translation())){
+                    setLeftFootDown();
+                } else {
+                    setBothFeetDown();
+                }
+            }
 
             for (int i = 0; i < 20; ++i) {
 
@@ -188,7 +203,10 @@ namespace darwin {
                 }
             }
 
-            //Gyro
+            // Gyro:
+            // Note: This reaction is not (and should not be) synced with the
+            // 'Receive Simulated Gyroscope' reaction above, so we can't
+            // reliably query the size of the gyroQueue.
             arma::vec3 sumGyro = {0,0,0};
             while (!gyroQueue.empty()){
                 auto g = gyroQueue.front();
@@ -202,7 +220,7 @@ namespace darwin {
 
             sensors.timestamp = NUClear::clock::now();
             
-            //Debug:
+            // //Debug:
             // integrated_gyroscope += sumGyro + arma::vec3({0,0,imu_drift_rate});
             // std::cout << "HardwareSimulator gyroscope = " << sensors.gyroscope.x << ", " << sensors.gyroscope.y << ", " << sensors.gyroscope.z << std::endl;
             // std::cout << "HardwareSimulator integrated_gyroscope = " << integrated_gyroscope.t() << std::endl;
@@ -262,6 +280,73 @@ namespace darwin {
         sensors->gyroscope.y += noise.gyroscope.y * centered_noise();
         sensors->gyroscope.z += noise.gyroscope.z * centered_noise();
     }
+
+    void HardwareSimulator::setRightFootDown(){
+         // Sensors
+        sensors.fsr.right.fsr1 = 1;
+        sensors.fsr.right.fsr2 = 1;
+        sensors.fsr.right.fsr3 = 1;
+        sensors.fsr.right.fsr4 = 1;
+
+        // Centre
+        sensors.fsr.right.centreX = 0;
+        sensors.fsr.right.centreY = 0;
+        // Sensors
+        sensors.fsr.left.fsr1 = 0;
+        sensors.fsr.left.fsr2 = 0;
+        sensors.fsr.left.fsr3 = 0;
+        sensors.fsr.left.fsr4 = 0;
+
+        // Centre
+        sensors.fsr.left.centreX = std::numeric_limits<double>::quiet_NaN();
+        sensors.fsr.left.centreY = std::numeric_limits<double>::quiet_NaN();
+
+    }
+
+    void HardwareSimulator::setLeftFootDown(){
+         // Sensors
+        sensors.fsr.right.fsr1 = 0;
+        sensors.fsr.right.fsr2 = 0;
+        sensors.fsr.right.fsr3 = 0;
+        sensors.fsr.right.fsr4 = 0;
+
+        // Centre
+        sensors.fsr.right.centreX = std::numeric_limits<double>::quiet_NaN();
+        sensors.fsr.right.centreY = std::numeric_limits<double>::quiet_NaN();
+        // Sensors
+        sensors.fsr.left.fsr1 = 1;
+        sensors.fsr.left.fsr2 = 1;
+        sensors.fsr.left.fsr3 = 1;
+        sensors.fsr.left.fsr4 = 1;
+
+        // Centre
+        sensors.fsr.left.centreX = 0;
+        sensors.fsr.left.centreY = 0;
+
+    }
+
+    void HardwareSimulator::setBothFeetDown(){
+         // Sensors
+        sensors.fsr.right.fsr1 = 1;
+        sensors.fsr.right.fsr2 = 1;
+        sensors.fsr.right.fsr3 = 1;
+        sensors.fsr.right.fsr4 = 1;
+
+        // Centre
+        sensors.fsr.right.centreX = 0;
+        sensors.fsr.right.centreY = 0;
+        // Sensors
+        sensors.fsr.left.fsr1 = 1;
+        sensors.fsr.left.fsr2 = 1;
+        sensors.fsr.left.fsr3 = 1;
+        sensors.fsr.left.fsr4 = 1;
+
+        // Centre
+        sensors.fsr.left.centreX = 0;
+        sensors.fsr.left.centreY = 0;
+
+    }
+
 }
 }
 }

@@ -45,6 +45,10 @@ namespace support {
             auto* sensorData = message.mutable_sensor_data();
 
             sensorData->set_timestamp(sensors.timestamp.time_since_epoch().count());
+            sensorData->set_voltage(sensors.voltage);
+
+            float battery = (sensors.voltage - 10) / 2.9;
+            sensorData->set_battery(battery);
 
             // Add each of the servos into the protocol buffer
             for(const auto& s : sensors.servos) {
@@ -96,17 +100,18 @@ namespace support {
             orient->mutable_y()->set_z(sensors.orientation(1,2));
             orient->mutable_z()->set_z(sensors.orientation(2,2));
 
+            // TODO: these do not exist in Sensors.h, this needs reimplementing
             // The left FSR values
-            auto* lfsr = sensorData->mutable_left_fsr();
-            lfsr->set_x(sensors.leftFSR[0]);
-            lfsr->set_y(sensors.leftFSR[1]);
-            lfsr->set_z(sensors.leftFSR[2]);
+            // auto* lfsr = sensorData->mutable_left_fsr();
+            // lfsr->set_x(sensors.leftFSR[0]);
+            // lfsr->set_y(sensors.leftFSR[1]);
+            // lfsr->set_z(sensors.leftFSR[2]);
 
-            // The right FSR values
-            auto* rfsr = sensorData->mutable_right_fsr();
-            rfsr->set_x(sensors.rightFSR[0]);
-            rfsr->set_y(sensors.rightFSR[1]);
-            rfsr->set_z(sensors.rightFSR[2]);
+            // // The right FSR values
+            // auto* rfsr = sensorData->mutable_right_fsr();
+            // rfsr->set_x(sensors.rightFSR[0]);
+            // rfsr->set_y(sensors.rightFSR[1]);
+            // rfsr->set_z(sensors.rightFSR[2]);
 
             // The LEDs
             for(auto& l : sensors.leds) {

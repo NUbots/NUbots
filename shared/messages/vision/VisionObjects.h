@@ -71,18 +71,24 @@ namespace messages {
                 UNKNOWN,
                 LEFT,
                 RIGHT,
-            } side;
+            } side = Side::UNKNOWN;
+
+            enum class Team {
+                UNKNOWN,
+                OWN,
+                OPPONENT,
+            } team = Team::UNKNOWN;
 
             utility::math::geometry::Quad quad;
         };
 
         struct Obstacle : public VisionObject {
 
-            enum class Team {
+            enum class Team { // TODO: Rename to TeamColour?
                 NONE,
                 MAGENTA,
                 CYAN
-            } team;
+            } team = Team::NONE;
 
             utility::math::geometry::Polygon polygon;
         };

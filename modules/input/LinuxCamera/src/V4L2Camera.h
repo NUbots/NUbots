@@ -47,13 +47,8 @@ namespace modules {
          */
         class V4L2Camera {
         private:
-            /// @brief This struct holds all of the variables we need for interaction with the kernel space buffers
-            struct KernelBuffer {
-                /// @brief the size of the kernel space buffer
-                size_t length;
-                /// @brief a pointer to the first address of the virtual mapped kernel space
-                void* payload;
-            } buff[2];
+            /// @brief Our two arrays of data that will be populated
+            std::array<std::vector<uint8_t>, 2> buffers;
 
             /// @brief this file descriptor points to the camera object
             int fd;
@@ -101,7 +96,7 @@ namespace modules {
              *
              * @return a pointer to the latest image from the camera
              */
-            std::unique_ptr<messages::input::Image> getImage();
+            messages::input::Image getImage();
 
             /**
              * @brief Sets up the camera at a given resolution

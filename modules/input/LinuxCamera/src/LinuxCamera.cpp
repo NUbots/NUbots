@@ -33,6 +33,7 @@ namespace modules {
 
         using messages::support::Configuration;
         using messages::input::CameraParameters;
+        using messages::input::Image;
 
         // We assume that the device will always be video0, if not then change this
         LinuxCamera::LinuxCamera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -42,7 +43,7 @@ namespace modules {
 
                 // If the camera is ready, get an image and emit it
                 if (camera.isStreaming()) {
-                    emit(camera.getImage());
+                    emit(std::make_unique<Image>(camera.getImage()));
                 }
             });
 

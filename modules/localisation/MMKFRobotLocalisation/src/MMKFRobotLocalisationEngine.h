@@ -85,15 +85,15 @@ namespace localisation {
         struct {
             bool angle_between_goals_observation_enabled;
             bool goal_pair_observation_enabled;
-            bool all_goals_are_blue;
+            bool all_goals_are_own;
             bool emit_robot_fieldobjects;
         } cfg_;
 
         struct {
-            utility::localisation::LocalisationFieldObject bl;
-            utility::localisation::LocalisationFieldObject br;
-            utility::localisation::LocalisationFieldObject yl;
-            utility::localisation::LocalisationFieldObject yr;
+            utility::localisation::LocalisationFieldObject own_l;
+            utility::localisation::LocalisationFieldObject own_r;
+            utility::localisation::LocalisationFieldObject opp_l;
+            utility::localisation::LocalisationFieldObject opp_r;
         } goalpost_lfos_;
 
         std::chrono::system_clock::time_point last_time_update_time_;

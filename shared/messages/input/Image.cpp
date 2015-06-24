@@ -23,41 +23,26 @@
 namespace messages {
     namespace input {
 
-        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data)
-            : imgWidth(width)
-            , imgHeight(height)
+        Image::Image(uint width, uint height, NUClear::clock::time_point timestamp, std::vector<uint8_t>&& data)
+            : width(width)
+            , height(height)
+            , timestamp(timestamp)
             , data(std::move(data)) {
         }
 
-        Image::Image(size_t width, size_t height, std::vector<Pixel>&& data, std::vector<uint8_t>&& source)
-            : imgWidth(width)
-            , imgHeight(height)
-            , data(std::move(data))
-            , src(std::move(source)) {
-        }
+        Image::Pixel Image::operator()(uint x, uint y) const {
+            int origin = (y * width + x) * 2;
+            int shift = (x % 2) * 2;
 
-        Image::Pixel& Image::operator ()(size_t x, size_t y) {
-            return data[y * imgWidth + x];
-        }
-
-        const Image::Pixel& Image::operator ()(size_t x, size_t y) const {
-            return data[y * imgWidth + x];
-        }
-
-        size_t Image::width() const {
-            return imgWidth;
-        }
-
-        size_t Image::height() const {
-            return imgHeight;
-        }
-
-        const std::vector<Image::Pixel>& Image::raw() const {
-            return data;
+            return {
+                data[origin + 0],
+                data[origin + 1 - shift],
+                data[origin + 3 - shift]
+            };
         }
 
         const std::vector<uint8_t>& Image::source() const {
-            return src;
+            return data;
         }
 
     }  // input

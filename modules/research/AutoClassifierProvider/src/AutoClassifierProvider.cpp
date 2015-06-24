@@ -43,10 +43,16 @@ namespace research {
 
             ballProvider.enable(config["ball"]["enabled"].as<bool>());
             ballEdgeBuffer = config["ball"]["edge_buffer"].as<int>();
+            ballLightnessMin = config["ball"]["lightness_range"][0].as<int>();
+            ballLightnessMax = config["ball"]["lightness_range"][1].as<int>();
             goalProvider.enable(config["goal"]["enabled"].as<bool>());
             goalEdgeBuffer = config["goal"]["edge_buffer"].as<int>();
+            goalLightnessMin = config["goal"]["lightness_range"][0].as<int>();
+            goalLightnessMax = config["goal"]["lightness_range"][1].as<int>();
             fieldProvider.enable(config["field"]["enabled"].as<bool>());
             fieldEdgeBuffer = config["field"]["edge_buffer"].as<int>();
+            fieldLightnessMin = config["field"]["lightness_range"][0].as<int>();
+            fieldLightnessMax = config["field"]["lightness_range"][1].as<int>();
             // lineProvider.enable(config["field"]["enabled"].as<bool>());
             // lineEdgeBuffer = config["field"]["edge_buffer"].as<int>();
 
@@ -69,16 +75,19 @@ namespace research {
                 // find the min and max y points on the circle
                 // capped at the bounds of the image
                 uint minY = std::max(std::ceil(centre[1] - radius), 0.0);
-                uint maxY = std::min(std::floor(centre[1] + radius), double(image.height() - 1));
+                uint maxY = std::min(std::floor(centre[1] + radius), double(image.height - 1));
 
                 // loop through pixels on the image in bounding box
                 for (uint y = minY + ballEdgeBuffer; y <= maxY - ballEdgeBuffer; ++y) {
                     auto edgePoints = circle.getEdgePoints(y);
                     uint minX = std::max(edgePoints[0], 0.0);
-                    uint maxX = std::min(edgePoints[1], double(image.width() - 1));
+                    uint maxX = std::min(edgePoints[1], double(image.width - 1));
 
                     for (uint x = minX + ballEdgeBuffer; x <= maxX - ballEdgeBuffer; ++x) {
-                        pixels->pixels.push_back(image(x, y));
+                        auto pixel = image(x, y);
+                        if(pixel.y > ballLightnessMin && y < ballLightnessMax) {
+                            pixels->pixels.push_back(pixel);
+                        }
                     }
                 }
 
@@ -99,7 +108,7 @@ namespace research {
                 // find the min and max y points on the quad
                 // capped at the bounds of the image
                 uint minY = std::max(std::min(quad.getTopLeft()[1], quad.getTopRight()[1]), 0.0);
-                uint maxY = std::min(std::max(quad.getBottomLeft()[1], quad.getBottomRight()[1]), double(image.height() - 1));
+                uint maxY = std::min(std::max(quad.getBottomLeft()[1], quad.getBottomRight()[1]), double(image.height - 1));
 
                 for (uint y = minY + goalEdgeBuffer; y <= maxY - goalEdgeBuffer; ++y) {
                     arma::vec2 edgePoints;
@@ -109,10 +118,13 @@ namespace research {
                         continue; // no intersection
                     }
                     uint minX = std::max(edgePoints[0], 0.0);
-                    uint maxX = std::min(edgePoints[1], double(image.width() - 1));
+                    uint maxX = std::min(edgePoints[1], double(image.width - 1));
 
                     for (uint x = minX + goalEdgeBuffer; x <= maxX - goalEdgeBuffer; ++x) {
-                        pixels->pixels.push_back(image(x, y));
+                        auto pixel = image(x, y);
+                        if(pixel.y > goalLightnessMin && y < goalLightnessMax) {
+                            pixels->pixels.push_back(pixel);
+                        }
                     }
                 }
             }
@@ -130,7 +142,10 @@ namespace research {
             for (uint x = fieldEdgeBuffer; x < classifiedImage.dimensions[0] - fieldEdgeBuffer; ++x) {
 
                 for (uint y = classifiedImage.visualHorizonAtPoint(x) + fieldEdgeBuffer; y < classifiedImage.dimensions[1] - fieldEdgeBuffer; ++y) {
-                    pixels->pixels.push_back(image(x, y));
+                    auto pixel = image(x, y);
+                    if(pixel.y > fieldLightnessMin && y < fieldLightnessMax) {
+                        pixels->pixels.push_back(pixel);
+                    }
                 }
             }
 

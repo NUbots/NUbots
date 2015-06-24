@@ -29,7 +29,6 @@
 #include "utility/math/geometry/Quad.h"
 #include "utility/localisation/transform.h"
 
-
 namespace modules {
 namespace support {
 
@@ -48,11 +47,15 @@ namespace support {
     	arma::vec2 screenAngular;
     };
 
-	inline static VisibleMeasurement computeVisible(arma::vec3 objPosition, const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors){
+	inline static VisibleMeasurement computeVisible(arma::vec3 objPosition, const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors, arma::vec4 error){
 		//Assumes we need to see the bottom or...
 		messages::vision::VisionObject::Measurement measurement;
         measurement.position = SphericalRobotObservation(robotPose.xy(), robotPose.angle(), objPosition);
-        measurement.error = arma::eye(3, 3) * 0.1;			
+        measurement.error = arma::eye(3, 3);
+
+        measurement.error[0] = std::fmax(error(0) * std::fabs(measurement.position(0)), error(1));
+        measurement.error.diag()[1] = error[1];
+        measurement.error.diag()[2] = error[2];
 
         arma::vec4 cam_space = sensors->kinematicsCamToGround.i() * sphericalToCartesian4(measurement.position);
         arma::vec2 screenAngular = cartesianToSpherical(cam_space.rows(0,2)).rows(1,2);
@@ -73,19 +76,23 @@ namespace support {
 
 	class VirtualGoalPost {
 	public:
-		VirtualGoalPost(arma::vec3 position_, float height_){
+		VirtualGoalPost(arma::vec3 position_, float height_, Goal::Side side_, Goal::Team team_){
 			position = position_;
 			height = height_;
+			side = side_;
+			team = team_;
 		}
 		~VirtualGoalPost(){}
 
-		arma::vec3 position;
-		float height;
+		arma::vec3 position = {0, 0, 0};
+		float height = 1.1;
+		Goal::Side side = Goal::Side::UNKNOWN; // LEFT, RIGHT, or UNKNOWN
+		Goal::Team team = Goal::Team::UNKNOWN; // OWN, OPPONENT, or UNKNOWN
 
-		Goal detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors){
+		Goal detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors, arma::vec4 error){
 			Goal result;
 
-			auto visibleMeasurements = computeVisible(position,camParams,robotPose,sensors);
+			auto visibleMeasurements = computeVisible(position,camParams,robotPose,sensors,error);
 
 			for (auto & m : visibleMeasurements.measurements){
 				result.measurements.push_back(m);
@@ -97,7 +104,8 @@ namespace support {
 			//Singularity goals
 			result.angularSize = arma::vec2({0, 0});
 			result.quad = Quad(result.screenAngular,result.screenAngular,result.screenAngular,result.screenAngular);
-			result.side = messages::vision::Goal::Side::UNKNOWN;
+			result.side = side;
+			result.team = team;
 			//If no measurements are in the goal, then it was not observed
 			return result;
 		}
@@ -123,10 +131,10 @@ namespace support {
 		// arma::vec2 position;
 		float diameter;
 
-		Ball detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors){
+		Ball detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors, arma::vec4 error){
 			Ball result;
 
-			auto visibleMeasurements = computeVisible(position, camParams, robotPose, sensors);
+			auto visibleMeasurements = computeVisible(position,camParams,robotPose,sensors,error);
 
 			// TODO: set timestamp, sensors, classifiedImage?
 			for (auto& m : visibleMeasurements.measurements){

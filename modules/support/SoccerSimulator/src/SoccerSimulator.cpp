@@ -32,6 +32,7 @@
 #include "messages/motion/WalkCommand.h"
 #include "messages/input/GameEvents/gameevents.h"
 
+
 namespace modules {
 namespace support {
 
@@ -60,6 +61,7 @@ namespace support {
     using messages::support::Configuration;
     using messages::support::GlobalConfig;
     using namespace messages::input::gameevents;
+    using utility::support::Expression;
 
     double triangle_wave(double t, double period) {
         auto a = period; // / 2.0;
@@ -75,36 +77,44 @@ namespace support {
     double sine_wave(double t, double period) {
         return std::sin((2.0 * M_PI * t) / period);
     }
-    double absolute_time() {
+    double SoccerSimulator::absolute_time() {
         auto now = NUClear::clock::now();
-        auto ms_since_epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
-        double ms = static_cast<double>(ms_since_epoch - 1393322147502L);
-        double t = ms / 1000.0;
+        auto msSinceStart = std::chrono::duration_cast<std::chrono::microseconds>(now - moduleStartupTime).count();
+        double ms = static_cast<double>(msSinceStart);
+        double t = ms * 1e-6;
         return t;
     }
 
     void SoccerSimulator::updateConfiguration(const Configuration<SoccerSimulatorConfig>& config, const GlobalConfig& globalConfig) {
 
+        moduleStartupTime = NUClear::clock::now();
+
         cfg_.simulate_goal_observations = config["vision"]["goal_observations"].as<bool>();
         cfg_.simulate_ball_observations = config["vision"]["ball_observations"].as<bool>();
+        cfg_.distinguish_own_and_opponent_goals = config["vision"]["distinguish_own_and_opponent_goals"].as<bool>();
 
         cfg_.robot.motion_type = motionTypeFromString(config["robot"]["motion_type"].as<std::string>());
-        cfg_.robot.path.period = config["robot"]["path"]["period"].as<float>();
-        cfg_.robot.path.x_amp = config["robot"]["path"]["x_amp"].as<float>();
-        cfg_.robot.path.y_amp = config["robot"]["path"]["y_amp"].as<float>();
+        cfg_.robot.path.period = config["robot"]["path"]["period"].as<Expression>();
+        cfg_.robot.path.x_amp = config["robot"]["path"]["x_amp"].as<Expression>();
+        cfg_.robot.path.y_amp = config["robot"]["path"]["y_amp"].as<Expression>();
         cfg_.robot.path.type = pathTypeFromString(config["robot"]["path"]["type"].as<std::string>());
 
         cfg_.ball.motion_type = motionTypeFromString(config["ball"]["motion_type"].as<std::string>());
-        cfg_.ball.path.period = config["ball"]["path"]["period"].as<float>();
-        cfg_.ball.path.x_amp = config["ball"]["path"]["x_amp"].as<float>();
-        cfg_.ball.path.y_amp = config["ball"]["path"]["y_amp"].as<float>();
+        cfg_.ball.path.period = config["ball"]["path"]["period"].as<Expression>();
+        cfg_.ball.path.x_amp = config["ball"]["path"]["x_amp"].as<Expression>();
+        cfg_.ball.path.y_amp = config["ball"]["path"]["y_amp"].as<Expression>();
         cfg_.ball.path.type = pathTypeFromString(config["ball"]["path"]["type"].as<std::string>());
 
         world.robotPose = config["initial"]["robot_pose"].as<arma::vec3>();
         world.ball.position = config["initial"]["ball"]["position"].as<arma::vec3>();
-        world.ball.diameter = config["initial"]["ball"]["diameter"].as<float>();
+        world.ball.diameter = config["initial"]["ball"]["diameter"].as<Expression>();
 
         cfg_.blind_robot = config["blind_robot"].as<bool>();
+
+        cfg_.vision_error(0) = config["vision"]["variance"]["r"]["proportional_factor"].as<Expression>();
+        cfg_.vision_error(1) = config["vision"]["variance"]["r"]["min_error"].as<Expression>();
+        cfg_.vision_error(2) = config["vision"]["variance"]["theta"].as<Expression>();
+        cfg_.vision_error(3) = config["vision"]["variance"]["phi"].as<Expression>();
 
         kicking = false;
         PLAYER_ID = globalConfig.playerId;
@@ -115,22 +125,27 @@ namespace support {
     SoccerSimulator::SoccerSimulator(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-
         on<Trigger<FieldDescription>>("FieldDescription Update", [this](const FieldDescription& desc) {
 
             field_description_ = std::make_shared<FieldDescription>(desc);
 
-            arma::vec3 goal_yr = {field_description_->goalpost_yr[0],field_description_->goalpost_yr[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_yr, 1.1));
+            goalPosts.clear();
 
-            arma::vec3 goal_yl = {field_description_->goalpost_yl[0],field_description_->goalpost_yl[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_yl, 1.1));
+            arma::vec3 goal_opp_r = {field_description_->goalpost_opp_r[0],field_description_->goalpost_opp_r[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_opp_r, 1.1, Goal::Side::RIGHT, Goal::Team::OPPONENT));
 
-            arma::vec3 goal_br = {field_description_->goalpost_br[0],field_description_->goalpost_br[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_br, 1.1));
+            arma::vec3 goal_opp_l = {field_description_->goalpost_opp_l[0],field_description_->goalpost_opp_l[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_opp_l, 1.1, Goal::Side::LEFT, Goal::Team::OPPONENT));
 
-            arma::vec3 goal_bl = {field_description_->goalpost_bl[0],field_description_->goalpost_bl[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_bl, 1.1));
+            arma::vec3 goal_own_r = {field_description_->goalpost_own_r[0],field_description_->goalpost_own_r[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_own_r, 1.1, Goal::Side::RIGHT, Goal::Team::OWN));
+
+            arma::vec3 goal_own_l = {field_description_->goalpost_own_l[0],field_description_->goalpost_own_l[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_own_l, 1.1, Goal::Side::LEFT, Goal::Team::OWN));
+
+            for(auto& g : goalPosts){
+                log("goalPost", g.position.t());
+            }
 
         });
 
@@ -172,6 +187,7 @@ namespace support {
                     diff = world.robotPose - oldRobotPose;
                     //Face along direction of movement
                     world.robotPose.angle() = vectorToBearing(diff.xy());
+
                     world.robotVelocity = Transform2D({arma::norm(diff) * SIMULATION_UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
                     break;
 
@@ -217,7 +233,10 @@ namespace support {
                     }
                     break;
             }
-            emit(computeGyro(world.robotPose.angle() - oldRobotPose.angle()));
+
+            // Emit the change in orientation as a DarwinSensors::Gyroscope,
+            // to be handled by HardwareSimulator.
+            emit(computeGyro(world.robotPose.angle(), oldRobotPose.angle()));
         });
 
         // Simulate Vision
@@ -236,27 +255,29 @@ namespace support {
 
             if (cfg_.simulate_goal_observations) {
                 auto goals = std::make_unique<std::vector<messages::vision::Goal>>();
-                if(cfg_.blind_robot){
+                if (cfg_.blind_robot) {
                     emit(std::move(goals));
                     return;
                 }
 
+                // for (auto& g : goalPosts) {
+                for (auto g : goalPosts) {
+                    if (cfg_.distinguish_own_and_opponent_goals) {
+                        g.team = Goal::Team::UNKNOWN;
+                    }
 
-                for (auto& g : goalPosts){
-                    auto m = g.detect(camParams, world.robotPose, sensors);
+                    // Detect the goal:
+                    auto m = g.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
 
                     if (!m.measurements.empty()) {
-
                         goals->push_back(m);
-
                     }
                 }
-
-
 
                 // Assign leftness and rightness to goals
                 if (goals->size() == 2) {
                     if (goals->at(0).quad.getCentre()(0) < goals->at(1).quad.getCentre()(0)) {
+
                         goals->at(0).side = messages::vision::Goal::Side::LEFT;
                         goals->at(1).side = messages::vision::Goal::Side::RIGHT;
                     } else {
@@ -287,7 +308,7 @@ namespace support {
                     return;
                 }
 
-                auto ball = world.ball.detect(camParams, world.robotPose, sensors);
+                auto ball = world.ball.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
 
                 if (!ball.measurements.empty()) {
 
@@ -336,7 +357,9 @@ namespace support {
         });
     }
 
-    std::unique_ptr<DarwinSensors::Gyroscope> SoccerSimulator::computeGyro(float dHeading){
+    std::unique_ptr<DarwinSensors::Gyroscope> SoccerSimulator::computeGyro(float heading, float oldHeading){
+        float dHeading = utility::math::angle::difference(heading, oldHeading);
+
         auto g = std::make_unique<DarwinSensors::Gyroscope>();
         g->x = 0;
         g->y = 0;
