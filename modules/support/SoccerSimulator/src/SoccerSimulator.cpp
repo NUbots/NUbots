@@ -261,15 +261,15 @@ namespace support {
                 }
 
                 // for (auto& g : goalPosts) {
-                for (auto g : goalPosts) { // Copy the goalpost so that any changes are temporary
-                    if (!cfg_.distinguish_own_and_opponent_goals) {
-                        g.team = Goal::Team::UNKNOWN;
-                    }
+                for (auto& g : goalPosts) {
 
                     // Detect the goal:
                     auto m = g.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
 
                     if (!m.measurements.empty()) {
+                        if (!cfg_.distinguish_own_and_opponent_goals) {
+                            m.team = messages::vision::Goal::Team::UNKNOWN;
+                        }
                         goals->push_back(m);
                     }
                 }

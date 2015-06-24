@@ -40,9 +40,9 @@ ball:
 
 # Initial pose of the robot, mainly for MOTION type
 initial:
-  robot_pose: [0, 0, 0]
+  robot_pose: [0, 0, 3.14]
   ball:
-    position: [2,-1, 0]
+    position: [-4.5,0, 0]
     diameter: 0.1
 
 # Turns off vision but leaves localisation running with no observations.

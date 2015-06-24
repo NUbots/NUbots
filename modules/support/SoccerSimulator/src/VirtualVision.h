@@ -63,7 +63,7 @@ namespace support {
 		std::vector<messages::vision::VisionObject::Measurement> measurements;
         if(std::fabs(screenAngular[0]) < camParams.FOV[0] / 2 && std::fabs(screenAngular[1]) < camParams.FOV[1] / 2){
         	measurements.push_back(measurement);
-        	measurements.push_back(measurement); // TODO: Fix the need for double measurements.
+        	//measurements.push_back(measurement); // TODO: Fix the need for double measurements.
         }
 
         VisibleMeasurement visibleMeas = {

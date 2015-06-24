@@ -52,6 +52,9 @@ namespace darwin {
             Vec3Noise gyroscope;
         } noise;
         arma::vec3 integrated_gyroscope;
+        void setRightFootDown();
+        void setLeftFootDown();
+        void setBothFeetDown();
     public:
         /// @brief called by a Powerplant to construct this reactor
         explicit HardwareSimulator(std::unique_ptr<NUClear::Environment> environment);
