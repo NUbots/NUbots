@@ -23,15 +23,28 @@ using messages::input::Sensors;
 using messages::input::LimbID;
 using messages::input::ServoID;
 using utility::math::matrix::Transform3D;
-
+using messages::support::Configuration;
 
 namespace modules{
 namespace motion{
 
+	void KickBalancer::configure(const Configuration<IKKickConfig>& config){
+		motion_gain = config["motion_gain"].as<float>();
+	    standHeight = config["balancer"]["stand_height"].as<float>();
+	}
+
+	void FootLifter::configure(const Configuration<IKKickConfig>& config){
+        liftFootHeight = config["lifter"]["lift_foot_beight"].as<float>();
+        liftFootBack = config["lifter"]["lift_foot_back"].as<float>();
+	}
+
+	void Kicker::configure(const Configuration<IKKickConfig>& config){
+
+	}
+
 	Transform3D KickBalancer::getFootPose(const Sensors& sensors, float deltaT){
 		    // Get our foot positions
-			float standHeight = 0.18;
-			float torsoShiftVelocity = 0.01;
+
             Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
             Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
 
@@ -71,7 +84,7 @@ namespace motion{
             // torsoShiftVelocity [m/s] is the configurable velocity that the torso should move at
             // Net displacement of torso each 1/UPDATE_FREQUENCY seconds
             // ((P1-P0))*velocity*(1/UPDATE_FREQUENCY)
-            auto torsoDisplacement = (torsoShiftVelocity * deltaT) * normalTorsoDirection;
+            auto torsoDisplacement = (motion_gain * deltaT) * normalTorsoDirection;
 
             // New position to give to inverse kinematics in support foot coordinates
             auto torsoNewPosition = torsoPosition + torsoDisplacement;

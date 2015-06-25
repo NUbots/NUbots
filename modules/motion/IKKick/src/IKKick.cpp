@@ -80,20 +80,18 @@ namespace motion {
         : Reactor(std::move(environment))
         , id(size_t(this) * size_t(this) - size_t(this)) {
 
-        on<Trigger<Configuration<IKKick>>>([this] (const Configuration<IKKick>& config){
+        on<Trigger<Configuration<IKKickConfig>>>([this] (const Configuration<IKKickConfig>& config){
+            balancer.configure(config);
+            lifter.configure(config);
+            kicker.configure(config);
+
             KICK_PRIORITY = config["kick_priority"].as<float>();
             EXECUTION_PRIORITY = config["execution_priority"].as<float>();
-            torsoShiftVelocity = config["torsoShiftVelocity"].as<float>();
-            kickVelocity = config["kickVelocity"].as<float>();
-            standHeight = config["standHeight"].as<float>();
-            liftFootHeight = config["liftFootHeight"].as<float>();
-            liftFootBack = config["liftFootBack"].as<float>();
 
             emit(std::make_unique<KickCommand>(
                 config["target"].as<arma::vec3>(),
                 config["direction"].as<arma::vec3>()
             ));
-            log("Config");
         });
 
         on<Trigger<KickCommand>>([this] (const KickCommand&) {

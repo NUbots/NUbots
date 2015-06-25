@@ -46,12 +46,6 @@ namespace motion {
 
     	float KICK_PRIORITY;
     	float EXECUTION_PRIORITY;
-        float torsoShiftVelocity;
-        float kickVelocity;
-        float standHeight;
-        float liftFootHeight;
-        float liftFootBack;
-        //float displacementTolerance;
 
         KickBalancer balancer;
         FootLifter lifter;

@@ -24,6 +24,7 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "messages/input/Sensors.h"
 #include "messages/input/LimbID.h"
+#include "messages/support/Configuration.h"
 #include "messages/input/ServoID.h"
 #include <armadillo>
 
@@ -37,12 +38,19 @@ namespace motion{
 			FINISHED = 3
 		};
 
+		
+        struct IKKickConfig{
+            static constexpr const char* CONFIGURATION_PATH = "IKKick.yaml";
+        };
+
+
 		class SixDOFMotionController{
-			private:
+			protected:
 				MotionStage stage;
 				bool stable;
+
+				float motion_gain = 0.1;
 			public:
-				
 				void start(){
 					if(stage != MotionStage::FINISHED){
 						stage = MotionStage::RUNNING;
@@ -56,21 +64,33 @@ namespace motion{
 				void reset()		{stage = MotionStage::READY;}
 
 				virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT) = 0;
+
+				virtual void configure(const messages::support::Configuration<IKKickConfig>& config) = 0;
 		};
 
 		class KickBalancer : public SixDOFMotionController{
-				public:
-					virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);
+		private:
+			float standHeight = 0.18;
+		public:
+			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);
+			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 		};
 
 		class FootLifter : public SixDOFMotionController{
-				public:
-					virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);
+		private:
+			float liftFootHeight = 0.05;
+			float liftFootBack = 0.01;
+		public:
+			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);
+			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 		};
 
 		class Kicker : public SixDOFMotionController{
-				public:
-					virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);	
+		private:
+
+		public:
+			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);	
+			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 		};
 
 	}
