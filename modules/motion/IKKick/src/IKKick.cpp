@@ -114,8 +114,11 @@ namespace motion {
             // homogeneous transforms with the coordinates in torso space. 1 for a point and 0 for a vector.
 
             //TODO: talk to jake about why this is wrong
-            ballPosition = leftFoot.i() * arma::join_cols(command.target, arma::vec({1}));
-            goalPosition = leftFoot.i() * arma::join_cols(command.direction, arma::vec({0}));
+            arma::vec4 ballPosition4 = leftFoot.i() * arma::join_cols(command.target, arma::vec({1}));
+            arma::vec4 goalPosition4 = leftFoot.i() * arma::join_cols(command.direction, arma::vec({0}));
+            
+            ballPosition = ballPosition4.rows(0,2);
+            goalPosition = goalPosition4.rows(0,2);
 
 
             log("Got a new kick!");
@@ -130,6 +133,12 @@ namespace motion {
 
             updatePriority(EXECUTION_PRIORITY);
 
+            if(ballPosition[1] > 0){
+                supportFoot = LimbID::RIGHT_LEG;
+            }else{
+                supportFoot = LimbID::LEFT_LEG;
+            }
+
             balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
             lifter.setKickParameters(supportFoot, ballPosition, goalPosition);
             kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
@@ -141,17 +150,17 @@ namespace motion {
 
             //Setup kick variables
             float deltaT = 1 / float(UPDATE_FREQUENCY);
-            LimbID kickLegID = LimbID::RIGHT_LEG;
-            LimbID supportLegID;
-            if(kickLegID == LimbID::RIGHT_LEG){
-                supportLegID = LimbID::LEFT_LEG;  
+
+            LimbID kickFoot;
+            if(supportFoot == LimbID::RIGHT_LEG){
+                kickFoot = LimbID::LEFT_LEG;  
             } else {
-                supportLegID = LimbID::RIGHT_LEG;
+                kickFoot = LimbID::RIGHT_LEG;
             }
 
             float footSeparation = 0.1;
 
-            int negativeIfKickRight = kickLegID == LimbID::RIGHT_LEG ? -1 : 1;
+            int negativeIfKickRight = kickFoot == LimbID::RIGHT_LEG ? -1 : 1;
 
             //State checker
             if(balancer.isStable()){
@@ -194,8 +203,8 @@ namespace motion {
             float torque = 100;
             
             std::vector<std::pair<messages::input::ServoID, float>> joints;
-            auto kickJoints = calculateLegJoints<DarwinModel>(kickFootGoal, kickLegID);
-            auto supportJoints = calculateLegJoints<DarwinModel>(supportFootGoal, supportLegID);
+            auto kickJoints = calculateLegJoints<DarwinModel>(kickFootGoal, kickFoot);
+            auto supportJoints = calculateLegJoints<DarwinModel>(supportFootGoal, supportFoot);
             joints.insert(joints.end(),kickJoints.begin(),kickJoints.end());
             joints.insert(joints.end(),supportJoints.begin(),supportJoints.end());
 
