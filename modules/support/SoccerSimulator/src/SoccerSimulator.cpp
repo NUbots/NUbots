@@ -92,6 +92,7 @@ namespace support {
         cfg_.simulate_goal_observations = config["vision"]["goal_observations"].as<bool>();
         cfg_.simulate_ball_observations = config["vision"]["ball_observations"].as<bool>();
         cfg_.distinguish_own_and_opponent_goals = config["vision"]["distinguish_own_and_opponent_goals"].as<bool>();
+        cfg_.distinguish_left_and_right_goals = config["vision"]["distinguish_own_and_opponent_goals"].as<bool>();
 
         cfg_.robot.motion_type = motionTypeFromString(config["robot"]["motion_type"].as<std::string>());
         cfg_.robot.path.period = config["robot"]["path"]["period"].as<Expression>();
@@ -267,7 +268,7 @@ namespace support {
                     return;
                 }
 
-                // for (auto& g : goalPosts) {
+               
                 for (auto& g : goalPosts) {
 
                     // Detect the goal:
@@ -280,6 +281,11 @@ namespace support {
                         goals->push_back(m);
                     }
                 }
+
+                if(!cfg_.distinguish_left_and_right_goals){
+                    setGoalLeftRightKnowledge(*goals);
+                }
+
 
                 emit(std::move(goals));
 
@@ -381,6 +387,34 @@ namespace support {
                 throw std::runtime_error(str.str());
         }
         return arma::vec2({wave1,wave2});
+    }
+
+    void SoccerSimulator::setGoalLeftRightKnowledge(std::vector<messages::vision::Goal>& goals){
+        // for (auto& g : goalPosts) {
+        int leftGoals = 0;
+        int rightGoals = 0;
+        int unknownGoals = 0;
+        for (auto& g : goals) {
+            //Count sides
+            if(g.side == Goal::Side::LEFT){
+                leftGoals++;
+            } else if(g.side == Goal::Side::RIGHT){
+                rightGoals++;
+            } else {
+                unknownGoals++;
+            }
+        }
+
+        int totalGoals = leftGoals + rightGoals + unknownGoals;
+
+        //we need to check if more or less than two goals are visible, or if the two visible goals are not a left-right pair,
+        // and remove left-right labels if so
+        if(totalGoals != 2 || leftGoals != 1 || rightGoals != 1){
+            for (auto& g : goals){
+                g.side = Goal::Side::UNKNOWN;
+                log("goals unkown = ", goals.size());
+            }
+        }
     }
 
 }
