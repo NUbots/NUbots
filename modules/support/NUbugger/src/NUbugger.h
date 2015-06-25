@@ -43,6 +43,11 @@ namespace modules {
             uint pubPort = 0;
             uint subPort = 0;
 
+            NUClear::clock::duration max_image_duration;
+            NUClear::clock::time_point last_image = NUClear::clock::now();
+            NUClear::clock::duration max_classified_image_duration;
+            NUClear::clock::time_point last_classified_image = NUClear::clock::now();
+
             bool listening = true;
 
             // Reaction Handles
@@ -61,6 +66,7 @@ namespace modules {
 
             std::mutex networkMutex;
             std::mutex fileMutex;
+
 
             void provideOverview();
             void provideDataPoints();

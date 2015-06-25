@@ -43,6 +43,7 @@ namespace support {
     using messages::vision::Colour;
 
     using utility::time::getUtcTimestamp;
+    using utility::time::durationFromSeconds;
 
     NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -52,6 +53,9 @@ namespace support {
         powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&NUbugger::run), this), std::bind(std::mem_fn(&NUbugger::kill), this)));
 
         on<Trigger<Configuration<NUbugger>>>([this] (const Configuration<NUbugger>& config) {
+
+            max_image_duration = durationFromSeconds(1.0 / config["output"]["network"]["max_image_fps"].as<double>());
+            max_classified_image_duration = durationFromSeconds(1.0 / config["output"]["network"]["max_classified_image_fps"].as<double>());
 
             // TODO if network disables then we should unbind
 
