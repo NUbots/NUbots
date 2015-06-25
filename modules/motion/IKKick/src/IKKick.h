@@ -30,14 +30,14 @@ namespace motion {
 
     private:
 
-        enum State {
-            BALANCE,
-            KICK,
-            RETURN,
-            STAND
-        };
-
-        State state;
+        // ID of support foot
+        messages::input::LimbID supportFoot;
+        // NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick foot which is rightFootFront
+        // KickPlanner has to add the radius of the all to get the location of the centre of the ball
+        // point position of ball
+        arma::vec3 ballPosition;
+        // direction we want to kick the ball
+        arma::vec3 goalPosition;
 
         /// Subsumption ID key to access motors
         const size_t id;
@@ -58,7 +58,6 @@ namespace motion {
         ReactionHandle updater;
 
     public:
-        static constexpr const char* CONFIGURATION_PATH = "IKKick.yaml";
         /// @brief Called by the powerplant to build and setup the IKKick reactor.
         explicit IKKick(std::unique_ptr<NUClear::Environment> environment);
     };

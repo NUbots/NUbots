@@ -58,22 +58,6 @@ namespace motion {
     struct ExecuteKick{};
     struct FinishKick{};
 
-    struct KickVector{
-        // ID of support foot
-        LimbID supportFoot;
-        // NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick foot which is rightFootFront
-        // KickPlanner has to add the radius of the all to get the location of the centre of the ball
-        // point position of ball
-        arma::vec3 ballPosition;
-        // direction we want to kick the ball
-        arma::vec3 goalDirection;
-
-        KickVector(const LimbID& supportFoot, const arma::vec3& ballPosition, const arma::vec3& goalDirection)
-        : supportFoot(supportFoot)
-        , ballPosition(ballPosition)
-        , goalDirection(goalDirection) {} 
-    };
-
     bool doThings = false;
 
     IKKick::IKKick(std::unique_ptr<NUClear::Environment> environment)
@@ -110,7 +94,6 @@ namespace motion {
 
         on<Trigger<ExecuteKick>, With<KickCommand>, With<Sensors>>([this] (const ExecuteKick&, const KickCommand& command, const Sensors& sensors) {
 
-            log("aajfoaigiojaga");
             // TODO Work out which of our feet are going to be the support foot
             // TODO store the support foot
             // Assume leftFoot is support
@@ -129,31 +112,32 @@ namespace motion {
 
             // Convert the direction vector and position of the ball into left foot coordinates by multiplying the inverse of the
             // homogeneous transforms with the coordinates in torso space. 1 for a point and 0 for a vector.
-            arma::vec4 ballPosition = leftFoot.i() * arma::join_cols(command.target, arma::vec({1}));
-            arma::vec4 goalDirection = leftFoot.i() * arma::join_cols(command.direction, arma::vec({0}));
 
-            emit(std::make_unique<KickVector>(
-                LimbID::LEFT_LEG,
-                ballPosition.rows(0,2),
-                goalDirection.rows(0,2)
-            ));
+            //TODO: talk to jake about why this is wrong
+            ballPosition = leftFoot.i() * arma::join_cols(command.target, arma::vec({1}));
+            goalPosition = leftFoot.i() * arma::join_cols(command.direction, arma::vec({0}));
+
 
             log("Got a new kick!");
             // Should this be kickcommand.target
             log("Target:", "x:", command.target[0], "y:", command.target[1], "z:", command.target[2]);
             log("Direction:", "x:", command.direction[0], "y:", command.direction[1], "z:", command.direction[2]);
             log("Ball Position in support foot coordinates:", "x:", ballPosition[0], "y:", ballPosition[1], "z:", ballPosition[2]);
-            log("Goal Direction in support foot coordinates:", "x:", goalDirection[0], "y:", goalDirection[1], "z:", goalDirection[2]);
+            log("Goal Direction in support foot coordinates:", "x:", goalPosition[0], "y:", goalPosition[1], "z:", goalPosition[2]);
 
             // Enable our kick pather
             updater.enable();
 
             updatePriority(EXECUTION_PRIORITY);
 
+            balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
+            lifter.setKickParameters(supportFoot, ballPosition, goalPosition);
+            kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
+            
             balancer.start();
         });
 
-        updater = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, With<KickVector>, Options<Single>>([this](const time_t&, const Sensors& sensors, const KickVector& kickVector) {
+        updater = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, Options<Single>>([this](const time_t&, const Sensors& sensors) {
 
             //Setup kick variables
             float deltaT = 1 / float(UPDATE_FREQUENCY);

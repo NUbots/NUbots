@@ -38,7 +38,7 @@ namespace motion{
 			FINISHED = 3
 		};
 
-		
+
         struct IKKickConfig{
             static constexpr const char* CONFIGURATION_PATH = "IKKick.yaml";
         };
@@ -50,6 +50,9 @@ namespace motion{
 				bool stable;
 
 				float motion_gain = 0.1;
+				messages::input::LimbID supportFoot;
+				arma::vec3 ballPosition;
+				arma::vec3 goalPosition;
 			public:
 				void start(){
 					if(stage != MotionStage::FINISHED){
@@ -62,6 +65,13 @@ namespace motion{
 				bool isStable()		{return stable;}
 				bool isFinished()   {return stage == MotionStage::FINISHED;}
 				void reset()		{stage = MotionStage::READY;}
+
+
+				void setKickParameters(messages::input::LimbID supportFoot_, arma::vec3 ballPosition_, arma::vec3 goalPosition_){
+					supportFoot = supportFoot_;
+					ballPosition = ballPosition_;
+					goalPosition = goalPosition_;
+				}
 
 				virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT) = 0;
 
@@ -86,8 +96,7 @@ namespace motion{
 		};
 
 		class Kicker : public SixDOFMotionController{
-		private:
-
+		// private:
 		public:
 			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);	
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
