@@ -143,9 +143,10 @@ namespace support {
             arma::vec3 goal_own_l = {field_description_->goalpost_own_l[0],field_description_->goalpost_own_l[1],0};
             goalPosts.push_back(VirtualGoalPost(goal_own_l, 1.1, Goal::Side::LEFT, Goal::Team::OWN));
 
-            for(auto& g : goalPosts){
-                log("goalPost", g.position.t());
-            }
+            //DEBUG
+            // for(auto& g : goalPosts){
+            //     log("goalPost", g.position.t());
+            // }
 
         });
 

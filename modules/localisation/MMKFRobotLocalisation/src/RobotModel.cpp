@@ -118,10 +118,7 @@ namespace robot {
         const arma::vec::fixed<RobotModel::size>& state) {
 
         // TODO: Clip robot's state to the field.
-
-        auto state2 = state;
-        state2.rows(kVX,kVY) = arma::vec2({0,0});
-        return state2;
+        return state;
     }
 
     arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise(){
