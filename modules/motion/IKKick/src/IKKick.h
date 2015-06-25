@@ -21,6 +21,7 @@
 #define MODULES_MOTION_IKKICK_H
 
 #include <nuclear>
+#include "IKKickControllers.h"
 
 namespace modules {
 namespace motion {
@@ -52,9 +53,11 @@ namespace motion {
         float liftFootBack;
         //float displacementTolerance;
 
+        KickBalancer balancer;
+        FootLifter lifter;
+        Kicker kicker;
+
     	void updatePriority(const float& priority);
-//        Transform3D balance(Transform3D leftFoot, Transform3D rightFoot);
-//        std::unique_ptr<std::vector<ServoCommand>> motionLegs(Transform3D leftFootNewPose, Transform3D rightFootNewPose);
 
     	static constexpr size_t UPDATE_FREQUENCY = 90;
 

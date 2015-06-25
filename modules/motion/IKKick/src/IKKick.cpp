@@ -151,140 +151,71 @@ namespace motion {
             updater.enable();
 
             updatePriority(EXECUTION_PRIORITY);
+
+            balancer.start();
         });
 
         updater = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, With<KickVector>, Options<Single>>([this](const time_t&, const Sensors& sensors, const KickVector& kickVector) {
 
-            //PSEUODCODE
-            //State checker
-/*
-            if(balancer.isEnabled()){
-                
-                if(balancer.isBalanced() && !footLifter.isEnabled() && kicker.hasKicked()){
-                    
-                    footLifter.start();
-
-                } else if(footLifter.isLifted() && !kicker.isEnabled()){
-                    kicker.start();
-                }
-
-                if(kicker.hasKicked()){
-                    footLifter.stop();
-                }
-
-                if(footLifter.done()){
-                    balancer.stop();
-                }
-
-            }else{
-                balancer.start()
-            }
-
-            //Do things based on current state
-            
-            if(balancer.isEnabled()){
-                support.kickfoot = balancer.getFootPose();
-            }
-            if(kickLifter.isEnabled()){
-                kickfoot += kickLifter.getFootPose();
-            }
-            if(kicker.isEnabled()){
-                kickfoot += kicker.getFootPose();
-            }
-
-            emit(ServoWaypoints(InverseKinematics(support,kickfoot))); //look up in walk engine
-*/
-            // TODO use states
-
-            // Get our foot positions
-
-//START BALANCER
-            Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
-            Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
-
-//            Transform3D IKKick::balance(Transform3D leftFoot, Transform3D rightFoot) {
-            // Moving the torso to balance on support foot before kick
-
-            // Obtain the position of the torso and the direction in which the torso needs to move
-            
-                // The position that the torso needs to move to in support foot coordinates
-            auto torsoTarget = arma::vec({0, 0, standHeight}); 
-
-                // Find position vector from support foot to torso in support foot coordinates.
-            auto torsoPosition = leftFoot.i().translation();
-           
-                // Find the direction in which we want to shift the torso in support foot coordinates
-            auto torsoDirection = torsoTarget - torsoPosition;
-           
-                // Normalise the direction
-            auto normalTorsoDirection = arma::normalise(torsoDirection);
-
-/*
-            // Finds out when the torso is within tolerance of the target
-            //TODO define displacementTolerance
-            
-            if (arma::abs(torsoTarget - torsoPosition) <= std::abs(torsoShiftVelocity/UPDATE_FREQUENCY)) {    
-                if (arma::abs(torsoTarget - torsoPosition <= diplacementTolerance) {
-                    //TODO Run Kick!
-                    state = State::BALANCE
-                } else {
-                    auto torsoDisplacement = ((torsoShiftVelocity/UPDATE_FREQUENCY)/2)*normalTorsoDirection;
-                }
+            //Setup kick variables
+            float deltaT = 1 / float(UPDATE_FREQUENCY);
+            LimbID kickLegID = LimbID::RIGHT_LEG;
+            LimbID supportLegID;
+            if(kickLegID == LimbID::RIGHT_LEG){
+                supportLegID = LimbID::LEFT_LEG;  
             } else {
-                auto torsoDisplacement = (torsoShiftVelocity/UPDATE_FREQUENCY)*normalTorsoDirection;
+                supportLegID = LimbID::RIGHT_LEG;
             }
-*/
 
-            // torsoShiftVelocity [m/s] is the configurable velocity that the torso should move at
-            // Net displacement of torso each 1/UPDATE_FREQUENCY seconds
-            // ((P1-P0))*velocity*(1/UPDATE_FREQUENCY)
-            auto torsoDisplacement = (torsoShiftVelocity/UPDATE_FREQUENCY)*normalTorsoDirection;
+            float footSeparation = 0.1;
 
-            // New position to give to inverse kinematics in support foot coordinates
-            auto torsoNewPosition = torsoPosition + torsoDisplacement;
+            int negativeIfKickRight = kickLegID == LimbID::RIGHT_LEG ? -1 : 1;
 
-            Transform3D supportFootNewPose = leftFoot;            
-            // Proof of Line Below
-            // auto supportFootNewPose = leftFoot - arma::join_cols(arma::zeros(4,3), arma::join_cols(-1*torsoDisplacement, arma::vec({0})).t());        
-            // = {deltaRotation, deltaTranslation; 0, 1}
-            // = {0, torsoPosition + torsoDisplacement; 0, 1}
+            //State checker
+            if(balancer.isStable()){
+                lifter.start();
+            }
 
-            // Put new position of the left foot to the torso in left foot coordinates into the transform matrix
-            supportFootNewPose.col(3) = arma::join_cols(torsoNewPosition, arma::vec({1}));  
-         
-            // TODO Need a way around this.
-            Transform3D leftFootNewPose = supportFootNewPose;
-            Transform3D rightFootNewPose = rightFoot;
+            if(lifter.isStable()){
+                kicker.start();
+            }
 
-/*
-// TODO CHECK THIS!!!!!! Don't need to convert DELETE THIS
-            // Convert the new torso position into torso coordinates
-            auto torsoNewPositionTorso = leftFoot*(arma::join_cols(torsoNewPosition, arma::vec({0})).t());
-            // Find support foot position relative to the torso
-            auto supportFootPosition = leftFoot.translation();
-            // Moving torso is equivalent to moving foot in the opposite direction
-            // New support foot position
-            auto supportFootNewPosition = supportFootPosition - torsoNewPositionTorso;
-            //HAVE TO CONVERT BACK TO SUPPORT FOOT COORDINATES TO PUT IN MATRIX
-            // TODO give position to inverse kinematics
-            // Puts together matrix to give to inverse kinematics
-            auto supportFootNewPose = leftFoot;
-            auto supportFootNewPose.col(3)= (arma::join_cols(supportFootNewPosition, arma::vec({1}))).t();
-            auto kickFootNewPose = rightFoot;
-*/
-            //}
+            if(kicker.isFinished()){
+                lifter.stop();
+            }
 
+            if(lifter.isFinished()){
+                balancer.stop();
+            }
+            
+            //Do things based on current state
 
-            // Lifted from WalkEngine::motionLegs()
-            // Move torso to target
-            //std::unique_ptr<std::vector<ServoCommand>> IKKick::motionLegs(Transform3D leftFootNewPose, Transform3D rightFootNewPose) {
-          
-            // Lifted from WalkEngine::updateStep()
-            // Calculate leg joints
+            Transform3D kickFootGoal;
+            Transform3D supportFootGoal;
+            
+            if(balancer.isRunning()){
+                kickFootGoal =  balancer.getFootPose(sensors, deltaT).translate(arma::vec3({0, negativeIfKickRight * footSeparation, 0}));
+                supportFootGoal = balancer.getFootPose(sensors, deltaT);
+            }
+            if(lifter.isRunning()){
+                //TODO: CHECK ORDER
+                kickFootGoal *= lifter.getFootPose(sensors, deltaT);
+            }
+            if(kicker.isRunning()){
+                //TODO: CHECK ORDER
+                kickFootGoal *= kicker.getFootPose(sensors, deltaT);
+            }
 
-            float gainLegs = 80;
+            //Calculate IK and send waypoints
+
+            float gainLegs = 30;
             float torque = 100;
-            auto joints = calculateLegJoints<DarwinModel>(supportFootNewPose, rightFoot);
+            
+            std::vector<std::pair<messages::input::ServoID, float>> joints;
+            auto kickJoints = calculateLegJoints<DarwinModel>(kickFootGoal, kickLegID);
+            auto supportJoints = calculateLegJoints<DarwinModel>(supportFootGoal, supportLegID);
+            joints.insert(joints.end(),kickJoints.begin(),kickJoints.end());
+            joints.insert(joints.end(),supportJoints.begin(),supportJoints.end());
 
             auto waypoints = std::make_unique<std::vector<ServoCommand>>();
             waypoints->reserve(16);
@@ -295,10 +226,8 @@ namespace motion {
                 waypoints->push_back({ id, time, joint.first, joint.second, gainLegs, torque});
             }
 
-            //return std::move(waypoints);
-            //}
-
             emit(std::move(waypoints));
+
 
 //END BALANCER
 /*
