@@ -29,17 +29,18 @@ namespace modules{
 namespace motion{
 
 	void KickBalancer::configure(const Configuration<IKKickConfig>& config){
-		motion_gain = config["motion_gain"].as<float>();
-	    standHeight = config["balancer"]["stand_height"].as<float>();
+		motion_gain = config["balancer"]["motion_gain"].as<float>();
+	    stand_height = config["balancer"]["stand_height"].as<float>();
 	}
 
 	void FootLifter::configure(const Configuration<IKKickConfig>& config){
-        liftFootHeight = config["lifter"]["lift_foot_beight"].as<float>();
-        liftFootBack = config["lifter"]["lift_foot_back"].as<float>();
+		motion_gain = config["lifter"]["motion_gain"].as<float>();
+        lift_foot_height = config["lifter"]["lift_foot_height"].as<float>();
+        lift_foot_back = config["lifter"]["lift_foot_back"].as<float>();
 	}
 
 	void Kicker::configure(const Configuration<IKKickConfig>& config){
-
+		motion_gain = config["kicker"]["motion_gain"].as<float>();
 	}
 
 	Transform3D KickBalancer::getFootPose(const Sensors& sensors, float deltaT){
@@ -54,7 +55,7 @@ namespace motion{
             // Obtain the position of the torso and the direction in which the torso needs to move
             
                 // The position that the torso needs to move to in support foot coordinates
-            auto torsoTarget = arma::vec({0, 0, standHeight}); 
+            auto torsoTarget = arma::vec({0, 0, stand_height}); 
 
                 // Find position vector from support foot to torso in support foot coordinates.
             auto torsoPosition = leftFoot.i().translation();

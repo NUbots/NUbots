@@ -4,8 +4,14 @@ execution_priority: 40
 target: [1, 1, 1]
 direction: [2, 2, 2]
 
-torsoShiftVelocity: 0.0333
-kickVelocity: 0.0333
-standHeight: 0.180
-liftFootHeight: 0.05
-liftFootBack: 0
+balancer:
+  motion_gain: 0.1
+  stand_height: 0.18
+
+lifter:
+  motion_gain: 0.1
+  lift_foot_height: 0.05
+  lift_foot_back: 0.01
+
+kicker:
+  motion_gain: 0.1

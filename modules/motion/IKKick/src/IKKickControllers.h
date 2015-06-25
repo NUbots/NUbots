@@ -70,7 +70,7 @@ namespace motion{
 
 		class KickBalancer : public SixDOFMotionController{
 		private:
-			float standHeight = 0.18;
+			float stand_height = 0.18;
 		public:
 			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
@@ -78,8 +78,8 @@ namespace motion{
 
 		class FootLifter : public SixDOFMotionController{
 		private:
-			float liftFootHeight = 0.05;
-			float liftFootBack = 0.01;
+			float lift_foot_height = 0.05;
+			float lift_foot_back = 0.01;
 		public:
 			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
