@@ -10,10 +10,12 @@ ADD_CUSTOM_TARGET(send
 SET_PROPERTY(TARGET send PROPERTY FOLDER "ALL_BUILD/")
 
 # Ninja code!
-FOREACH(robot 1 2 3 4 5 6 7)
+FOREACH(robot 0 1 2 3 4 5 6 7)
     FOREACH(config "" u o n i)
         FOREACH(ethernet "" e)
-            IF("${ethernet}" STREQUAL "e")
+            IF("${robot}" STREQUAL "0")
+                SET(address "10.1.0.1")
+            ELSEIF("${ethernet}" STREQUAL "e")
                 SET(address "10.1.2.${robot}")
             ELSE()
                 SET(address "10.1.1.${robot}")
