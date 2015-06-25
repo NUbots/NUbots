@@ -42,10 +42,6 @@ namespace messages {
             , direction(direction) {}
         };
 
-        struct IKKickConfig{
-            static constexpr const char* CONFIGURATION_PATH = "IKKick.yaml";
-        };
-
 
         struct KickPlannerConfig{
             float MAX_BALL_DISTANCE;
