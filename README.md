@@ -3,20 +3,49 @@ NUbots Codebase
 Vagrant
 --------
 
-Code compilation is generally faster with vagrant than with docker. To set up vagrant and simulator
+
+1. Install the following prerequisites on your machine (packages/installers are available for Windows, OSX, and Linux):
+	* [Git][]
+	* [Virtualbox][]
+	* [Vagrant][]
+	
+	e.g. Linux: Installation should be done via the apt-get repositories. Open a console with `Ctrl+Alt+T` and type:
+
+		$ sudo apt-get install git
+		$ sudo apt-get install virtualbox
+		$ sudo apt-get install vagrant
+
+	Windows and OSX installation can be done with installers from the program sites above.
+
+
+2. Clone this git repository onto your machine. First, open a terminal. In Ubuntu, the default shortcut is `Ctrl+Alt+T`. In Windows you will need to open a Git Bash terminal (this is installed when you install Git; search for Git Bash in the Start Menu). (Todo: Terminal in OSX). Then enter the following:
+
+		$ git clone git@github.com:nubots/NUbots.git ~/NUbots
+		
+	**Note** We recommend [Sublime Text 3][] for editing the code. The file 'NUbots.sublime-project' can be opened with Sublime ('Project -> Open Project...', then browse to your NUbots repository). This provides a shortcut to compiling the code from sublime with `Ctrl+B`, but don't try this until you have finished the instructions in this readme. Installers for Windows/OSX can be found on the Sublime site, while ubuntu users will need to use an installer from the command line:
+		
+		$ sudo add-apt-repository ppa:webupd8team/sublime-text-3
+		$ sudo apt-get update
+		$ sudo apt-get install sublime-text-installer
+
+3. Create vagrant machine
+	
+	$ vagrant up
+	
+4. To set up vagrant and simulator
 
 	$ vagrant ssh
 	$ cd nubots/NUbots/build
 	$ cmake .. -G Ninja
 	$ ninja
 
-If quex permission error occurs run
+4. If quex permission error occurs run
 
 	$ chmod +x /usr/local/bin/quex
 	$ quex
 	$ ninja
 
-Open a second terminal, go to NUsight and run
+5. Open a second terminal, go to NUsight (after cloning) and run
 
 	$ node app
 
@@ -29,7 +58,7 @@ go back to the first terminal and run
 
 	$ nano config/NUbugger.yaml
 
-Select which data is to be sent to NUsight (Usually just localization and sensors)
+6. Select which data is to be sent to NUsight (Usually just localization and sensors)
 
 	$ bin/soccersimulator
 	
