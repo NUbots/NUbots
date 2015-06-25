@@ -1,10 +1,58 @@
 NUbots Codebase
 ==========================
+Vagrant
+--------
+
+Code compilation is generally faster with vagrant than with docker. To set up vagrant and simulator
+
+	$ vagrant ssh
+	$ cd nubots/NUbots/build
+	$ cmake .. -G Ninja
+	$ ninja
+
+If quex permission error occurs run
+
+	$ chmod +x /usr/local/bin/quex
+	$ quex
+	$ ninja
+
+Open a second terminal, go to NUsight and run
+
+	$ node app
+
+then in internet browser go to 
+
+localhost:9090 
+
+and then localization window
+go back to the first terminal and run
+
+	$ nano config/NUbugger.yaml
+
+Select which data is to be sent to NUsight (Usually just localization and sensors)
+
+	$ bin/soccersimulator
+	
+and you're done!
+
+Simulation parameters can be found in
+
+	$ nano config/SoccerSimulatorConfig.yaml
+
+TroubleShooting Vagrant
+--------
+####1 	Shared folders not mounted
+	Run 
+	
+		$ vagrant plugin install vagrant-vbguest
+	
+	on the host machine. You may need to restart the host machine for it to work.
+
 
 Docker
 --------
 
-The NUbots use [Docker][] to manage the build environment for the NUbots project.
+Alternative to vagrant. The NUbots use [Docker][] to manage the build environment for the NUbots project.
 
 The following is a guide to getting you set up and ready to contribute to the NUbots project.
 
@@ -75,46 +123,7 @@ The following is a guide to getting you set up and ready to contribute to the NU
 	$ git config --global user.name "Your Name"
 	$ git config --global user.email you@example.com
 	$ git config --global color.ui auto
-
-To set up vagrant and simulator
-
-	$ vagrant ssh
-	$ cd nubots/NUbots/build
-	$ cmake .. -G Ninja
-	$ ninja
-
-If quex permission error occurs run
-
-	$ chmod +x /usr/local/bin/quex
-	$ quex
-	$ ninja
-
-Open a second terminal, go to NUsight and run
-
-	$ node app
-
-then in internet browser go to 
-
-localhost:9090 
-
-and then localization window
-go back to the first terminal and run
-
-	$ nano config/NUbugger.yaml
-
-Select which data is to be sent to NUsight (Usually just localization and sensors)
-
-	$ bin/soccersimulator
-	
-and you're done!
-
-Simulation parameters can be found in
-
-	$ nano config/SoccerSimulatorConfig.yaml
-
-
-
-Troubleshooting
+Troubleshooting Docker
 --------
 
 Check out the `docker` file to see the actual commands that are being run if you
