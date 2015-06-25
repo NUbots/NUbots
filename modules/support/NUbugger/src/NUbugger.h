@@ -55,11 +55,14 @@ namespace modules {
             bool networkEnabled = false;
             bool fileEnabled = false;
 
+            messages::support::nubugger::proto::Overview overview;
+
             std::ofstream outputFile;
 
             std::mutex networkMutex;
             std::mutex fileMutex;
 
+            void provideOverview();
             void provideDataPoints();
             void provideDrawObjects();
             void provideSubsumption();

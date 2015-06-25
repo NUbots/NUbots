@@ -19,18 +19,20 @@
 
 package messages.support.nubugger.proto;
 
-import "messages/input/proto/Sensors.proto";
+import "messages/behaviour/proto/Behaviour.proto";
+import "messages/behaviour/proto/Subsumption.proto";
 import "messages/input/proto/Image.proto";
 import "messages/input/proto/GameState.proto";
-import "messages/support/nuclear/proto/ReactionStatistics.proto";
-import "messages/support/nubugger/proto/DataPoint.proto";
-import "messages/support/nubugger/proto/ConfigurationState.proto";
-import "messages/support/nubugger/proto/DrawObjects.proto";
+import "messages/input/proto/Sensors.proto";
 import "messages/localisation/proto/Localisation.proto";
+import "messages/support/nubugger/proto/ConfigurationState.proto";
+import "messages/support/nubugger/proto/DataPoint.proto";
+import "messages/support/nubugger/proto/DrawObjects.proto";
+import "messages/support/nubugger/proto/Overview.proto";
+import "messages/support/nuclear/proto/ReactionStatistics.proto";
 import "messages/vision/proto/ClassifiedImage.proto";
-import "messages/vision/proto/VisionObject.proto";
 import "messages/vision/proto/LookUpTable.proto";
-import "messages/behaviour/proto/Subsumption.proto";
+import "messages/vision/proto/VisionObject.proto";
 
 message Message {
     enum Type {
@@ -50,6 +52,8 @@ message Message {
         REACTION_HANDLES = 13;
         GAME_STATE = 14;
         CONFIGURATION_STATE = 16;
+        BEHAVIOUR = 17;
+        OVERVIEW = 18;
     }
 
     required Type type = 1;
@@ -70,7 +74,9 @@ message Message {
     optional messages.input.proto.GameState game_state = 15;
     optional Command command = 16;
     optional ReactionHandles reaction_handles = 17;
-    optional ConfigurationState configuration_state = 19;
+    optional messages.support.nubugger.proto.ConfigurationState configuration_state = 19;
+    optional messages.behaviour.proto.Behaviour behaviour = 20;
+    optional messages.support.nubugger.proto.Overview overview = 21;
 
     message Command {
         optional string command = 1;

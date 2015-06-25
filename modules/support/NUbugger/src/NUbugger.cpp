@@ -161,6 +161,7 @@ namespace support {
             send(message);
         });
 
+        provideOverview();
         provideDataPoints();
         provideDrawObjects();
         provideSubsumption();

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2015 NUBots <nubots@nubots.net>
  */
 
 #include "NUbugger.h"
@@ -23,29 +23,44 @@
 
 #include "utility/time/time.h"
 
+/**
+ * @author Monica Olejniczak
+ */
 namespace modules {
 namespace support {
+
     using messages::support::nubugger::proto::Message;
     using utility::time::getUtcTimestamp;
 
-    using messages::support::nubugger::proto::DataPoint;
+    using messages::input::proto::Sensors;
+    using messages::behaviour::proto::Behaviour;
 
-    void NUbugger::provideDataPoints() {
+    /**
+     * @brief Provides triggers to send overview information over the network using the overview 
+     * instance variable.
+     */
+    void NUbugger::provideOverview() {
 
-        handles["data_points"].push_back(on<Trigger<DataPoint>>([this](const DataPoint& dataPoint) {
-
-            uint filterId = dataPointFilterIds.find(dataPoint.label()) == dataPointFilterIds.end()
-                ? dataPointFilterIds.insert(std::make_pair(dataPoint.label(), dataPointFilterId++)).first->second
-                : dataPointFilterIds[dataPoint.label()];
+        handles["overview"].push_back(on<Trigger<Every<5, std::chrono::seconds>>>([this](const time_t&) {
             Message message;
-            message.set_type(Message::DATA_POINT);
-            message.set_filter_id(filterId);
+            message.set_type(Message::OVERVIEW);
+            message.set_filter_id(0);
             message.set_utc_timestamp(getUtcTimestamp());
 
-            *message.mutable_data_point() = dataPoint;
+            *message.mutable_overview() = overview;
 
             send(message);
         }));
+
+        handles["overview"].push_back(on<Trigger<Behaviour::State>>([this](const Behaviour::State& state) {
+            overview.set_behaviour_state(state);
+        }));
+
+        handles["overview"].push_back(on<Trigger<Sensors>>([this](const Sensors& sensors) {
+            overview.set_voltage(sensors.voltage());
+            overview.set_battery(sensors.battery());
+        }));
+
     }
 }
 }

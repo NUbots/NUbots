@@ -22,37 +22,11 @@
 
 #include <nuclear>
 
+#include "messages/behaviour/proto/Behaviour.pb.h"
+
 namespace modules {
 namespace behaviour {
 namespace strategy {
-
-    enum class State {
-
-        INIT,
-        SEARCH_FOR_BALL,
-        SEARCH_FOR_GOALS,
-        WALK_TO_BALL
-
-    };
-
-    std::ostream& operator << (std::ostream& os, const State& state) {
-
-        switch (state) {
-            case State::SEARCH_FOR_BALL:
-                os << "Search for ball";
-                break;
-            case State::SEARCH_FOR_GOALS:
-                os << "Search for goals";
-                break;
-            case State::WALK_TO_BALL:
-                os << "Walk to ball";
-                break;
-            default:
-                os << "Undefined";
-        }
-        return os;
-        
-    }
 
     class KickAtGoal : public NUClear::Reactor {
     private:
@@ -64,7 +38,7 @@ namespace strategy {
         void walkToBall();
         void spinToWin();
 
-        State currentState = State::INIT;
+        messages::behaviour::proto::Behaviour::State currentState = messages::behaviour::proto::Behaviour::INIT;
     public:
         static constexpr const char* CONFIGURATION_PATH = "KickAtGoal.yaml";
 

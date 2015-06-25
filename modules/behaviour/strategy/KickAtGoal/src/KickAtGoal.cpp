@@ -35,6 +35,7 @@ namespace strategy {
     using messages::behaviour::WalkStrategy;
     using messages::behaviour::KickPlan;
     using messages::support::Configuration;
+    using messages::behaviour::proto::Behaviour;
     using VisionBall = messages::vision::Ball;
     using VisionGoal = messages::vision::Goal;
     using utility::time::durationFromSeconds;
@@ -72,7 +73,7 @@ namespace strategy {
 
     void KickAtGoal::doBehaviour() {
         // Store the state before executing behaviour.
-        State previousState = currentState;
+        Behaviour::State previousState = currentState;
 
         // Check if the ball  has been seen recently.
         if (NUClear::clock::now() - ballLastSeen < ballActiveTimeout) {
@@ -82,9 +83,8 @@ namespace strategy {
             spinToWin();
         }
 
-        // TODO send as protocol buffer
         if (currentState != previousState) {
-            std::cout << "Current state: " << currentState << std::endl;
+            emit(std::make_unique<Behaviour::State>(currentState));
         }
 
     }
@@ -96,7 +96,7 @@ namespace strategy {
         approach->walkMovementType = WalkApproach::WalkToPoint;
         approach->heading = arma::vec2({3, 0}); // TODO: unhack
         emit(std::move(approach));
-        currentState = State::WALK_TO_BALL;
+        currentState = Behaviour::WALK_TO_BALL;
     }
 
     void KickAtGoal::spinToWin() {
@@ -106,7 +106,7 @@ namespace strategy {
         command->target = {0,0};
         command->heading = {1,0};
         emit(std::move(command));
-        currentState = State::SEARCH_FOR_BALL;
+        currentState = Behaviour::SEARCH_FOR_BALL;
     }
 
 }
