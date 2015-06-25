@@ -26,6 +26,34 @@ namespace modules {
 namespace behaviour {
 namespace strategy {
 
+    enum class State {
+
+        INIT,
+        SEARCH_FOR_BALL,
+        SEARCH_FOR_GOALS,
+        WALK_TO_BALL
+
+    };
+
+    std::ostream& operator << (std::ostream& os, const State& state) {
+
+        switch (state) {
+            case State::SEARCH_FOR_BALL:
+                os << "Search for ball";
+                break;
+            case State::SEARCH_FOR_GOALS:
+                os << "Search for goals";
+                break;
+            case State::WALK_TO_BALL:
+                os << "Walk to ball";
+                break;
+            default:
+                os << "Undefined";
+        }
+        return os;
+        
+    }
+
     class KickAtGoal : public NUClear::Reactor {
     private:
         NUClear::clock::duration ballActiveTimeout;
@@ -35,6 +63,8 @@ namespace strategy {
         void doBehaviour();
         void walkToBall();
         void spinToWin();
+
+        State currentState = State::INIT;
     public:
         static constexpr const char* CONFIGURATION_PATH = "KickAtGoal.yaml";
 

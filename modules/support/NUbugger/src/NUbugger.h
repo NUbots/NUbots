@@ -62,7 +62,7 @@ namespace modules {
 
             void provideDataPoints();
             void provideDrawObjects();
-            void provideBehaviour();
+            void provideSubsumption();
             void provideGameController();
             void provideLocalisation();
             void provideReactionStatistics();

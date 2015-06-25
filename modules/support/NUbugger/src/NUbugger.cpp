@@ -163,7 +163,7 @@ namespace support {
 
         provideDataPoints();
         provideDrawObjects();
-        provideBehaviour();
+        provideSubsumption();
         provideGameController();
         provideLocalisation();
         provideReactionStatistics();

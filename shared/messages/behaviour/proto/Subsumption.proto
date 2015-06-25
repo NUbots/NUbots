@@ -19,7 +19,7 @@
 
 package messages.behaviour.proto;
 
-message Behaviour {
+message Subsumption {
     enum Type {
         ACTION_REGISTER = 1;
         ACTION_STATE = 2;
