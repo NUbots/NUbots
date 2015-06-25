@@ -69,8 +69,8 @@ namespace utility{
                     //Head movement limits
                     static constexpr float MAX_YAW = M_PI * 2 / 3;
                     static constexpr float MIN_YAW = -M_PI * 2 / 3;
-                    static constexpr float MAX_PITCH = M_PI / 4;
-                    static constexpr float MIN_PITCH = -M_PI / 4;
+                    static constexpr float MAX_PITCH = M_PI / 3;
+                    static constexpr float MIN_PITCH = -M_PI / 3;
                 };
 
                 class Arm {//ROUGH MEASUREMENTS

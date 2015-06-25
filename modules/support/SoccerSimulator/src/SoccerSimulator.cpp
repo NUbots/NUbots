@@ -170,8 +170,9 @@ namespace support {
 
         on<
             Trigger<Every<SIMULATION_UPDATE_FREQUENCY, Per<std::chrono::seconds>>>,
-            With<Optional<WalkCommand>>
+            With<Sensors, Optional<WalkCommand>>
         >("Robot motion", [this](const time_t&,
+                                 const Sensors& sensors,
                                  const std::shared_ptr<const WalkCommand>& walkCommand) {
 
             Transform2D diff;
@@ -195,7 +196,9 @@ namespace support {
                 case MotionType::MOTION:
                 //Update based on walk engine
                     if(walkCommand && !kicking){
-                        world.robotVelocity = walkCommand->command;
+                        world.robotVelocity.rows(0,1) = sensors.odometry;
+                        //angle from command:
+                        world.robotVelocity(2) = walkCommand->command(2);
                     } else {
                         world.robotVelocity = utility::math::matrix::Transform2D({0,0,0});
                     }
