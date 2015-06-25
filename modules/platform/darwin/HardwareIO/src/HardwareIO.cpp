@@ -119,7 +119,7 @@ namespace darwin {
             servo.errorFlags = data.servoErrorCodes[i] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.servoErrorCodes[i]);
 
             // Booleans
-            //servo.torqueEnabled = servoState[i].torqueEnabled;
+            servo.torqueEnabled = servoState[i].torqueEnabled;
 
             // Gain
             servo.pGain = servoState[i].pGain;
@@ -175,25 +175,30 @@ namespace darwin {
                     // Clear our dirty flag
                     servoState[i].dirty = false;
 
-                    // Get our goal position and speed
-                    uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
-                    uint16_t movingSpeed = Convert::servoSpeedInverse(servoState[i].movingSpeed);
-                    uint16_t torque = Convert::torqueLimitInverse(servoState[i].torque);
+                    if(!servoState[i].torqueEnabled) {
+                        darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
+                    }
+                    else {
+                        // Get our goal position and speed
+                        uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
+                        uint16_t movingSpeed = Convert::servoSpeedInverse(servoState[i].movingSpeed);
+                        uint16_t torque = Convert::torqueLimitInverse(servoState[i].torque);
 
-                    // Add to our sync write command
-                    command.insert(command.end(), {
-                        uint8_t(i + 1),
-                        Convert::gainInverse(servoState[i].dGain), // D Gain
-                        Convert::gainInverse(servoState[i].iGain), // I Gain
-                        Convert::gainInverse(servoState[i].pGain), // P Gain
-                        0,                                         // Reserved
-                        uint8_t(0xFF & goalPosition),              // Goal Position L
-                        uint8_t(0xFF & (goalPosition >> 8)),       // Goal Position H
-                        uint8_t(0xFF & movingSpeed),               // Goal Speed L
-                        uint8_t(0xFF & (movingSpeed >> 8)),         // Goal Speed H
-                        uint8_t(0xFF & torque),                     // Torque Limit L
-                        uint8_t(0xFF & (torque >> 8))              // Torque Limit H
-                    });
+                        // Add to our sync write command
+                        command.insert(command.end(), {
+                            uint8_t(i + 1),
+                            Convert::gainInverse(servoState[i].dGain), // D Gain
+                            Convert::gainInverse(servoState[i].iGain), // I Gain
+                            Convert::gainInverse(servoState[i].pGain), // P Gain
+                            0,                                         // Reserved
+                            uint8_t(0xFF & goalPosition),              // Goal Position L
+                            uint8_t(0xFF & (goalPosition >> 8)),       // Goal Position H
+                            uint8_t(0xFF & movingSpeed),               // Goal Speed L
+                            uint8_t(0xFF & (movingSpeed >> 8)),         // Goal Speed H
+                            uint8_t(0xFF & torque),                     // Torque Limit L
+                            uint8_t(0xFF & (torque >> 8))              // Torque Limit H
+                        });
+                    }                    
                 }
 
             }
@@ -239,9 +244,7 @@ namespace darwin {
 
 
                 // Update our internal state
-
-
-                if(servoState[uint(command.id)].pGain != command.gain
+                else if(servoState[uint(command.id)].pGain != command.gain
                 || servoState[uint(command.id)].iGain != command.gain * 0
                 || servoState[uint(command.id)].dGain != command.gain * 0
                 || servoState[uint(command.id)].movingSpeed != speed
@@ -256,6 +259,7 @@ namespace darwin {
 
                     servoState[uint(command.id)].movingSpeed = speed;
                     servoState[uint(command.id)].goalPosition = command.position;
+                    servoState[uint(command.id)].torqueEnabled == !isnan(command.position);
 
                     servoState[uint(command.id)].torque = command.torque;
 
