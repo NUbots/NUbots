@@ -46,13 +46,13 @@ namespace kinematics {
         utility::math::matrix::Transform3D runningTransform;
         float HEAD_PITCH = sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_PITCH)].presentPosition;
         float HEAD_YAW =  sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_YAW)].presentPosition;
-        arma::vec3 NECK_POS = {RobotKinematicModel::Head::NECK_BASE_POS_FROM_ORIGIN[0],
-                               RobotKinematicModel::Head::NECK_BASE_POS_FROM_ORIGIN[1],
-                               RobotKinematicModel::Head::NECK_BASE_POS_FROM_ORIGIN[2]};
+        arma::vec3 NECK_POS = {RobotKinematicModel::Head::NECK_BASE_POS_FROM_ORIGIN_X,
+                               RobotKinematicModel::Head::NECK_BASE_POS_FROM_ORIGIN_Y,
+                               RobotKinematicModel::Head::NECK_BASE_POS_FROM_ORIGIN_Z};
         float NECK_LENGTH = RobotKinematicModel::Head::NECK_LENGTH;
-        arma::vec3 NECK_TO_CAMERA = {RobotKinematicModel::Head::NECK_TO_CAMERA[0],
-                               RobotKinematicModel::Head::NECK_TO_CAMERA[1],
-                               RobotKinematicModel::Head::NECK_TO_CAMERA[2]};
+        arma::vec3 NECK_TO_CAMERA = {RobotKinematicModel::Head::NECK_TO_CAMERA_X,
+                                     RobotKinematicModel::Head::NECK_TO_CAMERA_Y,
+                                     RobotKinematicModel::Head::NECK_TO_CAMERA_Z};
 
         //Translate to base of neck from origin
         runningTransform = runningTransform.translate(NECK_POS);

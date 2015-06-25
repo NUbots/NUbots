@@ -150,8 +150,11 @@ namespace support {
 
         });
 
-        on<With<Configuration<SoccerSimulatorConfig>>, Trigger<GlobalConfig>>("Soccer Simulator Configuration", std::bind(std::mem_fn(&SoccerSimulator::updateConfiguration), this, std::placeholders::_1, std::placeholders::_2));
-        on<Trigger<Configuration<SoccerSimulatorConfig>>, With<GlobalConfig>>("Soccer Simulator Configuration", std::bind(std::mem_fn(&SoccerSimulator::updateConfiguration), this, std::placeholders::_1, std::placeholders::_2));
+        auto updateConfigLambda = [this](const Configuration<SoccerSimulatorConfig>& config, const GlobalConfig& globalConfig) {
+            updateConfiguration(config, globalConfig);
+        };
+        on<With<Configuration<SoccerSimulatorConfig>>, Trigger<GlobalConfig>>("Soccer Simulator Configuration", updateConfigLambda);
+        on<Trigger<Configuration<SoccerSimulatorConfig>>, With<GlobalConfig>>("Soccer Simulator Configuration", updateConfigLambda);
 
         on<Trigger<KickPlannerConfig>>("Get Kick Planner Config", [this](const KickPlannerConfig& cfg){
             kick_cfg = cfg;
