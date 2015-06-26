@@ -180,7 +180,7 @@ namespace vision {
                 if(deltaT == 0) {
                     widthVel = arma::zeros(3);
                     widthVelCov = 1e5 * arma::eye(3,3);
-                }else if(deltaT < 0.1){
+                }else if(deltaT < 1){
                     widthVel = (ballCentreGroundWidth - lastFrame.widthBall) / deltaT;
                 } else {
                     //If we havent see the ball for a while we dont measure vel
