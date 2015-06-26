@@ -20,11 +20,19 @@
 package messages.support.nubugger.proto;
 
 import "messages/behaviour/proto/Behaviour.proto";
+import "messages/Vector.proto";
 
 message Overview {
 
+	// Sensors
 	optional float voltage = 1;
 	optional float battery = 2;
+
+	// Behaviour
     optional messages.behaviour.proto.Behaviour.State behaviour_state = 3;
+
+    // Localisation
+    optional vec2 robot_position = 4;
+    optional vec2 robot_heading = 5;
     
 }

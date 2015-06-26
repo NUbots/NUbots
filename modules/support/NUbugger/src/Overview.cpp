@@ -20,6 +20,7 @@
 #include "NUbugger.h"
 
 #include "messages/support/nubugger/proto/Message.pb.h"
+#include "messages/support/nubugger/proto/Message.pb.h"
 
 #include "utility/time/time.h"
 
@@ -34,6 +35,8 @@ namespace support {
 
     using messages::input::proto::Sensors;
     using messages::behaviour::proto::Behaviour;
+
+    using messages::localisation::Self;
 
     /**
      * @brief Provides triggers to send overview information over the network using the overview 
@@ -59,6 +62,21 @@ namespace support {
         handles["overview"].push_back(on<Trigger<Sensors>>([this](const Sensors& sensors) {
             overview.set_voltage(sensors.voltage());
             overview.set_battery(sensors.battery());
+        }));
+        
+        handles["overview"].push_back(on<Trigger<std::vector<Self>>>([this](const std::vector<Self>& selfs) {
+            // Retrieve the first self in the vector.
+            Self self = selfs.front();
+            // Set each robot position.
+            auto* robotPosition = overview.mutable_robot_position();
+            arma::vec2 position = self.position;
+            robotPosition->set_x(position[0]);
+            robotPosition->set_y(position[1]);
+            // Set each robot heading.
+            auto* robotHeading = overview.mutable_robot_heading();
+            arma::vec2 heading = self.heading;
+            robotHeading->set_x(heading[0]);
+            robotHeading->set_y(heading[1]);
         }));
 
     }
