@@ -278,7 +278,7 @@ namespace nubugger {
         std::vector<uint> parentIndices;
         parentIndices.reserve(positions.size());
         for (uint i = 0; i < positions.size(); i++) {
-            parentIndices.push_back(std::max(0U, i - 1));
+            parentIndices.push_back(std::max(0, int(i) - 1));
         }
         return drawTree(name, positions, parentIndices);
 

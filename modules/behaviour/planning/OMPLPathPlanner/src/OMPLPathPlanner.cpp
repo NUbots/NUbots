@@ -61,7 +61,7 @@ namespace planning {
     OMPLPathPlanner::OMPLPathPlanner(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<OMPLPathPlanner>>>([this] (const Configuration<OMPLPathPlanner>& config) {
+        on<Trigger<Configuration<OMPLPathPlanner>>>([this] (const Configuration<OMPLPathPlanner>&/* config*/) {
             // Use configuration here from file OMPLPathPlanner.yaml
         });
 
@@ -73,7 +73,7 @@ namespace planning {
             With<std::vector<Self>>,
             Options<Sync<OMPLPathPlanner>>
            >("Follow current path plan", [this] (
-             const NUClear::clock::time_point& current_time,
+             const NUClear::clock::time_point&/* current_time*/,
              const std::vector<Self>& selfs
              ) {
             if (selfs.empty() || currentPath == nullptr) {
@@ -139,7 +139,7 @@ namespace planning {
              const LocalisationBall& ball,
              const std::vector<Self>& selfs,
              const KickPlan& kickPlan,
-             const std::shared_ptr<const std::vector<VisionObstacle>>& robots) {
+             const std::shared_ptr<const std::vector<VisionObstacle>>&/* robots*/) {
 
             if (selfs.empty()) {
                 return;
