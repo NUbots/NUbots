@@ -148,14 +148,24 @@ namespace planning {
 
             // Generate a new path:
             Transform2D start = {self.position(0), self.position(1), vectorToBearing(self.heading)};
+            Transform2D localGoal = {ball.position(0), ball.position(1), 0};
 
             // Determine the goal position and heading:
-            auto goalHeading = kickPlan.target - self.position;
-            arma::vec goalPosition = ball.position - 0.1 * arma::normalise(goalHeading);
+            // auto goalHeading = kickPlan.target - self.position;
+            arma::vec2 ballPos = start.localToWorld(localGoal).rows(0,1);
+            arma::vec2 goalHeading = kickPlan.target - ballPos;
+            arma::vec goalPosition = ballPos - 0.1 * arma::normalise(goalHeading);
+
+            NUClear::log("OMPLPP:ballPos:", ballPos.t());
+            NUClear::log("OMPLPP: goalPosition:", goalPosition.t());
+            NUClear::log("OMPLPP: kickPlan.target:", kickPlan.target.t());
 
             Transform2D goal = {goalPosition(0), goalPosition(1), vectorToBearing(goalHeading)};
             double timeLimit = 0.5; // Time limit in seconds.
             auto path = pathPlanner.obstacleFreePathBetween(start, goal, ball, timeLimit);
+            // LocalisationBall testBall;
+            // testBall.position = {0,1};
+            // auto path = pathPlanner.obstacleFreePathBetween({-4,1,0}, {3,3,3.14}, testBall, timeLimit);
 
 
             // Store as the current path:
