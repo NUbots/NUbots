@@ -41,6 +41,9 @@ namespace messages {
             struct Measurement {
                 arma::vec3 position;
                 arma::mat33 error;
+                //Optional vel measurement, currently used for ball only
+                arma::vec3 velocity;
+                arma::mat33 velCov;
             };
 
             // Time the image was taken
