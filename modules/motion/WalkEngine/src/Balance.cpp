@@ -122,6 +122,19 @@ namespace motion {
         //Apply opposite translation to the foot position
         target = target.translate(-torsoAdjustment_torso);
 
+
+        //-------------------------------
+        // Gains
+        //-------------------------------
+
+        for(auto it = servoControlPGains.cbegin(); it != servoControlPGains.cend(); ++it){
+            auto id = it->first;
+            float gain = it->second;
+            jointGains[id] = std::fmin(gainLegs, std::fabs(total * gain));
+            emit(graph(messages::input::stringFromId(id), jointGains[id]));
+        }
+
+
     }
 }
 }
