@@ -71,7 +71,7 @@ namespace planning {
 
         on<Trigger<Every<20, Per<std::chrono::seconds>>>,
             With<std::vector<Self>>,
-            Options<Sync<OMPLPathPlanner>>
+            Options<Sync<OMPLPathPlanner>, Single>
            >("Follow current path plan", [this] (
              const NUClear::clock::time_point&/* current_time*/,
              const std::vector<Self>& selfs
@@ -128,12 +128,12 @@ namespace planning {
             emit(std::move(command));
         });
 
-        on<Trigger<Every<1, std::chrono::seconds>>,
+        on<Trigger<Every<2, std::chrono::seconds>>,
             With<LocalisationBall>,
             With<std::vector<Self>>,
             With<KickPlan>,
             With<Optional<std::vector<VisionObstacle>>>,
-            Options<Sync<OMPLPathPlanner>>
+            Options<Sync<OMPLPathPlanner>, Single>
            >("Generate new path plan", [this] (
              const NUClear::clock::time_point& current_time,
              const LocalisationBall& ball,
@@ -161,7 +161,7 @@ namespace planning {
             NUClear::log("OMPLPP: kickPlan.target:", kickPlan.target.t());
 
             Transform2D goal = {goalPosition(0), goalPosition(1), vectorToBearing(goalHeading)};
-            double timeLimit = 0.5; // Time limit in seconds.
+            double timeLimit = 1; // Time limit in seconds.
             auto path = pathPlanner.obstacleFreePathBetween(start, goal, ball, timeLimit);
             // LocalisationBall testBall;
             // testBall.position = {0,1};

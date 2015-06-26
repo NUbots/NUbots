@@ -37,7 +37,7 @@ message DrawObject {
     message Path {
 
         required vec2 position = 1;
-        required uint32 parentIndex = 2;
+        required uint32 parent_index = 2;
 
     }
 
@@ -57,12 +57,12 @@ message DrawObject {
     repeated vec3 vertices = 13;
     repeated Path path = 14;
     optional uint32 faces = 15;
-    optional float lineWidth = 16;
+    optional float line_width = 16;
     optional float length = 17;
     optional float depth = 18;
     optional bool fill = 19;
 
-    optional float timeOut = 20;
+    optional float timeout = 20;
 }
 
 message DrawObjects {
