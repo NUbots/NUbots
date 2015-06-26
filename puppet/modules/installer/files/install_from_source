@@ -1,0 +1,117 @@
+#!/bin/bash
+
+#arg1 = prefix
+
+# Exit immediatly on error
+set -e
+
+# Get our prefix
+PREFIX="$1"
+export CFLAGS="-march=atom -mtune=atom -fuse-linker-plugin -flto -fno-fat-lto-objects -O3"
+export CXXFLAGS="-march=atom -mtune=atom -fuse-linker-plugin -flto -fno-fat-lto-objects -O3"
+shift 1
+
+# Say what we're doing!
+echo "Installing $(basename $(pwd)) to $PREFIX"
+
+# Work out what build system we are using
+if [[ -e "configure" ]]; then
+    echo "Configuring using autotools"
+
+    # Run configure
+    ./configure $@ --prefix="$PREFIX"
+
+    # Run make
+    make -j$(nproc)
+
+    # Run make install
+    make install
+
+elif [[ -e "CMakeLists.txt" ]]; then
+    echo "Configuring using cmake"
+
+    cmake . -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_CXX_FLAGS="$CXXFLAGS" -DCMAKE_INSTALL_PREFIX="$PREFIX" \
+
+    # Run make
+    make -j$(nproc)
+
+    # Run make install
+    make install
+
+elif [[ -e "Makefile" ]]; then
+    echo "Building using make"
+
+    export COMMON_OPT="$CFLAGS -O3"
+    export FCOMMON_OPT="$CXXFLAGS -O3"
+
+    make -j$(nproc)
+
+    make PREFIX="$PREFIX" install
+fi
+
+# # Discard our URL argument
+# shift 1
+
+# # Work out our context
+# BASE_DIR=$(pwd)
+# CODE_DIR=$(ls -d */)
+# cd "$CODE_DIR$CODE_PATH"
+
+# # Run cmake to build our makefile
+# cmake \
+#     -DCMAKE_C_FLAGS="$COMPILER_FLAGS -O3" \
+#     -DCMAKE_CXX_FLAGS="$COMPILER_FLAGS -O3" \
+#     -DCMAKE_INSTALL_PREFIX="$TOOLCHAIN_PATH" \
+#     $@
+
+# # Make and install
+# make -j$(nproc)
+# make install
+
+# # Delete our source code
+# rm -rf "$BASE_DIR/$CODE_DIR"
+
+# #!/bin/bash
+
+# # Exit immediatly on error
+# set -e
+
+# # Work out what kind of compression the URL uses
+# # And get our file
+# if [[ "$1" == *gz ]] # Gzip
+# then
+#     curl -L $1 | tar xz
+
+# elif [[ "$1" == *.bz2 ]] # Bzip2
+# then
+#     curl -L $1 | tar xj
+
+# elif [[ "$1" == *.zip ]] # Zip
+# then
+#     curl -L $1 -o "source.zip"
+#     unzip "source.zip"
+#     rm -rf "source.zip"
+# fi
+
+# # Discard our URL argument
+# shift 1
+
+# # Work out our context
+# BASE_DIR=$(pwd)
+# CODE_DIR=$(ls -d */)
+# cd "$CODE_DIR$CODE_PATH"
+
+# # Set our fags and run configure
+# CFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
+# CXXFLAGS="$COMPILER_FLAGS -I$TOOLCHAIN_PATH/include -O3" \
+# LDFLAGS="-L$TOOLCHAIN_PATH/lib" \
+# ./configure \
+#     $@ \
+#     --prefix="$TOOLCHAIN_PATH"
+
+# # Make and install
+# make -j$(nproc)
+# make install
+
+# # Delete our source code
+# rm -rf "$BASE_DIR/$CODE_DIR"
