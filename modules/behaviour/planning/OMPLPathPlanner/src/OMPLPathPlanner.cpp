@@ -167,29 +167,24 @@ namespace planning {
 
             // Emit the new path to NUSight.
             if (currentPath != nullptr) {
-                
+
                 // Get the path states:
                 auto pathGeom = boost::static_pointer_cast<ompl::geometric::PathGeometric>(currentPath);
                 std::vector<ob::State*>& states = pathGeom->getStates();
 
                 // Build the path to emit:
                 std::vector<arma::vec> positions;
-                std::vector<int> parentIndices;
 
-                int index = -1;
                 for (auto* state : states) {
                     // Cast the state as an SE2 state:
                     auto* se2State = state->as<ob::SE2StateSpace::StateType>();
-                    
+
                     // Add the position:
                     arma::vec2 pos = { se2State->getX(), se2State->getY() };
                     positions.push_back(pos);
-
-                    // Set the previous state as this node's parent:
-                    parentIndices.push_back(std::max(index++, 0));
                 }
 
-                emit(utility::nubugger::drawTree("OMPLPP_Path", positions, parentIndices));
+                emit(utility::nubugger::drawPolyline("OMPLPP_Path", positions));
             }
         });
 
