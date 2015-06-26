@@ -113,7 +113,7 @@ namespace motion {
             // Convert the direction vector and position of the ball into left foot coordinates by multiplying the inverse of the
             // homogeneous transforms with the coordinates in torso space. 1 for a point and 0 for a vector.
 
-            //TODO: talk to jake about why this is wrong
+
             arma::vec4 ballPosition4 = leftFoot.i() * arma::join_cols(command.target, arma::vec({1}));
             arma::vec4 goalPosition4 = leftFoot.i() * arma::join_cols(command.direction, arma::vec({0}));
             
@@ -220,7 +220,6 @@ namespace motion {
             emit(std::move(waypoints));
 
 
-//END BALANCER
 /*
 //START FOOTLIFTER w.r.t Torso, Should be support foot coordinates????
             // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
