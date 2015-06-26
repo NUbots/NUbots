@@ -22,7 +22,7 @@ git clone https://github.com/ompl/ompl.git
 cd ompl
 cd build
 mkdir build
-cmake .. -G Ninja
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local -G Ninja .. 
 ninja
 mkdir /tmp/omplinstall/debdir
 DESTDIR=/tmp/omplinstall/debdir ninja install

@@ -252,6 +252,27 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
+    inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawTree(std::string name, std::vector<arma::vec> positions, std::vector<int> parentIndices) {
+
+        auto drawObjects = std::make_unique<messages::support::nubugger::proto::DrawObjects>();
+        auto* object = drawObjects->add_objects();
+        object->set_name(name);
+        object->set_shape(messages::support::nubugger::proto::DrawObject::POLYLINE);
+
+        
+        for (unsigned int i = 0; i < positions.size(); i++) {
+            auto* objNode = object->add_path();
+
+            auto* nodeVertex = objNode->mutable_position();
+            nodeVertex->set_x(positions[i](0));
+            nodeVertex->set_y(positions[i](1));
+
+            objNode->set_parentindex(parentIndices[i]);
+        }
+
+        return std::move(drawObjects);
+    }
+
 }
 }
 
