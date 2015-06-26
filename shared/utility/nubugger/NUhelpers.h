@@ -252,15 +252,15 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawTree(std::string name, std::vector<arma::vec> positions, std::vector<int> parentIndices) {
+    inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawTree(std::string name, std::vector<arma::vec> positions, std::vector<uint> parentIndices) {
 
         auto drawObjects = std::make_unique<messages::support::nubugger::proto::DrawObjects>();
         auto* object = drawObjects->add_objects();
         object->set_name(name);
         object->set_shape(messages::support::nubugger::proto::DrawObject::POLYLINE);
 
-        
-        for (unsigned int i = 0; i < positions.size(); i++) {
+
+        for (uint i = 0; i < positions.size(); i++) {
             auto* objNode = object->add_path();
 
             auto* nodeVertex = objNode->mutable_position();
@@ -271,6 +271,17 @@ namespace nubugger {
         }
 
         return std::move(drawObjects);
+    }
+
+    inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawPolyline(std::string name, std::vector<arma::vec> positions) {
+
+        std::vector<uint> parentIndices;
+        parentIndices.reserve(positions.size());
+        for (uint i = 0; i < positions.size(); i++) {
+            parentIndices.push_back(std::max(0U, i - 1));
+        }
+        return drawTree(name, positions, parentIndices);
+
     }
 
 }
