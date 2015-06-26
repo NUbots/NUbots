@@ -29,6 +29,7 @@ define installer (
   $url,
   $args = '',
   $environment = [],
+  $method = 'auto',
   $prefix = '/nubots/toolchain',
   $strip_components = 1
 ) {
@@ -55,7 +56,7 @@ define installer (
   }
 
   exec { "install_${name}":
-    command => "/usr/local/bin/install_from_source '${prefix}' ${args}",
+    command => "/usr/local/bin/install_from_source '${prefix}' '${method}' ${args}",
     creates => "/nubots/toolchain/lib/lib${name}.a",
     cwd => "/nubots/toolchain/src/${name}",
     environment => $environment,

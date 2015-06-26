@@ -34,7 +34,7 @@ node nubotsvm {
   installer { 'protobuf':       url => 'https://github.com/google/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz',
                                 args => '--with-zlib',
                                 require => Installer['zlib'], }
-  installer { 'openpgm':        url => 'https://openpgm.googlecode.com/files/libpgm-5.2.122.tar.gz',
+  installer { 'pgm':            url => 'https://openpgm.googlecode.com/files/libpgm-5.2.122.tar.gz',
                                 strip_components => 3, }
   # installer { 'zeromq':         url => 'http://download.zeromq.org/zeromq-4.1.2.tar.gz',
   #                               args => '-with-pgm --without-libsodium',
@@ -46,8 +46,9 @@ node nubotsvm {
                                 environment => ['TARGET=ATOM',
                                                 'USE_THREAD=1',
                                                 'BINARY=32']}
-  # installer { 'armadillo':      url => 'http://sourceforge.net/projects/arma/files/armadillo-5.200.2.tar.gz',
-  #                               require => Installer['openblas'] }
+  installer { 'armadillo':      url => 'http://sourceforge.net/projects/arma/files/armadillo-5.200.2.tar.gz',
+                                method => 'cmake',
+                                require => Installer['openblas'] }
 
 
 
@@ -59,10 +60,10 @@ node nubotsvm {
   #                               args => '-DYAML_CPP_BUILD_CONTRIB=OFF -DYAML_CPP_BUILD_TOOLS=OFF', }
   # installer { 'ncurses':        url => 'http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz',
   #                               args => '--without-progs --without-test', }
-  # installer { 'fftw3':          url => 'http://www.fftw.org/fftw-3.3.4.tar.gz',
-  #                               args => '--disable-fortran --enable-shared', }
-  # installer { 'libjpeg-turbo':  url => 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.1/libjpeg-turbo-1.4.1.tar.gz',
-  #                               args => '--build=i686-linux-gnu --host=i686-linux-gnu', }
+  installer { 'fftw3':          url => 'http://www.fftw.org/fftw-3.3.4.tar.gz',
+                                args => '--disable-fortran --enable-shared', }
+  installer { 'libjpeg-turbo':  url => 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.1/libjpeg-turbo-1.4.1.tar.gz',
+                                args => '--build=i686-linux-gnu --host=i686-linux-gnu', }
   # installer { 'cppformat':      url => 'https://github.com/cppformat/cppformat/archive/1.1.0.tar.gz', }
   # installer { 'alsalib':        url => 'ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.29.tar.bz2', }
   # installer { 'portaudio':      url => 'http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz',
@@ -70,8 +71,8 @@ node nubotsvm {
   # installer { 'espeak':         url => 'http://sourceforge.net/projects/espeak/files/espeak/espeak-1.48/espeak-1.48.04-source.zip',
   #                               environment => ['AUDIO="PORTAUDIO"'],
   #                               require => Installer['portaudio'], }
-  # installer { 'muparser':       url => 'https://downloads.sourceforge.net/project/muparser/muparser/Version%202.2.3/muparser_v2_2_3.zip',
-  #                               args => '--disable-shared --disable-debug --disable-samples'}
+  installer { 'muparser':       url => 'https://github.com/TrentHouliston/muparser/archive/master.tar.gz',
+                                args => '--disable-shared --disable-debug --disable-samples'}
 }
 
   # Install dependencies
