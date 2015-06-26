@@ -121,6 +121,10 @@ namespace localisation {
                 engine_.TimeUpdate(curr_time);
 
                 engine_.MeasurementUpdate(balls[0]);
+                //DEBUG
+                // for(auto& m : balls[0].measurements){
+                //     log("ball measurement:", m.position, m.error, m.velocity, m.velCov);
+                // }
 
             }
         });

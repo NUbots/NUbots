@@ -254,7 +254,7 @@ namespace darwin {
 
 
                 // Update our internal state
-                else if(servoState[uint(command.id)].pGain != command.gain
+                if(servoState[uint(command.id)].pGain != command.gain
                 || servoState[uint(command.id)].iGain != command.gain * 0
                 || servoState[uint(command.id)].dGain != command.gain * 0
                 || servoState[uint(command.id)].movingSpeed != speed
