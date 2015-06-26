@@ -175,10 +175,20 @@ namespace darwin {
                     // Clear our dirty flag
                     servoState[i].dirty = false;
 
-                    if(!servoState[i].torqueEnabled) {
+                    // If our torque should be disabled then we disable our torque
+                    if(servoState[i].torqueEnabled &&
+                       (isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
+                        servoState[i].torqueEnabled = false;
                         darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
                     }
                     else {
+                        // If our torque was disabled but is now enabled
+                        if(!servoState[i].torqueEnabled &&
+                         !(isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
+                            servoState[i].torqueEnabled = true;
+                            darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, true);
+                        }
+
                         // Get our goal position and speed
                         uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
                         uint16_t movingSpeed = Convert::servoSpeedInverse(servoState[i].movingSpeed);
@@ -198,7 +208,7 @@ namespace darwin {
                             uint8_t(0xFF & torque),                     // Torque Limit L
                             uint8_t(0xFF & (torque >> 8))              // Torque Limit H
                         });
-                    }                    
+                    }
                 }
 
             }
@@ -259,10 +269,8 @@ namespace darwin {
 
                     servoState[uint(command.id)].movingSpeed = speed;
                     servoState[uint(command.id)].goalPosition = command.position;
-                    servoState[uint(command.id)].torqueEnabled == !isnan(command.position);
 
                     servoState[uint(command.id)].torque = command.torque;
-
                 }
             }
         });
