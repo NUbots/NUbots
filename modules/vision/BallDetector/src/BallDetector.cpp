@@ -177,9 +177,13 @@ namespace vision {
                 //compute velocity
                 arma::mat widthVelCov = measurement_distance_variance_factor * ballCentreGroundWidthDistance * arma::eye(3,3);
                 arma::vec3 widthVel;
-                if(deltaT < 0.1){
+                if(deltaT == 0) {
+                    widthVel = arma::zeros(3);
+                    widthVelCov = 1e5 * arma::eye(3,3);
+                }else if(deltaT < 1){
                     widthVel = (ballCentreGroundWidth - lastFrame.widthBall) / deltaT;
                 } else {
+                    //If we havent see the ball for a while we dont measure vel
                     widthVel = arma::zeros(3);
                     log<NUClear::WARN>("Ball velocity frame dropped because of too much time between frames");
                 }
@@ -201,9 +205,13 @@ namespace vision {
                 //compute velocity
                 arma::mat projVelCov = measurement_distance_variance_factor * ballCentreGroundWidthDistance * arma::eye(3,3);
                 arma::vec3 projVel;
-                if(deltaT < 0.1){
+                if(deltaT == 0) {
+                    projVel = arma::zeros(3);
+                    projVelCov = 1e5 * arma::eye(3,3);
+                }else if(deltaT < 1){
                     projVel = (ballCentreGroundProj - lastFrame.projBall) / deltaT;
                 } else {
+                    //If we havent see the ball for a while we dont measure vel
                     projVel = arma::zeros(3);
                     log<NUClear::WARN>("Ball velocity frame dropped because of too much time between frames");
                 }
