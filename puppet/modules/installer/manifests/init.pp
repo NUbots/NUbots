@@ -9,17 +9,19 @@ class installer::prerequisites {
   exec {'fix_compiler_environment':
     command => "update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
              && update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20 \
+             && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5   100 \
+             && update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-5   100 \
              && mv /usr/bin/ar /usr/bin/ar_bin \
-             && echo '#/bin/bash'                                                                    > /usr/bin/ar \
-             && echo '/usr/bin/ar_bin $@ --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so'     >> /usr/bin/ar \
+             && echo '#/bin/bash'                                                                     > /usr/bin/ar \
+             && echo '/usr/bin/ar_bin $@ --plugin /usr/lib/gcc/i686-linux-gnu/5/liblto_plugin.so'     >> /usr/bin/ar \
              && chmod +x /usr/bin/ar \
              && mv /usr/bin/ranlib /usr/bin/ranlib_bin \
-             && echo '#/bin/bash'                                                                    > /usr/bin/ranlib \
-             && echo '/usr/bin/ranlib_bin $@ --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so' >> /usr/bin/ranlib \
+             && echo '#/bin/bash'                                                                     > /usr/bin/ranlib \
+             && echo '/usr/bin/ranlib_bin $@ --plugin /usr/lib/gcc/i686-linux-gnu/5/liblto_plugin.so' >> /usr/bin/ranlib \
              && chmod +x /usr/bin/ranlib \
              && mv /usr/bin/nm /usr/bin/nm_bin \
-             && echo '#/bin/bash'                                                                    > /usr/bin/nm \
-             && echo '/usr/bin/nm_bin $@ --plugin /usr/lib/gcc/i686-linux-gnu/4.9/liblto_plugin.so'     >> /usr/bin/nm \
+             && echo '#/bin/bash'                                                                     > /usr/bin/nm \
+             && echo '/usr/bin/nm_bin $@ --plugin /usr/lib/gcc/i686-linux-gnu/5/liblto_plugin.so'     >> /usr/bin/nm \
              && chmod +x /usr/bin/nm",
     creates => "/usr/bin/ar_bin",
   }
@@ -29,6 +31,7 @@ define installer (
   $url,
   $args = '',
   $environment = [],
+  $lto = true,
   $method = 'auto',
   $prefix = '/nubots/toolchain',
   $strip_components = 1
@@ -56,7 +59,7 @@ define installer (
   }
 
   exec { "install_${name}":
-    command => "/usr/local/bin/install_from_source '${prefix}' '${method}' ${args}",
+    command => "/usr/local/bin/install_from_source '${prefix}' '${method}' ${lto} ${args}",
     creates => "/nubots/toolchain/lib/lib${name}.a",
     cwd => "/nubots/toolchain/src/${name}",
     environment => $environment,
