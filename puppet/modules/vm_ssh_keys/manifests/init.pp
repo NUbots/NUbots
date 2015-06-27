@@ -5,7 +5,7 @@ class vm_ssh_keys {
         ensure => present,
         source => 'puppet:///modules/vm_ssh_keys/id_rsa',
         owner => 'vagrant',
-	mode => '600',
+        mode => '600',
     }
 
     file { 'vm_public_key':

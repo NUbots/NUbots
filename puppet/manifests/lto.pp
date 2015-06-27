@@ -38,6 +38,7 @@ node nubotsvm {
   package { 'yasm': ensure => latest, }
   package { 'libboost-dev': ensure => latest, }
 
+  include quex
   installer { 'zlib':           url => 'http://zlib.net/zlib-1.2.8.tar.gz', }
   installer { 'protobuf':       url => 'https://github.com/google/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz',
                                 args => '--with-zlib',
@@ -63,8 +64,6 @@ node nubotsvm {
   installer { 'armadillo':      url => 'http://sourceforge.net/projects/arma/files/armadillo-5.200.2.tar.gz',
                                 method => 'cmake',
                                 require => Installer['openblas'], }
-
-
   # installer { 'tcmalloc':       url => 'https://googledrive.com/host/0B6NtGsLhIcf7MWxMMF9JdTN3UVk/gperftools-2.4.tar.gz',
   #                               args => '--with-tcmalloc-pagesize=64 --enable-minimal', }
   installer { 'yaml-cpp':       url => 'https://github.com/jbeder/yaml-cpp/archive/release-0.5.2.tar.gz',
@@ -75,15 +74,15 @@ node nubotsvm {
                                 args => '--disable-fortran --enable-shared', }
   installer { 'libjpeg-turbo':  url => 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.1/libjpeg-turbo-1.4.1.tar.gz',
                                 args => '--build=i686-linux-gnu --host=i686-linux-gnu', }
-  # installer { 'espeak':         url => 'http://sourceforge.net/projects/espeak/files/espeak/espeak-1.48/espeak-1.48.04-source.zip',
-  #                               environment => ['AUDIO="PORTAUDIO"'],
-  #                               require => Installer['portaudio'], }
   installer { 'cppformat':      url => 'https://github.com/cppformat/cppformat/archive/1.1.0.tar.gz', }
   installer { 'alsalib':        url => 'ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.29.tar.bz2',
                                 lto => false, }
   installer { 'portaudio':      url => 'http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz',
                                 require => Installer['alsalib'],
                                 lto => false, }
+  # installer { 'espeak':         url => 'http://sourceforge.net/projects/espeak/files/espeak/espeak-1.48/espeak-1.48.04-source.zip',
+  #                               environment => ['AUDIO="PORTAUDIO"'],
+  #                               require => Installer['portaudio'], }
   installer { 'muparser':       url => 'https://github.com/TrentHouliston/muparser/archive/master.tar.gz',
                                 args => '--disable-shared --disable-debug --disable-samples', }
 }
