@@ -8,7 +8,7 @@ class robocup::build_dep (
   ) {
   package { 'build-essential': ensure => latest }
   package { 'cmake': ensure => latest }
-  include ninja
+  package { 'ninja-build': ensure => latest }
   package { 'git': ensure => latest }
   # package { 'openssh-server': ensure => latest }
   package { ['libprotobuf-dev', 'protobuf-compiler']: ensure => latest }

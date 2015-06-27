@@ -18,7 +18,7 @@ class virtualbox_sharing_fix {
 
 class developer_tools {
   include vm_ssh_keys
-  class { 'vim':  username => $username, }
+  package { 'vim':  ensure => latest, }
   package { 'screen': ensure => latest, }
   package { 'htop': ensure => latest, }
   package { 'gdb': ensure => latest, }
@@ -26,7 +26,6 @@ class developer_tools {
   package { 'linux-headers-generic': ensure => latest, }
   package { 'dos2unix': ensure => latest, }
   package { 'rsync': ensure => latest, }
-  # package { 'curl': ensure => latest, }
 }
 
 node nubotsvm {
