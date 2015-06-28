@@ -143,14 +143,16 @@ namespace matrix {
     }
 
     Transform3D Transform3D::interpolate(Transform3D T1, Transform3D T2, float alpha){
-        UnitQuaternion q1 = UnitQuaternion(T1.rotation());
-        UnitQuaternion q2 = UnitQuaternion(T2.rotation());
+        Rotation3D r1 = T1.rotation();
+        UnitQuaternion q1 = UnitQuaternion(q1);
+        Rotation3D r2 = T2.rotation();
+        UnitQuaternion q2 = UnitQuaternion(q2);
 
         arma::vec3 t1 = T1.translation();
         arma::vec3 t2 = T2.translation();
 
-        auto qResult = q1.slerp(q2,alpha);
-        auto tResult = alpha * (t2 - t1) + t1;
+        UnitQuaternion qResult = q1.slerp(q2,alpha);
+        arma::vec3 tResult = alpha * (t2 - t1) + t1;
 
         Transform3D TResult = Transform3D(Rotation3D(qResult));
         TResult.translation() = tResult;

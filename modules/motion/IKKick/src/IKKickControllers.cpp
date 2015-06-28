@@ -18,12 +18,14 @@
  */
 
 #include "IKKickControllers.h"
+#include "utility/motion/RobotModels.h"
 
 using messages::input::Sensors;
 using messages::input::LimbID;
 using messages::input::ServoID;
-using utility::math::matrix::Transform3D;
 using messages::support::Configuration;
+using utility::math::matrix::Transform3D;
+using utility::motion::kinematics::DarwinModel;
 
 namespace modules{
 namespace motion{
@@ -45,21 +47,24 @@ namespace motion{
 
 	Transform3D KickBalancer::getFootPose(const Sensors& sensors, float deltaT){
 		    
-            // Get our foot positions
-            Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
-            Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
+        // Get our foot positions
+        Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
+        Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
 
-            
-            // Obtain the position of the torso and the direction in which the torso needs to move
-            // The position that the COM needs to move to in support foot coordinates
-            auto torsoTarget = arma::vec({0, 0, stand_height}); 
+        int negativeIfRight = supportFoot == LimbID::LEFT_LEG ? 1 : -1;
 
-            // Find position vector from support foot to torso in support foot coordinates.
-            auto torsoPosition = leftFoot.i().translation();
-           
+        // Obtain the position of the torso and the direction in which the torso needs to move
+        // The position that the COM needs to move to in support foot coordinates
+        Transform3D torsoTarget = arma::eye(4,4);
+        torsoTarget.submat(0,3,3,3) = arma::vec({0, negativeIfRight * DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE, stand_height,1}); 
 
+        // Find position vector from support foot to torso in support foot coordinates.
+        Transform3D torsoPose = supportFoot == LimbID::LEFT_LEG ? leftFoot.i() : rightFoot.i();
+        std::cout << "torsoPose = \n" << torsoPose << std::endl;
 
-		return leftFootNewPose;
+        Transform3D newSupportFootPose = utility::math::matrix::Transform3D::interpolate(torsoPose, torsoTarget, deltaT * motion_gain).i();
+
+		return torsoTarget.i();
 	}
 
 	Transform3D FootLifter::getFootPose(const Sensors& sensors, float deltaT){
