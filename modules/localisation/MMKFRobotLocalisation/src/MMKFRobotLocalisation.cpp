@@ -26,6 +26,7 @@
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/LocalisationFieldObject.h"
+#include "utility/localisation/transform.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
@@ -34,7 +35,6 @@
 #include "messages/localisation/ResetRobotHypotheses.h"
 #include "MMKFRobotLocalisationEngine.h"
 #include "RobotModel.h"
-#include "utility/nubugger/NUhelpers.h"
 
 using utility::math::matrix::Rotation3D;
 using utility::math::angle::bearingToUnitVector;
@@ -51,6 +51,27 @@ using utility::nubugger::graph;
 
 namespace modules {
 namespace localisation {
+
+    void MMKFRobotLocalisation::graphMMRMHypotheses(const std::string& descr, MultiModalRobotModel& mmrm) {
+        auto& hypotheses = mmrm.hypotheses();
+
+        int model_num = 0;
+        for (auto& model : hypotheses) {
+            // arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
+            auto model_state = model->GetEstimate();
+            auto model_cov = model->GetCovariance();
+
+            // Graph hypothesis state and covariance matrix:
+            std::stringstream msg_state;
+            msg_state << "MMKFRL, " << descr << ": hypothesis state " << model_num;
+            emit(graph(msg_state.str(), model_state));
+            std::stringstream msg_cov;
+            msg_cov << "MMKFRL, " << descr << ": hypothesis cov " << model_num;
+            emit(graph(msg_cov.str(), model_cov));
+            model_num++;
+        }
+    }
+
     MMKFRobotLocalisation::MMKFRobotLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)),
           engine_(std::make_unique<MMKFRobotLocalisationEngine>()) {
@@ -82,7 +103,7 @@ namespace localisation {
         });
 
         on<Trigger<ResetRobotHypotheses>,
-           Options<Sync<MMKFRobotLocalisation>>,
+           Options<Sync<MMKFRobotLocalisation>,Single>,
            With<Sensors>
           >("Localisation ResetRobotHypotheses", [this](const ResetRobotHypotheses& reset, const Sensors& sensors) {
             engine_->Reset(reset, sensors);
@@ -96,8 +117,8 @@ namespace localisation {
         // Emit self
         emit_data_handle = on<Trigger<Every<100, std::chrono::milliseconds>>,
            With<Sensors>,
-           Options<Sync<MMKFRobotLocalisation>>
-           >("Localisation NUbugger Output", [this](const time_t&, const Sensors& sensors) {
+           Options<Sync<MMKFRobotLocalisation>, Single>
+           >("Localisation NUSight Output", [this](const time_t&, const Sensors& sensors) {
             auto& hypotheses = engine_->robot_models_.hypotheses();
             if (hypotheses.size() == 0) {
                 NUClear::log<NUClear::ERROR>("MMKFRobotLocalisation has no robot hypotheses.");
@@ -107,22 +128,23 @@ namespace localisation {
             auto robots = std::vector<Self>();
 
             for (auto& model : hypotheses) {
-                arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
+                // arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
+                auto model_state = model->GetEstimate();
                 auto model_cov = model->GetCovariance();
 
-                emit(graph("model_state = ", model_state));
-                // log("model_cov = \n", model_cov);
-                
                 Self robot_model;
                 robot_model.position = model_state.rows(robot::kX, robot::kY);
-                Rotation3D imuRotation = Rotation3D::createRotationZ(model_state(robot::kImuOffset));
-                arma::vec3 world_heading = imuRotation * arma::mat(sensors.orientation.t()).col(0);
-                robot_model.heading = world_heading.rows(0, 1);
+                // Rotation3D imuRotation = Rotation3D::createRotationZ(model_state(robot::kImuOffset));
+                // arma::vec3 world_heading = imuRotation * arma::mat(sensors.orientation.t()).col(0);
+                // robot_model.heading = world_heading.rows(0, 1);
+                robot_model.heading = utility::localisation::transform::ImuToWorldHeadingTransform(model_state(robot::kImuOffset), sensors.orientation);
                 robot_model.velocity = model_state.rows(robot::kVX, robot::kVY);
                 robot_model.position_cov = model_cov.submat(0,0,1,1);
                 robot_model.last_measurement_time = last_measurement_time;
                 robots.push_back(robot_model);
             }
+
+            graphMMRMHypotheses("out", engine_->robot_models_);
 
             auto robot_msg = std::make_unique<std::vector<Self>>(robots);
             emit(std::move(robot_msg));
@@ -132,16 +154,16 @@ namespace localisation {
         emit_data_handle.disable();
 
 
-        // on<Trigger<Sensors>,
-        //    Options<Sync<MMKFRobotLocalisation>,Single>
-        //   >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
-        //     auto curr_time = NUClear::clock::now();
+        on<Trigger<Sensors>,
+           Options<Sync<MMKFRobotLocalisation>,Single>
+          >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
+            auto curr_time = NUClear::clock::now();
 
-        //     emit(graph("Odometry Measurement Update", sensors.odometry[0], sensors.odometry[1]));
-        //     log("Odometry Measurement Update", sensors.odometry.t());
-        //     engine_->TimeUpdate(curr_time, sensors);
-        //     engine_->OdometryMeasurementUpdate(sensors);
-        // });
+            emit(graph("Odometry Measurement Update", sensors.odometry[0], sensors.odometry[1]));
+            // log("Odometry Measurement Update", sensors.odometry.t());
+            engine_->TimeUpdate(curr_time, sensors);
+            engine_->OdometryMeasurementUpdate(sensors);
+        });
 
         // on<Trigger<Every<100, Per<std::chrono::seconds>>>,
         //    With<Sensors>,
@@ -173,24 +195,25 @@ namespace localisation {
             }
 
             //DEBUG
-            // for (auto& goal : goals) {
-            //     // std::cout << "  side:";
-            //     // std::cout << ((goal.side == Goal::Side::LEFT) ? "LEFT" :
-            //     //               (goal.side == Goal::Side::RIGHT) ? "RIGHT" : "UNKNOWN")
-            //     //           << std::endl;
+            for (auto& goal : goals) {
+                // std::cout << "  side:";
+                // std::cout << ((goal.side == Goal::Side::LEFT) ? "LEFT" :
+                //               (goal.side == Goal::Side::RIGHT) ? "RIGHT" : "UNKNOWN")
+                //           << std::endl;
 
-            //     for(uint i = 0; i < goal.measurements.size(); ++i) {
-            //         std::stringstream msg;
-            //         msg << ((goal.side == Goal::Side::LEFT) ? "LGoal Pos" :
-            //                (goal.side == Goal::Side::RIGHT) ? "RGoal Pos" : "UGoal Pos") <<
-            //          " " << i;
-            //         emit(graph(msg.str(), goal.measurements[i].position[0], goal.measurements[i].position[1], goal.measurements[i].position[2]));
-            //         // std::cout << "  measurement: " << num++ << std::endl;
-            //         // std::cout << "    error:" << measurement.error << std::endl;
-            //     }
-            //     std::cout << "    position:" << goal.measurements[0].position.t() << std::endl;
-
-            // }
+                for(uint i = 0; i < goal.measurements.size(); ++i) {
+                    std::stringstream msg;
+                    msg << ((goal.side == Goal::Side::LEFT) ? "L " :
+                           (goal.side == Goal::Side::RIGHT) ? "R" : "U") <<
+                           ((goal.team == Goal::Team::OWN) ? "OWN Goal Pos" :
+                           (goal.team == Goal::Team::OPPONENT) ? "OPP Goal Pos" : "UGoal Pos") <<
+                           " " << i;
+                    emit(graph(msg.str(), goal.measurements[i].position[0], goal.measurements[i].position[1], goal.measurements[i].position[2]));
+                    // std::cout << "  measurement: " << num++ << std::endl;
+                    // std::cout << "    error:" << measurement.error << std::endl;
+                }
+                //std::cout << "    position:" << goal.measurements[0].position.t() << std::endl;
+            }
 
             auto curr_time = NUClear::clock::now();
             last_measurement_time = curr_time;
@@ -198,6 +221,7 @@ namespace localisation {
             engine_->TimeUpdate(curr_time, sensors);
             engine_->ProcessObjects(goals);
 
+            graphMMRMHypotheses("update", engine_->robot_models_);
         });
     }
 }

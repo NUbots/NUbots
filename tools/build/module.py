@@ -100,7 +100,7 @@ def generate_header(parts):
 
         {closeNamespace}
 
-        #endif {define}
+        #endif  // {define}
         """)
 
     return template.format(year=datetime.datetime.now().year

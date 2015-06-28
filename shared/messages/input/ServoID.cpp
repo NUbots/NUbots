@@ -47,6 +47,21 @@ namespace messages {
                     : static_cast<ServoID>(-1);
         }
 
+        ServoID idFromPartialString(const std::string str, ServoSide side){
+            return   str == "SHOULDER_PITCH"    ? static_cast<ServoID>(int(ServoID::R_SHOULDER_PITCH) + int(side))
+                   : str == "SHOULDER_ROLL"     ? static_cast<ServoID>(int(ServoID::R_SHOULDER_ROLL) + int(side))
+                   : str == "ELBOW"             ? static_cast<ServoID>(int(ServoID::R_ELBOW) + int(side))
+                   : str == "HIP_YAW"           ? static_cast<ServoID>(int(ServoID::R_HIP_YAW) + int(side))
+                   : str == "HIP_ROLL"          ? static_cast<ServoID>(int(ServoID::R_HIP_ROLL) + int(side))
+                   : str == "HIP_PITCH"         ? static_cast<ServoID>(int(ServoID::R_HIP_PITCH) + int(side))
+                   : str == "KNEE"              ? static_cast<ServoID>(int(ServoID::R_KNEE) + int(side))
+                   : str == "ANKLE_PITCH"       ? static_cast<ServoID>(int(ServoID::R_ANKLE_PITCH) + int(side))
+                   : str == "ANKLE_ROLL"        ? static_cast<ServoID>(int(ServoID::R_ANKLE_ROLL) + int(side))
+                   : str == "HEAD_YAW"          ? ServoID::HEAD_YAW
+                   : str == "HEAD_PITCH"        ? ServoID::HEAD_PITCH
+                   : static_cast<ServoID>(-1);
+        }
+
         const std::string stringFromId(const ServoID id) {
 
             switch(id) {
@@ -73,5 +88,7 @@ namespace messages {
                 default:                         return "UNKNOWN";
             }
         }
+
+
     }
 }

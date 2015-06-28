@@ -178,6 +178,12 @@ namespace motion {
         double balanceIGain;
         double balanceDGain;
 
+        // jointGains are the current gains sent to the servos
+        std::map<ServoID, float> jointGains;
+        // servoControlPGains are the constant proportionality
+        // constants which define the current values of jointGains based on the robot's balance state
+        std::map<ServoID, float> servoControlPGains;
+        
         double balanceTransPGainX;
         double balanceTransPGainY;
         double balanceTransPGainZ;

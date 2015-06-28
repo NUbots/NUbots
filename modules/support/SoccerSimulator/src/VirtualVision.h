@@ -63,7 +63,7 @@ namespace support {
 		std::vector<messages::vision::VisionObject::Measurement> measurements;
         if(std::fabs(screenAngular[0]) < camParams.FOV[0] / 2 && std::fabs(screenAngular[1]) < camParams.FOV[1] / 2){
         	measurements.push_back(measurement);
-        	measurements.push_back(measurement); // TODO: Fix the need for double measurements.
+        	//measurements.push_back(measurement); // TODO: Fix the need for double measurements.
         }
 
         VisibleMeasurement visibleMeas = {
@@ -138,6 +138,8 @@ namespace support {
 
 			// TODO: set timestamp, sensors, classifiedImage?
 			for (auto& m : visibleMeasurements.measurements){
+				m.velocity.rows(0,1) = robotPose.rotation().i() * velocity.rows(0,1);
+				m.velCov = 0.1 * arma::eye(3,3);
 				result.measurements.push_back(m);
 			}
 
