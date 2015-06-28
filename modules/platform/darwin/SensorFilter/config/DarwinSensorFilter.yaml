@@ -9,6 +9,6 @@ imu_velocity_process_noise : 1e-8
 measurement_noise_accelerometer : 1e-4
 measurement_noise_gyroscope : 1e-8
 measurement_noise_foot_up : 1e-8
-foot_up_safe_zone: 0.7
+foot_up_safe_zone: 0
 debounce_threshold : 7
 odometry_covariance_factor : 0.05
