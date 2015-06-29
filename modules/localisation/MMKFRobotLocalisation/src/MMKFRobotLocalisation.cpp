@@ -35,7 +35,6 @@
 #include "messages/localisation/ResetRobotHypotheses.h"
 #include "MMKFRobotLocalisationEngine.h"
 #include "RobotModel.h"
-#include "utility/nubugger/NUhelpers.h"
 
 using utility::math::matrix::Rotation3D;
 using utility::math::angle::bearingToUnitVector;
@@ -155,16 +154,16 @@ namespace localisation {
         emit_data_handle.disable();
 
 
-        // on<Trigger<Sensors>,
-        //    Options<Sync<MMKFRobotLocalisation>,Single>
-        //   >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
-        //     auto curr_time = NUClear::clock::now();
+        on<Trigger<Sensors>,
+           Options<Sync<MMKFRobotLocalisation>,Single>
+          >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
+            auto curr_time = NUClear::clock::now();
 
-        //     emit(graph("Odometry Measurement Update", sensors.odometry[0], sensors.odometry[1]));
-        //     log("Odometry Measurement Update", sensors.odometry.t());
-        //     engine_->TimeUpdate(curr_time, sensors);
-        //     engine_->OdometryMeasurementUpdate(sensors);
-        // });
+            emit(graph("Odometry Measurement Update", sensors.odometry[0], sensors.odometry[1]));
+            // log("Odometry Measurement Update", sensors.odometry.t());
+            engine_->TimeUpdate(curr_time, sensors);
+            engine_->OdometryMeasurementUpdate(sensors);
+        });
 
         // on<Trigger<Every<100, Per<std::chrono::seconds>>>,
         //    With<Sensors>,

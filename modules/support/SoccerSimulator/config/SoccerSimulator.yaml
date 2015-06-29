@@ -9,7 +9,8 @@ vision:
   goal_observations: true
   ball_observations: true
 
-  distinguish_own_and_opponent_goals: true
+  distinguish_own_and_opponent_goals: false
+  distinguish_left_and_right_goals: false
 
   # Error values which are sent to localisation system representing uncertainty in vision measurements
   variance:
@@ -18,9 +19,9 @@ vision:
       # 1cm
       min_error:  0.01
     # 1deg
-    theta: 0.1 * pi / 180
+    theta: pi / 180
     # 1deg
-    phi: 0.1 * pi / 180
+    phi: pi / 180
 
 robot:
   # If use_motion is true, then the robot will move based on the latest behaviour commands
@@ -44,9 +45,9 @@ ball:
 
 # Initial pose of the robot, mainly for MOTION type
 initial:
-  robot_pose: [0, 0, 3.14]
+  robot_pose: [-4.5, 0, 0]
   ball:
-    position: [-4.5,0, 0]
+    position: [2 , 1, 0]
     diameter: 0.1
 
 # Turns off vision but leaves localisation running with no observations.

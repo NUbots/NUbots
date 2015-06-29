@@ -1,8 +1,8 @@
 stance:
   # The body height of the robot, in meters; changing this will alter how high the robot's natural stance is.
-  body_height: 0.285
+  body_height: 0.265
   # The angle of the torso when walking
-  body_tilt: 25 * pi / 180
+  body_tilt: 35 * pi / 180
   # Default arm positions while walking
   arms:
       left:
@@ -42,7 +42,7 @@ walk_cycle:
   hip_roll_compensation: 4 * pi / 180
   step:
     # The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
-    height: 0.015
+    height: 0.020
     # These limit the distance a footstep will take
     limits:
       - [-0.1, 0.1] # [min_x, max_x]
@@ -74,19 +74,39 @@ walk_cycle:
     weight: 0.7
     offset: 0 * pi / 180
     angle_gain:
-      p: 0.132
+      p: 0.5
       i: 0.0
-      d: 0.021
+      d: 0.0
     translation_gain:
       X:
-        p: 0
-        d: 0
+        p: 0.0
+        d: -0.0
       Y:
         p: 0
         d: 0
       Z:
-        p: 0
+        p: 0.035
         d: 0
+    servo_gains:
+      # -
+      #   id: "HIP_YAW"
+      #   p: 100
+      # -
+      #   id: "HIP_ROLL"
+      #   p: 100
+      # -
+      #   id: "HIP_PITCH"
+      #   p: 100
+      # -
+      #   id: "KNEE"
+      #   p: 1000
+      # -
+      #   id: "ANKLE_PITCH"
+      #   p: 100
+      # -
+      #   id: "ANKLE_ROLL"
+      #   p: 100
+      
     # Support bias parameters to reduce backlash-based instability
     # velFastForward: 0.05
     # velFastTurn: 0.15

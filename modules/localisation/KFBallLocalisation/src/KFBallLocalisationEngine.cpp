@@ -42,6 +42,7 @@ void KFBallLocalisationEngine::TimeUpdate(NUClear::clock::time_point current_tim
     ball_filter_.timeUpdate(seconds);
 }
 
+
 // void KFBallLocalisationEngine::TimeUpdate(std::chrono::system_clock::time_point current_time,
 //                                           const FakeOdometry&) {
 //     double seconds = TimeDifferenceSeconds(current_time, last_time_update_time_);
@@ -70,7 +71,16 @@ double KFBallLocalisationEngine::MeasurementUpdate(const VisionObject& observed_
         sphericalImuObservation(1) -= ballAngle;
         arma::mat33 cov = measurement.error;
 
-        quality *= ball_filter_.measurementUpdate(sphericalImuObservation, cov, ballAngle);
+        //Old measurement
+        // quality *= ball_filter_.measurementUpdate(sphericalImuObservation, cov, ballAngle);
+
+        //new measurement
+        //add velocity before measurement:
+        arma::vec posVel = arma::join_cols(sphericalImuObservation, measurement.velocity.rows(0,1));
+        arma::mat posVelCov = arma::eye(5,5);
+        posVelCov.submat(0,0,2,2) = cov;
+        posVelCov.submat(3,3,4,4) = measurement.velCov.submat(0,0,1,1);
+        quality *= ball_filter_.measurementUpdate(posVel, posVelCov, ballAngle);
     }
 
     return quality;

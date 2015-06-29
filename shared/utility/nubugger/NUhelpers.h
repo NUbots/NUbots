@@ -88,7 +88,7 @@ namespace nubugger {
         return dataPoint;
     }
 
-    inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawArrow(std::string name, arma::vec3 position, arma::vec3 direction, float length, float timeout = TIMEOUT) {
+    inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawArrow(std::string name, arma::vec3 position,  float length, arma::vec3 direction, float timeout = TIMEOUT) {
 
         auto drawObjects = std::make_unique<messages::support::nubugger::proto::DrawObjects>();
         auto* object = drawObjects->add_objects();

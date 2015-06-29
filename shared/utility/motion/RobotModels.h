@@ -58,15 +58,19 @@ namespace utility{
 
                 class Head {
                 public:
-                    static constexpr float NECK_BASE_POS_FROM_ORIGIN[3] = {0.013, 0, 0.11};
+                    static constexpr float NECK_BASE_POS_FROM_ORIGIN_X = 0.013;
+                    static constexpr float NECK_BASE_POS_FROM_ORIGIN_Y = 0;
+                    static constexpr float NECK_BASE_POS_FROM_ORIGIN_Z = 0.11;
                     static constexpr float NECK_LENGTH = 0.0426;
-                    static constexpr float NECK_TO_CAMERA[3] = {0.0514,0,0.043};
+                    static constexpr float NECK_TO_CAMERA_X = 0.0514;
+                    static constexpr float NECK_TO_CAMERA_Y = 0;
+                    static constexpr float NECK_TO_CAMERA_Z = 0.043;
                     static constexpr float CAMERA_DECLINATION_ANGLE_OFFSET = 0;
                     //Head movement limits
                     static constexpr float MAX_YAW = M_PI * 2 / 3;
                     static constexpr float MIN_YAW = -M_PI * 2 / 3;
-                    static constexpr float MAX_PITCH = M_PI / 4;
-                    static constexpr float MIN_PITCH = -M_PI / 4;
+                    static constexpr float MAX_PITCH = M_PI / 3;
+                    static constexpr float MIN_PITCH = -M_PI / 3;
                 };
 
                 class Arm {//ROUGH MEASUREMENTS

@@ -92,6 +92,7 @@ namespace support {
         cfg_.simulate_goal_observations = config["vision"]["goal_observations"].as<bool>();
         cfg_.simulate_ball_observations = config["vision"]["ball_observations"].as<bool>();
         cfg_.distinguish_own_and_opponent_goals = config["vision"]["distinguish_own_and_opponent_goals"].as<bool>();
+        cfg_.distinguish_left_and_right_goals = config["vision"]["distinguish_own_and_opponent_goals"].as<bool>();
 
         cfg_.robot.motion_type = motionTypeFromString(config["robot"]["motion_type"].as<std::string>());
         cfg_.robot.path.period = config["robot"]["path"]["period"].as<Expression>();
@@ -115,6 +116,8 @@ namespace support {
         cfg_.vision_error(1) = config["vision"]["variance"]["r"]["min_error"].as<Expression>();
         cfg_.vision_error(2) = config["vision"]["variance"]["theta"].as<Expression>();
         cfg_.vision_error(3) = config["vision"]["variance"]["phi"].as<Expression>();
+
+        lastNow = NUClear::clock::now();
 
         kicking = false;
         PLAYER_ID = globalConfig.playerId;
@@ -143,14 +146,18 @@ namespace support {
             arma::vec3 goal_own_l = {field_description_->goalpost_own_l[0],field_description_->goalpost_own_l[1],0};
             goalPosts.push_back(VirtualGoalPost(goal_own_l, 1.1, Goal::Side::LEFT, Goal::Team::OWN));
 
-            for(auto& g : goalPosts){
-                log("goalPost", g.position.t());
-            }
+            //DEBUG
+            // for(auto& g : goalPosts){
+            //     log("goalPost", g.position.t());
+            // }
 
         });
 
-        on<With<Configuration<SoccerSimulatorConfig>>, Trigger<GlobalConfig>>("Soccer Simulator Configuration", std::bind(std::mem_fn(&SoccerSimulator::updateConfiguration), this, std::placeholders::_1, std::placeholders::_2));
-        on<Trigger<Configuration<SoccerSimulatorConfig>>, With<GlobalConfig>>("Soccer Simulator Configuration", std::bind(std::mem_fn(&SoccerSimulator::updateConfiguration), this, std::placeholders::_1, std::placeholders::_2));
+        auto updateConfigLambda = [this](const Configuration<SoccerSimulatorConfig>& config, const GlobalConfig& globalConfig) {
+            updateConfiguration(config, globalConfig);
+        };
+        on<With<Configuration<SoccerSimulatorConfig>>, Trigger<GlobalConfig>>("Soccer Simulator Configuration", updateConfigLambda);
+        on<Trigger<Configuration<SoccerSimulatorConfig>>, With<GlobalConfig>>("Soccer Simulator Configuration", updateConfigLambda);
 
         on<Trigger<KickPlannerConfig>>("Get Kick Planner Config", [this](const KickPlannerConfig& cfg){
             kick_cfg = cfg;
@@ -166,10 +173,12 @@ namespace support {
 
         on<
             Trigger<Every<SIMULATION_UPDATE_FREQUENCY, Per<std::chrono::seconds>>>,
-            With<Optional<WalkCommand>>
+            With<Sensors, Optional<WalkCommand>>
         >("Robot motion", [this](const time_t&,
+                                 const Sensors& sensors,
                                  const std::shared_ptr<const WalkCommand>& walkCommand) {
-
+            time_t now = NUClear::clock::now();
+            double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(now - lastNow).count();
             Transform2D diff;
 
             switch (cfg_.robot.motion_type){
@@ -185,18 +194,20 @@ namespace support {
                     //Face along direction of movement
                     world.robotPose.angle() = vectorToBearing(diff.xy());
 
-                    world.robotVelocity = Transform2D({arma::norm(diff) * SIMULATION_UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
+                    world.robotVelocity = Transform2D({arma::norm(diff) / deltaT, 0, 0}); //Robot coordinates
                     break;
 
                 case MotionType::MOTION:
                 //Update based on walk engine
                     if(walkCommand && !kicking) {
-                        world.robotVelocity = walkCommand->command;
+                        world.robotVelocity.rows(0,1) = sensors.odometry;
+                        //angle from command:
+                        world.robotVelocity(2) = walkCommand->command(2);
                     } else {
                         world.robotVelocity = utility::math::matrix::Transform2D({0,0,0});
                     }
                     world.robotVelocity.xy() = world.robotPose.rotation() * world.robotVelocity.xy();
-                    world.robotPose += world.robotVelocity / SIMULATION_UPDATE_FREQUENCY;
+                    world.robotPose += world.robotVelocity * deltaT;
                     break;
             }
             // Update ball position
@@ -209,9 +220,10 @@ namespace support {
 
                     world.ball.position.rows(0,1) = getPath(cfg_.ball.path);
 
-                    diff = world.ball.position - oldBallPose;
-
-                    world.ball.velocity = Transform2D({arma::norm(diff) * SIMULATION_UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
+                    world.ball.velocity = (world.ball.position - oldBallPose) / deltaT; //world coordinates
+                    emit(graph("sim ball vel",world.ball.velocity));
+                    emit(graph("oldBallPose",oldBallPose));
+                    emit(graph("world.ball.position",world.ball.position));
                     break;
 
                 case MotionType::MOTION:
@@ -237,6 +249,7 @@ namespace support {
 
             oldRobotPose = world.robotPose;
             oldBallPose = world.ball.position;
+            lastNow = now;
         });
 
         // Simulate Vision
@@ -260,7 +273,7 @@ namespace support {
                     return;
                 }
 
-                // for (auto& g : goalPosts) {
+               
                 for (auto& g : goalPosts) {
 
                     // Detect the goal:
@@ -273,6 +286,11 @@ namespace support {
                         goals->push_back(m);
                     }
                 }
+
+                if(!cfg_.distinguish_left_and_right_goals){
+                    setGoalLeftRightKnowledge(*goals);
+                }
+
 
                 emit(std::move(goals));
 
@@ -328,7 +346,7 @@ namespace support {
 
             arma::vec2 bearingVector = world.robotPose.rotation() * arma::vec2({1,0});
             arma::vec3 robotHeadingVector = {bearingVector[0], bearingVector[1], 0};
-            emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, robotHeadingVector, 1, 0));
+            emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, 1, robotHeadingVector, 0));
 
             emit(drawSphere("ball", {world.ball.position(0), world.ball.position(1), 0}, 0.1, 0));
         });
@@ -373,6 +391,33 @@ namespace support {
                 throw std::runtime_error(str.str());
         }
         return arma::vec2({wave1,wave2});
+    }
+
+    void SoccerSimulator::setGoalLeftRightKnowledge(std::vector<messages::vision::Goal>& goals){
+        // for (auto& g : goalPosts) {
+        int leftGoals = 0;
+        int rightGoals = 0;
+        int unknownGoals = 0;
+        for (auto& g : goals) {
+            //Count sides
+            if(g.side == Goal::Side::LEFT){
+                leftGoals++;
+            } else if(g.side == Goal::Side::RIGHT){
+                rightGoals++;
+            } else {
+                unknownGoals++;
+            }
+        }
+
+        int totalGoals = leftGoals + rightGoals + unknownGoals;
+
+        //we need to check if more or less than two goals are visible, or if the two visible goals are not a left-right pair,
+        // and remove left-right labels if so
+        if(totalGoals != 2 || leftGoals != 1 || rightGoals != 1){
+            for (auto& g : goals){
+                g.side = Goal::Side::UNKNOWN;
+            }
+        }
     }
 
 }

@@ -50,7 +50,7 @@ namespace localisation {
             last_time_update_time_ = NUClear::clock::now();
         }
 
-        void TimeUpdate(std::chrono::system_clock::time_point current_time);
+        void TimeUpdate(NUClear::clock::time_point current_time);
 
         // void TimeUpdate(std::chrono::system_clock::time_point current_time,
         //                 const messages::localisation::FakeOdometry& odom);

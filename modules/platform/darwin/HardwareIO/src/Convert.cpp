@@ -45,7 +45,7 @@ namespace darwin {
         1,              // [16] R_ANKLE_ROLL
         1,              // [17] L_ANKLE_ROLL
         1,              // [18]  HEAD_YAW
-        -1,             // [19]  HEAD_PITCH
+        1,             // [19]  HEAD_PITCH
     };
 
     /// Offsets the radian angles of motors to change their 0 position

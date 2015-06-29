@@ -345,6 +345,8 @@ namespace modules {
                      *                   Odometry                   *
                      ************************************************/
 
+                    emit(graph("FSR Left Raw", input.fsr.left.fsr1, input.fsr.left.fsr2, input.fsr.left.fsr3, input.fsr.left.fsr4));
+                    emit(graph("FSR Right Raw", input.fsr.right.fsr1, input.fsr.right.fsr2, input.fsr.right.fsr3, input.fsr.right.fsr4));
                     //Check support foot:
                     sensors->leftFootDown = false;
                     sensors->rightFootDown = false;
@@ -371,8 +373,7 @@ namespace modules {
                         sensors->rightFootDown = true;
                         sensors->rightFSRCenter = {input.fsr.right.centreX, input.fsr.right.centreY};
                     }
-
-                        
+                            
                     // log("left", sensors->leftFSRCenter.t(), "right", sensors->rightFSRCenter.t());
 
                     // if(previousSensors && (!sensors->leftFootDown && !sensors->rightFootDown )) {
@@ -409,8 +410,8 @@ namespace modules {
                             arma::vec3 previousMeasuredTorsoFromLeftFoot = -previousSensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL).submat(0,0,2,2).t() * previousSensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL).col(3).rows(0,2);
                             arma::vec3 previousMeasuredTorsoFromRightFoot = -previousSensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL).submat(0,0,2,2).t() * previousSensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL).col(3).rows(0,2);
 
-                            arma::vec3 torsoVelFromLeftFoot =  -(measuredTorsoFromLeftFoot - previousMeasuredTorsoFromLeftFoot);//negate hack
-                            arma::vec3 torsoVelFromRightFoot =  -(measuredTorsoFromRightFoot - previousMeasuredTorsoFromRightFoot);
+                            arma::vec3 torsoVelFromLeftFoot =  (measuredTorsoFromLeftFoot - previousMeasuredTorsoFromLeftFoot);
+                            arma::vec3 torsoVelFromRightFoot =  (measuredTorsoFromRightFoot - previousMeasuredTorsoFromRightFoot);
 
                             arma::vec3 averageVelocity = (torsoVelFromLeftFoot * static_cast<int>(sensors->leftFootDown) + torsoVelFromRightFoot * static_cast<int>(sensors->rightFootDown))/(static_cast<int>(sensors->rightFootDown) + static_cast<int>(sensors->leftFootDown));
                             if(deltaT > 0){
