@@ -44,6 +44,8 @@ namespace motion {
         
         bool leftFootIsSupport;
 
+        float foot_separation;
+
     	float KICK_PRIORITY;
     	float EXECUTION_PRIORITY;
 

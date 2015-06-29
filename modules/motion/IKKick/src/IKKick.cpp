@@ -72,6 +72,8 @@ namespace motion {
             KICK_PRIORITY = config["kick_priority"].as<float>();
             EXECUTION_PRIORITY = config["execution_priority"].as<float>();
 
+            foot_separation = config["foot_separation"].as<float>();
+
             emit(std::make_unique<KickCommand>(
                 config["target"].as<arma::vec3>(),
                 config["direction"].as<arma::vec3>()
@@ -143,7 +145,7 @@ namespace motion {
             lifter.setKickParameters(supportFoot, ballPosition, goalPosition);
             kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
             
-            balancer.start();
+            balancer.start(sensors);
         });
 
         updater = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, Options<Single>>([this](const time_t&, const Sensors& sensors) {
@@ -158,24 +160,27 @@ namespace motion {
                 kickFoot = LimbID::RIGHT_LEG;
             }
 
-            float footSeparation = 0.1;
 
             int negativeIfKickRight = kickFoot == LimbID::RIGHT_LEG ? -1 : 1;
 
             //State checker
             if(balancer.isStable()){
-                lifter.start();
+                std::cout << "balancer.isStable" << std::endl;
+                lifter.start(sensors);
             }
 
             if(lifter.isStable()){
-                kicker.start();
+                std::cout << "lifter.isStable" << std::endl;
+                kicker.start(sensors);
             }
 
             if(kicker.isFinished()){
+                std::cout << "kicker.isFinished" << std::endl;
                 lifter.stop();
             }
 
             if(lifter.isFinished()){
+                std::cout << "lifter.isFinished" << std::endl;
                 balancer.stop();
             }
             
@@ -187,7 +192,7 @@ namespace motion {
             if(balancer.isRunning()){
                 Transform3D supportFootPose = balancer.getFootPose(sensors, deltaT);
                 supportFootGoal = supportFootPose;
-                kickFootGoal =  supportFootPose.translate(arma::vec3({0, negativeIfKickRight * footSeparation, 0}));
+                kickFootGoal =  supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
             }
             if(lifter.isRunning()){
                 //TODO: CHECK ORDER
@@ -205,10 +210,9 @@ namespace motion {
             
             std::vector<std::pair<messages::input::ServoID, float>> joints;
 
-            std::cout << "kickFootGoal \n" << kickFootGoal << std::endl; 
-            std::cout << "supportFootGoal \n" << supportFootGoal << std::endl; 
-
+            std::cout << "kickFootGoal" << kickFootGoal << std::endl;
             auto kickJoints = calculateLegJoints<DarwinModel>(kickFootGoal, kickFoot);
+            std::cout << "supportFootGoal" << supportFootGoal << std::endl;
             auto supportJoints = calculateLegJoints<DarwinModel>(supportFootGoal, supportFoot);
             joints.insert(joints.end(),kickJoints.begin(),kickJoints.end());
             joints.insert(joints.end(),supportJoints.begin(),supportJoints.end());
