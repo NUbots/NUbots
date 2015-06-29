@@ -54,19 +54,24 @@ namespace modules {
                             std::cout << "TRACE: ";
                             break;
                         case NUClear::DEBUG:
-                            std::cout << Colour::green << "DEBUG: ";
+                            std::cout << "DEBUG: ";
+                            // std::cout << Colour::green << "DEBUG: ";
                             break;
                         case NUClear::INFO:
-                            std::cout << Colour::brightblue << "INFO: ";
+                            std::cout << "INFO: ";
+                            // std::cout << Colour::brightblue << "INFO: ";
                             break;
                         case NUClear::WARN:
-                            std::cout << Colour::yellow << "WARN: ";
+                            std::cout << "WARN: ";
+                            // std::cout << Colour::yellow << "WARN: ";
                             break;
                         case NUClear::ERROR:
-                            std::cout << Colour::red << "ERROR: ";
+                            std::cout << "ERROR: ";
+                            // std::cout << Colour::red << "ERROR: ";
                             break;
                         case NUClear::FATAL:
-                            std::cout << Colour::red << "FATAL: ";
+                            std::cout << "FATAL: ";
+                            // std::cout << Colour::red << "FATAL: ";
                             break;
                     }
 

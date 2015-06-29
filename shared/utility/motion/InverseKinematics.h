@@ -95,7 +95,8 @@ namespace kinematics {
 
         arma::vec3 hipOffset = {LENGTH_BETWEEN_LEGS / 2.0, HIP_OFFSET_X, DISTANCE_FROM_BODY_TO_HIP_JOINT};
 
-        arma::vec3 targetLeg = anklePos - hipOffset;
+        arma::vec3 ankleToGroundDisplacement_torso = target.submat(0,0,2,2) * arma::vec3({0,0,RobotKinematicModel::Leg::FOOT_HEIGHT});
+        arma::vec3 targetLeg = anklePos - hipOffset - ankleToGroundDisplacement_torso;
 
         float length = arma::norm(targetLeg, 2);
         if (length > UPPER_LEG_LENGTH+LOWER_LEG_LENGTH){
@@ -201,7 +202,7 @@ namespace kinematics {
     template <typename RobotKinematicModel>
     std::vector<std::pair<messages::input::ServoID, float>> calculateLegJointsTeamDarwin(utility::math::matrix::Transform3D target, messages::input::LimbID limb) {
         target(2,3) += RobotKinematicModel::TEAMDARWINCHEST_TO_ORIGIN; // translate without regard to rotation
-        target = target.translateZ(RobotKinematicModel::Leg::FOOT_HEIGHT);
+        // target = target.translateZ(RobotKinematicModel::Leg::FOOT_HEIGHT);
         return calculateLegJoints<RobotKinematicModel>(target, limb);
     }
 

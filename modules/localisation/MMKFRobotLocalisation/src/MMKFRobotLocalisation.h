@@ -38,6 +38,8 @@ namespace localisation {
 
         time_t last_measurement_time;
         
+        void graphMMRMHypotheses(const std::string& descr, MultiModalRobotModel& mmrm);
+
     public:
         /// @brief Called by the powerplant to build and setup the MMKFRobotLocalisation reactor.
         explicit MMKFRobotLocalisation(std::unique_ptr<NUClear::Environment> environment);

@@ -4,7 +4,7 @@
 #
 class nusight(
     $username    = 'nubot',
-    $nubots_dir  = "/home/${username}/nubots", #"
+    $nubots_dir  = "/home/${username}/nubots",
 	) {
   $nusight_dir = "${nubots_dir}/NUsight"
 

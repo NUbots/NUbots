@@ -97,8 +97,8 @@ namespace motion {
         double newdRoll = (roll - lastRoll) / timeSinceLastMeasurement;
 
         //Exponential filter
-        dPitch = newdPitch * 0.25 + dPitch * 0.75;
-        dRoll = newdRoll * 0.25 + dRoll * 0.75;
+        dPitch = newdPitch * 0.1 + dPitch * 0.9;
+        dRoll = newdRoll * 0.1 + dRoll * 0.9;
 
         double dTotal = std::fabs(dPitch) + std::fabs(dRoll);
 
@@ -107,7 +107,8 @@ namespace motion {
         lastBalanceTime = now;
 
         //Debug result
-        // emit(graph("pd translation", pitch, dPitch));
+        emit(graph("pitch error", pitch, dPitch));
+        emit(graph("pd translation", balanceTransPGainX * sensors.bodyCentreHeight * std::sin(pitch), balanceTransDGainX * sensors.bodyCentreHeight * dPitch));
 
         //Compute torso position adjustment
         arma::vec3 torsoAdjustment_world = arma::vec3({- balanceTransPGainX * sensors.bodyCentreHeight * std::sin(pitch) - balanceTransDGainX * sensors.bodyCentreHeight * dPitch,
@@ -121,6 +122,19 @@ namespace motion {
 
         //Apply opposite translation to the foot position
         target = target.translate(-torsoAdjustment_torso);
+
+
+        //-------------------------------
+        // Gains
+        //-------------------------------
+
+        for(auto it = servoControlPGains.cbegin(); it != servoControlPGains.cend(); ++it){
+            auto id = it->first;
+            float gain = it->second;
+            jointGains[id] = std::fmin(gainLegs, std::fabs(total * gain));
+            emit(graph(messages::input::stringFromId(id), jointGains[id]));
+        }
+
 
     }
 }

@@ -64,14 +64,10 @@ namespace robot {
         const arma::vec3& actual_position,
         const Sensors& sensors) {
         //Rewrite:
-        // arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.robotToIMU);
         arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.orientation);
-        // auto orientation = sensors.orientation.axisAngle();
-        // std::cout << "worldRobotHeading axis = " << orientation.first.t() << " angle = " << orientation.second << std::endl;
         auto obs = SphericalRobotObservation(state.rows(kX, kY),
                                              worldRobotHeading,
                                              actual_position);
-        // std::cout << "obs = " << obs.t() << std::endl;
         return obs;
     }
 
@@ -112,8 +108,8 @@ namespace robot {
         } else {
             // Spherical coordinates
             arma::vec3 result = a - b;
-            result(1) = utility::math::angle::normalizeAngle(result(1)) * cfg_.observationDifferenceBearingFactor;
-            result(2) = utility::math::angle::normalizeAngle(result(2)) * cfg_.observationDifferenceElevationFactor;
+            result(1) = /*utility::math::angle::normalizeAngle*/(result(1)) * cfg_.observationDifferenceBearingFactor;
+            result(2) = /*utility::math::angle::normalizeAngle*/(result(2)) * cfg_.observationDifferenceElevationFactor;
             return result;
         }
     }
@@ -121,6 +117,7 @@ namespace robot {
     arma::vec::fixed<RobotModel::size> RobotModel::limitState(
         const arma::vec::fixed<RobotModel::size>& state) {
 
+        // TODO: Clip robot's state to the field.
         return state;
     }
 

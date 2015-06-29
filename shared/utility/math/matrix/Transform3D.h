@@ -177,7 +177,7 @@ namespace matrix {
             inline arma::subview<double> rotation() { return submat(0,0,2,2); }
 
             inline const arma::vec3 translation() const { return submat(0,3,2,3); }
-            inline arma::vec3 translation() { return submat(0,3,2,3); }
+            inline arma::subview<double> translation() { return submat(0,3,2,3); }
 
             arma::vec3 eulerAngles() const {
                 return rotation().eulerAngles();
@@ -214,6 +214,14 @@ namespace matrix {
              * @return The rotation transform
              */
             static Transform3D createRotationZ(double radians);
+            
+            /**
+             * @brief Interpolates between two transforms
+             *
+             * @param alpha
+             * @return  alpha * (T2 - T1) + T1;
+             */
+            static Transform3D interpolate(Transform3D T1, Transform3D T2, float alpha);
     };
 
 }  // matrix

@@ -94,7 +94,7 @@ namespace support {
             bool simulate_goal_observations = true;
             bool simulate_ball_observations = true;
             bool distinguish_own_and_opponent_goals = false;
-            // bool distinguish_left_and_right_goals = true;
+            bool distinguish_left_and_right_goals = true;
 
             struct Motion {
                 MotionType motion_type = MotionType::PATH;
@@ -136,10 +136,13 @@ namespace support {
 
         std::queue<messages::motion::KickCommand> kickQueue;
 
-
+        Transform2D oldRobotPose;
+        Transform2D oldBallPose;
 
         bool kicking;
         uint PLAYER_ID;
+
+        time_t lastNow;
 
         //Methods
         void updateConfiguration(const messages::support::Configuration<SoccerSimulatorConfig>& config, const messages::support::GlobalConfig& globalConfig);
@@ -147,6 +150,8 @@ namespace support {
         std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float heading, float oldHeading);
 
         arma::vec2 getPath(Config::Motion::Path p);
+
+        void setGoalLeftRightKnowledge(std::vector<messages::vision::Goal>& goals);
 
     public:
         /// @brief Called by the powerplant to build and setup the SoccerSimulator reactor.

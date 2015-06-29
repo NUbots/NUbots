@@ -29,6 +29,8 @@
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
 #include "BallModel.h"
+#include "utility/localisation/transform.h"
+#include "utility/nubugger/NUhelpers.h"
 
 using messages::localisation::Self;
 using utility::nubugger::graph;
@@ -36,6 +38,8 @@ using messages::input::Sensors;
 using messages::support::Configuration;
 // using messages::localisation::FakeOdometry;
 using messages::localisation::Ball;
+using utility::nubugger::drawArrow;
+
 
 namespace modules {
 namespace localisation {
@@ -84,6 +88,13 @@ namespace localisation {
             emit(std::move(ball_msg));
             emit(std::move(ball_vec_msg));
 
+            arma::vec3 worldSpaceBallPos = arma::zeros(3);
+            worldSpaceBallPos.rows(0,1) = utility::localisation::transform::RobotToWorldTransform(robots[0].position, robots[0].heading, robot_space_ball_pos);
+            arma::vec3 worldSpaceBallVel = arma::zeros(3);
+            worldSpaceBallVel.rows(0,1) = utility::localisation::transform::RobotToWorldTransform(arma::zeros(2), robots[0].heading, robot_space_ball_vel);
+
+            emit(drawArrow("ballvel", worldSpaceBallPos, worldSpaceBallVel, arma::norm(worldSpaceBallVel)));
+
             emit(graph("Localisation Ball", model_state(0), model_state(1)));
             emit(graph("Localisation Ball Velocity", model_state(2), model_state(3)));
         });
@@ -121,6 +132,10 @@ namespace localisation {
                 engine_.TimeUpdate(curr_time);
 
                 engine_.MeasurementUpdate(balls[0]);
+                //DEBUG
+                // for(auto& m : balls[0].measurements){
+                //     log("ball measurement:", m.position, m.error, m.velocity, m.velCov);
+                // }
 
             }
         });

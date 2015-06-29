@@ -22,12 +22,45 @@
 #include <yaml-cpp/yaml.h>
 
 extern "C" {
-    #include <sys/inotify.h>
-    #include <sys/eventfd.h>
     #include <fcntl.h>
     #include <dirent.h>
     #include <unistd.h>
+
+    #ifdef __linux__
+        #include <sys/inotify.h>
+        #include <sys/eventfd.h>
+    #else
+        struct inotify_event {
+            int mask;
+            char* name;
+            int wd;
+            int len;
+        };
+        int inotify_init(...) { 
+            int things[2];
+            pipe(things);
+            return things[0];
+        };
+        int inotify_add_watch(...) { return 0; };
+        void inotify_rm_watch(...) {};
+        int eventfd(...) { 
+            int things[2];
+            pipe(things);
+            return things[0];
+        }
+        typedef int eventfd_t;
+        #define EFD_NONBLOCK 0
+        #define IN_ATTRIB 0
+        #define IN_CREATE 0
+        #define IN_DELETE_SELF 0
+        #define IN_MOVE 0
+        #define IN_MODIFY 0
+        #define IN_MOVED_TO 0
+        #define IN_ISDIR 0
+        #define IN_MOVED_FROM 0
+    #endif
 }
+
 
 #include "utility/strutil/strutil.h"
 #include "utility/file/fileutil.h"

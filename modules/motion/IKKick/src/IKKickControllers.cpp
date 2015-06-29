@@ -18,12 +18,14 @@
  */
 
 #include "IKKickControllers.h"
+#include "utility/motion/RobotModels.h"
 
 using messages::input::Sensors;
 using messages::input::LimbID;
 using messages::input::ServoID;
-using utility::math::matrix::Transform3D;
 using messages::support::Configuration;
+using utility::math::matrix::Transform3D;
+using utility::motion::kinematics::DarwinModel;
 
 namespace modules{
 namespace motion{
@@ -44,92 +46,28 @@ namespace motion{
 	}
 
 	Transform3D KickBalancer::getFootPose(const Sensors& sensors, float deltaT){
-		    // Get our foot positions
+		    
+        // Get our foot positions
+        Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
+        Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
 
-            Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
-            Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
+        int negativeIfRight = supportFoot == LimbID::LEFT_LEG ? 1 : -1;
 
-//            Transform3D IKKick::balance(Transform3D leftFoot, Transform3D rightFoot) {
-            // Moving the torso to balance on support foot before kick
+        // Obtain the position of the torso and the direction in which the torso needs to move
+        // The position that the COM needs to move to in support foot coordinates
+        Transform3D torsoTarget = arma::eye(4,4);
+        torsoTarget.submat(0,3,3,3) = arma::vec({0, negativeIfRight * DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE, stand_height,1}); 
 
-            // Obtain the position of the torso and the direction in which the torso needs to move
-            
-                // The position that the torso needs to move to in support foot coordinates
-            auto torsoTarget = arma::vec({0, 0, stand_height}); 
+        // Find position vector from support foot to torso in support foot coordinates.
+        Transform3D torsoPose = supportFoot == LimbID::LEFT_LEG ? leftFoot.i() : rightFoot.i();
 
-                // Find position vector from support foot to torso in support foot coordinates.
-            auto torsoPosition = leftFoot.i().translation();
-           
-                // Find the direction in which we want to shift the torso in support foot coordinates
-            auto torsoDirection = torsoTarget - torsoPosition;
-           
-                // Normalise the direction
-            auto normalTorsoDirection = arma::normalise(torsoDirection);
-
-/*
-            // Finds out when the torso is within tolerance of the target
-            //TODO define displacementTolerance
-            
-            if (arma::abs(torsoTarget - torsoPosition) <= std::abs(torsoShiftVelocity/UPDATE_FREQUENCY)) {    
-                if (arma::abs(torsoTarget - torsoPosition <= diplacementTolerance) {
-                    //TODO Run Kick!
-                    state = State::BALANCE
-                } else {
-                    auto torsoDisplacement = ((torsoShiftVelocity/UPDATE_FREQUENCY)/2)*normalTorsoDirection;
-                }
-            } else {
-                auto torsoDisplacement = (torsoShiftVelocity/UPDATE_FREQUENCY)*normalTorsoDirection;
-            }
-*/
-
-            // torsoShiftVelocity [m/s] is the configurable velocity that the torso should move at
-            // Net displacement of torso each 1/UPDATE_FREQUENCY seconds
-            // ((P1-P0))*velocity*(1/UPDATE_FREQUENCY)
-            auto torsoDisplacement = (motion_gain * deltaT) * normalTorsoDirection;
-
-            // New position to give to inverse kinematics in support foot coordinates
-            auto torsoNewPosition = torsoPosition + torsoDisplacement;
-
-            Transform3D supportFootNewPose = leftFoot;            
-            // Proof of Line Below
-            // auto supportFootNewPose = leftFoot - arma::join_cols(arma::zeros(4,3), arma::join_cols(-1*torsoDisplacement, arma::vec({0})).t());        
-            // = {deltaRotation, deltaTranslation; 0, 1}
-            // = {0, torsoPosition + torsoDisplacement; 0, 1}
-
-            // Put new position of the left foot to the torso in left foot coordinates into the transform matrix
-            supportFootNewPose.col(3) = arma::join_cols(torsoNewPosition, arma::vec({1}));  
-         
-            // TODO Need a way around this.
-            Transform3D leftFootNewPose = supportFootNewPose;
-            Transform3D rightFootNewPose = rightFoot;
-
-/*
-// TODO CHECK THIS!!!!!! Don't need to convert DELETE THIS
-            // Convert the new torso position into torso coordinates
-            auto torsoNewPositionTorso = leftFoot*(arma::join_cols(torsoNewPosition, arma::vec({0})).t());
-            // Find support foot position relative to the torso
-            auto supportFootPosition = leftFoot.translation();
-            // Moving torso is equivalent to moving foot in the opposite direction
-            // New support foot position
-            auto supportFootNewPosition = supportFootPosition - torsoNewPositionTorso;
-            //HAVE TO CONVERT BACK TO SUPPORT FOOT COORDINATES TO PUT IN MATRIX
-            // TODO give position to inverse kinematics
-            // Puts together matrix to give to inverse kinematics
-            auto supportFootNewPose = leftFoot;
-            auto supportFootNewPose.col(3)= (arma::join_cols(supportFootNewPosition, arma::vec({1}))).t();
-            auto kickFootNewPose = rightFoot;
-*/
-            //}
-
-
-            // Lifted from WalkEngine::motionLegs()
-            // Move torso to target
-            //std::unique_ptr<std::vector<ServoCommand>> IKKick::motionLegs(Transform3D leftFootNewPose, Transform3D rightFootNewPose) {
-          
-            // Lifted from WalkEngine::updateStep()
-            // Calculate leg joints
-
-		return leftFootNewPose;
+        Transform3D newTorsoPose = utility::math::matrix::Transform3D::interpolate(torsoPose, torsoTarget, deltaT * motion_gain);
+        
+        std::cout << "torsoTarget\n" << torsoTarget << std::endl;
+        std::cout << "torsoPose\n" << torsoPose << std::endl;
+        std::cout << "newTorsoPose\n" << newTorsoPose << std::endl;
+        
+        return newTorsoPose.i();
 	}
 
 	Transform3D FootLifter::getFootPose(const Sensors& sensors, float deltaT){

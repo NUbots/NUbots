@@ -27,9 +27,13 @@ ADD_ROLE(
     behaviour::Controller
     behaviour::skills::Stand
     # behaviour::skills::FallingRelax
-    # behaviour::skills::Getup
-
+    behaviour::skills::Getup
+    behaviour::skills::HeadBehaviourSoccer
+    
     # Motion
+    motion::HeadController
     motion::ScriptEngine
+
+
 )
 

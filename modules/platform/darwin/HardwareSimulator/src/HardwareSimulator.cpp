@@ -28,6 +28,7 @@
 #include "utility/math/angle.h"
 #include "messages/support/Configuration.h"
 #include <limits>
+#include "utility/nubugger/NUhelpers.h"
 
 namespace modules {
 namespace platform {
@@ -37,6 +38,7 @@ namespace darwin {
     using messages::motion::ServoTarget;
     using messages::input::ServoID;
     using messages::input::Sensors;
+    using utility::nubugger::graph;
     using messages::support::Configuration;
 
     HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -166,13 +168,16 @@ namespace darwin {
 
 
         on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Optional<Sensors>>, Options<Single>>([this](const time_t&, const std::shared_ptr<const Sensors>& previousSensors) {
-
             if(previousSensors){
                 auto rightFootPose = previousSensors->forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
-                auto leftFootPose = previousSensors->forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
-                if(arma::norm(rightFootPose.translation()) > arma::norm(leftFootPose.translation())){
+                auto leftFootPose = previousSensors->forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
+                arma::vec3 torsoFromRightFoot = -rightFootPose.rotation().i() * rightFootPose.translation();
+                arma::vec3 torsoFromLeftFoot = -leftFootPose.rotation().i() * leftFootPose.translation();
+                // emit(graph("torsoFromRightFoot", torsoFromRightFoot));
+                // emit(graph("torsoFromLeftFoot", torsoFromLeftFoot));
+                if(torsoFromRightFoot(2) > torsoFromLeftFoot(2)){
                     setRightFootDown();
-                } else if(arma::norm(rightFootPose.translation()) < arma::norm(leftFootPose.translation())){
+                } else if(torsoFromRightFoot(2) < torsoFromLeftFoot(2)){
                     setLeftFootDown();
                 } else {
                     setBothFeetDown();
@@ -213,7 +218,7 @@ namespace darwin {
                 sumGyro += arma::vec3({g.x,g.y,g.z});
                 gyroQueue.pop();
             }
-            sumGyro = (sumGyro * UPDATE_FREQUENCY + arma::vec3({0,0,imu_drift_rate})) ;
+            sumGyro = (sumGyro * UPDATE_FREQUENCY + arma::vec3({0,0,imu_drift_rate}));
             sensors.gyroscope.x = sumGyro[0];
             sensors.gyroscope.y = sumGyro[1];
             sensors.gyroscope.z = sumGyro[2];
