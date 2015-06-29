@@ -25,6 +25,9 @@
 
 #include "messages/behaviour/FieldTarget.h"
 #include "messages/behaviour/proto/Behaviour.pb.h"
+#include "messages/localisation/FieldObject.h"
+#include "messages/input/Sensors.h"
+#include "messages/support/FieldDescription.h"
 
 namespace modules {
 namespace behaviour {
@@ -51,19 +54,19 @@ namespace strategy {
 
         time_t ballLastMeasured;
         time_t selfLastMeasured;
-        void initialLocalisationReset();
+        void initialLocalisationReset(const messages::support::FieldDescription& fieldDescription);
         void penaltyLocalisationReset();
-        void unpenalisedLocalisationReset();
+        void unpenalisedLocalisationReset(const messages::support::FieldDescription& fieldDescription);
 
         void standStill();
         void searchWalk();
-        void walkTo(const messages::behaviour::FieldTarget& object);
-        void walkTo(arma::vec position);
+        void walkTo(const messages::support::FieldDescription& fieldDescription, const messages::behaviour::FieldTarget& object);
+        void walkTo(const messages::support::FieldDescription& fieldDescription, arma::vec position);
         void find(const std::vector<messages::behaviour::FieldTarget>& objects);
         void spinWalk();
-        bool pickedUp();
+        bool pickedUp(const messages::input::Sensors& sensors);
         bool penalised();
-        bool ballDistance();
+        bool ballDistance(const messages::localisation::Ball& ball);
     public:
         static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";
 

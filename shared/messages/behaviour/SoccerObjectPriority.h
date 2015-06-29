@@ -21,10 +21,10 @@
 #ifndef MESSAGES_BEHAVIOUR_SOCCEROBJECTPRIORITY_H 
 #define MESSAGES_BEHAVIOUR_SOCCEROBJECTPRIORITY_H 
 
-namespace messages{
-namespace behaviour{
+namespace messages {
+namespace behaviour {
 
-	struct SoccerObjectPriority{
+	struct SoccerObjectPriority {
 		int ball;
 		int goal;
 		int line;

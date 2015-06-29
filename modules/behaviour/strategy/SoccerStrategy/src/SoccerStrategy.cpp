@@ -24,6 +24,7 @@
 #include "messages/behaviour/Look.h"
 #include "messages/behaviour/WalkStrategy.h"
 #include "messages/behaviour/KickPlan.h"
+#include "messages/behaviour/SoccerObjectPriority.h"
 #include "messages/support/FieldDescription.h"
 #include "messages/input/Sensors.h"
 #include "messages/motion/GetupCommand.h"
@@ -54,6 +55,7 @@ namespace strategy {
     using messages::behaviour::WalkTarget;
     using messages::behaviour::FieldTarget;
     using messages::behaviour::KickPlan;
+    using messages::behaviour::SoccerObjectPriority;
     using messages::behaviour::proto::Behaviour;
     using messages::support::FieldDescription;
     using messages::motion::ExecuteGetup;
@@ -123,15 +125,16 @@ namespace strategy {
             selfPenalised = true;
         });
 
-        on<Trigger<SelfUnpenalisation>>([this](const SelfUnpenalisation&) {
+        on<Trigger<SelfUnpenalisation>, With<FieldDescription>> ([this](const SelfUnpenalisation&, const FieldDescription& fieldDescription) {
             selfPenalised = false;
             // TODO: only do this once put down
-            unpenalisedLocalisationReset();
+            unpenalisedLocalisationReset(fieldDescription);
         });
 
         // Main Loop
-        on<Trigger<Every<30, Per<std::chrono::seconds>>>, With<GameState>, // TODO: ensure a reasonable state is emitted even if gamecontroller is not running
-            Options<Single>>([this](const time_t&, const GameState& gameState) {
+        // TODO: ensure a reasonable state is emitted even if gamecontroller is not running
+        on<Trigger<Every<30, Per<std::chrono::seconds>>>, With<Sensors>, With<GameState>, With<Phase>, With<FieldDescription>,
+            Options<Single>>([this](const time_t&, const Sensors& sensors, const GameState& gameState, const Phase& phase, const FieldDescription& fieldDescription) {
 
             try {
 
@@ -139,15 +142,7 @@ namespace strategy {
 
                 auto& mode = gameState.mode;
                 //auto& phase = gameState.phase;
-                Phase phase;
-                try {
-                    phase = *powerplant.get<Phase>();
-                }
-                catch(NUClear::metaprogramming::NoDataException) {
-                    throw std::runtime_error("unable to get the phase");
-                }
-
-                if (pickedUp()) {
+                if (pickedUp(sensors)) {
                     // TODO: stand, no moving
                     standStill();
                     currentState = Behaviour::PICKED_UP;
@@ -157,15 +152,15 @@ namespace strategy {
                         if (phase == Phase::INITIAL) {
                             standStill();
                             find({FieldTarget::SELF});
-                            initialLocalisationReset();
+                            initialLocalisationReset(fieldDescription);
                             currentState = Behaviour::INITIAL;
                         }
                         else if (false) { // phase == Phase::READY
                             if (gameState.ourKickOff) {
-                                walkTo(START_POSITION_OFFENSIVE);
+                                walkTo(fieldDescription, START_POSITION_OFFENSIVE);
                             }
                             else {
-                                walkTo(START_POSITION_DEFENSIVE);
+                                walkTo(fieldDescription, START_POSITION_DEFENSIVE);
                             }
                             find({FieldTarget::SELF});
                             currentState = Behaviour::READY;
@@ -177,7 +172,7 @@ namespace strategy {
                                 penaltyLocalisationReset();
                             }
                             else {
-                                initialLocalisationReset();
+                                initialLocalisationReset(fieldDescription);
                             }
                             currentState = Behaviour::SET;
                         }
@@ -201,7 +196,7 @@ namespace strategy {
 
                                 if (NUClear::clock::now() - ballLastMeasured < BALL_LAST_SEEN_MAX_TIME) { // ball has been seen recently
                                     if (!GOALIE) { // goalie
-                                        walkTo(FieldTarget::BALL);
+                                        walkTo(fieldDescription, FieldTarget::BALL);
                                     }
                                     find({FieldTarget::BALL});
                                     currentState = Behaviour::WALK_TO_BALL;
@@ -225,46 +220,32 @@ namespace strategy {
             // catch (std::exception err) {
             catch (NUClear::metaprogramming::NoDataException err) {
                 log(err.what());
-                log("Exception! asdflkj");
+                log("No data exception.");
             }
             catch (std::runtime_error err) {
                 log(err.what());
-                log("Exception! skldfalkjfsdjfjfjfjfjfjfj");
+                log("Runtime exception.");
             }
         });
+
     }
 
-    void SoccerStrategy::initialLocalisationReset() {
-        FieldDescription desc;
-
-        try {
-            desc = *powerplant.get<FieldDescription>();
-        }
-        catch (NUClear::metaprogramming::NoDataException) {
-            throw std::runtime_error("field description get failed asdlfkj");
-        }
+    void SoccerStrategy::initialLocalisationReset(const FieldDescription& fieldDescription) {
 
         auto reset = std::make_unique<ResetRobotHypotheses>();
 
         ResetRobotHypotheses::Self selfSideBaseLine;
-        selfSideBaseLine.position = arma::vec2({-desc.dimensions.field_length * 0.5 + desc.dimensions.goal_area_length, 0});
+        selfSideBaseLine.position = arma::vec2({-fieldDescription.dimensions.field_length * 0.5 + fieldDescription.dimensions.goal_area_length, 0});
         selfSideBaseLine.position_cov = arma::eye(2, 2) * 0.1;
         selfSideBaseLine.heading = 0;
         selfSideBaseLine.heading_var = 0.05;
         reset->hypotheses.push_back(selfSideBaseLine);
 
         emit(std::move(reset));
+
     }
 
     void SoccerStrategy::penaltyLocalisationReset() {
-        FieldDescription desc;
-
-        try {
-            desc = *powerplant.get<FieldDescription>();
-        }
-        catch (NUClear::metaprogramming::NoDataException) {
-            throw std::runtime_error("field description get failed asdlfkj");
-        }
 
         auto reset = std::make_unique<ResetRobotHypotheses>();
 
@@ -276,41 +257,35 @@ namespace strategy {
         reset->hypotheses.push_back(selfSideBaseLine);
 
         emit(std::move(reset));
+
     }
 
-    void SoccerStrategy::unpenalisedLocalisationReset() {
-        FieldDescription desc;
-
-        try {
-            desc = *powerplant.get<FieldDescription>();
-        }
-        catch (NUClear::metaprogramming::NoDataException) {
-            throw std::runtime_error("field description get failed asdlfkj");
-        }
+    void SoccerStrategy::unpenalisedLocalisationReset(const FieldDescription& fieldDescription) {
 
         auto reset = std::make_unique<ResetRobotHypotheses>();
         ResetRobotHypotheses::Self selfSideLeft;
-        selfSideLeft.position = arma::vec2({-desc.penalty_robot_start, desc.dimensions.field_width * 0.5});
+        selfSideLeft.position = arma::vec2({-fieldDescription.penalty_robot_start, fieldDescription.dimensions.field_width * 0.5});
         selfSideLeft.position_cov = arma::eye(2, 2) * 0.1;
         selfSideLeft.heading = -M_PI_2;
         selfSideLeft.heading_var = 0.05;
         reset->hypotheses.push_back(selfSideLeft);
 
         ResetRobotHypotheses::Self selfSideRight;
-        selfSideRight.position = arma::vec2({-desc.penalty_robot_start, -desc.dimensions.field_width * 0.5});
+        selfSideRight.position = arma::vec2({-fieldDescription.penalty_robot_start, -fieldDescription.dimensions.field_width * 0.5});
         selfSideRight.position_cov = arma::eye(2, 2) * 0.1;
         selfSideRight.heading = M_PI_2;
         selfSideRight.heading_var = 0.05;
         reset->hypotheses.push_back(selfSideRight);
 
         ResetRobotHypotheses::Self selfSideBaseLine;
-        selfSideBaseLine.position = arma::vec2({-desc.dimensions.field_length * 0.5 + desc.dimensions.goal_area_length, 0});
+        selfSideBaseLine.position = arma::vec2({-fieldDescription.dimensions.field_length * 0.5 + fieldDescription.dimensions.goal_area_length, 0});
         selfSideBaseLine.position_cov = arma::eye(2, 2) * 0.1;
         selfSideBaseLine.heading = 0;
         selfSideBaseLine.heading_var = 0.05;
         reset->hypotheses.push_back(selfSideBaseLine);
 
         emit(std::move(reset));
+
     }
 
     void SoccerStrategy::searchWalk() {
@@ -323,7 +298,7 @@ namespace strategy {
         emit(std::move(command));
     }
 
-    void SoccerStrategy::walkTo(const FieldTarget& object) {
+    void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, const FieldTarget& object) {
         // TODO: find object position and call other walkTo method
         WalkTarget walkTarget;
         arma::vec2 heading;
@@ -331,14 +306,7 @@ namespace strategy {
         switch (object) {
             case FieldTarget::BALL: {
                 walkTarget = WalkTarget::Ball;
-                FieldDescription desc;
-                try {
-                    desc = *powerplant.get<FieldDescription>();
-                }
-                catch (NUClear::metaprogramming::NoDataException) {
-                    throw std::runtime_error("field description get failed");
-                }
-                arma::vec2 enemyGoal({desc.dimensions.field_length * 0.5, 0});
+                arma::vec2 enemyGoal({fieldDescription.dimensions.field_length * 0.5, 0});
                 heading = enemyGoal;
                 break;
             }
@@ -353,17 +321,12 @@ namespace strategy {
         approach->heading = heading;
 
         emit(std::move(approach));
+
     }
 
-    void SoccerStrategy::walkTo(arma::vec position) {
-        FieldDescription desc;
-        try {
-            desc = *powerplant.get<FieldDescription>();
-        }
-        catch (NUClear::metaprogramming::NoDataException) {
-            throw std::runtime_error("field description get failed 2");
-        }
-        arma::vec2 enemyGoal({desc.dimensions.field_length * 0.5, 0});
+    void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, arma::vec position) {
+
+        arma::vec2 enemyGoal({fieldDescription.dimensions.field_length * 0.5, 0});
         auto approach = std::make_unique<WalkStrategy>();
         approach->targetPositionType = WalkTarget::WayPoint;
         approach->targetHeadingType = WalkTarget::WayPoint;
@@ -372,108 +335,52 @@ namespace strategy {
         approach->target = position;
 
         emit(std::move(approach));
+
     }
 
-    bool SoccerStrategy::pickedUp() {
-        try {
-            /*auto sensors = powerplant.get<Last<10, Sensors>>();
-            uint count = 0;
-            for (auto& s : *sensors) {
-                if (!s->leftFootDown && !s->rightFootDown) {
-                    count++;
-                }
-            }
-            bool feetOffGround = count > 7;*/
-            auto sensors = powerplant.get<Sensors>();
-            bool feetOffGround = !sensors->leftFootDown && !sensors->rightFootDown;
-            return false
+    bool SoccerStrategy::pickedUp(const Sensors& sensors) {
+
+        bool feetOffGround = !sensors.leftFootDown && !sensors.rightFootDown;
+        return false
             && feetOffGround
             && !isGettingUp
             && !isDiving
-            && sensors->orientation(2,2) < 0.92
-            && sensors->orientation(2,2) > 0.88;
-        }
-        catch (NUClear::metaprogramming::NoDataException) {
-            throw std::runtime_error("sensors get failed");
-        }
+            && sensors.orientation(2,2) < 0.92
+            && sensors.orientation(2,2) > 0.88;
+
     }
 
     bool SoccerStrategy::penalised() {
         return selfPenalised;
     }
 
-    bool SoccerStrategy::ballDistance() {
-        LocalisationBall ball;
-        try {
-            ball = *powerplant.get<LocalisationBall>();
-        }
-        catch (NUClear::metaprogramming::NoDataException) {
-            throw std::runtime_error("localisation ball get failed");
-        }
+    bool SoccerStrategy::ballDistance(const LocalisationBall& ball) {
         return arma::norm(ball.position);
     }
 
     void SoccerStrategy::find(const std::vector<FieldTarget>& fieldObjects) {
-        // TODO: stop hackig this madness
-        if(fieldObjects.size() == 1) {
-            auto& object = fieldObjects[0];
-            switch (object) {
-                case FieldTarget::BALL: {
-                    // Prioritise balls
-                    // auto strategy = std::make_unique<LookStrategy>();
-                    // strategy->priorities = {typeid(VisionBall)};
-                    // emit(std::move(strategy));
 
-                    auto panSelection = std::make_unique<Look::PanSelection>();
-                    panSelection->lookAtGoalInsteadOfBall = false;
-                    emit(std::move(panSelection));
+        // Create the soccer object priority pointer and initialise each value to 0.
+        auto soccerObjectPriority = std::make_unique<SoccerObjectPriority>();
+        soccerObjectPriority->ball = 0;
+        soccerObjectPriority->goal = 0;
+        soccerObjectPriority->line = 0;
+        for (auto& fieldObject : fieldObjects) {
+            switch (fieldObject) {
+                case FieldTarget::BALL: {
+                    soccerObjectPriority->ball = 1;
                     break;
                 }
                 case FieldTarget::SELF: {
-                    // // Prioritise goals
-                    // auto strategy = std::make_unique<LookStrategy>();
-                    // strategy->priorities = {typeid(VisionGoal)};
-                    // emit(std::move(strategy));
-
-                    auto panSelection = std::make_unique<Look::PanSelection>();
-                    panSelection->lookAtGoalInsteadOfBall = true;
-                    emit(std::move(panSelection));
+                    soccerObjectPriority->goal = 1;
                     break;
                 }
                 default:
                     throw std::runtime_error("Soccer strategy attempted to find a bad object");
             }
         }
-        else if(fieldObjects.size() == 2) {
-            // std::cout<<__FILE__<<__LINE__<<" ballLastMeasured = "<<std::duration_cast<std::chrono::seconds>(ballLastMeasured).count()<<std::endl;
-            // std::cout<<__FILE__<<__LINE__<<" BALL_LAST_SEEN_MAX_TIME = "<<std::duration_cast<std::chrono::seconds>(BALL_LAST_SEEN_MAX_TIME).count()<<std::endl;
-            // std::cout<<__FILE__<<__LINE__<<" selfLastMeasured = "<<std::duration_cast<std::chrono::seconds>(selfLastMeasured).count()<<std::endl;
-            // std::cout<<__FILE__<<__LINE__<<" GOAL_LAST_SEEN_MAX_TIME = "<< std::duration_cast<std::chrono::seconds>(GOAL_LAST_SEEN_MAX_TIME).count() <<std::endl;
-            // std::cout<<std::endl;
+        emit(std::move(soccerObjectPriority));
 
-            // Balls come first
-            if(NUClear::clock::now() - ballLastMeasured > BALL_LAST_SEEN_MAX_TIME
-                || NUClear::clock::now() - selfLastMeasured < GOAL_LAST_SEEN_MAX_TIME) {
-                // // Prioritise balls
-                // auto strategy = std::make_unique<LookStrategy>();
-                // strategy->priorities = {typeid(VisionBall)};
-                // emit(std::move(strategy));
-
-                auto panSelection = std::make_unique<Look::PanSelection>();
-                panSelection->lookAtGoalInsteadOfBall = false;
-                emit(std::move(panSelection));
-            }
-            else {
-                // // Prioritise goals
-                // auto strategy = std::make_unique<LookStrategy>();
-                // strategy->priorities = {typeid(VisionGoal)};
-                // emit(std::move(strategy));
-
-                auto panSelection = std::make_unique<Look::PanSelection>();
-                panSelection->lookAtGoalInsteadOfBall = true;
-                emit(std::move(panSelection));
-            }
-        }
     }
 
     void SoccerStrategy::spinWalk() {
@@ -485,8 +392,6 @@ namespace strategy {
         emit(std::move(command));
     }
 
-
-
-}  // strategy
-}  // behaviours
+} // strategy
+} // behaviours
 } // modules

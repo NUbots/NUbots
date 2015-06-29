@@ -20,12 +20,14 @@ reaction_handles:
   data_points: false
   # Info from the game controller
   game_controller: false
-  # Info about subsumption and behaviour
-  behaviour: false
+  # Info about subsumption
+  subsumption: true
+  # Info about behaviour
+  behaviour: true
   # Motor positions, orientation, etc.
-  sensors: false
+  sensors: true
   # Localisation state estimates and uncertainties
-  localisation: false
+  localisation: true
   # Vision data
   image: false # Raw image
   classified_image: false # Colour classified

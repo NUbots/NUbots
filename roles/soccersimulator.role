@@ -32,7 +32,7 @@ ADD_ROLE(
     behaviour::skills::HeadBehaviourSoccer
     behaviour::planning::KickPlanner
     behaviour::planning::WalkPathPlanner
-    behaviour::strategy::KickAtGoal
+    behaviour::strategy::SoccerStrategy
 
     #Motion
     motion::ScriptEngine
