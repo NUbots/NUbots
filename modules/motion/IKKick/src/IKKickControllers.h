@@ -27,6 +27,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/input/ServoID.h"
 #include <armadillo>
+#include <nuclear>
 
 namespace modules{
 namespace motion{
@@ -47,16 +48,20 @@ namespace motion{
 		class SixDOFMotionController{
 			protected:
 				MotionStage stage;
-				bool stable;
+				bool stable = false;
 
-				float motion_gain = 0.1;
+				float motion_gain = 10;
 				messages::input::LimbID supportFoot;
 				arma::vec3 ballPosition;
 				arma::vec3 goalPosition;
+				NUClear::clock::time_point motionStartTime;
+
 			public:
-				void start(){
+				virtual void computeMotion(const messages::input::Sensors& sensors) = 0;
+				void start(const messages::input::Sensors& sensors){
 					if(stage != MotionStage::FINISHED){
 						stage = MotionStage::RUNNING;
+						computeMotion(sensors);
 					}
 				}
 
@@ -73,6 +78,15 @@ namespace motion{
 					goalPosition = goalPosition_;
 				}
 
+				utility::math::matrix::Transform3D getTorsoPose(const messages::input::Sensors& sensors){
+			        // Get our foot positions
+			        auto leftFoot = sensors.forwardKinematics.find(messages::input::ServoID::L_ANKLE_ROLL)->second;
+			        auto rightFoot = sensors.forwardKinematics.find(messages::input::ServoID::R_ANKLE_ROLL)->second;
+
+			        // Find position vector from support foot to torso in support foot coordinates.
+		        	return supportFoot == messages::input::LimbID::LEFT_LEG ? leftFoot.i() : rightFoot.i();
+		        }
+
 				virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT) = 0;
 
 				virtual void configure(const messages::support::Configuration<IKKickConfig>& config) = 0;
@@ -85,15 +99,24 @@ namespace motion{
 		public:
 			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
+			virtual void computeMotion(const messages::input::Sensors& sensors);
 		};
 
 		class FootLifter : public SixDOFMotionController{
 		private:
+			//Config variables
+			float velocity = 0.1;
 			float lift_foot_height = 0.05;
 			float lift_foot_back = 0.01;
-		public:
+
+			//State variables
+			utility::math::matrix::Transform3D startPose;
+			utility::math::matrix::Transform3D finishPose;
+			float distance;
+		public: 
 			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
+			virtual void computeMotion(const messages::input::Sensors& sensors);
 		};
 
 		class Kicker : public SixDOFMotionController{
@@ -101,6 +124,7 @@ namespace motion{
 		public:
 			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);	
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
+			virtual void computeMotion(const messages::input::Sensors& sensors);
 		};
 
 	}

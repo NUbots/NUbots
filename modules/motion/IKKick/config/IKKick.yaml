@@ -15,6 +15,7 @@ lifter:
   motion_gain: 0.1
   lift_foot_height: 0.05 #m
   lift_foot_back: 0.01 #m
+  velocity: 0.1
 
 kicker:
   motion_gain: 0.1

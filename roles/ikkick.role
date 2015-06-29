@@ -12,4 +12,6 @@ ADD_ROLE(
     behaviour::Controller
     behaviour::skills::Stand
     motion::IKKick
+
+    motion::WalkEngine
 )

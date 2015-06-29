@@ -145,7 +145,7 @@ namespace motion {
             lifter.setKickParameters(supportFoot, ballPosition, goalPosition);
             kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
             
-            balancer.start();
+            balancer.start(sensors);
         });
 
         updater = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, Options<Single>>([this](const time_t&, const Sensors& sensors) {
@@ -165,18 +165,22 @@ namespace motion {
 
             //State checker
             if(balancer.isStable()){
-                lifter.start();
+                std::cout << "balancer.isStable" << std::endl;
+                lifter.start(sensors);
             }
 
             if(lifter.isStable()){
-                kicker.start();
+                std::cout << "lifter.isStable" << std::endl;
+                kicker.start(sensors);
             }
 
             if(kicker.isFinished()){
+                std::cout << "kicker.isFinished" << std::endl;
                 lifter.stop();
             }
 
             if(lifter.isFinished()){
+                std::cout << "lifter.isFinished" << std::endl;
                 balancer.stop();
             }
             
@@ -206,7 +210,9 @@ namespace motion {
             
             std::vector<std::pair<messages::input::ServoID, float>> joints;
 
+            std::cout << "kickFootGoal" << kickFootGoal << std::endl;
             auto kickJoints = calculateLegJoints<DarwinModel>(kickFootGoal, kickFoot);
+            std::cout << "supportFootGoal" << supportFootGoal << std::endl;
             auto supportJoints = calculateLegJoints<DarwinModel>(supportFootGoal, supportFoot);
             joints.insert(joints.end(),kickJoints.begin(),kickJoints.end());
             joints.insert(joints.end(),supportJoints.begin(),supportJoints.end());

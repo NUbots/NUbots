@@ -41,27 +41,38 @@ namespace motion{
 		motion_gain = config["lifter"]["motion_gain"].as<float>();
         lift_foot_height = config["lifter"]["lift_foot_height"].as<float>();
         lift_foot_back = config["lifter"]["lift_foot_back"].as<float>();
+        velocity = config["lifter"]["velocity"].as<float>();
 	}
 
 	void Kicker::configure(const Configuration<IKKickConfig>& config){
 		motion_gain = config["kicker"]["motion_gain"].as<float>();
 	}
 
+    void KickBalancer::computeMotion(const Sensors& sensors){
+
+    }
+
+    void FootLifter::computeMotion(const Sensors& sensors){
+        startPose = getTorsoPose(sensors);
+        finishPose = startPose.translate(arma::vec3({-lift_foot_back,0,lift_foot_height}));
+        distance = arma::norm(startPose.translation() - finishPose.translation());
+        motionStartTime = sensors.timestamp;
+    }
+
+    void Kicker::computeMotion(const Sensors& sensors){
+
+    }
+
+
 	Transform3D KickBalancer::getFootPose(const Sensors& sensors, float deltaT){
 		    
-        // Get our foot positions
-        Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
-        Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
-
-        int negativeIfRight = supportFoot == LimbID::LEFT_LEG ? 1 : -1;
-
         // Obtain the position of the torso and the direction in which the torso needs to move
         // The position that the COM needs to move to in support foot coordinates
+        int negativeIfRight = supportFoot == LimbID::LEFT_LEG ? 1 : -1;
         Transform3D torsoTarget = arma::eye(4,4);
         torsoTarget.submat(0,3,3,3) = arma::vec({0, negativeIfRight * DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE, stand_height,1}); 
 
-        // Find position vector from support foot to torso in support foot coordinates.
-        Transform3D torsoPose = supportFoot == LimbID::LEFT_LEG ? leftFoot.i() : rightFoot.i();
+        Transform3D torsoPose = getTorsoPose(sensors);
 
         //WARNING: DO NOT SWAP STABLE CHECK AND newTorsoPose OR YOU WILL BREAK ROBOTS
         stable = (arma::norm(torsoPose.submat(0,3,2,3) - torsoTarget.submat(0,3,2,3)) < tolerance);
@@ -72,9 +83,9 @@ namespace motion{
 	}
 
 	Transform3D FootLifter::getFootPose(const Sensors& sensors, float deltaT){
-        Transform3D goal;
-        goal = goal.translate(arma::vec3({-lift_foot_back,0,lift_foot_height}));
-		return goal;
+        double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count() * 1e-6;
+        float alpha = velocity * elapsedTime / distance;
+		return utility::math::matrix::Transform3D::interpolate(startPose,finishPose,alpha);
 	}
 
 	Transform3D Kicker::getFootPose(const Sensors& sensors, float deltaT){
