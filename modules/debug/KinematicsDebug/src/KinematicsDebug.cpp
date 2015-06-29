@@ -130,8 +130,8 @@ namespace modules {
                                 ikRequest = ikRequest.rotateY(2*M_PI*rand()/static_cast<double>(RAND_MAX));
                                 ikRequest = ikRequest.rotateX(2*M_PI*rand()/static_cast<double>(RAND_MAX));
                                 ikRequest = ikRequest.rotateZ(2*M_PI*rand()/static_cast<double>(RAND_MAX));
-                                ikRequest(0,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);
-                                ikRequest(1,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);
+                                ikRequest(0,3) = 0.03 * rand()/static_cast<double>(RAND_MAX);
+                                ikRequest(1,3) = 0.03 * rand()/static_cast<double>(RAND_MAX);
                                 ikRequest(2,3) = 0.1 * rand()/static_cast<double>(RAND_MAX);
                             }
 

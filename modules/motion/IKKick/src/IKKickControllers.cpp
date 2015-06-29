@@ -62,7 +62,11 @@ namespace motion{
         Transform3D torsoPose = supportFoot == LimbID::LEFT_LEG ? leftFoot.i() : rightFoot.i();
 
         Transform3D newTorsoPose = utility::math::matrix::Transform3D::interpolate(torsoPose, torsoTarget, deltaT * motion_gain);
+        
+        std::cout << "torsoTarget\n" << torsoTarget << std::endl;
+        std::cout << "torsoPose\n" << torsoPose << std::endl;
         std::cout << "newTorsoPose\n" << newTorsoPose << std::endl;
+        
         return newTorsoPose.i();
 	}
 
