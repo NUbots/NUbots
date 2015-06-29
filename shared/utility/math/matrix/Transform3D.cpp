@@ -157,6 +157,7 @@ namespace matrix {
         Transform3D TResult = Transform3D(Rotation3D(qResult));
         TResult.translation() = tResult;
 
+        std::cout << "TResult\n" << TResult << std::endl;
         return TResult;
     }
 

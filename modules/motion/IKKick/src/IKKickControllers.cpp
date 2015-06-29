@@ -60,11 +60,10 @@ namespace motion{
 
         // Find position vector from support foot to torso in support foot coordinates.
         Transform3D torsoPose = supportFoot == LimbID::LEFT_LEG ? leftFoot.i() : rightFoot.i();
-        std::cout << "torsoPose = \n" << torsoPose << std::endl;
 
-        Transform3D newSupportFootPose = utility::math::matrix::Transform3D::interpolate(torsoPose, torsoTarget, deltaT * motion_gain).i();
-
-		return torsoTarget.i();
+        Transform3D newTorsoPose = utility::math::matrix::Transform3D::interpolate(torsoPose, torsoTarget, deltaT * motion_gain);
+        std::cout << "newTorsoPose\n" << newTorsoPose << std::endl;
+        return newTorsoPose.i();
 	}
 
 	Transform3D FootLifter::getFootPose(const Sensors& sensors, float deltaT){

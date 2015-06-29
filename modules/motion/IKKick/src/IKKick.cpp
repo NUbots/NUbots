@@ -185,8 +185,9 @@ namespace motion {
             Transform3D supportFootGoal;
             
             if(balancer.isRunning()){
-                kickFootGoal =  balancer.getFootPose(sensors, deltaT).translate(arma::vec3({0, negativeIfKickRight * footSeparation, 0}));
-                supportFootGoal = balancer.getFootPose(sensors, deltaT);
+                Transform3D supportFootPose = balancer.getFootPose(sensors, deltaT);
+                supportFootGoal = supportFootPose;
+                kickFootGoal =  supportFootPose.translate(arma::vec3({0, negativeIfKickRight * footSeparation, 0}));
             }
             if(lifter.isRunning()){
                 //TODO: CHECK ORDER
@@ -203,6 +204,10 @@ namespace motion {
             float torque = 100;
             
             std::vector<std::pair<messages::input::ServoID, float>> joints;
+
+            std::cout << "kickFootGoal \n" << kickFootGoal << std::endl; 
+            std::cout << "supportFootGoal \n" << supportFootGoal << std::endl; 
+
             auto kickJoints = calculateLegJoints<DarwinModel>(kickFootGoal, kickFoot);
             auto supportJoints = calculateLegJoints<DarwinModel>(supportFootGoal, supportFoot);
             joints.insert(joints.end(),kickJoints.begin(),kickJoints.end());

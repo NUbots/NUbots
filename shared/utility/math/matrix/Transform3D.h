@@ -177,7 +177,7 @@ namespace matrix {
             inline arma::subview<double> rotation() { return submat(0,0,2,2); }
 
             inline const arma::vec3 translation() const { return submat(0,3,2,3); }
-            inline arma::vec3 translation() { return submat(0,3,2,3); }
+            inline arma::subview<double> translation() { return submat(0,3,2,3); }
 
             arma::vec3 eulerAngles() const {
                 return rotation().eulerAngles();
