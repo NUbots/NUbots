@@ -1,17 +1,20 @@
 kick_priority: 30
 execution_priority: 40
 
+foot_separation: 0.074 # 0.074 = hip separation
+
 target: [1, 1, 1]
 direction: [2, 2, 2]
 
 balancer:
-  motion_gain: 0.1
-  stand_height: 0.18
+  motion_gain: 10 # gain per second
+  stand_height: 0.18 #m 
+  tolerance: 0.01 #m
 
 lifter:
   motion_gain: 0.1
-  lift_foot_height: 0.05
-  lift_foot_back: 0.01
+  lift_foot_height: 0.05 #m
+  lift_foot_back: 0.01 #m
 
 kicker:
   motion_gain: 0.1

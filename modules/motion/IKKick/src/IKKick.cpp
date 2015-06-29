@@ -72,6 +72,8 @@ namespace motion {
             KICK_PRIORITY = config["kick_priority"].as<float>();
             EXECUTION_PRIORITY = config["execution_priority"].as<float>();
 
+            foot_separation = config["foot_separation"].as<float>();
+
             emit(std::make_unique<KickCommand>(
                 config["target"].as<arma::vec3>(),
                 config["direction"].as<arma::vec3>()
@@ -158,7 +160,6 @@ namespace motion {
                 kickFoot = LimbID::RIGHT_LEG;
             }
 
-            float footSeparation = 0.1;
 
             int negativeIfKickRight = kickFoot == LimbID::RIGHT_LEG ? -1 : 1;
 
@@ -187,7 +188,7 @@ namespace motion {
             if(balancer.isRunning()){
                 Transform3D supportFootPose = balancer.getFootPose(sensors, deltaT);
                 supportFootGoal = supportFootPose;
-                kickFootGoal =  supportFootPose.translate(arma::vec3({0, negativeIfKickRight * footSeparation, 0}));
+                kickFootGoal =  supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
             }
             if(lifter.isRunning()){
                 //TODO: CHECK ORDER
@@ -204,9 +205,6 @@ namespace motion {
             float torque = 100;
             
             std::vector<std::pair<messages::input::ServoID, float>> joints;
-
-            std::cout << "kickFootGoal \n" << kickFootGoal << std::endl; 
-            std::cout << "supportFootGoal \n" << supportFootGoal << std::endl; 
 
             auto kickJoints = calculateLegJoints<DarwinModel>(kickFootGoal, kickFoot);
             auto supportJoints = calculateLegJoints<DarwinModel>(supportFootGoal, supportFoot);

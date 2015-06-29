@@ -81,6 +81,7 @@ namespace motion{
 		class KickBalancer : public SixDOFMotionController{
 		private:
 			float stand_height = 0.18;
+			float tolerance = 0.01;
 		public:
 			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);

@@ -33,6 +33,8 @@ namespace motion{
 	void KickBalancer::configure(const Configuration<IKKickConfig>& config){
 		motion_gain = config["balancer"]["motion_gain"].as<float>();
 	    stand_height = config["balancer"]["stand_height"].as<float>();
+
+        tolerance = config["balancer"]["tolerance"].as<float>();
 	}
 
 	void FootLifter::configure(const Configuration<IKKickConfig>& config){
@@ -61,21 +63,24 @@ namespace motion{
         // Find position vector from support foot to torso in support foot coordinates.
         Transform3D torsoPose = supportFoot == LimbID::LEFT_LEG ? leftFoot.i() : rightFoot.i();
 
+        //WARNING: DO NOT SWAP STABLE CHECK AND newTorsoPose OR YOU WILL BREAK ROBOTS
+        stable = (arma::norm(torsoPose.submat(0,3,2,3) - torsoTarget.submat(0,3,2,3)) < tolerance);
+        
         Transform3D newTorsoPose = utility::math::matrix::Transform3D::interpolate(torsoPose, torsoTarget, deltaT * motion_gain);
-        
-        std::cout << "torsoTarget\n" << torsoTarget << std::endl;
-        std::cout << "torsoPose\n" << torsoPose << std::endl;
-        std::cout << "newTorsoPose\n" << newTorsoPose << std::endl;
-        
+
         return newTorsoPose.i();
 	}
 
 	Transform3D FootLifter::getFootPose(const Sensors& sensors, float deltaT){
-		return Transform3D();
+        Transform3D goal;
+        goal = goal.translate(arma::vec3({-lift_foot_back,0,lift_foot_height}));
+		return goal;
 	}
 
 	Transform3D Kicker::getFootPose(const Sensors& sensors, float deltaT){
-		return Transform3D();
+        Transform3D goal;
+        goal = goal.translate(arma::vec3({0.05,0,0}));
+		return goal;
 	}
 }
 }
